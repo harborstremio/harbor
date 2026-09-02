@@ -47,25 +47,25 @@ export function CustomEditor({
       <div className="flex items-center justify-between gap-4">
         <button
           onClick={() => onSave(draft)}
-          className="flex items-center gap-2 rounded-full border border-edge-soft px-4 py-2 text-[12.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+ className="flex items-center gap-2 rounded-md bg-canvas px-4 py-2 text-[12.5px] font-semibold text-ink-muted transition-colors hover:bg-surface hover:text-ink"
         >
-          <ArrowLeft size={13} strokeWidth={2.4} className="dir-icon" />
+          <ArrowLeft size={14} strokeWidth={2.4} className="dir-icon" />
           {t("Done")}
         </button>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setDraft(seed)}
-            className="flex items-center gap-2 rounded-full border border-edge-soft px-4 py-2 text-[12.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+ className="flex items-center gap-2 rounded-md bg-canvas px-4 py-2 text-[12.5px] font-semibold text-ink-muted transition-colors hover:bg-surface hover:text-ink"
           >
-            <RotateCcw size={13} strokeWidth={2.2} />
+            <RotateCcw size={14} strokeWidth={2.2} />
             {t("Reset")}
           </button>
           {canDelete && (
             <button
               onClick={onDelete}
-              className="flex items-center gap-2 rounded-full border border-rose-300/30 bg-rose-400/10 px-4 py-2 text-[12.5px] font-semibold text-rose-200 transition-colors hover:bg-rose-400/15"
+              className="flex items-center gap-2 rounded-full border border-danger/30 bg-danger/10 px-4 py-2 text-[12.5px] font-semibold text-danger transition-colors hover:bg-danger/15"
             >
-              <Trash2 size={13} strokeWidth={2.2} />
+              <Trash2 size={14} strokeWidth={2.2} />
               {t("Delete")}
             </button>
           )}
@@ -118,7 +118,7 @@ function ColorRow({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-edge-soft bg-elevated/15 px-4 py-3 transition-colors hover:border-edge">
+ <div className="flex items-center justify-between gap-3 rounded-md bg-elevated px-4 py-3 transition-colors hover:bg-raised">
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="text-[13px] font-semibold text-ink">{label}</span>
         <span className="text-[11.5px] text-ink-subtle">{hint}</span>

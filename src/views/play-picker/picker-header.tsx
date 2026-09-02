@@ -5,8 +5,6 @@ import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import type { PlayEpisode } from "@/lib/view";
 
-const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-
 export function PickerNav({
   onBack,
   onRefresh,
@@ -18,8 +16,7 @@ export function PickerNav({
 }) {
   const t = useT();
   const { settings } = useSettings();
-  const controlsInBar = IS_TAURI && !settings.useNativeTitleBar && !settings.hybridTitleBar;
-  const groupLeft = controlsInBar || settings.pickerRefreshNextToBack;
+  const groupLeft = settings.pickerRefreshNextToBack;
   return (
     <div className="-mb-9">
       <div className={`flex items-center gap-3 ${groupLeft ? "justify-start" : "justify-between"}`}>
@@ -71,7 +68,9 @@ export function PickerHeader({
               : `${meta.name} · Season ${episode.imdbSeason ?? episode.season} · Episode ${String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}`}
           </p>
           <h1 className="font-display text-[64px] font-medium leading-[0.96] tracking-tight text-ink">
-            {episode.name || `Episode ${absoluteEpisode ?? episode.episode}`}
+            {episode.name ||
+              metaEpisodeName(meta, episode) ||
+              `Episode ${absoluteEpisode ?? episode.episode}`}
           </h1>
           {episode.overview && <CollapsibleOverview text={episode.overview} />}
         </>
@@ -129,4 +128,11 @@ function CollapsibleOverview({ text }: { text: string }) {
       )}
     </div>
   );
+}
+
+function metaEpisodeName(meta: Meta, episode: PlayEpisode): string | undefined {
+  const match = meta.videos?.find(
+    (v) => (v.season ?? 1) === episode.season && (v.episode ?? v.number) === episode.episode,
+  );
+  return match?.name || match?.title || undefined;
 }

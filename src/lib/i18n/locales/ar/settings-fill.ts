@@ -35,6 +35,9 @@ const settingsFill: Record<string, string> = {
   "Smart resync with speech recognition": "إعادة مزامنة ذكية مع التعرّف على الكلام",
   "For the hardest files and the Try again button, Harbor transcribes a little speech on your device and lines the subtitle up to the actual words. Needs a build with the asr-whisper feature and downloads a small model the first time you use it.":
     "بالنسبة إلى أصعب الملفات وزر إعادة المحاولة، يفرّغ Harbor القليل من الكلام على جهازك ويحاذي الترجمة مع الكلمات الفعلية. يتطلّب ذلك نسخة مبنيّة تتضمّن ميزة asr-whisper، ويُنزّل نموذجًا صغيرًا عند أول استخدام.",
+  "Match subtitles across languages (experimental)": "مطابقة الترجمات بين اللغات (تجريبي)",
+  "When the audio and subtitle use different languages, Harbor compares a release-matched subtitle in the audio language. It only offers a fix unless every safety check is measured.":
+    "عندما يكون الصوت والترجمة بلغتين مختلفتين، يقارن Harbor ترجمة مطابقة للإصدار بلغة الصوت. ولا يقترح سوى إصلاح، ما لم تُقَس جميع فحوص السلامة.",
   "Community sync": "مزامنة المجتمع",
   "A good correction only has to be found once. Harbor can share verified fixes so the next person with the same file and subtitle gets an instant result. Records are keyed by salted fingerprints, never your files or anything personal.":
     "يكفي أن يُعثَر على التصحيح الجيّد مرّة واحدة فقط. يمكن لـ Harbor مشاركة الإصلاحات المُتحقَّق منها ليحصل الشخص التالي الذي لديه الملف والترجمة نفسهما على نتيجة فوريّة. تُفهرَس السجلّات ببصمات مُملَّحة، وليس بملفّاتك أو بأي شيء شخصي إطلاقًا.",
@@ -99,9 +102,6 @@ const settingsFill: Record<string, string> = {
   "Scan who is on screen while playing": "رصد مَن يظهر على الشاشة أثناء التشغيل",
   "Periodically match faces in the current frame against the cast to show who is on screen now. On-device, nothing leaves your machine. Uses a little more CPU while playing.":
     "يطابق الوجوه في الإطار الحالي مع طاقم العمل بشكل دوري لعرض مَن يظهر على الشاشة الآن. تتم المعالجة محلياً على جهازك، ولا يغادره أي شيء. يستهلك قدراً أكبر قليلاً من المعالج أثناء التشغيل.",
-  "Performance notice": "تنبيه حول الأداء",
-  "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.":
-    "يحمّل مسح الوجوه المباشر نماذج ذكاء اصطناعي على جهازك، وقد يزيد بشكل ملحوظ من استهلاك الذاكرة والمعالج وبطاقة الرسوميات أثناء التشغيل. عطّله إذا أصبح Harbor بطيئاً أو ارتفعت حرارة جهازك.",
   "X-Ray needs a TMDB key": "يحتاج X-Ray إلى مفتاح TMDB",
   "X-Ray reads the cast and their photos from TMDB. Without a TMDB key there is no cast to match against. Add your free key under Library & metadata.":
     "يقرأ X-Ray طاقم العمل وصورهم من TMDB. بدون مفتاح TMDB لا يوجد طاقم عمل للمطابقة معه. أضِف مفتاحك المجاني ضمن المكتبة والبيانات.",
@@ -127,8 +127,6 @@ const settingsFill: Record<string, string> = {
   "Manga reader remote": "جهاز تحكم في قارئ المانغا",
   "Control the manga flipbook from your phone while reading on the big screen: turn pages, zoom, and switch modes. The reader also shows this link while you read.":
     "تحكّم في دفتر تقليب المانجا من هاتفك أثناء القراءة على الشاشة الكبيرة: قلّب الصفحات، وكبّر، وبدّل الأوضاع. يعرض القارئ هذا الرابط أيضًا أثناء قراءتك.",
-  "Manga remote (this computer)": "جهاز التحكم بالمانجا (هذا الحاسوب)",
-  "Manga remote (Wi-Fi)": "جهاز التحكم بالمانجا (Wi-Fi)",
   "Flip the switch above and the phone remote and manga reader remote addresses appear here.":
     "فعّل المفتاح أعلاه وستظهر هنا عناوين جهاز التحكم عبر الهاتف وجهاز التحكم بقارئ المانجا.",
   "On a beta that's giving you trouble? Pick an earlier build below and run its installer over your current copy. Your library, settings, and downloads all stay put.":
@@ -424,6 +422,50 @@ const settingsFill: Record<string, string> = {
   "Add a TMDB key in Settings to identify the cast.":
     "أضف مفتاح TMDB في الإعدادات للتعرّف على طاقم العمل.",
   "No cast photos are available for this title.": "لا تتوفر صور لطاقم العمل لهذا العنوان.",
+  // Big Picture setup and ten-foot settings surfaces.
+  "Accounts and TMDB": "الحسابات وTMDB",
+  "Add an M3U link or Xtream Codes login": "أضف رابط M3U أو بيانات دخول Xtream Codes",
+  "Add playlist": "إضافة قائمة تشغيل",
+  "Artwork, rows and collections": "الصور والصفوف والمجموعات",
+  "Checking with TMDB…": "جارٍ التحقق من TMDB…",
+  "Connected: {list}": "متصل: {list}",
+  "Could not reach TMDB. Check the connection.": "تعذّر الوصول إلى TMDB. تحقق من الاتصال.",
+  "Edge margin": "هامش الحواف",
+  "Finish setting up Harbor": "أكمل إعداد Harbor",
+  "Get one free at {url}": "احصل على مفتاح مجاني من {url}",
+  "Getting a code ready…": "جارٍ تجهيز رمز…",
+  Harbor: "Harbor",
+  "Harbor needs a TMDB key for artwork, rows and collections. It is free.":
+    "يحتاج Harbor إلى مفتاح TMDB للصور والصفوف والمجموعات، وهو مجاني.",
+  "Harbor plays IPTV from your own provider. Add a playlist and the guide fills in.":
+    "يشغّل Harbor بث IPTV من مزوّدك الخاص. أضف قائمة تشغيل ليمتلئ الدليل.",
+  Interface: "الواجهة",
+  "Live TV playlists": "قوائم تشغيل البث التلفزيوني المباشر",
+  "Nothing connected yet. Scan a code with your phone.": "لا يوجد اتصال بعد. امسح رمزًا بهاتفك.",
+  "Phone setup is off": "إعداد الهاتف متوقف",
+  "Press OK on a field to type, or use the Harbor remote on your phone.":
+    "اضغط OK على أي حقل للكتابة، أو استخدم جهاز تحكم Harbor على هاتفك.",
+  "Raise this only if your TV cuts off the edges of the picture.":
+    "ارفع هذه القيمة فقط إذا كان تلفازك يقتطع حواف الصورة.",
+  "Replace the saved key": "استبدال المفتاح المحفوظ",
+  "Save key": "حفظ المفتاح",
+  "Scan with your phone to sign in without typing on the remote.":
+    "امسح بهاتفك لتسجيل الدخول دون الكتابة بجهاز التحكم.",
+  Screen: "الشاشة",
+  "Set up Live TV": "إعداد البث التلفزيوني المباشر",
+  Setup: "الإعداد",
+  "Setup QR code": "رمز QR للإعداد",
+  "Signed in as {name}": "مسجّل الدخول باسم {name}",
+  "Sync, themes and friends": "المزامنة والسمات والأصدقاء",
+  "TMDB API key": "مفتاح TMDB API",
+  "TMDB did not accept that key.": "لم يقبل TMDB هذا المفتاح.",
+  "Turn on phone setup": "تشغيل إعداد الهاتف",
+  "Type a key on this TV": "كتابة مفتاح على هذا التلفاز",
+  "Your Stremio library": "مكتبتك في Stremio",
+  "{count} added": "تمت إضافة {count}",
+  "Performance notice": "تنبيه حول الأداء",
+  "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.":
+    "يحمّل مسح الوجوه المباشر نماذج ذكاء اصطناعي على جهازك، وقد يزيد بشكل ملحوظ من استهلاك الذاكرة والمعالج وبطاقة الرسوميات أثناء التشغيل. عطّله إذا أصبح Harbor بطيئاً أو ارتفعت حرارة جهازك.",
 };
 
 export default settingsFill;

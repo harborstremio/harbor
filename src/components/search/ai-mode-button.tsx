@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { AI_MODELS, GROQ_MODELS, PROVIDER_NAME, providerForModel } from "@/lib/ai-models";
 import { pruneToCatalog, useGroqCatalog, useOpenRouterCatalog } from "@/lib/ai-live-models";
 import { ProviderLogo } from "@/components/ai-provider-logo";
@@ -23,6 +24,8 @@ export function AiModeButton({
   const holdTimer = useRef<number | null>(null);
   const heldRef = useRef(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [rect, setRect] = useState<DOMRect | null>(null);
   const provider = providerForModel(currentModel);
   const orCatalog = useOpenRouterCatalog();
   const groqCatalog = useGroqCatalog(settings.aiGroqKey);
@@ -32,9 +35,18 @@ export function AiModeButton({
   ];
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setRect(null);
+      return;
+    }
+    const place = () => {
+      const el = wrapRef.current;
+      if (el) setRect(el.getBoundingClientRect());
+    };
+    place();
     const onDoc = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (!wrapRef.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -44,9 +56,13 @@ export function AiModeButton({
     };
     window.addEventListener("mousedown", onDoc);
     window.addEventListener("keydown", onKey, true);
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
     return () => {
       window.removeEventListener("mousedown", onDoc);
       window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
     };
   }, [open]);
 
@@ -107,12 +123,18 @@ export function AiModeButton({
           <ProviderLogo provider={provider} size={20} round />
         </button>
       </HoverTooltip>
-      {open && (
-        <div className="animate-ai-entrance absolute end-0 top-12 z-[210] w-80 overflow-hidden rounded-2xl border border-edge-soft bg-canvas py-1.5 shadow-2xl">
+      {open &&
+        rect &&
+        createPortal(
+        <div
+          ref={menuRef}
+          className="animate-ai-entrance fixed z-[300] w-80 overflow-hidden rounded-2xl border border-edge-soft bg-canvas py-1.5 shadow-2xl"
+          style={{ top: rect.bottom + 8, right: Math.max(8, window.innerWidth - rect.right) }}
+        >
           <div className="px-3.5 pb-1 pt-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
             {t("AI model")}
           </div>
-          <div className="max-h-[320px] overflow-y-auto">
+          <div className="max-h-[min(320px,70vh)] overflow-y-auto">
             {allModels.map((m) => {
               const on = m.id === currentModel;
               return (
@@ -149,8 +171,9 @@ export function AiModeButton({
               );
             })}
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </div>
   );
 }

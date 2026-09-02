@@ -4,7 +4,6 @@ import { CatalogRows } from "@/components/catalog/catalog-rows";
 import { CatalogCustomizeBar } from "@/components/catalog/customize-bar";
 import { CinemaHero } from "@/components/cinema-hero";
 import { Row, ScrollRootContext } from "@/components/row";
-import { TopRankCard } from "@/components/top-rank-card";
 import { PickCard } from "@/components/pick-card";
 import { TmdbNudge } from "@/components/nudge";
 import { topMovies, type Meta } from "@/lib/cinemeta";
@@ -32,6 +31,7 @@ type MovieRow = {
   page: number;
   hasMore: boolean;
   fetcher?: (page: number) => Promise<Meta[]>;
+  variant?: "rank";
 };
 
 export function Movies({ active = true }: { active?: boolean }) {
@@ -154,7 +154,13 @@ export function Movies({ active = true }: { active?: boolean }) {
         ),
       ]);
       if (cancelled) return;
-      setHero(rotateDaily(top.filter((m) => m.background), HERO_POOL_TARGET, seen));
+      setHero(
+        rotateDaily(
+          top.filter((m) => m.background),
+          HERO_POOL_TARGET,
+          seen,
+        ),
+      );
       const built: MovieRow[] = [
         {
           key: "cinemeta-top",
@@ -217,10 +223,7 @@ export function Movies({ active = true }: { active?: boolean }) {
 
   const shownHero = useHideAnimeMetas(hero);
   const shownLetterboxdRows = useHideAnimeRows(letterboxdRows);
-  const trendingMetas = useMemo(
-    () => rows.find((r) => r.key === "trending")?.metas ?? [],
-    [rows],
-  );
+  const trendingMetas = useMemo(() => rows.find((r) => r.key === "trending")?.metas ?? [], [rows]);
   const shownTrending = useHideAnimeMetas(trendingMetas);
   const top10 = useMemo(() => shownTrending.slice(0, 10), [shownTrending]);
 
@@ -262,10 +265,23 @@ export function Movies({ active = true }: { active?: boolean }) {
         })),
     [movieCollections],
   );
-  const allRestRows = useMemo(
-    () => [...collectionRows, ...restRows],
-    [collectionRows, restRows],
-  );
+  const allRestRows = useMemo(() => [...collectionRows, ...restRows], [collectionRows, restRows]);
+  const catalogRows = useMemo<MovieRow[]>(() => {
+    if (top10.length < 10) return allRestRows;
+    const trending = rows.find((r) => r.key === "trending");
+    return [
+      {
+        key: "top10",
+        title: "Top 10 Movies Today",
+        metas: top10.slice(0, 10),
+        page: 1,
+        hasMore: false,
+        fetcher: trending?.fetcher,
+        variant: "rank",
+      },
+      ...allRestRows,
+    ];
+  }, [top10, rows, allRestRows]);
 
   return (
     <main ref={scrollCb} className="relative h-full overflow-y-auto overflow-x-hidden bg-canvas">
@@ -282,66 +298,43 @@ export function Movies({ active = true }: { active?: boolean }) {
           {shownLetterboxdRows.map((row, i) => {
             const catalogId = row.key.replace("letterboxd-", "");
             return (
-            <Row
-              key={row.key}
-              title={
-                <>
-                  {t(row.name)}
-                  <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
-                    Letterboxd
-                  </span>
-                </>
-              }
-              titleExtra={
-                <LetterboxdRowMenu
-                  canMoveUp={i > 0}
-                  canMoveDown={i < shownLetterboxdRows.length - 1}
-                  hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
-                  onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
-                  onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
-                  onToggleHidden={() => letterboxd.toggleHidden(catalogId)}
-                />
-              }
-              min={148}
-              shape="portrait"
-              scrollKey={`movies:${row.key}`}
-              onViewAll={
-                row.fetcher
-                  ? () => openGrid({ title: t(row.name), fetcher: row.fetcher!, initial: row.metas })
-                  : undefined
-              }
-            >
-              {row.metas.map((m) => (
-                <PickCard key={m.id} meta={m} />
-              ))}
-            </Row>
+              <Row
+                key={row.key}
+                title={
+                  <>
+                    {row.name}
+                    <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
+                      Letterboxd
+                    </span>
+                  </>
+                }
+                titleExtra={
+                  <LetterboxdRowMenu
+                    canMoveUp={i > 0}
+                    canMoveDown={i < shownLetterboxdRows.length - 1}
+                    hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
+                    onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
+                    onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
+                    onToggleHidden={() => letterboxd.toggleHidden(catalogId)}
+                  />
+                }
+                min={148}
+                shape="portrait"
+                scrollKey={`movies:${row.key}`}
+                onViewAll={
+                  row.fetcher
+                    ? () => openGrid({ title: row.name, fetcher: row.fetcher!, initial: row.metas })
+                    : undefined
+                }
+              >
+                {row.metas.map((m) => (
+                  <PickCard key={m.id} meta={m} />
+                ))}
+              </Row>
             );
           })}
-          {top10.length >= 10 && (
-            <Row
-              title={t("Top 10 Movies Today")}
-              min={216}
-              shape="rank"
-              scrollKey="movies:top10"
-              onViewAll={(() => {
-                const trending = rows.find((r) => r.key === "trending");
-                return trending?.fetcher
-                  ? () =>
-                      openGrid({
-                        title: t(trending.title),
-                        fetcher: trending.fetcher!,
-                        initial: trending.metas,
-                      })
-                  : undefined;
-              })()}
-            >
-              {top10.slice(0, 10).map((m, i) => (
-                <TopRankCard key={m.id} meta={m} rank={i + 1} />
-              ))}
-            </Row>
-          )}
           <CatalogRows
-            rows={allRestRows}
+            rows={catalogRows}
             editMode={pageRows.editMode}
             custom={pageRows.custom}
             onPersist={pageRows.persist}

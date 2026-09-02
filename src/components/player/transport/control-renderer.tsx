@@ -4,7 +4,6 @@ import { StremioVolume } from "./stremio-volume";
 import {
   Camera,
   ChevronLeft,
-  Info,
   Maximize,
   Minimize,
   PauseCircle,
@@ -12,8 +11,8 @@ import {
   PlayCircle,
   Replace,
   SlidersHorizontal,
-  Tv,
 } from "lucide-react";
+import { NavGlyph } from "@/components/icons/nav-glyph";
 import type { ReactNode } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
@@ -28,6 +27,7 @@ import {
 } from "@/lib/player-chrome";
 import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
 import { CustomIcon, renderCustomIconControl } from "./custom-icon-renderer";
+import { QualityInfo } from "./quality-badge";
 import { hdrFormatLabel, realQualityLabel } from "@/lib/player/resolution-label";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import { FullscreenClock } from "@/components/player/fullscreen-clock";
@@ -45,7 +45,7 @@ function getControlState(id: PlayerControlId, ctx: ControlContext): string | und
     case "dvr":
       return ctx.isLiveChannel ? "recording" : "idle";
     case "cast":
-      return ctx.capabilities.chromecast ? "connected" : "idle";
+      return "idle";
     case "pip":
       return "inactive";
     case "download":
@@ -157,13 +157,21 @@ export type ControlContext = {
   anime4kMode?: string;
   onAnime4kMode?: (id: string) => void;
   anime4kAvailable?: boolean;
+  homeServerQualityControl?: ReactNode;
 };
 
 export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNode {
   const t = ctx.t ?? translate;
   const state = getControlState(id, ctx);
   const iconUrl = getCustomIcon(ctx.customIcons, id, state);
-  if (iconUrl && id !== "back" && id !== "play-pause") {
+  if (
+    iconUrl &&
+    id !== "back" &&
+    id !== "play-pause" &&
+    id !== "seek-back" &&
+    id !== "seek-forward" &&
+    id !== "download"
+  ) {
     const custom = renderCustomIconControl(id, ctx, iconUrl);
     if (custom !== undefined) return custom;
   }
@@ -185,11 +193,21 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
               backdropFilter: "blur(18px) saturate(1.25)",
               WebkitBackdropFilter: "blur(18px) saturate(1.25)",
             }}
+            // PlainSurface hardcodes a variant background and an inset 1px ring,
+            // and it spreads style last, so the plate is cancelled here rather
+            // than in the shared component every other caller depends on.
+            // defaultStyle is glass-only, so turning liquid glass on brings the
+            // circle back instead of losing it.
             style={{
               transition: "opacity 300ms ease-out",
+              backgroundColor: "transparent",
+              boxShadow: "none",
+            }}
+            defaultStyle={{
+              border: "1px solid rgba(255,255,255,0.08)",
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
             }}
-            className={`h-11 w-11 shrink-0 border border-white/[0.08] transition-opacity duration-300 ${
+            className={`h-11 w-11 shrink-0 transition-opacity duration-300 ${
               ctx.active ? "opacity-100" : "opacity-0"
             }`}
             contentClassName="flex h-full w-full items-center justify-center"
@@ -227,16 +245,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
             >
               {primary}
             </h1>
-            {qual && (
-              <span className="shrink-0 rounded-md bg-white/15 px-1.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-white/85">
-                {qual}
-              </span>
-            )}
-            {hdr && (
-              <span className="shrink-0 rounded-md bg-amber-400/20 px-1.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-amber-200">
-                {hdr}
-              </span>
-            )}
+            <QualityInfo labels={[qual, hdr]} show={ctx.active} />
           </div>
           {secondary && (
             <p
@@ -257,11 +266,6 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
             aria-label={t("Title info")}
           >
             <div className="flex flex-col items-start gap-0.5">{lines}</div>
-            <Info
-              size={14}
-              strokeWidth={2.2}
-              className="opacity-50 transition-opacity group-hover:opacity-95"
-            />
           </button>
         );
       }
@@ -272,13 +276,14 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
       );
     }
     case "local-time":
-      return ctx.fullscreen ? (
+      return (
         <FullscreenClock
           durationSec={ctx.snap.durationSec}
           playbackRate={ctx.snap.rate}
           active={ctx.active}
+          fullscreen={ctx.fullscreen}
         />
-      ) : null;
+      );
     case "time-start": {
       return (
         <TimeStart
@@ -322,6 +327,8 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           onVolume={ctx.onVolume}
           capabilities={ctx.capabilities}
           style={ctx.volumeStyle ?? "slider"}
+          iconUrl={iconUrl}
+          mutedIconUrl={getCustomIcon(ctx.customIcons, "volume", "muted")}
         />
       );
     }
@@ -347,6 +354,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           onCancel={ctx.onDownloadCancel}
           onReveal={ctx.onDownloadReveal}
           onReset={ctx.onDownloadReset}
+          iconUrl={getCustomIcon(ctx.customIcons, "download", "idle")}
         />
       );
     }
@@ -371,31 +379,13 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
     case "play-pause": {
       const sizeClass = ctx.tight ? "h-12 w-12" : ctx.compact ? "h-14 w-14" : "h-16 w-16";
       const iconSize = ctx.tight ? 28 : ctx.compact ? 32 : 36;
-      const isMpv = ctx.engine === "mpv";
       return (
         <Tooltip label={ctx.playing ? t("Pause") : t("Play")}>
-          <ThreeLiquidGlassSurface
-            radius="9999px"
-            shaderRadius={0.48}
-            intensity={0.3}
-            refractionStrength={0.08}
-            interactive={false}
-            alwaysActive
-            experimentalStyle={{
-              background: isMpv
-                ? "linear-gradient(145deg, rgba(4,6,10,0.68), rgba(4,6,10,0.60) 48%, rgba(4,6,10,0.66))"
-                : "transparent",
-              backdropFilter: isMpv ? undefined : "blur(18px) saturate(1.25)",
-              WebkitBackdropFilter: isMpv ? undefined : "blur(18px) saturate(1.25)",
-            }}
-            className={`shrink-0 rounded-full border border-white/[0.10] ${sizeClass} transition-opacity duration-300 ${
+          <div
+            className={`shrink-0 rounded-full ${sizeClass} transition-opacity duration-300 ${
               ctx.active ? "opacity-100" : "opacity-0"
             }`}
-            contentClassName="h-full w-full bg-transparent"
-            style={{
-              transition: "opacity 300ms ease-out",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
-            }}
+            style={{ transition: "opacity 300ms ease-out" }}
           >
             <button
               type="button"
@@ -403,17 +393,22 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
               data-player-play-pause
               data-tv-initial-focus
               aria-label={ctx.playing ? t("Pause") : t("Play")}
-              className="relative flex h-full w-full items-center justify-center rounded-full bg-transparent text-white outline-none transition-transform duration-150 active:scale-95"
+              className="relative flex h-full w-full items-center justify-center rounded-full bg-transparent text-white outline-none transition-[transform,background-color] duration-150 hover:bg-white/10 focus-visible:bg-white/15 active:scale-95"
             >
-              {iconUrl ? (
-                <CustomIcon url={iconUrl} size={iconSize} />
-              ) : ctx.playing ? (
-                <PauseCircle size={iconSize} strokeWidth={1.5} />
-              ) : (
-                <PlayCircle size={iconSize} strokeWidth={1.5} />
-              )}
+              <span
+                key={ctx.playing ? "pause" : "play"}
+                className="flex items-center justify-center motion-safe:animate-play-toggle"
+              >
+                {iconUrl ? (
+                  <CustomIcon url={iconUrl} size={iconSize} />
+                ) : ctx.playing ? (
+                  <PauseCircle size={iconSize} strokeWidth={1.5} />
+                ) : (
+                  <PlayCircle size={iconSize} strokeWidth={1.5} />
+                )}
+              </span>
             </button>
-          </ThreeLiquidGlassSurface>
+          </div>
         </Tooltip>
       );
     }
@@ -444,13 +439,22 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           tooltip={ctx.isLiveChannel ? t("TV Guide") : t("Switch stream")}
         >
           {ctx.isLiveChannel ? (
-            <Tv size={22} strokeWidth={1.9} />
+            <NavGlyph name="guide" className="h-[22px] w-[22px]" />
           ) : (
             <Replace size={22} strokeWidth={1.9} />
           )}
         </BigButton>
       );
     }
+    case "home-server-quality":
+      return (
+        ctx.homeServerQualityControl ??
+        (ctx.editing ? (
+          <BigButton ariaLabel={t("Home server quality")}>
+            <SlidersHorizontal size={22} strokeWidth={1.9} />
+          </BigButton>
+        ) : null)
+      );
     case "audio-menu": {
       if (ctx.tight || ctx.engine === "html5") return null;
       return (
@@ -463,6 +467,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           onDelay={ctx.onAudioDelay}
           onOpenChange={ctx.setAudioMenuOpen}
           useOverlayPopup={ctx.useOverlayPopups}
+          iconUrl={iconUrl}
         />
       );
     }
@@ -485,6 +490,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           episode={ctx.episode}
           useOverlayPopup={ctx.useOverlayPopups}
           onOpenChange={ctx.setSubtitleMenuOpen}
+          iconUrl={iconUrl}
         />
       );
     }
@@ -496,6 +502,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           onRate={ctx.onRate}
           sleep={ctx.sleep}
           onOpenChange={ctx.setSpeedMenuOpen}
+          iconUrl={iconUrl}
         />
       );
     }
@@ -506,6 +513,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           mode={ctx.cropMode ?? "fit"}
           onMode={ctx.onCropMode}
           onOpenChange={ctx.setAspectMenuOpen}
+          iconUrl={iconUrl}
         />
       );
     }
@@ -517,6 +525,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           mode={(ctx.anime4kMode as Anime4kChoice) ?? "auto"}
           onMode={ctx.onAnime4kMode}
           onOpenChange={ctx.setAnime4kMenuOpen}
+          iconUrl={iconUrl}
         />
       );
     }
@@ -528,6 +537,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           onMode={ctx.onAnime4kMode}
           anime4kAvailable={!!ctx.anime4kAvailable}
           onOpenChange={ctx.setAnime4kMenuOpen}
+          iconUrl={iconUrl}
         />
       );
     }
@@ -537,11 +547,11 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
     }
     case "rtx-hdr-toggle": {
       if (ctx.tight || ctx.engine === "html5") return null;
-      return <RtxHdrToggleBigBtn meta={ctx.meta} />;
+      return <RtxHdrToggleBigBtn meta={ctx.meta} iconUrl={iconUrl} />;
     }
     case "rtx-vsr-toggle": {
       if (ctx.tight || ctx.engine === "html5") return null;
-      return <RtxVsrToggleBigBtn meta={ctx.meta} />;
+      return <RtxVsrToggleBigBtn meta={ctx.meta} iconUrl={iconUrl} />;
     }
     case "draw-toggle": {
       if (ctx.compact || !ctx.showDraw) return null;
@@ -569,14 +579,19 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
     }
     case "screenshot": {
       return (
-        <BigButton onClick={ctx.onScreenshot} ariaLabel={t("Screenshot")} tooltip={t("Screenshot")}>
+        <BigButton
+          onClick={ctx.onScreenshot}
+          ariaLabel={t("Screenshot")}
+          tooltip={t("Screenshot")}
+          iconUrl={iconUrl}
+        >
           <Camera size={24} strokeWidth={1.9} />
         </BigButton>
       );
     }
     case "song-id": {
       if (ctx.tight) return null;
-      return <IdentifySongButton editing={ctx.editing} />;
+      return <IdentifySongButton editing={ctx.editing} iconUrl={iconUrl} />;
     }
     case "pip": {
       if (!ctx.capabilities.pictureInPicture) return null;

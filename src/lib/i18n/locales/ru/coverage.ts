@@ -1,5 +1,4 @@
 const coverage: Record<string, string> = {
-  "Release compatibility": "Совместимость релиза",
   "Play from": "Играть с",
   end: "конец",
   "m:ss": "м:сс",
@@ -111,7 +110,6 @@ const coverage: Record<string, string> = {
   Exit: "Выход",
   Explore: "Обзор",
   External: "Внешние",
-  Extras: "Дополнительные материалы",
   Favorite: "Избранное",
   Favorited: "В избранном",
   Favourites: "Избранное",
@@ -164,7 +162,6 @@ const coverage: Record<string, string> = {
   List: "Список",
   Live: "Эфир",
   Loading: "Загрузка",
-  "Loading settings": "Загрузка настроек",
   Local: "Локально",
   "Locked until": "Заблокировано до",
   Logos: "Логотипы",
@@ -443,6 +440,103 @@ const coverage: Record<string, string> = {
   "so pick one you'll keep.": "поэтому выберите тот, который оставите.",
   something: "что-то",
   speed: "скорость",
+  "this season": "этот сезон",
+  title: "наименование",
+  titles: "наименований",
+  to: "до",
+  tomorrow: "завтра",
+  watched: "просмотрено",
+  yourhandle: "вашникнейм",
+  yourname: "вашеимя",
+  "{label} details": "Подробности: {label}",
+  "{n} / {max}": "{n} / {max}",
+  "{n} / {max} titles": "{n} / {max} наименований",
+  "{n} nom": "{n} номинация",
+  "{n} noms": "{n} номинаций",
+  "{n} win": "{n} победа",
+  "· {n} nom": "· {n} номинация",
+  "· {n} noms": "· {n} номинаций",
+  "Big Picture": "Большой экран",
+  "Leave Big Picture": "Выйти из большого экрана",
+  "A full screen, couch friendly Harbor for TVs, handhelds and big monitors.":
+    "Полноэкранный Harbor для просмотра с дивана: телевизоры, портативные консоли и большие мониторы.",
+  "Show the Big Picture button": "Показывать кнопку большого экрана",
+  "Adds a Big Picture button to Harbor's navigation. Turn this off to keep it out of the way.":
+    "Добавляет кнопку большого экрана в навигацию Harbor. Отключите, чтобы она не мешала.",
+  "Open in Big Picture": "Открывать в большом экране",
+  "Launch straight into Big Picture when Harbor starts. Press Esc at any time to leave.":
+    "Запускать Harbor сразу в режиме большого экрана. Нажмите Esc в любой момент, чтобы выйти.",
+  "Almost done": "Почти конец",
+  "Jump back in": "Продолжить просмотр",
+  "Couldn't load this title.": "Не удалось загрузить этот тайтл.",
+  "Directed by": "Режиссёр",
+  "Created by": "Создатели",
+  "Written by": "Сценарий",
+  "Music by": "Музыка",
+  "Box office": "Кассовые сборы",
+  Length: "Продолжительность",
+  "Couldn't load your catalogs": "Не удалось загрузить каталоги",
+  "Harbor couldn't reach the catalog servers. Check the connection and reopen Big Picture.":
+    "Harbor не смог связаться с серверами каталогов. Проверьте подключение и снова откройте большой экран.",
+  Letters: "Буквы",
+  Symbols: "Символы",
+  Space: "Пробел",
+  Backspace: "Стереть",
+  "Loading your library...": "Загрузка библиотеки...",
+  "Nothing saved yet. Add a title from any details page.":
+    "Пока ничего не сохранено. Добавьте тайтл с любой страницы описания.",
+  "Your watchlist is empty.": "Список к просмотру пуст.",
+  "Search Harbor": "Поиск в Harbor",
+  "{n} results": "Результатов: {n}",
+  "Looking...": "Ищем...",
+  "Start typing to search movies and series.": "Начните вводить, чтобы найти фильмы и сериалы.",
+  'Nothing found for "{q}"': 'Ничего не найдено по запросу "{q}"',
+  "Interface sounds": "Звуки интерфейса",
+  "Navigation and selection are silent": "Навигация и выбор без звука",
+  "Sound pack: {name}": "Набор звуков: {name}",
+  "Animated backdrop": "Анимированный фон",
+  "Drifting poster wall behind the interface. Turn off on low power devices.":
+    "Плывущая стена постеров за интерфейсом. Отключите на слабых устройствах.",
+  "Controller navigation": "Навигация геймпадом",
+  "Use a gamepad or remote to move around Harbor":
+    "Используйте геймпад или пульт для навигации по Harbor",
+  "Launch straight into Big Picture when Harbor starts":
+    "Запускать Harbor сразу в режиме большого экрана",
+  "Quick panel": "Быстрая панель",
+  "No trailer available for {name}": "Трейлер для {name} недоступен",
+  "Loading trailer...": "Загрузка трейлера...",
+  Toggle: "Переключить",
+  "Switch tab": "Сменить вкладку",
+  "Hold to skip or continue": "Удерживайте, чтобы пропустить или продолжить",
+  "Hold to continue": "Удерживайте, чтобы продолжить",
+  Nav: "Верхнее меню",
+  "Decrease {name}": "Уменьшить: {name}",
+  "Increase {name}": "Увеличить: {name}",
+  "Reset {name}": "Сбросить: {name}",
+  Move: "Перемещение",
+  Suggested: "Рекомендуем",
+  "Clear recent searches": "Очистить недавние запросы",
+  "Start typing to search movies, series and everything your addons carry.":
+    "Начните вводить, чтобы искать фильмы, сериалы и всё, что дают ваши дополнения.",
+  "Nothing watched yet.": "Пока ничего не просмотрено.",
+  "Remove from Continue watching": "Убрать из «Продолжить просмотр»",
+  "Known for": "Известен по",
+  "Nothing to show for this person.": "Для этого человека ничего нет.",
+  "Top match": "Лучшее совпадение",
+  "Addons you could install": "Дополнения, которые можно установить",
+  "Didn't answer": "Нет ответа",
+  "On-screen keyboard": "Экранная клавиатура",
+  Phone: "Телефон",
+  "Type on your phone": "Ввести с телефона",
+  "Nothing in this filter. Choose All to see everything that answered.":
+    "В этом фильтре ничего нет. Выберите «Все», чтобы увидеть всё, что ответило.",
+  'Nothing found for "{q}". {n} of your addons did not answer.':
+    'Ничего не найдено по запросу "{q}". Дополнений без ответа: {n}.',
+  'Your addons answered for "{q}", but nothing in the results opens here.':
+    'Ваши дополнения ответили на запрос "{q}", но ничего из найденного здесь не открывается.',
+  "Release compatibility": "Совместимость релиза",
+  Extras: "Дополнительные материалы",
+  "Loading settings": "Загрузка настроек",
   "Subtitles appear early": "Субтитры появляются раньше",
   "Subtitles appear late": "Субтитры появляются позже",
   "More timing controls": "Дополнительные настройки синхронизации",
@@ -453,14 +547,6 @@ const coverage: Record<string, string> = {
     "Когда субтитры опережают или отстают, Harbor анализирует речь и автоматически корректирует тайминг.",
   "Downloaded subtitles can arrive after playback starts. Harbor switches from a temporary track when a stronger release match becomes available.":
     "Загруженные субтитры могут появиться после начала воспроизведения. Harbor заменит временную дорожку, когда станет доступно более точное совпадение с релизом.",
-  "this season": "этот сезон",
-  title: "наименование",
-  titles: "наименований",
-  to: "до",
-  tomorrow: "завтра",
-  watched: "просмотрено",
-  yourhandle: "вашникнейм",
-  yourname: "вашеимя",
   "Only embedded subtitles are available right now.": "Сейчас доступны только встроенные субтитры.",
   "Search all sources again": "Повторить поиск во всех источниках",
   "Aligned here": "Выровнено здесь",
@@ -479,14 +565,88 @@ const coverage: Record<string, string> = {
   "Play until you hear a line inside this section, tap it, then choose Align to now.":
     "Дождитесь реплики внутри участка, нажмите на неё и выберите выравнивание по текущему моменту.",
   "Sync point {n}": "Точка синхронизации {n}",
-  "{label} details": "Подробности: {label}",
-  "{n} / {max}": "{n} / {max}",
-  "{n} / {max} titles": "{n} / {max} наименований",
-  "{n} nom": "{n} номинация",
-  "{n} noms": "{n} номинаций",
-  "{n} win": "{n} победа",
-  "· {n} nom": "· {n} номинация",
-  "· {n} noms": "· {n} номинаций",
+  "Skip the launch": "Пропустить отплытие",
+  "Click anywhere to skip": "Нажмите в любом месте, чтобы пропустить",
+  "Checking {total} episodes for sources.": "Идёт поиск источников для {total} серий.",
+  "Checked {done} of {total} episodes.": "Проверено {done} из {total} серий.",
+  "These episodes are already downloading.": "Эти серии уже скачиваются.",
+  "No source was found for any of these episodes. Try refreshing or another addon.":
+    "Ни для одной из этих серий не найдено источника. Попробуйте обновить или другое дополнение.",
+  "Queued {queued} of {total} episodes.": "В очередь поставлено {queued} из {total} серий.",
+  "Could not queue these episodes.": "Не удалось поставить эти серии в очередь.",
+  "Harbor found episode sources for {season}, but none of them is a single downloadable package. It can still fetch the episodes one at a time.":
+    "Harbor нашёл источники серий для {season}, но ни один из них не является единым пакетом для скачивания. Он всё ещё может скачивать серии по одной.",
+  "None of your addons returned a downloadable package for {season}. Harbor can still fetch the episodes one at a time, or you can refresh the sources.":
+    "Ни одно из ваших дополнений не вернуло пакет для скачивания для {season}. Harbor всё ещё может скачивать серии по одной, или вы можете обновить источники.",
+  "Download episode by episode": "Скачивать по одной серии",
+  "Test mode: your controller only moves this diagram. Press Esc to stop.":
+    "Режим проверки: контроллер двигает только эту схему. Нажмите Esc, чтобы остановить.",
+  "Stop test": "Остановить проверку",
+  "Test controller": "Проверить контроллер",
+  Ring: "Кольцо",
+  Pointer: "Указатель",
+  Dot: "Точка",
+  "Controller cursor": "Курсор контроллера",
+  "The pointer your right stick moves around Harbor. Pick a shape or use your own image.":
+    "Указатель, который вы двигаете правым стиком по Harbor. Выберите форму или используйте своё изображение.",
+  "Your own image": "Своё изображение",
+  "PNG, WEBP, SVG or GIF. Harbor shrinks it to 128px so it stays small on disk.":
+    "PNG, WEBP, SVG или GIF. Harbor уменьшит до 128 пикселей, чтобы файл занимал мало места.",
+  "Remove image": "Удалить изображение",
+  "That image could not be used. Try a smaller PNG or WEBP.":
+    "Это изображение не удалось использовать. Попробуйте PNG или WEBP поменьше.",
+  "Cursor size": "Размер курсора",
+  "Make it bigger for a TV across the room, smaller for a desk monitor.":
+    "Сделайте крупнее для телевизора в другом конце комнаты и мельче для настольного монитора.",
+  "{n} px": "{n} пикс.",
+  "Actual size on screen": "Реальный размер на экране",
+  "Harbor's full video engine. Plays anything you throw at it.":
+    "Полноценный видеодвижок Harbor. Воспроизводит всё, что вы ему дадите.",
+  "libmpv did not load, so playback falls back to HTML5 and formats like MKV may refuse to play. On Linux, install your distribution's libmpv package, then restart Harbor.":
+    "libmpv не загрузилась, поэтому воспроизведение переключается на HTML5, и форматы вроде MKV могут отказаться играть. В Linux установите пакет libmpv вашего дистрибутива и перезапустите Harbor.",
+  "{n} hours": "{n} часов",
+  "{n} GB": "{n} ГБ",
+  "Another program already holds this port, usually a Stremio server that is running on this machine. Harbor tried its spare ports too. Stop that server, or leave it running and point Harbor at it in Remote streaming server below.":
+    "Этот порт уже занят другой программой, обычно сервером Stremio, запущенным на этом компьютере. Harbor попробовал и запасные порты. Остановите тот сервер или оставьте его работать и укажите на него в разделе «Удалённый сервер потоковой передачи» ниже.",
+  "Open here": "Открыть здесь",
+  "Scan with your phone camera, or type the address above.":
+    "Отсканируйте камерой телефона или введите адрес выше.",
+  "No Wi-Fi address yet. Other devices cannot reach this computer.":
+    "Адреса Wi-Fi пока нет. Другие устройства не могут связаться с этим компьютером.",
+  "Harbor in a browser": "Harbor в браузере",
+  "This exact install, served as a web app. Open it on a phone, laptop or TV browser and it streams through this computer.":
+    "Эта же самая установка, отданная как веб-приложение. Откройте её на телефоне, ноутбуке или в браузере телевизора, и поток пойдёт через этот компьютер.",
+  "Play, pause, seek, volume and casting from the couch.":
+    "Воспроизведение, пауза, перемотка, громкость и трансляция прямо с дивана.",
+  "Turn pages, zoom and switch modes while you read on the big screen.":
+    "Листайте страницы, приближайте и переключайте режимы, пока читаете на большом экране.",
+  "One switch serves Harbor on your network. Scan a code below with your phone, or open an address on any device on the same Wi-Fi.":
+    "Один переключатель раздаёт Harbor в вашей сети. Отсканируйте код ниже телефоном или откройте адрес на любом устройстве в той же сети Wi-Fi.",
+  "Powers everything on this page: the web app, the phone remote, and the manga reader remote.":
+    "Обеспечивает работу всего на этой странице: веб-приложения, пульта на телефоне и пульта для чтения манги.",
+  "Flip the switch above and the addresses and scan codes appear here.":
+    "Включите переключатель выше, и здесь появятся адреса и коды для сканирования.",
+  "Show in windowed mode": "Показывать в оконном режиме",
+  "Keep the clock on screen when the player is not fullscreen.":
+    "Оставлять часы на экране, когда плеер не в полноэкранном режиме.",
+  "On the poster": "На постере",
+  Scores: "Оценки",
+  "Episode order": "Порядок серий",
+  "Watchlist overlaps ({n})": "Совпадения в списке просмотра ({n})",
+  "Favorites overlap ({n})": "Совпадения в избранном ({n})",
+  "Addons overlap ({n})": "Совпадения дополнений ({n})",
+  "Import selected data?": "Импортировать выбранные данные?",
+  "Show direct, debrid, and peer-to-peer sources":
+    "Показывать прямые, debrid- и одноранговые источники",
+  "Prefer direct and debrid sources; keep P2P when only web links are available":
+    "Предпочитать прямые и debrid-источники; сохранять P2P, когда доступны только веб-ссылки",
+  "Prefer peer-to-peer torrent sources": "Предпочитать одноранговые торрент-источники",
+  "New York Times": "New York Times",
+  "Bestseller lists in the eBook section.": "Списки бестселлеров в разделе eBook.",
+  "New York Times · bestseller lists": "New York Times · списки бестселлеров",
+  "NYT Books API key": "Ключ API NYT Books",
+  "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
+    "Выберите, должен ли Harbor предпочитать прямые и debrid-источники, одноранговые торренты или показывать оба варианта.",
 };
 
 export default coverage;

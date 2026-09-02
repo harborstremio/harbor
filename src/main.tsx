@@ -3,13 +3,19 @@ import { StrictMode, useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "@/App";
 import { hydrateCustomThemes } from "@/lib/custom-themes";
+import { getUiLanguage } from "@/lib/i18n/store";
+import { ensureUiLocale } from "@/lib/i18n/load-locale";
 import { applyOsDataset } from "@/lib/platform";
 import { loadSecrets } from "@/lib/secret-store";
 import { initSubtitleCache } from "@/lib/subtitles/subtitle-cache";
+import { CaptionsApp } from "@/views/captions-app";
 import { ModalOverlayApp } from "@/views/modal-overlay-app";
 import { HdrOverlayApp } from "@/views/hdr-overlay-app";
 import { PipApp } from "@/views/pip";
+import "@/lib/awards-history-eager";
 import "@/index.css";
+import "flag-icons/css/flag-icons.min.css";
+import { startTaskbarProgress } from "@/lib/download/taskbar-progress";
 
 function detectRemoteMode(): boolean {
   try {
@@ -40,6 +46,15 @@ function detectModalOverlay(): boolean {
   return false;
 }
 
+function detectCaptions(): boolean {
+  if (new URLSearchParams(window.location.search).get("harbor-captions") === "1") return true;
+  try {
+    const w = getCurrentWindow();
+    if (w.label === "harbor-captions") return true;
+  } catch {}
+  return false;
+}
+
 function detectHdrOverlay(): boolean {
   if (new URLSearchParams(window.location.search).get("harbor-overlay") === "1") return true;
   try {
@@ -52,6 +67,7 @@ function detectHdrOverlay(): boolean {
 const isPip = detectPipMode();
 const isModal = detectModalOverlay();
 const isHdrOverlay = detectHdrOverlay();
+const isCaptions = detectCaptions();
 const isRemote = detectRemoteMode();
 applyOsDataset();
 if (isRemote) {
@@ -70,7 +86,25 @@ if (isModal || isHdrOverlay) {
     root.style.backgroundColor = "transparent";
   }
 }
-if (import.meta.env.DEV) console.log("[harbor] entry: pip =", isPip, "modal =", isModal, "hdr =", isHdrOverlay, "remote =", isRemote, "label =", (() => { try { return getCurrentWindow().label; } catch { return "?"; } })());
+if (import.meta.env.DEV)
+  console.log(
+    "[harbor] entry: pip =",
+    isPip,
+    "modal =",
+    isModal,
+    "hdr =",
+    isHdrOverlay,
+    "remote =",
+    isRemote,
+    "label =",
+    (() => {
+      try {
+        return getCurrentWindow().label;
+      } catch {
+        return "?";
+      }
+    })(),
+  );
 if (import.meta.env.DEV && !isPip && !isModal && !isHdrOverlay && !isRemote) {
   void import("./lib/streams/__fixtures__/verify").then((m) => m.logVerificationReport());
 }
@@ -113,12 +147,19 @@ function MainRoot() {
 }
 
 async function mount() {
-  await Promise.all([loadSecrets(), hydrateCustomThemes().catch(() => {})]);
-  if (!isHdrOverlay && !isModal) void initSubtitleCache();
+  await Promise.all([
+    loadSecrets(),
+    hydrateCustomThemes().catch(() => {}),
+    ensureUiLocale(getUiLanguage()),
+  ]);
+  if (!isHdrOverlay && !isModal && !isCaptions) void initSubtitleCache();
+  if (!isHdrOverlay && !isModal && !isCaptions && !isPip) startTaskbarProgress();
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       {isHdrOverlay ? (
         <HdrOverlayApp />
+      ) : isCaptions ? (
+        <CaptionsApp />
       ) : isModal ? (
         <ModalOverlayApp />
       ) : isPip ? (
@@ -126,7 +167,7 @@ async function mount() {
       ) : (
         <MainRoot />
       )}
-      {(isHdrOverlay || isModal || isPip) && <StartupReady />}
+      {(isHdrOverlay || isModal || isPip || isCaptions) && <StartupReady />}
     </StrictMode>,
   );
 }

@@ -189,8 +189,6 @@ const settings: Record<string, string> = {
   "Groq API key (gsk-...)": "API-ключ Groq (gsk-...)",
   "Group Refresh on the left beside Back instead of the far right of the header.":
     "Разместить «Обновить» слева рядом с «Назад», а не у правого края шапки.",
-  "Harbor in your browser (Wi-Fi)": "Harbor в браузере (Wi-Fi)",
-  "Harbor in your browser (this computer)": "Harbor в браузере (этот компьютер)",
   "Harbor will not start the torrent engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable torrent streaming.":
     "Harbor не будет запускать торрент-движок, обращаться к трекерам и использовать DHT. Включите, если нужны только debrid и прямые ссылки. Отключите, чтобы вернуть торрент-потоки.",
   "Hide badge": "Скрыть значок",
@@ -247,9 +245,6 @@ const settings: Record<string, string> = {
   "Or try one of ours": "Или попробуйте наши",
   "Packs & import": "Пакеты и импорт",
   "Paste an image URL (png, webp, svg)": "Вставьте URL изображения (png, webp, svg)",
-  "Pattern (e.g. \\\\bremux\\\\b)": "Шаблон (например, \\\\bremux\\\\b)",
-  "Phone remote (Wi-Fi)": "Пульт на телефоне (Wi-Fi)",
-  "Phone remote (this computer)": "Пульт на телефоне (этот компьютер)",
   "Pick a source once and Harbor keeps playing the rest of that season from the same release, no re-picking. Works best with a debrid season pack. For anime it locks the whole series to that release.":
     "Выберите источник один раз, и Harbor продолжит воспроизводить остальной сезон из того же релиза без повторного выбора. Лучше всего работает с сезонным пакетом debrid. Для аниме привязывает к этому релизу весь сериал.",
   "Play a short sound when changing the player volume. Off by default.":
@@ -258,8 +253,6 @@ const settings: Record<string, string> = {
   "Player style": "Стиль плеера",
   "Player volume sounds": "Звуки громкости плеера",
   Poster: "Постер",
-  "Posters, logos, and title art load in the first available language from this list, falling back down the order. \\":
-    "Постеры, логотипы и оформление названий загружаются на первом доступном языке из этого списка, далее по порядку. \\",
   Provider: "Провайдер",
   "Queue drives Next/Previous": "Очередь задаёт «Далее»/«Предыдущее»",
   "Re-apply to the window and taskbar now": "Применить к окну и панели задач сейчас",
@@ -281,8 +274,6 @@ const settings: Record<string, string> = {
   "Rich season and order panel": "Расширенная панель сезонов и порядка",
   "Rotten Tomatoes": "Rotten Tomatoes",
   Ruleset: "Набор правил",
-  "SVP's files are here but its VapourSynth engine won't load ({err}). This usually means a stale VapourSynth entry or a missing Microsoft VC++ runtime. Reinstall SVP, or install the latest \\":
-    "Файлы SVP на месте, но его движок VapourSynth не загружается ({err}). Обычно это устаревшая запись VapourSynth или отсутствующая среда выполнения Microsoft VC++. Переустановите SVP или установите последнюю \\",
   "Score badges on cards": "Значки оценок на карточках",
   "Score position": "Положение оценки",
   "Search rules by name or pattern…": "Поиск правил по названию или шаблону…",
@@ -366,8 +357,6 @@ const settings: Record<string, string> = {
     "Перемещайте фокус по Harbor стрелками и Enter. Выключите, чтобы освободить стрелки и отключить навигацию по фокусу везде.",
   "Use your own image as the app icon": "Использовать своё изображение как значок приложения",
   "Watchlist bookmark": "Закладка списка к просмотру",
-  "When Esc would close the player, show a quick confirm first. You can tick \\":
-    "Когда Esc закрывает плеер, сначала показывать быстрое подтверждение. Можно отметить \\",
   "When off, a torrent stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.":
     "Когда выключено, торрент останавливается сразу при закрытии или смене потока, и ничего не качается в фоне. Включите, чтобы загрузка продолжалась после выхода; управлять ею и ставить на паузу можно на вкладке «Загрузки».",
   "Where scores appear": "Где показывать оценки",
@@ -559,31 +548,6 @@ const settings: Record<string, string> = {
   "Report a bug": "Сообщить об ошибке",
   "Send a bug report straight to the Harbor team. Screenshots and screen recordings welcome.":
     "Отправьте отчёт об ошибке прямо команде Harbor. Скриншоты и записи экрана приветствуются.",
-  "Highly recommended. This is what gives you the full Harbor experience: Popular, Trending, In Theaters, and per-service rails. Free at ":
-    "Настоятельно рекомендуется. Именно это даёт все возможности Harbor: «Популярное», «В тренде», «В кинотеатрах» и ряды по сервисам. Бесплатно на ",
-  ". Use the v3 key, not the read access token.":
-    ". Используйте ключ v3, а не токен доступа для чтения.",
-  "Free at ": "Бесплатно на ",
-  ". They email an activation link the first time. Click it, then come back and save.":
-    ". В первый раз на почту придёт ссылка активации. Перейдите по ней, затем вернитесь и сохраните.",
-  "Paid plan at ": "Платный тариф на ",
-  ". Once saved, every poster gets re-rendered with IMDb, Rotten Tomatoes, and Metacritic stamped on it.":
-    ". После сохранения каждый постер перерисовывается с оценками IMDb, Rotten Tomatoes и Metacritic.",
-  "Free key at ": "Бесплатный ключ на ",
-  ". Adds Letterboxd and Trakt community ratings to detail pages, covering what OMDb misses.":
-    ". Добавляет оценки сообществ Letterboxd и Trakt на страницы деталей, закрывая то, что упускает OMDb.",
-  "Two formats work: a bare RPDB-compatible server URL (your RPDB key above is still sent), or a full URL pattern from services like BetterPosters containing ":
-    "Работают два формата: простой URL сервера, совместимого с RPDB (ключ RPDB выше всё равно отправляется), или полный шаблон URL от сервисов вроде BetterPosters, содержащий ",
-  ". Patterns may also use ": ". В шаблонах также можно использовать ",
-  ", ": ", ",
-  ", and ": ", и ",
-  ". Leave empty for the default.": ". Оставьте пустым для значения по умолчанию.",
-  "Fills in where TMDB comes up empty (anime, older catalog). Free at ":
-    "Заполняет пробелы там, где у TMDB пусто (аниме, старые каталоги). Бесплатно на ",
-  '. Use the "personal" key, not the project one.': ". Используйте «личный» ключ, а не проектный.",
-  "Episode titles, alternate names, and network info. Layered on TMDB so the better source wins per field. Free at ":
-    "Названия серий, альтернативные названия и данные о телеканале. Накладывается поверх TMDB, чтобы для каждого поля побеждал лучший источник. Бесплатно на ",
-  '. Pick the "Negotiated API key" path.': ". Выберите вариант «Negotiated API key».",
   "Show Rotten Tomatoes score on cards": "Показывать оценку Rotten Tomatoes на карточках",
   "Fresh tomatoes for 60% and up, splat for anything under.":
     "Свежий помидор при 60% и выше, клякса для всего, что ниже.",
@@ -616,7 +580,6 @@ const settings: Record<string, string> = {
   Appearance: "Оформление",
   Notifications: "Уведомления",
   Help: "Помощь",
-  العربية: "العربية",
   "When you back out of a title, Harbor saves a frame so the Continue Watching card looks like the spot you left.":
     "Когда вы выходите из просмотра, Harbor сохраняет кадр, чтобы карточка «Продолжить просмотр» показывала место остановки.",
   "Used for streaming availability and the Now Playing release window.":
@@ -668,7 +631,7 @@ const settings: Record<string, string> = {
   "Stream safety filter": "Фильтр безопасности потоков",
   "Result order": "Порядок результатов",
   "Condensed shows a top pick, quality tiles, and a drawer. Stremio is a flat list grouped by addon, no scoring.":
-    "«Компактно» показывает лучший вариант, плитки качества и панель. «Stremio» — плоский список по дополнениям, без оценок.",
+    "«Компактно» показывает лучший вариант, плитки качества и панель. «Stremio» – плоский список по дополнениям, без оценок.",
   "Stream format chips": "Метки формата потока",
   "The little 4K · HDR · codec · audio chips that ride along each stream in the play picker.":
     "Небольшие метки 4K · HDR · кодек · звук рядом с каждым потоком в окне выбора.",
@@ -952,17 +915,6 @@ const settings: Record<string, string> = {
   "add one in settings": "добавьте его в настройках",
   "Using AIOStreams or another aggregator addon? Its own sorting and filtering happen inside the addon before Harbor ever sees the results, then Harbor applies the stream filter and result order above on top. If results look thinner than expected, keep one side permissive: either relax the addon's internal filters or set Harbor's stream filter to Balanced or Off.":
     "Используете AIOStreams или другое дополнение-агрегатор? Его сортировка и фильтры работают внутри дополнения ещё до того, как Harbor увидит результаты, а затем Harbor применяет сверху фильтр потоков и порядок результатов, заданные выше. Если результатов меньше, чем ожидалось, оставьте одну сторону мягкой: ослабьте внутренние фильтры дополнения или переключите фильтр потоков Harbor на «Сбалансированный» или «Выкл.».",
-  "Get yours at ": "Получите свой на ",
-  ". Used to check cache and unrestrict links. Harbor never adds or removes torrents on its own.":
-    ". Используется для проверки кэша и разблокировки ссылок. Harbor никогда не добавляет и не удаляет торренты сам.",
-  ". Same read-only usage as Real-Debrid. Also lets you queue uncached torrents from the play picker.":
-    ". Тот же режим только для чтения, что и у Real-Debrid. Также позволяет ставить некэшированные торренты в очередь из окна выбора потока.",
-  ". AllDebrid deprecated their cache-check endpoint, so streams may show as unknown until you actually hit Play.":
-    ". AllDebrid отключил свой эндпоинт проверки кэша, поэтому статус потоков может быть неизвестен, пока вы не нажмёте воспроизведение.",
-  ". Uses the directdl endpoint, which skips queueing for anything already cached.":
-    ". Использует эндпоинт directdl, который пропускает очередь для всего, что уже в кэше.",
-  ". EU-hosted, fast cache check. Same read-only usage as the others.":
-    ". Серверы в ЕС, быстрая проверка кэша. Тот же режим только для чтения, что и у остальных.",
   "Easynews+": "Easynews+",
   "{n} services need attention": "{n} сервисов требуют внимания",
   "Health for {n} services below": "Состояние {n} сервисов ниже",
@@ -1417,8 +1369,6 @@ const settings: Record<string, string> = {
   "Ready to send": "Готово к отправке",
   "Player freezes after the second episode autoplays":
     "Плеер зависает после автозапуска второй серии",
-  "1. Open Movies\n2. Click The Substance\n3. Press Play\n4. ...":
-    "1. Открыть «Фильмы»\n2. Нажать The Substance\n3. Нажать «Воспроизвести»\n4. ...",
   "Stream should start playing within a few seconds.":
     "Поток должен начать воспроизводиться через несколько секунд.",
   "Spinner stays forever and nothing in the player loads.":
@@ -1645,7 +1595,7 @@ const settings: Record<string, string> = {
     "Если debrid не настроен или торрент не закэширован, поток идёт напрямую со встроенного движка на localhost:11470. Подключение к пирам идёт через ваше соединение, как и во встроенном стриминге Stremio.",
   "Use Harbor's built-in engine (beta)": "Использовать встроенный движок Harbor (бета)",
   "Stream torrents through Harbor's own Rust peer-to-peer engine instead of the bundled Stremio Server. Falls back automatically if it can't connect. Status and a self-test live in the Local engine card below.":
-    "Стримить торренты через собственный peer-to-peer движок Harbor на Rust вместо встроенного Stremio Server. При сбое подключения автоматически используется запасной вариант. Состояние и самопроверка — в карточке «Локальный движок» ниже.",
+    "Стримить торренты через собственный peer-to-peer движок Harbor на Rust вместо встроенного Stremio Server. При сбое подключения автоматически используется запасной вариант. Состояние и самопроверка – в карточке «Локальный движок» ниже.",
   "Always re-encode when casting (recommended)":
     "Всегда перекодировать при трансляции (рекомендуется)",
   "On by default. Pipes every cast through ffmpeg as H.264 + AAC + MPEG-TS so Samsung, LG, Sony, and other DLNA TVs accept the stream regardless of source codec. Turn off only if you have a beefy receiver that handles raw HEVC/DTS and want max quality. Requires ffmpeg in PATH.":
@@ -2222,7 +2172,7 @@ const settings: Record<string, string> = {
   "Public mode uses just your username: watchlist, liked films, popular and Top 250. No password needed.":
     "Публичный режим использует только имя пользователя: список к просмотру, понравившиеся фильмы, популярное и Топ-250. Пароль не нужен.",
   "Full mode signs in with your Letterboxd password to also unlock your diary, friends activity and your personal ratings. Your password is sent only to Stremboxd to obtain a token — Harbor never stores it.":
-    "Полный режим выполняет вход с паролем Letterboxd и дополнительно открывает дневник, активность друзей и ваши оценки. Пароль отправляется только в Stremboxd для получения токена — Harbor его не хранит.",
+    "Полный режим выполняет вход с паролем Letterboxd и дополнительно открывает дневник, активность друзей и ваши оценки. Пароль отправляется только в Stremboxd для получения токена – Harbor его не хранит.",
   "Letterboxd username": "Имя пользователя Letterboxd",
   "Letterboxd password": "Пароль Letterboxd",
   "Your Letterboxd password": "Ваш пароль Letterboxd",
@@ -2230,9 +2180,9 @@ const settings: Record<string, string> = {
   "Connect / Verify": "Подключить / Проверить",
   "Verify & connect": "Проверить и подключить",
   "About Stremboxd": "О Stremboxd",
-  "Connected — {n} catalogs available": "Подключено — доступно каталогов: {n}",
+  "Connected — {n} catalogs available": "Подключено – доступно каталогов: {n}",
   "Full mode — diary, friends & ratings enabled":
-    "Полный режим — дневник, друзья и оценки включены",
+    "Полный режим – дневник, друзья и оценки включены",
   "Catalogs to show": "Какие каталоги показывать",
   "Custom lists": "Свои списки",
   "Remove list": "Удалить список",

@@ -63,7 +63,6 @@ const manga: Record<string, string> = {
   Creators: "المبدعون",
   "Custom source": "مصدر مخصّص",
   Dark: "داكن",
-  "Data from MangaUpdates": "البيانات من MangaUpdates",
   "Delete download": "حذف التنزيل",
   Direction: "الاتجاه",
   "Do it once on a browse page, once on a series page, once in the reader.":
@@ -342,7 +341,7 @@ const manga: Record<string, string> = {
     "ضمن «خادمك» أعلاه. كل ما تفعّله هناك يظهر هنا.",
   "update to v{version}": "التحديث إلى v{version}",
   "{label} · page {page}/{total}": "{label} · صفحة {page}/{total}",
-  "{n} chapter": "فصل واحد",
+  "{n} chapter": "{n} فصل",
   "{n} chapters": "{n} فصول",
   "{n} pages": "{n} صفحات",
   "{n}d ago": "قبل {n} يوم",

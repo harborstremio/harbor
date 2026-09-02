@@ -41,7 +41,9 @@ export function NavEditor({ layout }: { layout: ThemeLayout }) {
     <div className="flex flex-col gap-2.5">
       {!renamable && (
         <p className="text-[12.5px] leading-snug text-ink-subtle">
-          This layout shows icons only, so renaming is off here. Reorder and hide still apply.
+          {t(
+            "This layout shows icons only, so renaming is off here. Reorder and hide still apply.",
+          )}
         </p>
       )}
       {hasChanges && (
@@ -49,10 +51,10 @@ export function NavEditor({ layout }: { layout: ThemeLayout }) {
           <button
             type="button"
             onClick={() => update({ navCustomization: resetNavCustomization() })}
-            className="flex h-8 items-center gap-1.5 rounded-md border border-edge-soft bg-canvas/40 px-2.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+            className="flex h-8 items-center gap-1.5 rounded-md bg-canvas px-2.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-surface hover:text-ink"
           >
             <RotateCcw size={12} strokeWidth={2.2} />
-            Reset
+            {t("Reset")}
           </button>
         </div>
       )}

@@ -32,7 +32,11 @@ fn host_of(after_scheme: &str) -> String {
 
 fn check_v4(ip: Ipv4Addr, is_stream: bool) -> Result<(), String> {
     if ip.is_loopback() {
-        return if is_stream { Ok(()) } else { Err("loopback-blocked".into()) };
+        return if is_stream {
+            Ok(())
+        } else {
+            Err("loopback-blocked".into())
+        };
     }
     let o = ip.octets();
     let shared = o[0] == 100 && (o[1] & 0xc0) == 0x40;
@@ -66,7 +70,11 @@ pub fn validate_media_url(url: &str, allow_local: bool) -> Result<(), String> {
     }
     if let Ok(v6) = host.parse::<Ipv6Addr>() {
         if v6.is_loopback() {
-            return if is_stream { Ok(()) } else { Err("loopback-blocked".into()) };
+            return if is_stream {
+                Ok(())
+            } else {
+                Err("loopback-blocked".into())
+            };
         }
         if v6.is_unspecified() {
             return Err("internal-ip-blocked".into());
@@ -75,7 +83,12 @@ pub fn validate_media_url(url: &str, allow_local: bool) -> Result<(), String> {
         if (seg[0] & 0xffc0) == 0xfe80 || (seg[0] & 0xfe00) == 0xfc00 {
             return Err("internal-ip-blocked".into());
         }
-        let mapped = seg[0] == 0 && seg[1] == 0 && seg[2] == 0 && seg[3] == 0 && seg[4] == 0 && seg[5] == 0xffff;
+        let mapped = seg[0] == 0
+            && seg[1] == 0
+            && seg[2] == 0
+            && seg[3] == 0
+            && seg[4] == 0
+            && seg[5] == 0xffff;
         if mapped {
             let v4 = Ipv4Addr::new(
                 (seg[6] >> 8) as u8,

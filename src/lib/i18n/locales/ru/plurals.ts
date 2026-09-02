@@ -2,12 +2,18 @@
 // are picked by translate.ts from the count; the bare key is the "many" form.
 // Generated - see the i18n plural pass.
 const plurals: Record<string, string> = {
-  "Add {n} titles from your Harbor watchlist to Trakt? Trakt skips any it already has.": "Добавить {n} названий из списка к просмотру Harbor в Trakt? Trakt пропустит те, что уже есть.",
-  "Add {n} titles from your Harbor watchlist to Trakt? Trakt skips any it already has.#one": "Добавить {n} название из списка к просмотру Harbor в Trakt? Trakt пропустит те, что уже есть.",
-  "Add {n} titles from your Harbor watchlist to Trakt? Trakt skips any it already has.#few": "Добавить {n} названия из списка к просмотру Harbor в Trakt? Trakt пропустит те, что уже есть.",
-  "Add {n} titles from your Trakt watchlist to Harbor?": "Добавить {n} названий из списка к просмотру Trakt в Harbor?",
-  "Add {n} titles from your Trakt watchlist to Harbor?#one": "Добавить {n} название из списка к просмотру Trakt в Harbor?",
-  "Add {n} titles from your Trakt watchlist to Harbor?#few": "Добавить {n} названия из списка к просмотру Trakt в Harbor?",
+  "Add {n} titles from your Harbor watchlist to Trakt? Trakt skips any it already has.":
+    "Добавить {n} названий из списка к просмотру Harbor в Trakt? Trakt пропустит те, что уже есть.",
+  "Add {n} titles from your Harbor watchlist to Trakt? Trakt skips any it already has.#one":
+    "Добавить {n} название из списка к просмотру Harbor в Trakt? Trakt пропустит те, что уже есть.",
+  "Add {n} titles from your Harbor watchlist to Trakt? Trakt skips any it already has.#few":
+    "Добавить {n} названия из списка к просмотру Harbor в Trakt? Trakt пропустит те, что уже есть.",
+  "Add {n} titles from your Trakt watchlist to Harbor?":
+    "Добавить {n} названий из списка к просмотру Trakt в Harbor?",
+  "Add {n} titles from your Trakt watchlist to Harbor?#one":
+    "Добавить {n} название из списка к просмотру Trakt в Harbor?",
+  "Add {n} titles from your Trakt watchlist to Harbor?#few":
+    "Добавить {n} названия из списка к просмотру Trakt в Harbor?",
   "After {n} episodes": "После {n} серий",
   "After {n} episodes#one": "После {n} серии",
   "After {n} episodes#few": "После {n} серий",
@@ -44,27 +50,42 @@ const plurals: Record<string, string> = {
   "Import {n} JavaScript sources": "Импортировать {n} источников JavaScript",
   "Import {n} JavaScript sources#one": "Импортировать {n} источник JavaScript",
   "Import {n} JavaScript sources#few": "Импортировать {n} источника JavaScript",
-  "Nothing to send. All {n} watchlist items are anime, which Trakt can't track.": "Отправлять нечего. Все {n} позиций в списке к просмотру относятся к аниме, которое Trakt не отслеживает.",
-  "Nothing to send. All {n} watchlist items are anime, which Trakt can't track.#one": "Отправлять нечего. Все {n} позиция в списке к просмотру относится к аниме, которое Trakt не отслеживает.",
-  "Nothing to send. All {n} watchlist items are anime, which Trakt can't track.#few": "Отправлять нечего. Все {n} позиции в списке к просмотру относятся к аниме, которое Trakt не отслеживает.",
-  "Remove this folder and its {n} items? Files on your disk are not deleted.": "Удалить эту папку и её {n} элементов? Файлы на диске не удаляются.",
-  "Remove this folder and its {n} items? Files on your disk are not deleted.#one": "Удалить эту папку и её {n} элемент? Файлы на диске не удаляются.",
-  "Remove this folder and its {n} items? Files on your disk are not deleted.#few": "Удалить эту папку и её {n} элемента? Файлы на диске не удаляются.",
-  "Remove {n} items from your library? Files on your disk are not deleted.": "Удалить {n} элементов из библиотеки? Файлы на диске не удаляются.",
-  "Remove {n} items from your library? Files on your disk are not deleted.#one": "Удалить {n} элемент из библиотеки? Файлы на диске не удаляются.",
-  "Remove {n} items from your library? Files on your disk are not deleted.#few": "Удалить {n} элемента из библиотеки? Файлы на диске не удаляются.",
+  "Nothing to send. All {n} watchlist items are anime, which Trakt can't track.":
+    "Отправлять нечего. Все {n} позиций в списке к просмотру относятся к аниме, которое Trakt не отслеживает.",
+  "Nothing to send. All {n} watchlist items are anime, which Trakt can't track.#one":
+    "Отправлять нечего. Все {n} позиция в списке к просмотру относится к аниме, которое Trakt не отслеживает.",
+  "Nothing to send. All {n} watchlist items are anime, which Trakt can't track.#few":
+    "Отправлять нечего. Все {n} позиции в списке к просмотру относятся к аниме, которое Trakt не отслеживает.",
+  "Remove this folder and its {n} items? Files on your disk are not deleted.":
+    "Удалить эту папку и её {n} элементов? Файлы на диске не удаляются.",
+  "Remove this folder and its {n} items? Files on your disk are not deleted.#one":
+    "Удалить эту папку и её {n} элемент? Файлы на диске не удаляются.",
+  "Remove this folder and its {n} items? Files on your disk are not deleted.#few":
+    "Удалить эту папку и её {n} элемента? Файлы на диске не удаляются.",
+  "Remove {n} items from your library? Files on your disk are not deleted.":
+    "Удалить {n} элементов из библиотеки? Файлы на диске не удаляются.",
+  "Remove {n} items from your library? Files on your disk are not deleted.#one":
+    "Удалить {n} элемент из библиотеки? Файлы на диске не удаляются.",
+  "Remove {n} items from your library? Files on your disk are not deleted.#few":
+    "Удалить {n} элемента из библиотеки? Файлы на диске не удаляются.",
   "Rising · +{n} star in 24h": "Растёт · +{n} звёзд за 24 ч",
   "Rising · +{n} star in 24h#one": "Растёт · +{n} звезда за 24 ч",
   "Rising · +{n} star in 24h#few": "Растёт · +{n} звезды за 24 ч",
   "Rising · +{n} stars in 24h": "Растёт · +{n} звёзд за 24 ч",
   "Rising · +{n} stars in 24h#one": "Растёт · +{n} звезда за 24 ч",
   "Rising · +{n} stars in 24h#few": "Растёт · +{n} звезды за 24 ч",
-  "Saved harbor-anime-diagnostics.txt ({n} entries). Send us that file.": "Сохранён harbor-anime-diagnostics.txt ({n} записей). Отправьте нам этот файл.",
-  "Saved harbor-anime-diagnostics.txt ({n} entries). Send us that file.#one": "Сохранён harbor-anime-diagnostics.txt ({n} запись). Отправьте нам этот файл.",
-  "Saved harbor-anime-diagnostics.txt ({n} entries). Send us that file.#few": "Сохранён harbor-anime-diagnostics.txt ({n} записи). Отправьте нам этот файл.",
-  "Saved {n} entries to {path}. Send us that file.": "Сохранено {n} записей в {path}. Отправьте нам этот файл.",
-  "Saved {n} entries to {path}. Send us that file.#one": "Сохранена {n} запись в {path}. Отправьте нам этот файл.",
-  "Saved {n} entries to {path}. Send us that file.#few": "Сохранено {n} записи в {path}. Отправьте нам этот файл.",
+  "Saved harbor-anime-diagnostics.txt ({n} entries). Send us that file.":
+    "Сохранён harbor-anime-diagnostics.txt ({n} записей). Отправьте нам этот файл.",
+  "Saved harbor-anime-diagnostics.txt ({n} entries). Send us that file.#one":
+    "Сохранён harbor-anime-diagnostics.txt ({n} запись). Отправьте нам этот файл.",
+  "Saved harbor-anime-diagnostics.txt ({n} entries). Send us that file.#few":
+    "Сохранён harbor-anime-diagnostics.txt ({n} записи). Отправьте нам этот файл.",
+  "Saved {n} entries to {path}. Send us that file.":
+    "Сохранено {n} записей в {path}. Отправьте нам этот файл.",
+  "Saved {n} entries to {path}. Send us that file.#one":
+    "Сохранена {n} запись в {path}. Отправьте нам этот файл.",
+  "Saved {n} entries to {path}. Send us that file.#few":
+    "Сохранено {n} записи в {path}. Отправьте нам этот файл.",
   "Search {n} EPG channels": "Поиск по {n} каналам EPG",
   "Search {n} EPG channels#one": "Поиск по {n} каналу EPG",
   "Search {n} EPG channels#few": "Поиск по {n} каналам EPG",
@@ -104,12 +125,18 @@ const plurals: Record<string, string> = {
   "{avg} avg · {n} rated": "{avg} средн. · {n} оценок",
   "{avg} avg · {n} rated#one": "{avg} средн. · {n} оценка",
   "{avg} avg · {n} rated#few": "{avg} средн. · {n} оценки",
-  "{count} community ratings on stremio-addons.net": "{count} оценок сообщества на stremio-addons.net",
-  "{count} community ratings on stremio-addons.net#one": "{count} оценка сообщества на stremio-addons.net",
-  "{count} community ratings on stremio-addons.net#few": "{count} оценки сообщества на stremio-addons.net",
-  "{count} films, in the order you picked them. Nothing plays until you start.": "{count} фильмов в выбранном вами порядке. Ничего не запустится, пока вы не начнёте.",
-  "{count} films, in the order you picked them. Nothing plays until you start.#one": "{count} фильм в выбранном вами порядке. Ничего не запустится, пока вы не начнёте.",
-  "{count} films, in the order you picked them. Nothing plays until you start.#few": "{count} фильма в выбранном вами порядке. Ничего не запустится, пока вы не начнёте.",
+  "{count} community ratings on stremio-addons.net":
+    "{count} оценок сообщества на stremio-addons.net",
+  "{count} community ratings on stremio-addons.net#one":
+    "{count} оценка сообщества на stremio-addons.net",
+  "{count} community ratings on stremio-addons.net#few":
+    "{count} оценки сообщества на stremio-addons.net",
+  "{count} films, in the order you picked them. Nothing plays until you start.":
+    "{count} фильмов в выбранном вами порядке. Ничего не запустится, пока вы не начнёте.",
+  "{count} films, in the order you picked them. Nothing plays until you start.#one":
+    "{count} фильм в выбранном вами порядке. Ничего не запустится, пока вы не начнёте.",
+  "{count} films, in the order you picked them. Nothing plays until you start.#few":
+    "{count} фильма в выбранном вами порядке. Ничего не запустится, пока вы не начнёте.",
   "{count} friends in common": "{count} общих друзей",
   "{count} friends in common#one": "{count} общий друг",
   "{count} friends in common#few": "{count} общих друга",
@@ -125,9 +152,12 @@ const plurals: Record<string, string> = {
   "{n} addons": "{n} дополнений",
   "{n} addons#one": "{n} дополнение",
   "{n} addons#few": "{n} дополнения",
-  "{n} addons don't provide streams and aren't listed.": "{n} дополнений не предоставляют потоки и не показаны в списке.",
-  "{n} addons don't provide streams and aren't listed.#one": "{n} дополнение не предоставляет потоки и не показано в списке.",
-  "{n} addons don't provide streams and aren't listed.#few": "{n} дополнения не предоставляют потоки и не показаны в списке.",
+  "{n} addons don't provide streams and aren't listed.":
+    "{n} дополнений не предоставляют потоки и не показаны в списке.",
+  "{n} addons don't provide streams and aren't listed.#one":
+    "{n} дополнение не предоставляет потоки и не показано в списке.",
+  "{n} addons don't provide streams and aren't listed.#few":
+    "{n} дополнения не предоставляют потоки и не показаны в списке.",
   "{n} avatars across film, TV, and anime.": "{n} аватаров из фильмов, сериалов и аниме.",
   "{n} avatars across film, TV, and anime.#one": "{n} аватар из фильмов, сериалов и аниме.",
   "{n} avatars across film, TV, and anime.#few": "{n} аватара из фильмов, сериалов и аниме.",
@@ -173,9 +203,12 @@ const plurals: Record<string, string> = {
   "{n} films": "{n} фильмов",
   "{n} films#one": "{n} фильм",
   "{n} films#few": "{n} фильма",
-  "{n} frame stored. Wiping rebuilds them next time you watch.": "Сохранено {n} кадров. После очистки они создадутся заново при просмотре.",
-  "{n} frame stored. Wiping rebuilds them next time you watch.#one": "Сохранён {n} кадр. После очистки он создастся заново при просмотре.",
-  "{n} frame stored. Wiping rebuilds them next time you watch.#few": "Сохранено {n} кадра. После очистки они создадутся заново при просмотре.",
+  "{n} frame stored. Wiping rebuilds them next time you watch.":
+    "Сохранено {n} кадров. После очистки они создадутся заново при просмотре.",
+  "{n} frame stored. Wiping rebuilds them next time you watch.#one":
+    "Сохранён {n} кадр. После очистки он создастся заново при просмотре.",
+  "{n} frame stored. Wiping rebuilds them next time you watch.#few":
+    "Сохранено {n} кадра. После очистки они создадутся заново при просмотре.",
   "{n} genre": "{n} жанров",
   "{n} genre#one": "{n} жанр",
   "{n} genre#few": "{n} жанра",
@@ -257,14 +290,20 @@ const plurals: Record<string, string> = {
   "{n} titles": "{n} названий",
   "{n} titles#one": "{n} название",
   "{n} titles#few": "{n} названия",
-  "{n} titles need review — help us identify them.": "{n} названий требуют проверки — помогите их определить.",
-  "{n} titles need review — help us identify them.#one": "{n} название требует проверки — помогите его определить.",
-  "{n} titles need review — help us identify them.#few": "{n} названия требуют проверки — помогите их определить.",
+  "{n} titles need review — help us identify them.":
+    "{n} названий требуют проверки – помогите их определить.",
+  "{n} titles need review — help us identify them.#one":
+    "{n} название требует проверки – помогите его определить.",
+  "{n} titles need review — help us identify them.#few":
+    "{n} названия требуют проверки – помогите их определить.",
   "{n} titles together#one": "{n} проект вместе",
   "{n} titles together#few": "{n} проекта вместе",
-  "{n} tracker request blocked this session. Harbor itself sends zero telemetry.": "За сессию заблокировано {n} запросов трекеров. Сам Harbor не отправляет телеметрию.",
-  "{n} tracker request blocked this session. Harbor itself sends zero telemetry.#one": "За сессию заблокирован {n} запрос трекеров. Сам Harbor не отправляет телеметрию.",
-  "{n} tracker request blocked this session. Harbor itself sends zero telemetry.#few": "За сессию заблокировано {n} запроса трекеров. Сам Harbor не отправляет телеметрию.",
+  "{n} tracker request blocked this session. Harbor itself sends zero telemetry.":
+    "За сессию заблокировано {n} запросов трекеров. Сам Harbor не отправляет телеметрию.",
+  "{n} tracker request blocked this session. Harbor itself sends zero telemetry.#one":
+    "За сессию заблокирован {n} запрос трекеров. Сам Harbor не отправляет телеметрию.",
+  "{n} tracker request blocked this session. Harbor itself sends zero telemetry.#few":
+    "За сессию заблокировано {n} запроса трекеров. Сам Harbor не отправляет телеметрию.",
   "{n} votes": "{n} голосов",
   "{n} votes#one": "{n} голос",
   "{n} votes#few": "{n} голоса",

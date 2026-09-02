@@ -20,6 +20,11 @@ type ExternalLinkDestinationActions = {
   openInBrowser: () => void;
 };
 
+export type ExternalLinkBrowserOpenError = {
+  code: "browser-open-failed";
+  detail: string | null;
+};
+
 export type ExternalLinkBrowserOpenOptions = {
   journey: LinkOutJourney;
   href: string;
@@ -28,7 +33,7 @@ export type ExternalLinkBrowserOpenOptions = {
   openUrl: (href: string) => Promise<unknown>;
   closeJourney: () => void;
   setOpening: (opening: boolean) => void;
-  setError: (error: string | null) => void;
+  setError: (error: ExternalLinkBrowserOpenError | null) => void;
 };
 
 export function hasExternalLinkAlternateDestination(
@@ -65,8 +70,11 @@ export function chooseExternalLinkDestination(
   else actions.openInBrowser();
 }
 
-function browserOpenErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Harbor could not open your browser.";
+function browserOpenError(error: unknown): ExternalLinkBrowserOpenError {
+  return {
+    code: "browser-open-failed",
+    detail: error instanceof Error ? error.message : null,
+  };
 }
 
 export async function openExternalLinkInBrowser({
@@ -93,7 +101,7 @@ export async function openExternalLinkInBrowser({
 
   await settleLinkOutOpen(isCurrentJourney, journey, opening, {
     onSuccess: closeJourney,
-    onError: (error) => setError(browserOpenErrorMessage(error)),
+    onError: (error) => setError(browserOpenError(error)),
     onSettled: () => {
       openingRef.current = false;
       setOpening(false);

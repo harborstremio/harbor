@@ -29,7 +29,7 @@ function Photo({ person, className }: { person: XrayPerson; className: string })
 
 export function XrayRailCard({ person }: { person: XrayPerson }) {
   return (
-    <div className="flex items-center gap-3 rounded-[14px] px-1.5 py-1.5">
+    <div className="flex items-center gap-3 rounded-lg px-1.5 py-1.5">
       <Photo person={person} className="h-12 w-12 shrink-0 rounded-[11px] ring-1 ring-white/12" />
       <div className="flex min-w-0 flex-col">
         <span className="truncate text-[13.5px] font-semibold leading-tight text-white">{person.name}</span>

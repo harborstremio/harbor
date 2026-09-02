@@ -33,7 +33,8 @@ struct LinuxSampler {
 }
 
 #[cfg(target_os = "linux")]
-static LINUX_SAMPLER: std::sync::OnceLock<std::sync::Mutex<LinuxSampler>> = std::sync::OnceLock::new();
+static LINUX_SAMPLER: std::sync::OnceLock<std::sync::Mutex<LinuxSampler>> =
+    std::sync::OnceLock::new();
 #[cfg(target_os = "linux")]
 static LINUX_TOTAL_PHYS: std::sync::OnceLock<u64> = std::sync::OnceLock::new();
 
@@ -155,7 +156,11 @@ fn discovery_due(sampler: &LinuxSampler, now: std::time::Instant) -> bool {
 }
 
 #[cfg(target_os = "linux")]
-fn refresh_webkit_processes(sampler: &mut LinuxSampler, harbor_pid: u32, now: std::time::Instant) -> u64 {
+fn refresh_webkit_processes(
+    sampler: &mut LinuxSampler,
+    harbor_pid: u32,
+    now: std::time::Instant,
+) -> u64 {
     let webkit = discover_webkit_processes(harbor_pid);
     sampler.webkit_pids = webkit.iter().map(|process| process.pid).collect();
     sampler.last_discovery = Some(now);
@@ -170,7 +175,9 @@ fn read_linux() -> ProcMem {
     let harbor_rss = read_linux_process(harbor_pid).map_or(0, |process| process.rss);
     let now = std::time::Instant::now();
     let sampler = LINUX_SAMPLER.get_or_init(|| std::sync::Mutex::new(LinuxSampler::default()));
-    let mut sampler = sampler.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+    let mut sampler = sampler
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
 
     let webview_rss = if discovery_due(&sampler, now) {
         refresh_webkit_processes(&mut sampler, harbor_pid, now)
@@ -344,16 +351,34 @@ mod tests {
     #[test]
     fn parses_meminfo_values_as_bytes() {
         let meminfo = "MemTotal:       32768000 kB\nMemAvailable:   12000000 kB\n";
-        assert_eq!(parse_kib_field(meminfo, "MemTotal"), Some(32_768_000 * 1024));
+        assert_eq!(
+            parse_kib_field(meminfo, "MemTotal"),
+            Some(32_768_000 * 1024)
+        );
         assert_eq!(parse_kib_field(meminfo, "Missing"), None);
     }
 
     #[test]
     fn finds_the_full_descendant_tree() {
         let processes = vec![
-            LinuxProcess { pid: 2, parent: 1, name: "launcher".into(), rss: 0 },
-            LinuxProcess { pid: 3, parent: 2, name: "WebKitWebProces".into(), rss: 0 },
-            LinuxProcess { pid: 4, parent: 99, name: "WebKitWebProces".into(), rss: 0 },
+            LinuxProcess {
+                pid: 2,
+                parent: 1,
+                name: "launcher".into(),
+                rss: 0,
+            },
+            LinuxProcess {
+                pid: 3,
+                parent: 2,
+                name: "WebKitWebProces".into(),
+                rss: 0,
+            },
+            LinuxProcess {
+                pid: 4,
+                parent: 99,
+                name: "WebKitWebProces".into(),
+                rss: 0,
+            },
         ];
         let descendants = descendant_pids(&processes, 1);
         assert!(descendants.contains(&1));

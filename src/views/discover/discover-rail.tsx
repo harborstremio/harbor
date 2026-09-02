@@ -30,7 +30,7 @@ export function Rail({
   const items = deduped[railId] ?? null;
   const shelf = {
     ...def.shelf,
-    title: t(titleOverride ?? def.shelf.title),
+    title: titleOverride === undefined ? t(def.shelf.title) : titleOverride,
     kicker: def.shelf.kicker ? t(def.shelf.kicker) : def.shelf.kicker,
   };
   return (

@@ -1,7 +1,9 @@
+import { createPortal } from "react-dom";
 import { Award, Check, X } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 import { socialPost } from "@/lib/social/client";
 import { useT } from "@/lib/i18n";
+import { useEscape } from "@/components/modal-shell";
 import { badgeKey, SHOWN_BADGE_KEY_RE } from "./badge-catalog";
 import type { Badge, ProfileSummary } from "./profile-types";
 
@@ -40,7 +42,7 @@ function BadgeOption({
       onClick={onToggle}
       disabled={disabled}
       aria-pressed={selected}
-      className={`relative flex flex-col items-center gap-2 rounded-[14px] p-3 text-center ring-1 transition-colors disabled:opacity-40 ${
+      className={`relative flex flex-col items-center gap-2 rounded-lg p-3 text-center ring-1 transition-colors disabled:opacity-40 ${
         selected ? "bg-elevated ring-edge" : "ring-edge-soft hover:bg-elevated"
       }`}
     >
@@ -80,6 +82,7 @@ export function ShownBadgesPicker({
   onSaved: (next: ProfileSummary) => void;
 }) {
   const t = useT();
+  useEscape(onClose);
   const options = useMemo(() => pickableBadges(badges), [badges]);
   const verifiedBadge = useMemo(() => badges.find((b) => badgeKey(b.name) === "verified"), [badges]);
   const [showVerified, setShowVerified] = useState(!hideVerified);
@@ -119,16 +122,16 @@ export function ShownBadgesPicker({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[140] flex items-center justify-center p-4" role="dialog" aria-modal>
+  return createPortal(
+    <div className="fixed inset-0 z-[185] flex items-center justify-center p-4" role="dialog" aria-modal>
       <button aria-label={t("Close")} className="absolute inset-0 bg-black/55" onClick={onClose} />
-      <div className="relative flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-[20px] bg-surface ring-1 ring-edge">
+      <div className="relative flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-surface ring-1 ring-edge">
         <div className="flex items-center justify-between border-b border-edge-soft px-6 py-4">
           <h2 className="font-display text-[20px] text-ink">{t("Shown badges")}</h2>
           <button
             onClick={onClose}
             aria-label={t("Close")}
-            className="flex h-11 w-11 items-center justify-center rounded-[10px] text-ink-muted hover:bg-elevated"
+            className="flex h-11 w-11 items-center justify-center rounded-md text-ink-muted hover:bg-elevated"
           >
             <X size={20} />
           </button>
@@ -139,7 +142,7 @@ export function ShownBadgesPicker({
             {t("Pick up to {max} badges to show by your name. Tap in the order you want them to appear.", { max: MAX_SHOWN_BADGES })}
           </p>
           {options.length === 0 && !verifiedBadge ? (
-            <div className="flex flex-col items-center justify-center rounded-[10px] border border-dashed border-edge py-12 text-center">
+            <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-edge py-12 text-center">
               <Award size={24} className="text-ink-subtle" />
               <p className="mt-2 text-[14px] text-ink-muted">{t("No badges to show yet")}</p>
               <p className="mt-1 text-[12px] text-ink-subtle">{t("Earn badges and they will appear here to feature")}</p>
@@ -181,20 +184,21 @@ export function ShownBadgesPicker({
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="inline-flex min-h-11 items-center rounded-[10px] px-4 text-[14px] font-medium text-ink-muted hover:bg-elevated"
+              className="inline-flex min-h-11 items-center rounded-md px-4 text-[14px] font-medium text-ink-muted hover:bg-elevated"
             >
               {t("Cancel")}
             </button>
             <button
               onClick={() => void save()}
               disabled={saving}
-              className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
             >
               <Check size={20} /> {saving ? t("Saving") : t("Save")}
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

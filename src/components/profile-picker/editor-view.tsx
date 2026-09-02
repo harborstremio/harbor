@@ -39,11 +39,14 @@ import {
 } from "@/lib/profiles";
 import { emitListToast } from "@/components/lists/list-toast";
 import {
+  analyzeOverlaps,
   defaultSelectedAddonUrls,
   importDomains,
   summarizeSource,
+  type DomainOverlap,
   type ImportAddonPreview,
   type ImportDomain,
+  type ImportDomainChoice,
   type ImportSourceSummary,
 } from "@/lib/profile-import";
 import { useT } from "@/lib/i18n";
@@ -127,6 +130,10 @@ export function EditorView({
   });
   const [selectedAddons, setSelectedAddons] = useState<Set<string>>(new Set());
   const [sourceSummary, setSourceSummary] = useState<ImportSourceSummary | null>(null);
+  const [overlaps, setOverlaps] = useState<Partial<Record<ImportDomain, DomainOverlap>>>({});
+  const [domainChoices, setDomainChoices] = useState<
+    Partial<Record<ImportDomain, ImportDomainChoice>>
+  >({});
   const [importExpanded, setImportExpanded] = useState(mode.kind === "create");
   const [confirmingImport, setConfirmingImport] = useState(false);
   const [confirmingShare, setConfirmingShare] = useState(false);
@@ -160,6 +167,24 @@ export function EditorView({
     setSourceSummary(importSourceId ? summarizeSource(importSourceId) : null);
   }, [importSourceId]);
 
+  const targetProfileId = editing?.id ?? null;
+  useEffect(() => {
+    if (!importSourceId || !targetProfileId) {
+      setOverlaps({});
+      return;
+    }
+    const selectedMergeable = (Object.keys(importSelection) as ImportDomain[]).filter(
+      (d) => importSelection[d] && (d === "watchlist" || d === "favorites" || d === "addons"),
+    );
+    if (selectedMergeable.length === 0) {
+      setOverlaps({});
+      return;
+    }
+    setOverlaps(
+      analyzeOverlaps(importSourceId, targetProfileId, selectedMergeable, [...selectedAddons]),
+    );
+  }, [importSourceId, targetProfileId, importSelection, selectedAddons]);
+
   const resetImportChoice = () => {
     setImportSelection({
       settings: false,
@@ -170,11 +195,21 @@ export function EditorView({
       continueWatching: false,
     });
     setSelectedAddons(new Set());
+    setOverlaps({});
+    setDomainChoices({});
   };
 
   const toggleImportDomain = (domain: ImportDomain) => {
     const turningOn = !importSelection[domain];
     setImportSelection((prev) => ({ ...prev, [domain]: !prev[domain] }));
+    if (!turningOn) {
+      setDomainChoices((prev) => {
+        if (!(domain in prev)) return prev;
+        const next = { ...prev };
+        delete next[domain];
+        return next;
+      });
+    }
     if (domain === "addons" && turningOn) {
       setSelectedAddons(defaultSelectedAddonUrls(sourceSummary?.addons ?? []));
     }
@@ -187,6 +222,12 @@ export function EditorView({
       else next.add(transportUrl);
       return next;
     });
+    setDomainChoices((prev) => {
+      if (!("addons" in prev)) return prev;
+      const next = { ...prev };
+      delete next.addons;
+      return next;
+    });
   };
 
   const applyImportToExisting = () => {
@@ -195,6 +236,7 @@ export function EditorView({
     if (list.length === 0) return;
     importDomains(primary.id, editing.id, list, {
       addonTransportUrls: list.includes("addons") ? [...selectedAddons] : null,
+      choices: domainChoices,
     });
     if (list.includes("settings") && editing.settingsLinked !== false) {
       updateProfile(editing.id, { settingsLinked: false });
@@ -315,12 +357,15 @@ export function EditorView({
       if (importList.length > 0 && primary) {
         importDomains(primary.id, p.id, importList, {
           addonTransportUrls: importList.includes("addons") ? [...selectedAddons] : null,
+          choices: domainChoices,
         });
         if (importList.includes("settings")) patch.settingsLinked = false;
         emitListToast(t("Data copied from {name}", { name: primary.name }));
       }
       if (Object.keys(patch).length > 0) updateProfile(p.id, patch);
-      selectProfile(p.id);
+      // unlocked: the user set this PIN seconds ago in this very form. Without the flag
+      // selectProfile refuses the profile they just created and Save appears to fail.
+      selectProfile(p.id, { unlocked: true });
     }
     if (avatarSource && (isOwnProfile || mode.kind === "create")) {
       update({
@@ -703,11 +748,38 @@ export function EditorView({
                     onClick={() => toggleImportDomain("continueWatching")}
                   />
                 </div>
+                {(overlaps.watchlist?.overlapCount ?? 0) > 0 && (
+                  <ConflictRow
+                    label={t("Watchlist overlaps ({n})", {
+                      n: overlaps.watchlist?.overlapCount ?? 0,
+                    })}
+                    value={domainChoices.watchlist ?? "merge"}
+                    onChange={(v) => setDomainChoices((prev) => ({ ...prev, watchlist: v }))}
+                  />
+                )}
+                {(overlaps.favorites?.overlapCount ?? 0) > 0 && (
+                  <ConflictRow
+                    label={t("Favorites overlap ({n})", {
+                      n: overlaps.favorites?.overlapCount ?? 0,
+                    })}
+                    value={domainChoices.favorites ?? "merge"}
+                    onChange={(v) => setDomainChoices((prev) => ({ ...prev, favorites: v }))}
+                  />
+                )}
+                {(overlaps.addons?.overlapCount ?? 0) > 0 && (
+                  <ConflictRow
+                    label={t("Addons overlap ({n})", {
+                      n: overlaps.addons?.overlapCount ?? 0,
+                    })}
+                    value={domainChoices.addons ?? "merge"}
+                    onChange={(v) => setDomainChoices((prev) => ({ ...prev, addons: v }))}
+                  />
+                )}
                 <p className="text-[11px] leading-snug text-ink-subtle">
                   {t(
                     isCreate
                       ? "Copied once — afterwards this profile keeps its own copy. Nothing stays linked to Primary."
-                      : "Checking an area replaces this profile's current data in it.",
+                      : "Areas where data already exists let you choose how to combine it.",
                   )}
                 </p>
                 {!isCreate && (
@@ -735,7 +807,7 @@ export function EditorView({
                       </>
                     ) : (
                       <>
-                        <span className="text-ink-subtle">{t("Replace selected data?")}</span>
+                        <span className="text-ink-subtle">{t("Import selected data?")}</span>
                         <button
                           type="button"
                           onClick={() => setConfirmingImport(false)}
@@ -1211,6 +1283,41 @@ function ImportRow({
       </span>
       <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-ink">{label}</span>
     </button>
+  );
+}
+
+function ConflictRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: ImportDomainChoice;
+  onChange: (v: ImportDomainChoice) => void;
+}) {
+  const t = useT();
+  const options: { value: ImportDomainChoice; labelKey: string }[] = [
+    { value: "merge", labelKey: "Merge" },
+    { value: "replace", labelKey: "Replace" },
+  ];
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-edge-soft bg-elevated/30 p-2.5">
+      <span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold text-ink">{label}</span>
+      <div className="flex shrink-0 items-center gap-1 rounded-lg bg-canvas/50 p-1">
+        {options.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => onChange(o.value)}
+            className={`rounded-md px-2 py-1 text-[11.5px] font-semibold transition-colors ${
+              value === o.value ? "bg-accent/20 text-accent" : "text-ink-muted hover:text-ink"
+            }`}
+          >
+            {t(o.labelKey)}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 

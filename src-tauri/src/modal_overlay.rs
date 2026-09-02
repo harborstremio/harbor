@@ -2,7 +2,9 @@ use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tauri::{AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{
+    AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder,
+};
 use tokio::sync::Mutex;
 
 const OVERLAY_LABEL: &str = "harbor-modal-overlay";
@@ -131,10 +133,7 @@ pub async fn modal_overlay_close(
 }
 
 #[tauri::command]
-pub async fn modal_overlay_emit_state(
-    app: AppHandle,
-    payload: ModalPayload,
-) -> Result<(), String> {
+pub async fn modal_overlay_emit_state(app: AppHandle, payload: ModalPayload) -> Result<(), String> {
     let _ = app.emit_to(OVERLAY_LABEL, "modal://state", payload);
     Ok(())
 }

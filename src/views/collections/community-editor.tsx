@@ -1,5 +1,7 @@
-import { ArrowLeft, Check, Eye, GripVertical, ImagePlus, ListOrdered, Loader2, Plus, Search, Trash2, X } from "lucide-react";
+import { ArrowLeft, Check, Eye, GripVertical, ImagePlus, ListOrdered, Loader2, Plus, Trash2, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { ResultPoster } from "@/components/search/result-poster";
@@ -74,14 +76,16 @@ export function CommunityCollectionEditor({
   const [confirmClear, setConfirmClear] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const clearTimerRef = useRef<number | null>(null);
-  const [dragId, setDragId] = useState<string | null>(null);
+  const itemElsRef = useRef<Map<string, HTMLDivElement>>(new Map());
+  const dragCleanupRef = useRef<(() => void) | null>(null);
+  useEffect(() => () => dragCleanupRef.current?.(), []);
   const [order, setOrder] = useState<string[]>(() => collection?.items.map((it) => it.id) ?? []);
 
   const itemIds = collection?.items.map((it) => it.id).join(",") ?? "";
   useEffect(() => {
-    if (dragId) return;
+    if (dragCleanupRef.current) return; // don't yank the list out from under an active drag
     setOrder(itemIds ? itemIds.split(",") : []);
-  }, [itemIds, dragId]);
+  }, [itemIds]);
 
   useEffect(() => {
     const q = query.trim();
@@ -215,25 +219,107 @@ export function CommunityCollectionEditor({
     syncSoon();
   };
 
-  const onDragEnterItem = (overId: string) => {
-    if (!dragId || dragId === overId) return;
-    setOrder((cur) => {
-      const base = cur.length ? [...cur] : collection.items.map((it) => it.id);
-      const from = base.indexOf(dragId);
-      const to = base.indexOf(overId);
-      if (from < 0 || to < 0) return cur;
-      base.splice(from, 1);
-      base.splice(to, 0, dragId);
-      return base;
+  // Pointer-based sortable. The Tauri webview does not reliably fire native HTML5
+  // drag, so we drive it with pointer events: the grabbed card follows the finger
+  // and every other card slides to its new slot via a CSS transform. Nothing in
+  // the data list changes until release, so the DOM never reshuffles mid-drag
+  // (that is what made the native version spazz / do nothing). On release we
+  // commit the order with flushSync and clear the transforms in the same frame,
+  // so the shifted positions and the reordered DOM line up with no flash.
+  const startItemDrag = (e: React.PointerEvent<HTMLDivElement>, itemId: string, index: number) => {
+    if (e.button !== 0) return;
+    if ((e.target as HTMLElement).closest("button")) return; // let the remove (x) button click
+    const ids = orderedItems.map((it) => it.id);
+    if (ids.length < 2) return;
+    const els = ids.map((iid) => itemElsRef.current.get(iid));
+    if (els.some((el) => !el)) return;
+    const slots = els.map((el) => {
+      const r = el!.getBoundingClientRect();
+      return { x: r.left, y: r.top, cx: r.left + r.width / 2, cy: r.top + r.height / 2, h: r.height };
     });
-  };
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const dragged = itemElsRef.current.get(itemId)!;
+    let curOrder = ids;
+    let moved = false;
 
-  const commitReorder = () => {
-    if (dragId && order.length) {
-      reorderCollectionItems(id, order);
-      syncSoon();
+    const applyShift = (next: string[]) => {
+      for (let oi = 0; oi < ids.length; oi++) {
+        const iid = ids[oi];
+        if (iid === itemId) continue;
+        const el = itemElsRef.current.get(iid);
+        if (!el) continue;
+        const ni = next.indexOf(iid);
+        const tx = slots[ni].x - slots[oi].x;
+        const ty = slots[ni].y - slots[oi].y;
+        el.style.transition = "transform 190ms cubic-bezier(0.2,0.9,0.2,1)";
+        el.style.transform = tx || ty ? `translate(${tx}px,${ty}px)` : "";
+      }
+    };
+
+    function onMove(ev: PointerEvent) {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      if (!moved) {
+        if (Math.hypot(dx, dy) < 4) return;
+        moved = true;
+        document.body.style.userSelect = "none";
+        dragged.style.zIndex = "50";
+        dragged.style.willChange = "transform";
+        dragged.style.boxShadow = "0 22px 45px -14px rgba(0,0,0,0.65)";
+      }
+      dragged.style.transition = "none";
+      dragged.style.transform = `translate(${dx}px,${dy}px) scale(1.05)`;
+      const cx = slots[index].cx + dx;
+      const cy = slots[index].cy + dy;
+      let toIndex = 0;
+      for (let i = 0; i < slots.length; i++) {
+        if (i === index) continue;
+        const s = slots[i];
+        const tol = s.h * 0.5;
+        if (s.cy < cy - tol || (Math.abs(s.cy - cy) <= tol && s.cx < cx)) toIndex++;
+      }
+      const next = ids.filter((x) => x !== itemId);
+      next.splice(toIndex, 0, itemId);
+      if (next.join("") !== curOrder.join("")) {
+        curOrder = next;
+        applyShift(next);
+      }
     }
-    setDragId(null);
+
+    function cleanup() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+      document.body.style.userSelect = "";
+      dragCleanupRef.current = null;
+    }
+
+    function onUp() {
+      cleanup();
+      const changed = moved && curOrder.join("") !== ids.join("");
+      flushSync(() => {
+        if (changed) setOrder(curOrder);
+      });
+      for (const iid of ids) {
+        const el = itemElsRef.current.get(iid);
+        if (!el) continue;
+        el.style.transition = "";
+        el.style.transform = "";
+        el.style.zIndex = "";
+        el.style.boxShadow = "";
+        el.style.willChange = "";
+      }
+      if (changed) {
+        reorderCollectionItems(id, curOrder);
+        syncSoon();
+      }
+    }
+
+    dragCleanupRef.current = cleanup;
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   };
 
   const toggleNumbered = () => {
@@ -592,15 +678,12 @@ export function CommunityCollectionEditor({
                 {orderedItems.map((item, i) => (
                   <div
                     key={item.id}
-                    draggable
-                    onDragStart={() => setDragId(item.id)}
-                    onDragEnter={() => onDragEnterItem(item.id)}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDragEnd={commitReorder}
-                    onDrop={commitReorder}
-                    className={`group/item flex cursor-grab flex-col gap-1.5 active:cursor-grabbing ${
-                      dragId === item.id ? "opacity-50" : ""
-                    }`}
+                    ref={(el) => {
+                      if (el) itemElsRef.current.set(item.id, el);
+                      else itemElsRef.current.delete(item.id);
+                    }}
+                    onPointerDown={(e) => startItemDrag(e, item.id, i)}
+                    className="group/item flex cursor-grab touch-none select-none flex-col gap-1.5 active:cursor-grabbing"
                   >
                     <div className="relative">
                       <ResultPoster id={item.id} poster={item.poster} />

@@ -1,8 +1,10 @@
-import { Play, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { SearchResults } from "@/lib/search";
 import { AwardChips } from "@/components/award-chips";
 import { ResultPoster } from "./result-poster";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
+import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 
 export function TopMatch({
@@ -15,6 +17,7 @@ export function TopMatch({
   collection?: { name: string; onOpen: () => void };
 }) {
   const { openMeta } = useView();
+  const t = useT();
   const yearTxt = match.meta.releaseInfo ?? "";
   const rating = match.voteAverage && match.voteAverage > 0 ? match.voteAverage.toFixed(1) : null;
   const synopsis = (useLocalizedOverview(match.meta) ?? "").trim();
@@ -29,6 +32,7 @@ export function TopMatch({
       <button
         type="button"
         onClick={handleOpen}
+        aria-label={t("Open {name}", { name: match.meta.name })}
         className="group flex w-full items-center gap-5 p-4 text-start transition-colors duration-150 hover:bg-raised active:scale-[0.997]"
       >
         <div className="relative aspect-[2/3] w-[104px] shrink-0 overflow-hidden rounded-xl ring-1 ring-edge-soft">
@@ -41,7 +45,7 @@ export function TopMatch({
 
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-accent">
-            Top match
+            {t("Top match")}
           </span>
           <h2
             className="mt-1 truncate text-[clamp(22px,2.2vw,30px)] font-medium leading-[1.1] tracking-tight text-ink"
@@ -50,7 +54,7 @@ export function TopMatch({
             {match.meta.name}
           </h2>
           <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-[13px] text-ink-muted">
-            <span className="font-medium">{match.kind === "movie" ? "Movie" : "Series"}</span>
+            <span className="font-medium">{match.kind === "movie" ? t("Movie") : t("Series")}</span>
             {yearTxt && (
               <>
                 <Dot />
@@ -95,7 +99,7 @@ export function TopMatch({
               }}
               className="mt-2 inline-flex w-fit items-center gap-1 text-[12.5px] font-semibold text-accent transition-colors hover:text-accent/80"
             >
-              {`Part of ${collection.name}`}
+              {t("Part of {name}", { name: collection.name })}
               <span aria-hidden>›</span>
             </span>
           )}
@@ -103,7 +107,7 @@ export function TopMatch({
 
         <div className="me-1 inline-flex h-10 shrink-0 items-center gap-2 self-center rounded-full bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-opacity group-hover:opacity-90">
           <Play size={14} className="fill-current" strokeWidth={0} />
-          Open
+          {t("Open")}
         </div>
       </button>
     </section>

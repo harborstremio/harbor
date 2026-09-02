@@ -1,0 +1,4658 @@
+{
+  "summary": {
+    "previousBaselineEntries": 571,
+    "stillOpenInNewStrictBaseline": 286,
+    "removedAsFalsePositive": 39,
+    "removedAsConvertedFallbackStillInFile": 148,
+    "removedAsConvertedLiteralGone": 98,
+    "newlyVisibleWideOnly": 504,
+    "newlyVisibleClassedCopy": 233,
+    "newlyVisibleClassedDataTable": 249,
+    "newlyVisibleClassedHeader": 18,
+    "newlyVisibleClassedMatchKey": 4
+  },
+  "removedAsFalsePositive": [
+    {
+      "file": "AddonChrome.kt",
+      "line": 79,
+      "value": "Harbor plays what your addons find. Browse the public directory, add one by URL, sign in ",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonStoreHealth.kt",
+      "line": 202,
+      "value": "All $count addons answering",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsAdd.kt",
+      "line": 58,
+      "value": "If you do not have a URL, press Back and use Browse addons instead.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsAdd.kt",
+      "line": 63,
+      "value": "Nothing on this TV's clipboard. Type the URL, or press Back and use Browse addons.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsAdd.kt",
+      "line": 139,
+      "value": "Reading the manifest",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsBrowse.kt",
+      "line": 379,
+      "value": "Harbor could not reach the addon directory. Check this TV's network, then press Retry.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "AddonsOrder.kt",
+      "line": 89,
+      "value": "Add an addon first and its place in the queue will show up here.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsOrder.kt",
+      "line": 79,
+      "value": "Harbor asks your addons for streams from the top down and ranks what comes back. ",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsOrder.kt",
+      "line": 270,
+      "value": "Moving $held. Up and Down to place it, OK to drop it.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsOrder.kt",
+      "line": 85,
+      "value": "Press OK to pick an addon up, Up and Down to place it, OK to drop it.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsOrder.kt",
+      "line": 80,
+      "value": "The addon you trust most belongs first.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsPage.kt",
+      "line": 161,
+      "value": "Checking your addons",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsPage.kt",
+      "line": 270,
+      "value": "Sign in to Stremio in Settings to sync your addons.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsPage.kt",
+      "line": 231,
+      "value": "Still reading this addon's manifest",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsPage.kt",
+      "line": 267,
+      "value": "Synced. Added ${outcome.added}, removed ${outcome.removed}.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsPage.kt",
+      "line": 170,
+      "value": "Syncing with Stremio",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "DetailChrome.kt",
+      "line": 93,
+      "value": "Harbor could not reach the catalog servers. Check the connection and open it again.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverAffinity.kt",
+      "line": 298,
+      "value": "Features $loved, someone you watch a lot",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "DiscoverAffinity.kt",
+      "line": 302,
+      "value": "Features ${faces[0]} and ${faces[1]}",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "DiscoverData.kt",
+      "line": 101,
+      "value": "One pick at a time, full screen, until something lands.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverData.kt",
+      "line": 144,
+      "value": "Ranked by the work they left behind",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverQueueBand.kt",
+      "line": 49,
+      "value": "Leading with ${peek.shelf}",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "DiscoverQueueCall.kt",
+      "line": 58,
+      "value": "Bring back $snoozed skipped",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverQueueCall.kt",
+      "line": 39,
+      "value": "No picks loaded. Cinemeta could not be reached from this device.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverQueueCall.kt",
+      "line": 30,
+      "value": "One pick at a time, full screen, until something lands.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverQueueCall.kt",
+      "line": 49,
+      "value": "You have cleared the run. Bring back what you skipped, or come back tomorrow.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverQueueCall.kt",
+      "line": 54,
+      "value": "You have cleared the run. Come back tomorrow for a fresh set.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "LibrarySheets.kt",
+      "line": 195,
+      "value": "The list goes away on this device. The $count titles in it stay in your library, ",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "LiveShell.kt",
+      "line": 83,
+      "value": "Harbor could not reach $provider.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "LiveShell.kt",
+      "line": 72,
+      "value": "Harbor plays IPTV from your own provider. Add a playlist and the guide fills in.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "LiveShell.kt",
+      "line": 93,
+      "value": "This playlist came back without any live channels.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 84,
+      "value": "Top $shown of $total sources",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerUi.kt",
+      "line": 698,
+      "value": "Harbor is still reading this stream. Details appear once the first ",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerUi.kt",
+      "line": 906,
+      "value": "Resuming from ${playerClockText(startPositionMs)}",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerUi.kt",
+      "line": 808,
+      "value": "Try another source",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 705,
+      "value": "One source frame per $ratio refreshes.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "SearchStates.kt",
+      "line": 175,
+      "value": "Nothing matched, and $failed of $asked $noun did not answer.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamBadgePackImport.kt",
+      "line": 149,
+      "value": "That pack has $blank entries but none carry both a name and a pattern.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 144,
+      "value": "Harbor tried $triedCount sources for $what and none of them played.",
+      "why": "fallback lambda"
+    }
+  ],
+  "removedAsConvertedFallbackStillInFile": [
+    {
+      "file": "AddonChrome.kt",
+      "line": 318,
+      "value": "No addons yet",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "AddonsBrowse.kt",
+      "line": 383,
+      "value": "Nothing in the directory matches that name.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "AddonsBrowse.kt",
+      "line": 385,
+      "value": "Nothing in this category right now. Try Everything.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "AddonsBrowse.kt",
+      "line": 381,
+      "value": "Reading the directory",
+      "why": "sibling argument"
+    },
+    {
+      "file": "AddonsPage.kt",
+      "line": 310,
+      "value": "Sync with Stremio",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DetailChrome.kt",
+      "line": 87,
+      "value": "Couldn't load this title",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DetailCommentCompose.kt",
+      "line": 61,
+      "value": "Goes to Trakt under your name.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DetailCommentCompose.kt",
+      "line": 51,
+      "value": "Hold OK to post",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DetailCommentCompose.kt",
+      "line": 59,
+      "value": "Hold OK to remove yours",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DetailCommentCompose.kt",
+      "line": 49,
+      "value": "Say what you thought.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DetailComments.kt",
+      "line": 52,
+      "value": "Hold OK for replies",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DetailComments.kt",
+      "line": 54,
+      "value": "No replies came back.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DetailComments.kt",
+      "line": 62,
+      "value": "Nobody has said anything yet.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DetailComments.kt",
+      "line": 60,
+      "value": "Press OK to write one",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DetailComments.kt",
+      "line": 46,
+      "value": "Press to reveal",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DetailDialogs.kt",
+      "line": 40,
+      "value": "Plan to Watch",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverAwardSheet.kt",
+      "line": 263,
+      "value": "Reading the award book",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 110,
+      "value": "Bring the Tissues",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 119,
+      "value": "Coming of Age",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 114,
+      "value": "Into the Stars",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverHeroQueueCopy.kt",
+      "line": 44,
+      "value": "Cinemeta is unreachable",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverHeroQueueCopy.kt",
+      "line": 45,
+      "value": "Nothing left tonight",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverQueueBand.kt",
+      "line": 29,
+      "value": "Start the run",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverQueueBand.kt",
+      "line": 29,
+      "value": "Start the run",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverQueueCall.kt",
+      "line": 36,
+      "value": "Discovery Queue is offline",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverQueueCall.kt",
+      "line": 45,
+      "value": "Nothing left in today's picks",
+      "why": "sibling argument"
+    },
+    {
+      "file": "DiscoverQueueRail.kt",
+      "line": 242,
+      "value": "Skip for now",
+      "why": "sibling argument"
+    },
+    {
+      "file": "LiveShell.kt",
+      "line": 78,
+      "value": "Couldn't load this playlist",
+      "why": "sibling argument"
+    },
+    {
+      "file": "LiveShell.kt",
+      "line": 80,
+      "value": "Harbor could not reach the provider.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "LiveShell.kt",
+      "line": 90,
+      "value": "No channels here",
+      "why": "sibling argument"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 526,
+      "value": "Could not reach TMDB from this TV. You can save the key without checking it.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 888,
+      "value": "Publish a theme, share a list, keep both when you reinstall.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 604,
+      "value": "Save it anyway",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 893,
+      "value": "See what the people you follow are watching right now.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 737,
+      "value": "Signed in as ${who.orEmpty()}",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 529,
+      "value": "Skip this and Harbor runs on Cinemeta. You just see fewer rows.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 803,
+      "value": "Skip this and Harbor still works. Your library just stays local.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 525,
+      "value": "TMDB did not accept that key. Check you copied the v3 key, not the read access token.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 749,
+      "value": "The key from another Stremio session",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 571,
+      "value": "The key is saved on this device only.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 887,
+      "value": "Themes and lists",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 574,
+      "value": "Use a different key",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 789,
+      "value": "Use an auth key instead",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 789,
+      "value": "Use email and password",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsTaste.kt",
+      "line": 1480,
+      "value": "Harbor account linked as $harborName",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsTaste.kt",
+      "line": 1474,
+      "value": "Signed in as $stremioName",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "OnboardStepsTaste.kt",
+      "line": 121,
+      "value": "These rows need a TMDB key before they show anything.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAuto.kt",
+      "line": 83,
+      "value": "Already lined up",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAuto.kt",
+      "line": 31,
+      "value": "Asking other subtitle sources",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAuto.kt",
+      "line": 36,
+      "value": "Auto sync works on a subtitle you added, not one built into the file.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAuto.kt",
+      "line": 88,
+      "value": "Match against other versions of this subtitle",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAuto.kt",
+      "line": 42,
+      "value": "No other source had this subtitle to compare against.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAuto.kt",
+      "line": 28,
+      "value": "Reading your subtitle",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAuto.kt",
+      "line": 44,
+      "value": "The other versions did not agree well enough to trust a shift.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAuto.kt",
+      "line": 46,
+      "value": "The sources took too long to answer.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAuto.kt",
+      "line": 84,
+      "value": "These subtitles drift, use Timing",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAuto.kt",
+      "line": 85,
+      "value": "This looks like a different version",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAuto.kt",
+      "line": 40,
+      "value": "This stream did not come with a catalogue id.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAuto.kt",
+      "line": 38,
+      "value": "This subtitle has too few lines to compare.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAutoUi.kt",
+      "line": 98,
+      "value": "Could not auto sync",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAutoUi.kt",
+      "line": 93,
+      "value": "Different subtitle version",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAutoUi.kt",
+      "line": 83,
+      "value": "Subtitles already lined up",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAutoUi.kt",
+      "line": 88,
+      "value": "These subtitles drift",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAutoUi.kt",
+      "line": 67,
+      "value": "They drift about ${each}s every hour. Fix in Subtitles, Timing.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubAutoUi.kt",
+      "line": 55,
+      "value": "Undo in Subtitles, Timing.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubPanel.kt",
+      "line": 237,
+      "value": "A dark halo. Good on most pictures.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubPanel.kt",
+      "line": 239,
+      "value": "A filled plate. Easiest to read.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubPanel.kt",
+      "line": 238,
+      "value": "A hard stroke. Highest contrast.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubPanel.kt",
+      "line": 229,
+      "value": "Back closes this too.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubPanel.kt",
+      "line": 219,
+      "value": "Every setting back to default.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubPanel.kt",
+      "line": 189,
+      "value": "Height off the bottom",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubPanel.kt",
+      "line": 243,
+      "value": "Keep what the file asks for.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubPanel.kt",
+      "line": 205,
+      "value": "Late? press Right. Early? press Left.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubPanel.kt",
+      "line": 47,
+      "value": "Left and Right change the lit row. OK resets it.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubPanel.kt",
+      "line": 244,
+      "value": "Signs stay put, dialogue is yours.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubPanel.kt",
+      "line": 245,
+      "value": "Your look, on every line.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubStyle.kt",
+      "line": 139,
+      "value": "Big and bold on a solid plate.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "PlayerSubStyle.kt",
+      "line": 138,
+      "value": "Large and clear",
+      "why": "sibling argument"
+    },
+    {
+      "file": "PlayerSubStyle.kt",
+      "line": 155,
+      "value": "Small condensed with a thin outline.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "PlayerSubStyle.kt",
+      "line": 147,
+      "value": "Warm off white, lifted, heavier edge.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "PlayerSubStyle.kt",
+      "line": 131,
+      "value": "White text, soft shadow. The safe one.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "PlayerSubStyle.kt",
+      "line": 379,
+      "value": "Your own mix. Left and Right load one.",
+      "why": "sibling argument"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 62,
+      "value": "Fine step for a line that lands just ahead of the voice.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 57,
+      "value": "Fine step for a line that lands just behind the voice.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 90,
+      "value": "Fine step when the voices land ahead of the lips.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 85,
+      "value": "Fine step when the voices land behind the lips.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 38,
+      "value": "Later by 0.1s",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 38,
+      "value": "Later by 0.1s",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 29,
+      "value": "Left and Right nudge by 0.1s. Enter here clears the offset.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 29,
+      "value": "Left and Right nudge by 0.1s. Enter here clears the offset.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 80,
+      "value": "Pull the whole soundtrack a full second forward.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 95,
+      "value": "Push the whole soundtrack a full second back.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 27,
+      "value": "Reset to in sync",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 27,
+      "value": "Reset to in sync",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 52,
+      "value": "Show every line a full second earlier.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 67,
+      "value": "Show every line a full second later.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 35,
+      "value": "Sooner by 0.1s",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 35,
+      "value": "Sooner by 0.1s",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 32,
+      "value": "Sooner by 1s",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 32,
+      "value": "Sooner by 1s",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSubTune.kt",
+      "line": 99,
+      "value": "This stream has no picture, so there is nothing to hold the sound against.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 104,
+      "value": "Asking your addons",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 122,
+      "value": "Harbor could not reach your debrid service. Check the network and try again.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 126,
+      "value": "No debrid service is linked yet, so torrent sources cannot be opened.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 144,
+      "value": "No debrid service is linked, so that torrent cannot open.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 19,
+      "value": "Nothing matches these filters",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 90,
+      "value": "Picks start from the beginning",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 142,
+      "value": "That addon still needs setting up in Addons.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 150,
+      "value": "That entry carried no playable source.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 138,
+      "value": "That link opened a web page, not a stream.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 136,
+      "value": "That link was not a real video file. Try another source.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 140,
+      "value": "That source did not answer. Try another.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 152,
+      "value": "That source would not open. Try another.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 146,
+      "value": "That torrent is not cached on your debrid service yet.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 128,
+      "value": "The source your debrid service opened has no video file inside it.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 112,
+      "value": "Your debrid service has hit its traffic limit and will not hand out new links.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 118,
+      "value": "Your debrid service is asking Harbor to slow down. Wait a moment and try again.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 120,
+      "value": "Your debrid service is not answering right now. That is on their end, not yours.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 116,
+      "value": "Your debrid service rejected the saved key. Link it again from Settings.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 148,
+      "value": "Your debrid service returned no link for that source.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 124,
+      "value": "Your debrid service took too long to hand back a link.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerSwapSources.kt",
+      "line": 114,
+      "value": "Your debrid subscription has run out. Renew it to switch to torrent sources.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerTunePane.kt",
+      "line": 47,
+      "value": "Needs a picture to hold against",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 666,
+      "value": "Confirming the source rate before asking for ${formatHz(candidate.hz)}.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 330,
+      "value": "Display accepts Dolby Vision. The bitstream goes to the Dolby Vision decoder unchanged.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 344,
+      "value": "Display does not accept Dolby Vision, so the AV1 base layer plays as HDR10.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 340,
+      "value": "Display does not accept Dolby Vision, so the H.264 base layer plays as SDR.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 336,
+      "value": "Display does not accept Dolby Vision, so the HEVC base layer plays as HDR10.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 654,
+      "value": "Measuring source frame rate.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 670,
+      "value": "No display mode divides ${formatFps(fps)} evenly, so the cadence is uneven.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 704,
+      "value": "One source frame per refresh.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 652,
+      "value": "Refresh matching is off. Output stays at ${formatHz(displayHz)}.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 664,
+      "value": "Requested ${formatHz(candidate.hz)} from the display.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 146,
+      "value": "Harbor could not get a working stream for $what.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 110,
+      "value": "Harbor could not reach your debrid service. Check the network and try again.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 83,
+      "value": "Leave Big Picture and open settings",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 114,
+      "value": "No debrid service is linked yet. Add one from Settings and this gets much faster.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 77,
+      "value": "No streaming sources yet",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 274,
+      "value": "Stream this once",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 116,
+      "value": "The source your debrid service opened has no video file inside it.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 91,
+      "value": "We could not find a working stream",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 95,
+      "value": "Your debrid service can't process this right now.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 106,
+      "value": "Your debrid service is asking Harbor to slow down. Wait a moment and try again.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 108,
+      "value": "Your debrid service is not answering right now. That is on their end, not yours.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 104,
+      "value": "Your debrid service rejected the saved key. Link it again from Settings.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 112,
+      "value": "Your debrid service took too long to hand back a link.",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 93,
+      "value": "Your debrid service turned this down",
+      "why": "fallback lambda"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "line": 102,
+      "value": "Your debrid subscription has run out. Renew it and this title should play again.",
+      "why": "fallback lambda"
+    }
+  ],
+  "removedAsConvertedLiteralGone": [
+    {
+      "file": "AddonManifestFetch.kt",
+      "value": "Couldn't reach the addon. Check the URL and your connection.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AddonManifestFetch.kt",
+      "value": "Manifest fetch failed (HTTP ${res.code}). Check the URL.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AddonManifestFetch.kt",
+      "value": "Response wasn't valid JSON. The URL may not be a Stremio manifest.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AddonModel.kt",
+      "value": "Manifest is not a JSON object.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AddonsPage.kt",
+      "value": "Browse the public directory, add one by URL, set the order Harbor asks them in, ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AudioCaps.kt",
+      "value": "Decoded to PCM on this box.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AudioCaps.kt",
+      "value": "No audio track in this file can start on this setup.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AudioCaps.kt",
+      "value": "This box decodes $codec but not at ${channelName(channels)}, so this track cannot play as it is.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AudioCaps.kt",
+      "value": "This box has no $codec decoder and your receiver did not offer to take it, so this track has no way to make sound.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AudioCaps.kt",
+      "value": "This box has no $codec decoder.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AudioCaps.kt",
+      "value": "This box has no decoder for it and your receiver did not offer to take it.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AudioCaps.kt",
+      "value": "Your receiver accepted the format then refused the stream, so check its surround input settings.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AudioCaps.kt",
+      "value": "Your receiver did not offer to take $codec, so this box decodes it to PCM.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "AudioCaps.kt",
+      "value": "Your receiver lists $codec but Harbor's audio engine was not cleared to send it. Check the surround sound setting in the system audio menu.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "value": "An auth key from a Stremio session on another device. Harbor stores the key, ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "value": "Harbor is an independent client. It is not affiliated with or endorsed ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "value": "There is no safe way to type a password for this on a TV, so this one only ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudio.kt",
+      "value": "Audio output failed. Try Decode on device. ($text)",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudio.kt",
+      "value": "Every audio track here is a format your receiver claims, so Harbor cannot stop the bitstream on this file.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudio.kt",
+      "value": "Holding ${alt.plan.codec} so this stick decodes the audio instead of the receiver.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioPane.kt",
+      "value": "Go back to the list. Nothing changes.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioPane.kt",
+      "value": "Harbor has not read an audio track from this stream yet.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioPane.kt",
+      "value": "Keep the current track",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioPane.kt",
+      "value": "No other track in this file plays on this setup.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioPane.kt",
+      "value": "Sound is off so the picture keeps playing. Pick a track to try again.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioPane.kt",
+      "value": "This output takes plain PCM only, so Harbor decodes every track on this device.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioRow.kt",
+      "value": "Bluetooth cannot carry ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "DTS-HD bitstream. DTS:X, when the track carries it, is an extension inside this stream that the receiver decodes.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "Decode here, and hold the mix to two channels.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "Decode on device",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "Dolby Digital Plus with Atmos, sent untouched.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "Hand the untouched stream to the receiver when it can.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "If your receiver reports a format it cannot really decode, you get silence instead of sound.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "Low. Harbor still hands surround formats straight to your receiver, so a receiver that overstates what it decodes can still play silent.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "Play the best track this HDMI chain can handle.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "TrueHD bitstream at ${channelName(outChannels)}. Atmos rides inside the stream, so only the receiver front panel can confirm it.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "You lose surround and lossless audio. If every track in the file is a format your receiver claims, Harbor cannot stop the bitstream and will say so.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "Your receiver did not report Atmos in Dolby Digital Plus, so this sends plain Dolby Digital Plus.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "Your receiver did not report DTS-HD, so this drops to the ${encodingName(encoding)} encoding. Switch to Decode on device if it drops out.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "value": "Your receiver did not report DTS:X, so this drops to the ${encodingName(encoding)} core. Switch to Decode on device if it drops out.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerFacts.kt",
+      "value": "AV1 base layer, shown as HDR10",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerFacts.kt",
+      "value": "Asked for, but this stream did not take it",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerFacts.kt",
+      "value": "H.264 base layer, shown as SDR",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerFacts.kt",
+      "value": "HEVC base layer, shown as HDR10",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerFacts.kt",
+      "value": "Harbor turned it off after repeated bad samples.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerFacts.kt",
+      "value": "No decode path on this display",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerFacts.kt",
+      "value": "None found in this file",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerFacts.kt",
+      "value": "On, the decoder is holding picture and sound together",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerFacts.kt",
+      "value": "Sent to the Dolby Vision decoder",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerFacts.kt",
+      "value": "While tunneling is on, X-Ray cannot read a frame and the audio ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerSubAutoUi.kt",
+      "value": "Agreed by ${sourceWord(phase.sources)}. $UNDO_HINT",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerSubAutoUi.kt",
+      "value": "Checked against ${sourceWord(phase.sources)}. Nothing to change.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerSubAutoUi.kt",
+      "value": "This file does not match what ${sourceWord(phase.sources)} carry. Pick another subtitle.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "value": "Choose an HDR10 source.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "value": "Harbor could not read the Dolby Vision profile in this file, and this display does ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "value": "Profile 5 carries no HDR10 compatible base layer, so decoding it here would give wrong ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "value": "Profile 7 is the dual layer disc format. Rewriting it to Profile 8.1 is not something ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "value": "There is no decode path for this Dolby Vision profile on this display. ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Accounts and TMDB",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Add a profile for everyone who watches",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Add an M3U link or Xtream Codes login",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Ask if you are still watching",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Auto-play next episode",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Auto-skip stalled streams",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Badges on source rows",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Community release group and tracker badges, matched as text, no images loaded",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Confirm before leaving the player",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Fade between backdrops",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Harbor asks your addons for titles and descriptions in this language. ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Hero trailer preview",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Hide skip button after",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Hide watched in catalogs",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "How long to wait first",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Language for titles",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Minimal source rows",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Never hide the next episode",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Nothing connected yet. Scan a code with your phone.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Restore hidden shows",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Rotten Tomatoes, Metacritic, Letterboxd, Trakt and Simkl scores",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Send a title to your computer, and sync profiles",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Show episode descriptions",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Show episode ratings",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Show playback stats while playing",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Show the clock while playing",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Simkl, for anime only",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Skip intros and credits",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "The menus stay in English.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "This is how a subtitle will look.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Turn off what you do not have",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "SettingsPage.kt",
+      "value": "Turn off what you do not have",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "value": "Harbor needs at least one streaming source before it can play $what. ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "value": "Install a stream addon or add a debrid key in settings.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "value": "Real-Debrid says you have hit your traffic limit, so it will not hand out new links ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "value": "Real-Debrid, TorBox, AllDebrid and Premiumize all have brief outages where ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "value": "This source is not cached, so your debrid service would fetch it from other ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "StreamDialogs.kt",
+      "value": "Usually that means a debrid key has expired, no stream addon is installed yet, ",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "TogetherRoute.kt",
+      "value": "One other person is here.",
+      "why": "literal no longer in the file"
+    },
+    {
+      "file": "TraktLinkBus.kt",
+      "value": "Watchlist, lists, history and scrobbling",
+      "why": "literal no longer in the file"
+    }
+  ],
+  "newlyVisibleWideOnly": [
+    {
+      "file": "AddonMeta.kt",
+      "line": 87,
+      "value": "Episode $number",
+      "kind": "copy"
+    },
+    {
+      "file": "AnimeAddonBridge.kt",
+      "line": 3,
+      "value": "From Your Addons",
+      "kind": "copy"
+    },
+    {
+      "file": "AnimeExtras.kt",
+      "line": 74,
+      "value": "Episode length",
+      "kind": "copy"
+    },
+    {
+      "file": "AnimeExtras.kt",
+      "line": 81,
+      "value": "Age rating",
+      "kind": "copy"
+    },
+    {
+      "file": "AnimeHero.kt",
+      "line": 244,
+      "value": "Sub and Dub",
+      "kind": "copy"
+    },
+    {
+      "file": "AnimeHero.kt",
+      "line": 286,
+      "value": "Start Watching",
+      "kind": "copy"
+    },
+    {
+      "file": "AnimeHero.kt",
+      "line": 289,
+      "value": "More Info",
+      "kind": "copy"
+    },
+    {
+      "file": "AnimeTrackerPanel.kt",
+      "line": 47,
+      "value": "Anime tracking",
+      "kind": "copy"
+    },
+    {
+      "file": "AnimeTrackerPanel.kt",
+      "line": 56,
+      "value": "Connect Simkl",
+      "kind": "copy"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 121,
+      "value": "Awards & Recognition",
+      "kind": "copy"
+    },
+    {
+      "file": "BpGuideBrowseRail.kt",
+      "line": 237,
+      "value": "Search channels",
+      "kind": "copy"
+    },
+    {
+      "file": "BpGuideBrowseSources.kt",
+      "line": 34,
+      "value": "Add playlist",
+      "kind": "copy"
+    },
+    {
+      "file": "BpGuideChrome.kt",
+      "line": 108,
+      "value": "Live now",
+      "kind": "copy"
+    },
+    {
+      "file": "BpGuideChrome.kt",
+      "line": 118,
+      "value": "No schedule",
+      "kind": "copy"
+    },
+    {
+      "file": "CalendarModel.kt",
+      "line": 140,
+      "value": "Episode $number",
+      "kind": "copy"
+    },
+    {
+      "file": "CalendarModel.kt",
+      "line": 143,
+      "value": "Episode $number",
+      "kind": "copy"
+    },
+    {
+      "file": "CalendarModel.kt",
+      "line": 201,
+      "value": "Open settings",
+      "kind": "copy"
+    },
+    {
+      "file": "CalendarRow.kt",
+      "line": 57,
+      "value": "Nothing airing",
+      "kind": "copy"
+    },
+    {
+      "file": "CardRating.kt",
+      "line": 79,
+      "value": "Score $value",
+      "kind": "copy"
+    },
+    {
+      "file": "CollectionsRow.kt",
+      "line": 132,
+      "value": "All collections",
+      "kind": "copy"
+    },
+    {
+      "file": "CollectionsTab.kt",
+      "line": 619,
+      "value": "Open Settings",
+      "kind": "copy"
+    },
+    {
+      "file": "ConnectScreen.kt",
+      "line": 50,
+      "value": "View sources",
+      "kind": "copy"
+    },
+    {
+      "file": "CwAhead.kt",
+      "line": 58,
+      "value": "Episode $number",
+      "kind": "copy"
+    },
+    {
+      "file": "CwLibrary.kt",
+      "line": 146,
+      "value": "Episode ${at.second}",
+      "kind": "copy"
+    },
+    {
+      "file": "CwRow.kt",
+      "line": 103,
+      "value": "Your library",
+      "kind": "copy"
+    },
+    {
+      "file": "DetailHeroOrigin.kt",
+      "line": 11,
+      "value": "Anime Kitsu",
+      "kind": "copy"
+    },
+    {
+      "file": "DiscoverCopy.kt",
+      "line": 34,
+      "value": "Top Rated",
+      "kind": "copy"
+    },
+    {
+      "file": "DownloadsModel.kt",
+      "line": 178,
+      "value": "Failed: ",
+      "kind": "copy"
+    },
+    {
+      "file": "DownloadsNote.kt",
+      "line": 20,
+      "value": "Downloads finished",
+      "kind": "copy"
+    },
+    {
+      "file": "EpisodeFacts.kt",
+      "line": 128,
+      "value": "Episode ${ep.number}",
+      "kind": "copy"
+    },
+    {
+      "file": "EpisodeOrder.kt",
+      "line": 12,
+      "value": "All Episodes",
+      "kind": "copy"
+    },
+    {
+      "file": "EpisodeOrder.kt",
+      "line": 236,
+      "value": "Episode Order",
+      "kind": "copy"
+    },
+    {
+      "file": "EpisodePager.kt",
+      "line": 24,
+      "value": "Season ${it.key}",
+      "kind": "copy"
+    },
+    {
+      "file": "EpisodeSystem.kt",
+      "line": 82,
+      "value": "Episode ${ep.number}",
+      "kind": "copy"
+    },
+    {
+      "file": "EpisodeSystem.kt",
+      "line": 85,
+      "value": "Episode ${ep.number}",
+      "kind": "copy"
+    },
+    {
+      "file": "HarborLan.kt",
+      "line": 250,
+      "value": "Harbor TV",
+      "kind": "copy"
+    },
+    {
+      "file": "Hero.kt",
+      "line": 299,
+      "value": "More Info",
+      "kind": "copy"
+    },
+    {
+      "file": "HeroExpand.kt",
+      "line": 106,
+      "value": "Created by ",
+      "kind": "copy"
+    },
+    {
+      "file": "HeroExpand.kt",
+      "line": 112,
+      "value": "Written by ",
+      "kind": "copy"
+    },
+    {
+      "file": "HomeFeed.kt",
+      "line": 24,
+      "value": "All movies",
+      "kind": "copy"
+    },
+    {
+      "file": "HomeFeed.kt",
+      "line": 25,
+      "value": "All shows",
+      "kind": "copy"
+    },
+    {
+      "file": "HomeFeed.kt",
+      "line": 26,
+      "value": "All anime",
+      "kind": "copy"
+    },
+    {
+      "file": "IptvFetch.kt",
+      "line": 61,
+      "value": "Channel $autoIndex",
+      "kind": "copy"
+    },
+    {
+      "file": "IptvSetupFields.kt",
+      "line": 13,
+      "value": "Playlist address",
+      "kind": "copy"
+    },
+    {
+      "file": "IptvSetupFields.kt",
+      "line": 14,
+      "value": "Guide address",
+      "kind": "copy"
+    },
+    {
+      "file": "LibraryModel.kt",
+      "line": 29,
+      "value": "My Lists",
+      "kind": "copy"
+    },
+    {
+      "file": "LibraryModel.kt",
+      "line": 32,
+      "value": "Trakt Lists",
+      "kind": "copy"
+    },
+    {
+      "file": "LibraryModel.kt",
+      "line": 33,
+      "value": "Public Lists",
+      "kind": "copy"
+    },
+    {
+      "file": "LibraryModel.kt",
+      "line": 186,
+      "value": "No date",
+      "kind": "copy"
+    },
+    {
+      "file": "LibraryModel.kt",
+      "line": 189,
+      "value": "This week",
+      "kind": "copy"
+    },
+    {
+      "file": "LibraryModel.kt",
+      "line": 190,
+      "value": "This month",
+      "kind": "copy"
+    },
+    {
+      "file": "LibraryModel.kt",
+      "line": 258,
+      "value": "No matches.",
+      "kind": "copy"
+    },
+    {
+      "file": "LibraryRows.kt",
+      "line": 113,
+      "value": "Delete list",
+      "kind": "copy"
+    },
+    {
+      "file": "LibraryRows.kt",
+      "line": 121,
+      "value": "Your year",
+      "kind": "copy"
+    },
+    {
+      "file": "LibrarySheets.kt",
+      "line": 184,
+      "value": "Delete $name",
+      "kind": "copy"
+    },
+    {
+      "file": "LibrarySheets.kt",
+      "line": 204,
+      "value": "Keep list",
+      "kind": "copy"
+    },
+    {
+      "file": "LinkPanel.kt",
+      "line": 744,
+      "value": "Link Stremio",
+      "kind": "copy"
+    },
+    {
+      "file": "LinkPanel.kt",
+      "line": 750,
+      "value": "Link TMDB",
+      "kind": "copy"
+    },
+    {
+      "file": "LinkPanel.kt",
+      "line": 760,
+      "value": "Link MDBList",
+      "kind": "copy"
+    },
+    {
+      "file": "ListNameDialog.kt",
+      "line": 89,
+      "value": "List name",
+      "kind": "copy"
+    },
+    {
+      "file": "LiveIdent.kt",
+      "line": 32,
+      "value": "Live TV",
+      "kind": "copy"
+    },
+    {
+      "file": "MarqueeFeed.kt",
+      "line": 122,
+      "value": "The collection",
+      "kind": "copy"
+    },
+    {
+      "file": "MediaRows.kt",
+      "line": 512,
+      "value": "Loading trailer...",
+      "kind": "copy"
+    },
+    {
+      "file": "Onboarding.kt",
+      "line": 674,
+      "value": "Leave setup?",
+      "kind": "copy"
+    },
+    {
+      "file": "OnboardStepsTaste.kt",
+      "line": 1112,
+      "value": "In order: ",
+      "kind": "copy"
+    },
+    {
+      "file": "OptionsPanel.kt",
+      "line": 227,
+      "value": "Mark unwatched",
+      "kind": "copy"
+    },
+    {
+      "file": "OptionsPanel.kt",
+      "line": 227,
+      "value": "Mark watched",
+      "kind": "copy"
+    },
+    {
+      "file": "PersonCredits.kt",
+      "line": 216,
+      "value": "Known For",
+      "kind": "copy"
+    },
+    {
+      "file": "PersonData.kt",
+      "line": 262,
+      "value": "MMMM d, yyyy",
+      "kind": "copy"
+    },
+    {
+      "file": "PersonData.kt",
+      "line": 283,
+      "value": "Born $born",
+      "kind": "copy"
+    },
+    {
+      "file": "PersonData.kt",
+      "line": 283,
+      "value": "Born $born  ·  $age",
+      "kind": "copy"
+    },
+    {
+      "file": "PersonData.kt",
+      "line": 286,
+      "value": "Died $died",
+      "kind": "copy"
+    },
+    {
+      "file": "PersonPage.kt",
+      "line": 288,
+      "value": "Known For",
+      "kind": "copy"
+    },
+    {
+      "file": "PersonPage.kt",
+      "line": 294,
+      "value": "Top Rated",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudio.kt",
+      "line": 197,
+      "value": "PCM only",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioRow.kt",
+      "line": 73,
+      "value": "DTS Express",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioRow.kt",
+      "line": 75,
+      "value": "Dolby Atmos",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioRow.kt",
+      "line": 76,
+      "value": "Dolby Digital Plus",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioRow.kt",
+      "line": 77,
+      "value": "Dolby Digital",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioRow.kt",
+      "line": 78,
+      "value": "Dolby AC-4",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "line": 159,
+      "value": "Dolby TrueHD",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "line": 163,
+      "value": "Dolby Digital Plus",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "line": 164,
+      "value": "Dolby Digital",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "line": 165,
+      "value": "Dolby AC-4",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "line": 167,
+      "value": "PCM 16 bit",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "line": 168,
+      "value": "PCM float",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "line": 178,
+      "value": "DTS Express",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "line": 181,
+      "value": "Dolby Digital Plus",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "line": 182,
+      "value": "Dolby Digital",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerAudioTracks.kt",
+      "line": 183,
+      "value": "Dolby AC-4",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerBinge.kt",
+      "line": 216,
+      "value": "Keep watching",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerBinge.kt",
+      "line": 224,
+      "value": "Stop (",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerCwPill.kt",
+      "line": 81,
+      "value": "Episode ${ahead.number}",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerEngineTracks.kt",
+      "line": 7,
+      "value": "Output: ",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerEngineTracks.kt",
+      "line": 11,
+      "value": "Size: ",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerEngineTracks.kt",
+      "line": 12,
+      "value": "Style: ",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerEpisodes.kt",
+      "line": 29,
+      "value": "Episode $number",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerQuality.kt",
+      "line": 20,
+      "value": "Playing ",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerQuality.kt",
+      "line": 21,
+      "value": "Option ",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerQuality.kt",
+      "line": 22,
+      "value": "Track ",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerQuality.kt",
+      "line": 87,
+      "value": "Dolby Vision",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerQuality.kt",
+      "line": 184,
+      "value": "Dolby Vision",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerQualityPane.kt",
+      "line": 52,
+      "value": "Dolby Vision",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerResume.kt",
+      "line": 200,
+      "value": "Start over",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSeekBar.kt",
+      "line": 281,
+      "value": "Ends $endsText",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSideSubModel.kt",
+      "line": 41,
+      "value": "Styled, ASS",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSideSubModel.kt",
+      "line": 42,
+      "value": "Text, SRT",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSideSubModel.kt",
+      "line": 43,
+      "value": "Text, WebVTT",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSideSubModel.kt",
+      "line": 44,
+      "value": "Text, TTML",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSkip.kt",
+      "line": 153,
+      "value": "Skip Intro",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSkip.kt",
+      "line": 154,
+      "value": "Skip Recap",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSkip.kt",
+      "line": 155,
+      "value": "Next Episode",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSkip.kt",
+      "line": 155,
+      "value": "Skip Credits",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSleep.kt",
+      "line": 20,
+      "value": "End ep",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSpeed.kt",
+      "line": 46,
+      "value": "Sleep timer",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerStats.kt",
+      "line": 83,
+      "value": "Dolby Vision",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerStatsModel.kt",
+      "line": 16,
+      "value": "Link rate",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerStatsModel.kt",
+      "line": 17,
+      "value": "Stream rate",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubFind.kt",
+      "line": 30,
+      "value": "Find subtitles",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubFind.kt",
+      "line": 211,
+      "value": "Nothing found",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubFind.kt",
+      "line": 225,
+      "value": "Adding subtitle",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubs.kt",
+      "line": 701,
+      "value": "Track ${ordinal + 1}",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubs.kt",
+      "line": 711,
+      "value": "Image, PGS",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubs.kt",
+      "line": 712,
+      "value": "Styled, ASS",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubs.kt",
+      "line": 713,
+      "value": "Text, SRT",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubs.kt",
+      "line": 714,
+      "value": "Text, WebVTT",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubs.kt",
+      "line": 715,
+      "value": "Text, TTML",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubs.kt",
+      "line": 716,
+      "value": "Text, tx3g",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubs.kt",
+      "line": 717,
+      "value": "Image, DVB",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubsHud.kt",
+      "line": 39,
+      "value": "Subtitle sync",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubsPane.kt",
+      "line": 65,
+      "value": "Auto sync",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubsSwitch.kt",
+      "line": 11,
+      "value": "Turning on",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubsSwitch.kt",
+      "line": 12,
+      "value": "Turning off",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubsSwitch.kt",
+      "line": 16,
+      "value": "Subtitles off",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubsTune.kt",
+      "line": 43,
+      "value": "Subtitle timing",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSubsTune.kt",
+      "line": 44,
+      "value": "Subtitle size",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSwapHead.kt",
+      "line": 30,
+      "value": "Switch source",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerSwapHead.kt",
+      "line": 31,
+      "value": "Keep watching",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerUpNext.kt",
+      "line": 66,
+      "value": "Next episode",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerUpNext.kt",
+      "line": 66,
+      "value": "Previous episode",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 74,
+      "value": "Dolby Vision",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 257,
+      "value": "Dolby Vision",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 257,
+      "value": "Dolby Vision Profile $n",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 264,
+      "value": "Main 10",
+      "kind": "copy"
+    },
+    {
+      "file": "PlayerVideo.kt",
+      "line": 265,
+      "value": "Main Still",
+      "kind": "copy"
+    },
+    {
+      "file": "PlaylistVodDetail.kt",
+      "line": 111,
+      "value": "Season $number",
+      "kind": "copy"
+    },
+    {
+      "file": "PlaylistVodPage.kt",
+      "line": 229,
+      "value": "On Demand",
+      "kind": "copy"
+    },
+    {
+      "file": "PlutoApi.kt",
+      "line": 19,
+      "value": "Pluto TV",
+      "kind": "copy"
+    },
+    {
+      "file": "ProfileConfirm.kt",
+      "line": 64,
+      "value": "Remove ${profileCleanName(name).ifEmpty { CONFIRM_ANON }}?",
+      "kind": "copy"
+    },
+    {
+      "file": "ProfileEdit.kt",
+      "line": 324,
+      "value": "Remove profile",
+      "kind": "copy"
+    },
+    {
+      "file": "Progress.kt",
+      "line": 622,
+      "value": "Episode ${e.number}",
+      "kind": "copy"
+    },
+    {
+      "file": "Progress.kt",
+      "line": 674,
+      "value": "Episode ${slot.second}",
+      "kind": "copy"
+    },
+    {
+      "file": "QrCode.kt",
+      "line": 43,
+      "value": "Code unavailable",
+      "kind": "copy"
+    },
+    {
+      "file": "QrCode.kt",
+      "line": 44,
+      "value": "Setup QR code",
+      "kind": "copy"
+    },
+    {
+      "file": "RankRow.kt",
+      "line": 53,
+      "value": "Top Movies & TV",
+      "kind": "copy"
+    },
+    {
+      "file": "RowMoreCell.kt",
+      "line": 50,
+      "value": "Load more",
+      "kind": "copy"
+    },
+    {
+      "file": "RowMoreCell.kt",
+      "line": 52,
+      "value": "Try again",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchAiModel.kt",
+      "line": 23,
+      "value": "AI picks",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchIdle.kt",
+      "line": 92,
+      "value": "Popular now",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchIdle.kt",
+      "line": 118,
+      "value": "Search ",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchKeyboard.kt",
+      "line": 238,
+      "value": "Voice search",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchOrder.kt",
+      "line": 143,
+      "value": "Live TV",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchOrder.kt",
+      "line": 144,
+      "value": "Live TV  ·  $name",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchOrder.kt",
+      "line": 159,
+      "value": "Top result",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchOrder.kt",
+      "line": 217,
+      "value": "Your addons",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchOrder.kt",
+      "line": 384,
+      "value": "Your addons",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchRecallRail.kt",
+      "line": 30,
+      "value": "Press again",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchRepair.kt",
+      "line": 5,
+      "value": "Search again",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchStates.kt",
+      "line": 148,
+      "value": "Nothing matched.",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchStates.kt",
+      "line": 191,
+      "value": "Show all",
+      "kind": "copy"
+    },
+    {
+      "file": "SearchStates.kt",
+      "line": 220,
+      "value": "Try again",
+      "kind": "copy"
+    },
+    {
+      "file": "ServicePageChrome.kt",
+      "line": 49,
+      "value": "Hide watched",
+      "kind": "copy"
+    },
+    {
+      "file": "ServicePageChrome.kt",
+      "line": 50,
+      "value": "Open settings",
+      "kind": "copy"
+    },
+    {
+      "file": "ServicePageRows.kt",
+      "line": 126,
+      "value": "New releases",
+      "kind": "copy"
+    },
+    {
+      "file": "ServicePageRows.kt",
+      "line": 127,
+      "value": "Highest rated",
+      "kind": "copy"
+    },
+    {
+      "file": "ServiceRow.kt",
+      "line": 77,
+      "value": "Your streaming",
+      "kind": "copy"
+    },
+    {
+      "file": "SharedListNet.kt",
+      "line": 103,
+      "value": "Untitled list",
+      "kind": "copy"
+    },
+    {
+      "file": "SimklCw.kt",
+      "line": 14,
+      "value": "Episode ${row.number}",
+      "kind": "copy"
+    },
+    {
+      "file": "Spoilers.kt",
+      "line": 30,
+      "value": "Episode $number",
+      "kind": "copy"
+    },
+    {
+      "file": "Spoilers.kt",
+      "line": 30,
+      "value": "Episode $number",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamBadgePackStore.kt",
+      "line": 287,
+      "value": "Badge pack",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamChips.kt",
+      "line": 251,
+      "value": "Plays instantly",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamChips.kt",
+      "line": 275,
+      "value": "High bitrate",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamChips.kt",
+      "line": 318,
+      "value": "Any language",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamChips.kt",
+      "line": 336,
+      "value": "Show flagged",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamChips.kt",
+      "line": 346,
+      "value": "Clear filters",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamFilterModel.kt",
+      "line": 306,
+      "value": "Any quality",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamFilterModel.kt",
+      "line": 317,
+      "value": "Any addon",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamRow.kt",
+      "line": 148,
+      "value": "Now playing",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamRow.kt",
+      "line": 149,
+      "value": "Played last",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamRow.kt",
+      "line": 150,
+      "value": "In $cachedOnName",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamRow.kt",
+      "line": 151,
+      "value": "On $cachedOnName",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamRowText.kt",
+      "line": 54,
+      "value": "No label",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamRowText.kt",
+      "line": 128,
+      "value": "Director's Cut",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamRowText.kt",
+      "line": 129,
+      "value": "Open Matte",
+      "kind": "copy"
+    },
+    {
+      "file": "Streams.kt",
+      "line": 279,
+      "value": "Loading sources",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamScore.kt",
+      "line": 8,
+      "value": "Ultra HD",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamScore.kt",
+      "line": 10,
+      "value": "Full HD",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamScore.kt",
+      "line": 12,
+      "value": "Standard Def",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamScore.kt",
+      "line": 13,
+      "value": "Theater Capture",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamScore.kt",
+      "line": 146,
+      "value": "Cam Recording",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamScore.kt",
+      "line": 152,
+      "value": "No Label",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamScore.kt",
+      "line": 562,
+      "value": "CAM penalty",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamScore.kt",
+      "line": 563,
+      "value": "Telesync penalty",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamScore.kt",
+      "line": 564,
+      "value": "Telecine penalty",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamScore.kt",
+      "line": 565,
+      "value": "Screener penalty",
+      "kind": "copy"
+    },
+    {
+      "file": "StreamTokenParse.kt",
+      "line": 63,
+      "value": "No Label",
+      "kind": "copy"
+    },
+    {
+      "file": "SubLangCode.kt",
+      "line": 6,
+      "value": "Unknown language",
+      "kind": "copy"
+    },
+    {
+      "file": "SubLangModel.kt",
+      "line": 173,
+      "value": "Nothing found",
+      "kind": "copy"
+    },
+    {
+      "file": "SyncTvAdapters.kt",
+      "line": 20,
+      "value": "Custom theme",
+      "kind": "copy"
+    },
+    {
+      "file": "ThemeSync.kt",
+      "line": 71,
+      "value": "Harbor default",
+      "kind": "copy"
+    },
+    {
+      "file": "ThemeSync.kt",
+      "line": 230,
+      "value": "Custom theme",
+      "kind": "copy"
+    },
+    {
+      "file": "TogetherIdentity.kt",
+      "line": 122,
+      "value": "Guest ${Random.nextInt(1000, 10000)}",
+      "kind": "copy"
+    },
+    {
+      "file": "TogetherInbox.kt",
+      "line": 156,
+      "value": "Watch Together",
+      "kind": "copy"
+    },
+    {
+      "file": "TogetherLobby.kt",
+      "line": 38,
+      "value": "Keep waiting",
+      "kind": "copy"
+    },
+    {
+      "file": "TogetherOverlay.kt",
+      "line": 268,
+      "value": "The host",
+      "kind": "copy"
+    },
+    {
+      "file": "TogetherOverlay.kt",
+      "line": 273,
+      "value": "Loading on ",
+      "kind": "copy"
+    },
+    {
+      "file": "TogetherOverlay.kt",
+      "line": 349,
+      "value": "Start watching",
+      "kind": "copy"
+    },
+    {
+      "file": "TogetherRoute.kt",
+      "line": 104,
+      "value": "Relay ",
+      "kind": "copy"
+    },
+    {
+      "file": "TogetherRoute.kt",
+      "line": 113,
+      "value": "You are in ",
+      "kind": "copy"
+    },
+    {
+      "file": "TogetherRoute.kt",
+      "line": 128,
+      "value": "Rejoin ",
+      "kind": "copy"
+    },
+    {
+      "file": "TopNav.kt",
+      "line": 62,
+      "value": "Live TV",
+      "kind": "copy"
+    },
+    {
+      "file": "TopNav.kt",
+      "line": 63,
+      "value": "On Demand",
+      "kind": "copy"
+    },
+    {
+      "file": "TraktClient.kt",
+      "line": 43,
+      "value": "Connect Trakt first.",
+      "kind": "copy"
+    },
+    {
+      "file": "TraktLists.kt",
+      "line": 68,
+      "value": "List $listId",
+      "kind": "copy"
+    },
+    {
+      "file": "TraktListsUi.kt",
+      "line": 37,
+      "value": "Trakt lists",
+      "kind": "copy"
+    },
+    {
+      "file": "VoiceSearch.kt",
+      "line": 57,
+      "value": "Nothing heard",
+      "kind": "copy"
+    },
+    {
+      "file": "VoiceSearch.kt",
+      "line": 58,
+      "value": "Nothing heard",
+      "kind": "copy"
+    },
+    {
+      "file": "VoiceSearch.kt",
+      "line": 188,
+      "value": "Nothing heard",
+      "kind": "copy"
+    },
+    {
+      "file": "VoiceSearchUi.kt",
+      "line": 223,
+      "value": "Getting ready",
+      "kind": "copy"
+    },
+    {
+      "file": "VoiceSearchUi.kt",
+      "line": 225,
+      "value": "One moment",
+      "kind": "copy"
+    },
+    {
+      "file": "XrayModel.kt",
+      "line": 20,
+      "value": "Paused at ",
+      "kind": "copy"
+    },
+    {
+      "file": "YouTube.kt",
+      "line": 280,
+      "value": "Loading trailer...",
+      "kind": "copy"
+    },
+    {
+      "file": "AnimeAwards.kt",
+      "line": 16,
+      "value": "Crunchyroll Anime Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "AnimeAwards.kt",
+      "line": 17,
+      "value": "Japan Media Arts Festival",
+      "kind": "data table"
+    },
+    {
+      "file": "AnimeAwards.kt",
+      "line": 18,
+      "value": "Animation Kobe",
+      "kind": "data table"
+    },
+    {
+      "file": "AnimeAwards.kt",
+      "line": 19,
+      "value": "Tokyo Anime Award Festival",
+      "kind": "data table"
+    },
+    {
+      "file": "AnimeDetail.kt",
+      "line": 208,
+      "value": "TV Short",
+      "kind": "data table"
+    },
+    {
+      "file": "AnimeDetail.kt",
+      "line": 220,
+      "value": "Parent Story",
+      "kind": "data table"
+    },
+    {
+      "file": "AnimeDetail.kt",
+      "line": 221,
+      "value": "Side Story",
+      "kind": "data table"
+    },
+    {
+      "file": "AnimeKitsu.kt",
+      "line": 43,
+      "value": "Currently Airing",
+      "kind": "data table"
+    },
+    {
+      "file": "AnimeKitsu.kt",
+      "line": 44,
+      "value": "Finished Airing",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 124,
+      "value": "Academy Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 125,
+      "value": "Primetime Emmy Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 126,
+      "value": "Golden Globe Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 127,
+      "value": "BAFTA Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 128,
+      "value": "BAFTA Television Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 129,
+      "value": "Screen Actors Guild Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 130,
+      "value": "Critics' Choice Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 131,
+      "value": "Cannes Film Festival",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 132,
+      "value": "Venice Film Festival",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 133,
+      "value": "Berlin International Film Festival",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 134,
+      "value": "Annie Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 135,
+      "value": "Independent Spirit Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 136,
+      "value": "Saturn Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 137,
+      "value": "César Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 138,
+      "value": "Goya Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 139,
+      "value": "Blue Dragon Film Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 140,
+      "value": "Baeksang Arts Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 141,
+      "value": "British Independent Film Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 143,
+      "value": "Crunchyroll Anime Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 144,
+      "value": "Japan Media Arts Festival",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 145,
+      "value": "Animation Kobe",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 146,
+      "value": "Tokyo Anime Award Festival",
+      "kind": "data table"
+    },
+    {
+      "file": "Awards.kt",
+      "line": 147,
+      "value": "Other Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 397,
+      "value": "Popular Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 398,
+      "value": "Popular Series",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 399,
+      "value": "New Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 400,
+      "value": "New Series",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 401,
+      "value": "Featured Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 402,
+      "value": "Featured Series",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 406,
+      "value": "Trending Anime",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 407,
+      "value": "Popular Anime",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 408,
+      "value": "Airing Now",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 409,
+      "value": "Top Rated Anime",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 413,
+      "value": "Top Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 414,
+      "value": "Top Series",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 415,
+      "value": "Trending Anime",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 416,
+      "value": "New Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 417,
+      "value": "New Series",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 422,
+      "value": "New Releases",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 423,
+      "value": "Top Rated",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 428,
+      "value": "New Episodes",
+      "kind": "data table"
+    },
+    {
+      "file": "Data.kt",
+      "line": 429,
+      "value": "Top Rated",
+      "kind": "data table"
+    },
+    {
+      "file": "DetailFacts.kt",
+      "line": 27,
+      "value": "Original Story",
+      "kind": "data table"
+    },
+    {
+      "file": "DetailFacts.kt",
+      "line": 28,
+      "value": "Original Series Creator",
+      "kind": "data table"
+    },
+    {
+      "file": "DetailFacts.kt",
+      "line": 31,
+      "value": "Original Music Composer",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 66,
+      "value": "Academy Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 66,
+      "value": "Best Picture",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 67,
+      "value": "Golden Globe Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 67,
+      "value": "Golden Globes",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 67,
+      "value": "Best Motion Picture",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 68,
+      "value": "BAFTA Film Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 68,
+      "value": "Best Film",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 69,
+      "value": "Primetime Emmy Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 69,
+      "value": "Outstanding Drama Series",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 70,
+      "value": "Screen Actors Guild Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 70,
+      "value": "Outstanding Cast",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 71,
+      "value": "Critics' Choice Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 71,
+      "value": "Critics' Choice",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 71,
+      "value": "Best Picture",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 72,
+      "value": "BAFTA Television Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 72,
+      "value": "Best Drama Series",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 73,
+      "value": "Annie Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 73,
+      "value": "Best Animated Feature",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 74,
+      "value": "Independent Spirit Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 74,
+      "value": "Best Feature",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 75,
+      "value": "Saturn Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 75,
+      "value": "Best Science Fiction Film",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 76,
+      "value": "Cannes Film Festival",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 76,
+      "value": "Palme d'Or",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 77,
+      "value": "Venice Film Festival",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 77,
+      "value": "Golden Lion",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 78,
+      "value": "Berlin International Film Festival",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 78,
+      "value": "Golden Bear",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 79,
+      "value": "César Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 79,
+      "value": "Best Film",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 80,
+      "value": "Goya Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 80,
+      "value": "Best Film",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 81,
+      "value": "Blue Dragon Film Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 81,
+      "value": "Blue Dragon",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 81,
+      "value": "Best Film",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 82,
+      "value": "Baeksang Arts Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 82,
+      "value": "Grand Prize",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 83,
+      "value": "British Independent Film Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 83,
+      "value": "Best British Independent Film",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 87,
+      "value": "Crunchyroll Anime Awards",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 88,
+      "value": "Tokyo Anime Award Festival",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 89,
+      "value": "Japan Media Arts Festival",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 89,
+      "value": "Media Arts",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 89,
+      "value": "Grand Prize",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 91,
+      "value": "Animation Kobe",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverCatalog.kt",
+      "line": 91,
+      "value": "Feature Film Award",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverData.kt",
+      "line": 57,
+      "value": "Top Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverData.kt",
+      "line": 68,
+      "value": "Top Series",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverData.kt",
+      "line": 80,
+      "value": "Top $g",
+      "kind": "data table"
+    },
+    {
+      "file": "DiscoverQueueFeed.kt",
+      "line": 47,
+      "value": "Top Rated",
+      "kind": "data table"
+    },
+    {
+      "file": "EpisodeOrder.kt",
+      "line": 68,
+      "value": "Aired Order",
+      "kind": "data table"
+    },
+    {
+      "file": "HeroAwards.kt",
+      "line": 99,
+      "value": "Blue Dragon",
+      "kind": "data table"
+    },
+    {
+      "file": "HeroAwards.kt",
+      "line": 99,
+      "value": "Blue Dragons",
+      "kind": "data table"
+    },
+    {
+      "file": "HeroAwards.kt",
+      "line": 104,
+      "value": "Japan Media Arts",
+      "kind": "data table"
+    },
+    {
+      "file": "HeroAwards.kt",
+      "line": 104,
+      "value": "Japan Media Arts",
+      "kind": "data table"
+    },
+    {
+      "file": "HeroAwards.kt",
+      "line": 105,
+      "value": "Animation Kobe",
+      "kind": "data table"
+    },
+    {
+      "file": "HeroAwards.kt",
+      "line": 105,
+      "value": "Animation Kobe",
+      "kind": "data table"
+    },
+    {
+      "file": "HeroAwards.kt",
+      "line": 106,
+      "value": "Tokyo Anime",
+      "kind": "data table"
+    },
+    {
+      "file": "HeroAwards.kt",
+      "line": 106,
+      "value": "Tokyo Anime",
+      "kind": "data table"
+    },
+    {
+      "file": "HomeCatalogs.kt",
+      "line": 12,
+      "value": "Popular Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "HomeCatalogs.kt",
+      "line": 13,
+      "value": "Popular Series",
+      "kind": "data table"
+    },
+    {
+      "file": "HomeCatalogs.kt",
+      "line": 14,
+      "value": "New Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "HomeCatalogs.kt",
+      "line": 15,
+      "value": "Action Hits",
+      "kind": "data table"
+    },
+    {
+      "file": "HomeCatalogs.kt",
+      "line": 16,
+      "value": "New Series",
+      "kind": "data table"
+    },
+    {
+      "file": "HomeCatalogs.kt",
+      "line": 18,
+      "value": "Drama Series",
+      "kind": "data table"
+    },
+    {
+      "file": "HomeCatalogs.kt",
+      "line": 20,
+      "value": "Crime Series",
+      "kind": "data table"
+    },
+    {
+      "file": "HomeCatalogs.kt",
+      "line": 22,
+      "value": "Comedy Series",
+      "kind": "data table"
+    },
+    {
+      "file": "HomeCatalogs.kt",
+      "line": 23,
+      "value": "Animated Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "HomeCatalogs.kt",
+      "line": 25,
+      "value": "Featured Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "HomeCatalogs.kt",
+      "line": 27,
+      "value": "Featured Series",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 6,
+      "value": "Rede aberta",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 12,
+      "value": "Record News",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 15,
+      "value": "CNN Brasil",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 23,
+      "value": "ESPN Brasil",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 26,
+      "value": "Esporte Interativo",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 36,
+      "value": "BBC One",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 37,
+      "value": "BBC Two",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 38,
+      "value": "BBC Three",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 39,
+      "value": "BBC Four",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 41,
+      "value": "Channel 4",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 42,
+      "value": "Channel 5",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 43,
+      "value": "Sky News",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 50,
+      "value": "Sky Sports",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 51,
+      "value": "BT Sport",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksIntl.kt",
+      "line": 52,
+      "value": "TNT Sports",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 6,
+      "value": "Broadcast networks",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 17,
+      "value": "The CW",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 22,
+      "value": "Estrella TV",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 30,
+      "value": "FOX News",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 33,
+      "value": "FOX Business",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 37,
+      "value": "BBC America",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 38,
+      "value": "BBC World",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 40,
+      "value": "Weather Channel",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 56,
+      "value": "ESPN News",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 57,
+      "value": "ESPN Deportes",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 59,
+      "value": "FOX Sports 1",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 60,
+      "value": "FOX Sports 2",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 61,
+      "value": "NBC Sports",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 62,
+      "value": "CBS Sports",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 63,
+      "value": "NFL Network",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 66,
+      "value": "MLB Network",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 67,
+      "value": "NHL Network",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 68,
+      "value": "Tennis Channel",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 69,
+      "value": "Golf Channel",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 70,
+      "value": "Big Ten Network",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 71,
+      "value": "SEC Network",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 72,
+      "value": "ACC Network",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 73,
+      "value": "Olympic Channel",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 79,
+      "value": "Premium movies",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 89,
+      "value": "Apple TV+",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 97,
+      "value": "Turner Classic Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 108,
+      "value": "USA Network",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 114,
+      "value": "Comedy Central",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 115,
+      "value": "Paramount Network",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 118,
+      "value": "Pop TV",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 126,
+      "value": "Lifestyle & Reality",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 129,
+      "value": "Food Network",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 132,
+      "value": "Lifetime Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 137,
+      "value": "Investigation Discovery",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 141,
+      "value": "Hallmark Movies",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 149,
+      "value": "Documentary & Discovery",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 158,
+      "value": "History 2",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 161,
+      "value": "Nat Geo",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 165,
+      "value": "Nat Geo Wild",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 167,
+      "value": "Science Channel",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 168,
+      "value": "Animal Planet",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 169,
+      "value": "Travel Channel",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 170,
+      "value": "Destination America",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 176,
+      "value": "Kids & Family",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 178,
+      "value": "Disney Channel",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 179,
+      "value": "Disney Jr",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 180,
+      "value": "Disney XD",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 182,
+      "value": "Nick Jr",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 184,
+      "value": "Cartoon Network",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 186,
+      "value": "PBS Kids",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 187,
+      "value": "Universal Kids",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 189,
+      "value": "Baby TV",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 198,
+      "value": "MTV Classic",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 199,
+      "value": "MTV Live",
+      "kind": "data table"
+    },
+    {
+      "file": "IptvNetworksUs.kt",
+      "line": 202,
+      "value": "BET Her",
+      "kind": "data table"
+    },
+    {
+      "file": "LibraryFilters.kt",
+      "line": 71,
+      "value": "One list",
+      "kind": "data table"
+    },
+    {
+      "file": "LibraryModel.kt",
+      "line": 221,
+      "value": "A to Z",
+      "kind": "data table"
+    },
+    {
+      "file": "LibraryModel.kt",
+      "line": 225,
+      "value": "By year",
+      "kind": "data table"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 142,
+      "value": "David Corenswet",
+      "kind": "data table"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 143,
+      "value": "Rachel Brosnahan",
+      "kind": "data table"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 144,
+      "value": "Nicholas Hoult",
+      "kind": "data table"
+    },
+    {
+      "file": "OnboardStepsAccount.kt",
+      "line": 145,
+      "value": "Edi Gathegi",
+      "kind": "data table"
+    },
+    {
+      "file": "OnboardStepsTaste.kt",
+      "line": 139,
+      "value": "Spanish (Latin America)",
+      "kind": "data table"
+    },
+    {
+      "file": "OnboardStepsTaste.kt",
+      "line": 148,
+      "value": "Portuguese (Brazil)",
+      "kind": "data table"
+    },
+    {
+      "file": "People.kt",
+      "line": 223,
+      "value": "Original Music Composer",
+      "kind": "data table"
+    },
+    {
+      "file": "PersonData.kt",
+      "line": 27,
+      "value": "Original Story",
+      "kind": "data table"
+    },
+    {
+      "file": "PersonData.kt",
+      "line": 29,
+      "value": "Executive Producer",
+      "kind": "data table"
+    },
+    {
+      "file": "PersonData.kt",
+      "line": 218,
+      "value": "TV Shows",
+      "kind": "data table"
+    },
+    {
+      "file": "PersonData.kt",
+      "line": 224,
+      "value": "Other Work",
+      "kind": "data table"
+    },
+    {
+      "file": "PlayerSideSubHost.kt",
+      "line": 112,
+      "value": "Added subtitle",
+      "kind": "data table"
+    },
+    {
+      "file": "SearchOrder.kt",
+      "line": 18,
+      "value": "Live TV",
+      "kind": "data table"
+    },
+    {
+      "file": "SearchText.kt",
+      "line": 122,
+      "value": "Action & Adventure",
+      "kind": "data table"
+    },
+    {
+      "file": "SearchText.kt",
+      "line": 129,
+      "value": "Sci-Fi & Fantasy",
+      "kind": "data table"
+    },
+    {
+      "file": "ServiceRow.kt",
+      "line": 34,
+      "value": "Prime Video",
+      "kind": "data table"
+    },
+    {
+      "file": "ServiceRow.kt",
+      "line": 35,
+      "value": "Apple TV+",
+      "kind": "data table"
+    },
+    {
+      "file": "ServiceRow.kt",
+      "line": 51,
+      "value": "Pluto TV",
+      "kind": "data table"
+    },
+    {
+      "file": "ServiceRow.kt",
+      "line": 52,
+      "value": "The Roku Channel",
+      "kind": "data table"
+    },
+    {
+      "file": "ServiceRow.kt",
+      "line": 57,
+      "value": "Acorn TV",
+      "kind": "data table"
+    },
+    {
+      "file": "ServiceRow.kt",
+      "line": 63,
+      "value": "The CW",
+      "kind": "data table"
+    },
+    {
+      "file": "SettingsCatalog.kt",
+      "line": 10,
+      "value": "Spanish (Latin America)",
+      "kind": "data table"
+    },
+    {
+      "file": "SettingsCatalog.kt",
+      "line": 19,
+      "value": "Portuguese (Brazil)",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamBadgeSlots.kt",
+      "line": 29,
+      "value": "Audio format",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamBadgeSlots.kt",
+      "line": 36,
+      "value": "Surround layout",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamBadgeSlots.kt",
+      "line": 37,
+      "value": "Video codec",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamBadgeSlots.kt",
+      "line": 45,
+      "value": "Language flags",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamBadgeSlots.kt",
+      "line": 46,
+      "value": "File size",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamFacetModel.kt",
+      "line": 46,
+      "value": "Any source",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamFacetModel.kt",
+      "line": 53,
+      "value": "Any codec",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamFacetModel.kt",
+      "line": 60,
+      "value": "Any HDR",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamFacetModel.kt",
+      "line": 67,
+      "value": "Any audio",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamLanguages.kt",
+      "line": 12,
+      "value": "Spanish (Latin America)",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamLanguages.kt",
+      "line": 12,
+      "value": "Spanish (Latin America)",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamLanguages.kt",
+      "line": 13,
+      "value": "Spanish (Latin America)",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamLanguages.kt",
+      "line": 158,
+      "value": "Spanish (Latin America)",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamLanguages.kt",
+      "line": 163,
+      "value": "Portuguese (Brazil)",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamLanguages.kt",
+      "line": 236,
+      "value": "Portuguese (Brazil)",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamLanguages.kt",
+      "line": 238,
+      "value": "Spanish (Latin America)",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamTokenParse.kt",
+      "line": 154,
+      "value": "Dolby Vision",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamTokenParse.kt",
+      "line": 158,
+      "value": "Atmos 9.1.2",
+      "kind": "data table"
+    },
+    {
+      "file": "StreamTokenParse.kt",
+      "line": 188,
+      "value": "No Label",
+      "kind": "data table"
+    },
+    {
+      "file": "SubLangCode.kt",
+      "line": 66,
+      "value": "Spanish (Latin America)",
+      "kind": "data table"
+    },
+    {
+      "file": "SubLangCode.kt",
+      "line": 67,
+      "value": "Portuguese (Brazil)",
+      "kind": "data table"
+    },
+    {
+      "file": "SubLangCode.kt",
+      "line": 69,
+      "value": "Multiple languages",
+      "kind": "data table"
+    },
+    {
+      "file": "TitleExtras.kt",
+      "line": 61,
+      "value": "Opening Credits",
+      "kind": "data table"
+    },
+    {
+      "file": "Tvdb.kt",
+      "line": 135,
+      "value": "Aired Order",
+      "kind": "data table"
+    },
+    {
+      "file": "Tvdb.kt",
+      "line": 136,
+      "value": "DVD Order",
+      "kind": "data table"
+    },
+    {
+      "file": "Tvdb.kt",
+      "line": 137,
+      "value": "Absolute Order",
+      "kind": "data table"
+    },
+    {
+      "file": "Tvdb.kt",
+      "line": 138,
+      "value": "TVDB Absolute Order",
+      "kind": "data table"
+    },
+    {
+      "file": "Tvdb.kt",
+      "line": 139,
+      "value": "Alternate Order",
+      "kind": "data table"
+    },
+    {
+      "file": "Tvdb.kt",
+      "line": 140,
+      "value": "Regional Order",
+      "kind": "data table"
+    },
+    {
+      "file": "AniListApi.kt",
+      "line": 36,
+      "value": "Bearer $token",
+      "kind": "header"
+    },
+    {
+      "file": "AniListClient.kt",
+      "line": 73,
+      "value": "Bearer $token",
+      "kind": "header"
+    },
+    {
+      "file": "DebridOthers.kt",
+      "line": 95,
+      "value": "Bearer $bearer",
+      "kind": "header"
+    },
+    {
+      "file": "DebridOthers.kt",
+      "line": 101,
+      "value": "Bearer $bearer",
+      "kind": "header"
+    },
+    {
+      "file": "DebridOthers.kt",
+      "line": 107,
+      "value": "Bearer $bearer",
+      "kind": "header"
+    },
+    {
+      "file": "DebridRealDebrid.kt",
+      "line": 294,
+      "value": "Bearer $apiKey",
+      "kind": "header"
+    },
+    {
+      "file": "FriendsFeedNet.kt",
+      "line": 174,
+      "value": "Bearer $token",
+      "kind": "header"
+    },
+    {
+      "file": "MalClient.kt",
+      "line": 78,
+      "value": "Bearer $token",
+      "kind": "header"
+    },
+    {
+      "file": "MalSignIn.kt",
+      "line": 139,
+      "value": "Bearer $token",
+      "kind": "header"
+    },
+    {
+      "file": "PlutoStore.kt",
+      "line": 223,
+      "value": "Bearer ",
+      "kind": "header"
+    },
+    {
+      "file": "SearchAiSource.kt",
+      "line": 54,
+      "value": "Bearer $key",
+      "kind": "header"
+    },
+    {
+      "file": "SharedListNet.kt",
+      "line": 121,
+      "value": "Bearer $it",
+      "kind": "header"
+    },
+    {
+      "file": "SimklClient.kt",
+      "line": 89,
+      "value": "Bearer $token",
+      "kind": "header"
+    },
+    {
+      "file": "SyncNet.kt",
+      "line": 56,
+      "value": "Bearer $token",
+      "kind": "header"
+    },
+    {
+      "file": "SyncNet.kt",
+      "line": 59,
+      "value": "Bearer $next",
+      "kind": "header"
+    },
+    {
+      "file": "TraktAuth.kt",
+      "line": 376,
+      "value": "Bearer ${session.accessToken}",
+      "kind": "header"
+    },
+    {
+      "file": "TraktClient.kt",
+      "line": 205,
+      "value": "Bearer $it",
+      "kind": "header"
+    },
+    {
+      "file": "TraktClient.kt",
+      "line": 718,
+      "value": "Bearer $token",
+      "kind": "header"
+    },
+    {
+      "file": "People.kt",
+      "line": 228,
+      "value": "Director of",
+      "kind": "match key"
+    },
+    {
+      "file": "People.kt",
+      "line": 236,
+      "value": "Executive Producer",
+      "kind": "match key"
+    },
+    {
+      "file": "PersonRoute.kt",
+      "line": 39,
+      "value": "Director of",
+      "kind": "match key"
+    },
+    {
+      "file": "PersonRoute.kt",
+      "line": 45,
+      "value": "Executive Producer",
+      "kind": "match key"
+    }
+  ]
+}

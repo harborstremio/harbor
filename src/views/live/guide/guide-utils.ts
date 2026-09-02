@@ -3,10 +3,11 @@ export const PX_PER_MS = PX_PER_MIN / 60_000;
 export const CHANNEL_COL_PX = 200;
 export const ROW_HEIGHT_PX = 76;
 export const RULER_HEIGHT_PX = 52;
-export const WINDOW_HOURS = 8;
+export const HISTORY_HOURS = 12;
+export const WINDOW_HOURS = 48;
 export const WINDOW_PX = WINDOW_HOURS * 60 * PX_PER_MIN;
 
-export function startOfWindow(nowMs: number, paddingBeforeMinutes = 60): number {
+export function startOfWindow(nowMs: number, paddingBeforeMinutes = HISTORY_HOURS * 60): number {
   const slotMs = 30 * 60_000;
   const aligned = Math.floor((nowMs - paddingBeforeMinutes * 60_000) / slotMs) * slotMs;
   return aligned;

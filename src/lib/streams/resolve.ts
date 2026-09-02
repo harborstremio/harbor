@@ -21,13 +21,21 @@ import {
   type AddResult,
 } from "@/lib/torrent/local-engine";
 import {
+  buildTorrentStreamUrl,
+  createAndListFiles,
   directTorrentEnabled,
   engineP2pEligible,
+  isHostedTorrentServerUrl,
   isVideoFile,
   localTorrentAllowed,
   trackersFromSources,
   type TorrentFile,
 } from "@/lib/torrent/stremio-stream";
+import {
+  probeStremioServer,
+  remoteStreamServerStrict,
+  remoteStreamServerUrl,
+} from "@/lib/stremio-server";
 import type { ParsedStream, ScoredStream } from "./types";
 import { matchEpisodeFileIndex, type EpisodeHint } from "./episode-file";
 
@@ -46,6 +54,11 @@ type LinkValidation = { ok: boolean; readiness: LinkReadiness };
 const ERROR_VIDEO_MAX_BYTES = 80 * 1024 * 1024;
 const VIDEO_EXT_RE =
   /\.(mkv|mp4|avi|mov|m4v|webm|ts|m3u8|mpd|flv|wmv|m2ts|mpg|mpeg|ogv|3gp)(\?|#|$)/i;
+const REMOTE_CREATE_TIMEOUT_MS = 15000;
+
+type RemoteEngineFailure = "unreachable" | "no-files" | null;
+
+let lastRemoteEngineFailure: RemoteEngineFailure = null;
 
 async function probeIsWebPage(
   url: string,
@@ -108,6 +121,12 @@ export async function resolveStream(
     if (direct) return { ok: true, data: direct, via: "p2p" };
     if (signal.aborted) return { ok: false, code: "aborted", tried };
     return { ok: false, code: engineFailureCode(), tried };
+  }
+
+  if (stream.infoHash && isHostedTorrentServerUrl(stream.url) && engineP2pEligible(stream)) {
+    const direct = await tryTorrentEngine(stream, signal, hint);
+    if (direct) return { ok: true, data: direct, via: "p2p" };
+    if (signal.aborted) return { ok: false, code: "aborted", tried };
   }
 
   if (stream.url && stream.url !== "#") {
@@ -324,6 +343,7 @@ async function tryLocalEngine(
   hint?: EpisodeHint,
 ): Promise<DirectLink | null> {
   if (!stream.infoHash || !localTorrentAllowed() || signal.aborted) return null;
+  if (remoteStreamServerStrict()) return null;
   const addIdx =
     typeof stream.fileIdx === "number" && stream.fileIdx >= 0 ? stream.fileIdx : undefined;
   const added = await torrentEngineAdd(
@@ -363,11 +383,60 @@ async function tryLocalEngine(
   }
 }
 
+async function tryRemoteEngine(
+  stream: ParsedStream | ScoredStream,
+  signal: AbortSignal,
+  base: string,
+  hint?: EpisodeHint,
+): Promise<DirectLink | null> {
+  if (!stream.infoHash || signal.aborted) return null;
+  const trackers = trackersFromSources(stream.sources);
+  const season = hint?.season ?? stream.season;
+  const episode = hint?.episode ?? stream.episode;
+  const created = await createAndListFiles(
+    stream.infoHash,
+    trackers,
+    { season, episode },
+    REMOTE_CREATE_TIMEOUT_MS,
+    base,
+  );
+  if (!created || created.files.length === 0 || signal.aborted) return null;
+  let chosenIdx = stream.fileIdx;
+  if (chosenIdx == null || chosenIdx < 0) {
+    chosenIdx = selectEngineFileIdx(created.files, season, episode);
+  }
+  const filename = stream.behaviorHints?.filename ?? stream.behaviorHints?.fileName ?? null;
+  return {
+    url: buildTorrentStreamUrl({
+      infoHash: stream.infoHash,
+      fileIdx: chosenIdx,
+      trackers,
+      filename,
+      base,
+    }),
+    fileIdx: chosenIdx,
+    filename: filename ?? undefined,
+    notWebReady: stream.behaviorHints?.notWebReady,
+    subtitles: stream.subtitles?.map((s) => ({ url: s.url, lang: s.lang, id: s.id })),
+  };
+}
+
 async function tryTorrentEngine(
   stream: ParsedStream | ScoredStream,
   signal: AbortSignal,
   hint?: EpisodeHint,
 ): Promise<DirectLink | null> {
+  lastRemoteEngineFailure = null;
+  const remoteBase = remoteStreamServerUrl();
+  if (remoteBase) {
+    if (await probeStremioServer(false, remoteBase)) {
+      const remote = await tryRemoteEngine(stream, signal, remoteBase, hint);
+      if (remote) return remote;
+      lastRemoteEngineFailure = "no-files";
+    } else {
+      lastRemoteEngineFailure = "unreachable";
+    }
+  }
   return tryLocalEngine(stream, signal, hint);
 }
 
@@ -380,6 +449,12 @@ function registerAbortCleanup(added: AddResult, signal: AbortSignal): () => void
 }
 
 function engineFailureCode(): string {
+  if (lastRemoteEngineFailure === "unreachable") {
+    return remoteStreamServerStrict()
+      ? "remote-server-unreachable-strict"
+      : "remote-server-unreachable";
+  }
+  if (lastRemoteEngineFailure === "no-files") return "engine-no-peers";
   if (!localTorrentAllowed()) return "direct-torrent-disabled";
   const err = lastEngineAddError();
   if (err && /metadata timed out|no peers/i.test(err)) return "engine-no-peers";

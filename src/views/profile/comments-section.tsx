@@ -52,7 +52,7 @@ export function CommentsSection({
     if (next >= roots.length && hasMore) loadMore();
   };
   return (
-    <section aria-label={t("Comments")} className="rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
+    <section aria-label={t("Comments")} className="rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
       <div className="mb-4 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
         <MessageSquare size={20} /> {t("Comments")}
         {total > 0 && <span className="tabular-nums text-ink-subtle">({total})</span>}
@@ -106,7 +106,7 @@ export function CommentsSection({
           {canShowMore && (
             <button
               onClick={showMore}
-              className="mx-auto mt-2 inline-flex min-h-11 items-center rounded-[10px] bg-elevated px-5 text-[13px] font-medium text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-raised"
+              className="mx-auto mt-2 inline-flex min-h-11 items-center rounded-md bg-elevated px-5 text-[13px] font-medium text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-raised"
             >
               {t("Show {count} more", { count: nextCount })}
             </button>

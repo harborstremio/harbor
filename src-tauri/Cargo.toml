@@ -1,6 +1,6 @@
 [package]
 name = "harbor"
-version = "0.9.119"
+version = "0.9.121"
 description = "A Stremio client built for adventure"
 edition = "2021"
 
@@ -20,24 +20,20 @@ chromaprint = []
 [dependencies]
 tauri = { version = "2.11.1", features = ["protocol-asset", "tray-icon", "image-png", "image-ico"] }
 tauri-plugin-opener = "2"
+tauri-plugin-clipboard-manager = "2.3.2"
 tauri-plugin-os = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-http = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
 tauri-plugin-deep-link = "2"
-tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
-tauri-plugin-updater = "2"
-tauri-plugin-process = "2"
-tauri-plugin-window-state = "2"
 walkdir = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
-tokio-util = { version = "0.7", features = ["io"] }
+tokio-util = { version = "0.7", features = ["io", "rt"] }
 axum = { version = "0.8", features = ["ws"] }
 reqwest = { version = "0.12", default-features = false, features = [
-  "native-tls",
   "stream",
   "multipart",
   "json",
@@ -50,13 +46,12 @@ encoding_rs = "0.8"
 uuid = { version = "1", features = ["v4"] }
 futures-util = "0.3"
 gilrs = { version = "0.11", default-features = false, features = ["xinput"] }
-libmpv2 = "4"
-libmpv2-sys = "4"
 libc = "0.2"
 socket2 = "0.5"
 base64 = "0.22"
 png = "0.17"
 hound = "3.5"
+kothok-edge-tts = "0.2.10"
 discord-rich-presence = "1.1"
 rust_cast = { path = "vendor/rust_cast", version = "0.20" }
 mdns-sd = "0.13"
@@ -73,7 +68,32 @@ realfft = "3"
 ort = { version = "=2.0.0-rc.10", optional = true }
 ndarray = { version = "0.16", optional = true }
 whisper-rs = { version = "0.14", optional = true }
-tauri-plugin-clipboard-manager = "2.3.2"
+
+# Desktop-only crates. Cargo resolves `[target.'cfg(...)']` from the target spec
+# before any build script runs, so it cannot see tauri-build's `desktop`/`mobile`
+# cfg aliases. Writing `cfg(desktop)` here silently matches nothing. Spell the
+# target_os predicate out.
+#
+#   libmpv2-sys/build.rs emits an unconditional `cargo:rustc-link-lib=mpv`, and
+#   there is no libmpv in an NDK sysroot, so the Android link step dies here.
+#   window-state and single-instance are `#![cfg(not(android|ios))]` at the crate
+#   root: on Android they compile to an empty crate and every path into them is
+#   unresolved. updater and process declare Android support level "none".
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+libmpv2 = "4"
+libmpv2-sys = "4"
+tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
+tauri-plugin-updater = "2"
+minisign-verify = "0.2"
+tauri-plugin-process = "2"
+tauri-plugin-window-state = "2"
+# native-tls means schannel on Windows and Security.framework on macOS, but it
+# means a cross-compiled OpenSSL on Android. Keep `default-features = false` on
+# both halves or Cargo turns reqwest's defaults back on for every target.
+reqwest = { version = "0.12", default-features = false, features = ["native-tls"] }
+
+[target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.61", features = [
@@ -106,6 +126,25 @@ zbus = { version = "5", default-features = false, features = ["tokio"] }
 
 [profile.dev]
 debug = "line-tables-only"
+# The harbor crate itself, not just its dependencies. It sat at 0 to keep
+# incremental rebuilds cheap, which is the right trade on a desktop dev loop and
+# the wrong one for Android: every measurement taken against an Android debug
+# build was measuring unoptimised Harbor code, so the numbers described a binary
+# nobody ships. Release is not an option for measuring either, because it turns
+# off the debuggable webview and with it every CDP probe in tools/tv-bench.mjs.
+# opt-level 2 rather than 3: 3 buys little here and costs noticeably more build
+# time on a loop that already runs eleven minutes.
+opt-level = 2
+
+# Tauri brotli-compresses the frontend into the binary and calls BrotliDecompress on
+# every asset request (tauri-utils/src/assets.rs). At opt-level 0 that path served
+# 3,360 KB in 4,512 ms and 2,895 KB in 5,818 ms on a Fire TV Stick 4K Max, and it does
+# not parallelise, which is most of the 11.8s to first paint. Optimising dependencies
+# while leaving the harbor crate at 0 keeps incremental rebuilds cheap. Not target
+# scoped, so the first dev build on EVERY target rebuilds its whole graph, desktop
+# included, and desktop dev gains nothing because it loads from devUrl. Delete to revert.
+[profile.dev.package."*"]
+opt-level = 2
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"

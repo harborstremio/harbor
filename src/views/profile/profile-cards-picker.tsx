@@ -1,7 +1,9 @@
+import { createPortal } from "react-dom";
 import { ArrowDown, ArrowUp, Check, Eye, EyeOff, X } from "lucide-react";
 import { useState } from "react";
 import { socialPatch } from "@/lib/social/client";
 import { useT } from "@/lib/i18n";
+import { useEscape } from "@/components/modal-shell";
 import {
   CARD_LABELS,
   CARD_ORDER_DEFAULT,
@@ -13,7 +15,7 @@ import {
 import type { ProfileSummary } from "./profile-types";
 
 const iconBtn =
-  "grid h-11 w-11 shrink-0 place-items-center rounded-[10px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:opacity-30";
+  "grid h-11 w-11 shrink-0 place-items-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:opacity-30";
 
 function CardRow({
   label,
@@ -34,7 +36,7 @@ function CardRow({
 }) {
   const t = useT();
   return (
-    <li className="flex items-center gap-1 rounded-[14px] py-1.5 pe-1.5 ps-3 ring-1 ring-edge-soft">
+    <li className="flex items-center gap-1 rounded-lg py-1.5 pe-1.5 ps-3 ring-1 ring-edge-soft">
       <span className={`flex min-w-0 flex-1 items-baseline gap-2.5 ${hidden ? "opacity-45" : ""}`}>
         <span className="text-[12px] tabular-nums text-ink-subtle">{position}</span>
         <span className="truncate text-[14px] font-medium text-ink">{label}</span>
@@ -67,6 +69,7 @@ export function ProfileCardsPicker({
   onSaved: (next: ProfileSummary) => void;
 }) {
   const t = useT();
+  useEscape(onClose);
   const [order, setOrder] = useState<CardKey[]>(() =>
     effectiveOrder(sanitizeLayout(summary.cardLayout), CARD_ORDER_DEFAULT),
   );
@@ -95,16 +98,16 @@ export function ProfileCardsPicker({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[140] flex items-center justify-center p-4" role="dialog" aria-modal>
+  return createPortal(
+    <div className="fixed inset-0 z-[185] flex items-center justify-center p-4" role="dialog" aria-modal>
       <button aria-label={t("Close")} className="absolute inset-0 bg-black/55" onClick={onClose} />
-      <div className="relative flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-[20px] bg-surface ring-1 ring-edge">
+      <div className="relative flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-surface ring-1 ring-edge">
         <div className="flex items-center justify-between border-b border-edge-soft px-6 py-4">
           <h2 className="font-display text-[20px] text-ink">{t("Profile cards")}</h2>
           <button
             onClick={onClose}
             aria-label={t("Close")}
-            className="flex h-11 w-11 items-center justify-center rounded-[10px] text-ink-muted hover:bg-elevated"
+            className="flex h-11 w-11 items-center justify-center rounded-md text-ink-muted hover:bg-elevated"
           >
             <X size={20} />
           </button>
@@ -138,20 +141,21 @@ export function ProfileCardsPicker({
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="inline-flex min-h-11 items-center rounded-[10px] px-4 text-[14px] font-medium text-ink-muted hover:bg-elevated"
+              className="inline-flex min-h-11 items-center rounded-md px-4 text-[14px] font-medium text-ink-muted hover:bg-elevated"
             >
               {t("Cancel")}
             </button>
             <button
               onClick={() => void save()}
               disabled={saving}
-              className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
             >
               <Check size={20} /> {saving ? t("Saving") : t("Save")}
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

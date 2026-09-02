@@ -1,12 +1,10 @@
 import { memo } from "react";
 import type { ComponentProps } from "react";
 import { ClipChooser } from "@/components/player/clip-chooser";
-import { ContentAdvisoryToast } from "@/components/player/content-advisory-toast";
 import { GifRecordPill } from "@/components/player/gif-record-pill";
 import { QuickTools } from "@/components/player/quick-tools";
 import type { PlayEpisode } from "@/lib/view";
 import { SkipPillContainer } from "./skip-pill-container";
-import type { ParentalCategory } from "./hooks/use-content-advisory";
 import type { useClipRecorder } from "./hooks/use-clip-recorder";
 import type { useGifRecorder } from "./hooks/use-gif-recorder";
 
@@ -14,6 +12,7 @@ type SkipProps = ComponentProps<typeof SkipPillContainer>;
 type QuickToolsProps = ComponentProps<typeof QuickTools>;
 
 export const ToolsLayer = memo(function ToolsLayer({
+  tenFoot,
   engine,
   pipMode,
   drawMode,
@@ -28,8 +27,6 @@ export const ToolsLayer = memo(function ToolsLayer({
   nextEpMask,
   pillsVisible,
   allowAutoSkip,
-  contentAdvisory,
-  playing = true,
   onSkip,
   onNextEpisode,
   onCancelAutoNext,
@@ -39,6 +36,8 @@ export const ToolsLayer = memo(function ToolsLayer({
   gif,
   clip,
 }: {
+  /** Big Picture renders its own skip pill through BpTenFoot. */
+  tenFoot: boolean;
   engine: "html5" | "mpv";
   pipMode: boolean;
   drawMode: boolean;
@@ -53,12 +52,6 @@ export const ToolsLayer = memo(function ToolsLayer({
   nextEpMask: SkipProps["nextEpMask"];
   pillsVisible: boolean;
   allowAutoSkip: boolean;
-  contentAdvisory?: {
-    categories: ParentalCategory[];
-    playKey: string;
-    mpaRating?: string | null;
-  };
-  playing?: boolean;
   onSkip: (sec: number) => void;
   onNextEpisode: () => void;
   onCancelAutoNext: () => void;
@@ -70,34 +63,22 @@ export const ToolsLayer = memo(function ToolsLayer({
 }) {
   return (
     <>
-      {!pipMode && !drawMode && contentAdvisory && playing && (
-        <ContentAdvisoryToast
-          categories={contentAdvisory.categories}
-          playKey={contentAdvisory.playKey}
-          mpaRating={contentAdvisory.mpaRating}
+      {!tenFoot && !pipMode && !drawMode && !showWaiting && pendingResumeSec == null && pendingSeekSec == null && (
+        <SkipPillContainer
+          engine={engine}
+          skipSegments={skipSegments}
+          durationSec={durationSec}
+          hasNextEpisode={hasNextEpisode}
+          hasNextEpDisplay={hasNextEpDisplay}
+          nextEp={nextEp}
+          nextEpMask={nextEpMask}
+          visible={pillsVisible}
+          allowAutoSkip={allowAutoSkip}
+          onSkip={onSkip}
+          onNextEpisode={onNextEpisode}
+          onCancelAutoNext={onCancelAutoNext}
         />
       )}
-
-      {!pipMode &&
-        !drawMode &&
-        !showWaiting &&
-        pendingResumeSec == null &&
-        pendingSeekSec == null && (
-          <SkipPillContainer
-            engine={engine}
-            skipSegments={skipSegments}
-            durationSec={durationSec}
-            hasNextEpisode={hasNextEpisode}
-            hasNextEpDisplay={hasNextEpDisplay}
-            nextEp={nextEp}
-            nextEpMask={nextEpMask}
-            visible={pillsVisible}
-            allowAutoSkip={allowAutoSkip}
-            onSkip={onSkip}
-            onNextEpisode={onNextEpisode}
-            onCancelAutoNext={onCancelAutoNext}
-          />
-        )}
 
       {!pipMode && !drawMode && (
         <QuickTools

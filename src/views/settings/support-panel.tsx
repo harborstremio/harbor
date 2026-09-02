@@ -33,10 +33,10 @@ function LinkButton({ label, onClick, primary }: { label: string; onClick: () =>
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-11 items-center gap-2 rounded-full px-5 text-[13.5px] font-semibold transition-colors ${
+      className={`flex h-11 items-center gap-2 rounded-md px-5 text-[13.5px] font-semibold transition-colors ${
         primary
           ? "bg-ink text-canvas hover:opacity-90"
-          : "border border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
+          : "bg-raised text-ink-muted hover:text-ink"
       }`}
     >
       {label}
@@ -47,8 +47,8 @@ function LinkButton({ label, onClick, primary }: { label: string; onClick: () =>
 
 function GivingBadge({ icon, label, desc }: { icon?: string; label: string; desc: string }) {
   return (
-    <div className="flex items-center gap-3.5 rounded-2xl border border-edge-soft bg-canvas/40 px-5 py-4">
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-elevated ring-1 ring-edge-soft">
+    <div className="flex items-center gap-3.5 rounded-md bg-elevated px-5 py-4">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-canvas">
         {icon ? (
           <img src={icon} alt="" draggable={false} className="h-7 w-7 object-contain" />
         ) : (
@@ -56,7 +56,7 @@ function GivingBadge({ icon, label, desc }: { icon?: string; label: string; desc
         )}
       </span>
       <span className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-[14px] font-semibold text-ink">{label}</span>
+        <span className="text-[13.5px] font-semibold text-ink">{label}</span>
         <span className="text-[12.5px] leading-relaxed text-ink-muted">{desc}</span>
       </span>
     </div>
@@ -71,8 +71,8 @@ export function SupportPanel() {
         title={t("Who keeps this running")}
         subtitle={t("Harbor's backend runs on ElfHosted. They run our servers at no cost to the community.")}
       >
-        <div className="flex items-start gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-elevated ring-1 ring-edge-soft">
+        <div className="flex items-start gap-4 rounded-md bg-elevated p-5">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-canvas">
             <img src={elfLogo} alt="" draggable={false} className="h-7 w-7 object-contain" />
           </span>
           <div className="flex min-w-0 flex-col gap-3">
@@ -82,7 +82,7 @@ export function SupportPanel() {
             <ul className="flex flex-col gap-1.5">
               {ELF_PERKS.map((perk) => (
                 <li key={perk} className="flex items-start gap-2 text-[13px] leading-relaxed text-ink-muted">
-                  <Check size={15} strokeWidth={2.6} className="mt-0.5 shrink-0 text-emerald-300" />
+                  <Check size={16} strokeWidth={2.6} className="mt-0.5 shrink-0 text-success" />
                   {t(perk)}
                 </li>
               ))}
@@ -102,16 +102,16 @@ export function SupportPanel() {
         title={t("Built on Stremio")}
         subtitle={t("Harbor would not be possible without Stremio. It is the foundation everything here is built on.")}
       >
-        <div className="flex items-start gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-elevated ring-1 ring-edge-soft">
+        <div className="flex items-start gap-4 rounded-md bg-elevated p-5">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-canvas">
             <img src={stremioLogo} alt="" draggable={false} className="h-8 w-8 object-contain" />
           </span>
           <div className="flex min-w-0 flex-col gap-3">
             <p className="text-[13.5px] leading-relaxed text-ink-muted">
               {t("Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.")}
             </p>
-            <div className="flex items-center gap-2.5 rounded-xl bg-elevated/50 px-3.5 py-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-canvas ring-1 ring-edge-soft">
+            <div className="flex items-center gap-2.5 rounded-md bg-canvas px-3.5 py-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-elevated">
                 <img src={badgeIconUrl("stremio_supporter")} alt="" draggable={false} className="h-6 w-6 object-contain" />
               </span>
               <p className="text-[12.5px] leading-relaxed text-ink-muted">
@@ -143,8 +143,8 @@ export function SupportPanel() {
           <GivingBadge icon={badgeIconUrl("top_donator")} label={t("Charity $100+")} desc={t("For giving more than $100 to charity.")} />
           <GivingBadge icon={elfLogo} label={t("ElfHosted")} desc={t("For an active ElfHosted subscription.")} />
         </div>
-        <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
-          <Mail size={15} strokeWidth={2.2} className="mt-0.5 shrink-0 text-ink-subtle" />
+        <div className="mt-3 flex items-start gap-2.5 rounded-md bg-elevated px-4 py-3">
+          <Mail size={16} strokeWidth={2.2} className="mt-0.5 shrink-0 text-ink-subtle" />
           <p className="text-[12.5px] leading-relaxed text-ink-muted">
             {t("To get a Charity badge, forward your donation receipt or invoice to")}{" "}
             <span className="font-semibold text-ink">bugs@harbor.site</span>{" "}
@@ -163,13 +163,13 @@ export function SupportPanel() {
               key={c.url}
               type="button"
               onClick={() => openUrl(c.url)}
-              className="flex items-start gap-3.5 rounded-2xl border border-edge-soft bg-canvas/40 px-5 py-4 text-start transition-colors hover:border-edge hover:bg-canvas/60"
+              className="flex items-start gap-3.5 rounded-md bg-elevated px-5 py-4 text-start transition-colors hover:bg-raised"
             >
               <Heart size={16} strokeWidth={2.2} className="mt-0.5 shrink-0 text-ink-subtle" />
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="flex items-center gap-1.5 text-[14px] font-semibold text-ink">
+                <span className="flex items-center gap-1.5 text-[13.5px] font-semibold text-ink">
                   {c.name}
-                  <ArrowUpRight size={13} strokeWidth={2.2} className="text-ink-subtle" />
+                  <ArrowUpRight size={14} strokeWidth={2.2} className="text-ink-subtle" />
                 </span>
                 <span className="text-[12.5px] leading-relaxed text-ink-muted">{t(c.blurb)}</span>
               </span>
@@ -182,7 +182,7 @@ export function SupportPanel() {
           className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-ink-subtle transition-colors hover:text-ink"
         >
           {t("Look any of them up on Charity Navigator")}
-          <ArrowUpRight size={13} strokeWidth={2.2} />
+          <ArrowUpRight size={14} strokeWidth={2.2} />
         </button>
       </Section>
     </>

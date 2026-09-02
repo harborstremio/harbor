@@ -34,6 +34,10 @@ const settingsFill: Record<string, string> = {
   "Smart resync with speech recognition": "Умная пересинхронизация по распознаванию речи",
   "For the hardest files and the Try again button, Harbor transcribes a little speech on your device and lines the subtitle up to the actual words. Needs a build with the asr-whisper feature and downloads a small model the first time you use it.":
     "Для самых сложных файлов и кнопки «Повторить» Harbor распознаёт немного речи прямо на устройстве и выравнивает субтитры по реальным словам. Нужна сборка с функцией asr-whisper; при первом использовании загружается небольшая модель.",
+  "Match subtitles across languages (experimental)":
+    "Сопоставлять субтитры на разных языках (экспериментально)",
+  "When the audio and subtitle use different languages, Harbor compares a release-matched subtitle in the audio language. It only offers a fix unless every safety check is measured.":
+    "Когда язык звука и субтитров различается, Harbor сравнивает их с субтитрами для того же релиза на языке звука. Исправление лишь предлагается, пока не измерены все проверки безопасности.",
   "Community sync": "Синхронизация сообщества",
   "A good correction only has to be found once. Harbor can share verified fixes so the next person with the same file and subtitle gets an instant result. Records are keyed by salted fingerprints, never your files or anything personal.":
     "Хорошую поправку достаточно найти один раз. Harbor может делиться проверенными исправлениями, чтобы следующий человек с тем же файлом и субтитрами получил результат мгновенно. Записи привязаны к отпечаткам с солью, а не к вашим файлам или личным данным.",
@@ -98,9 +102,6 @@ const settingsFill: Record<string, string> = {
   "Scan who is on screen while playing": "Определять, кто на экране, во время воспроизведения",
   "Periodically match faces in the current frame against the cast to show who is on screen now. On-device, nothing leaves your machine. Uses a little more CPU while playing.":
     "Периодически сопоставлять лица в текущем кадре с актёрским составом и показывать, кто сейчас на экране. Всё на устройстве, ничего не покидает ваш компьютер. Во время просмотра немного растёт нагрузка на CPU.",
-  "Performance notice": "Предупреждение о производительности",
-  "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.":
-    "Распознавание лиц в реальном времени загружает локальные модели ИИ и может заметно увеличить использование оперативной памяти, CPU и GPU во время воспроизведения. Отключите его, если Harbor замедляется или устройство нагревается.",
   "X-Ray needs a TMDB key": "Для X-Ray нужен ключ TMDB",
   "X-Ray reads the cast and their photos from TMDB. Without a TMDB key there is no cast to match against. Add your free key under Library & metadata.":
     "X-Ray берёт актёрский состав и фотографии из TMDB. Без ключа TMDB сопоставлять не с чем. Добавьте бесплатный ключ в разделе «Библиотека и метаданные».",
@@ -123,8 +124,6 @@ const settingsFill: Record<string, string> = {
   "Manga reader remote": "Пульт читалки манги",
   "Control the manga flipbook from your phone while reading on the big screen: turn pages, zoom, and switch modes. The reader also shows this link while you read.":
     "Управляйте листалкой манги с телефона, читая на большом экране: перелистывание, масштаб и смена режимов. Читалка также показывает эту ссылку во время чтения.",
-  "Manga remote (this computer)": "Пульт манги (этот компьютер)",
-  "Manga remote (Wi-Fi)": "Пульт манги (Wi-Fi)",
   "Flip the switch above and the phone remote and manga reader remote addresses appear here.":
     "Включите переключатель выше, и здесь появятся адреса пульта для телефона и пульта читалки манги.",
   "On a beta that's giving you trouble? Pick an earlier build below and run its installer over your current copy. Your library, settings, and downloads all stay put.":
@@ -300,7 +299,7 @@ const settingsFill: Record<string, string> = {
   "Trial for ${n}": "Пробный за ${n}",
   ElfHosted: "ElfHosted",
   "Debridge is the part that finds you a working file. A TorBox and a Usenet account come with it, so you do not need to buy a debrid service separately. Already have Real-Debrid or AllDebrid? Plug it in instead.":
-    "Debridge — это то, что находит вам рабочий файл. В комплекте идут аккаунты TorBox и Usenet, так что отдельно покупать debrid-сервис не нужно. Уже есть Real-Debrid или AllDebrid? Просто подключите его.",
+    "Debridge – это то, что находит вам рабочий файл. В комплекте идут аккаунты TorBox и Usenet, так что отдельно покупать debrid-сервис не нужно. Уже есть Real-Debrid или AllDebrid? Просто подключите его.",
   "No Docker, no server, nothing to configure.": "Без Docker, без сервера, настраивать нечего.",
   "${n} for {days} days": "${n} за {days} дней",
   "cancel anytime": "отмена в любой момент",
@@ -317,14 +316,14 @@ const settingsFill: Record<string, string> = {
   "Harbor's backend runs on ElfHosted. They took it on without being asked, and Harbor has never charged for anything.":
     "Бэкенд Harbor работает на ElfHosted. Они взялись за это, хотя их не просили, а Harbor никогда ни за что не брал денег.",
   "If you want to put money somewhere and you use Harbor, an ElfHosted subscription is the most useful place for it. You get a managed instance, and the servers Harbor depends on stay paid for.":
-    "Если вы пользуетесь Harbor и хотите куда-то вложить деньги, подписка ElfHosted — самое полезное место. Вы получаете управляемый экземпляр, а серверы, от которых зависит Harbor, остаются оплаченными.",
+    "Если вы пользуетесь Harbor и хотите куда-то вложить деньги, подписка ElfHosted – самое полезное место. Вы получаете управляемый экземпляр, а серверы, от которых зависит Harbor, остаются оплаченными.",
   "Browse ElfHosted": "Открыть ElfHosted",
   "One-off donation": "Разовое пожертвование",
   "Donating to Harbor": "Пожертвования Harbor",
   "Short version: don't. Harbor takes no donations and no cut of anything on this page.":
     "Коротко: не надо. Harbor не принимает пожертвований и не получает ничего с того, что на этой странице.",
   "People have offered plenty of times and the answer has stayed no. If you were going to send something, send it to ElfHosted above so the infrastructure stays up, or to one of the charities below. Both do more good than paying me would.":
-    "Предлагали много раз, и ответ остаётся прежним — нет. Если хотите что-то отправить, отправьте это ElfHosted выше, чтобы инфраструктура продолжала работать, или одному из фондов ниже. И то и другое принесёт больше пользы, чем деньги мне.",
+    "Предлагали много раз, и ответ остаётся прежним – нет. Если хотите что-то отправить, отправьте это ElfHosted выше, чтобы инфраструктура продолжала работать, или одному из фондов ниже. И то и другое принесёт больше пользы, чем деньги мне.",
   "If you would rather give it away": "Если хотите отдать их на благотворительность",
   "No affiliation, no referral links, and Harbor gets nothing from these. They are just places where money goes further than it does here.":
     "Никакого партнёрства, никаких реферальных ссылок, Harbor не получает от этого ничего. Это просто места, где деньги приносят больше пользы, чем здесь.",
@@ -340,7 +339,7 @@ const settingsFill: Record<string, string> = {
   "Harbor's backend runs on ElfHosted. They run our servers at no cost to the community.":
     "Бэкенд Harbor работает на ElfHosted. Они содержат наши серверы бесплатно для сообщества.",
   "Keeping Harbor's backend online costs real money, and ElfHosted covers it so the community does not have to. Becoming a subscriber is the best way to keep that going, and it is not a donation. You get proper infrastructure for your own setup, and Harbor stays funded at the same time.":
-    "Поддержание бэкенда Harbor в сети стоит реальных денег, и ElfHosted берёт это на себя, чтобы сообществу не пришлось. Оформить подписку — лучший способ сохранить это, и это не пожертвование. Вы получаете полноценную инфраструктуру для собственной настройки, и при этом Harbor остаётся профинансированным.",
+    "Поддержание бэкенда Harbor в сети стоит реальных денег, и ElfHosted берёт это на себя, чтобы сообществу не пришлось. Оформить подписку – лучший способ сохранить это, и это не пожертвование. Вы получаете полноценную инфраструктуру для собственной настройки, и при этом Harbor остаётся профинансированным.",
   "Private Stremio add-ons with 10x the rate limits and built-in stream proxying, from $9 a month.":
     "Приватные аддоны Stremio с 10-кратными лимитами запросов и встроенным проксированием потоков, от $9 в месяц.",
   "Managed Plex, Emby, or Jellyfin, running in minutes with no hardware and no Docker.":
@@ -348,7 +347,7 @@ const settingsFill: Record<string, string> = {
   "Over 100 self-hosted apps: the *arr stack, debrid tools, books and audiobooks, and more.":
     "Более 100 самостоятельно размещаемых приложений: стек *arr, инструменты debrid, книги и аудиокниги и многое другое.",
   "Daily backups, automatic updates, and monitoring, all handled for you.":
-    "Ежедневные резервные копии, автоматические обновления и мониторинг — всё берут на себя.",
+    "Ежедневные резервные копии, автоматические обновления и мониторинг – всё берут на себя.",
   "Month to month, cancel anytime, and you can try the whole thing for $1 for a week.":
     "Помесячно, отмена в любой момент, а всё это можно попробовать за $1 на неделю.",
   "See what you get": "Посмотреть, что вы получите",
@@ -358,7 +357,7 @@ const settingsFill: Record<string, string> = {
     "Если вы собирались что-то отправить, отправьте это ElfHosted выше, чтобы серверы оставались оплаченными, или одной из благотворительных организаций ниже. И то, и другое принесёт больше пользы.",
   "Badges for giving": "Значки за поддержку",
   "Give to any charity below or subscribe to ElfHosted, and the badge lands on your profile.":
-    "Пожертвуйте любой организации ниже или оформите подписку ElfHosted — и значок появится в вашем профиле.",
+    "Пожертвуйте любой организации ниже или оформите подписку ElfHosted – и значок появится в вашем профиле.",
   Charity: "Благотворительность",
   "For donating to a charity.": "За пожертвование благотворительной организации.",
   "Charity $100+": "Благотворительность $100+",
@@ -373,7 +372,7 @@ const settingsFill: Record<string, string> = {
   "Funds research into less toxic, more targeted treatments for childhood cancer.":
     "Финансирует исследования менее токсичных и более точных методов лечения детского рака.",
   "Defends privacy, free expression, and the open internet, in the courts and in the code.":
-    "Защищает приватность, свободу слова и открытый интернет — в судах и в коде.",
+    "Защищает приватность, свободу слова и открытый интернет – в судах и в коде.",
   "Emergency medical care in crisis zones, independent of politics.":
     "Экстренная медицинская помощь в кризисных зонах, независимо от политики.",
   "Look any of them up on Charity Navigator": "Проверьте любую из них на Charity Navigator",
@@ -391,7 +390,7 @@ const settingsFill: Record<string, string> = {
   "If you were going to send something, send it to ElfHosted or Stremio above, or to one of the charities below. They all do more good with it.":
     "Если вы собирались что-то отправить, отправьте это ElfHosted или Stremio выше, или одной из благотворительных организаций ниже. Все они принесут больше пользы.",
   "Support ElfHosted or Stremio, or give to any charity below, and the badge lands on your profile.":
-    "Поддержите ElfHosted или Stremio, или пожертвуйте любой организации ниже — и значок появится в вашем профиле.",
+    "Поддержите ElfHosted или Stremio, или пожертвуйте любой организации ниже – и значок появится в вашем профиле.",
   "Fullscreen clock": "Часы в полноэкранном режиме",
   "Keep your local time visible during fullscreen playback and choose how it looks.":
     "Держите местное время на виду во время полноэкранного просмотра и выберите его вид.",
@@ -424,6 +423,52 @@ const settingsFill: Record<string, string> = {
   "Add a TMDB key in Settings to identify the cast.":
     "Добавьте ключ TMDB в настройках, чтобы распознавать актёров.",
   "No cast photos are available for this title.": "Для этого тайтла нет фотографий актёров.",
+  // Big Picture setup and ten-foot settings surfaces.
+  "Accounts and TMDB": "Аккаунты и TMDB",
+  "Add an M3U link or Xtream Codes login": "Добавьте ссылку M3U или вход Xtream Codes",
+  "Add playlist": "Добавить плейлист",
+  "Artwork, rows and collections": "Обложки, ряды и коллекции",
+  "Checking with TMDB…": "Проверка в TMDB…",
+  "Connected: {list}": "Подключено: {list}",
+  "Could not reach TMDB. Check the connection.":
+    "Не удалось связаться с TMDB. Проверьте подключение.",
+  "Edge margin": "Отступ от краёв",
+  "Finish setting up Harbor": "Завершите настройку Harbor",
+  "Get one free at {url}": "Получите бесплатно на {url}",
+  "Getting a code ready…": "Готовим код…",
+  Harbor: "Harbor",
+  "Harbor needs a TMDB key for artwork, rows and collections. It is free.":
+    "Harbor нужен ключ TMDB для обложек, рядов и коллекций. Он бесплатный.",
+  "Harbor plays IPTV from your own provider. Add a playlist and the guide fills in.":
+    "Harbor воспроизводит IPTV от вашего провайдера. Добавьте плейлист, и телегид заполнится.",
+  Interface: "Интерфейс",
+  "Live TV playlists": "Плейлисты прямого эфира",
+  "Nothing connected yet. Scan a code with your phone.":
+    "Пока ничего не подключено. Отсканируйте код телефоном.",
+  "Phone setup is off": "Настройка с телефона выключена",
+  "Press OK on a field to type, or use the Harbor remote on your phone.":
+    "Нажмите OK на поле, чтобы ввести текст, или используйте пульт Harbor на телефоне.",
+  "Raise this only if your TV cuts off the edges of the picture.":
+    "Увеличивайте это, только если телевизор обрезает края изображения.",
+  "Replace the saved key": "Заменить сохранённый ключ",
+  "Save key": "Сохранить ключ",
+  "Scan with your phone to sign in without typing on the remote.":
+    "Отсканируйте телефоном, чтобы войти без ввода с пульта.",
+  Screen: "Экран",
+  "Set up Live TV": "Настроить прямой эфир",
+  Setup: "Настройка",
+  "Setup QR code": "QR-код настройки",
+  "Signed in as {name}": "Вы вошли как {name}",
+  "Sync, themes and friends": "Синхронизация, темы и друзья",
+  "TMDB API key": "Ключ API TMDB",
+  "TMDB did not accept that key.": "TMDB не принял этот ключ.",
+  "Turn on phone setup": "Включить настройку с телефона",
+  "Type a key on this TV": "Ввести ключ на этом телевизоре",
+  "Your Stremio library": "Ваша библиотека Stremio",
+  "{count} added": "Добавлено: {count}",
+  "Performance notice": "Предупреждение о производительности",
+  "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.":
+    "Распознавание лиц в реальном времени загружает локальные модели ИИ и может заметно увеличить использование оперативной памяти, CPU и GPU во время воспроизведения. Отключите его, если Harbor замедляется или устройство нагревается.",
 };
 
 export default settingsFill;

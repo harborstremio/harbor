@@ -131,6 +131,6 @@ export function watchMinutes(c: {
   episodesWatched?: number;
 }): number {
   const tracked = Math.max(c.minutesWatched ?? 0, (c.hoursWatched ?? 0) * 60);
-  const estimated = (c.moviesWatched ?? 0) * 120 + (c.episodesWatched ?? 0) * 45;
-  return Math.max(tracked, estimated);
+  if (tracked > 0) return tracked;
+  return (c.moviesWatched ?? 0) * 120 + (c.episodesWatched ?? 0) * 45;
 }

@@ -9,7 +9,12 @@ import { markStreamDead, recordStubEvent } from "@/lib/dead-streams";
 const PREFLIGHT_STUB_TTL_MS = 15 * 60 * 1000;
 const SAME_SOURCE_MAX_RETRIES = 4;
 const SAME_SOURCE_RETRY_DELAY_MS = 1500;
-const RETRYABLE_ENGINE_FAILURES = new Set(["engine-no-peers", "engine-not-ready"]);
+const RETRYABLE_ENGINE_FAILURES = new Set([
+  "engine-no-peers",
+  "engine-not-ready",
+  "remote-server-unreachable",
+  "remote-server-unreachable-strict",
+]);
 import { engineP2pEligible } from "@/lib/torrent/stremio-stream";
 import { hasUncachedMarker } from "@/lib/streams/cached";
 import { preflightCheck } from "@/lib/streams/preflight";
@@ -28,8 +33,13 @@ import { openInAppBrowser, openUrl } from "@/lib/window";
 import { enqueueDownload } from "@/lib/download/downloads-store";
 import { downloadSeasonFromPack } from "@/lib/download/season-download";
 import { isDownloadableSeasonPack } from "@/lib/download/season-pack";
-import { useT } from "@/lib/i18n";
-import { formatStreamQuality, humanError, isDebridFailure, streamIdentity } from "./picker-utils";
+import {
+  formatStreamQuality,
+  isDebridFailure,
+  playError,
+  streamIdentity,
+  type PickerError,
+} from "./picker-utils";
 
 export type ResolvingSelection = { stream: ScoredStream; p2p: boolean };
 
@@ -102,10 +112,9 @@ export function usePickHandler({
   setAutoAttemptIdx: Dispatch<SetStateAction<number>>;
   setAutoExhausted: Dispatch<SetStateAction<boolean>>;
   setFailedStreams: Dispatch<SetStateAction<Set<ScoredStream>>>;
-  setResolveError: (msg: string | null) => void;
+  setResolveError: (error: PickerError | null) => void;
   setResolving: Dispatch<SetStateAction<ResolvingSelection | null>>;
 }) {
-  const t = useT();
   const [queuedHash, setQueuedHash] = useState<string | null>(null);
   const [queuedDownloadKeys, setQueuedDownloadKeys] = useState<Set<string>>(() => new Set());
   const [debridDown, setDebridDown] = useState(false);
@@ -163,9 +172,7 @@ export function usePickHandler({
       if (intent === "download" && seasonEpisodes && seasonEpisodes.length > 0) {
         if (!isDownloadableSeasonPack(stream)) {
           setFailedStreams((prev) => new Set(prev).add(stream));
-          setResolveError(
-            t("This source is not a downloadable season package. Pick another package."),
-          );
+          setResolveError({ kind: "play", code: "download-season-package-required" });
           return;
         }
         const label =
@@ -192,23 +199,19 @@ export function usePickHandler({
         }
         if (batch.queued === 0) {
           setFailedStreams((prev) => new Set(prev).add(stream));
-          setResolveError(
-            t(
-              "No downloadable episode files were found in this season package. Pick another package.",
-            ),
-          );
+          setResolveError({ kind: "play", code: "download-season-no-files" });
           return;
         }
         opened = true;
         setQueuedDownloadKeys((prev) => new Set(prev).add(streamIdentity(stream)));
         setResolving(null);
         if (batch.failed > 0) {
-          setResolveError(
-            t(
-              "Queued {queued} of {total} episodes. Harbor could not match every episode in this package.",
-              { queued: batch.queued, total: batch.total },
-            ),
-          );
+          setResolveError({
+            kind: "play",
+            code: "download-season-partial",
+            queued: batch.queued,
+            total: batch.total,
+          });
         }
         return;
       }
@@ -250,7 +253,7 @@ export function usePickHandler({
           debridFailStreakRef.current = 0;
         }
         const willRetry = autoActive && autoAttemptIdx + 1 < autoCandidatesLength;
-        if (!willRetry) setResolveError(humanError(r.code));
+        if (!willRetry) setResolveError(playError(r.code));
         advanceAuto();
         return;
       }
@@ -269,8 +272,9 @@ export function usePickHandler({
         } catch {
           setFailedStreams((prev) => new Set(prev).add(stream));
           const willRetry = autoActive && autoAttemptIdx + 1 < autoCandidatesLength;
-          if (!willRetry)
-            setResolveError("Could not start the local stream proxy. Pick another stream.");
+          if (!willRetry) {
+            setResolveError({ kind: "play", code: "stream-proxy-start-failed" });
+          }
           advanceAuto();
           return;
         }
@@ -307,9 +311,7 @@ export function usePickHandler({
         const willRetry = autoActive && autoAttemptIdx + 1 < autoCandidatesLength;
         advanceAuto();
         if (!willRetry && !autoActive) {
-          setResolveError(
-            "This source isn't ready on your debrid yet. Try it again in a moment or pick another.",
-          );
+          setResolveError({ kind: "play", code: "debrid-source-not-ready" });
         }
         return;
       }
@@ -347,9 +349,20 @@ export function usePickHandler({
         imdbId: imdbId ?? undefined,
         imdbIdVerified: imdbIdVerified === true,
         episode,
+        episodeEnd: stream.episodeEnd ?? undefined,
+        episodeSpan:
+          stream.season != null && stream.episode != null
+            ? {
+                season: stream.season,
+                episode: stream.episode,
+                episodeEnd: stream.episodeEnd ?? stream.episode,
+              }
+            : undefined,
         url: playUrl,
         title: episode
-          ? episode.name || `Episode ${absoluteEpisode ?? episode.episode}`
+          ? episode.name ||
+            metaEpisodeName(meta, episode) ||
+            `Episode ${absoluteEpisode ?? episode.episode}`
           : meta.name,
         subtitle: episode
           ? absoluteEpisode != null
@@ -365,6 +378,11 @@ export function usePickHandler({
         proxySessionId,
         historyUrl: r.data.url,
         streamRef: {
+          resolvedFilename:
+            r.data.filename ??
+            stream.behaviorHints?.filename ??
+            stream.behaviorHints?.fileName ??
+            null,
           infoHash: stream.infoHash ?? null,
           fileIdx: r.data.fileIdx ?? stream.fileIdx ?? null,
           addonId: stream.addonId ?? null,
@@ -395,6 +413,7 @@ export function usePickHandler({
           title: meta.name,
           parsedTitle: stream.parsedTitle ?? null,
           resolution: stream.resolution ?? null,
+          releaseGroup: stream.releaseGroupNormalized ?? null,
           source: stream.source ?? null,
           size: stream.size ?? null,
           bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
@@ -482,12 +501,12 @@ export function usePickHandler({
     setResolveError(null);
     setQueuedHash(null);
     if (!stream.infoHash) {
-      setResolveError(humanError("no-source"));
+      setResolveError(playError("no-source"));
       return;
     }
     const target = debrids.find((d) => d.queueCache);
     if (!target?.queueCache) {
-      setResolveError("Your debrid service doesn't support queueing torrents from Harbor yet.");
+      setResolveError({ kind: "play", code: "debrid-queue-unsupported" });
       return;
     }
     setResolving({ stream, p2p: false });
@@ -498,12 +517,12 @@ export function usePickHandler({
       const r = await target.queueCache(stream.infoHash, ac.signal);
       if (ac.signal.aborted) return;
       if (!r.ok) {
-        setResolveError(humanError(r.code));
+        setResolveError(playError(r.code));
         return;
       }
       setQueuedHash(stream.infoHash);
     } catch {
-      if (!ac.signal.aborted) setResolveError(humanError("error"));
+      if (!ac.signal.aborted) setResolveError(playError("error"));
     } finally {
       if (!ac.signal.aborted) setResolving(null);
     }
@@ -544,4 +563,14 @@ export function usePickHandler({
     confirmP2p,
     cancelP2p,
   };
+}
+
+function metaEpisodeName(
+  meta: { videos?: Array<{ season?: number; episode?: number; number?: number; name?: string; title?: string }> },
+  episode: { season: number; episode: number },
+): string | undefined {
+  const match = meta.videos?.find(
+    (v) => (v.season ?? 1) === episode.season && (v.episode ?? v.number) === episode.episode,
+  );
+  return match?.name || match?.title || undefined;
 }

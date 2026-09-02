@@ -38,48 +38,79 @@ export function needsImageProxy(url: string): boolean {
 }
 
 const blobCache = new Map<string, string>();
+// Module scoped, like the blob cache beside it. A failure used to live in
+// component state, so every remount re-invoked harbor_fetch for a url already
+// known to be dead, and each of those is a bridge crossing carrying a base64
+// image body. The in-flight map is for the row where twenty cells share a logo.
+const deadUrls = new Set<string>();
+const inflight = new Map<string, Promise<string | null>>();
+
+function proxyImage(url: string): Promise<string | null> {
+  const cached = blobCache.get(url);
+  if (cached) return Promise.resolve(cached);
+  if (deadUrls.has(url)) return Promise.resolve(null);
+  const existing = inflight.get(url);
+  if (existing) return existing;
+  const p = (async () => {
+    try {
+      const auth = suwayomiAuthFor(url);
+      const resp = await invoke<HarborFetchResponse>("harbor_fetch", {
+        args: {
+          url,
+          method: "GET",
+          responseType: "base64",
+          timeoutMs: 30000,
+          headers: auth ? { authorization: auth } : undefined,
+        },
+      });
+      if (!resp.ok) throw new Error(`status ${resp.status}`);
+      const type = resp.headers?.["content-type"] || resp.contentType || "image/jpeg";
+      if (type && !type.startsWith("image/")) throw new Error(`type ${type}`);
+      const created = URL.createObjectURL(new Blob([base64ToBytes(resp.body)], { type }));
+      blobCache.set(url, created);
+      return created;
+    } catch {
+      deadUrls.add(url);
+      return null;
+    } finally {
+      inflight.delete(url);
+    }
+  })();
+  inflight.set(url, p);
+  return p;
+}
 
 export function useProxiedImageSrc(url: string | undefined): string | undefined {
   const need = !!url && needsImageProxy(url);
   const [blob, setBlob] = useState<string | undefined>(() =>
     url && need ? blobCache.get(url) : undefined,
   );
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState(() => !!url && need && deadUrls.has(url));
   useEffect(() => {
-    setFailed(false);
     if (!url || !need) {
+      setFailed(false);
       setBlob(undefined);
       return;
     }
     const cached = blobCache.get(url);
     if (cached) {
+      setFailed(false);
       setBlob(cached);
       return;
     }
+    if (deadUrls.has(url)) {
+      setBlob(undefined);
+      setFailed(true);
+      return;
+    }
+    setFailed(false);
     setBlob(undefined);
     let alive = true;
-    (async () => {
-      try {
-        const auth = suwayomiAuthFor(url);
-        const resp = await invoke<HarborFetchResponse>("harbor_fetch", {
-          args: {
-            url,
-            method: "GET",
-            responseType: "base64",
-            timeoutMs: 30000,
-            headers: auth ? { authorization: auth } : undefined,
-          },
-        });
-        if (!resp.ok) throw new Error(`status ${resp.status}`);
-        const type = resp.headers?.["content-type"] || resp.contentType || "image/jpeg";
-        if (type && !type.startsWith("image/")) throw new Error(`type ${type}`);
-        const created = URL.createObjectURL(new Blob([base64ToBytes(resp.body)], { type }));
-        blobCache.set(url, created);
-        if (alive) setBlob(created);
-      } catch {
-        if (alive) setFailed(true);
-      }
-    })();
+    void proxyImage(url).then((created) => {
+      if (!alive) return;
+      if (created) setBlob(created);
+      else setFailed(true);
+    });
     return () => {
       alive = false;
     };

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Star } from "lucide-react";
 import { CatAvatar } from "@/components/icons/cat-avatar";
 import { BADGE_ICON_BASE } from "./badge-catalog";
+import { t, useT } from "@/lib/i18n";
 
 export function Avatar({
   src,
@@ -27,9 +28,18 @@ export function Avatar({
     <span className="relative inline-flex shrink-0" style={{ width: size, height: size }}>
       <span className="grid h-full w-full place-items-center overflow-hidden rounded-full bg-elevated ring-2 ring-edge-soft">
         {showImg ? (
-          <img src={resolved} alt="" onError={() => setFailed(true)} className="h-full w-full object-cover" draggable={false} />
+          <img
+            src={resolved}
+            alt=""
+            onError={() => setFailed(true)}
+            className="h-full w-full object-cover"
+            draggable={false}
+          />
         ) : initial ? (
-          <span className="font-display font-medium text-ink-muted" style={{ fontSize: size * 0.42 }}>
+          <span
+            className="font-display font-medium text-ink-muted"
+            style={{ fontSize: size * 0.42 }}
+          >
             {initial}
           </span>
         ) : (
@@ -49,6 +59,7 @@ export function Avatar({
 }
 
 export function VerifiedCheck({ size = 20 }: { size?: number }) {
+  const tr = useT();
   return (
     <span className="group relative inline-flex">
       <img
@@ -57,27 +68,28 @@ export function VerifiedCheck({ size = 20 }: { size?: number }) {
         height={size}
         className="inline-block"
         draggable={false}
-        alt="Verified"
+        alt={tr("Verified")}
       />
-      <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-[10px] bg-elevated px-2 py-1 text-[11px] font-medium text-ink opacity-0 shadow-lg ring-1 ring-edge-soft transition-opacity duration-150 group-hover:opacity-100">
-        Verified
+      <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md bg-elevated px-2 py-1 text-[11px] font-medium text-ink opacity-0 shadow-lg ring-1 ring-edge-soft transition-opacity duration-150 group-hover:opacity-100">
+        {tr("Verified")}
       </span>
     </span>
   );
 }
 
 export function FeaturedBadge() {
+  const tr = useT();
   return (
-    <span className="inline-flex items-center gap-1 rounded-[6px] bg-accent-soft px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-accent">
+    <span className="inline-flex items-center gap-1 rounded-sm bg-accent-soft px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-accent">
       <Star size={14} strokeWidth={2.4} className="fill-accent" />
-      Featured
+      {tr("Featured")}
     </span>
   );
 }
 
 export function StatPill({ value, label }: { value: string; label: string }) {
   return (
-    <div className="flex flex-col items-center rounded-[10px] bg-surface px-4 py-2.5 ring-1 ring-edge-soft">
+    <div className="flex flex-col items-center rounded-md bg-surface px-4 py-2.5 ring-1 ring-edge-soft">
       <span className="text-[17px] font-semibold tabular-nums text-ink">{value}</span>
       <span className="text-[11px] uppercase tracking-[0.1em] text-ink-subtle">{label}</span>
     </div>
@@ -94,9 +106,12 @@ export function compactNumber(n: number): string {
  *  >= 12 months → { a: "Y", aVal, b: "M", bVal, c: "D", cVal }
  */
 export function formatWatchTime(totalMinutes: number): {
-  a: string; aVal: number;
-  b: string; bVal: number;
-  c: string; cVal: number;
+  a: string;
+  aVal: number;
+  b: string;
+  bVal: number;
+  c: string;
+  cVal: number;
 } {
   const totalHours = Math.floor(totalMinutes / 60);
   const hours = totalHours % 24;
@@ -107,27 +122,27 @@ export function formatWatchTime(totalMinutes: number): {
     // M D H
     const months = totalMonths;
     const days = totalDays % 30;
-    return { a: "M", aVal: months, b: "D", bVal: days, c: "H", cVal: hours };
+    return { a: t("M"), aVal: months, b: t("D"), bVal: days, c: t("H"), cVal: hours };
   }
   // Y M D
   const years = Math.floor(totalMonths / 12);
   const months = totalMonths % 12;
   const days = totalDays % 30;
-  return { a: "Y", aVal: years, b: "M", bVal: months, c: "D", cVal: days };
+  return { a: t("Y"), aVal: years, b: t("M"), bVal: months, c: t("D"), cVal: days };
 }
 
 export function timeAgo(iso: string): string {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return "";
   const s = Math.max(1, Math.floor((Date.now() - then) / 1000));
-  if (s < 60) return "just now";
+  if (s < 60) return t("just now");
   const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m ago`;
+  if (m < 60) return t("{n}m ago", { n: m });
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
+  if (h < 24) return t("{n}h ago", { n: h });
   const d = Math.floor(h / 24);
-  if (d < 30) return `${d}d ago`;
+  if (d < 30) return t("{n}d ago", { n: d });
   const mo = Math.floor(d / 30);
-  if (mo < 12) return `${mo}mo ago`;
-  return `${Math.floor(mo / 12)}y ago`;
+  if (mo < 12) return t("{n}mo ago", { n: mo });
+  return t("{n}y ago", { n: Math.floor(mo / 12) });
 }

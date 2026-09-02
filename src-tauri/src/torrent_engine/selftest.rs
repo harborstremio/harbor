@@ -22,7 +22,11 @@ pub async fn run(app: AppHandle) -> SelfTestResult {
         return finish(steps);
     };
     let client = reqwest::Client::new();
-    match client.get(format!("http://127.0.0.1:{port}/health")).send().await {
+    match client
+        .get(format!("http://127.0.0.1:{port}/health"))
+        .send()
+        .await
+    {
         Ok(r) if r.status().is_success() => {
             steps.push(step("engine up", true, format!("port {port}, /health ok")));
         }

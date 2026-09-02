@@ -13,7 +13,7 @@ const keys = readFileSync(at("src/views/player/hooks/use-keyboard-shortcuts.ts")
 test("the picker offers both seek steps, not just the arrow one", () => {
   assert.match(btn, /const shortSeconds = sanitizeSeekStep\(/);
   assert.match(btn, /settings\.seekBackStepShortSec : settings\.seekForwardStepShortSec/);
-  assert.equal(btn.match(/<SeekColumn/g)?.length, 2);
+  assert.equal(btn.match(/<SeekGroup/g)?.length, 2);
   assert.match(btn, /label=\{t\("Arrows"\)\}/);
   assert.match(btn, /label=\{t\("Shift \+ Arrows"\)\}/);
 });

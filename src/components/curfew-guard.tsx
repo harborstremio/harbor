@@ -81,7 +81,12 @@ function CurfewLockdown({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[300] flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#3aa6c4] via-[#1c789f] to-[#0a3d5c] px-8 text-center text-white">
+    // z-[1000], above the Big Picture portal at z-[900]. A curfew lockout is the one
+    // surface in the app that must be topmost on every entry: at z-[300] it painted
+    // UNDERNEATH Big Picture, so on the television shell it would have been mounted,
+    // running and completely invisible, which is the appearance of child safety without
+    // any of it.
+    <div className="fixed inset-0 z-[1000] flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#3aa6c4] via-[#1c789f] to-[#0a3d5c] px-8 text-center text-white">
       <Bubbles />
       <div className="curfew-bob pointer-events-none absolute bottom-[14%] left-[8%]">
         <img

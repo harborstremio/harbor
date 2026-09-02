@@ -114,6 +114,7 @@ export type ParsedStream = Stream & {
   yearRange: [number, number] | null;
   season: number | null;
   episode: number | null;
+  episodeEnd: number | null;
   seasonPack: boolean;
   discIndex: number | null;
   repackIteration: number;

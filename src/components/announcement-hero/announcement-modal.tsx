@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Announcement } from "@/lib/announcements";
@@ -29,9 +30,9 @@ export function AnnouncementModal({
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-canvas/70 p-6 backdrop-blur-sm"
+      className="fixed inset-0 z-[170] flex items-center justify-center bg-canvas/70 p-6 backdrop-blur-sm"
       style={{
         animation: closing
           ? `ann-scrim-out ${CLOSE_MS}ms ease forwards`
@@ -48,7 +49,7 @@ export function AnnouncementModal({
             ? `ann-dialog-out ${CLOSE_MS}ms cubic-bezier(0.4,0,1,1) forwards`
             : "ann-dialog-in 340ms cubic-bezier(0.32,0.72,0.24,1) both",
         }}
-        className="relative w-full max-w-[560px] overflow-hidden rounded-[20px] border border-edge bg-elevated shadow-[0_40px_120px_-24px_rgba(0,0,0,0.85)]"
+        className="relative w-full max-w-[560px] overflow-hidden rounded-xl border border-edge bg-elevated shadow-[0_40px_120px_-24px_rgba(0,0,0,0.85)]"
       >
         <button
           type="button"
@@ -105,6 +106,7 @@ export function AnnouncementModal({
       @keyframes ann-scrim-out { from { opacity: 1 } to { opacity: 0 } }
       @keyframes ann-dialog-in { from { opacity: 0; transform: scale(0.96) translateY(8px) } to { opacity: 1; transform: none } }
       @keyframes ann-dialog-out { from { opacity: 1; transform: none } to { opacity: 0; transform: scale(0.985) translateY(2px) } }`}</style>
-    </div>
+    </div>,
+    document.body,
   );
 }

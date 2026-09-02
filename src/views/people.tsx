@@ -177,26 +177,7 @@ export function PeopleView({ init }: { init: PeopleInit }) {
           <PeopleJumpIndex bands={bands} scrollRef={scrollRef} />
         </div>
 
-        <div
-          className={`sticky top-20 z-30 px-12 transition-colors duration-250 ease-out motion-reduce:transition-none ${
-            solid ? "bg-canvas/95 backdrop-blur ring-1 ring-edge-soft" : "bg-transparent"
-          }`}
-        >
-          <PeopleFilterBar
-            dept={dept}
-            onDept={setDept}
-            country={country}
-            onCountry={setCountry}
-            genre={genre}
-            onGenre={setGenre}
-            query={query}
-            onQuery={setQuery}
-            countries={countries}
-            resultCount={query.trim() || genre || country ? { shown: filtered.length, total: people.length } : null}
-          />
-        </div>
-
-        <div className="px-12 pb-20 pt-6">
+        <div className="px-12 pb-6 pt-6">
           <PeopleRankList
             key={`${source}:${dept}:${country ?? "all"}:${genre ?? "all"}`}
             status={status}
@@ -217,6 +198,27 @@ export function PeopleView({ init }: { init: PeopleInit }) {
             onOpenSettings={() => openSettings("account")}
             onRetry={() => setReloadNonce((n) => n + 1)}
           />
+        </div>
+
+        <div className="sticky bottom-0 z-30 px-12 pb-4 pt-3">
+          <div
+            className={`rounded-2xl px-5 transition-colors duration-250 ease-out motion-reduce:transition-none ${
+              solid ? "bg-canvas/95 shadow-[0_-8px_28px_-16px_rgba(0,0,0,0.55)] ring-1 ring-edge-soft backdrop-blur" : "bg-transparent"
+            }`}
+          >
+            <PeopleFilterBar
+              dept={dept}
+              onDept={setDept}
+              country={country}
+              onCountry={setCountry}
+              genre={genre}
+              onGenre={setGenre}
+              query={query}
+              onQuery={setQuery}
+              countries={countries}
+              resultCount={query.trim() || genre || country ? { shown: filtered.length, total: people.length } : null}
+            />
+          </div>
         </div>
       </div>
 

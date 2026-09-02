@@ -1,0 +1,67 @@
+.ebook-shelf {
+  position: relative;
+  display: block;
+  width: 176px;
+  height: 104px;
+  margin-bottom: 6px;
+}
+
+.ebook-shelf-slot {
+  position: absolute;
+  left: 0;
+  bottom: 10px;
+  width: 62px;
+  height: 58px;
+  border-radius: 6px;
+  border: 1px dashed var(--color-edge);
+}
+
+.ebook-shelf-books {
+  position: absolute;
+  right: 0;
+  bottom: 10px;
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 78px;
+}
+
+.ebook-shelf-books i {
+  display: block;
+  width: 15px;
+  border-radius: 3px 3px 0 0;
+  background: var(--color-raised);
+}
+
+.ebook-shelf-books i:nth-child(1) {
+  height: 62px;
+}
+
+.ebook-shelf-books i:nth-child(2) {
+  height: 78px;
+  background: var(--color-accent);
+}
+
+.ebook-shelf-books i:nth-child(3) {
+  height: 54px;
+}
+
+.ebook-shelf-books i:nth-child(4) {
+  height: 70px;
+}
+
+.ebook-shelf-edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-elevated);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ebook-shelf-books i {
+    transition: height 200ms var(--ease-out);
+  }
+}

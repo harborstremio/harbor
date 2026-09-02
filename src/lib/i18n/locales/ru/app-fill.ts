@@ -476,7 +476,7 @@ const appFill: Record<string, string> = {
   "Your watch year": "Ваш год просмотров",
   "Nothing to show yet": "Пока нечего показать",
   "Connect Trakt or Simkl, or start watching, and your stats will build themselves.":
-    "Подключите Trakt или Simkl либо просто начните смотреть — статистика соберётся сама.",
+    "Подключите Trakt или Simkl либо просто начните смотреть – статистика соберётся сама.",
   'No movies match "{query}".': 'Нет фильмов по запросу "{query}".',
   'No shows match "{query}".': 'Нет сериалов по запросу "{query}".',
   "Backdrop reset to default": "Возвращён стандартный фон",
@@ -502,7 +502,7 @@ const appFill: Record<string, string> = {
   "You've hidden every catalog that matched.": "Все подходящие каталоги скрыты.",
   "No catalogs yet": "Каталогов пока нет",
   "Install a Stremio addon and its catalogs show up here as poster rails, ready to browse.":
-    "Установите дополнение Stremio — его каталоги появятся здесь рядами постеров, готовые к просмотру.",
+    "Установите дополнение Stremio – его каталоги появятся здесь рядами постеров, готовые к просмотру.",
   "Episode {n} airs {when}": "Серия {n} выходит {when}",
   "in {time}": "через {time}",
   "Exit AI mode": "Выйти из режима ИИ",
@@ -548,9 +548,9 @@ const appFill: Record<string, string> = {
   "{n} / {max} lists": "{n} / {max} списков",
   "Create your first list": "Создайте первый список",
   "Group the movies and shows you love. Rewatch shelf, weekend picks, whatever keeps them close.":
-    "Соберите любимые фильмы и сериалы. Полка для пересмотра, подборка на выходные — что угодно, лишь бы они были под рукой.",
+    "Соберите любимые фильмы и сериалы. Полка для пересмотра, подборка на выходные – что угодно, лишь бы они были под рукой.",
   "Library is everything from Stremio, Trakt, and this device. Watchlist is only titles you haven't watched yet. History is what you've watched. Local is files on your computer.":
-    "Библиотека — это всё из Stremio, Trakt и с этого устройства. Список к просмотру — только названия, которые вы ещё не смотрели. История — то, что уже просмотрено. Локальные — файлы на вашем компьютере.",
+    "Библиотека – это всё из Stremio, Trakt и с этого устройства. Список к просмотру – только названия, которые вы ещё не смотрели. История – то, что уже просмотрено. Локальные – файлы на вашем компьютере.",
   Stats: "Статистика",
   "My Lists": "Мои списки",
   "Heads up: most IPTV providers cap how many streams an account can run at the same time. If other devices or players are using these credentials, close them and try again.":
@@ -795,6 +795,16 @@ const appFill: Record<string, string> = {
   "Use Cinemeta for title metadata": "Использовать Cinemeta для метаданных названий",
   "Turn this off to take Cinemeta out entirely and use only your own metadata addons, such as AIOMetadata or AIOStreams. Cinemeta can go stale and show already released episodes as TBA. Leave it on unless you have a metadata addon installed, or titles will have no details.":
     "Выключите, чтобы полностью убрать Cinemeta и использовать только свои дополнения с метаданными, например AIOMetadata или AIOStreams. Данные Cinemeta устаревают, и уже вышедшие серии могут отображаться как TBA. Оставьте включённым, если у вас не установлено дополнение с метаданными, иначе у названий не будет подробностей.",
+  "This one also replaces Harbor's bundled players and tools, so it installs through Harbor Setup. Harbor closes, the installer finishes, then Harbor reopens.":
+    "Это обновление также заменяет встроенные в Harbor плееры и инструменты, поэтому оно устанавливается через Harbor Setup. Harbor закроется, установщик завершит работу, затем Harbor откроется снова.",
+  "This one installs through Harbor Setup, but the update manifest carries no signature for it. Harbor will not run an installer it cannot verify. Download it and run it yourself.":
+    "Это обновление устанавливается через Harbor Setup, но в манифесте обновления нет подписи для него. Harbor не запускает установщик, который не может проверить. Скачайте его и запустите сами.",
+  "Download installer": "Скачать установщик",
+  "Install and reopen": "Установить и открыть заново",
+  "Harbor is closing. Harbor Setup will finish and reopen it.":
+    "Harbor закрывается. Harbor Setup завершит установку и откроет его снова.",
+  "Harbor Setup did not finish updating Harbor. Nothing was changed.":
+    "Harbor Setup не завершил обновление Harbor. Ничего не изменилось.",
 };
 
 export default appFill;

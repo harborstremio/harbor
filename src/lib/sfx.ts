@@ -11,6 +11,7 @@ class SoundEffects {
   constructor() {
     if (typeof window === "undefined") return;
     const unlock = () => {
+      if (this.activeTheme === "none") return;
       this.getCtx();
     };
     window.addEventListener("pointerdown", unlock, true);
@@ -149,6 +150,52 @@ class SoundEffects {
       shimmer.stop(t + 0.6);
       return;
     }
+  }
+
+  boot() {
+    if (this.muted || this.activeTheme === "none") return;
+    const c = this.getCtx();
+    if (!c || !this.masterGain) return;
+    const t0 = c.currentTime + 0.05;
+
+    const tone = c.createBiquadFilter();
+    tone.type = "lowpass";
+    tone.frequency.setValueAtTime(2600, t0);
+    tone.Q.setValueAtTime(0.4, t0);
+    tone.connect(this.masterGain);
+
+    // Overtones decay faster than the fundamental, which is what makes a
+    // struck body sound played rather than synthesised.
+    const strike = (freq: number, at: number, vol: number, dur: number) => {
+      const partials: Array<[number, number]> = [
+        [1, 1],
+        [2, 0.3],
+        [3, 0.11],
+        [4, 0.05],
+      ];
+      for (const [ratio, share] of partials) {
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        const start = t0 + at;
+        const life = dur / Math.sqrt(ratio);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq * ratio, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.linearRampToValueAtTime(vol * share, start + 0.018);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + life);
+        osc.connect(gain).connect(tone);
+        osc.start(start);
+        osc.stop(start + life + 0.05);
+      }
+    };
+
+    strike(73.42, 0, 0.05, 2.8);
+    strike(146.83, 0.02, 0.036, 2.5);
+    strike(220.0, 0.13, 0.03, 2.3);
+    strike(293.66, 0.25, 0.026, 2.1);
+    strike(369.99, 0.37, 0.022, 2.0);
+    strike(440.0, 0.49, 0.018, 1.9);
+    strike(587.33, 0.66, 0.014, 1.8);
   }
 
   close() {

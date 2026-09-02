@@ -1,3 +1,5 @@
+import { t } from "@/lib/i18n";
+
 export type PasswordStrength = { score: 0 | 1 | 2 | 3 | 4; label: string };
 
 const COMMON = new Set([
@@ -16,8 +18,8 @@ const COMMON = new Set([
 
 export function passwordStrength(pw: string): PasswordStrength {
   if (!pw) return { score: 0, label: "" };
-  if (pw.length < 8) return { score: 1, label: "Too short" };
-  if (COMMON.has(pw.toLowerCase())) return { score: 1, label: "Too common" };
+  if (pw.length < 8) return { score: 1, label: t("Too short") };
+  if (COMMON.has(pw.toLowerCase())) return { score: 1, label: t("Too common") };
 
   let variety = 0;
   if (/[a-z]/.test(pw)) variety++;
@@ -31,7 +33,7 @@ export function passwordStrength(pw: string): PasswordStrength {
   if (pw.length >= 14 && variety >= 3) score = 4;
   if (/(.)\1\1/.test(pw) && score > 1) score--;
 
-  const labels = ["", "Weak", "Fair", "Good", "Strong"];
+  const labels = ["", t("Weak"), t("Fair"), t("Good"), t("Strong")];
   return { score: score as PasswordStrength["score"], label: labels[score] };
 }
 

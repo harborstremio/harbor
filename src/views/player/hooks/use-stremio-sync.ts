@@ -17,6 +17,23 @@ const TICK_MS = 30000;
 const BASE_REFRESH_MS = 30000;
 const MIN_POSITION_SEC = 6;
 const CREDITS_RATIO = 0.9;
+
+export function isFinaleEpisode(
+  videos: { season?: number | null; episode?: number | null }[] | null | undefined,
+  cur: { season: number; episode: number },
+): boolean {
+  const vids = (videos ?? []).filter(
+    (v) => typeof v.episode === "number" && (v.season ?? 0) >= 1,
+  );
+  if (vids.length === 0) return false;
+  const key = (s: number, e: number) => s * 100000 + e;
+  const covered = vids.some(
+    (v) => (v.season ?? 1) === cur.season && v.episode === cur.episode,
+  );
+  if (!covered) return false;
+  const maxKey = vids.reduce((m, v) => Math.max(m, key(v.season ?? 1, v.episode ?? 0)), 0);
+  return key(cur.season, cur.episode) >= maxKey;
+}
 const STUB_MAX_SEC = 150;
 
 let activeFlusher: (() => Promise<void>) | null = null;
@@ -387,21 +404,11 @@ async function writeLibraryItem(
   const effPrevFlagged = videoChanged || meaningfulResume ? 0 : prevFlagged;
   let finaleDone = false;
   if (isTerminal && nowFlagged && isSeries && src.episode) {
-    const vids = (src.meta.videos ?? []).filter(
-      (v) => typeof v.episode === "number" && (v.season ?? 0) >= 1,
-    );
-    if (vids.length > 0) {
-      const key = (s: number, e: number) => s * 100000 + e;
-      const maxKey = vids.reduce((m, v) => Math.max(m, key(v.season ?? 1, v.episode ?? 0)), 0);
-      const metaIsTt = src.meta.id.startsWith("tt");
-      const curSeason = metaIsTt
-        ? (src.episode.imdbSeason ?? src.episode.season)
-        : src.episode.season;
-      const curEpisode = metaIsTt
-        ? (src.episode.imdbEpisode ?? src.episode.episode)
-        : src.episode.episode;
-      finaleDone = key(curSeason, curEpisode) >= maxKey;
-    }
+    const metaIsTt = src.meta.id.startsWith("tt");
+    finaleDone = isFinaleEpisode(src.meta.videos, {
+      season: metaIsTt ? (src.episode.imdbSeason ?? src.episode.season) : src.episode.season,
+      episode: metaIsTt ? (src.episode.imdbEpisode ?? src.episode.episode) : src.episode.episode,
+    });
   }
 
   const state: StremioLibraryItemState = {

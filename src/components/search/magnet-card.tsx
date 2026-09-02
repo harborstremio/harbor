@@ -1,4 +1,5 @@
-import { AlertCircle, FileVideo, Loader2, Magnet, Play } from "lucide-react";
+import { AlertCircle, FileVideo, Loader2, Magnet } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { parse } from "parse-torrent-title";
 import { awaitCastServerReady, remoteStreamServerUrl } from "@/lib/stremio-server";
@@ -21,11 +22,13 @@ import { searchCinemeta } from "@/lib/search";
 import { meta as fetchMeta, type Meta } from "@/lib/cinemeta";
 import { ResultPoster } from "./result-poster";
 import { useView, type PlayerSrc } from "@/lib/view";
+import { useT } from "@/lib/i18n";
 
 import { releaseYear } from "@/lib/release-info";
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 type Mode = "idle" | "starting" | "picking" | "error";
+type Translate = (key: string, vars?: Record<string, string | number>) => string;
 
 type MagnetMatch = {
   meta: Meta;
@@ -36,6 +39,7 @@ type MagnetMatch = {
 
 export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void }) {
   const { openPlayer } = useView();
+  const t = useT();
   const parsed = useMemo(() => parseMagnet(raw), [raw]);
   const [mode, setMode] = useState<Mode>("idle");
   const [files, setFiles] = useState<TorrentFile[]>([]);
@@ -55,7 +59,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
   );
 
   const dn = parsed?.name ?? null;
-  const label = useMemo(() => cleanReleaseName(dn), [dn]);
+  const label = useMemo(() => cleanReleaseName(dn, t), [dn, t]);
 
   useEffect(() => {
     setMatch(null);
@@ -74,7 +78,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
       <div className="flex items-center gap-3 rounded-2xl border border-edge-soft bg-elevated/60 px-5 py-4">
         <AlertCircle size={22} className="shrink-0 text-ink-subtle" />
         <span className="text-[14px] text-ink-muted">
-          That does not look like a valid magnet link or infohash.
+          {t("That does not look like a valid magnet link or infohash.")}
         </span>
       </div>
     );
@@ -105,8 +109,12 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
       meta: playMeta,
       url,
       title: m?.meta.name ?? name ?? label,
-      subtitle: episodeLine(m),
-      streamRef: { infoHash: parsed.infoHash, fileIdx: fileIdx ?? null },
+      subtitle: episodeLine(m, t),
+      streamRef: {
+        resolvedFilename: name ?? null,
+        infoHash: parsed.infoHash,
+        fileIdx: fileIdx ?? null,
+      },
     };
     pendingEngineRef.current = null;
     onClose();
@@ -121,14 +129,16 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
       const ready = await awaitCastServerReady(8000);
       if (!ready) {
         setMode("error");
-        setError("Your remote streaming server is not reachable. Check its address in Settings.");
+        setError(
+          t("Your remote streaming server is not reachable. Check its address in Settings."),
+        );
         return;
       }
       const created = await createAndListFiles(parsed.infoHash, parsed.trackers);
       const videos = (created?.files ?? []).filter(isVideoFile).sort((a, b) => b.length - a.length);
       if (videos.length === 0) {
         setMode("error");
-        setError("No playable video file was found in this torrent.");
+        setError(t("No playable video file was found in this torrent."));
         return;
       }
       if (videos.length > 1) {
@@ -142,7 +152,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
 
     if (!isTauri) {
       setMode("error");
-      setError("Direct torrent play needs the Harbor desktop app.");
+      setError(t("Direct torrent play needs the Harbor desktop app."));
       return;
     }
 
@@ -156,7 +166,9 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
     }
     if (!status?.ready) {
       setMode("error");
-      setError("The streaming engine is still starting up. Give it a moment and press Play again.");
+      setError(
+        t("The streaming engine is still starting up. Give it a moment and press Play again."),
+      );
       return;
     }
 
@@ -167,8 +179,10 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
       const e = lastEngineAddError();
       setError(
         e && /peer|timed out|timeout/i.test(e)
-          ? "Could not find any peers for this torrent yet. It may be dead or very low on seeders."
-          : "Could not start this torrent.",
+          ? t(
+              "Could not find any peers for this torrent yet. It may be dead or very low on seeders.",
+            )
+          : t("Could not start this torrent."),
       );
       return;
     }
@@ -181,7 +195,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
         pendingEngineRef.current = null;
       }
       setMode("error");
-      setError("No playable video file was found in this torrent.");
+      setError(t("No playable video file was found in this torrent."));
       return;
     }
     if (videos.length > 1) {
@@ -204,7 +218,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
       ) : (
         <Play size={18} fill="currentColor" />
       )}
-      {mode === "starting" ? "Starting" : "Play"}
+      {mode === "starting" ? t("Starting") : t("Play")}
     </button>
   );
 
@@ -214,7 +228,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
         <div className="flex items-center gap-2 px-2 pb-1.5 pt-1">
           <FileVideo size={18} className="text-accent" />
           <span className="text-[12.5px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
-            {files.length} playable files
+            {t("{count} playable files", { count: files.length })}
           </span>
         </div>
         {files.map((f) => (
@@ -236,7 +250,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
   }
 
   if (match) {
-    const line = episodeLine(match) ?? match.meta.releaseInfo ?? "";
+    const line = episodeLine(match, t) ?? match.meta.releaseInfo ?? "";
     return (
       <div className="flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/60 px-4 py-3.5">
         <div className="h-[64px] w-[44px] shrink-0 overflow-hidden rounded-lg shadow-[0_6px_16px_-8px_rgba(0,0,0,0.55)] ring-1 ring-edge-soft">
@@ -263,11 +277,11 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
-          Torrent link
+          {t("Torrent link")}
         </span>
         <span className="truncate text-[15px] font-semibold text-ink">{label}</span>
         <span className="truncate text-[12.5px] text-ink-subtle">
-          {error ?? "Streams directly from peers over your own connection."}
+          {error ?? t("Streams directly from peers over your own connection.")}
         </span>
       </div>
       {playButton}
@@ -275,9 +289,9 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
   );
 }
 
-function episodeLine(m: MagnetMatch | null): string | undefined {
+function episodeLine(m: MagnetMatch | null, t: Translate): string | undefined {
   if (!m || m.season == null || m.episode == null) return undefined;
-  const base = `S${m.season} · E${m.episode}`;
+  const base = t("S{season} · E{episode}", { season: m.season, episode: m.episode });
   return m.episodeName ? `${base} · ${m.episodeName}` : base;
 }
 
@@ -339,15 +353,18 @@ async function resolveMagnetMeta(dn: string): Promise<MagnetMatch | null> {
   return out;
 }
 
-function cleanReleaseName(dn: string | null): string {
-  if (!dn) return "Magnet stream";
+function cleanReleaseName(dn: string | null, t: Translate): string {
+  if (!dn) return t("Magnet stream");
   const info = parse(dn);
   const title = (info.title ?? "").trim();
   if (title) {
     let line = title;
-    if (info.season != null && info.episode != null)
-      line += ` · S${info.season} · E${info.episode}`;
-    else if (info.year) line += ` · ${info.year}`;
+    if (info.season != null && info.episode != null) {
+      line += ` · ${t("S{season} · E{episode}", {
+        season: info.season,
+        episode: info.episode,
+      })}`;
+    } else if (info.year) line += ` · ${info.year}`;
     if (info.resolution) line += ` · ${info.resolution}`;
     return line;
   }
@@ -357,7 +374,7 @@ function cleanReleaseName(dn: string | null): string {
     .replace(/[._]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  if (!stripped) return "Magnet stream";
+  if (!stripped) return t("Magnet stream");
   return stripped.length > 70 ? `${stripped.slice(0, 67).trimEnd()}…` : stripped;
 }
 

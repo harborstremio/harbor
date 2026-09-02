@@ -33,7 +33,8 @@ const addons: Record<string, string> = {
   "Head to Discover. Cinemeta and OpenSubtitles cover the basics; Torrentio + a debrid key cover almost everything else.":
     "توجّه إلى الاكتشاف. تغطّي Cinemeta وOpenSubtitles الأساسيات؛ وتغطّي Torrentio مع مفتاح debrid كل شيء آخر تقريبًا.",
   "No installed addon matches that.": "لا توجد إضافة مثبّتة تطابق ذلك.",
-  "Clear the search to see all {n} installed.": "امسح البحث لرؤية كل الإضافات المثبّتة البالغ عددها {n}.",
+  "Clear the search to see all {n} installed.":
+    "امسح البحث لرؤية كل الإضافات المثبّتة البالغ عددها {n}.",
   Reorder: "إعادة ترتيب",
   "Change the order addons are tried in": "غيّر الترتيب الذي تُجرّب به الإضافات",
   "Off · catalogs and streams hidden": "متوقّفة · الكتالوجات والبثوث مخفية",
@@ -86,8 +87,8 @@ const addons: Record<string, string> = {
   "Click to open {name}'s setup page in Harbor's built-in browser. Pick your options. When you click Install on their page, Harbor catches the link automatically and updates the addon.":
     "انقر لفتح صفحة إعداد {name} في متصفّح Harbor المدمج. اختر خياراتك. عند النقر على تثبيت في صفحتها، يلتقط Harbor الرابط تلقائيًا ويحدّث الإضافة.",
   "Open setup page": "فتح صفحة الإعداد",
-  "Heads-up: a few addons (like AIOStatus) don't pre-fill from the URL. If the form loads blank, paste the existing manifest URL into their \"Import from URL\" field to restore your settings.":
-    "تنبيه: بعض الإضافات (مثل AIOStatus) لا تُملأ مسبقًا من الرابط. إذا حُمّل النموذج فارغًا، فالصق رابط الـ manifest الحالي في حقل \"الاستيراد من رابط\" لاستعادة إعداداتك.",
+  'Heads-up: a few addons (like AIOStatus) don\'t pre-fill from the URL. If the form loads blank, paste the existing manifest URL into their "Import from URL" field to restore your settings.':
+    'تنبيه: بعض الإضافات (مثل AIOStatus) لا تُملأ مسبقًا من الرابط. إذا حُمّل النموذج فارغًا، فالصق رابط الـ manifest الحالي في حقل "الاستيراد من رابط" لاستعادة إعداداتك.',
   "Or paste the install link manually": "أو الصق رابط التثبيت يدويًا",
   Read: "قراءة",
   Continue: "متابعة",
@@ -205,7 +206,7 @@ const addons: Record<string, string> = {
   "Harbor double-checks with Stremio after saving, so a half-written order can't slip through.":
     "يتحقّق Harbor مرتين مع Stremio بعد الحفظ، حتى لا يتسلّل ترتيب مكتوب جزئيًا.",
 
-  "{n} addon": "إضافة واحدة",
+  "{n} addon": "{n} إضافة",
   "{n} addons": "{n} إضافة",
   "Drag to reorder": "اسحب لإعادة الترتيب",
   "Move to top": "نقل إلى الأعلى",
@@ -266,14 +267,16 @@ const addons: Record<string, string> = {
   "Free torrent + usenet": "تورنت + Usenet مجاني",
   "No subscription needed. Quality varies.": "لا يتطلب اشتراكًا. تتفاوت الجودة.",
   "Anime done right": "أنمي بشكل صحيح",
-  "Kitsu IDs, fansub-friendly, season-aware.": "معرّفات Kitsu، متوافقة مع ترجمات المعجبين، مدركة للمواسم.",
+  "Kitsu IDs, fansub-friendly, season-aware.":
+    "معرّفات Kitsu، متوافقة مع ترجمات المعجبين، مدركة للمواسم.",
   "Proper search across providers, foreign-language coverage.":
     "بحث دقيق عبر المزوّدين، وتغطية للّغات الأجنبية.",
   "Better posters, ratings, episode info.": "ملصقات وتقييمات ومعلومات حلقات أفضل.",
   "Sports & live TV": "الرياضة والبث التلفزيوني المباشر",
   "Live streams that actually work.": "بثوث مباشرة تعمل فعلًا.",
   "Power tools": "أدوات احترافية",
-  "Quality-of-life upgrades. Sync, ratings, trailers.": "تحسينات لجودة الاستخدام. مزامنة وتقييمات ومقاطع دعائية.",
+  "Quality-of-life upgrades. Sync, ratings, trailers.":
+    "تحسينات لجودة الاستخدام. مزامنة وتقييمات ومقاطع دعائية.",
   "NSFW. Hidden until enabled.": "محتوى للبالغين. مخفي حتى يُفعّل.",
 };
 

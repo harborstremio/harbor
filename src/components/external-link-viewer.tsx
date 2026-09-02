@@ -1,5 +1,6 @@
 import { ExternalLink, Loader2, RotateCw, X } from "lucide-react";
 import { useLayoutEffect, useState } from "react";
+import { useT } from "@/lib/i18n";
 import { HarborLoader } from "@/components/harbor-loader";
 import {
   EXTERNAL_LINK_FRAME_PERMISSIONS,
@@ -32,6 +33,7 @@ function ExternalLinkViewerFrame({
   onOpenBrowser,
   onReload,
 }: ExternalLinkViewerFrameProps) {
+  const t = useT();
   const [loaded, setLoaded] = useState(false);
   const [slow, setSlow] = useState(false);
   const [timeout] = useState(() => createSoftLoadTimeout(() => setSlow(true), window));
@@ -54,19 +56,20 @@ function ExternalLinkViewerFrame({
       {!loaded && !slow && (
         <div
           role="status"
-          aria-label={`Loading ${link.hostname}`}
+          aria-label={t("Loading {hostname}", { hostname: link.hostname })}
           className="absolute inset-0 z-10 flex items-center justify-center bg-canvas"
         >
-          <HarborLoader size="lg" caption={`Loading ${link.hostname}`} />
+          <HarborLoader size="lg" caption={t("Loading {hostname}", { hostname: link.hostname })} />
         </div>
       )}
       {slow && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-canvas px-6 text-center">
           <div role="status" aria-live="polite">
-            <p className="text-[14px] font-semibold text-ink">Still loading?</p>
+            <p className="text-[14px] font-semibold text-ink">{t("Still loading?")}</p>
             <p className="max-w-[44ch] text-[12.5px] text-ink-muted">
-              This site may not support Harbor&apos;s temporary viewer. Retry the original link or
-              open it in your browser.
+              {t(
+                "This site may not support Harbor's temporary viewer. Retry the original link or open it in your browser.",
+              )}
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-2">
@@ -75,7 +78,7 @@ function ExternalLinkViewerFrame({
               onClick={onReload}
               className="rounded-full border border-edge-soft px-4 py-2 text-[12.5px] font-semibold text-ink"
             >
-              Retry
+              {t("Retry")}
             </button>
             <button
               type="button"
@@ -83,7 +86,7 @@ function ExternalLinkViewerFrame({
               disabled={openingBrowser}
               className="rounded-full bg-ink px-4 py-2 text-[12.5px] font-semibold text-canvas disabled:opacity-50"
             >
-              Open in browser
+              {t("Open in browser")}
             </button>
           </div>
         </div>
@@ -91,7 +94,7 @@ function ExternalLinkViewerFrame({
       <iframe
         key={reloadKey}
         src={link.href}
-        title={`External site: ${link.hostname}`}
+        title={t("External site: {hostname}", { hostname: link.hostname })}
         sandbox={EXTERNAL_LINK_FRAME_SANDBOX}
         referrerPolicy="no-referrer"
         allow={EXTERNAL_LINK_FRAME_PERMISSIONS}
@@ -126,6 +129,7 @@ export function ExternalLinkViewer({
   onClose,
   onReload,
 }: ExternalLinkViewerProps) {
+  const t = useT();
   const [reloadKey, setReloadKey] = useState(0);
   const reload = () => {
     onReload();
@@ -143,7 +147,7 @@ export function ExternalLinkViewer({
             <ExternalLink size={14} className="text-accent" strokeWidth={2.2} />
           </span>
           <span className="truncate text-[10.5px] font-bold uppercase tracking-[0.24em] text-accent">
-            External | {link.hostname}
+            {t("External | {hostname}", { hostname: link.hostname })}
           </span>
           {label && (
             <span className="hidden truncate text-[12px] font-medium text-ink-muted md:inline">
@@ -155,7 +159,7 @@ export function ExternalLinkViewer({
           <button
             type="button"
             onClick={reload}
-            aria-label="Reload original link"
+            aria-label={t("Reload original link")}
             className={headerButtonClass}
           >
             <RotateCw
@@ -166,13 +170,13 @@ export function ExternalLinkViewer({
                 transition: "transform 0.6s cubic-bezier(0.22,0.61,0.36,1)",
               }}
             />
-            <span className="hidden sm:inline">Reload</span>
+            <span className="hidden sm:inline">{t("Reload")}</span>
           </button>
           <button
             type="button"
             onClick={onOpenBrowser}
             disabled={openingBrowser}
-            aria-label="Open in system browser"
+            aria-label={t("Open in system browser")}
             className={headerButtonClass}
           >
             {openingBrowser ? (
@@ -180,12 +184,12 @@ export function ExternalLinkViewer({
             ) : (
               <ExternalLink size={12} strokeWidth={2.4} />
             )}
-            <span className="hidden sm:inline">Open in browser</span>
+            <span className="hidden sm:inline">{t("Open in browser")}</span>
           </button>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("Close")}
             autoFocus
             data-tv-initial-focus
             className={closeButtonClass}

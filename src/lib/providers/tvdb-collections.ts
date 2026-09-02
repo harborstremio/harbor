@@ -49,9 +49,11 @@ async function v4<T>(rel: string): Promise<T | null> {
 }
 
 const searchCache = new Map<string, TvdbCollectionHit[]>();
-const searchInflight = new Map<string, Promise<TvdbCollectionHit[]>>();
+const searchInflight = new Map<string, Promise<TvdbCollectionHit[] | null>>();
 
-export function searchTvdbCollections(query: string): Promise<TvdbCollectionHit[]> {
+// null is the backend not answering, [] is it answering with nothing. Callers
+// that report an outage to the user cannot tell those apart otherwise.
+export function searchTvdbCollectionsOrNull(query: string): Promise<TvdbCollectionHit[] | null> {
   const q = query.trim().toLowerCase();
   if (q.length < 3) return Promise.resolve([]);
   const hit = searchCache.get(q);
@@ -62,8 +64,9 @@ export function searchTvdbCollections(query: string): Promise<TvdbCollectionHit[
     const data = await v4<
       Array<{ tvdb_id?: string; name?: string; image_url?: string; overview?: string }>
     >(`/search?query=${encodeURIComponent(q)}&type=list&limit=10`);
+    if (!data) return null;
     const out: TvdbCollectionHit[] = [];
-    for (const row of data ?? []) {
+    for (const row of data) {
       const id = Number(row.tvdb_id);
       if (!Number.isFinite(id) || !row.name) continue;
       out.push({ id, name: row.name, image: img(row.image_url), overview: row.overview ?? null });
@@ -76,6 +79,10 @@ export function searchTvdbCollections(query: string): Promise<TvdbCollectionHit[
   });
   searchInflight.set(q, p);
   return p;
+}
+
+export function searchTvdbCollections(query: string): Promise<TvdbCollectionHit[]> {
+  return searchTvdbCollectionsOrNull(query).then((v) => v ?? []);
 }
 
 const collCache = new Map<number, TvdbCollection | null>();

@@ -64,7 +64,11 @@ export function LanguageStep() {
         </p>
       </div>
 
-      <div role="radiogroup" aria-label={t("Display language")} className="grid grid-cols-2 gap-2.5">
+      <div
+        role="radiogroup"
+        aria-label={t("Display language")}
+        className="grid max-h-[min(48vh,430px)] grid-cols-2 gap-2.5 overflow-y-auto pe-1"
+      >
         {LANGUAGES.map((lang, i) => {
           const selected = settings.uiLanguage === lang.code;
           return (
@@ -100,7 +104,7 @@ export function LanguageStep() {
                 >
                   {lang.nativeLabel}
                 </span>
-                <span className="text-[12.5px] leading-snug text-ink-muted">{lang.label}</span>
+                <span className="text-[12.5px] leading-snug text-ink-muted">{t(lang.label)}</span>
               </span>
             </button>
           );

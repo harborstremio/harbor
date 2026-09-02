@@ -2,7 +2,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, State, WebviewUrl, WebviewWindowBuilder};
+use tauri::{
+    AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, State, WebviewUrl,
+    WebviewWindowBuilder,
+};
 use tokio::sync::Mutex;
 
 const PIP_LABEL: &str = "harbor-pip";
@@ -102,7 +105,10 @@ pub async fn pip_open(
             .build();
         match result {
             Ok(window) => {
-                eprintln!("[pip] window built on main thread, label={}", window.label());
+                eprintln!(
+                    "[pip] window built on main thread, label={}",
+                    window.label()
+                );
                 let _ = window.show();
                 let _ = window.set_focus();
                 #[cfg(debug_assertions)]
@@ -178,10 +184,7 @@ pub async fn pip_publish_state(app: AppHandle, exit: PipExitState) -> Result<(),
 }
 
 #[tauri::command]
-pub async fn window_pip_enter(
-    app: AppHandle,
-    state: State<'_, PipState>,
-) -> Result<(), String> {
+pub async fn window_pip_enter(app: AppHandle, state: State<'_, PipState>) -> Result<(), String> {
     let main = app
         .get_webview_window("main")
         .ok_or_else(|| "main window missing".to_string())?;
@@ -275,10 +278,7 @@ pub async fn window_pip_enter(
 }
 
 #[tauri::command]
-pub async fn window_pip_exit(
-    app: AppHandle,
-    state: State<'_, PipState>,
-) -> Result<(), String> {
+pub async fn window_pip_exit(app: AppHandle, state: State<'_, PipState>) -> Result<(), String> {
     let main = app
         .get_webview_window("main")
         .ok_or_else(|| "main window missing".to_string())?;

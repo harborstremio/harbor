@@ -1,39 +1,57 @@
+import { useState } from "react";
+import { useSubTabs } from "./sub-tabs";
+import { fillStyle } from "@/components/slider";
 import { Gamepad2 } from "lucide-react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { useGamepads } from "@/lib/gamepad/store";
 import { Section, ToggleRow } from "./shared";
+import { SettingGroup, SettingRow } from "./kit";
+import { ButtonGlyph, type GlyphKind } from "./controllers-panel/button-glyphs";
 import { ControllerPreview } from "./controllers-panel/controller-preview";
+import { CursorSection } from "./controllers-panel/cursor-section";
 
-const BROWSE_MAP: Array<{ control: string; action: string }> = [
-  { control: "D-pad", action: "Move focus" },
-  { control: "A / Cross", action: "Click cursor" },
-  { control: "Right stick", action: "Move cursor" },
-  { control: "Left stick", action: "Scroll" },
-  { control: "B / Circle", action: "Back" },
-  { control: "Menu / Options", action: "Home" },
+type MapRow = { glyph: GlyphKind; action: string };
+
+const BROWSE_MAP: MapRow[] = [
+  { glyph: "dpad", action: "Move focus" },
+  { glyph: "south", action: "Select" },
+  { glyph: "east", action: "Back" },
+  { glyph: "center", action: "Home" },
 ];
 
-const PLAYER_MAP: Array<{ control: string; action: string }> = [
-  { control: "A / Cross", action: "Click cursor" },
-  { control: "Right stick", action: "Move cursor" },
-  { control: "Left stick", action: "Scroll" },
-  { control: "X / Square", action: "Subtitles" },
-  { control: "Y / Triangle", action: "Stats overlay" },
-  { control: "Bumpers (LB / RB)", action: "Previous or next episode" },
-  { control: "D-pad left / right", action: "Seek back or forward" },
-  { control: "D-pad up / down", action: "Volume up or down" },
-  { control: "B / Circle", action: "Exit player" },
+const PLAYER_MAP: MapRow[] = [
+  { glyph: "south", action: "Play or pause" },
+  { glyph: "west", action: "Subtitles" },
+  { glyph: "north", action: "Stats overlay" },
+  { glyph: "bumpers", action: "Previous or next episode" },
+  { glyph: "triggers", action: "Seek back or forward" },
+  { glyph: "dpadVertical", action: "Volume up or down" },
+  { glyph: "east", action: "Exit player" },
 ];
+
+type Tab = "setup" | "mapping";
 
 export function ControllersPanel() {
+  const [tab, setTab] = useState<Tab>("setup");
   const t = useT();
   const { settings, update } = useSettings();
   const gamepads = useGamepads();
   const enabled = settings.controllerSupportEnabled;
 
+  useSubTabs(
+    [
+      { id: "setup", label: t("Setup") },
+      { id: "mapping", label: t("Buttons & sticks") },
+    ],
+    tab,
+    (id) => setTab(id as Tab),
+  );
+
   return (
-    <>
+    <div key={tab} className="harbor-cascade flex flex-col gap-10">
+      {tab === "setup" && (
+        <>
       <Section
         title={t("Controller support")}
         subtitle={t(
@@ -62,6 +80,8 @@ export function ControllersPanel() {
 
       <ControllerPreview enabled={enabled} />
 
+      {enabled && <CursorSection />}
+
       <Section
         title={t("Connected controllers")}
         subtitle={t(
@@ -69,21 +89,21 @@ export function ControllersPanel() {
         )}
       >
         {gamepads.length === 0 ? (
-          <div className="flex items-center gap-3 rounded-xl border border-dashed border-edge-soft bg-canvas/40 px-4 py-4 text-[13px] text-ink-subtle">
+          <div className="flex items-center gap-3 rounded-md bg-elevated px-4 py-3.5 text-[13px] text-ink-subtle">
             <Gamepad2 size={18} strokeWidth={1.8} className="shrink-0 text-ink-subtle" />
             {t("No controllers detected. Connect one over USB or Bluetooth.")}
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             {gamepads.map((pad) => (
               <div
                 key={pad.id}
-                className="flex items-center gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3"
+                className="flex items-center gap-3 rounded-md bg-elevated px-4 py-3.5"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-elevated text-ink ring-1 ring-edge-soft">
-                  <Gamepad2 size={17} strokeWidth={1.9} />
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-canvas text-ink">
+                  <Gamepad2 size={18} strokeWidth={1.9} />
                 </span>
-                <span className="min-w-0 flex-1 truncate text-[14px] font-medium text-ink">{pad.name}</span>
+                <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium text-ink">{pad.name}</span>
                 <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-accent">
                   <span className="h-1.5 w-1.5 rounded-full bg-accent" />
                   {t("Connected")}
@@ -93,7 +113,10 @@ export function ControllersPanel() {
           </div>
         )}
       </Section>
-
+        </>
+      )}
+      {tab === "mapping" && (
+        <>
       <Section
         title={t("Button map")}
         subtitle={t("How the buttons map in each context. This is a reference; the layout is fixed.")}
@@ -121,26 +144,6 @@ export function ControllersPanel() {
           onChange={(v) => update({ controllerDeadzone: v })}
         />
         <SliderRow
-          label={t("Cursor speed")}
-          sub={t("How quickly the Harbor cursor moves with the right stick.")}
-          min={300}
-          max={1500}
-          step={100}
-          value={settings.controllerCursorSpeed}
-          display={t("{n} px/s", { n: settings.controllerCursorSpeed })}
-          onChange={(v) => update({ controllerCursorSpeed: v })}
-        />
-        <SliderRow
-          label={t("Keyboard size")}
-          sub={t("Size of the controller on-screen keyboard.")}
-          min={70}
-          max={130}
-          step={5}
-          value={settings.controllerKeyboardSize}
-          display={`${settings.controllerKeyboardSize}%`}
-          onChange={(v) => update({ controllerKeyboardSize: v })}
-        />
-        <SliderRow
           label={t("Repeat speed")}
           sub={t("How fast a held direction keeps moving the focus.")}
           min={80}
@@ -161,27 +164,26 @@ export function ControllersPanel() {
           onChange={(v) => update({ controllerInitialDelayMs: v })}
         />
       </Section>
-    </>
+        </>
+      )}
+    </div>
   );
 }
 
-function MapGroup({ heading, rows }: { heading: string; rows: Array<{ control: string; action: string }> }) {
+function MapGroup({ heading, rows }: { heading: string; rows: MapRow[] }) {
   const t = useT();
   return (
-    <div className="flex flex-col gap-1.5">
-      <h4 className="px-1 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">{heading}</h4>
+    <SettingGroup label={heading}>
       {rows.map((row) => (
-        <div
-          key={row.control + row.action}
-          className="flex items-center gap-4 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3"
-        >
-          <span className="min-w-0 flex-1 text-[14px] font-medium text-ink">{t(row.action)}</span>
-          <span className="flex h-8 shrink-0 items-center justify-center rounded-lg border border-edge bg-elevated px-3 text-[12.5px] font-semibold text-ink">
-            {t(row.control)}
+        <SettingRow key={row.glyph + row.action} label={t(row.action)}>
+          <span className="flex shrink-0 items-center gap-3 text-ink">
+            <ButtonGlyph kind={row.glyph} pad="xbox" />
+            <span className="h-4 w-px bg-edge-soft" />
+            <ButtonGlyph kind={row.glyph} pad="ps" />
           </span>
-        </div>
+        </SettingRow>
       ))}
-    </div>
+    </SettingGroup>
   );
 }
 
@@ -205,23 +207,22 @@ function SliderRow({
   onChange: (v: number) => void;
 }) {
   return (
-    <div className="flex flex-col gap-2.5 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-[14px] font-medium text-ink">{label}</span>
-          <span className="text-[12.5px] text-ink-subtle">{sub}</span>
-        </div>
-        <span className="shrink-0 tabular-nums text-[13px] font-semibold text-ink">{display}</span>
-      </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="h-1 w-full appearance-none rounded-full bg-edge-soft accent-ink"
+    <SettingRow label={label} desc={sub}>
+      <div className="flex w-[216px] shrink-0 items-center gap-3">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) => onChange(parseFloat(e.target.value))}
+          className="harbor-slider min-w-0 flex-1"
+        style={fillStyle(value, min, max)}
       />
-    </div>
+        <span className="w-[56px] shrink-0 text-end tabular-nums text-[12.5px] font-semibold text-ink">
+          {display}
+        </span>
+      </div>
+    </SettingRow>
   );
 }

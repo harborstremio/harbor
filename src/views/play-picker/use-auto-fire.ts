@@ -4,6 +4,7 @@ import type { SourceDescriptor } from "@/lib/together/protocol";
 import { engineP2pEligible } from "@/lib/torrent/stremio-stream";
 import { hasInstantMarker, streamMatchesLangs, torrentFilename } from "./picker-utils";
 import { episodeVariantMatch } from "@/lib/streams/episode-file";
+import { episodeSpanContains } from "@/lib/episode-span";
 import type { AddonProgress } from "@/lib/streams/addons";
 import { preferredSourceAddonPending, type PlaybackEntry } from "@/lib/playback-history";
 
@@ -73,6 +74,7 @@ export function useAutoFire(args: {
   } = args;
   const episodeQualifies = (s: ScoredStream) => {
     if (episode == null) return true;
+    if (season != null && s.season != null && episodeSpanContains(s, season, episode)) return true;
     if (s.episode === episode && (season == null || s.season == null || s.season === season))
       return true;
     if (s.episode != null) return false;

@@ -78,6 +78,7 @@ function buildGroups(lists: RawGroup[]): AnilistListGroup[] {
     if (group.isCustomList || !group.status) continue;
     const bucket = byStatus.get(group.status) ?? [];
     for (const entry of group.entries) {
+      if (entry.media.format === "NOVEL") continue;
       if (seen.has(entry.media.id)) continue;
       seen.add(entry.media.id);
       bucket.push(entry);
@@ -91,10 +92,12 @@ export async function fetchMangaListCollection(userId: number): Promise<AnilistL
   const existing = inflight.get(userId);
   if (existing) return existing;
   const run = (async () => {
-    const data = await anilistRequest<CollectionResponse>(COLLECTION_QUERY, { userId }).catch((e) => {
-      if (e instanceof AnilistApiError && e.status === 401) void validateAnilistSession();
-      return null;
-    });
+    const data = await anilistRequest<CollectionResponse>(COLLECTION_QUERY, { userId }).catch(
+      (e) => {
+        if (e instanceof AnilistApiError && e.status === 401) void validateAnilistSession();
+        return null;
+      },
+    );
     if (data == null) {
       const cached = readCachedMangaCollection(userId);
       return cached ?? [];

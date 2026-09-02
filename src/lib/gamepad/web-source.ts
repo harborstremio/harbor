@@ -37,6 +37,24 @@ function handledNatively(pad: Gamepad): boolean {
   return id.includes(MICROSOFT_VENDOR);
 }
 
+const AUDIO_DEVICE = /headset|headphone|audio|cloud|\bmic\b/i;
+const NON_GAMEPAD_VENDORS = ["0951", "03f0"];
+
+export type GamepadShape = {
+  id: string;
+  mapping: string;
+  buttons: readonly unknown[];
+  axes: readonly number[];
+};
+
+export function isLikelyGamepad(pad: GamepadShape): boolean {
+  const id = pad.id.toLowerCase();
+  if (AUDIO_DEVICE.test(id)) return false;
+  if (NON_GAMEPAD_VENDORS.some((vendor) => id.includes(`vendor: ${vendor}`))) return false;
+  if (pad.mapping === "standard") return true;
+  return pad.buttons.length >= 8 && pad.axes.length >= 2;
+}
+
 export type WebGamepadHandlers = {
   onButton: (button: GpButton, pressed: boolean) => void;
   onAxis: (axis: GpAxis, value: number) => void;
@@ -71,7 +89,7 @@ export function startWebGamepadSource(h: WebGamepadHandlers): () => void {
 
     const active: GamepadInfo[] = [];
     for (const pad of list) {
-      if (!pad || !pad.connected || handledNatively(pad)) continue;
+      if (!pad || !pad.connected || handledNatively(pad) || !isLikelyGamepad(pad)) continue;
       active.push({ id: WEB_ID_BASE + pad.index, name: pad.id });
 
       pad.buttons.forEach((btn, i) => {

@@ -1,4 +1,5 @@
-import { AlertCircle, ChevronRight, Compass, Loader2, RefreshCw, Search } from "lucide-react";
+import { AlertCircle, ChevronRight, Compass, Loader2, RefreshCw } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useState } from "react";
 import {
   listSources,

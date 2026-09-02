@@ -84,7 +84,7 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
       <div
         role="toolbar"
         aria-label={t("Subtitle sync")}
-        className="pointer-events-auto flex items-stretch gap-2.5 rounded-[16px] border border-edge bg-elevated/95 px-2.5 py-2 shadow-[0_24px_64px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
+        className="pointer-events-auto flex items-stretch gap-2.5 rounded-md bg-elevated px-2.5 py-2 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
       >
         {/* Left Side: Live Sync (Fixed width to center the middle section) */}
         <div className="flex w-[240px] items-center gap-1.5">
@@ -170,7 +170,7 @@ function StepBtn({ label, onClick, wide }: { label: string; onClick: () => void;
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[36px] items-center justify-center rounded-[10px] font-mono text-[13px] font-bold tabular-nums text-ink-muted transition-colors hover:bg-elevated hover:text-ink active:scale-95 ${
+      className={`flex h-[36px] items-center justify-center rounded-md font-mono text-[13px] font-bold tabular-nums text-ink-muted transition-colors hover:bg-elevated hover:text-ink active:scale-95 ${
         wide ? "w-14" : "w-12"
       }`}
     >

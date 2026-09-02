@@ -16,6 +16,9 @@ type RawResponse = {
 const cache = new Map<string, RawResponse | null>();
 const inflight = new Map<string, Promise<RawResponse | null>>();
 
+const FAILURE_COOLDOWN_MS = 10 * 60 * 1000;
+let coolingUntil = 0;
+
 function pickId(metaId: string): { tmdb?: string; imdb?: string } | null {
   if (metaId.startsWith("tmdb:movie:")) return { tmdb: metaId.slice("tmdb:movie:".length) };
   if (metaId.startsWith("tmdb:tv:")) return { tmdb: metaId.slice("tmdb:tv:".length) };
@@ -40,13 +43,18 @@ function spanToSegment(span: RawSpan, kind: SkipKind, durationSec: number): Skip
 async function fetchRaw(cacheKey: string): Promise<RawResponse | null> {
   const hit = cache.get(cacheKey);
   if (hit !== undefined) return hit;
+  if (Date.now() < coolingUntil) return null;
   const pending = inflight.get(cacheKey);
   if (pending) return pending;
   const p = (async () => {
     const res = await fetch(`https://api.theintrodb.org/v2/media?${cacheKey}`);
     if (!res.ok) {
-      if (res.status === 404) cache.set(cacheKey, null);
-      else warnProviderFailure("theintrodb", res.status, cacheKey);
+      if (res.status === 404) {
+        cache.set(cacheKey, null);
+      } else {
+        coolingUntil = Date.now() + FAILURE_COOLDOWN_MS;
+        warnProviderFailure("theintrodb", res.status, cacheKey);
+      }
       return null;
     }
     const json = (await res.json()) as RawResponse;

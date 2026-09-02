@@ -8,6 +8,7 @@ import { useSettings } from "@/lib/settings";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { Section, ToggleRow } from "./shared";
+import { ModalButton, SettingRow, SettingsModal } from "./kit";
 import { SyncIndicatorSetting } from "./sync-indicator-setting";
 
 export function MalPanel() {
@@ -57,7 +58,7 @@ export function MalPanel() {
   return (
     <>
       {!isConnected ? (
-        <section className="flex flex-col gap-5 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
+        <section className="flex flex-col gap-5 rounded-md bg-elevated p-7">
           <div className="flex flex-col gap-2">
             <h2 className="text-[19px] font-medium tracking-tight text-ink">
               {t("Connect your MyAnimeList account")}
@@ -70,17 +71,17 @@ export function MalPanel() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setModalOpen(true)}
-              className="flex h-11 items-center gap-2.5 rounded-xl bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
+              className="flex h-11 items-center gap-2.5 rounded-md bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
             >
-              <Link2 size={15} strokeWidth={2.2} />
+              <Link2 size={16} strokeWidth={2.2} />
               {t("Connect MyAnimeList")}
             </button>
             <button
               onClick={() => openUrl("https://myanimelist.net")}
-              className="flex h-11 items-center gap-2 rounded-xl border border-edge-soft px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+              className="flex h-11 items-center gap-2 rounded-md bg-raised px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:text-ink"
             >
               {t("About MyAnimeList")}
-              <ExternalLink size={13} strokeWidth={2.2} />
+              <ExternalLink size={14} strokeWidth={2.2} />
             </button>
           </div>
         </section>
@@ -111,53 +112,47 @@ export function MalPanel() {
               }
             />
           )}
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-400/12 ring-1 ring-emerald-400/30 text-emerald-300">
+          <SettingRow
+            icon={
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-success/15 text-success">
                 <Check size={16} strokeWidth={2.4} />
               </span>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[14px] font-medium text-ink">
-                  {userName || t("Connected")}
-                </span>
-                <span className="text-[12px] text-ink-subtle">
-                  {t("Authorized {when}", { when: sessionAge(t, session?.createdAt) })}
-                </span>
-              </div>
-            </div>
+            }
+            label={userName || t("Connected")}
+            desc={t("Authorized {when}", { when: sessionAge(t, session?.createdAt) })}
+          >
             {userName && (
               <button
                 onClick={() =>
                   openUrl(`https://myanimelist.net/profile/${encodeURIComponent(userName)}`)
                 }
-                className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-raised px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:text-ink"
               >
                 {t("Open profile")}
-                <ExternalLink size={11} strokeWidth={2.2} />
+                <ExternalLink size={12} strokeWidth={2.2} />
               </button>
             )}
-          </div>
-          {!confirmDisconnect ? (
+          </SettingRow>
+          <SettingRow label={t("Disconnect from MyAnimeList")}>
             <button
               onClick={() => setConfirmDisconnect(true)}
-              className="flex items-center gap-2 self-start rounded-lg px-2 py-1.5 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-red-300"
+              className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-raised px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:text-danger"
             >
               <Trash2 size={12} />
-              {t("Disconnect from MyAnimeList")}
+              {t("Disconnect")}
             </button>
-          ) : (
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-red-400/30 bg-red-400/5 p-3">
-              <span className="text-[12.5px] text-red-200">
-                {t("Disconnect MyAnimeList? Your progress will stop syncing until you reconnect.")}
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setConfirmDisconnect(false)}
-                  className="rounded-md px-2.5 py-1 text-[12px] text-ink-muted hover:text-ink"
-                >
+          </SettingRow>
+          <SettingsModal
+            open={confirmDisconnect}
+            onClose={() => setConfirmDisconnect(false)}
+            title={t("Disconnect from MyAnimeList")}
+            actions={
+              <>
+                <ModalButton ghost onClick={() => setConfirmDisconnect(false)}>
                   {t("Cancel")}
-                </button>
+                </ModalButton>
                 <button
+                  type="button"
                   onClick={() => {
                     if (settings.useMalAvatar && settings.harborAvatar === malAvatar) {
                       pushAvatar(null);
@@ -166,14 +161,18 @@ export function MalPanel() {
                     disconnect();
                     setConfirmDisconnect(false);
                   }}
-                  className="flex items-center gap-1.5 rounded-md bg-red-400/20 px-3 py-1 text-[12px] font-semibold text-red-200 hover:bg-red-400/30"
+                  className="harbor-press-pop flex h-9 items-center gap-1.5 rounded-md bg-danger/15 px-4 text-[12.5px] font-semibold text-danger transition-colors hover:bg-danger/25"
                 >
-                  <LogOut size={11} strokeWidth={2.4} />
+                  <LogOut size={12} strokeWidth={2.4} />
                   {t("Disconnect")}
                 </button>
-              </div>
-            </div>
-          )}
+              </>
+            }
+          >
+            <p className="rounded-md bg-elevated px-4 py-3.5 text-[13px] leading-relaxed text-ink-muted">
+              {t("Disconnect MyAnimeList? Your progress will stop syncing until you reconnect.")}
+            </p>
+          </SettingsModal>
         </Section>
       )}
 

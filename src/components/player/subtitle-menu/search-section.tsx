@@ -6,7 +6,7 @@ import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
 import { languageName } from "@/lib/subtitles/language";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { searchSubtitles, type SearchOptions } from "@/lib/subtitles/search";
-import { providerLabel, releaseOf, subtitleTitleOf } from "@/lib/subtitles/provider-label";
+import { subtitleLoadMetadataOf, subtitleTitleOf } from "@/lib/subtitles/provider-label";
 import type { SubResult } from "@/lib/subtitles/types";
 import {
   bestCandidate,
@@ -20,6 +20,14 @@ import { useSubtitleContext } from "./subtitle-context-store";
 import type { SubtitleMenuProps } from "./types";
 import { isVeryNewRelease } from "./utils";
 import { FilterChip, LangGroup } from "./search-results";
+import type { StreamHints } from "@/lib/subtitles/stream-hints";
+import {
+  readSubtitleSearchCacheEntry,
+  subtitleSearchCacheKey,
+  subtitleSearchResultsMayBeCached,
+  type SubtitleSearchCacheEntry,
+  type SubtitleSearchCacheScope,
+} from "@/lib/subtitles/search-cache";
 import { TargetBar, TitleSuggestDropdown } from "./title-suggest";
 
 type TitleTarget = {
@@ -41,11 +49,7 @@ function isPlayingTarget(a: TitleTarget, b: TitleTarget): boolean {
   );
 }
 
-const searchCache = new Map<string, SubResult[]>();
-
-function cacheKey(tgt: TitleTarget, filename?: string | null): string {
-  return `${tgt.imdbId}|${tgt.type}|${tgt.title}|${tgt.season ?? ""}|${tgt.episode ?? ""}|${filename ?? ""}`;
-}
+const searchCache = new Map<string, SubtitleSearchCacheEntry>();
 
 type SavedSearchState = {
   playingKey: string;
@@ -115,16 +119,7 @@ export function SearchSection(props: SubtitleMenuProps) {
   const resultsRef = useRef<HTMLDivElement>(null);
   const scrollTopRef = useRef(restorable?.scrollTop ?? 0);
   const scrollRestored = useRef(false);
-  const [results, setResults] = useState<SubResult[] | null>(() =>
-    restorable
-      ? (searchCache.get(
-          cacheKey(
-            restorable.target,
-            isPlayingTarget(restorable.target, playingTarget) ? playbackContext?.filename : null,
-          ),
-        ) ?? null)
-      : null,
-  );
+  const [results, setResults] = useState<SubResult[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [hideHI, setHideHI] = useState(restorable?.hideHI ?? false);
   const [forcedOnly, setForcedOnly] = useState(restorable?.forcedOnly ?? false);
@@ -136,6 +131,37 @@ export function SearchSection(props: SubtitleMenuProps) {
   const searchSeq = useRef(0);
   const coordsTouchedRef = useRef(false);
   const [pendingSources, setPendingSources] = useState(0);
+  const resultStreamHints = useMemo<StreamHints>(
+    () => ({
+      release:
+        (isPlayingTarget(target, playingTarget) ? playbackContext?.filename : null) ?? target.title,
+      season: target.season ?? null,
+      episode: target.episode ?? null,
+    }),
+    [target, playingTarget, playbackContext],
+  );
+
+  const cacheScope = (tgt: TitleTarget): SubtitleSearchCacheScope => {
+    const enabled = settings.subProvidersEnabled ?? {};
+    const titleOnly = !tgt.imdbId && Boolean(tgt.title);
+    const subdl = enabled.subdl === true && Boolean(settings.subdlApiKey.trim());
+    const subsource = enabled.subsource === true && Boolean(settings.subsourceApiKey.trim());
+    return {
+      languages: settings.preferredSubLangs ?? [],
+      providers: {
+        wyzie: titleOnly || enabled.wyzie === true,
+        addons: enabled.addons ?? true,
+        opensubtitles: enabled.opensubtitles ?? true,
+        subdl,
+        subsource,
+      },
+      addonUrls: (addons ?? []).map((addon) => addon.transportUrl),
+      credentialBound: subdl || subsource,
+    };
+  };
+
+  const cacheKeyFor = (tgt: TitleTarget, filename?: string | null) =>
+    subtitleSearchCacheKey({ ...tgt, filename, scope: cacheScope(tgt) });
 
   const latestStateRef = useRef<Omit<SavedSearchState, "scrollTop">>({
     playingKey,
@@ -192,6 +218,7 @@ export function SearchSection(props: SubtitleMenuProps) {
       const enabled = settings.subProvidersEnabled ?? {};
       const titleOnly = !tgt.imdbId && !!tgt.title;
       const playing = isPlayingTarget(tgt, playingTarget) ? playbackContext : null;
+      const scope = cacheScope(tgt);
       const searchQuery = {
         imdbId: tgt.imdbId || undefined,
         title: tgt.title || undefined,
@@ -204,6 +231,7 @@ export function SearchSection(props: SubtitleMenuProps) {
         filename: playing?.filename ?? undefined,
       };
       const searchOpts: SearchOptions = {
+        timeoutMs: 8_000,
         providers: {
           wyzie: titleOnly ? true : enabled.wyzie === true,
           addons: enabled.addons ?? true,
@@ -229,7 +257,12 @@ export function SearchSection(props: SubtitleMenuProps) {
       const r = await searchSubtitles(searchQuery, searchOpts);
       if (seq !== searchSeq.current) return;
       setResults(r);
-      searchCache.set(cacheKey(tgt, playing?.filename), r);
+      if (subtitleSearchResultsMayBeCached(scope, r)) {
+        searchCache.set(cacheKeyFor(tgt, playing?.filename), {
+          results: r,
+          createdAt: Date.now(),
+        });
+      }
       setPendingSources(0);
     } finally {
       setLoading(false);
@@ -250,16 +283,19 @@ export function SearchSection(props: SubtitleMenuProps) {
     if (addons === null || addonsLoading) return;
     if (!target.imdbId && !target.title) return;
     const playing = isPlayingTarget(target, playingTarget) ? playbackContext : null;
-    const key = cacheKey(target, playing?.filename);
+    const scope = cacheScope(target);
+    const key = cacheKeyFor(target, playing?.filename);
     if (lastAutoSearchKey.current === key) return;
     lastAutoSearchKey.current = key;
-    const cached = searchCache.get(key);
+    const cached = scope.credentialBound
+      ? null
+      : readSubtitleSearchCacheEntry(searchCache.get(key));
     if (cached) {
       setResults(cached);
       return;
     }
     void run(target);
-  }, [addons, addonsLoading, target, playingTarget, playbackContext]);
+  }, [addons, addonsLoading, target, playingTarget, playbackContext, settings]);
 
   useEffect(() => {
     if (!suggestOpen) return;
@@ -528,16 +564,9 @@ export function SearchSection(props: SubtitleMenuProps) {
             lang={lang}
             items={items}
             defaultOpen={i === 0}
+            streamHints={resultStreamHints}
             onAdd={(r) =>
-              onAddSubtitle(r.url, r.lang, subtitleTitleOf(r), {
-                format: r.format,
-                encoding: r.encoding,
-                release: releaseOf(r),
-                provider: providerLabel(r),
-                fps: r.fps,
-                downloads: r.downloads,
-                author: r.author,
-              })
+              onAddSubtitle(r.url, r.lang, subtitleTitleOf(r), subtitleLoadMetadataOf(r))
             }
           />
         ))}

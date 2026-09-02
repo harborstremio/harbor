@@ -22,8 +22,8 @@ type Tile = {
 };
 
 const TILE_CLASS: Record<StripSize, string> = {
-  hero: "h-[108px] w-[72px] rounded-[10px]",
-  featured: "h-[84px] w-[56px] rounded-[10px]",
+  hero: "h-[108px] w-[72px] rounded-md",
+  featured: "h-[84px] w-[56px] rounded-md",
   dense: "h-[66px] w-[44px] rounded-md",
 };
 

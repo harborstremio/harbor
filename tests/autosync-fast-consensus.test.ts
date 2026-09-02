@@ -13,26 +13,39 @@ const smart = read("src/lib/subtitles/autosync/smart-layer.ts");
 
 test("every audio and network port is timeout-bounded", () => {
   assert.match(context, /function bounded<T>\(p: Promise<T>, ms: number, fallback: T\)/);
-  for (const c of ["SCORE_TIMEOUT_MS", "VAD_TIMEOUT_MS", "TORRENT_SCORE_TIMEOUT_MS", "TORRENT_VAD_TIMEOUT_MS", "HASH_TIMEOUT_MS", "CROWD_TIMEOUT_MS"]) {
+  assert.match(context, /async function boundedMeasurement\(/);
+  for (const c of [
+    "SCORE_TIMEOUT_MS",
+    "VAD_TIMEOUT_MS",
+    "TORRENT_SCORE_TIMEOUT_MS",
+    "TORRENT_VAD_TIMEOUT_MS",
+    "HASH_TIMEOUT_MS",
+    "CROWD_TIMEOUT_MS",
+  ]) {
     assert.match(context, new RegExp(`const ${c} = \\d+;`));
   }
-  assert.match(context, /bounded\(\s*routeTorrent\s*\? torrentScore/);
+  assert.match(context, /boundedMeasurement\(\s*routeTorrent\s*\? torrentScore/);
   assert.match(context, /bounded\(\s*routeTorrent\s*\? torrentVad/);
   assert.match(context, /bounded\(rawHash\(hctx\), HASH_TIMEOUT_MS, null\)/);
   assert.match(context, /bounded\(crowdPort\(cctx\), CROWD_TIMEOUT_MS, null\)/);
 });
 
 test("pipeline starts consensus and quality probe in parallel, before hash", () => {
-  const qStart = pipeline.indexOf("const qualityBeforeP = ports.measureQuality(ctx, IDENTITY);");
+  const qStart = pipeline.indexOf(
+    "const qualityBeforeP = measureQuality(ctx, IDENTITY, validationRequest);",
+  );
   const cStart = pipeline.indexOf("const consensusP: Promise<ConsensusResult | null>");
   const hashStart = pipeline.indexOf("if (ports.hashExact) {");
   assert.ok(qStart >= 0 && cStart >= 0 && hashStart >= 0);
   assert.ok(qStart < hashStart && cStart < hashStart, "parallel starts must precede the hash tier");
-  assert.ok(!/const qualityBefore = await ports\.measureQuality/.test(pipeline), "no eager blocking quality probe");
+  assert.ok(
+    !/const qualityBefore = await ports\.measureQuality/.test(pipeline),
+    "no eager blocking quality probe",
+  );
 });
 
 test("consensus anchors produce a primary fast-apply transform", () => {
-  assert.match(smart, /export function consensusAnchorFit\(res: ConsensusResult\)/);
+  assert.match(smart, /export function consensusAnchorFit\(\s*res: ConsensusResult,?\s*\)/);
   assert.match(smart, /const FAST_MIN_ANCHORS = 8;/);
   assert.match(smart, /const FAST_MAX_RESIDUAL = 0\.6;/);
   assert.match(pipeline, /const fastFit = consensusAnchorFit\(consensusRes\);/);
@@ -42,9 +55,12 @@ test("consensus anchors produce a primary fast-apply transform", () => {
   assert.ok(fastTier >= 0 && vadTier > fastTier, "fast consensus tier must run before audio VAD");
 });
 
-test("fast tier falls back to best-effort apply when audio cannot confirm", () => {
+test("fast tier keeps best-effort at offer when audio cannot confirm", () => {
   assert.match(pipeline, /const be = evaluateBestEffort\(\{/);
-  assert.match(pipeline, /qualityBefore: await qualityBeforeP,/);
+  assert.match(pipeline, /const fastBefore = await qualityBeforeP;/);
+  assert.match(pipeline, /qualityBefore: fastBefore,/);
+  assert.match(pipeline, /if \(be\.decision === "offer"/);
+  assert.doesNotMatch(pipeline, /if \(be\.decision === "apply"/);
 });
 
 test("single-source subtitles can still vote on the offset", () => {
@@ -55,16 +71,23 @@ test("single-source subtitles can still vote on the offset", () => {
   assert.match(consensus, /corroboratedReference\(peers, true\)/);
   const fallback = consensus.indexOf("single-source fallback");
   const wrongVerdict = consensus.indexOf('verdict: "wrong"');
-  assert.ok(fallback >= 0 && wrongVerdict > fallback, "wrong-content verdict stays multi-source only");
+  assert.ok(
+    fallback >= 0 && wrongVerdict > fallback,
+    "wrong-content verdict stays multi-source only",
+  );
 });
 
 test("auto-sync is a real toggle with a visible best-effort pill", () => {
   const hook = read("src/views/player/hooks/use-auto-sync.ts");
   assert.match(hook, /stop: \(\) => void;/);
-  assert.match(hook, /const stop = useCallback\(\(\) => \{\s*activeDisposeRef\.current\?\.\(\);\s*revert\(\);/);
+  assert.match(
+    hook,
+    /const stop = useCallback\(\(\) => \{\s*activeDisposeRef\.current\?\.\(\);\s*revert\(\);/,
+  );
   const popover = read("src/components/player/autosync/autosync-popover.tsx");
   assert.match(popover, /case "best-effort":\s*return "synced";/);
   const menu = read("src/components/player/subtitle-menu/sync-control.tsx");
   assert.match(menu, /autoSync\?\.stop\(\);/);
-  assert.match(menu, /aria-pressed=\{autoSyncOn\}/);
+  assert.match(menu, /\{autoSyncOn \? tr\("Turn off auto-sync"\) : tr\("Auto sync"\)\}/);
+  assert.match(menu, /aria-label=\{tr\("\{label\}, sync options", \{ label \}\)\}/);
 });

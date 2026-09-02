@@ -19,7 +19,7 @@ function ListPoster({ item, onOpenMeta }: { item: FeaturedItem; onOpenMeta?: (id
         src={item.poster || undefined}
         seed={item.name || item.id}
         ratio="portrait"
-        className="rounded-[10px] ring-1 ring-edge-soft shadow-[0_2px_8px_-2px_rgba(0,0,0,0.35)] transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] motion-safe:group-hover:will-change-transform group-hover:shadow-[0_18px_36px_-14px_rgba(0,0,0,0.6)] motion-safe:group-hover:[transform:translate3d(0,-0.5rem,0)_scale(1.03)]"
+        className="rounded-md ring-1 ring-edge-soft shadow-[0_2px_8px_-2px_rgba(0,0,0,0.35)] transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] motion-safe:group-hover:will-change-transform group-hover:shadow-[0_18px_36px_-14px_rgba(0,0,0,0.6)] motion-safe:group-hover:[transform:translate3d(0,-0.5rem,0)_scale(1.03)]"
         lazy
       />
       {item.name && <div className="mt-1.5 truncate text-[12px] text-ink-muted">{item.name}</div>}
@@ -48,7 +48,7 @@ export function MyListsShowcase({
   const shown = lists.filter((l) => l.items.length > 0);
   if (shown.length === 0 && !isOwner) {
     return (
-      <section aria-label={t("My lists")} className="rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
+      <section aria-label={t("My lists")} className="rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
         <SectionHeader icon={<ListVideo size={20} />} label={t("My lists")} />
         <p className="py-6 text-center text-[13px] text-ink-subtle">
           {t("This user hasn't featured any lists")}
@@ -57,7 +57,7 @@ export function MyListsShowcase({
     );
   }
   return (
-    <section aria-label={t("My lists")} className="rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
+    <section aria-label={t("My lists")} className="rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
       <SectionHeader
         icon={<ListVideo size={20} />}
         label={t("My lists")}
@@ -95,20 +95,20 @@ export function MyListsShowcase({
           {isOwner && onManage && (
             <button
               onClick={onManage}
-              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[10px] border border-edge-soft text-[13px] font-medium text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-md border border-edge-soft text-[13px] font-medium text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
             >
               <ListVideo size={18} /> {t("Choose lists")}
             </button>
           )}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-[10px] border border-dashed border-edge py-10 text-center">
+        <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-edge py-10 text-center">
           <p className="text-[14px] text-ink-muted">{t("No lists featured yet")}</p>
           <p className="mt-1 text-[12px] text-ink-subtle">{t("Pick lists from your library to show them here")}</p>
           {onManage && (
             <button
               onClick={onManage}
-              className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-[10px] bg-ink px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
+              className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-md bg-ink px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
             >
               <Plus size={18} /> {t("Choose lists")}
             </button>

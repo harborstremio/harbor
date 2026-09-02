@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useSettings } from "@/lib/settings";
-import { usePlaylists, writePlaylists, type StoredPlaylist } from "@/lib/iptv/playlists-store";
+import { usePlaylists, writePlaylists } from "@/lib/iptv/playlists-store";
 import { clearPlaylistCache } from "@/lib/iptv/store";
 import { clearEpg } from "@/lib/iptv/epg-store";
 import { deleteIptvCache } from "@/lib/iptv/persistent-cache";
@@ -8,33 +8,13 @@ import { purgePlaylistState } from "@/lib/iptv/source-cleanup";
 import { useFavorites } from "@/lib/iptv/favorites";
 import { alertDialog } from "@/lib/dialog";
 import { useT } from "@/lib/i18n";
-import { buildXtreamUrls, type PlaylistFormValue } from "../source-picker/playlist-form";
+import {
+  materializePlaylistEntry,
+  newPlaylistId,
+  type PlaylistFormValue,
+} from "@/lib/iptv/playlist-entry";
 
-export function materializePlaylistEntry(id: string, entry: PlaylistFormValue): StoredPlaylist {
-  if (entry.kind === "xtream") {
-    const { m3u, epg } = buildXtreamUrls(
-      entry.xtream.server,
-      entry.xtream.username,
-      entry.xtream.password,
-    );
-    return {
-      id,
-      name: entry.name,
-      url: m3u,
-      epgUrl: epg,
-      kind: "xtream",
-      xtream: {
-        server: entry.xtream.server.replace(/\/+$/, ""),
-        username: entry.xtream.username,
-        password: entry.xtream.password,
-      },
-    };
-  }
-  if (entry.kind === "epg") {
-    return { id, name: entry.name, url: "", epgUrl: entry.epgUrl, kind: "epg" };
-  }
-  return { id, name: entry.name, url: entry.url, epgUrl: entry.epgUrl || undefined, kind: "m3u" };
-}
+export { materializePlaylistEntry };
 
 export function usePlaylistMutations(params: {
   activeId: string | null;
@@ -49,7 +29,7 @@ export function usePlaylistMutations(params: {
 
   const addPlaylist = useCallback(
     (entry: PlaylistFormValue) => {
-      const id = `pl-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      const id = newPlaylistId();
       const built = materializePlaylistEntry(id, entry);
       const carriesVod = entry.kind === "xtream" || entry.kind === "m3u";
       const persisted = writePlaylists([...playlists, built]);

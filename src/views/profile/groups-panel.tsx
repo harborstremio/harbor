@@ -13,7 +13,7 @@ function FindGroupRow({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="flex w-full min-h-11 items-center gap-3 rounded-[10px] px-2 py-1.5 text-start transition-colors hover:bg-elevated"
+      className="flex w-full min-h-11 items-center gap-3 rounded-md px-2 py-1.5 text-start transition-colors hover:bg-elevated"
     >
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-elevated text-ink-muted ring-1 ring-edge-soft">
         <PeopleSearchIcon size={20} />
@@ -68,7 +68,7 @@ export function GroupsPanel({ isOwner, handle }: { isOwner: boolean; handle: str
   if (!isOwner && (phase !== "ready" || groups.length === 0)) return null;
 
   return (
-    <section aria-label={t("Groups")} className="mt-6 rounded-[14px] bg-surface p-4 ring-1 ring-edge-soft">
+    <section aria-label={t("Groups")} className="mt-6 rounded-lg bg-surface p-4 ring-1 ring-edge-soft">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
           <UsersRound size={20} /> {t("Groups")}
@@ -84,7 +84,7 @@ export function GroupsPanel({ isOwner, handle }: { isOwner: boolean; handle: str
       </div>
 
       {isOwner && invites.length > 0 && (
-        <div className="mb-3 flex flex-col gap-2 rounded-[10px] bg-elevated/60 p-2.5 ring-1 ring-accent/20">
+        <div className="mb-3 flex flex-col gap-2 rounded-md bg-elevated/60 p-2.5 ring-1 ring-accent/20">
           <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-accent">
             {t("Invites")}
           </span>

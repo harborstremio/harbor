@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { ArrowLeft, ChevronDown, CloudUpload, History, Info, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getUserAddonsRaw, type Addon } from "@/lib/addons";
@@ -249,8 +250,8 @@ export function OrganizeAddonsPage({
   const stepLabel = phase.kind === "saving" ? stepLabelFor(phase.step) : null;
   const showBackups = !!authKey && phase.kind !== "loadError";
 
-  return (
-    <div className="fixed inset-0 z-[140] flex flex-col bg-canvas animate-in fade-in duration-150">
+  return createPortal(
+    <div className="fixed inset-0 z-[185] flex flex-col bg-canvas animate-in fade-in duration-150">
       <header
         data-tauri-drag-region
         className="relative z-50 shrink-0 border-b border-edge-soft bg-canvas/85 backdrop-blur-xl"
@@ -505,6 +506,7 @@ export function OrganizeAddonsPage({
         </div>
         <div className="h-10" />
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

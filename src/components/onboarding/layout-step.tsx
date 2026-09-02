@@ -1,7 +1,8 @@
-import harborStyleImg from "@/assets/onboarding/harborstyle.png";
-import traditionalStyleImg from "@/assets/onboarding/traditional.png";
+import harborStyleImg from "@/assets/onboarding/harborstyle.webp";
+import traditionalStyleImg from "@/assets/onboarding/traditional.webp";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { PreviewImage } from "@/views/settings/preview-image";
 
 export function LayoutStep() {
   const { settings, update } = useSettings();
@@ -36,63 +37,49 @@ export function LayoutStep() {
           {t("You can switch later in Settings under Library & metadata.")}
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div role="radiogroup" aria-label={t("Pick a home layout")} className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {options.map((opt) => {
           const selected = choice === opt.id;
           return (
             <button
               key={opt.id}
               type="button"
+              role="radio"
+              aria-checked={selected}
               onClick={() => update({ homeMode: opt.id })}
-              className={`group relative h-[200px] overflow-hidden rounded-2xl border bg-canvas text-start transition-all ${
-                selected
-                  ? "border-ink shadow-[0_0_0_3px_rgba(255,255,255,0.04)]"
-                  : "border-edge-soft hover:border-edge"
-              }`}
+              className="group flex flex-col gap-3 rounded-2xl text-start"
             >
-              <img
-                src={opt.img}
-                alt=""
-                aria-hidden
-                draggable={false}
-                className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-top"
-              />
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-canvas/95 via-canvas/45 to-transparent"
-              />
-              <div
-                aria-hidden
-                className={`pointer-events-none absolute inset-0 bg-canvas/82 transition-opacity duration-300 ease-out ${
-                  selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                }`}
-              />
               <span
-                className={`absolute end-3 top-3 z-20 flex h-5 w-5 items-center justify-center rounded-full border-2 bg-canvas/85 transition-colors ${
-                  selected ? "border-ink" : "border-edge"
+                className={`block overflow-hidden rounded-xl border-2 bg-canvas transition-colors duration-200 ease-out ${
+                  selected ? "border-ink" : "border-edge-soft group-hover:border-edge"
                 }`}
               >
-                {selected && <span className="h-2.5 w-2.5 rounded-full bg-ink" />}
+                <PreviewImage
+                  src={opt.img}
+                  className="block aspect-[16/10] w-full select-none object-cover object-top"
+                />
               </span>
-              <span
-                className={`absolute bottom-4 start-5 z-10 text-[15px] font-semibold tracking-tight text-ink drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] transition-opacity duration-300 ${
-                  selected ? "opacity-0" : "opacity-100 group-hover:opacity-0"
-                }`}
-              >
-                {opt.label}
-              </span>
-              <div
-                className={`absolute inset-5 z-10 flex flex-col justify-center gap-2 transition-opacity duration-300 ${
-                  selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                }`}
-              >
-                <span className="text-[16px] font-semibold tracking-tight text-ink">
-                  {opt.label}
+              <span className="flex flex-col gap-1.5">
+                <span className="flex items-center gap-2">
+                  <span
+                    className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200 ${
+                      selected ? "border-ink" : "border-edge"
+                    }`}
+                  >
+                    {selected && <span className="h-2 w-2 rounded-full bg-ink" />}
+                  </span>
+                  <span
+                    className={`text-[15px] tracking-tight transition-colors duration-200 ${
+                      selected ? "font-semibold text-ink" : "font-medium text-ink-muted group-hover:text-ink"
+                    }`}
+                  >
+                    {opt.label}
+                  </span>
                 </span>
-                <span className="max-w-[88%] text-[12.5px] leading-relaxed text-ink-muted">
+                <span className="ps-[26px] text-[12.5px] leading-relaxed text-ink-subtle">
                   {opt.sub}
                 </span>
-              </div>
+              </span>
             </button>
           );
         })}

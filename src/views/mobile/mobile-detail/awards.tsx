@@ -1,6 +1,7 @@
 import { AwardLogo, laurelColorFor } from "@/components/icons/award-logo";
 import { Laurel } from "@/components/icons/laurel";
 import type { AwardEntry, AwardType } from "@/lib/providers/wikidata";
+import { useT } from "@/lib/i18n";
 import { SectionTitle } from "./ui";
 
 const AWARD_TITLE: Record<AwardType, string> = {
@@ -32,9 +33,10 @@ export function AwardsSection({
   groups: { type: AwardType; wins: number; nominations: number }[];
   awards: AwardEntry[];
 }) {
+  const t = useT();
   return (
     <section id="awards-section" className="flex scroll-mt-4 flex-col gap-4">
-      <SectionTitle>Awards</SectionTitle>
+      <SectionTitle>{t("Awards")}</SectionTitle>
       <div className="flex flex-col gap-3">
         {groups.map((g) => (
           <AwardGroup
@@ -61,6 +63,8 @@ function AwardGroup({
   noms: number;
   entries: AwardEntry[];
 }) {
+  const t = useT();
+  const awardTitle = t(AWARD_TITLE[type]);
   const tint = laurelColorFor(type);
   const byYear = (a: AwardEntry, b: AwardEntry) => (b.year ?? 0) - (a.year ?? 0);
   const detailed = entries.filter((e) => e.category);
@@ -82,17 +86,17 @@ function AwardGroup({
           )}
         </span>
         <div className="flex min-w-0 flex-col gap-0.5">
-          <h3 className="text-[15px] font-medium tracking-tight text-ink">{AWARD_TITLE[type]}</h3>
+          <h3 className="text-[15px] font-medium tracking-tight text-ink">{awardTitle}</h3>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
             {wins > 0 && (
               <>
-                <span className="text-accent">{wins}</span> {wins === 1 ? "Win" : "Wins"}
+                <span className="text-accent">{wins}</span> {wins === 1 ? t("Win") : t("Wins")}
               </>
             )}
             {wins > 0 && noms > 0 && <span className="mx-1.5 opacity-40">·</span>}
             {noms > 0 && (
               <>
-                {noms} {noms === 1 ? "Nomination" : "Nominations"}
+                {noms} {noms === 1 ? t("Nomination") : t("Nominations")}
               </>
             )}
           </p>
@@ -106,7 +110,7 @@ function AwardGroup({
         </ul>
       ) : (
         <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-          Recognized at the {AWARD_TITLE[type].toLowerCase()}.
+          {t("Recognized at the {award}.", { award: awardTitle.toLocaleLowerCase() })}
         </p>
       )}
     </div>
@@ -114,22 +118,27 @@ function AwardGroup({
 }
 
 function AwardEntryRow({ entry }: { entry: AwardEntry }) {
+  const t = useT();
   const won = entry.result === "won";
   const recipients = entry.recipients ?? (entry.recipient ? [entry.recipient] : []);
   return (
     <li className="flex items-baseline gap-3 border-t border-edge-soft/30 py-2 text-[12.5px] first:border-t-0">
-      <span className={`w-9 shrink-0 font-semibold tabular-nums ${won ? "text-accent" : "text-ink-subtle"}`}>
+      <span
+        className={`w-9 shrink-0 font-semibold tabular-nums ${won ? "text-accent" : "text-ink-subtle"}`}
+      >
         {entry.year ?? "-"}
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="leading-tight text-ink">{entry.category}</span>
         {recipients.length > 0 && (
-          <span className="text-[11.5px] leading-tight text-ink-subtle">{recipients.join(", ")}</span>
+          <span className="text-[11.5px] leading-tight text-ink-subtle">
+            {recipients.join(", ")}
+          </span>
         )}
       </div>
       {!won && (
         <span className="shrink-0 rounded-full bg-elevated/70 px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-wide text-ink-subtle">
-          Nom
+          {t("Nom")}
         </span>
       )}
     </li>

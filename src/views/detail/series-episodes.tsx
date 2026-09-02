@@ -16,6 +16,11 @@ import { tmdbSeasonEpisodes, type Episode, type Season } from "@/lib/providers/t
 import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
 import type { OrderedEpisode } from "@/lib/providers/tvdb-order";
 import { pickLocalizedText } from "@/lib/localized-text";
+import {
+  PREFERRED_TEXT_SCORE,
+  preferredVideoName,
+  preferredVideoOverview,
+} from "@/lib/meta-resource";
 import { useSettings } from "@/lib/settings";
 import { effectiveOrderProvider, tvdbPanelEnabled } from "@/lib/settings/episode-order";
 import { useTrakt } from "@/lib/trakt/provider";
@@ -136,12 +141,14 @@ export function SeriesEpisodes({
     setActive(def);
   }, [meta.id, seasons, combinedWatched, resumeSeason]);
 
-  const { episodes: enrichedBase, imdbRatings } = useEpisodeEnrich({
+  const { episodes: enrichedBase, imdbRatings, preferredVideos } = useEpisodeEnrich({
     episodes,
     active,
     imdbId,
     tvdbKey: settings.tvdbKey,
     omdbKey: settings.omdbKey,
+    metaId: meta.id,
+    preferCustomMeta: settings.preferCustomMetaAddon,
   });
   const tvdbStills = useSeriesTvdbStills(imdbId, enrichedBase.length, settings.tvdbSeasonType);
   const enrichedEpisodes = useMemo(() => {
@@ -257,14 +264,25 @@ export function SeriesEpisodes({
     }
     return orderedEpsRaw.map((ep) => {
       const tmdbEp = airedLike ? tmdbByKey.get(`${ep.seasonNumber}:${ep.episodeNumber}`) : undefined;
+      const pref = preferredVideos.get(`${ep.seasonNumber}:${ep.episodeNumber}`);
       const name =
         pickLocalizedText(
-          [{ text: ep.name }, { text: ep.nameEn ?? "" }, { text: tmdbEp?.name ?? "" }],
+          [
+            { text: preferredVideoName(pref), score: PREFERRED_TEXT_SCORE },
+            { text: ep.name },
+            { text: ep.nameEn ?? "" },
+            { text: tmdbEp?.name ?? "" },
+          ],
           { forName: true, lang },
         ) ?? ep.name;
       const overview =
         pickLocalizedText(
-          [{ text: ep.overview }, { text: ep.overviewEn ?? "" }, { text: tmdbEp?.overview ?? "" }],
+          [
+            { text: preferredVideoOverview(pref), score: PREFERRED_TEXT_SCORE },
+            { text: ep.overview },
+            { text: ep.overviewEn ?? "" },
+            { text: tmdbEp?.overview ?? "" },
+          ],
           { lang },
         ) ?? ep.overview;
       let next = { ...ep, name, overview };
@@ -274,7 +292,14 @@ export function SeriesEpisodes({
       }
       return next;
     });
-  }, [orderedEpsRaw, imdbRatings, orderActive, orderSeasonEff, settings.tvdbSeasonType]);
+  }, [
+    orderedEpsRaw,
+    imdbRatings,
+    orderActive,
+    orderSeasonEff,
+    settings.tvdbSeasonType,
+    preferredVideos,
+  ]);
   const visibleOrderedEps = useMemo(
     () =>
       hideActive && hiddenSet.size > 0
@@ -336,7 +361,7 @@ export function SeriesEpisodes({
               className={`flex h-9 items-center gap-1.5 rounded-full px-3 text-[12.5px] font-semibold tabular-nums transition-colors ${
                 showHidden
                   ? "bg-ink text-canvas"
-                  : "border border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
+                  : "bg-white/[0.06] text-ink-muted hover:bg-white/[0.10] hover:text-ink"
               }`}
             >
               {showHidden ? <Eye size={14} strokeWidth={2.2} /> : <EyeOff size={14} strokeWidth={2.2} />}

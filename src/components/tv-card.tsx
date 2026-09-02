@@ -94,7 +94,7 @@ export const TvCard = memo(function TvCard({ meta, kids = false }: { meta: Meta;
       />
 
       <span className={`absolute z-10 flex gap-2.5 ${pos}`}>
-        <span className="h-[54px] w-[36px] shrink-0 overflow-hidden rounded-[6px] shadow-[0_8px_18px_-8px_rgba(0,0,0,0.9)] ring-1 ring-white/12">
+        <span className="h-[54px] w-[36px] shrink-0 overflow-hidden rounded-sm shadow-[0_8px_18px_-8px_rgba(0,0,0,0.9)] ring-1 ring-white/12">
           <img src={poster.src} onError={poster.onError} alt="" draggable={false} className="h-full w-full object-cover" />
         </span>
         <span className="flex min-w-0 flex-1 flex-col justify-end gap-1">

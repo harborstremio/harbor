@@ -41,7 +41,7 @@ export function Lightbox({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-canvas/95 p-10"
+      className="fixed inset-0 z-[170] flex items-center justify-center bg-canvas/95 p-10"
       role="dialog"
       aria-modal="true"
       aria-label={t("{title} image viewer", { title })}

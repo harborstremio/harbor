@@ -1,4 +1,5 @@
-import { Search, X } from "lucide-react";
+import { X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import type { AiProvider } from "@/lib/ai-models";
 import { ProviderLogo } from "@/components/ai-provider-logo";
 import { HoverTooltip } from "@/components/hover-tooltip";
@@ -27,10 +28,10 @@ export function EpisodeSearchToggle({
           type="button"
           onClick={onSearch}
           aria-label={t("Search episodes")}
-          className={`flex h-10 w-10 items-center justify-center rounded-full border transition-colors ${
+          className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
             searchActive
-              ? "border-accent/50 bg-accent/15 text-accent"
-              : "border-edge-soft bg-canvas/90 text-ink-muted hover:text-ink"
+              ? "bg-accent/15 text-accent"
+              : "bg-white/[0.06] text-ink-muted hover:bg-white/[0.10] hover:text-ink"
           }`}
         >
           <Search size={16} />
@@ -47,10 +48,10 @@ export function EpisodeSearchToggle({
             type="button"
             onClick={onAskAi}
             aria-label={t("Ask AI")}
-            className={`flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-[12.5px] font-medium transition-colors xl:px-3 ${
+            className={`flex h-10 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[12.5px] font-medium transition-colors xl:px-3 ${
               aiMode
-                ? "border-accent/50 bg-accent/15 text-accent"
-                : "border-edge-soft bg-canvas/90 text-ink-muted hover:text-ink"
+                ? "bg-accent/15 text-accent"
+                : "bg-white/[0.06] text-ink-muted hover:bg-white/[0.10] hover:text-ink"
             }`}
           >
             <ProviderLogo provider={aiProvider} size={16} />

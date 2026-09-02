@@ -76,7 +76,7 @@ export function PostCompose({
   };
 
   return (
-    <div className="flex gap-3 rounded-[14px] bg-surface p-3.5 ring-1 ring-edge-soft transition-shadow focus-within:ring-edge">
+    <div className="flex gap-3 rounded-lg bg-surface p-3.5 ring-1 ring-edge-soft transition-shadow focus-within:ring-edge">
       <Avatar src={meAvatar} size={38} alias={meAlias} />
       <div className="flex min-w-0 flex-1 flex-col gap-2.5">
         <textarea
@@ -126,7 +126,7 @@ export function PostCompose({
                   const sel = body.slice(el.selectionStart, el.selectionEnd);
                   splice(el.selectionStart, el.selectionEnd, tool.wrap[0] + sel + tool.wrap[1]);
                 }}
-                className="grid h-8 w-8 place-items-center rounded-[6px] text-ink-subtle transition-colors hover:bg-elevated hover:text-ink active:scale-90 motion-reduce:active:scale-100"
+                className="grid h-8 w-8 place-items-center rounded-sm text-ink-subtle transition-colors hover:bg-elevated hover:text-ink active:scale-90 motion-reduce:active:scale-100"
               >
                 <tool.icon size={15} strokeWidth={2.1} />
               </button>
@@ -136,7 +136,7 @@ export function PostCompose({
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => setPreview((v) => !v)}
               title={preview ? t("Edit") : t("Preview")}
-              className="ms-auto flex h-8 items-center gap-1.5 rounded-[6px] px-2.5 text-[12px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+              className="ms-auto flex h-8 items-center gap-1.5 rounded-sm px-2.5 text-[12px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
             >
               {preview ? <Pencil size={13} /> : <Eye size={14} />} {preview ? t("Edit") : t("Preview")}
             </button>

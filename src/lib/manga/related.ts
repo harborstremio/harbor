@@ -3,10 +3,14 @@ import { searchManga, type MangaSummary } from "@/lib/manga/api";
 
 export type MangaAdaptation = {
   anilistId: number;
+  malId?: number;
   title: string;
   cover?: string;
   banner?: string;
   format?: string;
+  episodes?: number;
+  year?: number;
+  score?: number;
 };
 
 type TitleFields = { english: string | null; romaji: string | null };
@@ -15,14 +19,16 @@ type RelationEdge = {
   relationType: string | null;
   node: {
     id: number;
+    idMal: number | null;
     type: string | null;
     format: string | null;
     episodes: number | null;
     seasonYear: number | null;
     startDate: { year: number | null } | null;
     title: TitleFields | null;
-    coverImage: { large: string | null } | null;
+    coverImage: { extraLarge: string | null; large: string | null } | null;
     bannerImage: string | null;
+    averageScore: number | null;
   };
 };
 
@@ -50,14 +56,16 @@ const ADAPTATION_QUERY = `query ($s: String) {
           relationType
           node {
             id
+            idMal
             type
             format
             episodes
             seasonYear
             startDate { year }
             title { english romaji }
-            coverImage { large }
+            coverImage { extraLarge large }
             bannerImage
+            averageScore
           }
         }
       }
@@ -128,10 +136,14 @@ export async function mangaAdaptation(title: string): Promise<MangaAdaptation | 
     const name = pickTitle(node.title);
     const result: MangaAdaptation = {
       anilistId: node.id,
+      malId: node.idMal ?? undefined,
       title: name ?? "Adaptation",
-      cover: node.coverImage?.large ?? undefined,
+      cover: node.coverImage?.extraLarge ?? node.coverImage?.large ?? undefined,
       banner: node.bannerImage ?? undefined,
       format: node.format ?? undefined,
+      episodes: node.episodes ?? undefined,
+      year: node.seasonYear ?? node.startDate?.year ?? undefined,
+      score: node.averageScore ?? undefined,
     };
     adaptationCache.set(key, result);
     return result;

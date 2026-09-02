@@ -19,6 +19,9 @@ import type { SubResult } from "@/lib/subtitles/types";
 import { parseRelease } from "@/lib/subtitles/release-match";
 import { providerLabel } from "@/lib/subtitles/provider-label";
 import { useT } from "@/lib/i18n";
+import { subtitleSearchMatchDetails } from "@/lib/subtitles/match-explanation";
+import type { StreamHints } from "@/lib/subtitles/stream-hints";
+import { subtitleClassificationLabels } from "@/lib/subtitles/classification-labels";
 
 const PAGE_SIZE = 30;
 
@@ -48,11 +51,13 @@ export function LangGroup({
   items,
   defaultOpen,
   onAdd,
+  streamHints,
 }: {
   lang: string;
   items: SubResult[];
   defaultOpen: boolean;
   onAdd: (r: SubResult) => void | Promise<boolean | void>;
+  streamHints?: StreamHints;
 }) {
   const t = useT();
   const [open, setOpen] = useState(defaultOpen);
@@ -128,6 +133,7 @@ export function LangGroup({
             result={r}
             lang={lang}
             onAdd={() => onAdd(r)}
+            streamHints={streamHints}
           />
         ))}
     </div>
@@ -138,10 +144,12 @@ function ResultRow({
   result,
   lang,
   onAdd,
+  streamHints,
 }: {
   result: SubResult;
   lang: string;
   onAdd: () => void | Promise<boolean | void>;
+  streamHints?: StreamHints;
 }) {
   const t = useT();
   const { openAt } = useContextMenu();
@@ -192,6 +200,7 @@ function ResultRow({
         title: result.title,
         lang: result.lang,
         format: result.format,
+        downloadAuth: result.downloadAuth,
         label: t("Subtitle"),
       });
       if (outcome === "ok") {
@@ -239,6 +248,8 @@ function ResultRow({
   ]
     .filter(Boolean)
     .join(" · ");
+  const matchDetails = subtitleSearchMatchDetails(result, streamHints);
+  const classificationLabels = subtitleClassificationLabels(result, t);
   const contextTarget = {
     kind: "subtitle" as const,
     label: primaryName,
@@ -252,10 +263,9 @@ function ResultRow({
       release: result.release,
       author: result.author,
       downloads: result.downloads,
-      flags: [
-        result.hearingImpaired ? t("HI/SDH") : null,
-        result.forced ? t("Forced") : null,
-      ].filter((flag): flag is string => flag != null),
+      compatibilityPercent: matchDetails.compatibilityPercent,
+      matchReasons: matchDetails.reasons,
+      flags: classificationLabels.map(({ label }) => label),
     },
     download,
   };
@@ -310,7 +320,7 @@ function ResultRow({
               </span>
             )}
           </span>
-          <span className="flex items-center gap-2 text-[11.5px] text-ink-subtle">
+          <span className="flex flex-wrap items-center gap-2 text-[11.5px] text-ink-subtle">
             <span className={`truncate font-semibold ${sourceColor}`}>{providerName}</span>
             {result.format && (
               <>
@@ -324,16 +334,24 @@ function ResultRow({
                 <span>{t("{count} dl", { count: compactNumber(result.downloads) })}</span>
               </>
             )}
-            {result.hearingImpaired && (
-              <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-200">
-                {t("HI/SDH")}
-              </span>
+            {matchDetails.compatibilityPercent > 0 && (
+              <>
+                <span aria-hidden>·</span>
+                <span>{matchDetails.compatibilityPercent}%</span>
+              </>
             )}
-            {result.forced && (
-              <span className="rounded bg-sky-400/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-sky-200">
-                {t("Forced")}
+            {classificationLabels.map(({ kind, label }) => (
+              <span
+                key={kind}
+                className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${
+                  kind === "hearingImpaired" || kind === "machineTranslated"
+                    ? "bg-amber-400/15 text-amber-200"
+                    : "bg-sky-400/15 text-sky-200"
+                }`}
+              >
+                {label}
               </span>
-            )}
+            ))}
           </span>
         </div>
       </button>

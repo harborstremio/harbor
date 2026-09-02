@@ -11,11 +11,11 @@ export function ProfilesStrip() {
     locked ? openPicker({ kind: "unlock", profileId: id }) : selectProfile(id);
 
   const gridClass = compact
-    ? "grid grid-cols-[repeat(auto-fill,minmax(118px,1fr))] gap-2.5"
-    : "grid grid-cols-2 gap-3 sm:grid-cols-3";
+    ? "grid grid-cols-[repeat(auto-fill,minmax(118px,1fr))] gap-1.5"
+    : "grid grid-cols-2 gap-1.5 sm:grid-cols-3";
   const cardPad = compact ? "gap-2.5 p-3.5" : "gap-3.5 p-5";
   const avatarBox = compact ? "h-14 w-14" : "h-[78px] w-[78px]";
-  const avatarRing = compact ? 2.5 : 3;
+  const avatarPad = compact ? "p-[2.5px]" : "p-[3px]";
   const nameClass = compact ? "text-[13px]" : "text-[15px]";
 
   return (
@@ -26,12 +26,9 @@ export function ProfilesStrip() {
         return (
           <div
             key={p.id}
-            className={`group relative flex flex-col items-center rounded-2xl border transition-colors duration-200 ${cardPad} ${
-              active
-                ? "border-transparent bg-elevated/70"
-                : "border-edge-soft/50 bg-canvas/30 hover:border-edge-soft hover:bg-elevated/40"
+            className={`group relative flex flex-col items-center rounded-md transition-colors duration-200 ${cardPad} ${
+              active ? "bg-ink" : "bg-canvas hover:bg-raised"
             }`}
-            style={active ? { boxShadow: `inset 0 0 0 2px ${p.color}` } : undefined}
           >
             <button
               type="button"
@@ -45,23 +42,27 @@ export function ProfilesStrip() {
             >
               <span className="relative">
                 <span
-                  className={`flex items-center justify-center overflow-hidden rounded-full bg-elevated transition-transform duration-200 group-hover:scale-[1.03] ${avatarBox}`}
-                  style={{ boxShadow: `0 0 0 ${avatarRing}px ${p.color}` }}
+                  className={`block shrink-0 rounded-full transition-transform duration-200 group-hover:scale-[1.03] ${avatarPad}`}
+                  style={{ background: p.color }}
                 >
-                  {p.avatar ? (
-                    <img
-                      src={p.avatar}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      draggable={false}
-                    />
-                  ) : (
-                    <CatAvatar className="h-full w-full" />
-                  )}
+                  <span
+                    className={`flex items-center justify-center overflow-hidden rounded-full bg-elevated ${avatarBox}`}
+                  >
+                    {p.avatar ? (
+                      <img
+                        src={p.avatar}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        draggable={false}
+                      />
+                    ) : (
+                      <CatAvatar className="h-full w-full" />
+                    )}
+                  </span>
                 </span>
                 {locked && (
                   <span
-                    className={`absolute -bottom-0.5 -end-0.5 flex items-center justify-center rounded-full bg-canvas text-ink ring-1 ring-edge ${
+                    className={`absolute -bottom-0.5 -end-0.5 flex items-center justify-center rounded-full bg-canvas text-ink ${
                       compact ? "h-5 w-5" : "h-6 w-6"
                     }`}
                   >
@@ -69,11 +70,17 @@ export function ProfilesStrip() {
                   </span>
                 )}
               </span>
-              <span className="flex w-full flex-col items-center gap-1">
-                <span className={`max-w-full truncate font-semibold text-ink ${nameClass}`}>{p.name}</span>
+              <span className="flex w-full flex-col items-center gap-1.5">
+                <span
+                  className={`max-w-full truncate font-semibold ${nameClass} ${
+                    active ? "text-canvas" : "text-ink"
+                  }`}
+                >
+                  {p.name}
+                </span>
                 {active ? (
-                  <span className="flex items-center gap-1 text-[10.5px] font-bold uppercase tracking-[0.14em] text-accent">
-                    <Check size={11} strokeWidth={3} />
+                  <span className="flex items-center gap-1 rounded-full bg-canvas px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-[0.14em] text-ink">
+                    <Check size={12} strokeWidth={3} />
                     {t("Active")}
                   </span>
                 ) : p.isPrimary ? (
@@ -84,7 +91,7 @@ export function ProfilesStrip() {
                     {t("profile.primary")}
                   </span>
                 ) : (
-                  <span className={compact ? "text-[11px] text-ink-subtle" : "text-[12px] text-ink-subtle"}>
+                  <span className={compact ? "text-[11.5px] text-ink-subtle" : "text-[12.5px] text-ink-subtle"}>
                     {t("Tap to switch")}
                   </span>
                 )}
@@ -94,9 +101,9 @@ export function ProfilesStrip() {
               type="button"
               onClick={() => openPicker({ kind: "edit", profileId: p.id })}
               aria-label={t("Edit {name}", { name: p.name })}
-              className={`absolute flex items-center justify-center rounded-full text-ink-subtle/70 transition-colors hover:bg-canvas hover:text-ink ${
-                compact ? "end-1.5 top-1.5 h-7 w-7" : "end-2.5 top-2.5 h-8 w-8"
-              }`}
+              className={`absolute flex items-center justify-center rounded-md transition-colors hover:bg-elevated hover:text-ink ${
+                active ? "text-canvas" : "text-ink-subtle"
+              } ${compact ? "end-1.5 top-1.5 h-7 w-7" : "end-2.5 top-2.5 h-8 w-8"}`}
             >
               <Pencil size={compact ? 13 : 14} strokeWidth={2.2} />
             </button>
@@ -107,11 +114,9 @@ export function ProfilesStrip() {
         type="button"
         onClick={() => openPicker({ kind: "create" })}
         aria-label={t("Add profile")}
-        className={`group flex flex-col items-center justify-center rounded-2xl border border-dashed border-edge-soft/60 text-ink-subtle transition-colors duration-200 hover:border-ink-subtle hover:bg-elevated/30 hover:text-ink ${cardPad}`}
+        className={`group flex flex-col items-center justify-center rounded-md bg-canvas text-ink-subtle transition-colors duration-200 hover:bg-raised hover:text-ink ${cardPad}`}
       >
-        <span
-          className={`flex items-center justify-center rounded-full border-2 border-dashed border-current ${avatarBox}`}
-        >
+        <span className={`flex items-center justify-center rounded-full bg-elevated ${avatarBox}`}>
           <Plus size={compact ? 22 : 26} strokeWidth={2.2} />
         </span>
         <span className={`font-semibold ${nameClass}`}>{t("Add")}</span>

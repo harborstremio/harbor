@@ -1,7 +1,7 @@
 import Hls from "hls.js";
 import mpegts from "mpegts.js";
 import {
-  emptySnapshot,
+  initialPlayerSnapshot,
   type PlayerBridge,
   type PlayerCapabilities,
   type PlayerSnapshot,
@@ -9,20 +9,26 @@ import {
   type TrackInfo,
 } from "../bridge";
 import { fetchAndParse, findActiveCue } from "@/lib/subtitles/parser";
+import { prepareSubtitle } from "@/lib/subtitles/prepare";
+import { subtitleTrackDownloadHeaders } from "@/lib/subtitles/provider-auth";
+import { takePreparedSubtitle } from "@/lib/subtitles/prepared-registry";
 import type { SubTrack } from "./types";
 import { bufferedAhead, readAudioTracks, videoAudio } from "./audio-tracks";
-import { mapErrorCode, mapErrorMessage } from "./error-map";
+import { mapErrorCode } from "./error-map";
 import { noteSubtitleOrigin } from "@/lib/subtitles/subtitle-memory";
 import { mountCustomPip } from "./pip";
 import { finishPlaybackTrace, markPlaybackTrace } from "@/lib/perf/playback-trace";
 import { isPlayerInteractionLocked } from "@/lib/player/interaction-lock";
+import { SubtitleSelectionCoordinator } from "@/lib/player/subtitle-selection";
+import { PreparedSubtitleSeedBatch } from "@/lib/subtitles/seed-batch";
+import { isSafeProviderSubtitleUrl } from "@/lib/subtitles/provider-url";
 
 let DOCUMENT_PIP_KNOWN_BROKEN = false;
 
 export function createHtml5Bridge(): PlayerBridge {
   let video: HTMLVideoElement | null = null;
   let host: HTMLElement | null = null;
-  let snap: PlayerSnapshot = { ...emptySnapshot };
+  let snap: PlayerSnapshot = initialPlayerSnapshot();
   const listeners = new Set<(s: PlayerSnapshot) => void>();
   let pendingStart: number | null = null;
   let pipWindow: Window | null = null;
@@ -42,6 +48,9 @@ export function createHtml5Bridge(): PlayerBridge {
   let cueTickerRaf: number | null = null;
   let lastCueId = "";
   let activeTraceId: string | null = null;
+  let mediaRevision = 0;
+  const mainSubtitleSelection = new SubtitleSelectionCoordinator();
+  const secondarySubtitleSelection = new SubtitleSelectionCoordinator();
 
   const emit = () => {
     const next: PlayerSnapshot = { ...snap };
@@ -98,7 +107,7 @@ export function createHtml5Bridge(): PlayerBridge {
     if (video.error) {
       snap.status = "error";
       snap.errorCode = mapErrorCode(video.error.code);
-      snap.errorMessage = mapErrorMessage(video.error.code);
+      snap.errorMessage = video.error.message || null;
     } else if (video.ended) {
       snap.status = "ended";
     } else if (!video.paused) {
@@ -135,12 +144,31 @@ export function createHtml5Bridge(): PlayerBridge {
       selected: t.id === activeSubId,
       secondary: t.id === secondarySubId,
       external: t.external,
-      url: t.url,
+      prepared: t.metadata?.prepared === true || (t.cues != null && t.cues.length > 0),
+      autoSelectionEligible: t.metadata?.autoSelectionEligible,
+      url: t.originalUrl ?? t.url,
+      originalUrl: t.metadata?.originalUrl ?? t.originalUrl,
+      downloadAuth: t.metadata?.downloadAuth,
+      format: t.metadata?.format,
       release: t.metadata?.release,
       provider: t.metadata?.provider,
+      providerDerived: t.metadata?.providerDerived,
       fps: t.metadata?.fps,
       downloads: t.metadata?.downloads,
       author: t.metadata?.author,
+      uploadedAt: t.metadata?.uploadedAt,
+      rating: t.metadata?.rating,
+      productionType: t.metadata?.productionType,
+      releaseType: t.metadata?.releaseType,
+      hearingImpaired: t.metadata?.hearingImpaired,
+      forced: t.metadata?.forced,
+      foreignOnly: t.metadata?.foreignOnly,
+      machineTranslated: t.metadata?.machineTranslated,
+      fromTrusted: t.metadata?.fromTrusted,
+      providerMatch: t.metadata?.providerMatch,
+      timingStatus: t.metadata?.timingStatus,
+      timingMeasurementStatus: t.metadata?.timingMeasurementStatus,
+      matchExplanation: t.metadata?.matchExplanation,
       matchScore: t.metadata?.matchScore,
       matchConfidence: t.metadata?.matchConfidence,
       matchReasons: t.metadata?.matchReasons,
@@ -213,23 +241,74 @@ export function createHtml5Bridge(): PlayerBridge {
     tsPlayer = null;
   };
 
-  const ensureLoaded = async (track: SubTrack) => {
-    if (track.cues || track.loading) return;
+  const disposeSubtitleTracks = () => {
+    for (const track of subTracks) track.cleanup?.();
+    subTracks.length = 0;
+  };
+
+  const ensureLoaded = (track: SubTrack): Promise<boolean> => {
+    if (track.cues) return Promise.resolve(track.cues.length > 0);
+    if (track.loadingPromise) return track.loadingPromise;
+    const requestMediaRevision = mediaRevision;
     track.loading = true;
-    try {
-      track.cues = await fetchAndParse(track.url, { ...track.metadata, lang: track.lang });
-    } catch (e) {
-      console.warn("[subtitles] failed to load track", {
-        provider: track.metadata?.provider,
-        release: track.metadata?.release,
-        error: e instanceof Error ? e.name : "unknown",
-      });
-      track.cues = [];
-    } finally {
-      track.loading = false;
-      refreshSnapshot();
-      tickCues();
-    }
+    let loadingPromise: Promise<boolean>;
+    loadingPromise = (async () => {
+      try {
+        if (/^https?:/i.test(track.url)) {
+          const prepared = await prepareSubtitle({
+            url: track.url,
+            format: track.metadata?.format,
+            encoding: track.metadata?.encoding,
+            language: track.lang,
+            release: track.metadata?.release,
+            filename: track.metadata?.rawFilename,
+            requestHeaders: subtitleTrackDownloadHeaders(
+              track.metadata?.downloadAuth,
+              track.url,
+              track.metadata?.providerDerived ?? Boolean(track.metadata?.provider),
+            ),
+          });
+          if (requestMediaRevision !== mediaRevision || !subTracks.includes(track)) {
+            prepared.cleanup();
+            return false;
+          }
+          track.cleanup?.();
+          track.cleanup = prepared.cleanup;
+          track.url = prepared.playableUrl;
+          track.cues = prepared.cues;
+          track.metadata = {
+            ...track.metadata,
+            format: prepared.format,
+            encoding: prepared.encoding,
+            rawFilename: prepared.rawFilename,
+            archive: prepared.archive,
+            prepared: true,
+          };
+        } else {
+          const cues = await fetchAndParse(track.url, { ...track.metadata, lang: track.lang });
+          if (requestMediaRevision !== mediaRevision || !subTracks.includes(track)) return false;
+          track.cues = cues;
+        }
+        return track.cues.length > 0;
+      } catch (e) {
+        console.warn("[subtitles] failed to load track", {
+          provider: track.metadata?.provider,
+          release: track.metadata?.release,
+          error: e instanceof Error ? e.name : "unknown",
+        });
+        if (requestMediaRevision === mediaRevision && subTracks.includes(track)) track.cues = [];
+        return false;
+      } finally {
+        delete track.loadingPromise;
+        track.loading = false;
+        if (requestMediaRevision === mediaRevision && subTracks.includes(track)) {
+          refreshSnapshot();
+          tickCues();
+        }
+      }
+    })();
+    track.loadingPromise = loadingPromise;
+    return loadingPromise;
   };
 
   const onAny = () => {
@@ -376,6 +455,9 @@ export function createHtml5Bridge(): PlayerBridge {
       bind();
     },
     detach() {
+      mediaRevision += 1;
+      mainSubtitleSelection.invalidate();
+      secondarySubtitleSelection.invalidate();
       unbind();
       stopCueTicker();
       if (hls) {
@@ -399,6 +481,9 @@ export function createHtml5Bridge(): PlayerBridge {
     },
     async load(src: PlayerSource) {
       if (!video) return;
+      mediaRevision += 1;
+      mainSubtitleSelection.invalidate();
+      secondarySubtitleSelection.invalidate();
       if (activeTraceId && activeTraceId !== src.traceId) {
         finishPlaybackTrace(activeTraceId, "replaced");
       }
@@ -458,7 +543,7 @@ export function createHtml5Bridge(): PlayerBridge {
         video.src = src.url;
       }
       markPlaybackTrace(activeTraceId, "loadfile-accepted");
-      subTracks.length = 0;
+      disposeSubtitleTracks();
       activeSubId = null;
       secondarySubId = null;
       subDelaySec = 0;
@@ -468,18 +553,51 @@ export function createHtml5Bridge(): PlayerBridge {
       snap.secondarySubText = "";
       snap.subDelaySec = 0;
       if (src.subtitles?.length) {
+        const seedRevision = mediaRevision;
+        const seedTracks: SubTrack[] = [];
         for (let i = 0; i < src.subtitles.length; i++) {
           const s = src.subtitles[i];
-          subTracks.push({
+          if (s.trustedSource !== true && !isSafeProviderSubtitleUrl(s.url)) continue;
+          const track: SubTrack = {
             id: s.id ?? `seed-${i}`,
             url: s.url,
+            originalUrl: s.url,
             lang: s.lang,
             title: undefined,
             external: true,
             cues: null,
             loading: false,
-          });
+            metadata: {
+              originalUrl: s.url,
+              providerDerived: s.trustedSource !== true,
+              autoSelectionEligible: false,
+            },
+          };
+          subTracks.push(track);
+          seedTracks.push(track);
         }
+        const seedBatch = new PreparedSubtitleSeedBatch(seedTracks);
+        void Promise.all(
+          seedTracks.map(async (track) => {
+            if (await ensureLoaded(track)) seedBatch.markReady(track);
+          }),
+        ).then(() => {
+          seedBatch.commit(
+            () => seedRevision === mediaRevision,
+            (readyTracks) => {
+              for (const track of readyTracks) {
+                if (!subTracks.includes(track)) continue;
+                track.metadata = {
+                  ...track.metadata,
+                  prepared: true,
+                  autoSelectionEligible: true,
+                };
+              }
+              refreshSnapshot();
+              tickCues();
+            },
+          );
+        });
       }
       snap.subtitleTracks = readCustomSubtitleTracks();
       snap.status = "loading";
@@ -588,25 +706,56 @@ export function createHtml5Bridge(): PlayerBridge {
       refreshSnapshot();
     },
     setSubtitleTrack(id) {
-      activeSubId = id;
-      lastCueId = "";
-      if (id != null) {
-        const track = subTracks.find((t) => t.id === id);
-        if (track) void ensureLoaded(track);
-      } else {
+      if (id == null) {
+        mainSubtitleSelection.invalidate();
+        activeSubId = null;
+        lastCueId = "";
         snap.subText = "";
         snap.subStartSec = 0;
+        refreshSnapshot();
+        tickCues();
+        return;
       }
-      refreshSnapshot();
-      tickCues();
+      const track = subTracks.find((candidate) => candidate.id === id);
+      if (!track) return;
+      const request = mainSubtitleSelection.begin(mediaRevision, id, activeSubId);
+      void ensureLoaded(track).then((loaded) => {
+        const settlement = mainSubtitleSelection.settle(
+          request,
+          mediaRevision,
+          loaded,
+          (candidateId) => subTracks.some((candidate) => candidate.id === candidateId),
+        );
+        if (!settlement.current) return;
+        activeSubId = settlement.selectedId;
+        lastCueId = "";
+        refreshSnapshot();
+        tickCues();
+      });
     },
     setSecondarySubtitleTrack(id) {
-      secondarySubId = id;
       if (id == null) {
+        secondarySubtitleSelection.invalidate();
+        secondarySubId = null;
         snap.secondarySubText = "";
       } else {
         const track = subTracks.find((t) => t.id === id);
-        if (track) void ensureLoaded(track);
+        if (!track) return;
+        const request = secondarySubtitleSelection.begin(mediaRevision, id, secondarySubId);
+        void ensureLoaded(track).then((loaded) => {
+          const settlement = secondarySubtitleSelection.settle(
+            request,
+            mediaRevision,
+            loaded,
+            (candidateId) => subTracks.some((candidate) => candidate.id === candidateId),
+          );
+          if (!settlement.current) return;
+          secondarySubId = settlement.selectedId;
+          if (secondarySubId == null) snap.secondarySubText = "";
+          refreshSnapshot();
+          tickCues();
+        });
+        return;
       }
       refreshSnapshot();
       tickCues();
@@ -631,6 +780,13 @@ export function createHtml5Bridge(): PlayerBridge {
     setVideoEq() {},
     setAnime4kShaders() {},
     async addSubtitle(url, lang, title, select, metadata): Promise<boolean> {
+      const requestMediaRevision = mediaRevision;
+      const id = `ext-${subTracks.length}-${Date.now()}`;
+      const selectionRequest =
+        select === true ? mainSubtitleSelection.begin(mediaRevision, id, activeSubId) : null;
+      const prepared = takePreparedSubtitle(url);
+      const providerDerived = metadata?.providerDerived ?? Boolean(metadata?.provider);
+      if (!prepared && providerDerived && !isSafeProviderSubtitleUrl(url)) return false;
       let resolvedUrl = url;
       if (
         !/^(https?|blob|data):/i.test(url) &&
@@ -642,23 +798,63 @@ export function createHtml5Bridge(): PlayerBridge {
           resolvedUrl = convertFileSrc(url);
         } catch {}
       }
-      const id = `ext-${subTracks.length}-${Date.now()}`;
+      if (requestMediaRevision !== mediaRevision) {
+        prepared?.cleanup();
+        return false;
+      }
       const track: SubTrack = {
         id,
         url: resolvedUrl,
+        originalUrl: metadata?.originalUrl ?? url,
         lang,
         title,
         external: true,
-        cues: null,
+        cues: prepared?.cues ?? null,
         loading: false,
-        metadata,
+        metadata: prepared
+          ? {
+              ...metadata,
+              format: prepared.format,
+              encoding: prepared.encoding,
+              rawFilename: prepared.rawFilename,
+              archive: prepared.archive,
+              prepared: true,
+            }
+          : metadata,
+        cleanup: prepared?.cleanup,
       };
       subTracks.push(track);
       noteSubtitleOrigin(resolvedUrl, url);
-      if (select === true) {
-        activeSubId = id;
-        lastCueId = "";
-        await ensureLoaded(track);
+      if (selectionRequest) {
+        const loaded = await ensureLoaded(track);
+        if (requestMediaRevision !== mediaRevision || !subTracks.includes(track)) {
+          const index = subTracks.indexOf(track);
+          if (index >= 0) {
+            subTracks.splice(index, 1);
+            track.cleanup?.();
+            track.cleanup = undefined;
+          }
+          return false;
+        }
+        if (!loaded) {
+          const index = subTracks.indexOf(track);
+          if (index >= 0) subTracks.splice(index, 1);
+          track.cleanup?.();
+          track.cleanup = undefined;
+        }
+        const settlement = mainSubtitleSelection.settle(
+          selectionRequest,
+          mediaRevision,
+          loaded,
+          (candidateId) => subTracks.some((candidate) => candidate.id === candidateId),
+        );
+        if (settlement.current) {
+          activeSubId = settlement.selectedId;
+          lastCueId = "";
+        }
+        refreshSnapshot();
+        tickCues();
+        return loaded;
       }
       refreshSnapshot();
       return true;
@@ -848,10 +1044,13 @@ export function createHtml5Bridge(): PlayerBridge {
       };
     },
     destroy() {
+      mediaRevision += 1;
+      mainSubtitleSelection.invalidate();
+      secondarySubtitleSelection.invalidate();
       finishPlaybackTrace(activeTraceId, "aborted");
       activeTraceId = null;
       stopCueTicker();
-      subTracks.length = 0;
+      disposeSubtitleTracks();
       activeSubId = null;
       if (hls) {
         try {

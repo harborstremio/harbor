@@ -34,7 +34,7 @@ test("selecting a torrent file does not start peer transfer", () => {
   assert.ok(start >= 0 && end > start, "torrent_engine_select block is missing");
   const select = engine.slice(start, end);
   assert.match(select, /update_only_files_bounded\(&session, &handle, &only\)/);
-  assert.doesNotMatch(select, /\.unpause\(/);
+  assert.doesNotMatch(select, /session\.unpause\(/);
 });
 
 test("the local HTTP stream request starts a paused torrent on demand", () => {
@@ -160,11 +160,11 @@ test("existing torrent preparation is reused without repeating magnet discovery"
   assert.match(dhtBoot, /pub\(crate\) fn info_hash_from_magnet/);
 });
 
-test("P2P season packs prepare serially and stop retrying the same failed setup", () => {
-  assert.match(seasonDownload, /const limit = limiter\(preferP2p \? 1 : MAX_CONCURRENT\)/);
-  assert.match(seasonDownload, /let p2pSetupFailed = false/);
-  assert.match(seasonDownload, /if \(preferP2p && p2pSetupFailed\)/);
-  assert.match(seasonDownload, /if \(preferP2p\) p2pSetupFailed = true/);
+test("P2P season packs use one atomic torrent before concurrent debrid fallback", () => {
+  assert.match(seasonDownload, /if \(stream\.infoHash && localTorrentAllowed\(\)\)/);
+  assert.match(seasonDownload, /downloadPackViaEngine/);
+  assert.match(seasonDownload, /const limit = limiter\(MAX_CONCURRENT\)/);
+  assert.doesNotMatch(seasonDownload, /p2pSetupFailed/);
 });
 
 test("torrent file selection has a bounded recoverable wait", () => {
@@ -216,10 +216,10 @@ test("raw torrent downloads use the same P2P classification as the picker", () =
   );
   assert.match(
     pickHandler,
-    /forceP2p \|\| \(intent === "download" && shouldPreferP2pDownload\(stream\)\)/,
+    /const effectiveForceP2p =\s*forceP2p \|\| \(intent === "download" && shouldPreferP2pDownload\(stream\)\)/,
   );
-  assert.match(seasonDownload, /const preferP2p = shouldPreferP2pDownload\(packStream\)/);
-  assert.match(seasonDownload, /resolveStream\([\s\S]*?true,\s*preferP2p,\s*\{ season:/);
+  assert.match(seasonDownload, /downloadPackViaEngine/);
+  assert.match(seasonDownload, /resolveStream\([\s\S]*?true,\s*false,\s*\{ season:/);
 });
 
 test("completed P2P downloads are reused by exact torrent identity", () => {
@@ -242,7 +242,7 @@ test("completed P2P downloads are reused by exact torrent identity", () => {
   assert.match(pickHandler, /intent !== "download"/);
   assert.match(episodePanel, /r\.via === "local-download"/);
   assert.match(autoDownload, /hint, true, false\)/);
-  assert.match(seasonDownload, /true,\s+false,\s+\)\.catch/);
+  assert.match(seasonDownload, /resolveStream\([\s\S]*?true,\s*false,[\s\S]*?true,\s*\)\.catch/);
   assert.match(castResolve, /undefined, true, false\)/);
 });
 

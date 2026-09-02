@@ -1,4 +1,5 @@
 import { BookOpen } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import type { RemoteMangaState } from "@/lib/remote/protocol";
 
 const MANGA_NOWBAR_CSS = `
@@ -18,7 +19,16 @@ const MANGA_NOWBAR_CSS = `
 }
 `;
 
-export function MangaNowBar({ m, hidden, onExpand }: { m: RemoteMangaState; hidden: boolean; onExpand: () => void }) {
+export function MangaNowBar({
+  m,
+  hidden,
+  onExpand,
+}: {
+  m: RemoteMangaState;
+  hidden: boolean;
+  onExpand: () => void;
+}) {
+  const t = useT();
   return (
     <div
       className="harbor-manga-nowbar-slide pointer-events-none fixed inset-x-0 z-30 flex justify-center px-3"
@@ -36,8 +46,12 @@ export function MangaNowBar({ m, hidden, onExpand }: { m: RemoteMangaState; hidd
             {m.cover && <img src={m.cover} alt="" className="h-full w-full object-cover" />}
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-[13.5px] font-semibold text-ink">{m.title || "Reading"}</span>
-            <span className="truncate text-[11.5px] text-ink-muted">Reading {m.chapterLabel}</span>
+            <span className="truncate text-[13.5px] font-semibold text-ink">
+              {m.title || t("Reading")}
+            </span>
+            <span className="truncate text-[11.5px] text-ink-muted">
+              {t("Reading {chapter}", { chapter: m.chapterLabel })}
+            </span>
           </span>
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-canvas">
             <BookOpen size={16} strokeWidth={2.2} />

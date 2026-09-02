@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePlaybackPosition } from "@/lib/player/playback-clock";
 import { SkipPill } from "@/components/player/skip-pill";
+import { BpSkipPill } from "@/views/big-picture/player/bp-skip-pill";
 import { activeSegment, type SkipSegment } from "@/lib/skip-intro";
 import { useSettings } from "@/lib/settings";
 import type { SpoilerMask } from "@/lib/spoilers";
@@ -22,6 +23,7 @@ export function SkipPillContainer({
   nextEpMask,
   visible,
   allowAutoSkip = true,
+  tenFoot = false,
   onSkip,
   onNextEpisode,
   onCancelAutoNext,
@@ -35,6 +37,8 @@ export function SkipPillContainer({
   nextEpMask?: SpoilerMask;
   visible: boolean;
   allowAutoSkip?: boolean;
+  /** Swap the mouse pill for the D-pad one. All the timing logic is shared. */
+  tenFoot?: boolean;
   onSkip: (sec: number) => void;
   onNextEpisode: () => void;
   onCancelAutoNext: () => void;
@@ -86,63 +90,60 @@ export function SkipPillContainer({
     onSkip,
   ]);
 
+  const [autoHiddenKey, setAutoHiddenKey] = useState<string | null>(null);
   const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(() => new Set());
   const prevSkipKeyRef = useRef<string | null>(null);
-
   useEffect(() => {
+    setAutoHiddenKey(null);
     setDismissedKeys(new Set());
     prevSkipKeyRef.current = null;
   }, [skipSegments]);
-
   const buttonKey =
     realActiveSkip && settings.showSkipButton
       ? `${realActiveSkip.kind}:${Math.round(realActiveSkip.startSec)}:${Math.round(realActiveSkip.endSec)}`
       : null;
-
   useEffect(() => {
-    // When playback leaves the active skip segment (e.g. user seeks back to the start of the video),
-    // clear the dismissed/hidden state so seeking back into the intro segment shows the Skip Intro prompt again!
+    if (!buttonKey || settings.skipButtonHideSec <= 0) return;
+    const id = window.setTimeout(() => setAutoHiddenKey(buttonKey), settings.skipButtonHideSec * 1000);
+    return () => window.clearTimeout(id);
+  }, [buttonKey, settings.skipButtonHideSec]);
+  useEffect(() => {
     if (prevSkipKeyRef.current && prevSkipKeyRef.current !== buttonKey) {
-      const old = prevSkipKeyRef.current;
+      const previousKey = prevSkipKeyRef.current;
+      setAutoHiddenKey((prev) => (prev === previousKey ? null : prev));
       setDismissedKeys((prev) => {
-        if (!prev.has(old)) return prev;
+        if (!prev.has(previousKey)) return prev;
         const next = new Set(prev);
-        next.delete(old);
+        next.delete(previousKey);
         return next;
       });
     }
     prevSkipKeyRef.current = buttonKey;
   }, [buttonKey]);
-
-  const skipHidden = buttonKey != null && dismissedKeys.has(buttonKey);
+  const skipHidden =
+    buttonKey != null && (buttonKey === autoHiddenKey || dismissedKeys.has(buttonKey));
   const displaySkip = settings.showSkipButton && !skipHidden ? realActiveSkip : null;
   const activeSkip = displaySkip ?? syntheticOutro;
 
-  const activeKey =
-    buttonKey ??
-    (activeSkip
-      ? `${activeSkip.kind}:${Math.round(activeSkip.startSec)}:${Math.round(activeSkip.endSec)}`
-      : null);
+  const shared = {
+    segment: activeSkip,
+    hasNextEp: hasNextEpDisplay && leadSec > 0,
+    nextEp,
+    nextEpMask,
+    remainingSec,
+    leadSec,
+    visible,
+    onSkip: () => {
+      if (activeSkip) onSkip(activeSkip.endSec);
+    },
+    onNextEpisode,
+    onCancelAutoNext,
+    onDismiss:
+      displaySkip && buttonKey
+        ? () => setDismissedKeys((prev) => new Set(prev).add(buttonKey))
+        : undefined,
+  };
 
-  return (
-    <SkipPill
-      engine={engine}
-      segment={activeSkip}
-      hasNextEp={hasNextEpDisplay && leadSec > 0}
-      nextEp={nextEp}
-      nextEpMask={nextEpMask}
-      remainingSec={remainingSec}
-      leadSec={leadSec}
-      visible={visible}
-      countdownSec={settings.skipButtonHideSec}
-      onSkip={() => {
-        if (activeSkip) onSkip(activeSkip.endSec);
-      }}
-      onNextEpisode={onNextEpisode}
-      onCancelAutoNext={onCancelAutoNext}
-      onDismiss={
-        activeKey ? () => setDismissedKeys((prev) => new Set(prev).add(activeKey)) : undefined
-      }
-    />
-  );
+  if (tenFoot) return <BpSkipPill {...shared} />;
+  return <SkipPill engine={engine} {...shared} />;
 }

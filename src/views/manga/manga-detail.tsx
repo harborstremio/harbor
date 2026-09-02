@@ -1,16 +1,9 @@
+import { NavGlyph } from "@/components/icons/nav-glyph";
+import { UiIcon } from "@/components/ui-icon";
+import { PopIcon } from "@/components/pop-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CoverImg } from "@/components/cover-img";
-import {
-  ArrowDownToLine,
-  Award,
-  BookOpen,
-  ChevronLeft,
-  Flame,
-  Heart,
-  RotateCcw,
-  Sparkles,
-  Star,
-} from "lucide-react";
+import { Award, BookOpen, ChevronLeft, Flame, RotateCcw, Sparkles, Star } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const COLLECTION_ICON: Record<string, LucideIcon> = {
@@ -97,8 +90,8 @@ function MangaDetailSkeleton({ onBack }: { onBack: () => void }) {
                 ))}
               </div>
               <div className="flex gap-3">
-                <div className="h-12 w-40 animate-pulse rounded-xl bg-raised" />
-                <div className="h-12 w-48 animate-pulse rounded-xl bg-raised" />
+                <div className="h-12 w-40 animate-pulse rounded-full bg-raised" />
+                <div className="h-12 w-48 animate-pulse rounded-full bg-raised" />
               </div>
             </div>
           </div>
@@ -422,7 +415,7 @@ export function MangaDetail({
                         className="inline-flex items-center gap-1.5 rounded-full bg-elevated/60 py-1 pl-2 pr-2.5 text-[12px] font-medium text-accent ring-1 ring-edge-soft backdrop-blur-sm"
                       >
                         <Icon size={12.5} strokeWidth={2.4} />
-                        {c.badge}
+                        {t(c.badge)}
                       </span>
                     );
                   })}
@@ -436,7 +429,7 @@ export function MangaDetail({
                   onClick={() =>
                     canRead && onRead(langFiltered, langFiltered.length - 1, mangaMeta)
                   }
-                  className="inline-flex h-12 items-center gap-2 rounded-xl bg-accent px-6 text-[15px] font-bold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50"
+                  className="inline-flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
                 >
                   <BookOpen size={19} />
                   {t("Read latest")}
@@ -445,7 +438,7 @@ export function MangaDetail({
                   <button
                     type="button"
                     onClick={() => onResume(progress)}
-                    className="inline-flex h-12 items-center gap-2 rounded-xl border border-edge bg-elevated/40 px-5 text-[15px] font-semibold text-ink backdrop-blur-sm transition-colors hover:bg-elevated"
+                    className="inline-flex h-12 items-center gap-2 rounded-full bg-white/[0.06] px-6 text-[15px] font-semibold text-ink ring-1 ring-inset ring-edge-soft transition-colors duration-150 hover:bg-white/[0.10] active:scale-[0.98]"
                   >
                     <RotateCcw size={17} strokeWidth={2.2} />
                     {resumeLabel}
@@ -455,7 +448,7 @@ export function MangaDetail({
                     type="button"
                     disabled={!canRead}
                     onClick={() => canRead && onRead(langFiltered, 0, mangaMeta)}
-                    className="inline-flex h-12 items-center rounded-xl border border-edge bg-elevated/40 px-5 text-[15px] font-semibold text-ink backdrop-blur-sm transition-colors hover:bg-elevated disabled:pointer-events-none disabled:opacity-50"
+                    className="inline-flex h-12 items-center rounded-full bg-white/[0.06] px-6 text-[15px] font-semibold text-ink ring-1 ring-inset ring-edge-soft transition-colors duration-150 hover:bg-white/[0.10] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
                   >
                     {t("Start from beginning")}
                   </button>
@@ -468,16 +461,21 @@ export function MangaDetail({
                     detail &&
                     favorites.toggle({ id: mangaId, title: detail.title, cover: detail.cover })
                   }
-                  className={`flex h-12 w-12 items-center justify-center rounded-xl border backdrop-blur-sm transition-colors ${
+                  className={`group flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.94] ${
                     isFavorite
-                      ? "border-rose-400/40 bg-rose-500/15 text-rose-300"
-                      : "border-edge bg-elevated/40 text-ink-muted hover:bg-elevated hover:text-ink"
+                      ? "bg-accent/20 text-accent hover:bg-accent/22"
+                      : "bg-white/[0.06] text-ink hover:bg-white/[0.10]"
                   }`}
                 >
-                  <Heart size={22} fill={isFavorite ? "currentColor" : "none"} />
+                  <PopIcon
+                    active={isFavorite}
+                    activeIcon={<UiIcon name="unfavorite" className="h-5 w-5" />}
+                    inactiveIcon={<UiIcon name="favorite" className="h-5 w-5" />}
+                  />
                 </button>
                 {detail && (
                   <RateButton
+                    tone="lift"
                     target={ratingTarget(
                       { id: mangaId, name: detail.title, poster: detail.cover },
                       "manga",
@@ -495,9 +493,9 @@ export function MangaDetail({
                     aria-label={t("Downloads")}
                     title={t("Downloads")}
                     onClick={onOpenDownloads}
-                    className="flex h-12 w-12 items-center justify-center rounded-xl border border-edge bg-elevated/40 text-ink-muted backdrop-blur-sm transition-colors hover:bg-elevated hover:text-ink"
+                    className="group flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-ink transition-[transform,background-color] duration-200 hover:bg-white/[0.10] active:scale-[0.94]"
                   >
-                    <ArrowDownToLine size={21} strokeWidth={2} />
+                    <NavGlyph name="download" className="h-5 w-5" />
                   </button>
                 )}
               </div>

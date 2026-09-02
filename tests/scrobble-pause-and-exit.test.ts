@@ -30,7 +30,9 @@ test("pausing playback always tells the tracker", () => {
     ["simkl", simkl],
     ["trakt", trakt],
   ] as const) {
-    const branch = src.match(/status === "paused" && lastActionRef\.current === "start"\)\s*\{[\s\S]{0,220}?\n\s{4}\}/);
+    const branch = src.match(
+      /status === "paused" && lastActionRef\.current === "start"\)\s*\{[\s\S]{0,220}?\n\s{4}\}/,
+    );
     assert.ok(branch, `${name} has no paused branch`);
     assert.match(branch[0], /"pause"/, `${name} does not send pause`);
     assert.doesNotMatch(branch[0], /if \(/, `${name} still guards the pause send`);
@@ -44,7 +46,10 @@ test("the Simkl exit send uses a transport that survives teardown", () => {
   assert.match(beacon, /keepalive: true/);
   assert.match(safeFetch, /timeoutMs: 30000,/);
   assert.doesNotMatch(
-    safeFetch.slice(safeFetch.indexOf('invoke<HarborFetchResponse>("harbor_fetch"'), safeFetch.indexOf('invoke<HarborFetchResponse>("harbor_fetch"') + 320),
+    safeFetch.slice(
+      safeFetch.indexOf('invoke<HarborFetchResponse>("harbor_fetch"'),
+      safeFetch.indexOf('invoke<HarborFetchResponse>("harbor_fetch"') + 320,
+    ),
     /keepalive/,
     "if harbor_fetch ever forwards keepalive, revisit whether the beacon still needs native fetch",
   );
@@ -54,11 +59,24 @@ test("the Simkl exit send does not queue behind the POST throttle", () => {
   assert.match(simklClient, /const POST_MIN_GAP_MS = 1050;/);
   const unmount = simkl.slice(simkl.lastIndexOf("return () => {"));
   assert.match(unmount, /sendBeacon\(/, "unmount must beacon, not go through the queued client");
-  assert.doesNotMatch(unmount, /simklScrobble\(/, "simklScrobble waits on queueTail and can sleep 1050ms");
+  assert.doesNotMatch(
+    unmount,
+    /simklScrobble\(/,
+    "simklScrobble waits on queueTail and can sleep 1050ms",
+  );
 });
 
 test("Simkl and Trakt agree on when a session is finished", () => {
   const pct = (s: string) => s.match(/WATCHED_MARK_PCT\s*=\s*([\d.]+)/)?.[1];
   assert.ok(trakt.includes("const WATCHED_MARK_PCT = 70;"));
   assert.ok(pct(simkl) || simkl.includes("SIMKL_WATCHED_RATIO"));
+});
+
+test("Simkl does not write an early EOF directly to watched history", () => {
+  const ended = simkl.slice(
+    simkl.indexOf('if (snap.status === "ended")'),
+    simkl.indexOf("if (!loadResetSeenRef.current)"),
+  );
+  assert.match(ended, /if \(endPct >= WATCHED_MARK_PCT\)/);
+  assert.match(ended, /recordWatchedFallback/);
 });

@@ -5,11 +5,13 @@ import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import { writePlayerPrefs } from "@/lib/player-prefs";
 import {
   rememberedFromChoice,
+  subtitleSourceIsLocal,
   writeRememberedSub,
   type SubChoiceInput,
 } from "@/lib/subtitles/subtitle-memory";
 import { hasImportedSubTitle } from "@/lib/player/imported-subs";
 import type { RoomCommand } from "@/lib/together/protocol";
+import { cacheSelectedSubtitle } from "@/lib/subtitles/selected-subtitle-cache";
 
 const SEEK_ACCUM_WINDOW_MS = 700;
 
@@ -46,24 +48,78 @@ export function usePlaybackControls(params: {
     sendCommand,
   } = params;
 
+  const subtitleCacheContextRef = useRef({ mediaKey, revision: 0 });
+  if (subtitleCacheContextRef.current.mediaKey !== mediaKey) {
+    subtitleCacheContextRef.current = {
+      mediaKey,
+      revision: subtitleCacheContextRef.current.revision + 1,
+    };
+  }
+
   const rememberSubChoice = useCallback(
     (choice: SubChoiceInput | null | undefined) => {
+      const revision = ++subtitleCacheContextRef.current.revision;
       if (choice) {
         writePlayerPrefs(
           metaId,
           choice.lang ? { subLang: choice.lang, subsOff: false } : { subsOff: false },
         );
-        const imported = choice.imported === true || hasImportedSubTitle(choice.title);
-        writeRememberedSub(
-          mediaKey,
-          rememberedFromChoice({ ...choice, imported, streamKey: subtitleStreamKey }),
-        );
+        const source =
+          choice.source ?? choice.url ?? choice.originalUrl ?? choice.externalFilename ?? undefined;
+        const imported =
+          choice.imported === true ||
+          hasImportedSubTitle(choice.title) ||
+          subtitleSourceIsLocal(source);
+        const rememberedChoice = { ...choice, imported, streamKey: subtitleStreamKey };
+        writeRememberedSub(mediaKey, rememberedFromChoice(rememberedChoice));
+        if (!choice.external || !source || (imported && subtitleSourceIsLocal(source))) {
+          return;
+        }
+        void (async () => {
+          for (let attempt = 0; attempt < 40; attempt += 1) {
+            if (subtitleCacheContextRef.current.revision !== revision) return;
+            const selected = snapRef.current.subtitleTracks.find((track) => track.selected) ?? null;
+            const sourceMatches =
+              source === selected?.url ||
+              source === selected?.originalUrl ||
+              source === selected?.externalFilename;
+            const matches = choice.id
+              ? selected?.id === choice.id
+              : choice.subId
+                ? selected?.subId === choice.subId
+                : sourceMatches ||
+                  (!!choice.release &&
+                    selected?.release === choice.release &&
+                    (!choice.provider || selected.provider === choice.provider));
+            if (matches && selected) {
+              const cached = await cacheSelectedSubtitle({
+                mediaKey,
+                streamKey: subtitleStreamKey,
+                choice: {
+                  ...rememberedChoice,
+                  ...selected,
+                  source,
+                  url: source,
+                },
+                playableUrl: bridgeRef.current?.getSelectedTrackUrl() ?? null,
+                cues: bridgeRef.current?.getSelectedTrackCues() ?? null,
+              });
+              if (!cached || subtitleCacheContextRef.current.revision !== revision) return;
+              writeRememberedSub(
+                mediaKey,
+                rememberedFromChoice({ ...cached, streamKey: subtitleStreamKey }),
+              );
+              return;
+            }
+            await new Promise<void>((resolve) => window.setTimeout(resolve, 50));
+          }
+        })();
       } else {
         writePlayerPrefs(metaId, { subsOff: true });
         writeRememberedSub(mediaKey, { off: true });
       }
     },
-    [metaId, mediaKey, subtitleStreamKey],
+    [bridgeRef, snapRef, metaId, mediaKey, subtitleStreamKey],
   );
 
   const cycleSubtitles = () => {

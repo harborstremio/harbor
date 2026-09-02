@@ -27,10 +27,10 @@ export function PickCard({
       <button
         type="button"
         onClick={onSelect}
-        className={`flex w-full flex-col overflow-hidden rounded-[12px] text-start outline-none transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-24px_rgba(0,0,0,0.65)] focus-visible:ring-2 focus-visible:ring-accent motion-reduce:transform-none motion-reduce:transition-none ${
+        className={`flex w-full flex-col overflow-hidden rounded-md text-start outline-none transition-colors duration-200 ease-out hover:harbor-float focus-visible:ring-2 focus-visible:ring-accent motion-reduce:transform-none motion-reduce:transition-none ${
           selected
             ? "bg-accent-soft ring-2 ring-accent"
-            : "bg-canvas/40 ring-1 ring-edge-soft hover:bg-elevated/40 hover:ring-edge"
+            : "bg-canvas hover:bg-elevated"
         }`}
       >
         {children}

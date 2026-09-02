@@ -1,4 +1,9 @@
-import { listNotifications, markNotificationsRead, type ThemeNotification } from "@/lib/theme-store";
+import {
+  listNotifications,
+  markNotificationsRead,
+  type ThemeNotification,
+} from "@/lib/theme-store";
+import { t } from "@/lib/i18n";
 import { badgeIconUrl } from "@/views/profile/badge-catalog";
 import { socialGet, socialPost } from "./client";
 
@@ -38,10 +43,15 @@ function ms(x: string | number | undefined): number {
 }
 
 function themeToCenter(n: ThemeNotification): CenterNotif {
-  const name = n.themeName || "Your theme";
-  let title = `${n.actor || "Someone"} commented on ${name}`;
-  if (n.type === "downloads") title = `${name} hit ${n.count} downloads`;
-  else if (n.type === "stars") title = `${name} reached ${n.count} five-star ratings`;
+  const name = n.themeName || t("Your theme");
+  const count = String(n.count);
+  let title = t("{actor} commented on {name}", {
+    actor: n.actor || t("Someone"),
+    name,
+  });
+  if (n.type === "downloads") title = t("{name} hit {count} downloads", { name, count });
+  else if (n.type === "stars")
+    title = t("{name} reached {count} five-star ratings", { name, count });
   return {
     id: `t:${n.id}`,
     source: "theme",
@@ -62,8 +72,9 @@ function socialToCenter(n: SocialNotif): CenterNotif {
       id: `s:${n.id}`,
       source: "social",
       kind: "badge-received",
-      title: n.title || (name ? `You earned the ${name} badge` : "New badge unlocked"),
-      body: n.body || (name ? "Congrats! Tap to view your badges." : undefined),
+      title:
+        n.title || (name ? t("You earned the {name} badge", { name }) : t("New badge unlocked")),
+      body: n.body || (name ? t("Congrats! Tap to view your badges.") : undefined),
       cover: badgeIconUrl(icon),
       createdAt: ms(n.createdAt),
       read: !!n.read,
@@ -75,7 +86,11 @@ function socialToCenter(n: SocialNotif): CenterNotif {
       id: `s:${n.id}`,
       source: "social",
       kind: "diagnostics-request",
-      title: n.title || `${staff.name || "Harbor Staff"} requested your diagnostics`,
+      title:
+        n.title ||
+        t("{staff} requested your diagnostics", {
+          staff: staff.name || t("Harbor Staff"),
+        }),
       body: n.body || undefined,
       data: { ...(n.data || {}), requestId: n.entityId },
       createdAt: ms(n.createdAt),
@@ -87,7 +102,7 @@ function socialToCenter(n: SocialNotif): CenterNotif {
     id: `s:${n.id}`,
     source: "social",
     kind: n.type,
-    title: n.title || (n.type === "comment" ? "New profile comment" : "Notification"),
+    title: n.title || (n.type === "comment" ? t("New profile comment") : t("Notification")),
     body: n.body || undefined,
     edgeId: isRequest ? n.entityId : undefined,
     entityType: n.entityType,
@@ -103,9 +118,10 @@ export async function fetchAllNotifications(
 ): Promise<{ items: CenterNotif[]; unread: number }> {
   const [theme, social] = await Promise.all([
     listNotifications().catch(() => ({ notifications: [] as ThemeNotification[], unread: 0 })),
-    socialGet<{ notifications: SocialNotif[]; unread: number }>("/social/me/notifications", signal).catch(
-      () => ({ notifications: [] as SocialNotif[], unread: 0 }),
-    ),
+    socialGet<{ notifications: SocialNotif[]; unread: number }>(
+      "/social/me/notifications",
+      signal,
+    ).catch(() => ({ notifications: [] as SocialNotif[], unread: 0 })),
   ]);
   const items = [
     ...(theme.notifications || []).map(themeToCenter),

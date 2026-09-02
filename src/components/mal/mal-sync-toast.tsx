@@ -1,10 +1,17 @@
 import { Check, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { subscribeSync, type SyncEvent } from "@/lib/mal/sync";
+import { subscribeSync, type SyncError, type SyncEvent } from "@/lib/mal/sync";
+import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { syncToastWrapClass } from "@/lib/sync-toast-position";
 
+const SYNC_ERROR_MESSAGES: Record<SyncError, string> = {
+  "update-not-confirmed": "MAL did not confirm the update.",
+  unreachable: "Couldn't reach MyAnimeList.",
+};
+
 export function MalSyncToast() {
+  const t = useT();
   const { settings } = useSettings();
   const [event, setEvent] = useState<SyncEvent | null>(null);
   const timerRef = useRef<number | undefined>(undefined);
@@ -52,19 +59,19 @@ export function MalSyncToast() {
         <div className="flex min-w-0 flex-col">
           <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
             {syncing
-              ? "Syncing to MyAnimeList"
+              ? t("Syncing to MyAnimeList")
               : watching
-                ? "Now watching on MyAnimeList"
+                ? t("Now watching on MyAnimeList")
                 : ok
-                  ? "Synced to MyAnimeList"
-                  : "MyAnimeList sync"}
+                  ? t("Synced to MyAnimeList")
+                  : t("MyAnimeList sync")}
           </span>
           <span className="max-w-[300px] truncate text-[12.5px] font-semibold text-ink">
             {event.kind === "error"
-              ? event.message
+              ? t(SYNC_ERROR_MESSAGES[event.error])
               : event.kind === "watching"
                 ? event.title
-                : `${event.title} · Episode ${event.episode}`}
+                : t("{title} · Episode {episode}", { title: event.title, episode: event.episode })}
           </span>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { readPlayerVolume } from "@/lib/player-volume";
 import type { SubCue } from "@/lib/subtitles/parser";
 import type { SubtitleLoadMetadata } from "@/lib/subtitles/types";
 import type { SubtitleMatchConfidence } from "@/lib/subtitles/release-match";
@@ -13,17 +14,34 @@ export type TrackInfo = {
   channelCount?: number;
   title?: string;
   external?: boolean;
+  prepared?: boolean;
+  autoSelectionEligible?: boolean;
   externalFilename?: string;
   forced?: boolean;
   default?: boolean;
   hearingImpaired?: boolean;
   secondary?: boolean;
   url?: string;
+  originalUrl?: string;
+  downloadAuth?: SubtitleLoadMetadata["downloadAuth"];
+  format?: SubtitleLoadMetadata["format"];
   release?: string;
   provider?: string;
+  providerDerived?: boolean;
   fps?: number;
   downloads?: number;
   author?: string;
+  uploadedAt?: string;
+  rating?: SubtitleLoadMetadata["rating"];
+  productionType?: string;
+  releaseType?: string;
+  foreignOnly?: boolean;
+  machineTranslated?: boolean;
+  fromTrusted?: boolean;
+  providerMatch?: SubtitleLoadMetadata["providerMatch"];
+  timingStatus?: SubtitleLoadMetadata["timingStatus"];
+  timingMeasurementStatus?: SubtitleLoadMetadata["timingMeasurementStatus"];
+  matchExplanation?: SubtitleLoadMetadata["matchExplanation"];
   matchScore?: number;
   matchConfidence?: SubtitleMatchConfidence;
   matchReasons?: string[];
@@ -70,7 +88,14 @@ export type PlayerSource = {
   url: string;
   traceId?: string;
   startupProfile?: "standard" | "high-bitrate";
-  subtitles?: { id?: string; url: string; lang?: string; m?: string }[];
+  subtitles?: {
+    id?: string;
+    url: string;
+    lang?: string;
+    m?: string;
+    /** The path came from the user's local library or a configured home server, not an addon. */
+    trustedSource?: boolean;
+  }[];
   notWebReady?: boolean;
   startAtSec?: number;
   isLive?: boolean;
@@ -160,3 +185,9 @@ export const emptySnapshot: PlayerSnapshot = {
   errorMessage: null,
   errorCode: null,
 };
+
+/** Snapshot seeded with the persisted volume/mute preference instead of the 1.0/100% default. */
+export function initialPlayerSnapshot(): PlayerSnapshot {
+  const saved = readPlayerVolume();
+  return { ...emptySnapshot, volume: saved.volume, muted: saved.muted };
+}

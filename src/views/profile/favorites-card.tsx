@@ -70,7 +70,7 @@ export function FavoritesCard({
   return (
     <section
       aria-label={t(cfg.label)}
-      className="rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft"
+      className="rounded-lg bg-surface p-5 ring-1 ring-edge-soft"
     >
       {!hideTitle && (
         <div className="mb-4 flex items-start justify-between gap-3">

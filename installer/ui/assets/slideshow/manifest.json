@@ -1,0 +1,40 @@
+{
+  "panels": [
+    {
+      "image": "assets/slideshow/caligari-veidt.webp",
+      "headline": "Bring your own sources",
+      "body": "Harbor connects to the addons you choose. It hosts nothing and ships no catalog of its own.",
+      "credit": "The Cabinet of Dr. Caligari (1920), public domain"
+    },
+    {
+      "image": "assets/slideshow/caligari-03.webp",
+      "headline": "Playback that respects the file",
+      "body": "A bundled mpv engine handles TrueHD, DTS-HD, AV1, odd containers and HDR without transcoding.",
+      "credit": "The Cabinet of Dr. Caligari (1920), public domain"
+    },
+    {
+      "image": "assets/slideshow/caligari-04.webp",
+      "headline": "Themes that go deep",
+      "body": "Restyle every surface, or install a community theme and make Harbor look like nothing else.",
+      "credit": "The Cabinet of Dr. Caligari (1920), public domain"
+    },
+    {
+      "image": "assets/slideshow/general-cowcatcher.webp",
+      "headline": "Watch together, actually together",
+      "body": "Synced playback with friends over your own relay, with no account required.",
+      "credit": "The General (1926), public domain"
+    },
+    {
+      "image": "assets/slideshow/general-newspaper.webp",
+      "headline": "Anime, tracked properly",
+      "body": "Simkl and AniList stay in step with what you watch, episode by episode.",
+      "credit": "The General (1926), public domain"
+    },
+    {
+      "image": "assets/slideshow/safety-last.webp",
+      "headline": "Your library, on every device",
+      "body": "Settings, addons and continue watching follow you between machines.",
+      "credit": "Safety Last! (1923), public domain"
+    }
+  ]
+}

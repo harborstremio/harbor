@@ -66,7 +66,9 @@ mod mac {
     }
 
     pub fn end(token: Token) {
-        let Some(cls) = AnyClass::get(c"NSProcessInfo") else { return };
+        let Some(cls) = AnyClass::get(c"NSProcessInfo") else {
+            return;
+        };
         unsafe {
             let info: *mut AnyObject = msg_send![cls, processInfo];
             let Some(info) = info.as_ref() else { return };

@@ -137,7 +137,7 @@ export function ProfileMedia({
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={avatarBusy}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-[10px] bg-elevated px-3 text-[13px] font-medium text-ink ring-1 ring-edge-soft hover:bg-raised disabled:opacity-50"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-elevated px-3 text-[13px] font-medium text-ink ring-1 ring-edge-soft hover:bg-raised disabled:opacity-50"
             >
               <Camera size={15} /> {avatarBusy ? t("Saving") : t("Change photo")}
             </button>
@@ -146,7 +146,7 @@ export function ProfileMedia({
                 type="button"
                 onClick={removeAvatar}
                 disabled={avatarBusy}
-                className="inline-flex min-h-9 items-center gap-1.5 rounded-[10px] px-3 text-[13px] font-medium text-ink-muted transition-colors hover:text-danger disabled:opacity-50"
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium text-ink-muted transition-colors hover:text-danger disabled:opacity-50"
               >
                 <Trash2 size={15} /> {t("Remove")}
               </button>
@@ -165,7 +165,7 @@ export function ProfileMedia({
 
       <div className="space-y-2">
         <span className="text-[13px] font-medium text-ink">{t("Profile background")}</span>
-        <div className="relative aspect-[3/1] w-full overflow-hidden rounded-[14px] bg-elevated ring-1 ring-edge-soft">
+        <div className="relative aspect-[3/1] w-full overflow-hidden rounded-lg bg-elevated ring-1 ring-edge-soft">
           {bannerUrl ? (
             <img src={bannerUrl} alt="" className="h-full w-full object-cover" draggable={false} />
           ) : (
@@ -180,7 +180,7 @@ export function ProfileMedia({
             type="button"
             onClick={() => bannerRef.current?.click()}
             disabled={bannerBusy}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-[10px] bg-elevated px-3 text-[13px] font-medium text-ink ring-1 ring-edge-soft hover:bg-raised disabled:opacity-50"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-elevated px-3 text-[13px] font-medium text-ink ring-1 ring-edge-soft hover:bg-raised disabled:opacity-50"
           >
             <ImageIcon size={20} /> {bannerBusy ? t("Saving") : bannerUrl ? t("Change banner") : t("Add banner")}
           </button>
@@ -189,7 +189,7 @@ export function ProfileMedia({
               type="button"
               onClick={clearBanner}
               disabled={bannerBusy}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-[10px] px-3 text-[13px] font-medium text-ink-muted transition-colors hover:text-danger disabled:opacity-50"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium text-ink-muted transition-colors hover:text-danger disabled:opacity-50"
             >
               <Trash2 size={15} /> {t("Remove")}
             </button>

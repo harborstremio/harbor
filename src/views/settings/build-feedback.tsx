@@ -16,14 +16,12 @@ type Stop = {
   color: string;
 };
 const STOPS: Stop[] = [
-  { label: "Much worse", Icon: Angry, color: "#f04444" },
-  { label: "Worse", Icon: Frown, color: "#f59e0b" },
+  { label: "Much worse", Icon: Angry, color: "#e06060" },
+  { label: "Worse", Icon: Frown, color: "#d69352" },
   { label: "About the same", Icon: Meh, color: "#9aa3af" },
-  { label: "Better", Icon: Smile, color: "#34d399" },
-  { label: "Much better", Icon: Laugh, color: "#22c55e" },
+  { label: "Better", Icon: Smile, color: "#5cbb8a" },
+  { label: "Much better", Icon: Laugh, color: "#4bb87c" },
 ];
-const TRACK =
-  "linear-gradient(to right, #f04444 0%, #f59e0b 27%, #9aa3af 50%, #34d399 73%, #22c55e 100%)";
 
 function readSaved(): number | null {
   try {
@@ -40,15 +38,7 @@ export function BuildFeedback() {
   const t = useT();
   const [value, setValue] = useState(() => readSaved() ?? 2);
   const [committed, setCommitted] = useState<number | null>(() => readSaved());
-  const trackRef = useRef<HTMLDivElement>(null);
-  const dragging = useRef(false);
-
-  const setFromX = (clientX: number) => {
-    const r = trackRef.current?.getBoundingClientRect();
-    if (!r || r.width === 0) return;
-    const x = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
-    setValue(Math.round(x * (STOPS.length - 1)));
-  };
+  const tiles = useRef<(HTMLButtonElement | null)[]>([]);
 
   const commit = () => {
     setCommitted(value);
@@ -70,19 +60,22 @@ export function BuildFeedback() {
     );
   };
 
+  const move = (next: number) => {
+    const i = Math.max(0, Math.min(STOPS.length - 1, next));
+    setValue(i);
+    tiles.current[i]?.focus();
+  };
+
   if (committed != null) {
     const s = STOPS[committed];
     const negative = committed <= 1;
     return (
-      <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-4">
+      <div className="flex flex-col gap-3 rounded-md bg-canvas px-4 py-4">
         <div className="flex items-center gap-2.5">
-          <span
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-            style={{ backgroundColor: `${s.color}26`, color: s.color }}
-          >
-            <s.Icon size={18} strokeWidth={2.1} />
+          <span className="shrink-0" style={{ color: s.color }}>
+            <s.Icon size={20} strokeWidth={2} />
           </span>
-          <p className="flex-1 text-[14px] font-medium text-ink">
+          <p className="min-w-0 flex-1 text-[13.5px] font-medium text-ink">
             {t("You rated this build {label}.", { label: t(s.label) })}
           </p>
           <button
@@ -94,7 +87,7 @@ export function BuildFeedback() {
           </button>
         </div>
         {negative ? (
-          <div className="flex flex-col items-start gap-2.5 rounded-lg border border-edge-soft bg-elevated/40 p-3.5">
+          <div className="flex flex-col items-start gap-2.5 rounded-md bg-elevated p-3.5">
             <p className="text-[13px] leading-relaxed text-ink-muted">
               {t(
                 "Sorry this one is not better. Tell us what went wrong and we will fix it for you.",
@@ -103,7 +96,7 @@ export function BuildFeedback() {
             <button
               type="button"
               onClick={() => openIssue(committed)}
-              className="flex h-10 items-center gap-2 rounded-lg bg-ink px-4 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.98]"
+              className="harbor-press-pop flex h-9 items-center gap-2 rounded-md bg-ink px-4 text-[12.5px] font-semibold text-canvas"
             >
               <GitHubIcon size={15} strokeWidth={2.2} />
               {t("Open a quick issue")}
@@ -121,95 +114,66 @@ export function BuildFeedback() {
 
   const cur = STOPS[value];
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-4">
-      <div className="flex items-start gap-2.5">
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="flex items-center gap-2 text-[14px] font-medium text-ink">
-            {t("How is this build treating you?")}
-            <BetaTag />
-          </span>
-          <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-            {t("Does Harbor {version} feel better or worse than the version you had before?", {
-              version: APP_VERSION,
-            })}
-          </p>
-        </div>
+    <div className="flex flex-col gap-3.5 rounded-md bg-canvas px-4 py-4">
+      <div className="flex min-w-0 flex-col gap-1">
+        <span className="flex items-center gap-2 text-[13.5px] font-medium text-ink">
+          {t("How is this build treating you?")}
+          <BetaTag />
+        </span>
+        <p className="text-[12.5px] leading-relaxed text-ink-subtle">
+          {t("Does Harbor {version} feel better or worse than the version you had before?", {
+            version: APP_VERSION,
+          })}
+        </p>
       </div>
 
-      <div className="flex items-center justify-center gap-2.5 py-1" style={{ color: cur.color }}>
-        <cur.Icon size={26} strokeWidth={2} />
-        <span className="text-[18px] font-semibold tracking-tight">{t(cur.label)}</span>
+      <div
+        role="radiogroup"
+        aria-label={t("Rate this build")}
+        className="grid grid-cols-5 gap-1.5"
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            e.preventDefault();
+            move(value - 1);
+          } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            e.preventDefault();
+            move(value + 1);
+          }
+        }}
+      >
+        {STOPS.map((s, i) => {
+          const on = i === value;
+          return (
+            <button
+              key={s.label}
+              ref={(el) => {
+                tiles.current[i] = el;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              aria-label={t(s.label)}
+              tabIndex={on ? 0 : -1}
+              onClick={() => setValue(i)}
+              className={`harbor-press-pop flex h-14 items-center justify-center rounded-md outline-none transition-colors duration-150 ease-in-out ${
+                on ? "bg-elevated" : "bg-transparent hover:bg-elevated/45"
+              }`}
+              style={on ? { color: s.color } : undefined}
+            >
+              <span className={on ? "" : "text-ink-subtle"}>
+                <s.Icon size={on ? 24 : 20} strokeWidth={2} />
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      <div className="flex items-center gap-3" dir="ltr">
-        <span className="w-14 shrink-0 text-right text-[12px] font-semibold uppercase tracking-wide text-ink-subtle">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-subtle">
           {t("Worse")}
         </span>
-        <div
-          ref={trackRef}
-          role="slider"
-          tabIndex={0}
-          aria-label={t("Rate this build")}
-          aria-valuemin={0}
-          aria-valuemax={STOPS.length - 1}
-          aria-valuenow={value}
-          aria-valuetext={t(cur.label)}
-          onPointerDown={(e) => {
-            e.currentTarget.setPointerCapture(e.pointerId);
-            dragging.current = true;
-            setFromX(e.clientX);
-          }}
-          onPointerMove={(e) => {
-            if (dragging.current) setFromX(e.clientX);
-          }}
-          onPointerUp={(e) => {
-            dragging.current = false;
-            try {
-              e.currentTarget.releasePointerCapture(e.pointerId);
-            } catch {
-              /* ignore */
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
-              e.preventDefault();
-              setValue((v) => Math.max(0, v - 1));
-            } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
-              e.preventDefault();
-              setValue((v) => Math.min(STOPS.length - 1, v + 1));
-            }
-          }}
-          className="relative h-12 flex-1 cursor-pointer touch-none select-none outline-none"
-        >
-          <div
-            className="absolute inset-x-0 top-1/2 h-3 -translate-y-1/2 rounded-full opacity-90 ring-1 ring-inset ring-black/10"
-            style={{ backgroundImage: TRACK }}
-          />
-          {STOPS.map((_, i) => (
-            <span
-              key={i}
-              aria-hidden
-              className="absolute top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/55"
-              style={{ left: `${(i / (STOPS.length - 1)) * 100}%` }}
-            />
-          ))}
-          <span
-            aria-hidden
-            className={`absolute top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-canvas shadow-[0_4px_14px_-2px_rgba(0,0,0,0.55)] ring-2 transition-all duration-150 ${
-              dragging.current ? "scale-110" : ""
-            }`}
-            style={
-              {
-                left: `${(value / (STOPS.length - 1)) * 100}%`,
-                color: cur.color,
-                "--tw-ring-color": cur.color,
-              } as React.CSSProperties
-            }
-          >
-            <cur.Icon size={19} strokeWidth={2.1} />
-          </span>
-        </div>
-        <span className="w-14 shrink-0 text-left text-[12px] font-semibold uppercase tracking-wide text-ink-subtle">
+        <span className="text-[13px] font-semibold text-ink">{t(cur.label)}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-subtle">
           {t("Better")}
         </span>
       </div>
@@ -217,7 +181,7 @@ export function BuildFeedback() {
       <button
         type="button"
         onClick={commit}
-        className="flex h-11 items-center justify-center gap-2 self-stretch rounded-xl bg-accent text-[14px] font-semibold text-[#1b1304] transition-[filter,transform] hover:brightness-105 active:scale-[0.99]"
+        className="harbor-press-pop flex h-10 items-center justify-center self-start rounded-md bg-ink px-5 text-[13px] font-semibold text-canvas"
       >
         {t("Send rating")}
       </button>

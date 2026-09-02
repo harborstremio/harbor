@@ -1,18 +1,11 @@
 import { Bookmark, Brush, Download, Loader2, Star, X } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Poster } from "@/components/poster";
 import { useT } from "@/lib/i18n";
 import { emitListToast } from "@/components/lists/list-toast";
 import { clearShowcase, seedShowcaseMetaId, setThemeShowcase } from "@/lib/social/showcase";
 import { myThemes, type StoreTheme } from "@/lib/theme-store";
 import type { ProfileSummary, ShowcaseItem } from "./profile-types";
-import { downloadTheme } from "@/lib/theme-store";
-import { getCustomThemes } from "@/lib/custom-themes";
-import { getThemeById } from "@/lib/theme";
-import { useSettings } from "@/lib/settings";
-import { nextBackgroundImage } from "@/lib/theme-background";
-import type { ActiveThemeId } from "@/lib/theme";
-import { getDownloadRecords } from "@/lib/theme-updates";
 
 const KIND_LABEL: Record<ShowcaseItem["kind"], string> = {
   favorite: "All-time favorite",
@@ -28,20 +21,30 @@ function compact(n: number): string {
 }
 
 function ThemeCard({ item }: { item: ShowcaseItem }) {
+  const t = useT();
   return (
-    <div className="flex w-full items-center gap-4 rounded-[10px] p-2">
+    <div className="flex w-full items-center gap-4 rounded-md p-2">
       <div
-        className="w-36 shrink-0 overflow-hidden rounded-[10px] bg-elevated ring-1 ring-edge-soft shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)]"
+        className="w-36 shrink-0 overflow-hidden rounded-md bg-elevated ring-1 ring-edge-soft shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)]"
         style={{ aspectRatio: "16/10", background: item.swatch?.[1] || undefined }}
       >
         {item.posterUrl && (
-          <img src={item.posterUrl} alt="" draggable={false} className="h-full w-full object-cover" />
+          <img
+            src={item.posterUrl}
+            alt=""
+            draggable={false}
+            className="h-full w-full object-cover"
+          />
         )}
       </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[11px] uppercase tracking-[0.1em] text-accent">{KIND_LABEL.theme}</div>
+      <div className="min-w-0">
+        <div className="text-[11px] uppercase tracking-[0.1em] text-accent">
+          {t(KIND_LABEL.theme)}
+        </div>
         <div className="mt-1 truncate font-display text-[19px] text-ink">{item.title}</div>
-        {item.caption && <div className="mt-1 line-clamp-2 text-[13px] text-ink-muted">{item.caption}</div>}
+        {item.caption && (
+          <div className="mt-1 line-clamp-2 text-[13px] text-ink-muted">{item.caption}</div>
+        )}
         <div className="mt-1.5 flex items-center gap-3 text-[12.5px] tabular-nums text-ink-subtle">
           <span className="inline-flex items-center gap-1">
             <Download size={13} strokeWidth={2.2} /> {compact(item.downloads ?? 0)}
@@ -53,87 +56,7 @@ function ThemeCard({ item }: { item: ShowcaseItem }) {
           )}
         </div>
       </div>
-      {item.themeId && (
-        <div className="flex shrink-0 items-center">
-          <InstallThemeButton themeId={item.themeId} posterUrl={item.posterUrl} />
-        </div>
-      )}
     </div>
-  );
-}
-
-function InstallThemeButton({ themeId, posterUrl }: { themeId: string; posterUrl?: string }) {
-  const t = useT();
-  const { settings, update } = useSettings();
-  const [busy, setBusy] = useState(false);
-  const [justApplied, setJustApplied] = useState(false);
-
-  const records = getDownloadRecords();
-  const localEntry = Object.entries(records).find(
-    ([, rec]) => rec.storeId === themeId,
-  );
-  const localId = localEntry?.[0];
-  const installed = !!localId;
-  const applied =
-    justApplied ||
-    (installed && Object.entries(records).some(
-      ([id, rec]) => rec.storeId === themeId && settings.theme.preset === id,
-    ));
-
-  const handleClick = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      let saved = localId ? getCustomThemes().find((th) => th.id === localId) : undefined;
-      if (!saved) {
-        saved = await downloadTheme(themeId, posterUrl ?? null);
-      }
-      const next = getThemeById(saved.id);
-      const activeTheme =
-        settings.theme.preset === "custom" ? null : getThemeById(settings.theme.preset);
-      update({
-        theme: {
-          ...settings.theme,
-          preset: saved.id as ActiveThemeId,
-          backgroundImage: nextBackgroundImage(
-            settings.theme.backgroundImage,
-            activeTheme,
-            next,
-          ),
-          ...(next?.background
-            ? { backgroundDim: next.background.dim ?? settings.theme.backgroundDim }
-            : {}),
-        },
-      });
-      setJustApplied(true);
-      emitListToast(t("Theme applied!"));
-    } catch {
-      emitListToast(t("Could not install theme"));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={applied || busy}
-      className={`inline-flex min-h-11 items-center gap-2 rounded-[10px] px-4 text-[14px] font-semibold transition-colors disabled:opacity-70 ${
-        applied
-          ? "bg-surface text-ink ring-1 ring-edge"
-          : "bg-ink text-canvas hover:opacity-90"
-      } ${busy ? "opacity-70" : ""}`}
-    >
-      {busy && <Loader2 size={15} className="animate-spin" />}
-      {busy
-        ? t("Installing...")
-        : applied
-          ? t("Applied")
-          : installed
-            ? t("Apply theme")
-            : t("Install & apply")}
-    </button>
   );
 }
 
@@ -168,7 +91,7 @@ function ThemePicker({
   }, []);
 
   return (
-    <div className="mt-3 rounded-[10px] border border-edge-soft bg-elevated/40 p-3">
+    <div className="mt-3 rounded-md border border-edge-soft bg-elevated/40 p-3">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-ink-subtle">
           {t("Feature a theme")}
@@ -201,10 +124,17 @@ function ThemePicker({
               className="flex items-center gap-3 rounded-[8px] p-1.5 text-start transition-colors hover:bg-raised disabled:opacity-60"
             >
               <span
-                className="h-10 w-16 shrink-0 overflow-hidden rounded-[6px] bg-raised ring-1 ring-edge-soft"
+                className="h-10 w-16 shrink-0 overflow-hidden rounded-sm bg-raised ring-1 ring-edge-soft"
                 style={{ background: th.swatch?.[1] || undefined }}
               >
-                {th.cover && <img src={th.cover} alt="" className="h-full w-full object-cover" draggable={false} />}
+                {th.cover && (
+                  <img
+                    src={th.cover}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    draggable={false}
+                  />
+                )}
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[13.5px] font-medium text-ink">{th.name}</span>
@@ -267,10 +197,10 @@ export function Showcase({
   };
 
   return (
-    <section aria-label="Showcase" className="rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
+    <section aria-label={t("Showcase")} className="rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
       <div className="mb-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
-          <Bookmark size={20} /> Showcase
+          <Bookmark size={20} /> {t("Showcase")}
         </div>
         {isOwner && !picking && (
           <button
@@ -288,17 +218,29 @@ export function Showcase({
             <ThemeCard item={item} />
           ) : (
             <button
-              onClick={() => item.metaId && onOpen?.(item.metaId, undefined, { name: item.title, poster: item.posterUrl })}
+              onClick={() =>
+                item.metaId &&
+                onOpen?.(item.metaId, undefined, { name: item.title, poster: item.posterUrl })
+              }
               disabled={!item.metaId}
-              className="group flex w-full items-center gap-4 rounded-[10px] p-2 text-start transition-colors hover:bg-elevated disabled:cursor-default"
+              className="group flex w-full items-center gap-4 rounded-md p-2 text-start transition-colors hover:bg-elevated disabled:cursor-default"
             >
               <div className="w-24 shrink-0">
-                <Poster src={item.posterUrl} seed={item.title} ratio="portrait" className="rounded-[10px]" />
+                <Poster
+                  src={item.posterUrl}
+                  seed={item.title}
+                  ratio="portrait"
+                  className="rounded-md"
+                />
               </div>
               <div className="min-w-0">
-                <div className="text-[11px] uppercase tracking-[0.1em] text-accent">{KIND_LABEL[item.kind]}</div>
+                <div className="text-[11px] uppercase tracking-[0.1em] text-accent">
+                  {t(KIND_LABEL[item.kind])}
+                </div>
                 <div className="mt-1 truncate font-display text-[19px] text-ink">{item.title}</div>
-                {item.caption && <div className="mt-1 line-clamp-2 text-[13px] text-ink-muted">{item.caption}</div>}
+                {item.caption && (
+                  <div className="mt-1 line-clamp-2 text-[13px] text-ink-muted">{item.caption}</div>
+                )}
               </div>
             </button>
           )}
@@ -306,21 +248,27 @@ export function Showcase({
             <button
               onClick={remove}
               disabled={busy}
-              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[10px] border border-edge-soft text-[13px] font-medium text-ink-muted transition-colors hover:border-danger/40 hover:text-danger disabled:opacity-60"
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-md border border-edge-soft text-[13px] font-medium text-ink-muted transition-colors hover:border-danger/40 hover:text-danger disabled:opacity-60"
             >
-              <X size={20} /> {busy ? "Removing" : "Remove from showcase"}
+              <X size={20} /> {busy ? t("Removing") : t("Remove from showcase")}
             </button>
           )}
         </div>
       ) : isOwner ? (
-        <div className="flex flex-col items-center justify-center rounded-[10px] border border-dashed border-edge py-10 text-center">
-          <p className="text-[14px] text-ink-muted">Nothing on display yet</p>
-          <p className="mt-1 text-[12px] text-ink-subtle">A favorite title or one of your themes will appear here</p>
+        <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-edge py-10 text-center">
+          <p className="text-[14px] text-ink-muted">{t("Nothing on display yet")}</p>
+          <p className="mt-1 text-[12px] text-ink-subtle">
+            {t("A favorite title or one of your themes will appear here")}
+          </p>
         </div>
       ) : (
-        <p className="py-6 text-center text-[13px] text-ink-subtle">This user hasn't set a showcase</p>
+        <p className="py-6 text-center text-[13px] text-ink-subtle">
+          {t("This user hasn't set a showcase")}
+        </p>
       )}
-      {isOwner && picking && <ThemePicker onPick={pickTheme} onClose={() => setPicking(false)} busy={busy} />}
+      {isOwner && picking && (
+        <ThemePicker onPick={pickTheme} onClose={() => setPicking(false)} busy={busy} />
+      )}
     </section>
   );
 }

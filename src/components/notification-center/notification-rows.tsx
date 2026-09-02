@@ -136,7 +136,7 @@ export function RequestRow({
           type="button"
           onClick={onAccept}
           disabled={busy}
-          className="flex h-8 items-center gap-1 rounded-full bg-ink px-3 text-[12px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+          className="harbor-press-pop flex h-8 items-center gap-1 rounded-full bg-ink px-3 text-[12px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
         >
           <Check size={13} strokeWidth={2.6} /> {t("Accept")}
         </button>
@@ -259,7 +259,7 @@ export function NotificationDetail({
         <button
           type="button"
           onClick={action.run}
-          className="mt-auto flex h-11 items-center justify-center rounded-xl bg-ink text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
+          className="harbor-press-pop mt-auto flex h-11 items-center justify-center rounded-xl bg-ink text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
         >
           {action.label}
         </button>

@@ -11,6 +11,7 @@ import { providerTabFor } from "@/lib/ai-models";
 import { useSearch } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
+import { useT } from "@/lib/i18n";
 import { tmdbCollection, tmdbDiscover, tmdbTrending } from "@/lib/providers/tmdb";
 import { topMovies, topSeries } from "@/lib/cinemeta";
 import { rpdbPoster } from "@/lib/providers/rpdb";
@@ -19,6 +20,10 @@ import { fetchAddonCatalogPage, fetchAddonMeta, isCollectionCatalog } from "@/li
 import { MobileDetail } from "./mobile-detail";
 import { MobileAwards } from "./mobile-awards";
 import { MobileGenrePage } from "./mobile-genre-page";
+import { useMobileRemote } from "./mobile-remote";
+import { LocalLibraryBrand } from "@/components/local-library-brand";
+import { MediaServerBrand } from "@/components/media-server-brand";
+import type { MediaServerProvider } from "@/lib/media-server/types";
 
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
@@ -55,7 +60,12 @@ const CATEGORIES = [
 ];
 
 const EXPLORE = [
-  { label: "Recently added", kind: "recent" as const, caption: "Just landed", img: "recently_added" },
+  {
+    label: "Recently added",
+    kind: "recent" as const,
+    caption: "Just landed",
+    img: "recently_added",
+  },
   { label: "Popular", kind: "popular" as const, caption: "Most watched", img: "popular" },
   { label: "Trending", kind: "trending" as const, caption: "On the rise", img: "trending" },
 ];
@@ -78,9 +88,11 @@ function interleave(a: Meta[], b: Meta[]): Meta[] {
 type Catalog = { title: string; metas: Meta[] | null; empty?: string };
 
 export function MobileSearch() {
+  const t = useT();
   const { settings, update } = useSettings();
   const { authKey } = useAuth();
-  const { query, results, status, recent, setQuery, clear, recordRecent, removeRecent } = useSearch();
+  const { query, results, status, recent, setQuery, clear, recordRecent, removeRecent } =
+    useSearch();
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [collections, setCollections] = useState(false);
   const [genreView, setGenreView] = useState<(typeof CATEGORIES)[number] | null>(null);
@@ -109,14 +121,17 @@ export function MobileSearch() {
   const openGenre = (c: (typeof CATEGORIES)[number]) => {
     setCatalog(null);
     setCollections(false);
-    setGenreView(c);
+    setGenreView({ ...c, label: t(c.label) });
   };
 
   const openExplore = (e: (typeof EXPLORE)[number]) =>
-    openCatalog(e.label, async () => {
+    openCatalog(t(e.label), async () => {
       if (key) {
         if (e.kind === "trending") {
-          const [m, t] = await Promise.all([tmdbTrending(key, "movie", "week"), tmdbTrending(key, "tv", "week")]);
+          const [m, t] = await Promise.all([
+            tmdbTrending(key, "movie", "week"),
+            tmdbTrending(key, "tv", "week"),
+          ]);
           return interleave(m, t);
         }
         if (e.kind === "popular") {
@@ -212,7 +227,11 @@ export function MobileSearch() {
             onOpenDetail={setDetailMeta}
           />
         ) : catalog ? (
-          <CatalogView catalog={catalog} onBack={() => setCatalog(null)} onOpenDetail={setDetailMeta} />
+          <CatalogView
+            catalog={catalog}
+            onBack={() => setCatalog(null)}
+            onOpenDetail={setDetailMeta}
+          />
         ) : (
           <Landing
             recent={recent}
@@ -247,6 +266,7 @@ function SearchBar({
   onClear: () => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
+  const t = useT();
   const [focused, setFocused] = useState(false);
   return (
     <div
@@ -276,13 +296,13 @@ function SearchBar({
         inputMode="search"
         autoComplete="off"
         spellCheck={false}
-        placeholder="Actor, title, genre"
+        placeholder={t("Actor, title, genre")}
         className="min-w-0 flex-1 bg-transparent text-[16px] font-medium text-canvas placeholder:text-canvas/45 focus:outline-none"
       />
       {value && (
         <button
           type="button"
-          aria-label="Clear"
+          aria-label={t("Clear")}
           onClick={(e) => {
             e.stopPropagation();
             onClear();
@@ -314,11 +334,12 @@ function Landing({
   onAwards: () => void;
   onCollections: () => void;
 }) {
+  const t = useT();
   return (
     <div className="flex flex-col gap-9">
       {recent.length > 0 && (
         <section className="flex flex-col gap-3.5">
-          <SectionTitle>Recent</SectionTitle>
+          <SectionTitle>{t("Recent")}</SectionTitle>
           <div className="flex flex-wrap gap-2">
             {recent.map((r) => (
               <span
@@ -330,7 +351,7 @@ function Landing({
                 </button>
                 <button
                   type="button"
-                  aria-label={`Remove ${r}`}
+                  aria-label={t("Remove {query}", { query: r })}
                   onClick={() => onRemoveRecent(r)}
                   className="grid h-5 w-5 place-items-center rounded-full text-ink-subtle transition-colors active:text-ink motion-reduce:transition-none"
                 >
@@ -348,7 +369,7 @@ function Landing({
       </section>
 
       <section className="flex flex-col gap-3.5">
-        <SectionTitle>More to explore</SectionTitle>
+        <SectionTitle>{t("More to explore")}</SectionTitle>
         <div className="overflow-hidden rounded-[18px] bg-surface ring-1 ring-edge-soft">
           {EXPLORE.map((e, i) => (
             <button
@@ -367,8 +388,8 @@ function Landing({
                 className="h-8 w-8 shrink-0 object-contain mix-blend-screen"
               />
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="text-[15.5px] font-semibold text-ink">{e.label}</span>
-                <span className="text-[12.5px] text-ink-subtle">{e.caption}</span>
+                <span className="text-[15.5px] font-semibold text-ink">{t(e.label)}</span>
+                <span className="text-[12.5px] text-ink-subtle">{t(e.caption)}</span>
               </span>
               <ChevronRight size={19} strokeWidth={2.2} className="shrink-0 text-ink-subtle" />
             </button>
@@ -377,7 +398,7 @@ function Landing({
       </section>
 
       <section className="flex flex-col gap-3.5">
-        <SectionTitle>Genres</SectionTitle>
+        <SectionTitle>{t("Genres")}</SectionTitle>
         <div className="grid grid-cols-2 gap-3">
           {CATEGORIES.map((c) => (
             <GenreTile key={c.label} category={c} onOpen={() => onGenre(c)} />
@@ -388,18 +409,37 @@ function Landing({
   );
 }
 
-function FeatureCardShell({ onClick, art, title, caption, wash, backdrop }: { onClick: () => void; art: React.ReactNode; title: string; caption: string; wash: string; backdrop?: React.ReactNode }) {
+function FeatureCardShell({
+  onClick,
+  art,
+  title,
+  caption,
+  wash,
+  backdrop,
+}: {
+  onClick: () => void;
+  art: React.ReactNode;
+  title: string;
+  caption: string;
+  wash: string;
+  backdrop?: React.ReactNode;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group relative flex min-h-[132px] flex-col justify-between overflow-hidden rounded-[20px] bg-surface p-4 text-start ring-1 ring-edge-soft transition-transform duration-150 active:scale-[0.98] motion-reduce:transition-none"
+      className="group relative flex min-h-[132px] flex-col justify-between overflow-hidden rounded-xl bg-surface p-4 text-start ring-1 ring-edge-soft transition-transform duration-150 active:scale-[0.98] motion-reduce:transition-none"
     >
       {backdrop}
-      <span aria-hidden className={`pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent ${wash}`} />
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent ${wash}`}
+      />
       <span className="relative flex h-12 items-center">{art}</span>
       <span className="relative mt-3 flex flex-col gap-0.5">
-        <span className="font-display text-[18px] font-medium leading-tight tracking-tight text-ink">{title}</span>
+        <span className="font-display text-[18px] font-medium leading-tight tracking-tight text-ink">
+          {title}
+        </span>
         <span className="text-[12.5px] leading-snug text-ink-muted">{caption}</span>
       </span>
     </button>
@@ -434,14 +474,18 @@ function AwardMarkCycle() {
 }
 
 function AwardsCard({ onClick }: { onClick: () => void }) {
+  const t = useT();
   return (
     <FeatureCardShell
       onClick={onClick}
-      title="Awards"
-      caption="Oscar, SAG, BAFTA winners"
+      title={t("Awards")}
+      caption={t("Oscar, SAG, BAFTA winners")}
       wash="from-[oklch(0.83_0.10_85_/_0.14)]"
       art={
-        <span className="drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]" style={{ color: "oklch(0.83 0.10 85)" }}>
+        <span
+          className="drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]"
+          style={{ color: "oklch(0.83 0.10 85)" }}
+        >
           <Laurel size={48}>
             <AwardMarkCycle />
           </Laurel>
@@ -463,7 +507,9 @@ function useCollectionSlides(key: string): CollectionSlide[] {
       return;
     }
     let alive = true;
-    Promise.all(PREVIEW_COLLECTION_IDS.slice(0, 6).map((id) => tmdbCollection(key, id).catch(() => null)))
+    Promise.all(
+      PREVIEW_COLLECTION_IDS.slice(0, 6).map((id) => tmdbCollection(key, id).catch(() => null)),
+    )
       .then((cols) => {
         if (!alive) return;
         const out: CollectionSlide[] = [];
@@ -474,7 +520,10 @@ function useCollectionSlides(key: string): CollectionSlide[] {
             .filter((x): x is string => !!x)
             .slice(0, 3);
           if (posters.length < 2) continue;
-          out.push({ backdrop: c.backdrop ?? c.parts.find((p) => p.background)?.background, posters });
+          out.push({
+            backdrop: c.backdrop ?? c.parts.find((p) => p.background)?.background,
+            posters,
+          });
         }
         setSlides(out);
       })
@@ -496,6 +545,7 @@ const COLL_CSS = `
 `;
 
 function CollectionsCard({ onClick }: { onClick: () => void }) {
+  const t = useT();
   const { settings } = useSettings();
   const slides = useCollectionSlides(settings.tmdbKey);
   const [reduced] = useState(prefersReducedMotion);
@@ -511,11 +561,15 @@ function CollectionsCard({ onClick }: { onClick: () => void }) {
       <style>{COLL_CSS}</style>
       <FeatureCardShell
         onClick={onClick}
-        title="Collections"
-        caption="Curated sets and sagas"
+        title={t("Collections")}
+        caption={t("Curated sets and sagas")}
         wash={active ? "from-transparent" : "from-accent/12"}
-        backdrop={active?.backdrop ? <CollectionBackdrop src={active.backdrop} slideKey={idx} /> : undefined}
-        art={active ? <CollectionArt posters={active.posters} slideKey={idx} /> : <CollectionStack />}
+        backdrop={
+          active?.backdrop ? <CollectionBackdrop src={active.backdrop} slideKey={idx} /> : undefined
+        }
+        art={
+          active ? <CollectionArt posters={active.posters} slideKey={idx} /> : <CollectionStack />
+        }
       />
     </>
   );
@@ -543,16 +597,27 @@ function CollectionStack() {
 function CollectionArt({ posters, slideKey }: { posters: string[]; slideKey: number }) {
   return (
     <span key={slideKey} aria-hidden className="relative h-11 w-[60px] coll-in">
-      <PosterCard src={posters[0]} className="absolute bottom-0 start-0 h-10 w-[29px] -rotate-[13deg]" />
-      <PosterCard src={posters[1] ?? posters[0]} className="absolute bottom-0 start-[14px] h-10 w-[29px] rotate-[3deg]" />
-      <PosterCard src={posters[2] ?? posters[1] ?? posters[0]} className="absolute bottom-0 start-[28px] h-10 w-[29px] rotate-[13deg]" />
+      <PosterCard
+        src={posters[0]}
+        className="absolute bottom-0 start-0 h-10 w-[29px] -rotate-[13deg]"
+      />
+      <PosterCard
+        src={posters[1] ?? posters[0]}
+        className="absolute bottom-0 start-[14px] h-10 w-[29px] rotate-[3deg]"
+      />
+      <PosterCard
+        src={posters[2] ?? posters[1] ?? posters[0]}
+        className="absolute bottom-0 start-[28px] h-10 w-[29px] rotate-[13deg]"
+      />
     </span>
   );
 }
 
 function PosterCard({ src, className }: { src: string; className: string }) {
   return (
-    <span className={`overflow-hidden rounded-[7px] bg-elevated ring-1 ring-edge-soft ${className}`}>
+    <span
+      className={`overflow-hidden rounded-[7px] bg-elevated ring-1 ring-edge-soft ${className}`}
+    >
       <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
     </span>
   );
@@ -560,24 +625,55 @@ function PosterCard({ src, className }: { src: string; className: string }) {
 
 const GENRE_PALETTE: Record<string, { from: string; to: string; ink: string }> = {
   Action: { from: "oklch(0.40 0.18 25)", to: "oklch(0.18 0.10 20)", ink: "oklch(0.96 0.02 25)" },
-  Adventure: { from: "oklch(0.45 0.14 145)", to: "oklch(0.20 0.10 155)", ink: "oklch(0.96 0.02 145)" },
-  Animation: { from: "oklch(0.50 0.16 200)", to: "oklch(0.20 0.10 195)", ink: "oklch(0.96 0.02 200)" },
+  Adventure: {
+    from: "oklch(0.45 0.14 145)",
+    to: "oklch(0.20 0.10 155)",
+    ink: "oklch(0.96 0.02 145)",
+  },
+  Animation: {
+    from: "oklch(0.50 0.16 200)",
+    to: "oklch(0.20 0.10 195)",
+    ink: "oklch(0.96 0.02 200)",
+  },
   Comedy: { from: "oklch(0.55 0.16 75)", to: "oklch(0.22 0.08 60)", ink: "oklch(0.96 0.02 80)" },
   Crime: { from: "oklch(0.32 0.10 50)", to: "oklch(0.14 0.04 30)", ink: "oklch(0.95 0.04 60)" },
-  Documentary: { from: "oklch(0.36 0.10 145)", to: "oklch(0.18 0.06 150)", ink: "oklch(0.96 0.02 145)" },
+  Documentary: {
+    from: "oklch(0.36 0.10 145)",
+    to: "oklch(0.18 0.06 150)",
+    ink: "oklch(0.96 0.02 145)",
+  },
   Drama: { from: "oklch(0.36 0.12 240)", to: "oklch(0.18 0.06 230)", ink: "oklch(0.96 0.02 240)" },
   Family: { from: "oklch(0.50 0.13 100)", to: "oklch(0.20 0.08 110)", ink: "oklch(0.96 0.02 100)" },
-  Fantasy: { from: "oklch(0.42 0.14 320)", to: "oklch(0.18 0.08 305)", ink: "oklch(0.96 0.02 320)" },
+  Fantasy: {
+    from: "oklch(0.42 0.14 320)",
+    to: "oklch(0.18 0.08 305)",
+    ink: "oklch(0.96 0.02 320)",
+  },
   Horror: { from: "oklch(0.30 0.10 15)", to: "oklch(0.10 0.04 20)", ink: "oklch(0.94 0.02 20)" },
   Mystery: { from: "oklch(0.32 0.10 95)", to: "oklch(0.14 0.06 80)", ink: "oklch(0.95 0.04 90)" },
   Romance: { from: "oklch(0.45 0.15 0)", to: "oklch(0.20 0.08 350)", ink: "oklch(0.96 0.02 0)" },
-  "Sci-Fi": { from: "oklch(0.38 0.16 285)", to: "oklch(0.18 0.10 280)", ink: "oklch(0.96 0.02 285)" },
-  Thriller: { from: "oklch(0.32 0.10 200)", to: "oklch(0.14 0.04 220)", ink: "oklch(0.96 0.02 220)" },
+  "Sci-Fi": {
+    from: "oklch(0.38 0.16 285)",
+    to: "oklch(0.18 0.10 280)",
+    ink: "oklch(0.96 0.02 285)",
+  },
+  Thriller: {
+    from: "oklch(0.32 0.10 200)",
+    to: "oklch(0.14 0.04 220)",
+    ink: "oklch(0.96 0.02 220)",
+  },
   War: { from: "oklch(0.32 0.06 70)", to: "oklch(0.14 0.04 60)", ink: "oklch(0.95 0.02 75)" },
   Western: { from: "oklch(0.45 0.12 55)", to: "oklch(0.18 0.08 35)", ink: "oklch(0.96 0.04 60)" },
 };
 
-function GenreTile({ category, onOpen }: { category: (typeof CATEGORIES)[number]; onOpen: () => void }) {
+function GenreTile({
+  category,
+  onOpen,
+}: {
+  category: (typeof CATEGORIES)[number];
+  onOpen: () => void;
+}) {
+  const t = useT();
   const { settings } = useSettings();
   const [art, setArt] = useState<Meta[]>([]);
   const palette = GENRE_PALETTE[category.genre] ?? GENRE_PALETTE.Action;
@@ -611,12 +707,24 @@ function GenreTile({ category, onOpen }: { category: (typeof CATEGORIES)[number]
           mixBlendMode: "multiply",
         }}
       />
-      <span aria-hidden className="absolute inset-x-0 bottom-0 h-1/2" style={{ background: `linear-gradient(to bottom, transparent, ${palette.to})` }} />
+      <span
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-1/2"
+        style={{ background: `linear-gradient(to bottom, transparent, ${palette.to})` }}
+      />
       <span className="absolute inset-x-3.5 bottom-3 flex items-end justify-between">
-        <span className="font-display text-[17px] font-medium leading-tight tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]" style={{ color: palette.ink }}>
-          {category.label}
+        <span
+          className="font-display text-[17px] font-medium leading-tight tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]"
+          style={{ color: palette.ink }}
+        >
+          {t(category.label)}
         </span>
-        <ChevronRight size={16} strokeWidth={2.4} className="shrink-0" style={{ color: palette.ink }} />
+        <ChevronRight
+          size={16}
+          strokeWidth={2.4}
+          className="shrink-0"
+          style={{ color: palette.ink }}
+        />
       </span>
     </button>
   );
@@ -627,7 +735,11 @@ function GenreCollage({ art, rpdbKey }: { art: Meta[]; rpdbKey: string }) {
   return (
     <span aria-hidden className="absolute inset-0 grid grid-cols-3">
       {art.slice(0, 3).map((m, i) => (
-        <span key={m.id} className="relative overflow-hidden" style={{ transform: `skewX(-8deg) translateX(${(i - 1) * 5}px)` }}>
+        <span
+          key={m.id}
+          className="relative overflow-hidden"
+          style={{ transform: `skewX(-8deg) translateX(${(i - 1) * 5}px)` }}
+        >
           <Poster
             src={rpdbPoster(rpdbKey, m.id, m.background ?? m.poster)}
             seed={m.id}
@@ -649,9 +761,10 @@ function Results({
   metas: Meta[];
   onOpenDetail: (m: Meta) => void;
 }) {
+  const t = useT();
   if (metas.length === 0) {
     if (status === "loading" || status === "typing") return <LoaderBlock />;
-    return <EmptyState Icon={SearchIcon} text="No matches yet. Try another title." />;
+    return <EmptyState Icon={SearchIcon} text={t("No matches yet. Try another title.")} />;
   }
   return <Grid metas={metas} onOpenDetail={onOpenDetail} />;
 }
@@ -665,6 +778,7 @@ function CatalogView({
   onBack: () => void;
   onOpenDetail: (m: Meta) => void;
 }) {
+  const t = useT();
   return (
     <div className="flex flex-col gap-5">
       <BackBar title={catalog.title} onBack={onBack} />
@@ -672,7 +786,7 @@ function CatalogView({
         {catalog.metas === null ? (
           <LoaderBlock />
         ) : catalog.metas.length === 0 ? (
-          <EmptyState Icon={Trophy} text={catalog.empty ?? "Nothing to show here right now."} />
+          <EmptyState Icon={Trophy} text={catalog.empty ?? t("Nothing to show here right now.")} />
         ) : (
           <Grid metas={catalog.metas} onOpenDetail={onOpenDetail} />
         )}
@@ -690,6 +804,7 @@ function CollectionsBrowser({
   onBack: () => void;
   onOpenDetail: (m: Meta) => void;
 }) {
+  const t = useT();
   const [list, setList] = useState<Meta[] | null>(null);
   const [active, setActive] = useState<Meta | null>(null);
   const [members, setMembers] = useState<Meta[] | null>(null);
@@ -700,7 +815,9 @@ function CollectionsBrowser({
     (async () => {
       try {
         const cats = await listBrowseCatalogs(authKey);
-        const wanted = cats.filter((c) => isCollectionCatalog({ type: c.type, id: c.id, name: c.name }));
+        const wanted = cats.filter((c) =>
+          isCollectionCatalog({ type: c.type, id: c.id, name: c.name }),
+        );
         const pages = await Promise.all(
           wanted.map((c) => browseFetcher(c, null)(1).catch(() => [] as Meta[])),
         );
@@ -744,11 +861,14 @@ function CollectionsBrowser({
             setMembers(null);
           }}
         />
-        <div key={`members:${active.id}:${members === null ? "loading" : "loaded"}`} className="ms-view-in">
+        <div
+          key={`members:${active.id}:${members === null ? "loading" : "loaded"}`}
+          className="ms-view-in"
+        >
           {members === null ? (
             <LoaderBlock />
           ) : members.length === 0 ? (
-            <EmptyState Icon={Layers} text="This collection has no titles to show yet." />
+            <EmptyState Icon={Layers} text={t("This collection has no titles to show yet.")} />
           ) : (
             <Grid metas={members} onOpenDetail={onOpenDetail} />
           )}
@@ -759,12 +879,15 @@ function CollectionsBrowser({
 
   return (
     <div className="flex flex-col gap-5">
-      <BackBar title="Collections" onBack={onBack} />
+      <BackBar title={t("Collections")} onBack={onBack} />
       <div key={`list:${list === null ? "loading" : "loaded"}`} className="ms-view-in">
         {list === null ? (
           <LoaderBlock />
         ) : list.length === 0 ? (
-          <EmptyState Icon={Layers} text="No collections yet. Add a collections addon to browse curated sets." />
+          <EmptyState
+            Icon={Layers}
+            text={t("No collections yet. Add a collections addon to browse curated sets.")}
+          />
         ) : (
           <div className="grid grid-cols-3 gap-x-3 gap-y-4">
             {list.map((m) => (
@@ -789,6 +912,12 @@ function Grid({ metas, onOpenDetail }: { metas: Meta[]; onOpenDetail: (m: Meta) 
 
 function GridTile({ meta, onOpenDetail }: { meta: Meta; onOpenDetail: (m: Meta) => void }) {
   const { settings } = useSettings();
+  const { snapshot } = useMobileRemote();
+  const local = snapshot.library?.local?.some((item) => item.id === meta.id) ?? false;
+  const providers = useMemo(() => {
+    const found = snapshot.library?.mediaServers?.find((item) => item.id === meta.id);
+    return found?.mediaServerProviders ?? [];
+  }, [snapshot.library?.mediaServers, meta.id]);
   const { src, onError } = usePosterChain(
     settings.rpdbKey,
     meta.id,
@@ -801,8 +930,32 @@ function GridTile({ meta, onOpenDetail }: { meta: Meta; onOpenDetail: (m: Meta) 
       onClick={() => onOpenDetail(meta)}
       className="text-start transition-transform duration-150 active:scale-[0.96] motion-reduce:transition-none"
     >
-      <Poster src={src} onError={onError} seed={meta.id} ratio="portrait" lazy className="rounded-[12px]" />
-      <p className="mt-1.5 line-clamp-2 text-[12px] font-medium leading-snug text-ink-muted">{meta.name}</p>
+      <div className="relative overflow-hidden rounded-[12px]">
+        <Poster
+          src={src}
+          onError={onError}
+          seed={meta.id}
+          ratio="portrait"
+          lazy
+          className="rounded-[12px]"
+        />
+        {(local || providers.length > 0) && (
+          <span className="absolute end-1.5 top-1.5 flex items-center gap-1 rounded-lg bg-canvas/90 px-1.5 py-1 text-ink shadow-lg ring-1 ring-edge-soft backdrop-blur-md">
+            {local && <LocalLibraryBrand className="h-4 w-4" />}
+            {providers.map((provider) => (
+              <MediaServerBrand
+                key={provider}
+                provider={provider as MediaServerProvider}
+                name={provider}
+                compact
+              />
+            ))}
+          </span>
+        )}
+      </div>
+      <p className="mt-1.5 line-clamp-2 text-[12px] font-medium leading-snug text-ink-muted">
+        {meta.name}
+      </p>
     </button>
   );
 }
@@ -820,7 +973,9 @@ function CollectionTile({ meta, onOpen }: { meta: Meta; onOpen: (m: Meta) => voi
           <Layers size={13} strokeWidth={2.2} />
         </span>
       </div>
-      <p className="mt-1.5 line-clamp-2 text-[12px] font-medium leading-snug text-ink-muted">{meta.name}</p>
+      <p className="mt-1.5 line-clamp-2 text-[12px] font-medium leading-snug text-ink-muted">
+        {meta.name}
+      </p>
     </button>
   );
 }
@@ -858,7 +1013,9 @@ function LoaderBlock() {
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="font-display text-[19px] font-medium tracking-tight text-ink">{children}</h2>;
+  return (
+    <h2 className="font-display text-[19px] font-medium tracking-tight text-ink">{children}</h2>
+  );
 }
 
 type CollectionVideo = NonNullable<Meta["videos"]>[number];
@@ -874,7 +1031,11 @@ function videoToMeta(v: CollectionVideo, fallback: "movie" | "series"): Meta | n
   if (!v.id) return null;
   const raw = v as Record<string, unknown>;
   const poster =
-    typeof raw.poster === "string" ? raw.poster : typeof v.thumbnail === "string" ? v.thumbnail : undefined;
+    typeof raw.poster === "string"
+      ? raw.poster
+      : typeof v.thumbnail === "string"
+        ? v.thumbnail
+        : undefined;
   return {
     id: v.id,
     type: memberType(v.id, fallback),

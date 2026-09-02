@@ -1,4 +1,5 @@
-import { AlertCircle, ChevronLeft, Loader2, RefreshCw, Search, SearchX } from "lucide-react";
+import { AlertCircle, ChevronLeft, Loader2, RefreshCw, SearchX } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useMemo, useState } from "react";
 import type { ServerConfig, SuwayomiSource } from "@/lib/manga/sources/suwayomi/provider";
 import type { MangaSummary } from "@/lib/manga/types";

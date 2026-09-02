@@ -45,7 +45,7 @@ export function shouldDropFinished(
   const finaleEp = list[list.length - 1];
   const dur = state?.duration ?? 0;
   const off = state?.timeOffset ?? 0;
-  const midEpisode = off > 0 && dur > 0 && off / dur < FINISHED_RATIO;
+  const midEpisode = off > 0 && (dur <= 0 || off / dur < FINISHED_RATIO);
   const freshMidResume =
     animeMode === "only" && midEpisode && finaleEp != null && effCur.episode < finaleEp.episode;
   if (freshMidResume || midEpisode) return false;

@@ -1,5 +1,6 @@
 import { AlertTriangle, Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { t, useT } from "@/lib/i18n";
 
 const ACCEPTED_TYPES = "image/png,image/gif,image/webp,image/jpeg,image/svg+xml,.svg";
 const MAX_GIF_SIZE = 2 * 1024 * 1024;
@@ -26,6 +27,7 @@ export function SeekImageUpload({
   targetDim?: number;
   targetQuality?: number;
 }) {
+  const tr = useT();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export function SeekImageUpload({
       onSelect(result.url);
     } catch (e) {
       console.warn("[seek-image] processing failed", e);
-      setError("Couldn't read that image. Try a different file.");
+      setError(tr("Couldn't read that image. Try a different file."));
     } finally {
       setBusy(false);
     }
@@ -50,13 +52,13 @@ export function SeekImageUpload({
 
   return (
     <div
-      className={`flex flex-col gap-2 rounded-xl border bg-canvas/40 p-3 transition-colors duration-200 ${
-        error ? "border-danger/60" : "border-edge-soft"
+      className={`flex flex-col gap-2 rounded-md border bg-canvas p-3 transition-colors duration-200 ${
+        error ? "border-danger" : "border-edge-soft"
       }`}
     >
       <div className="flex items-center gap-3">
         <div
-          className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-raised transition-colors duration-200"
+          className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-raised transition-colors duration-200"
           style={{
             backgroundImage: value
               ? `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.04), transparent 70%)`
@@ -66,15 +68,17 @@ export function SeekImageUpload({
           <ImageIcon
             size={20}
             strokeWidth={1.6}
-            className={`absolute text-ink-subtle transition-all duration-300 ${
+            className={`absolute text-ink-subtle transition duration-300 ${
               value ? "scale-50 opacity-0" : "scale-100 opacity-100"
             }`}
           />
           <img
             key={value || "empty"}
-            src={value || "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="}
+            src={
+              value || "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+            }
             alt=""
-            className={`h-12 w-12 object-contain transition-all duration-300 ease-out ${
+            className={`h-12 w-12 object-contain transition duration-300 ease-out ${
               value ? "translate-y-0 scale-100 opacity-100" : "translate-y-2 scale-75 opacity-0"
             }`}
           />
@@ -84,20 +88,20 @@ export function SeekImageUpload({
             </div>
           )}
         </div>
-        <div className="flex flex-1 flex-col gap-1">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
           <p className="text-[12.5px] font-medium text-ink">
-            {value ? "Custom image loaded" : emptyTitle}
+            {value ? tr("Custom image loaded") : emptyTitle}
           </p>
-          <p className="text-[11px] leading-snug text-ink-subtle">{hint}</p>
+          <p className="text-[11.5px] leading-snug text-ink-subtle">{hint}</p>
         </div>
         <button
           type="button"
           disabled={busy}
           onClick={() => fileInputRef.current?.click()}
-          className="flex h-9 items-center gap-1.5 rounded-full bg-raised px-3 text-[12px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:cursor-wait disabled:opacity-60"
+          className="flex h-9 items-center gap-1.5 rounded-full bg-raised px-3 text-[12.5px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:cursor-wait disabled:opacity-60"
         >
           <Upload size={12} strokeWidth={2.2} />
-          {busy ? "Processing" : value ? "Replace" : "Upload"}
+          {busy ? tr("Processing") : value ? tr("Replace") : tr("Upload")}
         </button>
         <button
           type="button"
@@ -106,15 +110,15 @@ export function SeekImageUpload({
             onClear();
           }}
           disabled={!value}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-raised text-ink-muted transition-all duration-200 hover:bg-danger hover:text-white disabled:pointer-events-none disabled:scale-90 disabled:opacity-0"
-          aria-label="Remove image"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-raised text-ink-muted transition duration-200 hover:bg-danger hover:text-white disabled:pointer-events-none disabled:scale-90 disabled:opacity-0"
+          aria-label={tr("Remove image")}
         >
-          <X size={13} strokeWidth={2.2} />
+          <X size={14} strokeWidth={2.2} />
         </button>
       </div>
       {error && (
-        <div className="flex items-start gap-2 rounded-lg bg-danger/15 px-2.5 py-2 text-[11.5px] leading-snug text-danger ring-1 ring-danger/30">
-          <AlertTriangle size={13} strokeWidth={2.4} className="mt-0.5 shrink-0" />
+        <div className="flex items-start gap-2 rounded-md bg-danger/15 px-2.5 py-2 text-[11.5px] leading-snug text-danger ring-1 ring-danger">
+          <AlertTriangle size={14} strokeWidth={2.4} className="mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
@@ -161,7 +165,12 @@ async function processSeekImage(file: File, maxDim: number, quality: number): Pr
   if (isSvg) {
     if (file.size > MAX_SVG_SIZE) {
       return {
-        error: `That SVG is ${formatBytes(file.size)} (max 512 KB). Optimize it at svgomg or save it smaller and try again.`,
+        error: t(
+          "That SVG is {size} (max 512 KB). Optimize it at svgomg or save it smaller and try again.",
+          {
+            size: formatBytes(file.size),
+          },
+        ),
       };
     }
     const text = await file.text();
@@ -172,7 +181,12 @@ async function processSeekImage(file: File, maxDim: number, quality: number): Pr
   if (isGif) {
     if (file.size > MAX_GIF_SIZE) {
       return {
-        error: `Animated GIFs are kept as-is to preserve animation, but this one is ${formatBytes(file.size)} and the cap is 2 MB. Try a shorter or lower-frame-rate version.`,
+        error: t(
+          "Animated GIFs are kept as-is to preserve animation, but this one is {size} and the cap is 2 MB. Try a shorter or lower-frame-rate version.",
+          {
+            size: formatBytes(file.size),
+          },
+        ),
       };
     }
     const url = await readAsDataUrl(file);
@@ -181,18 +195,22 @@ async function processSeekImage(file: File, maxDim: number, quality: number): Pr
 
   if (file.size > MAX_RASTER_SOURCE) {
     return {
-      error: `That file is ${formatBytes(file.size)}. Source images need to be under 16 MB before resizing.`,
+      error: t("That file is {size}. Source images need to be under 16 MB before resizing.", {
+        size: formatBytes(file.size),
+      }),
     };
   }
 
   const sourceUrl = await readAsDataUrl(file);
   const downsized = await downsizeRaster(sourceUrl, maxDim, quality);
-  if (!downsized) return { error: "Couldn't read that image. Try a PNG, JPEG, or WebP." };
+  if (!downsized) return { error: t("Couldn't read that image. Try a PNG, JPEG, or WebP.") };
   if (downsized.length > MAX_STORED_BYTES) {
     const tighter = await downsizeRaster(sourceUrl, Math.round(maxDim / 2), 0.82);
     if (tighter && tighter.length <= MAX_STORED_BYTES) return { url: tighter };
     return {
-      error: "Even after auto-shrinking this image is still too big to store. Try one with a tighter crop.",
+      error: t(
+        "Even after auto-shrinking this image is still too big to store. Try one with a tighter crop.",
+      ),
     };
   }
   return { url: downsized };
@@ -210,7 +228,11 @@ function readAsDataUrl(file: File): Promise<string> {
   });
 }
 
-async function downsizeRaster(dataUrl: string, maxDim: number, quality: number): Promise<string | null> {
+async function downsizeRaster(
+  dataUrl: string,
+  maxDim: number,
+  quality: number,
+): Promise<string | null> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {

@@ -11,6 +11,7 @@ import { useActiveKid } from "@/lib/profiles";
 import { useView, type View } from "@/lib/view";
 import { KidsSidebarDoodles } from "./kids-sidebar-doodles";
 import { CollapseToggle } from "@/chrome/sidebar/collapse-toggle";
+import { SidebarBigPictureEntry } from "@/chrome/sidebar/big-picture-entry";
 import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
 
 const PRIMARY_IDS = new Set(["home", "discover", "catalogs", "movies", "shows", "kids", "anime", "live", "vod"]);
@@ -116,13 +117,8 @@ export function Sidebar() {
           onPinNav={(v) => setPendingPinView(v)}
         />
         <div className={`relative p-2 ${collapsed ? "" : "lg:p-4"}`}>
-          <div
-            aria-hidden
-            className={`pointer-events-none absolute inset-x-2 top-0 h-px bg-gradient-to-r from-transparent via-edge-soft/55 to-transparent ${
-              collapsed ? "" : "lg:inset-x-4"
-            }`}
-          />
-          <div className={`flex pb-1 ${collapsed ? "justify-center" : ""}`}>
+          <div className={`flex flex-col gap-1 pb-1 ${collapsed ? "items-center" : ""}`}>
+            <SidebarBigPictureEntry collapsed={collapsed} />
             <CollapseToggle collapsed={collapsed} />
           </div>
           {locked ? (
@@ -263,9 +259,7 @@ function ScrollableNav({
             />
           )}
         </div>
-        <div data-tauri-drag-region className="py-2.5">
-          <div className="mx-3 h-px bg-gradient-to-r from-transparent via-edge-soft/55 to-transparent" />
-        </div>
+        <div data-tauri-drag-region aria-hidden className="h-5 shrink-0" />
         <div className="flex flex-col gap-1.5">
           {collections.map((item) => {
             const gated = !!item.pinGated && locked;
@@ -368,20 +362,20 @@ function NavItem({
       data-active={active ? "" : undefined}
       aria-label={gated ? t("chrome.lockedRequiresPin", { label: text }) : text}
       title={gated ? t("chrome.lockedShort", { label: text }) : text}
-      className={`relative flex items-center justify-center gap-4 transition-colors duration-150 ${
-        big ? "h-[68px] rounded-2xl text-[20px] font-bold" : "h-14 rounded-xl text-[16px]"
+      className={`group relative flex items-center justify-center gap-4 transition-colors duration-150 ${
+        big ? "h-[68px] rounded-2xl text-[20px] font-bold" : "h-14 rounded-lg text-[16px]"
       } ${collapsed ? "" : big ? "lg:justify-start lg:px-5" : "lg:justify-start lg:px-4"} ${
         collapsed
           ? active
             ? "text-accent"
             : "text-ink-muted hover:text-ink"
           : active
-            ? "bg-elevated text-ink"
+            ? "bg-elevated text-ink ring-1 ring-edge"
             : "text-ink-muted hover:bg-elevated/50 hover:text-ink"
       }`}
     >
       <span className={`relative ${big ? "scale-110" : ""} ${gated ? "opacity-70" : ""}`}>
-        {render(hovered)}
+        {render(Boolean(active || hovered))}
         {gated && (
           <span className="absolute -bottom-1 -end-1 flex h-4 w-4 items-center justify-center rounded-full bg-canvas text-ink-subtle ring-1 ring-edge">
             <Lock size={9} strokeWidth={2.4} />

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Download, Star } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { downloadTheme, type StoreTheme } from "@/lib/theme-store";
 import { getBundle, installBundle, type StoreBundle } from "@/lib/bundle-store";
 import { UserHoverCard } from "@/views/profile/user-hover-card";
@@ -11,10 +12,10 @@ import { useAcquireState } from "./use-acquire";
 import { tokensFromStoreTheme } from "./fit-palette";
 
 const CARD_CLASS =
-  "group/card relative flex w-full cursor-pointer flex-col overflow-hidden rounded-[14px] bg-surface text-start outline-none ring-1 ring-edge-soft transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-24px_rgba(0,0,0,0.65)] focus-visible:ring-2 focus-visible:ring-accent active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none";
+  "group/card relative flex w-full cursor-pointer flex-col overflow-hidden rounded-md bg-elevated text-start outline-none transition-colors duration-200 hover:bg-raised focus-visible:ring-2 focus-visible:ring-accent";
 
 const ACTION_ROW =
-  "absolute inset-x-0 bottom-1.5 z-10 flex translate-y-1.5 items-center p-2.5 opacity-0 transition-all duration-200 ease-out group-hover/card:translate-y-0 group-hover/card:opacity-100 motion-reduce:translate-y-0 motion-reduce:opacity-100";
+  "absolute inset-x-0 bottom-1.5 z-10 flex translate-y-1.5 items-center p-2.5 opacity-0 transition duration-200 ease-out group-hover/card:translate-y-0 group-hover/card:opacity-100 motion-reduce:translate-y-0 motion-reduce:opacity-100";
 
 function RankChip({ rank }: { rank: number }) {
   const top = rank <= 3;
@@ -31,8 +32,8 @@ function RankChip({ rank }: { rank: number }) {
 
 function RatingChip({ avg }: { avg: number }) {
   return (
-    <span className="absolute end-2.5 top-2.5 z-10 flex items-center gap-1 rounded-[8px] bg-black/55 px-1.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm transition-opacity duration-200 group-hover/card:opacity-0">
-      <Star size={10} className="fill-accent text-accent" />
+    <span className="absolute end-2.5 top-2.5 z-10 flex items-center gap-1 rounded-[8px] bg-black/55 px-1.5 py-0.5 text-[11.5px] font-semibold text-white backdrop-blur-sm transition-opacity duration-200 group-hover/card:opacity-0">
+      <Star size={12} className="fill-accent text-accent" />
       {avg.toFixed(1)}
     </span>
   );
@@ -54,8 +55,11 @@ function ThemeMarketCard({
   rank?: number;
   onOpen: (t: StoreTheme) => void;
 }) {
+  const t = useT();
   const { state, run } = useAcquireState(() =>
-    downloadTheme(theme.id, theme.cover ?? theme.screenshots[0] ?? null, theme.versionsCount).then(() => {}),
+    downloadTheme(theme.id, theme.cover ?? theme.screenshots[0] ?? null, theme.versionsCount).then(
+      () => {},
+    ),
   );
   const tokens = useMemo(() => tokensFromStoreTheme(theme), [theme]);
   return (
@@ -72,23 +76,25 @@ function ThemeMarketCard({
         {theme.ratingCount > 0 && <RatingChip avg={theme.ratingAvg} />}
         {rank != null && <RankChip rank={rank} />}
         <div className={ACTION_ROW}>
-          <MarketCta variant="acquire" size="sm" state={state} onClick={run} label="Get" />
+          <MarketCta variant="acquire" size="sm" state={state} onClick={run} label={t("Get")} />
         </div>
         <div className="absolute inset-x-0 bottom-0 z-10">
           <PaletteSeam swatch={theme.swatch} />
         </div>
       </div>
       <div className="flex min-w-0 flex-col gap-0.5 px-3.5 pb-3 pt-2.5">
-        <span className="truncate text-[14.5px] font-semibold tracking-tight text-ink">{theme.name}</span>
+        <span className="truncate text-[14.5px] font-semibold tracking-tight text-ink">
+          {theme.name}
+        </span>
         <span className="flex items-center gap-1.5 truncate text-[11.5px] text-ink-subtle">
           {theme.authorHandle ? (
             <UserHoverCard handle={theme.authorHandle}>
               <span className="truncate text-ink-muted transition-colors hover:text-ink">
-                {theme.author || "Anonymous"}
+                {theme.author || t("Anonymous")}
               </span>
             </UserHoverCard>
           ) : (
-            <span className="truncate text-ink-muted">{theme.author || "Anonymous"}</span>
+            <span className="truncate text-ink-muted">{theme.author || t("Anonymous")}</span>
           )}
           <span className="text-ink-subtle/60">·</span>
           <span className="inline-flex shrink-0 items-center gap-1 tabular-nums">
@@ -110,6 +116,7 @@ function BundleMarketCard({
   rank?: number;
   onOpen: (b: StoreBundle) => void;
 }) {
+  const t = useT();
   const { state, run } = useAcquireState(async () => {
     installBundle(bundle);
     await getBundle(bundle.id).catch(() => {});
@@ -128,11 +135,13 @@ function BundleMarketCard({
         {bundle.ratingCount > 0 && <RatingChip avg={bundle.ratingAvg} />}
         {rank != null && <RankChip rank={rank} />}
         <div className={ACTION_ROW}>
-          <MarketCta variant="acquire" size="sm" state={state} onClick={run} label="Install" />
+          <MarketCta variant="acquire" size="sm" state={state} onClick={run} label={t("Install")} />
         </div>
       </div>
       <div className="flex min-w-0 flex-col gap-0.5 px-3.5 pb-3 pt-2.5">
-        <span className="truncate text-[14.5px] font-semibold tracking-tight text-ink">{bundle.name}</span>
+        <span className="truncate text-[14.5px] font-semibold tracking-tight text-ink">
+          {bundle.name}
+        </span>
         <span className="flex items-center gap-1.5 truncate text-[11.5px] text-ink-subtle">
           {bundle.authorAvatar && (
             <img
@@ -142,7 +151,7 @@ function BundleMarketCard({
               className="h-4 w-4 shrink-0 rounded-full object-cover ring-1 ring-edge-soft"
             />
           )}
-          <span className="truncate text-ink-muted">{bundle.author || "Anonymous"}</span>
+          <span className="truncate text-ink-muted">{bundle.author || t("Anonymous")}</span>
           <span className="text-ink-subtle/60">·</span>
           <span className="inline-flex shrink-0 items-center gap-1 tabular-nums">
             <Download size={10.5} strokeWidth={2.2} />

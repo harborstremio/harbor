@@ -1,0 +1,344 @@
+.hbk {
+  --hbk-ratio: 1.5;
+  --hbk-thick: 9px;
+  --hbk-open: -62deg;
+  --hbk-turn: -15deg;
+  --hbk-paper: #efe7d8;
+  --hbk-paper-dim: #d9cfbd;
+  --hbk-paper-ink: #3d382e;
+  --hbk-art: 32 29 25;
+  --hbk-board: rgb(var(--hbk-art));
+  --hbk-board-dim: color-mix(in srgb, rgb(var(--hbk-art)) 70%, #000);
+  --hbk-radius: 2px;
+  position: relative;
+  display: block;
+  width: 100%;
+  perspective: 1700px;
+  perspective-origin: 34% 50%;
+}
+
+.hbk-block {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding-top: calc(100% * var(--hbk-ratio));
+  transform-style: preserve-3d;
+}
+
+.hbk-cover,
+.hbk-paper {
+  position: absolute;
+  border-radius: 0 var(--hbk-radius) var(--hbk-radius) 0;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.hbk-paper {
+  inset: 1px 2px 1px 3%;
+  overflow: hidden;
+  background: var(--hbk-paper);
+  transform: translateZ(-16px);
+}
+
+.hbk-cover {
+  z-index: 3;
+  inset: 0;
+  background: var(--hbk-board);
+  box-shadow: 9px 13px 24px -13px rgba(0, 0, 0, 0.75);
+}
+
+.hbk-face,
+.hbk-inside {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  backface-visibility: hidden;
+}
+
+.hbk-face {
+  --poster-radius: 0px;
+  transform: translateZ(2px);
+}
+
+.hbk-inside {
+  background: var(--hbk-board-dim);
+  transform: rotateY(180deg) translateZ(2px);
+}
+
+.hbk-inside::after {
+  content: "";
+  position: absolute;
+  inset: 5% 6%;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--hbk-paper-ink) 62%, var(--hbk-board-dim));
+}
+
+.hbk-cover::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: calc(var(--hbk-thick) * 0.72);
+  width: 2px;
+  background: rgba(0, 0, 0, 0.36);
+  transform: translateZ(4px);
+}
+
+.hbk-cover::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: calc(var(--hbk-thick) * 0.38);
+  background: var(--hbk-board-dim);
+  transform: rotateY(90deg);
+  transform-origin: right center;
+}
+
+.hbk-edge {
+  position: absolute;
+  z-index: 2;
+  inset-block: 1px;
+  right: calc(var(--hbk-thick) * -1 + 1px);
+  width: calc(var(--hbk-thick) - 1px);
+  background: repeating-linear-gradient(
+    to right,
+    var(--hbk-paper-dim) 0 1px,
+    var(--hbk-paper) 1px 3px
+  );
+  opacity: 0;
+  backface-visibility: hidden;
+  transform: rotateY(90deg);
+  transform-origin: left center;
+}
+
+.hbk-spine {
+  position: absolute;
+  z-index: 4;
+  inset-block: 2px;
+  left: 0;
+  width: var(--hbk-thick);
+  background: var(--hbk-board-dim);
+  backface-visibility: hidden;
+  transform: rotateY(-90deg);
+  transform-origin: left center;
+}
+
+.hbk-page {
+  display: flex;
+  overflow: hidden;
+  height: 100%;
+  flex-direction: column;
+  padding-block: 11% 9%;
+  padding-inline: 20% 10%;
+  color: var(--hbk-paper-ink);
+  text-align: start;
+}
+
+.hbk-page-title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-family: var(--font-book);
+  font-size: clamp(9px, calc(var(--hbk-scale, 1) * var(--hbk-title, 1) * 15px), 30px);
+  font-weight: 500;
+  line-height: 1.12;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.hbk-page-by {
+  margin-top: 0.45em;
+  color: color-mix(in srgb, var(--hbk-paper-ink) 62%, transparent);
+  font-size: clamp(7px, calc(var(--hbk-scale, 1) * 9px), 15px);
+  font-style: italic;
+}
+
+.hbk-page-rule {
+  width: 34%;
+  height: 1px;
+  margin: 0.85em 0;
+  background: color-mix(in srgb, var(--hbk-paper-ink) 34%, transparent);
+}
+
+.hbk-page-text {
+  min-height: 0;
+  max-height: calc(5lh);
+  overflow: hidden;
+  color: color-mix(in srgb, var(--hbk-paper-ink) 76%, transparent);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(6.5px, calc(var(--hbk-scale, 1) * 8.5px), 14px);
+  line-height: 1.62;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 0.5lh,
+    #000 calc(100% - 0.5lh),
+    transparent 100%
+  );
+}
+
+.hbk-page-drift {
+  margin: 0;
+}
+
+.hbk:hover .hbk-page-drift,
+.hbk:focus-within .hbk-page-drift,
+.ebook-library-hero:hover .hbk-page-drift {
+  animation: hbk-page-drift 19s ease-in-out 1.4s infinite;
+}
+
+@keyframes hbk-page-drift {
+  0%,
+  15% {
+    transform: translateY(0);
+  }
+  50%,
+  65% {
+    transform: translateY(min(0px, calc(5lh - 100%)));
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hbk:hover .hbk-page-drift,
+  .hbk:focus-within .hbk-page-drift,
+  .ebook-library-hero:hover .hbk-page-drift {
+    animation: none;
+  }
+}
+
+.hbk-page-mark {
+  margin-top: auto;
+  padding-top: 0.8em;
+  color: color-mix(in srgb, var(--hbk-paper-ink) 44%, transparent);
+  font-size: clamp(5.5px, calc(var(--hbk-scale, 1) * 7px), 11px);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hbk-block,
+.hbk-cover {
+  transition: transform 380ms ease-in-out;
+}
+
+.hbk-block {
+  transform: rotateY(0deg) translateZ(0);
+}
+
+.hbk-cover {
+  transform: rotateY(0deg);
+}
+
+.hbk:hover,
+.hbk:focus-within {
+  z-index: 5;
+}
+
+.hbk-edge {
+  transition: opacity 240ms ease-in-out;
+}
+
+.hbk:hover .hbk-edge,
+.hbk:focus-within .hbk-edge {
+  opacity: 1;
+  transition-delay: 150ms;
+}
+
+.hbk:hover .hbk-block,
+.hbk:focus-within .hbk-block {
+  transform: rotateY(var(--hbk-turn)) translateZ(7px);
+  transition:
+    transform 460ms linear(0, 0.36 20%, 0.74 38%, 0.97 55%, 1.03 70%, 1.004 86%, 1)
+      150ms;
+}
+
+.hbk:hover .hbk-cover,
+.hbk:focus-within .hbk-cover {
+  transform: rotateY(var(--hbk-open));
+  transition:
+    transform 560ms linear(0, 0.32 18%, 0.7 36%, 0.95 54%, 1.035 70%, 1.006 86%, 1)
+      150ms;
+}
+
+.hbk[data-mode="lift"]:hover .hbk-block,
+.hbk[data-mode="lift"]:focus-within .hbk-block {
+  transform: rotateY(calc(-11deg + var(--hbk-mx, 0) * 17deg))
+    rotateX(calc(var(--hbk-my, 0) * -11deg)) rotateZ(-1deg) translateZ(18px) scale(1.07);
+  transition: transform 170ms ease-out 0s;
+}
+
+.hbk[data-mode="lift"]:hover .hbk-cover,
+.hbk[data-mode="lift"]:focus-within .hbk-cover {
+  transform: rotateY(0deg);
+  transition-delay: 0s;
+}
+
+.hbk[data-mode="lift"] .hbk-cover {
+  transition-property: transform, box-shadow;
+}
+
+.hbk[data-mode="lift"]:hover .hbk-cover,
+.hbk[data-mode="lift"]:focus-within .hbk-cover {
+  box-shadow: 16px 20px 34px -14px rgba(0, 0, 0, 0.85);
+}
+
+:dir(rtl) .hbk {
+  --hbk-open: 62deg;
+  --hbk-turn: 15deg;
+  perspective-origin: 66% 50%;
+}
+
+:dir(rtl) .hbk-cover,
+:dir(rtl) .hbk-paper {
+  border-radius: var(--hbk-radius) 0 0 var(--hbk-radius);
+  transform-origin: right center;
+}
+
+:dir(rtl) .hbk-paper {
+  inset: 1px 3% 1px 2px;
+}
+
+:dir(rtl) .hbk-cover::before {
+  right: calc(var(--hbk-thick) * 0.72);
+  left: auto;
+}
+
+:dir(rtl) .hbk-cover::after {
+  right: auto;
+  left: 0;
+  transform: rotateY(-90deg);
+  transform-origin: left center;
+}
+
+:dir(rtl) .hbk-edge {
+  right: auto;
+  left: calc(var(--hbk-thick) * -1 + 1px);
+  transform: rotateY(-90deg);
+  transform-origin: right center;
+}
+
+:dir(rtl) .hbk-spine {
+  right: 0;
+  left: auto;
+  transform: rotateY(90deg);
+  transform-origin: right center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hbk-block,
+  .hbk-cover,
+  .hbk-edge {
+    transition: none;
+  }
+
+}
+
+[data-ebook-page] .harbor-row-track {
+  padding-inline: 26px;
+  margin-inline: -26px;
+  scroll-padding-inline: 26px;
+}

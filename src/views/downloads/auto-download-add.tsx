@@ -1,12 +1,17 @@
-import { Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useRef, useState } from "react";
 import { Poster, usePosterChain } from "@/components/poster";
 import type { Meta } from "@/lib/cinemeta";
 import { searchAll, searchCinemeta } from "@/lib/search";
 import { useSettings } from "@/lib/settings";
 import { addAutoDownload, isAutoDownloaded } from "@/lib/auto-download";
+import { useT } from "@/lib/i18n";
+
+const MAX_RESULTS = 8;
 
 export function AutoDownloadAdd() {
+  const t = useT();
   const { settings } = useSettings();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Meta[]>([]);
@@ -29,19 +34,29 @@ export function AutoDownloadAdd() {
       void (async () => {
         const [tmdb, cine] = await Promise.all([
           settings.tmdbKey
-            ? searchAll(settings.tmdbKey, trimmed).then((r) => r.series).catch(() => [])
+            ? searchAll(settings.tmdbKey, trimmed)
+                .then((r) => r.series)
+                .catch(() => [])
             : Promise.resolve<Meta[]>([]),
-          searchCinemeta(trimmed).then((r) => r.series).catch(() => []),
+          searchCinemeta(trimmed)
+            .then((r) => r.series)
+            .catch(() => []),
         ]);
         if (id !== reqRef.current) return;
         const seen = new Set<string>();
         const merged: Meta[] = [];
-        for (const m of [...tmdb, ...cine]) {
-          if (seen.has(m.id)) continue;
-          seen.add(m.id);
-          merged.push(m);
+        const rounds = Math.max(tmdb.length, cine.length);
+        for (let i = 0; i < rounds && merged.length < MAX_RESULTS; i++) {
+          for (const m of [tmdb[i], cine[i]]) {
+            if (!m || merged.length >= MAX_RESULTS) continue;
+            const title = `${m.name.trim().toLowerCase()}|${(m.releaseInfo ?? "").slice(0, 4)}`;
+            if (seen.has(m.id) || seen.has(title)) continue;
+            seen.add(m.id);
+            seen.add(title);
+            merged.push(m);
+          }
         }
-        setResults(merged.slice(0, 8));
+        setResults(merged);
         setLoading(false);
       })();
     }, 200);
@@ -67,16 +82,16 @@ export function AutoDownloadAdd() {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => window.setTimeout(() => setFocused(false), 140)}
-          placeholder="Add a series to auto-download"
+          placeholder={t("Add a series to auto-download")}
           className="h-full w-full bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-subtle"
         />
       </div>
       {showPanel && (
         <div className="absolute inset-x-0 top-full z-30 mt-1.5 overflow-hidden rounded-xl border border-edge bg-elevated shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)]">
           {loading && results.length === 0 ? (
-            <p className="px-4 py-3 text-[13px] text-ink-subtle">Searching...</p>
+            <p className="px-4 py-3 text-[13px] text-ink-subtle">{t("Searching...")}</p>
           ) : results.length === 0 ? (
-            <p className="px-4 py-3 text-[13px] text-ink-subtle">No series found</p>
+            <p className="px-4 py-3 text-[13px] text-ink-subtle">{t("No series found")}</p>
           ) : (
             <ul className="max-h-[320px] overflow-y-auto py-1">
               {results.map((m) => (
@@ -100,6 +115,7 @@ function AddResult({
   onPick: (m: Meta) => void;
 }) {
   const poster = usePosterChain(rpdbKey, meta.id, meta.poster ?? undefined, "series");
+  const t = useT();
   const already = isAutoDownloaded(meta.id);
   return (
     <li>
@@ -120,7 +136,7 @@ function AddResult({
           )}
         </div>
         {already ? (
-          <span className="shrink-0 text-[11.5px] font-medium text-accent">Added</span>
+          <span className="shrink-0 text-[11.5px] font-medium text-accent">{t("Added")}</span>
         ) : (
           <Plus size={16} className="shrink-0 text-ink-subtle" strokeWidth={2} />
         )}

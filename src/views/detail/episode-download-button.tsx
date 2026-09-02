@@ -53,7 +53,7 @@ export function EpisodeDownloadButton({
   const stroke = dim >= 38 ? 2.5 : 2.2;
 
   const stateTone = done
-    ? "text-emerald-300"
+    ? "text-success"
     : failed
       ? isBar
         ? "text-danger"
@@ -62,7 +62,7 @@ export function EpisodeDownloadButton({
         ? "text-ink"
         : "text-ink-subtle hover:bg-elevated hover:text-ink active:scale-90";
   const wrapperClass = isBar
-    ? `group/dl relative flex shrink-0 items-center justify-center rounded-full border border-edge bg-canvas/80 transition-[transform,background-color,border-color] duration-200 hover:border-ink-subtle hover:bg-canvas/95 active:scale-[0.96] ${stateTone}`
+    ? `group/dl relative flex shrink-0 items-center justify-center rounded-full bg-canvas/80 transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.96] ${stateTone}`
     : `group/dl relative flex shrink-0 items-center justify-center self-start rounded-full transition-[opacity,background-color,transform] duration-200 ease-out ${
         persistent ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
       } ${stateTone}`;

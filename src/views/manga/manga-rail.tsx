@@ -11,6 +11,7 @@ export function MangaRail({
   award = false,
   collapsibleKey,
   hideKey,
+  scrollKey,
   items: preloaded,
   load,
   loadStream,
@@ -21,6 +22,7 @@ export function MangaRail({
   art?: string | null;
   award?: boolean;
   collapsibleKey?: string;
+  scrollKey?: string;
   hideKey?: string;
   items?: MangaSummary[];
   load?: () => Promise<MangaSummary[]>;
@@ -93,7 +95,13 @@ export function MangaRail({
   ) : undefined;
 
   const row = (
-    <MangaPosterRow items={items} onOpen={onOpen} award={award} art={art} scrollKey={`manga:${title}`} />
+    <MangaPosterRow
+      items={items}
+      onOpen={onOpen}
+      award={award}
+      art={art}
+      scrollKey={scrollKey ?? `manga:${title}`}
+    />
   );
 
   if (collapsibleKey) {
@@ -104,7 +112,9 @@ export function MangaRail({
         hideKey={hideKey}
         title={title}
         leading={leading}
-        trailing={subtitle ? <span className="text-[13px] text-ink-subtle">{subtitle}</span> : undefined}
+        trailing={
+          subtitle ? <span className="text-[13px] text-ink-subtle">{subtitle}</span> : undefined
+        }
       >
         {row}
       </CollapsibleSection>

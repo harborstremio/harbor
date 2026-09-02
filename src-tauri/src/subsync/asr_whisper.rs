@@ -53,10 +53,17 @@ impl AsrEngine for WhisperEngine {
         if pcm.len() < ASR_SAMPLE_RATE as usize {
             return Ok(Vec::new());
         }
-        let mut state = self.ctx.create_state().map_err(|e| format!("state: {}", e))?;
+        let mut state = self
+            .ctx
+            .create_state()
+            .map_err(|e| format!("state: {}", e))?;
         let params = self.params(lang, translate);
-        state.full(params, pcm).map_err(|e| format!("full: {}", e))?;
-        let n = state.full_n_segments().map_err(|e| format!("nseg: {}", e))?;
+        state
+            .full(params, pcm)
+            .map_err(|e| format!("full: {}", e))?;
+        let n = state
+            .full_n_segments()
+            .map_err(|e| format!("nseg: {}", e))?;
         let mut out = Vec::with_capacity(n as usize);
         for i in 0..n {
             let text = state.full_get_segment_text(i).unwrap_or_default();
@@ -82,7 +89,13 @@ impl AsrEngine for WhisperEngine {
                     });
                 }
             }
-            out.push(AsrSegment { text, t0, t1, no_speech, tokens });
+            out.push(AsrSegment {
+                text,
+                t0,
+                t1,
+                no_speech,
+                tokens,
+            });
         }
         Ok(out)
     }

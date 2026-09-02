@@ -3,8 +3,13 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { activeLayout } from "@/lib/theme";
 import { useView } from "@/lib/view";
-import { matchesSettingsSearch } from "./search-match";
+import {
+  matchesSettingsSearch,
+  rankSettingsSearch,
+  setSettingsSearchVocabulary,
+} from "./search-match";
 import { settingsAnchor, type SectionId } from "./shared";
+import { TOP_GROUPS } from "./groups";
 import { markSectionSeen, useSettingsNew } from "./settings-new";
 
 type IconProps = { size?: number; strokeWidth?: number };
@@ -29,6 +34,14 @@ const IconBase = ({
   </svg>
 );
 
+function IconChevronRight(p: IconProps) {
+  return (
+    <IconBase {...p}>
+      <path d="M9 5l7 7-7 7" />
+    </IconBase>
+  );
+}
+
 function IconRemotes(p: IconProps) {
   return (
     <IconBase {...p}>
@@ -36,6 +49,23 @@ function IconRemotes(p: IconProps) {
       <path d="M10.8 17.6h2.4" />
       <path d="M19.6 7.2a6.6 6.6 0 0 1 0 4.6" />
       <path d="M4.4 7.2a6.6 6.6 0 0 0 0 4.6" />
+    </IconBase>
+  );
+}
+
+function IconTvSettings(p: IconProps) {
+  return (
+    <IconBase {...p}>
+      <rect x="2.5" y="4.5" width="19" height="12.5" rx="2.2" />
+      <path d="M8.5 20.5h7" />
+      <path d="M12 17v3.5" />
+      <circle cx="12" cy="10.75" r="2.1" />
+      <path d="M12 6.6v1.4" />
+      <path d="M12 13.5v1.4" />
+      <path d="M15.6 8.7l-1.2.7" />
+      <path d="M9.6 12.1l-1.2.7" />
+      <path d="M15.6 12.8l-1.2-.7" />
+      <path d="M9.6 9.4l-1.2-.7" />
     </IconBase>
   );
 }
@@ -187,16 +217,6 @@ function IconSubtitles(p: IconProps) {
   );
 }
 
-function IconAutoSync(p: IconProps) {
-  return (
-    <IconBase {...p}>
-      <path d="M20 11a8 8 0 0 0-14.3-4.6M4 5v3.5h3.5" />
-      <path d="M4 13a8 8 0 0 0 14.3 4.6M20 19v-3.5h-3.5" />
-      <path d="M9.5 12h5" />
-    </IconBase>
-  );
-}
-
 function IconVideoTune(p: IconProps) {
   return (
     <IconBase {...p}>
@@ -288,6 +308,16 @@ function IconAdvanced(p: IconProps) {
         strokeLinejoin="round"
         strokeLinecap="round"
       />
+    </IconBase>
+  );
+}
+
+function IconUpdates(p: IconProps) {
+  return (
+    <IconBase {...p}>
+      <path d="M12 3v10" />
+      <path d="m8 9.5 4 4 4-4" />
+      <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
     </IconBase>
   );
 }
@@ -431,6 +461,23 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
         label: "Account",
         Icon: IconAccount,
         keywords: ["stremio", "sign in", "login", "profile", "logout"],
+      },
+      {
+        id: "trackers",
+        label: "Trackers",
+        Icon: IconTrakt,
+        keywords: [
+          "trakt",
+          "simkl",
+          "anilist",
+          "mal",
+          "myanimelist",
+          "letterboxd",
+          "scrobble",
+          "sync",
+          "watch history",
+          "connect service",
+        ],
       },
       {
         id: "library",
@@ -586,6 +633,36 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
           "flipbook remote",
         ],
       },
+      {
+        id: "tv",
+        label: "TV Settings",
+        Icon: IconTvSettings,
+        keywords: [
+          "tv",
+          "tv settings",
+          "android tv",
+          "big picture",
+          "10 foot",
+          "ten foot",
+          "living room",
+          "shield",
+          "fire stick",
+          "firestick",
+          "chromecast",
+          "google tv",
+          "set up my tv",
+          "configure tv",
+          "tv theme",
+          "tv subtitles",
+          "tv player",
+          "overscan",
+          "edge margin",
+          "couch",
+          "sync to tv",
+          "cloud",
+          "from my computer",
+        ],
+      },
     ],
   },
   {
@@ -732,10 +809,14 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
         keywords: ["subtitles", "audio", "preferred", "tracks", "opensubtitles"],
       },
       {
-        id: "subSources",
-        label: "Sub sources",
+        id: "subtitles",
+        label: "Subtitles",
         Icon: IconSubtitles,
         keywords: [
+          "subtitles",
+          "captions",
+          "srt",
+          "vtt",
           "sub sources",
           "subtitle sources",
           "subtitle providers",
@@ -743,20 +824,8 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
           "open subtitles",
           "wyzie",
           "subtitle addon",
-          "subtitle addons",
-          "captions",
-          "srt",
-          "vtt",
-          "where subtitles come from",
           "add subtitle source",
           "dedupe subtitles",
-        ],
-      },
-      {
-        id: "autoSync",
-        label: "Subtitle auto-sync",
-        Icon: IconAutoSync,
-        keywords: [
           "auto sync",
           "autosync",
           "auto-sync",
@@ -774,6 +843,9 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
           "asr",
           "community sync",
           "drift",
+          "subtitle size",
+          "subtitle font",
+          "subtitle color",
         ],
       },
     ],
@@ -885,6 +957,22 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
     heading: "System",
     items: [
       {
+        id: "updates",
+        label: "Updates & backup",
+        Icon: IconUpdates,
+        keywords: [
+          "update",
+          "new version",
+          "beta",
+          "rollback",
+          "downgrade",
+          "backup",
+          "restore",
+          "export settings",
+          "import settings",
+        ],
+      },
+      {
         id: "storage",
         label: "Storage",
         Icon: IconStorage,
@@ -921,7 +1009,323 @@ type SettingsOption = {
   keywords?: string[];
 };
 
+const NAV_ITEM_BY_ID = new Map(NAV_GROUPS.flatMap((g) => g.items).map((i) => [i.id, i] as const));
+
 const SETTINGS_OPTIONS: SettingsOption[] = [
+  {
+    label: "Set up my TV from this computer",
+    section: "tv",
+    anchorTitle: "The link to your TV",
+    keywords: [
+      "tv",
+      "android tv",
+      "big picture",
+      "living room",
+      "configure tv",
+      "set up tv",
+      "sync to tv",
+      "cloud",
+      "shield",
+      "fire stick",
+      "google tv",
+      "remote setup",
+      "edit tv settings",
+      "tv not signed in",
+    ],
+  },
+  {
+    label: "Harbors on your network",
+    section: "tv",
+    anchorTitle: "Harbors on your network",
+    keywords: [
+      "devices",
+      "instances",
+      "lan",
+      "local network",
+      "discover",
+      "harbors nearby",
+      "play on",
+      "other harbor",
+      "which tv",
+    ],
+  },
+  {
+    label: "Theme on the TV",
+    section: "tv",
+    anchorTitle: "Theme on the TV",
+    keywords: [
+      "tv theme",
+      "big picture theme",
+      "tv colors",
+      "tv colours",
+      "tv palette",
+      "nord",
+      "dracula",
+      "tokyo night",
+      "noir",
+      "match this computer",
+      "same theme on tv",
+      "copy my theme",
+    ],
+  },
+  {
+    label: "Home layout on the TV",
+    section: "tv",
+    anchorTitle: "Getting around the TV",
+    keywords: [
+      "tv home",
+      "big picture home",
+      "harbor layout",
+      "classic layout",
+      "tv rows",
+      "tv hero",
+      "hero trailer",
+      "hide watched on tv",
+    ],
+  },
+  {
+    label: "Display language on the TV",
+    section: "tv",
+    anchorTitle: "Getting around the TV",
+    keywords: [
+      "tv language",
+      "big picture language",
+      "ui language tv",
+      "arabic tv",
+      "russian tv",
+      "portuguese tv",
+    ],
+  },
+  {
+    label: "Controller navigation on the TV",
+    section: "tv",
+    anchorTitle: "Getting around the TV",
+    keywords: [
+      "controller",
+      "gamepad",
+      "xbox controller",
+      "tv controller",
+      "joystick",
+      "dpad",
+      "open in big picture",
+      "auto start big picture",
+      "boot into tv mode",
+    ],
+  },
+  {
+    label: "Edge margin (TV crops the picture)",
+    section: "tv",
+    anchorTitle: "Picture and feel",
+    keywords: [
+      "overscan",
+      "edge margin",
+      "cut off edges",
+      "picture cropped",
+      "cant see the edges",
+      "safe area",
+      "tv cuts off ui",
+      "shrink ui",
+    ],
+  },
+  {
+    label: "Picture quality on the TV",
+    section: "tv",
+    anchorTitle: "Picture and feel",
+    keywords: [
+      "tv performance",
+      "slow tv",
+      "laggy tv",
+      "cheap stick",
+      "balanced",
+      "max quality",
+      "animated backdrop",
+      "tv art quality",
+      "fire stick slow",
+    ],
+  },
+  {
+    label: "Interface sounds on the TV",
+    section: "tv",
+    anchorTitle: "Picture and feel",
+    keywords: [
+      "tv sounds",
+      "ui sounds",
+      "click sound",
+      "navigation sound",
+      "cinematic",
+      "retro",
+      "glass",
+      "mute ui sounds",
+    ],
+  },
+  {
+    label: "Instant play on the TV",
+    section: "tv",
+    anchorTitle: "Starting a show",
+    keywords: [
+      "instant play tv",
+      "tv play button",
+      "source picker tv",
+      "minimal source rows",
+      "tv stream list",
+    ],
+  },
+  {
+    label: "Player engine on the TV",
+    section: "tv",
+    anchorTitle: "Starting a show",
+    keywords: [
+      "tv engine",
+      "mpv on tv",
+      "html5 tv",
+      "exoplayer",
+      "media3",
+      "hardware acceleration tv",
+      "hwdec",
+      "green screen tv",
+      "tearing on tv",
+    ],
+  },
+  {
+    label: "Auto-play next episode on the TV",
+    section: "tv",
+    anchorTitle: "Bingeing",
+    keywords: [
+      "tv autoplay",
+      "auto next tv",
+      "binge tv",
+      "still watching",
+      "are you still watching",
+      "ask after episodes",
+      "tv plays all night",
+    ],
+  },
+  {
+    label: "Episode spoilers on the TV",
+    section: "tv",
+    anchorTitle: "Episodes and spoilers",
+    keywords: [
+      "tv spoilers",
+      "hide spoilers tv",
+      "hide thumbnails",
+      "hide episode titles",
+      "hide descriptions",
+      "episode ratings tv",
+      "next episode spoiler",
+    ],
+  },
+  {
+    label: "Audio and subtitle languages on the TV",
+    section: "tv",
+    anchorTitle: "Languages on the TV",
+    keywords: [
+      "tv languages",
+      "tv audio language",
+      "tv subtitle language",
+      "dub on tv",
+      "sub on tv",
+      "english subs tv",
+      "japanese audio tv",
+    ],
+  },
+  {
+    label: "Streaming services on the TV",
+    section: "tv",
+    anchorTitle: "Services on the TV",
+    keywords: [
+      "tv services",
+      "netflix tv",
+      "disney tv",
+      "turn off services tv",
+      "services i dont have",
+      "tv providers",
+      "where to watch tv",
+    ],
+  },
+  {
+    label: "Player controls on the TV",
+    section: "tv",
+    anchorTitle: "Player controls on the TV",
+    keywords: [
+      "tv player chrome",
+      "skip button tv",
+      "skip intro tv",
+      "hide skip button",
+      "clock while playing",
+      "tv player layout",
+      "tv overlay",
+    ],
+  },
+  {
+    label: "Subtitle look on the TV",
+    section: "tv",
+    anchorTitle: "Subtitle look on the TV",
+    keywords: [
+      "tv subtitle size",
+      "tv subtitles too small",
+      "bigger subtitles on tv",
+      "subtitle color tv",
+      "subtitle outline tv",
+      "subtitle box tv",
+      "subtitle position tv",
+      "subtitle font tv",
+      "bold subtitles tv",
+      "line spacing",
+      "sublook",
+      "read from the couch",
+    ],
+  },
+  {
+    label: "Copy my settings to the TV",
+    section: "tv",
+    anchorTitle: "Start from this computer",
+    keywords: [
+      "copy to tv",
+      "mirror settings",
+      "same as my computer",
+      "match my pc",
+      "clone settings",
+      "duplicate settings",
+      "push settings to tv",
+      "one click tv setup",
+      "start from this computer",
+    ],
+  },
+  {
+    label: "Things you still do on the TV itself",
+    section: "tv",
+    anchorTitle: "Still done on the TV",
+    keywords: [
+      "pairing code",
+      "scan code",
+      "tv sign in",
+      "log in on tv",
+      "tv accounts",
+      "mdblist on tv",
+      "live tv playlist",
+      "m3u",
+      "xtream",
+      "tv addons",
+      "watch together on tv",
+      "other devices",
+      "cannot set from computer",
+    ],
+  },
+  {
+    label: "Bingeing on the TV",
+    section: "tv",
+    anchorTitle: "Bingeing",
+    keywords: [
+      "still watching",
+      "are you still watching",
+      "tv autoplay",
+      "auto next tv",
+      "binge tv",
+      "ask after episodes",
+      "tv plays all night",
+      "stop after",
+    ],
+  },
   {
     label: "Play button behavior",
     section: "player",
@@ -943,6 +1347,11 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "player",
     anchorTitle: "Auto-skip stalled streams",
     keywords: [
+      "player",
+      "buffering",
+      "keeps buffering",
+      "stuttering",
+      "playback stalls",
       "auto skip",
       "dead stream",
       "dead addon",
@@ -976,8 +1385,8 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "What fullscreen does",
-    section: "player",
-    anchorTitle: "What fullscreen does",
+    section: "hotkeys",
+    anchorTitle: "Behavior",
     keywords: [
       "maximize",
       "maximized",
@@ -1103,7 +1512,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Subtitle style",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: [
       "subtitle",
@@ -1144,8 +1553,8 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Subtitle sync indicator",
-    section: "language",
-    anchorTitle: "Subtitle sync indicator",
+    section: "subtitles",
+    anchorTitle: "Sync indicator",
     keywords: [
       "subtitle offset",
       "subtitle delay",
@@ -1159,7 +1568,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Subtitle sources (OpenSubtitles, Wyzie, addons)",
-    section: "subSources",
+    section: "subtitles",
     anchorTitle: "Subtitle sources",
     keywords: [
       "sub sources",
@@ -1180,8 +1589,54 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
+    label: "OpenSubtitles API key",
+    section: "subtitles",
+    anchorTitle: "Subtitle sources",
+    keywords: [
+      "opensubtitles key",
+      "opensubtitles api",
+      "os key",
+      "subtitle api key",
+      "autosync key",
+      "automatic subtitle sync",
+      "sync subtitles automatically",
+      "subtitles out of sync",
+      "opensubtitles login",
+      "opensubtitles account",
+    ],
+  },
+  {
+    label: "Run Anime4K on everything, not just anime",
+    section: "shaders",
+    anchorTitle: "Anime4K upscaling",
+    keywords: [
+      "anime4k live action",
+      "anime only",
+      "anime4k everything",
+      "upscale movies",
+      "anime4k not working on movies",
+      "anime4k all content",
+      "shader anime only",
+    ],
+  },
+  {
+    label: "Favour titles from your region on Home",
+    section: "language",
+    anchorTitle: "Home catalogs",
+    keywords: [
+      "locale bias",
+      "local titles",
+      "my country",
+      "regional picks",
+      "home rows region",
+      "same movies every day",
+      "feed bias",
+      "local releases",
+    ],
+  },
+  {
     label: "Subtitle auto-sync (fix out-of-sync subtitles)",
-    section: "autoSync",
+    section: "subtitles",
     anchorTitle: "Subtitle auto-sync",
     keywords: [
       "auto sync",
@@ -1252,7 +1707,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Poster size",
     section: "theme",
-    anchorTitle: "Poster size",
+    anchorTitle: "Poster card style",
     keywords: [
       "poster size",
       "card size",
@@ -1300,7 +1755,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Trailer quality",
-    section: "theme",
+    section: "player",
     anchorTitle: "Trailer quality",
     keywords: [
       "trailer",
@@ -1361,7 +1816,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Skip intros",
     section: "player",
-    anchorTitle: "Skip intros",
+    anchorTitle: "Skip intros & credits",
     keywords: [
       "skip intro",
       "skip intros",
@@ -1419,10 +1874,29 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
+    label: "Cycle the backdrop on show pages",
+    section: "library",
+    anchorTitle: "Show pages",
+    keywords: [
+      "backdrop carousel",
+      "cycle backdrop",
+      "rotate backdrop",
+      "changing background",
+      "moving background",
+      "hero backdrop",
+      "detail page background",
+      "slideshow backdrop",
+      "animated backdrop",
+    ],
+  },
+  {
     label: "Downloads folder",
     section: "advanced",
     anchorTitle: "Downloads",
     keywords: [
+      "download failed",
+      "downloads failing",
+      "download error",
       "downloads",
       "download folder",
       "location",
@@ -1489,6 +1963,10 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "remotes",
     anchorTitle: "Phone remote",
     keywords: [
+      "control from phone",
+      "use my phone",
+      "phone as remote",
+      "control harbor from my phone",
       "phone remote",
       "remote control",
       "couch",
@@ -1570,7 +2048,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Anime4K presets & modes",
     section: "shaders",
-    anchorTitle: "Anime4K presets",
+    anchorTitle: "Anime4K upscaling",
     keywords: [
       "anime4k",
       "setup",
@@ -1928,7 +2406,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Region & language",
-    section: "library",
+    section: "language",
     anchorTitle: "Region & language",
     keywords: ["region", "country", "availability", "location", "iso"],
   },
@@ -1993,7 +2471,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Subtitle languages & autoload",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle languages",
     keywords: [
       "subtitle languages",
@@ -2012,20 +2490,33 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Metadata language",
     section: "language",
-    anchorTitle: "Metadata language",
+    anchorTitle: "Titles and descriptions",
     keywords: ["metadata language", "tmdb titles", "overviews", "taglines", "translation"],
   },
   {
     label: "Audio languages",
     section: "language",
     anchorTitle: "Audio languages",
-    keywords: ["audio languages", "dub", "audio tracks", "preferred audio"],
+    keywords: [
+      "movies",
+      "films",
+      "shows",
+      "wrong language",
+      "wrong audio",
+      "dubbed in the wrong language",
+      "audio languages",
+      "dub",
+      "audio tracks",
+      "preferred audio",
+    ],
   },
   {
     label: "Preferred languages",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Preferred languages",
     keywords: [
+      "wrong language",
+      "wrong subtitles",
       "preferred languages",
       "rank",
       "priority",
@@ -2058,6 +2549,24 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["picker layout", "condensed", "stremio", "sources", "drawer", "list"],
   },
   {
+    label: "Source mode (Both / Direct/debrid / P2P)",
+    section: "streaming",
+    anchorTitle: "Source mode",
+    keywords: [
+      "source mode",
+      "both",
+      "direct",
+      "debrid",
+      "addons",
+      "p2p",
+      "peer to peer",
+      "torrent sources",
+      "missing torrents",
+      "hidden torrents",
+      "stream mode",
+    ],
+  },
+  {
     label: "Result order (ranking / addon order)",
     section: "streaming",
     anchorTitle: "Result order",
@@ -2068,6 +2577,9 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "streaming",
     anchorTitle: "Debrid services",
     keywords: [
+      "add debrid",
+      "add a service",
+      "connect debrid",
       "debrid",
       "real-debrid",
       "realdebrid",
@@ -2110,7 +2622,19 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Watch Together relay",
     section: "relay",
     anchorTitle: "Harbor Relay",
-    keywords: ["watch together", "relay", "party", "p2p", "host", "cloudflare", "deploy", "share"],
+    keywords: [
+      "friends",
+      "with friends",
+      "watch party",
+      "watch together",
+      "relay",
+      "party",
+      "p2p",
+      "host",
+      "cloudflare",
+      "deploy",
+      "share",
+    ],
   },
 
   {
@@ -2155,6 +2679,10 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "theme",
     anchorTitle: "Typography",
     keywords: [
+      "different font",
+      "change font",
+      "typeface",
+      "use a different font",
       "typography",
       "font",
       "display font",
@@ -2204,13 +2732,13 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Fullscreen clock",
-    section: "theme",
+    section: "playerLayout",
     anchorTitle: "Fullscreen clock",
     keywords: ["fullscreen clock", "local time", "player clock", "clock format", "clock style"],
   },
   {
     label: "Home hero shadow",
-    section: "theme",
+    section: "library",
     anchorTitle: "Home hero shadow",
     keywords: [
       "hero shadow",
@@ -2226,7 +2754,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
 
   {
     label: "Updates & rollback",
-    section: "advanced",
+    section: "updates",
     anchorTitle: "Updates",
     keywords: [
       "updates",
@@ -2242,7 +2770,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Backup & restore",
-    section: "advanced",
+    section: "updates",
     anchorTitle: "Backup & restore",
     keywords: ["backup", "restore", "export", "import", "settings file"],
   },
@@ -2268,7 +2796,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Stremio install links",
-    section: "advanced",
+    section: "account",
     anchorTitle: "Stremio install links",
     keywords: ["stremio install links", "deeplink", "protocol handler", "install addon"],
   },
@@ -2291,7 +2819,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "API budget (OMDb)",
-    section: "advanced",
+    section: "library",
     anchorTitle: "API budget",
     keywords: ["api budget", "omdb budget", "daily requests", "counter", "rate limit"],
   },
@@ -2351,7 +2879,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
 
   {
     label: "Trakt connection",
-    section: "trakt",
+    section: "trackers",
     keywords: [
       "trakt",
       "scrobble",
@@ -2365,7 +2893,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "AniList connection",
-    section: "anilist",
+    section: "trackers",
     keywords: [
       "anilist",
       "anime",
@@ -2381,12 +2909,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Simkl connection",
-    section: "simkl",
+    section: "trackers",
     keywords: ["simkl", "sync", "watched", "watchlist", "connect", "disconnect", "avatar", "anime"],
   },
   {
     label: "Letterboxd connection",
-    section: "letterboxd",
+    section: "trackers",
     keywords: [
       "letterboxd",
       "stremboxd",
@@ -2484,7 +3012,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "How Play works",
     section: "basics",
-    anchorTitle: "How Play works",
+    anchorTitle: "When you press Play",
     keywords: [
       "instant",
       "manual picker",
@@ -2570,6 +3098,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "account",
     anchorTitle: "Harbor identity",
     keywords: [
+      "pin",
+      "set a pin",
+      "lock a profile",
+      "parental controls",
+      "kids",
+      "child",
       "profiles",
       "profile",
       "who's watching",
@@ -2624,6 +3158,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "account",
     anchorTitle: "Synced addons",
     keywords: ["manage addons", "installed addons", "addons page", "open addons"],
+  },
+  {
+    label: "New Episodes row",
+    section: "library",
+    anchorTitle: "Home layout",
+    keywords: ["new episodes", "recent episodes", "aired", "episode row", "dismiss"],
   },
   {
     label: "Show every addon row",
@@ -2691,7 +3231,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Home languages",
     section: "library",
-    anchorTitle: "Home languages",
+    anchorTitle: "Home catalogs",
     keywords: [
       "language filter",
       "original language",
@@ -2768,6 +3308,10 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "bandwidth",
       "slow connection",
       "w300",
+      "episode thumbnails",
+      "hq stills",
+      "sharp episode images",
+      "episode image quality",
     ],
   },
   {
@@ -2790,7 +3334,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Episode ordering (TVDB, DVD, absolute, arc order)",
     section: "library",
-    anchorTitle: "Metadata providers",
+    anchorTitle: "Episode order",
     keywords: [
       "episode ordering",
       "episode order",
@@ -2926,7 +3470,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "AudD · in-player song ID",
     section: "library",
-    anchorTitle: "Metadata providers",
+    anchorTitle: "Song identification",
     keywords: ["audd", "song recognition", "music id", "api token", "identify song key"],
   },
   {
@@ -2952,7 +3496,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Prefer my installed metadata addon",
     section: "library",
-    anchorTitle: "Metadata providers",
+    anchorTitle: "Titles and descriptions",
     keywords: [
       "meta addon",
       "localized cinemeta",
@@ -3159,42 +3703,42 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Connect your Trakt account",
-    section: "trakt",
+    section: "trackers",
     keywords: ["trakt", "connect", "tracking", "scrobble", "watchlist", "recommendations"],
   },
   {
     label: "Connect Trakt",
-    section: "trakt",
+    section: "trackers",
     keywords: ["trakt login", "device code", "authorize", "link trakt"],
   },
   {
     label: "About Trakt",
-    section: "trakt",
+    section: "trackers",
     keywords: ["trakt.tv", "what is trakt", "info", "website"],
   },
   {
     label: "Open Trakt profile",
-    section: "trakt",
+    section: "trackers",
     keywords: ["open profile", "trakt profile", "view profile", "my trakt", "profile page"],
   },
   {
     label: "Use my Trakt avatar as my Harbor avatar",
-    section: "trakt",
+    section: "trackers",
     keywords: ["trakt avatar", "profile picture", "avatar sync", "wear avatar"],
   },
   {
     label: "Disconnect from Trakt",
-    section: "trakt",
+    section: "trackers",
     keywords: ["disconnect", "unlink", "remove trakt", "stop scrobbling", "sign out"],
   },
   {
     label: "Export to Trakt",
-    section: "trakt",
+    section: "trackers",
     keywords: ["export watchlist", "copy watchlist", "send to trakt", "upload", "move watchlist"],
   },
   {
     label: "Import from Trakt",
-    section: "trakt",
+    section: "trackers",
     keywords: [
       "import watchlist",
       "pull watchlist",
@@ -3205,12 +3749,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Show comments on detail pages",
-    section: "trakt",
+    section: "trackers",
     keywords: ["trakt comments", "community comments", "reviews", "discussion", "episodes"],
   },
   {
     label: "Blur Trakt comments by default",
-    section: "trakt",
+    section: "trackers",
     keywords: [
       "blur comments by default",
       "blur comments",
@@ -3221,42 +3765,42 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Connect your AniList account",
-    section: "anilist",
+    section: "trackers",
     keywords: ["anilist", "connect", "anime lists", "link account", "anime tracking", "rails"],
   },
   {
     label: "Connect AniList",
-    section: "anilist",
+    section: "trackers",
     keywords: ["anilist login", "authorize", "oauth", "link"],
   },
   {
     label: "About AniList",
-    section: "anilist",
+    section: "trackers",
     keywords: ["anilist.co", "info", "website", "what is anilist"],
   },
   {
     label: "Open AniList profile",
-    section: "anilist",
+    section: "trackers",
     keywords: ["open profile", "anilist profile", "view profile", "profile page", "my anilist"],
   },
   {
     label: "Sync watch progress",
-    section: "anilist",
+    section: "trackers",
     keywords: ["anilist sync", "episode progress", "auto update", "forward only", "tracking"],
   },
   {
     label: "Use my AniList avatar as my Harbor avatar",
-    section: "anilist",
+    section: "trackers",
     keywords: ["anilist avatar", "profile picture", "avatar", "wear avatar"],
   },
   {
     label: "Show AniList comments",
-    section: "anilist",
+    section: "trackers",
     keywords: ["anilist comments", "forum threads", "anime discussion", "detail pages"],
   },
   {
     label: "Blur AniList comments by default",
-    section: "anilist",
+    section: "trackers",
     keywords: [
       "blur comments by default",
       "blur comments",
@@ -3268,12 +3812,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Disconnect from AniList",
-    section: "anilist",
+    section: "trackers",
     keywords: ["disconnect", "unlink", "remove anilist", "stop sync"],
   },
   {
     label: "Connect your MyAnimeList account",
-    section: "mal",
+    section: "trackers",
     keywords: [
       "mal",
       "myanimelist",
@@ -3286,22 +3830,22 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "MAL Client ID",
-    section: "mal",
+    section: "trackers",
     keywords: ["mal client id", "api key", "myanimelist api", "client id", "register app"],
   },
   {
     label: "Connect MyAnimeList",
-    section: "mal",
+    section: "trackers",
     keywords: ["mal login", "authorize", "oauth", "pin code", "link"],
   },
   {
     label: "About MyAnimeList",
-    section: "mal",
+    section: "trackers",
     keywords: ["myanimelist.net", "info", "website", "what is mal"],
   },
   {
     label: "Open MAL profile",
-    section: "mal",
+    section: "trackers",
     keywords: [
       "open profile",
       "mal profile",
@@ -3312,77 +3856,77 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Disconnect from MyAnimeList",
-    section: "mal",
+    section: "trackers",
     keywords: ["disconnect", "unlink", "remove mal", "stop sync"],
   },
   {
     label: "Connect your Simkl account",
-    section: "simkl",
+    section: "trackers",
     keywords: ["simkl", "connect", "tracking", "plan to watch", "mark watched", "sync"],
   },
   {
     label: "Connect Simkl",
-    section: "simkl",
+    section: "trackers",
     keywords: ["simkl login", "device code", "authorize", "link"],
   },
   {
     label: "About Simkl",
-    section: "simkl",
+    section: "trackers",
     keywords: ["simkl.com", "info", "website", "what is simkl"],
   },
   {
     label: "Open Simkl profile",
-    section: "simkl",
+    section: "trackers",
     keywords: ["open profile", "simkl profile", "view profile", "profile page", "my simkl"],
   },
   {
     label: "Use my Simkl avatar as my Harbor avatar",
-    section: "simkl",
+    section: "trackers",
     keywords: ["simkl avatar", "profile picture", "avatar", "wear avatar"],
   },
   {
     label: "Disconnect from Simkl",
-    section: "simkl",
+    section: "trackers",
     keywords: ["disconnect", "unlink", "remove simkl", "stop sync"],
   },
   {
     label: "Enable Letterboxd integration",
-    section: "letterboxd",
+    section: "trackers",
     keywords: ["letterboxd", "letterbox", "stremboxd", "enable", "films", "diary", "watchlist"],
   },
   {
     label: "Mode",
-    section: "letterboxd",
+    section: "trackers",
     keywords: ["public mode", "full mode", "username only", "password mode", "segmented"],
   },
   {
     label: "Letterboxd username",
-    section: "letterboxd",
+    section: "trackers",
     keywords: ["username", "handle", "account name", "letterbox user"],
   },
   {
     label: "Letterboxd password",
-    section: "letterboxd",
+    section: "trackers",
     keywords: ["password", "sign in", "2fa", "totp", "two-factor", "full mode"],
   },
   {
     label: "Connect / Verify",
-    section: "letterboxd",
+    section: "trackers",
     keywords: ["verify", "connect", "validate", "check catalogs", "public"],
   },
   {
     label: "Connect",
-    section: "letterboxd",
+    section: "trackers",
     keywords: ["login", "sign in", "verify & connect", "full login"],
   },
   {
     label: "About Stremboxd",
-    section: "letterboxd",
+    section: "trackers",
     keywords: ["stremboxd", "bridge", "configure", "info", "website"],
   },
   {
     label: "Catalogs to show",
-    section: "letterboxd",
+    section: "trackers",
     keywords: [
       "watchlist",
       "diary",
@@ -3395,27 +3939,27 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Custom lists",
-    section: "letterboxd",
+    section: "trackers",
     keywords: ["add list", "list url", "remove list", "letterboxd list", "import list", "slug"],
   },
   {
     label: "Show my rating on movie posters",
-    section: "letterboxd",
+    section: "trackers",
     keywords: ["my rating", "poster overlay", "stars", "personal rating"],
   },
   {
     label: "Blur reviews by default",
-    section: "letterboxd",
+    section: "trackers",
     keywords: ["blur reviews", "spoilers", "film pages", "reveal"],
   },
   {
     label: "Hidden catalogs",
-    section: "letterboxd",
+    section: "trackers",
     keywords: ["unhide", "show hidden", "restore catalog", "hidden rows"],
   },
   {
     label: "Disconnect",
-    section: "letterboxd",
+    section: "trackers",
     keywords: ["logout", "disconnect", "sign out letterboxd", "unlink", "full mode"],
   },
   {
@@ -3651,6 +4195,15 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "streamFilters",
     anchorTitle: "Saved stream filters",
     keywords: [
+      "releases",
+      "prefer releases",
+      "prefer 4k",
+      "prefer 1080p",
+      "block cam",
+      "block cam rips",
+      "no cam",
+      "quality rules",
+      "resolution rules",
       "custom filters",
       "saved filters",
       "filter builder",
@@ -3882,7 +4435,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Subtitle languages",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle languages",
     keywords: [
       "subtitles",
@@ -3897,7 +4450,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Start with subtitles off",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle languages",
     keywords: [
       "subtitles off",
@@ -3910,7 +4463,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Prefer embedded subtitles",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle languages",
     keywords: [
       "embedded subs",
@@ -3923,7 +4476,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Forced subs with native audio",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle languages",
     keywords: [
       "forced subtitles",
@@ -3936,7 +4489,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Upgrade subtitles when better ones load",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle languages",
     keywords: [
       "subtitle upgrade",
@@ -3948,9 +4501,15 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Never auto-select tracks containing",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle languages",
     keywords: [
+      "hearing impaired",
+      "hard of hearing",
+      "deaf",
+      "hi track",
+      "captions",
+      "closed captions",
       "block words",
       "commentary",
       "descriptive",
@@ -3962,7 +4521,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Second subtitle language",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Dual subtitles",
     keywords: [
       "dual subtitles",
@@ -3977,7 +4536,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Where it shows",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Dual subtitles",
     keywords: [
       "second subtitle position",
@@ -3988,13 +4547,13 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Second line size",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Dual subtitles",
     keywords: ["second subtitle size", "dual subtitle size", "smaller second line"],
   },
   {
     label: "Background",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: [
       "drop shadow",
@@ -4008,7 +4567,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Styled (ASS) subtitles",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: [
       "ass subtitles",
@@ -4023,19 +4582,19 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Background opacity",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: ["box opacity", "subtitle background transparency", "dim box", "see through box"],
   },
   {
     label: "Outline thickness",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: ["outline width", "stroke size", "border thickness", "letter outline"],
   },
   {
     label: "Font",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: [
       "subtitle font",
@@ -4049,19 +4608,19 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Upload font",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: ["custom subtitle font", "ttf", "otf", "woff", "add font", "install font"],
   },
   {
     label: "Bold text",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: ["bold subtitles", "heavier weight", "thick text", "font weight"],
   },
   {
     label: "Show subtitles in Picture-in-Picture",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: [
       "pip subtitles",
@@ -4072,19 +4631,19 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Subtitle size",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: ["size", "font size", "bigger subtitles", "text size", "small subtitles"],
   },
   {
     label: "Opacity",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: ["subtitle transparency", "faded subtitles", "see through text", "subtitle opacity"],
   },
   {
     label: "Distance from bottom",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: [
       "subtitle position",
@@ -4096,7 +4655,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Alignment",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: [
       "left",
@@ -4109,25 +4668,25 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Text color",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: ["subtitle color", "font color", "white subtitles", "yellow subtitles", "colour"],
   },
   {
     label: "Outline color",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: ["border color", "stroke color", "outline colour", "edge color"],
   },
   {
     label: "Box color",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: ["background color", "black bar color", "box colour", "panel color"],
   },
   {
     label: "Reset subtitle style to defaults",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: [
       "reset to defaults",
@@ -4140,13 +4699,13 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Translate titles",
     section: "language",
-    anchorTitle: "Metadata language",
+    anchorTitle: "Titles and descriptions",
     keywords: ["translated titles", "original title", "localized titles", "keep english title"],
   },
   {
     label: "Translate overviews",
     section: "language",
-    anchorTitle: "Metadata language",
+    anchorTitle: "Titles and descriptions",
     keywords: [
       "translated plot",
       "descriptions",
@@ -4157,7 +4716,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Only show streams in my languages",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Preferred languages",
     keywords: [
       "hide other languages",
@@ -4169,7 +4728,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Contribute on GitHub",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Preferred languages",
     keywords: ["github", "translate harbor", "contribute", "open source", "help translate", "i18n"],
   },
@@ -4257,6 +4816,8 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "on screen volume",
       "scroll wheel volume",
       "osd",
+      "volume osd",
+      "volume indicator",
     ],
   },
   {
@@ -4337,7 +4898,18 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "HDR-to-SDR tonemapping",
     section: "player",
     anchorTitle: "Player engine",
-    keywords: ["hdr sdr", "tonemapping toggle", "bt2446a", "sdr displays", "washed out fix"],
+    keywords: [
+      "hdr sdr",
+      "tonemapping toggle",
+      "bt2446a",
+      "sdr displays",
+      "washed out fix",
+      "hdr",
+      "tonemap",
+      "washed out",
+      "hdr looks grey",
+      "sdr conversion",
+    ],
   },
   {
     label: "Display panel",
@@ -4484,7 +5056,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Show the Skip button",
     section: "player",
-    anchorTitle: "Skip intros",
+    anchorTitle: "Skip intros & credits",
     keywords: [
       "skip button",
       "skip intro button",
@@ -4496,19 +5068,34 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Auto-skip intros",
     section: "player",
-    anchorTitle: "Skip intros",
-    keywords: ["auto skip", "skip openings automatically", "jump past intro", "autoskip"],
+    anchorTitle: "Skip intros & credits",
+    keywords: [
+      "auto skip",
+      "skip openings automatically",
+      "jump past intro",
+      "autoskip",
+      "skip intro",
+      "auto skip intro",
+      "skip opening",
+      "op skip",
+      "anime intro",
+      "theme song",
+      "skip automatically",
+    ],
   },
   {
     label: "Auto-hide the Skip button after",
     section: "player",
-    anchorTitle: "Skip intros",
+    anchorTitle: "Skip intros & credits",
     keywords: [
       "hide skip button",
       "skip button timeout",
       "auto dismiss",
       "5s 10s 15s 30s",
       "disappear",
+      "skip button",
+      "hide skip",
+      "how long skip shows",
     ],
   },
   {
@@ -4534,6 +5121,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "continuous play",
       "auto next episode",
       "stop after episode",
+      "autoplay",
+      "auto play next",
+      "binge",
+      "next episode",
+      "play next automatically",
+      "continue playing",
     ],
   },
   {
@@ -4946,12 +5539,6 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Player screen lock",
-    section: "playerLayout",
-    anchorTitle: "While you watch",
-    keywords: ["screen lock", "lock controls", "disable input", "child lock"],
-  },
-  {
     label: "Show P2P status chip",
     section: "playerLayout",
     keywords: [
@@ -5108,19 +5695,6 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "hotkeys",
     anchorTitle: "Player",
     keywords: ["escape", "exit playback", "quit player", "back out"],
-  },
-  {
-    label: "Lock player controls",
-    section: "hotkeys",
-    anchorTitle: "Player",
-    keywords: [
-      "screen lock",
-      "lock controls",
-      "disable keyboard",
-      "disable mouse",
-      "ctrl l",
-      "child lock",
-    ],
   },
   {
     label: "Play / pause",
@@ -5483,7 +6057,16 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Edit colors",
     section: "theme",
     anchorTitle: "Your themes",
-    keywords: ["customize theme colors", "tweak palette", "color editor", "adjust theme"],
+    keywords: [
+      "accent colour",
+      "accent color",
+      "change accent",
+      "highlight colour",
+      "customize theme colors",
+      "tweak palette",
+      "color editor",
+      "adjust theme",
+    ],
   },
   {
     label: "Copy theme",
@@ -5587,31 +6170,31 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Home hero",
-    section: "theme",
+    section: "library",
     anchorTitle: "Home hero",
     keywords: ["hero banner", "featured banner", "big hero", "home banner"],
   },
   {
     label: "Full hero banner",
-    section: "theme",
+    section: "library",
     anchorTitle: "Home hero",
     keywords: ["edge to edge hero", "taller hero", "stretch banner", "bigger featured"],
   },
   {
     label: "Full quality hero image",
-    section: "theme",
+    section: "library",
     anchorTitle: "Home hero",
     keywords: ["high res hero", "sharper artwork", "hero bandwidth", "full resolution banner"],
   },
   {
     label: "Shadow",
-    section: "theme",
+    section: "library",
     anchorTitle: "Home hero shadow",
     keywords: ["shadow slider", "gradient darkness", "hero dim", "let artwork show"],
   },
   {
-    label: "Autoplay trailer on detail pages",
-    section: "theme",
+    label: "Auto-play trailer on detail pages",
+    section: "player",
     anchorTitle: "Trailer quality",
     keywords: [
       "auto trailer",
@@ -5623,7 +6206,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Start trailers with audio",
-    section: "theme",
+    section: "player",
     anchorTitle: "Trailer quality",
     keywords: ["unmuted trailer", "trailer sound on", "audio autoplay", "start with sound"],
   },
@@ -5710,31 +6293,31 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Show fullscreen clock",
-    section: "theme",
+    section: "playerLayout",
     anchorTitle: "Fullscreen clock",
     keywords: ["local time", "player clock", "fullscreen time", "show clock", "hide clock"],
   },
   {
     label: "Clock format",
-    section: "theme",
+    section: "playerLayout",
     anchorTitle: "Fullscreen clock",
     keywords: ["12 hour", "24 hour", "am pm", "system time", "seconds"],
   },
   {
     label: "Clock size",
-    section: "theme",
+    section: "playerLayout",
     anchorTitle: "Fullscreen clock",
     keywords: ["clock pixels", "larger clock", "smaller clock", "resize time", "font size"],
   },
   {
     label: "Show estimated finish time",
-    section: "theme",
+    section: "playerLayout",
     anchorTitle: "Fullscreen clock",
     keywords: ["ends at", "finish time", "movie end", "episode end", "estimated end"],
   },
   {
     label: "Clock style",
-    section: "theme",
+    section: "playerLayout",
     anchorTitle: "Fullscreen clock",
     keywords: ["glass", "minimal", "solid", "accent", "clock design"],
   },
@@ -5973,14 +6556,80 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["send bug report", "file bug", "submit issue", "report problem"],
   },
   {
+    label: "Donating to Harbor",
+    section: "support",
+    anchorTitle: "Donating to Harbor",
+    keywords: [
+      "donate",
+      "donation",
+      "support harbor",
+      "give money",
+      "patreon",
+      "paypal",
+      "fund harbor",
+      "contribute",
+      "tip",
+      "pay for harbor",
+      "subscription",
+    ],
+  },
+  {
+    label: "Badges for giving",
+    section: "support",
+    anchorTitle: "Badges for giving",
+    keywords: [
+      "charity badge",
+      "donation badge",
+      "supporter badge",
+      "profile badge",
+      "elfhosted badge",
+      "giving badge",
+      "how do i get a badge",
+    ],
+  },
+  {
+    label: "Who pays for the servers",
+    section: "support",
+    anchorTitle: "Who keeps this running",
+    keywords: [
+      "elfhosted",
+      "hosting",
+      "servers",
+      "backend",
+      "who pays",
+      "infrastructure",
+      "sponsor",
+      "running costs",
+    ],
+  },
+  {
+    label: "Built on Stremio",
+    section: "support",
+    anchorTitle: "Built on Stremio",
+    keywords: ["stremio", "credit", "foundation", "upstream", "thanks", "support stremio"],
+  },
+  {
+    label: "Charities to give to instead",
+    section: "support",
+    anchorTitle: "If you would rather give it away",
+    keywords: [
+      "charity",
+      "give away",
+      "donate to charity",
+      "good causes",
+      "nonprofit",
+      "where to give",
+    ],
+  },
+  {
     label: "Updates",
-    section: "advanced",
+    section: "updates",
     anchorTitle: "Updates",
     keywords: ["app updates", "new version", "update channel", "auto update"],
   },
   {
     label: "Check for updates",
-    section: "advanced",
+    section: "updates",
     anchorTitle: "Updates",
     keywords: [
       "update check",
@@ -5993,9 +6642,13 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Get beta updates",
-    section: "advanced",
+    section: "updates",
     anchorTitle: "Updates",
     keywords: [
+      "join beta",
+      "join the beta",
+      "beta program",
+      "early access",
       "beta channel",
       "early builds",
       "prerelease",
@@ -6006,7 +6659,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Roll back to an earlier build",
-    section: "advanced",
+    section: "updates",
     anchorTitle: "Updates",
     keywords: [
       "rollback",
@@ -6019,7 +6672,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "How is this build treating you?",
-    section: "advanced",
+    section: "updates",
     anchorTitle: "Updates",
     keywords: [
       "rate build",
@@ -6032,13 +6685,13 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Export everything",
-    section: "advanced",
+    section: "updates",
     anchorTitle: "Backup & restore",
     keywords: ["export backup", "save setup file", "harbx", "full backup", "backup file"],
   },
   {
     label: "Restore from a backup",
-    section: "advanced",
+    section: "updates",
     anchorTitle: "Backup & restore",
     keywords: ["import backup", "load backup", "new computer", "restore settings", "replace setup"],
   },
@@ -6046,7 +6699,18 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Downloads",
     section: "advanced",
     anchorTitle: "Downloads",
-    keywords: ["download folder", "save location", "downloads directory", "where videos save"],
+    keywords: [
+      "offline",
+      "watch offline",
+      "where do downloads go",
+      "download location",
+      "how much space",
+      "download limit",
+      "download folder",
+      "save location",
+      "downloads directory",
+      "where videos save",
+    ],
   },
   {
     label: "Choose folder",
@@ -6111,7 +6775,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Catch stremio:// install links inside Harbor",
-    section: "advanced",
+    section: "account",
     anchorTitle: "Stremio install links",
     keywords: [
       "protocol handler",
@@ -6120,6 +6784,9 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "addon install",
       "default app",
       "configure and install",
+      "stremio links",
+      "install links",
+      "deeplink",
     ],
   },
   {
@@ -6166,13 +6833,13 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "API budget",
-    section: "advanced",
+    section: "library",
     anchorTitle: "API budget",
     keywords: ["api quota", "daily budget", "rate limit", "call counter"],
   },
   {
     label: "OMDB daily budget",
-    section: "advanced",
+    section: "library",
     anchorTitle: "API budget",
     keywords: ["omdb quota", "rating lookups", "reset counter", "api calls", "fresh scores"],
   },
@@ -6258,7 +6925,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Lock to season server",
     section: "basics",
-    anchorTitle: "How Play works",
+    anchorTitle: "When you press Play",
     keywords: [
       "season lock",
       "season server",
@@ -6273,22 +6940,9 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Instant playback preparation",
-    section: "basics",
-    anchorTitle: "How Play works",
-    keywords: [
-      "prepare playback",
-      "faster playback",
-      "cached debrid",
-      "instant source",
-      "pre-resolve",
-      "play startup",
-    ],
-  },
-  {
     label: "Restore window position after fullscreen",
     section: "basics",
-    anchorTitle: "How Play works",
+    anchorTitle: "When you press Play",
     keywords: [
       "restore window",
       "window position",
@@ -6435,6 +7089,9 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "finished show",
       "hide caught up",
       "up to date",
+      "remove from continue watching",
+      "clear finished",
+      "hide watched shows",
     ],
   },
   {
@@ -6508,7 +7165,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Use live web context (Jina Reader)",
     section: "library",
-    anchorTitle: "AI search",
+    anchorTitle: "Live web",
     keywords: [
       "live web",
       "jina",
@@ -6522,13 +7179,13 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Jina API key",
     section: "library",
-    anchorTitle: "AI search",
+    anchorTitle: "Live web",
     keywords: ["jina key", "jina api", "reader key", "web quota", "jina token"],
   },
   {
     label: "Use free IMDb data without a TMDB key",
     section: "library",
-    anchorTitle: "Metadata providers",
+    anchorTitle: "Titles and descriptions",
     keywords: [
       "imdb fallback",
       "free imdb",
@@ -6542,7 +7199,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Song ID provider (AudD / Gemini)",
     section: "library",
-    anchorTitle: "Metadata providers",
+    anchorTitle: "Song identification",
     keywords: [
       "song id provider",
       "audd",
@@ -6555,7 +7212,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Gemini · in-player song ID",
     section: "library",
-    anchorTitle: "Metadata providers",
+    anchorTitle: "Song identification",
     keywords: [
       "gemini",
       "google gemini",
@@ -6710,7 +7367,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Show sync indicator",
-    section: "anilist",
+    section: "trackers",
     anchorTitle: "Sync indicator",
     keywords: [
       "sync indicator",
@@ -6725,7 +7382,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Sync indicator position",
-    section: "anilist",
+    section: "trackers",
     anchorTitle: "Sync indicator",
     keywords: [
       "position",
@@ -6740,7 +7397,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Use MyAnimeList avatar",
-    section: "mal",
+    section: "trackers",
     anchorTitle: "Connected",
     keywords: [
       "mal avatar",
@@ -6754,7 +7411,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Show Simkl rails on Home",
-    section: "simkl",
+    section: "trackers",
     anchorTitle: "Connected",
     keywords: [
       "simkl rails",
@@ -6769,7 +7426,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Show Up Next on Simkl rail",
-    section: "simkl",
+    section: "trackers",
     anchorTitle: "Connected",
     keywords: [
       "up next",
@@ -6783,7 +7440,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Show Simkl Trending Today rail",
-    section: "simkl",
+    section: "trackers",
     anchorTitle: "Connected",
     keywords: [
       "trending",
@@ -6798,7 +7455,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Scrobble to Simkl",
-    section: "simkl",
+    section: "trackers",
     anchorTitle: "Connected",
     keywords: [
       "scrobble",
@@ -6813,7 +7470,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Display Simkl Community Ratings",
-    section: "simkl",
+    section: "trackers",
     anchorTitle: "Connected",
     keywords: [
       "community ratings",
@@ -6826,7 +7483,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Enable User Ratings",
-    section: "simkl",
+    section: "trackers",
     anchorTitle: "Connected",
     keywords: [
       "user ratings",
@@ -6840,7 +7497,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Anime Title Language",
-    section: "simkl",
+    section: "trackers",
     anchorTitle: "Connected",
     keywords: [
       "anime title",
@@ -6855,7 +7512,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Home rail categories (Movies, TV, Anime)",
-    section: "simkl",
+    section: "trackers",
     anchorTitle: "Home Rail Settings",
     keywords: [
       "home rail settings",
@@ -7056,6 +7713,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "recap segment",
       "jump recap",
       "skip previously on",
+      "skip catch up",
     ],
   },
   {
@@ -7070,6 +7728,8 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "ending",
       "skip ending",
       "credits countdown",
+      "ed skip",
+      "skip end credits",
     ],
   },
   {
@@ -7085,6 +7745,10 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "keep watching prompt",
       "after 3 episodes",
       "auto pause binge",
+      "are you still there",
+      "binge guard",
+      "stop after episodes",
+      "idle prompt",
     ],
   },
   {
@@ -7099,6 +7763,9 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "play queue",
       "queue controls next",
       "queue drives nav",
+      "queue",
+      "next previous",
+      "playlist order",
     ],
   },
   {
@@ -7399,6 +8066,49 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
+    label: "Test controller",
+    section: "controllers",
+    anchorTitle: "Controller support",
+    keywords: [
+      "test controller",
+      "test mode",
+      "controller test",
+      "try controller",
+      "check buttons",
+      "controller selecting things",
+      "stop controller navigating",
+      "capture controller",
+    ],
+  },
+  {
+    label: "Controller cursor",
+    section: "controllers",
+    anchorTitle: "Controller cursor",
+    keywords: [
+      "cursor",
+      "pointer",
+      "dot",
+      "controller cursor",
+      "cursor image",
+      "custom cursor",
+      "harbor logo cursor",
+      "boat cursor",
+      "cursor size",
+    ],
+  },
+  {
+    label: "Your own image",
+    section: "controllers",
+    anchorTitle: "Controller cursor",
+    keywords: ["custom cursor", "upload cursor", "cursor image", "replace cursor"],
+  },
+  {
+    label: "Cursor size",
+    section: "controllers",
+    anchorTitle: "Controller cursor",
+    keywords: ["cursor size", "bigger cursor", "smaller pointer", "cursor px"],
+  },
+  {
     label: "Deadzone",
     section: "controllers",
     anchorTitle: "Stick and timing",
@@ -7439,7 +8149,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Choose subtitles before playback",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle languages",
     keywords: [
       "subtitle picker",
@@ -7455,7 +8165,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Image languages",
     section: "language",
-    anchorTitle: "Image languages",
+    anchorTitle: "Artwork",
     keywords: [
       "image languages",
       "poster language",
@@ -7469,7 +8179,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Normalize embedded subtitle size",
-    section: "language",
+    section: "subtitles",
     anchorTitle: "Subtitle style",
     keywords: [
       "normalize subtitle size",
@@ -7483,7 +8193,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "SUBDL subtitle source",
-    section: "subSources",
+    section: "subtitles",
     anchorTitle: "Subtitle sources",
     keywords: [
       "subdl",
@@ -7498,7 +8208,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Subsource subtitle source",
-    section: "subSources",
+    section: "subtitles",
     anchorTitle: "Subtitle sources",
     keywords: [
       "subsource",
@@ -7513,7 +8223,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Auto-apply audio-derived sync fixes",
-    section: "autoSync",
+    section: "subtitles",
     anchorTitle: "Subtitle auto-sync",
     keywords: [
       "auto apply",
@@ -7530,7 +8240,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Use community corrections",
-    section: "autoSync",
+    section: "subtitles",
     anchorTitle: "Community sync",
     keywords: [
       "community corrections",
@@ -7547,7 +8257,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Community sync server URL",
-    section: "autoSync",
+    section: "subtitles",
     anchorTitle: "Community sync",
     keywords: [
       "sync server",
@@ -7564,7 +8274,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Private mode (no community sync contact)",
-    section: "autoSync",
+    section: "subtitles",
     anchorTitle: "Community sync",
     keywords: [
       "private mode",
@@ -7682,7 +8392,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Home hero featured source",
-    section: "theme",
+    section: "library",
     anchorTitle: "Home hero",
     keywords: [
       "featured source",
@@ -7697,7 +8407,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Play trailers in the hero",
-    section: "theme",
+    section: "library",
     anchorTitle: "Home hero",
     keywords: [
       "hero trailer",
@@ -7710,7 +8420,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Home hero audio",
-    section: "theme",
+    section: "library",
     anchorTitle: "Home hero",
     keywords: [
       "hero audio",
@@ -7754,6 +8464,9 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "theme",
     anchorTitle: "Window title bar",
     keywords: [
+      "menu on top",
+      "top bar",
+      "move the menu",
       "frost top bar",
       "blur top bar",
       "scroll blur",
@@ -7810,6 +8523,10 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "theme",
     anchorTitle: "Logo & app icon",
     keywords: [
+      "change the app icon",
+      "custom icon",
+      "dock icon",
+      "taskbar icon",
       "app icon",
       "window icon",
       "taskbar icon",
@@ -8041,7 +8758,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
   {
     label: "Restore previous settings",
-    section: "advanced",
+    section: "updates",
     anchorTitle: "Backup & restore",
     keywords: [
       "recover settings",
@@ -8054,7 +8771,346 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "previous settings",
     ],
   },
+  {
+    label: "Auto-sync subtitles",
+    section: "subtitles",
+    anchorTitle: "Subtitle auto-sync",
+    keywords: [
+      "auto sync",
+      "autosync",
+      "fix subtitle timing",
+      "subtitles out of sync",
+      "resync automatically",
+    ],
+  },
+  {
+    label: "Let structural tiers auto-apply",
+    section: "subtitles",
+    anchorTitle: "Subtitle auto-sync",
+    keywords: ["auto apply", "structural", "apply fix without asking", "no prompt sync"],
+  },
+  {
+    label: "Smart resync with speech recognition",
+    section: "subtitles",
+    anchorTitle: "Subtitle auto-sync",
+    keywords: ["speech recognition", "asr", "smart resync", "audio derived sync", "whisper"],
+  },
+  {
+    label: "Match subtitles across languages (experimental)",
+    section: "subtitles",
+    anchorTitle: "Subtitle auto-sync",
+    keywords: [
+      "cross language",
+      "different language",
+      "pivot subtitle",
+      "audio language",
+      "experimental sync",
+    ],
+  },
+  {
+    label: "Stay on one source for a season",
+    section: "player",
+    anchorTitle: "Play button behavior",
+    keywords: [
+      "season lock",
+      "same source",
+      "keep release",
+      "one release per season",
+      "stick to source",
+    ],
+  },
+  {
+    label: "Auto-skip stalled streams",
+    section: "player",
+    anchorTitle: "Play button behavior",
+    keywords: [
+      "stalled",
+      "dead stream",
+      "stream wont start",
+      "try next stream",
+      "skip broken source",
+    ],
+  },
+  {
+    label: "Disable torrents entirely",
+    section: "p2p",
+    anchorTitle: "Power tools & diagnostics",
+    keywords: ["no torrents", "disable p2p", "turn off torrents", "debrid only"],
+  },
+  {
+    label: "Auto-confirm peer-to-peer streaming",
+    section: "p2p",
+    anchorTitle: "Power tools & diagnostics",
+    keywords: ["p2p confirm", "skip torrent warning", "auto confirm", "dont ask torrent"],
+  },
+  {
+    label: "Keep downloading after you leave",
+    section: "p2p",
+    anchorTitle: "Local engine",
+    keywords: ["keep downloading", "background download", "continue after close", "seed"],
+  },
+  {
+    label: "Row card style",
+    section: "theme",
+    anchorTitle: "Poster card style",
+    keywords: ["tv cards", "poster cards", "wide cards", "card layout", "landscape cards"],
+  },
+  {
+    label: "Focused Card",
+    section: "theme",
+    anchorTitle: "Card behaviour",
+    keywords: ["focused card", "dim other cards", "highlight selected", "blur others"],
+  },
+  {
+    label: "Expanding Cards",
+    section: "theme",
+    anchorTitle: "Card behaviour",
+    keywords: ["expanding cards", "card expands", "wide art on focus", "backdrop expansion"],
+  },
+  {
+    label: "Watchlist bookmark",
+    section: "library",
+    anchorTitle: "On the poster",
+    keywords: ["bookmark", "watchlist marker", "saved marker", "corner bookmark"],
+  },
+  {
+    label: "Max scores per card",
+    section: "library",
+    anchorTitle: "Scores",
+    keywords: ["badge limit", "how many ratings", "score count", "too many badges"],
+  },
+  {
+    label: "Keep Continue Watching private to each profile",
+    section: "library",
+    anchorTitle: "Home layout",
+    keywords: [
+      "private continue watching",
+      "per profile history",
+      "separate history",
+      "profile privacy",
+    ],
+  },
+  {
+    label: "Smooth scrolling",
+    section: "library",
+    anchorTitle: "Home layout",
+    keywords: ["smooth scroll", "scrolling", "scroll animation", "jerky scrolling"],
+  },
+  {
+    label: "Always re-encode when casting",
+    section: "player",
+    anchorTitle: "Player engine",
+    keywords: ["cast", "chromecast", "re-encode", "transcode", "casting wont play"],
+  },
+  {
+    label: "Enable X-Ray",
+    section: "player",
+    anchorTitle: "X-Ray (experimental)",
+    keywords: ["xray", "x-ray", "cast list", "who is this actor", "amazon xray", "actor bios"],
+  },
+  {
+    label: "Quality badge style",
+    section: "player",
+    anchorTitle: "Stream quality in player",
+    keywords: ["quality badge", "4k badge", "resolution badge", "what am i watching"],
+  },
+  {
+    label: "Show the Big Picture button",
+    section: "hotkeys",
+    anchorTitle: "Big Picture",
+    keywords: ["big picture button", "tv mode button", "hide big picture", "ten foot"],
+  },
+  {
+    label: "Keep controlling Harbor in the background",
+    section: "controllers",
+    anchorTitle: "Controller support",
+    keywords: ["background controller", "controller when unfocused", "gamepad background"],
+  },
+  {
+    label: "Start as",
+    section: "account",
+    anchorTitle: "Profiles",
+    keywords: ["default profile", "start as", "skip whos watching", "auto select profile"],
+  },
+  {
+    label: "Subtitle indicator dot",
+    section: "subtitles",
+    anchorTitle: "Turning them on",
+    keywords: ["subtitle dot", "green dot", "subtitle indicator", "cc indicator"],
+  },
+  {
+    label: "Never auto-select tracks containing",
+    section: "language",
+    anchorTitle: "Skip these tracks",
+    keywords: [
+      "block words",
+      "skip commentary",
+      "descriptive audio",
+      "avoid tracks",
+      "track blocklist",
+    ],
+  },
+  {
+    label: "Show an on disk badge on cards",
+    section: "library",
+    anchorTitle: "On the poster",
+    keywords: ["on disk", "local file badge", "downloaded badge", "have it locally"],
+  },
+  {
+    label: "Use Cinemeta for title metadata",
+    section: "library",
+    anchorTitle: "Titles and descriptions",
+    keywords: ["cinemeta", "stremio metadata", "title source", "metadata addon"],
+  },
+  {
+    label: "When a title is in your local library",
+    section: "library",
+    anchorTitle: "Local library",
+    keywords: ["local file", "play local", "prefer local copy", "on disk playback"],
+  },
+  {
+    label: "SVP engine",
+    section: "anime",
+    anchorTitle: "SVP frame interpolation",
+    keywords: [
+      "svp",
+      "smoothvideo",
+      "frame interpolation",
+      "60fps",
+      "motion smoothing",
+      "vapoursynth",
+    ],
+  },
+  {
+    label: "Rich season and order panel",
+    section: "library",
+    anchorTitle: "Episode cards",
+    keywords: ["season panel", "episode order", "absolute order", "season picker"],
+  },
+  {
+    label: "Player style",
+    section: "playerLayout",
+    keywords: ["player skin", "player layout", "player look", "controls style"],
+  },
+  {
+    label: "Sound profile",
+    section: "player",
+    anchorTitle: "Audio",
+    keywords: [
+      "sound profile",
+      "eq",
+      "equalizer",
+      "audio profile",
+      "night mode audio",
+      "boost dialogue",
+    ],
+  },
+  {
+    label: "Playback quality",
+    section: "mpv",
+    anchorTitle: "Picture quality",
+    keywords: [
+      "playback quality",
+      "picture quality",
+      "performance",
+      "quality preset",
+      "how hard my pc works",
+    ],
+  },
+  {
+    label: "Scroll up for the trailer",
+    section: "library",
+    anchorTitle: "Show pages",
+    keywords: ["scroll trailer", "trailer on scroll", "autoplay trailer", "hero trailer"],
+  },
+  {
+    label: "Serve Harbor on your network",
+    section: "remotes",
+    anchorTitle: "Harbor on other devices",
+    keywords: [
+      "lan",
+      "network",
+      "web app",
+      "open on phone",
+      "serve harbor",
+      "local server",
+      "wifi access",
+    ],
+  },
+  {
+    label: "Deploy a relay",
+    section: "relay",
+    keywords: [
+      "deploy relay",
+      "cloudflare worker",
+      "watch together server",
+      "own relay",
+      "host relay",
+    ],
+  },
+  {
+    label: "Use an existing relay",
+    section: "relay",
+    keywords: ["relay url", "existing relay", "friends relay", "paste relay", "wss"],
+  },
+  {
+    label: "Subtitle language order",
+    section: "subtitles",
+    anchorTitle: "Subtitle languages",
+    keywords: ["language order", "priority", "which subtitle first", "preferred subtitle language"],
+  },
+  {
+    label: "Show subtitle sync indicator",
+    section: "subtitles",
+    anchorTitle: "Sync indicator",
+    keywords: ["sync indicator", "subtitle offset display", "timing feedback", "offset readout"],
+  },
+  {
+    label: "When you open a profile",
+    section: "account",
+    anchorTitle: "Profiles",
+    keywords: ["profile open", "on profile switch", "profile startup", "what happens on switch"],
+  },
+  {
+    label: "Cache folder",
+    section: "storage",
+    anchorTitle: "Stream cache",
+    keywords: [
+      "cache folder",
+      "cache location",
+      "change folder",
+      "where files live",
+      "move cache",
+      "different drive",
+    ],
+  },
+  {
+    label: "Bookmark corner",
+    section: "library",
+    anchorTitle: "On the poster",
+    keywords: ["bookmark corner", "marker position", "watchlist corner", "which corner"],
+  },
+  {
+    label: "Import a badge pack",
+    section: "badges",
+    anchorTitle: "Packs & import",
+    keywords: ["import pack", "install pack", "badge pack", "badges json", "community pack"],
+  },
+  {
+    label: "Make an award pack",
+    section: "awardIcons",
+    anchorTitle: "Award Icons",
+    keywords: ["award pack", "make pack", "custom awards", "award icons", "laurel"],
+  },
 ];
+
+setSettingsSearchVocabulary([
+  ...SETTINGS_OPTIONS.flatMap((o) => [o.label, ...(o.keywords ?? [])]),
+  ...NAV_GROUPS.flatMap((g) => [
+    g.heading ?? "",
+    ...g.items.flatMap((it) => [it.label, ...(it.keywords ?? [])]),
+  ]),
+]);
 
 export function SettingsNav({
   active,
@@ -8064,6 +9120,7 @@ export function SettingsNav({
   onChange: (id: SectionId, anchor?: string) => void;
 }) {
   const { settings } = useSettings();
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
   const { goBack, canGoBack, setView } = useView();
   const t = useT();
   const isNew = useSettingsNew();
@@ -8083,20 +9140,24 @@ export function SettingsNav({
       const groupHit = group.heading ? matchesSettingsSearch(trimmed, [group.heading], t) : false;
       for (const item of group.items) {
         const hit =
-          groupHit ||
-          matchesSettingsSearch(trimmed, [item.label], t) ||
-          (item.keywords ?? []).some((k) => k.toLowerCase().includes(trimmed));
+          groupHit || matchesSettingsSearch(trimmed, [item.label], t, item.keywords ?? []);
         if (hit) out.push(item);
       }
     }
-    return out;
+    return out.sort(
+      (a, b) =>
+        rankSettingsSearch(trimmed, a.label, a.keywords ?? []) -
+        rankSettingsSearch(trimmed, b.label, b.keywords ?? []),
+    );
   }, [t, trimmed]);
   const optionMatches = useMemo<SettingsOption[] | null>(() => {
     if (!trimmed) return null;
-    return SETTINGS_OPTIONS.filter(
-      (o) =>
-        matchesSettingsSearch(trimmed, [o.label], t) ||
-        (o.keywords ?? []).some((k) => k.toLowerCase().includes(trimmed)),
+    return SETTINGS_OPTIONS.filter((o) =>
+      matchesSettingsSearch(trimmed, [o.label], t, o.keywords ?? []),
+    ).sort(
+      (a, b) =>
+        rankSettingsSearch(trimmed, a.label, a.keywords ?? []) -
+        rankSettingsSearch(trimmed, b.label, b.keywords ?? []),
     );
   }, [t, trimmed]);
 
@@ -8137,6 +9198,8 @@ export function SettingsNav({
         ? "FULL"
         : "ON"
       : null,
+    trackers: null,
+    updates: null,
     relay: relayLive,
     streaming: debridChip,
     streamFilters: settings.customStreamFilters?.length
@@ -8144,8 +9207,7 @@ export function SettingsNav({
       : null,
     p2p: null,
     language: null,
-    subSources: null,
-    autoSync: settings.subtitleAutoSync ? "on" : null,
+    subtitles: settings.subtitleAutoSync ? "sync" : null,
     player: settings.playerEngine === "auto" ? null : settings.playerEngine,
     mpv:
       (settings.mpvQuality ?? "balanced") === "balanced"
@@ -8171,6 +9233,7 @@ export function SettingsNav({
     bug: null,
     support: null,
     remotes: settings.serveWebUi || settings.remoteControlEnabled ? "live" : null,
+    tv: null,
     storage: null,
     advanced: null,
   };
@@ -8186,17 +9249,13 @@ export function SettingsNav({
           onChange(id);
           setQuery("");
         }}
-        className={`group flex h-14 w-full items-center gap-3 rounded-xl px-2.5 text-start transition-colors ${
-          isActive
-            ? "bg-raised text-ink shadow-[inset_0_0_0_1px_var(--color-edge)]"
-            : "text-ink-muted hover:bg-elevated/70 hover:text-ink"
+        className={`group flex h-14 w-full items-center gap-3 rounded-md px-2.5 text-start transition-colors ${
+          isActive ? "bg-raised text-ink" : "text-ink-muted hover:bg-elevated hover:text-ink"
         }`}
       >
         <span
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
-            isActive
-              ? "bg-elevated text-ink shadow-[inset_0_0_0_1px_var(--color-edge-soft)]"
-              : "bg-canvas/60 text-ink-subtle group-hover:text-ink-muted"
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-colors ${
+            isActive ? "text-canvas" : "bg-canvas text-ink-subtle group-hover:text-ink-muted"
           }`}
         >
           <Icon size={20} strokeWidth={1.6} />
@@ -8205,16 +9264,16 @@ export function SettingsNav({
         {(chip || debridChipLocal) && (
           <span className="flex shrink-0 gap-1">
             {debridChipLocal && (
-              <span className="rounded-md bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-accent">
+              <span className="rounded-md bg-accent-soft px-1.5 py-0.5 text-[10.5px] font-semibold tracking-wide text-accent">
                 {debridChipLocal}
               </span>
             )}
             {chip && (
               <span
-                className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium tracking-wide ${
+                className={`rounded-md px-1.5 py-0.5 text-[10.5px] font-medium tracking-wide ${
                   chip === "live" || chip === "via relay"
-                    ? "bg-accent/15 text-accent"
-                    : "bg-canvas/70 text-ink-subtle"
+                    ? "bg-accent-soft text-accent"
+                    : "bg-canvas text-ink-subtle"
                 }`}
               >
                 {chip}
@@ -8230,7 +9289,7 @@ export function SettingsNav({
     <nav
       data-harbor-sidebar
       data-tv-scroll-focus
-      className="relative flex w-72 shrink-0 flex-col bg-surface pt-24 shadow-[1px_0_0_var(--color-edge)]"
+      className="relative flex w-72 shrink-0 flex-col bg-canvas pt-24"
     >
       <div data-tauri-drag-region className="h-3 shrink-0" />
       {showBack && (
@@ -8238,7 +9297,7 @@ export function SettingsNav({
           <button
             type="button"
             onClick={() => (canGoBack ? goBack() : setView("home"))}
-            className="flex h-10 w-full items-center gap-2 rounded-xl px-3 text-start text-[13.5px] font-semibold text-ink-muted transition-colors hover:bg-elevated/70 hover:text-ink"
+            className="flex h-10 w-full items-center gap-2 rounded-md px-3 text-start text-[13.5px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
           >
             <svg
               width="16"
@@ -8258,17 +9317,17 @@ export function SettingsNav({
         </div>
       )}
       <div className="px-3 pb-3">
-        <div className="flex h-10 items-center gap-2 rounded-xl bg-elevated/70 px-3 shadow-[inset_0_0_0_1px_var(--color-edge-soft)]">
+        <div className="group/find flex h-[46px] items-center gap-[11px] rounded-md bg-elevated px-[15px] transition-colors focus-within:bg-raised">
           <svg
-            width="14"
-            height="14"
+            width="17"
+            height="17"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="shrink-0 text-ink-subtle"
+            className="shrink-0 text-ink-subtle transition-colors group-focus-within/find:text-ink"
           >
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
@@ -8278,7 +9337,7 @@ export function SettingsNav({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("Search settings")}
-            className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-subtle"
+            className="min-w-0 flex-1 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-ink-subtle"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 if (matches && matches.length > 0) {
@@ -8298,7 +9357,7 @@ export function SettingsNav({
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="shrink-0 text-ink-subtle transition-colors hover:text-ink"
+              className="animate-badge-pop harbor-press-pop shrink-0 text-ink-subtle transition-colors hover:text-ink"
               aria-label={t("Clear")}
             >
               <svg
@@ -8351,9 +9410,9 @@ export function SettingsNav({
                       );
                       setQuery("");
                     }}
-                    className="group flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-start text-ink-muted transition-colors hover:bg-elevated/70 hover:text-ink"
+                    className="group flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-start text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
                   >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-canvas/60 text-ink-subtle group-hover:text-ink-muted">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-canvas text-ink-subtle group-hover:text-ink-muted">
                       <svg
                         width="14"
                         height="14"
@@ -8372,7 +9431,7 @@ export function SettingsNav({
                       <span className="block truncate text-[13.5px] font-medium text-ink">
                         {t(o.label)}
                       </span>
-                      <span className="block truncate text-[11px] text-ink-subtle">
+                      <span className="block truncate text-[11.5px] text-ink-subtle">
                         {t(sectionLabel.get(o.section) ?? o.section)}
                       </span>
                     </span>
@@ -8383,71 +9442,134 @@ export function SettingsNav({
           </div>
         )}
         {!matches &&
-          NAV_GROUPS.map((group, gi) => (
-            <div key={gi} className="flex flex-col gap-1">
-              {group.heading && (
-                <div className="px-3.5 pb-1.5 pt-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink-subtle/80">
-                  {t(group.heading)}
-                </div>
-              )}
-              {group.items.map(({ id, label, Icon }) => {
-                const isActive = id === active;
-                const chip = status[id];
-                const debridChip = id === "streaming" && debridKeys > 0 ? `${debridKeys}D` : null;
-                return (
-                  <button
-                    key={id}
-                    onClick={() => {
-                      onChange(id);
-                      markSectionSeen(id);
-                    }}
-                    className={`group flex h-14 w-full items-center gap-3 rounded-xl px-2.5 text-start transition-colors ${
-                      isActive
-                        ? "bg-raised text-ink shadow-[inset_0_0_0_1px_var(--color-edge)]"
-                        : "text-ink-muted hover:bg-elevated/70 hover:text-ink"
+          TOP_GROUPS.map((group, gi) => {
+            const prevSection = gi > 0 ? TOP_GROUPS[gi - 1].section : null;
+            const showSection = group.section !== prevSection;
+            const firstId = group.children[0];
+            const meta = NAV_ITEM_BY_ID.get(firstId);
+            const Icon = meta?.Icon;
+            const isActive = group.children.includes(active);
+            const multi = group.children.length > 1;
+            const isOpen = multi ? openGroups.has(group.id) || isActive : false;
+            const groupChip = group.children.map((c) => status[c]).find(Boolean);
+            const debridChip =
+              group.children.includes("streaming") && debridKeys > 0 ? `${debridKeys}D` : null;
+            const anyNew = group.children.some((c) => isNew(c));
+            return (
+              <div key={group.id} className="flex flex-col">
+                {showSection && (
+                  <div className="px-3.5 pb-1.5 pt-1 text-[10.5px] font-bold uppercase tracking-[0.2em] text-ink-subtle">
+                    {t(group.section)}
+                  </div>
+                )}
+                <button
+                  aria-expanded={multi ? isOpen : undefined}
+                  onClick={() => {
+                    if (multi) {
+                      setOpenGroups((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(group.id)) next.delete(group.id);
+                        else next.add(group.id);
+                        return next;
+                      });
+                      return;
+                    }
+                    onChange(firstId);
+                    markSectionSeen(firstId);
+                  }}
+                  className={`group flex h-11 w-full items-center gap-2.5 rounded-md px-2.5 text-start transition-colors ${
+                    isActive
+                      ? "bg-elevated text-ink"
+                      : "text-ink-muted hover:bg-elevated hover:text-ink"
+                  }`}
+                >
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center transition-colors ${
+                      isActive ? "text-ink" : "text-ink-subtle group-hover:text-ink-muted"
                     }`}
                   >
-                    <span
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
-                        isActive
-                          ? "bg-elevated text-ink shadow-[inset_0_0_0_1px_var(--color-edge-soft)]"
-                          : "bg-canvas/60 text-ink-subtle group-hover:text-ink-muted"
-                      }`}
-                    >
-                      <Icon size={20} strokeWidth={1.6} />
+                    {Icon && <Icon size={18} strokeWidth={1.9} />}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-[13.5px] font-semibold">
+                    {t(group.label)}
+                  </span>
+                  {anyNew && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />}
+                  <span
+                    className={`shrink-0 text-ink-subtle transition-transform ${
+                      isActive ? "rotate-90" : ""
+                    }`}
+                  >
+                    <IconChevronRight size={14} strokeWidth={2} />
+                  </span>
+                  {(groupChip || debridChip) && (
+                    <span className="flex shrink-0 gap-1">
+                      {debridChip && (
+                        <span className="rounded-md bg-accent-soft px-1.5 py-0.5 text-[10.5px] font-semibold tracking-wide text-accent">
+                          {debridChip}
+                        </span>
+                      )}
+                      {groupChip && (
+                        <span
+                          className={`rounded-md px-1.5 py-0.5 text-[10.5px] font-medium tracking-wide ${
+                            groupChip === "live" || groupChip === "via relay"
+                              ? "bg-accent-soft text-accent"
+                              : "bg-elevated text-ink-subtle"
+                          }`}
+                        >
+                          {groupChip}
+                        </span>
+                      )}
                     </span>
-                    <span className="flex-1 truncate text-[14.5px] font-medium">{t(label)}</span>
-                    {isNew(id) && (
-                      <span className="flex shrink-0 items-center gap-1 rounded-full bg-accent/15 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.12em] text-accent ring-1 ring-accent/30">
-                        <span className="h-1 w-1 rounded-full bg-accent" />
-                        {t("New")}
-                      </span>
-                    )}
-                    {(chip || debridChip) && (
-                      <span className="flex shrink-0 gap-1">
-                        {debridChip && (
-                          <span className="rounded-md bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-accent">
-                            {debridChip}
-                          </span>
-                        )}
-                        {chip && (
+                  )}
+                </button>
+                {isOpen && (
+                  <div className="relative mb-1 ms-[19px] flex flex-col ps-3">
+                    <span
+                      aria-hidden
+                      className="absolute inset-y-1 start-0 w-[2px] rounded-full bg-edge"
+                    />
+                    {group.children.map((childId) => {
+                      const child = NAV_ITEM_BY_ID.get(childId);
+                      if (!child) return null;
+                      const on = childId === active;
+                      return (
+                        <button
+                          key={childId}
+                          onClick={() => {
+                            onChange(childId);
+                            markSectionSeen(childId);
+                          }}
+                          className={`relative flex h-9 w-full items-center gap-2 rounded-md px-2.5 text-start text-[13px] transition-colors ${
+                            on ? "text-ink" : "text-ink-subtle hover:text-ink-muted"
+                          }`}
+                        >
+                          {on && (
+                            <span
+                              aria-hidden
+                              className="harbor-rail-mark absolute inset-y-1 -start-3 w-[2px] rounded-full bg-ink"
+                            />
+                          )}
                           <span
-                            className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium tracking-wide ${
-                              chip === "live" || chip === "via relay"
-                                ? "bg-accent/15 text-accent"
-                                : "bg-canvas/70 text-ink-subtle"
-                            }`}
+                            className={`min-w-0 flex-1 truncate ${on ? "font-semibold" : "font-medium"}`}
                           >
-                            {chip}
+                            {t(child.label)}
                           </span>
-                        )}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
+                          {isNew(childId) && (
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                          )}
+                          {status[childId] && (
+                            <span className="shrink-0 text-[10.5px] text-ink-subtle">
+                              {status[childId]}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
       </div>
     </nav>
   );

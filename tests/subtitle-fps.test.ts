@@ -478,7 +478,7 @@ test("the panel refreshes after Auto Sync or secondary subtitles reset the nativ
   assert.match(panel, /resetByPlayer[\s\S]*autoSyncActive[\s\S]*hasSecondary/);
   assert.match(controls, /onBeforeApply=\{autoSync\?\.stop\}/);
   assert.match(panel, /onBeforeApply\?\.\(\)[\s\S]*writeMpvSubtitleFps/);
-  assert.match(panel, /<option value="auto">/);
+  assert.match(panel, /value: "auto",\s*label:/);
   assert.match(panel, /applySourceFps\(videoFps, "auto"\)/);
 });
 

@@ -94,11 +94,11 @@ export function useAutoRetry(params: {
   useEffect(() => {
     setSlowLoad(false);
     if (isLocal) return;
-    const hasMeaningful = snap.durationSec > 0 && hasProgress;
+    const hasMeaningful = hasProgress || snap.firstFrameReady;
     if (hasMeaningful) return;
     const t = window.setTimeout(() => setSlowLoad(true), SLOW_LOAD_MS);
     return () => window.clearTimeout(t);
-  }, [src.url, snap.durationSec, hasProgress, isLocal]);
+  }, [src.url, snap.firstFrameReady, hasProgress, isLocal]);
 
   const autoRetriedRef = useRef(false);
   const transcodedTriedRef = useRef(false);

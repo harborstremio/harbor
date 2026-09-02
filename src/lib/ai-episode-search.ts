@@ -1,4 +1,4 @@
-import { extractJsonArray, friendlyAiError } from "./ai-search";
+import { AiSearchError, extractJsonArray, friendlyAiError } from "./ai-search";
 import { DEFAULT_AI_MODEL, migrateModelId } from "./ai-models";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
@@ -52,7 +52,7 @@ export async function aiFindEpisodes(
   });
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
-    throw new Error(friendlyAiError(res.status, detail));
+    throw new AiSearchError(friendlyAiError(res.status, detail));
   }
   const data = (await res.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
@@ -60,7 +60,7 @@ export async function aiFindEpisodes(
   };
   if (data?.error) {
     const code = typeof data.error.code === "number" ? data.error.code : 0;
-    throw new Error(friendlyAiError(code, data.error.message ?? ""));
+    throw new AiSearchError(friendlyAiError(code, data.error.message ?? ""));
   }
   return parseRefs(data?.choices?.[0]?.message?.content ?? "");
 }

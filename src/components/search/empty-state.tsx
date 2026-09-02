@@ -1,4 +1,4 @@
-import { ArrowLeft, ListTree, Loader2, Shuffle, X } from "lucide-react";
+import { ArrowLeft, Loader2, Shuffle, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AddonsIcon } from "@/components/icons/addons-icon";
 import { AnimeIcon } from "@/components/icons/anime-icon";
@@ -9,6 +9,7 @@ import { LibraryIcon } from "@/components/icons/library-icon";
 import { LiveTvIcon } from "@/components/icons/live-tv-icon";
 import { MoviesIcon } from "@/components/icons/movies-icon";
 import { TvIcon } from "@/components/icons/tv-icon";
+import { NavGlyph } from "@/components/icons/nav-glyph";
 import { MOVIE_GENRES } from "@/lib/feed/tags";
 
 const TV_GENRE_FOR_MOVIE: Record<string, number> = {
@@ -406,7 +407,7 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
               className="group flex h-12 items-center gap-2.5 rounded-full border border-edge-soft bg-elevated/50 px-5 text-[14.5px] font-semibold text-ink transition-all hover:border-edge hover:bg-elevated active:scale-[0.97]"
             >
               <span className="flex h-5 w-5 items-center justify-center text-ink-muted transition-colors group-hover:text-accent">
-                <ListTree size={16} strokeWidth={2} />
+                <NavGlyph name="guide" className="h-[22px] w-[22px]" />
               </span>
               {t("TV Guide")}
             </button>

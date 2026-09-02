@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Ban, Check, ChevronDown, Clock, Eye, Pause, Repeat, Trash2 } from "lucide-react";
 import type { RemoteLibraryAction, RemoteTrackers } from "@/lib/remote/protocol";
+import { useT } from "@/lib/i18n";
 import { Group, SheetRow } from "./sheet-ui";
 
 type TrackerId = "simkl" | "anilist" | "mal";
@@ -10,7 +11,6 @@ type StatusOption = {
   icon: ReactNode;
   op: RemoteLibraryAction;
   key: string;
-  confirm: string;
   remove?: boolean;
 };
 
@@ -33,69 +33,70 @@ function statusIcon(label: string): ReactNode {
   }
 }
 
-function status(label: string, name: string, op: RemoteLibraryAction, key: string): StatusOption {
-  return { label, icon: statusIcon(label), op, key, confirm: `Saved to ${name} as ${label}` };
+function status(label: string, op: RemoteLibraryAction, key: string): StatusOption {
+  return { label, icon: statusIcon(label), op, key };
 }
 
-function remove(name: string, op: RemoteLibraryAction): StatusOption {
+function remove(op: RemoteLibraryAction): StatusOption {
   return {
-    label: `Remove from ${name}`,
+    label: "Remove",
     icon: <Trash2 size={19} strokeWidth={2} />,
     op,
     key: "remove",
-    confirm: `Removed from ${name}`,
     remove: true,
   };
 }
 
 function simklOptions(isSeriesLike: boolean): StatusOption[] {
-  const n = "Simkl";
   const base = isSeriesLike
     ? [
-        status("Watching", n, { kind: "simkl", status: "watching" }, "watching"),
-        status("Plan to Watch", n, { kind: "simkl", status: "plantowatch" }, "plantowatch"),
-        status("Completed", n, { kind: "simkl", status: "completed" }, "completed"),
-        status("On Hold", n, { kind: "simkl", status: "hold" }, "hold"),
-        status("Dropped", n, { kind: "simkl", status: "dropped" }, "dropped"),
+        status("Watching", { kind: "simkl", status: "watching" }, "watching"),
+        status("Plan to Watch", { kind: "simkl", status: "plantowatch" }, "plantowatch"),
+        status("Completed", { kind: "simkl", status: "completed" }, "completed"),
+        status("On Hold", { kind: "simkl", status: "hold" }, "hold"),
+        status("Dropped", { kind: "simkl", status: "dropped" }, "dropped"),
       ]
     : [
-        status("Plan to Watch", n, { kind: "simkl", status: "plantowatch" }, "plantowatch"),
-        status("Completed", n, { kind: "simkl", status: "completed" }, "completed"),
-        status("Dropped", n, { kind: "simkl", status: "dropped" }, "dropped"),
+        status("Plan to Watch", { kind: "simkl", status: "plantowatch" }, "plantowatch"),
+        status("Completed", { kind: "simkl", status: "completed" }, "completed"),
+        status("Dropped", { kind: "simkl", status: "dropped" }, "dropped"),
       ];
-  return [...base, remove(n, { kind: "simkl", status: null })];
+  return [...base, remove({ kind: "simkl", status: null })];
 }
 
 function anilistOptions(): StatusOption[] {
-  const n = "AniList";
   return [
-    status("Watching", n, { kind: "anilist", status: "CURRENT" }, "CURRENT"),
-    status("Plan to Watch", n, { kind: "anilist", status: "PLANNING" }, "PLANNING"),
-    status("Completed", n, { kind: "anilist", status: "COMPLETED" }, "COMPLETED"),
-    status("Rewatching", n, { kind: "anilist", status: "REPEATING" }, "REPEATING"),
-    status("On Hold", n, { kind: "anilist", status: "PAUSED" }, "PAUSED"),
-    status("Dropped", n, { kind: "anilist", status: "DROPPED" }, "DROPPED"),
-    remove(n, { kind: "anilist", status: null }),
+    status("Watching", { kind: "anilist", status: "CURRENT" }, "CURRENT"),
+    status("Plan to Watch", { kind: "anilist", status: "PLANNING" }, "PLANNING"),
+    status("Completed", { kind: "anilist", status: "COMPLETED" }, "COMPLETED"),
+    status("Rewatching", { kind: "anilist", status: "REPEATING" }, "REPEATING"),
+    status("On Hold", { kind: "anilist", status: "PAUSED" }, "PAUSED"),
+    status("Dropped", { kind: "anilist", status: "DROPPED" }, "DROPPED"),
+    remove({ kind: "anilist", status: null }),
   ];
 }
 
 function malOptions(): StatusOption[] {
-  const n = "MyAnimeList";
   return [
-    status("Watching", n, { kind: "mal", status: "watching" }, "watching"),
-    status("Plan to Watch", n, { kind: "mal", status: "plan_to_watch" }, "plan_to_watch"),
-    status("Completed", n, { kind: "mal", status: "completed" }, "completed"),
-    status("On Hold", n, { kind: "mal", status: "on_hold" }, "on_hold"),
-    status("Dropped", n, { kind: "mal", status: "dropped" }, "dropped"),
-    remove(n, { kind: "mal", status: null }),
+    status("Watching", { kind: "mal", status: "watching" }, "watching"),
+    status("Plan to Watch", { kind: "mal", status: "plan_to_watch" }, "plan_to_watch"),
+    status("Completed", { kind: "mal", status: "completed" }, "completed"),
+    status("On Hold", { kind: "mal", status: "on_hold" }, "on_hold"),
+    status("Dropped", { kind: "mal", status: "dropped" }, "dropped"),
+    remove({ kind: "mal", status: null }),
   ];
 }
 
-function buildRows(trackers: RemoteTrackers, isAnime: boolean, isSeriesLike: boolean): TrackerRow[] {
+function buildRows(
+  trackers: RemoteTrackers,
+  isAnime: boolean,
+  isSeriesLike: boolean,
+): TrackerRow[] {
   const rows: TrackerRow[] = [];
   if (trackers.simkl)
     rows.push({ id: "simkl", name: "Simkl", options: simklOptions(isSeriesLike || isAnime) });
-  if (trackers.anilist && isAnime) rows.push({ id: "anilist", name: "AniList", options: anilistOptions() });
+  if (trackers.anilist && isAnime)
+    rows.push({ id: "anilist", name: "AniList", options: anilistOptions() });
   if (trackers.mal && isAnime) rows.push({ id: "mal", name: "MyAnimeList", options: malOptions() });
   return rows;
 }
@@ -113,6 +114,7 @@ export function TrackGroup({
   reduced: boolean;
   send: (op: RemoteLibraryAction) => boolean;
 }) {
+  const t = useT();
   const rows = useMemo(
     () => buildRows(trackers, isAnime, isSeriesLike),
     [trackers, isAnime, isSeriesLike],
@@ -129,22 +131,32 @@ export function TrackGroup({
     const sent = send(opt.op);
     if (sent) {
       setChosen((c) => ({ ...c, [row.id]: opt.key }));
-      setNote({ id: row.id, text: opt.confirm, ok: true });
+      setNote({
+        id: row.id,
+        text: opt.remove
+          ? t("Removed from {service}", { service: row.name })
+          : t("Saved to {service} as {status}", { service: row.name, status: t(opt.label) }),
+        ok: true,
+      });
     } else {
-      setNote({ id: row.id, text: "Not connected to your computer", ok: false });
+      setNote({ id: row.id, text: t("Not connected to your computer"), ok: false });
     }
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setNote(null), 2200);
   };
 
   return (
-    <Group label="Track">
+    <Group label={t("Track")}>
       <div className="flex flex-col gap-1">
         {rows.map((row) => {
           const isOpen = open === row.id;
           const pickedKey = chosen[row.id];
           const picked = row.options.find((o) => o.key === pickedKey);
-          const sub = picked ? (picked.remove ? "Not tracked" : picked.label) : "Set your status";
+          const sub = picked
+            ? picked.remove
+              ? t("Not tracked")
+              : t(picked.label)
+            : t("Set your status");
           return (
             <div key={row.id} className="overflow-hidden rounded-2xl bg-surface/40">
               <button
@@ -183,7 +195,11 @@ export function TrackGroup({
                     <SheetRow
                       key={opt.key}
                       icon={opt.icon}
-                      label={opt.label}
+                      label={
+                        opt.remove
+                          ? t("Remove from {service}", { service: row.name })
+                          : t(opt.label)
+                      }
                       active={pickedKey === opt.key}
                       trailing={
                         pickedKey === opt.key ? (

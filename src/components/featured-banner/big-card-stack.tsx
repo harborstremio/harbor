@@ -156,7 +156,7 @@ export function BigCardStack({
           <div
             key={m.id}
             aria-hidden={i !== active}
-            className="absolute inset-[2px] overflow-hidden rounded-[14px]"
+            className="absolute inset-[2px] overflow-hidden rounded-lg"
             style={{
               opacity: i === active ? 1 : 0,
               transition: `opacity ${FADE_MS}ms cubic-bezier(0.32, 0.72, 0.24, 1)`,
@@ -175,7 +175,7 @@ export function BigCardStack({
       })}
       <div
         aria-hidden
-        className="absolute inset-[2px] rounded-[14px]"
+        className="absolute inset-[2px] rounded-lg"
         style={{
           background:
             "linear-gradient(to top, oklch(0.10 0.02 260 / 0.92) 0%, oklch(0.10 0.02 260 / 0.20) 38%, transparent 60%)",

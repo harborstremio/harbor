@@ -168,7 +168,9 @@ function Skeleton({ shape }: { shape: RowShape }) {
     return <div className="h-20 w-full rounded-xl bg-elevated/40" />;
   }
   if (shape === "rank") {
-    return <div className="aspect-[228/246] w-full bg-elevated/30" style={{ borderRadius: radius }} />;
+    return (
+      <div className="aspect-[228/246] w-full bg-elevated/30" style={{ borderRadius: radius }} />
+    );
   }
   if (shape === "tile") {
     return <div className="aspect-[5/4] w-full rounded-2xl bg-elevated/30" />;
@@ -225,7 +227,8 @@ export function Row({
 }) {
   const { settings } = useSettings();
   const t = useT();
-  const tvCards = shape === "portrait" && settings.rowCardStyle === "tv" && holdsPosterCards(children);
+  const tvCards =
+    shape === "portrait" && settings.rowCardStyle === "tv" && holdsPosterCards(children);
   const effShape: RowShape = tvCards ? "landscape" : shape;
   const effMin = Math.max(72, Math.round((tvCards ? TV_CARD_MIN : min) * settings.posterScale));
   const expandingCards = effShape === "portrait" && settings.posterBackdropExpansion;
@@ -363,6 +366,8 @@ export function Row({
   useLayoutEffect(() => {
     measure();
     measureScroll();
+  }, [childCount, trackEl, effMin]);
+  useLayoutEffect(() => {
     if (!trackEl || cellWidth == null) return;
     if (scrollKey && !restoredRef.current && childCount > 0) {
       const n = recallRowScroll(scrollKey);
@@ -375,7 +380,7 @@ export function Row({
     if (!userInteractedRef.current && readPos(trackEl) !== 0) {
       writePos(trackEl, 0);
     }
-  }, [children, childCount, cellWidth, trackEl, scrollKey, recallRowScroll, effMin]);
+  }, [childCount, cellWidth, trackEl, scrollKey, recallRowScroll]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -731,8 +736,9 @@ export function Row({
             }`}
             style={
               {
+                "--row-poster-height": `${(cellWidth ?? effMin) * (effShape === "landscape" ? 9 / 16 : 1.5)}px`,
                 ...(expandingCards
-                  ? { "--row-poster-height": `${(cellWidth ?? effMin) * 1.5}px` }
+                  ? {}
                   : { gridAutoColumns: cellWidth != null ? `${cellWidth}px` : `${effMin}px` }),
                 transform: "translateZ(0)",
                 contain: expandingCards ? "style" : "layout style",
@@ -821,9 +827,13 @@ function EdgeArrow({
             background:
               "linear-gradient(145deg, rgba(8,12,18,0.50), rgba(8,12,18,0.38) 52%, rgba(8,12,18,0.44))",
           }}
-          style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)" }}
+          style={{
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+          }}
           className={`h-11 w-11 pointer-events-auto border border-white/[0.08] transition-opacity duration-200 ${
-            visible ? "opacity-85 group-hover/row:opacity-100 focus-within:opacity-100" : "pointer-events-none opacity-0"
+            visible
+              ? "opacity-85 group-hover/row:opacity-100 focus-within:opacity-100"
+              : "pointer-events-none opacity-0"
           }`}
           contentClassName="flex h-full w-full items-center justify-center"
         >
@@ -834,7 +844,11 @@ function EdgeArrow({
             tabIndex={visible ? 0 : -1}
             className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-ink outline-none"
           >
-            {side === "left" ? <ChevronLeft size={22} strokeWidth={2.2} className="dir-icon" /> : <ChevronRight size={22} strokeWidth={2.2} className="dir-icon" />}
+            {side === "left" ? (
+              <ChevronLeft size={22} strokeWidth={2.2} className="dir-icon" />
+            ) : (
+              <ChevronRight size={22} strokeWidth={2.2} className="dir-icon" />
+            )}
           </button>
         </ThreeLiquidGlassSurface>
       </div>

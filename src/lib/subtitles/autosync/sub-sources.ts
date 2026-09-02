@@ -1,52 +1,25 @@
-import { dinfo } from "@/lib/debug";
-import { normalizeLang, languageName, langScore } from "@/lib/subtitles/language";
+import { languageName, langScore } from "@/lib/subtitles/language";
+import {
+  browserSubtitleCredentialKey,
+  type SubtitleDownloadAuth,
+} from "@/lib/subtitles/provider-auth";
 import type { SubResult, SubSearchQuery } from "@/lib/subtitles/types";
 import { podnapisiSource } from "./sub-source-podnapisi";
 import { subdlSource } from "./sub-source-subdl";
 import { gestdownSource } from "./sub-source-gestdown";
 import { subsourceSource } from "./sub-source-subsource";
+import {
+  isRateLimited,
+  isSeries,
+  subtitleSourceCacheKey,
+  wantedLangs,
+  type ProviderCtx,
+  type SourceSubCandidate,
+  type SubProviderId,
+  type SubSource,
+} from "./sub-source-contract";
 
-export type SubProviderId = "podnapisi" | "subdl" | "gestdown" | "subsource";
-export type SubFormat = "srt" | "vtt" | "ass" | "ssa" | "sub" | "zip" | "unknown";
-
-export type ProviderCtx = {
-  userAgent: string;
-  subdlApiKey?: string | null;
-  subsourceApiKey?: string | null;
-  enabled?: Partial<Record<SubProviderId, boolean>>;
-  netAllowed?: boolean;
-  timeoutMs?: number;
-  bypassCache?: boolean;
-};
-
-export type SourceSubCandidate = {
-  provider: SubProviderId;
-  id: string;
-  url: string | null;
-  pageUrl: string | null;
-  lang: string;
-  release: string | null;
-  format: SubFormat;
-  hearingImpaired: boolean;
-  foreignOnly: boolean;
-  machineTranslated: boolean;
-  fps: number | null;
-  downloads: number;
-  fromTrusted: boolean;
-  hashMatched: boolean;
-  langConfirmed: boolean;
-  episodeConfirmed: boolean;
-  idConfirmed: boolean;
-  matchScore: number;
-};
-
-export interface SubSource {
-  id: SubProviderId;
-  supportsHash: boolean;
-  supportsMovie: boolean;
-  supportsTv: boolean;
-  search(q: SubSearchQuery, ctx: ProviderCtx): Promise<SourceSubCandidate[] | null>;
-}
+export * from "./sub-source-contract";
 
 export type AggregateSubResult = {
   exact: SourceSubCandidate[];
@@ -66,56 +39,10 @@ type PersistHooks = {
 };
 
 const memCache = new Map<string, CacheEntry>();
-const rateLimitedUntil = new Map<SubProviderId, number>();
 let persist: PersistHooks = {};
 
 export function configureSubSourceCache(hooks: PersistHooks): void {
   persist = hooks;
-}
-
-export function wantedLangs(q: SubSearchQuery): string[] {
-  return (q.langs ?? []).map(normalizeLang).filter(Boolean);
-}
-
-export function isSeries(q: SubSearchQuery): boolean {
-  return q.type === "series" || (q.season != null && q.episode != null);
-}
-
-export function imdbTt(raw?: string): string | null {
-  if (!raw) return null;
-  const d = raw.replace(/^tt/i, "").replace(/\D/g, "");
-  return d ? `tt${d.padStart(7, "0")}` : null;
-}
-
-export function detectFormat(url: string | null, hint?: string | null): SubFormat {
-  const s = `${url ?? ""} ${hint ?? ""}`.toLowerCase();
-  if (s.includes(".zip")) return "zip";
-  if (s.includes(".vtt")) return "vtt";
-  if (s.includes(".ass")) return "ass";
-  if (s.includes(".ssa")) return "ssa";
-  if (s.includes(".sub")) return "sub";
-  if (s.includes("srt")) return "srt";
-  return "unknown";
-}
-
-export function isRateLimited(id: SubProviderId): boolean {
-  return Date.now() < (rateLimitedUntil.get(id) ?? 0);
-}
-
-export function markRateLimited(id: SubProviderId, seconds: number): void {
-  rateLimitedUntil.set(id, Date.now() + Math.max(1, seconds) * 1000);
-}
-
-function queryKey(q: SubSearchQuery): string {
-  return [
-    q.videoHash ?? "",
-    imdbTt(q.imdbId) ?? "",
-    q.tmdbId ?? "",
-    q.title ?? "",
-    q.season ?? "",
-    q.episode ?? "",
-    wantedLangs(q).sort().join(","),
-  ].join("|");
 }
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
@@ -134,7 +61,7 @@ async function cachedSearch(
   q: SubSearchQuery,
   ctx: ProviderCtx,
 ): Promise<SourceSubCandidate[] | null> {
-  const key = `${source.id}|${queryKey(q)}`;
+  const key = subtitleSourceCacheKey(source, q);
   const now = Date.now();
   if (!ctx.bypassCache) {
     const mem = memCache.get(key);
@@ -151,7 +78,10 @@ async function cachedSearch(
   if (isRateLimited(source.id)) return null;
   const fresh = await source.search(q, ctx).catch(() => null);
   if (fresh === null) return null;
-  const entry: CacheEntry = { expires: now + (fresh.length ? POS_TTL_MS : NEG_TTL_MS), value: fresh };
+  const entry: CacheEntry = {
+    expires: now + (fresh.length ? POS_TTL_MS : NEG_TTL_MS),
+    value: fresh,
+  };
   memCache.set(key, entry);
   if (persist.save) void persist.save(key, entry).catch(() => {});
   return fresh;
@@ -165,6 +95,9 @@ function scoreCandidate(c: SourceSubCandidate, preferred: string[]): number {
   if (c.langConfirmed) s += 100;
   s += langScore(c.lang, preferred) * 20;
   if (c.fromTrusted) s += 40;
+  if (c.providerMatch?.score != null && Number.isFinite(c.providerMatch.score)) {
+    s += Math.max(0, Math.min(1, c.providerMatch.score)) * 80;
+  }
   s += Math.min(c.downloads, 5000) * 0.01;
   if (c.hearingImpaired) s -= 4;
   if (c.foreignOnly) s -= 300;
@@ -174,11 +107,7 @@ function scoreCandidate(c: SourceSubCandidate, preferred: string[]): number {
 
 function isExact(c: SourceSubCandidate): boolean {
   return (
-    c.hashMatched &&
-    c.langConfirmed &&
-    c.lang.length > 0 &&
-    !c.machineTranslated &&
-    !c.foreignOnly
+    c.hashMatched && c.langConfirmed && c.lang.length > 0 && !c.machineTranslated && !c.foreignOnly
   );
 }
 
@@ -216,8 +145,18 @@ export function pickSources(q: SubSearchQuery, ctx: ProviderCtx): SubSource[] {
   const series = isSeries(q);
   return ALL_SOURCES.filter((s) => {
     if (ctx.enabled && ctx.enabled[s.id] === false) return false;
-    if (s.id === "subdl" && !ctx.subdlApiKey) return false;
-    if (s.id === "subsource" && !ctx.subsourceApiKey) return false;
+    if (
+      s.id === "subdl" &&
+      !browserSubtitleCredentialKey(ctx.subdlApiKey) &&
+      !ctx.credentialAuth?.subdl
+    )
+      return false;
+    if (
+      s.id === "subsource" &&
+      !browserSubtitleCredentialKey(ctx.subsourceApiKey) &&
+      !ctx.credentialAuth?.subsource
+    )
+      return false;
     return series ? s.supportsTv : s.supportsMovie;
   });
 }
@@ -239,14 +178,16 @@ export async function searchExtraSubSources(
   });
   const deduped = dedupCandidates(all);
   const { exact, ambiguous } = partitionForGate(deduped, wantedLangs(q));
-  dinfo(`[sub-src] exact=${exact.length} ambiguous=${ambiguous.length} degraded=${degraded.join(",") || "none"}`);
   return { exact, ambiguous, all: deduped, degraded };
 }
 
 type ExtraSource = SubResult["source"] | SubProviderId;
 export type ExtraSubResult = Omit<SubResult, "source"> & { source: ExtraSource };
 
-export function toSubResult(c: SourceSubCandidate): ExtraSubResult {
+export function toSubResult(
+  c: SourceSubCandidate,
+  downloadAuth?: SubtitleDownloadAuth,
+): ExtraSubResult {
   return {
     id: `${c.provider}:${c.id}`,
     url: c.url ?? "",
@@ -256,8 +197,28 @@ export function toSubResult(c: SourceSubCandidate): ExtraSubResult {
     format: c.format === "zip" || c.format === "unknown" ? undefined : c.format,
     fps: c.fps ?? undefined,
     hearingImpaired: c.hearingImpaired || undefined,
+    forced: c.forced || undefined,
+    foreignOnly: c.foreignOnly || undefined,
+    machineTranslated: c.machineTranslated || undefined,
+    fromTrusted: c.fromTrusted || undefined,
     release: c.release ?? undefined,
     downloads: c.downloads || undefined,
+    author: c.author ?? undefined,
+    uploadedAt: c.uploadedAt ?? undefined,
+    rating: c.rating,
+    productionType: c.productionType ?? undefined,
+    releaseType: c.releaseType ?? undefined,
+    archive: c.archive || undefined,
+    rawFilename: c.rawFilename ?? undefined,
+    fileSize: c.fileSize ?? undefined,
+    checksum: c.checksum ?? undefined,
+    season: c.season ?? undefined,
+    episode: c.episode ?? undefined,
+    langConfirmed: c.langConfirmed || undefined,
+    episodeConfirmed: c.episodeConfirmed || undefined,
+    idConfirmed: c.idConfirmed || undefined,
+    providerMatch: c.providerMatch,
+    downloadAuth,
     hash: c.hashMatched ? "moviehash" : undefined,
   };
 }

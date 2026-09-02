@@ -1,12 +1,29 @@
 import { useState } from "react";
-import { Star } from "lucide-react";
+import { UiIcon } from "@/components/ui-icon";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { useT } from "@/lib/i18n";
 import { useRating } from "@/lib/ratings/store";
 import type { RatingTarget } from "@/lib/ratings/types";
 import { RatingModal } from "./rating-modal";
 
-export function RateButton({ target }: { target: RatingTarget }) {
+const TONE = {
+  scrim: {
+    idle: "bg-canvas/80 text-ink hover:bg-canvas/95",
+    active: "bg-ink/15 text-ink hover:bg-ink/20",
+  },
+  lift: {
+    idle: "bg-white/[0.06] text-ink hover:bg-white/[0.10]",
+    active: "bg-white/[0.12] text-ink hover:bg-white/[0.16]",
+  },
+};
+
+export function RateButton({
+  target,
+  tone = "scrim",
+}: {
+  target: RatingTarget;
+  tone?: keyof typeof TONE;
+}) {
   const t = useT();
   const existing = useRating(target.itemKey);
   const [open, setOpen] = useState(false);
@@ -23,16 +40,14 @@ export function RateButton({ target }: { target: RatingTarget }) {
           type="button"
           onClick={() => setOpen(true)}
           aria-label={score ? t("Your rating {n}/10", { n: score }) : t("Rate this")}
-          className={`group flex h-12 w-12 shrink-0 items-center justify-center rounded-full border transition-[transform,background-color,border-color] duration-200 active:scale-[0.94] ${
-            score
-              ? "border-ink/30 bg-ink/10 text-ink hover:bg-ink/15"
-              : "border-edge bg-canvas/80 text-ink hover:border-ink-subtle hover:bg-canvas/95"
+          className={`group flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.94] ${
+            score ? TONE[tone].active : TONE[tone].idle
           }`}
         >
           {score ? (
             <span className="text-[16px] font-bold leading-none tabular-nums">{score}</span>
           ) : (
-            <Star size={20} strokeWidth={1.9} />
+            <UiIcon name="rate" className="h-5 w-5" />
           )}
         </button>
       </HoverTooltip>

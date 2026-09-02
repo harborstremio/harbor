@@ -1,4 +1,5 @@
-import { Check, Heart, Play } from "lucide-react";
+import { Check, Heart } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { markMovieWatched } from "@/lib/mark-watched";

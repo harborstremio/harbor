@@ -2,6 +2,7 @@ import { localLibraryGeneration, readLocalLibrary, type LocalEntry } from "@/lib
 import { parseStream } from "@/lib/streams/parser";
 import { tierOf } from "@/lib/streams/scoring/scoring-resolution";
 import type { ParsedStream, Stream, Tier } from "@/lib/streams/types";
+import { episodeSpanContains, parseEpisodeSpan } from "@/lib/episode-span";
 
 export { localGroupKey, localTitleKey } from "./group-key";
 
@@ -121,8 +122,11 @@ export function findLocalEpisodeVersions(
     readLocalLibrary().filter(
       (e) =>
         e.type === "show" &&
-        e.season === season &&
-        e.episode === episode &&
+        episodeSpanContains(
+          { ...e, episodeEnd: e.episodeEnd ?? parseEpisodeSpan(e.filename)?.episodeEnd },
+          season,
+          episode,
+        ) &&
         ((tmdbId != null && e.tmdbId === tmdbId) || (imdbId != null && e.imdbId === imdbId)),
     ),
   );

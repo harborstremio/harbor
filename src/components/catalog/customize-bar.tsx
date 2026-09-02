@@ -1,4 +1,5 @@
-import { Check, Pencil, RotateCcw } from "lucide-react";
+import { Check, RotateCcw } from "lucide-react";
+import { PencilOutlineIcon } from "@/components/icons/pencil-outline";
 import { useT } from "@/lib/i18n";
 
 type Props = {
@@ -53,7 +54,7 @@ function BarButtons({ editMode, hasChanges, onToggleEdit, onReset, kids }: Props
               className="block h-10 w-auto select-none"
             />
             <span className="absolute inset-0 flex items-center justify-center gap-1.5 pe-1 text-[13px] font-semibold text-[#36254d]">
-              <Pencil size={14} strokeWidth={2.6} />
+              <PencilOutlineIcon size={13} />
               {t("Customize page")}
             </span>
           </button>
@@ -67,7 +68,7 @@ function BarButtons({ editMode, hasChanges, onToggleEdit, onReset, kids }: Props
               : "border-edge-soft/40 bg-canvas/80 text-ink-muted hover:bg-canvas hover:text-ink"
           }`}
         >
-          <Pencil size={12} strokeWidth={2.4} />
+          <PencilOutlineIcon size={12} />
           {editMode ? t("Done editing") : t("Customize page")}
         </button>
       )}

@@ -1,4 +1,5 @@
-import { ChevronDown, Pencil, Play, Plus, Star, ThumbsUp } from "lucide-react";
+import { ChevronDown, Pencil, Plus, Star, ThumbsUp } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { topMovies, type Meta } from "@/lib/cinemeta";
 import {
@@ -70,7 +71,7 @@ export function HoverStyleGallery({
         <button
           type="button"
           onClick={() => setEditing("new")}
-          className="flex aspect-[2/3] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-edge-soft bg-canvas/40 text-ink-subtle transition-colors hover:border-edge hover:text-ink"
+          className="flex aspect-[2/3] flex-col items-center justify-center gap-2 rounded-md border border-dashed border-edge-soft bg-canvas/40 text-ink-subtle transition-colors hover:border-edge hover:text-ink"
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-raised">
             <Plus size={18} strokeWidth={2.4} />
@@ -113,12 +114,12 @@ function Tile({
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`flex flex-col gap-2 rounded-xl border p-2 text-start transition-colors ${
+      className={`flex flex-col gap-2 rounded-md border p-2 text-start transition-colors ${
         selected ? "border-accent bg-accent/10" : "border-edge-soft bg-canvas/50 hover:border-edge"
       }`}
     >
       <div
-        className={`relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-elevated ring-1 ring-edge-soft/60 ${cardHoverPosterClass(
+        className={`relative aspect-[2/3] w-full overflow-hidden rounded-md bg-elevated ring-1 ring-edge-soft/60 ${cardHoverPosterClass(
           style,
           true,
         )}`}
@@ -128,7 +129,7 @@ function Tile({
             src={meta.poster}
             alt=""
             draggable={false}
-            className={`absolute inset-0 h-full w-full rounded-lg object-cover ${
+            className={`absolute inset-0 h-full w-full rounded-md object-cover ${
               style === "default" || style === "marquee" ? "scale-110 blur-md brightness-[0.45]" : ""
             }`}
           />
@@ -167,13 +168,13 @@ function CustomTile({
       onClick={onClick}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick()}
       aria-pressed={selected}
-      className={`group/tile flex cursor-pointer flex-col gap-2 rounded-xl border p-2 text-start transition-colors ${
+      className={`group/tile flex cursor-pointer flex-col gap-2 rounded-md border p-2 text-start transition-colors ${
         selected ? "border-accent bg-accent/10" : "border-edge-soft bg-canvas/50 hover:border-edge"
       }`}
     >
-      <div className={`relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-elevated ring-1 ring-edge-soft/60 ${props.className}`} style={props.style}>
+      <div className={`relative aspect-[2/3] w-full overflow-hidden rounded-md bg-elevated ring-1 ring-edge-soft/60 ${props.className}`} style={props.style}>
         {meta?.poster && (
-          <img src={meta.poster} alt="" draggable={false} className="absolute inset-0 h-full w-full rounded-lg object-cover" />
+          <img src={meta.poster} alt="" draggable={false} className="absolute inset-0 h-full w-full rounded-md object-cover" />
         )}
         {meta && <CustomHoverOverlay config={config} meta={meta} onPlay={() => {}} preview />}
         <button
@@ -245,7 +246,7 @@ function MarqueeModalPreview({ meta }: { meta: Meta }) {
 function DefaultModalPreview({ meta }: { meta: Meta }) {
   const t = useT();
   return (
-    <div className="absolute inset-x-2 top-1/2 z-10 -translate-y-1/2 overflow-hidden rounded-lg bg-canvas/95 shadow-[0_16px_36px_-12px_rgba(0,0,0,0.8)] ring-1 ring-edge-soft/60 backdrop-blur-md">
+    <div className="absolute inset-x-2 top-1/2 z-10 -translate-y-1/2 overflow-hidden rounded-md bg-canvas/95 shadow-[0_16px_36px_-12px_rgba(0,0,0,0.8)] ring-1 ring-edge-soft/60 backdrop-blur-md">
       <div
         className="h-10 w-full bg-cover bg-center"
         style={{ backgroundImage: `url(${meta.background ?? meta.poster ?? ""})` }}

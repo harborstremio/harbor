@@ -60,19 +60,52 @@ function peopleLine(full: FullMeta | null): string {
 
 export function KnownTileHover({ meta, rect }: { meta: Meta; rect: DOMRect }) {
   const [full, setFull] = useState<FullMeta | null>(null);
+  const [art, setArt] = useState<string | null>(null);
+  const local = meta.background ?? meta.poster ?? null;
+
   useEffect(() => {
     setFull(null);
-    if (!meta.id.startsWith("tt")) return;
+    setArt(null);
     let alive = true;
+
+    const settle = (src: string | null) => {
+      if (!alive) return;
+      if (!src) return;
+      const probe = new Image();
+      const show = () => {
+        if (alive) setArt(src);
+      };
+      probe.src = src;
+      if (typeof probe.decode === "function") {
+        probe.decode().then(show, show);
+      } else {
+        probe.onload = show;
+        probe.onerror = show;
+      }
+    };
+
+    if (!meta.id.startsWith("tt")) {
+      settle(local);
+      return () => {
+        alive = false;
+      };
+    }
+
     fetchCinemetaMeta(narrowMediaType(meta.type), meta.id)
-      .then((m) => alive && m && setFull(m as FullMeta))
-      .catch(() => {});
+      .then((m) => {
+        if (!alive) return;
+        const resolved = m as FullMeta | null;
+        if (resolved) setFull(resolved);
+        settle(resolved?.background ?? local);
+      })
+      .catch(() => settle(local));
+
     return () => {
       alive = false;
     };
-  }, [meta.id, meta.type]);
+  }, [meta.id, meta.type, local]);
 
-  const backdrop = full?.background ?? meta.background ?? meta.poster;
+  const backdrop = art;
   const description = (full?.description ?? meta.description ?? "").trim();
   const people = useMemo(() => peopleLine(full), [full]);
   const year = meta.releaseInfo ?? full?.releaseInfo;
@@ -80,11 +113,11 @@ export function KnownTileHover({ meta, rect }: { meta: Meta; rect: DOMRect }) {
   return createPortal(
     <div
       style={placement(rect)}
-      className="pointer-events-none fixed z-[150] overflow-hidden rounded-[14px] border border-edge bg-elevated/95 shadow-[0_24px_64px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl animate-popover-in motion-reduce:animate-none"
+      className="pointer-events-none fixed z-[150] overflow-hidden rounded-lg border border-edge bg-elevated/95 shadow-[0_24px_64px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl animate-popover-in motion-reduce:animate-none"
     >
       <div className="relative aspect-video w-full overflow-hidden bg-canvas">
         {backdrop ? (
-          <img src={backdrop} alt="" loading="lazy" className="h-full w-full object-cover" />
+          <img src={backdrop} alt="" decoding="sync" className="h-full w-full object-cover" />
         ) : (
           <span className="block h-full w-full bg-gradient-to-br from-canvas to-elevated" />
         )}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Layers } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
+import { AllAddonsIcon } from "@/components/icons/harbor-glyphs";
 import { useT } from "@/lib/i18n";
 import type { AddonRef } from "./use-catalog-list";
 
@@ -59,13 +60,14 @@ export function AddonFilterSelect({
         {selected ? (
           <AddonMark addon={selected} size={20} />
         ) : (
-          <Layers size={17} className="text-ink-subtle" />
+          <AllAddonsIcon size={17} className="text-ink-subtle" />
         )}
         <span className="max-w-[180px] truncate">{selected ? selected.name : t("All addons")}</span>
         <ChevronDown size={15} className={`shrink-0 text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="absolute start-0 top-[calc(100%+6px)] z-40 flex max-h-[380px] w-[280px] flex-col overflow-y-auto rounded-2xl border border-edge bg-canvas p-1.5 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-xl">
+        <div className="absolute start-0 top-[calc(100%+6px)] z-40 w-[280px] overflow-hidden rounded-2xl border border-edge bg-canvas shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-xl">
+          <div className="flex max-h-[380px] flex-col overflow-y-auto p-1.5 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-edge-soft">
           <Row
             active={value === "all"}
             onClick={() => {
@@ -74,7 +76,7 @@ export function AddonFilterSelect({
             }}
           >
             <span className="flex h-5 w-5 items-center justify-center">
-              <Layers size={16} className="text-ink-subtle" />
+              <AllAddonsIcon size={16} className="text-ink-subtle" />
             </span>
             <span className="flex-1 truncate text-ink">{t("All addons")}</span>
           </Row>
@@ -93,6 +95,7 @@ export function AddonFilterSelect({
               <span className="shrink-0 text-[11.5px] text-ink-subtle">{a.count}</span>
             </Row>
           ))}
+          </div>
         </div>
       )}
     </div>

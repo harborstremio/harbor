@@ -1,10 +1,72 @@
-import { Check, Filter, Pencil, Plus, Trash2 } from "lucide-react";
+import { Check, Filter, FilterX, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { isFilterEmpty, summarizeFilter, type CustomStreamFilter } from "@/lib/streams/custom-filters";
+import { isFilterEmpty, type CustomStreamFilter } from "@/lib/streams/custom-filters";
 import { FilterBuilder } from "../play-picker/filter-builder";
 import { Section } from "./shared";
+import { ModalButton, SettingGroup, SettingRow, SettingsModal } from "./kit";
+
+function dimensionChips(values: string[] | undefined): string[] {
+  if (!values || values.length === 0) return [];
+  if (values.length === 1) return [values[0]];
+  return [values[0], `+${values.length - 1}`];
+}
+
+function FilterChips({ filter }: { filter: CustomStreamFilter }) {
+  const t = useT();
+  const chips = [
+    ...dimensionChips(filter.resolution),
+    ...dimensionChips(filter.source),
+    ...dimensionChips(filter.codec),
+    ...dimensionChips(filter.audio),
+  ];
+  if (filter.requireHdr === true) chips.push(t("HDR"));
+  if (filter.cachedOnly === true) chips.push(t("Cached"));
+  if (typeof filter.minSeeders === "number" && filter.minSeeders > 0)
+    chips.push(t("{n}+ seeds", { n: filter.minSeeders }));
+  if (typeof filter.maxSizeGb === "number" && filter.maxSizeGb > 0)
+    chips.push(t("Max {n} GB", { n: filter.maxSizeGb }));
+  if (chips.length === 0) return null;
+  return (
+    <span className="flex flex-wrap items-center gap-1">
+      {chips.map((chip, i) => (
+        <span
+          key={`${chip}-${i}`}
+          className="rounded-md bg-canvas px-2 py-[3px] text-[11.5px] font-semibold tabular-nums text-ink-muted"
+        >
+          {chip}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function ActiveChip({
+  on,
+  disabled,
+  onClick,
+}: {
+  on: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={on}
+      disabled={disabled}
+      className={`harbor-press-pop flex h-8 min-w-[96px] shrink-0 items-center justify-center gap-1.5 rounded-md px-3 text-[12.5px] font-semibold transition-colors disabled:cursor-default disabled:opacity-40 ${
+        on ? "bg-ink text-canvas" : "bg-canvas text-ink-muted hover:bg-raised hover:text-ink"
+      }`}
+    >
+      {on && <Check size={12} strokeWidth={2.6} />}
+      {on ? t("Active") : t("Set active")}
+    </button>
+  );
+}
 
 export function StreamFiltersPanel() {
   const t = useT();
@@ -13,6 +75,7 @@ export function StreamFiltersPanel() {
   const activeId = settings.activeStreamFilterId;
   const [editing, setEditing] = useState<CustomStreamFilter | null>(null);
   const [building, setBuilding] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<CustomStreamFilter | null>(null);
 
   const persist = (next: CustomStreamFilter[]) => update({ customStreamFilters: next });
 
@@ -46,102 +109,152 @@ export function StreamFiltersPanel() {
     setBuilding(false);
   };
 
+  const askDelete = (id: string) => {
+    const target = filters.find((f) => f.id === id);
+    if (target) setPendingDelete(target);
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    remove(pendingDelete.id);
+    setPendingDelete(null);
+    closeBuilder();
+  };
+
   return (
     <Section
       title={t("Saved stream filters")}
       subtitle={t("Build a named quality preference once and set it active. The picker prefers streams that match it, including the instant pick, and falls back to the next best source when nothing matches. Each filter ANDs its dimensions and ignores any you leave blank.")}
     >
-      <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-5">
-        <div className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
-            <Filter size={11} strokeWidth={2.3} />
-            {t("YOUR FILTERS")}
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              setEditing(null);
-              setBuilding(true);
-            }}
-            className="flex h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
-          >
-            <Plus size={13} strokeWidth={2.4} />
-            {t("New filter")}
-          </button>
-        </div>
+      <SettingGroup label={t("Your filters")}>
+        <SettingRow
+          label={t("No filter")}
+          icon={<FilterX size={16} />}
+          desc={t("Show every stream, with no quality preference applied.")}
+        >
+          <ActiveChip on={activeId == null} onClick={() => update({ activeStreamFilterId: null })} />
+        </SettingRow>
 
-        {filters.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-edge-soft/60 bg-canvas/20 px-3 py-6 text-center text-[12.5px] text-ink-subtle">
-            {t("No saved filters yet. Hit New filter to build one.")}
-          </div>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {filters.map((f) => (
-              <li
-                key={f.id}
-                className="flex items-center gap-3 rounded-lg border border-edge-soft bg-elevated/40 px-3.5 py-2.5"
+        {filters.map((f) => (
+          <SettingRow
+            key={f.id}
+            icon={
+              activeId === f.id ? (
+                <span className="text-accent">
+                  <Filter size={16} />
+                </span>
+              ) : (
+                <Filter size={16} />
+              )
+            }
+            label={
+              <input
+                type="text"
+                value={f.name}
+                onChange={(e) => rename(f.id, e.target.value)}
+                aria-label={t("Name")}
+                placeholder={t("Untitled filter")}
+                maxLength={60}
+                spellCheck={false}
+                className="h-8 w-[204px] min-w-0 max-w-full rounded-md bg-canvas px-2.5 text-[13px] font-medium text-ink outline-none placeholder:text-ink-subtle"
+              />
+            }
+            desc={
+              isFilterEmpty(f) ? (
+                t("No dimensions set. This filter matches every stream.")
+              ) : (
+                <FilterChips filter={f} />
+              )
+            }
+          >
+            <span className="flex shrink-0 items-center gap-1.5">
+              <ActiveChip
+                on={activeId === f.id}
+                disabled={isFilterEmpty(f)}
+                onClick={() => toggleActive(f.id)}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setBuilding(false);
+                  setEditing(f);
+                }}
+                aria-label={t("Edit filter")}
+                className="harbor-press-pop flex h-8 shrink-0 items-center gap-1.5 rounded-md bg-canvas px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink"
               >
-                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                  <input
-                    type="text"
-                    value={f.name}
-                    onChange={(e) => rename(f.id, e.target.value)}
-                    placeholder={t("Untitled filter")}
-                    maxLength={60}
-                    spellCheck={false}
-                    className="w-full max-w-[280px] bg-transparent text-[13px] font-semibold text-ink outline-none placeholder:text-ink-subtle/70"
-                  />
-                  <span className="w-fit max-w-full truncate rounded-full bg-canvas/70 px-2 py-0.5 text-[11px] font-medium text-ink-muted ring-1 ring-edge-soft/60">
-                    {summarizeFilter(f)}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => toggleActive(f.id)}
-                  aria-pressed={activeId === f.id}
-                  disabled={isFilterEmpty(f)}
-                  className={`flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[11.5px] font-semibold transition-colors disabled:cursor-default disabled:opacity-40 ${
-                    activeId === f.id
-                      ? "bg-accent/15 text-accent ring-1 ring-accent/35"
-                      : "text-ink-muted ring-1 ring-edge-soft hover:bg-canvas/60 hover:text-ink"
-                  }`}
-                >
-                  {activeId === f.id && <Check size={12} strokeWidth={2.6} />}
-                  {activeId === f.id ? t("Active") : t("Set active")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBuilding(false);
-                    setEditing(f);
-                  }}
-                  aria-label={t("Edit filter")}
-                  className="flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[11.5px] font-medium text-ink-muted transition-colors hover:bg-canvas/60 hover:text-ink"
-                >
-                  <Pencil size={12} strokeWidth={2} />
-                  {t("Edit")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => remove(f.id)}
-                  aria-label={t("Delete filter")}
-                  className="flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-danger/15 hover:text-danger"
-                >
-                  <Trash2 size={12} strokeWidth={1.9} />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+                <Pencil size={12} strokeWidth={2} />
+                {t("Edit")}
+              </button>
+              <button
+                type="button"
+                onClick={() => askDelete(f.id)}
+                aria-label={t("Delete filter")}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-raised hover:text-danger"
+              >
+                <Trash2 size={14} strokeWidth={1.9} />
+              </button>
+            </span>
+          </SettingRow>
+        ))}
+      </SettingGroup>
+
+      <SettingRow
+        label={t("New filter")}
+        icon={<Plus size={16} />}
+        desc={
+          filters.length === 0
+            ? t("No saved filters yet. Hit New filter to build one.")
+            : t("Name it, tick the resolutions, sources, codecs and audio you want, and leave the rest blank.")
+        }
+        tip={t("A filter applies everywhere Harbor picks a stream: the source picker, the instant pick, and Big Picture on TV.")}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            setEditing(null);
+            setBuilding(true);
+          }}
+          className="harbor-press-pop flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-ink px-3.5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+        >
+          <Plus size={14} strokeWidth={2.4} />
+          {t("Create")}
+        </button>
+      </SettingRow>
 
       <FilterBuilder
         open={building || editing != null}
         initial={editing}
         onSave={upsert}
-        onDelete={remove}
+        onDelete={askDelete}
         onClose={closeBuilder}
       />
+
+      <SettingsModal
+        open={pendingDelete != null}
+        onClose={() => setPendingDelete(null)}
+        title={t("Delete filter")}
+        actions={
+          <>
+            <ModalButton ghost onClick={() => setPendingDelete(null)}>
+              {t("Cancel")}
+            </ModalButton>
+            <button
+              type="button"
+              onClick={confirmDelete}
+              className="harbor-press-pop flex h-9 items-center gap-1.5 rounded-md bg-danger/15 px-4 text-[12.5px] font-semibold text-danger transition-colors hover:bg-danger/25"
+            >
+              <Trash2 size={12} strokeWidth={2.4} />
+              {t("Delete")}
+            </button>
+          </>
+        }
+      >
+        <p className="rounded-md bg-elevated px-4 py-3.5 text-[13px] leading-relaxed text-ink-muted">
+          {t("Delete {name}? Saved filters cannot be brought back.", {
+            name: pendingDelete?.name.trim() || t("Untitled filter"),
+          })}
+        </p>
+      </SettingsModal>
     </Section>
   );
 }

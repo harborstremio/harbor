@@ -105,7 +105,12 @@ export function TransportKids({
           <span className="w-[68px] shrink-0 font-mono text-[17px] font-bold tabular-nums text-white">
             {fmtTime(snap.positionSec)}
           </span>
-          <KidsSeekBar position={snap.positionSec} duration={snap.durationSec} buffered={snap.bufferedSec} onSeek={onSeek} />
+          <KidsSeekBar
+            position={snap.positionSec}
+            duration={snap.durationSec}
+            buffered={snap.bufferedSec}
+            onSeek={onSeek}
+          />
           <span className="w-[68px] shrink-0 text-end font-mono text-[17px] font-bold tabular-nums text-white">
             {fmtTime(snap.durationSec)}
           </span>
@@ -113,7 +118,12 @@ export function TransportKids({
 
         <div className="pointer-events-auto grid grid-cols-[1fr_auto_1fr] items-center gap-4">
           <div className="flex items-center justify-self-start">
-            <KidsVolume volume={snap.volume} muted={snap.muted} onMute={onMute} onVolume={onVolume} />
+            <KidsVolume
+              volume={snap.volume}
+              muted={snap.muted}
+              onMute={onMute}
+              onVolume={onVolume}
+            />
           </div>
 
           <div className="flex items-center gap-6 justify-self-center">
@@ -148,7 +158,11 @@ export function TransportKids({
               </button>
             )}
             <RoundBtn onClick={onFullscreen} label={t("Fullscreen")}>
-              {fullscreen ? <Minimize size={28} strokeWidth={2.2} /> : <Maximize size={28} strokeWidth={2.2} />}
+              {fullscreen ? (
+                <Minimize size={28} strokeWidth={2.2} />
+              ) : (
+                <Maximize size={28} strokeWidth={2.2} />
+              )}
             </RoundBtn>
           </div>
         </div>
@@ -182,7 +196,9 @@ function KidsSeekBar({
     <div
       ref={ref}
       data-player-seekbar
-      onClick={(e) => { if (!e.isTrusted && duration > 0) onSeek(fromX(e.clientX) * duration); }}
+      onClick={(e) => {
+        if (!e.isTrusted && duration > 0) onSeek(fromX(e.clientX) * duration);
+      }}
       onPointerDown={(e) => {
         e.currentTarget.setPointerCapture(e.pointerId);
         setDrag(fromX(e.clientX));
@@ -225,6 +241,7 @@ function KidsVolume({
   onMute: () => void;
   onVolume: (v: number) => void;
 }) {
+  const t = useT();
   const ref = useRef<HTMLDivElement>(null);
   const v = muted ? 0 : clamp01(volume);
   const fromX = (clientX: number) => {
@@ -237,10 +254,14 @@ function KidsVolume({
     <div className="flex items-center gap-3">
       <button
         onClick={onMute}
-        aria-label={v === 0 ? "Unmute" : "Mute"}
+        aria-label={v === 0 ? t("Unmute") : t("Mute")}
         className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 active:scale-95"
       >
-        {v === 0 ? <VolumeX size={28} strokeWidth={2.2} /> : <Volume2 size={28} strokeWidth={2.2} />}
+        {v === 0 ? (
+          <VolumeX size={28} strokeWidth={2.2} />
+        ) : (
+          <Volume2 size={28} strokeWidth={2.2} />
+        )}
       </button>
       <div
         ref={ref}

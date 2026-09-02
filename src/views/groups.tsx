@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Loader2, Plus, Search, UsersRound } from "lucide-react";
+import { Loader2, Plus, UsersRound } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useT } from "@/lib/i18n";
 import { currentAuthor } from "@/lib/theme-auth";
 import { useView } from "@/lib/view";

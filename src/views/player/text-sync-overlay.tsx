@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, Loader2, RotateCcw, Scissors, Search, X } from "lucide-react";
+import { Check, Loader2, RotateCcw, Scissors, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { findActiveCue } from "@/lib/subtitles/parser";
 import { applyLinear, deltaFn } from "@/lib/subtitles/text-sync";
 import { usePlaybackPosition } from "@/lib/player/playback-clock";

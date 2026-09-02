@@ -94,7 +94,7 @@ function toRef(n: RawNode | null, role: string | null): CharacterMediaRef | null
     type: n.type === "MANGA" ? "manga" : "anime",
     format: n.format ?? null,
     name: title,
-    poster: n.coverImage?.extraLarge ?? n.coverImage?.large ?? null,
+    poster: n.coverImage?.large ?? n.coverImage?.extraLarge ?? null,
     background: n.bannerImage ?? null,
     year: n.startDate?.year ? String(n.startDate.year) : null,
     score: n.averageScore ? n.averageScore / 10 : 0,

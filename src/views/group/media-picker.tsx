@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Search, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { searchAll } from "@/lib/search";
@@ -86,7 +87,7 @@ export function MediaPicker({
           type="button"
           onClick={onClose}
           aria-label={t("Cancel")}
-          className="grid h-7 w-7 shrink-0 place-items-center rounded-[6px] text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
+          className="grid h-7 w-7 shrink-0 place-items-center rounded-sm text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
         >
           <X size={14} strokeWidth={2.2} />
         </button>

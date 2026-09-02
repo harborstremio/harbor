@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ExternalLink, Loader2 } from "lucide-react";
 import { DiscordIcon } from "@/components/discord-icon";
 import { linkDiscord, unlinkDiscord } from "@/lib/account/discord-link";
-import { accountErrorMessage } from "@/lib/account/error-messages";
+import { accountErrorMessage, type AccountErrorMessage } from "@/lib/account/error-messages";
 import { canDiscordAuth } from "@/lib/discord-auth";
 import type { Author } from "@/lib/theme-auth";
 import { useT } from "@/lib/i18n";
@@ -16,7 +16,7 @@ export function DiscordLinkCard({
 }) {
   const t = useT();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<AccountErrorMessage | null>(null);
   const canDesktop = canDiscordAuth();
 
   if (author.discordLinkMethod) {
@@ -62,7 +62,11 @@ export function DiscordLinkCard({
             {t("Unlink")}
           </button>
         </div>
-        {error && <p className="text-[12px] text-danger">{error}</p>}
+        {error && (
+          <p className="text-[12px] text-danger">
+            {error.kind === "built-in" ? t(error.key) : error.detail}
+          </p>
+        )}
       </div>
     );
   }
@@ -120,7 +124,11 @@ export function DiscordLinkCard({
         </p>
       )}
 
-      {error && <p className="text-[12px] text-danger">{error}</p>}
+      {error && (
+        <p className="text-[12px] text-danger">
+          {error.kind === "built-in" ? t(error.key) : error.detail}
+        </p>
+      )}
     </div>
   );
 }

@@ -175,7 +175,7 @@ function CommentRow({
   }, [liking, connected, liked, comment.id]);
 
   return (
-    <div className="flex gap-3 rounded-xl bg-elevated p-4 ring-1 ring-edge">
+    <div className="flex gap-3 rounded-xl bg-elevated p-4">
       <Avatar src={comment.user.avatar} name={comment.user.name} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -228,7 +228,7 @@ function ThreadRow({
   return (
     <button
       onClick={() => onOpen(thread)}
-      className="flex w-full items-center gap-3 rounded-xl bg-elevated p-4 text-left ring-1 ring-edge transition-colors hover:bg-raised"
+      className="flex w-full items-center gap-3 rounded-xl bg-elevated p-4 text-left transition-colors hover:bg-raised"
     >
       <Avatar src={thread.user.avatar} name={thread.user.name} />
       <div className="min-w-0 flex-1">
@@ -446,7 +446,7 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
     return (
       <section>
         <h2 className="mb-5 text-[20px] font-bold text-ink">{t("AniList Comments")}</h2>
-        <p className="rounded-xl bg-elevated p-4 text-[13px] text-ink-muted ring-1 ring-edge">
+        <p className="rounded-xl bg-elevated p-4 text-[13px] text-ink-muted">
           {t("Could not find this title on AniList.")}
         </p>
       </section>
@@ -460,7 +460,7 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
         {mediaId && !activeThread && (
           <button
             onClick={() => setShowNewThread(!showNewThread)}
-            className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-[12px] font-medium text-ink-muted ring-1 ring-edge transition-colors hover:bg-elevated hover:text-ink"
+            className="flex items-center gap-1 rounded-lg bg-white/[0.06] px-3 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
           >
             <Plus size={12} />
             {t("New thread")}
@@ -469,7 +469,7 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
         {activeThread && (
           <button
             onClick={backToThreads}
-            className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-[12px] font-medium text-ink-muted ring-1 ring-edge transition-colors hover:bg-elevated hover:text-ink"
+            className="flex items-center gap-1 rounded-lg bg-white/[0.06] px-3 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
           >
             <ArrowLeft size={12} />
             {t("Back to threads")}
@@ -496,19 +496,19 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
           </div>
         )}
         {showNewThread && !activeThread && (
-          <div className="mb-5 rounded-xl bg-elevated p-4 ring-1 ring-edge">
+          <div className="mb-5 rounded-xl bg-elevated p-4">
             <input
               value={threadTitle}
               onChange={(e) => setThreadTitle(e.target.value)}
               placeholder={t("Thread title")}
-              className="mb-2 w-full rounded-lg bg-raised px-3 py-2 text-[13px] text-ink outline-none ring-1 ring-edge placeholder:text-ink-muted/50 focus:ring-2 focus:ring-ink/20"
+              className="mb-2 w-full rounded-lg bg-canvas px-3 py-2 text-[13px] text-ink outline-none ring-1 ring-inset ring-edge-soft placeholder:text-ink-subtle focus:ring-1 focus:ring-inset focus:ring-accent/50"
             />
             <textarea
               value={threadBody}
               onChange={(e) => setThreadBody(e.target.value)}
               placeholder={t("Thread body (optional)")}
               rows={3}
-              className="mb-2 w-full resize-none rounded-lg bg-raised px-3 py-2 text-[13px] text-ink outline-none ring-1 ring-edge placeholder:text-ink-muted/50 focus:ring-2 focus:ring-ink/20"
+              className="mb-2 w-full resize-none rounded-lg bg-canvas px-3 py-2 text-[13px] text-ink outline-none ring-1 ring-inset ring-edge-soft placeholder:text-ink-subtle focus:ring-1 focus:ring-inset focus:ring-accent/50"
             />
             {threadError && (
               <p className="mb-2 text-[12px] text-red-400">{threadError}</p>
@@ -538,7 +538,7 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
 
         {activeThread ? (
           <>
-            <div className="mb-4 rounded-xl bg-elevated/60 p-4 ring-1 ring-edge">
+            <div className="mb-4 rounded-xl bg-elevated/60 p-4">
               <h3 className="text-[16px] font-semibold text-ink">{activeThread.title}</h3>
               {activeThread.bodyHtml && (
                 <HtmlContent html={activeThread.bodyHtml} className="mt-1.5 text-[13px] leading-relaxed text-ink-muted" />
@@ -572,7 +572,7 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
                       onChange={(e) => setCommentText(e.target.value)}
                       placeholder={t("Write a comment...")}
                       rows={1}
-                      className="min-h-[36px] max-h-32 flex-1 resize-none overflow-y-auto rounded-xl bg-elevated px-3.5 py-2 text-[13px] text-ink outline-none ring-1 ring-edge placeholder:text-ink-muted/50 focus:ring-2 focus:ring-ink/20"
+                      className="min-h-[36px] max-h-32 flex-1 resize-none overflow-y-auto rounded-xl bg-canvas px-3.5 py-2 text-[13px] text-ink outline-none ring-1 ring-inset ring-edge-soft placeholder:text-ink-subtle focus:ring-1 focus:ring-inset focus:ring-accent/50"
                       onInput={(e) => {
                         const el = e.currentTarget;
                         el.style.height = "auto";
@@ -599,7 +599,7 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
             )}
 
             {activeThread.isLocked && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-elevated px-3 py-2 text-[12px] text-ink-muted ring-1 ring-edge">
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-elevated px-3 py-2 text-[12px] text-ink-muted">
                 <Lock size={12} />
                 {t("This thread is locked.")}
               </div>
@@ -608,7 +608,7 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
             {loadingComments && (
               <div className="flex flex-col gap-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex gap-3 rounded-xl bg-elevated p-4 ring-1 ring-edge">
+                  <div key={i} className="flex gap-3 rounded-xl bg-elevated p-4">
                     <div className="h-9 w-9 animate-pulse rounded-full bg-ink-muted/20" />
                     <div className="flex-1">
                       <div className="mb-2 h-3 w-24 animate-pulse rounded bg-ink-muted/20" />
@@ -643,7 +643,7 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
             {loading && (
               <div className="flex flex-col gap-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex gap-3 rounded-xl bg-elevated p-4 ring-1 ring-edge">
+                  <div key={i} className="flex gap-3 rounded-xl bg-elevated p-4">
                     <div className="h-9 w-9 animate-pulse rounded-full bg-ink-muted/20" />
                     <div className="flex-1">
                       <div className="mb-2 h-3 w-1/2 animate-pulse rounded bg-ink-muted/20" />
@@ -655,7 +655,7 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
             )}
 
             {!loading && threads.length === 0 && (
-              <div className="rounded-xl bg-elevated p-6 text-center ring-1 ring-edge">
+              <div className="rounded-xl bg-elevated p-6 text-center">
                 <p className="text-[14px] text-ink-muted">{t("No threads for this title yet.")}</p>
                 <p className="mt-1 text-[12px] text-ink-muted/60">{t("Be the first to start a discussion.")}</p>
               </div>
@@ -671,7 +671,7 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
                     type="button"
                     onClick={() => void loadMore()}
                     disabled={loadingMore}
-                    className="mt-1 flex h-10 items-center justify-center gap-2 rounded-xl border border-edge-soft bg-elevated/40 text-[13px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
+                    className="mt-1 flex h-10 items-center justify-center gap-2 rounded-xl bg-white/[0.06] text-[13px] font-semibold text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink disabled:opacity-60"
                   >
                     {loadingMore && <Loader2 size={15} className="animate-spin" />}
                     {loadingMore ? t("Loading more") : t("Load more threads")}

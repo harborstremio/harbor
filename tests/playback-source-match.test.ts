@@ -2,7 +2,11 @@
 import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
-import { preferredSourceAddonPending, streamMatchesSource } from "../src/lib/playback-history.ts";
+import {
+  preferredSourceAddonPending,
+  streamMatchesReleaseLineage,
+  streamMatchesSource,
+} from "../src/lib/playback-history.ts";
 
 test("season-pack episodes match by torrent hash when their file-specific binge groups differ", () => {
   const entry = {
@@ -44,6 +48,87 @@ test("different known torrent hashes do not match through broader source metadat
   };
 
   assert.equal(streamMatchesSource(differentRelease, entry), false);
+});
+
+test("next episode keeps the same release group across per-episode torrents", () => {
+  const entry = {
+    infoHash: "episode-one-hash",
+    addonId: "torrentio",
+    resolution: "1080p",
+    releaseGroup: "SUCCESSFULCRAB",
+    source: "WEB-DL",
+    savedAt: Date.now(),
+  };
+  const nextEpisode = {
+    infoHash: "episode-two-hash",
+    addonId: "torrentio",
+    resolution: "1080p",
+    releaseGroupNormalized: "SUCCESSFULCRAB",
+    source: "WEB-DL",
+  };
+
+  assert.equal(streamMatchesSource(nextEpisode, entry), false);
+  assert.equal(streamMatchesReleaseLineage(nextEpisode, entry), true);
+});
+
+test("next episode keeps the same release group when binge groups are file-specific", () => {
+  const entry = {
+    addonId: "comet",
+    url: "https://debrid.example/episode-one",
+    resolution: "1080p",
+    releaseGroup: "NTB",
+    source: "WEB-DL",
+    bingeGroup: "comet|torbox|aaaa1111|3",
+    savedAt: Date.now(),
+  };
+  const nextEpisode = {
+    addonId: "comet",
+    resolution: "1080p",
+    releaseGroupNormalized: "NTB",
+    source: "WEB-DL",
+    behaviorHints: { bingeGroup: "comet|torbox|bbbb2222|4" },
+  };
+
+  assert.equal(streamMatchesSource(nextEpisode, entry), false);
+  assert.equal(streamMatchesReleaseLineage(nextEpisode, entry), true);
+});
+
+test("next episode does not cross addons, release groups, or unparsed titles", () => {
+  const entry = {
+    infoHash: "episode-one-hash",
+    addonId: "comet",
+    resolution: "1080p",
+    releaseGroup: "NTB",
+    source: "WEB-DL",
+    savedAt: Date.now(),
+  };
+  const otherAddon = {
+    infoHash: "episode-two-hash",
+    addonId: "torrentio",
+    resolution: "1080p",
+    releaseGroupNormalized: "NTB",
+    source: "WEB-DL",
+  };
+  const otherGroup = {
+    infoHash: "episode-two-hash",
+    addonId: "comet",
+    resolution: "1080p",
+    releaseGroupNormalized: "FLUX",
+    source: "WEB-DL",
+  };
+  const unknownGroup = {
+    infoHash: "episode-two-hash",
+    addonId: "comet",
+    resolution: "1080p",
+    releaseGroupNormalized: null,
+    source: "WEB-DL",
+  };
+  const entryWithoutGroup = { ...entry, releaseGroup: null };
+
+  assert.equal(streamMatchesReleaseLineage(otherAddon, entry), false);
+  assert.equal(streamMatchesReleaseLineage(otherGroup, entry), false);
+  assert.equal(streamMatchesReleaseLineage(unknownGroup, entry), false);
+  assert.equal(streamMatchesReleaseLineage(otherGroup, entryWithoutGroup), false);
 });
 
 test("auto-play waits while the remembered source addon is still loading", () => {

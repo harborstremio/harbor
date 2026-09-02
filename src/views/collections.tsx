@@ -1,4 +1,5 @@
-import { ArrowLeft, Search, X } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { CollectionCard } from "@/components/collection-card";

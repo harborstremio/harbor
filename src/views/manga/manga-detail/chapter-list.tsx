@@ -1,19 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  BookOpen,
-  Check,
-  ChevronDown,
-  Download,
-  Globe,
-  LayoutGrid,
-  List,
-  Loader2,
-  Pause,
-  Play,
-  Search,
-  Server,
-  Tv,
-} from "lucide-react";
+import { BookOpen, Check, ChevronDown, Download, Globe, LayoutGrid, List, Loader2, Pause, Server, Tv } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
+import { Search } from "@/components/icons/search-icon";
 import { t, useT } from "@/lib/i18n";
 import { Flag, flagSrc } from "@/components/flag";
 import { languageName, type MangaChapter } from "@/lib/manga/model";

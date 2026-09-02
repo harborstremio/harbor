@@ -64,6 +64,43 @@ export const SANDBOX_SOURCE = String.raw`(function () {
     });
   }
 
+  function bytesBase64(value) {
+    if (typeof value === "string") return value;
+    var bytes;
+    if (value instanceof Uint8Array) bytes = value;
+    else if (value instanceof ArrayBuffer) bytes = new Uint8Array(value);
+    else if (Array.isArray(value)) bytes = Uint8Array.from(value);
+    else throw new Error("gRPC request must be Uint8Array, ArrayBuffer, byte array, or base64");
+    var binary = "";
+    for (var i = 0; i < bytes.length; i += 0x8000) {
+      var chunk = bytes.subarray(i, i + 0x8000);
+      for (var j = 0; j < chunk.length; j++) binary += String.fromCharCode(chunk[j]);
+    }
+    return btoa(binary);
+  }
+
+  function base64Bytes(value) {
+    var binary = atob(String(value || ""));
+    return Uint8Array.from(binary, function (character) { return character.charCodeAt(0); });
+  }
+
+  function grpcCall(url, request, opts) {
+    var norm = normOpts(opts);
+    return bridge("grpc", {
+      url: String(url),
+      requestBase64: bytesBase64(request),
+      opts: {
+        headers: norm.headers,
+        timeoutMs: norm.timeoutMs,
+        mode: opts && opts.mode === "grpc-web" ? "grpc-web" : "grpc"
+      }
+    }).then(function (res) {
+      res.body = base64Bytes(res.body);
+      res.messages = (res.messages || []).map(base64Bytes);
+      return res;
+    });
+  }
+
   function parseHtml(html) {
     return bridge("parse", { html: String(html) }).then(function (tree) {
       return new HDocument(tree);
@@ -80,7 +117,7 @@ export const SANDBOX_SOURCE = String.raw`(function () {
 
   function register(p) { provider = p; }
 
-  var harbor = { http: httpCall, parseHtml: parseHtml, register: register, log: log };
+  var harbor = { http: httpCall, grpc: grpcCall, parseHtml: parseHtml, register: register, log: log };
 
   function isEl(node) { return node != null && typeof node === "object" && typeof node.t === "string"; }
   function children(node) { return isEl(node) && Array.isArray(node.c) ? node.c : []; }
@@ -301,7 +338,9 @@ export const SANDBOX_SOURCE = String.raw`(function () {
         meta: {
           id: String(provider.id),
           name: String(provider.name),
-          hasTags: typeof provider.tags === "function"
+          hasTags: typeof provider.tags === "function",
+          methods: ["popular", "search", "detail", "chapters", "content", "pageUrls", "tags"]
+            .filter(function (name) { return typeof provider[name] === "function"; })
         }
       });
     } catch (err) {

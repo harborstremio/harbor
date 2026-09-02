@@ -2,7 +2,7 @@ import { lruSet } from "@/lib/cache";
 import { registerCache } from "@/lib/memory-profiler";
 import { loadStoredSettings } from "@/lib/settings/load";
 import { get, IMG } from "./tmdb-client";
-import { imageLangParam, imageLangRank, pickedImageLangs } from "./tmdb-image-lang";
+import { imageLangParam, imageLangPriority, imageLangRank } from "./tmdb-image-lang";
 
 export type LogoEntry = { file_path: string; iso_639_1: string | null; vote_average?: number };
 
@@ -26,7 +26,7 @@ export async function fetchMovieAssets(
   if (!key) return null;
   const match = metaId.match(/^tmdb:(movie|tv):(\d+)$/);
   if (!match) return null;
-  const cacheKey = originalLang ? `${metaId}|${originalLang}` : metaId;
+  const cacheKey = `${metaId}|${originalLang ?? ""}|${imageLangParam(originalLang)}`;
   const cached = movieAssetsCache.get(cacheKey);
   if (cached) return cached;
   const inflight = movieAssetsInflight.get(cacheKey);
@@ -58,20 +58,29 @@ export const pickLogo = (logos: LogoEntry[], originalLang?: string | null): stri
 export async function tmdbLocalizedPoster(
   key: string,
   metaId: string,
+  originalLang?: string | null,
 ): Promise<string | undefined> {
   const st = loadStoredSettings();
   const metaBase = (st.tmdbLanguage ?? "").split("-")[0]?.toLowerCase() ?? "";
-  // Prefer the metadata language, then configured image languages, then English, then original —
-  // so a missing localized poster falls back to English rather than the original-language (e.g. Japanese).
+  // Artwork language is an independent preference. Use its configured order first,
+  // then the metadata language and stable fallbacks when no matching artwork exists.
   const want: string[] = [];
   const add = (c: string | null) => {
-    if (c && !want.includes(c)) want.push(c);
+    const code = c ?? "";
+    if (!want.includes(code)) want.push(code);
   };
-  if (metaBase && metaBase !== "en") add(metaBase);
-  for (const c of pickedImageLangs()) add(c);
+  for (const c of imageLangPriority()) {
+    if (c === null) {
+      add(originalLang ? (originalLang.split("-")[0]?.toLowerCase() ?? null) : null);
+      add(null);
+    } else add(c);
+  }
+  if (metaBase) add(metaBase);
   add("en");
+  add(originalLang ? (originalLang.split("-")[0]?.toLowerCase() ?? null) : null);
+  add(null);
   if (want.length === 0) return undefined;
-  const assets = await fetchMovieAssets(key, metaId, want[0] ?? null);
+  const assets = await fetchMovieAssets(key, metaId, originalLang);
   const posters = assets?.posters ?? [];
   if (!posters.length) return undefined;
   const rank = (iso?: string | null) => {

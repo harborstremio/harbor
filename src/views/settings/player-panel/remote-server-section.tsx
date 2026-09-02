@@ -10,7 +10,7 @@ type TestResult = { ok: boolean; message: string };
 const PILL = {
   off: { label: "Off", dot: "bg-ink-subtle", chip: "bg-ink-subtle/15 text-ink-muted" },
   checking: { label: "Checking", dot: "bg-ink-subtle", chip: "bg-ink-subtle/15 text-ink-muted" },
-  connected: { label: "Connected", dot: "bg-emerald-400", chip: "bg-emerald-500/15 text-emerald-400" },
+  connected: { label: "Connected", dot: "bg-success", chip: "bg-success/15 text-success" },
   unreachable: { label: "Unreachable", dot: "bg-danger", chip: "bg-danger/15 text-danger" },
 };
 
@@ -80,7 +80,7 @@ export function RemoteServerSection() {
   const pill = !saved ? PILL.off : reach === null ? PILL.checking : reach ? PILL.connected : PILL.unreachable;
 
   return (
-    <section id={settingsAnchor("Remote streaming server")} className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
+ <section id={settingsAnchor("Remote streaming server")} className="scroll-mt-28 flex flex-col gap-4 rounded-md bg-elevated p-7">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Remote streaming server")}</h2>
@@ -88,7 +88,7 @@ export function RemoteServerSection() {
             {t("Point Harbor at a streaming server on another machine, like the Stremio service on a home server. Torrents download and stream from that machine instead of this one.")}
           </p>
         </div>
-        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${pill.chip}`}>
+        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold uppercase tracking-wider ${pill.chip}`}>
           <span className={`h-1.5 w-1.5 rounded-full ${pill.dot}`} />
           {t(pill.label)}
         </span>
@@ -106,13 +106,13 @@ export function RemoteServerSection() {
           placeholder="http://192.168.1.50:11470"
           spellCheck={false}
           autoComplete="off"
-          className="h-11 flex-1 rounded-xl border border-edge bg-canvas px-3.5 font-mono text-[13px] text-ink transition-colors focus:border-accent"
+          className="min-w-0 h-11 flex-1 rounded-md bg-canvas px-3.5 font-mono text-[13px] text-ink transition-colors focus:bg-elevated"
         />
         {saved && (
           <button
             type="button"
             onClick={() => update({ remoteStreamServerUrl: "" })}
-            className="h-11 shrink-0 rounded-xl border border-edge px-4 text-[13px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+ className="h-11 shrink-0 rounded-md px-4 text-[13px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
           >
             {t("Forget")}
           </button>
@@ -127,7 +127,7 @@ export function RemoteServerSection() {
             value={settings.remoteStreamServerStrict}
             onChange={(v) => update({ remoteStreamServerStrict: v })}
           />
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
+ <div className="flex items-center justify-between gap-3 rounded-md bg-canvas px-4 py-3">
             <div className="flex min-w-0 flex-col">
               <span className="text-[13px] font-medium text-ink">{t("Test connection")}</span>
               <span className="text-[11.5px] text-ink-subtle">
@@ -138,15 +138,15 @@ export function RemoteServerSection() {
               type="button"
               onClick={() => void test()}
               disabled={testing}
-              className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-edge px-3 text-[12.5px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:opacity-60"
+ className="flex h-9 shrink-0 items-center gap-1.5 rounded-md px-3 text-[12.5px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:opacity-60"
             >
-              {testing ? <Loader2 size={13} strokeWidth={1.9} className="animate-spin" /> : <Wifi size={13} strokeWidth={1.9} />}
+              {testing ? <Loader2 size={14} strokeWidth={1.9} className="animate-spin" /> : <Wifi size={14} strokeWidth={1.9} />}
               {testing ? t("Testing") : t("Run test")}
             </button>
           </div>
           {result && (
-            <div className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3 ${result.ok ? "border-accent/40 bg-accent/10" : "border-danger/40 bg-danger/10"}`}>
-              <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${result.ok ? "bg-accent/25 text-accent" : "bg-danger/25 text-danger"}`}>
+            <div className={`flex items-start gap-2.5 rounded-md border px-3.5 py-3 ${result.ok ? "border-accent bg-accent-soft" : "border-danger bg-danger/15"}`}>
+              <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${result.ok ? "bg-accent-soft text-accent" : "bg-danger/15 text-danger"}`}>
                 {result.ok ? <Check size={12} strokeWidth={2.4} /> : <X size={12} strokeWidth={2.4} />}
               </span>
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">

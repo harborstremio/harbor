@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Harbor Setup, unboxing</title>
+    <link rel="stylesheet" href="styles/fonts.css" />
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/base.css" />
+    <link rel="stylesheet" href="styles/boot.css" />
+    <style>
+      body {
+        width: auto;
+        height: auto;
+        display: block;
+        margin: 0;
+        background: #0b0c0e;
+        overflow: hidden;
+        font-family: var(--font-sans);
+      }
+      .hb-boot { position: relative; inset: auto; width: 100vw; height: calc(100vh - 96px); }
+      .d-bar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 96px;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 0 26px;
+        background: var(--surface);
+        box-shadow: inset 0 1px 0 var(--edge-soft);
+      }
+      .d-btn {
+        height: 34px;
+        padding: 0 16px;
+        border-radius: var(--r-pill);
+        font-family: var(--font-sans);
+        font-size: 12.5px;
+        font-weight: 500;
+        color: var(--ink-muted);
+        background: var(--wash-quiet);
+        box-shadow: inset 0 0 0 1px var(--edge-soft);
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .d-btn:hover { color: var(--ink); background: var(--wash); }
+      .d-btn.on { color: var(--canvas); background: var(--accent); box-shadow: none; }
+      .d-scrub { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+      .d-scrub input { width: 100%; accent-color: var(--accent); }
+      .d-ticks {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        color: var(--ink-subtle);
+      }
+      .d-time {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        color: var(--ink);
+        min-width: 96px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hb-boot" id="hb-boot">
+      <div class="bx-stage">
+        <div class="bx-shadow"></div>
+        <div class="bx-crate">
+          <div class="bx-box">
+            <div class="bx-side bx-back"></div>
+            <div class="bx-side bx-floor"></div>
+            <div class="bx-flap bx-flap-b"></div>
+          </div>
+        </div>
+        <div class="bx-crate">
+          <div class="bx-box">
+            <div class="bx-side bx-left"></div>
+            <div class="bx-flap bx-flap-l"></div>
+          </div>
+        </div>
+        <div class="bx-logo"><img src="assets/harbor-mark.svg" alt="" /></div>
+        <div class="bx-crate">
+          <div class="bx-box">
+            <div class="bx-side bx-right"></div>
+            <div class="bx-flap bx-flap-r"></div>
+          </div>
+        </div>
+        <div class="bx-crate">
+          <div class="bx-box">
+            <div class="bx-side bx-front">
+              <div class="bx-stamp"><img src="assets/harbor-mark.svg" alt="" /></div>
+              <div class="bx-stencil" id="bx-stencil">0.9.121</div>
+            </div>
+            <div class="bx-flap bx-flap-f"></div>
+          </div>
+        </div>
+        <div class="bx-word"><span class="bx-word-type">Harb<span class="bx-word-o">o</span>r</span></div>
+      </div>
+    </div>
+
+    <div class="d-bar">
+      <button class="d-btn" id="replay" type="button">Replay</button>
+      <button class="d-btn" id="slow" type="button">Quarter speed</button>
+      <div class="d-scrub">
+        <input id="scrub" type="range" min="0" max="3900" step="10" value="3900" />
+        <div class="d-ticks">
+          <span>0 drop</span><span>880 flaps</span><span>1500 logo</span><span>1980 box out</span><span>3060 word</span><span>3900</span>
+        </div>
+      </div>
+      <div class="d-time" id="time">3900 ms</div>
+    </div>
+
+    <script>
+      const scrub = document.getElementById('scrub');
+      const time = document.getElementById('time');
+      const anims = () => document.getAnimations();
+
+      function seek(t) {
+        anims().forEach((a) => { try { a.pause(); a.currentTime = t; } catch (e) {} });
+        time.textContent = Math.round(t) + ' ms';
+        scrub.value = t;
+      }
+
+      scrub.addEventListener('input', () => seek(Number(scrub.value)));
+
+      let rate = 1;
+      document.getElementById('slow').addEventListener('click', (e) => {
+        rate = rate === 1 ? 0.25 : 1;
+        e.currentTarget.classList.toggle('on', rate !== 1);
+        anims().forEach((a) => { a.playbackRate = rate; });
+      });
+
+      document.getElementById('replay').addEventListener('click', () => {
+        anims().forEach((a) => {
+          try {
+            a.currentTime = 0;
+            a.playbackRate = rate;
+            a.play();
+          } catch (e) {}
+        });
+        const t0 = performance.now();
+        (function tick() {
+          const t = (performance.now() - t0) * rate;
+          time.textContent = Math.round(t) + ' ms';
+          scrub.value = Math.min(t, 3900);
+          if (t < 3900) requestAnimationFrame(tick);
+        })();
+      });
+
+      window.addEventListener('load', () => seek(3900));
+    </script>
+  </body>
+</html>

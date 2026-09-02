@@ -7,6 +7,7 @@ export function BigButton({
   tooltip,
   active,
   disabled,
+  iconUrl,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
@@ -14,13 +15,14 @@ export function BigButton({
   tooltip?: string;
   active?: boolean;
   disabled?: boolean;
+  iconUrl?: string;
 }) {
   const btn = (
     <button
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`flex h-12 w-12 items-center justify-center rounded-full transition-[background-color,color,opacity] ${
+      className={`flex h-12 w-12 items-center justify-center rounded-full transition-[background-color,color,opacity,transform] duration-150 active:scale-90 motion-reduce:active:scale-100 ${
         disabled
           ? "cursor-not-allowed text-white/30"
           : active
@@ -28,7 +30,18 @@ export function BigButton({
             : "text-white/85 hover:bg-white/10 hover:text-white"
       }`}
     >
-      {children}
+      {iconUrl ? (
+        <img
+          src={iconUrl}
+          alt=""
+          width={22}
+          height={22}
+          draggable={false}
+          className="pointer-events-none h-[22px] w-[22px] select-none object-contain"
+        />
+      ) : (
+        children
+      )}
     </button>
   );
   if (!tooltip) return btn;

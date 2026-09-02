@@ -1,4 +1,6 @@
-import { ChevronLeft, Library, ListVideo, Search, X } from "lucide-react";
+import { ChevronLeft, ListVideo, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
+import { UiIcon } from "@/components/ui-icon";
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
@@ -206,7 +208,7 @@ export function CastModal({
                 className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
                 aria-label={t("Library")}
               >
-                <Library size={18} strokeWidth={2.2} />
+                <UiIcon name="library" className="h-[18px] w-[18px]" />
               </button>
             )}
             {view.kind !== "search" && (

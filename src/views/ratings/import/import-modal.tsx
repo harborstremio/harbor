@@ -115,14 +115,14 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={begin}
-            className="inline-flex min-h-11 items-center rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
+            className="inline-flex min-h-11 items-center rounded-md bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
           >
             {t("Try again")}
           </button>
           <button
             type="button"
             onClick={again}
-            className="inline-flex min-h-11 items-center rounded-[10px] px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-surface"
+            className="inline-flex min-h-11 items-center rounded-md px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-surface"
           >
             {t("Pick another source")}
           </button>
@@ -231,14 +231,14 @@ function InputStep({
           type="button"
           onClick={onStart}
           disabled={!ready}
-          className="inline-flex min-h-11 items-center rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+          className="inline-flex min-h-11 items-center rounded-md bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
         >
           {t("Start import")}
         </button>
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex min-h-11 items-center rounded-[10px] px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-surface"
+          className="inline-flex min-h-11 items-center rounded-md px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-surface"
         >
           {t("Back")}
         </button>
@@ -328,7 +328,7 @@ function KeyInput({
         placeholder={t(field.placeholder)}
         spellCheck={false}
         autoComplete="off"
-        className="min-h-11 w-full rounded-[10px] bg-surface px-3 text-[14px] text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus:ring-edge"
+        className="min-h-11 w-full rounded-md bg-surface px-3 text-[14px] text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus:ring-edge"
       />
     </label>
   );

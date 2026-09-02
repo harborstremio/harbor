@@ -1,4 +1,5 @@
 node_modules
+__pycache__/
 dist
 dist-ssr
 *.local
@@ -59,3 +60,39 @@ public/awards/golden-globe.png
 public/awards/cannestrophy.png
 public/awards/sag.png
 public/awards/critics-choice.png
+
+# Android (Tauri) build output. Gradle regenerates all of this on every build,
+# so it is never committed. Was polluting the tree with ~2,300 files / 2.5GB.
+src-tauri/gen/android/**/build/
+src-tauri/gen/android/.gradle/
+src-tauri/gen/android/**/.gradle/
+src-tauri/gen/android/local.properties
+src-tauri/gen/android/.idea/
+
+# Android native shell (Kotlin/Compose, local dev). Not committed yet per
+# direction. Excluded wholesale: ~13k source + Gradle cache files (checksums,
+# executionHistory, build/) were flooding the tree. Remove this line when ready
+# to start tracking the source; the Gradle caches below stay ignored regardless.
+android-native/
+**/.gradle/
+**/gradle/*.lock
+**/*-checksums.bin
+**/checksums.lock
+**/executionHistory.bin
+**/executionHistory.lock
+/.audit
+audit-defects.txt
+audit-routing.txt
+docs/TV-OPEN-BACKLOG.md
+audit-rest.txt
+*.md
+
+installer/src-tauri/payload/
+installer/payload-stage/
+!installer/**/*.md
+# local design references and perf captures, not for distribution
+tools/tv-refs/
+docs/tv-perf/
+# tauri-generated scaffolding, recreate with: pnpm android:init
+src-tauri/gen/
+installer/src-tauri/gen/

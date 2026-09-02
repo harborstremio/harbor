@@ -1,4 +1,5 @@
 import type { DownloadItem } from "@/lib/download/downloads-store";
+import { t } from "@/lib/i18n";
 
 export function fmtBytes(n: number | null): string {
   if (n == null || n <= 0) return "";
@@ -14,11 +15,14 @@ export function fmtSpeed(bps: number): string {
 }
 
 export function fmtEta(d: DownloadItem): string {
-  if (d.bytesPerSec <= 0 || d.totalBytes == null) return "";
-  const remain = d.totalBytes - d.receivedBytes;
-  if (remain <= 0) return "";
-  const secs = remain / d.bytesPerSec;
-  if (secs >= 3600) return `${Math.round(secs / 3600)}h left`;
-  if (secs >= 60) return `${Math.round(secs / 60)}m left`;
-  return `${Math.round(secs)}s left`;
+  const secs =
+    d.etaSeconds != null
+      ? d.etaSeconds
+      : d.bytesPerSec > 0 && d.totalBytes != null
+        ? (d.totalBytes - d.receivedBytes) / d.bytesPerSec
+        : 0;
+  if (secs <= 0) return "";
+  if (secs >= 3600) return t("{count}h left", { count: Math.round(secs / 3600) });
+  if (secs >= 60) return t("{count}m left", { count: Math.round(secs / 60) });
+  return t("{count}s left", { count: Math.round(secs) });
 }

@@ -7,6 +7,7 @@ import type { PlayEpisode } from "@/lib/view";
 import { resolveAddonRanks } from "./addon-priority";
 import { animeAbsoluteFromScopedId } from "./anime-identity-core";
 import type { PipelineInput } from "./pipeline";
+import { unverifiedAnimeSeasonId } from "./stream-ids";
 import type { Stream } from "./types";
 
 function runtimeMinutes(runtime: string | number | undefined): number | undefined {
@@ -81,6 +82,12 @@ export function buildEpisodePipelineInput(params: {
         ? "series"
         : "movie";
   const animeReq = streamIds.some((id) => id.startsWith("kitsu:") || id.startsWith("mal:"));
+  const unverifiedAnimeId = unverifiedAnimeSeasonId(meta.id, episode);
+  const animeIdUnverified =
+    unverifiedAnimeId != null &&
+    streamIds.includes(unverifiedAnimeId) &&
+    streamIds[0] !== unverifiedAnimeId &&
+    !streamIds.some((id) => id !== unverifiedAnimeId && /^(kitsu|mal|anidb|anilist):/.test(id));
   const animeAbsoluteEpisode = animeReq
     ? (streamIds.map(animeAbsoluteFromScopedId).find((n) => n != null) ?? null)
     : null;
@@ -106,6 +113,7 @@ export function buildEpisodePipelineInput(params: {
     request: {
       type: requestType,
       ids: streamIds,
+      animeIdUnverified,
     },
     query: {
       type: episode ? "series" : meta.type === "series" ? "series" : "movie",

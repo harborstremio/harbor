@@ -20,7 +20,7 @@ export function StremioWebButton({ onDone, disabled }: { onDone: () => void; dis
       await signInWithKey(key);
       onDone();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Sign-in failed.");
+      setError(e instanceof Error ? e.message : t("Sign-in failed."));
       setBusy(false);
     }
   };
@@ -48,7 +48,9 @@ export function StremioWebButton({ onDone, disabled }: { onDone: () => void; dis
       <p className="text-center text-[11.5px] leading-snug text-ink-subtle">
         {t("Opens Stremio in your browser. Works with email, Facebook, and Apple accounts.")}
       </p>
-      {error && <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12px] text-danger">{error}</p>}
+      {error && (
+        <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12px] text-danger">{error}</p>
+      )}
     </div>
   );
 }

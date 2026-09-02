@@ -1,16 +1,17 @@
 import { Camera } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useSettingsPreviewArt } from "@/lib/settings-preview-art";
+import { PreviewImage } from "./preview-image";
 
 export function CwSnapshotShowcase() {
   const t = useT();
   const art = useSettingsPreviewArt();
   const still = art?.stills?.[0];
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-edge-soft bg-canvas/30 p-4">
-      <div className="relative aspect-video w-44 shrink-0 overflow-hidden rounded-xl ring-1 ring-edge-soft/60">
+    <div className="flex items-center gap-4 rounded-md border border-edge-soft bg-canvas/30 p-4">
+      <div className="relative aspect-video w-44 shrink-0 overflow-hidden rounded-md ring-1 ring-edge-soft/60">
         {still ? (
-          <img src={still} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
+          <PreviewImage src={still} className="absolute inset-0 h-full w-full object-cover" />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-elevated to-canvas" />
         )}

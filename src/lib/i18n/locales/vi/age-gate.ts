@@ -1,0 +1,148 @@
+const ageGate: Record<string, string> = {
+  'Giving "two weeks\' notice" at a job means:': '"Báo trước hai tuần" khi nghỉ việc có nghĩa là:',
+  "Booking two weeks of holiday": "Đặt lịch nghỉ hai tuần",
+  "Telling your boss you're quitting": "Báo với sếp rằng bạn sẽ nghỉ việc",
+  "Starting a probation period": "Bắt đầu thời gian thử việc",
+  "Demanding a raise within 14 days": "Yêu cầu tăng lương trong vòng 14 ngày",
+  'A landlord asks for a "deposit" before move-in. What\'s it for?':
+    'Chủ nhà yêu cầu "tiền đặt cọc" trước khi chuyển vào. Khoản tiền này dùng để làm gì?',
+  "Pre-paying the last month's rent": "Trả trước tiền thuê tháng cuối",
+  "A property registration tax": "Nộp thuế đăng ký bất động sản",
+  "Cover for damage when you leave": "Bù đắp thiệt hại khi bạn chuyển đi",
+  "Fee to the listing agent": "Trả phí cho môi giới đăng tin",
+  'Your account goes "overdrawn". What happened?':
+    'Tài khoản của bạn bị "thấu chi". Điều gì đã xảy ra?',
+  "You earned interest above the limit": "Bạn nhận tiền lãi vượt quá hạn mức",
+  "You spent past your balance": "Bạn đã chi tiêu vượt quá số dư",
+  "You hit the savings ceiling": "Bạn đã đạt giới hạn tiết kiệm",
+  "Your bank locked the account": "Ngân hàng đã khóa tài khoản của bạn",
+  '"Compound" interest is calculated on:': 'Lãi "kép" được tính trên:',
+  "Only the original sum borrowed": "Chỉ số tiền vay ban đầu",
+  "Sum borrowed plus earned interest": "Số tiền vay cộng với tiền lãi đã phát sinh",
+  "A fixed amount every month": "Một khoản cố định mỗi tháng",
+  "Whatever's left at year-end": "Số tiền còn lại vào cuối năm",
+  "You make an insurance claim. Before the insurer pays out, you usually:":
+    "Bạn yêu cầu bồi thường bảo hiểm. Trước khi công ty bảo hiểm chi trả, thông thường bạn phải:",
+  "Get all your past payments refunded": "Nhận lại toàn bộ các khoản đã đóng trước đây",
+  "Pay a set amount yourself first": "Tự trả trước một khoản cố định",
+  "Receive a loyalty bonus instead": "Thay vào đó, nhận thưởng dành cho khách hàng thân thiết",
+  "Have the policy cancelled automatically": "Để hợp đồng bảo hiểm tự động bị hủy",
+  'Friend asks you to "co-sign" a loan. You agree to:':
+    'Một người bạn nhờ bạn "đồng ký tên" khoản vay. Bạn đồng ý:',
+  "Split the borrowed amount equally": "Chia đều số tiền vay",
+  "Pay if the friend defaults": "Trả nợ nếu người bạn đó không trả được",
+  "Witness the contract only": "Chỉ làm chứng cho hợp đồng",
+  "Receive interest from the friend": "Nhận tiền lãi từ người bạn đó",
+  'You buy something "in installments". That means you:':
+    'Bạn mua một món đồ theo hình thức "trả góp". Điều đó có nghĩa là bạn:',
+  "Pay a one-time fee to reserve it": "Trả phí một lần để giữ món đồ",
+  "Pay the total in smaller amounts over time":
+    "Thanh toán tổng số tiền thành nhiều khoản nhỏ theo thời gian",
+  "Get a discount for paying early": "Được giảm giá khi thanh toán sớm",
+  "Lease it and return it after a while": "Thuê món đồ rồi trả lại sau một thời gian",
+  'A bill is set up via "direct debit". The biller can:':
+    'Một hóa đơn được thanh toán bằng hình thức "ghi nợ trực tiếp". Bên lập hóa đơn có thể:',
+  "Charge a one-time fee only": "Chỉ thu phí một lần",
+  "Pull money on a schedule": "Tự động trích tiền theo lịch",
+  "Reverse old transactions": "Đảo ngược các giao dịch cũ",
+  "Convert your currency": "Chuyển đổi tiền tệ của bạn",
+  "A mortgage is essentially:": "Về cơ bản, khoản vay thế chấp là:",
+  "Insurance that covers the home": "Bảo hiểm cho ngôi nhà",
+  "A loan tied to the property": "Khoản vay gắn với bất động sản",
+  "An agreement between landlord and tenant": "Thỏa thuận giữa chủ nhà và người thuê",
+  "A yearly property tax bill": "Hóa đơn thuế bất động sản hằng năm",
+  "You only ever pay the minimum on a credit card each month. Over time you:":
+    "Mỗi tháng, bạn chỉ thanh toán mức tối thiểu của thẻ tín dụng. Theo thời gian, bạn sẽ:",
+  "Pay no interest as long as the minimum is met":
+    "Không phải trả lãi miễn là đã thanh toán mức tối thiểu",
+  "Owe more, because interest keeps building on the rest":
+    "Nợ nhiều hơn vì phần còn lại tiếp tục phát sinh lãi",
+  "Clear the balance in equal monthly steps": "Trả hết dư nợ theo các khoản bằng nhau hằng tháng",
+  "Lower the card's interest rate automatically": "Tự động giảm lãi suất thẻ",
+  'The economy has "inflation". What\'s happening?':
+    'Nền kinh tế đang có "lạm phát". Điều gì đang xảy ra?',
+  "GDP is shrinking": "GDP đang giảm",
+  "Prices are rising overall": "Mặt bằng giá cả đang tăng",
+  "Currency is gaining strength": "Đồng tiền đang tăng giá",
+  "Unemployment is climbing": "Tỷ lệ thất nghiệp đang tăng",
+  'A document needs to be "notarised". You take it to someone who will:':
+    'Một tài liệu cần được "công chứng". Bạn mang tài liệu đó đến người sẽ:',
+  "Translate it into another language": "Dịch tài liệu sang ngôn ngữ khác",
+  "Verify and witness the signing": "Xác minh và chứng kiến việc ký tên",
+  "File it with the government": "Nộp tài liệu cho cơ quan nhà nước",
+  "Legally enforce it": "Làm cho tài liệu có hiệu lực thi hành",
+  'You\'re given "power of attorney" for a relative. You can:':
+    'Bạn được người thân trao "giấy ủy quyền". Bạn có thể:',
+  "Inherit their property automatically": "Tự động thừa kế tài sản của họ",
+  "Make decisions on their behalf": "Đưa ra quyết định thay mặt họ",
+  "Practise law in court for them": "Hành nghề luật và đại diện họ trước tòa",
+  "Override their existing will": "Vô hiệu hóa di chúc hiện có của họ",
+  'A laid-off employee receives "severance". That\'s:':
+    'Một nhân viên bị cho thôi việc nhận được "trợ cấp thôi việc". Đó là:',
+  "The standard year-end bonus": "Khoản thưởng cuối năm thông thường",
+  "A payout when employment ends": "Khoản tiền được trả khi chấm dứt việc làm",
+  "A retirement-fund withdrawal": "Khoản rút từ quỹ hưu trí",
+  "The signing bonus from year one": "Khoản thưởng ký hợp đồng từ năm đầu tiên",
+  'A will names someone as "executor". Their job is to:':
+    'Di chúc chỉ định một người làm "người thi hành di chúc". Nhiệm vụ của họ là:',
+  "Inherit the largest share": "Thừa kế phần tài sản lớn nhất",
+  "Settle the estate's affairs": "Giải quyết các vấn đề của di sản",
+  "Witness the signing only": "Chỉ chứng kiến việc ký tên",
+  "Approve the will in court": "Phê chuẩn di chúc tại tòa",
+  'Your payslip shows "gross" and "net" pay. Net is:':
+    'Phiếu lương hiển thị lương "trước thuế" và lương "thực nhận". Lương thực nhận là:',
+  "The hourly rate": "Mức lương theo giờ",
+  "What lands in your bank": "Số tiền thực nhận vào tài khoản ngân hàng",
+  "Just the bonus portion": "Chỉ phần tiền thưởng",
+  "The same as gross": "Bằng với lương gộp",
+  'You sign an "NDA" with a company. You\'re agreeing to:':
+    'Bạn ký "NDA" với một công ty. Nghĩa là bạn đồng ý:',
+  "Not quit without long notice": "Không nghỉ việc khi chưa báo trước đủ lâu",
+  "Not share their confidential info": "Không chia sẻ thông tin mật của công ty",
+  "Waive any overtime claim": "Từ bỏ mọi yêu cầu về tiền làm thêm giờ",
+  "Relocate if they ask": "Chuyển nơi ở nếu công ty yêu cầu",
+  "Interest rate on a loan is shown as a percentage. It tells you:":
+    "Lãi suất khoản vay được hiển thị dưới dạng phần trăm. Lãi suất cho biết:",
+  "How many months the loan lasts": "Khoản vay kéo dài bao nhiêu tháng",
+  "The cost of borrowing per year": "Chi phí vay tiền mỗi năm",
+  "The bank's quarterly profit": "Lợi nhuận hằng quý của ngân hàng",
+  "Total fees in fixed dollars": "Tổng phí dưới dạng số tiền cố định",
+  'A charge on your bank app sits as "pending" for a day. The merchant is:':
+    'Một khoản thanh toán trên ứng dụng ngân hàng của bạn ở trạng thái "đang chờ xử lý" trong một ngày. Đơn vị bán hàng đang:',
+  "Reversing it back to you": "Hoàn lại cho bạn",
+  "Holding the funds before settling": "Giữ tiền trước khi quyết toán",
+  "Charging double next week": "Tính phí gấp đôi vào tuần tới",
+  "Refusing the transaction": "Từ chối giao dịch",
+  'Your boss says "submit your timesheet by Friday". You\'re recording:':
+    'Sếp nói "nộp bảng chấm công trước thứ Sáu". Bạn đang ghi lại:',
+  "Receipts for expenses": "Biên lai chi phí",
+  "Hours you worked this week": "Số giờ bạn đã làm trong tuần này",
+  "Your holiday plans": "Kế hoạch nghỉ lễ của bạn",
+  "A complaint to HR": "Đơn khiếu nại gửi bộ phận nhân sự",
+  "A new job's salary is \"pro-rated\" because you start mid-year. You'll receive:":
+    'Mức lương ở công việc mới được "tính theo tỷ lệ" vì bạn bắt đầu vào giữa năm. Bạn sẽ nhận được:',
+  "The full annual amount upfront": "Toàn bộ lương năm trả trước",
+  "A share matching your months worked": "Phần lương tương ứng với số tháng đã làm việc",
+  "Double pay to catch you up": "Lương gấp đôi để bù cho thời gian trước đó",
+  "Nothing until next year begins": "Không nhận được gì cho đến đầu năm sau",
+  'A subscription "auto-renews" at the end of the term. That means:':
+    'Gói đăng ký "tự động gia hạn" khi hết kỳ. Điều đó có nghĩa là:',
+  "It pauses until you reactivate": "Gói sẽ tạm dừng cho đến khi bạn kích hoạt lại",
+  "It charges you for another period": "Gói sẽ tính phí bạn cho kỳ tiếp theo",
+  "The price drops by half": "Giá giảm một nửa",
+  "It cancels and refunds": "Gói sẽ bị hủy và hoàn tiền",
+  'A job offer\'s compensation is described as "competitive". That tells you:':
+    'Mức đãi ngộ trong thư mời làm việc được mô tả là "cạnh tranh". Điều đó cho biết:',
+  "You'll compete with peers for it": "Bạn sẽ phải cạnh tranh với đồng nghiệp để nhận được mức đó",
+  "It's broadly in line with the market": "Mức đó nhìn chung phù hợp với mặt bằng thị trường",
+  "It changes every quarter": "Mức đó thay đổi mỗi quý",
+  "It's commission-only": "Chỉ được trả hoa hồng",
+  'You file a tax return as a "sole proprietor" or self-employed. You owe tax on:':
+    'Bạn khai thuế với tư cách "chủ doanh nghiệp tư nhân" hoặc người tự kinh doanh. Bạn phải nộp thuế trên:',
+  "Only the cash you withdrew": "Chỉ số tiền mặt bạn đã rút",
+  "Your business profit": "Lợi nhuận kinh doanh của bạn",
+  "The total revenue": "Tổng doanh thu",
+  "Whatever's in your bank account": "Bất kỳ khoản tiền nào trong tài khoản ngân hàng của bạn",
+};
+
+export default ageGate;

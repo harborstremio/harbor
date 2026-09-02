@@ -13,7 +13,12 @@ import type { AddonProgress } from "@/lib/streams/addons";
 import { runPipeline, type PipelineResult } from "@/lib/streams/pipeline";
 import { buildEpisodePipelineInput } from "@/lib/streams/episode-pipeline-input";
 import type { PlayEpisode } from "@/lib/view";
-import { stampAddonOrder } from "./picker-utils";
+import {
+  pickerErrorTransport,
+  pipelineError,
+  stampAddonOrder,
+  type PickerError,
+} from "./picker-utils";
 
 type Settings = ReturnType<typeof useSettings>["settings"];
 
@@ -45,7 +50,7 @@ export function usePipelineResult({
   const [pipelineDone, setPipelineDone] = useState(false);
   const [firstResultAt, setFirstResultAt] = useState<number | null>(null);
   const [autoSettleReady, setAutoSettleReady] = useState(false);
-  const [resolveError, setResolveError] = useState<string | null>(null);
+  const [pickerError, setResolveError] = useState<PickerError | null>(null);
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [addonQuorum, setAddonQuorum] = useState<AddonProgress>({
     settled: 0,
@@ -138,11 +143,7 @@ export function usePipelineResult({
       })
       .catch((e) => {
         if (ac.signal.aborted) return;
-        setResolveError(
-          e instanceof Error
-            ? e.message
-            : "Couldn't load streams. Check your addons and connection.",
-        );
+        setResolveError(pipelineError(e instanceof Error ? e.message : undefined));
         setLoading(false);
         setPipelineDone(true);
         setAutoSettleReady(true);
@@ -172,6 +173,7 @@ export function usePipelineResult({
     clearOnePickerCache(meta, episode);
     setRefreshNonce((n) => n + 1);
   }, [meta, episode]);
+  const resolveError = pickerErrorTransport(pickerError);
 
   return {
     result,
@@ -182,6 +184,7 @@ export function usePipelineResult({
     addonQuorum,
     pipelineStartedAt,
     resolveError,
+    pickerError,
     refresh,
     setResult,
     setLoading,

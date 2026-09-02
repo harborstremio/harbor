@@ -5,6 +5,19 @@ import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
 
+const STREMIO_REGISTER = "https://www.stremio.com/register";
+
+/* Same form as tmdb-step.tsx, and for the same reason: a button that calls
+   openUrl is a programmatic navigation, and where that is not credited as a
+   user gesture the tap can take over the current tab instead of opening one.
+   A real anchor cannot do that. The Tauri branch keeps the desktop app handing
+   the url to the OS browser rather than a webview tab. */
+function openRegister(e: React.MouseEvent) {
+  if (!("__TAURI_INTERNALS__" in window)) return;
+  e.preventDefault();
+  openUrl(STREMIO_REGISTER);
+}
+
 export function StremioStep() {
   const { user, signIn } = useAuth();
   const t = useT();
@@ -135,15 +148,17 @@ export function StremioStep() {
             t("Sign in to Stremio")
           )}
         </button>
-        <button
-          type="button"
-          onClick={() => openUrl("https://www.stremio.com/register")}
+        <a
+          href={STREMIO_REGISTER}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={openRegister}
           className="flex items-center justify-center gap-1.5 text-[12.5px] text-ink-subtle transition-colors hover:text-ink-muted"
         >
           <span>{t("Don't have an account?")}</span>
           <span className="font-medium text-ink-muted">{t("Create one")}</span>
           <ExternalLink size={11} />
-        </button>
+        </a>
       </form>
     );
   }
@@ -176,12 +191,15 @@ export function StremioStep() {
             style={{ filter: "grayscale(1) invert(1)" }}
           />
         </button>
-        <button
-          onClick={() => openUrl("https://www.stremio.com/register")}
+        <a
+          href={STREMIO_REGISTER}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={openRegister}
           className="text-center text-[12.5px] text-ink-subtle transition-colors hover:text-ink-muted"
         >
           {t("Don't have an account? Create one →")}
-        </button>
+        </a>
       </div>
     </div>
   );

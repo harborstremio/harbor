@@ -77,7 +77,7 @@ export function GroupPosts({
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="harbor-shimmer relative h-[104px] rounded-[14px] ring-1 ring-edge-soft"
+              className="harbor-shimmer relative h-[104px] rounded-lg ring-1 ring-edge-soft"
               style={{ ["--ai-delay" as string]: `${i * 110}ms` }}
             />
           ))}
@@ -127,7 +127,7 @@ export function GroupPosts({
 
 function EmptyBox({ title, body }: { title: string; body: string }) {
   return (
-    <div className="flex flex-col items-center gap-2.5 rounded-[14px] border border-dashed border-edge bg-surface/30 px-6 py-14 text-center">
+    <div className="flex flex-col items-center gap-2.5 rounded-lg border border-dashed border-edge bg-surface/30 px-6 py-14 text-center">
       <MessagesSquare size={30} strokeWidth={1.7} className="text-ink-subtle" />
       <div className="flex max-w-sm flex-col gap-1">
         <span className="text-[14.5px] font-semibold text-ink">{title}</span>

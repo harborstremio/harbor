@@ -20,6 +20,8 @@ export type AutoDlSeries = {
   grabbedCount: number;
   grabbedKeys: string[];
   nextAirDate: number | null;
+  imdbId: string | null;
+  lastError: string | null;
 };
 
 const KEY = "harbor.auto-download.v1";
@@ -46,6 +48,8 @@ function normalize(e: Partial<AutoDlSeries> & { id: string }): AutoDlSeries {
     grabbedCount: typeof e.grabbedCount === "number" ? e.grabbedCount : 0,
     grabbedKeys: Array.isArray(e.grabbedKeys) ? e.grabbedKeys.filter((k) => typeof k === "string") : [],
     nextAirDate: typeof e.nextAirDate === "number" ? e.nextAirDate : null,
+    imdbId: typeof e.imdbId === "string" ? e.imdbId : null,
+    lastError: typeof e.lastError === "string" ? e.lastError : null,
   };
 }
 
@@ -92,6 +96,8 @@ export function addAutoDownload(meta: Meta): AutoDlSeries {
     grabbedCount: 0,
     grabbedKeys: [],
     nextAirDate: null,
+    imdbId: meta.id.startsWith("tt") ? meta.id : null,
+    lastError: null,
   };
   items = [entry, ...items];
   persist();

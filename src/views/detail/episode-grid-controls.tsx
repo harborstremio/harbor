@@ -49,7 +49,7 @@ function SortMenu({ sort, onSort }: { sort: Sort; onSort: (s: Sort) => void }) {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label={sort === "newest" ? t("Newest") : t("Oldest")}
-        className="flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/90 px-2.5 text-[13px] font-medium text-ink transition-colors hover:bg-canvas xl:gap-2 xl:ps-3.5 xl:pe-3"
+        className="flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-white/[0.06] px-2.5 text-[13px] font-medium text-ink transition-colors hover:bg-white/[0.10] xl:gap-2 xl:ps-3.5 xl:pe-3"
       >
         <ArrowDownUp size={14} className="text-ink-muted" />
         <span className="hidden xl:inline">{sort === "newest" ? t("Newest") : t("Oldest")}</span>
@@ -59,7 +59,7 @@ function SortMenu({ sort, onSort }: { sort: Sort; onSort: (s: Sort) => void }) {
         />
       </button>
       {open && (
-        <div className="animate-fade-in absolute end-0 top-full z-30 mt-2 w-40 overflow-hidden rounded-2xl border border-edge-soft bg-canvas py-1.5 shadow-2xl">
+        <div className="animate-fade-in absolute end-0 top-full z-30 mt-2 w-40 overflow-hidden rounded-lg border border-edge bg-elevated py-1.5 shadow-[0_18px_44px_-12px_rgba(0,0,0,0.6)]">
           {(["oldest", "newest"] as const).map((s) => (
             <button
               key={s}
@@ -68,7 +68,7 @@ function SortMenu({ sort, onSort }: { sort: Sort; onSort: (s: Sort) => void }) {
                 setOpen(false);
               }}
               className={`flex w-full items-center justify-between px-4 py-2.5 text-start text-[13px] transition-colors ${
-                sort === s ? "bg-ink/10 text-ink" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
+                sort === s ? "bg-ink/10 text-ink" : "text-ink-muted hover:bg-raised hover:text-ink"
               }`}
             >
               {s === "newest" ? t("Newest") : t("Oldest")}
@@ -95,7 +95,7 @@ function OptionsMenu({
       aria-label={label}
       title={label}
       onClick={() => onMarkSeason(!allWatched)}
-      className={`flex h-10 w-10 items-center justify-center rounded-full border border-edge-soft bg-canvas/90 transition-colors hover:bg-canvas ${
+      className={`flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.06] transition-colors hover:bg-white/[0.10] ${
         allWatched ? "text-accent" : "text-ink-muted hover:text-ink"
       }`}
     >

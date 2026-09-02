@@ -5,26 +5,47 @@ import type { PlayerSrc } from "@/lib/view";
 import { markAddedSub } from "./added-subs";
 import { langScore, normalizeLang } from "./language";
 import {
-  providerLabel,
   releaseOf,
+  subtitleLoadMetadataOf,
   subtitleStreamDescriptor,
   subtitleTitleOf,
 } from "./provider-label";
 import {
   compareSubtitleMatch,
+  rankSubtitleCandidates,
   searchSubtitles,
   streamMatchDetail,
   type StreamHints,
 } from "./search";
-import { loadFirstWorkingSubtitle } from "./autoload";
 import type { SubResult } from "./types";
+import { prepareRankedSubtitleCandidates, prepareSubtitle } from "./prepare";
+import {
+  choosePreparedCandidate,
+  orderPreparedCandidates,
+  preparedCandidateAutoSelectionEligible,
+  preflightPreparedCandidates,
+  type CandidatePreflightProbe,
+  type PreparedSubtitlePreflight,
+} from "./candidate-preflight";
+import { providerSubtitleDownloadHeaders } from "./provider-auth";
+import {
+  discardPreparedSubtitle,
+  registerPreparedSubtitle,
+  takePreparedSubtitleCleanup,
+} from "./prepared-registry";
+import { releaseCompatibilityPercent } from "./release-match";
+import { isSafeProviderSubtitleUrl } from "./provider-url";
+import { SUBTITLE_PROVIDER_TIMEOUT_MS } from "./autoload";
 
-const EXTRA_TRACKS_PER_LANGUAGE = 35;
-const DEEP_EXTRA_TRACKS = 60;
+const EXTRA_TRACKS_PER_LANGUAGE = 15;
+const DEEP_EXTRA_TRACKS = 15;
 const DEEP_TIMEOUT_MS = 20_000;
 const BUILT_IN_TIMEOUT_MS = 12_000;
 const BUILT_IN_EAGER_LIMIT_PER_LANGUAGE = 1;
-const PROGRESSIVE_TRACKS_PER_LANGUAGE = 35;
+const AUTO_SELECTION_CANDIDATE_LIMIT = 3;
+const PROGRESSIVE_TRACKS_PER_LANGUAGE = 15;
+const PROGRESSIVE_PREVIEW_TRACKS_PER_LANGUAGE =
+  EXTRA_TRACKS_PER_LANGUAGE - AUTO_SELECTION_CANDIDATE_LIMIT;
 const SUBTITLE_ADD_CONCURRENCY = 4;
 const ON_DEMAND_SOURCES = new Set<SubResult["source"]>([
   "podnapisi",
@@ -45,7 +66,10 @@ export type SubFetchParams = {
   episode?: number;
   videoHash?: string;
   videoSize?: number;
+  durationSec?: number;
   deep?: boolean;
+  autoSelect?: boolean;
+  shouldAutoSelect?: () => boolean;
   providers?: {
     opensubtitles?: boolean;
     wyzie?: boolean;
@@ -63,6 +87,12 @@ export type SubFetchResult = {
   selected: SubResult | null;
 };
 
+export type SubtitleFetchDependencies = {
+  search?: typeof searchSubtitles;
+  prepare?: typeof prepareSubtitle;
+  preflightProbe?: CandidatePreflightProbe;
+};
+
 export function streamHintsOf(src: PlayerSrc): StreamHints {
   return {
     release: src.streamRef?.title ?? src.streamRef?.parsedTitle ?? null,
@@ -73,17 +103,19 @@ export function streamHintsOf(src: PlayerSrc): StreamHints {
   };
 }
 
-function extraCtx(settings: Settings, deep: boolean) {
+function extraCtx(settings: Settings, deep: boolean, hashOnly: boolean) {
   const enabled = settings.subProvidersEnabled ?? {};
   const wantSubdl = enabled.subdl === true && !!settings.subdlApiKey;
   const wantSubsource = enabled.subsource === true && !!settings.subsourceApiKey;
-  if (!wantSubdl && !wantSubsource) return undefined;
+  if (!hashOnly && !wantSubdl && !wantSubsource) return undefined;
   return {
     userAgent: "Harbor",
     netAllowed: true,
     subdlApiKey: settings.subdlApiKey || null,
     subsourceApiKey: settings.subsourceApiKey || null,
-    enabled: { subdl: wantSubdl, subsource: wantSubsource },
+    enabled: hashOnly
+      ? { podnapisi: true, gestdown: false, subdl: false, subsource: false }
+      : { subdl: wantSubdl, subsource: wantSubsource },
     bypassCache: deep,
     timeoutMs: deep ? DEEP_TIMEOUT_MS : BUILT_IN_TIMEOUT_MS,
   };
@@ -152,11 +184,13 @@ function spreadBySourcePerLanguage(
   return out;
 }
 
-export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFetchResult> {
+export async function fetchSubtitlesIntoPlayer(
+  p: SubFetchParams,
+  dependencies: SubtitleFetchDependencies = {},
+): Promise<SubFetchResult> {
   const deep = p.deep === true;
   const enabled = p.settings.subProvidersEnabled ?? {};
   const hints = streamHintsOf(p.src);
-
   const consumed = new Set<SubResult>();
   const attemptedUrls = new Set(p.skipUrls ?? []);
   let selected: SubResult | null = null;
@@ -165,22 +199,16 @@ export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFe
   const meta = (r: SubResult) => {
     const match = streamMatchDetail(r, hints);
     return {
-      format: r.format,
-      encoding: r.encoding,
-      release: releaseOf(r),
-      provider: providerLabel(r),
-      fps: r.fps,
-      downloads: r.downloads,
-      author: r.author,
+      ...subtitleLoadMetadataOf(r),
       matchScore: match.score,
       matchConfidence: match.confidence,
       matchReasons: match.reasons,
-      subId: r.id,
     };
   };
 
   const rankedResults = (results: SubResult[]) =>
     results
+      .filter((result) => isSafeProviderSubtitleUrl(result.url))
       .filter((r) => langScore(r.lang ?? "", p.langs) >= 0)
       .sort((a, b) => {
         const language = langScore(b.lang ?? "", p.langs) - langScore(a.lang ?? "", p.langs);
@@ -210,7 +238,6 @@ export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFe
         if (ok !== true) continue;
         markAddedSub(result.url);
         consumed.add(result);
-        selected ??= result;
         added++;
       }
     };
@@ -225,20 +252,29 @@ export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFe
   const queuePartial = (partial: SubResult[]) => {
     progressiveQueue = progressiveQueue.then(async () => {
       if (!p.isActive()) return;
+      const reservedForSelection = deep
+        ? null
+        : new Set(
+            rankSubtitleCandidates(partial, p.langs, hints)
+              .slice(0, AUTO_SELECTION_CANDIDATE_LIMIT)
+              .map((result) => result.url),
+          );
       const fresh = rankedFresh(partial).filter(
-        (result) => streamMatchDetail(result, hints).confidence !== "incompatible",
+        (result) =>
+          streamMatchDetail(result, hints).confidence !== "incompatible" &&
+          !reservedForSelection?.has(result.url),
       );
       const eagerPool = limitEagerProviderDownloads(fresh, consumed);
       const candidates = spreadBySourcePerLanguage(
         eagerPool,
         consumed,
-        PROGRESSIVE_TRACKS_PER_LANGUAGE,
+        deep ? PROGRESSIVE_TRACKS_PER_LANGUAGE : PROGRESSIVE_PREVIEW_TRACKS_PER_LANGUAGE,
       );
       await addCandidates(candidates);
     });
   };
 
-  const results = await searchSubtitles(
+  const searchedResults = await (dependencies.search ?? searchSubtitles)(
     {
       imdbId: p.searchImdbId ?? undefined,
       stremioId: p.src.meta.id,
@@ -253,7 +289,7 @@ export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFe
       filename: subtitleStreamDescriptor(p.src.streamRef),
     },
     {
-      timeoutMs: deep ? DEEP_TIMEOUT_MS : 7_000,
+      timeoutMs: deep ? DEEP_TIMEOUT_MS : SUBTITLE_PROVIDER_TIMEOUT_MS,
       providers: {
         wyzie: p.providers?.wyzie ?? enabled.wyzie === true,
         addons: p.providers?.addons ?? enabled.addons !== false,
@@ -262,32 +298,129 @@ export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFe
       addons: p.addons,
       preferredLangs: p.langs,
       streamHints: hints,
-      extra: p.providers?.extras === false ? undefined : extraCtx(p.settings, deep),
+      extra: p.providers?.extras === false ? undefined : extraCtx(p.settings, deep, !!p.videoHash),
       onPartial: queuePartial,
     },
   );
+  const results = searchedResults.filter((result) => isSafeProviderSubtitleUrl(result.url));
 
   await progressiveQueue;
 
   if (!p.isActive()) return { added: 0, found: results.length, hints, selected: null };
 
-  const fresh = rankedFresh(results);
-  if (!deep && selected == null) {
-    const autoCandidates = fresh.filter(
-      (result) => streamMatchDetail(result, hints).confidence !== "incompatible",
+  if (!deep) {
+    const rankedAuto = rankSubtitleCandidates(results, p.langs, hints).filter(
+      (result) => !attemptedUrls.has(result.url),
     );
-    selected = await loadFirstWorkingSubtitle(autoCandidates, async (r) => {
-      if (!p.isActive()) return false;
-      if (attemptedUrls.has(r.url)) return false;
-      attemptedUrls.add(r.url);
-      const ok = await p.bridge.addSubtitle(r.url, r.lang, subtitleTitleOf(r), false, meta(r));
-      if (ok === true) {
-        markAddedSub(r.url);
-        consumed.add(r);
-        added++;
-      }
-      return ok === true;
+    const preparedResults = await prepareRankedSubtitleCandidates(
+      rankedAuto,
+      (result) =>
+        (dependencies.prepare ?? prepareSubtitle)({
+          url: result.url,
+          format: result.format,
+          encoding: result.encoding,
+          language: result.lang,
+          season: p.season,
+          episode: p.episode,
+          release: releaseOf(result) ?? hints.release ?? undefined,
+          filename: result.rawFilename ?? subtitleStreamDescriptor(p.src.streamRef),
+          durationSec: p.durationSec,
+          requestHeaders: providerSubtitleDownloadHeaders(result.downloadAuth, result.url),
+        }),
+      AUTO_SELECTION_CANDIDATE_LIMIT,
+    );
+    for (const result of preparedResults) attemptedUrls.add(result.candidate.url);
+    const preflights = await preflightPreparedCandidates(
+      preparedResults,
+      {
+        mediaUrl: p.src.url,
+        headers: p.src.headers,
+        durationSec: p.durationSec ?? 0,
+      },
+      {
+        probe: dependencies.preflightProbe,
+        compatibilityPercent: (result) => {
+          const match = streamMatchDetail(result, hints);
+          return releaseCompatibilityPercent(match.confidence, match.score);
+        },
+        releaseConfidence: (result) => streamMatchDetail(result, hints).confidence,
+        reasons: (result) => [
+          ...(result.providerMatch?.reasons ?? []).map((reason) => `Provider: ${reason}`),
+          ...streamMatchDetail(result, hints).reasons.map((reason) => `Local: ${reason}`),
+        ],
+      },
+    );
+    const rerankEntries = preflights.map((item) => ({
+      item,
+      candidate: { ...item.candidate, timingStatus: item.timingStatus },
+    }));
+    const itemByCandidate = new Map<SubResult, PreparedSubtitlePreflight<SubResult>>(
+      rerankEntries.map(({ item, candidate }) => [candidate, item]),
+    );
+    const selectionRank = new Map<PreparedSubtitlePreflight<SubResult>, number>();
+    rankSubtitleCandidates(
+      rerankEntries.map(({ candidate }) => candidate),
+      p.langs,
+      hints,
+    ).forEach((candidate, rank) => {
+      const item = itemByCandidate.get(candidate);
+      if (item) selectionRank.set(item, rank);
     });
+    const preferred = choosePreparedCandidate(preflights, {
+      rankOf: (item) => selectionRank.get(item) ?? Number.MAX_SAFE_INTEGER,
+    });
+    const loadOrder = orderPreparedCandidates(preflights, {
+      rankOf: (item) => selectionRank.get(item) ?? Number.MAX_SAFE_INTEGER,
+    });
+    const keep = new Set<PreparedSubtitlePreflight<SubResult>>();
+    for (const item of loadOrder) {
+      if (!p.isActive()) break;
+      const autoSelectionEligible = preparedCandidateAutoSelectionEligible(item, {
+        autoSelect: p.autoSelect !== false && selected == null,
+        selectionLeaseValid: p.shouldAutoSelect?.() ?? true,
+      });
+      const shouldSelect = selected == null && preferred != null && autoSelectionEligible;
+      registerPreparedSubtitle(item.prepared);
+      const itemMeta = {
+        ...meta(item.candidate),
+        format: item.prepared.format,
+        encoding: item.prepared.encoding,
+        archive: item.prepared.archive,
+        rawFilename: item.prepared.rawFilename,
+        prepared: true,
+        autoSelectionEligible,
+        originalUrl: item.candidate.url,
+        timingStatus: item.timingStatus,
+        timingMeasurementStatus: item.measurement.status,
+        matchExplanation: item.explanation,
+      };
+      const ok = await p.bridge.addSubtitle(
+        item.prepared.playableUrl,
+        item.candidate.lang,
+        subtitleTitleOf(item.candidate),
+        shouldSelect,
+        itemMeta,
+      );
+      if (ok === true) {
+        keep.add(item);
+        markAddedSub(item.candidate.url);
+        consumed.add(item.candidate);
+        added++;
+        if (shouldSelect) selected = item.candidate;
+      } else {
+        takePreparedSubtitleCleanup(item.prepared.playableUrl)?.();
+      }
+    }
+    for (const result of preparedResults) {
+      const preflight =
+        result.status === "prepared"
+          ? preflights.find((item) => item.prepared === result.prepared)
+          : undefined;
+      if (result.status === "prepared" && (!preflight || !keep.has(preflight))) {
+        takePreparedSubtitleCleanup(result.prepared.playableUrl)?.();
+        discardPreparedSubtitle(result.prepared);
+      }
+    }
   }
 
   const byPreferredLang = rankedResults(results).sort(

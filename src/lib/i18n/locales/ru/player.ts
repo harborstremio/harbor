@@ -61,6 +61,11 @@ const player: Record<string, string> = {
   "Forced only": "Только форсированные",
   "Forced subs with native audio": "Форсированные субтитры с родным аудио",
   "HI/SDH": "HI/SDH",
+  "Hearing impaired": "Для слабослышащих",
+  "Foreign-only": "Только иностранные фрагменты",
+  "Machine-translated": "Машинный перевод",
+  MT: "MT",
+  "Audio verified": "Проверено по аудио",
   "No styling": "Без оформления",
   "Position and size only": "Только положение и размер",
   "Show HI/SDH": "Показывать HI/SDH",
@@ -149,7 +154,7 @@ const player: Record<string, string> = {
   "Choose a folder...": "Выбрать папку...",
   Clear: "Очистить",
   "Click any source to swap in place": "Нажмите источник, чтобы заменить на лету",
-  "Click to apply · Right-click to delete": "Нажмите, чтобы применить · правый клик — удалить",
+  "Click to apply · Right-click to delete": "Нажмите, чтобы применить · правый клик – удалить",
   Close: "Закрыть",
   "Close guide": "Закрыть телепрограмму",
   "Close match": "Близкое совпадение",
@@ -331,8 +336,6 @@ const player: Record<string, string> = {
     "Ведущий запускает воспроизведение для всей комнаты.",
   "This and next: + {title}": "Эта и следующая: + {title}",
   "This file has one audio track.": "В этом файле одна аудиодорожка.",
-  'This file is in OneDrive. If "Files On-Demand" is on, the file is a cloud placeholder until it\'s downloaded. Right-click it in Explorer and pick':
-    "Этот файл находится в OneDrive. Если включены «Файлы по запросу», файл остаётся облачным заполнителем, пока не будет скачан. Нажмите на него правой кнопкой в проводнике и выберите",
   "This show: {title}": "Эта передача: {title}",
   "Tighter spacing": "Плотный интервал",
   Title: "Название",
@@ -360,7 +363,7 @@ const player: Record<string, string> = {
   "Wrong channel or source?": "Не тот канал или источник?",
   "Wrong episode or quality?": "Не та серия или качество?",
   "Your copy runs {guest}, host's runs {host}. Sync may drift.":
-    "Ваша копия — {guest}, у хоста — {host}. Возможен рассинхрон.",
+    "Ваша копия – {guest}, у хоста – {host}. Возможен рассинхрон.",
   "Your style is overriding the embedded subtitle's own styling":
     "Ваш стиль переопределяет собственное оформление встроенных субтитров",
   Yours: "У вас",
@@ -438,9 +441,9 @@ const player: Record<string, string> = {
     "Отключите автосинхронизацию перед изменением частоты кадров субтитров.",
   "Resize subtitle menu": "Изменить размер меню субтитров",
   "Drag to resize. Use arrow keys to adjust, or Home to reset.":
-    "Перетащите для изменения размера. Используйте клавиши со стрелками для настройки, а Home — для сброса.",
+    "Перетащите для изменения размера. Используйте клавиши со стрелками для настройки, а Home – для сброса.",
   "Drag the corner to resize. Left and right change width; up and down change height; Home resets the size.":
-    "Перетащите угол для изменения размера. Стрелки влево и вправо меняют ширину, вверх и вниз — высоту, а Home сбрасывает размер.",
+    "Перетащите угол для изменения размера. Стрелки влево и вправо меняют ширину, вверх и вниз – высоту, а Home сбрасывает размер.",
   "Couldn't switch subtitles. Try again.": "Не удалось переключить субтитры. Повторите попытку.",
   "Subtitle details": "Сведения о субтитрах",
   "Open subtitle details": "Открыть сведения о субтитрах",

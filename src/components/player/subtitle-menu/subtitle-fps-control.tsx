@@ -101,7 +101,10 @@ export function SubtitleFpsControl({
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: PointerEvent) => {
-      if (!wrapRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (wrapRef.current?.contains(target)) return;
+      if ((target as Element).closest?.("[data-dropdown-menu]")) return;
+      setOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
@@ -142,7 +145,7 @@ export function SubtitleFpsControl({
       </HoverTooltip>
 
       {open && (
-        <div className="absolute end-0 top-[calc(100%+6px)] z-[60] w-[340px] overflow-hidden rounded-xl border border-edge bg-elevated shadow-[0_18px_44px_-18px_rgba(0,0,0,0.85)]">
+        <div className="absolute end-0 top-[calc(100%+6px)] z-[60] w-[300px] overflow-hidden rounded-md bg-elevated shadow-[0_18px_44px_-18px_rgba(0,0,0,0.85)] animate-menu-pop">
           <SubtitleFpsPanel
             track={track}
             engine={engine}

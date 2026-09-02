@@ -13,7 +13,12 @@ pub fn apply_transparency(app: &tauri::AppHandle, label: &str) {
         let controller = webview.controller();
         match controller.cast::<ICoreWebView2Controller2>() {
             Ok(controller2) => {
-                let color = COREWEBVIEW2_COLOR { A: 0, R: 0, G: 0, B: 0 };
+                let color = COREWEBVIEW2_COLOR {
+                    A: 0,
+                    R: 0,
+                    G: 0,
+                    B: 0,
+                };
                 match controller2.SetDefaultBackgroundColor(color) {
                     Ok(()) => eprintln!("[harbor::transparent] re-applied (alpha=0)"),
                     Err(e) => eprintln!("[harbor::transparent] re-apply FAILED: {:?}", e),

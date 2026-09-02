@@ -10,16 +10,15 @@ const CACHE_MAX_AGE: Duration = Duration::from_secs(14 * 24 * 60 * 60);
 
 const FORMAT_LOW: &str =
     "18/best[height<=360][ext=mp4][vcodec!=none][acodec!=none]/worst[ext=mp4][vcodec!=none][acodec!=none]";
-const FORMAT_HIGH: &str =
-    "22/18/best[ext=mp4][vcodec!=none][acodec!=none][height<=720]/best[vcodec!=none][acodec!=none]";
+const FORMAT_HIGH: &str = "22/18/best[height<=720][ext=mp4][vcodec!=none][acodec!=none]";
 const FORMAT_1080: &str =
     "bestvideo[height<=1080][ext=mp4][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080][ext=mp4]/bestvideo[height<=1080]+bestaudio/best[height<=1080]";
 const FORMAT_BEST: &str =
     "bestvideo[ext=mp4][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/bestvideo+bestaudio/best";
 const FORMAT_LOW_MERGED: &str =
-    "bestvideo[height<=360][ext=mp4][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/best[height<=360][ext=mp4]/bestvideo[height<=360]+bestaudio/best[height<=360]";
+    "bestvideo[height<=360][ext=mp4][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=360]+bestaudio";
 const FORMAT_HIGH_MERGED: &str =
-    "bestvideo[height<=720][ext=mp4][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]/bestvideo[height<=720]+bestaudio/best[height<=720]";
+    "bestvideo[height<=720][ext=mp4][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio";
 
 fn cache_dir() -> PathBuf {
     std::env::temp_dir().join("harbor-trailers")
@@ -50,17 +49,33 @@ fn quality_path(id: &str, quality: &str) -> PathBuf {
 }
 
 fn format_for(quality: &str, can_merge: bool) -> &'static str {
-    if !can_merge {
-        return match quality {
-            "360p" => FORMAT_LOW,
-            _ => FORMAT_HIGH,
-        };
+    match (quality, can_merge) {
+        ("1080p", true) => FORMAT_1080,
+        ("best", true) => FORMAT_BEST,
+        ("360p", _) => FORMAT_LOW,
+        _ => FORMAT_HIGH,
+    }
+}
+
+fn should_merge(quality: &str, ffmpeg_available: bool) -> bool {
+    ffmpeg_available && matches!(quality, "1080p" | "best")
+}
+
+fn fallback_format(
+    quality: &str,
+    primary_merged: bool,
+    ffmpeg_available: bool,
+) -> Option<(&'static str, bool)> {
+    if primary_merged {
+        return Some((FORMAT_HIGH, false));
+    }
+    if !ffmpeg_available {
+        return None;
     }
     match quality {
-        "360p" => FORMAT_LOW_MERGED,
-        "1080p" => FORMAT_1080,
-        "best" => FORMAT_BEST,
-        _ => FORMAT_HIGH_MERGED,
+        "360p" => Some((FORMAT_LOW_MERGED, true)),
+        "720p" => Some((FORMAT_HIGH_MERGED, true)),
+        _ => None,
     }
 }
 
@@ -77,13 +92,11 @@ fn cached_info(path: &Path, quality: &str, size: u64, stream_url: Option<String>
 
 struct YtDlpOutput {
     success: bool,
-    #[cfg(target_os = "linux")]
     exit_code: Option<i32>,
     stdout: Vec<u8>,
     stderr: Vec<u8>,
 }
 
-#[cfg(target_os = "linux")]
 fn yt_dlp_failure(source: &str, label: &str, output: &YtDlpOutput) -> String {
     let stderr = String::from_utf8_lossy(&output.stderr);
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -179,9 +192,40 @@ async fn run_yt_dlp(
             .map_err(|error| format!("yt-dlp {label}: {error}"))?;
         Ok(YtDlpOutput {
             success: output.status.success(),
+            exit_code: output.status.code(),
             stdout: output.stdout,
             stderr: output.stderr,
         })
+    }
+}
+
+fn download_args(format: &str, output: &str, url: &str, ffmpeg: Option<&Path>) -> Vec<String> {
+    let mut args = vec![
+        "-f".into(),
+        format.into(),
+        "-o".into(),
+        output.into(),
+        "--no-playlist".into(),
+        "--no-warnings".into(),
+        "--quiet".into(),
+        "--force-overwrites".into(),
+        "--no-mtime".into(),
+    ];
+    if let Some(path) = ffmpeg {
+        args.push("--ffmpeg-location".into());
+        args.push(path.to_string_lossy().to_string());
+        args.push("--merge-output-format".into());
+        args.push("mp4".into());
+    }
+    args.push(url.into());
+    args
+}
+
+fn completed_download(output: Result<YtDlpOutput, String>, label: &str) -> Result<(), String> {
+    match output {
+        Ok(output) if output.success => Ok(()),
+        Ok(output) => Err(yt_dlp_failure("bundled", label, &output)),
+        Err(error) => Err(error),
     }
 }
 
@@ -284,38 +328,60 @@ pub async fn fetch_trailer(
 
     let file_path_str = file_path.to_string_lossy().to_string();
     let ffmpeg = crate::transcode::locate_ffmpeg();
-    let wants_merge = ffmpeg.is_some();
+    let wants_merge = should_merge(quality, ffmpeg.is_some());
     let effective_format = format_for(quality, wants_merge);
-    let mut dl_args: Vec<String> = vec![
-        "-f".into(),
-        effective_format.into(),
-        "-o".into(),
-        file_path_str.clone(),
-        "--no-playlist".into(),
-        "--no-warnings".into(),
-        "--quiet".into(),
-        "--force-overwrites".into(),
-        "--no-mtime".into(),
-    ];
-    if wants_merge {
-        if let Some(ff) = &ffmpeg {
-            dl_args.push("--ffmpeg-location".into());
-            dl_args.push(ff.to_string_lossy().to_string());
-        }
-        dl_args.push("--merge-output-format".into());
-        dl_args.push("mp4".into());
-    }
-    dl_args.push(url.clone());
+    let merge_ffmpeg = if wants_merge { ffmpeg.as_deref() } else { None };
+    let dl_args = download_args(effective_format, &file_path_str, &url, merge_ffmpeg);
     let dl_timeout = if wants_merge {
         Duration::from_secs(240)
     } else {
         DOWNLOAD_TIMEOUT
     };
-    let download_output = run_yt_dlp(&app, dl_args, dl_timeout, "download").await?;
+    let primary = completed_download(
+        run_yt_dlp(&app, dl_args, dl_timeout, "download").await,
+        "download",
+    );
 
-    if !download_output.success {
-        let stderr = String::from_utf8_lossy(&download_output.stderr);
-        return Err(format!("yt-dlp download failed: {}", stderr));
+    if let Err(primary_error) = primary {
+        let Some((fallback_format, fallback_merges)) =
+            fallback_format(quality, wants_merge, ffmpeg.is_some())
+        else {
+            eprintln!("[harbor::trailer] download failed quality={quality}: {primary_error}");
+            return Err(primary_error);
+        };
+        let fallback_label = if fallback_merges {
+            "adaptive fallback"
+        } else {
+            "progressive fallback"
+        };
+        eprintln!(
+            "[harbor::trailer] primary download failed quality={quality}: {primary_error}; retrying {fallback_label}"
+        );
+        let _ = std::fs::remove_file(&file_path);
+        let fallback_ffmpeg = if fallback_merges {
+            ffmpeg.as_deref()
+        } else {
+            None
+        };
+        let fallback_args = download_args(fallback_format, &file_path_str, &url, fallback_ffmpeg);
+        let fallback_timeout = if fallback_merges {
+            Duration::from_secs(240)
+        } else {
+            DOWNLOAD_TIMEOUT
+        };
+        completed_download(
+            run_yt_dlp(&app, fallback_args, fallback_timeout, fallback_label).await,
+            fallback_label,
+        )
+        .map_err(|fallback_error| {
+            eprintln!(
+                "[harbor::trailer] {fallback_label} failed quality={quality}: {fallback_error}"
+            );
+            format!(
+                "primary trailer download failed: {primary_error}; {fallback_label} failed: {fallback_error}"
+            )
+        })?;
+        eprintln!("[harbor::trailer] {fallback_label} completed quality={quality}");
     }
 
     let file_meta = std::fs::metadata(&file_path).map_err(|e| format!("file check: {}", e))?;

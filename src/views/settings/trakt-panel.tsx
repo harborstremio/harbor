@@ -1,4 +1,4 @@
-import { Check, ExternalLink, Link2, LogOut, Trash2 } from "lucide-react";
+import { ExternalLink, Link2, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { TraktDeviceModal } from "@/components/trakt/trakt-device-modal";
 import { useProfiles } from "@/lib/profiles";
@@ -8,6 +8,11 @@ import { useTrakt } from "@/lib/trakt/provider";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { Section, ToggleRow } from "./shared";
+import traktLogo from "@/assets/trakt.svg";
+import { ModalButton, SettingsModal } from "./kit";
+import { TrackerIdentity } from "./tracker-identity";
+import { Disclosure } from "./disclosure";
+import { CommentArt } from "./group-art";
 import { WatchlistSync } from "./trakt-panel/watchlist-sync";
 
 export function TraktPanel() {
@@ -56,7 +61,7 @@ export function TraktPanel() {
   return (
     <>
       {!isConnected ? (
-        <section className="flex flex-col gap-5 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
+        <section className="flex flex-col gap-5 rounded-md bg-elevated p-7">
           <div className="flex flex-col gap-2">
             <h2 className="text-[19px] font-medium tracking-tight text-ink">
               {t("Connect your Trakt account")}
@@ -68,17 +73,17 @@ export function TraktPanel() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setModalOpen(true)}
-              className="flex h-11 items-center gap-2.5 rounded-xl bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
+              className="flex h-11 items-center gap-2.5 rounded-md bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
             >
-              <Link2 size={15} strokeWidth={2.2} />
+              <Link2 size={16} strokeWidth={2.2} />
               {t("Connect Trakt")}
             </button>
             <button
               onClick={() => openUrl("https://trakt.tv")}
-              className="flex h-11 items-center gap-2 rounded-xl border border-edge-soft px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+              className="flex h-11 items-center gap-2 rounded-md bg-raised px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:text-ink"
             >
               {t("About Trakt")}
-              <ExternalLink size={13} strokeWidth={2.2} />
+              <ExternalLink size={14} strokeWidth={2.2} />
             </button>
           </div>
         </section>
@@ -87,78 +92,36 @@ export function TraktPanel() {
           title={t("Connected")}
           subtitle={t("Harbor will scrobble your playback to Trakt and sync your watchlist.")}
         >
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
-            <div className="flex items-center gap-3">
-              {traktAvatar ? (
-                <img
-                  src={traktAvatar}
-                  alt=""
-                  draggable={false}
-                  className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-edge"
-                />
-              ) : (
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-400/12 ring-1 ring-emerald-400/30 text-emerald-300">
-                  <Check size={16} strokeWidth={2.4} />
-                </span>
-              )}
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[14px] font-medium text-ink">
-                  {username ? `@${username}` : t("Connected")}
-                </span>
-                <span className="text-[12px] text-ink-subtle">
-                  {t("Authorized {when}", { when: sessionAge(t, session?.createdAt) })}
-                </span>
-              </div>
-            </div>
-            {username && (
-              <button
-                onClick={() =>
-                  openUrl(`https://trakt.tv/users/${encodeURIComponent(username)}`)
-                }
-                className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
-              >
-                {t("Open profile")}
-                <ExternalLink size={11} strokeWidth={2.2} />
-              </button>
-            )}
-          </div>
+          <TrackerIdentity
+            logo={traktLogo}
+            service="Trakt"
+            handle={username ?? undefined}
+            avatar={traktAvatar}
+            meta={t("Authorized {when}", { when: sessionAge(t, session?.createdAt) })}
+            profileUrl={
+              username ? `https://trakt.tv/users/${encodeURIComponent(username)}` : undefined
+            }
+            onDisconnect={() => setConfirmDisconnect(true)}
+          />
           {traktAvatar && (
             <ToggleRow
               label={t("Use my Trakt avatar as my Harbor avatar")}
               sub={t("Wear your Trakt profile picture across Harbor instead of the default.")}
               value={settings.useTraktAvatar}
               onChange={toggleTraktAvatar}
-              leading={
-                <img
-                  src={traktAvatar}
-                  alt=""
-                  draggable={false}
-                  className="h-9 w-9 rounded-full object-cover"
-                />
-              }
             />
           )}
-          {!confirmDisconnect ? (
-            <button
-              onClick={() => setConfirmDisconnect(true)}
-              className="flex items-center gap-2 self-start rounded-lg px-2 py-1.5 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-red-300"
-            >
-              <Trash2 size={12} />
-              {t("Disconnect from Trakt")}
-            </button>
-          ) : (
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-red-400/30 bg-red-400/5 p-3">
-              <span className="text-[12.5px] text-red-200">
-                {t("Disconnect Trakt? Scrobbles and syncs will stop until you reconnect.")}
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setConfirmDisconnect(false)}
-                  className="rounded-md px-2.5 py-1 text-[12px] text-ink-muted hover:text-ink"
-                >
+          <SettingsModal
+            open={confirmDisconnect}
+            onClose={() => setConfirmDisconnect(false)}
+            title={t("Disconnect from Trakt")}
+            actions={
+              <>
+                <ModalButton ghost onClick={() => setConfirmDisconnect(false)}>
                   {t("Cancel")}
-                </button>
+                </ModalButton>
                 <button
+                  type="button"
                   onClick={() => {
                     if (settings.useTraktAvatar && settings.harborAvatar === traktAvatar) {
                       pushAvatar(null);
@@ -167,14 +130,18 @@ export function TraktPanel() {
                     disconnect();
                     setConfirmDisconnect(false);
                   }}
-                  className="flex items-center gap-1.5 rounded-md bg-red-400/20 px-3 py-1 text-[12px] font-semibold text-red-200 hover:bg-red-400/30"
+                  className="harbor-press-pop flex h-9 items-center gap-1.5 rounded-md bg-danger/15 px-4 text-[12.5px] font-semibold text-danger transition-colors hover:bg-danger/25"
                 >
-                  <LogOut size={11} strokeWidth={2.4} />
+                  <LogOut size={12} strokeWidth={2.4} />
                   {t("Disconnect")}
                 </button>
-              </div>
-            </div>
-          )}
+              </>
+            }
+          >
+            <p className="rounded-md bg-elevated px-4 py-3.5 text-[13px] leading-relaxed text-ink-muted">
+              {t("Disconnect Trakt? Scrobbles and syncs will stop until you reconnect.")}
+            </p>
+          </SettingsModal>
         </Section>
       )}
 
@@ -187,9 +154,10 @@ export function TraktPanel() {
         </Section>
       )}
 
-      <Section
+      <Disclosure
+        art={<CommentArt />}
         title={t("Comments")}
-        subtitle={t("Community comments from Trakt that appear on movie and show pages.")}
+        summary={t("Community comments from Trakt that appear on movie and show pages.")}
       >
         <ToggleRow
           label={t("Show comments on detail pages")}
@@ -199,13 +167,15 @@ export function TraktPanel() {
         />
         {settings.showTraktComments === true && (
           <ToggleRow
-            label={t("Blur comments by default")}
-            sub={t("Comments are blurred until you reveal them, even if they are not tagged as spoilers.")}
+            label={t("Blur comments and reviews by default")}
+            sub={t(
+              "Comments and reviews on detail pages stay blurred until you reveal them, even when they are not tagged as spoilers. This one switch covers Trakt and Letterboxd.",
+            )}
             value={!!settings.blurComments}
             onChange={(on) => update({ blurComments: on })}
           />
         )}
-      </Section>
+      </Disclosure>
 
       {modalOpen && <TraktDeviceModal onClose={() => setModalOpen(false)} />}
     </>

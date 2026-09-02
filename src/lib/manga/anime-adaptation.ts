@@ -9,7 +9,7 @@ import { parseKitsuId } from "@/lib/providers/kitsu";
 
 export async function resolveAnilistId(id: string, malId?: number | null): Promise<number | null> {
   if (id.startsWith("anilist:")) return Number(id.slice(8)) || null;
-  const mal = id.startsWith("mal:") ? Number(id.slice(4)) : malId ?? null;
+  const mal = id.startsWith("mal:") ? Number(id.slice(4)) : (malId ?? null);
   if (mal) {
     const art = await anilistArtByMalId(mal).catch(() => null);
     if (art?.id) return art.id;
@@ -20,7 +20,15 @@ export async function resolveAnilistId(id: string, malId?: number | null): Promi
 }
 
 const TITLE_STOP = new Set([
-  "the", "and", "season", "part", "movie", "ova", "manga", "gekijouban", "final",
+  "the",
+  "and",
+  "season",
+  "part",
+  "movie",
+  "ova",
+  "manga",
+  "gekijouban",
+  "final",
 ]);
 
 function titleTokens(s: string): string[] {
@@ -38,6 +46,10 @@ function franchiseOverlap(anime: string, manga: string): number {
   return hits;
 }
 
+function isEBookNode(node: AnilistRelatedNode): boolean {
+  return node.format?.toLocaleLowerCase().includes("novel") === true;
+}
+
 const RELATION_SCORE: Record<string, number> = {
   Source: 100,
   Adaptation: 90,
@@ -51,17 +63,53 @@ const RELATION_SCORE: Record<string, number> = {
   Summary: -60,
 };
 
-export function pickSourceManga(details: AnilistMediaDetails, animeName: string): AnilistRelatedNode | null {
-  const mangas = details.adaptations.filter((n) => n.mediaType === "manga");
-  if (mangas.length === 0) return null;
+function pickBestSource(
+  details: AnilistMediaDetails,
+  animeName: string,
+  candidates: AnilistRelatedNode[],
+): AnilistRelatedNode | null {
+  if (candidates.length === 0) return null;
   const animeTitle = details.englishTitle ?? details.romajiTitle ?? animeName;
-  const best = mangas
+  const best = candidates
     .map((n) => ({
       n,
-      score: (RELATION_SCORE[n.relation] ?? 0) + franchiseOverlap(animeTitle, n.title) * 25 + (n.poster ? 8 : 0),
+      score:
+        (RELATION_SCORE[n.relation] ?? 0) +
+        franchiseOverlap(animeTitle, n.title) * 25 +
+        (n.poster ? 8 : 0),
     }))
     .sort((a, b) => b.score - a.score)[0];
   return best.score > 0 ? best.n : null;
+}
+
+export type AnimeReadingSource = {
+  kind: "manga" | "ebook";
+  node: AnilistRelatedNode;
+};
+
+export function pickSourceReading(
+  details: AnilistMediaDetails,
+  animeName: string,
+): AnimeReadingSource | null {
+  const node = pickBestSource(
+    details,
+    animeName,
+    details.adaptations.filter((candidate) => candidate.mediaType === "manga"),
+  );
+  return node ? { kind: isEBookNode(node) ? "ebook" : "manga", node } : null;
+}
+
+export function pickSourceManga(
+  details: AnilistMediaDetails,
+  animeName: string,
+): AnilistRelatedNode | null {
+  return pickBestSource(
+    details,
+    animeName,
+    details.adaptations.filter(
+      (candidate) => candidate.mediaType === "manga" && !isEBookNode(candidate),
+    ),
+  );
 }
 
 export async function resolveAnimeSourceManga(
@@ -73,4 +121,15 @@ export async function resolveAnimeSourceManga(
   if (anilistId == null) return null;
   const details = await fetchAnilistMediaDetails(anilistId).catch(() => null);
   return details ? pickSourceManga(details, animeName) : null;
+}
+
+export async function resolveAnimeSourceReading(
+  id: string,
+  malId: number | null | undefined,
+  animeName: string,
+): Promise<AnimeReadingSource | null> {
+  const anilistId = await resolveAnilistId(id, malId);
+  if (anilistId == null) return null;
+  const details = await fetchAnilistMediaDetails(anilistId).catch(() => null);
+  return details ? pickSourceReading(details, animeName) : null;
 }

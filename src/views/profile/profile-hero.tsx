@@ -88,7 +88,11 @@ export function ProfileHero({
   const presenceLabel = p.isOwner
     ? myStatus === "online"
       ? t("Online now")
-      : meta.label
+      : myStatus === "away"
+        ? t("Away")
+        : myStatus === "dnd"
+          ? t("Do not disturb")
+          : t("Appear offline")
     : p.online
       ? t("Online now")
       : t("Offline");
@@ -193,20 +197,20 @@ export function ProfileHero({
               <>
                 <button
                   onClick={openFeed}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-surface px-4 text-[14px] font-medium text-ink ring-1 ring-edge transition-colors hover:bg-raised"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-md bg-surface px-4 text-[14px] font-medium text-ink ring-1 ring-edge transition-colors hover:bg-raised"
                 >
                   <Activity size={18} /> {t("Activity")}
                 </button>
                 <button
                   onClick={() => setSharing(true)}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-surface px-4 text-[14px] font-medium text-ink ring-1 ring-edge transition-colors hover:bg-raised"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-md bg-surface px-4 text-[14px] font-medium text-ink ring-1 ring-edge transition-colors hover:bg-raised"
                 >
                   <Share2 size={18} /> {t("Share")}
                 </button>
                 <EditProfileHint enabled={p.isOwner}>
                   <button
                     onClick={onEdit}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-surface px-4 text-[14px] font-medium text-ink ring-1 ring-edge transition-colors hover:bg-raised"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-md bg-surface px-4 text-[14px] font-medium text-ink ring-1 ring-edge transition-colors hover:bg-raised"
                   >
                     <Settings2 size={18} /> {t("Edit profile")}
                   </button>
@@ -281,7 +285,7 @@ function HeroBadge({ badge }: { badge: HeroBadge }) {
         draggable={false}
         className="inline-block"
       />
-      <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-[10px] bg-elevated px-2 py-1 text-[11px] font-medium text-ink opacity-0 shadow-lg ring-1 ring-edge-soft transition-opacity duration-150 group-hover/badge:opacity-100">
+      <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md bg-elevated px-2 py-1 text-[11px] font-medium text-ink opacity-0 shadow-lg ring-1 ring-edge-soft transition-opacity duration-150 group-hover/badge:opacity-100">
         {badge.name}
       </span>
     </span>
@@ -293,7 +297,7 @@ function WatchTimePill({ totalMinutes }: { totalMinutes: number }) {
   const { a, aVal, b, bVal, c, cVal } = formatWatchTime(totalMinutes);
   const pad = (n: number) => String(n).padStart(2, "0");
   return (
-    <div className="flex flex-col items-center rounded-[10px] bg-surface px-2 py-2.5 ring-1 ring-edge-soft">
+    <div className="flex flex-col items-center rounded-md bg-surface px-2 py-2.5 ring-1 ring-edge-soft">
       <span className="flex items-baseline tabular-nums">
         <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
           {a}
@@ -318,7 +322,7 @@ function WatchTimePill({ totalMinutes }: { totalMinutes: number }) {
 type FriendRel = NonNullable<ProfileSummary["friendStatus"]>;
 
 const FRIEND_BTN =
-  "inline-flex min-h-11 items-center gap-2 rounded-[10px] px-4 text-[14px] font-semibold transition-colors disabled:opacity-70";
+  "inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-[14px] font-semibold transition-colors disabled:opacity-70";
 
 function UseStyleButton({ summary }: { summary: ProfileSummary }) {
   const t = useT();

@@ -15,7 +15,13 @@ import {
   setActiveMangaSource,
   subscribeMangaSources,
 } from "@/lib/manga/sources";
-import { resumeChapters, popularManga, searchManga, type MangaChapter, type MangaSummary } from "@/lib/manga/api";
+import {
+  resumeChapters,
+  popularManga,
+  searchManga,
+  type MangaChapter,
+  type MangaSummary,
+} from "@/lib/manga/api";
 import { listMangaProgress, type MangaProgressEntry } from "@/lib/manga-progress";
 import { useProfiles } from "@/lib/profiles";
 import { takeMangaReadIntent } from "@/lib/manga/read-intent";
@@ -168,9 +174,7 @@ export function MangaView() {
     return (
       <main className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24">
         <MangaDownloadsView
-          onBack={() =>
-            setMode(from ? { screen: "detail", mangaId: from } : { screen: "browse" })
-          }
+          onBack={() => setMode(from ? { screen: "detail", mangaId: from } : { screen: "browse" })}
           onOpenManga={(id) => setMode({ screen: "detail", mangaId: id })}
           onRead={(chapters, index, manga) =>
             setMode({ screen: "reader", mangaId: manga.id, manga, chapters, index })
@@ -264,7 +268,10 @@ export function MangaView() {
 
   if (mode.screen === "detail") {
     return (
-      <main ref={detailScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24">
+      <main
+        ref={detailScrollRef}
+        className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24"
+      >
         <MangaDetail
           mangaId={mode.mangaId}
           onBack={() => setMode({ screen: "browse" })}
@@ -295,10 +302,10 @@ export function MangaView() {
           className="mb-7 inline-flex items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/40 px-4 py-2 text-[14px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
         >
           <ChevronLeft size={18} />
-          Back
+          {t("Back")}
         </button>
         <h1 className="mb-8 font-display text-[32px] font-medium tracking-tight text-ink">
-          Collections
+          {t("Collections")}
         </h1>
         <MangaCollections onOpen={openMangaItem} />
       </main>
@@ -317,11 +324,11 @@ export function MangaView() {
   }
 
   return (
-    <main ref={browseScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-28">
-      <MangaHero
-        featured={featured}
-        onOpen={(id) => setMode({ screen: "detail", mangaId: id })}
-      />
+    <main
+      ref={browseScrollRef}
+      className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-28"
+    >
+      <MangaHero featured={featured} onOpen={(id) => setMode({ screen: "detail", mangaId: id })} />
       <div className="mt-8">
         <MangaContinue onResume={resume} />
       </div>
@@ -330,43 +337,50 @@ export function MangaView() {
       <BecauseYouWatched onOpen={openMangaItem} />
       <div className="mt-8">
         <MangaRail
-          title="Popular Manga"
-          subtitle="Most read right now"
+          title={t("Popular Manga")}
+          subtitle={t("Most read right now")}
           collapsibleKey="harbor.manga.popularRowOpen"
           hideKey="popular"
+          scrollKey="manga:Popular Manga"
           load={() => popularManga(0)}
           onOpen={openMangaItem}
         />
       </div>
       <div className="mb-9 mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <button
-        type="button"
-        onClick={() => setMode({ screen: "collections" })}
-        className="group flex h-full min-h-[84px] items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 px-6 py-4 text-start transition-all duration-300 hover:bg-elevated/70 active:scale-[0.99]"
-      >
-        <span className="relative grid h-12 w-16 shrink-0 place-items-center">
-          <span className="absolute h-10 w-7 -translate-x-2.5 -rotate-[18deg] overflow-hidden rounded-[5px] bg-elevated shadow-[0_4px_10px_-4px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft transition-transform duration-300 ease-out group-hover:-translate-x-4 group-hover:-rotate-[28deg]">
-            {featured[1]?.cover && <CoverImg src={featured[1].cover} alt="" className="h-full w-full object-cover" />}
+        <button
+          type="button"
+          onClick={() => setMode({ screen: "collections" })}
+          className="group flex h-full min-h-[84px] items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 px-6 py-4 text-start transition-all duration-300 hover:bg-elevated/70 active:scale-[0.99]"
+        >
+          <span className="relative grid h-12 w-16 shrink-0 place-items-center">
+            <span className="absolute h-10 w-7 -translate-x-2.5 -rotate-[18deg] overflow-hidden rounded-[5px] bg-elevated shadow-[0_4px_10px_-4px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft transition-transform duration-300 ease-out group-hover:-translate-x-4 group-hover:-rotate-[28deg]">
+              {featured[1]?.cover && (
+                <CoverImg src={featured[1].cover} alt="" className="h-full w-full object-cover" />
+              )}
+            </span>
+            <span className="absolute h-10 w-7 translate-x-2.5 rotate-[18deg] overflow-hidden rounded-[5px] bg-raised shadow-[0_4px_10px_-4px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft transition-transform duration-300 ease-out group-hover:translate-x-4 group-hover:rotate-[28deg]">
+              {featured[2]?.cover && (
+                <CoverImg src={featured[2].cover} alt="" className="h-full w-full object-cover" />
+              )}
+            </span>
+            <span className="absolute h-10 w-7 overflow-hidden rounded-[5px] bg-gradient-to-br from-accent to-accent/60 shadow-[0_6px_14px_-4px_rgba(0,0,0,0.7)] ring-1 ring-white/10 transition-transform duration-300 ease-out group-hover:-translate-y-1">
+              {featured[0]?.cover && (
+                <CoverImg src={featured[0].cover} alt="" className="h-full w-full object-cover" />
+              )}
+            </span>
           </span>
-          <span className="absolute h-10 w-7 translate-x-2.5 rotate-[18deg] overflow-hidden rounded-[5px] bg-raised shadow-[0_4px_10px_-4px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft transition-transform duration-300 ease-out group-hover:translate-x-4 group-hover:rotate-[28deg]">
-            {featured[2]?.cover && <CoverImg src={featured[2].cover} alt="" className="h-full w-full object-cover" />}
-          </span>
-          <span className="absolute h-10 w-7 overflow-hidden rounded-[5px] bg-gradient-to-br from-accent to-accent/60 shadow-[0_6px_14px_-4px_rgba(0,0,0,0.7)] ring-1 ring-white/10 transition-transform duration-300 ease-out group-hover:-translate-y-1">
-            {featured[0]?.cover && <CoverImg src={featured[0].cover} alt="" className="h-full w-full object-cover" />}
-          </span>
-        </span>
-        <div className="flex min-w-0 flex-1 flex-col">
-          <span className="text-[15.5px] font-semibold text-ink">Collections</span>
-          <span className="truncate text-[13px] text-ink-muted">
-            Most popular, critically acclaimed, award winners and more
-          </span>
-        </div>
-        <ChevronRight
-          size={22}
-          className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-1"
-        />
-      </button>
-      <UniversesCta onClick={() => setMode({ screen: "universes" })} />
+          <div className="flex min-w-0 flex-1 flex-col">
+            <span className="text-[15.5px] font-semibold text-ink">{t("Collections")}</span>
+            <span className="truncate text-[13px] text-ink-muted">
+              {t("Most popular, critically acclaimed, award winners and more")}
+            </span>
+          </div>
+          <ChevronRight
+            size={22}
+            className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-1"
+          />
+        </button>
+        <UniversesCta onClick={() => setMode({ screen: "universes" })} />
       </div>
       <div className="mb-6 mt-3 flex items-center justify-between gap-4">
         <h2 className="text-[22px] font-medium tracking-tight text-ink">{t("Browse manga")}</h2>
@@ -376,7 +390,7 @@ export function MangaView() {
           className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-edge-soft bg-surface/60 px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:bg-elevated/60 hover:text-ink"
         >
           <ArrowDownToLine size={16} strokeWidth={2} />
-          Downloads
+          {t("Downloads")}
           {downloadsCount > 0 && (
             <span className="rounded-full bg-elevated px-2 py-0.5 text-[11.5px] font-semibold tabular-nums text-ink ring-1 ring-edge-soft">
               {downloadsCount}
@@ -404,7 +418,9 @@ function EnableGate({ onEnable }: { onEnable: () => void }) {
         {t("Read manga in Harbor")}
       </h1>
       <p className="max-w-md text-[14px] leading-relaxed text-ink-muted">
-        {t("Harbor does not host any manga. Add a source plugin from a repository you trust, connect your own server, or open a local folder. You can turn this off anytime in Settings.")}
+        {t(
+          "Harbor does not host any manga. Add a source plugin from a repository you trust, connect your own server, or open a local folder. You can turn this off anytime in Settings.",
+        )}
       </p>
       <button
         type="button"

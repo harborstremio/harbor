@@ -63,10 +63,7 @@ function render(nodes: CNode[]): React.ReactNode {
         );
       case "code":
         return (
-          <code
-            key={i}
-            className="rounded-[6px] bg-canvas/70 px-1.5 py-0.5 font-mono text-[12.5px] text-ink ring-1 ring-edge-soft"
-          >
+          <code key={i} className="rounded-sm bg-canvas px-1.5 py-0.5 font-mono text-[12.5px] text-ink ring-1 ring-edge-soft">
             {render(n.children)}
           </code>
         );
@@ -100,7 +97,7 @@ function render(nodes: CNode[]): React.ReactNode {
             decoding="async"
             referrerPolicy="no-referrer"
             draggable={false}
-            className="my-1.5 block max-h-72 max-w-full rounded-[10px] border border-edge-soft object-contain"
+ className="my-1.5 block max-h-72 max-w-full rounded-md object-contain"
           />
         );
     }
@@ -109,9 +106,5 @@ function render(nodes: CNode[]): React.ReactNode {
 
 export function CommentBody({ text }: { text: string }) {
   const nodes = useMemo(() => parseComment(text), [text]);
-  return (
-    <div className="break-words text-[13.5px] leading-relaxed text-ink-muted [word-break:break-word]">
-      {render(nodes)}
-    </div>
-  );
+  return <div className="break-words text-[13.5px] leading-relaxed text-ink-muted [word-break:break-word]">{render(nodes)}</div>;
 }

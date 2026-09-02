@@ -1,13 +1,5 @@
-import { Settings as SettingsLucide } from "lucide-react";
+import { NavGlyph } from "./nav-glyph";
 
-export function SettingsIcon({ active = false }: { active?: boolean }) {
-  return (
-    <span
-      className={`inline-flex h-[26px] w-[26px] items-center justify-center ${
-        active ? "animate-gear-spin" : ""
-      }`}
-    >
-      <SettingsLucide size={26} strokeWidth={1.75} />
-    </span>
-  );
+export function SettingsIcon(_props: { active?: boolean }) {
+  return <NavGlyph name="settings" className="h-[26px] w-[26px] p-[2px]" />;
 }

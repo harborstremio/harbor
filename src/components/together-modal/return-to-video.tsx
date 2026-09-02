@@ -1,7 +1,9 @@
-import { Play } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
+import { useT } from "@/lib/i18n";
 import type { SyncState } from "@/lib/together/protocol";
 
 export function ReturnToVideo({ media, onReturn }: { media: SyncState; onReturn: () => void }) {
+  const t = useT();
   return (
     <button
       onClick={onReturn}
@@ -21,15 +23,17 @@ export function ReturnToVideo({ media, onReturn }: { media: SyncState; onReturn:
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
-          Now watching
+          {t("Now watching")}
         </span>
         <span className="truncate text-[13px] font-semibold text-ink">
-          {media.mediaTitle ?? "Untitled"}
+          {media.mediaTitle ?? t("Untitled")}
         </span>
         {media.episode && (
           <span className="font-mono text-[10.5px] tracking-[0.1em] text-ink-subtle">
-            S{media.episode.imdbSeason ?? media.episode.season} · E
-            {String(media.episode.imdbEpisode ?? media.episode.episode).padStart(2, "0")}
+            {t("S{season} · E{episode}", {
+              season: media.episode.imdbSeason ?? media.episode.season,
+              episode: String(media.episode.imdbEpisode ?? media.episode.episode).padStart(2, "0"),
+            })}
           </span>
         )}
       </div>

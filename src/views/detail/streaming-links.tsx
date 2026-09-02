@@ -35,7 +35,7 @@ function StreamingLinkChip({ streamer }: { streamer: KitsuStreamer }) {
     <button
       type="button"
       onClick={() => openUrl(streamer.url)}
-      className="group flex h-11 items-center gap-2.5 rounded-xl border border-edge-soft bg-elevated/70 px-4 transition-[transform,background-color,border-color] duration-150 hover:border-ink-subtle hover:bg-elevated active:scale-[0.97]"
+      className="group flex h-11 items-center gap-2.5 rounded-xl bg-white/[0.06] px-4 transition-[transform,background-color] duration-150 hover:bg-white/[0.10] active:scale-[0.97]"
       style={{ boxShadow: `inset 0 0 0 1px ${info.brandColor}22` }}
     >
       {info.logo && !logoFailed ? (

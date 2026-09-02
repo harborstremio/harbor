@@ -218,6 +218,15 @@ export function searchMangaEverywhere(query: string) {
   );
 }
 
+/** Search every configured source and return IDs routed back to the source that owns them. */
+export async function searchMangaAcrossSources(query: string): Promise<MangaSummary[]> {
+  await ensureMangaSources();
+  return streamAll(
+    (provider) => provider.searchAll?.(query) ?? provider.search(query, 0),
+    () => {},
+  );
+}
+
 type Chunk = (items: MangaSummary[]) => void;
 
 async function streamOrCall(
@@ -306,11 +315,29 @@ export function searchMangaStream(
 }
 
 export function mangaDetail(id: string) {
-  return cached("detail", id, 20 * MIN, (p) => p.detail(id), { timeout: 15_000 });
+  return cached(
+    "detail",
+    id,
+    20 * MIN,
+    (provider) => {
+      const routed = routeById(id);
+      return routed ? routed.provider.detail(routed.orig) : provider.detail(id);
+    },
+    { timeout: 15_000 },
+  );
 }
 
 export function mangaChapters(id: string, opts?: { tries?: number; timeout?: number }) {
-  return cached("chapters", id, 20 * MIN, (p) => p.chapters(id), { timeout: 15_000, ...opts });
+  return cached(
+    "chapters",
+    id,
+    20 * MIN,
+    (provider) => {
+      const routed = routeById(id);
+      return routed ? routed.provider.chapters(routed.orig) : provider.chapters(id);
+    },
+    { timeout: 15_000, ...opts },
+  );
 }
 
 export function resumeChapters(id: string): Promise<MangaChapter[]> {

@@ -1,4 +1,5 @@
-import { ChevronsRight, FastForward, Play, X } from "lucide-react";
+import { ChevronsRight, FastForward, X } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { AdSkipIcon } from "@/components/icons/adskip-icon";
 import { useEffect, useState } from "react";
 import type { SkipSegment } from "@/lib/skip-intro";

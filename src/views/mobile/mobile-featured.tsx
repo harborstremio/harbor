@@ -69,7 +69,10 @@ export function MobileFeatured({ items, onOpen }: { items: Meta[]; onOpen: (m: M
     const kid = el.children[i] as HTMLElement | undefined;
     if (!kid) return;
     const delta = kid.getBoundingClientRect().left - el.getBoundingClientRect().left;
-    el.scrollTo({ left: el.scrollLeft + delta - GUTTER, behavior: reduceRef.current ? "auto" : "smooth" });
+    el.scrollTo({
+      left: el.scrollLeft + delta - GUTTER,
+      behavior: reduceRef.current ? "auto" : "smooth",
+    });
   };
 
   useEffect(() => {
@@ -112,7 +115,7 @@ export function MobileFeatured({ items, onOpen }: { items: Meta[]; onOpen: (m: M
             <button
               key={m.id}
               type="button"
-              aria-label={`Go to featured item ${i + 1}`}
+              aria-label={t("Go to featured item {n}", { n: i + 1 })}
               onClick={() => goTo(i)}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 i === active ? "w-5 bg-accent" : "w-1.5 bg-ink/20"
@@ -125,7 +128,16 @@ export function MobileFeatured({ items, onOpen }: { items: Meta[]; onOpen: (m: M
   );
 }
 
-function FeaturedCard({ meta, logo, onOpen }: { meta: Meta; logo?: string; onOpen: (m: Meta) => void }) {
+function FeaturedCard({
+  meta,
+  logo,
+  onOpen,
+}: {
+  meta: Meta;
+  logo?: string;
+  onOpen: (m: Meta) => void;
+}) {
+  const t = useT();
   const bg = upsize(meta.background) ?? meta.poster;
   const year = yearOf(meta);
   const badge = meta.providerBadge;
@@ -133,23 +145,34 @@ function FeaturedCard({ meta, logo, onOpen }: { meta: Meta; logo?: string; onOpe
     <button
       type="button"
       onClick={() => onOpen(meta)}
+      aria-label={t("Open {name}", { name: meta.name })}
       className="relative block aspect-[4/5] w-[86%] shrink-0 snap-start overflow-hidden rounded-[22px] bg-surface text-start ring-1 ring-edge-soft/50 transition-transform duration-150 active:scale-[0.98]"
     >
       {bg && (
-        <img src={bg} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+        <img
+          src={bg}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/35 to-black/10" />
       <div className="absolute inset-x-0 top-0 flex p-4">
         {badge ? (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-black/45 py-1 pe-1.5 ps-2.5 text-[10.5px] font-semibold text-white/90 backdrop-blur-md">
-            Popular on
+            {t("Popular on")}
             <span className="flex h-[17px] items-center rounded-full bg-white px-1.5">
-              <img src={badge.logo} alt={badge.name} className="h-2.5 w-auto max-w-[52px] object-contain" />
+              <img
+                src={badge.logo}
+                alt={badge.name}
+                className="h-2.5 w-auto max-w-[52px] object-contain"
+              />
             </span>
           </span>
         ) : (
           <span className="rounded-full bg-black/40 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-accent backdrop-blur-md">
-            Featured
+            {t("Featured")}
           </span>
         )}
       </div>
@@ -178,7 +201,9 @@ function FeaturedCard({ meta, logo, onOpen }: { meta: Meta; logo?: string; onOpe
           {meta.genres?.[0] && <span className="text-white/65">{meta.genres[0]}</span>}
         </div>
         {meta.description && (
-          <p className="line-clamp-2 max-w-[92%] text-[12.5px] leading-relaxed text-white/70">{meta.description}</p>
+          <p className="line-clamp-2 max-w-[92%] text-[12.5px] leading-relaxed text-white/70">
+            {meta.description}
+          </p>
         )}
       </div>
     </button>

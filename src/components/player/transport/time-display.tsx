@@ -1,15 +1,19 @@
 import type { ReactNode } from "react";
 import { usePlaybackDownloadedGated, usePlaybackPositionGated } from "@/lib/player/playback-clock";
+import { useT } from "@/lib/i18n";
 import { fmtTime } from "./transport-utils";
 import type { TimeFormat } from "@/lib/player-chrome";
 
+const TIME_FONT = { fontFamily: '"Plus Jakarta Sans", "Inter", system-ui, sans-serif' } as const;
+
 function CachedDot({ active }: { active: boolean }): ReactNode {
+  const t = useT();
   const downloaded = usePlaybackDownloadedGated(active);
   if (downloaded < 0.999) return null;
   return (
     <span
       className="ms-2 inline-block h-2 w-2 shrink-0 rounded-full bg-[#22c55e] align-middle shadow-[0_0_4px_rgba(34,197,94,0.7)]"
-      title="Cached"
+      title={t("Cached")}
     />
   );
 }
@@ -35,12 +39,14 @@ export function TimeStart({
   stremio?: boolean;
   onCycle?: () => void;
 }): ReactNode {
+  const t = useT();
   const positionSec = usePlaybackPositionGated(active);
   if (isLiveChannel) return null;
   if (stremio) {
     const fmt: TimeFormat = timeFormat ?? "start-end";
     const positionText = fmtTime(positionSec);
-    const cls = "pointer-events-auto ms-2 shrink-0 font-medium tabular-nums text-[14px] text-white/90";
+    const cls =
+      "pointer-events-auto ms-2 shrink-0 font-medium tabular-nums text-[14px] text-white/90";
     const inner =
       fmt === "elapsed-only" ? (
         <>
@@ -62,7 +68,7 @@ export function TimeStart({
         <button
           type="button"
           onClick={onCycle}
-          title={cycleTitle(fmt)}
+          title={t(cycleTitle(fmt))}
           className={`${cls} cursor-pointer transition-colors hover:text-white`}
         >
           {inner}
@@ -73,7 +79,10 @@ export function TimeStart({
   }
   if (tight) return null;
   return (
-    <span className="shrink-0 font-mono text-[13px] tabular-nums text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]">
+    <span
+      style={TIME_FONT}
+      className="shrink-0 text-[15px] font-semibold tabular-nums text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]"
+    >
       {fmtTime(positionSec)}
     </span>
   );
@@ -94,6 +103,7 @@ export function TimeEnd({
   active: boolean;
   onCycle?: () => void;
 }): ReactNode {
+  const t = useT();
   const positionSec = usePlaybackPositionGated(active);
   if (isLiveChannel || tight) return null;
   const fmt: TimeFormat = timeFormat ?? "start-end";
@@ -102,13 +112,14 @@ export function TimeEnd({
   const text =
     fmt === "remaining" ? `-${fmtTime(Math.max(0, duration - positionSec))}` : fmtTime(duration);
   const cls =
-    "inline-flex shrink-0 items-center font-mono text-[13px] tabular-nums text-white/65 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]";
+    "inline-flex shrink-0 items-center text-[15px] font-semibold tabular-nums text-white/55 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]";
   if (onCycle) {
     return (
       <button
         type="button"
         onClick={onCycle}
-        title={cycleTitle(fmt)}
+        title={t(cycleTitle(fmt))}
+        style={TIME_FONT}
         className={`${cls} pointer-events-auto cursor-pointer transition-colors hover:text-white/95`}
       >
         {text}
@@ -117,7 +128,7 @@ export function TimeEnd({
     );
   }
   return (
-    <span className={cls}>
+    <span className={cls} style={TIME_FONT}>
       {text}
       <CachedDot active={active} />
     </span>

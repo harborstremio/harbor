@@ -1,8 +1,9 @@
-import { RotateCcw, RotateCw } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { SEEK_STEP_OPTIONS, sanitizeSeekStep } from "@/lib/seek-step";
 const DEFAULT_SHORT_SEC = 3;
+const CURATED_SEEK = [5, 10, 30];
 import { useSettings } from "@/lib/settings";
 import { Tooltip } from "./tooltip";
 
@@ -17,7 +18,6 @@ export function SeekStepBtn({
 }) {
   const t = useT();
   const { settings, update } = useSettings();
-  const Icon = direction === "back" ? RotateCcw : RotateCw;
   const word = direction === "back" ? t("Back") : t("Forward");
   const seconds = sanitizeSeekStep(
     direction === "back" ? settings.seekBackStepSec : settings.seekForwardStepSec,
@@ -27,10 +27,34 @@ export function SeekStepBtn({
     direction === "back" ? settings.seekBackStepShortSec : settings.seekForwardStepShortSec,
     DEFAULT_SHORT_SEC,
   );
+  const numberedSrc = `/player-icons/seek-${direction}-${seconds}.png`;
+  const [numberedOk, setNumberedOk] = useState(true);
+  useEffect(() => setNumberedOk(true), [numberedSrc]);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => {
+    if (!pickerOpen) setExpanded(false);
+  }, [pickerOpen]);
+  const curatedFor = (v: number) => [...new Set([...CURATED_SEEK, v])].sort((a, b) => a - b);
   const wrapRef = useRef<HTMLDivElement>(null);
   const holdTimerRef = useRef<number | null>(null);
   const claimedRef = useRef(false);
+  const iconRef = useRef<HTMLImageElement>(null);
+
+  const playNudge = () => {
+    const el = iconRef.current;
+    if (!el) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const deg = direction === "back" ? -40 : 40;
+    el.animate(
+      [
+        { transform: "rotate(0deg)" },
+        { transform: `rotate(${deg}deg)`, offset: 0.4 },
+        { transform: "rotate(0deg)" },
+      ],
+      { duration: 460, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
+    );
+  };
 
   useEffect(() => {
     if (!pickerOpen) return;
@@ -75,6 +99,7 @@ export function SeekStepBtn({
     if (holdTimerRef.current != null) {
       cancelTimer();
       onSeekStep(direction === "back" ? -seconds : seconds);
+      playNudge();
     }
   };
 
@@ -96,7 +121,7 @@ export function SeekStepBtn({
 
   return (
     <div ref={wrapRef} className="relative">
-      <Tooltip label={t("{word} {n}s · hold for options", { word, n: seconds })}>
+      <Tooltip label={t("Hold for more options")}>
         <button
           type="button"
           onPointerDown={onPointerDown}
@@ -108,72 +133,108 @@ export function SeekStepBtn({
             setPickerOpen(true);
           }}
           aria-label={t("{word} {n} seconds. Hold for options", { word, n: seconds })}
-          className={`relative flex h-14 w-14 items-center justify-center rounded-full transition-colors ${
+          className={`relative flex h-14 w-14 items-center justify-center rounded-full transition-[background-color,transform] duration-150 active:scale-90 motion-reduce:active:scale-100 ${
             pickerOpen ? "bg-white/15 text-white" : "text-white/85 hover:bg-white/10 hover:text-white"
           }`}
         >
-          <Icon size={32} strokeWidth={1.8} />
-          <span className="absolute font-mono text-[10.5px] font-bold tabular-nums leading-none">
-            {seconds}
-          </span>
+          {numberedOk ? (
+            <img
+              ref={iconRef}
+              src={numberedSrc}
+              width={30}
+              height={30}
+              alt=""
+              draggable={false}
+              className="select-none"
+              onError={() => setNumberedOk(false)}
+            />
+          ) : (
+            <>
+              <img
+                src={`/player-icons/seek-${direction}.svg`}
+                width={34}
+                height={34}
+                alt=""
+                draggable={false}
+                className="select-none"
+              />
+              <span className="absolute font-mono text-[10px] font-bold tabular-nums leading-none">
+                {seconds}
+              </span>
+            </>
+          )}
         </button>
       </Tooltip>
       {pickerOpen && (
-        <div className="absolute bottom-[calc(100%+12px)] left-1/2 z-30 -translate-x-1/2 overflow-hidden rounded-2xl border border-edge bg-elevated p-1.5 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
-          <div className="border-b border-edge-soft px-2.5 pb-2 pt-1.5 text-center text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
+        <div className="absolute bottom-[calc(100%+12px)] left-1/2 z-30 w-60 max-w-[calc(100vw-32px)] -translate-x-1/2 rounded-md bg-elevated p-3 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop">
+          <div className="mb-2.5 text-[10.5px] font-semibold uppercase tracking-[0.2em] text-ink-subtle">
             {word}
           </div>
-          <div className="flex items-start gap-1 pt-1.5">
-            <SeekColumn
-              label={t("Arrows")}
-              value={seconds}
-              onPick={commitChoice}
-              ariaFor={(n) => t("{word} {n} seconds", { word, n })}
+          <SeekGroup
+            label={t("Arrows")}
+            value={seconds}
+            options={expanded ? SEEK_STEP_OPTIONS : curatedFor(seconds)}
+            onPick={commitChoice}
+            ariaFor={(n) => t("{word} {n} seconds", { word, n })}
+          />
+          <div className="my-2.5 h-px bg-edge-soft" />
+          <SeekGroup
+            label={t("Shift + Arrows")}
+            value={shortSeconds}
+            options={expanded ? SEEK_STEP_OPTIONS : curatedFor(shortSeconds)}
+            onPick={commitShortChoice}
+            ariaFor={(n) => t("Short {word} {n} seconds", { word, n })}
+          />
+          <button
+            type="button"
+            onClick={() => setExpanded((e) => !e)}
+            className="mt-2.5 flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-[11.5px] font-medium text-ink-subtle transition-colors hover:bg-canvas/55 hover:text-ink"
+          >
+            {expanded ? t("Show less") : t("All times")}
+            <ChevronDown
+              size={13}
+              strokeWidth={2.4}
+              className={`transition-transform ${expanded ? "rotate-180" : ""}`}
             />
-            <div className="my-1 w-px self-stretch bg-edge-soft" />
-            <SeekColumn
-              label={t("Shift + Arrows")}
-              value={shortSeconds}
-              onPick={commitShortChoice}
-              ariaFor={(n) => t("Short {word} {n} seconds", { word, n })}
-            />
-          </div>
+          </button>
         </div>
       )}
     </div>
   );
 }
 
-function SeekColumn({
+function SeekGroup({
   label,
   value,
+  options,
   onPick,
   ariaFor,
 }: {
   label: string;
   value: number;
+  options: readonly number[];
   onPick: (seconds: number) => void;
   ariaFor: (seconds: number) => string;
 }) {
   return (
-    <div className="flex flex-col items-center">
-      <span className="px-1 pb-1 text-center text-[9.5px] font-semibold uppercase leading-tight tracking-[0.1em] text-ink-subtle">
+    <div>
+      <div className="mb-1.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
         {label}
-      </span>
-      <div className="flex flex-col-reverse gap-1">
-        {SEEK_STEP_OPTIONS.map((s) => {
-          const isSel = s === value;
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map((s) => {
+          const sel = s === value;
           return (
             <button
               key={s}
               type="button"
               onClick={() => onPick(s)}
-              className={`flex h-10 w-12 items-center justify-center rounded-full font-mono text-[12px] font-bold tabular-nums transition-colors ${
-                isSel
-                  ? "bg-elevated text-ink ring-1 ring-edge"
-                  : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
-              }`}
               aria-label={ariaFor(s)}
+              className={`flex h-9 min-w-[44px] items-center justify-center rounded-lg px-2.5 text-[13px] tabular-nums transition-colors ${
+                sel
+                  ? "bg-accent/15 font-semibold text-accent ring-1 ring-inset ring-accent/40"
+                  : "bg-canvas/50 text-ink-muted hover:bg-canvas/70 hover:text-ink"
+              }`}
             >
               {s}s
             </button>

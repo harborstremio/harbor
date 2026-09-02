@@ -16,7 +16,9 @@ export type Quality = "360p" | "720p" | "1080p" | "best";
 export type TrailerQualityPref = "auto" | Quality;
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-const TIMEOUT_MS = 270000;
+// Native retrieval may use 15s for metadata, then a 240s merged attempt and a
+// 120s progressive fallback. Keep the UI deadline beyond that complete retry path.
+export const TRAILER_FETCH_TIMEOUT_MS = 400_000;
 const CACHE_MAX = 64;
 
 const cache = new Map<string, Promise<TrailerInfo | null>>();
@@ -73,17 +75,20 @@ export function fetchTrailer(
       return null;
     },
   );
-  const timeout = new Promise<null>((resolve) => {
-    setTimeout(() => {
+  const p = new Promise<TrailerInfo | null>((resolve) => {
+    const timeout = setTimeout(() => {
       console.error("[harbor::trailer] fetch timed out", {
         videoId,
         quality,
-        timeoutMs: TIMEOUT_MS,
+        timeoutMs: TRAILER_FETCH_TIMEOUT_MS,
       });
       resolve(null);
-    }, TIMEOUT_MS);
-  });
-  const p = Promise.race([extract, timeout]).then((result) => {
+    }, TRAILER_FETCH_TIMEOUT_MS);
+    void extract.then((result) => {
+      clearTimeout(timeout);
+      resolve(result);
+    });
+  }).then((result) => {
     if (result === null) cache.delete(key);
     return result;
   });

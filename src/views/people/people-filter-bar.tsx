@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Dropdown } from "@/components/dropdown";
 import { type PeopleDept } from "@/lib/harbor-rank";

@@ -1,3 +1,4 @@
+import { withMetaCache } from "@/lib/cinemeta-cache";
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 
 const CINEMETA = "https://v3-cinemeta.strem.io";
@@ -129,8 +130,13 @@ export async function meta(
   force = false,
 ): Promise<Meta | null> {
   if (!force && !cinemetaEnabled()) return null;
-  const res = await fetch(`${CINEMETA}/meta/${type}/${id}.json`);
-  if (!res.ok) return null;
-  const json = await res.json();
-  return json.meta ?? null;
+  return withMetaCache(type, id, async () => {
+    const res = await fetch(`${CINEMETA}/meta/${type}/${id}.json`);
+    if (!res.ok) {
+      const definitive = res.status >= 400 && res.status < 500 && res.status !== 429;
+      return { value: null, cacheable: definitive };
+    }
+    const json = await res.json();
+    return { value: json.meta ?? null, cacheable: true };
+  });
 }

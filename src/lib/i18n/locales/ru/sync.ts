@@ -7,7 +7,7 @@ const sync: Record<string, string> = {
   Invite: "Пригласить",
   "Watch Together needs a relay.": "Для совместного просмотра нужен релей.",
   "A relay is a tiny Cloudflare Worker that passes play/pause/seek messages between you and your friends. No video data ever touches it. Deploy your own in one click (free tier is plenty), or paste a friend's invite link to use theirs.":
-    "Релей — это небольшой Cloudflare Worker, который передаёт команды воспроизведения, паузы и перемотки между вами и друзьями. Видеоданные через него не проходят. Разверните свой в один клик (бесплатного тарифа хватает с запасом) или вставьте ссылку-приглашение друга, чтобы подключиться к его релею.",
+    "Релей – это небольшой Cloudflare Worker, который передаёт команды воспроизведения, паузы и перемотки между вами и друзьями. Видеоданные через него не проходят. Разверните свой в один клик (бесплатного тарифа хватает с запасом) или вставьте ссылку-приглашение друга, чтобы подключиться к его релею.",
   "Paste invite link": "Вставить ссылку-приглашение",
   Join: "Присоединиться",
   "Your name": "Ваше имя",

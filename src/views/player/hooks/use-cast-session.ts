@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { t } from "@/lib/i18n";
 import { ffmpegInstallStep } from "@/lib/ffmpeg-install";
 import {
   castLoad,
@@ -30,61 +31,84 @@ type LoadParams = {
   subStyle?: CastSubStyle | null;
 };
 
+export function localizedFfmpegInstallStep(): string {
+  const step = ffmpegInstallStep();
+  if (step === "Open a terminal and run: brew install ffmpeg") {
+    return t("Open a terminal and run: brew install ffmpeg");
+  }
+  if (
+    step === "Install ffmpeg using your system package manager (apt, dnf, pacman, zypper, etc.)."
+  ) {
+    return t("Install ffmpeg using your system package manager (apt, dnf, pacman, zypper, etc.).");
+  }
+  if (step === "Open a terminal and run: winget install Gyan.FFmpeg") {
+    return t("Open a terminal and run: winget install Gyan.FFmpeg");
+  }
+  return step;
+}
+
 function buildActionableCastError(
   err: string,
   deviceName: string,
   deviceKind: CastDeviceInfo["kind"],
 ): CastErrorInfo | null {
-  if (deviceKind === "roku" && /ROKU_ECP_BLOCKED|control by mobile apps|network access/i.test(err)) {
+  if (
+    deviceKind === "roku" &&
+    /ROKU_ECP_BLOCKED|control by mobile apps|network access/i.test(err)
+  ) {
     return {
-      title: "Enable Roku Network Access",
-      message:
+      title: t("Enable Roku Network Access"),
+      message: t(
         "Your Roku is set to block control requests from apps on your network, so Harbor can't reach it. This is a one-time setting on the Roku.",
+      ),
       steps: [
-        "On your Roku remote, press Home.",
-        "Open Settings, then System, then Advanced system settings.",
-        'Select "Control by mobile apps" and set Network access to "Default".',
-        "Come back to Harbor and try casting again.",
+        t("On your Roku remote, press Home."),
+        t("Open Settings, then System, then Advanced system settings."),
+        t('Select "Control by mobile apps" and set Network access to "Default".'),
+        t("Come back to Harbor and try casting again."),
       ],
       deviceName,
     };
   }
   if (deviceKind === "roku" && /ROKU_ECP_NOT_FOUND/i.test(err)) {
     return {
-      title: "Couldn't reach this Roku",
-      message:
+      title: t("Couldn't reach this Roku"),
+      message: t(
         "Harbor found something at this address that looked like a Roku, but it didn't respond like one. The device may be offline or another product picked up the same broadcast.",
+      ),
       steps: [
-        "Make sure the Roku is powered on and on the same Wi-Fi as your computer.",
-        "Close the cast menu and reopen it to rescan the network.",
-        "If multiple Rokus appear, pick the one matching your TV's name.",
+        t("Make sure the Roku is powered on and on the same Wi-Fi as your computer."),
+        t("Close the cast menu and reopen it to rescan the network."),
+        t("If multiple Rokus appear, pick the one matching your TV's name."),
       ],
       deviceName,
     };
   }
   if (deviceKind === "roku" && /ROKU_MEDIA_ASSISTANT_MISSING|media assistant/i.test(err)) {
     return {
-      title: "Install Media Assistant",
-      message:
+      title: t("Install Media Assistant"),
+      message: t(
         "Roku changed its OS to block the built-in Media Player from accepting video from other apps. Media Assistant is a free channel built to take over that job. One-time install on your Roku and casting works.",
+      ),
       steps: [
-        "On your Roku, open Streaming Channels from the home screen.",
-        'Search for "Media Assistant" (channel ID 782875, free).',
-        "Install it.",
-        "Come back to Harbor and try casting again.",
+        t("On your Roku, open Streaming Channels from the home screen."),
+        t('Search for "Media Assistant" (channel ID 782875, free).'),
+        t("Install it."),
+        t("Come back to Harbor and try casting again."),
       ],
       deviceName,
     };
   }
   if (/ffmpeg/i.test(err)) {
     return {
-      title: "Install ffmpeg",
-      message:
+      title: t("Install ffmpeg"),
+      message: t(
         "Harbor uses ffmpeg to convert streams into formats TVs can play. It's a one-time install and Harbor will pick it up automatically.",
+      ),
       steps: [
-        ffmpegInstallStep(),
-        "Restart Harbor after the install completes.",
-        "Open the cast menu and try this device again.",
+        localizedFfmpegInstallStep(),
+        t("Restart Harbor after the install completes."),
+        t("Open the cast menu and try this device again."),
       ],
       deviceName,
     };
@@ -94,7 +118,9 @@ function buildActionableCastError(
 
 export function useCastSession(bridgeRef?: RefObject<PlayerBridge | null>) {
   const [castMenuOpen, setCastMenuOpen] = useState(false);
-  const [castMenuAnchor, setCastMenuAnchor] = useState<{ right: number; bottom: number } | null>(null);
+  const [castMenuAnchor, setCastMenuAnchor] = useState<{ right: number; bottom: number } | null>(
+    null,
+  );
   const [castDevice, setCastDevice] = useState<CastDeviceInfo | null>(null);
   const [pendingCastDevice, setPendingCastDevice] = useState<CastDeviceInfo | null>(null);
   const [castError, setCastError] = useState<string | null>(null);
@@ -125,7 +151,11 @@ export function useCastSession(bridgeRef?: RefObject<PlayerBridge | null>) {
   const closeCastMenu = useCallback(() => setCastMenuOpen(false), []);
 
   const pickCastDevice = useCallback(
-    async (device: CastDeviceInfo, params: Omit<LoadParams, "host" | "port">, beforeLoad?: () => void) => {
+    async (
+      device: CastDeviceInfo,
+      params: Omit<LoadParams, "host" | "port">,
+      beforeLoad?: () => void,
+    ) => {
       setCastMenuOpen(false);
       setCastError(null);
       setPendingCastDevice(device);
@@ -146,7 +176,7 @@ export function useCastSession(bridgeRef?: RefObject<PlayerBridge | null>) {
         setPendingCastDevice(null);
       } else {
         setPendingCastDevice(null);
-        const err = res.error ?? `Could not cast to ${device.name}.`;
+        const err = res.error ?? t("Could not cast to {deviceName}.", { deviceName: device.name });
         const actionable = buildActionableCastError(err, device.name, device.kind);
         if (actionable) {
           setCastErrorInfo(actionable);

@@ -7,24 +7,32 @@ import { simklRequest } from "../client";
 
 let cachedAll: string | null = null;
 let cachedAt = 0;
+let inflight: Promise<string | null> | null = null;
 const GATE_TTL_MS = 20000;
 
 export async function currentActivitiesAll(): Promise<string | null> {
   const now = Date.now();
   if (cachedAll !== null && now - cachedAt < GATE_TTL_MS) return cachedAll;
-  try {
-    const a = await simklRequest<{ all?: string }>("/sync/activities");
-    if (a && typeof a.all === "string") {
-      cachedAll = a.all;
-      cachedAt = now;
+  if (inflight) return inflight;
+  inflight = (async () => {
+    try {
+      const a = await simklRequest<{ all?: string }>("/sync/activities");
+      if (a && typeof a.all === "string") {
+        cachedAll = a.all;
+        cachedAt = Date.now();
+      }
+    } catch {
+      /* fail-open: caller pulls */
+    } finally {
+      inflight = null;
     }
-  } catch {
-    /* fail-open: caller pulls */
-  }
-  return cachedAll;
+    return cachedAll;
+  })();
+  return inflight;
 }
 
 export function resetActivitiesGate(): void {
   cachedAll = null;
   cachedAt = 0;
+  inflight = null;
 }

@@ -16,6 +16,8 @@ const KEYPADS = [
   "src/components/profile-picker/pin-entry.tsx",
 ];
 
+const BP_KEYPADS = ["src/views/big-picture/bp-who-is-watching-pin.tsx"];
+
 test("Arabic really does flip the document, so PIN order is at risk", () => {
   assert.match(read("src/lib/i18n/store.ts"), /root\.dir = isRtl\(lang\) \? "rtl" : "ltr";/);
   assert.match(read("src/lib/i18n/languages.ts"), /code: "ar",[^\n]*rtl: true/);
@@ -37,6 +39,22 @@ test("every numeric keypad stays left to right", () => {
   }
 });
 
+test("the ten-foot keypad stays left to right too", () => {
+  for (const p of BP_KEYPADS) {
+    const src = read(p);
+    assert.match(
+      src,
+      /dir="ltr"\s*\n\s*data-bp-grid/,
+      `${p} keypad would render 3,2,1 in Arabic`,
+    );
+    assert.match(
+      src,
+      /<div dir="ltr" className="flex items-center gap-\[clamp\(10px,1\.2vh,18px\)\]" aria-hidden>/,
+      `${p} PIN dots would fill right to left in Arabic`,
+    );
+  }
+});
+
 test("these are still the only numeric keypads in the app", () => {
   const found: string[] = [];
   const walk = (dir: URL) => {
@@ -52,5 +70,5 @@ test("these are still the only numeric keypads in the app", () => {
     }
   };
   walk(at("src/"));
-  assert.deepEqual(found.sort(), [...KEYPADS].sort());
+  assert.deepEqual(found.sort(), [...KEYPADS, ...BP_KEYPADS].sort());
 });

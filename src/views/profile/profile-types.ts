@@ -2,6 +2,7 @@ import type { FeaturedList } from "@/lib/social/featured-lists";
 import type { SocialKey } from "@/lib/social/socials";
 import type { RatingsSummary } from "@/lib/ratings/types";
 import type { FavoriteMedia } from "@/lib/providers/favorites-types";
+import type { PresenceStatus } from "@/lib/social/presence";
 
 export type SocialEntry = { service: SocialKey; value: string };
 
@@ -71,6 +72,7 @@ export type ProfileSummary = {
   pronouns?: string;
   customUrl?: string;
   online: boolean;
+  presence?: PresenceStatus;
   watching?: ProfileWatching;
   memberSince: string;
   counts: ProfileCounts;
@@ -131,7 +133,7 @@ export type Friend = {
   avatarUrl?: string;
   slogan?: string;
   online: boolean;
-  presence?: string;
+  presence?: PresenceStatus;
   status?: string;
   mutual?: boolean;
 };

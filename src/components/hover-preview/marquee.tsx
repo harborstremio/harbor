@@ -4,7 +4,6 @@ import {
   Ghost,
   Heart,
   MessageSquareWarning,
-  Play,
   Plus,
   ShieldAlert,
   Star,
@@ -13,6 +12,7 @@ import {
   Wine,
   type LucideIcon,
 } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { PreviewData } from "@/lib/hover-preview/preview-data";
@@ -26,6 +26,7 @@ import {
 import { tmdbImdbCached } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
+import { useT } from "@/lib/i18n";
 import { PreviewBlock } from "./block";
 import { CrownArt, PreviewCrown } from "./crown";
 
@@ -66,15 +67,20 @@ const ADVISORY_COLOR: Record<string, string> = {
   Mild: "text-ink-subtle",
 };
 
-function advisoryChip(category: string): { Icon: LucideIcon; label: string } {
+function advisoryChip(category: string): { Icon: LucideIcon; label: string; builtIn: boolean } {
   const c = category.toLowerCase();
-  if (c.includes("sex") || c.includes("nudity")) return { Icon: Heart, label: "Nudity" };
-  if (c.includes("violence") || c.includes("gore")) return { Icon: Swords, label: "Violence" };
-  if (c.includes("profanity")) return { Icon: MessageSquareWarning, label: "Language" };
-  if (c.includes("alcohol") || c.includes("drug") || c.includes("smoking"))
-    return { Icon: Wine, label: "Substances" };
-  if (c.includes("frighten") || c.includes("intense")) return { Icon: Ghost, label: "Intense" };
-  return { Icon: ShieldAlert, label: category };
+  if (c.includes("sex") || c.includes("nudity"))
+    return { Icon: Heart, label: "Nudity", builtIn: true };
+  if (c.includes("violence") || c.includes("gore"))
+    return { Icon: Swords, label: "Violence", builtIn: true };
+  if (c.includes("profanity"))
+    return { Icon: MessageSquareWarning, label: "Language", builtIn: true };
+  if (c.includes("alcohol") || c.includes("drug") || c.includes("smoking")) {
+    return { Icon: Wine, label: "Substances", builtIn: true };
+  }
+  if (c.includes("frighten") || c.includes("intense"))
+    return { Icon: Ghost, label: "Intense", builtIn: true };
+  return { Icon: ShieldAlert, label: category, builtIn: false };
 }
 
 function useAdvisory(imdbId: string | undefined): ParentalCategory[] {
@@ -103,6 +109,7 @@ function useAdvisory(imdbId: string | undefined): ParentalCategory[] {
 }
 
 function AdvisoryStrip({ imdbId }: { imdbId: string | undefined }) {
+  const t = useT();
   const cats = useAdvisory(imdbId);
   const rated = cats
     .filter((c) => ADVISORY_SEV[c.severity])
@@ -112,15 +119,16 @@ function AdvisoryStrip({ imdbId }: { imdbId: string | undefined }) {
   return (
     <div data-stagger="2" className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
       {rated.map((c) => {
-        const { Icon, label } = advisoryChip(c.category);
+        const { Icon, label, builtIn } = advisoryChip(c.category);
+        const displayLabel = builtIn ? t(label) : label;
         return (
           <span
             key={c.category}
-            title={`${label} · ${c.severity}`}
+            title={`${displayLabel} · ${t(c.severity)}`}
             className={`inline-flex items-center gap-1 text-[11.5px] font-medium ${ADVISORY_COLOR[c.severity] ?? "text-ink-subtle"}`}
           >
             <Icon size={13} strokeWidth={2} />
-            <span className="text-ink-muted">{label}</span>
+            <span className="text-ink-muted">{displayLabel}</span>
           </span>
         );
       })}
@@ -197,6 +205,7 @@ function MarqueeBlock({
   onPlay: () => void;
   onDetails: () => void;
 }) {
+  const t = useT();
   const meta = data.meta;
   const alt = tmdbImdbCached(meta.id);
   const imdb = meta.id.startsWith("tt") ? meta.id : (alt ?? undefined);
@@ -214,8 +223,8 @@ function MarqueeBlock({
         <button
           type="button"
           tabIndex={-1}
-          aria-label="Play"
-          title="Play"
+          aria-label={t("Play")}
+          title={t("Play")}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             stop(e);
@@ -226,7 +235,7 @@ function MarqueeBlock({
           <Play size={20} fill="currentColor" strokeWidth={0} className="translate-x-[1px]" />
         </button>
         <CircleAction
-          label={inList ? "Remove from watchlist" : "Add to watchlist"}
+          label={inList ? t("Remove from watchlist") : t("Add to watchlist")}
           active={inList}
           onClick={(e) => {
             stop(e);
@@ -244,7 +253,7 @@ function MarqueeBlock({
           {inList ? <Check size={18} strokeWidth={2.7} /> : <Plus size={18} strokeWidth={2.7} />}
         </CircleAction>
         <CircleAction
-          label="Mark watched"
+          label={t("Mark watched")}
           active={watched}
           onClick={(e) => {
             stop(e);
@@ -260,7 +269,7 @@ function MarqueeBlock({
         </CircleAction>
         <div className="ms-auto">
           <CircleAction
-            label="More info"
+            label={t("More info")}
             onClick={(e) => {
               stop(e);
               onDetails();

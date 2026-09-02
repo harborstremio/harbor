@@ -134,7 +134,7 @@ export function MangaHero({
             <button
               type="button"
               onClick={() => onOpen(current.id)}
-              className="inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-[13px] font-bold uppercase tracking-[0.08em] text-canvas transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97]"
+              className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
             >
               <BookOpen size={16} strokeWidth={2.6} />
               {t("Read Now")}
@@ -144,9 +144,11 @@ export function MangaHero({
               onClick={() => toggle({ id: current.id, title: current.title, cover: current.cover })}
               aria-label={fav ? t("Remove from favorites") : t("Add to favorites")}
               aria-pressed={fav}
-              className="flex h-12 w-12 items-center justify-center rounded-xl border border-edge bg-elevated/45 text-ink transition-colors hover:bg-elevated"
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.98] ${
+                fav ? "bg-ink/15 hover:bg-ink/20" : "bg-canvas/80 hover:bg-canvas/95"
+              }`}
             >
-              <Star size={18} strokeWidth={2.2} fill={fav ? "currentColor" : "none"} className={fav ? "text-amber-300" : ""} />
+              <Star size={18} strokeWidth={2.2} fill={fav ? "currentColor" : "none"} className={fav ? "text-accent" : "text-ink"} />
             </button>
           </div>
         </div>

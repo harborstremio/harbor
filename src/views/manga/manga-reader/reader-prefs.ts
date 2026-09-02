@@ -17,9 +17,9 @@ export const DEFAULT_PREFS: ReaderPrefs = {
   hideChapterEndHint: false,
 };
 
-export function loadPrefs(): ReaderPrefs {
+export function loadPrefs(key = PREFS_KEY): ReaderPrefs {
   try {
-    return { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") };
+    return { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(key) || "{}") };
   } catch {
     return DEFAULT_PREFS;
   }
@@ -38,7 +38,8 @@ export const BG_HEX: Record<ReaderBg, string> = {
 };
 
 export function pageStyle(fit: ReaderFit, zoom: number): CSSProperties {
-  if (fit === "height") return { height: `${Math.round(94 * zoom)}vh`, width: "auto", maxWidth: "100%" };
+  if (fit === "height")
+    return { height: `${Math.round(94 * zoom)}vh`, width: "auto", maxWidth: "100%" };
   if (fit === "original") return { width: `${Math.round(zoom * 100)}%`, maxWidth: "none" };
   return { width: "100%", maxWidth: `${Math.round(880 * zoom)}px` };
 }

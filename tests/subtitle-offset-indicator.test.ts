@@ -38,8 +38,8 @@ const subtitleMenuSource = readFileSync(
   new URL("../src/components/player/subtitle-menu/sync-control.tsx", import.meta.url),
   "utf8",
 );
-const languagePanelSource = readFileSync(
-  new URL("../src/views/settings/language-panel.tsx", import.meta.url),
+const subtitlesPanelSource = readFileSync(
+  new URL("../src/views/settings/subtitles-panel.tsx", import.meta.url),
   "utf8",
 );
 const defaultsSource = readFileSync(
@@ -96,7 +96,8 @@ test("subtitle offset settings support safe position and size choices", () => {
 });
 
 test("subtitle settings expose a preview, nine positions, and three sizes", () => {
-  assert.match(languagePanelSource, /title=\{t\("Subtitle sync indicator"\)\}/);
+  assert.match(subtitlesPanelSource, /<Section title=\{t\("Sync indicator"\)\}>/);
+  assert.match(subtitlesPanelSource, /<SubtitleOffsetSettings \/>/);
   assert.match(settingsSource, /<SubtitleOffsetIndicator delaySec=\{0\.3\} preview/);
   assert.equal(
     settingsSource.match(

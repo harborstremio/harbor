@@ -1,4 +1,5 @@
-import { Search } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
+import { useT } from "@/lib/i18n";
 
 export type LibCat = "all" | "Featured" | "Built-in" | "Template" | "Yours";
 
@@ -27,14 +28,16 @@ export function MyLibraryFilters({
   shown: number;
   total: number;
 }) {
+  const t = useT();
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="flex h-9 items-center gap-2 rounded-full border border-edge-soft bg-elevated/40 px-3.5">
-        <Search size={15} className="text-ink-subtle" />
+      <div className="flex h-9 items-center gap-2 rounded-md bg-canvas px-3.5">
+        <Search size={16} className="text-ink-subtle" />
         <input
           value={query}
           onChange={(e) => onQuery(e.target.value)}
-          placeholder="Search your library"
+          placeholder={t("Search your library")}
+          aria-label={t("Search your library")}
           className="w-48 bg-transparent text-[13px] text-ink placeholder:text-ink-subtle focus:outline-none"
         />
       </div>
@@ -47,19 +50,21 @@ export function MyLibraryFilters({
             key={c.id}
             type="button"
             onClick={() => onCat(c.id)}
-            className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-[12.5px] font-semibold transition-colors ${
+            className={`inline-flex h-9 items-center gap-1.5 rounded-md px-3.5 text-[12.5px] font-semibold transition-colors ${
               on
                 ? "border-ink bg-ink text-canvas"
-                : "border-edge-soft bg-elevated/40 text-ink-muted hover:border-edge hover:text-ink"
+                : "border-edge-soft bg-elevated text-ink-muted hover:bg-raised hover:text-ink"
             }`}
           >
-            {c.label}
-            <span className={`tabular-nums ${on ? "text-canvas/70" : "text-ink-subtle"}`}>{count}</span>
+            {t(c.label)}
+            <span className={`tabular-nums ${on ? "text-canvas/70" : "text-ink-subtle"}`}>
+              {count}
+            </span>
           </button>
         );
       })}
-      <span className="ms-auto text-[12px] tabular-nums text-ink-subtle">
-        {shown} of {total}
+      <span className="ms-auto text-[12.5px] tabular-nums text-ink-subtle">
+        {t("{shown} of {total}", { shown, total })}
       </span>
     </div>
   );

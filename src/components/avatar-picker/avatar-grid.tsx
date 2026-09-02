@@ -22,7 +22,7 @@ export function AvatarGrid({
       {items.map((it, i) => (
         <div
           key={it.key}
-          className="animate-in fade-in slide-in-from-bottom-1 motion-reduce:animate-none"
+          className="animate-fade-in-soft"
           style={{ animationDelay: `${Math.min(i * 15, 220)}ms`, animationDuration: "300ms" }}
         >
           <AvatarTile

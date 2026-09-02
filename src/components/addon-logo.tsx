@@ -98,6 +98,18 @@ export function resolveAddonLogo(logo: string | null | undefined, transportUrl: 
   }
 }
 
+export function addonLogoMap(
+  addons: ReadonlyArray<{ manifest?: { id?: string; logo?: string | null } | null; transportUrl?: string | null }>,
+): Map<string, string | null> {
+  const out = new Map<string, string | null>();
+  for (const a of addons) {
+    const id = a.manifest?.id;
+    if (!id) continue;
+    out.set(id, resolveAddonLogo(a.manifest?.logo, a.transportUrl));
+  }
+  return out;
+}
+
 function paletteFor(seed: string): readonly [string, string] {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;

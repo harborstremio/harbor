@@ -1,70 +1,141 @@
-mod anime4k;
-mod asr_model;
+// Modules that build on every target, desktop and Android alike. Nothing in
+// here may reach a `#[cfg(desktop)]` tauri API: every Window setter (show,
+// hide, close, set_size, set_position, set_focus, set_always_on_top,
+// start_dragging, set_icon) is desktop-only in tauri 2, and so are
+// `tauri::menu` and `tauri::tray`. The getters are not, which is why
+// display geometry reads are fine and display geometry writes are not.
 mod binary_lookup;
-mod browser;
-mod display_fit;
-mod cast;
 mod cast_hls;
-mod cast_server;
 mod cast_subs;
 mod crash_report;
 mod diagnostics;
-mod cf_relay;
-mod cf_solver;
-mod discord_auth;
-mod discord_rp;
-mod dlna;
 mod download;
-mod dvr;
+mod ebook_tts;
 mod fonts;
-mod fullscreen;
 mod gamepad;
-mod hdr_overlay;
 mod http_fetch;
 mod local_lib;
-mod media_controls;
-mod modal_overlay;
-mod mpv;
-mod multiview;
+mod media_server;
+mod power;
 mod proc_guard;
 mod proc_mem;
-mod roku;
-#[cfg(target_os = "macos")]
-mod mpv_render_mac;
-#[cfg(target_os = "linux")]
-mod mpv_render_linux;
-mod pip;
-#[cfg(target_os = "macos")]
-mod pip_mac;
-mod power;
-mod airplay;
 mod settings_store;
-mod shaders;
-mod song_id;
-mod song_id_gemini;
 mod stream_proxy;
 mod streams;
 mod stremio_auth;
-mod sub_extract;
-mod subsync;
-mod svp;
-mod thumbs;
-mod torrent_engine;
+mod subtitle_credentials;
 mod temp_prune;
-mod trailer;
+mod torrent_engine;
 mod transcode;
-mod tray;
 mod web_server;
+
+// Desktop-only. Each of these either drives a window, drives a tray or menu,
+// links libmpv, or exists purely to serve one of those. `desktop` is a cfg
+// alias emitted by tauri-build, so on Windows, macOS and Linux the predicate
+// is a compile-time true and the compiler sees exactly the tree it saw before.
+#[cfg(desktop)]
+mod airplay;
+#[cfg(desktop)]
+mod anime4k;
+#[cfg(desktop)]
+mod app_icon;
+#[cfg(desktop)]
+mod asr_model;
+#[cfg(desktop)]
+mod browser;
+#[cfg(desktop)]
+mod captions;
+#[cfg(desktop)]
+mod cast;
+#[cfg(desktop)]
+mod cast_server;
+#[cfg(desktop)]
+mod cf_relay;
+#[cfg(desktop)]
+mod cf_solver;
+mod discord_auth;
+#[cfg(desktop)]
+mod discord_rp;
+#[cfg(desktop)]
+mod display_fit;
+#[cfg(desktop)]
+mod dlna;
+#[cfg(desktop)]
+mod dvr;
+#[cfg(desktop)]
+mod fullscreen;
+#[cfg(desktop)]
+mod harbor_lan;
+#[cfg(desktop)]
+mod hdr_overlay;
+#[cfg(desktop)]
+mod installer_handoff;
+#[cfg(desktop)]
+mod media_controls;
+mod modal_overlay;
+#[cfg(desktop)]
+mod mpv;
+#[cfg(target_os = "linux")]
+mod mpv_render_linux;
+#[cfg(target_os = "macos")]
+mod mpv_render_mac;
+#[cfg(desktop)]
+mod multiview;
+#[cfg(desktop)]
+mod pip;
+#[cfg(target_os = "macos")]
+mod pip_mac;
+#[cfg(desktop)]
+mod roku;
+#[cfg(desktop)]
+mod shaders;
+#[cfg(desktop)]
+mod song_id;
+#[cfg(desktop)]
+mod song_id_gemini;
+#[cfg(desktop)]
+mod sub_extract;
+#[cfg(desktop)]
+mod subsync;
+#[cfg(desktop)]
+mod svp;
+#[cfg(desktop)]
+mod thumbs;
+#[cfg(desktop)]
+mod trailer;
+#[cfg(desktop)]
+mod tray;
+#[cfg(desktop)]
 mod webview_helpers;
 
+// http_fetch calls crate::cf_solver on the challenge path, and the real solver
+// needs a hidden webview window that Android does not have. Rather than edit
+// http_fetch, mobile binds the same module name to a stub that reports the
+// capability as absent instead of pretending it succeeded.
+#[cfg(mobile)]
+#[path = "cf_solver_mobile.rs"]
+mod cf_solver;
+#[cfg(mobile)]
+mod mobile;
+// Android P2P policy. torrent_engine picks up engine_dir, new_session and the
+// DHT rate from here behind the same cfg, so leaving this undeclared silently
+// reverts Android to the desktop tuning: payloads into a cacheDir the OS
+// reclaims mid-stream, and 400 DHT qps that fills a home router's NAT table.
+#[cfg(target_os = "android")]
+mod p2p_android;
+
+#[cfg(desktop)]
 pub(crate) fn release_stremio_scheme(app: &tauri::AppHandle) {
+    use std::io::Write;
     use tauri_plugin_deep_link::DeepLinkExt;
-    match app.deep_link().unregister("stremio") {
-        Ok(()) => eprintln!("[harbor::deeplink] released stremio:// on shutdown"),
-        Err(e) => eprintln!("[harbor::deeplink] could not release stremio://: {}", e),
-    }
+    let msg = match app.deep_link().unregister("stremio") {
+        Ok(()) => "[harbor::deeplink] released stremio:// on shutdown".to_string(),
+        Err(e) => format!("[harbor::deeplink] could not release stremio://: {}", e),
+    };
+    let _ = writeln!(std::io::stderr(), "{}", msg);
 }
 
+#[cfg(desktop)]
 pub(crate) fn shutdown_services(app: &tauri::AppHandle) {
     release_stremio_scheme(app);
     thumbs::shutdown(app);
@@ -77,14 +148,29 @@ pub(crate) fn shutdown_services(app: &tauri::AppHandle) {
     crash_report::mark_clean_exit();
 }
 
-pub static CLOSE_FLUSH_DONE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+#[cfg(desktop)]
+pub static CLOSE_FLUSH_DONE: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+#[cfg(desktop)]
 static CLOSE_IN_PROGRESS: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+// Maximised windows are clamped to the work area so they never cover the taskbar.
+// Fullscreen must cover it, so the clamp is lifted while fullscreen is active.
+#[cfg(desktop)]
+static MAXGUARD_CLAMP: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(true);
 
+#[cfg(desktop)]
+#[tauri::command]
+fn set_maximize_clamp(enabled: bool) {
+    MAXGUARD_CLAMP.store(enabled, std::sync::atomic::Ordering::Relaxed);
+}
+
+#[cfg(desktop)]
 #[tauri::command]
 fn harbor_flush_done() {
     CLOSE_FLUSH_DONE.store(true, std::sync::atomic::Ordering::SeqCst);
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 fn harbor_startup_ready(window: tauri::WebviewWindow) {
     if window.label() == "main" {
@@ -92,6 +178,7 @@ fn harbor_startup_ready(window: tauri::WebviewWindow) {
     }
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 fn close_aux_windows(app: tauri::AppHandle) {
     use tauri::Manager;
@@ -102,6 +189,7 @@ fn close_aux_windows(app: tauri::AppHandle) {
     }
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 async fn deeplink_set_stremio(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
     use tauri_plugin_deep_link::DeepLinkExt;
@@ -115,6 +203,7 @@ async fn deeplink_set_stremio(app: tauri::AppHandle, enabled: bool) -> Result<()
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 async fn deeplink_is_stremio_registered(app: tauri::AppHandle) -> Result<bool, String> {
     use tauri_plugin_deep_link::DeepLinkExt;
@@ -149,10 +238,20 @@ fn make_main_transparent(app: &tauri::AppHandle) {
         let controller = webview.controller();
         match controller.cast::<ICoreWebView2Controller2>() {
             Ok(controller2) => {
-                let color = COREWEBVIEW2_COLOR { A: 0, R: 0, G: 0, B: 0 };
+                let color = COREWEBVIEW2_COLOR {
+                    A: 0,
+                    R: 0,
+                    G: 0,
+                    B: 0,
+                };
                 match controller2.SetDefaultBackgroundColor(color) {
-                    Ok(()) => eprintln!("[harbor::transparent] SetDefaultBackgroundColor OK (alpha=0)"),
-                    Err(e) => eprintln!("[harbor::transparent] SetDefaultBackgroundColor FAILED: {:?}", e),
+                    Ok(()) => {
+                        eprintln!("[harbor::transparent] SetDefaultBackgroundColor OK (alpha=0)")
+                    }
+                    Err(e) => eprintln!(
+                        "[harbor::transparent] SetDefaultBackgroundColor FAILED: {:?}",
+                        e
+                    ),
                 }
             }
             Err(e) => eprintln!("[harbor::transparent] cast to Controller2 FAILED: {:?}", e),
@@ -197,9 +296,17 @@ unsafe extern "system" fn maxguard_subclass_proc(
         GetMonitorInfoW, MonitorFromWindow, MONITORINFO, MONITOR_DEFAULTTONEAREST,
     };
     use windows::Win32::UI::Shell::DefSubclassProc;
-    use windows::Win32::UI::WindowsAndMessaging::{MINMAXINFO, WM_GETMINMAXINFO};
+    use windows::Win32::UI::WindowsAndMessaging::{MINMAXINFO, WM_ERASEBKGND, WM_GETMINMAXINFO};
+    // Claim the erase. The WebView covers the whole client area, so nothing
+    // needs painting underneath it, but Windows still fills the frame with the
+    // class brush on every move and resize tick. The WebView and the mpv
+    // surface both repaint a beat later, and that gap is the black strobe over
+    // the video while the window is being dragged.
+    if msg == WM_ERASEBKGND {
+        return windows::Win32::Foundation::LRESULT(1);
+    }
     let res = DefSubclassProc(hwnd, msg, wparam, lparam);
-    if msg == WM_GETMINMAXINFO {
+    if msg == WM_GETMINMAXINFO && MAXGUARD_CLAMP.load(std::sync::atomic::Ordering::Relaxed) {
         let monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
         let mut mi = MONITORINFO {
             cbSize: std::mem::size_of::<MONITORINFO>() as u32,
@@ -229,7 +336,12 @@ fn install_maximize_guard(app: &tauri::AppHandle) {
         return;
     };
     unsafe {
-        let _ = SetWindowSubclass(hwnd, Some(maxguard_subclass_proc), HARBOR_MAXGUARD_SUBCLASS_ID, 0);
+        let _ = SetWindowSubclass(
+            hwnd,
+            Some(maxguard_subclass_proc),
+            HARBOR_MAXGUARD_SUBCLASS_ID,
+            0,
+        );
     }
     eprintln!("[harbor::maxguard] WM_GETMINMAXINFO work-area guard installed");
 }
@@ -362,8 +474,10 @@ fn harbor_resume_webview(app: tauri::AppHandle) {
     }
 }
 
+#[cfg(desktop)]
 const REVEAL_FAILSAFE_MS: u64 = 12_000;
 
+#[cfg(desktop)]
 fn install_reveal_failsafe(app: &tauri::AppHandle) {
     use tauri::Manager;
     let handle = app.clone();
@@ -384,6 +498,7 @@ fn install_reveal_failsafe(app: &tauri::AppHandle) {
     });
 }
 
+#[cfg(desktop)]
 fn ensure_window_on_screen(app: &tauri::AppHandle) {
     use tauri::Manager;
     let Some(window) = app.get_webview_window("main") else {
@@ -423,13 +538,19 @@ fn ensure_window_on_screen(app: &tauri::AppHandle) {
     let cx = mp.x + (ms.width as i32 - ww).max(0) / 2;
     let cy = mp.y + (ms.height as i32 - wh).max(0) / 2;
     let _ = window.set_position(tauri::PhysicalPosition::new(cx, cy));
-    eprintln!("[harbor::window] launched off-screen; recentered to {},{}", cx, cy);
+    eprintln!(
+        "[harbor::window] launched off-screen; recentered to {},{}",
+        cx, cy
+    );
 }
 
+#[cfg(desktop)]
 const MEDIA_EXTS: &[&str] = &[
-    "mkv", "mp4", "avi", "mov", "webm", "m4v", "ts", "m2ts", "mpg", "mpeg", "wmv", "flv", "ogv", "3gp",
+    "mkv", "mp4", "avi", "mov", "webm", "m4v", "ts", "m2ts", "mpg", "mpeg", "wmv", "flv", "ogv",
+    "3gp",
 ];
 
+#[cfg(desktop)]
 fn media_file_from_args(args: &[String]) -> Option<String> {
     for a in args {
         let lower = a.to_lowercase();
@@ -454,7 +575,16 @@ fn harbor_take_pending_file() -> Option<String> {
     pending_open_file().lock().ok().and_then(|mut g| g.take())
 }
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
+// Android runs an entirely separate builder in `mobile.rs`. Desktop keeps this
+// one verbatim: the `cfg_attr(mobile, ...)` that used to sit here expanded to
+// nothing on desktop, so the emitted code is unchanged.
+#[cfg(mobile)]
+#[tauri::mobile_entry_point]
+pub fn run() {
+    mobile::run();
+}
+
+#[cfg(desktop)]
 pub fn run() {
     {
         let args: Vec<String> = std::env::args().skip(1).collect();
@@ -484,6 +614,7 @@ pub fn run() {
     let dvr_state = dvr::DvrState::new();
     let multiview_state = multiview::MultiviewState::new();
     let modal_overlay_state = modal_overlay::ModalOverlayState::new();
+    let discord_loopback_state = discord_auth::DiscordLoopbackState::new();
     let app_builder = tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
             use tauri::{Emitter, Manager};
@@ -506,10 +637,10 @@ pub fn run() {
             }
         }))
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_deep_link::init())
@@ -532,8 +663,8 @@ pub fn run() {
         .manage(dvr_state)
         .manage(multiview_state)
         .manage(modal_overlay_state)
+        .manage(discord_loopback_state)
         .manage(discord_rp::DiscordState::new())
-        .manage(discord_auth::DiscordLoopbackState::new())
         .manage(download::DownloadState::new());
 
     #[cfg(target_os = "macos")]
@@ -677,13 +808,20 @@ pub fn run() {
             }
         })
         .invoke_handler(tauri::generate_handler![
+            set_maximize_clamp,
             crash_report::take_startup_crash_report,
             fonts::install_sub_font,
             fonts::remove_sub_font,
             fonts::list_sub_fonts,
+            ebook_tts::ebook_tts_synthesize,
+            ebook_tts::ebook_tts_cancel,
+            ebook_tts::ebook_tts_voices,
             harbor_flush_done,
             harbor_startup_ready,
             close_aux_windows,
+            installer_handoff::handoff_probe,
+            installer_handoff::handoff_stage,
+            installer_handoff::handoff_launch,
             power::power_inhibit,
             harbor_set_webview_memory_low,
             harbor_set_webview_visible,
@@ -694,6 +832,7 @@ pub fn run() {
             subsync::moviehash::compute_moviehash,
             subsync::sync_subtitle,
             subsync::scorer::subsync_score_transform,
+            subsync::scorer::subsync_preflight_candidates,
             subsync::torrent_sync::torrent_sync_availability,
             subsync::torrent_sync::torrent_sync_subtitle,
             subsync::torrent_sync::torrent_score_transform,
@@ -724,6 +863,7 @@ pub fn run() {
             settings_store::settings_write,
             settings_store::secrets_read,
             settings_store::secrets_write,
+            media_server::media_server_request,
             proc_mem::harbor_process_memory,
             diagnostics::diagnostics_collect,
             diagnostics::diagnostics_cleanup,
@@ -758,11 +898,16 @@ pub fn run() {
             mpv::mpv_gif_stop,
             mpv::mpv_gif_abort,
             mpv::mpv_clip_save,
+            captions::captions_open,
+            captions::captions_close,
+            captions::captions_push,
+            captions::captions_window_is_open,
+            captions::captions_request_state,
             modal_overlay::modal_overlay_open,
             modal_overlay::modal_overlay_close,
+            modal_overlay::modal_overlay_emit_result,
             modal_overlay::modal_overlay_emit_state,
             modal_overlay::modal_overlay_emit_action,
-            modal_overlay::modal_overlay_emit_result,
             modal_overlay::modal_overlay_sync,
             modal_overlay::modal_overlay_get_pending,
             hdr_overlay::hdr_overlay_open,
@@ -773,9 +918,10 @@ pub fn run() {
             hdr_overlay::hdr_overlay_emit_action,
             mpv::mpv_sub_add,
             mpv::sub_download,
+            mpv::mpv_stop,
             mpv::mpv_release_media,
             mpv::mpv_restore_media_surface,
-            mpv::mpv_stop,
+            discord_auth::discord_auth_start,
             pip::pip_open,
             pip::pip_get_session,
             pip::pip_close,
@@ -804,6 +950,8 @@ pub fn run() {
             multiview::multiview_stop_all,
             http_fetch::harbor_fetch,
             http_fetch::harbor_upload,
+            subtitle_credentials::subtitle_credential_bind,
+            subtitle_credentials::subtitle_credentials_clear,
             cf_solver::cf_report,
             discord_rp::discord_set_presence,
             discord_rp::discord_clear,
@@ -814,6 +962,10 @@ pub fn run() {
             gamepad::gamepad_set_background_input,
             discord_rp::discord_set_enabled,
             cast::cast_discover,
+            harbor_lan::harbor_lan_identity,
+            harbor_lan::harbor_lan_advertise,
+            harbor_lan::harbor_lan_stop_advertise,
+            harbor_lan::harbor_lan_discover,
             dlna::lan_ip,
             cast::cast_load,
             cast::cast_play,
@@ -826,6 +978,7 @@ pub fn run() {
             torrent_engine::torrent_engine_status,
             torrent_engine::torrent_engine_add,
             torrent_engine::torrent_engine_select,
+            torrent_engine::torrent_engine_select_set,
             torrent_engine::torrent_engine_stats,
             torrent_engine::torrent_engine_list,
             torrent_engine::torrent_engine_pause,
@@ -843,9 +996,9 @@ pub fn run() {
             tray::tray_set_prefs,
             tray::tray_set_custom_themes,
             stremio_auth::stremio_auth_start,
-            discord_auth::discord_auth_start,
             song_id::recognize_now_playing,
             song_id::recognize_now_playing_ai,
+            app_icon::set_app_icon,
             deeplink_set_stremio,
             deeplink_is_stremio_registered,
             harbor_take_pending_file,

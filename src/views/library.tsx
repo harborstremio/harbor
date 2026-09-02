@@ -1,4 +1,15 @@
-import { BarChart3, Bookmark, Clock, Eye, EyeOff, HardDrive, Layers, Library, Star } from "lucide-react";
+import {
+  BarChart3,
+  Bookmark,
+  Clock,
+  Eye,
+  EyeOff,
+  HardDrive,
+  Library,
+  Server,
+  Star,
+} from "lucide-react";
+import { UiIcon } from "@/components/ui-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import traktLogo from "@/assets/trakt.svg";
 import anilistLogo from "@/assets/anilist.png";
@@ -26,6 +37,7 @@ import { SimklTab } from "./library/simkl-tab";
 import { TraktTab } from "./library/trakt-tab";
 import { WatchlistTab } from "./library/watchlist-tab";
 import { LetterboxdTab } from "./library/letterboxd-tab";
+import { MediaServersTab } from "./library/media-servers-tab";
 import { pushActivityHint } from "@/lib/discord/activity-hint";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { LibraryFeaturedProvider, useLibraryFeatured } from "./library/featured-context";
@@ -49,6 +61,7 @@ function readSavedTab(): Tab {
       v === "watchlist" ||
       v === "history" ||
       v === "local" ||
+      v === "media-servers" ||
       v === "lists" ||
       v === "favorites" ||
       v === "trakt" ||
@@ -142,6 +155,7 @@ export function LibraryView({ active }: { active: boolean }) {
           {tab === "watchlist" && <WatchlistTab mode="watchlist" />}
           {tab === "history" && <HistoryTab />}
           {tab === "local" && <LocalTab scrollRef={scrollRef} />}
+          {tab === "media-servers" && <MediaServersTab scrollRef={scrollRef} />}
           {tab === "lists" && <MyListsTab />}
           {tab === "favorites" && <FavoritesTab />}
           {tab === "trakt" && traktConnected && <TraktTab />}
@@ -251,8 +265,12 @@ function Header({
           <HardDrive size={14} strokeWidth={2.2} />
           {t("Local")}
         </TabBtn>
+        <TabBtn active={tab === "media-servers"} onClick={() => onTab("media-servers")}>
+          <Server size={14} strokeWidth={2.2} />
+          {t("Media Servers")}
+        </TabBtn>
         <TabBtn active={tab === "lists"} onClick={() => onTab("lists")}>
-          <Layers size={14} strokeWidth={2.2} />
+          <UiIcon name="list" className="h-3.5 w-3.5" />
           {t("My Lists")}
         </TabBtn>
         <TabBtn active={tab === "favorites"} onClick={() => onTab("favorites")}>

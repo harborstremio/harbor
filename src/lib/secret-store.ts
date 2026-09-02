@@ -5,6 +5,8 @@ const SECRET_PREFIXES = [
   "harbor.trakt.session.v1",
   "harbor.mal.session.v1",
   "harbor.anilist.session.v1",
+  "harbor.media-server.token.v1",
+  "harbor.plex-auth.device.v1",
 ];
 
 let store: Record<string, string> = {};

@@ -4,7 +4,17 @@ import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { Meta } from "./cinemeta";
 import type { PlayEpisode } from "./view";
 import { tmdbDetails, tmdbSeasonEpisodes } from "./providers/tmdb";
-import { resolveMeta } from "./meta-resource";
+import { tmdbLanguageIso } from "./providers/tmdb/tmdb-client";
+import { pickLocalizedText } from "./localized-text";
+import {
+  PREFERRED_TEXT_SCORE,
+  preferCustomMeta,
+  preferredMeta,
+  preferredVideoMap,
+  preferredVideoName,
+  preferredVideoOverview,
+  resolveMeta,
+} from "./meta-resource";
 import { animeKitsuMeta } from "./providers/anime-kitsu-addon";
 import { externalToKitsu, kitsuToAnilist } from "./providers/anime-mapping";
 import { parseKitsuId } from "./providers/kitsu";
@@ -279,8 +289,38 @@ export async function fetchUpcomingEpisodes(
   return eps.slice(idx + 1, idx + 1 + count);
 }
 
+async function overlayPreferredEpisodes(id: string, eps: PlayEpisode[]): Promise<void> {
+  const full = await preferredMeta("series", id);
+  const byKey = preferredVideoMap(full?.videos);
+  if (byKey.size === 0) return;
+  const lang = tmdbLanguageIso();
+  for (const ep of eps) {
+    const v = byKey.get(`${ep.season}:${ep.episode}`);
+    if (!v) continue;
+    const name = pickLocalizedText(
+      [
+        { text: preferredVideoName(v), score: PREFERRED_TEXT_SCORE },
+        { text: ep.name ?? "" },
+      ],
+      { forName: true, lang },
+    );
+    if (name) ep.name = name;
+    const overview = pickLocalizedText(
+      [
+        { text: preferredVideoOverview(v), score: PREFERRED_TEXT_SCORE },
+        { text: ep.overview ?? "" },
+      ],
+      { lang },
+    );
+    if (overview) ep.overview = overview;
+    if (v.thumbnail) ep.still = v.thumbnail;
+  }
+}
+
 async function loadCinemetaEpisodes(id: string): Promise<PlayEpisode[] | null> {
-  if (cinemetaListCache.has(id)) return cinemetaListCache.get(id)!;
+  const prefer = preferCustomMeta();
+  const cacheKey = prefer ? `${id}:prefer` : id;
+  if (cinemetaListCache.has(cacheKey)) return cinemetaListCache.get(cacheKey)!;
   const res = await fetch(`https://v3-cinemeta.strem.io/meta/series/${id}.json`);
   if (!res.ok) return null;
   const json = await res.json();
@@ -313,7 +353,8 @@ async function loadCinemetaEpisodes(id: string): Promise<PlayEpisode[] | null> {
     });
   }
   eps.sort((a, b) => a.season - b.season || a.episode - b.episode);
-  lruSet(cinemetaListCache, id, eps, SEASON_CACHE_MAX);
+  if (prefer) await overlayPreferredEpisodes(id, eps);
+  lruSet(cinemetaListCache, cacheKey, eps, SEASON_CACHE_MAX);
   return eps;
 }
 

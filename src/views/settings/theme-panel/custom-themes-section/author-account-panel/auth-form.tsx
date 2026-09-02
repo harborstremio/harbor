@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AlertCircle, Check, Loader2, UserRound, X } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { loginAuthor, recoverAuthor, registerAuthor } from "@/lib/theme-auth";
 import { TextField } from "../field";
 import { PasswordField } from "./password-field";
@@ -16,6 +17,7 @@ const MODES: { id: Mode; label: string; action: string }[] = [
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,24}$/;
 
 export function AuthForm({ onRecovery }: { onRecovery: (code: string) => void }) {
+  const t = useT();
   const [mode, setMode] = useState<Mode>("signin");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -45,7 +47,11 @@ export function AuthForm({ onRecovery }: { onRecovery: (code: string) => void })
         const { recoveryCode: code } = await registerAuthor(username.trim(), password);
         onRecovery(code);
       } else {
-        const { recoveryCode: code } = await recoverAuthor(username.trim(), recoveryCode.trim(), newPassword);
+        const { recoveryCode: code } = await recoverAuthor(
+          username.trim(),
+          recoveryCode.trim(),
+          newPassword,
+        );
         onRecovery(code);
       }
     } catch (err) {
@@ -58,18 +64,22 @@ export function AuthForm({ onRecovery }: { onRecovery: (code: string) => void })
   const active = MODES.find((m) => m.id === mode)!;
 
   return (
-    <div className="flex flex-col gap-5 rounded-2xl border border-edge-soft bg-surface p-6">
+    <div className="flex flex-col gap-5 rounded-md bg-surface p-6">
       <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent">
-          <UserRound size={19} strokeWidth={2} />
+        <span className="flex h-10 w-10 items-center justify-center rounded-md bg-accent-soft text-accent">
+          <UserRound size={18} strokeWidth={2} />
         </span>
         <div className="flex flex-col">
-          <h3 className="text-[16px] font-semibold tracking-tight text-ink">Author account</h3>
-          <p className="text-[12.5px] text-ink-subtle">Publish themes under your name and update them anytime.</p>
+          <h3 className="text-[16px] font-semibold tracking-tight text-ink">
+            {t("Author account")}
+          </h3>
+          <p className="text-[12.5px] text-ink-subtle">
+            {t("Publish themes under your name and update them anytime.")}
+          </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-1 rounded-xl border border-edge-soft bg-elevated/40 p-1">
+      <div className="flex items-center gap-1 rounded-md bg-elevated p-1">
         {MODES.map((m) => (
           <button
             key={m.id}
@@ -78,11 +88,11 @@ export function AuthForm({ onRecovery }: { onRecovery: (code: string) => void })
               setMode(m.id);
               setError(null);
             }}
-            className={`h-8 flex-1 rounded-lg text-[12.5px] font-semibold transition-colors ${
+            className={`h-8 flex-1 rounded-md text-[12.5px] font-semibold transition-colors ${
               mode === m.id ? "bg-ink text-canvas" : "text-ink-muted hover:text-ink"
             }`}
           >
-            {m.label}
+            {t(m.label)}
           </button>
         ))}
       </div>
@@ -90,12 +100,16 @@ export function AuthForm({ onRecovery }: { onRecovery: (code: string) => void })
       <form onSubmit={submit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <TextField
-            label="Username"
+            label={t("Username")}
             value={username}
             onChange={setUsername}
-            placeholder="yourname"
+            placeholder={t("yourname")}
             maxLength={24}
-            hint={mode === "register" && !usernameOk ? "3 to 24 letters, numbers or underscores." : undefined}
+            hint={
+              mode === "register" && !usernameOk
+                ? t("3 to 24 letters, numbers or underscores.")
+                : undefined
+            }
           />
           {mode === "register" && usernameOk && (
             <UsernameStatus state={availability} name={username.trim()} />
@@ -103,36 +117,55 @@ export function AuthForm({ onRecovery }: { onRecovery: (code: string) => void })
         </div>
 
         {mode === "signin" && (
-          <PasswordField label="Password" value={password} onChange={setPassword} placeholder="Your password" />
+          <PasswordField
+            label={t("Password")}
+            value={password}
+            onChange={setPassword}
+            placeholder={t("Your password")}
+          />
         )}
         {mode === "register" && (
-          <PasswordField label="Password" value={password} onChange={setPassword} placeholder="At least 8 characters" showStrength />
+          <PasswordField
+            label={t("Password")}
+            value={password}
+            onChange={setPassword}
+            placeholder={t("At least 8 characters")}
+            showStrength
+          />
         )}
         {mode === "recover" && (
           <>
             <TextField
-              label="Recovery code"
+              label={t("Recovery code")}
               value={recoveryCode}
               onChange={setRecoveryCode}
-              placeholder="The code from sign up"
+              placeholder={t("The code from sign up")}
               maxLength={40}
             />
-            <PasswordField label="New password" value={newPassword} onChange={setNewPassword} placeholder="At least 8 characters" showStrength />
+            <PasswordField
+              label={t("New password")}
+              value={newPassword}
+              onChange={setNewPassword}
+              placeholder={t("At least 8 characters")}
+              showStrength
+            />
           </>
         )}
 
         {error && <p className="text-[12.5px] text-danger">{error}</p>}
         {mode === "register" && !error && (
-          <p className="text-[11.5px] text-ink-subtle">You will get a one-time recovery code right after this.</p>
+          <p className="text-[11.5px] text-ink-subtle">
+            {t("You will get a one-time recovery code right after this.")}
+          </p>
         )}
 
         <button
           type="submit"
           disabled={!ready || busy}
-          className="flex h-11 items-center justify-center gap-2 rounded-xl bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
+          className="flex h-11 items-center justify-center gap-2 rounded-md bg-accent text-[13.5px] font-semibold text-canvas transition duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
         >
           {busy && <Loader2 size={16} className="animate-spin" />}
-          {active.action}
+          {t(active.action)}
         </button>
       </form>
     </div>
@@ -140,31 +173,32 @@ export function AuthForm({ onRecovery }: { onRecovery: (code: string) => void })
 }
 
 function UsernameStatus({ state, name }: { state: Availability; name: string }) {
+  const t = useT();
   if (state === "checking") {
     return (
       <span className="flex items-center gap-1.5 text-[11.5px] text-ink-subtle">
-        <Loader2 size={12} className="animate-spin" /> Checking availability
+        <Loader2 size={12} className="animate-spin" /> {t("Checking availability")}
       </span>
     );
   }
   if (state === "available") {
     return (
       <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-success">
-        <Check size={12} strokeWidth={2.6} /> {name} is available
+        <Check size={12} strokeWidth={2.6} /> {t("{name} is available", { name })}
       </span>
     );
   }
   if (state === "taken") {
     return (
       <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-danger">
-        <X size={12} strokeWidth={2.6} /> {name} is taken
+        <X size={12} strokeWidth={2.6} /> {t("{name} is taken", { name })}
       </span>
     );
   }
   if (state === "error") {
     return (
       <span className="flex items-center gap-1.5 text-[11.5px] text-ink-subtle">
-        <AlertCircle size={12} strokeWidth={2.2} /> Couldn't check availability
+        <AlertCircle size={12} strokeWidth={2.2} /> {t("Couldn't check availability")}
       </span>
     );
   }

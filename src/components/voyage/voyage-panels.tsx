@@ -1,12 +1,13 @@
-import { Film, Play } from "lucide-react";
+import { Film } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useT } from "@/lib/i18n";
 import { endVoyage } from "@/lib/voyage/store";
 
 export function CompletePanel({ total }: { total: number }) {
   const t = useT();
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[10px] border border-dashed border-edge bg-canvas/30 px-6 py-10 text-center">
-      <span className="grid h-14 w-14 place-items-center rounded-[10px] bg-accent/12 text-accent">
+    <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-edge bg-canvas/30 px-6 py-10 text-center">
+      <span className="grid h-14 w-14 place-items-center rounded-md bg-accent/12 text-accent">
         <Film size={24} strokeWidth={1.9} />
       </span>
       <div className="flex max-w-sm flex-col gap-1">
@@ -30,7 +31,7 @@ export function CompletePanel({ total }: { total: number }) {
 export function ExhaustedPanel({ picked, onStart }: { picked: number; onStart: () => void }) {
   const t = useT();
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[10px] border border-dashed border-edge bg-canvas/30 px-6 py-9 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-edge bg-canvas/30 px-6 py-9 text-center">
       <span className="text-[13.5px] text-ink-muted">
         {picked > 0
           ? t("No more films to add. Start with what you picked.")

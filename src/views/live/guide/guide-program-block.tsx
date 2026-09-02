@@ -1,5 +1,5 @@
 import { RotateCcw } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import { formatTimeLabel, PX_PER_MS } from "./guide-utils";
@@ -28,7 +28,7 @@ export function GuideProgramBlock({
   const t = useT();
   const ref = useRef<HTMLButtonElement>(null);
   const [hovering, setHovering] = useState(false);
-  const [pos, setPos] = useState<{ left: number; top: number; below: boolean } | null>(null);
+  const [pos, setPos] = useState<{ left: number; above: number; below: number } | null>(null);
   const hideTimerRef = useRef<number | null>(null);
   const showTimerRef = useRef<number | null>(null);
 
@@ -65,12 +65,7 @@ export function GuideProgramBlock({
     if (!r) return;
     const viewportW = window.innerWidth;
     const center = Math.max(170, Math.min(viewportW - 170, r.left + r.width / 2));
-    const below = r.top < 180;
-    setPos({
-      left: center,
-      top: below ? r.bottom + 8 : r.top - 8,
-      below,
-    });
+    setPos({ left: center, above: r.top - 8, below: r.bottom + 8 });
   };
 
   const onEnter = () => {
@@ -93,12 +88,12 @@ export function GuideProgramBlock({
 
   const canReplay = isPast && !isLive && replayable;
   const stateClass = isLive
-    ? "border-danger/45 bg-danger/15 hover:bg-danger/25"
+    ? "bg-raised ring-1 ring-inset ring-danger/45 hover:bg-raised"
     : canReplay
-      ? "border-accent/35 bg-elevated/70 hover:border-accent hover:bg-raised"
+      ? "bg-elevated ring-1 ring-inset ring-accent/30 hover:bg-raised"
       : isPast
-        ? "border-edge-soft/30 bg-elevated/35 opacity-50 hover:opacity-70"
-        : "border-edge-soft/55 bg-elevated/85 hover:border-edge hover:bg-raised";
+        ? "bg-canvas/55 ring-1 ring-inset ring-edge-soft/35 opacity-60 hover:opacity-85"
+        : "bg-elevated ring-1 ring-inset ring-edge-soft hover:bg-raised";
 
   return (
     <>
@@ -109,10 +104,10 @@ export function GuideProgramBlock({
         onMouseLeave={onLeave}
         onFocus={onEnter}
         onBlur={onLeave}
-        className={`group absolute overflow-hidden rounded-lg border text-start transition-colors duration-150 ${stateClass}`}
+        className={`group absolute overflow-hidden rounded-md text-start transition-colors duration-150 ${stateClass}`}
         style={{
-          top: rowTop + 4,
-          height: rowHeight - 8,
+          top: rowTop + 3,
+          height: rowHeight - 6,
           left: left + 3,
           width: Math.max(20, width - 6),
         }}
@@ -174,13 +169,21 @@ function ProgramTooltip({
   onMouseLeave,
 }: {
   program: EpgProgram;
-  pos: { left: number; top: number; below: boolean };
+  pos: { left: number; above: number; below: number };
   isPast: boolean;
   isLive: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }) {
   const t = useT();
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [below, setBelow] = useState(false);
+  useLayoutEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const h = el.offsetHeight;
+    setBelow(pos.above - h < 8 && pos.below + h < window.innerHeight - 8);
+  }, [pos.above, pos.below]);
   const startTime = formatTimeLabel(program.startMs);
   const endTime = formatTimeLabel(program.endMs);
   const durationMin = Math.round((program.endMs - program.startMs) / 60_000);
@@ -189,11 +192,12 @@ function ProgramTooltip({
       role="tooltip"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className="pointer-events-auto fixed z-[200] w-[320px] rounded-xl border border-edge-soft bg-elevated text-start text-ink shadow-[0_22px_60px_-12px_rgba(0,0,0,0.75)]"
+      ref={boxRef}
+      className="pointer-events-auto fixed z-[200] w-[320px] rounded-md bg-elevated text-start text-ink ring-1 ring-edge-soft shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
       style={{
         left: pos.left,
-        top: pos.top,
-        transform: pos.below ? "translate(-50%, 0)" : "translate(-50%, -100%)",
+        top: below ? pos.below : pos.above,
+        transform: below ? "translate(-50%, 0)" : "translate(-50%, -100%)",
       }}
     >
       <div className="flex flex-col gap-1.5 px-3.5 py-3">

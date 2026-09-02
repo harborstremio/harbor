@@ -1,0 +1,829 @@
+{
+  "AddonCatalogPage.kt": [
+    "This addon provides streams only. It has no catalog to browse, ",
+    "This catalog came back empty. Try another one from the strip above."
+  ],
+  "AddonChrome.kt": [
+    "Harbor plays what your addons find. Browse the public directory, add one by URL, sign in ",
+    "No addons yet"
+  ],
+  "AddonCollectionPage.kt": [
+    "No titles found in this collection."
+  ],
+  "AddonManifestFetch.kt": [
+    "Couldn't reach the addon. Check the URL and your connection.",
+    "Manifest fetch failed (HTTP ${res.code}). Check the URL.",
+    "Response wasn't valid JSON. The URL may not be a Stremio manifest."
+  ],
+  "AddonModel.kt": [
+    "Manifest is not a JSON object."
+  ],
+  "AddonStoreHealth.kt": [
+    "All $count addons answering",
+    "Checking your addons",
+    "It took too long to answer.",
+    "Its security certificate is not valid.",
+    "Its server cannot be found. The addon may have shut down.",
+    "Its server refused the connection.",
+    "No addons to check"
+  ],
+  "AddonUrl.kt": [
+    "That doesn't look like a valid URL."
+  ],
+  "AddonsAdd.kt": [
+    "If you do not have a URL, press Back and use Browse addons instead.",
+    "Nothing on this TV's clipboard. Type the URL, or press Back and use Browse addons.",
+    "Reading the manifest"
+  ],
+  "AddonsBrowse.kt": [
+    "Harbor could not reach the addon directory. Check this TV's network, then press Retry.",
+    "Nothing in the directory matches that name.",
+    "Nothing in this category right now. Try Everything.",
+    "Reading the directory"
+  ],
+  "AddonsOrder.kt": [
+    "Add an addon first and its place in the queue will show up here.",
+    "Harbor asks your addons for streams from the top down and ranks what comes back. ",
+    "Moving $held. Up and Down to place it, OK to drop it.",
+    "Press OK to pick an addon up, Up and Down to place it, OK to drop it.",
+    "The addon you trust most belongs first."
+  ],
+  "AddonsPage.kt": [
+    "Browse the public directory, add one by URL, set the order Harbor asks them in, ",
+    "Checking your addons",
+    "Sign in to Stremio in Settings to sync your addons.",
+    "Still reading this addon's manifest",
+    "Sync with Stremio",
+    "Synced. Added ${outcome.added}, removed ${outcome.removed}.",
+    "Syncing with Stremio"
+  ],
+  "AniListClient.kt": [
+    "AniList is cooling down after a rate block.",
+    "Not signed in to AniList."
+  ],
+  "AniListConfig.kt": [
+    "AniList did not hand back a token. Try authorizing again.",
+    "AniList sent something Harbor could not read.",
+    "AniList took the code but would not say who you are.",
+    "AniList would not take that code. Authorize again and use the newest one.",
+    "Could not reach AniList.",
+    "Could not reach Harbor to finish the sign in.",
+    "Paste the code from AniList to continue."
+  ],
+  "AnimeTrackerPanel.kt": [
+    "Anime does not go to Trakt. Connect Simkl or AniList and every anime episode you finish ",
+    "Getting a code ready\u2026",
+    "Scan with your phone, or go to simkl.com/pin and enter the code.",
+    "Signed in as $it",
+    "Simkl sign in code",
+    "That code expired. Start again.",
+    "This TV could not seal the sign in to disk, so it is kept in memory only."
+  ],
+  "AudioCaps.kt": [
+    "Decoded to PCM on this box.",
+    "No audio track in this file can start on this setup.",
+    "This box decodes $codec but not at ${channelName(channels)}, so this track cannot play as it is.",
+    "This box has no $codec decoder and your receiver did not offer to take it, so this track has no way to make sound.",
+    "This box has no $codec decoder.",
+    "This box has no decoder for it and your receiver did not offer to take it.",
+    "Your receiver accepted the format then refused the stream, so check its surround input settings.",
+    "Your receiver did not offer to take $codec, so this box decodes it to PCM.",
+    "Your receiver lists $codec but Harbor's audio engine was not cleared to send it. Check the surround sound setting in the system audio menu."
+  ],
+  "BpGuideBrowseRail.kt": [
+    "Delete a letter to see channels again",
+    "Enter picks a category, right to search",
+    "Enter switches playlist, down for categories",
+    "Go left to a channel name, then OK to star it",
+    "Nothing matches ",
+    "Pick another category, the grid kept your channels",
+    "This category has nothing right now"
+  ],
+  "BpGuideScreen.kt": [
+    "No program info",
+    "Tuning the guide"
+  ],
+  "CalendarModel.kt": [
+    "Episodes from the anime you follow on AniList.",
+    "Episodes from the shows saved in your library.",
+    "Episodes from the shows you follow on Trakt."
+  ],
+  "CollectionPage.kt": [
+    "Add a TMDB key in Settings to browse collections.",
+    "Couldn't load this collection right now.",
+    "No films found in this collection."
+  ],
+  "CollectionsTab.kt": [
+    "Collections come from TMDB. Add a TMDB key in Settings and every saga, ",
+    "Nothing to show here yet."
+  ],
+  "ConnectScreen.kt": [
+    "Still working. If it does not open soon, the source list opens instead."
+  ],
+  "DetailChrome.kt": [
+    "Couldn't load this title",
+    "Harbor could not reach the catalog servers. Check the connection and open it again."
+  ],
+  "DetailCommentCompose.kt": [
+    "Goes to Trakt under your name.",
+    "Hold OK to post",
+    "Hold OK to remove yours",
+    "Say what you thought."
+  ],
+  "DetailComments.kt": [
+    "Hold OK for replies",
+    "No replies came back.",
+    "Nobody has said anything yet.",
+    "Press OK to write one",
+    "Press to reveal"
+  ],
+  "DetailDialogs.kt": [
+    "Plan to Watch"
+  ],
+  "DetailFacts.kt": [
+    "Director of Photography"
+  ],
+  "DiscoverAffinity.kt": [
+    "Features $loved, someone you watch a lot",
+    "Features ${faces[0]} and ${faces[1]}"
+  ],
+  "DiscoverAwardSheet.kt": [
+    "Reading the award book"
+  ],
+  "DiscoverCatalog.kt": [
+    "Animation of the Year",
+    "Anime of the Year",
+    "Anime of the Year",
+    "Bring the Tissues",
+    "Coming of Age",
+    "Into the Stars"
+  ],
+  "DiscoverData.kt": [
+    "One pick at a time, full screen, until something lands.",
+    "Ranked by the work they left behind"
+  ],
+  "DiscoverHeroQueueCopy.kt": [
+    "Cinemeta is unreachable",
+    "Nothing left tonight"
+  ],
+  "DiscoverQueueBand.kt": [
+    "Leading with ${peek.shelf}",
+    "Start the run",
+    "Start the run"
+  ],
+  "DiscoverQueueCall.kt": [
+    "Bring back $snoozed skipped",
+    "Discovery Queue is offline",
+    "No picks loaded. Cinemeta could not be reached from this device.",
+    "Nothing left in today's picks",
+    "One pick at a time, full screen, until something lands.",
+    "You have cleared the run. Bring back what you skipped, or come back tomorrow.",
+    "You have cleared the run. Come back tomorrow for a fresh set."
+  ],
+  "DiscoverQueueRail.kt": [
+    "Skip for now"
+  ],
+  "DownloadsFormat.kt": [
+    "Saved movies and episodes for offline watching"
+  ],
+  "DownloadsModel.kt": [
+    "Interrupted, press resume to finish"
+  ],
+  "DownloadsNote.kt": [
+    "Nothing left to download"
+  ],
+  "DownloadsPage.kt": [
+    "Nothing in this group yet.",
+    "Open a title, pick a source, then press right on it to save that source here "
+  ],
+  "DownloadsSpur.kt": [
+    "Press right on a source to save it for offline",
+    "Working out a direct link"
+  ],
+  "DownloadsStart.kt": [
+    "Not enough free space on this device",
+    "Saving $title for offline",
+    "That source would not give a direct link",
+    "This device has no writable storage"
+  ],
+  "EpisodeChoice.kt": [
+    "Start from the beginning"
+  ],
+  "HandoffQr.kt": [
+    "Open on ${peer.label}",
+    "Opened on ${peer.label}"
+  ],
+  "HarborLanTrustWire.kt": [
+    "An unnamed Harbor"
+  ],
+  "HeroExpand.kt": [
+    "Directed by "
+  ],
+  "HomeCatalogs.kt": [
+    "Sci-Fi and Fantasy"
+  ],
+  "LibraryModel.kt": [
+    "Anything you save but have not started yet waits here, so you always have something queued.",
+    "Connect Trakt in Settings and everything on your watchlist there lands on this shelf, newest first.",
+    "Hold OK on any title and add it to favorites. It stays pinned to the front of this shelf.",
+    "No favorites yet.",
+    "No lists yet.",
+    "Nothing on this shelf fits the filters you set. Open Filters above to widen them.",
+    "Nothing saved yet.",
+    "Nothing watched yet.",
+    "Open any title and use Add to list. Every list you build gets its own shelf here, and you can prune them from Filters.",
+    "Open anything and press Save. It lands on this shelf and follows you to every device signed in to the same account.",
+    "Press play on something. It shows up here with your place in it, ready to pick back up.",
+    "Sign in to Stremio or connect Trakt in Settings and everything you have already saved shows up, in the order you saved it.",
+    "Sign in to Stremio or connect Trakt in Settings to see what you have been watching and how far you got.",
+    "Your Trakt watchlist is empty.",
+    "Your history lives here.",
+    "Your shelf lives here.",
+    "Your watchlist is empty."
+  ],
+  "LibraryServices.kt": [
+    "Connect Trakt in Settings and each custom list you keep there lands on its own shelf, ready to browse and edit from the couch.",
+    "Every custom list on your Trakt account gets a shelf here. Build one on trakt.tv, or open any title and use Trakt lists to start filling it.",
+    "No Trakt lists yet.",
+    "Your Trakt lists live here."
+  ],
+  "LibrarySheets.kt": [
+    "The list goes away on this device. The $count titles in it stay in your library, "
+  ],
+  "LinkPanel.kt": [
+    "Link a debrid service",
+    "Signed in as $it"
+  ],
+  "LiveShell.kt": [
+    "Couldn't load this playlist",
+    "Harbor could not reach $provider.",
+    "Harbor could not reach the provider.",
+    "Harbor plays IPTV from your own provider. Add a playlist and the guide fills in.",
+    "No channels here",
+    "This playlist came back without any live channels."
+  ],
+  "MainScaffold.kt": [
+    "This page is not built yet. Harbor shows ${tab.label} in a row on the Home page."
+  ],
+  "MalClient.kt": [
+    "MyAnimeList is cooling down after a rate block.",
+    "Not signed in to MyAnimeList."
+  ],
+  "OnboardPhone.kt": [
+    "Signed in as $stremioName"
+  ],
+  "OnboardStepsAccount.kt": [
+    "An auth key from a Stremio session on another device. Harbor stores the key, ",
+    "Could not reach TMDB from this TV. You can save the key without checking it.",
+    "Harbor is an independent client. It is not affiliated with or endorsed ",
+    "Publish a theme, share a list, keep both when you reinstall.",
+    "Save it anyway",
+    "See what the people you follow are watching right now.",
+    "Signed in as ${who.orEmpty()}",
+    "Skip this and Harbor runs on Cinemeta. You just see fewer rows.",
+    "Skip this and Harbor still works. Your library just stays local.",
+    "TMDB did not accept that key. Check you copied the v3 key, not the read access token.",
+    "The key from another Stremio session",
+    "The key is saved on this device only.",
+    "Themes and lists",
+    "There is no safe way to type a password for this on a TV, so this one only ",
+    "Use a different key",
+    "Use an auth key instead",
+    "Use email and password"
+  ],
+  "OnboardStepsTaste.kt": [
+    "Harbor account linked as $harborName",
+    "Signed in as $stremioName",
+    "These rows need a TMDB key before they show anything."
+  ],
+  "OptionsPanel.kt": [
+    "Add to Watchlist",
+    "Add to favorites",
+    "Did not work",
+    "Remove from Continue watching",
+    "Remove from Stremio library",
+    "Remove from Watchlist",
+    "Remove from favorites"
+  ],
+  "PersonFilms.kt": [
+    "Nothing rated $minRating or higher.",
+    "Nothing to show."
+  ],
+  "PlayerAudio.kt": [
+    "Audio output failed. Try Decode on device. ($text)",
+    "Every audio track here is a format your receiver claims, so Harbor cannot stop the bitstream on this file.",
+    "Holding ${alt.plan.codec} so this stick decodes the audio instead of the receiver."
+  ],
+  "PlayerAudioPane.kt": [
+    "Go back to the list. Nothing changes.",
+    "Harbor has not read an audio track from this stream yet.",
+    "Keep the current track",
+    "No other track in this file plays on this setup.",
+    "Sound is off so the picture keeps playing. Pick a track to try again.",
+    "This output takes plain PCM only, so Harbor decodes every track on this device."
+  ],
+  "PlayerAudioRow.kt": [
+    "Bluetooth cannot carry "
+  ],
+  "PlayerAudioTracks.kt": [
+    "DTS-HD bitstream. DTS:X, when the track carries it, is an extension inside this stream that the receiver decodes.",
+    "Decode here, and hold the mix to two channels.",
+    "Decode on device",
+    "Dolby Digital Plus with Atmos, sent untouched.",
+    "Hand the untouched stream to the receiver when it can.",
+    "If your receiver reports a format it cannot really decode, you get silence instead of sound.",
+    "Low. Harbor still hands surround formats straight to your receiver, so a receiver that overstates what it decodes can still play silent.",
+    "Play the best track this HDMI chain can handle.",
+    "TrueHD bitstream at ${channelName(outChannels)}. Atmos rides inside the stream, so only the receiver front panel can confirm it.",
+    "You lose surround and lossless audio. If every track in the file is a format your receiver claims, Harbor cannot stop the bitstream and will say so.",
+    "Your receiver did not report Atmos in Dolby Digital Plus, so this sends plain Dolby Digital Plus.",
+    "Your receiver did not report DTS-HD, so this drops to the ${encodingName(encoding)} encoding. Switch to Decode on device if it drops out.",
+    "Your receiver did not report DTS:X, so this drops to the ${encodingName(encoding)} core. Switch to Decode on device if it drops out."
+  ],
+  "PlayerBinge.kt": [
+    "Your place is kept in Continue Watching either way."
+  ],
+  "PlayerCwPill.kt": [
+    "Kept in Continue Watching",
+    "Nothing further in this series yet"
+  ],
+  "PlayerEndHost.kt": [
+    "Press Back to stay on this screen",
+    "That source stopped. Moving to the next one."
+  ],
+  "PlayerEngineTracks.kt": [
+    "Draw a dim panel under subtitles on bright scenes.",
+    "Ignore styling and draw everything the same way.",
+    "Keep signs in place, but make dialogue plain and legible.",
+    "Keep the colours and positions the subtitle file asks for.",
+    "Shade behind text"
+  ],
+  "PlayerFacts.kt": [
+    "AV1 base layer, shown as HDR10",
+    "Asked for, but this stream did not take it",
+    "H.264 base layer, shown as SDR",
+    "HEVC base layer, shown as HDR10",
+    "Harbor turned it off after repeated bad samples.",
+    "No decode path on this display",
+    "None found in this file",
+    "On, the decoder is holding picture and sound together",
+    "Sent to the Dolby Vision decoder",
+    "While tunneling is on, X-Ray cannot read a frame and the audio "
+  ],
+  "PlayerQualityPane.kt": [
+    "Crop to the panel, shapes are kept.",
+    "Press right from any row",
+    "Stretch to the panel, shapes are not kept."
+  ],
+  "PlayerResume.kt": [
+    "Resume from ",
+    "Resuming in "
+  ],
+  "PlayerSideSubHost.kt": [
+    "Harbor could not read that file. Press OK to try again.",
+    "Reading the file"
+  ],
+  "PlayerSkip.kt": [
+    "Skip injected ad?"
+  ],
+  "PlayerSleep.kt": [
+    "End of episode",
+    "Pauses when this episode ends"
+  ],
+  "PlayerSpeed.kt": [
+    "Press right from any row",
+    "Press right from any row"
+  ],
+  "PlayerStallGuard.kt": [
+    "Playback ran dry ${seconds}s ago and ",
+    "Sound kept playing but no video frame has reached the screen in ${seconds}s. ",
+    "The link opened but nothing reached the screen in ${seconds}s.",
+    "The picture stopped on this source",
+    "This device could not keep decoding the picture in this file.",
+    "This source is not responding",
+    "This source stopped feeding",
+    "Try again, or pick a source with a lower bitrate.",
+    "Try another source, or press Back to leave."
+  ],
+  "PlayerSubAuto.kt": [
+    "Already lined up",
+    "Asking other subtitle sources",
+    "Auto sync works on a subtitle you added, not one built into the file.",
+    "Match against other versions of this subtitle",
+    "No other source had this subtitle to compare against.",
+    "Reading your subtitle",
+    "The other versions did not agree well enough to trust a shift.",
+    "The sources took too long to answer.",
+    "These subtitles drift, use Timing",
+    "This looks like a different version",
+    "This stream did not come with a catalogue id.",
+    "This subtitle has too few lines to compare."
+  ],
+  "PlayerSubAutoUi.kt": [
+    "Agreed by ${sourceWord(phase.sources)}. $UNDO_HINT",
+    "Checked against ${sourceWord(phase.sources)}. Nothing to change.",
+    "Could not auto sync",
+    "Different subtitle version",
+    "Subtitles already lined up",
+    "These subtitles drift",
+    "They drift about ${each}s every hour. Fix in Subtitles, Timing.",
+    "This file does not match what ${sourceWord(phase.sources)} carry. Pick another subtitle.",
+    "Undo in Subtitles, Timing."
+  ],
+  "PlayerSubFind.kt": [
+    "Asking every source",
+    "No source had one for this",
+    "Nothing to search with",
+    "Press to ask every source again.",
+    "Search every source",
+    "Search every source again",
+    "This stream did not come with a catalogue id."
+  ],
+  "PlayerSubPanel.kt": [
+    "A dark halo. Good on most pictures.",
+    "A filled plate. Easiest to read.",
+    "A hard stroke. Highest contrast.",
+    "Back closes this too.",
+    "Every setting back to default.",
+    "Height off the bottom",
+    "Keep what the file asks for.",
+    "Late? press Right. Early? press Left.",
+    "Left and Right change the lit row. OK resets it.",
+    "Signs stay put, dialogue is yours.",
+    "Your look, on every line."
+  ],
+  "PlayerSubStyle.kt": [
+    "Big and bold on a solid plate.",
+    "Large and clear",
+    "Small condensed with a thin outline.",
+    "Warm off white, lifted, heavier edge.",
+    "White text, soft shadow. The safe one.",
+    "Your own mix. Left and Right load one."
+  ],
+  "PlayerSubTune.kt": [
+    "Fine step for a line that lands just ahead of the voice.",
+    "Fine step for a line that lands just behind the voice.",
+    "Fine step when the voices land ahead of the lips.",
+    "Fine step when the voices land behind the lips.",
+    "Later by 0.1s",
+    "Later by 0.1s",
+    "Left and Right nudge by 0.1s. Enter here clears the offset.",
+    "Left and Right nudge by 0.1s. Enter here clears the offset.",
+    "Pull the whole soundtrack a full second forward.",
+    "Push the whole soundtrack a full second back.",
+    "Reset to in sync",
+    "Reset to in sync",
+    "Show every line a full second earlier.",
+    "Show every line a full second later.",
+    "Sooner by 0.1s",
+    "Sooner by 0.1s",
+    "Sooner by 1s",
+    "Sooner by 1s",
+    "This stream has no picture, so there is nothing to hold the sound against."
+  ],
+  "PlayerSubs.kt": [
+    "Image, VobSub, not decodable"
+  ],
+  "PlayerSubsModel.kt": [
+    "Harbor cannot decode this one",
+    "Harbor could not read that file. Press OK to try again.",
+    "In this file",
+    "No subtitles on screen",
+    "Reading the file",
+    "Turn subtitles off"
+  ],
+  "PlayerSubsPane.kt": [
+    "Find one online and Harbor will play it alongside.",
+    "Find subtitles online",
+    "Look and placement",
+    "No subtitle addon installed",
+    "On. Press OK to turn off.",
+    "This file carries no subtitle tracks."
+  ],
+  "PlayerSubsPick.kt": [
+    "Did not start. Press OK to go back to ",
+    "Did not start. Try another track."
+  ],
+  "PlayerSubsSwitch.kt": [
+    "This track did not start"
+  ],
+  "PlayerSubsTune.kt": [
+    "Back returns to the list.",
+    "Late? Press Right. Early? Press Left. OK puts it back in sync.",
+    "Left and Right resize. OK returns to 100%."
+  ],
+  "PlayerSwapSheet.kt": [
+    "No addon returned a source for this title.",
+    "Nothing here fits the filters you set. Press up to widen them."
+  ],
+  "PlayerSwapSources.kt": [
+    "Asking your addons",
+    "Harbor could not reach your debrid service. Check the network and try again.",
+    "No debrid service is linked yet, so torrent sources cannot be opened.",
+    "No debrid service is linked, so that torrent cannot open.",
+    "Nothing matches these filters",
+    "Picks start from the beginning",
+    "That addon still needs setting up in Addons.",
+    "That entry carried no playable source.",
+    "That link opened a web page, not a stream.",
+    "That link was not a real video file. Try another source.",
+    "That source did not answer. Try another.",
+    "That source would not open. Try another.",
+    "That torrent is not cached on your debrid service yet.",
+    "The source your debrid service opened has no video file inside it.",
+    "Top $shown of $total sources",
+    "Your debrid service has hit its traffic limit and will not hand out new links.",
+    "Your debrid service is asking Harbor to slow down. Wait a moment and try again.",
+    "Your debrid service is not answering right now. That is on their end, not yours.",
+    "Your debrid service rejected the saved key. Link it again from Settings.",
+    "Your debrid service returned no link for that source.",
+    "Your debrid service took too long to hand back a link.",
+    "Your debrid subscription has run out. Renew it to switch to torrent sources."
+  ],
+  "PlayerTunePane.kt": [
+    "Needs a picture to hold against",
+    "This stream reports a single audio track."
+  ],
+  "PlayerUi.kt": [
+    "Harbor is still reading this stream. Details appear once the first ",
+    "Resuming from ${playerClockText(startPositionMs)}",
+    "Try another source"
+  ],
+  "PlayerUpNext.kt": [
+    "OK plays it now, any other button keeps watching"
+  ],
+  "PlayerVideo.kt": [
+    "Choose an HDR10 source.",
+    "Confirming the source rate before asking for ${formatHz(candidate.hz)}.",
+    "Display accepts Dolby Vision. The bitstream goes to the Dolby Vision decoder unchanged.",
+    "Display does not accept Dolby Vision, so the AV1 base layer plays as HDR10.",
+    "Display does not accept Dolby Vision, so the H.264 base layer plays as SDR.",
+    "Display does not accept Dolby Vision, so the HEVC base layer plays as HDR10.",
+    "Harbor could not read the Dolby Vision profile in this file, and this display does ",
+    "Measuring source frame rate.",
+    "No display mode divides ${formatFps(fps)} evenly, so the cadence is uneven.",
+    "One source frame per $ratio refreshes.",
+    "One source frame per refresh.",
+    "Profile 5 carries no HDR10 compatible base layer, so decoding it here would give wrong ",
+    "Profile 7 is the dual layer disc format. Rewriting it to Profile 8.1 is not something ",
+    "Refresh matching is off. Output stays at ${formatHz(displayHz)}.",
+    "Requested ${formatHz(candidate.hz)} from the display.",
+    "There is no decode path for this Dolby Vision profile on this display. "
+  ],
+  "PlayerWaitNote.kt": [
+    "Opening the stream",
+    "Sound is running but no picture has arrived yet.",
+    "Still buffering. The link is slower than this stream needs.",
+    "Still opening. Large files take a moment to start.",
+    "Waiting for the first picture"
+  ],
+  "PlaylistVodPage.kt": [
+    "Add an IPTV playlist in Live TV and any movies or series ",
+    "Reading your playlist",
+    "Reading your playlist.",
+    "This playlist carries live channels only. Providers that include a "
+  ],
+  "PlaylistVodRails.kt": [
+    "Nothing on demand in this playlist"
+  ],
+  "ProfilePinPad.kt": [
+    "Too many tries. Try again in ${seconds}s."
+  ],
+  "SearchAiModel.kt": [
+    "That request was too big for this model. Pick a model with a larger context.",
+    "The model is rate-limited right now. Try again in a moment or switch models.",
+    "This model no longer exists at the provider. Pick another model.",
+    "You are a film and TV discovery engine for a media app. The user describes what they want ",
+    "Your API key was rejected. Check it in Settings, AI search.",
+    "Your account is out of credits for this model. Pick a free model or top up."
+  ],
+  "SearchAiSource.kt": [
+    "The model replied with nothing usable. Try another model or rephrase."
+  ],
+  "SearchIdle.kt": [
+    "On your list",
+    "Two letters and the search begins."
+  ],
+  "SearchQueryLine.kt": [
+    "Search movies and series"
+  ],
+  "SearchStates.kt": [
+    "Cannot reach search.",
+    "Everything this search found is under All.",
+    "No search source is set up yet. Add an addon in Settings, then try again.",
+    "Nothing answered. Check the connection, then try again.",
+    "Nothing matched, and $failed of $asked $noun did not answer.",
+    "Nothing under $label.",
+    "TMDB is not answering.",
+    "Titles, people and collections come from TMDB. Try again shortly.",
+    "Try a different spelling, a person's name, a year like 1972, or a genre like Horror."
+  ],
+  "ServicePage.kt": [
+    "Add a TMDB key in Settings to browse ${service.name}.",
+    "Change your region in Settings.",
+    "Nothing from ${service.name} is listed in $region right now. "
+  ],
+  "ServicePageRows.kt": [
+    "Also on your services",
+    "Trending on ${service.name}"
+  ],
+  "SettingsPage.kt": [
+    "Accounts and TMDB",
+    "Add a profile for everyone who watches",
+    "Add an M3U link or Xtream Codes login",
+    "Ask if you are still watching",
+    "Auto-play next episode",
+    "Auto-skip stalled streams",
+    "Badges on source rows",
+    "Community release group and tracker badges, matched as text, no images loaded",
+    "Confirm before leaving the player",
+    "Fade between backdrops",
+    "Harbor asks your addons for titles and descriptions in this language. ",
+    "Hero trailer preview",
+    "Hide skip button after",
+    "Hide watched in catalogs",
+    "How long to wait first",
+    "Language for titles",
+    "Minimal source rows",
+    "Never hide the next episode",
+    "Nothing connected yet. Scan a code with your phone.",
+    "Restore hidden shows",
+    "Rotten Tomatoes, Metacritic, Letterboxd, Trakt and Simkl scores",
+    "Send a title to your computer, and sync profiles",
+    "Show episode descriptions",
+    "Show episode ratings",
+    "Show playback stats while playing",
+    "Show the clock while playing",
+    "Simkl, for anime only",
+    "Skip intros and credits",
+    "The menus stay in English.",
+    "This is how a subtitle will look.",
+    "Turn off what you do not have",
+    "Turn off what you do not have"
+  ],
+  "SimklClient.kt": [
+    "Simkl is cooling down after a rate block."
+  ],
+  "SimklConfig.kt": [
+    "Could not reach Simkl to start the sign in.",
+    "Lost the connection while waiting for Simkl.",
+    "Simkl sent something Harbor could not read.",
+    "Simkl would not start the sign in."
+  ],
+  "Spoilers.kt": [
+    "Hidden so nothing is given away."
+  ],
+  "StreamBadgePackImport.kt": [
+    "All $unsafe patterns in that pack use regex Harbor will not run. Nothing was installed.",
+    "Could not reach that link. Check the URL and try again.",
+    "None of the $unsafe patterns in that pack are safe to run on a TV, and $blank were empty.",
+    "That link is not a badge pack. Expected JSON badge filters.",
+    "That link returned nothing.",
+    "That pack has $blank entries but none carry both a name and a pattern.",
+    "That pack has no badge filters."
+  ],
+  "StreamBadgePackPane.kt": [
+    "Add badge pack",
+    "Badge packs add release group and tracker badges to source rows. ",
+    "Harbor reads at most 96 KB and keeps at most 120 badges per pack.",
+    "Harbor runs pack patterns as literal text, never as regex, and never loads pack images.",
+    "Nothing on this TV's clipboard. Type the link instead.",
+    "Paste the badge pack's JSON link. It must be https. ",
+    "Reading the badge pack",
+    "Remove a pack first. Harbor keeps up to 3."
+  ],
+  "StreamBadgeSlots.kt": [
+    "Cuts and repacks",
+    "Dolby Vision and HDR",
+    "Dubbed and subbed"
+  ],
+  "StreamDialogs.kt": [
+    "Harbor could not get a working stream for $what.",
+    "Harbor could not reach your debrid service. Check the network and try again.",
+    "Harbor needs at least one streaming source before it can play $what. ",
+    "Harbor tried $triedCount sources for $what and none of them played.",
+    "Install a stream addon or add a debrid key in settings.",
+    "Leave Big Picture and open settings",
+    "No debrid service is linked yet. Add one from Settings and this gets much faster.",
+    "No streaming sources yet",
+    "Real-Debrid says you have hit your traffic limit, so it will not hand out new links ",
+    "Real-Debrid, TorBox, AllDebrid and Premiumize all have brief outages where ",
+    "Stream this once",
+    "The source your debrid service opened has no video file inside it.",
+    "This source is not cached, so your debrid service would fetch it from other ",
+    "Usually that means a debrid key has expired, no stream addon is installed yet, ",
+    "We could not find a working stream",
+    "Your debrid service can't process this right now.",
+    "Your debrid service is asking Harbor to slow down. Wait a moment and try again.",
+    "Your debrid service is not answering right now. That is on their end, not yours.",
+    "Your debrid service rejected the saved key. Link it again from Settings.",
+    "Your debrid service took too long to hand back a link.",
+    "Your debrid service turned this down",
+    "Your debrid subscription has run out. Renew it and this title should play again."
+  ],
+  "Streams.kt": [
+    "No addon returned a source for this title.",
+    "Nothing here fits the filters you set. Press up to widen them."
+  ],
+  "SubLangList.kt": [
+    "That file is not a subtitle Harbor can read.",
+    "That subtitle would not download. Try another."
+  ],
+  "ThemePickerPreview.kt": [
+    "Every colour on this screen comes from the theme you are on.",
+    "Light themes are not finished on TV yet."
+  ],
+  "TitleExtras.kt": [
+    "Behind the Scenes"
+  ],
+  "TogetherCopy.kt": [
+    "Read this out, or let them scan it.",
+    "Your TV made the room. Everyone else joins from a phone or a computer, so nobody has "
+  ],
+  "TogetherHost.kt": [
+    "Find something to watch",
+    "Or point a camera here",
+    "Watch party invite"
+  ],
+  "TogetherOverlay.kt": [
+    "Everyone is loaded in. Press play to start watching.",
+    "Nobody sees a frame until you start.",
+    "Play without sync",
+    "Ready when you are",
+    "Start anyway (",
+    "Still nothing. You can watch this on your own instead.",
+    "Still waiting. $host has not started yet.",
+    "Waiting for $host to start",
+    "You are loaded in and ready."
+  ],
+  "TogetherRoute.kt": [
+    "Nobody else has joined yet.",
+    "Nobody is in ",
+    "One other person is here.",
+    "Reaching room ",
+    "You are in the room"
+  ],
+  "TraktAuth.kt": [
+    "Could not reach Trakt to start the sign in.",
+    "Lost the connection while waiting for Trakt.",
+    "Trakt could not finish the sign in.",
+    "Trakt would not start the sign in."
+  ],
+  "TraktClient.kt": [
+    "A whole series cannot be scrobbled, only an episode.",
+    "Anime tracking goes to Simkl and AniList, not Trakt.",
+    "Could not reach Trakt. Check the connection.",
+    "Harbor has no id for this title that Trakt understands.",
+    "Trakt does not know that title.",
+    "Trakt is having trouble right now.",
+    "Trakt is rate limiting Harbor. Try again shortly.",
+    "Trakt no longer accepts this sign in. Connect again.",
+    "Trakt ratings need a TMDB id and this item has none.",
+    "Trakt sent a reply Harbor could not read.",
+    "Trakt turned that request down.",
+    "Write something before posting."
+  ],
+  "TraktCommentPost.kt": [
+    "Harbor has no id for this title that Trakt understands.",
+    "Hold OK to post.",
+    "Trakt already has that comment from you.",
+    "Trakt is holding you off. Try again in a minute.",
+    "Trakt needs $TRAKT_COMMENT_MIN_WORDS words before it will take a comment.",
+    "Trakt turned the comment down. Code $status.",
+    "Trakt would not accept the sign in. Connect Trakt again."
+  ],
+  "TraktLinkBus.kt": [
+    "Watchlist, lists, history and scrobbling"
+  ],
+  "TraktLists.kt": [
+    "No lists on Trakt yet. Build one on trakt.tv and it shows up here.",
+    "Reading your Trakt lists."
+  ],
+  "VoiceSearch.kt": [
+    "Microphone access is off",
+    "Microphone access is off",
+    "The microphone did not open",
+    "Voice did not start",
+    "Voice did not start",
+    "Voice did not work",
+    "Voice needs a connection",
+    "Voice needs a connection"
+  ],
+  "VoiceSearchUi.kt": [
+    "Back to cancel",
+    "Select to finish",
+    "Voice did not work"
+  ],
+  "WrappedPanels.kt": [
+    "Busiest day ",
+    "Connect Trakt for the whole picture.",
+    "Counted from what this Harbor has played. ",
+    "Play something, or connect Trakt in Settings, and this page fills in."
+  ],
+  "XrayUiBand.kt": [
+    "Holding the frame"
+  ],
+  "YouTube.kt": [
+    "This trailer cannot be played here. Press Back."
+  ]
+}

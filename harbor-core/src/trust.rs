@@ -412,7 +412,7 @@ fn check_one(
 
     if strict && !opts.is_anime && !has_file_idx && !s.season_pack {
         if let (Some(expected_episode), Some(episode)) = (opts.expected_episode, s.episode) {
-            if episode != expected_episode {
+            if expected_episode < episode || expected_episode > s.episode_end.unwrap_or(episode) {
                 return Some(format!(
                     "episode-mismatch:{episode}-vs-{expected_episode}"
                 ));
@@ -752,6 +752,7 @@ mod tests {
             year_range: None,
             season: None,
             episode: None,
+            episode_end: None,
             season_pack: false,
             disc_index: None,
             repack_iteration: 0,

@@ -1,4 +1,5 @@
-import { CalendarRange, List, Loader2, Search, X } from "lucide-react";
+import { CalendarRange, List, Loader2, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CategorySidebar } from "@/views/live/category-sidebar";
 import { GuideView } from "@/views/live/guide/guide-view";

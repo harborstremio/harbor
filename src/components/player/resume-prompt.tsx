@@ -1,4 +1,5 @@
-import { Play, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
 

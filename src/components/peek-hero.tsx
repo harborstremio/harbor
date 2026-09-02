@@ -1,4 +1,4 @@
-import { Play } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useRef, useState } from "react";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import { MetaAwardsCorner } from "@/components/meta-awards-corner";
@@ -54,7 +54,7 @@ export function PeekHero({ slides }: { slides: Meta[] }) {
 
   if (slides.length === 0) {
     return (
-      <div className="flex h-[440px] animate-pulse items-center justify-center rounded-[24px] border border-edge-soft bg-elevated/20" />
+      <div className="flex h-[440px] animate-pulse items-center justify-center rounded-3xl border border-edge-soft bg-elevated/20" />
     );
   }
 
@@ -233,7 +233,7 @@ function PeekSlide({
   return (
     <div
       onClick={() => (active ? openMeta(meta) : onSelect())}
-      className="absolute left-1/2 top-1/2 h-[420px] w-[920px] overflow-hidden rounded-[20px] shadow-[0_28px_60px_-26px_rgba(0,0,0,0.7)]"
+      className="absolute left-1/2 top-1/2 h-[420px] w-[920px] overflow-hidden rounded-xl shadow-[0_28px_60px_-26px_rgba(0,0,0,0.7)]"
       style={{
         transform: `translate(-50%, -50%) translateX(${translatePct}%) scale(${scale})`,
         transition: dragging
@@ -297,7 +297,7 @@ function PeekSlide({
                   e.stopPropagation();
                   openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay });
                 }}
-                className="flex h-10 items-center gap-2 rounded-full bg-white px-5 text-[13px] font-semibold text-black transition-transform hover:scale-[1.04] active:scale-[0.97]"
+                className="flex h-10 items-center gap-2 rounded-full bg-ink px-5 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.04] active:scale-[0.97]"
               >
                 <Play size={14} fill="currentColor" />
                 {t("Play")}
@@ -307,7 +307,7 @@ function PeekSlide({
                   e.stopPropagation();
                   openMeta(meta);
                 }}
-                className="flex h-10 items-center gap-2 rounded-full border border-white/30 bg-white/10 px-5 text-[13px] font-medium text-white backdrop-blur-md transition-colors hover:bg-white/20"
+                className="flex h-10 items-center gap-2 rounded-full bg-canvas/80 px-5 text-[13px] font-medium text-ink transition-colors hover:bg-canvas/95"
               >
                 {t("Episodes")}
               </button>

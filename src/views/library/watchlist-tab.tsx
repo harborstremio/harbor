@@ -217,22 +217,25 @@ function ViewModeToggle({ flat, onToggle }: { flat: boolean; onToggle: () => voi
   );
 }
 
-function filterLibrary(
+export function filterLibrary(
   items: LibraryItem[],
   bookmarkedOnly: boolean,
   mode: "library" | "watchlist",
 ): LibraryItem[] {
   return items.filter((i) => {
     if (i.removed) return false;
-    if (mode === "library") return true;
+    // Hide temp entries (auto-added just by opening a details page) in BOTH modes
+    // when bookmarked-only is on. It defaults on, so the Library tab must honour it
+    // instead of short-circuiting past it and showing everything you merely viewed.
     if (bookmarkedOnly && i.temp) return false;
+    if (mode === "library") return true;
     if ((i.state?.flaggedWatched ?? 0) > 0 || (i.state?.timesWatched ?? 0) > 0) return false;
     if ((i.state?.timeOffset ?? 0) > 0) return false;
     return true;
   });
 }
 
-function mergeWatchlist(
+export function mergeWatchlist(
   localEntries: LocalEntry[],
   stremio: LibraryItem[],
   trakt: TraktItem[],

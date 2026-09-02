@@ -1,4 +1,5 @@
-import { Search, X } from "lucide-react";
+import { X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useT } from "@/lib/i18n";
 
 export function EpisodeSearch({
@@ -23,7 +24,7 @@ export function EpisodeSearch({
         value={query}
         onChange={(e) => onQuery(e.target.value)}
         placeholder={t("Search by episode number or title")}
-        className="h-11 w-full rounded-2xl border border-edge-soft bg-canvas/70 ps-10 pe-24 text-[14px] text-ink outline-none transition-colors duration-150 placeholder:text-ink-subtle focus:border-ink-subtle focus:bg-canvas"
+        className="h-11 w-full rounded-lg bg-canvas ps-10 pe-24 text-[14px] text-ink outline-none ring-1 ring-inset ring-edge-soft transition-colors duration-150 placeholder:text-ink-subtle focus:ring-accent/50"
       />
       {query.trim() !== "" && (
         <div className="absolute end-2.5 flex items-center gap-2">

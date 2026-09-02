@@ -36,7 +36,7 @@ function Caption({ children }: { children: ReactNode }) {
 function Panel({ tag, active, children }: { tag: string; active?: boolean; children: ReactNode }) {
   return (
     <div
-      className={`flex flex-col gap-1.5 rounded-lg border p-2.5 ${
+      className={`flex flex-col gap-1.5 rounded-md border p-2.5 ${
         active ? "border-accent/40 bg-accent/[0.07]" : "border-edge-soft/60 bg-canvas/30"
       }`}
     >
@@ -138,7 +138,7 @@ function WatchlistSaved({ art }: { art: PreviewArt | null }) {
   );
   return (
     <>
-      <div className="flex items-end gap-2 rounded-lg border border-edge-soft/60 bg-canvas/30 p-2.5">
+      <div className="flex items-end gap-2 rounded-md border border-edge-soft/60 bg-canvas/30 p-2.5">
         <MiniPoster img={p[0]} badge={saved} />
         <MiniPoster img={p[1]} badge={saved} />
         <MiniPoster img={p[2]} badge={saved} />
@@ -157,7 +157,7 @@ function PlaylistsTab() {
   const items = [t("Home"), t("Library"), t("Discover")];
   return (
     <>
-      <div className="flex flex-col gap-1 rounded-lg border border-edge-soft/60 bg-canvas/30 p-2.5">
+      <div className="flex flex-col gap-1 rounded-md border border-edge-soft/60 bg-canvas/30 p-2.5">
         {items.map((it) => (
           <div key={it} className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[11px] text-ink-muted">
             <span className="h-3 w-3 rounded-[3px] bg-edge/70" />
@@ -181,7 +181,7 @@ function AnimeRoom({ art }: { art: PreviewArt | null }) {
   const an = art?.anime ?? [];
   return (
     <>
-      <div className="rounded-lg border border-edge-soft/60 bg-canvas/30 p-2.5">
+      <div className="rounded-md border border-edge-soft/60 bg-canvas/30 p-2.5">
         <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-ink-subtle">
           {t("Home · Continue Watching")}
         </div>
@@ -266,7 +266,7 @@ function HideWatched({ art }: { art: PreviewArt | null }) {
   );
   return (
     <>
-      <div className="flex items-end gap-2 rounded-lg border border-edge-soft/60 bg-canvas/30 p-2.5">
+      <div className="flex items-end gap-2 rounded-md border border-edge-soft/60 bg-canvas/30 p-2.5">
         <MiniPoster img={p[3]} />
         <MiniPoster img={p[4]} faded badge={check} />
         <MiniPoster img={p[5]} />

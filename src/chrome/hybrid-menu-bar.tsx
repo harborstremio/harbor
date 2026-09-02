@@ -80,6 +80,7 @@ export function HybridMenuBar() {
         { kind: "action", label: t("Anime"), onClick: () => setView("anime") },
         { kind: "action", label: t("Live TV"), onClick: () => setView("live") },
         { kind: "action", label: t("Manga"), onClick: () => setView("manga") },
+        { kind: "action", label: t("eBook"), onClick: () => setView("ebook") },
         { kind: "action", label: t("Library"), onClick: () => setView("library") },
       ],
     },

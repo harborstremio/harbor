@@ -13,7 +13,8 @@ test("russian plural categories follow the last-digit rule", () => {
 
 test("the teens are all many, including 11 and 21-adjacent traps", () => {
   for (let n = 11; n <= 14; n++) assert.equal(pluralForm("ru", n), "many", `${n} should be "many"`);
-  for (let n = 111; n <= 114; n++) assert.equal(pluralForm("ru", n), "many", `${n} should be "many"`);
+  for (let n = 111; n <= 114; n++)
+    assert.equal(pluralForm("ru", n), "many", `${n} should be "many"`);
   assert.equal(pluralForm("ru", 11), "many");
   assert.equal(pluralForm("ru", 21), "one");
 });
@@ -26,11 +27,45 @@ test("negatives mirror positives and non-integers fall back to many", () => {
   assert.equal(pluralForm("ru", Number.NaN), "many");
 });
 
-test("two-form languages declare no rule, so they keep the old single-lookup path", () => {
-  for (const lang of ["en", "pt", "ar"] as const) {
-    assert.equal(pluralForm(lang, 1), null);
-    assert.equal(pluralForm(lang, 5), null);
+test("polish plural categories distinguish one, few and many", () => {
+  const one = [1, -1];
+  const few = [2, 3, 4, 22, 23, 24, 102, 103, 104];
+  const many = [0, 5, 11, 12, 14, 21, 25, 100, 1.5];
+  for (const n of one) assert.equal(pluralForm("pl", n), "one", `${n} should be "one"`);
+  for (const n of few) assert.equal(pluralForm("pl", n), "few", `${n} should be "few"`);
+  for (const n of many) assert.equal(pluralForm("pl", n), "many", `${n} should be "many"`);
+});
+
+test("arabic uses one, few and many within the supported catalog variants", () => {
+  assert.equal(pluralForm("ar", 1), "one");
+  for (const n of [2, 3, 7, 10, 102]) assert.equal(pluralForm("ar", n), "few");
+  for (const n of [0, 11, 12, 99, 1.5]) assert.equal(pluralForm("ar", n), "many");
+});
+
+test("singular languages select their one variant only for singular counts", () => {
+  for (const lang of ["de", "es", "it"] as const) {
+    assert.equal(pluralForm(lang, 1), "one");
+    assert.equal(pluralForm(lang, 0), "many");
+    assert.equal(pluralForm(lang, 2), "many");
   }
+  for (const lang of ["fr", "hi", "pt"] as const) {
+    assert.equal(pluralForm(lang, 0), "one");
+    assert.equal(pluralForm(lang, 1), "one");
+    assert.equal(pluralForm(lang, 2), "many");
+  }
+});
+
+test("plural-invariant languages always use the base form", () => {
+  for (const lang of ["id", "ja", "ko", "tr", "vi", "zh"] as const) {
+    assert.equal(pluralForm(lang, 0), "many");
+    assert.equal(pluralForm(lang, 1), "many");
+    assert.equal(pluralForm(lang, 5), "many");
+  }
+});
+
+test("English keeps its source-string lookup path", () => {
+  assert.equal(pluralForm("en", 1), null);
+  assert.equal(pluralForm("en", 5), null);
 });
 
 const VARIANT_SUFFIX = /#(?:one|few|many)$/;

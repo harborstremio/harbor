@@ -106,7 +106,11 @@ fn ass_alignment(align_x: &str) -> u32 {
 pub fn build_force_style(style: &CastSubStyle) -> String {
     let primary = hex_to_ass_bgr(&style.font_color);
     let outline_color = hex_to_ass_bgr(&style.border_color);
-    let outline = if style.border_size == 0 { 2 } else { style.border_size };
+    let outline = if style.border_size == 0 {
+        2
+    } else {
+        style.border_size
+    };
     let alignment = ass_alignment(&style.align_x);
     format!(
         "Fontsize={},PrimaryColour={},OutlineColour={},BorderStyle=1,Outline={},Shadow=0,Alignment={},MarginV={}",
@@ -249,7 +253,10 @@ async fn extract_embedded(
     let ffmpeg = crate::transcode::locate_ffmpeg()?;
     let out = dir.join(format!("{}.srt", Uuid::new_v4()));
     let mut cmd = tokio::process::Command::new(&ffmpeg);
-    cmd.arg("-hide_banner").arg("-loglevel").arg("error").arg("-y");
+    cmd.arg("-hide_banner")
+        .arg("-loglevel")
+        .arg("error")
+        .arg("-y");
     apply_ffmpeg_headers(&mut cmd, headers);
     cmd.arg("-i")
         .arg(source_url)

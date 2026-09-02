@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Bookmark, Check, Eye, Film, Monitor, MoreHorizontal, Play } from "lucide-react";
+import { Bookmark, Check, Eye, Film, Monitor, MoreHorizontal } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import type { TmdbDetail } from "@/lib/providers/tmdb";
-import type { RemoteLibraryAction, RemoteLibraryItem, RemoteTrackers } from "@/lib/remote/protocol";
+import type { RemoteLibraryAction, RemoteLibraryItem } from "@/lib/remote/protocol";
 import { resolveTrailerId } from "@/lib/trailer";
 import { useSettings } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
 import { useMobileRemote } from "../mobile-remote";
 import { HIDE_SCROLL, prefersReducedMotion } from "./data";
 import { MobileTrailerOverlay } from "./trailer";
@@ -25,6 +27,7 @@ export function DetailActions({
   trailerId: string | null;
   onPlay: () => void;
 }) {
+  const t = useT();
   const { settings } = useSettings();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [trailerOpen, setTrailerOpen] = useState(false);
@@ -53,12 +56,12 @@ export function DetailActions({
           className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-ink text-[15.5px] font-semibold text-canvas shadow-[0_10px_30px_-12px_rgba(0,0,0,0.5)] transition-transform duration-150 active:scale-[0.98] motion-reduce:transition-none"
         >
           <Play size={18} strokeWidth={0} fill="currentColor" />
-          Play
+          {t("Play")}
         </button>
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          aria-label="More actions"
+          aria-label={t("More actions")}
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-edge-soft bg-surface text-ink transition-transform duration-150 active:scale-[0.94] motion-reduce:transition-none"
         >
           <MoreHorizontal size={20} strokeWidth={2} />
@@ -84,23 +87,13 @@ export function DetailActions({
   );
 }
 
-function inList(list: RemoteLibraryItem[] | undefined, id: string, imdbId?: string | null): boolean {
+function inList(
+  list: RemoteLibraryItem[] | undefined,
+  id: string,
+  imdbId?: string | null,
+): boolean {
   if (!list) return false;
   return list.some((it) => it.id === id || (!!imdbId && it.id === imdbId));
-}
-
-function joinAnd(items: string[]): string {
-  if (items.length <= 1) return items[0] ?? "";
-  if (items.length === 2) return `${items[0]} and ${items[1]}`;
-  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
-}
-
-function syncHint(trackers: RemoteTrackers | undefined): string | undefined {
-  if (!trackers) return undefined;
-  const names: string[] = [];
-  if (trackers.trakt) names.push("Trakt");
-  if (trackers.simkl) names.push("Simkl");
-  return names.length ? `Syncs to your ${joinAnd(names)}` : undefined;
 }
 
 function ActionsSheet({
@@ -118,6 +111,7 @@ function ActionsSheet({
   onPlayTrailer: () => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const [reduced] = useState(prefersReducedMotion);
   const { openOnHost, sendCommand, connected, snapshot } = useMobileRemote();
   const poster = meta.poster ?? detail?.poster;
@@ -155,13 +149,21 @@ function ActionsSheet({
       op,
     });
 
-  const sync = online ? syncHint(trackers) : undefined;
+  const syncServices = [trackers?.trakt ? "Trakt" : null, trackers?.simkl ? "Simkl" : null].filter(
+    (name): name is string => name !== null,
+  );
+  const syncList =
+    syncServices.length === 2
+      ? t("{first} and {second}", { first: syncServices[0], second: syncServices[1] })
+      : syncServices[0];
+  const sync =
+    online && syncList ? t("Syncs to your {services}", { services: syncList }) : undefined;
 
   const sheet = (
     <div className="fixed inset-0 z-[70] flex flex-col justify-end" role="dialog" aria-modal="true">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t("Close")}
         onClick={onClose}
         className={`absolute inset-0 bg-black/50 ${reduced ? "" : "md-sheet-fade"}`}
       />
@@ -178,12 +180,16 @@ function ActionsSheet({
 
         <div className="flex flex-col px-3 pb-1">
           {trailerId && (
-            <SheetRow icon={<Film size={20} strokeWidth={2} />} label="Play trailer" onClick={onPlayTrailer} />
+            <SheetRow
+              icon={<Film size={20} strokeWidth={2} />}
+              label={t("Play trailer")}
+              onClick={onPlayTrailer}
+            />
           )}
           <SheetRow
             icon={<Monitor size={20} strokeWidth={2} />}
-            label="Open on computer"
-            sublabel="Send this title to your Harbor app"
+            label={t("Open on computer")}
+            sublabel={t("Send this title to your Harbor app")}
             onClick={() => {
               onClose();
               openOnHost(meta);
@@ -191,14 +197,16 @@ function ActionsSheet({
           />
         </div>
 
-        <Group label="Your library">
+        <Group label={t("Your library")}>
           <SheetRow
             icon={<HeartIcon filled={isFav} />}
-            label="Favorites"
-            sublabel={isFav ? "Saved to your favorites" : "Save to your favorites"}
+            label={t("Favorites")}
+            sublabel={isFav ? t("Saved to your favorites") : t("Save to your favorites")}
             active={isFav}
             disabled={!online}
-            trailing={isFav ? <Check size={18} strokeWidth={2.6} className="text-accent" /> : undefined}
+            trailing={
+              isFav ? <Check size={18} strokeWidth={2.6} className="text-accent" /> : undefined
+            }
             onClick={() => {
               const next = !isFav;
               setFavOpt(next);
@@ -206,13 +214,19 @@ function ActionsSheet({
             }}
           />
           <SheetRow
-            icon={<Bookmark size={20} strokeWidth={2} fill={inWatchlist ? "currentColor" : "none"} />}
-            label="Watchlist"
-            sublabel={inWatchlist ? "In your watchlist" : "Add to your watchlist"}
+            icon={
+              <Bookmark size={20} strokeWidth={2} fill={inWatchlist ? "currentColor" : "none"} />
+            }
+            label={t("Watchlist")}
+            sublabel={inWatchlist ? t("In your watchlist") : t("Add to your watchlist")}
             hint={sync}
             active={inWatchlist}
             disabled={!online}
-            trailing={inWatchlist ? <Check size={18} strokeWidth={2.6} className="text-accent" /> : undefined}
+            trailing={
+              inWatchlist ? (
+                <Check size={18} strokeWidth={2.6} className="text-accent" />
+              ) : undefined
+            }
             onClick={() => {
               const next = !inWatchlist;
               setWatchlistOpt(next);
@@ -221,12 +235,14 @@ function ActionsSheet({
           />
           <SheetRow
             icon={<Eye size={20} strokeWidth={2} />}
-            label="Watched"
-            sublabel={isWatched ? "Marked as watched" : "Mark as watched"}
+            label={t("Watched")}
+            sublabel={isWatched ? t("Marked as watched") : t("Mark as watched")}
             hint={sync}
             active={isWatched}
             disabled={!online}
-            trailing={isWatched ? <Check size={18} strokeWidth={2.6} className="text-accent" /> : undefined}
+            trailing={
+              isWatched ? <Check size={18} strokeWidth={2.6} className="text-accent" /> : undefined
+            }
             onClick={() => {
               const next = !isWatched;
               setHistoryOpt(next);
@@ -236,7 +252,7 @@ function ActionsSheet({
           {!online && (
             <div className="flex items-center justify-center gap-2 px-6 pb-1 pt-1.5 text-center text-[12px] leading-relaxed text-ink-subtle">
               <Monitor size={14} strokeWidth={2} className="shrink-0" />
-              <span>Connect to your computer to manage your library.</span>
+              <span>{t("Connect to your computer to manage your library.")}</span>
             </div>
           )}
         </Group>

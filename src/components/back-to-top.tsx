@@ -30,7 +30,7 @@ export function BackToTop({
         })
       }
       aria-label={t("Back to top")}
-      className={`fixed bottom-5 end-5 z-40 flex h-8 w-8 items-center justify-center rounded-md border border-edge-soft/40 bg-canvas/90 text-ink-muted transition-[transform,opacity,background-color,color] duration-300 hover:bg-canvas hover:text-ink ${
+      className={`fixed bottom-5 end-5 z-40 flex h-9 w-9 items-center justify-center rounded-md bg-elevated text-ink-muted ring-1 ring-edge-soft shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] transition-[transform,opacity,background-color,color] duration-200 ease-in-out hover:bg-raised hover:text-ink active:scale-[0.97] ${
         show
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-2 opacity-0"

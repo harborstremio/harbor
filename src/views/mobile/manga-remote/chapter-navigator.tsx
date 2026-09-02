@@ -1,8 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDownWideNarrow, ArrowUp, ArrowUpNarrowWide, Check, ChevronDown, ChevronLeft, Layers, Search } from "lucide-react";
+import {
+  ArrowDownWideNarrow,
+  ArrowUp,
+  ArrowUpNarrowWide,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  Layers,
+} from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useMobileRemote } from "../mobile-remote";
 import { useRegisterSheet } from "../mobile-sheet-lock";
 import { SHEET_EXIT_CSS, useSheetPresence } from "../remote-extras";
+import { useT } from "@/lib/i18n";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { useVirtualWindow } from "./use-virtual-window";
 import type { RemoteMangaChapter } from "@/lib/remote/protocol";
@@ -48,6 +58,7 @@ export function ChapterNavigator({
   const { snapshot, sendCommand } = useMobileRemote();
   const manga = snapshot.manga;
   const reduce = useReducedMotion();
+  const t = useT();
   const { render, leaving } = useSheetPresence(open);
   useRegisterSheet(open);
 
@@ -65,7 +76,9 @@ export function ChapterNavigator({
     const num = (c: RemoteMangaChapter) => parseFloat(c.chapter ?? "") || 0;
     return chapters
       .filter((c) => effSrc === "all" || c.sourceId === effSrc)
-      .filter((c) => !q || c.label.toLowerCase().includes(q) || (c.title ?? "").toLowerCase().includes(q))
+      .filter(
+        (c) => !q || c.label.toLowerCase().includes(q) || (c.title ?? "").toLowerCase().includes(q),
+      )
       .sort((a, b) => (desc ? num(b) - num(a) : num(a) - num(b)));
   }, [chapters, query, desc, effSrc]);
 
@@ -111,15 +124,15 @@ export function ChapterNavigator({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Back"
+          aria-label={t("Back")}
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-transform active:scale-90"
         >
           <ChevronLeft size={24} strokeWidth={2.2} />
         </button>
         <div className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-[15px] font-semibold text-ink">Chapters</span>
+          <span className="truncate text-[15px] font-semibold text-ink">{t("Chapters")}</span>
           <span className="text-[12px] tabular-nums text-ink-subtle">
-            {manga.chapterIndex + 1} of {chapters.length}
+            {t("{a} of {b}", { a: manga.chapterIndex + 1, b: chapters.length })}
           </span>
         </div>
         <button
@@ -127,7 +140,7 @@ export function ChapterNavigator({
           onClick={onJumpPage}
           className="flex h-11 items-center rounded-full bg-elevated/70 px-4 text-[13.5px] font-semibold text-ink transition-transform active:scale-95"
         >
-          Page {manga.pageIndex + 1}
+          {t("Page {n}", { n: manga.pageIndex + 1 })}
         </button>
       </div>
 
@@ -139,7 +152,7 @@ export function ChapterNavigator({
             onChange={(e) => setQuery(e.target.value)}
             inputMode="search"
             enterKeyHint="search"
-            placeholder="Search chapters"
+            placeholder={t("Search chapters")}
             className="min-w-0 flex-1 bg-transparent text-[15px] text-ink placeholder:text-ink-subtle focus:outline-none"
           />
         </div>
@@ -155,14 +168,27 @@ export function ChapterNavigator({
               return n;
             })
           }
-          aria-label={desc ? "Sorted newest first, tap for oldest" : "Sorted oldest first, tap for newest"}
+          aria-label={
+            desc
+              ? t("Sorted newest first, tap for oldest")
+              : t("Sorted oldest first, tap for newest")
+          }
           className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-edge-soft/70 px-3 text-[12.5px] font-semibold text-ink-muted transition-transform active:scale-95"
         >
-          {desc ? <ArrowDownWideNarrow size={15} strokeWidth={2.2} /> : <ArrowUpNarrowWide size={15} strokeWidth={2.2} />}
-          {desc ? "Newest" : "Oldest"}
+          {desc ? (
+            <ArrowDownWideNarrow size={15} strokeWidth={2.2} />
+          ) : (
+            <ArrowUpNarrowWide size={15} strokeWidth={2.2} />
+          )}
+          {desc ? t("Newest") : t("Oldest")}
         </button>
         {multiSource ? (
-          <SourceDropdown sources={sources} total={chapters.length} active={effSrc} onPick={setSrc} />
+          <SourceDropdown
+            sources={sources}
+            total={chapters.length}
+            active={effSrc}
+            onPick={setSrc}
+          />
         ) : sources.length === 1 ? (
           <span className="flex h-9 min-w-0 items-center gap-1.5 rounded-full bg-elevated/50 px-3 text-[12.5px] font-medium text-ink-subtle">
             <Layers size={14} strokeWidth={2.2} className="shrink-0" />
@@ -172,7 +198,9 @@ export function ChapterNavigator({
       </div>
 
       {rows.length === 0 ? (
-        <p className="px-4 py-16 text-center text-[14px] text-ink-muted">No chapters match your search.</p>
+        <p className="px-4 py-16 text-center text-[14px] text-ink-muted">
+          {t("No chapters match your search.")}
+        </p>
       ) : (
         <div
           ref={vw.ref}
@@ -181,7 +209,10 @@ export function ChapterNavigator({
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
         >
           <div className="relative" style={{ height: vw.totalHeight }}>
-            <div className="absolute inset-x-0 top-0" style={{ transform: `translateY(${vw.padTop}px)` }}>
+            <div
+              className="absolute inset-x-0 top-0"
+              style={{ transform: `translateY(${vw.padTop}px)` }}
+            >
               {rows.slice(vw.start, vw.end).map((c) => (
                 <ChapterRow
                   key={c.id}
@@ -200,7 +231,7 @@ export function ChapterNavigator({
         <button
           type="button"
           onClick={() => vw.ref.current?.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" })}
-          aria-label="Scroll to top"
+          aria-label={t("Scroll to top")}
           className="absolute end-5 grid h-12 w-12 place-items-center rounded-full border border-edge-soft bg-elevated/90 text-ink shadow-[0_10px_24px_-8px_rgba(0,0,0,0.6)] backdrop-blur-md transition-transform active:scale-90"
           style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}
         >
@@ -222,6 +253,7 @@ function ChapterRow({
   showSource: boolean;
   onClick: () => void;
 }) {
+  const t = useT();
   const source = chapter.sourceName ?? chapter.sourceId;
   return (
     <div style={{ height: ROW_H }} className="py-1">
@@ -236,11 +268,15 @@ function ChapterRow({
           {chapter.chapter ?? "•"}
         </span>
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className={`truncate text-[15px] ${active ? "font-semibold text-accent" : "font-medium text-ink"}`}>
+          <span
+            className={`truncate text-[15px] ${active ? "font-semibold text-accent" : "font-medium text-ink"}`}
+          >
             {chapter.label}
           </span>
           {(chapter.title || chapter.group) && (
-            <span className="truncate text-[12px] text-ink-subtle">{chapter.title || chapter.group}</span>
+            <span className="truncate text-[12px] text-ink-subtle">
+              {chapter.title || chapter.group}
+            </span>
           )}
         </span>
         {showSource && source && (
@@ -249,7 +285,9 @@ function ChapterRow({
           </span>
         )}
         {chapter.downloaded && (
-          <span className="shrink-0 text-[10.5px] font-semibold uppercase tracking-wide text-ink-subtle">Saved</span>
+          <span className="shrink-0 text-[10.5px] font-semibold uppercase tracking-wide text-ink-subtle">
+            {t("Saved")}
+          </span>
         )}
         {active && <Check size={20} strokeWidth={2.6} className="shrink-0 text-accent" />}
       </button>
@@ -269,6 +307,7 @@ function SourceDropdown({
   onPick: (id: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -280,7 +319,10 @@ function SourceDropdown({
     return () => document.removeEventListener("pointerdown", onDown);
   }, [open]);
 
-  const activeName = active === "all" ? "All sources" : sources.find((s) => s.id === active)?.name ?? "All sources";
+  const activeName =
+    active === "all"
+      ? t("All sources")
+      : (sources.find((s) => s.id === active)?.name ?? t("All sources"));
 
   return (
     <div ref={ref} className="relative min-w-0 flex-1">
@@ -292,13 +334,34 @@ function SourceDropdown({
       >
         <Layers size={14} strokeWidth={2.2} className="shrink-0 text-ink-subtle" />
         <span className="min-w-0 flex-1 truncate text-start">{activeName}</span>
-        <ChevronDown size={14} strokeWidth={2.4} className={`shrink-0 text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={14}
+          strokeWidth={2.4}
+          className={`shrink-0 text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && (
         <div className="absolute inset-x-0 top-[calc(100%+6px)] z-30 overflow-hidden rounded-2xl border border-edge-soft bg-elevated p-1.5 shadow-[0_18px_44px_-14px_rgba(0,0,0,0.7)]">
-          <SourceOption name="All sources" count={total} active={active === "all"} onClick={() => { onPick("all"); setOpen(false); }} />
+          <SourceOption
+            name={t("All sources")}
+            count={total}
+            active={active === "all"}
+            onClick={() => {
+              onPick("all");
+              setOpen(false);
+            }}
+          />
           {sources.map((s) => (
-            <SourceOption key={s.id} name={s.name} count={s.count} active={active === s.id} onClick={() => { onPick(s.id); setOpen(false); }} />
+            <SourceOption
+              key={s.id}
+              name={s.name}
+              count={s.count}
+              active={active === s.id}
+              onClick={() => {
+                onPick(s.id);
+                setOpen(false);
+              }}
+            />
           ))}
         </div>
       )}
@@ -306,7 +369,17 @@ function SourceDropdown({
   );
 }
 
-function SourceOption({ name, count, active, onClick }: { name: string; count: number; active: boolean; onClick: () => void }) {
+function SourceOption({
+  name,
+  count,
+  active,
+  onClick,
+}: {
+  name: string;
+  count: number;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"

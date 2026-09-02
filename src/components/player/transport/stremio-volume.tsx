@@ -170,7 +170,7 @@ export function StremioVolume({
       )}
       <div
         aria-hidden={!showPopup}
-        className={`absolute bottom-full left-1/2 flex origin-bottom -translate-x-1/2 flex-col items-center rounded-[20px] border border-white/12 bg-black/85 px-3 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.7)] backdrop-blur-md transition-[opacity,transform] duration-200 ease-out ${
+        className={`absolute bottom-full left-1/2 flex origin-bottom -translate-x-1/2 flex-col items-center rounded-xl border border-white/12 bg-black/85 px-3 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.7)] backdrop-blur-md transition-[opacity,transform] duration-200 ease-out ${
           showPopup ? "scale-100 opacity-100" : "pointer-events-none scale-90 opacity-0"
         }`}
       >

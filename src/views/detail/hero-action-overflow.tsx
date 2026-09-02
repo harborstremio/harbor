@@ -1,4 +1,4 @@
-import { ArrowDownToLine, Bookmark, Check, Heart, Layers, MoreHorizontal, RotateCw, X } from "lucide-react";
+import { ArrowDownToLine, Bookmark, Check, MoreHorizontal, RotateCw, X } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
@@ -9,7 +9,7 @@ import { AddToListMenu } from "@/components/lists/add-to-list-menu";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import type { ListItemInput } from "@/lib/custom-lists";
 import { AnilistMenuItems, SimklMenuItems, TraktMenuItems } from "./overflow-sync-items";
-import { PreviewIcon } from "./preview-icon";
+import { UiIcon } from "@/components/ui-icon";
 
 const CIRCLES_SAVED_ESTIMATE = 132;
 
@@ -137,7 +137,7 @@ export function HeroActionOverflow({
           aria-label={t("More actions")}
           onMouseDown={(e) => e.stopPropagation()}
           onClick={() => (menu ? setMenu(null) : openMenu())}
-          className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-edge bg-canvas/80 text-ink transition-[transform,background-color,border-color] duration-200 hover:border-ink-subtle hover:bg-canvas/95 active:scale-[0.94]"
+          className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-canvas/80 text-ink transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.94]"
         >
           <MoreHorizontal size={20} strokeWidth={1.9} />
           {isFav && <span className="absolute end-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-accent" />}
@@ -188,11 +188,11 @@ export function HeroActionOverflow({
             )}
             <Item
               icon={
-                <Heart
-                  size={14}
-                  strokeWidth={isFav ? 0 : 2}
-                  fill={isFav ? "currentColor" : "none"}
-                />
+                isFav ? (
+                  <UiIcon name="unfavorite" className="h-3.5 w-3.5" />
+                ) : (
+                  <UiIcon name="favorite" className="h-3.5 w-3.5" />
+                )
               }
               label={isFav ? t("Favorited") : t("Favorite")}
               active={isFav}
@@ -203,7 +203,7 @@ export function HeroActionOverflow({
             />
             {listItem && (
               <Item
-                icon={<Layers size={14} strokeWidth={2} />}
+                icon={<UiIcon name="list" className="h-3.5 w-3.5" />}
                 label={t("Add to list")}
                 onClick={() => {
                   setMenu(null);
@@ -213,7 +213,13 @@ export function HeroActionOverflow({
             )}
             {showWatched && (
               <Item
-                icon={<Check size={14} strokeWidth={2.4} />}
+                icon={
+                  watchedMark ? (
+                    <UiIcon name="mark-unwatched" className="h-3.5 w-3.5" />
+                  ) : (
+                    <UiIcon name="mark-watched" className="h-3.5 w-3.5" />
+                  )
+                }
                 label={watchedMark ? t("Marked watched") : t("Mark watched")}
                 active={watchedMark}
                 onClick={() => {
@@ -224,7 +230,7 @@ export function HeroActionOverflow({
             )}
             {hasTrailer && (
               <Item
-                icon={<PreviewIcon size={14} />}
+                icon={<UiIcon name="trailer" className="h-3.5 w-3.5" />}
                 label={t("Watch trailer")}
                 onClick={() => {
                   onTrailer();

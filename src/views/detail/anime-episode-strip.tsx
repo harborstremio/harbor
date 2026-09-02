@@ -217,7 +217,7 @@ function AnimeEpisodeStripCard({
           {ep.number}
         </span>
         {progress.watched && (
-          <span className="absolute end-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/22 text-emerald-200 ring-1 ring-emerald-400/40 backdrop-blur-sm transition-opacity group-hover:opacity-0">
+          <span className="absolute end-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-success/20 text-success backdrop-blur-sm transition-opacity group-hover:opacity-0">
             <Check size={12} strokeWidth={3} />
           </span>
         )}

@@ -1,13 +1,14 @@
 import { X } from "lucide-react";
+import { useModalExit } from "@/components/modal-shell";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import type { AioService, AioStatusSnapshot } from "@/lib/streams/aiostatus";
 
 const PALETTE: Record<AioService["status"], { dot: string; text: string }> = {
-  expired: { dot: "bg-rose-300", text: "text-rose-200" },
-  expiring: { dot: "bg-amber-300", text: "text-amber-200" },
-  active: { dot: "bg-emerald-300", text: "text-emerald-200" },
+  expired: { dot: "bg-danger", text: "text-danger" },
+  expiring: { dot: "bg-accent", text: "text-accent" },
+  active: { dot: "bg-success", text: "text-success" },
   unknown: { dot: "bg-ink-subtle", text: "text-ink-subtle" },
 };
 
@@ -18,31 +19,31 @@ export function AioStatusModal({
   snapshot: AioStatusSnapshot;
   onClose: () => void;
 }) {
+  const { closing, close } = useModalExit(onClose);
   const t = useT();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") close();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [close]);
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-6"
-      onMouseDown={onClose}
+      className={`${closing ? "animate-scrim-out" : "animate-scrim-in"} fixed inset-0 z-[240] flex items-center justify-center p-6`}
+      onMouseDown={close}
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
         role="dialog"
         aria-label={t("Service status")}
         onMouseDown={(e) => e.stopPropagation()}
-        className="relative flex max-h-[80vh] w-full max-w-[460px] flex-col overflow-hidden rounded-2xl border border-edge bg-surface shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)] animate-popover-in"
+        className={`${closing ? "animate-dialog-out" : "animate-dialog-in"} flex max-h-[86vh] w-[min(640px,100%)] flex-col overflow-hidden rounded-md bg-surface harbor-float`}
       >
-        <header className="flex items-center justify-between gap-3 border-b border-edge-soft/60 px-5 py-4">
-          <div className="flex min-w-0 items-center gap-2.5">
+        <header className="flex items-start justify-between gap-4 px-6 pb-5 pt-5">
+          <div className="flex min-w-0 items-center gap-3">
             {snapshot.addonLogo && (
-              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-canvas ring-1 ring-edge-soft">
+              <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-canvas">
                 <img
                   src={snapshot.addonLogo}
                   alt=""
@@ -52,26 +53,30 @@ export function AioStatusModal({
                 />
               </span>
             )}
-            <div className="flex min-w-0 flex-col">
-              <span className="truncate text-[14px] font-semibold text-ink">{snapshot.addonName}</span>
-              <span className="text-[11.5px] text-ink-subtle">{t("Service status")}</span>
+            <div className="flex min-w-0 flex-col gap-1">
+              <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+                {t("Service status")}
+              </span>
+              <span className="truncate text-[17px] font-semibold text-ink">
+                {snapshot.addonName}
+              </span>
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={close}
             aria-label={t("Close")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
           >
             <X size={16} strokeWidth={2.2} />
           </button>
         </header>
-        <div className="flex-1 overflow-y-auto p-2">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
           {snapshot.services.length === 0 ? (
-            <p className="px-3 py-10 text-center text-[13px] text-ink-muted">
+            <p className="rounded-md bg-canvas px-3 py-10 text-center text-[13px] text-ink-muted">
               {t("No services reported.")}
             </p>
           ) : (
-            <ul className="flex flex-col gap-0.5">
+            <ul className="flex flex-col gap-1">
               {snapshot.services.map((s) => (
                 <ServiceRow key={s.id} service={s} />
               ))}
@@ -98,9 +103,9 @@ function ServiceRow({ service }: { service: AioService }) {
             ? t("Expiring")
             : t("Unknown");
   return (
-    <li className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-ink/5">
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate text-[13.5px] font-medium text-ink">{service.name}</span>
+    <li className="flex items-center gap-3 rounded-md bg-canvas px-3.5 py-3">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="truncate text-[13.5px] font-semibold text-ink">{service.name}</span>
         <span className="truncate text-[11.5px] text-ink-subtle">{service.rawLine}</span>
       </div>
       <span className={`flex shrink-0 items-center gap-1.5 text-[11.5px] font-semibold ${pal.text}`}>

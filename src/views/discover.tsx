@@ -1,4 +1,12 @@
-import { Fragment, startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { CollectionsRow } from "@/components/collections-row";
 import { CriticsPick } from "@/components/critics-pick";
@@ -12,10 +20,20 @@ import { LanguageTiles } from "@/components/language-tiles";
 import { Row, ScrollRootContext } from "@/components/row";
 import { PickCard } from "@/components/pick-card";
 import type { Meta } from "@/lib/cinemeta";
-import { useHideAnime, useHideAnimeMetas, useHideAnimeRows, useHideAnimeSlides } from "@/lib/anime-hide";
+import {
+  useHideAnime,
+  useHideAnimeMetas,
+  useHideAnimeRows,
+  useHideAnimeSlides,
+} from "@/lib/anime-hide";
 import { metaLooksAnime, useDetectedAnimeVersion } from "@/lib/anime-detect";
 import { fetchCriticsPickList, getPool, selectDailyRows, type FeedItem } from "@/lib/feed";
-import { buildFeatured, buildFeaturedFast, rescoreFeatured, type FeaturedResult } from "@/lib/feed/featured";
+import {
+  buildFeatured,
+  buildFeaturedFast,
+  rescoreFeatured,
+  type FeaturedResult,
+} from "@/lib/feed/featured";
 import type { FeaturedItem } from "@/lib/feed/featured/types";
 import { prewarmExternalWatched, subscribeExternalWatched } from "@/lib/feed/external-watched";
 import { getStore, subscribe as subscribeTaste } from "@/lib/discover/store";
@@ -127,7 +145,16 @@ export function Discover({ active = true }: { active?: boolean }) {
 
   const dailyRows = useMemo(
     () => selectDailyRows(settings.tmdbKey, getStore().affinity, settings, ROW_COUNT),
-    [settings.tmdbKey, settings.region, settings.streaming, tasteVersion],
+    [
+      settings.tmdbKey,
+      settings.region,
+      settings.streaming,
+      settings.preferredLanguages,
+      settings.tmdbLanguage,
+      settings.feedLocaleBias,
+      settings.uiLanguage,
+      tasteVersion,
+    ],
   );
   const rowSig = useMemo(() => dailyRows.map((r) => r.id).join("|"), [dailyRows]);
 
@@ -311,7 +338,9 @@ export function Discover({ active = true }: { active?: boolean }) {
         .then((list) => {
           railPagesRef.current[railId] = next;
           if (list.length < MIN_PAGE_YIELD) railExhaustedRef.current[railId] = true;
-          startTransition(() => setRails((prev) => ({ ...prev, [railId]: [...(prev[railId] ?? []), ...list] })));
+          startTransition(() =>
+            setRails((prev) => ({ ...prev, [railId]: [...(prev[railId] ?? []), ...list] })),
+          );
         })
         .catch(() => {})
         .finally(() => {
@@ -395,7 +424,9 @@ export function Discover({ active = true }: { active?: boolean }) {
   const voyageBannerPool = useMemo(() => {
     const exclude = new Set(featured.map((m) => m.id));
     if (criticsPick) exclude.add(criticsPick.id);
-    return shownSurprisePool.filter((m) => !exclude.has(m.id) && !!m.background && m.background !== m.poster);
+    return shownSurprisePool.filter(
+      (m) => !exclude.has(m.id) && !!m.background && m.background !== m.poster,
+    );
   }, [shownSurprisePool, featured, criticsPick]);
 
   const hiddenFeatured = pageRows.custom.hidden.includes("section-featured");
@@ -420,7 +451,9 @@ export function Discover({ active = true }: { active?: boolean }) {
                 <SectionEditBar
                   name={t("Featured & Recommended")}
                   hidden={hiddenFeatured}
-                  onToggle={() => pageRows.persist(togglePageRowHidden(pageRows.custom, "section-featured"))}
+                  onToggle={() =>
+                    pageRows.persist(togglePageRowHidden(pageRows.custom, "section-featured"))
+                  }
                 />
               )}
               <div className={hiddenFeatured ? "pointer-events-none opacity-40" : ""}>
@@ -438,7 +471,9 @@ export function Discover({ active = true }: { active?: boolean }) {
                 <SectionEditBar
                   name={t("Browse your catalogs")}
                   hidden={hiddenCatalog}
-                  onToggle={() => pageRows.persist(togglePageRowHidden(pageRows.custom, "section-catalog"))}
+                  onToggle={() =>
+                    pageRows.persist(togglePageRowHidden(pageRows.custom, "section-catalog"))
+                  }
                 />
                 <div className={hiddenCatalog ? "pointer-events-none opacity-40" : ""}>
                   <CatalogBrowser />
@@ -448,7 +483,9 @@ export function Discover({ active = true }: { active?: boolean }) {
                 <SectionEditBar
                   name={t("Can't decide?")}
                   hidden={hiddenSurprise}
-                  onToggle={() => pageRows.persist(togglePageRowHidden(pageRows.custom, "section-surprise"))}
+                  onToggle={() =>
+                    pageRows.persist(togglePageRowHidden(pageRows.custom, "section-surprise"))
+                  }
                 />
                 <div className={hiddenSurprise ? "pointer-events-none opacity-40" : ""}>
                   <SurpriseMe pool={shownSurprisePool} />
@@ -466,39 +503,41 @@ export function Discover({ active = true }: { active?: boolean }) {
             )
           )}
 
-          {!pageRows.editMode && voyageBannerPool.length >= 3 && <VoyageBanner pool={voyageBannerPool} />}
+          {!pageRows.editMode && voyageBannerPool.length >= 3 && (
+            <VoyageBanner pool={voyageBannerPool} />
+          )}
 
           {shownLetterboxdRows.map((row, i) => {
             const catalogId = row.key.replace("letterboxd-", "");
             return (
-            <Row
-              key={row.key}
-              title={
-                <>
-                  {row.name}
-                  <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
-                    Letterboxd
-                  </span>
-                </>
-              }
-              titleExtra={
-                <LetterboxdRowMenu
-                  canMoveUp={i > 0}
-                  canMoveDown={i < shownLetterboxdRows.length - 1}
-                  hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
-                  onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
-                  onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
-                  onToggleHidden={() => letterboxd.toggleHidden(catalogId)}
-                />
-              }
-              min={148}
-              shape="portrait"
-              scrollKey={`discover:${row.key}`}
-            >
-              {row.metas.map((m) => (
-                <PickCard key={m.id} meta={m} />
-              ))}
-            </Row>
+              <Row
+                key={row.key}
+                title={
+                  <>
+                    {row.name}
+                    <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
+                      Letterboxd
+                    </span>
+                  </>
+                }
+                titleExtra={
+                  <LetterboxdRowMenu
+                    canMoveUp={i > 0}
+                    canMoveDown={i < shownLetterboxdRows.length - 1}
+                    hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
+                    onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
+                    onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
+                    onToggleHidden={() => letterboxd.toggleHidden(catalogId)}
+                  />
+                }
+                min={148}
+                shape="portrait"
+                scrollKey={`discover:${row.key}`}
+              >
+                {row.metas.map((m) => (
+                  <PickCard key={m.id} meta={m} />
+                ))}
+              </Row>
             );
           })}
 
@@ -509,15 +548,25 @@ export function Discover({ active = true }: { active?: boolean }) {
                 return (
                   <div key={item.key}>
                     <RowControls
-                      name={t(item.title)}
+                      name={item.key in pageRows.custom.renamed ? item.title : t(item.title)}
                       hidden={hidden}
                       canMoveUp={idx > 0}
                       canMoveDown={idx >= 0 && idx < orderKeys.length - 1}
-                      onMoveUp={() => pageRows.persist(movePageRow(pageRows.custom, railKeys, item.key, -1))}
-                      onMoveDown={() => pageRows.persist(movePageRow(pageRows.custom, railKeys, item.key, 1))}
-                      onToggleHidden={() => pageRows.persist(togglePageRowHidden(pageRows.custom, item.key))}
-                      onRename={(label) => pageRows.persist(renamePageRow(pageRows.custom, item.key, label))}
-                      onResetName={() => pageRows.persist(renamePageRow(pageRows.custom, item.key, ""))}
+                      onMoveUp={() =>
+                        pageRows.persist(movePageRow(pageRows.custom, railKeys, item.key, -1))
+                      }
+                      onMoveDown={() =>
+                        pageRows.persist(movePageRow(pageRows.custom, railKeys, item.key, 1))
+                      }
+                      onToggleHidden={() =>
+                        pageRows.persist(togglePageRowHidden(pageRows.custom, item.key))
+                      }
+                      onRename={(label) =>
+                        pageRows.persist(renamePageRow(pageRows.custom, item.key, label))
+                      }
+                      onResetName={() =>
+                        pageRows.persist(renamePageRow(pageRows.custom, item.key, ""))
+                      }
                       isRenamed={item.key in pageRows.custom.renamed}
                     />
                     {!hidden && (
@@ -527,7 +576,7 @@ export function Discover({ active = true }: { active?: boolean }) {
                         deduped={dedupedShown}
                         loadMore={loadMore}
                         ensureLoaded={ensureLoaded}
-                        titleOverride={item.title}
+                        titleOverride={item.key in pageRows.custom.renamed ? item.title : undefined}
                       />
                     )}
                   </div>
@@ -542,7 +591,7 @@ export function Discover({ active = true }: { active?: boolean }) {
                       deduped={dedupedShown}
                       loadMore={loadMore}
                       ensureLoaded={ensureLoaded}
-                      titleOverride={item.title}
+                      titleOverride={item.key in pageRows.custom.renamed ? item.title : undefined}
                     />
                   </LazyMount>
 

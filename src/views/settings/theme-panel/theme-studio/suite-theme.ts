@@ -19,3 +19,22 @@ export const SUITE_CHROME = {
   "--font-display": FONT_PAIRS["sentient-switzer"].display,
   "--font-sans": FONT_PAIRS["sentient-switzer"].sans,
 } as CSSProperties;
+
+export const SUITE_COLORS_LIGHT = {
+  canvas: "#ffffff",
+  surface: "#f2f4f6",
+  elevated: "#f7f8fa",
+  raised: "#e9ecf0",
+  ink: "#181b20",
+  inkMuted: "#565f6d",
+  inkSubtle: "#89909d",
+  edge: "#cfd3da",
+  accent: "#e0a33e",
+  danger: "#d75760",
+};
+
+export const SUITE_CHROME_LIGHT = {
+  ...customColorsToTokens(SUITE_COLORS_LIGHT),
+  "--font-display": FONT_PAIRS["sentient-switzer"].display,
+  "--font-sans": FONT_PAIRS["sentient-switzer"].sans,
+} as CSSProperties;

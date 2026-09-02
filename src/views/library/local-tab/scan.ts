@@ -9,7 +9,12 @@ import {
   readNfo,
 } from "@/lib/local-library/sidecars";
 
-export type ScannedFile = { path: string; filename: string; size: number };
+export type ScannedFile = {
+  path: string;
+  filename: string;
+  size: number;
+  subtitlePaths?: string[];
+};
 
 type Parsed = ReturnType<typeof parseFilename>;
 
@@ -62,10 +67,12 @@ export async function buildTmdbEntry(
     imdbId: tmdb.imdbId ?? null,
     season: parsed.season,
     episode: parsed.episode,
+    episodeEnd: parsed.episodeEnd,
     addedAt: Date.now(),
     source: "tmdb",
     needsReview: needsReview || undefined,
     isAnime: tmdb.isAnime || undefined,
+    subtitlePaths: f.subtitlePaths,
   };
 }
 
@@ -141,11 +148,13 @@ export async function buildNfoEntry(
     imdbId,
     season: parsed.season,
     episode: parsed.episode,
+    episodeEnd: parsed.episodeEnd,
     addedAt: Date.now(),
     source: "nfo",
     localArt,
     needsReview: needsReview || undefined,
     isAnime: isAnime || undefined,
+    subtitlePaths: f.subtitlePaths,
   };
 }
 

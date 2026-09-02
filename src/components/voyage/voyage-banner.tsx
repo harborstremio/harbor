@@ -1,4 +1,4 @@
-import { Flame } from "lucide-react";
+import { FlameStreak } from "@/components/icons/flame-streak";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
@@ -94,8 +94,8 @@ export function VoyageBanner({ pool }: { pool: Meta[] }) {
         <span className="text-[10.5px] font-bold uppercase tracking-[0.22em]" style={{ color: accent }}>
           {t("Harbor Voyages")}
           {streak > 1 && (
-            <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-elevated/70 px-2 py-0.5 align-middle text-ink">
-              <Flame size={11} strokeWidth={2.2} fill="currentColor" style={{ color: accent }} />
+            <span className="ms-2 inline-flex h-[19px] items-baseline gap-0.5 rounded-full bg-elevated/70 ps-1.5 pe-2.5 align-middle text-ink">
+              <FlameStreak size={13} style={{ color: accent }} />
               <span className="tabular-nums">{streak}</span>
             </span>
           )}
@@ -145,7 +145,7 @@ function VoyageCapsule({ meta }: { meta: Meta }) {
         style={{ background: "radial-gradient(135% 130% at 100% 0%, transparent 26%, color-mix(in oklch, var(--color-canvas), transparent 6%) 92%)" }}
       />
       <div className="absolute bottom-3 left-4 flex items-end gap-2.5 [transform:skewX(8deg)]">
-        <span className="block h-[68px] w-[46px] shrink-0 overflow-hidden rounded-[6px] shadow-[0_8px_18px_-6px_rgba(0,0,0,0.85)] ring-1 ring-white/15">
+        <span className="block h-[68px] w-[46px] shrink-0 overflow-hidden rounded-sm shadow-[0_8px_18px_-6px_rgba(0,0,0,0.85)] ring-1 ring-white/15">
           <img src={poster.src} onError={poster.onError} alt="" draggable={false} className="h-full w-full object-cover" />
         </span>
         <span className="line-clamp-2 max-w-[8.5rem] pb-1 text-[12px] font-semibold leading-tight text-ink [text-shadow:0_1px_6px_rgba(0,0,0,0.95)]">

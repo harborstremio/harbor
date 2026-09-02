@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Loader2, Trash2, X } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
+import { UiIcon } from "@/components/ui-icon";
 import { Poster } from "@/components/poster";
 import { useT } from "@/lib/i18n";
 import { authToken } from "@/lib/theme-auth";
@@ -230,7 +231,7 @@ export function RatingModal({ target, onClose }: { target: RatingTarget; onClose
                     aria-label={t("Remove rating")}
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-ink-subtle ring-1 ring-edge-soft transition-colors hover:bg-elevated hover:text-danger disabled:opacity-40"
                   >
-                    <Trash2 size={16} />
+                    <UiIcon name="unrate" className="h-4 w-4" />
                   </button>
                 )}
                 <button

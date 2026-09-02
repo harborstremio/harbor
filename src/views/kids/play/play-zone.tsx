@@ -2,6 +2,7 @@ import { ArrowLeft, Fish, Gamepad2, Hash, Puzzle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { pushOverlayPin } from "@/lib/overlay-pin";
+import { useT } from "@/lib/i18n";
 import { BubblePop } from "./bubble-pop";
 import { GameArcade } from "./games";
 import { MemoryMatch } from "./memory-match";
@@ -53,6 +54,7 @@ const ACTIVITIES: Array<{
 ];
 
 export function KidsPlayZone({ onClose }: { onClose: () => void }) {
+  const t = useT();
   const [activity, setActivity] = useState<Activity | null>(null);
   const [gameOpen, setGameOpen] = useState(false);
   const [gameExitSignal, setGameExitSignal] = useState(0);
@@ -90,21 +92,26 @@ export function KidsPlayZone({ onClose }: { onClose: () => void }) {
   return createPortal(
     <div className="fixed inset-0 z-[150] flex flex-col overflow-hidden animate-in fade-in duration-200">
       <UnderwaterScene />
-      <header data-tauri-drag-region className="relative z-10 flex shrink-0 items-center gap-4 px-8 pt-7">
+      <header
+        data-tauri-drag-region
+        className="relative z-10 flex shrink-0 items-center gap-4 px-8 pt-7"
+      >
         <button
           type="button"
           onClick={goBack}
           className="flex h-14 items-center gap-2.5 rounded-full border-4 border-white/40 bg-white/90 px-6 text-[17px] font-bold text-[#123a52] shadow-[0_12px_28px_-10px_rgba(0,20,40,0.6)] transition-transform duration-150 hover:scale-[1.04] active:scale-95"
         >
           <ArrowLeft size={20} strokeWidth={2.6} className="dir-icon" />
-          Back
+          {t("Back")}
         </button>
         <div className="flex min-w-0 flex-col">
           <h1 className="font-display text-[34px] font-medium leading-tight text-white drop-shadow-[0_2px_14px_rgba(0,20,40,0.5)]">
-            {active ? active.name : "Play Zone"}
+            {active ? t(active.name) : t("Play Zone")}
           </h1>
           {!active && (
-            <p className="text-[15px] font-semibold text-white/75">Games, coloring and ocean wonders</p>
+            <p className="text-[15px] font-semibold text-white/75">
+              {t("Games, coloring and ocean wonders")}
+            </p>
           )}
         </div>
         <img
@@ -132,7 +139,7 @@ export function KidsPlayZone({ onClose }: { onClose: () => void }) {
                     key={a.id}
                     type="button"
                     onClick={() => setActivity(a.id)}
-                    className="kids-card group flex items-center gap-5 rounded-[28px] border-4 border-white/35 bg-white/90 px-7 py-6 text-start shadow-[0_24px_60px_-20px_rgba(0,20,40,0.6)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+                    className="kids-card group flex items-center gap-5 rounded-2xl border-4 border-white/35 bg-white/90 px-7 py-6 text-start shadow-[0_24px_60px_-20px_rgba(0,20,40,0.6)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
                     style={{ animationDelay: `${i * 90}ms` }}
                   >
                     <img
@@ -150,10 +157,10 @@ export function KidsPlayZone({ onClose }: { onClose: () => void }) {
                           <Icon size={16} strokeWidth={2.6} />
                         </span>
                         <span className="font-display text-[24px] font-medium leading-tight text-[#123a52]">
-                          {a.name}
+                          {t(a.name)}
                         </span>
                       </span>
-                      <span className="text-[15px] font-semibold text-[#3c6a84]">{a.blurb}</span>
+                      <span className="text-[15px] font-semibold text-[#3c6a84]">{t(a.blurb)}</span>
                     </span>
                   </button>
                 );

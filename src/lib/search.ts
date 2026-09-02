@@ -1,11 +1,5 @@
 import { effectiveTmdbLanguage, get } from "@/lib/providers/tmdb/tmdb-client";
-import {
-  movieMeta,
-  seriesMeta,
-  type Page,
-  type RawMovie,
-  type RawSeries,
-} from "@/lib/providers/tmdb/tmdb-meta-mappers";
+import { movieMeta, seriesMeta, type Page, type RawMovie, type RawSeries } from "@/lib/providers/tmdb/tmdb-meta-mappers";
 import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
 import type { Meta } from "@/lib/cinemeta";
 import type { AddonResultGroup } from "@/lib/search-addons";
@@ -66,14 +60,7 @@ export type AnimeHit = {
 
 export type SearchResults = {
   query: string;
-  topMatch: {
-    kind: "movie" | "series";
-    meta: Meta;
-    popularity: number;
-    backdrop?: string;
-    overview?: string;
-    voteAverage?: number;
-  } | null;
+  topMatch: { kind: "movie" | "series"; meta: Meta; popularity: number; backdrop?: string; overview?: string; voteAverage?: number } | null;
   people: SearchPerson[];
   movies: Meta[];
   series: Meta[];
@@ -153,7 +140,7 @@ async function jikanAnimeSearch(query: string, limit: number): Promise<AnimeHit[
         format: a.type ?? null,
         name,
         year: year ? String(year) : null,
-        poster: a.images?.jpg?.large_image_url ?? a.images?.jpg?.image_url ?? null,
+        poster: a.images?.jpg?.image_url ?? a.images?.jpg?.large_image_url ?? null,
         background: a.trailer?.images?.maximum_image_url ?? null,
         overview: a.synopsis ?? "",
         score: a.score ?? 0,
@@ -194,7 +181,7 @@ async function kitsuAnimeSearch(query: string, limit: number): Promise<AnimeHit[
         format: at.subtype ?? null,
         name: at.titles?.en?.trim() || at.canonicalTitle || "Untitled",
         year: at.startDate ? at.startDate.slice(0, 4) : null,
-        poster: at.posterImage?.large ?? at.posterImage?.medium ?? null,
+        poster: at.posterImage?.medium ?? at.posterImage?.large ?? null,
         background: at.coverImage?.large ?? null,
         overview: at.synopsis ?? "",
         score: at.averageRating ? Number(at.averageRating) / 10 : 0,
@@ -213,21 +200,9 @@ export async function searchAnime(query: string, limit = 8): Promise<AnimeHit[]>
   const q = query.trim();
   if (q.length < 2) return [];
   const [anilist, jikan, kitsu] = await Promise.all([
-    withSearchTimeout(
-      anilistAnimeSearch(q, limit).catch(() => []),
-      1500,
-      [],
-    ),
-    withSearchTimeout(
-      jikanAnimeSearch(q, limit).catch(() => []),
-      1200,
-      [],
-    ),
-    withSearchTimeout(
-      kitsuAnimeSearch(q, limit).catch(() => []),
-      3000,
-      [],
-    ),
+    withSearchTimeout(anilistAnimeSearch(q, limit).catch(() => []), 1500, []),
+    withSearchTimeout(jikanAnimeSearch(q, limit).catch(() => []), 1200, []),
+    withSearchTimeout(kitsuAnimeSearch(q, limit).catch(() => []), 3000, []),
   ]);
   const out: AnimeHit[] = [];
   const seenMal = new Set<number>();
@@ -280,36 +255,10 @@ export async function searchAll(
 ): Promise<SearchResults> {
   const trimmed = query.trim();
   if (!trimmed) {
-    return {
-      query: "",
-      topMatch: null,
-      people: [],
-      movies: [],
-      series: [],
-      liveTv: [],
-      anime: [],
-      manga: [],
-      characters: [],
-      addonGroups: [],
-      addons: [],
-      intent: null,
-    };
+    return { query: "", topMatch: null, people: [], movies: [], series: [], liveTv: [], anime: [], manga: [], characters: [], addonGroups: [], addons: [], intent: null };
   }
   if (!key) {
-    return {
-      query: trimmed,
-      topMatch: null,
-      people: [],
-      movies: [],
-      series: [],
-      liveTv: [],
-      anime: [],
-      manga: [],
-      characters: [],
-      addonGroups: [],
-      addons: [],
-      intent: detectIntent(trimmed),
-    };
+    return { query: trimmed, topMatch: null, people: [], movies: [], series: [], liveTv: [], anime: [], manga: [], characters: [], addonGroups: [], addons: [], intent: detectIntent(trimmed) };
   }
 
   const data = await get<Page<MultiItem>>(key, "search/multi", {
@@ -389,10 +338,7 @@ export async function searchAll(
       }
     } else if (r.media_type === "person") {
       const known = (r.known_for ?? [])
-        .map(
-          (k) =>
-            (k as { title?: string; name?: string }).title ?? (k as { name?: string }).name ?? "",
-        )
+        .map((k) => (k as { title?: string; name?: string }).title ?? (k as { name?: string }).name ?? "")
         .filter(Boolean)
         .slice(0, 2)
         .join(", ");
@@ -425,9 +371,7 @@ export async function searchAll(
         ? movieMeta(winner as RawMovie, enNameById?.get(winner.id))
         : seriesMeta(winner as RawSeries, enNameById?.get(winner.id)),
       popularity: winner.popularity ?? 0,
-      backdrop: winner.backdrop_path
-        ? `https://image.tmdb.org/t/p/w1280${winner.backdrop_path}`
-        : undefined,
+      backdrop: winner.backdrop_path ? `https://image.tmdb.org/t/p/w1280${winner.backdrop_path}` : undefined,
       overview: winner.overview,
       voteAverage: winner.vote_average,
     };
@@ -496,10 +440,7 @@ async function fuzzyPeopleFallback(
     if (seen.has(r.id) || !nameCloseTo(r.name, query)) continue;
     seen.add(r.id);
     const known = (r.known_for ?? [])
-      .map(
-        (k) =>
-          (k as { title?: string; name?: string }).title ?? (k as { name?: string }).name ?? "",
-      )
+      .map((k) => (k as { title?: string; name?: string }).title ?? (k as { name?: string }).name ?? "")
       .filter(Boolean)
       .slice(0, 2)
       .join(", ");

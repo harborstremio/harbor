@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Harbor Setup",
+  "version": "0.9.121",
+  "identifier": "app.harbor.setup",
+  "build": {
+    "frontendDist": "../ui"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Harbor Setup",
+        "width": 1028,
+        "height": 632,
+        "resizable": true,
+        "maximizable": true,
+        "decorations": false,
+        "transparent": false,
+        "center": true,
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["icons/icon.ico"]
+  }
+}

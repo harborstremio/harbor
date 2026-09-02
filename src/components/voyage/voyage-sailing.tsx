@@ -1,4 +1,5 @@
-import { Flag, Play } from "lucide-react";
+import { Flag } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
@@ -31,7 +32,7 @@ export function VoyageSailing({
         {t("Up next")}
       </span>
 
-      <div className="flex items-center gap-4 rounded-[10px] border border-edge-soft bg-canvas/30 p-3">
+      <div className="flex items-center gap-4 rounded-md border border-edge-soft bg-canvas/30 p-3">
         <span className="block h-[86px] w-[58px] shrink-0 overflow-hidden rounded-[8px] ring-1 ring-edge-soft">
           <img
             src={poster.src}

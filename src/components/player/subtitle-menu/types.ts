@@ -20,6 +20,7 @@ export type SubtitleMenuProps = {
   useOverlayPopup?: boolean;
   onOpenChange?: (open: boolean) => void;
   onOpenStyleBar?: () => void;
+  iconUrl?: string;
 };
 
 export type Group = { langKey: string; langDisplay: string; variants: TrackInfo[] };

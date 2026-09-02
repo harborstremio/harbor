@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useAutoDownload } from "@/lib/auto-download";
 import { runAutoDownloadCheck, useIsRunning } from "@/lib/auto-download/runner";
+import { useT } from "@/lib/i18n";
 import { AutoDownloadAdd } from "./auto-download-add";
 import { AutoDownloadRow } from "./auto-download-row";
 
 export function AutoDownloadButton() {
+  const t = useT();
   const list = useAutoDownload();
   const running = useIsRunning();
   const [open, setOpen] = useState(false);
@@ -22,7 +24,7 @@ export function AutoDownloadButton() {
         ) : (
           <Rss size={14} strokeWidth={2.1} className="shrink-0 text-ink-subtle" />
         )}
-        Auto-download
+        {t("Auto-download")}
         {list.length > 0 && (
           <span className="rounded-full bg-accent/15 px-1.5 py-px text-[11px] font-semibold tabular-nums text-accent">
             {list.length}
@@ -35,6 +37,7 @@ export function AutoDownloadButton() {
 }
 
 export function AutoDownloadModal({ onClose }: { onClose: () => void }) {
+  const t = useT();
   const list = useAutoDownload();
 
   useEffect(() => {
@@ -51,17 +54,17 @@ export function AutoDownloadModal({ onClose }: { onClose: () => void }) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Auto-download"
+        aria-label={t("Auto-download")}
         onClick={(e) => e.stopPropagation()}
         className="animate-modal-in flex max-h-[min(80vh,640px)] w-[min(92vw,560px)] flex-col overflow-hidden rounded-2xl border border-edge-soft bg-elevated shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]"
       >
         <header className="flex items-start justify-between gap-4 px-6 pt-6">
           <div className="flex flex-col gap-1">
             <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">
-              Auto-download
+              {t("Auto-download")}
             </h2>
             <p className="text-[13px] leading-snug text-ink-muted">
-              New episodes grab themselves in the background
+              {t("Episodes that air after you add a series grab themselves")}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
@@ -69,7 +72,7 @@ export function AutoDownloadModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={onClose}
-              aria-label="Close"
+              aria-label={t("Close")}
               className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-subtle transition duration-150 hover:bg-ink/10 hover:text-ink active:scale-90"
             >
               <X size={16} strokeWidth={2.2} />
@@ -84,7 +87,9 @@ export function AutoDownloadModal({ onClose }: { onClose: () => void }) {
         <div className="min-h-[300px] flex-1 overflow-y-auto px-6 pb-6">
           {list.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-edge-soft bg-canvas/30 px-5 py-8 text-center text-[13px] leading-relaxed text-ink-muted">
-              Add a series above and Harbor will grab each new episode as it airs, on your terms.
+              {t(
+                "Add a series above and Harbor will grab each new episode as it airs, on your terms.",
+              )}
             </p>
           ) : (
             <ul className="flex flex-col gap-2.5">
@@ -101,6 +106,7 @@ export function AutoDownloadModal({ onClose }: { onClose: () => void }) {
 }
 
 function CheckNowButton() {
+  const t = useT();
   const running = useIsRunning();
   return (
     <button
@@ -110,7 +116,7 @@ function CheckNowButton() {
       className="flex h-9 shrink-0 items-center gap-2 rounded-lg border border-edge bg-canvas/40 px-3.5 text-[12.5px] font-medium text-ink-muted transition duration-150 hover:border-ink-subtle hover:text-ink active:scale-[0.97] disabled:opacity-60"
     >
       <RotateCw size={13} strokeWidth={2.2} className={running ? "animate-spin" : ""} />
-      {running ? "Checking..." : "Check now"}
+      {running ? t("Checking...") : t("Check now")}
     </button>
   );
 }

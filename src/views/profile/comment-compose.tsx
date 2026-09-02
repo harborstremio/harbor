@@ -57,14 +57,14 @@ export function CommentCompose({
 
   if (disabled) {
     return (
-      <div className="rounded-[10px] border border-dashed border-edge px-4 py-3 text-center text-[13px] text-ink-subtle">
+      <div className="rounded-md border border-dashed border-edge px-4 py-3 text-center text-[13px] text-ink-subtle">
         {t("Sign in to leave a comment")}
       </div>
     );
   }
 
   return (
-    <div className="relative rounded-[10px] bg-elevated p-2 ring-1 ring-edge-soft focus-within:ring-edge">
+    <div className="relative rounded-md bg-elevated p-2 ring-1 ring-edge-soft focus-within:ring-edge">
       <MentionPicker suggest={suggest} onPick={pick} />
       <textarea
         ref={boxRef}
@@ -114,7 +114,7 @@ export function CommentCompose({
         <button
           onClick={() => void send()}
           disabled={sending || !text.trim()}
-          className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-4 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+          className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-4 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
         >
           <Send size={20} /> {sending ? t("Posting") : t("Post")}
         </button>

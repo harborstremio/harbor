@@ -3,7 +3,7 @@ import { fetchWatchedHistory, type HistoryItem } from "@/lib/trakt/history";
 import { fetchWatchlist } from "@/lib/trakt/watchlist";
 import { traktItemToMeta } from "@/lib/trakt/to-meta";
 import type { TraktItem } from "@/lib/trakt/types";
-import { historyItemsToDated } from "./history-tab";
+import { historyItemsToDated } from "./history-merge";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import {

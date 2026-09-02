@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { t } from "@/lib/i18n";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import {
   captureBaseTitle,
@@ -44,14 +45,14 @@ export function useFrameGrab(params: {
         setToast({
           id: Date.now(),
           kind: "ok",
-          text: `Screenshot saved to ${dir ? "Pictures/Harbor" : "downloads"}`,
+          text: t("Screenshot saved to {path}", { path: dir ? "Pictures/Harbor" : "downloads" }),
           path: result.path,
         });
       } else {
         setToast({
           id: Date.now(),
           kind: "error",
-          text: result.error || "Frame grab failed",
+          text: result.error || t("Frame grab failed"),
         });
       }
       dismissTimer.current = window.setTimeout(() => setToast(null), 5200);
@@ -60,9 +61,12 @@ export function useFrameGrab(params: {
     }
   }, [bridgeRef, src.meta.name, src.episode]);
 
-  useEffect(() => () => {
-    if (dismissTimer.current) window.clearTimeout(dismissTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (dismissTimer.current) window.clearTimeout(dismissTimer.current);
+    },
+    [],
+  );
 
   return { toast, trigger };
 }

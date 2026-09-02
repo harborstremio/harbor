@@ -6,6 +6,7 @@ import { resolveAwardIcon, useAwardPacks } from "@/lib/award-icons";
 import type { Meta } from "@/lib/cinemeta";
 import { awardSummary, pickHeroAwards, useAwards, type AwardType } from "@/lib/providers/wikidata";
 import { mergeBundledAwards } from "@/lib/awards-history";
+import { useBundledAwardsVersion } from "@/lib/use-bundled-awards";
 
 const HEADLINE_FOR: Record<string, string> = {
   oscar: "Academy Award",
@@ -83,7 +84,7 @@ function AnimeCorner({ name, year }: { name: string; year?: number }) {
   return (
     <div
       ref={ref}
-      className="pointer-events-none absolute bottom-10 end-10 z-10 flex max-w-[44%] items-center justify-end gap-3 text-end"
+      className="harbor-awards-corner pointer-events-none absolute bottom-10 end-10 z-10 flex max-w-[44%] items-center justify-end gap-3 text-end"
       title={wins.map((w) => `${awardSourceMeta(w.source).shortName} ${w.year} ${w.categoryName}`).join("\n")}
     >
       <div className="flex min-w-0 flex-col gap-0.5">
@@ -126,7 +127,11 @@ function ClassicCorner({
 }) {
   const { ref, tier } = useHostTier();
   const live = useAwards(imdbId ?? undefined, isSeries);
-  const awards = useMemo(() => mergeBundledAwards(live, name, year), [live, name, year]);
+  const awardsV = useBundledAwardsVersion();
+  const awards = useMemo(
+    () => mergeBundledAwards(live, name, year),
+    [awardsV, live, name, year],
+  );
   const summary = useMemo(() => pickHeroAwards(awardSummary(awards)), [awards]);
   if (summary.length === 0 || tier === "hidden") return null;
   const top = summary[0];
@@ -149,7 +154,7 @@ function ClassicCorner({
   return (
     <div
       ref={ref}
-      className="pointer-events-none absolute bottom-10 end-10 z-10 flex max-w-[44%] items-center justify-end gap-3 text-end"
+      className="harbor-awards-corner pointer-events-none absolute bottom-10 end-10 z-10 flex max-w-[44%] items-center justify-end gap-3 text-end"
       title={lines.join(" · ")}
     >
       <div className="flex min-w-0 flex-col gap-0.5">

@@ -3,7 +3,11 @@ use base64::{engine::general_purpose::STANDARD as B64, Engine as _};
 use serde_json::{json, Value};
 use std::time::Duration;
 
-const MODELS: [&str; 3] = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.1-flash-lite"];
+const MODELS: [&str; 3] = [
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-3.1-flash-lite",
+];
 
 const RETIRED: [&str; 8] = [
     "gemini-2.0-flash",
@@ -26,13 +30,20 @@ struct GErr {
 
 impl GErr {
     fn hard(message: String) -> Self {
-        GErr { message, try_next: false, bad_request: false }
+        GErr {
+            message,
+            try_next: false,
+            bad_request: false,
+        }
     }
 }
 
 pub fn model_chain(requested: Option<String>) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
-    if let Some(m) = requested.map(|m| m.trim().to_string()).filter(|m| !m.is_empty()) {
+    if let Some(m) = requested
+        .map(|m| m.trim().to_string())
+        .filter(|m| !m.is_empty())
+    {
         if !RETIRED.contains(&m.as_str()) {
             out.push(m);
         }
@@ -146,7 +157,9 @@ async fn attempt(
         if body.is_empty() {
             if !reason.is_empty() && reason != "STOP" {
                 return Err(GErr {
-                    message: format!("Gemini stopped without an answer ({reason}). Try a different scene."),
+                    message: format!(
+                        "Gemini stopped without an answer ({reason}). Try a different scene."
+                    ),
                     try_next: true,
                     bad_request: false,
                 });
@@ -169,7 +182,13 @@ async fn attempt(
     if title.is_empty() && artist.is_empty() {
         return Ok(None);
     }
-    Ok(Some(SongResult { title, artist, album, artwork: String::new(), link: String::new() }))
+    Ok(Some(SongResult {
+        title,
+        artist,
+        album,
+        artwork: String::new(),
+        link: String::new(),
+    }))
 }
 
 fn classify(status: u16, model: &str, msg: String) -> GErr {
@@ -271,13 +290,28 @@ mod tests {
     fn wire_format_matches_documented_contract() {
         let b = build_body("QUJD", true);
         assert_eq!(b["contents"][0]["role"], "user");
-        assert_eq!(b["contents"][0]["parts"][1]["inlineData"]["mimeType"], "audio/wav");
+        assert_eq!(
+            b["contents"][0]["parts"][1]["inlineData"]["mimeType"],
+            "audio/wav"
+        );
         assert_eq!(b["contents"][0]["parts"][1]["inlineData"]["data"], "QUJD");
-        assert!(b["contents"][0]["parts"][0]["text"].as_str().unwrap().contains("JSON"));
-        assert_eq!(b["generationConfig"]["responseMimeType"], "application/json");
+        assert!(b["contents"][0]["parts"][0]["text"]
+            .as_str()
+            .unwrap()
+            .contains("JSON"));
+        assert_eq!(
+            b["generationConfig"]["responseMimeType"],
+            "application/json"
+        );
         assert_eq!(b["generationConfig"]["responseSchema"]["type"], "OBJECT");
-        assert_eq!(b["generationConfig"]["responseSchema"]["properties"]["title"]["type"], "STRING");
-        assert_eq!(b["generationConfig"]["responseSchema"]["required"][0], "artist");
+        assert_eq!(
+            b["generationConfig"]["responseSchema"]["properties"]["title"]["type"],
+            "STRING"
+        );
+        assert_eq!(
+            b["generationConfig"]["responseSchema"]["required"][0],
+            "artist"
+        );
         assert!(b["contents"][0]["parts"][1]["inline_data"].is_null());
         assert!(b["contents"][0]["parts"][1]["inlineData"]["mime_type"].is_null());
     }
@@ -302,7 +336,10 @@ mod tests {
 
     #[test]
     fn model_chain_dedupes_and_honours_a_live_custom_model() {
-        assert_eq!(model_chain(Some("gemini-3.6-flash".into())).len(), MODELS.len());
+        assert_eq!(
+            model_chain(Some("gemini-3.6-flash".into())).len(),
+            MODELS.len()
+        );
         let c = model_chain(Some("  my-model  ".into()));
         assert_eq!(c[0], "my-model");
         assert_eq!(c.len(), MODELS.len() + 1);
@@ -324,7 +361,10 @@ mod tests {
     fn collect_text_survives_missing_shapes() {
         assert_eq!(collect_text(&json!({})), "");
         assert_eq!(collect_text(&json!({ "candidates": [] })), "");
-        assert_eq!(collect_text(&json!({ "candidates": [{ "finishReason": "SAFETY" }] })), "");
+        assert_eq!(
+            collect_text(&json!({ "candidates": [{ "finishReason": "SAFETY" }] })),
+            ""
+        );
         assert_eq!(collect_text(&parts(json!("not-an-array"))), "");
     }
 
@@ -333,8 +373,14 @@ mod tests {
         let want = json!({ "artist": "Debussy", "title": "Clair de Lune" });
         let plain = "{\"artist\":\"Debussy\",\"title\":\"Clair de Lune\"}";
         assert_eq!(extract_json(plain).unwrap(), want);
-        assert_eq!(extract_json(&format!("```json\n{plain}\n```")).unwrap(), want);
-        assert_eq!(extract_json(&format!("Sure! {plain} Hope that helps.")).unwrap(), want);
+        assert_eq!(
+            extract_json(&format!("```json\n{plain}\n```")).unwrap(),
+            want
+        );
+        assert_eq!(
+            extract_json(&format!("Sure! {plain} Hope that helps.")).unwrap(),
+            want
+        );
         assert_eq!(extract_json(&format!("  \n{plain}\n  ")).unwrap(), want);
     }
 
@@ -373,15 +419,25 @@ mod tests {
     fn classify_routes_every_status_correctly() {
         assert!(classify(404, "m", "not found".into()).try_next);
         assert!(classify(400, "m", "bad schema".into()).bad_request);
-        let key = classify(400, "m", "API key not valid. Please pass a valid API key.".into());
+        let key = classify(
+            400,
+            "m",
+            "API key not valid. Please pass a valid API key.".into(),
+        );
         assert!(!key.bad_request && !key.try_next);
         assert!(key.message.contains("API key"));
         for s in [401u16, 403] {
             let e = classify(s, "m", "x".into());
-            assert!(!e.try_next && !e.bad_request, "status {s} must be a hard stop");
+            assert!(
+                !e.try_next && !e.bad_request,
+                "status {s} must be a hard stop"
+            );
         }
         for s in [429u16, 500, 503] {
-            assert!(classify(s, "m", "x".into()).try_next, "status {s} must advance the chain");
+            assert!(
+                classify(s, "m", "x".into()).try_next,
+                "status {s} must advance the chain"
+            );
         }
     }
 
@@ -389,6 +445,9 @@ mod tests {
     fn payload_stays_far_under_the_20mb_inline_cap() {
         let max_pcm = 44100usize * 15 * 2 * 2;
         let b64 = (max_pcm + 44).div_ceil(3) * 4;
-        assert!(b64 < 20 * 1024 * 1024, "worst case {b64} bytes exceeds the inline cap");
+        assert!(
+            b64 < 20 * 1024 * 1024,
+            "worst case {b64} bytes exceeds the inline cap"
+        );
     }
 }

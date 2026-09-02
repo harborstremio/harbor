@@ -1,6 +1,7 @@
 import { ArrowUpRight, ClipboardCopy, ExternalLink, RotateCw, Sparkles, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useT } from "@/lib/i18n";
 import { installFromUrl } from "@/lib/addon-store";
 import { isAdultText } from "@/lib/addons-store/adult-filter";
 import { pushActivityHint } from "@/lib/discord/activity-hint";
@@ -31,9 +32,7 @@ export function openInstallerViewport(url: string, title?: string, logo?: string
     return;
   }
   window.__harborInstallerOpen = true;
-  window.dispatchEvent(
-    new CustomEvent<InstallerDetail>(EVENT, { detail: { url, title, logo } }),
-  );
+  window.dispatchEvent(new CustomEvent<InstallerDetail>(EVENT, { detail: { url, title, logo } }));
 }
 
 export function InstallerViewportRoot() {
@@ -88,6 +87,7 @@ function InstallerViewport({
   logo: string | null;
   onClose: () => void;
 }) {
+  const t = useT();
   const [pasteValue, setPasteValue] = useState("");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [loaded, setLoaded] = useState(false);
@@ -107,16 +107,24 @@ function InstallerViewport({
 
   useEffect(() => {
     if (isAdultText(url, title))
-      return pushActivityHint({ details: "Setting up an addon", state: "Addon setup" });
+      return pushActivityHint({
+        details: t("Setting up an addon"),
+        state: t("Addon setup"),
+      });
     const label =
       phase.kind === "installing"
-        ? `Installing ${title}`
+        ? t("Installing {title}", { title })
         : phase.kind === "success"
-          ? `Installed ${title}`
-          : `Configuring ${title}`;
+          ? t("Installed {title}", { title })
+          : t("Configuring {title}", { title });
     const largeImage = logo && logo.startsWith("https://") ? logo : undefined;
-    return pushActivityHint({ details: label, state: "Addon setup", largeImage, largeText: title });
-  }, [url, title, logo, phase.kind]);
+    return pushActivityHint({
+      details: label,
+      state: t("Addon setup"),
+      largeImage,
+      largeText: title,
+    });
+  }, [url, title, logo, phase.kind, t]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -141,14 +149,14 @@ function InstallerViewport({
       if (!normalized) {
         setPhase({
           kind: "error",
-          message: "Paste a stremio:// link or an https://…/manifest.json URL.",
+          message: t("Paste a stremio:// link or an https://…/manifest.json URL."),
         });
         return;
       }
       setPhase({ kind: "installing", name: null });
       try {
         const result = await installFromUrl(normalized);
-        const name = result.addon.manifest.name ?? "Addon";
+        const name = result.addon.manifest.name ?? t("Addon");
         const logo = result.addon.manifest.logo ?? null;
         const id = result.addon.manifest.id;
         setPhase({ kind: "success", name, logo });
@@ -159,11 +167,11 @@ function InstallerViewport({
           onClose();
         }, 2000);
       } catch (e) {
-        const msg = e instanceof Error ? e.message : "Install failed.";
+        const msg = e instanceof Error ? e.message : t("Install failed.");
         setPhase({ kind: "error", message: msg });
       }
     },
-    [onClose],
+    [onClose, t],
   );
 
   useEffect(() => {
@@ -224,7 +232,7 @@ function InstallerViewport({
     } catch {
       setPhase({
         kind: "error",
-        message: "Clipboard access was blocked. Paste the link manually.",
+        message: t("Clipboard access was blocked. Paste the link manually."),
       });
     }
   };
@@ -257,14 +265,14 @@ function InstallerViewport({
             </span>
           )}
           <span className="truncate text-[10.5px] font-bold uppercase tracking-[0.24em] text-accent">
-            Setup · {title}
+            {t("Setup · {title}", { title })}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={reload}
-            aria-label="Reload"
+            aria-label={t("Reload")}
             className="flex h-9 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[12px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
           >
             <RotateCw
@@ -275,7 +283,7 @@ function InstallerViewport({
                 transition: "transform 0.6s cubic-bezier(0.22,0.61,0.36,1)",
               }}
             />
-            Reload
+            {t("Reload")}
           </button>
           <button
             type="button"
@@ -283,12 +291,12 @@ function InstallerViewport({
             className="flex h-9 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[12px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
           >
             <ExternalLink size={12} strokeWidth={2.4} />
-            Open in browser
+            {t("Open in browser")}
           </button>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("Close")}
             disabled={phase.kind === "installing"}
             className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-elevated/60 hover:text-ink disabled:opacity-40"
           >
@@ -300,17 +308,18 @@ function InstallerViewport({
       <div className="relative flex-1 overflow-hidden bg-white">
         {!loaded && !blocked && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-canvas">
-            <HarborLoader size="lg" caption={`Loading ${title}`} />
+            <HarborLoader size="lg" caption={t("Loading {title}", { title })} />
           </div>
         )}
         {blocked && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-canvas px-6 text-center">
             <p className="text-[14px] font-semibold text-ink">
-              {title} won&apos;t load inside Harbor.
+              {t("{title} won't load inside Harbor.", { title })}
             </p>
             <p className="max-w-[44ch] text-[12.5px] text-ink-muted">
-              Open it in a regular browser, set it up there, then come back and paste the install
-              link below.
+              {t(
+                "Open it in a regular browser, set it up there, then come back and paste the install link below.",
+              )}
             </p>
             <button
               type="button"
@@ -318,7 +327,7 @@ function InstallerViewport({
               className="flex h-10 items-center gap-1.5 rounded-full bg-ink px-4 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90"
             >
               <ArrowUpRight size={13} strokeWidth={2.4} />
-              Open in browser
+              {t("Open in browser")}
             </button>
           </div>
         )}
@@ -339,8 +348,12 @@ function InstallerViewport({
       <footer className="flex shrink-0 flex-col gap-2.5 border-t border-white/10 bg-canvas/72 px-5 py-3.5 backdrop-blur-md">
         <p className="text-[12.5px] leading-snug text-ink-muted">
           {isWeb()
-            ? "Configure the addon above, then copy its manifest URL and paste it here. The web app can't catch the Install button automatically the way the desktop app does."
-            : "Paste the manifest URL, or click Install on the addon's configuration page above."}
+            ? t(
+                "Configure the addon above, then copy its manifest URL and paste it here. The web app can't catch the Install button automatically the way the desktop app does.",
+              )
+            : t(
+                "Paste the manifest URL, or click Install on the addon's configuration page above.",
+              )}
         </p>
         <form
           onSubmit={(e) => {
@@ -360,7 +373,7 @@ function InstallerViewport({
                 window.setTimeout(() => void submit(text), 60);
               }
             }}
-            placeholder="stremio://… or https://…/manifest.json"
+            placeholder={t("stremio://… or https://…/manifest.json")}
             className="h-10 flex-1 rounded-full border border-edge-soft bg-surface px-4 text-[13px] text-ink placeholder:text-ink-subtle focus:border-accent focus:outline-none"
             spellCheck={false}
             autoCapitalize="off"
@@ -374,7 +387,7 @@ function InstallerViewport({
             className="flex h-10 items-center gap-1.5 rounded-full border border-edge-soft px-3.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-40"
           >
             <ClipboardCopy size={13} strokeWidth={2.2} />
-            From clipboard
+            {t("From clipboard")}
           </button>
           <button
             type="submit"
@@ -382,7 +395,7 @@ function InstallerViewport({
             className="flex h-10 items-center gap-1.5 rounded-full bg-accent px-4 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Sparkles size={13} strokeWidth={2.4} />
-            Install
+            {t("Install")}
           </button>
         </form>
         {phase.kind === "error" && (
@@ -393,7 +406,7 @@ function InstallerViewport({
               onClick={dismissError}
               className="font-semibold uppercase tracking-wider opacity-70 hover:opacity-100"
             >
-              Dismiss
+              {t("Dismiss")}
             </button>
           </div>
         )}

@@ -1,3 +1,5 @@
+import { useSubTabs } from "./sub-tabs";
+import { StreamCacheSection } from "./player-panel/p2p-advanced-section";
 import { Check, Database, HardDrive, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useT } from "@/lib/i18n";
@@ -8,7 +10,8 @@ import { clearPlaylistCache } from "@/lib/iptv/store";
 import { clearSeriesInfoCache } from "@/lib/iptv/xtream-vod";
 import { clearDeadStreams } from "@/lib/dead-streams";
 import { clearResurfaceCache } from "@/lib/cw-resurface";
-import { settingsAnchor } from "./shared";
+import { Section } from "./shared";
+import { SettingGroup, SettingRow } from "./kit";
 import { TempFilesCard } from "./temp-files-card";
 
 function fmtBytes(n: number): string {
@@ -74,31 +77,30 @@ function ClearRow({
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-[13.5px] font-medium text-ink">{title}</span>
-        <span className="text-[12px] leading-snug text-ink-subtle">{sub}</span>
-      </div>
+    <SettingRow label={title} desc={sub}>
       <button
         type="button"
         onClick={click}
-        className={`flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-[12.5px] font-medium transition-colors ${
+        className={`harbor-press-pop flex h-9 shrink-0 items-center gap-1.5 rounded-md px-3.5 text-[12.5px] font-semibold transition-colors ${
           done
-            ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+            ? "bg-success/15 text-success"
             : armed
-              ? "border-danger/50 bg-danger/10 text-danger"
-              : "border-edge text-ink-muted hover:bg-elevated hover:text-ink"
+              ? "bg-danger/15 text-danger"
+              : "bg-raised text-ink-muted hover:text-ink"
         }`}
       >
-        {done ? <Check size={13} strokeWidth={2.4} /> : <Trash2 size={13} strokeWidth={1.9} />}
+        {done ? <Check size={14} strokeWidth={2.4} /> : <Trash2 size={14} strokeWidth={1.9} />}
         {done ? t("Cleared") : armed ? t("Sure?") : t("Clear")}
       </button>
-    </div>
+    </SettingRow>
   );
 }
 
+type Tab = "overview" | "video" | "caches";
+
 export function StoragePanel() {
   const t = useT();
+  const [tab, setTab] = useState<Tab>("overview");
   const [tick, setTick] = useState(0);
   const [estimate, setEstimate] = useState<{ usage: number; quota: number } | null>(null);
 
@@ -122,71 +124,80 @@ export function StoragePanel() {
   const ls = useMemo(() => localStorageBreakdown(), [tick]);
   const pct = estimate && estimate.quota > 0 ? Math.min(100, (estimate.usage / estimate.quota) * 100) : 0;
 
+  useSubTabs(
+    [
+      { id: "overview", label: t("Overview") },
+      { id: "video", label: t("Video files") },
+      { id: "caches", label: t("Caches") },
+    ],
+    tab,
+    (id) => setTab(id as Tab),
+  );
+
   return (
-    <div className="flex flex-col gap-5">
-      <TempFilesCard />
-      <section
-        id={settingsAnchor("Storage overview")}
-        className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
+    <div key={tab} className="harbor-cascade flex flex-col gap-10">
+      {tab === "overview" && (
+        <>
+      <Section
+        title={t("Storage overview")}
+        subtitle={t("Everything Harbor saves lives on this computer. If space runs low, clear a cache below; Harbor rebuilds them as you browse.")}
       >
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-canvas/60 text-ink-muted">
-            <HardDrive size={17} strokeWidth={1.9} />
-          </span>
-          <div className="flex flex-col gap-1">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Storage overview")}</h2>
-            <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Everything Harbor saves lives on this computer. If space runs low, clear a cache below; Harbor rebuilds them as you browse.")}
-            </p>
-          </div>
-        </div>
-
-        {estimate && (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-baseline justify-between text-[12.5px]">
-              <span className="font-medium text-ink">
-                {t("App storage")}: {fmtBytes(estimate.usage)}
-              </span>
-              <span className="text-ink-subtle">{t("{quota} available", { quota: fmtBytes(estimate.quota) })}</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-canvas/70">
-              <div className="h-full rounded-full bg-accent transition-[width] duration-500" style={{ width: `${Math.max(1, pct)}%` }} />
-            </div>
-          </div>
-        )}
-
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[11.5px] font-semibold uppercase tracking-wider text-ink-subtle">
-            {t("Settings storage")}: {fmtBytes(ls.total)}
-          </span>
-          <div className="flex flex-col gap-1">
-            {ls.top.map((row) => (
-              <div key={row.key} className="flex items-center justify-between gap-3 text-[12.5px]">
-                <span className="min-w-0 truncate capitalize text-ink-muted">{friendlyKey(row.key)}</span>
-                <span className="shrink-0 tabular-nums text-ink-subtle">{fmtBytes(row.bytes)}</span>
+        <SettingGroup>
+          {estimate && (
+            <SettingRow
+              wide
+              icon={<HardDrive size={16} strokeWidth={1.9} />}
+              label={
+                <>
+                  {t("App storage")}: {fmtBytes(estimate.usage)}
+                </>
+              }
+              desc={t("{quota} available", { quota: fmtBytes(estimate.quota) })}
+            >
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-canvas">
+                <div
+                  className="h-full rounded-full bg-accent transition-[width] duration-500"
+                  style={{ width: `${Math.max(1, pct)}%` }}
+                />
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </SettingRow>
+          )}
 
-      <section
-        id={settingsAnchor("Clear caches")}
-        className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
+          <SettingRow
+            wide
+            icon={<Database size={16} strokeWidth={1.9} />}
+            label={
+              <>
+                {t("Settings storage")}: {fmtBytes(ls.total)}
+              </>
+            }
+          >
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              {ls.top.map((row) => (
+                <div key={row.key} className="flex items-center justify-between gap-3 text-[12.5px]">
+                  <span className="min-w-0 truncate capitalize text-ink-muted">{friendlyKey(row.key)}</span>
+                  <span className="shrink-0 tabular-nums text-ink-subtle">{fmtBytes(row.bytes)}</span>
+                </div>
+              ))}
+            </div>
+          </SettingRow>
+        </SettingGroup>
+      </Section>
+        </>
+      )}
+      {tab === "video" && (
+        <>
+          <StreamCacheSection />
+          <TempFilesCard />
+        </>
+      )}
+      {tab === "caches" && (
+        <>
+      <Section
+        title={t("Clear caches")}
+        subtitle={t("Safe to clear anytime. Nothing here touches your watch history, library, themes, or sign-ins.")}
       >
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-canvas/60 text-ink-muted">
-            <Database size={17} strokeWidth={1.9} />
-          </span>
-          <div className="flex flex-col gap-1">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Clear caches")}</h2>
-            <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Safe to clear anytime. Nothing here touches your watch history, library, themes, or sign-ins.")}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
+        <SettingGroup>
           <ClearRow
             title={t("Stream picker cache")}
             sub={t("Remembered source lists per title. Clears stale results after changing addons or debrid.")}
@@ -229,12 +240,14 @@ export function StoragePanel() {
               refresh();
             }}
           />
-        </div>
+        </SettingGroup>
 
-        <p className="text-[12px] leading-relaxed text-ink-subtle">
+        <p className="px-1 text-[12.5px] leading-relaxed text-ink-subtle">
           {t("Downloaded themes are managed in Theme & appearance. Video and manga downloads are managed on the Downloads page.")}
         </p>
-      </section>
+      </Section>
+        </>
+      )}
     </div>
   );
 }

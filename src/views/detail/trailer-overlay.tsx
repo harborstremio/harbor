@@ -1,7 +1,7 @@
 import { Cast, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { fetchTrailer, getQualityHint, trailerSrc } from "@/lib/trailer";
+import { fetchTrailer, resolveTrailerQuality, trailerSrc } from "@/lib/trailer";
 import { isMacDesktop } from "@/lib/platform";
 import { openUrl } from "@/lib/window";
 import { useSettings } from "@/lib/settings";
@@ -43,7 +43,7 @@ export function TrailerOverlay({
   useEffect(() => {
     let cancelled = false;
     const pref = settings.trailerQuality;
-    const quality = pref === "auto" ? (getQualityHint() === "360p" ? "360p" : "1080p") : pref;
+    const quality = resolveTrailerQuality(pref);
     fetchTrailer(id, quality).then((info) => {
       if (cancelled) return;
       if (info) setStreamUrl(trailerSrc(info));
@@ -85,11 +85,19 @@ export function TrailerOverlay({
       role="dialog"
       aria-modal="true"
       aria-label={t("Trailer")}
-      className="fixed inset-0 z-[120] flex cursor-zoom-out items-center justify-center"
+      className="fixed inset-0 z-[170] flex cursor-zoom-out items-center justify-center"
       style={{
-        backgroundColor: open ? (isMacDesktop() ? "rgba(0,0,0,1)" : "rgba(0,0,0,0.82)") : "rgba(0,0,0,0)",
+        backgroundColor: open
+          ? isMacDesktop()
+            ? "rgba(0,0,0,1)"
+            : "rgba(0,0,0,0.82)"
+          : "rgba(0,0,0,0)",
         backdropFilter: isMacDesktop() ? "none" : open ? "blur(32px) saturate(1.2)" : "blur(0px)",
-        WebkitBackdropFilter: isMacDesktop() ? "none" : open ? "blur(32px) saturate(1.2)" : "blur(0px)",
+        WebkitBackdropFilter: isMacDesktop()
+          ? "none"
+          : open
+            ? "blur(32px) saturate(1.2)"
+            : "blur(0px)",
         transition:
           "background-color 360ms cubic-bezier(0.32,0.72,0.24,1), backdrop-filter 360ms cubic-bezier(0.32,0.72,0.24,1)",
       }}
@@ -124,8 +132,7 @@ export function TrailerOverlay({
         style={{
           opacity: open ? 1 : 0,
           transform: open ? "scale(1)" : "scale(0.93)",
-          transition:
-            "opacity 320ms ease, transform 420ms cubic-bezier(0.32,0.72,0.24,1)",
+          transition: "opacity 320ms ease, transform 420ms cubic-bezier(0.32,0.72,0.24,1)",
         }}
       >
         {streamUrl ? (
@@ -192,7 +199,15 @@ function YouTubeEmbed({ id, title }: { id: string; title: string }) {
   );
 }
 
-function ExternalTrailerFallback({ id, title, logo }: { id: string; title: string; logo?: string }) {
+function ExternalTrailerFallback({
+  id,
+  title,
+  logo,
+}: {
+  id: string;
+  title: string;
+  logo?: string;
+}) {
   const t = useT();
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-8 text-center">

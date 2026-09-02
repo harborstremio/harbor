@@ -91,7 +91,13 @@ export function MangaAwardCorner({
     </>
   );
   return (
-    <HoverTooltip label={award.name} sublabel={award.subtitle} side="top" align="center" large>
+    <HoverTooltip
+      label={t(award.name)}
+      sublabel={award.subtitle ? t(award.subtitle) : undefined}
+      side="top"
+      align="center"
+      large
+    >
       {canOpen ? (
         <button
           type="button"
@@ -121,6 +127,7 @@ export function CollectionBadges({
   side?: "top" | "bottom";
   awardsOnly?: boolean;
 }) {
+  const t = useT();
   let withArt = collectionsForTitle(title).filter((c) => BADGE_ART[c.id]);
   if (awardsOnly) {
     const seenArt = new Set<string>();
@@ -137,8 +144,8 @@ export function CollectionBadges({
       {withArt.map((c) => (
         <HoverTooltip
           key={c.id}
-          label={c.name}
-          sublabel={c.subtitle}
+          label={t(c.name)}
+          sublabel={c.subtitle ? t(c.subtitle) : undefined}
           side={side}
           align="center"
           large
@@ -146,7 +153,7 @@ export function CollectionBadges({
         >
           <img
             src={BADGE_ART[c.id]}
-            alt={c.name}
+            alt={t(c.name)}
             draggable={false}
             style={{ width: size, height: size }}
             className="object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.55)]"

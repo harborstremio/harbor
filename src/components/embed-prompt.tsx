@@ -98,14 +98,14 @@ export function EmbedPrompt({
   };
 
   return (
-    <div className="flex flex-col gap-2 rounded-[10px] bg-canvas/50 p-2.5 ring-1 ring-edge-soft">
+    <div className="flex flex-col gap-2 rounded-md bg-canvas/50 p-2.5 ring-1 ring-edge-soft">
       <div className="flex items-center gap-2">
         <span className="text-[12px] font-semibold text-ink">{t(spec.title)}</span>
         <button
           type="button"
           onClick={onClose}
           aria-label={t("Cancel")}
-          className="ms-auto grid h-7 w-7 place-items-center rounded-[6px] text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
+          className="ms-auto grid h-7 w-7 place-items-center rounded-sm text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
         >
           <X size={14} strokeWidth={2.2} />
         </button>

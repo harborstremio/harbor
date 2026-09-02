@@ -85,7 +85,7 @@ export function AnimeSeasonPicker({
           setMenu(null);
         }}
         className={`flex w-full items-start gap-3 px-4 py-3 text-start transition-colors ${
-          isActive ? "bg-ink/10 text-ink" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
+          isActive ? "bg-ink/10 text-ink" : "text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
         <span className="mt-0.5 font-mono text-[11px] text-ink-subtle">
@@ -118,7 +118,7 @@ export function AnimeSeasonPicker({
         ref={btnRef}
         onMouseDown={(e) => e.stopPropagation()}
         onClick={() => (menu ? setMenu(null) : openMenu())}
-        className="flex h-10 items-center gap-2 rounded-full border border-edge-soft bg-elevated/70 ps-4 pe-3 text-[13.5px] font-medium text-ink transition-colors hover:bg-elevated"
+        className="flex h-10 items-center gap-2 rounded-full bg-white/[0.06] ps-4 pe-3 text-[13.5px] font-medium text-ink transition-colors hover:bg-white/[0.10]"
       >
         <span className="font-mono text-[11.5px] text-ink-subtle">{positionLabel}</span>
         <span title={current.meta.name} className="max-w-[280px] truncate">
@@ -136,7 +136,7 @@ export function AnimeSeasonPicker({
             ref={menuRef}
             onMouseDown={(e) => e.stopPropagation()}
             style={{ right: menu.right, top: menu.top, bottom: menu.bottom }}
-            className="animate-fade-in fixed z-[200] w-[360px] max-w-[min(360px,calc(100vw-3rem))] overflow-hidden rounded-2xl border border-edge-soft bg-canvas py-1.5 shadow-2xl"
+            className="animate-fade-in fixed z-[200] w-[360px] max-w-[min(360px,calc(100vw-3rem))] overflow-hidden rounded-lg border border-edge bg-elevated py-1.5 shadow-[0_18px_44px_-12px_rgba(0,0,0,0.6)]"
           >
             <div className="overflow-y-auto" style={{ maxHeight: menu.maxH }}>
               {seasonIdxs.map(renderEntry)}

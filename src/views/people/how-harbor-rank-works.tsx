@@ -38,7 +38,7 @@ export function HowHarborRankWorks({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[140] flex items-end justify-center bg-canvas/85 backdrop-blur-sm animate-in fade-in duration-150 motion-reduce:animate-none sm:items-center"
+      className="fixed inset-0 z-[185] flex items-end justify-center bg-canvas/85 backdrop-blur-sm animate-in fade-in duration-150 motion-reduce:animate-none sm:items-center"
       role="dialog"
       aria-modal="true"
       aria-label={t("How Harbor Rank works")}
@@ -46,7 +46,7 @@ export function HowHarborRankWorks({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex w-full max-h-[calc(100vh-2rem)] flex-col overflow-y-auto rounded-t-3xl bg-surface p-7 pt-6 shadow-[0_30px_120px_-30px_rgba(0,0,0,0.85)] ring-1 ring-edge-soft animate-in fade-in slide-in-from-bottom-4 duration-200 motion-reduce:animate-none sm:m-6 sm:w-[min(92vw,460px)] sm:rounded-3xl sm:slide-in-from-bottom-0 sm:zoom-in-95"
+        className="relative flex w-full max-h-[calc(100vh-2rem)] flex-col overflow-y-auto rounded-t-3xl bg-surface p-7 pt-6 shadow-[0_30px_120px_-30px_rgba(0,0,0,0.85)] ring-1 ring-edge-soft animate-in fade-in slide-in-from-bottom-4 duration-200 motion-reduce:animate-none sm:m-6 sm:w-[min(92vw,460px)] sm:rounded-lg sm:slide-in-from-bottom-0 sm:zoom-in-95"
       >
         <button
           onClick={onClose}
@@ -83,7 +83,7 @@ export function HowHarborRankWorks({
         <ul className="mt-4 flex flex-col gap-2.5">
           {PILLARS.map((p) => (
             <li key={p.key} className="flex items-center gap-3">
-              <span className={`h-3 w-3 shrink-0 rounded-[3px] ${p.tone} ring-1 ring-edge-soft`} />
+              <span className={`h-3 w-3 shrink-0 rounded-[3px] ${p.tone}`} />
               <span className="flex-1 text-[14px] text-ink">{t(p.label)}</span>
               <span className="text-[14px] font-semibold text-ink-muted tabular-nums">
                 {Math.round(HARBOR_RANK_WEIGHTS[p.key] * 100)}%
@@ -92,7 +92,7 @@ export function HowHarborRankWorks({
           ))}
         </ul>
 
-        <p className="mt-6 rounded-2xl bg-canvas/60 px-4 py-3 text-[13px] leading-relaxed text-ink-subtle ring-1 ring-edge-soft">
+        <p className="mt-6 rounded-lg bg-canvas/60 px-4 py-3 text-[13px] leading-relaxed text-ink-subtle ring-1 ring-edge-soft">
           {t(
             "All-time body of work, not who is trending. Trending and Top on TMDB are the live tabs.",
           )}

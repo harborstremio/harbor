@@ -1,5 +1,18 @@
 import type { PlayEpisode } from "@/lib/view";
 
+const ANIME_SCHEME_RX = /^(kitsu|mal|anilist|anidb):/;
+
+export function unverifiedAnimeSeasonId(
+  metaId: string,
+  episode: PlayEpisode | null | undefined,
+): string | null {
+  if (!episode || episode.kitsuStreamId != null) return null;
+  if (!ANIME_SCHEME_RX.test(metaId)) return null;
+  if (typeof episode.imdbSeason !== "number" || episode.imdbSeason < 2) return null;
+  const [scheme, entry] = metaId.split(":");
+  return `${scheme}:${entry}:${episode.episode}`;
+}
+
 export function buildStreamIds(
   metaId: string,
   episode: PlayEpisode | undefined,
@@ -30,10 +43,12 @@ export function buildStreamIds(
     push(`${mappedImdb}:${episode!.imdbSeason}:${episode!.imdbEpisode}`);
   }
 
+  const unverifiedAnimeId = unverifiedAnimeSeasonId(metaId, episode);
+
   if (episode?.kitsuStreamId) {
     push(episode.kitsuStreamId);
   } else if (/^(kitsu|mal|anilist|anidb):/.test(metaId) && episode) {
-    if (episode.imdbSeason !== 0) {
+    if (episode.imdbSeason !== 0 && unverifiedAnimeId == null) {
       push(`${metaId.split(":")[0]}:${metaId.split(":")[1]}:${episode.episode}`);
     }
   } else if ((metaId.startsWith("kitsu:") || metaId.startsWith("mal:")) && !episode) {
@@ -43,9 +58,18 @@ export function buildStreamIds(
   } else if (metaId.startsWith("tt") && !episode) {
     push(metaId);
   } else if (metaId.startsWith("tmdb:")) {
+    // Some stream addons (and AIOMetadata) use the bare `tmdb:{id}` scheme
+    // without the movie/tv segment. Emit it first so addons that match the bare
+    // prefix (they also match the scoped form) are queried with it; they index
+    // by the bare id and return nothing for the scoped form.
+    const bareBase = metaId.replace(/^tmdb:(movie|tv):/, "tmdb:");
     if (episode) {
-      if (!animeMeta) push(`${metaId}:${episode.season}:${episode.episode}`);
+      if (!animeMeta) {
+        if (bareBase !== metaId) push(`${bareBase}:${episode.season}:${episode.episode}`);
+        push(`${metaId}:${episode.season}:${episode.episode}`);
+      }
     } else {
+      if (bareBase !== metaId) push(bareBase);
       push(metaId);
     }
   } else {
@@ -95,6 +119,21 @@ export function buildStreamIds(
   ) {
     push(`${mappedImdb}:${episode.imdbSeason}:${episode.imdbEpisode}`);
   }
+
+  if (
+    animeMeta &&
+    episode != null &&
+    mappedImdb != null &&
+    mappedImdb.startsWith("tt") &&
+    episode.imdbSeason != null &&
+    episode.imdbSeason >= 1 &&
+    episode.imdbEpisode != null &&
+    episode.imdbEpisode >= 1
+  ) {
+    push(`${mappedImdb}:${episode.imdbSeason}:${episode.imdbEpisode}`);
+  }
+
+  if (unverifiedAnimeId) push(unverifiedAnimeId);
 
   return out;
 }

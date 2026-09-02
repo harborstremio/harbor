@@ -7,6 +7,7 @@ import { StremioRow } from "./stremio-row";
 import { FACET_DIMS, facetOptions, matchesFacets, type FacetState } from "./stream-facets";
 import { addonInstanceKey, buildAddonOptions } from "./picker-utils";
 import { useSettings } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
 import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
 import { FacetMenuRow } from "./facet-menu-row";
 import { FilterBuilder } from "./filter-builder";
@@ -36,6 +37,7 @@ export function StremioLayout({
   downloadStateFor?: (stream: ScoredStream) => "idle" | "preparing" | "queued";
   isAnime?: boolean;
 }) {
+  const t = useT();
   const [filter, setFilter] = useState<string>("all");
   const [filterOpen, setFilterOpen] = useState(false);
   const [facet, setFacet] = useState<FacetState>({});
@@ -70,7 +72,12 @@ export function StremioLayout({
     () =>
       FACET_DIMS.map((dim) => {
         const base = addonFiltered.filter((s) => matchesFacets(s, facet, dim.key));
-        return { dim, options: facetOptions(base, dim), total: base.length, value: facet[dim.key] ?? "all" };
+        return {
+          dim,
+          options: facetOptions(base, dim),
+          total: base.length,
+          value: facet[dim.key] ?? "all",
+        };
       }),
     [addonFiltered, facet],
   );
@@ -109,10 +116,9 @@ export function StremioLayout({
       return 0;
     });
   }, [addonFiltered, facet, filter, addonRank, preserveOrder]);
-  const filterLabel = filter === "all"
-    ? "All"
-    : addonOptions.find((o) => o.id === filter)?.name ?? "All";
-  const filterLogo = filter === "all" ? null : addonLogoMap.get(filter) ?? null;
+  const filterLabel =
+    filter === "all" ? t("All") : (addonOptions.find((o) => o.id === filter)?.name ?? t("All"));
+  const filterLogo = filter === "all" ? null : (addonLogoMap.get(filter) ?? null);
   return (
     <div className="flex flex-col gap-3">
       <div className="relative">
@@ -147,8 +153,8 @@ export function StremioLayout({
                 filter === "all" ? "text-ink font-semibold" : "text-ink-muted"
               }`}
             >
-              <CircleLogo addonId={null} addonName="All" logo={null} />
-              <span className="flex-1 truncate">All sources</span>
+              <CircleLogo addonId={null} addonName={t("All")} logo={null} />
+              <span className="flex-1 truncate">{t("All sources")}</span>
               <span className="text-[12px] text-ink-subtle">{streams.length}</span>
             </button>
             {addonOptions.map((opt) => (
@@ -207,7 +213,9 @@ export function StremioLayout({
       {streams.length > 0 && visibleStreams.length === 0 && (
         <div className="flex flex-col items-center gap-3 rounded-2xl bg-elevated/60 px-5 py-6 text-center ring-1 ring-edge-soft">
           <p className="text-[14px] text-ink-muted">
-            {`All ${streams.length} source${streams.length === 1 ? "" : "s"} are hidden by the active filter.`}
+            {streams.length === 1
+              ? t("All {n} source is hidden by the active filter.", { n: streams.length })
+              : t("All {n} sources are hidden by the active filter.", { n: streams.length })}
           </p>
           <button
             onClick={() => {
@@ -216,16 +224,12 @@ export function StremioLayout({
             }}
             className="rounded-full bg-accent-soft px-4 py-2 text-[13px] font-semibold text-accent ring-1 ring-edge-soft transition-transform hover:scale-[1.02] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100"
           >
-            Clear filters
+            {t("Clear filters")}
           </button>
         </div>
       )}
       {!pipelineDone && (
-        <PendingAddonsPill
-          addons={addons}
-          streams={streams}
-          fallbackCount={loadingAddonCount}
-        />
+        <PendingAddonsPill addons={addons} streams={streams} fallbackCount={loadingAddonCount} />
       )}
       <FilterBuilder
         open={builderOpen}
@@ -262,6 +266,7 @@ function PendingAddonsPill({
   streams: ScoredStream[];
   fallbackCount: number;
 }) {
+  const t = useT();
   const pending = useMemo(() => {
     if (!addons || addons.length === 0) return [] as Addon[];
     const returned = new Set(streams.map((s) => s.addonId));
@@ -295,8 +300,10 @@ function PendingAddonsPill({
         ) : (
           <span className="text-[12px] text-ink-muted">
             {fallbackCount > 0
-              ? `${fallbackCount} ${fallbackCount === 1 ? "addon" : "addons"} loading`
-              : "Loading more sources"}
+              ? fallbackCount === 1
+                ? t("{n} addon loading", { n: fallbackCount })
+                : t("{n} addons loading", { n: fallbackCount })
+              : t("Loading more sources")}
           </span>
         )}
       </div>
@@ -314,6 +321,7 @@ function Spinner() {
 }
 
 function PendingChip({ addon }: { addon: Addon }) {
+  const t = useT();
   const id = addon.manifest?.id ?? "";
   const name = addon.manifest?.name ?? id ?? "addon";
   const remoteLogo = resolveAddonLogo(addon.manifest?.logo, addon.transportUrl);
@@ -321,7 +329,7 @@ function PendingChip({ addon }: { addon: Addon }) {
   const src = remoteLogo ?? bundled ?? null;
   return (
     <span className="flex items-center gap-2 text-[12px] text-ink">
-      <span className="text-ink-subtle">Waiting for</span>
+      <span className="text-ink-subtle">{t("Waiting for")}</span>
       <span className="flex items-center gap-1.5">
         {src ? (
           <img src={src} alt="" className="h-4 w-4 rounded-sm object-contain" />
@@ -355,10 +363,46 @@ function CircleLogo({
     return (
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-elevated ring-1 ring-edge-soft">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-          <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-          <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-          <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
+          <rect
+            x="3"
+            y="3"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
+          <rect
+            x="14"
+            y="3"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
+          <rect
+            x="3"
+            y="14"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
+          <rect
+            x="14"
+            y="14"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
         </svg>
       </div>
     );

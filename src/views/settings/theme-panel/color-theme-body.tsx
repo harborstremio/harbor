@@ -67,7 +67,7 @@ export function ColorThemeBody({
           <button
             key={p.id}
             onClick={() => onSelect(p.id)}
-            className={`group relative flex h-[150px] flex-col justify-end overflow-hidden rounded-2xl border p-4 text-start transition-all ${
+            className={`group relative flex h-[150px] flex-col justify-end overflow-hidden rounded-md border p-4 text-start transition ${
               active ? "border-ink" : "border-edge-soft hover:border-edge"
             }`}
             style={{ background: p.swatch[0] }}
@@ -124,19 +124,19 @@ function CustomTile({
     return (
       <button
         onClick={onApply}
-        className="group flex h-[150px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-edge bg-elevated/20 p-4 text-ink-muted transition-all hover:border-edge hover:bg-elevated/40 hover:text-ink"
+        className="group flex h-[150px] flex-col items-center justify-center gap-2 rounded-md border border-dashed border-edge bg-elevated p-4 text-ink-muted transition hover:border-edge hover:bg-elevated hover:text-ink"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-elevated/60">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-elevated">
           <Plus size={18} strokeWidth={2.2} />
         </span>
-        <p className="text-[14px] font-semibold">{t("Custom")}</p>
+        <p className="text-[13.5px] font-semibold">{t("Custom")}</p>
         <p className="text-[11.5px] text-ink-subtle">{t("Build your own palette")}</p>
       </button>
     );
   }
   return (
     <div
-      className={`group relative flex h-[150px] flex-col justify-end overflow-hidden rounded-2xl border p-4 text-start transition-all ${
+      className={`group relative flex h-[150px] flex-col justify-end overflow-hidden rounded-md border p-4 text-start transition ${
         active ? "border-ink" : "border-edge-soft hover:border-edge"
       }`}
       style={{ background: custom.canvas }}

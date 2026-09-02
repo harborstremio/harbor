@@ -24,7 +24,10 @@ const EYEBROW: Record<RankSource, string> = {
 };
 
 const REVEAL = "animate-in fade-in slide-in-from-bottom-2 duration-250 motion-reduce:animate-none";
-const revealAt = (ms: number): CSSProperties => ({ animationDelay: `${ms}ms`, animationFillMode: "both" });
+const revealAt = (ms: number): CSSProperties => ({
+  animationDelay: `${ms}ms`,
+  animationFillMode: "both",
+});
 
 export function PeopleHero({
   person,
@@ -46,20 +49,20 @@ export function PeopleHero({
   const ranked = harbor && person.score !== null;
   const bg = bandImage(person);
   const face = profilePhoto(person.profilePath, 342);
+  const departmentKey = DEPT_LABEL[person.department];
+  const departmentLabel = departmentKey ? t(departmentKey) : person.department;
   const meta = [
-    t(DEPT_LABEL[person.department] ?? person.department),
-    harbor ? person.country ?? undefined : undefined,
-    ranked && person.avgRating !== null ? t("{v} avg", { v: person.avgRating.toFixed(1) }) : undefined,
+    departmentLabel,
+    harbor ? (person.country ?? undefined) : undefined,
+    ranked && person.avgRating !== null
+      ? t("{v} avg", { v: person.avgRating.toFixed(1) })
+      : undefined,
   ].filter(Boolean);
   const showSecondary = source === "harbor" || source === "consensus";
 
   return (
-    <section className="relative isolate min-h-[360px] overflow-hidden sm:min-h-[440px] lg:min-h-[560px]">
-      <PeopleHeroBackdrop
-        stills={person.stills ?? []}
-        fallback={bg}
-        seed={String(person.id)}
-      />
+    <section className="harbor-people-hero relative isolate min-h-[360px] overflow-hidden sm:min-h-[440px] lg:min-h-[560px]">
+      <PeopleHeroBackdrop stills={person.stills ?? []} fallback={bg} seed={String(person.id)} />
 
       <div className="hero-reveal relative max-w-[46rem] px-12 pb-10 pt-40">
         <span
@@ -82,7 +85,7 @@ export function PeopleHero({
               type="button"
               onClick={() => onOpenPerson(person.id)}
               aria-label={t("View {name}", { name: person.name })}
-              className="relative h-[188px] w-[128px] shrink-0 overflow-hidden rounded-2xl bg-elevated/60 shadow-[0_26px_50px_-16px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft no-press transition-[scale,box-shadow] duration-250 ease-out motion-safe:hover:scale-[1.02] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="relative h-[188px] w-[128px] shrink-0 overflow-hidden rounded-lg bg-elevated/60 shadow-[0_26px_50px_-16px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft no-press transition-[scale,box-shadow] duration-250 ease-out motion-safe:hover:scale-[1.02] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               {face ? (
                 <img
@@ -91,7 +94,12 @@ export function PeopleHero({
                   className="absolute inset-0 h-full w-full object-cover object-[center_top]"
                 />
               ) : (
-                <Poster src={undefined} seed={String(person.id)} ratio="portrait" className="absolute inset-0" />
+                <Poster
+                  src={undefined}
+                  seed={String(person.id)}
+                  ratio="portrait"
+                  className="absolute inset-0"
+                />
               )}
             </button>
 
@@ -108,11 +116,14 @@ export function PeopleHero({
               )}
               {ranked ? (
                 <p className="text-[13px] text-ink-muted">
-                  {t("Ranked #1 of {total} for {acclaimed} acclaimed titles and {awards} major awards.", {
-                    total: String(total),
-                    acclaimed: String(person.acclaimedCount8),
-                    awards: String(person.majorAwardWins),
-                  })}
+                  {t(
+                    "Ranked #1 of {total} for {acclaimed} acclaimed titles and {awards} major awards.",
+                    {
+                      total: String(total),
+                      acclaimed: String(person.acclaimedCount8),
+                      awards: String(person.majorAwardWins),
+                    },
+                  )}
                 </p>
               ) : (
                 <TrendingLine person={person} />
@@ -171,7 +182,12 @@ function TrendingLine({ person }: { person: Person }) {
   if (isHarborExplanation(person)) return null;
   const delta = person.delta;
   if (delta === undefined) return null;
-  const copy = delta === null ? t("New to the chart") : delta > 0 ? t("Up {n} spots this week", { n: String(delta) }) : null;
+  const copy =
+    delta === null
+      ? t("New to the chart")
+      : delta > 0
+        ? t("Up {n} spots this week", { n: String(delta) })
+        : null;
   if (!copy) return null;
   return <p className="text-[13px] text-ink-muted">{copy}</p>;
 }
@@ -194,10 +210,14 @@ function HeroStrip({
   );
   if (harbor && isHarborExplanation(person)) {
     if (person.topTitles.length === 0) return null;
-    return wrap(<PersonKnownStrip titles={person.topTitles} size="hero" count={6} onOpenMeta={onOpenMeta} />);
+    return wrap(
+      <PersonKnownStrip titles={person.topTitles} size="hero" count={6} onOpenMeta={onOpenMeta} />,
+    );
   }
   if (!isHarborExplanation(person) && person.knownFor && person.knownFor.length > 0) {
-    return wrap(<PersonKnownStrip known={person.knownFor} size="hero" count={6} onOpenMeta={onOpenMeta} />);
+    return wrap(
+      <PersonKnownStrip known={person.knownFor} size="hero" count={6} onOpenMeta={onOpenMeta} />,
+    );
   }
   return null;
 }

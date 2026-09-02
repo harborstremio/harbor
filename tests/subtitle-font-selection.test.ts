@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
-import { sfntFamilyName } from "../src/lib/font-family-name";
+import { sfntFamilyName } from "../src/lib/font-family-name.ts";
 
 const at = (p: string) => new URL(`../${p}`, import.meta.url);
 const read = (p: string) => readFileSync(at(p), "utf8");
@@ -50,8 +50,15 @@ test("the picker offers exactly the presets both renderers can resolve", () => {
 test("every family mpv is told to use is provisioned into the bundle", () => {
   for (const family of ["Inter", "Fredoka", "Vazirmatn"]) {
     assert.match(mpv, new RegExp(`"${family}"`), `mpvFontFor never returns "${family}"`);
-    assert.match(fetchFonts, new RegExp(`${family}-Variable\\.ttf`), `fetch-fonts.mjs never fetches ${family}`);
-    assert.match(fetchFonts, new RegExp(`file: "${family}-Variable\\.ttf",[\\s\\S]{0,200}?sha256: "[0-9a-f]{64}"`));
+    assert.match(
+      fetchFonts,
+      new RegExp(`${family}-Variable\\.ttf`),
+      `fetch-fonts.mjs never fetches ${family}`,
+    );
+    assert.match(
+      fetchFonts,
+      new RegExp(`file: "${family}-Variable\\.ttf",[\\s\\S]{0,200}?sha256: "[0-9a-f]{64}"`),
+    );
   }
   assert.doesNotMatch(mpv, /Noto Sans Arabic/, "arabic must resolve to the bundled Vazirmatn");
 });
@@ -80,13 +87,20 @@ test("arabic uses the bundled arabic face, not Inter", () => {
 test("a custom font reaches mpv under its real family name", () => {
   assert.match(mpv, /if \(id\.startsWith\("custom:"\)\) return customName \|\| "Inter";/);
   assert.match(mpv, /mpvFontFor\(s\.subFontFamily, customFontName\(s\)\)/);
-  assert.match(mpv, /f\?\.family \|\| f\?\.name/, "the internal family name must win over the filename");
+  assert.match(
+    mpv,
+    /f\?\.family \|\| f\?\.name/,
+    "the internal family name must win over the filename",
+  );
 });
 
 test("uploading a font never puts its bytes in the settings blob", () => {
   assert.match(picker, /await saveFontData\(id, dataUrl\);/);
-  assert.doesNotMatch(picker, /name: baseName \|\| `Custom \$\{customFonts\.length \+ 1\}`, dataUrl,/);
-  assert.match(picker, /family, format: formatMap\[ext\] \}/);
+  assert.doesNotMatch(
+    picker,
+    /name: baseName \|\| `Custom \$\{customFonts\.length \+ 1\}`, dataUrl,/,
+  );
+  assert.match(picker, /family,\s+format: formatMap\[ext\],/);
 });
 
 test("a settings write that does not persist is not swallowed", () => {
@@ -102,12 +116,18 @@ test("a deleted custom font never strands the font picker", () => {
 test("a failed font migration never discards the only copy of the font", () => {
   assert.match(settings, /const moved = new Set<string>\(\);/);
   assert.match(settings, /moved\.add\(f\.id\);/);
-  assert.match(settings, /moved\.has\(f\.id\) \? \{ id: f\.id, name: f\.name, format: f\.format \} : f/);
+  assert.match(
+    settings,
+    /moved\.has\(f\.id\) \? \{ id: f\.id, name: f\.name, format: f\.format \} : f/,
+  );
 });
 
 test("family-name parsing survives junk instead of guessing", () => {
   assert.equal(sfntFamilyName(new ArrayBuffer(0)), null);
-  assert.equal(sfntFamilyName(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]).buffer), null);
+  assert.equal(
+    sfntFamilyName(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]).buffer),
+    null,
+  );
 });
 
 test("an uploaded font is registered from bytes, not a megabyte-long css url", () => {

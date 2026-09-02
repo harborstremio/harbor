@@ -11,6 +11,7 @@ import { cloudWriteId } from "@/lib/stremio";
 import { markMovieWatchedStremio } from "@/lib/stremio-watched-sync";
 import { syncSeriesWatchedToStremio } from "@/lib/stremio-episode-watched";
 import { tmdbImdbCached } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
+import { airedOnly } from "@/lib/aired";
 
 export async function markMovieWatched(
   meta: Meta,
@@ -55,20 +56,15 @@ async function releasedEpisodes(
 ): Promise<Array<{ season: number; episode: number }>> {
   const fetchId = resolveSeriesImdb(meta, imdbId) ?? meta.id;
   const source = meta.videos?.length ? meta : (await fetchMeta("series", fetchId).catch(() => null)) ?? meta;
-  const now = Date.now();
-  const out: Array<{ season: number; episode: number }> = [];
+  const ordered: Array<{ season: number; episode: number; rel: string | null }> = [];
   for (const v of source.videos ?? []) {
     const season = v.season ?? 0;
     const episode = v.episode ?? v.number;
     if (season < 1 || episode == null) continue;
-    const rel = v.released ?? v.firstAired;
-    if (rel) {
-      const at = Date.parse(rel);
-      if (Number.isFinite(at) && at > now) continue;
-    }
-    out.push({ season, episode });
+    ordered.push({ season, episode, rel: v.released ?? v.firstAired ?? null });
   }
-  return out;
+  ordered.sort((a, b) => a.season - b.season || a.episode - b.episode);
+  return airedOnly(ordered, (v) => v.rel).map(({ season, episode }) => ({ season, episode }));
 }
 
 export async function markMetaWatched(

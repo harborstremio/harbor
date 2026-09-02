@@ -10,18 +10,35 @@ import {
   Play,
   Plus,
   RotateCcw,
-  Search,
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from "react";
+import { Search } from "@/components/icons/search-icon";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { CastIcon } from "@/components/player/cast-icon";
 import { HarborLoader } from "@/components/harbor-loader";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import type { CastDeviceInfo } from "@/lib/cast";
 import { useKeyboardNavigation } from "@/lib/keyboard-navigation";
 import { useRemoteClient } from "@/lib/remote/use-remote-client";
-import type { RemoteCastDevice, RemoteNavKey, RemoteSnapshot, RemoteTextEntry } from "@/lib/remote/protocol";
+import type {
+  RemoteCastDevice,
+  RemoteNavKey,
+  RemoteSnapshot,
+  RemoteTextEntry,
+} from "@/lib/remote/protocol";
+import { useT } from "@/lib/i18n";
+import { ConfirmLeave } from "@/views/mobile/dpad-remote";
+import { useRegisterSheet } from "@/views/mobile/mobile-sheet-lock";
 
 function toCastDevice(d: RemoteCastDevice): CastDeviceInfo {
   return {
@@ -104,19 +121,16 @@ function SeekTen({
   disabled?: boolean;
   onClick: () => void;
 }) {
+  const t = useT();
   return (
     <CircleBtn
-      label={forward ? "Seek forward 10 seconds" : "Seek back 10 seconds"}
+      label={forward ? t("Seek forward 10 seconds") : t("Seek back 10 seconds")}
       disabled={disabled}
       onClick={onClick}
       size="lg"
     >
       <span className="relative flex h-9 w-9 items-center justify-center">
-        <RotateCcw
-          size={34}
-          strokeWidth={1.5}
-          className={forward ? "scale-x-[-1]" : undefined}
-        />
+        <RotateCcw size={34} strokeWidth={1.5} className={forward ? "scale-x-[-1]" : undefined} />
         <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold tracking-tight">
           10
         </span>
@@ -153,13 +167,14 @@ function TouchpadSurface({
   onNav,
   className,
   children,
-  ariaLabel = "Touchpad. Swipe to move, tap to select.",
+  ariaLabel,
 }: {
   onNav: (key: RemoteNavKey) => void;
   className?: string;
   children?: ReactNode;
   ariaLabel?: string;
 }) {
+  const t = useT();
   const originRef = useRef<{ x: number; y: number } | null>(null);
   const lastStepRef = useRef<{ x: number; y: number } | null>(null);
   const movedRef = useRef(false);
@@ -170,13 +185,7 @@ function TouchpadSurface({
     (dx: number, dy: number) => {
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
       const horizontal = Math.abs(dx) >= Math.abs(dy);
-      const key: RemoteNavKey = horizontal
-        ? dx > 0
-          ? "right"
-          : "left"
-        : dy > 0
-          ? "down"
-          : "up";
+      const key: RemoteNavKey = horizontal ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up";
       lastSwipeTimeRef.current = Date.now();
       onNav(key);
     },
@@ -226,7 +235,7 @@ function TouchpadSurface({
   return (
     <div
       role="application"
-      aria-label={ariaLabel}
+      aria-label={ariaLabel ?? t("Touchpad. Swipe to move, tap to select.")}
       className={`relative touch-none select-none overflow-hidden ${className ?? ""}`}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -254,6 +263,7 @@ function FullscreenTextEntry({
   /** Close the overlay without submitting (does not send host Back). */
   onDismiss: () => void;
 }) {
+  const t = useT();
   const [value, setValue] = useState(entry.value);
   const focusedRef = useRef(false);
   const didAutofocus = useRef(false);
@@ -285,14 +295,14 @@ function FullscreenTextEntry({
           className="flex h-11 items-center gap-1.5 rounded-full bg-white/[0.08] px-4 text-[15px] font-semibold text-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] active:bg-white/[0.14]"
         >
           <ChevronLeft size={18} strokeWidth={1.8} />
-          Done
+          {t("Done")}
         </button>
         <button
           type="button"
           onClick={() => onSubmit(value)}
           className="flex h-11 items-center rounded-full bg-white/[0.12] px-5 text-[15px] font-semibold text-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] active:bg-white/[0.18]"
         >
-          Go
+          {t("Go")}
         </button>
       </div>
 
@@ -307,7 +317,7 @@ function FullscreenTextEntry({
         autoComplete="off"
         spellCheck={false}
         rows={1}
-        aria-label="Type into the focused field on the display"
+        aria-label={t("Type into the focused field on the display")}
         onFocus={() => {
           focusedRef.current = true;
         }}
@@ -346,15 +356,19 @@ function RendererSheet({
   onPickCast: (id: string) => void;
   onRefresh: () => void;
 }) {
+  const t = useT();
   if (!open) return null;
   const activeId = snapshot.target.kind === "cast" ? snapshot.target.deviceId : "local";
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end bg-canvas/70 backdrop-blur-sm" data-remote-sheet>
+    <div
+      className="fixed inset-0 z-50 flex flex-col justify-end bg-canvas/70 backdrop-blur-sm"
+      data-remote-sheet
+    >
       <div className="flex-1" role="presentation" onClick={onClose} />
       <div className="rounded-t-2xl border border-edge-soft bg-surface px-4 pb-8 pt-3 shadow-2xl">
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-edge" />
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-[18px] font-semibold text-ink">Select renderer</h2>
+          <h2 className="text-[18px] font-semibold text-ink">{t("Select renderer")}</h2>
           <button
             type="button"
             onClick={onRefresh}
@@ -362,8 +376,10 @@ function RendererSheet({
             className="rounded-lg border border-edge px-2.5 py-1.5 text-[12px] text-ink-muted hover:bg-elevated hover:text-ink disabled:cursor-default disabled:opacity-60"
           >
             <span className="inline-flex items-center gap-1.5">
-              {snapshot.castDiscovering && <Loader2 size={12} strokeWidth={2.2} className="animate-spin" />}
-              {snapshot.castDiscovering ? "Scanning..." : "Refresh"}
+              {snapshot.castDiscovering && (
+                <Loader2 size={12} strokeWidth={2.2} className="animate-spin" />
+              )}
+              {snapshot.castDiscovering ? t("Scanning...") : t("Refresh")}
             </span>
           </button>
         </div>
@@ -381,8 +397,10 @@ function RendererSheet({
                 <Monitor size={22} strokeWidth={1.6} className="text-ink" />
               </span>
               <span className="flex flex-1 flex-col">
-                <span className="text-[16px] font-medium">This PC</span>
-                <span className="text-[12px] text-ink-muted">Harbor on the server display</span>
+                <span className="text-[16px] font-medium">{t("This PC")}</span>
+                <span className="text-[12px] text-ink-muted">
+                  {t("Harbor on the server display")}
+                </span>
               </span>
             </button>
           </li>
@@ -408,8 +426,10 @@ function RendererSheet({
           {snapshot.castDevices.length === 0 && (
             <li className="px-3 py-4 text-[13px] text-ink-muted">
               {snapshot.castDiscovering
-                ? "Scanning your network..."
-                : "No Chromecast, DLNA, or Roku devices found. Make sure your TV is on, awake, and on the same Wi-Fi."}
+                ? t("Scanning your network...")
+                : t(
+                    "No Chromecast, DLNA, or Roku devices found. Make sure your TV is on, awake, and on the same Wi-Fi.",
+                  )}
             </li>
           )}
         </ul>
@@ -449,6 +469,7 @@ function RemoteBody({
   onSubmitText: (value: string) => void;
   onBlurText: () => void;
 }) {
+  const t = useT();
   const mode = useRemoteSurfaceMode(snapshot.idle);
   const browsing = mode === "browse";
   const heldSnap = useRef(snapshot);
@@ -466,17 +487,20 @@ function RemoteBody({
 
   const episodeLine = useMemo(() => {
     if (!view.episode) return null;
-    const ep = `S${view.episode.season} · E${view.episode.episode}`;
+    const ep = t("S{season} · E{episode}", {
+      season: view.episode.season,
+      episode: view.episode.episode,
+    });
     const epName = view.episode.name?.trim();
     return epName ? `${ep}  ${epName}` : ep;
-  }, [view.episode]);
+  }, [view.episode, t]);
   const source = sourceLine(view);
   const activeCast = useMemo(() => {
     if (snapshot.target.kind !== "cast") return null;
     const id = snapshot.target.deviceId;
     return snapshot.castDevices.find((d) => d.id === id) ?? null;
   }, [snapshot.target, snapshot.castDevices]);
-  const title = view.mediaTitle || "Unknown title";
+  const title = view.mediaTitle || t("Unknown title");
   const showEpisodeNav = !!view.episode;
 
   useEffect(() => {
@@ -538,8 +562,7 @@ function RemoteBody({
     [onSubmitText],
   );
 
-  const showTextOverlay =
-    !textDismissed && (textEntryActive || typing) && !!heldTextEntry.current;
+  const showTextOverlay = !textDismissed && (textEntryActive || typing) && !!heldTextEntry.current;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-[clamp(0.75rem,2.2vh,1.25rem)] px-4 pb-[calc(env(safe-area-inset-bottom,0px)+96px)] pt-[max(0.75rem,env(safe-area-inset-top))]">
@@ -557,7 +580,7 @@ function RemoteBody({
       <div className="flex items-center gap-2">
         <button
           type="button"
-          aria-label="Back to home"
+          aria-label={t("Back to home")}
           onClick={onBack}
           className="flex h-11 shrink-0 items-center gap-2 rounded-full bg-white/[0.08] px-3 text-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] active:bg-white/[0.14]"
         >
@@ -577,22 +600,16 @@ function RemoteBody({
               <Monitor size={15} strokeWidth={1.7} />
             )}
           </span>
-          <span className="truncate text-[15px] font-medium text-ink">
-            {snapshot.target.label}
-          </span>
+          <span className="truncate text-[15px] font-medium text-ink">{snapshot.target.label}</span>
           <ChevronDown size={16} strokeWidth={1.8} className="shrink-0 text-ink-muted" />
         </button>
 
         {browsing ? (
-          <CircleBtn label="Search on display" onClick={onOpenSearch} size="sm">
+          <CircleBtn label={t("Search on display")} onClick={onOpenSearch} size="sm">
             <Search size={18} strokeWidth={1.7} />
           </CircleBtn>
         ) : (
-          <CircleBtn
-            label={snapshot.muted ? "Unmute" : "Mute"}
-            onClick={onMute}
-            size="sm"
-          >
+          <CircleBtn label={snapshot.muted ? t("Unmute") : t("Mute")} onClick={onMute} size="sm">
             {snapshot.muted || snapshot.volume === 0 ? (
               <VolumeX size={18} strokeWidth={1.7} />
             ) : (
@@ -602,14 +619,13 @@ function RemoteBody({
         )}
       </div>
 
-
       {/* One touchpad for both modes — poster is the surface while playing */}
       <TouchpadSurface
         onNav={onNav}
         ariaLabel={
           browsing
-            ? "Touchpad. Swipe to move, tap to select."
-            : "Now playing touchpad. Swipe to move focus on the display, tap to select."
+            ? t("Touchpad. Swipe to move, tap to select.")
+            : t("Now playing touchpad. Swipe to move focus on the display, tap to select.")
         }
         className={
           browsing
@@ -657,7 +673,7 @@ function RemoteBody({
                 >
                   <button
                     type="button"
-                    aria-label="Previous episode"
+                    aria-label={t("Previous episode")}
                     disabled={!view.hasPrevEpisode}
                     onClick={onPrevEpisode}
                     className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors ${
@@ -670,7 +686,7 @@ function RemoteBody({
                   </button>
                   <button
                     type="button"
-                    aria-label="Next episode"
+                    aria-label={t("Next episode")}
                     disabled={!view.hasNextEpisode}
                     onClick={onNextEpisode}
                     className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors ${
@@ -691,7 +707,7 @@ function RemoteBody({
       {browsing ? (
         <button
           type="button"
-          aria-label="Back on display"
+          aria-label={t("Back on display")}
           onClick={() => onNav("back")}
           className="flex h-16 w-full shrink-0 items-center justify-center gap-2.5 rounded-full bg-white/[0.08] text-[17px] font-semibold text-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] active:bg-white/[0.14]"
         >
@@ -702,16 +718,12 @@ function RemoteBody({
           data-remote-transport
           className="grid w-full grid-cols-[1fr_auto_1fr] grid-rows-[4.75rem_4.75rem] place-items-center gap-4 pb-2"
         >
-          <CircleBtn
-            label="Back on display"
-            onClick={() => onNav("back")}
-            size="lg"
-          >
+          <CircleBtn label={t("Back on display")} onClick={() => onNav("back")} size="lg">
             <ChevronLeft size={32} strokeWidth={1.7} />
           </CircleBtn>
 
           <CircleBtn
-            label={view.playing ? "Pause" : "Play"}
+            label={view.playing ? t("Pause") : t("Play")}
             onClick={onToggle}
             size="lg"
             initialFocus
@@ -726,7 +738,7 @@ function RemoteBody({
           <div className="col-start-3 row-span-2 grid w-[4.75rem] grid-rows-[4.75rem_1rem_4.75rem] overflow-hidden rounded-full bg-white/[0.08] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
             <button
               type="button"
-              aria-label="Volume up"
+              aria-label={t("Volume up")}
               onClick={() => onVolumeStep(0.1)}
               className="flex items-center justify-center text-ink active:bg-white/[0.1]"
             >
@@ -737,7 +749,7 @@ function RemoteBody({
             </div>
             <button
               type="button"
-              aria-label="Volume down"
+              aria-label={t("Volume down")}
               onClick={() => onVolumeStep(-0.1)}
               className="flex items-center justify-center text-ink active:bg-white/[0.1]"
             >
@@ -757,10 +769,17 @@ function RemoteBody({
 const DISCONNECT_OVERLAY_MS = 1200;
 
 export function RemoteApp() {
+  const t = useT();
   const { status, snapshot, sendCommand } = useRemoteClient();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [wasConnected, setWasConnected] = useState(false);
   const [showDisconnected, setShowDisconnected] = useState(false);
+  const [confirmBack, setConfirmBack] = useState(false);
+  const reduced =
+    typeof window !== "undefined" &&
+    !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const watching = !!snapshot.mediaId && !snapshot.idle;
+  useRegisterSheet(confirmBack);
 
   useEffect(() => {
     if (status === "connected") {
@@ -783,10 +802,19 @@ export function RemoteApp() {
       closeSheet();
       return true;
     }
-    // Drive the host display back — don't navigate the phone away from /remote.
-    sendCommand({ action: "nav", key: "back" });
+    // Confirm on the phone before asking the host player to leave playback.
+    if (watching) setConfirmBack(true);
+    else sendCommand({ action: "nav", key: "back" });
     return true;
-  }, [sheetOpen, closeSheet, sendCommand]);
+  }, [sheetOpen, closeSheet, sendCommand, watching]);
+
+  const onNav = useCallback(
+    (key: RemoteNavKey) => {
+      if (key === "back" && watching) setConfirmBack(true);
+      else sendCommand({ action: "nav", key });
+    },
+    [sendCommand, watching],
+  );
 
   useKeyboardNavigation({ wrap: false, onBack });
 
@@ -822,7 +850,7 @@ export function RemoteApp() {
     <div className="flex h-full min-h-[100dvh] flex-col bg-canvas text-ink">
       {showDisconnected ? (
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center bg-black">
-          <HarborLoader size="md" caption="Connecting" />
+          <HarborLoader size="md" caption={t("Connecting")} />
         </div>
       ) : (
         <>
@@ -843,14 +871,17 @@ export function RemoteApp() {
                 })
               }
               onVolumeStep={(delta) => {
-                const next = Math.max(0, Math.min(1, (snapshot.muted ? 0 : snapshot.volume) + delta));
+                const next = Math.max(
+                  0,
+                  Math.min(1, (snapshot.muted ? 0 : snapshot.volume) + delta),
+                );
                 sendCommand({ action: "setVolume", volume: next });
                 if (next > 0 && snapshot.muted) sendCommand({ action: "setMuted", muted: false });
               }}
               onMute={() => sendCommand({ action: "setMuted", muted: !snapshot.muted })}
               onPrevEpisode={() => sendCommand({ action: "prevEpisode" })}
               onNextEpisode={() => sendCommand({ action: "nextEpisode" })}
-              onNav={(key) => sendCommand({ action: "nav", key })}
+              onNav={onNav}
               onSetText={(value) => sendCommand({ action: "setText", value })}
               onSubmitText={(value) => sendCommand({ action: "submitText", value })}
               onBlurText={() => sendCommand({ action: "blurText" })}
@@ -871,6 +902,18 @@ export function RemoteApp() {
               setSheetOpen(false);
             }}
           />
+          {confirmBack && (
+            <ConfirmLeave
+              snapshot={snapshot}
+              reduced={reduced}
+              leaving={false}
+              onCancel={() => setConfirmBack(false)}
+              onConfirm={() => {
+                sendCommand({ action: "nav", key: "back" });
+                setConfirmBack(false);
+              }}
+            />
+          )}
         </>
       )}
     </div>

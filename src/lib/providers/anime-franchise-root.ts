@@ -7,6 +7,47 @@ const MAX_WALK = 8;
 const rootCache = new Map<string, string>();
 const inflight = new Map<string, Promise<string>>();
 
+// Memory only meant every launch re-walked the whole continue-watching row, up to
+// eight sequential kitsu calls per title, for relations that change about never.
+const ROOT_KEY = "harbor.animefranchiseroot.v1";
+const ROOT_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const ROOT_MAX = 600;
+const ROOT_FLUSH_MS = 800;
+
+let rootFlushTimer = 0;
+
+(() => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(ROOT_KEY) ?? "null") as {
+      t?: number;
+      m?: Record<string, string>;
+    } | null;
+    if (!raw?.m || typeof raw.t !== "number") return;
+    if (Date.now() - raw.t > ROOT_TTL_MS) return;
+    for (const [k, v] of Object.entries(raw.m)) if (typeof v === "string") rootCache.set(k, v);
+  } catch {
+    localStorage.removeItem(ROOT_KEY);
+  }
+})();
+
+function persistRoots() {
+  if (typeof window === "undefined") return;
+  window.clearTimeout(rootFlushTimer);
+  rootFlushTimer = window.setTimeout(() => {
+    try {
+      const entries = [...rootCache.entries()].slice(-ROOT_MAX);
+      localStorage.setItem(ROOT_KEY, JSON.stringify({ t: Date.now(), m: Object.fromEntries(entries) }));
+    } catch {
+      localStorage.removeItem(ROOT_KEY);
+    }
+  }, ROOT_FLUSH_MS);
+}
+
+function rememberRoot(id: string, root: string) {
+  rootCache.set(id, root);
+  persistRoots();
+}
+
 registerCache("anime:franchise-root", () => rootCache.size);
 
 function extService(id: string): string | null {
@@ -70,14 +111,14 @@ export async function franchiseRoot(id: string): Promise<string> {
   const p = (async () => {
     const kitsuId = await normalizeToKitsu(id);
     if (kitsuId == null) {
-      rootCache.set(id, id);
+      rememberRoot(id, id);
       return id;
     }
     const chain = await walkUp(kitsuId);
     const rootStr = `kitsu:${chain[chain.length - 1]}`;
     for (const node of chain) rootCache.set(`kitsu:${node}`, rootStr);
     rootCache.set(id, rootStr);
-    rootCache.set(rootStr, rootStr);
+    rememberRoot(rootStr, rootStr);
     return rootStr;
   })().finally(() => {
     inflight.delete(id);

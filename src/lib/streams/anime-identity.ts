@@ -48,7 +48,9 @@ export function animeIdentityEligible(
 ): boolean {
   if (!episode) return false;
   if (episode.kitsuStreamId != null) return false;
-  if (ANIME_META_RX.test(metaId)) return false;
+  if (ANIME_META_RX.test(metaId)) {
+    return typeof episode.imdbSeason === "number" && episode.imdbSeason >= 1;
+  }
   if (!(metaId.startsWith("tt") || metaId.startsWith("tmdb:tv:"))) return false;
   const season = episode.imdbSeason ?? episode.season;
   return typeof season === "number" && season >= 1;
@@ -209,6 +211,6 @@ export async function buildStreamIdsWithIdentity(
   const base = buildStreamIds(metaId, episode, imdbId, defaultVideoId);
   if (!animeIdentityEligible(metaId, episode)) return base;
   const identity = await resolveAnimeIdentity(metaId, imdbId, episode);
-  if (!identity || base.includes(identity.streamId)) return base;
-  return [identity.streamId, ...base];
+  if (!identity || base[0] === identity.streamId) return base;
+  return [identity.streamId, ...base.filter((id) => id !== identity.streamId)];
 }

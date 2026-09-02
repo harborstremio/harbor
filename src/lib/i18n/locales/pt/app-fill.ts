@@ -797,6 +797,18 @@ const appFill: Record<string, string> = {
   "Use Cinemeta for title metadata": "Usar o Cinemeta para metadados de títulos",
   "Turn this off to take Cinemeta out entirely and use only your own metadata addons, such as AIOMetadata or AIOStreams. Cinemeta can go stale and show already released episodes as TBA. Leave it on unless you have a metadata addon installed, or titles will have no details.":
     "Desative para remover o Cinemeta por completo e usar apenas seus próprios addons de metadados, como AIOMetadata ou AIOStreams. O Cinemeta pode ficar desatualizado e mostrar episódios já lançados como TBA. Deixe ativado a menos que você tenha um addon de metadados instalado, ou os títulos ficarão sem detalhes.",
+  "This one also replaces Harbor's bundled players and tools, so it installs through Harbor Setup. Harbor closes, the installer finishes, then Harbor reopens.":
+    "Esta atualização também substitui os reprodutores e as ferramentas que vêm com o Harbor, por isso ela é instalada pelo Harbor Setup. O Harbor fecha, o instalador termina e o Harbor abre novamente.",
+  "This one installs through Harbor Setup, but the update manifest carries no signature for it. Harbor will not run an installer it cannot verify. Download it and run it yourself.":
+    "Esta atualização é instalada pelo Harbor Setup, mas o manifesto de atualização não traz assinatura para ele. O Harbor não executa um instalador que não consegue verificar. Baixe o instalador e execute você mesmo.",
+  "Download installer":
+    "Baixar o instalador",
+  "Install and reopen":
+    "Instalar e reabrir",
+  "Harbor is closing. Harbor Setup will finish and reopen it.":
+    "O Harbor está fechando. O Harbor Setup vai terminar e abri-lo novamente.",
+  "Harbor Setup did not finish updating Harbor. Nothing was changed.":
+    "O Harbor Setup não terminou de atualizar o Harbor. Nada foi alterado.",
 };
 
 export default appFill;

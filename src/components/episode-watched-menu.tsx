@@ -1,6 +1,7 @@
 import { Ban, Check, Eye, EyeOff } from "lucide-react";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useT } from "@/lib/i18n";
 import {
   recordManualWatchedMeta,
   setManualWatched,
@@ -43,6 +44,7 @@ export function EpisodeWatchedMenu({
   allEpisodes?: Array<{ season: number; episode: number; released?: string | null }>;
   onClose: () => void;
 }) {
+  const t = useT();
   const { isConnected: simklConnected } = useSimkl();
   const { settings } = useSettings();
   const hidden = isEpisodeHidden(metaId, target.season, target.episode);
@@ -91,12 +93,16 @@ export function EpisodeWatchedMenu({
       className="fixed z-[320] flex w-[224px] flex-col rounded-xl border border-edge bg-elevated p-1 shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] animate-popover-in"
     >
       {target.watched ? (
-        <Item icon={<EyeOff size={14} strokeWidth={2} />} label="Mark as unwatched" onClick={unmark} />
+        <Item
+          icon={<EyeOff size={14} strokeWidth={2} />}
+          label={t("Mark as unwatched")}
+          onClick={unmark}
+        />
       ) : (
         <>
           <Item
             icon={<Check size={14} strokeWidth={2} />}
-            label="Mark as watched"
+            label={t("Mark as watched")}
             onClick={() => {
               recordManualWatchedMeta(metaId, meta);
               setManualWatched(metaId, target.season, target.episode, true);
@@ -106,7 +112,7 @@ export function EpisodeWatchedMenu({
           />
           <Item
             icon={<Eye size={14} strokeWidth={2} />}
-            label="Mark watched up to here"
+            label={t("Mark watched up to here")}
             onClick={() => {
               recordManualWatchedMeta(metaId, meta);
               if (allEpisodes && allEpisodes.length > 0) {
@@ -118,9 +124,7 @@ export function EpisodeWatchedMenu({
                 );
                 setManualWatchedMany(metaId, upTo, true);
                 if (showIds) {
-                  const eps = upTo
-                    .filter((e) => e.season === target.season)
-                    .map((e) => e.episode);
+                  const eps = upTo.filter((e) => e.season === target.season).map((e) => e.episode);
                   if (eps.length > 0) void markEpisodesWatched(showIds, target.season, eps);
                 }
               } else {
@@ -134,7 +138,11 @@ export function EpisodeWatchedMenu({
             }}
           />
           {started && (
-            <Item icon={<EyeOff size={14} strokeWidth={2} />} label="Mark as unwatched" onClick={unmark} />
+            <Item
+              icon={<EyeOff size={14} strokeWidth={2} />}
+              label={t("Mark as unwatched")}
+              onClick={unmark}
+            />
           )}
         </>
       )}
@@ -144,7 +152,7 @@ export function EpisodeWatchedMenu({
           {hidden ? (
             <Item
               icon={<Eye size={14} strokeWidth={2} />}
-              label="Show episode"
+              label={t("Show episode")}
               onClick={() => {
                 setEpisodeHidden(metaId, target.season, target.episode, false);
                 onClose();
@@ -153,7 +161,7 @@ export function EpisodeWatchedMenu({
           ) : (
             <Item
               icon={<Ban size={14} strokeWidth={2} />}
-              label="Hide episode"
+              label={t("Hide episode")}
               onClick={() => {
                 setEpisodeHidden(metaId, target.season, target.episode, true);
                 onClose();

@@ -28,7 +28,7 @@ export function GuideSkeleton() {
   const slotMin = 30;
   const slots = Math.ceil((WINDOW_HOURS * 60) / slotMin);
   return (
-    <div className="-mx-6 flex flex-col">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <div className="relative overflow-hidden">
         <div
           className="relative"
@@ -98,18 +98,24 @@ export function GuideSkeleton() {
   );
 }
 
-function ProgramBlocksRow({ seed }: { seed: number }) {
-  const widths = ROW_WIDTHS[seed % ROW_WIDTHS.length];
+export function ProgramBlocksRow({ seed }: { seed: number }) {
+  const base = ROW_WIDTHS[seed % ROW_WIDTHS.length];
+  const widths: number[] = [];
+  for (let total = 0, i = 0; total < WINDOW_PX; i += 1) {
+    const w = base[i % base.length];
+    widths.push(w);
+    total += w + 6;
+  }
   let x = 0;
   return (
     <div className="relative flex h-full" style={{ width: WINDOW_PX }}>
       {widths.map((w, i) => {
         const left = x;
-        x += w + 4;
+        x += w + 6;
         return (
           <div
             key={i}
-            className="absolute top-2 bottom-2 animate-pulse rounded-lg bg-elevated/50"
+            className="absolute top-1.5 bottom-1.5 animate-pulse rounded-md bg-elevated/50"
             style={{
               left,
               width: w,

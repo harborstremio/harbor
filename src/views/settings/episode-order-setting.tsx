@@ -22,7 +22,7 @@ function OrderPreview({ active }: { active: Provider }) {
             <span
               key={o}
               className={`rounded-full px-1.5 py-[3px] text-[8.5px] font-semibold ${
-                i === 0 ? "bg-ink text-canvas" : "bg-elevated/70 text-ink-subtle"
+                i === 0 ? "bg-ink text-canvas" : "bg-elevated text-ink-subtle"
               }`}
             >
               {o}
@@ -37,7 +37,7 @@ function OrderPreview({ active }: { active: Provider }) {
           ].map((r) => (
             <div
               key={r.s}
-              className="flex items-center justify-between rounded-md bg-canvas/50 px-2 py-1"
+              className="flex items-center justify-between rounded-md bg-canvas px-2 py-1"
             >
               <span className="text-[9.5px] font-medium text-ink">{r.s}</span>
               <span className="text-[8.5px] text-ink-subtle">{r.n} eps</span>
@@ -54,7 +54,7 @@ function OrderPreview({ active }: { active: Provider }) {
             { n: 4, name: t("Episode 4") },
           ].map((e) => (
             <div key={e.n} className="flex items-center gap-1.5">
-              <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded bg-elevated/70 text-[8px] font-semibold text-ink-subtle">
+              <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded bg-elevated text-[8px] font-semibold text-ink-subtle">
                 {e.n}
               </span>
               <span className="truncate text-[9.5px] text-ink">{e.name}</span>
@@ -81,13 +81,13 @@ function PreviewCard({
 }) {
   return (
     <div
-      className={`flex flex-col rounded-xl border bg-canvas/40 p-2.5 transition-all ${
-        on ? "border-ink/80 shadow-[0_0_0_3px_rgba(255,255,255,0.04)]" : "border-edge-soft/60 opacity-45"
+      className={`flex flex-col rounded-md border bg-canvas p-2.5 transition ${
+        on ? "border-ink/80" : "border-edge-soft/60 opacity-45"
       }`}
     >
       <div className="mb-2 flex items-center gap-1.5">
         <img src={logo} alt="" className="h-3.5 w-3.5 rounded-[3px] object-contain" />
-        <span className="text-[10px] font-semibold text-ink">{title}</span>
+        <span className="text-[10.5px] font-semibold text-ink">{title}</span>
         <span className="ms-auto text-[8.5px] font-medium uppercase tracking-wide text-ink-subtle">
           {tag}
         </span>
@@ -107,7 +107,7 @@ function Seg<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="flex shrink-0 items-center gap-1 rounded-full border border-edge-soft bg-canvas/60 p-1">
+ <div className="flex shrink-0 items-center gap-1 rounded-full bg-canvas p-1">
       {options.map((o) => (
         <button
           key={o.value}
@@ -139,7 +139,7 @@ export function EpisodeOrderSetting() {
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col">
           <span className="text-[13.5px] font-medium text-ink">{t("Episode ordering")}</span>
-          <span className="text-[12px] leading-relaxed text-ink-subtle">
+          <span className="text-[12.5px] leading-relaxed text-ink-subtle">
             {t(
               "How episodes are grouped for shows and anime. TVDB is the default: it gives the arc, DVD, and absolute orderings anime fans expect, with no key needed. TMDB keeps the plain aired order. Either way, every episode still plays and marks watched the same.",
             )}

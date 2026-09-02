@@ -9,6 +9,7 @@ import { saveSubtitleToDisk } from "@/lib/subtitles/save-to-disk";
 import { useImportedSubs } from "@/lib/player/imported-subs";
 import { useT } from "@/lib/i18n";
 import { parseRelease } from "@/lib/subtitles/release-match";
+import { subtitleClassificationLabels } from "@/lib/subtitles/classification-labels";
 import { OverflowMarquee } from "./overflow-marquee";
 
 function subExt(track: TrackInfo): string {
@@ -43,9 +44,16 @@ export function VariantRow({
   const { openAt } = useContextMenu();
   const imported = useImportedSubs();
   const isImported = !!track.title && imported.has(track.title);
-  const tags: { label: string; tone: "warn" | "info" | "default" }[] = [];
-  if (track.forced) tags.push({ label: tr("Forced"), tone: "info" });
-  if (track.hearingImpaired) tags.push({ label: tr("HI/SDH"), tone: "warn" });
+  const tags: { label: string; tone: "warn" | "info" | "default" }[] = subtitleClassificationLabels(
+    track,
+    tr,
+  ).map(({ kind, label }) => ({
+    label,
+    tone: kind === "hearingImpaired" || kind === "machineTranslated" ? "warn" : "info",
+  }));
+  if (track.timingStatus === "aligned") {
+    tags.push({ label: tr("Audio verified"), tone: "info" });
+  }
   if (track.default) tags.push({ label: tr("Default"), tone: "default" });
   if (isImageSubTrack(track)) tags.push({ label: tr("Position and size only"), tone: "warn" });
   const sourceLabel = isImported
@@ -88,8 +96,10 @@ export function VariantRow({
       release: realRelease,
       author: track.author,
       downloads: track.downloads,
-      compatibilityPercent,
-      matchReasons: matchReasons?.length ? matchReasons : track.matchReasons,
+      compatibilityPercent: track.matchExplanation?.compatibilityPercent ?? compatibilityPercent,
+      matchReasons:
+        track.matchExplanation?.reasons ??
+        (matchReasons?.length ? matchReasons : track.matchReasons),
       flags,
     },
     download: track.url
@@ -97,7 +107,8 @@ export function VariantRow({
           saveSubtitleToDisk(track.url!, {
             title: track.title || titleText,
             lang: track.lang,
-            format: subExt(track),
+            format: track.format ?? subExt(track),
+            downloadAuth: track.downloadAuth,
             label: tr("Subtitle"),
           })
       : undefined,
@@ -204,35 +215,35 @@ export function VariantRow({
           openAt({ x: rect.right, y: rect.bottom }, contextTarget);
         }}
         title={
-          compatibilityPercent == null
+          (track.matchExplanation?.compatibilityPercent ?? compatibilityPercent) == null
             ? `${tr("Match estimate")}: ${tr("Unknown")}`
-            : `${tr("Match estimate")}: ${compatibilityPercent}%`
+            : `${tr("Match estimate")}: ${track.matchExplanation?.compatibilityPercent ?? compatibilityPercent}%`
         }
         aria-label={
-          compatibilityPercent == null
+          (track.matchExplanation?.compatibilityPercent ?? compatibilityPercent) == null
             ? `${rank}, ${tr("Match estimate")} ${tr("Unknown")}`
-            : `${rank}, ${tr("Match estimate")} ${compatibilityPercent}%`
+            : `${rank}, ${tr("Match estimate")} ${track.matchExplanation?.compatibilityPercent ?? compatibilityPercent}%`
         }
         className="flex w-20 shrink-0 items-center justify-end gap-1.5 rounded-e-lg pe-2 text-[10.5px] font-medium tabular-nums outline-none transition-colors hover:bg-raised focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
       >
         <span aria-hidden className={selected ? "text-accent" : "text-ink-muted"}>
           {rank}
         </span>
-        {compatibilityPercent != null && (
+        {(track.matchExplanation?.compatibilityPercent ?? compatibilityPercent) != null && (
           <span
             aria-hidden
             className={
-              compatibilityPercent >= 90
+              (track.matchExplanation?.compatibilityPercent ?? compatibilityPercent ?? 0) >= 90
                 ? "text-accent"
-                : compatibilityPercent >= 70
+                : (track.matchExplanation?.compatibilityPercent ?? compatibilityPercent ?? 0) >= 70
                   ? "text-ink"
                   : "text-ink-subtle"
             }
           >
-            {compatibilityPercent}%
+            {track.matchExplanation?.compatibilityPercent ?? compatibilityPercent}%
           </span>
         )}
-        {compatibilityPercent == null && (
+        {(track.matchExplanation?.compatibilityPercent ?? compatibilityPercent) == null && (
           <span aria-hidden className="text-ink-subtle">
             —
           </span>

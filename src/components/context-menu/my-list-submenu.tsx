@@ -1,5 +1,6 @@
 import { Check, ChevronRight, ListPlus, Plus } from "lucide-react";
 import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   addToList,
   toggleInList,
@@ -13,6 +14,7 @@ import { emitListToast } from "@/components/lists/list-toast";
 import { CreateListModal } from "@/components/lists/create-list-modal";
 
 const FLYOUT_WIDTH = 244;
+const FLYOUT_HEIGHT_ESTIMATE = 320;
 
 export function MyListSubmenu({ item, onClose }: { item: ListItemInput; onClose: () => void }) {
   const t = useT();
@@ -21,8 +23,7 @@ export function MyListSubmenu({ item, onClose }: { item: ListItemInput; onClose:
   const local = useLocalWatchlist();
   const inDefault = useInLocalWatchlist(item.id);
   const [open, setOpen] = useState(false);
-  const [openLeft, setOpenLeft] = useState(false);
-  const [openUp, setOpenUp] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const [creating, setCreating] = useState(false);
   const rowRef = useRef<HTMLButtonElement>(null);
   const timer = useRef(0);
@@ -33,8 +34,12 @@ export function MyListSubmenu({ item, onClose }: { item: ListItemInput; onClose:
     window.clearTimeout(timer.current);
     const rect = rowRef.current?.getBoundingClientRect();
     if (rect) {
-      setOpenLeft(rect.right + FLYOUT_WIDTH + 12 > window.innerWidth);
-      setOpenUp(rect.top + 320 > window.innerHeight);
+      const openLeft = rect.right + FLYOUT_WIDTH + 12 > window.innerWidth;
+      const openUp = rect.top + FLYOUT_HEIGHT_ESTIMATE > window.innerHeight;
+      setPos({
+        left: openLeft ? Math.max(8, rect.left - FLYOUT_WIDTH - 4) : rect.right + 4,
+        top: openUp ? Math.max(8, rect.bottom - FLYOUT_HEIGHT_ESTIMATE) : rect.top,
+      });
     }
     setOpen(true);
   };
@@ -76,41 +81,42 @@ export function MyListSubmenu({ item, onClose }: { item: ListItemInput; onClose:
         <ChevronRight size={14} strokeWidth={2.2} className="dir-icon ms-auto text-ink-subtle" />
       </button>
 
-      {open && (
-        <div
-          onMouseEnter={show}
-          onMouseLeave={hide}
-          style={{ width: FLYOUT_WIDTH }}
-          className={`absolute z-[146] overflow-hidden rounded-xl border border-edge bg-elevated p-1 shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] animate-popover-in ${
-            openLeft ? "right-full me-1" : "left-full ms-1"
-          } ${openUp ? "bottom-0" : "top-0"}`}
-        >
-          <div className="max-h-[248px] overflow-y-auto">
-            <ListRow
-              label={t("My List")}
-              checked={inDefault}
-              count={local.count}
-              onClick={toggleDefault}
-            />
-            {lists.map((l) => (
-              <ListRow
-                key={l.id}
-                label={l.name}
-                checked={containing.has(l.id)}
-                count={l.items.length}
-                onClick={() => toggleCustom(l.id, l.name)}
-              />
-            ))}
-          </div>
-          <span aria-hidden className="my-1 block h-px bg-edge-soft/60" />
-          <button
-            onClick={() => setCreating(true)}
-            className="flex h-9 w-full items-center gap-2.5 rounded-lg px-3 text-start text-[13px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+      {open &&
+        pos &&
+        createPortal(
+          <div
+            onMouseEnter={show}
+            onMouseLeave={hide}
+            style={{ position: "fixed", top: pos.top, left: pos.left, width: FLYOUT_WIDTH }}
+            className="z-[146] overflow-hidden rounded-xl border border-edge bg-elevated p-1 shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] animate-popover-in"
           >
-            <Plus size={14} strokeWidth={2} /> {t("Create new list")}
-          </button>
-        </div>
-      )}
+            <div className="max-h-[248px] overflow-y-auto">
+              <ListRow
+                label={t("My List")}
+                checked={inDefault}
+                count={local.count}
+                onClick={toggleDefault}
+              />
+              {lists.map((l) => (
+                <ListRow
+                  key={l.id}
+                  label={l.name}
+                  checked={containing.has(l.id)}
+                  count={l.items.length}
+                  onClick={() => toggleCustom(l.id, l.name)}
+                />
+              ))}
+            </div>
+            <span aria-hidden className="my-1 block h-px bg-edge-soft/60" />
+            <button
+              onClick={() => setCreating(true)}
+              className="flex h-9 w-full items-center gap-2.5 rounded-lg px-3 text-start text-[13px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+            >
+              <Plus size={14} strokeWidth={2} /> {t("Create new list")}
+            </button>
+          </div>,
+          document.body,
+        )}
 
       {creating && (
         <CreateListModal

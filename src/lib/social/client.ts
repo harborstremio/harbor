@@ -15,8 +15,9 @@ async function unwrap<T>(r: Response): Promise<T> {
   const d = (await r.json().catch(() => ({}))) as Record<string, unknown>;
   if (!r.ok) {
     const message = typeof d.error === "string" ? d.error : `Request failed (${r.status}).`;
-    const err = new Error(message) as Error & { status?: number };
+    const err = new Error(message) as Error & { status?: number; body?: unknown };
     err.status = r.status;
+    err.body = d;
     throw err;
   }
   return d as T;

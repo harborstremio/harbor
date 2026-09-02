@@ -133,7 +133,7 @@ export function ListDetail({ listId, onBack }: { listId: string; onBack: () => v
                   suppressClick.current = false;
                 }
               }}
-              className={`group/item relative touch-none rounded-[14px] transition-[opacity,box-shadow] ${
+              className={`group/item relative touch-none rounded-lg transition-[opacity,box-shadow] ${
                 dragId === it.id ? "opacity-40" : ""
               } ${dropTarget === it.id && dragId !== it.id ? "ring-2 ring-accent ring-offset-2 ring-offset-canvas" : ""}`}
             >

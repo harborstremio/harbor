@@ -5,20 +5,23 @@ import { PICTURE_KEYS, PICTURE_TEMPLATES, TweakSlider, useTweaks } from "@/views
 import { useT } from "@/lib/i18n";
 import { useMenuSide } from "../menu-side";
 import { Tooltip } from "./tooltip";
+import { watchOutsideMouseDown } from "@/lib/player/overlay-dismiss";
 
 export function AspectMenu({
   mode,
   onMode,
   onOpenChange,
+  iconUrl,
 }: {
   mode: string;
   onMode: (id: string) => void;
   onOpenChange?: (open: boolean) => void;
+  iconUrl?: string;
 }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
-  const { side, measure } = useMenuSide(wrap, 360);
+  const { measure } = useMenuSide(wrap, 360);
   const { tweaks, setTweak, applyPatch, applyPreset } = useTweaks();
   useEffect(() => {
     onOpenChange?.(open);
@@ -28,8 +31,7 @@ export function AspectMenu({
     const close = (e: MouseEvent) => {
       if (!wrap.current?.contains(e.target as Node)) setOpen(false);
     };
-    window.addEventListener("mousedown", close);
-    return () => window.removeEventListener("mousedown", close);
+    return watchOutsideMouseDown(close);
   }, [open]);
   const aspectActive = mode !== "fit";
   const pictureActive = PICTURE_KEYS.some((k) => tweaks[k] != null && tweaks[k] !== "");
@@ -48,14 +50,18 @@ export function AspectMenu({
             accent ? "bg-white/22 text-white hover:bg-white/30" : "text-white/85 hover:bg-white/10 hover:text-white"
           }`}
         >
-          <SlidersHorizontal size={21} strokeWidth={1.9} />
+          {iconUrl ? (
+            <img src={iconUrl} alt="" className="h-[22px] w-[22px] shrink-0 select-none object-contain" draggable={false} />
+          ) : (
+            <SlidersHorizontal size={21} strokeWidth={1.9} />
+          )}
           {aspectActive && current ? (
             <span className="text-[11px] font-bold tabular-nums tracking-wider">{current.label}</span>
           ) : null}
         </button>
       </Tooltip>
       {open && (
-        <div className={`absolute bottom-[calc(100%+10px)] ${side === "start" ? "start-0" : "end-0"} flex max-h-[70vh] w-[360px] max-w-[calc(100vw-32px)] flex-col overflow-y-auto rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}>
+        <div className="fixed end-14 bottom-[150px] flex max-h-[calc(100vh-174px)] w-[360px] max-w-[calc(100vw-72px)] flex-col overflow-y-auto rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop">
           <div className="p-3">
             <div className="flex items-center justify-between px-1 pb-2">
               <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">

@@ -46,15 +46,21 @@ export type RemoteProfile = {
 export type RemoteLibraryItem = {
   id: string;
   type: string;
+  tmdbId?: number;
+  imdbId?: string;
   name?: string;
   poster?: string;
   background?: string;
+  local?: boolean;
+  mediaServerProviders?: Array<"jellyfin" | "emby" | "plex">;
 };
 
 export type RemoteLibrary = {
   watchlist: RemoteLibraryItem[];
   history: RemoteLibraryItem[];
   favorites: RemoteLibraryItem[];
+  local: RemoteLibraryItem[];
+  mediaServers: RemoteLibraryItem[];
 };
 
 export type RemoteTrackers = {
@@ -160,6 +166,10 @@ export type RemoteSnapshot = {
   tmdbKey?: string;
   rpdbKey?: string;
   tvdbKey?: string;
+  tmdbLanguage?: string;
+  tmdbImageLangs?: string[];
+  translateTitles?: boolean;
+  translateDescriptions?: boolean;
   hostVersion?: string;
   library?: RemoteLibrary;
   trackers?: RemoteTrackers;
@@ -173,6 +183,7 @@ export type RemoteNavKey = "up" | "down" | "left" | "right" | "select" | "back";
 export type RemoteCommand =
   | { action: "play" }
   | { action: "pause" }
+  | { action: "togglePlayback" }
   | { action: "seek"; positionSec: number }
   | { action: "setVolume"; volume: number }
   | { action: "setMuted"; muted: boolean }

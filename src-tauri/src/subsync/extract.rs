@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::time::Duration;
-use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 
 use crate::transcode::locate_ffmpeg;
@@ -60,7 +59,8 @@ pub async fn speech_intervals(
         .iter()
         .find(|(k, _)| k.to_lowercase() == "user-agent")
         .map(|(_, v)| v.clone());
-    cmd.arg("-user_agent").arg(ua.unwrap_or_else(|| "Harbor".into()));
+    cmd.arg("-user_agent")
+        .arg(ua.unwrap_or_else(|| "Harbor".into()));
     let blob = header_blob(headers);
     if !blob.is_empty() {
         cmd.arg("-headers").arg(blob);
@@ -75,34 +75,40 @@ pub async fn speech_intervals(
         .arg("-map")
         .arg("0:a:0")
         .arg("-af")
-        .arg(format!("{},silencedetect=noise={}:d={}", SPEECH_FILTER, NOISE_DB, MIN_SILENCE))
+        .arg(format!(
+            "{},silencedetect=noise={}:d={}",
+            SPEECH_FILTER, NOISE_DB, MIN_SILENCE
+        ))
         .arg("-f")
         .arg("null")
         .arg("-");
     cmd.stdout(std::process::Stdio::null());
     cmd.stderr(std::process::Stdio::piped());
+    cmd.kill_on_drop(true);
     #[cfg(windows)]
     cmd.creation_flags(0x0800_0000 | 0x0000_4000);
 
-    let mut child = cmd.spawn().map_err(|e| format!("spawn ffmpeg: {}", e))?;
-    let stderr = child.stderr.take().ok_or("no stderr")?;
-    let mut lines = BufReader::new(stderr).lines();
-
+    let output = tokio::time::timeout(Duration::from_secs(HARD_TIMEOUT_SECS), cmd.output())
+        .await
+        .map_err(|_| "ffmpeg-timeout".to_string())?
+        .map_err(|error| format!("run ffmpeg: {}", error))?;
+    if !output.status.success() {
+        return Err(format!("ffmpeg-exit-status: {}", output.status));
+    }
     let mut silences: Vec<(f32, f32)> = Vec::new();
     let mut open_start: Option<f32> = None;
-    let collect = async {
-        while let Ok(Some(line)) = lines.next_line().await {
-            if let Some(v) = parse_after(&line, "silence_start:") {
-                open_start = Some(v);
-            } else if let Some(v) = parse_after(&line, "silence_end:") {
-                if let Some(s) = open_start.take() {
-                    silences.push((s, v));
-                }
+    for line in String::from_utf8_lossy(&output.stderr).lines() {
+        if let Some(value) = parse_after(line, "silence_start:") {
+            open_start = Some(value);
+        } else if let Some(value) = parse_after(line, "silence_end:") {
+            if let Some(start) = open_start.take() {
+                silences.push((start, value));
             }
         }
-    };
-    let _ = tokio::time::timeout(Duration::from_secs(HARD_TIMEOUT_SECS), collect).await;
-    let _ = child.kill().await;
+    }
+    if let Some(start) = open_start {
+        silences.push((start, len_sec));
+    }
 
     Ok(complement(&mut silences, len_sec, start_sec))
 }
@@ -143,7 +149,10 @@ mod tests {
     #[test]
     fn parse_after_reads_value() {
         assert_eq!(
-            parse_after("[silencedetect @ 0x1] silence_start: 12.34", "silence_start:"),
+            parse_after(
+                "[silencedetect @ 0x1] silence_start: 12.34",
+                "silence_start:"
+            ),
             Some(12.34)
         );
     }

@@ -3,8 +3,12 @@ import type { LibraryKey } from "./settings/library-panel";
 import type { RelayMode } from "./settings/relay-section";
 import type { DebridKey } from "./settings/streaming-sources-panel";
 import { SettingsNav } from "./settings/nav";
-import { SettingsJumpBar } from "./settings/jump-bar";
+import { groupForSection } from "./settings/groups";
+import { requestTracker } from "./settings/tracker-request";
+import { SubTabsProvider, type SubTabReg } from "./settings/sub-tabs";
+import { SubTabBar } from "./settings/sub-tab-bar";
 import { SettingsActiveContext, type SectionId } from "./settings/shared";
+import "./settings/tv-panel/store";
 import { useThemeLibraryOpen } from "./settings/theme-panel/library-open-store";
 import { BackToTop } from "@/components/back-to-top";
 import { resetOmdbBudget } from "@/lib/providers/omdb";
@@ -22,8 +26,7 @@ const StreamingSourcesPanel = lazy(() => import("./settings/streaming-sources-pa
 const StreamFiltersPanel = lazy(() => import("./settings/stream-filters-panel").then((m) => ({ default: m.StreamFiltersPanel })));
 const P2PPanel = lazy(() => import("./settings/p2p-panel").then((m) => ({ default: m.P2PPanel })));
 const LanguagePanel = lazy(() => import("./settings/language-panel").then((m) => ({ default: m.LanguagePanel })));
-const SubSourcesPanel = lazy(() => import("./settings/sub-sources-panel").then((m) => ({ default: m.SubSourcesPanel })));
-const AutoSyncPanel = lazy(() => import("./settings/autosync-panel").then((m) => ({ default: m.AutoSyncPanel })));
+const SubtitlesPanel = lazy(() => import("./settings/subtitles-panel").then((m) => ({ default: m.SubtitlesPanel })));
 const QualityPanel = lazy(() => import("./settings/quality-panel").then((m) => ({ default: m.QualityPanel })));
 const MpvPanel = lazy(() => import("./settings/mpv-panel").then((m) => ({ default: m.MpvPanel })));
 const AnimePanel = lazy(() => import("./settings/anime-panel").then((m) => ({ default: m.AnimePanel })));
@@ -31,11 +34,6 @@ const ShadersPanel = lazy(() => import("./settings/shaders-panel").then((m) => (
 const PlayerLayoutPanel = lazy(() => import("./settings/player-layout-panel").then((m) => ({ default: m.PlayerLayoutPanel })));
 const HotkeysPanel = lazy(() => import("./settings/hotkeys-panel").then((m) => ({ default: m.HotkeysPanel })));
 const ControllersPanel = lazy(() => import("./settings/controllers-panel").then((m) => ({ default: m.ControllersPanel })));
-const TraktPanel = lazy(() => import("./settings/trakt-panel").then((m) => ({ default: m.TraktPanel })));
-const AnilistPanel = lazy(() => import("./settings/anilist-panel").then((m) => ({ default: m.AnilistPanel })));
-const MalPanel = lazy(() => import("./settings/mal-panel").then((m) => ({ default: m.MalPanel })));
-const SimklPanel = lazy(() => import("./settings/simkl-panel").then((m) => ({ default: m.SimklPanel })));
-const LetterboxdPanel = lazy(() => import("./settings/letterboxd-panel").then((m) => ({ default: m.LetterboxdPanel })));
 const ThemePanel = lazy(() => import("./settings/theme-panel").then((m) => ({ default: m.ThemePanel })));
 const StreamBadgesPanel = lazy(() => import("./settings/stream-badges-panel").then((m) => ({ default: m.StreamBadgesPanel })));
 const AwardIconsPanel = lazy(() => import("./settings/award-icons-panel").then((m) => ({ default: m.AwardIconsPanel })));
@@ -43,8 +41,50 @@ const WebhooksPanel = lazy(() => import("./settings/webhooks-panel").then((m) =>
 const BugReportPanel = lazy(() => import("./settings/bug-report-panel").then((m) => ({ default: m.BugReportPanel })));
 const SupportPanel = lazy(() => import("./settings/support-panel").then((m) => ({ default: m.SupportPanel })));
 const RemotesPanel = lazy(() => import("./settings/remotes-panel").then((m) => ({ default: m.RemotesPanel })));
+const TvPanel = lazy(() => import("./settings/tv-panel").then((m) => ({ default: m.TvPanel })));
 const StoragePanel = lazy(() => import("./settings/storage-panel").then((m) => ({ default: m.StoragePanel })));
+const TrackersPanel = lazy(() => import("./settings/trackers-panel").then((m) => ({ default: m.TrackersPanel })));
+const UpdatesPanel = lazy(() => import("./settings/updates-panel").then((m) => ({ default: m.UpdatesPanel })));
 const AdvancedPanel = lazy(() => import("./settings/advanced-panel").then((m) => ({ default: m.AdvancedPanel })));
+
+
+const SECTION_PRELOAD: Partial<Record<SectionId, () => Promise<unknown>>> = {
+  basics: () => import("./settings/basics-panel"),
+  account: () => import("./settings/account"),
+  library: () => import("./settings/library-panel"),
+  relay: () => import("./settings/relay-section"),
+  streaming: () => import("./settings/streaming-sources-panel"),
+  streamFilters: () => import("./settings/stream-filters-panel"),
+  p2p: () => import("./settings/p2p-panel"),
+  language: () => import("./settings/language-panel"),
+  subtitles: () => import("./settings/subtitles-panel"),
+  player: () => import("./settings/quality-panel"),
+  mpv: () => import("./settings/mpv-panel"),
+  anime: () => import("./settings/anime-panel"),
+  shaders: () => import("./settings/shaders-panel"),
+  playerLayout: () => import("./settings/player-layout-panel"),
+  hotkeys: () => import("./settings/hotkeys-panel"),
+  controllers: () => import("./settings/controllers-panel"),
+  theme: () => import("./settings/theme-panel"),
+  badges: () => import("./settings/stream-badges-panel"),
+  awardIcons: () => import("./settings/award-icons-panel"),
+  webhooks: () => import("./settings/webhooks-panel"),
+  bug: () => import("./settings/bug-report-panel"),
+  support: () => import("./settings/support-panel"),
+  remotes: () => import("./settings/remotes-panel"),
+  tv: () => import("./settings/tv-panel"),
+  storage: () => import("./settings/storage-panel"),
+  trackers: () => import("./settings/trackers-panel"),
+  updates: () => import("./settings/updates-panel"),
+  advanced: () => import("./settings/advanced-panel"),
+};
+
+const preloaded = new Set<SectionId>();
+export function preloadSettingsSection(id: SectionId) {
+  if (preloaded.has(id)) return;
+  preloaded.add(id);
+  void SECTION_PRELOAD[id]?.().catch(() => preloaded.delete(id));
+}
 
 const SECTION_META: Record<SectionId, { label: string; sub: string }> = {
   basics: {
@@ -99,15 +139,11 @@ const SECTION_META: Record<SectionId, { label: string; sub: string }> = {
   },
   language: {
     label: "Languages",
-    sub: "Which audio and subtitle languages rank first in stream lists.",
+    sub: "What language Harbor speaks, and which audio tracks it reaches for first.",
   },
-  subSources: {
-    label: "Sub sources",
-    sub: "Choose where Harbor pulls subtitles from. OpenSubtitles is built in and on by default.",
-  },
-  autoSync: {
-    label: "Subtitle auto-sync",
-    sub: "Time out-of-sync subtitles to the audio automatically, on any external subtitle.",
+  subtitles: {
+    label: "Subtitles",
+    sub: "Which languages, where they come from, how they sync, and how they look.",
   },
   player: {
     label: "Player & quality",
@@ -165,9 +201,21 @@ const SECTION_META: Record<SectionId, { label: string; sub: string }> = {
     label: "Remotes",
     sub: "Harbor on your other devices: the web app, the phone remote, and the manga reader remote.",
   },
+  tv: {
+    label: "TV Settings",
+    sub: "Set up your television from here. Everything on this page is written to your Harbor account and picked up by Big Picture on the TV, so you never have to type on a remote.",
+  },
   storage: {
     label: "Storage",
     sub: "See what Harbor stores on this computer and clear caches when you want the space back.",
+  },
+  trackers: {
+    label: "Trackers",
+    sub: "Services that record what you watch. Connect the ones you use and tune what each one sends.",
+  },
+  updates: {
+    label: "Updates & backup",
+    sub: "Install updates, try beta builds, and keep a copy of your setup.",
   },
   advanced: {
     label: "Advanced",
@@ -192,8 +240,17 @@ export function Settings() {
   const [dlDraft, setDlDraft] = useState(settings.dlKey);
   const [savedKey, setSavedKey] = useState<SavedKey | null>(null);
   const { settingsSectionRequest } = useView();
+  const TRACKER_IDS = ["trakt", "anilist", "mal", "simkl", "letterboxd"];
+  const resolveSection = (id: string | null | undefined): SectionId => {
+    if (!id) return "account";
+    if (TRACKER_IDS.includes(id)) {
+      requestTracker(id);
+      return "trackers";
+    }
+    return id as SectionId;
+  };
   const [active, setActive] = useState<SectionId>(
-    (settingsSectionRequest.section as SectionId | null) ?? "account",
+    resolveSection(settingsSectionRequest.section),
   );
   const [relayMode, setRelayMode] = useState<RelayMode>("panel");
   const [pendingAnchor, setPendingAnchor] = useState<string | null>(null);
@@ -207,13 +264,19 @@ export function Settings() {
   };
 
   useEffect(() => {
-    if (settingsSectionRequest.section) setActive(settingsSectionRequest.section as SectionId);
+    if (settingsSectionRequest.section) setActive(resolveSection(settingsSectionRequest.section));
   }, [settingsSectionRequest]);
 
   useEffect(() => {
     if (active !== "relay") setRelayMode("panel");
   }, [active]);
 
+  const [subRegRaw, setSubReg] = useState<SubTabReg>(null);
+  const subReg = subRegRaw && subRegRaw.tabs.length > 0 ? subRegRaw : null;
+  const subRegRef = useRef<SubTabReg>(null);
+  subRegRef.current = subReg;
+  const triedTabs = useRef<Set<string>>(new Set());
+  const restoreTab = useRef<string | null>(null);
   const pendingAnchorRef = useRef<string | null>(null);
   pendingAnchorRef.current = pendingAnchor;
 
@@ -258,9 +321,28 @@ export function Settings() {
         setPendingAnchor(null);
         return;
       }
+      const reg = subRegRef.current;
+      if (reg && triedTabs.current.size < reg.tabs.length) {
+        const next = reg.tabs.find((tab) => !triedTabs.current.has(tab.id));
+        if (next) {
+          triedTabs.current.add(next.id);
+          if (next.id !== reg.value) {
+            reg.onChange(next.id);
+            tries = 0;
+            timer = window.setTimeout(tryScroll, 50);
+            return;
+          }
+        }
+      }
       if (tries++ < 30) timer = window.setTimeout(tryScroll, 50);
-      else setPendingAnchor(null);
+      else {
+        if (restoreTab.current && subRegRef.current) subRegRef.current.onChange(restoreTab.current);
+        setPendingAnchor(null);
+      }
     };
+    triedTabs.current = new Set();
+    restoreTab.current = subRegRef.current?.value ?? null;
+    if (subRegRef.current) triedTabs.current.add(subRegRef.current.value);
     timer = window.setTimeout(tryScroll, 60);
     return () => window.clearTimeout(timer);
   }, [active, pendingAnchor]);
@@ -288,6 +370,15 @@ export function Settings() {
 
   const themeLibOpen = useThemeLibraryOpen();
   const wide = active === "theme" && themeLibOpen;
+  const activeGroup = groupForSection(active);
+  useEffect(() => {
+    if (!activeGroup) return;
+    const run = () => activeGroup.children.forEach((child) => preloadSettingsSection(child));
+    const ric = (window as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
+    if (ric) { const h = ric(run); return () => (window as { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback?.(h); }
+    const tid = window.setTimeout(run, 200);
+    return () => window.clearTimeout(tid);
+  }, [activeGroup]);
 
   useEffect(() => {
     if (themeLibOpen) scrollRef.current?.scrollTo({ top: 0 });
@@ -295,7 +386,8 @@ export function Settings() {
 
   return (
     <SettingsActiveContext.Provider value={{ setActive }}>
-    <div className="flex h-full bg-canvas">
+    <SubTabsProvider value={{ reg: subReg, setReg: setSubReg }}>
+    <div className="flex h-full bg-surface">
       <SettingsNav active={active} onChange={handleNav} />
       <main
         ref={scrollRef}
@@ -306,22 +398,25 @@ export function Settings() {
           className={wide ? "mx-auto flex w-full max-w-[1500px] flex-col gap-8 px-8" : "mx-auto flex max-w-3xl flex-col gap-10 px-12"}
         >
           {!wide && !(active === "relay" && relayMode !== "panel") && (
-            <header className="flex flex-col gap-2">
-              <h1 className="font-display text-[44px] font-medium leading-[1.05] tracking-tight text-ink">
+            <header className="flex flex-col gap-4">
+              <h1 className="font-display text-[32px] font-medium leading-[1.1] tracking-tight text-ink">
                 {t(SECTION_META[active].label)}
               </h1>
-              <p className="text-[15px] text-ink-muted">{t(SECTION_META[active].sub)}</p>
+              {subReg && (
+                <SubTabBar tabs={subReg.tabs} value={subReg.value} onChange={subReg.onChange} />
+              )}
             </header>
           )}
 
           <Suspense
             fallback={
               <div
-                className="h-64 rounded-2xl border border-edge-soft bg-elevated/40"
+                className="h-64 rounded-md bg-elevated"
                 aria-label={t("Loading settings")}
               />
             }
           >
+          <div key={active} className="harbor-cascade flex flex-col gap-10">
           {active === "basics" && <BasicsPanel />}
 
           {active === "account" && <AccountStub />}
@@ -369,10 +464,7 @@ export function Settings() {
           {active === "p2p" && <P2PPanel />}
 
           {active === "language" && <LanguagePanel />}
-
-          {active === "subSources" && <SubSourcesPanel />}
-
-          {active === "autoSync" && <AutoSyncPanel />}
+          {active === "subtitles" && <SubtitlesPanel />}
 
           {active === "player" && <QualityPanel />}
 
@@ -388,15 +480,10 @@ export function Settings() {
 
           {active === "controllers" && <ControllersPanel />}
 
-          {active === "trakt" && <TraktPanel />}
 
-          {active === "anilist" && <AnilistPanel />}
 
-          {active === "mal" && <MalPanel />}
 
-          {active === "simkl" && <SimklPanel />}
 
-          {active === "letterboxd" && <LetterboxdPanel />}
 
           {active === "theme" && <ThemePanel />}
 
@@ -410,15 +497,22 @@ export function Settings() {
 
           {active === "remotes" && <RemotesPanel />}
 
+          {active === "tv" && <TvPanel />}
+
           {active === "storage" && <StoragePanel />}
 
+          {active === "trackers" && <TrackersPanel />}
+
+          {active === "updates" && <UpdatesPanel />}
+
           {active === "advanced" && <AdvancedPanel />}
+          </div>
           </Suspense>
         </div>
       </main>
       <BackToTop scrollRef={scrollRef} />
-      <SettingsJumpBar scrollRef={scrollRef} activeSection={active} />
     </div>
+    </SubTabsProvider>
     </SettingsActiveContext.Provider>
   );
 }

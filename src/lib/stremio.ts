@@ -149,6 +149,42 @@ export async function library(authKey: string): Promise<LibraryItem[]> {
   });
 }
 
+const LIBRARY_FORCE_REFETCH_MS = 300_000;
+let libraryCache: { authKey: string; sig: string; at: number; items: LibraryItem[] } | null = null;
+
+export async function libraryIfChanged(authKey: string): Promise<LibraryItem[]> {
+  const ids = await call<Array<[string, string]>>("datastoreMeta", {
+    authKey,
+    collection: "libraryItem",
+  });
+  if (!ids?.length) {
+    libraryCache = null;
+    return [];
+  }
+  const sig = ids
+    .map(([id, mtime]) => `${id}:${mtime}`)
+    .sort()
+    .join("|");
+  const hit =
+    libraryCache &&
+    libraryCache.authKey === authKey &&
+    libraryCache.sig === sig &&
+    Date.now() - libraryCache.at < LIBRARY_FORCE_REFETCH_MS;
+  if (hit) return libraryCache!.items;
+  const items = await call<LibraryItem[]>("datastoreGet", {
+    authKey,
+    collection: "libraryItem",
+    ids: ids.map(([id]) => id),
+    all: true,
+  });
+  libraryCache = { authKey, sig, at: Date.now(), items };
+  return items;
+}
+
+export function invalidateLibraryCache(): void {
+  libraryCache = null;
+}
+
 export async function libraryGetOne(authKey: string, id: string): Promise<LibraryItem | null> {
   const items = await call<LibraryItem[]>("datastoreGet", {
     authKey,

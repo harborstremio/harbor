@@ -1,3 +1,4 @@
+import { useT } from "@/lib/i18n";
 import { IDE, type ThemeFile } from "./files";
 
 export function StatusBar({
@@ -13,6 +14,7 @@ export function StatusBar({
   lines: number;
   chars: number;
 }) {
+  const t = useT();
   return (
     <footer
       className="flex h-9 shrink-0 items-center gap-4 px-4 text-[13px]"
@@ -24,17 +26,15 @@ export function StatusBar({
       >
         {file.lang}
       </span>
-      <span className="tabular-nums">
-        Ln {line}, Col {col}
-      </span>
-      <span className="tabular-nums">{lines} lines</span>
-      <span className="tabular-nums">{chars.toLocaleString()} chars</span>
+      <span className="tabular-nums">{t("Ln {line}, Col {col}", { line, col })}</span>
+      <span className="tabular-nums">{t("{lines} lines", { lines })}</span>
+      <span className="tabular-nums">{t("{chars} chars", { chars: chars.toLocaleString() })}</span>
       <span className="ms-auto flex items-center gap-4">
-        <span>Spaces: 2</span>
+        <span>{t("Spaces: 2")}</span>
         <span>UTF-8</span>
         <span className="flex items-center gap-1.5" style={{ color: "#98c379" }}>
           <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#98c379" }} />
-          Live
+          {t("Live")}
         </span>
       </span>
     </footer>

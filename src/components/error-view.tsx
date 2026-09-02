@@ -4,6 +4,7 @@ import { HarborMark } from "@/components/icons/harbor-mark";
 import { submitErrorReport } from "@/lib/bug-report";
 import { loadStartupCrashReport, startupCrashToHarborError } from "@/lib/startup-crash";
 import { isStaleTauriListenerError } from "@/lib/tauri-unlisten";
+import { t as translate, useT } from "@/lib/i18n";
 
 export type HarborError = {
   code: string;
@@ -46,6 +47,7 @@ type ReportState =
   | { kind: "error"; message: string };
 
 export function ErrorView() {
+  const t = useT();
   const [error, setError] = useState<HarborError | null>(null);
   const [report, setReport] = useState<ReportState>({ kind: "idle" });
 
@@ -61,7 +63,7 @@ export function ErrorView() {
       showHarborError({
         code: err?.name || "RuntimeError",
         title: "RuntimeError",
-        message: e.message || err?.message || "An unexpected runtime error occurred.",
+        message: e.message || err?.message || translate("An unexpected runtime error occurred."),
         detail: [
           `${err?.name ?? "Error"}: ${err?.message ?? e.message}`,
           err?.stack ? `\n${err.stack}` : "",
@@ -75,12 +77,14 @@ export function ErrorView() {
         | string
         | undefined;
       const message =
-        typeof reason === "string" ? reason : (reason?.message ?? "Unhandled promise rejection.");
+        typeof reason === "string"
+          ? reason
+          : (reason?.message ?? translate("Unhandled promise rejection."));
       const name = typeof reason === "object" ? (reason?.name ?? "Rejection") : "Rejection";
       if (isNoisyError(reason, message)) return;
       showHarborError({
         code: name,
-        title: "Promise rejection",
+        title: translate("Promise rejection"),
         message,
         detail: [
           `${name}: ${message}`,
@@ -147,6 +151,26 @@ export function ErrorView() {
   }, [error, dismiss]);
 
   if (!error) return null;
+  const displayTitle =
+    error.title === "Crash"
+      ? t("Crash")
+      : error.code === "NativePanic"
+        ? t("Previous native crash")
+        : error.title;
+  const displayMessage =
+    error.message ===
+    "Something blew up while rendering. Reload to recover, or send us the technical detail."
+      ? t("Something blew up while rendering. Reload to recover, or send us the technical detail.")
+      : error.message ===
+          "We couldn't find what you were looking for. The wire got snipped: either the page moved, the addon's offline, or something glitched on our end."
+        ? t(
+            "We couldn't find what you were looking for. The wire got snipped: either the page moved, the addon's offline, or something glitched on our end.",
+          )
+        : error.code === "NativePanic"
+          ? t(
+              "Sorry, Harbor crashed the last time it was running. You can review the details and choose whether to send a report.",
+            )
+          : error.message;
 
   return (
     <div
@@ -183,14 +207,16 @@ export function ErrorView() {
 
       <div className="relative z-10 mx-auto flex w-full max-w-[560px] flex-col gap-5 px-6 pb-10 pt-6 sm:gap-6 sm:px-8 lg:ms-auto lg:me-[8vw] lg:gap-7 lg:py-0">
         <h1 className="font-display text-[80px] font-medium leading-[0.9] tracking-tight text-ink drop-shadow-[0_4px_22px_rgba(0,0,0,0.45)] sm:text-[110px] lg:text-[148px] lg:leading-[0.86]">
-          Oops..
+          {t("Oops..")}
         </h1>
 
         <p className="max-w-[460px] text-[14.5px] leading-relaxed text-ink-muted sm:text-[15.5px]">
-          {error.message}
+          {displayMessage}
         </p>
 
-        {error.detail && <TechnicalDetail content={buildReportBody(error)} />}
+        {error.detail && (
+          <TechnicalDetail content={buildReportBody(error, displayTitle, displayMessage)} />
+        )}
 
         <div className="mt-1 flex flex-wrap items-center gap-2.5">
           <button
@@ -199,7 +225,7 @@ export function ErrorView() {
             className="inline-flex h-11 items-center gap-2 rounded-full bg-accent px-5 text-[13.5px] font-semibold text-canvas transition-colors hover:bg-accent/90"
           >
             <ArrowLeftIcon className="dir-icon h-[16px] w-[16px]" />
-            Take me back
+            {t("Take me back")}
           </button>
           <button
             type="button"
@@ -219,17 +245,17 @@ export function ErrorView() {
               <BugIcon className="h-[15px] w-[15px]" />
             )}
             {report.kind === "sending"
-              ? "Sending…"
+              ? t("Sending…")
               : report.kind === "sent"
-                ? "Report sent"
+                ? t("Report sent")
                 : report.kind === "error"
-                  ? "Try again"
-                  : "Submit report"}
+                  ? t("Try again")
+                  : t("Submit report")}
           </button>
           <button
             type="button"
             onClick={reload}
-            aria-label="Reload"
+            aria-label={t("Reload")}
             className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-elevated/60 hover:text-ink"
           >
             <ReloadIcon className="h-[15px] w-[15px]" />
@@ -238,13 +264,13 @@ export function ErrorView() {
 
         <p className="text-[11.5px] text-ink-subtle">
           {report.kind === "sent" ? (
-            <>
-              Thanks. Tracked as <span className="font-mono text-ink-muted">{report.id}</span>.
-            </>
+            t("Thanks. Tracked as {id}.", { id: report.id })
           ) : report.kind === "error" ? (
-            <span className="text-danger/80">Could not send: {report.message}</span>
+            <span className="text-danger/80">
+              {t("Could not send: {message}", { message: report.message })}
+            </span>
           ) : (
-            <>Sends the context above straight to the Harbor team. No keys or library data.</>
+            t("Sends the context above straight to the Harbor team. No keys or library data.")
           )}
         </p>
       </div>
@@ -252,24 +278,25 @@ export function ErrorView() {
   );
 }
 
-function buildReportBody(error: HarborError): string {
+function buildReportBody(error: HarborError, title: string, message: string): string {
   return [
-    `Code: ${error.code}`,
-    `Title: ${error.title}`,
-    `Message: ${error.message}`,
-    error.detail ? `\nDetail:\n${error.detail}` : "",
+    translate("Code: {code}", { code: error.code }),
+    translate("Title: {title}", { title }),
+    translate("Message: {message}", { message }),
+    error.detail ? `\n${translate("Detail:")}\n${error.detail}` : "",
     "",
-    `Time: ${new Date().toISOString()}`,
-    `Path: ${window.location.pathname}${window.location.hash}`,
-    `Version: ${APP_VERSION}`,
-    `Platform: ${navigator.platform}`,
-    `User-Agent: ${navigator.userAgent}`,
+    translate("Time: {time}", { time: new Date().toISOString() }),
+    translate("Path: {path}", { path: `${window.location.pathname}${window.location.hash}` }),
+    translate("Version: {version}", { version: APP_VERSION }),
+    translate("Platform: {platform}", { platform: navigator.platform }),
+    translate("User-Agent: {agent}", { agent: navigator.userAgent }),
   ]
     .filter(Boolean)
     .join("\n");
 }
 
 function TechnicalDetail({ content }: { content: string }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const resetTimer = useRef<number | null>(null);
@@ -299,7 +326,7 @@ function TechnicalDetail({ content }: { content: string }) {
         <ChevronIcon
           className={`h-[10px] w-[10px] transition-transform duration-200 ${open ? "rotate-90" : ""}`}
         />
-        Technical detail
+        {t("Technical detail")}
       </button>
 
       <div
@@ -312,8 +339,8 @@ function TechnicalDetail({ content }: { content: string }) {
             <button
               type="button"
               onClick={onCopy}
-              aria-label={copied ? "Copied" : "Copy to clipboard"}
-              title={copied ? "Copied" : "Copy"}
+              aria-label={copied ? t("Copied") : t("Copy to clipboard")}
+              title={copied ? t("Copied") : t("Copy")}
               className={`absolute end-2.5 top-2.5 inline-flex h-8 w-8 items-center justify-center rounded-full transition-[background-color,color,transform] active:scale-95 ${
                 copied
                   ? "bg-accent/20 text-accent"

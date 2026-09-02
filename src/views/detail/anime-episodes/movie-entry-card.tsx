@@ -1,4 +1,5 @@
-import { Check, Play } from "lucide-react";
+import { Check } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { useSettings } from "@/lib/settings";
@@ -40,7 +41,7 @@ export function MovieEntryCard({
       onClick={() =>
         openPicker(meta, entryPlayEpisode(ep), { autoPlay: settings.instantPlay })
       }
-      className="group relative block h-[300px] w-full overflow-hidden rounded-2xl border border-edge-soft/50 text-start"
+      className="group relative block h-[300px] w-full overflow-hidden rounded-2xl text-start"
     >
       {banner ? (
         <img src={banner} alt="" className="absolute inset-0 h-full w-full object-cover" />
@@ -57,7 +58,7 @@ export function MovieEntryCard({
         {t("Play movie")}
       </span>
       {watched && (
-        <span className="absolute end-4 top-4 flex items-center gap-1.5 rounded-full bg-emerald-400/22 px-2.5 py-1 text-[12px] font-semibold text-emerald-200 ring-1 ring-emerald-400/40 backdrop-blur-sm">
+        <span className="absolute end-4 top-4 flex items-center gap-1.5 rounded-full bg-success/20 px-2.5 py-1 text-[12px] font-semibold text-success backdrop-blur-sm">
           <Check size={13} strokeWidth={3} />
           {t("Watched")}
         </span>

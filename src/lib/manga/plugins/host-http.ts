@@ -1,6 +1,6 @@
-import { safeFetch } from "@/lib/safe-fetch";
+import { safeFetch, safeFetchBytes } from "@/lib/safe-fetch";
 import { isBlockedUrl } from "@/lib/privacy/blocklist";
-import type { PluginHttpOpts, PluginHttpResult } from "./types";
+import type { PluginGrpcOpts, PluginGrpcResult, PluginHttpOpts, PluginHttpResult } from "./types";
 
 const MAX_BYTES = 8 * 1024 * 1024;
 const MAX_TIMEOUT = 45_000;
@@ -39,6 +39,10 @@ const ALLOW_RESPONSE_HEADERS = new Set([
   "vary",
   "age",
   "server",
+  "grpc-status",
+  "grpc-message",
+  "grpc-encoding",
+  "grpc-accept-encoding",
 ]);
 
 function isPrivateV4(h: string): boolean {
@@ -90,19 +94,78 @@ export function assertSafeUrl(raw: string): string {
 }
 
 const TWO_LEVEL_TLDS = new Set([
-  "co.uk", "org.uk", "gov.uk", "ac.uk", "me.uk", "net.uk", "sch.uk", "ltd.uk", "plc.uk",
-  "com.au", "net.au", "org.au", "edu.au", "gov.au", "id.au",
-  "co.jp", "or.jp", "ne.jp", "ac.jp", "go.jp",
-  "com.cn", "net.cn", "org.cn", "gov.cn",
-  "co.nz", "net.nz", "org.nz",
-  "co.in", "net.in", "org.in", "firm.in", "gen.in", "ind.in",
-  "co.kr", "or.kr",
-  "com.br", "net.br", "org.br", "gov.br",
-  "com.mx", "com.ar", "com.tr", "com.ua", "com.pl", "com.ru", "com.sa", "com.eg", "com.ng",
-  "co.za", "co.il", "co.id", "co.th", "co.ke",
-  "com.sg", "com.hk", "com.tw", "com.my", "com.ph", "com.vn",
-  "github.io", "pages.dev", "web.app", "workers.dev", "vercel.app", "netlify.app",
-  "onrender.com", "fly.dev", "deno.dev", "firebaseapp.com", "herokuapp.com", "glitch.me", "r2.dev",
+  "co.uk",
+  "org.uk",
+  "gov.uk",
+  "ac.uk",
+  "me.uk",
+  "net.uk",
+  "sch.uk",
+  "ltd.uk",
+  "plc.uk",
+  "com.au",
+  "net.au",
+  "org.au",
+  "edu.au",
+  "gov.au",
+  "id.au",
+  "co.jp",
+  "or.jp",
+  "ne.jp",
+  "ac.jp",
+  "go.jp",
+  "com.cn",
+  "net.cn",
+  "org.cn",
+  "gov.cn",
+  "co.nz",
+  "net.nz",
+  "org.nz",
+  "co.in",
+  "net.in",
+  "org.in",
+  "firm.in",
+  "gen.in",
+  "ind.in",
+  "co.kr",
+  "or.kr",
+  "com.br",
+  "net.br",
+  "org.br",
+  "gov.br",
+  "com.mx",
+  "com.ar",
+  "com.tr",
+  "com.ua",
+  "com.pl",
+  "com.ru",
+  "com.sa",
+  "com.eg",
+  "com.ng",
+  "co.za",
+  "co.il",
+  "co.id",
+  "co.th",
+  "co.ke",
+  "com.sg",
+  "com.hk",
+  "com.tw",
+  "com.my",
+  "com.ph",
+  "com.vn",
+  "github.io",
+  "pages.dev",
+  "web.app",
+  "workers.dev",
+  "vercel.app",
+  "netlify.app",
+  "onrender.com",
+  "fly.dev",
+  "deno.dev",
+  "firebaseapp.com",
+  "herokuapp.com",
+  "glitch.me",
+  "r2.dev",
 ]);
 
 function ipLiteral(h: string): boolean {
@@ -210,6 +273,47 @@ function toBase64(bytes: Uint8Array): string {
   return btoa(bin);
 }
 
+function fromBase64(value: string): Uint8Array {
+  let binary: string;
+  try {
+    binary = atob(value.replace(/\s/g, ""));
+  } catch {
+    throw new Error("invalid base64 protobuf request");
+  }
+  if (binary.length > MAX_BYTES) throw new Error("protobuf request exceeds 8 MB");
+  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+}
+
+function parseGrpcFrames(bytes: Uint8Array): {
+  messages: string[];
+  trailers: Record<string, string>;
+} {
+  const messages: string[] = [];
+  const trailers: Record<string, string> = {};
+  for (let offset = 0; offset < bytes.length;) {
+    if (offset + 5 > bytes.length) throw new Error("incomplete gRPC frame header");
+    const flags = bytes[offset];
+    const length = new DataView(bytes.buffer, bytes.byteOffset + offset + 1, 4).getUint32(0);
+    offset += 5;
+    if (offset + length > bytes.length) throw new Error("incomplete gRPC frame payload");
+    const payload = bytes.subarray(offset, offset + length);
+    offset += length;
+    if (flags & 0x80) {
+      if (flags !== 0x80) throw new Error("invalid gRPC trailer frame flags");
+      for (const line of new TextDecoder().decode(payload).split(/\r?\n/)) {
+        const split = line.indexOf(":");
+        if (split > 0)
+          trailers[line.slice(0, split).trim().toLowerCase()] = line.slice(split + 1).trim();
+      }
+    } else {
+      if (flags > 1) throw new Error("invalid gRPC message frame flags");
+      if (flags & 1) throw new Error("compressed gRPC responses are not supported");
+      messages.push(toBase64(payload));
+    }
+  }
+  return { messages, trailers };
+}
+
 export async function runPluginHttp(url: string, opts: PluginHttpOpts): Promise<PluginHttpResult> {
   const target = assertSafeUrl(url);
   const method = (opts.method || "GET").toUpperCase();
@@ -234,4 +338,64 @@ export async function runPluginHttp(url: string, opts: PluginHttpOpts): Promise<
   const bytes = await readCapped(res);
   const body = opts.responseType === "base64" ? toBase64(bytes) : new TextDecoder().decode(bytes);
   return { status: res.status, ok: res.ok, headers: pickHeaders(res.headers), body };
+}
+
+export async function runPluginGrpc(
+  url: string,
+  requestBase64: string,
+  opts: PluginGrpcOpts,
+): Promise<PluginGrpcResult> {
+  const target = assertSafeUrl(url);
+  const message = fromBase64(requestBase64);
+  const frame = new Uint8Array(message.length + 5);
+  new DataView(frame.buffer).setUint32(1, message.length);
+  frame.set(message, 5);
+  const mode = opts.mode === "grpc-web" ? "grpc-web" : "grpc";
+  const contentType = mode === "grpc-web" ? "application/grpc-web+proto" : "application/grpc";
+  const timeout = Math.min(Math.max(opts.timeoutMs || DEFAULT_TIMEOUT, 1_000), MAX_TIMEOUT);
+  const headers = filterHeaders(opts.headers, {
+    host: hostOf(target) ?? "",
+    allowRefererHost: hostOf(opts.allowReferer),
+    allowCookieHost: hostOf(opts.allowCookie),
+  });
+  if (!Object.keys(headers).some((key) => key.toLowerCase() === "content-type"))
+    headers["Content-Type"] = contentType;
+  if (!Object.keys(headers).some((key) => key.toLowerCase() === "accept"))
+    headers.Accept = contentType;
+  headers["grpc-accept-encoding"] = "identity";
+  if (!Object.keys(headers).some((key) => key.toLowerCase() === "grpc-timeout"))
+    headers["grpc-timeout"] = `${timeout}m`;
+  if (mode === "grpc") headers.te = "trailers";
+  else headers["x-grpc-web"] = "1";
+  const response = await safeFetchBytes(
+    target,
+    {
+      method: "POST",
+      headers,
+      body: frame,
+      redirect: "follow",
+      credentials: "omit",
+      signal: AbortSignal.timeout(timeout),
+    },
+    timeout,
+  );
+  const parsed = parseGrpcFrames(await readCapped(response));
+  const responseHeaders = pickHeaders(response.headers);
+  const grpcStatusValue = parsed.trailers["grpc-status"] ?? responseHeaders["grpc-status"];
+  const grpcStatus = grpcStatusValue === undefined ? undefined : Number(grpcStatusValue);
+  const encodedMessage = parsed.trailers["grpc-message"] ?? responseHeaders["grpc-message"];
+  let grpcMessage = encodedMessage;
+  try {
+    if (encodedMessage) grpcMessage = decodeURIComponent(encodedMessage);
+  } catch {}
+  return {
+    status: response.status,
+    ok: response.ok && (grpcStatus === undefined ? !!parsed.messages.length : grpcStatus === 0),
+    headers: responseHeaders,
+    body: parsed.messages[0] ?? "",
+    messages: parsed.messages,
+    trailers: parsed.trailers,
+    grpcStatus: Number.isFinite(grpcStatus) ? grpcStatus : undefined,
+    grpcMessage,
+  };
 }

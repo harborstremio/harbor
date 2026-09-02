@@ -9,6 +9,8 @@ const at = (p: string) => new URL(`../${p}`, import.meta.url);
 const handler = readFileSync(at("src/views/play-picker/use-pick-handler.ts"), "utf8");
 const resolve = readFileSync(at("src/lib/streams/resolve.ts"), "utf8");
 const picker = readFileSync(at("src/views/play-picker.tsx"), "utf8");
+const switcher = readFileSync(at("src/components/player/stream-switcher.tsx"), "utf8");
+const bigPicture = readFileSync(at("src/views/big-picture/bp-stream-filters.ts"), "utf8");
 
 test("a stream with an infoHash can always reach the torrent engine", () => {
   assert.match(
@@ -23,13 +25,19 @@ test("a stream with an infoHash can always reach the torrent engine", () => {
 });
 
 test("the P2P consent prompt is not suppressed by the source preference", () => {
-  const gate = handler.slice(handler.indexOf("!skipP2pConfirm") - 260, handler.indexOf("!skipP2pConfirm"));
+  const gate = handler.slice(
+    handler.indexOf("!skipP2pConfirm") - 260,
+    handler.indexOf("!skipP2pConfirm"),
+  );
   assert.doesNotMatch(gate, /streamMode !== "addons" &&/);
   assert.match(handler, /engineP2pEligible\(stream\) &&\s*\n\s*\(hasUncachedMarker\(stream\)/);
 });
 
-test("addons mode still leaves P2P sources selectable, so they must stay playable", () => {
-  assert.match(picker, /if \(addonsOnly\.length > 0\) all = addonsOnly;/);
+test("every picker surface uses the shared stream-mode policy", () => {
+  for (const source of [picker, switcher, bigPicture]) {
+    assert.match(source, /filterStreamsByMode\(/);
+    assert.doesNotMatch(source, /const addonsOnly =/);
+  }
 });
 
 test("only the explicit kill switch disables torrents", () => {

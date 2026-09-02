@@ -8,6 +8,7 @@ import { isRtxHdrBlocked, isRtxVsrBlocked } from "@/lib/player/rtx-video-policy"
 import { mediaKeyGate } from "@/lib/media-session";
 import { useSettings } from "@/lib/settings";
 import { isAnyFullscreen, exitAnyFullscreen } from "@/lib/fullscreen-state";
+import { isBigPictureActive } from "@/lib/big-picture";
 import { getLeaveConfirm, openLeaveConfirm } from "@/lib/player/leave-confirm";
 import { isPlayerInteractionLocked } from "@/lib/player/interaction-lock";
 import { round2 } from "../player-utils";
@@ -183,7 +184,11 @@ export function useKeyboardShortcuts(params: {
           return;
         }
         void (async () => {
-          if (settings.playerEscExitsFullscreen && (await isAnyFullscreen())) {
+          if (
+            settings.playerEscExitsFullscreen &&
+            !isBigPictureActive() &&
+            (await isAnyFullscreen())
+          ) {
             await exitAnyFullscreen();
             return;
           }

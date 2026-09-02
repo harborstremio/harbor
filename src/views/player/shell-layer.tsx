@@ -3,7 +3,7 @@ import type { Meta } from "@/lib/cinemeta";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlayerShell, type PlayerShellProps } from "@/lib/player-shells/registry";
 import { writePlayerPrefs } from "@/lib/player-prefs";
-import type { SubChoiceInput } from "@/lib/subtitles/subtitle-memory";
+import { rememberedChoiceFromLoad, type SubChoiceInput } from "@/lib/subtitles/subtitle-memory";
 import { writePlayerVolume } from "@/lib/player-volume";
 import type { useVideoDownload } from "./hooks/use-video-download";
 
@@ -63,6 +63,7 @@ export const ShellLayer = memo(function ShellLayer({
   onOpenDvr,
   sleep,
   onVolumeFeedback,
+  homeServerQualityControl,
 }: {
   shellId: string;
   shellSnap: PlayerSnapshot;
@@ -119,6 +120,7 @@ export const ShellLayer = memo(function ShellLayer({
   onOpenDvr?: () => void;
   sleep: PlayerShellProps["sleep"];
   onVolumeFeedback?: (volume: number, muted: boolean) => void;
+  homeServerQualityControl?: PlayerShellProps["homeServerQualityControl"];
 }) {
   const ActiveShell = getPlayerShell(shellId).Component;
   return (
@@ -127,7 +129,16 @@ export const ShellLayer = memo(function ShellLayer({
       engine={engine}
       useOverlayPopups={false}
       onMenuOpenChange={onMenuOpenChange}
-      capabilities={bridgeRef.current?.capabilities() ?? { engine: "html5", pictureInPicture: false, airplay: false, chromecast: false, hdrPassthrough: false, hardwareDecode: true }}
+      capabilities={
+        bridgeRef.current?.capabilities() ?? {
+          engine: "html5",
+          pictureInPicture: false,
+          airplay: false,
+          chromecast: false,
+          hdrPassthrough: false,
+          hardwareDecode: true,
+        }
+      }
       visible={visible}
       fullscreen={fullscreen}
       drawMode={drawMode}
@@ -170,16 +181,7 @@ export const ShellLayer = memo(function ShellLayer({
           bridgeRef.current?.addSubtitle(url, lang, title2, true, metadata) ??
           Promise.resolve(false);
         void p.then((ok) => {
-          if (ok)
-            rememberSubChoice({
-              lang,
-              title: title2,
-              url,
-              source: url,
-              external: true,
-              format: metadata?.format,
-              encoding: metadata?.encoding,
-            });
+          if (ok) rememberSubChoice(rememberedChoiceFromLoad(url, lang, title2, metadata));
         });
         return p;
       }}
@@ -195,9 +197,7 @@ export const ShellLayer = memo(function ShellLayer({
       onPiP={onPiP}
       onFullscreen={onFullscreen}
       onCast={() => {
-        const btn = (document.querySelector(
-          '[aria-label="Cast"]',
-        ) as HTMLElement | null);
+        const btn = document.querySelector('[aria-label="Cast"]') as HTMLElement | null;
         if (btn) {
           const r = btn.getBoundingClientRect();
           openCastMenu({ right: r.right, bottom: r.top });
@@ -236,6 +236,7 @@ export const ShellLayer = memo(function ShellLayer({
       onDownloadReset={download?.reset}
       onOpenDvr={onOpenDvr}
       sleep={sleep}
+      homeServerQualityControl={homeServerQualityControl}
     />
   );
 });

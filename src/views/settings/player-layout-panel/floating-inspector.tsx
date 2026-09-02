@@ -1,3 +1,4 @@
+import { useT } from "@/lib/i18n";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Eye, EyeOff, RotateCcw, X } from "lucide-react";
 import {
   CONTROL_META,
@@ -53,6 +54,7 @@ export function FloatingInspector({
   previewStates,
   onSetPreviewState,
 }: Props) {
+  const t = useT();
   if (selectedPanelId) {
     return (
       <PanelInspector
@@ -75,40 +77,40 @@ export function FloatingInspector({
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-6 z-30 flex flex-col items-center gap-2 px-6">
-      <div className="pointer-events-auto flex max-w-full items-stretch gap-1 overflow-x-auto rounded-2xl border border-white/12 bg-black/85 p-2 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+      <div className="pointer-events-auto flex max-w-full items-stretch gap-1 overflow-x-auto rounded-md border border-white/12 bg-black/85 p-2 harbor-float backdrop-blur-2xl">
         <div className="flex shrink-0 flex-col items-start justify-center px-3 py-1">
           <span className="text-[9.5px] font-semibold uppercase tracking-[0.18em] text-white/40">
-            {meta.group}
+            {t(meta.group)}
           </span>
           <span className="whitespace-nowrap text-[13px] font-semibold text-white">
-            {meta.label}
+            {t(meta.label)}
           </span>
         </div>
 
         <Divider />
 
-        <Group label="Slot">
+        <Group label={t("Slot")}>
           <IconBtn
             icon={<ArrowLeft size={14} strokeWidth={2.3} />}
             onClick={() => onMoveSlot(-1)}
-            title="Move to previous slot"
+            title={t("Move to previous slot")}
           />
-          <Chip>{SLOT_LABEL[control.slot]}</Chip>
+          <Chip>{t(SLOT_LABEL[control.slot])}</Chip>
           <IconBtn
             icon={<ArrowRight size={14} strokeWidth={2.3} />}
             onClick={() => onMoveSlot(1)}
-            title="Move to next slot"
+            title={t("Move to next slot")}
           />
         </Group>
 
         <Divider />
 
-        <Group label="Order">
+        <Group label={t("Order")}>
           <IconBtn
             icon={<ArrowUp size={14} strokeWidth={2.3} />}
             onClick={() => onMoveOrder(-1)}
             disabled={peers.length <= 1 || indexInSlot <= 0}
-            title="Move up"
+            title={t("Move up")}
           />
           <Chip mono>
             {indexInSlot + 1} / {peers.length}
@@ -117,15 +119,15 @@ export function FloatingInspector({
             icon={<ArrowDown size={14} strokeWidth={2.3} />}
             onClick={() => onMoveOrder(1)}
             disabled={peers.length <= 1 || indexInSlot >= peers.length - 1}
-            title="Move down"
+            title={t("Move down")}
           />
         </Group>
 
         {controlStates(selectedId).length > 0 && (
           <>
             <Divider />
-            <Group label="Preview state">
-              <div className="flex items-center gap-0.5 rounded-lg bg-white/8 p-0.5">
+            <Group label={t("Preview state")}>
+              <div className="flex items-center gap-0.5 rounded-md bg-white/8 p-0.5">
                 {controlStates(selectedId).map((s) => {
                   const active = (previewStates[selectedId] ?? controlStates(selectedId)[0]) === s;
                   return (
@@ -133,11 +135,11 @@ export function FloatingInspector({
                       key={s}
                       type="button"
                       onClick={() => onSetPreviewState(selectedId, s)}
-                      className={`h-8 whitespace-nowrap rounded-md px-2.5 text-[11px] font-medium transition-colors ${
+                      className={`h-8 whitespace-nowrap rounded-md px-2.5 text-[11.5px] font-medium transition-colors ${
                         active ? "bg-white/18 text-white" : "text-white/55 hover:text-white/85"
                       }`}
                     >
-                      {STATE_LABEL[s] ?? s}
+                      {STATE_LABEL[s] ? t(STATE_LABEL[s]) : s}
                     </button>
                   );
                 })}
@@ -149,7 +151,7 @@ export function FloatingInspector({
         {isVariantAware(selectedId) && (
           <>
             <Divider />
-            <Group label="Size">
+            <Group label={t("Size")}>
               <VariantPicker
                 value={control.variant ?? "auto"}
                 onChange={(v) => onSetVariant(selectedId, v === "auto" ? null : v)}
@@ -160,7 +162,7 @@ export function FloatingInspector({
 
         <Divider />
 
-        <Group label="Icon">
+        <Group label={t("Icon")}>
           <IconUpload
             currentUrl={config.customIcons?.[selectedId]}
             replaceable={isIconReplaceable(selectedId)}
@@ -170,7 +172,7 @@ export function FloatingInspector({
               if (list.length === 0) return undefined;
               return list.map((s) => ({
                 id: s,
-                label: STATE_LABEL[s] ?? s,
+                label: STATE_LABEL[s] ? t(STATE_LABEL[s]) : s,
                 url: config.customIcons?.[iconKey(selectedId, s)],
               }));
             })()}
@@ -184,17 +186,23 @@ export function FloatingInspector({
 
         <Divider />
 
-        <Group label={control.hidden ? "Hidden" : "Visible"}>
+        <Group label={t(control.hidden ? "Hidden" : "Visible")}>
           <IconBtn
-            icon={control.hidden ? <EyeOff size={14} strokeWidth={2.3} /> : <Eye size={14} strokeWidth={2.3} />}
+            icon={
+              control.hidden ? (
+                <EyeOff size={14} strokeWidth={2.3} />
+              ) : (
+                <Eye size={14} strokeWidth={2.3} />
+              )
+            }
             onClick={onToggleHidden}
             variant={control.hidden ? "active" : "default"}
-            title={control.hidden ? "Show this control" : "Hide this control"}
+            title={t(control.hidden ? "Show this control" : "Hide this control")}
           />
           <IconBtn
-            icon={<RotateCcw size={13} strokeWidth={2.3} />}
+            icon={<RotateCcw size={14} strokeWidth={2.3} />}
             onClick={onResetControl}
-            title="Reset to default"
+            title={t("Reset to default")}
           />
         </Group>
 
@@ -203,13 +211,16 @@ export function FloatingInspector({
         <IconBtn
           icon={<X size={14} strokeWidth={2.3} />}
           onClick={() => onSelect(null)}
-          title="Deselect"
+          title={t("Deselect")}
         />
       </div>
 
       {crowded && (
-        <div className="pointer-events-auto rounded-full border border-amber-300/30 bg-amber-300/10 px-3.5 py-1.5 text-[11px] font-medium text-amber-200/90 backdrop-blur-xl">
-          Slot is getting crowded ({peers.length}/{limit}). May overflow on narrow screens.
+        <div className="pointer-events-auto rounded-full border border-accent/30 bg-accent/10 px-3.5 py-1.5 text-[11.5px] font-medium text-accent/90 backdrop-blur-xl">
+          {t("Slot is getting crowded ({count}/{limit}). May overflow on narrow screens.", {
+            count: peers.length,
+            limit,
+          })}
         </div>
       )}
     </div>
@@ -242,7 +253,7 @@ function IconBtn({
 }) {
   const tone =
     variant === "active"
-      ? "bg-accent/85 text-canvas hover:bg-accent"
+      ? "bg-accent-soft text-canvas hover:bg-accent"
       : "text-white/85 hover:bg-white/15 hover:text-white";
   return (
     <button
@@ -251,7 +262,7 @@ function IconBtn({
       disabled={disabled}
       title={title}
       aria-label={title}
-      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-150 active:scale-[0.94] ${
+      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition duration-150 active:scale-[0.94] ${
         disabled ? "cursor-not-allowed text-white/25" : tone
       }`}
     >
@@ -263,7 +274,7 @@ function IconBtn({
 function Chip({ children, mono }: { children: React.ReactNode; mono?: boolean }) {
   return (
     <span
-      className={`flex h-9 shrink-0 items-center whitespace-nowrap rounded-lg bg-white/10 px-3 text-[11.5px] text-white/90 ${
+      className={`flex h-9 shrink-0 items-center whitespace-nowrap rounded-md bg-white/10 px-3 text-[11.5px] text-white/90 ${
         mono ? "font-mono tabular-nums" : "font-medium"
       }`}
     >
@@ -305,18 +316,19 @@ function PanelInspector({
   onSetCorner: (id: PanelId, corner: PanelCorner) => void;
   onToggleHidden: (id: PanelId) => void;
 }) {
+  const t = useT();
   const meta = PANEL_META[panelId];
   const cfg = panelConfig(config, panelId);
-  const eyebrow = panelId === "episodes" ? "Series tab" : "Watch Together panel";
+  const eyebrow = t(panelId === "episodes" ? "Series tab" : "Watch Together panel");
   return (
     <div className="pointer-events-none absolute inset-x-0 top-6 z-40 flex flex-col items-center gap-2 px-6">
-      <div className="pointer-events-auto flex max-w-full items-stretch gap-1 overflow-x-auto rounded-2xl border border-white/12 bg-black/85 p-2 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+      <div className="pointer-events-auto flex max-w-full items-stretch gap-1 overflow-x-auto rounded-md border border-white/12 bg-black/85 p-2 harbor-float backdrop-blur-2xl">
         <div className="flex shrink-0 flex-col items-start justify-center px-3 py-1">
           <span className="text-[9.5px] font-semibold uppercase tracking-[0.18em] text-white/40">
             {eyebrow}
           </span>
           <span className="whitespace-nowrap text-[13px] font-semibold text-white">
-            {meta.label}
+            {t(meta.label)}
           </span>
         </div>
 
@@ -324,7 +336,7 @@ function PanelInspector({
 
         <div className="flex shrink-0 flex-col items-center gap-1 px-1.5 py-1">
           <span className="text-[8.5px] font-semibold uppercase tracking-[0.18em] text-white/35">
-            {meta.placementMode === "side" ? "Side" : "Corner"}
+            {t(meta.placementMode === "side" ? "Side" : "Corner")}
           </span>
           <div className="flex items-center gap-1">
             {meta.placementMode === "side"
@@ -336,12 +348,12 @@ function PanelInspector({
                       key={side}
                       type="button"
                       onClick={() => onSetCorner(panelId, targetCorner)}
-                      title={SIDE_LABEL[side]}
-                      className={`flex h-9 items-center whitespace-nowrap rounded-lg px-2.5 text-[11.5px] font-medium transition-colors ${
+                      title={t(SIDE_LABEL[side])}
+                      className={`flex h-9 items-center whitespace-nowrap rounded-md px-2.5 text-[11.5px] font-medium transition-colors ${
                         active ? "bg-white/18 text-white" : "text-white/55 hover:text-white/85"
                       }`}
                     >
-                      {SIDE_LABEL[side]}
+                      {t(SIDE_LABEL[side])}
                     </button>
                   );
                 })
@@ -352,12 +364,12 @@ function PanelInspector({
                       key={c}
                       type="button"
                       onClick={() => onSetCorner(panelId, c)}
-                      title={CORNER_LABEL[c]}
-                      className={`flex h-9 items-center whitespace-nowrap rounded-lg px-2.5 text-[11.5px] font-medium transition-colors ${
+                      title={t(CORNER_LABEL[c])}
+                      className={`flex h-9 items-center whitespace-nowrap rounded-md px-2.5 text-[11.5px] font-medium transition-colors ${
                         active ? "bg-white/18 text-white" : "text-white/55 hover:text-white/85"
                       }`}
                     >
-                      {CORNER_LABEL[c]}
+                      {t(CORNER_LABEL[c])}
                     </button>
                   );
                 })}
@@ -366,12 +378,18 @@ function PanelInspector({
 
         <Divider />
 
-        <Group label={cfg.hidden ? "Hidden" : "Visible"}>
+        <Group label={t(cfg.hidden ? "Hidden" : "Visible")}>
           <IconBtn
-            icon={cfg.hidden ? <EyeOff size={14} strokeWidth={2.3} /> : <Eye size={14} strokeWidth={2.3} />}
+            icon={
+              cfg.hidden ? (
+                <EyeOff size={14} strokeWidth={2.3} />
+              ) : (
+                <Eye size={14} strokeWidth={2.3} />
+              )
+            }
             onClick={() => onToggleHidden(panelId)}
             variant={cfg.hidden ? "active" : "default"}
-            title={cfg.hidden ? "Show this panel" : "Hide this panel"}
+            title={t(cfg.hidden ? "Show this panel" : "Hide this panel")}
           />
         </Group>
 
@@ -380,7 +398,7 @@ function PanelInspector({
         <IconBtn
           icon={<X size={14} strokeWidth={2.3} />}
           onClick={() => onSelect(null)}
-          title="Deselect"
+          title={t("Deselect")}
         />
       </div>
     </div>
@@ -400,8 +418,9 @@ function VariantPicker({
   value: ControlVariant;
   onChange: (v: ControlVariant) => void;
 }) {
+  const t = useT();
   return (
-    <div className="flex items-center gap-0.5 rounded-lg bg-white/8 p-0.5">
+    <div className="flex items-center gap-0.5 rounded-md bg-white/8 p-0.5">
       {VARIANT_OPTIONS.map((opt) => {
         const active = value === opt.value;
         return (
@@ -409,11 +428,11 @@ function VariantPicker({
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
-            className={`h-8 whitespace-nowrap rounded-md px-2.5 text-[11px] font-medium transition-colors ${
+            className={`h-8 whitespace-nowrap rounded-md px-2.5 text-[11.5px] font-medium transition-colors ${
               active ? "bg-white/18 text-white" : "text-white/55 hover:text-white/85"
             }`}
           >
-            {opt.label}
+            {t(opt.label)}
           </button>
         );
       })}

@@ -1,10 +1,12 @@
-import { ChevronDown, Download, ExternalLink, Loader2, Play, Zap } from "lucide-react";
+import { ChevronDown, Download, ExternalLink, Loader2, Zap } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useMemo, useState } from "react";
 import { AddonLogo, AddonLogoStack } from "@/components/addon-logo";
 import { CopyLinkButton, resolveStreamLink } from "@/components/player/copy-link-button";
 import { FlagStack } from "@/components/flag";
 import { FormatBadge, RuleBadges } from "@/components/format-badge";
 import { HostMatchChip } from "@/components/host-match-chip";
+import { useT } from "@/lib/i18n";
 import { useDebridClients } from "@/lib/debrid/registry";
 import { useSettings } from "@/lib/settings";
 import type { ScoredStream } from "@/lib/streams/types";
@@ -14,7 +16,6 @@ import {
   addonInstanceKey,
   anyStreamCached,
   buildAddonOptions,
-  contributorLabel,
   displayTitle,
   streamSummaryParts,
   tierChipBadges,
@@ -52,6 +53,7 @@ export function SourceDrawer({
   episode?: PlayEpisode;
   absoluteEpisode?: number | null;
 }) {
+  const t = useT();
   const [addonFilter, setAddonFilter] = useState("all");
   const addonOptions = useMemo(() => buildAddonOptions(streams), [streams]);
   const shown = useMemo(
@@ -67,19 +69,20 @@ export function SourceDrawer({
     <div className="flex flex-col gap-4">
       <button
         onClick={onToggle}
+        aria-expanded={open}
         className="group flex w-fit items-center gap-3 rounded-full border border-edge-soft/70 bg-canvas/70 px-4 py-2 text-[11.5px] font-semibold uppercase tracking-[0.22em] text-ink-muted transition-all hover:border-edge hover:bg-canvas/90 hover:text-ink"
       >
         <ChevronDown
           size={14}
           className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`}
         />
-        <span>{open ? "Hide all sources" : "All sources"}</span>
+        <span>{open ? t("Hide all sources") : t("All sources")}</span>
         <span className="text-ink-subtle/80">{count}</span>
         {usedAddons.length > 0 && (
           <span className="flex items-center gap-2">
             <AddonLogoStack addons={usedAddons} size="sm" max={5} />
             <span className="text-ink-subtle/80">
-              {addonCount} addon{addonCount === 1 ? "" : "s"}
+              {addonCount === 1 ? t("1 addon") : t("{n} addons", { n: addonCount })}
             </span>
           </span>
         )}
@@ -89,7 +92,7 @@ export function SourceDrawer({
           <AddonPill
             active={addonFilter === "all"}
             onClick={() => setAddonFilter("all")}
-            label="All"
+            label={t("All")}
             count={streams.length}
           />
           {addonOptions.map((o) => (
@@ -175,14 +178,28 @@ function SourceRow({
   episode?: PlayEpisode;
   absoluteEpisode?: number | null;
 }) {
+  const t = useT();
   const { settings } = useSettings();
   const cachedDebrids = debrids.filter((d) => stream.cached[d.slug]);
   const libraryDebrids = debrids.filter((d) => stream.inLibrary[d.slug]);
   const addonCached = anyStreamCached(stream);
-  const summary = streamSummaryParts(stream);
+  const summary = streamSummaryParts(stream).map((part) =>
+    stream.seeders != null && part === `${stream.seeders} seeds`
+      ? t("{n} seeds", { n: stream.seeders })
+      : part,
+  );
   const link = resolveStreamLink(stream);
   const title = displayTitle(stream, showName, episode, absoluteEpisode);
   const fname = settings.pickerShowFilename ? torrentFilename(stream) : "";
+  const contributor =
+    !stream.contributors || stream.contributors.length <= 1
+      ? stream.addonName
+      : stream.contributors.length === 2
+        ? `${stream.contributors[0].name} + ${stream.contributors[1].name}`
+        : t("{name} + {n} more", {
+            name: stream.contributors[0].name,
+            n: stream.contributors.length - 1,
+          });
 
   return (
     <li className={divider ? "border-t border-edge-soft/30" : ""}>
@@ -209,7 +226,7 @@ function SourceRow({
               size="sm"
             />
             <span className="truncate">
-              {contributorLabel(stream)}
+              {contributor}
               {summary.length > 0 && (
                 <span className="text-ink-subtle/60"> · {summary.join(" · ")}</span>
               )}
@@ -230,27 +247,31 @@ function SourceRow({
             {libraryDebrids.length > 0 ? (
               <span className="inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.14em] text-accent">
                 <Zap size={12} fill="currentColor" strokeWidth={0} />
-                In {libraryDebrids.map((d) => d.name).join(" + ")}
+                {t("In {providers}", {
+                  providers: libraryDebrids.map((d) => d.name).join(" + "),
+                })}
               </span>
             ) : cachedDebrids.length > 0 ? (
               <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
                 <Zap size={11} strokeWidth={2} />
-                Cached on {cachedDebrids.map((d) => d.name).join(" + ")}
+                {t("Cached on {providers}", {
+                  providers: cachedDebrids.map((d) => d.name).join(" + "),
+                })}
               </span>
             ) : addonCached ? (
               <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
                 <Zap size={11} strokeWidth={2} />
-                Cached
+                {t("Cached")}
               </span>
             ) : !stream.url && !stream.infoHash && (stream.externalUrl || stream.ytId) ? (
               <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
                 <ExternalLink size={11} strokeWidth={2.2} />
-                External
+                {t("External")}
               </span>
             ) : !stream.url ? (
               <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
                 <Download size={11} strokeWidth={2.2} />
-                {debrids.length === 0 && stream.infoHash ? "Stream" : "Cache"}
+                {debrids.length === 0 && stream.infoHash ? t("Stream") : t("Cache")}
               </span>
             ) : null}
             {resolving ? (

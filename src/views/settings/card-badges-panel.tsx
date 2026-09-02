@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bookmark, Popcorn } from "lucide-react";
+import { Bookmark, Eye, Hash, MoveVertical, Popcorn } from "lucide-react";
 import { useHydratedPoster, useSampleArtwork } from "@/lib/sample-artwork";
 import previewPoster3 from "@/assets/preview/poster3.webp";
 import letterboxdLogo from "@/assets/addon-logos/letterboxd.png";
@@ -12,6 +12,8 @@ import { MalLogo } from "@/components/icons/mal-logo";
 import { RtFresh } from "@/components/icons/rt-fresh";
 import type { Settings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { Segmented, ToggleRow } from "./shared";
+import { SettingRow, Nested } from "./kit";
 
 export type PreviewFlags = {
   showImdb: boolean;
@@ -40,13 +42,13 @@ function previewExtras(f: PreviewFlags): React.ReactNode[] {
   if (f.showPopcorn)
     out.push(
       <span className="flex items-center gap-0.5">
-        <Popcorn size={11} strokeWidth={2.4} className="text-accent" />
+        <Popcorn size={12} strokeWidth={2.4} className="text-accent" />
         <span>85%</span>
       </span>,
     );
   if (f.showMetacritic)
     out.push(
-      <span className="flex h-[12px] min-w-[14px] items-center justify-center rounded-[3px] bg-emerald-500 px-0.5 text-[8px] font-bold text-white">
+      <span className="flex h-[12px] min-w-[14px] items-center justify-center rounded-[3px] bg-success px-0.5 text-[8px] font-bold text-white">
         78
       </span>,
     );
@@ -95,7 +97,7 @@ function PreviewBadgeRow({
   return (
     <div
       style={scale < 1 ? { transform: `scale(${scale})`, transformOrigin: "right" } : undefined}
-      className={`absolute end-1.5 flex items-center gap-1 whitespace-nowrap rounded-md bg-canvas/95 px-1.5 py-0.5 text-[9px] font-semibold text-ink transition-opacity duration-700 ease-in-out ${badgePos} ${
+      className={`absolute end-1.5 flex items-center gap-1 whitespace-nowrap rounded-md bg-canvas px-1.5 py-0.5 text-[9px] font-semibold text-ink transition-opacity duration-700 ease-in-out ${badgePos} ${
         visible ? "opacity-100" : "opacity-0"
       }`}
     >
@@ -162,7 +164,7 @@ function PreviewCard({
   const cap = Math.max(1, limit);
   const badgePos = position === "top" ? "top-1.5" : "bottom-1.5";
   return (
-    <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl shadow-[0_10px_28px_-8px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft/60">
+    <div className="relative aspect-[2/3] w-full overflow-hidden rounded-md bg-raised">
       <img
         src={normalPoster}
         alt=""
@@ -183,20 +185,11 @@ function PreviewCard({
       <PreviewBadgeRow nodes={anime.slice(0, cap)} badgePos={badgePos} visible={phase === "anime"} />
       {watchlistBadge !== "off" && (
         <span
-          className={`absolute z-10 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-canvas/85 text-ink ring-1 ring-edge-soft/70 ${WL_PREVIEW_POS[watchlistBadge]}`}
+          className={`absolute z-10 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-canvas text-ink ${WL_PREVIEW_POS[watchlistBadge]}`}
         >
           <Bookmark size={9} strokeWidth={2.6} fill="currentColor" />
         </span>
       )}
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-2">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{label}</span>
-      {children}
     </div>
   );
 }
@@ -217,12 +210,12 @@ function Choice({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`h-9 rounded-lg border px-3.5 text-[13px] font-semibold transition-colors ${
+      className={`relative z-10 min-w-[34px] rounded-[4px] px-3 py-2 text-[12.5px] font-bold tracking-[0.04em] transition-colors ${
         disabled
-          ? "cursor-not-allowed border-edge-soft/40 bg-canvas/30 text-ink-subtle/40"
+          ? "cursor-not-allowed text-ink-subtle opacity-40"
           : active
-            ? "border-accent bg-accent/15 text-accent"
-            : "border-edge-soft bg-canvas/60 text-ink-muted hover:border-edge hover:text-ink"
+            ? "bg-ink text-canvas"
+            : "text-ink-subtle hover:text-ink"
       }`}
     >
       {children}
@@ -230,7 +223,7 @@ function Choice({
   );
 }
 
-function WatchlistControl({
+export function WatchlistControl({
   value,
   onChange,
 }: {
@@ -240,59 +233,40 @@ function WatchlistControl({
   const t = useT();
   const on = value !== "off";
   const [last, setLast] = useState<Exclude<WatchlistPos, "off">>(value !== "off" ? value : "topEnd");
-  const corners: Array<{ v: Exclude<WatchlistPos, "off">; label: string }> = [
-    { v: "topStart", label: t("Top left") },
-    { v: "topEnd", label: t("Top right") },
-    { v: "bottomStart", label: t("Bottom left") },
-    { v: "bottomEnd", label: t("Bottom right") },
+  const corners: Array<{ value: Exclude<WatchlistPos, "off">; label: string }> = [
+    { value: "topStart", label: t("Top left") },
+    { value: "topEnd", label: t("Top right") },
+    { value: "bottomStart", label: t("Bottom left") },
+    { value: "bottomEnd", label: t("Bottom right") },
   ];
   return (
-    <div className="flex flex-col gap-2.5">
-      <button
-        type="button"
-        onClick={() => onChange(on ? "off" : last)}
-        className="flex items-center justify-between gap-4 rounded-xl border border-edge-soft bg-canvas/60 px-3.5 py-2.5 text-start transition-colors hover:border-edge"
-      >
-        <span className="flex items-center gap-2 text-[13px] font-medium text-ink">
-          <Bookmark size={14} strokeWidth={2.2} className="text-ink-muted" />
-          {t("Show a bookmark on saved titles")}
-        </span>
-        <span
-          aria-hidden
-          className={`relative h-6 w-10 shrink-0 rounded-full transition-colors ${on ? "bg-ink" : "bg-edge"}`}
-        >
-          <span
-            className={`absolute start-[2px] top-0.5 h-5 w-5 rounded-full bg-canvas transition-transform ${
-              on ? "translate-x-4 rtl:-translate-x-4" : "translate-x-0"
-            }`}
-          />
-        </span>
-      </button>
+    <>
+      <ToggleRow
+        label={t("Watchlist bookmark")}
+        sub={t("Show a bookmark on saved titles")}
+        leading={<Bookmark size={16} strokeWidth={2.2} className="text-ink-muted" />}
+        value={on}
+        onChange={(v) => onChange(v ? last : "off")}
+      />
       {on && (
-        <div className="grid grid-cols-2 gap-1.5">
-          {corners.map((c) => {
-            const active = value === c.v;
-            return (
-              <button
-                key={c.v}
-                type="button"
-                onClick={() => {
-                  setLast(c.v);
-                  onChange(c.v);
-                }}
-                className={`h-9 rounded-lg border text-[12.5px] font-semibold transition-colors ${
-                  active
-                    ? "border-accent bg-accent/15 text-accent"
-                    : "border-edge-soft bg-canvas/60 text-ink-muted hover:border-edge hover:text-ink"
-                }`}
-              >
-                {c.label}
-              </button>
-            );
-          })}
-        </div>
+        <Nested>
+          <SettingRow
+            label={t("Bookmark corner")}
+            desc={t("Where the bookmark sits on the poster.")}
+          >
+            <Segmented
+              value={value}
+              options={corners}
+              onChange={(v) => {
+                const c = v as Exclude<WatchlistPos, "off">;
+                setLast(c);
+                onChange(c);
+              }}
+            />
+          </SettingRow>
+        </Nested>
       )}
-    </div>
+    </>
   );
 }
 
@@ -318,74 +292,59 @@ export function CardBadgesPanel({
   const effLimit = Math.min(settings.cardBadgeLimit, maxN);
 
   return (
-    <div className="flex flex-col gap-6 rounded-2xl border border-edge-soft bg-canvas/40 p-5 sm:flex-row sm:items-start sm:gap-7">
-      <div className="mx-auto w-36 shrink-0 sm:mx-0">
-        <PreviewCard
-          position={placement}
-          phase={phase}
-          flags={flags}
-          watchlistBadge={settings.watchlistBadge}
-          limit={effLimit}
-        />
-        <p className="mt-2.5 text-center text-[11px] font-medium uppercase tracking-[0.14em] text-ink-subtle">
-          {t("Live preview")}
-        </p>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-5">
-        <Field label={t("Score position")}>
-          <div className="flex gap-2">
-            <Choice active={placement === "top"} onClick={() => update({ badgePlacement: "top" })}>
-              {t("Top")}
-            </Choice>
-            <Choice active={placement === "bottom"} onClick={() => update({ badgePlacement: "bottom" })}>
-              {t("Bottom")}
-            </Choice>
-          </div>
-        </Field>
-
-        <Field label={t("Max scores per card")}>
-          <div className="flex flex-wrap items-center gap-2">
-            {[2, 3, 4, 5, 6].map((n) => (
-              <Choice
-                key={n}
-                active={effLimit === n}
-                disabled={n > maxN}
-                onClick={() => update({ cardBadgeLimit: n })}
-              >
-                {n}
-              </Choice>
-            ))}
-            <span className="ms-1 text-[12px] text-ink-subtle">
-              {t("{n} enabled", { n: enabledBadgeCount })}
-            </span>
-          </div>
-        </Field>
-
-        <Field label={t("Watchlist bookmark")}>
-          <WatchlistControl
-            value={settings.watchlistBadge}
-            onChange={(v) => update({ watchlistBadge: v })}
+    <div className="flex flex-col gap-1.5">
+      <SettingRow
+        wide
+        icon={<Eye size={16} strokeWidth={2.2} />}
+        label={t("Live preview")}
+        desc={t("A real poster with your scores on it. It swaps to an anime title every few seconds so you can check both sets.")}
+      >
+        <div className="mx-auto w-36">
+          <PreviewCard
+            position={placement}
+            phase={phase}
+            flags={flags}
+            watchlistBadge={settings.watchlistBadge}
+            limit={effLimit}
           />
-        </Field>
+        </div>
+      </SettingRow>
 
-        <Field label={t("Watched badge")}>
-          <div className="flex gap-2">
+      <SettingRow
+        icon={<MoveVertical size={16} strokeWidth={2.2} />}
+        label={t("Score position")}
+        desc={t("Which end of the poster the score chip rides on.")}
+      >
+        <Segmented
+          value={placement}
+          options={[
+            { value: "top", label: t("Top") },
+            { value: "bottom", label: t("Bottom") },
+          ]}
+          onChange={(v) => update({ badgePlacement: v as "top" | "bottom" })}
+        />
+      </SettingRow>
+
+      <SettingRow
+        icon={<Hash size={16} strokeWidth={2.2} />}
+        label={t("Max scores per card")}
+        desc={t("{n} enabled", { n: enabledBadgeCount })}
+        tip={t("Extra scores are dropped from the end of the chip. Turn scores on or off in the list above.")}
+      >
+        <div className="flex shrink-0 flex-wrap items-center gap-0.5 rounded-md bg-canvas p-1">
+          {[2, 3, 4, 5, 6].map((n) => (
             <Choice
-              active={settings.showWatchedBadge}
-              onClick={() => update({ showWatchedBadge: true })}
+              key={n}
+              active={effLimit === n}
+              disabled={n > maxN}
+              onClick={() => update({ cardBadgeLimit: n })}
             >
-              {t("On")}
+              {n}
             </Choice>
-            <Choice
-              active={!settings.showWatchedBadge}
-              onClick={() => update({ showWatchedBadge: false })}
-            >
-              {t("Off")}
-            </Choice>
-          </div>
-        </Field>
-      </div>
+          ))}
+        </div>
+      </SettingRow>
+
     </div>
   );
 }

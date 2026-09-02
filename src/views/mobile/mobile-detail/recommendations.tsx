@@ -1,6 +1,7 @@
 import { narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { Poster, usePosterChain } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
 import { HIDE_SCROLL } from "./data";
 import { SectionTitle } from "./ui";
 
@@ -13,9 +14,10 @@ export function RecRail({
   items: Meta[];
   onOpen: (m: Meta) => void;
 }) {
+  const t = useT();
   return (
     <section className="flex flex-col gap-3.5">
-      <SectionTitle>{title}</SectionTitle>
+      <SectionTitle>{t(title)}</SectionTitle>
       <div className={`-mx-5 flex snap-x snap-proximity gap-3 overflow-x-auto px-5 ${HIDE_SCROLL}`}>
         {items.slice(0, 20).map((m) => (
           <RecCard key={m.id} meta={m} onOpen={() => onOpen(m)} />
@@ -47,7 +49,9 @@ function RecCard({ meta, onOpen }: { meta: Meta; onOpen: () => void }) {
         lazy
         className="rounded-xl ring-1 ring-edge-soft/60"
       />
-      <p className="line-clamp-2 text-[12px] font-medium leading-tight text-ink-muted">{meta.name}</p>
+      <p className="line-clamp-2 text-[12px] font-medium leading-tight text-ink-muted">
+        {meta.name}
+      </p>
     </button>
   );
 }

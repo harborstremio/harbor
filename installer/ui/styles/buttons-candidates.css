@@ -1,0 +1,317 @@
+.btn-a .hb-actions {
+  --hb-pad: 26px;
+  --hb-track: 0.11em;
+  --hb-plate-hover: oklch(0.935 0.010 75);
+  --hb-plate-press: oklch(0.885 0.008 75);
+  --hb-dead: oklch(0.36 0.004 260);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.btn-a .hb-pill,
+.btn-a .hb-pill-ghost {
+  appearance: none;
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+  height: var(--h-pill);
+  padding-inline: var(--hb-pad);
+  border-radius: var(--r-pill);
+  display: grid;
+  grid-template-areas: "label";
+  place-items: center;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: var(--hb-track);
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+  translate: 0 0;
+  transition-property: background-color, color, box-shadow, translate;
+  transition-duration: var(--t-state), var(--t-state), var(--t-state), 200ms;
+  transition-timing-function: var(--ease);
+}
+.btn-a .hb-pill-label {
+  grid-area: label;
+  display: block;
+  margin-right: calc(var(--hb-track) * -1);
+}
+.btn-a .hb-pill::before {
+  content: "Launch Harbor" / "";
+  grid-area: label;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+  margin-right: calc(var(--hb-track) * -1);
+}
+@supports (text-box-edge: cap alphabetic) {
+  .btn-a .hb-pill-label { text-box-trim: trim-both; text-box-edge: cap alphabetic; }
+}
+@supports not (text-box-edge: cap alphabetic) {
+  .btn-a .hb-pill-label { padding-bottom: 0.125em; }
+}
+.btn-a .hb-pill {
+  background-color: var(--ink);
+  color: var(--canvas);
+}
+.btn-a .hb-pill-ghost {
+  --hb-track: 0.13em;
+  background-color: transparent;
+  color: var(--ink-muted);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, currentColor 78%, transparent);
+}
+.btn-a .hb-pill:hover:not(:disabled),
+.btn-a .hb-pill-ghost:hover:not(:disabled),
+.btn-a .hb-pill:focus-visible:not(:disabled),
+.btn-a .hb-pill-ghost:focus-visible:not(:disabled) {
+  transition-duration: var(--t-hover), var(--t-hover), var(--t-hover), 200ms;
+}
+.btn-a .hb-pill:hover:not(:disabled),
+.btn-a .hb-pill:focus-visible:not(:disabled) {
+  background-color: var(--hb-plate-hover);
+}
+.btn-a .hb-pill-ghost:hover:not(:disabled),
+.btn-a .hb-pill-ghost:focus-visible:not(:disabled) {
+  background-color: var(--wash-quiet);
+  color: var(--ink);
+}
+.btn-a .hb-pill:active:not(:disabled),
+.btn-a .hb-pill-ghost:active:not(:disabled) {
+  translate: 0 1px;
+  transition-duration: var(--t-press), var(--t-press), var(--t-press), 70ms;
+}
+.btn-a .hb-pill:active:not(:disabled) { background-color: var(--hb-plate-press); }
+.btn-a .hb-pill-ghost:active:not(:disabled) { background-color: var(--wash); color: var(--ink); }
+.btn-a .hb-pill:disabled {
+  background-color: var(--hb-dead);
+  color: var(--ink-muted);
+  translate: 0 0;
+}
+.btn-a .hb-pill-ghost:disabled { color: var(--ink-subtle); translate: 0 0; }
+html.btn-a:not([data-input-modality="pointer"]) .hb-pill:focus-visible,
+html.btn-a:not([data-input-modality="pointer"]) .hb-pill-ghost:focus-visible,
+html:not([data-input-modality="pointer"]) .btn-a .hb-pill:focus-visible,
+html:not([data-input-modality="pointer"]) .btn-a .hb-pill-ghost:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.btn-a .hb-pill:focus-visible,
+.btn-a .hb-pill-ghost:focus-visible { outline: none; }
+@media (prefers-reduced-motion: reduce) {
+  .btn-a .hb-pill:active:not(:disabled),
+  .btn-a .hb-pill-ghost:active:not(:disabled) { translate: 0 0; }
+}
+@media (forced-colors: active) {
+  .btn-a .hb-pill, .btn-a .hb-pill-ghost { border: 1px solid ButtonBorder; }
+  .btn-a .hb-pill:disabled { border-color: GrayText; color: GrayText; }
+}
+
+.btn-b .hb-actions {
+  --hb-pad: 24px;
+  --hb-track: 0.005em;
+  --hb-plate-hover: oklch(0.935 0.003 260);
+  --hb-plate-press: oklch(0.885 0.003 260);
+  --hb-soft-hover: oklch(0.33 0.004 260);
+  --hb-soft-press: oklch(0.365 0.004 260);
+  --hb-dead: oklch(0.40 0.004 260);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.btn-b .hb-pill,
+.btn-b .hb-pill-ghost {
+  appearance: none;
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+  height: var(--h-pill);
+  padding-inline: var(--hb-pad);
+  border-radius: var(--r-pill);
+  display: grid;
+  grid-template-areas: "label";
+  place-items: center;
+  font-family: var(--font-sans);
+  font-size: 15.5px;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: var(--hb-track);
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+  box-shadow: none;
+  translate: 0 0;
+  transition-property: background-color, color;
+  transition-duration: var(--t-state);
+  transition-timing-function: var(--ease);
+}
+.btn-b .hb-pill-label {
+  grid-area: label;
+  display: block;
+  margin-right: calc(var(--hb-track) * -1);
+}
+.btn-b .hb-pill::before {
+  content: "Launch Harbor" / "";
+  grid-area: label;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+  margin-right: calc(var(--hb-track) * -1);
+}
+@supports (text-box-edge: cap alphabetic) {
+  .btn-b .hb-pill-label { text-box-trim: trim-both; text-box-edge: cap alphabetic; }
+}
+@supports not (text-box-edge: cap alphabetic) {
+  .btn-b .hb-pill-label { padding-bottom: 0.125em; }
+}
+.btn-b .hb-pill { background-color: var(--ink); color: var(--canvas); }
+.btn-b .hb-pill-ghost {
+  --hb-track: 0.015em;
+  background-color: var(--elevated);
+  color: var(--ink-muted);
+}
+.btn-b .hb-pill:hover:not(:disabled),
+.btn-b .hb-pill-ghost:hover:not(:disabled),
+.btn-b .hb-pill:focus-visible:not(:disabled),
+.btn-b .hb-pill-ghost:focus-visible:not(:disabled) {
+  transition-duration: var(--t-hover);
+}
+.btn-b .hb-pill:hover:not(:disabled),
+.btn-b .hb-pill:focus-visible:not(:disabled) { background-color: var(--hb-plate-hover); }
+.btn-b .hb-pill-ghost:hover:not(:disabled),
+.btn-b .hb-pill-ghost:focus-visible:not(:disabled) {
+  background-color: var(--hb-soft-hover);
+  color: var(--ink);
+}
+.btn-b .hb-pill:active:not(:disabled),
+.btn-b .hb-pill-ghost:active:not(:disabled) { transition-duration: var(--t-press); translate: 0 0; }
+.btn-b .hb-pill:active:not(:disabled) { background-color: var(--hb-plate-press); }
+.btn-b .hb-pill-ghost:active:not(:disabled) { background-color: var(--hb-soft-press); color: var(--ink); }
+.btn-b .hb-pill:disabled { background-color: var(--hb-dead); color: var(--ink-muted); }
+.btn-b .hb-pill-ghost:disabled { background-color: var(--surface); color: var(--ink-subtle); }
+html.btn-b:not([data-input-modality="pointer"]) .hb-pill:focus-visible,
+html.btn-b:not([data-input-modality="pointer"]) .hb-pill-ghost:focus-visible,
+html:not([data-input-modality="pointer"]) .btn-b .hb-pill:focus-visible,
+html:not([data-input-modality="pointer"]) .btn-b .hb-pill-ghost:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.btn-b .hb-pill:focus-visible, .btn-b .hb-pill-ghost:focus-visible { outline: none; }
+@media (forced-colors: active) {
+  .btn-b .hb-pill, .btn-b .hb-pill-ghost { border: 1px solid ButtonBorder; }
+  .btn-b .hb-pill:disabled { border-color: GrayText; color: GrayText; }
+}
+
+.btn-c .hb-actions {
+  --hb-track: 0.10em;
+  --hb-amber-hover: oklch(0.825 0.135 62);
+  --hb-amber-press: oklch(0.72 0.125 58);
+  --hb-dead: oklch(0.36 0.018 60);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.btn-c .hb-pill,
+.btn-c .hb-pill-ghost {
+  appearance: none;
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+  height: var(--h-pill);
+  border-radius: var(--r-pill);
+  display: grid;
+  grid-template-areas: "label";
+  place-items: center;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: var(--hb-track);
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+  box-shadow: none;
+  translate: 0 0;
+  transition-property: background-color, color, translate;
+  transition-duration: var(--t-state), var(--t-state), 200ms;
+  transition-timing-function: var(--ease);
+}
+.btn-c .hb-pill-label {
+  grid-area: label;
+  display: block;
+  margin-right: calc(var(--hb-track) * -1);
+}
+.btn-c .hb-pill::before {
+  content: "Launch Harbor" / "";
+  grid-area: label;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+  margin-right: calc(var(--hb-track) * -1);
+}
+@supports (text-box-edge: cap alphabetic) {
+  .btn-c .hb-pill-label { text-box-trim: trim-both; text-box-edge: cap alphabetic; }
+}
+@supports not (text-box-edge: cap alphabetic) {
+  .btn-c .hb-pill-label { padding-bottom: 0.125em; }
+}
+.btn-c .hb-pill {
+  padding-inline: 30px;
+  background-color: var(--accent);
+  color: var(--canvas);
+}
+.btn-c .hb-pill-ghost {
+  --hb-track: 0.12em;
+  padding-inline: 20px;
+  background-color: transparent;
+  color: var(--ink-muted);
+}
+.btn-c .hb-pill:hover:not(:disabled),
+.btn-c .hb-pill-ghost:hover:not(:disabled),
+.btn-c .hb-pill:focus-visible:not(:disabled),
+.btn-c .hb-pill-ghost:focus-visible:not(:disabled) {
+  transition-duration: var(--t-hover), var(--t-hover), 200ms;
+}
+.btn-c .hb-pill:hover:not(:disabled),
+.btn-c .hb-pill:focus-visible:not(:disabled) { background-color: var(--hb-amber-hover); }
+.btn-c .hb-pill-ghost:hover:not(:disabled),
+.btn-c .hb-pill-ghost:focus-visible:not(:disabled) {
+  background-color: var(--wash);
+  color: var(--ink);
+}
+.btn-c .hb-pill:active:not(:disabled),
+.btn-c .hb-pill-ghost:active:not(:disabled) {
+  translate: 0 1px;
+  transition-duration: var(--t-press), var(--t-press), 70ms;
+}
+.btn-c .hb-pill:active:not(:disabled) { background-color: var(--hb-amber-press); }
+.btn-c .hb-pill-ghost:active:not(:disabled) { background-color: var(--wash-hover); color: var(--ink); }
+.btn-c .hb-pill:disabled {
+  background-color: var(--hb-dead);
+  color: var(--ink-muted);
+  translate: 0 0;
+}
+.btn-c .hb-pill-ghost:disabled { color: var(--ink-subtle); translate: 0 0; }
+html.btn-c:not([data-input-modality="pointer"]) .hb-pill:focus-visible,
+html.btn-c:not([data-input-modality="pointer"]) .hb-pill-ghost:focus-visible,
+html:not([data-input-modality="pointer"]) .btn-c .hb-pill:focus-visible,
+html:not([data-input-modality="pointer"]) .btn-c .hb-pill-ghost:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+.btn-c .hb-pill:focus-visible, .btn-c .hb-pill-ghost:focus-visible { outline: none; }
+@media (prefers-reduced-motion: reduce) {
+  .btn-c .hb-pill:active:not(:disabled),
+  .btn-c .hb-pill-ghost:active:not(:disabled) { translate: 0 0; }
+}
+@media (forced-colors: active) {
+  .btn-c .hb-pill, .btn-c .hb-pill-ghost { border: 1px solid ButtonBorder; }
+  .btn-c .hb-pill:disabled { border-color: GrayText; color: GrayText; }
+}

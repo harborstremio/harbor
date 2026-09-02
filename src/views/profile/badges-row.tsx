@@ -113,7 +113,7 @@ export function BadgesRow({
 }) {
   const t = useT();
   return (
-    <section aria-label={t("Badges")} className="rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
+    <section aria-label={t("Badges")} className="rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
       <SectionHeader
         icon={<Award size={20} />}
         label={t("Badges")}

@@ -31,7 +31,7 @@ export function TitleSuggestDropdown({
   return createPortal(
     <div
       data-title-suggest-dropdown=""
-      className="fixed z-[2000] overflow-hidden rounded-xl border border-edge bg-elevated/98 shadow-[0_24px_64px_-24px_rgba(0,0,0,0.85)] backdrop-blur-2xl"
+      className="fixed z-[2000] overflow-hidden rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
       style={{ top: rect.top, left: rect.left, width: rect.width }}
     >
       <div className="max-h-[300px] overflow-y-auto p-1.5">

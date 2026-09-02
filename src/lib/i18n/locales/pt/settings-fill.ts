@@ -35,6 +35,10 @@ const settingsFill: Record<string, string> = {
   "Smart resync with speech recognition": "Ressincronização inteligente com reconhecimento de fala",
   "For the hardest files and the Try again button, Harbor transcribes a little speech on your device and lines the subtitle up to the actual words. Needs a build with the asr-whisper feature and downloads a small model the first time you use it.":
     "Para os arquivos mais difíceis e o botão Tentar novamente, o Harbor transcreve um trecho da fala no seu dispositivo e alinha a legenda às palavras reais. Requer uma compilação com o recurso asr-whisper e baixa um modelo pequeno na primeira vez que você o usa.",
+  "Match subtitles across languages (experimental)":
+    "Comparar legendas entre idiomas (experimental)",
+  "When the audio and subtitle use different languages, Harbor compares a release-matched subtitle in the audio language. It only offers a fix unless every safety check is measured.":
+    "Quando o áudio e a legenda estão em idiomas diferentes, o Harbor compara uma legenda da mesma versão no idioma do áudio. Ele só sugere uma correção, a menos que todas as verificações de segurança tenham sido medidas.",
   "Community sync": "Sincronização da comunidade",
   "A good correction only has to be found once. Harbor can share verified fixes so the next person with the same file and subtitle gets an instant result. Records are keyed by salted fingerprints, never your files or anything personal.":
     "Uma boa correção só precisa ser encontrada uma vez. O Harbor pode compartilhar correções verificadas para que a próxima pessoa com o mesmo arquivo e a mesma legenda obtenha um resultado instantâneo. Os registros são indexados por impressões digitais salgadas, nunca pelos seus arquivos nem por nada pessoal.",
@@ -99,9 +103,6 @@ const settingsFill: Record<string, string> = {
   "Scan who is on screen while playing": "Detectar quem está na tela durante a reprodução",
   "Periodically match faces in the current frame against the cast to show who is on screen now. On-device, nothing leaves your machine. Uses a little more CPU while playing.":
     "Compara periodicamente os rostos no quadro atual com o elenco para mostrar quem está na tela agora. Tudo no próprio dispositivo, nada sai da sua máquina. Usa um pouco mais de CPU durante a reprodução.",
-  "Performance notice": "Aviso de desempenho",
-  "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.":
-    "A detecção facial ao vivo carrega modelos de IA no dispositivo e pode aumentar significativamente o uso de RAM, CPU e GPU durante a reprodução. Desative-a se o Harbor ficar lento ou se o dispositivo aquecer.",
   "X-Ray needs a TMDB key": "O X-Ray precisa de uma chave do TMDB",
   "X-Ray reads the cast and their photos from TMDB. Without a TMDB key there is no cast to match against. Add your free key under Library & metadata.":
     "O X-Ray lê o elenco e suas fotos do TMDB. Sem uma chave do TMDB não há elenco para comparar. Adicione sua chave gratuita em Biblioteca e metadados.",
@@ -124,8 +125,6 @@ const settingsFill: Record<string, string> = {
   "Manga reader remote": "Controle remoto do leitor de mangá",
   "Control the manga flipbook from your phone while reading on the big screen: turn pages, zoom, and switch modes. The reader also shows this link while you read.":
     "Controle o flipbook de mangá pelo celular enquanto lê na tela grande: vire as páginas, use o zoom e alterne os modos. O leitor também mostra este link enquanto você lê.",
-  "Manga remote (this computer)": "Controle remoto de mangá (este computador)",
-  "Manga remote (Wi-Fi)": "Controle remoto de mangá (Wi-Fi)",
   "Flip the switch above and the phone remote and manga reader remote addresses appear here.":
     "Ligue a chave acima e os endereços do controle pelo celular e do controle do leitor de mangá aparecem aqui.",
   "On a beta that's giving you trouble? Pick an earlier build below and run its installer over your current copy. Your library, settings, and downloads all stay put.":
@@ -276,63 +275,65 @@ const settingsFill: Record<string, string> = {
     "Se um stream não começar a reproduzir a tempo (uma fonte morta ou um addon fora do ar), tenta automaticamente o próximo stream disponível. Desativado por padrão.",
   "How long to wait first": "Quanto tempo esperar antes",
   "Slow addons and P2P sources often need more than 10 seconds to start. Raise this if streams are being skipped before they get a fair chance.":
-    "Addons lentos e fontes P2P costumam precisar de mais de 10 segundos para começar. Aumente isto se os streams estiverem a ser saltados antes de terem hipótese.",
+    "Addons lentos e fontes P2P costumam precisar de mais de 10 segundos para iniciar. Aumente este tempo se os streams estiverem sendo ignorados antes de terem uma chance.",
   "{n} sec": "{n} s",
-  "Only start the torrent engine when needed": "Só iniciar o motor de torrents quando necessário",
+  "Only start the torrent engine when needed":
+    "Iniciar o mecanismo de torrents somente quando necessário",
   "Harbor normally starts its torrent engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a torrent. Takes effect next launch.":
-    "Normalmente o Harbor inicia o motor de torrents ao arrancar para que o primeiro stream P2P ligue mais depressa. Isso mantém um nó DHT ativo e a comunicar com a rede mesmo quando não está a ver nada. Ative isto se tiver uma ligação limitada ou tarifada: o motor passa a arrancar só na primeira vez que reproduzir um torrent. Aplica-se no próximo arranque.",
-  "What fullscreen does": "O que o ecrã inteiro faz",
+    "Normalmente, o Harbor inicia o mecanismo de torrents ao abrir para que o primeiro stream P2P conecte mais rápido. Isso mantém um nó DHT ativo e em contato com a rede mesmo quando você não está assistindo. Ative esta opção se sua conexão for limitada ou tiver franquia de dados: o mecanismo só será iniciado quando você reproduzir um torrent pela primeira vez. A alteração entra em vigor na próxima inicialização.",
+  "What fullscreen does": "Como funciona a tela cheia",
   "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.":
-    "O ecrã inteiro real cobre todo o ecrã e esconde a barra de tarefas. Maximizar preenche o ecrã mas mantém a barra de tarefas e a barra de título, para continuar a trocar de aplicações.",
-  "True fullscreen": "Ecrã inteiro real",
+    "A tela cheia real ocupa toda a tela e oculta a barra de tarefas. Maximizar preenche a tela, mas mantém a barra de tarefas e a barra de título para você continuar alternando entre aplicativos.",
+  "True fullscreen": "Tela cheia real",
   Maximize: "Maximizar",
   "Dual subtitles": "Legendas duplas",
   "Show a second subtitle in another language at the same time. Handy when you are learning a language: keep the one you are learning as your main subtitle, and put your own language here.":
-    "Mostra uma segunda legenda noutro idioma ao mesmo tempo. Útil quando está a aprender um idioma: mantenha o que está a aprender como legenda principal e coloque o seu próprio idioma aqui.",
+    "Mostra ao mesmo tempo uma segunda legenda em outro idioma. É útil ao aprender uma língua: mantenha o idioma que está estudando como legenda principal e escolha aqui o seu próprio idioma.",
   "Second subtitle language": "Idioma da segunda legenda",
   "Harbor loads it automatically when a track in that language exists. You can also set or clear the second track for one video from the subtitle menu in the player.":
-    "O Harbor carrega-a automaticamente quando existe uma faixa nesse idioma. Também pode definir ou remover a segunda faixa para um vídeo no menu de legendas do reprodutor.",
+    "O Harbor a carrega automaticamente quando existe uma faixa nesse idioma. Você também pode definir ou remover a segunda faixa de um vídeo pelo menu de legendas do player.",
   "Where it shows": "Onde aparece",
-  "Top of the screen": "No topo do ecrã",
+  "Top of the screen": "No topo da tela",
   "Above the main line": "Acima da linha principal",
   "Second line size": "Tamanho da segunda linha",
   "Get your own": "Tenha o seu",
   "Trial for ${n}": "Teste por ${n}",
   ElfHosted: "ElfHosted",
   "Debridge is the part that finds you a working file. A TorBox and a Usenet account come with it, so you do not need to buy a debrid service separately. Already have Real-Debrid or AllDebrid? Plug it in instead.":
-    "O Debridge é a parte que lhe encontra um ficheiro que funciona. Vem com uma conta TorBox e uma de Usenet, por isso não precisa de comprar um serviço de debrid à parte. Já tem Real-Debrid ou AllDebrid? Basta ligá-lo.",
-  "No Docker, no server, nothing to configure.": "Sem Docker, sem servidor, nada para configurar.",
+    "O Debridge encontra um arquivo que funcione. Ele inclui contas TorBox e Usenet, então você não precisa comprar um serviço de debrid separadamente. Já tem Real-Debrid ou AllDebrid? Conecte o seu.",
+  "No Docker, no server, nothing to configure.":
+    "Sem Docker, sem servidor e sem nada para configurar.",
   "${n} for {days} days": "${n} por {days} dias",
   "cancel anytime": "cancele quando quiser",
-  "Rather not set any of this up?": "Prefere não configurar nada disto?",
-  "Get {name} hosted, plus {n} more addons.": "Tenha o {name} alojado, e mais {n} addons.",
+  "Rather not set any of this up?": "Prefere não configurar nada disso?",
+  "Get {name} hosted, plus {n} more addons.": "Tenha o {name} hospedado e mais {n} addons.",
   "{n} addons run for you, with Debridge included: TorBox and Usenet accounts, so there is no debrid service to buy separately.":
-    "{n} addons geridos por si, com Debridge incluído: contas TorBox e Usenet, sem serviço de debrid para comprar à parte.",
+    "{n} addons gerenciados para você, com Debridge incluído: contas TorBox e Usenet, sem precisar comprar outro serviço de debrid.",
   "Try it for ${n}": "Experimente por ${n}",
   "Hide this": "Ocultar",
   "Includes Comet, MediaFusion, AIOStreams, StremThru, Jackettio and more, plus TorBox and Usenet accounts. No Docker, no server, no config.":
-    "Inclui Comet, MediaFusion, AIOStreams, StremThru, Jackettio e mais, além de contas TorBox e Usenet. Sem Docker, sem servidor, sem configuração.",
+    "Inclui Comet, MediaFusion, AIOStreams, StremThru, Jackettio e outros, além de contas TorBox e Usenet. Sem Docker, servidor ou configuração.",
   "Support Harbor": "Apoiar o Harbor",
-  "Who keeps this running": "Quem mantém isto a funcionar",
+  "Who keeps this running": "Quem mantém tudo funcionando",
   "Harbor's backend runs on ElfHosted. They took it on without being asked, and Harbor has never charged for anything.":
-    "O backend do Harbor corre na ElfHosted. Assumiram-no sem lhes ser pedido, e o Harbor nunca cobrou nada.",
+    "O backend do Harbor funciona na ElfHosted. Eles assumiram esse trabalho por iniciativa própria, e o Harbor nunca cobrou por nada.",
   "If you want to put money somewhere and you use Harbor, an ElfHosted subscription is the most useful place for it. You get a managed instance, and the servers Harbor depends on stay paid for.":
-    "Se quiser gastar dinheiro em algo e usa o Harbor, uma subscrição da ElfHosted é o sítio mais útil. Fica com uma instância gerida, e os servidores de que o Harbor depende continuam pagos.",
-  "Browse ElfHosted": "Ver a ElfHosted",
+    "Se você usa o Harbor e quer contribuir financeiramente, uma assinatura da ElfHosted é a opção mais útil. Você recebe uma instância gerenciada e ajuda a manter os servidores dos quais o Harbor depende.",
+  "Browse ElfHosted": "Conhecer a ElfHosted",
   "One-off donation": "Doação única",
-  "Donating to Harbor": "Doar ao Harbor",
+  "Donating to Harbor": "Doar para o Harbor",
   "Short version: don't. Harbor takes no donations and no cut of anything on this page.":
-    "Versão curta: não. O Harbor não aceita doações nem leva qualquer parte do que está nesta página.",
+    "Resumindo: não doe. O Harbor não aceita doações nem recebe comissão por nada desta página.",
   "People have offered plenty of times and the answer has stayed no. If you were going to send something, send it to ElfHosted above so the infrastructure stays up, or to one of the charities below. Both do more good than paying me would.":
-    "Já ofereceram muitas vezes e a resposta manteve-se não. Se ia enviar algo, envie à ElfHosted acima para a infraestrutura se manter de pé, ou a uma das instituições abaixo. Ambas fazem mais bem do que pagar-me a mim.",
-  "If you would rather give it away": "Se preferir doar",
+    "Muitas pessoas já ofereceram, mas a resposta continua sendo não. Se você pretendia enviar algo, apoie a ElfHosted acima para manter a infraestrutura ou uma das instituições abaixo. O dinheiro será mais útil assim.",
+  "If you would rather give it away": "Se preferir fazer uma doação",
   "No affiliation, no referral links, and Harbor gets nothing from these. They are just places where money goes further than it does here.":
-    "Sem afiliação, sem links de referência, e o Harbor não recebe nada destes. São apenas sítios onde o dinheiro rende mais do que aqui.",
+    "Não há afiliação nem links de indicação, e o Harbor não recebe nada dessas organizações. São apenas lugares onde o dinheiro faz mais diferença.",
   "Insecticide-treated nets. One of the most cost-effective interventions measured.":
-    "Redes tratadas com inseticida. Uma das intervenções com melhor relação custo-eficácia já medidas.",
+    "Mosquiteiros tratados com inseticida. Uma das intervenções de melhor custo-benefício já avaliadas.",
   "Cash straight to people living in extreme poverty, no strings.":
-    "Dinheiro directo a pessoas em pobreza extrema, sem condições.",
-  "Emergency medical care in crisis zones.": "Cuidados médicos de emergência em zonas de crise.",
+    "Dinheiro enviado diretamente a pessoas em extrema pobreza, sem condições.",
+  "Emergency medical care in crisis zones.": "Atendimento médico de emergência em zonas de crise.",
   "Keeps the web's memory alive. Harbor would be poorer without it.":
     "Mantém viva a memória da web. O Harbor seria mais pobre sem ela.",
   "Who pays for the servers, and where to put money if you want to.":
@@ -425,6 +426,52 @@ const settingsFill: Record<string, string> = {
     "Adicione uma chave TMDB nas Configurações para identificar o elenco.",
   "No cast photos are available for this title.":
     "Não há fotos do elenco disponíveis para este título.",
+  // Big Picture setup and ten-foot settings surfaces.
+  "Accounts and TMDB": "Contas e TMDB",
+  "Add an M3U link or Xtream Codes login": "Adicione um link M3U ou um login Xtream Codes",
+  "Add playlist": "Adicionar playlist",
+  "Artwork, rows and collections": "Artes, fileiras e coleções",
+  "Checking with TMDB…": "Verificando com o TMDB…",
+  "Connected: {list}": "Conectado: {list}",
+  "Could not reach TMDB. Check the connection.":
+    "Não foi possível acessar o TMDB. Verifique a conexão.",
+  "Edge margin": "Margem das bordas",
+  "Finish setting up Harbor": "Conclua a configuração do Harbor",
+  "Get one free at {url}": "Obtenha uma gratuita em {url}",
+  "Getting a code ready…": "Preparando um código…",
+  Harbor: "Harbor",
+  "Harbor needs a TMDB key for artwork, rows and collections. It is free.":
+    "O Harbor precisa de uma chave do TMDB para artes, fileiras e coleções. Ela é gratuita.",
+  "Harbor plays IPTV from your own provider. Add a playlist and the guide fills in.":
+    "O Harbor reproduz IPTV do seu próprio provedor. Adicione uma playlist e o guia é preenchido.",
+  Interface: "Interface",
+  "Live TV playlists": "Playlists de TV ao vivo",
+  "Nothing connected yet. Scan a code with your phone.":
+    "Nada conectado ainda. Escaneie um código com o celular.",
+  "Phone setup is off": "A configuração pelo celular está desativada",
+  "Press OK on a field to type, or use the Harbor remote on your phone.":
+    "Pressione OK em um campo para digitar, ou use o controle do Harbor no celular.",
+  "Raise this only if your TV cuts off the edges of the picture.":
+    "Aumente isto apenas se a sua TV cortar as bordas da imagem.",
+  "Replace the saved key": "Substituir a chave salva",
+  "Save key": "Salvar chave",
+  "Scan with your phone to sign in without typing on the remote.":
+    "Escaneie com o celular para entrar sem digitar no controle.",
+  Screen: "Tela",
+  "Set up Live TV": "Configurar TV ao vivo",
+  Setup: "Configuração",
+  "Setup QR code": "QR code de configuração",
+  "Signed in as {name}": "Conectado como {name}",
+  "Sync, themes and friends": "Sincronização, temas e amigos",
+  "TMDB API key": "Chave de API do TMDB",
+  "TMDB did not accept that key.": "O TMDB não aceitou essa chave.",
+  "Turn on phone setup": "Ativar configuração pelo celular",
+  "Type a key on this TV": "Digitar uma chave nesta TV",
+  "Your Stremio library": "Sua biblioteca do Stremio",
+  "{count} added": "{count} adicionadas",
+  "Performance notice": "Aviso de desempenho",
+  "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.":
+    "A detecção facial ao vivo carrega modelos de IA no dispositivo e pode aumentar significativamente o uso de RAM, CPU e GPU durante a reprodução. Desative-a se o Harbor ficar lento ou se o dispositivo aquecer.",
 };
 
 export default settingsFill;

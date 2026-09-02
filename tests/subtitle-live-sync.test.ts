@@ -72,6 +72,8 @@ test("saving live sync keeps the corrected track selected with its source metada
   assert.match(hook, /b\.addSubtitle\(path, source\?\.lang, title, true/);
   assert.match(hook, /matchConfidence: "exact"/);
   assert.match(hook, /provider: "Harbor Live Sync"/);
+  assert.match(hook, /providerDerived: false/);
+  assert.match(hook, /writePlayerPrefs\(metaIdRef\.current, \{ subDelaySec: 0 \}\)/);
   assert.match(hook, /b\.setSubDelay\(previewDelay\)/);
   assert.match(hook, /onSavedTrackRef\.current\?\.\(\{/);
   assert.match(hook, /appDataDir\(\)/);

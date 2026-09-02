@@ -2,12 +2,19 @@ import { ArrowUpRight, Check, Loader2, Plus, Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import stremioAddonsLogo from "@/assets/stremio-addons-net.png";
 import { ArrowedScrollRow } from "@/components/arrowed-scroll-row";
-import { addonSiteUrl, isAdultAddon, listAddons, listRising, type SAAddon } from "@/lib/providers/stremio-addons";
+import {
+  addonSiteUrl,
+  isAdultAddon,
+  listAddons,
+  listRising,
+  type SAAddon,
+} from "@/lib/providers/stremio-addons";
 import { useSettings } from "@/lib/settings";
 import { fetchManifestAt, installAddon, manifestToConfigureUrl } from "@/lib/addon-store";
 import { rememberPendingAddon } from "@/lib/addons-store/pending-detail";
 import { openInstallerViewport } from "@/components/installer-viewport";
 import { openUrl } from "@/lib/window";
+import { useT } from "@/lib/i18n";
 
 const SITE_NAME = "stremio-addons.net";
 const SITE_URL = "https://stremio-addons.net";
@@ -29,6 +36,7 @@ export function CommunityAddonsRail({
   onChange?: () => void;
   onOpen?: (manifestId: string) => void;
 }) {
+  const t = useT();
   const { settings } = useSettings();
   const showAdult = settings.showAdultAddons;
   const [sortMode, setSortMode] = useState<SortMode>("trending");
@@ -62,7 +70,7 @@ export function CommunityAddonsRail({
       })
       .catch((e) => {
         if (cancelled) return;
-        setError(e instanceof Error ? e.message : "Couldn't reach stremio-addons.net");
+        setError(e instanceof Error ? e.message : "");
       });
     return () => {
       cancelled = true;
@@ -76,7 +84,7 @@ export function CommunityAddonsRail({
           <button
             type="button"
             onClick={() => openUrl(SITE_URL)}
-            aria-label={`Open ${SITE_NAME}`}
+            aria-label={t("Open {site}", { site: SITE_NAME })}
             className="group/logo relative h-14 w-14 shrink-0 transition-transform hover:-translate-y-0.5 active:scale-95"
           >
             <img
@@ -88,10 +96,10 @@ export function CommunityAddonsRail({
           </button>
           <div className="flex flex-col gap-1">
             <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-accent">
-              Community index
+              {t("Community index")}
             </span>
             <h3 className="text-[24px] font-medium tracking-tight text-ink">
-              From{" "}
+              {t("From")}{" "}
               <button
                 type="button"
                 onClick={() => openUrl(SITE_URL)}
@@ -101,7 +109,7 @@ export function CommunityAddonsRail({
               </button>
             </h3>
             <p className="max-w-[52ch] text-[12.5px] text-ink-muted">
-              Ranked by the {SITE_NAME} community from their public index.
+              {t("Ranked by the {site} community from their public index.", { site: SITE_NAME })}
             </p>
           </div>
         </div>
@@ -113,7 +121,7 @@ export function CommunityAddonsRail({
             className="flex h-9 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[12px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
           >
             <ArrowUpRight size={12} strokeWidth={2.4} className="dir-icon" />
-            Browse all
+            {t("Browse all")}
           </button>
         </div>
       </div>
@@ -137,6 +145,7 @@ export function CommunityAddonsRail({
 }
 
 function TabBar({ value, onChange }: { value: SortMode; onChange: (v: SortMode) => void }) {
+  const translate = useT();
   return (
     <div className="flex items-center gap-1 rounded-full border border-edge-soft bg-canvas/40 p-1">
       {TABS.map((t) => {
@@ -146,12 +155,12 @@ function TabBar({ value, onChange }: { value: SortMode; onChange: (v: SortMode) 
             key={t.id}
             type="button"
             onClick={() => onChange(t.id)}
-            title={t.sub}
+            title={translate(t.sub)}
             className={`h-8 rounded-full px-3 text-[12px] font-semibold transition-[color,background-color,transform] active:scale-95 motion-reduce:active:scale-100 ${
               active ? "bg-ink text-canvas" : "text-ink-muted hover:text-ink"
             }`}
           >
-            {t.label}
+            {translate(t.label)}
           </button>
         );
       })}
@@ -207,6 +216,7 @@ function CommunityCard({
   onChange?: () => void;
   onOpen?: (manifestId: string) => void;
 }) {
+  const t = useT();
   const [busy, setBusy] = useState(false);
   const m = addon.manifest;
   const name = m?.name ?? addon.slug;
@@ -223,8 +233,9 @@ function CommunityCard({
     if (!m?.id || busy) return;
     setBusy(true);
     try {
-      let hints = (m as { behaviorHints?: { configurable?: boolean; configurationRequired?: boolean } })
-        .behaviorHints;
+      let hints = (
+        m as { behaviorHints?: { configurable?: boolean; configurationRequired?: boolean } }
+      ).behaviorHints;
       if (!hints) {
         const full = await fetchManifestAt(addon.manifestUrl).catch(() => null);
         hints = full?.behaviorHints;
@@ -292,7 +303,7 @@ function CommunityCard({
               openUrl(addonSiteUrl(addon.slug));
             }}
             className="text-start text-[14px] font-semibold leading-tight text-ink transition-colors hover:text-accent hover:underline hover:underline-offset-4"
-            title={`Open ${name} on ${SITE_NAME}`}
+            title={t("Open {name} on {site}", { name, site: SITE_NAME })}
           >
             {name}
           </button>
@@ -316,7 +327,7 @@ function CommunityCard({
           {installed ? (
             <span className="flex h-8 items-center gap-1 rounded-full bg-accent/15 px-2.5 text-[11.5px] font-semibold text-accent">
               <Check size={11} strokeWidth={2.6} />
-              Installed
+              {t("Installed")}
             </span>
           ) : (
             <button
@@ -330,7 +341,7 @@ function CommunityCard({
               ) : (
                 <Plus size={11} strokeWidth={2.6} />
               )}
-              Install
+              {t("Install")}
             </button>
           )}
         </div>
@@ -353,19 +364,28 @@ function SkeletonRow() {
 }
 
 function EmptyState() {
+  const t = useT();
   return (
     <p className="rounded-xl border border-dashed border-edge bg-canvas/30 px-4 py-6 text-center text-[12.5px] text-ink-subtle">
-      No addons match these filters right now.
+      {t("No addons match these filters right now.")}
     </p>
   );
 }
 
 function ErrorState({ message }: { message: string }) {
+  const t = useT();
   return (
     <p className="rounded-xl border border-dashed border-edge bg-canvas/30 px-4 py-6 text-center text-[12.5px] text-ink-subtle">
-      {SITE_NAME} should be reachable in a moment. They're deploying right now. Refresh once their docs go live.
+      {t(
+        "{site} should be reachable in a moment. They're deploying right now. Refresh once their docs go live.",
+        {
+          site: SITE_NAME,
+        },
+      )}
       <br />
-      <span className="text-[10.5px] opacity-70">({message})</span>
+      <span className="text-[10.5px] opacity-70">
+        ({message || t("Couldn't reach {site}", { site: SITE_NAME })})
+      </span>
     </p>
   );
 }

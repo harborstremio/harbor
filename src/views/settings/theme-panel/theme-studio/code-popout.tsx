@@ -1,11 +1,13 @@
-import { BookOpen, Check, Copy, Download, Play, Redo2, Undo2 } from "lucide-react";
+import { BookOpen, Check, Copy, Download, Play, Redo2, Undo2, X } from "lucide-react";
 import { useState } from "react";
 import { CodeEditor, type CodeLang } from "@/components/code-editor";
 import { downloadText } from "@/lib/download-text";
+import { useT } from "@/lib/i18n";
 import { CheatSheet } from "./cheat-sheet";
 import { FileTree } from "./code-popout/file-tree";
-import { IDE, THEME_FILES } from "./code-popout/files";
+import { THEME_FILES } from "./code-popout/files";
 import { StatusBar } from "./code-popout/status-bar";
+import { SUITE_CHROME } from "./suite-theme";
 
 export function CodePopout({
   css,
@@ -34,6 +36,7 @@ export function CodePopout({
   canUndo: boolean;
   canRedo: boolean;
 }) {
+  const t = useT();
   const [tab, setTab] = useState<CodeLang>(initialTab);
   const [caret, setCaret] = useState({ line: 1, col: 1 });
   const [copied, setCopied] = useState(false);
@@ -50,7 +53,7 @@ export function CodePopout({
 
   const download = (id: CodeLang) => {
     const f = THEME_FILES.find((x) => x.id === id);
-    if (f) void downloadText(f.name, values[id], [f.id], "Harbor theme");
+    if (f) void downloadText(f.name, values[id], [f.id], t("Harbor theme"));
   };
 
   const copy = () => {
@@ -61,29 +64,28 @@ export function CodePopout({
 
   return (
     <div
-      className={`pointer-events-auto fixed inset-0 z-[230] flex flex-col ${
+      style={SUITE_CHROME}
+      className={`pointer-events-auto fixed inset-0 z-[244] flex flex-col bg-surface text-ink-muted ${
         closing ? "animate-[editorOut_150ms_ease-in_forwards]" : "animate-[editorIn_220ms_ease-out]"
       }`}
-      style={{ background: IDE.overlay, color: IDE.text }}
     >
-      <header
-        className="flex h-14 shrink-0 items-center gap-3 px-4"
-        style={{ background: IDE.panel, borderBottom: `1px solid ${IDE.border}` }}
-      >
-        <span className="flex items-center gap-2 text-[14px]">
-          <span style={{ color: IDE.textDim }}>{themeName}</span>
-          <span style={{ color: IDE.textFaint }}>/</span>
-          <span className="font-semibold" style={{ color: IDE.text }}>
-            Code
+      <header className="flex shrink-0 items-start gap-4 px-6 pb-5 pt-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+            {t("Code")}
           </span>
-        </span>
+          <h2 className="truncate text-[17px] font-semibold tracking-tight text-ink">
+            {themeName}
+          </h2>
+        </div>
         <button
           type="button"
           onClick={requestClose}
-          className="ms-auto flex h-10 items-center rounded-lg px-5 text-[14.5px] font-semibold transition-opacity hover:opacity-90"
-          style={{ background: IDE.accent, color: IDE.overlay }}
+          aria-label={t("Done")}
+          title={t("Done")}
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
         >
-          Done
+          <X size={16} />
         </button>
       </header>
 
@@ -98,11 +100,8 @@ export function CodePopout({
         />
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <div
-            className="flex h-12 shrink-0 items-center"
-            style={{ background: IDE.panel, borderBottom: `1px solid ${IDE.border}` }}
-          >
-            <div className="flex h-full items-stretch">
+          <div className="flex h-12 shrink-0 items-center px-3">
+            <div className="flex items-center gap-1">
               {THEME_FILES.map((f) => {
                 const Icon = f.icon;
                 const on = f.id === tab;
@@ -111,30 +110,26 @@ export function CodePopout({
                     key={f.id}
                     type="button"
                     onClick={() => setTab(f.id)}
-                    className="flex items-center gap-2 px-4 text-[14px] transition-colors"
-                    style={{
-                      background: on ? IDE.editor : "transparent",
-                      borderRight: `1px solid ${IDE.border}`,
-                      borderTop: on ? `2px solid ${IDE.accent}` : "2px solid transparent",
-                      color: on ? "#fff" : IDE.textDim,
-                      fontWeight: on ? 600 : 500,
-                    }}
+                    className={`flex h-9 items-center gap-2 rounded-md px-3 text-[13px] transition-colors ${
+                      on
+                        ? "bg-elevated font-semibold text-ink"
+                        : "font-medium text-ink-subtle hover:text-ink"
+                    }`}
                   >
-                    <Icon size={17} strokeWidth={2} style={{ color: f.tint }} />
+                    <Icon size={16} strokeWidth={2} style={{ color: f.tint }} />
                     {f.name}
                   </button>
                 );
               })}
             </div>
 
-            <div className="ms-auto flex items-center gap-1.5 pe-3">
+            <div className="ms-auto flex items-center gap-1">
               <button
                 type="button"
                 onClick={onUndo}
                 disabled={!canUndo}
-                title="Undo (Ctrl/Cmd + Z)"
-                className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-white/10 disabled:pointer-events-none disabled:opacity-30"
-                style={{ color: IDE.textDim }}
+                title={t("Undo (Ctrl/Cmd + Z)")}
+                className="grid h-9 w-9 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink disabled:pointer-events-none disabled:opacity-30"
               >
                 <Undo2 size={16} strokeWidth={2.2} />
               </button>
@@ -142,51 +137,51 @@ export function CodePopout({
                 type="button"
                 onClick={onRedo}
                 disabled={!canRedo}
-                title="Redo (Ctrl/Cmd + Shift + Z)"
-                className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-white/10 disabled:pointer-events-none disabled:opacity-30"
-                style={{ color: IDE.textDim }}
+                title={t("Redo (Ctrl/Cmd + Shift + Z)")}
+                className="grid h-9 w-9 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink disabled:pointer-events-none disabled:opacity-30"
               >
                 <Redo2 size={16} strokeWidth={2.2} />
               </button>
-              <span className="mx-0.5 h-5 w-px" style={{ background: IDE.border }} />
               <button
                 type="button"
                 onClick={() => setCheatOpen(true)}
-                className="flex h-9 items-center gap-1.5 rounded-lg px-3 text-[13.5px] font-medium transition-colors hover:bg-white/10"
-                style={{ color: IDE.textDim }}
+                className="flex h-9 items-center gap-1.5 rounded-md px-3 text-[12.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
               >
-                <BookOpen size={15} strokeWidth={2.2} />
-                Cheat sheet
+                <BookOpen size={16} strokeWidth={2.2} />
+                {t("Cheat sheet")}
               </button>
               {tab === "js" && (
                 <button
                   type="button"
                   onClick={onRunJs}
                   disabled={!value.trim()}
-                  className="flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-[13.5px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-30"
-                  style={{ background: "#98c379", color: IDE.overlay }}
+                  className="harbor-press-pop flex h-9 items-center gap-1.5 rounded-md bg-success px-3.5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-30"
                 >
                   <Play size={14} strokeWidth={2.6} fill="currentColor" />
-                  Run
+                  {t("Run")}
                 </button>
               )}
               <button
                 type="button"
                 onClick={copy}
-                className="flex h-9 items-center gap-1.5 rounded-lg px-3 text-[13.5px] font-medium transition-colors hover:bg-white/10"
-                style={{ color: copied ? "#98c379" : IDE.textDim }}
+                className={`flex h-9 items-center gap-1.5 rounded-md px-3 text-[12.5px] font-semibold transition-colors hover:bg-elevated ${
+                  copied ? "text-success" : "text-ink-subtle hover:text-ink"
+                }`}
               >
-                {copied ? <Check size={15} strokeWidth={2.6} /> : <Copy size={15} strokeWidth={2.2} />}
-                {copied ? "Copied" : "Copy"}
+                {copied ? (
+                  <Check size={16} strokeWidth={2.6} />
+                ) : (
+                  <Copy size={16} strokeWidth={2.2} />
+                )}
+                {copied ? t("Copied") : t("Copy")}
               </button>
               <button
                 type="button"
                 onClick={() => download(tab)}
-                className="flex h-9 items-center gap-1.5 rounded-lg px-3 text-[13.5px] font-medium transition-colors hover:bg-white/10"
-                style={{ color: IDE.textDim }}
+                className="flex h-9 items-center gap-1.5 rounded-md px-3 text-[12.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
               >
-                <Download size={15} strokeWidth={2.2} />
-                Download
+                <Download size={16} strokeWidth={2.2} />
+                {t("Download")}
               </button>
             </div>
           </div>
@@ -203,8 +198,8 @@ export function CodePopout({
             />
             {!value && (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <span className="text-[14px]" style={{ color: IDE.textFaint }}>
-                  {meta.name} is empty. Start typing to restyle Harbor.
+                <span className="text-[13px] text-ink-subtle">
+                  {t("{file} is empty. Start typing to restyle Harbor.", { file: meta.name })}
                 </span>
               </div>
             )}

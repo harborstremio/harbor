@@ -26,7 +26,7 @@ export function ProfileTile({
         <button
           type="button"
           onClick={onSelect}
-          className="block cursor-pointer outline-none"
+          className="block cursor-pointer rounded-full outline-none"
           aria-label={t("Switch to {name}", { name: profile.name })}
         >
           <span

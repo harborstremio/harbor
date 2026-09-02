@@ -1,3 +1,5 @@
+import type { CalendarPosterSize } from "@/lib/calendar";
+import type { ControllerCursorId } from "@/lib/gamepad/cursor";
 import type { ThemeSettings } from "@/lib/theme";
 import type { CustomList } from "@/lib/lists/types";
 import type { SourceRow } from "@/lib/custom-sources";
@@ -5,6 +7,7 @@ import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
 import type { SyncIndicatorPosition } from "@/lib/sync-toast-position";
 import type { FullscreenClockFormat, FullscreenClockStyle } from "@/lib/local-time";
 import type { SubtitleOffsetPosition, SubtitleOffsetSize } from "@/lib/player/subtitle-offset";
+import type { UiLanguage } from "@/lib/i18n/languages";
 
 export type StreamingService =
   | "netflix"
@@ -18,7 +21,22 @@ export type StreamingService =
   | "crunchyroll"
   | "amcplus"
   | "starz"
-  | "shudder";
+  | "shudder"
+  | "tubi"
+  | "plutotv"
+  | "roku"
+  | "fubo"
+  | "mgmplus"
+  | "philo"
+  | "britbox"
+  | "acorntv"
+  | "mubi"
+  | "curiositystream"
+  | "kanopy"
+  | "hoopla"
+  | "pbs"
+  | "cw"
+  | "hidive";
 
 export type WebhookTrigger =
   | { event: "newMovie" }
@@ -115,6 +133,7 @@ export type Settings = {
   simklGranularFilters: SimklGranularFilters;
   cardBadgeLimit: number;
   showQualityBadge: boolean;
+  qualityBadgeStyle: "bar" | "chips";
   showCardBadges: boolean;
   homeLanguages: string[];
   posterScale: number;
@@ -144,6 +163,9 @@ export type Settings = {
   controllerBackgroundInput: boolean;
   controllerDeadzone: number;
   controllerCursorSpeed: number;
+  controllerCursor: ControllerCursorId;
+  controllerCursorImage: string;
+  controllerCursorSize: number;
   controllerKeyboardSize: number;
   controllerRepeatMs: number;
   controllerInitialDelayMs: number;
@@ -317,6 +339,7 @@ export type Settings = {
   autoSyncApplyStructural: boolean;
   autoSyncDrift: boolean;
   subtitleAutoSyncAsr: boolean;
+  subtitleAutoSyncPivot: boolean;
   subtitleAutoSyncCrowd: boolean;
   communitySyncUrl: string;
   communitySyncOptOut: boolean;
@@ -341,6 +364,8 @@ export type Settings = {
   showLocalLibraryBadge: boolean;
   showWatchedBadge: boolean;
   localPlaybackMode: "ask" | "local" | "stream";
+  playbackSourcePreference: "ask" | "local" | "online" | "home-server";
+  preferredMediaServerId: string | null;
   localMinFileSizeMb: number;
   catalogsPinned: string[];
   catalogsHidden: string[];
@@ -394,6 +419,22 @@ export type Settings = {
   playerConfirmLeave: boolean;
   tvNavigation: boolean;
   playerTvNavigation: boolean;
+  bigPictureButton: boolean;
+  bigPictureAutoStart: boolean;
+  bigPictureSound: "none" | "glass" | "modern" | "retro" | "cinematic";
+  bigPictureMosaic: boolean;
+  /**
+   * Fraction of each edge a television is assumed to crop, 0 to 0.1. Read at
+   * import time by bp-safe-area straight out of localStorage, which is why it
+   * has to exist here: it was being read for months with nothing able to write
+   * it.
+   *
+   * null means nobody has chosen, and that is not the same as 0. It is what
+   * lets bp-safe-area fall through to its ten-foot default on a television
+   * while a desktop stays at no inset. A concrete default here would hand
+   * every desktop window a crop margin it never had.
+   */
+  bigPictureOverscan: number | null;
   playerHdrStage: "auto" | "off" | "always";
   opensubtitlesApiKey: string;
   jimakuToken: string;
@@ -435,6 +476,7 @@ export type Settings = {
   customAppIconPreset: string;
   homeMode: "harbor" | "classic";
   homeShowAllAddonRows: boolean;
+  homeNewEpisodes: boolean;
   libraryBookmarkedOnly: boolean;
   librarySort: "recent" | "title" | "year";
   preferCustomMetaAddon: boolean;
@@ -449,6 +491,7 @@ export type Settings = {
   fullscreenClockStyle: FullscreenClockStyle;
   fullscreenClockShowSeconds: boolean;
   fullscreenClockShowEndTime: boolean;
+  fullscreenClockWindowed: boolean;
   fullscreenClockSizePx: number;
   hybridTitleBar: boolean;
   topbarScrollBlur: boolean;
@@ -552,6 +595,7 @@ export type Settings = {
   simklScrobbleEnabled: boolean;
   simklAnimeTitleLanguage: "english" | "romaji" | "native";
   weekStartsMonday: boolean;
+  calendarPosterSize: CalendarPosterSize;
   customCalendar: {
     trackedPeople: Array<{
       id: number;
@@ -575,7 +619,23 @@ export type Settings = {
   }>;
   downloadDir: string;
   downloadCreateFolders: boolean;
+  ebookDownloadDir: string;
+  ebookDownloadCreateFolders: boolean;
+  nytKey: string;
   stremioDeeplinkInstall: boolean;
+  iptvPlaylists: Array<{
+    id: string;
+    name: string;
+    url: string;
+    epgUrl?: string;
+    kind?: "m3u" | "xtream" | "epg";
+    xtream?: {
+      server: string;
+      username: string;
+      password: string;
+    };
+  }>;
+
   iptvLiveContainer: "ts" | "m3u8";
   iptvForceProxy: boolean;
   iptvEpgOffsetHours: number;
@@ -584,7 +644,7 @@ export type Settings = {
   libraryHero: boolean;
   mangaEnabled: boolean;
   feedLocaleBias: boolean;
-  uiLanguage: "en" | "ar" | "pt" | "ru";
+  uiLanguage: UiLanguage;
   arabicWelcomeSeen: boolean;
   cropMode: string;
   customLists: CustomList[];

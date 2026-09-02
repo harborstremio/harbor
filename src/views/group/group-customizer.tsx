@@ -13,9 +13,9 @@ import {
 } from "@/views/profile/customization/customization-types";
 
 const inputCls =
-  "w-full min-h-11 rounded-[10px] bg-elevated px-3 text-[14px] text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus:ring-edge";
+  "w-full min-h-11 rounded-md bg-elevated px-3 text-[14px] text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus:ring-edge";
 const codeCls =
-  "harbor-scroll w-full resize-y rounded-[10px] bg-elevated p-3 font-mono text-[12.5px] leading-relaxed text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus:ring-edge";
+  "harbor-scroll w-full resize-y rounded-md bg-elevated p-3 font-mono text-[12.5px] leading-relaxed text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus:ring-edge";
 
 type Form = {
   groupFont: string;
@@ -96,7 +96,7 @@ export function GroupCustomizer({
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
+    <div className="flex flex-col gap-4 rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="text-[13.5px] font-semibold text-ink">{t("Show customization to members")}</div>
@@ -188,7 +188,7 @@ export function GroupCustomizer({
         {t("Your canvas runs in a sandbox with no scripts, so use HTML and CSS for layout and art.")}
       </p>
 
-      {error && <p className="rounded-[10px] bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>}
+      {error && <p className="rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>}
 
       <button
         type="button"

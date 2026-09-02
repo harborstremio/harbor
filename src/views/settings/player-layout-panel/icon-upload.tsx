@@ -2,13 +2,15 @@ import { Image as ImageIcon, Layers, RotateCcw, Upload } from "lucide-react";
 import { useRef, useState, type ChangeEvent } from "react";
 import type { PlayerControlId } from "@/lib/player-chrome";
 import { getIconPresets, presetThumb, type IconPreset } from "@/lib/player-icon-presets";
+import { useT } from "@/lib/i18n";
 
 const MAX_BYTES = 256 * 1024;
 const WARN_BYTES = Math.floor(MAX_BYTES * 0.8);
 const MIN_DIM = 16;
 const MAX_DIM = 512;
 
-const SVG_STRIP = /<script[\s\S]*?<\/script>|\son\w+="[^"]*"|\son\w+='[^']*'|\s(?:xlink:href|href)="(?:javascript:|data:text\/html)[^"]*"/gi;
+const SVG_STRIP =
+  /<script[\s\S]*?<\/script>|\son\w+="[^"]*"|\son\w+='[^']*'|\s(?:xlink:href|href)="(?:javascript:|data:text\/html)[^"]*"/gi;
 
 export function IconUpload({
   currentUrl,
@@ -27,17 +29,23 @@ export function IconUpload({
   onApplyToAll?: (dataUrl: string) => void;
   controlId?: PlayerControlId;
 }) {
+  const t = useT();
   if (!replaceable) {
     return (
-      <span className="flex h-9 items-center whitespace-nowrap rounded-lg bg-white/4 px-3 text-[10px] uppercase tracking-[0.16em] text-white/35">
-        Icon locked
+      <span className="flex h-9 items-center whitespace-nowrap rounded-md bg-white/4 px-3 text-[10.5px] uppercase tracking-[0.16em] text-white/35">
+        {t("Icon locked")}
       </span>
     );
   }
   const presets = controlId ? getIconPresets(controlId) : [];
   const uploadUI =
     states && states.length > 0 ? (
-      <MultiStateUpload states={states} onUpload={onUpload} onReset={onReset} onApplyToAll={onApplyToAll} />
+      <MultiStateUpload
+        states={states}
+        onUpload={onUpload}
+        onReset={onReset}
+        onApplyToAll={onApplyToAll}
+      />
     ) : (
       <SingleUpload currentUrl={currentUrl} onUpload={onUpload} onReset={onReset} />
     );
@@ -58,21 +66,28 @@ function PresetRow({
   presets: IconPreset[];
   onUpload: (dataUrl: string, state?: string) => void;
 }) {
+  const t = useT();
   const apply = (p: IconPreset) => {
-    for (const [state, url] of Object.entries(p.icons)) onUpload(url, state === "default" ? undefined : state);
+    for (const [state, url] of Object.entries(p.icons))
+      onUpload(url, state === "default" ? undefined : state);
   };
   return (
     <div className="flex items-center gap-1">
-      <span className="text-[9px] uppercase tracking-[0.14em] text-white/40">Preset</span>
+      <span className="text-[9px] uppercase tracking-[0.14em] text-white/40">{t("Preset")}</span>
       {presets.map((p) => (
         <button
           key={p.id}
           type="button"
           onClick={() => apply(p)}
-          title={`${p.label} icons`}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/12 bg-white/6 transition-colors hover:border-accent hover:bg-white/12"
+          title={t("{label} icons", { label: t(p.label) })}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/12 bg-white/6 transition-colors hover:border-accent hover:bg-white/12"
         >
-          <img src={presetThumb(p)} alt={p.label} className="h-5 w-5 object-contain" draggable={false} />
+          <img
+            src={presetThumb(p)}
+            alt={t(p.label)}
+            className="h-5 w-5 object-contain"
+            draggable={false}
+          />
         </button>
       ))}
     </div>
@@ -90,6 +105,7 @@ function SingleUpload({
   onReset: (state?: string) => void;
   label?: string;
 }) {
+  const t = useT();
   const [busy, setBusy] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -98,11 +114,16 @@ function SingleUpload({
     if (!file) return;
     setWarning(null);
     if (!/^image\//.test(file.type)) {
-      window.alert("Please choose a PNG, SVG, JPG, or WebP image.");
+      window.alert(t("Please choose a PNG, SVG, JPG, or WebP image."));
       return;
     }
     if (file.size > MAX_BYTES) {
-      window.alert(`Icon must be under ${Math.round(MAX_BYTES / 1024)} KB. Yours is ${Math.round(file.size / 1024)} KB.`);
+      window.alert(
+        t("Icon must be under {max} KB. Yours is {size} KB.", {
+          max: Math.round(MAX_BYTES / 1024),
+          size: Math.round(file.size / 1024),
+        }),
+      );
       return;
     }
     setBusy(true);
@@ -111,13 +132,20 @@ function SingleUpload({
       const sanitized = file.type === "image/svg+xml" ? sanitizeSvgDataUrl(dataUrl) : dataUrl;
       const dims = await probeImage(sanitized);
       const messages: string[] = [];
-      if (file.size > WARN_BYTES) messages.push(`large file (${Math.round(file.size / 1024)} KB)`);
-      if (dims && (dims.w < MIN_DIM || dims.h < MIN_DIM)) messages.push(`tiny (${dims.w}×${dims.h}px)`);
-      if (dims && (dims.w > MAX_DIM || dims.h > MAX_DIM)) messages.push(`huge (${dims.w}×${dims.h}px)`);
+      if (file.size > WARN_BYTES)
+        messages.push(t("large file ({size} KB)", { size: Math.round(file.size / 1024) }));
+      if (dims && (dims.w < MIN_DIM || dims.h < MIN_DIM))
+        messages.push(t("tiny ({width}×{height}px)", { width: dims.w, height: dims.h }));
+      if (dims && (dims.w > MAX_DIM || dims.h > MAX_DIM))
+        messages.push(t("huge ({width}×{height}px)", { width: dims.w, height: dims.h }));
       if (messages.length > 0) setWarning(messages.join(" · "));
       onUpload(sanitized);
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Could not read the file.");
+      window.alert(
+        err instanceof Error && err.message === "Unexpected file contents."
+          ? t("Unexpected file contents.")
+          : t("Could not read the file."),
+      );
     } finally {
       setBusy(false);
     }
@@ -161,12 +189,13 @@ function MultiStateUpload({
   onReset: (state?: string) => void;
   onApplyToAll?: (dataUrl: string) => void;
 }) {
+  const t = useT();
   const [activeState, setActiveState] = useState(states[0]?.id);
   const active = states.find((s) => s.id === activeState) ?? states[0];
   if (!active) return null;
   return (
     <div className="flex items-center gap-2">
-      <div className="flex items-center gap-0.5 rounded-lg bg-white/8 p-0.5">
+      <div className="flex items-center gap-0.5 rounded-md bg-white/8 p-0.5">
         {states.map((s) => (
           <button
             key={s.id}
@@ -176,8 +205,8 @@ function MultiStateUpload({
               s.id === active.id ? "bg-white/18 text-white" : "text-white/55 hover:text-white/85"
             }`}
           >
-            {s.url && <span className="h-2 w-2 rounded-full bg-emerald-400" />}
-            {s.label}
+            {s.url && <span className="h-2 w-2 rounded-full bg-success" />}
+            {t(s.label)}
           </button>
         ))}
       </div>
@@ -185,16 +214,16 @@ function MultiStateUpload({
         currentUrl={active.url}
         onUpload={(url) => onUpload(url, active.id)}
         onReset={() => onReset(active.id)}
-        label={active.label}
+        label={t(active.label)}
       />
       {onApplyToAll && active.url && (
         <button
           type="button"
           onClick={() => onApplyToAll(active.url!)}
-          title="Use this icon for all states"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white/85 transition-colors hover:bg-white/15 hover:text-white"
+          title={t("Use this icon for all states")}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-white/85 transition-colors hover:bg-white/15 hover:text-white"
         >
-          <Layers size={13} strokeWidth={2.3} />
+          <Layers size={14} strokeWidth={2.3} />
         </button>
       )}
     </div>
@@ -214,11 +243,16 @@ function Thumb({
   warning: string | null;
   label?: string;
 }) {
+  const t = useT();
   return (
     <div
-      title={warning ?? (label ? `${label} icon` : undefined)}
-      className={`relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-white/8 transition-colors ${
-        dragOver ? "border-accent ring-2 ring-accent/40" : warning ? "border-amber-300/40" : "border-white/12"
+      title={warning ?? (label ? t("{label} icon", { label }) : undefined)}
+      className={`relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-white/8 transition-colors ${
+        dragOver
+          ? "border-accent ring-2 ring-accent"
+          : warning
+            ? "border-accent/40"
+            : "border-white/12"
       }`}
     >
       {busy ? (
@@ -229,13 +263,14 @@ function Thumb({
         <ImageIcon size={14} className="text-white/40" strokeWidth={2.1} />
       )}
       {warning && !busy && (
-        <span className="absolute -end-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber-300 ring-1 ring-black/40" />
+        <span className="absolute -end-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent ring-1 ring-black/40" />
       )}
     </div>
   );
 }
 
 function PickButton({ onPick, busy }: { onPick: (file: File | undefined) => void; busy: boolean }) {
+  const t = useT();
   const ref = useRef<HTMLInputElement>(null);
   return (
     <>
@@ -253,9 +288,9 @@ function PickButton({ onPick, busy }: { onPick: (file: File | undefined) => void
         type="button"
         disabled={busy}
         onClick={() => ref.current?.click()}
-        title="Upload icon"
-        aria-label="Upload icon"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white/85 transition-colors hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+        title={t("Upload icon")}
+        aria-label={t("Upload icon")}
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-white/85 transition-colors hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
       >
         <Upload size={14} strokeWidth={2.3} />
       </button>
@@ -264,15 +299,16 @@ function PickButton({ onPick, busy }: { onPick: (file: File | undefined) => void
 }
 
 function ResetButton({ onClick }: { onClick: () => void }) {
+  const t = useT();
   return (
     <button
       type="button"
       onClick={onClick}
-      title="Reset to default"
-      aria-label="Reset icon"
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white/85 transition-colors hover:bg-white/15 hover:text-white"
+      title={t("Reset to default")}
+      aria-label={t("Reset icon")}
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-white/85 transition-colors hover:bg-white/15 hover:text-white"
     >
-      <RotateCcw size={13} strokeWidth={2.3} />
+      <RotateCcw size={14} strokeWidth={2.3} />
     </button>
   );
 }

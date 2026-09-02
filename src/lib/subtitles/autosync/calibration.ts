@@ -4,6 +4,7 @@ export type TierId =
   | "vad_affine"
   | "vad_piecewise"
   | "asr_match"
+  | "consensus"
   | "metadata_prior";
 
 export type Calibrator =
@@ -171,7 +172,13 @@ export function brier(records: LabelledPrediction[]): number {
   return sum / records.length;
 }
 
-export type ReliabilityBin = { lo: number; hi: number; n: number; meanConf: number; meanAcc: number };
+export type ReliabilityBin = {
+  lo: number;
+  hi: number;
+  n: number;
+  meanConf: number;
+  meanAcc: number;
+};
 
 export function reliabilityBins(
   records: LabelledPrediction[],
@@ -187,11 +194,23 @@ export function reliabilityBins(
       const chunk = sorted.slice(i, i + per);
       const conf = chunk.reduce((s, r) => s + clampProb(r.p), 0) / chunk.length;
       const acc = chunk.reduce((s, r) => s + (r.correct ? 1 : 0), 0) / chunk.length;
-      out.push({ lo: chunk[0].p, hi: chunk[chunk.length - 1].p, n: chunk.length, meanConf: conf, meanAcc: acc });
+      out.push({
+        lo: chunk[0].p,
+        hi: chunk[chunk.length - 1].p,
+        n: chunk.length,
+        meanConf: conf,
+        meanAcc: acc,
+      });
     }
     return out;
   }
-  const buckets = Array.from({ length: bins }, (_, i) => ({ lo: i / bins, hi: (i + 1) / bins, n: 0, conf: 0, acc: 0 }));
+  const buckets = Array.from({ length: bins }, (_, i) => ({
+    lo: i / bins,
+    hi: (i + 1) / bins,
+    n: 0,
+    conf: 0,
+    acc: 0,
+  }));
   for (const r of records) {
     const p = clampProb(r.p);
     const idx = Math.min(bins - 1, Math.floor(p * bins));
@@ -231,7 +250,14 @@ export function selectApplyThreshold(
 ): ThresholdChoice {
   const total = records.length;
   if (total === 0) {
-    return { threshold: 1, appliedN: 0, falseApplies: 0, wilsonUpper: 1, coverage: 0, meetsTarget: false };
+    return {
+      threshold: 1,
+      appliedN: 0,
+      falseApplies: 0,
+      wilsonUpper: 1,
+      coverage: 0,
+      meetsTarget: false,
+    };
   }
   const candidates = Array.from(new Set(records.map((r) => clampProb(r.p)))).sort((a, b) => a - b);
   let valid: ThresholdChoice | null = null;
@@ -300,6 +326,7 @@ export const DEFAULT_BUNDLE: CalibrationBundle = {
     vad_affine: { calibrator: { kind: "platt", a: 8.8, b: -4.8 }, reliability: 0.75 },
     vad_piecewise: { calibrator: { kind: "platt", a: 8.0, b: -4.4 }, reliability: 0.7 },
     asr_match: { calibrator: { kind: "platt", a: 9.8, b: -3.7 }, reliability: 0.85 },
+    consensus: { calibrator: { kind: "platt", a: 6, b: -3 }, reliability: 0.6 },
     metadata_prior: { calibrator: { kind: "identity" }, reliability: 0.4 },
   },
   fused: { kind: "identity" },
@@ -310,7 +337,7 @@ export const DEFAULT_BUNDLE: CalibrationBundle = {
     corpusItems: 0,
     seed: 0,
     method: "hand-set-provisional",
-    note: "Mirrors pipeline.ts CALIBRATORS/RELIABILITY and fp-gate.ts THRESHOLDS. Not release-gated. Replace via prototypes/calibrate.mjs.",
+    note: "Hand-set provisional values. Runtime safety caps structural decisions at offer until a release-ready bundle is supplied.",
   },
 };
 

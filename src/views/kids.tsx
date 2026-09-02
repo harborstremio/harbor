@@ -183,7 +183,7 @@ export function Kids({ active = true }: { active?: boolean }) {
           <button
             type="button"
             onClick={() => setPlayOpen(true)}
-            className="group relative flex items-center gap-6 overflow-hidden rounded-[28px] border-4 border-white/40 px-8 py-6 text-start shadow-[0_24px_60px_-24px_rgba(6,44,71,0.55)] transition-transform duration-200 hover:scale-[1.01] active:scale-[0.99]"
+            className="group relative flex items-center gap-6 overflow-hidden rounded-2xl border-4 border-white/40 px-8 py-6 text-start shadow-[0_24px_60px_-24px_rgba(6,44,71,0.55)] transition-transform duration-200 hover:scale-[1.01] active:scale-[0.99]"
             style={{
               background: "linear-gradient(115deg, #1a7d9e 0%, #10618a 55%, #0a4062 100%)",
             }}

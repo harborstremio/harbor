@@ -1,11 +1,22 @@
+import { t } from "@/lib/i18n";
+
+function htmlAttribute(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
 export type Recipe = { title: string; lang: "css" | "html" | "js"; code: string; why: string };
 
 export const RECIPES: Recipe[] = [
   {
     title: "Bell + account menu in your custom chrome",
     lang: "html",
-    code: `<div style="display:flex; align-items:center; gap:6px; margin-inline-start:auto;">
-  <button data-harbor-notifications aria-label="Notifications"
+    get code() {
+      return `<div style="display:flex; align-items:center; gap:6px; margin-inline-start:auto;">
+  <button data-harbor-notifications aria-label="${htmlAttribute(t("Notifications"))}"
           style="position:relative; display:grid; place-items:center;
                  width:38px; height:38px; border:0; border-radius:999px;
                  background:transparent; color:var(--color-ink-muted); cursor:pointer;">
@@ -20,7 +31,7 @@ export const RECIPES: Recipe[] = [
                  border-radius:999px; background:var(--color-accent);
                  color:var(--color-canvas); font:700 9px var(--font-sans);"></span>
   </button>
-  <button data-harbor-account aria-label="Account"
+  <button data-harbor-account aria-label="${htmlAttribute(t("Account"))}"
           style="display:grid; place-items:center; width:38px; height:38px; border:0;
                  border-radius:999px; background:transparent;
                  color:var(--color-ink-muted); cursor:pointer;">
@@ -30,7 +41,8 @@ export const RECIPES: Recipe[] = [
     </svg>
   </button>
 </div>
-<style>[data-harbor-unread][data-empty] { display: none; }</style>`,
+<style>[data-harbor-unread][data-empty] { display: none; }</style>`;
+    },
     why: "Drop this in any custom top bar or sidebar. The attributes do everything: the bell opens the real notification center, the badge stays live, and the account button opens Harbor's real dropdown (profiles, View my profile, Notifications, sign in/out) anchored under it. Zero JS, and new menu items appear in your theme automatically with every Harbor update.",
   },
   {

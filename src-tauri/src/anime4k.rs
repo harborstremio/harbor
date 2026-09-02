@@ -4,13 +4,34 @@ use tauri::Manager;
 const BASE: &str = "https://raw.githubusercontent.com/bloc97/Anime4K/master/glsl";
 
 const FILES: &[(&str, &str)] = &[
-    ("Restore/Anime4K_Clamp_Highlights.glsl", "Anime4K_Clamp_Highlights.glsl"),
-    ("Restore/Anime4K_Restore_CNN_VL.glsl", "Anime4K_Restore_CNN_VL.glsl"),
-    ("Restore/Anime4K_Restore_CNN_M.glsl", "Anime4K_Restore_CNN_M.glsl"),
-    ("Restore/Anime4K_Restore_CNN_Soft_VL.glsl", "Anime4K_Restore_CNN_Soft_VL.glsl"),
-    ("Restore/Anime4K_Restore_CNN_Soft_M.glsl", "Anime4K_Restore_CNN_Soft_M.glsl"),
-    ("Upscale/Anime4K_Upscale_CNN_x2_VL.glsl", "Anime4K_Upscale_CNN_x2_VL.glsl"),
-    ("Upscale/Anime4K_Upscale_CNN_x2_M.glsl", "Anime4K_Upscale_CNN_x2_M.glsl"),
+    (
+        "Restore/Anime4K_Clamp_Highlights.glsl",
+        "Anime4K_Clamp_Highlights.glsl",
+    ),
+    (
+        "Restore/Anime4K_Restore_CNN_VL.glsl",
+        "Anime4K_Restore_CNN_VL.glsl",
+    ),
+    (
+        "Restore/Anime4K_Restore_CNN_M.glsl",
+        "Anime4K_Restore_CNN_M.glsl",
+    ),
+    (
+        "Restore/Anime4K_Restore_CNN_Soft_VL.glsl",
+        "Anime4K_Restore_CNN_Soft_VL.glsl",
+    ),
+    (
+        "Restore/Anime4K_Restore_CNN_Soft_M.glsl",
+        "Anime4K_Restore_CNN_Soft_M.glsl",
+    ),
+    (
+        "Upscale/Anime4K_Upscale_CNN_x2_VL.glsl",
+        "Anime4K_Upscale_CNN_x2_VL.glsl",
+    ),
+    (
+        "Upscale/Anime4K_Upscale_CNN_x2_M.glsl",
+        "Anime4K_Upscale_CNN_x2_M.glsl",
+    ),
     (
         "Upscale%2BDenoise/Anime4K_Upscale_Denoise_CNN_x2_VL.glsl",
         "Anime4K_Upscale_Denoise_CNN_x2_VL.glsl",
@@ -19,8 +40,14 @@ const FILES: &[(&str, &str)] = &[
         "Upscale%2BDenoise/Anime4K_Upscale_Denoise_CNN_x2_M.glsl",
         "Anime4K_Upscale_Denoise_CNN_x2_M.glsl",
     ),
-    ("Upscale/Anime4K_AutoDownscalePre_x2.glsl", "Anime4K_AutoDownscalePre_x2.glsl"),
-    ("Upscale/Anime4K_AutoDownscalePre_x4.glsl", "Anime4K_AutoDownscalePre_x4.glsl"),
+    (
+        "Upscale/Anime4K_AutoDownscalePre_x2.glsl",
+        "Anime4K_AutoDownscalePre_x2.glsl",
+    ),
+    (
+        "Upscale/Anime4K_AutoDownscalePre_x4.glsl",
+        "Anime4K_AutoDownscalePre_x4.glsl",
+    ),
 ];
 
 fn shaders_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
@@ -69,7 +96,10 @@ pub async fn anime4k_download(app: tauri::AppHandle, force: bool) -> Result<Stri
         if !resp.status().is_success() {
             return Err(format!("download {}: HTTP {}", local, resp.status()));
         }
-        let bytes = resp.bytes().await.map_err(|e| format!("read {}: {}", local, e))?;
+        let bytes = resp
+            .bytes()
+            .await
+            .map_err(|e| format!("read {}: {}", local, e))?;
         if bytes.is_empty() {
             return Err(format!("{} was empty", local));
         }

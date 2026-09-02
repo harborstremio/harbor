@@ -6,13 +6,13 @@ import {
   type CastSubStyle,
 } from "@/lib/cast";
 import { useDebridClients } from "@/lib/debrid/registry";
-import { ffmpegInstallStep } from "@/lib/ffmpeg-install";
+import { t } from "@/lib/i18n";
 import type { PlayerBridge, PlayerSnapshot, TrackInfo } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import type { Settings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
 import { resolveCompatibleCastUrl } from "../cast-resolve";
-import type { useCastSession } from "./use-cast-session";
+import { localizedFfmpegInstallStep, type useCastSession } from "./use-cast-session";
 
 type CastSession = ReturnType<typeof useCastSession>;
 
@@ -60,6 +60,44 @@ function buildCastSubStyle(s: Settings): CastSubStyle {
   };
 }
 
+function formatCastReasons(reasons: string[]): string {
+  return reasons
+    .map((reason) => {
+      const resolution = /^(\d+)p above device max (\d+)p$/.exec(reason);
+      if (resolution) {
+        return t("{resolution}p above device max {maxResolution}p", {
+          resolution: resolution[1],
+          maxResolution: resolution[2],
+        });
+      }
+      switch (reason) {
+        case "Dolby Vision unsupported":
+          return t("Dolby Vision unsupported");
+        case "HDR10 unsupported":
+          return t("HDR10 unsupported");
+        case "AV1 unsupported":
+          return t("AV1 unsupported");
+        case "HEVC unsupported":
+          return t("HEVC unsupported");
+        case "TrueHD audio unsupported":
+          return t("TrueHD audio unsupported");
+        case "DTS audio unsupported":
+          return t("DTS audio unsupported");
+        case "E-AC-3 unsupported":
+          return t("E-AC-3 unsupported");
+        case "AC-3 audio unsupported":
+          return t("AC-3 audio unsupported");
+        case "MKV container unsupported":
+          return t("MKV container unsupported");
+        case "audio must be re-encoded":
+          return t("audio must be re-encoded");
+        default:
+          return reason;
+      }
+    })
+    .join(", ");
+}
+
 export function useCastPick(params: {
   src: PlayerSrc;
   debrids: ReturnType<typeof useDebridClients>;
@@ -71,22 +109,34 @@ export function useCastPick(params: {
   pickCastDevice: CastSession["pickCastDevice"];
   setCastErrorInfo: CastSession["setCastErrorInfo"];
 }) {
-  const { src, debrids, snapRef, bridgeRef, settings, burnSubsOnTv, closeCastMenu, pickCastDevice, setCastErrorInfo } =
-    params;
+  const {
+    src,
+    debrids,
+    snapRef,
+    bridgeRef,
+    settings,
+    burnSubsOnTv,
+    closeCastMenu,
+    pickCastDevice,
+    setCastErrorInfo,
+  } = params;
   const [castIncompatError, setCastIncompatError] = useState<string | null>(null);
   const [castTranscoding, setCastTranscoding] = useState(false);
 
   useEffect(() => {
     if (!castIncompatError) return;
-    const t = window.setTimeout(() => setCastIncompatError(null), 8000);
-    return () => window.clearTimeout(t);
+    const timeoutId = window.setTimeout(() => setCastIncompatError(null), 8000);
+    return () => window.clearTimeout(timeoutId);
   }, [castIncompatError]);
 
   const onPickDevice = useCallback(
     async (device: CastDeviceInfo) => {
       if (device.audio_only) {
         setCastIncompatError(
-          `${device.name} is an audio-only device. Harbor can't transcode video to audio yet, so this device can only stream audio files. Pick a TV, Chromecast, or display-equipped device to stream video.`,
+          t(
+            "{deviceName} is an audio-only device. Harbor can't transcode video to audio yet, so this device can only stream audio files. Pick a TV, Chromecast, or display-equipped device to stream video.",
+            { deviceName: device.name },
+          ),
         );
         closeCastMenu();
         return;
@@ -99,20 +149,39 @@ export function useCastPick(params: {
       if (resolved.kind === "incompatible") {
         const hint =
           resolved.candidatesChecked === 0
-            ? `${resolved.caps.label} can't play this stream (${resolved.reasons.join(", ")}). Click "Pick another" first to load alternatives, then try casting again.`
-            : `${resolved.caps.label} can't play this stream (${resolved.reasons.join(", ")}) and none of the ${resolved.candidatesChecked} available alternatives match its capabilities.`;
+            ? t(
+                '{deviceLabel} can\'t play this stream ({reasons}). Click "Pick another" first to load alternatives, then try casting again.',
+                {
+                  deviceLabel: resolved.caps.label,
+                  reasons: formatCastReasons(resolved.reasons),
+                },
+              )
+            : t(
+                "{deviceLabel} can't play this stream ({reasons}) and none of the {count} available alternatives match its capabilities.",
+                {
+                  deviceLabel: resolved.caps.label,
+                  reasons: formatCastReasons(resolved.reasons),
+                  count: resolved.candidatesChecked,
+                },
+              );
         setCastIncompatError(hint);
         closeCastMenu();
         return;
       }
       if (resolved.kind === "needs-ffmpeg") {
         setCastErrorInfo({
-          title: "Install ffmpeg",
-          message: `${resolved.caps.label} can't decode this stream natively (${resolved.reasons.join(", ")}). Harbor uses ffmpeg to convert it into a format your TV understands.`,
+          title: t("Install ffmpeg"),
+          message: t(
+            "{deviceLabel} can't decode this stream natively ({reasons}). Harbor uses ffmpeg to convert it into a format your TV understands.",
+            {
+              deviceLabel: resolved.caps.label,
+              reasons: formatCastReasons(resolved.reasons),
+            },
+          ),
           steps: [
-            ffmpegInstallStep(),
-            "Restart Harbor after the install completes.",
-            "Open the cast menu and try this device again.",
+            localizedFfmpegInstallStep(),
+            t("Restart Harbor after the install completes."),
+            t("Open the cast menu and try this device again."),
           ],
           deviceName: device.name,
         });
@@ -144,9 +213,7 @@ export function useCastPick(params: {
             ? "application/x-mpegURL"
             : guessContentType(resolved.url, src.streamRef?.title ?? src.title),
           startTimeSec: isLiveIptv ? 0 : getPlaybackPosition(),
-          headers: isLiveIptv
-            ? { "user-agent": "VLC/3.0.20 LibVLC/3.0.20" }
-            : undefined,
+          headers: isLiveIptv ? { "user-agent": "VLC/3.0.20 LibVLC/3.0.20" } : undefined,
           transcode: forceTranscode,
           profile,
           subtitle: burnSub,
@@ -155,8 +222,24 @@ export function useCastPick(params: {
         () => bridgeRef.current?.pause(),
       );
     },
-    [src, debrids, snapRef, bridgeRef, settings, burnSubsOnTv, closeCastMenu, pickCastDevice, setCastErrorInfo],
+    [
+      src,
+      debrids,
+      snapRef,
+      bridgeRef,
+      settings,
+      burnSubsOnTv,
+      closeCastMenu,
+      pickCastDevice,
+      setCastErrorInfo,
+    ],
   );
 
-  return { castIncompatError, setCastIncompatError, castTranscoding, setCastTranscoding, onPickDevice };
+  return {
+    castIncompatError,
+    setCastIncompatError,
+    castTranscoding,
+    setCastTranscoding,
+    onPickDevice,
+  };
 }

@@ -1,4 +1,5 @@
 import { downloadText } from "@/lib/download-text";
+import { buildSyncBackup, type SyncBackup } from "@/lib/profile-sync/backup-payload";
 import { loadBgImage, saveBgImage } from "@/lib/theme-storage";
 import { readAllProfilesIdentity } from "@/lib/profiles";
 import { activeProfileId } from "@/lib/active-profile-id";
@@ -10,6 +11,7 @@ import {
   setSecret,
 } from "@/lib/secret-store";
 import { setItemWithRecovery } from "@/lib/storage-recovery";
+import { localLibraryReady, readLocalLibrary, restoreLocalLibrary } from "@/lib/local-library";
 
 declare const __APP_VERSION__: string;
 
@@ -255,6 +257,12 @@ export type Backup = {
   bgImages?: Record<string, string>;
   /** @deprecated legacy single-image field from before per-profile backgrounds; still read on restore */
   bgImage?: string | null;
+  /**
+   * A resolved snapshot of everything account sync owns, so the server side never
+   * becomes the only copy of a household's customisation. That is the standing wound on
+   * the :8799 community sync service and it must not repeat here with higher stakes.
+   */
+  sync?: SyncBackup;
 };
 
 function isPortable(key: string): boolean {
@@ -278,6 +286,10 @@ export async function buildBackup(selected?: BackupSectionKey[]): Promise<Backup
     if (!isPortable(key)) continue;
     if (sectionSet && !sectionSet.has(sectionOf(key))) continue;
     if (data[key] == null) data[key] = value;
+  }
+  if (!sectionSet || sectionSet.has("watchlist")) {
+    await localLibraryReady();
+    data["harbor.library.local.v1"] = JSON.stringify(readLocalLibrary());
   }
   // Xtream playlists embed credentials in their URLs; when the Xtream
   // credentials section is left out (but Live TV is exported), drop them so
@@ -314,6 +326,7 @@ export async function buildBackup(selected?: BackupSectionKey[]): Promise<Backup
     app: typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : "dev",
     exportedAt: new Date().toISOString(),
     data,
+    sync: buildSyncBackup(),
     sections: sectionSet
       ? (ALL_SECTION_KEYS.filter((k) => sectionSet.has(k)) as BackupSectionKey[])
       : [...ALL_SECTION_KEYS],
@@ -328,7 +341,16 @@ export async function downloadBackup(selected?: BackupSectionKey[]): Promise<boo
   return downloadText(`harbor-backup-${stamp}.harbx`, text, ["harbx"], "Harbor backup");
 }
 
-export type ParsedBackup = { ok: true; backup: Backup } | { ok: false; error: string };
+export type BackupValidationError =
+  | "That file is not valid JSON."
+  | "Unrecognized file."
+  | "This is not a Harbor backup file."
+  | "This backup has no data in it."
+  | "This backup contained nothing restorable.";
+
+export type ParsedBackup =
+  | { ok: true; backup: Backup }
+  | { ok: false; error: BackupValidationError };
 
 export function parseBackup(text: string): ParsedBackup {
   let json: unknown;
@@ -446,6 +468,11 @@ function retargetProfileKeys(data: Record<string, string>): Record<string, strin
 
 export async function applyBackup(backup: Backup): Promise<void> {
   const data = retargetProfileKeys(backup.data);
+  const localLibrary = data["harbor.library.local.v1"];
+  if (localLibrary != null) {
+    restoreLocalLibrary(localLibrary);
+    delete data["harbor.library.local.v1"];
+  }
 
   // Whole-domain wiping is reserved for legacy full backups (no sections
   // field): there, "restore everything" must also clear items the source

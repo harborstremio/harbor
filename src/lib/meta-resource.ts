@@ -2,10 +2,19 @@ import { cinemetaEnabled, meta as cinemetaMeta, type Meta } from "./cinemeta";
 import { safeFetch as fetch } from "./safe-fetch";
 import { addonAccepts, userAddons, type Addon } from "./addons";
 import { loadInstalled } from "./addon-store";
+import { readActiveStremioAuthKey } from "./auth";
+import { lruSet } from "./cache";
 
 const ADDON_TIMEOUT_MS = 4000;
+const PREFERRED_CACHE_MAX = 500;
 
-function preferCustomMeta(): boolean {
+export const PREFERRED_TEXT_SCORE = 1000;
+
+export type PreferredVideo = NonNullable<Meta["videos"]>[number];
+
+const preferredCache = new Map<string, Promise<Meta | null>>();
+
+export function preferCustomMeta(): boolean {
   try {
     const raw = localStorage.getItem("harbor.settings");
     return raw ? JSON.parse(raw).preferCustomMetaAddon === true : false;
@@ -26,6 +35,12 @@ export async function resolveMeta(
   id: string,
 ): Promise<Meta | null> {
   const cinemetaPromise = cinemetaMeta(type, id).catch(() => null);
+  const cinemetaOff = !cinemetaEnabled();
+
+  if (!cinemetaOff && !preferCustomMeta()) {
+    const early = await cinemetaPromise;
+    if (early?.poster) return early;
+  }
 
   const user = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
   const seen = new Set<string>();
@@ -36,8 +51,6 @@ export async function resolveMeta(
     seen.add(key);
     if (addonAccepts(a, "meta", type, id) && !isCinemeta(a)) candidates.push(a);
   }
-
-  const cinemetaOff = !cinemetaEnabled();
 
   if (candidates.length === 0) {
     return cinemetaOff ? cinemetaMeta(type, id, true).catch(() => null) : cinemetaPromise;
@@ -62,9 +75,19 @@ export async function resolveMeta(
   }
 
   if (preferCustomMeta()) {
+    let firstAny: Meta | null = null;
+    let firstAddon: Addon | null = null;
     for (const { a, p } of addonRaces) {
       const result = await p;
-      if (result && result.poster) return withOrigin(result, a);
+      if (!result) continue;
+      if (result.poster) return withOrigin(result, a);
+      if (!firstAny) {
+        firstAny = result;
+        firstAddon = a;
+      }
+    }
+    if (firstAny && firstAddon) {
+      return fillArtwork(withOrigin(firstAny, firstAddon), cinemetaPromise);
     }
     return (await cinemetaPromise) ?? null;
   }
@@ -78,6 +101,55 @@ export async function resolveMeta(
   }
 
   return cinemeta ?? null;
+}
+
+async function fillArtwork(preferred: Meta, fallback: Promise<Meta | null>): Promise<Meta> {
+  const base = await fallback;
+  if (!base) return preferred;
+  return {
+    ...preferred,
+    poster: preferred.poster || base.poster,
+    background: preferred.background || base.background,
+    logo: preferred.logo || base.logo,
+  };
+}
+
+export function preferredMeta(type: "movie" | "series", id: string): Promise<Meta | null> {
+  if (!preferCustomMeta()) return Promise.resolve(null);
+  const key = `${type}:${id}`;
+  const cached = preferredCache.get(key);
+  if (cached) return cached;
+  let authKey: string | null = null;
+  try {
+    authKey = readActiveStremioAuthKey();
+  } catch {
+    authKey = null;
+  }
+  const pending = resolveMeta(authKey, type, id)
+    .then((full) => (full?.addonOrigin ? full : null))
+    .catch(() => null);
+  lruSet(preferredCache, key, pending, PREFERRED_CACHE_MAX);
+  return pending;
+}
+
+export function preferredVideoMap(videos: Meta["videos"]): Map<string, PreferredVideo> {
+  const out = new Map<string, PreferredVideo>();
+  for (const v of videos ?? []) {
+    const season = typeof v.season === "number" ? v.season : null;
+    const episode =
+      typeof v.episode === "number" ? v.episode : typeof v.number === "number" ? v.number : null;
+    if (season == null || episode == null) continue;
+    out.set(`${season}:${episode}`, v);
+  }
+  return out;
+}
+
+export function preferredVideoName(v: PreferredVideo | undefined): string {
+  return v?.title || v?.name || "";
+}
+
+export function preferredVideoOverview(v: PreferredVideo | undefined): string {
+  return v?.overview || v?.description || "";
 }
 
 function withOrigin(meta: Meta, addon: Addon): Meta {

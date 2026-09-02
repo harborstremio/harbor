@@ -6,6 +6,7 @@ import {
   hasExternalLinkAlternateDestination,
 } from "@/lib/social/external-link-journey-controller";
 import type { ExternalLinkDestinationPreference } from "@/lib/social/external-link-preference";
+import { useT } from "@/lib/i18n";
 
 export type ExternalLinkSplitButtonProps = {
   main: ExternalLinkDestinationPreference;
@@ -25,10 +26,6 @@ function ActionIcon({ action }: { action: ExternalLinkDestinationPreference }) {
   );
 }
 
-function actionLabel(action: ExternalLinkDestinationPreference) {
-  return action === "harbor" ? "Continue in Harbor" : "Continue in browser";
-}
-
 export function ExternalLinkSplitButton({
   main,
   alternate,
@@ -38,6 +35,7 @@ export function ExternalLinkSplitButton({
   onMenuOpenChange,
   onSelect,
 }: ExternalLinkSplitButtonProps) {
+  const t = useT();
   const rootRef = useRef<HTMLDivElement>(null);
   const menuItemRef = useRef<HTMLButtonElement>(null);
   const menuId = useId();
@@ -59,7 +57,7 @@ export function ExternalLinkSplitButton({
     <div
       ref={rootRef}
       role="group"
-      aria-label="Choose where to open this link"
+      aria-label={t("Choose where to open this link")}
       className="relative inline-flex w-full sm:w-auto"
     >
       <button
@@ -70,7 +68,7 @@ export function ExternalLinkSplitButton({
           hasAlternate ? "rounded-s-[12px]" : "rounded-[12px]"
         }`}
       >
-        <span>{actionLabel(main)}</span>
+        <span>{main === "harbor" ? t("Continue in Harbor") : t("Continue in browser")}</span>
         <ActionIcon action={main} />
       </button>
       {hasAlternate && (
@@ -85,7 +83,7 @@ export function ExternalLinkSplitButton({
             onMenuOpenChange(true);
           }}
           disabled={disabled}
-          aria-label="Choose another destination"
+          aria-label={t("Choose another destination")}
           aria-haspopup="menu"
           aria-expanded={menuOpen}
           aria-controls={menuOpen ? menuId : undefined}
@@ -102,7 +100,7 @@ export function ExternalLinkSplitButton({
         <div
           id={menuId}
           role="menu"
-          aria-label="Alternate link destination"
+          aria-label={t("Alternate link destination")}
           className="absolute end-0 top-[calc(100%+8px)] z-20 min-w-[220px] overflow-hidden rounded-xl border border-edge bg-elevated p-1 shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] animate-popover-in"
         >
           <button
@@ -120,7 +118,9 @@ export function ExternalLinkSplitButton({
             className="flex min-h-11 w-full items-center gap-2.5 rounded-lg px-3 text-start text-[13px] font-medium text-ink transition-colors hover:bg-raised"
           >
             <ActionIcon action={alternate} />
-            <span>{actionLabel(alternate)}</span>
+            <span>
+              {alternate === "harbor" ? t("Continue in Harbor") : t("Continue in browser")}
+            </span>
           </button>
         </div>
       )}

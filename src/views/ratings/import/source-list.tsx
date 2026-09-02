@@ -127,7 +127,7 @@ function SourceRow({
       type="button"
       disabled={ok !== true}
       onClick={() => onPick(source)}
-      className="flex min-h-[60px] w-full items-center gap-3.5 rounded-[14px] border border-edge-soft bg-canvas/40 px-3.5 py-3 text-start transition-colors hover:bg-elevated/70 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-canvas/40"
+      className="flex min-h-[60px] w-full items-center gap-3.5 rounded-lg border border-edge-soft bg-canvas/40 px-3.5 py-3 text-start transition-colors hover:bg-elevated/70 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-canvas/40"
     >
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-surface text-ink-subtle">
         <SourceLogo id={source.id} />

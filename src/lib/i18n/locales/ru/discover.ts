@@ -77,6 +77,20 @@ const discover: Record<string, string> = {
   "Browse your catalogs": "Обзор ваших каталогов",
   "Hide section": "Скрыть раздел",
   "Show section": "Показать раздел",
+  "One pick at a time, full screen, until something lands.": "По одному варианту на весь экран, пока что-нибудь не зацепит.",
+  "Open the queue": "Открыть очередь",
+  // Phrased with the numeral after a colon on purpose: a bare "{n} ожидают"
+  // needs three plural forms, and this reads correctly for every count.
+  "{n} waiting": "В очереди: {n}",
+  "Back to Discover": "Назад к Обзору",
+  "Nothing left in today's picks": "На сегодня подборки закончились",
+  "Come back tomorrow, or clear what you skipped in Settings.": "Загляните завтра или очистите пропущенное в настройках.",
+  "Hide this permanently?": "Скрыть навсегда?",
+  "{title} will not come back in the Discovery Queue.": "{title} больше не появится в очереди открытий.",
+  // "Open Settings" and "Keep" are deliberately absent. Both already resolve in
+  // every locale, and this module is spread after app-fill: adding "Keep" here
+  // would override ar/app-fill.ts, where it is the construct-state half of
+  // "Keep @handle" on the handle-change screen.
 };
 
 export default discover;

@@ -51,7 +51,7 @@ function toCharacter(edge: RawEdge): AnimeCharacter | null {
     id: node.id,
     name,
     nativeName: node.name.native ?? undefined,
-    image: node.image?.large ?? node.image?.medium ?? undefined,
+    image: node.image?.medium ?? node.image?.large ?? undefined,
     role: edge.role ? ROLE_LABELS[edge.role] ?? undefined : undefined,
     favourites:
       typeof node.favourites === "number" && node.favourites > 0 ? node.favourites : undefined,

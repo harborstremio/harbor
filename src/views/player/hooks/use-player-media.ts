@@ -12,6 +12,7 @@ import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { useSettings } from "@/lib/settings";
 import { useSimklScrobble } from "@/lib/simkl/scrobble-hook";
 import { useTraktScrobble } from "@/lib/trakt/scrobble-hook";
+import { useMediaServerProgress } from "@/lib/media-server/progress-sync";
 import {
   claimTorrentPlaybackHandoff,
   confirmTorrentUsage,
@@ -143,17 +144,30 @@ export function usePlayerMedia(params: {
     volumeRestoredRef.current = true;
   }, [bridgeReady, bridgeKey, snap.status]);
 
-  const { resolvedImdbId, resolvedImdbVerified, resolutionSettled, subtitleSearchActive } =
-    useTrackAutoload({
-      bridgeRef,
-      src,
-      snap,
-      engine,
-      settings,
-      authKey,
-    });
+  const {
+    resolvedImdbId,
+    resolvedImdbVerified,
+    resolutionSettled,
+    subtitleSearchActive,
+    subtitlePreflightSettled,
+  } = useTrackAutoload({
+    bridgeRef,
+    src,
+    snap,
+    engine,
+    settings,
+    authKey,
+  });
 
-  const autoSync = useAutoSync({ bridgeRef, src, snap, engine, settings });
+  const autoSync = useAutoSync({
+    bridgeRef,
+    src,
+    snap,
+    engine,
+    settings,
+    authKey,
+    subtitlePreflightSettled,
+  });
   const {
     status: asStatus,
     offer: asOffer,
@@ -253,6 +267,7 @@ export function usePlayerMedia(params: {
 
   useTraktScrobble({ src, snap });
   useSimklScrobble({ src, snap });
+  useMediaServerProgress({ src, snap });
   const download = useVideoDownload({
     url: src.url,
     meta: src.meta,

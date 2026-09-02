@@ -12,6 +12,11 @@ import {
 } from "../src/lib/cw-anime-episode.ts";
 import { stripFranchiseSuffix } from "../src/lib/providers/jikan.ts";
 import { buildBody } from "../src/lib/simkl/scrobble-body.ts";
+import {
+  animeCoordPairs,
+  findAnimeEntryNumber,
+  selectSiblingWindows,
+} from "../src/lib/streams/anime-identity-core.ts";
 import { stremioIdToTraktTarget } from "../src/lib/trakt/ids.ts";
 
 const MUSHOKU = {
@@ -127,4 +132,61 @@ test("the Continue Watching card enriches before it hands the episode to the pla
   );
   assert.doesNotMatch(src, /imdbToKitsu/);
   assert.match(src, /const animeId = getAnimeCwId\(item\._id\);/);
+});
+
+const SEQUEL_BASE_ENTRY = {
+  mappings: { kitsu_id: 43806, thetvdb_id: 400001, imdb_id: "tt13875348" },
+  episodes: {
+    "1": { seasonNumber: 1, episodeNumber: 1 },
+    "12": { seasonNumber: 1, episodeNumber: 12 },
+  },
+};
+
+const SEQUEL_SECOND_SEASON_ENTRY = {
+  mappings: { kitsu_id: 49711, thetvdb_id: 400001, imdb_id: "tt13875348" },
+  episodes: {
+    "1": { seasonNumber: 2, episodeNumber: 1 },
+    "4": { seasonNumber: 2, episodeNumber: 4 },
+  },
+};
+
+test("an imdb keyed season 2 play never lands its progress on the season 1 list entry", () => {
+  const pairs = animeCoordPairs({ season: 2, episode: 4 });
+  assert.deepEqual(pairs, [[2, 4]]);
+  assert.equal(findAnimeEntryNumber(SEQUEL_BASE_ENTRY, pairs), null);
+});
+
+test("the sibling entry that actually aired the season supplies the tracker episode number", () => {
+  const windows = [
+    { anidbId: 14205, season: 1, offset: 0 },
+    { anidbId: 17654, season: 2, offset: 0 },
+  ];
+  assert.deepEqual(selectSiblingWindows(windows, 2, 14205), [17654]);
+  assert.equal(
+    findAnimeEntryNumber(SEQUEL_SECOND_SEASON_ENTRY, animeCoordPairs({ season: 2, episode: 4 })),
+    4,
+  );
+});
+
+test("an imdb keyed Continue Watching play no longer drops the AniList and MAL sync", () => {
+  const src = readFileSync(
+    new URL("../src/views/player/hooks/use-resume-autosave.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(src, /animeIdentityEligible\(id, s\.episode\)/);
+  assert.match(src, /resolveAnimeIdentity\(id, latestRef\.current\.resolvedImdbId, \{/);
+  assert.match(src, /fireTrackers\(`kitsu:\$\{identity\.kitsuId\}`, identity\.number\)/);
+  assert.doesNotMatch(
+    src,
+    /anilistAutoSyncRef\.current && trackId/,
+    "a null anime track id must resolve through the identity chain, not silently skip",
+  );
+});
+
+test("the AniList resolver still refuses to guess a media id from an imdb id", () => {
+  const src = readFileSync(new URL("../src/lib/anilist/sync.ts", import.meta.url), "utf8");
+  const body = /export async function resolveAnilistMediaId[\s\S]*?\r?\n\}/.exec(src)?.[0] ?? "";
+  assert.ok(body.length > 0);
+  assert.doesNotMatch(body, /startsWith\("tt"\)/);
+  assert.doesNotMatch(body, /imdbToKitsu/);
 });

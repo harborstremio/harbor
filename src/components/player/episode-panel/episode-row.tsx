@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Check, ChevronDown, Hourglass, Play, RotateCcw } from "lucide-react";
+import { Check, ChevronDown, Hourglass, RotateCcw } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { SPOILER_TEXT_CLASS, SPOILER_THUMB_CLASS, type SpoilerMask } from "@/lib/spoilers";
 import type { PlayEpisode } from "@/lib/view";
 import { useSettings } from "@/lib/settings";
@@ -20,6 +21,7 @@ export function EpisodeRow({
   isCurrent = false,
   watched = false,
   spoiler,
+  imdbRating,
 }: {
   episode: PlayEpisode;
   expanded: boolean;
@@ -28,10 +30,14 @@ export function EpisodeRow({
   isCurrent?: boolean;
   watched?: boolean;
   spoiler?: SpoilerMask;
+  imdbRating?: number;
 }) {
   const t = useT();
   const { settings } = useSettings();
-  const hasMeta = episode.rating != null || !!episode.airDate || episode.runtime != null;
+  const imdbVal = imdbRating != null && imdbRating > 0 ? imdbRating : null;
+  const tmdbVal = episode.rating != null && episode.rating > 0 ? episode.rating : null;
+  const ratingVal = imdbVal ?? tmdbVal;
+  const hasMeta = !!episode.airDate || episode.runtime != null;
   const epLabel = `S${episode.imdbSeason ?? episode.season} · E${String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}`;
   const hasStill = !!episode.still;
   const [imgFailed, setImgFailed] = useState(false);
@@ -64,6 +70,11 @@ export function EpisodeRow({
           <span className="absolute bottom-1.5 start-2 text-[10.5px] font-bold uppercase tracking-[0.18em] text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
             {epLabel}
           </span>
+          {settings.showEpisodeRating && ratingVal != null && (
+            <span className="absolute bottom-1.5 end-1.5 flex items-center gap-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+              <EpisodeRatingBadge value={ratingVal} isImdb={imdbVal != null} />
+            </span>
+          )}
           {watched && !isCurrent && (
             <span
               title={t("Watched")}
@@ -87,7 +98,7 @@ export function EpisodeRow({
           <div className="flex items-center gap-2">
             <button
               onClick={onPlay}
-              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-accent px-4 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
+              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-[color-mix(in_srgb,var(--color-accent)_82%,var(--color-canvas))] px-4 text-[14px] font-semibold text-canvas transition-[background-color] hover:bg-[color-mix(in_srgb,var(--color-accent)_92%,var(--color-canvas))]"
             >
               {isCurrent ? <RotateCcw size={15} strokeWidth={2.6} /> : <Play size={16} fill="currentColor" />}
               {isCurrent ? t("Restart") : t("Play")}
@@ -106,26 +117,33 @@ export function EpisodeRow({
           </div>
         </div>
       </div>
-      {expanded && (
-        <div className="mx-3 mb-3 flex flex-col gap-2 rounded-xl bg-canvas/40 p-3">
-          {hasMeta && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] font-semibold text-ink-subtle">
-              {settings.showEpisodeRating && episode.rating != null && episode.rating > 0 && (
-                <EpisodeRatingBadge value={episode.rating} isImdb={false} />
-              )}
-              {episode.airDate && <span>{formatAirDate(episode.airDate)}</span>}
-              {episode.runtime != null && <span>{t("{n} min", { n: episode.runtime })}</span>}
-            </div>
-          )}
-          {episode.overview ? (
-            <p className={`text-[13px] leading-relaxed text-ink-muted ${spoiler?.desc ? SPOILER_TEXT_CLASS : ""}`}>
-              {episode.overview}
-            </p>
-          ) : (
-            <p className="text-[12.5px] text-ink-subtle">{t("No description available.")}</p>
-          )}
+      <div
+        className={`grid overflow-hidden transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div
+            className={`mx-3 mb-3 flex flex-col gap-2 rounded-xl bg-canvas/40 p-3 transition-opacity duration-200 ${
+              expanded ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            {hasMeta && (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] font-semibold text-ink-subtle">
+                {episode.airDate && <span>{formatAirDate(episode.airDate)}</span>}
+                {episode.runtime != null && <span>{t("{n} min", { n: episode.runtime })}</span>}
+              </div>
+            )}
+            {episode.overview ? (
+              <p className={`text-[13px] leading-relaxed text-ink-muted ${spoiler?.desc ? SPOILER_TEXT_CLASS : ""}`}>
+                {episode.overview}
+              </p>
+            ) : (
+              <p className="text-[12.5px] text-ink-subtle">{t("No description available.")}</p>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

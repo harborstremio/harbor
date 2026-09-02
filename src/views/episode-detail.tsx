@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import type { EpisodeDetail } from "@/lib/providers/tmdb/tmdb-episode-types";
 import type { CastEntry } from "@/lib/providers/tmdb";
@@ -271,7 +272,7 @@ export function EpisodeDetailView({
                 <PlayModeHint>
                   <button
                     onClick={handlePlay}
-                    className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.65),inset_0_-1px_0_rgba(0,0,0,0.18)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+                    className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
                   >
                     <Play size={18} fill="currentColor" />
                     {t("Play Episode")}

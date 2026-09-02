@@ -4,9 +4,9 @@ import { BadgesRosetteIcon, DiscoverCompassIcon, ThemesDropIcon } from "./store-
 export type StoreTab = "discover" | "themes" | "badges" | "awards";
 
 const TABS: SegmentedItem[] = [
-  { id: "discover", label: "Discover", icon: <DiscoverCompassIcon size={15} strokeWidth={2.2} /> },
-  { id: "themes", label: "Themes", icon: <ThemesDropIcon size={15} strokeWidth={2.2} /> },
-  { id: "badges", label: "Badge bundles", icon: <BadgesRosetteIcon size={15} strokeWidth={2.2} /> },
+  { id: "discover", label: "Discover", icon: <DiscoverCompassIcon size={16} strokeWidth={2.2} /> },
+  { id: "themes", label: "Themes", icon: <ThemesDropIcon size={16} strokeWidth={2.2} /> },
+  { id: "badges", label: "Badge bundles", icon: <BadgesRosetteIcon size={16} strokeWidth={2.2} /> },
 ];
 
 export function StoreTabs({

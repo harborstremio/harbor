@@ -110,7 +110,7 @@ function SpotlightCard({
   };
 
   return (
-    <section className="relative min-h-[300px] overflow-hidden rounded-[28px] border border-edge-soft bg-elevated/30">
+    <section className="relative min-h-[300px] overflow-hidden rounded-2xl border border-edge-soft bg-elevated/30">
       {background ? (
         <img
           src={background}
@@ -142,7 +142,7 @@ function SpotlightCard({
               src={logo}
               alt=""
               draggable={false}
-              className="h-14 w-14 shrink-0 rounded-[14px] bg-canvas/85 object-contain p-1.5 ring-1 ring-white/10"
+              className="h-14 w-14 shrink-0 rounded-lg bg-canvas/85 object-contain p-1.5 ring-1 ring-white/10"
             />
           )}
           <div className="flex min-w-0 flex-col gap-1">
@@ -206,7 +206,7 @@ function SpotlightCard({
 
 function SpotlightSkeleton() {
   return (
-    <div className="harbor-skel relative min-h-[300px] overflow-hidden rounded-[28px] border border-edge-soft bg-elevated/25">
+    <div className="harbor-skel relative min-h-[300px] overflow-hidden rounded-2xl border border-edge-soft bg-elevated/25">
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3.5 p-8 sm:p-10">
         <div className="h-5 w-40 rounded-full bg-elevated/60" />
         <div className="h-9 w-1/2 max-w-[380px] rounded-lg bg-elevated/60" />

@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { Check, ChevronDown, ChevronUp, ListVideo, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Poster } from "@/components/poster";
@@ -52,7 +53,7 @@ function ListRow({
       onClick={onToggle}
       disabled={disabled}
       aria-pressed={selected}
-      className={`flex w-full items-center gap-3 rounded-[10px] p-2.5 text-start ring-1 transition-colors disabled:opacity-40 ${
+      className={`flex w-full items-center gap-3 rounded-md p-2.5 text-start ring-1 transition-colors disabled:opacity-40 ${
         selected ? "bg-elevated ring-edge" : "ring-edge-soft hover:bg-elevated"
       }`}
     >
@@ -73,7 +74,7 @@ function ListRow({
       <div className="flex shrink-0 gap-1">
         {list.items.slice(0, 4).map((item) => (
           <div key={item.id} className="w-8">
-            <Poster src={item.poster || undefined} seed={item.name || item.id} ratio="portrait" className="rounded-[6px]" />
+            <Poster src={item.poster || undefined} seed={item.name || item.id} ratio="portrait" className="rounded-sm" />
           </div>
         ))}
       </div>
@@ -100,13 +101,13 @@ function SelectedRow({
 }) {
   const t = useT();
   return (
-    <div className="flex items-center gap-2.5 rounded-[10px] bg-elevated p-2.5 ring-1 ring-edge">
+    <div className="flex items-center gap-2.5 rounded-md bg-elevated p-2.5 ring-1 ring-edge">
       <div className="flex shrink-0 flex-col">
         <button
           onClick={onMoveUp}
           disabled={index === 0}
           aria-label={t("Move up")}
-          className="flex h-6 w-7 items-center justify-center rounded-t-[6px] text-ink-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-25"
+          className="flex h-6 w-7 items-center justify-center rounded-t-sm text-ink-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-25"
         >
           <ChevronUp size={16} strokeWidth={2.5} />
         </button>
@@ -114,7 +115,7 @@ function SelectedRow({
           onClick={onMoveDown}
           disabled={index === total - 1}
           aria-label={t("Move down")}
-          className="flex h-6 w-7 items-center justify-center rounded-b-[6px] text-ink-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-25"
+          className="flex h-6 w-7 items-center justify-center rounded-b-sm text-ink-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-25"
         >
           <ChevronDown size={16} strokeWidth={2.5} />
         </button>
@@ -130,7 +131,7 @@ function SelectedRow({
       <div className="flex shrink-0 gap-1">
         {list.items.slice(0, 3).map((item) => (
           <div key={item.id} className="w-8">
-            <Poster src={item.poster || undefined} seed={item.name || item.id} ratio="portrait" className="rounded-[6px]" />
+            <Poster src={item.poster || undefined} seed={item.name || item.id} ratio="portrait" className="rounded-sm" />
           </div>
         ))}
       </div>
@@ -232,16 +233,16 @@ export function MyListsPicker({ onClose }: { onClose?: () => void }) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[140] flex items-center justify-center p-4" role="dialog" aria-modal>
+  return createPortal(
+    <div className="fixed inset-0 z-[185] flex items-center justify-center p-4" role="dialog" aria-modal>
       <button aria-label={t("Close")} className="absolute inset-0 bg-black/55" onClick={onClose} />
-      <div className="relative flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-[20px] bg-surface ring-1 ring-edge">
+      <div className="relative flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-surface ring-1 ring-edge">
         <div className="flex items-center justify-between border-b border-edge-soft px-6 py-4">
           <h2 className="font-display text-[20px] text-ink">{t("Featured lists")}</h2>
           <button
             onClick={onClose}
             aria-label={t("Close")}
-            className="flex h-11 w-11 items-center justify-center rounded-[10px] text-ink-muted hover:bg-elevated"
+            className="flex h-11 w-11 items-center justify-center rounded-md text-ink-muted hover:bg-elevated"
           >
             <X size={20} />
           </button>
@@ -252,7 +253,7 @@ export function MyListsPicker({ onClose }: { onClose?: () => void }) {
             {t("Pick up to {max} lists to show on your public profile.", { max: MAX_FEATURED_LISTS })}
           </p>
           {entries.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-[10px] border border-dashed border-edge py-12 text-center">
+            <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-edge py-12 text-center">
               <ListVideo size={24} className="text-ink-subtle" />
               <p className="mt-2 text-[14px] text-ink-muted">{t("You have no lists yet")}</p>
               <p className="mt-1 text-[12px] text-ink-subtle">{t("Create lists in your library to feature them here")}</p>
@@ -305,20 +306,21 @@ export function MyListsPicker({ onClose }: { onClose?: () => void }) {
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="inline-flex min-h-11 items-center rounded-[10px] px-4 text-[14px] font-medium text-ink-muted hover:bg-elevated"
+              className="inline-flex min-h-11 items-center rounded-md px-4 text-[14px] font-medium text-ink-muted hover:bg-elevated"
             >
               {t("Cancel")}
             </button>
             <button
               onClick={() => void save()}
               disabled={saving || !loaded}
-              className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
             >
               <Check size={20} /> {saving ? t("Saving") : t("Save")}
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

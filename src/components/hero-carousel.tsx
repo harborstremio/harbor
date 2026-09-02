@@ -105,7 +105,7 @@ export function HeroCarousel({
   if (slides.length === 0) {
     return (
       <div
-        className={`harbor-hero-stage animate-pulse border border-edge-soft bg-elevated/30 ${full ? "min-h-[max(78vh,640px)] rounded-none" : "min-h-[560px] rounded-[28px]"}`}
+        className={`harbor-hero-stage animate-pulse border border-edge-soft bg-elevated/30 ${full ? "min-h-[max(78vh,640px)] rounded-none" : "min-h-[560px] rounded-2xl"}`}
       />
     );
   }
@@ -117,6 +117,8 @@ export function HeroCarousel({
       e.target instanceof Element &&
       e.target.closest("button, a, input, select, textarea, [role='button']")
     ) {
+      downRef.current = false;
+      moved.current = false;
       return;
     }
     widthRef.current = viewportRef.current?.clientWidth ?? 1000;
@@ -177,9 +179,18 @@ export function HeroCarousel({
     if (wantNext) setActive(active + 1);
     else if (wantPrev) setActive(active - 1);
     setOffset(0);
+    setTimeout(() => {
+      moved.current = false;
+    }, 0);
   };
 
   const onClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (
+      e.target instanceof Element &&
+      e.target.closest("button, a, input, select, textarea, [role='button']")
+    ) {
+      return;
+    }
     if (moved.current) {
       e.stopPropagation();
       e.preventDefault();
@@ -230,7 +241,7 @@ export function HeroCarousel({
         onPointerUp={billboard ? undefined : endDrag}
         onPointerCancel={billboard ? undefined : endDrag}
         onClickCapture={billboard ? undefined : onClickCapture}
-        className={`group relative overflow-hidden ${full ? "rounded-none" : "rounded-[28px]"} ${
+        className={`group relative overflow-hidden ${full ? "rounded-none" : "rounded-2xl"} ${
           billboard ? "" : dragging ? "cursor-grabbing" : "cursor-grab"
         } select-none`}
         style={{ touchAction: "pan-y" }}
@@ -276,7 +287,7 @@ export function HeroCarousel({
                   />
                 ) : (
                   <div
-                    className={`harbor-hero-stage w-full bg-elevated/30 ${full ? "h-[78vh] min-h-[640px] rounded-none" : "h-[560px] rounded-[28px]"}`}
+                    className={`harbor-hero-stage w-full bg-elevated/30 ${full ? "h-[78vh] min-h-[640px] rounded-none" : "h-[560px] rounded-2xl"}`}
                   />
                 )}
               </div>

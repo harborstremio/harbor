@@ -1,4 +1,5 @@
-import { Play, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { CSSProperties } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { CustomHoverConfig } from "@/lib/custom-hover";

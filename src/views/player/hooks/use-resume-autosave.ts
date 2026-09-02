@@ -1,16 +1,17 @@
 import { useEffect, useRef } from "react";
 import { markAnimeWatching, syncAnimeProgress } from "@/lib/anilist/sync";
 import { markMalWatching, syncMalProgress } from "@/lib/mal/sync";
+import { animeIdentityEligible, resolveAnimeIdentity } from "@/lib/streams/anime-identity";
 import { profileFromMeta } from "@/lib/discover/profile";
 import { trackEvent } from "@/lib/discover/store";
 import { isExternalPlaylistId } from "@/lib/iptv/vod";
-import { saveLocalCw } from "@/lib/local-cw";
+import { clearLocalCw, localCwEntry, saveLocalCw } from "@/lib/local-cw";
 import { recordWatchEvent } from "@/lib/watch-events";
 import { isLocalUrl } from "@/lib/player/local-url";
 import { isManuallyWatched, recordManualWatchedMeta, setManualWatched } from "@/lib/manual-watched";
 import { savePlayback } from "@/lib/playback-history";
 import { clearResume, saveResumeMs } from "@/lib/resume";
-import { setMovieWatchedLocal } from "@/lib/movie-watched";
+import { isMovieWatchedLocal, setMovieWatchedLocal } from "@/lib/movie-watched";
 import { setViewedSeason } from "@/lib/season-view-pref";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition, subscribePlaybackClock } from "@/lib/player/playback-clock";
@@ -24,6 +25,7 @@ const TICK_MS = 4000;
 const MIN_POSITION_SEC = 5;
 const TASTE_MIN_SEC = 90;
 const WATCHED_RATIO = 0.85;
+const REWATCH_RESUME_SEC = 45;
 const STUB_MAX_SEC = 150;
 
 const isAnimeId = (id: string) =>
@@ -82,8 +84,21 @@ export function useResumeAutosave(params: {
     const finished =
       (sn.durationSec > 0 && pos / sn.durationSec >= WATCHED_RATIO) || isNaturalEnd(sn, pos);
     lastSavedRef.current = pos * 1000;
-    if (finished) clearResume(id, se, ep);
-    else saveResumeMs(id, pos * 1000, se, ep, cs);
+    const covered =
+      s.episodeSpan && cs === s.episodeSpan.season
+        ? Array.from(
+            { length: s.episodeSpan.episodeEnd - s.episodeSpan.episode + 1 },
+            (_, index) => s.episodeSpan!.episode + index,
+          )
+        : typeof ep === "number"
+          ? [ep]
+          : [];
+    if (finished) {
+      if (covered.length) for (const coveredEpisode of covered) clearResume(id, se, coveredEpisode);
+      else clearResume(id, se, ep);
+    } else if (covered.length) {
+      for (const coveredEpisode of covered) saveResumeMs(id, pos * 1000, se, coveredEpisode, cs);
+    } else saveResumeMs(id, pos * 1000, se, ep, cs);
     if (typeof cs === "number") setViewedSeason(id, cs);
     if (isExternalPlaylistId(id)) return;
     if (s.streamRef) {
@@ -104,11 +119,15 @@ export function useResumeAutosave(params: {
         poster: s.meta.poster,
         background: s.meta.background,
       });
-      setManualWatched(id, cs, ep, true);
+      for (const coveredEpisode of covered.length ? covered : [ep])
+        setManualWatched(id, cs, coveredEpisode, true);
       const { resolvedImdbId: rid, resolvedImdbVerified: rv } = latestRef.current;
       void syncSeriesWatchedToStremio(s.meta, rv ? rid : null);
     }
-    if (s.meta.type === "movie" && finished) setMovieWatchedLocal(id, true);
+    if (s.meta.type === "movie" && finished) {
+      setMovieWatchedLocal(id, true);
+      clearLocalCw(id);
+    }
     if (finished) {
       recordWatchEvent({
         id,
@@ -125,9 +144,21 @@ export function useResumeAutosave(params: {
       id.startsWith("tt") &&
       !!s.episode?.kitsuStreamId &&
       (s.episode.imdbSeason == null || s.episode.imdbEpisode == null);
+    // Rewatching an already-finished movie (resumed past 45s, still below the finish ratio)
+    // must put it back in Continue Watching even when the Stremio cloud write is skipped (e.g.
+    // signed out). Clearing the local watched marker and tracking it locally yields an in-progress
+    // item with flaggedWatched=0 that isCwMember accepts, independent of authKey.
+    const movieWasWatched = s.meta.type === "movie" && isMovieWatchedLocal(id);
+    const rewatchMovie =
+      s.meta.type === "movie" &&
+      sn.durationSec > 0 &&
+      pos >= REWATCH_RESUME_SEC &&
+      pos / sn.durationSec < WATCHED_RATIO &&
+      (movieWasWatched || localCwEntry(id) !== null);
+    if (rewatchMovie && movieWasWatched) setMovieWatchedLocal(id, false);
     if (
       (s.meta.type === "series" || s.meta.type === "movie" || animeLocal) &&
-      (!CLOUD_OK.test(id) || isLocalUrl(s.url) || animeLocal || ttAnimeUnmapped)
+      (!CLOUD_OK.test(id) || isLocalUrl(s.url) || animeLocal || ttAnimeUnmapped || rewatchMovie)
     ) {
       saveLocalCw({
         id,
@@ -145,19 +176,31 @@ export function useResumeAutosave(params: {
     }
     if (pos < TASTE_MIN_SEC) return;
     const trackId = s.episode?.sourceMetaId ?? animeTrackId(s);
-    if (anilistAutoSyncRef.current && trackId) {
-      void markAnimeWatching(trackId, s.meta.name);
-    }
-    if (malAutoSyncRef.current && trackId) {
-      void markMalWatching(trackId, s.meta.name);
-    }
     const absEp = s.episode?.absoluteNumber;
     const trackEp = s.episode?.sourceMetaId ? ep : (s.episode?.imdbEpisode ?? ep);
-    if (finished && anilistAutoSyncRef.current && trackId) {
-      void syncAnimeProgress(trackId, trackEp, s.meta.name, absEp);
-    }
-    if (finished && malAutoSyncRef.current && trackId) {
-      void syncMalProgress(trackId, trackEp, s.meta.name, absEp);
+    const fireTrackers = (tid: string, tep: number | undefined): void => {
+      if (anilistAutoSyncRef.current) void markAnimeWatching(tid, s.meta.name);
+      if (malAutoSyncRef.current) void markMalWatching(tid, s.meta.name);
+      if (!finished) return;
+      if (anilistAutoSyncRef.current) void syncAnimeProgress(tid, tep, s.meta.name, absEp);
+      if (malAutoSyncRef.current) void syncMalProgress(tid, tep, s.meta.name, absEp);
+    };
+    if (trackId) {
+      fireTrackers(trackId, trackEp);
+    } else if (
+      (anilistAutoSyncRef.current || malAutoSyncRef.current) &&
+      animeIdentityEligible(id, s.episode)
+    ) {
+      void resolveAnimeIdentity(id, latestRef.current.resolvedImdbId, {
+        season: cs,
+        episode: ep,
+        imdbSeason: s.episode?.imdbSeason,
+        imdbEpisode: s.episode?.imdbEpisode,
+      })
+        .then((identity) => {
+          if (identity) fireTrackers(`kitsu:${identity.kitsuId}`, identity.number);
+        })
+        .catch(() => {});
     }
     const kind = finished ? "watched" : "play";
     const key = `${id}|${kind}`;

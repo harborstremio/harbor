@@ -2,6 +2,7 @@ import { BadgeCheck, FileText, Loader2, Lock, ShieldCheck, X } from "lucide-reac
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { fetchDiagnosticsRequest, type DiagnosticsRequestSummary } from "@/lib/social/diagnostics";
+import { t as translate, useT } from "@/lib/i18n";
 
 const TRUST_LINE =
   "Harbor will always ask before requesting your logs. We never collect or transmit anything without your explicit consent.";
@@ -15,6 +16,7 @@ const SHARED_ITEMS = [
 ];
 
 function StaffCard({ staff }: { staff: DiagnosticsRequestSummary["staff"] }) {
+  const t = useT();
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-edge-soft bg-canvas/40 p-3.5">
       <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-elevated text-ink-muted">
@@ -31,7 +33,7 @@ function StaffCard({ staff }: { staff: DiagnosticsRequestSummary["staff"] }) {
           </span>
         </div>
         <span className="truncate text-[12px] text-ink-subtle">
-          @{staff.handle} · Verified Harbor Staff
+          @{staff.handle} · {t("Verified Harbor Staff")}
         </span>
       </div>
     </div>
@@ -47,6 +49,7 @@ export function DiagnosticsConsentModal({
   onShare: (summary: DiagnosticsRequestSummary) => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const [summary, setSummary] = useState<DiagnosticsRequestSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +60,9 @@ export function DiagnosticsConsentModal({
     fetchDiagnosticsRequest(requestId, ac.signal)
       .then(setSummary)
       .catch((e: unknown) => {
-        if (!ac.signal.aborted) setError(e instanceof Error ? e.message : "Could not load this request.");
+        if (!ac.signal.aborted) {
+          setError(e instanceof Error ? e.message : translate("Could not load this request."));
+        }
       });
     return () => ac.abort();
   }, [requestId]);
@@ -81,17 +86,19 @@ export function DiagnosticsConsentModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Diagnostics request"
+        aria-label={t("Diagnostics request")}
         onClick={(e) => e.stopPropagation()}
         className="harbor-together-surface flex max-h-[86vh] w-[min(460px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-edge shadow-[0_40px_100px_-24px_rgba(0,0,0,0.85)]"
         style={{ animation: "diag-pop-in 220ms cubic-bezier(0.32,0.72,0.24,1) both" }}
       >
         <div className="flex items-center justify-between border-b border-edge-soft px-5 py-3.5">
-          <span className="text-[14px] font-semibold tracking-tight text-ink">Diagnostics request</span>
+          <span className="text-[14px] font-semibold tracking-tight text-ink">
+            {t("Diagnostics request")}
+          </span>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("Close")}
             className="grid h-7 w-7 place-items-center rounded-full text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
           >
             <X size={15} />
@@ -112,7 +119,7 @@ export function DiagnosticsConsentModal({
               onClick={onClose}
               className="flex h-10 items-center rounded-xl bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
             >
-              Close
+              {t("Close")}
             </button>
           </div>
         )}
@@ -122,8 +129,10 @@ export function DiagnosticsConsentModal({
             <StaffCard staff={summary.staff} />
 
             <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              Sharing your diagnostics for issue #{ticket}. Your session tokens, API keys, and passwords are
-              removed before anything leaves your device.
+              {t(
+                "Sharing your diagnostics for issue #{ticket}. Your session tokens, API keys, and passwords are removed before anything leaves your device.",
+                { ticket },
+              )}
             </p>
 
             {summary.note && (
@@ -135,13 +144,13 @@ export function DiagnosticsConsentModal({
 
             <div className="flex flex-col gap-2 rounded-xl border border-edge-soft bg-canvas/30 p-3.5">
               <span className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
-                What is shared
+                {t("What is shared")}
               </span>
               <ul className="flex flex-col gap-1.5">
                 {SHARED_ITEMS.map((item) => (
                   <li key={item} className="flex items-center gap-2 text-[12.5px] text-ink-muted">
                     <span className="h-1 w-1 shrink-0 rounded-full bg-ink-subtle" />
-                    {item}
+                    {t(item)}
                   </li>
                 ))}
               </ul>
@@ -149,7 +158,7 @@ export function DiagnosticsConsentModal({
 
             <div className="flex items-start gap-2.5 rounded-xl bg-accent/[0.06] p-3">
               <Lock size={14} className="mt-0.5 shrink-0 text-accent" />
-              <span className="text-[12px] leading-relaxed text-ink-muted">{TRUST_LINE}</span>
+              <span className="text-[12px] leading-relaxed text-ink-muted">{t(TRUST_LINE)}</span>
             </div>
           </div>
         )}
@@ -161,14 +170,14 @@ export function DiagnosticsConsentModal({
               onClick={onClose}
               className="flex h-11 flex-1 items-center justify-center rounded-xl border border-edge-soft text-[14px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
             >
-              Not now
+              {t("Not now")}
             </button>
             <button
               type="button"
               onClick={() => onShare(summary)}
               className="flex h-11 flex-[1.4] items-center justify-center rounded-xl bg-ink text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
             >
-              Share diagnostics
+              {t("Share diagnostics")}
             </button>
           </div>
         )}

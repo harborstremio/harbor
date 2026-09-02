@@ -121,7 +121,7 @@ export function InfoBlock({ detail, isAnime = false }: { detail: TmdbDetail; isA
   if (filtered.length === 0) return null;
 
   return (
-    <div className="border-t border-edge-soft pt-12">
+    <div className="pt-12">
       <h3 className="mb-6 text-[22px] font-medium tracking-tight text-ink">{t("Information")}</h3>
       <dl className="grid grid-cols-1 gap-x-12 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((row) => (

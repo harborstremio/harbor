@@ -6,6 +6,7 @@ export type AmbientItem = { bg: string; title: string; sub: string };
 const DEEP_IDLE_MS = 6 * 60 * 1000;
 const ROTATE_MS = 13000;
 const FADE_MS = 1600;
+const DRIFT_STEPS = 240;
 
 function useClock(): { time: string; date: string } {
   const [now, setNow] = useState(() => new Date());
@@ -37,9 +38,10 @@ function AmbientSlide({ src, out, reduce }: { src: string; out: boolean; reduce:
         opacity: visible ? 1 : 0,
         transform: reduce ? undefined : shown ? "scale(1.1)" : "scale(1.03)",
         transformOrigin: "50% 42%",
+        willChange: reduce ? undefined : "transform, opacity",
         transition: reduce
           ? `opacity ${FADE_MS}ms ease-out`
-          : `opacity ${FADE_MS}ms ease-out, transform 16000ms linear`,
+          : `opacity ${FADE_MS}ms ease-out, transform 16000ms steps(${DRIFT_STEPS}, end)`,
       }}
     />
   );
@@ -52,11 +54,13 @@ export function AmbientOverlay({
   reduce,
   visible,
   onDismiss,
+  neverDeep,
 }: {
   items: AmbientItem[];
   reduce: boolean;
   visible: boolean;
   onDismiss: () => void;
+  neverDeep?: boolean;
 }) {
   const { time, date } = useClock();
   const [deep, setDeep] = useState(false);
@@ -64,10 +68,14 @@ export function AmbientOverlay({
   const keyRef = useRef(1);
   const idxRef = useRef(0);
 
+  // Deep idle blanks the art to a clock, which is right for a desktop window
+  // left open all day and wrong for a TV: Big Picture opts out and keeps
+  // cycling, because a black screen there reads as the app having died.
   useEffect(() => {
+    if (neverDeep) return;
     const id = window.setTimeout(() => setDeep(true), DEEP_IDLE_MS);
     return () => window.clearTimeout(id);
-  }, []);
+  }, [neverDeep]);
 
   useEffect(() => {
     if (deep || items.length < 2) return;

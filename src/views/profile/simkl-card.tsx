@@ -12,7 +12,7 @@ import type { SimklPublished } from "./profile-types";
 import { useSimklCard } from "./use-simkl-card";
 
 const TILE =
-  "flex flex-col items-center rounded-[10px] bg-elevated px-2 py-2.5 ring-1 ring-edge-soft";
+  "flex flex-col items-center rounded-md bg-elevated px-2 py-2.5 ring-1 ring-edge-soft";
 const LABEL = "text-[10.5px] uppercase tracking-[0.1em] text-ink-subtle";
 const CENTERED = "flex flex-col items-center gap-3.5 px-5 py-5 text-center";
 
@@ -30,7 +30,7 @@ function SimklMark({ size }: { size: number }) {
 
 function VipChip({ plus }: { plus: boolean }) {
   return (
-    <span className="inline-flex items-center rounded-[6px] bg-accent-soft px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-accent">
+    <span className="inline-flex items-center rounded-sm bg-accent-soft px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-accent">
       {plus ? "VIP+" : "VIP"}
     </span>
   );
@@ -62,7 +62,7 @@ function StatsSkeleton() {
   return (
     <div className="grid grid-cols-3 gap-2" aria-busy>
       {[0, 1, 2].map((i) => (
-        <div key={i} className="harbor-skel h-[54px] rounded-[10px] bg-elevated" />
+        <div key={i} className="harbor-skel h-[54px] rounded-md bg-elevated" />
       ))}
     </div>
   );
@@ -149,7 +149,7 @@ function PublishedSimklCard({
   return (
     <section
       aria-label={t("Simkl")}
-      className="overflow-hidden rounded-[14px] bg-surface ring-1 ring-edge-soft"
+      className="overflow-hidden rounded-lg bg-surface ring-1 ring-edge-soft"
     >
       {!hideTitle && (
         <div className="flex items-center gap-2 px-4 pb-3 pt-4 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
@@ -245,7 +245,7 @@ export function SimklCard({
         <button
           type="button"
           onClick={() => setConnecting(true)}
-          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[10px] bg-ink px-4 text-[14px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-ink px-4 text-[14px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
         >
           <Link2 size={16} strokeWidth={2.2} /> {t("Connect Simkl")}
         </button>
@@ -259,7 +259,7 @@ export function SimklCard({
           <button
             type="button"
             onClick={reload}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] border border-edge-soft px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-edge-soft px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
           >
             <RefreshCw size={15} strokeWidth={2.2} /> {t("Try again")}
           </button>
@@ -287,7 +287,7 @@ export function SimklCard({
             <button
               type="button"
               onClick={() => openSettings("simkl")}
-              className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[10px] border border-edge-soft text-[13px] font-medium text-ink-subtle transition-colors hover:border-edge hover:text-ink"
+              className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-edge-soft text-[13px] font-medium text-ink-subtle transition-colors hover:border-edge hover:text-ink"
             >
               <Settings2 size={14} strokeWidth={2.2} /> {t("Manage connection")}
             </button>
@@ -300,7 +300,7 @@ export function SimklCard({
     <>
       <section
         aria-label={t("Simkl")}
-        className="overflow-hidden rounded-[14px] bg-surface ring-1 ring-edge-soft"
+        className="overflow-hidden rounded-lg bg-surface ring-1 ring-edge-soft"
       >
         {!hideTitle && (
           <div className="flex items-center gap-2 px-4 pb-3 pt-4 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">

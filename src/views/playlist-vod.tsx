@@ -1,4 +1,5 @@
-import { Film, Search, Tv } from "lucide-react";
+import { Film, Tv } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";

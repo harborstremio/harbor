@@ -77,6 +77,18 @@ const discover: Record<string, string> = {
   "Browse your catalogs": "Navegar pelos seus catálogos",
   "Hide section": "Ocultar seção",
   "Show section": "Mostrar seção",
+  "One pick at a time, full screen, until something lands.": "Uma escolha por vez, em tela cheia, até algo te pegar.",
+  "Open the queue": "Abrir a fila",
+  "{n} waiting": "{n} na fila",
+  "Back to Discover": "Voltar para Descobrir",
+  "Nothing left in today's picks": "Nada restou nas escolhas de hoje",
+  "Come back tomorrow, or clear what you skipped in Settings.": "Volte amanhã, ou limpe o que você pulou nas Configurações.",
+  "Hide this permanently?": "Ocultar permanentemente?",
+  "{title} will not come back in the Discovery Queue.": "{title} não voltará na Fila de Descoberta.",
+  // "Open Settings" and "Keep" are deliberately absent. Both already resolve in
+  // every locale, and this module is spread after app-fill: adding "Keep" here
+  // would override ar/app-fill.ts, where it is the construct-state half of
+  // "Keep @handle" on the handle-change screen.
 };
 
 export default discover;

@@ -9,7 +9,7 @@ export function NewBadge({ id }: { id: string }) {
     <span
       onMouseEnter={() => markSettingSeen(id)}
       onFocus={() => markSettingSeen(id)}
-      className="rounded-full bg-accent/15 px-2 py-[3px] text-[9.5px] font-semibold uppercase tracking-wider text-accent"
+      className="rounded-full bg-accent-soft px-2 py-[3px] text-[9.5px] font-semibold uppercase tracking-wider text-accent"
     >
       {t("NEW")}
     </span>

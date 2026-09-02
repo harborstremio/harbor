@@ -1,5 +1,4 @@
 const coverage: Record<string, string> = {
-  "Release compatibility": "توافق الإصدار",
   "Play from": "التشغيل من",
   end: "النهاية",
   "m:ss": "د:ث",
@@ -109,7 +108,6 @@ const coverage: Record<string, string> = {
   Exit: "خروج",
   Explore: "استكشاف",
   External: "خارجي",
-  Extras: "الإضافات",
   Favorite: "مفضّل",
   Favorited: "في المفضلة",
   Favourites: "المفضلة",
@@ -161,7 +159,6 @@ const coverage: Record<string, string> = {
   List: "قائمة",
   Live: "مباشر",
   Loading: "جارٍ التحميل",
-  "Loading settings": "جارٍ تحميل الإعدادات",
   Local: "محلي",
   "Locked until": "مقفل حتى",
   Logos: "الشعارات",
@@ -437,6 +434,103 @@ const coverage: Record<string, string> = {
   "so pick one you'll keep.": "لذا اختر واحدًا ستحتفظ به.",
   something: "شيء ما",
   speed: "السرعة",
+  "this season": "هذا الموسم",
+  title: "عنوان",
+  titles: "عناوين",
+  to: "إلى",
+  tomorrow: "غدًا",
+  watched: "تمت مشاهدته",
+  yourhandle: "معرّفك",
+  yourname: "اسمك",
+  "{label} details": "تفاصيل {label}",
+  "{n} / {max}": "{n} / {max}",
+  "{n} / {max} titles": "{n} / {max} عنوان",
+  "{n} nom": "{n} ترشيح",
+  "{n} noms": "{n} ترشيحات",
+  "{n} win": "{n} فوز",
+  "· {n} nom": "· {n} ترشيح",
+  "· {n} noms": "· {n} ترشيحات",
+  "Big Picture": "وضع الشاشة الكبيرة",
+  "Leave Big Picture": "مغادرة وضع الشاشة الكبيرة",
+  "A full screen, couch friendly Harbor for TVs, handhelds and big monitors.":
+    "واجهة Harbor بملء الشاشة مصممة للمشاهدة من الأريكة: التلفزيونات والأجهزة المحمولة والشاشات الكبيرة.",
+  "Show the Big Picture button": "إظهار زر وضع الشاشة الكبيرة",
+  "Adds a Big Picture button to Harbor's navigation. Turn this off to keep it out of the way.":
+    "يضيف زر وضع الشاشة الكبيرة إلى شريط التنقل في Harbor. أوقفه لإبقائه بعيدًا عن الطريق.",
+  "Open in Big Picture": "الفتح في وضع الشاشة الكبيرة",
+  "Launch straight into Big Picture when Harbor starts. Press Esc at any time to leave.":
+    "يبدأ Harbor مباشرة في وضع الشاشة الكبيرة عند التشغيل. اضغط Esc في أي وقت للخروج.",
+  "Almost done": "أوشك على الانتهاء",
+  "Jump back in": "تابع ما بدأته",
+  "Couldn't load this title.": "تعذر تحميل هذا العنوان.",
+  "Directed by": "إخراج",
+  "Created by": "من ابتكار",
+  "Written by": "كتابة",
+  "Music by": "موسيقى",
+  "Box office": "إيرادات الشباك",
+  Length: "المدة",
+  "Couldn't load your catalogs": "تعذر تحميل الكتالوجات",
+  "Harbor couldn't reach the catalog servers. Check the connection and reopen Big Picture.":
+    "تعذر على Harbor الوصول إلى خوادم الكتالوج. تحقق من الاتصال وأعد فتح وضع الشاشة الكبيرة.",
+  Letters: "حروف",
+  Symbols: "رموز",
+  Space: "مسافة",
+  Backspace: "مسح",
+  "Loading your library...": "جارٍ تحميل مكتبتك...",
+  "Nothing saved yet. Add a title from any details page.":
+    "لا يوجد شيء محفوظ بعد. أضف عنوانًا من أي صفحة تفاصيل.",
+  "Your watchlist is empty.": "قائمة المشاهدة فارغة.",
+  "Search Harbor": "البحث في Harbor",
+  "{n} results": "{n} نتيجة",
+  "Looking...": "جارٍ البحث...",
+  "Start typing to search movies and series.": "ابدأ الكتابة للبحث عن الأفلام والمسلسلات.",
+  'Nothing found for "{q}"': 'لا توجد نتائج لـ "{q}"',
+  "Interface sounds": "أصوات الواجهة",
+  "Navigation and selection are silent": "التنقل والاختيار بلا صوت",
+  "Sound pack: {name}": "حزمة الأصوات: {name}",
+  "Animated backdrop": "خلفية متحركة",
+  "Drifting poster wall behind the interface. Turn off on low power devices.":
+    "جدار ملصقات متحرك خلف الواجهة. أوقفه على الأجهزة منخفضة الأداء.",
+  "Controller navigation": "التنقل بذراع التحكم",
+  "Use a gamepad or remote to move around Harbor":
+    "استخدم ذراع تحكم أو جهاز تحكم عن بعد للتنقل في Harbor",
+  "Launch straight into Big Picture when Harbor starts":
+    "البدء مباشرة في وضع الشاشة الكبيرة عند تشغيل Harbor",
+  "Quick panel": "اللوحة السريعة",
+  "No trailer available for {name}": "لا يوجد مقطع دعائي لـ {name}",
+  "Loading trailer...": "جارٍ تحميل المقطع الدعائي...",
+  Toggle: "تبديل",
+  "Switch tab": "تبديل التبويب",
+  "Hold to skip or continue": "اضغط مطولاً للتخطي أو المتابعة",
+  "Hold to continue": "اضغط مطولاً للمتابعة",
+  Nav: "التنقل العلوي",
+  "Decrease {name}": "خفض {name}",
+  "Increase {name}": "رفع {name}",
+  "Reset {name}": "إعادة تعيين {name}",
+  Move: "التنقل",
+  Suggested: "مقترح",
+  "Clear recent searches": "مسح عمليات البحث الأخيرة",
+  "Start typing to search movies, series and everything your addons carry.":
+    "ابدأ الكتابة للبحث في الأفلام والمسلسلات وكل ما توفره إضافاتك.",
+  "Nothing watched yet.": "لم تتم مشاهدة أي شيء بعد.",
+  "Remove from Continue watching": "إزالة من متابعة المشاهدة",
+  "Known for": "اشتهر بـ",
+  "Nothing to show for this person.": "لا يوجد ما يمكن عرضه لهذا الشخص.",
+  "Top match": "أفضل نتيجة",
+  "Addons you could install": "إضافات يمكنك تثبيتها",
+  "Didn't answer": "لم تستجب",
+  "On-screen keyboard": "لوحة مفاتيح على الشاشة",
+  Phone: "الهاتف",
+  "Type on your phone": "اكتب على هاتفك",
+  "Nothing in this filter. Choose All to see everything that answered.":
+    "لا شيء في هذا المرشح. اختر الكل لعرض كل ما استجاب.",
+  'Nothing found for "{q}". {n} of your addons did not answer.':
+    'لم يتم العثور على شيء لـ "{q}". {n} من إضافاتك لم تستجب.',
+  'Your addons answered for "{q}", but nothing in the results opens here.':
+    'استجابت إضافاتك لـ "{q}"، لكن لا شيء في النتائج يفتح هنا.',
+  "Release compatibility": "توافق الإصدار",
+  Extras: "الإضافات",
+  "Loading settings": "جارٍ تحميل الإعدادات",
   "Subtitles appear early": "تظهر الترجمة مبكرًا",
   "Subtitles appear late": "تظهر الترجمة متأخرة",
   "More timing controls": "المزيد من عناصر التحكم بالتوقيت",
@@ -447,14 +541,6 @@ const coverage: Record<string, string> = {
     "عندما تظهر الترجمة مبكرًا أو متأخرًا، يقيس Harbor الكلام ويصحح التوقيت تلقائيًا.",
   "Downloaded subtitles can arrive after playback starts. Harbor switches from a temporary track when a stronger release match becomes available.":
     "قد تصل الترجمات المحمّلة بعد بدء التشغيل. يستبدل Harbor المسار المؤقت عند توفر تطابق أقوى مع الإصدار.",
-  "this season": "هذا الموسم",
-  title: "عنوان",
-  titles: "عناوين",
-  to: "إلى",
-  tomorrow: "غدًا",
-  watched: "تمت مشاهدته",
-  yourhandle: "معرّفك",
-  yourname: "اسمك",
   "Only embedded subtitles are available right now.": "لا تتوفر الآن سوى الترجمات المضمّنة.",
   "Search all sources again": "إعادة البحث في كل المصادر",
   "Aligned here": "تمت المحاذاة هنا",
@@ -473,14 +559,88 @@ const coverage: Record<string, string> = {
   "Play until you hear a line inside this section, tap it, then choose Align to now.":
     "شغّل حتى تسمع جملة داخل هذا المقطع، واضغط عليها، ثم اختر «محاذاة مع الوقت الحالي».",
   "Sync point {n}": "نقطة المزامنة {n}",
-  "{label} details": "تفاصيل {label}",
-  "{n} / {max}": "{n} / {max}",
-  "{n} / {max} titles": "{n} / {max} عنوان",
-  "{n} nom": "{n} ترشيح",
-  "{n} noms": "{n} ترشيحات",
-  "{n} win": "{n} فوز",
-  "· {n} nom": "· {n} ترشيح",
-  "· {n} noms": "· {n} ترشيحات",
+  "Skip the launch": "تخطَّ الإبحار",
+  "Click anywhere to skip": "انقر في أي مكان للتخطي",
+  "Checking {total} episodes for sources.": "جارٍ البحث عن مصادر لـ {total} حلقة.",
+  "Checked {done} of {total} episodes.": "تم فحص {done} من أصل {total} حلقة.",
+  "These episodes are already downloading.": "هذه الحلقات قيد التنزيل بالفعل.",
+  "No source was found for any of these episodes. Try refreshing or another addon.":
+    "لم يُعثر على أي مصدر لأي من هذه الحلقات. جرّب التحديث أو إضافة أخرى.",
+  "Queued {queued} of {total} episodes.": "أُضيفت {queued} من أصل {total} حلقة إلى القائمة.",
+  "Could not queue these episodes.": "تعذّرت إضافة هذه الحلقات إلى القائمة.",
+  "Harbor found episode sources for {season}, but none of them is a single downloadable package. It can still fetch the episodes one at a time.":
+    "عثر Harbor على مصادر لحلقات {season}، لكن لا توجد بينها حزمة واحدة قابلة للتنزيل. لا يزال بإمكانه جلب الحلقات واحدة تلو الأخرى.",
+  "None of your addons returned a downloadable package for {season}. Harbor can still fetch the episodes one at a time, or you can refresh the sources.":
+    "لم تُرجع أي من إضافاتك حزمة قابلة للتنزيل لـ {season}. لا يزال بإمكان Harbor جلب الحلقات واحدة تلو الأخرى، أو يمكنك تحديث المصادر.",
+  "Download episode by episode": "التنزيل حلقة تلو الأخرى",
+  "Test mode: your controller only moves this diagram. Press Esc to stop.":
+    "وضع الاختبار: ذراع التحكم يحرّك هذا المخطط فقط. اضغط Esc للإيقاف.",
+  "Stop test": "إيقاف الاختبار",
+  "Test controller": "اختبار ذراع التحكم",
+  Ring: "دائرة مفرغة",
+  Pointer: "مؤشر",
+  Dot: "نقطة",
+  "Controller cursor": "مؤشر ذراع التحكم",
+  "The pointer your right stick moves around Harbor. Pick a shape or use your own image.":
+    "المؤشر الذي تحرّكه بعصا التحكم اليمنى داخل Harbor. اختر شكلًا أو استخدم صورتك الخاصة.",
+  "Your own image": "صورتك الخاصة",
+  "PNG, WEBP, SVG or GIF. Harbor shrinks it to 128px so it stays small on disk.":
+    "PNG أو WEBP أو SVG أو GIF. يصغّرها Harbor إلى 128 بكسل لتبقى صغيرة على القرص.",
+  "Remove image": "إزالة الصورة",
+  "That image could not be used. Try a smaller PNG or WEBP.":
+    "تعذّر استخدام تلك الصورة. جرّب ملف PNG أو WEBP أصغر.",
+  "Cursor size": "حجم المؤشر",
+  "Make it bigger for a TV across the room, smaller for a desk monitor.":
+    "كبّره لتلفاز في آخر الغرفة، وصغّره لشاشة مكتب.",
+  "{n} px": "{n} بكسل",
+  "Actual size on screen": "الحجم الفعلي على الشاشة",
+  "Harbor's full video engine. Plays anything you throw at it.":
+    "محرك الفيديو الكامل في Harbor. يشغّل كل ما تعطيه إياه.",
+  "libmpv did not load, so playback falls back to HTML5 and formats like MKV may refuse to play. On Linux, install your distribution's libmpv package, then restart Harbor.":
+    "لم تُحمّل libmpv، لذا يعود التشغيل إلى HTML5 وقد ترفض صيغ مثل MKV العمل. على لينكس، ثبّت حزمة libmpv الخاصة بتوزيعتك ثم أعد تشغيل Harbor.",
+  "{n} hours": "{n} ساعة",
+  "{n} GB": "{n} غيغابايت",
+  "Another program already holds this port, usually a Stremio server that is running on this machine. Harbor tried its spare ports too. Stop that server, or leave it running and point Harbor at it in Remote streaming server below.":
+    "برنامج آخر يشغل هذا المنفذ بالفعل، وغالبًا ما يكون خادم Stremio يعمل على هذا الجهاز. جرّب Harbor منافذه الاحتياطية أيضًا. أوقف ذلك الخادم، أو اتركه يعمل ووجّه Harbor إليه من خادم البث البعيد أدناه.",
+  "Open here": "افتح هنا",
+  "Scan with your phone camera, or type the address above.":
+    "امسح بكاميرا هاتفك، أو اكتب العنوان أعلاه.",
+  "No Wi-Fi address yet. Other devices cannot reach this computer.":
+    "لا يوجد عنوان Wi-Fi بعد. لا تستطيع الأجهزة الأخرى الوصول إلى هذا الحاسوب.",
+  "Harbor in a browser": "Harbor في المتصفح",
+  "This exact install, served as a web app. Open it on a phone, laptop or TV browser and it streams through this computer.":
+    "هذا التثبيت نفسه، مقدَّمًا كتطبيق ويب. افتحه على هاتف أو حاسوب محمول أو متصفح تلفاز وسيبثّ عبر هذا الحاسوب.",
+  "Play, pause, seek, volume and casting from the couch.":
+    "التشغيل والإيقاف والتقديم ومستوى الصوت والبث من على الأريكة.",
+  "Turn pages, zoom and switch modes while you read on the big screen.":
+    "اقلب الصفحات وكبّر الصورة وبدّل الأوضاع وأنت تقرأ على الشاشة الكبيرة.",
+  "One switch serves Harbor on your network. Scan a code below with your phone, or open an address on any device on the same Wi-Fi.":
+    "مفتاح واحد يقدّم Harbor على شبكتك. امسح رمزًا أدناه بهاتفك، أو افتح عنوانًا على أي جهاز على شبكة Wi-Fi نفسها.",
+  "Powers everything on this page: the web app, the phone remote, and the manga reader remote.":
+    "يشغّل كل شيء في هذه الصفحة: تطبيق الويب، وريموت الهاتف، وريموت قارئ المانغا.",
+  "Flip the switch above and the addresses and scan codes appear here.":
+    "فعّل المفتاح أعلاه لتظهر هنا العناوين ورموز المسح.",
+  "Show in windowed mode": "إظهار في وضع النافذة",
+  "Keep the clock on screen when the player is not fullscreen.":
+    "أبقِ الساعة على الشاشة عندما لا يكون المشغّل في وضع ملء الشاشة.",
+  "On the poster": "على الملصق",
+  Scores: "التقييمات",
+  "Episode order": "ترتيب الحلقات",
+  "Watchlist overlaps ({n})": "عناصر متداخلة في قائمة المشاهدة ({n})",
+  "Favorites overlap ({n})": "عناصر متداخلة في المفضلة ({n})",
+  "Addons overlap ({n})": "إضافات متداخلة ({n})",
+  "Import selected data?": "هل تريد استيراد البيانات المحددة؟",
+  "Show direct, debrid, and peer-to-peer sources":
+    "إظهار المصادر المباشرة وdebrid ومصادر الند للند",
+  "Prefer direct and debrid sources; keep P2P when only web links are available":
+    "تفضيل المصادر المباشرة وdebrid، مع إبقاء P2P عندما لا تتوفر سوى روابط الويب",
+  "Prefer peer-to-peer torrent sources": "تفضيل مصادر التورنت بنظام الند للند",
+  "New York Times": "New York Times",
+  "Bestseller lists in the eBook section.": "قوائم الكتب الأكثر مبيعًا في قسم الكتب الإلكترونية.",
+  "New York Times · bestseller lists": "New York Times · قوائم الكتب الأكثر مبيعًا",
+  "NYT Books API key": "مفتاح API لخدمة NYT Books",
+  "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
+    "اختر ما إذا كان Harbor يفضّل المصادر المباشرة وdebrid أو تورنت الند للند أو يعرض كليهما.",
 };
 
 export default coverage;

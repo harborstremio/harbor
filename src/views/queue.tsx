@@ -2,6 +2,8 @@ import { NavChevron } from "@/components/nav-arrow";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FeedHero } from "@/components/feed-hero";
 import { Poster } from "@/components/poster";
+import type { Meta } from "@/lib/cinemeta";
+import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { extendPool, getPool, type FeedItem } from "@/lib/feed";
 import { rankByAffinity } from "@/lib/feed/rank";
 import { blockQueueItem, filterQueuePool, shuffleQueuePool, snoozeQueueItem } from "@/lib/feed/skipped";
@@ -179,9 +181,9 @@ export function QueueView() {
   }, [onNext, onPrev]);
 
   return (
-    <main ref={rootRef} className="min-w-0 flex-1 overflow-hidden pb-12 pt-20">
+    <main ref={rootRef} className="harbor-queue-page min-w-0 flex-1 overflow-hidden pb-12 pt-20">
       <div className="mx-auto flex h-full min-w-0 max-w-[1180px] flex-col gap-5 px-6 sm:px-12">
-        <header className="flex shrink-0 items-baseline gap-3">
+        <header className="harbor-queue-head flex shrink-0 items-baseline gap-3">
           <h1 className="font-display text-[20px] font-medium tracking-tight text-ink">
             {t("Discovery Queue")}
           </h1>
@@ -248,7 +250,7 @@ function NavArrow({
       onClick={onClick}
       disabled={disabled}
       aria-label={side === "left" ? t("Previous") : t("Next")}
-      className={`absolute top-1/2 ${
+      className={`harbor-queue-arrow absolute top-1/2 ${
         side === "left" ? "-start-5" : "-end-5"
       } z-20 grid h-20 w-20 -translate-y-1/2 place-items-center text-white/85 drop-shadow-[0_2px_9px_rgba(0,0,0,0.8)] transition-[transform,color,opacity] duration-200 ease-out hover:scale-110 hover:text-white active:scale-95 disabled:pointer-events-none disabled:opacity-20 motion-reduce:transition-none motion-reduce:hover:scale-100`}
     >
@@ -281,7 +283,7 @@ function Strip({
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-ink-subtle">
+      <span className="harbor-queue-striplabel text-[11px] font-semibold uppercase tracking-[0.24em] text-ink-subtle">
         {t("Queue")}
       </span>
       <div
@@ -297,7 +299,7 @@ function Strip({
               type="button"
               data-active={isActive}
               onClick={() => onJump(i)}
-              className={`group relative h-[112px] w-[200px] shrink-0 rounded-[10px] transition-all duration-200 hover:z-10 hover:scale-[1.02] ${
+              className={`harbor-queue-tile group relative h-[112px] w-[200px] shrink-0 rounded-md transition-all duration-200 hover:z-10 hover:scale-[1.02] ${
                 isPast ? "opacity-50" : ""
               }`}
             >
@@ -305,12 +307,12 @@ function Strip({
                 src={item.meta.background ?? item.meta.poster}
                 seed={item.meta.id}
                 ratio="landscape"
-                className="absolute inset-0 rounded-[10px]"
+                className="absolute inset-0 rounded-md"
               />
               {isActive && (
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute inset-0 rounded-[10px]"
+                  className="pointer-events-none absolute inset-0 rounded-md"
                   style={{
                     background:
                       "linear-gradient(180deg, oklch(0.79 0.13 62 / 0.18) 0%, oklch(0.79 0.13 62 / 0.28) 100%)",
@@ -321,12 +323,18 @@ function Strip({
               {isActive && (
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute inset-0 rounded-[10px] shadow-[inset_0_0_0_2px_var(--color-accent)]"
+                  className="pointer-events-none absolute inset-0 rounded-md shadow-[inset_0_0_0_2px_var(--color-accent)]"
                 />
               )}
-              <span className="absolute start-1.5 top-1.5 rounded-md bg-canvas/85 px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-ink">
-                {item.tag}
-              </span>
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 rounded-b-md"
+                style={{
+                  background:
+                    "linear-gradient(to top, color-mix(in oklch, var(--color-canvas), transparent 8%) 0%, color-mix(in oklch, var(--color-canvas), transparent 55%) 46%, transparent 100%)",
+                }}
+              />
+              <QueueCardTitle meta={item.meta} />
             </button>
           );
         })}
@@ -335,11 +343,55 @@ function Strip({
   );
 }
 
+function useQueueLogo(meta: Meta): string | undefined {
+  const { settings } = useSettings();
+  const [logo, setLogo] = useState<string | undefined>(() => peekCachedLogo(settings.tmdbKey, meta));
+  useEffect(() => {
+    let cancelled = false;
+    const cached = peekCachedLogo(settings.tmdbKey, meta);
+    if (cached) {
+      setLogo(cached);
+      return;
+    }
+    setLogo(undefined);
+    resolveLogo(settings.tmdbKey, meta)
+      .then((url) => {
+        if (!cancelled && url) setLogo(url);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [meta, settings.tmdbKey]);
+  return logo;
+}
+
+function QueueCardTitle({ meta }: { meta: Meta }) {
+  const logo = useQueueLogo(meta);
+  const [failed, setFailed] = useState(false);
+  if (logo && !failed) {
+    return (
+      <img
+        src={logo}
+        alt={meta.name}
+        draggable={false}
+        onError={() => setFailed(true)}
+        className="pointer-events-none absolute bottom-2 start-2.5 end-2.5 max-h-[38px] w-auto max-w-[82%] object-contain object-left-bottom drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]"
+      />
+    );
+  }
+  return (
+    <span className="pointer-events-none absolute bottom-2 start-2.5 end-2.5 line-clamp-2 text-start text-[12.5px] font-semibold leading-tight text-ink [text-shadow:0_1px_6px_rgba(0,0,0,0.85)]">
+      {meta.name}
+    </span>
+  );
+}
+
 function QueueSkeleton({ loading, hasKey }: { loading: boolean; hasKey: boolean }) {
   const t = useT();
   if (loading) {
     return (
-      <div className="harbor-skel relative h-full min-h-[300px] overflow-hidden rounded-[28px] border border-edge-soft bg-elevated/25">
+      <div className="harbor-skel relative h-full min-h-[300px] overflow-hidden rounded-2xl border border-edge-soft bg-elevated/25">
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3.5 p-8 sm:p-10">
           <div className="h-6 w-20 rounded-full bg-elevated/60" />
           <div className="h-10 w-2/3 max-w-[420px] rounded-lg bg-elevated/60" />
@@ -353,7 +405,7 @@ function QueueSkeleton({ loading, hasKey }: { loading: boolean; hasKey: boolean 
     );
   }
   return (
-    <div className="flex h-full min-h-[300px] items-center justify-center rounded-[28px] border border-edge-soft bg-elevated/30 px-12 py-16 text-center">
+    <div className="flex h-full min-h-[300px] items-center justify-center rounded-2xl border border-edge-soft bg-elevated/30 px-12 py-16 text-center">
       {!hasKey ? (
         <p className="max-w-[60ch] text-[15px] text-ink-muted">
           {t("Add a TMDB key in Settings to unlock the full discovery feed.")}

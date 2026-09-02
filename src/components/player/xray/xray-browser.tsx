@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { ScanFace, X } from "lucide-react";
+import { X } from "lucide-react";
+import { UiIcon } from "@/components/ui-icon";
 import type { Meta } from "@/lib/cinemeta";
 import type { CrewEntry, TmdbDetail } from "@/lib/providers/tmdb";
 import { useT } from "@/lib/i18n";
@@ -74,10 +75,10 @@ export function XrayBrowser({
   const [tab, setTab] = useState<TabId>(people.length ? "in-scene" : cast.length ? "cast" : "in-scene");
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-50 flex flex-col bg-black/85 backdrop-blur-2xl animate-in fade-in duration-200 motion-reduce:animate-none">
+    <div className="pointer-events-auto absolute inset-0 z-50 flex flex-col bg-black/85 backdrop-blur-2xl animate-xray-open motion-reduce:animate-none">
       <header className="flex items-center gap-5 px-6 pt-14 sm:px-9">
         <span className="flex shrink-0 items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.24em] text-white">
-          <ScanFace size={15} strokeWidth={2.4} className="text-accent" /> {t("X-Ray")}
+          <UiIcon name="xray" className="h-[15px] w-[15px] text-accent" /> {t("X-Ray")}
         </span>
         <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto [scrollbar-width:none]">
           {tabs.map((tb) => (
@@ -105,7 +106,7 @@ export function XrayBrowser({
       </header>
 
       <div className="mt-5 min-h-0 flex-1 overflow-y-auto px-6 pb-12 sm:px-9">
-        <div className="mx-auto w-full max-w-[1440px]">
+        <div key={tab} className="mx-auto w-full max-w-[1440px] animate-media-swap motion-reduce:animate-none">
           {!details && !people.length ? (
             <Empty label={t("Add a TMDB key in Settings to see the cast, crew, and details.")} />
           ) : tab === "about" ? (

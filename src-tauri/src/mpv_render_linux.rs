@@ -56,6 +56,8 @@ struct Embed {
     gtk_window: gtk::ApplicationWindow,
     vbox: gtk::Box,
     web_view: gtk::Widget,
+    render: Rc<RefCell<Option<RenderContext>>>,
+    window_was_app_paintable: bool,
 }
 
 thread_local! {
@@ -90,7 +92,12 @@ fn proc_loader() -> Option<unsafe extern "C" fn(*const c_char) -> *mut c_void> {
     if !sym.is_null() {
         return Some(unsafe { std::mem::transmute(sym) });
     }
-    let egl = unsafe { dlsym(RTLD_DEFAULT, b"eglGetProcAddress\0".as_ptr() as *const c_char) };
+    let egl = unsafe {
+        dlsym(
+            RTLD_DEFAULT,
+            b"eglGetProcAddress\0".as_ptr() as *const c_char,
+        )
+    };
     if egl.is_null() {
         return None;
     }
@@ -233,7 +240,9 @@ pub fn configure_linux_graphics() {
             .map(|v| !v.is_empty())
             .unwrap_or(false);
     if wayland && std::env::var("__NV_DISABLE_EXPLICIT_SYNC").is_err() {
-        eprintln!("[harbor::mpv_linux] NVIDIA + Wayland detected; setting __NV_DISABLE_EXPLICIT_SYNC=1");
+        eprintln!(
+            "[harbor::mpv_linux] NVIDIA + Wayland detected; setting __NV_DISABLE_EXPLICIT_SYNC=1"
+        );
         std::env::set_var("__NV_DISABLE_EXPLICIT_SYNC", "1");
     }
 }
@@ -260,6 +269,7 @@ pub fn install(gtk_window: &gtk::ApplicationWindow, vbox: &gtk::Box) -> Result<(
         .with(|slot| slot.borrow_mut().take())
         .ok_or_else(|| "no pending mpv ctx for linux install".to_string())?;
 
+    let window_was_app_paintable = gtk_window.is_app_paintable();
     apply_rgba_visual(gtk_window);
     let web_view = vbox
         .children()
@@ -296,6 +306,7 @@ pub fn install(gtk_window: &gtk::ApplicationWindow, vbox: &gtk::Box) -> Result<(
     overlay.show_all();
 
     let render_cell: Rc<RefCell<Option<RenderContext>>> = Rc::new(RefCell::new(None));
+    let render_slot = render_cell.clone();
     let mpv = pending.mpv;
     let backend = pending.backend;
     let display_native = pending.display_native;
@@ -303,11 +314,10 @@ pub fn install(gtk_window: &gtk::ApplicationWindow, vbox: &gtk::Box) -> Result<(
     // Invalidate cached FBO dimensions on GLArea resize so the next
     // render call re-queries the physical GPU dimensions. This avoids
     // synchronous GL queries on every frame.
-    let area_clone = area.clone();
-    area.connect_resize(move |_a, _w, _h| {
+    area.connect_resize(|a, _w, _h| {
         FBO_WIDTH.store(-1, Ordering::Relaxed);
         FBO_HEIGHT.store(-1, Ordering::Relaxed);
-        area_clone.queue_render();
+        a.queue_render();
     });
 
     area.connect_render(move |area, _ctx| {
@@ -337,11 +347,16 @@ pub fn install(gtk_window: &gtk::ApplicationWindow, vbox: &gtk::Box) -> Result<(
             gtk_window: gtk_window.clone(),
             vbox: vbox.clone(),
             web_view,
+            render: render_slot,
+            window_was_app_paintable,
         })
     });
 
     area.queue_render();
-    eprintln!("[harbor::mpv_linux] installed backend={}", backend_label(backend));
+    eprintln!(
+        "[harbor::mpv_linux] installed backend={}",
+        backend_label(backend)
+    );
     Ok(())
 }
 
@@ -392,10 +407,7 @@ fn do_render(rc: &RenderContext, area: &gtk::GLArea) {
 
     let packed = ((w as u64) << 32) | (h as u32 as u64);
     if LAST_SURFACE.swap(packed, Ordering::Relaxed) != packed {
-        eprintln!(
-            "[harbor::mpv_linux] render surface {}x{} px",
-            w, h,
-        );
+        eprintln!("[harbor::mpv_linux] render surface {}x{} px", w, h,);
     }
     if fbo == 0 && !FBO_ZERO_WARNED.swap(true, Ordering::Relaxed) {
         eprintln!("[harbor::mpv_linux] WARNING: GtkGLArea FBO query returned 0; mpv will render to the default framebuffer and the video region will stay BLACK. glGetIntegerv or the GL proc loader likely failed to resolve.");
@@ -412,10 +424,12 @@ fn do_render(rc: &RenderContext, area: &gtk::GLArea) {
 // widget drawn after the video. Driver agnostic: this is a contract, not a
 // vendor quirk.
 fn restore_gdk_gl_state(w: i32, h: i32) {
-    if let Some(f) = resolve_gl::<unsafe extern "C" fn(c_int, c_int, c_int, c_int)>(b"glViewport\0") {
+    if let Some(f) = resolve_gl::<unsafe extern "C" fn(c_int, c_int, c_int, c_int)>(b"glViewport\0")
+    {
         unsafe { f(0, 0, w.max(1), h.max(1)) };
     }
-    if let Some(f) = resolve_gl::<unsafe extern "C" fn(c_int, c_int, c_int, c_int)>(b"glScissor\0") {
+    if let Some(f) = resolve_gl::<unsafe extern "C" fn(c_int, c_int, c_int, c_int)>(b"glScissor\0")
+    {
         unsafe { f(0, 0, w.max(1), h.max(1)) };
     }
     if let Some(f) = resolve_gl::<unsafe extern "C" fn(u32)>(b"glDisable\0") {
@@ -454,6 +468,10 @@ pub fn uninstall() -> Result<(), String> {
 }
 
 fn restore_webview(embed: Embed) {
+    if embed.render.borrow().is_some() && embed.area.is_realized() {
+        embed.area.make_current();
+    }
+    *embed.render.borrow_mut() = None;
     set_webview_opaque(&embed.web_view);
     if let Some(parent) = embed.web_view.parent() {
         if let Some(container) = parent.downcast_ref::<gtk::Container>() {
@@ -474,7 +492,9 @@ fn restore_webview(embed: Embed) {
     if embed.vbox.parent().is_none() {
         embed.gtk_window.add(&embed.vbox);
     }
+    embed.gtk_window.set_app_paintable(embed.window_was_app_paintable);
     embed.vbox.show_all();
+    embed.gtk_window.queue_draw();
 }
 
 fn schedule_redraw() {
@@ -516,7 +536,9 @@ fn apply_rgba_visual(window: &gtk::ApplicationWindow) {
             // stays on by default; HARBOR_LINUX_NO_APP_PAINTABLE=1 turns it off
             // to test whether the missing per-frame clear is the ghosting cause.
             if probe("HARBOR_LINUX_NO_APP_PAINTABLE") {
-                eprintln!("[harbor::mpv_linux] probe: leaving GtkWindow background painter enabled");
+                eprintln!(
+                    "[harbor::mpv_linux] probe: leaving GtkWindow background painter enabled"
+                );
             } else {
                 window.set_app_paintable(true);
             }

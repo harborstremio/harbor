@@ -146,7 +146,7 @@ export function AutosyncPopover({ handle }: { handle: AutoSyncHandle }) {
         </button>
 
         {open && hasPanel && (
-          <div className="absolute top-full mt-2 w-[min(88vw,360px)] rounded-[14px] border border-edge bg-elevated/95 p-3 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.85)] backdrop-blur-2xl animate-in fade-in slide-in-from-top-1 duration-200 motion-reduce:animate-none">
+          <div className="absolute top-full mt-2 w-[min(88vw,360px)] rounded-md bg-elevated p-3 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-in fade-in slide-in-from-top-1 duration-200 motion-reduce:animate-none">
             <span className="absolute -top-1.5 start-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-s border-t border-edge bg-elevated" />
             <button
               type="button"
@@ -321,7 +321,7 @@ function PrimaryBtn({ icon, label, onClick, busy }: { icon: ReactNode; label: st
       type="button"
       onClick={onClick}
       disabled={busy}
-      className="flex h-9 items-center gap-1.5 whitespace-nowrap rounded-[10px] bg-accent px-3 text-[13px] font-semibold text-canvas transition-all hover:brightness-110 active:scale-95 disabled:opacity-70 motion-reduce:transition-none motion-reduce:active:scale-100"
+      className="flex h-9 items-center gap-1.5 whitespace-nowrap rounded-md bg-accent px-3 text-[13px] font-semibold text-canvas transition-all hover:brightness-110 active:scale-95 disabled:opacity-70 motion-reduce:transition-none motion-reduce:active:scale-100"
     >
       {busy ? <Loader2 size={14} strokeWidth={2.4} className="animate-spin motion-reduce:animate-none" /> : icon}
       {label}
@@ -334,7 +334,7 @@ function GhostBtn({ icon, label, onClick }: { icon?: ReactNode; label: string; o
     <button
       type="button"
       onClick={onClick}
-      className="flex h-9 items-center gap-1.5 whitespace-nowrap rounded-[10px] bg-raised px-3 text-[13px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100"
+      className="flex h-9 items-center gap-1.5 whitespace-nowrap rounded-md bg-raised px-3 text-[13px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100"
     >
       {icon}
       {label}
@@ -349,7 +349,7 @@ function IconBtn({ label, danger, onClick, children }: { label: string; danger?:
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`flex h-9 w-9 items-center justify-center rounded-[10px] text-ink-muted transition-colors hover:bg-raised active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100 ${danger ? "hover:text-danger" : "hover:text-success"}`}
+      className={`flex h-9 w-9 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-raised active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100 ${danger ? "hover:text-danger" : "hover:text-success"}`}
     >
       {children}
     </button>

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Play, Tv } from "lucide-react";
+import { Tv } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import type { IptvChannel } from "@/lib/iptv/types";

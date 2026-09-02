@@ -1,5 +1,5 @@
 import { useRef, useState, type RefObject } from "react";
-import { ScanFace } from "lucide-react";
+import { UiIcon } from "@/components/ui-icon";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import type { CastEntry } from "@/lib/providers/tmdb";
@@ -86,9 +86,9 @@ export function XrayOverlay({
           type="button"
           onClick={() => setView("rail")}
           aria-label={t("X-Ray")}
-          className="absolute left-4 top-20 z-20 flex h-9 items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-3 text-[12.5px] font-semibold text-white backdrop-blur-md transition-[background-color,transform] hover:bg-black/65 active:scale-[0.97] motion-reduce:active:scale-100"
+          className="absolute left-7 top-20 z-20 flex items-center gap-1.5 py-1 text-[12.5px] font-semibold text-white opacity-40 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] transition-opacity duration-300 hover:opacity-100"
         >
-          <ScanFace size={15} strokeWidth={2.2} className="text-accent" /> {t("X-Ray")}
+          <UiIcon name="xray" className="h-[15px] w-[15px] text-accent" /> {t("X-Ray")}
         </button>
       )}
       {view === "rail" && (

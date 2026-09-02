@@ -88,6 +88,10 @@ function toCard(i: LibraryItem): CwCard {
   };
 }
 
+const CW_RETRY_DELAYS_MS = [1000, 4000, 10000];
+let cwCacheKey: string | null = null;
+let cwCacheItems: LibraryItem[] = [];
+
 export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
   const { authKey } = useAuth();
   const { settings } = useSettings();
@@ -101,13 +105,44 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       return;
     }
     let cancelled = false;
-    library(authKey)
-      .then((li) => {
-        if (!cancelled) setItems(li);
-      })
-      .catch(() => {});
+    let timer: number | null = null;
+    let attempt = 0;
+    if (cwCacheKey === authKey && cwCacheItems.length > 0) setItems(cwCacheItems);
+    const load = () => {
+      library(authKey)
+        .then((li) => {
+          cwCacheKey = authKey;
+          cwCacheItems = li;
+          attempt = 0;
+          if (!cancelled) setItems(li);
+        })
+        .catch(() => {
+          if (cancelled || attempt >= CW_RETRY_DELAYS_MS.length) return;
+          const wait = CW_RETRY_DELAYS_MS[attempt];
+          attempt += 1;
+          timer = window.setTimeout(load, wait);
+        });
+    };
+    load();
+    const retryNow = () => {
+      if (cancelled || cwCacheKey === authKey) return;
+      if (timer != null) {
+        window.clearTimeout(timer);
+        timer = null;
+      }
+      attempt = 0;
+      load();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") retryNow();
+    };
+    window.addEventListener("online", retryNow);
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       cancelled = true;
+      if (timer != null) window.clearTimeout(timer);
+      window.removeEventListener("online", retryNow);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [authKey]);
 

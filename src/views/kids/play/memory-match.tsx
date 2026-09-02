@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PartyPopper, RotateCcw } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 const PAIRS = [
   "lilbluewhale",
@@ -22,6 +23,7 @@ function buildDeck(): Card[] {
 }
 
 export function MemoryMatch() {
+  const t = useT();
   const [deck, setDeck] = useState<Card[]>(() => buildDeck());
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matched, setMatched] = useState<Set<number>>(new Set());
@@ -80,7 +82,7 @@ export function MemoryMatch() {
     <div className="relative flex h-full flex-col items-center justify-center gap-6 px-6">
       <div className="flex items-center gap-4">
         <span className="rounded-full bg-white/20 px-5 py-2 text-[16px] font-bold text-white">
-          Moves: {moves}
+          {t("Moves: {moves}", { moves })}
         </span>
         <button
           type="button"
@@ -88,7 +90,7 @@ export function MemoryMatch() {
           className="flex h-11 items-center gap-2 rounded-full bg-white/90 px-5 text-[15px] font-bold text-[#123a52] transition-transform duration-150 hover:scale-[1.04] active:scale-95"
         >
           <RotateCcw size={16} strokeWidth={2.6} />
-          Shuffle
+          {t("Shuffle")}
         </button>
       </div>
       <div className="grid w-[min(100%,520px,calc(100vh-290px))] grid-cols-4 gap-3">
@@ -100,7 +102,7 @@ export function MemoryMatch() {
               key={card.key}
               type="button"
               onClick={() => tap(card.key)}
-              aria-label={isUp ? "Card" : "Hidden card"}
+              aria-label={isUp ? t("Card") : t("Hidden card")}
               className="aspect-[3/4] [perspective:600px]"
             >
               <span
@@ -142,17 +144,21 @@ export function MemoryMatch() {
               }}
             />
           ))}
-          <div className="kids-card flex flex-col items-center gap-4 rounded-[28px] border-4 border-[#ffd166] bg-white/95 px-12 py-10 text-center">
+          <div className="kids-card flex flex-col items-center gap-4 rounded-2xl border-4 border-[#ffd166] bg-white/95 px-12 py-10 text-center">
             <PartyPopper size={44} className="text-[#e08900]" strokeWidth={2} />
-            <p className="font-display text-[30px] font-medium text-[#123a52]">You found them all!</p>
-            <p className="text-[16px] font-semibold text-[#3c6a84]">{moves} moves. Amazing memory!</p>
+            <p className="font-display text-[30px] font-medium text-[#123a52]">
+              {t("You found them all!")}
+            </p>
+            <p className="text-[16px] font-semibold text-[#3c6a84]">
+              {t("{moves} moves. Amazing memory!", { moves })}
+            </p>
             <button
               type="button"
               onClick={reset}
               className="mt-1 flex h-14 items-center gap-2 rounded-full bg-[#ffd166] px-8 text-[18px] font-bold text-[#4a3200] transition-transform duration-150 hover:scale-[1.04] active:scale-95"
             >
               <RotateCcw size={18} strokeWidth={2.6} />
-              Play again
+              {t("Play again")}
             </button>
           </div>
         </div>

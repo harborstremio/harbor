@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::future::Future;
-use std::net::IpAddr;
+use std::net::{IpAddr, SocketAddr};
 use std::sync::OnceLock;
 use std::time::Duration;
 
@@ -54,9 +54,94 @@ fn is_blocked_ip(ip: IpAddr) -> bool {
     }
 }
 
+fn is_public_network_ip(ip: IpAddr) -> bool {
+    let ip = match ip {
+        IpAddr::V6(v6) => match v6.to_ipv4_mapped() {
+            Some(v4) => IpAddr::V4(v4),
+            None => IpAddr::V6(v6),
+        },
+        other => other,
+    };
+    match ip {
+        IpAddr::V4(v4) => {
+            let [a, b, c, _] = v4.octets();
+            !(a == 0
+                || a == 10
+                || a == 127
+                || a >= 224
+                || (a == 100 && (64..=127).contains(&b))
+                || (a == 169 && b == 254)
+                || (a == 172 && (16..=31).contains(&b))
+                || (a == 192 && b == 168)
+                || (a == 192 && b == 0)
+                || (a == 192 && b == 88 && c == 99)
+                || (a == 198 && (b == 18 || b == 19))
+                || (a == 198 && b == 51 && c == 100)
+                || (a == 203 && b == 0 && c == 113))
+        }
+        IpAddr::V6(v6) => {
+            let segments = v6.segments();
+            (segments[0] & 0xe000) == 0x2000
+                && segments[0] != 0x2002
+                && !(segments[0] == 0x2001 && segments[1] == 0x0db8)
+                && !(segments[0] == 0x2001 && segments[1] < 0x0200)
+        }
+    }
+}
+
+async fn resolve_public_target(url: &reqwest::Url) -> Result<Vec<SocketAddr>, String> {
+    if url.scheme() != "http" && url.scheme() != "https" {
+        return Err(format!("public target bad scheme: {}", url.scheme()));
+    }
+    let host = url
+        .host_str()
+        .map(|value| {
+            value
+                .trim_start_matches('[')
+                .trim_end_matches(']')
+                .to_string()
+        })
+        .filter(|value| !value.is_empty())
+        .ok_or_else(|| "public target has no host".to_string())?;
+    let port = url
+        .port_or_known_default()
+        .ok_or_else(|| "public target has no port".to_string())?;
+    if let Ok(ip) = host.parse::<IpAddr>() {
+        if !is_public_network_ip(ip) {
+            return Err(format!("blocked non-public target: {host}"));
+        }
+        return Ok(vec![SocketAddr::new(ip, port)]);
+    }
+
+    let lookup = (host.clone(), port);
+    let mut addresses = tokio::task::spawn_blocking(move || {
+        use std::net::ToSocketAddrs;
+        lookup
+            .to_socket_addrs()
+            .map(|items| items.collect::<Vec<_>>())
+    })
+    .await
+    .map_err(|_| format!("public target DNS failed: {host}"))?
+    .map_err(|_| format!("public target DNS failed: {host}"))?;
+    if addresses.is_empty()
+        || addresses
+            .iter()
+            .any(|address| !is_public_network_ip(address.ip()))
+    {
+        return Err(format!("blocked non-public target: {host}"));
+    }
+    addresses.sort_unstable();
+    addresses.dedup();
+    Ok(addresses)
+}
+
 fn host_is_blocked_literal(url: &reqwest::Url) -> bool {
     match url.host_str() {
-        Some(h) => match h.trim_start_matches('[').trim_end_matches(']').parse::<IpAddr>() {
+        Some(h) => match h
+            .trim_start_matches('[')
+            .trim_end_matches(']')
+            .parse::<IpAddr>()
+        {
             Ok(ip) => is_blocked_ip(ip),
             Err(_) => false,
         },
@@ -79,7 +164,9 @@ async fn validate_target(url: &reqwest::Url) -> Result<(), String> {
     let lookup = (host.clone(), port);
     let resolved = tokio::task::spawn_blocking(move || {
         use std::net::ToSocketAddrs;
-        lookup.to_socket_addrs().map(|it| it.map(|a| a.ip()).collect::<Vec<_>>())
+        lookup
+            .to_socket_addrs()
+            .map(|it| it.map(|a| a.ip()).collect::<Vec<_>>())
     })
     .await;
     if let Ok(Ok(ips)) = resolved {
@@ -90,8 +177,14 @@ async fn validate_target(url: &reqwest::Url) -> Result<(), String> {
     Ok(())
 }
 
-fn same_host(a: &reqwest::Url, b: &reqwest::Url) -> bool {
-    a.host_str() == b.host_str() && a.port_or_known_default() == b.port_or_known_default()
+fn same_origin(a: &reqwest::Url, b: &reqwest::Url) -> bool {
+    a.scheme() == b.scheme()
+        && a.host_str() == b.host_str()
+        && a.port_or_known_default() == b.port_or_known_default()
+}
+
+fn is_https_downgrade(a: &reqwest::Url, b: &reqwest::Url) -> bool {
+    a.scheme() == "https" && b.scheme() == "http"
 }
 
 fn strip_headers(headers: &mut Vec<(String, String)>, drop: &[&str]) {
@@ -125,7 +218,7 @@ fn is_followable_redirect(status: reqwest::StatusCode) -> bool {
 
 fn apply_redirect_method(
     method: &mut reqwest::Method,
-    body: &mut Option<String>,
+    body: &mut Option<Vec<u8>>,
     status: reqwest::StatusCode,
 ) {
     use reqwest::{Method, StatusCode};
@@ -136,32 +229,45 @@ fn apply_redirect_method(
             }
             *body = None;
         }
-        StatusCode::MOVED_PERMANENTLY | StatusCode::FOUND => {
-            if *method == Method::POST {
-                *method = Method::GET;
-                *body = None;
-            }
+        StatusCode::MOVED_PERMANENTLY | StatusCode::FOUND if *method == Method::POST => {
+            *method = Method::GET;
+            *body = None;
         }
         _ => {}
     }
+}
+
+fn http_client_builder() -> reqwest::ClientBuilder {
+    reqwest::Client::builder()
+        .no_proxy()
+        .redirect(reqwest::redirect::Policy::none())
+        .timeout(Duration::from_secs(30))
+        .connect_timeout(Duration::from_secs(10))
+        .pool_idle_timeout(Duration::from_secs(30))
+        .pool_max_idle_per_host(8)
 }
 
 fn http_client() -> Result<&'static reqwest::Client, String> {
     static CLIENT: OnceLock<Result<reqwest::Client, String>> = OnceLock::new();
     CLIENT
         .get_or_init(|| {
-            reqwest::Client::builder()
-                .no_proxy()
-                .redirect(reqwest::redirect::Policy::none())
-                .timeout(Duration::from_secs(30))
-                .connect_timeout(Duration::from_secs(10))
-                .pool_idle_timeout(Duration::from_secs(30))
-                .pool_max_idle_per_host(8)
+            http_client_builder()
                 .build()
                 .map_err(|e| format!("client: {e}"))
         })
         .as_ref()
         .map_err(|e| e.clone())
+}
+
+async fn public_http_client(url: &reqwest::Url) -> Result<reqwest::Client, String> {
+    let host = url
+        .host_str()
+        .ok_or_else(|| "public target has no host".to_string())?;
+    let addresses = resolve_public_target(url).await?;
+    http_client_builder()
+        .resolve_to_addrs(host, &addresses)
+        .build()
+        .map_err(|error| format!("public client: {error}"))
 }
 
 #[derive(Debug, Deserialize)]
@@ -171,8 +277,12 @@ pub struct HarborFetchArgs {
     pub method: Option<String>,
     pub headers: Option<HashMap<String, String>>,
     pub body: Option<String>,
+    pub body_base64: Option<String>,
     pub timeout_ms: Option<u64>,
     pub response_type: Option<String>,
+    pub max_response_bytes: Option<u64>,
+    pub credential_handle: Option<String>,
+    pub public_network_only: Option<bool>,
 }
 
 #[derive(Debug, Serialize)]
@@ -191,6 +301,7 @@ pub async fn harbor_fetch(
     args: HarborFetchArgs,
 ) -> Result<HarborFetchResponse, String> {
     let timeout = Duration::from_millis(args.timeout_ms.unwrap_or(DEFAULT_TIMEOUT_MS));
+    let _permit = acquire_fetch_permit().await?;
     run_with_deadline(timeout, harbor_fetch_inner(app, args)).await
 }
 
@@ -198,21 +309,21 @@ async fn harbor_fetch_inner(
     app: tauri::AppHandle,
     args: HarborFetchArgs,
 ) -> Result<HarborFetchResponse, String> {
-    let _permit = acquire_fetch_permit().await?;
-
-    let client = http_client()?;
     let timeout = Duration::from_millis(args.timeout_ms.unwrap_or(DEFAULT_TIMEOUT_MS));
+    let public_network_only = args.public_network_only.unwrap_or(false);
 
-    let method = args
-        .method
-        .as_deref()
-        .unwrap_or("GET")
-        .to_uppercase();
-    let mut current_method = reqwest::Method::from_bytes(method.as_bytes())
-        .map_err(|e| format!("method: {}", e))?;
+    let method = args.method.as_deref().unwrap_or("GET").to_uppercase();
+    let mut current_method =
+        reqwest::Method::from_bytes(method.as_bytes()).map_err(|e| format!("method: {}", e))?;
 
     let mut current_url = reqwest::Url::parse(&args.url).map_err(|e| format!("url: {}", e))?;
     validate_target(&current_url).await?;
+
+    let mut subtitle_credential = args
+        .credential_handle
+        .as_deref()
+        .map(crate::subtitle_credentials::resolve)
+        .transpose()?;
 
     let original_host = current_url.host_str().map(|s| s.to_string());
     let cf = current_url.host_str().and_then(crate::cf_solver::cf_cached);
@@ -224,6 +335,12 @@ async fn harbor_fetch_inner(
     if let Some(caller_headers) = args.headers {
         for (k, v) in caller_headers {
             let low = k.to_ascii_lowercase();
+            if low == "x-harbor-subtitle-credential" {
+                continue;
+            }
+            if subtitle_credential.is_some() && low == "x-api-key" {
+                continue;
+            }
             if low == "user-agent" {
                 if cf.is_some() {
                     continue;
@@ -260,21 +377,53 @@ async fn harbor_fetch_inner(
         headers.push(("Accept-Language".to_string(), "en-US,en;q=0.9".to_string()));
     }
 
-    let mut body: Option<String> = args.body;
+    let mut body = match args.body_base64 {
+        Some(value) => Some(
+            base64::engine::general_purpose::STANDARD
+                .decode(value)
+                .map_err(|error| format!("request base64: {error}"))?,
+        ),
+        None => args.body.map(String::into_bytes),
+    };
     let mut redirect_count = 0usize;
 
-    let res = loop {
+    let mut res = loop {
+        let pinned_client = if public_network_only {
+            Some(public_http_client(&current_url).await?)
+        } else {
+            None
+        };
+        let client = if let Some(client) = pinned_client.as_ref() {
+            client
+        } else {
+            http_client()?
+        };
+        let (request_url, credential_header) = match subtitle_credential.as_ref() {
+            Some(credential) => {
+                crate::subtitle_credentials::apply_to_request(&current_url, credential)?
+            }
+            None => (current_url.clone(), None),
+        };
         let mut req = client
-            .request(current_method.clone(), current_url.clone())
+            .request(current_method.clone(), request_url)
             .timeout(timeout);
         for (k, v) in &headers {
             req = req.header(k.as_str(), v.as_str());
+        }
+        if let Some((name, value)) = credential_header {
+            req = req.header(name.as_str(), value.as_str());
         }
         if let Some(b) = &body {
             req = req.body(b.clone());
         }
 
-        let resp = req.send().await.map_err(|e| format!("send: {}", e))?;
+        let resp = req.send().await.map_err(|error| {
+            if subtitle_credential.is_some() {
+                "send: subtitle provider request failed".to_string()
+            } else {
+                format!("send: {error}")
+            }
+        })?;
         let status = resp.status();
         if !is_followable_redirect(status) {
             break resp;
@@ -298,12 +447,35 @@ async fn harbor_fetch_inner(
         if next_url.scheme() != "http" && next_url.scheme() != "https" {
             return Err(format!("redirect bad scheme: {}", next_url.scheme()));
         }
-        validate_target(&next_url).await?;
-        if !same_host(&current_url, &next_url) {
-            strip_headers(&mut headers, &["cookie", "referer", "origin"]);
+        if is_https_downgrade(&current_url, &next_url) {
+            return Err("redirect from HTTPS to HTTP is not allowed".to_string());
         }
+        if !public_network_only {
+            validate_target(&next_url).await?;
+        }
+        let cross_origin = !same_origin(&current_url, &next_url);
         let had_body = body.is_some();
         apply_redirect_method(&mut current_method, &mut body, status);
+        if cross_origin_redirect_forwards_body(cross_origin, &body) {
+            return Err("cross-origin redirect cannot forward request body".to_string());
+        }
+        if cross_origin {
+            subtitle_credential = None;
+            strip_headers(
+                &mut headers,
+                &[
+                    "authorization",
+                    "proxy-authorization",
+                    "x-api-key",
+                    "api-key",
+                    "x-auth-token",
+                    "x-harbor-auth",
+                    "cookie",
+                    "referer",
+                    "origin",
+                ],
+            );
+        }
         if had_body && body.is_none() {
             strip_headers(
                 &mut headers,
@@ -331,7 +503,27 @@ async fn harbor_fetch_inner(
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_string());
     let response_headers = collect_headers(res.headers());
-    let body = if args.response_type.as_deref() == Some("base64") {
+    let body = if let Some(max_bytes) = args.max_response_bytes {
+        if res.content_length().is_some_and(|size| size > max_bytes) {
+            return Err("response size limit exceeded".to_string());
+        }
+        let mut bytes = Vec::new();
+        while let Some(chunk) = res
+            .chunk()
+            .await
+            .map_err(|error| format!("read: {error}"))?
+        {
+            if (bytes.len() as u64).saturating_add(chunk.len() as u64) > max_bytes {
+                return Err("response size limit exceeded".to_string());
+            }
+            bytes.extend_from_slice(&chunk);
+        }
+        if args.response_type.as_deref() == Some("base64") {
+            base64::engine::general_purpose::STANDARD.encode(&bytes)
+        } else {
+            String::from_utf8_lossy(&bytes).into_owned()
+        }
+    } else if args.response_type.as_deref() == Some("base64") {
         match res.bytes().await {
             Ok(bytes) => base64::engine::general_purpose::STANDARD.encode(&bytes),
             Err(_) => String::new(),
@@ -341,18 +533,30 @@ async fn harbor_fetch_inner(
     };
 
     if is_cloudflare_challenge(status, cf_mitigated.as_deref(), &body) {
-        eprintln!("[cf] challenge detected ({}) for {}", status, args.url);
         if let Some(h) = original_host.as_deref() {
             crate::cf_solver::cf_invalidate(h);
         }
-        if let Ok(solved) = crate::cf_solver::cf_fetch(app, args.url.clone()).await {
-            return Ok(HarborFetchResponse {
-                status: 200,
-                ok: true,
-                body: solved,
-                content_type: None,
-                headers: HashMap::new(),
-            });
+        let solver_ok = original_host
+            .as_deref()
+            .map(solver_host_allowed)
+            .unwrap_or(false);
+        // The solver returns text, not a byte-preserving/base64 response, and does not
+        // participate in the caller's response-size contract. Binary/capped callers
+        // must receive the original bounded response instead of bypassing those rules.
+        if solver_ok
+            && args.response_type.as_deref() != Some("base64")
+            && args.max_response_bytes.is_none()
+        {
+            eprintln!("[cf] challenge detected ({}) for {}", status, args.url);
+            if let Ok(solved) = crate::cf_solver::cf_fetch(app, args.url.clone()).await {
+                return Ok(HarborFetchResponse {
+                    status: 200,
+                    ok: true,
+                    body: solved,
+                    content_type: None,
+                    headers: HashMap::new(),
+                });
+            }
         }
     }
 
@@ -365,18 +569,35 @@ async fn harbor_fetch_inner(
     })
 }
 
+const BACKGROUND_PROVIDER_HOSTS: &[&str] =
+    &["api.theintrodb.org", "api.introdb.app", "api.skipdb.tv"];
+
+fn solver_host_allowed(host: &str) -> bool {
+    let host = host.trim_end_matches('.').to_ascii_lowercase();
+    !BACKGROUND_PROVIDER_HOSTS.contains(&host.as_str())
+}
+
+fn is_cloudflare_hard_block(body: &str) -> bool {
+    body.contains("Sorry, you have been blocked")
+        || body.contains("error code: 1020")
+        || body.contains("Error 1015")
+        || body.contains("You are being rate limited")
+}
+
 fn is_cloudflare_challenge(status: u16, cf_mitigated: Option<&str>, body: &str) -> bool {
+    if is_cloudflare_hard_block(body) {
+        return false;
+    }
     if cf_mitigated == Some("challenge") {
         return true;
     }
-    if !matches!(status, 403 | 429 | 503) {
+    if !matches!(status, 403 | 503) {
         return false;
     }
     body.contains("Just a moment")
-        || body.contains("challenge-platform")
-        || body.contains("__cf_chl")
-        || body.contains("cf-please-wait")
         || body.contains("cf_chl_opt")
+        || body.contains("challenge-form")
+        || body.contains("cf-please-wait")
 }
 
 #[derive(Debug, Deserialize)]
@@ -415,12 +636,14 @@ async fn harbor_upload_inner(args: HarborUploadArgs) -> Result<HarborFetchRespon
 
     let mut req = client
         .post(url)
-        .timeout(Duration::from_millis(args.timeout_ms.unwrap_or(DEFAULT_TIMEOUT_MS)))
+        .timeout(Duration::from_millis(
+            args.timeout_ms.unwrap_or(DEFAULT_TIMEOUT_MS),
+        ))
         .multipart(form);
     let mut has_ua = false;
     if let Some(caller_headers) = args.headers {
         for (k, v) in caller_headers {
-            if k.to_ascii_lowercase() == "user-agent" {
+            if k.eq_ignore_ascii_case("user-agent") {
                 has_ua = true;
             }
             req = req.header(k.as_str(), v.as_str());
@@ -447,4 +670,93 @@ async fn harbor_upload_inner(args: HarborUploadArgs) -> Result<HarborFetchRespon
         content_type,
         headers,
     })
+}
+
+fn cross_origin_redirect_forwards_body(cross_origin: bool, body: &Option<Vec<u8>>) -> bool {
+    cross_origin && body.is_some()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        apply_redirect_method, cross_origin_redirect_forwards_body, is_https_downgrade,
+        is_public_network_ip, same_origin, strip_headers,
+    };
+
+    #[test]
+    fn cross_host_redirects_strip_credentials() {
+        let mut headers = vec![
+            ("X-API-Key".to_string(), "secret".to_string()),
+            ("Authorization".to_string(), "Bearer secret".to_string()),
+            ("Cookie".to_string(), "session=secret".to_string()),
+            ("Accept".to_string(), "application/zip".to_string()),
+        ];
+        strip_headers(&mut headers, &["x-api-key", "authorization", "cookie"]);
+        assert_eq!(
+            headers,
+            vec![("Accept".to_string(), "application/zip".to_string())]
+        );
+    }
+
+    #[test]
+    fn redirect_origin_includes_scheme_and_effective_port() {
+        let https = reqwest::Url::parse("https://example.test/path").unwrap();
+        let same = reqwest::Url::parse("https://example.test/next").unwrap();
+        let downgrade = reqwest::Url::parse("http://example.test:443/next").unwrap();
+
+        assert!(same_origin(&https, &same));
+        assert!(!same_origin(&https, &downgrade));
+        assert!(is_https_downgrade(&https, &downgrade));
+    }
+
+    #[test]
+    fn cross_origin_redirects_never_forward_request_bodies() {
+        use reqwest::{Method, StatusCode};
+
+        for (status, method) in [
+            (StatusCode::TEMPORARY_REDIRECT, Method::POST),
+            (StatusCode::PERMANENT_REDIRECT, Method::POST),
+            (StatusCode::MOVED_PERMANENTLY, Method::PUT),
+            (StatusCode::FOUND, Method::PATCH),
+        ] {
+            let mut redirected_method = method;
+            let mut body = Some(b"secret".to_vec());
+            apply_redirect_method(&mut redirected_method, &mut body, status);
+            assert!(cross_origin_redirect_forwards_body(true, &body));
+            assert!(!cross_origin_redirect_forwards_body(false, &body));
+        }
+
+        let mut method = Method::POST;
+        let mut body = Some(b"safe-to-drop".to_vec());
+        apply_redirect_method(&mut method, &mut body, StatusCode::SEE_OTHER);
+        assert!(!cross_origin_redirect_forwards_body(true, &body));
+    }
+
+    #[test]
+    fn provider_public_network_policy_rejects_local_and_reserved_ranges() {
+        for value in [
+            "127.0.0.1",
+            "10.0.0.1",
+            "172.16.0.1",
+            "192.168.1.1",
+            "100.64.0.1",
+            "169.254.1.1",
+            "198.18.0.1",
+            "203.0.113.1",
+            "::1",
+            "fe80::1",
+            "fc00::1",
+            "fec0::1",
+            "2001:db8::1",
+            "2002:0a00:0001::1",
+            "::ffff:127.0.0.1",
+        ] {
+            let ip: std::net::IpAddr = value.parse().unwrap();
+            assert!(!is_public_network_ip(ip), "{value}");
+        }
+        for value in ["1.1.1.1", "8.8.8.8", "2606:4700:4700::1111"] {
+            let ip: std::net::IpAddr = value.parse().unwrap();
+            assert!(is_public_network_ip(ip), "{value}");
+        }
+    }
 }

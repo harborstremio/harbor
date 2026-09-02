@@ -52,13 +52,15 @@ export function useStreamSwitcher(params: {
   const [liveUrl, setLiveUrl] = useState(src.url);
   const [liveHistoryUrl, setLiveHistoryUrl] = useState(src.historyUrl ?? src.url);
   const [liveStreamRef, setLiveStreamRef] = useState(src.streamRef);
+  const swapAcRef = useRef<AbortController | null>(null);
   useEffect(() => {
     setLiveUrl(src.url);
     setLiveHistoryUrl(src.historyUrl ?? src.url);
     setLiveStreamRef(src.streamRef);
+    swapAcRef.current?.abort();
+    setSwapResolvingKey(null);
   }, [src.url, src.historyUrl, src.streamRef]);
 
-  const swapAcRef = useRef<AbortController | null>(null);
   const switchProxySessionRef = useRef<string | null>(null);
 
   // Pin this item's streams in the picker cache for the whole playback session
@@ -88,7 +90,10 @@ export function useStreamSwitcher(params: {
         ? { season: src.episode.season ?? null, episode: src.episode.episode ?? null }
         : undefined;
       const r = await resolveStream(stream, debrids, ac.signal, true, false, hint);
-      if (ac.signal.aborted) return;
+      if (ac.signal.aborted) {
+        if (swapAcRef.current === ac) setSwapResolvingKey(null);
+        return;
+      }
       if (!r.ok) {
         console.warn(`[player] stream swap failed: ${r.code}`);
         setSwapResolvingKey(null);
@@ -142,12 +147,18 @@ export function useStreamSwitcher(params: {
       setLiveUrl(playUrl);
       setLiveHistoryUrl(r.data.url);
       setLiveStreamRef({
+        resolvedFilename:
+          r.data.filename ??
+          stream.behaviorHints?.filename ??
+          stream.behaviorHints?.fileName ??
+          null,
         infoHash: stream.infoHash ?? null,
-        fileIdx: stream.fileIdx ?? null,
+        fileIdx: r.data.fileIdx ?? stream.fileIdx ?? null,
         addonId: stream.addonId ?? null,
         title: stream.title ?? null,
         parsedTitle: stream.parsedTitle ?? null,
         resolution: stream.resolution ?? null,
+        releaseGroup: stream.releaseGroupNormalized ?? null,
         source: stream.source ?? null,
         size: stream.size ?? null,
         bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
@@ -160,12 +171,13 @@ export function useStreamSwitcher(params: {
           src.meta.id,
           {
             infoHash: stream.infoHash ?? null,
-            fileIdx: stream.fileIdx ?? null,
+            fileIdx: r.data.fileIdx ?? stream.fileIdx ?? null,
             addonId: stream.addonId ?? null,
             url: r.data.url,
             title: src.meta.name,
             parsedTitle: stream.parsedTitle ?? null,
             resolution: stream.resolution ?? null,
+            releaseGroup: stream.releaseGroupNormalized ?? null,
             source: stream.source ?? null,
             size: stream.size ?? null,
             bingeGroup: stream.behaviorHints?.bingeGroup ?? null,

@@ -2,36 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { ToggleRow, settingsAnchor } from "./shared";
-import { AddressRow } from "./player-panel/server-address-section";
+import { Section, ToggleRow } from "./shared";
 import { isTauri } from "./player-panel/internals";
+import { RemoteCard } from "./remotes-panel/remote-card";
+import type { DeviceKind } from "./remotes-panel/device-art";
 
 const WEB_PORT = 11471;
-
-function Section({
-  anchor,
-  title,
-  sub,
-  children,
-}: {
-  anchor: string;
-  title: string;
-  sub: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section
-      id={settingsAnchor(anchor)}
-      className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
-    >
-      <div className="flex flex-col gap-1">
-        <h2 className="text-[19px] font-medium tracking-tight text-ink">{title}</h2>
-        <p className="text-[13.5px] leading-relaxed text-ink-muted">{sub}</p>
-      </div>
-      {children}
-    </section>
-  );
-}
 
 export function RemotesPanel() {
   const t = useT();
@@ -80,59 +56,67 @@ export function RemotesPanel() {
     );
   }
 
+  const lan = (path: string) => (lanIp ? `http://${lanIp}:${WEB_PORT}${path}` : null);
+  const local = (path: string) => `http://127.0.0.1:${WEB_PORT}${path}`;
+
+  const cards: Array<{ kind: DeviceKind; title: string; blurb: string; path: string }> = [
+    {
+      kind: "web",
+      title: t("Harbor in a browser"),
+      blurb: t("This exact install, served as a web app. Open it on a phone, laptop or TV browser and it streams through this computer."),
+      path: "",
+    },
+    {
+      kind: "remote",
+      title: t("Phone remote"),
+      blurb: t("Play, pause, seek, volume and casting from the couch."),
+      path: "/remote",
+    },
+    {
+      kind: "reader",
+      title: t("Manga reader remote"),
+      blurb: t("Turn pages, zoom and switch modes while you read on the big screen."),
+      path: "/reader",
+    },
+  ];
+
   return (
-    <div className="flex flex-col gap-5">
+    <>
       <Section
-        anchor="Harbor on other devices"
         title={t("Harbor on other devices")}
-        sub={t("Serves this exact install of Harbor as a web app on your network. Open it on a phone, laptop, or TV browser, sign in there, and it streams through this computer.")}
+        subtitle={t("One switch serves Harbor on your network. Scan a code below with your phone, or open an address on any device on the same Wi-Fi.")}
       >
         <ToggleRow
           label={t("Serve Harbor on your network")}
-          sub={t("One switch powers everything on this page: the web app, the phone remote, and the manga reader remote.")}
+          sub={t("Powers everything on this page: the web app, the phone remote, and the manga reader remote.")}
           value={enabled}
           onChange={(v) => update({ serveWebUi: v, remoteControlEnabled: v })}
         />
-        {enabled && (
-          <>
-            <AddressRow label={t("Harbor in your browser (this computer)")} url={`http://127.0.0.1:${WEB_PORT}`} openable />
-            {lanIp && <AddressRow label={t("Harbor in your browser (Wi-Fi)")} url={`http://${lanIp}:${WEB_PORT}`} />}
-            {webError && (
-              <span className="text-[12px] text-danger">
-                {t("Couldn't start on port {WEB_PORT}. Another app may be using it; toggle off and on to retry.", { WEB_PORT: String(WEB_PORT) })}
-              </span>
-            )}
-          </>
+        {webError && (
+          <span className="rounded-md bg-danger/15 px-4 py-3 text-[12.5px] leading-relaxed text-danger">
+            {t("Couldn't start on port {WEB_PORT}. Another app may be using it; toggle off and on to retry.", { WEB_PORT: String(WEB_PORT) })}
+          </span>
         )}
       </Section>
 
-      {enabled && (
-        <>
-          <Section
-            anchor="Phone remote"
-            title={t("Phone remote")}
-            sub={t("Turns your phone into a remote for this computer: play, pause, seek, volume, and casting, all from the couch. Open the Wi-Fi address on your phone's browser.")}
-          >
-            <AddressRow label={t("Phone remote (this computer)")} url={`http://127.0.0.1:${WEB_PORT}/remote`} openable />
-            {lanIp && <AddressRow label={t("Phone remote (Wi-Fi)")} url={`http://${lanIp}:${WEB_PORT}/remote`} />}
-          </Section>
-
-          <Section
-            anchor="Manga reader remote"
-            title={t("Manga reader remote")}
-            sub={t("Control the manga flipbook from your phone while reading on the big screen: turn pages, zoom, and switch modes. The reader also shows this link while you read.")}
-          >
-            <AddressRow label={t("Manga remote (this computer)")} url={`http://127.0.0.1:${WEB_PORT}/reader`} openable />
-            {lanIp && <AddressRow label={t("Manga remote (Wi-Fi)")} url={`http://${lanIp}:${WEB_PORT}/reader`} />}
-          </Section>
-        </>
-      )}
-
-      {!enabled && (
+      {enabled ? (
+        <div className="flex flex-col gap-3">
+          {cards.map((c) => (
+            <RemoteCard
+              key={c.path}
+              kind={c.kind}
+              title={c.title}
+              blurb={c.blurb}
+              lanUrl={lan(c.path)}
+              localUrl={local(c.path)}
+            />
+          ))}
+        </div>
+      ) : (
         <p className="px-1 text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("Flip the switch above and the phone remote and manga reader remote addresses appear here.")}
+          {t("Flip the switch above and the addresses and scan codes appear here.")}
         </p>
       )}
-    </div>
+    </>
   );
 }

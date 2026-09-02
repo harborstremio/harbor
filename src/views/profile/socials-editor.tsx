@@ -36,7 +36,7 @@ function ServiceTile({
       onClick={() => onSelect(service)}
       title={svc.label}
       aria-pressed={active}
-      className={`relative grid h-10 w-10 place-items-center rounded-[10px] ring-1 transition-colors ${
+      className={`relative grid h-10 w-10 place-items-center rounded-md ring-1 transition-colors ${
         active ? "bg-raised ring-accent" : "bg-surface ring-edge-soft hover:bg-raised"
       }`}
     >
@@ -59,7 +59,7 @@ function AddedRow({ entry, onRemove }: { entry: SocialEntry; onRemove: () => voi
   if (!svc) return null;
   const url = resolveUrl(entry.service, entry.value);
   return (
-    <div className="flex items-center gap-3 rounded-[10px] bg-surface px-3 py-2 ring-1 ring-edge-soft">
+    <div className="flex items-center gap-3 rounded-md bg-surface px-3 py-2 ring-1 ring-edge-soft">
       <span className={color ? "shrink-0" : "shrink-0 text-ink-muted"} style={color ? { color } : undefined}>
         <SocialIcon service={entry.service} size={18} />
       </span>
@@ -177,7 +177,7 @@ export function SocialsEditor({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex h-11 flex-1 items-center gap-2 rounded-[10px] bg-surface px-3 ring-1 ring-edge-soft focus-within:ring-edge">
+            <div className="flex h-11 flex-1 items-center gap-2 rounded-md bg-surface px-3 ring-1 ring-edge-soft focus-within:ring-edge">
               <span className={activeColor ? "shrink-0" : "shrink-0 text-ink-subtle"} style={activeColor ? { color: activeColor } : undefined}>
                 <SocialIcon service={active} size={16} />
               </span>
@@ -203,7 +203,7 @@ export function SocialsEditor({
               type="button"
               onClick={add}
               disabled={!canAdd}
-              className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-[10px] bg-ink px-4 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-md bg-ink px-4 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
             >
               <Plus size={15} /> {existing ? t("Update") : t("Add")}
             </button>
@@ -237,14 +237,14 @@ export function SocialsEditor({
         <div className="flex items-center justify-end gap-2 px-5 pb-5 pt-3">
           <button
             onClick={onClose}
-            className="inline-flex min-h-11 items-center rounded-[10px] px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-surface"
+            className="inline-flex min-h-11 items-center rounded-md px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-surface"
           >
             {t("Cancel")}
           </button>
           <button
             onClick={() => void save()}
             disabled={busy}
-            className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
           >
             {busy && <Loader2 size={16} className="animate-spin" />}
             {busy ? t("Saving") : t("Save")}

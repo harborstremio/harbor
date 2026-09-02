@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { useEffect } from "react";
 import { useT } from "@/lib/i18n";
 
@@ -27,10 +28,10 @@ export function CastErrorModal({
 
   if (!error) return null;
 
-  return (
-    <div className="pointer-events-auto fixed inset-0 z-50 flex animate-[harbor-cast-err-in_180ms_ease-out] items-center justify-center bg-canvas/85 backdrop-blur-md">
+  return createPortal(
+    <div className="pointer-events-auto fixed inset-0 z-[210] flex animate-[harbor-cast-err-in_180ms_ease-out] items-center justify-center bg-canvas/85 backdrop-blur-md">
       <div
-        className="relative mx-6 w-full max-w-[440px] rounded-[20px] border border-edge bg-elevated p-7 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)]"
+        className="relative mx-6 w-full max-w-[440px] rounded-xl border border-edge bg-elevated p-7 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-start gap-4">
@@ -85,6 +86,7 @@ export function CastErrorModal({
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
-    </div>
+    </div>,
+    document.body,
   );
 }

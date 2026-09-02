@@ -71,7 +71,7 @@ export function CommentItem({
   const canReply = !!onReply && !!signedIn && !!replyToId;
   return (
     <div className="flex flex-col">
-      <div className="group flex items-start gap-3 rounded-[10px] p-2 transition-colors hover:bg-elevated/60">
+      <div className="group flex items-start gap-3 rounded-md p-2 transition-colors hover:bg-elevated/60">
         <UserHoverCard handle={c.authorHandle}>
           <button
             onClick={() => onOpenAuthor?.(c.authorHandle)}
@@ -143,7 +143,7 @@ export function CommentItem({
           <button
             onClick={() => onDelete(c.id)}
             aria-label={t("Delete comment")}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-ink-subtle opacity-0 transition-all hover:bg-surface hover:text-danger focus-visible:opacity-100 group-hover:opacity-100"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-subtle opacity-0 transition-all hover:bg-surface hover:text-danger focus-visible:opacity-100 group-hover:opacity-100"
           >
             <Trash2 size={20} />
           </button>

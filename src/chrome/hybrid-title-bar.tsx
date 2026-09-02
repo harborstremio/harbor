@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useRef, type ReactNode } from "react";
 import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
 import { osClass } from "@/lib/platform";

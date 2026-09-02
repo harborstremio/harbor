@@ -1,4 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { Check, WifiOff } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
 import type { RemoteCommand, RemoteSnapshot } from "@/lib/remote/protocol";
@@ -27,18 +36,43 @@ export function MobileRemoteProvider({ children }: { children: ReactNode }) {
     const nextTmdb = snapshot.tmdbKey ?? "";
     const nextRpdb = snapshot.rpdbKey ?? "";
     const nextTvdb = snapshot.tvdbKey ?? "";
-    const patch: { tmdbKey?: string; rpdbKey?: string; tvdbKey?: string } = {};
+    const patch: Parameters<typeof update>[0] = {};
     if (nextTmdb && nextTmdb !== settings.tmdbKey) patch.tmdbKey = nextTmdb;
     if (nextRpdb && nextRpdb !== settings.rpdbKey) patch.rpdbKey = nextRpdb;
     if (nextTvdb && nextTvdb !== settings.tvdbKey) patch.tvdbKey = nextTvdb;
-    if (patch.tmdbKey !== undefined || patch.rpdbKey !== undefined || patch.tvdbKey !== undefined) update(patch);
+    if (snapshot.tmdbLanguage !== undefined && snapshot.tmdbLanguage !== settings.tmdbLanguage)
+      patch.tmdbLanguage = snapshot.tmdbLanguage;
+    if (
+      snapshot.tmdbImageLangs !== undefined &&
+      snapshot.tmdbImageLangs.join("\0") !== settings.tmdbImageLangs.join("\0")
+    )
+      patch.tmdbImageLangs = snapshot.tmdbImageLangs;
+    if (
+      snapshot.translateTitles !== undefined &&
+      snapshot.translateTitles !== settings.translateTitles
+    )
+      patch.translateTitles = snapshot.translateTitles;
+    if (
+      snapshot.translateDescriptions !== undefined &&
+      snapshot.translateDescriptions !== settings.translateDescriptions
+    )
+      patch.translateDescriptions = snapshot.translateDescriptions;
+    if (Object.keys(patch).length > 0) update(patch);
   }, [
     snapshot.tmdbKey,
     snapshot.rpdbKey,
     snapshot.tvdbKey,
+    snapshot.tmdbLanguage,
+    snapshot.tmdbImageLangs,
+    snapshot.translateTitles,
+    snapshot.translateDescriptions,
     settings.tmdbKey,
     settings.rpdbKey,
     settings.tvdbKey,
+    settings.tmdbLanguage,
+    settings.tmdbImageLangs,
+    settings.translateTitles,
+    settings.translateDescriptions,
     update,
   ]);
 
@@ -99,7 +133,11 @@ export function MobileRemoteProvider({ children }: { children: ReactNode }) {
               flash.ok ? "bg-ink text-canvas" : "bg-danger/90 text-white"
             }`}
           >
-            {flash.ok ? <Check size={16} strokeWidth={2.6} /> : <WifiOff size={16} strokeWidth={2.4} />}
+            {flash.ok ? (
+              <Check size={16} strokeWidth={2.6} />
+            ) : (
+              <WifiOff size={16} strokeWidth={2.4} />
+            )}
             {flash.text}
           </div>
         </div>

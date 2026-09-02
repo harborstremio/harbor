@@ -1,4 +1,5 @@
 import { ChevronDown, Plus, X } from "lucide-react";
+import { KawaiiBunny } from "./kawaii-bunny";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
@@ -75,6 +76,7 @@ export function ProfilePickerModal() {
       }`}
     >
       <div className="relative flex max-h-[calc(100vh-3rem)] w-full max-w-[860px] flex-col animate-in fade-in zoom-in-95 slide-in-from-bottom-3 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+        <KawaiiBunny />
         {showClose && (
           <button
             type="button"

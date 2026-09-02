@@ -1,4 +1,5 @@
-import { Check, Play } from "lucide-react";
+import { Check } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { Poster } from "@/components/poster";
 import { useT } from "@/lib/i18n";
 import { readResumeEntry } from "@/lib/resume";

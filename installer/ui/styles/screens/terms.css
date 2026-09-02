@@ -1,0 +1,164 @@
+.hb-terms-card {
+  position: relative;
+  width: var(--col);
+  height: 100%;
+  padding: 22px 26px;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--edge-soft);
+}
+
+.hb-terms-well {
+  height: 100%;
+}
+
+.hb-terms-scroll {
+  height: 100%;
+  padding: 24px 20px;
+  overflow-y: auto;
+}
+
+.hb-terms-prose {
+  max-width: 660px;
+  user-select: text;
+  cursor: auto;
+}
+
+.hb-terms-prose > :first-child {
+  margin-top: 0;
+}
+
+.hb-terms-prose h2 {
+  margin: 22px 0 6px;
+}
+
+.hb-terms-prose p {
+  margin: 0 0 14px;
+}
+
+.hb-terms-prose p:last-child {
+  margin-bottom: 0;
+}
+
+.hb-terms-rail {
+  top: 16px;
+  bottom: 16px;
+  right: 14px;
+  pointer-events: none;
+}
+
+.hb-terms-card .hb-rail-thumb {
+  top: 0;
+  background: var(--ink-subtle);
+}
+
+.hb-terms-agree {
+  display: flex;
+  align-items: center;
+}
+
+.hb-terms-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  margin: -6px 0;
+  border-radius: var(--r-sm);
+}
+
+.hb-terms-mark {
+  transition: background-color var(--t-hover) var(--ease), box-shadow var(--t-hover) var(--ease),
+    opacity var(--t-hover) var(--ease), transform var(--t-press) var(--ease);
+}
+
+.hb-terms-mark[aria-checked="true"] {
+  background: var(--accent);
+}
+
+.hb-terms-box:active .hb-terms-mark {
+  transform: scale(0.92, 0.88);
+}
+
+.hb-terms-label {
+  transition: color var(--t-hover) var(--ease);
+}
+
+.hb-terms-box:hover .hb-terms-label,
+.hb-terms-box[aria-checked="true"] .hb-terms-label {
+  color: var(--ink);
+}
+
+.hb-terms-hint {
+  margin: 0;
+}
+
+.hb-anim-terms-pop {
+  animation: terms-mark-pop 340ms var(--ease) 0ms both;
+}
+
+.hb-anim-terms-agree {
+  animation: terms-agree-in var(--t-reveal) var(--ease) 120ms both;
+}
+
+.hb-anim-terms-hint {
+  animation: terms-hint-in var(--t-state) var(--ease) 0ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-anim-terms-pop,
+  .hb-anim-terms-agree,
+  .hb-anim-terms-hint {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .hb-terms-mark,
+  .hb-terms-label {
+    transition-duration: 1ms;
+  }
+
+  .hb-terms-box:active .hb-terms-mark {
+    transform: none;
+  }
+}
+
+.hb-terms-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.hb-terms-langs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.hb-terms-lang {
+  height: 26px;
+  padding: 0 11px;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink-subtle);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--t-hover) var(--ease), color var(--t-hover) var(--ease);
+}
+
+.hb-terms-lang:hover {
+  background: var(--wash-quiet);
+  color: var(--ink-muted);
+}
+
+.hb-terms-lang[aria-pressed='true'] {
+  background: var(--wash);
+  color: var(--ink);
+}
+
+.hb-terms-print {
+  flex: 0 0 auto;
+}

@@ -1,0 +1,141 @@
+.hb-welcome-grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 12px;
+  row-gap: 8px;
+}
+
+.hb-welcome-row {
+  height: var(--h-row);
+  padding: 0 14px;
+  border-radius: var(--r-md);
+  background: var(--wash-quiet);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hb-welcome-chev {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  color: var(--ink-subtle);
+  animation: welcome-chevron-in 300ms var(--ease) calc(min(var(--i, 0) * 26ms, 320ms) + 90ms) both;
+}
+
+.hb-welcome-chev svg {
+  width: 16px;
+  height: 16px;
+}
+
+.hb-welcome-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.hb-welcome-name {
+  display: block;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hb-welcome-note {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hb-welcome-size {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.hb-welcome-loc {
+  margin-top: 20px;
+  height: var(--h-well);
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transform-origin: 50% 100%;
+  animation: welcome-well-in 360ms var(--ease) 250ms both;
+}
+
+.hb-welcome-path {
+  flex: 0 1 auto;
+  max-width: 560px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hb-welcome-total {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  white-space: nowrap;
+}
+
+.hb-welcome-change {
+  flex: 0 0 auto;
+}
+
+.hb-welcome-consequence,
+.hb-welcome-free {
+  margin: 0;
+}
+
+.hb-welcome-meter {
+  width: 240px;
+  margin-bottom: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-welcome-chev,
+  .hb-welcome-loc {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hb-welcome-row.is-present .hb-welcome-mark {
+  color: var(--accent);
+}
+
+.hb-welcome-row.is-present .hb-welcome-size {
+  color: var(--accent);
+}
+
+.hb-welcome-size.hb-skeleton {
+  width: 52px;
+  height: 11px;
+}
+
+.hb-welcome-path.hb-skeleton {
+  width: 260px;
+  height: 12px;
+}
+
+.hb-welcome-total.hb-skeleton {
+  width: 96px;
+  height: 11px;
+}
+
+.hb-welcome-consequence.hb-skeleton {
+  display: block;
+  width: 420px;
+  height: 13px;
+}
+
+.hb-welcome-total.is-tight {
+  color: var(--danger);
+}

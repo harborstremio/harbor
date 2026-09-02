@@ -57,7 +57,7 @@ export function RankModalShell({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[130] flex items-stretch justify-center bg-canvas/85 backdrop-blur-sm"
+      className="fixed inset-0 z-[175] flex items-stretch justify-center bg-canvas/85 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}

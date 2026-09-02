@@ -1,6 +1,7 @@
 import { ArrowLeft, Check, Eye } from "lucide-react";
 import { useRef, useState } from "react";
 import { socialPost } from "@/lib/social/client";
+import { useT } from "@/lib/i18n";
 import type { CustomizationInput, ProfileSummary } from "../profile-types";
 import { CustomizePreview } from "./customize-preview";
 import { PreviewHandle } from "./preview-handle";
@@ -18,6 +19,7 @@ export function CustomizationPanel({
   onClose: () => void;
   onSaved: (next: ProfileSummary) => void;
 }) {
+  const t = useT();
   const [form, setForm] = useState<CustomizationInput>({
     profileFont: summary.profileFont ?? "",
     profileFavicon: summary.profileFavicon ?? "",
@@ -66,7 +68,7 @@ export function CustomizationPanel({
       onSaved(next);
       onClose();
     } catch (e) {
-      setError((e as Error).message || "Could not save. Try again.");
+      setError((e as Error).message || t("Could not save. Try again."));
     } finally {
       setSaving(false);
     }
@@ -101,33 +103,33 @@ export function CustomizationPanel({
           <div className="flex min-w-0 items-center gap-3">
             <button
               onClick={onClose}
-              aria-label="Back"
-              className="flex h-11 w-11 items-center justify-center rounded-[10px] text-ink-muted transition-colors hover:bg-elevated"
+              aria-label={t("Back")}
+              className="flex h-11 w-11 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-elevated"
             >
               <ArrowLeft size={20} />
             </button>
-            <h2 className="font-display text-[20px] text-ink">Customize profile</h2>
+            <h2 className="font-display text-[20px] text-ink">{t("Customize profile")}</h2>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <button
               onClick={openPreview}
-              className="inline-flex min-h-11 items-center gap-2 rounded-[10px] px-4 text-[14px] font-medium text-ink ring-1 ring-edge transition-colors hover:bg-elevated"
+              className="inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-[14px] font-medium text-ink ring-1 ring-edge transition-colors hover:bg-elevated"
             >
-              <Eye size={18} /> Preview
+              <Eye size={18} /> {t("Preview")}
             </button>
             <button
               onClick={onClose}
-              className="inline-flex min-h-11 items-center rounded-[10px] px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-elevated"
+              className="inline-flex min-h-11 items-center rounded-md px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-elevated"
             >
-              Cancel
+              {t("Cancel")}
             </button>
             {(isDirty || saving) && (
               <button
                 onClick={() => void save()}
                 disabled={saving}
-                className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+                className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
               >
-                <Check size={18} /> {saving ? "Saving" : "Save"}
+                <Check size={18} /> {saving ? t("Saving") : t("Save")}
               </button>
             )}
           </div>

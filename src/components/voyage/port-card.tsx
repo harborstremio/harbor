@@ -50,7 +50,7 @@ export function PortCard({
       className="group flex w-full flex-col gap-2.5 text-start [transform-origin:center_bottom] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 active:scale-[0.97]"
     >
       <span
-        className={`relative block aspect-[2/3] overflow-hidden rounded-[10px] ring-1 ring-edge-soft transition-[transform,box-shadow,border-color] duration-200 ease-out group-hover:will-change-transform ${
+        className={`relative block aspect-[2/3] overflow-hidden rounded-md ring-1 ring-edge-soft transition-[transform,box-shadow,border-color] duration-200 ease-out group-hover:will-change-transform ${
           passive
             ? "opacity-55"
             : "group-hover:-translate-y-1 group-hover:ring-edge group-hover:shadow-[0_26px_50px_-20px_rgba(0,0,0,0.7)] motion-reduce:group-hover:translate-y-0"

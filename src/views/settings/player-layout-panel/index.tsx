@@ -32,7 +32,8 @@ import { EditLayoutCard, FooterBar, ThemeTabs } from "./panel-bars";
 import { useChromeEdits } from "./use-chrome-edits";
 import { AdvisoryPreview } from "./advisory-preview";
 import { SeekBarPanel } from "../player-panel";
-import { Section, Segmented, ToggleRow } from "../shared";
+import { FullscreenClockSettings } from "../theme-panel/fullscreen-clock-settings";
+import { Section, ToggleRow } from "../shared";
 import { pushActivityHint } from "@/lib/discord/activity-hint";
 import { useT } from "@/lib/i18n";
 
@@ -244,28 +245,41 @@ export function PlayerLayoutPanel() {
   const hiddenCount = draft.controls.length - visibleCount;
 
   return (
-    <div className="flex flex-col gap-6">
-      <EditLayoutCard
-        theme={theme}
-        config={draft}
-        visibleCount={visibleCount}
-        hiddenCount={hiddenCount}
-        activeProfileName={profiles.find((p) => p.id === activeProfileId)?.name ?? null}
-        onOpen={() => setEditorOpen(true)}
-      />
-
+    <div className="flex flex-col gap-10">
       <Section
-        title={t("Player style")}
+        title={t("Player layout")}
         subtitle={t(
           "The button set your layout is built on. Your customizations are kept separately for each style.",
         )}
       >
+        <EditLayoutCard
+          theme={theme}
+          config={draft}
+          visibleCount={visibleCount}
+          hiddenCount={hiddenCount}
+          activeProfileName={profiles.find((p) => p.id === activeProfileId)?.name ?? null}
+          onOpen={() => setEditorOpen(true)}
+        />
         <ThemeTabs
           value={theme}
           onChange={(id) => {
             update({ playerChromeTheme: id });
             setTheme(id);
           }}
+        />
+        <ToggleRow
+          label={t("True black menus")}
+          sub={t("Force player menus and panels to pure black, ignoring your theme tint.")}
+          value={settings.playerMenuBlack}
+          onChange={(v) => update({ playerMenuBlack: v })}
+        />
+        <ToggleRow
+          label={t("Player screen lock")}
+          sub={t(
+            "Show a lock control in the player that blocks mouse, keyboard, remote, and media-key input until you unlock it.",
+          )}
+          value={settings.playerScreenLockEnabled}
+          onChange={(v) => update({ playerScreenLockEnabled: v })}
         />
       </Section>
 
@@ -275,6 +289,7 @@ export function PlayerLayoutPanel() {
       >
         <OptionsSection
           config={draft}
+          theme={theme}
           onTimeFormat={(v: TimeFormat) =>
             setDraft((cur) => ({ ...cur, options: { ...cur.options, timeFormat: v } }))
           }
@@ -282,11 +297,13 @@ export function PlayerLayoutPanel() {
             setDraft((cur) => ({ ...cur, options: { ...cur.options, volumeStyle: v } }))
           }
         />
-        <ToggleRow
-          label={t("True black menus")}
-          sub={t("Force player menus and panels to pure black, ignoring your theme tint.")}
-          value={settings.playerMenuBlack}
-          onChange={(v) => update({ playerMenuBlack: v })}
+        <FooterBar
+          dirty={dirty}
+          justSaved={justSaved}
+          confirmingReset={confirmingReset}
+          onSave={onSave}
+          onDiscard={onDiscard}
+          onResetAll={onResetAll}
         />
       </Section>
 
@@ -295,17 +312,9 @@ export function PlayerLayoutPanel() {
         subtitle={t("Optional overlays that appear over the video.")}
       >
         <ToggleRow
-          label={t("Player screen lock")}
-          sub={t(
-            "Show a lock control in the player that blocks mouse, keyboard, remote, and media-key input until you unlock it.",
-          )}
-          value={settings.playerScreenLockEnabled}
-          onChange={(v) => update({ playerScreenLockEnabled: v })}
-        />
-        <ToggleRow
           label={t("Show P2P status chip")}
           sub={t(
-            "Peers, speed and progress while a torrent streams. Sits clear of the exit button, top left.",
+            "Peers, speed and progress on the player while a torrent streams. Sits top left, clear of the exit button.",
           )}
           value={settings.playerP2pChip}
           onChange={(v) => update({ playerP2pChip: v })}
@@ -313,34 +322,21 @@ export function PlayerLayoutPanel() {
         <ToggleRow
           label={t("Content advisory on start")}
           sub={t(
-            "When a movie or episode starts, briefly show its Common Sense Media parental guide (violence, nudity, profanity, substances) with severity. Fades on its own.",
+            "When a movie or episode starts, briefly show its IMDb parental guide (violence, profanity, substances, frightening scenes and more) with severity. Fades on its own.",
           )}
           value={settings.contentAdvisoryToast}
           onChange={(v) => update({ contentAdvisoryToast: v })}
+          preview={<AdvisoryPreview />}
         />
-        {settings.contentAdvisoryToast && (
-          <div className="flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3.5">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[13.5px] font-medium text-ink">
-                {t("Content advisory style")}
-              </span>
-              <span className="text-[12px] text-ink-subtle">
-                {t("Use color to distinguish severity, or keep every advisory monochrome.")}
-              </span>
-            </div>
-            <Segmented
-              value={settings.contentAdvisoryTheme}
-              options={[
-                { value: "colored", label: t("Colored") },
-                { value: "monochrome", label: t("Monochrome (White)") },
-              ]}
-              onChange={(value) =>
-                update({ contentAdvisoryTheme: value as "colored" | "monochrome" })
-              }
-            />
-          </div>
+      </Section>
+
+      <Section
+        title={t("Fullscreen clock")}
+        subtitle={t(
+          "Keep your local time visible during fullscreen playback and choose how it looks.",
         )}
-        <AdvisoryPreview />
+      >
+        <FullscreenClockSettings />
       </Section>
 
       <Section
@@ -352,15 +348,6 @@ export function PlayerLayoutPanel() {
       >
         <SeekBarPanel />
       </Section>
-
-      <FooterBar
-        dirty={dirty}
-        justSaved={justSaved}
-        confirmingReset={confirmingReset}
-        onSave={onSave}
-        onDiscard={onDiscard}
-        onResetAll={onResetAll}
-      />
 
       {editorOpen && (
         <EditorOverlay

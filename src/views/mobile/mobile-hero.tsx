@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, Info, Play, Plus, TrendingUp } from "lucide-react";
+import { Check, Info, Plus, TrendingUp } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import { useSettings } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
 import { useHeroLogos } from "@/components/anime-hero/use-hero-logos";
 import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
@@ -17,12 +19,6 @@ function upsize(url?: string): string | undefined {
   return url.replace(/\/t\/p\/w\d+\//, "/t/p/w1280/");
 }
 
-function kindLabel(t: Meta["type"]): string {
-  if (t === "series") return "Series";
-  if (t === "anime") return "Anime";
-  return "Movies";
-}
-
 function prefersReduced(): boolean {
   return !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 }
@@ -34,6 +30,7 @@ export function MobileHero({
   slides: Meta[];
   onOpenDetail?: (m: Meta) => void;
 }) {
+  const t = useT();
   const { settings } = useSettings();
   const { openOnHost, playOnHost } = useMobileRemote();
   const shown = useMemo(() => slides.slice(0, 6), [slides]);
@@ -141,14 +138,20 @@ export function MobileHero({
   const src0 = bgOf(slots[0]);
   const src1 = bgOf(slots[1]);
   const layerTransition = reduce ? "none" : `opacity ${DISSOLVE_MS}ms ease-in-out`;
+  const badge =
+    current.type === "series"
+      ? t("#{rank} in Series Today", { rank: safeActive + 1 })
+      : current.type === "anime"
+        ? t("#{rank} in Anime Today", { rank: safeActive + 1 })
+        : t("#{rank} in Movies Today", { rank: safeActive + 1 });
 
   return (
     <section className="flex flex-col gap-3">
       <div className="px-4">
-        <div className="relative aspect-[16/13] w-full overflow-hidden rounded-[24px] bg-surface ring-1 ring-edge-soft/50">
+        <div className="relative aspect-[16/13] w-full overflow-hidden rounded-3xl bg-surface ring-1 ring-edge-soft/50">
           <button
             type="button"
-            aria-label={`Open ${current.name}`}
+            aria-label={t("Open {name}", { name: current.name })}
             onClick={open}
             className="absolute inset-0 z-0 block h-full w-full text-start"
           >
@@ -185,8 +188,8 @@ export function MobileHero({
             }}
           >
             <span className="inline-flex items-center gap-1.5 self-start rounded-md bg-black/45 px-2.5 py-1 text-[11.5px] font-semibold text-white backdrop-blur-md">
-              <TrendingUp size={12} strokeWidth={2.6} className="text-accent" />#{safeActive + 1} in{" "}
-              {kindLabel(current.type)} Today
+              <TrendingUp size={12} strokeWidth={2.6} className="text-accent" />
+              {badge}
             </span>
             {logo ? (
               <img
@@ -218,11 +221,11 @@ export function MobileHero({
                 className="flex h-[52px] items-center gap-2.5 rounded-full bg-white px-8 text-[16px] font-semibold text-black shadow-[0_6px_20px_-6px_rgba(0,0,0,0.5)] transition-transform duration-150 active:scale-[0.97]"
               >
                 <Play size={19} strokeWidth={0} fill="currentColor" />
-                Play
+                {t("Play")}
               </button>
               <button
                 type="button"
-                aria-label={inWl ? "In My List" : "Add to My List"}
+                aria-label={inWl ? t("In My List") : t("Add to My List")}
                 onClick={() =>
                   toggleWatchlist({
                     id: current.id,
@@ -243,7 +246,7 @@ export function MobileHero({
               </button>
               <button
                 type="button"
-                aria-label="More info"
+                aria-label={t("More info")}
                 onClick={open}
                 className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full border border-white/25 bg-black/35 text-white backdrop-blur-sm transition-transform duration-150 active:scale-[0.94]"
               >
@@ -259,7 +262,7 @@ export function MobileHero({
             <button
               key={m.id}
               type="button"
-              aria-label={`Show ${m.name}`}
+              aria-label={t("Show {name}", { name: m.name })}
               onClick={() => {
                 pausedUntil.current = Date.now() + PILL_PAUSE_MS;
                 goTo(i);

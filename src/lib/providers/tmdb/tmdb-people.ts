@@ -29,10 +29,7 @@ function persistPersonNameSoon() {
   if (personNameSaveTimer) clearTimeout(personNameSaveTimer);
   personNameSaveTimer = window.setTimeout(() => {
     try {
-      localStorage.setItem(
-        PERSON_NAME_KEY,
-        JSON.stringify(Object.fromEntries(personNameCache)),
-      );
+      localStorage.setItem(PERSON_NAME_KEY, JSON.stringify(Object.fromEntries(personNameCache)));
     } catch {
       /* ignore */
     }
@@ -46,7 +43,7 @@ function personKey(name: string): string {
 export function tmdbPersonIdCached(name: string): number | null | undefined {
   loadPersonNameCache();
   const k = personKey(name);
-  return personNameCache.has(k) ? personNameCache.get(k) ?? null : undefined;
+  return personNameCache.has(k) ? (personNameCache.get(k) ?? null) : undefined;
 }
 
 export async function tmdbPersonIdByName(
@@ -72,9 +69,7 @@ export async function tmdbPersonIdByName(
     let chosen = ranked[0];
     if (preferDept) {
       const wantedDept = preferDept.toLowerCase();
-      const match = ranked.find(
-        (r) => (r.known_for_department ?? "").toLowerCase() === wantedDept,
-      );
+      const match = ranked.find((r) => (r.known_for_department ?? "").toLowerCase() === wantedDept);
       if (match) chosen = match;
     }
     const id = chosen?.id ?? null;
@@ -126,6 +121,25 @@ export type PersonDetail = {
   cast: PersonCredit[];
   crew: PersonCredit[];
 };
+
+const TMDB_DEPARTMENT_LABEL_KEYS: Readonly<Record<string, string>> = {
+  Acting: "Acting",
+  Art: "Art",
+  Camera: "Camera",
+  "Costume & Make-Up": "Costume & Make-Up",
+  Crew: "Crew",
+  Directing: "Directing",
+  Editing: "Editing",
+  Lighting: "Lighting",
+  Production: "Production",
+  Sound: "Sound",
+  "Visual Effects": "Visual Effects",
+  Writing: "Writing",
+};
+
+export function tmdbDepartmentLabelKey(department: string): string | undefined {
+  return TMDB_DEPARTMENT_LABEL_KEYS[department];
+}
 
 const personCache = new Map<number, PersonDetail>();
 const personInflight = new Map<number, Promise<PersonDetail | null>>();

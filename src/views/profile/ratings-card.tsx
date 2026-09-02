@@ -23,7 +23,7 @@ export function RatingsCard({
   if (!ratings || (count === 0 && !isOwner)) return null;
 
   return (
-    <section aria-label={t("Ratings")} className="rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
+    <section aria-label={t("Ratings")} className="rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
           <Star size={20} /> {t("Ratings")}

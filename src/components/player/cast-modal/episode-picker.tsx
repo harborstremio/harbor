@@ -1,4 +1,5 @@
-import { Check, ChevronDown, ListPlus, Play } from "lucide-react";
+import { Check, ChevronDown, ListPlus } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { queueToggle, useQueue } from "@/lib/queue";
@@ -188,7 +189,6 @@ export function EpisodePicker({
     (e: Episode | OrderedEpisode): PlayEpisode => {
       const match = flatByKey.get(`${e.seasonNumber}:${e.episodeNumber}`);
       const still = e.stillUrl ?? (e.stillPath ? `https://image.tmdb.org/t/p/w300${e.stillPath}` : undefined);
-      // pickLocalizedText keys script tests by ISO-1 ("ko"), not TVDB codes ("kor").
       const lang = tmdbLanguageIso();
       const enName = "nameEn" in e ? e.nameEn : undefined;
       const enOverview = "overviewEn" in e ? e.overviewEn : undefined;

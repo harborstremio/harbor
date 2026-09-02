@@ -40,12 +40,14 @@ export type AnilistMedia = {
   seasonYear: number | null;
   countryOfOrigin?: string | null;
   description?: string | null;
+  status?: string | null;
 };
 
 export type AnilistMediaEntry = {
   id: number;
   status: MediaListStatus;
   progress: number;
+  progressVolumes?: number;
   score: number;
   media: AnilistMedia;
 };

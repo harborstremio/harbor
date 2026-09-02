@@ -44,7 +44,7 @@ export function SaveLocationChip() {
 
   const current = settings.downloadDir || systemDefault;
   const isCustom = !!settings.downloadDir;
-  const folderName = current ? current.split(/[\\/]/).filter(Boolean).pop() ?? current : "";
+  const folderName = current ? (current.split(/[\\/]/).filter(Boolean).pop() ?? current) : "";
 
   const pick = async () => {
     try {
@@ -108,8 +108,8 @@ export function SaveLocationChip() {
           </div>
           <div className="mt-3 border-t border-edge-soft/60 pt-3">
             <ToggleRow
-              label="Organize downloads into folders"
-              note="Create a folder by movie or series name"
+              label={t("Organize downloads into folders")}
+              note={t("Create a folder by movie or series name")}
               value={settings.downloadCreateFolders}
               onChange={(v) => update({ downloadCreateFolders: v })}
             />

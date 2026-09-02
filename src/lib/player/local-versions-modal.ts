@@ -1,10 +1,14 @@
 import type { LocalEntry } from "@/lib/local-library";
+import type { PlayableCopy } from "@/lib/media-server/types";
 
 export type LocalVersionsPayload = {
   title: string;
   poster?: string | null;
   entries: LocalEntry[];
   onPlayLocal: (entry: LocalEntry) => void;
+  serverCopies?: PlayableCopy[];
+  onPlayServer?: (copy: PlayableCopy) => void;
+  onStream?: () => void;
 };
 
 type LocalVersionsState = { open: boolean; payload: LocalVersionsPayload | null };

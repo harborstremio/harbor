@@ -48,7 +48,7 @@ export function XrayRail({
             : null;
 
   return (
-    <div className="pointer-events-auto absolute left-0 top-24 z-40 max-h-[68%] w-[300px] animate-in fade-in slide-in-from-left-3 duration-200 motion-reduce:animate-none">
+    <div className="pointer-events-auto absolute left-0 top-24 z-40 max-h-[68%] w-[300px] animate-xray-rail-in motion-reduce:animate-none">
       <div className="relative flex max-h-[68vh] flex-col overflow-hidden pe-3">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent" />
         <div className="relative flex min-h-0 flex-col px-4 pb-5 pt-3">

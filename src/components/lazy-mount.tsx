@@ -1,11 +1,17 @@
 import { startTransition, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
+const CULL_PAD_Y = 24;
+
 const CULL_STYLE: CSSProperties = {
   contentVisibility: "auto",
   paddingLeft: "48px",
   paddingRight: "48px",
   marginLeft: "-48px",
   marginRight: "-48px",
+  paddingTop: `${CULL_PAD_Y}px`,
+  paddingBottom: `${CULL_PAD_Y}px`,
+  marginTop: `-${CULL_PAD_Y}px`,
+  marginBottom: `-${CULL_PAD_Y}px`,
 };
 
 export function LazyMount({
@@ -74,7 +80,7 @@ export function LazyMount({
         {
           ...CULL_STYLE,
           "--harbor-cull-min": `${minHeight}px`,
-          ...(shown ? null : { minHeight }),
+          ...(shown ? null : { minHeight: minHeight + CULL_PAD_Y * 2 }),
         } as CSSProperties
       }
       aria-hidden={shown ? undefined : true}

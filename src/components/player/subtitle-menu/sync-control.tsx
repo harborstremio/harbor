@@ -1,9 +1,9 @@
-import { AudioLines, ChevronDown, Loader2, Timer, Wand2 } from "lucide-react";
+import { AudioLines, ChevronDown, Loader2 } from "lucide-react";
+import { UiIcon } from "@/components/ui-icon";
 import { useEffect, useRef, useState } from "react";
 import { useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
 import { useT } from "@/lib/i18n";
 import { openSyncBar } from "@/lib/player/sub-sync";
-import { HoverTooltip } from "@/components/hover-tooltip";
 
 type Props = {
   canAutoSync: boolean;
@@ -13,23 +13,6 @@ type Props = {
   onLiveSync?: () => void | Promise<void>;
   onClose: () => void;
 };
-
-function MaybeTip({
-  show,
-  label,
-  children,
-}: {
-  show: boolean;
-  label: string;
-  children: React.ReactNode;
-}) {
-  if (!show) return <>{children}</>;
-  return (
-    <HoverTooltip label={label} side="bottom" align="end">
-      {children}
-    </HoverTooltip>
-  );
-}
 
 export function SyncControl({
   canAutoSync,
@@ -77,60 +60,39 @@ export function SyncControl({
     onClose();
   };
 
-  const label = busy ? tr("Cancel sync") : applied ? tr("Synced: on") : tr("Auto sync");
+  const label = applied ? tr("Synced: on") : tr("Auto sync");
 
   return (
     <div ref={wrapRef} className="relative flex items-center">
-      <div
-        className={`flex items-center rounded-full transition-colors ${
-          autoSyncOn ? "bg-accent text-canvas" : open ? "bg-raised" : ""
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-label={tr("{label}, sync options", { label })}
+        aria-expanded={open}
+        className={`flex h-9 items-center gap-1.5 rounded-md px-2.5 text-[12.5px] font-semibold transition-colors ${
+          autoSyncOn
+            ? "text-accent hover:bg-raised"
+            : open
+              ? "bg-raised text-ink"
+              : "text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
-        <MaybeTip show={!canAutoSync} label={tr("Needs an external subtitle")}>
-          <button
-            type="button"
-            disabled={!canAutoSync}
-            onClick={runAutoSync}
-            aria-label={tr("Auto sync")}
-            aria-pressed={autoSyncOn}
-            className={`flex h-9 items-center gap-1.5 rounded-s-full ps-3 pe-1.5 text-[12.5px] font-semibold transition-colors ${
-              autoSyncOn
-                ? "hover:brightness-110"
-                : canAutoSync
-                  ? "text-ink-muted hover:bg-raised hover:text-ink"
-                  : "cursor-not-allowed text-ink-subtle/50"
-            }`}
-          >
-            {busy ? (
-              <Loader2
-                size={14}
-                strokeWidth={2.4}
-                className="animate-spin motion-reduce:animate-none"
-              />
-            ) : (
-              <Wand2 size={14} strokeWidth={2.2} />
-            )}
-            {label}
-          </button>
-        </MaybeTip>
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={tr("Sync options")}
-          aria-expanded={open}
-          className={`relative flex h-9 w-7 items-center justify-center rounded-e-full transition-colors ${
-            autoSyncOn ? "hover:brightness-110" : "text-ink-muted hover:bg-raised hover:text-ink"
-          }`}
-        >
-          <ChevronDown size={14} strokeWidth={2.4} className={open ? "rotate-180" : ""} />
-          {delayNonZero && !autoSyncOn && (
-            <span className="absolute end-1 top-1.5 h-1.5 w-1.5 rounded-full bg-accent" />
-          )}
-        </button>
-      </div>
+        {busy && (
+          <Loader2 size={13} strokeWidth={2.4} className="animate-spin motion-reduce:animate-none" />
+        )}
+        <span>{label}</span>
+        <ChevronDown
+          size={13}
+          strokeWidth={2.4}
+          className={`-me-0.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+        {delayNonZero && !autoSyncOn && (
+          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+        )}
+      </button>
 
       {open && (
-        <div className="absolute end-0 top-[calc(100%+6px)] z-[60] w-[206px] overflow-hidden rounded-xl border border-edge bg-elevated py-1 shadow-[0_18px_44px_-18px_rgba(0,0,0,0.85)]">
+        <div className="absolute end-0 top-[calc(100%+6px)] z-[60] w-[206px] overflow-hidden rounded-md bg-elevated py-1 shadow-[0_18px_44px_-18px_rgba(0,0,0,0.85)] animate-menu-pop">
           <button
             type="button"
             disabled={!canLiveSync || !onLiveSync}
@@ -153,7 +115,7 @@ export function SyncControl({
             }}
             className="flex w-full items-center gap-2.5 px-3 py-2 text-start text-[13px] text-ink transition-colors hover:bg-raised disabled:cursor-not-allowed disabled:text-ink-subtle/50"
           >
-            <Wand2 size={14} strokeWidth={2.2} />
+            <UiIcon name="auto-sync" className="h-3.5 w-3.5" />
             {autoSyncOn ? tr("Turn off auto-sync") : tr("Auto sync")}
           </button>
           <button
@@ -165,7 +127,7 @@ export function SyncControl({
             }}
             className="flex w-full items-center gap-2.5 px-3 py-2 text-start text-[13px] text-ink transition-colors hover:bg-raised"
           >
-            <Timer size={14} strokeWidth={2} />
+            <UiIcon name="manual-offset" className="h-3.5 w-3.5" />
             <span className="flex-1">{tr("Manual offset")}</span>
             {delayNonZero && (
               <span className="font-mono text-[11.5px] tabular-nums text-accent">

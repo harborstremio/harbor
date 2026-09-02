@@ -3,6 +3,7 @@ import { Poster, usePosterChain } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
 import { removeAutoDownload, updateAutoDownload, type AutoDlSeries } from "@/lib/auto-download";
 import { useIsChecking, useNextRunAt } from "@/lib/auto-download/runner";
+import { useT } from "@/lib/i18n";
 import {
   InlineChoice,
   P2P_OPTIONS,
@@ -18,6 +19,7 @@ import {
 } from "./auto-download-controls";
 
 export function AutoDownloadRow({ series }: { series: AutoDlSeries }) {
+  const t = useT();
   const { settings } = useSettings();
   const now = useNow();
   const checking = useIsChecking(series.id);
@@ -28,12 +30,14 @@ export function AutoDownloadRow({ series }: { series: AutoDlSeries }) {
     series.stop.kind === "count" &&
     series.grabbedCount - (series.stop.from ?? series.grabbedCount) >= series.stop.value;
   const statusText = grabbed
-    ? `${series.grabbedCount} grabbed`
-    : series.lastCheckedAt == null
-      ? "first check pending"
-      : "up to date";
+    ? t("{count} grabbed", { count: series.grabbedCount })
+    : series.lastError
+      ? series.lastError
+      : series.lastCheckedAt == null
+        ? t("first check pending")
+        : t("up to date");
   const air = limitReached ? null : airText(series.nextAirDate, now);
-  const tailText = limitReached ? "limit reached" : nextCheckText(nextRunAt, now);
+  const tailText = limitReached ? t("limit reached") : nextCheckText(nextRunAt, now);
 
   return (
     <li className="flex gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-3.5">
@@ -49,14 +53,19 @@ export function AutoDownloadRow({ series }: { series: AutoDlSeries }) {
                 {statusText}
               </span>
               {grabbed && series.lastGrabbed && (
-                <span className="text-ink-muted">· last {series.lastGrabbed}</span>
+                <span className="text-ink-muted">
+                  · {t("last {episode}", { episode: series.lastGrabbed })}
+                </span>
+              )}
+              {grabbed && series.lastError && (
+                <span className="text-ink-muted">· {series.lastError}</span>
               )}
               {air && <span className="text-ink-muted">· {air}</span>}
               {checking ? (
                 <span className="inline-flex items-center gap-1.5 font-medium text-accent">
                   <span className="text-ink-subtle">·</span>
                   <RotateCw size={11} strokeWidth={2.2} className="animate-spin" />
-                  checking now
+                  {t("checking now")}
                 </span>
               ) : (
                 <span className="text-ink-subtle">· {tailText}</span>
@@ -66,22 +75,22 @@ export function AutoDownloadRow({ series }: { series: AutoDlSeries }) {
           <button
             type="button"
             onClick={() => removeAutoDownload(series.id)}
-            aria-label={`Stop auto-downloading ${series.title}`}
-            title="Stop auto-downloading"
+            aria-label={t("Stop auto-downloading {title}", { title: series.title })}
+            title={t("Stop auto-downloading")}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-ink/10 hover:text-ink"
           >
             <X size={15} strokeWidth={2.2} />
           </button>
         </div>
         <p className="text-[13px] leading-relaxed text-ink-muted">
-          Grab{" "}
+          {t("Grab")}{" "}
           <InlineChoice
             label={qualityLabel(series.maxHeight)}
             options={QUALITY_OPTIONS}
             isActive={(v) => v === series.maxHeight}
             onSelect={(v) => updateAutoDownload(series.id, { maxHeight: v })}
           />{" "}
-          episodes,{" "}
+          {t("episodes")},{" "}
           <InlineChoice
             label={p2pLabel(series.allowP2p)}
             options={P2P_OPTIONS}

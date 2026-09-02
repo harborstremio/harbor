@@ -41,7 +41,7 @@ export function TempFilesCard() {
   return (
     <section
       id={settingsAnchor("Temporary files")}
-      className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
+ className="scroll-mt-28 flex flex-col gap-4 rounded-md bg-elevated p-7"
     >
       <div className="flex items-start gap-3">
         <HardDrive size={20} className="mt-0.5 shrink-0 text-ink-subtle" />
@@ -61,9 +61,9 @@ export function TempFilesCard() {
           type="button"
           onClick={() => void clear()}
           disabled={busy || bytes === 0}
-          className="flex h-10 items-center gap-2 rounded-full px-4 text-[13px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:text-danger hover:ring-danger/40 disabled:opacity-40 disabled:hover:text-ink-muted disabled:hover:ring-edge-soft"
+          className="flex h-10 items-center gap-2 rounded-full px-4 text-[13px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:text-danger hover:ring-danger disabled:opacity-40 disabled:hover:text-ink-muted disabled:hover:ring-edge-soft"
         >
-          {busy ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+          {busy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
           {t("Clear now")}
         </button>
       </div>

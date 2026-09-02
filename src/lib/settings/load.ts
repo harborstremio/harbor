@@ -18,6 +18,11 @@ import {
   sanitizeSubtitleOffsetPosition,
   sanitizeSubtitleOffsetSize,
 } from "@/lib/player/subtitle-offset";
+import {
+  sanitizeControllerCursor,
+  sanitizeControllerCursorImage,
+  sanitizeControllerCursorSize,
+} from "@/lib/gamepad/cursor";
 
 const RETIRED_GEMINI = new Set([
   "gemini-2.0-flash",
@@ -152,7 +157,21 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       _playlistsTabV1?: boolean;
       _smoothScrollOptIn?: boolean;
       _streamCacheCapV1?: boolean;
+      _playbackSourcePreferenceV1?: boolean;
+      _playbackSourcePreferenceV2?: boolean;
     };
+    if (!parsed._playbackSourcePreferenceV1) {
+      parsed.playbackSourcePreference =
+        parsed.localPlaybackMode === "local" ? "local" : "online";
+      parsed.preferredMediaServerId = null;
+      parsed._playbackSourcePreferenceV1 = true;
+    }
+    if (!parsed._playbackSourcePreferenceV2) {
+      if (parsed.playbackSourcePreference === "ask") {
+        parsed.playbackSourcePreference = "online";
+      }
+      parsed._playbackSourcePreferenceV2 = true;
+    }
     if (!parsed._animeRowsV1) {
       const prev = (parsed.animeRows ?? {}) as Partial<Settings["animeRows"]>;
       const hiddenSet = new Set<string>(Array.isArray(prev.hidden) ? prev.hidden : []);
@@ -301,6 +320,9 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
         typeof parsed.fullscreenClockEnabled === "boolean"
           ? parsed.fullscreenClockEnabled
           : DEFAULT.fullscreenClockEnabled,
+      controllerCursor: sanitizeControllerCursor(parsed.controllerCursor),
+      controllerCursorImage: sanitizeControllerCursorImage(parsed.controllerCursorImage),
+      controllerCursorSize: sanitizeControllerCursorSize(parsed.controllerCursorSize),
       fullscreenClockFormat: sanitizeFullscreenClockFormat(parsed.fullscreenClockFormat),
       fullscreenClockStyle: sanitizeFullscreenClockStyle(parsed.fullscreenClockStyle),
       fullscreenClockShowSeconds:

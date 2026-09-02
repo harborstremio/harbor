@@ -1,4 +1,5 @@
-import { Play, Users } from "lucide-react";
+import { Users } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
@@ -82,7 +83,7 @@ export function WatchNowCard({ watching }: { watching?: ProfileWatching }) {
             }
           : undefined
       }
-      className={`rounded-[14px] bg-surface p-4 ring-1 ring-edge-soft ${
+      className={`rounded-lg bg-surface p-4 ring-1 ring-edge-soft ${
         open
           ? "cursor-pointer transition-colors hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           : ""

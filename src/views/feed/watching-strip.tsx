@@ -60,7 +60,7 @@ function WatchingCard({
       type="button"
       onClick={() => onOpenProfile?.(item.actor.handle)}
       style={{ animationDelay: `${Math.min(index * 45, 360)}ms`, animationDuration: "420ms", animationFillMode: "both" }}
-      className="group relative flex w-[228px] shrink-0 flex-col justify-end overflow-hidden rounded-[14px] bg-surface p-3 text-start ring-1 ring-edge-soft transition-[background-color,box-shadow,transform] duration-200 hover:bg-elevated hover:shadow-[0_18px_40px_-24px_rgba(0,0,0,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/70 active:scale-[0.99] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 sm:hover:-translate-y-[2px]"
+      className="group relative flex w-[228px] shrink-0 flex-col justify-end overflow-hidden rounded-lg bg-surface p-3 text-start ring-1 ring-edge-soft transition-[background-color,box-shadow,transform] duration-200 hover:bg-elevated hover:shadow-[0_18px_40px_-24px_rgba(0,0,0,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/70 active:scale-[0.99] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 sm:hover:-translate-y-[2px]"
     >
       {w.posterUrl && (
         <span

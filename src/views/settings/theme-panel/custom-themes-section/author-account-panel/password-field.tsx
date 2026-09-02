@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { Field, inputClass } from "../field";
 import { passwordStrength, strengthColor } from "./password-strength";
 
@@ -18,6 +19,7 @@ export function PasswordField({
   showStrength?: boolean;
   autoFocus?: boolean;
 }) {
+  const t = useT();
   const [reveal, setReveal] = useState(false);
   const strength = showStrength ? passwordStrength(value) : null;
   const filled = strength ? strength.score : 0;
@@ -41,8 +43,8 @@ export function PasswordField({
           type="button"
           tabIndex={-1}
           onClick={() => setReveal((r) => !r)}
-          aria-label={reveal ? "Hide password" : "Show password"}
-          className="absolute inset-y-0 end-0 flex w-11 items-center justify-center text-ink-subtle transition-all duration-150 hover:text-ink active:scale-90"
+          aria-label={reveal ? t("Hide password") : t("Show password")}
+          className="absolute inset-y-0 end-0 flex w-11 items-center justify-center text-ink-subtle transition duration-150 hover:text-ink active:scale-90"
         >
           {reveal ? <EyeOff size={16} strokeWidth={2} /> : <Eye size={16} strokeWidth={2} />}
         </button>
@@ -54,15 +56,17 @@ export function PasswordField({
               <span
                 key={seg}
                 className="h-[3px] flex-1 rounded-full transition-colors duration-300"
-                style={{ backgroundColor: seg <= filled ? strengthColor(filled) : "var(--color-edge-soft)" }}
+                style={{
+                  backgroundColor: seg <= filled ? strengthColor(filled) : "var(--color-edge-soft)",
+                }}
               />
             ))}
           </div>
           <span
-            className="w-16 text-end text-[11px] font-semibold tabular-nums transition-colors duration-300"
+            className="w-16 text-end text-[11.5px] font-semibold tabular-nums transition-colors duration-300"
             style={{ color: strengthColor(filled) }}
           >
-            {strength?.label}
+            {strength?.label ? t(strength.label) : ""}
           </span>
         </div>
       )}

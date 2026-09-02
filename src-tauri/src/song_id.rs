@@ -62,7 +62,9 @@ pub async fn recognize_now_playing_ai(
 #[cfg(windows)]
 fn capture_loopback(seconds: u32) -> Result<(Vec<u8>, u32, u16, u16), String> {
     use wasapi::*;
-    initialize_mta().ok().map_err(|e| format!("COM init failed: {e}"))?;
+    initialize_mta()
+        .ok()
+        .map_err(|e| format!("COM init failed: {e}"))?;
 
     let sample_rate = 44100u32;
     let channels = 2u16;
@@ -82,11 +84,21 @@ fn capture_loopback(seconds: u32) -> Result<(Vec<u8>, u32, u16, u16), String> {
 
     let (_default_period, min_period) = audio_client.get_periods().map_err(|e| e.to_string())?;
     audio_client
-        .initialize_client(&format, min_period, &Direction::Capture, &ShareMode::Shared, true)
+        .initialize_client(
+            &format,
+            min_period,
+            &Direction::Capture,
+            &ShareMode::Shared,
+            true,
+        )
         .map_err(|e| e.to_string())?;
 
-    let h_event = audio_client.set_get_eventhandle().map_err(|e| e.to_string())?;
-    let capture_client = audio_client.get_audiocaptureclient().map_err(|e| e.to_string())?;
+    let h_event = audio_client
+        .set_get_eventhandle()
+        .map_err(|e| e.to_string())?;
+    let capture_client = audio_client
+        .get_audiocaptureclient()
+        .map_err(|e| e.to_string())?;
     let blockalign = format.get_blockalign() as usize;
 
     audio_client.start_stream().map_err(|e| e.to_string())?;
@@ -202,5 +214,11 @@ async fn audd_recognize(wav: Vec<u8>, api_token: String) -> Result<Option<SongRe
         artwork = u.to_string();
     }
 
-    Ok(Some(SongResult { title, artist, album, artwork, link }))
+    Ok(Some(SongResult {
+        title,
+        artist,
+        album,
+        artwork,
+        link,
+    }))
 }

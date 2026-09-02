@@ -42,7 +42,7 @@ export function MinecraftCard({
   return (
     <section
       aria-label={t("Minecraft")}
-      className="overflow-hidden rounded-[14px] bg-surface ring-1 ring-edge-soft"
+      className="overflow-hidden rounded-lg bg-surface ring-1 ring-edge-soft"
     >
       {!hideTitle && (
         <div className="flex items-center gap-2 px-4 pt-4 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">

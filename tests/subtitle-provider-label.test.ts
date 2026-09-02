@@ -104,6 +104,17 @@ test("preserves selected stream quality when the parsed title only contains the 
   );
 });
 
+test("the exact resolved media filename outranks the original stream label", () => {
+  const descriptor = subtitleStreamDescriptor({
+    resolvedFilename: "Show.S02E07.1080p.WEB-DL.DDP5.1-GROUP.mkv",
+    title: "Season pack",
+    parsedTitle: "Show",
+    source: "WEB-DL",
+  });
+
+  assert.equal(descriptor, "Show.S02E07.1080p.WEB-DL.DDP5.1-GROUP.mkv");
+});
+
 test("placeholder release values are ignored", () => {
   assert.equal(
     subtitleTitleOf({

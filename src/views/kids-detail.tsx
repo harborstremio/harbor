@@ -1,4 +1,4 @@
-import { Play } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useRef, useState } from "react";
 import { PickCard } from "@/components/pick-card";
 import { Row } from "@/components/row";

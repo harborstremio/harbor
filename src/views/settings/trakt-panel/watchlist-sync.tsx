@@ -124,14 +124,14 @@ export function WatchlistSync() {
         ? phase.plan.movies.length + phase.plan.shows.length
         : phase.items.length;
     return (
-      <div className="flex flex-col gap-3 rounded-xl border border-edge bg-canvas/50 p-4">
+ <div className="flex flex-col gap-3 rounded-md bg-canvas p-4">
         <p className="text-[13.5px] leading-relaxed text-ink">
           {isExport
             ? t("Add {n} titles from your Harbor watchlist to Trakt? Trakt skips any it already has.", { n: count })
             : t("Add {n} titles from your Trakt watchlist to Harbor?", { n: count })}
         </p>
         {phase.kind === "confirm-export" && phase.plan.skippedAnime > 0 && (
-          <p className="text-[12px] text-ink-subtle">
+          <p className="text-[12.5px] text-ink-subtle">
             {t("{n} anime titles will be left out (Trakt has no IDs for them).", { n: phase.plan.skippedAnime })}
           </p>
         )}
@@ -140,14 +140,14 @@ export function WatchlistSync() {
             onClick={() =>
               phase.kind === "confirm-export" ? confirmExport(phase.plan) : confirmImport(phase.items)
             }
-            className="flex h-10 items-center gap-2 rounded-lg bg-ink px-4 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
+            className="flex h-10 items-center gap-2 rounded-md bg-ink px-4 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
           >
             {isExport ? <Upload size={14} strokeWidth={2.2} /> : <Download size={14} strokeWidth={2.2} />}
             {t("Continue")}
           </button>
           <button
             onClick={() => setPhase({ kind: "idle" })}
-            className="h-10 rounded-lg px-3.5 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
+            className="h-10 rounded-md px-3.5 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
           >
             {t("Cancel")}
           </button>
@@ -158,8 +158,8 @@ export function WatchlistSync() {
 
   if (phase.kind === "running") {
     return (
-      <div className="flex items-center gap-2.5 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3 text-[13px] text-ink-muted">
-        <Loader2 size={15} className="animate-spin" />
+ <div className="flex items-center gap-2.5 rounded-md bg-canvas px-4 py-3 text-[13px] text-ink-muted">
+        <Loader2 size={16} className="animate-spin" />
         {phase.label}
       </div>
     );
@@ -169,18 +169,18 @@ export function WatchlistSync() {
     return (
       <div className="flex flex-col gap-3">
         <div
-          className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 text-[13px] ${
+          className={`flex items-center gap-2.5 rounded-md border px-4 py-3 text-[13px] ${
             phase.tone === "ok"
-              ? "border-emerald-400/30 bg-emerald-400/8 text-emerald-200"
-              : "border-amber-400/30 bg-amber-400/8 text-amber-200"
+              ? "border-success/30 bg-success/8 text-success"
+              : "border-accent/30 bg-accent/8 text-accent"
           }`}
         >
-          {phase.tone === "ok" && <Check size={15} strokeWidth={2.4} />}
+          {phase.tone === "ok" && <Check size={16} strokeWidth={2.4} />}
           {phase.message}
         </div>
         <button
           onClick={() => setPhase({ kind: "idle" })}
-          className="h-9 self-start rounded-lg px-2 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
+          className="h-9 self-start rounded-md px-2 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
         >
           {t("Done")}
         </button>
@@ -194,17 +194,17 @@ export function WatchlistSync() {
       <button
         onClick={startExport}
         disabled={phase.kind === "loading"}
-        className="flex h-11 items-center gap-2 rounded-xl bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:opacity-50"
+        className="flex h-11 items-center gap-2 rounded-md bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:opacity-50"
       >
-        {loadingDir === "export" ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} strokeWidth={2.2} />}
+        {loadingDir === "export" ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} strokeWidth={2.2} />}
         {t("Export to Trakt")}
       </button>
       <button
         onClick={startImport}
         disabled={phase.kind === "loading"}
-        className="flex h-11 items-center gap-2 rounded-xl border border-edge-soft px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-50"
+ className="flex h-11 items-center gap-2 rounded-md px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:bg-canvas hover:text-ink disabled:opacity-50"
       >
-        {loadingDir === "import" ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} strokeWidth={2.2} />}
+        {loadingDir === "import" ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} strokeWidth={2.2} />}
         {t("Import from Trakt")}
       </button>
     </div>

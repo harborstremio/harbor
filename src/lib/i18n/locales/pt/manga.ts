@@ -62,7 +62,6 @@ const manga: Record<string, string> = {
   "Could not save that source.": "Não foi possível salvar essa fonte.",
   "Custom source": "Fonte personalizada",
   Dark: "Escuro",
-  "Data from MangaUpdates": "Dados do MangaUpdates",
   "Delete download": "Excluir download",
   Direction: "Direção",
   "Do it once on a browse page, once on a series page, once in the reader.":

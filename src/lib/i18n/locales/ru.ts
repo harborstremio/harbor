@@ -28,7 +28,17 @@ import manga from "./ru/manga";
 import controllers from "./ru/controllers";
 import plurals from "./ru/plurals";
 
+import bpSources from "./ru/bp-sources";
 import used from "./ru/used";
+import sweep from "./ru/sweep";
+import ageGate from "./ru/age-gate";
+import repairs from "./ru/repairs";
+import wired from "./ru/wired";
+import surfaces from "./ru/surfaces";
+import surfaces2 from "./ru/surfaces2";
+import surfaces3 from "./ru/surfaces3";
+import surfaces4 from "./ru/surfaces4";
+import surfaces5 from "./ru/surfaces5";
 
 const ru: Record<string, string> = {
   ...coverage,
@@ -60,7 +70,17 @@ const ru: Record<string, string> = {
   ...manga,
   ...controllers,
   ...plurals,
+  ...bpSources,
   ...used,
+  ...sweep,
+  ...ageGate,
+  ...repairs,
+  ...wired,
+  ...surfaces,
+  ...surfaces2,
+  ...surfaces3,
+  ...surfaces4,
+  ...surfaces5,
 };
 
 export default ru;

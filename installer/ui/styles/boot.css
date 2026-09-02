@@ -1,0 +1,39 @@
+.hb-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: var(--canvas);
+  transition: opacity 420ms var(--ease);
+}
+
+.hb-boot[hidden] {
+  display: none;
+}
+
+.hb-boot.is-gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hb-boot .bx-stage {
+  position: relative;
+  width: 560px;
+  height: 490px;
+}
+
+.hb-boot .bx-lottie {
+  position: absolute;
+  inset: 0;
+}
+
+.hb-boot .bx-lottie svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-boot { transition: none; }
+}

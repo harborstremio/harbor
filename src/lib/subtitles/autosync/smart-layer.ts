@@ -1,14 +1,26 @@
 import { robustMedian, mad, clamp } from "./drift-dsp";
-import { toLogOdds, type Calibrator, type FusedConfidence, type SignalEvidence, type TierId } from "./confidence";
+import {
+  DEFAULT_PRIOR,
+  fuseConfidence as fuseSignalConfidence,
+  toLogOdds,
+  type Calibrator,
+  type FusedConfidence,
+  type SignalEvidence,
+  type TierId,
+} from "./confidence";
+import { normalizeLang } from "@/lib/subtitles/language";
+import { normalizeArabicForMatch } from "@/lib/subtitles/arabic-normalize";
 import {
   evaluateBestEffort,
   type AffineTransform,
-  type AlignmentQuality,
   type Bounds,
+  type QualityMeasurement,
+  type SubtitleFormat,
   type SyncTransform,
 } from "./fp-gate";
 import type {
   AsrPhrase,
+  AsrTranscript,
   AsrWindowSpec,
   ConsensusResult,
   PipelineContext,
@@ -32,6 +44,12 @@ const IDENTITY: AffineTransform = { kind: "affine", offsetSec: 0, ratio: 1 };
 type Anchor = [number, number];
 type Estimate = { offsetSec: number; ratio: number; wOff: number; wRatio: number; source: string };
 type Fit = { offsetSec: number; ratio: number; residualSec: number; n: number };
+
+export function canUseLexicalAsr(ctx: PipelineContext): boolean {
+  const audio = normalizeLang(ctx.audioLanguage ?? "");
+  const subtitle = normalizeLang(ctx.subtitleLanguage ?? "");
+  return audio.length > 0 && subtitle.length > 0 && audio === subtitle;
+}
 
 export function denseAsrWindows(durationSec: number): AsrWindowSpec[] {
   if (!(durationSec > 0)) return [];
@@ -57,7 +75,9 @@ function applyAffine(t: SyncTransform, timeSec: number): number {
 
 export function anchorsAgree(anchors: Anchor[], lead: SyncTransform, tolSec: number): boolean {
   if (anchors.length < MIN_ANCHORS) return false;
-  const residuals = anchors.map(([subTime, correctTime]) => Math.abs(applyAffine(lead, subTime) - correctTime));
+  const residuals = anchors.map(([subTime, correctTime]) =>
+    Math.abs(applyAffine(lead, subTime) - correctTime),
+  );
   return robustMedian(residuals) <= tolSec;
 }
 
@@ -94,14 +114,17 @@ function robustFit(anchors: Anchor[]): Fit | null {
   if (!first) return null;
   const spread = mad(anchors.map(([x, y]) => y - (first.offsetSec + first.ratio * x)));
   const keepBand = Math.max(RESIDUAL_KEEP_SEC, 2.5 * spread);
-  const kept = anchors.filter(([x, y]) => Math.abs(first.offsetSec + first.ratio * x - y) <= keepBand);
+  const kept = anchors.filter(
+    ([x, y]) => Math.abs(first.offsetSec + first.ratio * x - y) <= keepBand,
+  );
   if (kept.length < MIN_ANCHORS) return kept.length >= 2 ? fitAnchors(kept) : first;
   return fitAnchors(kept) ?? first;
 }
 
-function tokenize(text: string): string[] {
-  return text
-    .toLowerCase()
+function tokenize(text: string, language?: string): string[] {
+  const normalized =
+    normalizeLang(language ?? "") === "ar" ? normalizeArabicForMatch(text) : text.toLowerCase();
+  return normalized
     .replace(/<[^>]*>/g, " ")
     .replace(/[^\p{L}\p{N}\s]/gu, " ")
     .split(/\s+/)
@@ -119,13 +142,14 @@ export function alignSubToAsr(
   cues: Array<[number, number]>,
   cueText: string[] | undefined,
   phrases: AsrPhrase[],
+  language?: string,
 ): Estimate | null {
   if (!cueText || cues.length === 0 || phrases.length === 0) return null;
-  const cueSets = cueText.map((t) => new Set(tokenize(t)));
+  const cueSets = cueText.map((t) => new Set(tokenize(t, language)));
   const anchors: Anchor[] = [];
   let eligible = 0;
   for (const phrase of phrases) {
-    const pset = new Set(tokenize(phrase.text));
+    const pset = new Set(tokenize(phrase.text, language));
     if (pset.size < MIN_SHARED_TOKENS) continue;
     eligible += 1;
     let bestJ = MIN_JACCARD;
@@ -157,19 +181,29 @@ function weightedMean(pairs: Array<[number, number]>, fallback: number): number 
   return sw > 0 ? sv / sw : fallback;
 }
 
-function fuse(estimates: Estimate[]): { transform: AffineTransform; spread: number; sources: number } | null {
+function fuse(
+  estimates: Estimate[],
+): { transform: AffineTransform; spread: number; sources: number } | null {
   const offs = estimates.filter((e) => e.wOff > 0);
   if (offs.length === 0) return null;
   const offVals = offs.map((e) => e.offsetSec);
   const offMed = robustMedian(offVals);
   const offSpread = mad(offVals);
   const offKeep = offs.filter((e) => Math.abs(e.offsetSec - offMed) <= 2.5 * offSpread + 0.5);
-  const offsetSec = weightedMean(offKeep.map((e) => [e.offsetSec, e.wOff]), offMed);
+  const offsetSec = weightedMean(
+    offKeep.map((e) => [e.offsetSec, e.wOff]),
+    offMed,
+  );
 
   const rats = estimates.filter((e) => e.wRatio > 0);
   const ratMed = rats.length ? robustMedian(rats.map((e) => e.ratio)) : 1;
   const ratKeep = rats.filter((e) => Math.abs(e.ratio - ratMed) <= 0.03);
-  const ratio = snapRatio(weightedMean(ratKeep.map((e) => [e.ratio, e.wRatio]), 1));
+  const ratio = snapRatio(
+    weightedMean(
+      ratKeep.map((e) => [e.ratio, e.wRatio]),
+      1,
+    ),
+  );
 
   return {
     transform: { kind: "affine", offsetSec, ratio },
@@ -181,7 +215,9 @@ function fuse(estimates: Estimate[]): { transform: AffineTransform; spread: numb
 const FAST_MIN_ANCHORS = 8;
 const FAST_MAX_RESIDUAL = 0.6;
 
-export function consensusAnchorFit(res: ConsensusResult): { offsetSec: number; ratio: number } | null {
+export function consensusAnchorFit(
+  res: ConsensusResult,
+): { offsetSec: number; ratio: number } | null {
   if (res.verdict !== "right" || !res.textAnchors) return null;
   if (res.textAnchors.length < FAST_MIN_ANCHORS) return null;
   const fit = robustFit(res.textAnchors);
@@ -202,7 +238,11 @@ export function consensusSignal(res: ConsensusResult, lead: SyncTransform | null
         ? clamp(0.5 + res.agreement * 0.5, 0.5, 1)
         : 0.5;
   const supportsWrong =
-    res.verdict === "wrong" ? Math.max(0.6, 1 - res.agreement) : res.verdict === "unknown" ? 0.15 : 0;
+    res.verdict === "wrong"
+      ? Math.max(0.6, 1 - res.agreement)
+      : res.verdict === "unknown"
+        ? 0.15
+        : 0;
   return {
     tier: "consensus",
     rawScore: raw,
@@ -231,7 +271,12 @@ export function wrongContentOutcome(
         transform: IDENTITY,
       },
       candidate: IDENTITY,
-      subSwap: { url: cand.url, format: cand.format === "vtt" ? "vtt" : "srt", lang: cand.lang, source: cand.source },
+      subSwap: {
+        url: cand.url,
+        format: cand.format === "vtt" ? "vtt" : "srt",
+        lang: cand.lang,
+        source: cand.source,
+      },
       evidence,
       tiersRun,
     };
@@ -250,9 +295,13 @@ export function wrongContentOutcome(
   };
 }
 
-function bestEffortConfidence(pCorrect: number, agreeing: number): FusedConfidence {
+function bestEffortConfidence(
+  pCorrect: number,
+  agreeing: number,
+  conflictK: number,
+): FusedConfidence {
   const p = clamp(pCorrect, 0.3, 0.85);
-  return { pCorrect: p, logOdds: toLogOdds(p), conflictK: 0, agreeingSignals: agreeing, perTier: [] };
+  return { pCorrect: p, logOdds: toLogOdds(p), conflictK, agreeingSignals: agreeing, perTier: [] };
 }
 
 export type EscalateArgs = {
@@ -262,28 +311,60 @@ export type EscalateArgs = {
   leadNcc: number;
   consensus: ConsensusResult | null;
   bounds: Bounds;
-  qualityBefore: AlignmentQuality;
+  qualityBefore: QualityMeasurement;
+  inputAlreadyGood: boolean;
+  wrongContentReason?: string;
   evidence: SignalEvidence[];
   tiersRun: TierId[];
+  calibrationReady: boolean;
+  structuralAutoApplyEnabled: boolean;
+  subtitleFormat: SubtitleFormat;
 };
 
 export async function escalateTryHarder(args: EscalateArgs): Promise<PipelineOutcome | null> {
   const { ctx, ports, lead, consensus, bounds, qualityBefore, evidence, tiersRun } = args;
+  if (args.wrongContentReason) {
+    const transform = lead ?? IDENTITY;
+    return {
+      decision: {
+        decision: "refuse",
+        reason: args.wrongContentReason,
+        bindingRule: "metadata-hard-refuse",
+        pCorrect: DEFAULT_PRIOR,
+        transform,
+      },
+      candidate: lead,
+      evidence,
+      tiersRun,
+      bestEffort: true,
+    };
+  }
   const contentWrong = consensus?.verdict === "wrong";
   const estimates: Estimate[] = [];
 
   if (lead && !contentWrong) {
     const a = affineOf(lead);
     const w = clamp(args.leadNcc, 0, 1) * 0.8;
-    if (w > 0) estimates.push({ offsetSec: a.offsetSec, ratio: a.ratio, wOff: w, wRatio: w, source: "vad" });
+    if (w > 0)
+      estimates.push({ offsetSec: a.offsetSec, ratio: a.ratio, wOff: w, wRatio: w, source: "vad" });
   }
 
   let asrMatched = false;
-  if (ports.asrTranscribe) {
-    const phrases = await ports
+  if (ports.asrTranscribe && (!ctx.audioLanguage || canUseLexicalAsr(ctx))) {
+    const transcript = await ports
       .asrTranscribe(ctx, denseAsrWindows(ctx.durationSec))
-      .catch(() => [] as AsrPhrase[]);
-    const asrEst = alignSubToAsr(ctx.cues, ctx.cueText, phrases);
+      .catch(() => ({ phrases: [], detectedLanguage: null }) satisfies AsrTranscript);
+    const lexicalContext = ctx.audioLanguage
+      ? ctx
+      : { ...ctx, audioLanguage: transcript.detectedLanguage };
+    const asrEst = canUseLexicalAsr(lexicalContext)
+      ? alignSubToAsr(
+          ctx.cues,
+          ctx.cueText,
+          transcript.phrases,
+          ctx.subtitleLanguage ?? lexicalContext.audioLanguage ?? undefined,
+        )
+      : null;
     if (asrEst) {
       asrMatched = true;
       estimates.push(asrEst);
@@ -296,22 +377,40 @@ export async function escalateTryHarder(args: EscalateArgs): Promise<PipelineOut
     const fit = robustFit(consensus.textAnchors);
     if (fit && fit.residualSec <= RESIDUAL_KEEP_SEC * 2) {
       const w = clamp(consensus.agreement, 0, 1) * 0.7;
-      estimates.push({ offsetSec: fit.offsetSec, ratio: fit.ratio, wOff: w, wRatio: w, source: "consensus" });
+      estimates.push({
+        offsetSec: fit.offsetSec,
+        ratio: fit.ratio,
+        wOff: w,
+        wRatio: w,
+        source: "consensus",
+      });
     }
   }
 
   const runtime = ctx.meta?.expectedRuntimeSec;
   const subSpan = ctx.cues.length ? ctx.cues[ctx.cues.length - 1][1] - ctx.cues[0][0] : 0;
   if (runtime && subSpan > 60) {
-    estimates.push({ offsetSec: 0, ratio: snapRatio(runtime / subSpan), wOff: 0, wRatio: 0.3, source: "meta" });
+    estimates.push({
+      offsetSec: 0,
+      ratio: snapRatio(runtime / subSpan),
+      wOff: 0,
+      wRatio: 0.3,
+      source: "meta",
+    });
   }
 
   const fused = fuse(estimates);
   if (!fused) return null;
 
-  const qualityAfter = await ports.measureQuality(ctx, fused.transform);
+  const qualityAfter = await ports.measureQuality(ctx, fused.transform, { purpose: "validation" });
   const pCorrect = 0.4 + 0.15 * fused.sources - fused.spread * 0.1;
-  const confidence = bestEffortConfidence(pCorrect, fused.sources);
+  const signalConflict = fuseSignalConfidence(evidence, DEFAULT_PRIOR).conflictK;
+  const estimateConflict = clamp(fused.spread / 3, 0, 1);
+  const confidence = bestEffortConfidence(
+    pCorrect,
+    fused.sources,
+    Math.max(signalConflict, estimateConflict),
+  );
   const decision = evaluateBestEffort({
     transform: fused.transform,
     confidence,
@@ -319,7 +418,11 @@ export async function escalateTryHarder(args: EscalateArgs): Promise<PipelineOut
     qualityAfter,
     bounds,
     exactIdentity: false,
-    inputAlreadyGood: false,
+    candidateKind: "structural",
+    calibrationReady: args.calibrationReady,
+    structuralAutoApplyEnabled: args.structuralAutoApplyEnabled,
+    subtitleFormat: args.subtitleFormat,
+    inputAlreadyGood: args.inputAlreadyGood,
   });
 
   return { decision, candidate: fused.transform, evidence, tiersRun, bestEffort: true };

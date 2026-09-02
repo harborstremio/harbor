@@ -7,6 +7,7 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { useMenuSide } from "../menu-side";
 import { Tooltip } from "./tooltip";
+import { watchOutsideMouseDown } from "@/lib/player/overlay-dismiss";
 
 const A4K_OPTIONS: Array<{ id: Anime4kChoice; label: string }> = [
   { id: "auto", label: "Auto" },
@@ -19,17 +20,19 @@ export function ShaderMenu({
   onMode,
   anime4kAvailable,
   onOpenChange,
+  iconUrl,
 }: {
   mode: Anime4kChoice;
   onMode: (m: Anime4kChoice) => void;
   anime4kAvailable: boolean;
   onOpenChange?: (open: boolean) => void;
+  iconUrl?: string;
 }) {
   const t = useT();
   const { settings, update } = useSettings();
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
-  const { side, measure } = useMenuSide(wrap, 340);
+  const { measure } = useMenuSide(wrap, 340);
 
   useEffect(() => {
     onOpenChange?.(open);
@@ -39,8 +42,7 @@ export function ShaderMenu({
     const close = (e: MouseEvent) => {
       if (!wrap.current?.contains(e.target as Node)) setOpen(false);
     };
-    window.addEventListener("mousedown", close);
-    return () => window.removeEventListener("mousedown", close);
+    return watchOutsideMouseDown(close);
   }, [open]);
 
   const shaderMap = settings.playerShaders ?? {};
@@ -70,15 +72,17 @@ export function ShaderMenu({
             accent ? "bg-white/22 text-white hover:bg-white/30" : "text-white/85 hover:bg-white/10 hover:text-white"
           }`}
         >
-          <Layers size={19} strokeWidth={1.9} />
+          {iconUrl ? (
+            <img src={iconUrl} alt="" className="h-[22px] w-[22px] shrink-0 select-none object-contain" draggable={false} />
+          ) : (
+            <Layers size={19} strokeWidth={1.9} />
+          )}
           {activeCount > 0 ? <span className="text-[11px] font-bold tracking-wider">{activeCount}</span> : null}
         </button>
       </Tooltip>
       {open && (
         <div
-          className={`absolute bottom-[calc(100%+10px)] ${
-            side === "start" ? "start-0" : "end-0"
-          } max-h-[min(70vh,520px)] w-[340px] max-w-[calc(100vw-32px)] overflow-y-auto rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}
+          className="fixed end-14 bottom-[150px] max-h-[calc(100vh-174px)] w-[340px] max-w-[calc(100vw-72px)] overflow-y-auto rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop"
         >
           <div className="p-2">
             {anime4kAvailable && (

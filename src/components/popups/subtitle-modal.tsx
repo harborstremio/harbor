@@ -53,7 +53,7 @@ export function SubtitleModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <ResizableSubtitlePanel className="mb-24 me-6">
+      <ResizableSubtitlePanel className="mb-[84px] me-[56px]">
         <div className="flex min-h-0 flex-1 flex-col" onClick={(e) => e.stopPropagation()}>
           <SubtitleMenuBody
             tracks={state.tracks}

@@ -1,4 +1,5 @@
-import { ArrowRight, Loader2, Play } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";

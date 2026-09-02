@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
-import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
+import type { PlayerBridge, PlayerSnapshot, TrackInfo } from "@/lib/player/bridge";
 import type { PlayerSrc } from "@/lib/view";
 import type { Settings } from "@/lib/settings";
 import { dwarn } from "@/lib/debug";
@@ -13,6 +13,10 @@ import {
 } from "@/lib/subtitles/autosync/pipeline";
 import { buildTierPorts, defaultOsConfig } from "@/lib/subtitles/autosync/context";
 import {
+  preferAutoSyncOutcome,
+  runExperimentalPivotAutoSync,
+} from "@/lib/subtitles/autosync/pivot-runtime";
+import {
   crowdConfigFromSettings,
   reportCrowdFeedback,
   reportVerifiedSync,
@@ -24,7 +28,11 @@ import {
   type ProgressiveHandle,
 } from "@/lib/subtitles/autosync/torrent-sync";
 import { resolveSwapCues, type OsConfig } from "@/lib/subtitles/autosync/opensubtitles";
-import { type SyncTransform } from "@/lib/subtitles/autosync/fp-gate";
+import {
+  isDelayOnlyTransform,
+  type SubtitleFormat,
+  type SyncTransform,
+} from "@/lib/subtitles/autosync/fp-gate";
 import { transformCues } from "@/lib/subtitles/autosync/html5-sync";
 import {
   DriftMonitor,
@@ -37,13 +45,9 @@ import {
   isAutoSyncScopeCurrent,
   runAfterSubtitleFpsReset,
 } from "@/lib/player/subtitle-fps";
-import {
-  buildContext,
-  isLoopback,
-  outcomeScore,
-  subLanguages,
-  toDriftState,
-} from "./use-auto-sync.helpers";
+import { isAssTrack } from "@/lib/player/sub-format";
+import { automaticAutoSyncMayStart } from "@/lib/subtitles/autosync/preflight-gate";
+import { buildContext, isLoopback, outcomeScore, toDriftState } from "./use-auto-sync.helpers";
 
 export type AutoSyncStatus =
   | "idle"
@@ -65,7 +69,8 @@ export type AutoSyncHandle = {
   feedback: (good: boolean) => void;
 };
 
-type SubFmt = "srt" | "vtt";
+type SubFmt = SubtitleFormat;
+type WritableSubFmt = Extract<SubFmt, "srt" | "vtt">;
 type AutoSyncScope = { mediaKey: string; trackId: string };
 type AppliedState = {
   transform: SyncTransform | null;
@@ -74,14 +79,12 @@ type AppliedState = {
   scope: AutoSyncScope | null;
   changed: boolean;
 };
-type AutoSyncFlags = { autoSyncDrift?: boolean; subtitleAutoSyncAsr?: boolean };
+type AutoSyncFlags = { autoSyncDrift?: boolean };
 
 const MIN_DURATION_SEC = 60;
 const MIN_CUES = 4;
 const OFFSET_EPS = 0.25;
-const RATIO_EPS = 0.003;
 const DRIFT_TICK_MS = 4000;
-const SWAP_AUTO_APPLY = false;
 
 function isSyncedTrack(t: { title?: string } | null | undefined): boolean {
   return /^Synced \((?:SRT|VTT)\)/.test(t?.title ?? "");
@@ -106,8 +109,10 @@ export function useAutoSync(params: {
   snap: PlayerSnapshot;
   engine: "html5" | "mpv";
   settings: Settings;
+  authKey: string | null;
+  subtitlePreflightSettled: boolean;
 }): AutoSyncHandle {
-  const { bridgeRef, src, snap, engine, settings } = params;
+  const { bridgeRef, src, snap, engine, settings, authKey, subtitlePreflightSettled } = params;
   const [status, setStatus] = useState<AutoSyncStatus>("idle");
   const [offer, setOffer] = useState<PipelineOutcome | null>(null);
 
@@ -153,7 +158,12 @@ export function useAutoSync(params: {
     settings.subtitleAutoSync === true &&
     snap.durationSec >= MIN_DURATION_SEC &&
     selected?.external === true &&
-    !selectedSynced;
+    !selectedSynced &&
+    automaticAutoSyncMayStart({
+      preflightSettled: subtitlePreflightSettled,
+      tracks: snap.subtitleTracks,
+      selectedLanguage: selected.lang,
+    });
   const runKey = selectedSynced
     ? doneKeyRef.current
     : ready && selected
@@ -207,7 +217,7 @@ export function useAutoSync(params: {
     ): Promise<boolean> => {
       if (!isCurrent()) return false;
       const a = appliedRef.current;
-      if (t.kind === "affine" && Math.abs(t.ratio - 1) < RATIO_EPS) {
+      if (t.kind === "affine" && isDelayOnlyTransform(t)) {
         if (Math.abs(t.offsetSec) < OFFSET_EPS && !a.transform) return true;
         if (!isCurrent()) return false;
         if (a.originalTrackId) b.setSubtitleTrack(a.originalTrackId);
@@ -216,6 +226,14 @@ export function useAutoSync(params: {
         if (!isCurrent()) return false;
         a.transform = t;
         return true;
+      }
+      if (fmt === "ass" || fmt === "ssa") {
+        dwarn(`[auto-sync] ${fmt.toUpperCase()} structural rewrite blocked to preserve formatting`);
+        return false;
+      }
+      if (fmt === "unknown") {
+        dwarn("[auto-sync] structural rewrite blocked because subtitle format is unknown");
+        return false;
       }
       const finalCues = transformCues(cues, t);
       if (finalCues.length === 0 || !isCurrent()) return false;
@@ -234,9 +252,7 @@ export function useAutoSync(params: {
       if (flagsRef.current.autoSyncDrift !== true || driftRef.current) return;
       const active = srcRef.current;
       const trackKey = doneKeyRef.current ?? active.url;
-      const ports = makeTauriDriftPorts(active.url, active.headers, {
-        enableAsr: flagsRef.current.subtitleAutoSyncAsr === true,
-      });
+      const ports = makeTauriDriftPorts(active.url, active.headers);
       const deps: DriftDeps = {
         getState: () => toDriftState(liveSnapRef.current, cues, trackKey),
         setSubDelay: (s) => {
@@ -271,7 +287,7 @@ export function useAutoSync(params: {
         if (!appliedRef.current.transform) setStatus("declined");
         return;
       }
-      if (dec === "offer" || (o.subSwap && !SWAP_AUTO_APPLY)) {
+      if (dec === "offer") {
         setOffer(o);
         if (!appliedRef.current.transform) setStatus("offer");
         return;
@@ -281,6 +297,30 @@ export function useAutoSync(params: {
       const t = o.candidate;
       const b = bridgeRef.current;
       if (!t || !b) return;
+      const automaticSwap = o.subSwap;
+      if (automaticSwap) {
+        const os = defaultOsConfig(settingsRef.current) ?? {
+          apiKey: "",
+          userAgent: "Harbor autosync",
+        };
+        void runWithSubtitleFpsReset(
+          async () => {
+            if (!isCurrent()) return;
+            bestScoreRef.current = score;
+            setOffer(null);
+            const applied = await applySwap(b, automaticSwap, os, isCurrent);
+            if (!isCurrent()) return;
+            if (applied) appliedRef.current.changed = true;
+            setStatus(applied ? "synced" : "error");
+          },
+          cancelled,
+          isCurrent,
+        ).catch((error) => {
+          dwarn("[auto-sync] automatic swap failed", error);
+          if (!cancelled.current && isCurrent()) setStatus("error");
+        });
+        return;
+      }
       void runWithSubtitleFpsReset(
         async () => {
           if (!isCurrent()) return;
@@ -353,10 +393,17 @@ export function useAutoSync(params: {
               setStatus(force ? "error" : "idle");
               return;
             }
-            const fmt = formatOf(b);
-            const langs = subLanguages(activeSelected.lang, settingsRef.current.preferredSubLangs);
-            const ctx = buildContext(active, activeSnap, sourceKind, cues, langs);
+            const fmt = formatOf(b, activeSelected);
+            const ctx = buildContext(active, activeSnap, sourceKind, cues, {
+              language: activeSelected.lang,
+              preferredLanguages: settingsRef.current.preferredSubLangs,
+              format: fmt,
+            });
             const os = defaultOsConfig(settingsRef.current);
+            const pipelineOptions = (tryHarder: boolean) => ({
+              tryHarder,
+              allowStructuralAutoApply: settingsRef.current.autoSyncApplyStructural,
+            });
             const applyAndCapture = (o: PipelineOutcome) => {
               handleOutcome(o, cues, fmt, cancelled, statusScope);
               if (
@@ -373,30 +420,57 @@ export function useAutoSync(params: {
                 };
               }
             };
+            const pivotResolver = (ports: ReturnType<typeof buildTierPorts>) => {
+              let pivotPromise: Promise<PipelineOutcome | null> | null = null;
+              return async (base: PipelineOutcome): Promise<PipelineOutcome> => {
+                if (base.decision.decision === "apply") return base;
+                try {
+                  pivotPromise ??= runExperimentalPivotAutoSync({
+                    ctx,
+                    ports,
+                    settings: settingsRef.current,
+                    src: active,
+                    authKey,
+                  });
+                  return preferAutoSyncOutcome(base, await pivotPromise);
+                } catch (error) {
+                  dwarn("[auto-sync/pivot] experimental pivot failed", error);
+                  return base;
+                }
+              };
+            };
             if (isTorrent && ctx.infoHash) {
               const basePorts = buildTierPorts(ctx, settingsRef.current, {
                 osConfig: os,
+                authKey,
                 torrent: { fileIdx, getPositionSec: () => liveSnapRef.current.positionSec },
               });
+              const resolveOutcome = pivotResolver(basePorts);
               progressiveRef.current = scheduleProgressiveTorrentSync({
                 ctx,
                 fileIdx,
                 basePorts,
+                opts: pipelineOptions(force),
                 osConfig: os ?? undefined,
                 getSnapshot: () => ({
                   positionSec: liveSnapRef.current.positionSec,
                   durationSec: liveSnapRef.current.durationSec || ctx.durationSec,
                 }),
-                onOutcome: (o) => applyAndCapture(o),
+                onOutcome: (o) => {
+                  void resolveOutcome(o).then(applyAndCapture);
+                },
               });
               retryRef.current = () =>
-                void runAutoSync(ctx, basePorts, { tryHarder: true }).then((o) =>
-                  applyAndCapture(o),
-                );
+                void runAutoSync(ctx, basePorts, pipelineOptions(true))
+                  .then(resolveOutcome)
+                  .then(applyAndCapture);
             } else {
-              const ports = buildTierPorts(ctx, settingsRef.current, { osConfig: os });
+              const ports = buildTierPorts(ctx, settingsRef.current, { osConfig: os, authKey });
+              const resolveOutcome = pivotResolver(ports);
               const runDirect = async (tryHarder: boolean) => {
-                const outcome = await runAutoSync(ctx, ports, { tryHarder });
+                const outcome = await resolveOutcome(
+                  await runAutoSync(ctx, ports, pipelineOptions(tryHarder)),
+                );
                 applyAndCapture(outcome);
               };
               retryRef.current = () => void runDirect(true);
@@ -422,7 +496,15 @@ export function useAutoSync(params: {
       activeDisposeRef.current = dispose;
       return dispose;
     },
-    [engine, bridgeRef, handleOutcome, isCurrentAutoSyncScope, runWithSubtitleFpsReset, stopDrift],
+    [
+      engine,
+      bridgeRef,
+      handleOutcome,
+      isCurrentAutoSyncScope,
+      runWithSubtitleFpsReset,
+      stopDrift,
+      authKey,
+    ],
   );
 
   const selKey = selectedSynced
@@ -532,7 +614,9 @@ export function useAutoSync(params: {
         const t = o.candidate;
         const cues = b.getSelectedTrackCues();
         if (!t || !cues) return;
-        const applied = await applyTransform(b, cues, formatOf(b), t, isCurrent);
+        const selectedTrack =
+          liveSnapRef.current.subtitleTracks.find((track) => track.selected) ?? null;
+        const applied = await applyTransform(b, cues, formatOf(b, selectedTrack), t, isCurrent);
         if (!applied || !isCurrent()) return;
         setStatus("synced");
         startDrift(b, cues);
@@ -572,7 +656,7 @@ export function useAutoSync(params: {
 async function writeSyncedTrack(
   b: PlayerBridge,
   text: string,
-  fmt: SubFmt,
+  fmt: WritableSubFmt,
   isCurrent: () => boolean,
 ): Promise<boolean> {
   if (!isCurrent()) return false;
@@ -589,7 +673,7 @@ async function writeSyncedTrack(
 
 async function applySwap(
   b: PlayerBridge,
-  subSwap: { url: string; format: SubFmt },
+  subSwap: { url: string; format: WritableSubFmt },
   os: OsConfig,
   isCurrent: () => boolean,
 ): Promise<boolean> {
@@ -634,7 +718,17 @@ function safeConvert(url: string): string | null {
   return null;
 }
 
-function formatOf(b: PlayerBridge): SubFmt {
-  const url = b.getSelectedTrackUrl() ?? "";
-  return /\.vtt(\?|#|$)/i.test(url) ? "vtt" : "srt";
+function formatOf(b: PlayerBridge, track: TrackInfo | null): SubFmt {
+  const source = [b.getSelectedTrackUrl(), track?.externalFilename, track?.title]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
+  if (/\.ssa(?:$|[?#\s])/i.test(source) || /\bSSA\b/i.test(track?.codec ?? "")) return "ssa";
+  if (/\.ass(?:$|[?#\s])/i.test(source) || isAssTrack(track)) return "ass";
+  if (/\.vtt(?:$|[?#\s])/i.test(source) || /WEBVTT|\bVTT\b/i.test(track?.codec ?? "")) {
+    return "vtt";
+  }
+  if (/\.srt(?:$|[?#\s])/i.test(source) || /SUBRIP|\bSRT\b/i.test(track?.codec ?? "")) {
+    return "srt";
+  }
+  return "unknown";
 }

@@ -296,6 +296,24 @@ export function streamMatchesSource(
   );
 }
 
+export function streamMatchesReleaseLineage(
+  s: {
+    infoHash?: string | null;
+    addonId?: string | null;
+    resolution?: string | null;
+    source?: string | null;
+    releaseGroupNormalized?: string | null;
+    behaviorHints?: { bingeGroup?: string };
+  },
+  e: PlaybackEntry,
+): boolean {
+  if (streamMatchesSource(s, e)) return true;
+  if (!e.releaseGroup || !s.releaseGroupNormalized) return false;
+  if (s.releaseGroupNormalized !== e.releaseGroup) return false;
+  if (e.addonId && s.addonId !== e.addonId) return false;
+  return e.resolution === s.resolution && e.source === s.source;
+}
+
 export function preferredSourceAddonPending(
   entry: PlaybackEntry | null,
   sourceMatched: boolean,

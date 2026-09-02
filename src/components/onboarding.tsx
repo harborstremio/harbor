@@ -11,6 +11,7 @@ import { SubtitlesStep } from "@/components/onboarding/subtitles-step";
 import { TasteStep, TASTE_MAX } from "@/components/onboarding/taste-step";
 import { TmdbStep } from "@/components/onboarding/tmdb-step";
 import { WelcomeStep } from "@/components/onboarding/welcome-step";
+import { useBigPicture } from "@/lib/big-picture";
 import type { Meta } from "@/lib/cinemeta";
 import { setVote } from "@/lib/feed/preferences";
 import { useT } from "@/lib/i18n";
@@ -42,19 +43,24 @@ const STEPS: StepId[] = [
 
 export function OnboardingModal() {
   const { onboarded, finishOnboarding } = useOnboarding();
+  const bigPicture = useBigPicture().active;
   const t = useT();
   const [stepIdx, setStepIdx] = useState(0);
   const [closing, setClosing] = useState(false);
   const [tastePicks, setTastePicks] = useState<Meta[]>([]);
 
   useEffect(() => {
-    if (!onboarded) document.body.style.overflow = "hidden";
+    if (onboarded || bigPicture) return;
+    document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [onboarded]);
+  }, [onboarded, bigPicture]);
 
-  if (onboarded) return null;
+  // Big Picture ships its own ten-foot setup at z-900. Leaving this mounted
+  // underneath it keeps a second focusable dialog in native tab order and a
+  // second owner of the body scroll lock.
+  if (onboarded || bigPicture) return null;
 
   const step = STEPS[stepIdx];
   const isSplash = step === "splash";
@@ -85,7 +91,7 @@ export function OnboardingModal() {
       }`}
     >
       <div
-        className={`relative flex flex-col overflow-hidden rounded-[28px] border border-edge-soft bg-elevated/95 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] ${
+        className={`relative flex flex-col overflow-hidden rounded-2xl border border-edge-soft bg-elevated/95 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] ${
           isTaste ? "w-[min(93vw,640px)]" : "w-[min(92vw,580px)]"
         } transition-[width] duration-300 ${closing ? "scale-[0.97] opacity-0 !transition-all !duration-300" : "animate-modal-in"}`}
       >

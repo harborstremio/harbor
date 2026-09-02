@@ -25,6 +25,12 @@ class FakeObjectStore {
     return req;
   }
 
+  getAll(): FakeRequest<unknown[]> {
+    const req = new FakeRequest<unknown[]>();
+    req.succeed([...this.data.values()]);
+    return req;
+  }
+
   put(value: unknown, key: string): FakeRequest<string> {
     const req = new FakeRequest<string>();
     this.data.set(key, value);

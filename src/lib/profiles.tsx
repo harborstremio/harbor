@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -11,6 +12,12 @@ import type { HiddenTabs } from "./lockable-tabs";
 import type { ContentFilters } from "./settings";
 import { isRemovedBuiltinAvatar } from "./avatars/catalog";
 import { deleteProfileBgImage } from "./theme-storage";
+// Concrete modules, not the barrel: it re-exports ProfileSyncRunner, and pulling the
+// whole sync layer in from the profile provider is how a cycle gets built by accident.
+import { configureRosterStore } from "./profile-sync/roster-store";
+import { noteProfileDeleted } from "./profile-sync/roster-section";
+import { refuseProfileSelect } from "./profile-sync/profile-lock";
+import type { LocalProfileLike } from "./profile-sync/types";
 
 export const PROFILE_COLORS = [
   "#7dd3fc",
@@ -34,6 +41,83 @@ export type KidConfig = {
 };
 
 export const DEFAULT_KID: KidConfig = { age: 7, curfewMinutes: null, parentPinHash: null };
+
+// Every namespaced key a profile owns. Kept as one list because deleteProfile and the
+// sync roster apply both purge, and a key that only one of them knows about is a leak
+// that outlives the profile.
+const PROFILE_KEY_PREFIXES = [
+  "harbor.auth.",
+  "harbor.theme-session.",
+  "harbor.localcw.v1.",
+  "harbor.favorites.v1.",
+  "harbor.charfavorites.v1.",
+  "harbor.mangafav.v1.",
+  "harbor.mangaread.v1.",
+  "harbor.localwatchlist.v1.",
+  "harbor.settings.",
+  "harbor.trakt.session.v1.",
+  "harbor.simkl.session.v1.",
+  "harbor.anilist.session.v1.",
+  "harbor.mal.session.v1.",
+  "harbor.simkl.cache.v2.",
+  "harbor.anilist.synced.v1.",
+  "harbor.mal.synced.v1.",
+  "harbor.moviewatched.v1.",
+  "harbor.watchedFlag.v1.",
+  "harbor.manualwatched.v1.",
+  "harbor.manualunwatched.v1.",
+  "harbor.manualwatched.meta.v1.",
+  "harbor.manualwatched.dismissed.v1.",
+  "harbor.manualunwatched.at.v1.",
+  "harbor.manualwatched.fromremote.v1.",
+  "harbor.watchevents.v1.",
+  "harbor.playback-history.v1.",
+  "harbor.watchlist.v1.",
+  "harbor.watchlist.aggregate.v1.",
+  "harbor.installed-addons.",
+  "harbor.addons.disabled.",
+  "harbor.stremio.freshwatched.v1.",
+];
+
+function purgeProfileStorage(id: string): void {
+  try {
+    for (const prefix of PROFILE_KEY_PREFIXES) localStorage.removeItem(`${prefix}${id}`);
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * The wire carries no secrets and no shareStremioWith, so those come off the profile
+ * being replaced rather than being dropped. A parentPinHash lost here would silently
+ * unlock a kid profile on the device that adopted the roster.
+ */
+function adoptProfile(
+  next: LocalProfileLike,
+  prev: Profile | undefined,
+  fallbackColor: ProfileColor,
+): Profile {
+  return {
+    id: next.id,
+    name: next.name,
+    avatar: next.avatar,
+    color: next.color || prev?.color || fallbackColor,
+    isPrimary: next.isPrimary,
+    shareStremioWith: prev?.shareStremioWith ?? null,
+    passwordHash: next.passwordHash ?? prev?.passwordHash ?? null,
+    hideContent: (next.hideContent as ContentFilters | null) ?? null,
+    lockedTabs: (next.lockedTabs as HiddenTabs | null) ?? null,
+    kid: next.kid
+      ? {
+          age: next.kid.age,
+          curfewMinutes: next.kid.curfewMinutes,
+          parentPinHash: next.kid.parentPinHash ?? prev?.kid?.parentPinHash ?? null,
+        }
+      : null,
+    settingsLinked: next.settingsLinked !== false,
+    createdAt: next.createdAt,
+  };
+}
 
 export type Profile = {
   id: string;
@@ -70,7 +154,8 @@ type ProfilesValue = {
   openPicker: (view?: PickerView) => void;
   setPickerView: (view: PickerView) => void;
   closePicker: () => void;
-  selectProfile: (id: string, opts?: { unlocked?: boolean }) => void;
+  /** False when the profile is locked and this call did not prove the PIN. */
+  selectProfile: (id: string, opts?: { unlocked?: boolean }) => boolean;
   sessionUnlockedIds: Set<string>;
   createProfile: (input: {
     name: string;
@@ -78,10 +163,7 @@ type ProfilesValue = {
     color: ProfileColor;
     kid?: KidConfig | null;
   }) => Profile;
-  updateProfile: (
-    id: string,
-    patch: Partial<Omit<Profile, "id" | "createdAt" | "isPrimary">>,
-  ) => void;
+  updateProfile: (id: string, patch: Partial<Omit<Profile, "id" | "createdAt" | "isPrimary">>) => void;
   deleteProfile: (id: string) => void;
   setPrimary: (id: string) => void;
 };
@@ -164,10 +246,7 @@ function readProfilePromptInterval(): ProfilePromptInterval {
   try {
     const raw = readLaunchSettingsRaw();
     if (!raw) return "launch";
-    const parsed = JSON.parse(raw) as {
-      profilePromptInterval?: unknown;
-      skipProfileScreen?: unknown;
-    };
+    const parsed = JSON.parse(raw) as { profilePromptInterval?: unknown; skipProfileScreen?: unknown };
     const v = parsed.profilePromptInterval;
     if (v === "launch" || v === "15m" || v === "30m" || v === "never") return v;
     return parsed.skipProfileScreen === true ? "never" : "launch";
@@ -289,19 +368,11 @@ function readState(): ProfilesState {
       if (p.isPrimary) {
         if (isPlaceholderName(p.name)) next.name = fallbackName;
         if (identity.color) next.color = identity.color;
-        if (
-          p.avatar == null &&
-          identity.avatar != null &&
-          !identity.avatar.startsWith("/kids/avatars/")
-        ) {
+        if (p.avatar == null && identity.avatar != null && !identity.avatar.startsWith("/kids/avatars/")) {
           next.avatar = identity.avatar;
         }
       }
-      if (
-        next.kid == null &&
-        typeof next.avatar === "string" &&
-        next.avatar.startsWith("/kids/avatars/")
-      ) {
+      if (next.kid == null && typeof next.avatar === "string" && next.avatar.startsWith("/kids/avatars/")) {
         next.avatar = null;
       }
       if (isRemovedBuiltinAvatar(next.avatar)) {
@@ -410,7 +481,22 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
   );
 
   const [sessionUnlockedIds, setSessionUnlockedIds] = useState<Set<string>>(() => new Set());
+  // Read through refs so the gate can see current state without giving selectProfile a
+  // changing identity, which several consumers put straight into their own dep arrays.
+  const profilesRef = useRef(state.profiles);
+  profilesRef.current = state.profiles;
+  const unlockedRef = useRef(sessionUnlockedIds);
+  unlockedRef.current = sessionUnlockedIds;
+
   const selectProfile = useCallback((id: string, opts?: { unlocked?: boolean }) => {
+    // THE GATE LIVES HERE, not in the UI. It used to be duplicated in picker-modal and
+    // use-account-menu, and RemoteOpenBridge has neither: it calls selectProfile(id)
+    // straight off a harbor:remote-set-profile event, so a paired phone walked past
+    // every profile PIN including a kid profile's parent PIN. Gated callers already
+    // pass { unlocked: true } after verifying, so they are unaffected and the remote
+    // now fails closed.
+    const target = profilesRef.current.find((p) => p.id === id) ?? null;
+    if (refuseProfileSelect(target, unlockedRef.current, opts)) return false;
     if (opts?.unlocked) {
       setSessionUnlockedIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
     }
@@ -427,6 +513,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     setState((s) => ({ ...s, activeId: id }));
     setPickerOpen(false);
     setPickerViewState({ kind: "list" });
+    return true;
   }, []);
 
   useEffect(() => {
@@ -495,41 +582,11 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     (id) => {
       const target = state.profiles.find((p) => p.id === id);
       if (!target || target.isPrimary) return;
-      try {
-        localStorage.removeItem(`harbor.auth.${id}`);
-        localStorage.removeItem(`harbor.theme-session.${id}`);
-        localStorage.removeItem(`harbor.localcw.v1.${id}`);
-        localStorage.removeItem(`harbor.favorites.v1.${id}`);
-        localStorage.removeItem(`harbor.charfavorites.v1.${id}`);
-        localStorage.removeItem(`harbor.mangafav.v1.${id}`);
-        localStorage.removeItem(`harbor.mangaread.v1.${id}`);
-        localStorage.removeItem(`harbor.localwatchlist.v1.${id}`);
-        localStorage.removeItem(`harbor.settings.${id}`);
-        localStorage.removeItem(`harbor.trakt.session.v1.${id}`);
-        localStorage.removeItem(`harbor.simkl.session.v1.${id}`);
-        localStorage.removeItem(`harbor.anilist.session.v1.${id}`);
-        localStorage.removeItem(`harbor.mal.session.v1.${id}`);
-        localStorage.removeItem(`harbor.simkl.cache.v2.${id}`);
-        localStorage.removeItem(`harbor.anilist.synced.v1.${id}`);
-        localStorage.removeItem(`harbor.mal.synced.v1.${id}`);
-        localStorage.removeItem(`harbor.moviewatched.v1.${id}`);
-        localStorage.removeItem(`harbor.watchedFlag.v1.${id}`);
-        localStorage.removeItem(`harbor.manualwatched.v1.${id}`);
-        localStorage.removeItem(`harbor.manualunwatched.v1.${id}`);
-        localStorage.removeItem(`harbor.manualwatched.meta.v1.${id}`);
-        localStorage.removeItem(`harbor.manualwatched.dismissed.v1.${id}`);
-        localStorage.removeItem(`harbor.manualunwatched.at.v1.${id}`);
-        localStorage.removeItem(`harbor.manualwatched.fromremote.v1.${id}`);
-        localStorage.removeItem(`harbor.watchevents.v1.${id}`);
-        localStorage.removeItem(`harbor.playback-history.v1.${id}`);
-        localStorage.removeItem(`harbor.watchlist.v1.${id}`);
-        localStorage.removeItem(`harbor.watchlist.aggregate.v1.${id}`);
-        localStorage.removeItem(`harbor.installed-addons.${id}`);
-        localStorage.removeItem(`harbor.addons.disabled.${id}`);
-        localStorage.removeItem(`harbor.stremio.freshwatched.v1.${id}`);
-      } catch {
-        /* ignore */
-      }
+      // Before the purge, while the id map still resolves. Without a tombstone the
+      // delete never reaches a third device: it still holds the profile, pushes it back
+      // up, and it reappears on the two devices that deleted it.
+      noteProfileDeleted(id);
+      purgeProfileStorage(id);
       void deleteProfileBgImage(id);
       setState((s) => {
         const profiles = s.profiles
@@ -541,6 +598,27 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     },
     [state.profiles],
   );
+
+  // The sync roster reads and applies through the provider, never through
+  // harbor.profiles.v1 directly: this component persists its own state on every change
+  // and never reads that key back, so an external write is clobbered on the next render.
+  useEffect(() => {
+    configureRosterStore({
+      read: () => profilesRef.current,
+      apply: (plan) => {
+        for (const id of plan.dropLocalIds) purgeProfileStorage(id);
+        setState((s) => {
+          const byId = new Map(s.profiles.map((p) => [p.id, p]));
+          const profiles = plan.replaceWith.map((next) =>
+            adoptProfile(next, byId.get(next.id), pickColor(s.profiles)),
+          );
+          const stillHere = profiles.some((p) => p.id === s.activeId);
+          return { profiles, activeId: stillHere ? s.activeId : (profiles[0]?.id ?? null) };
+        });
+      },
+    });
+    return () => configureRosterStore(null);
+  }, []);
 
   const setPrimary = useCallback<ProfilesValue["setPrimary"]>((id) => {
     setState((s) => {

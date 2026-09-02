@@ -7,14 +7,11 @@ import {
   type FlipCtor,
   type FlipInstance,
 } from "./flipbook";
+import { IMAGE_FALLBACK_HEADERS, measureAspect } from "./reader-utils";
 
 const BASE = "/flipbook";
 const NAME = "harborBook";
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-const IMG_HEADERS = {
-  "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-};
 const hostOf = (u: string): string => {
   try {
     return new URL(u).host;
@@ -82,19 +79,6 @@ function loadFlipbook(): Promise<void> {
   return loaded;
 }
 
-function firstAspect(src?: string): Promise<number> {
-  return new Promise((resolve) => {
-    if (!src) {
-      resolve(1.4);
-      return;
-    }
-    const img = new Image();
-    img.onload = () => resolve(img.naturalHeight / (img.naturalWidth || 1));
-    img.onerror = () => resolve(1.4);
-    img.src = src;
-  });
-}
-
 function sampledAspect(srcs: string[]): Promise<number> {
   if (srcs.length === 0) return Promise.resolve(1.4);
   const idxs = [
@@ -104,7 +88,7 @@ function sampledAspect(srcs: string[]): Promise<number> {
       ),
     ),
   ];
-  return Promise.all(idxs.map((i) => firstAspect(srcs[i]))).then((aspects) => {
+  return Promise.all(idxs.map((i) => measureAspect(srcs[i]))).then((aspects) => {
     const valid = aspects.filter((a) => a > 0.2 && a < 6).sort((a, b) => a - b);
     if (!valid.length) return 1.4;
     return valid[Math.floor((valid.length - 1) / 2)];
@@ -126,6 +110,7 @@ export function BookFlip({
   bg,
   resumePage,
   soundEnabled,
+  instanceName = NAME,
   zoom = 1,
   onProgress,
   onReady,
@@ -135,6 +120,7 @@ export function BookFlip({
   bg: string;
   resumePage: number;
   soundEnabled: boolean;
+  instanceName?: string;
   zoom?: number;
   onProgress: (page: number, spread: string) => void;
   onReady?: (api: BookApi) => void;
@@ -227,7 +213,9 @@ export function BookFlip({
           typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
         const host = hostOf(u);
         if (host && hosts.has(host)) {
-          return httpMod.then((m) => (m.fetch as unknown as typeof fetch)(u, { headers: IMG_HEADERS }));
+          return httpMod.then((m) =>
+            (m.fetch as unknown as typeof fetch)(u, { headers: IMAGE_FALLBACK_HEADERS }),
+          );
         }
         return origFetch(input, init);
       }) as typeof fetch;
@@ -235,7 +223,7 @@ export function BookFlip({
 
     const onPage = (e: Event) => {
       const d = (e as CustomEvent).detail as { page?: string | number; name?: string } | undefined;
-      if (!d || d.name !== NAME) return;
+      if (!d || d.name !== instanceName) return;
       const spread = String(d.page);
       const first = Number(spread.split("-")[0]);
       if (!Number.isFinite(first) || first <= 0) return;
@@ -255,7 +243,7 @@ export function BookFlip({
       }
       const singlePageMode = aspect < 1.2 || aspect > 1.9;
       inst = new Ctor(ref.current, {
-        name: NAME,
+        name: instanceName,
         pages: pages.map((src) => ({ src })),
         viewMode: "webgl",
         singlePageMode,
@@ -378,7 +366,7 @@ export function BookFlip({
       }
       ref.current?.replaceChildren();
     };
-  }, [pages, rtl, bg, resumePage]);
+  }, [pages, rtl, bg, resumePage, instanceName]);
 
   return (
     <div className="relative h-full w-full overflow-hidden">

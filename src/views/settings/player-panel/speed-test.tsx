@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import cloudflareLogo from "@/assets/cloudflare.webp";
+import { useT } from "@/lib/i18n";
 import { isTauri } from "./internals";
 import { runSpeedTest, type SpeedTestResult } from "./speed-test-run";
 
@@ -20,6 +21,7 @@ export function formatMbps(mbps: number): string {
 }
 
 function SpeedResultBadge({ value }: { value: string }) {
+  const t = useT();
   const [hovered, setHovered] = useState(false);
   const [pinned, setPinned] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -49,7 +51,7 @@ function SpeedResultBadge({ value }: { value: string }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onClick={() => setPinned((v) => !v)}
-        className={`flex items-center gap-1.5 rounded-full bg-canvas/60 px-2.5 py-1 text-[13px] font-semibold tabular-nums text-ink ring-1 transition-colors ${
+        className={`flex items-center gap-1.5 rounded-full bg-canvas px-2.5 py-1 text-[13px] font-semibold tabular-nums text-ink ring-1 transition-colors ${
           open ? "ring-edge" : "ring-edge-soft hover:ring-edge"
         }`}
       >
@@ -73,7 +75,7 @@ function SpeedResultBadge({ value }: { value: string }) {
       {open && (
         <div
           role="tooltip"
-          className="absolute end-0 top-[calc(100%+8px)] z-30 w-[300px] origin-top-right rtl:origin-top-left rounded-xl border border-edge bg-elevated p-3.5 text-start shadow-[0_18px_48px_-12px_rgba(0,0,0,0.65)]"
+          className="absolute end-0 top-[calc(100%+8px)] z-30 w-[300px] origin-top-right rtl:origin-top-left rounded-md bg-raised p-3.5 text-start harbor-float"
           style={{ animation: "harbor-fade-in 140ms ease-out both" }}
         >
           <div className="mb-2 flex items-center gap-2">
@@ -83,26 +85,27 @@ function SpeedResultBadge({ value }: { value: string }) {
               draggable={false}
               className="h-4 w-4 shrink-0 object-contain"
             />
-            <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-              How this is measured
+            <span className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+              {t("How this is measured")}
             </span>
           </div>
           <p className="mb-2.5 text-[12.5px] leading-snug text-ink-muted">
-            Harbor opens 4 parallel requests to{" "}
-            <span className="font-medium text-ink">speed.cloudflare.com</span>, discards the first
-            1.2s so TCP slow-start doesn't tank the result, then measures until it has 150 MB or 8
-            seconds of steady-state transfer.
+            {t("Harbor opens 4 parallel requests to")}{" "}
+            <span className="font-medium text-ink">speed.cloudflare.com</span>
+            {t(
+              ", discards the first 1.2s so TCP slow-start doesn't tank the result, then measures until it has 150 MB or 8 seconds of steady-state transfer.",
+            )}
           </p>
           <p className="mb-2 text-[12.5px] leading-snug text-ink-muted">
-            The number is bytes divided by the time they actually took to arrive. Cloudflare is a
-            single origin, so on a very fast line this can read lower than a multi-server test like
-            speedtest.net.
+            {t(
+              "The number is bytes divided by the time they actually took to arrive. Cloudflare is a single origin, so on a very fast line this can read lower than a multi-server test like speedtest.net.",
+            )}
           </p>
-          <div className="mt-2 flex items-center gap-2 border-t border-edge-soft pt-2 text-[11px] text-ink-subtle">
+          <div className="mt-2 flex items-center gap-2 border-t border-edge-soft pt-2 text-[11.5px] text-ink-subtle">
             <span className="h-1 w-1 rounded-full bg-ink-subtle/60" />
-            Uses up to 150 MB
+            {t("Uses up to 150 MB")}
             <span className="h-1 w-1 rounded-full bg-ink-subtle/60" />
-            90s cooldown
+            {t("90s cooldown")}
           </div>
         </div>
       )}
@@ -111,10 +114,11 @@ function SpeedResultBadge({ value }: { value: string }) {
 }
 
 export function SpeedTestButton() {
+  const t = useT();
   if (!isTauri) {
     return (
-      <span className="flex h-8 shrink-0 items-center rounded-full border border-edge-soft px-3 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        Desktop only
+      <span className="flex h-8 shrink-0 items-center rounded-md bg-canvas px-3 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+        {t("Desktop only")}
       </span>
     );
   }
@@ -122,6 +126,7 @@ export function SpeedTestButton() {
 }
 
 function SpeedTestButtonInner() {
+  const t = useT();
   const [state, setState] = useState<"idle" | "running" | "done" | "error">("idle");
   const [mbps, setMbps] = useState<number | null>(null);
   const [liveMbps, setLiveMbps] = useState<number | null>(null);
@@ -155,7 +160,7 @@ function SpeedTestButtonInner() {
       return;
     }
 
-    setError(ERROR_COPY[result.reason]);
+    setError(t(ERROR_COPY[result.reason]));
     if (result.reason === "rate_limited") {
       setCooldownUntil(Date.now() + SPEEDTEST_LIMITED_COOLDOWN_MS);
       setNow(Date.now());
@@ -167,14 +172,16 @@ function SpeedTestButtonInner() {
     return (
       <span className="flex h-8 shrink-0 items-center gap-2 text-[12.5px] font-semibold tabular-nums text-ink">
         <Loader2 size={12} strokeWidth={2.4} className="animate-spin text-ink-subtle" />
-        {liveMbps != null ? formatMbps(liveMbps) : "warming up…"}
+        {liveMbps != null ? formatMbps(liveMbps) : t("warming up…")}
       </span>
     );
   }
   if (state === "error") {
     return (
       <div className="flex shrink-0 items-center gap-2.5">
-        <span className="max-w-[260px] text-end text-[12px] leading-snug text-ink-subtle">{error}</span>
+        <span className="max-w-[260px] text-end text-[12.5px] leading-snug text-ink-subtle">
+          {error}
+        </span>
         <button
           type="button"
           onClick={run}
@@ -182,10 +189,10 @@ function SpeedTestButtonInner() {
           className={`flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[11.5px] font-semibold uppercase tracking-[0.12em] transition-colors ${
             cooling
               ? "cursor-not-allowed border-edge-soft text-ink-subtle"
-              : "border-danger/40 text-danger hover:bg-danger/10"
+              : "border-danger text-danger hover:bg-danger/25"
           }`}
         >
-          {cooling ? `${Math.ceil(cooldownRemaining / 1000)}s` : "Retry"}
+          {cooling ? `${Math.ceil(cooldownRemaining / 1000)}s` : t("Retry")}
         </button>
       </div>
     );
@@ -195,9 +202,9 @@ function SpeedTestButtonInner() {
       <button
         type="button"
         onClick={run}
-        className="flex h-8 shrink-0 items-center rounded-full border border-edge-soft px-3 text-[11.5px] font-semibold uppercase tracking-[0.12em] text-ink-muted transition-colors hover:border-edge hover:text-ink"
+        className="flex h-8 shrink-0 items-center rounded-md bg-canvas px-3 text-[11.5px] font-semibold uppercase tracking-[0.12em] text-ink-muted transition-colors hover:bg-surface hover:text-ink"
       >
-        Run speed test
+        {t("Run speed test")}
       </button>
     );
   }
@@ -208,11 +215,15 @@ function SpeedTestButtonInner() {
         type="button"
         onClick={run}
         disabled={cooling}
-        aria-label={cooling ? `Wait ${Math.ceil(cooldownRemaining / 1000)}s` : "Re-test"}
+        aria-label={
+          cooling
+            ? t("Wait {seconds}s", { seconds: Math.ceil(cooldownRemaining / 1000) })
+            : t("Re-test")
+        }
         className={`flex h-7 items-center justify-center rounded-full text-ink-subtle transition-colors ${
           cooling
             ? "w-auto cursor-not-allowed px-2 text-[10.5px] font-semibold tabular-nums tracking-wide"
-            : "w-7 hover:bg-canvas/40 hover:text-ink"
+            : "w-7 hover:bg-canvas hover:text-ink"
         }`}
       >
         {cooling ? (

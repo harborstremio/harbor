@@ -11,6 +11,7 @@ import {
   type Layout,
   type SlotChannel,
 } from "@/lib/multiview/store";
+import { useT } from "@/lib/i18n";
 import { Cell } from "./cell";
 
 const HANDLE_CENTER_OFFSET = "0.875rem";
@@ -44,8 +45,13 @@ function Divider({
   onChange: (pct: number) => void;
   onDragStart?: () => void;
 }) {
+  const t = useT();
   const dragRef = useRef<DividerDrag | null>(null);
   const isX = axis === "x";
+  const label = isX ? t("Resize columns") : t("Resize rows");
+  const instruction = isX
+    ? t("Drag or use arrow keys to resize columns")
+    : t("Drag or use arrow keys to resize rows");
 
   const valueAt = (target: HTMLDivElement, clientX: number, clientY: number) => {
     const parent = target.parentElement;
@@ -74,6 +80,8 @@ function Divider({
   return (
     <div
       role="separator"
+      aria-label={label}
+      title={instruction}
       aria-orientation={isX ? "vertical" : "horizontal"}
       aria-valuenow={Math.round(split)}
       aria-valuemin={Math.round(min)}
@@ -161,6 +169,7 @@ function Nexus({
   onSplitRow2Change: (pct: number) => void;
   onAlign: () => void;
 }) {
+  const t = useT();
   const handleRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<NexusDrag | null>(null);
 
@@ -203,15 +212,14 @@ function Nexus({
   };
 
   const center = (splitRow + splitRow2) / 2;
+  const instruction = linked
+    ? t("Double-click to unlink rows")
+    : t("Drag to resize all four panels · Double-click to align rows");
 
   return (
     <div
       ref={handleRef}
-      title={
-        linked
-          ? "Double-click to unlink rows"
-          : "Drag to resize all four panels · Double-click to align rows"
-      }
+      title={instruction}
       onDoubleClick={onAlign}
       onPointerDown={(event) => {
         if (event.button !== 0 || !event.isPrimary || dragRef.current || !rootRef.current) return;

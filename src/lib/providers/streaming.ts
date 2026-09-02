@@ -42,6 +42,21 @@ export const SERVICES: Record<StreamingService, Service> = {
   amcplus: { id: 526, name: "AMC+", logo: "/services/amcplus.svg", tint: "#0A9BD8" },
   starz: { id: 43, name: "STARZ", logo: "/services/starz.svg", tint: "#FFFFFF" },
   shudder: { id: 99, name: "Shudder", logo: "/services/shudder.svg", tint: "#E4181C" },
+  tubi: { id: 73, name: "Tubi", logo: "/services/tubi.svg", tint: "#7C3AED" },
+  plutotv: { id: 300, name: "Pluto TV", logo: "/services/plutotv.svg", tint: "#2B2D7C" },
+  roku: { id: 207, name: "The Roku Channel", logo: "/services/roku.svg", tint: "#662D91" },
+  fubo: { id: 257, name: "Fubo", logo: "/services/fubo.svg", tint: "#FA4616" },
+  mgmplus: { id: 34, providerIds: [34, 583, 636], name: "MGM+", logo: "/services/mgmplus.svg", tint: "#C6A15B" },
+  philo: { id: 2383, name: "Philo", logo: "/services/philo.svg", tint: "#E5177E" },
+  britbox: { id: 151, name: "BritBox", logo: "/services/britbox.svg", tint: "#163BD6" },
+  acorntv: { id: 87, name: "Acorn TV", logo: "/services/acorntv.svg", tint: "#6E9F4B" },
+  mubi: { id: 11, name: "MUBI", logo: "/services/mubi.svg", tint: "#2563C9" },
+  curiositystream: { id: 190, name: "CuriosityStream", logo: "/services/curiositystream.svg", tint: "#0089CF" },
+  kanopy: { id: 191, name: "Kanopy", logo: "/services/kanopy.png", tint: "#E4552A" },
+  hoopla: { id: 212, name: "Hoopla", logo: "/services/hoopla.svg", tint: "#0077C8" },
+  pbs: { id: 209, name: "PBS", logo: "/services/pbs.svg", tint: "#2638C4" },
+  cw: { id: 83, name: "The CW", logo: "/services/cw.svg", tint: "#2BA84A" },
+  hidive: { id: 430, name: "HIDIVE", logo: "/services/hidive.png", tint: "#00AEEF" },
 };
 
 export function providerIdsFor(svc: Service): string {
@@ -93,6 +108,36 @@ async function discover<T>(
     sort_by: "popularity.desc",
   });
   return data?.results ?? [];
+}
+
+const POSTER_CAP = 40;
+
+export async function servicePosters(
+  key: string,
+  service: StreamingService,
+  region: string,
+): Promise<string[]> {
+  if (!key) return [];
+  const providers = providerIdsFor(SERVICES[service]);
+  const [movies, series] = await Promise.all([
+    discover<RawMovie>(key, "movie", providers, region),
+    discover<RawSeries>(key, "tv", providers, region),
+  ]);
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const push = (p?: string) => {
+    if (!p || seen.has(p) || out.length >= POSTER_CAP) return;
+    seen.add(p);
+    out.push(p);
+  };
+  const max = Math.max(movies.length, series.length);
+  for (let i = 0; i < max && out.length < POSTER_CAP; i += 1) {
+    const m = movies[i];
+    const s = series[i];
+    if (m) push(poster(m.poster_path));
+    if (s) push(poster(s.poster_path));
+  }
+  return out;
 }
 
 export type ServiceRow = { service: StreamingService; name: string; metas: Meta[] };

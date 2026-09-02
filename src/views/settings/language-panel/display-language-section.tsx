@@ -1,3 +1,4 @@
+import { Flag } from "@/components/flag";
 import { useSettings } from "@/lib/settings";
 import { LANGUAGES, setUiLanguage, useT } from "@/lib/i18n";
 import { Section } from "../shared";
@@ -8,36 +9,47 @@ export function DisplayLanguageSection() {
   return (
     <Section
       title={t("Display language")}
-      subtitle={t("Sets the language of Harbor's own interface: menus, buttons, and labels. Arabic switches the layout to right to left. This is separate from subtitle and metadata languages below.")}
+      subtitle={t(
+        "Sets the language of Harbor's own interface: menus, buttons, and labels. Arabic switches the layout to right to left. This is separate from subtitle and metadata languages below.",
+      )}
     >
-      <div className="flex flex-col gap-2.5">
+      <div className="grid gap-1.5 sm:grid-cols-2">
         {LANGUAGES.map((lang) => {
           const selected = settings.uiLanguage === lang.code;
           return (
             <button
               key={lang.code}
               type="button"
+              aria-pressed={selected}
               onClick={() => {
                 setUiLanguage(lang.code);
                 update({ uiLanguage: lang.code });
               }}
-              className={`flex items-center gap-3.5 rounded-2xl border px-5 py-4 text-start transition-colors ${
-                selected
-                  ? "border-ink bg-elevated"
-                  : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-canvas/60"
+              className={`flex items-center gap-3.5 rounded-md px-4 py-3.5 text-start transition-colors ${
+                selected ? "bg-ink text-canvas" : "bg-elevated text-ink hover:bg-raised"
               }`}
             >
+              <Flag language={lang.label} size="md" showLabel={false} />
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="truncate text-[13.5px] font-medium leading-snug">
+                  {lang.nativeLabel}
+                </span>
+                <span
+                  className={`truncate text-[12.5px] leading-snug ${
+                    selected ? "text-canvas/70" : "text-ink-subtle"
+                  }`}
+                >
+                  {lang.rtl ? `${t(lang.label)} · ${t("Right to left")}` : t(lang.label)}
+                </span>
+              </span>
               <span
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                  selected ? "border-ink" : "border-edge"
+                dir={lang.rtl ? "rtl" : "ltr"}
+                className={`shrink-0 rounded-md bg-canvas px-2.5 py-1 text-[12.5px] font-medium ${
+                  selected ? "text-ink" : "text-ink-muted"
                 }`}
               >
-                {selected && <span className="h-2.5 w-2.5 rounded-full bg-ink" />}
+                {lang.greeting}
               </span>
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="text-[15px] font-semibold text-ink">{lang.nativeLabel}</span>
-                <span className="text-[12.5px] leading-snug text-ink-muted">{lang.label}</span>
-              </div>
             </button>
           );
         })}

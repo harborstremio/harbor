@@ -153,6 +153,7 @@ export function MediaGallery({
         </div>
       </div>
 
+      <div key={current} className="animate-media-swap motion-reduce:animate-none">
       {current === "videos" && (
         <MediaRail min={300}>
           {videos.map((v) => (
@@ -206,6 +207,7 @@ export function MediaGallery({
           ))}
         </MediaRail>
       )}
+      </div>
 
       {trailer && <TrailerOverlay id={trailer} title={title} logo={logo} onClose={() => setTrailer(null)} />}
       {lightbox &&

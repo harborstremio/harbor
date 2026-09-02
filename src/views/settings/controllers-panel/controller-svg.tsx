@@ -1,184 +1,337 @@
+import { Fragment, useEffect, useMemo, useRef } from "react";
 import type { GpButton } from "@/lib/gamepad/protocol";
-import type { LiveGamepad } from "@/lib/gamepad/live";
+import { liveAxes, subscribeLive, useLiveButtons } from "@/lib/gamepad/live";
+import { useT } from "@/lib/i18n";
+import { DUALSENSE_ART, XBOX_ART, type PadArt, type PadPart } from "./pad-art";
+import { detectLayout, type Layout } from "./controller-shape";
+import { useLatchedButtons } from "./use-latched-buttons";
 
-export type Layout = "xbox" | "ps";
+export { detectLayout };
+export type { Layout };
 
-type P = { x: number; y: number };
+const ART: Record<Layout, PadArt> = { xbox: XBOX_ART, ps: DUALSENSE_ART };
 
-const LAYOUT: Record<Layout, Record<string, P>> = {
-  xbox: {
-    leftStick: { x: 110, y: 118 },
-    dpad: { x: 152, y: 182 },
-    rightStick: { x: 268, y: 182 },
-    face: { x: 310, y: 118 },
-    bumperL: { x: 98, y: 62 },
-    bumperR: { x: 322, y: 62 },
-    triggerL: { x: 98, y: 34 },
-    triggerR: { x: 322, y: 34 },
-    centerL: { x: 186, y: 114 },
-    centerR: { x: 234, y: 114 },
-    guide: { x: 210, y: 90 },
-  },
-  ps: {
-    dpad: { x: 110, y: 116 },
-    leftStick: { x: 152, y: 184 },
-    rightStick: { x: 268, y: 184 },
-    face: { x: 310, y: 116 },
-    bumperL: { x: 98, y: 62 },
-    bumperR: { x: 322, y: 62 },
-    triggerL: { x: 98, y: 34 },
-    triggerR: { x: 322, y: 34 },
-    centerL: { x: 172, y: 110 },
-    centerR: { x: 248, y: 110 },
-    guide: { x: 210, y: 150 },
-  },
+const BUTTON: Record<string, GpButton> = {
+  faceN: "north",
+  faceE: "east",
+  faceS: "south",
+  faceW: "west",
+  dpadU: "dup",
+  dpadD: "ddown",
+  dpadL: "dleft",
+  dpadR: "dright",
+  view: "back",
+  menu: "start",
+  create: "back",
+  options: "start",
+  guide: "guide",
+  stickL: "lstick",
+  stickR: "rstick",
+  bumperL: "lb",
+  bumperR: "rb",
 };
 
-const BODY =
-  "M128 64C96 58 60 66 40 96C20 128 22 176 40 214C58 252 92 262 118 246C138 234 150 206 172 200C190 196 230 196 248 200C270 206 282 234 302 246C328 262 362 252 380 214C398 176 400 128 380 96C360 66 324 58 292 64C256 71 244 74 210 74C176 74 164 71 128 64Z";
+const ARM_HUB = 18;
+const ARM_TIP = 82;
+const ARM_HALF = 26;
 
-const FACE: Record<Layout, Record<"north" | "east" | "south" | "west", { color: string; label: string }>> = {
-  xbox: {
-    north: { color: "#f2c14e", label: "Y" },
-    east: { color: "#e5484d", label: "B" },
-    south: { color: "#46c48a", label: "A" },
-    west: { color: "#4c9aff", label: "X" },
-  },
-  ps: {
-    north: { color: "#4fd6c2", label: "△" },
-    east: { color: "#f76d8a", label: "○" },
-    south: { color: "#6f9cff", label: "✕" },
-    west: { color: "#d47bf0", label: "□" },
-  },
+const DPAD_ARMS: Array<{
+  b: GpButton;
+  box: (cx: number, cy: number) => [number, number, number, number];
+}> = [
+  { b: "dup", box: (cx, cy) => [cx - ARM_HALF, cy - ARM_TIP, ARM_HALF * 2, ARM_TIP - ARM_HUB] },
+  { b: "ddown", box: (cx, cy) => [cx - ARM_HALF, cy + ARM_HUB, ARM_HALF * 2, ARM_TIP - ARM_HUB] },
+  { b: "dleft", box: (cx, cy) => [cx - ARM_TIP, cy - ARM_HALF, ARM_TIP - ARM_HUB, ARM_HALF * 2] },
+  { b: "dright", box: (cx, cy) => [cx + ARM_HUB, cy - ARM_HALF, ARM_TIP - ARM_HUB, ARM_HALF * 2] },
+];
+
+function travelOf(art: PadArt, k: "stickL" | "stickR"): number {
+  const well = art.stickWell[k] ?? Infinity;
+  const radii = art.parts.filter((p) => p.k === k && p.r !== undefined).map((p) => p.r as number);
+  const fixed = radii.filter((r) => r >= well);
+  const caps = radii.filter((r) => r < well);
+  if (!fixed.length || !caps.length) return 0;
+  return Math.max(0, Math.min(...fixed) - Math.max(...caps));
+}
+
+const TRIGGER_LABEL: Record<Layout, [string, string]> = {
+  xbox: ["LT", "RT"],
+  ps: ["L2", "R2"],
 };
 
-function press(live: LiveGamepad, b: GpButton): boolean {
-  return !!live.buttons[b];
+const SHOULDER_X: Record<Layout, [number, number]> = {
+  xbox: [282, 751],
+  ps: [227, 797],
+};
+
+const PS_BUMPER: Array<[number, number]> = [
+  [176, 182],
+  [298, 182],
+  [286.8, 216.6],
+  [149.5, 242.9],
+];
+
+function points(list: Array<[number, number]>): string {
+  return list.map(([x, y]) => `${x},${y}`).join(" ");
 }
 
-function Stick({ pos, ax, ay, down }: { pos: P; ax: number; ay: number; down: boolean }) {
-  const tx = Math.max(-1, Math.min(1, ax)) * 12;
-  const ty = Math.max(-1, Math.min(1, ay)) * 12;
-  return (
-    <g>
-      <circle cx={pos.x} cy={pos.y} r={25} className="fill-canvas" stroke="currentColor" strokeOpacity={0.16} strokeWidth={1.5} />
-      <circle cx={pos.x} cy={pos.y} r={18.5} className="fill-surface" />
-      <g style={{ transform: `translate(${tx}px, ${ty}px) scale(${down ? 0.9 : 1})`, transformOrigin: `${pos.x}px ${pos.y}px`, transition: "transform 80ms linear" }}>
-        <circle cx={pos.x} cy={pos.y} r={16} className={down ? "fill-accent" : "fill-raised"} stroke="currentColor" strokeOpacity={0.28} strokeWidth={1.5} style={{ transition: "fill 120ms ease" }} />
-        <circle cx={pos.x} cy={pos.y - 3.5} r={6} className="fill-ink" opacity={down ? 0.28 : 0.13} />
-      </g>
-    </g>
-  );
+const CHIP_W = 104;
+const CHIP_H = 48;
+const CHIP_GAP = 132;
+
+function isCap(part: PadPart, art: PadArt): boolean {
+  const k = part.k;
+  if (k !== "stickL" && k !== "stickR") return false;
+  return part.r !== undefined && part.r < (art.stickWell[k] ?? Infinity);
 }
 
-function DPad({ pos, live }: { pos: P; live: LiveGamepad }) {
-  const arm = 11;
-  const w = 12;
-  const seg = (b: GpButton, rot: number) => {
-    const on = press(live, b);
-    return (
+const PUSHES = new Set([
+  "faceN",
+  "faceE",
+  "faceS",
+  "faceW",
+  "dpadU",
+  "dpadD",
+  "dpadL",
+  "dpadR",
+  "view",
+  "menu",
+  "create",
+  "options",
+  "guide",
+  "mic",
+]);
+
+const SINKS = new Set(["bumperL", "bumperR"]);
+
+const STICK_PRESS = 0.965;
+
+const LATCH_MS = 170;
+
+function pressAbout(cx: number, cy: number, scale: number): string {
+  return `translate(${cx} ${cy}) scale(${scale}) translate(${-cx} ${-cy})`;
+}
+
+type Slot = { part?: PadPart; caps?: PadPart[]; stick?: "stickL" | "stickR"; key: string };
+
+function buildSequence(art: PadArt): Slot[] {
+  const lastOf: Record<string, number> = {};
+  art.parts.forEach((p, i) => {
+    if (p.k) lastOf[p.k] = i;
+  });
+  const held: Record<string, PadPart[]> = {};
+  const seq: Slot[] = [];
+  art.parts.forEach((part, i) => {
+    const k = part.k;
+    if (isCap(part, art) && k) (held[k] ??= []).push(part);
+    else seq.push({ part, key: `p${i}` });
+    if (k && i === lastOf[k] && held[k]) {
+      seq.push({ caps: held[k], stick: k as "stickL" | "stickR", key: `${k}caps` });
+      delete held[k];
+    }
+  });
+  return seq;
+}
+
+export function ControllerSvg({ layout, compact }: { layout: Layout; compact?: boolean }) {
+  const t = useT();
+  const art = ART[layout];
+  const live = useLiveButtons();
+  const buttons = useLatchedButtons(live, LATCH_MS);
+  const down = (b: GpButton | undefined) => !!(b && buttons[b]);
+  const capL = useRef<SVGGElement>(null);
+  const capR = useRef<SVGGElement>(null);
+  const applyRef = useRef<() => void>(() => {});
+  const sunk = useRef({ l: false, r: false });
+  sunk.current = { l: down("lstick"), r: down("rstick") };
+  const everPressed = useRef(new Set<string>());
+  for (const [part, btn] of Object.entries(BUTTON)) {
+    if (buttons[btn]) everPressed.current.add(part);
+  }
+
+  const travelL = useMemo(() => travelOf(art, "stickL"), [art]);
+  const travelR = useMemo(() => travelOf(art, "stickR"), [art]);
+
+  useEffect(() => {
+    const apply = () => {
+      const ax = liveAxes();
+      const set = (
+        g: SVGGElement | null,
+        x: number,
+        y: number,
+        reach: number,
+        centre: [number, number] | undefined,
+        pressed: boolean,
+      ) => {
+        if (!g) return;
+        const mag = Math.hypot(x, y);
+        const k = mag > 1 ? 1 / mag : 1;
+        const dx = x * k * reach;
+        const dy = y * k * reach;
+        let tf = `translate(${dx.toFixed(2)} ${dy.toFixed(2)})`;
+        if (pressed && centre) tf += ` ${pressAbout(centre[0], centre[1], STICK_PRESS)}`;
+        g.setAttribute("transform", tf);
+      };
+      set(capL.current, ax.lx, ax.ly, travelL, art.centers.stickL, sunk.current.l);
+      set(capR.current, ax.rx, ax.ry, travelR, art.centers.stickR, sunk.current.r);
+    };
+    applyRef.current = apply;
+    apply();
+    return subscribeLive(apply);
+  }, [layout, travelL, travelR, art]);
+
+  useEffect(() => {
+    applyRef.current();
+  }, [buttons]);
+  const dpad = art.centers.dpad;
+  const cross = [...art.parts].reverse().find((p) => p.k === "dpad")?.d;
+  const [bx, by, bw, bh] = art.box;
+  const shoulderX = SHOULDER_X[layout];
+  const psBumper = (side: "l" | "r", on: boolean) =>
+    on ? (
+      <polygon
+        points={points(
+          side === "l"
+            ? PS_BUMPER
+            : [...PS_BUMPER].reverse().map(([x, y]): [number, number] => [1024 - x, y]),
+        )}
+        className="fill-accent"
+        opacity={0.92}
+        clipPath="url(#ps-body)"
+      />
+    ) : null;
+  const sequence = useMemo(() => buildSequence(art), [art]);
+
+  const band = compact ? 0 : CHIP_GAP;
+  const chipY = by - CHIP_GAP + (CHIP_GAP - CHIP_H) / 2;
+  const trigger = (cx: number, label: string, on: boolean) => (
+    <g
+      key={label}
+      style={{ transform: on ? "translateY(3px)" : "none", transition: "transform 80ms ease" }}
+    >
       <rect
-        key={b}
-        x={pos.x - w / 2}
-        y={pos.y - arm - w / 2}
-        width={w}
-        height={arm + w / 2}
-        rx={3}
-        className={on ? "fill-accent" : "fill-raised"}
-        transform={`rotate(${rot} ${pos.x} ${pos.y})`}
+        x={cx - CHIP_W / 2}
+        y={chipY}
+        width={CHIP_W}
+        height={CHIP_H}
+        rx={CHIP_H / 2}
+        className={on ? "fill-accent" : "fill-elevated"}
+        stroke="currentColor"
+        strokeOpacity={0.18}
+        strokeWidth={2}
         style={{ transition: "fill 90ms ease" }}
       />
-    );
-  };
-  return (
-    <g stroke="currentColor" strokeOpacity={0.14} strokeWidth={1}>
-      {seg("dup", 0)}
-      {seg("ddown", 180)}
-      {seg("dleft", 270)}
-      {seg("dright", 90)}
-      <circle cx={pos.x} cy={pos.y} r={5.5} className="fill-elevated" stroke="none" />
+      <text
+        x={cx}
+        y={chipY + CHIP_H / 2 + 1}
+        dominantBaseline="central"
+        textAnchor="middle"
+        fontSize={24}
+        fontWeight={700}
+        className={on ? "fill-canvas" : "fill-ink-muted"}
+      >
+        {label}
+      </text>
     </g>
   );
-}
 
-function FaceButtons({ pos, layout, live }: { pos: P; layout: Layout; live: LiveGamepad }) {
-  const R = 20;
-  const face = FACE[layout];
-  const items: Array<{ b: "north" | "east" | "south" | "west"; dx: number; dy: number }> = [
-    { b: "north", dx: 0, dy: -R },
-    { b: "east", dx: R, dy: 0 },
-    { b: "south", dx: 0, dy: R },
-    { b: "west", dx: -R, dy: 0 },
-  ];
   return (
-    <g>
-      {items.map(({ b, dx, dy }) => {
-        const on = press(live, b);
-        const cx = pos.x + dx;
-        const cy = pos.y + dy;
-        const info = face[b];
+    <svg
+      viewBox={`${bx} ${by - band} ${bw} ${bh + band}`}
+      className="w-full text-ink"
+      role="img"
+      aria-label={t("Controller preview")}
+    >
+      <defs>
+        {layout === "ps" && (
+          <clipPath id="ps-body">
+            <path d={art.bodyClip} />
+          </clipPath>
+        )}
+        {layout === "xbox" && cross && (
+          <clipPath id="xbox-dpad">
+            <path d={cross} />
+          </clipPath>
+        )}
+      </defs>
+
+      {sequence.map((slot) => {
+        if (slot.caps) {
+          return (
+            <g key={slot.key} ref={slot.stick === "stickL" ? capL : capR}>
+              {slot.caps.map((cap, j) => (
+                <path key={j} d={cap.d} fill={cap.f} />
+              ))}
+            </g>
+          );
+        }
+        const part = slot.part!;
+        const k = part.k;
+        const on = down(k ? BUTTON[k] : undefined);
+        const centre = k ? art.centers[k] : undefined;
+        const tintable = k === "guide" ? part.f !== art.guideWindow : !!part.b;
+        const tint = on && tintable;
+        const pushes = !!k && PUSHES.has(k) && !!centre;
+        const sinks = !!k && SINKS.has(k) && tintable;
+        const primed = !!k && everPressed.current.has(k);
+        const cls = pushes
+          ? on
+            ? "pad-press"
+            : primed
+              ? "pad-release"
+              : undefined
+          : sinks
+            ? on
+              ? "pad-sink"
+              : primed
+                ? "pad-rise"
+                : undefined
+            : undefined;
         return (
-          <g key={b} style={{ transform: `scale(${on ? 0.9 : 1})`, transformOrigin: `${cx}px ${cy}px`, transition: "transform 90ms ease" }}>
-            {on && <circle cx={cx} cy={cy} r={15} fill={info.color} opacity={0.35} style={{ filter: "blur(5px)" }} />}
-            <circle cx={cx} cy={cy} r={11.5} className="fill-elevated" stroke={info.color} strokeWidth={on ? 2.4 : 1.8} style={{ transition: "stroke-width 90ms" }} fillOpacity={on ? 0.15 : 1} />
-            {on && <circle cx={cx} cy={cy} r={11.5} fill={info.color} opacity={0.85} />}
-            <text x={cx} y={cy} dominantBaseline="central" textAnchor="middle" fontSize={layout === "ps" ? 11 : 10.5} fontWeight={700} fill={on ? "#0d1017" : info.color} style={{ transition: "fill 90ms" }}>
-              {info.label}
-            </text>
-          </g>
+          <Fragment key={slot.key}>
+            <g
+              className={cls}
+              style={
+                pushes && centre ? { transformOrigin: `${centre[0]}px ${centre[1]}px` } : undefined
+              }
+            >
+              <path
+                d={part.d}
+                fill={tint ? "var(--color-accent)" : part.f}
+                style={tintable ? { transition: "fill 110ms ease-in-out" } : undefined}
+              />
+            </g>
+            {slot.key === "p0" && layout === "ps" && (
+              <>
+                {psBumper("l", down("lb"))}
+                {psBumper("r", down("rb"))}
+              </>
+            )}
+          </Fragment>
         );
       })}
-    </g>
-  );
-}
 
-function Bumper({ pos, on, label }: { pos: P; on: boolean; label: string }) {
-  return (
-    <g style={{ transform: on ? "translateY(1.5px)" : "none", transition: "transform 80ms ease" }}>
-      <rect x={pos.x - 34} y={pos.y - 9} width={68} height={18} rx={9} className={on ? "fill-accent" : "fill-raised"} stroke="currentColor" strokeOpacity={0.16} strokeWidth={1} style={{ transition: "fill 90ms ease" }} />
-      <text x={pos.x} y={pos.y} dominantBaseline="central" textAnchor="middle" fontSize={9} fontWeight={700} className={on ? "fill-canvas" : "fill-ink-muted"}>
-        {label}
-      </text>
-    </g>
-  );
-}
+      {layout === "xbox" &&
+        dpad &&
+        cross &&
+        DPAD_ARMS.filter(({ b }) => down(b)).map(({ b, box }) => {
+          const [x, y, w, h] = box(dpad[0], dpad[1]);
+          return (
+            <rect
+              key={b}
+              x={x}
+              y={y}
+              width={w}
+              height={h}
+              className="fill-accent"
+              opacity={0.92}
+              clipPath="url(#xbox-dpad)"
+            />
+          );
+        })}
 
-function Trigger({ pos, on, label }: { pos: P; on: boolean; label: string }) {
-  return (
-    <g style={{ transform: on ? "translateY(3px)" : "none", transition: "transform 90ms ease" }}>
-      <rect x={pos.x - 26} y={pos.y - 11} width={52} height={20} rx={9} className={on ? "fill-accent" : "fill-elevated"} stroke="currentColor" strokeOpacity={0.16} strokeWidth={1} style={{ transition: "fill 90ms ease" }} />
-      <text x={pos.x} y={pos.y - 1} dominantBaseline="central" textAnchor="middle" fontSize={9} fontWeight={700} className={on ? "fill-canvas" : "fill-ink-muted"}>
-        {label}
-      </text>
-    </g>
-  );
-}
-
-function CenterButton({ pos, on }: { pos: P; on: boolean }) {
-  return <rect x={pos.x - 8} y={pos.y - 4} width={16} height={8} rx={4} className={on ? "fill-accent" : "fill-raised"} style={{ transition: "fill 90ms ease" }} />;
-}
-
-export function ControllerSvg({ layout, live }: { layout: Layout; live: LiveGamepad }) {
-  const L = LAYOUT[layout];
-  const guideOn = press(live, "guide");
-  return (
-    <svg viewBox="0 0 420 300" className="w-full text-ink" role="img" aria-label="Controller preview">
-      <path d={BODY} className="fill-elevated" stroke="currentColor" strokeOpacity={0.18} strokeWidth={2} />
-      <path d={BODY} fill="none" stroke="#000" strokeOpacity={0.25} strokeWidth={2} transform="translate(0 2)" style={{ mixBlendMode: "multiply" }} />
-
-      <Trigger pos={L.triggerL} on={press(live, "lt")} label="LT" />
-      <Trigger pos={L.triggerR} on={press(live, "rt")} label="RT" />
-      <Bumper pos={L.bumperL} on={press(live, "lb")} label="LB" />
-      <Bumper pos={L.bumperR} on={press(live, "rb")} label="RB" />
-
-      <CenterButton pos={L.centerL} on={press(live, "back")} />
-      <CenterButton pos={L.centerR} on={press(live, "start")} />
-      <circle cx={L.guide.x} cy={L.guide.y} r={layout === "ps" ? 9 : 12} className={guideOn ? "fill-accent" : "fill-raised"} stroke="currentColor" strokeOpacity={0.2} strokeWidth={1.2} style={{ transition: "fill 120ms ease" }} />
-
-      <DPad pos={L.dpad} live={live} />
-      <FaceButtons pos={L.face} layout={layout} live={live} />
-      <Stick pos={L.leftStick} ax={live.axes.lx} ay={live.axes.ly} down={press(live, "lstick")} />
-      <Stick pos={L.rightStick} ax={live.axes.rx} ay={live.axes.ry} down={press(live, "rstick")} />
+      {!compact && trigger(shoulderX[0], TRIGGER_LABEL[layout][0], down("lt"))}
+      {!compact && trigger(shoulderX[1], TRIGGER_LABEL[layout][1], down("rt"))}
     </svg>
   );
 }

@@ -11,11 +11,29 @@ import type {
   HashExactResult,
   AsrWindowSpec,
   AsrPhrase,
+  AsrTranscript,
 } from "./pipeline";
-import type { AlignmentQuality, PiecewiseSegment, SyncTransform } from "./fp-gate";
+import {
+  unknownQuality,
+  type AlignmentQuality,
+  type PiecewiseSegment,
+  type QualityMeasurement,
+  type QualityMeasurementRequest,
+  type QualityUnknownReason,
+  type SyncTransform,
+} from "./fp-gate";
+import {
+  directScoreInvokeArgs,
+  directScoreMeasurement,
+  nativeScoreMeasurement,
+  torrentScoreInvokeArgs,
+  type NativeDirectScore,
+} from "./direct-validation";
 import { resolveTier0, resolveSwapCues, type OsConfig } from "./opensubtitles";
 import { createConsensusPort, type ConsensusConfig } from "./consensus";
 import { createCrowdDbPort, crowdConfigFromSettings } from "./crowd-db";
+import { normalizeLang } from "@/lib/subtitles/language";
+import { consensusLanguages } from "./language-context";
 
 type AsrTokenRaw = { text?: string; t0?: number; t1?: number; p?: number };
 type AsrWindowRaw = { startSec?: number; lenSec?: number; lang?: string; tokens?: AsrTokenRaw[] };
@@ -23,8 +41,6 @@ type AsrWindowRaw = { startSec?: number; lenSec?: number; lang?: string; tokens?
 const PIECE_MARGIN = 0.1;
 const PIECE_OFFSETS = [-2, 0, 2];
 
-const NEUTRAL_QUALITY: AlignmentQuality = { ncc: 0.5, coverage: 0.5, z: 0 };
-const TORRENT_BASELINE: AlignmentQuality = { ncc: 0.85, coverage: 0.8, z: 6 };
 const CANDIDATE_COVERAGE = 0.8;
 
 const SCORE_TIMEOUT_MS = 4000;
@@ -41,6 +57,32 @@ function bounded<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
   ]);
 }
 
+function qualityFailureReason(error: unknown): QualityUnknownReason {
+  const message = String(error ?? "").toLowerCase();
+  if (message.includes("ffmpeg")) return "ffmpeg-unavailable";
+  if (message.includes("audio") || message.includes("no stream")) return "audio-unavailable";
+  if (message.includes("unsupported") || message.includes("not supported")) return "not-supported";
+  return "provider-error";
+}
+
+async function boundedMeasurement(
+  measurement: Promise<QualityMeasurement>,
+  ms: number,
+  method: string,
+): Promise<QualityMeasurement> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      measurement.catch((error) => unknownQuality(qualityFailureReason(error), method)),
+      new Promise<QualityMeasurement>((resolve) => {
+        timer = setTimeout(() => resolve(unknownQuality("timeout", method)), ms);
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
 export type AutoSyncExtraPorts = {
   measureQuality?: TierPorts["measureQuality"];
   crowdDb?: TierPorts["crowdDb"];
@@ -51,6 +93,7 @@ export type AutoSyncExtraPorts = {
 
 export type BuildTierPortsOpts = {
   osConfig?: OsConfig | null;
+  authKey?: string | null;
   extra?: AutoSyncExtraPorts;
   torrent?: { fileIdx?: number; getPositionSec?: () => number };
 };
@@ -65,7 +108,9 @@ function flagsOf(settings: Settings): AutoSyncFlags {
 }
 
 function isTorrentSource(ctx: PipelineContext): boolean {
-  return ctx.sourceKind === "torrent" && typeof ctx.infoHash === "string" && ctx.infoHash.length > 0;
+  return (
+    ctx.sourceKind === "torrent" && typeof ctx.infoHash === "string" && ctx.infoHash.length > 0
+  );
 }
 
 function affineParams(t: SyncTransform): { offsetSec: number; ratio: number } {
@@ -74,18 +119,21 @@ function affineParams(t: SyncTransform): { offsetSec: number; ratio: number } {
   return s ? { offsetSec: s.offsetSec, ratio: s.ratio } : { offsetSec: 0, ratio: 1 };
 }
 
-async function directScore(ctx: PipelineContext, transform: SyncTransform): Promise<AlignmentQuality> {
+async function directScore(
+  ctx: PipelineContext,
+  transform: SyncTransform,
+  request?: QualityMeasurementRequest,
+): Promise<QualityMeasurement> {
+  const method = "subsync-score-transform";
   try {
-    const q = await invoke<AlignmentQuality | null>("subsync_score_transform", {
-      url: ctx.mediaUrl,
-      headers: ctx.headers ?? null,
-      cues: ctx.cues,
-      durationSec: ctx.durationSec,
-      transform,
-    });
-    if (q && Number.isFinite(q.ncc)) return { ncc: q.ncc, coverage: q.coverage, z: q.z };
-  } catch {}
-  return NEUTRAL_QUALITY;
+    const q = await invoke<NativeDirectScore | null>(
+      "subsync_score_transform",
+      directScoreInvokeArgs(ctx, transform, request),
+    );
+    return directScoreMeasurement(q, request, method);
+  } catch (error) {
+    return unknownQuality(qualityFailureReason(error), method);
+  }
 }
 
 async function torrentScore(
@@ -94,23 +142,21 @@ async function torrentScore(
   infoHash: string,
   fileIdx: number,
   positionSec: number | null,
-): Promise<AlignmentQuality> {
-  const a = affineParams(transform);
+  request?: QualityMeasurementRequest,
+): Promise<QualityMeasurement> {
+  const method = "torrent-score-transform";
+  if (transform.kind !== "affine") {
+    return unknownQuality("not-supported", method);
+  }
   try {
-    const q = await invoke<AlignmentQuality | null>("torrent_score_transform", {
-      infoHash,
-      fileIdx,
-      url: ctx.mediaUrl,
-      headers: ctx.headers ?? null,
-      cues: ctx.cues,
-      durationSec: ctx.durationSec,
-      offsetSec: a.offsetSec,
-      ratio: a.ratio,
-      positionSec,
-    });
-    if (q && Number.isFinite(q.ncc)) return { ncc: q.ncc, coverage: q.coverage, z: q.z };
-  } catch {}
-  return TORRENT_BASELINE;
+    const q = await invoke<NativeDirectScore | null>(
+      "torrent_score_transform",
+      torrentScoreInvokeArgs(ctx, transform, infoHash, fileIdx, positionSec, request),
+    );
+    return nativeScoreMeasurement(q, request, method, "torrent");
+  } catch (error) {
+    return unknownQuality(qualityFailureReason(error), method);
+  }
 }
 
 async function directVad(ctx: PipelineContext): Promise<VadResult | null> {
@@ -126,13 +172,20 @@ async function directVad(ctx: PipelineContext): Promise<VadResult | null> {
       dinfo("[autosync/vad] audio analyzed, no confident offset");
       return null;
     }
-    dinfo(`[autosync/vad] offset=${out.offsetSec.toFixed(2)}s ratio=${out.ratio.toFixed(4)} conf=${out.confidence.toFixed(2)}`);
+    dinfo(
+      `[autosync/vad] offset=${out.offsetSec.toFixed(2)}s ratio=${out.ratio.toFixed(4)} conf=${out.confidence.toFixed(2)}`,
+    );
     const quality: AlignmentQuality = {
       ncc: out.confidence,
       coverage: CANDIDATE_COVERAGE,
       z: out.confidence >= 0.55 ? 8 : 0,
     };
-    return { transform: { kind: "affine", offsetSec: out.offsetSec, ratio: out.ratio }, rawScore: out.confidence, quality };
+    return {
+      transform: { kind: "affine", offsetSec: out.offsetSec, ratio: out.ratio },
+      rawScore: out.confidence,
+      quality,
+      fitWindowIds: out.fitWindowIds?.length ? out.fitWindowIds : undefined,
+    };
   } catch (e) {
     dwarn("[autosync/vad] audio engine unavailable", String(e));
     return null;
@@ -147,7 +200,12 @@ async function torrentVad(
   positionSec: number | null,
 ): Promise<VadResult | null> {
   try {
-    const out = await invoke<{ offsetSec: number; ratio: number; confidence: number } | null>("torrent_sync_subtitle", {
+    const out = await invoke<{
+      offsetSec: number;
+      ratio: number;
+      confidence: number;
+      fitWindowIds?: string[];
+    } | null>("torrent_sync_subtitle", {
       infoHash,
       fileIdx,
       url: ctx.mediaUrl,
@@ -164,7 +222,12 @@ async function torrentVad(
       coverage: CANDIDATE_COVERAGE,
       z: out.confidence >= 0.55 ? 8 : 0,
     };
-    return { transform: { kind: "affine", offsetSec: out.offsetSec, ratio: out.ratio }, rawScore: out.confidence, quality };
+    return {
+      transform: { kind: "affine", offsetSec: out.offsetSec, ratio: out.ratio },
+      rawScore: out.confidence,
+      quality,
+      fitWindowIds: out.fitWindowIds?.length ? out.fitWindowIds : undefined,
+    };
   } catch {
     return null;
   }
@@ -206,14 +269,23 @@ function median(xs: number[]): number {
   return s[Math.floor(s.length / 2)];
 }
 
-function makePiecewisePort(score: TierPorts["measureQuality"]): NonNullable<TierPorts["vadPiecewise"]> {
+function makePiecewisePort(
+  score: TierPorts["measureQuality"],
+  fitWindowIds: () => string[] | undefined,
+): NonNullable<TierPorts["vadPiecewise"]> {
   return async (ctx, seed) => {
     if (ctx.cues.length < 8) return null;
     const starts = ctx.cues.map((c) => c[0]);
     const mid = median(starts);
     if (!Number.isFinite(mid) || mid <= starts[0] || mid >= starts[starts.length - 1]) return null;
     const a = affineParams(seed);
-    const base = await score(ctx, { kind: "affine", offsetSec: a.offsetSec, ratio: a.ratio });
+    const baseMeasurement = await score(ctx, {
+      kind: "affine",
+      offsetSec: a.offsetSec,
+      ratio: a.ratio,
+    });
+    if (baseMeasurement.status !== "measured") return null;
+    const base = baseMeasurement.value;
     let best: { q: AlignmentQuality; t: SyncTransform } = {
       q: base,
       t: { kind: "affine", offsetSec: a.offsetSec, ratio: a.ratio },
@@ -225,19 +297,29 @@ function makePiecewisePort(score: TierPorts["measureQuality"]): NonNullable<Tier
         { fromSec: mid, toSec: Infinity, offsetSec: a.offsetSec + d, ratio: a.ratio },
       ];
       const t: SyncTransform = { kind: "piecewise", segments };
-      const q = await score(ctx, t);
+      const measurement = await score(ctx, t);
+      if (measurement.status !== "measured") continue;
+      const q = measurement.value;
       if (q.ncc > best.q.ncc) best = { q, t };
     }
     if (best.t.kind !== "piecewise" || best.q.ncc < base.ncc + PIECE_MARGIN) return null;
-    const result: PiecewiseResult = { transform: best.t, rawScore: best.q.ncc, quality: best.q };
+    const result: PiecewiseResult = {
+      transform: best.t,
+      rawScore: best.q.ncc,
+      quality: best.q,
+      fitWindowIds: fitWindowIds(),
+    };
     return result;
   };
 }
 
-function flattenAsr(out: AsrWindowRaw[] | null): AsrPhrase[] {
-  if (!Array.isArray(out)) return [];
+function flattenAsr(out: AsrWindowRaw[] | null): AsrTranscript {
+  if (!Array.isArray(out)) return { phrases: [], detectedLanguage: null };
   const segs: AsrPhrase[] = [];
+  const languageCounts = new Map<string, number>();
   for (const w of out) {
+    const lang = normalizeLang(w.lang ?? "");
+    if (lang) languageCounts.set(lang, (languageCounts.get(lang) ?? 0) + 1);
     for (const tk of w.tokens ?? []) {
       const text = String(tk.text ?? "").trim();
       if (text && Number.isFinite(tk.t0) && Number.isFinite(tk.t1)) {
@@ -246,7 +328,10 @@ function flattenAsr(out: AsrWindowRaw[] | null): AsrPhrase[] {
     }
   }
   segs.sort((x, y) => x.start - y.start);
-  return segs;
+  const detectedLanguage =
+    [...languageCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ??
+    null;
+  return { phrases: segs, detectedLanguage };
 }
 
 async function ensureAsrModel(): Promise<string | null> {
@@ -261,7 +346,7 @@ async function ensureAsrModel(): Promise<string | null> {
 function makeAsrTranscribePort(): NonNullable<TierPorts["asrTranscribe"]> {
   return async (ctx, windows) => {
     const modelPath = await ensureAsrModel();
-    if (!modelPath) return [];
+    if (!modelPath) return { phrases: [], detectedLanguage: null };
     const spans: AsrWindowSpec[] = Array.isArray(windows)
       ? windows.filter((w) => w != null && Number.isFinite(w.lenSec))
       : [];
@@ -272,7 +357,7 @@ function makeAsrTranscribePort(): NonNullable<TierPorts["asrTranscribe"]> {
         url: ctx.mediaUrl,
         headers: ctx.headers ?? null,
         durationSec: ctx.durationSec,
-        subLang: ctx.languages[0] || null,
+        subLang: ctx.audioLanguage || null,
         probeCount,
         windowSec,
         modelPath,
@@ -280,17 +365,18 @@ function makeAsrTranscribePort(): NonNullable<TierPorts["asrTranscribe"]> {
       });
       return flattenAsr(out);
     } catch {
-      return [];
+      return { phrases: [], detectedLanguage: null };
     }
   };
 }
 
-function consensusConfig(ctx: PipelineContext, settings: Settings): ConsensusConfig {
+function consensusConfig(
+  ctx: PipelineContext,
+  settings: Settings,
+  authKey?: string | null,
+): ConsensusConfig {
   const enabled = settings.subProvidersEnabled;
-  const langs =
-    settings.preferredSubLangs && settings.preferredSubLangs.length > 0
-      ? settings.preferredSubLangs
-      : ctx.languages;
+  const langs = consensusLanguages(ctx, settings.preferredSubLangs);
   return {
     providers: {
       wyzie: enabled?.wyzie === true,
@@ -299,6 +385,7 @@ function consensusConfig(ctx: PipelineContext, settings: Settings): ConsensusCon
     },
     preferredLangs: langs,
     netAllowed: true,
+    authKey: authKey ?? null,
   };
 }
 
@@ -317,28 +404,32 @@ export function buildTierPorts(
   const positionOf = (): number | null => getPositionSec?.() ?? null;
 
   const scoreTimeout = routeTorrent ? TORRENT_SCORE_TIMEOUT_MS : SCORE_TIMEOUT_MS;
-  const scoreFallback = routeTorrent ? TORRENT_BASELINE : NEUTRAL_QUALITY;
-  const measureQuality: TierPorts["measureQuality"] = (mctx, transform) =>
-    bounded(
+  const measureQuality: TierPorts["measureQuality"] = (mctx, transform, request) =>
+    boundedMeasurement(
       routeTorrent
-        ? torrentScore(mctx, transform, infoHash, fileIdx, positionOf())
-        : directScore(mctx, transform),
+        ? torrentScore(mctx, transform, infoHash, fileIdx, positionOf(), request)
+        : directScore(mctx, transform, request),
       scoreTimeout,
-      scoreFallback,
+      routeTorrent ? "torrent-score-transform" : "subsync-score-transform",
     );
 
-  const vadAffine: NonNullable<TierPorts["vadAffine"]> = (mctx, win) =>
-    bounded(
+  let fitWindowIds: string[] | undefined;
+  const vadAffine: NonNullable<TierPorts["vadAffine"]> = async (mctx, win) => {
+    const result = await bounded(
       routeTorrent
         ? torrentVad(mctx, win.lateWindow, infoHash, fileIdx, positionOf())
         : directVad(mctx),
       routeTorrent ? TORRENT_VAD_TIMEOUT_MS : VAD_TIMEOUT_MS,
       null,
     );
+    fitWindowIds = result?.fitWindowIds;
+    return result;
+  };
 
   const rawMeasure = extra.measureQuality;
   const effectiveMeasure: TierPorts["measureQuality"] = rawMeasure
-    ? (mctx, transform) => bounded(rawMeasure(mctx, transform), scoreTimeout, scoreFallback)
+    ? (mctx, transform, request) =>
+        boundedMeasurement(rawMeasure(mctx, transform, request), scoreTimeout, "custom-quality")
     : measureQuality;
   const ports: TierPorts = {
     measureQuality: effectiveMeasure,
@@ -354,13 +445,15 @@ export function buildTierPorts(
     const crowdPort = extra.crowdDb ?? (crowdCfg ? createCrowdDbPort(crowdCfg) : undefined);
     if (crowdPort) ports.crowdDb = (cctx) => bounded(crowdPort(cctx), CROWD_TIMEOUT_MS, null);
   }
-  const piecewise = extra.vadPiecewise ?? (routeTorrent ? undefined : makePiecewisePort(effectiveMeasure));
+  const piecewise =
+    extra.vadPiecewise ??
+    (routeTorrent ? undefined : makePiecewisePort(effectiveMeasure, () => fitWindowIds));
   if (piecewise) ports.vadPiecewise = piecewise;
   if (flags.subtitleAutoSyncAsr === true) {
     if (extra.asrMatch) ports.asrMatch = extra.asrMatch;
     ports.asrTranscribe = makeAsrTranscribePort();
   }
   if (extra.metadataBounds) ports.metadataBounds = extra.metadataBounds;
-  ports.consensus = createConsensusPort(consensusConfig(ctx, settings));
+  ports.consensus = createConsensusPort(consensusConfig(ctx, settings, opts.authKey));
   return ports;
 }

@@ -6,6 +6,7 @@ import type { AnimeCharacter } from "@/lib/providers/anime-characters";
 import type { AnilistMediaDetails, AnilistRelatedNode } from "@/lib/anilist/media-details";
 import { AnimeTitlesBlock } from "@/views/detail/anime-titles-block";
 import { AnimeStatsDonut } from "@/views/detail/anime-stats-donut";
+import { useT } from "@/lib/i18n";
 import { HIDE_SCROLL } from "./data";
 import { SectionTitle } from "./ui";
 
@@ -22,10 +23,13 @@ function formatCount(n: number): string {
 }
 
 export function CharactersRow({ characters }: { characters: AnimeCharacter[] }) {
+  const t = useT();
   return (
     <section className="flex flex-col gap-3.5">
-      <SectionTitle>Characters</SectionTitle>
-      <div className={`-mx-5 flex snap-x snap-proximity gap-3.5 overflow-x-auto px-5 ${HIDE_SCROLL}`}>
+      <SectionTitle>{t("Characters")}</SectionTitle>
+      <div
+        className={`-mx-5 flex snap-x snap-proximity gap-3.5 overflow-x-auto px-5 ${HIDE_SCROLL}`}
+      >
         {characters.map((c) => (
           <CharacterChip key={c.id} character={c} />
         ))}
@@ -37,11 +41,19 @@ export function CharactersRow({ characters }: { characters: AnimeCharacter[] }) 
 function CharacterChip({ character }: { character: AnimeCharacter }) {
   return (
     <div className="flex w-[88px] shrink-0 snap-start flex-col gap-2">
-      <Poster src={character.image} seed={String(character.id)} ratio="portrait" lazy className="rounded-xl" />
+      <Poster
+        src={character.image}
+        seed={String(character.id)}
+        ratio="portrait"
+        lazy
+        className="rounded-xl"
+      />
       <div className="flex flex-col gap-0.5">
         <p className="line-clamp-1 text-[12.5px] font-medium text-ink">{character.name}</p>
         {character.role && (
-          <p className="line-clamp-1 text-[11.5px] leading-tight text-ink-subtle">{character.role}</p>
+          <p className="line-clamp-1 text-[11.5px] leading-tight text-ink-subtle">
+            {character.role}
+          </p>
         )}
         {character.favourites ? (
           <span className="inline-flex items-center gap-1 text-[11px] leading-tight text-ink-subtle">
@@ -63,9 +75,10 @@ export function AnimeRelatedRow({
   nodes: AnilistRelatedNode[];
   onOpen?: (node: AnilistRelatedNode) => void;
 }) {
+  const t = useT();
   return (
     <section className="flex flex-col gap-3.5">
-      <SectionTitle>{title}</SectionTitle>
+      <SectionTitle>{t(title)}</SectionTitle>
       <div className={`-mx-5 flex snap-x snap-proximity gap-3 overflow-x-auto px-5 ${HIDE_SCROLL}`}>
         {nodes.map((node) => (
           <RelatedCard key={node.anilistId} node={node} onOpen={onOpen} />
@@ -82,7 +95,12 @@ function RelatedCard({
   node: AnilistRelatedNode;
   onOpen?: (node: AnilistRelatedNode) => void;
 }) {
-  const meta = [node.format, node.year ? String(node.year) : undefined, node.rating ? `★ ${node.rating}` : undefined]
+  const t = useT();
+  const meta = [
+    node.format,
+    node.year ? String(node.year) : undefined,
+    node.rating ? `★ ${node.rating}` : undefined,
+  ]
     .filter(Boolean)
     .join(" · ");
   const Wrap: "button" | "div" = onOpen ? "button" : "div";
@@ -91,7 +109,9 @@ function RelatedCard({
     <Wrap
       {...wrapProps}
       className={`flex w-[104px] shrink-0 snap-start flex-col gap-2 text-start ${
-        onOpen ? "transition-transform active:scale-[0.97] motion-reduce:transition-none" : "cursor-default"
+        onOpen
+          ? "transition-transform active:scale-[0.97] motion-reduce:transition-none"
+          : "cursor-default"
       }`}
     >
       <Poster
@@ -106,12 +126,14 @@ function RelatedCard({
         </span>
         {node.upcoming && (
           <span className="pointer-events-none absolute end-1.5 top-1.5 rounded-full bg-canvas/80 px-2 py-0.5 text-[10px] text-ink backdrop-blur-sm">
-            Soon
+            {t("Soon")}
           </span>
         )}
       </Poster>
       <div className="flex flex-col gap-0.5">
-        <p className="line-clamp-2 text-[12px] font-medium leading-tight text-ink-muted">{node.title}</p>
+        <p className="line-clamp-2 text-[12px] font-medium leading-tight text-ink-muted">
+          {node.title}
+        </p>
         {meta && <p className="text-[11px] leading-tight text-ink-subtle">{meta}</p>}
       </div>
     </Wrap>
@@ -129,28 +151,32 @@ export function AnimeInfo({
   anilist: AnilistMediaDetails | null;
   malRating?: string;
 }) {
+  const t = useT();
   const studios = anilist?.studios.length
     ? anilist.studios.slice(0, 3).join(", ")
     : detail?.productionCompanies.slice(0, 3).join(", ");
-  const episodes = anilist?.episodes ?? (detail && detail.numberOfEpisodes > 0 ? detail.numberOfEpisodes : undefined);
-  const format = detail ? (detail.kind === "movie" ? "Movie" : "TV Series") : undefined;
+  const episodes =
+    anilist?.episodes ??
+    (detail && detail.numberOfEpisodes > 0 ? detail.numberOfEpisodes : undefined);
+  const format = detail ? (detail.kind === "movie" ? t("Movie") : t("TV Series")) : undefined;
   const genres = detail?.genres.length ? detail.genres.join(", ") : undefined;
 
   const rows: InfoRow[] = [];
-  if (format) rows.push({ label: "Format", value: format });
-  if (detail?.status) rows.push({ label: "Status", value: detail.status });
-  if (episodes) rows.push({ label: "Episodes", value: String(episodes) });
-  if (anilist?.source) rows.push({ label: "Source", value: anilist.source });
-  if (studios) rows.push({ label: "Studio", value: studios });
-  if (malRating) rows.push({ label: "MAL Score", value: `★ ${malRating}` });
-  if (anilist?.favourites) rows.push({ label: "AniList Favorites", value: formatCount(anilist.favourites) });
-  if (genres) rows.push({ label: "Genres", value: genres });
+  if (format) rows.push({ label: t("Format"), value: format });
+  if (detail?.status) rows.push({ label: t("Status"), value: detail.status });
+  if (episodes) rows.push({ label: t("Episodes"), value: String(episodes) });
+  if (anilist?.source) rows.push({ label: t("Source"), value: anilist.source });
+  if (studios) rows.push({ label: t("Studio"), value: studios });
+  if (malRating) rows.push({ label: t("MAL Score"), value: `★ ${malRating}` });
+  if (anilist?.favourites)
+    rows.push({ label: t("AniList Favorites"), value: formatCount(anilist.favourites) });
+  if (genres) rows.push({ label: t("Genres"), value: genres });
 
   if (rows.length === 0) return null;
 
   return (
     <section className="flex flex-col gap-3">
-      <SectionTitle>Information</SectionTitle>
+      <SectionTitle>{t("Information")}</SectionTitle>
       <div className="grid grid-cols-2 gap-x-4 gap-y-4">
         {rows.map((r) => (
           <div key={r.label} className="flex min-w-0 flex-col gap-1">
@@ -168,23 +194,36 @@ export function AnimeInfo({
 export function hasAnimeTitles(details: AnilistMediaDetails, primaryTitle: string): boolean {
   const p = primaryTitle.trim().toLowerCase();
   const diff = (v?: string) => !!v && v.trim().toLowerCase() !== p;
-  return diff(details.nativeTitle) || diff(details.romajiTitle) || diff(details.englishTitle) || details.synonyms.length > 0;
+  return (
+    diff(details.nativeTitle) ||
+    diff(details.romajiTitle) ||
+    diff(details.englishTitle) ||
+    details.synonyms.length > 0
+  );
 }
 
-export function AnimeTitles({ details, primaryTitle }: { details: AnilistMediaDetails; primaryTitle: string }) {
+export function AnimeTitles({
+  details,
+  primaryTitle,
+}: {
+  details: AnilistMediaDetails;
+  primaryTitle: string;
+}) {
+  const t = useT();
   return (
     <section className="flex flex-col gap-3.5">
-      <SectionTitle>Titles</SectionTitle>
+      <SectionTitle>{t("Titles")}</SectionTitle>
       <AnimeTitlesBlock details={details} primaryTitle={primaryTitle} />
     </section>
   );
 }
 
 export function AnimeStats({ details }: { details: AnilistMediaDetails }) {
+  const t = useT();
   if (details.statusDistribution.length === 0) return null;
   return (
     <section className="flex flex-col gap-3.5">
-      <SectionTitle>Statistics</SectionTitle>
+      <SectionTitle>{t("Statistics")}</SectionTitle>
       <AnimeStatsDonut slices={details.statusDistribution} />
     </section>
   );

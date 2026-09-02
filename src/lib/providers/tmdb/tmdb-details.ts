@@ -6,6 +6,7 @@ import { imageLangParam, imageLangRank } from "./tmdb-image-lang";
 import { pickTrailers, type Video } from "./tmdb-trailers";
 import type { PersonRef } from "./tmdb-people";
 import { isAnimeItem } from "./tmdb-meta-mappers";
+import { setItemWithRecovery } from "@/lib/storage-recovery";
 
 export type CastEntry = {
   id: number;
@@ -127,6 +128,35 @@ const WRITER_JOBS = new Set([
 ]);
 const PRODUCER_JOBS = new Set(["Producer", "Executive Producer"]);
 
+const FIND_KEY = "harbor.tmdb.find.v1";
+const FIND_MAX = 600;
+let findMap: Record<string, string> | null = null;
+let findTimer: ReturnType<typeof setTimeout> | null = null;
+
+function findCache(): Record<string, string> {
+  if (findMap) return findMap;
+  try {
+    findMap = JSON.parse(localStorage.getItem(FIND_KEY) ?? "{}") as Record<string, string>;
+  } catch {
+    findMap = {};
+  }
+  return findMap;
+}
+
+function rememberFind(key: string, value: string): void {
+  const map = findCache();
+  map[key] = value;
+  const keys = Object.keys(map);
+  if (keys.length > FIND_MAX) for (const k of keys.slice(0, keys.length - FIND_MAX)) delete map[k];
+  if (findTimer != null) return;
+  findTimer = setTimeout(() => {
+    findTimer = null;
+    try {
+      setItemWithRecovery(FIND_KEY, JSON.stringify(findMap ?? {}));
+    } catch {}
+  }, 3000);
+}
+
 type RawImageEntry = { file_path?: string; vote_average?: number };
 
 function urlsFromImages(
@@ -177,16 +207,25 @@ export async function tmdbDetails(key: string, meta: Meta, lang?: string): Promi
     kind = "tv";
     id = meta.id.slice("tmdb:tv:".length);
   } else if (meta.id.startsWith("tt")) {
-    const find = await get<any>(key, `find/${meta.id}`, { external_source: "imdb_id" });
-    if (!find) return null;
-    if (meta.type === "movie" && find.movie_results?.[0]) {
-      kind = "movie";
-      id = String(find.movie_results[0].id);
-    } else if (meta.type === "series" && find.tv_results?.[0]) {
-      kind = "tv";
-      id = String(find.tv_results[0].id);
+    const findKey = `${meta.id}:${meta.type}`;
+    const cached = findCache()[findKey];
+    if (cached) {
+      const cut = cached.indexOf(":");
+      kind = cached.slice(0, cut) as "movie" | "tv";
+      id = cached.slice(cut + 1);
     } else {
-      return null;
+      const find = await get<any>(key, `find/${meta.id}`, { external_source: "imdb_id" });
+      if (!find) return null;
+      if (meta.type === "movie" && find.movie_results?.[0]) {
+        kind = "movie";
+        id = String(find.movie_results[0].id);
+      } else if (meta.type === "series" && find.tv_results?.[0]) {
+        kind = "tv";
+        id = String(find.tv_results[0].id);
+      } else {
+        return null;
+      }
+      rememberFind(findKey, `${kind}:${id}`);
     }
   } else {
     return null;
@@ -201,9 +240,6 @@ export async function tmdbDetails(key: string, meta: Meta, lang?: string): Promi
   });
   if (!raw) return null;
 
-  // TMDB returns a person's name in the requested language only when a translation
-  // exists; otherwise it falls back to the original name (e.g. Japanese for anime
-  // staff). Fetch English credits as a fallback so untranslated names stay readable.
   const metaLangBase = metaLang.split("-")[0]?.toLowerCase() ?? "";
   let enNameById: Map<number, string> | null = null;
   if (metaLangBase && metaLangBase !== "en") {
@@ -340,21 +376,15 @@ export async function tmdbDetails(key: string, meta: Meta, lang?: string): Promi
   const anime = isAnimeItem(raw);
   const requestedTitle = raw.title || raw.name;
   const originalTitle = raw.original_title || raw.original_name || requestedTitle;
-  // TMDB falls back to the original (Japanese) title when the requested language lacks a
-  // translation, so anime falls back to English rather than unreadable Japanese.
   const titleFellBackToOriginal = requestedTitle === originalTitle;
 
   let overview = raw.overview ?? "";
   let tagline = raw.tagline ?? "";
-  // Explicit per-call languages (anime localization) bypass the global "Translate overviews"
-  // toggle, which is meant for regular TMDB content only.
   const enTrans = raw.translations?.translations?.find((t: any) => t.iso_639_1 === "en")?.data;
   if (!settings.translateDescriptions && !lang) {
     if (enTrans?.overview) overview = enTrans.overview;
     if (enTrans?.tagline) tagline = enTrans.tagline;
   }
-  // "Translate titles" off means English titles; prefer the English translation over the
-  // requested-language title and the original-language title.
   const enTitle = enTrans?.title || enTrans?.name;
 
   let finalPosterPath = raw.poster_path;

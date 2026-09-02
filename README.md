@@ -23,7 +23,7 @@ Offering things like a native player, a stream ranking engine, Wikidata, watch p
 
 <br/>
 
-[Why Harbor](#why-harbor) &middot; [Features](#feature-tour) &middot; [Install](#install) &middot; [Configuration](#configuration) &middot; [Architecture](#architecture) &middot; [FAQ](#faq) &middot; [Contributing](#contributing)
+[Why Harbor](#why-harbor) &middot; [Features](#feature-tour) &middot; [Home servers](#home-server-integrations) &middot; [Install](#install) &middot; [Configuration](#configuration) &middot; [Architecture](#architecture) &middot; [FAQ](#faq) &middot; [Contributing](#contributing)
 
 </div>
 
@@ -60,6 +60,7 @@ HARBOR IS A OPEN CONCEPT AND NOT A ENTITY. WE DO NOT PROFIT OR ACCEPT MONEY FOR 
 - [Feature Tour](#feature-tour)
   - [Rooms and views](#rooms-and-views)
   - [The stream engine](#the-stream-engine)
+  - [Home-server integrations](#home-server-integrations)
   - [The player](#the-player)
   - [Casting](#casting)
   - [Together: watch parties](#together-watch-parties)
@@ -101,6 +102,7 @@ HARBOR IS A OPEN CONCEPT AND NOT A ENTITY. WE DO NOT PROFIT OR ACCEPT MONEY FOR 
 - **Live TV and Multiview.** Bring M3U or Xtream playlists and get a real EPG grid guide, favorites, catchup, and up to four channels at once in a grid. Missed the show? play a rerun or record the next episode using built in DVR. Switch channels while in the live player at any time with the TV Guide
 - **Stream switcher** In player switcher allows you to hop streams if you get served a bad one without leaving the player and going through results again. Play next episodes with ease on the player UI controls or in a full "Next Up" sidebar.
 - **Casts across the room.** DLNA/UPnP, Chromecast, AirPlay, and Roku via a bundled Rust cast server and a web cast receiver.
+- **Your home servers, in one player.** Connect Plex, Jellyfin, or Emby to browse their libraries, choose a server copy alongside local files and online streams, and keep progress in sync.
 - **Integrations.** Feature rich discord rich presence integration, webhooks for Discord and Telegram, Trakt Sync, and native integrations to TMDB, OMDB, Fanart.Tv, RPDB and more! Customize the location and what badges are shown.
 - **And much more! (seriously this would be very long)**
 
@@ -218,6 +220,26 @@ parse  ->  trust  ->  score  ->  rank
 | **Rank**  | Sorts into quality tiers (4K DV, 4K HDR, 4K, 1080p HDR, 1080p, 720p, SD) and surfaces the best cached pick first, with partial results streamed to the UI as addons respond                                                                                                                                        |
 
 Debrid services are checked live and uniformly: **Real-Debrid, AllDebrid, Premiumize, Debrid-Link, and TorBox**. Cache hints embedded by popular addons are read directly, and every torrent hash is cross checked against your debrid library to catch what the cache API misses. No debrid is required: Harbor can stream torrents directly through the bundled Stremio Server engine. All keys stay on your device.
+
+<p align="right"><a href="#readme-top">&#9650; back to top</a></p>
+
+### Home-server integrations
+
+Harbor can now work as a client for your existing media server. Connect a server once, then browse and play its versions alongside Harbor's local library and online sources—without moving or re-importing your files.
+
+<p align="center">
+  <a href="https://www.plex.tv/"><img src="https://cdn.simpleicons.org/plex/E5A00D" height="42" alt="Plex"></a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://jellyfin.org/"><img src="https://cdn.simpleicons.org/jellyfin/AA5CC3" height="42" alt="Jellyfin"></a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://emby.media/"><img src="https://cdn.simpleicons.org/emby/52B54B" height="42" alt="Emby"></a>
+</p>
+
+- **[Plex](https://www.plex.tv/), [Jellyfin](https://jellyfin.org/), and [Emby](https://emby.media/).** Add and manage connections from Harbor, then synchronize their libraries into one source-aware view.
+- **One title, every available copy.** A movie or episode can show local files, server versions, and online streams together, with provider, connection, quality, and direct-play/transcode context before playback.
+- **Reliable episode matching.** Harbor uses exact server episode items first and filename matching as a fallback. Dual-episode files are deduplicated while remaining available from each covered episode.
+- **Progress that follows you.** Resume and watched state synchronize with the home-server items Harbor can identify, while retaining Harbor's existing Stremio, Trakt, and Simkl tracking.
+- **Choose how Play behaves.** Ask every time, prefer this device, prefer online streams, or prefer a connected home server.
 
 <p align="right"><a href="#readme-top">&#9650; back to top</a></p>
 

@@ -119,9 +119,9 @@ export function HarborLoader({
 
   return (
     <div className={`flex flex-col items-center justify-center gap-2 ${className}`}>
-      <div ref={ref} className={SIZE_CLASS[size]} aria-hidden />
+      <div ref={ref} className={`harbor-loader-art ${SIZE_CLASS[size]}`} aria-hidden />
       {caption && (
-        <p className="mt-1 text-[12.5px] font-medium uppercase tracking-[0.18em] text-white/70">
+        <p className="harbor-loader-cap mt-1 text-[12.5px] font-medium uppercase tracking-[0.18em] text-white/70">
           {caption}
         </p>
       )}

@@ -239,6 +239,7 @@ pub struct ParsedStream {
     pub year_range: Option<(u16, u16)>,
     pub season: Option<i32>,
     pub episode: Option<i32>,
+    pub episode_end: Option<i32>,
     pub season_pack: bool,
     pub disc_index: Option<i32>,
     pub repack_iteration: i32,

@@ -83,11 +83,13 @@ export function useChromeVisibility(params: {
     };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("touchstart", onMove);
+    window.addEventListener("harbor:controller-activity", onMove);
     window.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("touchstart", onMove);
+      window.removeEventListener("harbor:controller-activity", onMove);
       window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("keydown", onKeyDown);
       if (hideTimer.current) window.clearTimeout(hideTimer.current);

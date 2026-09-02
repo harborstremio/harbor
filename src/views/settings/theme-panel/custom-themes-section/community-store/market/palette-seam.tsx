@@ -1,6 +1,10 @@
+import { useT } from "@/lib/i18n";
 export function PaletteSeam({ swatch, labeled = false }: { swatch: string[]; labeled?: boolean }) {
-  const cols = Array.isArray(swatch) ? swatch.filter((c): c is string => typeof c === "string" && c.length > 0) : [];
+  const cols = Array.isArray(swatch)
+    ? swatch.filter((c): c is string => typeof c === "string" && c.length > 0)
+    : [];
 
+  const t = useT();
   if (labeled) {
     const canvas = cols[0] ?? "#20222a";
     const surface = cols[1] ?? canvas;
@@ -16,9 +20,12 @@ export function PaletteSeam({ swatch, labeled = false }: { swatch: string[]; lab
       <div className="grid grid-cols-4 gap-2">
         {ramp.map((cell) => (
           <div key={cell.name} className="flex min-w-0 flex-col gap-1.5">
-            <span className="h-10 w-full rounded-[8px] ring-1 ring-edge-soft" style={{ background: cell.color }} />
-            <span className="truncate text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-subtle">
-              {cell.name}
+            <span
+              className="h-10 w-full rounded-[8px] ring-1 ring-edge-soft"
+              style={{ background: cell.color }}
+            />
+            <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.1em] text-ink-subtle">
+              {t(cell.name)}
             </span>
           </div>
         ))}

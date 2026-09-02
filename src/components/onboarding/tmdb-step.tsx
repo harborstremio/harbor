@@ -51,12 +51,32 @@ export function TmdbStep() {
           )}
         </p>
       </div>
-      <button
-        onClick={() => openUrl("https://www.themoviedb.org/settings/api")}
+      {/* A real anchor with target=_blank, not a button calling window.open.
+          This step is served to a PHONE during handoff setup, and mobile
+          browsers routinely block a programmatic window.open that is not
+          recognised as a direct user gesture; when it is blocked the caller
+          swallows the failure and the tap can end up navigating the current tab
+          instead. js hit exactly that: TMDB replaced the setup page and there
+          was no way back to Harbor.
+          A user-activated anchor is never popup-blocked, so this is the one form
+          that cannot strand the setup flow. preventDefault plus openUrl keeps
+          the Tauri path, where the desktop app must hand the url to the OS
+          browser rather than open a webview tab. */}
+      <a
+        href="https://www.themoviedb.org/settings/api"
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => {
+          // window.ts keeps its own isTauri private, and widening an export for
+          // one call site is not worth it. Same check it makes.
+          if (!("__TAURI_INTERNALS__" in window)) return;
+          e.preventDefault();
+          openUrl("https://www.themoviedb.org/settings/api");
+        }}
         className="inline-flex w-fit items-center gap-1.5 text-[14px] text-ink underline-offset-4 hover:underline"
       >
         {t("Get a free key at themoviedb.org")} <ExternalLink size={13} />
-      </button>
+      </a>
       <div className="flex items-center gap-2.5">
         <div
           key={`pulse-${pulseKey}`}

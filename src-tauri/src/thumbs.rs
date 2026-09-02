@@ -568,7 +568,7 @@ async fn is_hdr_source(url: &str) -> bool {
         "-select_streams",
         "v:0",
         "-show_entries",
-        "stream=color_transfer",
+        "stream=color_transfer,color_primaries,color_space",
         "-of",
         "default=nw=1:nk=1",
         url,
@@ -585,8 +585,8 @@ async fn is_hdr_source(url: &str) -> bool {
     let Ok(Ok(out)) = probe else {
         return false;
     };
-    let trc = String::from_utf8_lossy(&out.stdout).trim().to_ascii_lowercase();
-    trc.contains("smpte2084") || trc.contains("arib-std-b67")
+    let s = String::from_utf8_lossy(&out.stdout).to_ascii_lowercase();
+    s.contains("smpte2084") || s.contains("arib-std-b67") || s.contains("bt2020")
 }
 
 fn thumb_filter(hdr: bool) -> String {

@@ -1,6 +1,6 @@
 import { Check, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { AlarmClockIcon } from "@/components/alarm-clock-icon";
+import { UiIcon } from "@/components/ui-icon";
 import { AnchoredMenu } from "@/components/anchored-menu";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { emitListToast } from "@/components/lists/list-toast";
@@ -189,13 +189,13 @@ export function ReminderButton({ id, type, name, poster }: ReminderSeed) {
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-label={active ? t("Edit reminder") : t("Set reminder")}
-          className={`group flex h-12 w-12 items-center justify-center rounded-full border transition-[transform,background-color,border-color] duration-200 active:scale-[0.94] ${
+          className={`group flex h-12 w-12 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.94] ${
             active
-              ? "border-accent/55 bg-accent/15 text-accent hover:bg-accent/22"
-              : "border-edge bg-canvas/80 text-ink hover:border-ink-subtle hover:bg-canvas/95"
+              ? "bg-accent/20 text-accent hover:bg-accent/22"
+              : "bg-canvas/80 text-ink hover:bg-canvas/95"
           }`}
         >
-          <AlarmClockIcon size={20} strokeWidth={active ? 2.1 : 1.9} />
+          <UiIcon name="remindme" className="h-5 w-5" />
         </button>
       </HoverTooltip>
       <ReminderMenu

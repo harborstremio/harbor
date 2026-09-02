@@ -5,7 +5,7 @@ export function GroupsSkeleton({ count = 8 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="harbor-shimmer relative flex h-[148px] flex-col gap-3 rounded-[14px] p-4 ring-1 ring-edge-soft" style={{ ["--ai-delay" as string]: `${i * 90}ms` }}>
+        <div key={i} className="harbor-shimmer relative flex h-[148px] flex-col gap-3 rounded-lg p-4 ring-1 ring-edge-soft" style={{ ["--ai-delay" as string]: `${i * 90}ms` }}>
           <div className="flex items-center gap-3">
             <span className="h-12 w-12 shrink-0 rounded-full bg-elevated" />
             <span className="flex flex-1 flex-col gap-2">
@@ -24,7 +24,7 @@ export function GroupsSkeleton({ count = 8 }: { count?: number }) {
 export function GroupsEmpty({ query, onCreate }: { query: string; onCreate?: () => void }) {
   const t = useT();
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[14px] border border-dashed border-edge bg-surface/40 px-6 py-16 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-edge bg-surface/40 px-6 py-16 text-center">
       <PeopleSearchIcon size={40} className="text-ink-subtle" />
       <div className="flex max-w-sm flex-col gap-1">
         <span className="text-[15px] font-semibold text-ink">
@@ -50,7 +50,7 @@ export function GroupsEmpty({ query, onCreate }: { query: string; onCreate?: () 
 export function GroupsError({ onRetry }: { onRetry: () => void }) {
   const t = useT();
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[14px] border border-dashed border-edge bg-surface/40 px-6 py-16 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-edge bg-surface/40 px-6 py-16 text-center">
       <span className="text-[13.5px] text-ink-muted">{t("Could not load groups.")}</span>
       <button
         type="button"

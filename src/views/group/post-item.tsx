@@ -100,7 +100,7 @@ export function PostItem({
   return (
     <article
       style={{ animationDelay: `${Math.min(index * 40, 320)}ms`, animationDuration: "420ms", animationFillMode: "both" }}
-      className={`group/post relative flex gap-3 rounded-[14px] p-3.5 ring-1 transition-colors duration-200 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 ${
+      className={`group/post relative flex gap-3 rounded-lg p-3.5 ring-1 transition-colors duration-200 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 ${
         post.pinned ? "bg-elevated/60 ring-accent/25" : "bg-surface ring-edge-soft hover:bg-elevated/40"
       }`}
     >
@@ -131,7 +131,7 @@ export function PostItem({
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) void saveEdit();
                 if (e.key === "Escape") setEditing(false);
               }}
-              className="harbor-scroll min-h-[64px] w-full resize-none rounded-[10px] bg-elevated px-3 py-2.5 text-[14px] leading-relaxed text-ink outline-none ring-1 ring-edge-soft transition-shadow focus:ring-edge"
+              className="harbor-scroll min-h-[64px] w-full resize-none rounded-md bg-elevated px-3 py-2.5 text-[14px] leading-relaxed text-ink outline-none ring-1 ring-edge-soft transition-shadow focus:ring-edge"
             />
             {editError && <p className="text-[12.5px] text-danger">{editError}</p>}
             <div className="flex items-center gap-2">

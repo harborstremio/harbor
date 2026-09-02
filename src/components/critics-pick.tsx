@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight, ExternalLink, Play, Quote, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Quote, Star } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { pickRandom } from "@/lib/feed/tags";
@@ -6,7 +7,13 @@ import { useImdbRating } from "@/lib/imdb-rating";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { useOmdbScores } from "@/lib/providers/omdb";
 import { rpdbPoster } from "@/lib/providers/rpdb";
-import { tmdbCriticData, tmdbMovieImages, useTmdbImdbId, type CriticData, type CriticReview } from "@/lib/providers/tmdb";
+import {
+  tmdbCriticData,
+  tmdbMovieImages,
+  useTmdbImdbId,
+  type CriticData,
+  type CriticReview,
+} from "@/lib/providers/tmdb";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
@@ -41,9 +48,7 @@ export function CriticsPick({ meta }: { meta: Meta }) {
   const [logo, setLogo] = useState<string | null>(
     () => peekCachedLogo(settings.tmdbKey, meta) ?? null,
   );
-  const [logoLoaded, setLogoLoaded] = useState<boolean>(
-    !!peekCachedLogo(settings.tmdbKey, meta),
-  );
+  const [logoLoaded, setLogoLoaded] = useState<boolean>(!!peekCachedLogo(settings.tmdbKey, meta));
 
   useEffect(() => {
     const cached = peekCachedLogo(settings.tmdbKey, meta);
@@ -119,7 +124,7 @@ export function CriticsPick({ meta }: { meta: Meta }) {
   const activeReview: CriticReview | null = reviews[reviewIdx] ?? null;
   const quote = activeReview
     ? excerptReview(activeReview.content)
-    : tagline || (overview ? overview.split(/(?<=[.!?])\s+/)[0] : "A standout this week.");
+    : tagline || (overview ? overview.split(/(?<=[.!?])\s+/)[0] : t("A standout this week."));
   const canOpenOverview = !!(overview || activeReview);
   const openOverview = () => canOpenOverview && setOverviewOpen(true);
 
@@ -209,16 +214,17 @@ export function CriticsPick({ meta }: { meta: Meta }) {
     <section className="flex flex-col gap-5">
       <div className="flex items-baseline justify-between">
         <h2 className="font-display text-[28px] font-medium leading-tight tracking-tight text-ink">
-          Critics' Pick
+          {t("Critics' Pick")}
         </h2>
         <span className="text-[12px] uppercase tracking-[0.22em] text-ink-subtle">
-          Loved by reviewers today
+          {t("Loved by reviewers today")}
         </span>
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)_360px] items-stretch gap-4">
         <button
           type="button"
           onClick={() => openMeta({ ...meta, logo: logo ?? meta.logo })}
+          aria-label={t("Open {name}", { name: meta.name })}
           className="group relative min-h-[520px] overflow-hidden rounded-2xl border border-edge-soft bg-canvas text-start transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] hover:-translate-y-1"
           style={{ isolation: "isolate" }}
         >
@@ -229,20 +235,20 @@ export function CriticsPick({ meta }: { meta: Meta }) {
                 src={src}
                 alt=""
                 decoding="async"
-                className="absolute inset-[2px] h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-[14px] object-cover"
+                className="absolute inset-[2px] h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-lg object-cover"
               />
             ) : (
               <Poster
                 src={undefined}
                 seed={meta.id}
                 ratio="landscape"
-                className="absolute inset-[2px] h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-[14px]"
+                className="absolute inset-[2px] h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-lg"
               />
             );
           })()}
           <div
             aria-hidden
-            className="absolute inset-[2px] rounded-[14px]"
+            className="absolute inset-[2px] rounded-lg"
             style={{
               background:
                 "linear-gradient(to top, oklch(0.10 0.02 260 / 0.92) 0%, oklch(0.10 0.02 260 / 0.30) 40%, transparent 70%)",
@@ -277,9 +283,21 @@ export function CriticsPick({ meta }: { meta: Meta }) {
               {meta.releaseInfo && <span>{meta.releaseInfo}</span>}
               {imdbRating && (
                 <>
-                  {meta.releaseInfo && <span aria-hidden className="text-ink/40">·</span>}
+                  {meta.releaseInfo && (
+                    <span aria-hidden className="text-ink/40">
+                      ·
+                    </span>
+                  )}
                   <span className="inline-flex items-center gap-1.5">
-                    {hasImdbIdentity ? <ImdbIcon className="h-[12px] w-auto rounded-[2px]" /> : <Star className="h-[12px] w-[12px] text-amber-400" fill="currentColor" strokeWidth={0} />}
+                    {hasImdbIdentity ? (
+                      <ImdbIcon className="h-[12px] w-auto rounded-[2px]" />
+                    ) : (
+                      <Star
+                        className="h-[12px] w-[12px] text-amber-400"
+                        fill="currentColor"
+                        strokeWidth={0}
+                      />
+                    )}
                     {imdbRating}
                   </span>
                 </>
@@ -311,7 +329,11 @@ export function CriticsPick({ meta }: { meta: Meta }) {
               }`}
               style={reviewFade}
             >
-              <LinkedReview text={quote} people={linkablePeople} onPersonClick={handlePersonClick} />
+              <LinkedReview
+                text={quote}
+                people={linkablePeople}
+                onPersonClick={handlePersonClick}
+              />
             </p>
             {activeReview ? (
               <div className="flex items-center justify-between gap-2">
@@ -375,7 +397,15 @@ export function CriticsPick({ meta }: { meta: Meta }) {
                 <div className="flex items-center gap-3">
                   {imdbRating && (
                     <span className="inline-flex items-center gap-1.5">
-                      {hasImdbIdentity ? <ImdbIcon className="h-[12px] w-auto rounded-[2px]" /> : <Star className="h-[12px] w-[12px] text-amber-400" fill="currentColor" strokeWidth={0} />}
+                      {hasImdbIdentity ? (
+                        <ImdbIcon className="h-[12px] w-auto rounded-[2px]" />
+                      ) : (
+                        <Star
+                          className="h-[12px] w-[12px] text-amber-400"
+                          fill="currentColor"
+                          strokeWidth={0}
+                        />
+                      )}
                       {imdbRating}
                     </span>
                   )}
@@ -387,7 +417,9 @@ export function CriticsPick({ meta }: { meta: Meta }) {
                   )}
                   {omdb?.metascore != null && (
                     <span className="inline-flex items-center gap-1.5">
-                      <span className="rounded-[3px] bg-[#ffcc33] px-1 text-[9.5px] font-bold tracking-wider text-black">M</span>
+                      <span className="rounded-[3px] bg-[#ffcc33] px-1 text-[9.5px] font-bold tracking-wider text-black">
+                        M
+                      </span>
                       {omdb.metascore}
                     </span>
                   )}
@@ -419,7 +451,9 @@ export function CriticsPick({ meta }: { meta: Meta }) {
           {data && data.cast.length > 0 && (
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10.5px] uppercase tracking-[0.2em] text-ink-subtle">{t("Cast")}</span>
+                <span className="text-[10.5px] uppercase tracking-[0.2em] text-ink-subtle">
+                  {t("Cast")}
+                </span>
                 {data.cast.length > 4 && (
                   <div className="flex gap-1">
                     <button
@@ -459,7 +493,9 @@ export function CriticsPick({ meta }: { meta: Meta }) {
             <div className="flex flex-col gap-2 text-[12.5px]">
               {data.director && (
                 <div className="flex items-baseline justify-between gap-3">
-                  <span className="text-[10.5px] uppercase tracking-[0.2em] text-ink-subtle">{t("Director")}</span>
+                  <span className="text-[10.5px] uppercase tracking-[0.2em] text-ink-subtle">
+                    {t("Director")}
+                  </span>
                   <button
                     type="button"
                     onClick={() => openPerson(data.director!.id)}
@@ -493,7 +529,7 @@ export function CriticsPick({ meta }: { meta: Meta }) {
               }}
               className="rounded-full bg-ink px-6 py-2 text-[13px] font-semibold text-canvas transition-colors duration-200 hover:bg-ink/90"
             >
-              Play
+              {t("Play")}
             </button>
           </div>
         </aside>

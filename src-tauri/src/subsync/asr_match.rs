@@ -6,9 +6,9 @@ const P_MIN: f32 = 0.35;
 const TAU_SEC: f32 = 0.80;
 const CUE_PAD_SEC: f32 = 1.5;
 const STOP: &[&str] = &[
-    "the", "a", "an", "and", "or", "but", "of", "to", "in", "on", "at", "is", "it", "i",
-    "you", "he", "she", "we", "they", "for", "so", "my", "me", "be", "do", "no", "yes",
-    "oh", "as", "if", "up", "by", "am", "are", "was", "im", "its", "this", "that", "with",
+    "the", "a", "an", "and", "or", "but", "of", "to", "in", "on", "at", "is", "it", "i", "you",
+    "he", "she", "we", "they", "for", "so", "my", "me", "be", "do", "no", "yes", "oh", "as", "if",
+    "up", "by", "am", "are", "was", "im", "its", "this", "that", "with",
 ];
 
 pub struct SubTok {
@@ -97,7 +97,13 @@ pub fn cue_tokens(
             }
             let phon = phonetic(&norm);
             let content = is_content(&norm);
-            out.push(SubTok { raw_t, audio_t: offset + ratio * raw_t, norm, phon, content });
+            out.push(SubTok {
+                raw_t,
+                audio_t: offset + ratio * raw_t,
+                norm,
+                phon,
+                content,
+            });
         }
     }
     out
@@ -190,7 +196,12 @@ mod tests {
     use super::*;
 
     fn tok(t: &str, at: f32, p: f32) -> AsrToken {
-        AsrToken { text: t.into(), t0: at, t1: at + 0.3, p }
+        AsrToken {
+            text: t.into(),
+            t0: at,
+            t1: at + 0.3,
+            p,
+        }
     }
 
     #[test]
@@ -213,7 +224,13 @@ mod tests {
         let ev = score_window(&toks, &good, "en".into(), 0.0, 30.0);
         assert_eq!((ev.eligible, ev.matched), (2, 2));
 
-        let bad = cue_tokens(&[(10.0, 11.6, "quarterly revenue".into())], 0.0, 30.0, 0.0, 1.0);
+        let bad = cue_tokens(
+            &[(10.0, 11.6, "quarterly revenue".into())],
+            0.0,
+            30.0,
+            0.0,
+            1.0,
+        );
         let ev2 = score_window(&toks, &bad, "en".into(), 0.0, 30.0);
         assert_eq!(ev2.matched, 0);
     }

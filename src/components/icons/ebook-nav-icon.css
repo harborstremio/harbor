@@ -1,0 +1,74 @@
+.ebook-nav-icon {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  perspective: 56px;
+}
+
+.ebook-nav-icon svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ebook-nav-cover {
+  stroke-width: 1.35;
+}
+
+.ebook-nav-page {
+  opacity: 0;
+  stroke-width: 1.1;
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+}
+
+.group:hover .ebook-nav-page,
+.ebook-nav-icon.is-active .ebook-nav-page {
+  animation: ebook-nav-page-flip 1.45s cubic-bezier(0.32, 0.72, 0.24, 1) both;
+}
+
+.group:hover .ebook-nav-page-two,
+.ebook-nav-icon.is-active .ebook-nav-page-two {
+  animation-delay: 180ms;
+}
+
+.ebook-nav-icon.is-active .ebook-nav-page {
+  animation-iteration-count: infinite;
+  animation-delay: 260ms;
+}
+
+.ebook-nav-icon.is-active .ebook-nav-page-two {
+  animation-delay: 440ms;
+}
+
+@keyframes ebook-nav-page-flip {
+  0%,
+  12% {
+    opacity: 0;
+    transform: rotateY(0deg);
+  }
+  22% {
+    opacity: 0.9;
+  }
+  68% {
+    opacity: 0.8;
+    transform: rotateY(-168deg);
+  }
+  78%,
+  100% {
+    opacity: 0;
+    transform: rotateY(-180deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .ebook-nav-page,
+  .ebook-nav-icon.is-active .ebook-nav-page {
+    animation: none;
+  }
+}

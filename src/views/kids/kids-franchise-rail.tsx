@@ -35,7 +35,7 @@ function FranchiseTile({ franchise, tmdbKey }: { franchise: Franchise; tmdbKey: 
     <button
       type="button"
       onClick={open}
-      className="group relative block aspect-[16/10] w-full overflow-hidden rounded-[24px] ring-2 ring-white shadow-[0_14px_34px_-16px_rgba(20,40,60,0.5)] transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_22px_46px_-16px_rgba(20,40,60,0.6)] active:scale-[0.98]"
+      className="group relative block aspect-[16/10] w-full overflow-hidden rounded-3xl ring-2 ring-white shadow-[0_14px_34px_-16px_rgba(20,40,60,0.5)] transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_22px_46px_-16px_rgba(20,40,60,0.6)] active:scale-[0.98]"
     >
       <div className={`absolute inset-0 bg-gradient-to-br ${franchise.grad}`} />
       <div className="absolute -right-10 -top-12 h-32 w-32 rounded-full bg-white/25 blur-md transition-transform duration-500 group-hover:scale-110" />

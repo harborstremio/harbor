@@ -2,6 +2,7 @@ import { Check, ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnchoredMenu } from "@/components/anchored-menu";
 import type { AutoDlStop } from "@/lib/auto-download";
+import { t, useT } from "@/lib/i18n";
 
 export const CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000;
 
@@ -15,22 +16,23 @@ export function useNow(everyMs = 60_000): number {
 }
 
 export function nextCheckText(nextRunAt: number | null, now: number): string {
-  if (nextRunAt == null) return "checks periodically";
+  if (nextRunAt == null) return t("checks periodically");
   const delta = nextRunAt - now;
-  if (delta <= 60_000) return "checks any moment";
-  if (delta < 3_600_000) return `checks in ${Math.floor(delta / 60_000)}m`;
-  if (delta < 86_400_000) return `checks in ${Math.floor(delta / 3_600_000)}h`;
-  return `checks in ${Math.floor(delta / 86_400_000)}d`;
+  if (delta <= 60_000) return t("checks any moment");
+  if (delta < 3_600_000) return t("checks in {count}m", { count: Math.floor(delta / 60_000) });
+  if (delta < 86_400_000) return t("checks in {count}h", { count: Math.floor(delta / 3_600_000) });
+  return t("checks in {count}d", { count: Math.floor(delta / 86_400_000) });
 }
 
 export function airText(nextAirDate: number | null, now: number): string | null {
   if (nextAirDate == null) return null;
   const delta = nextAirDate - now;
   if (delta <= 0) return null;
-  if (delta < 86_400_000) return `next airs in ${Math.max(1, Math.floor(delta / 3_600_000))}h`;
+  if (delta < 86_400_000)
+    return t("next airs in {count}h", { count: Math.max(1, Math.floor(delta / 3_600_000)) });
   const days = Math.floor(delta / 86_400_000);
-  if (days <= 21) return `next airs in ${days}d`;
-  return `next airs in ${Math.floor(days / 7)}w`;
+  if (days <= 21) return t("next airs in {count}d", { count: days });
+  return t("next airs in {count}w", { count: Math.floor(days / 7) });
 }
 
 export const QUALITY_OPTIONS: { value: number | null; label: string }[] = [
@@ -41,7 +43,7 @@ export const QUALITY_OPTIONS: { value: number | null; label: string }[] = [
 ];
 
 export function qualityLabel(maxHeight: number | null): string {
-  return QUALITY_OPTIONS.find((o) => o.value === maxHeight)?.label ?? "any quality";
+  return t(QUALITY_OPTIONS.find((o) => o.value === maxHeight)?.label ?? "any quality");
 }
 
 export const P2P_OPTIONS: { value: boolean; label: string }[] = [
@@ -50,7 +52,7 @@ export const P2P_OPTIONS: { value: boolean; label: string }[] = [
 ];
 
 export function p2pLabel(allowP2p: boolean): string {
-  return allowP2p ? "allow P2P downloads" : "cached only";
+  return t(allowP2p ? "allow P2P downloads" : "cached only");
 }
 
 export const STOP_OPTIONS: { value: AutoDlStop; label: string }[] = [
@@ -63,9 +65,11 @@ export const STOP_OPTIONS: { value: AutoDlStop; label: string }[] = [
 ];
 
 export function stopLabel(stop: AutoDlStop): string {
-  if (stop.kind === "off") return "until I stop";
-  if (stop.kind === "seasonEnd") return "until the season ends";
-  return `for ${stop.value} more episode${stop.value === 1 ? "" : "s"}`;
+  if (stop.kind === "off") return t("until I stop");
+  if (stop.kind === "seasonEnd") return t("until the season ends");
+  return stop.value === 1
+    ? t("for 1 more episode")
+    : t("for {count} more episodes", { count: stop.value });
 }
 
 export function stopEquals(a: AutoDlStop, b: AutoDlStop): boolean {
@@ -74,7 +78,7 @@ export function stopEquals(a: AutoDlStop, b: AutoDlStop): boolean {
   return true;
 }
 
-export function InlineChoice<T,>({
+export function InlineChoice<T>({
   label,
   options,
   isActive,
@@ -85,6 +89,7 @@ export function InlineChoice<T,>({
   isActive: (value: T) => boolean;
   onSelect: (value: T) => void;
 }) {
+  const translate = useT();
   const ref = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
@@ -97,7 +102,10 @@ export function InlineChoice<T,>({
         className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-medium text-ink underline decoration-dotted decoration-edge underline-offset-[5px] transition-colors hover:bg-ink/10 hover:decoration-ink-subtle"
       >
         {label}
-        <ChevronDown size={13} className={`text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={13}
+          className={`text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       <AnchoredMenu anchorRef={ref} open={open} onClose={close} width={210}>
         <div className="overflow-hidden rounded-xl border border-edge bg-raised py-1 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)]">
@@ -115,7 +123,7 @@ export function InlineChoice<T,>({
                   active ? "text-ink" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
                 }`}
               >
-                {o.label}
+                {translate(o.label)}
                 {active && <Check size={14} className="text-accent" />}
               </button>
             );

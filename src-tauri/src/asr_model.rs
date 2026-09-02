@@ -1,6 +1,6 @@
+use futures_util::StreamExt;
 use std::io::Write;
 use std::path::PathBuf;
-use futures_util::StreamExt;
 use tauri::{Emitter, Manager};
 
 const MODEL_URL: &str = "https://harbor.site/models/ggml-tiny.bin";
@@ -54,7 +54,8 @@ pub async fn asr_ensure_model(app: tauri::AppHandle) -> Result<String, String> {
     let mut stream = resp.bytes_stream();
     while let Some(chunk) = stream.next().await {
         let chunk = chunk.map_err(|e| format!("read: {}", e))?;
-        file.write_all(&chunk).map_err(|e| format!("write: {}", e))?;
+        file.write_all(&chunk)
+            .map_err(|e| format!("write: {}", e))?;
         received += chunk.len() as u64;
         if received - last_emit >= 1_048_576 {
             last_emit = received;

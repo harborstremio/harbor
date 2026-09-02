@@ -1,5 +1,4 @@
-import type { SubResult } from "./types";
-import type { SubSearchQuery } from "./types";
+import type { SubResult, SubSearchQuery, SubtitleLoadMetadata } from "./types";
 import { subtitleReleaseLabel } from "./release-label.ts";
 
 function meaningfulRelease(value: string | undefined): string | undefined {
@@ -99,6 +98,40 @@ export function subtitleTitleOf(
   return releaseOf(r) ?? filenameFromUrl(r.url) ?? r.displayTitle ?? providerLabel(r);
 }
 
+export function subtitleLoadMetadataOf(result: SubResult): SubtitleLoadMetadata {
+  return {
+    format: result.format,
+    encoding: result.encoding,
+    release: releaseOf(result),
+    provider: providerLabel(result),
+    fps: result.fps,
+    downloads: result.downloads,
+    author: result.author,
+    uploadedAt: result.uploadedAt,
+    rating: result.rating,
+    productionType: result.productionType,
+    releaseType: result.releaseType,
+    archive: result.archive,
+    rawFilename: result.rawFilename,
+    fileSize: result.fileSize,
+    checksum: result.checksum,
+    season: result.season,
+    episode: result.episode,
+    langConfirmed: result.langConfirmed,
+    episodeConfirmed: result.episodeConfirmed,
+    idConfirmed: result.idConfirmed,
+    hearingImpaired: result.hearingImpaired,
+    forced: result.forced,
+    foreignOnly: result.foreignOnly,
+    machineTranslated: result.machineTranslated,
+    fromTrusted: result.fromTrusted,
+    providerMatch: result.providerMatch,
+    downloadAuth: result.downloadAuth,
+    originalUrl: result.url,
+    subId: result.id,
+  };
+}
+
 export function subtitleContextTitle(
   q: Pick<SubSearchQuery, "title" | "season" | "episode" | "filename">,
 ): string | undefined {
@@ -117,6 +150,7 @@ export function subtitleContextTitle(
 export function subtitleStreamDescriptor(
   stream:
     | {
+        resolvedFilename?: string | null;
         title?: string | null;
         parsedTitle?: string | null;
         source?: string | null;
@@ -128,6 +162,8 @@ export function subtitleStreamDescriptor(
     | undefined,
 ): string | undefined {
   if (!stream) return undefined;
+  const resolvedFilename = stream.resolvedFilename?.trim();
+  if (resolvedFilename) return resolvedFilename;
   const parts = [
     stream.title,
     stream.parsedTitle,

@@ -1,11 +1,13 @@
 const downloads: Record<string, string> = {
-  "Saved movies and episodes for offline watching": "Сохранённые фильмы и эпизоды для просмотра офлайн",
+  "Saved movies and episodes for offline watching":
+    "Сохранённые фильмы и эпизоды для просмотра офлайн",
   "1 item": "1 видео",
   "{count} items": "{count} видео",
   "{count} downloading": "{count} в загрузке",
   "{size} saved": "{size} сохранено",
   "No downloads yet": "Загрузок пока нет",
-  "Open any movie or show, hover an episode, and click the download icon. Pick the exact source you want and it saves here for offline watching.": "Откройте фильм или сериал, наведите курсор на эпизод и нажмите значок загрузки. Выберите нужный источник, и файл сохранится здесь для просмотра офлайн.",
+  "Open any movie or show, hover an episode, and click the download icon. Pick the exact source you want and it saves here for offline watching.":
+    "Откройте фильм или сериал, наведите курсор на эпизод и нажмите значок загрузки. Выберите нужный источник, и файл сохранится здесь для просмотра офлайн.",
   "Failed: {error}": "Ошибка: {error}",
   "Interrupted: re-download to finish": "Прервано: загрузите заново, чтобы завершить",
   "Cancel download": "Отменить загрузку",
@@ -44,14 +46,15 @@ const downloads: Record<string, string> = {
   "Same file": "Тот же файл",
   "{shown} of {total} file from your computer": "{shown} из {total} файла с компьютера",
   "{shown} of {total} files from your computer": "{shown} из {total} файлов с компьютера",
-  "Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.": "Укажите Harbor папку. Мы найдём в ней фильмы и сериалы, определим названия по именам файлов и дополним данными TMDB, чтобы они выглядели так же, как всё остальное здесь. Мы просто запоминаем путь: ничего не копируется и не перемещается.",
+  "Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.":
+    "Укажите Harbor папку. Мы найдём в ней фильмы и сериалы, определим названия по именам файлов и дополним данными TMDB, чтобы они выглядели так же, как всё остальное здесь. Мы просто запоминаем путь: ничего не копируется и не перемещается.",
   "No video files found in that folder.": "В этой папке нет видеофайлов.",
   "Couldn't scan that folder.": "Не удалось просканировать папку.",
   "Couldn't open this file": "Не удалось открыть файл",
-  "This file is in OneDrive. If \"Files On-Demand\" is on, the file is a cloud placeholder until it's downloaded. Right-click it in Explorer and pick": "Этот файл находится в OneDrive. Если включены \"Файлы по запросу\", файл остаётся облачным ярлыком, пока не будет скачан. Нажмите на него правой кнопкой в Проводнике и выберите",
   ", then try again.": ", затем повторите попытку.",
   "You're offline": "Вы не в сети",
-  "You're offline. Your downloads still play.": "Вы не в сети. Загруженное всё равно можно смотреть.",
+  "You're offline. Your downloads still play.":
+    "Вы не в сети. Загруженное всё равно можно смотреть.",
   "Saving GIF…": "Сохранение GIF…",
   "Continue Watching screenshots": "Скриншоты в «Продолжить просмотр»",
   "Go to show": "Перейти к сериалу",

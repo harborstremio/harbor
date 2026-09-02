@@ -1,6 +1,7 @@
 import { memo } from "react";
 import type { ComponentProps } from "react";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
+import { mapErrorSourceKey } from "@/lib/player/html5/error-map";
 import type { PlayerSrc } from "@/lib/view";
 import { CinematicPlayerLoader } from "./cinematic-player-loader";
 import { LiveChannelError } from "./live-channel-error";
@@ -47,7 +48,8 @@ export const LoaderLayer = memo(function LoaderLayer({
       {isLocalSrc && snap.errorCode != null && (
         <LocalFileError
           path={src.url}
-          errorMessage={snap.errorMessage}
+          errorSourceKey={mapErrorSourceKey(snap.errorCode)}
+          errorDetail={snap.errorMessage}
           onBack={onCancel}
           onRetry={onRetry}
         />

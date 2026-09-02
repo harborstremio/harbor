@@ -17,6 +17,9 @@ type RawResponse = {
 const cache = new Map<string, SkipSegment[]>();
 const inflight = new Map<string, Promise<SkipSegment[]>>();
 
+const FAILURE_COOLDOWN_MS = 10 * 60 * 1000;
+let coolingUntil = 0;
+
 function toSegment(raw: RawSeg | null | undefined, kind: SkipKind): SkipSegment | null {
   if (!raw) return null;
   const start = raw.start_ms;
@@ -36,13 +39,18 @@ export function fetchIntroDbAppSegments(
   const key = params.toString();
   const hit = cache.get(key);
   if (hit) return Promise.resolve(hit);
+  if (Date.now() < coolingUntil) return Promise.resolve([]);
   const pending = inflight.get(key);
   if (pending) return pending;
   const p = (async () => {
     const res = await fetch(`https://api.introdb.app/segments?${key}`);
     if (!res.ok) {
-      if (res.status === 404) cache.set(key, []);
-      else warnProviderFailure("introdb-app", res.status, key);
+      if (res.status === 404) {
+        cache.set(key, []);
+      } else {
+        coolingUntil = Date.now() + FAILURE_COOLDOWN_MS;
+        warnProviderFailure("introdb-app", res.status, key);
+      }
       return [];
     }
     const json = (await res.json()) as RawResponse;

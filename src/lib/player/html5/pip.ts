@@ -1,4 +1,5 @@
 import type { PlayerSnapshot } from "../bridge";
+import { t } from "@/lib/i18n";
 
 export function mountCustomPip(
   pipWin: Window,
@@ -31,9 +32,8 @@ export function mountCustomPip(
   const topBar = doc.createElement("div");
   topBar.className = "pip-top";
   topBar.innerHTML = `
-    <button class="pip-exit" type="button" aria-label="Exit Picture in Picture">
+    <button class="pip-exit" type="button">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9V5a2 2 0 0 1 2-2h4"/><path d="M21 9V5a2 2 0 0 0-2-2h-4"/><path d="M3 15v4a2 2 0 0 0 2 2h4"/><path d="M21 15v4a2 2 0 0 1-2 2h-4"/></svg>
-      Exit PiP
     </button>
   `;
   stage.appendChild(topBar);
@@ -41,23 +41,23 @@ export function mountCustomPip(
   const bottom = doc.createElement("div");
   bottom.className = "pip-bottom";
   bottom.innerHTML = `
-    <button class="pip-btn pip-back30" type="button" aria-label="Back 30 seconds">
+    <button class="pip-btn pip-back30" type="button">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 10 9 10"/></svg>
       <span class="pip-step">30</span>
     </button>
-    <button class="pip-play" type="button" aria-label="Play / Pause">
+    <button class="pip-play" type="button">
       <svg class="pip-play-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
       <svg class="pip-pause-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
     </button>
-    <button class="pip-btn pip-fwd30" type="button" aria-label="Forward 30 seconds">
+    <button class="pip-btn pip-fwd30" type="button">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 4 21 10 15 10"/></svg>
       <span class="pip-step">30</span>
     </button>
-    <button class="pip-mute" type="button" aria-label="Mute / Unmute">
+    <button class="pip-mute" type="button">
       <svg class="pip-vol-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
       <svg class="pip-vol-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>
     </button>
-    <input class="pip-volume" type="range" min="0" max="1" step="0.02" aria-label="Volume" />
+    <input class="pip-volume" type="range" min="0" max="1" step="0.02" />
   `;
   stage.appendChild(bottom);
 
@@ -77,6 +77,13 @@ export function mountCustomPip(
   const volOn = root.querySelector<HTMLElement>(".pip-vol-on")!;
   const volOff = root.querySelector<HTMLElement>(".pip-vol-off")!;
   const fillEl = root.querySelector<HTMLElement>(".pip-progress-fill")!;
+  exitBtn.setAttribute("aria-label", t("Exit Picture in Picture"));
+  exitBtn.appendChild(doc.createTextNode(t("Exit PiP")));
+  back30.setAttribute("aria-label", t("Back 30 seconds"));
+  playBtn.setAttribute("aria-label", t("Play / Pause"));
+  fwd30.setAttribute("aria-label", t("Forward 30 seconds"));
+  muteBtn.setAttribute("aria-label", t("Mute / Unmute"));
+  volRange.setAttribute("aria-label", t("Volume"));
 
   exitBtn.addEventListener("click", () => {
     pipWin.close();

@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useId } from "react";
-import { Heart, MessageCircle, ChevronDown, Settings, Loader2, Send, AlertCircle, Trash2 } from "lucide-react";
+import {
+  Heart,
+  MessageCircle,
+  ChevronDown,
+  Settings,
+  Loader2,
+  Send,
+  AlertCircle,
+  Trash2,
+} from "lucide-react";
 import { useT } from "@/lib/i18n";
 import {
   fetchComments,
@@ -19,17 +28,19 @@ import { useView } from "@/lib/view";
 import { useSettings } from "@/lib/settings";
 import { openUrl } from "@/lib/window";
 
-function timeAgo(dateStr: string): string {
+type Translate = (key: string, vars?: Record<string, string | number>) => string;
+
+function timeAgo(dateStr: string, t: Translate): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t("just now");
+  if (mins < 60) return t("{n}m ago", { n: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t("{n}h ago", { n: hours });
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
+  if (days < 30) return t("{n}d ago", { n: days });
   const months = Math.floor(days / 30);
-  return `${months}mo ago`;
+  return t("{n}mo ago", { n: months });
 }
 
 function UserAvatar({ username, size = "sm" }: { username?: string | null; size?: "sm" | "md" }) {
@@ -41,7 +52,9 @@ function UserAvatar({ username, size = "sm" }: { username?: string | null; size?
   return (
     <div className={`shrink-0 ${dim}`}>
       {error || !username ? (
-        <div className={`flex ${dim} items-center justify-center rounded-full bg-ink-muted/20 ${font} font-semibold text-ink-muted`}>
+        <div
+          className={`flex ${dim} items-center justify-center rounded-full bg-ink-muted/20 ${font} font-semibold text-ink-muted`}
+        >
           {initial}
         </div>
       ) : (
@@ -58,10 +71,21 @@ function UserAvatar({ username, size = "sm" }: { username?: string | null; size?
   );
 }
 
-function StarRow({ value, interactive, onRate, onHover }: { value: number; interactive: boolean; onRate?: (v: number) => void; onHover?: (v: number) => void }) {
+function StarRow({
+  value,
+  interactive,
+  onRate,
+  onHover,
+}: {
+  value: number;
+  interactive: boolean;
+  onRate?: (v: number) => void;
+  onHover?: (v: number) => void;
+}) {
   const [localHover, setLocalHover] = useState(0);
-  const display = interactive ? (localHover || value) : value;
-  const starPath = "M8 .2a.9.9 0 0 0-.8.6L5.4 5.2.6 5.9a.9.9 0 0 0-.5 1.5l3.5 3.4-1 4.8a.9.9 0 0 0 1.3 1l4.1-2.6 4 2.6a.9.9 0 0 0 1.4-1l-1-4.8 3.4-3.4a.9.9 0 0 0-.5-1.5l-4.8-.7L8.8.8A.9.9 0 0 0 8 .2z";
+  const display = interactive ? localHover || value : value;
+  const starPath =
+    "M8 .2a.9.9 0 0 0-.8.6L5.4 5.2.6 5.9a.9.9 0 0 0-.5 1.5l3.5 3.4-1 4.8a.9.9 0 0 0 1.3 1l4.1-2.6 4 2.6a.9.9 0 0 0 1.4-1l-1-4.8 3.4-3.4a.9.9 0 0 0-.5-1.5l-4.8-.7L8.8.8A.9.9 0 0 0 8 .2z";
   const id = useId();
 
   return (
@@ -109,7 +133,10 @@ function StarRow({ value, interactive, onRate, onHover }: { value: number; inter
                   setLocalHover(v);
                   onHover?.(v);
                 }}
-                onMouseLeave={() => { setLocalHover(0); onHover?.(0); }}
+                onMouseLeave={() => {
+                  setLocalHover(0);
+                  onHover?.(0);
+                }}
               >
                 <span className="h-full w-1/2" />
                 <span className="h-full w-1/2" />
@@ -149,7 +176,8 @@ function CommentCard({
 
   const avatar = (() => {
     if (comment.user.avatar) return comment.user.avatar;
-    if (comment.user.slug) return `https://walter.trakt.tv/users/${comment.user.slug}/avatars/medium`;
+    if (comment.user.slug)
+      return `https://walter.trakt.tv/users/${comment.user.slug}/avatars/medium`;
     return null;
   })();
   const initial = (comment.user.name ?? comment.user.username).charAt(0).toUpperCase();
@@ -196,7 +224,7 @@ function CommentCard({
           <span className="text-[13px] font-semibold text-ink">
             {comment.user.name ?? comment.user.username}
           </span>
-          <span className="text-[11px] text-ink-muted">{timeAgo(comment.createdAt)}</span>
+          <span className="text-[11px] text-ink-muted">{timeAgo(comment.createdAt, t)}</span>
           {comment.userRating != null && (
             <span className="ms-auto">
               <StarRow value={comment.userRating} interactive={false} />
@@ -210,13 +238,16 @@ function CommentCard({
               className="inline-flex items-center gap-1.5 rounded-lg bg-yellow-500/10 px-3 py-1.5 text-[12px] font-medium text-yellow-400 transition-colors hover:bg-yellow-500/20"
             >
               <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 fill-current">
-                <path d="M8 3C4.5 3 1.7 5.3 0 8c1.7 2.7 4.5 5 8 5s6.3-2.3 8-5c-1.7-2.7-4.5-5-8-5zm0 8a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-4a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                <path d="M8 3C4.5 3 1.7 5.3 0 8c1.7 2.7 4.5 5 8 5s6.3-2.3 8-5c-1.7-2.7-4.5-5-8-5zm0 8a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-4a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
               </svg>
               {t("Spoiler — Click to reveal")}
             </button>
           </div>
         ) : (
-          <p className="mt-1.5 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-ink" dir="auto">
+          <p
+            className="mt-1.5 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-ink"
+            dir="auto"
+          >
             {comment.comment}
           </p>
         )}
@@ -225,25 +256,23 @@ function CommentCard({
             onClick={handleLike}
             disabled={liking || !connected}
             className={`flex items-center gap-1 transition-colors ${
-              likes !== comment.likes
-                ? "text-red-400"
-                : "text-ink-muted hover:text-red-400"
+              likes !== comment.likes ? "text-red-400" : "text-ink-muted hover:text-red-400"
             } ${!connected ? "cursor-not-allowed opacity-50" : ""}`}
           >
             {liking ? (
               <Loader2 size={12} className="animate-spin" />
             ) : (
-              <Heart
-                size={12}
-                fill={likes !== comment.likes ? "currentColor" : "none"}
-              />
+              <Heart size={12} fill={likes !== comment.likes ? "currentColor" : "none"} />
             )}
             {likes}
           </button>
           {comment.replies > 0 && (
             <button
               onClick={() => {
-                if (replies) { setReplies(null); return; }
+                if (replies) {
+                  setReplies(null);
+                  return;
+                }
                 setLoadingReplies(true);
                 fetchReplies(comment.id).then((r) => {
                   setReplies(r);
@@ -275,11 +304,7 @@ function CommentCard({
               disabled={deleting}
               className="flex items-center gap-1 text-ink-muted transition-colors hover:text-red-400 disabled:opacity-50"
             >
-              {deleting ? (
-                <Loader2 size={12} className="animate-spin" />
-              ) : (
-                <Trash2 size={12} />
-              )}
+              {deleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
             </button>
           )}
         </div>
@@ -289,7 +314,12 @@ function CommentCard({
               <div key={r.id} className="flex gap-2 rounded-lg bg-raised/50 p-3">
                 <div className="shrink-0">
                   {r.user.avatar ? (
-                    <img src={r.user.avatar} alt="" className="h-6 w-6 rounded-full object-cover" referrerPolicy="no-referrer" />
+                    <img
+                      src={r.user.avatar}
+                      alt=""
+                      className="h-6 w-6 rounded-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
                   ) : (
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-ink-muted/20 text-[10px] font-semibold text-ink-muted">
                       {(r.user.name ?? r.user.username).charAt(0).toUpperCase()}
@@ -298,13 +328,18 @@ function CommentCard({
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-semibold text-ink">{r.user.name ?? r.user.username}</span>
-                    <span className="text-[10px] text-ink-muted">{timeAgo(r.createdAt)}</span>
+                    <span className="text-[11px] font-semibold text-ink">
+                      {r.user.name ?? r.user.username}
+                    </span>
+                    <span className="text-[10px] text-ink-muted">{timeAgo(r.createdAt, t)}</span>
                   </div>
                   {r.spoiler ? (
                     <SpoilerLabel comment={r} />
                   ) : (
-                    <p className="mt-0.5 whitespace-pre-wrap break-words text-[12px] leading-relaxed text-ink" dir="auto">
+                    <p
+                      className="mt-0.5 whitespace-pre-wrap break-words text-[12px] leading-relaxed text-ink"
+                      dir="auto"
+                    >
                       {r.comment}
                     </p>
                   )}
@@ -319,6 +354,13 @@ function CommentCard({
 }
 
 const SORTS = ["likes", "newest", "oldest"] as const;
+type Sort = (typeof SORTS)[number];
+
+const SORT_LABEL: Record<Sort, string> = {
+  likes: "Likes",
+  newest: "Newest",
+  oldest: "Oldest",
+};
 
 const COMMENTS_PAGE_SIZE = 20;
 
@@ -329,7 +371,7 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [sort, setSort] = useState<string>("likes");
+  const [sort, setSort] = useState<Sort>("likes");
   const [showSort, setShowSort] = useState(false);
   const [myComments, setMyComments] = useState(false);
   const [posting, setPosting] = useState(false);
@@ -386,7 +428,9 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
         setUserAvatar(data.images?.avatar?.full ?? null);
       })
       .catch(() => {});
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [connected]);
 
   // Restore cached rating from localStorage
@@ -411,7 +455,7 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
       if (cancelled) return;
       // Merge API comments with locally posted ones (prepend)
       const local = commentsCacheKey
-        ? JSON.parse(localStorage.getItem(commentsCacheKey) ?? "[]") as TraktComment[]
+        ? (JSON.parse(localStorage.getItem(commentsCacheKey) ?? "[]") as TraktComment[])
         : [];
       const localIds = new Set(local.map((c) => c.id));
       const merged = [...local, ...data.filter((c) => !localIds.has(c.id))];
@@ -419,7 +463,9 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
       setHasMore(data.length >= COMMENTS_PAGE_SIZE);
       setLoading(false);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [target, sort, commentsCacheKey]);
 
   const loadMore = useCallback(async () => {
@@ -452,7 +498,9 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
     const slug = ids.tmdb ? `tmdb:${ids.tmdb}` : ids.imdb;
     if (!slug) return;
     if (target.kind === "episode") {
-      openUrl(`https://app.trakt.tv/shows/${slug}/seasons/${target.season}/episodes/${target.number}?mode=media`);
+      openUrl(
+        `https://app.trakt.tv/shows/${slug}/seasons/${target.season}/episodes/${target.number}?mode=media`,
+      );
     } else if (target.kind === "movie") {
       openUrl(`https://app.trakt.tv/movies/${slug}?mode=media`);
     } else {
@@ -470,7 +518,9 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
       setComments((prev) => [created, ...prev]);
       setText("");
       if (commentsCacheKey) {
-        const existing = JSON.parse(localStorage.getItem(commentsCacheKey) ?? "[]") as TraktComment[];
+        const existing = JSON.parse(
+          localStorage.getItem(commentsCacheKey) ?? "[]",
+        ) as TraktComment[];
         existing.unshift(created);
         localStorage.setItem(commentsCacheKey, JSON.stringify(existing));
       }
@@ -487,39 +537,48 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
           if (!msg) msg = parsed.error_description ?? parsed.error ?? `HTTP ${e.status}`;
           setPostError(msg.replace(/^\w+\s*-\s*/, ""));
         } catch {
-          setPostError(`HTTP ${e.status}: ${e.body.slice(0, 100) || "(empty body)"}`);
+          const body = e.body.slice(0, 100) || t("(empty body)");
+          setPostError(t("HTTP {status}: {body}", { status: e.status, body }));
         }
       } else {
-        setPostError(e instanceof TypeError ? "Network error" : "Failed to post comment");
+        setPostError(e instanceof TypeError ? t("Network error") : t("Failed to post comment"));
       }
     }
     setPosting(false);
-  }, [target, text, posting, commentsCacheKey, spoiler]);
+  }, [target, text, posting, commentsCacheKey, spoiler, t]);
 
-  const handleDelete = useCallback((id: number) => {
-    setComments((prev) => prev.filter((c) => c.id !== id));
-    if (commentsCacheKey) {
-      const existing = JSON.parse(localStorage.getItem(commentsCacheKey) ?? "[]") as TraktComment[];
-      localStorage.setItem(commentsCacheKey, JSON.stringify(existing.filter((c) => c.id !== id)));
-    }
-  }, [commentsCacheKey]);
-
-  const handleRate = useCallback(async (rating: number) => {
-    if (!target || ratinging) return;
-    setRatinging(true);
-    try {
-      if (rating === userRating) {
-        await removeRating(target);
-        setUserRating(0);
-        if (ratingCacheKey) localStorage.removeItem(ratingCacheKey);
-      } else {
-        await rateContent(target, rating);
-        setUserRating(rating);
-        if (ratingCacheKey) localStorage.setItem(ratingCacheKey, String(rating));
+  const handleDelete = useCallback(
+    (id: number) => {
+      setComments((prev) => prev.filter((c) => c.id !== id));
+      if (commentsCacheKey) {
+        const existing = JSON.parse(
+          localStorage.getItem(commentsCacheKey) ?? "[]",
+        ) as TraktComment[];
+        localStorage.setItem(commentsCacheKey, JSON.stringify(existing.filter((c) => c.id !== id)));
       }
-    } catch {}
-    setRatinging(false);
-  }, [target, ratinging, userRating, ratingCacheKey]);
+    },
+    [commentsCacheKey],
+  );
+
+  const handleRate = useCallback(
+    async (rating: number) => {
+      if (!target || ratinging) return;
+      setRatinging(true);
+      try {
+        if (rating === userRating) {
+          await removeRating(target);
+          setUserRating(0);
+          if (ratingCacheKey) localStorage.removeItem(ratingCacheKey);
+        } else {
+          await rateContent(target, rating);
+          setUserRating(rating);
+          if (ratingCacheKey) localStorage.setItem(ratingCacheKey, String(rating));
+        }
+      } catch {}
+      setRatinging(false);
+    },
+    [target, ratinging, userRating, ratingCacheKey],
+  );
 
   return (
     <section>
@@ -540,9 +599,9 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
             <div ref={sortRef} className="relative">
               <button
                 onClick={() => setShowSort(!showSort)}
-                className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-[12px] font-medium text-ink-muted ring-1 ring-edge transition-colors hover:bg-elevated hover:text-ink"
+                className="flex items-center gap-1 rounded-lg bg-white/[0.06] px-3 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
               >
-                {t(sort.charAt(0).toUpperCase() + sort.slice(1))}
+                {t(SORT_LABEL[sort])}
                 <ChevronDown size={12} />
               </button>
               {showSort && (
@@ -550,12 +609,15 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
                   {SORTS.map((s) => (
                     <button
                       key={s}
-                      onClick={() => { setSort(s); setShowSort(false); }}
+                      onClick={() => {
+                        setSort(s);
+                        setShowSort(false);
+                      }}
                       className={`block w-full px-3 py-2 text-start text-[12px] transition-colors hover:bg-raised ${
                         s === sort ? "font-semibold text-ink" : "text-ink-muted"
                       }`}
                     >
-                      {t(s.charAt(0).toUpperCase() + s.slice(1))}
+                      {t(SORT_LABEL[s])}
                     </button>
                   ))}
                 </div>
@@ -563,7 +625,7 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
             </div>
             <button
               onClick={handleOpenTrakt}
-              className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-[12px] font-medium text-ink-muted ring-1 ring-edge transition-colors hover:bg-elevated hover:text-ink"
+              className="flex items-center gap-1 rounded-lg bg-white/[0.06] px-3 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
             >
               {t("Open on Trakt")}
             </button>
@@ -571,11 +633,15 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
         )}
       </div>
 
-      <div className={`relative rounded-xl ${settings.blurComments && blurred ? "overflow-hidden" : ""}`}>
+      <div
+        className={`relative rounded-xl ${settings.blurComments && blurred ? "overflow-hidden" : ""}`}
+      >
         {settings.blurComments && blurred && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center gap-3 pt-16 backdrop-blur-sm"
+          <div
+            className="absolute inset-0 z-10 flex flex-col items-center gap-3 pt-16 backdrop-blur-sm"
             style={{
-              background: "linear-gradient(to bottom, color-mix(in srgb, var(--color-canvas) 5%, transparent) 0%, color-mix(in srgb, var(--color-canvas) 78%, transparent) 40%, color-mix(in srgb, var(--color-canvas) 95%, transparent) 100%)",
+              background:
+                "linear-gradient(to bottom, color-mix(in srgb, var(--color-canvas) 5%, transparent) 0%, color-mix(in srgb, var(--color-canvas) 78%, transparent) 40%, color-mix(in srgb, var(--color-canvas) 95%, transparent) 100%)",
             }}
           >
             <button
@@ -589,156 +655,171 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
         )}
 
         {target && connected && (
-        <div className="mb-4 flex items-center gap-2">
-          <span className="text-[12px] font-medium text-ink-muted">{t("Rating")}:</span>
-          <StarRow value={userRating} interactive={true} onRate={handleRate} onHover={setHoverRating} />
-          {(hoverRating || userRating) > 0 && (
-            <span className="text-[12px] font-medium text-ink-muted">
-              {((hoverRating || userRating) / 2).toFixed(1).replace(/\.0$/, "")}
-            </span>
-          )}
-          {userRating > 0 && !hoverRating && (
-            <button
-              onClick={() => handleRate(userRating)}
-              disabled={ratinging}
-              className="text-[11px] text-ink-muted/50 underline transition-colors hover:text-ink-muted"
-            >
-              {t("Remove")}
-            </button>
-          )}
-        </div>
-      )}
-
-      {resolution && !resolution.ok && (
-        <p className="rounded-xl bg-elevated p-4 text-[13px] text-ink-muted ring-1 ring-edge">
-          {resolution.reason === "anime"
-            ? t("Trakt comments are not available for anime titles.")
-            : t("Could not identify this title on Trakt.")}
-        </p>
-      )}
-
-      {target && !connected && (
-        <div className="mb-5 rounded-xl border border-edge-soft bg-elevated/60 p-5 text-center">
-          <p className="text-[14px] text-ink-muted">
-            {t("Connect your Trakt account to see comments and reviews.")}
-          </p>
-          <p className="mt-3">
-            <button
-              onClick={() => openSettings("trakt")}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02]"
-            >
-              <Settings size={14} strokeWidth={2.2} />
-              {t("Connect Trakt")}
-            </button>
-          </p>
-        </div>
-      )}
-
-      {target && connected && (
-        <div className="mb-5">
-          <div className="flex items-start gap-3">
-            {userAvatar ? (
-              <img
-                src={userAvatar}
-                alt={username ?? ""}
-                className="h-8 w-8 shrink-0 rounded-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <UserAvatar username={username} size="sm" />
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-[12px] font-medium text-ink-muted">{t("Rating")}:</span>
+            <StarRow
+              value={userRating}
+              interactive={true}
+              onRate={handleRate}
+              onHover={setHoverRating}
+            />
+            {(hoverRating || userRating) > 0 && (
+              <span className="text-[12px] font-medium text-ink-muted">
+                {((hoverRating || userRating) / 2).toFixed(1).replace(/\.0$/, "")}
+              </span>
             )}
-            <div className="flex flex-1 items-start gap-2">
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder={t("Write a comment...")}
-                rows={1}
-                className="min-h-[36px] max-h-32 flex-1 resize-none overflow-y-auto rounded-xl bg-elevated px-3.5 py-2 text-[13px] text-ink outline-none ring-1 ring-edge placeholder:text-ink-muted/50 focus:ring-2 focus:ring-ink/20"
-                onInput={(e) => {
-                  const el = e.currentTarget;
-                  el.style.height = "auto";
-                  el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
-                }}
-              />
+            {userRating > 0 && !hoverRating && (
               <button
-                onClick={handlePost}
-                disabled={!text.trim() || posting}
-                className={`flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3.5 text-[13px] font-semibold transition-all ${
-                  !text.trim() || posting
-                    ? "bg-ink-muted/20 text-ink-muted/50 cursor-not-allowed"
-                    : "bg-ink text-canvas hover:scale-[1.02]"
-                }`}
+                onClick={() => handleRate(userRating)}
+                disabled={ratinging}
+                className="text-[11px] text-ink-muted/50 underline transition-colors hover:text-ink-muted"
               >
-                {posting ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <Send size={14} />
-                )}
+                {t("Remove")}
               </button>
-            </div>
+            )}
           </div>
-          <div className="mt-2 flex items-center gap-4">
-            <label className="flex cursor-pointer items-center gap-1.5 text-[12px] text-ink-muted transition-colors hover:text-ink">
-              <input
-                type="checkbox"
-                checked={spoiler}
-                onChange={(e) => setSpoiler(e.target.checked)}
-                className="h-3.5 w-3.5 rounded border-edge bg-elevated accent-ink"
-              />
-              {t("Contains spoiler")}
-            </label>
-            <span className="text-[11px] text-ink-muted/40">{t("Comments may take a moment to appear on Trakt")}</span>
-          </div>
-          {postError && (
-            <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-red-500/10 px-3 py-2 text-[12px] text-red-400">
-              <AlertCircle size={12} />
-              {postError}
-            </div>
-          )}
-        </div>
-      )}
+        )}
 
-      {target && loading && (
-        <div className="flex flex-col gap-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex gap-3 rounded-xl bg-elevated p-4 ring-1 ring-edge">
-              <div className="h-9 w-9 animate-pulse rounded-full bg-ink-muted/20" />
-              <div className="flex-1">
-                <div className="mb-2 h-3 w-24 animate-pulse rounded bg-ink-muted/20" />
-                <div className="mb-1 h-3 w-full animate-pulse rounded bg-ink-muted/20" />
-                <div className="h-3 w-3/4 animate-pulse rounded bg-ink-muted/20" />
+        {resolution && !resolution.ok && (
+          <p className="rounded-xl bg-elevated p-4 text-[13px] text-ink-muted ring-1 ring-edge">
+            {resolution.reason === "anime"
+              ? t("Trakt comments are not available for anime titles.")
+              : t("Could not identify this title on Trakt.")}
+          </p>
+        )}
+
+        {target && !connected && (
+          <div className="mb-5 rounded-xl border border-edge-soft bg-elevated/60 p-5 text-center">
+            <p className="text-[14px] text-ink-muted">
+              {t("Connect your Trakt account to see comments and reviews.")}
+            </p>
+            <p className="mt-3">
+              <button
+                onClick={() => openSettings("trakt")}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02]"
+              >
+                <Settings size={14} strokeWidth={2.2} />
+                {t("Connect Trakt")}
+              </button>
+            </p>
+          </div>
+        )}
+
+        {target && connected && (
+          <div className="mb-5">
+            <div className="flex items-start gap-3">
+              {userAvatar ? (
+                <img
+                  src={userAvatar}
+                  alt={username ?? ""}
+                  className="h-8 w-8 shrink-0 rounded-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <UserAvatar username={username} size="sm" />
+              )}
+              <div className="flex flex-1 items-start gap-2">
+                <textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder={t("Write a comment...")}
+                  rows={1}
+                  className="min-h-[36px] max-h-32 flex-1 resize-none overflow-y-auto rounded-xl bg-elevated px-3.5 py-2 text-[13px] text-ink outline-none ring-1 ring-edge placeholder:text-ink-muted/50 focus:ring-2 focus:ring-ink/20"
+                  onInput={(e) => {
+                    const el = e.currentTarget;
+                    el.style.height = "auto";
+                    el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
+                  }}
+                />
+                <button
+                  onClick={handlePost}
+                  disabled={!text.trim() || posting}
+                  className={`flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3.5 text-[13px] font-semibold transition-all ${
+                    !text.trim() || posting
+                      ? "bg-ink-muted/20 text-ink-muted/50 cursor-not-allowed"
+                      : "bg-ink text-canvas hover:scale-[1.02]"
+                  }`}
+                >
+                  {posting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                </button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+            <div className="mt-2 flex items-center gap-4">
+              <label className="flex cursor-pointer items-center gap-1.5 text-[12px] text-ink-muted transition-colors hover:text-ink">
+                <input
+                  type="checkbox"
+                  checked={spoiler}
+                  onChange={(e) => setSpoiler(e.target.checked)}
+                  className="h-3.5 w-3.5 rounded border-edge bg-elevated accent-ink"
+                />
+                {t("Contains spoiler")}
+              </label>
+              <span className="text-[11px] text-ink-muted/40">
+                {t("Comments may take a moment to appear on Trakt")}
+              </span>
+            </div>
+            {postError && (
+              <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-red-500/10 px-3 py-2 text-[12px] text-red-400">
+                <AlertCircle size={12} />
+                {postError}
+              </div>
+            )}
+          </div>
+        )}
 
-      {target && !loading && comments.length === 0 && (
-        <p className="text-[14px] text-ink-muted">{t("No comments yet")}</p>
-      )}
+        {target && loading && (
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex gap-3 rounded-xl bg-elevated p-4 ring-1 ring-edge">
+                <div className="h-9 w-9 animate-pulse rounded-full bg-ink-muted/20" />
+                <div className="flex-1">
+                  <div className="mb-2 h-3 w-24 animate-pulse rounded bg-ink-muted/20" />
+                  <div className="mb-1 h-3 w-full animate-pulse rounded bg-ink-muted/20" />
+                  <div className="h-3 w-3/4 animate-pulse rounded bg-ink-muted/20" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
-      {target && !loading && (myComments ? comments.filter((c) => c.user.username === username) : comments).length === 0 && myComments && (
-        <p className="text-[14px] text-ink-muted">{t("You haven't commented yet")}</p>
-      )}
+        {target && !loading && comments.length === 0 && (
+          <p className="text-[14px] text-ink-muted">{t("No comments yet")}</p>
+        )}
 
-      {target && !loading && (
-        <div className="flex flex-col gap-3">
-          {(myComments ? comments.filter((c) => c.user.username === username) : comments).map((c) => (
-            <CommentCard key={c.id} comment={c} connected={connected} username={username} onDelete={handleDelete} />
-          ))}
-          {hasMore && !myComments && (
-            <button
-              type="button"
-              onClick={() => void loadMore()}
-              disabled={loadingMore}
-              className="mt-1 flex h-10 items-center justify-center gap-2 rounded-xl border border-edge-soft bg-elevated/40 text-[13px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
-            >
-              {loadingMore && <Loader2 size={15} className="animate-spin" />}
-              {loadingMore ? t("Loading more") : t("Load more comments")}
-            </button>
+        {target &&
+          !loading &&
+          (myComments ? comments.filter((c) => c.user.username === username) : comments).length ===
+            0 &&
+          myComments && (
+            <p className="text-[14px] text-ink-muted">{t("You haven't commented yet")}</p>
           )}
-        </div>
-      )}
+
+        {target && !loading && (
+          <div className="flex flex-col gap-3">
+            {(myComments ? comments.filter((c) => c.user.username === username) : comments).map(
+              (c) => (
+                <CommentCard
+                  key={c.id}
+                  comment={c}
+                  connected={connected}
+                  username={username}
+                  onDelete={handleDelete}
+                />
+              ),
+            )}
+            {hasMore && !myComments && (
+              <button
+                type="button"
+                onClick={() => void loadMore()}
+                disabled={loadingMore}
+                className="mt-1 flex h-10 items-center justify-center gap-2 rounded-xl bg-white/[0.06] text-[13px] font-semibold text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink disabled:opacity-60"
+              >
+                {loadingMore && <Loader2 size={15} className="animate-spin" />}
+                {loadingMore ? t("Loading more") : t("Load more comments")}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -748,14 +829,21 @@ function SpoilerLabel({ comment }: { comment: { comment: string } }) {
   const t = useT();
   const [show, setShow] = useState(false);
   if (show) {
-    return <p className="mt-0.5 whitespace-pre-wrap break-words text-[12px] leading-relaxed text-ink" dir="auto">{comment.comment}</p>;
+    return (
+      <p
+        className="mt-0.5 whitespace-pre-wrap break-words text-[12px] leading-relaxed text-ink"
+        dir="auto"
+      >
+        {comment.comment}
+      </p>
+    );
   }
   return (
     <button
       onClick={() => setShow(true)}
       className="mt-0.5 inline-flex items-center gap-1 rounded bg-yellow-500/10 px-2 py-0.5 text-[10px] font-medium text-yellow-400 transition-colors hover:bg-yellow-500/20"
     >
-{t("Spoiler — Click")}
+      {t("Spoiler — Click")}
     </button>
   );
 }

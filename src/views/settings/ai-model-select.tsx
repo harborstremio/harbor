@@ -31,12 +31,12 @@ export function AiModelSelect({
     (value ? undefined : models.find((m) => m.id === defaultModel));
   return (
     <div className="flex items-center gap-2.5 px-1">
-      <span className="shrink-0 text-[12px] text-ink-subtle">{t("Model")}</span>
+      <span className="shrink-0 text-[12.5px] text-ink-subtle">{t("Model")}</span>
       <div ref={ref} className="relative flex-1">
         <button
           onClick={() => setOpen((v) => !v)}
-          className={`flex w-full items-center gap-2.5 rounded-lg border px-3 py-2 text-start transition-colors ${
-            open ? "border-edge bg-elevated" : "border-edge-soft bg-canvas/60 hover:border-edge"
+          className={`flex w-full items-center gap-2.5 rounded-md border px-3 py-2 text-start transition-colors ${
+            open ? "border-edge bg-elevated" : "border-edge-soft bg-canvas hover:border-edge"
           }`}
         >
           {current ? (
@@ -44,11 +44,11 @@ export function AiModelSelect({
               <ProviderLogo provider={current.family ?? current.provider} />
               <span className="flex min-w-0 flex-1 items-baseline gap-2">
                 <span className="truncate text-[13px] font-medium text-ink">{current.label}</span>
-                <span className="shrink-0 text-[11px] text-ink-subtle">{PROVIDER_NAME[current.family ?? current.provider]}</span>
+                <span className="shrink-0 text-[11.5px] text-ink-subtle">{PROVIDER_NAME[current.family ?? current.provider]}</span>
               </span>
             </>
           ) : (
-            <span className="flex-1 truncate font-mono text-[12px] text-ink-muted">
+            <span className="flex-1 truncate font-mono text-[12.5px] text-ink-muted">
               {value || t("Choose a model")}
             </span>
           )}
@@ -58,7 +58,7 @@ export function AiModelSelect({
           />
         </button>
         {open && (
-          <div className="absolute inset-x-0 top-[calc(100%+6px)] z-30 flex max-h-[320px] flex-col overflow-y-auto rounded-2xl border border-edge bg-canvas py-1.5 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-xl">
+          <div className="absolute inset-x-0 top-[calc(100%+6px)] z-30 flex max-h-[320px] flex-col overflow-y-auto rounded-md bg-elevated py-1.5 harbor-float">
             {models.map((m) => {
               const sel = m.id === value;
               return (
@@ -69,7 +69,7 @@ export function AiModelSelect({
                     setOpen(false);
                   }}
                   className={`flex items-center gap-2.5 px-3.5 py-2 text-start transition-colors ${
-                    sel ? "bg-elevated" : "hover:bg-elevated/60"
+                    sel ? "bg-elevated" : "hover:bg-elevated"
                   }`}
                 >
                   <ProviderLogo provider={m.family ?? m.provider} />
@@ -79,16 +79,16 @@ export function AiModelSelect({
                     </span>
                     <span className="flex flex-wrap items-center gap-1">
                       {m.recommended && (
-                        <span className="shrink-0 rounded-[5px] bg-accent/15 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-accent">
+                        <span className="shrink-0 rounded-[5px] bg-accent-soft px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-accent">
                           {t("Recommended")}
                         </span>
                       )}
                       {m.free && (
-                        <span className="shrink-0 rounded-[5px] bg-accent/15 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-accent">
+                        <span className="shrink-0 rounded-[5px] bg-accent-soft px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-accent">
                           {m.provider === "groq" ? t("Free tier") : t("Free")}
                         </span>
                       )}
-                      <span className="text-[10px] uppercase tracking-wider text-ink-subtle">
+                      <span className="text-[10.5px] uppercase tracking-wider text-ink-subtle">
                         {PROVIDER_NAME[m.family ?? m.provider]}
                       </span>
                     </span>

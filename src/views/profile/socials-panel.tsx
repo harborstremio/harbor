@@ -102,7 +102,7 @@ export function SocialsPanel({
   if (!isOwner && entries.length === 0) return null;
 
   return (
-    <section aria-label={t("Socials")} className="rounded-[14px] bg-surface p-4 ring-1 ring-edge-soft">
+    <section aria-label={t("Socials")} className="rounded-lg bg-surface p-4 ring-1 ring-edge-soft">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
           <AtSign size={20} /> {t("Socials")}
@@ -121,7 +121,7 @@ export function SocialsPanel({
         isOwner ? (
           <button
             onClick={() => setEditing(true)}
-            className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[10px] border border-dashed border-edge text-[13px] font-medium text-ink-muted transition-colors hover:border-accent/40 hover:text-ink"
+            className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-md border border-dashed border-edge text-[13px] font-medium text-ink-muted transition-colors hover:border-accent/40 hover:text-ink"
           >
             <Plus size={16} /> {t("Add your social links")}
           </button>

@@ -11,6 +11,8 @@ import {
 } from "@/lib/local-time";
 import { useSettings } from "@/lib/settings";
 import { Segmented, ToggleRow } from "../shared";
+import { SettingGroup } from "../kit";
+import { SliderRow } from "./display-section";
 
 const CLOCK_FORMATS: ReadonlyArray<{ value: FullscreenClockFormat; label: string }> = [
   { value: "system", label: "System" },
@@ -35,7 +37,7 @@ export function FullscreenClockSettings() {
   const [previewDate] = useState(() => new Date(2026, 6, 31, 20, 42, 18));
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2">
       <ToggleRow
         label={t("Show fullscreen clock")}
         sub={t("The clock appears with the player controls.")}
@@ -45,20 +47,20 @@ export function FullscreenClockSettings() {
           <span
             className={`flex h-9 w-9 items-center justify-center rounded-full ${
               settings.fullscreenClockEnabled
-                ? "bg-accent/15 text-accent"
+                ? "bg-accent-soft text-accent"
                 : "bg-raised text-ink-subtle"
             }`}
           >
-            <Clock3 size={15} strokeWidth={2.2} />
+            <Clock3 size={16} strokeWidth={2.2} />
           </span>
         }
       />
 
       {settings.fullscreenClockEnabled && (
-        <div className="flex flex-col gap-5 rounded-xl border border-edge-soft bg-canvas/25 p-5">
-          <div className="relative isolate flex min-h-32 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#080b10]">
+        <SettingGroup>
+          <div className="relative isolate flex min-h-32 items-center justify-center overflow-hidden rounded-md bg-[#080b10]">
             <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] via-transparent to-accent/[0.08]" />
-            <span className="absolute start-4 top-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/45">
+            <span className="absolute start-4 top-3 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-white/45">
               {t("Live preview")}
             </span>
             <div className="relative">
@@ -66,16 +68,13 @@ export function FullscreenClockSettings() {
             </div>
           </div>
 
-          <fieldset className="flex flex-col gap-2.5">
-            <legend className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-              {t("Clock format")}
-            </legend>
+          <SettingGroup label={t("Clock format")}>
             <Segmented
               value={settings.fullscreenClockFormat}
-              options={CLOCK_FORMATS}
+              options={CLOCK_FORMATS.map((o) => ({ ...o, label: t(o.label) }))}
               onChange={(fullscreenClockFormat) => update({ fullscreenClockFormat })}
             />
-          </fieldset>
+          </SettingGroup>
 
           <ToggleRow
             label={t("Show seconds")}
@@ -84,7 +83,19 @@ export function FullscreenClockSettings() {
             onChange={(fullscreenClockShowSeconds) => update({ fullscreenClockShowSeconds })}
             leading={
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-raised text-ink-muted">
-                <Clock3 size={15} strokeWidth={2.2} />
+                <Clock3 size={16} strokeWidth={2.2} />
+              </span>
+            }
+          />
+
+          <ToggleRow
+            label={t("Show in windowed mode")}
+            sub={t("Keep the clock on screen when the player is not fullscreen.")}
+            value={settings.fullscreenClockWindowed}
+            onChange={(fullscreenClockWindowed) => update({ fullscreenClockWindowed })}
+            leading={
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-raised text-ink-muted">
+                <Clock3 size={16} strokeWidth={2.2} />
               </span>
             }
           />
@@ -96,43 +107,24 @@ export function FullscreenClockSettings() {
             onChange={(fullscreenClockShowEndTime) => update({ fullscreenClockShowEndTime })}
             leading={
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-raised text-ink-muted">
-                <Clock3 size={15} strokeWidth={2.2} />
+                <Clock3 size={16} strokeWidth={2.2} />
               </span>
             }
           />
 
-          <label className="flex items-center gap-4 px-1 py-1.5">
-            <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">
-              {t("Clock size")}
-            </span>
-            <input
-              type="range"
-              min={FULLSCREEN_CLOCK_SIZE_MIN_PX}
-              max={FULLSCREEN_CLOCK_SIZE_MAX_PX}
-              step={1}
-              value={settings.fullscreenClockSizePx}
-              onChange={(event) => update({ fullscreenClockSizePx: Number(event.target.value) })}
-              className="h-1.5 min-w-0 flex-1 cursor-pointer appearance-none rounded-full bg-raised accent-accent"
-            />
-            <span className="w-12 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
-              {settings.fullscreenClockSizePx} px
-            </span>
-            {settings.fullscreenClockSizePx !== DEFAULT_FULLSCREEN_CLOCK_SIZE_PX && (
-              <button
-                type="button"
-                onClick={() => update({ fullscreenClockSizePx: DEFAULT_FULLSCREEN_CLOCK_SIZE_PX })}
-                className="shrink-0 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
-              >
-                {t("Reset")}
-              </button>
-            )}
-          </label>
+          <SliderRow
+            label={t("Clock size")}
+            value={settings.fullscreenClockSizePx}
+            min={FULLSCREEN_CLOCK_SIZE_MIN_PX}
+            max={FULLSCREEN_CLOCK_SIZE_MAX_PX}
+            step={1}
+            readout={`${settings.fullscreenClockSizePx} px`}
+            resetTo={DEFAULT_FULLSCREEN_CLOCK_SIZE_PX}
+            onChange={(fullscreenClockSizePx) => update({ fullscreenClockSizePx })}
+          />
 
-          <fieldset>
-            <legend className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-              {t("Clock style")}
-            </legend>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <SettingGroup label={t("Clock style")}>
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-3">
               {CLOCK_STYLES.map((option) => {
                 const active = settings.fullscreenClockStyle === option.value;
                 return (
@@ -141,10 +133,8 @@ export function FullscreenClockSettings() {
                     type="button"
                     aria-pressed={active}
                     onClick={() => update({ fullscreenClockStyle: option.value })}
-                    className={`group overflow-hidden rounded-xl border text-start transition-[border-color,background-color,transform] duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-                      active
-                        ? "border-accent/70 bg-accent-soft"
-                        : "border-edge-soft bg-elevated/35 hover:border-edge hover:bg-elevated/55"
+                    className={`group overflow-hidden rounded-md text-start transition-[background-color,transform] duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                      active ? "bg-accent-soft" : "bg-elevated hover:bg-raised"
                     }`}
                   >
                     <span className="relative flex h-20 items-center justify-center overflow-hidden bg-[#080b10]">
@@ -183,8 +173,8 @@ export function FullscreenClockSettings() {
                 );
               })}
             </div>
-          </fieldset>
-        </div>
+          </SettingGroup>
+        </SettingGroup>
       )}
     </div>
   );

@@ -1,0 +1,75 @@
+.hb-fin-confirm {
+  height: var(--sz-confirm);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.hb-fin-confirm-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hb-fin-confirm-text p,
+.hb-fin-line {
+  margin: 0;
+}
+
+.hb-fin-mark.hb-draw path {
+  animation-duration: var(--t-state);
+  animation-delay: 420ms;
+}
+
+.hb-fin-repair {
+  margin-top: 24px;
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.hb-fin-repair-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  line-height: 24px;
+}
+
+.hb-fin-choices {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.hb-fin-choice {
+  height: var(--h-icon-btn);
+  padding: 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-align: start;
+}
+
+.hb-fin-choice-label {
+  transition: color var(--t-hover) var(--ease);
+}
+
+.hb-fin-choice:hover .hb-fin-choice-label {
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-fin-mark.hb-draw path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .hb-fin-choice-label {
+    transition-duration: 1ms;
+  }
+}

@@ -185,7 +185,9 @@ pub fn run_loop(app: AppHandle) {
                 Some(s) => Assets::new()
                     .small_image(s)
                     .small_text(desired.small_text.as_deref().unwrap_or("Harbor")),
-                None => Assets::new().small_image(SMALL_IMAGE_KEY).small_text("Harbor"),
+                None => Assets::new()
+                    .small_image(SMALL_IMAGE_KEY)
+                    .small_text("Harbor"),
             };
             if let Some(img) = desired.large_image.as_deref() {
                 assets = assets.large_image(img);

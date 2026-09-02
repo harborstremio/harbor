@@ -1,11 +1,21 @@
-import type { CalendarFilter, CalendarItem } from "@/lib/calendar";
+import { type CalendarFilter, type CalendarItem, type CalendarPosterSize } from "@/lib/calendar";
 import { type LibraryItem } from "@/lib/stremio";
 import type { Meta } from "@/lib/cinemeta";
 import type { Cell } from "./types";
 
 export const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 export const WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -22,6 +32,15 @@ export const FILTERS: Array<{ id: CalendarFilter; label: string }> = [
   { id: "anime", label: "Anime" },
 ];
 
+export const CALENDAR_POSTER_SIZES: Array<{ value: CalendarPosterSize; label: string }> = [
+  { value: "default", label: "Default" },
+  { value: "large", label: "Large" },
+];
+
+export function isUpcoming(item: CalendarItem): boolean {
+  return item.releaseAtMs != null && item.releaseAtMs > Date.now();
+}
+
 export function calendarToMeta(item: CalendarItem): Meta {
   return {
     id: calendarBaseId(item.id),
@@ -35,7 +54,9 @@ export function calendarToMeta(item: CalendarItem): Meta {
   };
 }
 
-export function calendarEpisodeHint(item: CalendarItem): { season: number; episode: number } | null {
+export function calendarEpisodeHint(
+  item: CalendarItem,
+): { season: number; episode: number } | null {
   const m = item.id.match(/:(\d+):(\d+)$/);
   if (!m) return null;
   return { season: Number(m[1]), episode: Number(m[2]) };

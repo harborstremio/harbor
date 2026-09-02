@@ -62,6 +62,11 @@ const player: Record<string, string> = {
   "Forced only": "Somente forçadas",
   "Forced subs with native audio": "Legendas forçadas com áudio original",
   "HI/SDH": "HI/SDH",
+  "Hearing impaired": "Para pessoas com deficiência auditiva",
+  "Foreign-only": "Somente trechos estrangeiros",
+  "Machine-translated": "Tradução automática",
+  MT: "MT",
+  "Audio verified": "Verificada pelo áudio",
   "No styling": "Sem estilo",
   "Position and size only": "Apenas posição e tamanho",
   "Show HI/SDH": "Mostrar HI/SDH",
@@ -428,7 +433,7 @@ const player: Record<string, string> = {
   "Enter an FPS from 1 to 240.": "Introduza uma taxa de FPS entre 1 e 240.",
   "Select a subtitle track first.": "Selecione primeiro uma faixa de legendas.",
   "Subtitle FPS is only available with the libmpv player.":
-    "O FPS da legenda só está disponível com o leitor libmpv.",
+    "O FPS da legenda só está disponível com o player libmpv.",
   "Subtitle FPS conversion is only available for text-based subtitles.":
     "A conversão de FPS só está disponível para legendas de texto.",
   "Subtitle FPS is unavailable while a secondary subtitle is active.":
@@ -440,13 +445,13 @@ const player: Record<string, string> = {
     "Desative a sincronização automática antes de alterar o FPS da legenda.",
   "Resize subtitle menu": "Redimensionar menu de legendas",
   "Drag to resize. Use arrow keys to adjust, or Home to reset.":
-    "Arraste para redimensionar. Use as teclas de seta para ajustar ou Home para repor.",
+    "Arraste para redimensionar. Use as teclas de seta para ajustar ou Home para redefinir.",
   "Drag the corner to resize. Left and right change width; up and down change height; Home resets the size.":
-    "Arraste o canto para redimensionar. Esquerda e direita alteram a largura; cima e baixo alteram a altura; Home repõe o tamanho.",
+    "Arraste o canto para redimensionar. Esquerda e direita alteram a largura; cima e baixo alteram a altura; Home redefine o tamanho.",
   "Couldn't switch subtitles. Try again.": "Não foi possível mudar de legenda. Tente novamente.",
   "Subtitle details": "Detalhes da legenda",
   "Open subtitle details": "Abrir detalhes da legenda",
-  Provider: "Fornecedor",
+  Provider: "Provedor",
   Format: "Formato",
   Quality: "Qualidade",
   Author: "Autor",
@@ -457,8 +462,8 @@ const player: Record<string, string> = {
   "This is a metadata-based release estimate, not a measured timing score.":
     "Esta é uma estimativa baseada nos metadados do lançamento, não uma medição da sincronização.",
   "Couldn't save the synced subtitle. Try again.":
-    "Não foi possível guardar a legenda sincronizada. Tente novamente.",
-  "Saving...": "A guardar...",
+    "Não foi possível salvar a legenda sincronizada. Tente novamente.",
+  "Saving...": "Salvando...",
 };
 
 export default player;

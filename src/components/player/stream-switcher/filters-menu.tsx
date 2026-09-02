@@ -114,13 +114,13 @@ export function FiltersMenu({ filters }: { filters: SwitcherFilters }) {
       </button>
 
       {open && (
-        <div className="absolute end-0 top-full z-30 mt-2 max-h-[68vh] w-[288px] overflow-y-auto rounded-xl border border-edge bg-elevated p-3 shadow-[0_22px_54px_-16px_rgba(0,0,0,0.75)]">
+        <div className="absolute end-0 top-full z-30 mt-2 max-h-[68vh] w-[288px] overflow-y-auto rounded-md bg-elevated p-3 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]">
           <Section label={t("Sources")}>
             <div className="flex gap-1.5">
               {(
                 [
                   ["both", t("Both")],
-                  ["addons", t("Addons")],
+                  ["addons", t("Direct/debrid")],
                   ["p2p", t("P2P")],
                 ] as Array<[StreamMode, string]>
               ).map(([v, label]) => (
@@ -330,7 +330,9 @@ function ToggleRow({
       className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-1.5 text-start transition-colors hover:bg-raised"
     >
       <span className="flex min-w-0 flex-col">
-        <span className={`text-[12.5px] ${on ? "font-semibold text-ink" : "text-ink-muted"}`}>{label}</span>
+        <span className={`text-[12.5px] ${on ? "font-semibold text-ink" : "text-ink-muted"}`}>
+          {label}
+        </span>
         <span className="truncate text-[10.5px] text-ink-subtle">{hint}</span>
       </span>
       <span

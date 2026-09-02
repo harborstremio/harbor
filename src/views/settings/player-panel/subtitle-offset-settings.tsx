@@ -50,7 +50,7 @@ export function SubtitleOffsetSettings() {
           <span
             className={`flex h-9 w-9 items-center justify-center rounded-full ${
               settings.subOffsetIndicatorEnabled
-                ? "bg-accent/15 text-accent"
+                ? "bg-accent-soft text-accent"
                 : "bg-raised text-ink-subtle"
             }`}
           >
@@ -60,17 +60,17 @@ export function SubtitleOffsetSettings() {
       />
 
       {settings.subOffsetIndicatorEnabled && (
-        <div className="flex flex-col gap-5 rounded-xl border border-edge-soft bg-canvas/25 p-5">
-          <div className="relative isolate h-40 overflow-hidden rounded-2xl border border-white/10 bg-[#080b10]">
+ <div className="flex flex-col gap-5 rounded-md bg-canvas p-5">
+          <div className="relative isolate h-40 overflow-hidden rounded-md border border-white/10 bg-[#080b10]">
             <div className="absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-accent/[0.07]" />
-            <span className="absolute start-4 top-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/45">
+            <span className="absolute start-4 top-3 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-white/45">
               {t("Preview")}
             </span>
             <SubtitleOffsetIndicator delaySec={0.3} preview />
           </div>
 
           <fieldset className="flex flex-col gap-2.5">
-            <legend className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+            <legend className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
               {t("Position")}
             </legend>
             <div className="grid grid-cols-3 gap-2">
@@ -82,20 +82,20 @@ export function SubtitleOffsetSettings() {
                     type="button"
                     aria-pressed={active}
                     onClick={() => update({ subOffsetIndicatorPosition: option.value })}
-                    className={`flex min-h-14 items-center gap-2.5 rounded-xl px-3 text-start ring-1 transition-[background-color,box-shadow,color,transform] duration-150 ease-out active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                    className={`flex min-h-14 items-center gap-2.5 rounded-md px-3 text-start ring-1 transition-[background-color,box-shadow,color,transform] duration-150 ease-out active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                       active
-                        ? "bg-accent-soft text-ink ring-accent/70"
-                        : "bg-elevated/35 text-ink-muted ring-edge-soft hover:bg-elevated/55 hover:text-ink hover:ring-edge"
+                        ? "bg-accent-soft text-ink ring-accent"
+                        : "bg-elevated text-ink-muted ring-edge-soft hover:bg-elevated hover:text-ink hover:ring-edge"
                     }`}
                   >
-                    <span className="relative h-6 w-9 shrink-0 rounded-md bg-canvas/70 ring-1 ring-edge-soft">
+                    <span className="relative h-6 w-9 shrink-0 rounded-md bg-canvas ring-1 ring-edge-soft">
                       <span
                         className={`absolute size-1.5 rounded-full ${
                           active ? "bg-accent" : "bg-ink-subtle"
                         } ${POSITION_DOT_CLASSES[option.value]}`}
                       />
                     </span>
-                    <span className="text-[12px] font-semibold leading-tight">
+                    <span className="text-[12.5px] font-semibold leading-tight">
                       {t(option.label)}
                     </span>
                   </button>
@@ -105,12 +105,12 @@ export function SubtitleOffsetSettings() {
           </fieldset>
 
           <fieldset className="flex flex-col gap-2.5">
-            <legend className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+            <legend className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
               {t("Size")}
             </legend>
             <Segmented
               value={settings.subOffsetIndicatorSize}
-              options={SIZE_OPTIONS}
+              options={SIZE_OPTIONS.map((o) => ({ ...o, label: t(o.label) }))}
               onChange={(subOffsetIndicatorSize) => update({ subOffsetIndicatorSize })}
             />
           </fieldset>

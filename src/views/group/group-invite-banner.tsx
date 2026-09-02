@@ -32,7 +32,7 @@ export function GroupInviteBanner({
   const inviter = detail.owner?.alias || detail.owner?.handle;
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-[14px] bg-elevated/70 p-4 ring-1 ring-accent/25">
+    <div className="flex flex-wrap items-center gap-3 rounded-lg bg-elevated/70 p-4 ring-1 ring-accent/25">
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-[13.5px] font-semibold text-ink">
           {inviter

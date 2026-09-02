@@ -2,7 +2,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { safeFetch } from "@/lib/safe-fetch";
 import { dwarn } from "@/lib/debug";
 import { normalizeLang } from "@/lib/subtitles/language";
-import { fetchAndParse, type SubCue } from "@/lib/subtitles/parser";
+import { prepareSubtitle } from "@/lib/subtitles/prepare";
+import { providerSubtitleDownloadHeaders } from "@/lib/subtitles/provider-auth";
 
 const API_BASE = "https://api.opensubtitles.com/api/v1";
 const POS_TTL_MS = 30 * 24 * 3600 * 1000;
@@ -111,7 +112,9 @@ function parseSub(item: unknown): OsSub | null {
 async function searchByHash(hash: string, langs: string[], cfg: OsConfig): Promise<OsSub[] | null> {
   if (Date.now() < rateLimitedUntil) return null;
   const lang = langs.map(normalizeLang).filter(Boolean).join(",");
-  const qs = lang ? `?moviehash=${encodeURIComponent(hash)}&languages=${encodeURIComponent(lang)}` : `?moviehash=${encodeURIComponent(hash)}`;
+  const qs = lang
+    ? `?moviehash=${encodeURIComponent(hash)}&languages=${encodeURIComponent(lang)}`
+    : `?moviehash=${encodeURIComponent(hash)}`;
   try {
     const res = await safeFetch(`${API_BASE}/subtitles${qs}`, {
       headers: {
@@ -276,21 +279,29 @@ export async function resolveSwapCues(
     if (!dl) return null;
     fetchUrl = dl.link;
   }
-  let parsed: SubCue[];
+  let prepared: Awaited<ReturnType<typeof prepareSubtitle>>;
   try {
-    parsed = await fetchAndParse(fetchUrl, subSwap.format ? { format: subSwap.format } : {});
+    prepared = await prepareSubtitle({
+      url: fetchUrl,
+      format: subSwap.format ?? undefined,
+      requestHeaders: providerSubtitleDownloadHeaders(undefined, fetchUrl),
+    });
   } catch (e) {
     dwarn("[os-hash] swap parse failed", e);
     return null;
   }
-  const usable = parsed.filter(
-    (c) => Number.isFinite(c.start) && Number.isFinite(c.end) && c.end > c.start,
-  );
-  if (usable.length < 4) return null;
-  return {
-    cues: usable.map((c) => [c.start, c.end] as [number, number]),
-    cueText: usable.map((c) => c.text),
-  };
+  try {
+    const usable = prepared.cues.filter(
+      (cue) => Number.isFinite(cue.start) && Number.isFinite(cue.end) && cue.end > cue.start,
+    );
+    if (usable.length < 4) return null;
+    return {
+      cues: usable.map((cue) => [cue.start, cue.end] as [number, number]),
+      cueText: usable.map((cue) => cue.text),
+    };
+  } finally {
+    prepared.cleanup();
+  }
 }
 
 export async function login(

@@ -2,6 +2,7 @@ import {
   Camera,
   ChevronLeft,
   Info,
+  Gauge,
   Maximize,
   Minimize,
   Pause,
@@ -10,10 +11,11 @@ import {
   Replace,
   SkipBack,
   SkipForward,
-  Tv,
 } from "lucide-react";
+import { NavGlyph } from "@/components/icons/nav-glyph";
 import { hdrFormatLabel, realQualityLabel } from "@/lib/player/resolution-label";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
+import type { ReactNode } from "react";
 import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 import type { Meta } from "@/lib/cinemeta";
 import {
@@ -35,6 +37,7 @@ import { AspectMenu } from "./aspect-menu";
 import { Anime4kMenu } from "./anime4k-menu";
 import { ShaderMenu } from "./shader-menu";
 import { HdrToggleStremioBtn } from "./hdr-toggle-btn";
+import { QualityInfo } from "./quality-badge";
 import { RtxHdrToggleStremioBtn } from "./rtx-hdr-toggle-btn";
 import { RtxVsrToggleStremioBtn } from "./rtx-vsr-toggle-btn";
 import type { Anime4kChoice } from "@/views/player/hooks/use-anime4k";
@@ -135,6 +138,7 @@ export type StremioRenderCtx = {
   onDownloadReveal?: () => void;
   onDownloadReset?: () => void;
   onOpenDvr?: () => void;
+  homeServerQualityControl?: ReactNode;
 };
 
 function getStremioState(id: PlayerControlId, ctx: StremioRenderCtx): string | undefined {
@@ -150,7 +154,7 @@ function getStremioState(id: PlayerControlId, ctx: StremioRenderCtx): string | u
     case "dvr":
       return ctx.isLiveChannel ? "recording" : "idle";
     case "cast":
-      return ctx.capabilities.chromecast ? "connected" : "idle";
+      return "idle";
     case "pip":
       return "inactive";
     case "download":
@@ -203,16 +207,7 @@ export function RenderedStremioControl({
                     {ctx.subtitle}
                   </span>
                 )}
-                {!showQuality && res && (
-                  <span className="shrink-0 rounded-md bg-white/15 px-1.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-white/80">
-                    {res}
-                  </span>
-                )}
-                {!showQuality && hdr && (
-                  <span className="shrink-0 rounded-md bg-amber-400/20 px-1.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-amber-200">
-                    {hdr}
-                  </span>
-                )}
+                {!showQuality && <QualityInfo labels={[res, hdr]} show={ctx.active} />}
               </span>
               {showQuality && (
                 <span className="truncate text-[12px] font-normal tabular-nums text-white/55">
@@ -257,13 +252,14 @@ export function RenderedStremioControl({
       );
     }
     case "local-time":
-      return ctx.fullscreen ? (
+      return (
         <FullscreenClock
           durationSec={ctx.snap.durationSec}
           playbackRate={ctx.snap.rate}
           active={ctx.active}
+          fullscreen={ctx.fullscreen}
         />
-      ) : null;
+      );
     case "play-pause":
       return (
         <Tooltip label={ctx.playing ? tr("Pause") : tr("Play")}>
@@ -338,7 +334,7 @@ export function RenderedStremioControl({
             ariaLabel={ctx.isLiveChannel ? tr("TV Guide") : tr("Switch stream")}
           >
             {ctx.isLiveChannel ? (
-              <Tv size={26} strokeWidth={1.9} />
+              <NavGlyph name="guide" className="h-[26px] w-[26px]" />
             ) : (
               <Replace size={26} strokeWidth={1.9} />
             )}
@@ -450,6 +446,15 @@ export function RenderedStremioControl({
           onOpenChange={ctx.setAudioMenuOpen}
           useOverlayPopup={ctx.useOverlayPopups}
         />
+      );
+    case "home-server-quality":
+      return (
+        ctx.homeServerQualityControl ??
+        (ctx.editing ? (
+          <StremioBtn ariaLabel={tr("Home server quality")}>
+            <Gauge size={22} strokeWidth={1.9} />
+          </StremioBtn>
+        ) : null)
       );
     case "draw-toggle":
       if (!ctx.showDraw) return null;

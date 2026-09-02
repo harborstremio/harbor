@@ -68,10 +68,10 @@ export function EpisodeDownloadsMenu({ meta, episodes }: { meta: Meta; episodes:
           onMouseDown={(e) => e.stopPropagation()}
           onClick={() => (menu ? setMenu(null) : openMenu())}
           aria-label={t("Download")}
-          className={`flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
+          className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
             autoOn
-              ? "border-accent/55 bg-accent/12 text-accent"
-              : "border-edge-soft bg-canvas/60 text-ink-muted hover:border-edge hover:text-ink"
+              ? "bg-accent/12 text-accent"
+              : "bg-white/[0.06] text-ink-muted hover:bg-white/[0.10] hover:text-ink"
           }`}
         >
           <ArrowDownToLine size={16} strokeWidth={2} />

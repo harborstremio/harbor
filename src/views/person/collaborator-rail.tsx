@@ -35,7 +35,7 @@ function CollaboratorCard({ person }: { person: Collaborator }) {
       <div className="flex flex-col gap-0.5 px-0.5">
         <span className="line-clamp-1 text-[13.5px] font-semibold text-ink">{person.name}</span>
         <span className="line-clamp-1 text-[11.5px] text-ink-subtle">
-          {person.role ? `${t(person.role)} · ${shared}` : shared}
+          {person.role ? `${person.role} · ${shared}` : shared}
         </span>
       </div>
     </button>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTogether } from "@/lib/together/provider";
+import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 
 const PREF_KEY = "harbor.together.followHostExit";
@@ -18,6 +19,7 @@ function writePref(v: Exclude<Pref, null>) {
 export function TogetherHostLeavingPrompt() {
   const { incomingHostLeaving, dismissHostLeaving, snapshot, clientId } = useTogether();
   const { exitPlayback, topKind } = useView();
+  const t = useT();
   const [remember, setRemember] = useState(false);
   const triggeredRef = useRef<number | null>(null);
 
@@ -70,13 +72,17 @@ export function TogetherHostLeavingPrompt() {
       <div className="pointer-events-auto flex w-full max-w-md flex-col gap-4 rounded-2xl border border-edge bg-surface p-5 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.75)] animate-popover-in">
         <div className="flex flex-col gap-1.5">
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-accent">
-            {incomingHostLeaving.name} left the video
+            {t("{name} left the video", { name: incomingHostLeaving.name })}
           </span>
-          <h3 className="text-[16px] font-semibold text-ink">Follow them out?</h3>
+          <h3 className="text-[16px] font-semibold text-ink">{t("Follow them out?")}</h3>
           <p className="text-[13.5px] text-ink-muted">
             {othersRemain
-              ? "You'll stay in the room either way. Keep watching with the others, or step out of the player."
-              : "You'll stay in the room either way. Keep watching alone, or step out of the player."}
+              ? t(
+                  "You'll stay in the room either way. Keep watching with the others, or step out of the player.",
+                )
+              : t(
+                  "You'll stay in the room either way. Keep watching alone, or step out of the player.",
+                )}
           </p>
         </div>
 
@@ -87,7 +93,7 @@ export function TogetherHostLeavingPrompt() {
             onChange={(e) => setRemember(e.target.checked)}
             className="h-4 w-4 rounded border border-edge bg-canvas accent-accent"
           />
-          Remember my choice
+          {t("Remember my choice")}
         </label>
 
         <div className="flex gap-2">
@@ -95,13 +101,13 @@ export function TogetherHostLeavingPrompt() {
             onClick={handleLeave}
             className="flex-1 rounded-full border border-edge bg-elevated px-4 py-3 text-[13.5px] font-medium text-ink transition-colors hover:bg-raised"
           >
-            Leave the video
+            {t("Leave the video")}
           </button>
           <button
             onClick={handleStay}
             className="flex-1 rounded-full bg-ink px-4 py-3 text-[13.5px] font-semibold text-canvas transition-colors hover:opacity-90"
           >
-            Keep watching
+            {t("Keep watching")}
           </button>
         </div>
       </div>

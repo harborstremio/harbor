@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, Link2, Loader2, Search, Star, Tv, X } from "lucide-react";
+import { ChevronDown, Link2, Loader2, Star, Tv, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useFavorites } from "@/lib/iptv/favorites";
 import { computeTvgIdCounts, epgProgramsForChannel } from "@/lib/iptv/epg-resolver";
 import { findCurrent } from "@/lib/iptv/xmltv";
 import type { EpgIndex, IptvChannel, IptvPlaylist, IptvPlaylistSource } from "@/lib/iptv/types";
 import type { SlotChannel } from "@/lib/multiview/store";
+import { useT } from "@/lib/i18n";
 import { ChannelCard } from "@/views/live/channel-card";
 
 const ALL = "__ALL__";
@@ -31,6 +33,7 @@ export function ChannelPicker({
   onPick: (ch: SlotChannel) => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const favorites = useFavorites();
   const [q, setQ] = useState("");
   const [groupKey, setGroupKey] = useState<string>(ALL);
@@ -91,7 +94,7 @@ export function ChannelPicker({
       <style>{MVPICKER_KEYFRAMES}</style>
       <header className="flex shrink-0 items-center gap-3 border-b border-edge-soft/60 px-7 py-4">
         <span className="font-display text-[18px] font-medium tracking-tight text-ink">
-          Add to tile {slot + 1}
+          {t("Add to tile {n}", { n: slot + 1 })}
         </span>
         {sources.length > 1 && (
           <PlaylistDropdown
@@ -109,8 +112,10 @@ export function ChannelPicker({
             onChange={(e) => setQ(e.target.value)}
             placeholder={
               showLoading
-                ? "Loading channels…"
-                : `Search ${scopedChannels.length.toLocaleString()} channels`
+                ? t("Loading channels…")
+                : scopedChannels.length === 1
+                  ? t("Search {n} channel", { n: scopedChannels.length })
+                  : t("Search {n} channels", { n: scopedChannels.length })
             }
             className="flex-1 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-subtle/60"
           />
@@ -118,7 +123,7 @@ export function ChannelPicker({
         </div>
         <button
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t("Close")}
           className="flex h-10 w-10 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
         >
           <X size={18} />
@@ -133,14 +138,14 @@ export function ChannelPicker({
             <>
               <RailItem
                 k={FAVS}
-                label="★ Favorites"
+                label={`★ ${t("Favorites")}`}
                 count={favorites.count}
                 active={groupKey === FAVS}
                 onClick={() => setGroupKey(FAVS)}
               />
               <RailItem
                 k={ALL}
-                label="All channels"
+                label={t("All channels")}
                 count={scopedChannels.length}
                 active={groupKey === ALL}
                 onClick={() => setGroupKey(ALL)}
@@ -167,12 +172,16 @@ export function ChannelPicker({
               {groupKey === FAVS ? (
                 <>
                   <Star size={26} className="text-ink-subtle" />
-                  <p className="text-[13.5px]">No favorites yet. Star channels to pin them here.</p>
+                  <p className="text-[13.5px]">
+                    {t("No favorites yet. Star channels to pin them here.")}
+                  </p>
                 </>
               ) : (
                 <>
                   <Tv size={26} className="text-ink-subtle" />
-                  <p className="text-[13.5px]">No channels match. Try another group or paste a URL.</p>
+                  <p className="text-[13.5px]">
+                    {t("No channels match. Try another group or paste a URL.")}
+                  </p>
                 </>
               )}
             </div>
@@ -195,7 +204,10 @@ export function ChannelPicker({
               </div>
               {filtered.length > RENDER_CAP && (
                 <p className="mt-6 text-center text-[12.5px] text-ink-subtle">
-                  Showing {RENDER_CAP} of {filtered.length}. Refine the search to see more.
+                  {t("Showing {shown} of {total}. Refine the search to see more.", {
+                    shown: RENDER_CAP,
+                    total: filtered.length,
+                  })}
                 </p>
               )}
             </>
@@ -209,7 +221,7 @@ export function ChannelPicker({
           value={manual}
           onChange={(e) => setManual(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submitManual()}
-          placeholder="Or paste a stream URL"
+          placeholder={t("Or paste a stream URL")}
           spellCheck={false}
           className="h-9 flex-1 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-ink-subtle/60"
         />
@@ -218,7 +230,7 @@ export function ChannelPicker({
           disabled={!/^https?:\/\//i.test(manual.trim())}
           className="rounded-full bg-ink px-4 py-1.5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Add
+          {t("Add")}
         </button>
       </footer>
     </div>
@@ -269,6 +281,7 @@ function PlaylistDropdown({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -281,10 +294,11 @@ function PlaylistDropdown({
     return () => document.removeEventListener("mousedown", onDown);
   }, [open]);
 
+  const total = sumChannels(playlists);
   const activeLabel =
     value === ALL_PLAYLISTS
-      ? "All playlists"
-      : sources.find((s) => s.id === value)?.name ?? "Playlist";
+      ? t("All playlists")
+      : (sources.find((s) => s.id === value)?.name ?? t("Playlist"));
 
   return (
     <div ref={wrapRef} className="relative">
@@ -303,8 +317,8 @@ function PlaylistDropdown({
       {open && (
         <div className="absolute start-0 top-[calc(100%+6px)] z-[310] w-[240px] overflow-hidden rounded-xl border border-edge-soft bg-elevated shadow-[0_18px_50px_-15px_rgba(0,0,0,0.6)]">
           <PlaylistOption
-            label="All playlists"
-            sub={`${sumChannels(playlists)} channels`}
+            label={t("All playlists")}
+            sub={total === 1 ? t("{n} channel", { n: total }) : t("{n} channels", { n: total })}
             active={value === ALL_PLAYLISTS}
             onClick={() => {
               onChange(ALL_PLAYLISTS);
@@ -318,7 +332,13 @@ function PlaylistDropdown({
               <PlaylistOption
                 key={s.id}
                 label={s.name}
-                sub={pl ? `${pl.channels.length.toLocaleString()} channels` : "Loading…"}
+                sub={
+                  pl
+                    ? pl.channels.length === 1
+                      ? t("{n} channel", { n: pl.channels.length })
+                      : t("{n} channels", { n: pl.channels.length })
+                    : t("Loading…")
+                }
                 active={value === s.id}
                 onClick={() => {
                   onChange(s.id);
@@ -358,10 +378,10 @@ function PlaylistOption({
   );
 }
 
-function sumChannels(playlists: Map<string, IptvPlaylist>): string {
+function sumChannels(playlists: Map<string, IptvPlaylist>): number {
   let total = 0;
   for (const p of playlists.values()) total += p.channels.length;
-  return total.toLocaleString();
+  return total;
 }
 
 function RailSkeleton() {

@@ -1,4 +1,5 @@
-import { Play, RotateCcw, Trash2 } from "lucide-react";
+import { RotateCcw, Trash2 } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { type Meta } from "@/lib/cinemeta";
 import { useContextMenu } from "@/lib/context-menu";
@@ -6,7 +7,7 @@ import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { fetchSeasonEpisodes } from "@/lib/series-episodes";
-import { type HistoryEntry } from "./history-tab";
+import { type HistoryEntry } from "./history-merge";
 
 export function HistoryEpisodeCard({
   entry,

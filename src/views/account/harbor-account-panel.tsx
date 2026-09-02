@@ -5,14 +5,15 @@ import { useT } from "@/lib/i18n";
 import { Section } from "@/views/settings/shared";
 import { RecoveryReveal } from "@/views/settings/theme-panel/custom-themes-section/author-account-panel/recovery-reveal";
 import { AccountAuthForm } from "./account-auth-form";
-import { AccountSignedInBar } from "./account-signed-in-bar";
+import { AccountIdentityCard } from "./account-identity-card";
 import { DiscordLinkCard } from "./discord-link-card";
-import { HandleClaimCard } from "./handle-claim-card";
+import { SignedOutHero } from "./signed-out-hero";
 
 export function HarborAccountPanel() {
   const t = useT();
   const [author, setAuthor] = useState(currentAuthor);
   const [reveal, setReveal] = useState<string | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
 
   useEffect(() => subscribeAuthor(() => setAuthor(currentAuthor())), []);
 
@@ -20,25 +21,27 @@ export function HarborAccountPanel() {
     if (author) void fetchMe();
   }, [author?.id]);
 
+  useEffect(() => {
+    if (author) setAuthOpen(false);
+  }, [author]);
+
+  if (!author) {
+    return (
+      <>
+        <SignedOutHero onSignIn={() => setAuthOpen(true)} />
+        {authOpen && <AccountAuthForm onRecovery={setReveal} onClose={() => setAuthOpen(false)} />}
+        {reveal && <RecoveryReveal code={reveal} onDone={() => setReveal(null)} />}
+      </>
+    );
+  }
+
   return (
     <Section title={t("Harbor account")} subtitle={t("Your handle across Harbor.")}>
-      {!author ? (
-        <div className="rounded-2xl border border-edge-soft bg-canvas/40 p-5">
-          <AccountAuthForm onRecovery={setReveal} />
-        </div>
-      ) : (
-        <div className="divide-y divide-edge-soft/60 overflow-hidden rounded-2xl border border-edge-soft bg-canvas/40">
-          <div className="p-5">
-            <AccountSignedInBar author={author} />
-          </div>
-          <div className="p-5">
-            <HandleClaimCard author={author} />
-          </div>
-          <div className="p-5">
-            <DiscordLinkCard author={author} onRecovery={setReveal} />
-          </div>
-        </div>
-      )}
+      <AccountIdentityCard author={author} />
+      <div className="rounded-md bg-elevated px-5 py-5">
+        <DiscordLinkCard author={author} onRecovery={setReveal} />
+      </div>
+      {authOpen && <AccountAuthForm onRecovery={setReveal} onClose={() => setAuthOpen(false)} />}
       {reveal && <RecoveryReveal code={reveal} onDone={() => setReveal(null)} />}
     </Section>
   );

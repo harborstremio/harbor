@@ -1,0 +1,10 @@
+{
+  "overrides": [
+    {
+      "files": ["src/lib/i18n/locales/**/*.ts"],
+      "options": {
+        "quoteProps": "consistent"
+      }
+    }
+  ]
+}

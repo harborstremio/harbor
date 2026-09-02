@@ -19,7 +19,10 @@ pub fn router(session: Arc<Session>) -> Router {
         .route("/health", get(health))
         .route("/settings", get(h_settings))
         .route("/{hash}/create", post(h_create))
-        .route("/{hash}/{file_id}", get(h_remote_stream).head(h_remote_stream))
+        .route(
+            "/{hash}/{file_id}",
+            get(h_remote_stream).head(h_remote_stream),
+        )
         .with_state(session)
 }
 
@@ -65,7 +68,12 @@ fn trackers_from_sources(sources: Option<Vec<String>>) -> Vec<String> {
                 Some(rest.to_string())
             } else if s.starts_with("dht:") {
                 None
-            } else if s.starts_with("udp://") || s.starts_with("http://") || s.starts_with("https://") || s.starts_with("ws://") || s.starts_with("wss://") {
+            } else if s.starts_with("udp://")
+                || s.starts_with("http://")
+                || s.starts_with("https://")
+                || s.starts_with("ws://")
+                || s.starts_with("wss://")
+            {
                 Some(s)
             } else {
                 None
@@ -110,15 +118,17 @@ async fn h_create(
     let trackers = trackers_from_sources(body.peer_search.and_then(|p| p.sources));
     match super::ensure_added(&hash, trackers, None).await {
         Ok((_info_hash, files)) => {
-            let guessed = files
-                .iter()
-                .max_by_key(|f| f.length)
-                .map(|f| f.idx);
+            let guessed = files.iter().max_by_key(|f| f.length).map(|f| f.idx);
             let out = serde_json::json!({
                 "guessedFileIdx": guessed,
                 "files": files,
             });
-            (StatusCode::OK, [(header::CONTENT_TYPE, "application/json")], out.to_string()).into_response()
+            (
+                StatusCode::OK,
+                [(header::CONTENT_TYPE, "application/json")],
+                out.to_string(),
+            )
+                .into_response()
         }
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
     }
@@ -169,7 +179,11 @@ async fn stream_file(
         }
     }
     let ct = handle
-        .with_metadata(|m| m.file_infos.get(file_id).map(|fi| ct_for(&fi.relative_filename)))
+        .with_metadata(|m| {
+            m.file_infos
+                .get(file_id)
+                .map(|fi| ct_for(&fi.relative_filename))
+        })
         .ok()
         .flatten()
         .unwrap_or("application/octet-stream");
@@ -185,8 +199,8 @@ async fn stream_file(
     let (status, start, end) = match parsed {
         Some(Ok((start, end))) => (StatusCode::PARTIAL_CONTENT, start, end),
         Some(Err(())) => {
-            let mut response = (StatusCode::RANGE_NOT_SATISFIABLE, "range not satisfiable")
-                .into_response();
+            let mut response =
+                (StatusCode::RANGE_NOT_SATISFIABLE, "range not satisfiable").into_response();
             if let Ok(value) = HeaderValue::from_str(&format!("bytes */{len}")) {
                 response.headers_mut().insert(header::CONTENT_RANGE, value);
             }

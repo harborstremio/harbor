@@ -46,7 +46,7 @@ export function SharedListMissing({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex min-h-11 items-center rounded-[10px] bg-surface px-4 text-[14px] font-medium text-ink ring-1 ring-edge transition-colors hover:bg-raised"
+          className="inline-flex min-h-11 items-center rounded-md bg-surface px-4 text-[14px] font-medium text-ink ring-1 ring-edge transition-colors hover:bg-raised"
         >
           Go back
         </button>
@@ -54,7 +54,7 @@ export function SharedListMissing({
           <button
             type="button"
             onClick={onRetry}
-            className="inline-flex min-h-11 items-center rounded-[10px] bg-ink px-4 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
+            className="inline-flex min-h-11 items-center rounded-md bg-ink px-4 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
           >
             Try again
           </button>

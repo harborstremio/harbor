@@ -13,7 +13,7 @@ export function AccountValueProps() {
     <ul className="flex flex-col gap-2.5">
       {PROPS.map(({ icon: Icon, title, body }) => (
         <li key={title} className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-elevated text-ink-muted ring-1 ring-edge-soft">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-canvas text-ink-muted">
             <Icon size={15} strokeWidth={2} />
           </span>
           <div className="flex min-w-0 flex-col">

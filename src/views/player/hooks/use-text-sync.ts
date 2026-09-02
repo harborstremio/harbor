@@ -7,6 +7,7 @@ import { getCuesAnySource } from "@/lib/subtitles/extract";
 import { toSrt, toVtt } from "@/lib/subtitles/serialize";
 import type { SubChoiceInput } from "@/lib/subtitles/subtitle-memory";
 import { applyLinear, deltaFn, type SyncPoint, type SyncSegment } from "@/lib/subtitles/text-sync";
+import { writePlayerPrefs } from "@/lib/player-prefs";
 
 const round3 = (v: number) => Math.round(v * 1000) / 1000;
 
@@ -219,6 +220,7 @@ export function useTextSync(
         format: cur.sourceFormat,
         release,
         provider: "Harbor Live Sync",
+        providerDerived: false,
         fps: source?.fps,
         downloads: source?.downloads,
         author: source?.author,
@@ -240,11 +242,13 @@ export function useTextSync(
         title,
         subId: syncedSubId,
         provider: "Harbor Live Sync",
+        providerDerived: false,
         release,
         format: cur.sourceFormat,
         matchScore: 10_000,
         matchConfidence: "exact",
       });
+      writePlayerPrefs(metaIdRef.current, { subDelaySec: 0 });
       exit();
       return { ok: true };
     } catch (e) {

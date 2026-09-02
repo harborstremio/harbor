@@ -30,10 +30,10 @@ export function SyncIndicatorSetting() {
           <span className="text-[13px] font-medium text-ink">{t("Position")}</span>
           <Segmented
             value={settings.syncIndicatorPosition}
-            options={POSITIONS}
+            options={POSITIONS.map((o) => ({ ...o, label: t(o.label) }))}
             onChange={(v) => update({ syncIndicatorPosition: v })}
           />
-          <span className="text-[12px] leading-relaxed text-ink-subtle">
+          <span className="text-[12.5px] leading-relaxed text-ink-subtle">
             {t("Corners keep it clear of subtitles along the bottom.")}
           </span>
         </div>

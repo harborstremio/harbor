@@ -32,12 +32,10 @@ export function PipStepBtn({
   label,
   onClick,
   icon,
-  stepText,
 }: {
   label: string;
   onClick: () => void;
   icon: React.ReactNode;
-  stepText: string;
 }) {
   return (
     <Tooltip label={label}>
@@ -45,12 +43,9 @@ export function PipStepBtn({
         type="button"
         onClick={onClick}
         aria-label={label}
-        className="inline-flex h-11 w-10 flex-col items-center justify-center gap-0 rounded-lg text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+        className="inline-flex h-11 w-10 items-center justify-center rounded-lg text-white/85 transition-colors hover:bg-white/10 hover:text-white"
       >
         {icon}
-        <span className="text-[8.5px] font-semibold uppercase leading-none tracking-[0.06em] text-white/70">
-          {stepText}
-        </span>
       </button>
     </Tooltip>
   );

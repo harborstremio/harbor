@@ -26,13 +26,13 @@ const appSource = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8
 
 test("viewer uses Harbor identity and the fixed remote-content boundary", () => {
   assert.match(source, /<HarborLoader/);
-  assert.match(source, /caption={`Loading \${link\.hostname}`}/);
+  assert.match(source, /caption=\{t\("Loading \{hostname\}"/);
   assert.match(source, /sandbox={EXTERNAL_LINK_FRAME_SANDBOX}/);
   assert.match(source, /allow={EXTERNAL_LINK_FRAME_PERMISSIONS}/);
   assert.match(source, /referrerPolicy="no-referrer"/);
   assert.match(source, /tabIndex={-1}/);
-  assert.match(source, />Reload</);
-  assert.match(source, />Open in browser</);
+  assert.match(source, /\{t\("Retry"\)\}/);
+  assert.match(source, /\{t\("Open in browser"\)\}/);
   assert.doesNotMatch(source, /@tauri-apps|postMessage|addEventListener\("message"|\binvoke\(/);
   assert.doesNotMatch(source, /createPortal|aria-modal|role="dialog"/);
   assert.equal(EXTERNAL_LINK_FRAME_SANDBOX, "allow-scripts");

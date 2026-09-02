@@ -19,9 +19,11 @@ export function hdrFormatLabel(
 ): string | null {
   const q = formats.filter(Boolean).join(" ").toLowerCase();
   const isDv = DV_TOKEN.test(q);
-  if (hdrGamma === "pq" || hdrGamma === "hlg") return isDv ? "DV" : "HDR";
+  const isHdr10Plus = /hdr10\s*\+|hdr10plus/.test(q);
+  if (hdrGamma === "pq" || hdrGamma === "hlg") return isDv ? "DV" : isHdr10Plus ? "HDR10+" : "HDR";
   if (hdrGamma) return null;
   if (isDv) return "DV";
+  if (isHdr10Plus) return "HDR10+";
   if (HDR_TOKEN.test(q)) return "HDR";
   return null;
 }

@@ -14,13 +14,24 @@ import { buildStreamIds } from "@/lib/streams/stream-ids";
 import type { PlayerSrc } from "@/lib/view";
 import type { Settings } from "@/lib/settings";
 import { canStartSubtitleAutoload, subtitleSearchImdbId } from "@/lib/subtitles/autoload";
+import {
+  SubtitleAutoloadRunCoordinator,
+  subtitleAutoloadLateSelectionAllowed,
+  subtitleAutoloadSelectionLeaseValid,
+} from "@/lib/subtitles/autoload-run";
 import { resolveAnimeSearchCoords } from "@/lib/subtitles/anime-numbering";
-import { pickDesiredSubtitleTrack } from "@/lib/subtitles/track-selection";
+import {
+  isAutoSelectableSubtitleTrack,
+  pickDesiredSubtitleTrack,
+  subtitleAutoSelectionSignature,
+} from "@/lib/subtitles/track-selection";
 import { markAddedSub } from "@/lib/subtitles/added-subs";
 import { markImportedSub } from "@/lib/player/imported-subs";
+import { bindSubtitleDownloadAuth } from "@/lib/subtitles/provider-auth";
 import {
   readRememberedSub,
   rememberedSubAppliesToStream,
+  rememberedSubtitleLoadMetadata,
   subtitleMediaKey,
 } from "@/lib/subtitles/subtitle-memory";
 
@@ -35,6 +46,22 @@ export function useTrackAutoload(params: {
   const { bridgeRef, src, snap, engine, settings, authKey } = params;
   const snapRef = useRef(snap);
   snapRef.current = snap;
+  const selectedSubtitleId = snap.subtitleTracks.find((track) => track.selected)?.id ?? null;
+  const subtitleSelectionStateRef = useRef({
+    mediaUrl: src.url,
+    selectedId: selectedSubtitleId,
+    revision: 0,
+  });
+  if (subtitleSelectionStateRef.current.mediaUrl !== src.url) {
+    subtitleSelectionStateRef.current = {
+      mediaUrl: src.url,
+      selectedId: selectedSubtitleId,
+      revision: 0,
+    };
+  } else if (subtitleSelectionStateRef.current.selectedId !== selectedSubtitleId) {
+    subtitleSelectionStateRef.current.selectedId = selectedSubtitleId;
+    subtitleSelectionStateRef.current.revision += 1;
+  }
 
   const [resolvedImdbId, setResolvedImdbId] = useState<string | null>(null);
   const [resolvedImdbVerified, setResolvedImdbVerified] = useState(false);
@@ -98,6 +125,10 @@ export function useTrackAutoload(params: {
   const refetchRef = useRef<(() => Promise<number>) | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [initialSearches, setInitialSearches] = useState(0);
+  const [initialPreflight, setInitialPreflight] = useState({
+    mediaUrl: src.url,
+    settled: false,
+  });
   const [refreshReady, setRefreshReady] = useState(false);
   const [lastAdded, setLastAdded] = useState<number | null>(null);
   const lastAddedTimer = useRef<number | null>(null);
@@ -113,6 +144,7 @@ export function useTrackAutoload(params: {
     setLastAdded(null);
     setRefreshing(false);
     setInitialSearches(0);
+    setInitialPreflight({ mediaUrl: src.url, settled: false });
     clearLastAddedTimer();
   }, [src.url]);
 
@@ -166,30 +198,36 @@ export function useTrackAutoload(params: {
 
   const autoSubLoadKeyRef = useRef<string | null>(null);
   const autoSubStagesRef = useRef(new Set<string>());
+  const autoSubRunRef = useRef(new SubtitleAutoloadRunCoordinator());
+  const autoSubIdRef = useRef<string | null>(null);
+  const autoSubSourceRef = useRef<string | null>(null);
+  const autoAudioIdRef = useRef<string | null>(null);
   useEffect(() => {
+    autoSubRunRef.current.invalidate();
     autoSubLoadKeyRef.current = null;
+    autoSubSourceRef.current = null;
     autoSubStagesRef.current.clear();
   }, [src.url]);
   useEffect(() => {
     if (!resolutionSettled) return;
-    const mediaReady = snap.audioTracks.length > 0 || snap.durationSec > 0;
+    // The identity preflight needs a real duration. Audio tracks often appear first,
+    // while duration is still zero; starting then permanently records an unmeasurable run.
+    const mediaReady = snap.durationSec > 0;
     const enabled = settings.subProvidersEnabled ?? {};
     const readyAddons = enabled.addons === false ? [] : userAddons;
+    if (readyAddons == null) return;
     const searchImdbId = subtitleSearchImdbId(resolvedImdbId, resolvedImdbVerified);
     const contentId = searchImdbId ?? src.meta.id;
-    if (!canStartSubtitleAutoload({ imdbId: contentId, mediaReady })) return;
+    if (!canStartSubtitleAutoload({ imdbId: contentId, mediaReady })) {
+      if (mediaReady) setInitialPreflight({ mediaUrl: src.url, settled: true });
+      return;
+    }
     const key = `${contentId}|${src.episode?.season ?? ""}|${src.episode?.episode ?? ""}|${src.url}`;
-    const coreStageKey = `${key}|core`;
-    const coreStarted = autoSubStagesRef.current.has(coreStageKey);
-    const stage = readyAddons == null ? "core" : coreStarted ? "addons" : "all";
-    const addonSignature =
-      readyAddons == null
-        ? ""
-        : readyAddons
-            .map((addon) => addon.transportUrl)
-            .sort()
-            .join("|");
-    const stageKey = stage === "addons" ? `${key}|addons|${addonSignature}` : `${key}|${stage}`;
+    const addonSignature = readyAddons
+      .map((addon) => addon.transportUrl)
+      .sort()
+      .join("|");
+    const stageKey = `${key}|all|${addonSignature}`;
     if (autoSubStagesRef.current.has(stageKey)) return;
     const subIsAnime =
       !!src.meta.id?.startsWith("kitsu:") ||
@@ -206,6 +244,10 @@ export function useTrackAutoload(params: {
     );
     autoSubLoadKeyRef.current = key;
     autoSubStagesRef.current.add(stageKey);
+    const runLease = autoSubRunRef.current.begin(key);
+    const isActive = () =>
+      autoSubLoadKeyRef.current === key && autoSubRunRef.current.isCurrent(runLease, key);
+    setInitialPreflight({ mediaUrl: src.url, settled: false });
     void (async () => {
       const coords = await resolveAnimeSearchCoords({
         isAnime: subIsAnime,
@@ -214,6 +256,7 @@ export function useTrackAutoload(params: {
         imdbVerified: resolvedImdbVerified,
         episode: src.episode,
       });
+      if (!isActive()) return;
       const animeIds = candidateIds.some((i) => i.startsWith("kitsu:") || i.startsWith("mal:"));
       const imdbEpAligned =
         !animeIds ||
@@ -236,7 +279,7 @@ export function useTrackAutoload(params: {
         searchSeason,
         searchEpisode,
       });
-      console.info(`[subs/autoload] starting ${stage} stage`, {
+      console.info("[subs/autoload] starting unified stage", {
         imdbId: searchImdbId,
         candidateIds,
         numbering: coords?.mode ?? "default",
@@ -246,28 +289,74 @@ export function useTrackAutoload(params: {
       });
       const movieHashStageKey = `${key}|moviehash`;
       const shouldResolveMovieHash =
-        settings.subtitleAutoSync && !autoSubStagesRef.current.has(movieHashStageKey);
+        canResolveVideoHash(src) && !autoSubStagesRef.current.has(movieHashStageKey);
       if (shouldResolveMovieHash) autoSubStagesRef.current.add(movieHashStageKey);
       const movieHashPromise = shouldResolveMovieHash ? resolveVideoHash(src) : null;
       const b = bridgeRef.current;
-      if (!b || autoSubLoadKeyRef.current !== key) {
+      if (!b || !isActive()) {
         console.warn("[subs/autoload] no bridge ready, skipping");
         return;
       }
       const base = {
         src,
         settings,
-        addons: readyAddons ?? [],
+        addons: readyAddons,
         langs,
         searchImdbId,
         candidateIds,
         season: searchSeason,
         episode: searchEpisode,
+        durationSec: snapRef.current.durationSec,
       };
+      const selectionLease = {
+        revision: subtitleSelectionStateRef.current.revision,
+        selectedId: subtitleSelectionStateRef.current.selectedId,
+      };
+      const shouldAutoSelectForStage = (lateHash: boolean) => {
+        const state = subtitleSelectionStateRef.current;
+        const currentTrack = snapRef.current.subtitleTracks.find((track) => track.selected) ?? null;
+        const currentSelected = currentTrack?.id ?? null;
+        const autoSource = autoSubSourceRef.current;
+        const currentSelectionIsAutomatic =
+          currentSelected != null &&
+          (currentSelected === autoSubIdRef.current ||
+            (autoSource != null &&
+              (currentTrack?.originalUrl === autoSource || currentTrack?.url === autoSource)));
+        const selectionLeaseValid = subtitleAutoloadSelectionLeaseValid({
+          leaseRevision: selectionLease.revision,
+          leaseSelectedId: selectionLease.selectedId,
+          currentRevision: state.revision,
+          currentSelectedId: currentSelected,
+          currentSelectionIsAutomatic,
+        });
+        const stageAllowsSelection =
+          !lateHash ||
+          subtitleAutoloadLateSelectionAllowed({
+            currentSelectedId: currentSelected,
+            currentSelectionIsAutomatic,
+            autoUpgradeEnabled: settings.subtitleAutoUpgrade,
+          });
+        return (
+          isActive() &&
+          !src.subtitlePreselect &&
+          !subsOffFor(readPlayerPrefs(src.meta.id), settings) &&
+          !rememberedSubAppliesToStream(
+            readRememberedSub(
+              subtitleMediaKey(src.meta.id, src.episode?.season, src.episode?.episode),
+            ),
+            src.streamRef,
+          ) &&
+          stageAllowsSelection &&
+          selectionLeaseValid
+        );
+      };
+      const shouldAutoSelect = () => shouldAutoSelectForStage(false);
+      const shouldAutoSelectLateHash = () => shouldAutoSelectForStage(true);
       refetchRef.current = async () => {
         const bridge = bridgeRef.current;
-        if (!bridge || autoSubLoadKeyRef.current !== key) return 0;
-        const movieHash = settings.subtitleAutoSync ? await resolveVideoHash(src) : {};
+        if (!bridge || !isActive()) return 0;
+        const movieHash = await resolveVideoHash(src);
+        if (!isActive()) return 0;
         const skipUrls = new Set(
           (snapRef.current.subtitleTracks ?? []).map((t) => t.url ?? "").filter(Boolean),
         );
@@ -277,7 +366,7 @@ export function useTrackAutoload(params: {
           bridge,
           deep: true,
           skipUrls,
-          isActive: () => autoSubLoadKeyRef.current === key,
+          isActive,
         });
         console.info(`[subs/refresh] found ${r.found}, added ${r.added} new tracks`);
         return r.added;
@@ -288,20 +377,15 @@ export function useTrackAutoload(params: {
         const res = await fetchSubtitlesIntoPlayer({
           ...base,
           bridge: b,
-          providers:
-            stage === "core"
-              ? { addons: false }
-              : stage === "addons"
-                ? { opensubtitles: false, wyzie: false, addons: true, extras: false }
-                : undefined,
-          isActive: () => autoSubLoadKeyRef.current === key,
+          shouldAutoSelect,
+          isActive,
         });
-        console.info(
-          `[subs/autoload] ${stage} stage found ${res.found}, added ${res.added} tracks`,
-        );
+        if (isActive() && res.selected) autoSubSourceRef.current = res.selected.url;
+        console.info(`[subs/autoload] unified stage found ${res.found}, added ${res.added} tracks`);
       } finally {
         if (autoSubLoadKeyRef.current === key) {
           setInitialSearches((count) => Math.max(0, count - 1));
+          setInitialPreflight({ mediaUrl: src.url, settled: true });
         }
       }
 
@@ -311,7 +395,7 @@ export function useTrackAutoload(params: {
       if (movieHashPromise) {
         void movieHashPromise
           .then(async ({ videoHash, videoSize }) => {
-            if (!videoHash || autoSubLoadKeyRef.current !== key) return;
+            if (!videoHash || !isActive()) return;
             console.info("[subs/autoload] moviehash ready", { videoSize });
             const bridge = bridgeRef.current;
             if (!bridge) return;
@@ -333,9 +417,13 @@ export function useTrackAutoload(params: {
                   addons: false,
                   extras: true,
                 },
+                shouldAutoSelect: shouldAutoSelectLateHash,
                 skipUrls,
-                isActive: () => autoSubLoadKeyRef.current === key,
+                isActive,
               });
+              if (isActive() && result.selected) {
+                autoSubSourceRef.current = result.selected.url;
+              }
               console.info(
                 `[subs/autoload] moviehash stage found ${result.found}, added ${result.added} tracks`,
               );
@@ -345,9 +433,18 @@ export function useTrackAutoload(params: {
               }
             }
           })
-          .catch((error) => console.warn("[subs/autoload] moviehash enrichment failed", error));
+          .catch((error) =>
+            console.warn("[subs/autoload] moviehash enrichment failed", {
+              error: error instanceof Error ? error.name : "unknown",
+            }),
+          );
       }
-    })();
+    })().catch((error) => {
+      console.warn("[subs/autoload] unified stage failed", {
+        error: error instanceof Error ? error.name : "unknown",
+      });
+      if (isActive()) setInitialPreflight({ mediaUrl: src.url, settled: true });
+    });
   }, [
     resolvedImdbId,
     resolvedImdbVerified,
@@ -362,8 +459,6 @@ export function useTrackAutoload(params: {
 
   const autoTrackKeyRef = useRef<string | null>(null);
   const prefsAppliedRef = useRef<string | null>(null);
-  const autoSubIdRef = useRef<string | null>(null);
-  const autoAudioIdRef = useRef<string | null>(null);
   useEffect(() => {
     autoSubIdRef.current = null;
     autoAudioIdRef.current = null;
@@ -383,9 +478,11 @@ export function useTrackAutoload(params: {
     }
     if (choice.url) {
       const url = choice.url;
-      void bridgeRef.current?.addSubtitle(url, choice.lang, choice.title, true)?.then((ok) => {
-        if (ok) markAddedSub(url);
-      });
+      void bridgeRef.current
+        ?.addSubtitle(url, choice.lang, choice.title, true, choice.metadata)
+        ?.then((ok) => {
+          if (ok) markAddedSub(url);
+        });
     }
   }, [
     src.url,
@@ -568,23 +665,29 @@ export function useTrackAutoload(params: {
         release: remembered.release,
         imported: remembered.imported === true,
       });
-      void bridge
-        .addSubtitle(source, remembered.lang, remembered.title, true, {
-          format: remembered.format,
-          encoding: remembered.encoding,
-          release: remembered.release,
-          provider: remembered.provider,
-          matchScore: remembered.matchScore,
-          matchConfidence: remembered.matchConfidence,
-        })
-        .then((ok) => {
-          if (subRestoreAddRef.current?.key !== restoreKey) return;
-          subRestoreAddRef.current = { key: restoreKey, pending: false };
-          if (!ok) return;
-          if (remembered.imported && remembered.title) markImportedSub(remembered.title);
-          else markAddedSub(source);
-          setSubRestoreTick((tick) => tick + 1);
+      void (async () => {
+        const rememberedApiKey =
+          remembered.downloadAuthKind === "subsource-api-key"
+            ? settings.subsourceApiKey
+            : remembered.downloadAuthKind === "subdl-api-key"
+              ? settings.subdlApiKey
+              : null;
+        const downloadAuth = await bindSubtitleDownloadAuth(
+          remembered.downloadAuthKind,
+          rememberedApiKey,
+        );
+        if (subRestoreAddRef.current?.key !== restoreKey) return false;
+        return bridge.addSubtitle(source, remembered.lang, remembered.title, true, {
+          ...rememberedSubtitleLoadMetadata(remembered, downloadAuth),
         });
+      })().then((ok) => {
+        if (subRestoreAddRef.current?.key !== restoreKey) return;
+        subRestoreAddRef.current = { key: restoreKey, pending: false };
+        if (!ok) return;
+        if (remembered.imported && remembered.title) markImportedSub(remembered.title);
+        else markAddedSub(source);
+        setSubRestoreTick((tick) => tick + 1);
+      });
       return;
     }
 
@@ -610,13 +713,15 @@ export function useTrackAutoload(params: {
     snap.durationSec,
     bridgeRef,
     subRestoreTick,
+    settings.subsourceApiKey,
+    settings.subdlApiKey,
   ]);
   useEffect(() => {
     if (engine !== "mpv") return;
     bridgeRef.current?.setAudioDevice?.(settings.audioDevice);
   }, [engine, settings.audioDevice, bridgeRef]);
   useEffect(() => {
-    const subIdSig = snap.subtitleTracks.map((t) => t.id).join(",");
+    const subIdSig = subtitleAutoSelectionSignature(snap.subtitleTracks);
     const audioIdSig = snap.audioTracks.map((t) => t.id).join(",");
     const key = `${src.url}|${audioIdSig}|${subIdSig}`;
     if (autoTrackKeyRef.current === key) return;
@@ -695,7 +800,7 @@ export function useTrackAutoload(params: {
           langScore(effAudio.lang ?? "", subLangs) >= 0;
         const want = nativeAudio
           ? (snap.subtitleTracks
-              .filter(isForcedTrack)
+              .filter((track) => isForcedTrack(track) && isAutoSelectableSubtitleTrack(track))
               .sort(
                 (a, b) => langScore(b.lang ?? "", subLangs) - langScore(a.lang ?? "", subLangs),
               )[0] ?? null)
@@ -736,6 +841,7 @@ export function useTrackAutoload(params: {
     resolvedImdbVerified,
     resolutionSettled,
     subtitleSearchActive: refreshing || initialSearches > 0,
+    subtitlePreflightSettled: initialPreflight.mediaUrl === src.url && initialPreflight.settled,
   };
 }
 
@@ -777,6 +883,10 @@ function isLoopback(url: string): boolean {
   return /^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])[:/]/i.test(url);
 }
 
+function canResolveVideoHash(src: PlayerSrc): boolean {
+  return !!src.url && !src.url.startsWith("blob:") && !isLoopback(src.url);
+}
+
 function raceTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
   return Promise.race([p, new Promise<null>((resolve) => setTimeout(() => resolve(null), ms))]);
 }
@@ -784,8 +894,7 @@ function raceTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
 async function resolveVideoHash(
   src: PlayerSrc,
 ): Promise<{ videoHash?: string; videoSize?: number }> {
-  if (isLoopback(src.url)) return {};
-  if (!src.url || src.url.startsWith("blob:")) return {};
+  if (!canResolveVideoHash(src)) return {};
   try {
     const mh = await raceTimeout(
       invoke<{ hash: string; size: number }>("compute_moviehash", {

@@ -1,4 +1,5 @@
-import { Play, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { ElegantHoverActions } from "./elegant-hover";

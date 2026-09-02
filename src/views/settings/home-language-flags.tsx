@@ -38,7 +38,7 @@ function Flag({ code }: { code: string }) {
   const src = FLAG_SRC[code];
   if (!src) return null;
   return (
-    <span className="inline-block h-3 w-[18px] shrink-0 overflow-hidden rounded-[2px] shadow-[0_1px_1.5px_rgba(0,0,0,0.35)] ring-1 ring-black/25">
+    <span className="inline-block h-3 w-[18px] shrink-0 overflow-hidden rounded-[2px] ring-1 ring-black/25">
       <img src={src} alt="" draggable={false} className="h-full w-full object-cover" />
     </span>
   );
@@ -49,7 +49,7 @@ export function LangFlags({ codes }: { codes: string[] }) {
     <span className="flex items-center gap-1">
       {codes.map((c, i) => (
         <span key={c} className="flex items-center gap-1">
-          {i > 0 && <span className="text-[11px] font-light leading-none text-ink-subtle/60">/</span>}
+          {i > 0 && <span className="text-[11.5px] font-light leading-none text-ink-subtle/60">/</span>}
           <Flag code={c} />
         </span>
       ))}

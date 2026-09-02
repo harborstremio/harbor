@@ -4,7 +4,7 @@ import type { Addon } from "@/lib/addons";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
 import { languageName } from "@/lib/subtitles/language";
 import { subtitleStreamDescriptor } from "@/lib/subtitles/provider-label";
-import { searchSubtitles } from "@/lib/subtitles/search";
+import { rankSubtitleCandidates, searchSubtitles } from "@/lib/subtitles/search";
 import { resolveAnimeSearchCoords } from "@/lib/subtitles/anime-numbering";
 import type { SubResult } from "@/lib/subtitles/types";
 import { useSettings } from "@/lib/settings";
@@ -106,6 +106,16 @@ export function useSubtitleChoices(src: PlayerSrc) {
               source: src.streamRef?.source ?? null,
               resolution: src.streamRef?.resolution ?? null,
             },
+            extra: {
+              userAgent: "Harbor",
+              netAllowed: true,
+              subdlApiKey: settings.subdlApiKey || null,
+              subsourceApiKey: settings.subsourceApiKey || null,
+              enabled: {
+                subdl: enabled.subdl === true,
+                subsource: enabled.subsource === true,
+              },
+            },
           },
         );
         if (!cancelled) {
@@ -122,7 +132,14 @@ export function useSubtitleChoices(src: PlayerSrc) {
     return () => {
       cancelled = true;
     };
-  }, [src.url, authKey, preferredLangs, settings.subProvidersEnabled]);
+  }, [
+    src.url,
+    authKey,
+    preferredLangs,
+    settings.subProvidersEnabled,
+    settings.subdlApiKey,
+    settings.subsourceApiKey,
+  ]);
 
   const groups = useMemo<SubtitleLangGroup[]>(() => {
     if (!results) return [];
@@ -140,7 +157,17 @@ export function useSubtitleChoices(src: PlayerSrc) {
     }));
   }, [results]);
 
-  const bestId = results && results.length > 0 ? results[0].id : null;
+  const bestId = useMemo(() => {
+    if (!results?.length) return null;
+    const ranked = rankSubtitleCandidates(results, preferredLangs, {
+      release: src.streamRef?.title ?? src.streamRef?.parsedTitle ?? null,
+      source: src.streamRef?.source ?? null,
+      resolution: src.streamRef?.resolution ?? null,
+      season: src.episode?.imdbSeason ?? src.episode?.season ?? null,
+      episode: src.episode?.imdbEpisode ?? src.episode?.episode ?? null,
+    });
+    return ranked[0]?.id ?? null;
+  }, [results, preferredLangs, src.streamRef, src.episode]);
 
   return { loading, error, results, groups, bestId };
 }

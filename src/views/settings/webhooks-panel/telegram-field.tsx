@@ -62,7 +62,7 @@ export function TelegramComposedField({
   const ready = token.length > 0 && chatId.length > 0;
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-4">
+ <div className="flex flex-col gap-3 rounded-md bg-canvas p-4">
       <div className="flex items-center justify-between gap-3">
         <span className="flex items-center gap-2 text-[13px] font-semibold text-ink">
           <TelegramMark />
@@ -89,12 +89,12 @@ export function TelegramComposedField({
       <button
         onClick={onTest}
         disabled={!ready || status.state === "busy"}
-        className="flex h-10 items-center justify-center gap-1.5 self-start rounded-lg bg-ink px-5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex h-10 items-center justify-center gap-1.5 self-start rounded-md bg-ink px-5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {status.state === "busy" && <Loader2 size={12} strokeWidth={2.4} className="animate-spin" />}
         {t("Send test")}
       </button>
-      <div className="rounded-lg bg-canvas/60 p-3 text-[12px] leading-relaxed text-ink-muted">
+      <div className="rounded-md bg-canvas p-3 text-[12.5px] leading-relaxed text-ink-muted">
         <TelegramTutorial />
       </div>
     </div>
@@ -116,7 +116,7 @@ function SubField({
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+      <span className="text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
         {label}
       </span>
       <input
@@ -126,8 +126,8 @@ function SubField({
         placeholder={placeholder}
         spellCheck={false}
         autoComplete="off"
-        className={`h-10 rounded-lg border border-edge bg-canvas px-3 text-[12.5px] text-ink outline-none transition-colors focus:border-ink-subtle ${
-          monospace ? "font-mono text-[12px]" : ""
+ className={`h-10 rounded-md bg-canvas px-3 text-[12.5px] text-ink outline-none transition-colors focus:border-ink-subtle ${
+          monospace ? "font-mono text-[12.5px]" : ""
         }`}
       />
     </label>

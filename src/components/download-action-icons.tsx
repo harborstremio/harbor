@@ -1,4 +1,5 @@
-import { Pause, Play, X } from "lucide-react";
+import { Pause, X } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 
 export function DownloadPauseResumeIcon({ paused, size }: { paused: boolean; size: number }) {
   return (

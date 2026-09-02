@@ -5,6 +5,7 @@ import { ColorPopoverTrigger } from "@/views/settings/color-picker";
 import { previewFamily } from "@/views/settings/player-panel/internals";
 import { type Settings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { noteOverlayDismiss } from "@/lib/player/overlay-dismiss";
 
 export const SWATCHES = ["#FFFFFF", "#FFE45E", "#9AE6B4", "#93C5FD", "#FCA5A5", "#C4B5FD"];
 
@@ -42,6 +43,7 @@ export function FontMenu({
     };
     place();
     const onDown = (e: MouseEvent) => {
+      noteOverlayDismiss();
       const target = e.target as Node;
       if (btnRef.current?.contains(target) || menuRef.current?.contains(target)) return;
       setOpen(false);
@@ -87,7 +89,7 @@ export function FontMenu({
             />
             <div
               ref={menuRef}
-              className="fixed z-[320] max-h-[min(60vh,380px)] w-[208px] overflow-y-auto rounded-[14px] border border-edge bg-elevated p-1.5 shadow-[0_24px_60px_-14px_rgba(0,0,0,0.8)] backdrop-blur-md [scrollbar-width:thin]"
+              className="fixed z-[320] max-h-[min(60vh,380px)] w-[208px] overflow-y-auto rounded-md bg-elevated p-1.5 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] [scrollbar-width:thin]"
               style={{ top: pos.top, left: pos.left }}
             >
               {items.map((it) => {

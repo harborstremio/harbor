@@ -306,6 +306,12 @@ export const STABLE_SELECTORS: HookSelector[] = [
     where: "Clicking any element with this attribute opens the search overlay.",
   },
   {
+    selector: "[data-harbor-bigpicture]",
+    where:
+      "Clicking any element with this attribute enters Big Picture, the couch-mode interface. Harbor floats its own Big Picture button on custom layouts so older themes are not stranded, and hides it the moment your chrome carries this hook.",
+    tip: "On a kid profile, or when the Big Picture button is turned off in settings, Harbor sets data-empty on your element and ignores the click. Style [data-harbor-bigpicture][data-empty] { display: none } so the control never sits there dead. Builder chrome does this already.",
+  },
+  {
     selector: ".harbor-profile-dropdown",
     where: "The account dropdown panel itself. Restyle it to match your theme.",
   },

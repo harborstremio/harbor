@@ -9,8 +9,8 @@ import {
 import type { Meta } from "@/lib/cinemeta";
 import type { Rejection } from "@/lib/streams/trust";
 import type { Addon } from "@/lib/addons";
-import type { ScoredStream, Stream, Tier } from "@/lib/streams/types";
-import { hasCachedMarker } from "@/lib/streams/cached";
+import type { DebridSlug, ScoredStream, Stream, Tier } from "@/lib/streams/types";
+import { hasCachedMarker, hasUncachedMarker } from "@/lib/streams/cached";
 import type { PlayEpisode } from "@/lib/view";
 
 export async function cinemetaImdbFallback(
@@ -421,11 +421,19 @@ export function hasInstantMarker(s: ScoredStream): boolean {
   return /\binstant\b/.test(haystack) || haystack.includes("⚡");
 }
 
-export { hasUncachedMarker } from "@/lib/streams/cached";
-export { hasCachedMarker };
+export { hasCachedMarker, hasUncachedMarker };
 
 export function anyStreamCached(s: ScoredStream): boolean {
   return Object.values(s.cached).some((v) => v === true) || hasCachedMarker(s);
+}
+
+export function streamIsCached(
+  s: ScoredStream,
+  debrids: ReadonlyArray<{ slug: DebridSlug }>,
+): boolean {
+  if (s.url != null && !s.infoHash && !hasUncachedMarker(s)) return true;
+  if (debrids.some((d) => s.cached[d.slug] === true || s.inLibrary[d.slug] === true)) return true;
+  return hasCachedMarker(s);
 }
 
 const DEBRID_FAIL_CODES = new Set([
@@ -459,84 +467,267 @@ export function needsDownload(s: ScoredStream): boolean {
   return NEEDS_DOWNLOAD_RX.test(haystack);
 }
 
-export const ENGINE_WARMING_MESSAGE =
-  "Harbor's peer-to-peer engine is warming up. This clears on its own in a few seconds, then Play works.";
+export type PickerError =
+  | {
+      kind: "play";
+      code: Exclude<PlayErrorCode, "download-season-partial" | "unknown-playback">;
+    }
+  | {
+      kind: "play";
+      code: "download-season-partial";
+      queued: number;
+      total: number;
+    }
+  | {
+      kind: "play";
+      code: "unknown-playback";
+      detail: string;
+    }
+  | {
+      kind: "pipeline";
+      code: "load-streams-failed";
+      detail?: string;
+    };
 
-export function isEngineWarmingError(msg: string | null): boolean {
-  return msg === ENGINE_WARMING_MESSAGE;
+export type PlayErrorCode =
+  | "not-cached"
+  | "still-downloading"
+  | "timeout"
+  | "stalled"
+  | "error"
+  | "stub-or-error-video"
+  | "all-debrids-failed"
+  | "no-debrid-could-play"
+  | "no-debrid-configured"
+  | "remote-server-unreachable-strict"
+  | "remote-server-unreachable"
+  | "engine-no-peers"
+  | "engine-not-ready"
+  | "direct-torrent-disabled"
+  | "no-source"
+  | "addon-not-configured"
+  | "external-url-only"
+  | "youtube-only"
+  | "nzb-needs-external-player"
+  | "unauthorized"
+  | "not-premium"
+  | "rate-limited"
+  | "traffic-limit"
+  | "upstream-unavailable"
+  | "aborted"
+  | "download-season-package-required"
+  | "download-season-no-files"
+  | "download-season-partial"
+  | "stream-proxy-start-failed"
+  | "debrid-source-not-ready"
+  | "debrid-queue-unsupported"
+  | "unknown-playback";
+
+type Translate = (key: string, vars?: Record<string, string | number>) => string;
+
+const KNOWN_PLAY_ERROR_CODES: Record<string, true> = {
+  "not-cached": true,
+  "still-downloading": true,
+  timeout: true,
+  stalled: true,
+  error: true,
+  "stub-or-error-video": true,
+  "all-debrids-failed": true,
+  "no-debrid-could-play": true,
+  "no-debrid-configured": true,
+  "remote-server-unreachable-strict": true,
+  "remote-server-unreachable": true,
+  "engine-no-peers": true,
+  "engine-not-ready": true,
+  "direct-torrent-disabled": true,
+  "no-source": true,
+  "addon-not-configured": true,
+  "external-url-only": true,
+  "youtube-only": true,
+  "nzb-needs-external-player": true,
+  unauthorized: true,
+  "not-premium": true,
+  "rate-limited": true,
+  "traffic-limit": true,
+  "upstream-unavailable": true,
+  aborted: true,
+};
+
+export function playError(code: string): PickerError {
+  return KNOWN_PLAY_ERROR_CODES[code]
+    ? {
+        kind: "play",
+        code: code as Exclude<PlayErrorCode, "download-season-partial" | "unknown-playback">,
+      }
+    : { kind: "play", code: "unknown-playback", detail: code };
 }
 
-export function debridBannerTitle(e: { name: string; code: string }): string {
-  switch (e.code) {
-    case "traffic-limit":
-      return `${e.name} is over its traffic or fair-use limit right now.`;
-    case "rate-limited":
-      return `${e.name} is rate-limiting Harbor right now.`;
+export function pipelineError(detail?: string): PickerError {
+  return detail !== undefined
+    ? { kind: "pipeline", code: "load-streams-failed", detail }
+    : { kind: "pipeline", code: "load-streams-failed" };
+}
+
+export const PIPELINE_ERROR_TRANSPORT = "harbor:error:pipeline-load-streams-failed";
+
+export function pickerErrorTransport(error: PickerError | null): string | null {
+  if (error?.kind !== "pipeline") return null;
+  return error.detail ?? PIPELINE_ERROR_TRANSPORT;
+}
+
+export function translatePipelineErrorTransport(t: Translate, value: string): string {
+  return value === PIPELINE_ERROR_TRANSPORT
+    ? t("Couldn't load streams. Check your addons and connection.")
+    : value;
+}
+
+export function isEngineWarmingError(error: PickerError | null): boolean {
+  return error?.kind === "play" && error.code === "engine-not-ready";
+}
+
+export function translatePickerError(t: Translate, error: PickerError): string {
+  if (error.kind === "pipeline") {
+    return error.detail ?? t("Couldn't load streams. Check your addons and connection.");
+  }
+  switch (error.code) {
+    case "not-cached":
+      return t("This stream isn't cached on your debrid yet. Try a different one from the list.");
+    case "still-downloading":
+      return t(
+        "Your debrid is still adding this torrent. Give it 30-60s and hit Play again, or pick a cached source from the list.",
+      );
+    case "timeout":
+      return t("Your debrid took too long to respond. Hit Play again, or try another stream.");
+    case "stalled":
+      return t("Your debrid couldn't fetch this torrent (no seeders). Pick a different source.");
+    case "error":
+      return t("Your debrid hit an error on this torrent. Pick a different source.");
+    case "stub-or-error-video":
+      return t(
+        "Your debrid served a placeholder/error video instead of the real file. Pick another stream.",
+      );
+    case "all-debrids-failed":
+      return t("None of your debrid services could deliver a working file. Pick another stream.");
+    case "no-debrid-could-play":
+      return t("None of your debrid services could resolve this stream. Try a different one.");
+    case "no-debrid-configured":
+      return t("Add a debrid provider in Settings first.");
+    case "remote-server-unreachable-strict":
+      return t(
+        "Remote streaming server unreachable. Strict mode is on, so local fallback is disabled.",
+      );
+    case "remote-server-unreachable":
+      return t(
+        "Remote streaming server unreachable. Check the address in Settings > P2P & servers and that the server machine is online.",
+      );
+    case "engine-no-peers":
+      return t(
+        "Couldn't prepare this P2P source. It may not have reachable peers. Try again or choose another source.",
+      );
+    case "engine-not-ready":
+      return t(
+        "Harbor's peer-to-peer engine is warming up. This clears on its own in a few seconds, then Play works.",
+      );
+    case "direct-torrent-disabled":
+      return t(
+        "Direct torrent streaming is turned off. Turn it on in Settings > P2P & servers to stream torrents without a debrid.",
+      );
+    case "no-source":
+      return t("This stream has no playable source.");
+    case "addon-not-configured":
+      return t("This addon isn't fully configured. Open its setup page and finish the wizard.");
+    case "external-url-only":
+      return t("This source only opens in an external browser, not in Harbor's player.");
+    case "youtube-only":
+      return t("This is a YouTube link, not a video file. Open it in a browser instead.");
+    case "nzb-needs-external-player":
+      return t("This is a raw NZB file. It needs SABnzbd or NZBGet to download first, then play.");
     case "unauthorized":
-      return `${e.name} rejected your API key.`;
+      return t("Your debrid key was rejected. Check it in Settings.");
     case "not-premium":
-      return `Your ${e.name} subscription looks expired.`;
+      return t("Your debrid subscription has expired.");
+    case "rate-limited":
+      return t("The debrid service is rate-limiting us. Try again in a moment.");
+    case "traffic-limit":
+      return t(
+        "Real-Debrid is refusing this download right now, which usually means its traffic or fair-use limit has been hit. Try again later, pick a different source, or use another debrid.",
+      );
     case "upstream-unavailable":
-      return `${e.name} is temporarily unavailable (server error).`;
-    default:
-      return `${e.name} returned an error (${e.code}).`;
+      return t(
+        "The debrid service returned a server error and is temporarily unavailable. Try again in a moment or pick another source.",
+      );
+    case "aborted":
+      return t("Cancelled.");
+    case "download-season-package-required":
+      return t("This source is not a downloadable season package. Pick another package.");
+    case "download-season-no-files":
+      return t(
+        "No downloadable episode files were found in this season package. Pick another package.",
+      );
+    case "download-season-partial":
+      return t(
+        "Queued {queued} of {total} episodes. Harbor could not match every episode in this package.",
+        { queued: error.queued, total: error.total },
+      );
+    case "stream-proxy-start-failed":
+      return t("Could not start the local stream proxy. Pick another stream.");
+    case "debrid-source-not-ready":
+      return t(
+        "This source isn't ready on your debrid yet. Try it again in a moment or pick another.",
+      );
+    case "debrid-queue-unsupported":
+      return t("Your debrid service doesn't support queueing torrents from Harbor yet.");
+    case "unknown-playback":
+      return error.detail;
   }
 }
 
-export function humanError(code: string): string {
-  switch (code) {
-    case "not-cached":
-      return "This stream isn't cached on your debrid yet. Try a different one from the list.";
-    case "still-downloading":
-      return "Your debrid is still adding this torrent. Give it 30-60s and hit Play again, or pick a cached source from the list.";
-    case "timeout":
-      return "Your debrid took too long to respond. Hit Play again, or try another stream.";
-    case "stalled":
-      return "Your debrid couldn't fetch this torrent (no seeders). Pick a different source.";
-    case "error":
-      return "Your debrid hit an error on this torrent. Pick a different source.";
-    case "stub-or-error-video":
-      return "Your debrid served a placeholder/error video instead of the real file. Pick another stream.";
-    case "all-debrids-failed":
-      return "None of your debrid services could deliver a working file. Pick another stream.";
-    case "no-debrid-could-play":
-      return "None of your debrid services could resolve this stream. Try a different one.";
-    case "no-debrid-configured":
-      return "Add a debrid provider in Settings first.";
-    case "remote-server-unreachable-strict":
-      return "Remote streaming server unreachable. Strict mode is on, so local fallback is disabled.";
-    case "remote-server-unreachable":
-      return "Remote streaming server unreachable. Check the address in Settings > P2P & servers and that the server machine is online.";
-    case "engine-no-peers":
-      return "Couldn't prepare this P2P source. It may not have reachable peers. Try again or choose another source.";
-    case "engine-not-ready":
-      return ENGINE_WARMING_MESSAGE;
-    case "direct-torrent-disabled":
-      return "Direct torrent streaming is turned off. Turn it on in Settings > P2P & servers to stream torrents without a debrid.";
-    case "no-source":
-      return "This stream has no playable source.";
-    case "addon-not-configured":
-      return "This addon isn't fully configured. Open its setup page and finish the wizard.";
-    case "external-url-only":
-      return "This source only opens in an external browser, not in Harbor's player.";
-    case "youtube-only":
-      return "This is a YouTube link, not a video file. Open it in a browser instead.";
-    case "nzb-needs-external-player":
-      return "This is a raw NZB file. It needs SABnzbd or NZBGet to download first, then play.";
-    case "unauthorized":
-      return "Your debrid key was rejected. Check it in Settings.";
-    case "not-premium":
-      return "Your debrid subscription has expired.";
-    case "rate-limited":
-      return "The debrid service is rate-limiting us. Try again in a moment.";
+export type DebridBannerCode =
+  | "traffic-limit"
+  | "rate-limited"
+  | "unauthorized"
+  | "not-premium"
+  | "upstream-unavailable"
+  | "unknown";
+
+export type DebridBanner = {
+  name: string;
+  code: DebridBannerCode;
+  detail?: string;
+};
+
+export function debridBanner(error: { name: string; code: string }): DebridBanner {
+  switch (error.code) {
     case "traffic-limit":
-      return "Real-Debrid is refusing this download right now, which usually means its traffic or fair-use limit has been hit. Try again later, pick a different source, or use another debrid.";
+    case "rate-limited":
+    case "unauthorized":
+    case "not-premium":
     case "upstream-unavailable":
-      return "The debrid service returned a server error and is temporarily unavailable. Try again in a moment or pick another source.";
-    case "aborted":
-      return "Cancelled.";
+      return { name: error.name, code: error.code };
     default:
-      return `Couldn't play this stream (${code}).`;
+      return { name: error.name, code: "unknown", detail: error.code };
+  }
+}
+
+export function translateDebridBannerTitle(t: Translate, banner: DebridBanner): string {
+  switch (banner.code) {
+    case "traffic-limit":
+      return t("{name} is over its traffic or fair-use limit right now.", {
+        name: banner.name,
+      });
+    case "rate-limited":
+      return t("{name} is rate-limiting Harbor right now.", { name: banner.name });
+    case "unauthorized":
+      return t("{name} rejected your API key.", { name: banner.name });
+    case "not-premium":
+      return t("Your {name} subscription looks expired.", { name: banner.name });
+    case "upstream-unavailable":
+      return t("{name} is temporarily unavailable (server error).", { name: banner.name });
+    case "unknown":
+      return t("{name} returned an error ({code}).", {
+        name: banner.name,
+        code: banner.detail ?? "",
+      });
   }
 }
 

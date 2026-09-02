@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Pause, Play, Trash2 } from "lucide-react";
+import { Pause, Trash2 } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useT } from "@/lib/i18n";
 import {
   torrentEnginePause,

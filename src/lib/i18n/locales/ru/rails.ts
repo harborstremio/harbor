@@ -111,6 +111,10 @@ const rails: Record<string, string> = {
   "Show me less like this": "Показывать меньше такого",
   "Tune your recommendations": "Настройте рекомендации",
   "Thumbs down hides this title from Featured. Thumbs up helps surface similar picks.": "Палец вниз скрывает это из раздела «Избранное». Палец вверх помогает находить похожее.",
+  "Your addons": "Ваши аддоны",
+  "What each addon is actually serving up right now.": "Что каждый аддон выдаёт прямо сейчас.",
+  "This addon provides streams only. It has no catalog to browse, but it still works behind every title you open.": "Этот аддон отдаёт только источники. Каталога для просмотра у него нет, но он продолжает работать за каждым открытым тайтлом.",
+  "This catalog came back empty. Try another one, or check the addon in Settings.": "Этот каталог вернулся пустым. Попробуйте другой или проверьте аддон в настройках.",
 };
 
 export default rails;

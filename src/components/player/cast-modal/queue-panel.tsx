@@ -1,4 +1,5 @@
-import { Check, Clock, GripVertical, Moon, Play, Plus, Trash2, X } from "lucide-react";
+import { Check, Clock, GripVertical, Moon, Plus, Trash2, X } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useT } from "@/lib/i18n";
 
 export type SegmentedItem = { id: string; label: string; icon?: ReactNode; badge?: number };
 
@@ -11,8 +12,9 @@ export function MarketSegmented({
   active: string;
   onSelect: (id: string) => void;
 }) {
+  const t = useT();
   return (
-    <div className="flex w-fit flex-wrap items-center gap-1 rounded-2xl bg-elevated/40 p-1 ring-1 ring-edge-soft/60">
+    <div className="flex w-fit flex-wrap items-center gap-1 rounded-md bg-elevated p-1 ring-1 ring-edge-soft/60">
       {items.map((it) => {
         const on = it.id === active;
         return (
@@ -25,9 +27,9 @@ export function MarketSegmented({
             }`}
           >
             {it.icon && <span className="inline-flex shrink-0">{it.icon}</span>}
-            {it.label}
+            {t(it.label)}
             {it.badge != null && it.badge > 0 && (
-              <span className="ms-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold tabular-nums text-canvas">
+              <span className="ms-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10.5px] font-bold tabular-nums text-canvas">
                 {it.badge > 99 ? "99+" : it.badge}
               </span>
             )}

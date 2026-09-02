@@ -16,8 +16,7 @@ import {
 } from "lucide-react";
 import { renderBbcode } from "@/lib/social/bbcode";
 import { EmbedPrompt, type EmbedKind } from "@/components/embed-prompt";
-import { handleLinkOutActivation } from "@/lib/social/link-out-activation";
-import { openLinkOut } from "@/lib/social/link-out";
+import { useT } from "@/lib/i18n";
 
 export const ABOUT_MAX = 4000;
 
@@ -44,6 +43,41 @@ const TOOLS: Tool[] = [
   { icon: Music2, label: "Spotify", open: "[spotify]", close: "[/spotify]", embed: "spotify" },
 ];
 
+function translateToolLabel(label: string, t: (key: string) => string): string {
+  switch (label) {
+    case "Bold":
+      return t("Bold");
+    case "Italic":
+      return t("Italic");
+    case "Underline":
+      return t("Underline");
+    case "Strikethrough":
+      return t("Strikethrough");
+    case "Quote":
+      return t("Quote");
+    case "Code":
+      return t("Code");
+    case "List":
+      return t("List");
+    case "Link":
+      return t("Link");
+    case "Image":
+      return t("Image");
+    case "YouTube":
+      return t("YouTube");
+    case "Spotify":
+      return t("Spotify");
+    default:
+      return label;
+  }
+}
+
+function translateToolPlaceholder(placeholder: string, t: (key: string) => string): string {
+  if (placeholder === "item") return t("item");
+  if (placeholder === "link text") return t("link text");
+  return placeholder;
+}
+
 export function AboutEditor({
   value,
   onChange,
@@ -51,6 +85,7 @@ export function AboutEditor({
   value: string;
   onChange: (next: string) => void;
 }) {
+  const t = useT();
   const ref = useRef<HTMLTextAreaElement>(null);
   const [preview, setPreview] = useState(false);
   const [embed, setEmbed] = useState<EmbedKind | null>(null);
@@ -75,7 +110,9 @@ export function AboutEditor({
     }
     const el = ref.current;
     if (!el) return;
-    const sel = value.slice(el.selectionStart, el.selectionEnd) || tool.placeholder || "";
+    const sel =
+      value.slice(el.selectionStart, el.selectionEnd) ||
+      (tool.placeholder ? translateToolPlaceholder(tool.placeholder, t) : "");
     splice(el.selectionStart, el.selectionEnd, tool.open + sel + tool.close);
   };
 
@@ -88,26 +125,29 @@ export function AboutEditor({
   const over = value.length > ABOUT_MAX;
 
   return (
-    <div className="flex flex-col gap-2 rounded-[10px] bg-elevated p-2.5 ring-1 ring-edge-soft">
+    <div className="flex flex-col gap-2 rounded-md bg-elevated p-2.5 ring-1 ring-edge-soft">
       <div className="flex flex-wrap items-center gap-0.5">
-        {TOOLS.map((tool) => (
-          <button
-            key={tool.label}
-            type="button"
-            onClick={() => apply(tool)}
-            title={tool.label}
-            aria-label={tool.label}
-            className="grid h-8 w-8 place-items-center rounded-[6px] text-ink-subtle transition-colors hover:bg-raised hover:text-ink active:scale-90 motion-reduce:active:scale-100"
-          >
-            <tool.icon size={15} strokeWidth={2.1} />
-          </button>
-        ))}
+        {TOOLS.map((tool) => {
+          const label = translateToolLabel(tool.label, t);
+          return (
+            <button
+              key={tool.label}
+              type="button"
+              onClick={() => apply(tool)}
+              title={label}
+              aria-label={label}
+              className="grid h-8 w-8 place-items-center rounded-sm text-ink-subtle transition-colors hover:bg-raised hover:text-ink active:scale-90 motion-reduce:active:scale-100"
+            >
+              <tool.icon size={15} strokeWidth={2.1} />
+            </button>
+          );
+        })}
         <button
           type="button"
           onClick={() => setPreview((p) => !p)}
-          className="ms-auto flex h-8 items-center gap-1.5 rounded-[6px] px-2.5 text-[12px] font-semibold text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
+          className="ms-auto flex h-8 items-center gap-1.5 rounded-sm px-2.5 text-[12px] font-semibold text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
         >
-          {preview ? <Pencil size={13} /> : <Eye size={14} />} {preview ? "Edit" : "Preview"}
+          {preview ? <Pencil size={13} /> : <Eye size={14} />} {preview ? t("Edit") : t("Preview")}
         </button>
       </div>
 
@@ -118,12 +158,13 @@ export function AboutEditor({
           {value.trim() ? (
             <div
               className="max-w-none break-words text-[14px] leading-relaxed text-ink-muted"
-              onClick={(e) => handleLinkOutActivation(e, openLinkOut)}
-              onAuxClick={(e) => handleLinkOutActivation(e, openLinkOut)}
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest?.("a")) e.preventDefault();
+              }}
               dangerouslySetInnerHTML={{ __html: renderBbcode(value) }}
             />
           ) : (
-            <span className="text-[13px] text-ink-subtle">Nothing to preview yet.</span>
+            <span className="text-[13px] text-ink-subtle">{t("Nothing to preview yet.")}</span>
           )}
         </div>
       ) : (
@@ -132,7 +173,9 @@ export function AboutEditor({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           rows={8}
-          placeholder="Show off. [b]bold[/b], [color=gold]color[/color], [youtube]link[/youtube], [img]https://...[/img] and more."
+          placeholder={t(
+            "Show off. [b]bold[/b], [color=gold]color[/color], [youtube]link[/youtube], [img]https://...[/img] and more.",
+          )}
           className="min-h-[120px] resize-y rounded-[8px] bg-canvas/40 p-3 text-[13.5px] leading-relaxed text-ink outline-none placeholder:text-ink-subtle focus:ring-1 focus:ring-edge"
         />
       )}

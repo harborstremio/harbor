@@ -1,4 +1,5 @@
-import { ArrowUpRight, Search, Trophy, X } from "lucide-react";
+import { ArrowUpRight, Trophy, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import {

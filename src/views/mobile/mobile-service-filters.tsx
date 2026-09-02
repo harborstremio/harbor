@@ -1,3 +1,5 @@
+import { useT } from "@/lib/i18n";
+
 export type ServiceMedia = "movie" | "tv";
 
 export type Genre = {
@@ -41,11 +43,12 @@ export function MediaToggle({
   onChange: (m: ServiceMedia) => void;
   labels?: { movie: string; tv: string };
 }) {
-  const lbl = labels ?? { movie: "Movies", tv: "Shows" };
+  const t = useT();
+  const lbl = labels ?? { movie: t("Movies"), tv: t("Shows") };
   return (
     <div
       role="tablist"
-      aria-label="Media type"
+      aria-label={t("Media type")}
       className="inline-flex gap-1 rounded-full bg-elevated/60 p-1 ring-1 ring-edge-soft/60"
     >
       {(["movie", "tv"] as const).map((m) => {
@@ -80,6 +83,7 @@ export function ServiceFilters({
   onMediaChange: (m: ServiceMedia) => void;
   onGenreChange: (g: Genre) => void;
 }) {
+  const t = useT();
   const genres = GENRES.filter((g) => genreAvailable(g, media));
   return (
     <div className="flex flex-col gap-3.5">
@@ -88,7 +92,7 @@ export function ServiceFilters({
       </div>
       <div
         role="tablist"
-        aria-label="Genre"
+        aria-label={t("Genre")}
         className="flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {genres.map((g) => {
@@ -106,7 +110,7 @@ export function ServiceFilters({
                   : "bg-elevated/60 text-ink-muted ring-1 ring-edge-soft/60"
               }`}
             >
-              {g.label}
+              {t(g.label)}
             </button>
           );
         })}

@@ -1,6 +1,7 @@
+import { fillStyle } from "@/components/slider";
 import { RotateCcw } from "lucide-react";
 import { useRef, useState } from "react";
-import seekPreviewBg from "@/assets/preview/seek-preview.png";
+import seekPreviewBg from "@/assets/preview/seek-preview.webp";
 import { SeekBarVisual } from "@/components/player/transport/seek-bar-visual";
 import { useSettings, type Settings } from "@/lib/settings";
 import { ColorPopoverTrigger } from "../color-picker";
@@ -8,6 +9,7 @@ import { SubField } from "./internals";
 import { ToggleRow } from "../shared";
 import { SeekImageUpload, openSeekImageDialog } from "./seek-image-upload";
 import { useT } from "@/lib/i18n";
+import { PreviewImage } from "../preview-image";
 
 const STYLES: Array<{ id: "flat" | "glass" | "pinstripe" | "rainbow"; label: string; sub: string }> = [
   { id: "flat", label: "Flat_Style", sub: "Solid fill, no texture. Cleanest baseline." },
@@ -69,7 +71,7 @@ export function SeekBarPanel() {
           ))}
         </div>
         {currentStyle === "image" && (
-          <p className="mt-1 text-[11px] text-ink-subtle">
+          <p className="mt-1 text-[11.5px] text-ink-subtle">
             {t("Image bar active. Pick a style above to switch back, or clear the image below.")}
           </p>
         )}
@@ -83,8 +85,9 @@ export function SeekBarPanel() {
           step={1}
           value={heightVal}
           onChange={(e) => update({ seekBarHeight: Number(e.target.value) })}
-          className="w-full accent-ink"
-        />
+          className="harbor-slider w-full"
+        style={fillStyle(heightVal, 3, 14)}
+      />
       </SubField>
 
       <SubField label={t("Bar color")}>
@@ -97,7 +100,7 @@ export function SeekBarPanel() {
                 key={c || "default"}
                 type="button"
                 onClick={() => update({ seekBarColor: c })}
-                className={`flex h-8 w-8 items-center justify-center rounded-full ring-2 transition-all ${
+                className={`flex h-8 w-8 items-center justify-center rounded-full ring-2 transition ${
                   isSel ? "ring-ink scale-110" : "ring-edge-soft hover:ring-edge"
                 }`}
                 style={{
@@ -122,7 +125,7 @@ export function SeekBarPanel() {
               onClick={() => update({ seekBarColor: "" })}
               className="flex h-8 items-center gap-1 rounded-full bg-raised px-3 text-[11.5px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
             >
-              <RotateCcw size={11} strokeWidth={2.4} />
+              <RotateCcw size={12} strokeWidth={2.4} />
               {t("Default")}
             </button>
           )}
@@ -165,7 +168,8 @@ export function SeekBarPanel() {
           value={Math.round((settings.seekBarFillOpacity ?? 0.35) * 100)}
           onChange={(e) => update({ seekBarFillOpacity: Number(e.target.value) / 100 })}
           disabled={settings.seekBarFill === false}
-          className="w-full accent-ink disabled:opacity-40"
+          className="harbor-slider w-full"
+          style={fillStyle(Math.round((settings.seekBarFillOpacity ?? 0.35) * 100), 5, 100)}
         />
       </SubField>
 
@@ -199,8 +203,9 @@ export function SeekBarPanel() {
           value={dotVal}
           onChange={(e) => update({ seekDotSize: Number(e.target.value) })}
           disabled={currentShape === "hidden"}
-          className="w-full accent-ink disabled:opacity-40"
-        />
+          className="harbor-slider w-full"
+        style={fillStyle(dotVal, 8, currentShape === "image" ? 200 : 64)}
+      />
       </SubField>
 
       <SubField label={t("Dot image")}>
@@ -237,10 +242,10 @@ function PickTile({
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`flex flex-col gap-0.5 rounded-xl border px-3 py-2.5 text-start transition-all duration-150 ${
+      className={`flex flex-col gap-0.5 rounded-md border px-3 py-2.5 text-start transition duration-150 ${
         selected
-          ? "border-ink bg-elevated text-ink ring-2 ring-ink/30 shadow-[0_0_0_3px_rgba(255,255,255,0.05)]"
-          : "border-edge-soft bg-canvas/30 text-ink-muted hover:border-edge hover:text-ink"
+          ? "border-ink bg-elevated text-ink ring-2 ring-ink/30"
+          : "border-edge-soft bg-canvas text-ink-muted hover:border-edge hover:text-ink"
       }`}
     >
       <span className={`text-[12.5px] font-semibold ${selected ? "text-ink" : ""}`}>{label}</span>
@@ -264,8 +269,8 @@ function Preview({ settings }: { settings: Settings }) {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-edge shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-      <img src={seekPreviewBg} alt="" className="block h-auto w-full select-none" draggable={false} />
+ <div className="relative overflow-hidden rounded-md">
+      <PreviewImage src={seekPreviewBg} className="block aspect-[1599/254] w-full select-none object-cover" />
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 via-black/25 to-transparent px-7 pb-3 pt-6">
         <div
           ref={trackRef}

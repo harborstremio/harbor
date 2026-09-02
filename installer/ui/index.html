@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1024, initial-scale=1" />
+    <title>Harbor Installer</title>
+    <link rel="stylesheet" href="styles/fonts.css" />
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/base.css" />
+    <link rel="stylesheet" href="styles/pills.css" />
+    <link rel="stylesheet" href="styles/modal.css" />
+    <link rel="stylesheet" href="styles/motion.css" />
+    <link rel="stylesheet" href="styles/screens/start.css" />
+    <link rel="stylesheet" href="styles/screens/language.css" />
+    <link rel="stylesheet" href="styles/screens/terms.css" />
+    <link rel="stylesheet" href="styles/screens/welcome.css" />
+    <link rel="stylesheet" href="styles/screens/installing.css" />
+    <link rel="stylesheet" href="styles/screens/finished.css" />
+    <link rel="stylesheet" href="styles/screens/uninstall.css" />
+    <link rel="stylesheet" href="styles/boot.css" />
+  </head>
+  <body>
+    <div class="hb-boot" id="hb-boot" hidden>
+      <div class="bx-stage">
+        <div class="bx-lottie" id="bx-lottie"></div>
+      </div>
+    </div>
+    <div class="hb-window" id="hb-window">
+      <header class="hb-header" id="hb-header">
+        <div class="hb-badge" id="hb-badge">
+          <div class="hb-mark"></div>
+        </div>
+
+        <p class="hb-eyebrow t-eyebrow" id="hb-eyebrow">
+          <span>Harbor</span>
+          <span class="hb-eyebrow-sep">&middot;</span>
+          <span class="hb-eyebrow-ver" id="hb-version">0.9.121</span>
+        </p>
+
+        <h1 class="hb-title t-title" id="hb-title">
+          <span class="hb-title-line" id="hb-title-line"></span>
+        </h1>
+
+        <div class="hb-wincontrols" id="hb-wincontrols">
+          <button class="hb-winbtn" id="hb-min" type="button" aria-label="Minimize">
+            <svg viewBox="0 0 13 13" fill="none">
+              <path d="M3 6.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </button>
+          <button class="hb-winbtn" id="hb-max" type="button" aria-label="Maximize">
+            <svg viewBox="0 0 13 13" fill="none" class="hb-glyph-max">
+              <rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="1.4" rx="1.2" />
+            </svg>
+            <svg viewBox="0 0 13 13" fill="none" class="hb-glyph-restore">
+              <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" stroke-width="1.4" rx="1" />
+              <path d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9" stroke="currentColor" stroke-width="1.4" fill="none" />
+            </svg>
+          </button>
+          <button class="hb-winbtn hb-winbtn-danger" id="hb-close" type="button" aria-label="Close installer">
+            <svg viewBox="0 0 13 13" fill="none">
+              <path d="M3.5 3.5l6 6M9.5 3.5l-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="hb-rule"></div>
+
+      <div class="hb-body" id="screen"></div>
+
+      <footer class="hb-footer" id="hb-footer">
+        <div class="hb-consequence" id="hb-consequence"></div>
+        <div class="hb-actions" id="hb-actions">
+          <button class="hb-pill-ghost t-btn" id="hb-back" type="button">
+            <span class="hb-pill-label">Back</span>
+          </button>
+          <button class="hb-pill t-btn" id="hb-next" type="button">
+            <span class="hb-pill-label">Continue</span>
+          </button>
+        </div>
+      </footer>
+    </div>
+
+    <script src="vendor/lottie.min.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

@@ -1,4 +1,5 @@
-import { Check, ChevronDown, Play } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
@@ -183,7 +184,7 @@ export function CinemetaEpisodeRow({
     <div
       data-no-card-ring
       onContextMenu={onContextMenu ? (e) => onContextMenu(e, season, epNumber, watched) : undefined}
-      className="group flex items-center gap-4 rounded-2xl px-4 py-5 transition-colors hover:bg-elevated/30"
+      className="group flex items-center gap-4 rounded-lg px-4 py-5 transition-colors hover:bg-elevated/30"
     >
       <button
         onClick={() =>
@@ -293,7 +294,7 @@ function SeasonDropdown({
         ref={btnRef}
         onMouseDown={(e) => e.stopPropagation()}
         onClick={() => (menu ? setMenu(null) : openMenu())}
-        className="flex h-10 items-center gap-2 rounded-full border border-edge-soft bg-canvas/90 ps-4 pe-3 text-[13.5px] font-medium text-ink transition-colors hover:bg-canvas"
+        className="flex h-10 items-center gap-2 rounded-full bg-white/[0.06] ps-4 pe-3 text-[13.5px] font-medium text-ink transition-colors hover:bg-white/[0.10]"
       >
         <span>{seasonLabel(t, active)}</span>
         <ChevronDown
@@ -307,7 +308,7 @@ function SeasonDropdown({
             ref={menuRef}
             onMouseDown={(e) => e.stopPropagation()}
             style={{ right: menu.right, top: menu.top, bottom: menu.bottom }}
-            className="animate-fade-in fixed z-[200] w-44 overflow-hidden rounded-2xl border border-edge-soft bg-canvas py-1.5 shadow-2xl"
+            className="animate-fade-in fixed z-[200] w-44 overflow-hidden rounded-lg border border-edge bg-elevated py-1.5 shadow-[0_18px_44px_-12px_rgba(0,0,0,0.6)]"
           >
             <div className="overflow-y-auto" style={{ maxHeight: menu.maxH }}>
               {seasons.map((s) => {
@@ -322,7 +323,7 @@ function SeasonDropdown({
                     className={`flex w-full items-center px-4 py-2.5 text-start text-[13.5px] transition-colors ${
                       isActive
                         ? "bg-ink/10 text-ink"
-                        : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
+                        : "text-ink-muted hover:bg-raised hover:text-ink"
                     }`}
                   >
                     {seasonLabel(t, s)}

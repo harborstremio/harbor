@@ -10,6 +10,7 @@ import {
   Plus,
   X,
 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { useMobileRemote } from "../mobile-remote";
 import { RendererSheet } from "../renderer-sheet";
@@ -39,6 +40,7 @@ export function MangaRemote({
 }) {
   const { connected, snapshot, sendCommand } = useMobileRemote();
   const reduce = useReducedMotion();
+  const t = useT();
   const m = snapshot.manga;
 
   const [deviceOpen, setDeviceOpen] = useState(false);
@@ -71,7 +73,7 @@ export function MangaRemote({
   const turn = (dir: TurnDir) => {
     const sent = sendCommand({ action: "mangaTurnPage", dir });
     if (sent) advance(dir);
-    else flash("Reconnecting to your computer");
+    else flash(t("Reconnecting to your computer"));
   };
   const flipProgress = (p: number) => {
     sendCommand({ action: "mangaFlipProgress", p });
@@ -79,7 +81,7 @@ export function MangaRemote({
   const flipEnd = (commit: boolean, dir: TurnDir) => {
     const sent = sendCommand({ action: "mangaFlipEnd", commit, dir });
     if (commit && sent) advance(dir);
-    else if (!sent) flash("Reconnecting to your computer");
+    else if (!sent) flash(t("Reconnecting to your computer"));
   };
   const zoomAbs = (z: number) => sendCommand({ action: "mangaSetZoom", zoom: clampZoom(z) });
   const zoomStep = (dir: "in" | "out") =>
@@ -106,7 +108,7 @@ export function MangaRemote({
         <div className={`flex items-center gap-2 px-3 pt-3 ${chromeCls}`}>
           <button
             type="button"
-            aria-label="Close reader"
+            aria-label={t("Close reader")}
             onClick={() => sendCommand({ action: "mangaCloseReader" })}
             className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-muted transition-transform active:scale-90"
           >
@@ -123,7 +125,7 @@ export function MangaRemote({
               className={connected ? "text-ink" : "text-ink-subtle"}
             />
             <span className="truncate text-[13px] font-semibold text-ink">
-              {connected ? snapshot.target.label || "Your computer" : "Reconnecting"}
+              {connected ? snapshot.target.label || t("Your computer") : t("Reconnecting")}
             </span>
             <ChevronDown size={14} strokeWidth={2.4} className="shrink-0 text-ink-subtle" />
           </button>
@@ -131,10 +133,10 @@ export function MangaRemote({
             <button
               type="button"
               onClick={onReadHere}
-              aria-label="Read on this device"
+              aria-label={t("Read on this device")}
               className="ms-auto flex h-11 items-center gap-1.5 rounded-full bg-accent px-3.5 text-[12.5px] font-semibold text-canvas transition-transform active:scale-95"
             >
-              <BookOpen size={15} strokeWidth={2.4} /> Read here
+              <BookOpen size={15} strokeWidth={2.4} /> {t("Read here")}
             </button>
           )}
         </div>
@@ -175,37 +177,37 @@ export function MangaRemote({
           className={`flex items-center justify-center gap-2 px-4 ${chromeCls} ${zoomEngaged ? "pointer-events-none opacity-0" : ""}`}
         >
           <DockButton
-            label="Previous chapter"
+            label={t("Previous chapter")}
             disabled={!m.hasPrev}
             onPress={() => sendCommand({ action: "mangaJumpChapter", index: m.chapterIndex - 1 })}
           >
             <ChevronsLeft size={24} strokeWidth={2.2} />
           </DockButton>
           {m.canZoom && (
-            <DockButton label="Zoom out" onPress={() => zoomStep("out")}>
+            <DockButton label={t("Zoom out")} onPress={() => zoomStep("out")}>
               <Minus size={22} strokeWidth={2.4} />
             </DockButton>
           )}
           {m.canZoom && (
             <button
               type="button"
-              aria-label="Reset zoom"
+              aria-label={t("Reset zoom")}
               onClick={() => zoomAbs(1)}
               className="grid h-11 min-w-[54px] place-items-center rounded-full bg-elevated/60 px-3 text-[13px] font-semibold tabular-nums text-ink ring-1 ring-edge-soft/50 transition-transform active:scale-95"
             >
               {Math.round(m.zoom * 100)}%
             </button>
           )}
-          <DockButton label="Bookmarks" accent onPress={() => setBookmarksOpen(true)}>
+          <DockButton label={t("Bookmarks")} accent onPress={() => setBookmarksOpen(true)}>
             <Bookmark size={26} strokeWidth={2.2} />
           </DockButton>
           {m.canZoom && (
-            <DockButton label="Zoom in" onPress={() => zoomStep("in")}>
+            <DockButton label={t("Zoom in")} onPress={() => zoomStep("in")}>
               <Plus size={22} strokeWidth={2.4} />
             </DockButton>
           )}
           <DockButton
-            label="Next chapter"
+            label={t("Next chapter")}
             disabled={!m.hasNext}
             onPress={() => sendCommand({ action: "mangaJumpChapter", index: m.chapterIndex + 1 })}
           >
@@ -231,7 +233,7 @@ export function MangaRemote({
           style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
         >
           <span className="rounded-full bg-surface/90 px-4 py-2 text-[13px] font-semibold text-ink-muted backdrop-blur-xl">
-            Reconnecting to your computer
+            {t("Reconnecting to your computer")}
           </span>
         </div>
       )}
@@ -246,7 +248,7 @@ export function MangaRemote({
         </div>
       )}
 
-      <RendererSheet open={deviceOpen} onClose={() => setDeviceOpen(false)} title="Read on" />
+      <RendererSheet open={deviceOpen} onClose={() => setDeviceOpen(false)} title={t("Read on")} />
       <Suspense fallback={null}>
         {chaptersOpen && (
           <ChapterNavigator

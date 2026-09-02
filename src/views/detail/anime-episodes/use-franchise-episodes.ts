@@ -46,7 +46,7 @@ export function useFranchiseEpisodes(
     if (!enabled || otherIds.length === 0 || extra.length === 0) return currentEpisodes;
     const keyOf = (ep: KitsuEpisode) =>
       ep.imdbSeason != null && ep.imdbEpisode != null
-        ? `s${ep.imdbSeason}e${ep.imdbEpisode}`
+        ? `${ep.sourceMetaId ?? "cur"}|s${ep.imdbSeason}e${ep.imdbEpisode}`
         : `${ep.sourceMetaId ?? "cur"}:${ep.id}`;
     const seen = new Set<string>();
     const combined: KitsuEpisode[] = [];

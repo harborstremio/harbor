@@ -13,11 +13,16 @@ const continueCardSource = readFileSync(
 test("Continue Watching keeps source selection, direct play, and details as separate actions", () => {
   assert.match(
     continueCardSource,
-    /const onChooseSource[\s\S]*?openPicker\(meta, episode, \{ autoPlay: false, resume: false \}\)/,
+    /const onChooseSource[\s\S]*?openAvailableSources\(episode, true\)/,
   );
+  assert.match(continueCardSource, /const onPlay[\s\S]*?openAvailableSources\(episode, false\)/);
+  assert.match(continueCardSource, /onClick=\{onOpenDetails\}/);
+});
+
+test("Continue Watching re-resolves addon metadata when authentication changes", () => {
+  assert.match(continueCardSource, /resolveMeta\(authKey,/);
   assert.match(
     continueCardSource,
-    /playStream: \(\) => openPicker\(meta, episode, \{ autoPlay: true, resume: true \}\)/,
+    /\}, \[item\._id, item\.type, item\.state\?\.video_id, authKey\]\);/,
   );
-  assert.match(continueCardSource, /onClick=\{onOpenDetails\}/);
 });

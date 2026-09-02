@@ -85,7 +85,9 @@ export function AiSearchSection({
         </div>
       )}
 
-      {status === "loading" && <AiThinking provider={provider} label={label} phrases={thinkingPhrases} />}
+      {status === "loading" && (
+        <AiThinking provider={provider} label={label} phrases={thinkingPhrases} />
+      )}
 
       {status === "error" && (
         <button
@@ -95,7 +97,12 @@ export function AiSearchSection({
           <span className="text-[13px] font-semibold text-ink">
             {t("AI search failed. Tap to retry.")}
           </span>
-          <span className="line-clamp-2 text-[12px] text-ink-muted">{error}</span>
+          <span className="text-[12px] text-ink-muted">
+            {error ? t(error.messageKey, error.values) : t("AI search failed.")}
+          </span>
+          {error?.detail && (
+            <span className="line-clamp-2 text-[12px] text-ink-subtle">{error.detail}</span>
+          )}
         </button>
       )}
 

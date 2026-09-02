@@ -9,9 +9,17 @@ import { useEpisodeOrder } from "@/views/detail/series-episodes/use-episode-orde
 import { useTvdbSeasonTypes } from "@/views/detail/series-episodes/use-tvdb-season-types";
 import { useSettings } from "@/lib/settings";
 import { effectiveOrderProvider } from "@/lib/settings/episode-order";
+import { t as translate, useT, useUiLanguage } from "@/lib/i18n";
 import { getViewedSeason, setViewedSeason } from "@/lib/season-view-pref";
 import { useMobileRemote } from "../mobile-remote";
-import { HIDE_SCROLL, prefersReducedMotion, stillFrom, tmdbTvId, type Ep, type SeasonOption } from "./data";
+import {
+  HIDE_SCROLL,
+  prefersReducedMotion,
+  stillFrom,
+  tmdbTvId,
+  type Ep,
+  type SeasonOption,
+} from "./data";
 import { Line, SectionTitle } from "./ui";
 import { OrderStyleSwitch, type OrderOption } from "./order-switch";
 
@@ -53,13 +61,18 @@ export function EpisodeSection({
   seasons: number[];
   onPlay: (ep: Ep) => void;
 }) {
+  const t = useT();
+  const language = useUiLanguage();
   const { settings } = useSettings();
   const { snapshot } = useMobileRemote();
   const tvdbKey = settings.tvdbKey || snapshot.tvdbKey || "";
   const imdbId = detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null);
 
   const settingsProvider = effectiveOrderProvider(settings);
-  const [override, setOverride] = useState<{ provider: "default" | "tvdb"; seasonType: string } | null>(null);
+  const [override, setOverride] = useState<{
+    provider: "default" | "tvdb";
+    seasonType: string;
+  } | null>(null);
   useEffect(() => {
     setOverride(null);
   }, [meta.id]);
@@ -85,19 +98,26 @@ export function EpisodeSection({
       return ordering.seasons
         .filter((s) => s.seasonNumber >= 1)
         .map((s) => {
-          const label = s.name && s.name.trim() ? s.name : `Season ${s.seasonNumber}`;
+          const label =
+            s.name && s.name.trim()
+              ? s.name
+              : translate("Season {number}", { number: s.seasonNumber });
           return { number: s.seasonNumber, label, badge: seasonTypeBadge(s.seasonNumber, label) };
         });
     }
-    return seasons.map((n) => ({ number: n, label: `Season ${n}` }));
-  }, [ordering, seasons]);
+    return seasons.map((n) => ({ number: n, label: translate("Season {number}", { number: n }) }));
+  }, [ordering, seasons, language]);
 
   const [season, setSeason] = useState<number>(() => {
     const v = getViewedSeason(meta.id);
-    return v != null && seasonOptions.some((o) => o.number === v) ? v : seasonOptions[0]?.number ?? 1;
+    return v != null && seasonOptions.some((o) => o.number === v)
+      ? v
+      : (seasonOptions[0]?.number ?? 1);
   });
   useEffect(() => {
-    setSeason((s) => (seasonOptions.some((o) => o.number === s) ? s : seasonOptions[0]?.number ?? 1));
+    setSeason((s) =>
+      seasonOptions.some((o) => o.number === s) ? s : (seasonOptions[0]?.number ?? 1),
+    );
   }, [seasonOptions]);
   const pickSeason = (n: number) => {
     setViewedSeason(meta.id, n);
@@ -171,14 +191,21 @@ export function EpisodeSection({
 
   if (seasonOptions.length === 0) return null;
 
-  const activeLabel = seasonOptions.find((o) => o.number === season)?.label ?? `Season ${season}`;
+  const activeLabel =
+    seasonOptions.find((o) => o.number === season)?.label ??
+    t("Season {number}", { number: season });
 
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
-        <SectionTitle>Episodes</SectionTitle>
+        <SectionTitle>{t("Episodes")}</SectionTitle>
         {seasonOptions.length > 1 && (
-          <SeasonPicker options={seasonOptions} value={season} label={activeLabel} onChange={pickSeason} />
+          <SeasonPicker
+            options={seasonOptions}
+            value={season}
+            label={activeLabel}
+            onChange={pickSeason}
+          />
         )}
       </div>
       {orderOptions.length > 1 && (
@@ -191,7 +218,7 @@ export function EpisodeSection({
           ))}
         </div>
       ) : episodes.length === 0 ? (
-        <p className="text-[13.5px] text-ink-subtle">No episodes to show here yet.</p>
+        <p className="text-[13.5px] text-ink-subtle">{t("No episodes to show here yet.")}</p>
       ) : (
         <div className="flex flex-col gap-1.5">
           {episodes.map((ep) => (
@@ -251,12 +278,13 @@ function SeasonSheet({
   onPick: (n: number) => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const [reduced] = useState(prefersReducedMotion);
   const sheet = (
     <div className="fixed inset-0 z-[60] flex flex-col justify-end" role="dialog" aria-modal="true">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t("Close")}
         onClick={onClose}
         className={`absolute inset-0 bg-black/50 ${reduced ? "" : "md-sheet-fade"}`}
       />
@@ -271,7 +299,7 @@ function SeasonSheet({
         </div>
         <div className="flex flex-col px-3 pb-2">
           <h3 className="px-3 pb-1 text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-            Seasons
+            {t("Seasons")}
           </h3>
           {options.map((o) => (
             <button
@@ -284,7 +312,7 @@ function SeasonSheet({
             >
               <span className="flex min-w-0 items-center gap-2">
                 <span className="truncate">{o.label}</span>
-                {o.badge && <Badge>{o.badge}</Badge>}
+                {o.badge && <Badge>{t(o.badge)}</Badge>}
               </span>
               {o.number === value && (
                 <Check size={17} strokeWidth={2.6} className="shrink-0 text-accent" />
@@ -299,10 +327,11 @@ function SeasonSheet({
 }
 
 function EpisodeItem({ ep, onPlay }: { ep: Ep; onPlay: (ep: Ep) => void }) {
+  const t = useT();
   const upcoming = isUpcoming(ep.airDate);
   const sub = [
-    `S${ep.season} E${ep.episode}`,
-    ep.runtime ? `${ep.runtime} min` : null,
+    t("S{season} E{episode}", { season: ep.season, episode: ep.episode }),
+    ep.runtime ? t("{count} min", { count: ep.runtime }) : null,
     formatAirDate(ep.airDate) || null,
   ]
     .filter(Boolean)
@@ -328,9 +357,9 @@ function EpisodeItem({ ep, onPlay }: { ep: Ep; onPlay: (ep: Ep) => void }) {
               upcoming ? "text-ink-muted" : "text-ink"
             }`}
           >
-            {ep.name || `Episode ${ep.episode}`}
+            {ep.name || t("Episode {number}", { number: ep.episode })}
           </p>
-          {upcoming && <Badge>Upcoming</Badge>}
+          {upcoming && <Badge>{t("Upcoming")}</Badge>}
         </div>
         {sub && <p className="text-[11.5px] text-ink-subtle">{sub}</p>}
         {ep.overview && (

@@ -43,7 +43,8 @@ export function makeMangayomiProvider(record: MangayomiSourceRecord): MangaProvi
     search: (query, offset, tagId) => w.call("search", [query, offset, tagId], 20_000).then(toSummaries),
     detail: (id) => w.call("detail", [id], 20_000).then(toSummary),
     chapters: (id) => w.call("chapters", [id], 25_000).then(toChapters),
-    pageUrls: (chapterId) => w.call("pageUrls", [chapterId], 30_000).then(toStrings),
+    pageUrls: (chapterId) =>
+      w.call("pageUrls", [chapterId], 30_000).then((v) => toStrings(v, record.baseUrl)),
   };
   if (record.hasTags) provider.tags = () => w.call("tags", [], 15_000).then(toTags);
   return provider;

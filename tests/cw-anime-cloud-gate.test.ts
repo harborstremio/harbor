@@ -161,8 +161,11 @@ test("tracker sync cannot corrupt the wrong cour", () => {
   for (const src of [anilistSync, malSync]) {
     assert.match(src, /if \(target > total \+ 1\) return;/);
   }
-  assert.match(anilistSync, /entry\.progress >= total\) return;/);
-  assert.match(malSync, /num_episodes_watched >= total\) return;/);
+  assert.match(anilistSync, /entry && total > 0 && entry\.progress >= total\) return;/);
+  assert.match(
+    malSync,
+    /cur\?\.my_list_status && total > 0 && cur\.my_list_status\.num_episodes_watched >= total\)\s*return;/,
+  );
 });
 
 test("home dedup prefers the twin that actually played most recently", () => {

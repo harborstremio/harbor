@@ -1,6 +1,6 @@
 use harbor_core::{
-    parser, scoring, trust,
-    ParsedStream, RankedPicker, Rejection, ScoreOptions, ScoredStream, Stream, TrustOptions,
+    parser, scoring, trust, ParsedStream, RankedPicker, Rejection, ScoreOptions, ScoredStream,
+    Stream, TrustOptions,
 };
 use serde::{Deserialize, Serialize};
 
@@ -27,7 +27,11 @@ pub async fn streams_run_pipeline(
             .into_iter()
             .map(|p| scoring::score_stream(p, &score_opts, &corpus))
             .collect();
-        let picker = scoring::rank_and_pick(scored, &score_opts.active_debrids, score_opts.respect_addon_order);
+        let picker = scoring::rank_and_pick(
+            scored,
+            &score_opts.active_debrids,
+            score_opts.respect_addon_order,
+        );
         PipelineResult {
             picker,
             rejected: trust_result.rejected,
@@ -39,11 +43,9 @@ pub async fn streams_run_pipeline(
 
 #[tauri::command]
 pub async fn streams_parse(streams: Vec<Stream>) -> Result<Vec<ParsedStream>, String> {
-    tokio::task::spawn_blocking(move || {
-        streams.into_iter().map(parser::parse_stream).collect()
-    })
-    .await
-    .map_err(|e| format!("join: {e}"))
+    tokio::task::spawn_blocking(move || streams.into_iter().map(parser::parse_stream).collect())
+        .await
+        .map_err(|e| format!("join: {e}"))
 }
 
 #[tauri::command]

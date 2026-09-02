@@ -12,13 +12,12 @@ export type AutoSyncResult = {
   offsetSec: number;
   ratio: number;
   confidence: number;
+  fitWindowIds?: string[];
 };
 
 export const AUTO_SYNC_AVAILABLE = true;
 
-export async function estimateSubtitleOffset(
-  input: AutoSyncInput,
-): Promise<AutoSyncResult | null> {
+export async function estimateSubtitleOffset(input: AutoSyncInput): Promise<AutoSyncResult | null> {
   return invoke<AutoSyncResult | null>("sync_subtitle", {
     url: input.mediaUrl,
     headers: input.headers,

@@ -1,11 +1,4 @@
 const settings: Record<string, string> = {
-  "Content advisory style": "نمط تنبيه المحتوى",
-  "Use color to distinguish severity, or keep every advisory monochrome.":
-    "استخدم الألوان لتمييز مستوى الشدة، أو اجعل جميع التنبيهات أحادية اللون.",
-  Colored: "ملون",
-  "Monochrome (White)": "أحادي (أبيض)",
-  "When a movie or episode starts, briefly show its Common Sense Media parental guide (violence, nudity, profanity, substances) with severity. Fades on its own.":
-    "عند بدء فيلم أو حلقة، اعرض لفترة وجيزة إرشادات المحتوى من Common Sense Media (العنف والعري والألفاظ والمواد) مع مستوى الشدة، ثم أخفها تلقائياً.",
   "Smooth scrolling": "تمرير سلس",
   "Eases mouse-wheel scrolling instead of jumping line by line. Turn off if you prefer an instant response or notice any lag.":
     "تمرير سلس بعجلة الفأرة بدلا من القفز سطرا بسطر. عطله إذا كنت تفضل استجابة فورية أو لاحظت بطئا.",
@@ -178,7 +171,7 @@ const settings: Record<string, string> = {
     "تخطّي شارة النهاية تلقائيًا وبدء العد التنازلي للحلقة التالية فورًا.",
   "Automatically track what you are playing and save watch progress in real-time.":
     "تتبّع ما تشاهده تلقائيًا وحفظ تقدّم المشاهدة في الوقت الفعلي.",
-  "Autoplay trailer on detail pages": "تشغيل المقطع الدعائي تلقائيًا في صفحات التفاصيل",
+  "Auto-play trailer on detail pages": "تشغيل المقطع الدعائي تلقائيًا في صفحات التفاصيل",
   "Award Icons": "أيقونات الجوائز",
   "Award tab on cards": "علامة تبويب الجوائز على البطاقات",
   "Award tab position": "موضع علامة تبويب الجوائز",
@@ -368,8 +361,6 @@ const settings: Record<string, string> = {
     "ضع زر التحديث على اليسار بجانب زر الرجوع بدلًا من أقصى يمين الترويسة.",
   "Group episodes by story arc": "تجميع الحلقات حسب القوس القصصي",
   HDR: "HDR",
-  "Harbor in your browser (Wi-Fi)": "Harbor في متصفّحك (Wi-Fi)",
-  "Harbor in your browser (this computer)": "Harbor في متصفّحك (هذا الحاسوب)",
   "Harbor keeps your MyAnimeList watch progress in sync.":
     "يبقي Harbor تقدّم مشاهدتك في MyAnimeList متزامنًا.",
   "Harbor ranking puts the best-scoring sources first. Addon order follows your addon priority (organize it in Addons, Installed tab, Reorder) and keeps each addon's results in the order it returned them, like the Stremio and Vidi apps.":
@@ -519,11 +510,8 @@ const settings: Record<string, string> = {
   Panel: "اللوحة",
   Pass: "ناجح",
   "Paste an image URL (png, webp, svg)": "الصق رابط صورة (png، webp، svg)",
-  "Pattern (e.g. \\\\bremux\\\\b)": "النمط (مثل \\\\bremux\\\\b)",
   "Peers, speed and progress while a torrent streams. Sits clear of the exit button, top left.":
     "الأقران والسرعة والتقدّم أثناء بث التورنت. يظهر بعيدًا عن زر الخروج، أعلى اليسار.",
-  "Phone remote (Wi-Fi)": "جهاز تحكم عبر الهاتف (Wi-Fi)",
-  "Phone remote (this computer)": "جهاز تحكم عبر الهاتف (هذا الحاسوب)",
   "Pick OLED for perfect-black panels to unlock shadow detail in tonemapped HDR.":
     "اختر OLED لشاشات الأسود المثالي لإظهار تفاصيل الظلال في HDR المُحوَّل درجاته اللونية.",
   "Pick a display and body pairing, or upload your own font to use across Harbor.":
@@ -555,8 +543,6 @@ const settings: Record<string, string> = {
   Position: "الموضع",
   Poster: "الملصق",
   "Poster card style": "نمط بطاقة الملصق",
-  "Posters, logos, and title art load in the first available language from this list, falling back down the order. \\":
-    "تُحمّل الملصقات والشعارات وصور العناوين بأول لغة متاحة من هذه القائمة، مع التراجع تدريجيًا عبر الترتيب. \\",
   "Power tools & diagnostics": "الأدوات المتقدّمة والتشخيصات",
   "Prefer my installed metadata addon": "تفضيل إضافة البيانات الوصفية المثبّتة لديّ",
   "Preferred language for anime titles displayed on poster cards.":
@@ -612,8 +598,6 @@ const settings: Record<string, string> = {
   Running: "قيد التشغيل",
   "SVP is already handling frame interpolation. Turn off SVP below to use this instead. Running both delays the audio.":
     "يتولّى SVP بالفعل استيفاء الإطارات. أوقف SVP أدناه لاستخدام هذا بدلًا منه. تشغيلهما معًا يؤخّر الصوت.",
-  "SVP's files are here but its VapourSynth engine won't load ({err}). This usually means a stale VapourSynth entry or a missing Microsoft VC++ runtime. Reinstall SVP, or install the latest \\":
-    "ملفات SVP موجودة هنا لكن محرّك VapourSynth الخاص بها لا يُحمّل ({err}). يعني هذا عادةً وجود إدخال VapourSynth قديم أو غياب حزمة تشغيل Microsoft VC++. أعد تثبيت SVP، أو ثبّت أحدث \\",
   "Save sharper frames instead of light thumbnails. They look crisper on the card but take more space, so fewer are kept before the oldest roll off.":
     "احفظ إطارات أوضح بدلًا من صور مصغّرة خفيفة. تبدو أنقى على البطاقة لكنها تشغل مساحة أكبر، لذا يُحتفظ بعدد أقل قبل أن تُزال الأقدم.",
   "Saved stream filters": "مرشّحات البث المحفوظة",
@@ -838,8 +822,6 @@ const settings: Record<string, string> = {
     "ما يفعله زر التشغيل عندما يكون الفيلم أو الحلقة موجودًا على قرصك أيضًا. يفضّل التشغيل التلقائي النسخة المحلية دائمًا ما لم يُضبط على البث.",
   "What happens when you hit Play on a title. Instant just starts; Manual lets you pick the source.":
     "ما يحدث عند الضغط على تشغيل عنوان ما. 'فوري' يبدأ التشغيل مباشرةً؛ و'يدوي' يتيح لك اختيار المصدر.",
-  "When Esc would close the player, show a quick confirm first. You can tick \\":
-    "عندما يوشك مفتاح Esc على إغلاق المشغل، اعرض تأكيدًا سريعًا أولًا. يمكنك تحديد \\",
   "When a movie or episode starts, briefly show its IMDb parental guide (violence, profanity, substances, frightening scenes and more) with severity. Fades on its own.":
     "عند بدء فيلم أو حلقة، اعرض لفترة وجيزة دليل IMDb الإرشادي للآباء (العنف والألفاظ النابية والمواد المخدّرة والمشاهد المخيفة والمزيد) مع درجة الشدّة. يختفي من تلقاء نفسه.",
   "When a title is in your local library": "عندما يكون العنوان في مكتبتك المحلية",
@@ -869,7 +851,7 @@ const settings: Record<string, string> = {
     "بدون مفتاح TMDB، تسحب لوحة 'حول' معلومات طاقم التمثيل وفريق العمل والعنوان من مصدر IMDb مجاني. لا يزال TMDB يُستخدم كلما تم ضبط مفتاح.",
   Wordmark: "شعار نصّي",
   Worse: "أسوأ",
-  "YOUR FILTERS": "مرشّحاتك",
+  "Your filters": "مرشّحاتك",
   "You're on the latest build. Earlier builds show up here as new versions ship.":
     "أنت على أحدث إصدار. ستظهر الإصدارات الأقدم هنا مع طرح نسخ جديدة.",
   "Your Trakt watchlist is empty, nothing to import.":
@@ -1079,28 +1061,6 @@ const settings: Record<string, string> = {
   "Report a bug": "الإبلاغ عن خطأ",
   "Send a bug report straight to the Harbor team. Screenshots and screen recordings welcome.":
     "أرسل تقرير خطأ مباشرة إلى فريق Harbor. نرحب بلقطات الشاشة وتسجيلات الشاشة.",
-  "Highly recommended. This is what gives you the full Harbor experience: Popular, Trending, In Theaters, and per-service rails. Free at ":
-    "موصى به بشدة. هذا ما يمنحك تجربة Harbor الكاملة: الرائج، الترند، في دور السينما، وصفوف لكل خدمة. مجانًا على ",
-  ". Use the v3 key, not the read access token.": ". استخدم مفتاح v3، وليس رمز الوصول للقراءة.",
-  "Free at ": "مجانًا على ",
-  ". They email an activation link the first time. Click it, then come back and save.":
-    ". سيرسلون رابط تفعيل عبر البريد الإلكتروني في المرة الأولى. انقر عليه، ثم ارجع إلى هنا واحفظ.",
-  "Paid plan at ": "خطة مدفوعة على ",
-  ". Once saved, every poster gets re-rendered with IMDb, Rotten Tomatoes, and Metacritic stamped on it.":
-    ". بمجرد الحفظ، تتم إعادة تصيير كل ملصق مع إضافة أختام تقييمات IMDb، وRotten Tomatoes، وMetacritic عليه.",
-  "Free key at ": "مفتاح مجاني على ",
-  ". Adds Letterboxd and Trakt community ratings to detail pages, covering what OMDb misses.":
-    ". يضيف تقييمات مجتمع Letterboxd و Trakt إلى صفحات التفاصيل، لتغطية ما ينقص OMDb.",
-  "Two formats work: a bare RPDB-compatible server URL (your RPDB key above is still sent), or a full URL pattern from services like BetterPosters containing ":
-    "يعمل تنسيقان: عنوان خادم متوافق مع RPDB فقط (لا يزال مفتاح RPDB أعلاه يُرسل)، أو نمط عنوان URL كامل من خدمات مثل BetterPosters يحتوي على ",
-  ". Patterns may also use ": ". يمكن للأنماط أيضًا استخدام ",
-  ", ": "، ",
-  ", and ": "، و ",
-  ". Leave empty for the default.": ". اتركه فارغًا للوضع الافتراضي.",
-  "Fills in where TMDB comes up empty (anime, older catalog). Free at ":
-    "يملأ الفراغات عندما لا توفر TMDB نتائج (الأنمي، الكتالوجات القديمة). مجانًا على ",
-  '. Use the "personal" key, not the project one.':
-    '. استخدم المفتاح "الشخصي" (personal)، وليس مفتاح المشروع.',
   "Show Rotten Tomatoes score on cards": "إظهار تقييم Rotten Tomatoes على البطاقات",
   "Fresh tomatoes for 60% and up, splat for anything under.":
     "طماطم طازجة لنسبة 60% فأكثر، ولطخة لما دونها.",
@@ -1133,7 +1093,6 @@ const settings: Record<string, string> = {
   Appearance: "المظهر",
   Notifications: "الإشعارات",
   Help: "المساعدة",
-  العربية: "العربية",
   "When you back out of a title, Harbor saves a frame so the Continue Watching card looks like the spot you left.":
     "عند الخروج من عنوان، يحفظ Harbor لقطة ليبدو الكارت مثل المكان الذي توقفت فيه.",
   "Used for streaming availability and the Now Playing release window.":
@@ -1322,7 +1281,6 @@ const settings: Record<string, string> = {
   "Press a key…": "اضغط على مفتاح…",
   "Focus search": "التركيز على البحث",
   "Jump to the top-bar search from anywhere.": "الانتقال إلى شريط البحث العلوي من أي مكان.",
-  "Open Harbor's settings outside playback.": "فتح إعدادات Harbor خارج وضع التشغيل.",
   "Your face in Watch Together rooms, sessions, and chat. Sits on top of your Stremio account.":
     "صورتك في غرف المشاهدة المشتركة والجلسات والدردشة. تُبنى فوق حسابك في Stremio.",
   "Use my AniList avatar as my Harbor avatar":
@@ -1442,10 +1400,10 @@ const settings: Record<string, string> = {
     "يقوم Discord بنشر رسالة إلى قناة كلما أرسل Harbor إشعاراً. يستغرق الإعداد حوالي دقيقة.",
   "Open the Discord server where you want notifications to land.":
     "افتح خادم Discord الذي تريد أن تصل الإشعارات إليه.",
-  "Edit Channel": "Edit Channel",
-  Integrations: "Integrations",
-  "New Webhook": "New Webhook",
-  "Copy Webhook URL": "Copy Webhook URL",
+  "Edit Channel": "تعديل القناة",
+  Integrations: "عمليات التكامل",
+  "New Webhook": "Webhook جديد",
+  "Copy Webhook URL": "نسخ رابط Webhook",
   "Paste the URL into the box above and send a test.": "الصق الرابط في المربع أعلاه وأرسل اختباراً.",
   "No Integrations option? You need the Manage Webhooks permission. Ask whoever owns the server.":
     "لا يوجد خيار Integrations؟ تحتاج إلى إذن Manage Webhooks. اسأل مالك الخادم.",
@@ -1465,17 +1423,6 @@ const settings: Record<string, string> = {
   "add one in settings": "أضف واحداً في الإعدادات",
   "Using AIOStreams or another aggregator addon? Its own sorting and filtering happen inside the addon before Harbor ever sees the results, then Harbor applies the stream filter and result order above on top. If results look thinner than expected, keep one side permissive: either relax the addon's internal filters or set Harbor's stream filter to Balanced or Off.":
     "هل تستخدم AIOStreams أو إضافة تجميع أخرى؟ الفرز والتصفية الخاصة بها تحدث داخل الإضافة قبل أن يرى Harbor النتائج، ثم يُطبق Harbor فلتر أمان البث وترتيب النتائج أعلاه. إذا كانت النتائج أقل من المتوقع، اجعل أحدهما أكثر مرونة: إما أن تخفف الفلاتر الداخلية للإضافة أو تعين فلتر Harbor على متوازن أو إيقاف.",
-  "Get yours at ": "احصل عليه من ",
-  ". Used to check cache and unrestrict links. Harbor never adds or removes torrents on its own.":
-    ". يُستخدم للتحقق من التخزين المؤقت وفك القيود. Harbor لا يضيف أو يزيل التورنت بمفرده أبداً.",
-  ". Same read-only usage as Real-Debrid. Also lets you queue uncached torrents from the play picker.":
-    ". نفس استخدام Real-Debrid (للقراءة فقط). يسمح لك أيضاً بوضع التورنت غير المخزن مؤقتاً في قائمة الانتظار من المشغل.",
-  ". AllDebrid deprecated their cache-check endpoint, so streams may show as unknown until you actually hit Play.":
-    ". ألغت AllDebrid نقطة فحص التخزين المؤقت، لذا قد تظهر البثوث غير معروفة حتى تنقر على تشغيل.",
-  ". Uses the directdl endpoint, which skips queueing for anything already cached.":
-    ". يستخدم نقطة نهاية directdl، التي تتجاوز قائمة الانتظار لأي شيء مخزن مسبقاً.",
-  ". EU-hosted, fast cache check. Same read-only usage as the others.":
-    ". استضافة أوروبية وفحص سريع للذاكرة المؤقتة. نفس استخدام البقية (للقراءة فقط).",
   "Easynews+": "Easynews+",
   "{n} services need attention": "{n} خدمات تحتاج إلى انتباه",
   "Health for {n} services below": "حالة {n} خدمات أدناه",
@@ -1518,7 +1465,7 @@ const settings: Record<string, string> = {
   "PIN on": "الرمز مفعل",
   "PIN off": "الرمز معطل",
   "no tab locks": "لا يوجد أقفال للتبويبات",
-  "{n} tab locked": "تم قفل تبويب واحد",
+  "{n} tab locked": "تم قفل {n} تبويب",
   "{n} tabs locked": "تم قفل {n} تبويبات",
   "Profile security": "أمان الملف الشخصي",
   "PIN & sidebar locks": "الرمز السري وأقفال الشريط الجانبي",
@@ -1532,7 +1479,7 @@ const settings: Record<string, string> = {
   "Sidebar access": "الوصول للشريط الجانبي",
   "No locks. All sidebar tabs open without a PIN.":
     "لا يوجد أقفال. تفتح جميع تبويبات الشريط الجانبي بدون رمز.",
-  "{n} tab requires this profile's PIN.": "يتطلب تبويب واحد رمز هذا الملف الشخصي.",
+  "{n} tab requires this profile's PIN.": "يتطلب {n} تبويب رمز هذا الملف الشخصي.",
   "{n} tabs require this profile's PIN.": "تتطلب {n} تبويبات رمز هذا الملف الشخصي.",
   "Lock sidebar tabs": "قفل تبويبات الشريط الجانبي",
   "Locks only activate once a PIN is set.": "الأقفال تتفعل فقط عند تعيين رمز.",
@@ -1776,18 +1723,18 @@ const settings: Record<string, string> = {
   Relay: "الخادم",
   "On Cloudflare, click {b1}, then find {b2} and click {b3}.":
     "في Cloudflare، انقر على {b1}، ثم ابحث عن {b2} وانقر على {b3}.",
-  "Create Token": "Create Token",
-  "Create Custom Token": "Create Custom Token",
-  "Get started": "Get started",
+  "Create Token": "إنشاء رمز",
+  "Create Custom Token": "إنشاء رمز مخصّص",
+  "Get started": "البدء",
   "Cloudflare token form filled with name 'Harbor Relay' and one permission row set to Account / Workers Scripts / Edit":
     "نموذج رمز Cloudflare المليء بالاسم 'Harbor Relay' وصف أذونات واحد تم تعيينه على Account / Workers Scripts / Edit",
   "Token name can be anything. The permission row must be exactly {b1} + {b2} + {b3}.":
     "يمكن أن يكون اسم الرمز المميز أي شيء. يجب أن يكون صف الأذونات بالتحديد {b1} + {b2} + {b3}.",
-  "Workers Scripts": "Workers Scripts",
-  Edit: "Edit",
+  "Workers Scripts": "برامج Workers النصية",
+  Edit: "تعديل",
   "Leave everything below it alone. Scroll down, click {b1}, then {b2}. Copy the long string it shows you (you only see it once) and bring it back here.":
     "اترك كل شيء تحته كما هو. مرر لأسفل، انقر على {b1}، ثم {b2}. انسخ النص الطويل الذي يظهر لك (ستراه مرة واحدة فقط) وأحضره إلى هنا.",
-  "Continue to summary": "Continue to summary",
+  "Continue to summary": "المتابعة إلى الملخص",
   Continue: "متابعة",
   "Copy URL": "نسخ الرابط",
   "Something went wrong.": "حدث خطأ ما.",
@@ -1795,11 +1742,11 @@ const settings: Record<string, string> = {
     "لم يقم حسابك باختيار عنوان {code} المجاني الخاص به بعد. يطلب Cloudflare ذلك في المرة الأولى فقط. الإعداد سريع.",
   "Click {b1} in the top right. Pick the {b2} template (it's the default, should already be selected).":
     "انقر على {b1} في أعلى اليمين. اختر قالب {b2} (إنه الافتراضي، ويجب أن يكون محدداً بالفعل).",
-  Create: "Create",
+  Create: "إنشاء",
   "Hello World": "Hello World",
   "Cloudflare asks you to pick a name (this becomes {code}). Type any name (your first name works). Then click {b1}.":
     "يطلب منك Cloudflare اختيار اسم (سيصبح هذا {code}). اكتب أي اسم (اسمك الأول مناسب). ثم انقر على {b1}.",
-  Deploy: "Deploy",
+  Deploy: "نشر",
   "Come back here and hit {b1}. The Hello World can stay where it is. It's free and harmless.":
     "عد إلى هنا واضغط على {b1}. يمكن أن يبقى Hello World حيث هو. إنه مجاني وغير ضار.",
   Close: "إغلاق",
@@ -1919,12 +1866,10 @@ const settings: Record<string, string> = {
   "Could not send:": "تعذر الإرسال:",
   "Ready to send": "جاهز للإرسال",
   "Player freezes after the second episode autoplays":
-    "المشغل يتجمد بعد التشغيل التلقائي للحلقة الثانية",
-  "1. Open Movies\n2. Click The Substance\n3. Press Play\n4. ...":
-    "1. افتح الأفلام\n2. اضغط على The Substance\n3. اضغط تشغيل\n4. ...",
-  "Stream should start playing within a few seconds.": "يجب أن يبدأ البث خلال ثوانٍ قليلة.",
+    "يتجمّد المشغّل بعد التشغيل التلقائي للحلقة الثانية",
+  "Stream should start playing within a few seconds.": "يُفترض أن يبدأ تشغيل البث خلال بضع ثوانٍ.",
   "Spinner stays forever and nothing in the player loads.":
-    "تستمر أيقونة التحميل للأبد ولا يظهر شيء في المشغل.",
+    "يظل مؤشر التحميل ظاهرًا ولا يُحمَّل أي شيء في المشغّل.",
   "Email or Discord": "البريد الإلكتروني أو Discord",
   "Loading environment details…": "جاري تحميل تفاصيل بيئة التشغيل…",
   "Auto-included. No keys, no library, no URLs. Just structural flags so reproductions go faster.":
@@ -2342,8 +2287,6 @@ const settings: Record<string, string> = {
   "Saved {when} from Harbor {app}.": "حُفظ في {when} من Harbor {app}.",
   "Restoring...": "جارٍ الاستعادة...",
   "Restore and reload": "الاستعادة وإعادة التحميل",
-  "Xtream credentials were left out of this backup.":
-    "تمّ استبعاد بيانات اعتماد Xtream من هذه النسخة الاحتياطية.",
   "Get beta updates": "الحصول على التحديثات التجريبية",
   "Receive early builds with the newest fixes before they reach the stable release. Betas can be rough around the edges; switch this off to return to stable at the next update.":
     "تلقَّ إصدارات مبكّرة بأحدث الإصلاحات قبل وصولها إلى الإصدار المستقرّ. قد تكون النسخ التجريبية غير مصقولة؛ عطّل هذا للعودة إلى المستقرّ في التحديث القادم.",
@@ -2704,7 +2647,7 @@ const settings: Record<string, string> = {
   "Public mode uses just your username: watchlist, liked films, popular and Top 250. No password needed.":
     "الوضع العام يستخدم فقط اسم المستخدم: قائمة المشاهدة، الأفلام المعجب بها، الشائعة وأفضل 250 فيلماً. لا يلزم إدخال كلمة مرور.",
   "Full mode signs in with your Letterboxd password to also unlock your diary, friends activity and your personal ratings. Your password is sent only to Stremboxd to obtain a token — Harbor never stores it.":
-    "الوضع الكامل يسجل الدخول بكلمة مرور ليتربوكسد لفتح مذكراتك ونشاط أصدقائك وتقييماتك الشخصية. تُرسل كلمة مرورك إلى Stremboxd فقط للحصول على الرمز (Token) — ولا يحفظها Harbor أبدًا.",
+    "يسجّل الوضع الكامل الدخول بكلمة مرور Letterboxd لفتح يومياتك ونشاط أصدقائك وتقييماتك الشخصية أيضًا. لا تُرسل كلمة مرورك إلا إلى Stremboxd للحصول على رمز، ولا يحفظها Harbor مطلقًا.",
   "Letterboxd username": "اسم مستخدم ليتربوكسد",
   "Letterboxd password": "كلمة مرور ليتربوكسد",
   "Your Letterboxd password": "كلمة مرور ليتربوكسد الخاصة بك",
@@ -2712,9 +2655,9 @@ const settings: Record<string, string> = {
   "Connect / Verify": "ربط / تحقق",
   "Verify & connect": "تحقق وربط",
   "About Stremboxd": "حول Stremboxd",
-  "Connected — {n} catalogs available": "متصل — متاح {n} من الكتالوجات",
+  "Connected — {n} catalogs available": "متصل، يتوفر {n} كتالوج",
   "Full mode — diary, friends & ratings enabled":
-    "الوضع الكامل — تفعيل اليوميات، الأصدقاء والتقييمات",
+    "الوضع الكامل، تم تفعيل اليوميات والأصدقاء والتقييمات",
   "Catalogs to show": "الكتالوجات المراد عرضها",
   "Custom lists": "قوائم مخصصة",
   "Remove list": "إزالة القائمة",
@@ -2817,6 +2760,17 @@ const settings: Record<string, string> = {
     "ارجع إطاراً واحداً مع الإيقاف المؤقت. دقة بمستوى الإطار على mpv.",
   "Step forward one frame and pause. Frame-accurate on mpv.":
     "تقدّم إطاراً واحداً مع الإيقاف المؤقت. دقة بمستوى الإطار على mpv.",
+  "Autoplay trailer on detail pages": "تشغيل المقطع الدعائي تلقائيًا في صفحات التفاصيل",
+  "YOUR FILTERS": "مرشّحاتك",
+  "Open Harbor's settings outside playback.": "فتح إعدادات Harbor خارج وضع التشغيل.",
+  "Xtream credentials were left out of this backup.":
+    "تمّ استبعاد بيانات اعتماد Xtream من هذه النسخة الاحتياطية.",
+  "Content advisory style": "نمط تنبيه المحتوى",
+  "Use color to distinguish severity, or keep every advisory monochrome.":
+    "استخدم الألوان لتمييز مستوى الشدة، أو اجعل جميع التنبيهات أحادية اللون.",
+  "Monochrome (White)": "أحادي (أبيض)",
+  "When a movie or episode starts, briefly show its Common Sense Media parental guide (violence, nudity, profanity, substances) with severity. Fades on its own.":
+    "عند بدء فيلم أو حلقة، اعرض لفترة وجيزة إرشادات المحتوى من Common Sense Media (العنف والعري والألفاظ والمواد) مع مستوى الشدة، ثم أخفها تلقائياً.",
 };
 
 export default settings;

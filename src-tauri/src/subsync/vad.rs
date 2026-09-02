@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::time::Duration;
-use tokio::io::AsyncReadExt;
 use tokio::process::Command;
 
 use crate::transcode::locate_ffmpeg;
@@ -97,9 +96,11 @@ pub async fn speech_intervals_ml(
     backend: Backend,
     map_spec: &str,
 ) -> Result<Vec<(f32, f32)>, String> {
-    Ok(speech_report_ml(url, headers, start_sec, len_sec, cfg, backend, map_spec)
-        .await?
-        .intervals)
+    Ok(
+        speech_report_ml(url, headers, start_sec, len_sec, cfg, backend, map_spec)
+            .await?
+            .intervals,
+    )
 }
 
 pub async fn speech_report_ml(
@@ -129,7 +130,11 @@ pub async fn speech_report_ml(
         probs.iter().filter(|&&p| p >= cfg.speech_threshold).count() as f32 / probs.len() as f32
     };
     let intervals = hysteresis(&probs, frame_ms, cfg, start_sec, start_sec + len_sec);
-    Ok(VadReport { intervals, speech_frac, gated_frac })
+    Ok(VadReport {
+        intervals,
+        speech_frac,
+        gated_frac,
+    })
 }
 
 fn has_ctl(s: &str) -> bool {
@@ -166,7 +171,10 @@ async fn decode_pcm(
         return Err("ffmpeg not found".into());
     };
     let mut cmd = Command::new(&ff);
-    cmd.arg("-hide_banner").arg("-nostats").arg("-loglevel").arg("error");
+    cmd.arg("-hide_banner")
+        .arg("-nostats")
+        .arg("-loglevel")
+        .arg("error");
     cmd.arg("-user_agent")
         .arg(user_agent(headers).unwrap_or_else(|| "Harbor".into()));
     let blob = safe_header_blob(headers);
@@ -193,20 +201,28 @@ async fn decode_pcm(
         .arg("-");
     cmd.stdout(std::process::Stdio::piped());
     cmd.stderr(std::process::Stdio::null());
+    cmd.kill_on_drop(true);
     #[cfg(windows)]
     cmd.creation_flags(0x0800_0000 | 0x0000_4000);
 
-    let mut child = cmd.spawn().map_err(|e| format!("spawn ffmpeg: {}", e))?;
-    let mut stdout = child.stdout.take().ok_or("no stdout")?;
-    let mut raw: Vec<u8> = Vec::new();
-    let read = stdout.read_to_end(&mut raw);
-    let _ = tokio::time::timeout(Duration::from_secs(HARD_TIMEOUT_SECS), read).await;
-    let _ = child.kill().await;
+    let output = tokio::time::timeout(Duration::from_secs(HARD_TIMEOUT_SECS), cmd.output())
+        .await
+        .map_err(|_| "ffmpeg-timeout".to_string())?
+        .map_err(|error| format!("run ffmpeg: {}", error))?;
+    if !output.status.success() {
+        return Err(format!("ffmpeg-exit-status: {}", output.status));
+    }
+    let raw = output.stdout;
 
     let mut pcm = Vec::with_capacity(raw.len() / 4);
     let mut i = 0;
     while i + 4 <= raw.len() {
-        pcm.push(f32::from_le_bytes([raw[i], raw[i + 1], raw[i + 2], raw[i + 3]]));
+        pcm.push(f32::from_le_bytes([
+            raw[i],
+            raw[i + 1],
+            raw[i + 2],
+            raw[i + 3],
+        ]));
         i += 4;
     }
     Ok(pcm)
@@ -277,7 +293,11 @@ mod tests {
 
     #[test]
     fn hysteresis_merges_padded_neighbors() {
-        let cfg = VadConfig { speech_pad_ms: 200, min_silence_ms: 100, ..Default::default() };
+        let cfg = VadConfig {
+            speech_pad_ms: 200,
+            min_silence_ms: 100,
+            ..Default::default()
+        };
         let mut probs = vec![0.0f32; 200];
         for p in probs.iter_mut().take(40).skip(20) {
             *p = 0.9;
@@ -301,7 +321,11 @@ mod tests {
 
     #[test]
     fn hysteresis_offsets_to_absolute_time() {
-        let cfg = VadConfig { speech_pad_ms: 0, min_speech_ms: 50, ..Default::default() };
+        let cfg = VadConfig {
+            speech_pad_ms: 0,
+            min_speech_ms: 50,
+            ..Default::default()
+        };
         let mut probs = vec![0.0f32; 300];
         for p in probs.iter_mut().take(200).skip(100) {
             *p = 0.9;

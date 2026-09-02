@@ -55,7 +55,7 @@ export function GroupMembers({
         <button
           type="button"
           onClick={onInvite}
-          className="flex min-h-[64px] items-center gap-3 rounded-[14px] border border-dashed border-edge bg-surface/30 px-4 text-start text-ink-muted transition-colors hover:border-edge hover:bg-surface hover:text-ink"
+          className="flex min-h-[64px] items-center gap-3 rounded-lg border border-dashed border-edge bg-surface/30 px-4 text-start text-ink-muted transition-colors hover:border-edge hover:bg-surface hover:text-ink"
         >
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-elevated ring-1 ring-edge-soft">
             <UserPlus size={18} />
@@ -66,7 +66,7 @@ export function GroupMembers({
           </span>
         </button>
       )}
-      {error && <p className="rounded-[10px] bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>}
+      {error && <p className="rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {ordered.map((m, i) => (
           <MemberCard
@@ -113,7 +113,7 @@ function MemberCard({
   return (
     <div
       style={{ animationDelay: `${Math.min(index * 30, 300)}ms`, animationDuration: "400ms", animationFillMode: "both" }}
-      className="group/member flex items-center gap-3 rounded-[14px] bg-surface p-3 ring-1 ring-edge-soft transition-colors hover:bg-elevated motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1"
+      className="group/member flex items-center gap-3 rounded-lg bg-surface p-3 ring-1 ring-edge-soft transition-colors hover:bg-elevated motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1"
     >
       <UserHoverCard handle={member.handle}>
         <button

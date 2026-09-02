@@ -1,4 +1,5 @@
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 export function ReaderDock({
   hasPrev,
@@ -11,18 +12,19 @@ export function ReaderDock({
   onPrev: () => void;
   onNext: () => void;
 }) {
+  const t = useT();
   return (
     <div
       className="bg-gradient-to-t from-[#0b0b0d]/95 to-transparent pt-9"
       style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 14px)" }}
     >
       <div className="flex items-center justify-center gap-3 px-4">
-        <ChapterButton label="Previous chapter" disabled={!hasPrev} onPress={onPrev}>
+        <ChapterButton label={t("Previous chapter")} disabled={!hasPrev} onPress={onPrev}>
           <ChevronsLeft size={20} strokeWidth={2.4} />
-          <span>Prev</span>
+          <span>{t("Prev")}</span>
         </ChapterButton>
-        <ChapterButton label="Next chapter" disabled={!hasNext} onPress={onNext}>
-          <span>Next</span>
+        <ChapterButton label={t("Next chapter")} disabled={!hasNext} onPress={onNext}>
+          <span>{t("Next")}</span>
           <ChevronsRight size={20} strokeWidth={2.4} />
         </ChapterButton>
       </div>

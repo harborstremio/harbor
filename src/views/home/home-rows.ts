@@ -30,8 +30,14 @@ export function buildTmdbSpecs(settings: Settings): RowSpec[] {
 
 export async function buildTmdbRows(settings: Settings) {
   const specs = buildTmdbSpecs(settings);
+  let failed = 0;
   const firstPages = await Promise.all(
-    specs.map((s) => s.fetcher(1).catch(() => [] as Meta[])),
+    specs.map((s) =>
+      s.fetcher(1).catch(() => {
+        failed += 1;
+        return [] as Meta[];
+      }),
+    ),
   );
   const rows: HomeRow[] = specs
     .map((spec, i) => ({
@@ -53,10 +59,16 @@ export async function buildTmdbRows(settings: Settings) {
     byKey("tmdb-now-playing")[0],
     byKey("tmdb-on-the-air")[0],
   ].filter(Boolean) as Meta[];
-  return { rows, hero };
+  return { rows, hero, failed };
 }
 
 export async function buildCinemetaRows() {
+  let failed = 0;
+  const guard = (p: Promise<Meta[]>): Promise<Meta[]> =>
+    p.catch(() => {
+      failed += 1;
+      return [] as Meta[];
+    });
   const [
     movies,
     series,
@@ -76,23 +88,23 @@ export async function buildCinemetaRows() {
     sComedy,
     sCrime,
   ] = await Promise.all([
-    topMovies().catch(() => [] as Meta[]),
-    topSeries().catch(() => [] as Meta[]),
-    topMovies("Drama").catch(() => [] as Meta[]),
-    topMovies("Comedy").catch(() => [] as Meta[]),
-    topMovies("Action").catch(() => [] as Meta[]),
-    topMovies("Sci-Fi").catch(() => [] as Meta[]),
-    topMovies("Thriller").catch(() => [] as Meta[]),
-    topMovies("Animation").catch(() => [] as Meta[]),
-    topMovies("Horror").catch(() => [] as Meta[]),
-    topMovies("Romance").catch(() => [] as Meta[]),
-    topMovies("Adventure").catch(() => [] as Meta[]),
-    topMovies("Documentary").catch(() => [] as Meta[]),
-    topMovies("Mystery").catch(() => [] as Meta[]),
-    topMovies("Fantasy").catch(() => [] as Meta[]),
-    topSeries("Drama").catch(() => [] as Meta[]),
-    topSeries("Comedy").catch(() => [] as Meta[]),
-    topSeries("Crime").catch(() => [] as Meta[]),
+    guard(topMovies()),
+    guard(topSeries()),
+    guard(topMovies("Drama")),
+    guard(topMovies("Comedy")),
+    guard(topMovies("Action")),
+    guard(topMovies("Sci-Fi")),
+    guard(topMovies("Thriller")),
+    guard(topMovies("Animation")),
+    guard(topMovies("Horror")),
+    guard(topMovies("Romance")),
+    guard(topMovies("Adventure")),
+    guard(topMovies("Documentary")),
+    guard(topMovies("Mystery")),
+    guard(topMovies("Fantasy")),
+    guard(topSeries("Drama")),
+    guard(topSeries("Comedy")),
+    guard(topSeries("Crime")),
   ]);
   const make = (
     key: string,
@@ -122,7 +134,7 @@ export async function buildCinemetaRows() {
   ].filter((r) => r.metas.length > 0);
   const hero = [movies[0], series[0], mDrama[0], mComedy[0], mAction[0], mScifi[0]]
     .filter(Boolean) as Meta[];
-  return { rows, hero };
+  return { rows, hero, failed };
 }
 
 export async function buildAnimeHomeRows(): Promise<HomeRow[]> {

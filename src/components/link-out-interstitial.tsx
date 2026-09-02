@@ -6,10 +6,12 @@ import { ExternalLinkViewer } from "@/components/external-link-viewer";
 import { pushBackHandler } from "@/lib/back-intercept";
 import { createExternalLinkViewerFocusScope } from "@/lib/external-link-viewer-modal";
 import { isBackKey } from "@/lib/keyboard-navigation/geometry";
+import { useT } from "@/lib/i18n";
 import {
   chooseExternalLinkDestination,
   handleExternalLinkBack,
   openExternalLinkInBrowser,
+  type ExternalLinkBrowserOpenError,
 } from "@/lib/social/external-link-journey-controller";
 import {
   readExternalLinkDestinationPreference,
@@ -17,10 +19,7 @@ import {
   writeExternalLinkDestinationPreference,
   type ExternalLinkDestinationPreference,
 } from "@/lib/social/external-link-preference";
-import {
-  parseExternalLink,
-  type ExternalLinkParseFailureReason,
-} from "@/lib/social/external-link-policy";
+import { parseExternalLink } from "@/lib/social/external-link-policy";
 import {
   closeLinkOut,
   isCurrentLinkOutJourney,
@@ -30,16 +29,6 @@ import {
 import { openExternalUrlStrict } from "@/lib/window";
 
 type Stage = "warning" | "viewer";
-
-function invalidDestinationMessage(reason: ExternalLinkParseFailureReason) {
-  if (reason === "unsupported-protocol") {
-    return "Harbor can open only HTTP or HTTPS destinations.";
-  }
-  if (reason === "embedded-credentials") {
-    return "Harbor cannot open links that include embedded credentials.";
-  }
-  return "Harbor could not verify this destination.";
-}
 
 export function LinkOutInterstitial() {
   const journey = useLinkOutJourney();
@@ -70,11 +59,12 @@ function LinkOutJourneyInterstitial({
   preference: ExternalLinkDestinationPreference;
   onPreferenceChange: (next: ExternalLinkDestinationPreference) => void;
 }) {
+  const t = useT();
   const parsed = useMemo(() => parseExternalLink(journey.url), [journey.url]);
   const [stage, setStage] = useState<Stage>("warning");
   const [menuOpen, setMenuOpen] = useState(false);
   const [openingBrowser, setOpeningBrowser] = useState(false);
-  const [browserError, setBrowserError] = useState<string | null>(null);
+  const [browserError, setBrowserError] = useState<ExternalLinkBrowserOpenError | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const goBackRef = useRef<HTMLButtonElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -84,6 +74,11 @@ function LinkOutJourneyInterstitial({
   const actionLayout = parsed.ok
     ? resolveExternalLinkActionLayout(preference, parsed.link.canOpenInHarbor)
     : null;
+  const browserErrorMessage =
+    browserError?.detail ??
+    (browserError?.code === "browser-open-failed"
+      ? t("Harbor could not open your browser.")
+      : null);
 
   const setMenuOpenState = useCallback((open: boolean) => {
     menuOpenRef.current = open;
@@ -180,7 +175,9 @@ function LinkOutJourneyInterstitial({
       aria-labelledby={stage === "warning" ? "link-out-title" : undefined}
       aria-describedby={stage === "warning" ? "link-out-description" : undefined}
       aria-label={
-        stage === "viewer" && parsed.ok ? `External site: ${parsed.link.hostname}` : undefined
+        stage === "viewer" && parsed.ok
+          ? t("External site: {hostname}", { hostname: parsed.link.hostname })
+          : undefined
       }
       tabIndex={-1}
       data-tv-focus-scope
@@ -190,7 +187,7 @@ function LinkOutJourneyInterstitial({
         <ExternalLinkViewer
           link={parsed.link}
           openingBrowser={openingBrowser}
-          browserError={browserError}
+          browserError={browserErrorMessage}
           onOpenBrowser={openInBrowser}
           onReload={() => setBrowserError(null)}
           onClose={closeJourney}
@@ -204,16 +201,16 @@ function LinkOutJourneyInterstitial({
             id="link-out-title"
             className="mt-6 font-display text-[26px] font-medium tracking-tight text-ink"
           >
-            You&apos;re leaving Harbor
+            {t("You're leaving Harbor")}
           </h1>
           <p id="link-out-description" className="mt-2 text-[14px] leading-relaxed text-ink-muted">
-            This link goes to an external site that Harbor does not control or vouch for.
-            Triple-check the address before you continue, and never enter your Harbor password
-            anywhere but Harbor.
+            {t(
+              "This link goes to an external site that Harbor does not control or vouch for. Triple-check the address before you continue, and never enter your Harbor password anywhere but Harbor.",
+            )}
           </p>
-          <div className="mt-6 flex flex-col gap-1 rounded-[14px] border border-edge-soft bg-surface p-4 text-start">
+          <div className="mt-6 flex flex-col gap-1 rounded-lg border border-edge-soft bg-surface p-4 text-start">
             <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-              Destination
+              {t("Destination")}
             </span>
             <span className="truncate text-[17px] font-semibold text-ink">{host}</span>
             <span className="mt-1 break-all font-mono text-[12px] leading-snug text-ink-subtle">
@@ -221,21 +218,26 @@ function LinkOutJourneyInterstitial({
             </span>
           </div>
           <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-danger/12 px-3 py-1.5 text-[12px] font-medium text-danger">
-            <TriangleAlert size={14} strokeWidth={2.2} /> Only continue if you fully trust this link
+            <TriangleAlert size={14} strokeWidth={2.2} />{" "}
+            {t("Only continue if you fully trust this link")}
           </div>
           {!parsed.ok && (
             <p role="alert" className="mt-4 text-[13px] leading-relaxed text-danger">
-              {invalidDestinationMessage(parsed.reason)}
+              {parsed.reason === "unsupported-protocol"
+                ? t("Harbor can open only HTTP or HTTPS destinations.")
+                : parsed.reason === "embedded-credentials"
+                  ? t("Harbor cannot open links that include embedded credentials.")
+                  : t("Harbor could not verify this destination.")}
             </p>
           )}
           {parsed.ok && !parsed.link.canOpenInHarbor && (
             <p className="mt-4 text-[13px] leading-relaxed text-ink-muted">
-              Harbor&apos;s temporary viewer requires HTTPS.
+              {t("Harbor's temporary viewer requires HTTPS.")}
             </p>
           )}
-          {browserError && (
+          {browserErrorMessage && (
             <p role="alert" className="mt-4 text-[13px] leading-relaxed text-danger">
-              {browserError}
+              {browserErrorMessage}
             </p>
           )}
           <div className="mt-7 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
@@ -246,7 +248,7 @@ function LinkOutJourneyInterstitial({
               data-tv-initial-focus
               className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[12px] bg-surface px-5 text-[14px] font-medium text-ink ring-1 ring-edge transition-colors hover:bg-raised sm:w-auto"
             >
-              <ArrowLeft size={18} /> Go back
+              <ArrowLeft size={18} /> {t("Go back")}
             </button>
             {actionLayout && (
               <ExternalLinkSplitButton

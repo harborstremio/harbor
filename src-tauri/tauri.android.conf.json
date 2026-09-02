@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "build": {
+    "beforeDevCommand": "pnpm dev --mode android",
+    "beforeBuildCommand": "pnpm build:tv",
+    "devUrl": "http://localhost:1420"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Harbor",
+        "url": "index-tv.html",
+        "backgroundColor": [8, 9, 10, 255]
+      }
+    ]
+  },
+  "bundle": {
+    "externalBin": [],
+    "fileAssociations": [],
+    "android": {
+      "minSdkVersion": 24
+    }
+  },
+  "plugins": {
+    "updater": null
+  }
+}

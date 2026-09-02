@@ -1,4 +1,5 @@
-import { ChevronDown, Search } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { browseFetcher, listBrowseCatalogs, type BrowseCatalog } from "@/lib/catalog-browse";

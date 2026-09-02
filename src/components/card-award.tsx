@@ -80,7 +80,7 @@ export function ClassicAwardBadge({
   const topClass = above >= 2 ? "top-[56px]" : above === 1 ? "top-[34px]" : "top-2";
   return (
     <span
-      className={`pointer-events-none absolute start-2 inline-flex max-w-[calc(100%-1rem)] items-center gap-1 rounded-md bg-canvas/85 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.1em] text-ink ring-1 ring-edge-soft/60 backdrop-blur-md ${topClass}`}
+      className={`pointer-events-none absolute start-2 inline-flex max-w-[calc(100%-1rem)] items-center gap-1 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.1em] text-ink ring-1 ring-edge-soft/60 ${topClass}`}
     >
       <AwardLogo type={win.type} size={11} />
       <span className="truncate">{labelFor(win)}</span>

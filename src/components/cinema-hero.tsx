@@ -1,4 +1,5 @@
-import { ChevronRight, Info, Play } from "lucide-react";
+import { ChevronRight, Info } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useRef, useState } from "react";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import { MetaAwardsCorner } from "@/components/meta-awards-corner";
@@ -391,14 +392,14 @@ function CinemaSlide({
           <div className="mt-2 flex items-center gap-3">
             <button
               onClick={() => openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay })}
-              className="flex h-12 items-center gap-2.5 rounded-md bg-ink px-7 text-[14.5px] font-semibold text-canvas shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.5)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]"
+              className="flex h-12 items-center gap-2.5 rounded-md bg-ink px-7 text-[14.5px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]"
             >
               <Play size={17} fill="currentColor" />
               {t("Play")}
             </button>
             <button
               onClick={() => openMeta(meta)}
-              className="flex h-12 items-center gap-2.5 rounded-md border border-edge bg-canvas/50 px-6 text-[14.5px] font-medium text-ink backdrop-blur-sm transition-colors duration-200 hover:bg-canvas/70"
+              className="flex h-12 items-center gap-2.5 rounded-md bg-canvas/80 px-6 text-[14.5px] font-medium text-ink transition-colors duration-200 hover:bg-canvas/95"
             >
               <Info size={16} strokeWidth={2} />
               {t("More info")}

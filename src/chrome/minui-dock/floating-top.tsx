@@ -1,9 +1,11 @@
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, Monitor } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { NotificationCenter } from "@/components/notification-center/notification-center";
 import { AccountMenu } from "@/chrome/account-menu/account-menu";
 import { RecordingPill } from "@/chrome/recording-pill";
 import { TogetherButton } from "@/chrome/topbar";
+import { useBigPictureEntry } from "@/chrome/use-big-picture-entry";
 import { useT } from "@/lib/i18n";
 import { useSearch } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
@@ -18,6 +20,7 @@ export function FloatingTop() {
   const { settings } = useSettings();
   const { setOpen: setSearchOpen } = useSearch();
   const t = useT();
+  const bigPicture = useBigPictureEntry();
 
   const themePreset =
     settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
@@ -60,6 +63,11 @@ export function FloatingTop() {
         <RecordingPill />
         <NotificationCenter />
         {!liveActive && <TogetherButton variant="ghost" popoverPlacement="below-right" />}
+        {bigPicture.offer && (
+          <PillBtn label={bigPicture.label} onClick={bigPicture.open}>
+            <Monitor size={16} strokeWidth={2.2} />
+          </PillBtn>
+        )}
         <PillBtn label={t("common.search")} onClick={() => setSearchOpen(true)}>
           <Search size={16} strokeWidth={2.2} />
           <span className="hidden sm:inline">{t("common.search")}</span>

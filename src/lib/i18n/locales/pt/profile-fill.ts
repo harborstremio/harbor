@@ -1,7 +1,7 @@
 const profileFill: Record<string, string> = {
-  "General": "Geral",
-  "Look": "Aparência",
-  "optional": "opcional",
+  General: "Geral",
+  Look: "Aparência",
+  optional: "opcional",
   "Your name and the details shown at the top of your profile.":
     "Seu nome e os detalhes exibidos no topo do seu perfil.",
   "Your avatar, banner, and how the whole profile is styled.":
@@ -15,17 +15,17 @@ const profileFill: Record<string, string> = {
   "Show a Minecraft card with your username":
     "Mostre um cartão do Minecraft com seu nome de usuário",
   "Showing {name}": "Mostrando {name}",
-  "Manage connection": "Gerir ligação",
-  "Show your Simkl card": "Mostrar o seu cartão Simkl",
+  "Manage connection": "Gerenciar conexão",
+  "Show your Simkl card": "Mostrar seu cartão do Simkl",
   "Off by default. Shows your Simkl avatar, name and watch stats on your profile for anyone who visits. Manage the connection itself in Settings, Simkl.":
-    "Desativado por predefinição. Mostra o seu avatar, nome e estatísticas do Simkl no perfil a quem o visitar. A ligação em si é gerida nas Definições, secção Simkl.",
+    "Desativado por padrão. Mostra seu avatar, nome e estatísticas do Simkl no perfil para quem o visitar. Gerencie a conexão em Configurações, Simkl.",
   "On Simkl": "No Simkl",
-  "Open Simkl profile": "Abrir perfil Simkl",
-  "Last watched {when}": "Visto pela última vez {when}",
-  "Nothing tracked on Simkl yet": "Ainda não há nada registado no Simkl",
+  "Open Simkl profile": "Abrir perfil do Simkl",
+  "Last watched {when}": "Assistido pela última vez {when}",
+  "Nothing tracked on Simkl yet": "Nada registrado no Simkl ainda",
   "Link Simkl and everything you watch shows up right here.":
-    "Associe o Simkl e tudo o que vir aparece aqui.",
-  "Could not reach Simkl.": "Não foi possível contactar o Simkl.",
+    "Conecte o Simkl e tudo o que você assistir aparecerá aqui.",
+  "Could not reach Simkl.": "Não foi possível acessar o Simkl.",
   "Your rating": "Sua avaliação",
   "Tap the heart on any movie, show, manga, or character to save it here.":
     "Toque no coração de qualquer filme, série, mangá ou personagem para salvá-lo aqui.",
@@ -37,8 +37,8 @@ const profileFill: Record<string, string> = {
   "Save changes": "Salvar alterações",
   "Ratings need a Harbor account": "As avaliações exigem uma conta Harbor",
   "Your Harbor account is separate from your Stremio sign in. Create one free or sign in from Settings.":
-    "A sua conta Harbor é separada do seu início de sessão no Stremio. Crie uma gratuitamente ou inicie sessão nas Definições.",
-  "Open account settings": "Abrir definições da conta",
+    "Sua conta Harbor é separada do login no Stremio. Crie uma gratuitamente ou entre pelas Configurações.",
+  "Open account settings": "Abrir configurações da conta",
   "Save rating": "Salvar avaliação",
   "Rate this": "Avaliar",
   "Write a review": "Escrever uma crítica",
@@ -224,8 +224,6 @@ const profileFill: Record<string, string> = {
   "Add background": "Adicionar plano de fundo",
   "In a watch party": "Em uma sessão do Assistir Juntos",
   "{count} aboard": "{count} a bordo",
-  "Paused on ": "Pausado em ",
-  "Watching ": "Assistindo ",
   something: "algo",
   Share: "Compartilhar",
   "Share profile": "Compartilhar perfil",

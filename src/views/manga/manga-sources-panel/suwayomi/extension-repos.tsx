@@ -34,7 +34,13 @@ function repoHost(indexUrl: string): string {
   }
 }
 
-export function ExtensionRepos({ config, onChanged }: { config: ServerConfig; onChanged: () => void }) {
+export function ExtensionRepos({
+  config,
+  onChanged,
+}: {
+  config: ServerConfig;
+  onChanged: () => void;
+}) {
   const t = useT();
   const [supported, setSupported] = useState<boolean | null>(null);
   const [repos, setRepos] = useState<ExtensionRepo[]>([]);
@@ -156,7 +162,11 @@ export function ExtensionRepos({ config, onChanged }: { config: ServerConfig; on
           disabled={busy || !url.trim()}
           className="flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-5 text-[14.5px] font-semibold text-canvas transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
         >
-          {busy ? <Loader2 size={17} className="animate-spin" /> : <Plus size={17} strokeWidth={2.4} />}
+          {busy ? (
+            <Loader2 size={17} className="animate-spin" />
+          ) : (
+            <Plus size={17} strokeWidth={2.4} />
+          )}
           {t("Add")}
         </button>
       </div>
@@ -164,7 +174,12 @@ export function ExtensionRepos({ config, onChanged }: { config: ServerConfig; on
       {error && <p className="text-[13px] font-medium text-danger">{error}</p>}
 
       <div className="flex flex-wrap gap-2">
-        {SUGGESTIONS.filter((s) => !have.has(`https://raw.githubusercontent.com/${s.url.split("github.com/")[1]}/repo/index.min.json`.toLowerCase())).map((s) => (
+        {SUGGESTIONS.filter(
+          (s) =>
+            !have.has(
+              `https://raw.githubusercontent.com/${s.url.split("github.com/")[1]}/repo/index.min.json`.toLowerCase(),
+            ),
+        ).map((s) => (
           <button
             key={s.url}
             type="button"
@@ -173,7 +188,7 @@ export function ExtensionRepos({ config, onChanged }: { config: ServerConfig; on
             className="flex flex-col items-start rounded-xl bg-raised px-3.5 py-2 text-start ring-1 ring-edge-soft transition-all hover:ring-edge active:scale-[0.98] disabled:opacity-50"
           >
             <span className="text-[13px] font-semibold text-ink">{s.label}</span>
-            <span className="text-[11.5px] text-ink-subtle">{s.sub}</span>
+            <span className="text-[11.5px] text-ink-subtle">{t(s.sub)}</span>
           </button>
         ))}
       </div>

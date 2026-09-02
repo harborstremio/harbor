@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { emptySnapshot, type PlayerBridge, type PlayerSnapshot } from "@/lib/player/bridge";
+import {
+  emptySnapshot,
+  initialPlayerSnapshot,
+  type PlayerBridge,
+  type PlayerSnapshot,
+} from "@/lib/player/bridge";
 import { probeMpv } from "@/lib/player/mpv";
 import { mergeMpvOptions } from "@/lib/player/mpv-tuning";
 import { metaIsAnime } from "@/lib/player/anime-src";
@@ -13,6 +18,7 @@ import type { PlayerSrc } from "@/lib/view";
 import type { Settings } from "@/lib/settings";
 import { setPlaybackClock } from "@/lib/player/playback-clock";
 import { isLinuxDesktop, isWindowsDesktop } from "@/lib/platform";
+import { isLivePlaybackSrc } from "@/lib/player/live-src";
 import { svpEnsureRunning, svpStatus } from "@/lib/svp";
 import { isSvpActiveForMedia } from "@/lib/player/svp-policy";
 import { pickBridge } from "../player-utils";
@@ -49,7 +55,7 @@ export function usePlayerBridge(params: {
 }) {
   const { bridgeRef, videoMountRef, src, settings } = params;
 
-  const [snap, setSnap] = useState<PlayerSnapshot>(emptySnapshot);
+  const [snap, setSnap] = useState<PlayerSnapshot>(initialPlayerSnapshot);
   const prevSnapRef = useRef<PlayerSnapshot>(emptySnapshot);
   const [engine, setEngine] = useState<"html5" | "mpv">("html5");
   const [autoFallbackTried, setAutoFallbackTried] = useState(false);
@@ -86,10 +92,7 @@ export function usePlayerBridge(params: {
   useEffect(() => {
     if (svpOn) void svpEnsureRunning().catch(() => {});
   }, [svpOn]);
-  const isLiveLike =
-    !!src.meta.id?.startsWith("iptv:") ||
-    (!!src.meta.type &&
-      !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
+  const isLiveLike = isLivePlaybackSrc(src);
   const chosenEngine =
     isLiveLike && !src.notWebReady ? "html5" : autoFallbackTried ? "mpv" : settings.playerEngine;
   const bridgeKey = `${chosenEngine}|${anime4kOn}|${embedActive}|${anime4kOn ? settings.playerAnime4kShaders.join(",") : ""}|${generalShaderKey(settings)}|${svpOn}|${svpOn ? settings.svpVpyPath : ""}`;

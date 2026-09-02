@@ -84,7 +84,7 @@ export function OverviewModal({
       aria-modal="true"
       aria-label={t("{title} overview", { title })}
       onClick={onClose}
-      className="critics-backdrop-in fixed inset-0 z-[120] flex items-center justify-center bg-canvas/85 p-8 backdrop-blur-md"
+      className="critics-backdrop-in fixed inset-0 z-[170] flex items-center justify-center bg-canvas/85 p-8 backdrop-blur-md"
     >
       <div
         onClick={(e) => e.stopPropagation()}

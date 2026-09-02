@@ -4,6 +4,7 @@ import { HarborMark } from "@/components/icons/harbor-mark";
 import { NotificationCenter } from "@/components/notification-center/notification-center";
 import { AccountMenu } from "@/chrome/account-menu/account-menu";
 import { CollapseToggle } from "@/chrome/sidebar/collapse-toggle";
+import { SidebarBigPictureEntry } from "@/chrome/sidebar/big-picture-entry";
 import { RecordingPill } from "@/chrome/recording-pill";
 import { TogetherButton } from "@/chrome/topbar";
 import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
@@ -133,7 +134,8 @@ export function SideRail() {
             {!collapsed && <NotificationCenter />}
             {!collapsed && view !== "live" && <TogetherButton variant="ghost" popoverPlacement="above-left" />}
           </div>
-          <div className={`flex ${collapsed ? "justify-center" : ""}`}>
+          <div className={`flex flex-col gap-1 ${collapsed ? "items-center" : ""}`}>
+            <SidebarBigPictureEntry collapsed={collapsed} />
             <CollapseToggle collapsed={collapsed} />
           </div>
           {!collapsed && <AccountMenu trigger="row" placement="up" align="stretch" showSettings onOpenSettings={() => setView("settings")} settingsActive={view === "settings"} />}

@@ -103,7 +103,7 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
   return (
     <section
       aria-label={t("Profile song")}
-      className="relative rounded-[14px] bg-surface ring-1 ring-edge-soft"
+      className="relative rounded-lg bg-surface ring-1 ring-edge-soft"
     >
       {isSpotify ? (
         <iframe
@@ -112,7 +112,7 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
           loading="lazy"
           allow="encrypted-media; clipboard-write"
           referrerPolicy="strict-origin-when-cross-origin"
-          className="block h-[152px] w-full rounded-[14px] border-0"
+          className="block h-[152px] w-full rounded-lg border-0"
         />
       ) : (
         <>
@@ -121,7 +121,7 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
               type="button"
               onClick={() => (started ? setPlaying((p) => !p) : startPlay())}
               aria-label={playing ? t("Pause") : t("Play")}
-              className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-elevated ring-1 ring-edge-soft"
+              className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-md bg-elevated ring-1 ring-edge-soft"
             >
               {meta?.thumbnail ? (
                 <img src={meta.thumbnail} alt="" draggable={false} className="h-full w-full object-cover" />
@@ -158,7 +158,7 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
                 {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
               </button>
               <div
-                className={`absolute bottom-full left-1/2 z-20 flex -translate-x-1/2 flex-col items-center rounded-[14px] border border-edge-soft bg-canvas/95 px-2.5 py-3 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.75)] backdrop-blur-md transition-[opacity,transform] duration-150 ${
+                className={`absolute bottom-full left-1/2 z-20 flex -translate-x-1/2 flex-col items-center rounded-lg border border-edge-soft bg-canvas/95 px-2.5 py-3 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.75)] backdrop-blur-md transition-[opacity,transform] duration-150 ${
                   barOpen ? "scale-100 opacity-100" : "pointer-events-none scale-90 opacity-0"
                 }`}
               >

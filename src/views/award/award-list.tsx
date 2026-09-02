@@ -1,4 +1,5 @@
-import { ArrowUpRight, Search, X } from "lucide-react";
+import { ArrowUpRight, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useState } from "react";
 import { AWARD_CATALOG } from "@/lib/awards-catalog";
 import { readAwardHistory, type CategoryHistory } from "@/lib/awards-history";

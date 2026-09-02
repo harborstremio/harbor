@@ -56,7 +56,7 @@ export function StillWatchingPrompt({
       aria-modal
       style={{ opacity: entered ? 1 : 0, transition: "opacity 240ms ease-out" }}
     >
-      <div className="mx-6 flex w-full max-w-md flex-col items-center rounded-[20px] border border-white/10 bg-neutral-950/80 px-8 py-9 text-center shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]">
+      <div className="mx-6 flex w-full max-w-md flex-col items-center rounded-xl border border-white/10 bg-neutral-950/80 px-8 py-9 text-center shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]">
         <h2 className="font-display text-[27px] font-medium tracking-tight text-white">
           {t("Still watching?")}
         </h2>

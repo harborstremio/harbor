@@ -1,4 +1,5 @@
-import { ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { X } from "lucide-react";
+import { ThumbsDownIcon, ThumbsUpIcon } from "@/components/icons/harbor-glyphs";
 import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { trackEvent } from "@/lib/discover/store";
@@ -53,7 +54,7 @@ export function ThumbsDock({ meta }: { meta: Meta }) {
             cast("down");
           }}
         >
-          <ThumbsDown size={16} />
+          <ThumbsDownIcon size={16} />
         </ThumbButton>
       </Tooltip>
       <div className="relative inline-flex">
@@ -67,7 +68,7 @@ export function ThumbsDock({ meta }: { meta: Meta }) {
               cast("up");
             }}
           >
-            <ThumbsUp size={16} />
+            <ThumbsUpIcon size={16} />
           </ThumbButton>
         </Tooltip>
         {showHint && <ThumbsHint onDismiss={() => dismiss("featured-thumbs")} />}

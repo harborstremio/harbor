@@ -1,9 +1,10 @@
-import { Lock } from "lucide-react";
+import { Lock, Monitor } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { AccountMenu } from "@/chrome/account-menu/account-menu";
 import { NAV_ITEMS, applyNavCustomization } from "@/chrome/nav-items";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
+import { useBigPictureEntry } from "@/chrome/use-big-picture-entry";
 import { useT } from "@/lib/i18n";
 import { useParental } from "@/lib/parental";
 import { useSettings } from "@/lib/settings";
@@ -16,6 +17,7 @@ export function StremioRail() {
   const { settings } = useSettings();
   const t = useT();
   const [pendingPin, setPendingPin] = useState<View | null>(null);
+  const bigPicture = useBigPictureEntry();
 
   const themePreset =
     settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
@@ -72,7 +74,20 @@ export function StremioRail() {
             );
           })}
         </nav>
-        <div className="flex shrink-0 flex-col items-center px-1 pb-3 pt-1">
+        <div className="flex shrink-0 flex-col items-center gap-1.5 px-1 pb-3 pt-1">
+          {bigPicture.offer && (
+            <button
+              type="button"
+              onClick={bigPicture.open}
+              aria-label={bigPicture.label}
+              title={bigPicture.label}
+              className="flex h-11 w-16 items-center justify-center rounded-xl text-white/35 transition-colors duration-150 hover:bg-white/[0.05] hover:text-white/85"
+            >
+              <span className="flex h-7 w-7 items-center justify-center">
+                <Monitor size={26} strokeWidth={1.75} />
+              </span>
+            </button>
+          )}
           {locked ? (
             <div className="flex h-16 flex-col items-center justify-center gap-1 rounded-xl text-white/35">
               <Lock size={16} />
@@ -139,7 +154,7 @@ function RailTab({
       }`}
     >
       <span className={`relative flex h-7 w-7 items-center justify-center ${gated ? "opacity-70" : ""}`}>
-        {render(hovered)}
+        {render(Boolean(active || hovered))}
         {gated && (
           <span className="absolute -bottom-1 -end-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-canvas text-white/55 ring-1 ring-white/15">
             <Lock size={8} strokeWidth={2.4} />

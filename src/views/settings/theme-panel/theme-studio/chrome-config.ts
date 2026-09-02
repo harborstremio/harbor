@@ -1,5 +1,6 @@
 import type { ChromeConfig, ChromeNavId } from "@/lib/theme";
 import { iconInnerSvg } from "./chrome-icons";
+import { t } from "@/lib/i18n";
 
 export const NAV_LABELS: Record<ChromeNavId, string> = {
   home: "Home",
@@ -50,7 +51,7 @@ function resolveIconMarkup(value: string): string | undefined {
 function buttons(config: ChromeConfig): string {
   return config.items
     .map((id) => {
-      const label = config.labels?.[id]?.trim() || NAV_LABELS[id];
+      const label = config.labels?.[id]?.trim() || t(NAV_LABELS[id]);
       const iconVal = config.icons?.[id];
       const iconMarkup = iconVal ? resolveIconMarkup(iconVal) : undefined;
       const inner = iconMarkup ? `${iconMarkup}<span>${esc(label)}</span>` : esc(label);
@@ -132,6 +133,7 @@ html[data-theme-layout="custom"] .myc-badge {
   font-weight: 700;
 }
 html[data-theme-layout="custom"] .myc-badge[data-empty] { display: none; }
+html[data-theme-layout="custom"] .myc-iconbtn[data-harbor-bigpicture][data-empty] { display: none; }
 html[data-theme-layout="custom"]:not([data-chrome-hidden]) main { padding-left: 248px !important; }
 html:not([data-theme-layout="custom"]) .myc-rail,
 html[data-chrome-hidden] .myc-rail { display: none !important; }`;
@@ -203,19 +205,25 @@ html[data-theme-layout="custom"] .myc-bar .myc-badge {
   font-weight: 700;
 }
 html[data-theme-layout="custom"] .myc-bar .myc-badge[data-empty] { display: none; }
+html[data-theme-layout="custom"] .myc-bar .myc-iconbtn[data-harbor-bigpicture][data-empty] { display: none; }
 html[data-theme-layout="custom"]:not([data-chrome-hidden]) main { padding-top: 92px !important; }
 html:not([data-theme-layout="custom"]) .myc-bar,
 html[data-chrome-hidden] .myc-bar { display: none !important; }`;
 
 const BELL_SVG = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>`;
+const MONITOR_SVG = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>`;
 const USER_SVG = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>`;
 
 function quickCluster(): string {
+  const bigPicture = esc(t("Big Picture"));
+  const notifications = esc(t("Notifications"));
+  const account = esc(t("Account"));
   return [
     `  <div class="myc-spacer"></div>`,
     `  <div class="myc-quick">`,
-    `    <button class="myc-iconbtn" data-harbor-notifications aria-label="Notifications">${BELL_SVG}<span class="myc-badge" data-harbor-unread data-empty></span></button>`,
-    `    <button class="myc-iconbtn" data-harbor-account aria-label="Account">${USER_SVG}</button>`,
+    `    <button class="myc-iconbtn" data-harbor-bigpicture aria-label="${bigPicture}">${MONITOR_SVG}</button>`,
+    `    <button class="myc-iconbtn" data-harbor-notifications aria-label="${notifications}">${BELL_SVG}<span class="myc-badge" data-harbor-unread data-empty></span></button>`,
+    `    <button class="myc-iconbtn" data-harbor-account aria-label="${account}">${USER_SVG}</button>`,
     `  </div>`,
   ].join("\n");
 }

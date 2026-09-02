@@ -1,5 +1,4 @@
 const coverage: Record<string, string> = {
-  "Release compatibility": "Compatibilidade da versão",
   "Play from": "Tocar de",
   end: "fim",
   "m:ss": "m:ss",
@@ -111,7 +110,6 @@ const coverage: Record<string, string> = {
   Exit: "Sair",
   Explore: "Explorar",
   External: "Externo",
-  Extras: "Extras",
   Favorite: "Favorito",
   Favorited: "Favoritado",
   Favourites: "Favoritos",
@@ -164,7 +162,6 @@ const coverage: Record<string, string> = {
   List: "Lista",
   Live: "Ao vivo",
   Loading: "Carregando",
-  "Loading settings": "Carregando configurações",
   Local: "Local",
   "Locked until": "Bloqueado até",
   Logos: "Logos",
@@ -442,6 +439,103 @@ const coverage: Record<string, string> = {
   "so pick one you'll keep.": "então escolha um que você vá manter.",
   something: "algo",
   speed: "velocidade",
+  "this season": "esta temporada",
+  title: "título",
+  titles: "títulos",
+  to: "até",
+  tomorrow: "amanhã",
+  watched: "assistido",
+  yourhandle: "seuidentificador",
+  yourname: "seunome",
+  "{label} details": "Detalhes de {label}",
+  "{n} / {max}": "{n} / {max}",
+  "{n} / {max} titles": "{n} / {max} títulos",
+  "{n} nom": "{n} indicação",
+  "{n} noms": "{n} indicações",
+  "{n} win": "{n} vitória",
+  "· {n} nom": "· {n} indicação",
+  "· {n} noms": "· {n} indicações",
+  "Big Picture": "Modo Big Picture",
+  "Leave Big Picture": "Sair do modo Big Picture",
+  "A full screen, couch friendly Harbor for TVs, handhelds and big monitors.":
+    "O Harbor em tela cheia, pensado para usar no sofá, em TVs, dispositivos portáteis e monitores grandes.",
+  "Show the Big Picture button": "Mostrar o botão Big Picture",
+  "Adds a Big Picture button to Harbor's navigation. Turn this off to keep it out of the way.":
+    "Adiciona um botão Big Picture à navegação do Harbor. Desative para ocultá-lo.",
+  "Open in Big Picture": "Abrir no modo Big Picture",
+  "Launch straight into Big Picture when Harbor starts. Press Esc at any time to leave.":
+    "Abrir diretamente no modo Big Picture ao iniciar o Harbor. Pressione Esc a qualquer momento para sair.",
+  "Almost done": "Quase no fim",
+  "Jump back in": "Continuar de onde parou",
+  "Couldn't load this title.": "Não foi possível carregar este título.",
+  "Directed by": "Direção",
+  "Created by": "Criação",
+  "Written by": "Roteiro",
+  "Music by": "Música",
+  "Box office": "Bilheteria",
+  Length: "Duração",
+  "Couldn't load your catalogs": "Não foi possível carregar seus catálogos",
+  "Harbor couldn't reach the catalog servers. Check the connection and reopen Big Picture.":
+    "O Harbor não conseguiu acessar os servidores de catálogo. Verifique a conexão e reabra o modo Big Picture.",
+  Letters: "Letras",
+  Symbols: "Símbolos",
+  Space: "Espaço",
+  Backspace: "Apagar",
+  "Loading your library...": "Carregando sua biblioteca...",
+  "Nothing saved yet. Add a title from any details page.":
+    "Nada salvo ainda. Adicione um título em qualquer página de detalhes.",
+  "Your watchlist is empty.": "Sua lista está vazia.",
+  "Search Harbor": "Pesquisar no Harbor",
+  "{n} results": "{n} resultados",
+  "Looking...": "Procurando...",
+  "Start typing to search movies and series.": "Comece a digitar para pesquisar filmes e séries.",
+  'Nothing found for "{q}"': 'Nada encontrado para "{q}"',
+  "Interface sounds": "Sons da interface",
+  "Navigation and selection are silent": "A navegação e a seleção não emitem sons",
+  "Sound pack: {name}": "Pacote de sons: {name}",
+  "Animated backdrop": "Fundo animado",
+  "Drifting poster wall behind the interface. Turn off on low power devices.":
+    "Mural de pôsteres em movimento atrás da interface. Desative em dispositivos menos potentes.",
+  "Controller navigation": "Navegação por controle",
+  "Use a gamepad or remote to move around Harbor":
+    "Use um controle ou controle remoto para navegar pelo Harbor",
+  "Launch straight into Big Picture when Harbor starts":
+    "Abrir diretamente no modo Big Picture ao iniciar o Harbor",
+  "Quick panel": "Painel rápido",
+  "No trailer available for {name}": "Nenhum trailer disponível para {name}",
+  "Loading trailer...": "Carregando trailer...",
+  Toggle: "Alternar",
+  "Switch tab": "Trocar de aba",
+  "Hold to skip or continue": "Segure para pular ou continuar",
+  "Hold to continue": "Segure para continuar",
+  Nav: "Menu superior",
+  "Decrease {name}": "Diminuir {name}",
+  "Increase {name}": "Aumentar {name}",
+  "Reset {name}": "Redefinir {name}",
+  Move: "Mover",
+  Suggested: "Sugestões",
+  "Clear recent searches": "Limpar pesquisas recentes",
+  "Start typing to search movies, series and everything your addons carry.":
+    "Comece a digitar para pesquisar filmes, séries e tudo o que seus addons oferecem.",
+  "Nothing watched yet.": "Nada assistido ainda.",
+  "Remove from Continue watching": "Remover de Continuar assistindo",
+  "Known for": "Conhecido por",
+  "Nothing to show for this person.": "Nada a mostrar para esta pessoa.",
+  "Top match": "Melhor resultado",
+  "Addons you could install": "Addons que você pode instalar",
+  "Didn't answer": "Não respondeu",
+  "On-screen keyboard": "Teclado na tela",
+  Phone: "Celular",
+  "Type on your phone": "Digitar no celular",
+  "Nothing in this filter. Choose All to see everything that answered.":
+    "Nada neste filtro. Escolha Todos para ver tudo o que respondeu.",
+  'Nothing found for "{q}". {n} of your addons did not answer.':
+    'Nada encontrado para "{q}". {n} dos seus addons não responderam.',
+  'Your addons answered for "{q}", but nothing in the results opens here.':
+    'Os seus addons responderam a "{q}", mas nada nos resultados abre aqui.',
+  "Release compatibility": "Compatibilidade da versão",
+  Extras: "Extras",
+  "Loading settings": "Carregando configurações",
   "Subtitles appear early": "As legendas aparecem adiantadas",
   "Subtitles appear late": "As legendas aparecem atrasadas",
   "More timing controls": "Mais controles de sincronização",
@@ -452,14 +546,6 @@ const coverage: Record<string, string> = {
     "Quando uma legenda fica adiantada ou atrasada, o Harbor mede a fala e corrige o tempo automaticamente.",
   "Downloaded subtitles can arrive after playback starts. Harbor switches from a temporary track when a stronger release match becomes available.":
     "As legendas baixadas podem chegar depois do início da reprodução. O Harbor troca a faixa temporária quando uma correspondência melhor com a versão fica disponível.",
-  "this season": "esta temporada",
-  title: "título",
-  titles: "títulos",
-  to: "até",
-  tomorrow: "amanhã",
-  watched: "assistido",
-  yourhandle: "seuidentificador",
-  yourname: "seunome",
   "Only embedded subtitles are available right now.":
     "Apenas legendas incorporadas estão disponíveis agora.",
   "Search all sources again": "Pesquisar todas as fontes novamente",
@@ -479,14 +565,87 @@ const coverage: Record<string, string> = {
   "Play until you hear a line inside this section, tap it, then choose Align to now.":
     "Reproduza até ouvir uma fala nessa seção, toque nela e escolha Alinhar com agora.",
   "Sync point {n}": "Ponto de sincronização {n}",
-  "{label} details": "Detalhes de {label}",
-  "{n} / {max}": "{n} / {max}",
-  "{n} / {max} titles": "{n} / {max} títulos",
-  "{n} nom": "{n} indicação",
-  "{n} noms": "{n} indicações",
-  "{n} win": "{n} vitória",
-  "· {n} nom": "· {n} indicação",
-  "· {n} noms": "· {n} indicações",
+  "Skip the launch": "Pular a partida",
+  "Click anywhere to skip": "Clique em qualquer lugar para pular",
+  "Checking {total} episodes for sources.": "Procurando fontes para {total} episódios.",
+  "Checked {done} of {total} episodes.": "{done} de {total} episódios verificados.",
+  "These episodes are already downloading.": "Estes episódios já estão baixando.",
+  "No source was found for any of these episodes. Try refreshing or another addon.":
+    "Nenhuma fonte foi encontrada para nenhum destes episódios. Tente atualizar ou outro addon.",
+  "Queued {queued} of {total} episodes.": "{queued} de {total} episódios na fila.",
+  "Could not queue these episodes.": "Não foi possível colocar estes episódios na fila.",
+  "Harbor found episode sources for {season}, but none of them is a single downloadable package. It can still fetch the episodes one at a time.":
+    "O Harbor encontrou fontes de episódios para {season}, mas nenhuma delas é um pacote único para baixar. Ele ainda pode buscar os episódios um de cada vez.",
+  "None of your addons returned a downloadable package for {season}. Harbor can still fetch the episodes one at a time, or you can refresh the sources.":
+    "Nenhum dos seus addons retornou um pacote para baixar de {season}. O Harbor ainda pode buscar os episódios um de cada vez, ou você pode atualizar as fontes.",
+  "Download episode by episode": "Baixar episódio por episódio",
+  "Test mode: your controller only moves this diagram. Press Esc to stop.":
+    "Modo de teste: seu controle move apenas este diagrama. Pressione Esc para parar.",
+  "Stop test": "Parar teste",
+  "Test controller": "Testar controle",
+  Ring: "Anel",
+  Pointer: "Ponteiro",
+  Dot: "Ponto",
+  "Controller cursor": "Cursor do controle",
+  "The pointer your right stick moves around Harbor. Pick a shape or use your own image.":
+    "O ponteiro que o seu analógico direito move pelo Harbor. Escolha um formato ou use sua própria imagem.",
+  "Your own image": "Sua própria imagem",
+  "PNG, WEBP, SVG or GIF. Harbor shrinks it to 128px so it stays small on disk.":
+    "PNG, WEBP, SVG ou GIF. O Harbor reduz para 128px para ocupar pouco espaço em disco.",
+  "Remove image": "Remover imagem",
+  "That image could not be used. Try a smaller PNG or WEBP.":
+    "Não foi possível usar essa imagem. Tente um PNG ou WEBP menor.",
+  "Cursor size": "Tamanho do cursor",
+  "Make it bigger for a TV across the room, smaller for a desk monitor.":
+    "Deixe maior para uma TV do outro lado da sala, menor para um monitor de mesa.",
+  "{n} px": "{n} px",
+  "Actual size on screen": "Tamanho real na tela",
+  "Harbor's full video engine. Plays anything you throw at it.":
+    "O motor de vídeo completo do Harbor. Reproduz tudo o que você jogar nele.",
+  "libmpv did not load, so playback falls back to HTML5 and formats like MKV may refuse to play. On Linux, install your distribution's libmpv package, then restart Harbor.":
+    "A libmpv não carregou, então a reprodução volta para HTML5 e formatos como MKV podem se recusar a tocar. No Linux, instale o pacote libmpv da sua distribuição e reinicie o Harbor.",
+  "{n} hours": "{n} horas",
+  "{n} GB": "{n} GB",
+  "Another program already holds this port, usually a Stremio server that is running on this machine. Harbor tried its spare ports too. Stop that server, or leave it running and point Harbor at it in Remote streaming server below.":
+    "Outro programa já está usando esta porta, geralmente um servidor Stremio rodando nesta máquina. O Harbor também tentou suas portas reservas. Pare esse servidor, ou deixe-o rodando e aponte o Harbor para ele em Servidor de streaming remoto abaixo.",
+  "Open here": "Abrir aqui",
+  "Scan with your phone camera, or type the address above.":
+    "Leia com a câmera do celular, ou digite o endereço acima.",
+  "No Wi-Fi address yet. Other devices cannot reach this computer.":
+    "Ainda sem endereço de Wi-Fi. Outros dispositivos não conseguem alcançar este computador.",
+  "Harbor in a browser": "Harbor no navegador",
+  "This exact install, served as a web app. Open it on a phone, laptop or TV browser and it streams through this computer.":
+    "Esta mesma instalação, servida como um app web. Abra no celular, notebook ou navegador da TV e ele transmite através deste computador.",
+  "Play, pause, seek, volume and casting from the couch.":
+    "Reproduzir, pausar, avançar, volume e transmissão direto do sofá.",
+  "Turn pages, zoom and switch modes while you read on the big screen.":
+    "Vire páginas, dê zoom e troque de modo enquanto lê na tela grande.",
+  "One switch serves Harbor on your network. Scan a code below with your phone, or open an address on any device on the same Wi-Fi.":
+    "Uma única chave serve o Harbor na sua rede. Leia um código abaixo com o celular, ou abra um endereço em qualquer dispositivo no mesmo Wi-Fi.",
+  "Powers everything on this page: the web app, the phone remote, and the manga reader remote.":
+    "Alimenta tudo nesta página: o app web, o controle no celular e o controle do leitor de mangá.",
+  "Flip the switch above and the addresses and scan codes appear here.":
+    "Ative a chave acima e os endereços e códigos de leitura aparecem aqui.",
+  "Show in windowed mode": "Mostrar no modo janela",
+  "Keep the clock on screen when the player is not fullscreen.":
+    "Manter o relógio na tela quando o player não estiver em tela cheia.",
+  "On the poster": "Na capa",
+  Scores: "Notas",
+  "Episode order": "Ordem dos episódios",
+  "Watchlist overlaps ({n})": "Itens em comum na lista para assistir ({n})",
+  "Favorites overlap ({n})": "Favoritos em comum ({n})",
+  "Addons overlap ({n})": "Addons em comum ({n})",
+  "Import selected data?": "Importar os dados selecionados?",
+  "Show direct, debrid, and peer-to-peer sources": "Mostrar fontes diretas, debrid e ponto a ponto",
+  "Prefer direct and debrid sources; keep P2P when only web links are available":
+    "Preferir fontes diretas e debrid; manter P2P quando apenas links da web estiverem disponíveis",
+  "Prefer peer-to-peer torrent sources": "Preferir fontes de torrent ponto a ponto",
+  "New York Times": "New York Times",
+  "Bestseller lists in the eBook section.": "Listas de best-sellers na seção de eBooks.",
+  "New York Times · bestseller lists": "New York Times · listas de best-sellers",
+  "NYT Books API key": "Chave da API NYT Books",
+  "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
+    "Escolha se o Harbor prefere fontes diretas e debrid, torrents ponto a ponto ou mostra ambos.",
 };
 
 export default coverage;

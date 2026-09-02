@@ -16,7 +16,7 @@ export function VersionItem({ entry, isCurrent }: { entry: VersionEntry; isCurre
   return (
     <div
       className={`flex items-center gap-3 px-3.5 py-2.5 ${
-        isCurrent ? "bg-accent/[0.07]" : "transition-colors hover:bg-raised/40"
+        isCurrent ? "bg-accent-soft]" : "transition-colors hover:bg-raised"
       }`}
     >
       <button
@@ -29,7 +29,7 @@ export function VersionItem({ entry, isCurrent }: { entry: VersionEntry; isCurre
           <span className="text-[13.5px] font-semibold tabular-nums text-ink">{entry.version}</span>
           {entry.channel === "beta" && <BetaTag force />}
           {entry.channel === "stable" && (
-            <span className="inline-flex shrink-0 items-center rounded-md bg-ink/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted ring-1 ring-edge">
+            <span className="inline-flex shrink-0 items-center rounded-md bg-ink/10 px-1.5 py-0.5 text-[10.5px] font-bold uppercase tracking-[0.14em] text-ink-muted ring-1 ring-edge">
               {t("Stable")}
             </span>
           )}
@@ -41,7 +41,7 @@ export function VersionItem({ entry, isCurrent }: { entry: VersionEntry; isCurre
       </button>
 
       {isCurrent ? (
-        <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-accent">
+        <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-accent-soft px-2.5 py-1 text-[11.5px] font-bold uppercase tracking-[0.1em] text-accent">
           <Check size={12} strokeWidth={2.8} />
           {t("Current")}
         </span>
@@ -50,9 +50,9 @@ export function VersionItem({ entry, isCurrent }: { entry: VersionEntry; isCurre
           type="button"
           title={t("Download this build's installer, then run it over your current copy")}
           onClick={() => openUrl(url)}
-          className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-edge bg-elevated px-3 text-[12px] font-semibold text-ink transition-all hover:scale-[1.02] hover:border-ink active:scale-[0.97]"
+          className="flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-edge bg-elevated px-3 text-[12.5px] font-semibold text-ink transition hover:scale-[1.02] hover:border-ink active:scale-[0.97]"
         >
-          <ArrowDownToLine size={13} strokeWidth={2.4} />
+          <ArrowDownToLine size={14} strokeWidth={2.4} />
           {t("Download")}
         </button>
       ) : (

@@ -1,13 +1,14 @@
-import { Check, ChevronDown, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { ORIGIN_OPTIONS } from "@/lib/anime-filter";
 import { GENRE } from "@/lib/providers/jikan";
+import { ANIME_GENRE_ART } from "@/lib/anime-genre-art-map";
 import { GENRE_ICON } from "./anime-genre-picker/genre-icons";
 
-const OPTIONS: Array<{ id: number; label: string }> = [
+export const ANIME_GENRE_OPTIONS: Array<{ id: number; label: string }> = [
   { id: GENRE.Action, label: "Action" },
   { id: GENRE.Adventure, label: "Adventure" },
   { id: GENRE.Comedy, label: "Comedy" },
@@ -40,9 +41,6 @@ export function AnimeGenrePicker({
   const [selected, setSelected] = useState<Set<number>>(() => new Set(initial));
   const [origins, setOrigins] = useState<Set<string>>(() => new Set(settings.animeExcludeOrigins));
   const [hideWatched, setHideWatched] = useState(settings.animeHideWatchedPicks);
-  const [filtersOpen, setFiltersOpen] = useState(
-    settings.animeExcludeOrigins.length > 0 || settings.animeHideWatchedPicks,
-  );
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -81,163 +79,184 @@ export function AnimeGenrePicker({
     onClose();
   };
 
+  const hiddenCount = origins.size + (hideWatched ? 1 : 0);
+
   return createPortal(
     <div className="fixed inset-0 z-[210] flex items-center justify-center px-4 py-10">
       <button
         aria-label={t("Close")}
         onClick={onClose}
-        className="animate-in fade-in absolute inset-0 -z-10 cursor-default bg-canvas/85 backdrop-blur-[3px] duration-200"
+        className="animate-scrim-in absolute inset-0 -z-10 cursor-default bg-canvas/80 backdrop-blur-[2px]"
       />
-      <div className="animate-in fade-in zoom-in-95 relative flex max-h-full w-full max-w-2xl flex-col overflow-hidden rounded-[26px] border border-edge-soft/70 bg-elevated shadow-[0_40px_120px_-30px_rgba(0,0,0,0.85)] duration-200 ease-[cubic-bezier(0.32,0.72,0.24,1)]">
-        <button
-          type="button"
-          aria-label={t("Close")}
-          onClick={onClose}
-          className="absolute end-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
-        >
-          <X size={16} strokeWidth={2.2} />
-        </button>
-
-        <div className="flex flex-col gap-1.5 px-8 pt-8">
-          <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-ink-subtle">
-            {t("Tune anime")}
-          </span>
-          <h2 className="font-display text-[27px] font-medium leading-tight tracking-tight text-ink">
-            {t("Shape your anime feed.")}
-          </h2>
-          <p className="text-[13.5px] text-ink-muted">
-            {t("Steer your Top Picks and hero toward what you love, and hide what you don't.")}
-          </p>
+      <div className="animate-dialog-in relative flex max-h-full w-full max-w-[46rem] flex-col overflow-hidden rounded-lg bg-elevated ring-1 ring-edge-soft shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]">
+        <div className="flex items-start gap-4 px-7 pt-7">
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink-subtle">
+              {t("Tune anime")}
+            </span>
+            <h2 className="font-display text-[22px] font-medium leading-tight tracking-tight text-ink">
+              {t("Shape your anime feed.")}
+            </h2>
+            <p className="text-[13px] leading-relaxed text-ink-muted">
+              {t("Steer your Top Picks and hero toward what you love, and hide what you don't.")}
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label={t("Close")}
+            onClick={onClose}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-white/[0.06] text-ink-subtle transition-colors duration-150 hover:bg-white/[0.10] hover:text-ink active:scale-[0.97]"
+          >
+            <X size={15} strokeWidth={2.2} />
+          </button>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto px-8 py-7">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-7 py-6">
           <div className="flex flex-col gap-3">
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-ink-subtle">
+            <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
               {t("Genres you want more of")}
             </span>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-              {OPTIONS.map((opt) => {
+            <div className="harbor-cascade grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {ANIME_GENRE_OPTIONS.map((opt) => {
                 const on = selected.has(opt.id);
+                const poster = ANIME_GENRE_ART[opt.label];
                 return (
                   <button
                     key={opt.id}
                     type="button"
                     onClick={() => toggle(opt.id)}
                     aria-pressed={on}
-                    className={`group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-start transition-[background-color,box-shadow,transform] duration-200 ease-[cubic-bezier(0.32,0.72,0.24,1)] active:scale-[0.97] motion-reduce:active:scale-100 ${
+                    className={`group relative isolate aspect-[16/10] overflow-hidden rounded-md text-start transition-[box-shadow,background-color] duration-150 ease-in-out active:scale-[0.98] motion-reduce:active:scale-100 ${
                       on
-                        ? "bg-accent/[0.12] ring-2 ring-accent"
-                        : "bg-canvas/50 ring-1 ring-edge-soft hover:bg-canvas/70 hover:ring-edge"
+                        ? "bg-canvas ring-2 ring-inset ring-accent"
+                        : "bg-canvas/60 ring-1 ring-inset ring-edge-soft hover:ring-edge"
                     }`}
                   >
-                    <span
-                      className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.32,0.72,0.24,1)] group-hover:scale-[1.06] group-active:scale-95 motion-reduce:transform-none ${
-                        on ? "bg-accent/20" : "bg-elevated/70"
+                    {poster && (
+                      <img
+                        src={poster}
+                        alt=""
+                        draggable={false}
+                        loading="lazy"
+                        className={`absolute inset-0 -z-10 h-full w-full object-cover transition-[opacity,filter] duration-300 ease-in-out ${
+                          on
+                            ? "opacity-[0.85] saturate-100"
+                            : "opacity-[0.34] saturate-[0.35] group-hover:opacity-[0.48]"
+                        }`}
+                      />
+                    )}
+                    <img
+                      src={GENRE_ICON[opt.id]}
+                      alt=""
+                      draggable={false}
+                      className={`pointer-events-none absolute -end-3 -top-2 h-20 w-20 transition-[opacity,filter,transform] duration-200 ease-in-out group-hover:scale-[1.04] motion-reduce:transform-none ${
+                        on ? "opacity-45 saturate-100" : "opacity-[0.28] saturate-0"
+                      }`}
+                    />
+                    <div
+                      className={`absolute inset-x-0 bottom-0 flex items-center gap-1.5 px-2.5 py-2 transition-colors duration-150 ${
+                        on ? "bg-canvas/90" : "bg-canvas/75"
                       }`}
                     >
-                      <img src={GENRE_ICON[opt.id]} alt="" draggable={false} className="h-[26px] w-[26px]" />
-                    </span>
-                    <span
-                      className={`min-w-0 flex-1 truncate text-[14px] font-semibold transition-colors ${
-                        on ? "text-ink" : "text-ink-muted"
-                      }`}
-                    >
-                      {opt.label}
-                    </span>
+                      <span
+                        className={`min-w-0 flex-1 truncate text-[13px] transition-colors duration-150 ${
+                          on ? "font-semibold text-ink" : "font-medium text-ink-muted"
+                        }`}
+                      >
+                        {t(opt.label)}
+                      </span>
+                      {on && (
+                        <Check
+                          size={13}
+                          strokeWidth={3}
+                          className="harbor-pop shrink-0 text-accent"
+                          aria-hidden
+                        />
+                      )}
+                    </div>
                   </button>
                 );
               })}
             </div>
           </div>
-          <div className="border-t border-edge-soft/45 pt-4">
+
+          <div className="flex flex-col gap-3 rounded-md bg-canvas/60 p-4 ring-1 ring-inset ring-edge-soft">
+            <div className="flex items-center gap-2">
+              <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
+                {t("Hide from your picks")}
+              </span>
+              {hiddenCount > 0 && (
+                <span className="rounded-full bg-white/[0.06] px-1.5 py-[1px] text-[10px] font-semibold tabular-nums text-ink-muted">
+                  {hiddenCount}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ORIGIN_OPTIONS.map((opt) => {
+                const on = origins.has(opt.code);
+                return (
+                  <button
+                    key={opt.code}
+                    type="button"
+                    onClick={() => toggleOrigin(opt.code)}
+                    aria-pressed={on}
+                    className={`h-8 rounded-full px-3.5 text-[12.5px] font-medium transition-colors duration-150 ease-in-out active:scale-[0.97] motion-reduce:active:scale-100 ${
+                      on
+                        ? "bg-danger/15 text-danger ring-1 ring-inset ring-danger/30"
+                        : "bg-white/[0.06] text-ink-muted hover:bg-white/[0.10] hover:text-ink"
+                    }`}
+                  >
+                    {t(opt.label)}
+                  </button>
+                );
+              })}
+            </div>
             <button
               type="button"
-              onClick={() => setFiltersOpen((v) => !v)}
-              aria-expanded={filtersOpen}
-              className="group flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-start"
+              onClick={() => setHideWatched((v) => !v)}
+              aria-pressed={hideWatched}
+              className="group flex items-center gap-2.5 self-start text-start"
             >
-              <span className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-ink-subtle transition-colors group-hover:text-ink-muted">
-                {t("Hide from your picks")}
-                {origins.size + (hideWatched ? 1 : 0) > 0 && (
-                  <span className="rounded-full bg-danger/15 px-2 py-[2px] text-[10px] font-bold tracking-normal text-danger">
-                    {origins.size + (hideWatched ? 1 : 0)}
-                  </span>
-                )}
-              </span>
-              <ChevronDown
-                size={18}
-                strokeWidth={2.2}
-                className={`shrink-0 text-ink-subtle transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] ${
-                  filtersOpen ? "rotate-180 text-ink-muted" : ""
+              <span
+                className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] transition-colors duration-150 ${
+                  hideWatched
+                    ? "bg-accent text-canvas"
+                    : "bg-white/[0.06] text-transparent ring-1 ring-inset ring-edge-soft group-hover:bg-white/[0.10]"
                 }`}
-              />
+              >
+                <Check size={12} strokeWidth={3} />
+              </span>
+              <span
+                className={`text-[13px] transition-colors duration-150 ${
+                  hideWatched ? "text-ink" : "text-ink-muted group-hover:text-ink"
+                }`}
+              >
+                {t("Hide anime I've already watched")}
+              </span>
             </button>
-            <div
-              className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] ${
-                filtersOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-              }`}
-            >
-              <div className="overflow-hidden">
-                <div className="flex flex-col gap-3 pt-4">
-                  <div className="flex flex-wrap gap-2.5">
-                    {ORIGIN_OPTIONS.map((opt) => {
-                      const on = origins.has(opt.code);
-                      return (
-                        <button
-                          key={opt.code}
-                          type="button"
-                          onClick={() => toggleOrigin(opt.code)}
-                          className={`h-11 rounded-full px-5 text-[14px] font-semibold transition-[background-color,color,box-shadow,transform] duration-150 active:scale-[0.97] ${
-                            on
-                              ? "bg-danger text-white shadow-[0_6px_18px_-8px_rgba(0,0,0,0.55)]"
-                              : "bg-canvas/50 text-ink-muted ring-1 ring-edge-soft hover:text-ink hover:ring-edge"
-                          }`}
-                        >
-                          {t(opt.label)}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setHideWatched((v) => !v)}
-                    className="mt-1 flex items-center gap-3 self-start rounded-xl py-1 text-start"
-                  >
-                    <span
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
-                        hideWatched ? "border-accent bg-accent text-canvas" : "border-edge text-transparent"
-                      }`}
-                    >
-                      <Check size={13} strokeWidth={3} />
-                    </span>
-                    <span className="text-[14px] font-medium text-ink">
-                      {t("Hide anime I've already watched")}
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-edge-soft/45 px-8 py-5">
+        <div className="flex items-center justify-between gap-3 border-t border-edge-soft/45 px-7 py-4">
           <button
             type="button"
             onClick={() => setSelected(new Set())}
-            className={`text-[12.5px] font-medium transition-colors ${
-              selected.size > 0 ? "text-ink-subtle hover:text-ink" : "pointer-events-none text-transparent"
+            className={`text-[12.5px] font-medium transition-colors duration-150 ${
+              selected.size > 0
+                ? "text-ink-subtle hover:text-ink"
+                : "pointer-events-none text-transparent"
             }`}
           >
             {t("Clear all")}
           </button>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3.5">
             <span className="text-[12.5px] tabular-nums text-ink-subtle">
               {selected.size > 0 ? t("{count} selected", { count: selected.size }) : t("None yet")}
             </span>
             <button
               type="button"
               onClick={save}
-              className="h-11 rounded-full bg-ink px-7 text-[14px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.98]"
+              className="h-9 rounded-md bg-ink px-5 text-[13px] font-semibold text-canvas transition-opacity duration-150 hover:opacity-90 active:scale-[0.98] motion-reduce:active:scale-100"
             >
               {t("Done")}
             </button>

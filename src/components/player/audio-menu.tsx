@@ -4,10 +4,11 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { Flag } from "@/components/flag";
 import type { TrackInfo } from "@/lib/player/bridge";
 import { modalOverlayClose, modalOverlayEmitState, modalOverlayOpen } from "@/lib/modal-overlay";
-import { languageName } from "@/lib/subtitles/language";
+import { languageName, trackLanguageName } from "@/lib/subtitles/language";
 import { useT } from "@/lib/i18n";
 import { useMenuSide } from "./menu-side";
 import { Tooltip } from "./transport/tooltip";
+import { watchOutsideMouseDown } from "@/lib/player/overlay-dismiss";
 
 type Props = {
   tracks: TrackInfo[];
@@ -18,6 +19,7 @@ type Props = {
   onDelay: (sec: number) => void;
   onOpenChange?: (open: boolean) => void;
   useOverlayPopup?: boolean;
+  iconUrl?: string;
 };
 
 function buildAudioOverlayState(props: Props) {
@@ -34,7 +36,7 @@ export function AudioMenu(props: Props) {
   const [open, setOpen] = useState(false);
   const [forceInline, setForceInline] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
-  const { side, measure } = useMenuSide(wrap, 360);
+  const { measure } = useMenuSide(wrap, 360);
   const useOverlay = props.useOverlayPopup === true;
   const propsRef = useRef(props);
   propsRef.current = props;
@@ -49,8 +51,7 @@ export function AudioMenu(props: Props) {
     const close = (e: MouseEvent) => {
       if (!wrap.current?.contains(e.target as Node)) setOpen(false);
     };
-    window.addEventListener("mousedown", close);
-    return () => window.removeEventListener("mousedown", close);
+    return watchOutsideMouseDown(close);
   }, [open, useOverlay]);
 
   useEffect(() => {
@@ -115,11 +116,15 @@ export function AudioMenu(props: Props) {
             open ? "bg-white/22 text-white" : "text-white/85 hover:bg-white/10 hover:text-white"
           }`}
         >
-          <Languages size={19} strokeWidth={2} />
+          {props.iconUrl ? (
+            <img src={props.iconUrl} alt="" className="h-[22px] w-[22px] shrink-0 select-none object-contain" draggable={false} />
+          ) : (
+            <Languages size={19} strokeWidth={2} />
+          )}
         </button>
       </Tooltip>
       {open && (forceInline || !useOverlay) && (
-        <div className={`absolute bottom-[calc(100%+10px)] ${side === "start" ? "start-0" : "end-0"} flex max-h-[400px] w-[360px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}>
+        <div className="fixed end-14 bottom-[150px] flex max-h-[calc(100vh-174px)] w-[360px] max-w-[calc(100vw-72px)] flex-col overflow-hidden rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop">
           <AudioMenuBody {...props} onClose={() => setOpen(false)} />
         </div>
       )}
@@ -214,7 +219,7 @@ function TrackSection({
             </span>
             {t.lang && (
               <span className="mt-0.5 shrink-0">
-                <Flag language={languageName(t.lang)} size="sm" showLabel={false} />
+                <Flag language={trackLanguageName(t.lang, t.title)} size="sm" showLabel={false} />
               </span>
             )}
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -240,7 +245,7 @@ function trackTitle(t: TrackInfo, tr: (key: string) => string): string {
 
 function trackSubtitle(t: TrackInfo, tr: (key: string) => string): string {
   const parts: string[] = [];
-  if (t.lang) parts.push(languageName(t.lang));
+  if (t.lang) parts.push(trackLanguageName(t.lang, t.title));
   if (t.codec) parts.push(t.codec);
   if (t.channels) parts.push(t.channels);
   if (t.default) parts.push(tr("Default"));

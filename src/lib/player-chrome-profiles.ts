@@ -15,6 +15,7 @@ import {
   type PlayerControlId,
   type ThemeId,
 } from "./player-chrome";
+import { t } from "@/lib/i18n";
 
 export type LayoutProfile = {
   id: string;
@@ -46,7 +47,10 @@ function emptyDb(): ProfileDb {
 }
 
 function isValidIconDataUrl(s: unknown): s is string {
-  return typeof s === "string" && /^data:image\/(png|jpe?g|webp|gif|svg\+xml);(?:base64,|[^,]*,)/i.test(s);
+  return (
+    typeof s === "string" &&
+    /^data:image\/(png|jpe?g|webp|gif|svg\+xml);(?:base64,|[^,]*,)/i.test(s)
+  );
 }
 
 function baselineFor(theme: ThemeId): PlayerChromeConfig {
@@ -85,9 +89,10 @@ function sanitizeConfig(input: unknown, theme: ThemeId): PlayerChromeConfig {
   const panels: Partial<Record<PanelId, PanelConfig>> = {};
   for (const pid of PANELS) {
     const stored = partial.panels?.[pid];
-    const corner: PanelCorner = stored && PANEL_CORNERS.includes(stored.corner)
-      ? stored.corner
-      : PANEL_META[pid].defaultCorner;
+    const corner: PanelCorner =
+      stored && PANEL_CORNERS.includes(stored.corner)
+        ? stored.corner
+        : PANEL_META[pid].defaultCorner;
     panels[pid] = { corner, hidden: !!stored?.hidden };
   }
   return {
@@ -108,7 +113,9 @@ function readDbRaw(): ProfileDb {
     const parsed = JSON.parse(raw) as ProfileDb;
     if (!parsed || !Array.isArray(parsed.profiles)) return emptyDb();
     parsed.profiles = parsed.profiles
-      .filter((p): p is LayoutProfile => !!p && typeof p.id === "string" && typeof p.name === "string")
+      .filter(
+        (p): p is LayoutProfile => !!p && typeof p.id === "string" && typeof p.name === "string",
+      )
       .map((p) => ({
         ...p,
         themeId: p.themeId === "stremio" ? "stremio" : "default",
@@ -141,14 +148,17 @@ function writeDb(db: ProfileDb): SaveResult {
   try {
     json = JSON.stringify(db);
   } catch (err) {
-    return { ok: false, error: "Could not serialize profile (a value may be circular)." };
+    return { ok: false, error: t("Could not serialize profile (a value may be circular).") };
   }
   const bytes = json.length * 2;
   if (bytes > SAFE_PAYLOAD_BYTES) {
     const mb = (bytes / 1024 / 1024).toFixed(2);
     return {
       ok: false,
-      error: `Profile data is too large (${mb} MB). Remove unused custom icons or delete an old profile, then try again.`,
+      error: t(
+        "Profile data is too large ({mb} MB). Remove unused custom icons or delete an old profile, then try again.",
+        { mb },
+      ),
     };
   }
   try {
@@ -159,12 +169,17 @@ function writeDb(db: ProfileDb): SaveResult {
     if (name === "QuotaExceededError" || name === "NS_ERROR_DOM_QUOTA_REACHED") {
       return {
         ok: false,
-        error: "Your browser's storage is full. Remove custom icons or delete profiles to free up space, then try again.",
+        error: t(
+          "Your browser's storage is full. Remove custom icons or delete profiles to free up space, then try again.",
+        ),
       };
     }
     return {
       ok: false,
-      error: err instanceof Error ? err.message : "Save failed for an unknown reason.",
+      error:
+        err instanceof Error
+          ? t("Save failed: {error}", { error: err.message })
+          : t("Save failed for an unknown reason."),
     };
   }
 }
@@ -185,7 +200,7 @@ function migrateLegacyOnce(db: ProfileDb): ProfileDb {
       const cfg = sanitizeConfig(parsed, themeId);
       const profile: LayoutProfile = {
         id: newId(),
-        name: "My layout",
+        name: t("My layout"),
         themeId,
         config: cfg,
         createdAt: now,
@@ -219,13 +234,18 @@ export function getActiveProfile(theme: ThemeId): LayoutProfile | null {
 export function setActiveProfile(theme: ThemeId, profileId: string): SaveResult {
   const db = readProfileDb();
   const exists = db.profiles.some((p) => p.id === profileId && p.themeId === theme);
-  if (!exists) return { ok: false, error: "Profile not found." };
+  if (!exists) return { ok: false, error: t("Profile not found.") };
   db.active[theme] = profileId;
   return writeDb(db);
 }
 
-function dedupeProfileName(db: ProfileDb, theme: ThemeId, baseName: string, excludeId?: string): string {
-  const trimmed = baseName.trim() || "Untitled";
+function dedupeProfileName(
+  db: ProfileDb,
+  theme: ThemeId,
+  baseName: string,
+  excludeId?: string,
+): string {
+  const trimmed = baseName.trim() || t("Untitled");
   const existing = new Set(
     db.profiles
       .filter((p) => p.themeId === theme && p.id !== excludeId)
@@ -268,7 +288,7 @@ export function updateActiveProfileConfig(
   const id = db.active[theme];
   const existing = id ? db.profiles.find((p) => p.id === id) : null;
   if (!existing) {
-    return createProfile(theme, "My layout", config);
+    return createProfile(theme, t("My layout"), config);
   }
   const prevConfig = existing.config;
   const prevModified = existing.modifiedAt;
@@ -286,7 +306,7 @@ export function updateActiveProfileConfig(
 export function renameProfile(profileId: string, newName: string): SaveResult {
   const db = readProfileDb();
   const p = db.profiles.find((x) => x.id === profileId);
-  if (!p) return { ok: false, error: "Profile not found." };
+  if (!p) return { ok: false, error: t("Profile not found.") };
   p.name = dedupeProfileName(db, p.themeId, newName, p.id);
   p.modifiedAt = Date.now();
   return writeDb(db);
@@ -295,7 +315,7 @@ export function renameProfile(profileId: string, newName: string): SaveResult {
 export function deleteProfile(profileId: string): SaveResult {
   const db = readProfileDb();
   const idx = db.profiles.findIndex((p) => p.id === profileId);
-  if (idx < 0) return { ok: false, error: "Profile not found." };
+  if (idx < 0) return { ok: false, error: t("Profile not found.") };
   const removed = db.profiles[idx];
   db.profiles.splice(idx, 1);
   if (db.active[removed.themeId] === profileId) {
@@ -329,23 +349,25 @@ export function importProfileJson(
   try {
     parsed = JSON.parse(text);
   } catch {
-    return { ok: false, error: "Not valid JSON. The file may be corrupted." };
+    return { ok: false, error: t("Not valid JSON. The file may be corrupted.") };
   }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    return { ok: false, error: "File is not a Harbor layout profile." };
+    return { ok: false, error: t("File is not a Harbor layout profile.") };
   }
   const obj = parsed as Record<string, unknown>;
   if (obj.harborProfileVersion !== undefined && obj.harborProfileVersion !== 1) {
     return {
       ok: false,
-      error: `Unsupported profile version (${String(obj.harborProfileVersion)}). Update Harbor or use an older profile.`,
+      error: t("Unsupported profile version ({version}). Update Harbor or use an older profile.", {
+        version: String(obj.harborProfileVersion),
+      }),
     };
   }
   if (!obj.config || typeof obj.config !== "object") {
-    return { ok: false, error: "Profile file has no chrome config." };
+    return { ok: false, error: t("Profile file has no chrome config.") };
   }
   const theme: ThemeId = obj.themeId === "stremio" ? "stremio" : "default";
-  const name = typeof obj.name === "string" && obj.name.trim() ? obj.name : "Imported";
+  const name = typeof obj.name === "string" && obj.name.trim() ? obj.name : t("Imported");
   const config = sanitizeConfig(obj.config, theme);
   return createProfile(theme, name, config);
 }

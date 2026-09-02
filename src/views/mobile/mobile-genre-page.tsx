@@ -4,6 +4,7 @@ import type { Meta } from "@/lib/cinemeta";
 import { topMovies, topSeries } from "@/lib/cinemeta";
 import { tmdbDiscover } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
 import { MobileDetail } from "./mobile-detail";
 import { MediaToggle, type ServiceMedia } from "./mobile-service-filters";
 import {
@@ -55,6 +56,7 @@ export function MobileGenrePage({
   genre: { label: string; genre: string };
   onBack: () => void;
 }) {
+  const t = useT();
   const { settings } = useSettings();
   const [media, setMedia] = useState<ServiceMedia>("movie");
   const [detailMeta, setDetailMeta] = useState<Meta | null>(null);
@@ -95,7 +97,7 @@ export function MobileGenrePage({
         <MediaToggle
           media={media}
           onChange={setMedia}
-          labels={{ movie: "Movies", tv: "TV Shows" }}
+          labels={{ movie: t("Movies"), tv: t("TV Shows") }}
         />
       </div>
       <MobileCatalogGrid
@@ -113,6 +115,7 @@ export function MobileGenrePage({
 }
 
 function GenreHeader({ label, onBack }: { label: string; onBack: () => void }) {
+  const t = useT();
   return (
     <div className="relative overflow-hidden">
       <div
@@ -126,20 +129,22 @@ function GenreHeader({ label, onBack }: { label: string; onBack: () => void }) {
         <button
           type="button"
           onClick={onBack}
-          aria-label="Back"
+          aria-label={t("Back")}
           className="-ms-2 flex h-10 w-10 items-center justify-center rounded-full text-ink-muted transition-transform active:scale-[0.96]"
         >
           <ChevronLeft size={24} strokeWidth={2.4} />
         </button>
         <div className="flex flex-col gap-2 pb-1">
           <span className="text-[11.5px] font-medium uppercase tracking-[0.2em] text-ink-subtle">
-            Genre
+            {t("Genre")}
           </span>
           <h1 className="font-display text-[28px] font-medium leading-none tracking-tight text-ink">
             {label}
           </h1>
           <p className="max-w-md text-[13.5px] leading-relaxed text-ink-muted">
-            The best {label.toLowerCase()} movies and shows, updated constantly.
+            {t("The best {genre} movies and shows, updated constantly.", {
+              genre: label.toLowerCase(),
+            })}
           </p>
         </div>
       </div>
@@ -148,16 +153,20 @@ function GenreHeader({ label, onBack }: { label: string; onBack: () => void }) {
 }
 
 function GenreEmpty({ label }: { label: string }) {
+  const t = useT();
   return (
     <div className="flex min-h-[42vh] flex-col items-center justify-center gap-4 px-8 text-center">
       <span className="flex h-16 w-16 items-center justify-center rounded-full bg-elevated/60 text-ink-subtle ring-1 ring-edge-soft/60">
         <Film size={26} strokeWidth={1.8} />
       </span>
       <div className="flex flex-col gap-1.5">
-        <h2 className="font-display text-[19px] font-medium text-ink">Nothing to show yet</h2>
+        <h2 className="font-display text-[19px] font-medium text-ink">
+          {t("Nothing to show yet")}
+        </h2>
         <p className="max-w-xs text-[13.5px] leading-relaxed text-ink-muted">
-          No {label.toLowerCase()} titles to show right now. Try switching between Movies and TV
-          Shows.
+          {t("No {genre} titles to show right now. Try switching between Movies and TV Shows.", {
+            genre: label.toLowerCase(),
+          })}
         </p>
       </div>
     </div>

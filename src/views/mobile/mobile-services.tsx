@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { SERVICES } from "@/lib/providers/streaming";
 import type { StreamingService } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
 import { MobileServicePage } from "./mobile-service-page";
 
 const FORCE_WHITE = "brightness(0) invert(1)";
@@ -34,6 +35,7 @@ export function MobileServices({
   onBack: () => void;
   initialService?: StreamingService;
 }) {
+  const t = useT();
   const [selected, setSelected] = useState<StreamingService | null>(initialService ?? null);
   const [hasNavigated, setHasNavigated] = useState(false);
 
@@ -57,7 +59,7 @@ export function MobileServices({
       style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 10px)" }}
     >
       <style>{SERVICES_MOTION_CSS}</style>
-      <TopBar title="Services" onBack={onBack} />
+      <TopBar title={t("Services")} onBack={onBack} />
       <div className="grid grid-cols-3 gap-3">
         {SERVICE_KEYS.map((svc) => (
           <ServiceCard
@@ -76,12 +78,13 @@ export function MobileServices({
 }
 
 function TopBar({ title, onBack }: { title: string; onBack: () => void }) {
+  const t = useT();
   return (
     <header className="flex items-center gap-2">
       <button
         type="button"
         onClick={onBack}
-        aria-label="Back"
+        aria-label={t("Back")}
         className="-ms-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-muted transition-transform active:scale-[0.96]"
       >
         <ChevronLeft size={24} strokeWidth={2.4} />
@@ -91,20 +94,15 @@ function TopBar({ title, onBack }: { title: string; onBack: () => void }) {
   );
 }
 
-function ServiceCard({
-  service,
-  onSelect,
-}: {
-  service: StreamingService;
-  onSelect: () => void;
-}) {
+function ServiceCard({ service, onSelect }: { service: StreamingService; onSelect: () => void }) {
   const [failed, setFailed] = useState(false);
+  const t = useT();
   const meta = SERVICES[service];
   return (
     <button
       type="button"
       onClick={onSelect}
-      aria-label={meta.name}
+      aria-label={t("View {title}", { title: meta.name })}
       className="flex aspect-[16/10] items-center justify-center rounded-2xl bg-elevated/70 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4)] ring-1 ring-edge-soft/60 transition-transform active:scale-[0.96]"
     >
       {failed ? (

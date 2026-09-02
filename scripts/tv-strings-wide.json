@@ -1,0 +1,1181 @@
+{
+  "AddonCatalogPage.kt": [
+    "This addon provides streams only. It has no catalog to browse, ",
+    "This catalog came back empty. Try another one from the strip above."
+  ],
+  "AddonCollectionPage.kt": [
+    "No titles found in this collection."
+  ],
+  "AddonMeta.kt": [
+    "Episode $number"
+  ],
+  "AddonStoreHealth.kt": [
+    "Checking your addons",
+    "It took too long to answer.",
+    "Its security certificate is not valid.",
+    "Its server cannot be found. The addon may have shut down.",
+    "Its server refused the connection.",
+    "No addons to check"
+  ],
+  "AddonUrl.kt": [
+    "That doesn't look like a valid URL."
+  ],
+  "AniListApi.kt": [
+    "Bearer $token"
+  ],
+  "AniListClient.kt": [
+    "AniList is cooling down after a rate block.",
+    "Bearer $token",
+    "Not signed in to AniList."
+  ],
+  "AniListConfig.kt": [
+    "AniList did not hand back a token. Try authorizing again.",
+    "AniList sent something Harbor could not read.",
+    "AniList took the code but would not say who you are.",
+    "AniList would not take that code. Authorize again and use the newest one.",
+    "Could not reach AniList.",
+    "Could not reach Harbor to finish the sign in.",
+    "Paste the code from AniList to continue."
+  ],
+  "AnimeAddonBridge.kt": [
+    "From Your Addons"
+  ],
+  "AnimeAwards.kt": [
+    "Animation Kobe",
+    "Crunchyroll Anime Awards",
+    "Japan Media Arts Festival",
+    "Tokyo Anime Award Festival"
+  ],
+  "AnimeDetail.kt": [
+    "Parent Story",
+    "Side Story",
+    "TV Short"
+  ],
+  "AnimeExtras.kt": [
+    "Age rating",
+    "Episode length"
+  ],
+  "AnimeHero.kt": [
+    "More Info",
+    "Start Watching",
+    "Sub and Dub"
+  ],
+  "AnimeKitsu.kt": [
+    "Currently Airing",
+    "Finished Airing"
+  ],
+  "AnimeTrackerPanel.kt": [
+    "Anime does not go to Trakt. Connect Simkl or AniList and every anime episode you finish ",
+    "Anime tracking",
+    "Connect Simkl",
+    "Getting a code ready…",
+    "Scan with your phone, or go to simkl.com/pin and enter the code.",
+    "Signed in as $it",
+    "Simkl sign in code",
+    "That code expired. Start again.",
+    "This TV could not seal the sign in to disk, so it is kept in memory only."
+  ],
+  "Awards.kt": [
+    "Academy Awards",
+    "Animation Kobe",
+    "Annie Awards",
+    "Awards & Recognition",
+    "BAFTA Awards",
+    "BAFTA Television Awards",
+    "Baeksang Arts Awards",
+    "Berlin International Film Festival",
+    "Blue Dragon Film Awards",
+    "British Independent Film Awards",
+    "Cannes Film Festival",
+    "Critics' Choice Awards",
+    "Crunchyroll Anime Awards",
+    "César Awards",
+    "Golden Globe Awards",
+    "Goya Awards",
+    "Independent Spirit Awards",
+    "Japan Media Arts Festival",
+    "Other Awards",
+    "Primetime Emmy Awards",
+    "Saturn Awards",
+    "Screen Actors Guild Awards",
+    "Tokyo Anime Award Festival",
+    "Venice Film Festival"
+  ],
+  "BpGuideBrowseRail.kt": [
+    "Delete a letter to see channels again",
+    "Enter picks a category, right to search",
+    "Enter switches playlist, down for categories",
+    "Go left to a channel name, then OK to star it",
+    "Nothing matches ",
+    "Pick another category, the grid kept your channels",
+    "Search channels",
+    "This category has nothing right now"
+  ],
+  "BpGuideBrowseSources.kt": [
+    "Add playlist"
+  ],
+  "BpGuideChrome.kt": [
+    "Live now",
+    "No schedule"
+  ],
+  "BpGuideScreen.kt": [
+    "No program info",
+    "Tuning the guide"
+  ],
+  "CalendarModel.kt": [
+    "Episode $number",
+    "Episode $number",
+    "Episodes from the anime you follow on AniList.",
+    "Episodes from the shows saved in your library.",
+    "Episodes from the shows you follow on Trakt.",
+    "Open settings"
+  ],
+  "CalendarRow.kt": [
+    "Nothing airing"
+  ],
+  "CardRating.kt": [
+    "Score $value"
+  ],
+  "CollectionPage.kt": [
+    "Add a TMDB key in Settings to browse collections.",
+    "Couldn't load this collection right now.",
+    "No films found in this collection."
+  ],
+  "CollectionsRow.kt": [
+    "All collections"
+  ],
+  "CollectionsTab.kt": [
+    "Collections come from TMDB. Add a TMDB key in Settings and every saga, ",
+    "Nothing to show here yet.",
+    "Open Settings"
+  ],
+  "ConnectScreen.kt": [
+    "Still working. If it does not open soon, the source list opens instead.",
+    "View sources"
+  ],
+  "CwAhead.kt": [
+    "Episode $number"
+  ],
+  "CwLibrary.kt": [
+    "Episode ${at.second}"
+  ],
+  "CwRow.kt": [
+    "Your library"
+  ],
+  "Data.kt": [
+    "Airing Now",
+    "Featured Movies",
+    "Featured Series",
+    "New Episodes",
+    "New Movies",
+    "New Movies",
+    "New Releases",
+    "New Series",
+    "New Series",
+    "Popular Anime",
+    "Popular Movies",
+    "Popular Series",
+    "Top Movies",
+    "Top Rated",
+    "Top Rated",
+    "Top Rated Anime",
+    "Top Series",
+    "Trending Anime",
+    "Trending Anime"
+  ],
+  "DebridOthers.kt": [
+    "Bearer $bearer",
+    "Bearer $bearer",
+    "Bearer $bearer"
+  ],
+  "DebridRealDebrid.kt": [
+    "Bearer $apiKey"
+  ],
+  "DetailFacts.kt": [
+    "Director of Photography",
+    "Original Music Composer",
+    "Original Series Creator",
+    "Original Story"
+  ],
+  "DetailHeroOrigin.kt": [
+    "Anime Kitsu"
+  ],
+  "DiscoverCatalog.kt": [
+    "Academy Awards",
+    "Animation Kobe",
+    "Animation of the Year",
+    "Anime of the Year",
+    "Anime of the Year",
+    "Annie Awards",
+    "BAFTA Film Awards",
+    "BAFTA Television Awards",
+    "Baeksang Arts Awards",
+    "Berlin International Film Festival",
+    "Best Animated Feature",
+    "Best British Independent Film",
+    "Best Drama Series",
+    "Best Feature",
+    "Best Film",
+    "Best Film",
+    "Best Film",
+    "Best Film",
+    "Best Motion Picture",
+    "Best Picture",
+    "Best Picture",
+    "Best Science Fiction Film",
+    "Blue Dragon",
+    "Blue Dragon Film Awards",
+    "British Independent Film Awards",
+    "Cannes Film Festival",
+    "Critics' Choice",
+    "Critics' Choice Awards",
+    "Crunchyroll Anime Awards",
+    "César Awards",
+    "Feature Film Award",
+    "Golden Bear",
+    "Golden Globe Awards",
+    "Golden Globes",
+    "Golden Lion",
+    "Goya Awards",
+    "Grand Prize",
+    "Grand Prize",
+    "Independent Spirit Awards",
+    "Japan Media Arts Festival",
+    "Media Arts",
+    "Outstanding Cast",
+    "Outstanding Drama Series",
+    "Palme d'Or",
+    "Primetime Emmy Awards",
+    "Saturn Awards",
+    "Screen Actors Guild Awards",
+    "Tokyo Anime Award Festival",
+    "Venice Film Festival"
+  ],
+  "DiscoverCopy.kt": [
+    "Top Rated"
+  ],
+  "DiscoverData.kt": [
+    "Top $g",
+    "Top Movies",
+    "Top Series"
+  ],
+  "DiscoverQueueFeed.kt": [
+    "Top Rated"
+  ],
+  "DownloadsFormat.kt": [
+    "Saved movies and episodes for offline watching"
+  ],
+  "DownloadsModel.kt": [
+    "Failed: ",
+    "Interrupted, press resume to finish"
+  ],
+  "DownloadsNote.kt": [
+    "Downloads finished",
+    "Nothing left to download"
+  ],
+  "DownloadsPage.kt": [
+    "Nothing in this group yet.",
+    "Open a title, pick a source, then press right on it to save that source here "
+  ],
+  "DownloadsSpur.kt": [
+    "Press right on a source to save it for offline",
+    "Working out a direct link"
+  ],
+  "DownloadsStart.kt": [
+    "Not enough free space on this device",
+    "Saving $title for offline",
+    "That source would not give a direct link",
+    "This device has no writable storage"
+  ],
+  "EpisodeChoice.kt": [
+    "Start from the beginning"
+  ],
+  "EpisodeFacts.kt": [
+    "Episode ${ep.number}"
+  ],
+  "EpisodeOrder.kt": [
+    "Aired Order",
+    "All Episodes",
+    "Episode Order"
+  ],
+  "EpisodePager.kt": [
+    "Season ${it.key}"
+  ],
+  "EpisodeSystem.kt": [
+    "Episode ${ep.number}",
+    "Episode ${ep.number}"
+  ],
+  "FriendsFeedNet.kt": [
+    "Bearer $token"
+  ],
+  "HandoffQr.kt": [
+    "Open on ${peer.label}",
+    "Opened on ${peer.label}"
+  ],
+  "HarborLan.kt": [
+    "Harbor TV"
+  ],
+  "HarborLanTrustWire.kt": [
+    "An unnamed Harbor"
+  ],
+  "Hero.kt": [
+    "More Info"
+  ],
+  "HeroAwards.kt": [
+    "Animation Kobe",
+    "Animation Kobe",
+    "Blue Dragon",
+    "Blue Dragons",
+    "Japan Media Arts",
+    "Japan Media Arts",
+    "Tokyo Anime",
+    "Tokyo Anime"
+  ],
+  "HeroExpand.kt": [
+    "Created by ",
+    "Directed by ",
+    "Written by "
+  ],
+  "HomeCatalogs.kt": [
+    "Action Hits",
+    "Animated Movies",
+    "Comedy Series",
+    "Crime Series",
+    "Drama Series",
+    "Featured Movies",
+    "Featured Series",
+    "New Movies",
+    "New Series",
+    "Popular Movies",
+    "Popular Series",
+    "Sci-Fi and Fantasy"
+  ],
+  "HomeFeed.kt": [
+    "All anime",
+    "All movies",
+    "All shows"
+  ],
+  "IptvFetch.kt": [
+    "Channel $autoIndex"
+  ],
+  "IptvNetworksIntl.kt": [
+    "BBC Four",
+    "BBC One",
+    "BBC Three",
+    "BBC Two",
+    "BT Sport",
+    "CNN Brasil",
+    "Channel 4",
+    "Channel 5",
+    "ESPN Brasil",
+    "Esporte Interativo",
+    "Record News",
+    "Rede aberta",
+    "Sky News",
+    "Sky Sports",
+    "TNT Sports"
+  ],
+  "IptvNetworksUs.kt": [
+    "ACC Network",
+    "Animal Planet",
+    "Apple TV+",
+    "BBC America",
+    "BBC World",
+    "BET Her",
+    "Baby TV",
+    "Big Ten Network",
+    "Broadcast networks",
+    "CBS Sports",
+    "Cartoon Network",
+    "Comedy Central",
+    "Destination America",
+    "Disney Channel",
+    "Disney Jr",
+    "Disney XD",
+    "Documentary & Discovery",
+    "ESPN Deportes",
+    "ESPN News",
+    "Estrella TV",
+    "FOX Business",
+    "FOX News",
+    "FOX Sports 1",
+    "FOX Sports 2",
+    "Food Network",
+    "Golf Channel",
+    "Hallmark Movies",
+    "History 2",
+    "Investigation Discovery",
+    "Kids & Family",
+    "Lifestyle & Reality",
+    "Lifetime Movies",
+    "MLB Network",
+    "MTV Classic",
+    "MTV Live",
+    "NBC Sports",
+    "NFL Network",
+    "NHL Network",
+    "Nat Geo",
+    "Nat Geo Wild",
+    "Nick Jr",
+    "Olympic Channel",
+    "PBS Kids",
+    "Paramount Network",
+    "Pop TV",
+    "Premium movies",
+    "SEC Network",
+    "Science Channel",
+    "Tennis Channel",
+    "The CW",
+    "Travel Channel",
+    "Turner Classic Movies",
+    "USA Network",
+    "Universal Kids",
+    "Weather Channel"
+  ],
+  "IptvSetupFields.kt": [
+    "Guide address",
+    "Playlist address"
+  ],
+  "LibraryFilters.kt": [
+    "One list"
+  ],
+  "LibraryModel.kt": [
+    "A to Z",
+    "Anything you save but have not started yet waits here, so you always have something queued.",
+    "By year",
+    "Connect Trakt in Settings and everything on your watchlist there lands on this shelf, newest first.",
+    "Hold OK on any title and add it to favorites. It stays pinned to the front of this shelf.",
+    "My Lists",
+    "No date",
+    "No favorites yet.",
+    "No lists yet.",
+    "No matches.",
+    "Nothing on this shelf fits the filters you set. Open Filters above to widen them.",
+    "Nothing saved yet.",
+    "Nothing watched yet.",
+    "Open any title and use Add to list. Every list you build gets its own shelf here, and you can prune them from Filters.",
+    "Open anything and press Save. It lands on this shelf and follows you to every device signed in to the same account.",
+    "Press play on something. It shows up here with your place in it, ready to pick back up.",
+    "Public Lists",
+    "Sign in to Stremio or connect Trakt in Settings and everything you have already saved shows up, in the order you saved it.",
+    "Sign in to Stremio or connect Trakt in Settings to see what you have been watching and how far you got.",
+    "This month",
+    "This week",
+    "Trakt Lists",
+    "Your Trakt watchlist is empty.",
+    "Your history lives here.",
+    "Your shelf lives here.",
+    "Your watchlist is empty."
+  ],
+  "LibraryRows.kt": [
+    "Delete list",
+    "Your year"
+  ],
+  "LibraryServices.kt": [
+    "Connect Trakt in Settings and each custom list you keep there lands on its own shelf, ready to browse and edit from the couch.",
+    "Every custom list on your Trakt account gets a shelf here. Build one on trakt.tv, or open any title and use Trakt lists to start filling it.",
+    "No Trakt lists yet.",
+    "Your Trakt lists live here."
+  ],
+  "LibrarySheets.kt": [
+    "Delete $name",
+    "Keep list"
+  ],
+  "LinkPanel.kt": [
+    "Link MDBList",
+    "Link Stremio",
+    "Link TMDB",
+    "Link a debrid service",
+    "Signed in as $it",
+    "Signed in as $it"
+  ],
+  "ListNameDialog.kt": [
+    "List name"
+  ],
+  "LiveIdent.kt": [
+    "Live TV"
+  ],
+  "MainScaffold.kt": [
+    "This page is not built yet. Harbor shows ${tab.label} in a row on the Home page."
+  ],
+  "MalClient.kt": [
+    "Bearer $token",
+    "MyAnimeList is cooling down after a rate block.",
+    "Not signed in to MyAnimeList."
+  ],
+  "MalSignIn.kt": [
+    "Bearer $token"
+  ],
+  "MarqueeFeed.kt": [
+    "The collection"
+  ],
+  "MediaRows.kt": [
+    "Loading trailer..."
+  ],
+  "OnboardPhone.kt": [
+    "Signed in as $stremioName"
+  ],
+  "OnboardStepsAccount.kt": [
+    "David Corenswet",
+    "Edi Gathegi",
+    "Nicholas Hoult",
+    "Rachel Brosnahan"
+  ],
+  "OnboardStepsTaste.kt": [
+    "In order: ",
+    "Portuguese (Brazil)",
+    "Spanish (Latin America)"
+  ],
+  "Onboarding.kt": [
+    "Leave setup?"
+  ],
+  "OptionsPanel.kt": [
+    "Add to Watchlist",
+    "Add to favorites",
+    "Did not work",
+    "Mark unwatched",
+    "Mark watched",
+    "Remove from Continue watching",
+    "Remove from Stremio library",
+    "Remove from Watchlist",
+    "Remove from favorites"
+  ],
+  "People.kt": [
+    "Director of",
+    "Executive Producer",
+    "Original Music Composer"
+  ],
+  "PersonCredits.kt": [
+    "Known For"
+  ],
+  "PersonData.kt": [
+    "Born $born",
+    "Born $born  ·  $age",
+    "Died $died",
+    "Executive Producer",
+    "MMMM d, yyyy",
+    "Original Story",
+    "Other Work",
+    "TV Shows"
+  ],
+  "PersonFilms.kt": [
+    "Nothing rated $minRating or higher.",
+    "Nothing to show."
+  ],
+  "PersonPage.kt": [
+    "Known For",
+    "Top Rated"
+  ],
+  "PersonRoute.kt": [
+    "Director of",
+    "Executive Producer"
+  ],
+  "PlayerAudio.kt": [
+    "PCM only"
+  ],
+  "PlayerAudioRow.kt": [
+    "DTS Express",
+    "Dolby AC-4",
+    "Dolby Atmos",
+    "Dolby Digital",
+    "Dolby Digital Plus"
+  ],
+  "PlayerAudioTracks.kt": [
+    "DTS Express",
+    "Dolby AC-4",
+    "Dolby AC-4",
+    "Dolby Digital",
+    "Dolby Digital",
+    "Dolby Digital Plus",
+    "Dolby Digital Plus",
+    "Dolby TrueHD",
+    "PCM 16 bit",
+    "PCM float"
+  ],
+  "PlayerBinge.kt": [
+    "Keep watching",
+    "Stop (",
+    "Your place is kept in Continue Watching either way."
+  ],
+  "PlayerCwPill.kt": [
+    "Episode ${ahead.number}",
+    "Kept in Continue Watching",
+    "Nothing further in this series yet"
+  ],
+  "PlayerEndHost.kt": [
+    "Press Back to stay on this screen",
+    "That source stopped. Moving to the next one."
+  ],
+  "PlayerEngineTracks.kt": [
+    "Draw a dim panel under subtitles on bright scenes.",
+    "Ignore styling and draw everything the same way.",
+    "Keep signs in place, but make dialogue plain and legible.",
+    "Keep the colours and positions the subtitle file asks for.",
+    "Output: ",
+    "Shade behind text",
+    "Size: ",
+    "Style: "
+  ],
+  "PlayerEpisodes.kt": [
+    "Episode $number"
+  ],
+  "PlayerQuality.kt": [
+    "Dolby Vision",
+    "Dolby Vision",
+    "Option ",
+    "Playing ",
+    "Track "
+  ],
+  "PlayerQualityPane.kt": [
+    "Crop to the panel, shapes are kept.",
+    "Dolby Vision",
+    "Press right from any row",
+    "Stretch to the panel, shapes are not kept."
+  ],
+  "PlayerResume.kt": [
+    "Resume from ",
+    "Resuming in ",
+    "Start over"
+  ],
+  "PlayerSeekBar.kt": [
+    "Ends $endsText"
+  ],
+  "PlayerSideSubHost.kt": [
+    "Added subtitle",
+    "Harbor could not read that file. Press OK to try again.",
+    "Reading the file"
+  ],
+  "PlayerSideSubModel.kt": [
+    "Styled, ASS",
+    "Text, SRT",
+    "Text, TTML",
+    "Text, WebVTT"
+  ],
+  "PlayerSkip.kt": [
+    "Next Episode",
+    "Skip Credits",
+    "Skip Intro",
+    "Skip Recap",
+    "Skip injected ad?"
+  ],
+  "PlayerSleep.kt": [
+    "End ep",
+    "End of episode",
+    "Pauses when this episode ends"
+  ],
+  "PlayerSpeed.kt": [
+    "Press right from any row",
+    "Press right from any row",
+    "Sleep timer"
+  ],
+  "PlayerStallGuard.kt": [
+    "Playback ran dry ${seconds}s ago and ",
+    "Sound kept playing but no video frame has reached the screen in ${seconds}s. ",
+    "The link opened but nothing reached the screen in ${seconds}s.",
+    "The picture stopped on this source",
+    "This device could not keep decoding the picture in this file.",
+    "This source is not responding",
+    "This source stopped feeding",
+    "Try again, or pick a source with a lower bitrate.",
+    "Try another source, or press Back to leave."
+  ],
+  "PlayerStats.kt": [
+    "Dolby Vision"
+  ],
+  "PlayerStatsModel.kt": [
+    "Link rate",
+    "Stream rate"
+  ],
+  "PlayerSubFind.kt": [
+    "Adding subtitle",
+    "Asking every source",
+    "Find subtitles",
+    "No source had one for this",
+    "Nothing found",
+    "Nothing to search with",
+    "Press to ask every source again.",
+    "Search every source",
+    "Search every source again",
+    "This stream did not come with a catalogue id."
+  ],
+  "PlayerSubs.kt": [
+    "Image, DVB",
+    "Image, PGS",
+    "Image, VobSub, not decodable",
+    "Styled, ASS",
+    "Text, SRT",
+    "Text, TTML",
+    "Text, WebVTT",
+    "Text, tx3g",
+    "Track ${ordinal + 1}"
+  ],
+  "PlayerSubsHud.kt": [
+    "Subtitle sync"
+  ],
+  "PlayerSubsModel.kt": [
+    "Harbor cannot decode this one",
+    "Harbor could not read that file. Press OK to try again.",
+    "In this file",
+    "No subtitles on screen",
+    "Reading the file",
+    "Turn subtitles off"
+  ],
+  "PlayerSubsPane.kt": [
+    "Auto sync",
+    "Find one online and Harbor will play it alongside.",
+    "Find subtitles online",
+    "Look and placement",
+    "No subtitle addon installed",
+    "On. Press OK to turn off.",
+    "This file carries no subtitle tracks."
+  ],
+  "PlayerSubsPick.kt": [
+    "Did not start. Press OK to go back to ",
+    "Did not start. Try another track."
+  ],
+  "PlayerSubsSwitch.kt": [
+    "Subtitles off",
+    "This track did not start",
+    "Turning off",
+    "Turning on"
+  ],
+  "PlayerSubsTune.kt": [
+    "Back returns to the list.",
+    "Late? Press Right. Early? Press Left. OK puts it back in sync.",
+    "Left and Right resize. OK returns to 100%.",
+    "Subtitle size",
+    "Subtitle timing"
+  ],
+  "PlayerSwapHead.kt": [
+    "Keep watching",
+    "Switch source"
+  ],
+  "PlayerSwapSheet.kt": [
+    "No addon returned a source for this title.",
+    "Nothing here fits the filters you set. Press up to widen them."
+  ],
+  "PlayerTunePane.kt": [
+    "This stream reports a single audio track."
+  ],
+  "PlayerUpNext.kt": [
+    "Next episode",
+    "OK plays it now, any other button keeps watching",
+    "Previous episode"
+  ],
+  "PlayerVideo.kt": [
+    "Dolby Vision",
+    "Dolby Vision",
+    "Dolby Vision Profile $n",
+    "Main 10",
+    "Main Still"
+  ],
+  "PlayerWaitNote.kt": [
+    "Opening the stream",
+    "Sound is running but no picture has arrived yet.",
+    "Still buffering. The link is slower than this stream needs.",
+    "Still opening. Large files take a moment to start.",
+    "Waiting for the first picture"
+  ],
+  "PlaylistVodDetail.kt": [
+    "Season $number"
+  ],
+  "PlaylistVodPage.kt": [
+    "Add an IPTV playlist in Live TV and any movies or series ",
+    "On Demand",
+    "Reading your playlist",
+    "Reading your playlist.",
+    "This playlist carries live channels only. Providers that include a "
+  ],
+  "PlaylistVodRails.kt": [
+    "Nothing on demand in this playlist"
+  ],
+  "PlutoApi.kt": [
+    "Pluto TV"
+  ],
+  "PlutoStore.kt": [
+    "Bearer "
+  ],
+  "ProfileConfirm.kt": [
+    "Remove ${profileCleanName(name).ifEmpty { CONFIRM_ANON }}?"
+  ],
+  "ProfileEdit.kt": [
+    "Remove profile"
+  ],
+  "ProfilePinPad.kt": [
+    "Too many tries. Try again in ${seconds}s."
+  ],
+  "Progress.kt": [
+    "Episode ${e.number}",
+    "Episode ${slot.second}"
+  ],
+  "QrCode.kt": [
+    "Code unavailable",
+    "Setup QR code"
+  ],
+  "RankRow.kt": [
+    "Top Movies & TV"
+  ],
+  "RowMoreCell.kt": [
+    "Load more",
+    "Try again"
+  ],
+  "SearchAiModel.kt": [
+    "AI picks",
+    "That request was too big for this model. Pick a model with a larger context.",
+    "The model is rate-limited right now. Try again in a moment or switch models.",
+    "This model no longer exists at the provider. Pick another model.",
+    "You are a film and TV discovery engine for a media app. The user describes what they want ",
+    "Your API key was rejected. Check it in Settings, AI search.",
+    "Your account is out of credits for this model. Pick a free model or top up."
+  ],
+  "SearchAiSource.kt": [
+    "Bearer $key",
+    "The model replied with nothing usable. Try another model or rephrase."
+  ],
+  "SearchIdle.kt": [
+    "On your list",
+    "Popular now",
+    "Search ",
+    "Two letters and the search begins."
+  ],
+  "SearchKeyboard.kt": [
+    "Voice search"
+  ],
+  "SearchOrder.kt": [
+    "Live TV",
+    "Live TV",
+    "Live TV  ·  $name",
+    "Top result",
+    "Your addons",
+    "Your addons"
+  ],
+  "SearchQueryLine.kt": [
+    "Search movies and series"
+  ],
+  "SearchRecallRail.kt": [
+    "Press again"
+  ],
+  "SearchRepair.kt": [
+    "Search again"
+  ],
+  "SearchStates.kt": [
+    "Cannot reach search.",
+    "Everything this search found is under All.",
+    "No search source is set up yet. Add an addon in Settings, then try again.",
+    "Nothing answered. Check the connection, then try again.",
+    "Nothing matched.",
+    "Nothing under $label.",
+    "Show all",
+    "TMDB is not answering.",
+    "Titles, people and collections come from TMDB. Try again shortly.",
+    "Try a different spelling, a person's name, a year like 1972, or a genre like Horror.",
+    "Try again"
+  ],
+  "SearchText.kt": [
+    "Action & Adventure",
+    "Sci-Fi & Fantasy"
+  ],
+  "ServicePage.kt": [
+    "Add a TMDB key in Settings to browse ${service.name}.",
+    "Change your region in Settings.",
+    "Nothing from ${service.name} is listed in $region right now. "
+  ],
+  "ServicePageChrome.kt": [
+    "Hide watched",
+    "Open settings"
+  ],
+  "ServicePageRows.kt": [
+    "Also on your services",
+    "Highest rated",
+    "New releases",
+    "Trending on ${service.name}"
+  ],
+  "ServiceRow.kt": [
+    "Acorn TV",
+    "Apple TV+",
+    "Pluto TV",
+    "Prime Video",
+    "The CW",
+    "The Roku Channel",
+    "Your streaming"
+  ],
+  "SettingsCatalog.kt": [
+    "Portuguese (Brazil)",
+    "Spanish (Latin America)"
+  ],
+  "SharedListNet.kt": [
+    "Bearer $it",
+    "Untitled list"
+  ],
+  "SimklClient.kt": [
+    "Bearer $token",
+    "Simkl is cooling down after a rate block."
+  ],
+  "SimklConfig.kt": [
+    "Could not reach Simkl to start the sign in.",
+    "Lost the connection while waiting for Simkl.",
+    "Simkl sent something Harbor could not read.",
+    "Simkl would not start the sign in."
+  ],
+  "SimklCw.kt": [
+    "Episode ${row.number}"
+  ],
+  "Spoilers.kt": [
+    "Episode $number",
+    "Episode $number",
+    "Hidden so nothing is given away."
+  ],
+  "StreamBadgePackImport.kt": [
+    "All $unsafe patterns in that pack use regex Harbor will not run. Nothing was installed.",
+    "Could not reach that link. Check the URL and try again.",
+    "None of the $unsafe patterns in that pack are safe to run on a TV, and $blank were empty.",
+    "That link is not a badge pack. Expected JSON badge filters.",
+    "That link returned nothing.",
+    "That pack has no badge filters."
+  ],
+  "StreamBadgePackPane.kt": [
+    "Add badge pack",
+    "Badge packs add release group and tracker badges to source rows. ",
+    "Harbor reads at most 96 KB and keeps at most 120 badges per pack.",
+    "Harbor runs pack patterns as literal text, never as regex, and never loads pack images.",
+    "Nothing on this TV's clipboard. Type the link instead.",
+    "Paste the badge pack's JSON link. It must be https. ",
+    "Reading the badge pack",
+    "Remove a pack first. Harbor keeps up to 3."
+  ],
+  "StreamBadgePackStore.kt": [
+    "Badge pack"
+  ],
+  "StreamBadgeSlots.kt": [
+    "Audio format",
+    "Cuts and repacks",
+    "Dolby Vision and HDR",
+    "Dubbed and subbed",
+    "File size",
+    "Language flags",
+    "Surround layout",
+    "Video codec"
+  ],
+  "StreamChips.kt": [
+    "Any language",
+    "Clear filters",
+    "High bitrate",
+    "Plays instantly",
+    "Show flagged"
+  ],
+  "StreamFacetModel.kt": [
+    "Any HDR",
+    "Any audio",
+    "Any codec",
+    "Any source"
+  ],
+  "StreamFilterModel.kt": [
+    "Any addon",
+    "Any quality"
+  ],
+  "StreamLanguages.kt": [
+    "Portuguese (Brazil)",
+    "Portuguese (Brazil)",
+    "Spanish (Latin America)",
+    "Spanish (Latin America)",
+    "Spanish (Latin America)",
+    "Spanish (Latin America)",
+    "Spanish (Latin America)"
+  ],
+  "StreamRow.kt": [
+    "In $cachedOnName",
+    "Now playing",
+    "On $cachedOnName",
+    "Played last"
+  ],
+  "StreamRowText.kt": [
+    "Director's Cut",
+    "No label",
+    "Open Matte"
+  ],
+  "StreamScore.kt": [
+    "CAM penalty",
+    "Cam Recording",
+    "Full HD",
+    "No Label",
+    "Screener penalty",
+    "Standard Def",
+    "Telecine penalty",
+    "Telesync penalty",
+    "Theater Capture",
+    "Ultra HD"
+  ],
+  "StreamTokenParse.kt": [
+    "Atmos 9.1.2",
+    "Dolby Vision",
+    "No Label",
+    "No Label"
+  ],
+  "Streams.kt": [
+    "Loading sources",
+    "No addon returned a source for this title.",
+    "Nothing here fits the filters you set. Press up to widen them."
+  ],
+  "SubLangCode.kt": [
+    "Multiple languages",
+    "Portuguese (Brazil)",
+    "Spanish (Latin America)",
+    "Unknown language"
+  ],
+  "SubLangList.kt": [
+    "That file is not a subtitle Harbor can read.",
+    "That subtitle would not download. Try another."
+  ],
+  "SubLangModel.kt": [
+    "Nothing found"
+  ],
+  "SyncNet.kt": [
+    "Bearer $next",
+    "Bearer $token"
+  ],
+  "SyncTvAdapters.kt": [
+    "Custom theme"
+  ],
+  "ThemePickerPreview.kt": [
+    "Every colour on this screen comes from the theme you are on.",
+    "Light themes are not finished on TV yet."
+  ],
+  "ThemeSync.kt": [
+    "Custom theme",
+    "Harbor default"
+  ],
+  "TitleExtras.kt": [
+    "Behind the Scenes",
+    "Opening Credits"
+  ],
+  "TogetherCopy.kt": [
+    "Read this out, or let them scan it.",
+    "Your TV made the room. Everyone else joins from a phone or a computer, so nobody has "
+  ],
+  "TogetherHost.kt": [
+    "Find something to watch",
+    "Or point a camera here",
+    "Watch party invite"
+  ],
+  "TogetherIdentity.kt": [
+    "Guest ${Random.nextInt(1000, 10000)}"
+  ],
+  "TogetherInbox.kt": [
+    "Watch Together"
+  ],
+  "TogetherLobby.kt": [
+    "Keep waiting"
+  ],
+  "TogetherOverlay.kt": [
+    "Everyone is loaded in. Press play to start watching.",
+    "Loading on ",
+    "Nobody sees a frame until you start.",
+    "Play without sync",
+    "Ready when you are",
+    "Start anyway (",
+    "Start watching",
+    "Still nothing. You can watch this on your own instead.",
+    "Still waiting. $host has not started yet.",
+    "The host",
+    "Waiting for $host to start",
+    "You are loaded in and ready."
+  ],
+  "TogetherRoute.kt": [
+    "Nobody else has joined yet.",
+    "Nobody is in ",
+    "Reaching room ",
+    "Rejoin ",
+    "Relay ",
+    "You are in ",
+    "You are in the room"
+  ],
+  "TopNav.kt": [
+    "Live TV",
+    "On Demand"
+  ],
+  "TraktAuth.kt": [
+    "Bearer ${session.accessToken}",
+    "Could not reach Trakt to start the sign in.",
+    "Lost the connection while waiting for Trakt.",
+    "Trakt could not finish the sign in.",
+    "Trakt would not start the sign in."
+  ],
+  "TraktClient.kt": [
+    "A whole series cannot be scrobbled, only an episode.",
+    "Anime tracking goes to Simkl and AniList, not Trakt.",
+    "Bearer $it",
+    "Bearer $token",
+    "Connect Trakt first.",
+    "Could not reach Trakt. Check the connection.",
+    "Harbor has no id for this title that Trakt understands.",
+    "Trakt does not know that title.",
+    "Trakt is having trouble right now.",
+    "Trakt is rate limiting Harbor. Try again shortly.",
+    "Trakt no longer accepts this sign in. Connect again.",
+    "Trakt ratings need a TMDB id and this item has none.",
+    "Trakt sent a reply Harbor could not read.",
+    "Trakt turned that request down.",
+    "Write something before posting."
+  ],
+  "TraktCommentPost.kt": [
+    "Harbor has no id for this title that Trakt understands.",
+    "Hold OK to post.",
+    "Trakt already has that comment from you.",
+    "Trakt is holding you off. Try again in a minute.",
+    "Trakt needs $TRAKT_COMMENT_MIN_WORDS words before it will take a comment.",
+    "Trakt turned the comment down. Code $status.",
+    "Trakt would not accept the sign in. Connect Trakt again."
+  ],
+  "TraktLists.kt": [
+    "List $listId",
+    "No lists on Trakt yet. Build one on trakt.tv and it shows up here.",
+    "Reading your Trakt lists."
+  ],
+  "TraktListsUi.kt": [
+    "Trakt lists"
+  ],
+  "Tvdb.kt": [
+    "Absolute Order",
+    "Aired Order",
+    "Alternate Order",
+    "DVD Order",
+    "Regional Order",
+    "TVDB Absolute Order"
+  ],
+  "VoiceSearch.kt": [
+    "Microphone access is off",
+    "Microphone access is off",
+    "Nothing heard",
+    "Nothing heard",
+    "Nothing heard",
+    "The microphone did not open",
+    "Voice did not start",
+    "Voice did not start",
+    "Voice did not work",
+    "Voice needs a connection",
+    "Voice needs a connection"
+  ],
+  "VoiceSearchUi.kt": [
+    "Back to cancel",
+    "Getting ready",
+    "One moment",
+    "Select to finish",
+    "Voice did not work"
+  ],
+  "WrappedPanels.kt": [
+    "Busiest day ",
+    "Connect Trakt for the whole picture.",
+    "Counted from what this Harbor has played. ",
+    "Play something, or connect Trakt in Settings, and this page fills in."
+  ],
+  "XrayModel.kt": [
+    "Paused at "
+  ],
+  "XrayUiBand.kt": [
+    "Holding the frame"
+  ],
+  "YouTube.kt": [
+    "Loading trailer...",
+    "This trailer cannot be played here. Press Back."
+  ]
+}

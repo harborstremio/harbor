@@ -1,0 +1,64 @@
+:root {
+  --canvas: oklch(0.18 0.004 260);
+  --surface: oklch(0.22 0.004 260);
+  --elevated: oklch(0.27 0.004 260);
+  --raised: oklch(0.32 0.004 260);
+
+  --ink: oklch(0.97 0.003 260);
+  --ink-muted: oklch(0.72 0.004 260);
+  --ink-subtle: oklch(0.58 0.004 260);
+
+  --accent: oklch(0.78 0.13 60);
+
+  --edge: oklch(0.36 0.004 260 / 0.55);
+  --edge-soft: oklch(0.36 0.004 260 / 0.25);
+
+  --ink-hover: oklch(1 0.003 260);
+  --ink-press: oklch(0.9 0.003 260);
+  --accent-ring: oklch(0.78 0.13 60 / 0.28);
+  --wash-quiet: oklch(1 0 0 / 0.04);
+  --wash: oklch(1 0 0 / 0.06);
+  --wash-hover: oklch(1 0 0 / 0.1);
+  --track: oklch(0.18 0.004 260 / 0.8);
+  --danger: oklch(0.55 0.18 25);
+  --shadow-float: 0 18px 44px -12px oklch(0 0 0 / 0.6);
+
+  --scrim-art: linear-gradient(to bottom, transparent 0%, oklch(0.18 0.004 260 / 0.86) 100%);
+  --fade-mask: linear-gradient(to bottom, transparent 0, black 24px, black calc(100% - 24px), transparent 100%);
+
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+
+  --ease: ease-in-out;
+  --t-hover: 150ms;
+  --t-press: 90ms;
+  --t-state: 260ms;
+  --t-enter: 380ms;
+  --t-reveal: 460ms;
+  --t-cross: 900ms;
+
+  --font-sans: "Plus Jakarta Sans", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+
+  --win-w: 1024px;
+  --win-h: 632px;
+  --gutter: 48px;
+  --col: 928px;
+  --band-header: 132px;
+  --band-body: 359px;
+  --band-footer: 120px;
+
+  --h-pill: 44px;
+  --h-pill-mini: 30px;
+  --h-tile: 64px;
+  --h-row: 48px;
+  --h-well: 44px;
+  --h-icon-btn: 32px;
+  --sz-check: 18px;
+  --sz-state: 16px;
+  --sz-confirm: 48px;
+  --h-bar: 4px;
+  --h-meter: 6px;
+}

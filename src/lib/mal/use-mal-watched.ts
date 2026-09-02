@@ -2,19 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMal } from "@/lib/mal/provider";
 import { fetchListEntry, resolveMalMediaId } from "@/lib/mal/mutations";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
+import { airedOnly } from "@/lib/aired";
 
 export type MalWatched = { watchedKeys: Set<string>; completed: boolean };
 
 const EMPTY: MalWatched = { watchedKeys: new Set(), completed: false };
-
-function airedEpisodes(episodes: KitsuEpisode[]): KitsuEpisode[] {
-  const now = Date.now();
-  return episodes.filter((e) => {
-    if (!e.airdate) return true;
-    const t = Date.parse(e.airdate);
-    return !Number.isFinite(t) || t <= now;
-  });
-}
 
 export function useMalWatched(harborId: string, episodes: KitsuEpisode[]): MalWatched {
   const { isConnected } = useMal();
@@ -43,8 +35,11 @@ export function useMalWatched(harborId: string, episodes: KitsuEpisode[]): MalWa
         return;
       }
       const { status, numEpisodesWatched } = info.entry;
-      const sorted = airedEpisodes(episodesRef.current).sort(
-        (a, b) => (a.seasonNumber ?? 1) - (b.seasonNumber ?? 1) || a.number - b.number,
+      const sorted = airedOnly(
+        [...episodesRef.current].sort(
+          (a, b) => (a.seasonNumber ?? 1) - (b.seasonNumber ?? 1) || a.number - b.number,
+        ),
+        (e) => e.airdate,
       );
       const mediaTotal = info.numEpisodes;
       const cap =

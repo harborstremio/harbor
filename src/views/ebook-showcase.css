@@ -1,0 +1,92 @@
+.ebook-card-read-mark {
+  transform: translateZ(3px);
+  backface-visibility: hidden;
+}
+
+.ebook-details-book-cover {
+  position: relative;
+  width: calc(100% - 8px);
+  isolation: isolate;
+  filter: drop-shadow(11px 14px 13px rgba(0, 0, 0, 0.42));
+}
+
+.ebook-details-book-rear {
+  position: absolute;
+  z-index: -2;
+  inset: 3px -8px -4px 5px;
+  border-radius: 3px 11px 11px 3px;
+  background: color-mix(in srgb, var(--color-accent) 36%, #252936);
+  box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.34);
+}
+
+.ebook-details-book-pages {
+  position: absolute;
+  z-index: -1;
+  top: 7px;
+  right: -6px;
+  bottom: 7px;
+  width: 9px;
+  border-radius: 0 5px 5px 0;
+  background: repeating-linear-gradient(
+    to right,
+    #c8bdab 0,
+    #eee6d9 1px,
+    #d2c7b6 2px,
+    #f5eee3 3px
+  );
+  box-shadow: inset -2px 0 3px rgba(0, 0, 0, 0.2);
+}
+
+.ebook-details-book-poster {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 3px 10px 10px 3px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 0 0 1px color-mix(in srgb, var(--color-edge) 82%, transparent);
+}
+
+.ebook-details-book-spine {
+  position: absolute;
+  z-index: 4;
+  inset-block: 0;
+  left: 10px;
+  width: 4px;
+  border-inline: 1px solid rgba(0, 0, 0, 0.16);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.28),
+    rgba(255, 255, 255, 0.13) 48%,
+    rgba(0, 0, 0, 0.14)
+  );
+  box-shadow:
+    -2px 0 5px rgba(0, 0, 0, 0.16),
+    2px 0 4px rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+:dir(rtl) .ebook-details-book-cover {
+  margin-inline-start: 8px;
+}
+
+:dir(rtl) .ebook-details-book-rear {
+  inset: 3px 5px -4px -8px;
+  border-radius: 11px 3px 3px 11px;
+}
+
+:dir(rtl) .ebook-details-book-pages {
+  right: auto;
+  left: -6px;
+  border-radius: 5px 0 0 5px;
+}
+
+:dir(rtl) .ebook-details-book-poster {
+  border-radius: 10px 3px 3px 10px;
+}
+
+:dir(rtl) .ebook-details-book-spine {
+  right: 10px;
+  left: auto;
+}

@@ -1,5 +1,6 @@
 import { ChevronDown, Download, Folder } from "lucide-react";
 import type { CodeLang } from "@/components/code-editor";
+import { useT } from "@/lib/i18n";
 import { IDE, type ThemeFile } from "./files";
 
 export function FileTree({
@@ -17,6 +18,7 @@ export function FileTree({
   onSelect: (id: CodeLang) => void;
   onDownload: (id: CodeLang) => void;
 }) {
+  const t = useT();
   return (
     <aside
       className="flex w-[264px] shrink-0 flex-col"
@@ -24,16 +26,16 @@ export function FileTree({
     >
       <div className="px-4 pb-1.5 pt-4">
         <span
-          className="text-[11px] font-bold uppercase tracking-[0.24em]"
+          className="text-[11.5px] font-bold uppercase tracking-[0.24em]"
           style={{ color: IDE.textFaint }}
         >
-          Project
+          {t("Project")}
         </span>
       </div>
 
       <div className="flex items-center gap-2 px-3.5 py-2">
         <ChevronDown size={16} strokeWidth={2.4} style={{ color: IDE.textDim }} />
-        <Folder size={17} strokeWidth={2} style={{ color: IDE.accent }} />
+        <Folder size={18} strokeWidth={2} style={{ color: IDE.accent }} />
         <span className="truncate text-[14.5px] font-semibold" style={{ color: IDE.text }}>
           {projectName}
         </span>
@@ -55,12 +57,13 @@ export function FileTree({
               <button
                 type="button"
                 onClick={() => onSelect(f.id)}
-                className="flex h-11 w-full items-center gap-2.5 rounded-lg ps-6 pe-2.5 text-start transition-colors hover:bg-white/[0.04]"
-                style={{ background: on ? "rgba(255,255,255,0.06)" : "transparent" }}
+                className={`flex h-11 w-full items-center gap-2.5 rounded-md ps-6 pe-2.5 text-start transition-colors ${
+                  on ? "bg-white/[0.06]" : "hover:bg-white/[0.04]"
+                }`}
               >
                 <Icon size={18} strokeWidth={2} style={{ color: f.tint }} />
                 <span
-                  className="flex-1 truncate text-[14px]"
+                  className="flex-1 truncate text-[13.5px]"
                   style={{ color: on ? "#fff" : IDE.text, fontWeight: on ? 600 : 500 }}
                 >
                   {f.name}
@@ -77,7 +80,7 @@ export function FileTree({
               <button
                 type="button"
                 onClick={() => onDownload(f.id)}
-                aria-label={`Download ${f.name}`}
+                aria-label={t("Download {file}", { file: f.name })}
                 className="absolute end-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md opacity-0 transition-opacity hover:bg-white/10 group-hover/row:opacity-100"
                 style={{ color: IDE.textDim }}
               >

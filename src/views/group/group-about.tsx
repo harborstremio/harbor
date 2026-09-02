@@ -58,7 +58,7 @@ export function GroupAbout({
   if (!perms.editGroup) {
     return (
       <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-5 rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
+        <div className="flex flex-col gap-5 rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
           <Field label={t("About")}>
             <p className="text-[14px] leading-relaxed text-ink-muted">
               {detail.description || t("This group has not written a description yet.")}
@@ -86,7 +86,7 @@ export function GroupAbout({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-5 rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
+      <div className="flex flex-col gap-5 rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
         <Field label={t("Description")}>
           <textarea
             value={description}
@@ -94,7 +94,7 @@ export function GroupAbout({
             rows={3}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t("What is this group about?")}
-            className="w-full resize-none rounded-[10px] bg-elevated px-3.5 py-2.5 text-[14px] leading-relaxed text-ink outline-none ring-1 ring-edge-soft transition-shadow placeholder:text-ink-subtle focus:ring-edge"
+            className="w-full resize-none rounded-md bg-elevated px-3.5 py-2.5 text-[14px] leading-relaxed text-ink outline-none ring-1 ring-edge-soft transition-shadow placeholder:text-ink-subtle focus:ring-edge"
           />
           <span className="self-end text-[11.5px] tabular-nums text-ink-subtle">{DESC_MAX - description.length}</span>
         </Field>
@@ -104,7 +104,7 @@ export function GroupAbout({
         <Field label={t("Tags")}>
           <GroupTagsInput tags={tags} onChange={setTags} />
         </Field>
-        {error && <p className="rounded-[10px] bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>}
+        {error && <p className="rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>}
         {dirty && (
           <button
             type="button"
@@ -122,7 +122,7 @@ export function GroupAbout({
       <GroupCustomizer detail={detail} onApply={onApply} />
 
       {perms.deleteGroup && (
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-danger/25 bg-danger/[0.06] p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-danger/25 bg-danger/[0.06] p-4">
         <div className="flex flex-col gap-0.5">
           <span className="text-[13.5px] font-semibold text-ink">{t("Delete this group")}</span>
           <span className="text-[12.5px] text-ink-subtle">{t("Everyone loses access. This cannot be undone.")}</span>

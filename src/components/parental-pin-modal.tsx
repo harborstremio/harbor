@@ -130,7 +130,7 @@ export function ParentalPinModal({
       }}
     >
       <div
-        className={`relative flex w-full max-w-[420px] flex-col gap-7 overflow-hidden rounded-[24px] px-9 py-9 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200 ${
+        className={`relative flex w-full max-w-[420px] flex-col gap-7 overflow-hidden rounded-3xl px-9 py-9 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200 ${
           kids ? "text-white" : "modal-panel border border-edge-soft bg-elevated/95"
         } ${shake ? "animate-[pin-shake_0.34s_ease]" : ""}`}
       >

@@ -1,67 +1,84 @@
-import { ChevronDown, ChevronUp, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import type { Diagnostics } from "@/lib/bug-report";
+import { ModalButton, SettingRow, SettingsModal } from "../kit";
+import { useT } from "@/lib/i18n";
 
 export function DiagnosticsCard({ diag }: { diag: Diagnostics | null }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
   if (!diag) {
     return (
-      <div className="flex items-center gap-2 rounded-xl border border-edge-soft/55 bg-canvas/30 px-4 py-3 text-[12px] text-ink-subtle">
-        Loading environment details…
-      </div>
+      <SettingRow
+        icon={<ShieldCheck size={14} strokeWidth={1.9} />}
+        label={t("What gets sent")}
+        desc={t("Loading environment details…")}
+      />
     );
   }
   const compact = `Harbor ${diag.appVersion} · ${diag.os}${diag.osVersion ? ` ${diag.osVersion}` : ""} · ${diag.viewport} · ${diag.locale}`;
+  const mpv = diag.mpvProbe;
+  const mpvLine = !mpv
+    ? t("not probed")
+    : mpv.available
+      ? mpv.version || t("available")
+      : t("unavailable: {error}", { error: mpv.error || t("unknown") });
   return (
-    <div className="rounded-xl border border-edge-soft/55 bg-canvas/30">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-start"
+    <>
+      <SettingRow
+        icon={<ShieldCheck size={14} strokeWidth={1.9} />}
+        label={t("What gets sent")}
+        desc={compact}
       >
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-elevated text-ink-muted">
-          <ShieldCheck size={14} strokeWidth={1.9} />
-        </span>
-        <div className="flex min-w-0 flex-col">
-          <span className="text-[12px] font-semibold text-ink">What gets sent</span>
-          <span className="truncate text-[11.5px] text-ink-subtle">{compact}</span>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="shrink-0 rounded-md bg-raised px-3 py-1.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
+        >
+          {t("Review")}
+        </button>
+      </SettingRow>
+      <SettingsModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={t("What gets sent")}
+        sub={t(
+          "Auto-included. No keys, no library, no URLs. Just structural flags so reproductions go faster.",
+        )}
+        actions={
+          <ModalButton ghost onClick={() => setOpen(false)}>
+            {t("Close")}
+          </ModalButton>
+        }
+      >
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-md bg-elevated px-4 py-3.5 font-mono text-[11.5px] text-ink-muted">
+          <Pair k={t("App")} v={diag.appVersion} />
+          <Pair k={t("OS")} v={`${diag.os} ${diag.osVersion}`} />
+          <Pair k={t("Viewport")} v={diag.viewport} />
+          <Pair k={t("Locale")} v={diag.locale} />
+          <Pair k={t("Player")} v={diag.flags.playerEngine} />
+          <Pair k="libmpv" v={mpvLine} />
+          <Pair k={t("Region")} v={diag.flags.region} />
+          <Pair k={t("TMDB key")} v={diag.flags.hasTmdb ? t("yes") : t("no")} />
+          <Pair k={t("RPDB key")} v={diag.flags.hasRpdb ? t("yes") : t("no")} />
+          <Pair k="Trakt" v={diag.flags.hasTrakt ? t("yes") : t("no")} />
+          <Pair k="Stremio" v={diag.flags.hasStremio ? t("signed in") : t("guest")} />
+          <Pair k={t("Debrid keys")} v={String(diag.flags.debridCount)} />
+          <Pair k={t("Addons")} v={String(diag.flags.addonCount)} />
+          <Pair k={t("IPTV lists")} v={String(diag.flags.iptvCount)} />
+          <Pair k={t("Recent errors")} v={String(diag.recentErrors.length)} />
         </div>
-        <span className="ms-auto text-ink-subtle">
-          {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </span>
-      </button>
-      {open && (
-        <div className="border-t border-edge-soft/55 px-4 py-3">
-          <p className="mb-2 text-[11.5px] leading-relaxed text-ink-muted">
-            Auto-included. No keys, no library, no URLs. Just structural flags so reproductions go faster.
-          </p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11.5px] font-mono text-ink-muted">
-            <Pair k="App" v={diag.appVersion} />
-            <Pair k="OS" v={`${diag.os} ${diag.osVersion}`} />
-            <Pair k="Viewport" v={diag.viewport} />
-            <Pair k="Locale" v={diag.locale} />
-            <Pair k="Player" v={diag.flags.playerEngine} />
-            <Pair k="Region" v={diag.flags.region} />
-            <Pair k="TMDB key" v={diag.flags.hasTmdb ? "yes" : "no"} />
-            <Pair k="RPDB key" v={diag.flags.hasRpdb ? "yes" : "no"} />
-            <Pair k="Trakt" v={diag.flags.hasTrakt ? "yes" : "no"} />
-            <Pair k="Stremio" v={diag.flags.hasStremio ? "signed in" : "guest"} />
-            <Pair k="Debrid keys" v={String(diag.flags.debridCount)} />
-            <Pair k="Addons" v={String(diag.flags.addonCount)} />
-            <Pair k="IPTV lists" v={String(diag.flags.iptvCount)} />
-            <Pair k="Recent errors" v={String(diag.recentErrors.length)} />
-          </div>
-        </div>
-      )}
-    </div>
+      </SettingsModal>
+    </>
   );
 }
 
 function Pair({ k, v }: { k: string; v: string }) {
+  const t = useT();
   return (
     <>
       <span className="text-ink-subtle">{k}</span>
-      <span className="truncate text-ink">{v || "n/a"}</span>
+      <span className="truncate text-ink">{v || t("n/a")}</span>
     </>
   );
 }

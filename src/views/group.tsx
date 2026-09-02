@@ -58,7 +58,7 @@ export function GroupView({ id, onOpenProfile }: { id: string; onOpenProfile?: (
         )}
 
         {g.phase === "error" && (
-          <div className="flex flex-col items-center gap-3 rounded-[14px] border border-dashed border-edge bg-surface/30 px-6 py-20 text-center">
+          <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-edge bg-surface/30 px-6 py-20 text-center">
             <span className="text-[15px] font-semibold text-ink">{t("This group could not be loaded.")}</span>
             <span className="max-w-sm text-[13px] text-ink-subtle">
               {t("It may be invite only, or it no longer exists.")}
@@ -95,7 +95,7 @@ export function GroupView({ id, onOpenProfile }: { id: string; onOpenProfile?: (
             />
 
             {g.error && (
-              <p className="mt-4 rounded-[10px] bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{g.error}</p>
+              <p className="mt-4 rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{g.error}</p>
             )}
 
             {g.detail.isPending && (

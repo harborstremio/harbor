@@ -15,6 +15,11 @@ import { fmtTime } from "./transport-utils";
 const BUFFER_PAD_SEC = 4;
 const PENDING_MAX_MS = 2500;
 
+// This bar is the mouse-era scrubber and it stays that way. The ten-foot
+// scrubber is views/big-picture/player/bp-player-scrub.tsx, which lives inside
+// the Big Picture focus root and steps through setBpPlayerKeyHandler. A D-pad
+// engine here would be unreachable: bp-focus-core only scans [data-bp-root],
+// and this element is never inside one.
 export function SeekBar({
   durationSec,
   onSeek,
@@ -28,9 +33,11 @@ export function SeekBar({
   const [hover, setHover] = useState<number | null>(null);
   const [scrub, setScrub] = useState<number | null>(null);
   const [pending, setPending] = useState<number | null>(null);
+  const [overDot, setOverDot] = useState(false);
   const pendingAtRef = useRef<number | null>(null);
   const positionRef = useRef(0);
   const { settings } = useSettings();
+  const baseDot = Math.min(Math.max(settings.seekDotSize ?? 16, 8), 200);
   const { active: trickplayActive, bufferedOnly } = useTrickplayState();
   const position = usePlaybackPositionGated(active);
   const buffered = usePlaybackBufferedGated(active);
@@ -61,6 +68,7 @@ export function SeekBar({
   const clearInteraction = () => {
     setScrub(null);
     setHover(null);
+    setOverDot(false);
   };
 
   useEffect(() => {
@@ -113,8 +121,17 @@ export function SeekBar({
   const onMove = (e: React.PointerEvent) => {
     setHover(fromEvent(e.clientX));
     if (scrub != null) setScrub(fromEvent(e.clientX));
+    const r = ref.current?.getBoundingClientRect();
+    if (r && r.width > 0) {
+      const pointerX = e.clientX - r.left;
+      const dotX = (positionRef.current / dur) * r.width;
+      setOverDot(Math.abs(pointerX - dotX) <= baseDot / 2 + 8);
+    }
   };
-  const onLeave = () => setHover(null);
+  const onLeave = () => {
+    setHover(null);
+    setOverDot(false);
+  };
   const onCancel = () => clearInteraction();
   const onDown = (e: React.PointerEvent) => {
     try {
@@ -163,7 +180,7 @@ export function SeekBar({
           hovered={hover != null}
           segments={segmentSpans}
         />
-        {hover != null &&
+        {hover != null && !(overDot && scrub == null) &&
           (trickplayActive ? (
             <ThumbPreview
               time={hover}

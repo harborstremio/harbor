@@ -2,7 +2,9 @@ import { useEffect, useSyncExternalStore } from "react";
 import { autoDlList, isAutoDownloaded, recordGrab, updateAutoDownload, type AutoDlSeries } from "@/lib/auto-download";
 import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { enqueueDownload } from "@/lib/download/downloads-store";
-import { gatherContext, type AutoDlContext } from "./context";
+import { resolveMeta } from "@/lib/meta-resource";
+import { tmdbImdbId } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
+import { gatherContext, readAuthKey, type AutoDlContext } from "./context";
 import { eligibleEpisodes, grabKey, nextUnairedDate } from "./episodes";
 import { resolveBestDownload } from "./resolve";
 
@@ -79,9 +81,25 @@ function createLimiter(max: number) {
   };
 }
 
-async function seriesMeta(series: AutoDlSeries): Promise<Meta | null> {
-  if (narrowMediaType(series.type) !== "series") return null;
-  return fetchMeta("series", series.id).catch(() => null);
+type SeriesResolution = { meta: Meta | null; imdbId: string | null };
+
+async function seriesImdbId(series: AutoDlSeries, ctx: AutoDlContext): Promise<string | null> {
+  if (series.id.startsWith("tt")) return series.id;
+  if (series.imdbId) return series.imdbId;
+  if (!ctx.settings.tmdbKey) return null;
+  const resolved = await tmdbImdbId(ctx.settings.tmdbKey, series.id).catch(() => null);
+  if (resolved) updateAutoDownload(series.id, { imdbId: resolved });
+  return resolved;
+}
+
+async function seriesMeta(series: AutoDlSeries, ctx: AutoDlContext): Promise<SeriesResolution> {
+  if (narrowMediaType(series.type) !== "series") return { meta: null, imdbId: null };
+  const imdbId = await seriesImdbId(series, ctx);
+  const lookupId = imdbId ?? series.id;
+  const direct = await fetchMeta("series", lookupId).catch(() => null);
+  if (direct) return { meta: direct, imdbId };
+  const viaAddon = await resolveMeta(readAuthKey(), "series", lookupId).catch(() => null);
+  return { meta: viaAddon, imdbId };
 }
 
 async function processSeries(
@@ -92,11 +110,12 @@ async function processSeries(
   signal: AbortSignal,
   gen: number,
 ): Promise<void> {
-  const m = await seriesMeta(series);
+  const { meta: m, imdbId } = await seriesMeta(series, ctx);
   if (gen !== runGen) return;
   updateAutoDownload(series.id, {
     lastCheckedAt: Date.now(),
     nextAirDate: m ? nextUnairedDate(m) : series.nextAirDate,
+    lastError: m ? null : "couldn't load episodes",
   });
   if (!m || signal.aborted) return;
 
@@ -109,6 +128,8 @@ async function processSeries(
   const eps = eligibleEpisodes(fresh, m, grabbed);
   if (eps.length === 0) return;
 
+  let attempted = 0;
+  let found = 0;
   await Promise.all(
     eps.map((ep) =>
       limit(async () => {
@@ -123,13 +144,16 @@ async function processSeries(
         }
         const key = grabKey(series.id, ep.season, ep.episode);
         if (grabbed.has(key) || claimedKeys.has(key)) return;
+        attempted += 1;
         const hit = await resolveBestDownload(m, ep, {
           allowP2p: current.allowP2p,
           maxHeight: current.maxHeight,
+          imdbId,
           debrids: ctx.debrids,
           addons: ctx.addons,
           signal,
         });
+        if (hit) found += 1;
         if (!hit || signal.aborted || gen !== runGen) return;
         if (grabbed.has(key) || claimedKeys.has(key)) return;
         grabbed.add(key);
@@ -154,6 +178,10 @@ async function processSeries(
       }),
     ),
   );
+  if (signal.aborted || gen !== runGen) return;
+  if (attempted > 0 && found === 0) {
+    updateAutoDownload(series.id, { lastError: "no sources found" });
+  }
 }
 
 async function runSeriesList(list: AutoDlSeries[], signal: AbortSignal, gen: number): Promise<void> {

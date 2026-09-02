@@ -8,7 +8,7 @@ export function GroupCard({ group, onOpen }: { group: Group; onOpen: (id: string
   return (
     <button
       onClick={() => onOpen(group.id)}
-      className="flex w-full min-h-11 items-center gap-3 rounded-[10px] px-2 py-1.5 text-start transition-colors hover:bg-elevated"
+      className="flex w-full min-h-11 items-center gap-3 rounded-md px-2 py-1.5 text-start transition-colors hover:bg-elevated"
     >
       <Avatar src={group.avatarUrl} size={40} alias={group.name} />
       <div className="min-w-0 flex-1">

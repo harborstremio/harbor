@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { discoverCastDevices, type CastDeviceInfo } from "@/lib/cast";
 import { useT } from "@/lib/i18n";
 import { CastIcon } from "./cast-icon";
+import { noteOverlayDismiss } from "@/lib/player/overlay-dismiss";
 
 export function CastMenu({
   open,
@@ -48,6 +49,7 @@ export function CastMenu({
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
+      noteOverlayDismiss();
       if (!wrapRef.current?.contains(e.target as Node)) onClose();
     };
     const onKey = (e: KeyboardEvent) => {
@@ -67,10 +69,10 @@ export function CastMenu({
     <div
       ref={wrapRef}
       onMouseDown={(e) => e.stopPropagation()}
-      className="animate-popover-in fixed z-[140] w-[320px] rounded-2xl border border-edge bg-elevated p-4 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-md"
+      className="animate-menu-pop fixed z-[140] w-[320px] rounded-md bg-elevated p-4 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
       style={{
         right: anchor ? window.innerWidth - anchor.right : 24,
-        bottom: anchor ? window.innerHeight - anchor.bottom + 12 : 80,
+        bottom: anchor ? window.innerHeight - anchor.bottom + 82 : 150,
       }}
     >
       <div className="mb-2 flex items-center justify-between">

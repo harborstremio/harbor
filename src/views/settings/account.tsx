@@ -1,298 +1,133 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import stremioWordmark from "@/assets/stremio-wordmark.png";
-import { AuthModal } from "@/components/auth-modal";
-import { useAuth } from "@/lib/auth";
-import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
-import { useProfiles } from "@/lib/profiles";
+import { SettingGroup } from "./kit";
 import { useSettings } from "@/lib/settings";
-import { useTogether } from "@/lib/together/provider";
+import { useState } from "react";
+import { Users, Link2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { ColorPicker } from "./color-picker";
-import { Section } from "./shared";
-import { AvatarRing } from "./account/avatar-ring";
-import { resizeAvatar } from "./account/avatar-utils";
-import { ProfileAudioSetting } from "./profile-audio-setting";
-import { SyncedAddonsCard } from "./account/synced-addons-card";
+import { Section, ToggleRow } from "./shared";
+import { useSubTabs } from "./sub-tabs";
+import { IdentityTab } from "./account/identity-tab";
 import { ProfilesStrip } from "./account/profiles-strip";
 import { StartupDefaults } from "./account/startup-defaults";
 import { SettingsScopeCard } from "./account/settings-scope-card";
-import { AvatarFan } from "@/components/avatar-picker/avatar-fan";
-import { AvatarCatalogModal } from "@/components/avatar-picker/avatar-catalog-modal";
+import { StremioCard } from "./account/stremio-card";
+import { SyncedAddonsCard } from "./account/synced-addons-card";
 import { HarborAccountPanel } from "@/views/account/harbor-account-panel";
-import { nameEquals } from "@/lib/account/name-sync";
+
+const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+type Tab = "you" | "profiles" | "harbor" | "stremio";
 
 export function AccountStub() {
   const t = useT();
-  const { user, signOut } = useAuth();
-  const { settings, update } = useSettings();
-  const { displayName, setDisplayName } = useTogether();
-  const [harborAuthor, setHarborAuthor] = useState(currentAuthor);
-  useEffect(() => subscribeAuthor(() => setHarborAuthor(currentAuthor())), []);
-  const { activeProfile, updateProfile } = useProfiles();
-  const pushIdentity = (patch: { harborColor?: string; harborAvatar?: string | null }) => {
-    update(patch);
-    if (!activeProfile) return;
-    const profilePatch: { color?: string; avatar?: string | null } = {};
-    if (patch.harborColor !== undefined) profilePatch.color = patch.harborColor;
-    if (patch.harborAvatar !== undefined) profilePatch.avatar = patch.harborAvatar;
-    if (Object.keys(profilePatch).length > 0) updateProfile(activeProfile.id, profilePatch);
-  };
-  const pushDisplayName = (next: string) => {
-    const trimmed = next.trim();
-    if (nameEquals(trimmed, displayName)) return;
-    setDisplayName(next);
-    if (activeProfile && trimmed && trimmed !== activeProfile.name) {
-      updateProfile(activeProfile.id, { name: trimmed });
-    }
-  };
-  const [showAuth, setShowAuth] = useState(false);
-  const [reveal, setReveal] = useState(false);
-  const [nameDraft, setNameDraft] = useState(displayName);
-  const [editingName, setEditingName] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
+  const [tab, setTab] = useState<Tab>("you");
+  const tabs = [
+    { id: "you" as const, label: t("You") },
+    { id: "profiles" as const, label: t("Profiles") },
+    { id: "harbor" as const, label: t("Harbor account") },
+    { id: "stremio" as const, label: t("Stremio") },
+  ];
 
-  useEffect(() => {
-    setNameDraft(displayName);
-  }, [displayName]);
-
-  const stremioAvatar = user?.avatar ?? null;
-  const harborAvatar = settings.harborAvatar;
-  const customAvatar = activeProfile?.avatar ?? harborAvatar ?? null;
-  const effectiveAvatar = customAvatar ?? stremioAvatar;
-
-  const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    try {
-      const dataUrl = await resizeAvatar(file, 320);
-      pushIdentity({ harborAvatar: dataUrl });
-    } catch (err) {
-      console.warn("[avatar] resize failed", err);
-    }
-  };
-
-  const maskedEmail = useMemo(() => {
-    if (!user?.email) return "";
-    const [local, domain] = user.email.split("@");
-    if (!domain) return "*****";
-    const visible = local.slice(0, 1);
-    return `${visible}${"*".repeat(Math.max(local.length - 1, 4))}@${domain}`;
-  }, [user]);
-
+  useSubTabs(tabs, tab, (id) => setTab(id as Tab));
   return (
-    <div className="flex flex-col gap-5">
-      <Section
-        title={t("Harbor identity")}
-        subtitle={t("Your avatar, name, and handle across Harbor.")}
-      >
-        <div className="flex flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
-          <div className="flex items-center gap-5">
-            <AvatarRing
-              src={effectiveAvatar}
-              size={88}
-              onClick={() => fileRef.current?.click()}
-            />
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/png,image/jpeg,image/webp,image/gif"
-              onChange={onPickFile}
-              className="hidden"
-            />
-            <div className="flex min-w-0 flex-1 flex-col gap-3">
-              {editingName ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    autoFocus
-                    value={nameDraft}
-                    maxLength={32}
-                    onChange={(e) => setNameDraft(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        pushDisplayName(nameDraft.trim() || displayName);
-                        setEditingName(false);
-                      }
-                      if (e.key === "Escape") {
-                        setNameDraft(displayName);
-                        setEditingName(false);
-                      }
-                    }}
-                    className="h-10 flex-1 rounded-xl border border-ink bg-elevated px-3 text-[15px] font-semibold text-ink outline-none"
-                  />
-                  <button
-                    onClick={() => {
-                      pushDisplayName(nameDraft.trim() || displayName);
-                      setEditingName(false);
-                    }}
-                    className="h-10 rounded-xl bg-ink px-4 text-[12.5px] font-semibold text-canvas"
-                  >
-                    {t("Save")}
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setEditingName(true)}
-                  className="flex flex-wrap items-baseline gap-x-2 gap-y-0 self-start rounded-lg px-1 py-0.5 text-start transition-colors hover:bg-canvas/50"
-                >
-                  <span className="font-display text-[24px] font-medium leading-tight tracking-tight text-ink">
-                    {displayName}
-                  </span>
-                  {harborAuthor?.handle ? (
-                    <span className="text-[13px] font-medium text-ink-subtle">@{harborAuthor.handle}</span>
-                  ) : user ? (
-                    <span className="text-[13px] text-ink-subtle">
-                      ({user.fullname || user.email.split("@")[0]})
-                    </span>
-                  ) : null}
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-subtle">
-                    <path
-                      d="M16.5 4.5l3 3-11 11H5.5v-3l11-11z"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              )}
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  onClick={() => fileRef.current?.click()}
-                  className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                  </svg>
-                  {t("Upload photo")}
-                </button>
-                {customAvatar && (
-                  <button
-                    onClick={() => pushIdentity({ harborAvatar: null })}
-                    className="flex h-9 items-center rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:text-danger"
-                  >
-                    {stremioAvatar ? t("Reset to Stremio avatar") : t("Reset to default")}
-                  </button>
-                )}
-              </div>
-              <AvatarFan
-                onClick={() => setAvatarPickerOpen(true)}
-                onRandomize={(value) => pushIdentity({ harborAvatar: value })}
-              />
-              <ColorPicker
-                value={settings.harborColor}
-                onChange={(c) => pushIdentity({ harborColor: c })}
-              />
-            </div>
-          </div>
-        </div>
-      </Section>
+    <div key={tab} className="harbor-cascade flex flex-col gap-10">
+        {tab === "you" && <IdentityTab />}
+        {tab === "profiles" && <ProfilesTab />}
+        {tab === "harbor" && <HarborAccountPanel />}
+      {tab === "stremio" && <StremioTab />}
+    </div>
+  );
+}
 
-      <HarborAccountPanel />
+function ProfilesTab() {
+  const t = useT();
+  return (
+    <Section
+      title={t("Profiles")}
+      subtitle={t("Everyone who uses this Harbor gets their own watch history, avatar, color, and optional PIN. Switch anytime.")}
+    >
+      <div className="flex flex-col gap-4 rounded-md bg-elevated px-4 py-4">
+        <span className="flex items-center gap-2.5">
+          <Users size={16} strokeWidth={2} className="shrink-0 text-ink-muted" />
+          <span className="text-[13.5px] font-medium text-ink">{t("Everyone on this Harbor")}</span>
+          <span className="text-[12.5px] text-ink-subtle">
+            {t("Tap to switch. The pencil renames, recolors, or adds a PIN.")}
+          </span>
+        </span>
+        <ProfilesStrip />
+      </div>
+      <StartupDefaults />
+      <SettingsScopeCard />
+    </Section>
+  );
+}
 
-      <Section
-        title={t("Profiles")}
-        subtitle={t("Everyone who uses this Harbor gets their own watch history, avatar, color, and optional PIN. Switch anytime.")}
-      >
-        <div className="flex flex-col gap-5 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
-          <ProfilesStrip />
-          <StartupDefaults />
-          <SettingsScopeCard />
-        </div>
-      </Section>
+function StremioTab() {
+  const t = useT();
+  return (
+    <>
+      {isTauri && (
+        <Section
+          title={t("Stremio install links")}
+          subtitle={t(
+            "Harbor catches stremio:// install links so the configure-and-install flow stays inside the app. Every install also syncs to your Stremio account, so the official app remains the canonical home for your library.",
+          )}
+        >
+          <StremioDeeplinkRow />
+        </Section>
+      )}
 
       <Section
         title={t("Stremio account")}
         subtitle={t("Library, watch progress, and addon collection sync from this account.")}
       >
-        {user ? (
-          <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-edge-soft bg-canvas/40 p-5">
-            <img
-              src={stremioWordmark}
-              alt=""
-              aria-hidden
-              className="pointer-events-none absolute end-5 bottom-4 h-9 w-auto opacity-45 select-none"
-              style={{ filter: "invert(1) grayscale(1) brightness(1.1)" }}
-              draggable={false}
-            />
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex min-w-0 flex-col">
-                <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-                  {t("Email")}
-                </span>
-                <span className="truncate font-mono text-[14.5px] text-ink">
-                  {reveal ? user.email : maskedEmail}
-                </span>
-              </div>
-              <button
-                onClick={() => setReveal((v) => !v)}
-                className="flex h-9 shrink-0 items-center rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
-              >
-                {reveal ? t("Hide") : t("Reveal")}
-              </button>
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex min-w-0 flex-col">
-                <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-                  {t("Stremio ID")}
-                </span>
-                <span className="truncate font-mono text-[12.5px] text-ink-muted">{user._id}</span>
-              </div>
-            </div>
-            <div className="mt-1 flex items-center gap-2 border-t border-edge-soft/60 pt-3">
-              <button
-                onClick={() => setShowAuth(true)}
-                className="flex h-10 items-center gap-1.5 rounded-xl border border-edge-soft px-4 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
-              >
-                {t("Re-authenticate")}
-              </button>
-              <button
-                onClick={signOut}
-                className="flex h-10 items-center gap-1.5 rounded-xl border border-edge-soft px-4 text-[12.5px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:bg-danger/10 hover:text-danger"
-              >
-                {t("Sign out")}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
-            <div className="flex flex-col">
-              <span className="text-[14px] font-medium text-ink">{t("Not signed in")}</span>
-              <span className="text-[12.5px] text-ink-subtle">
-                {t("Sign in to sync your library, watch progress, and addons.")}
-              </span>
-            </div>
-            <button
-              onClick={() => setShowAuth(true)}
-              className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-4 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02]"
-            >
-              {t("Sign in")}
-            </button>
-          </div>
-        )}
+        <StremioCard />
       </Section>
-
-      <ProfileAudioSetting />
-
       <Section
         title={t("Synced addons")}
         subtitle={t("Harbor pulls your addon collection from Stremio. Manage individual addons in Streaming sources.")}
       >
         <SyncedAddonsCard />
       </Section>
+    </>
+  );
+}
 
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
-      {avatarPickerOpen && (
-        <AvatarCatalogModal
-          current={effectiveAvatar}
-          onPick={(value) => {
-            pushIdentity({ harborAvatar: value });
-            setAvatarPickerOpen(false);
-          }}
-          onClose={() => setAvatarPickerOpen(false)}
-        />
+function StremioDeeplinkRow() {
+  const t = useT();
+  const { settings, update } = useSettings();
+  const on = settings.stremioDeeplinkInstall;
+  return (
+    <SettingGroup>
+      <ToggleRow
+        label={t("Catch stremio:// install links inside Harbor")}
+        sub={t(
+          "Harbor's in-app installer animates the manifest install and keeps you in context. Anything Harbor installs is also synced to your Stremio account, so the official app stays the canonical library. Turn this off and Stremio becomes the only handler for stremio:// links; Harbor still installs anything you trigger from inside the app (Configure & install, paste, drag-and-drop).",
+        )}
+        leading={
+          <span
+            className={`flex h-9 w-9 items-center justify-center rounded-md ${
+              on ? "bg-accent-soft text-accent" : "bg-raised text-ink-subtle"
+            }`}
+          >
+            <Link2 size={16} strokeWidth={2.2} />
+          </span>
+        }
+        value={on}
+        onChange={(stremioDeeplinkInstall) => update({ stremioDeeplinkInstall })}
+      />
+      {on ? (
+        <p className="px-1 text-[11.5px] leading-relaxed text-ink-subtle">
+          {t(
+            "Heads up: if Stremio is also installed, Windows may ask which app to use the first time a stremio:// link fires. Pick Harbor to make it stick.",
+          )}
+        </p>
+      ) : (
+        <p className="px-1 text-[11.5px] leading-relaxed text-ink-subtle">
+          {t(
+            "stremio:// links now open in the Stremio app. Harbor will only install when you trigger it from inside Harbor.",
+          )}
+        </p>
       )}
-    </div>
+    </SettingGroup>
   );
 }

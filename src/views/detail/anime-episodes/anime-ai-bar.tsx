@@ -24,7 +24,7 @@ export function AnimeAiBar({
         e.preventDefault();
         onSubmit(input);
       }}
-      className="animate-ai-morph relative flex items-center gap-2.5 overflow-hidden rounded-2xl bg-accent/10 px-3.5 ring-1 ring-accent/40"
+      className="animate-ai-morph relative flex items-center gap-2.5 overflow-hidden rounded-lg bg-canvas px-3.5 ring-1 ring-inset ring-edge-soft focus-within:ring-accent/50"
     >
       <span className="animate-ai-logo-swap relative shrink-0">
         <ProviderLogo provider={provider} size={18} round />

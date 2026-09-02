@@ -83,6 +83,7 @@ export type TransportStremioProps = {
   onDownloadReset?: () => void;
   onOpenDvr?: () => void;
   sleep?: import("@/views/player/hooks/use-sleep-timer").SleepTimerState;
+  homeServerQualityControl?: import("react").ReactNode;
 };
 
 export function TransportStremio(p: TransportStremioProps) {
@@ -146,6 +147,7 @@ export function TransportStremio(p: TransportStremioProps) {
     onDownloadReset,
     onOpenDvr,
     sleep,
+    homeServerQualityControl,
   } = p;
 
   const playing = snap.status === "playing";
@@ -165,8 +167,17 @@ export function TransportStremio(p: TransportStremioProps) {
   const controlsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    onMenuOpenChange?.(audioMenuOpen || subtitleMenuOpen || speedMenuOpen || aspectMenuOpen || anime4kMenuOpen);
-  }, [audioMenuOpen, subtitleMenuOpen, speedMenuOpen, aspectMenuOpen, anime4kMenuOpen, onMenuOpenChange]);
+    onMenuOpenChange?.(
+      audioMenuOpen || subtitleMenuOpen || speedMenuOpen || aspectMenuOpen || anime4kMenuOpen,
+    );
+  }, [
+    audioMenuOpen,
+    subtitleMenuOpen,
+    speedMenuOpen,
+    aspectMenuOpen,
+    anime4kMenuOpen,
+    onMenuOpenChange,
+  ]);
 
   useEffect(() => {
     const refresh = () => setConfig(readPlayerChromeConfig("stremio"));
@@ -262,6 +273,7 @@ export function TransportStremio(p: TransportStremioProps) {
     onDownloadReveal,
     onDownloadReset,
     onOpenDvr,
+    homeServerQualityControl,
   };
 
   const renderSlot = (slot: PlayerSlot) =>
@@ -334,9 +346,7 @@ export function TransportStremio(p: TransportStremioProps) {
             setCastModalOpen(false);
             castModalPlay(m, ep);
           }}
-          currentEpisode={
-            season != null && episode != null ? { season, episode } : null
-          }
+          currentEpisode={season != null && episode != null ? { season, episode } : null}
         />
       )}
     </>

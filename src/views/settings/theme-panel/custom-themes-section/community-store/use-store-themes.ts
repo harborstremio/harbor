@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import { t } from "@/lib/i18n";
 import { browseThemes, type StoreTheme } from "@/lib/theme-store";
 import { MOOD_MIN, MOOD_RAILS, moodScores, type Mood } from "./color-rank";
 
-export type AuthorStat = { author: string; handle: string | null; count: number; downloads: number; ratingAvg: number; avatar: string | null };
+export type AuthorStat = {
+  author: string;
+  handle: string | null;
+  count: number;
+  downloads: number;
+  ratingAvg: number;
+  avatar: string | null;
+};
 
 export type MoodRail = { mood: Mood; title: string; blurb: string; items: StoreTheme[] };
 
@@ -43,7 +51,11 @@ export function useStoreThemes(): {
         cache = list;
         setAll(list);
       })
-      .catch((e) => !cancelled && setError(e instanceof Error ? e.message : "Could not reach the theme library."))
+      .catch(
+        (e) =>
+          !cancelled &&
+          setError(e instanceof Error ? e.message : t("Could not reach the theme library.")),
+      )
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
@@ -54,7 +66,9 @@ export function useStoreThemes(): {
     if (!all) return null;
     const topRated = [...all].sort((a, b) => score(b) - score(a));
     const popular = [...all].sort((a, b) => b.downloads - a.downloads);
-    const fresh = [...all].sort((a, b) => (b.createdAt > a.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0));
+    const fresh = [...all].sort((a, b) =>
+      b.createdAt > a.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0,
+    );
     const hero = topRated.find((t) => t.cover) ?? topRated[0] ?? null;
     const scores = new Map(all.map((t) => [t.id, moodScores(t)] as const));
     const sc = (t: StoreTheme, m: Mood) => scores.get(t.id)?.[m] ?? 0;
@@ -93,8 +107,13 @@ export function useStoreThemes(): {
     return { all, hero, topRated, popular, fresh, moodRails, authors };
   }, [all]);
 
-  return { data, loading, error, reload: () => {
-    cache = null;
-    setTick((t) => t + 1);
-  } };
+  return {
+    data,
+    loading,
+    error,
+    reload: () => {
+      cache = null;
+      setTick((t) => t + 1);
+    },
+  };
 }

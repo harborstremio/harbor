@@ -49,14 +49,14 @@ export function ShareModal({ target, onClose }: { target: ShareTarget; onClose: 
     >
       <div
         onClick={(ev) => ev.stopPropagation()}
-        className="animate-modal-in flex w-[min(94vw,440px)] flex-col rounded-[20px] bg-surface shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft"
+        className="animate-modal-in flex w-[min(94vw,440px)] flex-col rounded-xl bg-surface shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft"
       >
         <div className="flex items-center justify-between gap-3 border-b border-edge-soft px-5 py-4">
           <h2 className="font-display text-[19px] text-ink">{target.heading}</h2>
           <button
             onClick={onClose}
             aria-label={t("Close")}
-            className="flex h-9 w-9 items-center justify-center rounded-[10px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+            className="flex h-9 w-9 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
           >
             <X size={18} />
           </button>
@@ -119,7 +119,7 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
     <button
       type="button"
       onClick={onClick}
-      className={`min-h-9 rounded-[10px] px-3 text-[13px] font-medium transition-colors ${
+      className={`min-h-9 rounded-md px-3 text-[13px] font-medium transition-colors ${
         active ? "bg-elevated text-ink ring-1 ring-edge-soft" : "text-ink-muted hover:text-ink"
       }`}
     >
@@ -143,7 +143,7 @@ function ShareButton({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex min-h-[52px] flex-col items-center justify-center gap-1 rounded-[10px] px-2 py-2 ring-1 transition-colors ${
+      className={`inline-flex min-h-[52px] flex-col items-center justify-center gap-1 rounded-md px-2 py-2 ring-1 transition-colors ${
         active ? "bg-accent/15 text-accent ring-accent/40" : "bg-elevated text-ink ring-edge-soft hover:bg-raised"
       }`}
     >

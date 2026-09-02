@@ -6,7 +6,6 @@ import {
   type LocalEntry,
 } from "@/lib/local-library";
 import { clearSidecarCache, countNfoFor } from "@/lib/local-library/sidecars";
-import { confirmDialog } from "@/lib/dialog";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { buildNfoEntry, buildTmdbEntry, type ScannedFile } from "./scan";
@@ -113,16 +112,11 @@ export function useLocalScan({
   }, [items]);
 
   const removeFolder = useCallback(
-    async (path: string) => {
-      const count = folders.find((f) => f.path === path)?.count ?? 0;
-      const ok = await confirmDialog(
-        t("Remove this folder and its {n} items? Files on your disk are not deleted.", { n: count }),
-      );
-      if (!ok) return;
+    (path: string) => {
       removeLocalFolder(path);
       setToast(t("Removed folder from your library"));
     },
-    [folders, setToast, t],
+    [setToast, t],
   );
 
   return {

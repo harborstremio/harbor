@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import { useT } from "@/lib/i18n";
 import { useSettingsPreviewArt } from "@/lib/settings-preview-art";
+import { PreviewImage } from "./preview-image";
 
 export type EpisodeCardKind = "rating" | "description" | "hd";
 
@@ -30,10 +31,8 @@ function Caption({ children }: { children: ReactNode }) {
 function Still({ src, soft }: { src?: string; soft?: boolean }) {
   if (!src) return <div className="h-full w-full bg-gradient-to-br from-elevated to-canvas" />;
   return (
-    <img
+    <PreviewImage
       src={src}
-      alt=""
-      draggable={false}
       className={`h-full w-full object-cover ${soft ? "scale-105 blur-[1.6px]" : ""}`}
     />
   );
@@ -53,7 +52,7 @@ function EpiCard({
   const t = useT();
   return (
     <>
-      <div className="overflow-hidden rounded-lg bg-canvas/40 ring-1 ring-edge-soft/60">
+      <div className="overflow-hidden rounded-md bg-canvas/40 ring-1 ring-edge-soft/60">
         <div className="relative aspect-video">
           <Still src={still} />
           <span className="absolute start-1.5 top-1.5 rounded bg-black/65 px-1.5 py-0.5 text-[10px] font-semibold text-ink">
@@ -107,7 +106,7 @@ function HdCompare({ src }: { src?: string }) {
 function Tile({ label, src, soft, accent }: { label: string; src?: string; soft?: boolean; accent?: boolean }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="overflow-hidden rounded-lg ring-1 ring-edge-soft/60">
+      <div className="overflow-hidden rounded-md ring-1 ring-edge-soft/60">
         <div className="relative aspect-video">
           <Still src={src} soft={soft} />
         </div>

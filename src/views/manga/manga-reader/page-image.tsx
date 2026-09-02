@@ -1,37 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { RefreshCw } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { fetchImageObjectUrl, IMAGE_FALLBACK_HEADERS } from "./reader-utils";
 
 type Status = "loading" | "loaded" | "error";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-
-type HarborFetchResponse = {
-  status: number;
-  ok: boolean;
-  body: string;
-  contentType?: string | null;
-  headers?: Record<string, string>;
-};
-
-function base64ToBytes(b64: string): Uint8Array {
-  const bin = atob(b64.trim());
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
-}
-
-async function fetchHeaderImage(url: string, headers: Record<string, string>): Promise<string> {
-  const resp = await invoke<HarborFetchResponse>("harbor_fetch", {
-    args: { url, method: "GET", headers, responseType: "base64", timeoutMs: 30000 },
-  });
-  if (!resp.ok) throw new Error(`status ${resp.status}`);
-  const type = resp.headers?.["content-type"] || resp.contentType || "";
-  if (type && !type.startsWith("image/")) throw new Error(`type ${type}`);
-  const blob = new Blob([base64ToBytes(resp.body)], { type: type || "image/jpeg" });
-  return URL.createObjectURL(blob);
-}
 
 export function PageImage({
   url,
@@ -53,11 +27,18 @@ export function PageImage({
   const [bust, setBust] = useState(0);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [headerFailed, setHeaderFailed] = useState(false);
+  const [nativeFallback, setNativeFallback] = useState(false);
   const autoRetried = useRef(false);
   const prevUrl = useRef(url);
 
   const wantHeaderFetch =
     isTauri && !!headers && Object.keys(headers).length > 0 && !headerFailed;
+  const nativeFetch = wantHeaderFetch || (isTauri && nativeFallback);
+
+  const failHeaders = () => {
+    setBlobUrl(null);
+    setHeaderFailed(true);
+  };
 
   if (prevUrl.current !== url) {
     prevUrl.current = url;
@@ -65,6 +46,7 @@ export function PageImage({
     setBust(0);
     setBlobUrl(null);
     setHeaderFailed(false);
+    setNativeFallback(false);
     autoRetried.current = false;
   }
 
@@ -79,11 +61,11 @@ export function PageImage({
   }, [status]);
 
   useEffect(() => {
-    if (!wantHeaderFetch || !headers) return;
+    if (!nativeFetch) return;
     let alive = true;
     let created: string | null = null;
     setStatus("loading");
-    fetchHeaderImage(url, headers)
+    fetchImageObjectUrl(url, wantHeaderFetch && headers ? headers : IMAGE_FALLBACK_HEADERS)
       .then((obj) => {
         if (!alive) {
           URL.revokeObjectURL(obj);
@@ -93,16 +75,18 @@ export function PageImage({
         setBlobUrl(obj);
       })
       .catch(() => {
-        if (alive) setHeaderFailed(true);
+        if (!alive) return;
+        if (wantHeaderFetch) failHeaders();
+        else setStatus("error");
       });
     return () => {
       alive = false;
       if (created) URL.revokeObjectURL(created);
     };
-  }, [url, headers, wantHeaderFetch, bust]);
+  }, [url, headers, nativeFetch, wantHeaderFetch, bust]);
 
   const rawSrc = bust ? `${url}${url.includes("?") ? "&" : "?"}h=${bust}` : url;
-  const src = wantHeaderFetch ? blobUrl : rawSrc;
+  const src = nativeFetch ? blobUrl : rawSrc;
 
   const retry = () => {
     setStatus("loading");
@@ -138,7 +122,11 @@ export function PageImage({
           draggable={false}
           referrerPolicy="no-referrer"
           onLoad={() => setStatus("loaded")}
-          onError={() => (wantHeaderFetch ? setHeaderFailed(true) : setStatus("error"))}
+          onError={() => {
+            if (wantHeaderFetch) failHeaders();
+            else if (isTauri && !nativeFallback) setNativeFallback(true);
+            else setStatus("error");
+          }}
           className={`${className ?? ""} transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
           style={style}
         />

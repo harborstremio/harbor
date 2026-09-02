@@ -1,4 +1,10 @@
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, SlidersHorizontal, Star } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  SlidersHorizontal,
+  Star,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   applyCalendarFilter,
@@ -28,6 +34,7 @@ import { SourceSwitcher } from "./calendar/source-switcher";
 import {
   buildLibraryNameSet,
   buildMonthCells,
+  CALENDAR_POSTER_SIZES,
   calendarEpisodeHint,
   calendarToMeta,
   FILTERS,
@@ -171,15 +178,16 @@ export function CalendarView() {
   };
 
   const todayISO = todayLocalISO();
-  const dayModalItems = dayModal ? grouped.get(dayModal) ?? [] : [];
+  const dayModalItems = dayModal ? (grouped.get(dayModal) ?? []) : [];
 
   const showAllControls = source === "all";
   const showPremiereFilters = source === "simkl-anticipated";
   const hideTypeTag = source === "anime";
   const filtersActiveCount = buildActiveCount(settings.customCalendar);
-  const filters = settings.hideContent.anime || source === "all"
-    ? FILTERS.filter((f) => f.id !== "anime")
-    : FILTERS;
+  const filters =
+    settings.hideContent.anime || source === "all"
+      ? FILTERS.filter((f) => f.id !== "anime")
+      : FILTERS;
 
   let body: React.ReactNode;
   if (source === "library" && !authKey) {
@@ -296,6 +304,25 @@ export function CalendarView() {
           >
             {t("Start week on Monday")}
           </button>
+          <div className="flex items-center gap-1 rounded-full border border-edge-soft bg-elevated/30 p-1">
+            {CALENDAR_POSTER_SIZES.map(({ value, label }) => {
+              const active = settings.calendarPosterSize === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => update({ calendarPosterSize: value })}
+                  aria-pressed={active}
+                  className={`rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors ${
+                    active
+                      ? "bg-ink text-canvas"
+                      : "text-ink-muted hover:bg-raised/60 hover:text-ink"
+                  }`}
+                >
+                  {t(label)}
+                </button>
+              );
+            })}
+          </div>
           {source === "custom" && railOverlay && (
             <button
               type="button"
@@ -327,9 +354,7 @@ export function CalendarView() {
                 {filters.map((f) => {
                   const active = filter === f.id;
                   const count =
-                    f.id === "all"
-                      ? filtered.length
-                      : applyCalendarFilter(items, f.id).length;
+                    f.id === "all" ? filtered.length : applyCalendarFilter(items, f.id).length;
                   return (
                     <button
                       key={f.id}

@@ -26,15 +26,27 @@ import {
   type Dir,
 } from "./keyboard-navigation/geometry";
 
-const TV_NAV_KEY: Record<Dir | "back", string> = {
+const TV_NAV_KEY: Record<Dir | "back" | "prevTab" | "nextTab" | "options", string> = {
   up: "ArrowUp",
   down: "ArrowDown",
   left: "ArrowLeft",
   right: "ArrowRight",
   back: "Escape",
+  prevTab: "PageUp",
+  nextTab: "PageDown",
+  options: "ContextMenu",
 };
 
-export function dispatchTvNav(action: Dir | "select" | "back" | "home"): void {
+export function dispatchTvNav(
+  action: Dir | "select" | "back" | "home" | "prevTab" | "nextTab" | "options",
+  /**
+   * This press is the pad's own autorepeat, not a fresh one. A synthetic event
+   * that always reported repeat:false made a held D-pad indistinguishable from
+   * a burst of taps, which is the one thing Big Picture's held-Down escape has
+   * to tell apart.
+   */
+  repeat = false,
+): void {
   if (typeof window === "undefined") return;
   if (action === "home") {
     const homeNav = document.querySelector('[data-harbor-nav="home"]');
@@ -43,7 +55,11 @@ export function dispatchTvNav(action: Dir | "select" | "back" | "home"): void {
   }
   if (action === "select") {
     const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    if (active && !isEditable(active)) active.click();
+    const target = hoveredEl ?? active;
+    if (target && !isEditable(target)) {
+      if (target !== active) target.focus({ preventScroll: true });
+      target.click();
+    }
     return;
   }
   const anchor = action !== "back" ? hoveredEl : null;
@@ -55,7 +71,7 @@ export function dispatchTvNav(action: Dir | "select" | "back" | "home"): void {
   const key = TV_NAV_KEY[action];
   suppressFocusScroll = fromHover;
   window.dispatchEvent(
-    new KeyboardEvent("keydown", { key, code: key, bubbles: true, cancelable: true }),
+    new KeyboardEvent("keydown", { key, code: key, bubbles: true, cancelable: true, repeat }),
   );
   suppressFocusScroll = false;
 }
@@ -68,9 +84,10 @@ function ensureFocusStyles() {
   style.setAttribute("data-tv-focus-styles", "true");
   style.textContent = `
     html:not([data-input-modality="pointer"]) [data-tv-focused="true"] {
-      outline: none !important;
-      box-shadow: 0 0 0 2px var(--color-canvas), 0 0 0 5px var(--tv-focus-ring, var(--color-accent)), 0 0 0 7px rgba(0,0,0,0.45) !important;
-      transition: box-shadow 120ms ease;
+      outline: 2.5px solid var(--tv-focus-ring, var(--color-accent)) !important;
+      outline-offset: 3px;
+      box-shadow: 0 0 0 7px color-mix(in oklch, var(--tv-focus-ring, var(--color-accent)) 16%, transparent) !important;
+      transition: outline-color 120ms ease, box-shadow 120ms ease;
       z-index: 20;
       position: relative;
     }
@@ -93,7 +110,16 @@ export function tvHover(el: HTMLElement | null) {
 
 function clearTvFocusRing() {
   lastFocusedEl?.removeAttribute("data-tv-focused");
+  lastFocusedEl?.style.removeProperty("border-radius");
   lastFocusedEl = null;
+}
+
+function borrowRadius(el: HTMLElement) {
+  if (getComputedStyle(el).borderRadius !== "0px") return;
+  const parent = el.parentElement;
+  if (!parent) return;
+  const radius = getComputedStyle(parent).borderRadius;
+  if (radius && radius !== "0px") el.style.borderRadius = radius;
 }
 
 type InputModality = "pointer" | "keys";
@@ -132,6 +158,7 @@ function focusElement(el: HTMLElement) {
   ensureFocusStyles();
   if (lastFocusedEl && lastFocusedEl !== el) clearTvFocusRing();
   el.setAttribute("data-tv-focused", "true");
+  borrowRadius(el);
   lastFocusedEl = el;
 
   el.focus({ preventScroll: true });

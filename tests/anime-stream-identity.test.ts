@@ -1,6 +1,8 @@
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
+import { readFileSync } from "node:fs";
+// @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import {
   animeCoordPairs,
@@ -9,7 +11,7 @@ import {
   partitionByExactAnimeEpisode,
   selectSiblingWindows,
 } from "../src/lib/streams/anime-identity-core.ts";
-import { buildStreamIds } from "../src/lib/streams/stream-ids.ts";
+import { buildStreamIds, unverifiedAnimeSeasonId } from "../src/lib/streams/stream-ids.ts";
 
 const ONE_PIECE = {
   mappings: { kitsu_id: 11243 },
@@ -91,6 +93,60 @@ test("legacy stream ids are unchanged when identity cannot be resolved", () => {
   const ids = buildStreamIds("tmdb:tv:37854", episode, "tt0388629");
   assert.ok(ids.includes("tmdb:tv:37854:23:14"));
   assert.ok(ids.includes("tt0388629:23:14"));
+});
+
+test("a later provider season with no verified episode id is an unverified anime id", () => {
+  const later = { season: 4, episode: 9, imdbSeason: 4, imdbEpisode: 9 };
+  assert.equal(unverifiedAnimeSeasonId("kitsu:41493", later), "kitsu:41493:9");
+  assert.equal(unverifiedAnimeSeasonId("tt9335498", later), null);
+  assert.equal(unverifiedAnimeSeasonId("kitsu:41493", null), null);
+  assert.equal(
+    unverifiedAnimeSeasonId("kitsu:41493", { ...later, kitsuStreamId: "kitsu:48661:9" }),
+    null,
+  );
+  assert.equal(
+    unverifiedAnimeSeasonId("kitsu:41493", {
+      season: 1,
+      episode: 9,
+      imdbSeason: 1,
+      imdbEpisode: 9,
+    }),
+    null,
+  );
+});
+
+test("a later-season row stops asking the opened entry for its own episode 9", () => {
+  const ids = buildStreamIds(
+    "kitsu:41493",
+    { season: 4, episode: 9, imdbSeason: 4, imdbEpisode: 9 },
+    "tt9335498",
+  );
+  assert.equal(ids[0], "tt9335498:4:9");
+  assert.equal(ids[ids.length - 1], "kitsu:41493:9");
+});
+
+test("an entry keeps its own numbering first for a season it owns", () => {
+  const ids = buildStreamIds(
+    "kitsu:41493",
+    { season: 1, episode: 9, imdbSeason: 1, imdbEpisode: 9 },
+    "tt9335498",
+  );
+  assert.equal(ids[0], "kitsu:41493:9");
+});
+
+test("a verified kitsu episode id still leads", () => {
+  const ids = buildStreamIds(
+    "kitsu:41493",
+    { season: 4, episode: 9, imdbSeason: 4, imdbEpisode: 9, kitsuStreamId: "kitsu:48661:9" },
+    "tt9335498",
+  );
+  assert.equal(ids[0], "kitsu:48661:9");
+});
+
+test("an unverified anime id hands the imdb pair to addons that accept both", () => {
+  const src = readFileSync(new URL("../src/lib/streams/addons.ts", import.meta.url), "utf8");
+  assert.match(src, /if \(animeIdUnverified\) return \[ttId\];/);
+  assert.match(src, /pickIds\(addon, req\.type, req\.ids, req\.animeIdUnverified === true\)/);
 });
 
 test("episode filter drops only confident single-episode mismatches", () => {

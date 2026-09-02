@@ -4,7 +4,8 @@ import { Poster, usePosterChain } from "@/components/poster";
 import type { CalendarItem } from "@/lib/calendar";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
-import { formatDateLong } from "./utils";
+import { AiringCountdown } from "./airing-countdown";
+import { formatDateLong, isUpcoming } from "./utils";
 
 export function CalendarChip({
   item,
@@ -17,6 +18,8 @@ export function CalendarChip({
 }) {
   const t = useT();
   const { settings } = useSettings();
+  const tier = settings.calendarPosterSize;
+  const isLarge = tier === "large";
   const poster = usePosterChain(
     settings.rpdbKey,
     item.id,
@@ -31,6 +34,14 @@ export function CalendarChip({
     : item.type === "movie"
       ? "bg-amber-400/20 text-amber-200"
       : "bg-blue-400/20 text-blue-200";
+  const posterSizeClass = isLarge ? "h-10 w-7" : "h-7 w-5";
+  const typeTag = !hideTypeTag && (
+    <span
+      className={`hidden shrink-0 rounded-sm px-1 py-px text-[9px] font-bold uppercase tracking-[0.12em] xl:inline ${tagClass}`}
+    >
+      {tag}
+    </span>
+  );
   return (
     <button
       ref={ref}
@@ -42,25 +53,27 @@ export function CalendarChip({
       onMouseLeave={() => setHovered(false)}
       className="group relative flex min-w-0 items-center gap-2 rounded-md bg-canvas/50 p-1 pe-2 text-start transition-colors hover:bg-canvas/85"
     >
-      <div className="h-7 w-5 shrink-0 overflow-hidden rounded-[3px] bg-elevated/50">
-        {item.poster ? (
-          <Poster
-            src={poster.src}
-            onError={poster.onError}
-            seed={item.id}
-            ratio="portrait"
-            className="h-full w-full"
-          />
-        ) : null}
+      <div className={`shrink-0 overflow-hidden rounded-[3px] bg-elevated/50 ${posterSizeClass}`}>
+        <Poster
+          src={poster.src}
+          onError={poster.onError}
+          seed={item.id}
+          ratio="portrait"
+          className="h-full w-full"
+        />
       </div>
-      <span className="flex-1 truncate text-[11.5px] font-medium text-ink">{item.name}</span>
-      {!hideTypeTag && (
-        <span
-          className={`hidden shrink-0 rounded-sm px-1 py-px text-[9px] font-bold uppercase tracking-[0.12em] xl:inline ${tagClass}`}
-        >
-          {tag}
-        </span>
-      )}
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <div className="flex items-center gap-2">
+          <span className="flex-1 truncate text-[11.5px] font-medium text-ink">{item.name}</span>
+          {typeTag}
+        </div>
+        {item.releaseTime && (
+          <span className="truncate text-[10px] font-medium text-ink-subtle">
+            {item.releaseTime}
+            {isUpcoming(item) && <AiringCountdown atMs={item.releaseAtMs!} />}
+          </span>
+        )}
+      </div>
       {hovered && <ChipTooltip item={item} anchorRef={ref} hideTypeTag={hideTypeTag} />}
     </button>
   );
@@ -77,6 +90,7 @@ function ChipTooltip({
 }) {
   const t = useT();
   const { settings } = useSettings();
+  const tier = settings.calendarPosterSize;
   const poster = usePosterChain(
     settings.rpdbKey,
     item.id,
@@ -108,25 +122,28 @@ function ChipTooltip({
 
   const tag = item.isAnime ? t("Anime") : item.type === "movie" ? t("Movie") : t("TV");
   const dateLabel = formatDateLong(item.releaseDate);
+  const isLarge = tier === "large";
+  const panelWidthClass = isLarge ? "w-[380px]" : "w-[320px]";
+  const posterSizeClass = isLarge ? "h-[180px] w-[120px]" : "h-[120px] w-[80px]";
 
   return createPortal(
     <div
       ref={tipRef}
       onClick={(e) => e.stopPropagation()}
       style={{ left: pos.left, top: pos.top, opacity: pos.ready ? 1 : 0 }}
-      className="pointer-events-none fixed z-[200] flex w-[320px] flex-col gap-3 rounded-2xl border border-edge bg-elevated/95 p-4 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-md transition-opacity duration-100"
+      className={`pointer-events-none fixed z-[200] flex flex-col gap-3 rounded-2xl border border-edge bg-elevated/95 p-4 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-md transition-opacity duration-100 ${panelWidthClass}`}
     >
       <div className="flex items-start gap-3">
-        <div className="h-[120px] w-[80px] shrink-0 overflow-hidden rounded-lg bg-canvas/40 ring-1 ring-edge-soft">
-          {item.poster ? (
-            <Poster
-              src={poster.src}
-              onError={poster.onError}
-              seed={item.id}
-              ratio="portrait"
-              className="h-full w-full"
-            />
-          ) : null}
+        <div
+          className={`shrink-0 overflow-hidden rounded-lg bg-canvas/40 ring-1 ring-edge-soft ${posterSizeClass}`}
+        >
+          <Poster
+            src={poster.src}
+            onError={poster.onError}
+            seed={item.id}
+            ratio="portrait"
+            className="h-full w-full"
+          />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           {!hideTypeTag && (
@@ -138,6 +155,7 @@ function ChipTooltip({
           <p className="text-[12px] text-ink-muted">
             {dateLabel}
             {item.releaseTime ? ` · ${item.releaseTime}` : ""}
+            {isUpcoming(item) && <AiringCountdown atMs={item.releaseAtMs!} />}
           </p>
           {item.voteAverage > 0 && (
             <p className="text-[11.5px] text-ink-muted">

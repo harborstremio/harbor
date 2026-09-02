@@ -1,4 +1,5 @@
-import { Check, Loader2, Search, UserPlus, X } from "lucide-react";
+import { Check, Loader2, UserPlus, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { addGroupMember, type GroupDetail } from "@/lib/social/groups";

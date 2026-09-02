@@ -1,5 +1,5 @@
-import still1 from "@/assets/preview/blur1.png";
-import still2 from "@/assets/preview/blur2.png";
+import still1 from "@/assets/preview/blur1.webp";
+import still2 from "@/assets/preview/blur2.webp";
 import {
   SPOILER_TEXT_CLASS,
   SPOILER_THUMB_CLASS,
@@ -8,6 +8,7 @@ import {
 } from "@/lib/spoilers";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { PreviewImage } from "./preview-image";
 
 export function SpoilerPreview() {
   const { settings } = useSettings();
@@ -15,7 +16,7 @@ export function SpoilerPreview() {
   const mask = spoilerMaskFor(settings, { watched: false, isNextUp: false });
   const active = mask.thumb || mask.title || mask.desc;
   return (
-    <div className="mt-1 flex flex-col gap-3 rounded-2xl border border-edge-soft bg-canvas/30 p-4">
+    <div className="mt-1 flex flex-col gap-3 rounded-md border border-edge-soft bg-canvas/30 p-4">
       <div className="flex items-center justify-between gap-2">
         <span className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
           {t("Preview")}
@@ -79,9 +80,9 @@ function PreviewCard({
   const t = useT();
   return (
     <div className="group min-w-0 flex-1 cursor-default select-none">
-      <div className="relative aspect-video overflow-hidden rounded-xl">
+      <div className="relative aspect-video overflow-hidden rounded-md">
         <div className={`absolute inset-0 ${mask.thumb ? SPOILER_THUMB_CLASS : ""}`}>
-          <img src={img} alt="" draggable={false} className={`h-full w-full object-cover ${imgPos}`} />
+          <PreviewImage src={img} className={`h-full w-full object-cover ${imgPos}`} />
         </div>
         <span className="absolute start-2 top-2 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[11px] font-semibold text-ink">
           {n}

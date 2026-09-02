@@ -45,7 +45,10 @@ fn extract_error(body: &Value) -> String {
     if let Some(arr) = body.get("errors").and_then(|v| v.as_array()) {
         if let Some(first) = arr.first() {
             let code = first.get("code").and_then(|v| v.as_i64()).unwrap_or(0);
-            let msg = first.get("message").and_then(|v| v.as_str()).unwrap_or("unknown");
+            let msg = first
+                .get("message")
+                .and_then(|v| v.as_str())
+                .unwrap_or("unknown");
             return format!("Cloudflare error {code}: {msg}");
         }
     }
@@ -55,16 +58,28 @@ fn extract_error(body: &Value) -> String {
 #[tauri::command]
 pub async fn cf_list_accounts(api_token: String) -> Result<Vec<CfAccount>, String> {
     let body = cf_get(&format!("{CF_BASE}/accounts"), &api_token).await?;
-    if !body.get("success").and_then(|v| v.as_bool()).unwrap_or(false) {
+    if !body
+        .get("success")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false)
+    {
         return Err(extract_error(&body));
     }
-    let arr = body.get("result").and_then(|v| v.as_array()).cloned().unwrap_or_default();
+    let arr = body
+        .get("result")
+        .and_then(|v| v.as_array())
+        .cloned()
+        .unwrap_or_default();
     Ok(arr
         .into_iter()
         .filter_map(|a| {
             Some(CfAccount {
                 id: a.get("id").and_then(|v| v.as_str())?.to_string(),
-                name: a.get("name").and_then(|v| v.as_str()).unwrap_or("Account").to_string(),
+                name: a
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("Account")
+                    .to_string(),
             })
         })
         .collect())
@@ -82,7 +97,10 @@ async fn ensure_subdomain(api_token: &str, account_id: &str) -> Result<String, S
 }
 
 #[tauri::command]
-pub async fn cf_deploy_relay(api_token: String, account_id: String) -> Result<DeployResult, String> {
+pub async fn cf_deploy_relay(
+    api_token: String,
+    account_id: String,
+) -> Result<DeployResult, String> {
     let subdomain = ensure_subdomain(&api_token, &account_id).await?;
     let exists = script_exists(&api_token, &account_id).await?;
 
@@ -143,7 +161,8 @@ async fn upload_with_retry(
                 if attempt == NAMESPACE_RETRY_BACKOFF_MS.len() {
                     break;
                 }
-                tokio::time::sleep(Duration::from_millis(NAMESPACE_RETRY_BACKOFF_MS[attempt])).await;
+                tokio::time::sleep(Duration::from_millis(NAMESPACE_RETRY_BACKOFF_MS[attempt]))
+                    .await;
             }
             Err(e) => return Err(e),
         }

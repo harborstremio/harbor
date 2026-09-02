@@ -33,7 +33,7 @@ export function GroupHierarchy({
   if (tiers.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-4 rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
+    <div className="flex flex-col gap-4 rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
       <div className="flex flex-col gap-1">
         <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
           {t("Who runs this group")}

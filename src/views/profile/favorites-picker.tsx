@@ -1,18 +1,6 @@
-import {
-  AlertTriangle,
-  BookOpen,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Gamepad2,
-  KeyRound,
-  Loader2,
-  Music2,
-  RotateCw,
-  Search,
-  SearchX,
-  X,
-} from "lucide-react";
+import { createPortal } from "react-dom";
+import { AlertTriangle, BookOpen, Check, ChevronDown, ChevronUp, Gamepad2, KeyRound, Loader2, Music2, RotateCw, SearchX, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Poster } from "@/components/poster";
 import { useT } from "@/lib/i18n";
@@ -56,7 +44,7 @@ function Cover({
       fallbacks={entry.imageFallback ? [entry.imageFallback] : undefined}
       seed={entry.name || entry.id || "favorite"}
       ratio="portrait"
-      className={tile ? "rounded-[10px] ring-1 ring-edge-soft" : "rounded-[6px]"}
+      className={tile ? "rounded-md ring-1 ring-edge-soft" : "rounded-sm"}
       lazy={tile}
     />
   );
@@ -83,7 +71,7 @@ function ResultTile({
       onClick={onToggle}
       disabled={disabled}
       aria-pressed={selected}
-      className={`relative flex flex-col gap-2 rounded-[14px] p-2 text-start ring-1 transition-colors disabled:opacity-40 ${
+      className={`relative flex flex-col gap-2 rounded-lg p-2 text-start ring-1 transition-colors disabled:opacity-40 ${
         selected ? "bg-elevated ring-edge" : "ring-edge-soft hover:bg-elevated"
       }`}
     >
@@ -124,13 +112,13 @@ function SelectedRow({
 }) {
   const t = useT();
   return (
-    <div className="flex items-center gap-2.5 rounded-[10px] bg-elevated p-2.5 ring-1 ring-edge">
+    <div className="flex items-center gap-2.5 rounded-md bg-elevated p-2.5 ring-1 ring-edge">
       <div className="flex shrink-0 flex-col">
         <button
           onClick={onMoveUp}
           disabled={index === 0}
           aria-label={t("Move up")}
-          className="flex h-6 w-7 items-center justify-center rounded-t-[6px] text-ink-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-25"
+          className="flex h-6 w-7 items-center justify-center rounded-t-sm text-ink-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-25"
         >
           <ChevronUp size={16} strokeWidth={2.5} />
         </button>
@@ -138,7 +126,7 @@ function SelectedRow({
           onClick={onMoveDown}
           disabled={index === total - 1}
           aria-label={t("Move down")}
-          className="flex h-6 w-7 items-center justify-center rounded-b-[6px] text-ink-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-25"
+          className="flex h-6 w-7 items-center justify-center rounded-b-sm text-ink-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-25"
         >
           <ChevronDown size={16} strokeWidth={2.5} />
         </button>
@@ -174,7 +162,7 @@ function PickerState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-[10px] border border-dashed border-edge px-6 py-12 text-center">
+    <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-edge px-6 py-12 text-center">
       {icon}
       <p className="mt-2 text-[14px] text-ink-muted">{title}</p>
       {body && <p className="mt-1 text-[12px] text-ink-subtle">{body}</p>}
@@ -188,7 +176,7 @@ function StateAction({ onClick, children }: { onClick: () => void; children: Rea
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-elevated px-4 text-[13px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-raised hover:text-ink"
+      className="inline-flex min-h-11 items-center gap-2 rounded-md bg-elevated px-4 text-[13px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-raised hover:text-ink"
     >
       {children}
     </button>
@@ -270,20 +258,20 @@ export function FavoritesPicker({
     onClose();
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[140] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[185] flex items-center justify-center p-4"
       role="dialog"
       aria-modal
     >
       <button aria-label={t("Close")} className="absolute inset-0 bg-black/55" onClick={onClose} />
-      <div className="relative flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-[20px] bg-surface ring-1 ring-edge">
+      <div className="relative flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl bg-surface ring-1 ring-edge">
         <div className="flex items-center justify-between border-b border-edge-soft px-6 py-4">
           <h2 className="font-display text-[20px] text-ink">{copy.title}</h2>
           <button
             onClick={onClose}
             aria-label={t("Close")}
-            className="flex h-11 w-11 items-center justify-center rounded-[10px] text-ink-muted hover:bg-elevated"
+            className="flex h-11 w-11 items-center justify-center rounded-md text-ink-muted hover:bg-elevated"
           >
             <X size={20} />
           </button>
@@ -421,20 +409,21 @@ export function FavoritesPicker({
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="inline-flex min-h-11 items-center rounded-[10px] px-4 text-[14px] font-medium text-ink-muted hover:bg-elevated"
+              className="inline-flex min-h-11 items-center rounded-md px-4 text-[14px] font-medium text-ink-muted hover:bg-elevated"
             >
               {t("Cancel")}
             </button>
             <button
               onClick={() => void submit()}
               disabled={saving || !loaded || loadFailed}
-              className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
             >
               <Check size={20} /> {saving ? t("Saving") : t("Save")}
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

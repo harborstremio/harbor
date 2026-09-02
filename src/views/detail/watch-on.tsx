@@ -15,7 +15,7 @@ export function WatchOn({ providers }: { providers: WatchProvider[] }) {
             type="button"
             onClick={() => p.link && openUrl(p.link)}
             title={p.name}
-            className="group flex h-11 items-center gap-2.5 rounded-xl border border-edge-soft bg-elevated/70 ps-2 pe-3.5 transition-[transform,background-color,border-color] duration-150 hover:border-ink-subtle hover:bg-elevated active:scale-[0.97]"
+            className="group flex h-11 items-center gap-2.5 rounded-xl bg-white/[0.06] ps-2 pe-3.5 transition-[transform,background-color] duration-150 hover:bg-white/[0.10] active:scale-[0.97]"
           >
             <img
               src={p.logo}

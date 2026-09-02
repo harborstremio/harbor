@@ -1,4 +1,5 @@
 import { AlertCircle } from "lucide-react";
+import { NavGlyph } from "@/components/icons/nav-glyph";
 import { useEffect, useState, type ReactNode } from "react";
 import type { PlayerControlId } from "@/lib/player-chrome";
 import { t as translate } from "@/lib/i18n";
@@ -143,7 +144,11 @@ export function renderCustomIconControl(
       const label = ctx.isLiveChannel ? t("TV Guide") : t("Switch stream");
       return (
         <BigButton onClick={ctx.onPickAnother} ariaLabel={label} tooltip={label}>
-          <CustomIcon url={iconUrl} size={22} />
+          {ctx.isLiveChannel ? (
+            <NavGlyph name="guide" className="h-[22px] w-[22px]" />
+          ) : (
+            <CustomIcon url={iconUrl} size={22} />
+          )}
         </BigButton>
       );
     }

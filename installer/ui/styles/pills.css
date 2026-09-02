@@ -1,0 +1,111 @@
+.hb-actions {
+  --hb-pad: 26px;
+  --hb-track: 0.11em;
+  --hb-plate-hover: oklch(0.935 0.010 75);
+  --hb-plate-press: oklch(0.885 0.008 75);
+  --hb-dead: oklch(0.36 0.004 260);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.hb-pill,
+.hb-pill-ghost {
+  appearance: none;
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+  height: var(--h-pill);
+  padding-inline: var(--hb-pad);
+  border-radius: var(--r-pill);
+  display: grid;
+  grid-template-areas: "label";
+  place-items: center;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: var(--hb-track);
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+  translate: 0 0;
+  transition-property: background-color, color, box-shadow, translate;
+  transition-duration: var(--t-state), var(--t-state), var(--t-state), 200ms;
+  transition-timing-function: var(--ease);
+}
+.hb-pill-label {
+  grid-area: label;
+  display: block;
+  margin-right: calc(var(--hb-track) * -1);
+}
+.hb-pill::before {
+  content: "Launch Harbor" / "";
+  grid-area: label;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+  margin-right: calc(var(--hb-track) * -1);
+}
+@supports (text-box-edge: cap alphabetic) {
+  .hb-pill-label { text-box-trim: trim-both; text-box-edge: cap alphabetic; }
+}
+@supports not (text-box-edge: cap alphabetic) {
+  .hb-pill-label { padding-bottom: 0.125em; }
+}
+.hb-pill {
+  background-color: var(--ink);
+  color: var(--canvas);
+}
+.hb-pill-ghost {
+  --hb-track: 0.13em;
+  background-color: transparent;
+  color: var(--ink-muted);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, currentColor 78%, transparent);
+}
+.hb-pill:hover:not(:disabled),
+.hb-pill-ghost:hover:not(:disabled),
+.hb-pill:focus-visible:not(:disabled),
+.hb-pill-ghost:focus-visible:not(:disabled) {
+  transition-duration: var(--t-hover), var(--t-hover), var(--t-hover), 200ms;
+}
+.hb-pill:hover:not(:disabled),
+.hb-pill:focus-visible:not(:disabled) {
+  background-color: var(--hb-plate-hover);
+}
+.hb-pill-ghost:hover:not(:disabled),
+.hb-pill-ghost:focus-visible:not(:disabled) {
+  background-color: var(--wash-quiet);
+  color: var(--ink);
+}
+.hb-pill:active:not(:disabled),
+.hb-pill-ghost:active:not(:disabled) {
+  translate: 0 1px;
+  transition-duration: var(--t-press), var(--t-press), var(--t-press), 70ms;
+}
+.hb-pill:active:not(:disabled) { background-color: var(--hb-plate-press); }
+.hb-pill-ghost:active:not(:disabled) { background-color: var(--wash); color: var(--ink); }
+.hb-pill:disabled {
+  background-color: var(--hb-dead);
+  color: var(--ink-muted);
+  translate: 0 0;
+}
+.hb-pill-ghost:disabled { color: var(--ink-subtle); translate: 0 0; }
+html:not([data-input-modality="pointer"]) .hb-pill:focus-visible,
+html:not([data-input-modality="pointer"]) .hb-pill-ghost:focus-visible,
+html:not([data-input-modality="pointer"]) .hb-pill:focus-visible,
+html:not([data-input-modality="pointer"]) .hb-pill-ghost:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.hb-pill:focus-visible,
+.hb-pill-ghost:focus-visible { outline: none; }
+@media (prefers-reduced-motion: reduce) {
+  .hb-pill:active:not(:disabled),
+  .hb-pill-ghost:active:not(:disabled) { translate: 0 0; }
+}
+@media (forced-colors: active) {
+  .hb-pill, .hb-pill-ghost { border: 1px solid ButtonBorder; }
+  .hb-pill:disabled { border-color: GrayText; color: GrayText; }
+}

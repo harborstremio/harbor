@@ -1,4 +1,5 @@
-import { Loader2, Play, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useT } from "@/lib/i18n";
 import type { ScoredStream } from "@/lib/streams/types";
 import { QUALITY_LABEL, qualityKey } from "./quality";

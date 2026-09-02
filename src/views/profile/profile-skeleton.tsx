@@ -29,18 +29,18 @@ export function ProfileSkeleton() {
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:gap-6">
             <div className="harbor-skel h-[124px] w-[124px] shrink-0 rounded-full ring-4 ring-canvas" />
             <div className="min-w-0 flex-1 space-y-3 pb-1">
-              <div className="harbor-skel h-8 w-64 max-w-full rounded-[10px]" />
+              <div className="harbor-skel h-8 w-64 max-w-full rounded-md" />
               <div className="harbor-skel h-4 w-48 max-w-full rounded-lg" />
               <div className="harbor-skel h-4 w-80 max-w-full rounded-lg" />
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <div className="harbor-skel h-11 w-28 rounded-[10px]" />
-              <div className="harbor-skel h-11 w-32 rounded-[10px]" />
+              <div className="harbor-skel h-11 w-28 rounded-md" />
+              <div className="harbor-skel h-11 w-32 rounded-md" />
             </div>
           </div>
           <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="harbor-skel h-[68px] rounded-[14px]" />
+              <div key={i} className="harbor-skel h-[68px] rounded-lg" />
             ))}
           </div>
         </div>

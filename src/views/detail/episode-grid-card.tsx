@@ -1,4 +1,5 @@
-import { CalendarClock, CalendarDays, Check, Info, Play, RotateCcw } from "lucide-react";
+import { CalendarClock, CalendarDays, Check, Info, RotateCcw } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { EpisodeDownloadButton } from "./episode-download-button";
 import { useEffect, useRef, useState } from "react";
@@ -154,7 +155,7 @@ function StatusTag({
 }) {
   if (watched)
     return (
-      <span className="absolute bottom-2 end-2 flex items-center gap-1 rounded-md bg-canvas/90 px-1.5 py-0.5 text-[10.5px] font-semibold text-emerald-300">
+      <span className="absolute bottom-2 end-2 flex items-center gap-1 rounded-md bg-canvas/90 px-1.5 py-0.5 text-[10.5px] font-semibold text-success">
         <Check size={11} strokeWidth={3} />
         {t("Watched")}
       </span>
@@ -247,7 +248,7 @@ function EpisodePreview({
             }
             className={`flex h-9 flex-1 items-center justify-center gap-2 rounded-lg text-[12.5px] font-semibold transition-[opacity,color] hover:opacity-90 ${
               g.upcoming
-                ? "border border-edge bg-elevated/50 text-ink-muted hover:text-ink"
+                ? "bg-white/[0.06] text-ink-muted hover:bg-white/[0.10] hover:text-ink"
                 : "bg-ink text-canvas"
             }`}
           >
@@ -282,7 +283,7 @@ function EpisodePreview({
             <button
               onClick={() => openEpisodeDetail(meta.id, g.season, g.number, meta)}
               aria-label={t("Episode details")}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-edge-soft text-ink-muted transition-colors hover:border-edge hover:text-ink"
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.06] text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
             >
               <Info size={15} strokeWidth={2} />
             </button>

@@ -31,7 +31,7 @@ export function GroupTile({ group, index = 0, onOpen }: { group: Group; index?: 
       type="button"
       onClick={() => onOpen(group.id)}
       style={{ animationDelay: `${Math.min(index * 35, 420)}ms`, animationDuration: "460ms", animationFillMode: "both" }}
-      className="harbor-group-tile group relative flex w-full flex-col gap-3 overflow-hidden rounded-[14px] bg-surface p-4 text-start ring-1 ring-edge-soft transition-[transform,box-shadow,background-color] duration-200 ease-out hover:bg-elevated hover:shadow-[0_18px_40px_-24px_rgba(0,0,0,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/70 active:scale-[0.99] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-reduce:hover:translate-y-0 sm:hover:-translate-y-[3px]"
+      className="harbor-group-tile group relative flex w-full flex-col gap-3 overflow-hidden rounded-lg bg-surface p-4 text-start ring-1 ring-edge-soft transition-[transform,box-shadow,background-color] duration-200 ease-out hover:bg-elevated hover:shadow-[0_18px_40px_-24px_rgba(0,0,0,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/70 active:scale-[0.99] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-reduce:hover:translate-y-0 sm:hover:-translate-y-[3px]"
     >
       {group.avatarUrl && (
         <span

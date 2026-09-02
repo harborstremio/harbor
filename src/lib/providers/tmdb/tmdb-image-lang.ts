@@ -57,6 +57,7 @@ export function pickedImageLangs(): string[] {
 }
 
 export function shouldLocalizePosters(): boolean {
+  if (imageLangPriority()[0] === null) return true;
   const top = imageRequestLang();
   if (!!top && top !== "en") return true;
   // Posters should also follow the metadata language (search returns the original-language

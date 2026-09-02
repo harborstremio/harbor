@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, type RefObject, type CSSProperties } from "react";
 import { PickCard } from "@/components/pick-card";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
@@ -44,9 +44,9 @@ export function FilmGrid({
       />
       <div className={GRID}>
         {skeleton
-          ? Array.from({ length: PREVIEW }).map((_, i) => <PosterSkeleton key={i} />)
+          ? Array.from({ length: PREVIEW }).map((_, i) => <PosterSkeleton key={i} index={i} />)
           : shown.map((m) => <PickCard key={m.id} meta={m} />)}
-        {expanded && loadingMore && Array.from({ length: 6 }).map((_, i) => <PosterSkeleton key={`m${i}`} />)}
+        {expanded && loadingMore && Array.from({ length: 6 }).map((_, i) => <PosterSkeleton key={`m${i}`} index={i} />)}
       </div>
 
       {canViewAll && (
@@ -97,8 +97,13 @@ function LoadMoreSentinel({
   return <div ref={ref} aria-hidden className="h-1 w-full" />;
 }
 
-function PosterSkeleton() {
-  return <div className="aspect-[2/3] animate-pulse rounded-xl bg-elevated/40" />;
+function PosterSkeleton({ index }: { index?: number }) {
+  return (
+    <div
+      className="harbor-shimmer relative aspect-[2/3]"
+      style={{ "--ai-delay": `${(index ?? 0) * 70}ms`, borderRadius: 12 } as CSSProperties}
+    />
+  );
 }
 
 export function Header({

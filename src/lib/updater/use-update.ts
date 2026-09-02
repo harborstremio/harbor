@@ -1,6 +1,14 @@
 import { useSyncExternalStore } from "react";
 import { check } from "@tauri-apps/plugin-updater";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+import { t } from "@/lib/i18n";
+import {
+  launchHandoff,
+  probeHandoff,
+  readHandoffPlan,
+  stageHandoff,
+  type HandoffPlan,
+} from "./handoff";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 const DISMISS_KEY = "harbor.update.dismissed";
@@ -29,6 +37,7 @@ export type UpdateState = {
   manualCheck: boolean;
   dismissed: string | null;
   panelOpen: boolean;
+  handoff: HandoffPlan | null;
 };
 
 function readDismissed(): string | null {
@@ -51,6 +60,7 @@ let state: UpdateState = {
   manualCheck: false,
   dismissed: readDismissed(),
   panelOpen: false,
+  handoff: null,
 };
 
 type UpdateHandle = {
@@ -132,12 +142,29 @@ export async function checkForUpdate(manual = false): Promise<void> {
   set({ status: "checking", manualCheck: manual, error: null });
   try {
     const wantBeta = betaChannel();
+    let beta = wantBeta;
     let update = await check(wantBeta ? BETA_HEADERS : undefined);
     if (!update && !wantBeta && (await runningPrerelease())) {
+      beta = true;
       update = await check(BETA_HEADERS);
     }
+    const plan = await readHandoffPlan(beta ? BETA_HEADERS : undefined).catch(() => null);
+    if (plan) {
+      handle = update ? (update as unknown as UpdateHandle) : null;
+      const version = plan.version || update?.version || "";
+      const dismissed = readDismissed();
+      set({
+        status: "available",
+        version,
+        notes: plan.notes ?? update?.body ?? null,
+        handoff: plan,
+        dismissed,
+        panelOpen: manual || dismissed !== version,
+      });
+      return;
+    }
     if (!update) {
-      set({ status: "uptodate", version: null, notes: null });
+      set({ status: "uptodate", version: null, notes: null, handoff: null });
       return;
     }
     handle = update as unknown as UpdateHandle;
@@ -146,6 +173,7 @@ export async function checkForUpdate(manual = false): Promise<void> {
       status: "available",
       version: update.version,
       notes: update.body ?? null,
+      handoff: null,
       dismissed,
       panelOpen: manual || dismissed !== update.version,
     });
@@ -155,7 +183,36 @@ export async function checkForUpdate(manual = false): Promise<void> {
 }
 
 export async function downloadUpdate(): Promise<void> {
-  if (!handle || state.status === "downloading" || state.status === "installing") return;
+  if (state.status === "downloading" || state.status === "installing") return;
+  const plan = state.handoff;
+  if (plan) {
+    if (!plan.verifiable) {
+      void openHandoffDownload();
+      return;
+    }
+    set({
+      status: "downloading",
+      progress: 0,
+      downloadedBytes: 0,
+      totalBytes: plan.size ?? 0,
+      error: null,
+    });
+    try {
+      await stageHandoff(plan, ({ received, total, verifying }) => {
+        const size = total ?? plan.size ?? 0;
+        set({
+          downloadedBytes: verifying ? size : received,
+          totalBytes: size,
+          progress: size > 0 ? Math.min(1, received / size) : 0,
+        });
+      });
+      set({ status: "downloaded", progress: 1 });
+    } catch (e) {
+      set({ status: "error", error: String(e) });
+    }
+    return;
+  }
+  if (!handle) return;
   set({ status: "downloading", progress: 0, downloadedBytes: 0, totalBytes: 0, error: null });
   try {
     let total = 0;
@@ -178,6 +235,30 @@ export async function downloadUpdate(): Promise<void> {
 }
 
 export async function installUpdate(): Promise<void> {
+  const plan = state.handoff;
+  if (plan) {
+    set({ status: "installing", error: null, installFailed: false });
+    try {
+      localStorage.setItem(
+        PENDING_KEY,
+        JSON.stringify({
+          version: plan.version,
+          payloadVersion: plan.payloadVersion,
+          handoff: true,
+          at: Date.now(),
+        }),
+      );
+    } catch {
+      clearPending();
+    }
+    try {
+      await launchHandoff();
+    } catch (e) {
+      clearPending();
+      set({ status: "error", error: String(e), installFailed: true, panelOpen: true });
+    }
+    return;
+  }
   if (!handle) return;
   set({ status: "installing", error: null, installFailed: false });
   try {
@@ -242,14 +323,50 @@ export async function openManualDownload(): Promise<void> {
   openUrl(target);
 }
 
+export async function openHandoffDownload(): Promise<void> {
+  const url = state.handoff?.url;
+  const { openUrl } = await import("@/lib/window");
+  openUrl(url || HARBOR_API_BASE);
+}
+
+function clearPending(): void {
+  try {
+    localStorage.removeItem(PENDING_KEY);
+  } catch {}
+}
+
+async function detectFailedHandoff(pending: {
+  version?: string;
+  payloadVersion?: number;
+}): Promise<boolean> {
+  const probe = await probeHandoff();
+  const want = pending.payloadVersion ?? 0;
+  if (!probe || probe.payloadVersion >= want) {
+    clearPending();
+    return false;
+  }
+  clearPending();
+  const plan = await readHandoffPlan(betaChannel() ? BETA_HEADERS : undefined).catch(() => null);
+  set({
+    status: "error",
+    installFailed: true,
+    version: pending.version ?? null,
+    handoff: plan,
+    error: t("Harbor Setup did not finish updating Harbor. Nothing was changed."),
+    panelOpen: true,
+  });
+  return true;
+}
+
 async function detectFailedUpdate(): Promise<boolean> {
   if (!IS_TAURI) return false;
-  let pending: { version?: string } | null = null;
+  let pending: { version?: string; payloadVersion?: number; handoff?: boolean } | null = null;
   try {
     pending = JSON.parse(localStorage.getItem(PENDING_KEY) ?? "null");
   } catch {
     pending = null;
   }
+  if (pending?.handoff) return detectFailedHandoff(pending);
   if (!pending?.version) return false;
   let current: string | null = null;
   try {
@@ -270,7 +387,9 @@ async function detectFailedUpdate(): Promise<boolean> {
     status: "error",
     installFailed: true,
     version: pending.version,
-    error: `Harbor ${pending.version} downloaded but did not install on its own.`,
+    error: t("Harbor {version} downloaded but did not install on its own.", {
+      version: pending.version,
+    }),
     panelOpen: true,
   });
   return true;
@@ -309,6 +428,7 @@ export function clearStagedUpdate(): void {
     totalBytes: 0,
     error: null,
     panelOpen: false,
+    handoff: null,
   });
 }
 

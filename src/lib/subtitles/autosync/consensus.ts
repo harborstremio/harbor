@@ -1,7 +1,10 @@
 import { dinfo, dwarn } from "@/lib/debug";
 import { searchSubtitles } from "@/lib/subtitles/search";
-import { fetchAndParse, type SubCue } from "@/lib/subtitles/parser";
+import type { SubCue } from "@/lib/subtitles/parser";
+import { prepareSubtitle } from "@/lib/subtitles/prepare";
+import { providerSubtitleDownloadHeaders } from "@/lib/subtitles/provider-auth";
 import { normalizeLang } from "@/lib/subtitles/language";
+import { normalizeArabicForMatch } from "@/lib/subtitles/arabic-normalize";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
 import type { SubResult, SubSearchQuery } from "@/lib/subtitles/types";
 import type { Addon } from "@/lib/addons";
@@ -16,6 +19,8 @@ export type ConsensusConfig = {
   netAllowed?: boolean;
   maxCandidates?: number;
   fetchTimeoutMs?: number;
+  authKey?: string | null;
+  gatherAddons?: typeof gatherSubtitleAddons;
 };
 
 export type ConsensusPort = (ctx: PipelineContext) => Promise<ConsensusResult | null>;
@@ -38,11 +43,12 @@ const URL_RX = /https?:\/\/\S+|www\.\S+/g;
 const LEAD_DASH_RX = /^\s*[-–—>]+\s*/;
 const PUNCT_RX = /[^\p{L}\p{N}\s]/gu;
 
-export function normalizeLine(raw: string): string {
+export function normalizeLine(raw: string, language?: string): string {
   let s = raw.replace(/\r/g, " ").replace(TAG_RX, " ").replace(HI_RX, " ");
   s = s.replace(URL_RX, " ").replace(/^\s+/, "");
   s = s.replace(LEAD_DASH_RX, "");
   s = s.replace(SPEAKER_RX, "");
+  if (normalizeLang(language ?? "") === "ar") return normalizeArabicForMatch(s);
   s = s.toLowerCase();
   s = s.replace(PUNCT_RX, " ");
   return s.replace(/\s+/g, " ").trim();
@@ -50,12 +56,12 @@ export function normalizeLine(raw: string): string {
 
 export type DialogueSequence = { lines: string[]; times: number[] };
 
-export function dialogueSequence(cues: SubCue[]): DialogueSequence {
+export function dialogueSequence(cues: SubCue[], language?: string): DialogueSequence {
   const lines: string[] = [];
   const times: number[] = [];
   for (const c of cues) {
     if (!Number.isFinite(c.start)) continue;
-    const n = normalizeLine(String(c.text ?? "").replace(/\n+/g, " "));
+    const n = normalizeLine(String(c.text ?? "").replace(/\n+/g, " "), language);
     if (n.length >= MIN_LINE_LEN) {
       lines.push(n);
       times.push(c.start);
@@ -229,33 +235,55 @@ function buildQuery(ctx: PipelineContext, langs: string[]): SubSearchQuery {
   };
 }
 
-async function fetchCandidate(r: SubResult, timeoutMs: number): Promise<Candidate | null> {
+export async function prepareConsensusCandidate(
+  r: SubResult,
+  timeoutMs: number,
+  ctx: PipelineContext,
+): Promise<Candidate | null> {
   if (!r.url) return null;
-  const parsed = await withTimeout(
-    fetchAndParse(r.url, { format: r.format, encoding: r.encoding, lang: r.lang }),
+  return withTimeout(
+    (async () => {
+      const prepared = await prepareSubtitle({
+        url: r.url,
+        format: r.format,
+        encoding: r.encoding,
+        language: r.lang,
+        season: ctx.meta?.season,
+        episode: ctx.meta?.episode,
+        release: r.release ?? undefined,
+        filename: r.rawFilename ?? undefined,
+        durationSec: ctx.durationSec,
+        requestHeaders: providerSubtitleDownloadHeaders(r.downloadAuth, r.url),
+      });
+      try {
+        if (prepared.cues.length < MIN_LINES) return null;
+        const seq = dialogueSequence(prepared.cues, r.lang);
+        if (seq.lines.length < MIN_LINES) return null;
+        return {
+          url: r.url,
+          lang: r.lang,
+          source: r.source,
+          format: prepared.format,
+          downloads: r.downloads ?? 0,
+          hashMatch: typeof r.hash === "string" && r.hash.length > 0,
+          isUser: false,
+          seq,
+          shingles: wordShingles(seq.lines),
+        };
+      } finally {
+        prepared.cleanup();
+      }
+    })(),
     timeoutMs,
   );
-  if (!parsed || parsed.length < MIN_LINES) return null;
-  const seq = dialogueSequence(parsed);
-  if (seq.lines.length < MIN_LINES) return null;
-  return {
-    url: r.url,
-    lang: r.lang,
-    source: r.source,
-    format: r.format,
-    downloads: r.downloads ?? 0,
-    hashMatch: typeof r.hash === "string" && r.hash.length > 0,
-    isUser: false,
-    seq,
-    shingles: wordShingles(seq.lines),
-  };
 }
 
 function userCandidate(ctx: PipelineContext): Candidate | null {
   const text = ctx.cueText;
   if (!Array.isArray(text) || text.length < MIN_LINES) return null;
   const cues: SubCue[] = ctx.cues.map((c, i) => ({ start: c[0], end: c[1], text: text[i] ?? "" }));
-  const seq = dialogueSequence(cues);
+  const language = ctx.subtitleLanguage ?? ctx.languages[0] ?? "";
+  const seq = dialogueSequence(cues, language);
   if (seq.lines.length < MIN_LINES) return null;
   return {
     url: "",
@@ -271,10 +299,12 @@ function userCandidate(ctx: PipelineContext): Candidate | null {
 
 async function gatherCandidates(ctx: PipelineContext, cfg: ConsensusConfig): Promise<SubResult[]> {
   const providers = cfg.providers ?? {};
-  const langs = cfg.preferredLangs && cfg.preferredLangs.length > 0 ? cfg.preferredLangs : ctx.languages;
+  const langs =
+    cfg.preferredLangs && cfg.preferredLangs.length > 0 ? cfg.preferredLangs : ctx.languages;
   let addons = cfg.addons;
   if (!addons && providers.addons !== false) {
-    addons = (await withTimeout(gatherSubtitleAddons(null), FETCH_TIMEOUT_MS)) ?? [];
+    const gather = cfg.gatherAddons ?? gatherSubtitleAddons;
+    addons = (await withTimeout(gather(cfg.authKey ?? null), FETCH_TIMEOUT_MS)) ?? [];
   }
   const results = await withTimeout(
     searchSubtitles(buildQuery(ctx, langs), {
@@ -307,7 +337,9 @@ export async function runConsensus(
   const filtered = results.filter((r) => !targetLang || normalizeLang(r.lang) === targetLang);
   const capped = filtered.slice(0, cfg.maxCandidates ?? DEFAULT_MAX_CANDIDATES);
   const timeoutMs = cfg.fetchTimeoutMs ?? FETCH_TIMEOUT_MS;
-  const settled = await Promise.all(capped.map((r) => fetchCandidate(r, timeoutMs).catch(() => null)));
+  const settled = await Promise.all(
+    capped.map((result) => prepareConsensusCandidate(result, timeoutMs, ctx).catch(() => null)),
+  );
   const externals = settled.filter((c): c is Candidate => c !== null);
 
   const answeringSources = new Set(externals.map((c) => c.source));
@@ -343,10 +375,14 @@ export async function runConsensus(
 
   if (!userInMajority) {
     const best = [...peers].sort((a, b) => trustScore(b) - trustScore(a))[0] ?? null;
-    dinfo(`[consensus] verdict=wrong agreement=${agreement.toFixed(2)} sources=${majority.sources.size}`);
+    dinfo(
+      `[consensus] verdict=wrong agreement=${agreement.toFixed(2)} sources=${majority.sources.size}`,
+    );
     return {
       verdict: "wrong",
-      bestCandidate: best ? { url: best.url, lang: best.lang, source: best.source, format: best.format } : null,
+      bestCandidate: best
+        ? { url: best.url, lang: best.lang, source: best.source, format: best.format }
+        : null,
       agreement,
       textAnchors: null,
     };

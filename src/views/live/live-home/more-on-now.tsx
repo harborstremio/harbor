@@ -1,4 +1,4 @@
-import { Play } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import { Poster, usePosterChain } from "@/components/poster";
 import { useT } from "@/lib/i18n";

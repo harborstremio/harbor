@@ -1,6 +1,7 @@
 import { BookOpen, Code2 } from "lucide-react";
 import { useState } from "react";
 import type { CodeLang } from "@/components/code-editor";
+import { useT } from "@/lib/i18n";
 import { CheatSheet } from "./cheat-sheet";
 
 export function CodeSection({
@@ -15,6 +16,7 @@ export function CodeSection({
   onExpand: (tab: CodeLang) => void;
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const t = useT();
   const anyCode = !!(css.trim() || html.trim() || js.trim());
 
   return (
@@ -22,25 +24,29 @@ export function CodeSection({
       <button
         type="button"
         onClick={() => onExpand("css")}
-        className="flex h-14 items-center justify-center gap-2.5 rounded-lg bg-ink text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90"
+        className="flex h-14 items-center justify-center gap-2.5 rounded-md bg-ink text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90"
       >
         <Code2 size={18} strokeWidth={2.2} />
-        Open code editor
+        {t("Open code editor")}
       </button>
 
-      <div className="flex items-center justify-between gap-3 rounded-lg border border-edge-soft bg-elevated/15 px-4 py-3">
+      <div className="flex items-center justify-between gap-3 rounded-md bg-elevated px-4 py-3">
         <span className="text-[13px] text-ink-muted">
           {anyCode
-            ? `CSS ${css.length.toLocaleString()} · HTML ${html.length.toLocaleString()} · JS ${js.length.toLocaleString()}`
-            : "No custom code yet."}
+            ? t("CSS {css} · HTML {html} · JS {js}", {
+                css: css.length.toLocaleString(),
+                html: html.length.toLocaleString(),
+                js: js.length.toLocaleString(),
+              })
+            : t("No custom code yet.")}
         </span>
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg border border-edge-soft px-3.5 text-[14px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+          className="flex h-11 shrink-0 items-center gap-1.5 rounded-md px-3.5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
         >
           <BookOpen size={16} strokeWidth={2.2} />
-          Cheat sheet
+          {t("Cheat sheet")}
         </button>
       </div>
 

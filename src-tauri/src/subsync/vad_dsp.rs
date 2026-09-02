@@ -12,7 +12,11 @@ struct Frame {
 
 fn hann(n: usize) -> Vec<f32> {
     (0..n)
-        .map(|i| (std::f32::consts::PI * i as f32 / (n as f32 - 1.0)).sin().powi(2))
+        .map(|i| {
+            (std::f32::consts::PI * i as f32 / (n as f32 - 1.0))
+                .sin()
+                .powi(2)
+        })
         .collect()
 }
 
@@ -61,7 +65,12 @@ fn frame_features(
         }
         let energy_db = 20.0 * ((e / WIN as f32).sqrt() + 1e-9).log10();
         if fwd.process(&mut buf, &mut spec).is_err() {
-            out.push(Frame { energy_db, flatness: 1.0, harmonicity: 0.0, log_env: energy_db });
+            out.push(Frame {
+                energy_db,
+                flatness: 1.0,
+                harmonicity: 0.0,
+                log_env: energy_db,
+            });
             continue;
         }
         let (mut geo, mut ari, mut cnt) = (0.0f32, 0.0f32, 0.0f32);
@@ -77,7 +86,10 @@ fn frame_features(
             1.0
         };
         for k in 0..power.len() {
-            power[k] = Complex { re: spec[k].norm_sqr(), im: 0.0 };
+            power[k] = Complex {
+                re: spec[k].norm_sqr(),
+                im: 0.0,
+            };
         }
         let harmonicity = if inv.process(&mut power, &mut acf).is_ok() && acf[0] > 1e-9 {
             let z = acf[0];
@@ -92,7 +104,12 @@ fn frame_features(
         } else {
             0.0
         };
-        out.push(Frame { energy_db, flatness, harmonicity, log_env: energy_db });
+        out.push(Frame {
+            energy_db,
+            flatness,
+            harmonicity,
+            log_env: energy_db,
+        });
     }
     out
 }
@@ -150,7 +167,11 @@ pub fn heuristic_probs(pcm: &[f32], cfg: &VadConfig) -> (Vec<f32>, f32) {
             probs.push(0.0);
             continue;
         }
-        let tonal = ramp(cfg.flatness_hi - fr.flatness, 0.0, cfg.flatness_hi - cfg.flatness_lo);
+        let tonal = ramp(
+            cfg.flatness_hi - fr.flatness,
+            0.0,
+            cfg.flatness_hi - cfg.flatness_lo,
+        );
         let voiced = ramp(fr.harmonicity, cfg.harmonicity_lo, cfg.harmonicity_hi);
         let base = tonal.max(0.15) * voiced;
         let speechy = ramp(modr[i], cfg.mod_ratio_lo, cfg.mod_ratio_hi);

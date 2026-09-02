@@ -1,5 +1,17 @@
-import { AlertTriangle, Check, Eraser, Loader2, Play, RotateCw, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  Activity,
+  AlertTriangle,
+  Check,
+  Download,
+  Eraser,
+  Gauge,
+  Loader2,
+  Play,
+  RotateCw,
+  Timer,
+  X,
+} from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import {
@@ -9,22 +21,49 @@ import {
   torrentEngineStatus as engineStatus,
   type EngineStatus,
 } from "@/lib/torrent/local-engine";
-import { settingsAnchor, ToggleRow } from "../shared";
+import { Section, ToggleRow } from "../shared";
+import { SettingGroup, SettingRow, ROW_ACTION } from "../kit";
 
 type SelfTestResult = Awaited<ReturnType<typeof engineSelfTest>>;
 
 type EngineState = "running" | "stopped" | "error";
 
-const PILL: Record<EngineState, { label: string; dot: string; chip: string }> = {
-  running: { label: "Running", dot: "bg-emerald-400", chip: "bg-emerald-500/15 text-emerald-400" },
-  stopped: { label: "Stopped", dot: "bg-ink-subtle", chip: "bg-ink-subtle/15 text-ink-muted" },
-  error: { label: "Error", dot: "bg-danger", chip: "bg-danger/15 text-danger" },
+const PILL: Record<EngineState, { dot: string; chip: string }> = {
+  running: { dot: "bg-success", chip: "bg-success/15 text-success" },
+  stopped: { dot: "bg-ink-subtle", chip: "bg-raised text-ink-muted" },
+  error: { dot: "bg-danger", chip: "bg-danger/15 text-danger" },
 };
+
+const ROW_ACTION_PRIMARY =
+  "harbor-press-pop flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-ink px-3.5 text-[12.5px] font-semibold text-canvas transition-colors hover:opacity-90 disabled:opacity-50";
+const ROW_ACTION_DANGER =
+  "harbor-press-pop flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-raised px-3.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-danger disabled:opacity-60";
 
 function engineState(status: EngineStatus | null): EngineState {
   if (status?.last_error) return "error";
   if (status?.ready) return "running";
   return "stopped";
+}
+
+function StateIcon({ on, children }: { on: boolean; children: ReactNode }) {
+  return (
+    <span
+      className={`flex h-9 w-9 items-center justify-center rounded-md ${
+        on ? "bg-accent-soft text-accent" : "bg-raised text-ink-subtle"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
+function Stat({ label, value, tone }: { label: string; value: string; tone?: string }) {
+  return (
+    <span className="flex items-baseline gap-1.5 text-[12.5px] text-ink-subtle">
+      {label}
+      <span className={`font-mono tabular-nums ${tone ?? "text-accent"}`}>{value}</span>
+    </span>
+  );
 }
 
 export function LocalEngineSection() {
@@ -93,174 +132,223 @@ export function LocalEngineSection() {
     }
   };
 
-  const pill = PILL[engineState(status)];
+  const state = engineState(status);
+  const pill = PILL[state];
+  const pillLabel = state === "running" ? t("Running") : state === "error" ? t("Error") : t("Stopped");
   const udpStep = result?.steps.find((s) => s.label === "udp egress");
   const httpsStep = result?.steps.find((s) => s.label === "https egress");
   const udpBlocked = !!udpStep && !udpStep.ok && !!httpsStep && httpsStep.ok;
+  const dhtNodes = status?.dht_nodes ?? 0;
 
   return (
-    <section id={settingsAnchor("Local engine")} className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Local engine")}</h2>
-          <p className="text-[13.5px] leading-relaxed text-ink-muted">
-            {t("Built-in peer-to-peer streaming, served from your own machine.")}
-          </p>
-        </div>
-        <span
-          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${pill.chip}`}
-        >
-          <span className={`h-1.5 w-1.5 rounded-full ${pill.dot}`} />
-          {t(pill.label)}
-        </span>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12.5px] text-ink-subtle">
-        <span>
-          {t("Port")} <span className="font-mono text-accent">{status?.port ?? "n/a"}</span>
-        </span>
-        <span>
-          {t("Active torrents")} <span className="font-mono text-accent">{status?.active_torrents ?? 0}</span>
-        </span>
-        {status?.dht_tier ? (
-          <span>
-            {t("DHT")}{" "}
-            <span className={`font-mono ${(status.dht_nodes ?? 0) > 0 ? "text-accent" : "text-danger"}`}>
-              {status.dht_nodes ?? 0} {t("nodes")}
-            </span>
-          </span>
-        ) : null}
-      </div>
-
-      {status?.last_error && (
-        <div className="flex flex-col gap-1.5">
-          <p className="text-[12px] leading-relaxed text-danger">{status.last_error}</p>
-          <p className="text-[12px] leading-relaxed text-ink-subtle">
-            {t("If streams stop loading, hit Clear & restart below to wipe the engine and start it fresh on a new port.")}
-          </p>
-        </div>
-      )}
-
-      <ToggleRow
-        label={t("Show P2P status overlay")}
-        sub={t("Peers, speed and progress chip on the player during torrent playback. Turn off to keep the player clean.")}
-        value={settings.playerP2pChip}
-        onChange={(v) => update({ playerP2pChip: v })}
-      />
-
-      <ToggleRow
-        label={t("Keep downloading after you leave")}
-        sub={t("When off, a torrent stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.")}
-        value={settings.keepStreamDownloadsInBackground}
-        onChange={(v) => update({ keepStreamDownloadsInBackground: v })}
-      />
-
-      <ToggleRow
-        label={t("Only start the torrent engine when needed")}
-        sub={t("Harbor normally starts its torrent engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a torrent. Takes effect next launch.")}
-        value={settings.deferTorrentEngine}
-        onChange={(v) => update({ deferTorrentEngine: v })}
-      />
-
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => void runTest()}
-          disabled={busy || strictRemote}
-          className="flex h-10 items-center gap-2 rounded-lg bg-ink px-4 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60 disabled:hover:scale-100"
-        >
-          {running ? (
-            <Loader2 size={15} className="animate-spin" />
-          ) : (
-            <Play size={14} strokeWidth={2.4} />
+    <Section
+      title={t("Local engine")}
+      subtitle={t("Built-in peer-to-peer streaming, served from your own machine.")}
+    >
+      <SettingGroup label={t("Status")}>
+        <SettingRow
+          wide
+          icon={<Activity size={16} strokeWidth={1.9} />}
+          label={t("Engine status")}
+          desc={t("Live state of Harbor's own torrent engine on this machine.")}
+          tip={t(
+            "The engine listens on a local port and joins the DHT to find peers. Active torrents are the streams it currently has open.",
           )}
-          {running ? t("Running self-test") : t("Run self-test")}
-        </button>
-        <button
-          type="button"
-          onClick={() => void restart()}
-          disabled={busy}
-          className="flex h-10 items-center gap-2 rounded-lg border border-edge-soft px-4 text-[13px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
         >
-          {restarting ? (
-            <Loader2 size={15} className="animate-spin" />
-          ) : (
-            <RotateCw size={14} strokeWidth={2.4} />
-          )}
-          {restarting ? t("Restarting") : t("Restart engine")}
-        </button>
-        <button
-          type="button"
-          onClick={() => void clearAll()}
-          disabled={busy}
-          className="flex h-10 items-center gap-2 rounded-lg border border-edge-soft px-4 text-[13px] font-semibold text-ink-muted transition-colors hover:border-danger/50 hover:text-danger disabled:opacity-60"
-        >
-          {clearing ? (
-            <Loader2 size={15} className="animate-spin" />
-          ) : (
-            <Eraser size={14} strokeWidth={2.4} />
-          )}
-          {clearing ? t("Clearing") : t("Clear & restart")}
-        </button>
-      </div>
-
-      {strictRemote && (
-        <p className="text-[12px] leading-relaxed text-accent/85">
-          {t("Self-test is disabled while strict remote streaming is on. It downloads a test torrent over peer-to-peer on this machine.")}
-        </p>
-      )}
-
-      {result && (
-        <div className="flex flex-col gap-2.5 rounded-xl border border-edge-soft bg-canvas/40 p-3.5">
-          <div className="flex items-center gap-2">
-            <span className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-              {t("Self-test")}
-            </span>
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${
-                result.pass ? "bg-emerald-500/15 text-emerald-400" : "bg-danger/15 text-danger"
-              }`}
-            >
-              {result.pass ? (
-                <Check size={12} strokeWidth={2.8} />
-              ) : (
-                <X size={12} strokeWidth={2.8} />
-              )}
-              {result.pass ? t("Pass") : t("Fail")}
-            </span>
-          </div>
-          <ul className="flex flex-col gap-1.5">
-            {result.steps.map((step) => (
-              <li key={step.label} className="flex items-center gap-2.5 text-[12.5px]">
-                <span
-                  className={`flex h-4 w-4 shrink-0 items-center justify-center ${
-                    step.ok ? "text-emerald-400" : step.warn ? "text-amber-400" : "text-danger"
-                  }`}
-                >
-                  {step.ok ? (
-                    <Check size={13} strokeWidth={2.8} />
-                  ) : step.warn ? (
-                    <AlertTriangle size={12} strokeWidth={2.6} />
-                  ) : (
-                    <X size={13} strokeWidth={2.8} />
+          <div className="flex w-full flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+              <span
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold uppercase tracking-wider ${pill.chip}`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${pill.dot}`} />
+                {pillLabel}
+              </span>
+              <Stat label={t("Port")} value={status?.port ? String(status.port) : t("n/a")} />
+              <Stat label={t("Active torrents")} value={String(status?.active_torrents ?? 0)} />
+              {status?.dht_tier ? (
+                <Stat
+                  label={t("DHT")}
+                  value={`${dhtNodes} ${t("nodes")}`}
+                  tone={dhtNodes > 0 ? "text-accent" : "text-danger"}
+                />
+              ) : null}
+            </div>
+            {status?.last_error && (
+              <div className="flex w-full flex-col gap-1.5 rounded-md bg-canvas px-3.5 py-2.5">
+                <span className="text-[12.5px] leading-relaxed text-danger">{status.last_error}</span>
+                <span className="text-[12.5px] leading-relaxed text-ink-subtle">
+                  {t(
+                    "If streams stop loading, hit Clear & restart below to wipe the engine and start it fresh on a new port.",
                   )}
                 </span>
-                <span className="font-medium text-ink">{step.label}</span>
-                {step.detail && (
-                  <span className="ms-auto truncate ps-3 text-end font-mono text-[11.5px] text-ink-subtle">
-                    {step.detail}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-          {udpBlocked && (
-            <p className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-[12px] leading-relaxed text-amber-300/90">
-              {t("Your network blocks UDP, so DHT is offline, but HTTPS trackers are reachable over TCP. Streams can still find peers, they may just take a little longer to start.")}
-            </p>
+              </div>
+            )}
+          </div>
+        </SettingRow>
+      </SettingGroup>
+
+      <SettingGroup label={t("Behaviour")}>
+        <ToggleRow
+          label={t("Show P2P status chip")}
+          sub={t(
+            "Peers, speed and progress on the player while a torrent streams. Sits top left, clear of the exit button.",
           )}
-        </div>
-      )}
-    </section>
+          leading={
+            <StateIcon on={settings.playerP2pChip}>
+              <Gauge size={16} strokeWidth={2.2} />
+            </StateIcon>
+          }
+          value={settings.playerP2pChip}
+          onChange={(v) => update({ playerP2pChip: v })}
+        />
+
+        <ToggleRow
+          label={t("Keep downloading after you leave")}
+          sub={t(
+            "When off, a torrent stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.",
+          )}
+          leading={
+            <StateIcon on={settings.keepStreamDownloadsInBackground}>
+              <Download size={16} strokeWidth={2.2} />
+            </StateIcon>
+          }
+          value={settings.keepStreamDownloadsInBackground}
+          onChange={(v) => update({ keepStreamDownloadsInBackground: v })}
+        />
+
+        <ToggleRow
+          label={t("Only start the torrent engine when needed")}
+          sub={t(
+            "Harbor normally starts its torrent engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a torrent. Takes effect next launch.",
+          )}
+          leading={
+            <StateIcon on={settings.deferTorrentEngine}>
+              <Timer size={16} strokeWidth={2.2} />
+            </StateIcon>
+          }
+          value={settings.deferTorrentEngine}
+          onChange={(v) => update({ deferTorrentEngine: v })}
+        />
+      </SettingGroup>
+
+      <SettingGroup label={t("Maintenance")}>
+        <SettingRow
+          label={t("Run self-test")}
+          desc={t("Checks that this network can reach trackers and peers.")}
+          tip={t(
+            "Fetches a small public test torrent, then reports UDP and HTTPS egress, DHT bootstrap and tracker reachability step by step.",
+          )}
+          lockReason={
+            strictRemote
+              ? t(
+                  "Self-test is disabled while strict remote streaming is on. It downloads a test torrent over peer-to-peer on this machine.",
+                )
+              : undefined
+          }
+        >
+          <button
+            type="button"
+            onClick={() => void runTest()}
+            disabled={busy || strictRemote}
+            className={ROW_ACTION_PRIMARY}
+          >
+            {running ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} strokeWidth={2.4} />}
+            {running ? t("Running self-test") : t("Run self-test")}
+          </button>
+        </SettingRow>
+
+        <SettingRow
+          label={t("Restart engine")}
+          desc={t("Stops and starts the engine. Cached stream files are kept.")}
+        >
+          <button type="button" onClick={() => void restart()} disabled={busy} className={ROW_ACTION}>
+            {restarting ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <RotateCw size={14} strokeWidth={2.4} />
+            )}
+            {restarting ? t("Restarting") : t("Restart engine")}
+          </button>
+        </SettingRow>
+
+        <SettingRow
+          label={t("Clear & restart")}
+          desc={t("Wipes engine data and starts fresh on a new port.")}
+          tip={t(
+            "The stronger fix when streams refuse to load. Cached stream files and the DHT cache are removed, so the next stream starts from scratch.",
+          )}
+        >
+          <button
+            type="button"
+            onClick={() => void clearAll()}
+            disabled={busy}
+            className={ROW_ACTION_DANGER}
+          >
+            {clearing ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Eraser size={14} strokeWidth={2.4} />
+            )}
+            {clearing ? t("Clearing") : t("Clear & restart")}
+          </button>
+        </SettingRow>
+
+        {result && (
+          <div className="flex flex-col gap-2.5 rounded-md bg-elevated px-4 py-3.5">
+            <div className="flex items-center gap-2">
+              <span className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
+                {t("Self-test")}
+              </span>
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold uppercase tracking-wider ${
+                  result.pass ? "bg-success/15 text-success" : "bg-danger/15 text-danger"
+                }`}
+              >
+                {result.pass ? <Check size={12} strokeWidth={2.8} /> : <X size={12} strokeWidth={2.8} />}
+                {result.pass ? t("Pass") : t("Fail")}
+              </span>
+            </div>
+            <ul className="flex flex-col gap-1">
+              {result.steps.map((step) => (
+                <li
+                  key={step.label}
+                  className="flex items-center gap-2.5 rounded-md bg-canvas px-3 py-2 text-[12.5px]"
+                >
+                  <span
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center ${
+                      step.ok ? "text-success" : step.warn ? "text-accent" : "text-danger"
+                    }`}
+                  >
+                    {step.ok ? (
+                      <Check size={14} strokeWidth={2.8} />
+                    ) : step.warn ? (
+                      <AlertTriangle size={12} strokeWidth={2.6} />
+                    ) : (
+                      <X size={14} strokeWidth={2.8} />
+                    )}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate font-medium text-ink">{step.label}</span>
+                  {step.detail && (
+                    <span className="min-w-0 shrink truncate text-end font-mono text-[11.5px] text-ink-subtle">
+                      {step.detail}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+            {udpBlocked && (
+              <div className="flex items-start gap-2 rounded-md bg-canvas px-3 py-2.5">
+                <AlertTriangle size={14} strokeWidth={2.4} className="mt-[2px] shrink-0 text-accent" />
+                <span className="text-[12.5px] leading-relaxed text-ink-muted">
+                  {t(
+                    "Your network blocks UDP, so DHT is offline, but HTTPS trackers are reachable over TCP. Streams can still find peers, they may just take a little longer to start.",
+                  )}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </SettingGroup>
+    </Section>
   );
 }

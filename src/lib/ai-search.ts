@@ -1,6 +1,6 @@
 import { searchCinemeta } from "./search";
 import { DEFAULT_AI_MODEL, migrateModelId } from "./ai-models";
-import type { Meta } from "./cinemeta";
+import { meta as fetchFullMeta, type Meta } from "./cinemeta";
 
 import { releaseText } from "@/lib/release-info";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
@@ -23,6 +23,39 @@ export type AiResult = {
   episode?: number;
   episodeTitle?: string;
 };
+
+export type AiErrorMessageKey =
+  | "Your API key was rejected. Check it in Settings, AI search."
+  | "Your account is out of credits for this model. Pick a free model or top up."
+  | "This model no longer exists at the provider. Pick another model (hold the AI button)."
+  | "That request was too big for this model. Pick a model with a larger context."
+  | "The model is rate-limited right now. Try again in a moment or switch models."
+  | "The model replied with nothing usable. Try another model (hold the AI button) or rephrase."
+  | "AI search failed ({status})."
+  | "AI search failed.";
+
+export type AiErrorDescriptor = {
+  messageKey: AiErrorMessageKey;
+  values?: { status: number };
+  detail?: string;
+};
+
+export class AiSearchError extends Error {
+  readonly messageKey: AiErrorMessageKey;
+  readonly values?: { status: number };
+  readonly detail?: string;
+
+  constructor({ messageKey, values, detail }: AiErrorDescriptor) {
+    const sourceMessage = values
+      ? messageKey.replace("{status}", String(values.status))
+      : messageKey;
+    super(detail ? `${sourceMessage} ${detail}` : sourceMessage);
+    this.name = "AiSearchError";
+    this.messageKey = messageKey;
+    this.values = values;
+    this.detail = detail;
+  }
+}
 
 const SYSTEM_PROMPT =
   'You are a film and TV discovery engine for a media app. The user describes what they want to watch in natural language. Reply with ONLY a JSON array (no prose, no markdown code fences) of up to 12 specific, real movies or TV shows that best match, most relevant first. Each element is an object: {"title": string, "year": number, "type": "movie" or "series"}. If the user is clearly asking about a SPECIFIC EPISODE (by plot, scene, character, quote, or meme, for example \'the south park episode with kanye west\'), return that show as the first result and add its "season" and "episode" numbers plus "episodeTitle", like {"title": "South Park", "type": "series", "season": 13, "episode": 5, "episodeTitle": "Fishsticks"}. Use your own knowledge of the show to pick the exact episode. Use the original or most internationally recognized title. Never repeat a title. When live web context is provided below, treat it as authoritative ground truth for fact-grounded queries (people\'s filmographies, box office, recency, regional titles, memes, current seasons/episodes): use it as your primary source and cite the exact title/year it mentions rather than guessing from training data.';
@@ -63,7 +96,7 @@ export async function aiSuggest(
   });
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
-    throw new Error(friendlyAiError(res.status, detail));
+    throw new AiSearchError(friendlyAiError(res.status, detail));
   }
   const data = (await res.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
@@ -71,33 +104,50 @@ export async function aiSuggest(
   };
   if (data?.error) {
     const code = typeof data.error.code === "number" ? data.error.code : 0;
-    throw new Error(friendlyAiError(code, data.error.message ?? ""));
+    throw new AiSearchError(friendlyAiError(code, data.error.message ?? ""));
   }
   const content = data?.choices?.[0]?.message?.content;
   if (typeof content !== "string" || content.trim() === "") {
-    throw new Error(
-      "The model replied with nothing usable. Try another model (hold the AI button) or rephrase.",
-    );
+    throw new AiSearchError({
+      messageKey:
+        "The model replied with nothing usable. Try another model (hold the AI button) or rephrase.",
+    });
   }
   return parseSuggestions(content);
 }
 
-export function friendlyAiError(status: number, detail = ""): string {
-  const friendly =
+export function friendlyAiError(status: number, detail = ""): AiErrorDescriptor {
+  const rawDetail = detail.slice(0, 140).trim();
+  const error =
     status === 401
-      ? "Your API key was rejected. Check it in Settings, AI search."
+      ? { messageKey: "Your API key was rejected. Check it in Settings, AI search." as const }
       : status === 402
-        ? "Your account is out of credits for this model. Pick a free model or top up."
+        ? {
+            messageKey:
+              "Your account is out of credits for this model. Pick a free model or top up." as const,
+          }
         : status === 404
-          ? "This model no longer exists at the provider. Pick another model (hold the AI button)."
+          ? {
+              messageKey:
+                "This model no longer exists at the provider. Pick another model (hold the AI button)." as const,
+            }
           : status === 413
-            ? "That request was too big for this model. Pick a model with a larger context."
+            ? {
+                messageKey:
+                  "That request was too big for this model. Pick a model with a larger context." as const,
+              }
             : status === 429
-              ? "The model is rate-limited right now. Try again in a moment or switch models."
+              ? {
+                  messageKey:
+                    "The model is rate-limited right now. Try again in a moment or switch models." as const,
+                }
               : status
-                ? `AI search failed (${status}).`
-                : "AI search failed.";
-  return `${friendly} ${detail.slice(0, 140)}`.trim();
+                ? {
+                    messageKey: "AI search failed ({status})." as const,
+                    values: { status },
+                  }
+                : { messageKey: "AI search failed." as const };
+  return rawDetail ? { ...error, detail: rawDetail } : error;
 }
 
 export function extractJsonArray(raw: string): string | null {
@@ -200,11 +250,24 @@ export async function resolveAiSuggestions(suggestions: AiSuggestion[]): Promise
         const meta = pickBest([...c.movies, ...c.series], s);
         if (!meta) return null;
         const isEpisode = meta.type === "series" && s.season != null && s.episode != null;
+        let episodeTitle = isEpisode ? s.episodeTitle : undefined;
+        if (isEpisode) {
+          try {
+            const full = await fetchFullMeta("series", meta.id);
+            const vid = full?.videos?.find(
+              (v) => v.season === s.season && (v.episode ?? v.number) === s.episode,
+            );
+            const real = (vid?.name ?? vid?.title)?.trim();
+            if (real) episodeTitle = real;
+          } catch {
+            /* fall back to the model's episodeTitle */
+          }
+        }
         return {
           meta,
           season: isEpisode ? s.season : undefined,
           episode: isEpisode ? s.episode : undefined,
-          episodeTitle: isEpisode ? s.episodeTitle : undefined,
+          episodeTitle,
         };
       } catch {
         return null;

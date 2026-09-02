@@ -1,6 +1,6 @@
-use tauri::{AppHandle, Manager, Url, WebviewUrl, WebviewWindowBuilder};
 #[cfg(target_os = "linux")]
 use tauri::Emitter;
+use tauri::{AppHandle, Manager, Url, WebviewUrl, WebviewWindowBuilder};
 
 const BROWSER_LABEL: &str = "harbor-browser";
 

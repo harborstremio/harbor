@@ -1,4 +1,5 @@
-import { Check, Download, ImagePlus, Play, RotateCcw } from "lucide-react";
+import { Check, Download, ImagePlus, RotateCcw } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { t } from "@/lib/i18n";
 

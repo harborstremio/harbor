@@ -1,4 +1,9 @@
-import { getStremioServerUrl, remoteStreamServerUrl } from "@/lib/stremio-server";
+import {
+  DEFAULT_BUNDLED_PORT,
+  getStremioServerUrl,
+  isBundledEngineUrl,
+  remoteStreamServerUrl,
+} from "@/lib/stremio-server";
 
 export type TorrentFile = {
   idx: number;
@@ -42,6 +47,27 @@ export function buildTorrentStreamUrl(opts: {
   if (opts.filename) params.set("f", opts.filename);
   const qs = params.toString();
   return `${opts.base ?? getStremioServerUrl()}/${opts.infoHash.toLowerCase()}/${idx}${qs ? `?${qs}` : ""}`;
+}
+
+const HOSTED_TORRENT_PATH_RX = /\/[0-9a-f]{40}\/-?\d+(?:\/|$)/i;
+
+function parsedUrlOrNull(raw: string): URL | null {
+  try {
+    return new URL(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function isHostedTorrentServerUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  if (isBundledEngineUrl(url)) return false;
+  const parsed = parsedUrlOrNull(url);
+  if (!parsed) return false;
+  if (!HOSTED_TORRENT_PATH_RX.test(parsed.pathname)) return false;
+  const host = parsed.hostname.toLowerCase();
+  if (host === "strem.io" || host.endsWith(".strem.io")) return true;
+  return parsed.port === String(DEFAULT_BUNDLED_PORT);
 }
 
 export function isVideoFile(f: TorrentFile): boolean {

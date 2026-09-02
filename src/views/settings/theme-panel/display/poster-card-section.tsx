@@ -1,3 +1,4 @@
+import { fillStyle } from "@/components/slider";
 import { useEffect, useRef } from "react";
 import previewPoster1 from "@/assets/preview/poster1.webp";
 import previewPoster2 from "@/assets/preview/poster2.webp";
@@ -7,124 +8,183 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { resetPosterDock, updatePosterDock } from "@/lib/poster-dock";
 import { Section, Segmented, ToggleRow } from "../../shared";
+import { SettingRow } from "../../kit";
 import { POSTER_RADII, POSTER_SIZES, PxField, posterSizeKey, radiusKey } from "./poster-options";
+import { PreviewImage } from "../../preview-image";
+
+function sizeIndex(scale: number): number {
+  const key = posterSizeKey(scale);
+  const i = POSTER_SIZES.findIndex((p) => p.value === key);
+  return i < 0 ? 2 : i;
+}
+
+function SIZE_LABEL(t: (s: string) => string, scale: number): string {
+  return t(POSTER_SIZES[sizeIndex(scale)].label);
+}
+
+function RADIUS_LABEL(t: (s: string) => string, px: number): string {
+  const key = radiusKey(px);
+  const found = POSTER_RADII.find((p) => p.value === key);
+  return `${t(found?.label ?? "Classic")} · ${px}px`;
+}
 
 export function PosterCardSection({ previewPoster }: { previewPoster: string }) {
   const t = useT();
   const { settings, update } = useSettings();
   const cardW = Math.round(150 * settings.posterScale);
   const cardH = Math.round(225 * settings.posterScale);
-  const previewW = Math.min(cardW, 190);
+  const previewW = Math.min(cardW, 178);
   const tv = settings.rowCardStyle === "tv";
 
   return (
-    <Section
-      title={t("Poster card style")}
-      subtitle={t("How cards look across Home, Discover, and your library. The preview updates live.")}
-    >
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        <aside className="flex shrink-0 flex-col gap-3 rounded-2xl bg-canvas/40 p-4 ring-1 ring-edge-soft lg:w-[218px]">
-          <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-            {t("Live preview")}
-          </span>
-          <div className="flex justify-center py-1">
-            <img
-              src={previewPoster}
-              alt=""
-              draggable={false}
-              className="aspect-[2/3] object-cover shadow-[0_10px_28px_-10px_rgba(0,0,0,0.65)] transition-[width,border-radius] duration-200"
-              style={{ width: previewW, borderRadius: settings.posterRadius }}
-            />
-          </div>
-          <div className="flex flex-col gap-1.5 text-[12.5px]">
-            <PxRow label={t("Width")} value={cardW} min={90} max={300} onCommit={(px) => update({ posterScale: Math.round((px / 150) * 100) / 100 })} />
-            <PxRow label={t("Height")} value={cardH} min={135} max={450} onCommit={(px) => update({ posterScale: Math.round((px / 225) * 100) / 100 })} />
-            <PxRow label={t("Corner radius")} value={settings.posterRadius} min={0} max={40} onCommit={(px) => update({ posterRadius: px })} />
-          </div>
-        </aside>
-
-        <div className="flex min-w-0 flex-1 flex-col divide-y divide-edge-soft/60">
-          <Row label={t("Row card style")} hint={t("TV shows wide art cards with the logo on them. Poster is the classic grid.")}>
-            <Segmented
-              value={settings.rowCardStyle}
-              options={[
-                { value: "poster", label: t("Poster") },
-                { value: "tv", label: t("TV") },
-              ]}
-              onChange={(v) => update({ rowCardStyle: v })}
-            />
-          </Row>
-
-          {tv && (
-            <Row label={t("Logo position")} hint={t("Where the logo and poster sit on a TV card.")}>
-              <Segmented
-                value={settings.tvCardLogoPos}
-                options={[
-                  { value: "bottomStart", label: t("Start") },
-                  { value: "center", label: t("Center") },
-                  { value: "bottomEnd", label: t("End") },
-                ]}
-                onChange={(v) => update({ tvCardLogoPos: v })}
+    <>
+      <Section title={t("Poster card style")}>
+        <div className="flex flex-wrap gap-1.5">
+          <aside className="flex w-[230px] shrink-0 flex-col gap-3 rounded-md bg-elevated px-4 py-4">
+            <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+              {t("Live preview")}
+            </span>
+            <span className="flex min-h-[236px] items-center justify-center rounded-md bg-canvas py-3">
+              <PreviewImage
+                src={previewPoster}
+                className="aspect-[2/3] object-cover transition-[width,border-radius] duration-300 ease-in-out"
+                style={{ width: previewW, borderRadius: settings.posterRadius }}
               />
-            </Row>
-          )}
+            </span>
+            <span className="flex flex-col gap-1">
+              <PxRow
+                label={t("Width")}
+                value={cardW}
+                min={90}
+                max={300}
+                onCommit={(px) => update({ posterScale: Math.round((px / 150) * 100) / 100 })}
+              />
+              <PxRow
+                label={t("Height")}
+                value={cardH}
+                min={135}
+                max={450}
+                onCommit={(px) => update({ posterScale: Math.round((px / 225) * 100) / 100 })}
+              />
+              <PxRow
+                label={t("Radius")}
+                value={settings.posterRadius}
+                min={0}
+                max={40}
+                onCommit={(px) => update({ posterRadius: px })}
+              />
+            </span>
+          </aside>
 
-          <Row label={t("Size")}>
-            <Segmented
-              value={posterSizeKey(settings.posterScale)}
-              options={POSTER_SIZES.map((p) => ({ value: p.value, label: p.label }))}
-              onChange={(v) => update({ posterScale: POSTER_SIZES.find((p) => p.value === v)?.scale ?? 1 })}
-            />
-          </Row>
+          <div className="flex min-w-[280px] flex-1 flex-col gap-1.5">
+            <SettingRow
+              label={t("Row card style")}
+              desc={t("TV shows wide art cards with the logo on them. Poster is the classic grid.")}
+            >
+              <Segmented
+                value={settings.rowCardStyle}
+                options={[
+                  { value: "poster", label: t("Poster") },
+                  { value: "tv", label: t("TV") },
+                ]}
+                onChange={(v) => update({ rowCardStyle: v })}
+              />
+            </SettingRow>
 
-          <Row label={t("Corner radius")}>
-            <Segmented
-              value={radiusKey(settings.posterRadius)}
-              options={POSTER_RADII.map((p) => ({ value: p.value, label: t(p.label) }))}
-              onChange={(v) => update({ posterRadius: POSTER_RADII.find((p) => p.value === v)?.px ?? 12 })}
-            />
-          </Row>
+            {tv && (
+              <SettingRow
+                label={t("Logo position")}
+                desc={t("Where the logo and poster sit on a TV card.")}
+              >
+                <Segmented
+                  value={settings.tvCardLogoPos}
+                  options={[
+                    { value: "bottomStart", label: t("Start") },
+                    { value: "center", label: t("Center") },
+                    { value: "bottomEnd", label: t("End") },
+                  ]}
+                  onChange={(v) => update({ tvCardLogoPos: v })}
+                />
+              </SettingRow>
+            )}
 
-          <Row label={t("Load effect")} hint={t("Blur up looks smoothest. Fade is lighter on older devices. Instant turns it off.")}>
-            <Segmented
-              value={settings.posterEffect}
-              options={[
-                { value: "blur", label: t("Blur up") },
-                { value: "fade", label: t("Fade") },
-                { value: "off", label: t("Instant") },
-              ]}
-              onChange={(v) => update({ posterEffect: v as "blur" | "fade" | "off" })}
-            />
-          </Row>
+            <SettingRow
+              label={t("Size")}
+              desc={SIZE_LABEL(t, settings.posterScale)}
+            >
+              <input
+                type="range"
+                min={0}
+                max={POSTER_SIZES.length - 1}
+                step={1}
+                aria-label={t("Size")}
+                value={sizeIndex(settings.posterScale)}
+                onChange={(e) => update({ posterScale: POSTER_SIZES[Number(e.target.value)].scale })}
+                className="harbor-slider w-[190px] shrink-0"
+                style={fillStyle(sizeIndex(settings.posterScale), 0, POSTER_SIZES.length - 1)}
+              />
+            </SettingRow>
 
-          <Row label={t("Quality")} hint={t("High is sized to your screen and looks identical to full res on far less memory. Balanced saves the most. Maximum keeps original resolution.")}>
-            <Segmented
-              value={settings.posterQuality}
-              options={[
-                { value: "balanced", label: t("Balanced") },
-                { value: "high", label: t("High") },
-                { value: "max", label: t("Maximum") },
-              ]}
-              onChange={(v) => update({ posterQuality: v as "balanced" | "high" | "max" })}
-            />
-          </Row>
+            <SettingRow
+              label={t("Corner radius")}
+              desc={RADIUS_LABEL(t, settings.posterRadius)}
+            >
+              <input
+                type="range"
+                min={0}
+                max={40}
+                step={1}
+                aria-label={t("Corner radius")}
+                value={settings.posterRadius}
+                onChange={(e) => update({ posterRadius: Number(e.target.value) })}
+                className="harbor-slider w-[190px] shrink-0"
+                style={fillStyle(settings.posterRadius, 0, 40)}
+              />
+            </SettingRow>
+
+            <SettingRow
+              label={t("Load effect")}
+              desc={t("Blur up looks smoothest. Fade is lighter on older devices. Instant turns it off.")}
+            >
+              <Segmented
+                value={settings.posterEffect}
+                options={[
+                  { value: "blur", label: t("Blur up") },
+                  { value: "fade", label: t("Fade") },
+                  { value: "off", label: t("Instant") },
+                ]}
+                onChange={(v) => update({ posterEffect: v as "blur" | "fade" | "off" })}
+              />
+            </SettingRow>
+
+            <SettingRow
+              label={t("Quality")}
+              desc={t("High is sized to your screen and looks identical to full res on far less memory. Balanced saves the most. Maximum keeps original resolution.")}
+            >
+              <Segmented
+                value={settings.posterQuality}
+                options={[
+                  { value: "balanced", label: t("Balanced") },
+                  { value: "high", label: t("High") },
+                  { value: "max", label: t("Maximum") },
+                ]}
+                onChange={(v) => update({ posterQuality: v as "balanced" | "high" | "max" })}
+              />
+            </SettingRow>
+          </div>
         </div>
-      </div>
+      </Section>
 
-      <div className="flex flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas/35 p-5">
+      <Section title={t("Card behaviour")}>
         <ToggleRow
           label={t("Focused Card")}
-          sub={t(
-            "Emphasize the selected card across the page while gently darkening and blurring the other cards.",
-          )}
+          sub={t("Emphasize the selected card across the page while gently darkening and blurring the other cards.")}
           value={settings.posterFocusedCard}
           onChange={(posterFocusedCard) => update({ posterFocusedCard })}
         />
         <ToggleRow
           label={t("Expanding Cards")}
-          sub={t(
-            "Expand poster cards during keyboard or remote navigation across poster rows, using preloaded wide artwork.",
-          )}
+          sub={t("Expand poster cards during keyboard or remote navigation across poster rows, using preloaded wide artwork.")}
           value={settings.posterBackdropExpansion}
           onChange={(posterBackdropExpansion) => update({ posterBackdropExpansion })}
         />
@@ -136,9 +196,8 @@ export function PosterCardSection({ previewPoster }: { previewPoster: string }) 
           onChange={(posterDockMagnification) => update({ posterDockMagnification })}
         />
         {settings.posterDockMagnification && (
-          <>
-            <div className="flex items-center gap-4 px-1 py-1.5">
-              <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">{t("Animation speed")}</span>
+          <div className="harbor-cascade flex flex-col gap-1.5">
+            <SettingRow label={t("Animation speed")}>
               <input
                 type="range"
                 min="250"
@@ -146,26 +205,27 @@ export function PosterCardSection({ previewPoster }: { previewPoster: string }) 
                 step="10"
                 value={settings.posterDockTransitionMs}
                 onChange={(event) => update({ posterDockTransitionMs: Number(event.target.value) })}
-                className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
+                className="harbor-slider w-[220px] shrink-0"
+                style={fillStyle(settings.posterDockTransitionMs, 250, 1500)}
               />
-              <span className="w-16 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
+              <span className="w-16 shrink-0 text-end text-[15px] font-semibold tabular-nums text-ink">
                 {settings.posterDockTransitionMs}ms
               </span>
               {settings.posterDockTransitionMs !== 760 && (
                 <button
                   type="button"
                   onClick={() => update({ posterDockTransitionMs: 760 })}
-                  className="shrink-0 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
+                  className="harbor-press-pop h-8 shrink-0 rounded-md bg-canvas px-3 text-[12.5px] font-semibold text-ink-subtle transition-colors hover:text-ink"
                 >
                   {t("Reset")}
                 </button>
               )}
-            </div>
+            </SettingRow>
             <PosterDockPreview transitionMs={settings.posterDockTransitionMs} />
-          </>
+          </div>
         )}
-      </div>
-    </Section>
+      </Section>
+    </>
   );
 }
 
@@ -208,9 +268,11 @@ function PosterDockPreview({ transitionMs }: { transitionMs: number }) {
   );
 
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Live preview")}</span>
-      <div className="overflow-visible px-3 pb-4 pt-2">
+    <div className="flex flex-col gap-2.5 rounded-md bg-elevated px-4 py-4">
+      <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+        {t("Hover the row")}
+      </span>
+      <div className="overflow-visible px-2 pb-3 pt-1">
         <div
           ref={trackRef}
           onPointerMove={(event) => schedule(event.clientX)}
@@ -222,25 +284,16 @@ function PosterDockPreview({ transitionMs }: { transitionMs: number }) {
         >
           {[previewPoster1, previewPoster2, previewPoster3, previewPoster4].map((poster, index) => (
             <div key={`${poster}-${index}`} className="min-w-0">
-              <div data-preview-anchor className="overflow-hidden rounded-lg shadow-[0_6px_16px_-8px_rgba(0,0,0,0.8)]">
-                <img src={poster} alt="" draggable={false} className="aspect-[2/3] w-full object-cover" />
+              <div
+                data-preview-anchor
+                className="overflow-hidden rounded-md shadow-[0_6px_16px_-8px_rgba(0,0,0,0.8)]"
+              >
+                <PreviewImage src={poster} className="aspect-[2/3] w-full object-cover" />
               </div>
             </div>
           ))}
         </div>
       </div>
-    </div>
-  );
-}
-
-function Row({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3 first:pt-0 last:pb-0">
-      <span className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-[13.5px] font-medium text-ink">{label}</span>
-        {hint && <span className="max-w-[46ch] text-[12px] leading-snug text-ink-subtle">{hint}</span>}
-      </span>
-      <span className="min-w-0 max-w-full">{children}</span>
     </div>
   );
 }
@@ -259,8 +312,8 @@ function PxRow({
   onCommit: (px: number) => void;
 }) {
   return (
-    <span className="flex items-center justify-between gap-3">
-      <span className="font-medium text-ink">{label}</span>
+    <span className="flex items-center justify-between gap-3 rounded-md bg-canvas px-3 py-2">
+      <span className="text-[12.5px] font-medium text-ink-subtle">{label}</span>
       <PxField value={value} min={min} max={max} onCommit={onCommit} />
     </span>
   );

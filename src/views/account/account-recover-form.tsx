@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { recoverIdentity } from "@/lib/account/identity";
 import { finishDiscordRecovery, startDiscordRecovery } from "@/lib/account/discord-link";
-import { accountErrorMessage } from "@/lib/account/error-messages";
+import { accountErrorMessage, type AccountErrorMessage } from "@/lib/account/error-messages";
 import { canDiscordAuth } from "@/lib/discord-auth";
 import { DiscordIcon } from "@/components/discord-icon";
 import { PasswordField, TextField } from "./fields";
@@ -28,7 +28,7 @@ export function AccountRecoverForm({
   const [pin, setPin] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<AccountErrorMessage | null>(null);
   const canDiscord = canDiscordAuth();
 
   const usernameOk = USERNAME_RE.test(username.trim());
@@ -143,12 +143,16 @@ export function AccountRecoverForm({
             onEnter={submitKey}
           />
 
-          {error && <p className="text-[12.5px] text-danger">{error}</p>}
+          {error && (
+            <p className="text-[12.5px] text-danger">
+              {error.kind === "built-in" ? t(error.key) : error.detail}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={!keyReady || busy}
-            className="flex h-11 items-center justify-center gap-2 rounded-[10px] bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
+            className="flex h-11 items-center justify-center gap-2 rounded-md bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
           >
             {busy && <Loader2 size={16} className="animate-spin" />}
             {t("Reset password")}
@@ -193,12 +197,16 @@ export function AccountRecoverForm({
             autoComplete="username"
           />
 
-          {error && <p className="text-[12.5px] text-danger">{error}</p>}
+          {error && (
+            <p className="text-[12.5px] text-danger">
+              {error.kind === "built-in" ? t(error.key) : error.detail}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={!usernameOk || busy}
-            className="flex h-11 items-center justify-center gap-2 rounded-[10px] bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
+            className="flex h-11 items-center justify-center gap-2 rounded-md bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
           >
             {busy && <Loader2 size={16} className="animate-spin" />}
             {t("Send code")}
@@ -230,12 +238,16 @@ export function AccountRecoverForm({
             onEnter={confirmDiscordCode}
           />
 
-          {error && <p className="text-[12.5px] text-danger">{error}</p>}
+          {error && (
+            <p className="text-[12.5px] text-danger">
+              {error.kind === "built-in" ? t(error.key) : error.detail}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={!confirmReady || busy}
-            className="flex h-11 items-center justify-center gap-2 rounded-[10px] bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
+            className="flex h-11 items-center justify-center gap-2 rounded-md bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
           >
             {busy && <Loader2 size={16} className="animate-spin" />}
             {t("Reset password")}

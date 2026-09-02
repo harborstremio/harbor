@@ -1,4 +1,9 @@
-import { getActiveProfile, updateActiveProfileConfig, type SaveResult } from "./player-chrome-profiles";
+import {
+  getActiveProfile,
+  updateActiveProfileConfig,
+  type SaveResult,
+} from "./player-chrome-profiles";
+import { DEFAULT_PLAYER_ICONS } from "./default-player-icons";
 
 export type PlayerSlot =
   | "top-left"
@@ -24,6 +29,7 @@ export type PlayerControlId =
   | "seek-forward"
   | "next-episode"
   | "pick-another"
+  | "home-server-quality"
   | "audio-menu"
   | "subtitle-menu"
   | "speed-menu"
@@ -80,10 +86,7 @@ export type PlayerControlConfig = {
   variant?: ControlVariant;
 };
 
-export const VARIANT_AWARE_CONTROLS: readonly PlayerControlId[] = [
-  "prev-episode",
-  "next-episode",
-];
+export const VARIANT_AWARE_CONTROLS: readonly PlayerControlId[] = ["prev-episode", "next-episode"];
 
 export function isVariantAware(id: PlayerControlId): boolean {
   return VARIANT_AWARE_CONTROLS.includes(id);
@@ -96,7 +99,7 @@ export type CustomIconMap = Record<string, string>;
 
 export const CONTROL_STATES: Partial<Record<PlayerControlId, readonly string[]>> = {
   "play-pause": ["playing", "paused"],
-  "fullscreen": ["fullscreen", "windowed"],
+  fullscreen: ["fullscreen", "windowed"],
   "draw-toggle": ["active", "inactive"],
   cast: ["connected", "idle"],
   dvr: ["recording", "idle"],
@@ -132,12 +135,13 @@ export function getCustomIcon(
   id: PlayerControlId,
   state?: string,
 ): string | undefined {
-  if (!map) return undefined;
   if (state) {
     const k = iconKey(id, state);
-    if (map[k]) return map[k];
+    if (map?.[k]) return map[k];
+    if (DEFAULT_PLAYER_ICONS[k]) return DEFAULT_PLAYER_ICONS[k];
   }
-  return map[id];
+  if (map?.[id]) return map[id];
+  return DEFAULT_PLAYER_ICONS[id];
 }
 
 export const ICON_REPLACEABLE_CONTROLS: readonly PlayerControlId[] = [
@@ -187,6 +191,7 @@ export const DEFAULT_DEFAULT_CONFIG: PlayerChromeConfig = {
     { id: "seek-forward", slot: "bottom-center", order: 30 },
     { id: "next-episode", slot: "bottom-center", order: 40 },
     { id: "pick-another", slot: "bottom-right", order: 0 },
+    { id: "home-server-quality", slot: "bottom-right", order: 5 },
     { id: "audio-menu", slot: "bottom-right", order: 10 },
     { id: "subtitle-menu", slot: "bottom-right", order: 20 },
     { id: "aspect-menu", slot: "bottom-right", order: 25, hidden: true },
@@ -226,6 +231,7 @@ export const DEFAULT_STREMIO_CONFIG: PlayerChromeConfig = {
     { id: "seek-forward", slot: "bottom-center", order: 20 },
     { id: "next-episode", slot: "bottom-center", order: 30 },
     { id: "speed-menu", slot: "bottom-right", order: 0 },
+    { id: "home-server-quality", slot: "bottom-right", order: 5 },
     { id: "audio-menu", slot: "bottom-right", order: 10 },
     { id: "subtitle-menu", slot: "bottom-right", order: 20 },
     { id: "aspect-menu", slot: "bottom-right", order: 25, hidden: true },
@@ -264,16 +270,37 @@ export const CONTROL_META: Record<
   "play-pause": { label: "Play / Pause", group: "transport", defaultSlot: "bottom-center" },
   "seek-forward": { label: "Seek forward", group: "transport", defaultSlot: "bottom-center" },
   "next-episode": { label: "Next episode", group: "transport", defaultSlot: "bottom-center" },
-  "pick-another": { label: "Switch stream / TV Guide", group: "actions", defaultSlot: "bottom-right" },
+  "pick-another": {
+    label: "Switch stream / TV Guide",
+    group: "actions",
+    defaultSlot: "bottom-right",
+  },
+  "home-server-quality": {
+    label: "Home server quality",
+    group: "menus",
+    defaultSlot: "bottom-right",
+  },
   "audio-menu": { label: "Audio tracks", group: "menus", defaultSlot: "bottom-right" },
   "subtitle-menu": { label: "Subtitles", group: "menus", defaultSlot: "bottom-right" },
   "speed-menu": { label: "Playback speed", group: "menus", defaultSlot: "bottom-right" },
-  "aspect-menu": { label: "Picture (adjustments & aspect)", group: "menus", defaultSlot: "bottom-right" },
+  "aspect-menu": {
+    label: "Picture (adjustments & aspect)",
+    group: "menus",
+    defaultSlot: "bottom-right",
+  },
   "anime4k-menu": { label: "Anime4K", group: "menus", defaultSlot: "bottom-right" },
-  "shader-menu": { label: "Shaders (Anime4K + installed)", group: "menus", defaultSlot: "bottom-right" },
+  "shader-menu": {
+    label: "Shaders (Anime4K + installed)",
+    group: "menus",
+    defaultSlot: "bottom-right",
+  },
   "hdr-toggle": { label: "HDR to SDR toggle", group: "menus", defaultSlot: "bottom-right" },
   "rtx-hdr-toggle": { label: "RTX Video HDR toggle", group: "menus", defaultSlot: "bottom-right" },
-  "rtx-vsr-toggle": { label: "RTX Super Resolution toggle", group: "menus", defaultSlot: "bottom-right" },
+  "rtx-vsr-toggle": {
+    label: "RTX Super Resolution toggle",
+    group: "menus",
+    defaultSlot: "bottom-right",
+  },
   "draw-toggle": { label: "Draw on video", group: "actions", defaultSlot: "bottom-right" },
   picture: { label: "Picture adjustments", group: "actions", defaultSlot: "bottom-right" },
   screenshot: { label: "Screenshot", group: "actions", defaultSlot: "bottom-right" },
@@ -281,7 +308,11 @@ export const CONTROL_META: Record<
   pip: { label: "Picture-in-picture", group: "actions", defaultSlot: "bottom-right" },
   cast: { label: "Cast", group: "actions", defaultSlot: "bottom-right" },
   fullscreen: { label: "Fullscreen", group: "transport", defaultSlot: "bottom-right" },
-  "window-controls": { label: "Window buttons (minimize, maximize, close)", group: "actions", defaultSlot: "top-right" },
+  "window-controls": {
+    label: "Window buttons (minimize, maximize, close)",
+    group: "actions",
+    defaultSlot: "top-right",
+  },
 };
 
 export type ThemeId = "default" | "stremio";
@@ -320,7 +351,5 @@ export const PLAYER_CHROME_CHANGED_EVENT = "harbor:player-chrome-changed";
 
 export function notifyPlayerChromeChanged(theme: ThemeId): void {
   if (typeof window === "undefined") return;
-  window.dispatchEvent(
-    new CustomEvent(PLAYER_CHROME_CHANGED_EVENT, { detail: { theme } }),
-  );
+  window.dispatchEvent(new CustomEvent(PLAYER_CHROME_CHANGED_EVENT, { detail: { theme } }));
 }

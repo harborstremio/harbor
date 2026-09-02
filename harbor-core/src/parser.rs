@@ -5,6 +5,24 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::{BTreeMap, HashSet};
 
+static EPISODE_SPAN_RX: Lazy<Vec<Regex>> = Lazy::new(|| vec![
+    Regex::new(r"(?i)(?:^|[^a-z0-9])s(\d{1,3})[ ._-]*e(\d{1,4})[ ._-]*e(\d{1,4})(?:\D|$)").unwrap(),
+    Regex::new(r"(?i)(?:^|[^a-z0-9])s(\d{1,3})[ ._-]*e(\d{1,4})\s*-\s*e?(\d{1,4})(?:\D|$)").unwrap(),
+    Regex::new(r"(?i)(?:^|[^a-z0-9])(\d{1,3})x(\d{1,4})\s*-\s*(\d{1,4})(?:\D|$)").unwrap(),
+]);
+
+fn parse_episode_span(text: &str) -> Option<(i32, i32, i32)> {
+    for regex in EPISODE_SPAN_RX.iter() {
+        let Some(captures) = regex.captures(text) else { continue };
+        let season = captures.get(1)?.as_str().parse().ok()?;
+        let episode = captures.get(2)?.as_str().parse().ok()?;
+        let episode_end = captures.get(3)?.as_str().parse().ok()?;
+        return (season > 0 && episode > 0 && episode_end == episode + 1)
+            .then_some((season, episode, episode_end));
+    }
+    None
+}
+
 static TRUSTED_GROUPS: Lazy<HashSet<&'static str>> = Lazy::new(|| {
     let mut s = HashSet::new();
     for g in [
@@ -837,8 +855,10 @@ pub fn parse_stream(stream: Stream) -> ParsedStream {
     let edition = parse_edition(&text, &ptt);
     let year = ptt.year;
     let year_range = parse_year_range(&text);
-    let season = ptt.season;
-    let episode = ptt.episode;
+    let span = parse_episode_span(&filename_line);
+    let season = span.map(|value| value.0).or(ptt.season);
+    let episode = span.map(|value| value.1).or(ptt.episode);
+    let episode_end = span.map(|value| value.2).or(episode);
     let season_pack = parse_season_pack(&text, &ptt);
     let disc_index = parse_disc(&text);
     let repack_iteration = parse_repack_iteration(&text, &ptt);
@@ -879,6 +899,7 @@ pub fn parse_stream(stream: Stream) -> ParsedStream {
         year_range,
         season,
         episode,
+        episode_end,
         season_pack,
         disc_index,
         repack_iteration,

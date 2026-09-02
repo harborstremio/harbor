@@ -17,6 +17,7 @@ export type MalHeroItem = {
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 let mem: MalHeroItem[] | null = null;
+let inflight: Promise<MalHeroItem[]> | null = null;
 
 function cleanSynopsis(s?: string): string | undefined {
   if (!s) return undefined;
@@ -46,15 +47,19 @@ function toItem(a: Record<string, any>): MalHeroItem | null {
     id: `mal:${a.mal_id}`,
     name,
     description: cleanSynopsis(a.synopsis),
-    poster: a.images?.webp?.large_image_url || a.images?.jpg?.large_image_url || undefined,
+    poster:
+      a.images?.webp?.image_url ||
+      a.images?.jpg?.image_url ||
+      a.images?.webp?.large_image_url ||
+      a.images?.jpg?.large_image_url ||
+      undefined,
     year: a.year ? String(a.year) : a.aired?.prop?.from?.year ? String(a.aired.prop.from.year) : undefined,
     rating: a.score ? Number(a.score).toFixed(1) : undefined,
     format: a.type ? String(a.type).toUpperCase() : undefined,
   };
 }
 
-export async function fetchMalHeroList(): Promise<MalHeroItem[]> {
-  if (mem) return mem;
+function readDisk(): MalHeroItem[] | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (raw) {
@@ -67,6 +72,10 @@ export async function fetchMalHeroList(): Promise<MalHeroItem[]> {
   } catch {
     /* ignore */
   }
+  return null;
+}
+
+async function crawlMalHeroList(): Promise<MalHeroItem[]> {
   const seen = new Set<number>();
   const out: MalHeroItem[] = [];
   const plan: Array<[string, number]> = [
@@ -97,4 +106,15 @@ export async function fetchMalHeroList(): Promise<MalHeroItem[]> {
     }
   }
   return out;
+}
+
+export function fetchMalHeroList(): Promise<MalHeroItem[]> {
+  if (mem) return Promise.resolve(mem);
+  const disk = readDisk();
+  if (disk) return Promise.resolve(disk);
+  if (inflight) return inflight;
+  inflight = crawlMalHeroList().finally(() => {
+    inflight = null;
+  });
+  return inflight;
 }

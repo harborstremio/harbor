@@ -1,4 +1,5 @@
 import type { AnilistMediaDetails } from "@/lib/anilist/media-details";
+import { useT } from "@/lib/i18n";
 
 type TitleRow = { label: string; value: string; muted?: boolean };
 
@@ -18,21 +19,21 @@ export function AnimeTitlesBlock({
   details: AnilistMediaDetails;
   primaryTitle: string;
 }) {
+  const t = useT();
   const primary = primaryTitle.trim().toLowerCase();
   const seen = new Set<string>();
   const rows: TitleRow[] = [];
-
   if (isNew(details.nativeTitle, primary, seen)) {
-    rows.push({ label: "Native Title", value: details.nativeTitle, muted: true });
+    rows.push({ label: t("Native Title"), value: details.nativeTitle, muted: true });
   }
   if (isNew(details.romajiTitle, primary, seen)) {
-    rows.push({ label: "Romaji", value: details.romajiTitle });
+    rows.push({ label: t("Romaji"), value: details.romajiTitle });
   }
   if (isNew(details.englishTitle, primary, seen)) {
-    rows.push({ label: "English", value: details.englishTitle });
+    rows.push({ label: t("English"), value: details.englishTitle });
   }
   if (details.synonyms.length) {
-    rows.push({ label: "Also Known As", value: details.synonyms.slice(0, 4).join("  •  ") });
+    rows.push({ label: t("Also Known As"), value: details.synonyms.slice(0, 4).join("  •  ") });
   }
 
   if (rows.length === 0) return null;

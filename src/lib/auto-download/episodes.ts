@@ -75,6 +75,7 @@ export function eligibleEpisodes(
     if (picked.has(key)) continue;
     if (grabbed.has(key)) continue;
     if (alreadyDownloaded(series.id, a.season, a.episode)) continue;
+    if (meta.id !== series.id && alreadyDownloaded(meta.id, a.season, a.episode)) continue;
     picked.add(key);
     eps.push({ season: a.season, episode: a.episode, videoId: a.videoId, name: a.name });
   }

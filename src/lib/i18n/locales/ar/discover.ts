@@ -48,16 +48,16 @@ const discover: Record<string, string> = {
   "More stories like these": "المزيد من القصص المشابهة",
   "Themes you keep returning to": "ثيمات تعود إليها دائمًا",
 
-  "Collections": "المجموعات",
-  "Collection": "مجموعة",
-  "Films": "الأفلام",
+  Collections: "المجموعات",
+  Collection: "مجموعة",
+  Films: "الأفلام",
   "{count} films": "{count} أفلام",
-  "Featured": "مختارة",
-  "All": "الكل",
+  Featured: "مختارة",
+  All: "الكل",
   "Every saga in one place. Search anything: if it exists, it's here.":
     "كل سلسلة في مكان واحد. ابحث عن أي شيء: إن كان موجودًا، فهو هنا.",
   "Search every collection on TMDB...": "ابحث في كل مجموعة على TMDB...",
-  "{label} · {n} collection": "{label} · مجموعة واحدة",
+  "{label} · {n} collection": "{label} · {n} مجموعة",
   "{label} · {n} collections": "{label} · {n} مجموعات",
   "More {category}": "المزيد من {category}",
   "That's every {category} collection we could find.":
@@ -71,21 +71,35 @@ const discover: Record<string, string> = {
     "أضف مفتاح TMDB في الإعدادات لتصفّح المجموعات.",
   "No films found in this collection.": "لا توجد أفلام في هذه المجموعة.",
 
-  "Sagas": "الملاحم",
-  "Superheroes": "الأبطال الخارقون",
-  "Action": "أكشن",
-  "Adventure": "مغامرة",
-  "Fantasy": "خيال",
-  "Animation": "رسوم متحركة",
-  "Horror": "رعب",
-  "Comedy": "كوميديا",
-  "Crime": "جريمة",
+  Sagas: "الملاحم",
+  Superheroes: "الأبطال الخارقون",
+  Action: "أكشن",
+  Adventure: "مغامرة",
+  Fantasy: "خيال",
+  Animation: "رسوم متحركة",
+  Horror: "رعب",
+  Comedy: "كوميديا",
+  Crime: "جريمة",
   "Can't decide?": "محتار؟",
   "Surprise me": "فاجئني",
   "Pick a random title": "اختر عنواناً عشوائياً",
   "Browse your catalogs": "تصفّح كتالوجاتك",
   "Hide section": "إخفاء القسم",
   "Show section": "إظهار القسم",
+  "One pick at a time, full screen, until something lands.":
+    "اختيار واحد في كل مرة، بملء الشاشة، حتى يعجبك شيء.",
+  "Open the queue": "افتح القائمة",
+  "{n} waiting": "{n} في الانتظار",
+  "Back to Discover": "العودة إلى الاكتشاف",
+  "Nothing left in today's picks": "لم يتبقَّ شيء في اختيارات اليوم",
+  "Come back tomorrow, or clear what you skipped in Settings.":
+    "عد غداً، أو امسح ما تخطّيته من الإعدادات.",
+  "Hide this permanently?": "إخفاؤه نهائياً؟",
+  "{title} will not come back in the Discovery Queue.": "لن يعود {title} في قائمة الاكتشاف.",
+  // "Open Settings" and "Keep" are deliberately absent. Both already resolve in
+  // every locale, and this module is spread after app-fill: adding "Keep" here
+  // would override ar/app-fill.ts, where it is the construct-state half of
+  // "Keep @handle" on the handle-change screen.
 };
 
 export default discover;

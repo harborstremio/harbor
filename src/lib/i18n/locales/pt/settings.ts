@@ -1,20 +1,20 @@
 const settings: Record<string, string> = {
-  "Smooth scrolling": "Deslocamento suave",
+  "Smooth scrolling": "Rolagem suave",
   "Eases mouse-wheel scrolling instead of jumping line by line. Turn off if you prefer an instant response or notice any lag.":
-    "Suaviza o deslocamento com a roda do rato em vez de saltar linha a linha. Desative se preferir uma resposta instantânea ou notar lentidão.",
-  "Sign in to Harbor": "Iniciar sessão no Harbor",
+    "Suaviza a rolagem da roda do mouse em vez de pular linha por linha. Desative se preferir uma resposta imediata ou notar lentidão.",
+  "Sign in to Harbor": "Entrar no Harbor",
   "Create Harbor account": "Criar conta Harbor",
-  "Claim your handle": "Reivindicar o seu identificador (@handle)",
-  "Reset password (recovery key)": "Repor palavra-passe (chave de recuperação)",
-  "Sign out of Harbor account": "Terminar sessão da conta Harbor",
-  "Verified status": "Estado de verificação",
+  "Claim your handle": "Escolher seu identificador (@handle)",
+  "Reset password (recovery key)": "Redefinir senha (chave de recuperação)",
+  "Sign out of Harbor account": "Sair da conta Harbor",
+  "Verified status": "Status de verificação",
   "Settings for this profile (shared or independent)":
-    "Definições para este perfil (partilhadas ou independentes)",
-  "PIN-locked profiles": "Perfis bloqueados com PIN",
+    "Configurações deste perfil (compartilhadas ou independentes)",
+  "PIN-locked profiles": "Perfis bloqueados por PIN",
   "Home style (Harbor curated / Classic Stremio)":
-    "Estilo da página inicial (curadoria Harbor / Stremio clássico)",
+    "Estilo da página inicial (curadoria do Harbor / Stremio clássico)",
   "When the latest episode ends (Hide / Timer)":
-    "Quando o último episódio termina (Ocultar / Cronômetro)",
+    "Quando o episódio mais recente terminar (Ocultar / Temporizador)",
   "Remove shows once you're caught up": "Remover séries quando você estiver em dia",
   "AI search provider (OpenRouter / Groq)": "Provedor de busca por IA (OpenRouter / Groq)",
   "Custom model id": "ID de modelo personalizado",
@@ -192,8 +192,6 @@ const settings: Record<string, string> = {
   "Groq API key (gsk-...)": "Chave de API do Groq (gsk-...)",
   "Group Refresh on the left beside Back instead of the far right of the header.":
     "Agrupar Atualizar à esquerda, ao lado de Voltar, em vez de na extremidade direita do cabeçalho.",
-  "Harbor in your browser (Wi-Fi)": "Harbor no seu navegador (Wi-Fi)",
-  "Harbor in your browser (this computer)": "Harbor no seu navegador (este computador)",
   "Harbor will not start the torrent engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable torrent streaming.":
     "O Harbor não iniciará o mecanismo de torrent, não contatará trackers nem executará o DHT. Use isso se você quiser apenas debrid e links diretos. Desative para reativar o streaming por torrent.",
   "Hide badge": "Ocultar selo",
@@ -250,9 +248,6 @@ const settings: Record<string, string> = {
   "Or try one of ours": "Ou experimente um dos nossos",
   "Packs & import": "Pacotes e importação",
   "Paste an image URL (png, webp, svg)": "Cole uma URL de imagem (png, webp, svg)",
-  "Pattern (e.g. \\\\bremux\\\\b)": "Padrão (ex.: \\\\bremux\\\\b)",
-  "Phone remote (Wi-Fi)": "Controle pelo celular (Wi-Fi)",
-  "Phone remote (this computer)": "Controle pelo celular (este computador)",
   "Pick a source once and Harbor keeps playing the rest of that season from the same release, no re-picking. Works best with a debrid season pack. For anime it locks the whole series to that release.":
     "Escolha uma fonte uma vez e o Harbor continua reproduzindo o resto daquela temporada a partir do mesmo lançamento, sem escolher de novo. Funciona melhor com um pacote de temporada em debrid. Para anime, trava a série inteira nesse lançamento.",
   "Play a short sound when changing the player volume. Off by default.":
@@ -261,8 +256,6 @@ const settings: Record<string, string> = {
   "Player style": "Estilo do player",
   "Player volume sounds": "Sons de volume do player",
   Poster: "Pôster",
-  "Posters, logos, and title art load in the first available language from this list, falling back down the order. \\":
-    "Pôsteres, logos e artes de título carregam no primeiro idioma disponível desta lista, recorrendo aos próximos na ordem. \\",
   Provider: "Provedor",
   "Queue drives Next/Previous": "A fila controla Próximo/Anterior",
   "Re-apply to the window and taskbar now": "Reaplicar à janela e à barra de tarefas agora",
@@ -284,8 +277,6 @@ const settings: Record<string, string> = {
   "Rich season and order panel": "Painel detalhado de temporada e ordem",
   "Rotten Tomatoes": "Rotten Tomatoes",
   Ruleset: "Conjunto de regras",
-  "SVP's files are here but its VapourSynth engine won't load ({err}). This usually means a stale VapourSynth entry or a missing Microsoft VC++ runtime. Reinstall SVP, or install the latest \\":
-    "Os arquivos do SVP estão aqui, mas o motor VapourSynth não carrega ({err}). Isso geralmente significa uma entrada desatualizada do VapourSynth ou um runtime do Microsoft VC++ ausente. Reinstale o SVP ou instale o mais recente \\",
   "Score badges on cards": "Selos de nota nos cards",
   "Score position": "Posição da nota",
   "Search rules by name or pattern…": "Buscar regras por nome ou padrão…",
@@ -370,8 +361,6 @@ const settings: Record<string, string> = {
     "Use as teclas de seta e Enter para mover o foco pelo Harbor. Desative isso para deixar as teclas de seta livres e desativar a navegação por foco em todos os lugares.",
   "Use your own image as the app icon": "Usar sua própria imagem como ícone do app",
   "Watchlist bookmark": "Marcador de watchlist",
-  "When Esc would close the player, show a quick confirm first. You can tick \\":
-    "Quando o Esc fecharia o player, mostrar uma confirmação rápida primeiro. Você pode marcar \\",
   "When off, a torrent stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.":
     "Quando desativado, um torrent para no momento em que você fecha ou troca o stream, então nada continua baixando em segundo plano. Ative para deixá-lo continuar depois que você sair; gerencie ou pause esses downloads na aba Downloads.",
   "Where scores appear": "Onde as notas aparecem",
@@ -563,31 +552,6 @@ const settings: Record<string, string> = {
   "Report a bug": "Reportar um bug",
   "Send a bug report straight to the Harbor team. Screenshots and screen recordings welcome.":
     "Envie um relatório de bug diretamente para a equipe do Harbor. Capturas de tela e gravações de tela são bem-vindas.",
-  "Highly recommended. This is what gives you the full Harbor experience: Popular, Trending, In Theaters, and per-service rails. Free at ":
-    "Altamente recomendado. É isso que dá a você a experiência completa do Harbor: Populares, Em Alta, Nos Cinemas e faixas por serviço. Grátis em ",
-  ". Use the v3 key, not the read access token.":
-    ". Use a chave v3, não o token de acesso de leitura.",
-  "Free at ": "Grátis em ",
-  ". They email an activation link the first time. Click it, then come back and save.":
-    ". Eles enviam um link de ativação por e-mail na primeira vez. Clique nele, depois volte e salve.",
-  "Paid plan at ": "Plano pago em ",
-  ". Once saved, every poster gets re-rendered with IMDb, Rotten Tomatoes, and Metacritic stamped on it.":
-    ". Depois de salvo, todos os pôsteres são renderizados novamente com as notas do IMDb, Rotten Tomatoes e Metacritic marcadas neles.",
-  "Free key at ": "Chave grátis em ",
-  ". Adds Letterboxd and Trakt community ratings to detail pages, covering what OMDb misses.":
-    ". Adiciona avaliações da comunidade do Letterboxd e do Trakt às páginas de detalhes, cobrindo o que o OMDb deixa de fora.",
-  "Two formats work: a bare RPDB-compatible server URL (your RPDB key above is still sent), or a full URL pattern from services like BetterPosters containing ":
-    "Dois formatos funcionam: uma URL de servidor compatível com RPDB simples (sua chave RPDB acima ainda é enviada), ou um padrão de URL completo de serviços como BetterPosters contendo ",
-  ". Patterns may also use ": ". Os padrões também podem usar ",
-  ", ": ", ",
-  ", and ": ", e ",
-  ". Leave empty for the default.": ". Deixe em branco para usar o padrão.",
-  "Fills in where TMDB comes up empty (anime, older catalog). Free at ":
-    "Preenche onde o TMDB fica vazio (anime, catálogo antigo). Gratuito em ",
-  '. Use the "personal" key, not the project one.': '. Use a chave "pessoal", não a do projeto.',
-  "Episode titles, alternate names, and network info. Layered on TMDB so the better source wins per field. Free at ":
-    "Títulos de episódios, nomes alternativos e informações de emissora. Combinado com o TMDB para que a melhor fonte prevaleça em cada campo. Gratuito em ",
-  '. Pick the "Negotiated API key" path.': '. Escolha o caminho "Negotiated API key".',
   "Show Rotten Tomatoes score on cards": "Mostrar nota do Rotten Tomatoes nos cards",
   "Fresh tomatoes for 60% and up, splat for anything under.":
     "Tomate fresco para 60% ou mais, tomate podre para qualquer coisa abaixo disso.",
@@ -620,7 +584,6 @@ const settings: Record<string, string> = {
   Appearance: "Aparência",
   Notifications: "Notificações",
   Help: "Ajuda",
-  العربية: "العربية",
   "When you back out of a title, Harbor saves a frame so the Continue Watching card looks like the spot you left.":
     "Quando você sai de um título, o Harbor salva um quadro para que o card de Continuar Assistindo mostre o ponto onde você parou.",
   "Used for streaming availability and the Now Playing release window.":
@@ -958,17 +921,6 @@ const settings: Record<string, string> = {
   "add one in settings": "adicione um nas configurações",
   "Using AIOStreams or another aggregator addon? Its own sorting and filtering happen inside the addon before Harbor ever sees the results, then Harbor applies the stream filter and result order above on top. If results look thinner than expected, keep one side permissive: either relax the addon's internal filters or set Harbor's stream filter to Balanced or Off.":
     "Está usando o AIOStreams ou outro addon agregador? A ordenação e a filtragem dele acontecem dentro do addon antes de o Harbor ver os resultados, e depois o Harbor aplica o filtro de streams e a ordem de resultados acima em cima disso. Se os resultados parecerem mais escassos que o esperado, mantenha um dos lados permissivo: relaxe os filtros internos do addon ou defina o filtro de streams do Harbor como Equilibrado ou Desativado.",
-  "Get yours at ": "Obtenha o seu em ",
-  ". Used to check cache and unrestrict links. Harbor never adds or removes torrents on its own.":
-    ". Usado para verificar o cache e liberar links. O Harbor nunca adiciona ou remove torrents por conta própria.",
-  ". Same read-only usage as Real-Debrid. Also lets you queue uncached torrents from the play picker.":
-    ". Mesmo uso somente leitura que o Real-Debrid. Também permite enfileirar torrents não armazenados em cache pelo seletor de reprodução.",
-  ". AllDebrid deprecated their cache-check endpoint, so streams may show as unknown until you actually hit Play.":
-    ". O AllDebrid descontinuou o endpoint de verificação de cache, então os streams podem aparecer como desconhecidos até que você realmente clique em Play.",
-  ". Uses the directdl endpoint, which skips queueing for anything already cached.":
-    ". Usa o endpoint directdl, que pula a fila para qualquer coisa já em cache.",
-  ". EU-hosted, fast cache check. Same read-only usage as the others.":
-    ". Hospedado na UE, verificação de cache rápida. Mesmo uso somente leitura que os outros.",
   "Easynews+": "Easynews+",
   "{n} services need attention": "{n} serviços precisam de atenção",
   "Health for {n} services below": "Status de {n} serviços abaixo",
@@ -1423,8 +1375,6 @@ const settings: Record<string, string> = {
   "Ready to send": "Pronto para enviar",
   "Player freezes after the second episode autoplays":
     "O player congela depois que o segundo episódio inicia automaticamente",
-  "1. Open Movies\n2. Click The Substance\n3. Press Play\n4. ...":
-    "1. Abra Filmes\n2. Clique em The Substance\n3. Pressione Play\n4. ...",
   "Stream should start playing within a few seconds.":
     "O stream deve começar a tocar em poucos segundos.",
   "Spinner stays forever and nothing in the player loads.":
@@ -2232,7 +2182,7 @@ const settings: Record<string, string> = {
   "Public mode uses just your username: watchlist, liked films, popular and Top 250. No password needed.":
     "O modo público usa apenas seu nome de usuário: watchlist, filmes curtidos, populares e Top 250. Não é preciso senha.",
   "Full mode signs in with your Letterboxd password to also unlock your diary, friends activity and your personal ratings. Your password is sent only to Stremboxd to obtain a token — Harbor never stores it.":
-    "O modo completo faz login com sua senha do Letterboxd para também desbloquear seu diário, atividade de amigos e suas avaliações pessoais. Sua senha é enviada apenas ao Stremboxd para obter um token — o Harbor nunca a armazena.",
+    "O modo completo usa sua senha do Letterboxd para liberar também seu diário, a atividade de amigos e suas avaliações pessoais. Sua senha é enviada somente ao Stremboxd para obter um token. O Harbor nunca a armazena.",
   "Letterboxd username": "Nome de usuário do Letterboxd",
   "Letterboxd password": "Senha do Letterboxd",
   "Your Letterboxd password": "Sua senha do Letterboxd",
@@ -2240,9 +2190,9 @@ const settings: Record<string, string> = {
   "Connect / Verify": "Conectar / Verificar",
   "Verify & connect": "Verificar e conectar",
   "About Stremboxd": "Sobre o Stremboxd",
-  "Connected — {n} catalogs available": "Conectado — {n} catálogos disponíveis",
+  "Connected — {n} catalogs available": "Conectado · {n} catálogos disponíveis",
   "Full mode — diary, friends & ratings enabled":
-    "Modo completo — diário, amigos e avaliações ativados",
+    "Modo completo · diário, amigos e avaliações ativados",
   "Catalogs to show": "Catálogos a exibir",
   "Custom lists": "Listas personalizadas",
   "Remove list": "Remover lista",

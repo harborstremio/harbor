@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { t } from "@/lib/i18n";
 
 export type SongResult = {
   title: string;
@@ -49,7 +50,7 @@ export type SongIdOptions = {
 function showResult(res: SongResult): void {
   const head = res ? res.title || res.artist : "";
   if (!res || !head) {
-    toast({ kind: "error", title: "Couldn't identify the song" });
+    toast({ kind: "error", title: t("Couldn't identify the song") });
     return;
   }
   const sub = res.title ? [res.artist, res.album].filter(Boolean).join(" · ") : res.album;
@@ -69,13 +70,13 @@ export async function identifyNowPlaying(opts: SongIdOptions): Promise<void> {
   if (!key) {
     toast({
       kind: "error",
-      title: useAi ? "Missing Gemini API key" : "Missing AudD key",
-      body: "Add it in Settings → Library & metadata",
+      title: useAi ? t("Missing Gemini API key") : t("Missing AudD key"),
+      body: t("Add it in Settings → Library & metadata"),
     });
     return;
   }
   busy = true;
-  toast({ kind: "info", title: "Listening…" });
+  toast({ kind: "info", title: t("Listening…") });
   try {
     const res = useAi
       ? await invoke<SongResult>("recognize_now_playing_ai", {
@@ -90,7 +91,7 @@ export async function identifyNowPlaying(opts: SongIdOptions): Promise<void> {
     const detail = typeof e === "string" ? e : ((e as Error)?.message ?? String(e));
     toast({
       kind: "error",
-      title: "Song identification failed",
+      title: t("Song identification failed"),
       body: detail.trim().slice(0, 260) || undefined,
     });
   } finally {

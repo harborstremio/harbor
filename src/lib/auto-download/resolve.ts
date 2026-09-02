@@ -15,6 +15,7 @@ export type DownloadPick = { url: string; headers?: Record<string, string>; labe
 export type ResolveOptions = {
   allowP2p: boolean;
   maxHeight: number | null;
+  imdbId: string | null;
   debrids: DebridStore[];
   addons: Addon[];
   signal: AbortSignal;
@@ -61,7 +62,7 @@ export async function resolveBestDownload(
   episode: PlayEpisode | undefined,
   opts: ResolveOptions,
 ): Promise<DownloadPick | null> {
-  const imdbId = meta.id.startsWith("tt") ? meta.id : null;
+  const imdbId = meta.id.startsWith("tt") ? meta.id : opts.imdbId;
   const streamIds = await buildStreamIdsWithIdentity(meta.id, episode, imdbId);
   if (streamIds.length === 0) return null;
 

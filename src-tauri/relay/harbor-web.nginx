@@ -30,7 +30,7 @@ server {
         set $proxy_target_host $1;
         set $proxy_target_path $2$is_args$args;
 
-        if ($proxy_target_host !~ ^(api\.torbox\.app|api\.knaben\.org|nyaa\.si|rutor\.info|apibay\.org|api\.real-debrid\.com|api\.alldebrid\.com|debrid-link\.com|www\.premiumize\.me|bitsearch\.to|eztv\.re|yts\.mx|torrentio\.strem\.fun|stremio\.torbox\.app|v3-cinemeta\.strem\.io|opensubtitles-v3\.strem\.io|opensubtitles\.strem\.io|opensubtitles\.stremio\.homes|1337x\.bz|.+\.elfhosted\.com|.+\.strem\.fun|.+\.strem\.io|.+\.stremio\.homes|.+\.baby-beamup\.club|.+\.workers\.dev|.+\.debridio\.com|.+\.code\.run|.+\.fly\.dev|.+\.onrender\.com|.+\.vercel\.app|.+\.netlify\.app|.+\.railway\.app|.+\.deno\.dev)$) {
+        if ($proxy_target_host !~ ^(api\.deepseek\.com|api\.torbox\.app|api\.knaben\.org|nyaa\.si|rutor\.info|apibay\.org|api\.real-debrid\.com|api\.alldebrid\.com|debrid-link\.com|www\.premiumize\.me|bitsearch\.to|eztv\.re|yts\.mx|torrentio\.strem\.fun|stremio\.torbox\.app|v3-cinemeta\.strem\.io|opensubtitles-v3\.strem\.io|opensubtitles\.strem\.io|opensubtitles\.stremio\.homes|1337x\.bz|.+\.elfhosted\.com|.+\.strem\.fun|.+\.strem\.io|.+\.stremio\.homes|.+\.baby-beamup\.club|.+\.workers\.dev|.+\.debridio\.com|.+\.code\.run|.+\.fly\.dev|.+\.onrender\.com|.+\.vercel\.app|.+\.netlify\.app|.+\.railway\.app|.+\.deno\.dev)$) {
             return 403;
         }
 

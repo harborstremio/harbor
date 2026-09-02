@@ -1,10 +1,12 @@
-import { Check, Download, Play } from "lucide-react";
+import { Check, Download } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { AddonLogo } from "@/components/addon-logo";
 import { CopyLinkButton, resolveStreamLink } from "@/components/player/copy-link-button";
 import { DubSubPill, streamDubSub } from "@/components/dub-sub-pill";
 import { FormatBadge, RuleBadges, streamBadges } from "@/components/format-badge";
 import { HostMatchChip } from "@/components/host-match-chip";
 import { useSettings } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
 import type { ScoredStream } from "@/lib/streams/types";
 import { EditionChip } from "./edition-chip";
 
@@ -27,9 +29,10 @@ export function StremioRow({
   downloadState?: "idle" | "preparing" | "queued";
   isAnime?: boolean;
 }) {
+  const t = useT();
   const { settings } = useSettings();
   const full = settings.fullStreamDescription;
-  const addonName = stream.addonName ?? "Source";
+  const addonName = stream.addonName ?? t("Source");
   const headline = stream.name?.trim() || addonName;
   const rawDescription = stream.title?.trim() || stream.description?.trim() || "";
   const description = full ? rawDescription : condenseDescription(rawDescription);
@@ -39,10 +42,10 @@ export function StremioRow({
   const preparing = download && downloadState === "preparing";
   const queued = download && downloadState === "queued";
   const downloadLabel = preparing
-    ? "Preparing download"
+    ? t("Preparing download")
     : queued
-      ? "Added to downloads"
-      : "Download";
+      ? t("Added to downloads")
+      : t("Download");
   return (
     <div
       className={`flex items-stretch gap-5 rounded-2xl bg-elevated/40 p-5 ring-1 transition-colors ${
@@ -77,7 +80,9 @@ export function StremioRow({
             <EditionChip stream={stream} />
           </div>
         )}
-        {failed && <p className="text-[13px] font-medium text-danger">Unavailable, try another.</p>}
+        {failed && (
+          <p className="text-[13px] font-medium text-danger">{t("Unavailable, try another.")}</p>
+        )}
       </div>
       <div className="flex shrink-0 items-center gap-2 self-center">
         {link && <CopyLinkButton url={link} size={16} className="h-9 w-9" />}
@@ -87,7 +92,7 @@ export function StremioRow({
             if (!preparing && !queued) onPlay();
           }}
           aria-disabled={preparing || queued}
-          aria-label={download ? downloadLabel : "Play"}
+          aria-label={download ? downloadLabel : t("Play")}
           className={
             download
               ? `source-download-button flex h-9 min-w-[116px] shrink-0 items-center justify-center gap-2.5 rounded-full border px-5 text-[13px] font-medium tracking-tight transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-[0.96] active:duration-100 aria-disabled:cursor-default aria-disabled:active:scale-100 motion-reduce:transition-none ${
@@ -101,12 +106,12 @@ export function StremioRow({
           {preparing ? (
             <>
               <TrailingDots />
-              <span>Preparing</span>
+              <span>{t("Preparing")}</span>
             </>
           ) : queued ? (
             <>
               <Check size={16} strokeWidth={2.5} aria-hidden="true" />
-              <span>Added</span>
+              <span>{t("Added")}</span>
             </>
           ) : download ? (
             <>
@@ -122,7 +127,7 @@ export function StremioRow({
                   className="source-download-morph-icon source-download-morph-icon-check absolute inset-0"
                 />
               </span>
-              <span>Download</span>
+              <span>{t("Download")}</span>
             </>
           ) : (
             <Play size={26} fill="currentColor" className="ml-0.5" />

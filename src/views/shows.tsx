@@ -7,7 +7,6 @@ import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss"
 import { PeekHero } from "@/components/peek-hero";
 import { Row, ScrollRootContext } from "@/components/row";
 import { TmdbNudge } from "@/components/nudge";
-import { TopRankCard } from "@/components/top-rank-card";
 import { useAuth } from "@/lib/auth";
 import { topSeries, type Meta } from "@/lib/cinemeta";
 import { useHideAnimeMetas } from "@/lib/anime-hide";
@@ -27,7 +26,7 @@ import {
   subscribeManualWatched,
 } from "@/lib/manual-watched";
 import { useCwAdvance } from "./home/hooks/use-cw-advance";
-import { useScrollMemory, useView } from "@/lib/view";
+import { useScrollMemory } from "@/lib/view";
 import { buildShowHero, bucketCopy } from "./shows/hero-curation";
 import { showSpecs } from "./shows/show-specs";
 import { useCollectionRowsForPage } from "@/lib/page-collection-rows";
@@ -42,13 +41,13 @@ type ShowRow = {
   page: number;
   hasMore: boolean;
   fetcher?: (page: number) => Promise<Meta[]>;
+  variant?: "rank";
 };
 
 export function Shows({ active = true }: { active?: boolean }) {
   const { settings } = useSettings();
   const { authKey } = useAuth();
   const cwVersion = useCwDismissVersion();
-  const { openGrid } = useView();
   const t = useT();
   const pageRows = usePageRows("shows");
   const [hero, setHero] = useState<Meta[]>([]);
@@ -275,6 +274,22 @@ export function Shows({ active = true }: { active?: boolean }) {
     () => [...collectionRows, ...restRows],
     [collectionRows, restRows],
   );
+  const catalogRows = useMemo<ShowRow[]>(() => {
+    if (top10.length < 10) return allRestRows;
+    const trending = rows.find((r) => r.key === "trending");
+    return [
+      {
+        key: "top10",
+        title: "Top 10 Series Today",
+        metas: top10.slice(0, 10),
+        page: 1,
+        hasMore: false,
+        fetcher: trending?.fetcher,
+        variant: "rank",
+      },
+      ...allRestRows,
+    ];
+  }, [top10, rows, allRestRows]);
 
   return (
     <main ref={scrollCb} className="relative h-full overflow-y-auto overflow-x-hidden bg-canvas">
@@ -310,31 +325,8 @@ export function Shows({ active = true }: { active?: boolean }) {
               ))}
             </Row>
           )}
-          {top10.length >= 10 && (
-            <Row
-              title={t("Top 10 Series Today")}
-              min={216}
-              shape="rank"
-              scrollKey="shows:top10"
-              onViewAll={(() => {
-                const trending = rows.find((r) => r.key === "trending");
-                return trending?.fetcher
-                  ? () =>
-                      openGrid({
-                        title: t(trending.title),
-                        fetcher: trending.fetcher!,
-                        initial: trending.metas,
-                      })
-                  : undefined;
-              })()}
-            >
-              {top10.slice(0, 10).map((m, i) => (
-                <TopRankCard key={m.id} meta={m} rank={i + 1} />
-              ))}
-            </Row>
-          )}
           <CatalogRows
-            rows={allRestRows}
+            rows={catalogRows}
             editMode={pageRows.editMode}
             custom={pageRows.custom}
             onPersist={pageRows.persist}

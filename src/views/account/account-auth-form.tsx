@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { ExternalLink, KeyRound, Loader2 } from "lucide-react";
-import { HarborMark } from "@/components/icons/harbor-mark";
+import { useLayoutEffect, useRef, useState } from "react";
+import { ExternalLink, KeyRound, Loader2, X } from "lucide-react";
+import { ModalShell, useModalExit } from "@/components/modal-shell";
 import { DiscordIcon } from "@/components/discord-icon";
 import { loginIdentity, registerIdentity } from "@/lib/account/identity";
 import {
@@ -8,7 +8,7 @@ import {
   signInWithDiscord,
   startDiscordSignup,
 } from "@/lib/account/discord-link";
-import { accountErrorMessage } from "@/lib/account/error-messages";
+import { accountErrorMessage, type AccountErrorMessage } from "@/lib/account/error-messages";
 import { canDiscordAuth } from "@/lib/discord-auth";
 import { PasswordField, TextField } from "./fields";
 import { AccountRecoverForm } from "./account-recover-form";
@@ -35,15 +35,26 @@ const DISCORD_DEAD_CODES = new Set([
   "discord_unreachable",
 ]);
 
-export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) => void }) {
+export function AccountAuthForm({
+  onRecovery,
+  onClose,
+}: {
+  onRecovery?: (code: string) => void;
+  onClose?: () => void;
+}) {
   const t = useT();
+  const { closing, close } = useModalExit(() => onClose?.());
+  const switchRef = useRef<HTMLDivElement | null>(null);
+  const modeRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const thumbRef = useRef<HTMLSpanElement | null>(null);
+  const prevMode = useRef(-1);
   const [view, setView] = useState<"auth" | "recover">("auth");
   const [mode, setMode] = useState<Mode>("register");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [discordBusy, setDiscordBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<AccountErrorMessage | null>(null);
   // Set once Discord confirms identity for a fresh signup, cleared once the
   // account is actually created. While set, the username/password fields
   // below finish the Discord signup instead of a plain password one -- see
@@ -116,34 +127,65 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
   };
 
   const active = MODES.find((m) => m.id === mode)!;
+  const modeIndex = MODES.findIndex((m) => m.id === mode);
+
+  useLayoutEffect(() => {
+    if (view !== "auth" || discordPending) return;
+    const thumb = thumbRef.current;
+    const to = modeRefs.current[modeIndex];
+    if (!thumb || !to) return;
+    const from = prevMode.current >= 0 ? modeRefs.current[prevMode.current] : null;
+    prevMode.current = modeIndex;
+    thumb.style.left = `${to.offsetLeft}px`;
+    thumb.style.top = `${to.offsetTop}px`;
+    thumb.style.width = `${to.offsetWidth}px`;
+    thumb.style.height = `${to.offsetHeight}px`;
+    thumb.style.opacity = "1";
+    if (!from || from === to) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const edge = Math.min(from.offsetLeft, to.offsetLeft);
+    const far = Math.max(from.offsetLeft + from.offsetWidth, to.offsetLeft + to.offsetWidth);
+    thumb.animate(
+      [
+        { left: `${from.offsetLeft}px`, width: `${from.offsetWidth}px` },
+        { left: `${edge}px`, width: `${far - edge}px`, offset: 0.48 },
+        { left: `${to.offsetLeft}px`, width: `${to.offsetWidth}px` },
+      ],
+      { duration: 440, easing: "ease-in-out" },
+    );
+  }, [modeIndex, view, discordPending]);
 
   if (view === "recover") {
     return (
-      <AccountRecoverForm
-        onBack={() => setView("auth")}
-        onReset={(code) => {
-          setView("auth");
-          onRecovery?.(code);
-        }}
-      />
+      <ModalShell closing={closing} onDismiss={close}>
+        <div className="overflow-y-auto">
+          <AccountRecoverForm
+            onBack={() => setView("auth")}
+            onReset={(code) => {
+              setView("auth");
+              onRecovery?.(code);
+            }}
+          />
+        </div>
+      </ModalShell>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-[18px] border border-edge-soft bg-surface">
-      <div className="flex items-center gap-3.5 border-b border-edge-soft/70 px-6 pt-6 pb-5">
-        <span className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-elevated text-ink ring-1 ring-edge-soft">
-          <HarborMark className="h-6 w-6" />
-        </span>
-        <div className="flex min-w-0 flex-col">
-          <h3 className="font-display text-[19px] font-medium tracking-tight text-ink">
+    <ModalShell closing={closing} onDismiss={close}>
+      <div className="flex items-start gap-4 px-6 pt-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+            {t("Harbor account")}
+          </span>
+          <h3 className="text-[17px] font-semibold tracking-tight text-ink">
             {discordPending
               ? t("Choose your username")
               : mode === "register"
                 ? t("Join Harbor")
                 : t("Welcome back")}
           </h3>
-          <p className="text-[12.5px] text-ink-subtle">
+          <p className="text-[12.5px] leading-relaxed text-ink-subtle">
             {discordPending
               ? t("Discord confirmed. Pick a username and password to finish.")
               : mode === "register"
@@ -151,26 +193,47 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
                 : t("Sign in to pick up where you left off.")}
           </p>
         </div>
+        {onClose && (
+          <button
+            type="button"
+            onClick={close}
+            aria-label={t("Close")}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
 
-      <div className="flex flex-col gap-5 p-6">
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-6">
         {!discordPending && mode === "register" && <AccountValueProps />}
 
         {!discordPending && (
-          <div className="flex items-center gap-1 rounded-[11px] border border-edge-soft bg-elevated/40 p-1">
-            {MODES.map((m) => (
+          <div
+            ref={switchRef}
+            className="relative flex items-center gap-1 rounded-md bg-canvas p-1"
+          >
+            <span
+              ref={thumbRef}
+              aria-hidden
+              className="pointer-events-none absolute rounded-[4px] bg-ink opacity-0"
+            />
+            {MODES.map((m, i) => (
               <button
                 key={m.id}
                 type="button"
+                ref={(el) => {
+                  modeRefs.current[i] = el;
+                }}
                 onClick={() => {
                   setMode(m.id);
                   setError(null);
                 }}
-                className={`h-9 flex-1 rounded-[8px] text-[12.5px] font-semibold transition-colors duration-150 ${
-                  mode === m.id ? "bg-ink text-canvas" : "text-ink-muted hover:text-ink"
+                className={`relative z-10 h-8 flex-1 rounded-[4px] text-[12.5px] font-semibold transition-colors duration-200 ${
+                  mode === m.id ? "text-canvas" : "text-ink-muted hover:text-ink"
                 }`}
               >
-                {m.label}
+                {t(m.label)}
               </button>
             ))}
           </div>
@@ -189,7 +252,7 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
             onChange={setUsername}
             placeholder={t("yourname")}
             maxLength={24}
-            hint={usernameHint}
+            hint={usernameHint ? t(usernameHint) : undefined}
             tone={usernameHint ? "danger" : "muted"}
             autoComplete="username"
           />
@@ -215,36 +278,13 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
           )}
 
           {error && (
-            <p className="rounded-[10px] border border-danger/25 bg-danger/10 px-3.5 py-2.5 text-[12.5px] leading-snug text-danger">
-              {error}
+            <p className="rounded-md bg-danger/10 px-3.5 py-2.5 text-[12.5px] leading-snug text-danger">
+              {error.kind === "built-in" ? t(error.key) : error.detail}
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={!ready || busy || discordBusy}
-            className="flex h-11 items-center justify-center gap-2 rounded-[11px] bg-ink text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
-          >
-            {busy && <Loader2 size={16} className="animate-spin" />}
-            {discordPending ? t("Finish creating my account") : active.action}
-          </button>
-
-          {discordPending && (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => {
-                setDiscordPending(null);
-                setError(null);
-              }}
-              className="self-center text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink disabled:opacity-40"
-            >
-              {t("Cancel")}
-            </button>
-          )}
-
           {(discordPending || mode === "register") && (
-            <p className="flex items-start gap-2 text-[11.5px] leading-snug text-ink-subtle">
+            <p className="flex items-start gap-2 rounded-md bg-canvas px-3.5 py-2.5 text-[11.5px] leading-snug text-ink-subtle">
               <KeyRound size={13} className="mt-0.5 shrink-0" />
               {discordPending
                 ? t(
@@ -255,6 +295,30 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
                   )}
             </p>
           )}
+
+          <div className="flex items-center justify-end gap-3">
+            {discordPending && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  setDiscordPending(null);
+                  setError(null);
+                }}
+                className="text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink disabled:opacity-40"
+              >
+                {t("Cancel")}
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={!ready || busy || discordBusy}
+              className="harbor-press-pop flex h-9 items-center justify-center gap-2 rounded-md bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-opacity duration-150 hover:opacity-90 disabled:opacity-40"
+            >
+              {busy && <Loader2 size={16} className="animate-spin" />}
+              {discordPending ? t("Finish creating my account") : t(active.action)}
+            </button>
+          </div>
         </form>
 
         {!discordPending && canDiscord && (
@@ -270,7 +334,7 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
               type="button"
               onClick={() => void runDiscord()}
               disabled={busy || discordBusy}
-              className="flex h-11 items-center justify-center gap-2 rounded-[11px] border border-edge-soft text-[13.5px] font-semibold text-ink transition-all duration-150 hover:bg-elevated/60 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
+              className="harbor-press-pop flex h-9 items-center justify-center gap-2 rounded-md bg-canvas px-4 text-[12.5px] font-semibold text-ink transition-colors hover:bg-elevated disabled:opacity-40"
             >
               {discordBusy ? (
                 <>
@@ -288,6 +352,6 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
           </>
         )}
       </div>
-    </div>
+    </ModalShell>
   );
 }

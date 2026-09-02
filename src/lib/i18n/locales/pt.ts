@@ -1,5 +1,4 @@
 import coverage from "./pt/coverage";
-import uiFallback from "./ui-fallback";
 import chrome from "./pt/chrome";
 import common from "./pt/common";
 import catalog from "./pt/catalog";
@@ -25,11 +24,19 @@ import addons from "./pt/addons";
 import extra from "./pt/extra";
 import manga from "./pt/manga";
 import controllers from "./pt/controllers";
+
+import bpSources from "./pt/bp-sources";
 import used from "./pt/used";
+import sweep from "./pt/sweep";
+import sourceCoverage from "./pt/source-coverage";
+import wired from "./pt/wired";
+import wiringSweep from "./pt/wiring-sweep";
+import wiringSweep2 from "./pt/wiring-sweep-2";
+import wiringSweep3 from "./pt/wiring-sweep-3";
+import wiringSweep4 from "./pt/wiring-sweep-4";
 
 const pt: Record<string, string> = {
   ...coverage,
-  ...uiFallback,
   ...chrome,
   ...common,
   ...catalog,
@@ -55,7 +62,15 @@ const pt: Record<string, string> = {
   ...extra,
   ...manga,
   ...controllers,
+  ...bpSources,
   ...used,
+  ...sweep,
+  ...sourceCoverage,
+  ...wired,
+  ...wiringSweep,
+  ...wiringSweep2,
+  ...wiringSweep3,
+  ...wiringSweep4,
 };
 
 export default pt;

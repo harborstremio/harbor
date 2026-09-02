@@ -1,6 +1,7 @@
 import { downloadDir } from "@tauri-apps/api/path";
 import { save } from "@tauri-apps/plugin-dialog";
 import { useCallback, useState } from "react";
+import { t } from "@/lib/i18n";
 import type { Meta } from "@/lib/cinemeta";
 import {
   cancelDownload,
@@ -58,7 +59,7 @@ export function useVideoDownload({ url, meta, episode, headers }: Args) {
               totalBytes: current.totalBytes,
             }
           : current?.status === "error" || current?.status === "interrupted"
-            ? { kind: "error", message: current.error ?? "Download interrupted" }
+            ? { kind: "error", message: current.error ?? t("Download interrupted") }
             : { kind: "idle" };
 
   const start = useCallback(async () => {
@@ -77,10 +78,10 @@ export function useVideoDownload({ url, meta, episode, headers }: Args) {
     try {
       path = await save({
         defaultPath,
-        filters: [{ name: "Video", extensions: [ext, "mkv", "mp4", "webm"] }],
+        filters: [{ name: t("Video"), extensions: [ext, "mkv", "mp4", "webm"] }],
       });
     } catch (e) {
-      setLocalError(e instanceof Error ? e.message : "Save dialog failed");
+      setLocalError(e instanceof Error ? e.message : t("Save dialog failed"));
       setPreparing(false);
       return;
     }
@@ -99,7 +100,7 @@ export function useVideoDownload({ url, meta, episode, headers }: Args) {
       });
       setDownloadId(id);
     } catch (e) {
-      setLocalError(e instanceof Error ? e.message : "Download failed");
+      setLocalError(e instanceof Error ? e.message : t("Download failed"));
     } finally {
       setPreparing(false);
     }

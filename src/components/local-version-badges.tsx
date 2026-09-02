@@ -10,16 +10,18 @@ import { FormatBadge, streamBadges, type BadgeSize } from "@/components/format-b
 export function LocalVersionBadges({
   entry,
   size = "sm",
+  showSize = true,
   className = "",
 }: {
   entry: LocalEntry;
   size?: BadgeSize;
+  showSize?: boolean;
   className?: string;
 }) {
   const parsed = parseLocalEntry(entry);
   const badges = streamBadges(parsed);
   const bytes = parsed.size ?? entry.size ?? null;
-  const sizeLabel = bytes != null ? formatBytes(bytes) : "";
+  const sizeLabel = showSize && bytes != null ? formatBytes(bytes) : "";
   if (badges.length === 0 && !sizeLabel) return null;
   return (
     <span className={`flex flex-wrap items-center gap-1.5 ${className}`}>

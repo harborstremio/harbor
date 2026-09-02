@@ -82,7 +82,7 @@ export function ColorPopover({
             />
             <div
               ref={panelRef}
-              className="animate-nudge-in fixed z-[320] w-[280px] rounded-2xl bg-elevated/95 p-3 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.65)] ring-1 ring-edge backdrop-blur-md"
+              className="animate-nudge-in fixed z-[320] w-[280px] rounded-md bg-surface p-3 harbor-float"
               style={{
                 top: pos.top,
                 left: pos.left,

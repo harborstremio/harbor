@@ -33,11 +33,16 @@ export function SeekBarVisual({
 }) {
   const accent = resolveAccent(settings);
   const baseHeight = clamp(settings.seekBarHeight ?? 6, 3, 14);
-  const trackHeight = scrubbing ? baseHeight + 2 : hovered ? baseHeight + 2 : baseHeight;
+  // Three steps, not two. Hover and scrub were both +2, so committing to a drag
+  // gave no feedback at all: the bar looked identical whether you were reading
+  // it or moving it.
+  const trackHeight = scrubbing ? baseHeight + 4 : hovered ? baseHeight + 2 : baseHeight;
   const shape = settings.seekDotShape ?? "circle";
   const dotMax = shape === "image" ? 200 : 64;
   const baseDot = clamp(settings.seekDotSize ?? 16, 8, dotMax);
-  const dotSize = scrubbing ? baseDot + 4 : baseDot;
+  // The dot has to answer the pointer before the drag, not after it. Growing
+  // only while scrubbing meant the target never acknowledged you were on it.
+  const dotSize = scrubbing ? baseDot + 6 : hovered ? baseDot + 3 : baseDot;
   const style = settings.seekBarStyle ?? "flat";
   const isRainbow = style === "rainbow";
   const isImage = style === "image" && !!settings.seekBarImage;
@@ -137,13 +142,18 @@ function SeekDot({
   const radius = shape === "square" ? "20%" : "50%";
   return (
     <div
-      className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_0_4px_rgba(0,0,0,0.45)] transition-[width,height,border-radius] duration-200"
+      className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 transition-[width,height,border-radius,box-shadow] duration-200 ease-[cubic-bezier(0.22,0.61,0.36,1)] motion-reduce:transition-none"
       style={{
         left: `${leftPct}%`,
         width: size,
         height: size,
         backgroundColor: color,
         borderRadius: radius,
+        // A hard 4px ring reads as a sticker. A tight dark halo keeps the dot
+        // legible over a blown-out frame, the soft drop seats it on the track,
+        // and the inset highlight gives it a lit top edge instead of a flat fill.
+        boxShadow:
+          "0 0 0 2px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.35)",
       }}
     />
   );

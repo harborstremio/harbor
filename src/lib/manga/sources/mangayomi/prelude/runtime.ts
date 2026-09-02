@@ -136,8 +136,19 @@ SharedPreferences.prototype.setStringList = SharedPreferences.prototype.set;
 SharedPreferences.prototype.setFloat = SharedPreferences.prototype.set;
 SharedPreferences.prototype.setBoolean = SharedPreferences.prototype.set;
 
+var __HY_IMG_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
+
+function PageUrl(url, headers) { this.url = String(url); this.headers = headers || {}; }
+
 function MProvider(source) { this.source = source || {}; this.client = new Client(); }
-MProvider.prototype.getHeaders = function () { return {}; };
+MProvider.prototype.getHeaders = function () {
+  var base = "";
+  try { base = this.getBaseUrl ? String(this.getBaseUrl() || "") : ""; } catch (e) { base = ""; }
+  if (!base && this.source && this.source.baseUrl) base = String(this.source.baseUrl);
+  var out = { "User-Agent": __HY_IMG_UA };
+  if (/^https?:\/\//i.test(base)) out.Referer = base.replace(/\/+$/, "") + "/";
+  return out;
+};
 MProvider.prototype.getFilterList = function () { return []; };
 MProvider.prototype.getSourcePreferences = function () { return []; };
 MProvider.prototype.getBaseUrl = function () { return this.source && this.source.baseUrl; };
@@ -223,17 +234,40 @@ function __hyToChapters(mmanga, lang) {
   return out;
 }
 
-function __hyToPages(res) {
+function __hyHeaderMap(src, into) {
+  var out = into || {};
+  if (!src || typeof src !== "object") return out;
+  for (var k in src) {
+    if (!Object.prototype.hasOwnProperty.call(src, k)) continue;
+    var v = src[k];
+    if (typeof v === "string" || typeof v === "number") out[String(k)] = String(v);
+  }
+  return out;
+}
+
+function __hySourceHeaders(ext) {
+  var h;
+  try {
+    h = ext && typeof ext.getHeaders === "function" ? ext.getHeaders(ext.source && ext.source.baseUrl) : null;
+  } catch (e) { h = null; }
+  return __hyHeaderMap(h);
+}
+
+function __hyToPages(res, ext) {
   var arr;
   if (Array.isArray(res)) arr = res;
   else if (res && typeof res === "object") {
     arr = Array.isArray(res.pages) ? res.pages : Array.isArray(res.list) ? res.list : [res];
   } else arr = [];
+  var base = __hySourceHeaders(ext);
   var out = [];
   for (var i = 0; i < arr.length; i++) {
     var it = arr[i];
     var u = typeof it === "string" ? it : it && (it.url || it.imageUrl || it.src || it.img || it.image);
-    if (u) out.push(String(u));
+    if (!u) continue;
+    var headers = __hyHeaderMap(base);
+    if (it && typeof it === "object") __hyHeaderMap(it.headers, headers);
+    out.push({ url: String(u), headers: headers });
   }
   return out;
 }
@@ -323,7 +357,9 @@ function __hyAdapt(ext, source) {
       return detailOf(String(id)).then(function (d) { return __hyToChapters(d, lang); });
     },
     pageUrls: function (chapterId) {
-      return Promise.resolve(ext.getPageList(String(chapterId))).then(__hyToPages);
+      return Promise.resolve(ext.getPageList(String(chapterId))).then(function (r) {
+        return __hyToPages(r, ext);
+      });
     },
   };
   var hasFilters = false;

@@ -1,4 +1,5 @@
-import { Check, Play } from "lucide-react";
+import { Check } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { Poster } from "@/components/poster";
 import type { Meta } from "@/lib/cinemeta";
 import { formatAirDate } from "@/lib/dates";
@@ -61,10 +62,11 @@ export function AnimeEpisodeRow({
       data-ep={ep.number}
       data-epid={ep.id}
       data-no-card-ring
+      style={{ contentVisibility: "auto", containIntrinsicSize: "auto 160px" }}
       onContextMenu={(e) =>
         onContextMenu?.(e, animeSeasonKey(ep), ep.number, progress.watched, ep.sourceMetaId)
       }
-      className="group flex gap-6 rounded-2xl px-4 py-5 transition-colors hover:bg-elevated/30"
+      className="group flex gap-6 rounded-lg px-4 py-5 transition-colors hover:bg-elevated/30"
     >
       <button
         onClick={() =>
@@ -93,7 +95,7 @@ export function AnimeEpisodeRow({
             </span>
           )}
           {progress.watched && (
-            <span className="absolute end-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/22 text-emerald-200 ring-1 ring-emerald-400/40 backdrop-blur-sm">
+            <span className="absolute end-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-success/20 text-success backdrop-blur-sm">
               <Check size={12} strokeWidth={3} />
             </span>
           )}
@@ -125,7 +127,7 @@ export function AnimeEpisodeRow({
                 .join("  ·  ")}
             </span>
             {progress.watched && watchedAgo && (
-              <span className="text-emerald-300/85">· {t("Watched {ago}", { ago: watchedAgo })}</span>
+              <span className="text-success/90">· {t("Watched {ago}", { ago: watchedAgo })}</span>
             )}
             {!progress.watched && progress.ratio > 0.01 && watchedAgo && (
               <span className="text-accent/85">

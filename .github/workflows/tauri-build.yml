@@ -101,7 +101,7 @@ jobs:
           TARGET="${{ matrix.platform.target }}"
           EXT=""
           if [[ "$TARGET" == *"windows"* ]]; then EXT=".exe"; fi
-          
+
           echo "Downloading yt-dlp..."
           if [[ "$TARGET" == *"windows"* ]]; then
             curl --retry 6 --retry-delay 4 --retry-all-errors -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -o "yt-dlp-${TARGET}${EXT}"
@@ -161,6 +161,19 @@ jobs:
             echo "::warning::TAURI_SIGNING_PRIVATE_KEY not set — building installers only, no signed updater artifacts."
           fi
 
+      - name: Prepare bundled macOS libraries
+        if: contains(matrix.platform.runner, 'macos')
+        id: macos-libraries
+        shell: bash
+        run: |
+          FRAMEWORKS_DIR="$RUNNER_TEMP/harbor-macos-frameworks-${{ matrix.platform.target }}"
+          CONFIG_PATH="$RUNNER_TEMP/tauri-macos-libmpv-${{ matrix.platform.target }}.json"
+          python3 scripts/macos-bundle-libmpv.py prepare \
+            --frameworks "$FRAMEWORKS_DIR" \
+            --config "$CONFIG_PATH"
+          echo "HARBOR_MACOS_FRAMEWORKS_DIR=$FRAMEWORKS_DIR" >> "$GITHUB_ENV"
+          echo "config=--config $CONFIG_PATH" >> "$GITHUB_OUTPUT"
+
       - name: Tauri build
         uses: tauri-apps/tauri-action@v0
         env:
@@ -169,7 +182,18 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tauriScript: pnpm tauri
-          args: --target ${{ matrix.platform.target }} ${{ steps.sign.outputs.config }}
+          args: --target ${{ matrix.platform.target }} ${{ steps.sign.outputs.config }} ${{ steps.macos-libraries.outputs.config }}
+
+      - name: Verify macOS app dependencies
+        if: contains(matrix.platform.runner, 'macos')
+        shell: bash
+        run: |
+          APP_PATH="$(find "src-tauri/target/${{ matrix.platform.target }}/release/bundle" -type d -name 'Harbor.app' -print -quit)"
+          if [ -z "$APP_PATH" ]; then
+            echo "Harbor.app was not produced" >&2
+            exit 1
+          fi
+          python3 scripts/macos-bundle-libmpv.py verify-app --app "$APP_PATH"
 
       - name: Upload artifacts
         if: success()

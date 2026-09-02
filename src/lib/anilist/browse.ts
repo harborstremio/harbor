@@ -19,6 +19,7 @@ const BROWSE_QUERY = `query ($page: Int, $perPage: Int, $sort: [MediaSort], $isA
       seasonYear
       countryOfOrigin
       description
+      status
     }
   }
 }`;
@@ -118,7 +119,7 @@ export async function anilistAnimeSearch(query: string, perPage = 8): Promise<An
       format: m.format ?? null,
       name: m.title.english?.trim() || m.title.romaji?.trim() || "Untitled",
       year: m.seasonYear ? String(m.seasonYear) : null,
-      poster: m.coverImage?.extraLarge ?? m.coverImage?.large ?? null,
+      poster: m.coverImage?.large ?? m.coverImage?.extraLarge ?? null,
       background: m.bannerImage ?? null,
       overview: (m.description ?? "").replace(/<[^>]+>/g, "").trim(),
       score: m.averageScore ? m.averageScore / 10 : 0,
@@ -145,7 +146,7 @@ async function fetchAnilistBrowse(sort: string, count: number): Promise<Meta[]> 
   const seenId = new Set<number>();
   for (const data of responses) {
     for (const m of data?.Page?.media ?? []) {
-      if (m.id == null || seenId.has(m.id)) continue;
+      if (m.id == null || seenId.has(m.id) || m.status === "NOT_YET_RELEASED") continue;
       seenId.add(m.id);
       all.push(m);
     }

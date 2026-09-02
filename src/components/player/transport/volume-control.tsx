@@ -20,12 +20,16 @@ export function VolumeControl({
   onVolume,
   capabilities,
   style = "slider",
+  iconUrl,
+  mutedIconUrl,
 }: {
   snap: PlayerSnapshot;
   onMute: () => void;
   onVolume: (v: number) => void;
   capabilities: PlayerCapabilities;
   style?: VolumeStyle;
+  iconUrl?: string;
+  mutedIconUrl?: string;
 }) {
   const tr = useT();
   const { settings } = useSettings();
@@ -75,6 +79,7 @@ export function VolumeControl({
   const pct = Math.round(v * 100);
   const boosting = allowBoost && v > 1.001;
   const label = muted ? tr("Unmute") : tr("Mute");
+  const speakerUrl = muted ? mutedIconUrl : iconUrl;
 
   const breakPct = NORMAL_FRACTION * 100;
   const filledPct = fillFraction * 100;
@@ -92,7 +97,13 @@ export function VolumeControl({
         className="flex h-12 w-12 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10 hover:text-white"
         aria-label={label}
       >
-        {muted ? <VolumeX size={24} strokeWidth={1.75} /> : <Volume2 size={24} strokeWidth={1.75} />}
+        {speakerUrl ? (
+          <img src={speakerUrl} alt="" width={24} height={24} draggable={false} className="pointer-events-none h-6 w-6 select-none object-contain" />
+        ) : muted ? (
+          <VolumeX size={24} strokeWidth={1.75} />
+        ) : (
+          <Volume2 size={24} strokeWidth={1.75} />
+        )}
       </button>
     </Tooltip>
   );
@@ -155,7 +166,7 @@ export function VolumeControl({
       >
         <div
           className="pointer-events-none relative w-full rounded-full bg-white/[0.18] transition-[height] duration-200 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
-          style={{ height: active ? 8 : 4 }}
+          style={{ height: active ? 12 : 7 }}
         >
           {allowBoost && (
             <div
@@ -174,15 +185,15 @@ export function VolumeControl({
           {allowBoost && (
             <div
               className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/40 transition-[height] duration-200"
-              style={{ left: `${breakPct}%`, width: 2, height: active ? 12 : 8 }}
+              style={{ left: `${breakPct}%`, width: 2, height: active ? 12 : 7 }}
             />
           )}
           <div
             className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full transition-[width,height] duration-200 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
             style={{
               left: `${filledPct}%`,
-              width: active ? 17 : 12,
-              height: active ? 17 : 12,
+              width: active ? 19 : 14,
+              height: active ? 19 : 14,
               background: boosting ? color : "white",
               boxShadow: active ? "0 2px 10px rgba(0,0,0,0.55)" : "0 1px 5px rgba(0,0,0,0.5)",
             }}

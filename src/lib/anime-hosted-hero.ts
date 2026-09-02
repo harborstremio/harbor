@@ -43,22 +43,27 @@ function toMeta(r: RawItem): HostedHeroItem | null {
   };
 }
 
-function readCache(): HostedHeroItem[] | null {
-  if (mem && Date.now() - mem.t < TTL_MS) return mem.items;
+function readStored(): Cached | null {
+  if (mem) return mem;
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const c = JSON.parse(raw) as Cached;
-    if (!c?.items?.length) return null;
+    if (!c?.items?.length || typeof c.t !== "number") return null;
     mem = c;
-    return c.items;
+    return c;
   } catch {
     return null;
   }
 }
 
+function readCache(): HostedHeroItem[] | null {
+  const c = readStored();
+  return c && Date.now() - c.t < TTL_MS ? c.items : null;
+}
+
 export function peekHostedHero(): HostedHeroItem[] | null {
-  return readCache();
+  return readStored()?.items ?? null;
 }
 
 export async function fetchHostedHero(): Promise<HostedHeroItem[] | null> {
@@ -66,10 +71,10 @@ export async function fetchHostedHero(): Promise<HostedHeroItem[] | null> {
   if (cached) return cached;
   try {
     const res = await safeFetch(HOSTED_URL);
-    if (!res.ok) return null;
+    if (!res.ok) return peekHostedHero();
     const j = (await res.json()) as { updated?: number; items?: RawItem[] };
     const items = (j?.items ?? []).map(toMeta).filter((m): m is HostedHeroItem => m != null);
-    if (items.length === 0) return null;
+    if (items.length === 0) return peekHostedHero();
     mem = { t: Date.now(), items };
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify(mem));
@@ -78,6 +83,6 @@ export async function fetchHostedHero(): Promise<HostedHeroItem[] | null> {
     }
     return items;
   } catch {
-    return null;
+    return peekHostedHero();
   }
 }

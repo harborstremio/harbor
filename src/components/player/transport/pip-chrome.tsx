@@ -1,10 +1,13 @@
-import { PauseCircle, PlayCircle } from "lucide-react";
+import { Captions } from "lucide-react";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { useT } from "@/lib/i18n";
 import { Tooltip } from "./tooltip";
 import { PipIconBtn, PipStepBtn } from "./pip-controls";
 import { PipSeekBar } from "./pip-seek-bar";
 import { PipVolume } from "./pip-volume";
+import { useSettings } from "@/lib/settings";
+import { sanitizeSeekStep } from "@/lib/seek-step";
+import { useCaptionsPopout } from "@/views/player/hooks/use-captions-popout";
 
 export function PipChrome({
   snap,
@@ -40,6 +43,10 @@ export function PipChrome({
   onNextEp: () => void;
 }) {
   const t = useT();
+  const { settings } = useSettings();
+  const { captionsOpen, captionsFault, toggleCaptions } = useCaptionsPopout(snap);
+  const backSec = sanitizeSeekStep(settings.seekBackStepSec, 10);
+  const fwdSec = sanitizeSeekStep(settings.seekForwardStepSec, 10);
   const muted = snap.muted || snap.volume === 0;
   return (
     <>
@@ -65,7 +72,7 @@ export function PipChrome({
           visible ? "opacity-100" : "opacity-0"
         }`}
       >
-        <div className="pointer-events-none flex max-w-[55%] flex-col gap-0.5 truncate text-start text-white/85">
+        <div className="pointer-events-none flex max-w-[45%] flex-col gap-0.5 truncate text-start text-white/85">
           {hoverTitle && (
             <span className="truncate text-[12px] font-semibold leading-tight drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
               {hoverTitle}
@@ -77,21 +84,35 @@ export function PipChrome({
             </span>
           )}
         </div>
+        <div className="pointer-events-none flex shrink-0 items-center">
+        <Tooltip label={captionsFault ?? (captionsOpen ? t("Hide subtitles window") : t("Pop out subtitles"))} side="bottom">
+          <button
+              type="button"
+              onClick={() => void toggleCaptions()}
+              aria-pressed={captionsOpen}
+              aria-label={captionsOpen ? t("Hide subtitles window") : t("Pop out subtitles")}
+              className={`pointer-events-auto me-1.5 inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full border transition-colors ${
+                captionsOpen
+                  ? "border-transparent bg-white text-black"
+                  : captionsFault
+                    ? "border-amber-400/60 bg-black/55 text-amber-300"
+                    : "border-white/15 bg-black/55 text-white/95 backdrop-blur-md hover:bg-black/85"
+              }`}
+            >
+              <Captions size={15} strokeWidth={2.2} />
+            </button>
+        </Tooltip>
         <Tooltip label={t("Return to full window")} side="bottom">
           <button
             onClick={onExitPip}
             className="pointer-events-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/95 backdrop-blur-md transition-colors hover:bg-black/85"
             aria-label={t("Exit Picture in Picture")}
           >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 9V5a2 2 0 0 1 2-2h4" />
-              <path d="M21 9V5a2 2 0 0 0-2-2h-4" />
-              <path d="M3 15v4a2 2 0 0 0 2 2h4" />
-              <path d="M21 15v4a2 2 0 0 1-2 2h-4" />
-            </svg>
+            <img src="/player-icons/pip--inactive.svg" width="12" height="12" alt="" className="shrink-0 select-none" draggable={false} />
             {t("Exit PiP")}
           </button>
         </Tooltip>
+        </div>
       </div>
 
       <div
@@ -106,21 +127,21 @@ export function PipChrome({
             onClick={onPrevEp}
             disabled={!hasPrevEp}
             icon={
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="19 20 9 12 19 4 19 20" />
-                <rect x="5" y="4" width="2" height="16" />
-              </svg>
+              <img src="/player-icons/skip-prev.png" width={17} height={17} alt="" draggable={false} className="select-none" />
             }
           />
           <PipStepBtn
-            label={t("Back 30 seconds")}
-            onClick={() => onSeekStep(-30)}
-            stepText="30s"
+            label={t("Back {n} seconds", { n: backSec })}
+            onClick={() => onSeekStep(-backSec)}
             icon={
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 12a9 9 0 1 0 3-6.7" />
-                <polyline points="3 4 3 10 9 10" />
-              </svg>
+              <img
+                src={`/player-icons/seek-back-${backSec}.png`}
+                width={22}
+                height={22}
+                alt=""
+                draggable={false}
+                className="select-none"
+              />
             }
           />
           <Tooltip label={playing ? t("Pause") : t("Play")}>
@@ -130,22 +151,29 @@ export function PipChrome({
               aria-label={playing ? t("Pause") : t("Play")}
               className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/14 text-white transition-[background-color,transform] hover:bg-white/24 active:scale-95"
             >
+              {/* The files are named for the glyph, the state for the player, and
+                  those are opposites: while playing the button offers pause.
+                  Hardcoded here rather than resolved through getCustomIcon, so
+                  fixing the shared icon map did not reach this surface. */}
               {playing ? (
-                <PauseCircle size={26} strokeWidth={1.5} />
+                <img src="/player-icons/play-pause--paused.svg" width={28} height={28} alt="" draggable={false} className="select-none" />
               ) : (
-                <PlayCircle size={26} strokeWidth={1.5} />
+                <img src="/player-icons/play-pause--playing.svg" width={28} height={28} alt="" draggable={false} className="select-none" />
               )}
             </button>
           </Tooltip>
           <PipStepBtn
-            label={t("Forward 30 seconds")}
-            onClick={() => onSeekStep(30)}
-            stepText="30s"
+            label={t("Forward {n} seconds", { n: fwdSec })}
+            onClick={() => onSeekStep(fwdSec)}
             icon={
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12a9 9 0 1 1-3-6.7" />
-                <polyline points="21 4 21 10 15 10" />
-              </svg>
+              <img
+                src={`/player-icons/seek-forward-${fwdSec}.png`}
+                width={22}
+                height={22}
+                alt=""
+                draggable={false}
+                className="select-none"
+              />
             }
           />
           <PipIconBtn
@@ -153,10 +181,7 @@ export function PipChrome({
             onClick={onNextEp}
             disabled={!hasNextEp}
             icon={
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="5 4 15 12 5 20 5 4" />
-                <rect x="17" y="4" width="2" height="16" />
-              </svg>
+              <img src="/player-icons/skip-next.png" width={17} height={17} alt="" draggable={false} className="select-none" />
             }
           />
           <PipVolume snap={snap} muted={muted} onMute={onMute} onVolume={onVolume} />

@@ -1,5 +1,6 @@
 import { ANILIST_GRAPHQL_URL } from "./config";
 import { getSession } from "./session";
+import { safeFetch } from "@/lib/safe-fetch";
 
 export class AnilistApiError extends Error {
   constructor(
@@ -22,7 +23,7 @@ function doFetch(
     Accept: "application/json",
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
-  return fetch(ANILIST_GRAPHQL_URL, {
+  return safeFetch(ANILIST_GRAPHQL_URL, {
     method: "POST",
     headers,
     body: JSON.stringify({ query, variables }),
@@ -35,7 +36,7 @@ export async function anilistRequest<T>(
   accessToken?: string,
   skipAuth = false,
 ): Promise<T> {
-  const token = skipAuth ? null : accessToken ?? getSession()?.accessToken ?? null;
+  const token = skipAuth ? null : (accessToken ?? getSession()?.accessToken ?? null);
   let res = await doFetch(query, variables, token);
 
   if (res.status === 429) {

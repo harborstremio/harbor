@@ -1,7 +1,13 @@
 import { FolderInput, FolderPlus, HelpCircle, Trash2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
-export type RailGroup = { id: string; label: string; count: number; packId?: string; badge?: number };
+export type RailGroup = {
+  id: string;
+  label: string;
+  count: number;
+  packId?: string;
+  badge?: number;
+};
 
 export function AvatarRail({
   groups,
@@ -27,7 +33,12 @@ export function AvatarRail({
   const t = useT();
   return (
     <div className="flex w-[184px] shrink-0 flex-col border-e border-edge-soft p-2.5">
-      <RailItem label={t("All")} count={total} active={section === "all"} onClick={() => onSelect("all")} />
+      <RailItem
+        label={t("All")}
+        count={total}
+        active={section === "all"}
+        onClick={() => onSelect("all")}
+      />
       <div className="mx-2 my-1.5 h-px bg-edge-soft/70" />
       <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto [scrollbar-width:thin]">
         {groups.map((g) => (
@@ -91,6 +102,7 @@ function RailItem({
   onClick: () => void;
   onDelete?: () => void;
 }) {
+  const t = useT();
   return (
     <div
       className={`group/row relative flex items-center rounded-[9px] transition-colors ${
@@ -103,7 +115,9 @@ function RailItem({
         onClick={onClick}
         className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-start outline-none"
       >
-        <span className={`truncate text-[13px] ${active ? "font-semibold text-ink" : "text-ink-muted"}`}>
+        <span
+          className={`truncate text-[13px] ${active ? "font-semibold text-ink" : "text-ink-muted"}`}
+        >
           {label}
         </span>
         {badge ? (
@@ -124,7 +138,7 @@ function RailItem({
         <button
           type="button"
           onClick={onDelete}
-          aria-label="Remove pack"
+          aria-label={t("Remove pack")}
           className="absolute end-1.5 flex h-6 w-6 items-center justify-center rounded-md text-ink-subtle opacity-0 transition-all hover:bg-danger/15 hover:text-danger group-hover/row:opacity-100"
         >
           <Trash2 size={13} strokeWidth={2.2} />

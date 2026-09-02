@@ -50,7 +50,7 @@ function toRoot(m: RelNode): RootMedia {
     id: m.id,
     idMal: m.idMal,
     name: (m.title.english || m.title.userPreferred || m.title.romaji || "").trim(),
-    poster: m.coverImage?.extraLarge ?? m.coverImage?.large ?? undefined,
+    poster: m.coverImage?.large ?? m.coverImage?.extraLarge ?? undefined,
     format: m.format ?? undefined,
   };
 }

@@ -17,13 +17,13 @@ export function RollbackRow() {
   if (!settings.betaUpdates) return null;
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3.5">
+ <div className="flex flex-col gap-3 rounded-md bg-canvas px-4 py-3.5">
       <div className="flex items-start gap-3">
         <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-raised text-ink-subtle">
-          <History size={15} strokeWidth={2.2} />
+          <History size={16} strokeWidth={2.2} />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="flex items-center gap-2 text-[14px] font-medium text-ink">
+          <span className="flex items-center gap-2 text-[13.5px] font-medium text-ink">
             {t("Roll back to an earlier build")}
             <BetaTag />
           </span>
@@ -35,7 +35,7 @@ export function RollbackRow() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-edge-soft/70 bg-canvas/50">
+ <div className="overflow-hidden rounded-md /70 bg-canvas">
         {state.status === "loading" ? (
           <HistorySkeleton />
         ) : state.status === "error" ? (
@@ -61,7 +61,7 @@ function VersionList({ versions }: { versions: VersionEntry[] }) {
 
   if (!hasOthers) {
     return (
-      <div className="px-3.5 py-5 text-center text-[12px] leading-relaxed text-ink-subtle">
+      <div className="px-3.5 py-5 text-center text-[12.5px] leading-relaxed text-ink-subtle">
         {t("You're on the latest build. Earlier builds show up here as new versions ship.")}
       </div>
     );
@@ -83,9 +83,9 @@ function HistorySkeleton() {
         <div key={i} className="flex items-center justify-between gap-3 px-3.5 py-3">
           <div className="flex flex-col gap-1.5">
             <div className="h-3 w-16 animate-pulse rounded bg-raised" />
-            <div className="h-2.5 w-24 animate-pulse rounded bg-raised/60" />
+            <div className="h-2.5 w-24 animate-pulse rounded bg-raised" />
           </div>
-          <div className="h-7 w-20 animate-pulse rounded-lg bg-raised" />
+          <div className="h-7 w-20 animate-pulse rounded-md bg-raised" />
         </div>
       ))}
     </div>
@@ -96,22 +96,22 @@ function HistoryError({ onRetry }: { onRetry: () => void }) {
   const t = useT();
   return (
     <div className="flex flex-col items-start gap-2.5 px-3.5 py-4">
-      <p className="text-[12px] leading-relaxed text-ink-subtle">
+      <p className="text-[12.5px] leading-relaxed text-ink-subtle">
         {t("Couldn't reach harbor.site to load earlier builds. Check your connection and try again.")}
       </p>
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onRetry}
-          className="flex h-8 items-center gap-1.5 rounded-lg border border-edge bg-elevated px-3 text-[12px] font-semibold text-ink transition-all hover:scale-[1.02] hover:border-ink active:scale-[0.97]"
+          className="flex h-8 items-center gap-1.5 rounded-md border border-edge bg-elevated px-3 text-[12.5px] font-semibold text-ink transition hover:scale-[1.02] hover:border-ink active:scale-[0.97]"
         >
-          <RotateCw size={13} strokeWidth={2.4} />
+          <RotateCw size={14} strokeWidth={2.4} />
           {t("Try again")}
         </button>
         <button
           type="button"
           onClick={() => openUrl(RELEASES_URL)}
-          className="text-[12px] font-semibold text-ink-subtle underline-offset-2 hover:text-ink hover:underline"
+          className="text-[12.5px] font-semibold text-ink-subtle underline-offset-2 hover:text-ink hover:underline"
         >
           {t("Browse all releases")}
         </button>

@@ -48,11 +48,35 @@ function keysFor(count: number): Set<string> {
   return set;
 }
 
+// A kitsu id maps to one anilist and one mal id forever, so these outlive the
+// list index the session resets. The caller re-enters with a longer id list
+// every time hero, picks and trending resolve, and without this each pass
+// re-reads and re-parses the whole arm cache out of localStorage per id.
+const anilistByKitsu = new Map<number, Promise<number | null>>();
+const malByKitsu = new Map<number, Promise<number | null>>();
+
+function memo(
+  store: Map<number, Promise<number | null>>,
+  kitsuId: number,
+  load: (id: number) => Promise<number | null>,
+): Promise<number | null> {
+  let p = store.get(kitsuId);
+  if (!p) {
+    p = load(kitsuId).catch(() => null);
+    store.set(kitsuId, p);
+  }
+  return p;
+}
+
+const MAP_CONCURRENCY = 8;
+
 export async function loadAnilistWatchedMap(harborIds: string[]): Promise<Map<string, Set<string>>> {
   const out = new Map<string, Set<string>>();
   if (harborIds.length === 0) return out;
   const { byAnilist, byMal } = await loadIndex();
   if (byAnilist.size === 0 && byMal.size === 0) return out;
+
+  const pending: Array<[string, number]> = [];
   for (const id of harborIds) {
     let hit: Entry | undefined;
     if (id.startsWith("anilist:")) {
@@ -63,16 +87,26 @@ export async function loadAnilistWatchedMap(harborIds: string[]): Promise<Map<st
       if (Number.isFinite(n)) hit = byMal.get(n);
     } else if (id.startsWith("kitsu:")) {
       const k = parseInt(id.slice(6), 10);
-      if (Number.isFinite(k)) {
-        const a = await kitsuToAnilist(k).catch(() => null);
-        if (a != null) hit = byAnilist.get(a);
-        if (!hit) {
-          const m = await kitsuToMal(k).catch(() => null);
-          if (m != null) hit = byMal.get(m);
-        }
-      }
+      if (Number.isFinite(k)) pending.push([id, k]);
     }
     if (hit) out.set(id, keysFor(hit.count));
   }
+
+  let at = 0;
+  const worker = async () => {
+    while (at < pending.length) {
+      const [id, k] = pending[at++];
+      let hit: Entry | undefined;
+      const a = await memo(anilistByKitsu, k, kitsuToAnilist);
+      if (a != null) hit = byAnilist.get(a);
+      if (!hit) {
+        const m = await memo(malByKitsu, k, kitsuToMal);
+        if (m != null) hit = byMal.get(m);
+      }
+      if (hit) out.set(id, keysFor(hit.count));
+    }
+  };
+  const lanes = Math.min(MAP_CONCURRENCY, pending.length);
+  await Promise.all(Array.from({ length: lanes }, worker));
   return out;
 }

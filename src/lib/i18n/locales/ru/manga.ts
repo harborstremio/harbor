@@ -62,7 +62,6 @@ const manga: Record<string, string> = {
   "Could not save that source.": "Не удалось сохранить источник.",
   "Custom source": "Свой источник",
   Dark: "Тёмная",
-  "Data from MangaUpdates": "Данные с MangaUpdates",
   "Delete download": "Удалить загрузку",
   Direction: "Направление",
   "Do it once on a browse page, once on a series page, once in the reader.":
@@ -77,7 +76,7 @@ const manga: Record<string, string> = {
   "Enter a URL or path.": "Укажите URL или путь.",
   "Enter a name and a valid https:// URL.": "Укажите название и корректный https:// URL.",
   "Enter a valid http(s):// URL": "Укажите корректный http(s):// URL",
-  "Everything else, via your own server": "Всё остальное — через свой сервер",
+  "Everything else, via your own server": "Всё остальное – через свой сервер",
   Extensions: "Расширения",
   "Featured manga": "Рекомендуемая манга",
   "Filter tags...": "Фильтр тегов...",
@@ -103,7 +102,7 @@ const manga: Record<string, string> = {
   "Implement the MangaProvider object: popular, search, detail, chapters, pageUrls, and optional tags. Nothing else.":
     "Реализуйте объект MangaProvider: popular, search, detail, chapters, pageUrls и опциональный tags. Больше ничего.",
   "Inside it, one folder per manga, named like the title.":
-    "Внутри — по одной папке на каждую мангу, названной по её названию.",
+    "Внутри – по одной папке на каждую мангу, названной по её названию.",
   "Install it in Extensions": "Установите его в «Расширениях»",
   "It may be rate limiting or temporarily down. Try again, or switch to another source.":
     "Возможно, действует ограничение частоты запросов или источник временно недоступен. Повторите попытку или переключитесь на другой источник.",
@@ -165,7 +164,7 @@ const manga: Record<string, string> = {
   "Pick a world and dive into everything in it.":
     "Выберите мир и погрузитесь во всё, что в нём есть.",
   "Pick one folder. Each subfolder inside is one manga, so name it exactly like the title. In each, add chapter folders of images or .cbz / .zip files. A cover.jpg sets a custom cover.":
-    "Выберите одну папку. Каждая вложенная папка — это одна манга, поэтому назовите её точно как название. Внутри добавьте папки глав с изображениями или файлы .cbz / .zip. Файл cover.jpg задаёт свою обложку.",
+    "Выберите одну папку. Каждая вложенная папка – это одна манга, поэтому назовите её точно как название. Внутри добавьте папки глав с изображениями или файлы .cbz / .zip. Файл cover.jpg задаёт свою обложку.",
   "Pick up the manga at {label}.": "Продолжить мангу с {label}.",
   "Pick up the manga where the anime ends.":
     "Продолжить мангу с того места, где заканчивается аниме.",
@@ -298,15 +297,15 @@ const manga: Record<string, string> = {
     "если на странице серии показаны только последние главы, а полный список лежит по другому URL, это перезаписывает URL серии на него.",
   "if the site blocks hotlinked images.": "если сайт блокирует прямые ссылки на изображения.",
   into: "в",
-  "is a page number. Add": "— номер страницы. Добавьте",
-  "is a regex for the part to change": "— регулярное выражение для заменяемой части",
-  "is each chapter row": "— строка каждой главы",
+  "is a page number. Add": "– номер страницы. Добавьте",
+  "is a regex for the part to change": "– регулярное выражение для заменяемой части",
+  "is each chapter row": "– строка каждой главы",
   "is how many items to skip, starting at 0. Harbor auto-detects the site's page size and walks it for you, so you never set a page size. Use this when the URL counts items.":
-    "— сколько элементов пропустить, начиная с 0. Harbor сам определяет размер страницы сайта и листает её за вас, поэтому размер страницы задавать не нужно. Используйте, если URL считает элементы.",
-  "is the box around one manga; inside it": "— контейнер вокруг одной манги; внутри него",
-  "is the manga URL": "— URL манги",
-  "is the search text (searchPath only).": "— текст поиска (только searchPath).",
-  "is what to swap in. The example turns": "— то, на что заменить. Пример превращает",
+    "– сколько элементов пропустить, начиная с 0. Harbor сам определяет размер страницы сайта и листает её за вас, поэтому размер страницы задавать не нужно. Используйте, если URL считает элементы.",
+  "is the box around one manga; inside it": "– контейнер вокруг одной манги; внутри него",
+  "is the manga URL": "– URL манги",
+  "is the search text (searchPath only).": "– текст поиска (только searchPath).",
+  "is what to swap in. The example turns": "– то, на что заменить. Пример превращает",
   "its URL": "его URL",
   "its image.": "его изображение.",
   "its name": "его название",

@@ -1,9 +1,15 @@
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import type { PlayerSrc } from "@/lib/view";
 import type { SubCue } from "@/lib/subtitles/parser";
-import type { MediaMeta, PipelineContext, PipelineOutcome, SourceKind } from "@/lib/subtitles/autosync/pipeline";
-import { outcomeRank } from "@/lib/subtitles/autosync/fp-gate";
+import type {
+  MediaMeta,
+  PipelineContext,
+  PipelineOutcome,
+  SourceKind,
+} from "@/lib/subtitles/autosync/pipeline";
+import { outcomeRank, type SubtitleFormat } from "@/lib/subtitles/autosync/fp-gate";
 import type { DriftPlayerState } from "@/lib/subtitles/autosync/drift-monitor";
+import { normalizeLang } from "@/lib/subtitles/language";
 
 export function isLoopback(url: string): boolean {
   return /^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])[:/]/i.test(url);
@@ -12,11 +18,30 @@ export function isLoopback(url: string): boolean {
 export function outcomeScore(o: PipelineOutcome): number {
   const c = o.candidate;
   const ratioResolved = c && c.kind === "affine" && Math.abs(c.ratio - 1) > 1e-6 ? 1 : 0;
-  return outcomeRank(o.decision.decision) * 100 + ratioResolved * 10 + Math.round(o.decision.pCorrect * 9);
+  return (
+    outcomeRank(o.decision.decision) * 100 +
+    ratioResolved * 10 +
+    Math.round(o.decision.pCorrect * 9)
+  );
 }
 
 export function subLanguages(trackLang: string | undefined, preferred: string[]): string[] {
-  return [...new Set([trackLang, ...preferred].filter((l): l is string => !!l))];
+  return [trackLang, ...preferred]
+    .map((lang) => normalizeLang(lang))
+    .filter((lang): lang is string => lang.length > 0)
+    .filter((lang, index, all) => all.indexOf(lang) === index);
+}
+
+export function audioLanguageFromSnapshot(snap: PlayerSnapshot): string | null {
+  const selected = snap.audioTracks.find((track) => track.selected) ?? null;
+  if (selected) return normalizeLang(selected.lang ?? "") || null;
+  const fallback = snap.audioTracks.find((track) => track.default) ?? null;
+  const candidates = [fallback, snap.audioTracks.length === 1 ? snap.audioTracks[0] : null];
+  for (const track of candidates) {
+    const lang = normalizeLang(track?.lang ?? "");
+    if (lang) return lang;
+  }
+  return null;
 }
 
 function parseMinutes(v: string | number | undefined): number | undefined {
@@ -43,8 +68,14 @@ export function buildContext(
   snap: PlayerSnapshot,
   sourceKind: SourceKind,
   cues: SubCue[],
-  languages: string[],
+  subtitle: {
+    language?: string | null;
+    preferredLanguages: string[];
+    format: SubtitleFormat;
+  },
 ): PipelineContext {
+  const subtitleLanguage = normalizeLang(subtitle.language ?? "") || null;
+  const preferredSubtitleLanguages = subLanguages(undefined, subtitle.preferredLanguages);
   return {
     mediaUrl: src.url,
     headers: src.headers,
@@ -54,12 +85,20 @@ export function buildContext(
     cues: cues.map((c) => [c.start, c.end] as [number, number]),
     cueText: cues.map((c) => c.text),
     moviebytesize: src.streamRef?.size ?? undefined,
-    languages,
+    audioLanguage: audioLanguageFromSnapshot(snap),
+    subtitleLanguage,
+    preferredSubtitleLanguages,
+    subtitleFormat: subtitle.format,
+    languages: subLanguages(subtitleLanguage ?? undefined, preferredSubtitleLanguages),
     meta: buildMeta(src),
   };
 }
 
-export function toDriftState(snap: PlayerSnapshot, cues: SubCue[], trackKey: string): DriftPlayerState {
+export function toDriftState(
+  snap: PlayerSnapshot,
+  cues: SubCue[],
+  trackKey: string,
+): DriftPlayerState {
   return {
     positionSec: snap.positionSec,
     durationSec: snap.durationSec,

@@ -43,16 +43,32 @@ pub fn locate_ffmpeg() -> Option<std::path::PathBuf> {
         if let Ok(exe) = std::env::current_exe() {
             if let Some(dir) = exe.parent() {
                 owned.push(dir.join("ffmpeg.exe").to_string_lossy().to_string());
-                owned.push(dir.join(r"..\binaries\ffmpeg.exe").to_string_lossy().to_string());
-                owned.push(dir.join(r"..\..\binaries\ffmpeg.exe").to_string_lossy().to_string());
-                owned.push(dir.join(r"..\..\..\binaries\ffmpeg.exe").to_string_lossy().to_string());
+                owned.push(
+                    dir.join(r"..\binaries\ffmpeg.exe")
+                        .to_string_lossy()
+                        .to_string(),
+                );
+                owned.push(
+                    dir.join(r"..\..\binaries\ffmpeg.exe")
+                        .to_string_lossy()
+                        .to_string(),
+                );
+                owned.push(
+                    dir.join(r"..\..\..\binaries\ffmpeg.exe")
+                        .to_string_lossy()
+                        .to_string(),
+                );
             }
         }
         // Dev tree relative to cwd
         owned.push(r"src-tauri\binaries\ffmpeg.exe".into());
         owned.push(r"binaries\ffmpeg.exe".into());
         // Common manual installs
-        for base in [r"C:\ffmpeg\bin", r"C:\Program Files\ffmpeg\bin", r"C:\Program Files (x86)\ffmpeg\bin"] {
+        for base in [
+            r"C:\ffmpeg\bin",
+            r"C:\Program Files\ffmpeg\bin",
+            r"C:\Program Files (x86)\ffmpeg\bin",
+        ] {
             owned.push(format!(r"{base}\ffmpeg.exe"));
         }
         // Chocolatey
@@ -60,15 +76,27 @@ pub fn locate_ffmpeg() -> Option<std::path::PathBuf> {
         // Scoop (per-user)
         if let Some(home) = std::env::var_os("USERPROFILE") {
             let h = std::path::PathBuf::from(home);
-            owned.push(h.join(r"scoop\shims\ffmpeg.exe").to_string_lossy().to_string());
-            owned.push(h.join(r"scoop\apps\ffmpeg\current\bin\ffmpeg.exe").to_string_lossy().to_string());
+            owned.push(
+                h.join(r"scoop\shims\ffmpeg.exe")
+                    .to_string_lossy()
+                    .to_string(),
+            );
+            owned.push(
+                h.join(r"scoop\apps\ffmpeg\current\bin\ffmpeg.exe")
+                    .to_string_lossy()
+                    .to_string(),
+            );
         }
         // WinGet — installs under %LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-*-essentials_build\bin
         if let Some(local) = std::env::var_os("LOCALAPPDATA") {
             let winget = std::path::PathBuf::from(&local).join(r"Microsoft\WinGet\Packages");
             if let Ok(entries) = std::fs::read_dir(&winget) {
                 for e in entries.flatten() {
-                    if e.file_name().to_string_lossy().to_lowercase().contains("ffmpeg") {
+                    if e.file_name()
+                        .to_string_lossy()
+                        .to_lowercase()
+                        .contains("ffmpeg")
+                    {
                         if let Ok(subs) = std::fs::read_dir(e.path()) {
                             for s in subs.flatten() {
                                 let candidate = s.path().join(r"bin\ffmpeg.exe");
@@ -82,6 +110,21 @@ pub fn locate_ffmpeg() -> Option<std::path::PathBuf> {
             }
         }
     } else if cfg!(target_os = "macos") {
+        if let Ok(exe) = std::env::current_exe() {
+            if let Some(dir) = exe.parent() {
+                owned.push(dir.join("ffmpeg").to_string_lossy().to_string());
+                owned.push(
+                    dir.join("ffmpeg-aarch64-apple-darwin")
+                        .to_string_lossy()
+                        .to_string(),
+                );
+                owned.push(
+                    dir.join("ffmpeg-x86_64-apple-darwin")
+                        .to_string_lossy()
+                        .to_string(),
+                );
+            }
+        }
         for p in [
             "/opt/homebrew/bin/ffmpeg",
             "/usr/local/bin/ffmpeg",
@@ -95,7 +138,9 @@ pub fn locate_ffmpeg() -> Option<std::path::PathBuf> {
             if let Some(dir) = exe.parent() {
                 owned.push(dir.join("ffmpeg").to_string_lossy().to_string());
                 owned.push(
-                    dir.join("ffmpeg-x86_64-unknown-linux-gnu").to_string_lossy().to_string(),
+                    dir.join("ffmpeg-x86_64-unknown-linux-gnu")
+                        .to_string_lossy()
+                        .to_string(),
                 );
             }
         }
@@ -156,7 +201,11 @@ pub fn ffmpeg_present() -> bool {
 }
 
 pub fn locate_ffprobe() -> Option<std::path::PathBuf> {
-    let name = if cfg!(windows) { "ffprobe.exe" } else { "ffprobe" };
+    let name = if cfg!(windows) {
+        "ffprobe.exe"
+    } else {
+        "ffprobe"
+    };
     if let Some(ffmpeg) = locate_ffmpeg() {
         if let Some(parent) = ffmpeg.parent() {
             let candidate = parent.join(name);
@@ -194,7 +243,10 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
     let mut cmd = tokio::process::Command::new(&ffprobe);
     cmd.arg("-v").arg("error");
     let mut has_ua = false;
-    if let Some((_, ua)) = headers.iter().find(|(k, _)| k.to_lowercase() == "user-agent") {
+    if let Some((_, ua)) = headers
+        .iter()
+        .find(|(k, _)| k.to_lowercase() == "user-agent")
+    {
         cmd.arg("-user_agent").arg(ua);
         has_ua = true;
     }
@@ -337,7 +389,10 @@ pub async fn handle_transcode(
         .arg("8");
 
     let mut has_ua = false;
-    if let Some((_, ua)) = headers.iter().find(|(k, _)| k.to_lowercase() == "user-agent") {
+    if let Some((_, ua)) = headers
+        .iter()
+        .find(|(k, _)| k.to_lowercase() == "user-agent")
+    {
         cmd.arg("-user_agent").arg(ua);
         has_ua = true;
     }
@@ -434,7 +489,11 @@ pub async fn handle_transcode(
         .get_args()
         .map(|a| a.to_string_lossy().to_string())
         .collect();
-    eprintln!("[harbor::transcode] spawning: {:?} {}", ffmpeg, args_dbg.join(" "));
+    eprintln!(
+        "[harbor::transcode] spawning: {:?} {}",
+        ffmpeg,
+        args_dbg.join(" ")
+    );
 
     crate::proc_guard::configure_command(&mut cmd);
     let mut child = match cmd.spawn() {
@@ -483,7 +542,10 @@ pub async fn handle_transcode(
     hmap.insert("Content-Type", HeaderValue::from_static("video/mp2t"));
     hmap.insert("Cache-Control", HeaderValue::from_static("no-cache"));
     hmap.insert("Connection", HeaderValue::from_static("close"));
-    hmap.insert("transferMode.dlna.org", HeaderValue::from_static("Streaming"));
+    hmap.insert(
+        "transferMode.dlna.org",
+        HeaderValue::from_static("Streaming"),
+    );
     hmap.insert(
         "contentFeatures.dlna.org",
         HeaderValue::from_static(

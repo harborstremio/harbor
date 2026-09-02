@@ -2,6 +2,7 @@ import {
   fuseConfidence,
   isAgreeingSignal,
   DEFAULT_PRIOR,
+  toLogOdds,
   type SignalEvidence,
   type TierId,
   type Calibrator,
@@ -10,11 +11,17 @@ import {
 import {
   evaluateBestEffort,
   evaluateGate,
+  unknownQuality,
   outcomeRank,
   DEFAULT_BOUNDS,
+  THRESHOLDS,
   type AlignmentQuality,
   type Bounds,
+  type CandidateKind,
   type GateDecision,
+  type QualityMeasurement,
+  type QualityMeasurementRequest,
+  type SubtitleFormat,
   type SyncTransform,
   type AffineTransform,
 } from "./fp-gate";
@@ -26,7 +33,21 @@ import {
   type EpisodeRef,
 } from "./metadata-priors";
 import type { SwapCues } from "./opensubtitles";
-import { escalateTryHarder, consensusAnchorFit, consensusSignal, wrongContentOutcome } from "./smart-layer";
+import {
+  canUseLexicalAsr,
+  escalateTryHarder,
+  consensusAnchorFit,
+  consensusSignal,
+  wrongContentOutcome,
+} from "./smart-layer";
+import {
+  applyFusedCalibration,
+  calibratorFor,
+  DEFAULT_BUNDLE,
+  isReleaseReady,
+  reliabilityFor,
+  type CalibrationBundle,
+} from "./calibration";
 
 export type SourceKind = "local" | "http" | "hls" | "debrid" | "torrent";
 
@@ -39,6 +60,7 @@ export type ConsensusResult = {
 };
 export type AsrWindowSpec = { startSec: number; lenSec: number };
 export type AsrPhrase = { start: number; end: number; text: string };
+export type AsrTranscript = { phrases: AsrPhrase[]; detectedLanguage: string | null };
 
 export type MediaMeta = {
   expectedRuntimeSec?: number;
@@ -60,6 +82,11 @@ export type PipelineContext = {
   cueText?: string[];
   moviehash?: string;
   moviebytesize?: number;
+  audioLanguage?: string | null;
+  subtitleLanguage?: string | null;
+  preferredSubtitleLanguages?: string[];
+  subtitleFormat?: SubtitleFormat;
+  /** Subtitle-only lookup languages retained for existing provider ports. */
   languages: string[];
   meta?: MediaMeta;
 };
@@ -81,8 +108,18 @@ export type CrowdResult = {
   verified: boolean;
   tier: CrowdTier;
 };
-export type VadResult = { transform: AffineTransform; rawScore: number; quality: AlignmentQuality };
-export type PiecewiseResult = { transform: SyncTransform; rawScore: number; quality: AlignmentQuality };
+export type VadResult = {
+  transform: AffineTransform;
+  rawScore: number;
+  quality: AlignmentQuality;
+  fitWindowIds?: string[];
+};
+export type PiecewiseResult = {
+  transform: SyncTransform;
+  rawScore: number;
+  quality: AlignmentQuality;
+  fitWindowIds?: string[];
+};
 export type AsrResult = { wordMatch: number; supportsTransform: number };
 
 export type TierPorts = {
@@ -93,15 +130,21 @@ export type TierPorts = {
   vadAffine?: (ctx: PipelineContext, win: WindowPolicy) => Promise<VadResult | null>;
   vadPiecewise?: (ctx: PipelineContext, seed: SyncTransform) => Promise<PiecewiseResult | null>;
   asrMatch?: (ctx: PipelineContext, candidate: SyncTransform) => Promise<AsrResult | null>;
-  asrTranscribe?: (ctx: PipelineContext, windows: AsrWindowSpec[]) => Promise<AsrPhrase[]>;
+  asrTranscribe?: (ctx: PipelineContext, windows: AsrWindowSpec[]) => Promise<AsrTranscript>;
   resolveSwapCues?: (ctx: PipelineContext, swap: SwapRef) => Promise<SwapCues | null>;
-  measureQuality: (ctx: PipelineContext, transform: SyncTransform) => Promise<AlignmentQuality>;
+  measureQuality: (
+    ctx: PipelineContext,
+    transform: SyncTransform,
+    request?: QualityMeasurementRequest,
+  ) => Promise<QualityMeasurement>;
 };
 
 export type PipelineOptions = {
   tryHarder?: boolean;
   prior?: number;
   calibrators?: Partial<Record<TierId, Calibrator>>;
+  calibration?: CalibrationBundle;
+  allowStructuralAutoApply?: boolean;
 };
 
 export type PipelineOutcome = {
@@ -115,15 +158,16 @@ export type PipelineOutcome = {
 
 const IDENTITY: AffineTransform = { kind: "affine", offsetSec: 0, ratio: 1 };
 const MIN_SWAP_CUES = 4;
+const GLOBAL_ESCALATION_VETOES = new Set(["conflict", "already-good", "metadata-hard-refuse"]);
 
-const TIERS: Record<TierId, { cal: Calibrator; rel: number; group: string }> = {
-  hash_exact: { cal: { kind: "identity" }, rel: 0.99, group: "hash" },
-  crowd_db: { cal: { kind: "identity" }, rel: 0.9, group: "crowd" },
-  vad_affine: { cal: { kind: "platt", a: 8.8, b: -4.8 }, rel: 0.75, group: "vad" },
-  vad_piecewise: { cal: { kind: "platt", a: 8.0, b: -4.4 }, rel: 0.7, group: "vad" },
-  asr_match: { cal: { kind: "platt", a: 9.8, b: -3.7 }, rel: 0.85, group: "asr" },
-  consensus: { cal: { kind: "platt", a: 6, b: -3 }, rel: 0.6, group: "consensus" },
-  metadata_prior: { cal: { kind: "identity" }, rel: 0.4, group: "meta" },
+const TIER_GROUP: Record<TierId, string> = {
+  hash_exact: "hash",
+  crowd_db: "crowd",
+  vad_affine: "vad",
+  vad_piecewise: "vad",
+  asr_match: "asr",
+  consensus: "consensus",
+  metadata_prior: "meta",
 };
 
 function signal(
@@ -133,16 +177,32 @@ function signal(
   opts: PipelineOptions,
   extra?: Partial<SignalEvidence>,
 ): SignalEvidence {
-  const t = TIERS[tier];
+  const bundle = opts.calibration ?? DEFAULT_BUNDLE;
   return {
     tier,
     rawScore,
-    calibrator: opts.calibrators?.[tier] ?? t.cal,
-    reliability: t.rel,
-    independenceGroup: t.group,
+    calibrator: opts.calibrators?.[tier] ?? calibratorFor(bundle, tier),
+    reliability: reliabilityFor(bundle, tier),
+    independenceGroup: TIER_GROUP[tier],
     clearedFloor,
     ...extra,
   };
+}
+
+function fusedConfidence(evidence: SignalEvidence[], prior: number, bundle: CalibrationBundle) {
+  const raw = fuseConfidence(evidence, prior);
+  const pCorrect = applyFusedCalibration(bundle, raw.pCorrect);
+  return pCorrect === raw.pCorrect ? raw : { ...raw, pCorrect, logOdds: toLogOdds(pCorrect) };
+}
+
+function subtitleLanguages(ctx: PipelineContext): string[] {
+  return [
+    ctx.subtitleLanguage ?? undefined,
+    ...(ctx.preferredSubtitleLanguages ?? []),
+    ...ctx.languages,
+  ]
+    .filter((lang): lang is string => typeof lang === "string" && lang.length > 0)
+    .filter((lang, index, all) => all.indexOf(lang) === index);
 }
 
 function windowPolicy(kind: SourceKind, tryHarder: boolean): WindowPolicy {
@@ -177,15 +237,23 @@ function episodeRefFromMeta(meta: MediaMeta): EpisodeRef {
   };
 }
 
-function affineApprox(t: SyncTransform): { offsetSec: number; ratio: number } {
-  if (t.kind === "affine") return { offsetSec: t.offsetSec, ratio: t.ratio };
-  const s = t.segments[0];
-  return s ? { offsetSec: s.offsetSec, ratio: s.ratio } : { offsetSec: 0, ratio: 1 };
+function isAlreadyGood(before: QualityMeasurement): boolean {
+  return before.status === "measured" && before.value.ncc >= THRESHOLDS.alreadyGoodNcc;
 }
 
-function isAlreadyGood(before: AlignmentQuality, t: SyncTransform): boolean {
-  const a = affineApprox(t);
-  return before.ncc >= 0.85 && Math.abs(a.offsetSec) < 0.25 && Math.abs(a.ratio - 1) < 0.003;
+function enforceMetadataHardRefuse(
+  decision: GateDecision,
+  transform: SyncTransform,
+  verdict: ClassCVerdict | null,
+): GateDecision {
+  if (!verdict?.hardRefuse || decision.decision === "refuse") return decision;
+  return {
+    decision: "refuse",
+    reason: `wrong content: ${verdict.reasons[0] ?? "metadata hard refuse"}`,
+    bindingRule: "metadata-hard-refuse",
+    pCorrect: decision.pCorrect,
+    transform,
+  };
 }
 
 function needsPiecewise(v: VadResult): boolean {
@@ -203,6 +271,7 @@ function shouldRunAsr(
   opts: PipelineOptions,
   verdict: ClassCVerdict | null,
 ): boolean {
+  if (!canUseLexicalAsr(ctx)) return false;
   if (opts.tryHarder) return true;
   const structural = evidence.some((e) => e.independenceGroup === "vad" && e.clearedFloor);
   if (!structural) return false;
@@ -222,40 +291,80 @@ export async function runAutoSync(
   opts: PipelineOptions = {},
 ): Promise<PipelineOutcome> {
   const prior = opts.prior ?? DEFAULT_PRIOR;
+  const calibration = opts.calibration ?? DEFAULT_BUNDLE;
+  const calibrationReady = isReleaseReady(calibration);
   const bounds = buildBounds(ctx, ports);
-  const qualityBeforeP = ports.measureQuality(ctx, IDENTITY);
+  const validationRequest: QualityMeasurementRequest = { purpose: "validation" };
+  const measureQuality = (
+    measurementCtx: PipelineContext,
+    transform: SyncTransform,
+    request: QualityMeasurementRequest,
+  ) =>
+    ports
+      .measureQuality(measurementCtx, transform, request)
+      .catch(() => unknownQuality("provider-error", "quality-port"));
+  const qualityBeforeP = measureQuality(ctx, IDENTITY, validationRequest);
   const consensusP: Promise<ConsensusResult | null> = ports.consensus
     ? ports.consensus(ctx).catch(() => null)
     : Promise.resolve(null);
   const priorRuntimeOk = runtimeOk(ctx);
   const evidence: SignalEvidence[] = [];
   const tiersRun: TierId[] = [];
-  let metaVerdict: ClassCVerdict | null = null;
+  const metaVerdict =
+    ctx.cues.length > 0
+      ? classifyContent({
+          videoDurationSec: ctx.durationSec,
+          sub: subtitleShapeFromCues(ctx.cues, ctx.cueText),
+          facts: [],
+          wantLangs: subtitleLanguages(ctx),
+          ref: ctx.meta ? episodeRefFromMeta(ctx.meta) : undefined,
+        })
+      : null;
 
   let best: PipelineOutcome = {
-    decision: { decision: "refuse", reason: "no candidate produced", bindingRule: "default", pCorrect: prior, transform: IDENTITY },
+    decision: {
+      decision: "refuse",
+      reason: "no candidate produced",
+      bindingRule: "default",
+      pCorrect: prior,
+      transform: IDENTITY,
+    },
     candidate: null,
     evidence,
     tiersRun,
   };
 
   const keep = (out: PipelineOutcome) => {
-    if (outcomeRank(out.decision.decision) > outcomeRank(best.decision.decision)) best = out;
+    const rank = outcomeRank(out.decision.decision);
+    const bestRank = outcomeRank(best.decision.decision);
+    if (rank > bestRank || (rank === bestRank && best.decision.bindingRule === "default")) {
+      best = out;
+    }
   };
 
   const gateFor = async (
     transform: SyncTransform,
+    candidateKind: CandidateKind,
     exactIdentity: boolean,
     over: {
       asrWordMatch?: number;
-      qualityAfter?: AlignmentQuality;
-      qualityBefore?: AlignmentQuality;
+      qualityAfter?: QualityMeasurement;
+      qualityBefore?: QualityMeasurement;
       requireImprovement?: boolean;
+      fitWindowIds?: string[];
     } = {},
   ): Promise<GateDecision> => {
-    const before = over.qualityBefore ?? (await qualityBeforeP);
-    const qualityAfter = over.qualityAfter ?? (await ports.measureQuality(ctx, transform));
-    const confidence = fuseConfidence(evidence, prior);
+    const request: QualityMeasurementRequest = {
+      purpose: "validation",
+      excludeWindowIds: over.fitWindowIds,
+    };
+    const before =
+      over.qualityBefore ??
+      (over.fitWindowIds?.length
+        ? await measureQuality(ctx, IDENTITY, request)
+        : await qualityBeforeP);
+    const qualityAfter = over.qualityAfter ?? (await measureQuality(ctx, transform, request));
+    const confidence = fusedConfidence(evidence, prior, calibration);
     return evaluateGate({
       transform,
       confidence,
@@ -263,9 +372,14 @@ export async function runAutoSync(
       qualityAfter,
       bounds,
       exactIdentity,
+      candidateKind,
+      calibrationReady,
+      structuralAutoApplyEnabled: opts.allowStructuralAutoApply === true,
+      subtitleFormat: ctx.subtitleFormat ?? "unknown",
+      fitWindowIds: over.fitWindowIds,
       asrWordMatch: over.asrWordMatch,
       priorRuntimeOk,
-      inputAlreadyGood: isAlreadyGood(before, transform),
+      inputAlreadyGood: isAlreadyGood(before),
       requireImprovement: over.requireImprovement,
     });
   };
@@ -274,13 +388,22 @@ export async function runAutoSync(
     const swapOut = { url: swap.url, format: swap.format };
     const resolved = ports.resolveSwapCues ? await ports.resolveSwapCues(ctx, swap) : null;
     if (!resolved || resolved.cues.length < MIN_SWAP_CUES) {
-      const pCorrect = fuseConfidence(evidence, prior).pCorrect;
-      const decision: GateDecision = { decision: "offer", reason: "hash-matched subtitle available, swapped timing unverified", bindingRule: "swap-unverified", pCorrect, transform: IDENTITY };
+      const pCorrect = fusedConfidence(evidence, prior, calibration).pCorrect;
+      const decision: GateDecision = {
+        decision: "offer",
+        reason: "hash-matched subtitle available, swapped timing unverified",
+        bindingRule: "swap-unverified",
+        pCorrect,
+        transform: IDENTITY,
+      };
       return { decision, candidate: IDENTITY, subSwap: swapOut, evidence, tiersRun };
     }
     const swapCtx: PipelineContext = { ...ctx, cues: resolved.cues, cueText: resolved.cueText };
-    const swapQuality = await ports.measureQuality(swapCtx, IDENTITY);
-    const decision = await gateFor(IDENTITY, true, { qualityAfter: swapQuality, requireImprovement: true });
+    const swapQuality = await measureQuality(swapCtx, IDENTITY, validationRequest);
+    const decision = await gateFor(IDENTITY, "exact-file-hash", true, {
+      qualityAfter: swapQuality,
+      requireImprovement: true,
+    });
     return { decision, candidate: IDENTITY, subSwap: swapOut, evidence, tiersRun };
   };
 
@@ -293,10 +416,11 @@ export async function runAutoSync(
       if (h.subSwap) {
         out = await gateSubSwap(h.subSwap);
       } else {
-        const decision = await gateFor(h.transform, true);
+        const decision = await gateFor(h.transform, "exact-file-hash", true);
         out = { decision, candidate: h.transform, evidence, tiersRun };
       }
       keep(out);
+      if (h.subSwap) return out;
       if (out.decision.decision === "apply") return out;
     }
   }
@@ -305,8 +429,13 @@ export async function runAutoSync(
     const c = await ports.crowdDb(ctx);
     if (c && c.verified) {
       tiersRun.push("crowd_db");
-      evidence.push(signal("crowd_db", c.rawScore, true, opts, { reliability: crowdReliability(c), crowdTier: c.tier }));
-      const decision = await gateFor(c.transform, c.tier === "A");
+      evidence.push(
+        signal("crowd_db", c.rawScore, true, opts, {
+          reliability: crowdReliability(c),
+          crowdTier: c.tier,
+        }),
+      );
+      const decision = await gateFor(c.transform, "structural", c.tier === "A");
       const out: PipelineOutcome = { decision, candidate: c.transform, evidence, tiersRun };
       keep(out);
       if (decision.decision === "apply") return out;
@@ -321,7 +450,12 @@ export async function runAutoSync(
       tiersRun.push("consensus");
       if (consensusRes.verdict === "wrong") {
         evidence.push(consensusSignal(consensusRes, null));
-        const out = wrongContentOutcome(consensusRes, fuseConfidence(evidence, prior).pCorrect, evidence, tiersRun);
+        const out = wrongContentOutcome(
+          consensusRes,
+          fusedConfidence(evidence, prior, calibration).pCorrect,
+          evidence,
+          tiersRun,
+        );
         keep(out);
         if (!opts.tryHarder) return out;
       }
@@ -331,30 +465,46 @@ export async function runAutoSync(
   if (consensusRes && consensusRes.verdict === "right") {
     const fastFit = consensusAnchorFit(consensusRes);
     if (fastFit) {
-      const fastT: SyncTransform = { kind: "affine", offsetSec: fastFit.offsetSec, ratio: fastFit.ratio };
+      const fastT: SyncTransform = {
+        kind: "affine",
+        offsetSec: fastFit.offsetSec,
+        ratio: fastFit.ratio,
+      };
       evidence.push(consensusSignal(consensusRes, fastT));
       consensusEvidencePushed = true;
-      const fastAfter = await ports.measureQuality(ctx, fastT);
-      let decision = await gateFor(fastT, false, { qualityAfter: fastAfter });
+      const fastBefore = await qualityBeforeP;
+      const fastAfter = await measureQuality(ctx, fastT, validationRequest);
+      let decision = enforceMetadataHardRefuse(
+        await gateFor(fastT, "structural", false, {
+          qualityBefore: fastBefore,
+          qualityAfter: fastAfter,
+        }),
+        fastT,
+        metaVerdict,
+      );
       let bestEffort = false;
-      if (decision.decision !== "apply") {
+      if (decision.decision !== "apply" && !metaVerdict?.hardRefuse) {
         const be = evaluateBestEffort({
           transform: fastT,
-          confidence: fuseConfidence(evidence, prior),
-          qualityBefore: await qualityBeforeP,
+          confidence: fusedConfidence(evidence, prior, calibration),
+          qualityBefore: fastBefore,
           qualityAfter: fastAfter,
           bounds,
           exactIdentity: false,
-          inputAlreadyGood: false,
+          candidateKind: "structural",
+          calibrationReady,
+          structuralAutoApplyEnabled: opts.allowStructuralAutoApply === true,
+          subtitleFormat: ctx.subtitleFormat ?? "unknown",
+          inputAlreadyGood: isAlreadyGood(fastBefore),
         });
-        if (be.decision === "apply") {
+        if (be.decision === "offer" && outcomeRank(be.decision) >= outcomeRank(decision.decision)) {
           decision = be;
           bestEffort = true;
         }
       }
+      const out: PipelineOutcome = { decision, candidate: fastT, evidence, tiersRun, bestEffort };
+      keep(out);
       if (decision.decision === "apply") {
-        const out: PipelineOutcome = { decision, candidate: fastT, evidence, tiersRun, bestEffort };
-        keep(out);
         return out;
       }
     }
@@ -362,6 +512,7 @@ export async function runAutoSync(
 
   let lead: SyncTransform | null = null;
   let leadNcc = 0;
+  let leadFitWindowIds: string[] | undefined;
   if (ports.vadAffine) {
     const v = await ports.vadAffine(ctx, windowPolicy(ctx.sourceKind, opts.tryHarder === true));
     if (v) {
@@ -369,6 +520,7 @@ export async function runAutoSync(
       evidence.push(signal("vad_affine", v.rawScore, v.quality.ncc >= 0.55, opts));
       lead = v.transform;
       leadNcc = v.quality.ncc;
+      leadFitWindowIds = v.fitWindowIds;
       if (ports.vadPiecewise && needsPiecewise(v)) {
         const p = await ports.vadPiecewise(ctx, v.transform);
         if (p) {
@@ -377,6 +529,7 @@ export async function runAutoSync(
           if (p.quality.ncc > v.quality.ncc) {
             lead = p.transform;
             leadNcc = p.quality.ncc;
+            leadFitWindowIds = p.fitWindowIds;
           }
         }
       }
@@ -389,15 +542,7 @@ export async function runAutoSync(
 
   if (ctx.cues.length > 0) {
     tiersRun.push("metadata_prior");
-    const sub = subtitleShapeFromCues(ctx.cues, ctx.cueText);
-    metaVerdict = classifyContent({
-      videoDurationSec: ctx.durationSec,
-      sub,
-      facts: [],
-      wantLangs: ctx.languages,
-      ref: ctx.meta ? episodeRefFromMeta(ctx.meta) : undefined,
-    });
-    evidence.push(metadataEvidence(metaVerdict));
+    if (metaVerdict) evidence.push(metadataEvidence(metaVerdict));
   }
 
   let asrWordMatch: number | undefined;
@@ -406,26 +551,65 @@ export async function runAutoSync(
     if (a) {
       tiersRun.push("asr_match");
       asrWordMatch = a.wordMatch;
-      evidence.push(signal("asr_match", a.supportsTransform, a.wordMatch >= 0.2, opts, {
-        supportsWrong: 1 - a.wordMatch,
-      }));
+      evidence.push(
+        signal("asr_match", a.supportsTransform, a.wordMatch >= 0.2, opts, {
+          supportsWrong: 1 - a.wordMatch,
+        }),
+      );
     }
   }
 
   if (lead) {
+    const request: QualityMeasurementRequest = {
+      purpose: "validation",
+      excludeWindowIds: leadFitWindowIds,
+    };
     const leadBefore =
-      ctx.sourceKind === "torrent" ? await ports.measureQuality(ctx, IDENTITY) : await qualityBeforeP;
-    let decision = await gateFor(lead, false, { asrWordMatch, qualityBefore: leadBefore });
-    if (metaVerdict?.hardRefuse && decision.decision !== "refuse") {
-      const reason = `wrong content: ${metaVerdict.reasons[0] ?? "metadata hard refuse"}`;
-      decision = { decision: "refuse", reason, bindingRule: "metadata-hard-refuse", pCorrect: decision.pCorrect, transform: lead };
-    }
+      ctx.sourceKind === "torrent" || leadFitWindowIds?.length
+        ? await measureQuality(ctx, IDENTITY, request)
+        : await qualityBeforeP;
+    let decision = await gateFor(lead, "structural", false, {
+      asrWordMatch,
+      qualityBefore: leadBefore,
+      fitWindowIds: leadFitWindowIds,
+    });
+    decision = enforceMetadataHardRefuse(decision, lead, metaVerdict);
     keep({ decision, candidate: lead, evidence, tiersRun });
   }
 
-  if (best.decision.decision !== "apply" && !best.subSwap && (opts.tryHarder || !!ports.asrTranscribe)) {
-    const esc = await escalateTryHarder({ ctx, ports, lead, leadNcc, consensus: consensusRes, bounds, qualityBefore: await qualityBeforeP, evidence, tiersRun });
-    if (esc) keep(esc);
+  if (
+    best.decision.decision !== "apply" &&
+    !best.subSwap &&
+    (opts.tryHarder || !!ports.asrTranscribe)
+  ) {
+    const escalationBefore = await qualityBeforeP;
+    const esc = await escalateTryHarder({
+      ctx,
+      ports,
+      lead,
+      leadNcc,
+      consensus: consensusRes,
+      bounds,
+      qualityBefore: escalationBefore,
+      inputAlreadyGood: isAlreadyGood(escalationBefore),
+      wrongContentReason: metaVerdict?.hardRefuse
+        ? `wrong content: ${metaVerdict.reasons[0] ?? "metadata hard refuse"}`
+        : undefined,
+      evidence,
+      tiersRun,
+      calibrationReady,
+      structuralAutoApplyEnabled: opts.allowStructuralAutoApply === true,
+      subtitleFormat: ctx.subtitleFormat ?? "unknown",
+    });
+    if (esc) {
+      if (
+        esc.decision.decision === "refuse" &&
+        GLOBAL_ESCALATION_VETOES.has(esc.decision.bindingRule)
+      ) {
+        return esc;
+      }
+      keep(esc);
+    }
   }
 
   return best;

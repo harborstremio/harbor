@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Captions, CaptionsOff, Check, Languages, Loader2, Play } from "lucide-react";
+import { ArrowLeft, Captions, CaptionsOff, Check, Languages, Loader2 } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { Flag } from "@/components/flag";
 import { useContextMenu } from "@/lib/context-menu";
 import { languageName } from "@/lib/subtitles/language";
+import { subtitleLoadMetadataOf } from "@/lib/subtitles/provider-label";
 import { saveSubtitleToDisk } from "@/lib/subtitles/save-to-disk";
 import type { SubResult } from "@/lib/subtitles/types";
 import { useT } from "@/lib/i18n";
+import { subtitleClassificationLabels } from "@/lib/subtitles/classification-labels";
 import type { PlayEpisode, PlayerSrc } from "@/lib/view";
 import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
 import { BackdropLayer } from "./backdrop-layer";
@@ -65,6 +68,7 @@ export function SubtitleSelectStep({
           url: r.url,
           lang: r.lang,
           title: r.title || languageName(r.lang),
+          metadata: subtitleLoadMetadataOf(r),
         },
       });
       return;
@@ -285,6 +289,7 @@ function TrackRow({
   const t = useT();
   const { open } = useContextMenu();
   const title = result.title || languageName(result.lang);
+  const classificationLabels = subtitleClassificationLabels(result, t, "compact");
   return (
     <button
       onClick={onPick}
@@ -298,6 +303,7 @@ function TrackRow({
                   title,
                   lang: result.lang,
                   format: result.format,
+                  downloadAuth: result.downloadAuth,
                   label: t("Subtitle"),
                 })
             : undefined,
@@ -325,16 +331,18 @@ function TrackRow({
               <span className="uppercase">{result.format}</span>
             </>
           )}
-          {result.hearingImpaired && (
-            <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-200">
-              {t("HI/SDH")}
+          {classificationLabels.map(({ kind, label }) => (
+            <span
+              key={kind}
+              className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${
+                kind === "hearingImpaired" || kind === "machineTranslated"
+                  ? "bg-amber-400/15 text-amber-200"
+                  : "bg-sky-400/15 text-sky-200"
+              }`}
+            >
+              {label}
             </span>
-          )}
-          {result.forced && (
-            <span className="rounded bg-sky-400/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-sky-200">
-              {t("Forced")}
-            </span>
-          )}
+          ))}
         </span>
       </div>
       <Flag language={languageName(result.lang)} size="md" showLabel={false} />

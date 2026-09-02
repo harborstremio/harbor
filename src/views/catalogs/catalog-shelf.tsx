@@ -2,21 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { FeedShelf } from "@/components/feed-shelf";
 import { useHideAnimeMetas } from "@/lib/anime-hide";
-import { browseFetcher, type BrowseCatalog } from "@/lib/catalog-browse";
+import { browseFetcher, catalogTypeLabelKey, type BrowseCatalog } from "@/lib/catalog-browse";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
-
-const TYPE_LABELS: Record<string, string> = {
-  movie: "Movies",
-  series: "Series",
-  anime: "Anime",
-  tv: "TV",
-  channel: "Channels",
-};
 
 export function CatalogShelf({ catalog }: { catalog: BrowseCatalog }) {
   const { openGrid } = useView();
   const t = useT();
+  const typeLabelKey = catalogTypeLabelKey(catalog.type);
   const [items, setItems] = useState<Meta[] | null>(null);
   const pageRef = useRef(1);
   const loadedRef = useRef(0);
@@ -33,7 +26,10 @@ export function CatalogShelf({ catalog }: { catalog: BrowseCatalog }) {
     const load = () => {
       if (startedRef.current) return;
       startedRef.current = true;
-      void browseFetcher(catalog, null)(1)
+      void browseFetcher(
+        catalog,
+        null,
+      )(1)
         .then((list) => {
           setItems(list);
           loadedRef.current = list.length;
@@ -76,7 +72,7 @@ export function CatalogShelf({ catalog }: { catalog: BrowseCatalog }) {
         shelf={{
           id: catalog.key,
           title: catalog.name,
-          kicker: t(TYPE_LABELS[catalog.type] ?? catalog.type),
+          kicker: typeLabelKey ? t(typeLabelKey) : catalog.type,
         }}
         items={items === null ? null : shownItems}
         onEndReached={loadMore}

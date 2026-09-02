@@ -1,4 +1,4 @@
-const enabled = import.meta.env.DEV;
+const enabled = import.meta.env?.DEV === true;
 
 export function dlog(...args: unknown[]): void {
   if (enabled) console.log(...args);

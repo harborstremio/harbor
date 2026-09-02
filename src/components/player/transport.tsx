@@ -29,6 +29,8 @@ import { renderControl, type ControlContext } from "./transport/control-renderer
 import { SongIdToast } from "@/components/song-id-toast";
 import { useCastModalPlay } from "./use-cast-modal-play";
 
+// This is the mouse-era transport. Big Picture suppresses it outright and
+// renders views/big-picture/player instead, so nothing here scales for ten feet.
 export function Transport({
   snap,
   capabilities,
@@ -92,6 +94,7 @@ export function Transport({
   onDownloadReset,
   onOpenDvr,
   sleep,
+  homeServerQualityControl,
 }: {
   snap: PlayerSnapshot;
   capabilities: PlayerCapabilities;
@@ -155,11 +158,13 @@ export function Transport({
   onDownloadReset?: () => void;
   onOpenDvr?: () => void;
   sleep?: import("@/views/player/hooks/use-sleep-timer").SleepTimerState;
+  homeServerQualityControl?: import("react").ReactNode;
 }) {
   const t = useT();
   const { settings } = useSettings();
   const kid = useActiveKid();
-  const isStremioLayout = resolveChromeTheme(settings.theme, settings.playerChromeTheme) === "stremio";
+  const isStremioLayout =
+    resolveChromeTheme(settings.theme, settings.playerChromeTheme) === "stremio";
   const playing = snap.status === "playing";
   const showEpisodeNav = hasPrevEp || hasNextEp;
   const [audioMenuOpen, setAudioMenuOpen] = useState(false);
@@ -180,8 +185,17 @@ export function Transport({
   const [compact, setCompact] = useState(false);
   const [tight, setTight] = useState(false);
   useEffect(() => {
-    onMenuOpenChange?.(audioMenuOpen || subtitleMenuOpen || speedMenuOpen || aspectMenuOpen || anime4kMenuOpen);
-  }, [audioMenuOpen, subtitleMenuOpen, speedMenuOpen, aspectMenuOpen, anime4kMenuOpen, onMenuOpenChange]);
+    onMenuOpenChange?.(
+      audioMenuOpen || subtitleMenuOpen || speedMenuOpen || aspectMenuOpen || anime4kMenuOpen,
+    );
+  }, [
+    audioMenuOpen,
+    subtitleMenuOpen,
+    speedMenuOpen,
+    aspectMenuOpen,
+    anime4kMenuOpen,
+    onMenuOpenChange,
+  ]);
   useEffect(() => {
     const refresh = () => setChromeConfig(readPlayerChromeConfig("default"));
     const onStorage = (e: StorageEvent) => {
@@ -270,6 +284,7 @@ export function Transport({
         onDownloadReset={onDownloadReset}
         onOpenDvr={onOpenDvr}
         sleep={sleep}
+        homeServerQualityControl={homeServerQualityControl}
       />
     );
   }
@@ -404,6 +419,7 @@ export function Transport({
     anime4kMode,
     onAnime4kMode,
     anime4kAvailable,
+    homeServerQualityControl,
   };
   const fadeClassName = `transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`;
   const renderFadedControl = (id: PlayerControlId) => {
@@ -418,7 +434,10 @@ export function Transport({
         data-tauri-drag-region={fullscreen ? undefined : ""}
         className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between px-7 pt-4 pb-8"
       >
-        <div aria-hidden className={`absolute inset-0 bg-gradient-to-b from-black/55 via-black/15 to-transparent ${fadeClassName}`} />
+        <div
+          aria-hidden
+          className={`absolute inset-0 bg-gradient-to-b from-black/55 via-black/15 to-transparent ${fadeClassName}`}
+        />
         <div className="pointer-events-auto relative flex items-start gap-2">
           {controlsInSlot(chromeConfig, "top-left").map((c) => (
             <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
@@ -440,15 +459,22 @@ export function Transport({
           tight ? "px-3 pt-6 pb-3" : "px-7 pt-10 pb-5"
         }`}
       >
-        <div aria-hidden className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent ${fadeClassName}`} />
+        <div
+          aria-hidden
+          className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent ${fadeClassName}`}
+        />
         <div dir="ltr" className="pointer-events-auto relative flex items-center gap-3">
           {isLiveChannel ? (
             <>
-              <div className={fadeClassName}><LiveBadge /></div>
+              <div className={fadeClassName}>
+                <LiveBadge />
+              </div>
               <div className={`flex-1 ${fadeClassName}`}>
                 <LiveSeekBar durationSec={snap.durationSec} onSeek={onSeek} active={visible} />
               </div>
-              <div className={fadeClassName}><GoToLive durationSec={snap.durationSec} onSeek={onSeek} /></div>
+              <div className={fadeClassName}>
+                <GoToLive durationSec={snap.durationSec} onSeek={onSeek} />
+              </div>
             </>
           ) : (
             <>
@@ -464,9 +490,11 @@ export function Transport({
             </>
           )}
         </div>
-        <div className={`pointer-events-auto relative grid items-center ${
-          compact ? "grid-cols-[auto_1fr_auto] gap-2" : "grid-cols-[1fr_auto_1fr] gap-4"
-        }`}>
+        <div
+          className={`pointer-events-auto relative grid items-center ${
+            compact ? "grid-cols-[auto_1fr_auto] gap-2" : "grid-cols-[1fr_auto_1fr] gap-4"
+          }`}
+        >
           <div className="flex min-w-0 items-center gap-2 justify-self-start">
             {controlsInSlot(chromeConfig, "bottom-left").map((c) => (
               <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
@@ -500,9 +528,7 @@ export function Transport({
             setCastModalOpen(false);
             castModalPlay(m, ep);
           }}
-          currentEpisode={
-            season != null && episode != null ? { season, episode } : null
-          }
+          currentEpisode={season != null && episode != null ? { season, episode } : null}
         />
       )}
     </>

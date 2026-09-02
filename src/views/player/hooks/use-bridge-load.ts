@@ -6,6 +6,7 @@ import type { PlayerSrc } from "@/lib/view";
 import { videoIdFor } from "./use-stremio-sync";
 import { useSettings } from "@/lib/settings";
 import { playbackStartupProfile } from "@/lib/player/startup-profile";
+import { isLivePlaybackSrc } from "@/lib/player/live-src";
 import { releaseStreamProxy, retainStreamProxy } from "@/lib/stream-proxy";
 
 const RESUME_PROMPT_MIN_SEC = 30;
@@ -73,10 +74,7 @@ export function useBridgeLoad(params: {
     const isFirstLoad = firstLoadRef.current;
     firstLoadRef.current = false;
     const isAutoRetry = (src.attempt ?? 0) > 0;
-    const isLive =
-      !!src.meta.id?.startsWith("iptv:") ||
-      (!!src.meta.type &&
-        !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
+    const isLive = isLivePlaybackSrc(src);
     let cancelled = false;
     (async () => {
       const openingVid = videoIdFor(
@@ -124,12 +122,19 @@ export function useBridgeLoad(params: {
         console.warn("[player] load failed", e);
         return;
       }
-      const startMs = resolved.ms;
+      const startMs = src.startPositionMs ?? resolved.ms;
       const runtimeMin = src.episode?.runtime ?? null;
       const durationMs = runtimeMin && runtimeMin > 0 ? runtimeMin * 60_000 : 0;
       const finishedNearEnd =
         resolved.finished || (durationMs > 0 && startMs / durationMs >= RESTART_THRESHOLD);
-      const startSec = (!resumePlaybackRef.current || finishedNearEnd ? 0 : startMs) / 1000;
+      // A source replacement (for example a home-server quality switch) carries
+      // an explicit position and must preserve it regardless of the user's
+      // automatic resume preference. That preference only governs stored resume
+      // progress when opening an item normally.
+      const hasExplicitStart = src.startPositionMs != null;
+      const startSec =
+        (hasExplicitStart ? startMs : !resumePlaybackRef.current || finishedNearEnd ? 0 : startMs) /
+        1000;
       const guestInRoom = inRoomRef.current && !isHostRef.current;
       const eligibleForPrompt =
         isFirstLoad &&
@@ -154,14 +159,13 @@ export function useBridgeLoad(params: {
         return;
       }
       if (!guestInRoom && startSec > 5) {
-        // On Linux's embedded mpv renderer, supplying `start` during load can
-        // race the initial render context with a network seek. Load the first
-        // frame normally, then seek once the bridge reports a duration.
         setPendingSeekSec(startSec);
         return;
       }
-      if (!inRoomRef.current) {
+      if (!inRoomRef.current && !src.startPaused) {
         bridge.play().catch(() => {});
+      } else if (src.startPaused) {
+        bridge.pause();
       }
     })();
     return () => {
@@ -176,6 +180,8 @@ export function useBridgeLoad(params: {
     src.playbackTraceId,
     src.meta.id,
     src.subtitles,
+    src.startPositionMs,
+    src.startPaused,
     season,
     episode,
     transcodedUrl,

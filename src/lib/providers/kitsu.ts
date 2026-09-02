@@ -1,6 +1,7 @@
 import { lruSet } from "@/lib/cache";
 import type { Meta } from "@/lib/cinemeta";
 import { registerEvictable } from "@/lib/maintenance";
+import { safeFetch } from "@/lib/safe-fetch";
 import { adultContentHidden } from "@/lib/addons-store/adult-filter";
 
 const KITSU = "https://kitsu.io/api/edge";
@@ -65,7 +66,7 @@ async function get<T>(path: string): Promise<T | null> {
   const hit = cache.get(url);
   if (hit && Date.now() - hit.t < TTL) return hit.v as T;
   try {
-    const r = await fetch(url, { headers: { Accept: "application/vnd.api+json" } });
+    const r = await safeFetch(url, { headers: { Accept: "application/vnd.api+json" } });
     if (!r.ok) return null;
     const j = (await r.json()) as T;
     cache.set(url, { v: j, t: Date.now() });
@@ -157,6 +158,10 @@ function pickImg(img?: Img | null): string | undefined {
   return img?.original ?? img?.large ?? img?.medium ?? img?.small ?? undefined;
 }
 
+function pickPoster(img?: Img | null): string | undefined {
+  return img?.medium ?? img?.large ?? img?.original ?? img?.small ?? undefined;
+}
+
 function ratingToTen(raw?: string | null): string | undefined {
   if (!raw) return undefined;
   const n = Number(raw);
@@ -214,7 +219,7 @@ export async function kitsuAnime(id: number): Promise<KitsuAnimeDetail | null> {
       (t): t is string => !!t,
     ),
     synopsis: a.synopsis || a.description || "",
-    poster: pickImg(a.posterImage),
+    poster: pickPoster(a.posterImage),
     backdrop: pickImg(a.coverImage),
     rating: ratingToTen(a.averageRating),
     episodeCount: a.episodeCount ?? undefined,
@@ -240,7 +245,7 @@ function attrsToMeta(id: string, a: KitsuAnimeAttrs): Meta {
     id: `kitsu:${id}`,
     type: a.subtype === "movie" ? "movie" : "series",
     name: a.titles?.en || a.canonicalTitle || a.titles?.en_jp || "Unknown",
-    poster: pickImg(a.posterImage),
+    poster: pickPoster(a.posterImage),
     background: pickImg(a.coverImage),
     description: a.synopsis || a.description || "",
     releaseInfo: a.startDate ? a.startDate.slice(0, 4) : undefined,
@@ -254,7 +259,6 @@ export async function kitsuSimilarByGenres(
   limit = 18,
 ): Promise<Meta[]> {
   if (genreSlugs.length === 0) return [];
-  // Kitsu 400s when the comma-joined genres filter is combined with the multi-value ageRating filter, so match on the primary genre only.
   const slug = genreSlugs[0];
   const ageFilter = adultContentHidden() ? "&filter[ageRating]=G,PG,R" : "";
   const params = `filter[genres]=${encodeURIComponent(slug)}${ageFilter}&sort=-userCount&page[limit]=${limit + 6}`;
@@ -443,7 +447,7 @@ export async function kitsuRelated(id: number): Promise<KitsuRelated[]> {
         id: `kitsu:${a.id}`,
         type: at.subtype === "movie" ? "movie" : "series",
         name: at.titles?.en || at.canonicalTitle || at.titles?.en_jp || "Unknown",
-        poster: pickImg(at.posterImage),
+        poster: pickPoster(at.posterImage),
         background: pickImg(at.coverImage),
         description: at.synopsis || at.description || "",
         releaseInfo: at.startDate ? at.startDate.slice(0, 4) : undefined,

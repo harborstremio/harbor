@@ -35,13 +35,13 @@ export function ProfileError({ onRetry, onBack }: { onRetry: () => void; onBack:
         <div className="flex gap-3">
           <button
             onClick={onBack}
-            className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-surface px-4 text-[14px] font-medium text-ink-muted ring-1 ring-edge-soft hover:bg-elevated"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-surface px-4 text-[14px] font-medium text-ink-muted ring-1 ring-edge-soft hover:bg-elevated"
           >
             <ArrowLeft size={20} /> {t("Back")}
           </button>
           <button
             onClick={onRetry}
-            className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas hover:opacity-90"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-semibold text-canvas hover:opacity-90"
           >
             <RefreshCw size={20} /> {t("Retry")}
           </button>
@@ -61,7 +61,7 @@ export function ProfileEmpty({ handle, onBack }: { handle: string; onBack: () =>
       action={
         <button
           onClick={onBack}
-          className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas hover:opacity-90"
+          className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-semibold text-canvas hover:opacity-90"
         >
           <ArrowLeft size={20} /> {t("Back")}
         </button>

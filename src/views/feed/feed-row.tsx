@@ -37,7 +37,7 @@ export function FeedRow({
   return (
     <div
       style={{ animationDelay: `${Math.min(index * 26, 300)}ms`, animationDuration: "400ms", animationFillMode: "both" }}
-      className="group flex items-center gap-3 rounded-[14px] bg-surface p-2.5 ring-1 ring-edge-soft transition-colors duration-200 hover:bg-elevated motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1"
+      className="group flex items-center gap-3 rounded-lg bg-surface p-2.5 ring-1 ring-edge-soft transition-colors duration-200 hover:bg-elevated motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1"
     >
       <button
         type="button"

@@ -1,23 +1,25 @@
 import { useState } from "react";
 import { MonitorSmartphone } from "lucide-react";
 import { APP_VERSION } from "@/lib/build-info";
+import { useT } from "@/lib/i18n";
 import { useMobileRemote } from "./mobile-remote";
 import { useRegisterSheet } from "./mobile-sheet-lock";
 import { RendererSheet } from "./renderer-sheet";
 
 export function MobileDeviceSwitcher() {
+  const t = useT();
   const { snapshot } = useMobileRemote();
   const [open, setOpen] = useState(false);
   useRegisterSheet(open);
 
-  const label = snapshot.target.label || "This PC";
+  const label = snapshot.target.label || t("This PC");
   const version = snapshot.hostVersion ?? APP_VERSION;
 
   return (
     <>
       <button
         type="button"
-        aria-label={`Playing on ${label}. Change device`}
+        aria-label={t("Playing on {device}. Change device", { device: label })}
         onClick={() => setOpen(true)}
         className="flex h-11 max-w-full items-center gap-2 rounded-full border border-edge-soft/60 bg-elevated/85 pe-2.5 ps-2 text-ink shadow-[0_8px_24px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-transform duration-150 active:scale-[0.97]"
       >

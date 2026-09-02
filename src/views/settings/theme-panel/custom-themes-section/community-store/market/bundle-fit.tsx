@@ -51,7 +51,7 @@ export function BundleFitBody({
           ))}
           {overflow > 0 && (
             <span
-              className={`grid shrink-0 place-items-center rounded-[8px] bg-surface text-[12px] font-semibold tabular-nums text-ink-muted ring-1 ring-edge-soft ${tile}`}
+              className={`grid shrink-0 place-items-center rounded-[8px] bg-surface text-[12.5px] font-semibold tabular-nums text-ink-muted ring-1 ring-edge-soft ${tile}`}
             >
               +{overflow}
             </span>

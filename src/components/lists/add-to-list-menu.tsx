@@ -1,4 +1,5 @@
-import { Bookmark, Check, Plus } from "lucide-react";
+import { Check, Plus } from "lucide-react";
+import { ShowcaseIcon } from "@/components/icons/harbor-glyphs";
 import { useState, type RefObject } from "react";
 import {
   addToList,
@@ -66,15 +67,15 @@ export function AddToListMenu({
   return (
     <>
       <AnchoredMenu anchorRef={anchorRef} open={open && !creating} onClose={onClose} width={280}>
-        <div className="animate-popover-in overflow-hidden rounded-2xl border border-edge-soft bg-elevated shadow-[0_18px_50px_-15px_rgba(0,0,0,0.6)]">
-          <div className="border-b border-edge-soft/55 px-3.5 pt-3 pb-2">
-            <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-subtle">
+        <div className="animate-menu-pop overflow-hidden rounded-md bg-elevated shadow-[0_18px_44px_-18px_rgba(0,0,0,0.85)]">
+          <div className="px-3 pt-2.5 pb-1.5">
+            <span className="text-[10.5px] font-medium uppercase tracking-wider text-ink-subtle">
               {t("Add to list")}
             </span>
           </div>
-          <div className="max-h-[264px] overflow-y-auto py-1.5">
+          <div className="max-h-[264px] overflow-y-auto">
             {lists.length === 0 && (
-              <p className="px-3.5 py-3 text-[12.5px] leading-snug text-ink-subtle">
+              <p className="px-3 pb-2.5 text-[12.5px] leading-snug text-ink-subtle">
                 {t("No lists yet. Create your first one below.")}
               </p>
             )}
@@ -84,14 +85,16 @@ export function AddToListMenu({
                 <button
                   key={l.id}
                   onClick={() => toggle(l.id, l.name)}
-                  className="flex w-full items-center gap-3 px-3.5 py-2.5 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+                  className="flex min-h-[44px] w-full items-center gap-2.5 px-3 py-2 text-start text-[13px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
                 >
                   <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
-                      inList ? "border-accent bg-accent/15 text-accent" : "border-edge"
+                    className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[4px] transition-colors ${
+                      inList
+                        ? "bg-accent text-canvas"
+                        : "bg-canvas ring-1 ring-inset ring-edge-soft"
                     }`}
                   >
-                    {inList && <Check size={13} strokeWidth={2.6} />}
+                    {inList && <Check size={12} strokeWidth={3} />}
                   </span>
                   <span className="flex-1 truncate">{l.name}</span>
                   <span className="shrink-0 text-[11px] tabular-nums text-ink-subtle">
@@ -101,27 +104,23 @@ export function AddToListMenu({
               );
             })}
           </div>
-          <div className="border-t border-edge-soft/55 p-1.5">
+          <div className="border-t border-edge-soft">
             <button
               onClick={toggleShowcase}
               disabled={busy}
-              className="flex min-h-[44px] w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-start text-[13px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink disabled:opacity-60"
+              className="flex min-h-[44px] w-full items-center gap-2.5 px-3 py-2 text-start text-[13px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink disabled:opacity-60"
             >
-              <span className="flex h-5 w-5 items-center justify-center">
-                <Bookmark
-                  size={20}
-                  strokeWidth={2}
-                  className={isShowcase ? "text-accent" : undefined}
-                />
+              <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center">
+                <ShowcaseIcon size={16} className={isShowcase ? "text-accent" : undefined} />
               </span>
               {isShowcase ? t("Remove from showcase") : t("Set as showcase")}
             </button>
             <button
               onClick={() => setCreating(true)}
-              className="flex min-h-[44px] w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-start text-[13px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+              className="flex min-h-[44px] w-full items-center gap-2.5 px-3 py-2 text-start text-[13px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink"
             >
-              <span className="flex h-5 w-5 items-center justify-center">
-                <Plus size={20} strokeWidth={2} />
+              <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center">
+                <Plus size={16} strokeWidth={2.4} />
               </span>
               {t("Create new list")}
             </button>

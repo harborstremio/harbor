@@ -2,15 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { BackToTop } from "@/components/back-to-top";
 import { PickCard } from "@/components/pick-card";
+import { TV_CARD_MIN } from "@/components/row";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { layoutHasGlobalBack } from "@/lib/theme";
+import { useSettings } from "@/lib/settings";
 import { useScrollMemory, useView, type GridSpec } from "@/lib/view";
 
 const PAGE_CAP = 40;
 
 export function GridView({ grid }: { grid: GridSpec }) {
   const { goBack } = useView();
+  const { settings } = useSettings();
   const t = useT();
   const scrollRef = useRef<HTMLElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -58,7 +61,14 @@ export function GridView({ grid }: { grid: GridSpec }) {
 
   const body = (
     <>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-x-4 gap-y-8">
+      <div
+        className="grid gap-x-4 gap-y-8"
+        style={{
+          gridTemplateColumns: `repeat(auto-fill, minmax(${
+            settings.rowCardStyle === "tv" && !hero ? TV_CARD_MIN : 150
+          }px, 1fr))`,
+        }}
+      >
         {metas.map((m, i) => (
           <PickCard key={`${m.id}-${i}`} meta={m} kids={!!hero} />
         ))}
@@ -68,11 +78,18 @@ export function GridView({ grid }: { grid: GridSpec }) {
         metas.length === 0 &&
         (hero ? (
           <div className="flex flex-col items-center gap-3 py-24 text-center">
-            <img src="/kids/doodles/lilpurpocto.png" alt="" draggable={false} className="h-20 w-auto opacity-80" />
-            <p className="font-display text-[24px] font-bold text-[#0e3a43]">{t("Nothing here yet!")}</p>
+            <img
+              src="/kids/doodles/lilpurpocto.png"
+              alt=""
+              draggable={false}
+              className="h-20 w-auto opacity-80"
+            />
+            <p className="font-display text-[24px] font-bold text-[#0e3a43]">
+              {t("Nothing here yet!")}
+            </p>
           </div>
         ) : (
-          <p className="py-20 text-center text-[14px] text-ink-subtle">Nothing here yet.</p>
+          <p className="py-20 text-center text-[14px] text-ink-subtle">{t("Nothing here yet.")}</p>
         ))}
     </>
   );
@@ -92,7 +109,9 @@ export function GridView({ grid }: { grid: GridSpec }) {
             ) : (
               <div className={`absolute inset-0 bg-gradient-to-br ${hero.grad}`} />
             )}
-            <div className={`pointer-events-none absolute inset-0 bg-gradient-to-tr ${hero.grad} opacity-25 mix-blend-overlay`} />
+            <div
+              className={`pointer-events-none absolute inset-0 bg-gradient-to-tr ${hero.grad} opacity-25 mix-blend-overlay`}
+            />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-canvas via-canvas/35 to-transparent" />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/45 via-black/10 to-transparent" />
             <img
@@ -118,7 +137,7 @@ export function GridView({ grid }: { grid: GridSpec }) {
             {!layoutHasGlobalBack() && (
               <button
                 onClick={goBack}
-                aria-label="Back"
+                aria-label={t("Back")}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-elevated text-ink-muted transition-colors hover:text-ink"
               >
                 <ArrowLeft size={18} strokeWidth={2.2} />
@@ -127,7 +146,9 @@ export function GridView({ grid }: { grid: GridSpec }) {
             <h1 className="font-display text-[30px] font-medium leading-none tracking-tight text-ink">
               {grid.title}
             </h1>
-            <span className="text-[14px] text-ink-subtle">{metas.length} titles</span>
+            <span className="text-[14px] text-ink-subtle">
+              {metas.length} {metas.length === 1 ? t("title") : t("titles")}
+            </span>
           </div>
           {body}
         </div>

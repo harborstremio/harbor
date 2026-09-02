@@ -1,6 +1,7 @@
 import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { watchOutsideMouseDown } from "@/lib/player/overlay-dismiss";
 import {
   COUNTRY_OPTIONS,
   LANGUAGE_OPTIONS,
@@ -33,8 +34,7 @@ function GenreSelect({
     const onDown = (e: MouseEvent) => {
       if (!ref.current?.contains(e.target as Node)) setOpen(false);
     };
-    window.addEventListener("mousedown", onDown);
-    return () => window.removeEventListener("mousedown", onDown);
+    return watchOutsideMouseDown(onDown);
   }, [open]);
   const current = options.find((o) => o.value === value) ?? options[0];
   const active = Boolean(value);

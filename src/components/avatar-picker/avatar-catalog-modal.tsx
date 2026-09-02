@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Info, Search, X } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Info, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { AVATAR_CATALOG, avatarUrl } from "@/lib/avatars/catalog";
 import { deleteAvatarPack, removeFromAvatarPack, UPLOADS_ID, useAvatarPacks } from "@/lib/avatars/packs";
 import { flattenAvatar, loadPersonBg, savePersonBg } from "@/lib/avatars/flatten";
@@ -148,26 +150,30 @@ export function AvatarCatalogModal({
 
   const contentKey = query ? "search" : section;
 
-  return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-8" onClick={onClose}>
-      <div className="absolute inset-0 animate-in fade-in bg-black/70 backdrop-blur-sm duration-200" />
+  return createPortal(
+    <div
+      className="animate-scrim-in fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-8"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div
-        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
         onDragEnter={onDragEnter}
         onDragOver={(e) => e.preventDefault()}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
-        className="relative flex h-[86vh] max-h-[720px] w-full max-w-[900px] animate-in fade-in zoom-in-95 flex-col overflow-hidden rounded-[16px] border border-edge bg-surface shadow-[0_30px_90px_-24px_rgba(0,0,0,0.85)] duration-200"
+        className="animate-dialog-in relative flex h-[86vh] max-h-[760px] w-full max-w-[1040px] flex-col overflow-hidden rounded-md bg-surface shadow-[0_30px_90px_-24px_rgba(0,0,0,0.85)]"
       >
-        <div className="flex items-center gap-4 border-b border-edge-soft px-6 py-4">
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <h2 className="font-display text-[20px] font-semibold tracking-tight text-ink">
+        <div className="flex items-center gap-4 px-6 pb-4 pt-5">
+          <div className="flex min-w-0 flex-1 items-baseline gap-2.5">
+            <h2 className="font-display text-[19px] font-medium tracking-tight text-ink">
               {t("Choose an avatar")}
             </h2>
-            <div className="flex items-center gap-1.5">
-              <p className="text-[12px] text-ink-subtle">{t("{n} in your library", { n: total })}</p>
+            <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
+              {total}
               <Disclaimer />
-            </div>
+            </span>
           </div>
           <div className="relative hidden sm:block">
             <Search
@@ -179,14 +185,14 @@ export function AvatarCatalogModal({
               onChange={(e) => setQ(e.target.value)}
               autoFocus
               placeholder={t("Search")}
-              className="h-9 w-52 rounded-[9px] border border-edge bg-canvas ps-9 pe-3 text-[13px] text-ink outline-none transition-colors focus:border-ink-subtle"
+              className="h-9 w-52 rounded-md bg-canvas ps-9 pe-3 text-[13px] text-ink outline-none transition-colors focus:bg-elevated"
             />
           </div>
           <button
             onClick={onClose}
             type="button"
             aria-label={t("common.close")}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink active:scale-95 motion-reduce:active:scale-100"
+            className="harbor-press-pop flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
           >
             <X size={18} strokeWidth={2.2} />
           </button>
@@ -213,7 +219,7 @@ export function AvatarCatalogModal({
           <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
             <div
               key={contentKey}
-              className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-2 duration-200 motion-reduce:animate-none"
+              className="animate-fade-in-soft flex flex-col gap-8"
             >
               {searchResults ? (
                 searchResults.length ? (
@@ -229,7 +235,7 @@ export function AvatarCatalogModal({
             </div>
           </div>
           {importing && (
-            <div className="absolute inset-0 z-20 flex animate-in fade-in bg-surface duration-150 motion-reduce:animate-none">
+            <div className="animate-scrim-in absolute inset-0 z-20 flex bg-surface">
               <AvatarImportProgress done={importing.done} total={importing.total} />
             </div>
           )}
@@ -238,7 +244,8 @@ export function AvatarCatalogModal({
         {dragging && <AvatarDropOverlay />}
       </div>
       {helpOpen && <AvatarPackHelp onClose={() => setHelpOpen(false)} />}
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -287,7 +294,7 @@ function Disclaimer() {
         <Info size={12.5} strokeWidth={2.2} />
       </button>
       {show && (
-        <div className="animate-popover-in absolute start-0 top-full z-20 mt-1.5 w-[300px] rounded-[10px] border border-edge-soft bg-elevated/97 px-3.5 py-3 text-start shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md">
+        <div className="animate-popover-in absolute start-0 top-full z-20 mt-1.5 w-[300px] rounded-md border border-edge-soft bg-elevated/97 px-3.5 py-3 text-start shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md">
           <p className="text-[12px] leading-relaxed text-ink-muted">
             {t(
               "These avatars are Harbor originals. Imported packs are stored only on this device: you choose what goes in them, and you are responsible for that content.",

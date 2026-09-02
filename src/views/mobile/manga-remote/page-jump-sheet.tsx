@@ -3,6 +3,7 @@ import { Minus, Plus } from "lucide-react";
 import { useMobileRemote } from "../mobile-remote";
 import { useRegisterSheet } from "../mobile-sheet-lock";
 import { SHEET_EXIT_CSS, useSheetPresence } from "../remote-extras";
+import { useT } from "@/lib/i18n";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 const clampPage = (p: number, total: number) => Math.min(total, Math.max(1, p));
@@ -11,6 +12,7 @@ export function PageJumpSheet({ open, onClose }: { open: boolean; onClose: () =>
   const { snapshot, sendCommand } = useMobileRemote();
   const manga = snapshot.manga;
   const reduce = useReducedMotion();
+  const t = useT();
   const { render, leaving } = useSheetPresence(open);
   useRegisterSheet(open);
   const total = Math.max(1, manga?.pageCount ?? 1);
@@ -41,23 +43,28 @@ export function PageJumpSheet({ open, onClose }: { open: boolean; onClose: () =>
     >
       <style>{SHEET_EXIT_CSS}</style>
       <div
-        className={`flex flex-col gap-6 rounded-t-[28px] border-t border-edge-soft/60 bg-elevated px-5 pt-4 ${leaving ? "harbor-sheet-panel-out" : reduce ? "" : "animate-in slide-in-from-bottom-4 duration-300"}`}
+        className={`flex flex-col gap-6 rounded-t-2xl border-t border-edge-soft/60 bg-elevated px-5 pt-4 ${leaving ? "harbor-sheet-panel-out" : reduce ? "" : "animate-in slide-in-from-bottom-4 duration-300"}`}
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto h-1 w-10 rounded-full bg-ink/20" />
         <div className="flex flex-col items-center gap-1">
           <span className="text-[13px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
-            {isPair ? "Jump to spread" : "Jump to page"}
+            {isPair ? t("Jump to spread") : t("Jump to page")}
           </span>
-          <span className={`font-bold leading-none tabular-nums text-ink ${isPair ? "text-[34px]" : "text-[44px]"}`}>
+          <span
+            className={`font-bold leading-none tabular-nums text-ink ${isPair ? "text-[34px]" : "text-[44px]"}`}
+          >
             {pageDisp}
             <span className="text-[20px] font-semibold text-ink-subtle"> / {total}</span>
           </span>
         </div>
         <PageScrubber page={page} total={total} onChange={setPage} reduce={reduce} />
         <div className="flex items-center gap-3">
-          <Stepper label="Previous page" onPress={() => setPage((p) => clampPage(p - 1, total))}>
+          <Stepper
+            label={t("Previous page")}
+            onPress={() => setPage((p) => clampPage(p - 1, total))}
+          >
             <Minus size={20} strokeWidth={2.4} />
           </Stepper>
           <button
@@ -65,9 +72,11 @@ export function PageJumpSheet({ open, onClose }: { open: boolean; onClose: () =>
             onClick={() => commit(page)}
             className="h-12 flex-1 rounded-full bg-accent text-[15px] font-semibold text-canvas transition-transform active:scale-[0.97]"
           >
-            {isPair ? `Go to pages ${pageDisp}` : `Go to page ${page}`}
+            {isPair
+              ? t("Go to pages {pages}", { pages: pageDisp })
+              : t("Go to page {page}", { page })}
           </button>
-          <Stepper label="Next page" onPress={() => setPage((p) => clampPage(p + 1, total))}>
+          <Stepper label={t("Next page")} onPress={() => setPage((p) => clampPage(p + 1, total))}>
             <Plus size={20} strokeWidth={2.4} />
           </Stepper>
         </div>
@@ -125,7 +134,10 @@ function PageScrubber({
       <div className="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 overflow-hidden rounded-full bg-raised">
         <div
           className="h-full rounded-full bg-accent"
-          style={{ width: `${pct * 100}%`, transition: still ? "none" : "width 120ms var(--ease-out)" }}
+          style={{
+            width: `${pct * 100}%`,
+            transition: still ? "none" : "width 120ms var(--ease-out)",
+          }}
         />
       </div>
       <div
@@ -136,7 +148,15 @@ function PageScrubber({
   );
 }
 
-function Stepper({ label, onPress, children }: { label: string; onPress: () => void; children: ReactNode }) {
+function Stepper({
+  label,
+  onPress,
+  children,
+}: {
+  label: string;
+  onPress: () => void;
+  children: ReactNode;
+}) {
   return (
     <button
       type="button"

@@ -108,7 +108,11 @@ pub fn shader_dir(app: tauri::AppHandle, id: String) -> Result<Option<String>, S
 }
 
 #[tauri::command]
-pub async fn shader_download(app: tauri::AppHandle, id: String, force: bool) -> Result<String, String> {
+pub async fn shader_download(
+    app: tauri::AppHandle,
+    id: String,
+    force: bool,
+) -> Result<String, String> {
     let pack = find_pack(&id).ok_or_else(|| format!("unknown shader pack: {}", id))?;
     let dir = pack_dir(&app, &id)?;
     std::fs::create_dir_all(&dir).map_err(|e| format!("create dir: {}", e))?;

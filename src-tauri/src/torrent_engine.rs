@@ -12,11 +12,18 @@ use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Duration;
 
 use librqbit::api::TorrentIdOrHash;
-use librqbit::dht::{Dht, PersistentDhtConfig};
+use librqbit::dht::Dht;
 use librqbit::{
     AddTorrent, AddTorrentOptions, AddTorrentResponse, ManagedTorrent, PeerConnectionOptions,
-    Session, SessionOptions, SessionPersistenceConfig,
+    Session,
 };
+// Only the desktop new_session builds SessionOptions inline. Android gets the
+// whole struct back from p2p_android::session_options, so these three would be
+// unused imports there.
+#[cfg(not(target_os = "android"))]
+use librqbit::dht::PersistentDhtConfig;
+#[cfg(not(target_os = "android"))]
+use librqbit::{SessionOptions, SessionPersistenceConfig};
 use serde::Serialize;
 use tauri::{AppHandle, Manager};
 use tokio::net::TcpListener;
@@ -56,6 +63,9 @@ fn engine() -> &'static Mutex<EngineState> {
 }
 
 pub const LAN_SERVER_PORT: u16 = 11470;
+const LAN_FALLBACK_PORTS: [u16; 10] = [
+    11480, 11481, 11482, 11483, 11484, 11485, 11486, 11487, 11488, 11489,
+];
 
 const CACHE_SWEEP_INITIAL_DELAY_SECS: u64 = 60;
 const CACHE_SWEEP_INTERVAL_SECS: u64 = 30 * 60;
@@ -160,7 +170,9 @@ fn spawn_cache_sweeper(app: AppHandle) -> CacheSweeper {
                 let started = std::time::Instant::now();
                 let released = expire_session_torrents(&dir, retention).await;
                 if released > 0 {
-                    eprintln!("[torrent-engine] cache sweep released {released} expired torrent(s)");
+                    eprintln!(
+                        "[torrent-engine] cache sweep released {released} expired torrent(s)"
+                    );
                 }
                 let cancelled_for_sweep = cancelled_for_task.clone();
                 let result = tokio::task::spawn_blocking(move || {
@@ -181,13 +193,14 @@ fn spawn_cache_sweeper(app: AppHandle) -> CacheSweeper {
                 .await;
                 match result {
                     Ok(Some(stats)) => eprintln!(
-                        "[torrent-engine] cache sweep completed in {:?}: scanned={} deleted={} reclaimed_bytes={} errors={} cancelled={}",
+                        "[torrent-engine] cache sweep completed in {:?}: scanned={} deleted={} reclaimed_bytes={} errors={} cancelled={} first_error={:?}",
                         started.elapsed(),
                         stats.scanned,
                         stats.deleted,
                         stats.reclaimed_bytes,
                         stats.errors,
                         stats.cancelled,
+                        stats.first_error,
                     ),
                     Ok(None) => eprintln!("[torrent-engine] cache sweep skipped; another sweep is active"),
                     Err(error) => eprintln!("[torrent-engine] cache sweep task failed: {error}"),
@@ -253,6 +266,22 @@ pub struct TorrentEngineStats {
     state: String,
 }
 
+#[cfg(target_os = "android")]
+async fn new_session(
+    dir: &std::path::Path,
+    full: bool,
+    dht: bool,
+    persist_dht: bool,
+) -> Result<Arc<Session>, String> {
+    Session::new_with_opts(
+        dir.to_path_buf(),
+        crate::p2p_android::session_options(dir, full, dht, persist_dht, trackers::as_url_set()),
+    )
+    .await
+    .map_err(|e| format!("{e:#}"))
+}
+
+#[cfg(not(target_os = "android"))]
 async fn new_session(
     dir: &std::path::Path,
     full: bool,
@@ -340,9 +369,21 @@ struct EngineConfig {
     max_gb: Option<u64>,
 }
 
+#[cfg(not(target_os = "android"))]
 fn config_path(app: &AppHandle) -> Option<std::path::PathBuf> {
     app.path()
         .app_cache_dir()
+        .ok()
+        .map(|d| d.join("engine.json"))
+}
+
+// Same reason as engine_dir below: Android's app_cache_dir is activity.cacheDir,
+// which the OS empties under storage pressure. Leaving engine.json there loses
+// the user's chosen cache directory and retention settings at random.
+#[cfg(target_os = "android")]
+fn config_path(app: &AppHandle) -> Option<std::path::PathBuf> {
+    app.path()
+        .app_data_dir()
         .ok()
         .map(|d| d.join("engine.json"))
 }
@@ -354,6 +395,7 @@ fn read_config(app: &AppHandle) -> EngineConfig {
         .unwrap_or_default()
 }
 
+#[cfg(not(target_os = "android"))]
 fn engine_dir(app: &AppHandle, cfg: &EngineConfig) -> Result<std::path::PathBuf, String> {
     if let Some(custom) = cfg.dir.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
         return Ok(std::path::PathBuf::from(custom).join("harbor-stream-cache"));
@@ -364,8 +406,25 @@ fn engine_dir(app: &AppHandle, cfg: &EngineConfig) -> Result<std::path::PathBuf,
         .map(|d| d.join("engine"))
 }
 
+#[cfg(target_os = "android")]
+fn engine_dir(app: &AppHandle, cfg: &EngineConfig) -> Result<std::path::PathBuf, String> {
+    if let Some(custom) = cfg.dir.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
+        return Ok(std::path::PathBuf::from(custom).join("harbor-stream-cache"));
+    }
+    app.path()
+        .app_data_dir()
+        .map_err(|e| e.to_string())
+        .map(|d| crate::p2p_android::engine_root(&d))
+}
+
 async fn init(app: AppHandle) -> Result<(), String> {
+    #[cfg(not(target_os = "android"))]
     std::env::set_var("DHT_QUERIES_PER_SECOND", "400");
+    #[cfg(target_os = "android")]
+    std::env::set_var(
+        "DHT_QUERIES_PER_SECOND",
+        crate::p2p_android::DHT_QUERIES_PER_SECOND,
+    );
     let cfg = read_config(&app);
     let dir = engine_dir(&app, &cfg)?;
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
@@ -740,14 +799,33 @@ pub fn lan_status() -> (bool, Option<u16>, Option<String>) {
     (st.lan_server.is_some(), st.lan_port, st.lan_error.clone())
 }
 
+async fn bind_lan_listener() -> Result<(TcpListener, u16), String> {
+    let mut first_error: Option<String> = None;
+    for port in std::iter::once(LAN_SERVER_PORT).chain(LAN_FALLBACK_PORTS) {
+        match TcpListener::bind(SocketAddr::from(([0, 0, 0, 0], port))).await {
+            Ok(listener) => return Ok((listener, port)),
+            Err(e) => {
+                if first_error.is_none() {
+                    first_error = Some(format!("port {port} unavailable: {e}"));
+                }
+            }
+        }
+    }
+    Err(first_error.unwrap_or_else(|| format!("port {LAN_SERVER_PORT} unavailable")))
+}
+
 pub async fn start_lan_server(app: &AppHandle) -> Result<u16, String> {
-    let session = ensure_session(app).await?;
-    stop_lan_server();
-    let listener = match TcpListener::bind(SocketAddr::from(([0, 0, 0, 0], LAN_SERVER_PORT))).await
-    {
-        Ok(l) => l,
+    let session = match ensure_session(app).await {
+        Ok(s) => s,
         Err(e) => {
-            let msg = format!("port {LAN_SERVER_PORT} unavailable: {e}");
+            engine().lock().unwrap().lan_error = Some(e.clone());
+            return Err(e);
+        }
+    };
+    stop_lan_server();
+    let (listener, port) = match bind_lan_listener().await {
+        Ok(bound) => bound,
+        Err(msg) => {
             engine().lock().unwrap().lan_error = Some(msg.clone());
             return Err(msg);
         }
@@ -760,9 +838,9 @@ pub async fn start_lan_server(app: &AppHandle) -> Result<u16, String> {
     });
     let mut st = engine().lock().unwrap();
     st.lan_server = Some(server);
-    st.lan_port = Some(LAN_SERVER_PORT);
+    st.lan_port = Some(port);
     st.lan_error = None;
-    Ok(LAN_SERVER_PORT)
+    Ok(port)
 }
 
 pub fn stop_lan_server() {
@@ -780,6 +858,32 @@ pub async fn torrent_engine_select(info_hash: String, file_idx: usize) -> Result
     let handle = session.get(id).ok_or_else(|| "no torrent".to_string())?;
     let only: HashSet<usize> = HashSet::from([file_idx]);
     update_only_files_bounded(&session, &handle, &only).await?;
+    Ok(())
+}
+
+// Select an exact set of files in one shot (no per-file re-add/replace storm) and
+// unpause. An empty set pauses the torrent so nothing keeps downloading.
+#[tauri::command]
+pub async fn torrent_engine_select_set(
+    info_hash: String,
+    file_idxs: Vec<usize>,
+) -> Result<(), String> {
+    let session = current_session().ok_or_else(|| "engine not ready".to_string())?;
+    let id = TorrentIdOrHash::parse(&info_hash).map_err(|e| e.to_string())?;
+    let handle = session.get(id).ok_or_else(|| "no torrent".to_string())?;
+    let only: HashSet<usize> = file_idxs.into_iter().collect();
+    if only.is_empty() {
+        session.pause(&handle).await.map_err(|e| format!("{e:#}"))?;
+        return Ok(());
+    }
+    session
+        .update_only_files(&handle, &only)
+        .await
+        .map_err(|e| format!("{e:#}"))?;
+    session
+        .unpause(&handle)
+        .await
+        .map_err(|e| format!("{e:#}"))?;
     Ok(())
 }
 
@@ -919,7 +1023,9 @@ pub fn torrent_engine_list() -> Vec<TorrentListItem> {
                             fi.relative_filename
                                 .file_name()
                                 .map(|s| s.to_string_lossy().to_string())
-                                .unwrap_or_else(|| fi.relative_filename.to_string_lossy().to_string())
+                                .unwrap_or_else(|| {
+                                    fi.relative_filename.to_string_lossy().to_string()
+                                })
                         })
                     })
                     .ok()
@@ -961,6 +1067,9 @@ pub async fn torrent_engine_resume(info_hash: String) -> Result<(), String> {
     let session = current_session().ok_or_else(|| "engine not ready".to_string())?;
     let id = TorrentIdOrHash::parse(&info_hash).map_err(|e| e.to_string())?;
     let handle = session.get(id).ok_or_else(|| "no torrent".to_string())?;
-    session.unpause(&handle).await.map_err(|e| format!("{e:#}"))?;
+    session
+        .unpause(&handle)
+        .await
+        .map_err(|e| format!("{e:#}"))?;
     Ok(())
 }

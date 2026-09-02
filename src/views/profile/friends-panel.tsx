@@ -1,7 +1,7 @@
 import { UserPlus, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
-import { PRESENCE_META } from "@/lib/social/presence";
+import { PRESENCE_META, resolvePresence, type PresenceStatus } from "@/lib/social/presence";
 import { AddFriendsModal } from "./add-friends-modal";
 import { Avatar } from "./profile-bits";
 import { UserHoverCard } from "./user-hover-card";
@@ -10,20 +10,28 @@ import type { Friend } from "./profile-types";
 const FRIENDS_PAGE = 6;
 const FRIENDS_STEP = 12;
 
-function friendDotClass(f: Friend): string {
-  const s = f.presence ?? f.status;
-  if (s === "online" || s === "away" || s === "dnd" || s === "offline") return PRESENCE_META[s].dot;
-  return f.online ? "bg-success" : "bg-ink-subtle";
+function friendPresence(f: Friend): PresenceStatus {
+  return resolvePresence(f.presence ?? f.status, f.online);
+}
+
+function friendIsOnline(f: Friend): boolean {
+  return friendPresence(f) !== "offline";
 }
 
 function FriendRow({ f, onOpen }: { f: Friend; onOpen?: (h: string) => void }) {
+  const presence = friendPresence(f);
   return (
-    <UserHoverCard handle={f.handle}>
+    <UserHoverCard handle={f.handle} presence={presence}>
       <button
         onClick={() => onOpen?.(f.handle)}
         className="flex w-full min-h-11 items-center gap-3 rounded-[10px] px-2 py-1.5 text-start transition-colors hover:bg-elevated"
       >
-        <Avatar src={f.avatarUrl} size={40} dotClass={friendDotClass(f)} alias={f.alias} />
+        <Avatar
+          src={f.avatarUrl}
+          size={40}
+          dotClass={PRESENCE_META[presence].dot}
+          alias={f.alias}
+        />
         <div className="min-w-0 flex-1">
           <div className="truncate text-[14px] font-medium text-ink">{f.alias}</div>
           <div className="truncate text-[12px] text-ink-subtle">{f.slogan || `@${f.handle}`}</div>
@@ -49,12 +57,12 @@ export function FriendsPanel({
   const t = useT();
   const [addOpen, setAddOpen] = useState(false);
   const [shown, setShown] = useState(FRIENDS_PAGE);
-  const online = friends.filter((f) => f.online);
-  const offline = friends.filter((f) => !f.online);
+  const online = friends.filter(friendIsOnline);
+  const offline = friends.filter((f) => !friendIsOnline(f));
   const ordered = [...online, ...offline];
   const visible = ordered.slice(0, shown);
-  const vOnline = visible.filter((f) => f.online);
-  const vOffline = visible.filter((f) => !f.online);
+  const vOnline = visible.filter(friendIsOnline);
+  const vOffline = visible.filter((f) => !friendIsOnline(f));
   const remaining = ordered.length - visible.length;
   const paginated = ordered.length > FRIENDS_PAGE;
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -85,7 +93,7 @@ export function FriendsPanel({
           )}
           <span className="text-[12px] tabular-nums text-ink-subtle">
             {visibilityPrivate ? (
-              total ?? 0
+              (total ?? 0)
             ) : (
               <>
                 <span className="text-success">{online.length}</span> / {total ?? friends.length}

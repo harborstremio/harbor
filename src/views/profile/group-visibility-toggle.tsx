@@ -24,7 +24,7 @@ export function VisibilityToggle({
             key={o.id}
             type="button"
             onClick={() => onChange(o.id)}
-            className={`flex flex-col gap-1 rounded-[10px] border p-3 text-start transition-colors ${
+            className={`flex flex-col gap-1 rounded-md border p-3 text-start transition-colors ${
               on ? "border-ink bg-surface" : "border-edge-soft bg-surface/40 hover:border-edge"
             }`}
           >

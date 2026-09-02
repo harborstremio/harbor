@@ -4,11 +4,13 @@ const addons: Record<string, string> = {
   "Install failed.": "Не удалось установить.",
   "Couldn't remove. Try again.": "Не удалось удалить. Повторите попытку.",
   "Loading the catalog": "Загрузка каталога",
-  "Addon order synced to your Stremio account": "Порядок дополнений синхронизирован с аккаунтом Stremio",
+  "Addon order synced to your Stremio account":
+    "Порядок дополнений синхронизирован с аккаунтом Stremio",
   "Addon order saved on this device": "Порядок дополнений сохранён на этом устройстве",
   "Hide adult addons": "Скрыть дополнения для взрослых",
   "Show adult addons": "Показать дополнения для взрослых",
-  "Curated for popularity and reliability. No paid placements. Install anything else by URL on the Browse tab.": "Отобрано по популярности и надёжности. Без платных размещений. Остальное можно установить по URL на вкладке «Каталог».",
+  "Curated for popularity and reliability. No paid placements. Install anything else by URL on the Browse tab.":
+    "Отобрано по популярности и надёжности. Без платных размещений. Остальное можно установить по URL на вкладке «Каталог».",
   "Top rated": "Лучшие по рейтингу",
   "By community stars": "По звёздам сообщества",
   "Top rising": "Набирают популярность",
@@ -17,21 +19,27 @@ const addons: Record<string, string> = {
   "Freshest on stremio-addons.net": "Самые свежие на stremio-addons.net",
   "Search addons": "Поиск дополнений",
   "No addons installed yet": "Дополнения ещё не установлены",
-  "Head to Discover. Cinemeta and OpenSubtitles cover the basics; Torrentio + a debrid key cover almost everything else.": "Загляните в «Обзор». Cinemeta и OpenSubtitles закрывают основное; Torrentio + ключ debrid — почти всё остальное.",
+  "Head to Discover. Cinemeta and OpenSubtitles cover the basics; Torrentio + a debrid key cover almost everything else.":
+    "Загляните в «Обзор». Cinemeta и OpenSubtitles закрывают основное; Torrentio + ключ debrid – почти всё остальное.",
   "No installed addon matches that.": "Нет установленных дополнений по этому запросу.",
-  "Clear the search to see all {n} installed.": "Очистите поиск, чтобы увидеть все установленные ({n}).",
+  "Clear the search to see all {n} installed.":
+    "Очистите поиск, чтобы увидеть все установленные ({n}).",
   "Change the order addons are tried in": "Изменить порядок обращения к дополнениям",
   "Off · catalogs and streams hidden": "Выкл. · каталоги и потоки скрыты",
   "Click to turn off": "Нажмите, чтобы выключить",
   "Click to turn on": "Нажмите, чтобы включить",
   "Turn {name} off": "Выключить {name}",
   "Turn {name} on": "Включить {name}",
-  "Re-configure this addon and apply the updated link": "Перенастроить дополнение и применить новую ссылку",
-  "Sign in to sync your addons across devices": "Войдите, чтобы синхронизировать дополнения между устройствами",
-  "Anything you install in Harbor pushes back to your Stremio account so it shows up on mobile too. Sign in via the avatar in the bottom-left of the sidebar.": "Всё, что вы устанавливаете в Harbor, отправляется в ваш аккаунт Stremio и появляется в том числе на телефоне. Войдите через аватар в левом нижнем углу боковой панели.",
+  "Re-configure this addon and apply the updated link":
+    "Перенастроить дополнение и применить новую ссылку",
+  "Sign in to sync your addons across devices":
+    "Войдите, чтобы синхронизировать дополнения между устройствами",
+  "Anything you install in Harbor pushes back to your Stremio account so it shows up on mobile too. Sign in via the avatar in the bottom-left of the sidebar.":
+    "Всё, что вы устанавливаете в Harbor, отправляется в ваш аккаунт Stremio и появляется в том числе на телефоне. Войдите через аватар в левом нижнем углу боковой панели.",
   "Common picks for a fresh setup.": "Частый выбор при первой настройке.",
   "Browse by category": "По категориям",
-  "Six places to start. Tap one and we'll filter the catalog for you.": "Шесть точек старта. Выберите одну — отфильтруем каталог.",
+  "Six places to start. Tap one and we'll filter the catalog for you.":
+    "Шесть точек старта. Выберите одну – отфильтруем каталог.",
   "Where your video comes from": "Источники видео",
   "Posters, ratings, lists": "Постеры, рейтинги, списки",
   "Captions in your language": "Субтитры на вашем языке",
@@ -46,10 +54,13 @@ const addons: Record<string, string> = {
   "Install addon": "Установить дополнение",
   "Add from URL": "Добавить по URL",
   "Configure on the addon's setup page": "Настройка на странице дополнения",
-  "Click to open {name}'s setup page. Pick your options, then copy the install link it gives you and paste it below to update the addon.": "Нажмите, чтобы открыть страницу настройки {name}. Выберите параметры, скопируйте выданную ссылку установки и вставьте её ниже, чтобы обновить дополнение.",
-  "Click to open {name}'s setup page in Harbor's built-in browser. Pick your options. When you click Install on their page, Harbor catches the link automatically and updates the addon.": "Нажмите, чтобы открыть страницу настройки {name} во встроенном браузере Harbor. Выберите параметры. Когда нажмёте кнопку установки на их странице, Harbor сам поймает ссылку и обновит дополнение.",
+  "Click to open {name}'s setup page. Pick your options, then copy the install link it gives you and paste it below to update the addon.":
+    "Нажмите, чтобы открыть страницу настройки {name}. Выберите параметры, скопируйте выданную ссылку установки и вставьте её ниже, чтобы обновить дополнение.",
+  "Click to open {name}'s setup page in Harbor's built-in browser. Pick your options. When you click Install on their page, Harbor catches the link automatically and updates the addon.":
+    "Нажмите, чтобы открыть страницу настройки {name} во встроенном браузере Harbor. Выберите параметры. Когда нажмёте кнопку установки на их странице, Harbor сам поймает ссылку и обновит дополнение.",
   "Open setup page": "Открыть страницу настройки",
-  "Heads-up: a few addons (like AIOStatus) don't pre-fill from the URL. If the form loads blank, paste the existing manifest URL into their \"Import from URL\" field to restore your settings.": "Обратите внимание: некоторые дополнения (например, AIOStatus) не подставляют значения из URL. Если форма открылась пустой, вставьте текущий URL манифеста в их поле \"Import from URL\", чтобы восстановить настройки.",
+  'Heads-up: a few addons (like AIOStatus) don\'t pre-fill from the URL. If the form loads blank, paste the existing manifest URL into their "Import from URL" field to restore your settings.':
+    'Обратите внимание: некоторые дополнения (например, AIOStatus) не подставляют значения из URL. Если форма открылась пустой, вставьте текущий URL манифеста в их поле "Import from URL", чтобы восстановить настройки.',
   "Or paste the install link manually": "Или вставьте ссылку установки вручную",
   "Couldn't read that addon URL.": "Не удалось прочитать этот URL дополнения.",
   "Reading manifest": "Чтение манифеста",
@@ -57,14 +68,17 @@ const addons: Record<string, string> = {
   "Saving to library": "Сохранение в библиотеку",
   "Swapping configuration": "Замена конфигурации",
   "Syncing to Stremio": "Синхронизация с Stremio",
-  "Looks like a re-configure of {name}. We'll replace the existing entry so you don't end up with two copies.": "Похоже, это перенастройка {name}. Заменим существующую запись, чтобы не было двух копий.",
+  "Looks like a re-configure of {name}. We'll replace the existing entry so you don't end up with two copies.":
+    "Похоже, это перенастройка {name}. Заменим существующую запись, чтобы не было двух копий.",
   "Updating {name}": "Обновление {name}",
   "Installing {name}": "Установка {name}",
   "Hang tight, won't be a sec.": "Секундочку, почти готово.",
   "is now using your new configuration.": "теперь использует новую конфигурацию.",
-  "is ready. Open Discover or hit Play on a title to use it.": "готово. Откройте «Обзор» или нажмите «Смотреть» на любой карточке.",
+  "is ready. Open Discover or hit Play on a title to use it.":
+    "готово. Откройте «Обзор» или нажмите «Смотреть» на любой карточке.",
   "Rate on stremio-addons.net": "Оценить на stremio-addons.net",
-  "Opening stremio-addons.net in your browser to sign in and rate": "Открываем stremio-addons.net в браузере для входа и оценки",
+  "Opening stremio-addons.net in your browser to sign in and rate":
+    "Открываем stremio-addons.net в браузере для входа и оценки",
   "Rising · +{n} star in 24h": "Растёт · +{n} звезда за 24 ч",
   "Rising · +{n} stars in 24h": "Растёт · +{n} звёзд за 24 ч",
   "Configure & install": "Настроить и установить",
@@ -80,11 +94,16 @@ const addons: Record<string, string> = {
   "ID prefixes": "Префиксы ID",
   "Manifest URL": "URL манифеста",
   "Hide the full URL": "Скрыть полный URL",
-  "URLs can carry debrid keys or tokens; reveal when you need to copy": "В URL могут быть ключи debrid или токены; показывайте только для копирования",
-  "Hidden by default. Manifest paths often carry API keys (debrid tokens, OMDB keys, etc.) you don't want over a shoulder.": "Скрыто по умолчанию. В путях манифеста часто есть API-ключи (токены debrid, ключи OMDB и т. п.), которые лучше не показывать посторонним.",
-  "Stremio addon, packaged into Harbor's catalog.": "Дополнение Stremio, включённое в каталог Harbor.",
-  "Version and capabilities come straight from the addon's manifest. Ratings and categories come from the": "Версия и возможности берутся прямо из манифеста дополнения. Рейтинги и категории — из",
-  "community API. Star, browse, and contribute on their site.": "API сообщества. Ставьте звёзды, ищите дополнения и участвуйте на их сайте.",
+  "URLs can carry debrid keys or tokens; reveal when you need to copy":
+    "В URL могут быть ключи debrid или токены; показывайте только для копирования",
+  "Hidden by default. Manifest paths often carry API keys (debrid tokens, OMDB keys, etc.) you don't want over a shoulder.":
+    "Скрыто по умолчанию. В путях манифеста часто есть API-ключи (токены debrid, ключи OMDB и т. п.), которые лучше не показывать посторонним.",
+  "Stremio addon, packaged into Harbor's catalog.":
+    "Дополнение Stremio, включённое в каталог Harbor.",
+  "Version and capabilities come straight from the addon's manifest. Ratings and categories come from the":
+    "Версия и возможности берутся прямо из манифеста дополнения. Рейтинги и категории – из",
+  "community API. Star, browse, and contribute on their site.":
+    "API сообщества. Ставьте звёзды, ищите дополнения и участвуйте на их сайте.",
   "More like this": "Похожие",
   "Recommended for you": "Рекомендации для вас",
   "Catalogs & metadata": "Каталоги и метаданные",
@@ -93,43 +112,66 @@ const addons: Record<string, string> = {
   "View more": "Показать ещё",
   "You've reached the end · {n} addons": "Это всё · {n} дополнений",
   "No velocity data yet": "Пока нет данных о динамике",
-  "Trending tracks star growth across your Harbor visits. Open the addons page again tomorrow and the top risers will appear here.": "Тренды отслеживают прирост звёзд между вашими визитами в Harbor. Откройте страницу дополнений завтра — здесь появятся лидеры роста.",
+  "Trending tracks star growth across your Harbor visits. Open the addons page again tomorrow and the top risers will appear here.":
+    "Тренды отслеживают прирост звёзд между вашими визитами в Harbor. Откройте страницу дополнений завтра – здесь появятся лидеры роста.",
   "Organize addons": "Упорядочить дополнения",
   "Back to addons": "Назад к дополнениям",
-  "This order drives your catalog rows and the default stream order. A stream priority set in Settings overrides it for streams.": "Этот порядок задаёт строки каталога и порядок потоков по умолчанию. Заданный в настройках приоритет потоков перекрывает его для потоков.",
+  "This order drives your catalog rows and the default stream order. A stream priority set in Settings overrides it for streams.":
+    "Этот порядок задаёт строки каталога и порядок потоков по умолчанию. Заданный в настройках приоритет потоков перекрывает его для потоков.",
   "Save order": "Сохранить порядок",
-  "Couldn't load your Stremio collection. Nothing can be reordered safely without it.": "Не удалось загрузить вашу коллекцию Stremio. Без неё безопасно изменить порядок нельзя.",
+  "Couldn't load your Stremio collection. Nothing can be reordered safely without it.":
+    "Не удалось загрузить вашу коллекцию Stremio. Без неё безопасно изменить порядок нельзя.",
   "Go back": "Назад",
   "Reload list": "Обновить список",
-  "Something unexpected went wrong. Nothing may have been written. Retry to re-check.": "Произошла непредвиденная ошибка. Возможно, ничего не записано. Повторите, чтобы перепроверить.",
-  "Backed up. The current account order is saved in the Backups panel.": "Резервная копия создана. Текущий порядок аккаунта сохранён в панели «Резервные копии».",
-  "Backup loaded into the editor. Addons added since stay at the end. Nothing changes until you press Save.": "Копия загружена в редактор. Добавленные позже дополнения останутся в конце. Ничего не изменится, пока вы не нажмёте «Сохранить».",
+  "Something unexpected went wrong. Nothing may have been written. Retry to re-check.":
+    "Произошла непредвиденная ошибка. Возможно, ничего не записано. Повторите, чтобы перепроверить.",
+  "Backed up. The current account order is saved in the Backups panel.":
+    "Резервная копия создана. Текущий порядок аккаунта сохранён в панели «Резервные копии».",
+  "Backup loaded into the editor. Addons added since stay at the end. Nothing changes until you press Save.":
+    "Копия загружена в редактор. Добавленные позже дополнения останутся в конце. Ничего не изменится, пока вы не нажмёте «Сохранить».",
   "Your Stremio account": "Ваш аккаунт Stremio",
-  "This order syncs to every Stremio app signed into this account.": "Этот порядок синхронизируется со всеми приложениями Stremio, где выполнен вход в этот аккаунт.",
-  "No addons are synced to this account yet.": "С этим аккаунтом пока не синхронизировано ни одного дополнения.",
+  "This order syncs to every Stremio app signed into this account.":
+    "Этот порядок синхронизируется со всеми приложениями Stremio, где выполнен вход в этот аккаунт.",
+  "No addons are synced to this account yet.":
+    "С этим аккаунтом пока не синхронизировано ни одного дополнения.",
   "On this device only": "Только на этом устройстве",
-  "These live in Harbor on this computer and never touch your account.": "Они хранятся в Harbor на этом компьютере и не попадают в аккаунт.",
+  "These live in Harbor on this computer and never touch your account.":
+    "Они хранятся в Harbor на этом компьютере и не попадают в аккаунт.",
   "On this device": "На этом устройстве",
-  "Sign in to Stremio to organize the addons synced to your account.": "Войдите в Stremio, чтобы упорядочить дополнения из аккаунта.",
+  "Sign in to Stremio to organize the addons synced to your account.":
+    "Войдите в Stremio, чтобы упорядочить дополнения из аккаунта.",
   "Good to know": "Полезно знать",
-  "Number 1 answers first when you press Play, unless Settings has a stream priority.": "Номер 1 отвечает первым при нажатии «Смотреть», если в настройках не задан приоритет потоков.",
-  "The order also decides which addon's rows win on your Home screen.": "Порядок также определяет, чьи строки победят на главном экране.",
-  "Nothing changes until you press Save. Leaving this page discards edits.": "Ничего не изменится, пока вы не нажмёте «Сохранить». При выходе со страницы правки пропадут.",
-  "The Backups button at the top keeps your last five orders. One click restores any of them.": "Кнопка «Резервные копии» вверху хранит пять последних вариантов порядка. Любой можно вернуть одним нажатием.",
-  "Harbor double-checks with Stremio after saving, so a half-written order can't slip through.": "После сохранения Harbor перепроверяет данные в Stremio, чтобы не остался наполовину записанный порядок.",
+  "Number 1 answers first when you press Play, unless Settings has a stream priority.":
+    "Номер 1 отвечает первым при нажатии «Смотреть», если в настройках не задан приоритет потоков.",
+  "The order also decides which addon's rows win on your Home screen.":
+    "Порядок также определяет, чьи строки победят на главном экране.",
+  "Nothing changes until you press Save. Leaving this page discards edits.":
+    "Ничего не изменится, пока вы не нажмёте «Сохранить». При выходе со страницы правки пропадут.",
+  "The Backups button at the top keeps your last five orders. One click restores any of them.":
+    "Кнопка «Резервные копии» вверху хранит пять последних вариантов порядка. Любой можно вернуть одним нажатием.",
+  "Harbor double-checks with Stremio after saving, so a half-written order can't slip through.":
+    "После сохранения Harbor перепроверяет данные в Stremio, чтобы не остался наполовину записанный порядок.",
   "{n} addon": "{n} дополнение",
   "{n} addons": "{n} дополнений",
   "Drag to reorder": "Перетащите, чтобы изменить порядок",
   "Move to top": "В начало",
-  "Couldn't save: the reordered list failed safety validation. Nothing was written.": "Не удалось сохранить: новый порядок не прошёл проверку безопасности. Ничего не записано.",
-  "Couldn't reach Stremio to confirm your collection. Nothing was written.": "Не удалось связаться с Stremio для подтверждения коллекции. Ничего не записано.",
-  "Your addon collection changed on another device. Nothing was written.": "Коллекция дополнений изменилась на другом устройстве. Ничего не записано.",
-  "Stremio didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again.": "Stremio не подтвердил сохранение. Возможно, коллекция не изменилась. Повтор сначала перепроверит данные.",
-  "Saved, but Harbor couldn't confirm the new order. Retry to re-check.": "Сохранено, но Harbor не смог подтвердить новый порядок. Повторите, чтобы перепроверить.",
-  "Stremio reports a different order than was saved.": "Stremio сообщает о другом порядке, чем был сохранён.",
-  "A safety copy of your addon order. One is saved automatically before Harbor writes any change, and you can save one yourself any time. The five most recent are kept.": "Резервная копия порядка дополнений. Создаётся автоматически перед тем, как Harbor запишет изменения, и вы можете сохранить её сами в любой момент. Хранятся пять последних.",
+  "Couldn't save: the reordered list failed safety validation. Nothing was written.":
+    "Не удалось сохранить: новый порядок не прошёл проверку безопасности. Ничего не записано.",
+  "Couldn't reach Stremio to confirm your collection. Nothing was written.":
+    "Не удалось связаться с Stremio для подтверждения коллекции. Ничего не записано.",
+  "Your addon collection changed on another device. Nothing was written.":
+    "Коллекция дополнений изменилась на другом устройстве. Ничего не записано.",
+  "Stremio didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again.":
+    "Stremio не подтвердил сохранение. Возможно, коллекция не изменилась. Повтор сначала перепроверит данные.",
+  "Saved, but Harbor couldn't confirm the new order. Retry to re-check.":
+    "Сохранено, но Harbor не смог подтвердить новый порядок. Повторите, чтобы перепроверить.",
+  "Stremio reports a different order than was saved.":
+    "Stremio сообщает о другом порядке, чем был сохранён.",
+  "A safety copy of your addon order. One is saved automatically before Harbor writes any change, and you can save one yourself any time. The five most recent are kept.":
+    "Резервная копия порядка дополнений. Создаётся автоматически перед тем, как Harbor запишет изменения, и вы можете сохранить её сами в любой момент. Хранятся пять последних.",
   "Back up current order": "Сохранить текущий порядок",
-  "No backups yet. Press the button above to save your first one.": "Копий пока нет. Нажмите кнопку выше, чтобы создать первую.",
+  "No backups yet. Press the button above to save your first one.":
+    "Копий пока нет. Нажмите кнопку выше, чтобы создать первую.",
   "{names} +{n} more": "{names} и ещё {n}",
   "Copy URL": "Копировать URL",
   "Try again": "Повторить",
@@ -140,23 +182,29 @@ const addons: Record<string, string> = {
   "Loading…": "Загрузка…",
   "Untitled addon": "Дополнение без названия",
   "Paste manifest URL or stremio:// link": "Вставьте URL манифеста или ссылку stremio://",
-  "Install from URL: paste any manifest or stremio:// link": "Установка по URL: вставьте любой манифест или ссылку stremio://",
-  "Click below to open {name}'s setup page. Pick your options, then copy the install link it gives you and paste it below to update the addon.": "Нажмите ниже, чтобы открыть страницу настройки {name}. Выберите параметры, скопируйте выданную ссылку установки и вставьте её ниже, чтобы обновить дополнение.",
-  "Click below to open {name}'s setup page in Harbor's built-in browser. Pick your options. When you click Install on their page, Harbor catches the link automatically and updates the addon.": "Нажмите ниже, чтобы открыть страницу настройки {name} во встроенном браузере Harbor. Выберите параметры. Когда нажмёте кнопку установки на их странице, Harbor сам поймает ссылку и обновит дополнение.",
+  "Install from URL: paste any manifest or stremio:// link":
+    "Установка по URL: вставьте любой манифест или ссылку stremio://",
+  "Click below to open {name}'s setup page. Pick your options, then copy the install link it gives you and paste it below to update the addon.":
+    "Нажмите ниже, чтобы открыть страницу настройки {name}. Выберите параметры, скопируйте выданную ссылку установки и вставьте её ниже, чтобы обновить дополнение.",
+  "Click below to open {name}'s setup page in Harbor's built-in browser. Pick your options. When you click Install on their page, Harbor catches the link automatically and updates the addon.":
+    "Нажмите ниже, чтобы открыть страницу настройки {name} во встроенном браузере Harbor. Выберите параметры. Когда нажмёте кнопку установки на их странице, Harbor сам поймает ссылку и обновит дополнение.",
   "Essential addons": "Основные дополнения",
   "Start here. The ones almost everyone has.": "Начните отсюда. Их ставят почти все.",
   "Best for debrid": "Лучшее для debrid",
-  "Cached on Real-Debrid, TorBox, AllDebrid. Instant play.": "В кеше Real-Debrid, TorBox, AllDebrid. Мгновенный запуск.",
+  "Cached on Real-Debrid, TorBox, AllDebrid. Instant play.":
+    "В кеше Real-Debrid, TorBox, AllDebrid. Мгновенный запуск.",
   "Free torrent + usenet": "Бесплатные торренты + usenet",
   "No subscription needed. Quality varies.": "Подписка не нужна. Качество разное.",
   "Anime done right": "Аниме как надо",
   "Kitsu IDs, fansub-friendly, season-aware.": "ID Kitsu, поддержка фансаба, учёт сезонов.",
-  "Proper search across providers, foreign-language coverage.": "Нормальный поиск по провайдерам, поддержка других языков.",
+  "Proper search across providers, foreign-language coverage.":
+    "Нормальный поиск по провайдерам, поддержка других языков.",
   "Better posters, ratings, episode info.": "Лучше постеры, рейтинги, данные об эпизодах.",
   "Sports & live TV": "Спорт и прямой эфир",
   "Live streams that actually work.": "Прямые трансляции, которые действительно работают.",
   "Power tools": "Продвинутые инструменты",
-  "Quality-of-life upgrades. Sync, ratings, trailers.": "Улучшения удобства. Синхронизация, рейтинги, трейлеры.",
+  "Quality-of-life upgrades. Sync, ratings, trailers.":
+    "Улучшения удобства. Синхронизация, рейтинги, трейлеры.",
   "NSFW. Hidden until enabled.": "NSFW. Скрыто, пока не включено.",
 };
 

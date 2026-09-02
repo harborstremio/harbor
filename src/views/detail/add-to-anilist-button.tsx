@@ -108,7 +108,7 @@ export function AddToAnilistButton({ harborId, title }: { harborId: string; titl
           type="button"
           disabled={busy}
           onClick={() => void setTo("PLANNING")}
-          className="flex h-12 items-center gap-2.5 rounded-full border border-edge bg-canvas/80 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[transform,background-color,border-color] duration-200 hover:border-ink-subtle hover:bg-canvas/95 active:scale-[0.98] disabled:opacity-60"
+          className="flex h-12 items-center gap-2.5 rounded-full bg-canvas/80 px-6 text-[15px] font-medium text-ink transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.98] disabled:opacity-60"
         >
           <img src={anilistLogo} alt="" className="h-[18px] w-[18px] rounded-[3px] object-contain" />
           <Plus size={16} strokeWidth={2.2} className="-ms-1" />

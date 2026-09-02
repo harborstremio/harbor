@@ -1,0 +1,61 @@
+const catalog: Record<string, string> = {
+  "All addons": "すべてのアドオン",
+  "TV Shows": "テレビ番組",
+  "Continue Watching": "続きを見る",
+  "Now Playing": "再生中",
+  "Now watching": "視聴中",
+  "Featured hero": "注目のメインバナー",
+  "Featured tonight": "今夜のおすすめ",
+  "Pick up where you left off": "続きから見る",
+  "Up next": "次のエピソード",
+  "Up Next": "次のエピソード",
+  "Up next in {s}s": "{s}秒後に次のエピソード",
+  "Movies · {n}": "映画 · {n}",
+  "Series · {n}": "シリーズ · {n}",
+  "TV Shows · {n}": "テレビ番組 · {n}",
+  "Cast · {n}": "キャスト · {n}",
+  "{name} (TV)": "{name}（テレビ）",
+  "TV Genre": "テレビ番組のジャンル",
+  "More {category}": "{category}をもっと見る",
+  "More for {name}": "{name}をもっと見る",
+  "More Like This": "こちらもおすすめ",
+  "You Might Also Like": "こんな作品もおすすめ",
+  "Top {n}": "トップ{n}",
+  "Top 10 {name}": "{name}のトップ10",
+  "Top 10 Movies Today": "今日の映画トップ10",
+  "Top 10 Series Today": "今日のシリーズトップ10",
+  "Top 10 Trending This Week": "今週のトレンドトップ10",
+  "Show as a normal row": "通常の列として表示",
+  "Show as a Top 10 with big numerals": "大きな数字付きのトップ10として表示",
+  "Show every addon row": "すべてのアドオン列を表示",
+  "Show on home": "ホームに表示",
+  "Hide from home": "ホームから非表示",
+  "Feature this catalog in the hero carousel": "このカタログをヒーローカルーセルに表示",
+  "Stop feeding the hero carousel (back to automatic)":
+    "ヒーローカルーセルへの表示をやめる（自動選択に戻す）",
+  "Needs artwork-rich titles to feed the hero": "ヒーロー表示には画像が豊富な作品が必要です",
+  "Needs at least 10 titles for the Top 10 look": "トップ10表示には10作品以上が必要です",
+  "Customize home": "ホームをカスタマイズ",
+  "Customize anime": "アニメをカスタマイズ",
+  "Home layout": "ホームのレイアウト",
+  "How the Home page assembles its rails.": "ホーム画面にコンテンツ列を配置する方法を設定します。",
+  "Card overlays": "カードのオーバーレイ",
+  "Hover preview": "ホバーでプレビュー",
+  "Rest the cursor on a poster to peek at the rating, runtime, and story without opening it.":
+    "ポスターにカーソルを合わせると、開かずに評価、再生時間、あらすじを確認できます。",
+  "Cleaner grid when your poster service already prints the title on the artwork.":
+    "ポスター画像にタイトルが入っている場合、グリッドをすっきり表示できます。",
+  "Hide titles under posters": "ポスター下のタイトルを非表示",
+  "No matches for these filters.": "このフィルターに一致する作品はありません。",
+  "No more found for this category.": "このカテゴリーの作品は以上です。",
+  "Cinemeta didn't return anything for {genre}. Try a different genre or add a TMDB key.":
+    "Cinemetaで{genre}の作品が見つかりませんでした。別のジャンルを試すか、TMDBキーを追加してください。",
+  "That's everything Cinemeta has for {genre}. Add a TMDB key for deeper rails.":
+    "Cinemetaにある{genre}の作品は以上です。さらに多くのコンテンツ列を表示するには、TMDBキーを追加してください。",
+  "Year, runtime, language, and country filters need TMDB. Genre browsing falls back to Cinemeta automatically.":
+    "年、再生時間、言語、国のフィルターにはTMDBが必要です。ジャンルの閲覧では自動的にCinemetaが使用されます。",
+  "The best {genre} {media}, layered by mood. Browse trending, dive into a director's run, sort by decade, find quiet gems.":
+    "ムード別にまとめた、おすすめの{genre}{media}。トレンドをチェックしたり、監督の作品をたどったり、年代順に並べたり、隠れた名作を見つけたりできます。",
+};
+
+export default catalog;

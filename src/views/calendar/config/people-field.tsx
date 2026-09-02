@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Loader2, Plus, Search, Trash2, User } from "lucide-react";
+import { Loader2, Plus, Trash2, User } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { searchAll, type SearchPerson } from "@/lib/search";
 import { useT } from "@/lib/i18n";
 import type { CustomCalendar } from "./constants";

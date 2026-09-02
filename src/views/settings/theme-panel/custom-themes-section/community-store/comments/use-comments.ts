@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { t } from "@/lib/i18n";
 import { deleteComment, listComments, postComment, type ThemeComment } from "@/lib/theme-store";
 
 export function useComments(themeId: string) {
@@ -12,7 +13,10 @@ export function useComments(themeId: string) {
     setError(null);
     listComments(themeId)
       .then((c) => !cancelled && setComments(c))
-      .catch((e) => !cancelled && setError(e instanceof Error ? e.message : "Could not load comments."))
+      .catch(
+        (e) =>
+          !cancelled && setError(e instanceof Error ? e.message : t("Could not load comments.")),
+      )
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;

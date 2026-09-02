@@ -195,7 +195,7 @@ export function HeroRatings({
     items.push(
       <ScoreItem compact={compact} key="metacritic" label={t("Metacritic")} sublabel={t("Metascore")}>
         <span
-          className={`flex h-[18px] min-w-[22px] items-center justify-center rounded-[4px] px-1 text-[11px] font-bold text-white ${metacriticBand(metacritic)}`}
+          className={`flex h-[18px] min-w-[22px] items-center justify-center rounded-sm px-1 text-[11px] font-bold text-canvas ${metacriticBand(metacritic)}`}
         >
           {metacritic}
         </span>
@@ -269,7 +269,7 @@ export function HeroRatings({
   }
 
   return (
-    <div className="inline-flex items-center rounded-full border border-edge-soft bg-canvas/70 px-1 py-0.5">
+    <div className="inline-flex items-center rounded-full bg-canvas/80 px-1 py-0.5">
       {items.map((item, i) => (
         <span key={i} className="flex items-center">
           {i > 0 && <Divider />}

@@ -115,11 +115,13 @@ export function ThumbPreview({
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-white/5 to-transparent" />
         )}
-        {loading && !src && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-white/70" />
-          </div>
-        )}
+        <div
+          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-150 ${
+            loading && !src ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+        </div>
       </div>
       <div className="mt-1 flex items-center justify-center gap-1">
         {segLabel && (

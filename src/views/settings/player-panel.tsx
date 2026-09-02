@@ -4,7 +4,7 @@ export { SubtitleStylePanel } from "./player-panel/subtitle-section";
 export { SeekBarPanel } from "./player-panel/seek-bar-section";
 export { DownloadsSection } from "./player-panel/downloads-section";
 export { LocalEngineSection } from "./player-panel/local-engine-section";
-export { P2PAdvancedSection } from "./player-panel/p2p-advanced-section";
+export { P2PPowerToolsSection, StreamCacheSection } from "./player-panel/p2p-advanced-section";
 export { RemoteServerSection } from "./player-panel/remote-server-section";
 export { ServerAddressSection } from "./player-panel/server-address-section";
 export { ShellSection } from "./player-panel/shell-section";

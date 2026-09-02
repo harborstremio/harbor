@@ -47,6 +47,101 @@ type StoredAddon = {
   manifest?: { name?: string };
 };
 
+export type ImportDomainChoice = "merge" | "replace";
+
+// Only id/url-keyed array domains can be merged; the rest (settings blob, watched
+// flags, continue-watching positions) stay replace-only.
+const MERGEABLE_DOMAINS = new Set<ImportDomain>(["watchlist", "favorites", "addons"]);
+
+type KeyOf = (o: Record<string, unknown>) => string | null;
+
+const byId: KeyOf = (o) => (typeof o.id === "string" && o.id) || null;
+const byUrl: KeyOf = (o) => (typeof o.transportUrl === "string" && o.transportUrl) || null;
+
+const DOMAIN_KEY_OF: Partial<Record<ImportDomain, KeyOf>> = {
+  watchlist: byId,
+  favorites: byId,
+  addons: byUrl,
+};
+
+type KeyedEntry = { key: string; raw: unknown };
+
+function readKeyedArray(key: string, keyOf: KeyOf): KeyedEntry[] {
+  const arr = readJson<unknown[]>(key);
+  if (!Array.isArray(arr)) return [];
+  const out: KeyedEntry[] = [];
+  for (const el of arr) {
+    if (typeof el === "string") {
+      out.push({ key: el, raw: el });
+    } else if (el && typeof el === "object") {
+      const k = keyOf(el as Record<string, unknown>);
+      if (k) out.push({ key: k, raw: el });
+    }
+  }
+  return out;
+}
+
+// Union source into existing target by identity key. Existing target entries win so a
+// merge never loses or clobbers data that is already on the target profile.
+function unionKeyedArray(srcKey: string, dstKey: string, keyOf: KeyOf): void {
+  const map = new Map<string, unknown>();
+  for (const e of readKeyedArray(dstKey, keyOf)) if (!map.has(e.key)) map.set(e.key, e.raw);
+  for (const e of readKeyedArray(srcKey, keyOf)) if (!map.has(e.key)) map.set(e.key, e.raw);
+  localStorage.setItem(dstKey, JSON.stringify(Array.from(map.values())));
+}
+
+export type DomainOverlap = {
+  sourceCount: number;
+  targetCount: number;
+  overlapCount: number;
+};
+
+export function analyzeOverlaps(
+  fromProfileId: string,
+  toProfileId: string,
+  domains: ImportDomain[],
+  addonUrls?: string[] | null,
+): Partial<Record<ImportDomain, DomainOverlap>> {
+  const result: Partial<Record<ImportDomain, DomainOverlap>> = {};
+  const srcKeys = new Map<ImportDomain, Set<string>>();
+  const dstKeys = new Map<ImportDomain, Set<string>>();
+  // Mirror applyAddons: a present (even empty) selection is a real subset; only
+  // null means "no subset / every source addon". An empty selection filters out
+  // all source addons, so it must report no addon overlap.
+  const addonSubset = addonUrls != null ? new Set(addonUrls) : null;
+  for (const domain of domains) {
+    if (!MERGEABLE_DOMAINS.has(domain)) continue;
+    const keyOf = DOMAIN_KEY_OF[domain];
+    if (!keyOf) continue;
+    const s = new Set<string>();
+    const d = new Set<string>();
+    if (domain === "addons") {
+      for (const e of readKeyedArray(INSTALLED_PREFIX + fromProfileId, keyOf)) {
+        if (addonSubset && !addonSubset.has(e.key)) continue;
+        s.add(e.key);
+      }
+      for (const e of readKeyedArray(INSTALLED_PREFIX + toProfileId, keyOf)) d.add(e.key);
+    } else if (domain !== "settings") {
+      const prefixes = DOMAIN_PREFIXES[domain];
+      for (const prefix of prefixes) {
+        for (const e of readKeyedArray(prefix + fromProfileId, keyOf)) s.add(e.key);
+        for (const e of readKeyedArray(prefix + toProfileId, keyOf)) d.add(e.key);
+      }
+    }
+    srcKeys.set(domain, s);
+    dstKeys.set(domain, d);
+  }
+  for (const domain of domains) {
+    const s = srcKeys.get(domain);
+    const d = dstKeys.get(domain);
+    if (!s || !d) continue;
+    let overlap = 0;
+    for (const k of s) if (d.has(k)) overlap++;
+    result[domain] = { sourceCount: s.size, targetCount: d.size, overlapCount: overlap };
+  }
+  return result;
+}
+
 type MinimalProfilesState = {
   profiles?: Array<{ id?: string; isPrimary?: boolean; settingsLinked?: boolean }>;
   activeId?: string | null;
@@ -140,11 +235,33 @@ export function importDomains(
   fromProfileId: string,
   toProfileId: string,
   domains: ImportDomain[],
-  opts?: { addonTransportUrls?: string[] | null },
+  opts?: {
+    addonTransportUrls?: string[] | null;
+    choices?: Partial<Record<ImportDomain, ImportDomainChoice>>;
+  },
 ): void {
   if (!fromProfileId || !toProfileId || fromProfileId === toProfileId) return;
+  const choices = opts?.choices ?? {};
+  const currentOverlaps = analyzeOverlaps(
+    fromProfileId,
+    toProfileId,
+    domains,
+    opts?.addonTransportUrls ?? null,
+  );
+  const choiceFor = (domain: ImportDomain): ImportDomainChoice => {
+    const requested = choices[domain] ?? (MERGEABLE_DOMAINS.has(domain) ? "merge" : "replace");
+    if (
+      requested === "replace" &&
+      MERGEABLE_DOMAINS.has(domain) &&
+      (currentOverlaps[domain]?.overlapCount ?? 0) === 0
+    ) {
+      return "merge";
+    }
+    return requested;
+  };
   try {
     for (const domain of domains) {
+      const choice = choiceFor(domain);
       if (domain === "settings") {
         // Copy the source's effective blob into the target's own blob. The
         // caller unlinks settings on the target so this copy is what loads.
@@ -158,47 +275,20 @@ export function importDomains(
       }
 
       if (domain === "addons") {
-        const installedRaw = localStorage.getItem(INSTALLED_PREFIX + fromProfileId);
-        if (installedRaw == null) continue;
-        const subset = opts?.addonTransportUrls ? new Set(opts.addonTransportUrls) : null;
-        if (!subset) {
-          localStorage.setItem(INSTALLED_PREFIX + toProfileId, installedRaw);
-          const disabledRaw = localStorage.getItem(DISABLED_PREFIX + fromProfileId);
-          if (disabledRaw != null) localStorage.setItem(DISABLED_PREFIX + toProfileId, disabledRaw);
-          continue;
-        }
-        // Subset import: keep only user-selected addons. The disabled list is
-        // filtered through an id->transportUrl map so entries survive either shape.
-        const installed = readJson<StoredAddon[]>(INSTALLED_PREFIX + fromProfileId) ?? [];
-        const list = Array.isArray(installed) ? installed : [];
-        const idToUrl = new Map<string, string>();
-        for (const a of list) {
-          if (a && typeof a.id === "string" && typeof a.transportUrl === "string") {
-            idToUrl.set(a.id, a.transportUrl);
+        applyAddons(fromProfileId, toProfileId, choice, opts?.addonTransportUrls ?? null);
+        continue;
+      }
+
+      if (MERGEABLE_DOMAINS.has(domain)) {
+        const keyOf = DOMAIN_KEY_OF[domain];
+        if (!keyOf) continue;
+        for (const prefix of DOMAIN_PREFIXES[domain]) {
+          if (choice === "replace") {
+            const raw = localStorage.getItem(prefix + fromProfileId);
+            if (raw != null) localStorage.setItem(prefix + toProfileId, raw);
+          } else {
+            unionKeyedArray(prefix + fromProfileId, prefix + toProfileId, keyOf);
           }
-        }
-        const kept = list.filter(
-          (a) => a && typeof a.transportUrl === "string" && subset.has(a.transportUrl),
-        );
-        localStorage.setItem(INSTALLED_PREFIX + toProfileId, JSON.stringify(kept));
-        const disabledParsed = readJson<unknown>(DISABLED_PREFIX + fromProfileId);
-        if (Array.isArray(disabledParsed)) {
-          const keptDisabled = disabledParsed.filter((entry) => {
-            if (typeof entry === "string") {
-              const url = idToUrl.get(entry);
-              return (url != null && subset.has(url)) || subset.has(entry);
-            }
-            if (entry && typeof entry === "object") {
-              const o = entry as { id?: unknown; transportUrl?: unknown };
-              if (typeof o.transportUrl === "string") return subset.has(o.transportUrl);
-              if (typeof o.id === "string") {
-                const url = idToUrl.get(o.id);
-                return url != null && subset.has(url);
-              }
-            }
-            return false;
-          });
-          localStorage.setItem(DISABLED_PREFIX + toProfileId, JSON.stringify(keptDisabled));
         }
         continue;
       }
@@ -211,4 +301,89 @@ export function importDomains(
   } catch (e) {
     console.warn("[profile-import] failed", e);
   }
+}
+
+function applyAddons(
+  fromProfileId: string,
+  toProfileId: string,
+  choice: ImportDomainChoice,
+  selectedUrls: string[] | null,
+): void {
+  const subset = selectedUrls ? new Set(selectedUrls) : null;
+  const sourceEntries = readKeyedArray(INSTALLED_PREFIX + fromProfileId, byUrl);
+  const picked = subset ? sourceEntries.filter((e) => subset.has(e.key)) : sourceEntries;
+
+  if (choice === "replace") {
+    const keptRaw = picked.map((e) => e.raw);
+    localStorage.setItem(INSTALLED_PREFIX + toProfileId, JSON.stringify(keptRaw));
+    const idToUrl = new Map<string, string>();
+    for (const e of sourceEntries) {
+      const o = e.raw as { id?: unknown };
+      if (typeof o.id === "string") idToUrl.set(o.id, e.key);
+    }
+    replaceDisabled(fromProfileId, toProfileId, picked, idToUrl);
+    return;
+  }
+
+  const targetEntries = readKeyedArray(INSTALLED_PREFIX + toProfileId, byUrl);
+  const map = new Map<string, unknown>();
+  for (const e of targetEntries) if (!map.has(e.key)) map.set(e.key, e.raw);
+  for (const e of picked) if (!map.has(e.key)) map.set(e.key, e.raw);
+  localStorage.setItem(INSTALLED_PREFIX + toProfileId, JSON.stringify(Array.from(map.values())));
+  const targetIdToUrl = new Map<string, string>();
+  for (const e of targetEntries) {
+    const o = e.raw as { id?: unknown };
+    if (typeof o.id === "string") targetIdToUrl.set(o.id, e.key);
+  }
+  const srcIdToUrl = new Map<string, string>();
+  for (const e of sourceEntries) {
+    const o = e.raw as { id?: unknown };
+    if (typeof o.id === "string") srcIdToUrl.set(o.id, e.key);
+  }
+  const srcDisabled = readJson<unknown>(DISABLED_PREFIX + fromProfileId);
+  if (Array.isArray(srcDisabled)) {
+    const disabledMap = new Map<string, unknown>();
+    const existingDisabled = readJson<unknown>(DISABLED_PREFIX + toProfileId);
+    if (Array.isArray(existingDisabled)) {
+      for (const entry of existingDisabled) {
+        const key = disabledKey(entry, targetIdToUrl);
+        if (key && !disabledMap.has(key)) disabledMap.set(key, entry);
+      }
+    }
+    for (const entry of srcDisabled) {
+      const key = disabledKey(entry, srcIdToUrl);
+      if (!key) continue;
+      if (subset && !subset.has(key)) continue;
+      if (!disabledMap.has(key)) disabledMap.set(key, entry);
+    }
+    localStorage.setItem(
+      DISABLED_PREFIX + toProfileId,
+      JSON.stringify(Array.from(disabledMap.values())),
+    );
+  }
+}
+
+function disabledKey(entry: unknown, idToUrl: Map<string, string>): string | null {
+  if (typeof entry === "string") return idToUrl.get(entry) ?? entry;
+  if (entry && typeof entry === "object") {
+    const o = entry as { id?: unknown; transportUrl?: unknown };
+    if (typeof o.transportUrl === "string") return o.transportUrl;
+    if (typeof o.id === "string") return idToUrl.get(o.id) ?? o.id;
+  }
+  return null;
+}
+
+function replaceDisabled(
+  fromProfileId: string,
+  toProfileId: string,
+  picked: KeyedEntry[],
+  idToUrl: Map<string, string>,
+): void {
+  const srcDisabled = readJson<unknown>(DISABLED_PREFIX + fromProfileId);
+  if (!Array.isArray(srcDisabled)) return;
+  const keptDisabled = srcDisabled.filter((entry) => {
+    const key = disabledKey(entry, idToUrl);
+    return key != null && picked.some((e) => e.key === key);
+  });
+  localStorage.setItem(DISABLED_PREFIX + toProfileId, JSON.stringify(keptDisabled));
 }

@@ -1,11 +1,21 @@
 import { invoke } from "@tauri-apps/api/core";
 
-export const BUNDLED_SERVER_URL = "http://127.0.0.1:11470";
+export const DEFAULT_BUNDLED_PORT = 11470;
 const PROBE_TIMEOUT_MS = 1500;
 const PROBE_TTL_MS = 30_000;
 const READY_WAIT_POLL_MS = 250;
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+let bundledPort = DEFAULT_BUNDLED_PORT;
+
+export function bundledServerPort(): number {
+  return bundledPort;
+}
+
+export function bundledServerUrl(): string {
+  return `http://127.0.0.1:${bundledPort}`;
+}
 
 export function remoteStreamServerUrl(): string {
   try {
@@ -31,7 +41,11 @@ export function remoteStreamServerStrict(): boolean {
 
 export function isBundledEngineUrl(url: string | undefined | null): boolean {
   if (!url) return false;
-  if (/^https?:\/\/(127\.0\.0\.1|localhost):11470\//i.test(url)) return true;
+  const loopback = /^https?:\/\/(?:127\.0\.0\.1|localhost):(\d+)\//i.exec(url);
+  if (loopback) {
+    const port = Number(loopback[1]);
+    if (port === bundledPort || port === DEFAULT_BUNDLED_PORT) return true;
+  }
   const remote = remoteStreamServerUrl();
   return !!remote && url.startsWith(`${remote}/`);
 }
@@ -47,6 +61,7 @@ export type CastServerStatus = {
   bundled: boolean;
   running: boolean;
   ready: boolean;
+  port: number | null;
   last_error: string | null;
   restart_count: number;
 };
@@ -54,20 +69,26 @@ export type CastServerStatus = {
 export async function getCastServerStatus(): Promise<CastServerStatus | null> {
   if (!isTauri) return null;
   try {
-    return await invoke<CastServerStatus>("cast_server_status");
+    const status = await invoke<CastServerStatus>("cast_server_status");
+    if (typeof status.port === "number" && status.port > 0 && status.port !== bundledPort) {
+      bundledPort = status.port;
+      probeCache = null;
+    }
+    return status;
   } catch {
     return null;
   }
 }
 
-export async function restartCastServer(): Promise<boolean> {
-  if (!isTauri) return false;
+export async function restartCastServer(): Promise<string | null> {
+  if (!isTauri) return "Harbor's streaming server only runs in the desktop app.";
   try {
     await invoke("cast_server_restart");
     probeCache = null;
-    return true;
-  } catch {
-    return false;
+    return null;
+  } catch (e) {
+    probeCache = null;
+    return String(e);
   }
 }
 
@@ -77,7 +98,7 @@ export async function awaitCastServerReady(timeoutMs = 5000): Promise<boolean> {
     if (await probeStremioServer(true)) return true;
     if (remoteStreamServerStrict()) return false;
   }
-  if (!isTauri) return probeStremioServer(!!remote, BUNDLED_SERVER_URL);
+  if (!isTauri) return probeStremioServer(!!remote, bundledServerUrl());
   const status = await getCastServerStatus();
   if (!status?.bundled) return false;
   if (status.ready) return true;
@@ -86,7 +107,7 @@ export async function awaitCastServerReady(timeoutMs = 5000): Promise<boolean> {
     await new Promise((r) => window.setTimeout(r, READY_WAIT_POLL_MS));
     const s = await getCastServerStatus();
     if (s?.ready) return true;
-    if (await httpProbe(true, BUNDLED_SERVER_URL)) return true;
+    if (await httpProbe(true, bundledServerUrl())) return true;
     if (s && !s.running && s.restart_count >= 3) return false;
   }
   return false;
@@ -94,15 +115,15 @@ export async function awaitCastServerReady(timeoutMs = 5000): Promise<boolean> {
 
 export async function probeStremioServer(force = false, base?: string): Promise<boolean> {
   const target = base ?? getStremioServerUrl();
-  if (target !== BUNDLED_SERVER_URL) return httpProbe(force, target);
+  if (target !== bundledServerUrl()) return httpProbe(force, target);
   if (isTauri) {
     const status = await getCastServerStatus();
     if (status) {
       if (status.ready) return true;
-      return httpProbe(force, target);
+      return httpProbe(force, bundledServerUrl());
     }
   }
-  return httpProbe(force, target);
+  return httpProbe(force, bundledServerUrl());
 }
 
 async function httpProbe(force: boolean, base: string): Promise<boolean> {
@@ -145,7 +166,8 @@ export function buildTranscodedUrl(sourceUrl: string): string {
 }
 
 export function engineBaseFor(url: string): string {
-  if (url.startsWith(`${BUNDLED_SERVER_URL}/`)) return BUNDLED_SERVER_URL;
+  const bundled = bundledServerUrl();
+  if (url.startsWith(`${bundled}/`)) return bundled;
   const remote = remoteStreamServerUrl();
   if (remote && url.startsWith(`${remote}/`)) return remote;
   return getStremioServerUrl();
@@ -155,7 +177,7 @@ export function getStremioServerUrl(): string {
   const remote = remoteStreamServerUrl();
   if (remote) return remote;
   if (!isTauri && typeof window !== "undefined" && window.location.port === "11471") {
-    return `http://${window.location.hostname}:11470`;
+    return `http://${window.location.hostname}:${DEFAULT_BUNDLED_PORT}`;
   }
-  return BUNDLED_SERVER_URL;
+  return bundledServerUrl();
 }

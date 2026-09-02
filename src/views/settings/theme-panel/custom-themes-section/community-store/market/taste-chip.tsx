@@ -1,4 +1,5 @@
 import type { StoreTheme } from "@/lib/theme-store";
+import { useT } from "@/lib/i18n";
 import type { Mood } from "../color-rank";
 import type { MoodRail } from "../use-store-themes";
 
@@ -21,7 +22,9 @@ export function TasteChip({
       onClick={onClick}
       aria-pressed={active}
       className={`group inline-flex shrink-0 items-center gap-2.5 rounded-full py-1.5 pe-4 ps-1.5 text-start transition-colors ${
-        active ? "bg-accent-soft ring-1 ring-accent" : "bg-surface ring-1 ring-edge-soft hover:bg-elevated hover:ring-edge"
+        active
+          ? "bg-accent-soft ring-1 ring-accent"
+          : "bg-surface ring-1 ring-edge-soft hover:bg-elevated hover:ring-edge"
       }`}
     >
       <span
@@ -48,13 +51,14 @@ export function StoreCategoryChips({
   active?: Mood | null;
   onPick: (mood: Mood) => void;
 }) {
+  const t = useT();
   if (rails.length === 0) return null;
   return (
     <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
       {rails.map((r) => (
         <TasteChip
           key={r.mood}
-          label={r.title}
+          label={t(r.title)}
           lead={r.items[0]}
           active={active === r.mood}
           onClick={() => onPick(r.mood)}

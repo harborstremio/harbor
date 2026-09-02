@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Poster } from "@/components/poster";
 import { useT } from "@/lib/i18n";
@@ -45,13 +46,19 @@ export function PersonRankRow({
   const harbor = isHarborExplanation(person);
   const ranked = harbor && person.score !== null;
   const tier: "featured" | "dense" = person.rank <= 10 ? "featured" : "dense";
-  const dept = t(DEPT_LABEL[person.department] ?? person.department);
+  const [everOpened, setEverOpened] = useState(false);
+  useEffect(() => {
+    if (expanded) setEverOpened(true);
+  }, [expanded]);
+
+  const departmentKey = DEPT_LABEL[person.department];
+  const dept = departmentKey ? t(departmentKey) : person.department;
   const photo = profilePhoto(person.profilePath, tier === "featured" ? 342 : 185);
 
   const frame =
     tier === "featured"
-      ? "min-h-[176px] rounded-2xl bg-canvas/40 p-5 ring-1 ring-edge-soft hover:bg-canvas/70"
-      : "min-h-[104px] rounded-xl bg-transparent py-3 pe-4 ps-2 ring-1 ring-edge-soft/60 hover:bg-canvas/50";
+      ? "min-h-[176px] rounded-lg bg-elevated p-5 hover:bg-raised"
+      : "min-h-[104px] rounded-lg bg-surface py-3 pe-4 ps-2 hover:bg-elevated";
   const faceSize = tier === "featured" ? "h-[152px] w-[104px]" : "h-[100px] w-[70px]";
 
   return (
@@ -62,16 +69,17 @@ export function PersonRankRow({
       >
         <div className="flex items-center gap-4 md:gap-5">
           <div className="relative flex shrink-0 items-center">
-            <span
-              className={`flex justify-end ${tier === "featured" ? "w-16" : "w-11"}`}
-            >
+            <span className={`flex justify-end ${tier === "featured" ? "w-16" : "w-11"}`}>
               <RankNumeral rank={person.rank} size={tier} />
             </span>
             <button
               type="button"
               onClick={() => onOpenPerson(person.id)}
-              aria-label={t("Open {name}, ranked {rank}", { name: person.name, rank: String(person.rank) })}
-              className={`relative z-10 -ms-3 shrink-0 overflow-hidden rounded-xl bg-elevated/60 ring-1 ring-edge-soft/60 no-press transition-[scale,box-shadow] duration-250 ease-out motion-safe:group-hover:scale-[1.04] motion-safe:group-hover:shadow-[0_18px_40px_-14px_rgba(0,0,0,0.55)] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${faceSize}`}
+              aria-label={t("Open {name}, ranked {rank}", {
+                name: person.name,
+                rank: String(person.rank),
+              })}
+              className={`relative z-10 -ms-3 shrink-0 overflow-hidden rounded-lg bg-elevated/60 ring-1 ring-edge-soft/60 no-press transition-[scale,box-shadow] duration-250 ease-out motion-safe:group-hover:scale-[1.04] motion-safe:group-hover:shadow-[0_18px_40px_-14px_rgba(0,0,0,0.55)] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${faceSize}`}
             >
               {photo ? (
                 <img
@@ -81,7 +89,12 @@ export function PersonRankRow({
                   className="absolute inset-0 h-full w-full object-cover object-[center_top]"
                 />
               ) : (
-                <Poster src={undefined} seed={String(person.id)} ratio="portrait" className="absolute inset-0" />
+                <Poster
+                  src={undefined}
+                  seed={String(person.id)}
+                  ratio="portrait"
+                  className="absolute inset-0"
+                />
               )}
             </button>
           </div>
@@ -98,9 +111,11 @@ export function PersonRankRow({
             </button>
 
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span className="text-[10.5px] uppercase tracking-[0.18em] text-ink-subtle">{dept}</span>
+              <span className="text-[10.5px] uppercase tracking-[0.18em] text-ink-subtle">
+                {dept}
+              </span>
               {ranked && person.avgRating !== null && (
-                <span className="rounded-full bg-elevated/40 px-1.5 text-[11px] tabular-nums text-ink-muted ring-1 ring-edge-soft">
+                <span className="rounded-full bg-white/[0.06] px-1.5 text-[11px] tabular-nums text-ink-muted">
                   {t("{v} avg", { v: person.avgRating.toFixed(1) })}
                 </span>
               )}
@@ -122,17 +137,15 @@ export function PersonRankRow({
                     onOpenMeta={onOpenMeta}
                   />
                 )}
-                {source === "consensus" && person.blendSources && person.blendSources.length > 0 && (
-                  <BlendTicks sources={person.blendSources} />
-                )}
+                {source === "consensus" &&
+                  person.blendSources &&
+                  person.blendSources.length > 0 && <BlendTicks sources={person.blendSources} />}
               </div>
             )}
           </div>
 
           {ranked && (
-            <div
-              className={`hidden shrink-0 flex-col gap-2.5 md:flex md:w-[212px] lg:w-[248px]`}
-            >
+            <div className={`hidden shrink-0 flex-col gap-2.5 md:flex md:w-[212px] lg:w-[248px]`}>
               <RankLedger person={person} mode="micro" onOpenMeta={onOpenMeta} />
               <PersonKnownStrip
                 titles={person.topTitles}
@@ -165,16 +178,22 @@ export function PersonRankRow({
 
         {ranked && (
           <div className="mt-3">
-            {expanded && (
-              <div className="mb-3 animate-in fade-in slide-in-from-top-1 duration-250 motion-reduce:animate-none">
-                <RankLedger person={person} mode="full" onOpenMeta={onOpenMeta} />
+            {everOpened && (
+              <div
+                className={`grid transition-[grid-template-rows,opacity] duration-250 ease-out motion-reduce:transition-none ${
+                  expanded ? "mb-3 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <RankLedger person={person} mode="full" onOpenMeta={onOpenMeta} />
+                </div>
               </div>
             )}
             <button
               type="button"
               onClick={onToggle}
               aria-expanded={expanded}
-              className={`flex w-full items-center justify-center gap-1.5 rounded-xl font-medium text-ink-muted ring-1 ring-edge-soft transition-colors ease-out hover:bg-elevated/50 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent motion-reduce:transition-none ${
+              className={`flex w-full items-center justify-center gap-1.5 rounded-lg bg-white/[0.06] font-medium text-ink-muted transition-colors ease-out hover:bg-white/[0.10] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent motion-reduce:transition-none ${
                 tier === "featured" ? "min-h-[44px] text-[12.5px]" : "min-h-[40px] text-[12px]"
               }`}
             >
@@ -226,7 +245,7 @@ function BlendTicks({ sources }: { sources: RankSource[] }) {
         {sources.map((s) => (
           <span
             key={s}
-            className="rounded-md px-1.5 py-0.5 text-[10px] uppercase tracking-[0.14em] text-ink-muted ring-1 ring-edge-soft"
+            className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[10px] uppercase tracking-[0.14em] text-ink-muted"
           >
             {t(SOURCE_TICK[s])}
           </span>

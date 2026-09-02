@@ -25,8 +25,8 @@ export function LoadingState({ hero }: { hero: boolean }) {
 
 function HeroSkeleton() {
   return (
-    <div className="flex items-end gap-6 rounded-[28px] bg-surface/40 p-8 ring-1 ring-edge-soft">
-      <div className="harbor-shimmer relative h-[188px] w-[128px] shrink-0 rounded-2xl" style={delayVar(0)} />
+    <div className="flex items-end gap-6 rounded-lg bg-elevated p-8">
+      <div className="harbor-shimmer relative h-[188px] w-[128px] shrink-0 rounded-lg" style={delayVar(0)} />
       <div className="flex min-w-0 flex-1 flex-col gap-3 pb-2">
         <div className="harbor-shimmer relative h-3 w-24 rounded-md" style={delayVar(60)} />
         <div className="harbor-shimmer relative h-12 w-3/5 rounded-lg" style={delayVar(120)} />
@@ -39,9 +39,9 @@ function HeroSkeleton() {
 
 function RowSkeleton({ delay }: { delay: number }) {
   return (
-    <div className="flex items-center gap-5 rounded-2xl bg-surface/40 p-5 ring-1 ring-edge-soft">
+    <div className="flex items-center gap-5 rounded-lg bg-elevated p-5">
       <div className="harbor-shimmer relative h-14 w-12 shrink-0 rounded-lg" style={delayVar(delay)} />
-      <div className="harbor-shimmer relative h-[152px] w-[104px] shrink-0 rounded-xl" style={delayVar(delay)} />
+      <div className="harbor-shimmer relative h-[152px] w-[104px] shrink-0 rounded-lg" style={delayVar(delay)} />
       <div className="flex min-w-0 flex-1 flex-col gap-2.5">
         <div className="harbor-shimmer relative h-5 w-2/5 rounded-md" style={delayVar(delay)} />
         <div className="harbor-shimmer relative h-3 w-1/4 rounded-md" style={delayVar(delay)} />
@@ -63,7 +63,7 @@ function RowSkeleton({ delay }: { delay: number }) {
 export function OfflinePill() {
   const t = useT();
   return (
-    <div className="flex items-center gap-2 self-start rounded-full bg-surface/60 px-3.5 py-2 text-[12.5px] text-ink-muted ring-1 ring-edge-soft">
+    <div className="flex items-center gap-2 self-start rounded-full bg-white/[0.06] px-3.5 py-2 text-[12.5px] text-ink-muted">
       <CloudOff size={14} strokeWidth={2} className="text-ink-subtle" aria-hidden />
       {t("Showing last synced ranking")}
     </div>
@@ -124,9 +124,9 @@ function StateShell({
   action: ReactNode;
 }) {
   return (
-    <div className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-2xl bg-surface/30 px-8 py-14 text-center ring-1 ring-edge-soft">
+    <div className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-lg bg-elevated px-8 py-14 text-center">
       {icon && (
-        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-elevated/50 ring-1 ring-edge-soft">
+        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06]">
           {icon}
         </span>
       )}

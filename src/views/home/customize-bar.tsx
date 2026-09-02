@@ -1,4 +1,5 @@
-import { ListPlus, Pencil, RotateCcw, Plus, SlidersHorizontal } from "lucide-react";
+import { ListPlus, RotateCcw, Plus, SlidersHorizontal } from "lucide-react";
+import { PencilOutlineIcon } from "@/components/icons/pencil-outline";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import type { HomeRowCustomization } from "@/lib/home-customization";
@@ -134,7 +135,7 @@ export function CustomizeBar({
             : "border-edge-soft/40 bg-canvas/80 text-ink-muted hover:bg-canvas hover:text-ink"
         }`}
       >
-        <Pencil size={12} strokeWidth={2.4} />
+        <PencilOutlineIcon size={12} />
         {editMode ? t("Done editing") : t("Customize home")}
       </button>
     </div>

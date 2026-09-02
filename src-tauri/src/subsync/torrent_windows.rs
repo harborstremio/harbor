@@ -15,7 +15,7 @@ pub struct Geometry {
     pub file_len: u64,
 }
 
-#[derive(Clone, Copy, serde::Serialize)]
+#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Window {
     pub start_sec: f32,
@@ -115,7 +115,10 @@ fn safe_intervals(spans: &[(u64, u64)], file_len: u64, duration: f32) -> Vec<(f3
 fn clamp_window(lo: f32, hi: f32, prefer_end: bool) -> Window {
     let len = (hi - lo).min(MAX_WINDOW_SEC);
     let start = if prefer_end { hi - len } else { lo };
-    Window { start_sec: start, len_sec: len }
+    Window {
+        start_sec: start,
+        len_sec: len,
+    }
 }
 
 pub fn center(w: &Window) -> f32 {
@@ -128,6 +131,27 @@ fn near_future(w: &Window, position: f32) -> bool {
 
 fn overlaps(a: &Window, b: &Window) -> bool {
     a.start_sec < b.start_sec + b.len_sec && b.start_sec < a.start_sec + a.len_sec
+}
+
+pub fn windows_available(
+    bytes: &[u8],
+    geo: &Geometry,
+    duration_sec: f32,
+    requested: &[Window],
+) -> bool {
+    if requested.is_empty() {
+        return false;
+    }
+    let spans = available_byte_spans(bytes, geo);
+    let safe = safe_intervals(&spans, geo.file_len, duration_sec.max(1.0));
+    requested.iter().all(|window| {
+        let end = window.start_sec + window.len_sec;
+        window.start_sec >= 0.0
+            && window.len_sec > 0.0
+            && safe
+                .iter()
+                .any(|&(start, safe_end)| window.start_sec >= start && end <= safe_end)
+    })
 }
 
 fn place_windows(safe: &[(f32, f32)], want_late: bool, position: f32) -> Vec<Window> {
@@ -175,7 +199,10 @@ pub fn downloaded_frac(bytes: &[u8], geo: &Geometry) -> f32 {
     if geo.file_len == 0 {
         return 0.0;
     }
-    let got: u64 = available_byte_spans(bytes, geo).iter().map(|&(s, e)| e - s).sum();
+    let got: u64 = available_byte_spans(bytes, geo)
+        .iter()
+        .map(|&(s, e)| e - s)
+        .sum();
     got as f32 / geo.file_len as f32
 }
 
@@ -183,7 +210,9 @@ pub fn endpoints_ready(bytes: &[u8], geo: &Geometry) -> (bool, bool) {
     let head_hi = (geo.file_offset + HEAD_TAIL_CHUNK).min(geo.file_offset + geo.file_len);
     let head = range_available(bytes, geo, geo.file_offset, head_hi);
     let file_end = geo.file_offset + geo.file_len;
-    let tail_start = file_end.saturating_sub(HEAD_TAIL_CHUNK).max(geo.file_offset);
+    let tail_start = file_end
+        .saturating_sub(HEAD_TAIL_CHUNK)
+        .max(geo.file_offset);
     let tail = range_available(bytes, geo, tail_start, file_end);
     (head, tail)
 }
@@ -223,7 +252,10 @@ mod tests {
     fn spans_coalesce_contiguous_and_break_on_gap() {
         let g = geo(8, 1000, 0, 8000);
         let have = [0b1110_0111u8];
-        assert_eq!(available_byte_spans(&have, &g), vec![(0, 3000), (5000, 8000)]);
+        assert_eq!(
+            available_byte_spans(&have, &g),
+            vec![(0, 3000), (5000, 8000)]
+        );
     }
 
     #[test]
@@ -266,5 +298,30 @@ mod tests {
         assert_eq!(endpoints_ready(&have, &g), (true, false));
         have[1] |= 0b0100_0000;
         assert_eq!(endpoints_ready(&have, &g), (true, true));
+    }
+
+    #[test]
+    fn explicit_windows_must_be_fully_inside_downloaded_safe_ranges() {
+        let g = geo(10, 100_000, 0, 1_000_000);
+        let full = [0xffu8, 0xc0u8];
+        assert!(windows_available(
+            &full,
+            &g,
+            1_000.0,
+            &[Window {
+                start_sec: 400.0,
+                len_sec: 60.0,
+            }]
+        ));
+        let head_only = [0xf0u8, 0x00u8];
+        assert!(!windows_available(
+            &head_only,
+            &g,
+            1_000.0,
+            &[Window {
+                start_sec: 700.0,
+                len_sec: 60.0,
+            }]
+        ));
     }
 }

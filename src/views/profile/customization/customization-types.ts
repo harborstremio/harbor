@@ -1,3 +1,4 @@
+import { t } from "@/lib/i18n";
 import type { CustomizationInput } from "../profile-types";
 
 export const CANVAS_MIN = 200;
@@ -36,14 +37,14 @@ export function validImage(value: string): boolean {
 
 export function validateCustomization(form: CustomizationInput): string | null {
   const font = form.profileFont.trim();
-  if (font && !validFont(font)) return "Font name can only use letters, numbers, and spaces.";
+  if (font && !validFont(font)) return t("Font name can only use letters, numbers, and spaces.");
   const color = form.pageBgColor.trim();
-  if (color && !validColor(color)) return "Background color must be a hex or rgb/hsl value.";
+  if (color && !validColor(color)) return t("Background color must be a hex or rgb/hsl value.");
   const image = form.pageBgImage.trim();
-  if (image && !validImage(image)) return "Background image must be an https URL.";
+  if (image && !validImage(image)) return t("Background image must be an https URL.");
   const favicon = form.profileFavicon.trim();
-  if (favicon && !validImage(favicon)) return "Favicon must be an https URL.";
-  if (form.customHtml.length > MARKUP_CAP) return "Custom HTML is too large.";
-  if (form.customCss.length > MARKUP_CAP) return "Custom CSS is too large.";
+  if (favicon && !validImage(favicon)) return t("Favicon must be an https URL.");
+  if (form.customHtml.length > MARKUP_CAP) return t("Custom HTML is too large.");
+  if (form.customCss.length > MARKUP_CAP) return t("Custom CSS is too large.");
   return null;
 }

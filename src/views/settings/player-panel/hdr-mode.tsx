@@ -2,6 +2,8 @@ import { useSettings } from "@/lib/settings";
 import { isWindowsDesktop } from "@/lib/platform";
 import { isRtxHdrBlocked, isRtxVsrBlocked } from "@/lib/player/rtx-video-policy";
 import { useT } from "@/lib/i18n";
+import { SettingGroup } from "../kit";
+import { ToggleRow } from "../shared";
 import { DisplayPanelSelector } from "./display-panel-selector";
 
 type HdrMode = "sdr" | "hdrWindow" | "hdrEmbedded";
@@ -22,6 +24,18 @@ function deriveMode(s: {
   if (s.playerHdrOpaqueWindow) return "hdrWindow";
   if (s.playerHdrToSdr) return "sdr";
   return "hdrEmbedded";
+}
+
+function Tag({ text, accent }: { text: string; accent?: boolean }) {
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider ${
+        accent ? "bg-accent-soft text-accent" : "bg-canvas text-ink-muted"
+      }`}
+    >
+      {text}
+    </span>
+  );
 }
 
 export function HdrModePicker() {
@@ -59,12 +73,12 @@ export function HdrModePicker() {
     },
   ];
 
+  const rtxHdrSub = t("Upconverts SDR video to HDR on an Nvidia RTX GPU (turn on RTX Video HDR in the Nvidia app; needs GPU decode). Experimental. Unavailable while SVP is active for the current video.");
+  const rtxVsrSub = t("Upscales SDR video with AI on an Nvidia RTX GPU (turn on RTX Video Super Resolution in the Nvidia app; needs GPU decode). Experimental. Unavailable while SVP is active for the current video.");
+
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        {t("HDR")}
-      </span>
-      <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-3">
+      <SettingGroup label={t("HDR")}>
         {options.map((o) => {
           const selected = current === o.id;
           return (
@@ -72,115 +86,49 @@ export function HdrModePicker() {
               key={o.id}
               type="button"
               onClick={() => update(MODE_FLAGS[o.id])}
-              className={`flex items-start gap-3.5 rounded-2xl border px-5 py-4 text-start transition-colors ${
-                selected
-                  ? "border-ink bg-elevated"
-                  : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-canvas/60"
+              className={`flex items-start gap-3.5 rounded-md px-4 py-3.5 text-start transition-colors ${
+                selected ? "bg-raised" : "bg-elevated hover:bg-raised"
               }`}
             >
               <span
-                className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                  selected ? "border-ink" : "border-edge"
+                className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full transition-colors ${
+                  selected ? "bg-accent" : "bg-canvas"
                 }`}
               >
-                {selected && <span className="h-2.5 w-2.5 rounded-full bg-ink" />}
+                {selected && <span className="h-2 w-2 rounded-full bg-canvas" />}
               </span>
-              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[15px] font-semibold text-ink">{o.label}</span>
-                  {o.recommended && (
-                    <span className="rounded-md bg-accent/15 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-accent">
-                      {t("Recommended")}
-                    </span>
-                  )}
-                  {o.experimental && (
-                    <span className="rounded-md bg-ink/10 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-ink-muted">
-                      {t("Experimental")}
-                    </span>
-                  )}
-                </div>
-                <span className="text-[12.5px] leading-snug text-ink-muted">{o.sub}</span>
-              </div>
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="text-[13.5px] font-medium leading-snug text-ink">{o.label}</span>
+                  {o.recommended && <Tag accent text={t("Recommended")} />}
+                  {o.experimental && <Tag text={t("Experimental")} />}
+                </span>
+                <span className="text-[12.5px] leading-relaxed text-ink-subtle">{o.sub}</span>
+              </span>
             </button>
           );
         })}
-      </div>
+      </SettingGroup>
       <DisplayPanelSelector />
       {isWindowsDesktop() && (
-        <button
-          type="button"
-          disabled={rtxHdrUnavailable}
-          onClick={() => update({ playerRtxHdr: !settings.playerRtxHdr })}
-          className={`mt-1 flex items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-start transition-colors ${
-            rtxHdrUnavailable
-              ? "cursor-not-allowed border-edge-soft bg-canvas/20 opacity-50"
-              : settings.playerRtxHdr
-                ? "border-ink bg-elevated"
-                : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-canvas/60"
-          }`}
-        >
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[15px] font-semibold text-ink">{t("RTX Video HDR")}</span>
-              <span className="rounded-md bg-ink/10 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-ink-muted">
-                {t("Nvidia only")}
-              </span>
-            </div>
-            <span className="text-[12.5px] leading-snug text-ink-muted">
-              {t("Upconverts SDR video to HDR on an Nvidia RTX GPU (turn on RTX Video HDR in the Nvidia app; needs GPU decode). Experimental. Unavailable while SVP is active for the current video.")}
-            </span>
-          </div>
-          <span
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-              settings.playerRtxHdr && !rtxHdrUnavailable ? "bg-ink" : "bg-edge"
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-canvas transition-transform ${
-                settings.playerRtxHdr && !rtxHdrUnavailable ? "translate-x-[22px]" : "translate-x-0.5"
-              }`}
-            />
-          </span>
-        </button>
+        <ToggleRow
+          label={t("RTX Video HDR")}
+          leading={<Tag text={t("Nvidia only")} />}
+          sub={rtxHdrSub}
+          lockReason={rtxHdrUnavailable ? rtxHdrSub : undefined}
+          value={settings.playerRtxHdr}
+          onChange={(v) => update({ playerRtxHdr: v })}
+        />
       )}
       {isWindowsDesktop() && (
-        <button
-          type="button"
-          disabled={rtxVsrUnavailable}
-          onClick={() => update({ playerRtxVsr: !settings.playerRtxVsr })}
-          className={`mt-1 flex items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-start transition-colors ${
-            rtxVsrUnavailable
-              ? "cursor-not-allowed border-edge-soft bg-canvas/20 opacity-50"
-              : settings.playerRtxVsr
-                ? "border-ink bg-elevated"
-                : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-canvas/60"
-          }`}
-        >
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[15px] font-semibold text-ink">
-                {t("RTX Video Super Resolution")}
-              </span>
-              <span className="rounded-md bg-ink/10 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-ink-muted">
-                {t("Nvidia only")}
-              </span>
-            </div>
-            <span className="text-[12.5px] leading-snug text-ink-muted">
-              {t("Upscales SDR video with AI on an Nvidia RTX GPU (turn on RTX Video Super Resolution in the Nvidia app; needs GPU decode). Experimental. Unavailable while SVP is active for the current video.")}
-            </span>
-          </div>
-          <span
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-              settings.playerRtxVsr && !rtxVsrUnavailable ? "bg-ink" : "bg-edge"
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-canvas transition-transform ${
-                settings.playerRtxVsr && !rtxVsrUnavailable ? "translate-x-[22px]" : "translate-x-0.5"
-              }`}
-            />
-          </span>
-        </button>
+        <ToggleRow
+          label={t("RTX Video Super Resolution")}
+          leading={<Tag text={t("Nvidia only")} />}
+          sub={rtxVsrSub}
+          lockReason={rtxVsrUnavailable ? rtxVsrSub : undefined}
+          value={settings.playerRtxVsr}
+          onChange={(v) => update({ playerRtxVsr: v })}
+        />
       )}
     </div>
   );

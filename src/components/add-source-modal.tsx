@@ -62,39 +62,49 @@ export function AddSourceModal({
 
   return createPortal(
     <div
-      className="pointer-events-auto fixed inset-0 z-[120] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
+      className="animate-in fade-in pointer-events-auto fixed inset-0 z-[170] flex items-center justify-center bg-black/60 backdrop-blur-sm duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-[24px] border border-edge-soft bg-elevated/95 px-8 py-8 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
-        <div className="flex items-start justify-between gap-4">
+      <div className="animate-modal-in flex w-full max-w-[420px] flex-col gap-4 rounded-lg border border-edge-soft bg-elevated p-4 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.75)]">
+        <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-0.5">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Add Custom Source")}</h2>
-            <p className="text-[12.5px] leading-relaxed text-ink-muted">{t("Provide a JSON link or paste it directly.")}</p>
+            <h2 className="text-[13px] font-semibold tracking-tight text-ink">{t("Add Custom Source")}</h2>
+            <p className="text-[11.5px] leading-relaxed text-ink-subtle">
+              {t("Provide a JSON link or paste it directly.")}
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-canvas/40 text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
             aria-label={t("Cancel")}
           >
-            <X size={16} />
+            <X size={15} />
           </button>
         </div>
 
-        <div className="flex gap-2 rounded-lg bg-surface-muted p-1">
+        <div className="relative flex rounded-md bg-canvas p-0.5">
+          <span
+            aria-hidden
+            className="harbor-seg-thumb absolute inset-y-0.5 w-[calc(50%-2px)] rounded-[6px] bg-raised ring-1 ring-edge"
+            style={{
+              left: mode === "url" ? "2px" : "calc(50% + 0px)",
+              animation: `${mode === "url" ? "harbor-seg-a" : "harbor-seg-b"} 300ms ease-in-out`,
+            }}
+          />
           <button
             onClick={() => setMode("url")}
-            className={`flex-1 rounded-md py-1.5 text-[13px] font-medium transition-colors ${
-              mode === "url" ? "bg-surface text-ink shadow-sm" : "text-ink-subtle hover:text-ink"
+            className={`relative z-10 flex-1 rounded-[6px] py-2 text-[12.5px] font-medium transition-colors ${
+              mode === "url" ? "text-ink" : "text-ink-muted hover:text-ink"
             }`}
           >
             {t("JSON URL")}
           </button>
           <button
             onClick={() => setMode("json")}
-            className={`flex-1 rounded-md py-1.5 text-[13px] font-medium transition-colors ${
-              mode === "json" ? "bg-surface text-ink shadow-sm" : "text-ink-subtle hover:text-ink"
+            className={`relative z-10 flex-1 rounded-[6px] py-2 text-[12.5px] font-medium transition-colors ${
+              mode === "json" ? "text-ink" : "text-ink-muted hover:text-ink"
             }`}
           >
             {t("Paste JSON")}
@@ -107,31 +117,31 @@ export function AddSourceModal({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
             placeholder="https://example.com/sources.json"
             autoFocus
-            className="w-full rounded-lg border border-edge-soft bg-canvas/60 px-4 py-2.5 text-[14px] text-ink outline-none transition-colors focus:border-accent"
+            className="h-10 w-full rounded-md bg-canvas px-3 text-[12.5px] text-ink ring-1 ring-inset ring-edge-soft transition-colors placeholder:text-ink-subtle focus:outline-none focus:ring-accent/50"
           />
         ) : (
           <textarea
             value={jsonText}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setJsonText(e.target.value)}
             placeholder='[ { "id": "...", "title": "Directors", "folders": [ ... ] } ]'
-            className="h-48 w-full resize-none rounded-lg border border-edge-soft bg-canvas/60 p-3 text-sm font-mono text-ink outline-none transition-colors focus:border-accent"
+            className="h-36 w-full resize-none rounded-md bg-canvas p-3 font-mono text-[12px] leading-relaxed text-ink ring-1 ring-inset ring-edge-soft transition-colors placeholder:text-ink-subtle focus:outline-none focus:ring-accent/50"
           />
         )}
 
-        {error && <p className="text-[12.5px] font-medium text-red-400">{error}</p>}
+        {error && <p className="text-[11.5px] text-danger">{error}</p>}
 
-        <div className="mt-2 flex justify-end gap-3">
+        <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
             disabled={loading}
-            className="rounded-full border border-edge bg-transparent px-5 py-2 text-[13px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+            className="harbor-press-pop inline-flex h-9 items-center justify-center rounded-md px-3.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:opacity-40"
           >
             {t("Cancel")}
           </button>
           <button
             onClick={handleSave}
             disabled={loading}
-            className="rounded-full bg-accent px-5 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="harbor-press-pop inline-flex h-9 items-center justify-center rounded-md bg-ink px-3.5 text-[12.5px] font-medium text-canvas transition-transform hover:scale-[1.01] disabled:opacity-40 disabled:hover:scale-100"
           >
             {loading ? t("Loading...") : t("Add Source")}
           </button>

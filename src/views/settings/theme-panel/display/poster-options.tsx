@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useT } from "@/lib/i18n";
 
 export const POSTER_RADII = [
   { value: "sharp", label: "Sharp", px: 0 },
@@ -9,7 +10,8 @@ export const POSTER_RADII = [
 ];
 
 export function radiusKey(px: number): string {
-  return POSTER_RADII.reduce((best, p) => (Math.abs(p.px - px) < Math.abs(best.px - px) ? p : best)).value;
+  return POSTER_RADII.reduce((best, p) => (Math.abs(p.px - px) < Math.abs(best.px - px) ? p : best))
+    .value;
 }
 
 export function PxField({
@@ -23,6 +25,7 @@ export function PxField({
   max: number;
   onCommit: (v: number) => void;
 }) {
+  const t = useT();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(value));
   useEffect(() => {
@@ -47,7 +50,7 @@ export function PxField({
           if (e.key === "Enter") commit();
           else if (e.key === "Escape") setEditing(false);
         }}
-        className="w-14 rounded-md border border-ink bg-canvas px-1.5 py-0.5 text-[12px] tabular-nums text-ink outline-none"
+        className="h-8 w-[74px] rounded-md bg-raised px-2.5 text-[13px] font-semibold tabular-nums text-ink outline-none"
       />
     );
   }
@@ -55,8 +58,8 @@ export function PxField({
     <button
       type="button"
       onClick={() => setEditing(true)}
-      title="Click to edit"
-      className="rounded px-1 py-0.5 tabular-nums text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+      title={t("Click to edit")}
+      className="h-8 w-[74px] rounded-md bg-elevated text-[13px] font-semibold tabular-nums text-ink-muted transition-colors hover:bg-raised hover:text-ink"
     >
       {value}px
     </button>

@@ -43,7 +43,10 @@ const BROWSER_UA: &str =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
 fn total_from_content_range(value: &str) -> Option<u64> {
-    value.rsplit('/').next().and_then(|s| s.trim().parse::<u64>().ok())
+    value
+        .rsplit('/')
+        .next()
+        .and_then(|s| s.trim().parse::<u64>().ok())
 }
 
 #[tauri::command]
@@ -56,9 +59,20 @@ pub async fn download_start(
     on_event: Channel<DownloadEvent>,
 ) -> Result<(), String> {
     let cancel = Arc::new(AtomicBool::new(false));
-    state.tasks.lock().unwrap().insert(id.clone(), cancel.clone());
+    state
+        .tasks
+        .lock()
+        .unwrap()
+        .insert(id.clone(), cancel.clone());
 
-    let outcome = run_download(&url, &dest, &headers.unwrap_or_default(), &cancel, &on_event).await;
+    let outcome = run_download(
+        &url,
+        &dest,
+        &headers.unwrap_or_default(),
+        &cancel,
+        &on_event,
+    )
+    .await;
     state.tasks.lock().unwrap().remove(&id);
 
     match outcome {
@@ -122,7 +136,11 @@ async fn run_download(
     } else if !has("range") {
         req = req.header(reqwest::header::RANGE, "bytes=0-");
     }
-    eprintln!("[harbor::download] GET {} resume-from={}", log_host(url), start_byte);
+    eprintln!(
+        "[harbor::download] GET {} resume-from={}",
+        log_host(url),
+        start_byte
+    );
     let resp = tokio::select! {
         biased;
         _ = wait_cancelled(cancel) => return Err(DownloadEnd::Canceled(start_byte)),
@@ -137,11 +155,16 @@ async fn run_download(
 
     if status == reqwest::StatusCode::RANGE_NOT_SATISFIABLE && start_byte > 0 {
         let _ = tokio::fs::rename(&part, dest).await;
-        let _ = on_event.send(DownloadEvent::Done { received: start_byte });
+        let _ = on_event.send(DownloadEvent::Done {
+            received: start_byte,
+        });
         return Ok(());
     }
     if !status.is_success() {
-        eprintln!("[harbor::download] upstream rejected: HTTP {}", status.as_u16());
+        eprintln!(
+            "[harbor::download] upstream rejected: HTTP {}",
+            status.as_u16()
+        );
         return Err(DownloadEnd::Failed(format!("HTTP {}", status.as_u16())));
     }
 
@@ -152,7 +175,10 @@ async fn run_download(
         .unwrap_or("")
         .to_lowercase();
     let declared = resp.content_length();
-    eprintln!("[harbor::download] content-type={} content-length={:?}", content_type, declared);
+    eprintln!(
+        "[harbor::download] content-type={} content-length={:?}",
+        content_type, declared
+    );
     let non_video = content_type.starts_with("text/")
         || content_type.contains("html")
         || content_type.contains("json")
@@ -167,7 +193,11 @@ async fn run_download(
         );
         return Err(DownloadEnd::Failed(format!(
             "source returned a {} page, not the video: {}",
-            if content_type.is_empty() { "small" } else { content_type.as_str() },
+            if content_type.is_empty() {
+                "small"
+            } else {
+                content_type.as_str()
+            },
             snippet.chars().take(160).collect::<String>()
         )));
     }
@@ -227,7 +257,10 @@ async fn run_download(
     drop(writer);
 
     if received < MIN_VIDEO_BYTES {
-        eprintln!("[harbor::download] refusing {} bytes (not a video file)", received);
+        eprintln!(
+            "[harbor::download] refusing {} bytes (not a video file)",
+            received
+        );
         let _ = tokio::fs::remove_file(&part).await;
         return Err(DownloadEnd::Failed(format!(
             "source returned only {} bytes, not the video (try a different source)",

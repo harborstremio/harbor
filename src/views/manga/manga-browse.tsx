@@ -1,4 +1,5 @@
-import { BookCheck, ChevronDown, Clock3, Loader2, Search, Sparkles } from "lucide-react";
+import { BookCheck, ChevronDown, Clock3, Loader2, Sparkles } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { Row } from "@/components/row";

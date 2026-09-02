@@ -1,4 +1,4 @@
-import { evaluateGate, type SyncTransform, type GateDecision } from "./fp-gate";
+import { evaluateGate, measuredQuality, type SyncTransform, type GateDecision } from "./fp-gate";
 import { fuseConfidence, DEFAULT_PRIOR, type SignalEvidence } from "./confidence";
 import {
   DEFAULT_DRIFT_CONFIG,
@@ -63,7 +63,11 @@ export class DriftMonitor {
   private pending: PendingOffer | null = null;
   private lastEvent: CorrectionEvent | null = null;
 
-  constructor(private ports: DriftPorts, private deps: DriftDeps, config?: Partial<DriftConfig>) {
+  constructor(
+    private ports: DriftPorts,
+    private deps: DriftDeps,
+    config?: Partial<DriftConfig>,
+  ) {
     this.cfg = { ...DEFAULT_DRIFT_CONFIG, ...config };
   }
 
@@ -151,7 +155,8 @@ export class DriftMonitor {
     this.pending = null;
     this.lastSampleSec = st.positionSec;
     this.cooldownUntilSec = st.positionSec + this.cfg.cooldownSec / 2;
-    if (this.statusValue !== "frozen" && this.statusValue !== "escalate") this.statusValue = "watching";
+    if (this.statusValue !== "frozen" && this.statusValue !== "escalate")
+      this.statusValue = "watching";
     return true;
   }
 
@@ -209,11 +214,16 @@ export class DriftMonitor {
 
   private pushSample(s: DriftSample): void {
     this.samples.push(s);
-    const horizon = s.playbackSec - Math.max(this.cfg.stabilityWindowSec, this.cfg.rollingQualitySec) - 5;
+    const horizon =
+      s.playbackSec - Math.max(this.cfg.stabilityWindowSec, this.cfg.rollingQualitySec) - 5;
     this.samples = this.samples.filter((x) => x.playbackSec >= horizon);
   }
 
-  private async attemptCorrection(st: DriftPlayerState, residualSec: number, members: DriftSample[]): Promise<void> {
+  private async attemptCorrection(
+    st: DriftPlayerState,
+    residualSec: number,
+    members: DriftSample[],
+  ): Promise<void> {
     const step = driftStep(residualSec, this.cfg);
     if (Math.abs(this.appliedDelta + step) > this.cfg.cumulativeCapSec) {
       this.statusValue = "escalate";
@@ -227,7 +237,12 @@ export class DriftMonitor {
     let asrWordMatch: number | undefined;
     if (this.ports.confirmAsr) {
       this.statusValue = "pending-confirm";
-      const asr = await this.ports.confirmAsr(lead.window[0], this.cfg.sampleWindowSec, lead.cues, residualSec);
+      const asr = await this.ports.confirmAsr(
+        lead.window[0],
+        this.cfg.sampleWindowSec,
+        lead.cues,
+        residualSec,
+      );
       if (asr) {
         asrUsed = true;
         asrWordMatch = asr.wordMatch;
@@ -235,7 +250,9 @@ export class DriftMonitor {
       }
     }
 
-    const rolling = this.samples.filter((s) => s.usable && lead.playbackSec - s.playbackSec <= this.cfg.rollingQualitySec);
+    const rolling = this.samples.filter(
+      (s) => s.usable && lead.playbackSec - s.playbackSec <= this.cfg.rollingQualitySec,
+    );
     const qualityBefore = aggregateQuality(rolling, 0, this.cfg);
     const qualityAfter = aggregateQuality(rolling, step, this.cfg);
     const confidence = fuseConfidence(evidence, DEFAULT_PRIOR);
@@ -243,10 +260,14 @@ export class DriftMonitor {
     const decision = evaluateGate({
       transform,
       confidence,
-      qualityBefore,
-      qualityAfter,
+      qualityBefore: measuredQuality(qualityBefore, "rolling-drift-samples"),
+      qualityAfter: measuredQuality(qualityAfter, "rolling-drift-samples"),
       bounds: onlineBounds(this.cfg),
       exactIdentity: false,
+      candidateKind: "structural",
+      calibrationReady: false,
+      structuralAutoApplyEnabled: true,
+      subtitleFormat: "unknown",
       asrWordMatch,
       priorRuntimeOk: undefined,
       inputAlreadyGood: false,

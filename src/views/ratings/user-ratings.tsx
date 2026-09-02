@@ -82,7 +82,7 @@ export function UserRatings({
 
   return createPortal(
     <div
-      className="animate-fade-in fixed inset-0 z-[130] flex items-stretch justify-center bg-canvas/85 backdrop-blur-sm"
+      className="animate-fade-in fixed inset-0 z-[175] flex items-stretch justify-center bg-canvas/85 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label={t("Ratings")}

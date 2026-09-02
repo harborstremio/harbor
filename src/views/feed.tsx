@@ -76,7 +76,7 @@ export function FeedView({ onOpenProfile }: { onOpenProfile?: (handle: string) =
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="harbor-shimmer relative h-[88px] rounded-[14px] ring-1 ring-edge-soft"
+                className="harbor-shimmer relative h-[88px] rounded-lg ring-1 ring-edge-soft"
                 style={{ ["--ai-delay" as string]: `${i * 90}ms` }}
               />
             ))}
@@ -141,7 +141,7 @@ function Empty({
   action?: { label: string; onClick: () => void };
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[14px] border border-dashed border-edge bg-surface/30 px-6 py-16 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-edge bg-surface/30 px-6 py-16 text-center">
       {icon && <span className="text-ink-subtle">{icon}</span>}
       <div className="flex max-w-sm flex-col gap-1">
         <span className="text-[15px] font-semibold text-ink">{title}</span>

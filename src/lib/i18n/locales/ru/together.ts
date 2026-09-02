@@ -7,19 +7,23 @@ const together: Record<string, string> = {
   " · paused": " · пауза",
   " · still loading": " · ещё загружается",
   " · left the video": " · не смотрит",
-  "The host starts playback for the whole room.": "Хост запускает воспроизведение для всей комнаты.",
+  "The host starts playback for the whole room.":
+    "Хост запускает воспроизведение для всей комнаты.",
   "Waiting for the host to start": "Ожидание запуска от хоста",
-  "Everyone is loaded in. Press play to start watching.": "Все загрузились. Нажмите воспроизведение, чтобы начать просмотр.",
+  "Everyone is loaded in. Press play to start watching.":
+    "Все загрузились. Нажмите воспроизведение, чтобы начать просмотр.",
   "Ready when you are": "Можно начинать",
   "Sharing {name}'s Stremio": "Используется Stremio от {name}",
-  "Your copy runs {guest}, host's runs {host}. Sync may drift.": "У вас версия {guest}, у хоста {host}. Синхронизация может сбиваться.",
+  "Your copy runs {guest}, host's runs {host}. Sync may drift.":
+    "У вас версия {guest}, у хоста {host}. Синхронизация может сбиваться.",
   "Say something…": "Напишите что-нибудь…",
   "Start anyway ({n} still loading)": "Всё равно начать (ещё загружаются: {n})",
   " · {n} instant": " · мгновенных: {n}",
   "Cached only": "Только кэш",
   "Cached only ({n})": "Только кэш ({n})",
   "No sources cached": "Нет кэшированных источников",
-  "Sources are not cached for this title. Open the picker page to refresh.": "Источники для этого названия не кэшированы. Откройте страницу выбора источников, чтобы обновить.",
+  "Sources are not cached for this title. Open the picker page to refresh.":
+    "Источники для этого названия не кэшированы. Откройте страницу выбора источников, чтобы обновить.",
   "Probably not cached. Pick another?": "Скорее всего, не в кэше. Выбрать другой?",
   "Click any source to swap in place": "Нажмите на любой источник для замены",
   "Does this stream look right?": "Этот поток подходит?",
@@ -30,8 +34,10 @@ const together: Record<string, string> = {
   "Close match": "Близкое совпадение",
   "Pick another": "Выбрать другой",
   "Something else": "Другое",
-  "Nothing matched. Try the franchise's first film name.": "Ничего не найдено. Попробуйте название первого фильма франшизы.",
-  "Not officially released yet. Click to search anyway in case of an early release.": "Официально ещё не вышло. Нажмите, чтобы всё равно поискать на случай раннего релиза.",
+  "Nothing matched. Try the franchise's first film name.":
+    "Ничего не найдено. Попробуйте название первого фильма франшизы.",
+  "Not officially released yet. Click to search anyway in case of an early release.":
+    "Официально ещё не вышло. Нажмите, чтобы всё равно поискать на случай раннего релиза.",
   "Hide streams": "Скрыть потоки",
   "Show streams": "Показать потоки",
   "Flagged shown": "Помеченные показаны",
@@ -47,13 +53,14 @@ const together: Record<string, string> = {
   "{word} {n}s · hold for options": "{word} на {n}s · удерживайте для настроек",
   "Cast to a device": "Транслировать на устройство",
   "Dismiss episode panel": "Закрыть панель эпизодов",
-  "Advance Continue Watching to the next episode": "Перевести «Продолжить просмотр» на следующий эпизод",
+  "Advance Continue Watching to the next episode":
+    "Перевести «Продолжить просмотр» на следующий эпизод",
   "Invite via link": "Пригласить по ссылке",
   "Watch together": "Смотреть вместе",
-  "Back": "Назад",
-  "Invite": "Пригласить",
+  Back: "Назад",
+  Invite: "Пригласить",
   "Paste invite link": "Вставьте ссылку-приглашение",
-  "Join": "Присоединиться",
+  Join: "Присоединиться",
   "Open Settings": "Открыть настройки",
   "Your name": "Ваше имя",
   "Starting…": "Запуск…",
@@ -66,7 +73,8 @@ const together: Record<string, string> = {
   "Show cursors": "Показывать курсоры",
   "Leave room": "Покинуть комнату",
   "Watch Together needs a relay.": "Для совместного просмотра нужен ретранслятор.",
-  "A relay is a tiny Cloudflare Worker that passes play/pause/seek messages between you and your friends. No video data ever touches it. Deploy your own in one click (free tier is plenty), or paste a friend's invite link to use theirs.": "Ретранслятор — это крошечный Cloudflare Worker, который передаёт команды воспроизведения, паузы и перемотки между вами и друзьями. Видеоданные через него никогда не проходят. Разверните свой в один клик (бесплатного тарифа хватит с запасом) или вставьте ссылку-приглашение друга, чтобы использовать его ретранслятор.",
+  "A relay is a tiny Cloudflare Worker that passes play/pause/seek messages between you and your friends. No video data ever touches it. Deploy your own in one click (free tier is plenty), or paste a friend's invite link to use theirs.":
+    "Ретранслятор – это крошечный Cloudflare Worker, который передаёт команды воспроизведения, паузы и перемотки между вами и друзьями. Видеоданные через него никогда не проходят. Разверните свой в один клик (бесплатного тарифа хватит с запасом) или вставьте ссылку-приглашение друга, чтобы использовать его ретранслятор.",
   "Watch Together": "Совместный просмотр",
 };
 

@@ -80,7 +80,7 @@ export function SimklRatingPicker({
 
   return (
     <div className="flex items-center gap-3">
-      <div className="flex items-center gap-1.5" role="group" aria-label="SIMKL rating picker">
+      <div className="flex items-center gap-1.5" role="group" aria-label={t("SIMKL rating picker")}>
         {[1, 2, 3, 4, 5].map((n) => {
           const isFilled = 2 * n <= activeRating;
           const isHalf = 2 * n - 1 === activeRating;

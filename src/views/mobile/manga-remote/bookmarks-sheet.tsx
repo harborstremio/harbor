@@ -3,22 +3,14 @@ import { Bookmark, BookmarkPlus, Check, Trash2 } from "lucide-react";
 import { useMobileRemote } from "../mobile-remote";
 import { useRegisterSheet } from "../mobile-sheet-lock";
 import { SHEET_EXIT_CSS, useSheetDrag, useSheetPresence } from "../remote-extras";
+import { useT } from "@/lib/i18n";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
-
-function timeAgo(ts: number): string {
-  const s = Math.max(0, Math.round((Date.now() - ts) / 1000));
-  if (s < 60) return "just now";
-  const m = Math.round(s / 60);
-  if (m < 60) return `${m}m ago`;
-  const h = Math.round(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.round(h / 24)}d ago`;
-}
 
 export function BookmarksSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { snapshot, sendCommand } = useMobileRemote();
   const manga = snapshot.manga;
   const reduce = useReducedMotion();
+  const t = useT();
   const { render, leaving } = useSheetPresence(open);
   const { handleProps, panelStyle } = useSheetDrag(onClose);
   useRegisterSheet(open);
@@ -28,7 +20,20 @@ export function BookmarksSheet({ open, onClose }: { open: boolean; onClose: () =
     if (!open) setSaved(false);
   }, [open]);
 
-  const chapterIds = useMemo(() => new Set((manga?.chapters ?? []).map((c) => c.id)), [manga?.chapters]);
+  const chapterIds = useMemo(
+    () => new Set((manga?.chapters ?? []).map((c) => c.id)),
+    [manga?.chapters],
+  );
+
+  const timeAgo = (ts: number): string => {
+    const seconds = Math.max(0, Math.round((Date.now() - ts) / 1000));
+    if (seconds < 60) return t("just now");
+    const minutes = Math.round(seconds / 60);
+    if (minutes < 60) return t("{n}m ago", { n: minutes });
+    const hours = Math.round(minutes / 60);
+    if (hours < 24) return t("{n}h ago", { n: hours });
+    return t("{n}d ago", { n: Math.round(hours / 24) });
+  };
 
   if (!render || !manga) return null;
   const bookmarks = manga.bookmarks ?? [];
@@ -36,7 +41,9 @@ export function BookmarksSheet({ open, onClose }: { open: boolean; onClose: () =
   const isSpread = (manga.mode === "book" || manga.mode === "double") && spreadNums.length >= 2;
 
   const add = (page?: number) => {
-    if (sendCommand(page != null ? { action: "mangaBookmark", page } : { action: "mangaBookmark" })) {
+    if (
+      sendCommand(page != null ? { action: "mangaBookmark", page } : { action: "mangaBookmark" })
+    ) {
       setSaved(true);
       window.setTimeout(() => setSaved(false), 1400);
     }
@@ -54,7 +61,7 @@ export function BookmarksSheet({ open, onClose }: { open: boolean; onClose: () =
     >
       <style>{SHEET_EXIT_CSS}</style>
       <div
-        className={`flex max-h-[78vh] flex-col rounded-t-[28px] border-t border-edge-soft/60 bg-elevated ${leaving ? "harbor-sheet-panel-out" : reduce ? "" : "animate-in slide-in-from-bottom-4 duration-300"}`}
+        className={`flex max-h-[78vh] flex-col rounded-t-2xl border-t border-edge-soft/60 bg-elevated ${leaving ? "harbor-sheet-panel-out" : reduce ? "" : "animate-in slide-in-from-bottom-4 duration-300"}`}
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)", ...panelStyle }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -62,8 +69,10 @@ export function BookmarksSheet({ open, onClose }: { open: boolean; onClose: () =
           <div className="mx-auto mt-3 h-1 w-10 rounded-full bg-ink/20" />
           <div className="flex items-center gap-2 px-5 pb-3 pt-4">
             <Bookmark size={18} className="text-accent" />
-            <h3 className="text-[16px] font-semibold text-ink">Bookmarks</h3>
-            <span className="ms-auto text-[12px] tabular-nums text-ink-subtle">{bookmarks.length}</span>
+            <h3 className="text-[16px] font-semibold text-ink">{t("Bookmarks")}</h3>
+            <span className="ms-auto text-[12px] tabular-nums text-ink-subtle">
+              {bookmarks.length}
+            </span>
           </div>
         </div>
 
@@ -71,12 +80,12 @@ export function BookmarksSheet({ open, onClose }: { open: boolean; onClose: () =
           <div className="mx-4 mb-3 flex flex-col gap-2">
             {saved ? (
               <div className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-accent-soft text-[15px] font-semibold text-accent">
-                <Check size={18} strokeWidth={2.6} /> Saved
+                <Check size={18} strokeWidth={2.6} /> {t("Saved")}
               </div>
             ) : (
               <>
                 <span className="px-1 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink-subtle">
-                  Bookmark which page
+                  {t("Bookmark which page")}
                 </span>
                 <div className="flex gap-2">
                   {spreadNums.map((n) => (
@@ -86,7 +95,7 @@ export function BookmarksSheet({ open, onClose }: { open: boolean; onClose: () =
                       onClick={() => add(n)}
                       className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-accent text-[15px] font-semibold text-canvas transition-transform active:scale-[0.97]"
                     >
-                      <BookmarkPlus size={17} strokeWidth={2.2} /> Page {n}
+                      <BookmarkPlus size={17} strokeWidth={2.2} /> {t("Page {n}", { n })}
                     </button>
                   ))}
                 </div>
@@ -99,22 +108,29 @@ export function BookmarksSheet({ open, onClose }: { open: boolean; onClose: () =
             onClick={() => add()}
             className={`mx-4 mb-3 flex h-12 items-center justify-center gap-2 rounded-2xl text-[15px] font-semibold transition-colors ${saved ? "bg-accent-soft text-accent" : "bg-accent text-canvas active:opacity-90"}`}
           >
-            {saved ? <Check size={18} strokeWidth={2.6} /> : <BookmarkPlus size={18} strokeWidth={2.2} />}
-            {saved ? "Saved" : `Bookmark page ${manga.pageIndex + 1}`}
+            {saved ? (
+              <Check size={18} strokeWidth={2.6} />
+            ) : (
+              <BookmarkPlus size={18} strokeWidth={2.2} />
+            )}
+            {saved ? t("Saved") : t("Bookmark page {page}", { page: manga.pageIndex + 1 })}
           </button>
         )}
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3">
           {bookmarks.length === 0 ? (
             <p className="px-3 py-10 text-center text-[14px] leading-relaxed text-ink-muted">
-              No bookmarks yet. Save your spot with the button above.
+              {t("No bookmarks yet. Save your spot with the button above.")}
             </p>
           ) : (
             <div className="flex flex-col gap-1">
               {bookmarks.map((bm) => {
                 const missing = chapterIds.size > 0 && !chapterIds.has(bm.chapterId);
                 return (
-                  <div key={bm.id} className="flex items-center gap-1 rounded-2xl px-1 active:bg-raised/40">
+                  <div
+                    key={bm.id}
+                    className="flex items-center gap-1 rounded-2xl px-1 active:bg-raised/40"
+                  >
                     <button
                       type="button"
                       disabled={missing}
@@ -123,14 +139,19 @@ export function BookmarksSheet({ open, onClose }: { open: boolean; onClose: () =
                     >
                       <span className="truncate text-[15px] font-medium text-ink">{bm.name}</span>
                       <span className="truncate text-[12.5px] text-ink-subtle">
-                        {missing ? "Not in this source" : `${bm.chapterLabel} · page ${bm.page}`}
+                        {missing
+                          ? t("Not in this source")
+                          : t("{chapter} · page {page}", {
+                              chapter: bm.chapterLabel,
+                              page: bm.page,
+                            })}
                         <span className="text-ink-subtle/70"> · {timeAgo(bm.createdAt)}</span>
                       </span>
                     </button>
                     <button
                       type="button"
                       onClick={() => remove(bm.id)}
-                      aria-label="Remove bookmark"
+                      aria-label={t("Remove bookmark")}
                       className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-subtle transition-colors active:bg-raised active:text-danger"
                     >
                       <Trash2 size={18} />

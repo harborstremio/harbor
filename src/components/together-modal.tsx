@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { createPortal } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
 import { useSettings } from "@/lib/settings";
+import { useKnobAnim } from "@/lib/knob-anim";
 import { useTogether } from "@/lib/together/provider";
 import { useSelfIdentity } from "@/lib/together/use-self-identity";
 import { useView } from "@/lib/view";
@@ -12,7 +13,6 @@ import { Avatar } from "./together-modal/avatar";
 import { ChatPanel } from "./together-modal/chat-panel";
 import { GuestPickToggle } from "./together-modal/guest-pick-toggle";
 import { InvitePanel } from "./together-modal/invite-panel";
-import { LinkGlyph } from "./together-modal/link-glyph";
 import { ReturnToVideo } from "./together-modal/return-to-video";
 import { TogetherRelayBanner } from "./together-relay-banner";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
@@ -40,8 +40,7 @@ export function TogetherModalShell() {
   return createPortal(
     <div
       ref={panelRef}
-      className="fixed end-4 top-[88px] z-[220]"
-      style={{ animation: "nc-pop-in 200ms cubic-bezier(0.32,0.72,0.24,1) both" }}
+      className="animate-panel-in fixed end-4 top-[88px] z-[220]"
     >
       <TogetherPopover modal />
     </div>,
@@ -67,6 +66,7 @@ export function TogetherPopover({
   const [draftName, setDraftName] = useState(displayName);
   const [copied, setCopied] = useState(false);
   const [view, setView] = useState<"default" | "link">("default");
+  const cursorKnob = useKnobAnim(settings.togetherShareCursors);
 
   useEffect(() => {
     setDraftName(displayName);
@@ -127,7 +127,7 @@ export function TogetherPopover({
   const roomMedia = snapshot.syncState;
   const canReturn = inSession && !!roomMedia?.mediaId && topKind !== "player";
   const surfaceShape = modal
-    ? "rounded-2xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]"
+    ? "rounded-md shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
     : `animate-popover-in shadow-[0_24px_60px_-20px_rgba(0,0,0,0.7)] ${
         connectStyle === "tab"
           ? placement === "above-left"
@@ -197,7 +197,6 @@ export function TogetherPopover({
                 : "bg-elevated text-ink-muted hover:bg-raised hover:text-ink"
             }`}
           >
-            <LinkGlyph />
             {t("Invite")}
           </button>
         </Tooltip>
@@ -217,7 +216,7 @@ export function TogetherPopover({
         />
       )}
       {view === "default" && !enabled && (
-        <div className="flex flex-col gap-3 rounded-xl border border-edge bg-canvas/60 p-3.5">
+        <div className="flex flex-col gap-3 rounded-lg bg-canvas/50 p-3.5">
           <div>
             <p className="text-[13px] text-ink">{t("Watch Together needs a relay.")}</p>
             <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
@@ -231,7 +230,7 @@ export function TogetherPopover({
             onChange={(e) => setJoinCode(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleJoin()}
             placeholder={t("Paste invite link")}
-            className="h-10 rounded-lg border border-edge bg-canvas px-3 text-[12px] text-ink transition-colors focus:border-accent"
+            className="h-10 rounded-lg bg-canvas px-3 text-[12px] text-ink transition-colors focus:outline-none focus:ring-1 focus:ring-inset focus:ring-accent/50"
           />
           <div className="flex items-center gap-2">
             <button
@@ -243,7 +242,7 @@ export function TogetherPopover({
             </button>
             <button
               onClick={goToSettings}
-              className="inline-flex h-9 items-center justify-center rounded-lg border border-edge px-3 text-[13px] font-medium text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-white/[0.06] px-3 text-[13px] font-medium text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
             >
               {t("Open Settings")}
             </button>
@@ -261,14 +260,14 @@ export function TogetherPopover({
               onBlur={commitName}
               onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
               maxLength={32}
-              className="h-10 rounded-lg border border-edge bg-canvas px-3 text-[13.5px] text-ink transition-colors focus:border-accent"
+              className="h-10 rounded-lg bg-canvas px-3 text-[13.5px] text-ink transition-colors focus:outline-none focus:ring-1 focus:ring-inset focus:ring-accent/50"
             />
           </label>
 
           <button
             onClick={handleStart}
             disabled={connecting}
-            className="flex h-11 items-center justify-center gap-2 rounded-xl bg-ink text-[13.5px] font-medium text-canvas transition-transform hover:scale-[1.01] disabled:opacity-40 disabled:hover:scale-100"
+            className="harbor-press-pop flex h-11 items-center justify-center gap-2 rounded-xl bg-ink text-[13.5px] font-medium text-canvas transition-transform hover:scale-[1.01] disabled:opacity-40 disabled:hover:scale-100"
           >
             <Plus size={15} strokeWidth={2.2} />
             {connecting ? t("Starting…") : t("Start a new room")}
@@ -290,7 +289,7 @@ export function TogetherPopover({
                 }}
                 onKeyDown={(e) => e.key === "Enter" && handleJoin()}
                 placeholder="ABCD23"
-                className={`h-10 flex-1 rounded-lg border border-edge bg-canvas px-3 text-ink transition-colors focus:border-accent ${
+                className={`h-10 flex-1 rounded-lg bg-canvas px-3 text-ink transition-colors focus:outline-none focus:ring-1 focus:ring-inset focus:ring-accent/50 ${
                   joinCode.length > 6 || joinCode.includes("/")
                     ? "text-[12px]"
                     : "text-center text-[15px] font-mono tracking-[0.3em]"
@@ -299,7 +298,7 @@ export function TogetherPopover({
               <button
                 onClick={handleJoin}
                 disabled={joinCode.trim().length === 0 || connecting}
-                className="h-10 rounded-lg border border-edge px-4 text-[13px] font-medium text-ink transition-colors hover:bg-elevated disabled:opacity-40 disabled:hover:bg-transparent"
+                className="harbor-press-pop h-10 rounded-lg bg-white/[0.06] px-4 text-[13px] font-medium text-ink transition-colors hover:bg-white/[0.10] disabled:opacity-40 disabled:hover:bg-white/[0.06]"
               >
                 {t("Join")}
               </button>
@@ -314,7 +313,7 @@ export function TogetherPopover({
               <p className="text-[12px] leading-snug text-danger">{snapshot.lastError}</p>
               <button
                 onClick={retrySession}
-                className="self-start rounded-md border border-danger/40 px-2.5 py-1 text-[11.5px] font-medium text-danger transition-colors hover:bg-danger/20"
+                className="self-start rounded-md bg-danger/15 px-2.5 py-1 text-[11.5px] font-medium text-danger transition-colors hover:bg-danger/25"
               >
                 {t("Try again")}
               </button>
@@ -327,14 +326,14 @@ export function TogetherPopover({
         <>
           {canReturn && roomMedia && <ReturnToVideo media={roomMedia} onReturn={returnToVideo} />}
 
-          <div className="flex items-center justify-between rounded-xl border border-edge bg-canvas/60 px-3.5 py-2.5">
+          <div className="flex items-center justify-between rounded-lg bg-canvas/50 px-3.5 py-2.5">
             <div className="flex flex-col">
               <span className="text-[10.5px] uppercase tracking-wider text-ink-subtle">{t("Room code")}</span>
               <span className="font-mono text-[18px] tracking-[0.35em] text-ink">{snapshot.room}</span>
             </div>
             <button
               onClick={handleCopy}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-edge text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.06] text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
               aria-label={t("Copy room code")}
             >
               {copied ? <Check size={15} strokeWidth={2.4} /> : <Copy size={14} strokeWidth={1.9} />}
@@ -376,7 +375,7 @@ export function TogetherPopover({
 
           <button
             onClick={() => update({ togetherShareCursors: !settings.togetherShareCursors })}
-            className="flex h-10 items-center justify-between gap-2 rounded-lg border border-edge px-3 text-[12.5px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+            className="flex h-10 items-center justify-between gap-2 rounded-lg bg-white/[0.06] px-3 text-[12.5px] text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
             aria-pressed={settings.togetherShareCursors}
           >
             <span className="flex items-center gap-2">
@@ -390,16 +389,16 @@ export function TogetherPopover({
               }`}
             >
               <span
-                className={`block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                className={`block h-4 w-4 rounded-full bg-white shadow-sm ${
                   settings.togetherShareCursors ? "translate-x-4 rtl:-translate-x-4" : "translate-x-0"
-                }`}
+                } ${cursorKnob}`}
               />
             </span>
           </button>
 
           <button
             onClick={leaveSession}
-            className="flex h-10 items-center justify-center gap-1.5 rounded-lg border border-edge text-[12.5px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+            className="flex h-10 items-center justify-center gap-1.5 rounded-lg bg-white/[0.06] text-[12.5px] text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
           >
             <LogOut size={13} strokeWidth={1.9} />
             {t("Leave room")}
@@ -424,13 +423,13 @@ function TogetherSurface({
   cornerStyle?: CSSProperties;
   children: React.ReactNode;
 }) {
-  const surfaceClass = `harbor-together-surface w-[400px] max-w-[calc(100vw-2rem)] border ${shapeClass}`;
+  const surfaceClass = `harbor-together-surface w-[400px] max-w-[calc(100vw-2rem)] ${shapeClass}`;
   const contentClass = "flex max-h-[85vh] w-full flex-col gap-4 overflow-y-auto p-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
 
   if (!liquid) {
     return (
-      <div role="dialog" aria-modal="true" aria-label={label} className={`${surfaceClass} ${contentClass} border-edge`}>
-        {children}
+      <div role="dialog" aria-modal="true" aria-label={label} className={surfaceClass}>
+        <div className={contentClass}>{children}</div>
       </div>
     );
   }

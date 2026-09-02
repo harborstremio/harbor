@@ -227,7 +227,7 @@ function LiveSeekRowMock() {
   return (
     <>
       <span className="flex shrink-0 items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.22em] text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]">
-        <span className="h-2 w-2 rounded-full bg-danger shadow-[0_0_8px_var(--color-danger)]" />
+        <span className="h-2 w-2 rounded-full bg-danger" />
         Live
       </span>
       <div className="pointer-events-none relative h-12 flex-1">
@@ -293,8 +293,8 @@ function ControlPick({
         e.stopPropagation();
         onSelect(selected ? null : id);
       }}
-      className={`relative cursor-pointer rounded-xl p-1 transition-all duration-150 ${
-        selected ? "bg-accent/15 ring-2 ring-accent" : "ring-2 ring-transparent hover:bg-white/8"
+      className={`relative cursor-pointer rounded-md p-1 transition duration-150 ${
+        selected ? "bg-accent-soft ring-2 ring-accent" : "ring-2 ring-transparent hover:bg-white/8"
       }`}
     >
       <div className="pointer-events-none">{children}</div>

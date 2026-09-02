@@ -1,7 +1,9 @@
+import { createPortal } from "react-dom";
 import { HelpCircle, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { usePlaybackPosition } from "@/lib/player/playback-clock";
 import { useT } from "@/lib/i18n";
+import { useEscape } from "@/components/modal-shell";
 import type { AdRange } from "@/lib/ad-report/submit";
 import { AboutPanel } from "./ad-report-modal/about-panel";
 import { RangeRow } from "./ad-report-modal/range-row";
@@ -16,6 +18,7 @@ export function AdReportModal({
   onSubmit: (ranges: AdRange[]) => Promise<boolean>;
 }) {
   const t = useT();
+  useEscape(onClose, open);
   const position = usePlaybackPosition();
   const [view, setView] = useState<"report" | "about">("report");
   const [ranges, setRanges] = useState<AdRange[]>([]);
@@ -41,7 +44,7 @@ export function AdReportModal({
     if (ok) window.setTimeout(onClose, 1200);
   };
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[200] grid place-items-center bg-black/60 p-4 backdrop-blur-sm"
       onClick={onClose}
@@ -127,6 +130,7 @@ export function AdReportModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

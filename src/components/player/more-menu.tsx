@@ -1,4 +1,13 @@
-import { Check, Download, ExternalLink, Link2, Loader2, Magnet, MoreHorizontal, type LucideIcon } from "lucide-react";
+import {
+  Check,
+  Download,
+  ExternalLink,
+  Link2,
+  Loader2,
+  Magnet,
+  MoreHorizontal,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { magnetFromHash } from "@/lib/debrid/types";
 import { saveSubtitleToDisk } from "@/lib/subtitles/save-to-disk";
@@ -7,6 +16,7 @@ import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { copyText } from "./copy-link-button";
 import { Tooltip } from "./transport/tooltip";
+import { watchOutsideMouseDown } from "@/lib/player/overlay-dismiss";
 
 type MoreRowSpec = {
   key: string;
@@ -24,7 +34,13 @@ type MoreMenuProps = {
   onOpenChange?: (open: boolean) => void;
 };
 
-export function MoreMenu({ visible, streamUrl, infoHash, selectedSub, onOpenChange }: MoreMenuProps) {
+export function MoreMenu({
+  visible,
+  streamUrl,
+  infoHash,
+  selectedSub,
+  onOpenChange,
+}: MoreMenuProps) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
@@ -40,8 +56,7 @@ export function MoreMenu({ visible, streamUrl, infoHash, selectedSub, onOpenChan
     const close = (e: MouseEvent) => {
       if (!wrap.current?.contains(e.target as Node)) setOpen(false);
     };
-    window.addEventListener("mousedown", close);
-    return () => window.removeEventListener("mousedown", close);
+    return watchOutsideMouseDown(close);
   }, [open]);
 
   const httpUrl = streamUrl && /^https?:\/\//i.test(streamUrl) ? streamUrl : null;
@@ -59,15 +74,29 @@ export function MoreMenu({ visible, streamUrl, infoHash, selectedSub, onOpenChan
         saveSubtitleToDisk(subUrl, {
           title: selectedSub?.title || selectedSub?.label,
           lang: selectedSub?.lang,
+          format: selectedSub?.format,
+          downloadAuth: selectedSub?.downloadAuth,
           label: t("Subtitle"),
         }).then((r) => r === "ok"),
     });
   }
   if (httpUrl) {
-    rows.push({ key: "url", icon: Link2, label: t("Copy stream link"), feedback: "copied", run: () => copyText(httpUrl) });
+    rows.push({
+      key: "url",
+      icon: Link2,
+      label: t("Copy stream link"),
+      feedback: "copied",
+      run: () => copyText(httpUrl),
+    });
   }
   if (magnet) {
-    rows.push({ key: "magnet", icon: Magnet, label: t("Copy magnet link"), feedback: "copied", run: () => copyText(magnet) });
+    rows.push({
+      key: "magnet",
+      icon: Magnet,
+      label: t("Copy magnet link"),
+      feedback: "copied",
+      run: () => copyText(magnet),
+    });
   }
   if (httpUrl) {
     rows.push({
@@ -99,14 +128,16 @@ export function MoreMenu({ visible, streamUrl, infoHash, selectedSub, onOpenChan
             aria-label={t("More options")}
             aria-expanded={open}
             className={`flex h-10 w-10 items-center justify-center rounded-full border border-white/15 shadow-[0_14px_40px_-15px_rgba(0,0,0,0.85)] backdrop-blur-md transition-colors ${
-              open ? "bg-white/22 text-white" : "bg-black/65 text-white/90 hover:bg-black/85 hover:text-white"
+              open
+                ? "bg-white/22 text-white"
+                : "bg-black/65 text-white/90 hover:bg-black/85 hover:text-white"
             }`}
           >
             <MoreHorizontal size={20} strokeWidth={2.2} />
           </button>
         </Tooltip>
         {open && (
-          <div className="absolute end-0 top-[calc(100%+10px)] w-64 max-w-[calc(100vw-32px)] overflow-hidden rounded-2xl border border-edge bg-elevated p-1.5 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+          <div className="absolute end-0 top-[calc(100%+10px)] w-64 max-w-[calc(100vw-32px)] overflow-hidden rounded-md bg-elevated p-1.5 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]">
             {rows.map((r) => (
               <MoreRow key={r.key} spec={r} />
             ))}
@@ -155,7 +186,9 @@ function MoreRow({ spec }: { spec: MoreRowSpec }) {
       onClick={onClick}
       className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-canvas/55 hover:text-ink"
     >
-      <span className={`flex h-5 w-5 shrink-0 items-center justify-center ${done ? "text-success" : "text-ink-subtle"}`}>
+      <span
+        className={`flex h-5 w-5 shrink-0 items-center justify-center ${done ? "text-success" : "text-ink-subtle"}`}
+      >
         {busy ? (
           <Loader2 size={15} className="animate-spin" />
         ) : done ? (

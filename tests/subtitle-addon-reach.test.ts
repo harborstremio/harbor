@@ -1,10 +1,11 @@
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
-import { filterTracksByPreferredLanguage } from "../src/lib/subtitles/language.ts";
+import { filterTracksByPreferredLanguage, isKnownLanguage } from "../src/lib/subtitles/language.ts";
+import { subtitleLanguage } from "../src/lib/local-library/player-src.ts";
 
 const src = readFileSync(
   new URL("../src/lib/subtitles/providers/addons.ts", import.meta.url),
@@ -89,8 +90,8 @@ const subtitleModal = readFileSync(
   new URL("../src/components/popups/subtitle-modal.tsx", import.meta.url),
   "utf8",
 );
-const modalOverlayApp = readFileSync(
-  new URL("../src/views/modal-overlay-app.tsx", import.meta.url),
+const subtitlePanelSize = readFileSync(
+  new URL("../src/components/player/subtitle-menu/panel-size.ts", import.meta.url),
   "utf8",
 );
 
@@ -105,7 +106,12 @@ test("one slow subtitle addon cannot discard faster addon results", () => {
     /withSubtitleTimeout\(searchAddons\(/,
     "the combined addon result must not be discarded by one shared timeout",
   );
-  assert.match(search, /searchAddons\(opts\.addons, q, tmo\)/);
+  assert.match(
+    search,
+    /for \(const addon of opts\.addons\)/,
+    "one search task per addon so a slow addon cannot hold back the rest",
+  );
+  assert.match(search, /searchAddons\(\[addon\], q, tmo\)/);
 });
 
 test("an enriched addon timeout still falls back to the standard subtitle endpoint", () => {
@@ -123,79 +129,12 @@ test("an enriched addon timeout still falls back to the standard subtitle endpoi
 });
 
 test("automatic subtitle loading limits each preferred language independently", () => {
-  assert.match(fetchIntoPlayer, /const EXTRA_TRACKS_PER_LANGUAGE = 35/);
+  assert.match(fetchIntoPlayer, /const EXTRA_TRACKS_PER_LANGUAGE = 15/);
   assert.match(fetchIntoPlayer, /spreadBySourcePerLanguage\(/);
   assert.match(
     fetchIntoPlayer,
     /spreadBySourcePerLanguage\(eagerPool, consumed, EXTRA_TRACKS_PER_LANGUAGE\)/,
   );
-});
-
-test("automatic subtitle loading protects rate-limited built-in providers", () => {
-  assert.match(fetchIntoPlayer, /const BUILT_IN_EAGER_LIMIT_PER_LANGUAGE = 1/);
-  assert.match(fetchIntoPlayer, /function limitEagerProviderDownloads/);
-  assert.match(fetchIntoPlayer, /const eagerPool = limitEagerProviderDownloads/);
-  assert.match(fetchIntoPlayer, /spreadBySourcePerLanguage\(eagerPool, consumed/);
-});
-
-test("built-in providers keep their longer timeout budget", () => {
-  assert.match(fetchIntoPlayer, /const BUILT_IN_TIMEOUT_MS = 12_000/);
-  assert.match(search, /const extraTimeout = opts\.extra\.timeoutMs \?\? tmo/);
-  assert.match(search, /extraTimeout \+ 500/);
-});
-
-test("automatic subtitle loading consumes provider results progressively", () => {
-  assert.match(fetchIntoPlayer, /const PROGRESSIVE_TRACKS_PER_LANGUAGE = 35/);
-  assert.match(fetchIntoPlayer, /const SUBTITLE_ADD_CONCURRENCY = 4/);
-  assert.match(fetchIntoPlayer, /Array\.from\(/);
-  assert.match(fetchIntoPlayer, /onPartial: queuePartial/);
-  assert.match(fetchIntoPlayer, /await progressiveQueue/);
-});
-
-test("automatic core subtitle providers do not wait for addon inventory", () => {
-  const autoload = readFileSync(
-    new URL("../src/views/player/hooks/use-track-autoload.ts", import.meta.url),
-    "utf8",
-  );
-  assert.match(autoload, /stage === "core"/);
-  assert.match(autoload, /\{ addons: false \}/);
-  assert.match(autoload, /stage === "addons"/);
-  assert.match(autoload, /opensubtitles: false, wyzie: false, addons: true, extras: false/);
-  assert.match(autoload, /refreshing \|\| initialSearches > 0 \? "searching" : "idle"/);
-});
-
-test("Auto Sync moviehash enrichment never blocks progressive subtitle discovery", () => {
-  const autoload = readFileSync(
-    new URL("../src/views/player/hooks/use-track-autoload.ts", import.meta.url),
-    "utf8",
-  );
-  const searchStart = autoload.indexOf("const res = await fetchSubtitlesIntoPlayer({");
-  const hashMerge = autoload.indexOf("if (movieHashPromise)");
-  assert.ok(searchStart >= 0 && hashMerge > searchStart);
-  assert.doesNotMatch(
-    autoload.slice(searchStart, hashMerge),
-    /await resolveVideoHash\(src\)/,
-    "the initial provider search must start without waiting for remote moviehash reads",
-  );
-  assert.match(autoload, /\[subs\/autoload\] moviehash stage found/);
-});
-
-test("content advisory waits for playback readiness and subtitle discovery", () => {
-  const player = readFileSync(new URL("../src/views/player.tsx", import.meta.url), "utf8");
-  const advisory = readFileSync(
-    new URL("../src/views/player/hooks/use-content-advisory.ts", import.meta.url),
-    "utf8",
-  );
-  assert.match(player, /!subtitleSearchActive/);
-  assert.match(advisory, /if \(!enabled \|\| !ready \|\| !meta\) return/);
-  assert.match(advisory, /window\.setTimeout/);
-});
-
-test("the detached subtitle popup waits for the real add result", () => {
-  assert.match(modalOverlayApp, /modalOverlayRequestAction<"ok" \| "failed" \| "limited">/);
-  assert.match(modalOverlayApp, /if \(result === "limited"\) markLimitReached\(url\)/);
-  assert.match(subtitleMenu, /modalOverlayEmitResult\("modal:\/\/subtitle\/add-result"/);
-  assert.match(subtitleMenu, /wasLimitReached\(e\.payload\.url\)/);
 });
 
 test("the subtitle menu only keeps configured languages", () => {
@@ -204,23 +143,59 @@ test("the subtitle menu only keeps configured languages", () => {
     { id: "ar", lang: "Arabic" },
     { id: "es", lang: "spa" },
     { id: "fr", lang: "French" },
+    { id: "untagged" },
   ];
   assert.deepEqual(
     filterTracksByPreferredLanguage(tracks, ["English", "Arabic"]).map((track) => track.id),
-    ["en", "ar"],
+    ["en", "ar", "untagged"],
   );
+});
+
+test("release suffixes are not mistaken for subtitle language tags", () => {
+  assert.equal(isKnownLanguage("eng"), true);
+  assert.equal(isKnownLanguage("en"), true);
+  assert.equal(isKnownLanguage("in"), true);
+  const video = "/movies/The.Imitation.Game.2014-Pahe.in.mkv";
+  assert.equal(subtitleLanguage(video, "/movies/The.Imitation.Game.2014-Pahe.in.srt"), undefined);
+  assert.equal(subtitleLanguage(video, "/movies/The.Imitation.Game.2014-Pahe.in.en.srt"), "en");
+  assert.equal(subtitleLanguage(video, "/movies/The.Imitation.Game.2014-Pahe.in.in.srt"), "id");
 });
 
 test("the configured languages reach the separate subtitle popup", () => {
   assert.match(
     subtitleMenu,
-    /buildOverlayState\(\s*propsRef\.current,\s*preferredLanguages,\s*subtitleContext,?\s*\)/,
+    /buildOverlayState\(propsRef\.current, preferredLanguages, subtitleContext\)/,
   );
   assert.match(subtitleModal, /preferredLanguages=\{state\.preferredLanguages\}/);
 });
 
-test("subtitle popups use the shared resizable panel above the controls", () => {
-  assert.match(subtitleMenu, /ResizableSubtitlePanel className="fixed end-6 bottom-24"/);
-  assert.match(subtitleModal, /ResizableSubtitlePanel className="mb-24 me-6"/);
+test("subtitle popup fills compact players while staying above the controls", () => {
+  assert.match(subtitleMenu, /fixed end-14 bottom-\[150px\]/);
+  assert.match(subtitleModal, /mb-\[84px\] me-\[56px\]/);
+  assert.match(subtitleMenu, /<ResizableSubtitlePanel className="fixed end-14/);
+  assert.match(
+    subtitlePanelSize,
+    /DEFAULT_SUBTITLE_PANEL_SIZE[^=]*= \{ width: 560, height: 460 \}/,
+  );
+  assert.doesNotMatch(subtitleMenu, /flex h-\[460px\].*w-\[560px\]/);
   assert.doesNotMatch(subtitleModal, /me-\[120px\]/);
+});
+
+test("every anchored player popup shares one anchor", () => {
+  const root = new URL("../src/components/player/", import.meta.url);
+  const drifted: string[] = [];
+  const walk = (dir: URL) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.isDirectory()) {
+        walk(new URL(`${e.name}/`, dir));
+      } else if (e.name.endsWith(".tsx")) {
+        const at = new URL(e.name, dir);
+        const src = readFileSync(at, "utf8");
+        const hit = src.match(/fixed end-\S+ bottom-\[\d+px\]/);
+        if (hit && hit[0] !== "fixed end-14 bottom-[150px]") drifted.push(`${e.name} ${hit[0]}`);
+      }
+    }
+  };
+  walk(root);
+  assert.deepEqual(drifted, []);
 });

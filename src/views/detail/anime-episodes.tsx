@@ -525,7 +525,7 @@ export function AnimeEpisodes({
             ) : tvdbPanel.active ? (
               <div
                 aria-hidden
-                className="h-10 w-44 animate-pulse rounded-full border border-edge-soft/50 bg-elevated/40"
+                className="h-10 w-44 animate-pulse rounded-full bg-white/[0.06]"
               />
             ) : effectiveOrder ? (
               <SeasonArcPicker

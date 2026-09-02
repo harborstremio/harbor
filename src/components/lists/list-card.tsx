@@ -18,7 +18,7 @@ export function ListCard({
   return (
     <button
       onClick={() => onOpen?.(list.id)}
-      className="group flex w-full flex-col overflow-hidden rounded-[20px] border border-edge-soft bg-surface text-start transition-colors hover:bg-elevated"
+      className="group flex w-full flex-col overflow-hidden rounded-xl border border-edge-soft bg-surface text-start transition-colors hover:bg-elevated"
     >
       <div className="relative h-[136px] overflow-hidden bg-canvas">
         {covers.length === 0 ? (

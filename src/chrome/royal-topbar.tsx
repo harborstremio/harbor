@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Search } from "lucide-react";
+import { Monitor } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { NotificationCenter } from "@/components/notification-center/notification-center";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
@@ -15,6 +16,7 @@ import { useView, type View } from "@/lib/view";
 import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
 import { OverflowNav, type NavEntry } from "@/chrome/nav-overflow";
 import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
+import { useBigPictureEntry } from "@/chrome/use-big-picture-entry";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -26,6 +28,7 @@ export function RoyalTopbar() {
   const t = useT();
   const [pinFor, setPinFor] = useState<View | null>(null);
   const maxed = useMaximized();
+  const bigPicture = useBigPictureEntry();
 
   const themePreset =
     settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
@@ -71,8 +74,8 @@ export function RoyalTopbar() {
               className="absolute inset-0 -z-10 rounded-md bg-accent-soft ring-1 ring-[color-mix(in_srgb,var(--color-accent)_22%,transparent)]"
             />
           )}
-          <span className="grid h-[18px] w-[18px] place-items-center [&_svg]:h-[18px] [&_svg]:w-[18px]">
-            {item.render(false)}
+          <span className="grid h-[18px] w-[18px] place-items-center [&>*]:!h-[18px] [&>*]:!w-[18px] [&>*]:!p-0 [&_svg]:h-[18px] [&_svg]:w-[18px]">
+            {item.render(active)}
           </span>
           <span className="hidden xl:inline">{label}</span>
         </button>
@@ -90,7 +93,7 @@ export function RoyalTopbar() {
       >
         <div
           data-tauri-drag-region
-          className="harbor-royal-bar pointer-events-auto grid h-14 w-full grid-cols-[1fr_auto] items-center gap-3 rounded-[10px] border border-[color-mix(in_srgb,var(--color-accent)_22%,var(--color-edge))] bg-canvas/85 ps-3.5 pe-2 shadow-[inset_0_1px_0_color-mix(in_srgb,var(--color-accent)_14%,transparent),0_22px_60px_-26px_rgba(0,0,0,0.85)] backdrop-blur-xl"
+          className="harbor-royal-bar pointer-events-auto grid h-14 w-full grid-cols-[1fr_auto] items-center gap-3 rounded-md border border-[color-mix(in_srgb,var(--color-accent)_22%,var(--color-edge))] bg-canvas/85 ps-3.5 pe-2 shadow-[inset_0_1px_0_color-mix(in_srgb,var(--color-accent)_14%,transparent),0_22px_60px_-26px_rgba(0,0,0,0.85)] backdrop-blur-xl"
         >
           <div className="flex min-w-0 items-center gap-2.5">
             <button
@@ -126,6 +129,17 @@ export function RoyalTopbar() {
             <SearchPill onOpen={() => setSearchOpen(true)} />
             <NotificationCenter />
             {view !== "live" && <TogetherButton variant="ghost" />}
+            {bigPicture.offer && (
+              <button
+                type="button"
+                onClick={bigPicture.open}
+                aria-label={bigPicture.label}
+                title={bigPicture.label}
+                className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-elevated/60 hover:text-ink"
+              >
+                <Monitor size={17} strokeWidth={2} />
+              </button>
+            )}
             <AccountMenu
               trigger="pill"
               placement="down"

@@ -86,11 +86,13 @@ export function FullscreenClock({
   durationSec,
   playbackRate = 1,
   active = true,
+  fullscreen = true,
 }: {
   variant?: ClockVariant;
   durationSec?: number;
   playbackRate?: number;
   active?: boolean;
+  fullscreen?: boolean;
 }) {
   const { settings } = useSettings();
   const {
@@ -100,7 +102,9 @@ export function FullscreenClock({
     fullscreenClockShowEndTime: showEndTime,
     fullscreenClockSizePx: sizePx,
     fullscreenClockStyle: style,
+    fullscreenClockWindowed: windowed,
   } = settings;
+  const allowedHere = variant === "preview" || fullscreen || windowed;
   const [now, setNow] = useState(() => new Date());
   const trackEndTime =
     enabled &&
@@ -137,7 +141,7 @@ export function FullscreenClock({
     };
   }, [enabled, showSeconds]);
 
-  if (!enabled) return null;
+  if (!enabled || !allowedHere) return null;
 
   const endDate = showEndTime
     ? variant === "preview"

@@ -95,28 +95,22 @@ export function ProfileView({
   const cloudMinutes = summary?.counts.minutesWatched ?? 0;
 
   useEffect(() => {
-    if (!isOwner) return;
-    const w = Math.max(watchedCount, libWatched, cloudWatched);
-    const m = Math.max(mangaProgress.length, cloudManga);
-    const movies = Math.max(watchedBreakdown.moviesWatched, cloudMovies);
-    const episodes = Math.max(watchedBreakdown.episodesWatched, cloudEpisodes);
-    const minutes = Math.max(watchedBreakdown.minutesWatched, cloudMinutes);
+    if (!isOwner || !watchedBreakdown.ready) return;
+    const w = Math.max(watchedCount, libWatched);
+    const m = mangaProgress.length;
+    const movies = watchedBreakdown.moviesWatched;
+    const episodes = watchedBreakdown.episodesWatched;
+    const minutes = watchedBreakdown.minutesWatched;
 
     if (
-      w <= cloudWatched &&
-      m <= cloudManga &&
-      movies <= cloudMovies &&
-      episodes <= cloudEpisodes &&
-      minutes <= cloudMinutes
+      w === cloudWatched &&
+      m === cloudManga &&
+      movies === cloudMovies &&
+      episodes === cloudEpisodes &&
+      minutes === cloudMinutes
     )
       return;
-    pushStats(
-      w > 0 ? w : null,
-      m > 0 ? m : null,
-      movies > 0 ? movies : null,
-      episodes > 0 ? episodes : null,
-      minutes > 0 ? minutes : null,
-    );
+    pushStats(w, m, movies, episodes, minutes);
   }, [
     isOwner,
     libWatched,
@@ -288,28 +282,20 @@ export function ProfileView({
   const presentCards = CARD_ORDER_DEFAULT.filter((k) => cardNodes[k] != null);
   const orderedCards = effectiveOrder(layout, presentCards);
 
-  const heroSummary = summary.isOwner
-    ? {
-        ...summary,
-        counts: {
-          ...summary.counts,
-          watched: Math.max(summary.counts.watched ?? 0, watchedBreakdown.watched),
-          moviesWatched: Math.max(
-            summary.counts.moviesWatched ?? 0,
-            watchedBreakdown.moviesWatched,
-          ),
-          episodesWatched: Math.max(
-            summary.counts.episodesWatched ?? 0,
-            watchedBreakdown.episodesWatched,
-          ),
-          minutesWatched: Math.max(
-            summary.counts.minutesWatched ?? 0,
-            watchedBreakdown.minutesWatched,
-            (summary.counts.hoursWatched ?? 0) * 60,
-          ),
-        },
-      }
-    : summary;
+  const heroSummary =
+    summary.isOwner && watchedBreakdown.ready
+      ? {
+          ...summary,
+          counts: {
+            ...summary.counts,
+            watched: Math.max(summary.counts.watched ?? 0, watchedBreakdown.watched),
+            moviesWatched: watchedBreakdown.moviesWatched,
+            episodesWatched: watchedBreakdown.episodesWatched,
+            minutesWatched: watchedBreakdown.minutesWatched,
+            hoursWatched: Math.floor(watchedBreakdown.minutesWatched / 60),
+          },
+        }
+      : summary;
 
   return (
     <div

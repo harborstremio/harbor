@@ -87,7 +87,7 @@ export function DetailHeroTrailer({
           onClick={() => setMuted((m) => !m)}
           aria-label={muted ? t("Unmute trailer") : t("Mute trailer")}
           title={muted ? t("Unmute trailer") : t("Mute trailer")}
-          className="absolute bottom-8 end-8 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white ring-1 ring-white/15 backdrop-blur-md transition-colors hover:bg-black/75"
+          className="absolute bottom-8 end-8 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md transition-colors hover:bg-black/75"
         >
           {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
         </button>

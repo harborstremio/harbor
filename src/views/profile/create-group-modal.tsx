@@ -104,7 +104,7 @@ export function CreateGroupModal({
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-[10px] bg-surface px-3 text-[13px] font-medium text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-surface px-3 text-[13px] font-medium text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
             >
               <Camera size={15} /> {preview ? t("Change photo") : t("Add photo")}
             </button>
@@ -128,7 +128,7 @@ export function CreateGroupModal({
               maxLength={48}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("Late-night sci-fi crew")}
-              className="w-full min-h-11 rounded-[10px] bg-surface px-3 text-[14px] text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus:ring-edge"
+              className="w-full min-h-11 rounded-md bg-surface px-3 text-[14px] text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus:ring-edge"
             />
           </label>
 
@@ -143,7 +143,7 @@ export function CreateGroupModal({
               rows={3}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t("What this group is about (optional)")}
-              className="w-full resize-none rounded-[10px] bg-surface px-3 py-2.5 text-[14px] text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus:ring-edge"
+              className="w-full resize-none rounded-md bg-surface px-3 py-2.5 text-[14px] text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus:ring-edge"
             />
           </label>
 
@@ -165,14 +165,14 @@ export function CreateGroupModal({
         <div className="flex items-center justify-end gap-2 px-5 pb-5 pt-2">
           <button
             onClick={onClose}
-            className="inline-flex min-h-11 items-center rounded-[10px] px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-surface"
+            className="inline-flex min-h-11 items-center rounded-md px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-surface"
           >
             {t("Cancel")}
           </button>
           <button
             onClick={() => void submit()}
             disabled={busy || !name.trim()}
-            className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
           >
             {busy && <Loader2 size={16} className="animate-spin" />}
             {busy ? t("Creating") : t("Create")}

@@ -9,6 +9,7 @@ import { useView } from "@/lib/view";
 import { useEpg, useNowTick } from "@/views/live/hooks/use-epg";
 import { useIptvPlaylist } from "@/views/live/hooks/use-iptv-playlist";
 import { GuideView } from "@/views/live/guide/guide-view";
+import { t as translate, useT } from "@/lib/i18n";
 
 function synthChannelMeta(ch: IptvChannel): Meta {
   return {
@@ -18,12 +19,15 @@ function synthChannelMeta(ch: IptvChannel): Meta {
     poster: ch.logo ?? undefined,
     logo: ch.logo ?? undefined,
     background: ch.logo ?? undefined,
-    description: ch.group ? `Live channel: ${ch.group}` : "Live channel",
-    releaseInfo: "Live",
+    description: ch.group
+      ? translate("Live channel: {group}", { group: ch.group })
+      : translate("Live channel"),
+    releaseInfo: translate("Live"),
   };
 }
 
 export function GuideModal({ onClose }: { onClose: () => void }) {
+  const t = useT();
   const playlists = usePlaylists();
   const { openPlayer } = useView();
   const m3uSources = useMemo(
@@ -62,7 +66,7 @@ export function GuideModal({ onClose }: { onClose: () => void }) {
       meta: synthChannelMeta(ch),
       url: ch.url,
       title: ch.name,
-      subtitle: ch.group ?? "Live",
+      subtitle: ch.group ?? t("Live"),
       notWebReady: true,
     });
     onClose();
@@ -72,7 +76,9 @@ export function GuideModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-[260] flex flex-col bg-canvas/95 backdrop-blur-xl">
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-edge-soft/40 px-8 py-5">
         <div className="flex items-center gap-4">
-          <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">TV Guide</h2>
+          <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">
+            {t("TV Guide")}
+          </h2>
           {m3uSources.length > 1 && (
             <select
               value={sourceId ?? ""}
@@ -90,18 +96,18 @@ export function GuideModal({ onClose }: { onClose: () => void }) {
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close guide"
+          aria-label={t("Close guide")}
           className="flex h-10 items-center gap-2 rounded-full border border-edge-soft bg-elevated/70 ps-3 pe-4 text-[13px] font-medium text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
         >
           <X size={14} strokeWidth={2.4} />
-          Close
+          {t("Close")}
         </button>
       </header>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-8 py-6">
         {!source && (
           <EmptyMessage
-            title="No Live TV playlists yet"
-            body="Add an M3U or Xtream playlist in Settings → Live TV to use the guide."
+            title={t("No Live TV playlists yet")}
+            body={t("Add an M3U or Xtream playlist in Settings → Live TV to use the guide.")}
           />
         )}
         {source && !playlist && (
@@ -111,8 +117,8 @@ export function GuideModal({ onClose }: { onClose: () => void }) {
         )}
         {source && playlist && playlist.channels.length === 0 && (
           <EmptyMessage
-            title="No channels"
-            body="This playlist hasn't been loaded yet, or it has no channels."
+            title={t("No channels")}
+            body={t("This playlist hasn't been loaded yet, or it has no channels.")}
           />
         )}
         {source && playlist && playlist.channels.length > 0 && (

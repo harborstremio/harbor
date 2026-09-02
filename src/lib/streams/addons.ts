@@ -31,6 +31,7 @@ function timeoutFor(addon: Addon, ceilingMs: number): number {
 export type StreamRequest = {
   type: string;
   ids: string[];
+  animeIdUnverified?: boolean;
 };
 
 export type AddonProgress = {
@@ -61,7 +62,10 @@ export async function fetchAddonStreams(
       continue;
     }
     const forcedId = forcedBases.get(addon.transportUrl.replace(/\/manifest\.json$/, ""));
-    const ids = forcedId != null ? [forcedId] : pickIds(addon, req.type, req.ids);
+    const ids =
+      forcedId != null
+        ? [forcedId]
+        : pickIds(addon, req.type, req.ids, req.animeIdUnverified === true);
     if (ids.length > 0) {
       for (const id of ids) {
         // Local lists only persist movie/series, which can drop the type an addon's
@@ -193,7 +197,12 @@ function hasStandardIdScheme(id: string): boolean {
   return STANDARD_ID_SCHEMES.some((p) => id.startsWith(p));
 }
 
-function pickIds(addon: Addon, type: string, ids: string[]): string[] {
+function pickIds(
+  addon: Addon,
+  type: string,
+  ids: string[],
+  animeIdUnverified = false,
+): string[] {
   const sorted = [...ids].sort((a, b) => idPriority(a) - idPriority(b));
   const accepted = sorted.filter((id) => addonAcceptsId(addon, type, id));
   if (accepted.length === 0) return [];
@@ -202,6 +211,7 @@ function pickIds(addon: Addon, type: string, ids: string[]): string[] {
   if (!animeId || !ttId) return [accepted[0]];
   // Specials have no reliable kitsu numbering, so both identities stay.
   if (SPECIALS_SCOPED_TT_RX.test(ttId)) return [animeId, ttId];
+  if (animeIdUnverified) return [ttId];
   return [animeId];
 }
 

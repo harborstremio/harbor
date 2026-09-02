@@ -1,0 +1,21 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "desktop-only",
+  "description": "Plugins that only exist on desktop. Cargo.toml gates updater and process behind cfg(not(android|ios)), so their permissions cannot be resolved on a mobile target and must not sit in the default capability.",
+  "platforms": [
+    "windows",
+    "macOS",
+    "linux"
+  ],
+  "windows": [
+    "main",
+    "harbor-pip",
+    "harbor-browser",
+    "harbor-modal-overlay",
+    "harbor-cf-solver"
+  ],
+  "permissions": [
+    "updater:default",
+    "process:default"
+  ]
+}

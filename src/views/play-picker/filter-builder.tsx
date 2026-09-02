@@ -33,7 +33,7 @@ function BadgeCard({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`flex h-11 items-center gap-2.5 rounded-[6px] px-3 text-[13.5px] font-semibold outline-none transition-[background-color,box-shadow] duration-150 active:scale-[0.98] motion-reduce:active:scale-100 ${
+      className={`flex h-11 items-center gap-2.5 rounded-sm px-3 text-[13.5px] font-semibold outline-none transition-[background-color,box-shadow] duration-150 active:scale-[0.98] motion-reduce:active:scale-100 ${
         active
           ? "bg-accent/12 text-ink ring-1 ring-accent"
           : "bg-elevated/45 text-ink-muted ring-1 ring-edge-soft hover:bg-elevated hover:text-ink"
@@ -164,7 +164,7 @@ function NumberSection({
           const n = Number(raw);
           onChange(Number.isFinite(n) ? n : null);
         }}
-        className="h-10 w-24 shrink-0 rounded-[6px] border border-edge bg-elevated px-3 text-end text-[14.5px] tabular-nums text-ink outline-none transition-colors focus:border-accent placeholder:text-ink-subtle/55"
+        className="h-10 w-24 shrink-0 rounded-sm border border-edge bg-elevated px-3 text-end text-[14.5px] tabular-nums text-ink outline-none transition-colors focus:border-accent placeholder:text-ink-subtle/55"
       />
     </div>
   );
@@ -263,7 +263,7 @@ export function FilterBuilder({
             type="button"
             onClick={requestClose}
             aria-label={t("Close")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] text-ink-subtle transition-colors hover:bg-raised hover:text-ink active:scale-90 motion-reduce:active:scale-100"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm text-ink-subtle transition-colors hover:bg-raised hover:text-ink active:scale-90 motion-reduce:active:scale-100"
           >
             <X size={18} />
           </button>
@@ -284,7 +284,7 @@ export function FilterBuilder({
                   save();
                 }
               }}
-              className="h-11 w-full rounded-[6px] border border-edge bg-canvas px-4 text-[15px] text-ink outline-none transition-colors focus:border-accent placeholder:text-ink-subtle/55"
+              className="h-11 w-full rounded-sm border border-edge bg-canvas px-4 text-[15px] text-ink outline-none transition-colors focus:border-accent placeholder:text-ink-subtle/55"
             />
           </div>
 
@@ -361,7 +361,7 @@ export function FilterBuilder({
             <button
               type="button"
               onClick={() => onDelete(draft.id)}
-              className="flex items-center gap-2 rounded-[6px] px-3 py-2 text-[13.5px] font-semibold text-danger transition-colors hover:bg-danger/12 active:scale-95 motion-reduce:active:scale-100"
+              className="flex items-center gap-2 rounded-sm px-3 py-2 text-[13.5px] font-semibold text-danger transition-colors hover:bg-danger/12 active:scale-95 motion-reduce:active:scale-100"
             >
               <Trash2 size={15} />
               {t("Delete")}
@@ -373,7 +373,7 @@ export function FilterBuilder({
             <button
               type="button"
               onClick={requestClose}
-              className="rounded-[6px] px-4 py-2.5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
+              className="rounded-sm px-4 py-2.5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
             >
               {t("Cancel")}
             </button>
@@ -381,7 +381,7 @@ export function FilterBuilder({
               type="button"
               onClick={save}
               disabled={!canSave}
-              className="rounded-[6px] bg-ink px-5 py-2.5 text-[13.5px] font-semibold text-canvas transition-[filter,transform] duration-150 hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100 motion-reduce:active:scale-100"
+              className="rounded-sm bg-ink px-5 py-2.5 text-[13.5px] font-semibold text-canvas transition-[filter,transform] duration-150 hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100 motion-reduce:active:scale-100"
             >
               {isEdit ? t("Save") : t("Create")}
             </button>

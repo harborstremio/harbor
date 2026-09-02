@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { episodeSpanContains, parseEpisodeSpan } from "@/lib/episode-span";
+import { loadLocalLibraryStore, saveLocalLibraryStore } from "@/lib/local-library/storage";
 
 const KEY = "harbor.library.local.v1";
 const subs = new Set<() => void>();
@@ -23,12 +25,15 @@ export type LocalEntry = {
   imdbId?: string | null;
   season?: number | null;
   episode?: number | null;
+  episodeEnd?: number | null;
   addedAt: number;
   needsReview?: boolean;
   isAnime?: boolean;
   source?: "tmdb" | "nfo";
   folder?: string;
   localArt?: { poster?: string; logo?: string; backdrop?: string };
+  /** External subtitle sidecars found beside this exact video file. */
+  subtitlePaths?: string[];
 };
 
 // Parsing the whole library out of localStorage on every read is O(n) per call,
@@ -36,32 +41,101 @@ export type LocalEntry = {
 // bump a generation counter so derived caches can invalidate against it.
 let cache: LocalEntry[] | null = null;
 let generation = 0;
+let hydrated = false;
+let hydration: Promise<void> | null = null;
+let dirtyBeforeHydration = false;
+let persistQueue = Promise.resolve();
 
-function read(): LocalEntry[] {
-  if (cache) return cache;
-  let parsed: LocalEntry[] = [];
+function normalizeEntries(entries: LocalEntry[]): LocalEntry[] {
+  return entries.map((entry) => {
+    const parsed = parseFilename(entry.filename);
+    if (parsed.type !== "show" || parsed.season == null || parsed.episode == null) return entry;
+    if (
+      entry.type === "show" &&
+      entry.season === parsed.season &&
+      entry.episode === parsed.episode &&
+      entry.episodeEnd === parsed.episodeEnd
+    )
+      return entry;
+    return {
+      ...entry,
+      type: "show",
+      season: parsed.season,
+      episode: parsed.episode,
+      episodeEnd: parsed.episodeEnd,
+    };
+  });
+}
+
+function readLegacy(): LocalEntry[] {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) parsed = arr as LocalEntry[];
-    }
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? normalizeEntries(parsed as LocalEntry[]) : [];
   } catch {
-    parsed = [];
+    return [];
   }
-  cache = parsed;
-  return cache;
+}
+
+function notify(): void {
+  for (const subscriber of subs) subscriber();
+}
+
+function persist(entries: LocalEntry[]): void {
+  const snapshot = entries;
+  persistQueue = persistQueue.then(async () => {
+    if (await saveLocalLibraryStore(snapshot)) {
+      try {
+        localStorage.removeItem(KEY);
+      } catch {
+        /* IndexedDB remains the durable copy. */
+      }
+      return;
+    }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(snapshot));
+    } catch (error) {
+      console.error("[local-library] could not persist library", error);
+    }
+  });
+}
+
+function ensureHydrated(): void {
+  if (hydration) return;
+  const legacy = readLegacy();
+  if (legacy.length > 0) cache = legacy;
+  hydration = (async () => {
+    const stored = await loadLocalLibraryStore<LocalEntry>();
+    hydrated = true;
+    if (dirtyBeforeHydration) {
+      persist(cache ?? []);
+      notify();
+      return;
+    }
+    if (stored != null && stored.length > 0) {
+      cache = normalizeEntries(stored);
+      generation += 1;
+      notify();
+      return;
+    }
+    cache ??= legacy;
+    if (legacy.length > 0) persist(legacy);
+    notify();
+  })();
+}
+
+function read(): LocalEntry[] {
+  ensureHydrated();
+  return cache ?? [];
 }
 
 function write(entries: LocalEntry[]): void {
   cache = entries;
   generation += 1;
-  try {
-    localStorage.setItem(KEY, JSON.stringify(entries));
-  } catch {
-    /* noop */
-  }
-  for (const s of subs) s();
+  if (!hydrated) dirtyBeforeHydration = true;
+  persist(entries);
+  notify();
 }
 
 /** Bumped on every mutation; derived caches key off this. */
@@ -71,6 +145,24 @@ export function localLibraryGeneration(): number {
 
 export function readLocalLibrary(): LocalEntry[] {
   return read();
+}
+
+/** Wait for the IndexedDB-backed library to be available before bulk reads such as backup export. */
+export async function localLibraryReady(): Promise<void> {
+  ensureHydrated();
+  await hydration;
+}
+
+/** Restore a serialized legacy backup without routing the large payload through localStorage. */
+export function restoreLocalLibrary(serialized: string): boolean {
+  try {
+    const value = JSON.parse(serialized);
+    if (!Array.isArray(value)) return false;
+    write(normalizeEntries(value as LocalEntry[]));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function localShowEpisodes(show: {
@@ -93,7 +185,15 @@ export function findLocalEpisode(
   season: number,
   episode: number,
 ): LocalEntry | null {
-  return localShowEpisodes(show).find((e) => e.season === season && e.episode === episode) ?? null;
+  return (
+    localShowEpisodes(show).find((e) =>
+      episodeSpanContains(
+        { ...e, episodeEnd: e.episodeEnd ?? parseEpisodeSpan(e.filename)?.episodeEnd },
+        season,
+        episode,
+      ),
+    ) ?? null
+  );
 }
 
 export function addLocalEntries(entries: LocalEntry[]): void {
@@ -152,8 +252,11 @@ export function findLocalEpisodeByIds(
     read().find(
       (e) =>
         e.type === "show" &&
-        e.season === season &&
-        e.episode === episode &&
+        episodeSpanContains(
+          { ...e, episodeEnd: e.episodeEnd ?? parseEpisodeSpan(e.filename)?.episodeEnd },
+          season,
+          episode,
+        ) &&
         ((tmdbId != null && e.tmdbId === tmdbId) || (imdbId != null && e.imdbId === imdbId)),
     ) ?? null
   );
@@ -195,6 +298,20 @@ export function useLocalLibrary(): LocalEntry[] {
     };
   }, []);
   return items;
+}
+
+export function useLocalLibraryReady(): boolean {
+  const [ready, setReady] = useState(hydrated);
+  useEffect(() => {
+    ensureHydrated();
+    if (hydrated) setReady(true);
+    const tick = () => setReady(hydrated);
+    subs.add(tick);
+    return () => {
+      subs.delete(tick);
+    };
+  }, []);
+  return ready;
 }
 
 let idSetCache: { gen: number; set: Set<string> } | null = null;
@@ -304,8 +421,9 @@ const NOISE = [
 ];
 const NOISE_RX = new RegExp(`\\b(${NOISE.join("|")})\\b`, "gi");
 const TV_RX =
-  /\bs(\d{1,2})[\s._-]*e(\d{1,3})\b|\b(\d{1,2})x(\d{1,3})\b|\bseason[\s._-]*(\d{1,2})[\s._-]*(?:episode|ep)[\s._-]*(\d{1,3})\b/i;
+  /\bs(\d{1,2})[\s._-]*e(\d{1,3})(?!\d)|\b(\d{1,2})x(\d{1,3})(?!\d)|\bseason[\s._-]*(\d{1,2})[\s._-]*(?:episode|ep)[\s._-]*(\d{1,3})(?!\d)/i;
 const YEAR_RX = /\b(19\d{2}|20\d{2})\b/;
+const EXTRAS_RX = /(?:^|[\s._-])s(\d{1,2})[\s._-]*(?:extras?|bonus)(?:[\s._-]|$)/i;
 
 export type ParsedFilename = {
   title: string;
@@ -313,20 +431,26 @@ export type ParsedFilename = {
   type: "movie" | "show";
   season: number | null;
   episode: number | null;
+  episodeEnd: number | null;
   resolution: string | null;
 };
 
 export function parseFilename(filename: string): ParsedFilename {
   const stem = filename.replace(/\.(mkv|mp4|m4v|mov|avi|wmv|webm|ts|m2ts|mpg|mpeg|flv|ogv)$/i, "");
+  const span = parseEpisodeSpan(stem);
   const tv = stem.match(TV_RX);
-  const season = tv ? parseInt(tv[1] ?? tv[3] ?? tv[5], 10) : null;
-  const episode = tv ? parseInt(tv[2] ?? tv[4] ?? tv[6], 10) : null;
+  const extras = !span && !tv ? stem.match(EXTRAS_RX) : null;
+  const season = extras ? 0 : (span?.season ?? (tv ? parseInt(tv[1] ?? tv[3] ?? tv[5], 10) : null));
+  const episode = extras
+    ? parseInt(extras[1], 10)
+    : (span?.episode ?? (tv ? parseInt(tv[2] ?? tv[4] ?? tv[6], 10) : null));
   const yearMatch = stem.match(YEAR_RX);
   const year = yearMatch ? parseInt(yearMatch[1], 10) : null;
   const resMatch = stem.match(/\b(2160p|1080p|720p|480p|4k|uhd)\b/i);
   const resolution = resMatch ? resMatch[1].toLowerCase() : null;
   let title = stem;
   if (tv) title = title.slice(0, tv.index);
+  if (extras?.index != null) title = title.slice(0, extras.index);
   if (yearMatch && yearMatch.index != null && yearMatch.index < title.length) {
     title = title.slice(0, yearMatch.index);
   }
@@ -335,8 +459,8 @@ export function parseFilename(filename: string): ParsedFilename {
     .replace(NOISE_RX, " ")
     .replace(/\s+/g, " ")
     .trim()
-    .replace(/[\[\(\{].*?[\]\)\}]/g, "")
-    .replace(/[\[\](){}]/g, " ")
+    .replace(/(?:\[|\(|\{).*?(?:\]|\)|\})/g, "")
+    .replace(/(?:\[|\]|\(|\)|\{|\})/g, " ")
     .replace(/[\s\-–—_]+$/g, "")
     .replace(/^[\s\-–—_]+/g, "")
     .replace(/\s+/g, " ")
@@ -345,9 +469,10 @@ export function parseFilename(filename: string): ParsedFilename {
   return {
     title,
     year,
-    type: tv ? "show" : "movie",
+    type: span || tv || extras ? "show" : "movie",
     season,
     episode,
+    episodeEnd: span?.episodeEnd ?? episode,
     resolution,
   };
 }

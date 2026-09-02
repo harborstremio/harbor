@@ -56,14 +56,10 @@ export function ChromeMiniPreview({ theme, config }: { theme: ThemeId; config: P
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at 30% 25%, oklch(0.34 0.10 260 / 0.42) 0%, transparent 60%), radial-gradient(ellipse at 78% 68%, oklch(0.28 0.08 320 / 0.32) 0%, transparent 65%), linear-gradient(180deg, oklch(0.09 0.02 260 / 0.30) 0%, oklch(0.06 0.02 260 / 0.72) 100%)",
+            "linear-gradient(180deg, oklch(0.10 0 0 / 0.35) 0%, oklch(0.06 0 0 / 0.72) 100%)",
         }}
       />
-      <div
-        className={`absolute inset-x-0 bottom-0 z-30 flex flex-col gap-2 bg-gradient-to-t from-black/70 via-black/25 to-transparent px-5 pb-3.5 pt-14 ${
-          theme === "stremio" ? "" : ""
-        }`}
-      >
+      <div className="absolute inset-x-0 bottom-0 z-30 flex flex-col gap-2 bg-gradient-to-t from-black/70 via-black/25 to-transparent px-5 pb-3.5 pt-14">
         {theme === "stremio" ? (
           <StremioLayout config={config} selectedId={null} onSelect={NOOP} renderOne={renderOne} isLive={false} hideSeek />
         ) : (

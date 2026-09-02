@@ -1,5 +1,8 @@
-import { Check, ExternalLink, KeyRound, X } from "lucide-react";
+import { Check, ExternalLink, X } from "lucide-react";
+import { useModalExit } from "@/components/modal-shell";
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
+import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
 import tvdb1 from "@/assets/tvdb-guide/tvdb1.png";
 import tvdb2 from "@/assets/tvdb-guide/tvdb2.png";
@@ -52,88 +55,94 @@ function linkify(text: string) {
 }
 
 export function TvdbGuideModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const t = useT();
+  const { closing, close } = useModalExit(onClose, open);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") close();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, close]);
   if (!open) return null;
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-canvas/70 p-6 backdrop-blur-sm animate-in fade-in duration-150"
-      onClick={onClose}
+      className={`${closing ? "animate-scrim-out" : "animate-scrim-in"} fixed inset-0 z-[250] flex items-center justify-center p-6`}
+      onClick={close}
     >
       <div
-        className="flex max-h-[86vh] w-full max-w-[520px] flex-col overflow-hidden rounded-3xl border border-edge bg-elevated shadow-[0_40px_120px_-30px_rgba(0,0,0,0.8)] animate-popover-in"
+        className={`${closing ? "animate-dialog-out" : "animate-dialog-in"} flex max-h-[86vh] w-[min(640px,100%)] flex-col overflow-hidden rounded-md bg-surface harbor-float`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-edge-soft px-6 py-5">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
-              <KeyRound size={18} strokeWidth={2.2} />
+        <div className="flex items-start justify-between gap-4 px-6 pb-5 pt-5">
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+              TheTVDB
             </span>
-            <div className="flex flex-col">
-              <h2 className="font-display text-[20px] font-medium tracking-tight text-ink">
-                Get your free TheTVDB key
-              </h2>
-              <p className="text-[12.5px] text-ink-muted">About a minute. Free for personal use.</p>
-            </div>
+            <h2 className="text-[17px] font-semibold text-ink">{t("Get your free TheTVDB key")}</h2>
+            <p className="text-[12.5px] text-ink-subtle">
+              {t("About a minute. Free for personal use.")}
+            </p>
           </div>
           <button
-            onClick={onClose}
-            aria-label="Close"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
+            onClick={close}
+            aria-label={t("Close")}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
           >
-            <X size={18} strokeWidth={2.2} />
+            <X size={16} strokeWidth={2.2} />
           </button>
         </div>
-        <div className="flex flex-col gap-4 overflow-y-auto px-6 py-6">
+        <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-6">
           {STEPS.map((step, i) => (
-            <div key={step.title} className="flex gap-3.5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-raised text-[13px] font-semibold text-ink">
+            <div key={step.title} className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-canvas text-[12.5px] font-semibold text-ink-muted">
                 {i + 1}
               </span>
               <div className="flex min-w-0 flex-col gap-1.5">
-                <span className="text-[14.5px] font-medium text-ink">{step.title}</span>
-                <p className="text-[13px] leading-relaxed text-ink-muted">{linkify(step.body)}</p>
+                <span className="text-[13.5px] font-semibold text-ink">{t(step.title)}</span>
+                <p className="text-[13px] leading-relaxed text-ink-muted">
+                  {linkify(t(step.body))}
+                </p>
                 {step.callout && (
-                  <div className="mt-1 flex items-start gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3.5 py-3">
-                    <Check size={15} strokeWidth={2.6} className="mt-0.5 shrink-0 text-accent" />
+                  <div className="mt-1 flex items-start gap-2 rounded-md bg-canvas px-3.5 py-3">
+                    <Check size={16} strokeWidth={2.6} className="mt-0.5 shrink-0 text-accent" />
                     <p className="text-[12.5px] leading-relaxed text-ink">
-                      Ignore the paid tiers. Personal use is free, you are not a company. Just pick the
-                      first option and keep going.
+                      {t(
+                        "Ignore the paid tiers. Personal use is free, you are not a company. Just pick the first option and keep going.",
+                      )}
                     </p>
                   </div>
                 )}
-                <img
-                  src={step.img}
-                  alt=""
-                  loading="lazy"
-                  className="mt-1.5 max-h-[128px] max-w-full rounded-lg border border-edge-soft/60"
-                />
+                <div className="mt-2 overflow-hidden rounded-lg bg-canvas ring-1 ring-inset ring-edge-soft">
+                  <img
+                    src={step.img}
+                    alt=""
+                    loading="lazy"
+                    className="block max-h-[240px] w-full object-contain"
+                  />
+                </div>
               </div>
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-between gap-3 border-t border-edge-soft px-6 py-4">
+        <div className="flex items-center justify-end gap-2 px-6 pb-5 pt-5">
           <button
-            onClick={onClose}
-            className="rounded-full px-4 py-2 text-[13.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
+            onClick={close}
+            className="h-9 rounded-md bg-elevated px-4 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
           >
-            Close
+            {t("Close")}
           </button>
           <button
             onClick={() => openUrl("https://thetvdb.com/api-information")}
-            className="flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-[13.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+            className="flex h-9 items-center gap-2 rounded-md bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
           >
-            Open TheTVDB
+            {t("Open TheTVDB")}
             <ExternalLink size={14} strokeWidth={2.2} />
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

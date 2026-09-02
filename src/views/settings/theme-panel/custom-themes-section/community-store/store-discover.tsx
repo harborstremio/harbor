@@ -1,4 +1,15 @@
-import { Clock, Flame, Minus, Moon, Snowflake, Sparkles, Sun, Zap, type LucideIcon } from "lucide-react";
+import {
+  Clock,
+  Flame,
+  Minus,
+  Moon,
+  Snowflake,
+  Sparkles,
+  Sun,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
+import { t as translate, useT } from "@/lib/i18n";
 import type { StoreTheme } from "@/lib/theme-store";
 import type { Mood } from "./color-rank";
 import type { StoreData } from "./use-store-themes";
@@ -21,10 +32,10 @@ const MOOD_ICON: Record<Mood, LucideIcon> = {
 function heroTag(data: StoreData): string | undefined {
   const h = data.hero;
   if (!h) return undefined;
-  if (data.popular[0]?.id === h.id) return "#1 this week";
+  if (data.popular[0]?.id === h.id) return translate("#1 this week");
   const created = Date.parse(h.createdAt);
-  if (Number.isFinite(created) && Date.now() - created < 14 * 86_400_000) return "New";
-  return "Staff pick";
+  if (Number.isFinite(created) && Date.now() - created < 14 * 86_400_000) return translate("New");
+  return translate("Staff pick");
 }
 
 export function StoreDiscover({
@@ -42,16 +53,24 @@ export function StoreDiscover({
   onPickMood: (mood: Mood) => void;
   onShare: () => void;
 }) {
+  const t = useT();
   return (
     <div className="flex flex-col gap-10">
-      {data.hero && <StoreHero theme={data.hero} label="Featured theme" tag={heroTag(data)} onOpen={onOpen} />}
+      {data.hero && (
+        <StoreHero
+          theme={data.hero}
+          label={t("Featured theme")}
+          tag={heroTag(data)}
+          onOpen={onOpen}
+        />
+      )}
 
       <StoreCategoryChips rails={data.moodRails} onPick={onPickMood} />
 
       <StoreRail
-        icon={<Sparkles size={15} strokeWidth={2.2} />}
-        title="You might like"
-        subtitle="Highly rated by the community"
+        icon={<Sparkles size={16} strokeWidth={2.2} />}
+        title={t("You might like")}
+        subtitle={t("Highly rated by the community")}
         themes={data.topRated.slice(0, 20)}
         scrollKey="themestore:toprated"
         onOpen={onOpen}
@@ -59,25 +78,30 @@ export function StoreDiscover({
       />
 
       <StoreRail
-        icon={<Clock size={15} strokeWidth={2.2} />}
-        title="New this week"
-        subtitle="Fresh from the community"
+        icon={<Clock size={16} strokeWidth={2.2} />}
+        title={t("New this week")}
+        subtitle={t("Fresh from the community")}
         themes={data.fresh.slice(0, 20)}
         scrollKey="themestore:fresh"
         onOpen={onOpen}
         onViewAll={onBrowseAll}
       />
 
-      <StoreTopCharts trending={data.topRated} popular={data.popular} fresh={data.fresh} onOpen={onOpen} />
+      <StoreTopCharts
+        trending={data.topRated}
+        popular={data.popular}
+        fresh={data.fresh}
+        onOpen={onOpen}
+      />
 
       {data.moodRails.map((r) => {
         const Icon = MOOD_ICON[r.mood];
         return (
           <StoreRail
             key={r.mood}
-            icon={<Icon size={15} strokeWidth={2.2} />}
-            title={r.title}
-            subtitle={r.blurb}
+            icon={<Icon size={16} strokeWidth={2.2} />}
+            title={t(r.title)}
+            subtitle={t(r.blurb)}
             themes={r.items.slice(0, 16)}
             scrollKey={`themestore:mood-${r.mood}`}
             onOpen={onOpen}

@@ -1,76 +1,8 @@
 import type { Meta } from "@/lib/cinemeta";
-import { registerEvictable } from "@/lib/maintenance";
 import { adultContentHidden, isAdultText } from "@/lib/addons-store/adult-filter";
+import { armKitsuIds, catalogGet, catalogSet } from "./jikan-cache";
 
 const JIKAN = "https://api.jikan.moe/v4";
-const ARM = "https://relations.yuna.moe/api/ids";
-
-const ARM_KEY = "harbor.armcache";
-const ARM_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-const ARM_NEG_TTL_MS = 24 * 60 * 60 * 1000;
-const ARM_TIMEOUT_MS = 3500;
-
-type ArmEntry = { kitsu?: number; anilist?: number; t: number; neg?: boolean };
-type ArmCache = Record<string, ArmEntry>;
-
-function readCache(): ArmCache {
-  try {
-    return JSON.parse(localStorage.getItem(ARM_KEY) ?? "{}");
-  } catch {
-    return {};
-  }
-}
-
-function writeCache(cache: ArmCache) {
-  try {
-    localStorage.setItem(ARM_KEY, JSON.stringify(cache));
-  } catch {
-    /* ignore */
-  }
-}
-
-const armMem: ArmCache = readCache();
-const armInflight = new Map<number, Promise<ArmEntry | null>>();
-let armFlushTimer = 0;
-
-function armRemember(malId: number, entry: ArmEntry) {
-  armMem[malId] = entry;
-  window.clearTimeout(armFlushTimer);
-  armFlushTimer = window.setTimeout(() => writeCache(armMem), 600);
-}
-
-async function armLookup(malId: number): Promise<ArmEntry | null> {
-  const hit = armMem[malId];
-  if (hit) {
-    const age = Date.now() - hit.t;
-    if (hit.neg ? age < ARM_NEG_TTL_MS : age < ARM_TTL_MS) return hit.neg ? null : hit;
-  }
-  const existing = armInflight.get(malId);
-  if (existing) return existing;
-  const p = (async () => {
-    const ac = new AbortController();
-    const timer = setTimeout(() => ac.abort(), ARM_TIMEOUT_MS);
-    try {
-      const r = await fetch(`${ARM}?source=myanimelist&id=${malId}`, { signal: ac.signal });
-      if (!r.ok) {
-        armRemember(malId, { t: Date.now(), neg: true });
-        return null;
-      }
-      const j = await r.json();
-      const entry: ArmEntry = { kitsu: j?.kitsu, anilist: j?.anilist, t: Date.now() };
-      armRemember(malId, entry);
-      return entry;
-    } catch {
-      armRemember(malId, { t: Date.now(), neg: true });
-      return null;
-    } finally {
-      clearTimeout(timer);
-      armInflight.delete(malId);
-    }
-  })();
-  armInflight.set(malId, p);
-  return p;
-}
 
 type JikanAnime = {
   mal_id: number;
@@ -101,13 +33,13 @@ type JikanAnime = {
 
 const SERIES_TYPES = new Set(["TV", "OVA", "ONA", "Special"]);
 
-function bestPoster(a: JikanAnime): string | undefined {
-  return (
-    a.images?.webp?.large_image_url ??
-    a.images?.jpg?.large_image_url ??
-    a.images?.webp?.image_url ??
-    a.images?.jpg?.image_url
-  );
+const MAL_SMALL_MAX = 300;
+const MAL_CARD_WANT = 266;
+
+function bestPoster(a: JikanAnime, want: number): string | undefined {
+  const small = a.images?.webp?.image_url ?? a.images?.jpg?.image_url;
+  const large = a.images?.webp?.large_image_url ?? a.images?.jpg?.large_image_url;
+  return want > MAL_SMALL_MAX ? (large ?? small) : (small ?? large);
 }
 
 function bestTitle(a: JikanAnime): string {
@@ -159,7 +91,7 @@ function toMeta(a: JikanAnime, id: string): Meta {
     : a.aired?.from
       ? a.aired.from.slice(0, 4)
       : undefined;
-  const poster = bestPoster(a);
+  const poster = bestPoster(a, MAL_CARD_WANT);
   return {
     id,
     type: isSeries ? "series" : "movie",
@@ -207,13 +139,11 @@ async function metasFromJikan(items: JikanAnime[]): Promise<Meta[]> {
     if (anchor) ordered.push(anchor);
   }
 
-  const mapped = await Promise.all(
-    ordered.map(async (a) => {
-      const arm = await armLookup(a.mal_id);
-      const id = arm?.kitsu ? `kitsu:${arm.kitsu}` : `mal:${a.mal_id}`;
-      return toMeta(a, id);
-    }),
-  );
+  const kitsuByMal = await armKitsuIds(ordered.map((a) => a.mal_id));
+  const mapped = ordered.map((a) => {
+    const kitsu = kitsuByMal.get(a.mal_id);
+    return toMeta(a, kitsu ? `kitsu:${kitsu}` : `mal:${a.mal_id}`);
+  });
   const seenIds = new Set<string>();
   const seenNames = new Set<string>();
   const out: Meta[] = [];
@@ -228,65 +158,19 @@ async function metasFromJikan(items: JikanAnime[]): Promise<Meta[]> {
 }
 
 const inflight = new Map<string, Promise<Meta[]>>();
-const cache = new Map<string, { metas: Meta[]; t: number }>();
-const CACHE_TTL = 6 * 60 * 60 * 1000;
 
-const CATALOG_KEY = "harbor.jikancatalog2";
-const CATALOG_MAX = 40;
-const PERSIST_DESC_MAX = 500;
-
-(() => {
-  try {
-    const raw = JSON.parse(localStorage.getItem(CATALOG_KEY) ?? "{}") as Record<
-      string,
-      { metas: Meta[]; t: number }
-    >;
-    const now = Date.now();
-    for (const [k, e] of Object.entries(raw)) {
-      if (e && Array.isArray(e.metas) && now - e.t < CACHE_TTL) cache.set(k, e);
-    }
-  } catch {
-    localStorage.removeItem(CATALOG_KEY);
-  }
-})();
-
-let catalogFlushTimer = 0;
-
-function persistCatalog() {
-  window.clearTimeout(catalogFlushTimer);
-  catalogFlushTimer = window.setTimeout(() => {
-    try {
-      const entries = [...cache.entries()]
-        .sort((a, b) => b[1].t - a[1].t)
-        .slice(0, CATALOG_MAX)
-        .map(([k, e]) => [
-          k,
-          {
-            t: e.t,
-            metas: e.metas.map((m) =>
-              m.description && m.description.length > PERSIST_DESC_MAX
-                ? { ...m, description: `${m.description.slice(0, PERSIST_DESC_MAX)}...` }
-                : m,
-            ),
-          },
-        ]);
-      localStorage.setItem(CATALOG_KEY, JSON.stringify(Object.fromEntries(entries)));
-    } catch {
-      localStorage.removeItem(CATALOG_KEY);
-    }
-  }, 1000);
-}
-
-registerEvictable("jikan-catalog", (aggressive) => {
-  if (aggressive) return cache.clear();
-  const now = Date.now();
-  for (const [k, e] of cache) if (now - e.t > CACHE_TTL) cache.delete(k);
-});
 const MIN_INTERVAL_MS = 400;
+const JIKAN_TIMEOUT_MS = 12000;
+const RAW_PAGE_TIMEOUT_MS = 8000;
 
 let queueChain: Promise<void> = Promise.resolve();
 
-function throttledJikanFetch(url: string, signal: AbortSignal): Promise<Response> {
+// The timeout is armed HERE, when the chain reaches this entry, never by the
+// caller before it enqueues. Twenty rows fire at once and this chain spaces them
+// 400ms apart, so a caller-armed budget is spent waiting in line: the tail of the
+// queue aborted while still queued, returned [], and every one of those rows was
+// then dropped from the page as settled-and-empty.
+function throttledJikanFetch(url: string, timeoutMs: number): Promise<Response> {
   let resolveOuter!: (r: Response) => void;
   let rejectOuter!: (e: unknown) => void;
   const result = new Promise<Response>((resolve, reject) => {
@@ -295,11 +179,15 @@ function throttledJikanFetch(url: string, signal: AbortSignal): Promise<Response
   });
 
   queueChain = queueChain.then(async () => {
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), timeoutMs);
     try {
-      const r = await fetch(url, { signal });
+      const r = await fetch(url, { signal: ac.signal });
       resolveOuter(r);
     } catch (e) {
       rejectOuter(e);
+    } finally {
+      clearTimeout(timer);
     }
     await new Promise<void>((r) => setTimeout(r, MIN_INTERVAL_MS));
   });
@@ -313,8 +201,8 @@ async function jikanQuery(path: string, params: Record<string, string | number> 
   for (const [k, v] of Object.entries(effective)) qs.set(k, String(v));
   const key = `${path}?${qs.toString()}`;
 
-  const hit = cache.get(key);
-  if (hit && Date.now() - hit.t < CACHE_TTL) return hit.metas;
+  const hit = catalogGet(key);
+  if (hit) return hit;
 
   const existing = inflight.get(key);
   if (existing) return existing;
@@ -322,10 +210,8 @@ async function jikanQuery(path: string, params: Record<string, string | number> 
   const p = (async () => {
     const url = `${JIKAN}${path}${qs.toString() ? `?${qs.toString()}` : ""}`;
     for (let attempt = 0; attempt < 4; attempt++) {
-      const ac = new AbortController();
-      const timer = setTimeout(() => ac.abort(), 12000);
       try {
-        const r = await throttledJikanFetch(url, ac.signal);
+        const r = await throttledJikanFetch(url, JIKAN_TIMEOUT_MS);
         if (r.status === 429) {
           const backoff = 2000 * Math.pow(2, attempt);
           await new Promise((resolve) => setTimeout(resolve, backoff));
@@ -335,13 +221,10 @@ async function jikanQuery(path: string, params: Record<string, string | number> 
         const j = await r.json();
         const items: JikanAnime[] = j?.data ?? [];
         const metas = await metasFromJikan(items);
-        cache.set(key, { metas, t: Date.now() });
-        persistCatalog();
+        catalogSet(key, metas);
         return metas;
       } catch {
         return [];
-      } finally {
-        clearTimeout(timer);
       }
     }
     return [];
@@ -407,29 +290,22 @@ export const jikanSearchByTitle = (title: string, limit = 1) =>
     sfw: "true",
   });
 
+// null means jikan answered and knows no such title. A transport failure REJECTS
+// instead, because the caller persists this result forever and a failure cached
+// as a no-match disables that franchise for the life of the device.
 export async function jikanResolveMalId(title: string): Promise<number | null> {
   const url = `${JIKAN}/anime?q=${encodeURIComponent(title)}&limit=1&sfw=true&order_by=popularity&sort=desc`;
-  const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 12000);
-  try {
-    const r = await throttledJikanFetch(url, ac.signal);
-    if (!r.ok) return null;
-    const j = await r.json();
-    const items: Array<{ mal_id?: number }> = j?.data ?? [];
-    return items[0]?.mal_id ?? null;
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timer);
-  }
+  const r = await throttledJikanFetch(url, JIKAN_TIMEOUT_MS);
+  if (!r.ok) throw new Error(`jikan ${r.status}`);
+  const j = await r.json();
+  const items: Array<{ mal_id?: number }> = j?.data ?? [];
+  return items[0]?.mal_id ?? null;
 }
 
 export async function jikanRecommendationsForMalId(malId: number): Promise<Meta[]> {
   const url = `${JIKAN}/anime/${malId}/recommendations`;
-  const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 12000);
   try {
-    const r = await throttledJikanFetch(url, ac.signal);
+    const r = await throttledJikanFetch(url, JIKAN_TIMEOUT_MS);
     if (!r.ok) return [];
     const j = await r.json();
     const items: Array<{ entry?: JikanAnime; votes?: number }> = j?.data ?? [];
@@ -442,8 +318,6 @@ export async function jikanRecommendationsForMalId(malId: number): Promise<Meta[
     return await metasFromJikan(animes);
   } catch {
     return [];
-  } finally {
-    clearTimeout(timer);
   }
 }
 
@@ -468,17 +342,13 @@ function isSequelTitle(a: JikanAnime): boolean {
   return candidates.some((t) => SEQUEL_RX.test(t));
 }
 
-const gemCache = new Map<number, { metas: Meta[]; t: number }>();
-
 async function fetchRawAnimePage(params: Record<string, string | number>): Promise<JikanAnime[]> {
   const qs = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) qs.set(k, String(v));
   const url = `${JIKAN}/anime?${qs.toString()}`;
   for (let attempt = 0; attempt < 3; attempt++) {
-    const ac = new AbortController();
-    const timer = setTimeout(() => ac.abort(), 8000);
     try {
-      const r = await throttledJikanFetch(url, ac.signal);
+      const r = await throttledJikanFetch(url, RAW_PAGE_TIMEOUT_MS);
       if (r.status === 429) {
         await new Promise((resolve) => setTimeout(resolve, 1200 * (attempt + 1)));
         continue;
@@ -488,48 +358,58 @@ async function fetchRawAnimePage(params: Record<string, string | number>): Promi
       return (j?.data ?? []) as JikanAnime[];
     } catch {
       return [];
-    } finally {
-      clearTimeout(timer);
     }
   }
   return [];
 }
 
 export async function jikanUnderratedGems(page = 1): Promise<Meta[]> {
-  const hit = gemCache.get(page);
-  if (hit && Date.now() - hit.t < CACHE_TTL) return hit.metas;
+  const key = `/gems?page=${page}`;
+  const hit = catalogGet(key);
+  if (hit) return hit;
+  const existing = inflight.get(key);
+  if (existing) return existing;
 
-  const [p1, p2] = await Promise.all([
-    fetchRawAnimePage({
-      order_by: "members",
-      sort: "asc",
-      min_score: 7.8,
-      sfw: "true",
-      type: "tv",
-      page: page * 2 - 1,
-    }),
-    fetchRawAnimePage({
-      order_by: "members",
-      sort: "asc",
-      min_score: 7.8,
-      sfw: "true",
-      type: "tv",
-      page: page * 2,
-    }),
-  ]);
-  const raw = [...p1, ...p2];
-  const seen = new Set<number>();
-  const filtered: JikanAnime[] = [];
-  for (const a of raw) {
-    if (seen.has(a.mal_id)) continue;
-    if ((a.members ?? 0) > GEM_MEMBER_CEILING) continue;
-    if ((a.scored_by ?? 0) < GEM_SCORED_BY_FLOOR) continue;
-    if (isSequelTitle(a)) continue;
-    seen.add(a.mal_id);
-    filtered.push(a);
+  const p = (async () => {
+    const [p1, p2] = await Promise.all([
+      fetchRawAnimePage({
+        order_by: "members",
+        sort: "asc",
+        min_score: 7.8,
+        sfw: "true",
+        type: "tv",
+        page: page * 2 - 1,
+      }),
+      fetchRawAnimePage({
+        order_by: "members",
+        sort: "asc",
+        min_score: 7.8,
+        sfw: "true",
+        type: "tv",
+        page: page * 2,
+      }),
+    ]);
+    const raw = [...p1, ...p2];
+    const seen = new Set<number>();
+    const filtered: JikanAnime[] = [];
+    for (const a of raw) {
+      if (seen.has(a.mal_id)) continue;
+      if ((a.members ?? 0) > GEM_MEMBER_CEILING) continue;
+      if ((a.scored_by ?? 0) < GEM_SCORED_BY_FLOOR) continue;
+      if (isSequelTitle(a)) continue;
+      seen.add(a.mal_id);
+      filtered.push(a);
+    }
+    filtered.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    const metas = await metasFromJikan(filtered);
+    if (metas.length > 0) catalogSet(key, metas);
+    return metas;
+  })();
+
+  inflight.set(key, p);
+  try {
+    return await p;
+  } finally {
+    inflight.delete(key);
   }
-  filtered.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-  const metas = await metasFromJikan(filtered);
-  gemCache.set(page, { metas, t: Date.now() });
-  return metas;
 }

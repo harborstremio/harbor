@@ -1,9 +1,112 @@
+import { fillStyle } from "@/components/slider";
+import { Dropdown } from "@/components/dropdown";
+import { Hourglass, Moon, Play, Sparkles, Text, Type, Volume1, Volume2, Waves, ZoomIn } from "lucide-react";
+import type { ReactNode } from "react";
 import { useSampleArtwork } from "@/lib/sample-artwork";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { Section, Segmented, ToggleRow } from "../shared";
+import { Section, ToggleRow } from "../shared";
+import { SettingGroup, SettingRow, Nested } from "../kit";
 import { PosterCardSection } from "./display/poster-card-section";
 import { SFX } from "@/lib/sfx";
+
+export function AmbienceSection() {
+  const t = useT();
+  const { settings, update } = useSettings();
+  const soundEffectsEnabled = settings.soundTheme !== "none";
+  return (
+    <>
+      <Section
+        title={t("Screensaver")}
+        subtitle={t("When Harbor sits idle in the foreground, it drifts through cinematic backdrops with a clock and what's trending. Any movement or key brings you back. Off by default.")}
+      >
+        <SettingGroup>
+          <ToggleRow
+            label={t("Ambient screensaver")}
+            sub={t("Drift through cinematic backdrops while Harbor sits idle.")}
+            value={settings.screensaver}
+            onChange={(v) => update({ screensaver: v })}
+            leading={<RowIcon on={settings.screensaver}><Moon size={16} strokeWidth={2.2} /></RowIcon>}
+          />
+          {settings.screensaver && (
+            <Nested>
+              <SettingRow
+                icon={<Hourglass size={16} strokeWidth={1.9} />}
+                label={t("Start after")}
+                desc={t("How long Harbor waits before drifting off.")}
+              >
+                <Picker
+                  value={String(settings.screensaverDelayMin)}
+                  options={[
+                    { value: "1", label: t("1 min") },
+                    { value: "3", label: t("3 min") },
+                    { value: "5", label: t("5 min") },
+                    { value: "10", label: t("10 min") },
+                    { value: "15", label: t("15 min") },
+                  ]}
+                  onChange={(v) => update({ screensaverDelayMin: Number(v) })}
+                />
+              </SettingRow>
+            </Nested>
+          )}
+        </SettingGroup>
+      </Section>
+
+      <Section
+        title={t("Sound effects")}
+        subtitle={t("Subtle audio feedback as you navigate and click. Off by default; pick a style to turn it on.")}
+      >
+        <SettingGroup>
+          <SettingRow
+            icon={<Volume2 size={16} strokeWidth={1.9} />}
+            label={t("Sound style")}
+            desc={t("Pick a style to turn interface sounds on.")}
+          >
+            <Picker
+              value={settings.soundTheme}
+              options={[
+                { value: "none", label: t("Off") },
+                { value: "glass", label: t("Glass") },
+                { value: "modern", label: t("Modern") },
+                { value: "retro", label: t("Retro") },
+                { value: "cinematic", label: t("Cinematic") },
+              ]}
+              onChange={(v) => update({ soundTheme: v as "none" | "glass" | "modern" | "retro" | "cinematic" })}
+            />
+          </SettingRow>
+
+          {soundEffectsEnabled && (
+            <Nested>
+              <SliderRow
+                label={t("Sound effects volume")}
+                desc={t("How loud the interface sounds are.")}
+                icon={<Volume1 size={16} strokeWidth={1.9} />}
+                value={settings.sfxVolume ?? 50}
+                min={0}
+                max={100}
+                step={5}
+                readout={`${settings.sfxVolume ?? 50}%`}
+                onChange={(volume) => {
+                  update({ sfxVolume: volume });
+                  SFX.setVolume(volume / 100);
+                  SFX.click();
+                }}
+              />
+
+              <ToggleRow
+                label={t("Player volume sounds")}
+                sub={t("Play a short sound when changing the player volume. Off by default.")}
+                value={settings.playerVolumeSfx}
+                onChange={(value) => update({ playerVolumeSfx: value })}
+                leading={<RowIcon on={settings.playerVolumeSfx}><Play size={16} strokeWidth={2.2} /></RowIcon>}
+              />
+            </Nested>
+          )}
+        </SettingGroup>
+      </Section>
+    </>
+  );
+}
 
 export function DisplaySection() {
   const t = useT();
@@ -11,360 +114,244 @@ export function DisplaySection() {
   const glassBlur = Number.isFinite(settings.defaultLiquidGlassBlur) ? settings.defaultLiquidGlassBlur : 2;
   const glassTint = Number.isFinite(settings.defaultLiquidGlassTint) ? settings.defaultLiquidGlassTint : 40;
   const { poster: previewPoster } = useSampleArtwork();
-  const soundEffectsEnabled = settings.soundTheme !== "none";
   return (
     <>
       <PosterCardSection previewPoster={previewPoster} />
-      <Section title={t("Liquid Glass")}>
-        <ToggleRow
-          label={t("Use liquid glass")}
-          newId="theme:liquid-glass"
-          sub={t("Use liquid glass for the search pill and row scroll arrows. The appearance settings below are shared by glass surfaces across Harbor.")}
-          value={settings.liquidGlass}
-          onChange={(v) => update({ liquidGlass: v })}
-        />
-        {settings.liquidGlass && (
-          <>
-          <ToggleRow
-            label={t("Enhanced liquid glass")}
-            sub={t("A richer glass treatment. May look better while using more graphics resources.")}
-            value={settings.experimentalLiquidGlassEnabled}
-            onChange={(v) => update({ experimentalLiquidGlassEnabled: v })}
-          />
-          {settings.experimentalLiquidGlassEnabled ? (
-            <div className="mt-4 flex items-center gap-4 px-1 py-1.5">
-              <span className="w-40 shrink-0 text-[13.5px] font-medium text-ink">{t("Glass opacity")}</span>
-              <input
-                type="range"
-                min="5"
-                max="100"
-                step="5"
-                value={settings.experimentalLiquidGlassOpacity}
-                onChange={(e) => update({ experimentalLiquidGlassOpacity: Number(e.target.value) })}
-                className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
-              />
-              <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
-                {settings.experimentalLiquidGlassOpacity}%
-              </span>
-            </div>
-          ) : (
-            <>
-              <div className="mt-4 flex items-center gap-4 px-1 py-1.5">
-                <span className="w-40 shrink-0 text-[13.5px] font-medium text-ink">{t("Glass blur")}</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="8"
-                  step="0.5"
-                  value={glassBlur}
-                  onChange={(e) => update({ defaultLiquidGlassBlur: Number(e.target.value) })}
-                  className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
-                />
-                <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">{glassBlur}px</span>
-              </div>
-              <div className="mt-4 flex items-center gap-4 px-1 py-1.5">
-                <span className="w-40 shrink-0 text-[13.5px] font-medium text-ink">{t("Glass tint")}</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="5"
-                  value={glassTint}
-                  onChange={(e) => update({ defaultLiquidGlassTint: Number(e.target.value) })}
-                  className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
-                />
-                <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">{glassTint}%</span>
-              </div>
-            </>
-          )}
-          </>
-        )}
-      </Section>
-
-      <Section
-        title={t("Sound effects")}
-        subtitle={t("Subtle audio feedback as you navigate and click. Off by default; pick a style to turn it on.")}
-      >
-        <div className="flex flex-col gap-4">
-          <Segmented
-            value={settings.soundTheme}
-            options={[
-              { value: "none", label: t("Off") },
-              { value: "glass", label: t("Glass") },
-              { value: "modern", label: t("Modern") },
-              { value: "retro", label: t("Retro") },
-              { value: "cinematic", label: t("Cinematic") },
-            ]}
-            onChange={(v) => update({ soundTheme: v as "none" | "glass" | "modern" | "retro" | "cinematic" })}
-          />
-
-          {soundEffectsEnabled && (
-            <>
-              <div className="flex items-center gap-4 px-1 py-1.5">
-                <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">
-                  {t("Sound effects volume")}
-                </span>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="5"
-                  value={settings.sfxVolume ?? 50}
-                  onChange={(e) => {
-                    const volume = parseInt(e.target.value, 10);
-                    update({ sfxVolume: volume });
-                    SFX.setVolume(volume / 100);
-                    SFX.click();
-                  }}
-                  className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
-                />
-                <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
-                  {settings.sfxVolume ?? 50}%
-                </span>
-              </div>
-
-              <ToggleRow
-                label={t("Player volume sounds")}
-                sub={t("Play a short sound when changing the player volume. Off by default.")}
-                value={settings.playerVolumeSfx}
-                onChange={(value) => update({ playerVolumeSfx: value })}
-              />
-            </>
-          )}
-        </div>
-      </Section>
-
       <Section
         title={t("Title text")}
         subtitle={t("Resize the row titles on Home and the title shown in the player, without scaling the rest of the interface. You can also lead the player title with the series name instead of the episode.")}
       >
-        <SizeSlider
-          label={t("Row titles")}
-          value={settings.rowTitleScale}
-          onChange={(v) => update({ rowTitleScale: v })}
-        />
-        <SizeSlider
-          label={t("Player title")}
-          value={settings.playerTitleScale}
-          onChange={(v) => update({ playerTitleScale: v })}
-        />
-        <ToggleRow
-          label={t("Show series name first in the player")}
-          sub={t("Lead with the show name instead of the episode title at the top of the player.")}
-          value={settings.playerTitleSeriesFirst}
-          onChange={(v) => update({ playerTitleSeriesFirst: v })}
-        />
+        <SettingGroup>
+          <SizeSlider
+            label={t("Row titles")}
+            desc={t("Headings above every row on Home.")}
+            icon={<Type size={16} strokeWidth={1.9} />}
+            value={settings.rowTitleScale}
+            onChange={(v) => update({ rowTitleScale: v })}
+          />
+          <SizeSlider
+            label={t("Player title")}
+            desc={t("The title shown at the top of the player.")}
+            icon={<Text size={16} strokeWidth={1.9} />}
+            value={settings.playerTitleScale}
+            onChange={(v) => update({ playerTitleScale: v })}
+          />
+          <ToggleRow
+            label={t("Show series name first in the player")}
+            sub={t("Lead with the show name instead of the episode title at the top of the player.")}
+            value={settings.playerTitleSeriesFirst}
+            onChange={(v) => update({ playerTitleSeriesFirst: v })}
+          />
+        </SettingGroup>
       </Section>
 
       <Section
         title={t("Accessibility")}
-        subtitle={t("Make everything bigger and easier to read: sidebar, menus, popups, every page. The whole interface scales live as you drag, so you can see the change right here. Great on 4K and ultrawide monitors, or whenever the text feels small.")}
+        subtitle={t("Make everything bigger and easier to read: sidebar, menus, popups, every page.")}
       >
-        <div className="flex items-center gap-4 px-1 py-1.5">
-          <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">{t("Interface scale")}</span>
-          <input
-            type="range"
+        <SettingGroup>
+          <SliderRow
+            label={t("Interface scale")}
+            desc={t("Scales the whole interface live as you drag.")}
+            tip={t("Make everything bigger and easier to read: sidebar, menus, popups, every page. The whole interface scales live as you drag, so you can see the change right here. Great on 4K and ultrawide monitors, or whenever the text feels small.")}
+            icon={<ZoomIn size={16} strokeWidth={1.9} />}
+            value={settings.uiScale}
             min={0.8}
             max={1.6}
             step={0.05}
-            value={settings.uiScale}
-            onChange={(e) => update({ uiScale: parseFloat(e.target.value) })}
-            className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
+            readout={`${Math.round(settings.uiScale * 100)}%`}
+            resetTo={1}
+            onChange={(uiScale) => update({ uiScale })}
           />
-          <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
-            {Math.round(settings.uiScale * 100)}%
-          </span>
-          {settings.uiScale !== 1 && (
-            <button
-              onClick={() => update({ uiScale: 1 })}
-              className="shrink-0 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
-            >
-              {t("Reset")}
-            </button>
-          )}
-        </div>
+        </SettingGroup>
       </Section>
 
       <Section
-        title={t("Home hero")}
-        subtitle={t("Make the featured banner on Home bigger and sharper.")}
+        title={t("Liquid Glass")}
+        subtitle={t("Frosted, refractive surfaces on Harbor's floating controls.")}
       >
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[14px] font-medium text-ink">{t("Featured source")}</span>
-          <span className="text-[12.5px] text-ink-subtle">
-            {t("What fills the hero. Trending is a fresh top list from Harbor, refreshed through the day. Classic uses your own Home rows.")}
-          </span>
-          <Segmented
-            value={settings.heroFeed}
-            options={[
-              { value: "trending", label: t("Trending") },
-              { value: "trakt", label: t("Trakt") },
-              { value: "simkl", label: t("Simkl") },
-              { value: "classic", label: t("Classic") },
-            ]}
-            onChange={(v) => update({ heroFeed: v as "trending" | "trakt" | "simkl" | "classic" })}
-          />
-        </div>
-        <ToggleRow
-          label={t("Full hero banner")}
-          sub={t("Stretch the featured hero edge to edge and taller, across every layout.")}
-          value={settings.heroFull}
-          onChange={(v) => update({ heroFull: v })}
-        />
-        <ToggleRow
-          label={t("Full quality hero image")}
-          sub={t("Load the highest-resolution artwork for the featured hero. Uses more bandwidth.")}
-          value={settings.heroFullQuality}
-          onChange={(v) => update({ heroFullQuality: v })}
-        />
-        <ToggleRow
-          label={t("Play trailers in the hero")}
-          newId="theme:hero-video"
-          sub={t("After a moment on a slide, the featured title's trailer plays muted in the background. Uses more bandwidth.")}
-          value={settings.heroTrailers}
-          onChange={(v) => update({ heroTrailers: v })}
-        />
-        {settings.heroTrailers && (
+        <SettingGroup>
           <ToggleRow
-            label={t("Home hero audio")}
-            sub={t("The home hero trailer plays with sound and a mute button in the corner, then shows a replay button when it ends. Auto-rotation pauses so it stays on the featured title.")}
-            value={settings.heroTrailerAudio}
-            onChange={(v) => update({ heroTrailerAudio: v })}
+            label={t("Use liquid glass")}
+            newId="theme:liquid-glass"
+            sub={t("Use liquid glass for the search pill and row scroll arrows. The appearance settings below are shared by glass surfaces across Harbor.")}
+            value={settings.liquidGlass}
+            onChange={(v) => update({ liquidGlass: v })}
+            leading={<RowIcon on={settings.liquidGlass}><Waves size={16} strokeWidth={2.2} /></RowIcon>}
           />
-        )}
-      </Section>
-
-      <Section
-        title={t("Screensaver")}
-        subtitle={t("When Harbor sits idle in the foreground, it drifts through cinematic backdrops with a clock and what's trending. Any movement or key brings you back. Off by default.")}
-      >
-        <ToggleRow
-          label={t("Ambient screensaver")}
-          value={settings.screensaver}
-          onChange={(v) => update({ screensaver: v })}
-        />
-        {settings.screensaver && (
-          <div className="mt-3 flex flex-col gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-              {t("Start after")}
-            </span>
-            <Segmented
-              value={String(settings.screensaverDelayMin)}
-              options={[
-                { value: "1", label: t("1 min") },
-                { value: "3", label: t("3 min") },
-                { value: "5", label: t("5 min") },
-                { value: "10", label: t("10 min") },
-                { value: "15", label: t("15 min") },
-              ]}
-              onChange={(v) => update({ screensaverDelayMin: Number(v) })}
-            />
-          </div>
-        )}
-      </Section>
-
-      <Section
-        title={t("Home hero shadow")}
-        subtitle={t("How dark the gradient behind the featured title on Home is. 100% is the classic look; lower it to let more of the artwork show through.")}
-      >
-        <div className="flex items-center gap-4 px-1 py-1.5">
-          <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">{t("Shadow")}</span>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={5}
-            value={settings.heroShadow}
-            onChange={(e) => update({ heroShadow: parseInt(e.target.value, 10) })}
-            className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
-          />
-          <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
-            {settings.heroShadow}%
-          </span>
-          {settings.heroShadow !== 100 && (
-            <button
-              onClick={() => update({ heroShadow: 100 })}
-              className="shrink-0 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
-            >
-              {t("Reset")}
-            </button>
+          {settings.liquidGlass && (
+            <Nested>
+              <ToggleRow
+                label={t("Enhanced liquid glass")}
+                sub={t("A richer glass treatment. May look better while using more graphics resources.")}
+                value={settings.experimentalLiquidGlassEnabled}
+                onChange={(v) => update({ experimentalLiquidGlassEnabled: v })}
+                leading={
+                  <RowIcon on={settings.experimentalLiquidGlassEnabled}>
+                    <Sparkles size={16} strokeWidth={2.2} />
+                  </RowIcon>
+                }
+              />
+              {settings.experimentalLiquidGlassEnabled ? (
+                <SliderRow
+                  label={t("Glass opacity")}
+                  desc={t("How solid the enhanced glass looks.")}
+                  value={settings.experimentalLiquidGlassOpacity}
+                  min={5}
+                  max={100}
+                  step={5}
+                  readout={`${settings.experimentalLiquidGlassOpacity}%`}
+                  onChange={(experimentalLiquidGlassOpacity) => update({ experimentalLiquidGlassOpacity })}
+                />
+              ) : (
+                <>
+                  <SliderRow
+                    label={t("Glass blur")}
+                    desc={t("How much the surface blurs what is behind it.")}
+                    value={glassBlur}
+                    min={0}
+                    max={8}
+                    step={0.5}
+                    readout={`${glassBlur}px`}
+                    onChange={(defaultLiquidGlassBlur) => update({ defaultLiquidGlassBlur })}
+                  />
+                  <SliderRow
+                    label={t("Glass tint")}
+                    desc={t("How much theme color the surface carries.")}
+                    value={glassTint}
+                    min={0}
+                    max={100}
+                    step={5}
+                    readout={`${glassTint}%`}
+                    onChange={(defaultLiquidGlassTint) => update({ defaultLiquidGlassTint })}
+                  />
+                </>
+              )}
+            </Nested>
           )}
-        </div>
+        </SettingGroup>
       </Section>
 
-      <Section
-        title={t("Trailer quality")}
-        subtitle={t("How sharp trailers play. Auto follows your connection speed, and the Watch Trailer button targets 1080p. Pick 1080p or Best (up to 4K when the source has it) to force higher. 1080p and Best merge separate video and audio with the bundled ffmpeg, so they take a beat longer to start.")}
-      >
-        <Segmented
-          value={settings.trailerQuality}
-          options={[
-            { value: "auto", label: "Auto" },
-            { value: "360p", label: "360p" },
-            { value: "720p", label: "720p" },
-            { value: "1080p", label: "1080p" },
-            { value: "best", label: "Best" },
-          ]}
-          onChange={(v) => update({ trailerQuality: v })}
-        />
-        <ToggleRow
-          label={t("Autoplay trailer on detail pages")}
-          sub={t("Plays a muted trailer in the backdrop when you open a title. Click the speaker to unmute. Falls back to the image when no trailer is available.")}
-          value={settings.detailTrailerAutoplay}
-          onChange={(v) => update({ detailTrailerAutoplay: v })}
-        />
-        {settings.detailTrailerAutoplay && (
-          <ToggleRow
-            label={t("Start trailers with audio")}
-            sub={t("Detail page trailers begin unmuted. Falls back to muted if the browser blocks sound until you interact.")}
-            value={settings.detailTrailerAudio}
-            onChange={(v) => update({ detailTrailerAudio: v })}
-          />
-        )}
-        <ToggleRow
-          label={t("Scroll up for the trailer")}
-          sub={t("From the very top of a detail page, keep scrolling up to open the trailer. Off by default.")}
-          value={settings.scrollUpTrailer}
-          onChange={(v) => update({ scrollUpTrailer: v })}
-        />
-      </Section>
+
     </>
+  );
+}
+
+export { Nested } from "../kit";
+
+export function RowIcon({ on, children }: { on?: boolean; children: ReactNode }) {
+  return (
+    <span
+      className={`flex h-9 w-9 items-center justify-center rounded-md ${
+        on ? "bg-accent text-canvas" : "bg-raised text-ink-subtle"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function Picker<T extends string>({
+  value,
+  options,
+  onChange,
+}: {
+  value: T;
+  options: ReadonlyArray<{ value: T; label: string }>;
+  onChange: (v: T) => void;
+}) {
+  return (
+    <Dropdown
+      size="sm"
+      value={value}
+      onChange={(v) => onChange(v as T)}
+      options={options.map((o) => ({ value: o.value, label: o.label }))}
+      className="w-[200px] shrink-0"
+    />
+  );
+}
+
+export function SliderRow({
+  label,
+  desc,
+  tip,
+  icon,
+  value,
+  min,
+  max,
+  step,
+  readout,
+  resetTo,
+  onChange,
+}: {
+  label: string;
+  desc?: string;
+  tip?: string;
+  icon?: ReactNode;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  readout: string;
+  resetTo?: number;
+  onChange: (v: number) => void;
+}) {
+  const t = useT();
+  return (
+    <SettingRow wide label={label} desc={desc} tip={tip} icon={icon}>
+      <div className="flex w-full items-center gap-3">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="harbor-slider min-w-0 flex-1"
+          style={fillStyle(value, min, max)}
+        />
+        <span className="w-16 shrink-0 text-end text-[15px] font-semibold tabular-nums text-ink">
+          {readout}
+        </span>
+        {resetTo !== undefined && value !== resetTo && (
+          <button
+            type="button"
+            onClick={() => onChange(resetTo)}
+            className="harbor-press-pop h-8 shrink-0 rounded-md bg-canvas px-3 text-[12.5px] font-semibold text-ink-subtle transition-colors hover:text-ink"
+          >
+            {t("Reset")}
+          </button>
+        )}
+      </div>
+    </SettingRow>
   );
 }
 
 function SizeSlider({
   label,
+  desc,
+  icon,
   value,
   onChange,
 }: {
   label: string;
+  desc?: string;
+  icon?: ReactNode;
   value: number;
   onChange: (v: number) => void;
 }) {
-  const t = useT();
   return (
-    <div className="flex items-center gap-4 px-1 py-1.5">
-      <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">{label}</span>
-      <input
-        type="range"
-        min={0.8}
-        max={1.6}
-        step={0.05}
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
-      />
-      <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
-        {Math.round(value * 100)}%
-      </span>
-      {value !== 1 && (
-        <button
-          onClick={() => onChange(1)}
-          className="shrink-0 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
-        >
-          {t("Reset")}
-        </button>
-      )}
-    </div>
+    <SliderRow
+      label={label}
+      desc={desc}
+      icon={icon}
+      value={value}
+      min={0.8}
+      max={1.6}
+      step={0.05}
+      readout={`${Math.round(value * 100)}%`}
+      resetTo={1}
+      onChange={onChange}
+    />
   );
 }

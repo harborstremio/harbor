@@ -1,5 +1,10 @@
 import type { LocalEntry } from "@/lib/local-library";
 import type { Meta } from "@/lib/cinemeta";
+import type { MediaServerProvider } from "@/lib/media-server/types";
+
+export type EpisodeSource =
+  | { kind: "device"; label: string }
+  | { kind: "home-server"; label: string; provider: MediaServerProvider };
 
 export type LocalEpisodesPayload = {
   title: string;
@@ -10,6 +15,10 @@ export type LocalEpisodesPayload = {
   initialSeason?: number | null;
   highlightEpisode?: number | null;
   onPlayLocal: (entry: LocalEntry) => void;
+  entries?: LocalEntry[];
+  entrySources?: Record<string, EpisodeSource>;
+  sourceLabel?: string;
+  onDownload?: (entry: LocalEntry) => void | Promise<void>;
   onStream?: () => void;
 };
 

@@ -197,19 +197,22 @@ function elegantFinScript(): string {
   );
   let script: string | undefined;
   const visit = (node: ts.Node): void => {
-    if (
-      ts.isVariableDeclaration(node) &&
-      ts.isIdentifier(node.name) &&
-      node.name.text === "elegantFinJs" &&
-      ts.isNoSubstitutionTemplateLiteral(node.initializer)
-    ) {
-      script = node.initializer.text;
+    if (ts.isFunctionDeclaration(node) && node.name?.text === "buildElegantFinJs" && node.body) {
+      const returned = node.body.statements.find(ts.isReturnStatement)?.expression;
+      assert.ok(returned && ts.isTemplateExpression(returned), "ElegantFin generated template");
+      script = returned.head.text;
+      for (const span of returned.templateSpans) {
+        const expression = span.expression.getText(themeSource);
+        const key = /^JSON\.stringify\(t\("([^"]+)"\)\)$/.exec(expression)?.[1];
+        assert.ok(key, `unsupported ElegantFin template expression: ${expression}`);
+        script += JSON.stringify(key) + span.literal.text;
+      }
       return;
     }
     ts.forEachChild(node, visit);
   };
   visit(themeSource);
-  assert.ok(script, "elegantFinJs template");
+  assert.ok(script, "ElegantFin generated script");
   return script;
 }
 

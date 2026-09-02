@@ -22,25 +22,47 @@ export function SectionCard({
   sub,
   count,
   action,
+  flat,
   children,
 }: {
   title: string;
   sub: string;
   count: number;
   action?: ReactNode;
+  flat?: boolean;
   children: ReactNode;
 }) {
   const t = useT();
   return (
-    <section className="rounded-2xl border border-edge-soft bg-elevated/40 p-5 sm:p-6">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <h2 className="font-display text-[21px] font-medium tracking-tight text-ink">{title}</h2>
-          <p className="text-[12.5px] text-ink-muted">{sub}</p>
+    <section
+      className={
+        flat
+          ? "rounded-md bg-elevated px-4 py-3.5"
+          : "rounded-2xl border border-edge-soft bg-elevated/40 p-5 sm:p-6"
+      }
+    >
+      <div className={`flex items-center justify-between gap-3 ${flat ? "mb-3" : "mb-4"}`}>
+        <div className="flex min-w-0 flex-col gap-1">
+          <h2
+            className={
+              flat
+                ? "text-[13.5px] font-medium tracking-tight text-ink"
+                : "font-display text-[21px] font-medium tracking-tight text-ink"
+            }
+          >
+            {title}
+          </h2>
+          <p className={`text-[12.5px] leading-relaxed ${flat ? "max-w-[70ch] text-ink-subtle" : "text-ink-muted"}`}>
+            {sub}
+          </p>
         </div>
         <div className="flex shrink-0 items-center gap-2.5">
           {action}
-          <span className="rounded-full bg-raised px-3 py-1 text-[12px] font-semibold text-ink-muted">
+          <span
+            className={`rounded-full bg-raised font-semibold text-ink-muted ${
+              flat ? "px-2.5 py-0.5 text-[11.5px]" : "px-3 py-1 text-[12px]"
+            }`}
+          >
             {count === 1 ? t("{n} addon", { n: count }) : t("{n} addons", { n: count })}
           </span>
         </div>

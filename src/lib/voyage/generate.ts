@@ -18,7 +18,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function usable(m: Meta | null | undefined, exclude?: PoolExclude): m is Meta {
+export function usable(m: Meta | null | undefined, exclude?: PoolExclude): m is Meta {
   if (!m || !m.id || !m.poster || !m.name) return false;
   if (exclude?.ids?.has(m.id)) return false;
   if (exclude?.titles?.size && exclude.titles.has(watchTitleKey(m.name))) return false;

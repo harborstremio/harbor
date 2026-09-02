@@ -14,10 +14,37 @@ export function simklTargetIds(target: SimklTarget): SimklIds {
 async function animeIdToMal(harborId: string): Promise<number | null> {
   const n = Number(harborId.split(":")[1]);
   if (!Number.isFinite(n)) return null;
+  if (harborId.startsWith("mal:")) return n;
   if (harborId.startsWith("kitsu:")) return kitsuToMal(n).catch(() => null);
   if (harborId.startsWith("anilist:")) return anilistToMal(n).catch(() => null);
   if (harborId.startsWith("anidb:")) return anidbToMal(n).catch(() => null);
   return null;
+}
+
+type EpisodeIdentity = {
+  season: number;
+  episode: number;
+  imdbSeason?: number;
+  imdbEpisode?: number;
+};
+
+export async function resolveSimklEpisodeTarget(
+  harborId: string,
+  episode: EpisodeIdentity,
+  fallbackImdb?: string,
+): Promise<SimklTarget | null> {
+  const direct = stremioIdToSimklTarget(harborId, episode);
+  if (direct.ok && (direct.target.kind === "episode" || direct.target.kind === "anime-episode")) {
+    return direct.target;
+  }
+  const season = episode.imdbSeason ?? episode.season;
+  const number = episode.imdbEpisode ?? episode.episode;
+  if (fallbackImdb && /^tt\d+$/.test(fallbackImdb)) {
+    return { kind: "episode", show: { ids: { imdb: fallbackImdb } }, season, number };
+  }
+  const mal = await animeIdToMal(harborId);
+  if (mal == null) return null;
+  return { kind: "anime-episode", anime: { ids: { mal } }, season, number };
 }
 
 export async function resolveSimklTarget(

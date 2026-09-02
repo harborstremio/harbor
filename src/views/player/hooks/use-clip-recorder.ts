@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { t } from "@/lib/i18n";
 import {
   captureBaseTitle,
   captureDir,
@@ -41,7 +42,7 @@ export function useClipRecorder(params: { src: PlayerSrc }): {
       busyRef.current = true;
       setSaving(true);
       if (dismissRef.current) window.clearTimeout(dismissRef.current);
-      setToast({ id: Date.now(), kind: "ok", text: "Saving clip…" });
+      setToast({ id: Date.now(), kind: "ok", text: t("Saving clip…") });
       try {
         const filename = `${safeName(captureBaseTitle(src))} - ${formatStamp(new Date())}.mp4`;
         const dir = await captureDir();
@@ -54,14 +55,14 @@ export function useClipRecorder(params: { src: PlayerSrc }): {
         setToast({
           id: Date.now(),
           kind: "ok",
-          text: `Clip saved to ${dir ? "Pictures/Harbor" : "downloads"}`,
+          text: t("Clip saved to {path}", { path: dir ? "Pictures/Harbor" : "downloads" }),
           path: result.path,
         });
       } catch (e) {
         setToast({
           id: Date.now(),
           kind: "error",
-          text: typeof e === "string" ? e : "Clip save failed",
+          text: typeof e === "string" ? e : t("Clip save failed"),
         });
       } finally {
         setSaving(false);

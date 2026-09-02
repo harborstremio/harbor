@@ -1,6 +1,23 @@
-import { createAddonCatalogFetcher, gatherCatalogAddons, isCollectionCatalog, type CatalogExtra } from "./addons";
+import {
+  createAddonCatalogFetcher,
+  gatherCatalogAddons,
+  isCollectionCatalog,
+  type CatalogExtra,
+} from "./addons";
 
 const NON_CONTENT = new Set(["addon_catalog"]);
+
+const CATALOG_TYPE_LABEL_KEYS: Readonly<Record<string, string>> = {
+  movie: "Movies",
+  series: "Series",
+  anime: "Anime",
+  tv: "TV",
+  channel: "Channels",
+};
+
+export function catalogTypeLabelKey(type: string): string | undefined {
+  return CATALOG_TYPE_LABEL_KEYS[type];
+}
 
 export type BrowseCatalog = {
   key: string;
@@ -49,6 +66,8 @@ export function browseFetcher(cat: BrowseCatalog, genre: string | null) {
   const collection = isCollectionCatalog({ type: cat.type, id: cat.id, name: cat.name });
   return createAddonCatalogFetcher(cursor, {
     mapMeta: (m) =>
-      collection ? { ...m, addonOrigin: origin, isCollection: true } : { ...m, addonOrigin: origin },
+      collection
+        ? { ...m, addonOrigin: origin, isCollection: true }
+        : { ...m, addonOrigin: origin },
   });
 }

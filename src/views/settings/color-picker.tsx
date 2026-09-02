@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useT } from "@/lib/i18n";
 
 export const HARBOR_COLOR_SWATCHES = [
   "#7dd3fc",
@@ -21,11 +22,12 @@ export function ColorPicker({
   value: string;
   onChange: (hex: string) => void;
 }) {
+  const t = useT();
   const isPreset = HARBOR_COLOR_SWATCHES.includes(value.toLowerCase());
   return (
     <div className="flex flex-col gap-2 pt-1">
       <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-        Your color
+        {t("Your color")}
       </span>
       <div className="flex flex-wrap items-center gap-2">
         {HARBOR_COLOR_SWATCHES.map((hex) => {
@@ -37,7 +39,9 @@ export function ColorPicker({
               onClick={() => onChange(hex)}
               aria-label={hex}
               className={`relative h-7 w-7 rounded-full transition-transform ${
-                selected ? "scale-110 ring-2 ring-ink ring-offset-2 ring-offset-canvas" : "hover:scale-105"
+                selected
+                  ? "scale-110 ring-2 ring-ink ring-offset-2 ring-offset-canvas"
+                  : "hover:scale-105"
               }`}
               style={{ background: hex }}
             />
@@ -46,12 +50,12 @@ export function ColorPicker({
         <ColorPopoverTrigger
           value={value}
           onChange={onChange}
-          label={!isPreset ? value.toUpperCase() : "Custom"}
+          label={!isPreset ? value.toUpperCase() : t("Custom")}
           highlighted={!isPreset}
         />
       </div>
       <span className="text-[11.5px] text-ink-subtle">
-        Used for your cursor in Watch Together, your draw color, and your name pill in chat.
+        {t("Used for your cursor in Watch Together, your draw color, and your name pill in chat.")}
       </span>
     </div>
   );
@@ -128,7 +132,7 @@ export function ColorPopoverTrigger({
   const panel = (
     <div
       ref={panelRef}
-      className="animate-nudge-in w-[280px] rounded-2xl border border-edge bg-elevated/95 p-3 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.65)] backdrop-blur-md"
+      className="animate-nudge-in w-[280px] rounded-md bg-surface p-3 harbor-float"
     >
       <CustomColorPanel value={value} onChange={onChange} />
     </div>
@@ -139,7 +143,7 @@ export function ColorPopoverTrigger({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-medium transition-colors ${
+        className={`flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[11.5px] font-medium transition-colors ${
           open || highlighted
             ? "border-ink text-ink"
             : "border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
@@ -217,7 +221,9 @@ export function CustomColorPanel({
     const { r, g, b } = hexToRgb(value);
     const next = rgbToHsv(r, g, b);
     setHsv((prev) =>
-      Math.abs(prev.h - next.h) < 0.5 && Math.abs(prev.s - next.s) < 0.005 && Math.abs(prev.v - next.v) < 0.005
+      Math.abs(prev.h - next.h) < 0.5 &&
+      Math.abs(prev.s - next.s) < 0.005 &&
+      Math.abs(prev.v - next.v) < 0.005
         ? prev
         : next,
     );
@@ -269,7 +275,7 @@ export function CustomColorPanel({
           if (e.buttons !== 1) return;
           onSLMove(e.clientX, e.clientY);
         }}
-        className="relative h-36 w-full cursor-crosshair touch-none rounded-lg ring-1 ring-edge-soft"
+        className="relative h-36 w-full cursor-crosshair touch-none rounded-md"
         style={{
           background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${baseHue})`,
         }}
@@ -290,7 +296,7 @@ export function CustomColorPanel({
           if (e.buttons !== 1) return;
           onHueMove(e.clientX);
         }}
-        className="relative h-3 w-full cursor-pointer touch-none rounded-full ring-1 ring-edge-soft"
+        className="relative h-3 w-full cursor-pointer touch-none rounded-full"
         style={{
           background:
             "linear-gradient(to right, #ff0000 0%, #ffff00 16.67%, #00ff00 33.33%, #00ffff 50%, #0000ff 66.67%, #ff00ff 83.33%, #ff0000 100%)",
@@ -303,10 +309,7 @@ export function CustomColorPanel({
         />
       </div>
       <div className="flex items-center gap-2">
-        <span
-          className="h-7 w-7 shrink-0 rounded-md ring-1 ring-edge-soft"
-          style={{ background: value }}
-        />
+        <span className="h-9 w-9 shrink-0 rounded-md" style={{ background: value }} />
         <input
           value={hexDraft.toUpperCase()}
           onChange={(e) => {
@@ -314,9 +317,8 @@ export function CustomColorPanel({
             setHexDraft(v);
             if (/^#[0-9a-f]{6}$/i.test(v)) onChange(v.toLowerCase());
           }}
-          className="h-8 w-24 rounded-md border border-edge-soft bg-canvas px-2 font-mono text-[12px] text-ink outline-none focus:border-ink"
+          className="h-9 min-w-0 flex-1 rounded-md bg-canvas px-3 font-mono text-[12.5px] uppercase text-ink outline-none transition-colors focus:bg-elevated"
         />
-        <span className="text-[11px] text-ink-subtle">click swatch or drag</span>
       </div>
     </div>
   );
@@ -333,7 +335,10 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 }
 
 function rgbToHex(r: number, g: number, b: number): string {
-  const c = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0");
+  const c = (n: number) =>
+    Math.max(0, Math.min(255, Math.round(n)))
+      .toString(16)
+      .padStart(2, "0");
   return `#${c(r)}${c(g)}${c(b)}`;
 }
 

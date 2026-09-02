@@ -13,7 +13,7 @@ export function CollectionsRow() {
   return (
     <Row
       title={t("Collections")}
-      min={320}
+      min={250}
       shape="landscape"
       scrollKey="home:collections"
       onViewAll={openCollections}

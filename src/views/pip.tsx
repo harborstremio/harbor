@@ -1,6 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { SkipBackIcon, SkipIcon } from "@/components/icons/harbor-glyphs";
+import { useT } from "@/lib/i18n";
 
 type PipSubtitle = {
   url: string;
@@ -22,6 +24,7 @@ type PipSession = {
 const STATE_PUBLISH_INTERVAL_MS = 1500;
 
 export function PipApp() {
+  const t = useT();
   useEffect(() => {
     if (import.meta.env.DEV) console.log("[pip] PipApp mounted");
   }, []);
@@ -61,7 +64,7 @@ export function PipApp() {
         const s = await invoke<PipSession | null>("pip_get_session");
         if (cancelled) return;
         if (!s) {
-          setError("No PiP session. Closing.");
+          setError(t("No PiP session. Closing."));
           closeTimer = window.setTimeout(() => closeWithState(), 800);
           return;
         }
@@ -70,7 +73,13 @@ export function PipApp() {
         setVol(s.volume);
         setPlaying(s.playing);
       } catch (e) {
-        if (!cancelled) setError(`Failed to read session: ${e instanceof Error ? e.message : String(e)}`);
+        if (!cancelled) {
+          setError(
+            t("Failed to read session: {message}", {
+              message: e instanceof Error ? e.message : String(e),
+            }),
+          );
+        }
       }
     })();
     listen("pip://session-replaced", () => {
@@ -107,13 +116,13 @@ export function PipApp() {
     while (v.firstChild) v.removeChild(v.firstChild);
     if (session.subtitles?.length) {
       session.subtitles.forEach((s, i) => {
-        const t = document.createElement("track");
-        t.src = s.url;
-        t.kind = "subtitles";
-        t.srclang = s.lang ?? "und";
-        t.label = s.label ?? s.lang ?? `Subtitle ${i + 1}`;
-        if (session.subtitle === s.url) t.default = true;
-        v.appendChild(t);
+        const track = document.createElement("track");
+        track.src = s.url;
+        track.kind = "subtitles";
+        track.srclang = s.lang ?? "und";
+        track.label = s.label ?? s.lang ?? t("Subtitle {number}", { number: i + 1 });
+        if (session.subtitle === s.url) track.default = true;
+        v.appendChild(track);
       });
     }
     const onLoaded = () => {
@@ -211,7 +220,10 @@ export function PipApp() {
         v.currentTime = Math.max(0, v.currentTime - 5);
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
-        v.currentTime = Math.min(Number.isFinite(v.duration) ? v.duration - 0.25 : v.currentTime + 5, v.currentTime + 5);
+        v.currentTime = Math.min(
+          Number.isFinite(v.duration) ? v.duration - 0.25 : v.currentTime + 5,
+          v.currentTime + 5,
+        );
       } else if (e.key === "Escape") {
         closeWithState();
       } else if (e.key === "m" || e.key === "M") {
@@ -294,13 +306,22 @@ export function PipApp() {
             onClick={closeWithState}
             className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/60 px-3 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur-md transition-colors hover:bg-black/80"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M3 9V5a2 2 0 0 1 2-2h4" />
               <path d="M21 9V5a2 2 0 0 0-2-2h-4" />
               <path d="M3 15v4a2 2 0 0 0 2 2h4" />
               <path d="M21 15v4a2 2 0 0 1-2 2h-4" />
             </svg>
-            Exit PiP
+            {t("Exit PiP")}
           </button>
           {session?.title && (
             <span className="pointer-events-none truncate text-[12px] font-medium text-white/75">
@@ -325,17 +346,16 @@ export function PipApp() {
           </div>
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1">
-              <PipBtn label="Back 30 seconds" onClick={back30}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 12a9 9 0 1 0 3-6.7" />
-                  <polyline points="3 4 3 10 9 10" />
-                </svg>
-                <span className="absolute bottom-0.5 right-0.5 rounded-sm bg-black/55 px-1 text-[8px] font-bold leading-none">30</span>
+              <PipBtn label={t("Back 30 seconds")} onClick={back30}>
+                <SkipBackIcon size={18} />
+                <span className="absolute bottom-0.5 right-0.5 rounded-sm bg-black/55 px-1 text-[8px] font-bold leading-none">
+                  30
+                </span>
               </PipBtn>
               <button
                 type="button"
                 onClick={playPause}
-                aria-label="Play / Pause"
+                aria-label={t("Play / Pause")}
                 className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/12 text-white transition-[background-color,transform] hover:bg-white/22 active:scale-95"
               >
                 {playing ? (
@@ -349,27 +369,44 @@ export function PipApp() {
                   </svg>
                 )}
               </button>
-              <PipBtn label="Forward 30 seconds" onClick={fwd30}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 12a9 9 0 1 1-3-6.7" />
-                  <polyline points="21 4 21 10 15 10" />
-                </svg>
-                <span className="absolute bottom-0.5 right-0.5 rounded-sm bg-black/55 px-1 text-[8px] font-bold leading-none">30</span>
+              <PipBtn label={t("Forward 30 seconds")} onClick={fwd30}>
+                <SkipIcon size={18} />
+                <span className="absolute bottom-0.5 right-0.5 rounded-sm bg-black/55 px-1 text-[8px] font-bold leading-none">
+                  30
+                </span>
               </PipBtn>
             </div>
             <span className="font-mono text-[11px] tabular-nums text-white/85">
               {formatTime(position)} / {formatTime(duration)}
             </span>
             <div className="flex items-center gap-1.5">
-              <PipBtn label="Mute / Unmute" onClick={toggleMute}>
+              <PipBtn label={t("Mute / Unmute")} onClick={toggleMute}>
                 {muted || vol === 0 ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                     <line x1="22" y1="9" x2="16" y2="15" />
                     <line x1="16" y1="9" x2="22" y2="15" />
                   </svg>
                 ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
                   </svg>
@@ -383,7 +420,7 @@ export function PipApp() {
                 value={muted ? 0 : vol}
                 onChange={onVol}
                 className="h-1 w-16 cursor-pointer appearance-none rounded-full bg-white/20"
-                aria-label="Volume"
+                aria-label={t("Volume")}
               />
             </div>
           </div>

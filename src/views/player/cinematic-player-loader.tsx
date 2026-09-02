@@ -2,10 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { HarborLoader } from "@/components/harbor-loader";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { isLocalUrl } from "@/lib/player/local-url";
+import { usePlaybackPositionGated } from "@/lib/player/playback-clock";
 import type { PlayerSrc } from "@/lib/view";
 import { Topbar } from "@/chrome/topbar";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
+import { resolveLogo } from "@/lib/logo";
+import { useSettings } from "@/lib/settings";
 import { useTitleLogo } from "@/lib/title-logo";
 import { LoaderLogoOrText } from "./loader-logo-or-text";
 import { readinessScore, type EngineStats } from "@/lib/torrent/engine-stats";
@@ -41,7 +44,22 @@ export function CinematicPlayerLoader({
 }) {
   const t = useT();
   const kid = useActiveKid();
+  const { settings } = useSettings();
   const pinnedLogo = useTitleLogo(src.meta.id);
+  const [localizedLogo, setLocalizedLogo] = useState<string | undefined>();
+  useEffect(() => {
+    let cancelled = false;
+    setLocalizedLogo(undefined);
+    if (pinnedLogo) return;
+    void resolveLogo(settings.tmdbKey, src.meta)
+      .then((logo) => {
+        if (!cancelled) setLocalizedLogo(logo);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [pinnedLogo, settings.tmdbKey, src.meta]);
   const isLocal = isLocalUrl(src.url);
   const isInfoHash =
     (isBundledEngineUrl(src.url) || isLocalEngineUrl(src.url)) && !src.url.includes("/hlsv2/");
@@ -56,6 +74,8 @@ export function CinematicPlayerLoader({
   const streamBytes = src.streamRef?.size ?? engineStats?.streamLen ?? null;
   const ready = isInfoHash ? readinessScore(engineStats ?? null, true) : 0;
   const heavyForP2p = isInfoHash && streamBytes != null && streamBytes > 20 * 1024 ** 3;
+  const clockTick = usePlaybackPositionGated(true);
+  void clockTick;
   const everPlayedRef = useRef(false);
   if (snap.firstFrameReady) {
     everPlayedRef.current = true;
@@ -95,7 +115,7 @@ export function CinematicPlayerLoader({
   return (
     <div
       data-tauri-drag-region
-      className={`absolute inset-0 z-[80] overflow-hidden transition-opacity duration-300 ${
+      className={`harbor-connecting absolute inset-0 z-[80] overflow-hidden transition-opacity duration-300 ${
         kid ? "bg-[#0c4a6e]" : "bg-black"
       } ${showing ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
     >
@@ -105,13 +125,13 @@ export function CinematicPlayerLoader({
           src={backdrop}
           alt=""
           aria-hidden
-          className={`absolute inset-0 h-full w-full object-cover saturate-150 ${
+          className={`harbor-connecting-art absolute inset-0 h-full w-full object-cover saturate-150 ${
             kid ? "opacity-20 blur-[36px]" : "opacity-40 blur-[28px]"
           }`}
         />
       )}
       <div
-        className={`absolute inset-0 ${
+        className={`harbor-connecting-veil absolute inset-0 ${
           kid
             ? "bg-gradient-to-b from-[#3aa6c4]/85 via-[#1c789f]/88 to-[#0a3d5c]/94"
             : "bg-gradient-to-b from-black/65 via-black/55 to-black/85"
@@ -156,10 +176,10 @@ export function CinematicPlayerLoader({
       )}
       <div
         data-tauri-drag-region
-        className="relative flex h-full flex-col items-center justify-center gap-7 px-8 text-center"
+        className="harbor-connecting-body relative flex h-full flex-col items-center justify-center gap-7 px-8 text-center"
       >
         <LoaderLogoOrText
-          logo={pinnedLogo ?? src.meta.logo ?? null}
+          logo={pinnedLogo ?? localizedLogo ?? src.meta.logo ?? null}
           fallbackText={src.meta.name ?? src.title}
         />
         {src.episode && (
@@ -183,13 +203,13 @@ export function CinematicPlayerLoader({
               <div className="flex items-center gap-2.5">
                 <button
                   onClick={onCancel}
-                  className="flex h-11 cursor-pointer items-center rounded-full border border-white/20 bg-white/10 px-6 text-[13.5px] font-medium text-white/90 transition-colors hover:border-white/35 hover:bg-white/15"
+                  className="harbor-connecting-btn flex h-11 cursor-pointer items-center rounded-full bg-[#34343b] px-6 text-[13.5px] font-medium text-white/90 transition-colors hover:bg-[#41414a]"
                 >
                   {t("Go back")}
                 </button>
                 <button
                   onClick={prep.retry}
-                  className="flex h-11 cursor-pointer items-center rounded-full border border-white/12 bg-transparent px-6 text-[13.5px] font-medium text-white/70 transition-colors hover:border-white/25 hover:text-white"
+                  className="harbor-connecting-btn2 flex h-11 cursor-pointer items-center rounded-full bg-[#26262c] px-6 text-[13.5px] font-medium text-white/70 transition-colors hover:bg-[#31313a] hover:text-white"
                 >
                   {t("Try again")}
                 </button>
@@ -240,7 +260,7 @@ export function CinematicPlayerLoader({
       {!(isLocalEngine && prep.phase === "no-peers") && (
         <button
           onClick={onCancel}
-          className="absolute bottom-10 left-1/2 z-10 flex h-11 -translate-x-1/2 cursor-pointer items-center gap-2 rounded-full border border-white/15 bg-black/45 px-6 text-[13.5px] font-medium text-white/75 backdrop-blur-md transition-colors hover:border-white/30 hover:bg-black/60 hover:text-white"
+          className="harbor-connecting-btn absolute bottom-10 left-1/2 z-10 flex h-11 -translate-x-1/2 cursor-pointer items-center gap-2 rounded-full bg-[#34343b] px-6 text-[13.5px] font-medium text-white/85 transition-colors hover:bg-[#41414a]"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
             <path

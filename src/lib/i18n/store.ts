@@ -47,6 +47,8 @@ export function setUiLanguage(lang: UiLanguage): void {
   if (next === current) return;
   current = next;
   for (const l of listeners) l();
+  if (next !== "en")
+    void import("./load-locale").then(({ ensureUiLocale }) => ensureUiLocale(next));
 }
 
 export function subscribe(cb: () => void): () => void {

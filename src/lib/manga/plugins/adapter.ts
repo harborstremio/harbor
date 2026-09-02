@@ -134,7 +134,11 @@ function sameSite(a: string, b: string): boolean {
   return a === b || registrableDomain(a) === registrableDomain(b);
 }
 
-function sanitizePageHeaders(url: string, raw: unknown): Record<string, string> | undefined {
+function sanitizePageHeaders(
+  url: string,
+  raw: unknown,
+  originHost: string | null,
+): Record<string, string> | undefined {
   if (!raw || typeof raw !== "object") return undefined;
   const targetHost = hostOf(url);
   if (!targetHost) return undefined;
@@ -148,14 +152,18 @@ function sanitizePageHeaders(url: string, raw: unknown): Record<string, string> 
     const clean = value.length > 2048 ? value.slice(0, 2048) : value;
     if (HOST_BOUND_HEADERS.has(low)) {
       const valueHost = hostOf(clean);
-      if (!valueHost || !sameSite(valueHost, targetHost)) continue;
+      if (!valueHost) continue;
+      const allowed =
+        sameSite(valueHost, targetHost) || (originHost != null && sameSite(valueHost, originHost));
+      if (!allowed) continue;
     }
     out[low] = clean;
   }
   return Object.keys(out).length ? out : undefined;
 }
 
-export function toPages(v: unknown): MangaPage[] {
+export function toPages(v: unknown, sourceUrl?: string): MangaPage[] {
+  const originHost = sourceUrl ? hostOf(sourceUrl) : null;
   const out: MangaPage[] = [];
   for (const item of arr(v)) {
     if (out.length >= 2_000) break;
@@ -170,15 +178,15 @@ export function toPages(v: unknown): MangaPage[] {
     }
     const url = typeof candidate === "string" ? candidate.trim() : "";
     if (!isSafeUrl(url)) continue;
-    const headers = sanitizePageHeaders(url, rawHeaders);
+    const headers = sanitizePageHeaders(url, rawHeaders, originHost);
     recordPageHeaders(url, headers);
     out.push(headers ? { url, headers } : { url });
   }
   return out;
 }
 
-export function toStrings(v: unknown): string[] {
-  return toPages(v).map((p) => p.url);
+export function toStrings(v: unknown, sourceUrl?: string): string[] {
+  return toPages(v, sourceUrl).map((p) => p.url);
 }
 
 export function toTags(v: unknown): MangaTag[] {

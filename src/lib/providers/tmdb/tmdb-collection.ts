@@ -13,11 +13,23 @@ export type TmdbCollection = {
 
 const cache = new Map<number, Promise<TmdbCollection | null>>();
 
+// A 429, a timeout or a revoked key resolves null. Memoizing that promise pins
+// the miss for the life of the process and no retry anywhere can escape it, so
+// only a hit is allowed to stay in the map.
 export function tmdbCollection(key: string, id: number): Promise<TmdbCollection | null> {
   if (!key || !Number.isFinite(id)) return Promise.resolve(null);
   const existing = cache.get(id);
   if (existing) return existing;
-  const promise = run(key, id);
+  const promise = run(key, id).then(
+    (v) => {
+      if (!v) cache.delete(id);
+      return v;
+    },
+    (err) => {
+      cache.delete(id);
+      throw err;
+    },
+  );
   cache.set(id, promise);
   return promise;
 }
@@ -82,7 +94,16 @@ export function tmdbSearchCollectionId(key: string, query: string): Promise<numb
   const ck = query.toLowerCase();
   const existing = searchCache.get(ck);
   if (existing) return existing;
-  const promise = runSearch(key, query);
+  const promise = runSearch(key, query).then(
+    (v) => {
+      if (v == null) searchCache.delete(ck);
+      return v;
+    },
+    (err) => {
+      searchCache.delete(ck);
+      throw err;
+    },
+  );
   searchCache.set(ck, promise);
   return promise;
 }

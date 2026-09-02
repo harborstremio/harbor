@@ -1,3 +1,4 @@
+import { t } from "@/lib/i18n";
 import { CANVAS_DEFAULT, CANVAS_MAX, CANVAS_MIN, MARKUP_CAP } from "./customization-types";
 
 const STRIP_RE = /<script|<\/script|javascript:|<iframe|<object|<embed/gi;
@@ -25,9 +26,9 @@ export function buildCanvasDoc(html: string, css: string): string {
   return (
     '<!doctype html><html><head><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
-    '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src https: data:; style-src \'unsafe-inline\'; font-src https: data:; media-src https:; base-uri \'none\'; form-action \'none\'">' +
+    "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src https: data:; style-src 'unsafe-inline'; font-src https: data:; media-src https:; base-uri 'none'; form-action 'none'\">" +
     '<base target="_blank"><style>html,body{margin:0;padding:0;color-scheme:dark}img,video{max-width:100%}' +
-    'html{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}body::-webkit-scrollbar,html::-webkit-scrollbar{width:8px;height:8px}body::-webkit-scrollbar-track,html::-webkit-scrollbar-track{background:transparent}body::-webkit-scrollbar-thumb,html::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:8px}body::-webkit-scrollbar-thumb:hover,html::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3)}' +
+    "html{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}body::-webkit-scrollbar,html::-webkit-scrollbar{width:8px;height:8px}body::-webkit-scrollbar-track,html::-webkit-scrollbar-track{background:transparent}body::-webkit-scrollbar-thumb,html::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:8px}body::-webkit-scrollbar-thumb:hover,html::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3)}" +
     userCss +
     "</style></head><body>" +
     userHtml +
@@ -38,8 +39,9 @@ export function buildCanvasDoc(html: string, css: string): string {
 export function buildCanvasIframe(html: string, css: string, height?: number): string {
   const doc = buildCanvasDoc(html, css).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
   const h = clampHeight(height);
+  const title = t("Custom profile").replace(/&/g, "&amp;").replace(/"/g, "&quot;");
   return (
-    '<iframe class="pw-canvas" title="Custom profile" sandbox="" referrerpolicy="no-referrer" loading="lazy" ' +
+    `<iframe class="pw-canvas" title="${title}" sandbox="" referrerpolicy="no-referrer" loading="lazy" ` +
     `style="width:100%;height:${h}px;border:0;border-radius:14px;display:block;background:transparent" ` +
     `srcdoc="${doc}"></iframe>`
   );

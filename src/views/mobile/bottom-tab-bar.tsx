@@ -1,12 +1,18 @@
-import { Bookmark, Home, MonitorSmartphone, Search, User } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Bookmark, Home, MonitorSmartphone, User } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
+import type { ComponentType } from "react";
 import { useProfiles } from "@/lib/profiles";
+import { useT } from "@/lib/i18n";
 import { useMobileRemote } from "./mobile-remote";
 import { useSheetLock } from "./mobile-sheet-lock";
 
 export type MobileTab = "remote" | "search" | "home" | "mystuff" | "profile";
 
-const TABS: Array<{ id: MobileTab; label: string; icon: LucideIcon }> = [
+const TABS: Array<{
+  id: MobileTab;
+  label: string;
+  icon: ComponentType<{ size?: number | string; className?: string; strokeWidth?: number }>;
+}> = [
   { id: "remote", label: "Remote", icon: MonitorSmartphone },
   { id: "search", label: "Search", icon: Search },
   { id: "home", label: "Home", icon: Home },
@@ -39,6 +45,7 @@ export function BottomTabBar({
   active: MobileTab;
   onSelect: (tab: MobileTab) => void;
 }) {
+  const translate = useT();
   const { snapshot } = useMobileRemote();
   const { activeProfile } = useProfiles();
   const { sheetOpen } = useSheetLock();
@@ -53,7 +60,7 @@ export function BottomTabBar({
       style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 10px)" }}
     >
       <style>{TAB_BAR_SLIDE_CSS}</style>
-      <div className="pointer-events-auto flex w-[min(400px,100%)] items-center justify-between rounded-[20px] border border-edge-soft/60 bg-elevated/80 px-2 py-2 shadow-[0_12px_34px_-10px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+      <div className="pointer-events-auto flex w-[min(400px,100%)] items-center justify-between rounded-xl border border-edge-soft/60 bg-elevated/80 px-2 py-2 shadow-[0_12px_34px_-10px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
         {TABS.map((t) => {
           const on = t.id === active;
           const Icon = t.icon;
@@ -61,7 +68,7 @@ export function BottomTabBar({
             <button
               key={t.id}
               type="button"
-              aria-label={t.label}
+              aria-label={translate(t.label)}
               aria-current={on ? "page" : undefined}
               onClick={() => onSelect(t.id)}
               className="flex flex-1 items-center justify-center"
@@ -81,11 +88,19 @@ export function BottomTabBar({
                     ) : pname ? (
                       pname.slice(0, 1).toUpperCase()
                     ) : (
-                      <User size={15} strokeWidth={2.1} className={on ? "text-canvas" : "text-ink-subtle"} />
+                      <User
+                        size={15}
+                        strokeWidth={2.1}
+                        className={on ? "text-canvas" : "text-ink-subtle"}
+                      />
                     )}
                   </span>
                 ) : (
-                  <Icon size={22} strokeWidth={2.1} className={on ? "text-canvas" : "text-ink-subtle"} />
+                  <Icon
+                    size={22}
+                    strokeWidth={2.1}
+                    className={on ? "text-canvas" : "text-ink-subtle"}
+                  />
                 )}
               </span>
             </button>

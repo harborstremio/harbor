@@ -3,6 +3,7 @@ const awards: Record<string, string> = {
   "to refresh the bundled dataset.": "для обновления встроенного набора данных.",
   "No data shipped for this award yet.": "Для этой премии пока нет данных.",
   "No winners match these filters.": "Нет победителей по этим фильтрам.",
+  "No match found": "Совпадений не найдено",
   "Clear filters": "Сбросить фильтры",
   "Search by recipient or title…": "Поиск по лауреату или названию…",
   "All years": "Все годы",

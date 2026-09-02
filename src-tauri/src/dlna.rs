@@ -32,7 +32,12 @@ fn classify_vendor(name: &str, model: &str, manufacturer: &str) -> DlnaVendor {
     if mf.contains("samsung") || n.contains("samsung") || mo.contains("samsung") {
         return DlnaVendor::Samsung;
     }
-    if mf.contains("lg") || mo.contains("webos") || n.contains("[lg]") || n.starts_with("lg ") || mo.starts_with("lg ") {
+    if mf.contains("lg")
+        || mo.contains("webos")
+        || n.contains("[lg]")
+        || n.starts_with("lg ")
+        || mo.starts_with("lg ")
+    {
         return DlnaVendor::LgWebos;
     }
     if mf.contains("sony")
@@ -47,7 +52,11 @@ fn classify_vendor(name: &str, model: &str, manufacturer: &str) -> DlnaVendor {
     if mf.contains("panasonic") || n.contains("viera") || mo.contains("viera") {
         return DlnaVendor::Panasonic;
     }
-    if mf.contains("hisense") || mo.contains("vidaa") || n.contains("vidaa") || n.contains("hisense") {
+    if mf.contains("hisense")
+        || mo.contains("vidaa")
+        || n.contains("vidaa")
+        || n.contains("hisense")
+    {
         return DlnaVendor::HisenseVidaa;
     }
     DlnaVendor::Other
@@ -323,7 +332,10 @@ fn is_renderer_st(st: &str) -> bool {
 
 #[tauri::command]
 pub fn lan_ip() -> Option<String> {
-    local_ipv4_interfaces().into_iter().next().map(|ip| ip.to_string())
+    local_ipv4_interfaces()
+        .into_iter()
+        .next()
+        .map(|ip| ip.to_string())
 }
 
 fn local_ipv4_interfaces() -> Vec<Ipv4Addr> {
@@ -373,14 +385,19 @@ async fn fetch_device(
         .connect_timeout(Duration::from_millis(800))
         .build()
         .map_err(|e| format!("client: {e}"))?;
-    let resp = client.get(location).send().await.map_err(|e| format!("desc get: {e}"))?;
+    let resp = client
+        .get(location)
+        .send()
+        .await
+        .map_err(|e| format!("desc get: {e}"))?;
     let xml = resp.text().await.map_err(|e| format!("desc body: {e}"))?;
     let name = extract_xml_tag(&xml, "friendlyName")
         .or_else(|| extract_xml_tag(&xml, "roomName"))
         .unwrap_or_else(|| "Media Renderer".into());
     let model = extract_xml_tag(&xml, "modelName");
     let manufacturer = extract_xml_tag(&xml, "manufacturer");
-    let control = extract_avtransport_control(&xml).ok_or_else(|| "no AVTransport service".to_string())?;
+    let control =
+        extract_avtransport_control(&xml).ok_or_else(|| "no AVTransport service".to_string())?;
     Ok((name, model, manufacturer, resolve_url(location, &control)))
 }
 
@@ -532,8 +549,12 @@ pub async fn status(control_url: String) -> Result<DlnaStatus, String> {
     let state_resp = soap_post(&control_url, "GetTransportInfo", &state_body)
         .await
         .unwrap_or_default();
-    let state = extract_xml_tag(&state_resp, "CurrentTransportState").unwrap_or_else(|| "UNKNOWN".into());
-    Ok(DlnaStatus { position_sec: pos, player_state: state })
+    let state =
+        extract_xml_tag(&state_resp, "CurrentTransportState").unwrap_or_else(|| "UNKNOWN".into());
+    Ok(DlnaStatus {
+        position_sec: pos,
+        player_state: state,
+    })
 }
 
 fn soap_envelope(action: &str, body: String) -> String {
@@ -591,7 +612,11 @@ fn pick_vendor_mime(vendor: DlnaVendor, is_live: bool) -> String {
 }
 
 fn build_didl(url: &str, title: &str, mime: &str, is_live: bool, vendor: DlnaVendor) -> String {
-    let class = if is_live { "object.item.videoItem.videoBroadcast" } else { "object.item.videoItem" };
+    let class = if is_live {
+        "object.item.videoItem.videoBroadcast"
+    } else {
+        "object.item.videoItem"
+    };
     let pn = match (vendor, is_live) {
         (DlnaVendor::SonyBravia, true) => "DLNA.ORG_PN=AVC_TS_HD_60_AC3_ISO;",
         (DlnaVendor::SonyBravia, false) => "DLNA.ORG_PN=AVC_MP4_MP_HD_AC3;",

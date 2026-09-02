@@ -6,6 +6,8 @@ export const IMG = "https://image.tmdb.org/t/p";
 
 const tmdbRequests = createRequestScheduler({ concurrency: 6 });
 
+const tmdbInflight = new Map<string, Promise<unknown>>();
+
 let tmdbLanguage = "";
 
 export function setTmdbLanguage(lang: string): void {
@@ -105,6 +107,18 @@ export async function get<T>(
   if (lang && !params.language) url.searchParams.set("language", lang);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   const target = url.toString();
+  const shared = tmdbInflight.get(target);
+  if (shared) return shared as Promise<T | null>;
+  const run = fetchWithRetry<T>(target, path);
+  tmdbInflight.set(target, run);
+  try {
+    return await run;
+  } finally {
+    tmdbInflight.delete(target);
+  }
+}
+
+async function fetchWithRetry<T>(target: string, path: string): Promise<T | null> {
   for (let attempt = 0; attempt < 4; attempt += 1) {
     try {
       const backoffMs = Math.min(2000, 250 * 2 ** attempt);

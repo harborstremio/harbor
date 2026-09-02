@@ -125,7 +125,7 @@ function GoToEpisode({ max, onGo }: { max: number; onGo: (n: number) => void }) 
         onChange={(e) => setV(e.target.value)}
         placeholder={t("Go to ep")}
         aria-label={t("Go to episode")}
-        className="h-8 w-[104px] rounded-lg border border-edge-soft bg-canvas px-2.5 text-[12px] text-ink outline-none transition-colors focus:border-ink-subtle"
+        className="h-8 w-[104px] rounded-lg bg-canvas px-2.5 text-[12px] text-ink outline-none ring-1 ring-inset ring-edge-soft transition-colors focus:ring-accent/50"
       />
     </form>
   );

@@ -34,8 +34,10 @@ import {
   type ActiveThemeId,
   type ThemePreset,
 } from "@/lib/theme";
+import { useT } from "@/lib/i18n";
 
 export function CustomThemesSection() {
+  const t = useT();
   const { settings, update } = useSettings();
   const [themes, setThemes] = useState<CustomTheme[]>(() => getCustomThemes());
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +47,31 @@ export function CustomThemesSection() {
   const [libraryTab, setLibraryTab] = useState<"library" | "community" | "mine">("library");
   const [libraryStoreTab, setLibraryStoreTab] = useState<StoreTab | undefined>(undefined);
   const [importedNotice, setImportedNotice] = useState<string | null>(null);
+  const browsingActivity = t("Browsing the theme library");
+  const localizeImportError = (message: string): string => {
+    const missingColor = /^This theme is missing a color \((.+)\)\.$/.exec(message);
+    if (missingColor) {
+      return t("This theme is missing a color ({color}).", { color: missingColor[1] });
+    }
+    switch (message) {
+      case "This file isn't a readable theme.":
+        return t("This file isn't a readable theme.");
+      case "This file isn't a Harbor theme.":
+        return t("This file isn't a Harbor theme.");
+      case "Theme is missing a name.":
+        return t("Theme is missing a name.");
+      case "This theme's preview colors look invalid.":
+        return t("This theme's preview colors look invalid.");
+      case "This theme is missing its colors.":
+        return t("This theme is missing its colors.");
+      case "This theme file is missing a name.":
+        return t("This theme file is missing a name.");
+      case "This theme file is missing its colors.":
+        return t("This theme file is missing its colors.");
+      default:
+        return message;
+    }
+  };
 
   useEffect(() => subscribeCustomThemes(() => setThemes(getCustomThemes())), []);
 
@@ -82,8 +109,8 @@ export function CustomThemesSection() {
 
   useEffect(() => {
     if (!libraryOpen || studioOpen) return;
-    return pushActivityHint({ details: "Browsing the theme library" });
-  }, [libraryOpen, studioOpen]);
+    return pushActivityHint({ details: browsingActivity });
+  }, [libraryOpen, studioOpen, browsingActivity]);
 
   const activeId = settings.theme.preset;
   const activeTheme = activeId === "custom" ? null : getThemeById(activeId);
@@ -122,7 +149,7 @@ export function CustomThemesSection() {
     try {
       const name = file.name.toLowerCase();
       if (name.endsWith(".zip") || file.type === "application/zip") {
-        setError("Zipped themes aren't supported yet. Drop the theme file directly.");
+        setError(t("Zipped themes aren't supported yet. Drop the theme file directly."));
         return;
       }
       const text = await file.text();
@@ -137,20 +164,24 @@ export function CustomThemesSection() {
           const first = foreign.themes[0];
           setImportedNotice(
             foreign.themes.length > 1
-              ? `${first.name} +${foreign.themes.length - 1} more (${foreign.format})`
-              : `${first.name} (${foreign.format})`,
+              ? t("{name} +{count} more ({format})", {
+                  name: first.name,
+                  count: foreign.themes.length - 1,
+                  format: foreign.format,
+                })
+              : t("{name} ({format})", { name: first.name, format: foreign.format }),
           );
           activateTheme(first.id, first.navCustomization);
           return;
         }
-        setError(result.error);
+        setError(localizeImportError(result.error));
         return;
       }
       saveCustomTheme(result.theme);
       setImportedNotice(result.theme.name);
       activateTheme(result.theme.id, result.theme.navCustomization);
     } catch {
-      setError("Could not read file");
+      setError(t("Could not read file"));
     }
   };
 
@@ -171,7 +202,11 @@ export function CustomThemesSection() {
   const remove = (id: string) => {
     const wasActive = settings.theme.preset === id;
     const image = wasActive
-      ? nextBackgroundImage(settings.theme.backgroundImage, getThemeById(id), getThemeById("cool-grey"))
+      ? nextBackgroundImage(
+          settings.theme.backgroundImage,
+          getThemeById(id),
+          getThemeById("cool-grey"),
+        )
       : null;
     removeCustomTheme(id);
     if (wasActive) {
@@ -238,15 +273,15 @@ export function CustomThemesSection() {
       />
 
       {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-danger/40 bg-danger/10 px-3.5 py-2.5 text-[12.5px] text-danger">
+        <div className="flex items-center gap-2 rounded-md border border-danger bg-danger/15 px-3.5 py-2.5 text-[12.5px] text-danger">
           <AlertCircle size={14} strokeWidth={2.2} />
           <span>{error}</span>
           <button
             type="button"
             onClick={() => setError(null)}
-            className="ms-auto rounded px-2 text-[11px] font-semibold uppercase tracking-wider opacity-70 hover:opacity-100"
+            className="ms-auto rounded px-2 text-[11.5px] font-semibold uppercase tracking-wider opacity-70 hover:opacity-100"
           >
-            Dismiss
+            {t("Dismiss")}
           </button>
         </div>
       )}

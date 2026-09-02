@@ -14,7 +14,12 @@ export function AnilistTrendingRow() {
         title={
           <span className="inline-flex items-center gap-2">
             {t("Trending on AniList")}
-            <PinHomeButton id="anilist:trending" source="anilist" name={t("Trending on AniList")} params={{ railKey: "trending" }} />
+            <PinHomeButton
+              id="anilist:trending"
+              source="anilist"
+              name="Trending on AniList"
+              params={{ railKey: "trending" }}
+            />
           </span>
         }
         scrollKey="anime:anilist-trending"
@@ -37,7 +42,12 @@ export function AnilistTopRow() {
         title={
           <span className="inline-flex items-center gap-2">
             {t("Top 100 on AniList")}
-            <PinHomeButton id="anilist:top100" source="anilist" name={t("Top 100 on AniList")} params={{ railKey: "top100" }} />
+            <PinHomeButton
+              id="anilist:top100"
+              source="anilist"
+              name="Top 100 on AniList"
+              params={{ railKey: "top100" }}
+            />
           </span>
         }
         scrollKey="anime:anilist-top"

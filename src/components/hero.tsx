@@ -1,15 +1,6 @@
 import { memo, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import {
-  Check,
-  ChevronRight,
-  Info,
-  Play,
-  Plus,
-  RotateCcw,
-  TrendingUp,
-  Volume2,
-  VolumeX,
-} from "lucide-react";
+import { Check, ChevronRight, Info, Plus, RotateCcw, TrendingUp, Volume2, VolumeX } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import tmdbIcon from "@/assets/addon-logos/tmdb.png";
 import traktIcon from "@/assets/trakt.svg";
@@ -297,7 +288,7 @@ export const Hero = memo(function Hero({
     <section
       ref={sectionRef}
       onClick={() => openMeta({ ...meta, logo: logo ?? meta.logo })}
-      className={`harbor-hero-stage group relative cursor-pointer overflow-hidden bg-canvas ${full ? "h-[78vh] min-h-[640px] rounded-none" : "h-[560px] rounded-[28px]"}`}
+      className={`harbor-hero-stage group relative cursor-pointer overflow-hidden bg-canvas ${full ? "h-[78vh] min-h-[640px] rounded-none" : "h-[560px] rounded-2xl"}`}
       style={{ isolation: "isolate" }}
     >
       {bg && loadBackdrop && (
@@ -379,22 +370,22 @@ export const Hero = memo(function Hero({
                 </span>
               </div>
               {rank.sources && rank.sources.length > 0 && (
-                <div className="pointer-events-none absolute left-0 top-full z-30 mt-2 w-max min-w-[210px] translate-y-1 rounded-xl border border-edge bg-elevated/95 p-3 opacity-0 shadow-[0_20px_50px_-16px_rgba(0,0,0,0.75)] backdrop-blur-xl transition-all duration-150 group-hover/rank:translate-y-0 group-hover/rank:opacity-100">
-                  <div className="mb-2 text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
+                <div className="pointer-events-none absolute left-0 top-full z-30 mt-2 w-max min-w-[232px] translate-y-1 rounded-md bg-elevated p-2.5 opacity-0 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] ring-1 ring-edge transition-[opacity,transform] duration-150 ease-out group-hover/rank:translate-y-0 group-hover/rank:opacity-100 motion-reduce:transition-none">
+                  <div className="px-1 pb-2 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
                     {t("Consensus ranking")}
                   </div>
-                  <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-col gap-1">
                     {rank.sources.map((s) => (
                       <div
                         key={s.label}
-                        className="flex items-center justify-between gap-8 text-[12.5px]"
+                        className="flex items-center justify-between gap-6 px-1 py-1.5"
                       >
-                        <span className="inline-flex items-center gap-2 text-ink-muted">
+                        <span className="inline-flex items-center gap-2 text-[12.5px] font-medium text-ink">
                           {SOURCE_ICON[s.label] && (
                             <img
                               src={SOURCE_ICON[s.label]}
                               alt=""
-                              className={`h-5 w-5 shrink-0 ${
+                              className={`h-[18px] w-[18px] shrink-0 ${
                                 ROUNDED_ICON.has(s.label)
                                   ? "rounded-full object-cover"
                                   : "object-contain"
@@ -403,11 +394,13 @@ export const Hero = memo(function Hero({
                           )}
                           {s.label}
                         </span>
-                        <span className="font-mono font-bold tabular-nums text-ink">#{s.rank}</span>
+                        <span className="text-[12px] font-semibold tabular-nums text-ink-muted">
+                          #{s.rank}
+                        </span>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-2.5 border-t border-edge-soft pt-2 text-[11px] leading-snug text-ink-subtle">
+                  <div className="px-1 pt-2.5 text-[11px] leading-snug text-ink-subtle">
                     {t("Blended across TMDB, Trakt, Simkl and Cinemeta.")}
                   </div>
                 </div>
@@ -456,7 +449,7 @@ export const Hero = memo(function Hero({
                 e.stopPropagation();
                 openMeta({ ...meta, logo: logo ?? meta.logo });
               }}
-              className={`flex h-12 items-center gap-2.5 ${actionRadius} bg-ink px-7 text-[15px] font-semibold text-canvas shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.65),inset_0_-1px_0_rgba(0,0,0,0.18)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]`}
+              className={`flex h-12 items-center gap-2.5 ${actionRadius} bg-ink px-7 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]`}
             >
               <Play size={18} fill="currentColor" />
               {t("Play")}
@@ -467,7 +460,7 @@ export const Hero = memo(function Hero({
                   e.stopPropagation();
                   openMeta({ ...meta, logo: logo ?? meta.logo });
                 }}
-                className={`flex h-12 items-center gap-2.5 ${actionRadius} border border-edge bg-canvas/55 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors duration-200 hover:border-ink-subtle hover:bg-canvas/75`}
+                className={`flex h-12 items-center gap-2.5 ${actionRadius} bg-canvas/80 px-6 text-[15px] font-medium text-ink transition-colors duration-200 hover:bg-canvas/95`}
               >
                 <Info size={18} strokeWidth={2} />
                 {t("More info")}
@@ -487,7 +480,7 @@ export const Hero = memo(function Hero({
                     videos: meta.videos,
                   });
                 }}
-                className={`flex h-12 items-center gap-2.5 ${actionRadius} border border-edge bg-canvas/55 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors duration-200 hover:border-ink-subtle hover:bg-canvas/75`}
+                className={`flex h-12 items-center gap-2.5 ${actionRadius} bg-canvas/80 px-6 text-[15px] font-medium text-ink transition-colors duration-200 hover:bg-canvas/95`}
               >
                 {inWatchlist ? (
                   <Check size={18} strokeWidth={2.4} />

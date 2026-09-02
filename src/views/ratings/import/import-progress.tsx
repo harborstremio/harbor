@@ -80,7 +80,7 @@ export function ImportProgressPanel({
         type="button"
         onClick={onCancel}
         disabled={cancelling}
-        className="inline-flex min-h-11 items-center justify-center self-start rounded-[10px] px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-surface disabled:opacity-50"
+        className="inline-flex min-h-11 items-center justify-center self-start rounded-md px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-surface disabled:opacity-50"
       >
         {cancelling ? t("Cancelling") : t("Cancel import")}
       </button>
@@ -148,14 +148,14 @@ export function ImportSummaryPanel({
         <button
           type="button"
           onClick={onDone}
-          className="inline-flex min-h-11 items-center rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
+          className="inline-flex min-h-11 items-center rounded-md bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
         >
           {t("Done")}
         </button>
         <button
           type="button"
           onClick={onAgain}
-          className="inline-flex min-h-11 items-center rounded-[10px] px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-surface"
+          className="inline-flex min-h-11 items-center rounded-md px-4 text-[14px] font-medium text-ink-muted transition-colors hover:bg-surface"
         >
           {t("Import from another source")}
         </button>

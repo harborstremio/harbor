@@ -6,6 +6,7 @@ import {
   handleExternalLinkBack,
   hasExternalLinkAlternateDestination,
   openExternalLinkInBrowser,
+  type ExternalLinkBrowserOpenError,
 } from "../src/lib/social/external-link-journey-controller.ts";
 import { resolveExternalLinkActionLayout } from "../src/lib/social/external-link-preference.ts";
 import { createLinkOutStore } from "../src/lib/social/link-out.ts";
@@ -75,7 +76,10 @@ test("opener rejection leaves the current journey open and releases its latch", 
   const openingRef = { current: false };
   let openerCalls = 0;
   let opening = false;
-  let error: string | null = "old error";
+  let error: ExternalLinkBrowserOpenError | null = {
+    code: "browser-open-failed",
+    detail: "old error",
+  };
   let closes = 0;
   const options = {
     journey,
@@ -110,7 +114,7 @@ test("opener rejection leaves the current journey open and releases its latch", 
   assert.equal(store.isCurrent(journey), true);
   assert.equal(opening, false);
   assert.equal(openingRef.current, false);
-  assert.equal(error, "browser unavailable");
+  assert.deepEqual(error, { code: "browser-open-failed", detail: "browser unavailable" });
 });
 
 test("stale opener settlement cannot mutate a newly generated journey", async () => {

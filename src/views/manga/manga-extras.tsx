@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Play } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { t, useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { resolveLogo } from "@/lib/logo";
+import { UiIcon } from "@/components/ui-icon";
+import { MalLogo } from "@/components/icons/mal-logo";
+import { jikanScore } from "@/lib/mal-rating";
 import { RailChevron } from "@/components/nav-arrow";
 import { mangaAdaptation, similarManga, type MangaAdaptation } from "@/lib/manga/related";
 import type { MangaChapter } from "@/lib/manga/api";
@@ -39,7 +44,10 @@ export function MangaAdaptationCard({
 }) {
   const { openMeta } = useView();
   const t = useT();
+  const { settings } = useSettings();
   const [adaptation, setAdaptation] = useState<MangaAdaptation | null>(null);
+  const [logo, setLogo] = useState<string | null>(null);
+  const [malScore, setMalScore] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,13 +60,59 @@ export function MangaAdaptationCard({
     };
   }, [title]);
 
+  const adaptationMalId = adaptation?.malId ?? null;
+
+  useEffect(() => {
+    let cancelled = false;
+    setMalScore(null);
+    if (!adaptationMalId) return;
+    void jikanScore(adaptationMalId)
+      .then((s) => {
+        if (!cancelled && s) setMalScore(s);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [adaptationMalId]);
+
+  const adaptationId = adaptation ? "anilist:" + adaptation.anilistId : null;
+  const adaptationName = adaptation?.title;
+  const adaptationKind = adaptation?.format === "MOVIE" ? "movie" : "series";
+  const adaptationPoster = adaptation?.cover;
+  const tmdbKey = settings.tmdbKey ?? "";
+
+  useEffect(() => {
+    let cancelled = false;
+    setLogo(null);
+    if (!adaptationId || !adaptationName) return;
+    void resolveLogo(
+      tmdbKey,
+      { id: adaptationId, type: adaptationKind, name: adaptationName, poster: adaptationPoster },
+      { preferOwn: true },
+    )
+      .then((url) => {
+        if (!cancelled && url) setLogo(url);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [adaptationId, adaptationName, adaptationKind, adaptationPoster, tmdbKey]);
+
   const coverage = info && chapters ? coverageOf(info, chapters) : null;
   if (!adaptation && !coverage) return null;
 
-  const bg =
-    adaptation?.banner && adaptation.banner !== heroBg
-      ? adaptation.banner
-      : (adaptation?.cover ?? adaptation?.banner);
+  const wideBg =
+    adaptation?.banner && adaptation.banner !== heroBg ? adaptation.banner : null;
+  const bg = wideBg ?? adaptation?.cover ?? adaptation?.banner;
+  const portrait = !wideBg && Boolean(adaptation?.cover);
+  const adaptationFacts = [
+    adaptation?.episodes ? t("{n} episodes", { n: adaptation.episodes }) : null,
+    adaptation?.year ? String(adaptation.year) : null,
+  ].filter((v): v is string => Boolean(v));
+  const shownScore =
+    malScore ?? (adaptation?.score != null ? (adaptation.score / 10).toFixed(1) : null);
   const open = () => {
     if (!adaptation) return;
     openMeta({
@@ -74,16 +128,31 @@ export function MangaAdaptationCard({
       <h2 className="text-[15px] font-semibold tracking-tight text-ink">{t("Anime Adaptation")}</h2>
       {adaptation ? (
         <div className="group relative overflow-hidden rounded-2xl ring-1 ring-edge-soft/60 transition-shadow duration-300 hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)] hover:ring-edge">
-          {bg && (
+          {bg && !portrait && (
             <img
               src={bg}
               alt=""
               draggable={false}
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-r from-canvas via-canvas/70 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-l from-canvas/85 to-transparent" />
+          {bg && portrait && (
+            <div className="pointer-events-none absolute inset-y-0 end-0 w-[42%] overflow-hidden">
+              <img
+                src={bg}
+                alt=""
+                draggable={false}
+                className="h-full w-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-canvas via-canvas/55 to-transparent" />
+            </div>
+          )}
+          {!portrait && (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-r from-canvas via-canvas/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-l from-canvas/85 to-transparent" />
+            </>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-canvas/85 to-transparent" />
           <div className="relative flex min-h-[190px] flex-col justify-end gap-6 p-6 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-col gap-3 sm:min-w-0 sm:flex-1">
@@ -91,9 +160,39 @@ export function MangaAdaptationCard({
                 <span className="w-fit rounded-full bg-elevated/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink-muted ring-1 ring-edge-soft/60 backdrop-blur-sm">
                   {formatLabel(adaptation.format)}
                 </span>
-                <h3 className="text-[22px] font-semibold leading-tight tracking-tight text-ink">
-                  {adaptation.title}
-                </h3>
+                {logo ? (
+                  <img
+                    src={logo}
+                    alt={adaptation.title}
+                    draggable={false}
+                    onError={() => setLogo(null)}
+                    className="max-h-[54px] w-auto max-w-[260px] object-contain object-left drop-shadow-[0_3px_14px_rgba(0,0,0,0.55)]"
+                  />
+                ) : (
+                  <h3 className="text-[22px] font-semibold leading-tight tracking-tight text-ink">
+                    {adaptation.title}
+                  </h3>
+                )}
+                {(shownScore != null || adaptationFacts.length > 0) && (
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-ink-subtle">
+                    {shownScore != null && (
+                      <span className="inline-flex items-center gap-1.5 font-semibold text-ink-muted tabular-nums">
+                        {malScore ? (
+                          <MalLogo className="h-[11px] w-auto text-ink-muted" />
+                        ) : (
+                          <UiIcon name="rate" className="h-3 w-3 text-accent" />
+                        )}
+                        {shownScore}
+                      </span>
+                    )}
+                    {adaptationFacts.map((fact, i) => (
+                      <span key={fact} className="inline-flex items-center gap-2">
+                        {(i > 0 || shownScore != null) && <span aria-hidden>&middot;</span>}
+                        {fact}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <button
                 type="button"
@@ -154,7 +253,7 @@ export function MangaRecommendedRail({
       <div className="relative">
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex gap-4 overflow-x-auto pt-2 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           style={{ scrollSnapType: "x proximity" }}
         >
           {items === null

@@ -1,5 +1,6 @@
 import { AlertTriangle, Check, ExternalLink, Eye, Key, Lock } from "lucide-react";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useKnobAnim } from "@/lib/knob-anim";
 import { openUrl } from "@/lib/window";
 import { sourceTranslationKey, useT } from "@/lib/i18n";
 import { HoverPreviewCard } from "./setting-preview";
@@ -19,8 +20,7 @@ export type SectionId =
   | "streamFilters"
   | "p2p"
   | "language"
-  | "subSources"
-  | "autoSync"
+  | "subtitles"
   | "player"
   | "mpv"
   | "anime"
@@ -35,7 +35,10 @@ export type SectionId =
   | "bug"
   | "support"
   | "remotes"
+  | "tv"
   | "storage"
+  | "trackers"
+  | "updates"
   | "advanced";
 
 export const SettingsActiveContext = createContext<{ setActive: (s: SectionId) => void } | null>(
@@ -71,7 +74,7 @@ export function settingsAnchor(title: string): string {
 
 export function Section({
   title,
-  subtitle,
+  subtitle: _subtitle,
   newId,
   bare,
   children,
@@ -85,19 +88,12 @@ export function Section({
   return (
     <section
       id={settingsAnchor(title)}
-      className={
-        bare
-          ? "scroll-mt-28"
-          : "scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
-      }
+      className={bare ? "scroll-mt-28" : "scroll-mt-28 flex flex-col gap-2"}
     >
       {!bare && (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">{title}</h2>
-            {newId && <NewBadge id={newId} />}
-          </div>
-          {subtitle && <p className="text-[13.5px] leading-relaxed text-ink-muted">{subtitle}</p>}
+        <div className="flex items-center gap-2 px-1 pb-0.5">
+          <h2 className="text-[13px] font-semibold tracking-tight text-ink">{title}</h2>
+          {newId && <NewBadge id={newId} />}
         </div>
       )}
       {children}
@@ -115,6 +111,7 @@ export function KeyField({
   help,
   iconSrc,
   iconBg,
+  iconNode,
   headerExtra,
   badge,
 }: {
@@ -127,6 +124,7 @@ export function KeyField({
   help: React.ReactNode;
   iconSrc?: string;
   iconBg?: string;
+  iconNode?: React.ReactNode;
   headerExtra?: React.ReactNode;
   badge?: string;
 }) {
@@ -163,11 +161,11 @@ export function KeyField({
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <label className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+          <label className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
             {label}
           </label>
           {badge && (
-            <span className="rounded-full bg-accent/15 px-2 py-[3px] text-[9.5px] font-semibold uppercase tracking-wider text-accent">
+            <span className="rounded-full bg-accent-soft px-2 py-[3px] text-[9.5px] font-semibold uppercase tracking-wider text-accent">
               {badge}
             </span>
           )}
@@ -175,21 +173,21 @@ export function KeyField({
         <div className="flex items-center gap-3">
           {headerExtra}
           {value.length > 0 && !showSave && (
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-accent transition-colors">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_6px_rgba(0,200,140,0.5)]" />
+            <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-ink-subtle transition-colors">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
               {saved ? t("Saved") : t("Active")}
             </span>
           )}
         </div>
       </div>
       <div
-        className={`flex h-14 items-center gap-3 rounded-2xl border bg-elevated px-4 transition-all ${
-          focused
-            ? "border-ink shadow-[0_0_0_3px_rgba(255,255,255,0.04)]"
-            : "border-edge hover:border-edge"
+        className={`flex h-14 items-center gap-3 rounded-md px-4 transition-colors ${
+          focused ? "bg-raised" : "bg-elevated"
         }`}
       >
-        {iconSrc ? (
+        {iconNode ? (
+          iconNode
+        ) : iconSrc ? (
           iconBg ? (
             <span
               className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md p-1"
@@ -211,7 +209,7 @@ export function KeyField({
             />
           )
         ) : (
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-canvas text-ink-subtle ring-1 ring-edge-soft">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-canvas text-ink-subtle">
             <Key size={14} />
           </span>
         )}
@@ -240,7 +238,7 @@ export function KeyField({
             type="button"
             onClick={() => setReveal((v) => !v)}
             aria-label={reveal ? t("Hide") : t("Show")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-canvas/40 hover:text-ink"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-canvas hover:text-ink"
           >
             {reveal ? (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -282,14 +280,14 @@ export function KeyField({
             type="button"
             onClick={onSave}
             disabled={!showSave && !saved}
-            className={`relative flex h-10 items-center justify-center overflow-hidden rounded-xl px-4 text-[13.5px] font-semibold transition-all ${
+            className={`relative flex h-10 items-center justify-center overflow-hidden rounded-md px-4 text-[13.5px] font-semibold transition ${
               saved
-                ? "bg-accent/15 text-accent"
+                ? "bg-accent-soft text-accent"
                 : "bg-ink text-canvas hover:scale-[1.02] active:scale-[0.97]"
             }`}
           >
             <span
-              className={`flex items-center gap-1.5 transition-all ${
+              className={`flex items-center gap-1.5 transition ${
                 saved ? "translate-y-0 opacity-100" : "absolute translate-y-3 opacity-0"
               }`}
             >
@@ -297,7 +295,7 @@ export function KeyField({
               {t("Saved")}
             </span>
             <span
-              className={`flex items-center transition-all ${
+              className={`flex items-center transition ${
                 saved ? "absolute -translate-y-3 opacity-0" : "translate-y-0 opacity-100"
               }`}
             >
@@ -355,6 +353,7 @@ export function ToggleRow({
     },
     [],
   );
+  const knobAnim = useKnobAnim(effective);
   return (
     <button
       ref={btnRef}
@@ -364,10 +363,8 @@ export function ToggleRow({
       onFocus={openPreview}
       onBlur={closePreview}
       disabled={locked}
-      className={`relative flex items-center justify-between gap-4 rounded-xl border bg-canvas/40 px-4 py-3 text-start transition-colors ${
-        locked
-          ? "cursor-not-allowed border-edge-soft/40 opacity-60"
-          : "border-edge-soft hover:border-edge"
+      className={`group relative flex w-full items-center gap-4 rounded-md px-4 py-3.5 text-start transition-colors ${
+        locked ? "cursor-not-allowed bg-elevated opacity-60" : "bg-elevated hover:bg-raised"
       }`}
     >
       {preview && (
@@ -375,8 +372,8 @@ export function ToggleRow({
           {preview}
         </HoverPreviewCard>
       )}
-      <div className="flex min-w-0 flex-1 items-center gap-3.5">
-        <span className={`relative ${locked ? "saturate-50 opacity-70" : ""}`}>
+      {leading && (
+        <span className={`relative shrink-0 ${locked ? "saturate-50 opacity-70" : ""}`}>
           {leading}
           {locked && (
             <span className="absolute -bottom-1 -end-1 flex h-4 w-4 items-center justify-center rounded-full bg-canvas ring-1 ring-edge text-ink-subtle">
@@ -384,47 +381,48 @@ export function ToggleRow({
             </span>
           )}
         </span>
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="flex items-center gap-2 text-[14px] font-medium text-ink">
-            {label}
-            {newId && <NewBadge id={newId} />}
-          </span>
-          {subText && (
-            <span
-              className={`text-[12.5px] ${
-                lockReason ? "text-accent/85" : note ? "text-ink-muted" : "text-ink-subtle"
-              }`}
-            >
-              {subText}
-            </span>
+      )}
+      <span className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="flex flex-wrap items-center gap-2 text-[13.5px] font-medium leading-snug text-ink">
+          {label}
+          {newId && <NewBadge id={newId} />}
+          {locked && !leading && (
+            <Lock size={12} strokeWidth={2.4} className="shrink-0 text-ink-subtle" />
           )}
-          {warn && (
-            <span className="mt-1 flex items-start gap-1.5 text-[12.5px] text-danger">
-              <AlertTriangle size={13} strokeWidth={2.4} className="mt-[2px] shrink-0" />
-              {warn}
-            </span>
-          )}
-        </div>
-      </div>
-      <span className="flex shrink-0 items-center gap-2.5">
-        {preview && (
-          <Eye
-            size={13}
-            className={`transition-colors ${hover ? "text-accent" : "text-ink-subtle/55"}`}
-          />
-        )}
-        <span
-          aria-hidden
-          className={`relative h-6 w-10 rounded-full transition-colors ${
-            effective ? "bg-ink" : "bg-edge"
-          }`}
-        >
-          <span
-            className={`absolute start-[2px] top-0.5 h-5 w-5 rounded-full bg-canvas transition-transform ${
-              effective ? "translate-x-4 rtl:-translate-x-4" : "translate-x-0"
-            }`}
-          />
         </span>
+        {subText && (
+          <span
+            className={`max-w-[70ch] text-[12.5px] leading-relaxed ${
+              lockReason ? "text-accent" : note ? "text-ink-muted" : "text-ink-subtle"
+            }`}
+          >
+            {subText}
+          </span>
+        )}
+        {warn && (
+          <span className="flex max-w-[70ch] items-start gap-1.5 text-[12.5px] text-danger">
+            <AlertTriangle size={14} strokeWidth={2.4} className="mt-[2px] shrink-0" />
+            {warn}
+          </span>
+        )}
+      </span>
+      {preview && (
+        <Eye
+          size={14}
+          className={`shrink-0 transition-colors ${hover ? "text-accent" : "text-ink-subtle/55"}`}
+        />
+      )}
+      <span
+        aria-hidden
+        className={`relative h-6 w-10 shrink-0 rounded-full transition-colors ${
+          effective ? "bg-ink" : "bg-edge"
+        }`}
+      >
+        <span
+          className={`absolute start-[2px] top-0.5 h-5 w-5 rounded-full bg-canvas ${
+            effective ? "translate-x-4 rtl:-translate-x-4" : "translate-x-0"
+          } ${knobAnim}`}
+        />
       </span>
     </button>
   );
@@ -444,17 +442,86 @@ export function Segmented<T extends string>({
   sub?: string;
 }) {
   const t = useT();
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const thumbRef = useRef<HTMLSpanElement | null>(null);
+  const prevIndex = useRef(-1);
+  const activeIndex = options.findIndex((o) => o.value === value);
+
+  useLayoutEffect(() => {
+    const thumb = thumbRef.current;
+    const to = btnRefs.current[activeIndex];
+    if (!thumb || !to) return;
+    const place = (el: HTMLButtonElement) => {
+      thumb.style.left = `${el.offsetLeft}px`;
+      thumb.style.top = `${el.offsetTop}px`;
+      thumb.style.width = `${el.offsetWidth}px`;
+      thumb.style.height = `${el.offsetHeight}px`;
+      thumb.style.opacity = "1";
+    };
+    const from = prevIndex.current >= 0 ? btnRefs.current[prevIndex.current] : null;
+    prevIndex.current = activeIndex;
+    place(to);
+    if (!from || from === to) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    if (from.offsetTop === to.offsetTop) {
+      const edge = Math.min(from.offsetLeft, to.offsetLeft);
+      const far = Math.max(from.offsetLeft + from.offsetWidth, to.offsetLeft + to.offsetWidth);
+      thumb.animate(
+        [
+          { left: `${from.offsetLeft}px`, width: `${from.offsetWidth}px` },
+          { left: `${edge}px`, width: `${far - edge}px`, offset: 0.5 },
+          { left: `${to.offsetLeft}px`, width: `${to.offsetWidth}px` },
+        ],
+        { duration: 420, easing: "ease-in-out" },
+      );
+    } else {
+      thumb.animate(
+        [
+          { left: `${from.offsetLeft}px`, top: `${from.offsetTop}px`, width: `${from.offsetWidth}px` },
+          { left: `${to.offsetLeft}px`, top: `${to.offsetTop}px`, width: `${to.offsetWidth}px` },
+        ],
+        { duration: 320, easing: "ease-in-out" },
+      );
+    }
+  }, [activeIndex, options.length]);
+
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      const thumb = thumbRef.current;
+      const el = btnRefs.current[activeIndex];
+      if (!thumb || !el) return;
+      thumb.style.left = `${el.offsetLeft}px`;
+      thumb.style.top = `${el.offsetTop}px`;
+      thumb.style.width = `${el.offsetWidth}px`;
+      thumb.style.height = `${el.offsetHeight}px`;
+    });
+    ro.observe(wrap);
+    return () => ro.disconnect();
+  }, [activeIndex]);
+
   const control = (
-    <div className="flex w-fit flex-wrap gap-1 rounded-2xl bg-elevated/40 p-1 ring-1 ring-edge-soft/60">
-      {options.map((o) => (
+    <div
+      ref={wrapRef}
+      className="relative flex w-fit flex-wrap gap-0.5 rounded-md bg-canvas p-1"
+    >
+      <span
+        ref={thumbRef}
+        aria-hidden
+        className="pointer-events-none absolute rounded-[4px] bg-ink opacity-0"
+      />
+      {options.map((o, i) => (
         <button
           key={o.value}
+          ref={(el) => {
+            btnRefs.current[i] = el;
+          }}
           type="button"
           onClick={() => onChange(o.value)}
-          className={`rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors ${
-            value === o.value
-              ? "bg-ink text-canvas"
-              : "text-ink-muted hover:bg-raised hover:text-ink"
+          className={`relative z-10 rounded-[4px] px-4 py-2 text-[12.5px] font-bold tracking-[0.04em] transition-colors duration-200 ${
+            value === o.value ? "text-canvas" : "text-ink-subtle hover:text-ink"
           }`}
         >
           {t(o.label)}
@@ -466,7 +533,7 @@ export function Segmented<T extends string>({
   return (
     <div className="flex flex-col gap-1.5">
       {label && <span className="text-[13px] font-medium text-ink">{label}</span>}
-      {sub && <span className="max-w-[62ch] text-[12px] leading-snug text-ink-subtle">{sub}</span>}
+      {sub && <span className="max-w-[62ch] text-[12.5px] leading-snug text-ink-subtle">{sub}</span>}
       {control}
     </div>
   );

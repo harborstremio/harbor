@@ -1,5 +1,5 @@
 import { userAddons, type Addon } from "@/lib/addons";
-import { fetchManifestAt, loadInstalled } from "@/lib/addon-store";
+import { fetchManifestAt, loadInstalled, type InstalledAddon } from "@/lib/addon-store";
 import { dlog } from "@/lib/debug";
 import { SUBTITLE_PROVIDER_TIMEOUT_MS, withSubtitleTimeout } from "./autoload";
 
@@ -16,7 +16,32 @@ function hasSubtitleResource(a: Addon): boolean {
   return hasSubtitles;
 }
 
-export async function gatherSubtitleAddons(authKey: string | null): Promise<Addon[]> {
+type CachedSubtitleAddons = { key: string; at: number; promise: Promise<Addon[]> };
+
+const ADDON_CACHE_TTL_MS = 60_000;
+let cachedSubtitleAddons: CachedSubtitleAddons | null = null;
+
+export function gatherSubtitleAddons(authKey: string | null): Promise<Addon[]> {
+  const localInstalled = loadInstalled();
+  const key = `${authKey ?? ""}|${localInstalled
+    .map((l) => l.transportUrl)
+    .sort()
+    .join("|")}`;
+  const now = Date.now();
+  const hit = cachedSubtitleAddons;
+  if (hit && hit.key === key && now - hit.at < ADDON_CACHE_TTL_MS) return hit.promise;
+  const promise = collectSubtitleAddons(authKey, localInstalled);
+  cachedSubtitleAddons = { key, at: now, promise };
+  void promise.catch(() => {
+    if (cachedSubtitleAddons?.promise === promise) cachedSubtitleAddons = null;
+  });
+  return promise;
+}
+
+async function collectSubtitleAddons(
+  authKey: string | null,
+  localInstalled: InstalledAddon[],
+): Promise<Addon[]> {
   dlog(`[addon-source] === GATHERING SUBTITLE ADDONS ===`);
   dlog(`[addon-source] Auth key present: ${!!authKey}`);
   
@@ -31,7 +56,6 @@ export async function gatherSubtitleAddons(authKey: string | null): Promise<Addo
     dlog(`[addon-source] Cloud addon names: ${cloud.map(a => a.manifest.name).join(', ')}`);
   }
   
-  const localInstalled = loadInstalled();
   dlog(`[addon-source] Total local installed addons: ${localInstalled.length}`);
   if (localInstalled.length > 0) {
     dlog(`[addon-source] Local installed names: ${localInstalled.map(l => l.manifest?.name || 'no-name').join(', ')}`);

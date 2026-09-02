@@ -1,4 +1,5 @@
-import { SlidersHorizontal, X } from "lucide-react";
+import { X } from "lucide-react";
+import { UiIcon } from "@/components/ui-icon";
 import type { TrackInfo } from "@/lib/player/bridge";
 import { useT } from "@/lib/i18n";
 import { useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
@@ -63,7 +64,7 @@ export function MenuHeader(p: Props) {
               aria-label={tr("Subtitle appearance")}
               className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-raised hover:text-ink"
             >
-              <SlidersHorizontal size={18} strokeWidth={2} />
+              <UiIcon name="customize-subtitles" className="h-[18px] w-[18px]" />
             </button>
           </HoverTooltip>
         )}

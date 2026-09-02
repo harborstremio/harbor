@@ -59,7 +59,7 @@ export type PendingOffer = { residualSec: number; stepSec: number; pCorrect: num
 export function makeTauriDriftPorts(
   mediaUrl: string,
   headers: Record<string, string> | undefined,
-  opts: { enableAsr?: boolean; mapSpec?: string } = {},
+  opts: { mapSpec?: string } = {},
 ): DriftPorts {
   const invokePort = async <T>(cmd: string, args: Record<string, unknown>): Promise<T> => {
     const core = await import("@tauri-apps/api/core");
@@ -68,19 +68,15 @@ export function makeTauriDriftPorts(
   const mapSpec = opts.mapSpec;
   const ports: DriftPorts = {
     sampleSpeech: (startSec, lenSec) =>
-      invokePort<Interval[]>("vad_speech_window", { url: mediaUrl, headers, startSec, lenSec, mapSpec }),
-  };
-  if (opts.enableAsr) {
-    ports.confirmAsr = (startSec, lenSec, cues, candidateResidualSec) =>
-      invokePort<AsrConfirm | null>("asr_confirm_window", {
+      invokePort<Interval[]>("vad_speech_window", {
         url: mediaUrl,
         headers,
         startSec,
         lenSec,
-        cues: cues.map((c) => [c.start, c.end, c.text]),
-        candidateResidualSec,
         mapSpec,
-      });
-  }
+      }),
+  };
+  // Lexical drift confirmation stays disabled until a native command can verify
+  // the selected audio and subtitle languages before comparing their words.
   return ports;
 }

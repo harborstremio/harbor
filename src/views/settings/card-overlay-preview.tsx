@@ -12,9 +12,9 @@ export function CardOverlayPreview() {
   const ribbonSide = settings.top10RibbonSide;
   const markCorner = ribbonSide === "left" ? "end-1.5" : "start-1.5";
   return (
-    <div className="mb-5 flex flex-col items-center gap-2 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
+    <div className="mb-5 flex flex-col items-center gap-2 rounded-md border border-edge-soft bg-canvas/40 p-5">
       <div
-        className="relative w-32 shrink-0 overflow-hidden rounded-xl ring-1 ring-edge-soft"
+        className="relative w-32 shrink-0 overflow-hidden rounded-md ring-1 ring-edge-soft"
         style={{ aspectRatio: "2 / 3" }}
       >
         <img

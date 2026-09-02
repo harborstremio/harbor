@@ -4,12 +4,15 @@ import type { SubtitleLoadMetadata } from "@/lib/subtitles/types";
 export type SubTrack = {
   id: string;
   url: string;
+  originalUrl?: string;
   lang?: string;
   title?: string;
   external: boolean;
   cues: SubCue[] | null;
   loading: boolean;
+  loadingPromise?: Promise<boolean>;
   metadata?: SubtitleLoadMetadata;
+  cleanup?: () => void;
 };
 
 export type AudioTrackList = {

@@ -1,7 +1,7 @@
 const profileFill: Record<string, string> = {
-  "General": "Общие",
-  "Look": "Оформление",
-  "optional": "необязательно",
+  General: "Общие",
+  Look: "Оформление",
+  optional: "необязательно",
   "Your name and the details shown at the top of your profile.":
     "Ваше имя и данные, которые показываются вверху профиля.",
   "Your avatar, banner, and how the whole profile is styled.":
@@ -219,8 +219,6 @@ const profileFill: Record<string, string> = {
   "Add background": "Добавить фон",
   "In a watch party": "На совместном просмотре",
   "{count} aboard": "{count} на борту",
-  "Paused on ": "На паузе ",
-  "Watching ": "Смотрит ",
   something: "что-то",
   Share: "Поделиться",
   "Share profile": "Поделиться профилем",

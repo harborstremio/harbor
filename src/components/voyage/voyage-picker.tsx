@@ -1,12 +1,15 @@
 import { Dices, Flag, Undo2 } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { chooseHeading, endVoyage, metaById, rerollHeadings, undoPick } from "@/lib/voyage/store";
 import type { Voyage } from "@/lib/voyage/types";
 import { PortCard } from "./port-card";
 
 export function VoyagePicker({ voyage }: { voyage: Voyage }) {
   const t = useT();
+  const { settings } = useSettings();
+  const tmdbKey = settings.tmdbKey ?? "";
   const headings = voyage.headingIds
     .map((id) => metaById(voyage, id))
     .filter((m): m is Meta => !!m);
@@ -30,7 +33,7 @@ export function VoyagePicker({ voyage }: { voyage: Voyage }) {
             meta={meta}
             index={i}
             state="heading"
-            onClick={() => chooseHeading(meta.id)}
+            onClick={() => chooseHeading(meta.id, tmdbKey)}
           />
         ))}
       </div>
@@ -47,7 +50,7 @@ export function VoyagePicker({ voyage }: { voyage: Voyage }) {
           {picked > 0 && (
             <button
               type="button"
-              onClick={undoPick}
+              onClick={() => undoPick(tmdbKey)}
               className="flex h-8 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[12px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
             >
               <Undo2 size={13} strokeWidth={2.2} /> {t("Undo")}
@@ -55,7 +58,7 @@ export function VoyagePicker({ voyage }: { voyage: Voyage }) {
           )}
           <button
             type="button"
-            onClick={rerollHeadings}
+            onClick={() => rerollHeadings(tmdbKey)}
             className="flex h-8 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[12px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
           >
             <Dices size={13} strokeWidth={2.2} /> {t("Show me 3 others")}

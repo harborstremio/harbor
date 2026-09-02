@@ -29,7 +29,7 @@ import {
   type SubtitleContextDetails,
   type ViewSummonable,
 } from "@/lib/context-menu";
-import { useT } from "@/lib/i18n";
+import { t as translate, useT } from "@/lib/i18n";
 import { usePlayerActions } from "@/lib/player-actions";
 import { useTogether } from "@/lib/together/provider";
 import type { ParticipantLocation } from "@/lib/together/protocol";
@@ -159,7 +159,7 @@ export function ContextMenu() {
       const view = topKindToView(topKind);
       if (view) {
         e.preventDefault();
-        open(e, { kind: "view", view, label: VIEW_LABELS[view] });
+        open(e, { kind: "view", view, label: translate(VIEW_LABELS[view]) });
       }
     };
     document.addEventListener("contextmenu", handler);
@@ -190,7 +190,7 @@ export function ContextMenu() {
       <Item
         key="go-to-host"
         icon={<Navigation size={14} strokeWidth={2} />}
-        label="Go to host"
+        label={t("Go to host")}
         onClick={goToHost}
         accent
       />,
@@ -233,7 +233,7 @@ export function ContextMenu() {
         <Item
           key="details"
           icon={<Info size={14} strokeWidth={2} />}
-          label="View details"
+          label={t("View details")}
           onClick={handleDetails}
         />,
       );
@@ -248,7 +248,7 @@ export function ContextMenu() {
             <Bookmark size={14} strokeWidth={2} />
           )
         }
-        label={isWatchlisted ? "In watchlist" : "Add to watchlist"}
+        label={isWatchlisted ? t("In watchlist") : t("Add to watchlist")}
         onClick={handleWatchlist}
         accent={isWatchlisted}
       />,
@@ -257,7 +257,7 @@ export function ContextMenu() {
       <Item
         key="favorite"
         icon={<Heart size={14} strokeWidth={2} fill={isFav ? "currentColor" : "none"} />}
-        label={isFav ? "Favorited" : "Favorite"}
+        label={isFav ? t("Favorited") : t("Favorite")}
         onClick={() => {
           toggleFavorite({
             id: meta.id,
@@ -291,7 +291,7 @@ export function ContextMenu() {
         <Item
           key="auto-download"
           icon={<ArrowDownToLine size={14} strokeWidth={2} />}
-          label={isAutoDl ? "Auto-downloading" : "Auto-download new episodes"}
+          label={isAutoDl ? t("Auto-downloading") : t("Auto-download new episodes")}
           onClick={() => {
             toggleAutoDownload(meta);
             close();
@@ -313,10 +313,10 @@ export function ContextMenu() {
           }
           label={
             isWatched
-              ? "Mark as unwatched"
+              ? t("Mark as unwatched")
               : meta.type === "series"
-                ? "Mark all watched"
-                : "Mark as watched"
+                ? t("Mark all watched")
+                : t("Mark as watched")
           }
           onClick={() => {
             if (isWatched) void unmarkMetaWatched(meta, targetImdb);
@@ -332,7 +332,7 @@ export function ContextMenu() {
         <Item
           key="bring"
           icon={<UserPlus size={14} strokeWidth={2} />}
-          label="Bring friends here"
+          label={t("Bring friends here")}
           onClick={handleBring}
         />,
       );
@@ -343,7 +343,7 @@ export function ContextMenu() {
         <Item
           key="fullscreen"
           icon={<Maximize size={14} strokeWidth={2} />}
-          label="Full screen"
+          label={t("Full screen")}
           onClick={() => {
             playerActions.toggleFullscreen();
             close();
@@ -355,7 +355,7 @@ export function ContextMenu() {
           <Item
             key="download"
             icon={<Download size={14} strokeWidth={2} />}
-            label="Download Video"
+            label={t("Download Video")}
             onClick={() => {
               playerActions.download();
               close();
@@ -433,7 +433,7 @@ export function ContextMenu() {
         <Item
           key="bring-page"
           icon={<UserPlus size={14} strokeWidth={2} />}
-          label={`Bring friends to ${label}`}
+          label={t("Bring friends to {label}", { label })}
           onClick={handleBringPage}
         />,
       );
@@ -449,7 +449,7 @@ export function ContextMenu() {
         <Item
           key="bring-addon"
           icon={<UserPlus size={14} strokeWidth={2} />}
-          label={`Bring friends to ${label}`}
+          label={t("Bring friends to {label}", { label })}
           onClick={handleBringAddon}
         />,
       );
@@ -461,7 +461,7 @@ export function ContextMenu() {
       <Item
         key="set-title-backdrop"
         icon={<Wallpaper size={14} strokeWidth={2} />}
-        label="Set as a backdrop"
+        label={t("Set as a backdrop")}
         onClick={() => {
           setTitleBackdrop(metaId, url);
           close();
@@ -474,7 +474,7 @@ export function ContextMenu() {
         <Item
           key="reset-title-backdrop"
           icon={<RotateCcw size={14} strokeWidth={2} />}
-          label="Reset to original"
+          label={t("Reset to original")}
           onClick={() => {
             clearTitleBackdrop(metaId);
             close();
@@ -538,14 +538,14 @@ export function ContextMenu() {
       <Item
         key="copy"
         icon={<Copy size={14} strokeWidth={2} />}
-        label="Copy"
+        label={t("Copy")}
         onClick={handleCopy}
         disabled={!canCopy}
       />,
       <Item
         key="paste"
         icon={<ClipboardPaste size={14} strokeWidth={2} />}
-        label="Paste"
+        label={t("Paste")}
         onClick={handlePaste}
         disabled={!canPaste}
       />,
@@ -651,7 +651,7 @@ function SubtitleDetailsCard({
           </p>
           <ul className="mt-1 space-y-0.5 text-[11px] leading-4 text-ink-muted">
             {details.matchReasons.slice(0, 4).map((reason) => (
-              <li key={reason}>• {t(reason)}</li>
+              <li key={reason}>• {reason}</li>
             ))}
           </ul>
         </div>

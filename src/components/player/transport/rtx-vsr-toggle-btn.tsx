@@ -34,7 +34,7 @@ export function RtxVsrToggleStremioBtn({ meta }: { meta?: Meta }) {
   );
 }
 
-export function RtxVsrToggleBigBtn({ meta }: { meta?: Meta }) {
+export function RtxVsrToggleBigBtn({ meta, iconUrl }: { meta?: Meta; iconUrl?: string }) {
   const t = useT();
   const { active, disabled, toggle } = useRtxVsr(meta);
   if (!isWindowsDesktop()) return null;
@@ -45,6 +45,7 @@ export function RtxVsrToggleBigBtn({ meta }: { meta?: Meta }) {
       tooltip={t("RTX Video Super Resolution")}
       active={active}
       disabled={disabled}
+      iconUrl={iconUrl}
     >
       <ImageUp size={22} strokeWidth={2} />
     </BigButton>

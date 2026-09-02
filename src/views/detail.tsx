@@ -7,7 +7,8 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { Check, HardDrive, Heart, Layers, Pencil, Play, Plus, RotateCcw } from "lucide-react";
+import { Check, Plus, RotateCcw } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import {
   animeDetails,
   type AnimeDetailExtras,
@@ -32,9 +33,10 @@ import {
   meta as fetchCinemetaMeta,
   narrowMediaType,
   isAddonNativeMeta,
+  hasEmbeddedStreams,
   type Meta,
 } from "@/lib/cinemeta";
-import { fetchAddonMeta } from "@/lib/addons";
+import { addonBasesForOrigin, fetchAddonMeta, gatherCatalogAddons } from "@/lib/addons";
 import { resolveMeta } from "@/lib/meta-resource";
 import { useMdblistScores } from "@/lib/providers/mdblist";
 import { lastPlayedEpisode, readResumeEntry, saveResumeMs } from "@/lib/resume";
@@ -79,10 +81,17 @@ import { useTogether } from "@/lib/together/provider";
 import { useTrakt } from "@/lib/trakt/provider";
 import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
 import { PopIcon } from "@/components/pop-icon";
-import { findLocalSeriesEpisodes, useInLocalLibrary } from "@/lib/local-library";
+import { useInLocalLibrary } from "@/lib/local-library";
+import { LocalLibraryBrand } from "@/components/local-library-brand";
+import { MediaServerBrand, mediaServerProviderName } from "@/components/media-server-brand";
+import { useTitleMediaServers } from "@/hooks/use-title-media-servers";
 import { localPlayerSrc } from "@/lib/local-library/player-src";
-import { playLocalAware } from "@/lib/local-library/playback";
-import { openLocalEpisodes } from "@/lib/player/local-episodes-modal";
+import { resolveLocalPlayVersions } from "@/lib/local-library/playback";
+import { openLocalVersions } from "@/lib/player/local-versions-modal";
+import { mediaServerConnections } from "@/lib/media-server/connections";
+import { mediaServerItems } from "@/lib/media-server/index-store";
+import { matchingServerItems, serverPlayableCopies } from "@/lib/media-server/selectors";
+import { createMediaServerPlayerSrc, decidePlaybackSource } from "@/lib/media-server/playback";
 import { markMovieWatched, unmarkMovieWatched } from "@/lib/mark-watched";
 import { useIsFavorite, useMediaFavorites } from "@/lib/media-favorites";
 import { openUrl } from "@/lib/window";
@@ -90,6 +99,7 @@ import { profileFromDetail, trackEvent } from "@/lib/discover";
 import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
 import { useScrollMemory, useView, type PlayEpisode } from "@/lib/view";
 import { prefetchSegments } from "@/lib/skip-intro";
+import { PencilOutlineIcon } from "@/components/icons/pencil-outline";
 import { useT } from "@/lib/i18n";
 import { AddToListMenu } from "@/components/lists/add-to-list-menu";
 import { HoverTooltip } from "@/components/hover-tooltip";
@@ -136,10 +146,11 @@ import { Pill } from "./detail/pill";
 import { Credit } from "./detail/credit";
 import { TitlePlate } from "./detail/title-plate";
 import { PlayModeHint } from "./detail/play-mode-hint";
+import { usePlayOnTrigger } from "@/components/play-on-trigger";
 import { UpcomingCta } from "./detail/upcoming-cta";
 import { Synopsis } from "./detail/synopsis";
 import { CastCard } from "./detail/cast-card";
-import { PreviewIcon } from "./detail/preview-icon";
+import { UiIcon } from "@/components/ui-icon";
 import { HeroActionOverflow, useHeroActionOverflow } from "./detail/hero-action-overflow";
 import { useTvdbCastFallback } from "./detail/use-tvdb-cast-fallback";
 import { HeroRatings } from "./detail/hero-ratings";
@@ -217,7 +228,7 @@ export function DetailView({
   episodeHint?: { season: number; episode: number };
 }) {
   const t = useT();
-  const { settings, update } = useSettings();
+  const { settings } = useSettings();
   const contentDrag = useContentDrag();
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -237,6 +248,7 @@ export function DetailView({
   const [detectedKitsu, setDetectedKitsu] = useState<number | null>(null);
   const [detectingAnime, setDetectingAnime] = useState(false);
   const failedKitsu = useRef<number | null>(null);
+  const addonMetaTriedRef = useRef<string | null>(null);
   const [streamers, setStreamers] = useState<KitsuStreamer[]>([]);
   const [backdrops, setBackdrops] = useState<string[]>([]);
   const [backdropIdx, setBackdropIdx] = useState(0);
@@ -328,6 +340,7 @@ export function DetailView({
   const { isConnected: traktConnected } = useTrakt();
   const inWatchlist = useInWatchlist(meta.id, [detail?.imdbId]);
   const inLocalLibrary = useInLocalLibrary(meta.id, [detail?.imdbId]);
+  const titleHomeServers = useTitleMediaServers(meta.id, detail?.imdbId);
   const { toggle: toggleFavorite } = useMediaFavorites();
   const isFav = useIsFavorite(meta.id, [detail?.imdbId]);
   const inSession = roomSnapshot.state === "joined" && roomSnapshot.participants.length >= 2;
@@ -478,6 +491,7 @@ export function DetailView({
     setDetectedKitsu(null);
     setDetectingAnime(false);
     failedKitsu.current = null;
+    addonMetaTriedRef.current = null;
     setStreamers([]);
     setBackdrops([]);
     setBackdropIdx(0);
@@ -512,7 +526,7 @@ export function DetailView({
     (async () => {
       let k = tmdbTv != null && Number.isFinite(tmdbTv) ? await tmdbTvToKitsu(tmdbTv) : null;
       if (k == null && imdb) k = await imdbToKitsu(imdb);
-      // Orphan ids (standalone TMDB/IMDb entries with no cross-db mapping —
+      // Orphan ids (standalone TMDB/IMDb entries with no cross-db mapping --
       // e.g. Bleach TYBW tt14986406): fall back to Kitsu title search and
       // accept the hit only when the year verdict agrees.
       if (k == null) {
@@ -600,20 +614,35 @@ export function DetailView({
 
   useEffect(() => {
     if (meta.type !== "series" && !addonNative) return;
-    const base = meta.addonOrigin?.base;
-    if (!base) return;
-    if (cinemetaFull?.videos && cinemetaFull.videos.length > 0) return;
+    const origin = meta.addonOrigin;
+    if (!origin) return;
+    if (addonMetaTriedRef.current === meta.id) return;
+    const held = cinemetaFull?.videos;
+    if (held && held.length > 0 && (!addonNative || hasEmbeddedStreams(held))) return;
+    addonMetaTriedRef.current = meta.id;
     let cancelled = false;
-    fetchAddonMeta(base, meta.type, meta.id)
-      .then((full) => {
-        if (cancelled || !full?.videos?.length) return;
+    void (async () => {
+      const attempt = async (base: string) => {
+        const full = await fetchAddonMeta(base, meta.type, meta.id).catch(() => null);
+        if (cancelled || !full?.videos?.length) return false;
         setCinemetaFull(full);
-      })
-      .catch(() => {});
+        return true;
+      };
+      const direct = origin.base ? origin.base.replace(/\/manifest\.json$/, "") : null;
+      if (direct && (await attempt(direct))) return;
+      if (cancelled) return;
+      const addons = await gatherCatalogAddons(authKey).catch(() => []);
+      if (cancelled) return;
+      for (const base of addonBasesForOrigin(addons, origin)) {
+        if (base === direct) continue;
+        if (await attempt(base)) return;
+        if (cancelled) return;
+      }
+    })();
     return () => {
       cancelled = true;
     };
-  }, [meta.id, meta.type, meta.addonOrigin?.base, addonNative, cinemetaFull?.videos?.length]);
+  }, [meta.id, meta.type, meta.addonOrigin, addonNative, authKey, cinemetaFull?.videos?.length]);
 
   useEffect(() => {
     if (meta.type !== "series") return;
@@ -1200,51 +1229,88 @@ export function DetailView({
     prefetchSegments(playMeta, targetEp);
   }, [loading, isSeries, isAnime, lastPlay, animeEpisodes, cinemetaFull?.videos, playMeta]);
 
+  const episodeName = useCallback(
+    (season: number, episode: number): string | undefined => {
+      const videos = playMeta.videos ?? cinemetaFull?.videos;
+      const match = videos?.find(
+        (v) => (v.season ?? 1) === season && (v.episode ?? v.number) === episode,
+      );
+      return match?.name || match?.title || undefined;
+    },
+    [playMeta.videos, cinemetaFull?.videos],
+  );
+
   const smartPlay = useCallback(
     async (forcePicker = false) => {
       if (inSession) claimHost(true);
       const opts = { autoPlay: !forcePicker && settings.instantPlay, resume: !forcePicker };
-      const launch = (episode: PlayEpisode | undefined) => {
+      const launch = async (episode: PlayEpisode | undefined) => {
         const stream = () => openPicker(playMeta, episode, opts);
         if (forcePicker) {
           stream();
           return;
         }
-        if (isSeries && !isAnime && settings.localPlaybackMode !== "stream") {
-          const tmdbMatch = meta.id.match(/^tmdb:tv:(\d+)$/);
-          const tmdbId = tmdbMatch ? parseInt(tmdbMatch[1], 10) : null;
-          const seriesImdb = detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null);
-          if (findLocalSeriesEpisodes(tmdbId, seriesImdb).length > 0) {
-            openLocalEpisodes({
-              title: playMeta.name,
-              tmdbId,
-              imdbId: seriesImdb,
-              poster: playMeta.poster,
-              videos: cinemetaFull?.videos,
-              initialSeason: episode?.season,
-              highlightEpisode: episode?.episode,
-              onPlayLocal: (e) => openPlayer(localPlayerSrc(e, isAnime)),
-              onStream: stream,
-            });
-            return;
-          }
+        const tmdbMatch = meta.id.match(/^tmdb:(?:movie|tv):(\d+)$/);
+        const identity = {
+          tmdbId: tmdbMatch ? Number(tmdbMatch[1]) : undefined,
+          imdbId: detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : undefined),
+        };
+        const connections = mediaServerConnections();
+        const indexed = await mediaServerItems();
+        const serverItems = matchingServerItems(
+          indexed,
+          identity,
+          isSeries ? "series" : "movie",
+          episode?.season,
+          episode?.episode,
+        );
+        const serverCopies = serverPlayableCopies(serverItems, connections);
+        const local = resolveLocalPlayVersions(playMeta, episode ?? null, detail?.imdbId);
+        const decision = decidePlaybackSource(settings, local.length, serverCopies);
+        if (decision.kind === "online") {
+          stream();
+          return;
         }
-        playLocalAware({
-          meta: playMeta,
-          episode: episode ?? null,
-          extraImdb: detail?.imdbId,
-          mode: settings.localPlaybackMode,
-          source: "manual",
-          playLocal: (e, o) =>
-            openPlayer({ ...localPlayerSrc(e, isAnime), startFromZero: o?.fromStart }),
-          playStream: stream,
-          setMode: (m) => update({ localPlaybackMode: m }),
-        });
+        if (decision.kind === "local" && local[0]) {
+          openPlayer(localPlayerSrc(local[0], isAnime, episode));
+          return;
+        }
+        const playServer = (copy: (typeof serverCopies)[number]) => {
+          const connection = connections.find((entry) => entry.id === copy.connectionId);
+          const item = serverItems.find(
+            (entry) => entry.connectionId === copy.connectionId && entry.id === copy.itemId,
+          );
+          if (!connection || !item) return;
+          void createMediaServerPlayerSrc({
+            meta: playMeta,
+            imdbId: identity.imdbId,
+            episode,
+            connection,
+            item,
+            versionId: copy.version.id,
+          }).then(openPlayer);
+        };
+        if (decision.kind === "home-server") {
+          playServer(decision.copy);
+          return;
+        }
+        if (decision.kind === "chooser") {
+          openLocalVersions({
+            title: playMeta.name,
+            poster: playMeta.poster,
+            entries: local,
+            onPlayLocal: (entry) => openPlayer(localPlayerSrc(entry, isAnime, episode)),
+            serverCopies,
+            onPlayServer: playServer,
+            onStream: stream,
+          });
+          return;
+        }
       };
       if (!isSeries) {
         if (meta.type === "other" && cinemetaFull?.videos?.length) {
           const first = cinemetaFull.videos[0];
-          launch({
+          await launch({
             season: first.season ?? 0,
             episode: first.episode ?? 1,
             name: first.name ?? first.title,
@@ -1253,7 +1319,7 @@ export function DetailView({
           });
           return;
         }
-        launch(undefined);
+        await launch(undefined);
         return;
       }
       if (isAnime) {
@@ -1263,7 +1329,7 @@ export function DetailView({
             )
           : animeEpisodes[0];
         if (wantedEp) {
-          launch({
+          await launch({
             season: wantedEp.seasonNumber || 1,
             episode: wantedEp.number,
             name: wantedEp.title,
@@ -1279,11 +1345,15 @@ export function DetailView({
           });
           return;
         }
-        launch(undefined);
+        await launch(undefined);
         return;
       }
       if (lastPlay) {
-        launch({ season: lastPlay.season, episode: lastPlay.episode });
+        await launch({
+          season: lastPlay.season,
+          episode: lastPlay.episode,
+          name: episodeName(lastPlay.season, lastPlay.episode),
+        });
         return;
       }
       if (authKey) {
@@ -1306,14 +1376,14 @@ export function DetailView({
               season >= 1 &&
               episode >= 1
             ) {
-              launch({ season, episode });
+              await launch({ season, episode, name: episodeName(season, episode) });
               return;
             }
           }
           if (item) break;
         }
       }
-      launch({ season: 1, episode: 1 });
+      await launch({ season: 1, episode: 1, name: episodeName(1, 1) });
     },
     [
       isSeries,
@@ -1326,14 +1396,14 @@ export function DetailView({
       openPlayer,
       playMeta,
       settings.instantPlay,
-      settings.localPlaybackMode,
-      update,
+      settings.playbackSourcePreference,
+      settings.preferredMediaServerId,
       inSession,
       claimHost,
       authKey,
       meta.id,
       detail?.imdbId,
-      cinemetaFull?.videos,
+      episodeName,
     ],
   );
   const smartPlayLabel =
@@ -1345,6 +1415,11 @@ export function DetailView({
             e: lastPlay.episode,
           })
         : t("Play");
+
+  const playOnTrigger = usePlayOnTrigger(() => ({
+    meta,
+    episode: lastPlay ? { season: lastPlay.season, episode: lastPlay.episode } : undefined,
+  }));
 
   const heroPills = (
     <>
@@ -1361,13 +1436,29 @@ export function DetailView({
         </Pill>
       )}
       {inLocalLibrary && (
-        <Pill>
-          <span className="flex items-center gap-1.5">
-            <HardDrive size={12} strokeWidth={2.4} />
-            {t("In your local library")}
-          </span>
-        </Pill>
+        <HoverTooltip label={t("In your local library")} side="top" align="center" arrow>
+          <Pill>
+            <LocalLibraryBrand className="h-[17px] w-[17px]" />
+          </Pill>
+        </HoverTooltip>
       )}
+      {titleHomeServers.map((connection) => {
+        const provider = mediaServerProviderName(connection.provider);
+        return (
+          <HoverTooltip
+            key={connection.id}
+            label={t("Available in {name}", { name: provider })}
+            sublabel={connection.name !== provider ? connection.name : undefined}
+            side="top"
+            align="center"
+            arrow
+          >
+            <Pill>
+              <MediaServerBrand provider={connection.provider} name={connection.name} compact />
+            </Pill>
+          </HoverTooltip>
+        );
+      })}
       <HeroRatings
         rating={rating}
         isAnime={isAnime}
@@ -1405,7 +1496,7 @@ export function DetailView({
         </HoverTooltip>
       )}
       {meta.addonOrigin ? (
-        <span className="flex items-center gap-2 rounded-full border border-edge bg-canvas/80 py-1 ps-1.5 pe-3 text-[12.5px] font-medium text-ink-muted">
+        <span className="flex items-center gap-2 rounded-full bg-canvas/80 py-1 ps-1.5 pe-3 text-[12.5px] font-medium text-ink-muted">
           {meta.addonOrigin.logo ? (
             <img
               src={meta.addonOrigin.logo}
@@ -1527,12 +1618,14 @@ export function DetailView({
                 ) : (
                   <PlayModeHint>
                     <button
+                      {...playOnTrigger}
+                      data-tv-initial-focus
                       onClick={() => smartPlay(false)}
                       onContextMenu={(e) => {
                         e.preventDefault();
                         void smartPlay(true);
                       }}
-                      className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.65),inset_0_-1px_0_rgba(0,0,0,0.18)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+                      className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
                     >
                       <Play size={18} fill="currentColor" />
                       {smartPlayLabel}
@@ -1560,10 +1653,10 @@ export function DetailView({
                           imdbId: detail?.imdbId,
                         })
                       }
-                      className={`flex h-12 items-center gap-2.5 whitespace-nowrap rounded-full border px-6 text-[15px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[transform,background-color,border-color] duration-200 active:scale-[0.98] ${
+                      className={`flex h-12 items-center gap-2.5 whitespace-nowrap rounded-full px-6 text-[15px] font-medium transition-[transform,background-color] duration-200 active:scale-[0.98] ${
                         inWatchlist
-                          ? "border-ink bg-ink/10 text-ink hover:bg-ink/20"
-                          : "border-edge bg-canvas/80 text-ink hover:border-ink-subtle hover:bg-canvas/95"
+                          ? "bg-ink/15 text-ink hover:bg-ink/20"
+                          : "bg-canvas/80 text-ink hover:bg-canvas/95"
                       }`}
                     >
                       <PopIcon
@@ -1660,16 +1753,16 @@ export function DetailView({
                           })
                         }
                         aria-label={isFav ? t("Remove from favorites") : t("Add to favorites")}
-                        className={`group flex h-12 w-12 items-center justify-center rounded-full border transition-[transform,background-color,border-color] duration-200 active:scale-[0.94] ${
+                        className={`group flex h-12 w-12 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.94] ${
                           isFav
-                            ? "border-accent/55 bg-accent/15 text-accent hover:bg-accent/22"
-                            : "border-edge bg-canvas/80 text-ink hover:border-ink-subtle hover:bg-canvas/95"
+                            ? "bg-accent/20 text-accent hover:bg-accent/22"
+                            : "bg-canvas/80 text-ink hover:bg-canvas/95"
                         }`}
                       >
                         <PopIcon
                           active={isFav}
-                          activeIcon={<Heart size={20} strokeWidth={0} fill="currentColor" />}
-                          inactiveIcon={<Heart size={20} strokeWidth={1.9} fill="none" />}
+                          activeIcon={<UiIcon name="unfavorite" className="h-5 w-5" />}
+                          inactiveIcon={<UiIcon name="favorite" className="h-5 w-5" />}
                         />
                       </button>
                     </HoverTooltip>
@@ -1684,9 +1777,9 @@ export function DetailView({
                         type="button"
                         onClick={() => setAddToListOpen((v) => !v)}
                         aria-label={t("Add to list")}
-                        className="group flex h-12 w-12 items-center justify-center rounded-full border border-edge bg-canvas/80 text-ink transition-[transform,background-color,border-color] duration-200 hover:border-ink-subtle hover:bg-canvas/95 active:scale-[0.94]"
+                        className="group flex h-12 w-12 items-center justify-center rounded-full bg-canvas/80 text-ink transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.94]"
                       >
-                        <Layers size={20} strokeWidth={1.9} />
+                        <UiIcon name="list" className="h-5 w-5" />
                       </button>
                     </HoverTooltip>
                     <AddToListMenu
@@ -1705,16 +1798,16 @@ export function DetailView({
                           type="button"
                           onClick={markThisMovieWatched}
                           aria-label={t("Mark watched")}
-                          className={`group flex h-12 w-12 items-center justify-center rounded-full border transition-[transform,background-color,border-color] duration-200 active:scale-[0.94] ${
+                          className={`group flex h-12 w-12 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.94] ${
                             watchedMark
-                              ? "border-accent/55 bg-accent/15 text-accent"
-                              : "border-edge bg-canvas/80 text-ink hover:border-ink-subtle hover:bg-canvas/95"
+                              ? "bg-accent/20 text-accent"
+                              : "bg-canvas/80 text-ink hover:bg-canvas/95"
                           }`}
                         >
                           <PopIcon
                             active={watchedMark}
-                            activeIcon={<Check size={20} strokeWidth={2.4} />}
-                            inactiveIcon={<Check size={20} strokeWidth={2.4} />}
+                            activeIcon={<UiIcon name="mark-unwatched" className="h-5 w-5" />}
+                            inactiveIcon={<UiIcon name="mark-watched" className="h-5 w-5" />}
                           />
                         </button>
                       </HoverTooltip>
@@ -1725,9 +1818,9 @@ export function DetailView({
                           type="button"
                           onClick={() => setTrailerOpen(true)}
                           aria-label={t("Watch trailer")}
-                          className="group flex h-12 w-12 items-center justify-center rounded-full border border-edge bg-canvas/80 text-ink transition-[transform,background-color,border-color] duration-200 hover:border-ink-subtle hover:bg-canvas/95 active:scale-[0.94]"
+                          className="group flex h-12 w-12 items-center justify-center rounded-full bg-canvas/80 text-ink transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.94]"
                         >
-                          <PreviewIcon size={20} />
+                          <UiIcon name="trailer" className="h-5 w-5" />
                         </button>
                       </HoverTooltip>
                     )}
@@ -1746,7 +1839,7 @@ export function DetailView({
                   <button
                     type="button"
                     onClick={promoteMetaToRoot}
-                    className="flex h-12 items-center gap-2 rounded-full border border-edge bg-canvas/80 px-5 text-[14px] font-medium text-ink-muted transition-colors hover:border-ink-subtle hover:bg-canvas/95 hover:text-ink"
+                    className="flex h-12 items-center gap-2 rounded-full bg-canvas/80 px-5 text-[14px] font-medium text-ink-muted transition-colors hover:bg-canvas/95 hover:text-ink"
                   >
                     {meta.type === "series" || meta.type === "tv"
                       ? t("Open in TV Shows")
@@ -1880,7 +1973,7 @@ export function DetailView({
               label: t("Crew"),
               minHeight: 160,
               node: (
-                <div className="grid grid-cols-1 gap-x-12 gap-y-6 border-b border-edge-soft pb-12 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-x-12 gap-y-6 pb-12 sm:grid-cols-2 lg:grid-cols-3">
                   {detail.directors.length > 0 && (
                     <Credit
                       label={detail.directors.length === 1 ? t("Director") : t("Directors")}
@@ -2137,7 +2230,7 @@ export function DetailView({
                 {layoutEdit && hasChanges && (
                   <button
                     onClick={() => persist(resetDetailCustomization())}
-                    className="flex h-8 items-center gap-1.5 rounded-md border border-edge-soft/40 bg-canvas/80 px-2.5 text-[12px] font-medium text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
+                    className="flex h-8 items-center gap-1.5 rounded-md bg-white/[0.06] px-2.5 text-[12px] font-medium text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
                   >
                     <RotateCcw size={12} strokeWidth={2.2} />
                     {t("Reset")}
@@ -2145,13 +2238,13 @@ export function DetailView({
                 )}
                 <button
                   onClick={() => setLayoutEdit((v) => !v)}
-                  className={`flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-[12px] font-medium transition-colors ${
+                  className={`flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[12px] font-medium transition-colors ${
                     layoutEdit
-                      ? "border-ink bg-ink text-canvas hover:opacity-90"
-                      : "border-edge-soft/40 bg-canvas/80 text-ink-muted hover:bg-canvas hover:text-ink"
+                      ? "bg-ink text-canvas hover:opacity-90"
+                      : "bg-white/[0.06] text-ink-muted hover:bg-white/[0.10] hover:text-ink"
                   }`}
                 >
-                  <Pencil size={12} strokeWidth={2.4} />
+                  <PencilOutlineIcon size={12} />
                   {layoutEdit ? t("Done editing") : t("Customize layout")}
                 </button>
               </div>
@@ -2169,7 +2262,7 @@ export function DetailView({
         })()}
 
         {!loading && !detail && !isAnime && !addonNative && !settings.tmdbKey && (
-          <div className="rounded-2xl border border-dashed border-edge px-6 py-12 text-center text-[14px] text-ink-muted">
+          <div className="rounded-2xl bg-canvas/50 px-6 py-12 text-center text-[14px] text-ink-muted">
             {t("Add a TMDB key in Settings to see cast, related titles, and trailers here.")}
           </div>
         )}

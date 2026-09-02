@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { useEffect } from "react";
 import { FolderInput, FolderPlus, Images, ShieldCheck, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
@@ -19,7 +20,7 @@ export function AvatarPackHelp({ onClose }: { onClose: () => void }) {
     { icon: ShieldCheck, title: t("You own the content"), body: t("Nothing is uploaded and nothing ships with Harbor. Everything stays on this device and you are responsible for the images you add.") },
   ];
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[310] flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 animate-in fade-in bg-black/60 duration-150" />
       <div
@@ -56,6 +57,7 @@ export function AvatarPackHelp({ onClose }: { onClose: () => void }) {
           ))}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

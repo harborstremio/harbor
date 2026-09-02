@@ -17,7 +17,7 @@ export function anilistMediaToMeta(m: AnilistMedia): Meta | null {
     id,
     type: m.format === "MOVIE" ? "movie" : "series",
     name,
-    poster: m.coverImage.extraLarge ?? m.coverImage.large ?? undefined,
+    poster: m.coverImage.large ?? m.coverImage.extraLarge ?? undefined,
     background: m.bannerImage ?? undefined,
     description: m.description ? stripHtml(m.description) : undefined,
     releaseInfo: m.seasonYear != null ? String(m.seasonYear) : undefined,

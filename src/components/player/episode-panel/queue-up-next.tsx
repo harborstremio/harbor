@@ -1,4 +1,5 @@
-import { Play, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import { queueClear, queueIndexOf, queueItemAfter, queueRemove, useQueue } from "@/lib/queue";
 import { useView, type PlayEpisode } from "@/lib/view";

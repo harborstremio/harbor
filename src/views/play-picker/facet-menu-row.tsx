@@ -1,7 +1,8 @@
 import { Check, ChevronDown, Pencil, Plus } from "lucide-react";
 import { useState } from "react";
 import { FormatBadge, type BadgeKind } from "@/components/format-badge";
-import { summarizeFilter, type CustomStreamFilter } from "@/lib/streams/custom-filters";
+import { useT } from "@/lib/i18n";
+import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
 import { facetBadge } from "./filter-builder/badge-maps";
 import type { FacetDim, FacetOption } from "./stream-facets";
 
@@ -29,9 +30,11 @@ export function FacetMenuRow({
   onNewFilter: () => void;
   onEditFilter: (filter: CustomStreamFilter) => void;
 }) {
+  const t = useT();
   const [openKey, setOpenKey] = useState<string | null>(null);
   const visible = facets.filter((f) => f.options.length >= 2 || f.value !== "all");
   const narrowed = facets.some((f) => f.value !== "all") || activeFilterId !== null;
+  const newFilterLabel = filters.length > 0 ? t("New filter") : t("Create a custom filter");
   const reset = () => {
     for (const f of facets) if (f.value !== "all") onFacet(f.dim.key, "all");
     if (activeFilterId !== null) onSelectFilter(null);
@@ -52,7 +55,9 @@ export function FacetMenuRow({
           }}
         />
       ))}
-      {(visible.length > 0 || filters.length > 0) && <span className="mx-1 h-4 w-px shrink-0 bg-edge-soft" />}
+      {(visible.length > 0 || filters.length > 0) && (
+        <span className="mx-1 h-4 w-px shrink-0 bg-edge-soft" />
+      )}
       {filters.map((f) => (
         <SavedChip
           key={f.id}
@@ -65,11 +70,12 @@ export function FacetMenuRow({
       <button
         type="button"
         onClick={onNewFilter}
-        title={filters.length > 0 ? "New filter" : "Create a custom filter"}
+        title={newFilterLabel}
+        aria-label={newFilterLabel}
         className="flex items-center gap-1 rounded-full bg-elevated/50 px-2.5 py-1.5 text-[12.5px] font-semibold text-ink-muted ring-1 ring-edge-soft/60 transition-colors hover:bg-elevated hover:text-ink"
       >
         <Plus size={13} strokeWidth={2.6} />
-        {filters.length === 0 && "Filter"}
+        {filters.length === 0 && t("Filter")}
       </button>
       {narrowed && (
         <button
@@ -77,7 +83,7 @@ export function FacetMenuRow({
           onClick={reset}
           className="px-2 py-1.5 text-[11.5px] font-semibold text-ink-subtle transition-colors hover:text-ink"
         >
-          Reset
+          {t("Reset")}
         </button>
       )}
     </div>
@@ -97,6 +103,38 @@ function FacetMenu({
   onClose: () => void;
   onPick: (value: string) => void;
 }) {
+  const t = useT();
+  const dimensionLabel = (() => {
+    switch (entry.dim.key) {
+      case "resolution":
+        return t("Resolution");
+      case "source":
+        return t("Source");
+      case "codec":
+        return t("Codec");
+      case "hdr":
+        return "HDR";
+      case "audio":
+        return t("Audio");
+      case "cached":
+        return t("Availability");
+      default:
+        return entry.dim.label;
+    }
+  })();
+  const optionLabel = (value: string) => {
+    switch (value) {
+      case "Remux":
+        return t("Remux");
+      case "Cached":
+        return t("Cached");
+      case "Debrid":
+        return t("Debrid");
+      default:
+        return value;
+    }
+  };
+  const selectedLabel = optionLabel(entry.value);
   const active = entry.value !== "all";
   const badgeSlot = entry.options.some((o) => facetBadge(entry.dim.key, o.key) !== null);
   return (
@@ -105,13 +143,17 @@ function FacetMenu({
         type="button"
         onClick={onToggle}
         aria-expanded={open}
+        aria-label={t("{facet} filter: {value}", {
+          facet: dimensionLabel,
+          value: active ? selectedLabel : t("All"),
+        })}
         className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-colors ${
           active
             ? "bg-ink text-canvas"
             : "bg-elevated/50 text-ink-muted ring-1 ring-edge-soft/60 hover:bg-elevated hover:text-ink"
         }`}
       >
-        {active ? entry.value : entry.dim.label}
+        {active ? selectedLabel : dimensionLabel}
         <ChevronDown
           size={12}
           strokeWidth={2.4}
@@ -124,13 +166,13 @@ function FacetMenu({
         <>
           <button
             type="button"
-            aria-label="Close menu"
+            aria-label={t("Close menu")}
             onClick={onClose}
             className="fixed inset-0 z-10 cursor-default"
           />
           <div className="absolute start-0 top-full z-20 mt-1 min-w-[176px] rounded-xl bg-elevated p-1 ring-1 ring-edge shadow-[0_18px_44px_-14px_rgba(0,0,0,0.7)]">
             <MenuItem
-              label="All"
+              label={t("All")}
               count={entry.total}
               selected={!active}
               badge={null}
@@ -140,7 +182,7 @@ function FacetMenu({
             {entry.options.map((o) => (
               <MenuItem
                 key={o.key}
-                label={o.key}
+                label={optionLabel(o.key)}
                 count={o.count}
                 selected={entry.value === o.key}
                 badge={facetBadge(entry.dim.key, o.key)}
@@ -185,11 +227,7 @@ function MenuItem({
       )}
       <span className="flex-1 truncate">{label}</span>
       <span className="text-[11.5px] text-ink-subtle">{count}</span>
-      <Check
-        size={13}
-        strokeWidth={2.6}
-        className={selected ? "text-ink" : "invisible"}
-      />
+      <Check size={13} strokeWidth={2.6} className={selected ? "text-ink" : "invisible"} />
     </button>
   );
 }
@@ -205,6 +243,27 @@ function SavedChip({
   onToggle: () => void;
   onEdit: () => void;
 }) {
+  const t = useT();
+  const summarizeValues = (values: string[] | undefined) => {
+    if (!values || values.length === 0) return null;
+    const first = values[0] === "Other" ? t("Other") : values[0];
+    return values.length === 1 ? first : t("{value} +{n}", { value: first, n: values.length - 1 });
+  };
+  const summaryParts = [
+    summarizeValues(filter.resolution),
+    summarizeValues(filter.source),
+    summarizeValues(filter.codec),
+    summarizeValues(filter.audio),
+  ].filter((part): part is string => part !== null);
+  if (filter.requireHdr === true) summaryParts.push("HDR");
+  if (filter.cachedOnly === true) summaryParts.push(t("Cached"));
+  if (filter.minSeeders != null && Number.isFinite(filter.minSeeders) && filter.minSeeders > 0) {
+    summaryParts.push(t("{n}+ seeds", { n: filter.minSeeders }));
+  }
+  if (filter.maxSizeGb != null && Number.isFinite(filter.maxSizeGb) && filter.maxSizeGb > 0) {
+    summaryParts.push(t("<= {size} GB", { size: filter.maxSizeGb }));
+  }
+  const summary = summaryParts.length > 0 ? summaryParts.join(" / ") : t("Any");
   return (
     <span
       className={`group flex items-center rounded-full text-[12.5px] font-semibold transition-colors ${
@@ -217,7 +276,7 @@ function SavedChip({
         type="button"
         onClick={onToggle}
         aria-pressed={active}
-        title={summarizeFilter(filter)}
+        title={summary}
         className="max-w-[180px] truncate py-1.5 pe-1 ps-3"
       >
         {filter.name}
@@ -225,7 +284,7 @@ function SavedChip({
       <button
         type="button"
         onClick={onEdit}
-        aria-label={`Edit ${filter.name}`}
+        aria-label={t("Edit {name}", { name: filter.name })}
         className={`flex h-[26px] w-6 items-center justify-center rounded-full pe-1 transition-colors ${
           active ? "text-canvas/70 hover:text-canvas" : "text-ink-subtle hover:text-ink"
         }`}

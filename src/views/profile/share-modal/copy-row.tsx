@@ -1,7 +1,17 @@
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
+import { useT } from "@/lib/i18n";
 
-export function CopyRow({ label, value, primary }: { label: string; value: string; primary?: boolean }) {
+export function CopyRow({
+  label,
+  value,
+  primary,
+}: {
+  label: string;
+  value: string;
+  primary?: boolean;
+}) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -21,20 +31,20 @@ export function CopyRow({ label, value, primary }: { label: string; value: strin
           value={value}
           onFocus={(ev) => ev.currentTarget.select()}
           spellCheck={false}
-          className={`min-w-0 flex-1 rounded-[10px] bg-elevated px-3 text-ink outline-none ring-1 ring-edge-soft ${
+          className={`min-w-0 flex-1 rounded-md bg-elevated px-3 text-ink outline-none ring-1 ring-edge-soft ${
             primary ? "min-h-11 text-[14px]" : "min-h-9 text-[13px]"
           }`}
         />
         <button
           type="button"
           onClick={() => void copy()}
-          aria-label={`Copy ${label}`}
-          className={`inline-flex shrink-0 items-center gap-1.5 rounded-[10px] px-3 text-[13px] font-medium ring-1 transition-colors ${
+          aria-label={t("Copy {label}", { label })}
+          className={`inline-flex shrink-0 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium ring-1 transition-colors ${
             primary ? "min-h-11" : "min-h-9"
           } ${copied ? "bg-accent/15 text-accent ring-accent/40" : "bg-elevated text-ink ring-edge-soft hover:bg-raised"}`}
         >
           {copied ? <Check size={15} strokeWidth={2.6} /> : <Copy size={15} />}
-          {copied ? "Copied" : "Copy"}
+          {copied ? t("Copied") : t("Copy")}
         </button>
       </div>
     </div>

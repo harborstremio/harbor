@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
 import { Loader2, Upload } from "lucide-react";
 import { fileToFaviconWebp, uploadFavicon } from "@/lib/social/favicon";
+import { useT } from "@/lib/i18n";
 import type { CustomizationInput, ProfileSummary } from "../profile-types";
 import { IMAGE_URL_MAX } from "./customization-types";
 
 const inputCls =
-  "w-full min-h-11 rounded-[10px] bg-elevated px-3 text-[14px] text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus:ring-edge";
+  "w-full min-h-11 rounded-md bg-elevated px-3 text-[14px] text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus:ring-edge";
 
 export function FaviconField({
   form,
@@ -16,6 +17,7 @@ export function FaviconField({
   set: <K extends keyof CustomizationInput>(k: K, v: CustomizationInput[K]) => void;
   onSaved?: (next: ProfileSummary) => void;
 }) {
+  const t = useT();
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export function FaviconField({
       set("profileFavicon", next.profileFavicon ?? "");
       onSaved?.(next);
     } catch (e) {
-      setError((e as Error).message || "Could not upload favicon.");
+      setError((e as Error).message || t("Could not upload favicon."));
     } finally {
       setBusy(false);
     }
@@ -39,8 +41,10 @@ export function FaviconField({
   return (
     <div className="block">
       <div className="mb-1.5 flex items-baseline justify-between">
-        <span className="text-[13px] font-medium text-ink">Profile favicon</span>
-        <span className="text-[12px] text-ink-subtle">Shows in the browser tab; defaults to your avatar</span>
+        <span className="text-[13px] font-medium text-ink">{t("Profile favicon")}</span>
+        <span className="text-[12px] text-ink-subtle">
+          {t("Shows in the browser tab; defaults to your avatar")}
+        </span>
       </div>
       <div className="flex gap-2">
         <input
@@ -56,9 +60,10 @@ export function FaviconField({
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={busy}
-          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-[10px] bg-elevated px-3.5 text-[13px] font-medium text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised disabled:opacity-50"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md bg-elevated px-3.5 text-[13px] font-medium text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised disabled:opacity-50"
         >
-          {busy ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />} Upload
+          {busy ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}{" "}
+          {t("Upload")}
         </button>
       </div>
       <input

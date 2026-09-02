@@ -207,7 +207,10 @@ function ReadoutRows({ person }: { person: HarborRankExplanation }) {
           <span className="flex items-baseline gap-2">
             <span className="text-[13px] font-medium text-ink">{t(PILLAR_LABEL[r.key])}</span>
             <span className="text-[12px] text-ink-subtle tabular-nums">
-              {t("{v} · weight {p}%", { v: String(Math.round(r.value * 100)), p: String(weightPct(r.key)) })}
+              {t("{v} · weight {p}%", {
+                v: String(Math.round(r.value * 100)),
+                p: String(weightPct(r.key)),
+              })}
             </span>
           </span>
           <span className="text-end text-[11.5px] text-ink-muted tabular-nums">{r.sub}</span>
@@ -256,9 +259,7 @@ function ProofRow({
   const t = useT();
   const { settings } = useSettings();
   const meta = titleToMeta(title);
-  const raw = title.posterPath
-    ? `https://image.tmdb.org/t/p/w92${title.posterPath}`
-    : undefined;
+  const raw = title.posterPath ? `https://image.tmdb.org/t/p/w92${title.posterPath}` : undefined;
   const poster = usePosterChain(
     settings.rpdbKey,
     meta.id,
@@ -300,8 +301,8 @@ function ProofRow({
             )}
           </span>
           <span className="flex items-center gap-2 text-[11px] text-ink-subtle">
-            <span className="rounded-full bg-elevated/60 px-1.5 py-0.5 text-[10px] text-ink-muted ring-1 ring-edge-soft">
-              {t(title.role)}
+            <span className="rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-ink-muted">
+              {title.role}
             </span>
             {title.rating !== null && (
               <span className="tabular-nums">

@@ -1,4 +1,5 @@
 import type { StatusSlice } from "@/lib/anilist/media-details";
+import { useT } from "@/lib/i18n";
 
 const LABEL_COLORS: Record<string, string> = {
   Watching: "oklch(0.72 0.13 235)",
@@ -35,6 +36,7 @@ function formatCount(n: number) {
 }
 
 export function AnimeStatsDonut({ slices }: { slices: StatusSlice[] }) {
+  const t = useT();
   if (slices.length === 0) return null;
   const total = slices.reduce((sum, s) => sum + s.amount, 0);
   if (total <= 0) return null;
@@ -84,7 +86,9 @@ export function AnimeStatsDonut({ slices }: { slices: StatusSlice[] }) {
           <span className="text-[19px] font-medium tracking-tight text-ink">
             {formatCount(total)}
           </span>
-          <span className="text-[10px] uppercase tracking-[0.16em] text-ink-subtle">members</span>
+          <span className="text-[10px] uppercase tracking-[0.16em] text-ink-subtle">
+            {t("members")}
+          </span>
         </div>
       </div>
       <ul className="grid min-w-0 flex-1 gap-2">
@@ -95,7 +99,19 @@ export function AnimeStatsDonut({ slices }: { slices: StatusSlice[] }) {
               style={{ backgroundColor: arc.color }}
             />
             <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-muted">
-              {arc.label}
+              {arc.label === "Watching"
+                ? t("Watching")
+                : arc.label === "Completed"
+                  ? t("Completed")
+                  : arc.label === "On Hold"
+                    ? t("On Hold")
+                    : arc.label === "Dropped"
+                      ? t("Dropped")
+                      : arc.label === "Plan to Watch"
+                        ? t("Plan to Watch")
+                        : arc.label === "Paused"
+                          ? t("Paused")
+                          : arc.label}
             </span>
             <span className="text-[12.5px] tabular-nums text-ink">{formatCount(arc.amount)}</span>
             <span className="w-11 text-end text-[12.5px] tabular-nums text-ink-subtle">

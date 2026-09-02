@@ -55,7 +55,7 @@ export function ProfileViewAll({
 
   return createPortal(
     <div
-      className="animate-fade-in fixed inset-0 z-[130] flex items-stretch justify-center bg-canvas/85 backdrop-blur-sm"
+      className="animate-fade-in fixed inset-0 z-[175] flex items-stretch justify-center bg-canvas/85 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label={t(TITLES[section])}
@@ -146,7 +146,7 @@ function ListsSection({
                   src={item.poster || undefined}
                   seed={item.name || item.id}
                   ratio="portrait"
-                  className="rounded-[10px] ring-1 ring-edge-soft transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] motion-safe:group-hover:will-change-transform motion-safe:group-hover:-translate-y-1"
+                  className="rounded-md ring-1 ring-edge-soft transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] motion-safe:group-hover:will-change-transform motion-safe:group-hover:-translate-y-1"
                   lazy
                 />
                 {item.name && <div className="mt-1.5 line-clamp-2 text-[12px] text-ink-muted">{item.name}</div>}

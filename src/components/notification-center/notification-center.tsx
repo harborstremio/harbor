@@ -1,4 +1,5 @@
-import { ArrowLeft, Bell, Loader2, X } from "lucide-react";
+import { ArrowLeft, Loader2, X } from "lucide-react";
+import { UiIcon } from "@/components/ui-icon";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { currentAuthor } from "@/lib/theme-auth";
@@ -76,9 +77,12 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
           aria-label={t("Notifications")}
           className="harbor-navbtn relative grid h-9 w-9 place-items-center rounded-full text-ink-muted transition-colors hover:bg-elevated/60 hover:text-ink"
         >
-          <Bell size={17} strokeWidth={2} />
+          <UiIcon name="notification" className="h-[17px] w-[17px]" />
           {badge > 0 && (
-            <span className="absolute -end-0.5 -top-0.5 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold tabular-nums text-canvas">
+            <span
+              key={badge}
+              className="animate-badge-pop absolute -end-0.5 -top-0.5 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold tabular-nums text-canvas"
+            >
               {badge > 9 ? "9+" : badge}
             </span>
           )}
@@ -96,10 +100,9 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
               role="dialog"
               aria-modal="true"
               onClick={(e) => e.stopPropagation()}
-              className="harbor-together-surface absolute end-4 top-[88px] flex max-h-[74vh] w-[min(400px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-edge shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]"
-              style={{ animation: "nc-pop-in 200ms cubic-bezier(0.32,0.72,0.24,1) both" }}
+              className="harbor-together-surface animate-panel-in absolute end-4 top-[88px] flex max-h-[74vh] w-[min(400px,calc(100vw-2rem))] flex-col overflow-hidden rounded-md shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
             >
-              <div className="flex items-center justify-between border-b border-edge-soft px-4 py-3">
+              <div className="flex items-center justify-between px-4 py-3">
                 {detail ? (
                   <button
                     type="button"
@@ -134,7 +137,7 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
               ) : (
                 <>
               {nc.items.length > 0 && (
-                <div className="flex items-center gap-2 border-b border-edge-soft px-4 py-2">
+                <div className="flex items-center gap-2 px-4 py-2">
                   <button
                     type="button"
                     onClick={() => void nc.markRead()}
@@ -185,10 +188,16 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
                   </div>
                 ) : (
                   nc.pending.length === 0 && (
-                    <div className="flex flex-col items-center gap-2 px-6 py-14 text-center">
-                      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-elevated/60 text-ink-subtle">
-                        <Bell size={20} strokeWidth={1.8} />
-                      </span>
+                    <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+                      <div className="harbor-pop relative inline-flex">
+                        <UiIcon name="notification" className="h-16 w-16 text-ink-subtle opacity-90" />
+                        <span
+                          className="animate-badge-pop absolute -right-1 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-ink-muted px-1 text-[11px] font-semibold tabular-nums text-canvas"
+                          style={{ animationDelay: "130ms" }}
+                        >
+                          0
+                        </span>
+                      </div>
                       <span className="text-[13px] text-ink-muted">{t("You are all caught up.")}</span>
                     </div>
                   )
@@ -199,7 +208,6 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
             </div>
             <style>{`
               @keyframes nc-scrim-in { from { opacity: 0 } to { opacity: 1 } }
-              @keyframes nc-pop-in { from { opacity: 0; transform: translateY(-8px) scale(0.98) } to { opacity: 1; transform: none } }
             `}</style>
           </div>,
           document.body,

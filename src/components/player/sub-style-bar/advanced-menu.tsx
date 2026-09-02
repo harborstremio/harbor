@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useSettings, type Settings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { noteOverlayDismiss } from "@/lib/player/overlay-dismiss";
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
@@ -32,6 +33,7 @@ export function AdvancedMenu() {
     };
     place();
     const onDown = (e: MouseEvent) => {
+      noteOverlayDismiss();
       const target = e.target as Node;
       if (btnRef.current?.contains(target) || menuRef.current?.contains(target)) return;
       setOpen(false);
@@ -59,7 +61,7 @@ export function AdvancedMenu() {
         aria-label={t("More subtitle options")}
         aria-pressed={open}
         title={t("More subtitle options")}
-        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] transition-colors ${
+        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md transition-colors ${
           open ? "bg-raised text-ink" : "text-ink-subtle hover:bg-raised hover:text-ink"
         }`}
       >
@@ -78,7 +80,7 @@ export function AdvancedMenu() {
             />
             <div
               ref={menuRef}
-              className="fixed z-[320] w-[260px] rounded-[16px] border border-edge bg-elevated p-2 shadow-[0_24px_60px_-14px_rgba(0,0,0,0.8)] backdrop-blur-md"
+              className="fixed z-[320] w-[260px] rounded-md bg-elevated p-2 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
               style={{ top: pos.top, left: pos.left }}
             >
               <Row label={t("Edge")}>
@@ -124,7 +126,7 @@ export function AdvancedMenu() {
               <div className="my-1.5 h-px bg-edge-soft" />
               <button
                 onClick={() => update({ subAssOverride: overrideOn ? "no" : "force" })}
-                className="flex w-full items-start gap-3 rounded-[10px] p-2 text-start transition-colors hover:bg-raised"
+                className="flex w-full items-start gap-3 rounded-md p-2 text-start transition-colors hover:bg-raised"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block text-[13.5px] font-semibold text-ink">{t("Override embedded styles")}</span>
@@ -151,7 +153,7 @@ export function AdvancedMenu() {
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-[10px] px-2 py-1.5">
+    <div className="flex items-center justify-between gap-3 rounded-md px-2 py-1.5">
       <span className="text-[13.5px] font-medium text-ink-muted">{label}</span>
       {children}
     </div>

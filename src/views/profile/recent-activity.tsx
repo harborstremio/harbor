@@ -38,7 +38,7 @@ function ImportCard({ a, onOpenRatings }: { a: ActivityItem; onOpenRatings?: () 
       disabled={!onOpenRatings}
       className="group w-full text-start disabled:cursor-default"
     >
-      <div className="flex aspect-[2/3] flex-col items-center justify-center gap-2 rounded-[10px] bg-gradient-to-br from-accent/18 via-elevated to-surface px-3 text-center ring-1 ring-edge-soft transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] group-hover:shadow-[0_18px_36px_-14px_rgba(0,0,0,0.6)] motion-safe:group-hover:[transform:translate3d(0,-0.5rem,0)_scale(1.03)]">
+      <div className="flex aspect-[2/3] flex-col items-center justify-center gap-2 rounded-md bg-gradient-to-br from-accent/18 via-elevated to-surface px-3 text-center ring-1 ring-edge-soft transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] group-hover:shadow-[0_18px_36px_-14px_rgba(0,0,0,0.6)] motion-safe:group-hover:[transform:translate3d(0,-0.5rem,0)_scale(1.03)]">
         <Library size={26} className="text-accent" />
         <span className="text-[24px] font-semibold leading-none tabular-nums text-ink">{count}</span>
         <span className="text-[11.5px] leading-snug text-ink-subtle">{t("ratings imported")}</span>
@@ -74,7 +74,7 @@ function ActivityCard({
         src={a.posterUrl}
         seed={a.title}
         ratio="portrait"
-        className="rounded-[10px] ring-1 ring-edge-soft shadow-[0_2px_8px_-2px_rgba(0,0,0,0.35)] transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] motion-safe:group-hover:will-change-transform group-hover:shadow-[0_18px_36px_-14px_rgba(0,0,0,0.6)] motion-safe:group-hover:[transform:translate3d(0,-0.5rem,0)_scale(1.03)]"
+        className="rounded-md ring-1 ring-edge-soft shadow-[0_2px_8px_-2px_rgba(0,0,0,0.35)] transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] motion-safe:group-hover:will-change-transform group-hover:shadow-[0_18px_36px_-14px_rgba(0,0,0,0.6)] motion-safe:group-hover:[transform:translate3d(0,-0.5rem,0)_scale(1.03)]"
         lazy
       />
       <div className="mt-2 flex items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] text-ink-subtle">
@@ -105,7 +105,7 @@ export function RecentActivity({
 }) {
   const t = useT();
   return (
-    <section aria-label={t("Recent activity")} className="rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
+    <section aria-label={t("Recent activity")} className="rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
       <SectionHeader
         icon={<Clapperboard size={20} />}
         label={t("Recent activity")}

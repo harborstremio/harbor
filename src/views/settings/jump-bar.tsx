@@ -160,9 +160,9 @@ export function SettingsJumpBar({
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         onWheel={onWheel}
-        className={`pointer-events-auto flex max-w-[min(640px,72vw)] select-none items-center gap-1 overflow-x-auto rounded-full border border-edge bg-surface/85 px-1.5 py-1.5 shadow-[0_10px_34px_rgba(0,0,0,0.4)] backdrop-blur-xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
+ className={`pointer-events-auto flex max-w-[min(640px,72vw)] select-none items-center gap-1 overflow-x-auto rounded-full bg-surface px-1.5 py-1.5 harbor-float backdrop-blur-xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${dragging ?"cursor-grabbing" :"cursor-grab"}`}
       >
-        <span className="shrink-0 ps-2.5 pe-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+        <span className="shrink-0 ps-2.5 pe-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
           {t("On this page")}
         </span>
         {items.map((it) => {

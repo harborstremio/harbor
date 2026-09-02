@@ -1,7 +1,14 @@
 import { SANDBOX_SOURCE } from "./sandbox";
-import { runPluginHttp } from "./host-http";
+import { runPluginGrpc, runPluginHttp } from "./host-http";
 import { serializeHtml } from "./host-parse";
-import type { InstalledPlugin, PluginMeta, FromWorker, ToWorker, PluginHttpOpts } from "./types";
+import type {
+  InstalledPlugin,
+  PluginGrpcOpts,
+  PluginMeta,
+  FromWorker,
+  ToWorker,
+  PluginHttpOpts,
+} from "./types";
 
 type Pending = {
   resolve: (v: unknown) => void;
@@ -22,6 +29,7 @@ export class PluginWorker {
   private calls = new Map<string, Pending>();
   private seq = 0;
   private httpInflight = 0;
+  private httpQueue: Array<() => void> = [];
 
   constructor(plugin: InstalledPlugin) {
     this.plugin = plugin;
@@ -111,6 +119,9 @@ export class PluginWorker {
       case "http":
         void this.onHttp(m.id, m.payload.url, m.payload.opts);
         break;
+      case "grpc":
+        void this.onGrpc(m.id, m.payload.url, m.payload.requestBase64, m.payload.opts);
+        break;
       case "parse":
         this.onParse(m.id, m.payload.html);
         break;
@@ -121,11 +132,7 @@ export class PluginWorker {
   }
 
   private async onHttp(id: string, url: string, opts: PluginHttpOpts): Promise<void> {
-    if (this.httpInflight >= MAX_CONCURRENT_HTTP) {
-      this.send({ type: "bridgeResult", id, ok: false, error: "http concurrency limit reached" });
-      return;
-    }
-    this.httpInflight++;
+    await this.acquireHttp();
     try {
       const trustedOpts: PluginHttpOpts = {
         ...opts,
@@ -137,8 +144,43 @@ export class PluginWorker {
     } catch (e) {
       this.send({ type: "bridgeResult", id, ok: false, error: errText(e) });
     } finally {
-      this.httpInflight--;
+      this.releaseHttp();
     }
+  }
+
+  private async onGrpc(
+    id: string,
+    url: string,
+    requestBase64: string,
+    opts: PluginGrpcOpts,
+  ): Promise<void> {
+    await this.acquireHttp();
+    try {
+      const value = await runPluginGrpc(url, requestBase64, {
+        ...opts,
+        allowReferer: this.plugin.baseUrl,
+        allowCookie: undefined,
+      });
+      this.send({ type: "bridgeResult", id, ok: true, value });
+    } catch (error) {
+      this.send({ type: "bridgeResult", id, ok: false, error: errText(error) });
+    } finally {
+      this.releaseHttp();
+    }
+  }
+
+  private acquireHttp(): Promise<void> {
+    if (this.httpInflight < MAX_CONCURRENT_HTTP) {
+      this.httpInflight++;
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => this.httpQueue.push(resolve));
+  }
+
+  private releaseHttp(): void {
+    const next = this.httpQueue.shift();
+    if (next) next();
+    else this.httpInflight--;
   }
 
   private onParse(id: string, html: string): void {

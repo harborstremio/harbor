@@ -27,7 +27,7 @@ export function WebhookField({
 }) {
   const t = useT();
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-4">
+ <div className="flex flex-col gap-3 rounded-md bg-canvas p-4">
       <div className="flex items-center justify-between gap-3">
         <span className="flex items-center gap-2 text-[13px] font-semibold text-ink">
           {logo}
@@ -43,18 +43,18 @@ export function WebhookField({
           placeholder={placeholder}
           spellCheck={false}
           autoComplete="off"
-          className="h-10 flex-1 rounded-lg border border-edge bg-canvas px-3 font-mono text-[12px] text-ink outline-none transition-colors focus:border-ink-subtle"
+          className="min-w-0 h-10 flex-1 rounded-md bg-canvas px-3 font-mono text-[12.5px] text-ink outline-none transition-colors focus:bg-elevated"
         />
         <button
           onClick={onTest}
           disabled={!value || status.state === "busy"}
-          className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-10 shrink-0 items-center gap-1.5 rounded-md bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {status.state === "busy" && <Loader2 size={12} strokeWidth={2.4} className="animate-spin" />}
           {t("Send test")}
         </button>
       </div>
-      <div className="rounded-lg bg-canvas/60 p-3 text-[12px] leading-relaxed text-ink-muted">
+      <div className="rounded-md bg-canvas p-3 text-[12.5px] leading-relaxed text-ink-muted">
         {help}
       </div>
     </div>
@@ -66,17 +66,17 @@ export function StatusBadge({ status }: { status: FieldStatus }) {
   if (status.state === "idle") return null;
   const palette =
     status.state === "ok"
-      ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-100"
+      ? "border-success/40 bg-success/15 text-success"
       : status.state === "error"
-        ? "border-rose-300/40 bg-rose-400/15 text-rose-100"
-        : "border-edge bg-elevated/40 text-ink-muted";
+        ? "border-danger/40 bg-danger/15 text-danger"
+        : "border-edge bg-elevated text-ink-muted";
   return (
     <span
-      className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${palette}`}
+      className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11.5px] font-semibold ${palette}`}
     >
-      {status.state === "ok" && <Check size={11} strokeWidth={2.6} />}
-      {status.state === "error" && <X size={11} strokeWidth={2.6} />}
-      {status.state === "busy" && <Loader2 size={11} strokeWidth={2.4} className="animate-spin" />}
+      {status.state === "ok" && <Check size={12} strokeWidth={2.6} />}
+      {status.state === "error" && <X size={12} strokeWidth={2.6} />}
+      {status.state === "busy" && <Loader2 size={12} strokeWidth={2.4} className="animate-spin" />}
       {status.message ? t(status.message) : null}
     </span>
   );
@@ -86,10 +86,10 @@ export function DiscordTutorial() {
   const t = useT();
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-[12px] text-ink-muted">
+      <p className="text-[12.5px] text-ink-muted">
         {t("Discord posts a message to a channel whenever Harbor pings it. Takes about a minute to set up.")}
       </p>
-      <ol className="ms-4 list-decimal space-y-1.5 text-[12px] text-ink-muted marker:text-ink-subtle">
+      <ol className="ms-4 list-decimal space-y-1.5 text-[12.5px] text-ink-muted marker:text-ink-subtle">
         <li>{t("Open the Discord server where you want notifications to land.")}</li>
         <li>{t("Right-click a text channel, pick")} <span className="text-ink">{t("Edit Channel")}</span>.</li>
         <li>{t("Click")} <span className="text-ink">{t("Integrations")}</span> {t("on the left, then")} <span className="text-ink">{t("Webhooks")}</span>.</li>
@@ -111,10 +111,10 @@ export function TelegramTutorial() {
   const t = useT();
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-[12px] text-ink-muted">
+      <p className="text-[12.5px] text-ink-muted">
         {t("Telegram sends through a bot you create. You need two things: a")} <span className="text-ink">{t("bot token")}</span> {t("and your")} <span className="text-ink">{t("chat ID")}</span>. {t("Both go in the boxes above. Harbor builds the URL for you.")}
       </p>
-      <ol className="ms-4 list-decimal space-y-1.5 text-[12px] text-ink-muted marker:text-ink-subtle">
+      <ol className="ms-4 list-decimal space-y-1.5 text-[12.5px] text-ink-muted marker:text-ink-subtle">
         <li>{t("Tap")} <span className="text-ink">{t("Open BotFather")}</span> {t("below. In Telegram, send him")} <span className="font-mono text-ink">/newbot</span>. {t("Pick any name. Pick a username ending in")} <span className="font-mono text-ink">bot</span>.</li>
         <li>{t("BotFather replies with a token like")} <span className="font-mono text-ink">1234567890:AAExample...</span>. {t("Long string with a colon in it. Copy it. Paste it into the")} <span className="text-ink">{t("Bot token")}</span> {t("box above.")}</li>
         <li>{t("Open the bot BotFather just made (he sends you a link). Send it any message so it's allowed to message you back.")}</li>
@@ -151,10 +151,10 @@ function ExternalLinkButton({ label, url }: { label: string; url: string }) {
     <button
       type="button"
       onClick={() => openUrl(url)}
-      className="inline-flex items-center gap-1.5 self-start rounded-lg border border-edge-soft bg-canvas/60 px-3 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:border-edge hover:bg-canvas/80"
+ className="inline-flex items-center gap-1.5 self-start rounded-md bg-canvas px-3 py-1.5 text-[11.5px] font-semibold text-ink transition-colors hover:bg-canvas"
     >
       {t(label)}
-      <ExternalLink size={11} strokeWidth={2.2} />
+      <ExternalLink size={12} strokeWidth={2.2} />
     </button>
   );
 }

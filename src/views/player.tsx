@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { resolveChromeTheme } from "@/lib/theme";
+import { useBigPicture } from "@/lib/big-picture";
 import { useActiveKid } from "@/lib/profiles";
 import { type PlayerBridge } from "@/lib/player/bridge";
 import { useDebridClients } from "@/lib/debrid/registry";
@@ -13,6 +14,7 @@ import { useQueue, useSleepAtEnd, queueIndexOf, setQueuePlaying } from "@/lib/qu
 import { useSkipSegments, useAdSegments } from "@/lib/skip-intro";
 import { withinAdWindow } from "@/lib/ad-report/window";
 import { isLocalUrl } from "@/lib/player/local-url";
+import { isLivePlaybackSrc } from "@/lib/player/live-src";
 import { hasPlaybackStartedForStallCheck, stallWaitMs } from "@/lib/player/stall-wait";
 import { useAuth } from "@/lib/auth";
 import { embedFlags } from "./player/player-utils";
@@ -55,6 +57,7 @@ import { useStartedNearEnd } from "./player/hooks/use-started-near-end";
 import { useFrameGrab } from "./player/hooks/use-frame-grab";
 import { useClipRecorder } from "./player/hooks/use-clip-recorder";
 import { useGifRecorder } from "./player/hooks/use-gif-recorder";
+import { HomeServerQualityControl } from "./player/home-server-quality-control";
 import { useSleepTimer } from "./player/hooks/use-sleep-timer";
 import { useAutoEndExit } from "./player/hooks/use-auto-end-exit";
 import { useQueueAdvance } from "./player/hooks/use-queue-advance";
@@ -88,17 +91,27 @@ import type { VolumeIndicatorState } from "@/components/player/volume-indicator"
 import type { ToastInfo } from "@/views/addons/addons-types";
 import { SFX } from "@/lib/sfx";
 import { useKeyboardNavigation } from "@/lib/keyboard-navigation";
+import { clearOverlayDismiss, dismissedJustNow } from "@/lib/player/overlay-dismiss";
 import { subtitleStreamKey } from "@/lib/subtitles/subtitle-memory";
 import { SUBTITLE_FPS_TRANSITION_FAILED_EVENT } from "@/lib/player/subtitle-fps";
 import { PlayerInteractionLockControls } from "@/components/player/player-interaction-lock";
 import { usePlayerInteractionLock } from "./player/hooks/use-player-interaction-lock";
+import { isNextAired } from "@/lib/cw-resurface";
 
 let hdrFallbackNoticeShown = false;
 
 export function PlayerView({ src }: { src: PlayerSrc }) {
-  const { setChromeHidden, topPath, openPicker, exitPlayback, replacePlayerSrc, exitPlayer } =
-    useView();
+  const {
+    setChromeHidden,
+    topPath,
+    openPicker,
+    exitPlayback,
+    replacePlayerSrc,
+    exitPlayer,
+    picker,
+  } = useView();
   const { settings, update } = useSettings();
+  const bigPictureActive = useBigPicture().active;
   const isKid = useActiveKid() != null;
   const t = useT();
   const chromeTheme = resolveChromeTheme(settings.theme, settings.playerChromeTheme);
@@ -154,6 +167,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     (isBundledEngineUrl(src.url) || isLocalEngineUrl(src.url)) &&
     !src.url.includes("/hlsv2/") &&
     !!src.streamRef?.infoHash;
+  const isLocalSrc = isLocalUrl(src.url);
   const { stats: engineStats, genuineFailure } = useEngineStats({
     url: src.url,
     infoHash: src.streamRef?.infoHash ?? null,
@@ -171,6 +185,8 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
           streamLen: engineStats?.streamLen ?? 0,
         }),
       );
+    } else if (isLocalSrc) {
+      setPlaybackDownloaded(1);
     } else if (!isLive && !isHls) {
       const dur = snap.durationSec || 0;
       setPlaybackDownloaded(dur > 0 ? Math.min(1, (snap.positionSec + snap.bufferedSec) / dur) : 0);
@@ -182,6 +198,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     engineStats?.streamLen,
     src.url,
     isP2pEngine,
+    isLocalSrc,
     src.isLive,
     src.meta.id,
     snap.positionSec,
@@ -289,7 +306,11 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     openPicker,
   });
 
-  const canChangeEpisode = src.meta.type === "series" && (!inRoom || isHost);
+  const airedNext =
+    adjacent.next && isNextAired(false, adjacent.next.airDate) ? adjacent.next : null;
+  const canChangeEpisode =
+    (src.meta.type === "series" || adjacent.next != null || adjacent.prev != null) &&
+    (!inRoom || isHost);
   const roomGuest = inRoom && !isHost;
   const broadcastEpisode = useCallback(
     (ep: PlayEpisode) => {
@@ -340,7 +361,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   useAutoNextEpisode({
     src,
     snap,
-    nextEp: settings.autoPlayNextEpisode && !queueOrSleepArmed ? adjacent.next : null,
+    nextEp: settings.autoPlayNextEpisode && !queueOrSleepArmed ? airedNext : null,
     canChangeEpisode,
     cancelled: autoNextCancelled,
     startedNearEndRef,
@@ -392,36 +413,29 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
         : { ...src, url: liveUrl, historyUrl: liveHistoryUrl, streamRef: liveStreamRef },
     [src, liveUrl, liveHistoryUrl, liveStreamRef],
   );
-  const {
-    resolvedImdbId,
-    subtitleSearchActive,
-    subAssNative,
-    captureExitSnapshot,
-    download,
-    subDropToast,
-  } = usePlayerMedia({
-    src: activeMediaSrc,
-    snap,
-    engine,
-    settings,
-    authKey,
-    bridgeRef,
-    bridgeReady,
-    bridgeKey,
-    svpActive,
-    videoMountRef,
-    toggleFullscreen,
-    castActiveRef: cast.castActiveRef,
-    season,
-    episode,
-  });
+  const { resolvedImdbId, subAssNative, captureExitSnapshot, download, subDropToast } =
+    usePlayerMedia({
+      src: activeMediaSrc,
+      snap,
+      engine,
+      settings,
+      authKey,
+      bridgeRef,
+      bridgeReady,
+      bridgeKey,
+      svpActive,
+      videoMountRef,
+      toggleFullscreen,
+      castActiveRef: cast.castActiveRef,
+      season,
+      episode,
+    });
 
   const contentAdvisory = useContentAdvisory(
     settings.contentAdvisoryToast,
-    (snap.status === "playing" || snap.status === "paused") && !subtitleSearchActive,
-    resolvedImdbId ?? src.imdbId ?? (src.meta.id.startsWith("tt") ? src.meta.id : null),
+    resolvedImdbId,
     src.url,
-    src.meta,
+    playing,
   );
   const { hostSourceRef } = useHostSource({
     inRoom,
@@ -442,11 +456,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     src,
     replacePlayerSrc,
   });
-  const isLiveLike =
-    liveOverlay.isLive ||
-    !!src.meta.id?.startsWith("iptv:") ||
-    (!!src.meta.type &&
-      !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
+  const isLiveLike = liveOverlay.isLive || isLivePlaybackSrc(src);
   const { hasNextEpisodeNow, hasPrevEpisodeNow, playNext, playPrev, playNextRef, playPrevRef } =
     useQueueNav({
       src,
@@ -734,6 +744,63 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   const videoFill = useVideoFill(bridgeRef, src.url, playing);
   useLivePictureEq(bridgeRef, src.url);
   const anime4k = useAnime4k(bridgeRef, src.url, src, snap.videoWidth);
+  const [mouseHoldSpeedActive, setMouseHoldSpeedActive] = useState(false);
+  const mouseHoldRef = useRef<{
+    pointerId: number | null;
+    timer: number | null;
+    engaged: boolean;
+    baseRate: number;
+  }>({ pointerId: null, timer: null, engaged: false, baseRate: 1 });
+  const suppressMouseClickRef = useRef(false);
+  const suppressMouseClickTimerRef = useRef<number | null>(null);
+
+  const releaseMouseHoldSpeed = useCallback(
+    (suppressClick: boolean) => {
+      const hold = mouseHoldRef.current;
+      if (hold.pointerId == null) return;
+      if (hold.timer != null) {
+        window.clearTimeout(hold.timer);
+        hold.timer = null;
+      }
+      const wasEngaged = hold.engaged;
+      hold.pointerId = null;
+      hold.engaged = false;
+      if (!wasEngaged) return;
+
+      bridgeRef.current?.setRate(hold.baseRate);
+      setMouseHoldSpeedActive(false);
+      if (!suppressClick) return;
+
+      suppressMouseClickRef.current = true;
+      if (suppressMouseClickTimerRef.current != null) {
+        window.clearTimeout(suppressMouseClickTimerRef.current);
+      }
+      suppressMouseClickTimerRef.current = window.setTimeout(() => {
+        suppressMouseClickRef.current = false;
+        suppressMouseClickTimerRef.current = null;
+      }, 0);
+    },
+    [bridgeRef],
+  );
+
+  useEffect(() => {
+    return () => {
+      const hold = mouseHoldRef.current;
+      if (hold.timer != null) window.clearTimeout(hold.timer);
+      if (hold.engaged) {
+        bridgeRef.current?.setRate(hold.baseRate);
+        setMouseHoldSpeedActive(false);
+      }
+      hold.pointerId = null;
+      hold.timer = null;
+      hold.engaged = false;
+      suppressMouseClickRef.current = false;
+      if (suppressMouseClickTimerRef.current != null) {
+        window.clearTimeout(suppressMouseClickTimerRef.current);
+      }
+    };
+  }, [bridgeRef, src.url]);
+
   const { holdSpeedActive, showStats, subtitleOffsetSec } = usePlayerHotkeys({
     bridgeRef,
     snap,
@@ -848,7 +915,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   useAutoEndExit({
     src,
     snap,
-    nextEp: adjacent.next,
+    nextEp: airedNext,
     canChangeEpisode,
     roomGuest,
     isLive: isLiveLike,
@@ -868,7 +935,6 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     exitPlayer,
   });
 
-  const isLocalSrc = isLocalUrl(src.url);
   const cancelToPicker = useCallback(() => {
     if (isLocalSrc || src.meta.id?.startsWith("iptv:")) {
       void closePlayer();
@@ -878,7 +944,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     bridgeRef.current = null;
     openPicker(src.meta, src.episode, { autoPlay: false });
   }, [bridgeRef, closePlayer, isLocalSrc, openPicker, src.episode, src.meta]);
-  const streamPillVariant = useStreamPill({
+  const { variant: streamPillVariant, dismiss: dismissStreamPill } = useStreamPill({
     srcUrl: src.url,
     snap,
     pipMode,
@@ -953,8 +1019,15 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     swapResolvingKey,
   });
   const [loaderShowing, setLoaderShowing] = useState(false);
+  // The desktop play-picker is a mouse surface, so while it is up the ten-foot
+  // chrome stands aside rather than layering a D-pad surface over something a
+  // remote cannot drive. PiP and draw are mouse modes for the same reason.
+  const tenFoot = bigPictureActive && !picker && !pipMode && !drawMode;
+  // One lever. showChrome feeds the transport, the quick tools, the ad-report
+  // button, the X-ray overlay and the P2P chip, and none of them belong on a
+  // television. Big Picture renders its own.
   const showChrome =
-    !screenLocked && !loaderActive && !loaderShowing && (chromeVisible || drawMode);
+    !screenLocked && !loaderActive && !loaderShowing && !tenFoot && (chromeVisible || drawMode);
   const liveShellSnap = cast.castDevice
     ? { ...snap, status: (cast.castPlaying ? "playing" : "paused") as typeof snap.status }
     : snap;
@@ -995,15 +1068,25 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   }, [src]);
 
   const overlayProps: PlayerOverlayLayersProps = {
+    tenFoot,
     snap,
     engine,
     src,
+    homeServerQualityControl: (
+      <HomeServerQualityControl
+        src={src}
+        positionMs={Math.max(0, snap.positionSec * 1000)}
+        playing={playing}
+        theme={resolveChromeTheme(settings.theme, settings.playerChromeTheme)}
+        replace={replacePlayerSrc}
+      />
+    ),
     adStreamRef: playStreamRef,
     adUrl: playUrl,
     subShowInPip: settings.subShowInPip,
     subAssNative,
     showStats,
-    holdSpeedActive,
+    holdSpeedActive: holdSpeedActive || mouseHoldSpeedActive,
     subtitleOffsetSec,
     volumeIndicator,
     volumeHudPosition: settings.playerVolumeHudPosition,
@@ -1047,8 +1130,8 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     pendingSeekSec,
     skipSegments,
     hasNextEpisode: hasNextEpisodeNow,
-    hasNextEpDisplay: canChangeEpisode && !autoNextCancelled && !!adjacent.next,
-    nextEp: canChangeEpisode && !autoNextCancelled ? adjacent.next : null,
+    hasNextEpDisplay: canChangeEpisode && !autoNextCancelled && !!airedNext,
+    nextEp: canChangeEpisode && !autoNextCancelled ? airedNext : null,
     nextEpMask,
     pillsVisible: hasStarted || !inRoom,
     allowAutoSkip: !roomGuest,
@@ -1122,6 +1205,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     streamPillVariant,
     mpvEmbedWindowsActive,
     setStreamCheckOpen,
+    dismissStreamPill,
     dvrOpen,
     setSwitcherOpen,
     onSwitchStream,
@@ -1168,9 +1252,60 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
       <div
         ref={videoMountRef}
         className="absolute inset-0"
+        onPointerDown={(e) => {
+          if (e.target !== e.currentTarget) return;
+          if (
+            e.pointerType !== "mouse" ||
+            !e.isPrimary ||
+            e.button !== 0 ||
+            drawMode ||
+            pipMode ||
+            screenLocked
+          ) {
+            return;
+          }
+          const hold = mouseHoldRef.current;
+          if (hold.pointerId != null) return;
+          const pointerId = e.pointerId;
+          hold.pointerId = pointerId;
+          hold.baseRate = snapRef.current.rate;
+          e.currentTarget.setPointerCapture(pointerId);
+          hold.timer = window.setTimeout(() => {
+            hold.timer = null;
+            if (hold.pointerId !== pointerId || snapRef.current.status !== "playing") return;
+            hold.engaged = true;
+            setMouseHoldSpeedActive(true);
+            bridgeRef.current?.setRate(Math.max(2, hold.baseRate));
+          }, 350);
+        }}
+        onPointerUp={(e) => {
+          if (mouseHoldRef.current.pointerId !== e.pointerId) return;
+          releaseMouseHoldSpeed(true);
+          if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+            e.currentTarget.releasePointerCapture(e.pointerId);
+          }
+        }}
+        onPointerCancel={(e) => {
+          if (mouseHoldRef.current.pointerId === e.pointerId) releaseMouseHoldSpeed(false);
+        }}
+        onLostPointerCapture={(e) => {
+          if (mouseHoldRef.current.pointerId === e.pointerId) releaseMouseHoldSpeed(false);
+        }}
         onClick={(e) => {
           if (e.target !== e.currentTarget) return;
           if (drawMode || pipMode) return;
+          if (suppressMouseClickRef.current) {
+            suppressMouseClickRef.current = false;
+            if (suppressMouseClickTimerRef.current != null) {
+              window.clearTimeout(suppressMouseClickTimerRef.current);
+              suppressMouseClickTimerRef.current = null;
+            }
+            return;
+          }
+          if (dismissedJustNow()) {
+            clearOverlayDismiss();
+            return;
+          }
           const resuming = snap.status !== "playing";
           playPauseToggle();
           if (resuming) hideForResume();
@@ -1212,7 +1347,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
           }}
         />
       )}
-      <LeaveConfirmModal />
+      {!tenFoot && <LeaveConfirmModal />}
       <HdrStageBridge
         active={hdrStageRequested}
         payload={{

@@ -10,7 +10,19 @@ import {
   type HashExactResult,
 } from "./pipeline";
 import { resolveTier0, type OsConfig } from "./opensubtitles";
-import { outcomeRank, type AffineTransform, type AlignmentQuality, type SyncTransform } from "./fp-gate";
+import {
+  outcomeRank,
+  unknownQuality,
+  type AffineTransform,
+  type AlignmentQuality,
+  type QualityMeasurement,
+  type SyncTransform,
+} from "./fp-gate";
+import {
+  nativeScoreMeasurement,
+  torrentScoreInvokeArgs,
+  type NativeDirectScore,
+} from "./direct-validation";
 
 export type TorrentWindow = { startSec: number; lenSec: number };
 
@@ -30,21 +42,23 @@ export type TorrentSyncOut = {
   leverSec: number;
   windows: number;
   ratioLocked: boolean;
+  fitWindowIds?: string[];
 };
 
 export type TorrentRef = { infoHash?: string | null; fileIdx?: number | null };
 
 export type TorrentClass = "torrent" | "debrid" | "direct";
 
-const UNVERIFIED_BASELINE_NCC = 0.85;
 const CANDIDATE_COVERAGE = 0.8;
-const BASELINE_Z = 6;
+const SCORE_TIMEOUT_MS = 6000;
 
 export function classifyTorrentSource(url: string, ref: TorrentRef): TorrentClass {
   const hasHash = typeof ref.infoHash === "string" && ref.infoHash.length > 0;
   const lower = url.toLowerCase();
   const loopbackStream =
-    (lower.includes("://127.0.0.1") || lower.includes("://localhost") || lower.includes("://[::1]")) &&
+    (lower.includes("://127.0.0.1") ||
+      lower.includes("://localhost") ||
+      lower.includes("://[::1]")) &&
     lower.includes("/stream/");
   if (loopbackStream && hasHash) return "torrent";
   if (hasHash && (lower.startsWith("http://") || lower.startsWith("https://"))) return "debrid";
@@ -107,17 +121,6 @@ function affineFrom(out: TorrentSyncOut): AffineTransform {
   return { kind: "affine", offsetSec: out.offsetSec, ratio: out.ratio };
 }
 
-function isIdentity(t: SyncTransform): boolean {
-  if (t.kind !== "affine") return false;
-  return Math.abs(t.offsetSec) < 1e-6 && Math.abs(t.ratio - 1) < 1e-9;
-}
-
-function affineParams(t: SyncTransform): { offsetSec: number; ratio: number } {
-  if (t.kind === "affine") return { offsetSec: t.offsetSec, ratio: t.ratio };
-  const s = t.segments[0];
-  return s ? { offsetSec: s.offsetSec, ratio: s.ratio } : { offsetSec: 0, ratio: 1 };
-}
-
 export type TorrentPortInputs = {
   ctx: PipelineContext;
   fileIdx: number;
@@ -130,7 +133,6 @@ export type TorrentPortInputs = {
 export function createTorrentPorts(input: TorrentPortInputs): Partial<TierPorts> {
   const { ctx, fileIdx } = input;
   const infoHash = ctx.infoHash ?? "";
-  const cache = { candidate: null as TorrentSyncOut | null };
 
   const hashExact: TierPorts["hashExact"] = async () => {
     const avail = input.availability;
@@ -170,51 +172,62 @@ export function createTorrentPorts(input: TorrentPortInputs): Partial<TierPorts>
       positionSec: input.getPositionSec ? input.getPositionSec() : undefined,
     });
     if (!out) return null;
-    cache.candidate = out;
     input.onCandidate?.(out);
     const quality: AlignmentQuality = {
       ncc: out.confidence,
       coverage: CANDIDATE_COVERAGE,
       z: out.confidence >= 0.55 ? 8 : 0,
     };
-    const vad: VadResult = { transform: affineFrom(out), rawScore: out.confidence, quality };
+    const vad: VadResult = {
+      transform: affineFrom(out),
+      rawScore: out.confidence,
+      quality,
+      fitWindowIds: out.fitWindowIds?.length ? out.fitWindowIds : undefined,
+    };
     return vad;
   };
 
   const scoreTransform = async (
     mctx: PipelineContext,
     transform: SyncTransform,
-  ): Promise<AlignmentQuality | null> => {
-    if (input.availability && input.availability.windows.length === 0) return null;
-    const a = affineParams(transform);
+    request?: import("./fp-gate").QualityMeasurementRequest,
+  ): Promise<QualityMeasurement> => {
+    const method = "torrent-score-transform";
+    if (transform.kind !== "affine") {
+      return unknownQuality("not-supported", method);
+    }
+    if (input.availability && input.availability.windows.length === 0) {
+      return unknownQuality("insufficient-data", method);
+    }
     try {
-      const q = await invoke<AlignmentQuality | null>("torrent_score_transform", {
-        infoHash,
-        fileIdx,
-        url: mctx.mediaUrl,
-        headers: mctx.headers ?? null,
-        cues: mctx.cues,
-        durationSec: mctx.durationSec,
-        offsetSec: a.offsetSec,
-        ratio: a.ratio,
-        positionSec: input.getPositionSec ? input.getPositionSec() : null,
-      });
-      return q && Number.isFinite(q.ncc) ? { ncc: q.ncc, coverage: q.coverage, z: q.z } : null;
+      const q = await invoke<NativeDirectScore | null>(
+        "torrent_score_transform",
+        torrentScoreInvokeArgs(
+          mctx,
+          transform,
+          infoHash,
+          fileIdx,
+          input.getPositionSec ? input.getPositionSec() : null,
+          request,
+        ),
+      );
+      return nativeScoreMeasurement(q, request, method, "torrent");
     } catch {
-      return null;
+      return unknownQuality("provider-error", method);
     }
   };
 
-  const measureQuality: TierPorts["measureQuality"] = async (mctx, transform) => {
-    const real = await scoreTransform(mctx, transform);
-    if (real) return real;
-    const cand = cache.candidate;
-    if (!isIdentity(transform) && cand) {
-      return { ncc: cand.confidence, coverage: CANDIDATE_COVERAGE, z: cand.confidence >= 0.55 ? 8 : 0 };
-    }
-    const baseline = cand ? Math.max(cand.confidence, UNVERIFIED_BASELINE_NCC) : UNVERIFIED_BASELINE_NCC;
-    return { ncc: baseline, coverage: CANDIDATE_COVERAGE, z: BASELINE_Z };
-  };
+  const measureQuality: TierPorts["measureQuality"] = (mctx, transform, request) =>
+    new Promise<QualityMeasurement>((resolve) => {
+      const timer = setTimeout(
+        () => resolve(unknownQuality("timeout", "torrent-score-transform")),
+        SCORE_TIMEOUT_MS,
+      );
+      void scoreTransform(mctx, transform, request).then((measurement) => {
+        clearTimeout(timer);
+        resolve(measurement);
+      });
+    });
 
   return { hashExact, vadAffine, measureQuality };
 }
@@ -282,7 +295,10 @@ export function scheduleProgressiveTorrentSync(args: ProgressiveArgs): Progressi
     runs += 1;
     lastCandidate = null;
     const snap = args.getSnapshot();
-    const ctx: PipelineContext = { ...args.ctx, durationSec: snap.durationSec || args.ctx.durationSec };
+    const ctx: PipelineContext = {
+      ...args.ctx,
+      durationSec: snap.durationSec || args.ctx.durationSec,
+    };
     const outcome = await runTorrentAutoSync(ctx, fileIdx, args.basePorts, args.opts ?? {}, {
       osConfig: args.osConfig,
       availability,

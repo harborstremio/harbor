@@ -12,13 +12,15 @@ import { setSecondarySub } from "@/lib/player/secondary-sub";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { wasLimitReached } from "@/lib/subtitles/limit-signal";
+import { bindSubtitleDownloadAuth } from "@/lib/subtitles/provider-auth";
 import type { SubtitleLoadMetadata } from "@/lib/subtitles/types";
 import { MenuBody } from "./subtitle-menu/menu-body";
+import { ResizableSubtitlePanel } from "./subtitle-menu/resizable-panel";
 import { useSubtitleContext } from "./subtitle-menu/subtitle-context-store";
 import type { SubtitleMenuProps } from "./subtitle-menu/types";
 import { buildOverlayState } from "./subtitle-menu/utils";
-import { ResizableSubtitlePanel } from "./subtitle-menu/resizable-panel";
 import { Tooltip } from "./transport/tooltip";
+import { watchOutsideMouseDown } from "@/lib/player/overlay-dismiss";
 
 export type { SubtitleMenuProps } from "./subtitle-menu/types";
 
@@ -50,10 +52,10 @@ export function SubtitleMenu(props: Props) {
       const target = e.target as HTMLElement | null;
       if (wrap.current?.contains(target)) return;
       if (target?.closest("[data-title-suggest-dropdown]")) return;
+      if (target?.closest("[data-dropdown-menu]")) return;
       setOpen(false);
     };
-    window.addEventListener("mousedown", close);
-    return () => window.removeEventListener("mousedown", close);
+    return watchOutsideMouseDown(close);
   }, [open, useOverlay]);
 
   useEffect(() => {
@@ -91,25 +93,25 @@ export function SubtitleMenu(props: Props) {
           requestId?: string;
         }
       >("modal://subtitle/add", (e) => {
-        void Promise.resolve(
-          propsRef.current.onAddSubtitle(e.payload.url, e.payload.lang, e.payload.title, {
-            format: e.payload.format,
-            encoding: e.payload.encoding,
-            release: e.payload.release,
-            provider: e.payload.provider,
-            matchScore: e.payload.matchScore,
-            matchConfidence: e.payload.matchConfidence,
-            subId: e.payload.subId,
-          }),
-        )
-          .then((result) =>
-            result !== false ? "ok" : wasLimitReached(e.payload.url) ? "limited" : "failed",
-          )
+        const { url, lang, title, requestId, ...metadata } = e.payload;
+        void (async () => {
+          const authKind = metadata.downloadAuth?.kind;
+          const apiKey =
+            authKind === "subsource-api-key"
+              ? settings.subsourceApiKey
+              : authKind === "subdl-api-key"
+                ? settings.subdlApiKey
+                : null;
+          const downloadAuth = await bindSubtitleDownloadAuth(authKind, apiKey);
+          const mainWindowMetadata: SubtitleLoadMetadata = { ...metadata, downloadAuth };
+          return propsRef.current.onAddSubtitle(url, lang, title, mainWindowMetadata);
+        })()
+          .then((result) => (result !== false ? "ok" : wasLimitReached(url) ? "limited" : "failed"))
           .catch(() => "failed" as const)
           .then((result) => {
-            if (!e.payload.requestId) return;
+            if (!requestId) return;
             return modalOverlayEmitResult("modal://subtitle/add-result", {
-              requestId: e.payload.requestId,
+              requestId,
               result,
             });
           });
@@ -119,7 +121,7 @@ export function SubtitleMenu(props: Props) {
     return () => {
       offs.forEach((p) => p.then((fn) => fn()).catch(() => {}));
     };
-  }, [useOverlay]);
+  }, [useOverlay, settings.subsourceApiKey, settings.subdlApiKey]);
 
   useEffect(() => {
     if (!useOverlay || !open) return;
@@ -189,14 +191,23 @@ export function SubtitleMenu(props: Props) {
             open ? "bg-white/22 text-white" : "text-white/85 hover:bg-white/10 hover:text-white"
           }`}
         >
-          <SubsIcon size={19} strokeWidth={2} />
+          {props.iconUrl ? (
+            <img
+              src={props.iconUrl}
+              alt=""
+              className="h-[22px] w-[22px] shrink-0 select-none object-contain"
+              draggable={false}
+            />
+          ) : (
+            <SubsIcon size={19} strokeWidth={2} />
+          )}
           {subSelected && (
             <span className="absolute end-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-emerald-400" />
           )}
         </button>
       </Tooltip>
       {open && (forceInline || !useOverlay) && (
-        <ResizableSubtitlePanel className="fixed end-6 bottom-24">
+        <ResizableSubtitlePanel className="fixed end-14 bottom-[150px] animate-menu-pop">
           <MenuBody
             {...props}
             preferredLanguages={preferredLanguages}

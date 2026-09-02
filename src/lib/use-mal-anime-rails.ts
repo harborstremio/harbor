@@ -29,22 +29,32 @@ function malEntryToMeta(entry: MalListEntry): Meta | null {
   };
 }
 
+export type MalRailsState = { rails: MalRail[]; loading: boolean; error: boolean };
+
+const IDLE: MalRailsState = { rails: [], loading: false, error: false };
+
 export function useMalAnimeRails(): MalRail[] {
+  return useMalAnimeRailsState().rails;
+}
+
+export function useMalAnimeRailsState(): MalRailsState {
   const { isConnected } = useMal();
-  const [rails, setRails] = useState<MalRail[]>([]);
+  const [state, setState] = useState<MalRailsState>(IDLE);
 
   useEffect(() => {
     if (!isConnected) {
-      setRails([]);
+      setState(IDLE);
       return;
     }
     let cancelled = false;
+    setState({ rails: [], loading: true, error: false });
     (async () => {
       let groups: MalListGroup[];
       try {
         groups = await fetchMalList();
       } catch (e) {
         console.error("Failed to fetch MAL list", e);
+        if (!cancelled) setState({ rails: [], loading: false, error: true });
         return;
       }
       if (cancelled) return;
@@ -62,12 +72,12 @@ export function useMalAnimeRails(): MalRail[] {
         if (metas.length >= MIN_PER_RAIL) out.push({ key: rail.key, title: rail.title, metas });
       }
 
-      if (!cancelled) setRails(out);
+      if (!cancelled) setState({ rails: out, loading: false, error: false });
     })();
     return () => {
       cancelled = true;
     };
   }, [isConnected]);
 
-  return rails;
+  return state;
 }

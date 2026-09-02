@@ -3,8 +3,8 @@ import { useT } from "@/lib/i18n";
 import { ProfileAvatar } from "./account-menu-parts";
 import type { AccountMenuController } from "./use-account-menu";
 
-const ITEM = "flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink";
-const SUB_ITEM = "flex items-center gap-2.5 py-2.5 ps-11 pe-4 text-start text-[13px] text-ink-subtle transition-colors hover:bg-raised hover:text-ink";
+const ITEM = "flex items-center gap-2.5 px-4 py-2.5 text-start text-[13.5px] text-ink-muted transition-colors duration-150 ease-[var(--ease-out)] hover:bg-raised hover:text-ink active:scale-[0.98]";
+const SUB_ITEM = "flex items-center gap-2.5 py-2 ps-11 pe-4 text-start text-[13px] text-ink-subtle transition-colors duration-150 ease-[var(--ease-out)] hover:bg-raised hover:text-ink";
 
 export function AccountMenuPanel({
   ctrl,
@@ -29,10 +29,10 @@ export function AccountMenuPanel({
 
   return (
     <div
-      className={`harbor-profile-dropdown absolute z-40 overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_20px_44px_-12px_rgba(0,0,0,0.65)] ${positionClass}`}
+      className={`harbor-profile-dropdown absolute z-40 overflow-hidden rounded-md bg-elevated ring-1 ring-edge shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] ${positionClass}`}
     >
       {showHeader && (
-        <div className="border-b border-edge-soft px-4 py-3">
+        <div className="border-b border-edge-soft px-4 py-2.5">
           <div className="truncate text-[13.5px] font-semibold text-ink">{name}</div>
           {user?.email && <div className="truncate text-[11.5px] text-ink-subtle">{user.email}</div>}
         </div>
@@ -47,12 +47,12 @@ export function AccountMenuPanel({
             <button
               key={p.id}
               onClick={() => requestSwitch(p)}
-              className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-start transition-colors hover:bg-raised"
+              className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-start transition-colors duration-150 ease-[var(--ease-out)] hover:bg-raised active:scale-[0.98]"
             >
               <span className="relative inline-flex shrink-0">
                 <ProfileAvatar profile={p} user={null} fallbackAvatar={null} size="sm" />
                 {p.passwordHash && (
-                  <span className="absolute -bottom-0.5 -end-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-canvas text-ink shadow-sm ring-1 ring-edge">
+                  <span className="absolute -bottom-0.5 -end-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-canvas text-ink ring-1 ring-edge">
                     <Lock size={8} strokeWidth={2.6} />
                   </span>
                 )}
@@ -97,7 +97,7 @@ export function AccountMenuPanel({
             />
           </button>
           {manageOpen && (
-            <div className="flex flex-col bg-canvas/30">
+            <div className="flex flex-col bg-canvas/50">
               <button
                 onClick={() => {
                   openPicker({ kind: "list" });

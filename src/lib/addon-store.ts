@@ -1,7 +1,12 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { readActiveStremioAuthKey } from "./auth";
 import { setUserAddons, userAddons, type Addon } from "./addons";
-import { applyOrderToItems } from "./addons-store/reorder";
+import {
+  applyOrderToItems,
+  loadDisplayOrder,
+  replaceUrlsInOrder,
+  saveDisplayOrder,
+} from "./addons-store/reorder";
 
 const PROFILES_KEY = "harbor.profiles.v1";
 
@@ -107,13 +112,42 @@ function readAuthKey(): string | null {
   return readActiveStremioAuthKey();
 }
 
-async function pushToStremio(addon: Addon, mode: "install" | "uninstall"): Promise<boolean> {
+async function pushToStremio(
+  addon: Addon,
+  mode: "install" | "uninstall",
+  replacedUrls: string[] = [],
+): Promise<boolean> {
   const authKey = readAuthKey();
   if (!authKey) return true;
   try {
     const current = await userAddons(authKey);
-    const filtered = current.filter((a) => a.transportUrl !== addon.transportUrl);
-    const next = mode === "install" ? [...filtered, addon] : filtered;
+    const id = addon.manifest.id;
+    const replaced = new Set(replacedUrls.filter((u) => u !== addon.transportUrl));
+    // Only remove entries that are actually being replaced (same id, same transport
+    // URL, or an explicitly replaced transport URL), so an update keeps the addon's
+    // place in the collection rather than pushing a fresh copy to the end.
+    const insertIndex = current.findIndex(
+      (a) =>
+        a.manifest.id === id ||
+        a.transportUrl === addon.transportUrl ||
+        replaced.has(a.transportUrl),
+    );
+    const filtered = current.filter(
+      (a) =>
+        a.manifest.id !== id &&
+        a.transportUrl !== addon.transportUrl &&
+        !replaced.has(a.transportUrl),
+    );
+    let next: Addon[];
+    if (mode === "uninstall") {
+      next = filtered;
+    } else if (insertIndex === -1) {
+      next = [...filtered, addon];
+    } else {
+      next = filtered.slice(0, insertIndex);
+      next.push(addon);
+      next.push(...filtered.slice(insertIndex));
+    }
     return await setUserAddons(authKey, next);
   } catch {
     return false;
@@ -214,6 +248,15 @@ export function reorderInstalled(urlSequence: string[]): void {
   const items = loadInstalled();
   if (items.length < 2) return;
   saveInstalled(applyOrderToItems(items, urlSequence));
+}
+
+function preserveOrderOnReplace(oldUrls: string[], newUrl: string): void {
+  let order = loadDisplayOrder();
+  if (order.length === 0) {
+    order = loadInstalled().map((a) => a.transportUrl);
+  }
+  if (order.length === 0) return;
+  saveDisplayOrder(replaceUrlsInOrder(order, oldUrls, newUrl));
 }
 
 export function loadDisabledAddons(): Set<string> {
@@ -342,11 +385,18 @@ export type InstallResult = {
 export async function installAddon(id: string, transportUrl: string): Promise<Addon> {
   const manifest = await fetchManifestAt(transportUrl);
   const canonicalId = manifest.id || id;
-  const next = loadInstalled().filter((a) => a.transportUrl !== transportUrl);
+  const before = loadInstalled();
+  // Deduplicate by ID (handles URL changes during updates) and by URL (re-installs)
+  const next = before.filter((a) => a.id !== canonicalId && a.transportUrl !== transportUrl);
+  const replaced = before.filter((a) => a.id === canonicalId || a.transportUrl === transportUrl);
+  const replacedUrls = replaced.map((a) => a.transportUrl);
+  if (replaced.length > 0) {
+    preserveOrderOnReplace(replacedUrls, transportUrl);
+  }
   next.push({ id: canonicalId, transportUrl, installedAt: Date.now(), manifest });
   saveInstalled(next);
   const addon: Addon = { manifest, transportUrl };
-  await pushToStremio(addon, "install");
+  await pushToStremio(addon, "install", replacedUrls);
   return addon;
 }
 
@@ -362,27 +412,22 @@ export async function installFromUrl(
   const replaceId = options.replaceId && options.replaceId !== id ? options.replaceId : null;
   const replacedById = before.some((a) => a.id === id);
   const replacedByOld = replaceId != null && before.some((a) => a.id === replaceId);
+  // Deduplicate by ID (updates), URL (re-installs), or explicit replaceId
   const next = before.filter(
-    (a) => a.transportUrl !== parsed.url && (!replaceId || a.id !== replaceId),
+    (a) => a.id !== id && a.transportUrl !== parsed.url && (!replaceId || a.id !== replaceId),
   );
+  const replaced = before.filter(
+    (a) =>
+      a.id === id || a.transportUrl === parsed.url || (replaceId != null && a.id === replaceId),
+  );
+  const replacedUrls = replaced.map((a) => a.transportUrl);
+  if (replaced.length > 0) {
+    preserveOrderOnReplace(replacedUrls, parsed.url);
+  }
   next.push({ id, transportUrl: parsed.url, installedAt: Date.now(), manifest });
   saveInstalled(next);
   const addon: Addon = { manifest, transportUrl: parsed.url };
-  const syncedToStremio = await pushToStremio(addon, "install");
-  if (replaceId && replaceId !== id) {
-    const authKey = readAuthKey();
-    if (authKey) {
-      try {
-        const current = await userAddons(authKey);
-        const trimmed = current.filter((a) => a.manifest.id !== replaceId);
-        if (trimmed.length !== current.length) {
-          await setUserAddons(authKey, trimmed);
-        }
-      } catch {
-        /* noop */
-      }
-    }
-  }
+  const syncedToStremio = await pushToStremio(addon, "install", replacedUrls);
   return { addon, syncedToStremio, replaced: replacedById || replacedByOld };
 }
 

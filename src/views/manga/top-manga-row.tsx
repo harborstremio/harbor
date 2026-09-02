@@ -26,7 +26,7 @@ export function TopMangaRow({
   const t = useT();
 
   const award = collection.award === true;
-  const why = award ? t("{honor} winner", { honor: honorFor(collection) }) : collection.badge;
+  const why = award ? t("{honor} winner", { honor: honorFor(collection) }) : t(collection.badge);
 
   const open = async () => {
     if (busy || missing) return;

@@ -1,26 +1,19 @@
 import { CalendarRange, Globe2, Tv } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
+import {
+  buildXtreamUrls,
+  EMPTY_PLAYLIST_FORM,
+  type PlaylistFormValue,
+  type PlaylistKind,
+} from "@/lib/iptv/playlist-entry";
 
-export type PlaylistKind = "m3u" | "xtream" | "epg";
+// Re-exported rather than redeclared: Big Picture's setup screen needs the same
+// shape and the same URL builder, and it must not pull this file in to get them.
+export { buildXtreamUrls };
+export type { PlaylistFormValue, PlaylistKind };
 
-export type PlaylistFormValue = {
-  name: string;
-  kind: PlaylistKind;
-  url: string;
-  epgUrl: string;
-  xtream: { server: string; username: string; password: string };
-};
-
-const EMPTY_XTREAM = { server: "", username: "", password: "" };
-
-export const EMPTY_FORM: PlaylistFormValue = {
-  name: "",
-  kind: "m3u",
-  url: "",
-  epgUrl: "",
-  xtream: { ...EMPTY_XTREAM },
-};
+export const EMPTY_FORM: PlaylistFormValue = EMPTY_PLAYLIST_FORM;
 
 const KINDS: Array<{ id: PlaylistKind; label: string; icon: React.ReactNode; sub: string }> = [
   { id: "m3u", label: "M3U URL", icon: <Tv size={14} strokeWidth={1.9} />, sub: "Direct .m3u link" },
@@ -244,12 +237,3 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export function buildXtreamUrls(server: string, username: string, password: string) {
-  const base = server.replace(/\/+$/, "");
-  const u = encodeURIComponent(username);
-  const p = encodeURIComponent(password);
-  return {
-    m3u: `${base}/get.php?username=${u}&password=${p}&type=m3u_plus&output=ts`,
-    epg: `${base}/xmltv.php?username=${u}&password=${p}`,
-  };
-}

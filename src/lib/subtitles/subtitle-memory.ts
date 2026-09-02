@@ -1,4 +1,6 @@
 import type { SubtitleMatchConfidence } from "./release-match";
+import type { SubtitleDownloadAuthKind } from "./provider-auth";
+import type { SubtitleLoadMetadata } from "./types";
 import type { PlayerStreamRef } from "@/lib/view";
 
 const STORAGE_KEY = "harbor.subtitle.memory.v1";
@@ -16,6 +18,8 @@ export type RememberedSub = {
   release?: string;
   format?: SubtitleFormat;
   encoding?: string;
+  downloadAuthKind?: SubtitleDownloadAuthKind;
+  providerDerived?: boolean;
   matchScore?: number;
   matchConfidence?: SubtitleMatchConfidence;
   streamKey?: string;
@@ -24,8 +28,10 @@ export type RememberedSub = {
 };
 
 export type SubChoiceInput = {
+  id?: string;
   lang?: string | null;
   url?: string;
+  originalUrl?: string;
   title?: string;
   external?: boolean;
   externalFilename?: string;
@@ -34,6 +40,8 @@ export type SubChoiceInput = {
   release?: string;
   format?: SubtitleFormat;
   encoding?: string;
+  downloadAuth?: SubtitleLoadMetadata["downloadAuth"];
+  providerDerived?: boolean;
   matchScore?: number;
   matchConfidence?: SubtitleMatchConfidence;
   streamKey?: string;
@@ -148,10 +156,68 @@ export function rememberedFromChoice(choice: SubChoiceInput): Omit<RememberedSub
     release: choice.release,
     format: choice.format,
     encoding: choice.encoding,
+    downloadAuthKind: choice.downloadAuth?.kind,
+    providerDerived: choice.providerDerived,
     matchScore: choice.matchScore,
     matchConfidence: choice.matchConfidence,
     streamKey: choice.streamKey,
     imported: choice.imported === true || undefined,
+  };
+}
+
+export function rememberedChoiceFromLoad(
+  url: string,
+  lang?: string,
+  title?: string,
+  metadata?: SubtitleLoadMetadata,
+): SubChoiceInput {
+  const source = metadata?.originalUrl ?? url;
+  return {
+    lang,
+    title,
+    url: source,
+    source,
+    external: true,
+    format: metadata?.format,
+    encoding: metadata?.encoding,
+    downloadAuth: metadata?.downloadAuth,
+    providerDerived: metadata?.providerDerived,
+    provider: metadata?.provider,
+    release: metadata?.release,
+    subId: metadata?.subId,
+    matchScore: metadata?.matchScore,
+    matchConfidence: metadata?.matchConfidence,
+  };
+}
+
+export function rememberedSubtitleIsLocal(
+  remembered: RememberedSub | null | undefined,
+): remembered is RememberedSub & { source: string } {
+  if (remembered?.imported !== true || !remembered.source) return false;
+  return !/^(https?|blob|data):/i.test(remembered.source);
+}
+
+export function subtitleSourceIsLocal(source: string | null | undefined): boolean {
+  return !!source && !/^(https?|blob|data):/i.test(source);
+}
+
+export function rememberedSubtitleLoadMetadata(
+  remembered: RememberedSub,
+  downloadAuth?: SubtitleLoadMetadata["downloadAuth"],
+): SubtitleLoadMetadata {
+  return {
+    format: remembered.format,
+    encoding: remembered.encoding,
+    originalUrl: remembered.source,
+    downloadAuth,
+    release: remembered.release,
+    provider: remembered.provider,
+    providerDerived:
+      remembered.providerDerived ??
+      (rememberedSubtitleIsLocal(remembered) ? false : Boolean(remembered.provider)),
+    subId: remembered.subId,
+    matchScore: remembered.matchScore,
+    matchConfidence: remembered.matchConfidence,
   };
 }
 

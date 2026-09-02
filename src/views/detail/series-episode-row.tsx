@@ -1,4 +1,5 @@
-import { Check, Eye, Play } from "lucide-react";
+import { Check, Eye } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { useEffect, useMemo, useState } from "react";
 import { EpisodeRatingBadge } from "./episode-rating-badge";
@@ -81,9 +82,10 @@ export function EpisodeRow({
     <div
       data-ep={ep.episodeNumber}
       data-no-card-ring
+      style={{ contentVisibility: "auto", containIntrinsicSize: "auto 160px" }}
       onContextMenu={(e) => onContextMenu?.(e, ep.seasonNumber, ep.episodeNumber, progress.watched)}
       onMouseEnter={() => prefetchSegments(meta, playEpisode)}
-      className="group flex gap-6 rounded-2xl px-4 py-5 transition-colors hover:bg-elevated/30"
+      className="group flex gap-6 rounded-lg px-4 py-5 transition-colors hover:bg-elevated/30"
     >
       <button
         onClick={() =>
@@ -117,7 +119,7 @@ export function EpisodeRow({
             {ep.episodeNumber}
           </span>
           {progress.watched && (
-            <span className="absolute end-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/22 text-emerald-200 ring-1 ring-emerald-400/40 backdrop-blur-sm">
+            <span className="absolute end-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-success/20 text-success backdrop-blur-sm">
               <Check size={12} strokeWidth={3} />
             </span>
           )}
@@ -153,7 +155,7 @@ export function EpisodeRow({
                 .join("  ·  ")}
             </span>
             {progress.watched && watchedAgo && (
-              <span className="text-emerald-300/85">· {t("Watched {ago}", { ago: watchedAgo })}</span>
+              <span className="text-success/90">· {t("Watched {ago}", { ago: watchedAgo })}</span>
             )}
             {!progress.watched && progress.ratio > 0.01 && watchedAgo && (
               <span className="text-accent/85">

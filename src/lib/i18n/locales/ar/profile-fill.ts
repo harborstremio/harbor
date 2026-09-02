@@ -1,7 +1,7 @@
 const profileFill: Record<string, string> = {
-  "General": "عام",
-  "Look": "المظهر",
-  "optional": "اختياري",
+  General: "عام",
+  Look: "المظهر",
+  optional: "اختياري",
   "Your name and the details shown at the top of your profile.":
     "اسمك والتفاصيل التي تظهر أعلى ملفك الشخصي.",
   "Your avatar, banner, and how the whole profile is styled.":
@@ -12,8 +12,7 @@ const profileFill: Record<string, string> = {
     "تحكّم بمن يمكنه رؤية أصدقائك ونشاطك وإحصائياتك.",
   "Show a Minecraft card on your profile. Leave the username blank to hide it.":
     "اعرض بطاقة Minecraft في ملفك الشخصي. اترك اسم المستخدم فارغًا لإخفائها.",
-  "Show a Minecraft card with your username":
-    "اعرض بطاقة Minecraft باسم المستخدم الخاص بك",
+  "Show a Minecraft card with your username": "اعرض بطاقة Minecraft باسم المستخدم الخاص بك",
   "Showing {name}": "يظهر {name}",
   "Manage connection": "إدارة الاتصال",
   "Show your Simkl card": "إظهار بطاقة Simkl",
@@ -216,8 +215,6 @@ const profileFill: Record<string, string> = {
   "Add background": "إضافة خلفية",
   "In a watch party": "في جلسة المشاهدة معاً",
   "{count} aboard": "{count} على المتن",
-  "Paused on ": "متوقّف عند ",
-  "Watching ": "يشاهد ",
   something: "شيء ما",
   Share: "مشاركة",
   "Share profile": "مشاركة الملف الشخصي",

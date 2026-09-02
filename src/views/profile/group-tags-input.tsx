@@ -30,7 +30,7 @@ export function GroupTagsInput({ tags, onChange }: { tags: string[]; onChange: (
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-1.5 rounded-[10px] bg-surface p-1.5 ring-1 ring-edge-soft">
+      <div className="flex flex-wrap items-center gap-1.5 rounded-md bg-surface p-1.5 ring-1 ring-edge-soft">
         {tags.map((tag) => (
           <span
             key={tag}

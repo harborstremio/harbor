@@ -116,6 +116,13 @@ export async function torrentEngineSelect(infoHash: string, fileIdx: number): Pr
   }
 }
 
+export async function torrentEngineSelectSet(infoHash: string, fileIdxs: number[]): Promise<void> {
+  if (!isTauri) return;
+  await invoke("torrent_engine_select_set", { infoHash, fileIdxs }).catch((e) =>
+    console.warn("[engine] select set failed", e),
+  );
+}
+
 export async function torrentEngineStats(
   infoHash: string,
   fileIdx: number | null,
@@ -211,7 +218,7 @@ function writePendingDeletes(pending: Set<string>): void {
     if (pending.size === 0) localStorage.removeItem(PENDING_DELETE_KEY);
     else localStorage.setItem(PENDING_DELETE_KEY, JSON.stringify([...pending]));
   } catch {
-    /* cleanup remains best-effort if local storage is unavailable */
+    /* noop */
   }
 }
 

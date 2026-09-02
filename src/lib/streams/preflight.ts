@@ -6,6 +6,8 @@ const probeFetch: typeof fetch = isTauri ? (tauriHttpFetch as unknown as typeof 
 
 const MIN_REAL_SIZE_BYTES = 5 * 1024 * 1024;
 const PREFLIGHT_TIMEOUT_MS = 1200;
+const MANIFEST_URL_RX = /\.(m3u8|mpd)(\?|#|$)/i;
+const MANIFEST_TYPE_RX = /mpegurl|dash\+xml|application\/xml|text\//i;
 
 export type PreflightOk = { ok: true; sizeBytes: number | null };
 export type PreflightFail = {
@@ -43,6 +45,7 @@ async function run(url: string, signal?: AbortSignal): Promise<PreflightResult> 
 }
 
 async function probe(url: string, signal?: AbortSignal): Promise<PreflightResult> {
+  if (MANIFEST_URL_RX.test(url)) return { ok: true, sizeBytes: null };
   const ctrl = new AbortController();
   const onAbort = () => ctrl.abort();
   signal?.addEventListener("abort", onAbort);
@@ -64,6 +67,8 @@ async function probe(url: string, signal?: AbortSignal): Promise<PreflightResult
     if (!rangeRes.ok && rangeRes.status !== 206 && rangeRes.status !== 200) {
       return { ok: false, reason: "http-error", sizeBytes: null, status: rangeRes.status };
     }
+    const isManifestBody = MANIFEST_TYPE_RX.test(rangeRes.headers.get("Content-Type") ?? "");
+    if (isManifestBody) return { ok: true, sizeBytes: null };
     const rangeTotal = parseRangeTotal(rangeRes.headers.get("Content-Range"));
     if (rangeTotal != null && rangeTotal > 0 && rangeTotal < MIN_REAL_SIZE_BYTES) {
       return { ok: false, reason: "stub", sizeBytes: rangeTotal };

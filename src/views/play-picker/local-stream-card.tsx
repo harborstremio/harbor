@@ -1,4 +1,5 @@
-import { HardDrive, Play } from "lucide-react";
+import { HardDrive } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { LocalEntry } from "@/lib/local-library";
 import { episodeLabel } from "@/lib/local-library/player-src";
 import { LocalVersionBadges } from "@/components/local-version-badges";

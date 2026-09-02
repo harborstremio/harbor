@@ -1,6 +1,7 @@
-import { Flame, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { FlameStreak } from "@/components/icons/flame-streak";
 import { useT } from "@/lib/i18n";
 import { closeVoyage, useVoyage } from "@/lib/voyage/store";
 import { VoyageChooser } from "./voyage-chooser";
@@ -37,11 +38,11 @@ export function VoyageModal() {
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
-        className="relative flex max-h-[88vh] w-full max-w-[720px] flex-col overflow-hidden rounded-2xl border border-edge bg-surface shadow-[0_40px_120px_-24px_rgba(0,0,0,0.85)]"
+        className="relative flex max-h-[88vh] w-full max-w-[720px] flex-col overflow-hidden rounded-lg bg-elevated shadow-[0_40px_120px_-24px_rgba(0,0,0,0.85)]"
         style={{
           animation: closing
             ? `voyage-pop-out ${CLOSE_MS}ms cubic-bezier(0.4,0,1,1) forwards`
-            : "voyage-pop-in 300ms cubic-bezier(0.32,0.72,0.24,1) both",
+            : "voyage-pop-in 380ms ease-in-out both",
         }}
       >
         {active && (
@@ -53,8 +54,8 @@ export function VoyageModal() {
         )}
 
         {streak > 1 && (
-          <span className="absolute start-4 top-4 z-30 flex items-center gap-1 rounded-full bg-raised/70 px-2.5 py-1 text-[11px] font-semibold text-ink-muted">
-            <Flame size={12} strokeWidth={2.2} fill="currentColor" className="text-accent" />
+          <span className="absolute start-4 top-4 z-30 flex h-[22px] items-baseline gap-1 rounded-md bg-white/[0.06] ps-1.5 pe-2.5 text-[11px] font-semibold text-ink-muted">
+            <FlameStreak size={14} className="text-accent" />
             <span className="tabular-nums">{streak}</span>
             <span className="text-ink-subtle">{t("day streak")}</span>
           </span>
@@ -64,7 +65,7 @@ export function VoyageModal() {
           type="button"
           onClick={requestClose}
           aria-label={t("Close")}
-          className="absolute end-4 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-canvas/55 text-ink-subtle transition-colors hover:bg-canvas/80 hover:text-ink active:scale-95"
+          className="harbor-press-pop absolute end-4 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-md bg-white/[0.06] text-ink-subtle transition-colors hover:bg-white/[0.10] hover:text-ink"
         >
           <X size={17} />
         </button>
@@ -76,7 +77,12 @@ export function VoyageModal() {
       <style>{`
         @keyframes voyage-scrim-in { from { opacity: 0 } to { opacity: 1 } }
         @keyframes voyage-scrim-out { from { opacity: 1 } to { opacity: 0 } }
-        @keyframes voyage-pop-in { from { opacity: 0; transform: scale(0.97) translateY(10px) } to { opacity: 1; transform: none } }
+        @keyframes voyage-pop-in {
+          0% { opacity: 0; translate: 0 14px; scale: 0.985 1.01 }
+          55% { opacity: 1 }
+          68% { translate: 0 -3px; scale: 1.004 0.994 }
+          100% { opacity: 1; translate: 0 0; scale: 1 1 }
+        }
         @keyframes voyage-pop-out { from { opacity: 1; transform: none } to { opacity: 0; transform: scale(0.99) translateY(3px) } }
       `}</style>
     </div>,

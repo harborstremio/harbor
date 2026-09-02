@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Layers } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
+import { AllAddonsIcon } from "@/components/icons/harbor-glyphs";
 import { useT } from "@/lib/i18n";
 import type { MangaChapter } from "@/views/manga/manga-reader/reader-types";
 
@@ -89,7 +90,7 @@ export function SourceMenu({
         {activeEntry ? (
           <SourceIcon url={activeEntry.iconUrl} name={activeEntry.name} size={14} />
         ) : (
-          <Layers size={13} strokeWidth={2.2} className="shrink-0" />
+          <AllAddonsIcon size={13} className="shrink-0" />
         )}
         <span className="truncate">{activeEntry ? activeEntry.name : t("All sources")}</span>
         <ChevronDown
@@ -101,7 +102,7 @@ export function SourceMenu({
       {open && (
         <div className="animate-popover-in absolute start-0 top-[calc(100%+6px)] z-20 w-60 origin-top-left overflow-hidden rounded-xl border border-edge bg-elevated p-1.5 shadow-[0_18px_44px_-14px_rgba(0,0,0,0.7)]">
           <SourceRow
-            icon={<Layers size={15} strokeWidth={2.1} className="shrink-0 text-ink-muted" />}
+            icon={<AllAddonsIcon size={15} className="shrink-0 text-ink-muted" />}
             name={t("All sources")}
             count={total}
             active={active === "all"}

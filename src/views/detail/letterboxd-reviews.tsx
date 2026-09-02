@@ -167,7 +167,7 @@ function LetterboxdReviewsInner({ meta, imdbId }: { meta: Meta; imdbId: string |
         </div>
         <div className="flex items-center gap-2">
           {/* Filters */}
-          <div className="flex items-center gap-1 rounded-lg bg-elevated/40 p-0.5 ring-1 ring-edge-soft/60">
+          <div className="flex items-center gap-1 rounded-lg bg-canvas p-0.5">
             <FilterBtn
               active={filter === "all"}
               onClick={() => { setFilter("all"); setShowAll(false); }}
@@ -192,7 +192,7 @@ function LetterboxdReviewsInner({ meta, imdbId }: { meta: Meta; imdbId: string |
               onClick={() => fetchReviews()}
               disabled={loading}
               aria-label={t("Refresh")}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-muted ring-1 ring-edge transition-colors hover:bg-elevated hover:text-ink disabled:opacity-50"
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.06] text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink disabled:opacity-50"
             >
               {loading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
             </button>
@@ -201,7 +201,7 @@ function LetterboxdReviewsInner({ meta, imdbId }: { meta: Meta; imdbId: string |
           {reviewsUrl && (
             <button
               onClick={() => openUrl(reviewsUrl)}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium text-ink-muted ring-1 ring-edge transition-colors hover:bg-elevated hover:text-ink"
+              className="flex items-center gap-1.5 rounded-lg bg-white/[0.06] px-3 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
             >
               {t("All reviews")}
               <ExternalLink size={11} strokeWidth={2.2} />
@@ -289,7 +289,7 @@ function LetterboxdReviewsInner({ meta, imdbId }: { meta: Meta; imdbId: string |
           {hiddenCount > 0 && (
             <button
               onClick={() => setShowAll(true)}
-              className="mt-1 flex h-10 items-center justify-center gap-2 rounded-xl border border-edge-soft bg-elevated/40 text-[13px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+              className="mt-1 flex h-10 items-center justify-center gap-2 rounded-xl bg-white/[0.06] text-[13px] font-semibold text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
             >
               <Heart size={14} />
               {t("Show {n} more reviews", { n: hiddenCount })}

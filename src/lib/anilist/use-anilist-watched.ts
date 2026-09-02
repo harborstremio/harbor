@@ -3,19 +3,11 @@ import { useAnilist } from "@/lib/anilist/provider";
 import { fetchListEntry } from "@/lib/anilist/mutations";
 import { resolveAnilistMediaId } from "@/lib/anilist/sync";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
+import { airedOnly } from "@/lib/aired";
 
 export type AnilistWatched = { watchedKeys: Set<string>; completed: boolean };
 
 const EMPTY: AnilistWatched = { watchedKeys: new Set(), completed: false };
-
-function airedEpisodes(episodes: KitsuEpisode[]): KitsuEpisode[] {
-  const now = Date.now();
-  return episodes.filter((e) => {
-    if (!e.airdate) return true;
-    const t = Date.parse(e.airdate);
-    return !Number.isFinite(t) || t <= now;
-  });
-}
 
 export function useAnilistWatched(harborId: string, episodes: KitsuEpisode[]): AnilistWatched {
   const { isConnected } = useAnilist();
@@ -44,8 +36,11 @@ export function useAnilistWatched(harborId: string, episodes: KitsuEpisode[]): A
         return;
       }
       const { status, progress } = info.entry;
-      const sorted = airedEpisodes(episodesRef.current).sort(
-        (a, b) => (a.seasonNumber ?? 1) - (b.seasonNumber ?? 1) || a.number - b.number,
+      const sorted = airedOnly(
+        [...episodesRef.current].sort(
+          (a, b) => (a.seasonNumber ?? 1) - (b.seasonNumber ?? 1) || a.number - b.number,
+        ),
+        (e) => e.airdate,
       );
       const mediaTotal = info.episodes;
       const cap =

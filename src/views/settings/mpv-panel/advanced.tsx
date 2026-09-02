@@ -15,17 +15,19 @@ export function AdvancedMpvSection() {
       title={t("Advanced (mpv.conf)")}
       subtitle={t("The escape hatch for power users. One mpv option per line as key=value, exactly like mpv.conf. These apply last, so they override every dial above. Anything Harbor can't read is skipped, so a typo won't break playback. Restart playback to apply.")}
     >
-      <textarea
-        value={value}
-        onChange={(e) => update({ mpvExtraOptions: e.target.value })}
-        spellCheck={false}
-        rows={5}
-        placeholder={"tone-mapping=hable\ninverse-tone-mapping=yes\nbrightness=5\nsub-scale=1.2"}
-        className="w-full resize-y rounded-xl border border-edge-soft bg-canvas/60 px-3.5 py-2.5 font-mono text-[12.5px] leading-relaxed text-ink placeholder:text-ink-subtle outline-none focus:border-edge"
-      />
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12px]">
+      <div className="rounded-md bg-elevated p-1.5">
+        <textarea
+          value={value}
+          onChange={(e) => update({ mpvExtraOptions: e.target.value })}
+          spellCheck={false}
+          rows={5}
+          placeholder={"tone-mapping=hable\ninverse-tone-mapping=yes\nbrightness=5\nsub-scale=1.2"}
+          className="block w-full resize-y rounded-[4px] bg-canvas px-3.5 py-2.5 font-mono text-[12.5px] leading-relaxed text-ink placeholder:text-ink-subtle outline-none"
+        />
+      </div>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-[12.5px]">
         {check.valid > 0 && (
-          <span className="font-medium text-emerald-400">
+          <span className="font-medium text-success">
             {check.valid === 1 ? t("1 option active") : t("{n} options active", { n: check.valid })}
           </span>
         )}
@@ -39,8 +41,8 @@ export function AdvancedMpvSection() {
         )}
       </div>
       {check.risky.length > 0 && (
-        <div className="flex items-start gap-2.5 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3.5 py-3 text-[12px] leading-snug text-ink">
-          <AlertTriangle size={14} strokeWidth={2.2} className="mt-0.5 shrink-0 text-amber-300" />
+        <div className="flex items-start gap-2.5 rounded-md bg-elevated px-4 py-3.5 text-[12.5px] leading-snug text-ink">
+          <AlertTriangle size={14} strokeWidth={2.2} className="mt-0.5 shrink-0 text-danger" />
           <span>
             {t("Heads up: {keys} can load outside scripts or open your player to the network. Only keep these if you know exactly what they do.", {
               keys: check.risky.join(", "),
@@ -49,8 +51,8 @@ export function AdvancedMpvSection() {
         </div>
       )}
       {compiled && (
-        <details className="group rounded-xl border border-edge-soft bg-canvas/40 px-3.5 py-2.5">
-          <summary className="cursor-pointer list-none text-[12px] font-semibold text-ink-muted transition-colors hover:text-ink">
+        <details className="group rounded-md bg-elevated px-4 py-3.5">
+          <summary className="cursor-pointer list-none text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink">
             {t("See the mpv.conf your dials above generate")}
           </summary>
           <pre className="mt-2 overflow-x-auto whitespace-pre-wrap font-mono text-[11.5px] leading-relaxed text-ink-subtle">

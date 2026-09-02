@@ -23,6 +23,12 @@ import { MiddleClickScroll } from "@/lib/use-middle-click-scroll";
 import { exitWindowFullscreenOnPlayerClose, toggleWindowFullscreen } from "@/lib/fullscreen-state";
 import { flushCloudSync } from "@/views/player/hooks/use-stremio-sync";
 import { startWriteQueueFlusher } from "@/lib/stremio-write-queue";
+import {
+  mediaServerConnections,
+  mediaServerSyncDue,
+  updateMediaServerConnection,
+} from "@/lib/media-server/connections";
+import { synchronizeMediaServer } from "@/lib/media-server/sync";
 import { setNativeMemoryActive } from "@/lib/native-memory";
 import { useOverlayPinned } from "@/lib/overlay-pin";
 import { isMobileWeb, isRemoteRoute } from "@/lib/platform";
@@ -80,6 +86,8 @@ import { RemindersRunner } from "@/lib/reminders-runner";
 import { MangaTrackingRunner } from "@/lib/manga-tracking";
 import { RemoteHostMount } from "@/lib/remote/host-mount";
 import { RemoteOpenBridge } from "@/lib/remote/remote-open-bridge";
+import { PlayOnModal } from "@/components/play-on-modal";
+import { ControllerConnectedToast } from "@/components/controller-connected-toast";
 import { GamepadRunner } from "@/components/gamepad-runner";
 import { ProfileIdentitySync } from "@/lib/profile-identity-sync";
 import { HarborAvatarSync } from "@/components/harbor-avatar-sync";
@@ -134,6 +142,11 @@ import { MalProvider } from "@/lib/mal/provider";
 import { SimklProvider } from "@/lib/simkl/provider";
 import { LetterboxdProvider } from "@/lib/stremboxd/provider";
 import { useKeyboardNavigation, tvFocus } from "@/lib/keyboard-navigation";
+import { enterBigPicture, useBigPicture } from "@/lib/big-picture";
+import { BpErrorBoundary } from "@/views/big-picture/bp-error-boundary";
+import { shouldAutoStartBigPicture, shouldOfferBigPicture } from "@/views/big-picture/bp-logic";
+import { BigPictureEntryButton } from "@/views/big-picture/bp-entry-button";
+import { releaseBigPictureFullscreen } from "@/views/big-picture/use-bp-fullscreen";
 import { getNavFocusTarget } from "@/lib/keyboard-navigation/geometry";
 import { SFX } from "@/lib/sfx";
 
@@ -222,8 +235,12 @@ const MatchDetailView = lazy(() =>
 const PlaylistVodView = lazy(() => importVod().then((m) => ({ default: m.PlaylistVodView })));
 const DownloadsView = lazy(() => importDownloads().then((m) => ({ default: m.DownloadsView })));
 const MangaView = lazy(() => import("@/views/manga").then((m) => ({ default: m.MangaView })));
+const EBookView = lazy(() => import("@/views/ebook").then((m) => ({ default: m.EBookView })));
 const OnboardingModal = lazy(() =>
   importOnboarding().then((m) => ({ default: m.OnboardingModal })),
+);
+const BigPictureShell = lazy(() =>
+  import("@/views/big-picture/bp-shell").then((m) => ({ default: m.BigPictureShell })),
 );
 
 function useViewPreloader(tmdbKey: string) {
@@ -390,12 +407,15 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                   <FeaturedListsSyncRunner />
                                                   <RatingsSyncRunner />
                                                   <ActivitySyncRunner />
+                                                  <MediaServerSyncRunner />
                                                   <AutoDownloadRunner />
                                                   <RemindersRunner />
                                                   <MangaTrackingRunner />
                                                   <RemoteHostMount />
                                                   <RemoteOpenBridge />
+                                                  <PlayOnModal />
                                                   <GamepadRunner />
+                                                  <ControllerConnectedToast />
                                                   <DiscordPresence />
                                                   <WatchPresenceRunner />
                                                   <ContextMenu />
@@ -472,6 +492,67 @@ function RatingsSyncRunner() {
 
 function ActivitySyncRunner() {
   useActivitySync();
+  return null;
+}
+
+const MEDIA_SERVER_SYNC_MS = 15 * 60 * 1000;
+
+function MediaServerSyncRunner() {
+  useEffect(() => {
+    let cancelled = false;
+    let running = false;
+    const launchSynced = new Set<string>();
+    const refresh = async () => {
+      if (running) return;
+      running = true;
+      try {
+        for (const connection of mediaServerConnections().filter(
+          (entry) =>
+            mediaServerSyncDue(entry) &&
+            (entry.refreshInterval !== "launch" || !launchSynced.has(entry.id)),
+        )) {
+          if (cancelled) break;
+          if (connection.refreshInterval === "launch") launchSynced.add(connection.id);
+          await synchronizeMediaServer(connection).catch((cause) => {
+            const at = Date.now();
+            updateMediaServerConnection(
+              connection.id,
+              {
+                lastSyncResult: {
+                  ok: false,
+                  message: cause instanceof Error ? cause.message : String(cause),
+                  at,
+                },
+              },
+              connection.profileId,
+            );
+          });
+        }
+      } finally {
+        running = false;
+      }
+    };
+    const onWake = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    const timer = window.setInterval(() => void refresh(), MEDIA_SERVER_SYNC_MS);
+    const initial = window.setTimeout(() => void refresh(), 2500);
+    const onProfile = () => {
+      launchSynced.clear();
+      void refresh();
+    };
+    window.addEventListener("harbor:active-profile-changed", onProfile);
+    window.addEventListener("online", refresh);
+    document.addEventListener("visibilitychange", onWake);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      window.clearTimeout(initial);
+      window.removeEventListener("harbor:active-profile-changed", onProfile);
+      window.removeEventListener("online", refresh);
+      document.removeEventListener("visibilitychange", onWake);
+    };
+  }, []);
   return null;
 }
 
@@ -702,6 +783,8 @@ function Shell({ onReady }: { onReady?: () => void }) {
   } = useView();
   const { settings, update } = useSettings();
   const { setOpen: setSearchOpen } = useSearch();
+  const bigPicture = useBigPicture().active;
+  const bigPictureBooted = useRef(false);
   const uiScaleRef = useRef(settings.uiScale);
   const { activeProfile } = useProfiles();
   const kid = activeProfile?.kid ?? null;
@@ -758,8 +841,23 @@ function Shell({ onReady }: { onReady?: () => void }) {
     );
   }, []);
 
+  useEffect(() => {
+    void releaseBigPictureFullscreen();
+  }, []);
+
+  useEffect(() => {
+    const go = shouldAutoStartBigPicture({
+      autoStart: settings.bigPictureAutoStart,
+      alreadyBooted: bigPictureBooted.current,
+      kidProfileActive: kid !== null,
+    });
+    if (!go) return;
+    bigPictureBooted.current = true;
+    enterBigPicture();
+  }, [settings.bigPictureAutoStart, kid]);
+
   useKeyboardNavigation({
-    enabled: settings.tvNavigation && !player && !picker,
+    enabled: settings.tvNavigation && !player && !picker && !bigPicture,
     wrap: false,
     onBack: handleTvBack,
     onBackToNav: handleTvBackToNav,
@@ -1043,6 +1141,14 @@ function Shell({ onReady }: { onReady?: () => void }) {
       openSettings: () => setView("settings"),
       openNotifications: () => openNotificationCenter(),
       openAccountMenu: (el?: unknown) => openAccountMenu(anchorFromElement(el)),
+      bigPicture: () => {
+        const offer = shouldOfferBigPicture({
+          kidProfileActive: kid !== null,
+          buttonEnabled: settings.bigPictureButton,
+          suppressedByChrome: false,
+        });
+        if (offer) enterBigPicture();
+      },
       tryViewMyProfile,
       viewMyProfile: async () => {
         if (tryViewMyProfile()) return;
@@ -1053,7 +1159,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
       onUnread: (cb: (count: number) => void) =>
         typeof cb === "function" ? subscribeUnread(cb) : () => {},
     };
-  }, [setView, goBack, setSearchOpen]);
+  }, [setView, goBack, setSearchOpen, kid, settings.bigPictureButton]);
 
   useEffect(() => {
     if (topKind !== "live") {
@@ -1196,6 +1302,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const vodTop = topKind === "vod";
   const downloadsTop = topKind === "downloads";
   const mangaTop = topKind === "manga";
+  const ebookTop = topKind === "ebook";
   const peopleTop = topKind === "people";
   const matchDetailTop = topKind === "match-detail";
 
@@ -1276,6 +1383,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const vodAlive = useIdleEvict(vodTop);
   const downloadsAlive = useIdleEvict(downloadsTop);
   const mangaAlive = useIdleEvict(mangaTop);
+  const ebookAlive = useIdleEvict(ebookTop);
   const peopleAlive = useIdleEvict(peopleTop);
 
   return (
@@ -1445,6 +1553,13 @@ function Shell({ onReady }: { onReady?: () => void }) {
           <div className={layer(mangaTop)}>
             <Suspense fallback={null}>
               <MangaView />
+            </Suspense>
+          </div>
+        )}
+        {ebookAlive && (
+          <div className={layer(ebookTop)}>
+            <Suspense fallback={null}>
+              <EBookView />
             </Suspense>
           </div>
         )}
@@ -1673,6 +1788,11 @@ function Shell({ onReady }: { onReady?: () => void }) {
             <TogetherButton />
           </div>
         )}
+        {!immersive && !playerActive && !pickerTop && !bigPicture && layout === "custom" && (
+          <div className="harbor-bp-proxy">
+            <BigPictureEntryButton hidden={chromeHidden} />
+          </div>
+        )}
         {!immersive && layout === "rail" && !settingsTop && (
           <div
             aria-hidden
@@ -1687,6 +1807,13 @@ function Shell({ onReady }: { onReady?: () => void }) {
             src={player}
           />
         </Suspense>
+      )}
+      {bigPicture && (
+        <BpErrorBoundary>
+          <Suspense fallback={null}>
+            <BigPictureShell />
+          </Suspense>
+        </BpErrorBoundary>
       )}
       <CustomCodeMount />
       <ThemeChromeBridge />

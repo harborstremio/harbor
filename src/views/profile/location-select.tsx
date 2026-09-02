@@ -39,14 +39,14 @@ export function LocationSelect({ value, onChange }: { value: string; onChange: (
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex min-h-11 w-full items-center gap-2.5 rounded-[10px] bg-elevated px-3 text-start text-[14px] text-ink ring-1 ring-edge-soft transition-colors hover:ring-edge"
+        className="flex min-h-11 w-full items-center gap-2.5 rounded-md bg-elevated px-3 text-start text-[14px] text-ink ring-1 ring-edge-soft transition-colors hover:ring-edge"
       >
         <FlagBadge code={current?.code} />
         <span className="flex-1 truncate">{current ? current.name : t("No location")}</span>
         <ChevronDown size={16} className={`shrink-0 text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="absolute z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-[10px] border border-edge bg-elevated py-1 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.7)]">
+        <div className="absolute z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-edge bg-elevated py-1 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.7)]">
           <Option label={t("No location")} selected={!value} onClick={() => { onChange(""); setOpen(false); }} />
           {COUNTRIES.map((c) => (
             <Option

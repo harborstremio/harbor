@@ -246,12 +246,15 @@ const NAME_TO_CODE: Record<string, string> = (() => {
   m["jp"] = "ja";
   m["mandarin"] = "zh";
   m["cantonese"] = "zh";
+  m["العربية"] = "ar";
+  m["عربي"] = "ar";
   return m;
 })();
 
 export function normalizeLang(input?: string | null): string {
   if (!input) return "";
   const raw = input.trim().toLowerCase();
+  if (raw === "in") return "id";
   if (LATAM_ALIASES.has(raw)) return "es-419";
   if (BRAZIL_ALIASES.has(raw)) return "pt-br";
   if (raw.length === 2) return raw;
@@ -270,6 +273,25 @@ export function normalizeLang(input?: string | null): string {
 export function languageName(code: string): string {
   const n = normalizeLang(code);
   return NAMES[n] || code.toUpperCase();
+}
+
+export function isKnownLanguage(code?: string | null): boolean {
+  return !!code && Object.hasOwn(NAMES, normalizeLang(code));
+}
+
+export function trackLanguageName(lang?: string | null, title?: string | null): string {
+  const base = normalizeLang(lang ?? "");
+  if (title) {
+    const fromTitle = normalizeLang(title);
+    if (
+      NAMES[fromTitle] &&
+      fromTitle !== base &&
+      (!base || base.split("-")[0] === fromTitle.split("-")[0])
+    ) {
+      return NAMES[fromTitle];
+    }
+  }
+  return NAMES[base] || (lang ? lang.toUpperCase() : "");
 }
 
 const IMPLAUSIBLE_LANG_PATTERN =
@@ -303,7 +325,9 @@ export function filterTracksByPreferredLanguage<T extends { id: string; lang?: s
   preferred: string[],
 ): T[] {
   if (preferred.length === 0) return tracks;
-  return tracks.filter((track) => langScore(track.lang ?? "", preferred) >= 0);
+  // An untagged track has no evidence that it is the wrong language. Keep it
+  // visible so local sidecars and poorly tagged media are still selectable.
+  return tracks.filter((track) => !track.lang || langScore(track.lang, preferred) >= 0);
 }
 
 export function pickBestTrack<T extends { lang?: string; default?: boolean; forced?: boolean }>(
