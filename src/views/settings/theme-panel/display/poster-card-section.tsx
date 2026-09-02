@@ -108,10 +108,7 @@ export function PosterCardSection({ previewPoster }: { previewPoster: string }) 
               </SettingRow>
             )}
 
-            <SettingRow
-              label={t("Size")}
-              desc={SIZE_LABEL(t, settings.posterScale)}
-            >
+            <SettingRow label={t("Size")} desc={SIZE_LABEL(t, settings.posterScale)}>
               <input
                 type="range"
                 min={0}
@@ -119,16 +116,15 @@ export function PosterCardSection({ previewPoster }: { previewPoster: string }) 
                 step={1}
                 aria-label={t("Size")}
                 value={sizeIndex(settings.posterScale)}
-                onChange={(e) => update({ posterScale: POSTER_SIZES[Number(e.target.value)].scale })}
+                onChange={(e) =>
+                  update({ posterScale: POSTER_SIZES[Number(e.target.value)].scale })
+                }
                 className="harbor-slider w-[190px] shrink-0"
                 style={fillStyle(sizeIndex(settings.posterScale), 0, POSTER_SIZES.length - 1)}
               />
             </SettingRow>
 
-            <SettingRow
-              label={t("Corner radius")}
-              desc={RADIUS_LABEL(t, settings.posterRadius)}
-            >
+            <SettingRow label={t("Corner radius")} desc={RADIUS_LABEL(t, settings.posterRadius)}>
               <input
                 type="range"
                 min={0}
@@ -144,7 +140,9 @@ export function PosterCardSection({ previewPoster }: { previewPoster: string }) 
 
             <SettingRow
               label={t("Load effect")}
-              desc={t("Blur up looks smoothest. Fade is lighter on older devices. Instant turns it off.")}
+              desc={t(
+                "Blur up looks smoothest. Fade is lighter on older devices. Instant turns it off.",
+              )}
             >
               <Segmented
                 value={settings.posterEffect}
@@ -159,7 +157,9 @@ export function PosterCardSection({ previewPoster }: { previewPoster: string }) 
 
             <SettingRow
               label={t("Quality")}
-              desc={t("High is sized to your screen and looks identical to full res on far less memory. Balanced saves the most. Maximum keeps original resolution.")}
+              desc={t(
+                "High is sized to your screen and looks identical to full res on far less memory. Balanced saves the most. Maximum keeps original resolution.",
+              )}
             >
               <Segmented
                 value={settings.posterQuality}
@@ -178,13 +178,17 @@ export function PosterCardSection({ previewPoster }: { previewPoster: string }) 
       <Section title={t("Card behaviour")}>
         <ToggleRow
           label={t("Focused Card")}
-          sub={t("Emphasize the selected card across the page while gently darkening and blurring the other cards.")}
+          sub={t(
+            "Emphasize the selected card across the page while gently darkening and blurring the other cards.",
+          )}
           value={settings.posterFocusedCard}
           onChange={(posterFocusedCard) => update({ posterFocusedCard })}
         />
         <ToggleRow
           label={t("Expanding Cards")}
-          sub={t("Expand poster cards during keyboard or remote navigation across poster rows, using preloaded wide artwork.")}
+          sub={t(
+            "Expand poster cards during keyboard or remote navigation across poster rows, using preloaded wide artwork.",
+          )}
           value={settings.posterBackdropExpansion}
           onChange={(posterBackdropExpansion) => update({ posterBackdropExpansion })}
         />
@@ -249,7 +253,7 @@ function PosterDockPreview({ transitionMs }: { transitionMs: number }) {
       cellWidth: firstCell.getBoundingClientRect().width,
       gap: 12,
       scrollPosition: 0,
-      rtl: false,
+      rtl: getComputedStyle(track).direction === "rtl",
       transitionMs,
     });
   };

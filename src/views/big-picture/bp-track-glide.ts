@@ -70,8 +70,9 @@ function stop(g: Glide | undefined): void {
  * and no snap-to-previous-target guard is needed before the measurement.
  */
 export function glideBpTrack(track: HTMLElement, to: number, reduce: boolean): void {
+  const isRtl = getComputedStyle(track).direction === "rtl";
   const max = Math.max(0, track.scrollWidth - track.clientWidth);
-  const target = Math.max(0, Math.min(to, max));
+  const target = isRtl ? Math.max(-max, Math.min(to, 0)) : Math.max(0, Math.min(to, max));
   const now = performance.now();
   const g = live.get(track);
   const from = track.scrollLeft;

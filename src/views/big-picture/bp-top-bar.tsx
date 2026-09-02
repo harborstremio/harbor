@@ -14,10 +14,7 @@ import { BpProfileMenu } from "./bp-profile-menu";
 import { useBpT } from "./bp-i18n";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { useHarborLogo } from "@/lib/harbor-logo";
-import {
-  goBigPictureTab,
-  type BigPictureTabKind,
-} from "@/lib/big-picture";
+import { goBigPictureTab, type BigPictureTabKind } from "@/lib/big-picture";
 
 function useClock(): string {
   const [now, setNow] = useState(() => new Date());
@@ -38,7 +35,11 @@ type BpTab = {
 
 const TABS: BpTab[] = [
   { kind: "home", label: "Home", icon: (a) => <HomeIcon active={a} /> },
-  { kind: "discover", label: "Discover", icon: () => <NavGlyph name="explore" className="h-[26px] w-[26px] p-[2px]" /> },
+  {
+    kind: "discover",
+    label: "Discover",
+    icon: () => <NavGlyph name="explore" className="h-[26px] w-[26px] p-[2px]" />,
+  },
   {
     kind: "anime",
     label: "Anime",
@@ -47,12 +48,25 @@ const TABS: BpTab[] = [
     parentalKey: "anime",
   },
   { kind: "shows", label: "Shows", icon: (a) => <TvIcon active={a} />, parentalKey: "shows" },
-  { kind: "movies", label: "Movies", icon: (a) => <MoviesIcon active={a} />, parentalKey: "movies" },
+  {
+    kind: "movies",
+    label: "Movies",
+    icon: (a) => <MoviesIcon active={a} />,
+    parentalKey: "movies",
+  },
   // Deliberately not gated on hasLive. A TV-only viewer has never seen the
   // desktop app, so hiding the tab until a playlist exists hid the only route to
   // adding one. Live TV owns its own setup screen when there is nothing yet.
-  { kind: "live", label: "Live TV", icon: () => <NavGlyph name="livetv" className="h-[26px] w-[26px] p-[2px]" /> },
-  { kind: "search", label: "Search", icon: () => <NavGlyph name="search" className="h-[26px] w-[26px] p-[2px]" /> },
+  {
+    kind: "live",
+    label: "Live TV",
+    icon: () => <NavGlyph name="livetv" className="h-[26px] w-[26px] p-[2px]" />,
+  },
+  {
+    kind: "search",
+    label: "Search",
+    icon: () => <NavGlyph name="search" className="h-[26px] w-[26px] p-[2px]" />,
+  },
   {
     kind: "library",
     label: "Library",
@@ -61,7 +75,11 @@ const TABS: BpTab[] = [
   },
   // Ungated for the same reason as Live TV: it needs a TMDB key, and hiding it
   // until there is one hid the only place that explains how to add one.
-  { kind: "collections", label: "Collections", icon: () => <NavGlyph name="collections" className="h-[26px] w-[26px] p-[2px]" /> },
+  {
+    kind: "collections",
+    label: "Collections",
+    icon: () => <NavGlyph name="collections" className="h-[26px] w-[26px] p-[2px]" />,
+  },
   { kind: "settings", label: "Settings", icon: (a) => <SettingsIcon active={a} /> },
 ];
 
@@ -77,10 +95,7 @@ export function useBpTabGate(): BpTabGate {
   const { settings } = useSettings();
   const { locked, hiddenTabs } = useParental();
   const animeHidden = Boolean(settings.hideContent.anime);
-  return useMemo(
-    () => ({ animeHidden, locked, hiddenTabs }),
-    [animeHidden, locked, hiddenTabs],
-  );
+  return useMemo(() => ({ animeHidden, locked, hiddenTabs }), [animeHidden, locked, hiddenTabs]);
 }
 
 function visibleTabs(gate: BpTabGate): BpTab[] {
@@ -178,12 +193,12 @@ function BpTabButton({
       onBlur={() => onHint(null, "")}
       aria-label={title}
       className={`${TAB_BASE} justify-center ${
-        !compact && on
-          ? "gap-[clamp(6px,0.5vw,9px)] px-[clamp(11px,1vw,20px)]"
-          : "aspect-square"
+        !compact && on ? "gap-[clamp(6px,0.5vw,9px)] px-[clamp(11px,1vw,20px)]" : "aspect-square"
       } ${on ? "bg-[var(--bp-on)] text-ink" : "text-ink-subtle hover:text-ink"}`}
     >
-      <span data-bp-tab-icon className={ICON_BOX}>{tab.icon(on)}</span>
+      <span data-bp-tab-icon className={ICON_BOX}>
+        {tab.icon(on)}
+      </span>
       {!compact && on && <span>{title}</span>}
     </button>
   );
@@ -240,8 +255,11 @@ export function BpTopBar({ active }: { active: BigPictureTabKind }) {
       if (!el) return;
       const t = track.getBoundingClientRect();
       const e = el.getBoundingClientRect();
+      const isRtl = getComputedStyle(track).direction === "rtl";
+      const max = Math.max(0, track.scrollWidth - track.clientWidth);
       const left = track.scrollLeft + (e.left - t.left) - (t.width - e.width) / 2;
-      track.scrollTo({ left: Math.max(0, left), behavior: "auto" });
+      const target = isRtl ? Math.max(-max, Math.min(0, left)) : Math.max(0, Math.min(max, left));
+      track.scrollTo({ left: target, behavior: "auto" });
     };
     reveal();
     const ro = new ResizeObserver(reveal);
@@ -339,7 +357,10 @@ export function BpTopBar({ active }: { active: BigPictureTabKind }) {
 
       <div className="pointer-events-auto relative col-start-3 flex shrink-0 items-center justify-self-end gap-[clamp(9px,0.9vw,17px)] whitespace-nowrap">
         <BpStatus />
-        <span data-bp-clock className="font-mono text-[clamp(14px,1.9vh,22px)] font-semibold tabular-nums leading-none text-ink">
+        <span
+          data-bp-clock
+          className="font-mono text-[clamp(14px,1.9vh,22px)] font-semibold tabular-nums leading-none text-ink"
+        >
           {clock}
         </span>
       </div>

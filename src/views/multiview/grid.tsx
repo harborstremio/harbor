@@ -11,7 +11,7 @@ import {
   type Layout,
   type SlotChannel,
 } from "@/lib/multiview/store";
-import { useT } from "@/lib/i18n";
+import { isRtl, useT, useUiLanguage } from "@/lib/i18n";
 import { Cell } from "./cell";
 
 const HANDLE_CENTER_OFFSET = "0.875rem";
@@ -35,15 +35,19 @@ function Divider({
   split,
   min,
   max,
+  rtl = false,
   onChange,
   onDragStart,
+  onPreview,
 }: {
   axis: Axis;
   split: number;
   min: number;
   max: number;
+  rtl?: boolean;
   onChange: (pct: number) => void;
   onDragStart?: () => void;
+  onPreview?: (pct: number) => void;
 }) {
   const t = useT();
   const dragRef = useRef<DividerDrag | null>(null);
@@ -59,7 +63,7 @@ function Divider({
     const rect = parent.getBoundingClientRect();
     const size = isX ? rect.width : rect.height;
     if (size === 0) return null;
-    const position = isX ? clientX - rect.left : clientY - rect.top;
+    const position = isX ? (rtl ? rect.right - clientX : clientX - rect.left) : clientY - rect.top;
     return clamp((position / size) * 100, min, max);
   };
 
@@ -68,6 +72,7 @@ function Divider({
     if (!(panel instanceof HTMLElement)) return;
     if (isX) panel.style.width = value + "%";
     else panel.style.height = value + "%";
+    onPreview?.(value);
   };
 
   const finish = () => {
@@ -121,8 +126,14 @@ function Divider({
         if (dragRef.current?.pointerId === event.pointerId) finish();
       }}
       onKeyDown={(event) => {
-        const increase = event.key === "ArrowRight" || event.key === "ArrowDown";
-        const decrease = event.key === "ArrowLeft" || event.key === "ArrowUp";
+        const increase =
+          isX && rtl
+            ? event.key === "ArrowLeft" || event.key === "ArrowDown"
+            : event.key === "ArrowRight" || event.key === "ArrowDown";
+        const decrease =
+          isX && rtl
+            ? event.key === "ArrowRight" || event.key === "ArrowUp"
+            : event.key === "ArrowLeft" || event.key === "ArrowUp";
         if (!increase && !decrease) return;
         event.preventDefault();
         onChange(clamp(split + (increase ? 2.5 : -2.5), min, max));
@@ -143,6 +154,7 @@ function Divider({
 }
 
 function Nexus({
+  nexusRef,
   rootRef,
   leftRef,
   leftTopRef,
@@ -151,11 +163,13 @@ function Nexus({
   splitRow,
   splitRow2,
   linked,
+  rtl = false,
   onSplitChange,
   onSplitRowChange,
   onSplitRow2Change,
   onAlign,
 }: {
+  nexusRef: RefObject<HTMLDivElement | null>;
   rootRef: RefObject<HTMLDivElement | null>;
   leftRef: RefObject<HTMLDivElement | null>;
   leftTopRef: RefObject<HTMLDivElement | null>;
@@ -164,22 +178,24 @@ function Nexus({
   splitRow: number;
   splitRow2: number;
   linked: boolean;
+  rtl?: boolean;
   onSplitChange: (pct: number) => void;
   onSplitRowChange: (pct: number) => void;
   onSplitRow2Change: (pct: number) => void;
   onAlign: () => void;
 }) {
   const t = useT();
-  const handleRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<NexusDrag | null>(null);
 
   const preview = (value: NexusValue) => {
     if (leftRef.current) leftRef.current.style.width = value.split + "%";
     if (leftTopRef.current) leftTopRef.current.style.height = value.row + "%";
     if (rightTopRef.current) rightTopRef.current.style.height = value.row2 + "%";
-    if (handleRef.current) {
-      handleRef.current.style.left = "calc(" + value.split + "% + " + HANDLE_CENTER_OFFSET + ")";
-      handleRef.current.style.top =
+    if (nexusRef.current) {
+      nexusRef.current.style.left = rtl
+        ? "calc(100% - " + value.split + "% - " + HANDLE_CENTER_OFFSET + ")"
+        : "calc(" + value.split + "% + " + HANDLE_CENTER_OFFSET + ")";
+      nexusRef.current.style.top =
         "calc(" + (value.row + value.row2) / 2 + "% + " + HANDLE_CENTER_OFFSET + ")";
     }
   };
@@ -191,10 +207,13 @@ function Nexus({
     const rect = root.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return drag.value;
 
+    const deltaX = ((clientX - drag.startX) / rect.width) * 100;
+    const deltaY = ((clientY - drag.startY) / rect.height) * 100;
+
     const value = {
-      split: clamp(drag.split + ((clientX - drag.startX) / rect.width) * 100, SPLIT_MIN, SPLIT_MAX),
-      row: clamp(drag.row + ((clientY - drag.startY) / rect.height) * 100, SPLIT_MIN, SPLIT_MAX),
-      row2: clamp(drag.row2 + ((clientY - drag.startY) / rect.height) * 100, SPLIT_MIN, SPLIT_MAX),
+      split: clamp(drag.split + (rtl ? -deltaX : deltaX), SPLIT_MIN, SPLIT_MAX),
+      row: clamp(drag.row + deltaY, SPLIT_MIN, SPLIT_MAX),
+      row2: clamp(drag.row2 + deltaY, SPLIT_MIN, SPLIT_MAX),
     };
     drag.value = value;
     return value;
@@ -218,7 +237,7 @@ function Nexus({
 
   return (
     <div
-      ref={handleRef}
+      ref={nexusRef}
       title={instruction}
       onDoubleClick={onAlign}
       onPointerDown={(event) => {
@@ -261,7 +280,9 @@ function Nexus({
           : "border-edge-soft bg-elevated/95 text-ink-muted hover:border-accent hover:bg-accent hover:text-black")
       }
       style={{
-        left: "calc(" + split + "% + " + HANDLE_CENTER_OFFSET + ")",
+        left: rtl
+          ? "calc(100% - " + split + "% - " + HANDLE_CENTER_OFFSET + ")"
+          : "calc(" + split + "% + " + HANDLE_CENTER_OFFSET + ")",
         top: "calc(" + center + "% + " + HANDLE_CENTER_OFFSET + ")",
       }}
     >
@@ -307,10 +328,14 @@ export function Grid({
   onSplit3aChange: (pct: number) => void;
   onSplit3bChange: (pct: number) => void;
 }) {
+  const lang = useUiLanguage();
+  const rtl =
+    isRtl(lang) || (typeof document !== "undefined" && document.documentElement.dir === "rtl");
   const rootRef = useRef<HTMLDivElement>(null);
   const leftRef = useRef<HTMLDivElement>(null);
   const leftTopRef = useRef<HTMLDivElement>(null);
   const rightTopRef = useRef<HTMLDivElement>(null);
+  const nexusRef = useRef<HTMLDivElement>(null);
   const [rowsLinked, setRowsLinked] = useState(false);
   const alignRows = () => {
     const avg = (splitRow + splitRow2) / 2;
@@ -339,7 +364,14 @@ export function Grid({
         <div className="flex h-full min-w-0" style={{ width: split + "%" }}>
           {renderCell(0)}
         </div>
-        <Divider axis="x" split={split} min={SPLIT_MIN} max={SPLIT_MAX} onChange={onSplitChange} />
+        <Divider
+          axis="x"
+          split={split}
+          min={SPLIT_MIN}
+          max={SPLIT_MAX}
+          rtl={rtl}
+          onChange={onSplitChange}
+        />
         <div className="flex h-full min-w-0 flex-1">{renderCell(1)}</div>
       </div>
     );
@@ -356,6 +388,7 @@ export function Grid({
           split={splitRow}
           min={SPLIT_MIN}
           max={SPLIT_MAX}
+          rtl={rtl}
           onChange={onSplitRowChange}
         />
         <div className="flex h-full min-h-0 flex-1">{renderCell(1)}</div>
@@ -374,6 +407,7 @@ export function Grid({
           split={split3a}
           min={SPLIT3A_MIN}
           max={SPLIT3A_MAX}
+          rtl={rtl}
           onChange={onSplit3aChange}
         />
         <div className="flex h-full min-w-0 flex-1 gap-2">
@@ -385,6 +419,7 @@ export function Grid({
             split={split3b}
             min={SPLIT3B_MIN}
             max={SPLIT3B_MAX}
+            rtl={rtl}
             onChange={onSplit3bChange}
           />
           <div className="flex h-full min-w-0 flex-1">{renderCell(2)}</div>
@@ -409,12 +444,33 @@ export function Grid({
             split={splitRow}
             min={SPLIT_MIN}
             max={SPLIT_MAX}
+            rtl={rtl}
             onChange={onSplitRowChange}
             onDragStart={unlinkRows}
+            onPreview={(val) => {
+              if (nexusRef.current) {
+                nexusRef.current.style.top =
+                  "calc(" + (val + splitRow2) / 2 + "% + " + HANDLE_CENTER_OFFSET + ")";
+              }
+            }}
           />
           <div className="flex h-full min-h-0 flex-1">{renderCell(1)}</div>
         </div>
-        <Divider axis="x" split={split} min={SPLIT_MIN} max={SPLIT_MAX} onChange={onSplitChange} />
+        <Divider
+          axis="x"
+          split={split}
+          min={SPLIT_MIN}
+          max={SPLIT_MAX}
+          rtl={rtl}
+          onChange={onSplitChange}
+          onPreview={(val) => {
+            if (nexusRef.current) {
+              nexusRef.current.style.left = rtl
+                ? "calc(100% - " + val + "% - " + HANDLE_CENTER_OFFSET + ")"
+                : "calc(" + val + "% + " + HANDLE_CENTER_OFFSET + ")";
+            }
+          }}
+        />
         <div className="flex h-full min-w-0 flex-1 flex-col gap-2">
           <div
             ref={rightTopRef}
@@ -428,12 +484,20 @@ export function Grid({
             split={splitRow2}
             min={SPLIT_MIN}
             max={SPLIT_MAX}
+            rtl={rtl}
             onChange={onSplitRow2Change}
             onDragStart={unlinkRows}
+            onPreview={(val) => {
+              if (nexusRef.current) {
+                nexusRef.current.style.top =
+                  "calc(" + (splitRow + val) / 2 + "% + " + HANDLE_CENTER_OFFSET + ")";
+              }
+            }}
           />
           <div className="flex h-full min-h-0 flex-1">{renderCell(3)}</div>
         </div>
         <Nexus
+          nexusRef={nexusRef}
           rootRef={rootRef}
           leftRef={leftRef}
           leftTopRef={leftTopRef}
@@ -442,6 +506,7 @@ export function Grid({
           splitRow={splitRow}
           splitRow2={splitRow2}
           linked={rowsLinked}
+          rtl={rtl}
           onSplitChange={onSplitChange}
           onSplitRowChange={onSplitRowChange}
           onSplitRow2Change={onSplitRow2Change}
