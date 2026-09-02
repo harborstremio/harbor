@@ -8,6 +8,7 @@ import { PeekHero } from "@/components/peek-hero";
 import { Row, ScrollRootContext } from "@/components/row";
 import { TmdbNudge } from "@/components/nudge";
 import { useAuth } from "@/lib/auth";
+import { useProfiles, anyProfileSharesStremioWith } from "@/lib/profiles";
 import { topSeries, type Meta } from "@/lib/cinemeta";
 import { useHideAnimeMetas } from "@/lib/anime-hide";
 import { useT } from "@/lib/i18n";
@@ -47,6 +48,8 @@ type ShowRow = {
 export function Shows({ active = true }: { active?: boolean }) {
   const { settings } = useSettings();
   const { authKey } = useAuth();
+  const { activeProfile, profiles } = useProfiles();
+  const hideSharedCw = settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
   const cwVersion = useCwDismissVersion();
   const t = useT();
   const pageRows = usePageRows("shows");
@@ -168,12 +171,12 @@ export function Shows({ active = true }: { active?: boolean }) {
     () =>
       items
         .filter((i) => i.type === "series" && !ANIME_CLOUD_ID.test(i._id) && isCwMember(i) && !isCwDismissed(i))
-        .filter((i) => !settings.cwPerProfile || localCwEntry(i._id) !== null)
+        .filter((i) => !hideSharedCw || localCwEntry(i._id) !== null)
         .map((i) => ({ i, k: cwSortKey(i) }))
         .sort((a, b) => b.k - a.k)
         .map((e) => e.i)
         .slice(0, 16),
-    [items, cwVersion, settings.cwPerProfile, localCwVer],
+    [items, cwVersion, hideSharedCw, localCwVer],
   );
 
   const manualWatchedVer = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);

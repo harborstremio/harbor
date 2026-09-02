@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import { useAuth } from "@/lib/auth";
+import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { useHideAnime } from "@/lib/anime-hide";
 import { useHeroLogos } from "@/components/anime-hero/use-hero-logos";
 import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
@@ -87,7 +88,8 @@ export function useMobileCwReady(): boolean {
 export function useMobileCw(limit = 14): LibraryItem[] {
   const { authKey } = useAuth();
   const { settings } = useSettings();
-  const cwPerProfile = settings.cwPerProfile;
+  const { activeProfile, profiles } = useProfiles();
+  const hideSharedCw = settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
   const hideAnime = useHideAnime();
   const [items, setItems] = useState<LibraryItem[]>(() =>
     authKey && cloudKey === authKey ? cloudCache : [],
@@ -124,7 +126,7 @@ export function useMobileCw(limit = 14): LibraryItem[] {
   return useMemo(() => {
     void localVersion;
     void dismissVersion;
-    const base = cwPerProfile ? [] : items.filter((i) => !ANIME_CLOUD_ID.test(i._id));
+    const base = hideSharedCw ? [] : items.filter((i) => !ANIME_CLOUD_ID.test(i._id));
     const merged = [...base, ...listLocalCw().map(localToLibraryItem)]
       .filter(
         (i) =>
@@ -146,7 +148,7 @@ export function useMobileCw(limit = 14): LibraryItem[] {
       if (out.length >= limit) break;
     }
     return out;
-  }, [items, localVersion, dismissVersion, limit, hideAnime, cwPerProfile]);
+  }, [items, localVersion, dismissVersion, limit, hideAnime, hideSharedCw]);
 }
 
 function toMeta(item: LibraryItem): Meta {

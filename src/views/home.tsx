@@ -31,6 +31,7 @@ import { isAnimeRow } from "@/views/anime";
 import { buildArabicHomeRows } from "@/lib/arabic/home-rows";
 import { buildRussianHomeRows } from "@/lib/russian/home-rows";
 import { useAuth } from "@/lib/auth";
+import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { type Meta } from "@/lib/cinemeta";
 import { t, useT, useUiLanguage } from "@/lib/i18n";
 import { useSettings, type StreamingService } from "@/lib/settings";
@@ -93,7 +94,9 @@ import type { SourceRow } from "@/lib/custom-sources";
 
 export function Home({ active = true, onReady }: { active?: boolean; onReady?: () => void }) {
   const { authKey, user } = useAuth();
+  const { activeProfile, profiles } = useProfiles();
   const { settings, update } = useSettings();
+  const hideSharedCw = settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
   const heroFull = settings.heroFull;
   const contentDrag = useContentDrag();
   const t = useT();
@@ -444,7 +447,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
             ? libItems.filter((i) => !isCorruptAnimeEntry(i))
             : libItems;
           setItems(view);
-          if (!settings.cwPerProfile) absorbCloudAnimeCw(view);
+          if (!hideSharedCw) absorbCloudAnimeCw(view);
           reconcileRemoteWatched(view);
           const importKey = `harbor.discover.libImported.${user?._id ?? "anon"}`;
           let importedSince = 0;
@@ -517,7 +520,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
     return () => {
       cancelled = true;
     };
-  }, [authKey, active, settings.cwPerProfile]);
+  }, [authKey, active, hideSharedCw]);
 
   const localCwVer = useSyncExternalStore(subscribeLocalCw, localCwVersion);
   const manualWatchedVer = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
@@ -554,7 +557,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
     }));
   }, [localCwVer]);
   const continueWatching = useMemo(() => {
-    const cwBase = settings.cwPerProfile
+    const cwBase = hideSharedCw
       ? []
       : [...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)), ...simklCw];
     const eligible = [...cwBase, ...localCwItems]
@@ -605,7 +608,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
       if (root) seenRoot.add(root);
     }
     return [...byId.values()].sort((a, b) => cwSortKey(b) - cwSortKey(a));
-  }, [items, simklCw, localCwItems, cwVersion, cwRootVersion, settings.animeOnlyInAnimeRoom, settings.hideContent.anime, settings.cwPerProfile, animeDetectVer]);
+  }, [items, simklCw, localCwItems, cwVersion, cwRootVersion, settings.animeOnlyInAnimeRoom, settings.hideContent.anime, hideSharedCw, animeDetectVer]);
   useEffect(() => {
     let cancelled = false;
     const ids = [...localCwItems, ...simklCw]
