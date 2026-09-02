@@ -20,6 +20,7 @@ import {
 } from "@/lib/player/subtitle-offset";
 import {
   sanitizeControllerCursor,
+  sanitizeControllerCursorHideMs,
   sanitizeControllerCursorImage,
   sanitizeControllerCursorSize,
 } from "@/lib/gamepad/cursor";
@@ -323,6 +324,11 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       controllerCursor: sanitizeControllerCursor(parsed.controllerCursor),
       controllerCursorImage: sanitizeControllerCursorImage(parsed.controllerCursorImage),
       controllerCursorSize: sanitizeControllerCursorSize(parsed.controllerCursorSize),
+      controllerCursorEnabled:
+        typeof parsed.controllerCursorEnabled === "boolean"
+          ? parsed.controllerCursorEnabled
+          : DEFAULT.controllerCursorEnabled,
+      controllerCursorHideMs: sanitizeControllerCursorHideMs(parsed.controllerCursorHideMs),
       fullscreenClockFormat: sanitizeFullscreenClockFormat(parsed.fullscreenClockFormat),
       fullscreenClockStyle: sanitizeFullscreenClockStyle(parsed.fullscreenClockStyle),
       fullscreenClockShowSeconds:

@@ -37,6 +37,11 @@ export function GamepadRunner() {
   const position = useRef({ x: innerWidth / 2, y: innerHeight / 2 });
   const axes = useRef(live.axes);
   const active = useRef(false);
+  const cursorEnabled = useRef(settings.controllerCursorEnabled);
+  cursorEnabled.current = settings.controllerCursorEnabled;
+  const cursorHideMs = useRef(settings.controllerCursorHideMs);
+  cursorHideMs.current = settings.controllerCursorHideMs;
+  const lastActivity = useRef(0);
   const hovered = useRef<HTMLElement>(null);
   const hoverPath = useRef<HTMLElement[]>([]);
   const controllerField = useRef<TextField | null>(null);
@@ -92,8 +97,9 @@ export function GamepadRunner() {
       const deadzone = settings.controllerDeadzone;
       const x = Math.abs(rx) < deadzone ? 0 : rx;
       const y = Math.abs(ry) < deadzone ? 0 : ry;
-      if (x || y) {
+      if (cursorEnabled.current && (x || y)) {
         active.current = true;
+        lastActivity.current = now;
         position.current.x = Math.max(
           0,
           Math.min(innerWidth, position.current.x + x * settings.controllerCursorSpeed * dt),
@@ -155,7 +161,9 @@ export function GamepadRunner() {
       }
       cursor.current?.style.setProperty(
         "opacity",
-        active.current &&
+        cursorEnabled.current &&
+          active.current &&
+          now - lastActivity.current < cursorHideMs.current &&
           !(
             document.documentElement.hasAttribute("data-player-chrome-mounted") &&
             !document.documentElement.hasAttribute("data-player-chrome-visible")
@@ -189,6 +197,36 @@ export function GamepadRunner() {
       window.removeEventListener("blur", refresh);
     };
   }, [settings.controllerDeadzone, settings.controllerCursorSpeed]);
+
+  // Yield the pointer to the mouse/keyboard. Only real user input counts: the
+  // runner dispatches synthetic events itself, filtered via `isTrusted`.
+  useEffect(() => {
+    const hide = (e: Event) => {
+      if (!e.isTrusted) return;
+      if (!active.current) return;
+      active.current = false;
+      lastActivity.current = 0;
+      cursor.current?.style.setProperty("opacity", "0");
+      for (const el of hoverPath.current) el.removeAttribute("data-gamepad-hover");
+      hoverPath.current = [];
+      hovered.current = null;
+      tvHover(null);
+    };
+    window.addEventListener("mousemove", hide, true);
+    window.addEventListener("mousedown", hide, true);
+    window.addEventListener("keydown", hide, true);
+    window.addEventListener("pointerdown", hide, true);
+    window.addEventListener("wheel", hide, true);
+    window.addEventListener("touchstart", hide, true);
+    return () => {
+      window.removeEventListener("mousemove", hide, true);
+      window.removeEventListener("mousedown", hide, true);
+      window.removeEventListener("keydown", hide, true);
+      window.removeEventListener("pointerdown", hide, true);
+      window.removeEventListener("wheel", hide, true);
+      window.removeEventListener("touchstart", hide, true);
+    };
+  }, []);
 
   useEffect(() => {
     if (captured || !live.buttons.south) return;
