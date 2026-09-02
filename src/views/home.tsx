@@ -89,7 +89,10 @@ import {
 import type { HomeRow } from "./home/home-types";
 import { RowSkeleton } from "./home/row-skeleton";
 import { AddSourceModal } from "@/components/add-source-modal";
-import type { SourceRow } from "@/lib/custom-sources";
+import {
+  SourceRow,
+  updateSourceFolder
+} from "@/lib/custom-sources";
 
 export function Home({ active = true, onReady }: { active?: boolean; onReady?: () => void }) {
   const { authKey, user } = useAuth();
@@ -954,19 +957,15 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
     });
   }, [homeRowsCustom, mutateHomeRows]);
 
-  const handleEditFolderImages = useCallback((sourceId: string, folderId: string, coverImageUrl: string, focusGifUrl: string) => {
+  const handleEditFolderImages = useCallback((sourceId: string, folderId: string, coverImageUrl: string, focusGifUrl: string, layout?: "CLASSIC" | "GRID") => {
     mutateHomeRows({
       ...homeRowsCustom,
-      customSources: (homeRowsCustom.customSources || []).map((sr) => {
-        if (sr.id !== sourceId) return sr;
-        return {
-          ...sr,
-          folders: sr.folders.map((f) => {
-            if (f.id !== folderId) return f;
-            return { ...f, coverImageUrl: coverImageUrl || null, focusGifUrl: focusGifUrl || null };
-          }),
-        };
-      }),
+      customSources: updateSourceFolder(
+        homeRowsCustom.customSources || [],
+        sourceId,
+        folderId,
+        { coverImageUrl: coverImageUrl || null, focusGifUrl: focusGifUrl || null, layout }
+      )
     });
   }, [homeRowsCustom, mutateHomeRows]);
 
