@@ -12,11 +12,15 @@ import { settingsAnchor, type SectionId } from "./shared";
 import { TOP_GROUPS } from "./groups";
 import { markSectionSeen, useSettingsNew } from "./settings-new";
 
-type IconProps = { size?: number; strokeWidth?: number };
-
+type IconProps = {
+  size?: number;
+  strokeWidth?: number;
+  className?: string;
+};
 const IconBase = ({
   size = 20,
   strokeWidth = 1.7,
+  className,
   children,
 }: IconProps & { children: React.ReactNode }) => (
   <svg
@@ -29,6 +33,7 @@ const IconBase = ({
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden
+    className={className}
   >
     {children}
   </svg>
@@ -36,7 +41,7 @@ const IconBase = ({
 
 function IconChevronRight(p: IconProps) {
   return (
-    <IconBase {...p}>
+    <IconBase {...p} className="rtl:transform-[scaleX(-1)]">
       <path d="M9 5l7 7-7 7" />
     </IconBase>
   );
@@ -9549,7 +9554,7 @@ export function SettingsNav({
                   {anyNew && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />}
                   <span
                     className={`shrink-0 text-ink-subtle transition-transform ${
-                      isActive ? "rotate-90" : ""
+                      isActive ? "rotate-90 rtl:rotate-270" : ""
                     }`}
                   >
                     <IconChevronRight size={14} strokeWidth={2} />
