@@ -1,10 +1,20 @@
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Magnet } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { serializeMagnet } from "@/lib/torrent/magnet";
 
-export function resolveStreamLink(stream: { url?: string; externalUrl?: string }): string | null {
-  return stream.url ?? stream.externalUrl ?? null;
+export function resolveStreamLink(stream: { url?: string; externalUrl?: string, infoHash?: string, fileIdx?: number, sources?: string[], behaviorHints?: { filename?: string } }): string | null {
+  if (stream.url || stream.externalUrl) return stream.url || stream.externalUrl || null;
+  if (stream.infoHash) {
+    return serializeMagnet({
+      infoHash: stream.infoHash,
+      name: stream.behaviorHints?.filename ?? null,
+      trackers: stream.sources ?? [],
+    });
+  }
+  return null;
+
 }
 
 export async function copyText(text: string): Promise<boolean> {
@@ -24,7 +34,6 @@ export async function copyText(text: string): Promise<boolean> {
     console.error("failed to copy: ", error);
   }
   return false;
-
 }
 
 export function CopyLinkButton({
@@ -39,9 +48,11 @@ export function CopyLinkButton({
   label?: string;
 }) {
   const t = useT();
-  const resolvedLabel = label ?? t("Copy link");
+  const isMagnetLink = url.startsWith("magnet:");
+  const resolvedLabel = label ?? t(isMagnetLink ? "Copy magnet link" : "Copy link");
   const [copied, setCopied] = useState(false);
   const timer = useRef<number | null>(null);
+  const Icon = isMagnetLink ? Magnet : Copy;
 
   useEffect(
     () => () => {
@@ -57,6 +68,7 @@ export function CopyLinkButton({
     if (timer.current !== null) window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setCopied(false), 1400);
   };
+
 
   return (
     <span
@@ -79,7 +91,8 @@ export function CopyLinkButton({
         copied ? "bg-success/12 text-success" : "text-ink-subtle hover:bg-canvas/60 hover:text-ink"
       } ${className}`}
     >
-      <Copy
+
+      <Icon
         size={size}
         strokeWidth={2}
         className={`absolute transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
