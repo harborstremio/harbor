@@ -10,7 +10,6 @@ import {
 import { BackToTop } from "@/components/back-to-top";
 import { CollectionsRow } from "@/components/collections-row";
 import { CriticsPick } from "@/components/critics-pick";
-import { LazyMount } from "@/components/lazy-mount";
 import { DiscoveryQueueCta } from "@/components/discovery-queue-cta";
 import { TopPeopleCta } from "@/components/top-people-cta";
 import { FeaturedBanner } from "@/components/featured-banner";
@@ -388,6 +387,9 @@ export function Discover({ active = true }: { active?: boolean }) {
     () => applyPageRows(railItems, pageRows.custom, false),
     [railItems, pageRows.custom],
   );
+  useEffect(() => {
+    for (const rail of visibleRails.slice(0, 6)) ensureLoadedRef.current(rail.key);
+  }, [epoch, visibleRails]);
   const peopleCtaIdx = useMemo(() => {
     let idx = -1;
     visibleRails.forEach((it, i) => {
@@ -582,36 +584,33 @@ export function Discover({ active = true }: { active?: boolean }) {
                   </div>
                 );
               })
-            : visibleRails.map((item, i) => (
-                <Fragment key={item.key}>
-                  <LazyMount minHeight={340}>
-                    <Rail
-                      railId={item.key}
-                      allRails={dailyRows}
-                      deduped={dedupedShown}
-                      loadMore={loadMore}
-                      ensureLoaded={ensureLoaded}
-                      titleOverride={item.key in pageRows.custom.renamed ? item.title : undefined}
-                    />
-                  </LazyMount>
+            : visibleRails.map((item, i) => {
+                const railEl = (
+                  <Rail
+                    railId={item.key}
+                    allRails={dailyRows}
+                    deduped={dedupedShown}
+                    loadMore={loadMore}
+                    ensureLoaded={ensureLoaded}
+                    titleOverride={item.key in pageRows.custom.renamed ? item.title : undefined}
+                  />
+                );
+                return (
+                  <Fragment key={item.key}>
+                    {railEl}
 
-                  {i === 0 && <GenreTiles />}
-                  {i === 1 && shownQueue.length > 0 && <DiscoveryQueueCta items={shownQueue} />}
-                  {i === 2 && <LanguageTiles />}
-                  {i === 2 && settings.tmdbKey && (
-                    <LazyMount minHeight={260}>
-                      <CollectionsRow />
-                    </LazyMount>
-                  )}
-                  {i === 3 && criticsPick && !(hideAnime && metaLooksAnime(criticsPick)) && (
-                    <LazyMount minHeight={580}>
+                    {i === 0 && <GenreTiles />}
+                    {i === 1 && shownQueue.length > 0 && <DiscoveryQueueCta items={shownQueue} />}
+                    {i === 2 && <LanguageTiles />}
+                    {i === 2 && settings.tmdbKey && <CollectionsRow />}
+                    {i === 3 && criticsPick && !(hideAnime && metaLooksAnime(criticsPick)) && (
                       <CriticsPick meta={criticsPick} />
-                    </LazyMount>
-                  )}
-                  {i === 4 && <AwardTiles />}
-                  {i === peopleCtaIdx && <TopPeopleCta />}
-                </Fragment>
-              ))}
+                    )}
+                    {i === 4 && <AwardTiles />}
+                    {i === peopleCtaIdx && <TopPeopleCta />}
+                  </Fragment>
+                );
+              })}
         </div>
       </ScrollRootContext.Provider>
       <BackToTop scrollRef={scrollRef} />

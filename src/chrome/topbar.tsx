@@ -76,6 +76,7 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
     IS_TAURI && !settings.useNativeTitleBar && settings.hybridTitleBar && !fullscreen;
   return (
     <header
+      data-tv-top-chrome
       data-cleannav={settings.topbarAppearance === "transparent" ? "on" : undefined}
       className={`pointer-events-none fixed inset-x-0 top-0 ${topKind === "picker" || connecting ? "z-[130]" : "z-[55]"} h-20`}
     >
@@ -94,19 +95,19 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
         />
       )}
       <div
+        {...dragProps}
+        className={`relative z-10 grid h-full grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-8 ${
+          hybridBar ? "pt-11" : ""
+        }`}
+      >
+        <div
           {...dragProps}
-          className={`relative z-10 grid h-full grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-8 ${
-            hybridBar ? "pt-11" : ""
-          }`}
+          className={
+            sidebarHidden
+              ? "pointer-events-auto flex h-full min-w-0 items-center justify-start gap-3"
+              : `pointer-events-auto flex h-full min-w-0 items-center justify-start ${sidebarOffset}`
+          }
         >
-          <div
-            {...dragProps}
-            className={
-              sidebarHidden
-                ? "pointer-events-auto flex h-full min-w-0 items-center justify-start gap-3"
-                : `pointer-events-auto flex h-full min-w-0 items-center justify-start ${sidebarOffset}`
-            }
-          >
           {onLiveRoot && (
             <button
               onClick={() => setView("home")}
@@ -125,54 +126,92 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
               </span>
             </div>
           )}
-            {!onLiveRoot && !connecting && <BackChrome />}
-          </div>
-          <div
-            {...dragProps}
-            className={`pointer-events-auto min-w-0 max-w-full transition-[width] duration-200 ease-out ${searchWidth}`}
-          >
-            {!hideSearch && !kid && !hybridBar && <SearchPill />}
-          </div>
-          <div
-            {...dragProps}
-            className="pointer-events-auto flex h-full items-center justify-end gap-2"
-          >
+          {!onLiveRoot && !connecting && <BackChrome />}
+        </div>
+        <div
+          {...dragProps}
+          className={`pointer-events-auto min-w-0 max-w-full transition-[width] duration-200 ease-out ${searchWidth}`}
+        >
+          {!hideSearch && !kid && !hybridBar && <SearchPill />}
+        </div>
+        <div
+          {...dragProps}
+          className="pointer-events-auto flex h-full items-center justify-end gap-2"
+        >
           <div className="hidden items-center gap-2 min-[900px]:flex">
-          <RecordingPill />
-          {settings.navbarSleepTimer && <SleepTimerButton />}
-          <DownloadsButton />
-          {!kid && <NotificationCenter />}
-          {!kid && <BookmarksButton />}
-          {!onLiveRoot && !kid && <TogetherButton />}
-          {!kid && <ProfileButton />}
+            <RecordingPill />
+            {settings.navbarSleepTimer && <SleepTimerButton />}
+            <DownloadsButton />
+            {!kid && <NotificationCenter />}
+            {!kid && <BookmarksButton />}
+            {!onLiveRoot && !kid && <TogetherButton />}
+            {!kid && <ProfileButton />}
           </div>
-            {IS_TAURI && !settings.useNativeTitleBar && !settings.hybridTitleBar && (
+          {IS_TAURI && !settings.useNativeTitleBar && !settings.hybridTitleBar && (
             <div className="ms-1 flex shrink-0 items-center gap-2">
               <Control label={t("chrome.minimize")} onClick={minimize}>
                 <svg width="18" height="18" viewBox="0 0 13 13" fill="none">
-                  <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <path
+                    d="M3 6.5h7"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </Control>
-              <Control label={maxed ? t("chrome.restore") : t("chrome.maximize")} onClick={() => void toggleMaximize()}>
+              <Control
+                label={maxed ? t("chrome.restore") : t("chrome.maximize")}
+                onClick={() => void toggleMaximize()}
+              >
                 <svg width="18" height="18" viewBox="0 0 13 13" fill="none">
                   {maxed ? (
                     <>
-                      <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" strokeWidth="1.4" rx="1" />
-                      <path d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9" stroke="currentColor" strokeWidth="1.4" fill="none" />
+                      <rect
+                        x="2.5"
+                        y="4.5"
+                        width="6"
+                        height="6"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        rx="1"
+                      />
+                      <path
+                        d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        fill="none"
+                      />
                     </>
                   ) : (
-                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.4" rx="1.2" />
+                    <rect
+                      x="3"
+                      y="3"
+                      width="7"
+                      height="7"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      rx="1.2"
+                    />
                   )}
                 </svg>
               </Control>
-              <Control label={t("common.close")} onClick={kid ? () => setCloseConfirm(true) : close} danger>
+              <Control
+                label={t("common.close")}
+                onClick={kid ? () => setCloseConfirm(true) : close}
+                danger
+              >
                 <svg width="18" height="18" viewBox="0 0 13 13" fill="none">
-                  <path d="M3.5 3.5l6 6M9.5 3.5l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <path
+                    d="M3.5 3.5l6 6M9.5 3.5l-6 6"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </Control>
             </div>
-            )}
-          </div>
+          )}
+        </div>
       </div>
       {closeConfirm && (
         <CloseConfirmKids onConfirm={close} onCancel={() => setCloseConfirm(false)} />
@@ -181,7 +220,13 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
   );
 }
 
-function CloseConfirmKids({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
+function CloseConfirmKids({
+  onConfirm,
+  onCancel,
+}: {
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
   const t = useT();
   return createPortal(
     <div
@@ -282,10 +327,14 @@ export function TogetherButton({
     live
       ? variant === "ghost"
         ? "text-ink hover:bg-white/12"
-        : glassControls ? "text-ink hover:text-ink" : "bg-elevated/70 text-ink hover:bg-elevated"
+        : glassControls
+          ? "text-ink hover:text-ink"
+          : "bg-elevated/70 text-ink hover:bg-elevated"
       : variant === "ghost"
         ? "text-ink-muted hover:bg-white/12 hover:text-ink"
-        : glassControls ? "text-ink-muted hover:text-ink" : "bg-elevated/70 text-ink-muted hover:bg-elevated hover:text-ink"
+        : glassControls
+          ? "text-ink-muted hover:text-ink"
+          : "bg-elevated/70 text-ink-muted hover:bg-elevated hover:text-ink"
   }`;
   const chrome = tabOpen
     ? `z-[51] harbor-together-surface border border-edge text-ink ${
@@ -312,8 +361,8 @@ export function TogetherButton({
             {visible.map((p) => {
               const self = p.id === clientId;
               const fallbackColor = `oklch(0.78 0.13 ${nameHue(p.name)})`;
-              const avatarSrc = self ? selfAvatar : p.avatar ?? null;
-              const color = self ? selfColor ?? fallbackColor : p.color ?? fallbackColor;
+              const avatarSrc = self ? selfAvatar : (p.avatar ?? null);
+              const color = self ? (selfColor ?? fallbackColor) : (p.color ?? fallbackColor);
               if (avatarSrc) {
                 return (
                   <span
@@ -322,7 +371,12 @@ export function TogetherButton({
                     className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full ring-2 ring-elevated"
                     style={{ boxShadow: `inset 0 0 0 1.5px ${color}` }}
                   >
-                    <img src={avatarSrc} alt="" draggable={false} className="h-full w-full object-cover" />
+                    <img
+                      src={avatarSrc}
+                      alt=""
+                      draggable={false}
+                      className="h-full w-full object-cover"
+                    />
                   </span>
                 );
               }
@@ -354,7 +408,15 @@ export function TogetherButton({
     <div ref={wrapRef} className="relative">
       {glassControls ? (
         <ThreeLiquidGlassSurface
-          radius={tabOpen ? (above ? "0 0 8px 8px" : "8px 8px 0 0") : variant === "ghost" ? "9999px" : "12px"}
+          radius={
+            tabOpen
+              ? above
+                ? "0 0 8px 8px"
+                : "8px 8px 0 0"
+              : variant === "ghost"
+                ? "9999px"
+                : "12px"
+          }
           shaderRadius={variant === "ghost" ? 1 : tabOpen ? 0.3 : 0.48}
           intensity={0.9}
           className={`relative inline-flex transition-colors duration-150 ${chrome} ${tabOpen ? "harbor-wt-tab" : ""}`}

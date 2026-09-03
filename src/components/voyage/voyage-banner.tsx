@@ -24,7 +24,9 @@ export function VoyageBanner({ pool }: { pool: Meta[] }) {
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
-    const obs = new IntersectionObserver((entries) => setOnScreen(entries.some((e) => e.isIntersecting)));
+    const obs = new IntersectionObserver((entries) =>
+      setOnScreen(entries.some((e) => e.isIntersecting)),
+    );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
@@ -59,7 +61,10 @@ export function VoyageBanner({ pool }: { pool: Meta[] }) {
         : t("Keep picking");
 
   return (
-    <section ref={rootRef} className="group relative min-h-[172px] w-full overflow-hidden rounded-2xl bg-canvas ring-1 ring-edge-soft">
+    <section
+      ref={rootRef}
+      className="group relative min-h-[172px] w-full overflow-hidden rounded-2xl bg-canvas ring-1 ring-edge-soft"
+    >
       <div
         className="absolute inset-y-0 z-0 overflow-hidden [transform:skewX(-8deg)]"
         style={{ left: "39%", right: "-34px" }}
@@ -85,13 +90,25 @@ export function VoyageBanner({ pool }: { pool: Meta[] }) {
       <div
         aria-hidden
         className="absolute inset-0 z-[1] opacity-60"
-        style={{ background: `radial-gradient(78% 120% at 0% 0%, color-mix(in oklch, ${accent}, transparent 84%), transparent 55%)` }}
+        style={{
+          background: `radial-gradient(78% 120% at 0% 0%, color-mix(in oklch, ${accent}, transparent 84%), transparent 55%)`,
+        }}
       />
 
-      <button type="button" onClick={openVoyage} aria-label={t("Open Voyages")} className="absolute inset-0 z-10 cursor-pointer" />
+      <button
+        type="button"
+        onClick={openVoyage}
+        aria-label={t("Open Voyages")}
+        tabIndex={-1}
+        data-tv-skip="true"
+        className="absolute inset-0 z-10 cursor-pointer rounded-2xl"
+      />
 
       <div className="pointer-events-none relative z-20 flex h-full min-h-[172px] max-w-[47%] flex-col justify-center gap-2.5 p-7">
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.22em]" style={{ color: accent }}>
+        <span
+          className="text-[10.5px] font-bold uppercase tracking-[0.22em]"
+          style={{ color: accent }}
+        >
           {t("Harbor Voyages")}
           {streak > 1 && (
             <span className="ms-2 inline-flex h-[19px] items-baseline gap-0.5 rounded-full bg-elevated/70 ps-1.5 pe-2.5 align-middle text-ink">
@@ -142,11 +159,20 @@ function VoyageCapsule({ meta }: { meta: Meta }) {
       <div
         aria-hidden
         className="absolute inset-0"
-        style={{ background: "radial-gradient(135% 130% at 100% 0%, transparent 26%, color-mix(in oklch, var(--color-canvas), transparent 6%) 92%)" }}
+        style={{
+          background:
+            "radial-gradient(135% 130% at 100% 0%, transparent 26%, color-mix(in oklch, var(--color-canvas), transparent 6%) 92%)",
+        }}
       />
       <div className="absolute inset-x-4 bottom-3 flex items-end gap-2.5 [transform:skewX(8deg)]">
         <span className="block h-[68px] w-[46px] shrink-0 overflow-hidden rounded-sm shadow-[0_8px_18px_-6px_rgba(0,0,0,0.85)] ring-1 ring-white/15">
-          <img src={poster.src} onError={poster.onError} alt="" draggable={false} className="h-full w-full object-cover" />
+          <img
+            src={poster.src}
+            onError={poster.onError}
+            alt=""
+            draggable={false}
+            className="h-full w-full object-cover"
+          />
         </span>
         <span
           className="line-clamp-3 min-w-0 flex-1 pb-1 text-[12px] font-semibold leading-[1.25] text-ink [overflow-wrap:anywhere] [text-shadow:0_1px_2px_var(--color-canvas),0_1px_8px_var(--color-canvas),0_0_16px_var(--color-canvas)]"

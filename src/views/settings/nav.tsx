@@ -9338,6 +9338,9 @@ export function SettingsNav({
     );
   };
 
+  const SEARCH_NAV_HINT = "Press Enter or Space to type";
+  const SEARCH_EDIT_HINT = "Text mode — Esc to exit";
+
   return (
     <nav
       data-harbor-sidebar
@@ -9370,7 +9373,11 @@ export function SettingsNav({
         </div>
       )}
       <div className="px-3 pb-3">
-        <div className="group/find flex h-[46px] items-center gap-[11px] rounded-md bg-elevated px-[15px] transition-colors focus-within:bg-raised">
+        <div
+          data-settings-search-field
+          data-tv-text-field
+          className="group/find flex h-[46px] items-center gap-[11px] rounded-md bg-elevated px-[15px] transition-colors focus-within:bg-raised"
+        >
           <svg
             width="17"
             height="17"
@@ -9390,6 +9397,7 @@ export function SettingsNav({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("Search settings")}
+            aria-describedby="settings-search-mode"
             className="min-w-0 flex-1 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-ink-subtle"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -9421,11 +9429,33 @@ export function SettingsNav({
                 stroke="currentColor"
                 strokeWidth="2.4"
                 strokeLinecap="round"
+                strokeLinejoin="round"
               >
                 <path d="M6 6l12 12M18 6 6 18" />
               </svg>
             </button>
           )}
+        </div>
+        <div
+          id="settings-search-mode"
+          data-settings-search-mode
+          aria-live="polite"
+          className="flex min-h-5 items-center px-2 pt-1 text-[10.5px] leading-none"
+        >
+          <span
+            data-settings-search-nav-hint
+            className="hidden items-center gap-1.5 text-ink-subtle"
+          >
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-ink-subtle" />
+            {t(SEARCH_NAV_HINT)}
+          </span>
+          <span
+            data-settings-search-edit-hint
+            className="hidden items-center gap-1.5 font-semibold text-accent"
+          >
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+            {t(SEARCH_EDIT_HINT)}
+          </span>
         </div>
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 pb-8">

@@ -12,7 +12,7 @@ import {
 } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
-import { useT } from "@/lib/i18n";
+import { useT, useUiLanguage, isRtl as checkRtl } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { resetPosterDock as resetPosterDockItems, updatePosterDock } from "@/lib/poster-dock";
@@ -226,6 +226,9 @@ export function Row({
 }) {
   const { settings } = useSettings();
   const t = useT();
+  const { rememberRowScroll, recallRowScroll } = useView();
+  const lang = useUiLanguage();
+  const rtl = checkRtl(lang);
   const tvCards =
     shape === "portrait" && settings.rowCardStyle === "tv" && holdsPosterCards(children);
   const effShape: RowShape = tvCards ? "landscape" : shape;
@@ -251,12 +254,9 @@ export function Row({
     onEndRef.current = onEndReached;
   });
 
-  const rtlRef = useRef(false);
   const measure = () => {
     const container = containerRef.current;
     if (!container) return;
-    rtlRef.current =
-      getComputedStyle(container).direction === "rtl" || document.documentElement.dir === "rtl";
     const available = container.getBoundingClientRect().width;
     if (available <= 0) return;
     const fits = Math.max(1, Math.floor((available + GAP) / (effMin + GAP)));
@@ -264,10 +264,9 @@ export function Row({
     setCellWidth((Math.ceil(raw * 64) + 1) / 64);
   };
 
-  const isRtl = () => rtlRef.current || document.documentElement.dir === "rtl";
-  const readPos = (el: HTMLDivElement) => (isRtl() ? -el.scrollLeft : el.scrollLeft);
+  const readPos = (el: HTMLDivElement) => (rtl ? -el.scrollLeft : el.scrollLeft);
   const writePos = (el: HTMLDivElement, pos: number) => {
-    el.scrollLeft = isRtl() ? -pos : pos;
+    el.scrollLeft = rtl ? -pos : pos;
   };
 
   const measureScroll = () => {
@@ -363,11 +362,10 @@ export function Row({
   const childCount = Children.count(children);
   const restoredRef = useRef(false);
   const userInteractedRef = useRef(false);
-  const { rememberRowScroll, recallRowScroll } = useView();
   useLayoutEffect(() => {
     measure();
     measureScroll();
-  }, [childCount, trackEl, effMin]);
+  }, [childCount, trackEl, effMin, rtl]);
   useLayoutEffect(() => {
     if (!trackEl || cellWidth == null) return;
     if (scrollKey && !restoredRef.current && childCount > 0) {
@@ -483,7 +481,6 @@ export function Row({
     if (!el) return;
     userInteractedRef.current = true;
     cancelGlide();
-    const rtl = rtlRef.current;
     const cur = rtl ? -el.scrollLeft : el.scrollLeft;
     const max = el.scrollWidth - el.clientWidth;
     const stride = strideRef.current;
@@ -515,7 +512,6 @@ export function Row({
       resetPosterDock();
       return;
     }
-    const rtl = rtlRef.current;
     updatePosterDock({
       track,
       pointerX,
@@ -525,7 +521,7 @@ export function Row({
       rtl,
       transitionMs: settings.posterDockTransitionMs,
     });
-  }, [cellWidth, dockEnabled, effMin, resetPosterDock, settings.posterDockTransitionMs]);
+  }, [cellWidth, dockEnabled, effMin, resetPosterDock, rtl, settings.posterDockTransitionMs]);
   const schedulePosterDock = useCallback(
     (clientX: number) => {
       dockPointerXRef.current = clientX;
@@ -554,7 +550,6 @@ export function Row({
   };
 
   const glideTo = (el: HTMLDivElement, target: number, snappy = false) => {
-    const rtl = rtlRef.current;
     const start = rtl ? -el.scrollLeft : el.scrollLeft;
     const distance = target - start;
     if (Math.abs(distance) < 2) {
@@ -652,7 +647,7 @@ export function Row({
     const v = d.vel;
     const projection = -((v * Math.abs(v)) / (2 * friction));
     const projectedRaw = el.scrollLeft + projection;
-    const projected = rtlRef.current ? -projectedRaw : projectedRaw;
+    const projected = rtl ? -projectedRaw : projectedRaw;
     const stride = (cellWidth ?? effMin) + GAP;
     const max = el.scrollWidth - el.clientWidth;
     const targetIdx = Math.round(projected / stride);
@@ -870,6 +865,7 @@ function EdgeArrow({
         onClick={onClick}
         aria-label={label}
         tabIndex={visible ? 0 : -1}
+        data-tv-skip="true"
         className={`pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-elevated/90 text-ink shadow-lg ring-1 ring-white/5 backdrop-blur transition-all duration-200 hover:scale-105 hover:bg-elevated active:scale-95 ${chev}`}
       >
         {side === "left" ? (

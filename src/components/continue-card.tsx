@@ -598,6 +598,8 @@ export const ContinueCard = memo(function ContinueCard({
           >
             <button
               type="button"
+              tabIndex={-1}
+              data-tv-skip="true"
               onClick={onPlay}
               aria-label={t("Play {name}", { name: displayTitle })}
               title={t("Play")}
@@ -611,6 +613,8 @@ export const ContinueCard = memo(function ContinueCard({
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center opacity-0 transition-opacity duration-[220ms] group-hover:opacity-100 group-focus-within:opacity-100">
           <button
             type="button"
+            tabIndex={-1}
+            data-tv-skip="true"
             onClick={onPlay}
             aria-label={t("Play {name}", { name: displayTitle })}
             title={t("Play")}
@@ -622,6 +626,8 @@ export const ContinueCard = memo(function ContinueCard({
       )}
       <button
         type="button"
+        tabIndex={-1}
+        data-tv-skip="true"
         onClick={onOpenDetails}
         aria-label={`${t("Open details")}: ${displayTitle}`}
         className="mt-2.5 block w-full truncate rounded-sm text-start text-[13px] font-medium text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -643,6 +649,8 @@ export const ContinueCard = memo(function ContinueCard({
             >
               <button
                 type="button"
+                tabIndex={-1}
+                data-tv-skip="true"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDismiss(item);
@@ -657,6 +665,8 @@ export const ContinueCard = memo(function ContinueCard({
         ) : (
           <button
             type="button"
+            tabIndex={-1}
+            data-tv-skip="true"
             onClick={(e) => {
               e.stopPropagation();
               onDismiss(item);
