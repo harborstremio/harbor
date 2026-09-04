@@ -288,6 +288,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let subtitleAddSelectionId = 0;
   const mainSubtitleSelection = new SubtitleSelectionCoordinator();
   const secondarySubtitleSelection = new SubtitleSelectionCoordinator();
+  let pendingSubtitlePick: { id: string | null; origin: string } | null = null;
   let subtitleTransitionQueue: Promise<void> = Promise.resolve();
   const enqueueSubtitleTransition = <T>(task: () => Promise<T>): Promise<T> => {
     const result = subtitleTransitionQueue.then(task, task);
@@ -300,6 +301,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   const invalidateSubtitleSelections = () => {
     mainSubtitleSelection.invalidate();
     secondarySubtitleSelection.invalidate();
+    pendingSubtitlePick = null;
   };
   let observedPaused: boolean | null = null;
   const applyDefaultVodBufferPhase = async (
@@ -901,37 +903,47 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     setAudioTrack(id) {
       invoke("mpv_set_property", { name: "aid", value: Number(id) || id }).catch(() => {});
     },
-    setSubtitleTrack(id) {
+    canAutoSelectSubtitle: () => mainSubtitleSelection.canAutoSelect(mediaRevision),
+    setSubtitleTrack(id, origin = "manual") {
+      if (!mainSubtitleSelection.claim(mediaRevision, origin)) return;
       const requestMediaRevision = mediaRevision;
       mainSubtitleSelection.begin(
         requestMediaRevision,
         id ?? "__harbor-subtitles-off__",
         snap.subtitleTracks.find((track) => track.selected)?.id ?? null,
       );
-      snap = {
-        ...snap,
-        subText: "",
-        subStartSec: 0,
-        subtitleTracks: snap.subtitleTracks.map((track) => ({
-          ...track,
-          selected: id != null && track.id === id,
-        })),
-      };
-      emit();
+      if (pendingSubtitlePick?.id === id && pendingSubtitlePick.origin === origin) return;
+      const pick = { id, origin };
+      pendingSubtitlePick = pick;
+      const canCommit = () =>
+        requestMediaRevision === mediaRevision &&
+        (origin === "manual" || mainSubtitleSelection.canAutoSelect(mediaRevision));
       void enqueueSubtitleTransition(async () => {
-        if (requestMediaRevision !== mediaRevision) return;
+        if (!canCommit()) return;
         await resetSubtitleFpsBeforeMpvTransition();
-        if (requestMediaRevision !== mediaRevision) return;
+        if (!canCommit()) return;
         await invoke("mpv_set_property", {
           name: "sid",
           value: id == null ? "no" : Number(id) || id,
         });
-      }).catch((error) => {
-        if (requestMediaRevision === mediaRevision) {
-          console.warn("[mpv] could not select a subtitle after resetting subtitle FPS", error);
-          window.dispatchEvent(new Event(SUBTITLE_FPS_TRANSITION_FAILED_EVENT));
-        }
-      });
+        if (requestMediaRevision !== mediaRevision) return;
+        const selectedSid = await invoke<string | number>("mpv_get_property", { name: "sid" });
+        if (requestMediaRevision !== mediaRevision) return;
+        snap.subtitleTracks = snap.subtitleTracks.map((track) => ({
+          ...track,
+          selected: track.id === String(selectedSid),
+        }));
+        emit();
+      })
+        .catch((error) => {
+          if (requestMediaRevision === mediaRevision) {
+            console.warn("[mpv] could not select a subtitle after resetting subtitle FPS", error);
+            window.dispatchEvent(new Event(SUBTITLE_FPS_TRANSITION_FAILED_EVENT));
+          }
+        })
+        .finally(() => {
+          if (pendingSubtitlePick === pick) pendingSubtitlePick = null;
+        });
     },
     setSecondarySubtitleTrack(id) {
       const requestMediaRevision = mediaRevision;
@@ -1011,10 +1023,10 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         );
       }
     },
-    async addSubtitle(url, lang, title, select, metadata): Promise<boolean> {
+    async addSubtitle(url, lang, title, select, metadata, origin = "manual"): Promise<boolean> {
       const requestMediaRevision = mediaRevision;
       const requestLoadId = mediaLoadId;
-      const wantsSelection = select ?? true;
+      const wantsSelection = (select ?? true) && mainSubtitleSelection.claim(mediaRevision, origin);
       const selectionRequest = wantsSelection
         ? mainSubtitleSelection.begin(
             mediaRevision,
@@ -1253,7 +1265,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     },
     subscribe(l) {
       listeners.add(l);
-      l(snap);
+      l({ ...snap });
       return () => {
         listeners.delete(l);
       };
