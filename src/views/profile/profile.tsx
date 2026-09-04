@@ -20,6 +20,7 @@ import {
 } from "@/lib/social/stats-sync";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
+import { useCustomLists } from "@/lib/custom-lists";
 import { currentAuthor } from "@/lib/theme-auth";
 import { useScrollMemory, useView } from "@/lib/view";
 import { pushBackHandler } from "@/lib/back-intercept";
@@ -80,6 +81,7 @@ export function ProfileView({
   const mangaProgress = useMangaProgressList();
   const watchedCount = useWatchedCount();
   const { state, summary, friends, badges, activity, reload, patchSummary } = useProfile(handle);
+  const localLists = useCustomLists();
   const isOwner = summary?.isOwner ?? false;
   const viewerSignedIn = !!currentAuthor();
   const libWatched = useLibraryWatchedCount(authKey, isOwner);
@@ -175,6 +177,13 @@ export function ProfileView({
   }
 
   const c = resolveCustomization(summary);
+  const featuredLists = summary.featuredLists?.map((featured) => {
+    if (!summary.isOwner || featured.description) return featured;
+    const local = localLists.find(
+      (list) => list.name.trim().toLowerCase() === featured.name.trim().toLowerCase(),
+    );
+    return local?.description ? { ...featured, description: local.description } : featured;
+  });
 
   const layout = sanitizeLayout(summary.cardLayout);
   const hiddenSet = new Set(layout.hidden ?? []);
@@ -221,7 +230,7 @@ export function ProfileView({
     ),
     lists: (
       <MyListsShowcase
-        lists={summary.featuredLists ?? []}
+        lists={featuredLists ?? []}
         isOwner={summary.isOwner}
         signedIn={viewerSignedIn}
         onOpenMeta={onOpenMeta}
@@ -404,7 +413,7 @@ export function ProfileView({
         {expanded && (
           <ProfileViewAll
             section={expanded}
-            lists={summary.featuredLists ?? []}
+            lists={featuredLists ?? []}
             badges={badges}
             activity={activity}
             signedIn={viewerSignedIn}

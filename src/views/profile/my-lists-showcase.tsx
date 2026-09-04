@@ -8,7 +8,13 @@ import { ListShareButton } from "./list-share-button";
 import { SaveListButton } from "./save-list-button";
 import type { FeaturedItem, FeaturedList } from "@/lib/social/featured-lists";
 
-function ListPoster({ item, onOpenMeta }: { item: FeaturedItem; onOpenMeta?: (id: string, kind?: string, hint?: { name?: string; poster?: string }) => void }) {
+function ListPoster({
+  item,
+  onOpenMeta,
+}: {
+  item: FeaturedItem;
+  onOpenMeta?: (id: string, kind?: string, hint?: { name?: string; poster?: string }) => void;
+}) {
   return (
     <button
       onClick={() => onOpenMeta?.(item.id, item.type, { name: item.name, poster: item.poster })}
@@ -48,7 +54,10 @@ export function MyListsShowcase({
   const shown = lists.filter((l) => l.items.length > 0);
   if (shown.length === 0 && !isOwner) {
     return (
-      <section aria-label={t("My lists")} className="rounded-lg bg-surface p-5 ring-1 ring-edge-soft">
+      <section
+        aria-label={t("My lists")}
+        className="rounded-lg bg-surface p-5 ring-1 ring-edge-soft"
+      >
         <SectionHeader icon={<ListVideo size={20} />} label={t("My lists")} />
         <p className="py-6 text-center text-[13px] text-ink-subtle">
           {t("This user hasn't featured any lists")}
@@ -69,7 +78,18 @@ export function MyListsShowcase({
             <Row
               key={list.id || `${list.name}:${i}`}
               title={list.name || t("Untitled list")}
-              titleExtra={<span className="text-[12px] tabular-nums text-ink-subtle">{list.items.length}</span>}
+              titleExtra={
+                <span className="text-[12px] tabular-nums text-ink-subtle">
+                  {list.items.length}
+                </span>
+              }
+              headerDescription={
+                list.description && (
+                  <p className="max-w-2xl text-[13px] leading-relaxed text-ink-muted">
+                    {list.description}
+                  </p>
+                )
+              }
               headerRight={
                 <div className="flex items-center gap-2.5">
                   <ListHeart
@@ -80,7 +100,9 @@ export function MyListsShowcase({
                     interactive={!!signedIn && !isOwner}
                   />
                   <ListShareButton handle={handle ?? ""} listId={list.id} name={list.name} />
-                  {signedIn && !isOwner && <SaveListButton handle={handle ?? ""} listId={list.id} />}
+                  {signedIn && !isOwner && (
+                    <SaveListButton handle={handle ?? ""} listId={list.id} />
+                  )}
                 </div>
               }
               min={96}
@@ -104,7 +126,9 @@ export function MyListsShowcase({
       ) : (
         <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-edge py-10 text-center">
           <p className="text-[14px] text-ink-muted">{t("No lists featured yet")}</p>
-          <p className="mt-1 text-[12px] text-ink-subtle">{t("Pick lists from your library to show them here")}</p>
+          <p className="mt-1 text-[12px] text-ink-subtle">
+            {t("Pick lists from your library to show them here")}
+          </p>
           {onManage && (
             <button
               onClick={onManage}

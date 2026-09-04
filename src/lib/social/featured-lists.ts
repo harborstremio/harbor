@@ -22,6 +22,7 @@ export type FeaturedItem = {
 export type FeaturedList = {
   id: string;
   name: string;
+  description?: string;
   items: FeaturedItem[];
   coverImage?: string;
   bgImage?: string;
@@ -33,6 +34,7 @@ export type FeaturedList = {
 export type PickableList = {
   id: string;
   name: string;
+  description?: string;
   items: FeaturedItem[];
   coverImage?: string;
   bgImage?: string;
@@ -43,6 +45,7 @@ export function toPickableList(list: CustomList): PickableList {
   return {
     id: list.id,
     name: list.name,
+    description: list.description,
     coverImage: list.coverImage,
     bgImage: list.bgImage,
     bgMode: list.bgMode,
@@ -63,6 +66,7 @@ export function toFeaturedList(list: PickableList): FeaturedList {
   return {
     id: "",
     name: list.name,
+    description: list.description,
     items: list.items,
     coverImage: list.coverImage,
     bgImage: list.bgImage,
@@ -86,6 +90,7 @@ export function buildFeaturedPayload(
   return selected.map((l) => ({
     id: idByName.get(normalizeListName(l.name)) ?? "",
     name: l.name,
+    description: l.description,
     coverImage: l.coverImage,
     bgImage: l.bgImage,
     bgMode: l.bgMode,

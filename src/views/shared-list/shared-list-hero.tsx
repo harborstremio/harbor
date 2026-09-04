@@ -29,7 +29,9 @@ export function SharedListHero({
       >
         <Avatar src={summary.avatarUrl} size={88} alias={summary.alias} />
         <span className="inline-flex items-center gap-1.5 text-[13.5px]">
-          <span className="font-medium text-ink-muted transition-colors group-hover:text-ink">{summary.alias}</span>
+          <span className="font-medium text-ink-muted transition-colors group-hover:text-ink">
+            {summary.alias}
+          </span>
           <span className="text-ink-subtle">@{summary.handle}</span>
         </span>
       </button>
@@ -38,6 +40,9 @@ export function SharedListHero({
         <h1 className="font-display text-[36px] leading-[1.04] text-ink sm:text-[46px]">
           {list.name || "Untitled list"}
         </h1>
+        {list.description && (
+          <p className="max-w-2xl text-[14px] leading-relaxed text-ink-muted">{list.description}</p>
+        )}
         <span className="text-[13px] tabular-nums text-ink-subtle">
           {count} {count === 1 ? "title" : "titles"}
         </span>
@@ -52,7 +57,9 @@ export function SharedListHero({
           interactive={signedIn && !summary.isOwner}
         />
         <ListShareButton handle={summary.handle} listId={list.id} name={list.name} />
-        {signedIn && !summary.isOwner && <SaveListButton handle={summary.handle} listId={list.id} />}
+        {signedIn && !summary.isOwner && (
+          <SaveListButton handle={summary.handle} listId={list.id} />
+        )}
         {openMaker && (
           <button
             type="button"

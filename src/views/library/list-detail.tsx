@@ -100,6 +100,11 @@ export function ListDetail({ listId, onBack }: { listId: string; onBack: () => v
           <h1 className="font-display text-[34px] font-medium leading-[1.05] text-ink">
             {list.name}
           </h1>
+          {list.description && (
+            <p className="max-w-2xl text-[14px] leading-relaxed text-ink-muted">
+              {list.description}
+            </p>
+          )}
           <p className="text-[12.5px] text-ink-muted">
             {t("{n} / {max} items", { n: list.items.length, max: MAX_ITEMS })}
             {list.updatedAt > 0 &&

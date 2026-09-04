@@ -14,6 +14,7 @@ export function CreateListModal({
   const t = useT();
   const lists = useCustomLists();
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const atMax = lists.length >= MAX_LISTS;
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export function CreateListModal({
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed || atMax) return;
-    const id = createList(trimmed);
+    const id = createList(trimmed, description);
     if (!id) return;
     emitListToast(t('Created "{name}"', { name: trimmed }));
     onCreated?.(id);
@@ -65,6 +66,21 @@ export function CreateListModal({
             placeholder={t("Weekend watchlist")}
             spellCheck={false}
             className="h-11 w-full rounded-xl border border-edge bg-canvas px-3.5 text-[14px] text-ink outline-none transition-colors placeholder:text-ink-subtle focus:border-ink disabled:opacity-50"
+          />
+        </label>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-subtle">
+            {t("Description")}
+          </span>
+          <textarea
+            value={description}
+            maxLength={240}
+            disabled={atMax}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={t("A short note about this list")}
+            rows={3}
+            className="w-full resize-none rounded-xl border border-edge bg-canvas px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors placeholder:text-ink-subtle focus:border-ink disabled:opacity-50"
           />
         </label>
 

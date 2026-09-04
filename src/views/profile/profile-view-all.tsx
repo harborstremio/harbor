@@ -88,7 +88,9 @@ export function ProfileViewAll({
             />
           )}
           {section === "badges" && <BadgesSection badges={badges} />}
-          {section === "activity" && <ActivitySection activity={activity} onOpenMeta={onOpenMeta} />}
+          {section === "activity" && (
+            <ActivitySection activity={activity} onOpenMeta={onOpenMeta} />
+          )}
         </div>
       </div>
     </div>,
@@ -97,7 +99,11 @@ export function ProfileViewAll({
 }
 
 function Empty({ label }: { label: string }) {
-  return <div className="flex h-40 items-center justify-center text-[13.5px] text-ink-muted">{label}</div>;
+  return (
+    <div className="flex h-40 items-center justify-center text-[13.5px] text-ink-muted">
+      {label}
+    </div>
+  );
 }
 
 function ListsSection({
@@ -134,11 +140,18 @@ function ListsSection({
               <ListShareButton handle={handle ?? ""} listId={list.id} name={list.name} />
             </div>
           </div>
+          {list.description && (
+            <p className="mb-3 max-w-2xl text-[13px] leading-relaxed text-ink-muted">
+              {list.description}
+            </p>
+          )}
           <div className="grid grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-x-4 gap-y-5">
             {list.items.map((item) => (
               <button
                 key={item.id}
-                onClick={() => onOpenMeta?.(item.id, item.type, { name: item.name, poster: item.poster })}
+                onClick={() =>
+                  onOpenMeta?.(item.id, item.type, { name: item.name, poster: item.poster })
+                }
                 disabled={!onOpenMeta}
                 className="group text-start disabled:cursor-default"
               >
@@ -149,7 +162,9 @@ function ListsSection({
                   className="rounded-md ring-1 ring-edge-soft transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] motion-safe:group-hover:will-change-transform motion-safe:group-hover:-translate-y-1"
                   lazy
                 />
-                {item.name && <div className="mt-1.5 line-clamp-2 text-[12px] text-ink-muted">{item.name}</div>}
+                {item.name && (
+                  <div className="mt-1.5 line-clamp-2 text-[12px] text-ink-muted">{item.name}</div>
+                )}
               </button>
             ))}
           </div>
@@ -195,7 +210,13 @@ function BadgesSection({ badges }: { badges: Badge[] }) {
   );
 }
 
-function ActivitySection({ activity, onOpenMeta }: { activity: ActivityItem[]; onOpenMeta?: (id: string) => void }) {
+function ActivitySection({
+  activity,
+  onOpenMeta,
+}: {
+  activity: ActivityItem[];
+  onOpenMeta?: (id: string) => void;
+}) {
   const t = useT();
   if (activity.length === 0) return <Empty label={t("No recent activity")} />;
   return (
@@ -220,7 +241,9 @@ function ActivitySection({ activity, onOpenMeta }: { activity: ActivityItem[]; o
             <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] text-ink-subtle">
               <ActivityGlyph kind={a.kind} size={15} />
               {ACTIVITY_VERB[a.kind]}
-              {a.kind === "rated" && a.rating !== undefined && <span className="text-accent">{a.rating}/10</span>}
+              {a.kind === "rated" && a.rating !== undefined && (
+                <span className="text-accent">{a.rating}/10</span>
+              )}
             </div>
             <div className="mt-0.5 truncate text-[14px] font-medium text-ink">{a.title}</div>
             {a.subtitle && <div className="truncate text-[12px] text-ink-muted">{a.subtitle}</div>}
