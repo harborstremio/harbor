@@ -14,12 +14,28 @@ export function mediaKeyGate(): boolean {
   return true;
 }
 
-export function updateMediaControls(playing: boolean, title: string, subtitle: string): void {
+export function updateMediaControls(
+  playing: boolean,
+  title: string,
+  subtitle: string,
+  artUrl?: string | null,
+  durationSec?: number | null,
+  positionSec?: number | null,
+): void {
   if (!isTauri()) return;
-  const state = `${playing ? 1 : 0}|${title}|${subtitle}`;
+  const art = artUrl ?? null;
+  const dur = typeof durationSec === "number" && Number.isFinite(durationSec) && durationSec > 0 ? Math.round(durationSec) : null;
+  const state = `${playing ? 1 : 0}|${title}|${subtitle}|${art ?? ""}|${dur ?? 0}`;
   if (state === lastState) return;
   lastState = state;
-  invoke("media_controls_update", { playing, title, subtitle }).catch(() => {});
+  invoke("media_controls_update", {
+    playing,
+    title,
+    subtitle,
+    artUrl: art,
+    durationSec: durationSec != null && Number.isFinite(durationSec) ? durationSec : null,
+    positionSec: positionSec != null && Number.isFinite(positionSec) ? positionSec : null,
+  }).catch(() => {});
 }
 
 export function clearMediaControls(): void {

@@ -130,6 +130,8 @@ export function useKeyboardShortcuts(params: {
   const mediaRef = useRef({
     status: snap.status,
     playPauseToggle,
+    seekStep,
+    seekTo,
     onNextEp,
     onPrevEp,
     hasNextEp,
@@ -138,6 +140,8 @@ export function useKeyboardShortcuts(params: {
   mediaRef.current = {
     status: snap.status,
     playPauseToggle,
+    seekStep,
+    seekTo,
     onNextEp,
     onPrevEp,
     hasNextEp,
@@ -578,9 +582,9 @@ export function useKeyboardShortcuts(params: {
   useEffect(() => {
     if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return;
     let dead = false;
-    let unlisten: (() => void) | undefined;
-    void import("@tauri-apps/api/event").then(({ listen }) =>
-      listen<string>("harbor://media-key", (e) => {
+    let cleanup: (() => void) | undefined;
+    void import("@tauri-apps/api/event").then(async ({ listen }) => {
+      const u1 = await listen<string>("harbor://media-key", (e) => {
         const m = mediaRef.current;
         const playing = m.status === "playing";
         switch (e.payload) {
@@ -601,14 +605,32 @@ export function useKeyboardShortcuts(params: {
             if (m.hasPrevEp && m.onPrevEp && mediaKeyGate()) m.onPrevEp();
             break;
         }
-      }).then((u) => {
-        if (dead) u();
-        else unlisten = u;
-      }),
-    );
+      });
+      const u2 = await listen<number>("harbor://media-seek-relative", (e) => {
+        if (typeof e.payload === "number" && Number.isFinite(e.payload)) {
+          mediaRef.current.seekStep(e.payload);
+        }
+      });
+      const u3 = await listen<number>("harbor://media-seek-absolute", (e) => {
+        if (typeof e.payload === "number" && Number.isFinite(e.payload)) {
+          mediaRef.current.seekTo(e.payload);
+        }
+      });
+      if (dead) {
+        u1();
+        u2();
+        u3();
+      } else {
+        cleanup = () => {
+          u1();
+          u2();
+          u3();
+        };
+      }
+    });
     return () => {
       dead = true;
-      unlisten?.();
+      cleanup?.();
     };
   }, []);
 

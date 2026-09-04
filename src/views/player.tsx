@@ -962,8 +962,10 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   useEffect(() => {
     const ep = src.episode;
     const subtitle = ep ? `S${ep.season} E${ep.episode}${ep.name ? ` · ${ep.name}` : ""}` : "";
-    updateMediaControls(playing, src.meta.name, subtitle);
-  }, [playing, src.meta.name, src.episode]);
+    // const artUrl = src.meta.poster || src.meta.background || null;
+    const artUrl = src.meta.background || src.meta.poster || null;
+    updateMediaControls(playing, src.meta.name, subtitle, artUrl, snap.durationSec, snap.positionSec);
+  }, [playing, src.meta.name, src.episode, src.meta.poster, src.meta.background, snap.durationSec]);
   useEffect(() => () => clearMediaControls(), []);
 
   const onPrevEpisode = useCallback(() => playPrevRef.current(), [playPrevRef]);
