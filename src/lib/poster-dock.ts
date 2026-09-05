@@ -82,10 +82,8 @@ export function updatePosterDock({
   const stride = cellWidth + gap;
   if (rect.width <= 0 || stride <= 0) return;
 
-  const viewportX = pointerX - rect.left;
-  const contentX = rtl
-    ? track.scrollWidth - viewportX - scrollPosition
-    : viewportX + scrollPosition;
+  const viewportX = rtl ? rect.right - pointerX : pointerX - rect.left;
+  const contentX = viewportX + scrollPosition;
 
   const activeIndex = (contentX - cellWidth / 2) / stride;
   const range = Math.ceil(DISTANCE / stride);

@@ -1322,7 +1322,7 @@ html[data-theme-layout="custom"] [class*="shadow-"] { --tw-shadow: 0 0 #0000; }
 html[data-theme-layout="custom"] ::selection { background: rgba(53,116,252,0.35); }`;
 
 function buildFeishinHtml(): string {
-  return `<aside class="fsh-rail" data-tauri-drag-region>
+  return `<aside class="fsh-rail" data-tv-nav-zone data-tauri-drag-region>
   <div class="fsh-actionbar">
     <button class="fsh-search" type="button" onclick="window.harbor.search()" aria-label="${escapeGeneratedHtml(t("Search"))}" title="${escapeGeneratedHtml(t("Search"))}">
       <svg class="fsh-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>

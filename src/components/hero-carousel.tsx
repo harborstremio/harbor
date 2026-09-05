@@ -298,6 +298,8 @@ export function HeroCarousel({
           <>
             <button
               type="button"
+              tabIndex={-1}
+              data-tv-skip="true"
               onClick={() => setActive((a) => (a - 1 + slides.length) % slides.length)}
               aria-label={t("Previous")}
               className="group/hl absolute inset-y-0 start-0 z-30 my-auto flex h-14 w-14 items-center justify-center"
@@ -310,6 +312,8 @@ export function HeroCarousel({
             </button>
             <button
               type="button"
+              tabIndex={-1}
+              data-tv-skip="true"
               onClick={() => setActive((a) => (a + 1) % slides.length)}
               aria-label={t("Next")}
               className="group/hr absolute inset-y-0 end-0 z-30 my-auto flex h-14 w-14 items-center justify-center"
@@ -330,6 +334,8 @@ export function HeroCarousel({
           {slides.map((_, i) => (
             <button
               key={i}
+              tabIndex={-1}
+              data-tv-skip="true"
               onClick={() => setActive(i)}
               aria-label={t("Slide {n}", { n: i + 1 })}
               className={`h-1.5 rounded-full transition-all duration-300 ${

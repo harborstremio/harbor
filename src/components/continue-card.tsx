@@ -77,8 +77,7 @@ export const ContinueCard = memo(function ContinueCard({
   const snapshot = readSnapshot(item._id);
   const isExternal = !!item.external;
   const externalLogo = item.external === "trakt" ? traktLogo : simklLogo;
-  const externalLabel =
-    item.external === "trakt" ? t("Paused on Trakt") : t("Paused on Simkl");
+  const externalLabel = item.external === "trakt" ? t("Paused on Trakt") : t("Paused on Simkl");
   const dur = item.state?.duration ?? 0;
   const off = item.state?.timeOffset ?? 0;
   const progress = dur > 0 ? Math.min(1, off / dur) : 0;
@@ -590,10 +589,6 @@ export const ContinueCard = memo(function ContinueCard({
             radius="9999px"
             shaderRadius={0.58}
             intensity={0.9}
-            experimentalStyle={{
-              background:
-                "linear-gradient(145deg, rgba(8,12,18,0.50), rgba(8,12,18,0.38) 52%, rgba(8,12,18,0.44))",
-            }}
             style={{
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
             }}
@@ -602,6 +597,8 @@ export const ContinueCard = memo(function ContinueCard({
           >
             <button
               type="button"
+              tabIndex={-1}
+              data-tv-skip="true"
               onClick={onPlay}
               aria-label={t("Play {name}", { name: displayTitle })}
               title={t("Play")}
@@ -615,6 +612,8 @@ export const ContinueCard = memo(function ContinueCard({
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center opacity-0 transition-opacity duration-[220ms] group-hover:opacity-100 group-focus-within:opacity-100">
           <button
             type="button"
+            tabIndex={-1}
+            data-tv-skip="true"
             onClick={onPlay}
             aria-label={t("Play {name}", { name: displayTitle })}
             title={t("Play")}
@@ -626,6 +625,8 @@ export const ContinueCard = memo(function ContinueCard({
       )}
       <button
         type="button"
+        tabIndex={-1}
+        data-tv-skip="true"
         onClick={onOpenDetails}
         aria-label={`${t("Open details")}: ${displayTitle}`}
         className="mt-2.5 block w-full truncate rounded-sm text-start text-[13px] font-medium text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -639,10 +640,6 @@ export const ContinueCard = memo(function ContinueCard({
               radius="9999px"
               shaderRadius={0.58}
               intensity={0.9}
-              experimentalStyle={{
-                background:
-                  "linear-gradient(145deg, rgba(8,12,18,0.50), rgba(8,12,18,0.38) 52%, rgba(8,12,18,0.44))",
-              }}
               style={{
                 boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
               }}
@@ -651,6 +648,8 @@ export const ContinueCard = memo(function ContinueCard({
             >
               <button
                 type="button"
+                tabIndex={-1}
+                data-tv-skip="true"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDismiss(item);
@@ -665,6 +664,8 @@ export const ContinueCard = memo(function ContinueCard({
         ) : (
           <button
             type="button"
+            tabIndex={-1}
+            data-tv-skip="true"
             onClick={(e) => {
               e.stopPropagation();
               onDismiss(item);

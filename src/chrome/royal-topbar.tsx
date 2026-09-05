@@ -8,7 +8,12 @@ import { TogetherButton } from "@/chrome/topbar";
 import { AccountMenu } from "@/chrome/account-menu/account-menu";
 import { useT } from "@/lib/i18n";
 import { useSearch } from "@/lib/search-context";
-import { effectiveBinding, eventToBinding, formatBindingForDisplay, shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
+import {
+  effectiveBinding,
+  eventToBinding,
+  formatBindingForDisplay,
+  shouldHandleGlobalKeyboardEvent,
+} from "@/lib/hotkeys";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
 import { useParental } from "@/lib/parental";
@@ -44,7 +49,8 @@ export function RoyalTopbar() {
   };
 
   const navigate = (item: NavItem) => {
-    const needsPin = locked && (item.pinGated || (item.parentalKey && hiddenTabs[item.parentalKey]));
+    const needsPin =
+      locked && (item.pinGated || (item.parentalKey && hiddenTabs[item.parentalKey]));
     if (needsPin) setPinFor(item.view);
     else setView(item.view);
   };
@@ -86,9 +92,12 @@ export function RoyalTopbar() {
   return (
     <>
       <header
+        data-tv-top-chrome
         aria-hidden={chromeHidden}
         className={`fixed inset-x-0 top-0 z-[60] flex h-20 items-center px-4 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          chromeHidden ? "pointer-events-none -translate-y-1.5 opacity-0" : "translate-y-0 opacity-100"
+          chromeHidden
+            ? "pointer-events-none -translate-y-1.5 opacity-0"
+            : "translate-y-0 opacity-100"
         }`}
       >
         <div
@@ -98,6 +107,8 @@ export function RoyalTopbar() {
           <div className="flex min-w-0 items-center gap-2.5">
             <button
               type="button"
+              tabIndex={-1}
+              data-tv-skip="true"
               onClick={() => setView("home")}
               className="flex shrink-0 items-center gap-2.5 text-ink"
               aria-label={t("chrome.harborHome")}
@@ -151,12 +162,28 @@ export function RoyalTopbar() {
             {IS_TAURI && !settings.useNativeTitleBar && !settings.hybridTitleBar && (
               <div className="ms-0.5 flex items-center gap-1">
                 <WinBtn onClick={minimize} label={t("chrome.minimize")}>
-                  <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <path
+                    d="M3 6.5h7"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                  />
                 </WinBtn>
-                <WinBtn onClick={toggleMaximize} label={maxed ? t("chrome.restore") : t("chrome.maximize")}>
+                <WinBtn
+                  onClick={toggleMaximize}
+                  label={maxed ? t("chrome.restore") : t("chrome.maximize")}
+                >
                   {maxed ? (
                     <>
-                      <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" strokeWidth="1.4" rx="1" />
+                      <rect
+                        x="2.5"
+                        y="4.5"
+                        width="6"
+                        height="6"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        rx="1"
+                      />
                       <path
                         d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
                         stroke="currentColor"
@@ -165,11 +192,24 @@ export function RoyalTopbar() {
                       />
                     </>
                   ) : (
-                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.4" rx="1.2" />
+                    <rect
+                      x="3"
+                      y="3"
+                      width="7"
+                      height="7"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      rx="1.2"
+                    />
                   )}
                 </WinBtn>
                 <WinBtn onClick={close} label={t("common.close")} danger>
-                  <path d="M3.5 3.5l6 6M9.5 3.5l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <path
+                    d="M3.5 3.5l6 6M9.5 3.5l-6 6"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                  />
                 </WinBtn>
               </div>
             )}
@@ -196,7 +236,10 @@ export function RoyalTopbar() {
 
 function Filigree() {
   return (
-    <span aria-hidden className="harbor-royal-filigree relative mx-1 h-6 w-px shrink-0 overflow-hidden">
+    <span
+      aria-hidden
+      className="harbor-royal-filigree relative mx-1 h-6 w-px shrink-0 overflow-hidden"
+    >
       <span className="absolute inset-0 bg-[color-mix(in_srgb,var(--color-accent)_42%,transparent)]" />
       <span className="harbor-royal-glint absolute inset-x-0 top-0 h-1.5 bg-[linear-gradient(to_bottom,transparent,color-mix(in_srgb,var(--color-accent)_85%,white),transparent)]" />
     </span>

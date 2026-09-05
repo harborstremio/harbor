@@ -10022,55 +10022,78 @@ function SearchField({
   onSubmit: () => void;
 }) {
   const t = useT();
+  const SEARCH_NAV_HINT = "Press Enter or Space to type";
+  const SEARCH_EDIT_HINT = "Text mode — Esc to exit";
   return (
-    <div className={NAV_FIELD}>
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={NAV_FIELD_GLYPH}
-        aria-hidden
-      >
-        <circle cx="11" cy="11" r="7" />
-        <path d="m20 20-3.5-3.5" />
-      </svg>
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={t("Search settings")}
-        className={NAV_FIELD_INPUT}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") onSubmit();
-          else if (e.key === "Escape") setQuery("");
-        }}
-      />
-      {query && (
-        <button
-          type="button"
-          onClick={() => setQuery("")}
-          className={NAV_FIELD_CLEAR}
-          aria-label={t("Clear")}
+    <div className="flex flex-1 flex-col">
+      <div data-settings-search-field data-tv-text-field className={NAV_FIELD}>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={NAV_FIELD_GLYPH}
+          aria-hidden
         >
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            aria-hidden
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t("Search settings")}
+          aria-describedby="settings-search-mode"
+          className={NAV_FIELD_INPUT}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") onSubmit();
+            else if (e.key === "Escape") setQuery("");
+          }}
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            className={NAV_FIELD_CLEAR}
+            aria-label={t("Clear")}
           >
-            <path d="M6 6l12 12M18 6 6 18" />
-          </svg>
-        </button>
-      )}
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              aria-hidden
+            >
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          </button>
+        )}
+      </div>
+      <div
+        id="settings-search-mode"
+        data-settings-search-mode
+        aria-live="polite"
+        className="flex min-h-5 items-center px-2 pt-1 text-[10.5px] leading-none"
+      >
+        <span data-settings-search-nav-hint className="hidden items-center gap-1.5 text-ink-subtle">
+          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-ink-subtle" />
+          {t(SEARCH_NAV_HINT)}
+        </span>
+        <span
+          data-settings-search-edit-hint
+          className="hidden items-center gap-1.5 font-semibold text-accent"
+        >
+          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+          {t(SEARCH_EDIT_HINT)}
+        </span>
+      </div>
     </div>
   );
 }

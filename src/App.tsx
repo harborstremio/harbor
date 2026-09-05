@@ -141,7 +141,12 @@ import { AnilistProvider } from "@/lib/anilist/provider";
 import { MalProvider } from "@/lib/mal/provider";
 import { SimklProvider } from "@/lib/simkl/provider";
 import { LetterboxdProvider } from "@/lib/stremboxd/provider";
-import { useKeyboardNavigation, tvFocus } from "@/lib/keyboard-navigation";
+import {
+  useKeyboardNavigation,
+  tvFocus,
+  focusTvPageDefault,
+  isVisible,
+} from "@/lib/keyboard-navigation";
 import { enterBigPicture, useBigPicture } from "@/lib/big-picture";
 import { BpErrorBoundary } from "@/views/big-picture/bp-error-boundary";
 import { shouldAutoStartBigPicture, shouldOfferBigPicture } from "@/views/big-picture/bp-logic";
@@ -785,7 +790,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
     chromeHidden,
   } = useView();
   const { settings, update } = useSettings();
-  const { setOpen: setSearchOpen } = useSearch();
+  const { open: searchOpen, setOpen: setSearchOpen } = useSearch();
   const bigPicture = useBigPicture().active;
   const bigPictureBooted = useRef(false);
   const uiScaleRef = useRef(settings.uiScale);
@@ -865,6 +870,39 @@ function Shell({ onReady }: { onReady?: () => void }) {
     onBack: handleTvBack,
     onBackToNav: handleTvBackToNav,
   });
+
+  useEffect(() => {
+    if (!settings.tvNavigation || searchOpen || topKind === "player" || picker || bigPicture)
+      return;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && (!isVisible(active) || active === document.body)) {
+      active.blur();
+    }
+    let frameId: number | null = null;
+    let timerId: number | null = null;
+    let attempts = 0;
+
+    const tryFocus = () => {
+      const current = document.activeElement;
+      if (current instanceof HTMLElement && current !== document.body && isVisible(current)) {
+        return;
+      }
+      focusTvPageDefault();
+      const after = document.activeElement;
+      if (
+        (!after || after === document.body || !isVisible(after as HTMLElement)) &&
+        attempts++ < 10
+      ) {
+        timerId = window.setTimeout(tryFocus, 100);
+      }
+    };
+
+    frameId = window.requestAnimationFrame(tryFocus);
+    return () => {
+      if (frameId !== null) window.cancelAnimationFrame(frameId);
+      if (timerId !== null) window.clearTimeout(timerId);
+    };
+  }, [settings.tvNavigation, topKind, meta?.id, searchOpen, picker, bigPicture]);
 
   useEffect(() => {
     SFX.setTheme(settings.soundTheme);
@@ -1339,6 +1377,18 @@ function Shell({ onReady }: { onReady?: () => void }) {
       ? "harbor-layer-active flex min-h-0 min-w-0 flex-1 flex-col"
       : "flex min-h-0 min-w-0 flex-1 flex-col absolute inset-0 invisible pointer-events-none [content-visibility:hidden]";
 
+  const layerProps = (top: boolean) => ({
+    className: layer(top),
+    inert: !top,
+    "data-layer-inactive": !top ? "" : undefined,
+  });
+
+  const parkLayerProps = (top: boolean) => ({
+    className: parkLayer(top),
+    inert: !top,
+    "data-layer-inactive": !top ? "" : undefined,
+  });
+
   const overlayPinned = useOverlayPinned();
   const settingsAlive = useIdleEvict(settingsTop, overlayPinned);
   const animeAlive = useIdleEvict(animeTop);
@@ -1446,102 +1496,102 @@ function Shell({ onReady }: { onReady?: () => void }) {
       <div
         className={`relative flex min-h-0 min-w-0 flex-1 flex-col ${playerActive ? "invisible" : ""}`}
       >
-        <div className={parkLayer(homeTop)}>
+        <div {...parkLayerProps(homeTop)}>
           <Home active={homeTop} onReady={onReady} />
         </div>
         {settingsAlive && (
-          <div className={layer(settingsTop)}>
+          <div {...layerProps(settingsTop)}>
             <Suspense fallback={null}>
               <Settings visible={settingsTop} />
             </Suspense>
           </div>
         )}
         {animeAlive && (
-          <div className={layer(animeTop)}>
+          <div {...layerProps(animeTop)}>
             <Suspense fallback={null}>
               <AnimeView active={animeTop} />
             </Suspense>
           </div>
         )}
         {discoverAlive && (
-          <div className={parkLayer(discoverTop)}>
+          <div {...parkLayerProps(discoverTop)}>
             <Suspense fallback={null}>
               <Discover active={discoverTop} />
             </Suspense>
           </div>
         )}
         {catalogsAlive && (
-          <div className={layer(catalogsTop)}>
+          <div {...layerProps(catalogsTop)}>
             <Suspense fallback={null}>
               <Catalogs active={catalogsTop} />
             </Suspense>
           </div>
         )}
         {addonsAlive && (
-          <div className={layer(addonsTop)}>
+          <div {...layerProps(addonsTop)}>
             <Suspense fallback={null}>
               <AddonsView />
             </Suspense>
           </div>
         )}
         {calendarAlive && (
-          <div className={layer(calendarTop)}>
+          <div {...layerProps(calendarTop)}>
             <Suspense fallback={null}>
               <CalendarView />
             </Suspense>
           </div>
         )}
         {wrappedAlive && (
-          <div className={layer(wrappedTop)}>
+          <div {...layerProps(wrappedTop)}>
             <Suspense fallback={null}>
               <WrappedView active={wrappedTop} />
             </Suspense>
           </div>
         )}
         {moviesAlive && (
-          <div className={layer(moviesTop)}>
+          <div {...layerProps(moviesTop)}>
             <Suspense fallback={null}>
               <Movies active={moviesTop} />
             </Suspense>
           </div>
         )}
         {kidsAlive && (
-          <div className={layer(kidsTop)}>
+          <div {...layerProps(kidsTop)}>
             <Suspense fallback={null}>
               <Kids active={kidsTop} />
             </Suspense>
           </div>
         )}
         {showsAlive && (
-          <div className={layer(showsTop)}>
+          <div {...layerProps(showsTop)}>
             <Suspense fallback={null}>
               <Shows active={showsTop} />
             </Suspense>
           </div>
         )}
         {libraryAlive && (
-          <div className={layer(libraryTop)}>
+          <div {...layerProps(libraryTop)}>
             <Suspense fallback={null}>
               <LibraryView active={libraryTop} />
             </Suspense>
           </div>
         )}
         {collectionsHubAlive && (
-          <div className={layer(collectionsHubTop)}>
+          <div {...layerProps(collectionsHubTop)}>
             <Suspense fallback={null}>
               <CommunityCollectionsView active={collectionsHubTop} />
             </Suspense>
           </div>
         )}
         {liveAlive && (
-          <div className={layer(liveTop)}>
+          <div {...layerProps(liveTop)}>
             <Suspense fallback={null}>
               <LiveView active={liveTop} />
             </Suspense>
           </div>
         )}
         {vodAlive && (
-          <div className={layer(vodTop)}>
+          <div {...layerProps(vodTop)}>
             <Suspense fallback={null}>
               <PlaylistVodView active={vodTop} />
             </Suspense>
@@ -1555,49 +1605,49 @@ function Shell({ onReady }: { onReady?: () => void }) {
           </div>
         )}
         {downloadsAlive && (
-          <div className={layer(downloadsTop)}>
+          <div {...layerProps(downloadsTop)}>
             <Suspense fallback={null}>
               <DownloadsView active={downloadsTop} />
             </Suspense>
           </div>
         )}
         {mangaAlive && (
-          <div className={layer(mangaTop)}>
+          <div {...layerProps(mangaTop)}>
             <Suspense fallback={null}>
               <MangaView />
             </Suspense>
           </div>
         )}
         {ebookAlive && (
-          <div className={layer(ebookTop)}>
+          <div {...layerProps(ebookTop)}>
             <Suspense fallback={null}>
               <EBookView />
             </Suspense>
           </div>
         )}
         {peopleAlive && (
-          <div className={layer(peopleTop)}>
+          <div {...layerProps(peopleTop)}>
             <Suspense fallback={null}>
               <PeopleView init={peopleInit} />
             </Suspense>
           </div>
         )}
         {queueAlive && (
-          <div className={layer(queueTop)}>
+          <div {...layerProps(queueTop)}>
             <Suspense fallback={null}>
               <QueueView />
             </Suspense>
           </div>
         )}
         {serviceAlive && service && (
-          <div className={layer(serviceTop)}>
+          <div {...layerProps(serviceTop)}>
             <Suspense fallback={null}>
               <ServiceView key={service} service={service} />
             </Suspense>
           </div>
         )}
         {detailAlive && meta && (
-          <div className={layer(detailTop)}>
+          <div {...layerProps(detailTop)}>
             <Suspense fallback={null}>
               {kid ? (
                 <KidsDetailView
@@ -1617,14 +1667,14 @@ function Shell({ onReady }: { onReady?: () => void }) {
           </div>
         )}
         {personAlive && personId !== null && (
-          <div className={layer(personTop)}>
+          <div {...layerProps(personTop)}>
             <Suspense fallback={null}>
               <PersonView key={`person-${personId}`} personId={personId} />
             </Suspense>
           </div>
         )}
         {profileAlive && profileHandle !== null && (
-          <div className={layer(profileTop)}>
+          <div {...layerProps(profileTop)}>
             <Suspense fallback={null}>
               <ProfileView
                 key={`profile-${profileHandle}`}
@@ -1647,28 +1697,28 @@ function Shell({ onReady }: { onReady?: () => void }) {
           </div>
         )}
         {feedAlive && (
-          <div className={layer(feedTop)}>
+          <div {...layerProps(feedTop)}>
             <Suspense fallback={null}>
               <FeedView onOpenProfile={requestOpenProfile} />
             </Suspense>
           </div>
         )}
         {groupsAlive && (
-          <div className={layer(groupsTop)}>
+          <div {...layerProps(groupsTop)}>
             <Suspense fallback={null}>
               <GroupsView />
             </Suspense>
           </div>
         )}
         {groupAlive && groupId !== null && (
-          <div className={layer(groupTop)}>
+          <div {...layerProps(groupTop)}>
             <Suspense fallback={null}>
               <GroupView key={`group-${groupId}`} id={groupId} onOpenProfile={requestOpenProfile} />
             </Suspense>
           </div>
         )}
         {listAlive && listHandle !== null && listId !== null && (
-          <div className={layer(listTop)}>
+          <div {...layerProps(listTop)}>
             <Suspense fallback={null}>
               <SharedListView
                 key={`list-${listHandle}-${listId}`}
@@ -1692,14 +1742,14 @@ function Shell({ onReady }: { onReady?: () => void }) {
           </div>
         )}
         {collectionAlive && collectionId !== null && (
-          <div className={layer(collectionTop)}>
+          <div {...layerProps(collectionTop)}>
             <Suspense fallback={null}>
               <CollectionView key={`collection-${collectionId}`} collectionId={collectionId} />
             </Suspense>
           </div>
         )}
         {addonCollectionAlive && addonCollectionMeta && (
-          <div className={layer(addonCollectionTop)}>
+          <div {...layerProps(addonCollectionTop)}>
             <Suspense fallback={null}>
               <AddonCollectionView
                 key={`addon-collection-${addonCollectionMeta.id}`}
@@ -1709,7 +1759,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
           </div>
         )}
         {episodeDetailAlive && episodeDetail && (
-          <div className={layer(episodeDetailTop)}>
+          <div {...layerProps(episodeDetailTop)}>
             <Suspense fallback={null}>
               <EpisodeDetailView
                 key={`episode-${episodeDetail.seriesId}-${episodeDetail.season}-${episodeDetail.episode}`}
@@ -1722,49 +1772,49 @@ function Shell({ onReady }: { onReady?: () => void }) {
           </div>
         )}
         {matchDetailAlive && matchDetailGame && (
-          <div className={layer(matchDetailTop)}>
+          <div {...layerProps(matchDetailTop)}>
             <Suspense fallback={null}>
               <MatchDetailView key={`match-${matchDetailGame.id}`} game={matchDetailGame} />
             </Suspense>
           </div>
         )}
         {filterAlive && filter && (
-          <div className={layer(filterTop)}>
+          <div {...layerProps(filterTop)}>
             <Suspense fallback={null}>
               <FilterView key={filterReactKey(filter)} filter={filter} />
             </Suspense>
           </div>
         )}
         {gridAlive && grid && (
-          <div className={layer(gridTop)}>
+          <div {...layerProps(gridTop)}>
             <Suspense fallback={null}>
               <GridView key={`grid-${grid.title}`} grid={grid} />
             </Suspense>
           </div>
         )}
         {collectionsIndexAlive && (
-          <div className={layer(collectionsIndexTop)}>
+          <div {...layerProps(collectionsIndexTop)}>
             <Suspense fallback={null}>
               <CollectionsView />
             </Suspense>
           </div>
         )}
         {awardAlive && awardType && (
-          <div className={layer(awardTop)}>
+          <div {...layerProps(awardTop)}>
             <Suspense fallback={null}>
               <AwardView key={`award-${awardType}`} awardType={awardType} />
             </Suspense>
           </div>
         )}
         {animeAwardAlive && animeAwardSource && (
-          <div className={layer(animeAwardTop)}>
+          <div {...layerProps(animeAwardTop)}>
             <Suspense fallback={null}>
               <AnimeAwardView key={`anime-award-${animeAwardSource}`} sourceId={animeAwardSource} />
             </Suspense>
           </div>
         )}
         {pickerAlive && picker && (
-          <div className={layer(pickerTop)}>
+          <div {...layerProps(pickerTop)}>
             <Suspense fallback={null}>
               <PlayPicker
                 key={`picker-${picker.meta.id}-${picker.episode?.season ?? ""}-${picker.episode?.episode ?? ""}-${picker.attempt ?? 0}-${picker.intent ?? "play"}-${picker.seasonEpisodes?.length ?? 0}`}

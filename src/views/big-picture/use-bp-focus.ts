@@ -186,10 +186,13 @@ export function useBpFocusRoot(params: {
       // reveal in moveVertically still has somewhere to look.
       let railMissed = false;
 
+      const isRtl = getComputedStyle(root).direction === "rtl";
+      const navDir = isRtl ? "right" : "left";
+
       // Apple's tvOS rule is that focus returns to the tab bar from anywhere
       // rather than by walking every row upward. Left already runs out at the
-      // start of a row, so that dead end becomes the direct path to the nav:
-      // one press from any depth instead of one per row.
+      // start of a row (Right in RTL), so that dead end becomes the direct path
+      // to the nav: one press from any depth instead of one per row.
       //
       // The row names the tab it belongs to, so Left out of a movies row lands
       // on Movies rather than on whichever tab is active. That is what replaced
@@ -199,16 +202,15 @@ export function useBpFocusRoot(params: {
       // behaviour. Read off the row rather than the cell so every card in the
       // row escapes to the same place.
       const toNav = (from: HTMLElement): HTMLElement | null => {
-        if (dir !== "left" || bpInChrome(from)) return null;
+        if (dir !== navDir || bpInChrome(from)) return null;
         const tab = from.closest<HTMLElement>("[data-bp-row]")?.dataset.bpRowTab;
         return focusBpTopBar(root, tab) ? currentBpFocus(root) : null;
       };
 
-      // Both ends of a row lead somewhere now. Left at the start reaches the
-      // nav, Right at the end reaches the row's own see-all, and Left off that
-      // see-all comes back to the cell it was pressed from rather than carrying
-      // on to the nav: the only door onto it is one press, so the reverse press
-      // has to undo exactly that one press.
+      // Both ends of a row lead somewhere now. In LTR, Left at the start reaches
+      // the nav, Right at the end reaches the row's own see-all, and Left off that
+      // see-all comes back to the cell it was pressed from. In RTL, these
+      // horizontal endpoints are mirrored.
       //
       // Shared by the fast path and the slow path because they answer
       // identically once the origin is known, and the two drifting apart is how
@@ -217,10 +219,10 @@ export function useBpFocusRoot(params: {
       // see-all branch reads it, and on the fast path building it is a
       // measureFocusables over the whole track.
       const stepAcross = (from: HTMLElement, pool: () => Measured[]): HTMLElement | null => {
-        if (isBpRowSeeAll(from)) return bpSeeAllExit(from, dir);
+        if (isBpRowSeeAll(from)) return bpSeeAllExit(from, dir, isRtl);
         return (
           focusFirstOf(candidatesFor(from, pool(), dir), { dir }) ??
-          bpSeeAllEnter(from, dir) ??
+          bpSeeAllEnter(from, dir, isRtl) ??
           toNav(from)
         );
       };
@@ -424,7 +426,10 @@ export function useBpFocusRoot(params: {
         }
       }
 
-      if (focused && (interactedRef.current || restored || focused.dataset.bpAutofocus === "true")) {
+      if (
+        focused &&
+        (interactedRef.current || restored || focused.dataset.bpAutofocus === "true")
+      ) {
         return;
       }
       const marked = root.querySelector<HTMLElement>("[data-bp-autofocus='true']");

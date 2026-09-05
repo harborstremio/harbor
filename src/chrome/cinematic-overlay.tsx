@@ -18,8 +18,7 @@ import { NotificationCenter } from "@/components/notification-center/notificatio
 import { AccountMenu } from "@/chrome/account-menu/account-menu";
 import { useBigPictureEntry } from "@/chrome/use-big-picture-entry";
 
-const IS_TAURI =
-  typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 export function CinematicOverlay() {
   const { view, setView, chromeHidden } = useView();
@@ -32,9 +31,7 @@ export function CinematicOverlay() {
   const bigPicture = useBigPictureEntry();
 
   const themePreset =
-    settings.theme.preset !== "custom"
-      ? getThemeById(settings.theme.preset)
-      : null;
+    settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
   const customMark = themePreset?.logo?.mark ?? null;
 
   const navigate = (item: NavItem) => {
@@ -45,10 +42,7 @@ export function CinematicOverlay() {
     setView(item.view);
   };
 
-  const navEntries: NavEntry[] = applyNavCustomization(
-    NAV_ITEMS,
-    settings.navCustomization,
-  )
+  const navEntries: NavEntry[] = applyNavCustomization(NAV_ITEMS, settings.navCustomization)
     .filter(
       (item) =>
         item.id !== "settings" &&
@@ -88,6 +82,7 @@ export function CinematicOverlay() {
   return (
     <>
       <header
+        data-tv-top-chrome
         aria-hidden={chromeHidden}
         className={`fixed inset-x-0 top-0 z-[60] flex h-24 items-start px-6 pt-3 transition-opacity duration-300 ${
           chromeHidden ? "pointer-events-none opacity-0" : "opacity-100"
@@ -100,17 +95,14 @@ export function CinematicOverlay() {
         >
           <button
             type="button"
+            tabIndex={-1}
+            data-tv-skip="true"
             onClick={() => setView("home")}
             className="flex shrink-0 items-center gap-2 text-ink"
             aria-label={t("chrome.harborHome")}
           >
             {customMark ? (
-              <img
-                src={customMark}
-                alt=""
-                draggable={false}
-                className="h-7 w-7 object-contain"
-              />
+              <img src={customMark} alt="" draggable={false} className="h-7 w-7 object-contain" />
             ) : (
               <HarborMark className="h-7 w-7" />
             )}
@@ -133,19 +125,13 @@ export function CinematicOverlay() {
           <div className="ms-2 flex shrink-0 items-center gap-1">
             <RecordingPill />
             <NotificationCenter />
-            {view !== "live" && (
-              <TogetherButton variant="ghost" connectStyle="tab" />
-            )}
+            {view !== "live" && <TogetherButton variant="ghost" connectStyle="tab" />}
             {bigPicture.offer && (
               <IconBtn onClick={bigPicture.open} label={bigPicture.label} active={false}>
                 <Monitor size={15} strokeWidth={2.2} />
               </IconBtn>
             )}
-            <IconBtn
-              onClick={() => setSearchOpen(true)}
-              label={t("common.search")}
-              active={false}
-            >
+            <IconBtn onClick={() => setSearchOpen(true)} label={t("common.search")} active={false}>
               <Search size={15} strokeWidth={2.2} />
             </IconBtn>
             <AccountMenu

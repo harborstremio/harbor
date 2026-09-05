@@ -88,6 +88,7 @@ export function TopDock() {
   return (
     <>
       <header
+        data-tv-top-chrome
         aria-hidden={chromeHidden}
         className={`fixed inset-x-0 top-0 z-[60] flex h-20 items-center px-4 transition-opacity duration-300 ${
           chromeHidden ? "pointer-events-none opacity-0" : "opacity-100"
@@ -99,6 +100,8 @@ export function TopDock() {
         >
           <button
             type="button"
+            tabIndex={-1}
+            data-tv-skip="true"
             onClick={() => setView("home")}
             className="flex shrink-0 items-center gap-2 text-ink"
             aria-label={t("chrome.harborHome")}
@@ -133,31 +136,68 @@ export function TopDock() {
                 <Monitor size={15} strokeWidth={2.2} />
               </IconBtn>
             )}
-            <IconBtn
-              onClick={() => setSearchOpen(true)}
-              label={t("common.search")}
-              active={false}
-            >
+            <IconBtn onClick={() => setSearchOpen(true)} label={t("common.search")} active={false}>
               <Search size={15} strokeWidth={2.2} />
             </IconBtn>
-            <AccountMenu trigger="pill" placement="down" align="end" showSettings onOpenSettings={() => setView("settings")} settingsActive={view === "settings"} />
+            <AccountMenu
+              trigger="pill"
+              placement="down"
+              align="end"
+              showSettings
+              onOpenSettings={() => setView("settings")}
+              settingsActive={view === "settings"}
+            />
             {IS_TAURI && !settings.useNativeTitleBar && !settings.hybridTitleBar && (
               <div className="ms-1 flex items-center gap-0.5">
                 <WinBtn onClick={minimize} label={t("chrome.minimize")}>
-                  <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <path
+                    d="M3 6.5h7"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                  />
                 </WinBtn>
-                <WinBtn onClick={toggleMaximize} label={maxed ? t("chrome.restore") : t("chrome.maximize")}>
+                <WinBtn
+                  onClick={toggleMaximize}
+                  label={maxed ? t("chrome.restore") : t("chrome.maximize")}
+                >
                   {maxed ? (
                     <>
-                      <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" strokeWidth="1.4" rx="1" />
-                      <path d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9" stroke="currentColor" strokeWidth="1.4" fill="none" />
+                      <rect
+                        x="2.5"
+                        y="4.5"
+                        width="6"
+                        height="6"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        rx="1"
+                      />
+                      <path
+                        d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        fill="none"
+                      />
                     </>
                   ) : (
-                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.4" rx="1.2" />
+                    <rect
+                      x="3"
+                      y="3"
+                      width="7"
+                      height="7"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      rx="1.2"
+                    />
                   )}
                 </WinBtn>
                 <WinBtn onClick={close} label={t("common.close")}>
-                  <path d="M3.5 3.5l6 6M9.5 3.5l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <path
+                    d="M3.5 3.5l6 6M9.5 3.5l-6 6"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                  />
                 </WinBtn>
               </div>
             )}
