@@ -55,7 +55,7 @@ async function fetchByStatus(status: string): Promise<SimklItem[]> {
 }
 
 async function fetchByStatusRaw(status: string): Promise<SimklItem[]> {
-  const data = await simklRequest<RawAllItems>(`/sync/all-items/all/${status}`).catch(
+  const data = await simklRequest<RawAllItems>(`/sync/all-items/all/${status}?extended=full`).catch(
     () => ({}) as RawAllItems,
   );
   const out: SimklItem[] = [];
