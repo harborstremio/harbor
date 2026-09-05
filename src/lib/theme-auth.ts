@@ -120,7 +120,17 @@ function parseSession(raw: string | null): Session | null {
 
 function readSession(): Session | null {
   try {
-    return parseSession(localStorage.getItem(sessionKey()));
+    const primary = parseSession(localStorage.getItem(sessionKey()));
+    if (primary) return primary;
+    const primaryId = primaryProfileId();
+    for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith(SESSION_PREFIX)) continue;
+      if (primaryId && k === SESSION_PREFIX + primaryId) continue;
+      const s = parseSession(localStorage.getItem(k));
+      if (s) return s;
+    }
+    return null;
   } catch {
     return null;
   }
