@@ -1,4 +1,4 @@
-use std::io::Read;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
@@ -30,6 +30,69 @@ static STAGED: Mutex<Option<Staged>> = Mutex::new(None);
 #[serde(rename_all = "camelCase")]
 struct InstallMarker {
     payload_version: Option<u64>,
+}
+
+fn read_install_marker(dest: &Path) -> Option<InstallMarker> {
+    std::fs::read_to_string(dest.join(MARKER))
+        .ok()
+        .and_then(|text| serde_json::from_str::<InstallMarker>(&text).ok())
+}
+
+fn payload_version(version: &str) -> Result<u64, String> {
+    let parts: Vec<_> = version.split('.').collect();
+    if parts.len() != 3
+        || parts
+            .iter()
+            .any(|part| part.is_empty() || !part.bytes().all(|c| c.is_ascii_digit()))
+    {
+        return Err("the running Harbor version cannot be used for installer recovery".into());
+    }
+    let major = parts[0].parse::<u64>().map_err(|e| e.to_string())?;
+    let minor = parts[1].parse::<u64>().map_err(|e| e.to_string())?;
+    let patch = parts[2].parse::<u64>().map_err(|e| e.to_string())?;
+    if minor >= 1_000 || patch >= 1_000 {
+        return Err("the running Harbor version cannot be used for installer recovery".into());
+    }
+    major
+        .checked_mul(1_000_000)
+        .and_then(|value| value.checked_add(minor * 1_000))
+        .and_then(|value| value.checked_add(patch))
+        .ok_or_else(|| "the running Harbor version cannot be used for installer recovery".into())
+}
+
+fn ensure_recovery_marker(dest: &Path, version: &str) -> Result<bool, String> {
+    let marker = dest.join(MARKER);
+    if marker.exists() {
+        return read_install_marker(dest)
+            .filter(|value| value.payload_version.unwrap_or(0) > 0)
+            .map(|_| false)
+            .ok_or_else(|| "the existing Harbor install marker is invalid".into());
+    }
+    if !dest.join("harbor.exe").is_file() {
+        return Err("the Harbor installation is missing harbor.exe".into());
+    }
+    let installed_at = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|duration| duration.as_secs())
+        .unwrap_or(0);
+    let body = serde_json::json!({
+        "payloadVersion": payload_version(version)?,
+        "version": version,
+        "installedAt": installed_at,
+        "installer": "harbor-bootstrap",
+    });
+    let mut file = std::fs::OpenOptions::new()
+        .create_new(true)
+        .write(true)
+        .open(&marker)
+        .map_err(|e| format!("cannot create the Harbor install marker: {e}"))?;
+    serde_json::to_writer_pretty(&mut file, &body)
+        .map_err(|e| format!("cannot write the Harbor install marker: {e}"))?;
+    file.write_all(b"\n")
+        .map_err(|e| format!("cannot write the Harbor install marker: {e}"))?;
+    file.sync_all()
+        .map_err(|e| format!("cannot flush the Harbor install marker: {e}"))?;
+    Ok(true)
 }
 
 #[derive(Serialize)]
@@ -80,17 +143,18 @@ fn platform_key() -> String {
 #[tauri::command]
 pub fn handoff_probe() -> HandoffProbe {
     let dir = install_dir();
-    let marker = dir
+    let marker = dir.as_deref().and_then(read_install_marker);
+    let payload_version = marker
         .as_ref()
-        .and_then(|d| std::fs::read_to_string(d.join(MARKER)).ok())
-        .and_then(|text| serde_json::from_str::<InstallMarker>(&text).ok());
+        .and_then(|value| value.payload_version)
+        .unwrap_or(0);
     HandoffProbe {
         supported: cfg!(target_os = "windows") && dir.is_some(),
-        managed: marker.is_some(),
+        managed: payload_version > 0,
         install_dir: dir
             .map(|d| d.to_string_lossy().to_string())
             .unwrap_or_default(),
-        payload_version: marker.and_then(|m| m.payload_version).unwrap_or(0),
+        payload_version,
         platform_key: platform_key(),
     }
 }
@@ -378,6 +442,9 @@ pub async fn handoff_launch(app: tauri::AppHandle) -> Result<(), String> {
     let pubkey = updater_pubkey(&app)?;
     tokio::task::spawn_blocking(move || {
         verify_setup(&setup, &signature, &pubkey)?;
+        if recoverable {
+            ensure_recovery_marker(&target, &from)?;
+        }
         spawn_setup(&setup, &target, &log, pid, &from, &version, recoverable)
     })
     .await
@@ -432,4 +499,48 @@ pub async fn handoff_save_backup(app: tauri::AppHandle, content: String) -> Resu
     })
     .await
     .map_err(|e| e.to_string())?
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn fixture() -> PathBuf {
+        std::env::temp_dir().join(format!("harbor-handoff-bootstrap-{}", uuid::Uuid::new_v4()))
+    }
+
+    #[test]
+    fn bootstraps_a_recoverable_nsis_install() {
+        let dest = fixture();
+        std::fs::create_dir_all(&dest).unwrap();
+        std::fs::write(dest.join("harbor.exe"), b"test").unwrap();
+
+        assert!(harbor_install_recovery::Transaction::begin(&dest, "0.999.1").is_err());
+        assert!(ensure_recovery_marker(&dest, "0.9.124").unwrap());
+
+        let marker: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(dest.join(MARKER)).unwrap()).unwrap();
+        assert_eq!(marker["payloadVersion"], 9_124);
+        assert_eq!(marker["version"], "0.9.124");
+        assert_eq!(marker["installer"], "harbor-bootstrap");
+        assert!(!ensure_recovery_marker(&dest, "0.9.124").unwrap());
+
+        let transaction = harbor_install_recovery::Transaction::begin(&dest, "0.999.1").unwrap();
+        let recovery = transaction.root().to_path_buf();
+        drop(transaction);
+        std::fs::remove_dir_all(recovery).unwrap();
+        std::fs::remove_dir_all(dest).unwrap();
+    }
+
+    #[test]
+    fn refuses_to_replace_an_invalid_marker() {
+        let dest = fixture();
+        std::fs::create_dir_all(&dest).unwrap();
+        std::fs::write(dest.join("harbor.exe"), b"test").unwrap();
+        std::fs::write(dest.join(MARKER), b"not json").unwrap();
+
+        assert!(ensure_recovery_marker(&dest, "0.9.124").is_err());
+        assert_eq!(std::fs::read(dest.join(MARKER)).unwrap(), b"not json");
+        std::fs::remove_dir_all(dest).unwrap();
+    }
 }

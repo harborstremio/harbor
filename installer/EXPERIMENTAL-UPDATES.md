@@ -27,12 +27,13 @@ The app now has **Return to beta** under Experimental builds. This is separate
 from **Leave experimental builds**, which only changes the future update feed.
 Normal stable/beta update discovery remains upgrade-only.
 
-Automatic experimental installation and return are currently gated to managed
-Windows x86_64 installations. The publisher/edge can still describe macOS, but
-this app will not install an experimental build without its tested, recoverable
-return path. Older Windows/NSIS and macOS automatic return are not implemented.
-The earlier cross-platform experimental-install descriptions below predate this
-safety gate and are not release-readiness claims.
+Automatic experimental installation and return are currently gated to Windows
+x86_64 installations with a tested recovery path. A signed recoverable handoff
+can bootstrap the recovery marker for a legacy NSIS installation immediately
+before Harbor Setup starts; subsequent handoffs are managed normally. The
+publisher/edge can still describe macOS, but this app will not install an
+experimental build there. The earlier cross-platform experimental-install
+descriptions below predate this safety gate and are not release-readiness claims.
 
 See [RETURN-TO-BETA.md](RETURN-TO-BETA.md) for the new installer protocol,
 publisher approval contract, recovery paths and required packaged tests. No real
@@ -175,12 +176,14 @@ Requirements enforced by the app:
 - Each supported exact OS/architecture has an HTTPS URL with no embedded
   credentials/fragment and a nonempty signature. Do not include top-level
   dynamic `url` or `signature` fields alongside `platforms`.
-- A managed Windows installation requires the separate `installer` entry, with a
+- A Windows recoverable handoff requires the separate `installer` entry, with a
   positive integer byte size and the unchanged payload formula:
   `major * 1_000_000 + minor * 1_000 + patch`.
 - `platforms.windows-x86_64` stays the legacy Tauri/NSIS artifact. Never replace
-  it with the new Harbor Setup executable. Managed Windows uses `installer`;
-  legacy Windows and macOS use the native Tauri updater.
+  it with the new Harbor Setup executable. Normal beta updates use this artifact;
+  experimental installation and return use `installer`, including the first
+  automatic handoff from an existing NSIS installation. macOS uses the native
+  Tauri updater only after its own return path is implemented and certified.
 - Native updater metadata must match the app's preflight version, build ID,
   platform URL and signature. If publishing changes between those checks, the
   user is asked to check again. Actual bytes still require native signature

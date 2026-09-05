@@ -2,10 +2,12 @@
 
 ## Status and scope
 
-Implemented locally; not release-certified or published. Managed Windows x86_64
-only. No signed artifact was produced, no real installer was run, and no stable,
-beta or experimental server object was changed. macOS/legacy Windows return and
-Linux builds remain release gates, not assumed successes.
+Implemented locally; not release-certified or published. Windows x86_64 only.
+A signed recoverable handoff can bootstrap an existing legacy NSIS installation;
+future experimental installs and returns then use the managed installer. No signed
+artifact was produced by this change, no real installer was run, and no stable,
+beta or experimental server object was changed. macOS and Linux builds remain
+release gates, not assumed successes.
 
 ## Tester flow
 
@@ -13,7 +15,9 @@ Linux builds remain release gates, not assumed successes.
 2. An experimental build is installable only when its manifest approves at least
    one compatible beta and declares recovery protocol 1 for Harbor Setup.
 3. Download, then approve installation. Harbor saves a local `.harbx` backup and
-   the source build's approved return choices. The installer keeps the previous
+   the source build's approved return choices. If this copy originally came from
+   NSIS, Harbor creates its recovery marker only after verifying the signed Setup
+   executable and immediately before launch. The installer keeps the previous
    application directory until the new main UI acknowledges successful startup.
 4. To finish testing, choose **Return to beta**, select an approved version,
    download/verify, then **Install beta … and restart**.
@@ -130,8 +134,9 @@ authorized:
 1. Install the proposed beta, enter experimental, select and return to that exact
    beta; confirm version, beta feed, addon order, profiles, settings, watch
    progress and latest selected subtitles. Repeat after leaving experimental.
-2. Test fresh and existing managed installs, paths with spaces, limited free
-   space, locked files, non-writable directories, tampered downloads and signatures.
+2. Test fresh managed installs and legacy NSIS upgrades, paths with spaces,
+   limited free space, locked files, non-writable directories, tampered downloads
+   and signatures. Confirm a corrupt pre-existing marker is never overwritten.
 3. Inject failure during extraction, each directory rename, registration,
    relaunch and pre-ack startup. Confirm automatic recovery or the documented
    manual recovery command; never mistake a newer running app for success.

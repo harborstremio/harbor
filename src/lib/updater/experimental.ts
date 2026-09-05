@@ -113,12 +113,7 @@ export function experimentalHandoff(
   probe: HandoffProbe,
 ): HandoffPlan | null {
   const entry = release.installer;
-  if (
-    !probe.supported ||
-    !probe.managed ||
-    !entry ||
-    entry.payloadVersion <= probe.payloadVersion
-  ) {
+  if (!probe.supported || !entry || entry.payloadVersion <= probe.payloadVersion) {
     return null;
   }
   return {

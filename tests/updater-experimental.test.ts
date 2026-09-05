@@ -486,20 +486,31 @@ test("manifest validation uses exact architecture, HTTPS, signatures and unchang
   }
 });
 
-test("unmanaged Windows and macOS cannot install without a supported recoverable return path", async () => {
-  for (const platform of ["windows-x86_64", "darwin-aarch64"]) {
-    const h = harness({ platform, managed: false });
-    h.updater.setExperimentalUpdates(true);
-    await h.updater.checkForUpdate(true);
-    assert.equal(h.updater.useUpdate().status, "unavailable");
-    assert.deepEqual(h.calls.headers, []);
-    assert.deepEqual(h.calls.fetchHeaders, [undefined]);
-    assert.ok(h.calls.fetchUrls[0].endsWith("/updates/latest-experimental.json"));
-    assert.equal(h.calls.download + h.calls.install, 0);
-    await h.updater.downloadUpdate();
-    await h.updater.installUpdate();
-    assert.equal(h.calls.install + h.calls.launch, 0);
-  }
+test("legacy NSIS Windows bootstraps through only the verified recoverable installer", async () => {
+  const h = harness({ managed: false });
+  h.updater.setExperimentalUpdates(true);
+  await h.updater.checkForUpdate(true);
+  assert.ok(h.updater.useUpdate().handoff?.verifiable);
+  assert.deepEqual(h.calls.headers, []);
+  assert.deepEqual(h.calls.fetchHeaders, [undefined]);
+  assert.ok(h.calls.fetchUrls[0].endsWith("/updates/latest-experimental.json"));
+  await h.updater.downloadUpdate();
+  await h.updater.installUpdate();
+  assert.equal(h.calls.stage, 1);
+  assert.equal(h.calls.backup, 1);
+  assert.equal(h.calls.launch, 1);
+  assert.equal(h.calls.download + h.calls.install, 0);
+});
+
+test("unsupported platforms and missing return approval cannot install experimental", async () => {
+  const mac = harness({ platform: "darwin-aarch64", managed: false });
+  mac.updater.setExperimentalUpdates(true);
+  await mac.updater.checkForUpdate(true);
+  assert.equal(mac.updater.useUpdate().status, "unavailable");
+  await mac.updater.downloadUpdate();
+  await mac.updater.installUpdate();
+  assert.equal(mac.calls.install + mac.calls.launch, 0);
+
   const h = harness();
   h.updater.setExperimentalUpdates(true);
   h.config.raw = { ...manifest(), returnToBeta: [] };
@@ -534,7 +545,7 @@ test("signature rejection and unsupported paths never permit an experimental ins
     await h.updater.checkForUpdate();
     h.config.signatureFailure = true;
     await h.updater.downloadUpdate();
-    assert.equal(h.updater.useUpdate().status, managed ? "error" : "unavailable");
+    assert.equal(h.updater.useUpdate().status, "error");
     await h.updater.installUpdate();
     await h.updater.openManualDownload();
     await h.updater.openHandoffDownload();

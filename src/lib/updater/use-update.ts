@@ -295,18 +295,19 @@ export async function checkForUpdate(manual = false): Promise<void> {
         return;
       }
       const plan = experimentalHandoff(release, probe);
-      if (
-        !betaReturnSupported(probe) ||
-        plan?.recoveryProtocol !== 1 ||
-        !parseBetaReturnTargets(release.returnToBeta, release.version, probe.platformKey).length
-      ) {
+      const returnTargets = parseBetaReturnTargets(
+        release.returnToBeta,
+        release.version,
+        probe.platformKey,
+      );
+      if (!betaReturnSupported(probe) || !returnTargets.length) {
         set({
           status: "unavailable",
           error: t("No tested return to beta is available for this build."),
         });
         return;
       }
-      if (probe.supported && probe.managed && !plan) {
+      if (!plan || plan.recoveryProtocol !== 1) {
         set({
           status: "unavailable",
           error: t("No verified experimental build is available for this device yet."),
