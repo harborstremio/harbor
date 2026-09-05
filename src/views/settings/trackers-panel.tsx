@@ -10,6 +10,7 @@ import { useSimkl } from "@/lib/simkl/provider";
 import { useTrakt } from "@/lib/trakt/provider";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { ROW_DESC } from "./kit";
 import { consumeTracker } from "./tracker-request";
 import { useSubTabs } from "./sub-tabs";
 
@@ -85,13 +86,18 @@ export function TrackersPanel() {
   return (
     <>
       {total > 0 && (
-        <p className="px-1 text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+        <p className={`mb-5 flex items-center gap-2.5 tabular-nums ${ROW_DESC}`}>
+          <span className="h-2 w-2 shrink-0 rounded-full bg-success" />
           {t("{n} of {total} connected", { n: total, total: TRACKERS.length })}
         </p>
       )}
 
       <div key={active} className="harbor-cascade flex flex-col gap-10">
-        <Suspense fallback={<div className="h-40 rounded-md bg-elevated" />}>
+        <Suspense
+          fallback={
+            <div className="h-40 rounded-[10px] bg-elevated" aria-label={t("Loading settings")} />
+          }
+        >
           {active === "trakt" && <TraktPanel />}
           {active === "simkl" && <SimklPanel />}
           {active === "anilist" && <AnilistPanel />}

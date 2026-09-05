@@ -610,6 +610,8 @@ const catalog04: Record<string, string> = {
   "HTTP {status}: {body}": "HTTP {status}: {body}",
   "HW decode": "하드웨어 디코딩",
   "Hairline cards": "헤어라인 카드",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "30분 분량을 미리 받아 둡니다. 연결이 매우 불안정할 때만 쓸 만합니다.",
   "Half-hours, anthologies, and a few epics for the morning routine.":
     "아침 일상에 어울리는 30분물과 앤솔러지, 그리고 몇 편의 대서사극입니다.",
   "Hand-tuned colors. Edit them in the section above.":
@@ -768,6 +770,8 @@ const catalog04: Record<string, string> = {
     "Harbor가 애니메이션 페이지에 AniList 목록을 표시하고 진도를 동기화합니다.",
   "Harbor signed you up but returned no session. Try signing in instead.":
     "Harbor 가입은 완료되었지만 세션이 반환되지 않았습니다. 대신 로그인해 보세요.",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "Harbor가 작품마다 미리 받아 둘 분량을 정하고, 재생이 안정되면 그 분량을 늘립니다. 대부분의 경우에 알맞습니다.",
   "Harbor snippet": "Harbor 스니펫",
   "Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.":
     "Harbor는 Stremio의 애드온 프로토콜을 사용하며, 전체 애드온 생태계도 이들의 작업을 바탕으로 성장했습니다. Stremio는 커뮤니티의 후원으로 운영되며, 후원자는 실험적 기능을 미리 이용할 수 있습니다. 여유가 있다면 Stremio도 후원해 주세요.",
@@ -825,6 +829,8 @@ const catalog04: Record<string, string> = {
     "Harbor의 공개 릴레이에는 아직 최신 프로토콜이 적용되지 않았습니다.",
   "Harbor's public relay updates automatically; nothing to do.":
     "Harbor 공개 릴레이는 자동으로 업데이트되므로 별도의 작업이 필요하지 않습니다.",
+  "Harbor's streaming server only runs in the desktop app.":
+    "Harbor 스트리밍 서버는 데스크톱 앱에서만 실행됩니다.",
   "Harbor's temporary viewer requires HTTPS.":
     "Harbor의 임시 뷰어를 사용하려면 HTTPS가 필요합니다.",
   "Harbor, from a public domain frame": "퍼블릭 도메인 프레임에서 가져온 Harbor",

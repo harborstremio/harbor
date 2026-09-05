@@ -28,6 +28,8 @@ const catalogAC: Record<string, string> = {
     "एक कॉम्पैक्ट वर्टिकल स्लाइडर, जो स्तर को 100 प्रतिशत से ऊपर तक बढ़ाता है।",
   "A complaint to HR": "HR से शिकायत",
   "A country releases something": "किसी देश की कोई रिलीज़ आए",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "करीब दो मिनट की शुरुआती बढ़त। छोटी-मोटी रुकावट को झेल जाती है और प्लेबैक शुरू होने में ज़्यादा इंतज़ार भी नहीं करना पड़ता।",
   "A dead source is dropped and the next one starts.":
     "काम न करने वाला स्रोत हटा दिया जाता है और अगला शुरू हो जाता है।",
   "A debrid service is connected. You'll get instant, high-quality streams.":
@@ -234,6 +236,7 @@ const catalogAC: Record<string, string> = {
   "Ad, analytics, and tracking requests pass through untouched.":
     "विज्ञापन, एनालिटिक्स और ट्रैकिंग अनुरोध बिना बदलाव के आगे बढ़ते हैं।",
   Adaptations: "रूपांतरण",
+  Adaptive: "एडैप्टिव",
   "Adaptive Sharpen": "एडैप्टिव शार्पन",
   Add: "जोड़ें",
   "Add Custom Source": "कस्टम स्रोत जोड़ें",
@@ -1115,6 +1118,7 @@ const catalogAC: Record<string, string> = {
   "Books you save will appear here": "आपकी सेव की गई किताबें यहाँ दिखाई देंगी",
   "Boost SDR video toward HDR": "SDR वीडियो को HDR जैसा बनाएँ",
   Border: "बॉर्डर",
+  "Borderless window": "बिना बॉर्डर वाली विंडो",
   Born: "जन्म",
   "Born {date}": "जन्म: {date}",
   "Bot token": "बॉट टोकन",
@@ -1214,6 +1218,7 @@ const catalogAC: Record<string, string> = {
     "बजट खत्म हो गया है। यह UTC के अनुसार आधी रात को रीसेट होगा।",
   "Buffer fill": "बफ़र फ़िल",
   "Buffer fill brightness": "बफ़र फ़िल की ब्राइटनेस",
+  "Buffer size": "बफ़र का आकार",
   Buffering: "बफ़र हो रहा है",
   "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and torrent streams. Uses more disk and bandwidth; cleared when you switch or close.":
     "देखते समय पूरी फ़ाइल को बैकग्राउंड में बफ़र करता है, पॉज़ होने पर भी, ताकि बड़े रीमक्स पहले से लोड हो जाएँ और आप कैश की गई फ़ाइल में बिना दोबारा बफ़रिंग के आगे-पीछे जा सकें। डीब्रिड और टोरेंट स्ट्रीम के साथ काम करता है। अधिक डिस्क और बैंडविड्थ इस्तेमाल करता है; स्विच करने या बंद करने पर साफ़ हो जाता है।",
@@ -1749,6 +1754,7 @@ const catalogAC: Record<string, string> = {
     "अपनी सूचियाँ यहाँ देखने के लिए अपने कंप्यूटर पर Harbor में AniList कनेक्ट करें।",
   "Connect Discord or Telegram and Harbor posts a message when something you follow is about to drop. Hit Test to send yourself a sample first.":
     "Discord या Telegram कनेक्ट करें और जब आपकी फ़ॉलो की हुई कोई चीज़ रिलीज़ होने वाली हो, तो Harbor एक संदेश पोस्ट करेगा। पहले खुद को एक टेस्ट मैसेज भेजने के लिए टेस्ट दबाएँ।",
+  "Connect Letterboxd": "Letterboxd कनेक्ट करें",
   "Connect MyAnimeList": "MyAnimeList कनेक्ट करें",
   "Connect MyAnimeList in Harbor on your computer to see your lists here.":
     "अपनी सूचियाँ यहाँ देखने के लिए अपने कंप्यूटर पर Harbor में MyAnimeList कनेक्ट करें।",
@@ -2106,8 +2112,11 @@ const catalogAC: Record<string, string> = {
     "वह इमेज पढ़ी नहीं जा सकी। PNG, JPEG, या WebP आज़माएँ।",
   "Couldn't read that image. Try a different file.": "वह इमेज पढ़ी नहीं जा सकी। कोई दूसरी फ़ाइल आज़माएँ।",
   "Couldn't read your watchlist. Try again.": "आपकी वॉचलिस्ट पढ़ी नहीं जा सकी। फिर कोशिश करें।",
+  "Couldn't reload the stream. Try picking another source.":
+    "स्ट्रीम फिर से लोड नहीं हो सकी। कोई दूसरा स्रोत चुनकर देखें।",
   "Couldn't remove. Try again.": "हटाया नहीं जा सका। फिर कोशिश करें।",
   "Couldn't rename the profile. {error}": "प्रोफ़ाइल का नाम नहीं बदला जा सका। {error}",
+  "Couldn't restart the streaming server.": "स्ट्रीमिंग सर्वर रीस्टार्ट नहीं हो सका।",
   "Couldn't save that background. Your local storage is full. Try a smaller crop or clear cached data.":
     "वह बैकग्राउंड सेव नहीं किया जा सका। आपका लोकल स्टोरेज भर गया है। छोटा क्रॉप आज़माएँ या कैश किया गया डेटा साफ़ करें।",
   "Couldn't save the playlist. Free up storage space in Settings and try again.":

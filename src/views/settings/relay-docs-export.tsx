@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { AnchoredMenu } from "@/components/anchored-menu";
 import { Check, FolderOpen, X } from "lucide-react";
 import { saveTextFileWithPath } from "@/lib/download-text";
+import { advanceFocus } from "@/lib/keyboard-navigation";
+import { getDirection, isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
 
 export function DownloadMenu({
@@ -13,19 +16,42 @@ export function DownloadMenu({
   const t = useT();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const wrap = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const close = (e: MouseEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
-    };
-    window.addEventListener("mousedown", close);
-    return () => window.removeEventListener("mousedown", close);
-  }, [open]);
+  const enterMenu = useCallback((el: HTMLDivElement | null) => {
+    listRef.current = el;
+    if (!el) return;
+    const first = el.querySelector<HTMLElement>('[role="menuitem"]');
+    if (first) advanceFocus(first);
+  }, []);
+
+  const close = (restore: boolean) => {
+    setOpen(false);
+    const trigger = btnRef.current;
+    if (restore && trigger) advanceFocus(trigger);
+  };
+
+  const onMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isBackKey(e.nativeEvent)) {
+      e.preventDefault();
+      e.stopPropagation();
+      close(true);
+      return;
+    }
+    const dir = getDirection(e.nativeEvent);
+    if (dir !== "up" && dir !== "down") return;
+    const items = Array.from(listRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+    if (!items.length) return;
+    e.preventDefault();
+    const from = items.indexOf(e.target as HTMLElement);
+    const next = items[from < 0 ? 0 : from + (dir === "down" ? 1 : -1)];
+    if (!next) return;
+    advanceFocus(next, dir);
+  };
 
   const exportAs = async (kind: "txt" | "json" | "pdf") => {
-    setOpen(false);
+    close(true);
     const root = docsRef.current;
     if (!root) return;
     const documentTitle = t("Harbor Relay Documentation");
@@ -52,27 +78,38 @@ export function DownloadMenu({
   };
 
   return (
-    <div ref={wrap} className="relative">
+    <div className="relative">
       <button
+        ref={btnRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={busy}
         aria-haspopup="menu"
         aria-expanded={open}
-        className={`flex h-10 items-center gap-2 rounded-md px-4 text-[12.5px] font-semibold transition-colors disabled:opacity-60 ${
+        className={`flex h-11 items-center gap-2 rounded-[8px] px-4 text-[15px] font-semibold transition-colors disabled:opacity-60 ${
           open ? "bg-raised text-ink" : "bg-canvas text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
         <DownloadGlyph />
         {busy ? t("Saving…") : t("Download")}
       </button>
-      {open && (
-        <div className="absolute end-0 top-[calc(100%+8px)] z-30 flex w-48 flex-col gap-0.5 overflow-hidden rounded-md bg-raised p-1 harbor-float animate-in fade-in slide-in-from-top-1 duration-150">
+      <AnchoredMenu
+        anchorRef={btnRef}
+        open={open}
+        onClose={() => close(!!listRef.current?.contains(document.activeElement))}
+        width={224}
+      >
+        <div
+          ref={enterMenu}
+          role="menu"
+          onKeyDown={onMenuKeyDown}
+          className="flex flex-col gap-0.5 overflow-hidden rounded-md bg-raised p-1 harbor-float animate-in fade-in slide-in-from-top-1 duration-150"
+        >
           <DownloadOption label={t("Plain text (.txt)")} onClick={() => void exportAs("txt")} />
           <DownloadOption label={t("JSON (.json)")} onClick={() => void exportAs("json")} />
           <DownloadOption label={t("PDF (print)")} onClick={() => void exportAs("pdf")} />
         </div>
-      )}
+      </AnchoredMenu>
     </div>
   );
 }
@@ -81,8 +118,9 @@ function DownloadOption({ label, onClick }: { label: string; onClick: () => void
   return (
     <button
       type="button"
+      role="menuitem"
       onClick={onClick}
-      className="flex w-full items-center rounded-md px-3 py-2.5 text-start text-[12.5px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+      className="flex h-11 w-full items-center rounded-md px-3 text-start text-[15.5px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
     >
       {label}
     </button>
@@ -91,7 +129,7 @@ function DownloadOption({ label, onClick }: { label: string; onClick: () => void
 
 function DownloadGlyph() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
         d="M12 4v12m0 0l-5-5m5 5l5-5M4 20h16"
         stroke="currentColor"
@@ -118,30 +156,30 @@ export function SavePill({ path, onDismiss }: { path: string; onDismiss: () => v
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-6 z-[120] flex justify-center px-4">
       <div className="pointer-events-auto flex max-w-[min(560px,90vw)] items-center gap-3 rounded-md bg-elevated p-2 ps-3 harbor-float animate-in fade-in slide-in-from-bottom-2 duration-200">
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-success/15 text-success">
-          <Check size={14} strokeWidth={2.8} />
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-success/15 text-success">
+          <Check size={16} strokeWidth={2.8} />
         </span>
         <div className="flex min-w-0 flex-col">
-          <span className="text-[12.5px] font-semibold leading-tight text-ink">{t("Saved")}</span>
-          <span className="truncate text-[11.5px] leading-tight text-ink-subtle" title={path}>
+          <span className="text-[16.5px] font-medium leading-[24px] text-ink">{t("Saved")}</span>
+          <span className="truncate text-[15.5px] leading-[22px] text-ink-subtle" title={path}>
             {dir || name}
           </span>
         </div>
         <button
           type="button"
           onClick={reveal}
-          className="ms-1 flex h-8 shrink-0 items-center gap-1.5 rounded-md bg-canvas px-3 text-[11.5px] font-semibold text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+          className="ms-1 flex h-11 shrink-0 items-center gap-2 rounded-[8px] bg-canvas px-4 text-[15px] font-semibold text-ink-muted transition-colors hover:bg-raised hover:text-ink"
         >
-          <FolderOpen size={14} strokeWidth={2.2} />
+          <FolderOpen size={18} strokeWidth={2.2} />
           {t("Show")}
         </button>
         <button
           type="button"
           onClick={onDismiss}
           aria-label={t("Dismiss")}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-canvas hover:text-ink"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-canvas hover:text-ink"
         >
-          <X size={14} strokeWidth={2.4} />
+          <X size={18} strokeWidth={2.4} />
         </button>
       </div>
     </div>

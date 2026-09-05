@@ -38,6 +38,8 @@ function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean
     a.audioDelaySec !== b.audioDelaySec ||
     a.subText !== b.subText ||
     a.subStartSec !== b.subStartSec ||
+    a.secondarySubText !== b.secondarySubText ||
+    a.noAudio !== b.noAudio ||
     a.audioNormalize !== b.audioNormalize ||
     a.videoWidth !== b.videoWidth ||
     a.videoHeight !== b.videoHeight ||
@@ -127,6 +129,8 @@ export function usePlayerBridge(params: {
         rtxVsr: settings.playerRtxVsr && !svpOn,
         embed: embedActive,
         d3d11Flip: settings.playerD3d11Flip,
+        renderer: settings.mpvRenderer,
+        forceYuv420p: settings.mpvForceYuv420p,
         anime4kShaders: [
           ...anime4kShadersFor(
             settings,

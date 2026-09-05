@@ -1,11 +1,14 @@
+import { Check } from "lucide-react";
 import type { ReactNode } from "react";
+import { RowDesc, RowText, RowTitle, useRegisterRowTitle } from "../shared";
+
+export const BADGE_BASE =
+  "inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
 
 export function Tag({ text, accent }: { text: string; accent?: boolean }) {
   return (
     <span
-      className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider ${
-        accent ? "bg-accent-soft text-accent" : "bg-canvas text-ink-muted"
-      }`}
+      className={`${BADGE_BASE} ${accent ? "bg-accent-soft text-accent" : "bg-elevated text-ink-subtle"}`}
     >
       {text}
     </span>
@@ -27,29 +30,34 @@ export function ChoiceBlock({
   sub?: string;
   tags?: ReactNode;
 }) {
+  useRegisterRowTitle(label);
   return (
     <button
       id={id}
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`flex scroll-mt-28 items-start gap-3.5 rounded-md px-4 py-3.5 text-start transition-colors ${
-        selected ? "bg-raised" : "bg-elevated hover:bg-raised"
-      }`}
+      data-interactive=""
+      className="hset-row scroll-mt-28"
     >
-      <span
-        className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full transition-colors ${
-          selected ? "bg-accent" : "bg-canvas"
-        }`}
-      >
-        {selected && <span className="h-2 w-2 rounded-full bg-canvas" />}
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="flex flex-wrap items-center gap-2">
-          <span className="text-[13.5px] font-medium leading-snug text-ink">{label}</span>
+      <RowText>
+        <RowTitle>
+          <span className="min-w-0">{label}</span>
           {tags}
-        </span>
-        {sub && <span className="text-[12.5px] leading-relaxed text-ink-subtle">{sub}</span>}
+        </RowTitle>
+        {sub && <RowDesc>{sub}</RowDesc>}
+      </RowText>
+      <span
+        aria-hidden
+        className="hset-row-control flex min-h-11 min-w-0 items-center justify-end"
+      >
+        <Check
+          size={20}
+          strokeWidth={2.6}
+          className={`shrink-0 text-accent transition-opacity duration-150 ${
+            selected ? "opacity-100" : "opacity-0"
+          }`}
+        />
       </span>
     </button>
   );

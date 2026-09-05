@@ -1,6 +1,8 @@
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { SettingRow } from "../kit";
 import { Section, Segmented, ToggleRow } from "../shared";
+import { UpNextPreview } from "./up-next-preview";
 
 const NEXT_EP_LEADS = [
   { value: "auto", label: "Auto", sec: -1 },
@@ -31,6 +33,7 @@ export function UpNextTab() {
           update({ nextEpisodeLeadSec: NEXT_EP_LEADS.find((o) => o.value === v)?.sec ?? -1 })
         }
       />
+      <UpNextPreview leadSec={settings.nextEpisodeLeadSec} />
       <ToggleRow
         label={t("Auto-play next episode")}
         sub={t("When an episode ends, automatically start the next one. Off lets the episode finish and stop.")}
@@ -46,16 +49,22 @@ export function UpNextTab() {
         />
       )}
       {settings.autoPlayNextEpisode && settings.stillWatching && (
-        <Segmented
-          value={String(settings.stillWatchingAfter)}
-          options={[
-            { value: "2", label: t("After 2") },
-            { value: "3", label: t("After 3") },
-            { value: "4", label: t("After 4") },
-            { value: "5", label: t("After 5") },
-          ]}
-          onChange={(v) => update({ stillWatchingAfter: Number(v) })}
-        />
+        <SettingRow
+          wide
+          label={t("Still watching check-in")}
+          desc={t("How many episodes auto-play back to back before Harbor pauses to ask.")}
+        >
+          <Segmented
+            value={String(settings.stillWatchingAfter)}
+            options={[
+              { value: "2", label: t("After 2") },
+              { value: "3", label: t("After 3") },
+              { value: "4", label: t("After 4") },
+              { value: "5", label: t("After 5") },
+            ]}
+            onChange={(v) => update({ stillWatchingAfter: Number(v) })}
+          />
+        </SettingRow>
       )}
       <ToggleRow
         label={t("Queue drives Next/Previous")}

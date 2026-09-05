@@ -1,5 +1,9 @@
 import { Star } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { ROW_DESC, ROW_TITLE } from "@/views/settings/shared";
+
+const BADGE =
+  "inline-flex h-[22px] shrink-0 items-center gap-1 rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
 
 export function ListingPreview({
   name,
@@ -17,9 +21,7 @@ export function ListingPreview({
   const t = useT();
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
-        {t("How it'll look")}
-      </span>
+      <span className="harbor-settings-label">{t("How it'll look")}</span>
       <div className="w-full max-w-[280px] overflow-hidden rounded-md border border-edge-soft bg-surface shadow-[0_18px_40px_-24px_rgba(0,0,0,0.5)]">
         <div className="relative aspect-video w-full overflow-hidden bg-elevated">
           {coverUrl ? (
@@ -31,27 +33,21 @@ export function ListingPreview({
               ))}
             </div>
           )}
-          <div className="absolute bottom-2 end-2 flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10.5px] font-semibold text-white backdrop-blur-sm">
-            <Star size={10} className="fill-accent text-accent" /> {t("new")}
+          <div className={`${BADGE} absolute bottom-2 end-2 bg-black/55 text-white backdrop-blur-sm`}>
+            <Star size={12} className="fill-accent text-accent" /> {t("new")}
           </div>
-          <div className="absolute bottom-0 left-0 right-0 flex h-1.5">
+          <div className="absolute inset-x-0 bottom-0 flex h-1.5">
             {swatch.map((c, i) => (
               <span key={i} className="flex-1" style={{ background: c }} />
             ))}
           </div>
         </div>
         <div className="flex min-w-0 flex-col px-4 py-3">
-          <span className="truncate text-[14.5px] font-semibold text-ink">
-            {name || t("Your theme")}
-          </span>
-          <span className="truncate text-[11.5px] text-ink-subtle">
+          <span className={`${ROW_TITLE} truncate`}>{name || t("Your theme")}</span>
+          <span className={`${ROW_DESC} truncate`}>
             {author || t("you")} · {t("0 downloads")}
           </span>
-          {blurb && (
-            <span className="mt-1 line-clamp-2 text-[12px] leading-snug text-ink-muted">
-              {blurb}
-            </span>
-          )}
+          {blurb && <span className={`${ROW_DESC} mt-1 line-clamp-2`}>{blurb}</span>}
         </div>
       </div>
     </div>

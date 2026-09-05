@@ -29,6 +29,9 @@ export function NavEditor({ layout }: { layout: ThemeLayout }) {
   const hasChanges =
     cfg.order.length > 0 || cfg.hidden.length > 0 || Object.keys(cfg.renamed).length > 0;
 
+  const moveTo = (id: string, targetId: string, pos: "before" | "after") =>
+    update({ navCustomization: moveNavItem(cfg, id, targetId, pos) });
+
   const commitDrop = (targetId: string, pos: "before" | "after") => {
     if (dragId && dragId !== targetId) {
       update({ navCustomization: moveNavItem(cfg, dragId, targetId, pos) });
@@ -40,7 +43,7 @@ export function NavEditor({ layout }: { layout: ThemeLayout }) {
   return (
     <div className="flex flex-col gap-2.5">
       {!renamable && (
-        <p className="text-[12.5px] leading-snug text-ink-subtle">
+        <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
           {t(
             "This layout shows icons only, so renaming is off here. Reorder and hide still apply.",
           )}
@@ -51,15 +54,15 @@ export function NavEditor({ layout }: { layout: ThemeLayout }) {
           <button
             type="button"
             onClick={() => update({ navCustomization: resetNavCustomization() })}
-            className="flex h-8 items-center gap-1.5 rounded-md bg-canvas px-2.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-surface hover:text-ink"
+            className="flex h-11 items-center gap-1.5 rounded-md bg-canvas px-3 text-[15.5px] font-medium text-ink-muted transition-colors hover:bg-surface hover:text-ink"
           >
-            <RotateCcw size={12} strokeWidth={2.2} />
+            <RotateCcw size={16} strokeWidth={2.2} />
             {t("Reset")}
           </button>
         </div>
       )}
       <div className="flex flex-col gap-1.5">
-        {rows.map((item) => (
+        {rows.map((item, i) => (
           <NavRow
             key={item.id}
             item={item}
@@ -70,8 +73,12 @@ export function NavEditor({ layout }: { layout: ThemeLayout }) {
             dragging={dragId === item.id}
             dropBefore={drop?.id === item.id && drop.pos === "before" && dragId !== item.id}
             dropAfter={drop?.id === item.id && drop.pos === "after" && dragId !== item.id}
+            isFirst={i === 0}
+            isLast={i === rows.length - 1}
             onRename={(label) => update({ navCustomization: renameNavItem(cfg, item.id, label) })}
             onToggleHidden={() => update({ navCustomization: toggleNavHidden(cfg, item.id) })}
+            onMoveUp={() => moveTo(item.id, rows[i - 1].id, "before")}
+            onMoveDown={() => moveTo(item.id, rows[i + 1].id, "after")}
             onDragStart={() => setDragId(item.id)}
             onOver={(pos) => setDrop({ id: item.id, pos })}
             onDropItem={(pos) => commitDrop(item.id, pos)}

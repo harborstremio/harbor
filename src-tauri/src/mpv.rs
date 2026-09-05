@@ -55,6 +55,8 @@ pub struct MpvStartArgs {
     pub startup_profile: Option<String>,
     pub headers: Option<HashMap<String, String>>,
     pub extra_options: Option<String>,
+    pub renderer: Option<String>,
+    pub force_yuv420p: Option<bool>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -621,8 +623,17 @@ pub async fn mpv_start(
     }
     let use_render_api = (cfg!(target_os = "macos") || cfg!(target_os = "linux")) && want_embed;
     if !use_render_api {
-        if let Err(e) = mpv.set_property("vo", "gpu-next,") {
+        let vo = match args.renderer.as_deref() {
+            Some("gpu") => "gpu,",
+            _ => "gpu-next,",
+        };
+        if let Err(e) = mpv.set_property("vo", vo) {
             eprintln!("[harbor::mpv] vo set FAILED: {:?}", e);
+        }
+        if args.force_yuv420p.unwrap_or(false) {
+            if let Err(e) = mpv.set_property("vf-append", "format=yuv420p") {
+                eprintln!("[harbor::mpv] vf yuv420p rejected: {:?}", e);
+            }
         }
     } else {
         if let Err(e) = mpv.set_property("vo", "libmpv") {
@@ -1805,6 +1816,11 @@ pub async fn mpv_clip_save(
     } else {
         None
     };
+    let sub_filter_sdh = with_subs
+        && mpv
+            .get_property::<String>("sub-filter-sdh")
+            .map(|v| v.trim() == "yes")
+            .unwrap_or(false);
 
     let mpv_bin = crate::thumbs::locate_mpv().ok_or_else(|| "mpv binary not found".to_string())?;
     if let Some(parent) = std::path::Path::new(&out_path).parent() {
@@ -1834,6 +1850,9 @@ pub async fn mpv_clip_save(
             cmd.arg(format!("--sid={}", id));
         }
         cmd.arg("--sub-visibility=yes");
+        if sub_filter_sdh {
+            cmd.arg("--sub-filter-sdh=yes");
+        }
     } else {
         cmd.arg("--sid=no").arg("--no-sub");
     }

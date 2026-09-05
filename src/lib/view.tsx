@@ -39,6 +39,7 @@ export type View =
   | "collections-hub"
   | "live"
   | "vod"
+  | "sports"
   | "downloads"
   | "wrapped"
   | "manga"
@@ -163,6 +164,7 @@ export type Frame =
   | { kind: "library" }
   | { kind: "live" }
   | { kind: "vod" }
+  | { kind: "sports" }
   | { kind: "downloads" }
   | { kind: "manga"; mangaId?: string }
   | { kind: "ebook"; ebookId?: string }
@@ -215,6 +217,7 @@ export type SettingsSection =
   | "trakt"
   | "anilist"
   | "simkl"
+  | "letterboxd"
   | "parental"
   | "relay"
   | "streaming"
@@ -380,6 +383,8 @@ function frameKey(f: Frame): string {
       return "live";
     case "vod":
       return "vod";
+    case "sports":
+      return "sports";
     case "downloads":
       return "downloads";
     case "manga":
@@ -517,6 +522,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
       if (f.kind === "collections-hub") return "collections-hub";
       if (f.kind === "live") return "live";
       if (f.kind === "vod") return "vod";
+      if (f.kind === "sports") return "sports";
       if (f.kind === "downloads") return "downloads";
       if (f.kind === "manga") return "manga";
       if (f.kind === "ebook") return "ebook";
@@ -779,6 +785,11 @@ export function ViewProvider({ children }: { children: ReactNode }) {
           scrollMem.current.clear();
           rowScrollMem.current.clear();
           return [{ kind: "vod" }];
+        }
+        if (v === "sports") {
+          scrollMem.current.clear();
+          rowScrollMem.current.clear();
+          return [{ kind: "sports" }];
         }
         if (v === "manga") {
           scrollMem.current.clear();

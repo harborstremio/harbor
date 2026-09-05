@@ -4,8 +4,8 @@ import { useT } from "@/lib/i18n";
 export function AdSkipShowcase() {
   const t = useT();
   return (
-    <div className="flex flex-col gap-2.5 rounded-md bg-canvas/40 p-3.5 ring-1 ring-edge-soft">
-      <div className="relative aspect-[16/7] w-full overflow-hidden rounded-md bg-raised">
+    <div className="flex w-fit max-w-full flex-col gap-2.5 rounded-md bg-canvas/40 p-3.5 ring-1 ring-edge-soft">
+      <div className="relative aspect-[16/7] max-h-[168px] w-full max-w-[380px] overflow-hidden rounded-md bg-raised">
         <span className="absolute start-2.5 top-2.5 rounded-md bg-accent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-canvas">
           {t("Ad")}
         </span>
@@ -19,7 +19,7 @@ export function AdSkipShowcase() {
         <span className="h-full w-[22%] bg-accent" />
         <span className="h-full flex-1 bg-ink-subtle/40" />
       </div>
-      <div className="flex items-center justify-between text-[10px] font-medium text-ink-subtle">
+      <div className="flex items-center justify-between gap-3 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink-subtle">
         <span>{t("Episode")}</span>
         <span className="text-accent">{t("Injected ad")}</span>
         <span>{t("Episode continues")}</span>

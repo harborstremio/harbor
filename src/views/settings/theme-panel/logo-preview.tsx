@@ -20,11 +20,9 @@ export function LogoPreview({ mark, wordmark, icon }: { mark: string; wordmark: 
   const t = useT();
   return (
     <div className="flex flex-wrap gap-1.5">
-      <div className="flex min-w-[260px] flex-1 flex-col gap-2.5 rounded-md bg-elevated px-4 py-4">
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
-          {t("In the sidebar")}
-        </span>
-        <span className="relative block h-[124px] overflow-hidden rounded-md bg-canvas">
+      <div className="flex min-w-[260px] flex-1 flex-col gap-3 rounded-[10px] bg-elevated px-5 py-5">
+        <span className="harbor-settings-label">{t("In the sidebar")}</span>
+        <span className="relative block h-[124px] overflow-hidden rounded-[10px] bg-canvas">
           <span className="absolute inset-y-0 start-0 block w-[104px] bg-ink/[0.05]" />
           <span className="absolute start-3 top-3 flex h-7 items-center gap-2">
             {mark ? (
@@ -50,15 +48,13 @@ export function LogoPreview({ mark, wordmark, icon }: { mark: string; wordmark: 
         </span>
       </div>
 
-      <div className="flex w-[210px] flex-col gap-2.5 rounded-md bg-elevated px-4 py-4">
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
-          {t("On the taskbar")}
-        </span>
-        <span className="relative block h-[124px] overflow-hidden rounded-md bg-canvas">
-          <span className="absolute inset-x-0 bottom-0 block h-9 bg-ink/[0.06]" />
-          <span className="absolute bottom-[7px] start-1/2 flex -translate-x-1/2 items-end gap-2.5">
+      <div className="flex w-[210px] flex-col gap-3 rounded-[10px] bg-elevated px-5 py-5">
+        <span className="harbor-settings-label">{t("On the taskbar")}</span>
+        <span className="relative block h-[124px] overflow-hidden rounded-[10px] bg-canvas">
+          <span className="absolute inset-x-0 bottom-0 block h-[36px] bg-ink/[0.06]" />
+          <span className="absolute bottom-[7px] start-1/2 flex -translate-x-1/2 items-end gap-2.5 rtl:translate-x-1/2">
             <span className="block h-5 w-5 rounded-[3px] bg-ink/[0.12]" />
-            <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-[4px] bg-elevated">
+            <span className="grid h-[32px] w-[32px] place-items-center overflow-hidden rounded-[4px] bg-elevated">
               {icon ? (
                 <img src={icon} alt="" draggable={false} className="h-full w-full object-cover" />
               ) : (

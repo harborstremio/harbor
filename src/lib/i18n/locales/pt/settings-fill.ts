@@ -472,6 +472,9 @@ const settingsFill: Record<string, string> = {
   "Performance notice": "Aviso de desempenho",
   "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.":
     "A detecção facial ao vivo carrega modelos de IA no dispositivo e pode aumentar significativamente o uso de RAM, CPU e GPU durante a reprodução. Desative-a se o Harbor ficar lento ou se o dispositivo aquecer.",
+  "Borderless window": "Janela sem bordas",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "A tela cheia real ocupa toda a tela e oculta a barra de tarefas, mas alternar entre aplicativos pode piscar. A janela sem bordas ocupa a mesma área com uma janela sem moldura, então o alt-tab e as sobreposições continuam instantâneos. Maximizar preenche a tela, mas mantém a barra de tarefas e a barra de título.",
 };
 
 export default settingsFill;

@@ -1,10 +1,13 @@
-import { ArrowUpRight, Check, Heart, Mail } from "lucide-react";
+import { ArrowUpRight, Check, Mail } from "lucide-react";
+import type { ReactNode } from "react";
 import elfLogo from "@/assets/elfhosted.svg";
 import stremioLogo from "@/assets/stremio.png";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
 import { badgeIconUrl } from "@/views/profile/badge-catalog";
-import { Section } from "./shared";
+import { SettingRow } from "./kit";
+import { ROW_DESC, Section } from "./shared";
+import { SButton, SRow } from "./ui";
 
 const ELF_STORE = "https://store.elfhosted.com/";
 const ELF_DONATE = "https://store.elfhosted.com/product/donation/";
@@ -28,37 +31,40 @@ const CHARITIES = [
   { name: "Against Malaria Foundation", url: "https://www.againstmalaria.com/", blurb: "Insecticide-treated nets. One of the most cost-effective interventions measured." },
 ];
 
-function LinkButton({ label, onClick, primary }: { label: string; onClick: () => void; primary?: boolean }) {
+const LEAD_IMG = "h-[22px] w-[22px] shrink-0 object-contain";
+
+function OutArrow() {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex h-11 items-center gap-2 rounded-md px-5 text-[13.5px] font-semibold transition-colors ${
-        primary
-          ? "bg-ink text-canvas hover:opacity-90"
-          : "bg-raised text-ink-muted hover:text-ink"
-      }`}
-    >
-      {label}
-      <ArrowUpRight size={14} strokeWidth={2.2} />
-    </button>
+    <ArrowUpRight size={18} strokeWidth={2.2} className="shrink-0 text-ink-subtle rtl:-scale-x-100" />
   );
 }
 
-function GivingBadge({ icon, label, desc }: { icon?: string; label: string; desc: string }) {
+function OpenButton({
+  label,
+  url,
+  primary,
+}: {
+  label: string;
+  url: string;
+  primary?: boolean;
+}) {
   return (
-    <div className="flex items-center gap-3.5 rounded-md bg-elevated px-5 py-4">
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-canvas">
-        {icon ? (
-          <img src={icon} alt="" draggable={false} className="h-7 w-7 object-contain" />
-        ) : (
-          <Heart size={18} strokeWidth={2.2} className="text-ink-subtle" />
-        )}
-      </span>
-      <span className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-[13.5px] font-semibold text-ink">{label}</span>
-        <span className="text-[12.5px] leading-relaxed text-ink-muted">{desc}</span>
-      </span>
+    <SButton variant={primary ? "primary" : "secondary"} onClick={() => openUrl(url)}>
+      {label}
+      <ArrowUpRight size={17} strokeWidth={2.2} className="shrink-0 rtl:-scale-x-100" />
+    </SButton>
+  );
+}
+
+function Prose({ children }: { children: ReactNode }) {
+  return <p className={`max-w-[70ch] ${ROW_DESC}`}>{children}</p>;
+}
+
+function Callout({ icon, children }: { icon: ReactNode; children: ReactNode }) {
+  return (
+    <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+      {icon}
+      <p className={`max-w-[66ch] ${ROW_DESC}`}>{children}</p>
     </div>
   );
 }
@@ -71,119 +77,119 @@ export function SupportPanel() {
         title={t("Who keeps this running")}
         subtitle={t("Harbor's backend runs on ElfHosted. They run our servers at no cost to the community.")}
       >
-        <div className="flex items-start gap-4 rounded-md bg-elevated p-5">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-canvas">
-            <img src={elfLogo} alt="" draggable={false} className="h-7 w-7 object-contain" />
-          </span>
-          <div className="flex min-w-0 flex-col gap-3">
-            <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Keeping Harbor's backend online costs real money, and ElfHosted covers it so the community does not have to. Becoming a subscriber is the best way to keep that going, and it is not a donation. You get proper infrastructure for your own setup, and Harbor stays funded at the same time.")}
-            </p>
-            <ul className="flex flex-col gap-1.5">
-              {ELF_PERKS.map((perk) => (
-                <li key={perk} className="flex items-start gap-2 text-[13px] leading-relaxed text-ink-muted">
-                  <Check size={16} strokeWidth={2.6} className="mt-0.5 shrink-0 text-success" />
-                  {t(perk)}
-                </li>
-              ))}
-            </ul>
-            <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-              {t("Month to month, cancel anytime, and you can try the whole thing for $1 for a week.")}
-            </p>
-            <div className="mt-1 flex flex-wrap gap-2.5">
-              <LinkButton label={t("See what you get")} onClick={() => openUrl(ELF_STORE)} primary />
-              <LinkButton label={t("One-off donation")} onClick={() => openUrl(ELF_DONATE)} />
+        <Prose>
+          {t("Keeping Harbor's backend online costs real money, and ElfHosted covers it so the community does not have to. Becoming a subscriber is the best way to keep that going, and it is not a donation. You get proper infrastructure for your own setup, and Harbor stays funded at the same time.")}
+        </Prose>
+        <ul className="flex max-w-[70ch] flex-col gap-2.5">
+          {ELF_PERKS.map((perk) => (
+            <li key={perk} className={`flex items-start gap-2.5 ${ROW_DESC}`}>
+              <Check size={18} strokeWidth={2.6} className="mt-[2px] shrink-0 text-success" />
+              <span className="min-w-0">{t(perk)}</span>
+            </li>
+          ))}
+        </ul>
+        <SettingRow
+          wide
+          label={t("ElfHosted plans")}
+          desc={t("Month to month, cancel anytime, and you can try the whole thing for $1 for a week.")}
+        >
+          <div className="flex w-full flex-wrap items-end justify-between gap-x-6 gap-y-4">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <OpenButton label={t("See what you get")} url={ELF_STORE} primary />
+              <OpenButton label={t("One-off donation")} url={ELF_DONATE} />
             </div>
+            <img
+              src={elfLogo}
+              alt="ElfHosted"
+              draggable={false}
+              className="h-[84px] w-auto shrink-0 object-contain"
+            />
           </div>
-        </div>
+        </SettingRow>
       </Section>
 
       <Section
         title={t("Built on Stremio")}
         subtitle={t("Harbor would not be possible without Stremio. It is the foundation everything here is built on.")}
       >
-        <div className="flex items-start gap-4 rounded-md bg-elevated p-5">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-canvas">
-            <img src={stremioLogo} alt="" draggable={false} className="h-8 w-8 object-contain" />
-          </span>
-          <div className="flex min-w-0 flex-col gap-3">
-            <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.")}
-            </p>
-            <div className="flex items-center gap-2.5 rounded-md bg-canvas px-3.5 py-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-elevated">
-                <img src={badgeIconUrl("stremio_supporter")} alt="" draggable={false} className="h-6 w-6 object-contain" />
-              </span>
-              <p className="text-[12.5px] leading-relaxed text-ink-muted">
-                {t("Stremio Supporters get a special badge on their Harbor profile.")}
-              </p>
-            </div>
-            <div className="mt-1 flex flex-wrap gap-2.5">
-              <LinkButton label={t("Support Stremio")} onClick={() => openUrl(STREMIO_DONATE)} primary />
-            </div>
-          </div>
-        </div>
+        <Prose>
+          {t("Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.")}
+        </Prose>
+        <Callout
+          icon={
+            <img
+              src={badgeIconUrl("stremio_supporter")}
+              alt=""
+              draggable={false}
+              className="mt-[1px] h-5 w-5 shrink-0 object-contain"
+            />
+          }
+        >
+          {t("Stremio Supporters get a special badge on their Harbor profile.")}
+        </Callout>
+        <SettingRow
+          icon={<img src={stremioLogo} alt="" draggable={false} className={LEAD_IMG} />}
+          label={t("Support Stremio")}
+          desc={t("Opens Stremio's donation page in your browser.")}
+        >
+          <OpenButton label={t("Donate")} url={STREMIO_DONATE} primary />
+        </SettingRow>
       </Section>
 
       <Section
         title={t("Donating to Harbor")}
         subtitle={t("Short version: don't. Harbor takes no donations.")}
       >
-        <p className="text-[13.5px] leading-relaxed text-ink-muted">
+        <Prose>
           {t("If you were going to send something, send it to ElfHosted or Stremio above, or to one of the charities below. They all do more good with it.")}
-        </p>
+        </Prose>
       </Section>
 
       <Section
         title={t("Badges for giving")}
         subtitle={t("Support ElfHosted or Stremio, or give to any charity below, and the badge lands on your profile.")}
       >
-        <div className="flex flex-col gap-2.5">
-          <GivingBadge icon={badgeIconUrl("donator")} label={t("Charity")} desc={t("For donating to a charity.")} />
-          <GivingBadge icon={badgeIconUrl("top_donator")} label={t("Charity $100+")} desc={t("For giving more than $100 to charity.")} />
-          <GivingBadge icon={elfLogo} label={t("ElfHosted")} desc={t("For an active ElfHosted subscription.")} />
-        </div>
-        <div className="mt-3 flex items-start gap-2.5 rounded-md bg-elevated px-4 py-3">
-          <Mail size={16} strokeWidth={2.2} className="mt-0.5 shrink-0 text-ink-subtle" />
-          <p className="text-[12.5px] leading-relaxed text-ink-muted">
-            {t("To get a Charity badge, forward your donation receipt or invoice to")}{" "}
-            <span className="font-semibold text-ink">bugs@harbor.site</span>{" "}
-            {t("with your @handle in the body so we can match it to your account.")}
-          </p>
-        </div>
+        <SRow
+          leading={<img src={badgeIconUrl("donator")} alt="" draggable={false} className={LEAD_IMG} />}
+          title={t("Charity")}
+          description={t("For donating to a charity.")}
+        />
+        <SRow
+          leading={<img src={badgeIconUrl("top_donator")} alt="" draggable={false} className={LEAD_IMG} />}
+          title={t("Charity $100+")}
+          description={t("For giving more than $100 to charity.")}
+        />
+        <SRow
+          leading={<img src={elfLogo} alt="" draggable={false} className={LEAD_IMG} />}
+          title={t("ElfHosted")}
+          description={t("For an active ElfHosted subscription.")}
+        />
+        <Callout icon={<Mail size={18} strokeWidth={2.2} className="mt-[2px] shrink-0 text-ink-subtle" />}>
+          {t("To get a Charity badge, forward your donation receipt or invoice to")}{" "}
+          <span className="font-semibold text-ink">bugs@harbor.site</span>{" "}
+          {t("with your @handle in the body so we can match it to your account.")}
+        </Callout>
       </Section>
 
       <Section
         title={t("If you would rather give it away")}
         subtitle={t("No affiliation, no referral links, and Harbor gets nothing from these. They are just places where money goes further than it does here.")}
       >
-        <div className="flex flex-col gap-2.5">
-          {CHARITIES.map((c) => (
-            <button
-              key={c.url}
-              type="button"
-              onClick={() => openUrl(c.url)}
-              className="flex items-start gap-3.5 rounded-md bg-elevated px-5 py-4 text-start transition-colors hover:bg-raised"
-            >
-              <Heart size={16} strokeWidth={2.2} className="mt-0.5 shrink-0 text-ink-subtle" />
-              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="flex items-center gap-1.5 text-[13.5px] font-semibold text-ink">
-                  {c.name}
-                  <ArrowUpRight size={14} strokeWidth={2.2} className="text-ink-subtle" />
-                </span>
-                <span className="text-[12.5px] leading-relaxed text-ink-muted">{t(c.blurb)}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-        <button
-          type="button"
+        {CHARITIES.map((c) => (
+          <SRow
+            key={c.url}
+            title={c.name}
+            description={t(c.blurb)}
+            onClick={() => openUrl(c.url)}
+            trailing={<OutArrow />}
+          />
+        ))}
+        <SRow
+          title={t("Charity Navigator")}
+          description={t("Look any of them up before you give, or find a cause of your own.")}
           onClick={() => openUrl(CHARITY_NAVIGATOR)}
-          className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-ink-subtle transition-colors hover:text-ink"
-        >
-          {t("Look any of them up on Charity Navigator")}
-          <ArrowUpRight size={14} strokeWidth={2.2} />
-        </button>
+          trailing={<OutArrow />}
+        />
       </Section>
     </>
   );

@@ -1,11 +1,11 @@
-import { Move, PanelTop } from "lucide-react";
+import { AppWindow, Frame, Move, PanelTop, PanelTopDashed } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { getCustomThemes, subscribeCustomThemes } from "@/lib/custom-themes";
 import { useSettings } from "@/lib/settings";
 import { FEATURED_CUSTOM_THEMES, getThemeById, THEME_PRESETS, type ThemeSettings } from "@/lib/theme";
 import { nextBackgroundImage } from "@/lib/theme-background";
 import { useT } from "@/lib/i18n";
-import { Section, Segmented, ToggleRow } from "./shared";
+import { ROW_DESC, Section, Segmented, ToggleRow } from "./shared";
 import { SettingGroup, SettingRow } from "./kit";
 import { useSubTabs } from "./sub-tabs";
 import { BackgroundPicker } from "./theme-panel/background-picker";
@@ -89,10 +89,10 @@ function ThemeTab() {
     <>
       <ThemeCommunityCta />
 
-      <Section
-        title={t("Theme")}
-        subtitle={t("Pick a look. Every color and surface updates instantly.")}
-      >
+      <Section title={t("Theme")} bare>
+        <p className={`mb-3 max-w-[70ch] ${ROW_DESC}`}>
+          {t("Pick a look. Every color and surface updates instantly.")}
+        </p>
         <ColorThemeBody
           activePreset={theme.preset}
           fontPair={theme.fontPair}
@@ -136,7 +136,7 @@ function ThemeTab() {
 function LogoTab() {
   const t = useT();
   return (
-    <Section title={t("Logo & app icon")}>
+    <Section title={t("Logo & app icon")} bare>
       <LogoPicker />
     </Section>
   );
@@ -146,11 +146,12 @@ function LibraryTab() {
   const t = useT();
   const libraryOpen = useThemeLibraryOpen();
   return (
-    <Section
-      title={t("Your themes")}
-      subtitle={t("Make your own in the Theme Studio, or import one a friend shared.")}
-      bare={libraryOpen}
-    >
+    <Section title={t("Your themes")} bare>
+      {!libraryOpen && (
+        <p className={`mb-4 max-w-[70ch] ${ROW_DESC}`}>
+          {t("Make your own in the Theme Studio, or import one a friend shared.")}
+        </p>
+      )}
       <CustomThemesSection />
     </Section>
   );
@@ -166,10 +167,10 @@ function TypographyTab() {
   };
 
   return (
-    <Section
-      title={t("Typography")}
-      subtitle={t("Pick a display and body pairing, or upload your own font to use across Harbor.")}
-    >
+    <Section title={t("Typography")} bare>
+      <p className={`mb-3 max-w-[70ch] ${ROW_DESC}`}>
+        {t("Pick a display and body pairing, or upload your own font to use across Harbor.")}
+      </p>
       <FontGrid
         pairValue={theme.fontPair}
         customValue={theme.customFontId ?? null}
@@ -188,7 +189,7 @@ function WindowTab() {
       {isTauri && (
         <Section
           title={t("Window title bar")}
-          subtitle={t("Use your operating system's native title bar and window buttons instead of Harbor's built-in ones. Handy if the in-app buttons ever feel out of reach, like during playback.")}
+          subtitle={t("Choose whether your operating system draws the title bar, or Harbor draws its own.")}
         >
           <SettingGroup>
             <NativeTitleBarRow />
@@ -233,14 +234,13 @@ function ThemeCommunityCta() {
   );
 }
 
-function RowIcon({ on, children }: { on?: boolean; children: ReactNode }) {
+function ArtPreview({ caption, children }: { caption: string; children: ReactNode }) {
   return (
-    <span
-      className={`flex h-9 w-9 items-center justify-center rounded-md ${
-        on ? "bg-accent text-canvas" : "bg-raised text-ink-subtle"
-      }`}
-    >
-      {children}
+    <span className="flex flex-col gap-2.5">
+      <span className="harbor-settings-label">{caption}</span>
+      <span className="grid h-[112px] place-items-center overflow-hidden rounded-[10px] bg-canvas">
+        <span className="block scale-[2.2]">{children}</span>
+      </span>
     </span>
   );
 }
@@ -255,7 +255,12 @@ function NativeTitleBarRow() {
       sub={t("Show your operating system's own title bar with its minimize, maximize, and close buttons. They stay reachable everywhere, including while a video is playing. Turn this off to use Harbor's built-in window buttons.")}
       value={on}
       onChange={(useNativeTitleBar) => update({ useNativeTitleBar })}
-      leading={<TitleBarArt native={on} on={on} />}
+      leading={<AppWindow size={18} strokeWidth={2} />}
+      preview={
+        <ArtPreview caption={t("Live preview")}>
+          <TitleBarArt native={on} on={on} />
+        </ArtPreview>
+      }
     />
   );
 }
@@ -276,7 +281,12 @@ function HybridBarRow() {
       }
       value={on}
       onChange={(hybridTitleBar) => update({ hybridTitleBar })}
-      leading={<HybridBarArt on={on} />}
+      leading={<PanelTopDashed size={18} strokeWidth={2} />}
+      preview={
+        <ArtPreview caption={t("Live preview")}>
+          <HybridBarArt on={on} />
+        </ArtPreview>
+      }
     />
   );
 }
@@ -291,11 +301,7 @@ function TopbarScrollBlurRow() {
       sub={t("As you scroll, the top bar frosts over the content beneath it. Off by default; it uses a blur, so leave it off on lower-end machines.")}
       value={on}
       onChange={(topbarScrollBlur) => update({ topbarScrollBlur })}
-      leading={
-        <RowIcon on={on}>
-          <PanelTop size={16} strokeWidth={2.2} />
-        </RowIcon>
-      }
+      leading={<PanelTop size={18} strokeWidth={2} />}
     />
   );
 }
@@ -309,13 +315,15 @@ function TopbarAppearanceRow() {
     : undefined;
   return (
     <SettingRow
-      icon={<WindowControlArt style={settings.topbarAppearance} on={!nativeOn} />}
+      wide
+      icon={<Frame size={18} strokeWidth={2} />}
       label={t("Top-right controls")}
       lockReason={lockedNote}
       tip={t("Choose how Watch Together and the minimize, maximize, and close buttons look. Liquid glass replaces the clean transparent controls.")}
       desc={lockedNote ?? t("How Watch Together and the window buttons are drawn.")}
     >
-      <div className={nativeOn ? "pointer-events-none" : ""}>
+      <div inert={nativeOn} className="flex w-full flex-wrap items-center gap-4">
+        <WindowControlArt style={settings.topbarAppearance} on={!nativeOn} />
         <Segmented
           value={settings.topbarAppearance}
           options={[
@@ -346,11 +354,7 @@ function DragAnywhereRow() {
       sub={t("Move Harbor by dragging any empty space on a page, not just the top bar. Leave this off to keep clicks inside pages from nudging the window.")}
       value={on}
       onChange={(dragAnywhere) => update({ dragAnywhere })}
-      leading={
-        <RowIcon on={on}>
-          <Move size={16} strokeWidth={2.2} />
-        </RowIcon>
-      }
+      leading={<Move size={18} strokeWidth={2} />}
     />
   );
 }

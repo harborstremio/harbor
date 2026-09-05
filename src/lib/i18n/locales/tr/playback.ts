@@ -100,6 +100,9 @@ const playback: Record<string, string> = {
     "Bu altyazı dosyası yüklenemedi. Başka bir tane deneyin.",
   "Couldn't load {name}": "{name} yüklenemedi",
   "Couldn't open this file": "Bu dosya açılamadı",
+  "Couldn't reload the stream. Try picking another source.":
+    "Yayın yeniden yüklenemedi. Başka bir kaynak seçmeyi deneyin.",
+  "Couldn't restart the streaming server.": "Yayın sunucusu yeniden başlatılamadı.",
   "Couldn't save the synced subtitle. Try again.":
     "Eşzamanlanan altyazı kaydedilemedi. Tekrar deneyin.",
   "Couldn't switch subtitles. Try again.": "Altyazı değiştirilemedi. Tekrar deneyin.",
@@ -202,6 +205,8 @@ const playback: Record<string, string> = {
   "HW decode": "Donanım kod çözme",
   "Harbor caps playlists at 80 MB to stay responsive. Most providers offer a filtered URL with fewer channels.":
     "Harbor, akıcı çalışmayı sürdürmek için oynatma listelerini 80 MB ile sınırlar. Çoğu sağlayıcı daha az kanal içeren filtrelenmiş bir URL sunar.",
+  "Harbor's streaming server only runs in the desktop app.":
+    "Harbor'ın yayın sunucusu yalnızca masaüstü uygulamasında çalışır.",
   Height: "Boy",
   Hidden: "Gizli",
   "Hidden by filter: {reason}": "Filtre nedeniyle gizlendi: {reason}",
@@ -395,10 +400,12 @@ const playback: Record<string, string> = {
     "Kaydediliyor · {pct}% · {remaining} · yönetmek için tıklayın",
   "Red Cards": "Kırmızı Kartlar",
   Release: "Sürüm",
+  "Reloading the stream…": "Yayın yeniden yükleniyor…",
   "Reset filters": "Filtreleri sıfırla",
   "Reset sync": "Senkronizasyonu sıfırla",
   "Resize subtitle menu": "Altyazı menüsünü yeniden boyutlandır",
   Restart: "Yeniden başlat",
+  "Restarting the streaming server…": "Yayın sunucusu yeniden başlatılıyor…",
   "Resume from {time}": "{time} konumundan devam et",
   "Return to full window": "Tam pencere görünümüne dön",
   Round: "Tur",
@@ -497,6 +504,7 @@ const playback: Record<string, string> = {
     "Bu cihazda yerel olarak saklanır. Giriş bilgileriniz cihazınızdan asla çıkmaz. Bir kanal oynatılamazsa sağlayıcınız paylaşılan hesapların kullanımını sınırlandırıyor olabilir. Oynatma listesini yenileyin veya sağlayıcınıza danışın.",
   "Stream failed to load": "Yayın yüklenemedi",
   "Stream is taking a while": "Yayının yüklenmesi uzun sürüyor",
+  "Streaming server restarted.": "Yayın sunucusu yeniden başlatıldı.",
   Strikeouts: "Strikeout'lar",
   Strikes: "Strike'lar",
   "Subtitle FPS": "Altyazı FPS'si",
@@ -555,6 +563,7 @@ const playback: Record<string, string> = {
     "Sunucu, Xtream verileri yerine bir web sayfasıyla yanıt verdi. Hesabın süresi dolmuş olabilir veya sunucu URL'si bir Xtream paneline ait olmayabilir.",
   "The server responded but the playlist is not at that URL. Check for typos and verify with your provider.":
     "Sunucu yanıt verdi ancak oynatma listesi bu URL'de değil. Yazım hatalarını kontrol edin ve sağlayıcınızla doğrulayın.",
+  "The streaming server didn't come back up.": "Yayın sunucusu yeniden çalışır duruma gelmedi.",
   "Thicker outline": "Daha kalın dış çizgi",
   "Thinner outline": "Daha ince dış çizgi",
   "This Xtream account is expired, banned, or disabled on the provider side. Renew or confirm with your provider.":

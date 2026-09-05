@@ -30,7 +30,11 @@ export function MarketRail({
   return (
     <div className="flex flex-col">
       <SectionHeader icon={icon} label={title} onViewAll={onViewAll} />
-      {subtitle && <p className="-mt-3 mb-4 text-[12.5px] text-ink-subtle">{subtitle}</p>}
+      {subtitle && (
+        <p className="-mt-3 mb-4 max-w-[70ch] text-[15.5px] font-normal leading-[22px] text-ink-subtle">
+          {subtitle}
+        </p>
+      )}
       <Row shape="landscape" min={252} scrollKey={scrollKey}>
         {items.map((it, i) => (
           <MarketCard key={it.id} item={it} kind={kind} rank={ranked ? i + 1 : undefined} onOpen={onOpen} />

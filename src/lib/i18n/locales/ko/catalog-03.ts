@@ -125,8 +125,11 @@ const catalog03: Record<string, string> = {
   "Couldn't read that image. Try a different file.":
     "이미지를 읽을 수 없습니다. 다른 파일을 사용해 보세요.",
   "Couldn't read your watchlist. Try again.": "관심 목록을 읽지 못했습니다. 다시 시도하세요.",
+  "Couldn't reload the stream. Try picking another source.":
+    "스트림을 다시 불러올 수 없습니다. 다른 소스를 선택해 보세요.",
   "Couldn't remove. Try again.": "삭제하지 못했습니다. 다시 시도하세요.",
   "Couldn't rename the profile. {error}": "프로필 이름을 변경하지 못했습니다. {error}",
+  "Couldn't restart the streaming server.": "스트리밍 서버를 다시 시작할 수 없습니다.",
   "Couldn't save that background. Your local storage is full. Try a smaller crop or clear cached data.":
     "배경을 저장할 수 없습니다. 로컬 저장 공간이 가득 찼습니다. 더 작게 자르거나 캐시된 데이터를 삭제해 보세요.",
   "Couldn't save the playlist. Free up storage space in Settings and try again.":

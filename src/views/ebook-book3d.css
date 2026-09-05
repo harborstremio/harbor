@@ -126,6 +126,7 @@
 }
 
 .hbk-page {
+  container-type: inline-size;
   display: flex;
   overflow: hidden;
   height: 100%;
@@ -139,8 +140,9 @@
 .hbk-page-title {
   display: -webkit-box;
   overflow: hidden;
+  flex: 0 0 auto;
   font-family: var(--font-book);
-  font-size: clamp(9px, calc(var(--hbk-scale, 1) * var(--hbk-title, 1) * 15px), 30px);
+  font-size: clamp(9px, calc(var(--hbk-title, 1) * 17cqi), 30px);
   font-weight: 500;
   line-height: 1.12;
   -webkit-box-orient: vertical;
@@ -148,13 +150,19 @@
 }
 
 .hbk-page-by {
+  display: -webkit-box;
+  overflow: hidden;
+  flex: 0 0 auto;
   margin-top: 0.45em;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   color: color-mix(in srgb, var(--hbk-paper-ink) 62%, transparent);
   font-size: clamp(7px, calc(var(--hbk-scale, 1) * 9px), 15px);
   font-style: italic;
 }
 
 .hbk-page-rule {
+  flex: 0 0 auto;
   width: 34%;
   height: 1px;
   margin: 0.85em 0;
@@ -162,6 +170,7 @@
 }
 
 .hbk-page-text {
+  flex: 1 1 auto;
   min-height: 0;
   max-height: calc(5lh);
   overflow: hidden;
@@ -211,6 +220,7 @@
 }
 
 .hbk-page-mark {
+  flex: 0 0 auto;
   margin-top: auto;
   padding-top: 0.8em;
   color: color-mix(in srgb, var(--hbk-paper-ink) 44%, transparent);

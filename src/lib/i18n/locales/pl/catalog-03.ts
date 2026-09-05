@@ -369,6 +369,7 @@ const catalog03: Record<string, string> = {
     "Połącz AniList w Harbor na komputerze, aby zobaczyć tutaj swoje listy.",
   "Connect Discord or Telegram and Harbor posts a message when something you follow is about to drop. Hit Test to send yourself a sample first.":
     "Połącz konto Discord lub Telegram, a Harbor wyśle wiadomość, gdy będzie zbliżać się premiera obserwowanej pozycji. Najpierw wybierz Testuj, aby wysłać sobie przykładową wiadomość.",
+  "Connect Letterboxd": "Połącz z Letterboxd",
   "Connect MyAnimeList": "Połącz z MyAnimeList",
   "Connect MyAnimeList in Harbor on your computer to see your lists here.":
     "Połącz MyAnimeList w Harbor na komputerze, aby zobaczyć tutaj swoje listy.",
@@ -725,8 +726,12 @@ const catalog03: Record<string, string> = {
     "Nie udało się odczytać tego obrazu. Spróbuj użyć innego pliku.",
   "Couldn't read your watchlist. Try again.":
     "Nie udało się odczytać listy do obejrzenia. Spróbuj ponownie.",
+  "Couldn't reload the stream. Try picking another source.":
+    "Nie udało się ponownie wczytać strumienia. Spróbuj wybrać inne źródło.",
   "Couldn't remove. Try again.": "Nie udało się usunąć. Spróbuj ponownie.",
   "Couldn't rename the profile. {error}": "Nie udało się zmienić nazwy profilu. {error}",
+  "Couldn't restart the streaming server.":
+    "Nie udało się ponownie uruchomić serwera strumieniowania.",
   "Couldn't save that background. Your local storage is full. Try a smaller crop or clear cached data.":
     "Nie udało się zapisać tego tła. Pamięć lokalna jest pełna. Spróbuj przyciąć obraz do mniejszego rozmiaru lub wyczyść dane z pamięci podręcznej.",
   "Couldn't save the synced subtitle. Try again.":

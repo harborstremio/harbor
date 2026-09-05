@@ -758,6 +758,8 @@ const miscC: Record<string, string> = {
   "Title & info": "Başlık ve bilgi",
   "Title (optional)": "Başlık (isteğe bağlı)",
   "Titles and descriptions": "Başlıklar ve açıklamalar",
+  "Titles you ignore on the advisory card never show it again.":
+    "Uyarı kartında yoksaydığınız içerikler için uyarı bir daha gösterilmez.",
   "To the side": "Yanda",
   Together: "Birlikte",
   "Toggle Anime4K": "Anime4K'yı aç/kapat",
@@ -1512,6 +1514,12 @@ const miscC: Record<string, string> = {
   "{count} seasons": "{count} sezon",
   "{count} selected": "{count} seçildi",
   "{count} sources": "{count} kaynak",
+  "{count} titles will never show the content advisory again.":
+    "{count} içerik için içerik uyarısı bir daha gösterilmeyecek.",
+  "{count} titles will never show the content advisory again.#one":
+    "{count} içerik için içerik uyarısı bir daha gösterilmeyecek.",
+  "{count} titles will never show the content advisory again.#few":
+    "{count} içerik için içerik uyarısı bir daha gösterilmeyecek.",
   "{count} tracker request blocked this session. Harbor itself sends zero telemetry.":
     "Bu oturumda {count} takip isteği engellendi. Harbor'ın kendisi hiçbir telemetri verisi göndermez.",
   "{count} views": "{count} görüntüleme",

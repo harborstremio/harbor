@@ -7,12 +7,17 @@ import { fetchTraktAvatar } from "@/lib/trakt/profile";
 import { useTrakt } from "@/lib/trakt/provider";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
-import { Section, ToggleRow } from "./shared";
+import { ROW_DESC, Section, ToggleRow } from "./shared";
 import traktLogo from "@/assets/trakt.svg";
-import { ModalButton, SettingsModal } from "./kit";
+import {
+  ModalButton,
+  ROW_ACTION,
+  ROW_ACTION_DANGER,
+  ROW_ACTION_PRIMARY,
+  SettingRow,
+  SettingsModal,
+} from "./kit";
 import { TrackerIdentity } from "./tracker-identity";
-import { Disclosure } from "./disclosure";
-import { CommentArt } from "./group-art";
 import { WatchlistSync } from "./trakt-panel/watchlist-sync";
 
 export function TraktPanel() {
@@ -61,36 +66,38 @@ export function TraktPanel() {
   return (
     <>
       {!isConnected ? (
-        <section className="flex flex-col gap-5 rounded-md bg-elevated p-7">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">
-              {t("Connect your Trakt account")}
-            </h2>
-            <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Track everything you watch, see your watchlist, and get personalized recommendations on Harbor's home page. Free at trakt.tv.")}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setModalOpen(true)}
-              className="flex h-11 items-center gap-2.5 rounded-md bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
-            >
-              <Link2 size={16} strokeWidth={2.2} />
-              {t("Connect Trakt")}
+        <Section
+          title={t("Connect your Trakt account")}
+          subtitle={t("Track everything you watch, see your watchlist, and get personalized recommendations on Harbor's home page. Free at trakt.tv.")}
+        >
+          <SettingRow
+            label={t("Connect Trakt")}
+            desc={t("Harbor shows you a short code to type in at trakt.tv. Scrobbling and watchlist sync begin the moment you approve it.")}
+          >
+            <button type="button" onClick={() => setModalOpen(true)} className={ROW_ACTION_PRIMARY}>
+              <Link2 size={18} strokeWidth={2.2} />
+              {t("Connect")}
             </button>
+          </SettingRow>
+
+          <SettingRow
+            label={t("About Trakt")}
+            desc={t("Opens trakt.tv in your browser, where you can read what Trakt does and make a free account.")}
+          >
             <button
+              type="button"
               onClick={() => openUrl("https://trakt.tv")}
-              className="flex h-11 items-center gap-2 rounded-md bg-raised px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:text-ink"
+              className={ROW_ACTION}
             >
-              {t("About Trakt")}
-              <ExternalLink size={14} strokeWidth={2.2} />
+              {t("Open trakt.tv")}
+              <ExternalLink size={18} strokeWidth={2.2} />
             </button>
-          </div>
-        </section>
+          </SettingRow>
+        </Section>
       ) : (
         <Section
-          title={t("Connected")}
-          subtitle={t("Harbor will scrobble your playback to Trakt and sync your watchlist.")}
+          title={t("Your Trakt account")}
+          subtitle={t("Harbor scrobbles your playback to Trakt and keeps your watchlist in sync.")}
         >
           <TrackerIdentity
             logo={traktLogo}
@@ -130,15 +137,15 @@ export function TraktPanel() {
                     disconnect();
                     setConfirmDisconnect(false);
                   }}
-                  className="harbor-press-pop flex h-9 items-center gap-1.5 rounded-md bg-danger/15 px-4 text-[12.5px] font-semibold text-danger transition-colors hover:bg-danger/25"
+                  className={ROW_ACTION_DANGER}
                 >
-                  <LogOut size={12} strokeWidth={2.4} />
+                  <LogOut size={18} strokeWidth={2.2} />
                   {t("Disconnect")}
                 </button>
               </>
             }
           >
-            <p className="rounded-md bg-elevated px-4 py-3.5 text-[13px] leading-relaxed text-ink-muted">
+            <p className={`max-w-[66ch] ${ROW_DESC}`}>
               {t("Disconnect Trakt? Scrobbles and syncs will stop until you reconnect.")}
             </p>
           </SettingsModal>
@@ -148,34 +155,31 @@ export function TraktPanel() {
       {isConnected && (
         <Section
           title={t("Move your watchlist")}
-          subtitle={t("Copy your Harbor watchlist over to Trakt, or pull your Trakt watchlist into Harbor. Safe to run again, Trakt skips anything it already has.")}
+          subtitle={t("Copy your Harbor watchlist over to Trakt, or pull your Trakt watchlist into Harbor.")}
         >
           <WatchlistSync />
         </Section>
       )}
 
-      <Disclosure
-        art={<CommentArt />}
+      <Section
         title={t("Comments")}
-        summary={t("Community comments from Trakt that appear on movie and show pages.")}
+        subtitle={t("Comments and reviews posted by other Trakt members.")}
       >
         <ToggleRow
           label={t("Show comments on detail pages")}
-          sub={t("Turn on to show the Trakt comments section on movies, shows, and episodes.")}
+          sub={t("Adds a comments section to movie, show, and episode pages. No Trakt account needed to read them.")}
           value={settings.showTraktComments === true}
           onChange={(on) => update({ showTraktComments: on })}
         />
-        {settings.showTraktComments === true && (
-          <ToggleRow
-            label={t("Blur comments and reviews by default")}
-            sub={t(
-              "Comments and reviews on detail pages stay blurred until you reveal them, even when they are not tagged as spoilers. This one switch covers Trakt and Letterboxd.",
-            )}
-            value={!!settings.blurComments}
-            onChange={(on) => update({ blurComments: on })}
-          />
-        )}
-      </Disclosure>
+        <ToggleRow
+          label={t("Blur comments and reviews by default")}
+          sub={t(
+            "Comments and reviews on detail pages stay blurred until you reveal them, even when they are not tagged as spoilers. This one switch covers Trakt and Letterboxd.",
+          )}
+          value={!!settings.blurComments}
+          onChange={(on) => update({ blurComments: on })}
+        />
+      </Section>
 
       {modalOpen && <TraktDeviceModal onClose={() => setModalOpen(false)} />}
     </>

@@ -2,7 +2,9 @@ import { LayoutGrid, LayoutTemplate, Pencil, RotateCcw, Save, Undo2 } from "luci
 import type { PlayerChromeConfig, ThemeId } from "@/lib/player-chrome";
 import { useT } from "@/lib/i18n";
 import { Segmented } from "../shared";
-import { SettingRow } from "../kit";
+import { ROW_DESC, SettingRow } from "../kit";
+import { usePageActions } from "../page-actions";
+import { SButton } from "../ui";
 import { ChromeMiniPreview } from "./chrome-mini-preview";
 
 export function EditLayoutCard({
@@ -25,7 +27,7 @@ export function EditLayoutCard({
   return (
     <SettingRow
       wide
-      icon={<LayoutTemplate size={16} strokeWidth={1.9} />}
+      icon={<LayoutTemplate size={18} strokeWidth={1.9} />}
       label={t("Edit player layout")}
       desc={t("A live preview of your player. Open the editor to move, hide, or reorder any control.")}
       tip={t("The editor is a working copy of the player. Click any control on it to move, resize, restyle or hide that control.")}
@@ -34,26 +36,21 @@ export function EditLayoutCard({
         <div className="relative h-[188px] w-full overflow-hidden rounded-md bg-canvas">
           <ChromeMiniPreview theme={theme} config={config} />
         </div>
-        <div className="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <span className="min-w-0 text-[12.5px] leading-relaxed text-ink-subtle">
+        <div className="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-2.5">
+          <span className={`min-w-0 max-w-[66ch] ${ROW_DESC}`}>
             {activeProfileName ? (
               <>
-                {t("Profile")} <span className="text-ink-muted">{activeProfileName}</span> ·{" "}
+                {t("Profile")} <span className="text-ink">{activeProfileName}</span> ·{" "}
               </>
             ) : null}
             {visibleCount} {t("visible")}
             {hiddenCount > 0 ? t(", {hiddenCount} hidden", { hiddenCount: String(hiddenCount) }) : ""} ·{" "}
             {t("{themeName} theme", { themeName: themeName })}
           </span>
-          <button
-            type="button"
-            onClick={onOpen}
-            aria-label={t("Edit player layout")}
-            className="harbor-press-pop flex h-9 shrink-0 items-center gap-2 rounded-md bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
-          >
-            <Pencil size={13} strokeWidth={2.4} />
+          <SButton variant="primary" onClick={onOpen}>
+            <Pencil size={16} strokeWidth={2.4} />
             {t("Edit layout")}
-          </button>
+          </SButton>
         </div>
       </div>
     </SettingRow>
@@ -64,7 +61,7 @@ export function ThemeTabs({ value, onChange }: { value: ThemeId; onChange: (v: T
   const t = useT();
   return (
     <SettingRow
-      icon={<LayoutGrid size={16} strokeWidth={1.9} />}
+      icon={<LayoutGrid size={18} strokeWidth={1.9} />}
       label={t("Player style")}
       desc={
         value === "stremio" ? t("Familiar Stremio button order.") : t("Harbor's native player chrome.")
@@ -83,7 +80,7 @@ export function ThemeTabs({ value, onChange }: { value: ThemeId; onChange: (v: T
   );
 }
 
-export function FooterBar({
+export function usePlayerLayoutPageActions({
   dirty,
   justSaved,
   confirmingReset,
@@ -98,67 +95,38 @@ export function FooterBar({
   onDiscard: () => void;
   onResetAll: () => void;
 }) {
-  const t = useT();
-  const status = justSaved
-    ? t("Saved")
+  const note = justSaved
+    ? "Saved"
     : dirty
-      ? t("Unsaved changes to your layout, time format and volume style.")
-      : t("Layout, time format and volume style apply when you save.");
-  return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-md bg-elevated px-4 py-3.5">
-        <span
-          className={`min-w-0 text-[12.5px] leading-relaxed ${
-            justSaved ? "text-accent" : "text-ink-subtle"
-          }`}
-        >
-          {status}
-        </span>
-        <div className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={onDiscard}
-            disabled={!dirty}
-            className="harbor-press-pop flex h-9 items-center gap-2 rounded-md bg-canvas px-4 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <Undo2 size={13} strokeWidth={2.4} />
-            {t("Discard changes")}
-          </button>
-          <button
-            type="button"
-            onClick={onSave}
-            disabled={!dirty}
-            className={`harbor-press-pop flex h-9 items-center gap-2 rounded-md px-4 text-[12.5px] font-semibold transition-opacity ${
-              justSaved
-                ? "bg-canvas text-accent"
-                : dirty
-                  ? "bg-ink text-canvas hover:opacity-90"
-                  : "cursor-not-allowed bg-canvas text-ink-subtle opacity-50"
-            }`}
-          >
-            <Save size={13} strokeWidth={2.4} />
-            {justSaved ? t("Saved") : t("Save changes")}
-          </button>
-        </div>
-      </div>
+      ? "Unsaved changes to your layout, time format and volume style."
+      : "Layout, time format and volume style apply when you save.";
 
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-md bg-elevated px-4 py-3.5">
-        <span className="min-w-0 text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("Puts every control, icon and option on this player style back the way it shipped.")}
-        </span>
-        <button
-          type="button"
-          onClick={onResetAll}
-          className={`harbor-press-pop flex h-9 shrink-0 items-center gap-2 rounded-md px-4 text-[12.5px] font-semibold transition-colors ${
-            confirmingReset
-              ? "bg-danger text-white"
-              : "bg-canvas text-ink-muted hover:text-ink"
-          }`}
-        >
-          <RotateCcw size={13} strokeWidth={2.4} />
-          {confirmingReset ? t("Confirm full reset") : t("Reset all to default")}
-        </button>
-      </div>
-    </div>
+  usePageActions(
+    [
+      {
+        id: "player-layout-reset",
+        label: confirmingReset ? "Confirm full reset" : "Reset all to default",
+        tone: "danger",
+        onSelect: onResetAll,
+        icon: <RotateCcw size={16} strokeWidth={2.4} />,
+      },
+      {
+        id: "player-layout-discard",
+        label: "Discard changes",
+        tone: "quiet",
+        disabled: !dirty,
+        onSelect: onDiscard,
+        icon: <Undo2 size={16} strokeWidth={2.4} />,
+      },
+      {
+        id: "player-layout-save",
+        label: justSaved ? "Saved" : "Save changes",
+        tone: "primary",
+        disabled: !dirty,
+        onSelect: onSave,
+        icon: <Save size={16} strokeWidth={2.4} />,
+      },
+    ],
+    note,
   );
 }

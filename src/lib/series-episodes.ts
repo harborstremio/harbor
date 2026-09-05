@@ -3,8 +3,15 @@ import { registerCache } from "@/lib/memory-profiler";
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { Meta } from "./cinemeta";
 import type { PlayEpisode } from "./view";
-import { tmdbDetails, tmdbSeasonEpisodes } from "./providers/tmdb";
+import {
+  applyTmdbEpisodeNames,
+  needsTmdbEpisodeNames,
+  tmdbDetails,
+  tmdbEpisodeNames,
+  tmdbSeasonEpisodes,
+} from "./providers/tmdb";
 import { tmdbLanguageIso } from "./providers/tmdb/tmdb-client";
+import { tmdbStillUrl } from "./providers/tmdb/tmdb-image-rungs";
 import { pickLocalizedText } from "./localized-text";
 import {
   PREFERRED_TEXT_SCORE,
@@ -234,7 +241,7 @@ export async function fetchAdjacentEpisodes(
   if (meta.id.startsWith("tt")) {
     const key = `${meta.id}:${current.season}:${current.episode}`;
     if (ttCache.has(key)) return ttCache.get(key)!;
-    const eps = await loadCinemetaEpisodes(meta.id);
+    const eps = await loadCinemetaEpisodes(meta.id, opts.tmdbKey);
     if (!eps) return { prev: null, next: null };
     const result = computeAdjacent(eps, current, opts.skip);
     lruSet(ttCache, key, result, TT_CACHE_MAX);
@@ -260,7 +267,7 @@ export async function fetchUpcomingEpisodes(
 ): Promise<PlayEpisode[]> {
   if ((meta.type !== "series" && !isAnimeId(meta.id)) || count <= 0) return [];
   if (meta.id.startsWith("tt")) {
-    const eps = await loadCinemetaEpisodes(meta.id);
+    const eps = await loadCinemetaEpisodes(meta.id, opts.tmdbKey);
     if (!eps) return [];
     const idx = eps.findIndex((v) => v.season === current.season && v.episode === current.episode);
     if (idx === -1) return eps.slice(0, count);
@@ -317,9 +324,38 @@ async function overlayPreferredEpisodes(id: string, eps: PlayEpisode[]): Promise
   }
 }
 
-async function loadCinemetaEpisodes(id: string): Promise<PlayEpisode[] | null> {
+async function overlayTmdbEpisodeNames(
+  id: string,
+  tmdbKey: string,
+  eps: PlayEpisode[],
+): Promise<PlayEpisode[]> {
+  const bySeason = new Map<number, PlayEpisode[]>();
+  for (const e of eps) {
+    const group = bySeason.get(e.season);
+    if (group) group.push(e);
+    else bySeason.set(e.season, [e]);
+  }
+  const wanted = [...bySeason].filter(([s, g]) => s >= 1 && needsTmdbEpisodeNames(g));
+  if (wanted.length === 0) return eps;
+  const patched = new Map<PlayEpisode, PlayEpisode>();
+  await Promise.all(
+    wanted.map(async ([season, group]) => {
+      const names = await tmdbEpisodeNames(tmdbKey, id, season).catch(() => null);
+      if (!names || names.size === 0) return;
+      const out = applyTmdbEpisodeNames(group, names);
+      if (out === group) return;
+      for (let i = 0; i < group.length; i++) {
+        if (out[i] !== group[i]) patched.set(group[i], out[i]);
+      }
+    }),
+  );
+  if (patched.size === 0) return eps;
+  return eps.map((e) => patched.get(e) ?? e);
+}
+
+async function loadCinemetaEpisodes(id: string, tmdbKey?: string): Promise<PlayEpisode[] | null> {
   const prefer = preferCustomMeta();
-  const cacheKey = prefer ? `${id}:prefer` : id;
+  const cacheKey = `${prefer ? `${id}:prefer` : id}${tmdbKey ? ":tmdb" : ""}`;
   if (cinemetaListCache.has(cacheKey)) return cinemetaListCache.get(cacheKey)!;
   const res = await fetch(`https://v3-cinemeta.strem.io/meta/series/${id}.json`);
   if (!res.ok) return null;
@@ -354,8 +390,9 @@ async function loadCinemetaEpisodes(id: string): Promise<PlayEpisode[] | null> {
   }
   eps.sort((a, b) => a.season - b.season || a.episode - b.episode);
   if (prefer) await overlayPreferredEpisodes(id, eps);
-  lruSet(cinemetaListCache, cacheKey, eps, SEASON_CACHE_MAX);
-  return eps;
+  const named = tmdbKey ? await overlayTmdbEpisodeNames(id, tmdbKey, eps) : eps;
+  lruSet(cinemetaListCache, cacheKey, named, SEASON_CACHE_MAX);
+  return named;
 }
 
 function uniqueSeasons(eps: PlayEpisode[] | null): number[] {
@@ -383,7 +420,7 @@ function uniqueAnimeSeasons(eps: PlayEpisode[] | null): number[] {
 export async function fetchSeasonList(meta: Meta, opts: { tmdbKey: string }): Promise<number[]> {
   if (meta.type !== "series" && !isAnimeId(meta.id)) return [];
   if (meta.id.startsWith("tt")) {
-    const nums = uniqueSeasons(await loadCinemetaEpisodes(meta.id));
+    const nums = uniqueSeasons(await loadCinemetaEpisodes(meta.id, opts.tmdbKey));
     return filterForeignAnimeSeasons(meta.id, meta.id, nums);
   }
   if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
@@ -402,7 +439,7 @@ export async function fetchSeasonEpisodes(
 ): Promise<PlayEpisode[]> {
   if ((meta.type !== "series" && !isAnimeId(meta.id)) || season < 1) return [];
   if (meta.id.startsWith("tt")) {
-    const eps = await loadCinemetaEpisodes(meta.id);
+    const eps = await loadCinemetaEpisodes(meta.id, opts.tmdbKey);
     return (eps ?? []).filter((e) => e.season === season);
   }
   if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
@@ -419,7 +456,7 @@ export async function fetchEpisodeList(
   opts: { tmdbKey: string },
 ): Promise<PlayEpisode[]> {
   if (meta.type !== "series" && !isAnimeId(meta.id)) return [];
-  if (meta.id.startsWith("tt")) return (await loadCinemetaEpisodes(meta.id)) ?? [];
+  if (meta.id.startsWith("tt")) return (await loadCinemetaEpisodes(meta.id, opts.tmdbKey)) ?? [];
   if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
     const seasons = await fetchSeasonList(meta, opts);
     const all: PlayEpisode[] = [];
@@ -480,7 +517,7 @@ async function tmdbSeason(key: string, tvId: number, season: number): Promise<Pl
       season: e.seasonNumber,
       episode: e.episodeNumber,
       name: e.name || undefined,
-      still: e.stillPath ? `https://image.tmdb.org/t/p/w300${e.stillPath}` : undefined,
+      still: tmdbStillUrl(e.stillPath),
       overview: e.overview || undefined,
       rating: e.voteAverage && e.voteAverage > 0 ? e.voteAverage : undefined,
       airDate: e.airDate || undefined,

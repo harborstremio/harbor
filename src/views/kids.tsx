@@ -157,6 +157,44 @@ export function Kids({ active = true }: { active?: boolean }) {
       .filter((r) => r.metas.length >= 4);
   }, [rows, hero]);
 
+  const playZoneCta = (
+    <button
+      type="button"
+      onClick={() => setPlayOpen(true)}
+      className="group relative flex w-full items-center gap-6 overflow-hidden rounded-2xl border-4 border-white/40 px-8 py-6 text-start shadow-[0_24px_60px_-24px_rgba(6,44,71,0.55)] transition-transform duration-200 hover:scale-[1.01] active:scale-[0.99]"
+      style={{
+        background: "linear-gradient(115deg, #1a7d9e 0%, #10618a 55%, #0a4062 100%)",
+      }}
+    >
+      <span aria-hidden className="kids-sparkles opacity-50" />
+      <img
+        src="/kids/doodles/lilbluewhale.png"
+        alt=""
+        draggable={false}
+        className="h-20 w-auto shrink-0 transition-transform duration-300 group-hover:scale-110"
+        style={{ animation: "curfew-sail 4.5s ease-in-out infinite" }}
+      />
+      <span className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="font-display text-[30px] font-medium leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,20,40,0.45)]">
+          Play Zone
+        </span>
+        <span className="text-[15.5px] font-semibold text-white/80">
+          Games, puzzles and amazing ocean facts. Dive in!
+        </span>
+      </span>
+      <img
+        src="/kids/doodles/lilpurpocto.png"
+        alt=""
+        draggable={false}
+        className="hidden h-16 w-auto shrink-0 sm:block"
+        style={{ animation: "kids-drift 8s ease-in-out infinite" }}
+      />
+      <span className="flex h-14 shrink-0 items-center rounded-full bg-[#ffd166] px-7 text-[17px] font-bold text-[#4a3200] transition-transform duration-150 group-hover:scale-105">
+        Let's play!
+      </span>
+    </button>
+  );
+
   return (
     <main ref={scrollCb} data-kids="on" className="relative h-full overflow-y-auto bg-canvas">
       <ScrollRootContext.Provider value={scrollEl}>
@@ -180,41 +218,6 @@ export function Kids({ active = true }: { active?: boolean }) {
               kids
             />
           </div>
-          <button
-            type="button"
-            onClick={() => setPlayOpen(true)}
-            className="group relative flex items-center gap-6 overflow-hidden rounded-2xl border-4 border-white/40 px-8 py-6 text-start shadow-[0_24px_60px_-24px_rgba(6,44,71,0.55)] transition-transform duration-200 hover:scale-[1.01] active:scale-[0.99]"
-            style={{
-              background: "linear-gradient(115deg, #1a7d9e 0%, #10618a 55%, #0a4062 100%)",
-            }}
-          >
-            <span aria-hidden className="kids-sparkles opacity-50" />
-            <img
-              src="/kids/doodles/lilbluewhale.png"
-              alt=""
-              draggable={false}
-              className="h-20 w-auto shrink-0 transition-transform duration-300 group-hover:scale-110"
-              style={{ animation: "curfew-sail 4.5s ease-in-out infinite" }}
-            />
-            <span className="flex min-w-0 flex-1 flex-col gap-1">
-              <span className="font-display text-[30px] font-medium leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,20,40,0.45)]">
-                Play Zone
-              </span>
-              <span className="text-[15.5px] font-semibold text-white/80">
-                Games, puzzles and amazing ocean facts. Dive in!
-              </span>
-            </span>
-            <img
-              src="/kids/doodles/lilpurpocto.png"
-              alt=""
-              draggable={false}
-              className="hidden h-16 w-auto shrink-0 sm:block"
-              style={{ animation: "kids-drift 8s ease-in-out infinite" }}
-            />
-            <span className="flex h-14 shrink-0 items-center rounded-full bg-[#ffd166] px-7 text-[17px] font-bold text-[#4a3200] transition-transform duration-150 group-hover:scale-105">
-              Let's play!
-            </span>
-          </button>
           {!settings.tmdbKey && <TmdbNudge />}
           <CatalogRows
             rows={restRows}
@@ -226,6 +229,8 @@ export function Kids({ active = true }: { active?: boolean }) {
             kids
             injectAfter={2}
             injectNode={settings.tmdbKey ? <KidsFranchiseRail /> : undefined}
+            injectAfter2={4}
+            injectNode2={playZoneCta}
           />
           <img
             src="/kids/octofooter.svg"

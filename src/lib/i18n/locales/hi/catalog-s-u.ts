@@ -789,6 +789,7 @@ const catalogSU: Record<string, string> = {
   "Show your AniList profile picture as your Harbor avatar.":
     "अपनी AniList प्रोफ़ाइल फ़ोटो को Harbor अवतार के रूप में इस्तेमाल करें।",
   "Show your Harbor profile picture on the community": "कम्युनिटी में अपना Harbor प्रोफ़ाइल चित्र दिखाएँ",
+  "Show your Letterboxd card": "अपना Letterboxd कार्ड दिखाएँ",
   "Show your Simkl card": "अपना Simkl कार्ड दिखाएँ",
   "Show your favourite games, books and music on your profile":
     "अपनी प्रोफ़ाइल पर अपने पसंदीदा गेम, किताबें और संगीत दिखाएँ",
@@ -1011,6 +1012,7 @@ const catalogSU: Record<string, string> = {
     "धीरे-धीरे खुलती दुनियाएँ और रोशन अध्याय, जिन्हें कॉफ़ी के साथ शुरू करना अच्छा लगे।",
   "Slowly fade between a show's backdrop images while you read the page, instead of holding one still. Only runs when the show has more than one backdrop, and never when you have pinned one or asked for reduced motion.":
     "पेज पढ़ते समय शो की बैकड्रॉप इमेज को स्थिर रखने के बजाय उनके बीच धीरे-धीरे फ़ेड करें। यह केवल तभी चलता है जब शो में एक से अधिक बैकड्रॉप हों। किसी बैकड्रॉप को पिन करने या कम मोशन की सेटिंग चालू करने पर यह नहीं चलता।",
+  Small: "छोटा",
   "Small controls that sit around playback rather than in the picture.":
     "छोटे कंट्रोल, जो तस्वीर के भीतर नहीं बल्कि प्लेबैक के आसपास रहते हैं।",
   Smaller: "और छोटा",
@@ -1323,6 +1325,7 @@ const catalogSU: Record<string, string> = {
   "Streaming now": "अभी स्ट्रीमिंग हो रही है",
   "Streaming quality": "स्ट्रीमिंग क्वालिटी",
   "Streaming server": "स्ट्रीमिंग सर्वर",
+  "Streaming server restarted.": "स्ट्रीमिंग सर्वर रीस्टार्ट हो गया।",
   "Streaming services on the TV": "TV पर स्ट्रीमिंग सेवाएँ",
   "Streaming sources": "स्ट्रीमिंग स्रोत",
   Streams: "स्ट्रीम्स",
@@ -1677,6 +1680,8 @@ const catalogSU: Record<string, string> = {
   "Telling your boss you're quitting": "अपने बॉस को बताना कि आप नौकरी छोड़ रहे हैं",
   Template: "टेम्पलेट",
   "Temporary files": "अस्थायी फ़ाइलें",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "दस मिनट की शुरुआती बढ़त। अस्थिर Wi-Fi या बहुत दूर के सर्वर के लिए बनाया गया है, बदले में प्लेबैक शुरू होने में ज़्यादा इंतज़ार करना पड़ता है।",
   "Tennis tournaments": "टेनिस टूर्नामेंट",
   "Tense Performances": "तनावपूर्ण अभिनय",
   Test: "टेस्ट",
@@ -1924,6 +1929,8 @@ const catalogSU: Record<string, string> = {
     "प्रोवाइडर के सर्वर ने त्रुटि लौटाई। Harbor की ओर से इसे ठीक नहीं किया जा सकता। कोई दूसरा सोर्स चुनें।",
   "The quick brown fox jumps": "तेज़ भूरी लोमड़ी छलाँग लगाती है",
   "The quick brown fox jumps over the lazy dog": "तेज़ भूरी लोमड़ी आलसी कुत्ते के ऊपर से कूदती है",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "सबसे तेज़ शुरुआत और सबसे कम मेमोरी का इस्तेमाल। तेज़ और स्थिर कनेक्शन पर, या कम मेमोरी वाली मशीन पर बढ़िया रहता है।",
   "The ratings row on a title's detail page, next to runtime and genre.":
     "किसी टाइटल के विवरण पेज पर अवधि और शैली के पास दिखाई देने वाली रेटिंग पंक्ति।",
   "The real footage": "असली फ़ुटेज",
@@ -1963,6 +1970,7 @@ const catalogSU: Record<string, string> = {
   "The standard year-end bonus": "सामान्य वर्षांत बोनस",
   "The streaming engine is still starting up. Give it a moment and press Play again.":
     "स्ट्रीमिंग इंजन अभी शुरू हो रहा है। थोड़ा इंतज़ार करें और फिर से प्ले दबाएँ।",
+  "The streaming server didn't come back up.": "स्ट्रीमिंग सर्वर दोबारा शुरू नहीं हुआ।",
   "The stronger fix when streams refuse to load. Cached stream files and the DHT cache are removed, so the next stream starts from scratch.":
     "स्ट्रीम लोड न होने पर अधिक असरदार समाधान। कैश की गई स्ट्रीम फ़ाइलें और DHT कैश हटा दिए जाते हैं, इसलिए अगली स्ट्रीम बिल्कुल नए सिरे से शुरू होती है।",
   "The test calls": "परीक्षण कॉल",
@@ -1982,6 +1990,7 @@ const catalogSU: Record<string, string> = {
   "The window and taskbar icon updates right away. The installed shortcut refreshes on the next update.":
     "विंडो और टास्कबार आइकन तुरंत अपडेट हो जाते हैं। इंस्टॉल किया गया शॉर्टकट अगले अपडेट पर रीफ़्रेश होगा।",
   "The yellow chip in the poster corner.": "पोस्टर के कोने में पीली चिप।",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · इंट्रो और क्रेडिट की टाइमिंग",
   TheTVDB: "TheTVDB",
   "TheTVDB · episode data": "TheTVDB · एपिसोड डेटा",
   "Theatrical Capture": "थिएट्रिकल कैप्चर",
@@ -2242,6 +2251,7 @@ const catalogSU: Record<string, string> = {
     "टाइमिंग मेल खा रही है। अगर आगे चलकर यह जल्दी या देर से आने लगे, तो किसी दूसरी पंक्ति पर इसे दोहराएँ।",
   "Timing looks aligned": "टाइमिंग मेल खा रही है",
   "Timing rate": "टाइमिंग रेट",
+  "Timing sources": "टाइमिंग के स्रोत",
   Title: "शीर्षक",
   "Title & info": "शीर्षक और जानकारी",
   "Title (optional)": "शीर्षक (वैकल्पिक)",
@@ -2249,6 +2259,8 @@ const catalogSU: Record<string, string> = {
   "Title text": "शीर्षक का टेक्स्ट",
   Titles: "शीर्षक",
   "Titles and descriptions": "शीर्षक और विवरण",
+  "Titles you ignore on the advisory card never show it again.":
+    "चेतावनी कार्ड पर आप जिन शीर्षकों को अनदेखा करते हैं, उन पर यह दोबारा कभी नहीं दिखती।",
   "Titles, overviews, and taglines from TMDB display in this language when a translation exists. Needs a TMDB key.":
     "अनुवाद उपलब्ध होने पर TMDB के शीर्षक, सारांश और टैगलाइन इस भाषा में दिखते हैं। TMDB कुंजी आवश्यक है।",
   "To clipboard": "क्लिपबोर्ड पर",
@@ -2496,6 +2508,8 @@ const catalogSU: Record<string, string> = {
   "True Stories": "सच्ची कहानियाँ",
   "True black menus": "एकदम काले मेन्यू",
   "True fullscreen": "वास्तविक फ़ुलस्क्रीन",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "वास्तविक फ़ुलस्क्रीन पूरी स्क्रीन को ढकता है और टास्कबार छिपा देता है, लेकिन ऐप बदलते समय स्क्रीन झिलमिला सकती है। बिना बॉर्डर वाली विंडो उतना ही हिस्सा फ़्रेम-रहित विंडो से ढकती है, इसलिए alt-tab और ओवरले तुरंत काम करते हैं। मैक्सिमाइज़ स्क्रीन भरता है, लेकिन टास्कबार और टाइटल बार बनाए रखता है।",
   "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.":
     "वास्तविक फ़ुलस्क्रीन पूरी स्क्रीन को ढकता है और टास्कबार छिपा देता है। मैक्सिमाइज़ स्क्रीन भरता है, लेकिन टास्कबार और टाइटल बार बनाए रखता है, ताकि आप फिर भी ऐप बदल सकें।",
   "True stories": "सच्ची कहानियाँ",

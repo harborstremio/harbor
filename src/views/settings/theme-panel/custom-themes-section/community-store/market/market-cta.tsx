@@ -6,9 +6,9 @@ import type { AcquireState } from "./use-acquire";
 import { fmtCount } from "../format";
 
 const SIZE: Record<"sm" | "md" | "lg", string> = {
-  sm: "h-11 gap-1.5 px-4 text-[13px]",
-  md: "h-11 gap-1.5 px-5 text-[13.5px]",
-  lg: "h-12 gap-2 px-6 text-[15px]",
+  sm: "h-11 gap-1.5 px-4 text-[15px]",
+  md: "h-11 gap-2 px-5 text-[15.5px]",
+  lg: "h-12 gap-2 px-6 text-[16.5px]",
 };
 
 export function MarketCta({
@@ -45,18 +45,22 @@ export function MarketCta({
       <button
         type="button"
         onClick={onClick}
-        className="group flex min-h-[64px] w-full items-center gap-3 rounded-md bg-surface pe-3 ps-4 text-start ring-1 ring-edge-soft transition-colors hover:bg-elevated"
+        className="group flex min-h-[68px] w-full items-center gap-3 rounded-[10px] bg-surface pe-3 ps-4 text-start ring-1 ring-edge-soft transition-colors hover:bg-elevated"
       >
         <IconFan icons={preview ?? []} />
         <span className="min-w-0 flex-1">
-          <span className="block text-[13.5px] font-semibold text-ink">
+          <span className="block text-[16.5px] font-medium leading-[24px] text-ink">
             {label ? t(label) : t("Browse community")}
           </span>
-          {meta && <span className="block text-[12.5px] text-ink-subtle tabular-nums">{meta}</span>}
+          {meta && (
+            <span className="block text-[15.5px] leading-[22px] text-ink-subtle tabular-nums">
+              {meta}
+            </span>
+          )}
         </span>
         <ChevronRight
           size={18}
-          className="dir-icon me-1 shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none"
+          className="dir-icon me-1 shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 motion-reduce:transform-none"
         />
       </button>
     );
@@ -78,7 +82,7 @@ export function MarketCta({
     state === "done"
       ? "bg-success text-canvas"
       : state === "error"
-        ? "bg-danger text-white"
+        ? "bg-danger text-canvas"
         : "bg-ink text-canvas";
   const text =
     state === "done"
@@ -97,13 +101,13 @@ export function MarketCta({
       className={`inline-flex items-center justify-center rounded-md font-semibold transition-[transform,background-color] duration-150 active:scale-[0.97] disabled:cursor-default motion-reduce:transform-none ${SIZE[size]} ${skin}`}
     >
       {state === "loading" ? (
-        <Loader2 size={16} className="animate-spin" />
+        <Loader2 size={18} className="animate-spin" />
       ) : state === "done" ? (
-        <Check size={16} className="harbor-pop" />
+        <Check size={18} className="harbor-pop" />
       ) : state === "error" ? (
-        <AlertCircle size={16} />
+        <AlertCircle size={18} />
       ) : (
-        <ArrowDownToLine size={16} strokeWidth={2.4} />
+        <ArrowDownToLine size={18} strokeWidth={2.4} />
       )}
       {text}
     </button>

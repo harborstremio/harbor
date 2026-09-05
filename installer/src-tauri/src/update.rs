@@ -12,6 +12,8 @@ struct Args {
     update: bool,
     passive: bool,
     relaunch: bool,
+    recoverable: bool,
+    recover_only: bool,
     target_dir: Option<PathBuf>,
     wait_pid: Option<u32>,
     from_version: Option<String>,
@@ -29,6 +31,8 @@ fn parse() -> Args {
             "--update" => args.update = true,
             "--passive" => args.passive = true,
             "--relaunch" => args.relaunch = true,
+            "--recoverable" => args.recoverable = true,
+            "--recover-only" => { args.recover_only = true; args.update = true; }
             "--target-dir" => {
                 args.target_dir = value(i).map(PathBuf::from);
                 i += 1;
@@ -125,7 +129,7 @@ fn desktop_shortcut_present() -> bool {
 }
 
 #[cfg(windows)]
-fn relaunch(dest: &Path) -> Result<(), String> {
+fn relaunch(dest: &Path) -> Result<std::process::Child, String> {
     use std::os::windows::process::CommandExt;
     const DETACHED_PROCESS: u32 = 0x0000_0008;
     const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
@@ -136,12 +140,11 @@ fn relaunch(dest: &Path) -> Result<(), String> {
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null())
         .spawn()
-        .map(|_| ())
         .map_err(|e| e.to_string())
 }
 
 #[cfg(not(windows))]
-fn relaunch(_dest: &Path) -> Result<(), String> {
+fn relaunch(_dest: &Path) -> Result<std::process::Child, String> {
     Err("relaunch is Windows only".to_string())
 }
 
@@ -165,6 +168,22 @@ fn run(args: Args) -> i32 {
     ));
 
     let dest = resolve_dest(args.target_dir.as_deref());
+    if args.recover_only {
+        if args.target_dir.is_none() { log.line("recovery requires an explicit target directory"); return 1; }
+        install::stop_harbor();
+        let result = harbor_install_recovery::Transaction::at(&dest).and_then(|tx| {
+            tx.restore()?;
+            tx.retain().map(|_| ())
+        });
+        if let Err(e) = result { log.line(&format!("recovery failed: {e}")); return 1; }
+        let _ = install::restore_registration(&dest);
+        let _ = relaunch(&dest);
+        return 0;
+    }
+    if args.recoverable && (args.to_version.as_deref() != Some(shipped.as_str()) || !args.relaunch) {
+        log.line("recoverable updates require the exact embedded payload version and relaunch");
+        return 1;
+    }
     let from_marker = install::read_marker_version(&dest);
     log.line(&format!("target {} (marker {})", dest.display(), from_marker));
 
@@ -182,6 +201,8 @@ fn run(args: Args) -> i32 {
         }
     }
     install::stop_harbor();
+
+    if args.recoverable { return run_recoverable(&dest, &shipped, &mut log); }
 
     let desktop = desktop_shortcut_present();
     let mut bucket = -1i64;
@@ -205,10 +226,61 @@ fn run(args: Args) -> i32 {
 
     if args.relaunch {
         match relaunch(&dest) {
-            Ok(()) => log.line("relaunched harbor"),
+            Ok(_) => log.line("relaunched harbor"),
             Err(reason) => log.line(&format!("relaunch failed: {}", reason)),
         }
     }
     log.line("done");
+    0
+}
+
+fn run_recoverable(dest: &Path, version: &str, log: &mut Log) -> i32 {
+    use harbor_install_recovery::Transaction;
+    let tx = match Transaction::begin(dest, version) {
+        Ok(tx) => tx,
+        Err(e) => { log.line(&format!("cannot start recovery transaction: {e}")); let _ = relaunch(dest); return 1; }
+    };
+    let outcome = (|| -> Result<(), String> {
+        let total = install::prepare_recoverable(&tx)?;
+        let instructions = format!(
+            "Recovery files are retained locally. No AppData is restored automatically.\r\n\
+             If interrupted before Harbor reopens, run from this folder:\r\n\
+             Recover-Harbor.exe --recover-only --target-dir \"{}\"\r\n", dest.display());
+        std::fs::write(tx.root().join("RECOVERY.txt"), instructions).map_err(|e| e.to_string())?;
+        tx.commit().map_err(|e| e.to_string())?;
+        install::finish_recoverable(dest, desktop_shortcut_present(), total)?;
+        let mut child = relaunch(dest)?;
+        let deadline = Instant::now() + Duration::from_secs(90);
+        loop {
+            if tx.acknowledged() { return Ok(()); }
+            if let Some(status) = child.try_wait().map_err(|e| e.to_string())? {
+                return Err(format!("Harbor exited before confirming startup: {status}"));
+            }
+            if Instant::now() >= deadline {
+                let _ = child.kill();
+                let _ = child.wait();
+                return Err("Harbor did not confirm startup within 90 seconds".into());
+            }
+            std::thread::sleep(Duration::from_millis(200));
+        }
+    })();
+    if let Err(e) = outcome {
+        log.line(&format!("recoverable install failed: {e}"));
+        if tx.root().join("previous").exists() {
+            install::stop_harbor();
+            if let Err(e) = tx.restore() {
+                log.line(&format!("automatic restore failed; use retained recovery tool: {e}"));
+                return 1;
+            }
+            let _ = install::restore_registration(dest);
+        }
+        let _ = tx.retain();
+        let _ = relaunch(dest);
+        return 1;
+    }
+    match tx.retain() {
+        Ok(path) => log.line(&format!("confirmed startup; recovery files retained at {}", path.display())),
+        Err(e) => log.line(&format!("confirmed startup; active recovery folder retained: {e}")),
+    }
     0
 }

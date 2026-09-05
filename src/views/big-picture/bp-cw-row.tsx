@@ -57,7 +57,7 @@ function episodeLabel(i: LibraryItem, t: T): string {
 function remainingLabel(i: LibraryItem, t: T): string {
   const dur = i.state?.duration ?? 0;
   const off = i.state?.timeOffset ?? 0;
-  if (dur <= 0 || i.external === "simkl") return "";
+  if (dur <= 0 || i.external) return "";
   const mins = Math.max(0, Math.round((dur - off) / 60000));
   if (mins < 1) return t("Almost done");
   if (mins < 60) return t("{n}m left", { n: mins });
@@ -200,7 +200,7 @@ export function BpCwCard({
             )}
             <BpCwCardPill
               sub={ep}
-              simkl={item.external === "simkl"}
+              external={item.external}
               meta={card}
               remaining={left}
             />

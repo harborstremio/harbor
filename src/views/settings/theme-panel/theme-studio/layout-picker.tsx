@@ -82,8 +82,8 @@ export function LayoutPicker({
             </div>
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-[13.5px] font-semibold text-ink">{t(l.name)}</span>
-                <span className="text-[11.5px] text-ink-subtle">{t(l.blurb)}</span>
+                <span className="text-[15.5px] font-semibold leading-[22px] text-ink">{t(l.name)}</span>
+                <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t(l.blurb)}</span>
               </div>
               {active && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-canvas">

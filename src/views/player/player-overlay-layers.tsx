@@ -128,7 +128,7 @@ export type PlayerOverlayLayersProps = {
   setHideOthersDrawings: (fn: (h: boolean) => boolean) => void;
   canPickAnother: boolean;
   resolvedImdbId: string | null;
-  contentAdvisory: { categories: ParentalCategory[]; playKey: string };
+  contentAdvisory: { categories: ParentalCategory[]; playKey: string; imdbId: string | null };
   tmdbKey: string | null;
   download: Shell["download"];
   liveOverlay: Live["liveOverlay"];

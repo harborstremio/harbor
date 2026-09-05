@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { isAdvisoryIgnored } from "@/lib/player/content-advisory-ignore";
 import { harborImdbParental, type ParentalCategory } from "@/lib/providers/harbor-imdb";
 
 export function useContentAdvisory(
@@ -6,7 +7,7 @@ export function useContentAdvisory(
   imdbId: string | null,
   srcKey: string,
   playing: boolean,
-): { categories: ParentalCategory[]; playKey: string } {
+): { categories: ParentalCategory[]; playKey: string; imdbId: string | null } {
   const [categories, setCategories] = useState<ParentalCategory[]>([]);
   const [playKey, setPlayKey] = useState("");
   const startedRef = useRef("");
@@ -15,7 +16,7 @@ export function useContentAdvisory(
     setCategories([]);
     setPlayKey("");
     startedRef.current = "";
-    if (!enabled || !imdbId) return;
+    if (!enabled || !imdbId || isAdvisoryIgnored(imdbId)) return;
     let cancelled = false;
     harborImdbParental(imdbId)
       .then((c) => {
@@ -34,5 +35,5 @@ export function useContentAdvisory(
     setPlayKey(srcKey);
   }, [enabled, playing, srcKey]);
 
-  return { categories, playKey };
+  return { categories, playKey, imdbId };
 }

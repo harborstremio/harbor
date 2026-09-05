@@ -1,8 +1,8 @@
-import { AlertTriangle } from "lucide-react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { SettingRow } from "../kit";
+import { ROW_ACTION_PRIMARY, SettingRow } from "../kit";
 import { Section, ToggleRow, useSettingsActiveContext } from "../shared";
+import { focusJumpTarget } from "./jump-focus";
 
 export function XrayTab() {
   const t = useT();
@@ -25,20 +25,14 @@ export function XrayTab() {
           sub={t("Periodically match faces in the current frame against the cast to show who is on screen now. On-device, nothing leaves your machine. Uses a little more CPU while playing.")}
           value={settings.xrayLiveScan}
           onChange={(v) => update({ xrayLiveScan: v })}
+          warn={
+            settings.xrayLiveScan
+              ? t(
+                  "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.",
+                )
+              : undefined
+          }
         />
-      )}
-      {settings.xrayEnabled && settings.xrayLiveScan && (
-        <div className="flex items-start gap-2.5 rounded-xl border border-amber-400/35 bg-amber-400/10 px-3.5 py-3 text-start">
-          <AlertTriangle size={14} strokeWidth={2.2} className="mt-0.5 shrink-0 text-amber-300" />
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="text-[12.5px] font-semibold text-amber-200">{t("Performance notice")}</span>
-            <span className="text-[12px] leading-relaxed text-amber-200/85">
-              {t(
-                "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.",
-              )}
-            </span>
-          </div>
-        </div>
       )}
       {settings.xrayEnabled && !settings.tmdbKey.trim() && (
         <SettingRow
@@ -47,8 +41,12 @@ export function XrayTab() {
         >
           <button
             type="button"
-            onClick={() => setActive("library")}
-            className="harbor-press-pop h-9 shrink-0 rounded-md bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+            onClick={(e) => {
+              const from = e.currentTarget;
+              setActive("library");
+              focusJumpTarget(from);
+            }}
+            className={ROW_ACTION_PRIMARY}
           >
             {t("Library & metadata")}
           </button>

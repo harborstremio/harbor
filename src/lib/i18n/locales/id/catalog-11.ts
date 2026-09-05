@@ -32,6 +32,8 @@ const catalog: Record<string, string> = {
   "True Stories": "Kisah Nyata",
   "True black menus": "Menu hitam pekat",
   "True fullscreen": "Layar penuh sejati",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "Layar penuh sesungguhnya menutupi seluruh layar dan menyembunyikan bilah tugas, tetapi berpindah aplikasi bisa menimbulkan kedipan. Jendela tanpa bingkai menutupi area yang sama menggunakan jendela tanpa rangka, sehingga alt-tab dan overlay tetap responsif tanpa jeda. Maksimalkan memenuhi layar tetapi tetap menampilkan bilah tugas dan bilah judul.",
   "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.":
     "Layar penuh sejati menutupi seluruh layar dan menyembunyikan bilah tugas. Maksimalkan memenuhi layar tetapi tetap menampilkan bilah tugas dan bilah judul, sehingga Anda masih dapat beralih aplikasi.",
   "True stories": "Kisah nyata",
@@ -473,6 +475,7 @@ const catalog: Record<string, string> = {
   WHEN: "KAPAN",
   WIN: "MENANG",
   "WWII on Film": "PD II dalam Film",
+  "Wait before playing": "Tunggu sebelum memutar",
   "Wait for the upload to finish. The relay URL gets written to":
     "Tunggu hingga unggahan selesai. URL relay akan ditulis ke",
   "Wait for the upload to finish. The relay URL gets written to {code} in Harbor settings.":

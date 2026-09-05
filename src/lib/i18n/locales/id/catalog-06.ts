@@ -115,6 +115,8 @@ const catalog: Record<string, string> = {
   "Never contact the community server in either direction. Nothing is looked up and nothing is contributed from this device.":
     "Jangan pernah menghubungi server komunitas dalam kedua arah. Tidak ada yang dicari atau dikirimkan dari perangkat ini.",
   "Never hide the next episode": "Jangan pernah sembunyikan episode berikutnya",
+  "Never show the content advisory for this title again":
+    "Jangan pernah tampilkan peringatan konten untuk judul ini lagi",
   "Never target official or licensed publisher sites.":
     "Jangan pernah menargetkan situs penerbit resmi atau berlisensi.",
   Nevermind: "Lupakan",
@@ -212,6 +214,7 @@ const catalog: Record<string, string> = {
   "No JavaScript. Scripts, inline handlers, and javascript: URLs are removed.":
     "Tanpa JavaScript. Skrip, pengendali inline, dan URL javascript: akan dihapus.",
   "No Label": "Tanpa Label",
+  "No Letterboxd lists shared yet": "Belum ada daftar Letterboxd yang dibagikan",
   "No Live TV playlists yet": "Belum ada playlist TV Langsung",
   "No PIN set.": "Belum ada PIN yang ditetapkan.",
   "No PiP session. Closing.": "Tidak ada sesi PiP. Menutup.",
@@ -687,6 +690,8 @@ const catalog: Record<string, string> = {
     "Nonaktif secara default. Izinkan pengunjung melihat apa yang telah Anda tonton",
   "Off by default. Show what you are watching right now, or your watch party, on your profile. Applies instantly":
     "Nonaktif secara default. Tampilkan apa yang sedang Anda tonton atau pesta menonton Anda di profil. Berlaku seketika",
+  "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
+    "Nonaktif secara default. Menampilkan nama, daftar, dan jumlah film Letterboxd Anda di profil kepada semua pengunjung. Kelola koneksinya di Pengaturan, Letterboxd.",
   "Off by default. Shows your Simkl avatar, name and watch stats on your profile for anyone who visits. Manage the connection itself in Settings, Simkl.":
     "Nonaktif secara default. Menampilkan avatar, nama, dan statistik tontonan Simkl Anda di profil kepada semua pengunjung. Kelola koneksinya di Pengaturan, Simkl.",
   "Off keeps your font, background, and canvas as a private preview.":
@@ -708,6 +713,7 @@ const catalog: Record<string, string> = {
     "Di Cloudflare, klik {b1}, lalu cari {b2} dan klik {b3}.",
   "On Edge": "Di Edge",
   "On Hold": "Ditunda",
+  "On Letterboxd": "Di Letterboxd",
   "On Shelf": "Di Rak",
   "On Simkl": "Di Simkl",
   "On Stremio-Addons": "Di Stremio-Addons",
@@ -843,6 +849,7 @@ const catalog: Record<string, string> = {
     "Buka Harbor di desktop untuk memverifikasi kepemilikan melalui browser Anda.",
   "Open Harbor's settings outside playback.": "Buka Pengaturan Harbor di luar Pemutaran.",
   "Open Languages": "Buka Bahasa",
+  "Open Letterboxd profile": "Buka profil Letterboxd",
   "Open Library settings": "Buka Pengaturan perpustakaan",
   "Open MAL profile": "Buka profil MAL",
   "Open MyAnimeList again": "Buka MyAnimeList lagi",
@@ -976,6 +983,8 @@ const catalog: Record<string, string> = {
     "Opsional. Menambahkan tangkapan layar apa pun akan mengganti semua tangkapan layar saat ini.",
   "Optional. Skip this step to keep your current cover.":
     "Opsional. Lewati langkah ini untuk mempertahankan sampul saat ini.",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "Opsional. TheIntroDB tetap merespons tanpa kunci, tetapi kunci menaikkan batas permintaan Anda sehingga data waktu terus tersedia saat Anda menonton maraton. Dapatkan kunci di",
   Options: "Opsi",
   "Options for the Library → Local tab: folders you scan from your own drive. When you export metadata, Harbor writes a Kodi-style .nfo and downloads artwork next to each file at the sizes below.":
     "Opsi untuk tab Perpustakaan → Lokal: folder dari drive Anda sendiri yang akan dipindai. Saat mengekspor metadata, Harbor akan menulis file .nfo bergaya Kodi dan mengunduh gambar di samping setiap file dengan ukuran di bawah ini.",

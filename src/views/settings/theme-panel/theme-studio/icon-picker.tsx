@@ -1,7 +1,8 @@
 import { Ban, Upload } from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { captureFocusReturn } from "@/lib/keyboard-navigation";
 import { CHROME_ICONS } from "./chrome-icons";
 
 export function IconPicker({
@@ -15,6 +16,8 @@ export function IconPicker({
   const [q, setQ] = useState("");
   const [hover, setHover] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => captureFocusReturn(), []);
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -38,13 +41,13 @@ export function IconPicker({
   return (
     <div className="flex flex-col gap-2 border-t border-edge-soft px-2.5 py-2.5">
       <div className="flex items-center gap-1.5">
-        <div className="flex h-8 flex-1 items-center gap-1.5 rounded-md border border-edge-soft bg-canvas px-2 transition-colors focus-within:border-accent">
-          <Search size={14} className="shrink-0 text-ink-subtle" />
+        <div className="flex h-11 flex-1 items-center gap-2 rounded-md border border-edge-soft bg-canvas px-2.5 transition-colors focus-within:border-accent">
+          <Search size={16} className="shrink-0 text-ink-subtle" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t("Search icons")}
-            className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-subtle"
+            className="min-w-0 flex-1 bg-transparent text-[15.5px] text-ink outline-none placeholder:text-ink-subtle"
           />
         </div>
         <button
@@ -52,9 +55,9 @@ export function IconPicker({
           onClick={() => fileRef.current?.click()}
           onMouseEnter={() => setHover("__upload")}
           onMouseLeave={() => setHover(null)}
-          className="flex h-8 shrink-0 items-center gap-1 rounded-md px-2.5 text-[12.5px] font-medium text-ink-muted transition-colors hover: hover:text-ink transition-colors focus:bg-elevated"
+          className="flex h-11 shrink-0 items-center gap-1.5 rounded-md px-3 text-[15.5px] font-medium text-ink-muted transition-colors hover:bg-elevated hover:text-ink focus:bg-elevated"
         >
-          <Upload size={14} strokeWidth={2} />
+          <Upload size={16} strokeWidth={2} />
           {t("Upload")}
         </button>
         <input
@@ -70,7 +73,7 @@ export function IconPicker({
         />
       </div>
 
-      <div className="grid max-h-[208px] grid-cols-7 gap-1 overflow-y-auto [scrollbar-width:thin]">
+      <div className="grid max-h-[268px] grid-cols-6 gap-1.5 overflow-y-auto [scrollbar-width:thin]">
         <Tile
           active={!value}
           label={t("No icon (text only)")}
@@ -91,13 +94,13 @@ export function IconPicker({
           </Tile>
         ))}
         {filtered.length === 0 && (
-          <p className="col-span-7 px-1 py-3 text-center text-[12.5px] text-ink-subtle">
+          <p className="col-span-6 px-1 py-3 text-center text-[15.5px] leading-[22px] text-ink-subtle">
             {t("No icons match that search. Try Upload.")}
           </p>
         )}
       </div>
 
-      <div className="flex h-5 items-center px-0.5 text-[11.5px] capitalize text-ink-subtle">
+      <div className="flex min-h-6 items-center px-0.5 text-[15.5px] capitalize leading-[22px] text-ink-subtle">
         {caption}
       </div>
     </div>
@@ -124,7 +127,7 @@ function Tile({
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
       aria-label={label}
-      className={`flex aspect-square items-center justify-center rounded-md border transition-colors ${
+      className={`flex aspect-square min-h-11 items-center justify-center rounded-md border transition-colors ${
         active
           ? "border-accent bg-accent-soft text-ink"
           : "border-edge-soft text-ink-muted hover:border-edge hover:bg-canvas hover:text-ink"

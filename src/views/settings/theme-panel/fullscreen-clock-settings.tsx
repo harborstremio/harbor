@@ -1,4 +1,4 @@
-import { Check, Clock3 } from "lucide-react";
+import { AppWindow, Check, Clock3, Hourglass, Timer } from "lucide-react";
 import { useState } from "react";
 import { ClockDisplay, FullscreenClock } from "@/components/player/fullscreen-clock";
 import { useT } from "@/lib/i18n";
@@ -43,28 +43,17 @@ export function FullscreenClockSettings() {
         sub={t("The clock appears with the player controls.")}
         value={settings.fullscreenClockEnabled}
         onChange={(fullscreenClockEnabled) => update({ fullscreenClockEnabled })}
-        leading={
-          <span
-            className={`flex h-9 w-9 items-center justify-center rounded-full ${
-              settings.fullscreenClockEnabled
-                ? "bg-accent-soft text-accent"
-                : "bg-raised text-ink-subtle"
-            }`}
-          >
-            <Clock3 size={16} strokeWidth={2.2} />
-          </span>
-        }
+        leading={<Clock3 size={18} strokeWidth={2} />}
       />
 
       {settings.fullscreenClockEnabled && (
         <SettingGroup>
-          <div className="relative isolate flex min-h-32 items-center justify-center overflow-hidden rounded-md bg-[#080b10]">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] via-transparent to-accent/[0.08]" />
-            <span className="absolute start-4 top-3 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-white/45">
-              {t("Live preview")}
-            </span>
-            <div className="relative">
-              <FullscreenClock variant="preview" />
+          <div className="flex flex-col gap-3">
+            <span className="harbor-settings-label">{t("Live preview")}</span>
+            <div className="relative flex min-h-32 items-center justify-center overflow-hidden rounded-[10px] bg-canvas">
+              <div className="relative">
+                <FullscreenClock variant="preview" />
+              </div>
             </div>
           </div>
 
@@ -81,11 +70,7 @@ export function FullscreenClockSettings() {
             sub={t("Update the clock every second.")}
             value={settings.fullscreenClockShowSeconds}
             onChange={(fullscreenClockShowSeconds) => update({ fullscreenClockShowSeconds })}
-            leading={
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-raised text-ink-muted">
-                <Clock3 size={16} strokeWidth={2.2} />
-              </span>
-            }
+            leading={<Timer size={18} strokeWidth={2} />}
           />
 
           <ToggleRow
@@ -93,11 +78,7 @@ export function FullscreenClockSettings() {
             sub={t("Keep the clock on screen when the player is not fullscreen.")}
             value={settings.fullscreenClockWindowed}
             onChange={(fullscreenClockWindowed) => update({ fullscreenClockWindowed })}
-            leading={
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-raised text-ink-muted">
-                <Clock3 size={16} strokeWidth={2.2} />
-              </span>
-            }
+            leading={<AppWindow size={18} strokeWidth={2} />}
           />
 
           <ToggleRow
@@ -105,11 +86,7 @@ export function FullscreenClockSettings() {
             sub={t("Display the local time when the current video is expected to end.")}
             value={settings.fullscreenClockShowEndTime}
             onChange={(fullscreenClockShowEndTime) => update({ fullscreenClockShowEndTime })}
-            leading={
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-raised text-ink-muted">
-                <Clock3 size={16} strokeWidth={2.2} />
-              </span>
-            }
+            leading={<Hourglass size={18} strokeWidth={2} />}
           />
 
           <SliderRow
@@ -133,12 +110,11 @@ export function FullscreenClockSettings() {
                     type="button"
                     aria-pressed={active}
                     onClick={() => update({ fullscreenClockStyle: option.value })}
-                    className={`group overflow-hidden rounded-md text-start transition-[background-color,transform] duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-                      active ? "bg-accent-soft" : "bg-elevated hover:bg-raised"
+                    className={`group overflow-hidden rounded-[10px] border bg-elevated text-start transition-[border-color,transform] duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                      active ? "border-accent" : "border-edge-soft hover:border-edge"
                     }`}
                   >
-                    <span className="relative flex h-20 items-center justify-center overflow-hidden bg-[#080b10]">
-                      <span className="absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-accent/[0.06]" />
+                    <span className="relative flex h-24 items-center justify-center overflow-hidden bg-canvas">
                       <span className="relative" aria-hidden="true">
                         <ClockDisplay
                           date={previewDate}
@@ -150,24 +126,18 @@ export function FullscreenClockSettings() {
                         />
                       </span>
                     </span>
-                    <span className="flex items-start gap-3 px-3.5 py-3">
-                      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                        <span className="text-[13.5px] font-semibold text-ink">
+                    <span className="flex min-h-11 items-start gap-3 px-4 py-3.5">
+                      <span className="flex min-w-0 flex-1 flex-col gap-1">
+                        <span className="text-[16.5px] font-medium leading-[24px] text-ink">
                           {t(option.label)}
                         </span>
-                        <span className="text-[11.5px] leading-relaxed text-ink-subtle">
+                        <span className="text-[15.5px] leading-[22px] text-ink-muted">
                           {t(option.description)}
                         </span>
                       </span>
-                      <span
-                        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-[background-color,color,opacity] ${
-                          active
-                            ? "bg-accent text-canvas opacity-100"
-                            : "bg-raised text-ink-subtle opacity-0 group-hover:opacity-50"
-                        }`}
-                      >
-                        <Check size={12} strokeWidth={2.8} />
-                      </span>
+                      {active && (
+                        <Check size={18} strokeWidth={2.6} className="mt-[3px] shrink-0 text-accent" />
+                      )}
                     </span>
                   </button>
                 );

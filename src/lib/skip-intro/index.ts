@@ -8,9 +8,10 @@ import { fetchAniSkipSegments, kitsuToMal } from "./aniskip";
 import { chaptersToSegments } from "./chapters";
 import { fetchIntroDbAppSegments } from "./introdb-app";
 import { fetchSkipDbSegments } from "./skipdb";
-import { fetchIntroDbSegments } from "./theintrodb";
+import { fetchIntroDbSegments, readTheIntroDbKey, setTheIntroDbApiKey } from "./theintrodb";
 import type { SkipSegment } from "./types";
 import { getLocalCache } from "../simkl/activities";
+import { useSettings } from "../settings";
 
 export type { SkipSegment, SkipKind, SkipSource } from "./types";
 
@@ -70,6 +71,8 @@ export function useSkipSegments(
   const [introDb, setIntroDb] = useState<SkipSegment[]>([]);
   const [skipDb, setSkipDb] = useState<SkipSegment[]>([]);
   const [introDbApp, setIntroDbApp] = useState<SkipSegment[]>([]);
+  const { settings } = useSettings();
+  const theIntroDbKey = readTheIntroDbKey(settings);
   const resolvedExternalId = useMemo(() => resolveAnimeToExternalId(meta.id), [meta.id]);
   const kitsuId = parseKitsuId(meta.id);
   const epNum = episode?.episode;
@@ -88,6 +91,10 @@ export function useSkipSegments(
       : resolvedExternalId && resolvedExternalId.startsWith("tt")
         ? resolvedExternalId
         : null;
+
+  useEffect(() => {
+    setTheIntroDbApiKey(theIntroDbKey);
+  }, [theIntroDbKey]);
 
   useEffect(() => {
     setAniSkip([]);
@@ -122,7 +129,7 @@ export function useSkipSegments(
     return () => {
       cancelled = true;
     };
-  }, [introDbId, introSeason, introEpisode, durationSec]);
+  }, [introDbId, introSeason, introEpisode, durationSec, theIntroDbKey]);
 
   useEffect(() => {
     setSkipDb([]);

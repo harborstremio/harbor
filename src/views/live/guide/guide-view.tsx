@@ -10,6 +10,7 @@ import { EpgMatchModal } from "./epg-match-modal";
 import { GuideChannelCell } from "./guide-channel-cell";
 import { GuideProgramBlock } from "./guide-program-block";
 import { GuideTimeRuler } from "./guide-time-ruler";
+import { GuideHoverPreview } from "./guide-hover-preview";
 import {
   CHANNEL_COL_PX,
   HISTORY_HOURS,
@@ -25,6 +26,7 @@ import { useMiddleDragPan } from "../hooks/use-middle-drag-pan";
 import { BackToTop } from "@/components/back-to-top";
 import { ProgramBlocksRow } from "../skeletons";
 
+const PREVIEW_DWELL_MS = 2000;
 const COL_MIN = 140;
 const COL_MAX = 560;
 const COL_KEY = "harbor.guide.channel-col-px";
@@ -46,9 +48,11 @@ export function GuideView({
   resetKey,
   showPrograms = true,
   currentChannelId,
+  epgLoading = false,
 }: {
   channels: IptvChannel[];
   epg: EpgIndex | null;
+  epgLoading?: boolean;
   nowMs: number;
   onPlay: (ch: IptvChannel) => void;
   onPlayCatchup?: (ch: IptvChannel, program: EpgProgram) => void;
@@ -87,6 +91,30 @@ export function GuideView({
   const tvgIdCounts = useMemo(() => computeTvgIdCounts(allChannels), [allChannels]);
   const epgMapVersion = useEpgMapVersion();
   const [matchTarget, setMatchTarget] = useState<IptvChannel | null>(null);
+  const [preview, setPreview] = useState<{ channel: IptvChannel; title: string } | null>(null);
+  const previewTimerRef = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (previewTimerRef.current != null) clearTimeout(previewTimerRef.current);
+    },
+    [],
+  );
+
+  const armPreview = (on: boolean, channel: IptvChannel, title: string) => {
+    if (previewTimerRef.current != null) {
+      clearTimeout(previewTimerRef.current);
+      previewTimerRef.current = null;
+    }
+    if (!on) {
+      setPreview(null);
+      return;
+    }
+    previewTimerRef.current = window.setTimeout(() => {
+      previewTimerRef.current = null;
+      setPreview({ channel, title });
+    }, PREVIEW_DWELL_MS);
+  };
 
   const programsByChannel = useMemo(() => {
     const m = new Map<string, EpgProgram[]>();
@@ -173,6 +201,7 @@ export function GuideView({
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col">
+      <GuideHoverPreview channel={preview?.channel ?? null} title={preview?.title ?? null} />
       {!epg && (
         <div className="animate-lift-in pointer-events-none absolute bottom-7 start-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-md bg-elevated px-3.5 py-2 text-[12.5px] text-ink-muted shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft">
           <Loader2 size={13} className="animate-spin text-ink-subtle" />
@@ -240,11 +269,11 @@ export function GuideView({
                   current={ch.id === currentChannelId}
                 />
                 <div
-                  className="relative border-b border-edge-soft/30"
+                  className="relative"
                   style={{ width: WINDOW_PX, height: ROW_HEIGHT_PX }}
                 >
-                  {!epg && <ProgramBlocksRow seed={i} />}
-                  {epg && programs.length === 0 && (
+                  {programs.length === 0 && !epg && <ProgramBlocksRow seed={i} />}
+                  {!!epg && !epgLoading && programs.length === 0 && (
                     <div className="flex h-full items-center gap-3 px-3 text-[11.5px] text-ink-subtle">
                       <span>{t("No program info")}</span>
                       {epg && epg.byChannel.size > 0 && (
@@ -275,6 +304,7 @@ export function GuideView({
                         onClick={() =>
                           replayable ? onPlayCatchup!(ch, p) : onPlay(ch)
                         }
+                        onHover={(on) => armPreview(on, ch, p.title)}
                       />
                     );
                   })}

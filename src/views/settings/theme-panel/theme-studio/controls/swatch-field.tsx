@@ -29,10 +29,9 @@ export function SwatchField({
           {children}
           <span
             aria-hidden
-            className={`pointer-events-none absolute end-1.5 top-1.5 rounded-md px-1 py-0.5 text-[10.5px] font-semibold tabular-nums transition-opacity ${
+            className={`pointer-events-none absolute end-1.5 top-1.5 rounded-md bg-canvas/85 px-1.5 py-0.5 text-[15.5px] font-medium leading-[22px] tabular-nums text-ink ring-1 ring-edge-soft transition-opacity ${
               hover || open ? "opacity-100" : "opacity-0"
             }`}
-            style={{ mixBlendMode: "difference", color: "#ffffff" }}
           >
             {value.toUpperCase()}
           </span>

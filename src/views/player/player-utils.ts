@@ -63,6 +63,8 @@ export async function pickBridge(
     anime4kShaders?: string[];
     d3d11Flip?: boolean;
     macEdr?: boolean;
+    renderer?: "gpu-next" | "gpu";
+    forceYuv420p?: boolean;
     extraOptions?: string;
     fullDownload?: boolean;
     getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;

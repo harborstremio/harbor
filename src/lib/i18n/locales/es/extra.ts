@@ -418,6 +418,7 @@ const extra: Record<string, string> = {
     "Si una fuente o el reproductor de video falla, exporta el registro del reproductor y adjúntalo arriba. Se guarda en tu carpeta Descargas.",
   "If streams stop loading, hit Clear & restart below to wipe the engine and start it fresh on a new port.":
     "Si las fuentes dejan de cargar, selecciona Borrar y reiniciar abajo para restablecer el motor e iniciarlo desde cero en un puerto nuevo.",
+  "Ignore this title": "Ignorar este título",
   "Image {n}": "Imagen {n}",
   "Image languages": "Idiomas de las imágenes",
   "Import from .nfo files": "Importar desde archivos .nfo",
@@ -501,6 +502,8 @@ const extra: Record<string, string> = {
   "Native/Japanese": "Original/Japonés",
   "nav.kids": "Ver",
   "Needs an external subtitle": "Requiere subtítulos externos",
+  "Never show the content advisory for this title again":
+    "No volver a mostrar la advertencia de contenido de este título",
   "New filter": "Nuevo filtro",
   "New hover style": "Nuevo estilo al pasar el cursor",
   Next: "Siguiente",

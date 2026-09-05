@@ -37,25 +37,25 @@ export function PasswordField({
           autoComplete="new-password"
           autoCapitalize="off"
           spellCheck={false}
-          className={`${inputClass} w-full pe-11`}
+          className={`${inputClass} w-full pe-12`}
         />
         <button
           type="button"
           tabIndex={-1}
           onClick={() => setReveal((r) => !r)}
           aria-label={reveal ? t("Hide password") : t("Show password")}
-          className="absolute inset-y-0 end-0 flex w-11 items-center justify-center text-ink-subtle transition duration-150 hover:text-ink active:scale-90"
+          className="absolute inset-y-0 end-0 flex w-12 items-center justify-center text-ink-subtle transition duration-150 hover:text-ink active:scale-90"
         >
-          {reveal ? <EyeOff size={16} strokeWidth={2} /> : <Eye size={16} strokeWidth={2} />}
+          {reveal ? <EyeOff size={18} strokeWidth={2} /> : <Eye size={18} strokeWidth={2} />}
         </button>
       </div>
       {showStrength && value.length > 0 && (
-        <div className="mt-1 flex items-center gap-2.5">
-          <div className="flex flex-1 gap-1">
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          <div className="flex min-w-[120px] flex-1 gap-1">
             {[1, 2, 3, 4].map((seg) => (
               <span
                 key={seg}
-                className="h-[3px] flex-1 rounded-full transition-colors duration-300"
+                className="h-[4px] flex-1 rounded-full transition-colors duration-300"
                 style={{
                   backgroundColor: seg <= filled ? strengthColor(filled) : "var(--color-edge-soft)",
                 }}
@@ -63,7 +63,7 @@ export function PasswordField({
             ))}
           </div>
           <span
-            className="w-16 text-end text-[11.5px] font-semibold tabular-nums transition-colors duration-300"
+            className="shrink-0 text-[15.5px] font-semibold leading-[22px] transition-colors duration-300"
             style={{ color: strengthColor(filled) }}
           >
             {strength?.label ? t(strength.label) : ""}

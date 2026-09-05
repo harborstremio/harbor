@@ -1,13 +1,16 @@
 import { Maximize2, Move, Timer } from "lucide-react";
-import type { ReactNode } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { normalizeFullscreenMode, type FullscreenMode } from "@/lib/fullscreen-state";
 import { STALL_WAIT_OPTIONS, stallWaitSec } from "@/lib/player/stall-wait";
 import { SettingGroup, SettingRow } from "../kit";
 import { Segmented, ToggleRow } from "../shared";
 import { Dropdown } from "@/components/dropdown";
 import { mediaServerConnections } from "@/lib/media-server/connections";
 import { Anchored, Nested } from "./choice";
+import { FullscreenPreview } from "../fullscreen-preview";
+import { PressPlayPreview } from "./press-play-preview";
+import { VolumeHudPreview } from "./volume-hud-preview";
 import {
   RememberStreamArt,
   ResumeArt,
@@ -16,65 +19,29 @@ import {
   StallSkipArt,
 } from "./setting-art";
 
-const MODE_ART: Record<"instant" | "manual", ReactNode> = {
-  instant: (
-    <span className="flex items-center gap-2">
-      <span className="h-[3px] w-5 rounded-full bg-current opacity-40" />
-      <span className="grid h-9 w-14 place-items-center rounded-[4px] bg-current/15">
-        <span className="ms-0.5 h-0 w-0 border-y-[7px] border-s-[11px] border-y-transparent border-s-current" />
-      </span>
-    </span>
-  ),
-  manual: (
-    <span className="flex items-center gap-2">
-      <span className="flex flex-col gap-[3px]">
-        <span className="h-[3px] w-5 rounded-full bg-current opacity-30" />
-        <span className="h-[3px] w-8 rounded-full bg-current" />
-        <span className="h-[3px] w-4 rounded-full bg-current opacity-30" />
-      </span>
-      <span className="grid h-9 w-14 place-items-center rounded-[4px] bg-current/15">
-        <span className="ms-0.5 h-0 w-0 border-y-[7px] border-s-[11px] border-y-transparent border-s-current" />
-      </span>
-    </span>
-  ),
-};
-
 export function PlayModeChoice() {
   const { settings, update } = useSettings();
   const t = useT();
-  const modes: Array<{ id: "instant" | "manual"; label: string; line: string }> = [
-    { id: "instant", label: t("Instant"), line: t("Plays the best stream straight away.") },
-    { id: "manual", label: t("Pick a source"), line: t("Shows the stream list every time.") },
-  ];
   return (
-    <div className="grid gap-1.5 sm:grid-cols-2">
-      {modes.map((m) => {
-        const on = settings.instantPlay === (m.id === "instant");
-        return (
-          <button
-            key={m.id}
-            type="button"
-            onClick={() => update({ instantPlay: m.id === "instant" })}
-            aria-pressed={on}
-            className={`flex flex-col gap-3 rounded-md px-4 py-4 text-start transition-colors ${
-              on ? "bg-ink text-canvas" : "bg-elevated text-ink hover:bg-raised"
-            }`}
-          >
-            <span className={`flex h-10 items-center ${on ? "text-canvas" : "text-ink-subtle"}`}>
-              {MODE_ART[m.id]}
-            </span>
-            <span className="flex flex-col gap-0.5">
-              <span className="text-[13.5px] font-semibold">{m.label}</span>
-              <span
-                className={`text-[12.5px] leading-snug ${on ? "text-canvas/70" : "text-ink-subtle"}`}
-              >
-                {m.line}
-              </span>
-            </span>
-          </button>
-        );
-      })}
-    </div>
+    <SettingRow
+      wide
+      label={t("When you press Play")}
+      desc={t(
+        "Instant starts the best-ranked stream straight away. Pick a source opens the stream list every time, so you choose the release, quality and provider yourself.",
+      )}
+    >
+      <div className="flex w-full flex-col gap-3">
+        <Segmented<"instant" | "manual">
+          value={settings.instantPlay ? "instant" : "manual"}
+          options={[
+            { value: "instant", label: t("Instant") },
+            { value: "manual", label: t("Pick a source") },
+          ]}
+          onChange={(v) => update({ instantPlay: v === "instant" })}
+        />
+        <PressPlayPreview instant={settings.instantPlay} />
+      </div>
+    </SettingRow>
   );
 }
 
@@ -86,13 +53,13 @@ export function PlayModePanel() {
     <div className="flex flex-col gap-5">
       <SettingGroup label={t("Playback")}>
         <SettingRow
-          label={t("Play button behavior")}
+          label={t("Where Play looks first")}
           desc={t(
-            "Choose whether Play asks, prefers this device, online sources, or one of your home servers.",
+            "Choose whether Play asks you, prefers this device, prefers online sources, or goes straight to one of your home servers.",
           )}
         >
           <Dropdown
-            className="w-56"
+            className="w-[280px] max-w-full"
             value={settings.playbackSourcePreference}
             onChange={(value) =>
               update({
@@ -109,22 +76,24 @@ export function PlayModePanel() {
         </SettingRow>
         {settings.playbackSourcePreference === "home-server" && (
           <SettingRow
+            wide
             label={t("Preferred home server")}
             desc={t(
               "Ask when more than one server has a copy, or always prefer a specific server.",
             )}
           >
-            <Dropdown
-              className="w-56"
-              value={settings.preferredMediaServerId ?? ""}
-              onChange={(value) => update({ preferredMediaServerId: value || null })}
-              options={[
-                { value: "", label: t("Ask which server") },
-                ...mediaServerConnections()
-                  .filter((connection) => connection.enabled)
-                  .map((connection) => ({ value: connection.id, label: connection.name })),
-              ]}
-            />
+            <div className="w-full max-w-[420px]">
+              <Dropdown
+                value={settings.preferredMediaServerId ?? ""}
+                onChange={(value) => update({ preferredMediaServerId: value || null })}
+                options={[
+                  { value: "", label: t("Ask which server") },
+                  ...mediaServerConnections()
+                    .filter((connection) => connection.enabled)
+                    .map((connection) => ({ value: connection.id, label: connection.name })),
+                ]}
+              />
+            </div>
           </SettingRow>
         )}
         <PlayModeChoice />
@@ -196,7 +165,8 @@ export function PlayModePanel() {
         {settings.autoNextStreamOnStall && (
           <Nested>
             <SettingRow
-              icon={<Timer size={16} />}
+              wide
+              icon={<Timer size={18} />}
               label={t("How long to wait first")}
               desc={t(
                 "Slow addons and P2P sources often need more than 10 seconds to start. Raise this if streams are being skipped before they get a fair chance.",
@@ -235,20 +205,27 @@ export function PlayModePanel() {
         <Anchored id="set-what-fullscreen-does">
           <Anchored id="set-fullscreen-mode">
             <SettingRow
-              icon={<Maximize2 size={16} />}
+              wide
+              icon={<Maximize2 size={18} />}
               label={t("What fullscreen does")}
               desc={t(
-                "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.",
+                "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.",
               )}
             >
-              <Segmented
-                value={settings.fullscreenMode ?? "fullscreen"}
-                options={[
-                  { value: "fullscreen", label: t("True fullscreen") },
-                  { value: "maximized", label: t("Maximize") },
-                ]}
-                onChange={(fullscreenMode) => update({ fullscreenMode })}
-              />
+              <div className="flex w-full flex-wrap items-start justify-between gap-x-6 gap-y-3">
+                <Segmented<FullscreenMode>
+                  value={normalizeFullscreenMode(settings.fullscreenMode)}
+                  options={[
+                    { value: "fullscreen", label: t("True fullscreen") },
+                    { value: "borderless", label: t("Borderless window") },
+                    { value: "maximized", label: t("Maximize") },
+                  ]}
+                  onChange={(mode) =>
+                    update({ fullscreenMode: mode as typeof settings.fullscreenMode })
+                  }
+                />
+                <FullscreenPreview mode={normalizeFullscreenMode(settings.fullscreenMode)} />
+              </div>
             </SettingRow>
           </Anchored>
         </Anchored>
@@ -282,20 +259,24 @@ export function PlayModePanel() {
         {settings.playerVolumeHud && (
           <Nested>
             <SettingRow
-              icon={<Move size={16} />}
+              wide
+              icon={<Move size={18} />}
               label={t("Pop-up position")}
               desc={t("Where the volume overlay appears on the video.")}
             >
-              <Segmented
-                value={settings.playerVolumeHudPosition}
-                options={[
-                  { value: "center", label: t("Center") },
-                  { value: "top", label: t("Top") },
-                  { value: "top-left", label: t("Top left") },
-                  { value: "top-right", label: t("Top right") },
-                ]}
-                onChange={(playerVolumeHudPosition) => update({ playerVolumeHudPosition })}
-              />
+              <div className="flex w-full flex-col gap-3">
+                <Segmented
+                  value={settings.playerVolumeHudPosition}
+                  options={[
+                    { value: "center", label: t("Center") },
+                    { value: "top", label: t("Top") },
+                    { value: "top-left", label: t("Top left") },
+                    { value: "top-right", label: t("Top right") },
+                  ]}
+                  onChange={(playerVolumeHudPosition) => update({ playerVolumeHudPosition })}
+                />
+                <VolumeHudPreview position={settings.playerVolumeHudPosition} />
+              </div>
             </SettingRow>
           </Nested>
         )}

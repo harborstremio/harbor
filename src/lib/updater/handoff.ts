@@ -1,5 +1,6 @@
 import { Channel, invoke } from "@tauri-apps/api/core";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+import { safeFetch } from "@/lib/safe-fetch";
 
 export type HandoffProbe = {
   supported: boolean;
@@ -17,6 +18,7 @@ export type HandoffPlan = {
   size: number | null;
   payloadVersion: number;
   verifiable: boolean;
+  recoveryProtocol?: 1;
 };
 
 type ManifestEntry = {
@@ -55,7 +57,7 @@ export async function probeHandoff(): Promise<HandoffProbe | null> {
 export async function readHandoffPlan(init?: RequestInit): Promise<HandoffPlan | null> {
   const probe = await probeHandoff();
   if (!probe?.supported || !probe.managed) return null;
-  const res = await fetch(`${HARBOR_API_BASE}/updates/latest.json`, {
+  const res = await safeFetch(`${HARBOR_API_BASE}/updates/latest.json`, {
     cache: "no-store",
     ...init,
   });
@@ -64,7 +66,14 @@ export async function readHandoffPlan(init?: RequestInit): Promise<HandoffPlan |
   const entry = manifest.installer?.[probe.platformKey];
   if (!entry?.url) return null;
   const payloadVersion = Number(entry.payloadVersion ?? 0);
-  if (!Number.isFinite(payloadVersion) || payloadVersion <= probe.payloadVersion) return null;
+  const { getVersion } = await import("@tauri-apps/api/app");
+  const running = await getVersion().catch(() => "");
+  const [major = 0, minor = 0, patch = 0] = running
+    .split(/[.\-+]/)
+    .map((n) => parseInt(n, 10) || 0);
+  const runningPayload = major * 1_000_000 + minor * 1_000 + patch;
+  const floor = Math.max(probe.payloadVersion, runningPayload);
+  if (!Number.isFinite(payloadVersion) || payloadVersion <= floor) return null;
   const signature = typeof entry.signature === "string" ? entry.signature.trim() : "";
   return {
     version: manifest.version ?? "",
@@ -95,6 +104,7 @@ export function stageHandoff(
     url: plan.url,
     signature: plan.signature,
     version: plan.version,
+    recoverable: plan.recoveryProtocol === 1,
     onEvent: channel,
   });
 }

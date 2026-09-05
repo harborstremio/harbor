@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { AudioLines, Server } from "lucide-react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { Section, ToggleRow } from "./shared";
-import { ModalButton, SettingGroup, SettingRow, SettingsModal, Nested } from "./kit";
+import { ROW_DESC, Section, ToggleRow } from "./shared";
+import { ModalButton, ROW_ACTION, SettingGroup, SettingRow, SettingsModal, Nested } from "./kit";
 
 const SPEECH: ReadonlyArray<readonly [number, number]> = [
   [1, 12],
@@ -18,10 +17,10 @@ const DRIFT = 5;
 function SyncTrack({ label, shift, lit }: { label: string; shift: number; lit?: boolean }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="w-[52px] shrink-0 text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
+      <span className="w-[84px] shrink-0 text-[13px] font-bold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">
         {label}
       </span>
-      <span className="relative h-2.5 min-w-0 flex-1">
+      <span className="relative h-3 min-w-0 flex-1">
         {SPEECH.map(([left, width], i) => (
           <span
             key={i}
@@ -71,6 +70,11 @@ export function AutoSyncPanel() {
     setServerOpen(false);
   };
 
+  const serverDesc = urlSaved
+    ? t("Saved.")
+    : storedUrl ||
+      t("Harbor uses its own community server. You can point it at a server you run yourself.");
+
   return (
     <>
       <Section
@@ -90,13 +94,12 @@ export function AutoSyncPanel() {
 
         <SettingRow
           wide
-          icon={<AudioLines size={16} />}
           label={t("How it works")}
           desc={t(
             "Harbor reads the speech in the audio, then slides the subtitle track until the two line up.",
           )}
         >
-          <div className="flex w-full flex-col gap-2.5 rounded-md bg-canvas px-4 py-4">
+          <div className="flex w-full flex-col gap-3 rounded-[10px] bg-elevated px-4 py-4">
             <SyncTrack label={t("Speech")} shift={0} />
             <SyncTrack label={t("Before")} shift={DRIFT} />
             <SyncTrack label={t("After")} shift={0} lit />
@@ -165,18 +168,13 @@ export function AutoSyncPanel() {
 
         <SettingGroup label={t("Server and privacy")}>
           <SettingRow
-            icon={<Server size={16} />}
             label={t("Community sync server")}
-            desc={urlSaved ? t("Saved") : storedUrl || t("Harbor's own community server")}
+            desc={serverDesc}
             tip={t(
               "Leave blank to use Harbor's own community server. Enter a URL to point at your own server instead. Private mode below stops all contact either way.",
             )}
           >
-            <button
-              type="button"
-              onClick={openServer}
-              className="harbor-press-pop flex h-9 shrink-0 items-center rounded-md bg-raised px-3.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:text-ink"
-            >
+            <button type="button" onClick={openServer} className={ROW_ACTION}>
               {storedUrl ? t("Change server") : t("Use my own server")}
             </button>
           </SettingRow>
@@ -199,12 +197,7 @@ export function AutoSyncPanel() {
           )}
           actions={<ModalButton onClick={closeServer}>{t("Save")}</ModalButton>}
         >
-          <SettingRow
-            wide
-            icon={<Server size={16} />}
-            label={t("Server address")}
-            desc={t("Private mode stops all contact with this server in either direction.")}
-          >
+          <div className="flex flex-col gap-2.5">
             <input
               type="url"
               value={urlDraft}
@@ -218,9 +211,12 @@ export function AutoSyncPanel() {
               placeholder={t("https://sync.harbor.site")}
               spellCheck={false}
               autoComplete="off"
-              className="h-11 w-full min-w-0 rounded-md bg-canvas px-3.5 text-[13px] text-ink outline-none transition-colors placeholder:text-ink-subtle focus:bg-surface"
+              className="h-11 w-full min-w-0 max-w-[520px] rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             />
-          </SettingRow>
+            <p className={`max-w-[70ch] ${ROW_DESC}`}>
+              {t("Private mode stops all contact with this server in either direction.")}
+            </p>
+          </div>
         </SettingsModal>
       </Section>
     </>

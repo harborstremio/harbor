@@ -15,7 +15,7 @@ export function AddonTimeoutSetting() {
     <Section title={t("Addon wait time")}>
       <div className="flex flex-col gap-4 rounded-md bg-elevated px-5 py-5">
         <div className="flex items-baseline justify-between gap-4">
-          <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+          <span className="harbor-settings-label">
             {t("Give each addon")}
           </span>
           <span className="font-display text-[28px] font-medium leading-none tabular-nums text-ink">
@@ -42,7 +42,7 @@ export function AddonTimeoutSetting() {
                   style={{ height: 14 + (sec / max) * 40 }}
                 />
                 <span
-                  className={`text-[11.5px] font-semibold tabular-nums transition-colors ${
+                  className={`text-[15.5px] font-semibold tabular-nums transition-colors ${
                     on ? "text-ink" : "text-ink-subtle group-hover:text-ink-muted"
                   }`}
                 >
@@ -53,7 +53,7 @@ export function AddonTimeoutSetting() {
           })}
         </div>
 
-        <p className="max-w-[70ch] text-[12.5px] leading-relaxed text-ink-subtle">
+        <p className="max-w-[70ch] text-[15.5px] leading-[22px] text-ink-subtle">
           {t("Aggregators that search many sources can need 45s or more. Results appear as each addon answers, so a longer wait never delays the fast ones. Raise this if an addon usually shows nothing until you hit refresh a few times.")}
         </p>
       </div>

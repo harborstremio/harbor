@@ -1,9 +1,13 @@
 import { Check } from "lucide-react";
+import { useRef } from "react";
 import { useT } from "@/lib/i18n";
+import { tvFocus } from "@/lib/keyboard-navigation";
+import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 import { useSettings } from "@/lib/settings";
 import { customColorsToTokens, getThemeById } from "@/lib/theme";
 import { Section } from "../shared";
 import { SettingRow } from "../kit";
+import { SButton } from "../ui";
 import { TV_BUILTIN_THEME_IDS } from "./model-lists";
 import { writeTvTheme, type TvThemeDoc } from "./store";
 
@@ -49,10 +53,10 @@ function thisComputer(
 
 function Swatch({ colors }: { colors: string[] }) {
   if (colors.length === 0) {
-    return <span className="h-8 w-full rounded-md bg-canvas" />;
+    return <span className="h-[34px] w-full rounded-[8px] bg-canvas" />;
   }
   return (
-    <span className="flex h-8 w-full overflow-hidden rounded-md">
+    <span className="flex h-[34px] w-full overflow-hidden rounded-[8px]">
       {colors.map((c, i) => (
         <span key={i} className="flex-1" style={{ backgroundColor: c }} />
       ))}
@@ -64,24 +68,29 @@ function Tile({
   card,
   on,
   onPick,
+  btnRef,
 }: {
   card: Card;
   on: boolean;
   onPick: () => void;
+  btnRef?: (el: HTMLButtonElement | null) => void;
 }) {
   const t = useT();
   return (
     <button
+      ref={btnRef}
       type="button"
       onClick={onPick}
-      className={`flex flex-col gap-2 rounded-md p-2.5 text-start transition-colors ${
+      className={`flex flex-col gap-2 rounded-[10px] p-2.5 text-start transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
         on ? "bg-raised" : "bg-elevated hover:bg-raised"
       }`}
     >
       <Swatch colors={card.swatch} />
-      <span className="flex items-center justify-between gap-2">
-        <span className="truncate text-[12.5px] font-medium text-ink">{t(card.name)}</span>
-        {on && <Check size={14} strokeWidth={2.8} className="shrink-0 text-accent" />}
+      <span className="flex min-h-[22px] items-center justify-between gap-2">
+        <span className="truncate text-[15.5px] font-normal leading-[22px] text-ink">
+          {t(card.name)}
+        </span>
+        {on && <Check size={16} strokeWidth={2.8} className="shrink-0 text-accent" />}
       </span>
     </button>
   );
@@ -102,9 +111,17 @@ export function TvThemeSection({
     settings.theme.customColors ? customColorsToTokens(settings.theme.customColors) : null,
   );
   const activeId = active?.id ?? null;
+  const tiles = useRef<(HTMLButtonElement | null)[]>([]);
 
   const pick = (card: Card) => {
     writeTvTheme(profileId, { id: card.id, name: card.name, tokens: card.tokens });
+  };
+
+  const keepOwn = () => {
+    const at = cards.findIndex((c) => c.id === activeId);
+    const back = tiles.current[at >= 0 ? at : 0];
+    if (back && navOwnsFocus(document.activeElement as HTMLElement | null)) tvFocus(back);
+    writeTvTheme(profileId, null);
   };
 
   return (
@@ -114,37 +131,36 @@ export function TvThemeSection({
     >
       {mine && (
         <SettingRow
-          wide
           label={t("Match this computer")}
           desc={t("Send the theme you are looking at right now, exactly as it is here.")}
         >
           <span className="w-32 shrink-0">
             <Swatch colors={mine.swatch} />
           </span>
-          <button
-            type="button"
-            onClick={() => pick(mine)}
-            className="shrink-0 rounded-md bg-ink px-3.5 py-2 text-[12.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
-          >
+          <SButton variant="primary" onClick={() => pick(mine)}>
             {t("Send to TV")}
-          </button>
+          </SButton>
         </SettingRow>
       )}
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {cards.map((c) => (
-          <Tile key={c.id} card={c} on={activeId === c.id} onPick={() => pick(c)} />
+        {cards.map((c, i) => (
+          <Tile
+            key={c.id}
+            card={c}
+            on={activeId === c.id}
+            onPick={() => pick(c)}
+            btnRef={(el) => {
+              tiles.current[i] = el;
+            }}
+          />
         ))}
       </div>
 
       {activeId && (
-        <button
-          type="button"
-          onClick={() => writeTvTheme(profileId, null)}
-          className="self-start text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
-        >
+        <SButton className="self-start" onClick={keepOwn}>
           {t("Let the TV keep its own theme")}
-        </button>
+        </SButton>
       )}
     </Section>
   );

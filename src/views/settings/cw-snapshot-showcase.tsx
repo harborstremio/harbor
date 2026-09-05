@@ -30,8 +30,8 @@ export function CwSnapshotShowcase() {
         </div>
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-[12.5px] font-semibold text-ink">{t("Picks up right where you left off")}</div>
-        <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
+        <div className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">{t("Picks up right where you left off")}</div>
+        <p className="mt-1 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
           {t("Back out mid-episode and the card keeps the exact frame you stopped on, with your progress, so it looks like a pause instead of a thumbnail.")}
         </p>
       </div>

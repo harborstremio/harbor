@@ -23,9 +23,9 @@ export function BackChrome() {
   return (
     <button
       onClick={goBack}
-      className="flex h-10 shrink-0 items-center gap-2 rounded-full border border-edge-soft/60 bg-canvas/85 ps-3 pe-5 text-[13.5px] font-medium text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
+      className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg ps-2 pe-3 text-[13px] font-medium text-ink-muted transition-colors hover:bg-ink/[0.07] hover:text-ink"
     >
-      <ArrowLeft size={15} className="dir-icon" />
+      <ArrowLeft size={16} strokeWidth={2.2} className="dir-icon" />
       {t("common.back")}
     </button>
   );

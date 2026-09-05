@@ -28,9 +28,10 @@ import { resolveChromeTheme } from "@/lib/theme";
 import { sameConfig } from "./config-helpers";
 import { EditorOverlay } from "./editor-overlay";
 import { OptionsSection } from "./options-section";
-import { EditLayoutCard, FooterBar, ThemeTabs } from "./panel-bars";
+import { EditLayoutCard, ThemeTabs, usePlayerLayoutPageActions } from "./panel-bars";
 import { useChromeEdits } from "./use-chrome-edits";
 import { AdvisoryPreview } from "./advisory-preview";
+import { AdvisoryIgnoreRow } from "./advisory-ignore-row";
 import { SeekBarPanel } from "../player-panel";
 import { FullscreenClockSettings } from "../theme-panel/fullscreen-clock-settings";
 import { Section, ToggleRow } from "../shared";
@@ -244,6 +245,15 @@ export function PlayerLayoutPanel() {
   const visibleCount = draft.controls.filter((c) => !c.hidden).length;
   const hiddenCount = draft.controls.length - visibleCount;
 
+  usePlayerLayoutPageActions({
+    dirty,
+    justSaved,
+    confirmingReset,
+    onSave,
+    onDiscard,
+    onResetAll,
+  });
+
   return (
     <div className="flex flex-col gap-10">
       <Section
@@ -297,14 +307,6 @@ export function PlayerLayoutPanel() {
             setDraft((cur) => ({ ...cur, options: { ...cur.options, volumeStyle: v } }))
           }
         />
-        <FooterBar
-          dirty={dirty}
-          justSaved={justSaved}
-          confirmingReset={confirmingReset}
-          onSave={onSave}
-          onDiscard={onDiscard}
-          onResetAll={onResetAll}
-        />
       </Section>
 
       <Section
@@ -328,6 +330,7 @@ export function PlayerLayoutPanel() {
           onChange={(v) => update({ contentAdvisoryToast: v })}
           preview={<AdvisoryPreview />}
         />
+        <AdvisoryIgnoreRow featureOn={settings.contentAdvisoryToast} />
       </Section>
 
       <Section

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type RefObj
 import { Check, Clock } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
+import traktLogo from "@/assets/trakt.svg";
 import { getAnimeCwId } from "@/lib/anime-cw-ids";
 import type { Meta } from "@/lib/cinemeta";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
@@ -11,7 +12,12 @@ import { useProfiles, type Profile } from "@/lib/profiles";
 import { useProxiedImageSrc } from "@/lib/remote-image-proxy";
 import { fetchSeasonEpisodes } from "@/lib/series-episodes";
 import { useSettings } from "@/lib/settings";
-import { episodeFromVideoId, libraryMetaType, type LibraryItem } from "@/lib/stremio";
+import {
+  episodeFromVideoId,
+  libraryMetaType,
+  type ExternalCwSource,
+  type LibraryItem,
+} from "@/lib/stremio";
 import { fetchWatchedKeySet } from "@/lib/trakt/history";
 import { isLibraryItemWatched } from "@/lib/trakt/library-key";
 import { useTrakt } from "@/lib/trakt/provider";
@@ -325,12 +331,12 @@ const GLYPH = "h-[1.05em] w-auto shrink-0";
 // and a countdown to an episode that has not aired is the opposite of live.
 export function BpCwCardPill({
   sub,
-  simkl,
+  external,
   meta,
   remaining,
 }: {
   sub: string;
-  simkl: boolean;
+  external?: ExternalCwSource;
   meta: BpCwCardMeta;
   remaining: string;
 }) {
@@ -341,12 +347,16 @@ export function BpCwCardPill({
     : upNext
       ? t("Up Next")
       : meta.episodeTitle || remaining;
-  if (!sub && !trailing && !simkl) return null;
+  if (!sub && !trailing && !external) return null;
 
   return (
     <span data-bp-cw-pill className={PILL}>
-      {simkl ? (
-        <img src={simklLogo} alt="" className="h-[1.15em] w-[1.15em] shrink-0 rounded-[3px]" />
+      {external ? (
+        <img
+          src={external === "trakt" ? traktLogo : simklLogo}
+          alt=""
+          className="h-[1.15em] w-[1.15em] shrink-0 rounded-[3px]"
+        />
       ) : meta.waitingForAir ? (
         <Clock className={GLYPH} strokeWidth={2.6} />
       ) : (

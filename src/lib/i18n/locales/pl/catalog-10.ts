@@ -274,6 +274,8 @@ const catalog10: Record<string, string> = {
   "Re-configure this addon and apply the updated link":
     "Skonfiguruj ten dodatek ponownie i zastosuj zaktualizowany link",
   "Re-download": "Pobierz ponownie",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "Otwórz ponownie oglądany strumień i wznów odtwarzanie od miejsca przerwania.",
   "Re-run deploy or paste the correct URL":
     "Ponownie uruchom wdrożenie lub wklej prawidłowy adres URL",
   "Re-runs the welcome flow and clears every dismissed tip.":
@@ -327,6 +329,7 @@ const catalog10: Record<string, string> = {
   "Reading your search": "Odczytywanie wyszukiwania",
   "Reading {chapter}": "Czytasz: {chapter}",
   "Reading…": "Odczytywanie…",
+  "Reads ahead": "Odczyt z wyprzedzeniem",
   Ready: "Gotowe",
   "Ready to play": "Gotowe do odtworzenia",
   "Ready to save": "Gotowe do zapisania",
@@ -379,6 +382,7 @@ const catalog10: Record<string, string> = {
   "Recording now": "Trwa nagrywanie",
   "Recording · {pct}% · {remaining} · click to manage":
     "Nagrywanie · {pct}% · {remaining} · kliknij, aby zarządzać",
+  Recovery: "Odzyskiwanie",
   "Recovery code": "Kod odzyskiwania",
   "Recovery key": "Klucz odzyskiwania",
   "Recovery key block {current} of {total}": "Blok klucza odzyskiwania {current} z {total}",
@@ -443,6 +447,8 @@ const catalog10: Record<string, string> = {
   Releases: "Premiery",
   "Reload list": "Wczytaj listę ponownie",
   "Reload original link": "Wczytaj ponownie oryginalny link",
+  "Reload source": "Wczytaj źródło ponownie",
+  "Reloading the stream…": "Ponowne wczytywanie strumienia…",
   "Remaining only": "Tylko czas do końca",
   Remap: "Zmień mapowanie",
   "Remap stream badges": "Zmień przypisanie oznaczeń strumieni",
@@ -655,9 +661,13 @@ const catalog10: Record<string, string> = {
   Restart: "Uruchom ponownie",
   "Restart Harbor after the install completes.":
     "Po zakończeniu instalacji uruchom ponownie Harbor.",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "Uruchom ponownie własny serwer strumieniowania Harbor, a następnie wczytaj strumień ponownie, gdy serwer wróci do działania. Tylko na komputerze.",
   "Restart engine": "Uruchom silnik ponownie",
   "Restart game": "Uruchom grę ponownie",
+  "Restart streaming server": "Uruchom ponownie serwer strumieniowania",
   Restarting: "Ponowne uruchamianie",
+  "Restarting the streaming server…": "Ponowne uruchamianie serwera strumieniowania…",
   Restore: "Przywróć",
   "Restore + upscale. The best all-rounder for most anime.":
     "Przywracanie + skalowanie w górę. Najlepszy wszechstronny wybór do większości anime.",

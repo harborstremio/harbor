@@ -96,3 +96,10 @@ docs/tv-perf/
 # tauri-generated scaffolding, recreate with: pnpm android:init
 src-tauri/gen/
 installer/src-tauri/gen/
+
+# Localization / Crowdin credentials (token lives outside the repo, env-var only)
+crowdin.credentials
+.crowdin.env
+crowdin_credentials.*
+*.token
+gemini.key

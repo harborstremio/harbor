@@ -883,6 +883,16 @@ const library: Record<string, string> = {
     "暂无旧版本。下次更新后将开始记录版本历史。",
   "Open the library, hit Share a theme, and your first publication shows up here with its review status, downloads, and version history.":
     "打开媒体库，点击“分享主题”。首次发布后，这里将显示审核状态、下载量和版本历史。",
+  "Paused on Trakt": "已在 Trakt 上暂停观看",
+  "On Letterboxd": "在 Letterboxd 上查看",
+  "Open Letterboxd profile": "打开 Letterboxd 个人资料",
+  "Connect Letterboxd": "连接 Letterboxd",
+  "No Letterboxd lists shared yet": "尚未分享任何 Letterboxd 列表",
+  "Link Letterboxd and the films and lists you keep there show up right here.":
+    "关联 Letterboxd，你在那里收藏的电影和列表就会显示在这里。",
+  "Show your Letterboxd card": "显示你的 Letterboxd 卡片",
+  "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
+    "默认关闭。启用后，任何访问者都能在你的个人资料中看到 Letterboxd 名称、列表和电影数量。连接本身可在“设置”的“Letterboxd”中管理。",
 };
 
 export default library;

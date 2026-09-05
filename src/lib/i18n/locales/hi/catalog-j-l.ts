@@ -284,6 +284,8 @@ const catalogJL: Record<string, string> = {
   "Lineups not available yet.": "लाइनअप अभी उपलब्ध नहीं हैं।",
   Link: "लिंक",
   "Link Discord": "Discord लिंक करें",
+  "Link Letterboxd and the films and lists you keep there show up right here.":
+    "Letterboxd कनेक्ट करें और वहाँ रखी आपकी फ़िल्में व सूचियाँ यहीं दिखने लगेंगी।",
   "Link Simkl and everything you watch shows up right here.":
     "Simkl लिंक करें और आप जो कुछ भी देखते हैं, वह यहीं दिखाई देगा।",
   "Link a title": "कोई शीर्षक लिंक करें",

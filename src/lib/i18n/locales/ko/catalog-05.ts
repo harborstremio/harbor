@@ -15,6 +15,8 @@ const catalog05: Record<string, string> = {
   "Hold to continue": "길게 눌러 계속하기",
   "Hold to skip or continue": "길게 눌러 건너뛰거나 계속하기",
   "Holdover Picks": "이어 보기 좋은 추천작",
+  "Holds up to {size} in memory while a video plays.":
+    "영상을 재생하는 동안 최대 {size}까지 메모리에 유지합니다.",
   "Holdup Matey!": "잠깐만요, 선장님!",
   "Holiday Classics": "연말연시 고전",
   "Holiday Warmth": "연말연시의 온기",
@@ -217,6 +219,8 @@ const catalog05: Record<string, string> = {
   "If you would rather give it away": "다른 곳에 기부하고 싶다면",
   "Ignore the paid tiers. Personal use is free, you are not a company. Just pick the first option and keep going.":
     "유료 요금제는 무시하세요. 개인 용도는 무료이며, 회사가 아닙니다. 첫 번째 옵션을 선택하고 계속 진행하세요.",
+  "Ignore this title": "이 작품 무시",
+  "Ignored titles": "무시한 작품",
   Image: "이미지",
   "Image URL (optional)": "이미지 URL(선택 사항)",
   "Image bar active. Pick a style above to switch back, or clear the image below.":
@@ -710,6 +714,8 @@ const catalog05: Record<string, string> = {
   "Lineups not available yet.": "아직 라인업 정보가 없습니다.",
   Link: "링크",
   "Link Discord": "Discord 연결",
+  "Link Letterboxd and the films and lists you keep there show up right here.":
+    "Letterboxd를 연결하면 그곳에 모아 둔 영화와 목록이 바로 여기에 표시됩니다.",
   "Link Simkl and everything you watch shows up right here.":
     "Simkl을 연결하면 시청한 모든 항목이 여기에 표시됩니다.",
   "Link a title": "제목 연결",

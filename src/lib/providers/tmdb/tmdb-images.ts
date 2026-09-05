@@ -1,7 +1,8 @@
 import { lruSet } from "@/lib/cache";
 import { registerCache } from "@/lib/memory-profiler";
 import { loadStoredSettings } from "@/lib/settings/load";
-import { get, IMG } from "./tmdb-client";
+import { get } from "./tmdb-client";
+import { tmdbBackdropUrl, tmdbLogoUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
 import { imageLangParam, imageLangPriority, imageLangRank } from "./tmdb-image-lang";
 
 export type LogoEntry = { file_path: string; iso_639_1: string | null; vote_average?: number };
@@ -52,7 +53,7 @@ export const pickLogo = (logos: LogoEntry[], originalLang?: string | null): stri
     return base + isPng + (l.vote_average ?? 0);
   };
   const best = [...logos].sort((a, b) => score(b) - score(a))[0];
-  return best?.file_path ? `${IMG}/w342${best.file_path}` : undefined;
+  return tmdbLogoUrl(best?.file_path);
 };
 
 export async function tmdbLocalizedPoster(
@@ -91,7 +92,7 @@ export async function tmdbLocalizedPoster(
     (a, b) =>
       rank(b.iso_639_1) - rank(a.iso_639_1) || (b.vote_average ?? 0) - (a.vote_average ?? 0),
   )[0];
-  return best?.file_path ? `${IMG}/w342${best.file_path}` : undefined;
+  return tmdbPosterUrl(best?.file_path);
 }
 
 const defaultPosterCache = new Map<string, string | null>();
@@ -113,7 +114,7 @@ export async function tmdbDefaultPoster(key: string, metaId: string): Promise<st
     (a, b) =>
       rank(b.iso_639_1) - rank(a.iso_639_1) || (b.vote_average ?? 0) - (a.vote_average ?? 0),
   )[0];
-  const url = best?.file_path ? `${IMG}/w342${best.file_path}` : undefined;
+  const url = tmdbPosterUrl(best?.file_path);
   lruSet(defaultPosterCache, metaId, url ?? null, MOVIE_ASSETS_MAX);
   return url;
 }
@@ -125,9 +126,10 @@ export async function tmdbMovieImages(key: string, metaId: string): Promise<stri
   for (const b of (data?.backdrops ?? []).sort(
     (a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0),
   )) {
-    if (!b.file_path || seen.has(b.file_path)) continue;
+    const url = tmdbBackdropUrl(b.file_path);
+    if (!url || seen.has(b.file_path)) continue;
     seen.add(b.file_path);
-    out.push(`${IMG}/w780${b.file_path}`);
+    out.push(url);
     if (out.length >= 12) break;
   }
   return out;

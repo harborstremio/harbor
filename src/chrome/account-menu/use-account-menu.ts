@@ -1,15 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { useView } from "@/lib/view";
 import { useProfiles, type Profile } from "@/lib/profiles";
 import { currentAuthor, subscribeAuthor, type Author } from "@/lib/theme-auth";
 import { currentStatus, setStatus, subscribeStatus, type PresenceStatus } from "@/lib/social/presence";
-import { fetchMe } from "@/lib/account/identity";
+import { openMyProfile } from "@/lib/social/open-my-profile";
 import { openNotificationCenter } from "@/lib/social/notification-open";
 
 export function useAccountMenu() {
   const { user, signOut } = useAuth();
-  const { openProfile } = useView();
   const { profiles, activeProfile, openPicker, selectProfile } = useProfiles();
   const [author, setAuthor] = useState<Author | null>(currentAuthor);
   useEffect(() => subscribeAuthor(() => setAuthor(currentAuthor())), []);
@@ -54,13 +52,7 @@ export function useAccountMenu() {
 
   const viewMyProfile = async () => {
     setMenuOpen(false);
-    let handle = currentAuthor()?.handle || author?.handle;
-    if (!handle) {
-      await fetchMe().catch(() => {});
-      handle = currentAuthor()?.handle;
-    }
-    if (handle) openProfile(handle);
-    else setAuthOpen(true);
+    if (!(await openMyProfile(author?.handle))) setAuthOpen(true);
   };
 
   const toggleStatus = () => {

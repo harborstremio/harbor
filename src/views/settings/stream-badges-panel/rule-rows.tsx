@@ -1,4 +1,4 @@
-import { Check, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import {
   badgeLabel,
   FormatBadge,
@@ -7,6 +7,20 @@ import {
 } from "@/components/format-badge";
 import { setBadgeRules, type CustomBadgeRule } from "@/lib/stream-badges";
 import { useT } from "@/lib/i18n";
+import { ROW_ACTION_DANGER, SettingRow } from "../kit";
+import { Segmented } from "../shared";
+import { SButton } from "../ui";
+import { handoffFocus } from "./focus-handoff";
+
+const QUAL =
+  "inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
+
+const TITLE_LINE = "inline-flex min-w-0 flex-wrap items-center gap-2";
+
+const ON_OFF = [
+  { value: "on", label: "On" },
+  { value: "off", label: "Off" },
+] as const;
 
 function ruleSource(r: CustomBadgeRule): string | null {
   const id = r.id.startsWith("nuvio-") ? r.id.slice(6) : r.id;
@@ -21,41 +35,35 @@ export function RuleRow({ rule, all }: { rule: CustomBadgeRule; all: CustomBadge
   const t = useT();
   const source = ruleSource(rule);
   return (
-    <div className="flex items-center gap-3 rounded-md bg-elevated px-4 py-3">
-      <span className="w-28 shrink-0 overflow-hidden">
-        <RuleBadgeChip rule={rule} size="md" />
-      </span>
-      <span className="w-32 shrink-0 truncate text-[13px] font-medium text-ink" title={rule.name}>
-        {rule.name}
-      </span>
-      <span className="min-w-0 flex-1 truncate font-mono text-[11.5px] text-ink-subtle" title={rule.pattern}>
-        {rule.pattern}
-      </span>
-      {source && (
-        <span className="shrink-0 rounded-md bg-raised px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-ink-subtle">
-          {source}
+    <SettingRow
+      label={
+        <span className={TITLE_LINE}>
+          <span data-tv-skip className="contents">
+            <RuleBadgeChip rule={rule} size="lg" />
+          </span>
+          <span className="min-w-0">{rule.name}</span>
+          {source && <span className={`${QUAL} bg-elevated text-ink-subtle`}>{source}</span>}
         </span>
-      )}
-      <button
-        onClick={() =>
-          setBadgeRules(all.map((r) => (r.id === rule.id ? { ...r, enabled: !r.enabled } : r)))
+      }
+      desc={<span className="break-words font-mono">{rule.pattern}</span>}
+    >
+      <Segmented
+        value={rule.enabled ? "on" : "off"}
+        options={ON_OFF}
+        onChange={(v) =>
+          setBadgeRules(
+            all.map((r) => (r.id === rule.id ? { ...r, enabled: v === "on" } : r)),
+          )
         }
-        aria-label={rule.enabled ? t("Disable rule") : t("Enable rule")}
-        title={rule.enabled ? t("On") : t("Off")}
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors ${
-          rule.enabled ? "bg-accent-soft text-accent" : "text-ink-subtle hover:bg-raised hover:text-ink"
-        }`}
+      />
+      <SButton
+        variant="danger"
+        onClick={() => handoffFocus(() => setBadgeRules(all.filter((r) => r.id !== rule.id)))}
       >
-        <Check size={14} strokeWidth={2.6} />
-      </button>
-      <button
-        onClick={() => setBadgeRules(all.filter((r) => r.id !== rule.id))}
-        aria-label={t("Delete rule")}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-danger/25 hover:text-danger"
-      >
-        <Trash2 size={14} />
-      </button>
-    </div>
+        <Trash2 size={18} />
+        {t("Delete")}
+      </SButton>
+    </SettingRow>
   );
 }
 
@@ -64,45 +72,40 @@ export function RemapRow({
   hidden,
   onEdit,
   onRemove,
+  resetRef,
 }: {
   kind: BadgeKind;
   hidden: boolean;
   onEdit: () => void;
   onRemove: () => void;
+  resetRef?: React.Ref<HTMLButtonElement>;
 }) {
   const t = useT();
   return (
-    <div className="flex items-center gap-3 rounded-md bg-elevated pe-4">
-      <button
-        onClick={onEdit}
-        className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-4 py-3 text-start transition-colors hover:bg-raised"
-      >
-        <span className="flex w-24 shrink-0 items-center overflow-hidden">
-          {hidden ? (
-            <span className="text-[11.5px] font-semibold uppercase tracking-wide text-ink-subtle">
-              {t("Hidden")}
+    <SettingRow
+      label={
+        <span className={TITLE_LINE}>
+          {!hidden && (
+            <span data-tv-skip className="contents">
+              <FormatBadge kind={kind} size="md" />
             </span>
-          ) : (
-            <FormatBadge kind={kind} size="md" />
           )}
+          <span className="min-w-0">{badgeLabel(kind)}</span>
+          <span className={`${QUAL} bg-elevated text-ink-subtle`}>
+            {hidden ? t("Hidden") : t("Custom art")}
+          </span>
         </span>
-        <span className="w-32 shrink-0 truncate text-[13px] font-medium text-ink" title={badgeLabel(kind)}>
-          {badgeLabel(kind)}
-        </span>
-        <span className="min-w-0 flex-1 truncate text-[11.5px] text-ink-subtle">
-          {hidden ? t("Hidden") : t("Custom art")}
-        </span>
-        <span className="shrink-0 rounded-md bg-canvas px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-ink-subtle">
-          {t("Remap")}
-        </span>
+      }
+      desc={
+        hidden
+          ? t("This badge is hidden everywhere streams show format chips.")
+          : t("This badge uses art you picked instead of Harbor's default.")
+      }
+    >
+      <SButton onClick={onEdit}>{t("Edit")}</SButton>
+      <button ref={resetRef} type="button" onClick={onRemove} className={ROW_ACTION_DANGER}>
+        {t("Reset")}
       </button>
-      <button
-        onClick={onRemove}
-        aria-label={t("Remove remap")}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-danger/25 hover:text-danger"
-      >
-        <Trash2 size={14} />
-      </button>
-    </div>
+    </SettingRow>
   );
 }

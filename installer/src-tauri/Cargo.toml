@@ -1,6 +1,6 @@
 [package]
 name = "harbor-setup"
-version = "0.9.121"
+version = "0.9.124"
 edition = "2021"
 rust-version = "1.77"
 default-run = "harbor-setup"
@@ -25,6 +25,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+harbor-install-recovery = { path = "../../harbor-install-recovery" }
 zip = { version = "2", default-features = false, features = ["deflate"], optional = true }
 crc32fast = { version = "1", optional = true }
 ureq = { version = "2", optional = true }

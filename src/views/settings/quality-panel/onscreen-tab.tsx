@@ -2,6 +2,7 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { SettingRow } from "../kit";
 import { Section, Segmented, ToggleRow } from "../shared";
+import { QualityBadgePreview } from "./quality-badge-preview";
 
 export function OnScreenTab() {
   const t = useT();
@@ -22,14 +23,17 @@ export function OnScreenTab() {
           label={t("Quality badge style")}
           desc={t("How the 4K and HDR tags beside the title look. Bar draws a vertical accent line and reveals each line as it appears; Chips shows small outlined pills that slide in.")}
         >
-          <Segmented
-            value={settings.qualityBadgeStyle}
-            options={[
-              { value: "bar", label: t("Bar") },
-              { value: "chips", label: t("Chips") },
-            ]}
-            onChange={(v) => update({ qualityBadgeStyle: v as "bar" | "chips" })}
-          />
+          <div className="flex w-full flex-col gap-3">
+            <Segmented
+              value={settings.qualityBadgeStyle}
+              options={[
+                { value: "bar", label: t("Bar") },
+                { value: "chips", label: t("Chips") },
+              ]}
+              onChange={(v) => update({ qualityBadgeStyle: v as "bar" | "chips" })}
+            />
+            <QualityBadgePreview style={settings.qualityBadgeStyle} />
+          </div>
         </SettingRow>
       </Section>
 

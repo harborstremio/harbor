@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, BookOpen, Loader2, UploadCloud, X } from "lucide-react";
+import { getActiveModal, isBackKey, isEditable } from "@/lib/keyboard-navigation/geometry";
 import { exportThemeJson, getCustomThemes, type CustomTheme } from "@/lib/custom-themes";
 import { optimizeBackgroundForShare } from "../image-utils";
 import { updateTheme, type StoreTheme } from "@/lib/theme-store";
@@ -42,6 +43,28 @@ export function ThemeUpdateFlow({
   const [result, setResult] = useState<{ share: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  const stepBack = () => {
+    if (!result && step > 0) setStep((s) => s - 1);
+    else onClose();
+  };
+  const stepBackRef = useRef(stepBack);
+  stepBackRef.current = stepBack;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const root = rootRef.current;
+      const from = e.target instanceof HTMLElement ? e.target : null;
+      if (!isBackKey(e) || !root || isEditable(from)) return;
+      if (getActiveModal(from) !== root) return;
+      e.preventDefault();
+      e.stopPropagation();
+      stepBackRef.current();
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, []);
 
   useEffect(() => {
     if (!coverBlob) return setCoverUrl(null);
@@ -109,8 +132,10 @@ export function ThemeUpdateFlow({
 
   return createPortal(
     <div
+      ref={rootRef}
       className="fixed inset-0 z-[300] flex flex-col bg-canvas"
       role="dialog"
+      aria-modal="true"
       aria-label={t("Update a theme")}
     >
       <header
@@ -121,7 +146,7 @@ export function ThemeUpdateFlow({
           <h1 className="pointer-events-none text-[17px] font-semibold tracking-tight text-ink">
             {t("Update {name}", { name: target.name })}
           </h1>
-          <p className="pointer-events-none text-[12.5px] text-ink-subtle">
+          <p className="pointer-events-none max-w-[70ch] text-[15.5px] leading-[22px] text-ink-subtle">
             {t(
               "Push a new version. Your published version stays live while the update is reviewed.",
             )}
@@ -130,9 +155,9 @@ export function ThemeUpdateFlow({
         <button
           onClick={onClose}
           aria-label={t("Close")}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
         >
-          <X size={16} strokeWidth={2.2} />
+          <X size={18} strokeWidth={2.2} />
         </button>
       </header>
 
@@ -165,7 +190,7 @@ export function ThemeUpdateFlow({
                 )}
                 {step === 1 && (
                   <div className="flex flex-col gap-3">
-                    <p className="text-[13.5px] text-ink-muted">
+                    <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
                       {t("Optional. Skip this step to keep your current cover.")}
                     </p>
                     <CoverCropper onChange={setCoverBlob} />
@@ -184,7 +209,7 @@ export function ThemeUpdateFlow({
                 />
               </div>
             </div>
-            {error && <p className="text-[13px] text-danger">{error}</p>}
+            {error && <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-danger">{error}</p>}
           </div>
         </div>
       )}
@@ -193,36 +218,36 @@ export function ThemeUpdateFlow({
         <footer className="flex shrink-0 items-center justify-between gap-4 px-10 pb-6 pt-4">
           <button
             onClick={() => setSheetOpen(true)}
-            className="flex h-9 items-center gap-2 rounded-md bg-elevated px-4 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
+            className="flex h-11 items-center gap-2 rounded-md bg-elevated px-4 text-[15.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
           >
-            <BookOpen size={14} strokeWidth={2.1} />
+            <BookOpen size={18} strokeWidth={2.1} />
             {t("API cheat sheet")}
           </button>
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => (step === 0 ? onClose() : setStep((s) => s - 1))}
-              className="flex h-9 items-center gap-2 rounded-md bg-elevated px-4 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
+              className="flex h-11 items-center gap-2 rounded-md bg-elevated px-4 text-[15.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
             >
-              <ArrowLeft size={16} className="dir-icon" /> {step === 0 ? t("Cancel") : t("Back")}
+              <ArrowLeft size={18} className="dir-icon" /> {step === 0 ? t("Cancel") : t("Back")}
             </button>
             {step < STEPS.length - 1 ? (
               <button
                 onClick={() => canAdvance && setStep((s) => s + 1)}
                 disabled={!canAdvance}
-                className="flex h-9 items-center gap-2 rounded-md bg-ink px-5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+                className="flex h-11 items-center gap-2 rounded-md bg-ink px-5 text-[15.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
               >
-                {t("Continue")} <ArrowRight size={16} className="dir-icon" />
+                {t("Continue")} <ArrowRight size={18} className="dir-icon" />
               </button>
             ) : (
               <button
                 onClick={submit}
                 disabled={submitting || !theme || !changelog.trim()}
-                className="flex h-9 items-center gap-2 rounded-md bg-ink px-5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+                className="flex h-11 items-center gap-2 rounded-md bg-ink px-5 text-[15.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
               >
                 {submitting ? (
-                  <Loader2 size={16} className="animate-spin" />
+                  <Loader2 size={18} className="animate-spin" />
                 ) : (
-                  <UploadCloud size={16} />
+                  <UploadCloud size={18} />
                 )}
                 {submitting ? t("Submitting…") : t("Submit update")}
               </button>

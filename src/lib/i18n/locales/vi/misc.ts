@@ -56,6 +56,7 @@ const misc: Record<string, string> = {
   "Watched on Trakt": "Đã xem trên Trakt",
   "New episode released since you last watched": "Có tập mới phát hành kể từ lần xem gần nhất",
   "Paused on Simkl": "Đã tạm dừng trên Simkl",
+  "Paused on Trakt": "Đã tạm dừng trên Trakt",
   "Remove from Continue Watching": "Xóa khỏi Xem tiếp",
   "Rotten Tomatoes audience score": "Điểm khán giả Rotten Tomatoes",
   "Next:": "Tiếp theo:",

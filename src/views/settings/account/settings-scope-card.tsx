@@ -5,10 +5,10 @@ import { useT } from "@/lib/i18n";
 import { Segmented } from "../shared";
 import { SettingRow } from "../kit";
 
-const OPTIONS = [
-  ["shared", "Share settings with all profiles", "One set of preferences everyone on this Harbor uses."],
-  ["independent", "Use independent settings for this profile", "This profile keeps its own preferences, separate from everyone else."],
-] as const;
+const SCOPE_DESC = {
+  shared: "One set of preferences everyone on this Harbor uses.",
+  independent: "This profile keeps its own preferences, separate from everyone else.",
+} as const;
 
 const SCOPES = [
   { value: "shared", label: "Shared" },
@@ -28,14 +28,12 @@ export function SettingsScopeCard() {
     setSettingsLinked(next);
     updateProfile(activeProfile.id, { settingsLinked: next });
   };
-  const active = linked ? OPTIONS[0] : OPTIONS[1];
 
   return (
     <SettingRow
-      icon={<SlidersHorizontal size={16} strokeWidth={2} />}
+      icon={<SlidersHorizontal size={18} strokeWidth={2} />}
       label={t("Settings for this profile")}
-      desc={t(active[1])}
-      tip={t(active[2])}
+      desc={t(linked ? SCOPE_DESC.shared : SCOPE_DESC.independent)}
     >
       <Segmented<Scope>
         value={linked ? "shared" : "independent"}

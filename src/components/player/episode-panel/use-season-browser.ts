@@ -8,6 +8,11 @@ import {
 } from "@/lib/series-episodes";
 import { useSettings } from "@/lib/settings";
 import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
+import {
+  applyTmdbEpisodeNames,
+  needsTmdbEpisodeNames,
+  tmdbEpisodeNames,
+} from "@/lib/providers/tmdb";
 import type { PlayEpisode } from "@/lib/view";
 
 export function useSeasonBrowser(
@@ -72,9 +77,21 @@ export function useSeasonBrowser(
     }
     let cancelled = false;
     setLoading(true);
+    const overlayTmdbNames = (eps: PlayEpisode[]) => {
+      if (!settings.tmdbKey || effMeta.id.startsWith("tmdb:tv:")) return;
+      if (!needsTmdbEpisodeNames(eps)) return;
+      void tmdbEpisodeNames(settings.tmdbKey, effMeta.id, season)
+        .then((names) => {
+          if (cancelled || names.size === 0) return;
+          setEpisodes((prev) => (prev === eps ? applyTmdbEpisodeNames(eps, names) : prev));
+        })
+        .catch(() => {});
+    };
     fetchSeasonEpisodes(effMeta, season, { tmdbKey: settings.tmdbKey })
       .then((eps) => {
-        if (!cancelled) setEpisodes(eps);
+        if (cancelled) return;
+        setEpisodes(eps);
+        overlayTmdbNames(eps);
       })
       .catch(() => {
         if (!cancelled) setEpisodes([]);

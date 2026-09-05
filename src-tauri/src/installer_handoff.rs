@@ -20,6 +20,8 @@ const PROGRESS_BYTES: u64 = 2 * 1024 * 1024;
 struct Staged {
     path: PathBuf,
     version: String,
+    signature: String,
+    recoverable: bool,
 }
 
 static STAGED: Mutex<Option<Staged>> = Mutex::new(None);
@@ -118,19 +120,14 @@ fn safe_version(version: &str) -> String {
 
 fn stage_dir(version: &str) -> Result<PathBuf, String> {
     let root = std::env::temp_dir();
-    if let Ok(entries) = std::fs::read_dir(&root) {
-        for entry in entries.flatten() {
-            if entry
-                .file_name()
-                .to_string_lossy()
-                .starts_with(STAGE_PREFIX)
-            {
-                let _ = std::fs::remove_dir_all(entry.path());
-            }
-        }
-    }
-    let dir = root.join(format!("{}{}", STAGE_PREFIX, safe_version(version)));
-    std::fs::create_dir_all(&dir).map_err(|e| format!("staging folder: {}", e))?;
+    // Do not erase a previous handoff or its recovery installer when retrying.
+    let dir = root.join(format!(
+        "{}{}-{}",
+        STAGE_PREFIX,
+        safe_version(version),
+        uuid::Uuid::new_v4()
+    ));
+    std::fs::create_dir(&dir).map_err(|e| format!("staging folder: {}", e))?;
     Ok(dir)
 }
 
@@ -232,6 +229,7 @@ pub async fn handoff_stage(
     url: String,
     signature: String,
     version: String,
+    recoverable: Option<bool>,
     on_event: Channel<StageEvent>,
 ) -> Result<(), String> {
     if !cfg!(target_os = "windows") {
@@ -249,9 +247,11 @@ pub async fn handoff_stage(
     }
     let _ = on_event.send(StageEvent::Verifying);
     let checked = dest.clone();
-    let outcome = tokio::task::spawn_blocking(move || verify_setup(&checked, &signature, &pubkey))
-        .await
-        .map_err(|e| format!("verify: {}", e))?;
+    let verify_signature = signature.clone();
+    let outcome =
+        tokio::task::spawn_blocking(move || verify_setup(&checked, &verify_signature, &pubkey))
+            .await
+            .map_err(|e| format!("verify: {}", e))?;
     if let Err(e) = outcome {
         let _ = std::fs::remove_dir_all(&dir);
         return Err(e);
@@ -260,6 +260,8 @@ pub async fn handoff_stage(
         *slot = Some(Staged {
             path: dest,
             version,
+            signature,
+            recoverable: recoverable.unwrap_or(false),
         });
     }
     let _ = on_event.send(StageEvent::Ready);
@@ -274,11 +276,16 @@ fn spawn_setup(
     pid: u32,
     from: &str,
     to: &str,
+    recoverable: bool,
 ) -> Result<(), String> {
     use std::os::windows::process::CommandExt;
     const DETACHED_PROCESS: u32 = 0x0000_0008;
     const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
-    let mut child = std::process::Command::new(setup)
+    let mut command = std::process::Command::new(setup);
+    if recoverable {
+        command.arg("--recoverable");
+    }
+    let mut child = command
         .arg("--update")
         .arg("--passive")
         .arg("--target-dir")
@@ -323,6 +330,7 @@ fn spawn_setup(
     _pid: u32,
     _from: &str,
     _to: &str,
+    _recoverable: bool,
 ) -> Result<(), String> {
     Err("the installer handoff only exists on Windows".to_string())
 }
@@ -347,11 +355,18 @@ fn quit_for_handoff(app: tauri::AppHandle) {
 
 #[tauri::command]
 pub async fn handoff_launch(app: tauri::AppHandle) -> Result<(), String> {
-    let staged = STAGED
-        .lock()
-        .ok()
-        .and_then(|slot| slot.as_ref().map(|s| (s.path.clone(), s.version.clone())));
-    let (setup, version) = staged.ok_or_else(|| "no verified installer is staged".to_string())?;
+    let staged = STAGED.lock().ok().and_then(|slot| {
+        slot.as_ref().map(|s| {
+            (
+                s.path.clone(),
+                s.version.clone(),
+                s.signature.clone(),
+                s.recoverable,
+            )
+        })
+    });
+    let (setup, version, signature, recoverable) =
+        staged.ok_or_else(|| "no verified installer is staged".to_string())?;
     if !setup.is_file() {
         return Err("the staged installer is no longer on disk".to_string());
     }
@@ -360,9 +375,61 @@ pub async fn handoff_launch(app: tauri::AppHandle) -> Result<(), String> {
     let log = setup.with_file_name(LOG_NAME);
     let from = app.package_info().version.to_string();
     let pid = std::process::id();
-    tokio::task::spawn_blocking(move || spawn_setup(&setup, &target, &log, pid, &from, &version))
-        .await
-        .map_err(|e| format!("launch: {}", e))??;
+    let pubkey = updater_pubkey(&app)?;
+    tokio::task::spawn_blocking(move || {
+        verify_setup(&setup, &signature, &pubkey)?;
+        spawn_setup(&setup, &target, &log, pid, &from, &version, recoverable)
+    })
+    .await
+    .map_err(|e| format!("launch: {}", e))??;
     quit_for_handoff(app);
     Ok(())
+}
+
+#[tauri::command]
+pub fn handoff_confirm(app: tauri::AppHandle, window: tauri::WebviewWindow) -> Result<(), String> {
+    if window.label() != "main" || !cfg!(target_os = "windows") {
+        return Ok(());
+    }
+    let dest = install_dir().ok_or("cannot resolve the install directory")?;
+    harbor_install_recovery::acknowledge(&dest, &app.package_info().version.to_string())
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn handoff_save_backup(app: tauri::AppHandle, content: String) -> Result<(), String> {
+    use tauri::Manager;
+    if content.len() > 100 * 1024 * 1024 {
+        return Err("recovery backup is too large".into());
+    }
+    let backup: serde_json::Value =
+        serde_json::from_str(&content).map_err(|_| "invalid recovery backup")?;
+    if backup.get("format").and_then(|v| v.as_str()) != Some("harbor-backup") {
+        return Err("invalid recovery backup format".into());
+    }
+    let dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| e.to_string())?
+        .join("update-recovery")
+        .join(uuid::Uuid::new_v4().to_string());
+    tokio::task::spawn_blocking(move || {
+        use std::io::Write;
+        std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+        let mut options = std::fs::OpenOptions::new();
+        options.create_new(true).write(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.mode(0o600);
+        }
+        let mut file = options
+            .open(dir.join("profile.harbx"))
+            .map_err(|e| e.to_string())?;
+        file.write_all(content.as_bytes())
+            .map_err(|e| e.to_string())?;
+        file.sync_all().map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }

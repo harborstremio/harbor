@@ -2,12 +2,12 @@ import { useT } from "@/lib/i18n";
 
 function Frame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex w-[210px] flex-col gap-2.5 rounded-md bg-canvas p-3.5">{children}</div>
+    <div className="flex w-[252px] flex-col gap-2.5 rounded-[10px] bg-canvas p-4">{children}</div>
   );
 }
 
 function Caption({ text }: { text: string }) {
-  return <span className="text-[11px] leading-snug text-ink-subtle">{text}</span>;
+  return <span className="text-[15.5px] leading-[22px] text-ink-subtle">{text}</span>;
 }
 
 export function ResumeArt() {
@@ -63,7 +63,7 @@ export function SeasonLockArt() {
   return (
     <Frame>
       <div className="flex h-[74px] flex-col justify-center gap-2 rounded-[4px] bg-elevated px-3">
-        <span className="mx-auto flex h-6 items-center rounded-[3px] bg-ink px-2.5 text-[9.5px] font-bold text-canvas">
+        <span className="mx-auto flex h-6 items-center rounded-[6px] bg-ink px-2.5 text-[13px] font-bold uppercase tracking-[0.72px] text-canvas">
           {t("One release")}
         </span>
         <div className="flex justify-center gap-1.5">

@@ -2,6 +2,11 @@ import { useState } from "react";
 import { Check, Download, Link2 } from "lucide-react";
 import { type CommunityPack } from "@/lib/stream-badges";
 import { useT } from "@/lib/i18n";
+import { ROW_ACTION, ROW_ACTION_PRIMARY } from "../kit";
+import { ROW_DESC } from "../shared";
+
+const QUAL =
+  "inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
 
 export function PackCard({
   pack,
@@ -17,42 +22,43 @@ export function PackCard({
   const t = useT();
   const [copied, setCopied] = useState(false);
   return (
-    <div className="flex flex-col gap-3 rounded-md bg-elevated p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-col">
-          <span className="text-[14.5px] font-semibold text-ink">{pack.name}</span>
-          <span className="text-[12.5px] text-ink-subtle">
-            {t("by {name}", { name: pack.author })} · {pack.count}
+    <div className="flex flex-col gap-3 rounded-[10px] border border-edge-soft bg-elevated p-4">
+      <div className="flex min-w-0 flex-col gap-1">
+        <span className="flex min-w-0 flex-wrap items-center gap-2 text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">
+          <span className="min-w-0">{pack.name}</span>
+          <span className={`${QUAL} bg-raised text-ink-subtle`}>
+            {pack.kind === "art" ? t("Art remap") : t("Ruleset")}
           </span>
-        </div>
-        <span className="shrink-0 rounded-md bg-raised px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-ink-subtle">
-          {pack.kind === "art" ? t("Art remap") : t("Ruleset")}
+        </span>
+        <span className="text-[15.5px] leading-[22px] text-ink-muted">
+          {t("by {name}", { name: pack.author })} · {pack.count}
         </span>
       </div>
       {pack.previews.length > 0 && (
-        <div className="flex h-9 items-center gap-3 overflow-hidden rounded-md bg-canvas px-3">
+        <div className="flex h-11 items-center gap-3 overflow-hidden rounded-[10px] bg-canvas px-3">
           {pack.previews.map((src) => (
             <img
               key={src}
               src={src}
               alt=""
               loading="lazy"
-              className="h-6 w-auto max-w-[72px] shrink-0 object-contain"
+              className="h-7 w-auto max-w-[80px] shrink-0 object-contain"
               draggable={false}
             />
           ))}
         </div>
       )}
-      <p className="min-h-[34px] text-[12.5px] leading-snug text-ink-muted">{pack.description}</p>
-      <div className="flex items-center gap-2">
+      <p className={`min-h-[44px] ${ROW_DESC}`}>{pack.description}</p>
+      <div className="flex flex-wrap items-center gap-2.5">
         <button
-          onClick={onInstall}
-          disabled={busy}
-          className={`harbor-press-pop inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-md px-4 text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-50 ${
-            installed ? "bg-raised text-ink-muted" : "bg-ink text-canvas"
-          }`}
+          type="button"
+          onClick={() => {
+            if (!busy) onInstall();
+          }}
+          aria-busy={busy}
+          className={`${installed ? ROW_ACTION : ROW_ACTION_PRIMARY} flex-1 justify-center`}
         >
-          {installed ? <Check size={14} strokeWidth={2.6} /> : <Download size={14} />}
+          {installed ? <Check size={18} strokeWidth={2.6} /> : <Download size={18} />}
           {busy ? t("Installing…") : installed ? t("Reinstall") : t("Install")}
         </button>
         {pack.kind === "nuvio" && pack.author === "Harbor" && (
@@ -64,11 +70,9 @@ export function PackCard({
               setCopied(true);
               window.setTimeout(() => setCopied(false), 1600);
             }}
-            className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md px-3 text-[12.5px] font-medium transition-colors ${
-              copied ? "bg-accent-soft text-accent" : "bg-raised text-ink-muted hover:text-ink"
-            }`}
+            className={`${ROW_ACTION} ${copied ? "border-accent/45 text-accent" : ""}`}
           >
-            {copied ? <Check size={14} strokeWidth={2.6} /> : <Link2 size={14} />}
+            {copied ? <Check size={18} strokeWidth={2.6} /> : <Link2 size={18} />}
             {copied ? t("Copied") : t("Use in Nuvio")}
           </button>
         )}

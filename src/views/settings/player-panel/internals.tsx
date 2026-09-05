@@ -8,9 +8,11 @@ export function DesktopOnlyBlock({ children }: { children: ReactNode }) {
   if (isTauri) return <>{children}</>;
   return (
     <div className="relative">
-      <div className="pointer-events-none select-none opacity-40">{children}</div>
+      <div inert data-tv-skip className="pointer-events-none select-none opacity-40">
+        {children}
+      </div>
       <div className="pointer-events-none absolute inset-0 flex items-start justify-center pt-3">
-        <span className="rounded-md bg-elevated px-3 py-1 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
+        <span className="inline-flex h-[22px] items-center rounded-[6px] bg-elevated px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink-subtle">
           {t("Desktop only")}
         </span>
       </div>
@@ -20,9 +22,7 @@ export function DesktopOnlyBlock({ children }: { children: ReactNode }) {
 
 export function Label({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-      {children}
-    </span>
+    <span className="harbor-settings-label">{children}</span>
   );
 }
 
@@ -40,7 +40,7 @@ export function SubField({
       <div className="flex items-center justify-between">
         <Label>{label}</Label>
         {value && (
-          <span className="font-mono text-[12.5px] tabular-nums text-ink-muted">{value}</span>
+          <span className="font-mono text-[15.5px] tabular-nums text-ink-muted">{value}</span>
         )}
       </div>
       {children}

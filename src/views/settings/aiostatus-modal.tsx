@@ -2,6 +2,8 @@ import { X } from "lucide-react";
 import { useModalExit } from "@/components/modal-shell";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { captureFocusReturn } from "@/lib/keyboard-navigation";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
 import type { AioService, AioStatusSnapshot } from "@/lib/streams/aiostatus";
 
@@ -21,9 +23,10 @@ export function AioStatusModal({
 }) {
   const { closing, close } = useModalExit(onClose);
   const t = useT();
+  useEffect(() => captureFocusReturn(), []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
+      if (isBackKey(e)) close();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -43,7 +46,7 @@ export function AioStatusModal({
         <header className="flex items-start justify-between gap-4 px-6 pb-5 pt-5">
           <div className="flex min-w-0 items-center gap-3">
             {snapshot.addonLogo && (
-              <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-canvas">
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-canvas">
                 <img
                   src={snapshot.addonLogo}
                   alt=""
@@ -54,10 +57,10 @@ export function AioStatusModal({
               </span>
             )}
             <div className="flex min-w-0 flex-col gap-1">
-              <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+              <span className="harbor-settings-label">
                 {t("Service status")}
               </span>
-              <span className="truncate text-[17px] font-semibold text-ink">
+              <span className="truncate text-[19px] font-semibold leading-[26px] tracking-tight text-ink">
                 {snapshot.addonName}
               </span>
             </div>
@@ -65,14 +68,14 @@ export function AioStatusModal({
           <button
             onClick={close}
             aria-label={t("Close")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
           >
-            <X size={16} strokeWidth={2.2} />
+            <X size={18} strokeWidth={2.2} />
           </button>
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
           {snapshot.services.length === 0 ? (
-            <p className="rounded-md bg-canvas px-3 py-10 text-center text-[13px] text-ink-muted">
+            <p className="rounded-md bg-canvas px-3 py-10 text-center text-[15.5px] text-ink-muted">
               {t("No services reported.")}
             </p>
           ) : (
@@ -105,11 +108,11 @@ function ServiceRow({ service }: { service: AioService }) {
   return (
     <li className="flex items-center gap-3 rounded-md bg-canvas px-3.5 py-3">
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="truncate text-[13.5px] font-semibold text-ink">{service.name}</span>
-        <span className="truncate text-[11.5px] text-ink-subtle">{service.rawLine}</span>
+        <span className="truncate text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">{service.name}</span>
+        <span className="truncate text-[15.5px] leading-[22px] text-ink-subtle">{service.rawLine}</span>
       </div>
-      <span className={`flex shrink-0 items-center gap-1.5 text-[11.5px] font-semibold ${pal.text}`}>
-        <span className={`h-1.5 w-1.5 rounded-full ${pal.dot}`} />
+      <span className={`flex shrink-0 items-center gap-2 text-[15px] font-semibold ${pal.text}`}>
+        <span className={`h-2 w-2 shrink-0 rounded-full ${pal.dot}`} />
         {label}
         {service.quotaUsedPercent != null && (
           <span className="text-ink-subtle">· {service.quotaUsedPercent}%</span>

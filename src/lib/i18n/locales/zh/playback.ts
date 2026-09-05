@@ -1044,6 +1044,59 @@ const playback: Record<string, string> = {
     "我们最初将它作为自用客户端。我们非常喜爱 {service}，希望用自己的方式诠释这个几乎每天都在使用的协议。它起初只是一个简洁易用的播放器，随着朋友们也开始使用，逐渐发展出更多功能：一起观看、即点即播等等。",
   "Same read-only usage as Real-Debrid. Also lets you queue uncached torrents from the play picker.":
     "与 Real-Debrid 相同，仅进行只读操作。还可让您从播放选择器中将未缓存的种子加入队列。",
+  Recovery: "故障恢复",
+  "Reload source": "重新加载片源",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "重新打开正在观看的视频流，并从中断处继续播放。",
+  "Restart streaming server": "重启流媒体服务器",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "重启 Harbor 自带的流媒体服务器，待其恢复后重新加载视频流。仅限桌面版。",
+  "Reloading the stream…": "正在重新加载视频流…",
+  "Couldn't reload the stream. Try picking another source.":
+    "无法重新加载视频流。请尝试选择其他片源。",
+  "Harbor's streaming server only runs in the desktop app.":
+    "Harbor 的流媒体服务器仅在桌面应用中运行。",
+  "Restarting the streaming server…": "正在重启流媒体服务器…",
+  "Couldn't restart the streaming server.": "无法重启流媒体服务器。",
+  "The streaming server didn't come back up.": "流媒体服务器未能恢复运行。",
+  "Streaming server restarted.": "流媒体服务器已重启。",
+  "Buffer size": "缓冲区大小",
+  Small: "小",
+  Medium: "中",
+  Adaptive: "自适应",
+  "Reads ahead": "预读时长",
+  "Memory cap": "内存上限",
+  "Wait before playing": "播放前等待",
+  "Holds up to {size} in memory while a video plays.": "播放视频时最多占用 {size} 内存。",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "Harbor 会为每部作品自动调整提前缓冲量，并在播放稳定后逐步增加。适合绝大多数人。",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "启动最快，占用内存最少。适合网络快速稳定，或内存吃紧的设备。",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "提前缓冲几分钟内容。既能扛过短暂的网络波动，又不会让播放等待太久。",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "提前缓冲十分钟内容。专为不稳定的 Wi-Fi 或距离较远的服务器设计，代价是播放前要等更久。",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "提前缓冲半小时内容。只有在网络极不稳定时才值得使用。",
+  "Ignore this title": "忽略这部作品",
+  "Never show the content advisory for this title again": "不再为这部作品显示内容警告",
+  "Ignored titles": "已忽略的作品",
+  "Titles you ignore on the advisory card never show it again.":
+    "在警告卡片上忽略的作品，将不再显示内容警告。",
+  "{count} titles will never show the content advisory again.":
+    "有 {count} 部作品将不再显示内容警告。",
+  "{count} titles will never show the content advisory again.#one":
+    "有 {count} 部作品将不再显示内容警告。",
+  "{count} titles will never show the content advisory again.#few":
+    "有 {count} 部作品将不再显示内容警告。",
+  "Borderless window": "无边框窗口",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "“真全屏”会占满整个屏幕并隐藏任务栏，但切换应用时可能出现闪烁。“无边框窗口”用无边框的窗口覆盖同样的区域，因此 Alt+Tab 和悬浮界面都能即时响应。“最大化”会填满屏幕，但保留任务栏和标题栏。",
+  "Timing sources": "时间点来源",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · 片头和片尾时间点",
+  "Paste your TheIntroDB API key": "粘贴你的 TheIntroDB API 密钥",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "可选。不填密钥 TheIntroDB 也能响应，但填入密钥可提高速率上限，连续追剧时也能持续获取时间点。可在此获取",
 };
 
 export default playback;

@@ -395,8 +395,16 @@ export function MangaDetail({
                 {pills.map((p) => (
                   <span
                     key={p}
-                    className="rounded-full bg-elevated/60 px-3 py-1 text-[13px] text-ink-muted ring-1 ring-edge-soft backdrop-blur-sm"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-elevated/60 px-3 py-1 text-[13px] text-ink-muted ring-1 ring-edge-soft backdrop-blur-sm"
                   >
+                    {p === enriched.statusLabel && (
+                      <span
+                        aria-hidden
+                        className={`h-2 w-2 rounded-full ${
+                          /ongoing/i.test(p) ? "bg-success" : "bg-ink-subtle/60"
+                        }`}
+                      />
+                    )}
                     {p}
                   </span>
                 ))}

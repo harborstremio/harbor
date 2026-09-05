@@ -1,8 +1,14 @@
 import { ArrowLeft, Check, FlaskConical, X } from "lucide-react";
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useEscape, useModalExit } from "@/components/modal-shell";
 import { BETA_THEMES, type ThemePreset } from "@/lib/theme";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
+import { ROW_TITLE } from "../../shared";
+
+const BADGE =
+  "inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
 
 export function BetaThemesCard({ count, onClick }: { count: number; onClick: () => void }) {
   const t = useT();
@@ -28,15 +34,13 @@ export function BetaThemesCard({ count, onClick }: { count: number; onClick: () 
             </span>
           ))}
         </div>
-        <span className="absolute end-3 top-3 flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
-          <FlaskConical size={11} strokeWidth={2.4} /> {t("Beta")}
+        <span className={`absolute end-3 top-3 bg-surface text-ink-muted ${BADGE}`}>
+          <FlaskConical size={14} strokeWidth={2.4} /> {t("Beta")}
         </span>
       </div>
       <div className="flex flex-col gap-1 p-4">
-        <span className="text-[16px] font-semibold tracking-tight text-ink">
-          {t("Beta themes")}
-        </span>
-        <span className="text-[12.5px] leading-relaxed text-ink-muted">
+        <span className={ROW_TITLE}>{t("Beta themes")}</span>
+        <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
           {count === 1 ? t("1 experimental port") : t("{count} experimental ports", { count })}
         </span>
       </div>
@@ -59,6 +63,17 @@ export function BetaThemesModal({
   const { closing, close } = useModalExit(onClose, open);
   useEscape(close, open);
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (!isBackKey(e)) return;
+      e.stopPropagation();
+      close();
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [open, close]);
+
   if (!open) return null;
 
   return createPortal(
@@ -75,19 +90,19 @@ export function BetaThemesModal({
           <button
             type="button"
             onClick={close}
-            className="flex h-11 items-center gap-2 rounded-full bg-canvas px-4 text-[13px] font-semibold text-ink-muted transition hover:-translate-x-0.5 hover:bg-surface hover:text-ink"
+            className="flex h-11 items-center gap-2 rounded-full bg-canvas px-4 text-[15.5px] font-semibold text-ink-muted transition hover:bg-surface hover:text-ink"
           >
-            <ArrowLeft size={16} strokeWidth={2.2} />
+            <ArrowLeft size={18} strokeWidth={2.2} />
             {t("Back")}
           </button>
           <div data-tauri-drag-region className="flex flex-col">
             <h1 className="pointer-events-none flex items-center gap-2 text-[24px] font-semibold tracking-tight text-ink">
               {t("Beta themes")}
-              <span className="rounded-md bg-accent-soft px-2 py-0.5 text-[11.5px] font-bold uppercase tracking-wider text-accent">
+              <span className={`bg-accent-soft text-accent ${BADGE}`}>
                 {t("Beta")}
               </span>
             </h1>
-            <p className="pointer-events-none text-[13px] text-ink-subtle">
+            <p className="pointer-events-none max-w-[70ch] text-[15.5px] leading-[22px] text-ink-subtle">
               {t("Experimental 1:1 ports of other apps. Rough edges expected.")}
             </p>
           </div>
@@ -96,7 +111,7 @@ export function BetaThemesModal({
           type="button"
           onClick={close}
           aria-label={t("Close")}
-          className="flex h-10 w-10 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
         >
           <X size={18} strokeWidth={2.2} />
         </button>
@@ -158,11 +173,11 @@ function BetaCard({
         }
       >
         {active && (
-          <span className="absolute end-3 top-3 flex h-7 items-center gap-1.5 rounded-full bg-accent px-2.5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-canvas">
-            <Check size={12} strokeWidth={3} /> {t("Active")}
+          <span className={`absolute end-3 top-3 bg-accent text-canvas ${BADGE}`}>
+            <Check size={14} strokeWidth={3} /> {t("Active")}
           </span>
         )}
-        <div className="absolute bottom-0 left-0 right-0 flex h-2">
+        <div className="absolute inset-x-0 bottom-0 flex h-2">
           {theme.swatch.map((c, i) => (
             <span key={i} className="flex-1" style={{ background: c }} />
           ))}
@@ -170,9 +185,9 @@ function BetaCard({
       </div>
       <div className="flex flex-col gap-3 p-4">
         <div className="flex min-w-0 flex-col gap-1">
-          <span className="text-[16px] font-semibold tracking-tight text-ink">{theme.name}</span>
+          <span className={ROW_TITLE}>{theme.name}</span>
           {blurb && (
-            <span className="line-clamp-2 text-[12.5px] leading-relaxed text-ink-muted">
+            <span className="line-clamp-2 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
               {blurb}
             </span>
           )}
@@ -181,7 +196,7 @@ function BetaCard({
           type="button"
           onClick={onActivate}
           disabled={active}
-          className={`h-10 rounded-sm text-[13px] font-semibold transition-opacity ${
+          className={`h-11 rounded-sm text-[15.5px] font-semibold transition-opacity ${
             active ? "bg-elevated text-ink ring-1 ring-edge" : "bg-ink text-canvas hover:opacity-90"
           }`}
         >

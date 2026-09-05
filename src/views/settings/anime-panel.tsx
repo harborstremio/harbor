@@ -1,8 +1,8 @@
-import { Waves } from "lucide-react";
+import { Info } from "lucide-react";
 import { useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { Section, ToggleRow } from "./shared";
+import { ROW_DESC, Section, ToggleRow } from "./shared";
 import { SettingRow } from "./kit";
 import { isTauri } from "./player-panel/internals";
 import { SvpSection } from "./anime-panel/svp-section";
@@ -18,7 +18,7 @@ export function AnimePanel() {
   useSubTabs(
     isTauri
       ? [
-          { id: "smooth", label: t("Smooth motion") },
+          { id: "smooth", label: t("Motion") },
           { id: "svp", label: t("SVP") },
         ]
       : [],
@@ -32,8 +32,11 @@ export function AnimePanel() {
         title={t("Desktop only")}
         subtitle={t("Smooth motion runs on the bundled mpv engine in the Harbor desktop app. It has no effect in the browser.")}
       >
-        <div className="rounded-md bg-elevated px-4 py-3.5 text-[13px] leading-relaxed text-ink-subtle">
-          {t("Download the desktop app to use anime enhancements.")}
+        <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+          <Info size={18} className="mt-[2px] shrink-0 text-ink-subtle" />
+          <p className={`max-w-[66ch] ${ROW_DESC}`}>
+            {t("Download the desktop app to use anime enhancements.")}
+          </p>
         </div>
       </Section>
     );
@@ -63,7 +66,6 @@ export function AnimePanel() {
 
         <SettingRow
           wide
-          icon={<Waves size={16} />}
           label={t("Before and after")}
           desc={t("The same camera pan on each setting. The lit lane is what you get right now.")}
           tip={t("Interpolation invents frames between the drawn ones, so a pan travels in many small moves instead of a few big jumps.")}

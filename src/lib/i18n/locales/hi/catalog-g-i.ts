@@ -181,6 +181,8 @@ const catalogGI: Record<string, string> = {
   "HTTP {status}: {body}": "HTTP {status}: {body}",
   "HW decode": "HW डिकोड",
   "Hairline cards": "महीन बॉर्डर वाले कार्ड",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "आधे घंटे की शुरुआती बढ़त। यह सिर्फ़ बेहद अस्थिर कनेक्शन पर ही फ़ायदेमंद है।",
   "Half-hours, anthologies, and a few epics for the morning routine.":
     "सुबह की दिनचर्या के लिए आधे घंटे वाले कार्यक्रम, संकलन और कुछ महागाथाएँ।",
   "Hall of Fame": "हॉल ऑफ़ फ़ेम",
@@ -349,6 +351,8 @@ const catalogGI: Record<string, string> = {
     "Harbor एनीमे पेज पर आपकी AniList सूचियाँ दिखाता है और आपकी प्रगति सिंक रखता है।",
   "Harbor signed you up but returned no session. Try signing in instead.":
     "Harbor ने आपका साइन अप कर दिया, लेकिन कोई सेशन नहीं मिला। इसके बजाय साइन इन करके देखें।",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "Harbor हर शीर्षक के लिए शुरुआती बढ़त खुद तय करता है और प्लेबैक स्थिर होने पर उसे बढ़ा देता है। लगभग सभी के लिए यही सही है।",
   "Harbor snippet": "Harbor स्निपेट",
   "Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.":
     "Harbor Stremio का ऐडऑन प्रोटोकॉल इस्तेमाल करता है और ऐडऑन का पूरा इकोसिस्टम उनके काम की ही देन है। Stremio को उसके समुदाय से फ़ंड मिलता है और योगदान देने वाले समर्थकों को प्रयोगात्मक सुविधाओं का अर्ली ऐक्सेस मिलता है। अगर आपके लिए संभव हो, तो उन्हें भी कुछ सहयोग दें।",
@@ -410,6 +414,8 @@ const catalogGI: Record<string, string> = {
     "Harbor के सार्वजनिक रिले पर नवीनतम प्रोटोकॉल अभी लागू नहीं हुआ है।",
   "Harbor's public relay updates automatically; nothing to do.":
     "Harbor का सार्वजनिक रिले अपने आप अपडेट होता है; आपको कुछ करने की ज़रूरत नहीं है।",
+  "Harbor's streaming server only runs in the desktop app.":
+    "Harbor का स्ट्रीमिंग सर्वर केवल डेस्कटॉप ऐप में चलता है।",
   "Harbor's temporary viewer requires HTTPS.": "Harbor के अस्थायी व्यूअर के लिए HTTPS आवश्यक है।",
   "Harbor, from a public domain frame": "Harbor, सार्वजनिक डोमेन के एक फ़्रेम से",
   "Harbors on your network": "आपके नेटवर्क पर मौजूद Harbor इंस्टेंस",
@@ -603,6 +609,8 @@ const catalogGI: Record<string, string> = {
   "Hold to skip or continue": "स्किप करने या जारी रखने के लिए दबाकर रखें",
   "Holding the funds before settling": "निपटान से पहले रकम रोक रहा है",
   "Holdover Picks": "पिछले दौर की चुनिंदा पेशकशें",
+  "Holds up to {size} in memory while a video plays.":
+    "वीडियो चलने के दौरान {size} तक मेमोरी में रखता है।",
   "Holdup Matey!": "ज़रा रुको, साथी!",
   "Holiday Classics": "छुट्टियों की क्लासिक फ़िल्में",
   "Holiday Warmth": "छुट्टियों की गर्माहट",
@@ -810,6 +818,8 @@ const catalogGI: Record<string, string> = {
   "If you would rather give it away": "अगर आप इसे दान करना चाहें",
   "Ignore the paid tiers. Personal use is free, you are not a company. Just pick the first option and keep going.":
     "सशुल्क टियर पर ध्यान न दें। निजी उपयोग मुफ़्त है, आप कोई कंपनी नहीं हैं। बस पहला विकल्प चुनें और आगे बढ़ें।",
+  "Ignore this title": "इस शीर्षक को अनदेखा करें",
+  "Ignored titles": "अनदेखा किए गए शीर्षक",
   Image: "इमेज",
   "Image URL (optional)": "इमेज URL (वैकल्पिक)",
   "Image bar active. Pick a style above to switch back, or clear the image below.":

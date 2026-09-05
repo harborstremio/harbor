@@ -42,6 +42,7 @@ const catalog: Record<string, string> = {
     "Hubungkan AniList di Harbor pada komputer Anda untuk melihat daftar Anda di sini.",
   "Connect Discord or Telegram and Harbor posts a message when something you follow is about to drop. Hit Test to send yourself a sample first.":
     "Hubungkan Discord atau Telegram, lalu Harbor akan mengirim pesan saat sesuatu yang Anda ikuti akan segera dirilis. Tekan Uji untuk mengirim contoh pesan kepada diri sendiri terlebih dahulu.",
+  "Connect Letterboxd": "Hubungkan Letterboxd",
   "Connect MyAnimeList": "Hubungkan MyAnimeList",
   "Connect MyAnimeList in Harbor on your computer to see your lists here.":
     "Hubungkan MyAnimeList di Harbor pada komputer Anda untuk melihat daftar Anda di sini.",
@@ -363,8 +364,11 @@ const catalog: Record<string, string> = {
   "Couldn't read that font file.": "Tidak dapat membaca file font tersebut.",
   "Couldn't read your watchlist. Try again.":
     "Tidak dapat membaca daftar tontonan Anda. Coba lagi.",
+  "Couldn't reload the stream. Try picking another source.":
+    "Tidak dapat memuat ulang stream. Coba pilih sumber lain.",
   "Couldn't remove. Try again.": "Tidak dapat menghapus. Coba lagi.",
   "Couldn't rename the profile. {error}": "Tidak dapat mengganti nama profil. {error}",
+  "Couldn't restart the streaming server.": "Tidak dapat memulai ulang server streaming.",
   "Couldn't save the playlist. Free up storage space in Settings and try again.":
     "Tidak dapat menyimpan playlist. Kosongkan ruang penyimpanan di Pengaturan lalu coba lagi.",
   "Couldn't save the synced subtitle. Try again.":

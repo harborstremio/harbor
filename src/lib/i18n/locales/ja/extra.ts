@@ -1132,6 +1132,14 @@ const extra: Record<string, string> = {
     "Traktのウォッチリストは空です。インポートする項目はありません。",
   "Your watchlist is empty, nothing to send.": "ウォッチリストは空です。送信する項目はありません。",
   Zoom: "ズーム",
+  "Ignore this title": "この作品では表示しない",
+  "Never show the content advisory for this title again":
+    "この作品では今後コンテンツに関する注意を表示しない",
+  "Timing sources": "タイミング情報の提供元",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · イントロとクレジットのタイミング",
+  "Paste your TheIntroDB API key": "TheIntroDB APIキーを貼り付け",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "任意です。TheIntroDBはキーなしでも応答しますが、キーを設定するとレート制限が緩和され、一気見してもタイミング情報が届き続けます。キーの取得先",
 };
 
 export default extra;

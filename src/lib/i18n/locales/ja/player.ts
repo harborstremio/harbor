@@ -455,6 +455,15 @@ const player: Record<string, string> = {
   "Couldn't save the synced subtitle. Try again.":
     "同期済み字幕を保存できませんでした。もう一度お試しください。",
   "Saving...": "保存中...",
+  "Reloading the stream…": "ストリームを再読み込み中…",
+  "Couldn't reload the stream. Try picking another source.":
+    "ストリームを再読み込みできませんでした。別のソースを選んでみてください。",
+  "Harbor's streaming server only runs in the desktop app.":
+    "Harborのストリーミングサーバーはデスクトップアプリでのみ動作します。",
+  "Restarting the streaming server…": "ストリーミングサーバーを再起動中…",
+  "Couldn't restart the streaming server.": "ストリーミングサーバーを再起動できませんでした。",
+  "The streaming server didn't come back up.": "ストリーミングサーバーが復帰しませんでした。",
+  "Streaming server restarted.": "ストリーミングサーバーを再起動しました。",
 };
 
 export default player;

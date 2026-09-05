@@ -1,4 +1,5 @@
 import gap from "./ru/gap";
+import experimentalUpdates from "./ru/experimental-updates";
 import coverage from "./ru/coverage";
 import uiFallback from "./ui-fallback";
 import chrome from "./ru/chrome";
@@ -81,6 +82,7 @@ const ru: Record<string, string> = {
   ...surfaces3,
   ...surfaces4,
   ...surfaces5,
+  ...experimentalUpdates,
 };
 
 export default ru;

@@ -1,5 +1,5 @@
 import { Dropdown } from "@/components/dropdown";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import {
   Ban,
   Check,
@@ -24,7 +24,15 @@ import {
   torrentEngineStatus,
 } from "@/lib/torrent/local-engine";
 import { Section, ToggleRow } from "../shared";
-import { ModalButton, SettingGroup, SettingRow, SettingsModal, ROW_ACTION } from "../kit";
+import {
+  ModalButton,
+  ROW_ACTION,
+  ROW_ACTION_DANGER,
+  SettingGroup,
+  SettingRow,
+  SettingsModal,
+} from "../kit";
+import { BADGE_BASE } from "./choice";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -45,18 +53,6 @@ const CACHE_LIMITS: Array<{ gb: number; label: string }> = [
   { gb: 50, label: "50 GB" },
   { gb: 100, label: "100 GB" },
 ];
-
-function StateIcon({ on, children }: { on: boolean; children: ReactNode }) {
-  return (
-    <span
-      className={`flex h-9 w-9 items-center justify-center rounded-md ${
-        on ? "bg-accent-soft text-accent" : "bg-raised text-ink-subtle"
-      }`}
-    >
-      {children}
-    </span>
-  );
-}
 
 function useCachePath(customDir: string): string {
   const [defaultPath, setDefaultPath] = useState("");
@@ -129,7 +125,7 @@ export function StreamCacheSection() {
     >
       <SettingGroup label={t("How long files stay")}>
         <SettingRow
-          icon={<Clock size={16} strokeWidth={1.9} />}
+          icon={<Clock size={18} strokeWidth={1.9} />}
           label={t("Keep cached files for")}
           desc={t("Reopening a title within this window resumes instead of re-downloading.")}
           tip={t(
@@ -137,10 +133,9 @@ export function StreamCacheSection() {
           )}
         >
           <Dropdown
-            size="sm"
             value={String(retention)}
             onChange={(v) => setRetention(Number(v))}
-            className="w-[200px] shrink-0"
+            className="w-[280px] max-w-full"
             options={[
               ...RETENTIONS.map((r) => ({ value: String(r.h), label: t(r.label) })),
               ...(knownRetention
@@ -151,7 +146,7 @@ export function StreamCacheSection() {
         </SettingRow>
 
         <SettingRow
-          icon={<HardDrive size={16} strokeWidth={1.9} />}
+          icon={<HardDrive size={18} strokeWidth={1.9} />}
           label={t("Keep at most")}
           desc={t("Over the cap, the oldest files are deleted first.")}
           tip={t(
@@ -159,10 +154,9 @@ export function StreamCacheSection() {
           )}
         >
           <Dropdown
-            size="sm"
             value={String(maxGb)}
             onChange={(v) => setMaxGb(Number(v))}
-            className="w-[200px] shrink-0"
+            className="w-[280px] max-w-full"
             options={[
               ...CACHE_LIMITS.map((c) => ({ value: String(c.gb), label: t(c.label) })),
               ...(knownMaxGb ? [] : [{ value: String(maxGb), label: t("{n} GB", { n: maxGb }) }]),
@@ -175,11 +169,7 @@ export function StreamCacheSection() {
           sub={t(
             "When you finish an episode or movie, remove its downloaded file right away. Something you stop partway through is kept so you can resume.",
           )}
-          leading={
-            <StateIcon on={settings.deleteWatchedDownloads}>
-              <Trash2 size={16} strokeWidth={2.2} />
-            </StateIcon>
-          }
+          leading={<Trash2 size={18} strokeWidth={2.2} />}
           value={settings.deleteWatchedDownloads}
           onChange={(v) => update({ deleteWatchedDownloads: v })}
         />
@@ -188,23 +178,24 @@ export function StreamCacheSection() {
       {isTauri && (
         <SettingGroup label={t("Where files live")}>
           <SettingRow
-            icon={<FolderOpen size={16} strokeWidth={1.9} />}
-            label={t("Cache location")}
-            desc={
-              <span className="flex min-w-0 items-center gap-2">
-                <span className="min-w-0 truncate font-mono text-[12.5px] text-ink" title={cachePath}>
-                  {cachePath || t("Default app cache folder")}
-                </span>
+            wide
+            icon={<FolderOpen size={18} strokeWidth={1.9} />}
+            label={
+              <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
+                <span className="min-w-0">{t("Cache location")}</span>
                 {!customDir && (
-                  <span className="shrink-0 rounded-full bg-raised px-2 py-0.5 text-[10.5px] font-medium uppercase tracking-wider text-ink-subtle">
-                    {t("Default")}
-                  </span>
+                  <span className={`${BADGE_BASE} bg-elevated text-ink-subtle`}>{t("Default")}</span>
                 )}
+              </span>
+            }
+            desc={
+              <span className="block break-all font-mono text-[15.5px] leading-[22px] text-ink">
+                {cachePath || t("Default app cache folder")}
               </span>
             }
           >
             <button type="button" onClick={() => setManage(true)} className={ROW_ACTION}>
-              <FolderOpen size={14} strokeWidth={2.2} />
+              <FolderOpen size={16} strokeWidth={2.2} />
               {t("Manage")}
             </button>
           </SettingRow>
@@ -234,44 +225,47 @@ export function StreamCacheSection() {
         }
       >
         <SettingRow wide label={t("Current folder")}>
-          <span className="w-full break-all rounded-md bg-canvas px-3.5 py-2.5 font-mono text-[12.5px] leading-relaxed text-ink">
+          <span className="block w-full break-all rounded-[10px] bg-canvas px-4 py-3 font-mono text-[15.5px] leading-[22px] text-ink">
             {cachePath || t("Default app cache folder")}
           </span>
         </SettingRow>
 
         <SettingRow
+          wide
           label={t("Change folder")}
           desc={t("Pick a drive with room to spare. Files already cached stay where they are.")}
         >
-          <button type="button" onClick={() => void pickDir()} className={ROW_ACTION}>
-            <FolderOpen size={14} strokeWidth={2.2} />
-            {t("Change…")}
-          </button>
-          {!!customDir && (
-            <button type="button" onClick={resetDir} className={ROW_ACTION}>
-              <RotateCcw size={14} strokeWidth={2.2} />
-              {t("Reset")}
+          <span className="flex flex-wrap items-center gap-2.5">
+            <button type="button" onClick={() => void pickDir()} className={ROW_ACTION}>
+              <FolderOpen size={16} strokeWidth={2.2} />
+              {t("Change…")}
             </button>
-          )}
+            {!!customDir && (
+              <button type="button" onClick={resetDir} className={ROW_ACTION}>
+                <RotateCcw size={16} strokeWidth={2.2} />
+                {t("Reset")}
+              </button>
+            )}
+          </span>
         </SettingRow>
 
         <SettingRow
           label={t("Clear cache now")}
           desc={t("Deletes every cached stream file and restarts the engine.")}
+          warn={t("Everything cached is removed. Anything you reopen downloads again from scratch.")}
         >
           <button
             type="button"
-            onClick={() => void clearCache()}
-            disabled={clearing}
+            onClick={clearing ? undefined : () => void clearCache()}
+            aria-disabled={clearing}
+            onBlur={() => setConfirmClear(false)}
             onMouseLeave={() => setConfirmClear(false)}
-            className={`harbor-press-pop flex h-9 shrink-0 items-center gap-1.5 rounded-md px-3.5 text-[12.5px] font-semibold transition-colors disabled:opacity-60 ${
-              confirmClear ? "bg-danger/15 text-danger" : "bg-raised text-ink-muted hover:text-danger"
-            }`}
+            className={`${ROW_ACTION_DANGER}${clearing ? " pointer-events-none opacity-45" : ""}`}
           >
             {clearing ? (
-              <Loader2 size={14} className="animate-spin" />
+              <Loader2 size={16} className="animate-spin" />
             ) : (
-              <Trash2 size={14} strokeWidth={2.2} />
+              <Trash2 size={16} strokeWidth={2.2} />
             )}
             {clearing ? t("Clearing…") : confirmClear ? t("Confirm clear") : t("Clear cache now")}
           </button>
@@ -333,11 +327,7 @@ export function P2PPowerToolsSection() {
           sub={t(
             "Harbor will not start the torrent engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable torrent streaming.",
           )}
-          leading={
-            <StateIcon on={settings.torrentsDisabled}>
-              <Ban size={16} strokeWidth={2.2} />
-            </StateIcon>
-          }
+          leading={<Ban size={18} strokeWidth={2.2} />}
           value={settings.torrentsDisabled}
           onChange={(v) => {
             update({ torrentsDisabled: v });
@@ -361,11 +351,7 @@ export function P2PPowerToolsSection() {
           sub={t(
             "Stream torrents straight from Harbor's built-in engine when you have no debrid set up, or a torrent isn't cached. This connects to peers over your own connection. Turn off to only ever play debrid and direct links.",
           )}
-          leading={
-            <StateIcon on={settings.directTorrentStream && !settings.torrentsDisabled && !strictRemote}>
-              <Zap size={16} strokeWidth={2.2} />
-            </StateIcon>
-          }
+          leading={<Zap size={18} strokeWidth={2.2} />}
           value={settings.directTorrentStream}
           onChange={(v) => update({ directTorrentStream: v })}
           lockReason={
@@ -382,11 +368,7 @@ export function P2PPowerToolsSection() {
           sub={t(
             "Skip the 'stream over peer-to-peer?' prompt and start uncached torrents immediately. Harbor remembers your choice after the first confirmation anyway.",
           )}
-          leading={
-            <StateIcon on={settings.p2pAutoConsent && !settings.torrentsDisabled}>
-              <ShieldCheck size={16} strokeWidth={2.2} />
-            </StateIcon>
-          }
+          leading={<ShieldCheck size={18} strokeWidth={2.2} />}
           value={settings.p2pAutoConsent}
           onChange={(v) => update({ p2pAutoConsent: v })}
           note={
@@ -399,7 +381,7 @@ export function P2PPowerToolsSection() {
 
       <SettingGroup label={t("Diagnostics")}>
         <SettingRow
-          icon={<ClipboardCopy size={16} strokeWidth={1.9} />}
+          icon={<ClipboardCopy size={18} strokeWidth={1.9} />}
           label={t("Copy diagnostics")}
           desc={t("Engine status and your P2P settings as JSON, ready to paste into a bug report.")}
           tip={t(
@@ -408,9 +390,9 @@ export function P2PPowerToolsSection() {
         >
           <button type="button" onClick={() => void copyDiagnostics()} className={ROW_ACTION}>
             {copied ? (
-              <Check size={14} strokeWidth={2.6} className="text-success" />
+              <Check size={16} strokeWidth={2.6} className="text-success" />
             ) : (
-              <ClipboardCopy size={14} strokeWidth={2.2} />
+              <ClipboardCopy size={16} strokeWidth={2.2} />
             )}
             {copied ? t("Copied") : t("Copy diagnostics")}
           </button>
@@ -418,20 +400,20 @@ export function P2PPowerToolsSection() {
 
         {isTauri && (
           <SettingRow
-            icon={<FolderOpen size={16} strokeWidth={1.9} />}
+            icon={<FolderOpen size={18} strokeWidth={1.9} />}
             label={t("Reveal engine folder")}
             desc={t("Opens the folder holding the DHT cache and active torrent data.")}
           >
             <button
               type="button"
-              onClick={() => void revealEngineFolder()}
-              disabled={opening}
-              className={ROW_ACTION}
+              onClick={opening ? undefined : () => void revealEngineFolder()}
+              aria-disabled={opening}
+              className={`${ROW_ACTION}${opening ? " pointer-events-none opacity-45" : ""}`}
             >
               {opening ? (
-                <Loader2 size={14} className="animate-spin" />
+                <Loader2 size={16} className="animate-spin" />
               ) : (
-                <FolderOpen size={14} strokeWidth={2.2} />
+                <FolderOpen size={16} strokeWidth={2.2} />
               )}
               {t("Reveal engine folder")}
             </button>

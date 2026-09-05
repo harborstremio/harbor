@@ -288,6 +288,11 @@ function ControlPick({
   return (
     <div
       data-control-id={id}
+      role="button"
+      tabIndex={-1}
+      data-focusable="true"
+      aria-pressed={selected}
+      data-tv-initial-focus={selected ? "" : undefined}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -297,7 +302,9 @@ function ControlPick({
         selected ? "bg-accent-soft ring-2 ring-accent" : "ring-2 ring-transparent hover:bg-white/8"
       }`}
     >
-      <div className="pointer-events-none">{children}</div>
+      <div data-tv-skip="" className="pointer-events-none">
+        {children}
+      </div>
       <span className="pointer-events-auto absolute inset-0 z-10" />
     </div>
   );

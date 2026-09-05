@@ -112,6 +112,7 @@ const catalog09: Record<string, string> = {
     "Otwórz Harbor na komputerze, aby potwierdzić własność w przeglądarce.",
   "Open Harbor's settings outside playback.": "Otwórz ustawienia Harbor poza odtwarzaniem.",
   "Open Languages": "Otwórz Języki",
+  "Open Letterboxd profile": "Otwórz profil Letterboxd",
   "Open Library settings": "Otwórz ustawienia biblioteki",
   "Open MAL profile": "Otwórz profil MAL",
   "Open MyAnimeList again": "Otwórz MyAnimeList ponownie",
@@ -237,6 +238,8 @@ const catalog09: Record<string, string> = {
     "Opcjonalnie. Dodanie zrzutów ekranu zastąpi obecny zestaw.",
   "Optional. Skip this step to keep your current cover.":
     "Opcjonalnie. Pomiń ten krok, aby zachować obecną okładkę.",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "Opcjonalne. TheIntroDB odpowiada bez klucza, ale klucz zwiększa limit żądań, dzięki czemu czasy nadchodzą nieprzerwanie podczas maratonu. Klucz uzyskasz na",
   Options: "Opcje",
   "Options for the Library → Local tab: folders you scan from your own drive. When you export metadata, Harbor writes a Kodi-style .nfo and downloads artwork next to each file at the sizes below.":
     "Opcje karty Biblioteka → Lokalne: foldery skanowane z własnego dysku. Podczas eksportowania metadanych Harbor zapisuje plik .nfo w stylu Kodi i pobiera grafiki w poniższych rozmiarach obok każdego pliku.",
@@ -402,6 +405,7 @@ const catalog09: Record<string, string> = {
   "Paste your OpenSubtitles API key": "Wklej klucz API OpenSubtitles",
   "Paste your SUBDL API key": "Wklej klucz API SUBDL",
   "Paste your Subsource API key": "Wklej klucz API Subsource",
+  "Paste your TheIntroDB API key": "Wklej swój klucz API TheIntroDB",
   "Paste your key": "Wklej swój klucz",
   "Paste your repo.json URL into Extensions above, then install. That is how you bring any site's sources back.":
     "Wklej URL swojego repo.json w sekcji Rozszerzenia powyżej, a następnie zainstaluj. W ten sposób ponownie dodasz źródła z dowolnej witryny.",
@@ -419,6 +423,7 @@ const catalog09: Record<string, string> = {
   Paused: "Wstrzymano",
   "Paused on": "Wstrzymano na",
   "Paused on Simkl": "Wstrzymano w Simkl",
+  "Paused on Trakt": "Wstrzymano w Trakt",
   Peacock: "Peacock",
   "Peers, speed and progress chip on the player during torrent playback. Turn off to keep the player clean.":
     "Widżet z liczbą peerów, szybkością i postępem wyświetlany w odtwarzaczu podczas odtwarzania torrenta. Wyłącz, aby zachować przejrzysty interfejs odtwarzacza.",

@@ -1,4 +1,5 @@
 import type { Settings } from "@/lib/settings";
+import { bufferMpvLines, bufferSizeFor } from "./buffer-profile";
 
 const QUALITY_LINES: Record<Settings["mpvQuality"], string[]> = {
   balanced: [],
@@ -30,16 +31,7 @@ export function compileMpvOptions(s: Settings): string {
   const lines: string[] = [...(QUALITY_LINES[s.mpvQuality] ?? [])];
   if (s.mpvHwdec === "on") lines.push("hwdec=yes");
   else if (s.mpvHwdec === "off") lines.push("hwdec=no");
-  if (s.mpvBufferBoost) {
-    lines.push(
-      "cache=yes",
-      "cache-secs=600",
-      "demuxer-max-bytes=1GiB",
-      "demuxer-readahead-secs=600",
-      "cache-pause-initial=yes",
-      "cache-pause-wait=10",
-    );
-  }
+  lines.push(...bufferMpvLines(bufferSizeFor(s)));
   if (s.mpvDownmixStereo) lines.push("audio-channels=stereo");
   if (s.audioDevice && s.audioDevice !== "auto") lines.push(`audio-device=${s.audioDevice}`);
   if (s.playerDisplayPanel === "oled" && s.playerHdrToSdr) lines.push("target-contrast=inf");

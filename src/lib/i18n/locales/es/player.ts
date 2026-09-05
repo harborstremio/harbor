@@ -72,6 +72,9 @@ const player: Record<string, string> = {
   "Couldn't load that subtitle file. Try another.":
     "No se pudo cargar ese archivo de subtítulos. Prueba con otro.",
   "Couldn't open this file": "No se pudo abrir este archivo",
+  "Couldn't reload the stream. Try picking another source.":
+    "No se pudo recargar la fuente. Prueba a elegir otra.",
+  "Couldn't restart the streaming server.": "No se pudo reiniciar el servidor de streaming.",
   "Couldn't save the synced subtitle. Try again.":
     "No se pudo guardar el subtítulo sincronizado. Inténtalo de nuevo.",
   "Couldn't switch subtitles. Try again.":
@@ -121,6 +124,8 @@ const player: Record<string, string> = {
   "Frame rate": "Velocidad de fotogramas",
   "Go to live": "Ir a TV en vivo",
   "Got it": "Entendido",
+  "Harbor's streaming server only runs in the desktop app.":
+    "El servidor de streaming de Harbor solo funciona en la aplicación de escritorio.",
   "HI/SDH": "HI/SDH",
   "Hidden by filter: {reason}": "Oculto por el filtro: {reason}",
   "Hide details": "Ocultar detalles",
@@ -229,8 +234,10 @@ const player: Record<string, string> = {
     "Grabando · {pct}% · {remaining} · haz clic para administrar",
   "Recording finished": "Grabación finalizada",
   "Recording now": "Grabando ahora",
+  "Reloading the stream…": "Recargando la fuente…",
   "Reset sync": "Restablecer sincronización",
   "Resize subtitle menu": "Redimensionar menú de subtítulos",
+  "Restarting the streaming server…": "Reiniciando el servidor de streaming…",
   "Resume from {time}": "Reanudar desde {time}",
   "Return to full window": "Volver a la ventana completa",
   "Same file": "Mismo archivo",
@@ -288,6 +295,7 @@ const player: Record<string, string> = {
   "Stop showing as second subtitle": "Dejar de mostrarlo como segundo subtítulo",
   "Stream failed to load": "No se pudo cargar la fuente",
   "Stream is taking a while": "La fuente está tardando",
+  "Streaming server restarted.": "Servidor de streaming reiniciado.",
   "Subtitle appearance": "Apariencia de los subtítulos",
   "Subtitle color {color}": "Color de subtítulos {color}",
   "Subtitle details": "Detalles de los subtítulos",
@@ -314,6 +322,7 @@ const player: Record<string, string> = {
   "Switch to program guide": "Cambiar a la guía de programación",
   "The host starts playback for the whole room.":
     "El anfitrión inicia la reproducción para toda la sala.",
+  "The streaming server didn't come back up.": "El servidor de streaming no volvió a iniciarse.",
   "Thicker outline": "Contorno más grueso",
   "Thinner outline": "Contorno más fino",
   "This and next: + {title}": "Este y el siguiente: + {title}",

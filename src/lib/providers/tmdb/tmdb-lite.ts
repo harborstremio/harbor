@@ -1,4 +1,5 @@
-import { effectiveTmdbLanguage, get, IMG } from "./tmdb-client";
+import { effectiveTmdbLanguage, get } from "./tmdb-client";
+import { tmdbBackdropUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
 
 export type TmdbLiteMeta = {
   name: string | null;
@@ -49,8 +50,8 @@ export async function tmdbLiteMeta(key: string, metaId: string): Promise<TmdbLit
       const out: TmdbLiteMeta | null = raw
         ? {
             name: (raw.title ?? raw.name ?? "").trim() || null,
-            poster: raw.poster_path ? `${IMG}/w300${raw.poster_path}` : null,
-            background: raw.backdrop_path ? `${IMG}/w780${raw.backdrop_path}` : null,
+            poster: tmdbPosterUrl(raw.poster_path) ?? null,
+            background: tmdbBackdropUrl(raw.backdrop_path) ?? null,
           }
         : null;
       cache.set(metaId, out);

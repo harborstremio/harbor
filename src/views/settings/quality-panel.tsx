@@ -41,19 +41,17 @@ export function QualityPanel() {
   ];
   useSubTabs(tabs, tab, (id) => setTab(id as Tab));
   return (
-    <>
-      <div key={tab} className="harbor-cascade flex flex-col gap-10">
-        {tab === "play" && <PlayTab />}
-        {tab === "engine" && <EngineTab />}
-        {tab === "aspect" && <AspectTab />}
-        {tab === "audio" && <AudioTab />}
-        {tab === "onscreen" && <OnScreenTab />}
-        {tab === "xray" && <XrayTab />}
-        {tab === "adskip" && <AdSkipTab />}
-        {tab === "intros" && <IntrosTab />}
-        {tab === "upnext" && <UpNextTab />}
-        {tab === "trailers" && <TrailersTab />}
-      </div>
-    </>
+    <div key={tab} className="harbor-cascade flex flex-col gap-10">
+      {tab === "play" && <PlayTab />}
+      {tab === "engine" && <EngineTab />}
+      {tab === "aspect" && <AspectTab />}
+      {tab === "audio" && <AudioTab />}
+      {tab === "onscreen" && <OnScreenTab />}
+      {tab === "xray" && <XrayTab />}
+      {tab === "adskip" && <AdSkipTab />}
+      {tab === "intros" && <IntrosTab />}
+      {tab === "upnext" && <UpNextTab />}
+      {tab === "trailers" && <TrailersTab />}
+    </div>
   );
 }

@@ -35,7 +35,7 @@ export function publishResumeStates(items: LibraryItem[]): void {
       fraction: dur > 0 ? Math.min(1, off / dur) : null,
       remainingMs: dur > 0 ? Math.max(0, dur - off) : null,
       upNext: item.upNext === true,
-      external: item.external === "simkl",
+      external: !!item.external,
     });
   }
 }

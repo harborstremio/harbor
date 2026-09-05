@@ -3,6 +3,7 @@ import { useModalExit } from "@/components/modal-shell";
 import { createPortal } from "react-dom";
 import { ArrowDownToLine, Check, RefreshCw, Share2, Star, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { isBackKey, isEditable } from "@/lib/keyboard-navigation/geometry";
 import { downloadTheme, rateTheme, type StoreTheme } from "@/lib/theme-store";
 import { FeaturedBadge } from "@/views/profile/profile-bits";
 import { subscribeOpenProfile } from "@/lib/social/open-profile";
@@ -29,7 +30,7 @@ export function ThemeDetail({ theme, onClose }: { theme: StoreTheme; onClose: ()
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (isBackKey(e) && !isEditable(e.target instanceof HTMLElement ? e.target : null)) {
         e.stopPropagation();
         close();
       }
@@ -71,19 +72,22 @@ export function ThemeDetail({ theme, onClose }: { theme: StoreTheme; onClose: ()
       className={`${closing ? "animate-scrim-out" : "animate-scrim-in"} fixed inset-0 z-[244] flex items-center justify-center p-4 sm:p-6`}
     >
       <button
+        data-tv-skip
         aria-label={tr("Close")}
         onClick={close}
         className="absolute inset-0 cursor-default bg-canvas/75 backdrop-blur-sm"
       />
       <div
+        role="dialog"
+        aria-modal="true"
         className={`modal-panel ${closing ? "animate-dialog-out" : "animate-dialog-in"} relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-md bg-elevated ring-1 ring-edge-soft harbor-float`}
       >
         <button
           onClick={close}
           aria-label={tr("Close")}
-          className="absolute end-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-surface text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-raised hover:text-ink"
+          className="absolute end-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-surface text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-raised hover:text-ink"
         >
-          <X size={18} />
+          <X size={20} />
         </button>
 
         <div className="min-h-0 overflow-y-auto [scrollbar-width:thin]">
@@ -98,16 +102,16 @@ export function ThemeDetail({ theme, onClose }: { theme: StoreTheme; onClose: ()
             <div className="flex min-w-0 flex-col gap-4">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pe-8">
                 <FeaturedBadge />
-                <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12.5px] font-medium text-ink-subtle">
+                <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[15.5px] leading-[22px] font-medium text-ink-subtle">
                   {t.ratingCount > 0 && (
                     <span className="inline-flex items-center gap-1">
-                      <Star size={14} className="fill-accent text-accent" />
+                      <Star size={16} className="fill-accent text-accent" />
                       <span className="tabular-nums text-ink">{t.ratingAvg.toFixed(1)}</span>
                       <span className="tabular-nums">({t.ratingCount})</span>
                     </span>
                   )}
                   <span className="inline-flex items-center gap-1.5 tabular-nums">
-                    <ArrowDownToLine size={12} strokeWidth={2.2} />
+                    <ArrowDownToLine size={15} strokeWidth={2.2} />
                     {fmtCount(t.downloads)}
                   </span>
                   {t.authorHandle ? (
@@ -126,7 +130,9 @@ export function ThemeDetail({ theme, onClose }: { theme: StoreTheme; onClose: ()
                 {t.name}
               </h2>
 
-              {t.blurb && <p className="text-[13.5px] leading-relaxed text-ink-muted">{t.blurb}</p>}
+              {t.blurb && (
+                <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t.blurb}</p>
+              )}
 
               <PaletteSeam swatch={t.swatch} labeled />
 
@@ -144,8 +150,8 @@ export function ThemeDetail({ theme, onClose }: { theme: StoreTheme; onClose: ()
                 </MarketCta>
               </div>
 
-              <div className="flex items-center gap-2.5">
-                <span className="text-[12.5px] font-medium text-ink-subtle">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                <span className="text-[15.5px] leading-[22px] font-medium text-ink-subtle">
                   {tr("Rate this theme")}
                 </span>
                 <div
@@ -160,10 +166,10 @@ export function ThemeDetail({ theme, onClose }: { theme: StoreTheme; onClose: ()
                       onClick={() => rate(n)}
                       onMouseEnter={() => setHover(n)}
                       aria-label={tr("Rate {count} stars", { count: n })}
-                      className="p-0.5 transition-transform hover:scale-110 active:scale-95 motion-reduce:transform-none"
+                      className="grid h-11 w-11 place-items-center rounded-full transition-transform hover:scale-110 active:scale-95 motion-reduce:transform-none"
                     >
                       <Star
-                        size={20}
+                        size={22}
                         className={n <= shownStars ? "fill-accent text-accent" : "text-ink-subtle"}
                       />
                     </button>
@@ -175,8 +181,8 @@ export function ThemeDetail({ theme, onClose }: { theme: StoreTheme; onClose: ()
 
           <div className="flex flex-col gap-5 p-6">
             {t.hasPendingUpdate && (
-              <div className="flex items-start gap-2.5 rounded-md bg-surface px-3.5 py-3 text-[12.5px] leading-relaxed text-ink-muted ring-1 ring-edge-soft">
-                <RefreshCw size={16} className="mt-0.5 shrink-0 text-ink-subtle" />
+              <div className="flex max-w-[70ch] items-start gap-2.5 rounded-md bg-surface px-3.5 py-3 text-[15.5px] leading-[22px] text-ink-muted ring-1 ring-edge-soft">
+                <RefreshCw size={18} className="mt-0.5 shrink-0 text-ink-subtle" />
                 <span>
                   <span className="font-semibold text-ink">{tr("Update queued.")}</span>{" "}
                   {tr(

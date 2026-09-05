@@ -15,13 +15,11 @@ export function TrayRow() {
         label={t("Close to the system tray")}
         sub={t("Closing the window tucks Harbor into the tray instead of quitting, so it reopens instantly. Right-click the tray icon for quick controls, or pick Quit to exit fully.")}
         leading={
-          <span
-            className={`flex h-9 w-9 items-center justify-center rounded-md ${
-              on ? "bg-accent-soft text-accent" : "bg-raised text-ink-subtle"
-            }`}
-          >
-            <Minimize2 size={16} strokeWidth={2.2} />
-          </span>
+          <Minimize2
+            size={18}
+            strokeWidth={2.2}
+            className={on ? "text-accent" : "text-ink-subtle"}
+          />
         }
         value={on}
         onChange={(closeToTray) => update({ closeToTray })}

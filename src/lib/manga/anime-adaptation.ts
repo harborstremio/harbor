@@ -91,12 +91,16 @@ export function pickSourceReading(
   details: AnilistMediaDetails,
   animeName: string,
 ): AnimeReadingSource | null {
-  const node = pickBestSource(
+  const manga = pickSourceManga(details, animeName);
+  if (manga) return { kind: "manga", node: manga };
+  const novel = pickBestSource(
     details,
     animeName,
-    details.adaptations.filter((candidate) => candidate.mediaType === "manga"),
+    details.adaptations.filter(
+      (candidate) => candidate.mediaType === "manga" && isEBookNode(candidate),
+    ),
   );
-  return node ? { kind: isEBookNode(node) ? "ebook" : "manga", node } : null;
+  return novel ? { kind: "ebook", node: novel } : null;
 }
 
 export function pickSourceManga(

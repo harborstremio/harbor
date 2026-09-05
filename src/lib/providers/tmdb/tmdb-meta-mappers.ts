@@ -1,7 +1,7 @@
 import type { Meta } from "../../cinemeta";
 import { MOVIE_GENRES, TV_GENRES } from "../../feed/tags";
 import { loadStoredSettings } from "../../settings/load";
-import { IMG } from "./tmdb-client";
+import { tmdbBackdropUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
 
 export function isAnimeItem(item: {
   genre_ids?: number[];
@@ -49,8 +49,8 @@ export type RawSeries = {
 
 export type Page<T> = { results?: T[] };
 
-export const poster = (p?: string | null) => (p ? `${IMG}/w342${p}` : undefined);
-export const back = (p?: string | null) => (p ? `${IMG}/w780${p}` : undefined);
+export const poster = (p?: string | null) => tmdbPosterUrl(p);
+export const back = (p?: string | null) => tmdbBackdropUrl(p);
 export const year = (s?: string) => (s ? s.slice(0, 4) : undefined);
 export const rating = (v?: number) => (v && v > 0 ? v.toFixed(1) : undefined);
 

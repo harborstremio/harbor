@@ -32,6 +32,7 @@ const exclusiveTeardown = new Map<symbol, () => void>();
 export function MultiPlayer({
   url,
   muted,
+  volume,
   cover = false,
   exclusive = false,
   onPlaying,
@@ -39,6 +40,7 @@ export function MultiPlayer({
 }: {
   url: string;
   muted: boolean;
+  volume?: number;
   cover?: boolean;
   exclusive?: boolean;
   onPlaying?: () => void;
@@ -223,6 +225,10 @@ export function MultiPlayer({
   useEffect(() => {
     if (ref.current) ref.current.muted = muted;
   }, [muted]);
+
+  useEffect(() => {
+    if (ref.current && volume != null) ref.current.volume = Math.max(0, Math.min(1, volume));
+  }, [volume]);
 
   return (
     <video

@@ -144,11 +144,14 @@ function VoyageCapsule({ meta }: { meta: Meta }) {
         className="absolute inset-0"
         style={{ background: "radial-gradient(135% 130% at 100% 0%, transparent 26%, color-mix(in oklch, var(--color-canvas), transparent 6%) 92%)" }}
       />
-      <div className="absolute bottom-3 left-4 flex items-end gap-2.5 [transform:skewX(8deg)]">
+      <div className="absolute inset-x-4 bottom-3 flex items-end gap-2.5 [transform:skewX(8deg)]">
         <span className="block h-[68px] w-[46px] shrink-0 overflow-hidden rounded-sm shadow-[0_8px_18px_-6px_rgba(0,0,0,0.85)] ring-1 ring-white/15">
           <img src={poster.src} onError={poster.onError} alt="" draggable={false} className="h-full w-full object-cover" />
         </span>
-        <span className="line-clamp-2 max-w-[8.5rem] pb-1 text-[12px] font-semibold leading-tight text-ink [text-shadow:0_1px_6px_rgba(0,0,0,0.95)]">
+        <span
+          className="line-clamp-3 min-w-0 flex-1 pb-1 text-[12px] font-semibold leading-[1.25] text-ink [overflow-wrap:anywhere] [text-shadow:0_1px_2px_var(--color-canvas),0_1px_8px_var(--color-canvas),0_0_16px_var(--color-canvas)]"
+          title={meta.name}
+        >
           {meta.name}
         </span>
       </div>

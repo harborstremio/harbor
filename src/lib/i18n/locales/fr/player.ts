@@ -54,6 +54,9 @@ const player: Record<string, string> = {
     "Impossible de charger ce fichier de sous-titres. Essayez-en un autre.",
   "Couldn't load {name}": "Impossible de charger {name}",
   "Couldn't open this file": "Impossible d’ouvrir ce fichier",
+  "Couldn't reload the stream. Try picking another source.":
+    "Impossible de recharger le flux. Essayez de choisir une autre source.",
+  "Couldn't restart the streaming server.": "Impossible de redémarrer le serveur de streaming.",
   "Couldn't save the synced subtitle. Try again.":
     "Impossible d’enregistrer les sous-titres synchronisés. Réessayez.",
   "Couldn't switch subtitles. Try again.": "Impossible de changer de sous-titres. Réessayez.",
@@ -102,6 +105,8 @@ const player: Record<string, string> = {
   "Frame rate": "Fréquence d’images",
   "Go to live": "Revenir au direct",
   "Got it": "Compris",
+  "Harbor's streaming server only runs in the desktop app.":
+    "Le serveur de streaming de Harbor ne fonctionne que dans l’application de bureau.",
   "HI/SDH": "Sourds et malentendants",
   "Hidden by filter: {reason}": "Masqué par le filtre : {reason}",
   "Hide details": "Masquer les détails",
@@ -110,6 +115,7 @@ const player: Record<string, string> = {
   "Hide others' drawings": "Masquer les dessins des autres",
   "Hide search": "Masquer la recherche",
   "HW decode": "Décodage matériel",
+  "Ignore this title": "Ignorer ce titre",
   "Imported and now playing": "Importé et en cours de lecture",
   "Instant Play: clicking Play queues the next stream automatically.":
     "Lecture instantanée : cliquer sur Lecture met automatiquement le flux suivant en file d’attente.",
@@ -149,6 +155,8 @@ const player: Record<string, string> = {
   "Mute · M": "Couper le son · M",
   "Name your first template": "Nommez votre premier modèle",
   "Name your look": "Nommez votre style",
+  "Never show the content advisory for this title again":
+    "Ne plus jamais afficher l’avertissement sur le contenu pour ce titre",
   "New look name": "Nom de la nouvelle apparence",
   "New template name": "Nom du nouveau modèle",
   "Next and Previous behavior": "Comportement de Suivant et Précédent",
@@ -209,8 +217,10 @@ const player: Record<string, string> = {
   "Recording now": "Enregistrement en cours",
   "Recording · {pct}% · {remaining} · click to manage":
     "Enregistrement · {pct}% · {remaining} · cliquez pour gérer",
+  "Reloading the stream…": "Rechargement du flux…",
   "Reset sync": "Réinitialiser la synchronisation",
   "Resize subtitle menu": "Redimensionner le menu des sous-titres",
+  "Restarting the streaming server…": "Redémarrage du serveur de streaming…",
   "Resume from {time}": "Reprendre à {time}",
   "Return to full window": "Revenir à la fenêtre entière",
   "Same file": "Même fichier",
@@ -269,6 +279,7 @@ const player: Record<string, string> = {
   "Stop showing as second subtitle": "Ne plus afficher comme deuxième sous-titre",
   "Stream failed to load": "Échec du chargement du flux",
   "Stream is taking a while": "Le chargement du flux prend du temps",
+  "Streaming server restarted.": "Serveur de streaming redémarré.",
   "Subtitle appearance": "Apparence des sous-titres",
   "Subtitle color {color}": "Couleur des sous-titres : {color}",
   "Subtitle details": "Détails des sous-titres",
@@ -295,6 +306,7 @@ const player: Record<string, string> = {
     "Passer à la liste des chaînes (masquer le guide des programmes)",
   "Switch to program guide": "Passer au guide des programmes",
   "The host starts playback for the whole room.": "L’hôte lance la lecture pour toute la salle.",
+  "The streaming server didn't come back up.": "Le serveur de streaming n’a pas redémarré.",
   "Thicker outline": "Contour plus épais",
   "Thinner outline": "Contour plus fin",
   "This and next: + {title}": "En cours et à suivre : + {title}",

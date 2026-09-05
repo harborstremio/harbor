@@ -123,7 +123,7 @@ export function ShotsStep({
             <button
               onClick={() => onRemove(i)}
               aria-label={t("Remove")}
-              className="absolute end-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur-sm transition-opacity hover:bg-black/75 group-hover:opacity-100"
+              className="absolute end-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur-sm transition-opacity hover:bg-black/75 group-hover:opacity-100 [[data-input-modality=keys]_&]:opacity-100"
             >
               <Trash2 size={14} />
             </button>

@@ -4,8 +4,9 @@ import { Check, RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { IS_BETA_BUILD } from "@/lib/build-info";
 import { useT } from "@/lib/i18n";
-import { Section } from "../shared";
-import { SettingGroup, SettingRow } from "../kit";
+import { readBetaReturnContext } from "@/lib/updater/beta-return";
+import { ROW_DESC, Section } from "../shared";
+import { SettingRow } from "../kit";
 import { Signature } from "../signature";
 import { isTauri } from "../player-panel/internals";
 
@@ -36,22 +37,27 @@ export function AboutTab() {
 
 function AboutRow() {
   const t = useT();
+  const experimental = readBetaReturnContext(__APP_VERSION__);
   return (
-    <SettingGroup>
+    <>
       <InfoLine
         label={t("Version")}
-        value={`${__APP_VERSION__}${IS_BETA_BUILD ? ` (${t("Beta")})` : ""}`}
+        value={
+          experimental
+            ? `${experimental.experimentalVersion} (${t("Experimental")})`
+            : `${__APP_VERSION__}${IS_BETA_BUILD ? ` (${t("Beta")})` : ""}`
+        }
       />
       <InfoLine label={t("Build")} value={isTauri ? t("Desktop (Tauri 2 / WebView2)") : t("Web")} />
       <InfoLine label={t("Bug reports")} value="bugs@harbor.site" />
-    </SettingGroup>
+    </>
   );
 }
 
 function InfoLine({ label, value }: { label: string; value: string }) {
   return (
     <SettingRow label={label}>
-      <span className="shrink-0 text-[13.5px] tabular-nums text-ink">{value}</span>
+      <span className={`min-w-0 break-words text-end tabular-nums ${ROW_DESC}`}>{value}</span>
     </SettingRow>
   );
 }
@@ -61,11 +67,8 @@ function LegalDisclaimer() {
   const trademarkNames =
     '"Stremio", "Cinemeta", "OpenSubtitles", "Real-Debrid", "Premiumize", "AllDebrid", "TorBox", "DebridLink", "TMDB", "Trakt", "IMDb", "Netflix", "Disney+"';
   return (
-    <section className="rounded-md bg-elevated p-5">
-      <span className="block text-[10.5px] font-bold uppercase tracking-[0.22em] text-ink-subtle">
-        {t("Legal")}
-      </span>
-      <p className="mt-2 text-[12.5px] leading-relaxed text-ink-muted">
+    <Section title={t("Legal")}>
+      <p className={`max-w-[70ch] ${ROW_DESC}`}>
         {t("{app} is an independent, open-source desktop and web client.", { app: "Harbor" })}{" "}
         <span className="font-semibold text-ink">
           {t(
@@ -82,13 +85,13 @@ function LegalDisclaimer() {
           { names: trademarkNames },
         )}
       </p>
-      <p className="mt-2 text-[12.5px] leading-relaxed text-ink-muted">
+      <p className={`max-w-[70ch] ${ROW_DESC}`}>
         {t(
           "{app} itself does not host, distribute, or index any media. All streams come from third-party addons, debrid services, or your own {service} account that you configure yourself. You are responsible for what you choose to play and for complying with the laws of your jurisdiction.",
           { app: "Harbor", service: "Stremio" },
         )}
       </p>
-    </section>
+    </Section>
   );
 }
 
@@ -103,13 +106,13 @@ function OnboardingRow() {
   }, [phase]);
 
   return (
-    <SettingGroup>
+    <>
       <ActionRow
         label={tr("Replay walkthrough")}
         sub={tr("Re-runs the welcome flow and clears every dismissed tip.")}
         cta={phase === "walkthrough" ? tr("Done") : tr("Replay")}
         icon={
-          phase === "walkthrough" ? <Check size={14} strokeWidth={2.6} /> : <RotateCw size={14} />
+          phase === "walkthrough" ? <Check size={16} strokeWidth={2.6} /> : <RotateCw size={16} />
         }
         tone={phase === "walkthrough" ? "success" : "neutral"}
         onClick={() => {
@@ -123,13 +126,13 @@ function OnboardingRow() {
           "Brings back the small in-app tips you've dismissed without redoing the welcome flow.",
         )}
         cta={phase === "hints" ? tr("Restored") : tr("Restore")}
-        icon={phase === "hints" ? <Check size={14} strokeWidth={2.6} /> : <RotateCw size={14} />}
+        icon={phase === "hints" ? <Check size={16} strokeWidth={2.6} /> : <RotateCw size={16} />}
         tone={phase === "hints" ? "success" : "neutral"}
         onClick={() => {
           resetNudges();
           setPhase("hints");
         }}
       />
-    </SettingGroup>
+    </>
   );
 }

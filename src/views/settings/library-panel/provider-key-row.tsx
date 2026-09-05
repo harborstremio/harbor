@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import { Key } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { SettingRow } from "../kit";
+import { ROW_ACTION, SettingRow } from "../kit";
 import type { LibraryKey } from "../library-panel";
 
-export type KeyId = LibraryKey | "mdblist" | "postersrv" | "audd" | "songai" | "nyt";
+export type KeyId = LibraryKey | "mdblist" | "postersrv" | "audd" | "songai" | "nyt" | "sports";
 
 export type KeyEntry = {
   id: KeyId;
@@ -17,6 +17,9 @@ export type KeyEntry = {
   guide?: ReactNode;
   field: ReactNode;
 };
+
+const KEY_BADGE =
+  "inline-flex h-[22px] shrink-0 items-center rounded-[6px] bg-accent-soft px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-accent";
 
 export function ProviderKeyRow({ entry, onOpen }: { entry: KeyEntry; onOpen: () => void }) {
   const t = useT();
@@ -31,40 +34,25 @@ export function ProviderKeyRow({ entry, onOpen }: { entry: KeyEntry; onOpen: () 
             src={entry.logo}
             alt=""
             draggable={false}
-            className="h-7 w-7 shrink-0 rounded-md object-contain"
+            className="h-5 w-5 shrink-0 rounded-[6px] object-contain"
           />
         ) : (
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-canvas text-ink-subtle">
-            <Key size={14} />
-          </span>
+          <Key size={18} strokeWidth={2} />
         )
       }
       label={
-        <>
-          {entry.name}
-          {entry.badge && (
-            <span className="rounded-full bg-accent-soft px-2 py-[3px] text-[9.5px] font-semibold uppercase tracking-wider text-accent">
-              {entry.badge}
-            </span>
-          )}
-        </>
+        <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
+          <span className="min-w-0">{entry.name}</span>
+          {entry.badge && <span className={KEY_BADGE}>{entry.badge}</span>}
+        </span>
       }
       desc={entry.desc}
     >
-      <span
-        className={`flex shrink-0 items-center gap-1.5 rounded-full bg-canvas px-2.5 py-1 text-[11.5px] font-semibold ${
-          set ? "text-accent" : "text-ink-subtle"
-        }`}
-      >
-        <span className={`h-1.5 w-1.5 rounded-full ${set ? "bg-accent" : "bg-edge"}`} />
+      <span className="flex shrink-0 items-center gap-2 text-[15.5px] text-ink-muted">
+        <span className={`h-2 w-2 shrink-0 rounded-full ${set ? "bg-success" : "bg-edge"}`} />
         {set ? t("Active") : t("Not set")}
       </span>
-      {entry.guide}
-      <button
-        type="button"
-        onClick={onOpen}
-        className="harbor-press-pop h-9 shrink-0 rounded-md bg-canvas px-4 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
-      >
+      <button type="button" onClick={onOpen} className={ROW_ACTION}>
         {set ? t("Manage") : t("Add key")}
       </button>
     </SettingRow>

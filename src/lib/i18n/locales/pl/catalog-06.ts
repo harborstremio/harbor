@@ -149,6 +149,8 @@ const catalog06: Record<string, string> = {
     "Harbor wyświetla Twoje listy AniList na stronie Anime i synchronizuje postęp.",
   "Harbor signed you up but returned no session. Try signing in instead.":
     "Harbor utworzył konto, ale nie zwrócił sesji. Zamiast tego spróbuj się zalogować.",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "Harbor sam dobiera zapas danych do każdego tytułu i zwiększa go, gdy odtwarzanie się ustabilizuje. Odpowiednie dla niemal każdego.",
   "Harbor snippet": "Fragment kodu Harbor",
   "Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.":
     "Harbor korzysta z protokołu dodatków Stremio, a cały ekosystem dodatków wyrósł z ich pracy. Stremio jest finansowane przez swoją społeczność, a osoby, które je wspierają, otrzymują wcześniejszy dostęp do funkcji eksperymentalnych. Jeśli możesz sobie na to pozwolić, wesprzyj również ich.",
@@ -208,6 +210,8 @@ const catalog06: Record<string, string> = {
     "Publiczny przekaźnik Harbor nie obsługuje jeszcze najnowszego protokołu.",
   "Harbor's public relay updates automatically; nothing to do.":
     "Publiczny przekaźnik Harbor aktualizuje się automatycznie, nie musisz nic robić.",
+  "Harbor's streaming server only runs in the desktop app.":
+    "Serwer strumieniowania Harbor działa tylko w aplikacji komputerowej.",
   "Harbor's temporary viewer requires HTTPS.":
     "Tymczasowa przeglądarka Harbor wymaga protokołu HTTPS.",
   "Harbor, from a public domain frame": "Harbor, z kadru należącego do domeny publicznej",
@@ -383,6 +387,8 @@ const catalog06: Record<string, string> = {
   "Hold to continue": "Przytrzymaj, aby kontynuować",
   "Hold to skip or continue": "Przytrzymaj, aby pominąć lub kontynuować",
   "Holdover Picks": "Propozycje na ciąg dalszy",
+  "Holds up to {size} in memory while a video plays.":
+    "Podczas odtwarzania wideo zajmuje w pamięci do {size}.",
   "Holdup Matey!": "Chwileczkę, kamracie!",
   "Holiday Classics": "Świąteczna klasyka",
   "Holiday Warmth": "Świąteczne ciepło",
@@ -585,6 +591,8 @@ const catalog06: Record<string, string> = {
   "If you would rather give it away": "Jeśli wolisz przekazać pieniądze innym",
   "Ignore the paid tiers. Personal use is free, you are not a company. Just pick the first option and keep going.":
     "Pomiń płatne plany. Użytek osobisty jest bezpłatny, nie jesteś firmą. Wybierz pierwszą opcję i przejdź dalej.",
+  "Ignore this title": "Ignoruj ten tytuł",
+  "Ignored titles": "Ignorowane tytuły",
   Image: "Obraz",
   "Image URL (optional)": "Adres URL obrazu (opcjonalnie)",
   "Image bar active. Pick a style above to switch back, or clear the image below.":

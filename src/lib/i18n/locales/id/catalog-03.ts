@@ -24,6 +24,8 @@ const catalog: Record<string, string> = {
   "<= {size} GB": "<= {size} GB",
   "A 16:9 shot of your theme looks best": "Gambar tema berasio 16:9 terlihat paling bagus",
   "A Short Tonight: {genre} Under 90": "Film Pendek Malam Ini: {genre} di Bawah 90 Menit",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "Muatan awal sekitar dua menit. Cukup untuk melewati gangguan singkat tanpa menunggu lama sebelum pemutaran dimulai.",
   "A favorite title or one of your themes will appear here":
     "Judul favorit atau salah satu tema Anda akan muncul di sini",
   "A living shelf for new worlds, beloved stories, and the books you have yet to meet.":
@@ -41,6 +43,7 @@ const catalog: Record<string, string> = {
   AWAY: "TIDAK DI TEMPAT",
   "About a minute. Free for personal use.": "Sekitar satu menit. Gratis untuk penggunaan pribadi.",
   "Actor, title, genre": "Aktor, judul, genre",
+  Adaptive: "Adaptif",
   "Add a Google Books API key for book titles, covers, authors, and descriptions. Wikidata works automatically as the final metadata fallback.":
     "Tambahkan kunci API Google Books untuk mendapatkan judul buku, sampul, penulis, dan deskripsi. Wikidata otomatis digunakan sebagai cadangan metadata terakhir.",
   "Add a TMDB key in Settings to browse service catalogs.":

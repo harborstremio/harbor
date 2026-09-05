@@ -2,6 +2,7 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Check, X } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
+import traktLogo from "@/assets/trakt.svg";
 import { narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { resolveMeta } from "@/lib/meta-resource";
 import { animeKitsuMeta, type AnimeKitsuVideo } from "@/lib/providers/anime-kitsu-addon";
@@ -74,7 +75,10 @@ export const ContinueCard = memo(function ContinueCard({
   useSnapshotVersion();
   const newEpisode = useHasNewEpisode(item);
   const snapshot = readSnapshot(item._id);
-  const isExternal = item.external === "simkl";
+  const isExternal = !!item.external;
+  const externalLogo = item.external === "trakt" ? traktLogo : simklLogo;
+  const externalLabel =
+    item.external === "trakt" ? t("Paused on Trakt") : t("Paused on Simkl");
   const dur = item.state?.duration ?? 0;
   const off = item.state?.timeOffset ?? 0;
   const progress = dur > 0 ? Math.min(1, off / dur) : 0;
@@ -522,10 +526,10 @@ export const ContinueCard = memo(function ContinueCard({
             <div className="absolute bottom-2 start-2 flex max-w-[calc(100%-16px)] items-center gap-1.5 rounded-md bg-canvas/95 px-2 py-1 text-[11px]">
               {isExternal ? (
                 <img
-                  src={simklLogo}
+                  src={externalLogo}
                   alt=""
                   className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                  title={t("Paused on Simkl")}
+                  title={externalLabel}
                 />
               ) : (
                 <Play size={11} fill="currentColor" className="shrink-0 text-ink" />

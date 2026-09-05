@@ -75,8 +75,10 @@ const catalog06: Record<string, string> = {
   Media: "미디어",
   "Media type": "미디어 유형",
   "Media types": "미디어 유형",
+  Medium: "보통",
   Member: "멤버",
   Members: "멤버",
+  "Memory cap": "메모리 상한",
   "Men of History": "역사 속 남자들",
   Menu: "메뉴",
   "Menu / Options": "메뉴 / 옵션",
@@ -345,6 +347,8 @@ const catalog06: Record<string, string> = {
   "Never contact the community server in either direction. Nothing is looked up and nothing is contributed from this device.":
     "커뮤니티 서버와 어떠한 방향으로도 통신하지 않습니다. 이 기기에서는 아무것도 조회하거나 공유하지 않습니다.",
   "Never hide the next episode": "다음 에피소드 항상 표시",
+  "Never show the content advisory for this title again":
+    "이 작품에는 콘텐츠 주의 사항을 다시 표시하지 않습니다",
   "Never target official or licensed publisher sites.":
     "공식 또는 정식 라이선스 출판사 사이트를 절대 대상으로 지정하지 마세요.",
   Nevermind: "취소",
@@ -433,6 +437,7 @@ const catalog06: Record<string, string> = {
   "No JavaScript. Scripts, inline handlers, and javascript: URLs are removed.":
     "JavaScript는 사용할 수 없습니다. 스크립트, 인라인 핸들러 및 javascript: URL은 삭제됩니다.",
   "No Label": "레이블 없음",
+  "No Letterboxd lists shared yet": "아직 공개된 Letterboxd 목록이 없습니다",
   "No Live TV playlists yet": "아직 Live TV 재생목록이 없습니다",
   "No PIN set.": "설정된 PIN이 없습니다.",
   "No Simkl history yet.": "아직 Simkl 시청 기록이 없습니다.",
@@ -888,6 +893,8 @@ const catalog06: Record<string, string> = {
     "기본적으로 꺼져 있습니다. 방문자가 내가 시청한 콘텐츠를 볼 수 있게 합니다",
   "Off by default. Show what you are watching right now, or your watch party, on your profile. Applies instantly":
     "기본적으로 꺼져 있습니다. 지금 시청 중인 콘텐츠나 시청 파티를 프로필에 표시합니다. 즉시 적용됩니다",
+  "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
+    "기본적으로 꺼져 있습니다. 프로필을 방문하는 누구에게나 Letterboxd 이름, 목록, 영화 편수를 표시합니다. 연결 자체는 설정 → Letterboxd에서 관리하세요.",
   "Off by default. Shows your Simkl avatar, name and watch stats on your profile for anyone who visits. Manage the connection itself in Settings, Simkl.":
     "기본적으로 꺼져 있습니다. 방문자 누구나 볼 수 있도록 프로필에 Simkl 아바타, 이름 및 시청 통계를 표시합니다. 연결 자체는 설정의 Simkl에서 관리하세요.",
   "Off keeps your font, background, and canvas as a private preview.":
@@ -908,6 +915,7 @@ const catalog06: Record<string, string> = {
     "Cloudflare에서 {b1}을(를) 클릭한 다음 {b2}을(를) 찾아 {b3}을(를) 클릭합니다.",
   "On Edge": "벼랑 끝 긴장감",
   "On Hold": "보류 중",
+  "On Letterboxd": "Letterboxd 프로필",
   "On Shelf": "서재에 있음",
   "On Simkl": "Simkl에서 보기",
   "On Stremio-Addons": "Stremio-Addons에서 보기",

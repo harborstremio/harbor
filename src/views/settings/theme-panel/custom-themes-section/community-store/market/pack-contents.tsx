@@ -15,8 +15,8 @@ function PackTile({
   const [failed, setFailed] = useState(false);
   if (variant === "hero") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-md bg-elevated px-2 py-1.5 ring-1 ring-edge-soft">
-        <span className="grid h-5 w-5 shrink-0 place-items-center">
+      <span className="inline-flex min-h-11 items-center gap-2 rounded-md bg-elevated px-2.5 py-2 ring-1 ring-edge-soft">
+        <span className="grid h-6 w-6 shrink-0 place-items-center">
           {!failed && (
             <img
               src={url}
@@ -27,12 +27,12 @@ function PackTile({
             />
           )}
         </span>
-        <span className="text-[12.5px] font-medium text-ink-muted">{label}</span>
+        <span className="text-[15.5px] font-normal leading-[22px] text-ink-muted">{label}</span>
       </span>
     );
   }
   return (
-    <span className="flex min-w-0 items-center gap-2 rounded-md bg-elevated px-2.5 py-2 ring-1 ring-edge-soft">
+    <span className="flex min-h-11 min-w-0 items-center gap-2.5 rounded-md bg-elevated px-2.5 py-2 ring-1 ring-edge-soft">
       <span className="grid h-7 w-7 shrink-0 place-items-center rounded-sm bg-surface">
         {!failed && (
           <img
@@ -44,7 +44,7 @@ function PackTile({
           />
         )}
       </span>
-      <span className="truncate text-[12.5px] font-medium text-ink">{label}</span>
+      <span className="truncate text-[15.5px] font-normal leading-[22px] text-ink">{label}</span>
     </span>
   );
 }
@@ -65,7 +65,7 @@ export function PackContents({
   const overflow = icons.length - shown.length;
   return (
     <div className={`flex flex-col gap-2.5 ${className ?? ""}`}>
-      <span className="text-[12.5px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
+      <span className="harbor-settings-label">
         {t("{count} in this pack", { count: icons.length })}
       </span>
       <div
@@ -82,7 +82,7 @@ export function PackContents({
           />
         ))}
         {variant === "hero" && overflow > 0 && (
-          <span className="inline-flex items-center rounded-md bg-elevated px-2.5 py-1.5 text-[12.5px] font-semibold text-ink-muted ring-1 ring-edge-soft">
+          <span className="inline-flex min-h-11 items-center rounded-md bg-elevated px-3 py-2 text-[15.5px] font-normal leading-[22px] text-ink-muted ring-1 ring-edge-soft">
             {t("+{count} more", { count: overflow })}
           </span>
         )}

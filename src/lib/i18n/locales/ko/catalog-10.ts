@@ -331,6 +331,8 @@ const catalog10: Record<string, string> = {
     "이번 버전에서 변경된 내용을 알려 주세요. 심사 담당자도 이 내용을 확인합니다.",
   Template: "템플릿",
   "Temporary files": "임시 파일",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "10분 분량을 미리 받아 둡니다. 불안정한 Wi-Fi나 멀리 있는 서버에 맞춘 설정으로, 대신 재생이 시작되기까지 더 오래 기다려야 합니다.",
   "Tennis tournaments": "테니스 토너먼트",
   "Tense Performances": "긴장감 넘치는 연기",
   Test: "테스트",
@@ -570,6 +572,8 @@ const catalog10: Record<string, string> = {
     "제공업체 서버에서 오류를 반환했습니다. Harbor에서는 해결할 수 없습니다. 다른 소스를 선택하세요.",
   "The quick brown fox jumps": "다람쥐 헌 쳇바퀴에 타고파",
   "The quick brown fox jumps over the lazy dog": "다람쥐 헌 쳇바퀴에 타고파",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "가장 빠르게 시작하고 메모리도 가장 적게 사용합니다. 빠르고 안정적인 연결이거나 메모리가 부족한 기기에 적합합니다.",
   "The ratings row on a title's detail page, next to runtime and genre.":
     "제목 상세 페이지에서 재생 시간 및 장르 옆에 표시되는 평점 행입니다.",
   "The real footage": "실제 기록 영상",
@@ -606,6 +610,7 @@ const catalog10: Record<string, string> = {
     "이 소스가 이 만화에 대해 잘못된 응답을 반환했습니다. 일시적인 문제이거나 작품이 이동되었을 수 있습니다. 다른 소스를 사용하거나 뒤로 돌아가 다른 작품을 선택하세요.",
   "The streaming engine is still starting up. Give it a moment and press Play again.":
     "스트리밍 엔진을 시작하는 중입니다. 잠시 후 재생을 다시 누르세요.",
+  "The streaming server didn't come back up.": "스트리밍 서버가 다시 시작되지 않았습니다.",
   "The stronger fix when streams refuse to load. Cached stream files and the DHT cache are removed, so the next stream starts from scratch.":
     "스트림이 로드되지 않을 때 사용하는 더 강력한 해결 방법입니다. 캐시된 스트림 파일과 DHT 캐시가 삭제되므로 다음 스트림은 처음부터 시작됩니다.",
   "The test calls": "테스트는",
@@ -624,6 +629,7 @@ const catalog10: Record<string, string> = {
   "The window and taskbar icon updates right away. The installed shortcut refreshes on the next update.":
     "창과 작업 표시줄 아이콘은 즉시 업데이트됩니다. 설치된 바로 가기는 다음 업데이트 시 새로 고쳐집니다.",
   "The yellow chip in the poster corner.": "포스터 모서리의 노란색 칩입니다.",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · 인트로 및 엔딩 크레딧 구간",
   TheTVDB: "TheTVDB",
   "TheTVDB · episode data": "TheTVDB · 에피소드 데이터",
   Theme: "테마",
@@ -872,6 +878,7 @@ const catalog10: Record<string, string> = {
     "타이밍이 맞춰졌습니다. 이후 다시 빠르거나 늦어지면 다른 대사에서 이 작업을 반복하세요.",
   "Timing looks aligned": "타이밍이 맞습니다",
   "Timing rate": "타이밍 속도",
+  "Timing sources": "구간 정보 소스",
   Title: "제목",
   "Title & info": "제목 및 정보",
   "Title (optional)": "제목(선택 사항)",
@@ -879,6 +886,8 @@ const catalog10: Record<string, string> = {
   "Title text": "제목 텍스트",
   Titles: "작품",
   "Titles and descriptions": "제목 및 설명",
+  "Titles you ignore on the advisory card never show it again.":
+    "주의 사항 카드에서 무시한 작품에는 콘텐츠 주의 사항이 다시 표시되지 않습니다.",
   "Titles, overviews, and taglines from TMDB display in this language when a translation exists. Needs a TMDB key.":
     "번역이 있으면 TMDB의 제목, 줄거리 및 태그라인을 이 언어로 표시합니다. TMDB 키가 필요합니다.",
   "To clipboard": "클립보드로",

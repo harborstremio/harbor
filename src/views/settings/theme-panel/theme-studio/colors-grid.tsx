@@ -11,9 +11,9 @@ const SURFACES: Array<{ key: keyof CustomColors; label: string }> = [
 ];
 
 const INK: Array<{ key: keyof CustomColors; sample: string; cls: string }> = [
-  { key: "ink", sample: "Primary text you read", cls: "text-[15px] font-semibold" },
-  { key: "inkMuted", sample: "Secondary copy sits here", cls: "text-[13px]" },
-  { key: "inkSubtle", sample: "Captions and quiet hints", cls: "text-[12.5px]" },
+  { key: "ink", sample: "Primary text you read", cls: "text-[16.5px] font-medium leading-[24px]" },
+  { key: "inkMuted", sample: "Secondary copy sits here", cls: "text-[15.5px] leading-[22px]" },
+  { key: "inkSubtle", sample: "Captions and quiet hints", cls: "text-[15.5px] leading-[22px]" },
 ];
 
 export function ColorsGrid({
@@ -37,7 +37,7 @@ export function ColorsGrid({
           >
             <span
               aria-hidden
-              className="absolute inset-x-0 bottom-0 px-2 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em]"
+              className="absolute inset-x-0 bottom-0 px-2 py-1.5 text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px]"
               style={{ color: "#ffffff", mixBlendMode: "difference" }}
             >
               {t(s.label)}
@@ -54,7 +54,7 @@ export function ColorsGrid({
           <ColorPopover key={l.key} value={colors[l.key]} onChange={(v) => set(l.key, v)}>
             {(open) => (
               <span
-                className={`block truncate rounded-md px-1.5 py-1 transition-shadow ${l.cls} ${
+                className={`block truncate rounded-md px-1.5 py-2.5 transition-shadow ${l.cls} ${
                   open ? "ring-2 ring-accent" : "ring-1 ring-transparent hover:ring-edge/40"
                 }`}
                 style={{ color: colors[l.key] }}
@@ -73,7 +73,7 @@ export function ColorsGrid({
             onChange={(v) => set("accent", v)}
             className="h-14 rounded-md"
           />
-          <span className="text-[11.5px] text-ink-subtle">{t("Accent")}</span>
+          <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t("Accent")}</span>
         </div>
         <div className="flex flex-col gap-1.5">
           <SwatchField
@@ -81,7 +81,7 @@ export function ColorsGrid({
             onChange={(v) => set("danger", v)}
             className="h-14 rounded-md"
           />
-          <span className="text-[11.5px] text-ink-subtle">{t("Danger")}</span>
+          <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t("Danger")}</span>
         </div>
         <div className="flex flex-col gap-1.5">
           <ColorPopover
@@ -99,7 +99,7 @@ export function ColorsGrid({
               </span>
             )}
           </ColorPopover>
-          <span className="text-[11.5px] text-ink-subtle">{t("Border")}</span>
+          <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t("Border")}</span>
         </div>
       </div>
     </div>

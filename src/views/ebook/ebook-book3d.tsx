@@ -3,6 +3,19 @@ import { Poster } from "@/components/poster";
 import { useArtGlow } from "../big-picture/bp-art-color";
 import "../ebook-book3d.css";
 
+const BYLINE_MAX = 44;
+
+function bylineOf(value: string): string {
+  const head = value
+    .replace(/\s+/g, " ")
+    .split(/,|;|\(|\bfirst published\b|\bpublished\b|\bborn\b/i)[0]
+    .replace(/^(?:[A-Z][a-z]+(?:-[A-Z][a-z]+)?\s+)?(?:writer|author|novelist|poet|playwright|journalist|essayist)\s+/i, "")
+    .trim();
+  if (head.length <= BYLINE_MAX) return head;
+  const cut = head.slice(0, BYLINE_MAX).replace(/\s+\S*$/, "");
+  return `${cut}…`;
+}
+
 function openingLines(value: string): string {
   return value
     .replace(/<[^>]*>/g, " ")
@@ -77,7 +90,7 @@ export function EBookBook3D({
         <div className="hbk-paper">
           <div className="hbk-page">
             <p className="hbk-page-title">{title}</p>
-            {author && <p className="hbk-page-by">{author}</p>}
+            {author && <p className="hbk-page-by">{bylineOf(author)}</p>}
             <span className="hbk-page-rule" aria-hidden="true" />
             {opening && (
               <div className="hbk-page-text">

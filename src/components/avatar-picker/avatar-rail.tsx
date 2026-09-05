@@ -1,4 +1,4 @@
-import { FolderInput, FolderPlus, HelpCircle, Trash2 } from "lucide-react";
+import { Download, FileJson, FolderInput, FolderPlus, HelpCircle, Trash2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 export type RailGroup = {
@@ -17,6 +17,8 @@ export function AvatarRail({
   onSelect,
   onImport,
   onImportFolder,
+  onImportPack,
+  onExportPack,
   onHelp,
   onDeletePack,
 }: {
@@ -27,6 +29,8 @@ export function AvatarRail({
   onSelect: (id: string) => void;
   onImport: () => void;
   onImportFolder: () => void;
+  onImportPack: () => void;
+  onExportPack?: (packId: string) => void;
   onHelp: () => void;
   onDeletePack: (packId: string) => void;
 }) {
@@ -51,6 +55,7 @@ export function AvatarRail({
             flash={flashIds?.includes(g.id)}
             onClick={() => onSelect(g.id)}
             onDelete={g.packId ? () => onDeletePack(g.packId as string) : undefined}
+            onExport={g.packId && onExportPack ? () => onExportPack(g.packId as string) : undefined}
           />
         ))}
       </div>
@@ -74,6 +79,14 @@ export function AvatarRail({
         </button>
         <button
           type="button"
+          onClick={onImportPack}
+          className="flex items-center gap-2 whitespace-nowrap rounded-[9px] px-3 py-2 text-[13px] font-medium text-ink-muted transition-colors hover:bg-elevated hover:text-ink active:scale-[0.98] motion-reduce:active:scale-100"
+        >
+          <FileJson size={15} strokeWidth={2.2} />
+          {t("Import pack (.json)")}
+        </button>
+        <button
+          type="button"
           onClick={onHelp}
           className="flex items-center gap-2 whitespace-nowrap rounded-[9px] px-3 py-1.5 text-[11.5px] font-medium text-ink-subtle transition-colors hover:bg-elevated hover:text-ink-muted"
         >
@@ -93,6 +106,7 @@ function RailItem({
   flash,
   onClick,
   onDelete,
+  onExport,
 }: {
   label: string;
   count: number;
@@ -101,6 +115,7 @@ function RailItem({
   flash?: boolean;
   onClick: () => void;
   onDelete?: () => void;
+  onExport?: () => void;
 }) {
   const t = useT();
   return (
@@ -134,6 +149,16 @@ function RailItem({
           </span>
         )}
       </button>
+      {onExport && (
+        <button
+          type="button"
+          onClick={onExport}
+          aria-label={t("Export pack")}
+          className="absolute end-8 flex h-6 w-6 items-center justify-center rounded-md text-ink-subtle opacity-0 transition-all hover:bg-elevated hover:text-ink group-hover/row:opacity-100"
+        >
+          <Download size={13} strokeWidth={2.2} />
+        </button>
+      )}
       {onDelete && (
         <button
           type="button"

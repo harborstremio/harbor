@@ -140,6 +140,12 @@ const plurals: Record<string, string> = {
   "{count} friends in common": "{count} общих друзей",
   "{count} friends in common#one": "{count} общий друг",
   "{count} friends in common#few": "{count} общих друга",
+  "{count} titles will never show the content advisory again.":
+    "Для {count} названий предупреждение о контенте больше не появится.",
+  "{count} titles will never show the content advisory again.#one":
+    "Для {count} названия предупреждение о контенте больше не появится.",
+  "{count} titles will never show the content advisory again.#few":
+    "Для {count} названий предупреждение о контенте больше не появится.",
   "{label} · {n} collection": "{label} · {n} коллекций",
   "{label} · {n} collection#one": "{label} · {n} коллекция",
   "{label} · {n} collection#few": "{label} · {n} коллекции",

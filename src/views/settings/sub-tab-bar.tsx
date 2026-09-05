@@ -1,6 +1,10 @@
 import { useLayoutEffect, useRef } from "react";
 import { useT } from "@/lib/i18n";
+import { stripArrowKeys } from "./shared";
 import type { SubTab } from "./sub-tabs";
+
+const COUNT_BADGE =
+  "inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] tabular-nums transition-colors";
 
 export function SubTabBar({
   tabs,
@@ -28,23 +32,58 @@ export function SubTabBar({
     const firstPaint = prevIndex.current < 0;
     prevIndex.current = activeIndex;
 
-    bar.style.left = `${to.offsetLeft}px`;
+    const track = to.offsetParent as HTMLElement | null;
+    const trackWidth = track ? track.clientWidth : 0;
+    const rtl = track ? getComputedStyle(track).direction === "rtl" : false;
+    const startOf = (el: HTMLElement) =>
+      rtl ? trackWidth - el.offsetLeft - el.offsetWidth : el.offsetLeft;
+
+    const toStart = startOf(to);
+    const toWidth = to.offsetWidth;
+
+    bar.style.insetInlineStart = `${toStart}px`;
     bar.style.top = `${to.offsetTop + to.offsetHeight - 2}px`;
-    bar.style.width = `${to.offsetWidth}px`;
+    bar.style.width = `${toWidth}px`;
     bar.style.opacity = "1";
 
     if (firstPaint || !from || from === to) return;
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
+    const fromStart = startOf(from);
+    const fromWidth = from.offsetWidth;
+
     if (from.offsetTop === to.offsetTop) {
-      const edge = Math.min(from.offsetLeft, to.offsetLeft);
-      const far = Math.max(from.offsetLeft + from.offsetWidth, to.offsetLeft + to.offsetWidth);
+      const edge = Math.min(fromStart, toStart);
+      const far = Math.max(fromStart + fromWidth, toStart + toWidth);
+      const base = to.offsetTop + to.offsetHeight - 2;
       bar.animate(
         [
-          { left: `${from.offsetLeft}px`, width: `${from.offsetWidth}px`, height: "2px" },
-          { left: `${edge}px`, width: `${far - edge}px`, height: "3px", offset: 0.45 },
-          { left: `${to.offsetLeft}px`, width: `${to.offsetWidth + 5}px`, height: "2px", offset: 0.76 },
-          { left: `${to.offsetLeft}px`, width: `${to.offsetWidth}px`, height: "2px" },
+          {
+            insetInlineStart: `${fromStart}px`,
+            top: `${base}px`,
+            width: `${fromWidth}px`,
+            height: "2px",
+          },
+          {
+            insetInlineStart: `${edge}px`,
+            top: `${base - 1}px`,
+            width: `${far - edge}px`,
+            height: "3px",
+            offset: 0.45,
+          },
+          {
+            insetInlineStart: `${toStart}px`,
+            top: `${base}px`,
+            width: `${toWidth + 5}px`,
+            height: "2px",
+            offset: 0.76,
+          },
+          {
+            insetInlineStart: `${toStart}px`,
+            top: `${base}px`,
+            width: `${toWidth}px`,
+            height: "2px",
+          },
         ],
         { duration: 460, easing: "ease-in-out" },
       );
@@ -52,14 +91,14 @@ export function SubTabBar({
       bar.animate(
         [
           {
-            left: `${from.offsetLeft}px`,
+            insetInlineStart: `${fromStart}px`,
             top: `${from.offsetTop + from.offsetHeight - 2}px`,
-            width: `${from.offsetWidth}px`,
+            width: `${fromWidth}px`,
           },
           {
-            left: `${to.offsetLeft}px`,
+            insetInlineStart: `${toStart}px`,
             top: `${to.offsetTop + to.offsetHeight - 2}px`,
-            width: `${to.offsetWidth}px`,
+            width: `${toWidth}px`,
           },
         ],
         { duration: 340, easing: "ease-in-out" },
@@ -78,7 +117,10 @@ export function SubTabBar({
   }, [activeIndex, tabs.length]);
 
   return (
-    <div className="relative flex flex-wrap items-center gap-x-6 gap-y-2">
+    <div
+      onKeyDown={stripArrowKeys(btnRefs, (i) => onChange(tabs[i].id))}
+      className="relative flex flex-wrap items-center gap-x-6 gap-y-2"
+    >
       <span
         ref={barRef}
         aria-hidden
@@ -96,7 +138,7 @@ export function SubTabBar({
             }}
             onClick={() => onChange(tab.id)}
             aria-pressed={on}
-            className={`flex h-9 items-center gap-2 text-[13.5px] font-semibold transition-colors duration-200 ${
+            className={`flex h-11 items-center gap-2 whitespace-nowrap text-[15.5px] font-semibold leading-[22px] transition-colors duration-200 ${
               on ? "text-ink" : "text-ink-subtle hover:text-ink-muted"
             }`}
           >
@@ -105,7 +147,7 @@ export function SubTabBar({
                 src={tab.icon}
                 alt=""
                 draggable={false}
-                className={`h-[17px] w-[17px] shrink-0 rounded-[3px] object-contain transition duration-200 ${
+                className={`h-5 w-5 shrink-0 rounded-[6px] object-contain transition duration-200 ${
                   on ? "opacity-100" : "opacity-55 grayscale"
                 }`}
               />
@@ -113,15 +155,15 @@ export function SubTabBar({
             {t(tab.label)}
             {tab.count !== undefined && tab.count > 0 && (
               <span
-                className={`rounded-[3px] px-1.5 py-px text-[10.5px] font-bold tabular-nums transition-colors ${
-                  on ? "bg-ink text-canvas" : "bg-elevated text-ink-subtle"
+                className={`${COUNT_BADGE} ${
+                  on ? "bg-accent-soft text-accent" : "bg-elevated text-ink-subtle"
                 }`}
               >
                 {tab.count}
               </span>
             )}
             {tab.dot && (
-              <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
+              <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-success" />
             )}
           </button>
         );

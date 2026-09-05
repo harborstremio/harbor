@@ -163,6 +163,8 @@ const catalog08: Record<string, string> = {
   "Never contact the community server in either direction. Nothing is looked up and nothing is contributed from this device.":
     "Nigdy nie komunikuj się z serwerem społecznościowym w żadnym kierunku. To urządzenie niczego nie wyszukuje ani nie udostępnia.",
   "Never hide the next episode": "Nigdy nie ukrywaj następnego odcinka",
+  "Never show the content advisory for this title again":
+    "Nigdy więcej nie pokazuj ostrzeżenia o treści dla tego tytułu",
   "Never target official or licensed publisher sites.":
     "Nigdy nie wskazuj oficjalnych ani licencjonowanych stron wydawców.",
   Nevermind: "Nieważne",
@@ -250,6 +252,7 @@ const catalog08: Record<string, string> = {
   "No JavaScript. Scripts, inline handlers, and javascript: URLs are removed.":
     "Bez JavaScriptu. Skrypty, procedury obsługi zdarzeń w kodzie i adresy URL javascript: są usuwane.",
   "No Label": "Bez etykiety",
+  "No Letterboxd lists shared yet": "Nie udostępniono jeszcze żadnych list Letterboxd",
   "No Live TV playlists yet": "Brak playlist telewizji na żywo",
   "No PIN set.": "Nie ustawiono PIN-u.",
   "No PiP session. Closing.": "Brak sesji PiP. Zamykanie.",
@@ -707,6 +710,8 @@ const catalog08: Record<string, string> = {
     "Domyślnie wyłączone. Pozwól odwiedzającym zobaczyć, co ostatnio oglądasz",
   "Off by default. Show what you are watching right now, or your watch party, on your profile. Applies instantly":
     "Domyślnie wyłączone. Pokazuj w profilu, co oglądasz w tej chwili lub w jakim wspólnym seansie uczestniczysz. Zmiana obowiązuje natychmiast",
+  "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
+    "Domyślnie wyłączone. Pokazuje nazwę, listy i liczbę filmów z Letterboxd na Twoim profilu każdej odwiedzającej go osobie. Samym połączeniem możesz zarządzać w Ustawieniach, w sekcji Letterboxd.",
   "Off by default. Shows your Simkl avatar, name and watch stats on your profile for anyone who visits. Manage the connection itself in Settings, Simkl.":
     "Domyślnie wyłączone. Pokazuje awatar, nazwę i statystyki oglądania z Simkl na Twoim profilu każdej odwiedzającej go osobie. Samym połączeniem możesz zarządzać w Ustawieniach, w sekcji Simkl.",
   "Off keeps your font, background, and canvas as a private preview.":
@@ -727,6 +732,7 @@ const catalog08: Record<string, string> = {
     "W Cloudflare kliknij {b1}, następnie znajdź {b2} i kliknij {b3}.",
   "On Edge": "Na krawędzi",
   "On Hold": "Wstrzymane",
+  "On Letterboxd": "Na Letterboxd",
   "On Shelf": "Na półce",
   "On Simkl": "W Simkl",
   "On Stremio-Addons": "W Stremio-Addons",

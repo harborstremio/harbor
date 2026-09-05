@@ -1,5 +1,6 @@
 import type { Meta } from "../../cinemeta";
 import { get, IMG } from "./tmdb-client";
+import { tmdbBackdropUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
 
 export type TmdbCollection = {
   id: number;
@@ -49,8 +50,8 @@ async function run(key: string, id: number): Promise<TmdbCollection | null> {
         id: `tmdb:movie:${p.id}`,
         type: "movie",
         name: p.title ?? p.name ?? "",
-        poster: p.poster_path ? `${IMG}/w342${p.poster_path}` : undefined,
-        background: p.backdrop_path ? `${IMG}/w780${p.backdrop_path}` : undefined,
+        poster: tmdbPosterUrl(p.poster_path),
+        background: tmdbBackdropUrl(p.backdrop_path),
         description: p.overview,
         releaseInfo: (p.release_date ?? "").slice(0, 4) || undefined,
         releaseDate: p.release_date || undefined,
@@ -63,7 +64,7 @@ async function run(key: string, id: number): Promise<TmdbCollection | null> {
     id: raw.id,
     name: raw.name ?? "",
     overview: raw.overview ?? "",
-    poster: raw.poster_path ? `${IMG}/w342${raw.poster_path}` : undefined,
+    poster: tmdbPosterUrl(raw.poster_path),
     backdrop: raw.backdrop_path ? `${IMG}/original${raw.backdrop_path}` : undefined,
     parts,
     genreCounts,
@@ -140,7 +141,7 @@ export async function tmdbSearchCollections(
     .map((r) => ({
       id: r.id,
       name: r.name ?? "",
-      backdrop: r.backdrop_path ? `${IMG}/w780${r.backdrop_path}` : null,
+      backdrop: tmdbBackdropUrl(r.backdrop_path) ?? null,
     }));
   return { hits, totalPages: Math.min(raw?.total_pages ?? 0, 500) };
 }

@@ -33,6 +33,15 @@ const player: Record<string, string> = {
   "Try a different source.": "Попробуйте другой источник.",
   "Try another source.": "Выберите другой источник.",
   "Switch stream": "Сменить поток",
+  "Reloading the stream…": "Перезагрузка потока…",
+  "Couldn't reload the stream. Try picking another source.":
+    "Не удалось перезагрузить поток. Попробуйте выбрать другой источник.",
+  "Harbor's streaming server only runs in the desktop app.":
+    "Стриминг-сервер Harbor работает только в десктопном приложении.",
+  "Restarting the streaming server…": "Перезапуск стриминг-сервера…",
+  "Couldn't restart the streaming server.": "Не удалось перезапустить стриминг-сервер.",
+  "The streaming server didn't come back up.": "Стриминг-сервер так и не заработал.",
+  "Streaming server restarted.": "Стриминг-сервер перезапущен.",
   "Switch to channel list (hide program guide)": "Перейти к списку каналов (скрыть телепрограмму)",
   "Switch to program guide": "Перейти к телепрограмме",
   "Audio tracks": "Аудиодорожки",

@@ -177,6 +177,7 @@ const importLibrary = () => import("@/views/library");
 const importCommunityCollections = () => import("@/views/collections/community-hub");
 const importLive = () => import("@/views/live");
 const importVod = () => import("@/views/playlist-vod");
+const importSports = () => import("@/views/sports");
 const importDownloads = () => import("@/views/downloads");
 const importMatchDetail = () => import("@/views/live/match-detail-view");
 const importOnboarding = () => import("@/components/onboarding");
@@ -233,6 +234,7 @@ const MatchDetailView = lazy(() =>
   importMatchDetail().then((m) => ({ default: m.MatchDetailView })),
 );
 const PlaylistVodView = lazy(() => importVod().then((m) => ({ default: m.PlaylistVodView })));
+const SportsView = lazy(() => importSports().then((m) => ({ default: m.SportsView })));
 const DownloadsView = lazy(() => importDownloads().then((m) => ({ default: m.DownloadsView })));
 const MangaView = lazy(() => import("@/views/manga").then((m) => ({ default: m.MangaView })));
 const EBookView = lazy(() => import("@/views/ebook").then((m) => ({ default: m.EBookView })));
@@ -271,6 +273,7 @@ function useViewPreloader(tmdbKey: string) {
       void importMovies();
       void importShows();
       void importLive();
+      void importSports();
       void importAnime();
       void importQueue();
       void importAward();
@@ -1300,6 +1303,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const collectionsHubTop = topKind === "collections-hub";
   const liveTop = topKind === "live";
   const vodTop = topKind === "vod";
+  const sportsTop = topKind === "sports";
   const downloadsTop = topKind === "downloads";
   const mangaTop = topKind === "manga";
   const ebookTop = topKind === "ebook";
@@ -1381,6 +1385,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const collectionsHubAlive = useIdleEvict(collectionsHubTop);
   const liveAlive = useIdleEvict(liveTop);
   const vodAlive = useIdleEvict(vodTop);
+  const sportsAlive = useIdleEvict(sportsTop);
   const downloadsAlive = useIdleEvict(downloadsTop);
   const mangaAlive = useIdleEvict(mangaTop);
   const ebookAlive = useIdleEvict(ebookTop);
@@ -1447,7 +1452,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
         {settingsAlive && (
           <div className={layer(settingsTop)}>
             <Suspense fallback={null}>
-              <Settings />
+              <Settings visible={settingsTop} />
             </Suspense>
           </div>
         )}
@@ -1539,6 +1544,13 @@ function Shell({ onReady }: { onReady?: () => void }) {
           <div className={layer(vodTop)}>
             <Suspense fallback={null}>
               <PlaylistVodView active={vodTop} />
+            </Suspense>
+          </div>
+        )}
+        {sportsAlive && (
+          <div className={parkLayer(sportsTop)}>
+            <Suspense fallback={null}>
+              <SportsView active={sportsTop} />
             </Suspense>
           </div>
         )}

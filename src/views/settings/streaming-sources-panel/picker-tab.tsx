@@ -1,13 +1,15 @@
+import { Check } from "lucide-react";
 import { useSettings } from "@/lib/settings";
-import { Section, ToggleRow } from "../shared";
+import { Section, Segmented, ToggleRow } from "../shared";
+import { SettingRow } from "../kit";
+import { SRow } from "../ui";
 import {
   PickerLayoutPreview,
   StreamDescriptionPreview,
   TorrentNamePreview,
 } from "../picker-previews";
-import { ChoiceBlock } from "../player-panel/choice";
 import { useT } from "@/lib/i18n";
-import { StreamModeToggle } from "@/components/stream-mode-toggle";
+import type { StreamMode } from "@/lib/streams/mode";
 
 export function PickerTab() {
   const t = useT();
@@ -27,42 +29,42 @@ export function PickerTab() {
         <PickerLayoutPreview value={settings.pickerLayout} />
       </Section>
 
-      <Section
-        title={t("Source mode")}
-        subtitle={t(
-          "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.",
-        )}
-      >
-        <StreamModeToggle
-          mode={settings.streamMode}
-          onChange={(mode) => update({ streamMode: mode })}
-        />
+      <Section title={t("Source mode")}>
+        <SettingRow
+          wide
+          label={t("Prefer these sources")}
+          desc={t(
+            "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps torrents out of the way unless nothing else is available. P2P puts torrents first.",
+          )}
+        >
+          <Segmented<StreamMode>
+            value={settings.streamMode}
+            onChange={(mode) => update({ streamMode: mode })}
+            options={[
+              { value: "both", label: "Both" },
+              { value: "addons", label: "Direct/debrid" },
+              { value: "p2p", label: "P2P" },
+            ]}
+          />
+        </SettingRow>
       </Section>
 
-      <Section
-        title={t("Refresh button")}
-        subtitle={t(
-          "Where the Refresh button sits in the picker header. Default keeps it on the right, across from Back.",
-        )}
-      >
+      <Section title={t("Refresh button")}>
         <ToggleRow
           label={t("Move Refresh next to Back")}
-          sub={t("Group Refresh on the left beside Back instead of the far right of the header.")}
+          sub={t(
+            "Groups Refresh beside Back at the start of the picker header. Off keeps it at the far end, across from Back.",
+          )}
           value={settings.pickerRefreshNextToBack}
           onChange={(v) => update({ pickerRefreshNextToBack: v })}
         />
       </Section>
 
-      <Section
-        title={t("Torrent name")}
-        subtitle={t(
-          "Show each source's full release filename on the condensed layout. The Stremio layout already shows it.",
-        )}
-      >
+      <Section title={t("Torrent name")}>
         <ToggleRow
           label={t("Show torrent name")}
           sub={t(
-            "Display the raw release filename under each source in the condensed picker. Off keeps rows compact.",
+            "Displays the raw release filename under each source in the condensed picker. Off keeps rows compact. The Stremio layout always shows it.",
           )}
           value={settings.pickerShowFilename}
           onChange={(v) => update({ pickerShowFilename: v })}
@@ -70,16 +72,11 @@ export function PickerTab() {
         <TorrentNamePreview on={settings.pickerShowFilename} />
       </Section>
 
-      <Section
-        title={t("Stream descriptions")}
-        subtitle={t(
-          "How much of each source's description the Stremio picker layout shows. Full keeps everything the addon sends, which matters for AIOStreams and other custom formats.",
-        )}
-      >
+      <Section title={t("Stream descriptions")}>
         <ToggleRow
           label={t("Show full descriptions")}
           sub={t(
-            "Show the addon's complete description instead of trimming it to a few lines. Turn off for shorter, tidier rows.",
+            "Shows everything the addon sends in the Stremio picker layout instead of trimming it to a few lines. That matters for AIOStreams and other custom formats. Off gives shorter, tidier rows.",
           )}
           value={settings.fullStreamDescription}
           onChange={(v) => update({ fullStreamDescription: v })}
@@ -115,16 +112,20 @@ function PickerLayoutPicker({
     },
   ];
   return (
-    <div className="flex flex-col gap-1.5">
+    <>
       {options.map((opt) => (
-        <ChoiceBlock
+        <SRow
           key={opt.id}
-          selected={value === opt.id}
           onClick={() => onChange(opt.id)}
-          label={opt.label}
-          sub={opt.sub}
+          title={opt.label}
+          description={opt.sub}
+          trailing={
+            <span className="grid h-11 w-11 place-items-center">
+              {value === opt.id && <Check size={20} strokeWidth={2.4} className="text-accent" />}
+            </span>
+          }
         />
       ))}
-    </div>
+    </>
   );
 }

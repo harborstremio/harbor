@@ -94,15 +94,15 @@ export function BpCategoryRow({
           SFX.click();
           onPress();
         }}
-        className={`flex h-[clamp(46px,6.6vh,62px)] w-full items-center gap-[clamp(10px,1vw,18px)] rounded-[var(--bp-r-sm)] px-[clamp(12px,1.2vw,22px)] text-start transition-colors duration-[var(--bp-dur-fast)] ${
+        className={`flex h-[clamp(46px,6.6vh,62px)] w-full items-center gap-[clamp(10px,1vw,18px)] rounded-[var(--bp-r-sm)] px-[clamp(12px,1.2vw,22px)] text-ink text-start transition-colors duration-[var(--bp-dur-fast)] ${
           active ? "bg-[var(--bp-glass)]" : "bg-transparent"
         }`}
       >
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-[clamp(15px,2.1vh,21px)] font-bold leading-tight text-ink">
+          <span className="truncate text-[color:inherit] text-[clamp(15px,2.1vh,21px)] font-bold leading-tight">
             {label}
           </span>
-          <span className="truncate text-[clamp(11px,1.5vh,15px)] font-medium leading-tight text-ink-subtle">
+          <span className="truncate text-[color:inherit] text-[clamp(11px,1.5vh,15px)] font-medium leading-tight opacity-65">
             {summary}
           </span>
         </span>
@@ -275,13 +275,13 @@ export function BpPushRow({
           SFX.click();
           onPress();
         }}
-        className="flex w-full items-center gap-[clamp(10px,1vw,18px)] rounded-[var(--bp-r-sm)] border border-[var(--bp-edge)] bg-[var(--bp-panel)] px-[clamp(12px,1.2vw,22px)] py-[clamp(9px,1.3vh,16px)] text-start transition-colors duration-[var(--bp-dur-fast)]"
+        className="flex w-full items-center gap-[clamp(10px,1vw,18px)] rounded-[var(--bp-r-sm)] border border-[var(--bp-edge)] bg-[var(--bp-panel)] px-[clamp(12px,1.2vw,22px)] py-[clamp(9px,1.3vh,16px)] text-ink text-start transition-colors duration-[var(--bp-dur-fast)]"
       >
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-[clamp(14px,2vh,20px)] font-bold leading-tight text-ink">
+          <span className="truncate text-[color:inherit] text-[clamp(14px,2vh,20px)] font-bold leading-tight">
             {label}
           </span>
-          <span className="truncate text-[clamp(11px,1.5vh,15px)] font-medium leading-tight text-ink-subtle">
+          <span className="truncate text-[color:inherit] text-[clamp(11px,1.5vh,15px)] font-medium leading-tight opacity-65">
             {detail}
           </span>
         </span>

@@ -92,8 +92,8 @@ function itemActivity(item: LibraryItem): number {
 
 export function isCwDismissed(item: LibraryItem): boolean {
   const plain = dismissed.get(item._id);
-  const simkl = item.external === "simkl" ? dismissed.get(`simkl|${item._id}`) : undefined;
-  const dismissedAt = Math.max(plain ?? -1, simkl ?? -1);
+  const ext = item.external ? dismissed.get(`${item.external}|${item._id}`) : undefined;
+  const dismissedAt = Math.max(plain ?? -1, ext ?? -1);
   if (dismissedAt < 0) return false;
   const vid = dismissedVid.get(item._id);
   const curVid = item.state?.video_id;
@@ -111,8 +111,8 @@ export function dismissCw(item: LibraryItem, authKey: string | null): void {
   const dismissVid = item.state?.video_id;
   if (typeof dismissVid === "string" && dismissVid) dismissedVid.set(id, dismissVid);
   else dismissedVid.delete(id);
-  if (item.external === "simkl") {
-    dismissed.set(`simkl|${id}`, nowMs);
+  if (item.external) {
+    dismissed.set(`${item.external}|${id}`, nowMs);
     persistDismissed();
     emit();
     return;

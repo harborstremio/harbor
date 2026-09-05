@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ArrowLeft,
@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { getActiveModal, isBackKey, isEditable } from "@/lib/keyboard-navigation/geometry";
 import { currentAuthor, subscribeAuthor, type Author } from "@/lib/theme-auth";
 import { recordBundleUpload, uploadBundle } from "@/lib/bundle-store";
 import { AuthorAccountPanel } from "../author-account-panel";
@@ -48,7 +49,29 @@ export function BundleUploadFlow({
   const [result, setResult] = useState<{ share: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [account, setAccount] = useState<Author | null>(currentAuthor);
+  const rootRef = useRef<HTMLDivElement>(null);
   useEffect(() => subscribeAuthor(() => setAccount(currentAuthor())), []);
+
+  const stepBack = () => {
+    if (account && !result && step > 0) setStep((s) => s - 1);
+    else onClose();
+  };
+  const stepBackRef = useRef(stepBack);
+  stepBackRef.current = stepBack;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const root = rootRef.current;
+      const from = e.target instanceof HTMLElement ? e.target : null;
+      if (!isBackKey(e) || !root || isEditable(from)) return;
+      if (getActiveModal(from) !== root) return;
+      e.preventDefault();
+      e.stopPropagation();
+      stepBackRef.current();
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, []);
 
   useEffect(() => {
     setAuthor(account?.username || localStorage.getItem(AUTHOR_KEY) || "");
@@ -105,8 +128,10 @@ export function BundleUploadFlow({
 
   return createPortal(
     <div
+      ref={rootRef}
       className="fixed inset-0 z-[300] flex flex-col bg-canvas"
       role="dialog"
+      aria-modal="true"
       aria-label={t("Share an icon pack")}
     >
       <header
@@ -117,16 +142,16 @@ export function BundleUploadFlow({
           <h1 className="pointer-events-none text-[17px] font-semibold tracking-tight text-ink">
             {t("Share an icon pack")}
           </h1>
-          <p className="pointer-events-none text-[12.5px] text-ink-subtle">
+          <p className="pointer-events-none max-w-[70ch] text-[15.5px] leading-[22px] text-ink-subtle">
             {t("It goes to a quick review, then it's live for everyone.")}
           </p>
         </div>
         <button
           onClick={onClose}
           aria-label={t("Close")}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
         >
-          <X size={16} strokeWidth={2.2} />
+          <X size={20} strokeWidth={2.2} />
         </button>
       </header>
 
@@ -142,7 +167,7 @@ export function BundleUploadFlow({
                   <h2 className="text-balance text-[20px] font-semibold leading-tight tracking-tight text-ink">
                     {t("Your icons, in everyone's library")}
                   </h2>
-                  <p className="text-balance text-[13.5px] leading-relaxed text-ink-muted">
+                  <p className="max-w-[66ch] text-balance text-[15.5px] leading-[22px] text-ink-muted">
                     {t("Create a free account to publish. No email required.")}
                   </p>
                 </div>
@@ -216,7 +241,7 @@ export function BundleUploadFlow({
                 />
               </div>
             </div>
-            {error && <p className="text-[13px] text-danger">{error}</p>}
+            {error && <p className="max-w-[70ch] text-[15.5px] leading-[22px] text-danger">{error}</p>}
           </div>
         </div>
       )}
@@ -225,7 +250,7 @@ export function BundleUploadFlow({
         <footer className="flex shrink-0 items-center justify-end gap-2.5 px-10 pb-6 pt-4">
           <button
             onClick={() => (step === 0 ? onClose() : setStep((s) => s - 1))}
-            className="flex h-9 items-center gap-2 rounded-md bg-elevated px-4 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
+            className="flex h-11 items-center gap-2 rounded-md bg-elevated px-5 text-[15.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
           >
             <ArrowLeft size={16} className="dir-icon" /> {step === 0 ? t("Cancel") : t("Back")}
           </button>
@@ -233,7 +258,7 @@ export function BundleUploadFlow({
             <button
               onClick={() => canAdvance && setStep((s) => s + 1)}
               disabled={!canAdvance}
-              className="flex h-9 items-center gap-2 rounded-md bg-ink px-5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="flex h-11 items-center gap-2 rounded-md bg-ink px-5 text-[15.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
             >
               {t("Continue")} <ArrowRight size={16} className="dir-icon" />
             </button>
@@ -241,7 +266,7 @@ export function BundleUploadFlow({
             <button
               onClick={submit}
               disabled={submitting || !coverBlob || !name.trim() || !iconsReady}
-              className="flex h-9 items-center gap-2 rounded-md bg-ink px-5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="flex h-11 items-center gap-2 rounded-md bg-ink px-5 text-[15.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
             >
               {submitting ? (
                 <Loader2 size={16} className="animate-spin" />
@@ -266,7 +291,7 @@ function StepRail({ step }: { step: number }) {
         <div key={label} className="flex min-w-0 flex-1 items-center gap-2">
           <div className="flex items-center gap-2">
             <span
-              className={`flex h-7 w-7 items-center justify-center rounded-full text-[12.5px] font-bold transition-colors ${
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[15.5px] font-bold transition-colors ${
                 i < step
                   ? "bg-accent text-canvas"
                   : i === step
@@ -274,10 +299,10 @@ function StepRail({ step }: { step: number }) {
                     : "bg-elevated text-ink-subtle"
               }`}
             >
-              {i < step ? <Check size={14} strokeWidth={3} /> : i + 1}
+              {i < step ? <Check size={18} strokeWidth={3} /> : i + 1}
             </span>
             <span
-              className={`text-[13px] font-semibold ${i <= step ? "text-ink" : "text-ink-subtle"}`}
+              className={`text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] ${i <= step ? "text-ink" : "text-ink-subtle"}`}
             >
               {t(label)}
             </span>
@@ -307,12 +332,14 @@ function Benefit({
 }) {
   return (
     <li className="flex items-start gap-3">
-      <span className="mt-px flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-surface text-ink-muted">
-        <Icon size={16} strokeWidth={2} />
+      <span className="mt-px flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-surface text-ink-muted">
+        <Icon size={20} strokeWidth={2} />
       </span>
       <div className="flex flex-col gap-0.5">
-        <span className="text-[13.5px] font-semibold text-ink">{title}</span>
-        <span className="text-[12.5px] leading-relaxed text-ink-subtle">{children}</span>
+        <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">
+          {title}
+        </span>
+        <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">{children}</span>
       </div>
     </li>
   );
@@ -339,25 +366,25 @@ function SuccessView({
         <h2 className="text-[20px] font-semibold tracking-tight text-ink">
           {t("Submitted for review")}
         </h2>
-        <p className="max-w-[42ch] text-[13.5px] text-ink-muted">
+        <p className="max-w-[52ch] text-[15.5px] leading-[22px] text-ink-muted">
           {t(
             "Thanks for sharing. It'll appear in the library once it's approved. You can manage it any time from your uploads.",
           )}
         </p>
       </div>
       <div className="flex items-center gap-2 rounded-md bg-surface p-2 ps-3">
-        <span className="max-w-[280px] truncate text-[12.5px] text-ink-muted">{share}</span>
+        <span className="max-w-[320px] truncate text-[15.5px] leading-[22px] text-ink-muted">{share}</span>
         <button
           onClick={onCopy}
-          className="flex h-8 items-center gap-1.5 rounded-md bg-elevated px-3 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
+          className="flex h-11 items-center gap-2 rounded-md bg-elevated px-4 text-[15.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
         >
-          {copied ? <Check size={14} /> : <Copy size={14} />}{" "}
+          {copied ? <Check size={16} /> : <Copy size={16} />}{" "}
           {copied ? t("Copied") : t("Copy link")}
         </button>
       </div>
       <button
         onClick={onDone}
-        className="mt-2 h-9 rounded-md bg-ink px-6 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+        className="mt-2 h-11 rounded-md bg-ink px-6 text-[15.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
       >
         {t("Done")}
       </button>

@@ -35,12 +35,39 @@ const DISCORD_DEAD_CODES = new Set([
   "discord_unreachable",
 ]);
 
+function Shell({
+  inline,
+  closing,
+  onDismiss,
+  children,
+}: {
+  inline: boolean;
+  closing: boolean;
+  onDismiss: () => void;
+  children: React.ReactNode;
+}) {
+  if (!inline) {
+    return (
+      <ModalShell closing={closing} onDismiss={onDismiss}>
+        {children}
+      </ModalShell>
+    );
+  }
+  return (
+    <div className="animate-lift-in mx-auto flex w-full max-w-[520px] flex-col overflow-hidden rounded-md bg-surface ring-1 ring-edge-soft">
+      {children}
+    </div>
+  );
+}
+
 export function AccountAuthForm({
   onRecovery,
   onClose,
+  inline = false,
 }: {
   onRecovery?: (code: string) => void;
   onClose?: () => void;
+  inline?: boolean;
 }) {
   const t = useT();
   const { closing, close } = useModalExit(() => onClose?.());
@@ -157,7 +184,7 @@ export function AccountAuthForm({
 
   if (view === "recover") {
     return (
-      <ModalShell closing={closing} onDismiss={close}>
+      <Shell inline={inline} closing={closing} onDismiss={close}>
         <div className="overflow-y-auto">
           <AccountRecoverForm
             onBack={() => setView("auth")}
@@ -167,12 +194,12 @@ export function AccountAuthForm({
             }}
           />
         </div>
-      </ModalShell>
+      </Shell>
     );
   }
 
   return (
-    <ModalShell closing={closing} onDismiss={close}>
+    <Shell inline={inline} closing={closing} onDismiss={close}>
       <div className="flex items-start gap-4 px-6 pt-6">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
@@ -352,6 +379,6 @@ export function AccountAuthForm({
           </>
         )}
       </div>
-    </ModalShell>
+    </Shell>
   );
 }

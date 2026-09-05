@@ -1,4 +1,7 @@
-const coverage: Record<string, string> = {
+const coverage: Record<string, string> = {
+  "Sound descriptions": "Deskripsi suara",
+  "Hide sound effects and speaker names": "Sembunyikan efek suara dan nama pembicara",
+  "Removes bracketed descriptions like [door creaks] and shouted speaker labels like JOHN: while subtitles play, so a release that only ships an SDH track still reads as plain dialogue. Song lyrics, ordinary parentheses and non-Latin scripts are left alone. Skipped on forced and picture-based tracks.": "Menghapus deskripsi dalam kurung siku seperti [pintu berderit] dan nama pembicara berhuruf kapital seperti JOHN: saat subtitle berjalan, sehingga rilis yang hanya menyertakan trek SDH tetap terbaca sebagai dialog biasa. Lirik lagu, tanda kurung biasa, dan aksara non-Latin dibiarkan apa adanya. Dilewati pada trek forced dan trek berbasis gambar.",
   " (you)": " (Anda)",
   " Anything you save also syncs to your Trakt account.":
     " Semua yang Anda simpan juga disinkronkan ke akun Trakt Anda.",

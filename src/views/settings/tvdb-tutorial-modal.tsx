@@ -2,6 +2,8 @@ import { Check, ExternalLink, X } from "lucide-react";
 import { useModalExit } from "@/components/modal-shell";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { captureFocusReturn } from "@/lib/keyboard-navigation";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
 import tvdb1 from "@/assets/tvdb-guide/tvdb1.png";
@@ -59,8 +61,12 @@ export function TvdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
   const { closing, close } = useModalExit(onClose, open);
   useEffect(() => {
     if (!open) return;
+    return captureFocusReturn();
+  }, [open]);
+  useEffect(() => {
+    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
+      if (isBackKey(e)) close();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -72,42 +78,44 @@ export function TvdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
       onClick={close}
     >
       <div
+        role="dialog"
+        aria-modal="true"
         className={`${closing ? "animate-dialog-out" : "animate-dialog-in"} flex max-h-[86vh] w-[min(640px,100%)] flex-col overflow-hidden rounded-md bg-surface harbor-float`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 px-6 pb-5 pt-5">
           <div className="flex min-w-0 flex-col gap-1">
-            <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+            <span className="harbor-settings-label">
               TheTVDB
             </span>
-            <h2 className="text-[17px] font-semibold text-ink">{t("Get your free TheTVDB key")}</h2>
-            <p className="text-[12.5px] text-ink-subtle">
+            <h2 className="text-[19px] font-semibold leading-[26px] tracking-tight text-ink">{t("Get your free TheTVDB key")}</h2>
+            <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
               {t("About a minute. Free for personal use.")}
             </p>
           </div>
           <button
             onClick={close}
             aria-label={t("Close")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
           >
-            <X size={16} strokeWidth={2.2} />
+            <X size={18} strokeWidth={2.2} />
           </button>
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-6">
           {STEPS.map((step, i) => (
             <div key={step.title} className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-canvas text-[12.5px] font-semibold text-ink-muted">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-canvas text-[15px] font-semibold tabular-nums text-ink-muted">
                 {i + 1}
               </span>
               <div className="flex min-w-0 flex-col gap-1.5">
-                <span className="text-[13.5px] font-semibold text-ink">{t(step.title)}</span>
-                <p className="text-[13px] leading-relaxed text-ink-muted">
+                <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">{t(step.title)}</span>
+                <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
                   {linkify(t(step.body))}
                 </p>
                 {step.callout && (
                   <div className="mt-1 flex items-start gap-2 rounded-md bg-canvas px-3.5 py-3">
-                    <Check size={16} strokeWidth={2.6} className="mt-0.5 shrink-0 text-accent" />
-                    <p className="text-[12.5px] leading-relaxed text-ink">
+                    <Check size={18} strokeWidth={2.6} className="mt-0.5 shrink-0 text-accent" />
+                    <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink">
                       {t(
                         "Ignore the paid tiers. Personal use is free, you are not a company. Just pick the first option and keep going.",
                       )}
@@ -129,16 +137,16 @@ export function TvdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
         <div className="flex items-center justify-end gap-2 px-6 pb-5 pt-5">
           <button
             onClick={close}
-            className="h-9 rounded-md bg-elevated px-4 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
+            className="h-11 rounded-[8px] bg-elevated px-4 text-[15px] font-semibold text-ink-muted transition-colors hover:text-ink"
           >
             {t("Close")}
           </button>
           <button
             onClick={() => openUrl("https://thetvdb.com/api-information")}
-            className="flex h-9 items-center gap-2 rounded-md bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+            className="flex h-11 items-center gap-2 rounded-[8px] bg-ink px-4 text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90"
           >
             {t("Open TheTVDB")}
-            <ExternalLink size={14} strokeWidth={2.2} />
+            <ExternalLink size={18} strokeWidth={2.2} />
           </button>
         </div>
       </div>

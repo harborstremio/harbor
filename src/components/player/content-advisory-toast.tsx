@@ -1,4 +1,5 @@
 import {
+  EyeOff,
   Ghost,
   Heart,
   Info,
@@ -10,6 +11,7 @@ import {
 } from "lucide-react";
 import { type FocusEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { ignoreAdvisory } from "@/lib/player/content-advisory-ignore";
 import { usePlaybackPosition } from "@/lib/player/playback-clock";
 import { useSettings } from "@/lib/settings";
 
@@ -69,12 +71,14 @@ type Phase = "idle" | "holding" | "collapsing" | "done";
 export function ContentAdvisoryToast({
   categories,
   playKey,
+  titleId,
   mpaRating,
   position = "top-start",
   preview = false,
 }: {
   categories: Advisory[];
   playKey: string;
+  titleId?: string | null;
   mpaRating?: string | null;
   position?: ContentAdvisoryPosition;
   preview?: boolean;
@@ -173,6 +177,11 @@ export function ContentAdvisoryToast({
   const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
     if (event.currentTarget.contains(event.relatedTarget)) return;
     handleInteractionEnd();
+  };
+  const canIgnore = !preview && !!titleId;
+  const handleIgnore = () => {
+    if (titleId) ignoreAdvisory(titleId);
+    setPhase("collapsing");
   };
   const positionClass =
     position === "top-end"
@@ -284,6 +293,23 @@ export function ContentAdvisoryToast({
               );
             })}
           </ul>
+        )}
+
+        {canIgnore && (
+          <div className={rated.length > 0 ? "mt-3 border-t border-edge-soft/70 pt-2.5" : "mt-2.5"}>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.currentTarget.blur();
+                handleIgnore();
+              }}
+              title={t("Never show the content advisory for this title again")}
+              className="flex w-full items-center justify-center gap-1.5 rounded-md bg-white/[0.06] px-3 py-1.5 text-[11.5px] font-semibold text-ink-muted transition-[color,background-color,transform] duration-150 hover:bg-white/[0.10] hover:text-ink active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ink"
+            >
+              <EyeOff size={12} strokeWidth={2.2} className="shrink-0" />
+              {t("Ignore this title")}
+            </button>
+          </div>
         )}
 
         {!preview && phase === "holding" && (

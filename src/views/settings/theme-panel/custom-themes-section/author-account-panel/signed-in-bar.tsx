@@ -6,6 +6,8 @@ import { removeAvatar as removeEcosystemAvatar, uploadAvatar } from "@/lib/socia
 import { markAvatarSynced } from "@/lib/account/avatar-sync";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
+import { ROW_ACTION, ROW_ACTION_DANGER, ROW_ACTION_PRIMARY } from "../../../kit";
+import { ROW_DESC, RowNote } from "../../../shared";
 import { TextField } from "../field";
 
 export type AuthorStats = {
@@ -43,39 +45,28 @@ export function SignedInBar({ author, stats }: { author: Author; stats?: AuthorS
             {initials}
           </span>
         )}
-        <div className="mr-auto flex min-w-0 flex-col gap-0.5">
+        <div className="me-auto flex min-w-0 flex-col gap-1">
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
             <span className="truncate text-[22px] font-semibold tracking-tight text-ink">
               {author.username}
             </span>
             {author.handle && (
-              <span className="truncate font-display text-[13.5px] font-medium text-ink-subtle">
+              <span className="truncate font-display text-[15.5px] font-medium leading-[22px] text-ink-subtle">
                 @{author.handle}
               </span>
             )}
           </div>
-          <span className="text-[12.5px] text-ink-subtle">
+          <span className={`max-w-[66ch] ${ROW_DESC}`}>
             {t("Theme author. Your published themes are tied to this account.")}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <AvatarButton author={author} />
-          <button
-            onClick={() => setPwOpen((v) => !v)}
-            className={`flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[12.5px] font-semibold ring-1 transition-colors ${
-              pwOpen
-                ? "bg-elevated text-ink ring-edge"
-                : "text-ink-muted ring-edge-soft hover:text-ink hover:ring-edge"
-            }`}
-          >
-            <KeyRound size={14} strokeWidth={2.2} /> {t("Change password")}
+          <button onClick={() => setPwOpen((v) => !v)} className={ROW_ACTION}>
+            <KeyRound size={18} strokeWidth={2.2} /> {t("Change password")}
           </button>
-          <button
-            onClick={signOut}
-            disabled={signingOut}
-            className="flex h-9 items-center gap-1.5 rounded-md bg-canvas px-3.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-danger hover:ring-danger disabled:opacity-50"
-          >
-            {signingOut ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />}{" "}
+          <button onClick={signOut} disabled={signingOut} className={ROW_ACTION_DANGER}>
+            {signingOut ? <Loader2 size={18} className="animate-spin" /> : <LogOut size={18} />}{" "}
             {t("Sign out")}
           </button>
         </div>
@@ -84,7 +75,7 @@ export function SignedInBar({ author, stats }: { author: Author; stats?: AuthorS
       {stats && <StatsStrip stats={stats} />}
 
       {pwOpen && (
-        <div className="relative border-t border-edge-soft p-6">
+        <div className="relative p-6">
           <ChangePassword onDone={() => setPwOpen(false)} />
         </div>
       )}
@@ -130,17 +121,17 @@ function AvatarButton({ author }: { author: Author }) {
 
   if (author.avatar) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           onClick={use}
           disabled={busy != null || !profileAvatar}
           title={hint ?? t("Re-sync from your Harbor profile picture")}
-          className="flex h-9 items-center gap-1.5 rounded-md bg-canvas px-3.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink hover:ring-edge disabled:opacity-50"
+          className={ROW_ACTION}
         >
           {busy === "set" ? (
-            <Loader2 size={14} className="animate-spin" />
+            <Loader2 size={18} className="animate-spin" />
           ) : (
-            <RefreshCw size={14} strokeWidth={2.2} />
+            <RefreshCw size={18} strokeWidth={2.2} />
           )}{" "}
           {t("Update photo")}
         </button>
@@ -149,12 +140,12 @@ function AvatarButton({ author }: { author: Author }) {
           disabled={busy != null}
           aria-label={t("Remove community photo")}
           title={t("Remove your community photo")}
-          className="flex h-9 w-9 items-center justify-center rounded-md bg-canvas text-ink-muted transition-colors hover:text-danger hover:ring-danger disabled:opacity-50"
+          className={`${ROW_ACTION_DANGER} justify-center`}
         >
           {busy === "remove" ? (
-            <Loader2 size={14} className="animate-spin" />
+            <Loader2 size={18} className="animate-spin" />
           ) : (
-            <Trash2 size={14} strokeWidth={2.2} />
+            <Trash2 size={18} strokeWidth={2.2} />
           )}
         </button>
       </div>
@@ -165,12 +156,12 @@ function AvatarButton({ author }: { author: Author }) {
       onClick={use}
       disabled={busy != null || !profileAvatar}
       title={hint ?? t("Show your Harbor profile picture on the community")}
-      className="flex h-9 items-center gap-1.5 rounded-md bg-canvas px-3.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink hover:ring-edge disabled:opacity-50"
+      className={ROW_ACTION}
     >
       {busy === "set" ? (
-        <Loader2 size={14} className="animate-spin" />
+        <Loader2 size={18} className="animate-spin" />
       ) : (
-        <ImagePlus size={14} strokeWidth={2.2} />
+        <ImagePlus size={18} strokeWidth={2.2} />
       )}{" "}
       {t("Use my photo")}
     </button>
@@ -182,19 +173,17 @@ function StatsStrip({ stats }: { stats: AuthorStats }) {
   const cells = [
     { label: "Published", value: String(stats.published) },
     { label: "Downloads", value: fmtNum(stats.downloads) },
-    { label: "Avg rating", value: stats.rating != null ? stats.rating.toFixed(1) : "—" },
+    { label: "Avg rating", value: stats.rating != null ? stats.rating.toFixed(1) : t("None") },
     { label: "In review", value: String(stats.inReview) },
   ];
   return (
-    <div className="relative grid grid-cols-2 gap-px border-t border-edge-soft bg-edge-soft/50 sm:grid-cols-4">
+    <div className="relative grid grid-cols-2 gap-px bg-edge-soft/50 sm:grid-cols-4">
       {cells.map((c) => (
-        <div key={c.label} className="flex flex-col gap-0.5 bg-surface px-6 py-4">
-          <span className="text-[23px] font-semibold tabular-nums leading-none tracking-tight text-ink">
+        <div key={c.label} className="flex flex-col gap-1 bg-surface px-6 py-4">
+          <span className="text-[23px] font-semibold leading-none tracking-tight tabular-nums text-ink">
             {c.value}
           </span>
-          <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-            {t(c.label)}
-          </span>
+          <span className="harbor-settings-label">{t(c.label)}</span>
         </div>
       ))}
     </div>
@@ -228,8 +217,8 @@ function ChangePassword({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-3">
-      <div className="grid gap-3 sm:grid-cols-2">
+    <form onSubmit={submit} className="flex flex-col gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <TextField
           label={t("Current password")}
           type="password"
@@ -246,27 +235,22 @@ function ChangePassword({ onDone }: { onDone: () => void }) {
           maxLength={200}
         />
       </div>
-      {error && <p className="text-[12.5px] text-danger">{error}</p>}
-      <div className="flex items-center gap-2">
+      {error && <RowNote>{error}</RowNote>}
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="submit"
           disabled={!ready || busy || done}
-          className={`flex h-10 items-center gap-1.5 rounded-[8px] px-4 text-[13px] font-semibold transition-opacity disabled:opacity-40 ${
-            done ? "bg-success text-canvas" : "bg-ink text-canvas hover:opacity-90"
-          }`}
+          style={done ? { background: "var(--color-success)" } : undefined}
+          className={ROW_ACTION_PRIMARY}
         >
           {busy ? (
-            <Loader2 size={14} className="animate-spin" />
+            <Loader2 size={18} className="animate-spin" />
           ) : done ? (
-            <Check size={14} className="harbor-pop" />
+            <Check size={18} className="harbor-pop" />
           ) : null}
           {done ? t("Password updated") : t("Update password")}
         </button>
-        <button
-          type="button"
-          onClick={onDone}
-          className="h-10 rounded-[8px] px-3 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
-        >
+        <button type="button" onClick={onDone} className={ROW_ACTION}>
           {t("Cancel")}
         </button>
       </div>

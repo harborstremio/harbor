@@ -69,6 +69,10 @@ const player: Record<string, string> = {
     "Diese Untertiteldatei konnte nicht geladen werden. Versuche eine andere.",
   "Couldn't load {name}": "{name} konnte nicht geladen werden",
   "Couldn't open this file": "Diese Datei konnte nicht geöffnet werden",
+  "Couldn't reload the stream. Try picking another source.":
+    "Der Stream konnte nicht neu geladen werden. Wähle eine andere Quelle.",
+  "Couldn't restart the streaming server.":
+    "Der Streaming-Server konnte nicht neu gestartet werden.",
   "Couldn't save the synced subtitle. Try again.":
     "Der synchronisierte Untertitel konnte nicht gespeichert werden. Versuche es erneut.",
   "Couldn't switch subtitles. Try again.":
@@ -127,6 +131,8 @@ const player: Record<string, string> = {
   "Got it": "Verstanden",
   "HI/SDH": "HI/SDH",
   "HW decode": "Hardwaredekodierung",
+  "Harbor's streaming server only runs in the desktop app.":
+    "Harbors Streaming-Server läuft nur in der Desktop-App.",
   Hidden: "Ausgeblendet",
   "Hidden by filter: {reason}": "Durch Filter ausgeblendet: {reason}",
   "Hide HI/SDH": "HI/SDH ausblenden",
@@ -242,9 +248,11 @@ const player: Record<string, string> = {
   "Recording · {pct}% · {remaining} · click to manage":
     "Aufnahme · {pct}% · {remaining} · zum Verwalten klicken",
   Release: "Veröffentlichung",
+  "Reloading the stream…": "Stream wird neu geladen…",
   "Reset sync": "Synchronisierung zurücksetzen",
   "Resize subtitle menu": "Größe des Untertitelmenüs ändern",
   Restart: "Neu starten",
+  "Restarting the streaming server…": "Streaming-Server wird neu gestartet…",
   "Resume from {time}": "Ab {time} fortsetzen",
   "Return to full window": "Zur vollständigen Fensteransicht zurückkehren",
   "Same file": "Gleiche Datei",
@@ -307,6 +315,7 @@ const player: Record<string, string> = {
   "Stop showing as second subtitle": "Nicht mehr als zweiten Untertitel anzeigen",
   "Stream failed to load": "Stream konnte nicht geladen werden",
   "Stream is taking a while": "Der Stream braucht etwas länger",
+  "Streaming server restarted.": "Streaming-Server neu gestartet.",
   "Subtitle FPS": "Untertitel-FPS",
   "Subtitle FPS conversion is only available for text-based subtitles.":
     "Die FPS-Konvertierung für Untertitel ist nur bei textbasierten Untertiteln verfügbar.",
@@ -336,6 +345,8 @@ const player: Record<string, string> = {
   "TV Guide": "TV-Programm",
   "The host starts playback for the whole room.":
     "Der Host startet die Wiedergabe für den gesamten Raum.",
+  "The streaming server didn't come back up.":
+    "Der Streaming-Server ist nicht wieder hochgefahren.",
   "Thicker outline": "Dickere Kontur",
   "Thinner outline": "Dünnere Kontur",
   "This and next: + {title}": "Diese und die nächste Folge: + {title}",

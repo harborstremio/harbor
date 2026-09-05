@@ -34,10 +34,16 @@ function LookTab() {
   const t = useT();
   return (
     <>
-      <Section title={t("Subtitle style")}>
+      <Section
+        title={t("Subtitle style")}
+        subtitle={t("How subtitles are drawn over the picture. The still below updates as you change anything, so you can judge the size and the contrast before you start a film.")}
+      >
         <SubtitleStylePanel />
       </Section>
-      <Section title={t("Sync indicator")}>
+      <Section
+        title={t("Sync indicator")}
+        subtitle={t("The small on-screen readout that appears while you nudge subtitle timing with Z and X during playback. Automatic syncing lives in the Sync tab.")}
+      >
         <SubtitleOffsetSettings />
       </Section>
     </>

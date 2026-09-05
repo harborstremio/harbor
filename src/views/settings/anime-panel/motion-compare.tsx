@@ -25,12 +25,12 @@ function useStripePan(stepped: boolean) {
 function Lane({ stepped, label, live }: { stepped: boolean; label: string; live: boolean }) {
   const ref = useStripePan(stepped);
   return (
-    <span className="flex min-w-[170px] flex-1 flex-col gap-2">
-      <span className="flex items-center gap-2 text-[11.5px] font-semibold tracking-wide">
-        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${live ? "bg-accent" : "bg-edge"}`} />
-        <span className={live ? "text-ink" : "text-ink-subtle"}>{label}</span>
+    <span className="flex min-w-[190px] flex-1 flex-col gap-2">
+      <span className="flex items-center gap-2 text-[15.5px] font-medium leading-[22px]">
+        <span className={`h-2 w-2 shrink-0 rounded-full ${live ? "bg-accent" : "bg-edge"}`} />
+        <span className={live ? "text-ink" : "text-ink-muted"}>{label}</span>
       </span>
-      <span className="relative block h-10 overflow-hidden rounded-md bg-canvas">
+      <span className="relative block h-12 overflow-hidden rounded-[10px] bg-canvas">
         <span
           ref={ref}
           aria-hidden

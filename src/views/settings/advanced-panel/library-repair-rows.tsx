@@ -88,9 +88,9 @@ export function LibraryRepairRow() {
       cta={busy ? t("Working…") : result ? t("Run again") : t("Repair now")}
       icon={
         busy ? (
-          <Loader2 size={14} strokeWidth={2.4} className="animate-spin" />
+          <Loader2 size={16} strokeWidth={2.4} className="animate-spin" />
         ) : (
-          <Wrench size={14} strokeWidth={2.4} />
+          <Wrench size={16} strokeWidth={2.4} />
         )
       }
       onClick={run}
@@ -187,14 +187,19 @@ export function AnimeRepairRow() {
       cta={cta}
       icon={
         busy ? (
-          <Loader2 size={14} strokeWidth={2.4} className="animate-spin" />
+          <Loader2 size={16} strokeWidth={2.4} className="animate-spin" />
         ) : (
-          <Wrench size={14} strokeWidth={2.4} />
+          <Wrench size={16} strokeWidth={2.4} />
         )
       }
       onClick={showRemove ? remove : scan}
       disabled={busy}
-      tone={phase === "done" && removed > 0 ? "success" : undefined}
+      tone={showRemove ? "danger" : phase === "done" && removed > 0 ? "success" : undefined}
+      warn={
+        showRemove
+          ? t("This deletes those entries from your library. Playing them again re-adds them.")
+          : undefined
+      }
     />
   );
 }

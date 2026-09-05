@@ -10,6 +10,7 @@ const en: Record<string, string> = {
   "nav.manga": "Manga",
   "nav.ebook": "eBook",
   "nav.live": "Live TV",
+  "nav.sports": "Sports",
   "nav.playlists": "Playlists",
   "nav.calendar": "Calendar",
   "nav.library": "My Library",

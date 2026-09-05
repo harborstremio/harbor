@@ -1,20 +1,24 @@
 import { useState } from "react";
-import { AlertCircle, Check, Loader2, UserRound, X } from "lucide-react";
+import { AlertCircle, Check, Loader2, UserRound } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { loginAuthor, recoverAuthor, registerAuthor } from "@/lib/theme-auth";
+import { ROW_ACTION_PRIMARY } from "../../../kit";
+import { ROW_DESC, ROW_TITLE, RowNote, Segmented } from "../../../shared";
 import { TextField } from "../field";
 import { PasswordField } from "./password-field";
 import { useUsernameAvailability, type Availability } from "./use-username-availability";
 
 type Mode = "signin" | "register" | "recover";
 
-const MODES: { id: Mode; label: string; action: string }[] = [
-  { id: "signin", label: "Sign in", action: "Sign in" },
-  { id: "register", label: "Create account", action: "Create account" },
-  { id: "recover", label: "Reset", action: "Reset password" },
+const MODES: { value: Mode; label: string; action: string }[] = [
+  { value: "signin", label: "Sign in", action: "Sign in" },
+  { value: "register", label: "Create account", action: "Create account" },
+  { value: "recover", label: "Reset", action: "Reset password" },
 ];
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,24}$/;
+
+const STATUS_LINE = "flex items-center gap-2 text-[15.5px] leading-[22px]";
 
 export function AuthForm({ onRecovery }: { onRecovery: (code: string) => void }) {
   const t = useT();
@@ -61,41 +65,30 @@ export function AuthForm({ onRecovery }: { onRecovery: (code: string) => void })
     }
   };
 
-  const active = MODES.find((m) => m.id === mode)!;
+  const active = MODES.find((m) => m.value === mode)!;
 
   return (
     <div className="flex flex-col gap-5 rounded-md bg-surface p-6">
-      <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-md bg-accent-soft text-accent">
-          <UserRound size={18} strokeWidth={2} />
+      <div className="flex items-start gap-3">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-accent-soft text-accent">
+          <UserRound size={20} strokeWidth={2} />
         </span>
-        <div className="flex flex-col">
-          <h3 className="text-[16px] font-semibold tracking-tight text-ink">
-            {t("Author account")}
-          </h3>
-          <p className="text-[12.5px] text-ink-subtle">
+        <div className="flex min-w-0 flex-col gap-1">
+          <h3 className={ROW_TITLE}>{t("Author account")}</h3>
+          <p className={`max-w-[66ch] ${ROW_DESC}`}>
             {t("Publish themes under your name and update them anytime.")}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-1 rounded-md bg-elevated p-1">
-        {MODES.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            onClick={() => {
-              setMode(m.id);
-              setError(null);
-            }}
-            className={`h-8 flex-1 rounded-md text-[12.5px] font-semibold transition-colors ${
-              mode === m.id ? "bg-ink text-canvas" : "text-ink-muted hover:text-ink"
-            }`}
-          >
-            {t(m.label)}
-          </button>
-        ))}
-      </div>
+      <Segmented
+        value={mode}
+        options={MODES}
+        onChange={(m) => {
+          setMode(m);
+          setError(null);
+        }}
+      />
 
       <form onSubmit={submit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
@@ -152,9 +145,9 @@ export function AuthForm({ onRecovery }: { onRecovery: (code: string) => void })
           </>
         )}
 
-        {error && <p className="text-[12.5px] text-danger">{error}</p>}
+        {error && <RowNote>{error}</RowNote>}
         {mode === "register" && !error && (
-          <p className="text-[11.5px] text-ink-subtle">
+          <p className={`max-w-[66ch] ${ROW_DESC}`}>
             {t("You will get a one-time recovery code right after this.")}
           </p>
         )}
@@ -162,9 +155,9 @@ export function AuthForm({ onRecovery }: { onRecovery: (code: string) => void })
         <button
           type="submit"
           disabled={!ready || busy}
-          className="flex h-11 items-center justify-center gap-2 rounded-md bg-accent text-[13.5px] font-semibold text-canvas transition duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
+          className={`${ROW_ACTION_PRIMARY} w-full justify-center`}
         >
-          {busy && <Loader2 size={16} className="animate-spin" />}
+          {busy && <Loader2 size={18} className="animate-spin" />}
           {t(active.action)}
         </button>
       </form>
@@ -176,29 +169,27 @@ function UsernameStatus({ state, name }: { state: Availability; name: string }) 
   const t = useT();
   if (state === "checking") {
     return (
-      <span className="flex items-center gap-1.5 text-[11.5px] text-ink-subtle">
-        <Loader2 size={12} className="animate-spin" /> {t("Checking availability")}
+      <span className={`${STATUS_LINE} text-ink-muted`}>
+        <Loader2 size={16} className="shrink-0 animate-spin" /> {t("Checking availability")}
       </span>
     );
   }
   if (state === "available") {
     return (
-      <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-success">
-        <Check size={12} strokeWidth={2.6} /> {t("{name} is available", { name })}
+      <span className={`${STATUS_LINE} font-medium text-success`}>
+        <Check size={16} strokeWidth={2.6} className="shrink-0" />{" "}
+        {t("{name} is available", { name })}
       </span>
     );
   }
   if (state === "taken") {
-    return (
-      <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-danger">
-        <X size={12} strokeWidth={2.6} /> {t("{name} is taken", { name })}
-      </span>
-    );
+    return <RowNote>{t("{name} is taken", { name })}</RowNote>;
   }
   if (state === "error") {
     return (
-      <span className="flex items-center gap-1.5 text-[11.5px] text-ink-subtle">
-        <AlertCircle size={12} strokeWidth={2.2} /> {t("Couldn't check availability")}
+      <span className={`${STATUS_LINE} text-ink-muted`}>
+        <AlertCircle size={16} strokeWidth={2.2} className="shrink-0" />{" "}
+        {t("Couldn't check availability")}
       </span>
     );
   }

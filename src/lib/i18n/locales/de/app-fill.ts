@@ -386,6 +386,7 @@ const appFill: Record<string, string> = {
   "Identify every file by its name and pull fresh titles and artwork from TMDB.":
     "Jede Datei anhand ihres Namens erkennen und aktuelle Titel sowie Bilder von TMDB abrufen.",
   "Identify this title before exporting.": "Erkenne diesen Titel vor dem Export.",
+  "Ignore this title": "Diesen Titel ignorieren",
   "Image {n}": "Bild {n}",
   "Import JavaScript sources": "JavaScript-Quellen importieren",
   "Import a folder, keep your sets": "Ordner importieren, Sammlungen behalten",
@@ -495,6 +496,8 @@ const appFill: Record<string, string> = {
   "My Lists": "Meine Listen",
   "My provider": "Mein Anbieter",
   "Needs an external subtitle": "Benötigt externe Untertitel",
+  "Never show the content advisory for this title again":
+    "Den Inhaltshinweis für diesen Titel nie wieder anzeigen",
   "New episodes": "Neue Folgen",
   "New list": "Neue Liste",
   "New seasons": "Neue Staffeln",

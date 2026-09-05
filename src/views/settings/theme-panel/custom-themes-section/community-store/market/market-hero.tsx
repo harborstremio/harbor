@@ -15,7 +15,7 @@ import { tokensFromStoreTheme } from "./fit-palette";
 
 function KindChip({ text }: { text: string }) {
   return (
-    <span className="inline-flex items-center rounded-full bg-elevated px-2.5 py-1 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ink-muted ring-1 ring-edge-soft">
+    <span className="inline-flex h-[22px] shrink-0 items-center rounded-full bg-elevated px-2.5 text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px] text-ink-muted ring-1 ring-edge-soft">
       {text}
     </span>
   );
@@ -75,16 +75,16 @@ export function MarketHero({
         >
           {item.name}
         </h2>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] font-medium text-ink-subtle">
+        <div className="flex max-w-[70ch] flex-wrap items-center gap-x-3 gap-y-1 text-[15.5px] font-normal leading-[22px] text-ink-subtle">
           {item.ratingCount > 0 && (
             <span className="inline-flex items-center gap-1.5">
-              <Star size={14} className="fill-accent text-accent" />
+              <Star size={16} className="fill-accent text-accent" />
               <span className="tabular-nums text-ink">{item.ratingAvg.toFixed(1)}</span>
               <span className="tabular-nums">({item.ratingCount})</span>
             </span>
           )}
           <span className="inline-flex items-center gap-1.5 tabular-nums">
-            <ArrowDownToLine size={14} strokeWidth={2.2} />
+            <ArrowDownToLine size={16} strokeWidth={2.2} />
             {t("{count} downloads", { count: fmtCount(item.downloads) })}
           </span>
           {"swatch" in item && item.authorHandle ? (

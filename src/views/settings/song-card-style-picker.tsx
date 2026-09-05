@@ -37,7 +37,7 @@ export function SongCardStylePicker() {
         onChange={(v) => update({ songIdEnabled: v })}
       />
 
-      <div className={`flex flex-col gap-4 ${enabled ? "" : "pointer-events-none opacity-40"}`}>
+      <div inert={!enabled} className={`flex flex-col gap-4 ${enabled ? "" : "opacity-40"}`}>
         <div className="grid grid-cols-2 gap-3">
           {options.map((o) => {
             const active = value === o.v;
@@ -47,7 +47,7 @@ export function SongCardStylePicker() {
                 type="button"
                 aria-pressed={active}
                 onClick={() => update({ songCardStyle: o.v })}
-                className={`flex flex-col gap-3 rounded-md border p-3 text-left transition-colors ${
+                className={`flex flex-col gap-3 rounded-md border p-3 text-start transition-colors ${
                   active
                     ? "border-accent bg-accent-soft"
                     : "border-edge-soft bg-canvas hover:border-edge"
@@ -56,15 +56,15 @@ export function SongCardStylePicker() {
                 <StyleThumb kind={o.v} />
                 <div className="flex items-center gap-2">
                   <span
-                    className={`flex h-4 w-4 items-center justify-center rounded-full border ${
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
                       active ? "border-accent" : "border-edge"
                     }`}
                   >
-                    {active ? <span className="h-2 w-2 rounded-full bg-accent" /> : null}
+                    {active ? <span className="h-2.5 w-2.5 rounded-full bg-accent" /> : null}
                   </span>
-                  <span className="text-[13px] font-semibold text-ink">{o.label}</span>
+                  <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">{o.label}</span>
                 </div>
-                <span className="text-[12.5px] leading-snug text-ink-muted">{o.desc}</span>
+                <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{o.desc}</span>
               </button>
             );
           })}
@@ -107,8 +107,8 @@ function StyleThumb({ kind }: { kind: SongCardStyle }) {
 function Disc() {
   return (
     <div className="relative h-9 w-9 flex-none rounded-full bg-canvas">
-      <div className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink/[0.10]" />
-      <div className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink/40" />
+      <div className="absolute start-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink/[0.10] rtl:translate-x-1/2" />
+      <div className="absolute start-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink/40 rtl:translate-x-1/2" />
     </div>
   );
 }

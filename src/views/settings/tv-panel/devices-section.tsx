@@ -27,6 +27,7 @@ import {
   type SweepHandle,
 } from "@/components/play-on-lan";
 import { Section } from "../shared";
+import { SButton } from "../ui";
 
 export const TV_DEVICES_TITLE = "Harbors on your network";
 
@@ -167,28 +168,23 @@ export function TvDevicesSection() {
         })}
 
         {isTauri && settled && count === 0 ? (
-          <p className="px-1 py-1 text-[12.5px] leading-relaxed text-ink-subtle">
+          <p className="max-w-[70ch] px-1 py-1 text-[15.5px] font-normal leading-[22px] text-ink-subtle">
             {t("Nothing else answered. A Harbor shows up here a moment after it starts on this network.")}
           </p>
         ) : null}
 
         {!isTauri ? (
-          <p className="px-1 py-1 text-[12.5px] text-ink-subtle">
+          <p className="max-w-[70ch] px-1 py-1 text-[15.5px] font-normal leading-[22px] text-ink-subtle">
             {t("Network discovery needs the desktop app.")}
           </p>
         ) : null}
 
         <div className="flex items-center gap-3 pt-0.5">
-          <button
-            type="button"
-            onClick={scan}
-            disabled={scanning || !isTauri}
-            className="inline-flex h-11 items-center gap-2 rounded-md bg-elevated px-3.5 text-[12.5px] font-medium text-ink transition-colors hover:bg-raised disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent motion-reduce:transition-none"
-          >
-            <RefreshCw size={14} strokeWidth={2.2} />
+          <SButton onClick={scan} disabled={!isTauri}>
+            <RefreshCw size={16} strokeWidth={2.2} />
             {t("Scan again")}
-          </button>
-          <span className="flex items-center gap-2 text-[12.5px] text-ink-subtle">
+          </SButton>
+          <span className="flex items-center gap-2 text-[15.5px] font-normal leading-[22px] text-ink-subtle">
             <ListeningPulse active={scanning} />
             {tally}
           </span>

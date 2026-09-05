@@ -10,7 +10,7 @@ export function WindowControlArt({ style, on }: { style: Style; on: boolean }) {
   return (
     <span
       aria-hidden
-      className={`relative block h-10 w-[68px] shrink-0 overflow-hidden rounded-md bg-canvas ${
+      className={`relative block h-[40px] w-[68px] shrink-0 overflow-hidden rounded-[10px] bg-canvas ${
         on ? "" : "opacity-40 saturate-0"
       }`}
     >
@@ -33,7 +33,7 @@ export function TitleBarArt({ native, on }: { native: boolean; on: boolean }) {
   return (
     <span
       aria-hidden
-      className={`relative block h-10 w-[68px] shrink-0 overflow-hidden rounded-md bg-canvas ${
+      className={`relative block h-[40px] w-[68px] shrink-0 overflow-hidden rounded-[10px] bg-canvas ${
         on ? "" : "opacity-40 saturate-0"
       }`}
     >
@@ -70,7 +70,7 @@ export function HybridBarArt({ on }: { on: boolean }) {
   return (
     <span
       aria-hidden
-      className={`relative block h-10 w-[68px] shrink-0 overflow-hidden rounded-md bg-canvas ${
+      className={`relative block h-[40px] w-[68px] shrink-0 overflow-hidden rounded-[10px] bg-canvas ${
         on ? "" : "opacity-40 saturate-0"
       }`}
     >

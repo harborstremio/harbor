@@ -53,6 +53,8 @@ const catalog: Record<string, string> = {
   Reload: "Muat ulang",
   "Reload list": "Muat ulang daftar",
   "Reload original link": "Muat ulang tautan asli",
+  "Reload source": "Muat ulang sumber",
+  "Reloading the stream…": "Memuat ulang stream…",
   "Relocate if they ask": "Pindahkan jika diminta",
   "Remaining only": "Hanya yang tersisa",
   Remap: "Petakan ulang",
@@ -283,10 +285,14 @@ const catalog: Record<string, string> = {
     "Diamkan kursor di atas poster untuk melihat sekilas rating, cerita, dan tindakan cepat tanpa membukanya.",
   Restart: "Mulai ulang",
   "Restart Harbor after the install completes.": "Mulai ulang Harbor setelah penginstalan selesai.",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "Mulai ulang server streaming milik Harbor, lalu muat ulang stream setelah server aktif kembali. Khusus desktop.",
   "Restart engine": "Mulai ulang mesin",
   "Restart game": "Mulai ulang game",
+  "Restart streaming server": "Mulai ulang server streaming",
   "Restart to update": "Mulai ulang untuk memperbarui",
   Restarting: "Memulai ulang",
+  "Restarting the streaming server…": "Memulai ulang server streaming…",
   Restore: "Pulihkan",
   "Restore + upscale. The best all-rounder for most anime.":
     "Pulihkan + tingkatkan resolusi. Pilihan serbaguna terbaik untuk sebagian besar anime.",

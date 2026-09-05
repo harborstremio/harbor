@@ -34,28 +34,28 @@ const SOURCES: SourceMeta[] = [
     id: "library",
     label: "My library",
     description: "Episodes and movies from shows you've saved on Stremio.",
-    icon: () => <Library size={14} strokeWidth={2} />,
+    icon: () => <Library size={19} strokeWidth={2} />,
     prereq: (_s, { authKey }) => (authKey ? null : "Sign in to Stremio first."),
   },
   {
     id: "all",
     label: "All upcoming",
     description: "Everything releasing in the current month from TMDB.",
-    icon: () => <Globe size={14} strokeWidth={2} />,
+    icon: () => <Globe size={19} strokeWidth={2} />,
     prereq: (s) => (s.tmdbKey ? null : "Add a TMDB key in Library settings."),
   },
   {
     id: "trakt",
     label: "My Trakt",
     description: "Upcoming episodes and movies from your Trakt watchlist.",
-    icon: () => <img src={traktLogo} alt="" className="h-3.5 w-3.5 object-contain" />,
+    icon: () => <img src={traktLogo} alt="" className="h-[19px] w-[19px] object-contain" />,
     prereq: (_s, { traktConnected }) => (traktConnected ? null : "Connect Trakt first."),
   },
   {
     id: "anticipated",
     label: "Anticipated",
     description: "The most anticipated upcoming releases on Trakt. No login needed.",
-    icon: () => <img src={traktLogo} alt="" className="h-3.5 w-3.5 object-contain" />,
+    icon: () => <img src={traktLogo} alt="" className="h-[19px] w-[19px] object-contain" />,
     prereq: () => null,
   },
   {
@@ -63,7 +63,7 @@ const SOURCES: SourceMeta[] = [
     label: "Custom calendar",
     description:
       "Anything matching your Custom calendar: tracked people, genres, providers, countries.",
-    icon: () => <Star size={14} strokeWidth={2} />,
+    icon: () => <Star size={19} strokeWidth={2} />,
     prereq: (s) => (s.tmdbKey ? null : "Add a TMDB key in Library settings."),
   },
 ];
@@ -126,7 +126,7 @@ export function WebhooksPanel() {
   useSubTabs(
     [
       { id: "destinations", label: t("Destinations") },
-      { id: "what", label: t("What to send") },
+      { id: "what", label: t("Sources") },
       { id: "rules", label: t("Rules") },
     ],
     tab,
@@ -136,33 +136,29 @@ export function WebhooksPanel() {
   return (
     <div key={tab} className="harbor-cascade flex flex-col gap-10">
       {tab === "destinations" && (
-        <>
-          <Section
-            title={t("Where alerts go")}
-            subtitle={t(
-              "Connect Discord or Telegram and Harbor posts a message when something you follow is about to drop. Hit Test to send yourself a sample first.",
-            )}
-          >
-            <div className="flex flex-col gap-5">
-              <WebhookField
-                label={t("Discord webhook URL")}
-                logo={<DiscordMark />}
-                placeholder="https://discord.com/api/webhooks/…"
-                value={settings.webhooks.discordUrl}
-                onChange={(v) => setUrl("discordUrl", v)}
-                onTest={() => send("discord")}
-                status={discordStatus}
-                help={<DiscordTutorial />}
-              />
-              <TelegramComposedField
-                fullUrl={settings.webhooks.telegramUrl}
-                onUrlChange={(v) => setUrl("telegramUrl", v)}
-                onTest={() => send("telegram")}
-                status={telegramStatus}
-              />
-            </div>
-          </Section>
-        </>
+        <Section
+          title={t("Where alerts go")}
+          subtitle={t(
+            "Connect Discord or Telegram and Harbor posts a message when something you follow is about to drop. Hit Send test to send yourself a sample first.",
+          )}
+        >
+          <WebhookField
+            label={t("Discord webhook URL")}
+            logo={<DiscordMark />}
+            placeholder="https://discord.com/api/webhooks/…"
+            value={settings.webhooks.discordUrl}
+            onChange={(v) => setUrl("discordUrl", v)}
+            onTest={() => send("discord")}
+            status={discordStatus}
+            help={<DiscordTutorial />}
+          />
+          <TelegramComposedField
+            fullUrl={settings.webhooks.telegramUrl}
+            onUrlChange={(v) => setUrl("telegramUrl", v)}
+            onTest={() => send("telegram")}
+            status={telegramStatus}
+          />
+        </Section>
       )}
       {tab === "what" && (
         <>
@@ -172,21 +168,15 @@ export function WebhooksPanel() {
               "Pick which calendars feed your alerts. Items are deduped across sources before sending.",
             )}
           >
-            <div className="flex flex-col gap-1.5">
-              {SOURCES.map((s) => {
-                const blocker = s.prereq(settings, { authKey, traktConnected });
-                const on = settings.webhooks.sources[s.id];
-                return (
-                  <SourceToggle
-                    key={s.id}
-                    source={s}
-                    on={on}
-                    blocker={blocker}
-                    onChange={(v) => setSource(s.id, v)}
-                  />
-                );
-              })}
-            </div>
+            {SOURCES.map((s) => (
+              <SourceToggle
+                key={s.id}
+                source={s}
+                on={settings.webhooks.sources[s.id]}
+                blocker={s.prereq(settings, { authKey, traktConnected })}
+                onChange={(v) => setSource(s.id, v)}
+              />
+            ))}
           </Section>
 
           <Section
@@ -195,36 +185,35 @@ export function WebhooksPanel() {
               "Filter by type after the sources merge. Leave them all on to send everything.",
             )}
           >
-            <div className="flex flex-col gap-1.5">
-              <ToggleRow
-                label={t("Movies")}
-                value={settings.webhooks.notifyMovies}
-                onChange={(v) => setNotify("notifyMovies", v)}
-              />
-              <ToggleRow
-                label={t("TV")}
-                value={settings.webhooks.notifyTv}
-                onChange={(v) => setNotify("notifyTv", v)}
-              />
-              <ToggleRow
-                label={t("Anime")}
-                value={settings.webhooks.notifyAnime}
-                onChange={(v) => setNotify("notifyAnime", v)}
-              />
-            </div>
+            <ToggleRow
+              label={t("Movies")}
+              sub={t("Include film releases from every source you turned on above.")}
+              value={settings.webhooks.notifyMovies}
+              onChange={(v) => setNotify("notifyMovies", v)}
+            />
+            <ToggleRow
+              label={t("TV")}
+              sub={t("Include series premieres and new episodes. Anime is counted separately.")}
+              value={settings.webhooks.notifyTv}
+              onChange={(v) => setNotify("notifyTv", v)}
+            />
+            <ToggleRow
+              label={t("Anime")}
+              sub={t("Include anime episodes and seasons, even when TV is turned off.")}
+              value={settings.webhooks.notifyAnime}
+              onChange={(v) => setNotify("notifyAnime", v)}
+            />
           </Section>
         </>
       )}
       {tab === "rules" && (
-        <>
-          <RuleBuilder
-            rules={settings.webhookRules}
-            onChange={(rules) => update({ webhookRules: rules })}
-            trackedPeople={settings.customCalendar.trackedPeople}
-            canDiscord={!!settings.webhooks.discordUrl}
-            canTelegram={!!settings.webhooks.telegramUrl}
-          />
-        </>
+        <RuleBuilder
+          rules={settings.webhookRules}
+          onChange={(rules) => update({ webhookRules: rules })}
+          trackedPeople={settings.customCalendar.trackedPeople}
+          canDiscord={!!settings.webhooks.discordUrl}
+          canTelegram={!!settings.webhooks.telegramUrl}
+        />
       )}
     </div>
   );
@@ -242,8 +231,6 @@ function SourceToggle({
   onChange: (v: boolean) => void;
 }) {
   const t = useT();
-  const disabled = blocker !== null;
-  const effective = on && !disabled;
   return (
     <ToggleRow
       label={t(source.label)}
@@ -251,15 +238,7 @@ function SourceToggle({
       value={on}
       onChange={onChange}
       lockReason={blocker ? t(blocker) : undefined}
-      leading={
-        <span
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${
-            effective ? "bg-ink text-canvas" : "bg-canvas text-ink-muted"
-          }`}
-        >
-          {source.icon()}
-        </span>
-      }
+      leading={source.icon()}
     />
   );
 }

@@ -1,16 +1,24 @@
 import { fillStyle } from "@/components/slider";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ImagePlus, Move, ZoomIn } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { getDirection, isRtl } from "@/lib/keyboard-navigation/geometry";
+import { ROW_ACTION } from "@/views/settings/kit";
+import { ROW_DESC, ROW_TITLE } from "@/views/settings/shared";
 
 const OUT_W = 1600;
 const OUT_H = 900;
+
+const HINT_CHIP =
+  "inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
 
 export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => void }) {
   const t = useT();
   const frameRef = useRef<HTMLDivElement>(null);
   const imgEl = useRef<HTMLImageElement | null>(null);
   const drag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
+  const nudgeTimer = useRef(0);
+  useEffect(() => () => window.clearTimeout(nudgeTimer.current), []);
   const [src, setSrc] = useState<string | null>(null);
   const [nat, setNat] = useState({ w: 0, h: 0 });
   const [zoom, setZoom] = useState(1);
@@ -35,6 +43,7 @@ export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => vo
 
   const commit = useCallback(
     (o: { x: number; y: number }, z: number, n: { w: number; h: number }) => {
+      window.clearTimeout(nudgeTimer.current);
       const im = imgEl.current;
       const f = frameSize();
       if (!im || !n.w || !f.w) return onChange(null);
@@ -102,6 +111,26 @@ export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => vo
     commit(offset, zoom, nat);
   };
 
+  const onFrameKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const dir = src ? getDirection(e.nativeEvent) : null;
+    if (!dir) return;
+    const step = 24;
+    const forward = (dir === "right") !== isRtl(e.currentTarget);
+    const next = clamp(
+      {
+        x: dir === "left" || dir === "right" ? offset.x + (forward ? step : -step) : offset.x,
+        y: dir === "up" ? offset.y - step : dir === "down" ? offset.y + step : offset.y,
+      },
+      zoom,
+      nat,
+    );
+    if (next.x === offset.x && next.y === offset.y) return;
+    e.preventDefault();
+    setOffset(next);
+    window.clearTimeout(nudgeTimer.current);
+    nudgeTimer.current = window.setTimeout(() => commit(next, zoom, nat), 220);
+  };
+
   const dispScale = nat.w
     ? Math.max((frameSize().w || 1) / nat.w, (frameSize().h || 1) / nat.h) * zoom
     : 1;
@@ -113,42 +142,50 @@ export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => vo
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={onUp}
+        onKeyDown={onFrameKeyDown}
+        tabIndex={src ? 0 : undefined}
+        role={src ? "group" : undefined}
+        aria-label={src ? t("drag to position") : undefined}
         className={`relative aspect-video w-full select-none overflow-hidden rounded-md bg-elevated ${src ? "cursor-grab active:cursor-grabbing" : ""}`}
       >
         {src ? (
           <>
-            <img
-              src={src}
-              alt=""
-              draggable={false}
-              style={{
-                position: "absolute",
-                left: "50%",
-                top: "50%",
-                width: nat.w * dispScale,
-                height: nat.h * dispScale,
-                maxWidth: "none",
-                transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))`,
-              }}
-            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <img
+                src={src}
+                alt=""
+                draggable={false}
+                style={{
+                  flex: "0 0 auto",
+                  width: nat.w * dispScale,
+                  height: nat.h * dispScale,
+                  maxWidth: "none",
+                  transform: `translate(${offset.x}px, ${offset.y}px)`,
+                }}
+              />
+            </div>
             <div className="pointer-events-none absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-0 transition-opacity duration-200 [.cursor-grab:active_&]:opacity-100">
               {Array.from({ length: 9 }).map((_, i) => (
                 <div key={i} className="border border-white/15" />
               ))}
             </div>
-            <div className="pointer-events-none absolute bottom-2 start-2 flex items-center gap-1.5 rounded-full bg-black/45 px-2.5 py-1 text-[11.5px] font-medium text-white/80 backdrop-blur-sm">
-              <Move size={12} /> {t("drag to position")}
+            <div
+              className={`${HINT_CHIP} pointer-events-none absolute bottom-2 start-2 bg-black/55 text-white backdrop-blur-sm`}
+            >
+              <Move size={14} /> {t("drag to position")}
             </div>
           </>
         ) : (
           <button
             type="button"
             onClick={pick}
-            className="flex h-full w-full flex-col items-center justify-center gap-2 text-ink-subtle transition-colors hover:text-ink"
+            className="flex h-full w-full flex-col items-center justify-center gap-2 px-6 text-center text-ink-subtle transition-colors hover:text-ink"
           >
             <ImagePlus size={28} strokeWidth={1.6} />
-            <span className="text-[13px] font-medium">{t("Add a cover image")}</span>
-            <span className="text-[11.5px]">{t("A 16:9 shot of your theme looks best")}</span>
+            <span className={ROW_TITLE}>{t("Add a cover image")}</span>
+            <span className={`${ROW_DESC} max-w-[66ch]`}>
+              {t("A 16:9 shot of your theme looks best")}
+            </span>
           </button>
         )}
       </div>
@@ -169,14 +206,10 @@ export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => vo
               setOffset(o);
               commit(o, z, nat);
             }}
-            className="harbor-slider flex-1"
-            style={fillStyle(zoom, 1, 3)}
+            className="harbor-slider h-11 min-w-0 flex-1"
+            style={fillStyle(zoom, 1, 3, 0.01)}
           />
-          <button
-            type="button"
-            onClick={pick}
-            className="shrink-0 text-[12.5px] font-medium text-ink-muted transition-colors hover:text-ink"
-          >
+          <button type="button" onClick={pick} className={ROW_ACTION}>
             {t("Replace")}
           </button>
         </div>

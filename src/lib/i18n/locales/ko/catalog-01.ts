@@ -12,6 +12,8 @@ const catalog01: Record<string, string> = {
   "A 16:9 shot of your theme looks best": "테마를 16:9로 캡처한 이미지가 가장 잘 어울립니다",
   "A Short Tonight: {genre} Under 90": "오늘 밤의 짧은 영화: 90분 미만 {genre}",
   "A country releases something": "특정 국가에서 작품이 공개됨",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "몇 분 분량을 미리 받아 둡니다. 재생이 시작되기까지 오래 기다리지 않으면서 짧은 끊김은 넘길 수 있습니다.",
   "A dead source is dropped and the next one starts.":
     "응답하지 않는 소스는 제외되고 다음 소스가 시작됩니다.",
   "A debrid service is connected. You'll get instant, high-quality streams.":
@@ -195,6 +197,7 @@ const catalog01: Record<string, string> = {
   "Ad, analytics, and tracking requests pass through untouched.":
     "광고, 분석 및 추적 요청을 차단하지 않고 그대로 통과시킵니다.",
   Adaptations: "각색 작품",
+  Adaptive: "자동 조절",
   "Adaptive Sharpen": "적응형 선명화",
   Add: "추가",
   "Add a Discord or Telegram URL above before creating rules.":

@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
+import { pickEpisodeName } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { SFX } from "@/lib/sfx";
 import { useBpT } from "../bp-i18n";
@@ -42,6 +43,7 @@ export function BpEpisodeCard({
   const rating = fact?.rating;
   const runtime = fact?.runtime;
   const aired = bpShortDate(ep.airDate ?? fact?.airDate);
+  const name = pickEpisodeName(ep.name, fact?.name);
   const overview = ep.overview || fact?.overview || "";
   const facts = [aired, runtime ? t("{n} min", { n: runtime }) : ""].filter(Boolean);
 
@@ -56,7 +58,7 @@ export function BpEpisodeCard({
         SFX.click();
         onPlay(stills[0] ? { ...ep, still: stills[0] } : ep);
       }}
-      aria-label={ep.name ? `${epLabel}, ${ep.name}` : epLabel}
+      aria-label={name ? `${epLabel}, ${name}` : epLabel}
       className="group relative flex shrink-0 flex-col overflow-hidden rounded-[var(--bp-r-md)] bg-[var(--bp-panel)] text-start transition-[transform,box-shadow] duration-[var(--bp-dur)] ease-[var(--bp-ease)]"
       style={{ width: BP_EPISODE_CARD_W }}
     >
@@ -87,7 +89,7 @@ export function BpEpisodeCard({
           {tag}
         </span>
         <span className="line-clamp-1 text-[clamp(13px,1.8vh,20.5px)] font-semibold text-ink">
-          {ep.name || epLabel}
+          {name || epLabel}
         </span>
         {facts.length > 0 && (
           <span className="line-clamp-1 text-[clamp(10.5px,1.35vh,15px)] font-medium tabular-nums text-ink-subtle">

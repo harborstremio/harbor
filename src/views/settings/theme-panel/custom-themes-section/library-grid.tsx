@@ -1,4 +1,4 @@
-import { Check, Copy, FilePlus2, Palette, Trash2 } from "lucide-react";
+import { ArrowRight, Check, Copy, FilePlus2, Palette, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { ThemePreset } from "@/lib/theme";
 import { useT } from "@/lib/i18n";
@@ -27,7 +27,7 @@ export function LibraryGrid({
   onUpload?: (file: File) => void;
 }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3">
       {entries.map((e) => (
         <LibraryCard
           key={e.theme.id}
@@ -59,13 +59,11 @@ function CreateTile({ onCreate }: { onCreate: () => void }) {
         style={{ background: "var(--color-accent)" }}
       />
       <div className="relative flex flex-col gap-1.5">
-        <span className="inline-flex w-fit items-center rounded-[3px] bg-accent px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-[0.2em] text-canvas">
-          {t("New")}
-        </span>
+        <span className="inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] bg-accent text-canvas">{t("New")}</span>
         <span className="text-[18px] font-semibold tracking-tight text-ink">
           {t("Build a theme")}
         </span>
-        <span className="max-w-[24ch] text-[12.5px] leading-snug text-ink-muted">
+        <span className="max-w-[40ch] text-[15.5px] leading-[22px] text-ink-muted">
           {t("Pick a layout, set colors and fonts, save it to your library. No code needed.")}
         </span>
       </div>
@@ -76,8 +74,9 @@ function CreateTile({ onCreate }: { onCreate: () => void }) {
         >
           <Palette size={20} strokeWidth={2} />
         </span>
-        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-accent transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">
-          {t("Open studio")} →
+        <span className="inline-flex min-h-11 items-center gap-1.5 text-[15.5px] font-semibold text-accent transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">
+          {t("Open studio")}
+          <ArrowRight size={18} strokeWidth={2.2} className="dir-icon" />
         </span>
       </div>
     </button>
@@ -118,13 +117,11 @@ function ImportTile({ onUpload }: { onUpload: (file: File) => void }) {
       aria-label={t("Import a theme file")}
     >
       <div className="relative flex flex-col gap-1.5">
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-ink-subtle">
-          {t("Have a file?")}
-        </span>
+        <span className="inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] bg-elevated text-ink-subtle">{t("Have a file?")}</span>
         <span className="text-[18px] font-semibold tracking-tight text-ink">
           {t("Import a theme")}
         </span>
-        <span className="max-w-[24ch] text-[12.5px] leading-snug text-ink-muted">
+        <span className="max-w-[40ch] text-[15.5px] leading-[22px] text-ink-muted">
           {dragOver
             ? t("Release to add it to your library")
             : t("Drop a theme file here or click to browse.")}
@@ -141,8 +138,9 @@ function ImportTile({ onUpload }: { onUpload: (file: File) => void }) {
         >
           <FilePlus2 size={20} strokeWidth={2} />
         </span>
-        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ink-muted transition-colors group-hover:text-ink">
-          {t("Browse files")} →
+        <span className="inline-flex min-h-11 items-center gap-1.5 text-[15.5px] font-semibold text-ink-muted transition-colors group-hover:text-ink">
+          {t("Browse files")}
+          <ArrowRight size={18} strokeWidth={2.2} className="dir-icon" />
         </span>
       </div>
     </button>
@@ -190,40 +188,38 @@ function LibraryCard({
             : { background: bg }
         }
       >
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/35" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-canvas/40" />
         <CategoryBadge category={category} active={active} />
         {active && (
-          <span className="absolute end-3 top-3 flex h-7 items-center gap-1 rounded-[3px] bg-accent px-2.5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-canvas">
-            <Check size={12} strokeWidth={3} /> {t("Active")}
+          <span className="absolute end-3 top-3 gap-1.5 inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] bg-accent text-canvas">
+            <Check size={14} strokeWidth={3} /> {t("Active")}
           </span>
         )}
         <SwatchStrip swatch={theme.swatch} />
       </div>
-      <div className="flex min-h-[88px] flex-1 flex-col justify-between gap-2 px-4 pb-3 pt-3">
+      <div className="flex min-h-[104px] flex-1 flex-col justify-between gap-3 px-4 pb-4 pt-3">
         <div className="flex min-w-0 flex-col">
-          <span className="truncate text-[14.5px] font-semibold text-ink">{theme.name}</span>
+          <span className="text-[16.5px] font-semibold leading-[24px] text-ink">{theme.name}</span>
           {localizedBlurb && (
-            <span className="line-clamp-2 text-[11.5px] leading-snug text-ink-subtle">
-              {localizedBlurb}
-            </span>
+            <span className="text-[15.5px] leading-[22px] text-ink-subtle">{localizedBlurb}</span>
           )}
         </div>
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={onActivate}
-            className={`h-8 flex-1 rounded-md text-[12.5px] font-semibold transition-opacity ${
+            className={`h-11 flex-1 rounded-[8px] text-[15.5px] font-semibold transition-opacity ${
               active ? "bg-elevated text-ink" : "bg-ink text-canvas hover:opacity-90"
             }`}
           >
             {active ? t("Active") : t("Apply")}
           </button>
           <ActionBtn label="Copy" onClick={onExport}>
-            <Copy size={12} strokeWidth={2.2} />
+            <Copy size={18} strokeWidth={2.2} />
           </ActionBtn>
           {removable && (
             <ActionBtn label="Remove" onClick={onRemove} danger>
-              <Trash2 size={12} strokeWidth={2.2} />
+              <Trash2 size={18} strokeWidth={2.2} />
             </ActionBtn>
           )}
         </div>
@@ -243,8 +239,8 @@ function CategoryBadge({
   const isFeatured = category === "Featured";
   return (
     <span
-      className={`absolute start-3 top-3 flex items-center gap-1 rounded-[3px] px-2 py-1 text-[9.5px] font-bold uppercase tracking-[0.2em] ${
-        isFeatured ? "bg-canvas text-accent" : "bg-canvas text-ink/85"
+      className={`absolute start-3 top-3 inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] ${
+        isFeatured ? "bg-canvas text-accent" : "bg-canvas text-ink"
       } ${active ? "opacity-0" : "opacity-100"}`}
     >
       {t(category)}
@@ -254,7 +250,7 @@ function CategoryBadge({
 
 function SwatchStrip({ swatch }: { swatch: string[] }) {
   return (
-    <div className="absolute bottom-0 left-0 right-0 flex h-1.5">
+    <div className="absolute inset-x-0 bottom-0 flex h-1.5">
       {swatch.map((c, i) => (
         <span key={i} className="flex-1" style={{ background: c }} />
       ))}
@@ -280,7 +276,7 @@ function ActionBtn({
       aria-label={t(label)}
       title={t(label)}
       onClick={onClick}
-      className={`flex h-8 w-8 items-center justify-center rounded-md bg-canvas text-ink-subtle transition-colors ${
+      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-canvas text-ink-subtle transition-colors ${
         danger ? "hover:bg-danger/15 hover:text-danger" : "hover:bg-surface hover:text-ink"
       }`}
     >

@@ -1,4 +1,7 @@
-const coverage: Record<string, string> = {
+const coverage: Record<string, string> = {
+  "Sound descriptions": "音の説明",
+  "Hide sound effects and speaker names": "効果音と話者名を隠す",
+  "Removes bracketed descriptions like [door creaks] and shouted speaker labels like JOHN: while subtitles play, so a release that only ships an SDH track still reads as plain dialogue. Song lyrics, ordinary parentheses and non-Latin scripts are left alone. Skipped on forced and picture-based tracks.": "再生中の字幕から [ドアがきしむ] のような角かっこの説明や、JOHN: のような大文字の話者名を取り除きます。SDH 字幕しか同梱されていないリリースでも、通常のせりふとして読めます。歌詞、通常の丸かっこ、ラテン文字以外の文字はそのまま残ります。強制字幕と画像字幕には適用されません。",
   "Play from": "再生開始位置",
   end: "末尾",
   "m:ss": "m:ss",

@@ -1,0 +1,417 @@
+THIRD-PARTY SOFTWARE NOTICES
+
+Harbor bundles the open source components listed below. Each is used under
+the licence named in its heading. The full text of every licence referenced
+187 components across 7 licences.
+
+here is available in Harbor under Settings, Licenses and attribution.
+
+==============================================================================
+Apache-2.0  (5 components)
+==============================================================================
+
+  @mediapipe/tasks-vision 0.10.35
+      http://mediapipe.dev
+  flatbuffers 25.9.23
+      https://google.github.io/flatbuffers/
+  hls.js 1.6.16
+      https://github.com/video-dev/hls.js
+  long 5.3.2
+      https://github.com/dcodeIO/long.js#readme
+  mpegts.js 1.8.0
+      https://github.com/xqq/mpegts.js#readme
+
+==============================================================================
+Apache-2.0 OR MIT  (1 component)
+==============================================================================
+
+  @tauri-apps/api 2.11.0, 2.11.1
+      https://github.com/tauri-apps/tauri#readme
+
+==============================================================================
+BSD-2-Clause  (1 component)
+==============================================================================
+
+  entities 6.0.1
+      https://github.com/fb55/entities#readme
+
+==============================================================================
+BSD-3-Clause  (10 components)
+==============================================================================
+
+  @protobufjs/aspromise 1.1.2
+      https://github.com/dcodeIO/protobuf.js#readme
+  @protobufjs/base64 1.1.2
+      https://github.com/dcodeIO/protobuf.js#readme
+  @protobufjs/codegen 2.0.5
+      https://github.com/dcodeIO/protobuf.js#readme
+  @protobufjs/eventemitter 1.1.1
+      https://github.com/dcodeIO/protobuf.js#readme
+  @protobufjs/fetch 1.1.1
+      https://github.com/dcodeIO/protobuf.js#readme
+  @protobufjs/float 1.0.2
+      https://github.com/dcodeIO/protobuf.js#readme
+  @protobufjs/path 1.1.2
+      https://github.com/dcodeIO/protobuf.js#readme
+  @protobufjs/pool 1.1.0
+      https://github.com/dcodeIO/protobuf.js#readme
+  @protobufjs/utf8 1.1.2
+      https://github.com/protobufjs/protobuf.js#readme
+  protobufjs 7.6.5
+      https://protobufjs.github.io/protobuf.js/
+
+==============================================================================
+ISC  (10 components)
+==============================================================================
+
+  @ungap/structured-clone 1.3.1
+      https://github.com/ungap/structured-clone#readme
+  cliui 6.0.0
+      https://github.com/yargs/cliui#readme
+  get-caller-file 2.0.5
+      https://github.com/stefanpenner/get-caller-file#readme
+  guid-typescript 1.0.9
+      https://github.com/NicolasDeveloper/guid-typescript#readme
+  lucide-react 0.460.0
+      https://lucide.dev
+  require-main-filename 2.0.0
+      https://github.com/yargs/require-main-filename#readme
+  set-blocking 2.0.0
+      https://github.com/yargs/set-blocking#readme
+  which-module 2.0.1
+      https://github.com/nexdrew/which-module#readme
+  y18n 4.0.3
+      https://github.com/yargs/y18n
+  yargs-parser 18.1.3
+      https://github.com/yargs/yargs-parser#readme
+
+==============================================================================
+MIT  (151 components)
+==============================================================================
+
+  @rive-app/canvas 2.41.0
+      https://rive.app
+  @tanstack/react-virtual 3.14.9
+      https://tanstack.com/virtual
+  @tanstack/virtual-core 3.17.7
+      https://tanstack.com/virtual
+  @types/debug 4.1.13
+      https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/debug
+  @types/estree 1.0.8
+      https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/estree
+  @types/estree-jsx 1.0.5
+      https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/estree-jsx
+  @types/hast 3.0.4
+      https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/hast
+  @types/mdast 4.0.4
+      https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/mdast
+  @types/ms 2.1.0
+      https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/ms
+  @types/node 26.1.1
+      https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node
+  @types/react 19.2.14
+      https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react
+  @types/unist 2.0.11, 3.0.3
+      https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/unist
+  ansi-regex 5.0.1
+      https://github.com/chalk/ansi-regex#readme
+  ansi-styles 4.3.0
+      https://github.com/chalk/ansi-styles#readme
+  bail 2.0.2
+      https://github.com/wooorm/bail#readme
+  camelcase 5.3.1
+      https://github.com/sindresorhus/camelcase#readme
+  ccount 2.0.1
+      https://github.com/wooorm/ccount#readme
+  character-entities 2.0.2
+      https://github.com/wooorm/character-entities#readme
+  character-entities-html4 2.1.0
+      https://github.com/wooorm/character-entities-html4#readme
+  character-entities-legacy 3.0.0
+      https://github.com/wooorm/character-entities-legacy#readme
+  character-reference-invalid 2.0.1
+      https://github.com/wooorm/character-reference-invalid#readme
+  color-convert 2.0.1
+      https://github.com/Qix-/color-convert#readme
+  color-name 1.1.4
+      https://github.com/colorjs/color-name
+  comma-separated-tokens 2.0.3
+      https://github.com/wooorm/comma-separated-tokens#readme
+  csstype 3.2.3
+      https://github.com/frenic/csstype#readme
+  debug 4.4.3
+      https://github.com/debug-js/debug#readme
+  decamelize 1.2.0
+      https://github.com/sindresorhus/decamelize#readme
+  decode-named-character-reference 1.3.0
+      https://github.com/wooorm/decode-named-character-reference#readme
+  dequal 2.0.3
+      https://github.com/lukeed/dequal#readme
+  devlop 1.1.0
+      https://github.com/wooorm/devlop#readme
+  dijkstrajs 1.0.3
+      https://github.com/tcort/dijkstrajs
+  emoji-regex 8.0.0
+      https://mths.be/emoji-regex
+  es6-promise 4.2.8
+      https://github.com/stefanpenner/es6-promise
+  escape-string-regexp 5.0.0
+      https://github.com/sindresorhus/escape-string-regexp#readme
+  estree-util-is-identifier-name 3.0.0
+      https://github.com/syntax-tree/estree-util-is-identifier-name#readme
+  extend 3.0.2
+      https://github.com/justmoon/node-extend#readme
+  fflate 0.8.3
+      https://101arrowz.github.io/fflate
+  find-up 4.1.0
+      https://github.com/sindresorhus/find-up#readme
+  flag-icons 7.5.0
+      https://github.com/lipis/flag-icons#readme
+  gifenc 1.0.3
+      https://github.com/mattdesl/gifenc
+  hast-util-from-parse5 8.0.3
+      https://github.com/syntax-tree/hast-util-from-parse5#readme
+  hast-util-parse-selector 4.0.0
+      https://github.com/syntax-tree/hast-util-parse-selector#readme
+  hast-util-raw 9.1.0
+      https://github.com/syntax-tree/hast-util-raw#readme
+  hast-util-to-jsx-runtime 2.3.6
+      https://github.com/syntax-tree/hast-util-to-jsx-runtime#readme
+  hast-util-to-parse5 8.0.1
+      https://github.com/syntax-tree/hast-util-to-parse5#readme
+  hast-util-whitespace 3.0.0
+      https://github.com/syntax-tree/hast-util-whitespace#readme
+  hastscript 9.0.1
+      https://github.com/syntax-tree/hastscript#readme
+  html-url-attributes 3.0.1
+      https://github.com/rehypejs/rehype-minify/tree/main#readme
+  html-void-elements 3.0.0
+      https://github.com/wooorm/html-void-elements#readme
+  inline-style-parser 0.2.7
+      https://github.com/remarkablemark/inline-style-parser#readme
+  is-alphabetical 2.0.1
+      https://github.com/wooorm/is-alphabetical#readme
+  is-alphanumerical 2.0.1
+      https://github.com/wooorm/is-alphanumerical#readme
+  is-decimal 2.0.1
+      https://github.com/wooorm/is-decimal#readme
+  is-fullwidth-code-point 3.0.0
+      https://github.com/sindresorhus/is-fullwidth-code-point#readme
+  is-hexadecimal 2.0.1
+      https://github.com/wooorm/is-hexadecimal#readme
+  is-plain-obj 4.1.0
+      https://github.com/sindresorhus/is-plain-obj#readme
+  locate-path 5.0.0
+      https://github.com/sindresorhus/locate-path#readme
+  longest-streak 3.1.0
+      https://github.com/wooorm/longest-streak#readme
+  lottie-web 5.13.0
+      https://github.com/airbnb/lottie-web#readme
+  markdown-table 3.0.4
+      https://github.com/wooorm/markdown-table#readme
+  mdast-util-find-and-replace 3.0.2
+      https://github.com/syntax-tree/mdast-util-find-and-replace#readme
+  mdast-util-from-markdown 2.0.3
+      https://github.com/syntax-tree/mdast-util-from-markdown#readme
+  mdast-util-gfm 3.1.0
+      https://github.com/syntax-tree/mdast-util-gfm#readme
+  mdast-util-gfm-autolink-literal 2.0.1
+      https://github.com/syntax-tree/mdast-util-gfm-autolink-literal#readme
+  mdast-util-gfm-footnote 2.1.0
+      https://github.com/syntax-tree/mdast-util-gfm-footnote#readme
+  mdast-util-gfm-strikethrough 2.0.0
+      https://github.com/syntax-tree/mdast-util-gfm-strikethrough#readme
+  mdast-util-gfm-table 2.0.0
+      https://github.com/syntax-tree/mdast-util-gfm-table#readme
+  mdast-util-gfm-task-list-item 2.0.0
+      https://github.com/syntax-tree/mdast-util-gfm-task-list-item#readme
+  mdast-util-mdx-expression 2.0.1
+      https://github.com/syntax-tree/mdast-util-mdx-expression#readme
+  mdast-util-mdx-jsx 3.2.0
+      https://github.com/syntax-tree/mdast-util-mdx-jsx#readme
+  mdast-util-mdxjs-esm 2.0.1
+      https://github.com/syntax-tree/mdast-util-mdxjs-esm#readme
+  mdast-util-phrasing 4.1.0
+      https://github.com/syntax-tree/mdast-util-phrasing#readme
+  mdast-util-to-hast 13.2.1
+      https://github.com/syntax-tree/mdast-util-to-hast#readme
+  mdast-util-to-markdown 2.1.2
+      https://github.com/syntax-tree/mdast-util-to-markdown#readme
+  mdast-util-to-string 4.0.0
+      https://github.com/syntax-tree/mdast-util-to-string#readme
+  micromark 4.0.2
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-core-commonmark 2.0.3
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-extension-gfm 3.0.0
+      https://github.com/micromark/micromark-extension-gfm#readme
+  micromark-extension-gfm-autolink-literal 2.1.0
+      https://github.com/micromark/micromark-extension-gfm-autolink-literal#readme
+  micromark-extension-gfm-footnote 2.1.0
+      https://github.com/micromark/micromark-extension-gfm-footnote#readme
+  micromark-extension-gfm-strikethrough 2.1.0
+      https://github.com/micromark/micromark-extension-gfm-strikethrough#readme
+  micromark-extension-gfm-table 2.1.1
+      https://github.com/micromark/micromark-extension-gfm-table#readme
+  micromark-extension-gfm-tagfilter 2.0.0
+      https://github.com/micromark/micromark-extension-gfm-tagfilter#readme
+  micromark-extension-gfm-task-list-item 2.1.0
+      https://github.com/micromark/micromark-extension-gfm-task-list-item#readme
+  micromark-factory-destination 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-factory-label 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-factory-space 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-factory-title 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-factory-whitespace 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-character 2.1.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-chunked 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-classify-character 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-combine-extensions 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-decode-numeric-character-reference 2.0.2
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-decode-string 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-encode 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-html-tag-name 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-normalize-identifier 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-resolve-all 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-sanitize-uri 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-subtokenize 2.1.0
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-symbol 2.0.1
+      https://github.com/micromark/micromark/tree/main#readme
+  micromark-util-types 2.0.2
+      https://github.com/micromark/micromark/tree/main#readme
+  ms 2.1.3
+      https://github.com/vercel/ms#readme
+  onnxruntime-common 1.27.0
+      https://github.com/Microsoft/onnxruntime#readme
+  onnxruntime-web 1.27.0
+      https://github.com/Microsoft/onnxruntime#readme
+  p-limit 2.3.0
+      https://github.com/sindresorhus/p-limit#readme
+  p-locate 4.1.0
+      https://github.com/sindresorhus/p-locate#readme
+  p-try 2.2.0
+      https://github.com/sindresorhus/p-try#readme
+  parse-entities 4.0.2
+      https://github.com/wooorm/parse-entities#readme
+  parse-torrent-title 3.0.1
+      https://github.com/clement-escolano/parse-torrent-title#readme
+  parse5 7.3.0
+      https://parse5.js.org
+  path-exists 4.0.0
+      https://github.com/sindresorhus/path-exists#readme
+  platform 1.3.6
+      https://github.com/bestiejs/platform.js#readme
+  pngjs 5.0.0
+      https://github.com/lukeapage/pngjs
+  property-information 7.1.0
+      https://github.com/wooorm/property-information#readme
+  qrcode 1.5.4
+      http://github.com/soldair/node-qrcode
+  react 19.2.5
+      https://react.dev/
+  react-dom 19.2.5
+      https://react.dev/
+  react-markdown 10.1.0
+      https://github.com/remarkjs/react-markdown#readme
+  rehype-raw 7.0.0
+      https://github.com/rehypejs/rehype-raw#readme
+  remark-gfm 4.0.1
+      https://github.com/remarkjs/remark-gfm#readme
+  remark-parse 11.0.0
+      https://remark.js.org
+  remark-rehype 11.1.2
+      https://github.com/remarkjs/remark-rehype#readme
+  remark-stringify 11.0.0
+      https://remark.js.org
+  require-directory 2.1.1
+      https://github.com/troygoode/node-require-directory/
+  scheduler 0.27.0
+      https://react.dev/
+  space-separated-tokens 2.0.2
+      https://github.com/wooorm/space-separated-tokens#readme
+  string-width 4.2.3
+      https://github.com/sindresorhus/string-width#readme
+  stringify-entities 4.0.4
+      https://github.com/wooorm/stringify-entities#readme
+  strip-ansi 6.0.1
+      https://github.com/chalk/strip-ansi#readme
+  style-to-js 1.1.21
+      https://github.com/remarkablemark/style-to-js#readme
+  style-to-object 1.0.14
+      https://github.com/remarkablemark/style-to-object#readme
+  tailwindcss 4.2.4
+      https://tailwindcss.com
+  trim-lines 3.0.1
+      https://github.com/wooorm/trim-lines#readme
+  trough 2.2.0
+      https://github.com/wooorm/trough#readme
+  undici-types 8.3.0
+      https://undici.nodejs.org
+  unified 11.0.5
+      https://unifiedjs.com
+  unist-util-is 6.0.1
+      https://github.com/syntax-tree/unist-util-is#readme
+  unist-util-position 5.0.0
+      https://github.com/syntax-tree/unist-util-position#readme
+  unist-util-stringify-position 4.0.0
+      https://github.com/syntax-tree/unist-util-stringify-position#readme
+  unist-util-visit 5.1.0
+      https://github.com/syntax-tree/unist-util-visit#readme
+  unist-util-visit-parents 6.0.2
+      https://github.com/syntax-tree/unist-util-visit-parents#readme
+  vfile 6.0.3
+      https://github.com/vfile/vfile#readme
+  vfile-location 5.0.3
+      https://github.com/vfile/vfile-location#readme
+  vfile-message 4.0.3
+      https://github.com/vfile/vfile-message#readme
+  web-namespaces 2.0.1
+      https://github.com/wooorm/web-namespaces#readme
+  webworkify-webpack 2.1.5
+      https://github.com/borisirota/webworkify-webpack
+  wrap-ansi 6.2.0
+      https://github.com/chalk/wrap-ansi#readme
+  yargs 15.4.1
+      https://yargs.js.org/
+  zwitch 2.0.4
+      https://github.com/wooorm/zwitch#readme
+
+==============================================================================
+MIT OR Apache-2.0  (9 components)
+==============================================================================
+
+  @tauri-apps/plugin-clipboard-manager 2.3.2
+      https://github.com/tauri-apps/plugins-workspace#readme
+  @tauri-apps/plugin-deep-link 2.4.9
+      https://github.com/tauri-apps/plugins-workspace#readme
+  @tauri-apps/plugin-dialog 2.7.1
+      https://github.com/tauri-apps/plugins-workspace#readme
+  @tauri-apps/plugin-fs 2.5.1
+      https://github.com/tauri-apps/plugins-workspace#readme
+  @tauri-apps/plugin-http 2.5.8
+      https://github.com/tauri-apps/plugins-workspace#readme
+  @tauri-apps/plugin-opener 2.5.3
+      https://github.com/tauri-apps/plugins-workspace#readme
+  @tauri-apps/plugin-os 2.3.2
+      https://github.com/tauri-apps/plugins-workspace#readme
+  @tauri-apps/plugin-process 2.3.1
+      https://github.com/tauri-apps/plugins-workspace#readme
+  @tauri-apps/plugin-updater 2.10.1
+      https://github.com/tauri-apps/plugins-workspace#readme
+

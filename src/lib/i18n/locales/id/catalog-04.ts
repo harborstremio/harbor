@@ -154,6 +154,7 @@ const catalog: Record<string, string> = {
   "Paste your OpenSubtitles API key": "Tempel kunci API OpenSubtitles Anda",
   "Paste your SUBDL API key": "Tempel kunci API SUBDL Anda",
   "Paste your Subsource API key": "Tempel kunci API Subsource Anda",
+  "Paste your TheIntroDB API key": "Tempel kunci API TheIntroDB Anda",
   "Paste your key": "Tempel kunci Anda",
   "Paste your repo.json URL into Extensions above, then install. That is how you bring any site's sources back.":
     "Tempel URL repo.json Anda ke Ekstensi di atas, lalu instal. Begitulah cara mengembalikan sumber dari situs mana pun.",
@@ -171,6 +172,7 @@ const catalog: Record<string, string> = {
   Paused: "Dijeda",
   "Paused on": "Dijeda di",
   "Paused on Simkl": "Dijeda di Simkl",
+  "Paused on Trakt": "Dijeda di Trakt",
   "Pausing after {n} more": "Akan dijeda setelah {n} lagi",
   "Pausing in {time}": "Akan dijeda dalam {time}",
   "Pausing when this one ends": "Akan dijeda setelah yang ini selesai",
@@ -821,6 +823,8 @@ const catalog: Record<string, string> = {
   "Re-configure this addon and apply the updated link":
     "Konfigurasikan ulang addon ini dan terapkan tautan yang diperbarui",
   "Re-download": "Unduh ulang",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "Buka kembali stream yang sedang Anda tonton dan lanjutkan dari posisi terakhir.",
   "Re-run deploy or paste the correct URL": "Jalankan ulang deploy atau tempel URL yang benar",
   "Re-runs the welcome flow and clears every dismissed tip.":
     "Menjalankan ulang alur sambutan dan menghapus semua tips yang ditutup.",
@@ -872,6 +876,7 @@ const catalog: Record<string, string> = {
   "Reading your search": "Membaca pencarian Anda",
   "Reading {chapter}": "Membaca {chapter}",
   "Reading…": "Membaca…",
+  "Reads ahead": "Muat di depan",
   Ready: "Siap",
   "Ready to play": "Siap diputar",
   "Ready to save": "Siap disimpan",
@@ -932,6 +937,7 @@ const catalog: Record<string, string> = {
   Recordings: "Rekaman",
   "Recover via Discord": "Pulihkan melalui Discord",
   "Recover via a code sent to Discord": "Pulihkan melalui kode yang dikirim ke Discord",
+  Recovery: "Pemulihan",
   "Recovery code": "Kode pemulihan",
   "Recovery key": "Kunci pemulihan",
   "Recovery key block {current} of {total}": "Blok kunci pemulihan {current} dari {total}",

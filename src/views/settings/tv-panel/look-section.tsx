@@ -28,7 +28,7 @@ export function TvSubLookSection({ profileId, doc }: { profileId: string; doc: T
       <SubPreview doc={doc} />
 
       <SettingRow wide label={t("Start from a look")}>
-        <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
+        <div className="flex min-w-0 flex-1 flex-wrap gap-2">
           {SUB_PRESETS.map((p) => {
             const on = matchesPreset(doc, p);
             return (
@@ -37,7 +37,7 @@ export function TvSubLookSection({ profileId, doc }: { profileId: string; doc: T
                 type="button"
                 title={t(p.note)}
                 onClick={() => writeTvLayout(profileId, p.values)}
-                className={`rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
+                className={`flex h-11 items-center rounded-full px-4 text-[15px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                   on ? "bg-ink text-canvas" : "bg-canvas text-ink-muted hover:text-ink"
                 }`}
               >

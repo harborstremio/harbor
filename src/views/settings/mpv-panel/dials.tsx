@@ -1,11 +1,13 @@
 import { fillStyle } from "@/components/slider";
-import { Contrast, RotateCcw, SlidersHorizontal, Sun, Wand2 } from "lucide-react";
-import { useId } from "react";
+import { Contrast, RotateCcw, Sun } from "lucide-react";
+import { useId, useRef, useState, type ChangeEvent } from "react";
+import { advanceFocus } from "@/lib/keyboard-navigation";
+import { isRtl, navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { useSampleArtwork } from "@/lib/sample-artwork";
 import { Section, ToggleRow } from "../shared";
-import { SettingRow } from "../kit";
+import { ROW_ACTION, ROW_ACTION_PRIMARY, SettingRow } from "../kit";
 
 export function useTweaks() {
   const { settings, update } = useSettings();
@@ -62,56 +64,76 @@ export function TweakSlider({
   const raw = tweaks[mpvKey];
   const value = raw != null && raw !== "" ? parseFloat(raw) : def;
   const active = raw != null && raw !== "" && parseFloat(raw) !== def;
-  const slider = (
-    <input
-      type="range"
-      min={min}
-      max={max}
-      step={step}
-      value={value}
-      onChange={(e) => {
-        const v = parseFloat(e.target.value);
-        setTweak(mpvKey, v === def ? null : String(v));
-      }}
-      className="harbor-slider min-w-0 flex-1"
-        style={fillStyle(value, min, max)}
-      />
-  );
-  const readout = (
-    <span
-      className={`shrink-0 text-end tabular-nums ${compact ? "w-10 text-[12.5px]" : "w-11 text-[12.5px]"} ${active ? "text-ink" : "text-ink-subtle"}`}
-    >
-      {fmt ? fmt(value) : value}
-    </span>
-  );
-  const reset = active ? (
-    <button
-      onClick={() => setTweak(mpvKey, null)}
-      className={`shrink-0 text-[12.5px] font-semibold text-ink-subtle transition-colors hover:text-ink ${compact ? "" : "w-[46px] text-end"}`}
-    >
-      {t("Reset")}
-    </button>
-  ) : (
-    <span className={`shrink-0 ${compact ? "w-7" : "w-[46px]"}`} />
-  );
+  const fill = fillStyle(value, min, max);
+  const onSlide = (e: ChangeEvent<HTMLInputElement>) => {
+    const v = parseFloat(e.target.value);
+    setTweak(mpvKey, v === def ? null : String(v));
+  };
   if (compact) {
     return (
-      <div className="flex items-center gap-2.5 px-1 py-1.5">
-        <span className="w-[76px] shrink-0 text-[12.5px] font-medium text-ink">{label}</span>
-        {slider}
-        {readout}
-        {reset}
+      <div className="flex flex-col px-1 py-1">
+        <div className="flex h-11 items-center gap-2.5">
+          <span className="min-w-0 flex-1 truncate text-[15.5px] font-medium leading-[22px] text-ink">
+            {label}
+          </span>
+          <span
+            className={`shrink-0 text-end text-[15.5px] leading-[22px] tabular-nums ${active ? "text-ink" : "text-ink-subtle"}`}
+          >
+            {fmt ? fmt(value) : value}
+          </span>
+          {active && (
+            <button
+              type="button"
+              onClick={() => setTweak(mpvKey, null)}
+              className="h-11 shrink-0 rounded-[8px] px-2 text-[15.5px] font-semibold text-ink-subtle transition-colors hover:text-ink"
+            >
+              {t("Reset")}
+            </button>
+          )}
+        </div>
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={onSlide}
+          aria-label={label}
+          className="harbor-slider w-full"
+          style={{ ...fill, blockSize: "44px" }}
+        />
       </div>
     );
   }
   return (
-    <div className="flex items-center gap-3.5 py-[7px]">
-      <span className="w-[118px] shrink-0 text-[12.5px] font-medium leading-tight text-ink">
-        {label}
-      </span>
-      {slider}
-      {readout}
-      {reset}
+    <div className="flex w-full max-w-[520px] flex-col gap-2">
+      <div className="flex items-center gap-4">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={onSlide}
+          aria-label={label}
+          className="harbor-slider min-w-0 flex-1"
+          style={{ ...fill, blockSize: "44px" }}
+        />
+        <span
+          className={`w-[64px] shrink-0 text-end text-[15.5px] leading-[22px] tabular-nums ${active ? "text-ink" : "text-ink-subtle"}`}
+        >
+          {fmt ? fmt(value) : value}
+        </span>
+      </div>
+      {active && (
+        <button
+          type="button"
+          onClick={() => setTweak(mpvKey, null)}
+          className="h-11 w-full rounded-[8px] bg-canvas text-[15.5px] font-semibold text-ink-subtle transition-colors hover:text-ink"
+        >
+          {t("Reset")}
+        </button>
+      )}
     </div>
   );
 }
@@ -140,6 +162,64 @@ export const PICTURE_TEMPLATES: Array<{ label: string; sub: string; patch: Recor
 ];
 
 export const PICTURE_KEYS = ["brightness", "contrast", "saturation", "gamma", "sharpen"];
+
+const DIALS: Array<{
+  mpvKey: string;
+  label: string;
+  desc: string;
+  min: number;
+  max: number;
+  step: number;
+  def: number;
+  fmt?: (v: number) => string;
+}> = [
+  {
+    mpvKey: "brightness",
+    label: "Brightness",
+    desc: "Lifts or lowers the whole picture at once. A small nudge is usually enough; too much washes the blacks out to grey.",
+    min: -50,
+    max: 50,
+    step: 1,
+    def: 0,
+  },
+  {
+    mpvKey: "contrast",
+    label: "Contrast",
+    desc: "Widens the gap between the darkest and brightest parts of the picture. Too much crushes detail at both ends.",
+    min: -50,
+    max: 50,
+    step: 1,
+    def: 0,
+  },
+  {
+    mpvKey: "saturation",
+    label: "Saturation",
+    desc: "How strong the colors are. Push it up for a vivid look, or all the way down for black and white.",
+    min: -50,
+    max: 50,
+    step: 1,
+    def: 0,
+  },
+  {
+    mpvKey: "gamma",
+    label: "Gamma (midtones)",
+    desc: "Brightens the middle tones and leaves black and white alone. This is the dial for movies whose night scenes are too dark to follow.",
+    min: -50,
+    max: 50,
+    step: 1,
+    def: 0,
+  },
+  {
+    mpvKey: "sharpen",
+    label: "Sharpen",
+    desc: "Adds edge definition to a soft source. A little helps; a lot looks crunchy and adds halos around outlines.",
+    min: 0,
+    max: 2,
+    step: 0.05,
+    def: 0,
+    fmt: (v: number) => v.toFixed(2),
+  },
+];
 
 function tweakNumber(tweaks: Record<string, string>, key: string): number {
   const raw = tweaks[key];
@@ -180,8 +260,8 @@ function PicturePreview({ tweaks }: { tweaks: Record<string, string> }) {
     .filter(Boolean)
     .join(" ");
   return (
-    <div className="flex w-[228px] shrink-0 flex-col gap-1.5">
-      <div className="relative aspect-video w-full overflow-hidden rounded-md bg-canvas">
+    <div className="flex w-full max-w-[420px] flex-col gap-2">
+      <div className="relative aspect-video w-full overflow-hidden rounded-[10px] bg-canvas">
         <img
           src={art.background ?? art.poster}
           alt=""
@@ -190,8 +270,8 @@ function PicturePreview({ tweaks }: { tweaks: Record<string, string> }) {
           style={{ filter }}
         />
       </div>
-      <span className="text-[11.5px] font-medium text-ink-subtle">{t("Live preview")}</span>
-      <svg aria-hidden className="pointer-events-none absolute h-0 w-0" focusable="false">
+      <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t("Live preview")}</span>
+      <svg aria-hidden className="pointer-events-none h-0 w-0" focusable="false">
         <filter id={filterId} colorInterpolationFilters="sRGB">
           {sharpen > 0 && <feConvolveMatrix order="3" preserveAlpha="true" kernelMatrix={kernel} />}
           {gamma !== 0 && (
@@ -212,6 +292,18 @@ export function PictureDialsSection() {
   const { tweaks, setTweak, applyPatch, applyPreset } = useTweaks();
   const anyActive = PICTURE_KEYS.some((k) => tweaks[k] != null && tweaks[k] !== "");
   const activeLook = PICTURE_TEMPLATES.find((tpl) => matchesLook(tweaks, tpl.patch));
+  const lookRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const resetRef = useRef<HTMLButtonElement | null>(null);
+  const [pointed, setPointed] = useState<string | null>(null);
+  const hint = pointed ?? activeLook?.sub;
+
+  const resetPicture = () => {
+    const back = lookRefs.current[PICTURE_TEMPLATES.length - 1];
+    const btn = resetRef.current;
+    if (back && btn && navOwnsFocus(btn)) advanceFocus(back, isRtl(btn) ? "right" : "left");
+    applyPatch(Object.fromEntries(PICTURE_KEYS.map((k) => [k, null])));
+  };
+
   return (
     <Section
       title={t("Picture adjustments")}
@@ -221,55 +313,59 @@ export function PictureDialsSection() {
         wide
         label={t("One-tap looks")}
         desc={t("A starting point for the dials. Hover one to see what it changes.")}
-        icon={<Wand2 size={16} />}
       >
-        <div className="flex flex-wrap items-center gap-1.5">
-          {PICTURE_TEMPLATES.map((tpl) => {
-            const on = activeLook?.label === tpl.label;
-            return (
-              <button
-                key={tpl.label}
-                type="button"
-                title={t(tpl.sub)}
-                onClick={() => applyPreset(PICTURE_KEYS, tpl.patch)}
-                className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-                  on ? "bg-ink text-canvas" : "bg-canvas text-ink-muted hover:text-ink"
-                }`}
-              >
-                {t(tpl.label)}
+        <div className="flex w-full flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
+            {PICTURE_TEMPLATES.map((tpl, i) => {
+              const on = activeLook?.label === tpl.label;
+              return (
+                <button
+                  key={tpl.label}
+                  ref={(el) => {
+                    lookRefs.current[i] = el;
+                  }}
+                  type="button"
+                  onClick={() => applyPreset(PICTURE_KEYS, tpl.patch)}
+                  onMouseEnter={() => setPointed(tpl.sub)}
+                  onMouseLeave={() => setPointed(null)}
+                  onFocus={() => setPointed(tpl.sub)}
+                  onBlur={() => setPointed(null)}
+                  className={on ? ROW_ACTION_PRIMARY : ROW_ACTION}
+                >
+                  {t(tpl.label)}
+                </button>
+              );
+            })}
+            {anyActive && (
+              <button ref={resetRef} type="button" onClick={resetPicture} className={ROW_ACTION}>
+                <RotateCcw size={16} strokeWidth={2.4} />
+                {t("Reset picture")}
               </button>
-            );
-          })}
-          {anyActive && (
-            <button
-              type="button"
-              onClick={() => applyPatch(Object.fromEntries(PICTURE_KEYS.map((k) => [k, null])))}
-              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-semibold text-ink-subtle transition-colors hover:text-ink"
-            >
-              <RotateCcw size={12} strokeWidth={2.4} />
-              {t("Reset picture")}
-            </button>
-          )}
+            )}
+          </div>
+          <span className="min-h-[22px] max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
+            {hint ? t(hint) : ""}
+          </span>
         </div>
       </SettingRow>
 
-      <SettingRow
-        wide
-        label={t("Fine tuning")}
-        desc={t("Drag a dial and watch the still update. Each dial resets on its own.")}
-        icon={<SlidersHorizontal size={16} />}
-      >
-        <div className="flex w-full flex-wrap items-start gap-5">
-          <PicturePreview tweaks={tweaks} />
-          <div className="flex min-w-[300px] flex-1 flex-col">
-            <TweakSlider tweaks={tweaks} setTweak={setTweak} mpvKey="brightness" label={t("Brightness")} min={-50} max={50} step={1} def={0} />
-            <TweakSlider tweaks={tweaks} setTweak={setTweak} mpvKey="contrast" label={t("Contrast")} min={-50} max={50} step={1} def={0} />
-            <TweakSlider tweaks={tweaks} setTweak={setTweak} mpvKey="saturation" label={t("Saturation")} min={-50} max={50} step={1} def={0} />
-            <TweakSlider tweaks={tweaks} setTweak={setTweak} mpvKey="gamma" label={t("Gamma (midtones)")} min={-50} max={50} step={1} def={0} />
-            <TweakSlider tweaks={tweaks} setTweak={setTweak} mpvKey="sharpen" label={t("Sharpen")} min={0} max={2} step={0.05} def={0} fmt={(v) => v.toFixed(2)} />
-          </div>
-        </div>
-      </SettingRow>
+      <PicturePreview tweaks={tweaks} />
+
+      {DIALS.map((d) => (
+        <SettingRow key={d.mpvKey} wide label={t(d.label)} desc={t(d.desc)}>
+          <TweakSlider
+            tweaks={tweaks}
+            setTweak={setTweak}
+            mpvKey={d.mpvKey}
+            label={t(d.label)}
+            min={d.min}
+            max={d.max}
+            step={d.step}
+            def={d.def}
+            fmt={d.fmt}
+          />
+        </SettingRow>
+      ))}
     </Section>
   );
 }
@@ -313,11 +409,7 @@ function ToneCurve({ kind, selected }: { kind: string; selected: boolean }) {
     return `${(u * 100).toFixed(2)},${(100 - y * 100).toFixed(2)}`;
   }).join(" ");
   return (
-    <span
-      className={`block h-[34px] w-full overflow-hidden rounded-md ${
-        selected ? "bg-canvas" : "bg-canvas"
-      }`}
-    >
+    <span className="block h-[40px] w-full overflow-hidden rounded-[6px] bg-canvas">
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full" aria-hidden>
         <polyline
           points="0,100 100,0"
@@ -355,11 +447,10 @@ export function ColorHdrSection() {
       <SettingRow
         wide
         label={t("Tone-mapping curve")}
-        desc={t("Each curve shows how much of the bright range it keeps before rolling off.")}
-        tip={t("The dotted line is a flat squeeze of the whole range. A curve that stays high keeps midtones punchy and compresses the highlights late; a lower curve rolls off early and looks gentler.")}
-        icon={<Contrast size={16} />}
+        desc={`${t("Each curve shows how much of the bright range it keeps before rolling off.")} ${t("The dotted line is a flat squeeze of the whole range. A curve that stays high keeps midtones punchy and compresses the highlights late; a lower curve rolls off early and looks gentler.")}`}
+        icon={<Contrast size={18} />}
       >
-        <div className="grid w-full gap-1.5 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
+        <div className="grid w-full gap-2.5 [grid-template-columns:repeat(auto-fit,minmax(172px,1fr))]">
           {TONEMAP.map((o) => {
             const selected = current === o.value;
             return (
@@ -367,12 +458,12 @@ export function ColorHdrSection() {
                 key={o.value || "auto"}
                 type="button"
                 onClick={() => setTweak("tone-mapping", o.value || null)}
-                className={`flex flex-col items-stretch gap-2 rounded-md p-2.5 text-start transition-colors ${
+                className={`flex flex-col items-stretch gap-2 rounded-[10px] p-3 text-start transition-colors ${
                   selected ? "bg-ink text-canvas" : "bg-canvas text-ink-muted hover:text-ink"
                 }`}
               >
                 <ToneCurve kind={o.value} selected={selected} />
-                <span className="text-[11.5px] font-semibold leading-tight">{t(o.label)}</span>
+                <span className="text-[15.5px] font-medium leading-[22px]">{t(o.label)}</span>
               </button>
             );
           })}
@@ -381,7 +472,7 @@ export function ColorHdrSection() {
       <ToggleRow
         label={t("Boost SDR video toward HDR")}
         sub={t("On an HDR display, stretches normal (non-HDR) movies to use the extra brightness range. Leave off on a regular screen; it can look washed out.")}
-        leading={<Sun size={16} className="text-ink-muted" />}
+        leading={<Sun size={18} className="text-ink-muted" />}
         value={tweaks["inverse-tone-mapping"] === "yes"}
         onChange={(on) => setTweak("inverse-tone-mapping", on ? "yes" : null)}
       />

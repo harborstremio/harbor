@@ -9,7 +9,8 @@ import {
 } from "@/lib/stremio-server";
 import { openUrl } from "@/lib/window";
 import { Section } from "../shared";
-import { SettingGroup, SettingRow, ROW_ACTION } from "../kit";
+import { SettingGroup, SettingRow, ROW_ACTION, ROW_DESC } from "../kit";
+import { BADGE_BASE } from "./choice";
 import { isTauri } from "./internals";
 import { useT } from "@/lib/i18n";
 
@@ -18,10 +19,10 @@ type EngineState = "checking" | "running" | "starting" | "stopped";
 const PORT_TAKEN_RE = /unavailable|in use|EADDRINUSE|10048/i;
 
 const PILL: Record<EngineState, { dot: string; chip: string }> = {
-  checking: { dot: "bg-ink-subtle", chip: "bg-raised text-ink-muted" },
-  running: { dot: "bg-success", chip: "bg-success/15 text-success" },
+  checking: { dot: "bg-ink-subtle", chip: "bg-elevated text-ink-subtle" },
+  running: { dot: "bg-success", chip: "bg-elevated text-success" },
   starting: { dot: "bg-accent", chip: "bg-accent-soft text-accent" },
-  stopped: { dot: "bg-danger", chip: "bg-danger/15 text-danger" },
+  stopped: { dot: "bg-danger", chip: "bg-elevated text-danger" },
 };
 
 async function probeBundled(): Promise<boolean> {
@@ -55,27 +56,25 @@ export function AddressRow({ label, url, openable }: { label: string; url: strin
   };
   return (
     <SettingRow
-      icon={<Globe size={16} strokeWidth={1.9} />}
+      icon={<Globe size={18} strokeWidth={1.9} />}
       label={label}
       desc={
-        <span className="block truncate font-mono text-[12.5px] text-ink" title={url}>
+        <span className="block break-all font-mono text-[15.5px] leading-[22px] text-ink">
           {url}
         </span>
       }
     >
-      <button
-        type="button"
-        onClick={copy}
-        className={`harbor-press-pop flex h-9 shrink-0 items-center gap-1.5 rounded-md px-3.5 text-[12.5px] font-semibold transition-colors ${
-          copied ? "bg-success/15 text-success" : "bg-raised text-ink-muted hover:text-ink"
-        }`}
-      >
-        {copied ? <Check size={14} strokeWidth={2.4} /> : <Copy size={14} strokeWidth={1.9} />}
+      <button type="button" onClick={copy} className={ROW_ACTION}>
+        {copied ? (
+          <Check size={16} strokeWidth={2.4} className="text-success" />
+        ) : (
+          <Copy size={16} strokeWidth={1.9} />
+        )}
         {copied ? t("Copied") : t("Copy")}
       </button>
       {openable && (
         <button type="button" onClick={() => openUrl(url)} className={ROW_ACTION}>
-          <ExternalLink size={14} strokeWidth={1.9} />
+          <ExternalLink size={16} strokeWidth={1.9} />
           {t("Open")}
         </button>
       )}
@@ -95,8 +94,13 @@ function ControlButton({
   onClick: () => void;
 }) {
   return (
-    <button type="button" disabled={busy} onClick={onClick} className={ROW_ACTION}>
-      {busy ? <Loader2 size={14} strokeWidth={1.9} className="animate-spin" /> : icon}
+    <button
+      type="button"
+      onClick={busy ? undefined : onClick}
+      aria-disabled={busy}
+      className={`${ROW_ACTION}${busy ? " pointer-events-none opacity-45" : ""}`}
+    >
+      {busy ? <Loader2 size={16} strokeWidth={1.9} className="animate-spin" /> : icon}
       {label}
     </button>
   );
@@ -186,30 +190,28 @@ export function ServerAddressSection() {
     >
       <SettingGroup label={t("Server")}>
         <SettingRow
-          icon={<Server size={16} strokeWidth={1.9} />}
+          icon={<Server size={18} strokeWidth={1.9} />}
           label={
-            <>
-              {t("Streaming server")}
-              <span
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold uppercase tracking-wider ${pill.chip}`}
-              >
+            <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
+              <span className="min-w-0">{t("Streaming server")}</span>
+              <span className={`${BADGE_BASE} gap-1.5 ${pill.chip}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${pill.dot}`} />
                 {pillLabel}
               </span>
-            </>
+            </span>
           }
           desc={t("Handles torrent playback and transcoding for this machine.")}
         >
           {running ? (
             <>
               <ControlButton
-                icon={<Square size={14} strokeWidth={2} />}
+                icon={<Square size={16} strokeWidth={2} />}
                 label={t("Stop")}
                 busy={acting}
                 onClick={() => void stop()}
               />
               <ControlButton
-                icon={<RotateCw size={14} strokeWidth={2} />}
+                icon={<RotateCw size={16} strokeWidth={2} />}
                 label={t("Restart")}
                 busy={acting}
                 onClick={() => void start()}
@@ -217,7 +219,7 @@ export function ServerAddressSection() {
             </>
           ) : (
             <ControlButton
-              icon={<Play size={14} strokeWidth={2} />}
+              icon={<Play size={16} strokeWidth={2} />}
               label={t("Start server")}
               busy={acting || engine === "checking"}
               onClick={() => void start()}
@@ -226,19 +228,19 @@ export function ServerAddressSection() {
         </SettingRow>
 
         {engine === "stopped" && lastError && (
-          <div className="flex flex-col gap-1.5 rounded-md bg-elevated px-4 py-3.5">
-            <span className="text-[12.5px] leading-relaxed text-danger">
+          <div className="flex flex-col gap-1.5 rounded-[10px] bg-elevated px-4 py-3">
+            <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-danger">
               <span className="font-semibold">{t("Server couldn't start:")}</span> {lastError}
             </span>
             {PORT_TAKEN_RE.test(lastError) && (
-              <span className="text-[12.5px] leading-relaxed text-ink-muted">
+              <span className={`max-w-[66ch] ${ROW_DESC}`}>
                 {t(
                   "Another program already holds this port, usually a Stremio server that is running on this machine. Harbor tried its spare ports too. Stop that server, or leave it running and point Harbor at it in Remote streaming server below.",
                 )}
               </span>
             )}
             {/not bundled/i.test(lastError) && (
-              <span className="text-[12.5px] leading-relaxed text-ink-muted">
+              <span className={`max-w-[66ch] ${ROW_DESC}`}>
                 {t(
                   "This usually means antivirus removed the server file (stremio-server.exe). Add Harbor's install folder to your antivirus exclusions, then reinstall.",
                 )}
@@ -253,7 +255,7 @@ export function ServerAddressSection() {
         {lanIp && <AddressRow label={t("From other devices on your Wi-Fi")} url={`http://${lanIp}:${port}`} />}
       </SettingGroup>
 
-      <p className="px-1 text-[12.5px] leading-relaxed text-ink-subtle">
+      <p className={`max-w-[70ch] ${ROW_DESC}`}>
         {t(
           "Looking for Harbor in your browser, the phone remote, or the manga reader remote? They moved to the Remotes page.",
         )}

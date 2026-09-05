@@ -2,6 +2,8 @@ import { ArrowLeft, ArrowRight, Check, ExternalLink, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useModalExit } from "@/components/modal-shell";
+import { captureFocusReturn } from "@/lib/keyboard-navigation";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
 import shot1 from "@/assets/tmdb-guide/tmdb1.png";
@@ -108,14 +110,17 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
 
   useEffect(() => {
     if (!open) return;
+    return captureFocusReturn();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-      if (e.key === "ArrowRight") setI((v) => Math.min(all.length - 1, v + 1));
-      if (e.key === "ArrowLeft") setI((v) => Math.max(0, v - 1));
+      if (isBackKey(e)) close();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, close, all.length]);
+  }, [open, close]);
 
   if (!open) return null;
 
@@ -125,16 +130,18 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
       onClick={close}
     >
       <div
+        role="dialog"
+        aria-modal="true"
         className={`${closing ? "animate-dialog-out" : "animate-dialog-in"} flex max-h-[88vh] w-[min(780px,100%)] flex-col overflow-hidden rounded-md bg-surface harbor-float`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 px-6 pb-4 pt-5">
           <div className="flex min-w-0 flex-col gap-1">
-            <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
+            <span className="harbor-settings-label">
               {t("TMDB")}
             </span>
-            <h2 className="text-[17px] font-semibold text-ink">{t("Get your free TMDB key")}</h2>
-            <p className="text-[12.5px] text-ink-subtle">
+            <h2 className="text-[19px] font-semibold leading-[26px] tracking-tight text-ink">{t("Get your free TMDB key")}</h2>
+            <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
               {t("Free forever for personal use. No payment, ever.")}
             </p>
           </div>
@@ -142,20 +149,20 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
             type="button"
             onClick={close}
             aria-label={t("Close")}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
           >
-            <X size={16} strokeWidth={2.2} />
+            <X size={18} strokeWidth={2.2} />
           </button>
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto px-6 pb-1">
           <div className="flex items-start gap-3">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-canvas text-[12px] font-semibold tabular-nums text-ink-muted">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-canvas text-[15px] font-semibold tabular-nums text-ink-muted">
               {i + 1}
             </span>
             <div className="flex min-w-0 flex-col gap-1">
-              <span className="text-[14px] font-semibold text-ink">{step.title}</span>
-              <p className="text-[13px] leading-relaxed text-ink-muted">{step.body}</p>
+              <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">{step.title}</span>
+              <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{step.body}</p>
             </div>
           </div>
 
@@ -169,9 +176,9 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
           </div>
 
           {step.note && (
-            <div className="flex items-start gap-2.5 rounded-lg bg-white/[0.04] px-3.5 py-3">
-              <Check size={15} strokeWidth={2.6} className="mt-0.5 shrink-0 text-accent" />
-              <p className="text-[12.5px] leading-relaxed text-ink">{step.note}</p>
+            <div className="flex items-start gap-2.5 rounded-lg bg-elevated px-3.5 py-3">
+              <Check size={18} strokeWidth={2.6} className="mt-0.5 shrink-0 text-accent" />
+              <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink">{step.note}</p>
             </div>
           )}
 
@@ -179,9 +186,9 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
             <button
               type="button"
               onClick={() => openUrl(API_URL)}
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform duration-150 active:scale-[0.98]"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-[8px] bg-ink px-5 text-[15px] font-semibold text-canvas transition-transform duration-150 active:scale-[0.98]"
             >
-              <ExternalLink size={15} strokeWidth={2.2} />
+              <ExternalLink size={18} strokeWidth={2.2} />
               {t("Open the TMDB API page")}
             </button>
           )}
@@ -195,10 +202,17 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
                 type="button"
                 aria-label={s.title}
                 onClick={() => setI(n)}
-                className={`h-1.5 rounded-full transition-all duration-150 ${
-                  n === i ? "w-5 bg-accent" : "w-1.5 bg-white/[0.14] hover:bg-white/[0.28]"
-                }`}
-              />
+                className="group/dot grid h-11 place-items-center px-1"
+              >
+                <span
+                  aria-hidden
+                  className={`block h-1.5 rounded-full transition-all duration-150 ${
+                    n === i
+                      ? "w-5 bg-accent"
+                      : "w-1.5 bg-edge group-hover/dot:bg-ink-subtle"
+                  }`}
+                />
+              </button>
             ))}
           </div>
           <div className="flex items-center gap-2">
@@ -206,18 +220,18 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
               type="button"
               disabled={i === 0}
               onClick={() => setI((v) => Math.max(0, v - 1))}
-              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-white/[0.06] px-3 text-[12.5px] font-semibold text-ink transition-colors duration-150 hover:bg-white/[0.10] disabled:pointer-events-none disabled:opacity-40"
+              className="inline-flex h-11 items-center gap-2 rounded-[8px] bg-elevated px-4 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-raised disabled:pointer-events-none disabled:opacity-40"
             >
-              <ArrowLeft size={14} strokeWidth={2.2} />
+              <ArrowLeft size={18} strokeWidth={2.2} />
               {t("Back")}
             </button>
             <button
               type="button"
               onClick={() => (last ? close() : setI((v) => v + 1))}
-              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-transform duration-150 active:scale-[0.98]"
+              className="inline-flex h-11 items-center gap-2 rounded-[8px] bg-ink px-4 text-[15px] font-semibold text-canvas transition-transform duration-150 active:scale-[0.98]"
             >
               {last ? t("Done") : t("Next")}
-              {!last && <ArrowRight size={14} strokeWidth={2.2} />}
+              {!last && <ArrowRight size={18} strokeWidth={2.2} />}
             </button>
           </div>
         </div>

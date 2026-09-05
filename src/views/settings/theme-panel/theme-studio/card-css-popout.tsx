@@ -1,10 +1,13 @@
 import { Sparkles, X } from "lucide-react";
 import { useModalExit } from "@/components/modal-shell";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { CodeEditor } from "@/components/code-editor";
 import { topMovies, type Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
+import { tvFocus } from "@/lib/keyboard-navigation";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
+import { useSettings } from "@/lib/settings";
 
 const STARTER = `/* Custom cards: .your-card targets each poster. */
 .your-card {
@@ -68,7 +71,10 @@ export function CardCssPopout({
   onClose: () => void;
 }) {
   const t = useT();
+  const { settings } = useSettings();
+  const tvNav = settings.tvNavigation;
   const [picks, setPicks] = useState(FALLBACK);
+  const doneRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -86,15 +92,23 @@ export function CardCssPopout({
     };
   }, []);
 
+  const { closing, close } = useModalExit(onClose);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
+      if (!isBackKey(e)) return;
+      if (document.querySelector("[data-search-editing]")) return;
+      e.preventDefault();
+      e.stopPropagation();
+      close();
     };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [close]);
 
-  const { closing, close } = useModalExit(onClose);
+  useEffect(() => {
+    if (tvNav && doneRef.current) tvFocus(doneRef.current);
+  }, [tvNav]);
 
   return createPortal(
     <div
@@ -110,34 +124,33 @@ export function CardCssPopout({
       >
         <header className="flex shrink-0 items-start gap-4 px-6 pb-5 pt-6">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
-              {t("Custom cards")}
-            </span>
+            <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">{t("Custom cards")}</span>
             <h2 className="truncate text-[17px] font-semibold tracking-tight text-ink">
               {t("Write CSS, watch real posters react")}
             </h2>
           </div>
           <button
             type="button"
+            ref={doneRef}
             onClick={onClose}
             aria-label={t("Done")}
             title={t("Done")}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         </header>
 
         <div className="flex min-h-0 flex-1 gap-3 px-6 pb-6">
           <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-md bg-canvas">
-            <div className="flex h-11 shrink-0 items-center gap-2 px-3">
-              <span className="font-mono text-[12.5px] text-ink-subtle">styles.css</span>
+            <div className="flex h-14 shrink-0 items-center gap-2 px-3">
+              <span className="font-mono text-[15.5px] leading-[22px] text-ink-subtle">styles.css</span>
               <button
                 type="button"
                 onClick={() => onChange({ css: css.trim() ? css : STARTER })}
-                className="harbor-press-pop ms-auto flex h-8 items-center gap-1.5 rounded-md bg-elevated px-2.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
+                className="harbor-press-pop ms-auto flex h-11 items-center gap-1.5 rounded-md bg-elevated px-3 text-[15.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
               >
-                <Sparkles size={14} strokeWidth={2.2} />
+                <Sparkles size={16} strokeWidth={2.2} />
                 {t("Insert starter")}
               </button>
             </div>
@@ -146,12 +159,12 @@ export function CardCssPopout({
                 value={css}
                 onChange={(v) => onChange({ css: v })}
                 language="css"
-                autoFocus
+                autoFocus={!tvNav}
                 className="h-full"
               />
               {!css && (
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-8 text-center">
-                  <span className="text-[13px] leading-relaxed text-ink-subtle">
+                  <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
                     {t(
                       "Style {selector} and the posters on the right update live. Hit Insert starter for a head start.",
                       {
@@ -169,7 +182,7 @@ export function CardCssPopout({
               {HOOKS.map((h) => (
                 <span
                   key={h.sel}
-                  className="inline-flex items-center gap-1.5 rounded-md bg-elevated px-2 py-1 text-[11.5px]"
+                  className="inline-flex min-h-8 items-center gap-2 rounded-md bg-elevated px-2.5 py-1 text-[15.5px] leading-[22px]"
                   title={t(h.note)}
                 >
                   <code className="font-mono text-ink">{h.sel}</code>
@@ -178,7 +191,7 @@ export function CardCssPopout({
               ))}
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-6 pt-1">
-              <div className="grid grid-cols-3 gap-5">
+              <div data-tv-skip className="grid grid-cols-3 gap-5">
                 {picks.map((p) => (
                   <button
                     key={p.id}
@@ -197,7 +210,7 @@ export function CardCssPopout({
                         />
                       </div>
                     </div>
-                    <p className="line-clamp-2 text-[12.5px] font-medium leading-snug text-ink">
+                    <p className="line-clamp-2 text-[15.5px] font-medium leading-[22px] text-ink">
                       {p.name}
                     </p>
                   </button>

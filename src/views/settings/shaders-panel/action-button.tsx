@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { SButton } from "../ui";
 
 export function ActionButton({
   onClick,
@@ -12,24 +13,17 @@ export function ActionButton({
   children: ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`harbor-press-pop flex h-9 shrink-0 items-center gap-2 rounded-md px-4 text-[12.5px] font-semibold transition-colors disabled:cursor-wait disabled:opacity-70 ${
-        ghost ? "bg-canvas text-ink-muted hover:text-ink" : "bg-ink text-canvas hover:opacity-90"
-      }`}
-    >
+    <SButton variant={ghost ? "secondary" : "primary"} onClick={onClick} disabled={disabled}>
       {children}
-    </button>
+    </SButton>
   );
 }
 
 export function Pill({ on, children }: { on?: boolean; children: ReactNode }) {
   return (
     <span
-      className={`rounded-full px-2 py-[3px] text-[10.5px] font-semibold uppercase tracking-wider ${
-        on ? "bg-ink text-canvas" : "bg-canvas text-ink-subtle"
+      className={`inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] ${
+        on ? "bg-accent-soft text-accent" : "bg-elevated text-ink-subtle"
       }`}
     >
       {children}

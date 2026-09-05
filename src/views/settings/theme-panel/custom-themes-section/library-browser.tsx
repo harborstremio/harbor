@@ -1,6 +1,7 @@
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { BETA_THEMES } from "@/lib/theme";
+import { getActiveModal, isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
 import { BetaThemesCard, BetaThemesModal } from "./beta-themes-modal";
 import { clearUnseenDownloads, getUnseenDownloads, subscribeUnseen } from "@/lib/theme-store";
@@ -37,7 +38,11 @@ export function LibraryBrowser({
   const t = useT();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (!isBackKey(e)) return;
+      if (getActiveModal(e.target instanceof HTMLElement ? e.target : null)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      onClose();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -82,10 +87,10 @@ export function LibraryBrowser({
         <button
           type="button"
           onClick={onClose}
-          className="group inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink-subtle transition-colors hover:text-ink"
+          className="group inline-flex min-h-11 items-center gap-1.5 text-[15.5px] font-semibold text-ink-subtle transition-colors hover:text-ink"
         >
           <ChevronLeft
-            size={16}
+            size={18}
             strokeWidth={2.4}
             className="dir-icon transition-transform group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5"
           />
@@ -130,7 +135,7 @@ export function LibraryBrowser({
                   onRemove={onRemove}
                 />
               ) : (
-                <p className="rounded-md border border-dashed border-edge px-4 py-14 text-center text-[13px] text-ink-subtle">
+                <p className="mx-auto max-w-[70ch] rounded-md border border-dashed border-edge px-4 py-14 text-center text-[15.5px] leading-[22px] text-ink-subtle">
                   {t("No themes match your filter.")}
                 </p>
               )
@@ -229,7 +234,7 @@ function BrowserSection({
     <section className="flex flex-col gap-4">
       <div className="flex flex-col">
         <h3 className="text-[17px] font-semibold tracking-tight text-ink">{t(title)}</h3>
-        <p className="text-[13px] text-ink-subtle">{t(subtitle)}</p>
+        <p className="max-w-[70ch] text-[15.5px] leading-[22px] text-ink-subtle">{t(subtitle)}</p>
       </div>
       {children}
     </section>

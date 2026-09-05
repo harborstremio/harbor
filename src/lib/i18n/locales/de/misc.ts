@@ -304,6 +304,7 @@ const misc: Record<string, string> = {
     "Füge diesen Code in Harbor ein, um die Sammlung zu öffnen.",
   Paused: "Pausiert",
   "Paused on Simkl": "Auf Simkl pausiert",
+  "Paused on Trakt": "Auf Trakt pausiert",
   "Pens currently in demand": "Derzeit gefragte Stifte",
   People: "Personen",
   "Pick a home layout": "Startseiten-Layout auswählen",

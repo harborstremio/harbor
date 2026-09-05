@@ -15,7 +15,7 @@ export function AvatarRing({
     <button
       onClick={onClick}
       type="button"
-      className="group relative shrink-0 overflow-hidden rounded-full ring-2 ring-edge-soft transition hover:ring-ink"
+      className="group relative shrink-0 overflow-hidden rounded-full ring-2 ring-edge-soft transition hover:ring-ink focus-visible:ring-ink"
       style={{ width: size, height: size }}
     >
       {src ? (
@@ -23,7 +23,7 @@ export function AvatarRing({
       ) : (
         <CatAvatar className="h-full w-full" />
       )}
-      <span className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/65 to-transparent pb-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white opacity-0 transition-opacity group-hover:opacity-100">
+      <span className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-canvas/85 to-transparent pb-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 group-data-[tv-focused=true]:opacity-100">
         {t("Change")}
       </span>
     </button>

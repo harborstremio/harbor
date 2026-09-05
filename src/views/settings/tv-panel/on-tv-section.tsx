@@ -2,6 +2,7 @@ import { useT } from "@/lib/i18n";
 import { Section, useSettingsActiveContext } from "../shared";
 import type { SectionId } from "../shared";
 import { SettingRow } from "../kit";
+import { SButton } from "../ui";
 
 type Item = { title: string; detail: string; jump?: SectionId; jumpLabel?: string };
 
@@ -62,13 +63,9 @@ export function TvOnDeviceSection() {
       {ITEMS.map((item) => (
         <SettingRow key={item.title} label={t(item.title)} desc={t(item.detail)}>
           {item.jump && (
-            <button
-              type="button"
-              onClick={() => setActive(item.jump as SectionId)}
-              className="shrink-0 rounded-md bg-raised px-3 py-1.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
-            >
+            <SButton onClick={() => setActive(item.jump as SectionId)}>
               {t(item.jumpLabel ?? "Open")}
-            </button>
+            </SButton>
           )}
         </SettingRow>
       ))}

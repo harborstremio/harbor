@@ -137,6 +137,7 @@ const catalog12: Record<string, string> = {
     "Używaj zdjęcia profilowego AniList jako awatara Harbor.",
   "Show your Harbor profile picture on the community":
     "Pokaż swoje zdjęcie profilowe Harbor w społeczności",
+  "Show your Letterboxd card": "Pokaż swoją kartę Letterboxd",
   "Show your Simkl card": "Pokaż swoją kartę Simkl",
   "Show your favourite games, books and music on your profile":
     "Pokaż na swoim profilu ulubione gry, książki i muzykę",
@@ -350,6 +351,7 @@ const catalog12: Record<string, string> = {
     "Światy rozwijające się w spokojnym tempie i pogodne rozdziały, które warto otworzyć przy kawie.",
   "Slowly fade between a show's backdrop images while you read the page, instead of holding one still. Only runs when the show has more than one backdrop, and never when you have pinned one or asked for reduced motion.":
     "Powoli przełączaj obrazy tła serialu podczas przeglądania strony zamiast wyświetlać jeden nieruchomy obraz. Działa tylko wtedy, gdy serial ma więcej niż jedno tło, nigdy po przypięciu jednego z nich ani po włączeniu ograniczenia ruchu.",
+  Small: "Mały",
   "Small controls that sit around playback rather than in the picture.":
     "Małe elementy sterujące rozmieszczone wokół obszaru odtwarzania, a nie na obrazie.",
   Smaller: "Mniejszy",
@@ -653,6 +655,7 @@ const catalog12: Record<string, string> = {
   "Streaming now": "Odtwarzane teraz",
   "Streaming quality": "Jakość strumieniowania",
   "Streaming server": "Serwer strumieniowania",
+  "Streaming server restarted.": "Serwer strumieniowania został uruchomiony ponownie.",
   "Streaming services on the TV": "Serwisy streamingowe na telewizorze",
   "Streaming sources": "Źródła strumieniowania",
   Streams: "Strumienie",

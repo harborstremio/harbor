@@ -4,6 +4,7 @@ import { useT } from "@/lib/i18n";
 import type { SubtitleOffsetPosition, SubtitleOffsetSize } from "@/lib/player/subtitle-offset";
 import { useSettings } from "@/lib/settings";
 import { Segmented, ToggleRow } from "../shared";
+import { SettingGroup } from "../kit";
 
 const POSITION_OPTIONS: ReadonlyArray<{ value: SubtitleOffsetPosition; label: string }> = [
   { value: "top-left", label: "Top left" },
@@ -18,15 +19,15 @@ const POSITION_OPTIONS: ReadonlyArray<{ value: SubtitleOffsetPosition; label: st
 ];
 
 const POSITION_DOT_CLASSES: Record<SubtitleOffsetPosition, string> = {
-  "top-left": "left-1 top-1",
-  top: "left-1/2 top-1 -translate-x-1/2",
-  "top-right": "right-1 top-1",
-  left: "left-1 top-1/2 -translate-y-1/2",
-  center: "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-  right: "right-1 top-1/2 -translate-y-1/2",
-  "bottom-left": "bottom-1 left-1",
-  bottom: "bottom-1 left-1/2 -translate-x-1/2",
-  "bottom-right": "right-1 bottom-1",
+  "top-left": "start-1 top-1",
+  top: "start-1/2 top-1 -translate-x-1/2 rtl:translate-x-1/2",
+  "top-right": "end-1 top-1",
+  left: "start-1 top-1/2 -translate-y-1/2",
+  center: "start-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rtl:translate-x-1/2",
+  right: "end-1 top-1/2 -translate-y-1/2",
+  "bottom-left": "bottom-1 start-1",
+  bottom: "bottom-1 start-1/2 -translate-x-1/2 rtl:translate-x-1/2",
+  "bottom-right": "bottom-1 end-1",
 };
 
 const SIZE_OPTIONS: ReadonlyArray<{ value: SubtitleOffsetSize; label: string }> = [
@@ -40,40 +41,27 @@ export function SubtitleOffsetSettings() {
   const { settings, update } = useSettings();
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <ToggleRow
         label={t("Show subtitle sync indicator")}
-        sub={t("Show the current offset when you adjust subtitle timing with Z or X.")}
+        sub={t(
+          "Puts the current offset on screen while you nudge subtitle timing with Z or X, so you can see how far you have shifted them.",
+        )}
         value={settings.subOffsetIndicatorEnabled}
         onChange={(subOffsetIndicatorEnabled) => update({ subOffsetIndicatorEnabled })}
-        leading={
-          <span
-            className={`flex h-9 w-9 items-center justify-center rounded-full ${
-              settings.subOffsetIndicatorEnabled
-                ? "bg-accent-soft text-accent"
-                : "bg-raised text-ink-subtle"
-            }`}
-          >
-            <Captions size={16} strokeWidth={2} />
-          </span>
-        }
+        leading={<Captions size={18} strokeWidth={2} />}
       />
 
       {settings.subOffsetIndicatorEnabled && (
- <div className="flex flex-col gap-5 rounded-md bg-canvas p-5">
-          <div className="relative isolate h-40 overflow-hidden rounded-md border border-white/10 bg-[#080b10]">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-accent/[0.07]" />
-            <span className="absolute start-4 top-3 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-white/45">
-              {t("Preview")}
-            </span>
+        <>
+          <div className="relative h-56 overflow-hidden rounded-[10px] border border-edge-soft bg-canvas">
+            <div className="absolute inset-0 bg-gradient-to-br from-elevated via-canvas to-accent-soft" />
+            <span className="harbor-settings-label absolute start-4 top-4">{t("Preview")}</span>
             <SubtitleOffsetIndicator delaySec={0.3} preview />
           </div>
 
-          <fieldset className="flex flex-col gap-2.5">
-            <legend className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-              {t("Position")}
-            </legend>
-            <div className="grid grid-cols-3 gap-2">
+          <SettingGroup label={t("Position")}>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5">
               {POSITION_OPTIONS.map((option) => {
                 const active = settings.subOffsetIndicatorPosition === option.value;
                 return (
@@ -82,39 +70,36 @@ export function SubtitleOffsetSettings() {
                     type="button"
                     aria-pressed={active}
                     onClick={() => update({ subOffsetIndicatorPosition: option.value })}
-                    className={`flex min-h-14 items-center gap-2.5 rounded-md px-3 text-start ring-1 transition-[background-color,box-shadow,color,transform] duration-150 ease-out active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                    className={`flex min-h-14 items-center gap-2.5 rounded-[10px] border px-3 text-start transition-colors duration-150 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                       active
-                        ? "bg-accent-soft text-ink ring-accent"
-                        : "bg-elevated text-ink-muted ring-edge-soft hover:bg-elevated hover:text-ink hover:ring-edge"
+                        ? "border-accent bg-accent-soft text-ink"
+                        : "border-edge-soft bg-elevated text-ink-muted hover:border-edge hover:text-ink"
                     }`}
                   >
-                    <span className="relative h-6 w-9 shrink-0 rounded-md bg-canvas ring-1 ring-edge-soft">
+                    <span className="relative h-7 w-11 shrink-0 rounded-[6px] border border-edge-soft bg-canvas">
                       <span
-                        className={`absolute size-1.5 rounded-full ${
+                        className={`absolute size-2 rounded-full ${
                           active ? "bg-accent" : "bg-ink-subtle"
                         } ${POSITION_DOT_CLASSES[option.value]}`}
                       />
                     </span>
-                    <span className="text-[12.5px] font-semibold leading-tight">
+                    <span className="min-w-0 text-[15.5px] font-medium leading-[20px]">
                       {t(option.label)}
                     </span>
                   </button>
                 );
               })}
             </div>
-          </fieldset>
+          </SettingGroup>
 
-          <fieldset className="flex flex-col gap-2.5">
-            <legend className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-              {t("Size")}
-            </legend>
+          <SettingGroup label={t("Size")}>
             <Segmented
               value={settings.subOffsetIndicatorSize}
               options={SIZE_OPTIONS.map((o) => ({ ...o, label: t(o.label) }))}
               onChange={(subOffsetIndicatorSize) => update({ subOffsetIndicatorSize })}
             />
-          </fieldset>
-        </div>
+          </SettingGroup>
+        </>
       )}
     </div>
   );

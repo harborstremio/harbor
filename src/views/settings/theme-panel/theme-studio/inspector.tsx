@@ -20,6 +20,7 @@ import { LayoutPicker } from "./layout-picker";
 import { NavEditor } from "./nav-editor";
 import { PresetGallery } from "./preset-gallery";
 import { StylePicker } from "./style-picker";
+import { ROW_DESC, ToggleRow } from "../../shared";
 import { StudioSection } from "./controls/studio-section";
 import type { Draft } from "./studio-types";
 
@@ -66,7 +67,7 @@ export function Inspector({
                 key={item.id}
                 type="button"
                 onClick={() => setTab(item.id)}
-                className={`harbor-studio-tab flex h-10 flex-1 items-center justify-center rounded-md text-[13.5px] font-semibold transition-colors ${
+                className={`harbor-studio-tab flex h-11 flex-1 items-center justify-center rounded-md text-[15.5px] font-semibold transition-colors ${
                   active
                     ? "bg-canvas text-ink ring-1 ring-edge"
                     : "text-ink-muted hover:bg-surface hover:text-ink"
@@ -94,7 +95,7 @@ export function Inspector({
                 title={t("Start from")}
                 action={
                   <HeaderAction
-                    icon={<Shuffle size={14} strokeWidth={2.2} />}
+                    icon={<Shuffle size={16} strokeWidth={2.2} />}
                     label={t("Shuffle")}
                     onClick={shuffle}
                   />
@@ -107,7 +108,7 @@ export function Inspector({
                 title={t("Palette")}
                 action={
                   <HeaderAction
-                    icon={<RotateCcw size={14} strokeWidth={2.2} />}
+                    icon={<RotateCcw size={16} strokeWidth={2.2} />}
                     label={t("Reset")}
                     onClick={() => onPatch({ colors: { ...DEFAULT_CUSTOM_COLORS } })}
                   />
@@ -127,7 +128,7 @@ export function Inspector({
               <StudioSection title={t("Surfaces")}>
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-2">
-                    <span className="text-[12.5px] text-ink-subtle">{t("Cards")}</span>
+                    <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">{t("Cards")}</span>
                     <StylePicker
                       kind="card"
                       value={draft.cardStyle}
@@ -136,7 +137,7 @@ export function Inspector({
                     />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <span className="text-[12.5px] text-ink-subtle">{t("Buttons")}</span>
+                    <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">{t("Buttons")}</span>
                     <StylePicker
                       kind="button"
                       value={draft.buttonStyle}
@@ -178,15 +179,14 @@ export function Inspector({
           )}
 
           {tab === "code" && (
-            <StudioSection
-              title={t("Code")}
-              collapsible
-              hint={t(
-                "CSS, HTML and JS layered over the whole app. Optional for built-in layouts, required for custom chrome.",
-              )}
-            >
+            <section className="pb-6">
+              <p className={`max-w-[70ch] pb-3 ${ROW_DESC}`}>
+                {t(
+                  "CSS, HTML and JS layered over the whole app. Optional for built-in layouts, required for custom chrome.",
+                )}
+              </p>
               <CodeSection css={draft.css} js={draft.js} html={draft.html} onExpand={onExpand} />
-            </StudioSection>
+            </section>
           )}
         </div>
       </div>
@@ -215,7 +215,7 @@ function HeaderAction({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-8 items-center gap-1.5 rounded-md px-2 text-[12.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+      className="flex h-11 items-center gap-1.5 rounded-md px-2.5 text-[15.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
     >
       {icon}
       {label}
@@ -226,26 +226,11 @@ function HeaderAction({
 function BokehToggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
   const t = useT();
   return (
-    <label className="-mx-1 flex cursor-pointer items-center justify-between gap-3 rounded-md px-1 py-1 transition-colors hover:bg-elevated">
-      <div className="flex min-w-0 flex-col">
-        <span className="text-[13.5px] font-semibold text-ink">{t("Bokeh background")}</span>
-        <span className="text-[13px] text-ink-muted">{t("Floating orbs over the canvas.")}</span>
-      </div>
-      <span
-        className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors"
-        style={{ background: value ? "var(--color-accent)" : "var(--color-edge)" }}
-      >
-        <input
-          type="checkbox"
-          checked={value}
-          onChange={(e) => onChange(e.target.checked)}
-          className="sr-only"
-        />
-        <span
-          className="absolute h-5 w-5 rounded-full bg-canvas shadow-[0_2px_6px_-2px_rgba(0,0,0,0.4)] transition-transform"
-          style={{ transform: value ? "translateX(22px)" : "translateX(2px)" }}
-        />
-      </span>
-    </label>
+    <ToggleRow
+      label={t("Bokeh background")}
+      sub={t("Floating orbs over the canvas.")}
+      value={value}
+      onChange={onChange}
+    />
   );
 }

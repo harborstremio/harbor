@@ -99,6 +99,8 @@ mod sub_extract;
 mod subsync;
 #[cfg(desktop)]
 mod svp;
+#[cfg(windows)]
+mod win_graphics;
 #[cfg(desktop)]
 mod thumbs;
 #[cfg(desktop)]
@@ -598,6 +600,8 @@ pub fn run() {
     svp::prime_svp_env();
     #[cfg(target_os = "linux")]
     mpv_render_linux::configure_linux_graphics();
+    #[cfg(windows)]
+    win_graphics::configure_windows_graphics();
     let _ = rustls::crypto::ring::default_provider().install_default();
     trailer::sweep_cache();
     std::thread::spawn(temp_prune::sweep_temp);
@@ -822,6 +826,8 @@ pub fn run() {
             installer_handoff::handoff_probe,
             installer_handoff::handoff_stage,
             installer_handoff::handoff_launch,
+            installer_handoff::handoff_confirm,
+            installer_handoff::handoff_save_backup,
             power::power_inhibit,
             harbor_set_webview_memory_low,
             harbor_set_webview_visible,

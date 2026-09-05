@@ -750,6 +750,12 @@ const catalog: Record<string, string> = {
   "{count} slot reskinned": "skin {count} slot diubah",
   "{count} slots reskinned": "skin {count} slot diubah",
   "{count} sources": "{count} sumber",
+  "{count} titles will never show the content advisory again.":
+    "{count} judul tidak akan pernah menampilkan peringatan konten lagi.",
+  "{count} titles will never show the content advisory again.#few":
+    "{count} judul tidak akan pernah menampilkan peringatan konten lagi.",
+  "{count} titles will never show the content advisory again.#one":
+    "{count} judul tidak akan pernah menampilkan peringatan konten lagi.",
   "{count} tracker request blocked this session. Harbor itself sends zero telemetry.":
     "{count} permintaan pelacak diblokir dalam sesi ini. Harbor sendiri sama sekali tidak mengirim telemetri.",
   "{count} views": "{count} tayangan",

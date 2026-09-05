@@ -73,9 +73,9 @@ export function CommunityDetail({ theme, onClose }: { theme: StoreTheme; onClose
         <button
           aria-label={tr("Close")}
           onClick={close}
-          className="absolute end-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-canvas/80 text-ink-muted backdrop-blur-md transition-colors hover:text-ink"
+          className="absolute end-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-canvas/80 text-ink-muted backdrop-blur-md transition-colors hover:text-ink"
         >
-          <X size={16} />
+          <X size={18} />
         </button>
         <div className="overflow-y-auto [scrollbar-width:thin]">
           {t.cover && <img src={t.cover} alt="" className="aspect-video w-full object-cover" />}
@@ -89,7 +89,7 @@ export function CommunityDetail({ theme, onClose }: { theme: StoreTheme; onClose
               <h2 className="mt-2 font-display text-[26px] font-medium leading-tight text-ink">
                 {t.name}
               </h2>
-              <p className="text-[13px] text-ink-subtle">
+              <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
                 {t.authorHandle ? (
                   <>
                     {authorPrefix}
@@ -106,30 +106,32 @@ export function CommunityDetail({ theme, onClose }: { theme: StoreTheme; onClose
                 · {tr("{rating}/5 ({count})", { rating: t.ratingAvg || "-", count: t.ratingCount })}
               </p>
             </div>
-            {t.blurb && <p className="text-[13.5px] leading-relaxed text-ink-muted">{t.blurb}</p>}
+            {t.blurb && (
+              <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t.blurb}</p>
+            )}
 
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={download}
                 disabled={downloading || done}
-                className={`flex h-11 items-center gap-2 rounded-md px-5 text-[13.5px] font-semibold transition-colors disabled:opacity-90 ${
-                  done ? "bg-success text-black" : "bg-ink text-canvas hover:opacity-90"
+                className={`flex h-11 items-center gap-2 rounded-md px-5 text-[15.5px] font-semibold transition-colors disabled:opacity-90 ${
+                  done ? "bg-success text-canvas" : "bg-ink text-canvas hover:opacity-90"
                 }`}
               >
                 {downloading ? (
-                  <Loader2 size={16} className="animate-spin" />
+                  <Loader2 size={18} className="animate-spin" />
                 ) : done ? (
-                  <Check key="done" size={16} className="harbor-pop" />
+                  <Check key="done" size={18} className="harbor-pop" />
                 ) : (
-                  <Download size={16} />
+                  <Download size={18} />
                 )}
                 {done ? tr("Added to library") : downloading ? tr("Downloading…") : tr("Download")}
               </button>
               <button
                 onClick={share}
-                className="flex h-11 items-center gap-2 rounded-md px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
+                className="flex h-11 items-center gap-2 rounded-md px-4 text-[15.5px] font-medium text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
               >
-                {copied ? <Check size={16} /> : <Share2 size={16} />}{" "}
+                {copied ? <Check size={18} /> : <Share2 size={18} />}{" "}
                 {copied ? tr("Copied") : tr("Share")}
               </button>
               <div
@@ -142,19 +144,21 @@ export function CommunityDetail({ theme, onClose }: { theme: StoreTheme; onClose
                     key={n}
                     onClick={() => rate(n)}
                     aria-label={tr("Rate {count} stars", { count: n })}
-                    className="p-0.5"
+                    className="grid h-11 w-11 place-items-center"
                   >
                     <Star
                       size={20}
                       className={
-                        n <= shownRating ? "fill-amber-300 text-accent" : "text-ink-subtle"
+                        n <= shownRating ? "fill-accent text-accent" : "text-ink-subtle"
                       }
                     />
                   </button>
                 ))}
               </div>
             </div>
-            {error && <p className="text-[12.5px] text-danger">{error}</p>}
+            {error && (
+              <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-danger">{error}</p>
+            )}
 
             {t.screenshots.length > 0 && (
               <div className="flex flex-col gap-2.5">

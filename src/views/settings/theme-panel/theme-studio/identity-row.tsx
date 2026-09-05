@@ -31,7 +31,7 @@ export function IdentityRow({
         value={blurb}
         onChange={(e) => onChange({ blurb: e.target.value })}
         placeholder={t("One line for the picker (optional)")}
-        className="h-9 w-full rounded-md bg-transparent px-3 text-[13.5px] text-ink-muted placeholder:text-ink-subtle/70 focus:outline-none"
+        className="h-11 w-full rounded-md bg-transparent px-3 text-[15.5px] text-ink-muted placeholder:text-ink-subtle/70 focus:outline-none"
       />
     </div>
   );

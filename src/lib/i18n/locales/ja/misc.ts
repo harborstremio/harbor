@@ -959,6 +959,7 @@ const misc: Record<string, string> = {
   "Remove tag": "タグを削除",
   "Tag limit reached": "タグの上限に達しました",
   "Add a tag": "タグを追加",
+  "Paused on Trakt": "Traktで一時停止中",
 };
 
 export default misc;

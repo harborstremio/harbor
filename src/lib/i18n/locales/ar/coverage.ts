@@ -1,4 +1,7 @@
-const coverage: Record<string, string> = {
+const coverage: Record<string, string> = {
+  "Sound descriptions": "أوصاف الأصوات",
+  "Hide sound effects and speaker names": "إخفاء المؤثرات الصوتية وأسماء المتحدثين",
+  "Removes bracketed descriptions like [door creaks] and shouted speaker labels like JOHN: while subtitles play, so a release that only ships an SDH track still reads as plain dialogue. Song lyrics, ordinary parentheses and non-Latin scripts are left alone. Skipped on forced and picture-based tracks.": "يزيل الأوصاف الموضوعة بين قوسين معقوفين مثل [صرير الباب] وأسماء المتحدثين المكتوبة بأحرف لاتينية كبيرة مثل JOHN: أثناء عرض الترجمة، حتى تُقرأ النسخة التي لا تتوفر إلا بمسار SDH كحوار عادي. تبقى كلمات الأغاني والأقواس العادية والكتابات غير اللاتينية كما هي. لا يُطبَّق على المسارات المفروضة ولا على المسارات الصورية.",
   "Play from": "التشغيل من",
   end: "النهاية",
   "m:ss": "د:ث",

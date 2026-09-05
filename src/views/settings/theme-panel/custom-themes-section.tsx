@@ -273,13 +273,13 @@ export function CustomThemesSection() {
       />
 
       {error && (
-        <div className="flex items-center gap-2 rounded-md border border-danger bg-danger/15 px-3.5 py-2.5 text-[12.5px] text-danger">
-          <AlertCircle size={14} strokeWidth={2.2} />
-          <span>{error}</span>
+        <div className="flex flex-wrap items-start gap-2.5 rounded-[10px] border border-danger/40 bg-elevated px-4 py-3 text-[15.5px] leading-[22px] text-danger">
+          <AlertCircle size={18} strokeWidth={2.2} className="mt-[2px] shrink-0" />
+          <span className="max-w-[66ch] flex-1">{error}</span>
           <button
             type="button"
             onClick={() => setError(null)}
-            className="ms-auto rounded px-2 text-[11.5px] font-semibold uppercase tracking-wider opacity-70 hover:opacity-100"
+            className="-my-1 flex h-11 shrink-0 items-center rounded-[8px] px-3 text-[15.5px] font-semibold opacity-80 transition-opacity hover:opacity-100"
           >
             {t("Dismiss")}
           </button>

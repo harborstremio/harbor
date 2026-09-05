@@ -1,7 +1,6 @@
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { Section, ToggleRow } from "../shared";
-import { SettingGroup } from "../kit";
 import { LanguagesPicker } from "../streaming-panel";
 import { DualSubtitleSection } from "./dual-subtitle-section";
 
@@ -68,9 +67,7 @@ export function SubtitlesLanguageTab() {
         />
       </Section>
 
-      <SettingGroup>
-        <DualSubtitleSection />
-      </SettingGroup>
+      <DualSubtitleSection />
     </>
   );
 }

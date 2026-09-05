@@ -22,14 +22,14 @@ export function MarketSegmented({
             key={it.id}
             type="button"
             onClick={() => onSelect(it.id)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors ${
+            className={`inline-flex h-11 items-center gap-1.5 rounded-full px-4 text-[15.5px] font-semibold leading-[22px] transition-colors ${
               on ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised hover:text-ink"
             }`}
           >
             {it.icon && <span className="inline-flex shrink-0">{it.icon}</span>}
             {t(it.label)}
             {it.badge != null && it.badge > 0 && (
-              <span className="ms-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10.5px] font-bold tabular-nums text-canvas">
+              <span className="ms-0.5 grid h-[22px] min-w-[22px] place-items-center rounded-full bg-accent px-1.5 text-[13px] font-bold leading-[17px] tabular-nums text-canvas">
                 {it.badge > 99 ? "99+" : it.badge}
               </span>
             )}

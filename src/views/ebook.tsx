@@ -43,7 +43,8 @@ import { NytMark } from "@/components/icons/nyt-mark";
 import { NYT_ATTRIBUTION, type NytList } from "@/lib/ebook/nyt";
 import { isNytPlaceholder } from "@/lib/ebook/nyt-rail";
 import { nytRailItems, nytRankFor } from "@/lib/ebook/nyt-rail";
-import { useNytAvailability, useNytList, useResolveNytBooks } from "@/lib/ebook/use-nyt";
+import { nytBestsellerFor } from "@/lib/ebook/nyt-match";
+import { useNytAvailability, useNytList, useNytSnapshot, useResolveNytBooks } from "@/lib/ebook/use-nyt";
 import { useAnilist } from "@/lib/anilist/provider";
 import { useT, useUiLanguage } from "@/lib/i18n";
 import {
@@ -1424,7 +1425,11 @@ function EBookLibraryHero({
   const loading = ebooks.length === 0;
   const currentTitle = current ? ebookTitleForLanguage(current, titleLanguage) : "";
   const authors = current?.authors.filter(Boolean).slice(0, 2).join(", ") ?? "";
-  const rank = current ? nytRankFor(bestsellers ?? null, current) : null;
+  const snapshot = useNytSnapshot();
+  const listRank = current ? nytRankFor(bestsellers ?? null, current) : null;
+  const anyMatch = current ? nytBestsellerFor(snapshot, current) : null;
+  const rank = listRank ?? anyMatch?.book ?? null;
+  const rankList = listRank ? null : (anyMatch?.list ?? null);
   const weeksLabel =
     rank && rank.weeksOnList > 0
       ? rank.weeksOnList === 1
@@ -1494,7 +1499,11 @@ function EBookLibraryHero({
 
         <div className="ebook-hero-copy" style={fade}>
           <span className="ebook-hero-kicker">
-            {rank ? `#${rank.rank} New York Times Bestseller` : t("Featured book")}
+            {rank
+              ? rankList
+                ? `#${rank.rank} New York Times Bestseller · ${rankList.displayName}`
+                : `#${rank.rank} New York Times Bestseller`
+              : t("Featured book")}
           </span>
           {loading && (
             <div className="ebook-hero-skeleton">
@@ -2645,7 +2654,10 @@ function EBookDetails({
   onOpen: (ebook: EBook) => void;
 }) {
   const detailBestsellers = useNytList();
-  const detailRank = ebook ? nytRankFor(detailBestsellers, ebook) : null;
+  const detailSnapshot = useNytSnapshot();
+  const detailRank = ebook
+    ? (nytRankFor(detailBestsellers, ebook) ?? nytBestsellerFor(detailSnapshot, ebook)?.book ?? null)
+    : null;
   const t = useT();
   const [saved, setSaved] = useState(() => (ebook ? ebookInLibrary(ebook.id) : false));
   const [favorite, setFavorite] = useState(() => (ebook ? ebookIsFavorite(ebook.id) : false));

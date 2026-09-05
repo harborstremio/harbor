@@ -266,6 +266,8 @@ const catalog07: Record<string, string> = {
   "Line-free video mode": "Tryb obrazu bez linii",
   "Lineups not available yet.": "Składy nie są jeszcze dostępne.",
   Link: "Link",
+  "Link Letterboxd and the films and lists you keep there show up right here.":
+    "Połącz konto Letterboxd, a filmy i listy, które tam prowadzisz, pojawią się właśnie tutaj.",
   "Link Simkl and everything you watch shows up right here.":
     "Połącz konto Simkl, a wszystko, co oglądasz, pojawi się właśnie tutaj.",
   "Link a title": "Połącz tytuł",
@@ -604,8 +606,10 @@ const catalog07: Record<string, string> = {
   Media: "Multimedia",
   "Media type": "Typ multimediów",
   "Media types": "Typy multimediów",
+  Medium: "Średni",
   Member: "Członek",
   Members: "Członkowie",
+  "Memory cap": "Limit pamięci",
   "Men of History": "Mężowie historii",
   Menu: "Menu",
   "Menu / Options": "Menu / Opcje",

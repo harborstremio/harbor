@@ -196,7 +196,8 @@ export function MangaView() {
       );
     }
     return (
-      <main className="animate-fade-in mx-auto flex min-h-[86vh] max-w-2xl flex-col items-center justify-center gap-6 px-12 pt-[9vh] text-center">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24">
+        <div className="animate-fade-in mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center gap-6 text-center">
         <img
           src="/nosources.png"
           alt=""
@@ -219,6 +220,7 @@ export function MangaView() {
         >
           {t("Set up a source")}
         </button>
+        </div>
       </main>
     );
   }
@@ -410,7 +412,8 @@ export function MangaView() {
 function EnableGate({ onEnable }: { onEnable: () => void }) {
   const t = useT();
   return (
-    <main className="mx-auto flex max-w-2xl flex-col items-center gap-5 px-12 pb-20 pt-28 text-center">
+    <main className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24">
+      <div className="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center gap-5 text-center">
       <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-elevated/50 text-ink ring-1 ring-edge-soft">
         <BookOpen size={28} strokeWidth={1.8} />
       </span>
@@ -429,6 +432,7 @@ function EnableGate({ onEnable }: { onEnable: () => void }) {
       >
         {t("Enable manga sources")}
       </button>
+      </div>
     </main>
   );
 }

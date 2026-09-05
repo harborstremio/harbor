@@ -3,7 +3,7 @@ import { useT } from "@/lib/i18n";
 function Frame({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-3 rounded-md bg-elevated px-4 py-4">
-      <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+      <span className="harbor-settings-label">
         {label}
       </span>
       {children}

@@ -3,25 +3,24 @@ import tmdbLogo from "@/assets/addon-logos/tmdb.png";
 import { useSettings } from "@/lib/settings";
 import { effectiveOrderProvider } from "@/lib/settings/episode-order";
 import { useT } from "@/lib/i18n";
-import { ToggleRow } from "./shared";
+import { Segmented, ToggleRow } from "./shared";
+import { SettingRow } from "./kit";
 
 type Provider = "tvdb" | "tmdb";
+
+const TAG =
+  "inline-flex h-[22px] shrink-0 items-center rounded-[6px] bg-elevated px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink-subtle";
 
 function OrderPreview({ active }: { active: Provider }) {
   const t = useT();
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <PreviewCard
-        on={active === "tvdb"}
-        logo={tvdbLogo}
-        title="TVDB"
-        tag={t("Structured")}
-      >
-        <div className="flex gap-1">
+    <div className="grid w-full grid-cols-2 gap-3">
+      <PreviewCard on={active === "tvdb"} logo={tvdbLogo} title="TVDB" tag={t("Structured")}>
+        <div className="flex flex-wrap gap-1.5">
           {["Aired", "DVD", "Abs"].map((o, i) => (
             <span
               key={o}
-              className={`rounded-full px-1.5 py-[3px] text-[8.5px] font-semibold ${
+              className={`rounded-full px-2.5 py-1 text-[13px] font-semibold ${
                 i === 0 ? "bg-ink text-canvas" : "bg-elevated text-ink-subtle"
               }`}
             >
@@ -29,7 +28,7 @@ function OrderPreview({ active }: { active: Provider }) {
             </span>
           ))}
         </div>
-        <div className="mt-1.5 flex flex-col gap-1">
+        <div className="mt-2.5 flex flex-col gap-1.5">
           {[
             { s: "Season 1", n: "12" },
             { s: "Season 2", n: "10" },
@@ -37,27 +36,33 @@ function OrderPreview({ active }: { active: Provider }) {
           ].map((r) => (
             <div
               key={r.s}
-              className="flex items-center justify-between rounded-md bg-canvas px-2 py-1"
+              className="flex items-center justify-between gap-3 rounded-md bg-canvas px-3 py-1.5"
             >
-              <span className="text-[9.5px] font-medium text-ink">{r.s}</span>
-              <span className="text-[8.5px] text-ink-subtle">{r.n} eps</span>
+              <span className="min-w-0 truncate text-[15.5px] font-medium leading-[22px] text-ink">
+                {r.s}
+              </span>
+              <span className="shrink-0 text-[15.5px] leading-[22px] text-ink-subtle">
+                {t("{n} eps", { n: r.n })}
+              </span>
             </div>
           ))}
         </div>
       </PreviewCard>
       <PreviewCard on={active === "tmdb"} logo={tmdbLogo} title="TMDB" tag={t("As aired")}>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1.5">
           {[
             { n: 1, name: "Pilot" },
             { n: 2, name: t("Episode 2") },
             { n: 3, name: t("Episode 3") },
             { n: 4, name: t("Episode 4") },
           ].map((e) => (
-            <div key={e.n} className="flex items-center gap-1.5">
-              <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded bg-elevated text-[8px] font-semibold text-ink-subtle">
+            <div key={e.n} className="flex items-center gap-2.5">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-elevated text-[13px] font-bold tabular-nums text-ink-subtle">
                 {e.n}
               </span>
-              <span className="truncate text-[9.5px] text-ink">{e.name}</span>
+              <span className="min-w-0 truncate text-[15.5px] leading-[22px] text-ink">
+                {e.name}
+              </span>
             </div>
           ))}
         </div>
@@ -81,45 +86,18 @@ function PreviewCard({
 }) {
   return (
     <div
-      className={`flex flex-col rounded-md border bg-canvas p-2.5 transition ${
+      className={`flex min-w-0 flex-col rounded-md border bg-canvas p-3.5 transition ${
         on ? "border-ink/80" : "border-edge-soft/60 opacity-45"
       }`}
     >
-      <div className="mb-2 flex items-center gap-1.5">
-        <img src={logo} alt="" className="h-3.5 w-3.5 rounded-[3px] object-contain" />
-        <span className="text-[10.5px] font-semibold text-ink">{title}</span>
-        <span className="ms-auto text-[8.5px] font-medium uppercase tracking-wide text-ink-subtle">
-          {tag}
+      <div className="mb-3 flex items-center gap-2">
+        <img src={logo} alt="" className="h-5 w-5 shrink-0 rounded-[3px] object-contain" />
+        <span className="min-w-0 truncate text-[16.5px] font-medium leading-[24px] text-ink">
+          {title}
         </span>
+        <span className={`ms-auto ${TAG}`}>{tag}</span>
       </div>
       {children}
-    </div>
-  );
-}
-
-function Seg<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: Array<{ value: T; label: string }>;
-  value: T;
-  onChange: (v: T) => void;
-}) {
-  return (
- <div className="flex shrink-0 items-center gap-1 rounded-full bg-canvas p-1">
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          onClick={() => onChange(o.value)}
-          className={`h-8 whitespace-nowrap rounded-full px-3.5 text-[12.5px] font-semibold transition-colors ${
-            value === o.value ? "bg-ink text-canvas" : "text-ink-muted hover:text-ink"
-          }`}
-        >
-          {o.label}
-        </button>
-      ))}
     </div>
   );
 }
@@ -135,17 +113,14 @@ export function EpisodeOrderSetting() {
   };
 
   return (
-    <div className="mt-2 flex flex-col gap-4 border-t border-edge-soft/60 pt-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-col">
-          <span className="text-[13.5px] font-medium text-ink">{t("Episode ordering")}</span>
-          <span className="text-[12.5px] leading-relaxed text-ink-subtle">
-            {t(
-              "How episodes are grouped for shows and anime. TVDB is the default: it gives the arc, DVD, and absolute orderings anime fans expect, with no key needed. TMDB keeps the plain aired order. Either way, every episode still plays and marks watched the same.",
-            )}
-          </span>
-        </div>
-        <Seg
+    <>
+      <SettingRow
+        label={t("Episode ordering")}
+        desc={t(
+          "How episodes are grouped for shows and anime. TVDB is the default: it gives the arc, DVD, and absolute orderings anime fans expect, with no key needed. TMDB keeps the plain aired order. Either way, every episode still plays and marks watched the same.",
+        )}
+      >
+        <Segmented
           options={[
             { value: "tvdb", label: "TVDB" },
             { value: "tmdb", label: "TMDB" },
@@ -153,7 +128,7 @@ export function EpisodeOrderSetting() {
           value={provider}
           onChange={pickProvider}
         />
-      </div>
+      </SettingRow>
 
       <OrderPreview active={provider} />
 
@@ -168,9 +143,8 @@ export function EpisodeOrderSetting() {
             onChange={(v) => update({ tvdbOrderPanel: v })}
           />
           {!settings.tvdbOrderPanel && (
-            <div className="flex items-center justify-between gap-4 ps-1">
-              <span className="text-[13px] text-ink-muted">{t("Which order")}</span>
-              <Seg
+            <SettingRow wide label={t("Which order")}>
+              <Segmented
                 options={[
                   { value: "aired", label: t("Aired") },
                   { value: "official", label: t("Official") },
@@ -181,10 +155,10 @@ export function EpisodeOrderSetting() {
                 value={settings.tvdbSeasonType}
                 onChange={(v) => update({ tvdbSeasonType: v })}
               />
-            </div>
+            </SettingRow>
           )}
         </>
       )}
-    </div>
+    </>
   );
 }

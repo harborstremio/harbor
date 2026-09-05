@@ -4,6 +4,8 @@ import { useSettings } from "@/lib/settings";
 import { applyLegacyToActive, recoverableLegacyBlob } from "@/lib/settings/profile-store";
 import type { Settings } from "@/lib/settings/types";
 import { useT } from "@/lib/i18n";
+import { SettingRow } from "./kit";
+import { SButton } from "./ui";
 
 const KEY_FIELDS = ["rdKey", "tbKey", "adKey", "pmKey", "dlKey", "tmdbKey", "rpdbKey"] as const;
 
@@ -41,22 +43,17 @@ export function SettingsRecoverRow() {
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-md border border-accent bg-accent-soft] p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[13.5px] font-medium text-ink">{t("Restore previous settings")}</span>
-        <span className="text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("Updating separated settings per profile, which may have reset your theme and keys. Harbor still has your old setup saved. Bring it back on this profile, then reload.")}
-        </span>
-      </div>
-      <button
-        type="button"
-        onClick={restore}
-        disabled={applying}
-        className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-accent px-3.5 text-[12.5px] font-semibold text-canvas transition hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60"
-      >
-        <History size={14} strokeWidth={2.4} />
+    <SettingRow
+      icon={<History size={20} strokeWidth={2.1} className="text-accent" />}
+      label={t("Restore previous settings")}
+      desc={t(
+        "Updating separated settings per profile, which may have reset your theme and keys. Harbor still has your old setup saved. Bring it back on this profile, then reload.",
+      )}
+    >
+      <SButton variant="primary" onClick={restore} disabled={applying}>
+        <History size={18} strokeWidth={2.4} />
         {applying ? t("Restoring...") : t("Restore")}
-      </button>
-    </div>
+      </SButton>
+    </SettingRow>
   );
 }

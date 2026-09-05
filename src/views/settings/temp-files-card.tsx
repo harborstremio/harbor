@@ -2,7 +2,8 @@ import { HardDrive, Loader2, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useT } from "@/lib/i18n";
-import { settingsAnchor } from "./shared";
+import { Section } from "./shared";
+import { ROW_ACTION_DANGER, SettingGroup, SettingRow } from "./kit";
 
 function formatBytes(n: number): string {
   if (n <= 0) return "0 MB";
@@ -39,34 +40,36 @@ export function TempFilesCard() {
   if (bytes === null) return null;
 
   return (
-    <section
-      id={settingsAnchor("Temporary files")}
- className="scroll-mt-28 flex flex-col gap-4 rounded-md bg-elevated p-7"
+    <Section
+      title={t("Temporary files")}
+      subtitle={t(
+        "Leftover installers from past updates, cached trailers, and casting scratch files. Harbor clears old ones on launch, keeping only the most recent installer.",
+      )}
     >
-      <div className="flex items-start gap-3">
-        <HardDrive size={20} className="mt-0.5 shrink-0 text-ink-subtle" />
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Temporary files")}</span>
-          <span className="text-[13px] leading-relaxed text-ink-subtle">
-            {t(
-              "Leftover installers from past updates, cached trailers, and casting scratch files. Harbor clears old ones on launch, keeping only the most recent installer.",
-            )}
-          </span>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="text-[22px] font-semibold tabular-nums text-ink">{formatBytes(bytes)}</span>
-        <button
-          type="button"
-          onClick={() => void clear()}
-          disabled={busy || bytes === 0}
-          className="flex h-10 items-center gap-2 rounded-full px-4 text-[13px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:text-danger hover:ring-danger disabled:opacity-40 disabled:hover:text-ink-muted disabled:hover:ring-edge-soft"
+      <SettingGroup>
+        <SettingRow
+          icon={<HardDrive size={18} strokeWidth={1.9} />}
+          label={t("Space in use")}
+          desc={t("Clearing these is always safe. Nothing you downloaded on purpose is removed.")}
         >
-          {busy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-          {t("Clear now")}
-        </button>
-      </div>
-    </section>
+          <span className="shrink-0 text-[15.5px] tabular-nums text-ink-muted">
+            {formatBytes(bytes)}
+          </span>
+          <button
+            type="button"
+            onClick={() => void clear()}
+            disabled={busy || bytes === 0}
+            className={ROW_ACTION_DANGER}
+          >
+            {busy ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <Trash2 size={18} strokeWidth={1.9} />
+            )}
+            {t("Clear now")}
+          </button>
+        </SettingRow>
+      </SettingGroup>
+    </Section>
   );
 }

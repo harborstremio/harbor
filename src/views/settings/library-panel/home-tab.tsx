@@ -1,17 +1,19 @@
-import { Nested, RowIcon, SliderRow } from "../theme-panel/display-section";
-import { useEffect, useState } from "react";
+import { SliderRow } from "../theme-panel/display-section";
+import { useEffect, useRef, useState } from "react";
 import harborStyleImg from "@/assets/onboarding/harborstyle.webp";
 import traditionalStyleImg from "@/assets/onboarding/traditional.webp";
-import { Camera, Clock, Contrast, Image as ImageIcon, LayoutGrid, LayoutTemplate, Maximize, Trash2, Play, Volume2 } from "lucide-react";
+import { Check, Contrast, Image as ImageIcon, LayoutTemplate, Maximize, Play, Volume2 } from "lucide-react";
 import { useSettings } from "@/lib/settings";
 import { clearAllSnapshots, snapshotCount } from "@/lib/snapshots";
 import { useT } from "@/lib/i18n";
 import { Dropdown, type DropdownOption } from "@/components/dropdown";
-import { Section, Segmented, ToggleRow } from "../shared";
-import { SettingGroup, SettingRow } from "../kit";
+import { ROW_DESC, ROW_TITLE, Section, Segmented, ToggleRow } from "../shared";
+import { Nested, ROW_ACTION_DANGER, SettingGroup, SettingRow } from "../kit";
 import { HomeRowPreview } from "../home-layout-previews";
 import { CwSnapshotShowcase } from "../cw-snapshot-showcase";
 import { PreviewImage } from "../preview-image";
+import { HeroShadowPreview } from "./hero-shadow-preview";
+import { CwEndPreview } from "./cw-end-preview";
 
 export function HomeTab() {
   const { settings, update } = useSettings();
@@ -25,7 +27,7 @@ export function HomeTab() {
         <SettingGroup>
           <SettingRow
             wide
-            icon={<LayoutTemplate size={16} strokeWidth={1.9} />}
+            icon={<LayoutTemplate size={18} strokeWidth={2} />}
             label={t("Featured source")}
             desc={t("What fills the hero. Trending is a fresh top list from Harbor, refreshed through the day. Classic uses your own Home rows.")}
           >
@@ -45,14 +47,14 @@ export function HomeTab() {
             sub={t("Stretch the featured hero edge to edge and taller, across every layout.")}
             value={settings.heroFull}
             onChange={(v) => update({ heroFull: v })}
-            leading={<RowIcon on={settings.heroFull}><Maximize size={16} strokeWidth={2.2} /></RowIcon>}
+            leading={<Maximize size={18} strokeWidth={2} />}
           />
           <ToggleRow
             label={t("Full quality hero image")}
             sub={t("Load the highest-resolution artwork for the featured hero. Uses more bandwidth.")}
             value={settings.heroFullQuality}
             onChange={(v) => update({ heroFullQuality: v })}
-            leading={<RowIcon on={settings.heroFullQuality}><ImageIcon size={16} strokeWidth={2.2} /></RowIcon>}
+            leading={<ImageIcon size={18} strokeWidth={2} />}
           />
         </SettingGroup>
 
@@ -63,7 +65,7 @@ export function HomeTab() {
             sub={t("After a moment on a slide, the featured title's trailer plays muted in the background. Uses more bandwidth.")}
             value={settings.heroTrailers}
             onChange={(v) => update({ heroTrailers: v })}
-            leading={<RowIcon on={settings.heroTrailers}><Play size={16} strokeWidth={2.2} /></RowIcon>}
+            leading={<Play size={18} strokeWidth={2} />}
           />
           {settings.heroTrailers && (
             <Nested>
@@ -72,7 +74,7 @@ export function HomeTab() {
                 sub={t("The home hero trailer plays with sound and a mute button in the corner, then shows a replay button when it ends. Auto-rotation pauses so it stays on the featured title.")}
                 value={settings.heroTrailerAudio}
                 onChange={(v) => update({ heroTrailerAudio: v })}
-                leading={<RowIcon on={settings.heroTrailerAudio}><Volume2 size={16} strokeWidth={2.2} /></RowIcon>}
+                leading={<Volume2 size={18} strokeWidth={2} />}
               />
             </Nested>
           )}
@@ -81,13 +83,14 @@ export function HomeTab() {
 
       <Section
         title={t("Home hero shadow")}
-        subtitle={t("How dark the gradient behind the featured title on Home is. 100% is the classic look; lower it to let more of the artwork show through.")}
+        subtitle={t("How dark the gradient behind the featured title on Home is. 100% is the classic look.")}
       >
+        <HeroShadowPreview />
         <SettingGroup>
           <SliderRow
-            label={t("Shadow")}
+            label={t("Shadow strength")}
             desc={t("Lower it to let more of the artwork show through.")}
-            icon={<Contrast size={16} strokeWidth={1.9} />}
+            icon={<Contrast size={18} strokeWidth={2} />}
             value={settings.heroShadow}
             min={0}
             max={100}
@@ -100,14 +103,12 @@ export function HomeTab() {
       </Section>
 
       <Section title={t("Home layout")} subtitle={t("How the Home page assembles its rails.")}>
-        <SettingRow
-          wide
-          icon={<LayoutGrid size={16} />}
-          label={t("Home style")}
-          desc={t("The shape of the whole Home page. Everything below tunes the rows inside it.")}
-        >
+        <SettingGroup label={t("Home style")}>
+          <p className={`max-w-[70ch] ${ROW_DESC}`}>
+            {t("The shape of the whole Home page. Everything below tunes the rows inside it.")}
+          </p>
           <HomeModePicker value={settings.homeMode} onChange={(v) => update({ homeMode: v })} />
-        </SettingRow>
+        </SettingGroup>
 
         <SettingGroup label={t("Rows")}>
           <ToggleRow
@@ -174,7 +175,6 @@ export function HomeTab() {
             onChange={(v) => update({ cwHideCaughtUp: v })}
           />
           <SettingRow
-            icon={<Clock size={16} />}
             label={t("When the latest episode ends")}
             desc={t(
               "Hide until the next episode airs, or keep showing a countdown to when it drops.",
@@ -189,6 +189,7 @@ export function HomeTab() {
               onChange={(v) => update({ animeCwEnd: v as "hide" | "timer" })}
             />
           </SettingRow>
+          <CwEndPreview mode={settings.animeCwEnd} />
           <ToggleRow
             label={t("Keep anime in the Anime room only")}
             sub={t(
@@ -205,6 +206,61 @@ export function HomeTab() {
             )}
             value={settings.cwPerProfile}
             onChange={(v) => update({ cwPerProfile: v })}
+          />
+        </SettingGroup>
+
+        <SettingGroup label={t("Continue Watching sources")}>
+          <p className={`${ROW_DESC} -mt-1 mb-1`}>
+            {t(
+              "Choose which services feed your Continue Watching row. Turn on as many as you like and Harbor merges them, keeping the most recent progress for each title. What you watch is still scrobbled to every connected service regardless of what you pick here.",
+            )}
+          </p>
+          <ToggleRow
+            label={t("Harbor library")}
+            sub={t("Your own Harbor account progress. The primary source for almost everyone.")}
+            value={settings.cwSources.library}
+            onChange={(v) => update({ cwSources: { ...settings.cwSources, library: v } })}
+            lockReason={
+              settings.cwPerProfile
+                ? t("Unavailable while Continue Watching is kept private to each profile.")
+                : undefined
+            }
+          />
+          <ToggleRow
+            label={t("Downloads")}
+            sub={t("Titles you are part-way through in your local downloads, even offline.")}
+            value={settings.cwSources.local}
+            onChange={(v) => update({ cwSources: { ...settings.cwSources, local: v } })}
+          />
+          <ToggleRow
+            label={t("Trakt progress")}
+            sub={t(
+              "Pulls what you have part-watched on Trakt into the row, marked with the Trakt logo. Requires a connected Trakt account.",
+            )}
+            value={settings.cwSources.trakt}
+            onChange={(v) => update({ cwSources: { ...settings.cwSources, trakt: v } })}
+            lockReason={
+              settings.cwPerProfile
+                ? t(
+                    "Unavailable while Continue Watching is kept private to each profile, because Trakt progress is shared across every profile on this account.",
+                  )
+                : undefined
+            }
+          />
+          <ToggleRow
+            label={t("Simkl progress")}
+            sub={t(
+              "Pulls what you have part-watched on Simkl into the row, marked with the Simkl logo. Requires a connected Simkl account.",
+            )}
+            value={settings.cwSources.simkl}
+            onChange={(v) => update({ cwSources: { ...settings.cwSources, simkl: v } })}
+            lockReason={
+              settings.cwPerProfile
+                ? t(
+                    "Unavailable while Continue Watching is kept private to each profile, because Simkl progress is shared across every profile on this account.",
+                  )
+                : undefined
+            }
           />
         </SettingGroup>
 
@@ -284,7 +340,7 @@ function HomeModePicker({
     <div
       role="radiogroup"
       aria-label={t("Home style")}
-      className="grid w-full grid-cols-1 gap-3 md:grid-cols-2"
+      className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2"
     >
       {options.map((opt) => {
         const selected = value === opt.id;
@@ -295,11 +351,11 @@ function HomeModePicker({
             role="radio"
             aria-checked={selected}
             onClick={() => onChange(opt.id)}
-            className="group flex flex-col gap-2.5 rounded-md text-start"
+            className="group flex flex-col gap-2.5 rounded-[10px] text-start"
           >
             <span
-              className={`block overflow-hidden rounded-md bg-canvas ring-2 transition-[box-shadow] duration-200 ease-out ${
-                selected ? "ring-accent" : "ring-transparent group-hover:ring-edge"
+              className={`block overflow-hidden rounded-[10px] border transition-colors duration-200 ease-out ${
+                selected ? "border-accent" : "border-edge-soft group-hover:border-edge"
               }`}
             >
               <PreviewImage
@@ -307,15 +363,12 @@ function HomeModePicker({
                 className="block aspect-[16/10] w-full select-none object-cover object-top"
               />
             </span>
-            <span className="flex flex-col gap-1 px-0.5">
-              <span
-                className={`text-[14px] tracking-tight transition-colors duration-200 ${
-                  selected ? "font-semibold text-ink" : "font-medium text-ink-muted group-hover:text-ink"
-                }`}
-              >
+            <span className="flex flex-col gap-1">
+              <span className={`flex flex-wrap items-center gap-2 ${ROW_TITLE}`}>
                 {opt.label}
+                {selected && <Check size={18} strokeWidth={2.4} className="shrink-0 text-accent" />}
               </span>
-              <span className="text-[12px] leading-relaxed text-ink-subtle">{opt.sub}</span>
+              <span className={`max-w-[66ch] ${ROW_DESC}`}>{opt.sub}</span>
             </span>
           </button>
         );
@@ -336,12 +389,11 @@ function RetentionPicker({ value, onChange }: { value: number; onChange: (v: num
   ];
   return (
     <SettingRow
-      icon={<Camera size={16} />}
       label={t("Keep frames for")}
       desc={t("How long a saved frame sticks around before the oldest roll off.")}
     >
       <Dropdown
-        className="w-44 shrink-0"
+        className="w-[280px] max-w-full"
         value={String(value)}
         options={options}
         onChange={(v) => onChange(Number(v))}
@@ -354,12 +406,15 @@ function ClearSnapshotsButton() {
   const t = useT();
   const [count, setCount] = useState<number>(() => snapshotCount());
   const [confirming, setConfirming] = useState(false);
+  const [spent, setSpent] = useState(false);
+  const startedEmpty = useRef(count === 0).current;
   useEffect(() => {
     if (!confirming) return;
     const timer = window.setTimeout(() => setConfirming(false), 4000);
     return () => window.clearTimeout(timer);
   }, [confirming]);
   const onClick = () => {
+    if (spent) return;
     if (!confirming) {
       setConfirming(true);
       return;
@@ -367,11 +422,11 @@ function ClearSnapshotsButton() {
     const cleared = clearAllSnapshots();
     setCount(0);
     setConfirming(false);
+    setSpent(true);
     void cleared;
   };
   return (
     <SettingRow
-      icon={<Trash2 size={16} />}
       label={t("Clear all saved frames")}
       desc={
         count > 0
@@ -380,18 +435,20 @@ function ClearSnapshotsButton() {
             : t("{n} frames stored. Wiping rebuilds them next time you watch.", { n: count })
           : t("No frames stored yet. They'll appear here as you watch things.")
       }
+      warn={
+        confirming
+          ? t("Every saved frame goes. Press again to confirm, or wait to cancel.")
+          : undefined
+      }
     >
       <button
         type="button"
         onClick={onClick}
-        disabled={count === 0 && !confirming}
-        className={`harbor-press-pop h-9 shrink-0 rounded-md px-4 text-[12.5px] font-semibold transition-colors ${
-          confirming
-            ? "bg-danger text-canvas hover:opacity-90"
-            : "bg-canvas text-ink-muted hover:text-ink disabled:opacity-40"
-        }`}
+        disabled={startedEmpty}
+        aria-disabled={spent || undefined}
+        className={ROW_ACTION_DANGER}
       >
-        {confirming ? t("Confirm clear") : t("Clear all")}
+        {spent ? t("Cleared") : confirming ? t("Confirm clear") : t("Clear all")}
       </button>
     </SettingRow>
   );

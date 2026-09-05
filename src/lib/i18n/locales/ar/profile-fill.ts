@@ -300,6 +300,15 @@ const profileFill: Record<string, string> = {
   Books: "الكتب",
   "Show your favourite games, books and music on your profile":
     "اعرض ألعابك وكتبك وموسيقاك المفضّلة في ملفك الشخصي",
+  "Show your Letterboxd card": "إظهار بطاقة Letterboxd",
+  "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
+    "معطّل افتراضيًا. يعرض اسمك على Letterboxd وقوائمك وعدد أفلامك في ملفك الشخصي لأي زائر. أما الاتصال نفسه فيُدار من الإعدادات، قسم Letterboxd.",
+  "On Letterboxd": "على Letterboxd",
+  "Open Letterboxd profile": "فتح ملف Letterboxd",
+  "No Letterboxd lists shared yet": "لا توجد قوائم Letterboxd مشتركة بعد",
+  "Link Letterboxd and the films and lists you keep there show up right here.":
+    "اربط Letterboxd وستظهر هنا الأفلام والقوائم التي تحتفظ بها هناك.",
+  "Connect Letterboxd": "ربط Letterboxd",
 };
 
 export default profileFill;

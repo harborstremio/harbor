@@ -1,8 +1,7 @@
 import harborDiscord from "@/assets/harbor-discord.svg";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { Section, ToggleRow } from "../shared";
-import { SettingGroup } from "../kit";
+import { ROW_DESC, Section, ToggleRow } from "../shared";
 import { PrivacyRow } from "../privacy-row";
 import { isTauri } from "../player-panel/internals";
 
@@ -38,7 +37,7 @@ function DiscordPresenceRow() {
   const { settings, update } = useSettings();
   const on = settings.discordRichPresence;
   return (
-    <SettingGroup>
+    <>
       <ToggleRow
         label={t("Show on Discord")}
         sub={t(
@@ -49,7 +48,7 @@ function DiscordPresenceRow() {
             src={harborDiscord}
             alt=""
             draggable={false}
-            className="h-9 w-auto shrink-0 object-contain"
+            className="h-5 w-5 shrink-0 object-contain"
           />
         }
         value={on}
@@ -93,13 +92,13 @@ function DiscordPresenceRow() {
             value={settings.discordShowPartyJoin}
             onChange={(discordShowPartyJoin) => update({ discordShowPartyJoin })}
           />
-          <p className="px-1 pt-1 text-[11.5px] leading-snug text-ink-subtle">
+          <p className={`max-w-[70ch] ${ROW_DESC}`}>
             {t(
               "And for the naughty ones: browsing or rating an adult addon never shows on Discord.",
             )}
           </p>
         </>
       )}
-    </SettingGroup>
+    </>
   );
 }

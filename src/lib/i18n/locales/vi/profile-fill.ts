@@ -10,6 +10,15 @@ const profileFill: Record<string, string> = {
   "Link Simkl and everything you watch shows up right here.":
     "Liên kết Simkl để mọi nội dung bạn xem xuất hiện ngay tại đây.",
   "Could not reach Simkl.": "Không thể kết nối với Simkl.",
+  "Show your Letterboxd card": "Hiển thị thẻ Letterboxd của bạn",
+  "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
+    "Mặc định tắt. Hiển thị tên, danh sách và số phim trên Letterboxd trong hồ sơ của bạn cho mọi người truy cập. Quản lý kết nối trong Cài đặt, Letterboxd.",
+  "On Letterboxd": "Trên Letterboxd",
+  "Open Letterboxd profile": "Mở hồ sơ Letterboxd",
+  "Connect Letterboxd": "Kết nối Letterboxd",
+  "No Letterboxd lists shared yet": "Chưa chia sẻ danh sách Letterboxd nào",
+  "Link Letterboxd and the films and lists you keep there show up right here.":
+    "Liên kết Letterboxd để phim và danh sách bạn lưu ở đó xuất hiện ngay tại đây.",
   "Tap the heart on any movie, show, manga, or character to save it here.":
     "Nhấn vào biểu tượng trái tim trên phim, phim bộ, manga hoặc nhân vật bất kỳ để lưu vào đây.",
   "Your rating {n}/10": "Điểm bạn đánh giá: {n}/10",

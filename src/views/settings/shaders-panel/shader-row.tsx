@@ -4,8 +4,7 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { Segmented, ToggleRow } from "../shared";
 import { SettingRow, Nested } from "../kit";
-import { Pill } from "./action-button";
-import { appliesLabel, STAGE_ICON, TIER_LABEL } from "./stages";
+import { appliesLabel, segmentedWide, STAGE_ICON, TIER_LOAD } from "./stages";
 
 export function ShaderRow({ entry }: { entry: ShaderCatalogEntry }) {
   const { settings, update } = useSettings();
@@ -36,13 +35,8 @@ export function ShaderRow({ entry }: { entry: ShaderCatalogEntry }) {
     <>
       <ToggleRow
         label={t(entry.name)}
-        leading={<Icon size={16} strokeWidth={2.2} className="text-ink-muted" />}
-        sub={
-          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <Pill>{t(TIER_LABEL[entry.tier])}</Pill>
-            <span>{t(appliesLabel(entry.content))}</span>
-          </span>
-        }
+        leading={<Icon size={18} strokeWidth={2.2} />}
+        sub={`${t(TIER_LOAD[entry.tier])} ${t(appliesLabel(entry.content))}`}
         value={enabled}
         onChange={(v) => patch({ enabled: v })}
         lockReason={lockReason}
@@ -52,7 +46,8 @@ export function ShaderRow({ entry }: { entry: ShaderCatalogEntry }) {
           <SettingRow
             label={t("Variant")}
             desc={t(activeVariant.sub)}
-            icon={<SlidersHorizontal size={16} strokeWidth={2.2} />}
+            icon={<SlidersHorizontal size={18} strokeWidth={2.2} />}
+            wide={segmentedWide(variants.map((v) => v.label))}
           >
             <Segmented
               value={activeVariant.id}

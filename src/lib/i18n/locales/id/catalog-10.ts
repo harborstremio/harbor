@@ -247,6 +247,8 @@ const catalog: Record<string, string> = {
   "Telling your boss you're quitting": "Memberi tahu atasan bahwa Anda mengundurkan diri",
   Template: "Templat",
   "Temporary files": "File sementara",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "Muatan awal sepuluh menit. Dirancang untuk Wi-Fi yang tidak stabil atau server yang jauh, dengan konsekuensi menunggu lebih lama sebelum pemutaran dimulai.",
   "Tennis tournaments": "Turnamen tenis",
   "Tense Performances": "Penampilan Menegangkan",
   Test: "Uji",
@@ -501,6 +503,8 @@ const catalog: Record<string, string> = {
     "Server penyedia mengembalikan kesalahan. Tidak ada yang dapat diperbaiki dari sisi Harbor. Pilih sumber lain.",
   "The quick brown fox jumps": "Rubah cokelat yang gesit melompat",
   "The quick brown fox jumps over the lazy dog": "Rubah cokelat yang gesit melompati anjing malas",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "Mulai paling cepat dengan penggunaan memori paling sedikit. Cocok untuk koneksi yang cepat dan stabil, atau perangkat dengan memori terbatas.",
   "The ratings row on a title's detail page, next to runtime and genre.":
     "Baris rating di halaman detail judul, di sebelah durasi dan genre.",
   "The real footage": "Rekaman asli",
@@ -540,6 +544,7 @@ const catalog: Record<string, string> = {
   "The standard year-end bonus": "Bonus standar akhir tahun",
   "The streaming engine is still starting up. Give it a moment and press Play again.":
     "Mesin streaming masih dimulai. Tunggu sebentar, lalu tekan Putar lagi.",
+  "The streaming server didn't come back up.": "Server streaming tidak kunjung aktif kembali.",
   "The stronger fix when streams refuse to load. Cached stream files and the DHT cache are removed, so the next stream starts from scratch.":
     "Solusi lebih ampuh saat stream tidak dapat dimuat. File stream dalam cache dan cache DHT akan dihapus, sehingga stream berikutnya dimulai dari awal.",
   "The test calls": "Pengujian memanggil",
@@ -559,6 +564,7 @@ const catalog: Record<string, string> = {
   "The window and taskbar icon updates right away. The installed shortcut refreshes on the next update.":
     "Ikon jendela dan bilah tugas langsung diperbarui. Pintasan yang terpasang akan diperbarui pada pembaruan berikutnya.",
   "The yellow chip in the poster corner.": "Chip kuning di sudut poster.",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · waktu intro dan kredit",
   TheTVDB: "TheTVDB",
   "TheTVDB · episode data": "TheTVDB · data episode",
   "Theatrical Capture": "Rekaman Bioskop",
@@ -829,6 +835,7 @@ const catalog: Record<string, string> = {
     "Waktunya sudah selaras. Jika nanti menjadi terlalu awal atau terlambat, ulangi ini pada baris lain.",
   "Timing looks aligned": "Waktunya tampak selaras",
   "Timing rate": "Laju waktu",
+  "Timing sources": "Sumber data waktu",
   Title: "Judul",
   "Title & info": "Judul & info",
   "Title (optional)": "Judul (opsional)",
@@ -836,6 +843,8 @@ const catalog: Record<string, string> = {
   "Title text": "Teks judul",
   Titles: "Judul",
   "Titles and descriptions": "Judul dan deskripsi",
+  "Titles you ignore on the advisory card never show it again.":
+    "Judul yang Anda abaikan di kartu peringatan tidak akan pernah menampilkannya lagi.",
   "Titles, overviews, and taglines from TMDB display in this language when a translation exists. Needs a TMDB key.":
     "Judul, ringkasan, dan slogan dari TMDB ditampilkan dalam bahasa ini jika terjemahan tersedia. Memerlukan kunci TMDB.",
   "To clipboard": "Ke papan klip",

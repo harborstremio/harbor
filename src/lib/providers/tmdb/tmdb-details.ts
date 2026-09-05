@@ -1,5 +1,6 @@
 import type { Meta } from "../../cinemeta";
 import { get, IMG, effectiveTmdbLanguage } from "./tmdb-client";
+import { tmdbBackdropUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
 import { loadStoredSettings } from "@/lib/settings/load";
 import { pickLogo, fetchMovieAssets } from "./tmdb-images";
 import { imageLangParam, imageLangRank } from "./tmdb-image-lang";
@@ -338,8 +339,8 @@ export async function tmdbDetails(key: string, meta: Meta, lang?: string): Promi
     id: kind === "movie" ? `tmdb:movie:${r.id}` : `tmdb:tv:${r.id}`,
     type: kind === "movie" ? "movie" : "series",
     name: r.title ?? r.name,
-    poster: r.poster_path ? `${IMG}/w342${r.poster_path}` : undefined,
-    background: r.backdrop_path ? `${IMG}/w780${r.backdrop_path}` : undefined,
+    poster: tmdbPosterUrl(r.poster_path),
+    background: tmdbBackdropUrl(r.backdrop_path),
     description: r.overview,
     releaseInfo: (r.release_date ?? r.first_air_date)?.slice(0, 4),
     releaseDate: r.release_date ?? r.first_air_date,
@@ -411,7 +412,7 @@ export async function tmdbDetails(key: string, meta: Meta, lang?: string): Promi
     originalTitle: raw.original_title ?? raw.original_name ?? "",
     tagline,
     overview,
-    poster: finalPosterPath ? `${IMG}/w342${finalPosterPath}` : undefined,
+    poster: tmdbPosterUrl(finalPosterPath),
     backdrop: raw.backdrop_path ? `${IMG}/original${raw.backdrop_path}` : undefined,
     logo,
     year: (raw.release_date ?? raw.first_air_date)?.slice(0, 4),

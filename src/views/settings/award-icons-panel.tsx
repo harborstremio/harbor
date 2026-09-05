@@ -1,4 +1,4 @@
-import { BookOpen, Download, RotateCcw, Trash2, Upload } from "lucide-react";
+import { BookOpen, Check, Copy, Download, RotateCcw, Trash2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { defaultAwardIcon } from "@/components/icons/award-logo";
 import { isNativePick } from "@/components/avatar-picker/avatar-import";
@@ -14,11 +14,25 @@ import {
   setCustomIcon,
   useAwardPacks,
 } from "@/lib/award-icons";
-import { Section } from "./shared";
+import { ROW_DESC, Section } from "./shared";
 import { ModalButton, SettingGroup, SettingRow, SettingsModal } from "./kit";
+import { SButton, SRow, SSection } from "./ui";
 
-const GHOST_BTN =
-  "inline-flex h-10 items-center gap-2 rounded-md bg-raised px-4 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink disabled:opacity-40";
+const FOCUS_RING =
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+
+const ICON_BTN = `grid h-11 w-11 shrink-0 place-items-center rounded-[8px] text-ink-muted transition-colors hover:bg-raised hover:text-ink ${FOCUS_RING}`;
+
+const ICON_BTN_DANGER = `grid h-11 w-11 shrink-0 place-items-center rounded-[8px] text-ink-muted transition-colors hover:bg-raised hover:text-danger ${FOCUS_RING}`;
+
+const FIELD = `h-11 w-full min-w-0 max-w-[520px] rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle focus-visible:border-edge ${FOCUS_RING}`;
+
+const CODE_BLOCK =
+  "overflow-x-auto rounded-[10px] bg-elevated p-4 font-mono text-[15.5px] leading-[22px] text-ink";
+
+const MODAL_LABEL = "harbor-settings-label";
+
+const AWARD_GRID = "grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-3";
 
 const PICK_EXT = ["png", "webp", "jpg", "jpeg", "svg"];
 type AwardError =
@@ -194,134 +208,134 @@ export function AwardIconsPanel() {
 
   return (
     <>
-      <Section
-        title={t("Award Icons")}
-        subtitle={t(
-          "Harbor ships a neutral trophy for every award. Install an icon pack or upload your own image per award to make them yours. Packs are hosted by whoever makes them, so the artwork is theirs, not bundled with Harbor.",
-        )}
-      >
-        <SettingRow
-          icon={<Download size={16} strokeWidth={2.2} />}
-          label={t("Install a pack")}
-          desc={t("From a hosted link, your own images, or a .zip.")}
-          warn={errorMessage ?? undefined}
-        >
-          <ModalButton onClick={() => setShowInstall(true)}>{t("Install")}</ModalButton>
-        </SettingRow>
+      <Section title={t("Award Icons")} bare>
+        <SSection>
+          <SettingRow
+            icon={<Download size={18} strokeWidth={2.2} />}
+            label={t("Install a pack")}
+            desc={t(
+              "Point Harbor at a hosted pack link, upload your own images, or import a .zip. Harbor stores the link, so the artwork stays with whoever made it.",
+            )}
+            warn={errorMessage ?? undefined}
+          >
+            <ModalButton onClick={() => setShowInstall(true)}>{t("Install")}</ModalButton>
+          </SettingRow>
+
+          <SettingRow
+            icon={<BookOpen size={18} strokeWidth={2.2} />}
+            label={t("How to make an award pack")}
+            desc={t(
+              "An award pack is a single JSON file plus the images it points to. Host both anywhere public (your own server, a GitHub repo, etc.) and share the JSON URL. Harbor only stores the URLs you install, never the images.",
+            )}
+          >
+            <ModalButton ghost onClick={() => setShowHelp(true)}>
+              {t("Show instructions")}
+            </ModalButton>
+          </SettingRow>
+        </SSection>
 
         {packs.length > 0 && (
-          <SettingGroup label={t("Installed packs")}>
+          <Section title={t("Installed packs")}>
             {packs.map((p) => (
-              <div
+              <SRow
                 key={p.name}
-                className="flex items-center justify-between gap-3 rounded-md bg-elevated px-4 py-3"
-              >
-                <div className="flex min-w-0 flex-col">
-                  <span className="truncate text-[13.5px] font-medium text-ink">{p.name}</span>
-                  <span className="truncate text-[11.5px] text-ink-subtle">
-                    {[p.author, `${Object.keys(p.icons).length} icons`].filter(Boolean).join(" · ")}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removePack(p.name)}
-                  aria-label={t("Remove")}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-raised hover:text-danger"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
+                title={p.name}
+                description={[p.author, `${Object.keys(p.icons).length} ${t("icons")}`]
+                  .filter(Boolean)
+                  .join(" · ")}
+                trailing={
+                  <SButton variant="danger" onClick={() => removePack(p.name)}>
+                    <Trash2 size={18} />
+                    {t("Remove")}
+                  </SButton>
+                }
+              />
             ))}
-          </SettingGroup>
+          </Section>
         )}
 
-        <SettingRow
-          icon={<BookOpen size={16} strokeWidth={2.2} />}
-          label={t("How to make an award pack")}
-          desc={t(
-            "An award pack is a single JSON file plus the images it points to. Host both anywhere public (your own server, a GitHub repo, etc.) and share the JSON URL. Harbor only stores the URLs you install, never the images.",
+        <Section
+          title={t("Customize each award")}
+          subtitle={t(
+            "Upload an image per award, or name your zip files after the ID shown under each one (tap to copy). Natural names work too, so best_soundtrack, movie_of_the_year, etc. still match.",
           )}
         >
-          <ModalButton ghost onClick={() => setShowHelp((v) => !v)}>
-            {showHelp ? t("Hide pack instructions") : t("Show instructions")}
-          </ModalButton>
-        </SettingRow>
-      </Section>
+          {AWARD_ICON_REGISTRY.map((group) => (
+            <SettingGroup key={group.title} label={t(group.title)}>
+              <div className={AWARD_GRID}>
+                {group.items.map((item) => {
+                  const icon = resolveAwardIcon(item.key) ?? defaultAwardIcon(item.key);
+                  const isCustom = item.key in custom;
+                  return (
+                    <div
+                      key={item.key}
+                      className={`flex items-center gap-3 rounded-[10px] border p-3 ${
+                        isCustom ? "border-accent" : "border-edge-soft"
+                      }`}
+                    >
+                      <span className="relative grid h-11 w-11 shrink-0 place-items-center">
+                        <img
+                          src={icon}
+                          alt=""
+                          className="h-11 w-11 rounded-[8px] object-contain"
+                          draggable={false}
+                        />
+                        {isCustom && (
+                          <span className="absolute -bottom-1 -end-1 grid h-5 w-5 place-items-center rounded-full bg-accent text-canvas">
+                            <Check size={13} strokeWidth={3} />
+                          </span>
+                        )}
+                      </span>
 
-      <Section
-        title={t("Customize each award")}
-        subtitle={t(
-          "Upload an image per award, or name your zip files after the ID shown under each one (tap to copy). Natural names work too, so best_soundtrack, movie_of_the_year, etc. still match.",
-        )}
-      >
-        {AWARD_ICON_REGISTRY.map((group) => (
-          <SettingGroup key={group.title} label={t(group.title)}>
-            <div className="grid grid-cols-2 gap-1.5">
-              {group.items.map((item) => {
-                const icon = resolveAwardIcon(item.key) ?? defaultAwardIcon(item.key);
-                const isCustom = item.key in custom;
-                return (
-                  <div
-                    key={item.key}
-                    className="flex items-center gap-2.5 rounded-md bg-elevated px-3 py-2.5"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => void pickAndUpload(item.key)}
-                      title={t("Upload")}
-                      aria-label={t("Upload")}
-                      className="group relative shrink-0 rounded-md outline-none"
-                    >
-                      <img
-                        src={icon}
-                        alt=""
-                        className="h-8 w-8 rounded-md object-contain transition-opacity group-hover:opacity-25"
-                        draggable={false}
-                      />
-                      <span className="absolute inset-0 grid place-items-center text-ink opacity-0 transition-opacity group-hover:opacity-100">
-                        <Upload size={14} strokeWidth={2.2} />
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">
+                          {t(item.label)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => copyFilename(item.key)}
+                          title={t("Copy filename")}
+                          className={`-mx-1 flex min-h-11 min-w-0 items-center gap-2 rounded-[8px] px-1 text-start font-mono text-[15.5px] leading-[22px] text-ink-subtle transition-colors hover:text-ink ${FOCUS_RING}`}
+                        >
+                          <span className="min-w-0 break-all">
+                            {copied === item.key ? t("copied!") : `${item.key}.png`}
+                          </span>
+                          {copied === item.key ? (
+                            <Check size={16} className="shrink-0 text-accent" />
+                          ) : (
+                            <Copy size={16} className="shrink-0" />
+                          )}
+                        </button>
                       </span>
+
+                      <button
+                        type="button"
+                        onClick={() => void pickAndUpload(item.key)}
+                        title={t("Upload")}
+                        aria-label={t("Upload")}
+                        className={ICON_BTN}
+                      >
+                        <Upload size={18} />
+                      </button>
+
                       {isCustom && (
-                        <span className="absolute -end-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent" />
+                        <button
+                          type="button"
+                          onClick={() => clearCustomIcon(item.key)}
+                          title={t("Reset")}
+                          aria-label={t("Reset")}
+                          className={ICON_BTN_DANGER}
+                        >
+                          <RotateCcw size={18} />
+                        </button>
                       )}
-                    </button>
-                    <div className="flex min-w-0 flex-1 flex-col">
-                      <span className="truncate text-[12.5px] leading-tight text-ink">
-                        {t(item.label)}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => copyFilename(item.key)}
-                        title={t("Copy filename")}
-                        className="truncate text-start font-mono text-[10.5px] text-ink-subtle transition-colors hover:text-ink"
-                      >
-                        {copied === item.key ? t("copied!") : `${item.key}.png`}
-                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => void pickAndUpload(item.key)}
-                      aria-label={t("Upload")}
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-                    >
-                      <Upload size={13.5} />
-                    </button>
-                    {isCustom && (
-                      <button
-                        type="button"
-                        onClick={() => clearCustomIcon(item.key)}
-                        aria-label={t("Reset")}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-                      >
-                        <RotateCcw size={14} />
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </SettingGroup>
-        ))}
+                  );
+                })}
+              </div>
+            </SettingGroup>
+          ))}
+        </Section>
       </Section>
 
       <SettingsModal
@@ -330,49 +344,48 @@ export function AwardIconsPanel() {
         title={t("Install a pack")}
         sub={t("Packs stay hosted by their maker. Harbor keeps the link, not the artwork.")}
       >
-        <div className="flex flex-col gap-2.5 rounded-md bg-elevated p-4">
-          <span className="text-[12.5px] font-semibold text-ink">{t("From a link")}</span>
-          <div className="flex gap-2">
-            <input
-              ref={packUrlRef}
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && install()}
-              placeholder="https://example.com/my-award-pack.json"
-              className="h-11 min-w-0 flex-1 rounded-md bg-canvas px-3.5 text-[13.5px] text-ink outline-none placeholder:text-ink-subtle"
-            />
-            <button
-              type="button"
-              onClick={install}
-              disabled={busy || !url.trim()}
-              className="h-11 shrink-0 rounded-md bg-ink px-5 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
-            >
+        <section className="flex flex-col gap-[11px]">
+          <h3 className={MODAL_LABEL}>{t("From a link")}</h3>
+          <input
+            ref={packUrlRef}
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && install()}
+            placeholder="https://example.com/my-award-pack.json"
+            className={FIELD}
+          />
+          <div className="flex flex-wrap items-center gap-2.5">
+            <SButton variant="primary" onClick={install} disabled={busy || !url.trim()}>
               {busy ? t("Installing...") : t("Install")}
-            </button>
+            </SButton>
           </div>
-        </div>
+        </section>
 
-        <div className="flex flex-col gap-2.5 rounded-md bg-elevated p-4">
-          <span className="text-[12.5px] font-semibold text-ink">{t("From your own files")}</span>
-          <div className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={uploadMultiple} disabled={busy} className={GHOST_BTN}>
-              <Upload size={14} />
+        <section className="flex flex-col gap-[11px]">
+          <h3 className={MODAL_LABEL}>{t("From your own files")}</h3>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <SButton onClick={uploadMultiple} disabled={busy}>
+              <Upload size={18} />
               {t("Upload multiple images")}
-            </button>
-            <button type="button" onClick={importZip} disabled={busy} className={GHOST_BTN}>
-              <Upload size={14} />
+            </SButton>
+            <SButton onClick={importZip} disabled={busy}>
+              <Upload size={18} />
               {t("Import a .zip pack")}
-            </button>
+            </SButton>
           </div>
-          <span className="text-[12.5px] leading-relaxed text-ink-subtle">
+          <p className={`max-w-[66ch] ${ROW_DESC}`}>
             {t(
               "Name each file after its award ID. Harbor resizes them and skips anything it cannot match.",
             )}
-          </span>
-        </div>
+          </p>
+        </section>
 
-        {importMessage && <p className="px-1 text-[12.5px] text-ink-muted">{importMessage}</p>}
-        {errorMessage && <p className="px-1 text-[12.5px] text-danger">{errorMessage}</p>}
+        {importMessage && <p className={`max-w-[66ch] ${ROW_DESC}`}>{importMessage}</p>}
+        {errorMessage && (
+          <p className="max-w-[66ch] text-[15.5px] font-normal leading-[22px] text-danger">
+            {errorMessage}
+          </p>
+        )}
       </SettingsModal>
 
       <SettingsModal
@@ -380,8 +393,7 @@ export function AwardIconsPanel() {
         onClose={() => setShowHelp(false)}
         title={t("How to make an award pack")}
       >
-        <div className="flex flex-col gap-3 text-[13.5px] leading-relaxed text-ink-muted">
-          <pre className="overflow-x-auto rounded-md bg-canvas p-3 text-[12.5px] text-ink">{`{
+        <pre className={CODE_BLOCK}>{`{
   "name": "My Award Pack",
   "author": "you",
   "version": "1.0",
@@ -392,23 +404,23 @@ export function AwardIconsPanel() {
     "best_romance": "https://your-host.com/romance.png"
   }
 }`}</pre>
-          <p>
-            {t(
-              "Each key above is an award ID. Any key you omit falls back to the default trophy (or a lower-priority pack). The full list of IDs is every award shown in the grid above.",
-            )}
-          </p>
-          <p className="font-semibold text-ink">{t("Or just zip up images")}</p>
-          <p>
-            {t(
-              'Name each image file after its award ID and put them in a .zip, then use "Import a .zip pack" above. No JSON, no hosting needed. Harbor matches each file to its award, stores it locally, resizes it, and skips anything it doesn\'t recognize.',
-            )}
-          </p>
-          <pre className="overflow-x-auto rounded-md bg-canvas p-3 text-[12.5px] text-ink">{`my-pack.zip
+        <p className={`max-w-[70ch] ${ROW_DESC}`}>
+          {t(
+            "Each key above is an award ID. Any key you omit falls back to the default trophy (or a lower-priority pack). The full list of IDs is every award shown in the grid above.",
+          )}
+        </p>
+
+        <h3 className={MODAL_LABEL}>{t("Or just zip up images")}</h3>
+        <p className={`max-w-[70ch] ${ROW_DESC}`}>
+          {t(
+            'Name each image file after its award ID and put them in a .zip, then use "Import a .zip pack" above. No JSON, no hosting needed. Harbor matches each file to its award, stores it locally, resizes it, and skips anything it doesn\'t recognize.',
+          )}
+        </p>
+        <pre className={CODE_BLOCK}>{`my-pack.zip
 ├─ oscar.png
 ├─ emmy.png
 ├─ crunchyroll.png
 └─ best_romance.png`}</pre>
-        </div>
       </SettingsModal>
     </>
   );

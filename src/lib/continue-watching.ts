@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
 import { listLocalCw, subscribeLocalCw } from "@/lib/local-cw";
+import { setExternalCwSources } from "@/lib/feed/external-cw";
+import { useExternalCw } from "@/lib/feed/external-cw";
 import {
   ANIME_CLOUD_ID,
   cwSortKey,
@@ -96,6 +98,11 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const cwPerProfile = settings.cwPerProfile;
+  const cwSources = settings.cwSources;
+  useEffect(() => {
+    setExternalCwSources({ trakt: cwSources.trakt, simkl: cwSources.simkl });
+  }, [cwSources.trakt, cwSources.simkl]);
+  const externalCw = useExternalCw(!cwPerProfile && (cwSources.trakt || cwSources.simkl));
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [localVersion, setLocalVersion] = useState(0);
 
@@ -150,8 +157,13 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
 
   return useMemo(() => {
     void localVersion;
-    const base = cwPerProfile ? [] : items.filter((i) => !ANIME_CLOUD_ID.test(i._id));
-    const merged = [...base, ...listLocalCw().map(localToLibraryItem)]
+    const base = cwPerProfile
+      ? []
+      : [
+          ...(cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
+          ...externalCw,
+        ];
+    const merged = [...base, ...(cwSources.local ? listLocalCw().map(localToLibraryItem) : [])]
       .filter((i) => (i.type as string) !== "other" && !i._id.startsWith("iptv:") && isCwMember(i))
       .map((i) => ({ i, k: cwSortKey(i) }))
       .sort((a, b) => b.k - a.k)
@@ -165,5 +177,5 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       if (out.length >= limit) break;
     }
     return out;
-  }, [items, localVersion, excludeId, limit, cwPerProfile]);
+  }, [items, externalCw, localVersion, excludeId, limit, cwPerProfile, cwSources]);
 }

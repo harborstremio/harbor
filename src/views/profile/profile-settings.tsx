@@ -872,6 +872,39 @@ export function ProfileSettings({
                         />
                       </button>
                     </div>
+
+                    <div className="flex items-center justify-between gap-3 rounded-xl bg-elevated px-4 py-3.5 ring-1 ring-edge-soft">
+                      <div className="min-w-0">
+                        <div className="text-[13.5px] font-medium text-ink">
+                          {t("Show your Letterboxd card")}
+                        </div>
+                        <div className="mt-0.5 text-[12.5px] leading-relaxed text-ink-subtle">
+                          {t(
+                            "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.",
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={settings.showLetterboxdCard}
+                        aria-label={t("Show your Letterboxd card")}
+                        onClick={() => {
+                          const next = !settings.showLetterboxdCard;
+                          updateSettings({ showLetterboxdCard: next });
+                          if (!next)
+                            void socialPatch("/social/me/profile", { letterboxd: null }).catch(
+                              () => {},
+                            );
+                        }}
+                        style={{ minHeight: 0 }}
+                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors ${settings.showLetterboxdCard ? "bg-accent" : "bg-edge"}`}
+                      >
+                        <span
+                          className={`block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${settings.showLetterboxdCard ? "translate-x-5" : "translate-x-0"}`}
+                        />
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

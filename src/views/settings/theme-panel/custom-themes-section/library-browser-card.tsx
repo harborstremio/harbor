@@ -3,6 +3,7 @@ import { Check, Copy, Download, ImagePlus, Loader2, Trash2 } from "lucide-react"
 import { setCustomThemePreview } from "@/lib/custom-themes";
 import type { ThemePreset } from "@/lib/theme";
 import { useT } from "@/lib/i18n";
+import { ROW_TITLE } from "../../shared";
 import { Fit } from "./community-store/market/fit";
 import { tokensFromPreset } from "./community-store/market/fit-palette";
 import { PaletteSeam } from "./community-store/market/palette-seam";
@@ -53,8 +54,8 @@ export function BrowserCard({
       <div className="relative aspect-[16/10] overflow-hidden bg-elevated">
         <Fit kind="theme" tokens={tokensFromPreset(theme)} cover={cover} />
         {active && (
-          <span className="absolute end-2.5 top-2.5 z-10 flex h-7 items-center gap-1.5 rounded-[8px] bg-accent px-2.5 text-[10.5px] font-bold uppercase tracking-[0.16em] text-canvas">
-            <Check size={12} strokeWidth={3} /> {t("Active")}
+          <span className="absolute end-2.5 top-2.5 z-10 inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-[6px] bg-accent px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-canvas">
+            <Check size={14} strokeWidth={3} /> {t("Active")}
           </span>
         )}
         {removable && !hasImage && (
@@ -62,7 +63,7 @@ export function BrowserCard({
             type="button"
             onClick={addImage}
             disabled={busy}
-            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1.5 bg-canvas/70 text-[12.5px] font-semibold text-ink-muted opacity-0 transition-opacity hover:text-ink group-hover/card:opacity-100"
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1.5 bg-canvas/70 text-[15.5px] font-semibold text-ink-muted opacity-0 transition-opacity hover:text-ink group-hover/card:opacity-100 [[data-input-modality=keys]_&]:opacity-100"
           >
             {busy ? (
               <Loader2 size={18} className="animate-spin" />
@@ -78,11 +79,9 @@ export function BrowserCard({
       </div>
       <div className="flex flex-col gap-3 p-4">
         <div className="flex min-w-0 flex-col gap-1">
-          <span className="truncate text-[14.5px] font-semibold tracking-tight text-ink">
-            {theme.name}
-          </span>
+          <span className={`truncate ${ROW_TITLE}`}>{theme.name}</span>
           {localizedBlurb && (
-            <span className="line-clamp-2 text-[12.5px] leading-relaxed text-ink-muted">
+            <span className="line-clamp-2 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
               {localizedBlurb}
             </span>
           )}
@@ -92,21 +91,21 @@ export function BrowserCard({
             type="button"
             onClick={onActivate}
             disabled={active}
-            className={`h-10 flex-1 rounded-md text-[13px] font-semibold transition-opacity ${
+            className={`h-11 flex-1 rounded-md text-[15.5px] font-semibold transition-opacity ${
               active ? "bg-elevated text-ink" : "bg-ink text-canvas hover:opacity-90"
             }`}
           >
             {active ? t("Active") : t("Apply")}
           </button>
           <IconButton label="Copy theme" onClick={onExport}>
-            <Copy size={14} strokeWidth={2.2} />
+            <Copy size={18} strokeWidth={2.2} />
           </IconButton>
           <IconButton label="Download" onClick={onDownload}>
-            <Download size={14} strokeWidth={2.2} />
+            <Download size={18} strokeWidth={2.2} />
           </IconButton>
           {removable && (
             <IconButton label="Remove" onClick={onRemove} danger>
-              <Trash2 size={14} strokeWidth={2.2} />
+              <Trash2 size={18} strokeWidth={2.2} />
             </IconButton>
           )}
         </div>
@@ -133,7 +132,7 @@ function IconButton({
       aria-label={t(label)}
       title={t(label)}
       onClick={onClick}
-      className={`flex h-10 w-10 items-center justify-center rounded-md bg-canvas text-ink-muted transition-colors ${
+      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-canvas text-ink-muted transition-colors ${
         danger ? "hover:text-danger hover:ring-danger" : "hover:text-ink hover:ring-edge"
       }`}
     >

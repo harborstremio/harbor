@@ -589,6 +589,12 @@ const catalog12: Record<string, string> = {
   "{count} slot reskinned": "슬롯 {count}개 디자인 변경됨",
   "{count} slots reskinned": "슬롯 {count}개 디자인 변경됨",
   "{count} sources": "소스 {count}개",
+  "{count} titles will never show the content advisory again.":
+    "작품 {count}개에 콘텐츠 주의 사항이 다시 표시되지 않습니다.",
+  "{count} titles will never show the content advisory again.#few":
+    "작품 {count}개에 콘텐츠 주의 사항이 다시 표시되지 않습니다.#few",
+  "{count} titles will never show the content advisory again.#one":
+    "작품 {count}개에 콘텐츠 주의 사항이 다시 표시되지 않습니다.#one",
   "{count} tracker request blocked this session. Harbor itself sends zero telemetry.":
     "이번 세션에서 차단된 추적기 요청 {count}개. Harbor 자체는 원격 측정 데이터를 전혀 전송하지 않습니다.",
   "{count} views": "조회수 {count}회",

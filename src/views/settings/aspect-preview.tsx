@@ -35,7 +35,7 @@ export function AspectPreview({ mode }: { mode: string }) {
           />
         </div>
       </div>
-      <p className="text-[11.5px] leading-relaxed text-ink-subtle">{shape.note}</p>
+      <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">{shape.note}</p>
     </div>
   );
 }

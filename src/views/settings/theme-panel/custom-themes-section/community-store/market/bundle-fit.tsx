@@ -32,7 +32,7 @@ export function BundleFitBody({
   const max = size === "hero" ? 10 : 8;
   const shown = icons.slice(0, max);
   const overflow = icons.length - shown.length;
-  const tile = size === "hero" ? "h-14 w-14" : "h-10 w-10";
+  const tile = size === "hero" ? "h-14 w-14" : "h-11 w-11";
   return (
     <div className="relative h-full w-full overflow-hidden bg-elevated">
       {cover && (
@@ -51,7 +51,7 @@ export function BundleFitBody({
           ))}
           {overflow > 0 && (
             <span
-              className={`grid shrink-0 place-items-center rounded-[8px] bg-surface text-[12.5px] font-semibold tabular-nums text-ink-muted ring-1 ring-edge-soft ${tile}`}
+              className={`grid shrink-0 place-items-center rounded-[8px] bg-surface text-[15.5px] font-semibold leading-[22px] tabular-nums text-ink-muted ring-1 ring-edge-soft ${tile}`}
             >
               +{overflow}
             </span>

@@ -1,13 +1,14 @@
 import { Loader2, RotateCcw } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
-const SHELL =
-  "animate-fade-in mx-auto flex min-h-[86vh] max-w-2xl flex-col items-center justify-center gap-6 px-12 pt-[9vh] text-center";
+const SHELL = "flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24";
+const INNER = "animate-fade-in mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center gap-6 text-center";
 
 export function MangaBootstrap() {
   const t = useT();
   return (
     <main className={SHELL}>
+      <div className={INNER}>
       <Loader2
         size={28}
         strokeWidth={1.9}
@@ -18,6 +19,7 @@ export function MangaBootstrap() {
         <p className="max-w-sm text-balance text-[13.5px] leading-relaxed text-ink-muted">
           {t("This only takes a moment the first time.")}
         </p>
+      </div>
       </div>
     </main>
   );
@@ -33,6 +35,7 @@ export function MangaBootstrapError({
   const t = useT();
   return (
     <main className={SHELL}>
+      <div className={INNER}>
       <img
         src="/manga-paper-boat.png"
         alt=""
@@ -65,6 +68,7 @@ export function MangaBootstrapError({
         >
           {t("Manage Servers")}
         </button>
+      </div>
       </div>
     </main>
   );

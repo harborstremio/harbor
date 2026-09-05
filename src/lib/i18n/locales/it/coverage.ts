@@ -1,4 +1,7 @@
-const coverage: Record<string, string> = {
+const coverage: Record<string, string> = {
+  "Sound descriptions": "Descrizioni sonore",
+  "Hide sound effects and speaker names": "Nascondi effetti sonori e nomi dei personaggi",
+  "Removes bracketed descriptions like [door creaks] and shouted speaker labels like JOHN: while subtitles play, so a release that only ships an SDH track still reads as plain dialogue. Song lyrics, ordinary parentheses and non-Latin scripts are left alone. Skipped on forced and picture-based tracks.": "Rimuove le descrizioni tra parentesi quadre come [la porta cigola] e i nomi dei personaggi in maiuscolo come JOHN: mentre scorrono i sottotitoli, così una versione che include solo una traccia SDH resta leggibile come dialogo normale. Testi delle canzoni, parentesi tonde normali e alfabeti non latini restano intatti. Non si applica alle tracce forzate e a quelle basate su immagini.",
   " (you)": " (tu)",
   '"Compound" interest is calculated on:': "Gli interessi composti si calcolano su:",
   "1 week": "1 settimana",
@@ -1221,6 +1224,71 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "Chiave API NYT Books",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "Scegli se Harbor deve preferire fonti dirette e debrid, torrent peer-to-peer oppure mostrarli entrambi.",
+  Recovery: "Ripristino",
+  "Reload source": "Ricarica la fonte",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "Riapri lo stream che stai guardando e riprendi da dove eri rimasto.",
+  "Restart streaming server": "Riavvia il server di streaming",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "Riavvia il server di streaming di Harbor, poi ricarica lo stream quando torna attivo. Solo desktop.",
+  "Reloading the stream…": "Ricaricamento dello stream…",
+  "Couldn't reload the stream. Try picking another source.":
+    "Impossibile ricaricare lo stream. Prova a scegliere un'altra fonte.",
+  "Harbor's streaming server only runs in the desktop app.":
+    "Il server di streaming di Harbor funziona solo nell'app desktop.",
+  "Restarting the streaming server…": "Riavvio del server di streaming…",
+  "Couldn't restart the streaming server.": "Impossibile riavviare il server di streaming.",
+  "The streaming server didn't come back up.": "Il server di streaming non è tornato attivo.",
+  "Streaming server restarted.": "Server di streaming riavviato.",
+  "Buffer size": "Dimensione del buffer",
+  Small: "Piccolo",
+  Medium: "Medio",
+  Adaptive: "Adattivo",
+  "Reads ahead": "Lettura anticipata",
+  "Memory cap": "Limite di memoria",
+  "Wait before playing": "Attesa prima della riproduzione",
+  "Holds up to {size} in memory while a video plays.":
+    "Tiene in memoria fino a {size} durante la riproduzione di un video.",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "Harbor calcola il margine adatto a ogni titolo e lo aumenta quando la riproduzione si stabilizza. La scelta giusta per quasi tutti.",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "L'avvio più rapido e il minor consumo di memoria. Indicato con una connessione veloce e stabile, oppure su un computer con poca memoria.",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "Un paio di minuti di margine. Supera una breve interruzione senza far attendere troppo prima che la riproduzione inizi.",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "Dieci minuti di margine. Pensato per una rete Wi-Fi instabile o un server lontano, al costo di un'attesa più lunga prima che la riproduzione inizi.",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "Mezz'ora di margine. Conviene solo con una connessione davvero inaffidabile.",
+  "Ignore this title": "Ignora questo titolo",
+  "Never show the content advisory for this title again":
+    "Non mostrare mai più l'avvertenza sui contenuti per questo titolo",
+  "Ignored titles": "Titoli ignorati",
+  "Titles you ignore on the advisory card never show it again.":
+    "I titoli che ignori dalla scheda dell'avvertenza non la mostreranno mai più.",
+  "{count} titles will never show the content advisory again.":
+    "{count} titoli non mostreranno mai più l'avvertenza sui contenuti.",
+  "{count} titles will never show the content advisory again.#one":
+    "{count} titolo non mostrerà mai più l'avvertenza sui contenuti.",
+  "{count} titles will never show the content advisory again.#few":
+    "{count} titoli non mostreranno mai più l'avvertenza sui contenuti.",
+  "Paused on Trakt": "In pausa su Trakt",
+  "On Letterboxd": "Su Letterboxd",
+  "Open Letterboxd profile": "Apri il profilo Letterboxd",
+  "Connect Letterboxd": "Collega Letterboxd",
+  "No Letterboxd lists shared yet": "Ancora nessuna lista Letterboxd condivisa",
+  "Link Letterboxd and the films and lists you keep there show up right here.":
+    "Collega Letterboxd e qui compariranno i film e le liste che tieni lì.",
+  "Show your Letterboxd card": "Mostra la tua scheda Letterboxd",
+  "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
+    "Disattivato per impostazione predefinita. Mostra il nome, le liste e il numero di film di Letterboxd sul tuo profilo a chiunque lo visiti. Gestisci la connessione nelle Impostazioni, alla voce Letterboxd.",
+  "Borderless window": "Finestra senza bordi",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "Lo schermo intero reale occupa tutto lo schermo e nasconde la barra delle applicazioni, ma il passaggio da un'app all'altra può causare sfarfallio. La finestra senza bordi copre la stessa area con una finestra priva di cornice, così alt-tab e gli elementi in sovrimpressione restano immediati. La modalità Ingrandita riempie lo schermo ma mantiene la barra delle applicazioni e la barra del titolo.",
+  "Timing sources": "Fonti dei tempi",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · tempi di sigla iniziale e titoli di coda",
+  "Paste your TheIntroDB API key": "Incolla la tua chiave API TheIntroDB",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "Facoltativo. TheIntroDB risponde anche senza chiave, ma una chiave aumenta il limite di richieste, così i tempi continuano ad arrivare durante le maratone. Ottienine una su",
 };
 
 export default coverage;

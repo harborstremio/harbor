@@ -1,6 +1,8 @@
-import { Check, Download, Loader2, RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { AlertTriangle, Check, Download, Loader2, RefreshCw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { tvFocus } from "@/lib/keyboard-navigation";
+import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 import { anime4kDir, downloadAnime4k } from "@/lib/anime4k";
 import { BeforeAfter } from "../shaders-panel/before-after";
 import {
@@ -10,6 +12,9 @@ import {
   type Anime4kTier,
 } from "@/lib/player/anime4k-modes";
 import { useSettings } from "@/lib/settings";
+import { ROW_ACTION, ROW_ACTION_PRIMARY, ROW_DESC, SettingGroup } from "../kit";
+import { Segmented } from "../shared";
+import { ChoiceBlock } from "./choice";
 
 export function Anime4kShaderList() {
   const { settings, update } = useSettings();
@@ -20,6 +25,9 @@ export function Anime4kShaderList() {
   const [busy, setBusy] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const setupRef = useRef<HTMLButtonElement>(null);
+  const tierRef = useRef<HTMLDivElement>(null);
+  const handOff = useRef(false);
 
   useEffect(() => {
     if (folder) return;
@@ -36,12 +44,23 @@ export function Anime4kShaderList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!folder || !handOff.current) return;
+    handOff.current = false;
+    const el = tierRef.current?.querySelector("button");
+    if (el) tvFocus(el);
+  }, [folder]);
+
   const setup = async (force = false) => {
+    if (busy) return;
     setBusy(true);
     setError(null);
     setJustUpdated(false);
     try {
       const dir = await downloadAnime4k(force);
+      const active = document.activeElement;
+      handOff.current =
+        !folder && active instanceof HTMLElement && active === setupRef.current && navOwnsFocus(active);
       update({ playerAnime4kFolder: dir, playerAnime4kShaders: anime4kChain(dir, mode, tier) });
       if (force) {
         setJustUpdated(true);
@@ -58,22 +77,16 @@ export function Anime4kShaderList() {
 
   const pickMode = (m: Anime4kMode) =>
     update({ playerAnime4kMode: m, playerAnime4kShaders: anime4kChain(folder, m, tier) });
-  const pickTier = (t: Anime4kTier) =>
-    update({ playerAnime4kTier: t, playerAnime4kShaders: anime4kChain(folder, mode, t) });
+  const pickTier = (nextTier: Anime4kTier) =>
+    update({ playerAnime4kTier: nextTier, playerAnime4kShaders: anime4kChain(folder, mode, nextTier) });
 
   return (
-    <div
-      id="set-anime4k-presets"
-      className="scroll-mt-28 flex flex-col gap-3.5 rounded-md bg-canvas px-4 py-4"
-    >
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[13.5px] font-semibold text-ink">{t("Anime4K presets")}</span>
-        <span className="text-[12.5px] leading-snug text-ink-subtle">
-          {t(
-            "GPU shaders that sharpen lines and clean up gradients on anime as it plays. Pick a mode, Harbor handles the shaders.",
-          )}
-        </span>
-      </div>
+    <SettingGroup label={t("Anime4K presets")}>
+      <p className={`max-w-[70ch] ${ROW_DESC}`}>
+        {t(
+          "GPU shaders that sharpen lines and clean up gradients on anime as it plays. Pick a mode, Harbor handles the shaders.",
+        )}
+      </p>
 
       <BeforeAfter
         demo={{
@@ -83,23 +96,26 @@ export function Anime4kShaderList() {
         }}
       />
 
+      {error && (
+        <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+          <AlertTriangle size={18} strokeWidth={2.2} className="mt-[2px] shrink-0 text-danger" />
+          <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-danger">{error}</p>
+        </div>
+      )}
+
       {!folder ? (
-        <div className="flex flex-col gap-3 rounded-md bg-canvas px-4 py-4">
-          <span className="text-[12.5px] leading-snug text-ink-muted">
+        <div className="flex flex-col gap-3">
+          <p className={`max-w-[70ch] ${ROW_DESC}`}>
             {t(
               "One-time setup downloads the shader pack (about 1 MB) into Harbor. No files to hunt down.",
             )}
-          </span>
-          {error && (
-            <span className="rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger ring-1 ring-danger">
-              {error}
-            </span>
-          )}
+          </p>
           <button
+            ref={setupRef}
             type="button"
-            onClick={() => setup(false)}
-            disabled={busy}
-            className="flex h-11 w-fit items-center gap-2 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-colors hover:bg-ink/90 disabled:cursor-wait disabled:opacity-70"
+            onClick={busy ? undefined : () => setup(false)}
+            aria-disabled={busy}
+            className={`${ROW_ACTION_PRIMARY} w-fit${busy ? " pointer-events-none opacity-40" : ""}`}
           >
             {busy ? (
               <Loader2 size={16} className="animate-spin" />
@@ -111,103 +127,60 @@ export function Anime4kShaderList() {
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-1 self-start rounded-full bg-elevated p-1 ring-1 ring-edge-soft/60">
-            <TierBtn active={tier === "hq"} onClick={() => pickTier("hq")} label={t("Quality")} />
-            <TierBtn
-              active={tier === "fast"}
-              onClick={() => pickTier("fast")}
-              label={t("Performance")}
+          <div ref={tierRef}>
+            <Segmented<Anime4kTier>
+              value={tier}
+              options={[
+                { value: "hq", label: t("Quality") },
+                { value: "fast", label: t("Performance") },
+              ]}
+              onChange={pickTier}
             />
           </div>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {ANIME4K_MODES.map((m) => {
-              const selected = mode === m.id;
-              return (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => pickMode(m.id)}
-                  className={`flex items-start gap-3 rounded-md border px-3.5 py-3 text-start transition-colors ${
-                    selected
-                      ? "border-ink bg-elevated"
-                      : "border-edge-soft bg-canvas hover:border-edge hover:bg-canvas"
-                  }`}
-                >
-                  <span
-                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
-                      selected ? "border-ink" : "border-edge"
-                    }`}
-                  >
-                    {selected && <Check size={12} strokeWidth={3} className="text-ink" />}
-                  </span>
-                  <span className="flex min-w-0 flex-col gap-0.5">
-                    <span className="text-[13.5px] font-semibold text-ink">{t(m.label)}</span>
-                    <span className="text-[12.5px] leading-snug text-ink-subtle">{t(m.sub)}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="flex items-center justify-between gap-3 pt-0.5">
-            <span className="flex items-center gap-1.5 text-[12.5px] text-ink-subtle">
-              <Check size={14} className="text-success" strokeWidth={2.6} />
+
+          {ANIME4K_MODES.map((m) => (
+            <ChoiceBlock
+              key={m.id}
+              selected={mode === m.id}
+              onClick={() => pickMode(m.id)}
+              label={t(m.label)}
+              sub={t(m.sub)}
+            />
+          ))}
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="flex items-center gap-2 text-[15.5px] leading-[22px] text-ink-muted">
+              <Check size={17} className="text-success" strokeWidth={2.6} />
               {t("Shaders installed")}
             </span>
             <button
               type="button"
-              onClick={() => setup(true)}
-              disabled={busy}
-              className={`flex items-center gap-1.5 text-[11.5px] font-semibold uppercase tracking-[0.14em] transition-colors disabled:opacity-70 ${
-                justUpdated ? "text-success" : "text-ink-subtle hover:text-ink"
+              onClick={busy ? undefined : () => setup(true)}
+              aria-disabled={busy}
+              className={`${ROW_ACTION} ${justUpdated ? "text-success" : ""}${
+                busy ? " pointer-events-none opacity-45" : ""
               }`}
             >
               {busy ? (
                 <>
-                  <Loader2 size={12} className="animate-spin" strokeWidth={2.6} />
+                  <Loader2 size={16} className="animate-spin" strokeWidth={2.6} />
                   {t("Updating…")}
                 </>
               ) : justUpdated ? (
                 <>
-                  <Check size={12} strokeWidth={3} />
+                  <Check size={16} strokeWidth={3} />
                   {t("Updated")}
                 </>
               ) : (
                 <>
-                  <RefreshCw size={12} strokeWidth={2.4} />
+                  <RefreshCw size={16} strokeWidth={2.4} />
                   {t("Re-download")}
                 </>
               )}
             </button>
           </div>
-          {error && (
-            <span className="rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger ring-1 ring-danger">
-              {error}
-            </span>
-          )}
         </>
       )}
-    </div>
-  );
-}
-
-function TierBtn({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-full px-4 py-2 text-[13px] font-semibold transition-colors ${
-        active ? "bg-ink text-canvas" : "text-ink-muted hover:text-ink"
-      }`}
-    >
-      {label}
-    </button>
+    </SettingGroup>
   );
 }

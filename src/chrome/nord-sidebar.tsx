@@ -13,7 +13,7 @@ import { useView, type View } from "@/lib/view";
 
 const FROST = "#88c0d0";
 const RAIL = "linear-gradient(180deg, #8fbcbb59, #88c0d033 44%, #b48ead2b 78%, #81a1c14d)";
-const PRIMARY_IDS = new Set(["home", "discover", "movies", "shows", "kids", "anime", "live", "vod"]);
+const PRIMARY_IDS = new Set(["home", "discover", "movies", "shows", "kids", "anime", "live", "sports", "vod"]);
 
 export function NordSidebar() {
   const { view, setView, chromeHidden } = useView();

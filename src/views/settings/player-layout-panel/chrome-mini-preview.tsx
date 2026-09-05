@@ -41,7 +41,7 @@ export function ChromeMiniPreview({ theme, config }: { theme: ThemeId; config: P
     );
 
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div data-tv-skip="" className="pointer-events-none absolute inset-0 overflow-hidden">
       {bg && (
         <img
           src={bg}

@@ -54,8 +54,10 @@ export function CustomChromeBuilder({
   return (
     <div className="flex flex-col gap-4 pb-6">
       <div className="flex flex-col gap-0.5">
-        <span className="text-[15px] font-semibold text-ink">{t("Your navigation")}</span>
-        <span className="text-[13px] leading-snug text-ink-subtle">
+        <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">
+          {t("Your navigation")}
+        </span>
+        <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
           {dirty
             ? t("You're editing the chrome by hand, so the visual builder stays out of your way.")
             : t("Pick a position, name it, then choose your menu items.")}
@@ -87,7 +89,7 @@ export function CustomChromeBuilder({
               value={config.brand}
               onChange={(e) => onChange({ ...config, brand: e.target.value })}
               placeholder="Harbor"
-              className="h-12 rounded-md bg-canvas px-3.5 text-[15px] text-ink placeholder:text-ink-subtle transition-colors /70 focus:bg-canvas focus:outline-none"
+              className="h-12 rounded-md bg-canvas px-3.5 text-[16.5px] text-ink transition-colors placeholder:text-ink-subtle/70 focus:bg-canvas focus:outline-none"
             />
           </Field>
 
@@ -108,7 +110,7 @@ export function CustomChromeBuilder({
                 />
               ))}
               {enabled.length === 0 && (
-                <p className="px-1 text-[12.5px] text-ink-subtle">
+                <p className="px-1 text-[15.5px] leading-[22px] text-ink-subtle">
                   {t("Add at least one item below.")}
                 </p>
               )}
@@ -120,9 +122,9 @@ export function CustomChromeBuilder({
                     key={id}
                     type="button"
                     onClick={() => onChange({ ...config, items: [...enabled, id] })}
-                    className="flex h-10 items-center gap-1 rounded-md bg-canvas px-3 text-[13.5px] font-medium text-ink-muted transition-colors hover:bg-surface hover:text-ink"
+                    className="flex h-11 items-center gap-1.5 rounded-md bg-canvas px-3 text-[15.5px] font-medium text-ink-muted transition-colors hover:bg-surface hover:text-ink"
                   >
-                    <Plus size={12} strokeWidth={2.4} />
+                    <Plus size={16} strokeWidth={2.4} />
                     {t(NAV_LABELS[id])}
                   </button>
                 ))}
@@ -135,7 +137,7 @@ export function CustomChromeBuilder({
       <button
         type="button"
         onClick={onOpenCode}
-        className="flex h-12 items-center justify-center gap-2 rounded-md text-[15px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+        className="flex h-12 items-center justify-center gap-2 rounded-md text-[15.5px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
       >
         <Code2 size={16} strokeWidth={2.2} />
         {t("Edit the HTML and CSS by hand")}
@@ -145,9 +147,9 @@ export function CustomChromeBuilder({
         <button
           type="button"
           onClick={onRegenerate}
-          className="flex h-8 items-center justify-center gap-1.5 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink-muted"
+          className="flex h-11 items-center justify-center gap-1.5 rounded-md text-[15.5px] font-medium text-ink-subtle transition-colors hover:text-ink-muted"
         >
-          <RotateCcw size={12} strokeWidth={2.2} />
+          <RotateCcw size={16} strokeWidth={2.2} />
           {t("Rebuild from the visual builder")}
         </button>
       )}
@@ -189,7 +191,7 @@ function MenuItemRow({
           type="button"
           onClick={() => setPicking((v) => !v)}
           aria-label={t("Choose icon")}
-          className={`flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border transition-colors ${
+          className={`flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-md border transition-colors ${
             picking
               ? "border-accent text-ink"
               : hasIcon
@@ -209,16 +211,16 @@ function MenuItemRow({
           value={label}
           onChange={(e) => onRename(e.target.value)}
           aria-label={t("Rename item")}
-          className="min-w-0 flex-1 rounded-md bg-transparent px-1.5 py-1 text-[15px] font-medium text-ink outline-none transition-colors hover:bg-canvas focus:bg-canvas"
+          className="h-11 min-w-0 flex-1 rounded-md bg-transparent px-1.5 text-[16.5px] font-medium text-ink outline-none transition-colors hover:bg-canvas focus:bg-canvas"
         />
         <IconBtn label={t("Move up")} disabled={isFirst} onClick={onMoveUp}>
-          <ChevronUp size={14} strokeWidth={2.4} />
+          <ChevronUp size={17} strokeWidth={2.4} />
         </IconBtn>
         <IconBtn label={t("Move down")} disabled={isLast} onClick={onMoveDown}>
-          <ChevronDown size={14} strokeWidth={2.4} />
+          <ChevronDown size={17} strokeWidth={2.4} />
         </IconBtn>
         <IconBtn label={t("Remove")} onClick={onRemove}>
-          <X size={14} strokeWidth={2.4} />
+          <X size={17} strokeWidth={2.4} />
         </IconBtn>
       </div>
       {picking && (
@@ -237,9 +239,7 @@ function MenuItemRow({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        {label}
-      </span>
+      <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">{label}</span>
       {children}
     </div>
   );
@@ -260,7 +260,7 @@ function PosButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-16 flex-col items-center justify-center gap-1.5 rounded-md border text-[13px] font-semibold transition ${
+      className={`flex h-[72px] flex-col items-center justify-center gap-1.5 rounded-md border text-[15.5px] font-semibold transition ${
         active
           ? "border-accent bg-canvas text-ink"
           : "border-edge-soft bg-canvas text-ink-muted hover:border-edge hover:text-ink"
@@ -289,7 +289,7 @@ function IconBtn({
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      className="flex h-9 w-9 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-raised hover:text-ink disabled:opacity-25 disabled:hover:bg-transparent"
+      className="flex h-11 w-9 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-raised hover:text-ink disabled:opacity-25 disabled:hover:bg-transparent"
     >
       {children}
     </button>

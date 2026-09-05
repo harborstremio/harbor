@@ -136,6 +136,7 @@ const misc: Record<string, string> = {
   "Watched on Trakt": "Просмотрено на Trakt",
   "New episode released since you last watched": "С последнего просмотра вышла новая серия",
   "Paused on Simkl": "Приостановлено на Simkl",
+  "Paused on Trakt": "Приостановлено на Trakt",
   "Remove from Continue Watching": "Убрать из «Продолжить просмотр»",
   "Rotten Tomatoes audience score": "Оценка зрителей Rotten Tomatoes",
   "Next:": "Далее:",

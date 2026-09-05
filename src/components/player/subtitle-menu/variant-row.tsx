@@ -1,4 +1,4 @@
-import { Check, Crosshair, Info, Languages, Sparkles } from "lucide-react";
+import { Check, Info, Languages } from "lucide-react";
 import type { TrackInfo } from "@/lib/player/bridge";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { useContextMenu, type ContextMenuTarget } from "@/lib/context-menu";
@@ -68,12 +68,6 @@ export function VariantRow({
   const provider = track.provider?.trim();
   const detailSource = provider && provider !== titleText ? provider : sourceLabel;
   const langName = subtitleTrackLanguageLabel(track);
-  const isSynced = track.external === true && /^Synced \((?:SRT|VTT)\)/i.test(track.title ?? "");
-  const isBestMatch =
-    track.external === true &&
-    (track.matchConfidence === "exact" ||
-      track.matchConfidence === "high" ||
-      (track.matchConfidence == null && (track.matchScore ?? 0) >= 120));
   const releaseTags = parseRelease(`${realRelease ?? ""} ${track.title ?? ""}`);
   const quality = [
     releaseTags.resolution,
@@ -117,14 +111,8 @@ export function VariantRow({
   return (
     <div
       data-subtitle-row
-      className={`group/row flex items-stretch rounded-lg transition-colors ${
-        selected
-          ? "bg-elevated ring-1 ring-edge"
-          : isSecondary
-            ? "bg-accent/[0.06] ring-1 ring-accent/25"
-            : isImported
-              ? "bg-accent/[0.07] ring-1 ring-accent/30 hover:bg-accent/10"
-              : "hover:bg-canvas/55"
+      className={`group/row flex items-stretch rounded-md transition-colors ${
+        selected || isSecondary ? "bg-raised ring-1 ring-edge" : "hover:bg-raised/60"
       }`}
     >
       <button
@@ -146,18 +134,6 @@ export function VariantRow({
               text={titleText}
               title={realRelease && releaseLabel ? realRelease : undefined}
             />
-            {isImported && (
-              <span className="flex shrink-0 items-center gap-1 rounded-full bg-accent/15 px-1.5 py-px text-[9px] font-bold uppercase tracking-[0.12em] text-accent ring-1 ring-accent/30">
-                <Sparkles size={9} strokeWidth={2.6} />
-                {tr("Yours")}
-              </span>
-            )}
-            {!isImported && (isSynced || isBestMatch) && (
-              <span className="flex shrink-0 items-center gap-1 rounded-full bg-accent/15 px-1.5 py-px text-[9px] font-bold uppercase tracking-[0.12em] text-accent ring-1 ring-accent/30">
-                <Crosshair size={9} strokeWidth={2.6} />
-                {isSynced ? tr("Synced") : tr("Best match")}
-              </span>
-            )}
           </div>
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10.5px] text-ink-subtle">
             <span className="font-semibold uppercase tracking-[0.1em]">{langName}</span>
@@ -199,7 +175,7 @@ export function VariantRow({
             aria-pressed={isSecondary}
             className={`my-1 me-1 flex shrink-0 items-center gap-1 rounded-md px-2 text-[10px] font-bold uppercase tracking-[0.1em] transition-opacity ${
               isSecondary
-                ? "bg-accent/15 text-accent ring-1 ring-accent/30"
+                ? "bg-elevated text-ink ring-1 ring-edge"
                 : "text-ink-subtle opacity-0 hover:text-ink focus-visible:opacity-100 group-hover/row:opacity-100"
             }`}
           >

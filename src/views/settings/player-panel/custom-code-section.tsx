@@ -1,7 +1,9 @@
 import { AlertTriangle, ChevronDown, Eraser } from "lucide-react";
 import { useState } from "react";
 import { useSettings, type Settings } from "@/lib/settings";
-import { settingsAnchor } from "../shared";
+import { Section } from "../shared";
+import { ROW_ACTION, ROW_DESC } from "../kit";
+import { SRow } from "../ui";
 import { SubField } from "./internals";
 import { useT } from "@/lib/i18n";
 
@@ -18,7 +20,7 @@ const FIELDS: Array<{
     id: "customCss",
     label: "Custom CSS",
     placeholder:
-      "/* override anything */\n.harbor-seek-fill { box-shadow: 0 0 12px #ffca3a; }",
+      "/* override anything */\n.harbor-seek-fill { box-shadow: 0 0 12px var(--color-accent); }",
     hint: "Live-injected into the document. Use it to retheme buttons, change spacing, recolor anything.",
     rows: 7,
   },
@@ -33,7 +35,7 @@ const FIELDS: Array<{
   {
     id: "customHtml",
     label: "Custom HTML overlay",
-    placeholder: '<div style="position:fixed;bottom:12px;right:12px">hello</div>',
+    placeholder: '<div style="position:fixed;bottom:12px;inset-inline-end:12px">hello</div>',
     hint: "Injected into a fixed-position layer above the app (pointer-events disabled by default). Wrap in a div with pointer-events:auto to make it interactive.",
     rows: 5,
   },
@@ -43,32 +45,28 @@ export function CustomCodeCard() {
   const t = useT();
   const [open, setOpen] = useState(false);
   return (
-    <section
-      id={settingsAnchor("Custom code")}
- className="scroll-mt-28 flex flex-col gap-4 rounded-md bg-elevated p-7"
+    <Section
+      title={t("Custom code")}
+      subtitle={t(
+        "Power-user knob. Inject your own CSS, JS, and HTML into Harbor. Lives in your local settings; nothing leaves your machine.",
+      )}
     >
-      <button
-        type="button"
+      <SRow
+        title={open ? t("Hide the code editors") : t("Show the code editors")}
+        description={t(
+          "Opens three editors for CSS, JavaScript, and an HTML overlay. Changes apply as you type.",
+        )}
         onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="flex items-start justify-between gap-3 text-start"
-      >
-        <div className="flex flex-col gap-1">
-          <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Custom code")}</h2>
-          <span className="text-[13.5px] leading-relaxed text-ink-muted">
-            {t("Power-user knob. Inject your own CSS, JS, and HTML into Harbor. Lives in your local settings; nothing leaves your machine.")}
-          </span>
-        </div>
- <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-elevated hover:text-ink">
+        trailing={
           <ChevronDown
-            size={14}
+            size={18}
             strokeWidth={2}
-            className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+            className={`text-ink-subtle transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           />
-        </span>
-      </button>
+        }
+      />
       {open && <CustomCodePanel />}
-    </section>
+    </Section>
   );
 }
 
@@ -77,12 +75,12 @@ export function CustomCodePanel() {
   const { settings, update } = useSettings();
 
   return (
-    <div className="flex flex-col gap-7">
-      <div className="flex items-start gap-2.5 rounded-md border border-danger bg-danger/15 px-3.5 py-3 text-[12.5px] leading-snug text-ink">
-        <AlertTriangle size={14} strokeWidth={2.2} className="mt-0.5 shrink-0 text-danger" />
-        <span>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+        <AlertTriangle size={18} strokeWidth={2.2} className="mt-[2px] shrink-0 text-danger" />
+        <p className={`max-w-[66ch] ${ROW_DESC}`}>
           {t("You're modding your own client. Custom JS has full access to your Harbor session. Only paste code you wrote or fully trust.")}
-        </span>
+        </p>
       </div>
 
       {FIELDS.map((f) => (
@@ -97,20 +95,21 @@ export function CustomCodePanel() {
             placeholder={f.placeholder}
             rows={f.rows}
             spellCheck={false}
-            className="w-full resize-y rounded-md bg-canvas px-3 py-2.5 font-mono text-[12.5px] leading-relaxed text-ink placeholder:text-ink-subtle/70 focus: focus:outline-none transition-colors focus:bg-elevated"
+            className="w-full resize-y rounded-[10px] border border-edge-soft bg-elevated px-4 py-3 font-mono text-[15.5px] leading-[22px] text-ink outline-none transition-colors placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           />
-          <div className="flex items-center justify-between">
-            <span className="text-[11.5px] leading-snug text-ink-subtle">{t(f.hint)}</span>
-            {settings[f.id] && (
-              <button
-                type="button"
-                onClick={() => update({ [f.id]: "" } as Partial<Settings>)}
-                className="flex h-7 items-center gap-1 rounded-full bg-raised px-2.5 text-[11.5px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
-              >
-                <Eraser size={12} strokeWidth={2.4} />
-                {t("Clear")}
-              </button>
-            )}
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            <span className={`max-w-[70ch] ${ROW_DESC}`}>{t(f.hint)}</span>
+            <button
+              type="button"
+              onClick={
+                settings[f.id] ? () => update({ [f.id]: "" } as Partial<Settings>) : undefined
+              }
+              aria-disabled={!settings[f.id]}
+              className={`${ROW_ACTION}${settings[f.id] ? "" : " pointer-events-none opacity-45"}`}
+            >
+              <Eraser size={16} strokeWidth={2.4} />
+              {t("Clear")}
+            </button>
           </div>
         </SubField>
       ))}

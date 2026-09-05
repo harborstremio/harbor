@@ -139,6 +139,8 @@ export type MpvOptions = {
   anime4kShaders?: string[];
   d3d11Flip?: boolean;
   macEdr?: boolean;
+  renderer?: "gpu-next" | "gpu";
+  forceYuv420p?: boolean;
   extraOptions?: string;
   fullDownload?: boolean;
   getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
@@ -154,6 +156,8 @@ function mpvReuseConfigKey(options: MpvOptions | undefined, hdrToSdr: boolean): 
     anime4kShaders: options?.anime4kShaders ?? [],
     d3d11Flip: options?.d3d11Flip === true,
     macEdr: options?.macEdr === true,
+    renderer: options?.renderer ?? "gpu-next",
+    forceYuv420p: options?.forceYuv420p === true,
     extraOptions: options?.extraOptions ?? "",
     fullDownload: options?.fullDownload === true,
   });
@@ -840,6 +844,8 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             fullDownload: opts.fullDownload === true,
             startupProfile: nextStartupProfile,
             headers: src.headers ?? null,
+            renderer: opts.renderer ?? "gpu-next",
+            forceYuv420p: opts.forceYuv420p === true,
             extraOptions: opts.extraOptions || undefined,
           },
         });
@@ -897,32 +903,31 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     },
     setSubtitleTrack(id) {
       const requestMediaRevision = mediaRevision;
-      const request = mainSubtitleSelection.begin(
+      mainSubtitleSelection.begin(
         requestMediaRevision,
         id ?? "__harbor-subtitles-off__",
         snap.subtitleTracks.find((track) => track.selected)?.id ?? null,
       );
-      snap.subText = "";
-      snap.subStartSec = 0;
+      snap = {
+        ...snap,
+        subText: "",
+        subStartSec: 0,
+        subtitleTracks: snap.subtitleTracks.map((track) => ({
+          ...track,
+          selected: id != null && track.id === id,
+        })),
+      };
       emit();
       void enqueueSubtitleTransition(async () => {
-        if (
-          requestMediaRevision !== mediaRevision ||
-          !mainSubtitleSelection.isCurrent(request, mediaRevision)
-        )
-          return;
+        if (requestMediaRevision !== mediaRevision) return;
         await resetSubtitleFpsBeforeMpvTransition();
-        if (
-          requestMediaRevision !== mediaRevision ||
-          !mainSubtitleSelection.isCurrent(request, mediaRevision)
-        )
-          return;
+        if (requestMediaRevision !== mediaRevision) return;
         await invoke("mpv_set_property", {
           name: "sid",
           value: id == null ? "no" : Number(id) || id,
         });
       }).catch((error) => {
-        if (mainSubtitleSelection.isCurrent(request, mediaRevision)) {
+        if (requestMediaRevision === mediaRevision) {
           console.warn("[mpv] could not select a subtitle after resetting subtitle FPS", error);
           window.dispatchEvent(new Event(SUBTITLE_FPS_TRANSITION_FAILED_EVENT));
         }
@@ -939,17 +944,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       snap.secondarySubText = "";
       emit();
       void enqueueSubtitleTransition(async () => {
-        if (
-          requestMediaRevision !== mediaRevision ||
-          !secondarySubtitleSelection.isCurrent(request, mediaRevision)
-        )
-          return;
+        if (requestMediaRevision !== mediaRevision) return;
         await resetSubtitleFpsBeforeMpvTransition();
-        if (
-          requestMediaRevision !== mediaRevision ||
-          !secondarySubtitleSelection.isCurrent(request, mediaRevision)
-        )
-          return;
+        if (requestMediaRevision !== mediaRevision) return;
         secondarySid = id;
         try {
           await invoke("mpv_set_property", {

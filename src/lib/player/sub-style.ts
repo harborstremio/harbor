@@ -42,6 +42,7 @@ export type SubRenderContext = {
   assNativeActive: boolean;
   imageNativeActive: boolean;
   assScale?: number;
+  sdhFilterAllowed?: boolean;
 };
 
 export async function applySubStyle(
@@ -59,7 +60,10 @@ export async function applySubStyle(
   const isBox = s.subStyle === "box";
   const isShadow = s.subStyle === "shadow";
   const reposition = !context.assNativeActive || override !== "no";
+  const hideSdh = s.subHideSdh === true && context.sdhFilterAllowed !== false;
   const props: Array<[string, unknown]> = [
+    ["sub-filter-sdh", hideSdh],
+    ["sub-filter-sdh-harder", false],
     ["sub-font-size", 32],
     ["sub-font", mpvFontFor(s.subFontFamily, customFontName(s))],
     ["sub-scale", normScale != null ? clamp(normScale, 0.2, 6) : Math.min(4, Math.max(0.4, (Number(s.subFontSize) || 32) / 32))],

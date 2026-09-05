@@ -11,6 +11,7 @@ import {
 import { settingsAnchor, type SectionId } from "./shared";
 import { TOP_GROUPS } from "./groups";
 import { markSectionSeen, useSettingsNew } from "./settings-new";
+import { useExperimentalAccess } from "@/lib/updater/experimental-access";
 
 type IconProps = { size?: number; strokeWidth?: number };
 
@@ -935,6 +936,47 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
         keywords: ["report", "feedback", "issue", "crash"],
       },
       {
+        id: "licenses",
+        label: "Licenses & attribution",
+        Icon: IconSupport,
+        keywords: [
+          "license",
+          "licence",
+          "attribution",
+          "credits",
+          "open source",
+          "oss",
+          "thanks",
+          "crowdin",
+          "cloudsmith",
+          "elfhosted",
+          "legal",
+          "mit",
+          "gpl",
+        ],
+      },
+      {
+        id: "icons",
+        label: "Icons & animation",
+        Icon: IconTheme,
+        keywords: [
+          "icons",
+          "icon library",
+          "artwork",
+          "art",
+          "illustration",
+          "lottie",
+          "animation",
+          "animated",
+          "svg",
+          "download icons",
+          "abiyyu",
+          "stass",
+          "designer",
+          "assets",
+        ],
+      },
+      {
         id: "support",
         label: "Support Harbor",
         Icon: IconSupport,
@@ -1002,7 +1044,7 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
   },
 ];
 
-type SettingsOption = {
+export type SettingsOption = {
   label: string;
   section: SectionId;
   anchorTitle?: string;
@@ -1824,7 +1866,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "auto-skip",
       "auto skip",
       "aniskip",
-      "theintroodb",
+      "theintrodb",
       "skip button",
     ],
   },
@@ -2752,6 +2794,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
 
+  {
+    label: "Experimental builds",
+    section: "updates",
+    anchorTitle: "Experimental builds",
+    keywords: ["experimental", "developer builds", "test builds", "preview", "early fixes"],
+  },
   {
     label: "Updates & rollback",
     section: "updates",
@@ -4685,6 +4733,27 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["background color", "black bar color", "box colour", "panel color"],
   },
   {
+    label: "Hide sound effects and speaker names",
+    section: "subtitles",
+    anchorTitle: "Subtitle style",
+    keywords: [
+      "sdh",
+      "sound effects in subtitles",
+      "sound descriptions",
+      "door creaks",
+      "ominous music",
+      "remove sound effects",
+      "speaker names",
+      "speaker labels",
+      "character names in subtitles",
+      "brackets in subtitles",
+      "square brackets",
+      "sdh only release",
+      "clean up subtitles",
+      "subtitles describe noises",
+    ],
+  },
+  {
     label: "Reset subtitle style to defaults",
     section: "subtitles",
     anchorTitle: "Subtitle style",
@@ -5096,6 +5165,20 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "skip button",
       "hide skip",
       "how long skip shows",
+    ],
+  },
+  {
+    label: "TheIntroDB API key",
+    section: "player",
+    anchorTitle: "Skip intros & credits",
+    keywords: [
+      "theintrodb",
+      "intro db",
+      "intro database",
+      "api key",
+      "skip intro key",
+      "rate limit",
+      "intro timing key",
     ],
   },
   {
@@ -5935,6 +6018,32 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "hotkeys",
     anchorTitle: "Player",
     keywords: ["sleep timer", "pause after episode", "l key", "bedtime", "auto pause"],
+  },
+  {
+    label: "Reload source",
+    section: "hotkeys",
+    anchorTitle: "Player",
+    keywords: [
+      "reload stream",
+      "restart stream",
+      "refresh source",
+      "stream stuck",
+      "reopen stream",
+      "buffering fix",
+    ],
+  },
+  {
+    label: "Restart streaming server",
+    section: "hotkeys",
+    anchorTitle: "Player",
+    keywords: [
+      "restart server",
+      "streaming server",
+      "engine restart",
+      "server stuck",
+      "torrent server",
+      "11470",
+    ],
   },
   {
     label: "Theme",
@@ -7900,6 +8009,19 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
+    label: "Ignored titles",
+    section: "playerLayout",
+    anchorTitle: "While you watch",
+    keywords: [
+      "ignored titles",
+      "content advisory",
+      "parental guide",
+      "restore advisory",
+      "unignore",
+      "stop hiding advisory",
+    ],
+  },
+  {
     label: "Buffer fill",
     section: "playerLayout",
     anchorTitle: "Seek bar",
@@ -9102,6 +9224,691 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     anchorTitle: "Award Icons",
     keywords: ["award pack", "make pack", "custom awards", "award icons", "laurel"],
   },
+  {
+    label: "Where Play looks first",
+    section: "player",
+    anchorTitle: "Playback",
+    keywords: [
+      "where play looks first",
+      "prefer local files",
+      "prefer online streams",
+      "ask every time",
+      "playback source",
+      "plex",
+      "jellyfin",
+      "emby",
+      "home server",
+      "play local instead of streaming",
+      "source preference",
+      "stream or local file",
+      "what does play use",
+    ],
+  },
+  {
+    label: "Preferred home server",
+    section: "player",
+    anchorTitle: "Playback",
+    keywords: [
+      "preferred home server",
+      "which server plays",
+      "default media server",
+      "plex",
+      "jellyfin",
+      "emby",
+      "always use this server",
+      "ask which server",
+      "pick my server",
+      "media server",
+      "nas",
+    ],
+  },
+  {
+    label: "Instant playback preparation",
+    section: "player",
+    anchorTitle: "Instant playback preparation",
+    keywords: [
+      "preload stream",
+      "prewarm",
+      "pre-warm",
+      "prepare stream",
+      "faster play",
+      "start playing quicker",
+      "cached debrid",
+      "warm up sources",
+      "play button slow",
+      "reduce startup delay",
+      "speed up playback start",
+      "debrid prepare",
+    ],
+  },
+  {
+    label: "Create folders for eBooks",
+    section: "advanced",
+    anchorTitle: "eBooks",
+    keywords: [
+      "ebook",
+      "ebooks",
+      "e-book",
+      "epub",
+      "pdf",
+      "book download folder",
+      "where do ebooks save",
+      "folder per book",
+      "organize ebooks",
+      "ebook location",
+      "books folder",
+      "books",
+      "where do my books save",
+      "download location for books",
+      "create folders for ebooks",
+      "pdf download folder",
+      "kindle",
+    ],
+  },
+  {
+    label: "Show seconds",
+    section: "playerLayout",
+    anchorTitle: "Fullscreen clock",
+    keywords: [
+      "show seconds",
+      "seconds",
+      "clock seconds",
+      "ticking clock",
+      "hide seconds",
+      "time with seconds",
+      "exact time",
+      "second by second",
+      "update every second",
+      "live clock",
+    ],
+  },
+  {
+    label: "Show in windowed mode",
+    section: "playerLayout",
+    anchorTitle: "Fullscreen clock",
+    keywords: [
+      "windowed",
+      "windowed mode",
+      "not fullscreen",
+      "clock in a window",
+      "always show the clock",
+      "keep clock visible",
+      "clock outside fullscreen",
+      "small window",
+      "clock when windowed",
+      "show clock always",
+      "windowed clock",
+      "clock when not fullscreen",
+      "keep the clock visible",
+      "show clock windowed",
+      "small window clock",
+    ],
+  },
+  {
+    label: "See what a shader does (before / after)",
+    section: "shaders",
+    anchorTitle: "Anime4K upscaling",
+    keywords: [
+      "before and after",
+      "before after",
+      "compare",
+      "comparison",
+      "see the difference",
+      "side by side",
+      "preview shader",
+      "what does it look like",
+      "example image",
+      "screenshot",
+      "demo",
+      "show me",
+      "is it worth it",
+      "drag slider compare",
+    ],
+  },
+  {
+    label: "New York Times \u00b7 bestseller lists",
+    section: "library",
+    anchorTitle: "Metadata providers",
+    keywords: [
+      "new york times",
+      "nyt",
+      "nytimes",
+      "nyt books",
+      "bestseller",
+      "best seller list",
+      "book list",
+      "ebook",
+      "books api",
+      "reading list",
+    ],
+  },
+  {
+    label: "API-Sports \u00b7 leagues ESPN does not carry",
+    section: "library",
+    anchorTitle: "Metadata providers",
+    keywords: [
+      "api sports",
+      "apisports",
+      "api-football",
+      "sports key",
+      "football",
+      "soccer",
+      "egyptian premier league",
+      "qatar stars league",
+      "uae pro league",
+      "k league",
+      "khl",
+      "hockey",
+      "missing leagues",
+    ],
+  },
+  {
+    label: "Home servers (Jellyfin, Emby, Plex)",
+    section: "streaming",
+    anchorTitle: "Home servers",
+    keywords: [
+      "jellyfin",
+      "jellifin",
+      "plex",
+      "emby",
+      "home server",
+      "media server",
+      "my own server",
+      "nas",
+      "local library",
+      "personal library",
+      "plex library",
+      "connect my server",
+    ],
+  },
+  {
+    label: "Connect a home server",
+    section: "streaming",
+    anchorTitle: "Home servers",
+    keywords: [
+      "add plex",
+      "add jellyfin",
+      "add emby",
+      "server address",
+      "server url",
+      "ip address",
+      "port number",
+      "server username",
+      "server password",
+      "new server",
+      "pair server",
+      "log in to my server",
+    ],
+  },
+  {
+    label: "Sign in with Plex",
+    section: "streaming",
+    anchorTitle: "Home servers",
+    keywords: [
+      "plex",
+      "plex login",
+      "plex token",
+      "x-plex-token",
+      "access token",
+      "plex account",
+      "plex pin",
+      "find my plex token",
+      "plex.tv",
+      "sign in with plex",
+    ],
+  },
+  {
+    label: "Refresh a home server library",
+    section: "streaming",
+    anchorTitle: "Home servers",
+    keywords: [
+      "sync now",
+      "resync",
+      "refresh library",
+      "rescan",
+      "scan library",
+      "new movies missing",
+      "library out of date",
+      "refresh interval",
+      "every launch",
+      "manual refresh",
+      "plex not updating",
+      "jellyfin not updating",
+    ],
+  },
+  {
+    label: "Home server streaming quality",
+    section: "streaming",
+    anchorTitle: "Home servers",
+    keywords: [
+      "transcode",
+      "transcoding",
+      "direct play",
+      "original quality",
+      "bitrate cap",
+      "mbps",
+      "plex buffering",
+      "jellyfin buffering",
+      "lower the quality",
+      "remote playback quality",
+    ],
+  },
+  {
+    label: "Logo position on TV cards",
+    section: "theme",
+    anchorTitle: "Poster card style",
+    keywords: [
+      "logo position",
+      "logo placement",
+      "tv card logo",
+      "where the logo sits",
+      "move the logo on cards",
+      "logo left",
+      "logo centre",
+      "logo center",
+      "logo right",
+      "card logo",
+      "wide card logo",
+      "title art position",
+    ],
+  },
+  {
+    label: "Browse the community theme store",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "theme store",
+      "download themes",
+      "more themes",
+      "get more themes",
+      "other peoples themes",
+      "themes made by other people",
+      "theme marketplace",
+      "theme shop",
+      "discover themes",
+      "new themes",
+      "staff pick",
+      "free themes",
+      "top authors",
+      "are community themes safe",
+    ],
+  },
+  {
+    label: "Sort and filter community themes",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "sort themes",
+      "most downloaded",
+      "top rated themes",
+      "newest themes",
+      "filter themes",
+      "popular themes",
+      "sidebar theme",
+      "top dock",
+      "side rail",
+      "stremio rail",
+      "floating dock",
+      "cinematic layout",
+      "theme layout style",
+    ],
+  },
+  {
+    label: "Find themes by mood",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "dark and moody",
+      "cozy theme",
+      "warm theme",
+      "vibrant theme",
+      "colourful theme",
+      "colorful theme",
+      "minimal theme",
+      "bright theme",
+      "calm theme",
+      "pastel theme",
+      "vibe",
+      "aesthetic",
+    ],
+  },
+  {
+    label: "Rate or comment on a theme",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "rate a theme",
+      "star rating",
+      "review a theme",
+      "leave a comment",
+      "theme comments",
+      "reply to a comment",
+      "give feedback",
+      "five stars",
+      "write a review",
+      "delete my comment",
+      "bbcode",
+    ],
+  },
+  {
+    label: "Theme author account (sign in or out)",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "theme account",
+      "sign in to publish",
+      "create an author account",
+      "register",
+      "author login",
+      "publish under my name",
+      "community account",
+      "store account",
+      "sign out of themes",
+      "theme username",
+    ],
+  },
+  {
+    label: "Reset or change your theme author password",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "forgot my password",
+      "recovery code",
+      "reset password",
+      "lost password",
+      "cant sign in",
+      "locked out",
+      "backup code",
+      "change password",
+      "new password",
+      "recovery key",
+    ],
+  },
+  {
+    label: "Your photo on the theme store",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "author photo",
+      "profile picture on themes",
+      "community photo",
+      "use my photo",
+      "remove my picture",
+      "avatar on the theme store",
+      "change author avatar",
+      "my face",
+    ],
+  },
+  {
+    label: "Publish a theme to the community",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "share my theme",
+      "publish a theme",
+      "upload a theme",
+      "submit a theme",
+      "put my theme online",
+      "list my theme",
+      "cover image",
+      "screenshots",
+      "tagline",
+      "submit for review",
+      "preview image",
+      "theme thumbnail",
+      "let others use my theme",
+    ],
+  },
+  {
+    label: "Update a theme you published",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "update my theme",
+      "push a new version",
+      "publish an update",
+      "changelog",
+      "what changed",
+      "edit my listing",
+      "unlist my theme",
+      "make my theme private",
+      "delete my published theme",
+      "version history",
+      "how many downloads",
+      "my published themes",
+    ],
+  },
+  {
+    label: "Claim a theme you uploaded",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "claim a theme",
+      "owner token",
+      "lost my theme",
+      "uploaded on another computer",
+      "transfer my theme",
+      "i made this theme",
+      "prove i own it",
+      "take ownership",
+      "theme link or id",
+      "reclaim",
+    ],
+  },
+  {
+    label: "Theme author notifications",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "notifications",
+      "bell",
+      "new comment on my theme",
+      "someone rated my theme",
+      "mark all read",
+      "unread",
+      "alerts about my themes",
+      "who commented",
+    ],
+  },
+  {
+    label: "Theme API cheat sheet",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "cheat sheet",
+      "css tokens",
+      "colour tokens",
+      "color tokens",
+      "selectors",
+      "theming docs",
+      "how do i write a theme",
+      "css classes",
+      "api reference",
+      "custom css help",
+      "harborstyle format",
+      "window.harbor",
+    ],
+  },
+  {
+    label: "Beta themes (experimental ports)",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "beta themes",
+      "experimental themes",
+      "app ports",
+      "looks like another app",
+      "clone theme",
+      "unfinished themes",
+      "work in progress",
+      "test themes",
+      "1 to 1 port",
+    ],
+  },
+  {
+    label: "Update your saved themes",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "theme update",
+      "new version of a theme",
+      "update all themes",
+      "outdated theme",
+      "theme out of date",
+      "update available",
+      "refresh my themes",
+      "upgrade theme",
+    ],
+  },
+  {
+    label: "Remove or download a saved theme",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "delete a theme",
+      "remove a theme",
+      "uninstall theme",
+      "get rid of a theme",
+      "save a theme to a file",
+      "download theme file",
+      "harborstyle file",
+      "export a theme to disk",
+      "back up my theme",
+    ],
+  },
+  {
+    label: "Search your theme library",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "find a theme i saved",
+      "search my themes",
+      "filter my themes",
+      "templates",
+      "starter theme",
+      "remix a theme",
+      "built in themes",
+      "my saved themes",
+      "which themes do i have",
+    ],
+  },
+  {
+    label: "Badge and icon packs from the community",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "badge packs",
+      "icon packs",
+      "quality badge art",
+      "download a badge pack",
+      "install a pack",
+      "4k badge icons",
+      "stream badge icons",
+      "community packs",
+      "badge bundles",
+      "award packs",
+      "trophy icons",
+      "report a pack",
+    ],
+  },
+  {
+    label: "Publish a badge or award pack",
+    section: "theme",
+    anchorTitle: "Your themes",
+    keywords: [
+      "share a badge pack",
+      "make a badge pack",
+      "upload an icon pack",
+      "publish a pack",
+      "my own badge art",
+      "award pack",
+      "custom trophies",
+      "naming guide",
+      "submit a pack",
+      "icon slots",
+      "zip of icons",
+      "rename my files",
+    ],
+  },
+  {
+    label: "Lock player controls",
+    section: "hotkeys",
+    anchorTitle: "Player",
+    keywords: [
+      "lock",
+      "screen lock",
+      "lock controls",
+      "lock the screen",
+      "unlock",
+      "child lock",
+      "kid lock",
+      "baby lock",
+      "ctrl l",
+      "block input",
+      "disable keyboard while watching",
+      "stop accidental clicks",
+      "freeze controls",
+      "toddler",
+    ],
+  },
+  {
+    label: "Rule name",
+    section: "webhooks",
+    anchorTitle: "Automations",
+    keywords: [
+      "rename rule",
+      "rule name",
+      "name my automation",
+      "rename automation",
+      "change rule name",
+      "what is this rule called",
+      "rule title",
+      "label the rule",
+      "untitled rule",
+      "automation name",
+      "give the rule a name",
+      "my rules all look the same",
+    ],
+  },
+  {
+    label: "Delete rule",
+    section: "webhooks",
+    anchorTitle: "Automations",
+    keywords: [
+      "delete rule",
+      "remove rule",
+      "delete automation",
+      "remove automation",
+      "get rid of a rule",
+      "erase rule",
+      "trash a rule",
+      "cancel automation",
+      "stop this alert",
+      "too many notifications",
+      "unwanted pings",
+      "stop discord messages",
+    ],
+  },
+  {
+    label: "Animated sidebar icons",
+    section: "theme",
+    anchorTitle: "Sidebar",
+    keywords: [
+      "animated sidebar icons",
+      "sidebar animation",
+      "nav animation",
+      "animated icons",
+      "static icons",
+      "turn off animation",
+      "stop the icons moving",
+      "lottie",
+      "hover animation",
+      "moving icons",
+      "disable animations",
+      "plain icons",
+      "sidebar icons",
+    ],
+  },
 ];
 
 setSettingsSearchVocabulary([
@@ -9112,27 +9919,9 @@ setSettingsSearchVocabulary([
   ]),
 ]);
 
-export function SettingsNav({
-  active,
-  onChange,
-}: {
-  active: SectionId;
-  onChange: (id: SectionId, anchor?: string) => void;
-}) {
-  const { settings } = useSettings();
-  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
-  const { goBack, canGoBack, setView } = useView();
+export function useNavSearch(trimmed: string) {
   const t = useT();
-  const isNew = useSettingsNew();
-  const navLayout = activeLayout(settings.theme);
-  const showBack = navLayout === "custom" || navLayout === "minui";
-  const [query, setQuery] = useState("");
-  const trimmed = query.trim().toLowerCase();
-  const sectionLabel = useMemo(() => {
-    const m = new Map<SectionId, string>();
-    for (const group of NAV_GROUPS) for (const item of group.items) m.set(item.id, item.label);
-    return m;
-  }, []);
+  const experimentalAccess = useExperimentalAccess();
   const matches = useMemo<NavItem[] | null>(() => {
     if (!trimmed) return null;
     const out: NavItem[] = [];
@@ -9152,14 +9941,234 @@ export function SettingsNav({
   }, [t, trimmed]);
   const optionMatches = useMemo<SettingsOption[] | null>(() => {
     if (!trimmed) return null;
-    return SETTINGS_OPTIONS.filter((o) =>
-      matchesSettingsSearch(trimmed, [o.label], t, o.keywords ?? []),
+    return SETTINGS_OPTIONS.filter(
+      (o) =>
+        (o.label !== "Experimental builds" || experimentalAccess) &&
+        matchesSettingsSearch(trimmed, [o.label], t, o.keywords ?? []),
     ).sort(
       (a, b) =>
         rankSettingsSearch(trimmed, a.label, a.keywords ?? []) -
         rankSettingsSearch(trimmed, b.label, b.keywords ?? []),
     );
-  }, [t, trimmed]);
+  }, [experimentalAccess, t, trimmed]);
+  return { matches, optionMatches };
+}
+
+const NAV_CHIP =
+  "inline-flex h-[22px] shrink-0 items-center rounded-md px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
+
+const NAV_FIELD =
+  "group/find flex h-11 min-w-0 flex-1 items-center rounded-[10px] bg-elevated px-3 transition-colors focus-within:bg-raised";
+
+const NAV_FIELD_GLYPH =
+  "me-2.5 shrink-0 text-ink-subtle transition-colors group-focus-within/find:text-ink";
+
+const NAV_FIELD_INPUT =
+  "min-w-0 flex-1 bg-transparent text-[16.5px] text-ink outline-none placeholder:text-ink-subtle";
+
+const NAV_FIELD_CLEAR =
+  "animate-badge-pop harbor-press-pop ms-1.5 grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink-subtle transition-colors hover:bg-raised hover:text-ink";
+
+const NAV_BACK =
+  "harbor-press-pop grid h-11 w-11 shrink-0 place-items-center rounded-[10px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink";
+
+const NAV_OPTION_ROW =
+  "group relative flex min-h-[64px] w-full items-center gap-[10px] ps-[14px] pe-[10px] py-[9px] text-start text-ink-muted transition-colors hover:bg-elevated hover:text-ink";
+
+const NAV_ICON_SLOT = "grid h-5 w-5 shrink-0 place-items-center";
+
+const NAV_SECTION =
+  "flex min-h-[38px] items-center gap-[10px] ps-[14px] pe-3 pt-2 text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px] text-ink-subtle";
+
+const NAV_ROW_BASE =
+  "no-press group relative flex min-h-[52px] w-full items-center gap-[10px] ps-[14px] pe-[10px] py-[7px] text-start text-[16.5px] leading-[22px] transition-colors";
+
+const NAV_CHILD_BASE =
+  "no-press group relative flex min-h-[44px] w-full items-center gap-[10px] ps-[44px] pe-[10px] py-[6px] text-start text-[15.5px] leading-[21px] transition-colors";
+
+const NAV_ON = "bg-elevated font-semibold text-ink";
+
+const NAV_OFF = "font-medium text-ink-muted hover:bg-elevated hover:text-ink";
+
+const NAV_CHILD_OFF = "font-medium text-ink-subtle hover:bg-elevated hover:text-ink";
+
+const NAV_TEXT = "min-w-0 flex-1 break-words";
+
+function NavChip({ tone, children }: { tone: "accent" | "muted"; children: React.ReactNode }) {
+  const skin = tone === "accent" ? "bg-accent-soft text-accent" : "bg-elevated text-ink-subtle";
+  return <span className={`${NAV_CHIP} ${skin}`}>{children}</span>;
+}
+
+function NavNewDot() {
+  return <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-accent" />;
+}
+
+function NavSection({ label, rule }: { label: string; rule: boolean }) {
+  return (
+    <div className={NAV_SECTION}>
+      <span className="shrink-0">{label}</span>
+      {rule && <span aria-hidden className="h-px min-w-0 flex-1 bg-edge-soft" />}
+    </div>
+  );
+}
+
+function SearchField({
+  query,
+  setQuery,
+  onSubmit,
+}: {
+  query: string;
+  setQuery: (v: string) => void;
+  onSubmit: () => void;
+}) {
+  const t = useT();
+  return (
+    <div className={NAV_FIELD}>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={NAV_FIELD_GLYPH}
+        aria-hidden
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" />
+      </svg>
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={t("Search settings")}
+        className={NAV_FIELD_INPUT}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") onSubmit();
+          else if (e.key === "Escape") setQuery("");
+        }}
+      />
+      {query && (
+        <button
+          type="button"
+          onClick={() => setQuery("")}
+          className={NAV_FIELD_CLEAR}
+          aria-label={t("Clear")}
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            aria-hidden
+          >
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
+function BackButton() {
+  const t = useT();
+  const { goBack, canGoBack, setView } = useView();
+  return (
+    <button
+      type="button"
+      onClick={() => (canGoBack ? goBack() : setView("home"))}
+      aria-label={t("Back")}
+      className={NAV_BACK}
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="dir-icon"
+        aria-hidden
+      >
+        <path d="M15 5l-7 7 7 7" />
+      </svg>
+    </button>
+  );
+}
+
+export function SettingsTools({
+  query,
+  setQuery,
+  onSubmit,
+}: {
+  query: string;
+  setQuery: (v: string) => void;
+  onSubmit: (id: SectionId, anchor?: string) => void;
+}) {
+  const { settings } = useSettings();
+  const navLayout = activeLayout(settings.theme);
+  const showBack = navLayout === "custom" || navLayout === "minui";
+  const { matches, optionMatches } = useNavSearch(query.trim().toLowerCase());
+  const submit = () => {
+    if (matches && matches.length > 0) {
+      onSubmit(matches[0].id);
+      setQuery("");
+      return;
+    }
+    if (optionMatches && optionMatches.length > 0) {
+      const o = optionMatches[0];
+      onSubmit(o.section, o.anchorTitle ? settingsAnchor(o.anchorTitle) : undefined);
+      setQuery("");
+    }
+  };
+  return (
+    <div data-tv-nav-zone className="hset-tools">
+      {showBack && <BackButton />}
+      <SearchField query={query} setQuery={setQuery} onSubmit={submit} />
+    </div>
+  );
+}
+
+export function SettingsNav({
+  active,
+  onChange,
+  onOpenGroup,
+  query: queryProp,
+  setQuery: setQueryProp,
+}: {
+  active: SectionId;
+  onChange: (id: SectionId, anchor?: string) => void;
+  onOpenGroup?: (groupId: string) => void;
+  query?: string;
+  setQuery?: (v: string) => void;
+}) {
+  const { settings } = useSettings();
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+  const t = useT();
+  const isNew = useSettingsNew();
+  const navLayout = activeLayout(settings.theme);
+  const showBack = navLayout === "custom" || navLayout === "minui";
+  const [ownQuery, setOwnQuery] = useState("");
+  const hoisted = queryProp !== undefined;
+  const query = hoisted ? queryProp : ownQuery;
+  const setQuery = (v: string) => {
+    if (setQueryProp) setQueryProp(v);
+    if (!hoisted) setOwnQuery(v);
+  };
+  const trimmed = query.trim().toLowerCase();
+  const sectionLabel = useMemo(() => {
+    const m = new Map<SectionId, string>();
+    for (const group of NAV_GROUPS) for (const item of group.items) m.set(item.id, item.label);
+    return m;
+  }, []);
+  const { matches, optionMatches } = useNavSearch(trimmed);
 
   const libraryKeys = [
     settings.tmdbKey,
@@ -9186,6 +10195,8 @@ export function SettingsNav({
     Object.values(settings.webhooks.sources).some(Boolean);
 
   const status: Record<SectionId, string | null> = {
+    licenses: null,
+    icons: null,
     basics: null,
     account: null,
     library: libraryKeys > 0 ? `${libraryKeys}/5` : null,
@@ -9238,6 +10249,8 @@ export function SettingsNav({
     advanced: null,
   };
 
+  const isLive = (chip: string) => chip === "live" || chip === "via relay";
+
   const renderItem = ({ id, label, Icon }: NavItem) => {
     const isActive = id === active;
     const chip = status[id];
@@ -9245,332 +10258,207 @@ export function SettingsNav({
     return (
       <button
         key={id}
+        data-active={isActive ? "" : undefined}
         onClick={() => {
           onChange(id);
           setQuery("");
         }}
-        className={`group flex h-14 w-full items-center gap-3 rounded-md px-2.5 text-start transition-colors ${
-          isActive ? "bg-raised text-ink" : "text-ink-muted hover:bg-elevated hover:text-ink"
-        }`}
+        className={`${NAV_ROW_BASE} ${isActive ? NAV_ON : NAV_OFF}`}
       >
-        <span
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-colors ${
-            isActive ? "text-canvas" : "bg-canvas text-ink-subtle group-hover:text-ink-muted"
-          }`}
-        >
-          <Icon size={20} strokeWidth={1.6} />
+        <span className={NAV_ICON_SLOT}>
+          <Icon size={20} strokeWidth={1.7} />
         </span>
-        <span className="flex-1 truncate text-[14.5px] font-medium">{t(label)}</span>
-        {(chip || debridChipLocal) && (
-          <span className="flex shrink-0 gap-1">
-            {debridChipLocal && (
-              <span className="rounded-md bg-accent-soft px-1.5 py-0.5 text-[10.5px] font-semibold tracking-wide text-accent">
-                {debridChipLocal}
-              </span>
-            )}
-            {chip && (
-              <span
-                className={`rounded-md px-1.5 py-0.5 text-[10.5px] font-medium tracking-wide ${
-                  chip === "live" || chip === "via relay"
-                    ? "bg-accent-soft text-accent"
-                    : "bg-canvas text-ink-subtle"
-                }`}
-              >
-                {chip}
-              </span>
-            )}
-          </span>
-        )}
+        <span className={NAV_TEXT}>{t(label)}</span>
+        {debridChipLocal && <NavChip tone="accent">{debridChipLocal}</NavChip>}
+        {chip && <NavChip tone={isLive(chip) ? "accent" : "muted"}>{chip}</NavChip>}
       </button>
     );
+  };
+
+  const submit = () => {
+    if (matches && matches.length > 0) {
+      onChange(matches[0].id);
+      setQuery("");
+      return;
+    }
+    if (optionMatches && optionMatches.length > 0) {
+      const o = optionMatches[0];
+      onChange(o.section, o.anchorTitle ? settingsAnchor(o.anchorTitle) : undefined);
+      setQuery("");
+    }
   };
 
   return (
     <nav
       data-harbor-sidebar
+      data-tv-nav-zone
       data-tv-scroll-focus
-      className="relative flex w-72 shrink-0 flex-col bg-canvas pt-24"
+      className="hset-sidebar flex min-h-0 flex-col"
     >
-      <div data-tauri-drag-region className="h-3 shrink-0" />
-      {showBack && (
-        <div className="px-3 pb-1.5">
-          <button
-            type="button"
-            onClick={() => (canGoBack ? goBack() : setView("home"))}
-            className="flex h-10 w-full items-center gap-2 rounded-md px-3 text-start text-[13.5px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="dir-icon"
-            >
-              <path d="M15 5l-7 7 7 7" />
-            </svg>
-            {t("Back")}
-          </button>
+      {!hoisted && (
+        <div className="flex shrink-0 items-center gap-2 px-3 pb-2 pt-2">
+          {showBack && <BackButton />}
+          <SearchField query={query} setQuery={setQuery} onSubmit={submit} />
         </div>
       )}
-      <div className="px-3 pb-3">
-        <div className="group/find flex h-[46px] items-center gap-[11px] rounded-md bg-elevated px-[15px] transition-colors focus-within:bg-raised">
-          <svg
-            width="17"
-            height="17"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="shrink-0 text-ink-subtle transition-colors group-focus-within/find:text-ink"
-          >
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-3.5-3.5" />
-          </svg>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("Search settings")}
-            className="min-w-0 flex-1 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-ink-subtle"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                if (matches && matches.length > 0) {
-                  onChange(matches[0].id);
-                  setQuery("");
-                } else if (optionMatches && optionMatches.length > 0) {
-                  const o = optionMatches[0];
-                  onChange(o.section, o.anchorTitle ? settingsAnchor(o.anchorTitle) : undefined);
-                  setQuery("");
+      {matches && (
+        <div className="flex flex-col">
+          {matches.length === 0 && (!optionMatches || optionMatches.length === 0) && (
+            <NavSection label={t("No matches")} rule={false} />
+          )}
+          {matches.length > 0 && (
+            <>
+              <NavSection
+                label={
+                  matches.length === 1
+                    ? t("{n} tab", { n: matches.length })
+                    : t("{n} tabs", { n: matches.length })
                 }
-              } else if (e.key === "Escape") {
-                setQuery("");
-              }
-            }}
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              className="animate-badge-pop harbor-press-pop shrink-0 text-ink-subtle transition-colors hover:text-ink"
-              aria-label={t("Clear")}
-            >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-              >
-                <path d="M6 6l12 12M18 6 6 18" />
-              </svg>
-            </button>
+                rule={false}
+              />
+              {matches.map(renderItem)}
+            </>
+          )}
+          {optionMatches && optionMatches.length > 0 && (
+            <>
+              <NavSection
+                label={
+                  optionMatches.length === 1
+                    ? t("{n} option", { n: optionMatches.length })
+                    : t("{n} options", { n: optionMatches.length })
+                }
+                rule={false}
+              />
+              {optionMatches.map((o) => (
+                <button
+                  key={`${o.section}-${o.label}`}
+                  onClick={() => {
+                    onChange(o.section, o.anchorTitle ? settingsAnchor(o.anchorTitle) : undefined);
+                    setQuery("");
+                  }}
+                  className={NAV_OPTION_ROW}
+                >
+                  <span className={`${NAV_ICON_SLOT} text-ink-subtle group-hover:text-ink-muted`}>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="m20 20-3.5-3.5" />
+                    </svg>
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block break-words text-[15.5px] font-medium leading-[21px] text-ink">
+                      {t(o.label)}
+                    </span>
+                    <span className="block break-words text-[15.5px] leading-[20px] text-ink-subtle">
+                      {t(sectionLabel.get(o.section) ?? o.section)}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </>
           )}
         </div>
-      </div>
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 pb-8">
-        {matches && (
-          <div className="flex flex-col gap-1">
-            {matches.length === 0 && (!optionMatches || optionMatches.length === 0) && (
-              <div className="px-3.5 pb-1.5 pt-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink-subtle/80">
-                {t("No matches")}
-              </div>
-            )}
-            {matches.length > 0 && (
-              <>
-                <div className="px-3.5 pb-1.5 pt-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink-subtle/80">
-                  {matches.length === 1
-                    ? t("{n} tab", { n: matches.length })
-                    : t("{n} tabs", { n: matches.length })}
-                </div>
-                {matches.map(renderItem)}
-              </>
-            )}
-            {optionMatches && optionMatches.length > 0 && (
-              <>
-                <div className="px-3.5 pb-1.5 pt-3 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink-subtle/80">
-                  {optionMatches.length === 1
-                    ? t("{n} option", { n: optionMatches.length })
-                    : t("{n} options", { n: optionMatches.length })}
-                </div>
-                {optionMatches.map((o) => (
-                  <button
-                    key={`${o.section}-${o.label}`}
-                    onClick={() => {
-                      onChange(
-                        o.section,
-                        o.anchorTitle ? settingsAnchor(o.anchorTitle) : undefined,
-                      );
-                      setQuery("");
-                    }}
-                    className="group flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-start text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
-                  >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-canvas text-ink-subtle group-hover:text-ink-muted">
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <circle cx="11" cy="11" r="7" />
-                        <path d="m20 20-3.5-3.5" />
-                      </svg>
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13.5px] font-medium text-ink">
-                        {t(o.label)}
-                      </span>
-                      <span className="block truncate text-[11.5px] text-ink-subtle">
-                        {t(sectionLabel.get(o.section) ?? o.section)}
-                      </span>
-                    </span>
-                  </button>
-                ))}
-              </>
-            )}
-          </div>
-        )}
-        {!matches &&
-          TOP_GROUPS.map((group, gi) => {
-            const prevSection = gi > 0 ? TOP_GROUPS[gi - 1].section : null;
-            const showSection = group.section !== prevSection;
-            const firstId = group.children[0];
-            const meta = NAV_ITEM_BY_ID.get(firstId);
-            const Icon = meta?.Icon;
-            const isActive = group.children.includes(active);
-            const multi = group.children.length > 1;
-            const isOpen = multi ? openGroups.has(group.id) || isActive : false;
-            const groupChip = group.children.map((c) => status[c]).find(Boolean);
-            const debridChip =
-              group.children.includes("streaming") && debridKeys > 0 ? `${debridKeys}D` : null;
-            const anyNew = group.children.some((c) => isNew(c));
-            return (
-              <div key={group.id} className="flex flex-col">
-                {showSection && (
-                  <div className="px-3.5 pb-1.5 pt-1 text-[10.5px] font-bold uppercase tracking-[0.2em] text-ink-subtle">
-                    {t(group.section)}
-                  </div>
-                )}
-                <button
-                  aria-expanded={multi ? isOpen : undefined}
-                  onClick={() => {
-                    if (multi) {
-                      setOpenGroups((prev) => {
-                        const next = new Set(prev);
-                        if (next.has(group.id)) next.delete(group.id);
-                        else next.add(group.id);
-                        return next;
-                      });
-                      return;
+      )}
+      {!matches &&
+        TOP_GROUPS.map((group, gi) => {
+          const prevSection = gi > 0 ? TOP_GROUPS[gi - 1].section : null;
+          const showSection = group.section !== prevSection;
+          const firstId = group.children[0];
+          const meta = NAV_ITEM_BY_ID.get(firstId);
+          const Icon = meta?.Icon;
+          const isActive = group.children.includes(active);
+          const multi = group.children.length > 1;
+          const isOpen = multi ? openGroups.has(group.id) || isActive : false;
+          const groupChip = group.children.map((c) => status[c]).find(Boolean);
+          const groupDebrid =
+            group.children.includes("streaming") && debridKeys > 0 ? `${debridKeys}D` : null;
+          const anyNew = group.children.some((c) => isNew(c));
+          return (
+            <div key={group.id} className="flex flex-col">
+              {showSection && <NavSection label={t(group.section)} rule />}
+              <button
+                aria-expanded={multi ? isOpen : undefined}
+                data-active={isActive ? "" : undefined}
+                onClick={() => {
+                  if (multi) {
+                    if (onOpenGroup) {
+                      onOpenGroup(group.id);
+                      group.children.forEach((c) => markSectionSeen(c));
                     }
-                    onChange(firstId);
-                    markSectionSeen(firstId);
-                  }}
-                  className={`group flex h-11 w-full items-center gap-2.5 rounded-md px-2.5 text-start transition-colors ${
-                    isActive
-                      ? "bg-elevated text-ink"
-                      : "text-ink-muted hover:bg-elevated hover:text-ink"
-                  }`}
-                >
-                  <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center transition-colors ${
-                      isActive ? "text-ink" : "text-ink-subtle group-hover:text-ink-muted"
-                    }`}
-                  >
-                    {Icon && <Icon size={18} strokeWidth={1.9} />}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-[13.5px] font-semibold">
-                    {t(group.label)}
-                  </span>
-                  {anyNew && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />}
-                  <span
-                    className={`shrink-0 text-ink-subtle transition-transform ${
-                      isActive ? "rotate-90" : ""
-                    }`}
-                  >
-                    <IconChevronRight size={14} strokeWidth={2} />
-                  </span>
-                  {(groupChip || debridChip) && (
-                    <span className="flex shrink-0 gap-1">
-                      {debridChip && (
-                        <span className="rounded-md bg-accent-soft px-1.5 py-0.5 text-[10.5px] font-semibold tracking-wide text-accent">
-                          {debridChip}
-                        </span>
-                      )}
-                      {groupChip && (
-                        <span
-                          className={`rounded-md px-1.5 py-0.5 text-[10.5px] font-medium tracking-wide ${
-                            groupChip === "live" || groupChip === "via relay"
-                              ? "bg-accent-soft text-accent"
-                              : "bg-elevated text-ink-subtle"
-                          }`}
-                        >
-                          {groupChip}
-                        </span>
-                      )}
-                    </span>
-                  )}
-                </button>
-                {isOpen && (
-                  <div className="relative mb-1 ms-[19px] flex flex-col ps-3">
-                    <span
-                      aria-hidden
-                      className="absolute inset-y-1 start-0 w-[2px] rounded-full bg-edge"
-                    />
-                    {group.children.map((childId) => {
-                      const child = NAV_ITEM_BY_ID.get(childId);
-                      if (!child) return null;
-                      const on = childId === active;
-                      return (
-                        <button
-                          key={childId}
-                          onClick={() => {
-                            onChange(childId);
-                            markSectionSeen(childId);
-                          }}
-                          className={`relative flex h-9 w-full items-center gap-2 rounded-md px-2.5 text-start text-[13px] transition-colors ${
-                            on ? "text-ink" : "text-ink-subtle hover:text-ink-muted"
-                          }`}
-                        >
-                          {on && (
-                            <span
-                              aria-hidden
-                              className="harbor-rail-mark absolute inset-y-1 -start-3 w-[2px] rounded-full bg-ink"
-                            />
-                          )}
-                          <span
-                            className={`min-w-0 flex-1 truncate ${on ? "font-semibold" : "font-medium"}`}
-                          >
-                            {t(child.label)}
-                          </span>
-                          {isNew(childId) && (
-                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                          )}
-                          {status[childId] && (
-                            <span className="shrink-0 text-[10.5px] text-ink-subtle">
-                              {status[childId]}
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
+                    setOpenGroups((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(group.id)) next.delete(group.id);
+                      else next.add(group.id);
+                      return next;
+                    });
+                    return;
+                  }
+                  onChange(firstId);
+                  markSectionSeen(firstId);
+                }}
+                className={`${NAV_ROW_BASE} ${isActive ? NAV_ON : NAV_OFF}`}
+              >
+                <span className={NAV_ICON_SLOT}>
+                  {Icon && <Icon size={20} strokeWidth={1.7} />}
+                </span>
+                <span className={NAV_TEXT}>{t(group.label)}</span>
+                {anyNew && <NavNewDot />}
+                {groupDebrid && <NavChip tone="accent">{groupDebrid}</NavChip>}
+                {groupChip && (
+                  <NavChip tone={isLive(groupChip) ? "accent" : "muted"}>{groupChip}</NavChip>
                 )}
-              </div>
-            );
-          })}
-      </div>
+                {multi && (
+                  <span aria-hidden className="dir-icon shrink-0 text-ink-subtle">
+                    <span
+                      className={`inline-flex transition-transform duration-150 ${
+                        isOpen ? "rotate-90" : ""
+                      }`}
+                    >
+                      <IconChevronRight size={15} strokeWidth={2} />
+                    </span>
+                  </span>
+                )}
+              </button>
+              {isOpen && (
+                <div className="harbor-nav-expand flex flex-col">
+                  {group.children.map((childId) => {
+                    const child = NAV_ITEM_BY_ID.get(childId);
+                    if (!child) return null;
+                    const on = childId === active;
+                    return (
+                      <button
+                        key={childId}
+                        data-active={on ? "" : undefined}
+                        onClick={() => {
+                          onChange(childId);
+                          markSectionSeen(childId);
+                        }}
+                        className={`${NAV_CHILD_BASE} ${on ? NAV_ON : NAV_CHILD_OFF}`}
+                      >
+                        <span className={NAV_TEXT}>{t(child.label)}</span>
+                        {isNew(childId) && <NavNewDot />}
+                        {status[childId] && (
+                          <NavChip tone={isLive(status[childId] as string) ? "accent" : "muted"}>
+                            {status[childId]}
+                          </NavChip>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
     </nav>
   );
 }

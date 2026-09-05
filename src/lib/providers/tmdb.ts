@@ -90,3 +90,13 @@ export {
   tmdbEpisodeGroup,
   type StoryArc,
 } from "./tmdb/tmdb-episode-groups";
+
+export { tmdbEpisodeNames } from "./tmdb/tmdb-episode-names";
+
+export {
+  applyTmdbEpisodeNames,
+  needsTmdbEpisodeNames,
+  pickEpisodeName,
+  type NamedEpisode,
+  type TmdbEpisodeText,
+} from "./tmdb/tmdb-episode-name-merge";

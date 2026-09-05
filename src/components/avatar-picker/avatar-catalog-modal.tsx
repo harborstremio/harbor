@@ -33,8 +33,22 @@ export function AvatarCatalogModal({
   const [personBg, setPersonBg] = useState(loadPersonBg);
   const [dragging, setDragging] = useState(false);
   const dragDepth = useRef(0);
-  const { importing, flashIds, uploadsBadge, fileRef, folderRef, importImages, importFolder, onInputChange, runImport } =
-    useAvatarImport(section);
+  const {
+    importing,
+    flashIds,
+    uploadsBadge,
+    fileRef,
+    folderRef,
+    packRef,
+    packError,
+    clearPackError,
+    importImages,
+    importFolder,
+    importPack,
+    onInputChange,
+    onPackInputChange,
+    runImport,
+  } = useAvatarImport(section);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -48,6 +62,14 @@ export function AvatarCatalogModal({
     folderRef.current?.setAttribute("webkitdirectory", "");
     folderRef.current?.setAttribute("directory", "");
   }, [folderRef]);
+
+  const exportPack = async (packId: string) => {
+    const pack = packs.find((p) => p.id === packId);
+    if (!pack) return;
+    const { avatarPackToJson, packFileName } = await import("@/lib/avatars/pack-json");
+    const { savePackJson } = await import("./avatar-pack-file");
+    await savePackJson(packFileName(pack), avatarPackToJson(pack));
+  };
 
   const groups = useMemo<ViewGroup[]>(() => {
     const catalog = AVATAR_CATALOG.map((g) => ({
@@ -200,6 +222,7 @@ export function AvatarCatalogModal({
 
         <input ref={fileRef} type="file" accept="image/*" multiple onChange={onInputChange} className="hidden" />
         <input ref={folderRef} type="file" multiple onChange={onInputChange} className="hidden" />
+        <input ref={packRef} type="file" accept="application/json,.json" onChange={onPackInputChange} className="hidden" />
 
         <div className="relative flex min-h-0 flex-1">
           <AvatarRail
@@ -213,6 +236,8 @@ export function AvatarCatalogModal({
             }}
             onImport={importImages}
             onImportFolder={importFolder}
+            onImportPack={importPack}
+            onExportPack={exportPack}
             onHelp={() => setHelpOpen(true)}
             onDeletePack={removePack}
           />
@@ -234,6 +259,18 @@ export function AvatarCatalogModal({
               ) : null}
             </div>
           </div>
+          {packError && (
+            <div className="absolute inset-x-0 bottom-0 z-20 flex items-center gap-3 border-t border-edge-soft bg-surface px-6 py-3">
+              <span className="flex-1 text-[12.5px] text-ink-muted">{packError}</span>
+              <button
+                type="button"
+                onClick={clearPackError}
+                className="shrink-0 rounded-md px-2 py-1 text-[12px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+              >
+                {t("common.close")}
+              </button>
+            </div>
+          )}
           {importing && (
             <div className="animate-scrim-in absolute inset-0 z-20 flex bg-surface">
               <AvatarImportProgress done={importing.done} total={importing.total} />

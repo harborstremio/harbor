@@ -2,7 +2,14 @@ import { Image as ImageIcon, Layers, RotateCcw, Upload } from "lucide-react";
 import { useRef, useState, type ChangeEvent } from "react";
 import type { PlayerControlId } from "@/lib/player-chrome";
 import { getIconPresets, presetThumb, type IconPreset } from "@/lib/player-icon-presets";
+import { tvFocus } from "@/lib/keyboard-navigation";
 import { useT } from "@/lib/i18n";
+import { stripArrowKeys } from "../shared";
+
+const OVERLAY_LABEL =
+  "text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px]";
+const ICON_BTN =
+  "flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-white/85 transition-colors hover:bg-white/15 hover:text-white";
 
 const MAX_BYTES = 256 * 1024;
 const WARN_BYTES = Math.floor(MAX_BYTES * 0.8);
@@ -32,7 +39,9 @@ export function IconUpload({
   const t = useT();
   if (!replaceable) {
     return (
-      <span className="flex h-9 items-center whitespace-nowrap rounded-md bg-white/4 px-3 text-[10.5px] uppercase tracking-[0.16em] text-white/35">
+      <span
+        className={`flex h-11 items-center whitespace-nowrap rounded-md bg-white/4 px-3.5 ${OVERLAY_LABEL} text-white/60`}
+      >
         {t("Icon locked")}
       </span>
     );
@@ -73,19 +82,19 @@ function PresetRow({
   };
   return (
     <div className="flex items-center gap-1">
-      <span className="text-[9px] uppercase tracking-[0.14em] text-white/40">{t("Preset")}</span>
+      <span className={`${OVERLAY_LABEL} text-white/60`}>{t("Preset")}</span>
       {presets.map((p) => (
         <button
           key={p.id}
           type="button"
           onClick={() => apply(p)}
           title={t("{label} icons", { label: t(p.label) })}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/12 bg-white/6 transition-colors hover:border-accent hover:bg-white/12"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-white/12 bg-white/6 transition-colors hover:border-accent hover:bg-white/12"
         >
           <img
             src={presetThumb(p)}
             alt={t(p.label)}
-            className="h-5 w-5 object-contain"
+            className="h-6 w-6 object-contain"
             draggable={false}
           />
         </button>
@@ -109,6 +118,8 @@ function SingleUpload({
   const [busy, setBusy] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const pickRef = useRef<HTMLButtonElement>(null);
+  const resetRef = useRef<HTMLButtonElement>(null);
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return;
@@ -172,8 +183,17 @@ function SingleUpload({
         warning={warning}
         label={label}
       />
-      <PickButton onPick={(f) => void handleFile(f)} busy={busy} />
-      {currentUrl && <ResetButton onClick={onReset} />}
+      <PickButton btnRef={pickRef} onPick={(f) => void handleFile(f)} busy={busy} />
+      {currentUrl && (
+        <ResetButton
+          btnRef={resetRef}
+          onClick={() => {
+            if (pickRef.current && document.activeElement === resetRef.current)
+              tvFocus(pickRef.current);
+            onReset();
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -191,18 +211,25 @@ function MultiStateUpload({
 }) {
   const t = useT();
   const [activeState, setActiveState] = useState(states[0]?.id);
+  const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const active = states.find((s) => s.id === activeState) ?? states[0];
   if (!active) return null;
   return (
     <div className="flex items-center gap-2">
-      <div className="flex items-center gap-0.5 rounded-md bg-white/8 p-0.5">
-        {states.map((s) => (
+      <div
+        onKeyDown={stripArrowKeys(btnRefs, (i) => setActiveState(states[i].id))}
+        className="flex items-center gap-0.5 rounded-md bg-white/8 p-0.5"
+      >
+        {states.map((s, i) => (
           <button
             key={s.id}
+            ref={(el) => {
+              btnRefs.current[i] = el;
+            }}
             type="button"
             onClick={() => setActiveState(s.id)}
-            className={`flex h-8 items-center gap-1 rounded-md px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] transition-colors ${
-              s.id === active.id ? "bg-white/18 text-white" : "text-white/55 hover:text-white/85"
+            className={`flex h-11 items-center gap-2 rounded-md px-3 text-[15px] font-medium transition-colors ${
+              s.id === active.id ? "bg-white/18 text-white" : "text-white/70 hover:text-white"
             }`}
           >
             {s.url && <span className="h-2 w-2 rounded-full bg-success" />}
@@ -221,9 +248,9 @@ function MultiStateUpload({
           type="button"
           onClick={() => onApplyToAll(active.url!)}
           title={t("Use this icon for all states")}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-white/85 transition-colors hover:bg-white/15 hover:text-white"
+          className={ICON_BTN}
         >
-          <Layers size={14} strokeWidth={2.3} />
+          <Layers size={18} strokeWidth={2.3} />
         </button>
       )}
     </div>
@@ -247,7 +274,7 @@ function Thumb({
   return (
     <div
       title={warning ?? (label ? t("{label} icon", { label }) : undefined)}
-      className={`relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-white/8 transition-colors ${
+      className={`relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-white/8 transition-colors ${
         dragOver
           ? "border-accent ring-2 ring-accent"
           : warning
@@ -258,9 +285,9 @@ function Thumb({
       {busy ? (
         <Spinner />
       ) : currentUrl ? (
-        <img src={currentUrl} alt="" className="h-6 w-6 object-contain" draggable={false} />
+        <img src={currentUrl} alt="" className="h-7 w-7 object-contain" draggable={false} />
       ) : (
-        <ImageIcon size={14} className="text-white/40" strokeWidth={2.1} />
+        <ImageIcon size={18} className="text-white/50" strokeWidth={2.1} />
       )}
       {warning && !busy && (
         <span className="absolute -end-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent ring-1 ring-black/40" />
@@ -269,7 +296,15 @@ function Thumb({
   );
 }
 
-function PickButton({ onPick, busy }: { onPick: (file: File | undefined) => void; busy: boolean }) {
+function PickButton({
+  onPick,
+  busy,
+  btnRef,
+}: {
+  onPick: (file: File | undefined) => void;
+  busy: boolean;
+  btnRef?: React.Ref<HTMLButtonElement>;
+}) {
   const t = useT();
   const ref = useRef<HTMLInputElement>(null);
   return (
@@ -285,30 +320,38 @@ function PickButton({ onPick, busy }: { onPick: (file: File | undefined) => void
         className="hidden"
       />
       <button
+        ref={btnRef}
         type="button"
         disabled={busy}
         onClick={() => ref.current?.click()}
         title={t("Upload icon")}
         aria-label={t("Upload icon")}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-white/85 transition-colors hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+        className={`${ICON_BTN} disabled:cursor-not-allowed disabled:opacity-40`}
       >
-        <Upload size={14} strokeWidth={2.3} />
+        <Upload size={18} strokeWidth={2.3} />
       </button>
     </>
   );
 }
 
-function ResetButton({ onClick }: { onClick: () => void }) {
+function ResetButton({
+  onClick,
+  btnRef,
+}: {
+  onClick: () => void;
+  btnRef?: React.Ref<HTMLButtonElement>;
+}) {
   const t = useT();
   return (
     <button
+      ref={btnRef}
       type="button"
       onClick={onClick}
       title={t("Reset to default")}
       aria-label={t("Reset icon")}
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-white/85 transition-colors hover:bg-white/15 hover:text-white"
+      className={ICON_BTN}
     >
-      <RotateCcw size={14} strokeWidth={2.3} />
+      <RotateCcw size={18} strokeWidth={2.3} />
     </button>
   );
 }

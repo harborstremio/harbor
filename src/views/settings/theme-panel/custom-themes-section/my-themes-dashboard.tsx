@@ -3,6 +3,7 @@ import { BookOpen, RefreshCw, UploadCloud } from "lucide-react";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import { myThemes, type StoreTheme } from "@/lib/theme-store";
 import { useT } from "@/lib/i18n";
+import { ROW_TITLE } from "../../shared";
 import { CheatSheet } from "../theme-studio/cheat-sheet";
 import { AuthorAccountPanel } from "./author-account-panel";
 import { SignedInBar, type AuthorStats } from "./author-account-panel/signed-in-bar";
@@ -19,14 +20,12 @@ export function ApiCheatCard({ compact = false }: { compact?: boolean }) {
         className={`flex flex-col gap-3 rounded-md bg-surface ring-1 ring-edge-soft ${compact ? "p-4" : "p-5"}`}
       >
         <div className="flex items-start gap-3">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-elevated text-ink-muted">
-            <BookOpen size={18} strokeWidth={2} />
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-elevated text-ink-muted">
+            <BookOpen size={20} strokeWidth={2} />
           </span>
           <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="text-[14.5px] font-semibold tracking-tight text-ink">
-              {t("Theme API cheat sheet")}
-            </span>
-            <span className="text-[12.5px] leading-snug text-ink-muted">
+            <span className={ROW_TITLE}>{t("Theme API cheat sheet")}</span>
+            <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
               {t(
                 "Every color token, stable selector, {api} call, live hook (bell, account menu, avatar, status dot, unread badge), and copy-paste recipe.",
                 { api: "window.harbor" },
@@ -37,9 +36,9 @@ export function ApiCheatCard({ compact = false }: { compact?: boolean }) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex h-10 items-center justify-center gap-2 rounded-md bg-ink text-[13.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+          className="flex h-11 items-center justify-center gap-2 rounded-md bg-ink text-[15.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
         >
-          <BookOpen size={14} strokeWidth={2.2} />
+          <BookOpen size={18} strokeWidth={2.2} />
           {t("Open the cheat sheet")}
         </button>
       </div>
@@ -110,16 +109,16 @@ export function MyThemesDashboard() {
               <h3 className="text-[18px] font-semibold tracking-tight text-ink">
                 {t("Published themes")}
               </h3>
-              <p className="text-[13px] text-ink-subtle">
+              <p className="max-w-[70ch] text-[15.5px] leading-[22px] text-ink-subtle">
                 {t("Push updates, flip visibility, and track where each one is in review.")}
               </p>
             </div>
             <button
               onClick={load}
               aria-label={t("Refresh")}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink-muted ring-1 ring-edge-soft transition-colors hover:text-ink hover:ring-edge"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted ring-1 ring-edge-soft transition-colors hover:text-ink hover:ring-edge"
             >
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
             </button>
           </div>
 
@@ -133,7 +132,7 @@ export function MyThemesDashboard() {
               ))}
             </div>
           ) : error ? (
-            <div className="rounded-md bg-danger/15 px-4 py-6 text-center text-[13px] text-danger ring-1 ring-danger">
+            <div className="rounded-md bg-danger/15 px-4 py-6 text-center text-[15.5px] leading-[22px] text-danger ring-1 ring-danger">
               {error}
             </div>
           ) : themes.length === 0 ? (
@@ -175,8 +174,8 @@ function EmptyState() {
         <UploadCloud size={24} strokeWidth={1.9} />
       </span>
       <div className="flex max-w-sm flex-col gap-1">
-        <span className="text-[15px] font-semibold text-ink">{t("No published themes yet")}</span>
-        <span className="text-[13px] leading-relaxed text-ink-subtle">
+        <span className={ROW_TITLE}>{t("No published themes yet")}</span>
+        <span className="max-w-[70ch] text-[15.5px] leading-[22px] text-ink-subtle">
           {t(
             "Open the library, hit Share a theme, and your first publication shows up here with its review status, downloads, and version history.",
           )}

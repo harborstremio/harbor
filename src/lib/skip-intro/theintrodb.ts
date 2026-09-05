@@ -1,4 +1,5 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
+import type { Settings } from "@/lib/settings";
 import type { SkipKind, SkipSegment } from "./types";
 import { warnProviderFailure } from "./provider-log";
 
@@ -13,11 +14,37 @@ type RawResponse = {
   preview?: RawSpan[];
 };
 
+type TheIntroDbKeyed = { theIntroDbKey?: string };
+
+const API_KEY_HEADER = "X-API-Key";
+
 const cache = new Map<string, RawResponse | null>();
 const inflight = new Map<string, Promise<RawResponse | null>>();
 
 const FAILURE_COOLDOWN_MS = 10 * 60 * 1000;
 let coolingUntil = 0;
+
+let apiKey = "";
+let epoch = 0;
+
+export function readTheIntroDbKey(settings: Settings): string {
+  const raw = (settings as Settings & TheIntroDbKeyed).theIntroDbKey;
+  return typeof raw === "string" ? raw.trim() : "";
+}
+
+export function theIntroDbKeyPatch(value: string): Partial<Settings> {
+  return { theIntroDbKey: value.trim() } as Partial<Settings> & TheIntroDbKeyed;
+}
+
+export function setTheIntroDbApiKey(key: string): void {
+  const next = key.trim();
+  if (next === apiKey) return;
+  apiKey = next;
+  epoch += 1;
+  cache.clear();
+  inflight.clear();
+  coolingUntil = 0;
+}
 
 function pickId(metaId: string): { tmdb?: string; imdb?: string } | null {
   if (metaId.startsWith("tmdb:movie:")) return { tmdb: metaId.slice("tmdb:movie:".length) };
@@ -46,24 +73,29 @@ async function fetchRaw(cacheKey: string): Promise<RawResponse | null> {
   if (Date.now() < coolingUntil) return null;
   const pending = inflight.get(cacheKey);
   if (pending) return pending;
+  const gen = epoch;
+  const key = apiKey;
   const p = (async () => {
-    const res = await fetch(`https://api.theintrodb.org/v2/media?${cacheKey}`);
+    const res = await fetch(
+      `https://api.theintrodb.org/v2/media?${cacheKey}`,
+      key ? { headers: { [API_KEY_HEADER]: key } } : undefined,
+    );
     if (!res.ok) {
       if (res.status === 404) {
-        cache.set(cacheKey, null);
+        if (gen === epoch) cache.set(cacheKey, null);
       } else {
-        coolingUntil = Date.now() + FAILURE_COOLDOWN_MS;
+        if (gen === epoch) coolingUntil = Date.now() + FAILURE_COOLDOWN_MS;
         warnProviderFailure("theintrodb", res.status, cacheKey);
       }
       return null;
     }
     const json = (await res.json()) as RawResponse;
-    cache.set(cacheKey, json);
+    if (gen === epoch) cache.set(cacheKey, json);
     return json;
   })()
     .catch(() => null)
     .finally(() => {
-      inflight.delete(cacheKey);
+      if (gen === epoch) inflight.delete(cacheKey);
     });
   inflight.set(cacheKey, p);
   return p;

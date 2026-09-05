@@ -1,4 +1,3 @@
-import { ActionRow } from "../advanced-panel/action-row";
 import { resetOmdbBudget, subscribeOmdbBudget, type OmdbBudget, omdbBudget as readOmdbBudget } from "@/lib/providers/omdb";
 import { useEffect, useState } from "react";
 import { Music, Check, RotateCw } from "lucide-react";
@@ -6,7 +5,7 @@ import { useSettings } from "@/lib/settings";
 import { hasCustomMetaAddon } from "@/lib/meta-resource";
 import { useT } from "@/lib/i18n";
 import { Section, Segmented, ToggleRow } from "../shared";
-import { SettingGroup, SettingRow, Nested } from "../kit";
+import { ROW_ACTION, SettingGroup, SettingRow, Nested } from "../kit";
 import { EpisodeOrderSetting } from "../episode-order-setting";
 import { useProviderKeys, type ProviderKeysArgs } from "./provider-keys";
 
@@ -20,15 +19,13 @@ export function ProvidersTab(props: ProviderKeysArgs) {
     <>
       {modals}
 
-      <Section title={t("Metadata providers")}>
+      <Section
+        title={t("Metadata providers")}
+        subtitle={t(
+          "A free TMDB key is highly recommended. It unlocks the full Harbor experience. The rest are optional, and Cinemeta works out of the box without any.",
+        )}
+      >
         <SettingGroup>
-          <SettingRow
-            wide
-            label={t("Bring your own keys")}
-            desc={t(
-              "A free TMDB key is highly recommended. It unlocks the full Harbor experience. The rest are optional, and Cinemeta works out of the box without any.",
-            )}
-          />
           {keyRow("tmdb")}
           {keyRow("omdb")}
           {keyRow("tvdb")}
@@ -37,6 +34,7 @@ export function ProvidersTab(props: ProviderKeysArgs) {
           {keyRow("rpdb")}
           {keyRow("postersrv")}
           {keyRow("nyt")}
+          {keyRow("sports")}
         </SettingGroup>
       </Section>
 
@@ -85,7 +83,8 @@ export function ProvidersTab(props: ProviderKeysArgs) {
       <Section title={t("Song identification")}>
         <SettingGroup>
           <SettingRow
-            icon={<Music size={16} />}
+            wide
+            icon={<Music size={18} strokeWidth={2} />}
             label={t("Song ID provider")}
             desc={t("Which service names the track when you tap Identify song in the player.")}
           >
@@ -123,32 +122,39 @@ function OmdbBudgetRow() {
     return () => clearTimeout(t);
   }, [confirmed]);
 
+  const label = tr("OMDB daily budget");
+
   if (!settings.omdbKey) {
     return (
-      <ActionRow
-        label={tr("OMDB daily budget")}
-        sub={tr("Save an OMDB key in Library & metadata to enable rating fetches.")}
-        disabled
+      <SettingRow
+        label={label}
+        lockReason={tr("Save an OMDB key in Library & metadata to enable rating fetches.")}
       />
     );
   }
 
-  const sub = budget.keyInvalid
+  const desc = budget.keyInvalid
     ? tr("Key rejected. Check it on Library & metadata.")
     : tr("{used} / {limit} requests today.", { used: budget.used, limit: budget.limit }) +
       (budget.exhausted ? " " + tr("Budget exhausted, resets at midnight UTC.") : "");
 
   return (
-    <ActionRow
-      label={tr("OMDB daily budget")}
-      sub={sub}
-      cta={confirmed ? tr("Reset") : tr("Reset counter")}
-      icon={confirmed ? <Check size={14} strokeWidth={2.6} /> : <RotateCw size={14} />}
-      tone={confirmed ? "success" : "neutral"}
-      onClick={() => {
-        resetOmdbBudget();
-        setConfirmed(true);
-      }}
-    />
+    <SettingRow label={label} desc={desc}>
+      <button
+        type="button"
+        onClick={() => {
+          resetOmdbBudget();
+          setConfirmed(true);
+        }}
+        className={ROW_ACTION}
+      >
+        {confirmed ? (
+          <Check size={18} strokeWidth={2.4} className="text-accent" />
+        ) : (
+          <RotateCw size={18} strokeWidth={2.2} />
+        )}
+        {confirmed ? tr("Reset") : tr("Reset counter")}
+      </button>
+    </SettingRow>
   );
 }

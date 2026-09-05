@@ -89,6 +89,8 @@ const personalization: Record<string, string> = {
   "Off (use CPU)": "Kapalı (CPU'yu kullan)",
   "Off by default, so your controller only drives Harbor while it is the focused window. Leave it off if you play games with the same controller.":
     "Varsayılan olarak kapalıdır; böylece kumandanız Harbor'ı yalnızca odaktaki pencere olduğunda kontrol eder. Aynı kumandayla oyun oynuyorsanız kapalı bırakın.",
+  "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
+    "Varsayılan olarak kapalıdır. Profilinizi ziyaret eden herkese Letterboxd adınızı, listelerinizi ve film sayılarınızı gösterir. Bağlantıyı Ayarlar'daki Letterboxd bölümünden yönetebilirsiniz.",
   "Off by default. Shows your Simkl avatar, name and watch stats on your profile for anyone who visits. Manage the connection itself in Settings, Simkl.":
     "Varsayılan olarak kapalıdır. Profilinizi ziyaret eden herkese Simkl avatarınızı, adınızı ve izleme istatistiklerinizi gösterir. Bağlantıyı Ayarlar'daki Simkl bölümünden yönetebilirsiniz.",
   "Off keeps your font, background, and canvas as a private preview.":
@@ -97,6 +99,7 @@ const personalization: Record<string, string> = {
     "Eski dizüstü bilgisayarlar · düşük donanım · pil · takılma yaşayan her sistem",
   "On Cloudflare, click {b1}, then find {b2} and click {b3}.":
     "Cloudflare'de {b1} seçeneğine tıklayın, ardından {b2} seçeneğini bulup {b3} seçeneğine tıklayın.",
+  "On Letterboxd": "Letterboxd'da",
   "On Simkl": "Simkl'de",
   "On a beta that's giving you trouble? Pick an earlier build below and run its installer over your current copy. Your library, settings, and downloads all stay put.":
     "Kullandığınız beta sürümü sorun mu çıkarıyor? Aşağıdan önceki bir derlemeyi seçip yükleyicisini mevcut kurulumunuzun üzerine çalıştırın. Kütüphaneniz, ayarlarınız ve indirmeleriniz olduğu gibi kalır.",
@@ -140,6 +143,7 @@ const personalization: Record<string, string> = {
   "Open Discord's webhook help": "Discord webhook yardımını aç",
   "Open Harbor's settings outside playback.": "Oynatma dışında Harbor ayarlarını açın.",
   "Open Languages": "Dilleri aç",
+  "Open Letterboxd profile": "Letterboxd profilini aç",
   "Open Library settings": "Kütüphane ayarlarını aç",
   "Open SVP": "SVP'yi aç",
   "Open Settings": "Ayarları Aç",
@@ -176,6 +180,8 @@ const personalization: Record<string, string> = {
     "TMDB raflarını, posterlere işlenmiş puanları, fanart görsellerini ve TVDB bölüm verilerini kullanıma açan isteğe bağlı anahtarlar.",
   "Optional overlays that appear over the video.":
     "Videonun üzerinde görünen isteğe bağlı katmanlar.",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "İsteğe bağlı. TheIntroDB anahtarsız da yanıt verir, ancak anahtar istek sınırınızı yükselttiği için art arda izlerken zamanlama bilgisi gelmeye devam eder. Şu adresten alabilirsiniz:",
   Options: "Seçenekler",
   "Or just zip up images": "Ya da görselleri ZIP dosyası yapın",
   "Or try one of ours": "Ya da bizimkilerden birini deneyin",
@@ -215,6 +221,7 @@ const personalization: Record<string, string> = {
   "Paste your API token first.": "Önce API token'ınızı yapıştırın.",
   "Paste your SUBDL API key": "SUBDL API anahtarınızı yapıştırın",
   "Paste your Subsource API key": "Subsource API anahtarınızı yapıştırın",
+  "Paste your TheIntroDB API key": "TheIntroDB API anahtarınızı yapıştırın",
   "Pattern (e.g. \\bremux\\b)": "Desen (ör. \\bremux\\b)",
   "Pause when minimized": "Küçültülünce duraklat",
   "Pause when unfocused": "Odak kaybolunca duraklat",
@@ -397,6 +404,8 @@ const personalization: Record<string, string> = {
   "Ratings need a Harbor account": "Puan vermek için Harbor hesabı gerekir",
   "Re-apply to the window and taskbar now": "Şimdi pencereye ve görev çubuğuna yeniden uygula",
   "Re-authenticate": "Yeniden kimlik doğrula",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "İzlediğiniz yayını yeniden açın ve kaldığınız yerden devam edin.",
   "Re-run deploy or paste the correct URL":
     "Dağıtımı yeniden çalıştırın veya doğru URL'yi yapıştırın",
   "Re-runs the welcome flow and clears every dismissed tip.":
@@ -408,6 +417,7 @@ const personalization: Record<string, string> = {
   "Reading subtitles...": "Altyazılar okunuyor...",
   "Reading the cast": "Oyuncu kadrosu inceleniyor",
   "Reading your search": "Aramanız yorumlanıyor",
+  "Reads ahead": "İleri okuma",
   "Ready to send": "Gönderilmeye hazır",
   "Real-Debrid API token": "Real-Debrid API belirteci",
   "Real-Debrid, TorBox, AllDebrid, Premiumize, Debrid-Link. Cached streams play direct. Keys stay local.":
@@ -420,6 +430,7 @@ const personalization: Record<string, string> = {
   "Recent activity": "Son etkinlikler",
   "Recommended for You": "Size Önerilenler",
   "Record GIF": "GIF kaydet",
+  Recovery: "Kurtarma",
   "Redeploy instructions": "Yeniden dağıtım talimatları",
   "Redeploy relay": "Aktarıcıyı yeniden dağıt",
   "Redeploy to pick up the latest Watch Together fixes. The in-app banner clears once the new version is live.":
@@ -449,6 +460,7 @@ const personalization: Record<string, string> = {
   "Relay verified end-to-end": "Aktarıcı uçtan uca doğrulandı",
   "Relay version status": "Relay sürüm durumu",
   "Relay version {version}. Update available.": "Aktarıcı sürümü {version}. Güncelleme mevcut.",
+  "Reload source": "Kaynağı yeniden yükle",
   "Remaining only": "Yalnızca kalan",
   Remap: "Yeniden eşle",
   "Remember last stream": "Son yayını hatırla",
@@ -532,7 +544,10 @@ const personalization: Record<string, string> = {
   "Resolution filter": "Çözünürlük filtresi",
   "Resolution posters are decoded at. High is sized to your screen with headroom and looks identical to full res while using far less memory; Balanced saves the most; Maximum keeps original resolution.":
     "Posterlerin çözümleneceği çözünürlük. Yüksek, ek pay bırakılarak ekranınıza göre boyutlandırılır; çok daha az bellek kullanırken tam çözünürlükle aynı görünür. Dengeli en fazla tasarrufu sağlar. Maksimum ise özgün çözünürlüğü korur.",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "Harbor'ın kendi yayın sunucusunu yeniden başlatın; sunucu geri geldiğinde yayın yeniden yüklenir. Yalnızca masaüstünde çalışır.",
   "Restart engine": "Motoru yeniden başlat",
+  "Restart streaming server": "Yayın sunucusunu yeniden başlat",
   "Restore and reload": "Geri yükle ve yeniden yükle",
   "Restore dismissed hints": "Kapatılan ipuçlarını geri getir",
   "Restore from a backup": "Yedekten geri yükle",
@@ -831,6 +846,7 @@ const personalization: Record<string, string> = {
   "Show while paused": "Duraklatıldığında göster",
   "Show your AniList profile picture as your Harbor avatar.":
     "AniList profil resminizi Harbor avatarınız olarak gösterin.",
+  "Show your Letterboxd card": "Letterboxd kartınızı gösterin",
   "Show your Simkl card": "Simkl kartınızı gösterin",
   "Show your favourite games, books and music on your profile":
     "Favori oyunlarınızı, kitaplarınızı ve müziklerinizi profilinizde gösterin",
@@ -884,6 +900,7 @@ const personalization: Record<string, string> = {
   "Slow down a moment before posting again": "Tekrar paylaşmadan önce biraz bekleyin",
   "Slow or unstable connection": "Yavaş veya kararsız bağlantı",
   "Slow playback by 0.25x.": "Oynatma hızını 0.25x azaltın.",
+  Small: "Küçük",
   "Smart resync with speech recognition": "Konuşma tanıma ile akıllı yeniden eşitleme",
   "Smooth motion": "Akıcı hareket",
   "Smooth motion runs on the bundled mpv engine in the Harbor desktop app. It has no effect in the browser.":
@@ -1107,6 +1124,8 @@ const personalization: Record<string, string> = {
   "Telegram bot": "Telegram botu",
   "Telegram sends through a bot you create. You need two things: a":
     "Telegram, oluşturduğun bir bot üzerinden gönderim yapar. İki şeye ihtiyacın var: bir",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "On dakikalık ön yükleme. Kesintili Wi-Fi veya uzaktaki sunucular için tasarlandı; karşılığında oynatma daha geç başlar.",
   Test: "Test et",
   "Test badge rules (Try it)": "Rozet kurallarını test et (Dene)",
   "Test connection": "Bağlantıyı test et",
@@ -1166,6 +1185,8 @@ const personalization: Record<string, string> = {
   "The primary manages profiles and can't be deleted. Transfer it here to delete the old one.":
     "Birincil profil, profilleri yönetir ve silinemez. Eski profili silmek için birincil profil yetkisini buna aktarın.",
   "The quick brown fox jumps over the lazy dog": "Pijamalı hasta yağız şoföre çabucak güvendi",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "En hızlı başlangıç ve en az bellek kullanımı. Hızlı ve kararlı bağlantılarda ya da belleği kısıtlı makinelerde iyi sonuç verir.",
   "The ratings row on a title's detail page, next to runtime and genre.":
     "Bir içeriğin ayrıntı sayfasında süre ve türün yanında yer alan puanlar satırı.",
   "The resolution Harbor downloads for each image when you export a title's metadata next to the file on disk.":
@@ -1187,6 +1208,7 @@ const personalization: Record<string, string> = {
   "The window and taskbar icon updates right away. The installed shortcut refreshes on the next update.":
     "Pencere ve görev çubuğu simgesi hemen güncellenir. Yüklü kısayol bir sonraki güncellemede yenilenir.",
   "The yellow chip in the poster corner.": "Posterin köşesindeki sarı etiket.",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · intro ve jenerik zamanlamaları",
   "TheTVDB · episode data": "TheTVDB · bölüm verileri",
   Theme: "Tema",
   "Theme & appearance": "Tema ve görünüm",
@@ -1258,6 +1280,7 @@ const personalization: Record<string, string> = {
   "Time only, with a subtle shadow.": "Yalnızca saat ve hafif bir gölge.",
   "Timing looks aligned": "Zamanlama uyumlu görünüyor",
   "Timing rate": "Zamanlama hızı",
+  "Timing sources": "Zamanlama kaynakları",
   "Title text": "Başlık metni",
   "Titles, overviews, and taglines from TMDB display in this language when a translation exists. Needs a TMDB key.":
     "Çevirisi varsa TMDB'deki başlıklar, özetler ve sloganlar bu dilde gösterilir. TMDB anahtarı gerekir.",
@@ -1320,6 +1343,8 @@ const personalization: Record<string, string> = {
   Troubleshooting: "Sorun giderme",
   "True black menus": "Gerçek siyah menüler",
   "True fullscreen": "Gerçek tam ekran",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "Gerçek tam ekran tüm ekranı kaplar ve görev çubuğunu gizler, ancak uygulamalar arasında geçerken titreme olabilir. Kenarlıksız pencere aynı alanı çerçevesiz bir pencereyle kaplar; böylece alt-tab ve ekran katmanları anında tepki verir. Ekranı kapla seçeneği ekranı doldurur ancak görev ve başlık çubuklarını korur.",
   "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.":
     "Gerçek tam ekran tüm ekranı kaplar ve görev çubuğunu gizler. Ekranı kapla seçeneği ekranı doldurur ancak görev ve başlık çubuklarını korur, böylece uygulamalar arasında geçiş yapabilirsiniz.",
   "Try deploy again": "Dağıtmayı yeniden dene",
@@ -1449,6 +1474,7 @@ const personalization: Record<string, string> = {
   "Volume control": "Ses denetimi",
   "Voyage complete": "Yolculuk tamamlandı",
   WHEN: "ŞU DURUMDA",
+  "Wait before playing": "Oynatmadan önce bekleme",
   "Wait for the upload to finish. The relay URL gets written to":
     "Yüklemenin bitmesini bekleyin. Aktarıcı URL'si Harbor ayarlarındaki",
   "Wait for the upload to finish. The relay URL gets written to {code} in Harbor settings.":

@@ -87,6 +87,7 @@ export type ProfileSummary = {
     music?: FavoriteMedia[];
   };
   simkl?: SimklPublished | null;
+  letterboxd?: LetterboxdPublished | null;
   socials?: ResolvedSocial[];
   audioUrl?: string;
   minecraftName?: string;
@@ -125,6 +126,21 @@ export type SimklPublished = {
     totalCompleted: number;
     lastWatchedAt: string | null;
   } | null;
+};
+
+export type LetterboxdPublishedList = {
+  id: string;
+  name: string;
+  filmCount?: number;
+};
+
+export type LetterboxdPublished = {
+  username: string | null;
+  displayName: string | null;
+  profileUrl: string | null;
+  listCount: number;
+  filmCount: number;
+  lists: LetterboxdPublishedList[];
 };
 
 export type Friend = {

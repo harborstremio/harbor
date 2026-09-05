@@ -180,7 +180,7 @@ export function BundleBrowse({ kind, onShare }: { kind: BundleKind; onShare?: ()
               label={q ? t("Results") : t("All packs")}
             />
             {shown.length === 0 ? (
-              <p className="rounded-md border border-dashed border-edge px-4 py-14 text-center text-[13px] text-ink-subtle">
+              <p className="rounded-md border border-dashed border-edge px-4 py-14 text-center text-[15.5px] leading-[22px] text-ink-subtle">
                 {t(copy.noResults)}
               </p>
             ) : (
@@ -229,18 +229,18 @@ function FilterBar({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex h-8 items-center gap-1 rounded-full bg-elevated pe-3.5 ps-2.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+          className="inline-flex h-11 items-center gap-1.5 rounded-full bg-elevated pe-4 ps-3 text-[15.5px] font-semibold text-ink-muted transition-colors hover:bg-raised hover:text-ink"
         >
-          <ChevronLeft size={14} strokeWidth={2.4} className="dir-icon" /> {t("Featured")}
+          <ChevronLeft size={18} strokeWidth={2.4} className="dir-icon" /> {t("Featured")}
         </button>
       )}
-      <div className="flex h-8 items-center gap-2 rounded-full bg-elevated px-3.5">
-        <Search size={14} className="text-ink-subtle" />
+      <div className="flex h-11 items-center gap-2 rounded-full bg-elevated px-4">
+        <Search size={18} className="text-ink-subtle" />
         <input
           value={query}
           onChange={(e) => onQuery(e.target.value)}
           placeholder={t(copy.search)}
-          className="w-40 bg-transparent text-[12.5px] text-ink placeholder:text-ink-subtle focus:outline-none"
+          className="w-48 bg-transparent text-[15.5px] leading-[22px] text-ink placeholder:text-ink-subtle focus:outline-none"
         />
       </div>
       {SORTS.map((s) => (
@@ -248,7 +248,7 @@ function FilterBar({
           key={s.id}
           type="button"
           onClick={() => onSort(s.id)}
-          className={`h-8 rounded-full border px-3.5 text-[12.5px] font-semibold transition-colors ${
+          className={`h-11 rounded-full border px-4 text-[15.5px] font-semibold transition-colors ${
             activeSort === s.id
               ? "border-ink bg-ink text-canvas"
               : "border-edge-soft bg-elevated text-ink-muted hover:border-edge hover:text-ink"
@@ -257,7 +257,7 @@ function FilterBar({
           {t(s.label)}
         </button>
       ))}
-      <span className="ms-auto text-[12.5px] tabular-nums text-ink-subtle">
+      <span className="ms-auto text-[15.5px] leading-[22px] tabular-nums text-ink-subtle">
         {count} {count === 1 ? t(copy.unit) : t(copy.units)}
       </span>
     </div>
@@ -271,13 +271,13 @@ function BundleError({ message, onRetry }: { message: string; onRetry: () => voi
       <span className="grid h-12 w-12 place-items-center rounded-full bg-danger/15 text-danger">
         <AlertCircle size={22} />
       </span>
-      <p className="text-[13.5px] text-ink-muted">{message}</p>
+      <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{message}</p>
       <button
         type="button"
         onClick={onRetry}
-        className="flex h-10 items-center gap-2 rounded-full bg-ink px-5 text-[13px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
+        className="flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[15.5px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
       >
-        <RefreshCw size={14} strokeWidth={2.2} /> {t("Try again")}
+        <RefreshCw size={16} strokeWidth={2.2} /> {t("Try again")}
       </button>
     </div>
   );
@@ -292,13 +292,13 @@ function BundleEmpty({ copy, onShare }: { copy: Copy; onShare?: () => void }) {
       </span>
       <div className="flex flex-col gap-1.5">
         <h3 className="text-[18px] font-semibold tracking-tight text-ink">{t(copy.emptyTitle)}</h3>
-        <p className="text-[13.5px] leading-relaxed text-ink-muted">{t(copy.emptyBody)}</p>
+        <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t(copy.emptyBody)}</p>
       </div>
       {onShare && (
         <button
           type="button"
           onClick={onShare}
-          className="flex h-11 items-center gap-2 rounded-full bg-ink px-6 text-[13.5px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
+          className="flex h-11 items-center gap-2 rounded-full bg-ink px-6 text-[15.5px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
         >
           <Upload size={16} strokeWidth={2.2} /> {t(copy.share)}
         </button>

@@ -461,6 +461,9 @@ const settingsFill: Record<string, string> = {
   "Performance notice": "パフォーマンスに関する注意",
   "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.":
     "リアルタイムの顔スキャンではデバイス上のAIモデルが読み込まれ、再生中のRAM、CPU、GPUの使用量が大幅に増える場合があります。Harborの動作が遅くなったり、デバイスが熱くなったりする場合はオフにしてください。",
+  "Borderless window": "ボーダーレスウィンドウ",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "「全画面表示」は画面全体を覆ってタスクバーを隠しますが、アプリを切り替えるときにちらつくことがあります。「ボーダーレスウィンドウ」は枠のないウィンドウで同じ範囲を覆うため、Alt+Tabやオーバーレイが瞬時に切り替わります。「最大化」は画面いっぱいに広がりますが、タスクバーとタイトルバーは残ります。",
 };
 
 export default settingsFill;

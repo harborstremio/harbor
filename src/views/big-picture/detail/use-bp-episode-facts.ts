@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { lruSet } from "@/lib/cache";
-import { tmdbSeasonEpisodes } from "@/lib/providers/tmdb";
+import { pickEpisodeName, tmdbSeasonEpisodes } from "@/lib/providers/tmdb";
 import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
 import { useSettings } from "@/lib/settings";
 import { useBpEpisodeEnrich } from "./use-bp-episode-enrich";
@@ -9,6 +9,7 @@ export type BpEpisodeFact = {
   rating?: number;
   ratingIsImdb?: boolean;
   runtime?: number;
+  name?: string;
   overview?: string;
   airDate?: string;
 };
@@ -56,6 +57,7 @@ export function useBpEpisodeFacts(
         out.set(`${e.seasonNumber}:${e.episodeNumber}`, {
           rating: e.voteAverage != null && e.voteAverage > 0 ? e.voteAverage : undefined,
           runtime: e.runtime != null && e.runtime > 0 ? e.runtime : undefined,
+          name: pickEpisodeName(undefined, e.name),
           overview: e.overview || undefined,
           airDate: e.airDate ?? undefined,
         });
@@ -94,6 +96,7 @@ export function useBpEpisodeFacts(
         rating: imdbVal ?? tmdbVal ?? undefined,
         ratingIsImdb: imdbVal != null,
         runtime: base?.runtime ?? tv?.runtime,
+        name: pickEpisodeName(base?.name, tv?.name),
         overview: overview || undefined,
         airDate: base?.airDate ?? tv?.aired,
       });

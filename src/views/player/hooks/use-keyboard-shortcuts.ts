@@ -50,6 +50,8 @@ export function useKeyboardShortcuts(params: {
   onToggleAnime4k?: () => void;
   onAnime4kOn?: () => void;
   onAnime4kOff?: () => void;
+  onReloadSource?: () => void;
+  onRestartServer?: () => void;
   onVolumeFeedback?: (volume: number, muted: boolean) => void;
 }) {
   const {
@@ -87,6 +89,8 @@ export function useKeyboardShortcuts(params: {
     onToggleAnime4k,
     onAnime4kOn,
     onAnime4kOff,
+    onReloadSource,
+    onRestartServer,
     onVolumeFeedback,
   } = params;
   const { settings, update } = useSettings();
@@ -462,6 +466,18 @@ export function useKeyboardShortcuts(params: {
         onClipRecord();
         return;
       }
+      if (match("playerReloadSource") && onReloadSource) {
+        e.preventDefault();
+        if (e.repeat) return;
+        onReloadSource();
+        return;
+      }
+      if (match("playerRestartServer") && onRestartServer) {
+        e.preventDefault();
+        if (e.repeat) return;
+        onRestartServer();
+        return;
+      }
       if (!e.ctrlKey && !e.metaKey && !e.altKey) {
         if (e.key === "0") {
           e.preventDefault();
@@ -545,6 +561,8 @@ export function useKeyboardShortcuts(params: {
     onToggleAnime4k,
     onAnime4kOn,
     onAnime4kOff,
+    onReloadSource,
+    onRestartServer,
     onFrameStep,
     onVolumeFeedback,
     settings.playerEscExitsFullscreen,

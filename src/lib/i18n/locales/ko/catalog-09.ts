@@ -428,6 +428,7 @@ const catalog09: Record<string, string> = {
   "Show your AniList profile picture as your Harbor avatar.":
     "AniList 프로필 사진을 Harbor 아바타로 표시합니다.",
   "Show your Harbor profile picture on the community": "커뮤니티에 Harbor 프로필 사진 표시",
+  "Show your Letterboxd card": "Letterboxd 카드 표시",
   "Show your Simkl card": "Simkl 카드 표시",
   "Show your favourite games, books and music on your profile":
     "프로필에 좋아하는 게임, 책, 음악을 표시하세요",
@@ -647,6 +648,7 @@ const catalog09: Record<string, string> = {
     "커피와 함께 시작하기 좋은, 서서히 빠져드는 세계와 생생한 이야기입니다.",
   "Slowly fade between a show's backdrop images while you read the page, instead of holding one still. Only runs when the show has more than one backdrop, and never when you have pinned one or asked for reduced motion.":
     "페이지를 읽는 동안 한 장의 이미지를 고정하지 않고 작품의 배경 이미지를 천천히 전환합니다. 배경 이미지가 두 장 이상일 때만 작동하며, 이미지를 고정했거나 모션 감소를 요청한 경우에는 작동하지 않습니다.",
+  Small: "작게",
   "Small controls that sit around playback rather than in the picture.":
     "화면 안이 아니라 재생 화면 주변에 배치되는 작은 컨트롤입니다.",
   Smaller: "더 작게",
@@ -951,6 +953,7 @@ const catalog09: Record<string, string> = {
   "Streaming now": "현재 스트리밍 중",
   "Streaming quality": "스트리밍 화질",
   "Streaming server": "스트리밍 서버",
+  "Streaming server restarted.": "스트리밍 서버를 다시 시작했습니다.",
   "Streaming services on the TV": "TV의 스트리밍 서비스",
   "Streaming sources": "스트리밍 소스",
   Streams: "스트림",

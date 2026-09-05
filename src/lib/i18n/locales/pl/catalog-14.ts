@@ -1,5 +1,7 @@
 const catalog14: Record<string, string> = {
   "Titles and descriptions": "Tytuły i opisy",
+  "Titles you ignore on the advisory card never show it again.":
+    "Tytuły zignorowane na karcie ostrzeżenia nigdy więcej go nie wyświetlą.",
   "Titles, overviews, and taglines from TMDB display in this language when a translation exists. Needs a TMDB key.":
     "Tytuły, opisy i slogany z TMDB są wyświetlane w tym języku, jeśli istnieje tłumaczenie. Wymaga klucza TMDB.",
   "To clipboard": "Do schowka",
@@ -234,6 +236,8 @@ const catalog14: Record<string, string> = {
   "True Stories": "Prawdziwe historie",
   "True black menus": "Menu z prawdziwą czernią",
   "True fullscreen": "Prawdziwy tryb pełnoekranowy",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "Prawdziwy tryb pełnoekranowy zajmuje cały ekran i ukrywa pasek zadań, ale przełączanie aplikacji może powodować migotanie. Okno bez ramki obejmuje ten sam obszar za pomocą okna pozbawionego ramki, dzięki czemu alt-tab i nakładki działają natychmiast. Maksymalizacja wypełnia ekran, ale zachowuje pasek zadań i pasek tytułu.",
   "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.":
     "Prawdziwy tryb pełnoekranowy zajmuje cały ekran i ukrywa pasek zadań. Maksymalizacja wypełnia ekran, ale zachowuje pasek zadań i pasek tytułu, umożliwiając przełączanie aplikacji.",
   "True stories": "Prawdziwe historie",
@@ -645,6 +649,7 @@ const catalog14: Record<string, string> = {
   WHEN: "GDY",
   WIN: "WYGRANA",
   "WWII on Film": "II wojna światowa na filmie",
+  "Wait before playing": "Oczekiwanie przed odtwarzaniem",
   "Wait for the upload to finish. The relay URL gets written to":
     "Poczekaj na zakończenie przesyłania. Adres URL przekaźnika zostanie zapisany w",
   "Wait for the upload to finish. The relay URL gets written to {code} in Harbor settings.":

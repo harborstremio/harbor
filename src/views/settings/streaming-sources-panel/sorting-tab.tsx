@@ -1,7 +1,9 @@
+import { Check, Info } from "lucide-react";
 import { useSettings } from "@/lib/settings";
 import { Section } from "../shared";
+import { SettingRow } from "../kit";
+import { SRow } from "../ui";
 import { StreamPriorityCard } from "../stream-priority-card";
-import { ChoiceBlock } from "../player-panel/choice";
 import { useT } from "@/lib/i18n";
 
 export function SortingTab() {
@@ -10,16 +12,19 @@ export function SortingTab() {
   return (
     <Section
       title={t("Result order")}
-      subtitle={t("Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, like the Stremio and Vidi apps. Stream priority below decides which addon leads, in both modes.")}
+      subtitle={t(
+        "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, like the Stremio and Vidi apps. Stream priority below decides which addon leads, in both modes.",
+      )}
     >
-      <StreamSortPicker
-        value={settings.streamSort}
-        onChange={(v) => update({ streamSort: v })}
-      />
+      <StreamSortPicker value={settings.streamSort} onChange={(v) => update({ streamSort: v })} />
       <StreamPriorityCard />
-      <p className="rounded-md bg-elevated px-4 py-3 text-[12.5px] leading-relaxed text-ink-muted">
-        {t("Using AIOStreams or another aggregator addon? Its own sorting and filtering happen inside the addon before Harbor ever sees the results, then Harbor applies the stream filter and result order above on top. If results look thinner than expected, keep one side permissive: either relax the addon's internal filters or set Harbor's stream filter to Balanced or Off.")}
-      </p>
+      <SettingRow
+        icon={<Info size={18} strokeWidth={2.2} className="text-ink-subtle" />}
+        label={t("Aggregator addons")}
+        desc={t(
+          "Using AIOStreams or another aggregator addon? Its own sorting and filtering happen inside the addon before Harbor ever sees the results, then Harbor applies the stream filter and result order above on top. If results look thinner than expected, keep one side permissive: either relax the addon's internal filters or set Harbor's stream filter to Balanced or Off.",
+        )}
+      />
     </Section>
   );
 }
@@ -41,20 +46,26 @@ function StreamSortPicker({
     {
       id: "addon",
       label: t("Addon order"),
-      sub: t("Show each addon's results in the order it returned them, grouped by your addon list. Matches the Stremio and Vidi apps."),
+      sub: t(
+        "Show each addon's results in the order it returned them, grouped by your addon list. Matches the Stremio and Vidi apps.",
+      ),
     },
   ];
   return (
-    <div className="flex flex-col gap-1.5">
+    <>
       {options.map((opt) => (
-        <ChoiceBlock
+        <SRow
           key={opt.id}
-          selected={value === opt.id}
           onClick={() => onChange(opt.id)}
-          label={opt.label}
-          sub={opt.sub}
+          title={opt.label}
+          description={opt.sub}
+          trailing={
+            <span className="grid h-11 w-11 place-items-center">
+              {value === opt.id && <Check size={20} strokeWidth={2.4} className="text-accent" />}
+            </span>
+          }
         />
       ))}
-    </div>
+    </>
   );
 }

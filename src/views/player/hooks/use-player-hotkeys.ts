@@ -40,6 +40,8 @@ export function usePlayerHotkeys(params: {
   onToggleAnime4k?: () => void;
   onAnime4kOn?: () => void;
   onAnime4kOff?: () => void;
+  onReloadSource?: () => void;
+  onRestartServer?: () => void;
   onVolumeFeedback?: (volume: number, muted: boolean) => void;
 }) {
   const {
@@ -74,6 +76,8 @@ export function usePlayerHotkeys(params: {
     onToggleAnime4k,
     onAnime4kOn,
     onAnime4kOff,
+    onReloadSource,
+    onRestartServer,
     onVolumeFeedback,
   } = params;
 
@@ -118,6 +122,8 @@ export function usePlayerHotkeys(params: {
     onToggleAnime4k,
     onAnime4kOn,
     onAnime4kOff,
+    onReloadSource,
+    onRestartServer,
     onFrameStep: (dir) => bridgeRef.current?.frameStep?.(dir),
     onVolumeFeedback,
   });

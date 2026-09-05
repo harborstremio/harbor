@@ -1,7 +1,9 @@
-import { Eye, EyeOff, GripVertical } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronDown, ChevronUp, Eye, EyeOff, GripVertical } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { NavItem } from "@/chrome/nav-items";
 import { useT } from "@/lib/i18n";
+import { tvFocus } from "@/lib/keyboard-navigation";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 
 export function NavRow({
   item,
@@ -12,8 +14,12 @@ export function NavRow({
   dragging,
   dropBefore,
   dropAfter,
+  isFirst,
+  isLast,
   onRename,
   onToggleHidden,
+  onMoveUp,
+  onMoveDown,
   onDragStart,
   onOver,
   onDropItem,
@@ -27,8 +33,12 @@ export function NavRow({
   dragging: boolean;
   dropBefore: boolean;
   dropAfter: boolean;
+  isFirst: boolean;
+  isLast: boolean;
   onRename: (label: string) => void;
   onToggleHidden: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
   onDragStart: () => void;
   onOver: (pos: "before" | "after") => void;
   onDropItem: (pos: "before" | "after") => void;
@@ -36,6 +46,8 @@ export function NavRow({
 }) {
   const t = useT();
   const [draft, setDraft] = useState(name);
+  const upRef = useRef<HTMLButtonElement>(null);
+  const downRef = useRef<HTMLButtonElement>(null);
   useEffect(() => setDraft(name), [name]);
 
   const posFrom = (e: { clientY: number; currentTarget: HTMLElement }): "before" | "after" => {
@@ -43,8 +55,19 @@ export function NavRow({
     return e.clientY < rect.top + rect.height / 2 ? "before" : "after";
   };
 
-  const commit = () => {
-    if (draft.trim() !== name) onRename(draft);
+  const commit = (value: string) => {
+    if (value.trim() !== name) onRename(value);
+  };
+
+  const move = (up: boolean) => {
+    if (up) onMoveUp();
+    else onMoveDown();
+    requestAnimationFrame(() => {
+      const self = up ? upRef.current : downRef.current;
+      if (!self || !self.disabled) return;
+      const other = up ? downRef.current : upRef.current;
+      if (other && !other.disabled) tvFocus(other);
+    });
   };
 
   return (
@@ -83,15 +106,15 @@ export function NavRow({
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          onBlur={commit}
+          onBlur={(e) => commit(e.currentTarget.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              commit();
-              e.currentTarget.blur();
+              e.preventDefault();
+              commit(e.currentTarget.value);
             }
-            if (e.key === "Escape") {
+            if (isBackKey(e.nativeEvent)) {
               setDraft(name);
-              e.currentTarget.blur();
+              e.currentTarget.value = name;
             }
           }}
           aria-label={t("Rename {name}", { name })}
@@ -115,6 +138,12 @@ export function NavRow({
           {t("Renamed")}
         </button>
       )}
+      <MoveBtn ref={upRef} label={t("Move up")} disabled={isFirst} onClick={() => move(true)}>
+        <ChevronUp size={16} strokeWidth={2.4} />
+      </MoveBtn>
+      <MoveBtn ref={downRef} label={t("Move down")} disabled={isLast} onClick={() => move(false)}>
+        <ChevronDown size={16} strokeWidth={2.4} />
+      </MoveBtn>
       <button
         type="button"
         onClick={onToggleHidden}
@@ -129,6 +158,34 @@ export function NavRow({
         {hidden ? <EyeOff size={16} strokeWidth={2.2} /> : <Eye size={16} strokeWidth={2.2} />}
       </button>
     </div>
+  );
+}
+
+function MoveBtn({
+  ref,
+  label,
+  disabled,
+  onClick,
+  children,
+}: {
+  ref: React.Ref<HTMLButtonElement>;
+  label: string;
+  disabled: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      ref={ref}
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+      className="flex h-9 w-7 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-raised hover:text-ink disabled:opacity-25 disabled:hover:bg-transparent"
+    >
+      {children}
+    </button>
   );
 }
 

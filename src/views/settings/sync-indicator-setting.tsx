@@ -2,6 +2,7 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import type { SyncIndicatorPosition } from "@/lib/sync-toast-position";
 import { Section, Segmented, ToggleRow } from "./shared";
+import { SettingRow } from "./kit";
 
 const POSITIONS: ReadonlyArray<{ value: SyncIndicatorPosition; label: string }> = [
   { value: "top-left", label: "Top left" },
@@ -26,17 +27,17 @@ export function SyncIndicatorSetting() {
         onChange={(v) => update({ syncIndicator: v })}
       />
       {settings.syncIndicator && (
-        <div className="flex flex-col gap-2">
-          <span className="text-[13px] font-medium text-ink">{t("Position")}</span>
+        <SettingRow
+          wide
+          label={t("Position")}
+          desc={t("Corners keep it clear of subtitles along the bottom.")}
+        >
           <Segmented
             value={settings.syncIndicatorPosition}
             options={POSITIONS.map((o) => ({ ...o, label: t(o.label) }))}
             onChange={(v) => update({ syncIndicatorPosition: v })}
           />
-          <span className="text-[12.5px] leading-relaxed text-ink-subtle">
-            {t("Corners keep it clear of subtitles along the bottom.")}
-          </span>
-        </div>
+        </SettingRow>
       )}
     </Section>
   );

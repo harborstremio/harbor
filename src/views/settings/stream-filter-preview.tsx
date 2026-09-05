@@ -37,7 +37,7 @@ export function StreamFilterPreview({ level }: { level: Level }) {
 
   return (
     <div className="flex flex-col gap-3 rounded-md bg-elevated px-4 py-4">
-      <span className="flex items-baseline gap-2 text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+      <span className="harbor-settings-label flex items-baseline gap-2">
         {t("What gets through")}
         <span className="text-ink tabular-nums">
           {kept}/{SAMPLE.length}
@@ -56,7 +56,7 @@ export function StreamFilterPreview({ level }: { level: Level }) {
                 />
               </span>
               <span
-                className={`w-[92px] shrink-0 text-end text-[10.5px] leading-none transition-colors duration-200 ${
+                className={`w-[104px] shrink-0 text-end text-[13px] font-bold leading-[17px] tracking-[0.72px] transition-colors duration-200 ${
                   blocked ? "text-ink-subtle" : "text-ink-subtle/0"
                 }`}
               >

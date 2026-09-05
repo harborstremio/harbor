@@ -13,6 +13,8 @@ export type User = {
   avatar?: string;
 };
 
+export type ExternalCwSource = "simkl" | "trakt";
+
 export type LibraryItem = {
   _id: string;
   type: string;
@@ -35,7 +37,7 @@ export type LibraryItem = {
   temp: boolean;
   _ctime: string;
   _mtime: string;
-  external?: "simkl";
+  external?: ExternalCwSource;
   isAnime?: boolean;
   upNext?: boolean;
   local?: boolean;

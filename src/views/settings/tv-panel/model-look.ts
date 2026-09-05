@@ -57,7 +57,7 @@ export const SUB_LOOK_ROWS: TvRow[] = [
       { value: "Right", label: "Right" },
     ],
   },
-  { kind: "step", key: "subLookGap", label: "Line spacing", def: 6, min: 0, max: 40, step: 4 },
+  { kind: "step", key: "subLookGap", label: "Line spacing", def: 6, min: 0, max: 40, step: 2 },
   { kind: "toggle", key: "subLookBold", label: "Bold", def: false },
   {
     kind: "choice",

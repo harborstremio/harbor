@@ -11,7 +11,7 @@ import {
   Timer,
   X,
 } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import {
@@ -22,22 +22,25 @@ import {
   type EngineStatus,
 } from "@/lib/torrent/local-engine";
 import { Section, ToggleRow } from "../shared";
-import { SettingGroup, SettingRow, ROW_ACTION } from "../kit";
+import {
+  ROW_ACTION,
+  ROW_ACTION_DANGER,
+  ROW_ACTION_PRIMARY,
+  ROW_DESC,
+  SettingGroup,
+  SettingRow,
+} from "../kit";
+import { BADGE_BASE } from "./choice";
 
 type SelfTestResult = Awaited<ReturnType<typeof engineSelfTest>>;
 
 type EngineState = "running" | "stopped" | "error";
 
 const PILL: Record<EngineState, { dot: string; chip: string }> = {
-  running: { dot: "bg-success", chip: "bg-success/15 text-success" },
-  stopped: { dot: "bg-ink-subtle", chip: "bg-raised text-ink-muted" },
-  error: { dot: "bg-danger", chip: "bg-danger/15 text-danger" },
+  running: { dot: "bg-success", chip: "bg-elevated text-success" },
+  stopped: { dot: "bg-ink-subtle", chip: "bg-elevated text-ink-subtle" },
+  error: { dot: "bg-danger", chip: "bg-elevated text-danger" },
 };
-
-const ROW_ACTION_PRIMARY =
-  "harbor-press-pop flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-ink px-3.5 text-[12.5px] font-semibold text-canvas transition-colors hover:opacity-90 disabled:opacity-50";
-const ROW_ACTION_DANGER =
-  "harbor-press-pop flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-raised px-3.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-danger disabled:opacity-60";
 
 function engineState(status: EngineStatus | null): EngineState {
   if (status?.last_error) return "error";
@@ -45,21 +48,9 @@ function engineState(status: EngineStatus | null): EngineState {
   return "stopped";
 }
 
-function StateIcon({ on, children }: { on: boolean; children: ReactNode }) {
-  return (
-    <span
-      className={`flex h-9 w-9 items-center justify-center rounded-md ${
-        on ? "bg-accent-soft text-accent" : "bg-raised text-ink-subtle"
-      }`}
-    >
-      {children}
-    </span>
-  );
-}
-
 function Stat({ label, value, tone }: { label: string; value: string; tone?: string }) {
   return (
-    <span className="flex items-baseline gap-1.5 text-[12.5px] text-ink-subtle">
+    <span className="flex items-baseline gap-1.5 text-[15.5px] leading-[22px] text-ink-muted">
       {label}
       <span className={`font-mono tabular-nums ${tone ?? "text-accent"}`}>{value}</span>
     </span>
@@ -148,7 +139,7 @@ export function LocalEngineSection() {
       <SettingGroup label={t("Status")}>
         <SettingRow
           wide
-          icon={<Activity size={16} strokeWidth={1.9} />}
+          icon={<Activity size={18} strokeWidth={1.9} />}
           label={t("Engine status")}
           desc={t("Live state of Harbor's own torrent engine on this machine.")}
           tip={t(
@@ -156,10 +147,8 @@ export function LocalEngineSection() {
           )}
         >
           <div className="flex w-full flex-col gap-3">
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              <span
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold uppercase tracking-wider ${pill.chip}`}
-              >
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5">
+              <span className={`${BADGE_BASE} gap-1.5 ${pill.chip}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${pill.dot}`} />
                 {pillLabel}
               </span>
@@ -174,9 +163,11 @@ export function LocalEngineSection() {
               ) : null}
             </div>
             {status?.last_error && (
-              <div className="flex w-full flex-col gap-1.5 rounded-md bg-canvas px-3.5 py-2.5">
-                <span className="text-[12.5px] leading-relaxed text-danger">{status.last_error}</span>
-                <span className="text-[12.5px] leading-relaxed text-ink-subtle">
+              <div className="flex w-full flex-col gap-1.5 rounded-[10px] bg-elevated px-4 py-3">
+                <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-danger">
+                  {status.last_error}
+                </span>
+                <span className={`max-w-[66ch] ${ROW_DESC}`}>
                   {t(
                     "If streams stop loading, hit Clear & restart below to wipe the engine and start it fresh on a new port.",
                   )}
@@ -193,11 +184,7 @@ export function LocalEngineSection() {
           sub={t(
             "Peers, speed and progress on the player while a torrent streams. Sits top left, clear of the exit button.",
           )}
-          leading={
-            <StateIcon on={settings.playerP2pChip}>
-              <Gauge size={16} strokeWidth={2.2} />
-            </StateIcon>
-          }
+          leading={<Gauge size={18} strokeWidth={2.2} />}
           value={settings.playerP2pChip}
           onChange={(v) => update({ playerP2pChip: v })}
         />
@@ -207,11 +194,7 @@ export function LocalEngineSection() {
           sub={t(
             "When off, a torrent stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.",
           )}
-          leading={
-            <StateIcon on={settings.keepStreamDownloadsInBackground}>
-              <Download size={16} strokeWidth={2.2} />
-            </StateIcon>
-          }
+          leading={<Download size={18} strokeWidth={2.2} />}
           value={settings.keepStreamDownloadsInBackground}
           onChange={(v) => update({ keepStreamDownloadsInBackground: v })}
         />
@@ -221,11 +204,7 @@ export function LocalEngineSection() {
           sub={t(
             "Harbor normally starts its torrent engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a torrent. Takes effect next launch.",
           )}
-          leading={
-            <StateIcon on={settings.deferTorrentEngine}>
-              <Timer size={16} strokeWidth={2.2} />
-            </StateIcon>
-          }
+          leading={<Timer size={18} strokeWidth={2.2} />}
           value={settings.deferTorrentEngine}
           onChange={(v) => update({ deferTorrentEngine: v })}
         />
@@ -248,11 +227,13 @@ export function LocalEngineSection() {
         >
           <button
             type="button"
-            onClick={() => void runTest()}
-            disabled={busy || strictRemote}
-            className={ROW_ACTION_PRIMARY}
+            onClick={busy || strictRemote ? undefined : () => void runTest()}
+            aria-disabled={busy || strictRemote}
+            className={`${ROW_ACTION_PRIMARY}${
+              busy || strictRemote ? " pointer-events-none opacity-40" : ""
+            }`}
           >
-            {running ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} strokeWidth={2.4} />}
+            {running ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} strokeWidth={2.4} />}
             {running ? t("Running self-test") : t("Run self-test")}
           </button>
         </SettingRow>
@@ -261,11 +242,16 @@ export function LocalEngineSection() {
           label={t("Restart engine")}
           desc={t("Stops and starts the engine. Cached stream files are kept.")}
         >
-          <button type="button" onClick={() => void restart()} disabled={busy} className={ROW_ACTION}>
+          <button
+            type="button"
+            onClick={busy ? undefined : () => void restart()}
+            aria-disabled={busy}
+            className={`${ROW_ACTION}${busy ? " pointer-events-none opacity-45" : ""}`}
+          >
             {restarting ? (
-              <Loader2 size={14} className="animate-spin" />
+              <Loader2 size={16} className="animate-spin" />
             ) : (
-              <RotateCw size={14} strokeWidth={2.4} />
+              <RotateCw size={16} strokeWidth={2.4} />
             )}
             {restarting ? t("Restarting") : t("Restart engine")}
           </button>
@@ -274,62 +260,61 @@ export function LocalEngineSection() {
         <SettingRow
           label={t("Clear & restart")}
           desc={t("Wipes engine data and starts fresh on a new port.")}
+          warn={t("Cached stream files and the DHT cache are deleted. The next stream starts from scratch.")}
           tip={t(
             "The stronger fix when streams refuse to load. Cached stream files and the DHT cache are removed, so the next stream starts from scratch.",
           )}
         >
           <button
             type="button"
-            onClick={() => void clearAll()}
-            disabled={busy}
-            className={ROW_ACTION_DANGER}
+            onClick={busy ? undefined : () => void clearAll()}
+            aria-disabled={busy}
+            className={`${ROW_ACTION_DANGER}${busy ? " pointer-events-none opacity-45" : ""}`}
           >
             {clearing ? (
-              <Loader2 size={14} className="animate-spin" />
+              <Loader2 size={16} className="animate-spin" />
             ) : (
-              <Eraser size={14} strokeWidth={2.4} />
+              <Eraser size={16} strokeWidth={2.4} />
             )}
             {clearing ? t("Clearing") : t("Clear & restart")}
           </button>
         </SettingRow>
 
         {result && (
-          <div className="flex flex-col gap-2.5 rounded-md bg-elevated px-4 py-3.5">
-            <div className="flex items-center gap-2">
-              <span className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-                {t("Self-test")}
-              </span>
+          <div className="flex flex-col gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="harbor-settings-label">{t("Self-test")}</h3>
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold uppercase tracking-wider ${
-                  result.pass ? "bg-success/15 text-success" : "bg-danger/15 text-danger"
+                className={`${BADGE_BASE} gap-1.5 ${
+                  result.pass ? "bg-canvas text-success" : "bg-canvas text-danger"
                 }`}
               >
-                {result.pass ? <Check size={12} strokeWidth={2.8} /> : <X size={12} strokeWidth={2.8} />}
+                {result.pass ? <Check size={14} strokeWidth={2.8} /> : <X size={14} strokeWidth={2.8} />}
                 {result.pass ? t("Pass") : t("Fail")}
               </span>
             </div>
-            <ul className="flex flex-col gap-1">
+            <ul className="flex flex-col gap-2">
               {result.steps.map((step) => (
                 <li
                   key={step.label}
-                  className="flex items-center gap-2.5 rounded-md bg-canvas px-3 py-2 text-[12.5px]"
+                  className="flex flex-wrap items-center gap-2.5 text-[15.5px] leading-[22px]"
                 >
                   <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center ${
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center ${
                       step.ok ? "text-success" : step.warn ? "text-accent" : "text-danger"
                     }`}
                   >
                     {step.ok ? (
-                      <Check size={14} strokeWidth={2.8} />
+                      <Check size={16} strokeWidth={2.8} />
                     ) : step.warn ? (
-                      <AlertTriangle size={12} strokeWidth={2.6} />
+                      <AlertTriangle size={15} strokeWidth={2.6} />
                     ) : (
-                      <X size={14} strokeWidth={2.8} />
+                      <X size={16} strokeWidth={2.8} />
                     )}
                   </span>
-                  <span className="min-w-0 flex-1 truncate font-medium text-ink">{step.label}</span>
+                  <span className="min-w-0 flex-1 font-medium text-ink">{step.label}</span>
                   {step.detail && (
-                    <span className="min-w-0 shrink truncate text-end font-mono text-[11.5px] text-ink-subtle">
+                    <span className="min-w-0 break-all text-end font-mono text-[15.5px] text-ink-subtle">
                       {step.detail}
                     </span>
                   )}
@@ -337,14 +322,14 @@ export function LocalEngineSection() {
               ))}
             </ul>
             {udpBlocked && (
-              <div className="flex items-start gap-2 rounded-md bg-canvas px-3 py-2.5">
-                <AlertTriangle size={14} strokeWidth={2.4} className="mt-[2px] shrink-0 text-accent" />
-                <span className="text-[12.5px] leading-relaxed text-ink-muted">
+              <span className="flex items-start gap-2.5">
+                <AlertTriangle size={18} strokeWidth={2.4} className="mt-[2px] shrink-0 text-accent" />
+                <span className={`max-w-[66ch] ${ROW_DESC}`}>
                   {t(
                     "Your network blocks UDP, so DHT is offline, but HTTPS trackers are reachable over TCP. Streams can still find peers, they may just take a little longer to start.",
                   )}
                 </span>
-              </div>
+              </span>
             )}
           </div>
         )}

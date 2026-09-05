@@ -15,6 +15,7 @@ import unrate from "@/assets/ui-icons/unrate.svg?raw";
 import watchTogether from "@/assets/ui-icons/watch-together.svg?raw";
 import xray from "@/assets/ui-icons/xray.svg?raw";
 import allAddons from "@/assets/ui-icons/all-addons.svg?raw";
+import help from "@/assets/ui-icons/help.svg?raw";
 import playFilled from "@/assets/ui-icons/play-filled.svg?raw";
 import saveBanner from "@/assets/ui-icons/save-banner.svg?raw";
 import showcase from "@/assets/ui-icons/showcase.svg?raw";
@@ -50,6 +51,7 @@ const ICONS = {
   "watch-together": prep(watchTogether),
   xray: prep(xray),
   "all-addons": prep(allAddons),
+  help: prep(help),
   "play-filled": prep(playFilled),
   "save-banner": prep(saveBanner),
   showcase: prep(showcase),

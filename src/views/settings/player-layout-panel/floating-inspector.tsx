@@ -1,5 +1,7 @@
 import { useT } from "@/lib/i18n";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Eye, EyeOff, RotateCcw, X } from "lucide-react";
+import { useRef } from "react";
+import { tvFocus } from "@/lib/keyboard-navigation";
 import {
   CONTROL_META,
   controlStates,
@@ -18,6 +20,13 @@ import {
 import { panelConfig } from "./editor-panels";
 import { IconUpload } from "./icon-upload";
 import { slotLimit, SLOT_LABEL, visibleInSlot } from "./panel-utils";
+import { stripArrowKeys } from "../shared";
+
+const OVERLAY_LABEL =
+  "text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px]";
+const OVERLAY_TITLE = "text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-white";
+const SEG_BTN =
+  "flex h-11 shrink-0 items-center whitespace-nowrap rounded-md px-3 text-[15px] font-medium transition-colors";
 
 type Props = {
   config: PlayerChromeConfig;
@@ -55,6 +64,10 @@ export function FloatingInspector({
   onSetPreviewState,
 }: Props) {
   const t = useT();
+  const upRef = useRef<HTMLButtonElement>(null);
+  const downRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const stateRefs = useRef<(HTMLButtonElement | null)[]>([]);
   if (selectedPanelId) {
     return (
       <PanelInspector
@@ -74,30 +87,27 @@ export function FloatingInspector({
   const indexInSlot = peers.findIndex((c) => c.id === selectedId);
   const limit = slotLimit(control.slot);
   const crowded = peers.length >= limit;
+  const states = controlStates(selectedId);
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-6 z-30 flex flex-col items-center gap-2 px-6">
-      <div className="pointer-events-auto flex max-w-full items-stretch gap-1 overflow-x-auto rounded-md border border-white/12 bg-black/85 p-2 harbor-float backdrop-blur-2xl">
+      <div className="pointer-events-auto flex max-w-full flex-wrap items-stretch gap-1 rounded-md border border-white/12 bg-black/85 p-2 harbor-float backdrop-blur-2xl">
         <div className="flex shrink-0 flex-col items-start justify-center px-3 py-1">
-          <span className="text-[9.5px] font-semibold uppercase tracking-[0.18em] text-white/40">
-            {t(meta.group)}
-          </span>
-          <span className="whitespace-nowrap text-[13px] font-semibold text-white">
-            {t(meta.label)}
-          </span>
+          <span className={`${OVERLAY_LABEL} text-white/60`}>{t(meta.group)}</span>
+          <span className={`whitespace-nowrap ${OVERLAY_TITLE}`}>{t(meta.label)}</span>
         </div>
 
         <Divider />
 
         <Group label={t("Slot")}>
           <IconBtn
-            icon={<ArrowLeft size={14} strokeWidth={2.3} />}
+            icon={<ArrowLeft size={18} strokeWidth={2.3} className="dir-icon" />}
             onClick={() => onMoveSlot(-1)}
             title={t("Move to previous slot")}
           />
           <Chip>{t(SLOT_LABEL[control.slot])}</Chip>
           <IconBtn
-            icon={<ArrowRight size={14} strokeWidth={2.3} />}
+            icon={<ArrowRight size={18} strokeWidth={2.3} className="dir-icon" />}
             onClick={() => onMoveSlot(1)}
             title={t("Move to next slot")}
           />
@@ -107,8 +117,12 @@ export function FloatingInspector({
 
         <Group label={t("Order")}>
           <IconBtn
-            icon={<ArrowUp size={14} strokeWidth={2.3} />}
-            onClick={() => onMoveOrder(-1)}
+            btnRef={upRef}
+            icon={<ArrowUp size={18} strokeWidth={2.3} />}
+            onClick={() => {
+              handOff(upRef.current, indexInSlot <= 1 ? downRef.current : null);
+              onMoveOrder(-1);
+            }}
             disabled={peers.length <= 1 || indexInSlot <= 0}
             title={t("Move up")}
           />
@@ -116,27 +130,37 @@ export function FloatingInspector({
             {indexInSlot + 1} / {peers.length}
           </Chip>
           <IconBtn
-            icon={<ArrowDown size={14} strokeWidth={2.3} />}
-            onClick={() => onMoveOrder(1)}
+            btnRef={downRef}
+            icon={<ArrowDown size={18} strokeWidth={2.3} />}
+            onClick={() => {
+              handOff(downRef.current, indexInSlot >= peers.length - 2 ? upRef.current : null);
+              onMoveOrder(1);
+            }}
             disabled={peers.length <= 1 || indexInSlot >= peers.length - 1}
             title={t("Move down")}
           />
         </Group>
 
-        {controlStates(selectedId).length > 0 && (
+        {states.length > 0 && (
           <>
             <Divider />
             <Group label={t("Preview state")}>
-              <div className="flex items-center gap-0.5 rounded-md bg-white/8 p-0.5">
-                {controlStates(selectedId).map((s) => {
-                  const active = (previewStates[selectedId] ?? controlStates(selectedId)[0]) === s;
+              <div
+                onKeyDown={stripArrowKeys(stateRefs, (i) => onSetPreviewState(selectedId, states[i]))}
+                className="flex items-center gap-0.5 rounded-md bg-white/8 p-0.5"
+              >
+                {states.map((s, i) => {
+                  const active = (previewStates[selectedId] ?? states[0]) === s;
                   return (
                     <button
                       key={s}
+                      ref={(el) => {
+                        stateRefs.current[i] = el;
+                      }}
                       type="button"
                       onClick={() => onSetPreviewState(selectedId, s)}
-                      className={`h-8 whitespace-nowrap rounded-md px-2.5 text-[11.5px] font-medium transition-colors ${
-                        active ? "bg-white/18 text-white" : "text-white/55 hover:text-white/85"
+                      className={`${SEG_BTN} ${
+                        active ? "bg-white/18 text-white" : "text-white/70 hover:text-white"
                       }`}
                     >
                       {STATE_LABEL[s] ? t(STATE_LABEL[s]) : s}
@@ -168,9 +192,8 @@ export function FloatingInspector({
             replaceable={isIconReplaceable(selectedId)}
             controlId={selectedId}
             states={(() => {
-              const list = controlStates(selectedId);
-              if (list.length === 0) return undefined;
-              return list.map((s) => ({
+              if (states.length === 0) return undefined;
+              return states.map((s) => ({
                 id: s,
                 label: STATE_LABEL[s] ? t(STATE_LABEL[s]) : s,
                 url: config.customIcons?.[iconKey(selectedId, s)],
@@ -179,7 +202,7 @@ export function FloatingInspector({
             onUpload={(url, state) => onSetCustomIcon(selectedId, url, state)}
             onReset={(state) => onSetCustomIcon(selectedId, null, state)}
             onApplyToAll={(url) => {
-              for (const s of controlStates(selectedId)) onSetCustomIcon(selectedId, url, s);
+              for (const s of states) onSetCustomIcon(selectedId, url, s);
             }}
           />
         </Group>
@@ -190,9 +213,9 @@ export function FloatingInspector({
           <IconBtn
             icon={
               control.hidden ? (
-                <EyeOff size={14} strokeWidth={2.3} />
+                <EyeOff size={18} strokeWidth={2.3} />
               ) : (
-                <Eye size={14} strokeWidth={2.3} />
+                <Eye size={18} strokeWidth={2.3} />
               )
             }
             onClick={onToggleHidden}
@@ -200,7 +223,7 @@ export function FloatingInspector({
             title={t(control.hidden ? "Show this control" : "Hide this control")}
           />
           <IconBtn
-            icon={<RotateCcw size={14} strokeWidth={2.3} />}
+            icon={<RotateCcw size={18} strokeWidth={2.3} />}
             onClick={onResetControl}
             title={t("Reset to default")}
           />
@@ -209,14 +232,18 @@ export function FloatingInspector({
         <Divider />
 
         <IconBtn
-          icon={<X size={14} strokeWidth={2.3} />}
-          onClick={() => onSelect(null)}
+          btnRef={closeRef}
+          icon={<X size={18} strokeWidth={2.3} />}
+          onClick={() => {
+            handOff(closeRef.current, document.querySelector(`[data-control-id="${selectedId}"]`));
+            onSelect(null);
+          }}
           title={t("Deselect")}
         />
       </div>
 
       {crowded && (
-        <div className="pointer-events-auto rounded-full border border-accent/30 bg-accent/10 px-3.5 py-1.5 text-[11.5px] font-medium text-accent/90 backdrop-blur-xl">
+        <div className="pointer-events-auto max-w-[66ch] rounded-full border border-accent/30 bg-accent/10 px-4 py-2 text-[15.5px] font-medium leading-[22px] text-accent backdrop-blur-xl">
           {t("Slot is getting crowded ({count}/{limit}). May overflow on narrow screens.", {
             count: peers.length,
             limit,
@@ -227,12 +254,15 @@ export function FloatingInspector({
   );
 }
 
+function handOff(from: HTMLElement | null, to: Element | null) {
+  if (!from || !to || !(to instanceof HTMLElement) || document.activeElement !== from) return;
+  tvFocus(to);
+}
+
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex shrink-0 flex-col items-center gap-1 px-1.5 py-1">
-      <span className="text-[8.5px] font-semibold uppercase tracking-[0.18em] text-white/35">
-        {label}
-      </span>
+      <span className={`${OVERLAY_LABEL} text-white/60`}>{label}</span>
       <div className="flex items-center gap-1">{children}</div>
     </div>
   );
@@ -244,12 +274,14 @@ function IconBtn({
   disabled,
   title,
   variant,
+  btnRef,
 }: {
   icon: React.ReactNode;
   onClick: () => void;
   disabled?: boolean;
   title?: string;
   variant?: "default" | "active";
+  btnRef?: React.Ref<HTMLButtonElement>;
 }) {
   const tone =
     variant === "active"
@@ -257,13 +289,14 @@ function IconBtn({
       : "text-white/85 hover:bg-white/15 hover:text-white";
   return (
     <button
+      ref={btnRef}
       type="button"
       onClick={onClick}
       disabled={disabled}
       title={title}
       aria-label={title}
-      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition duration-150 active:scale-[0.94] ${
-        disabled ? "cursor-not-allowed text-white/25" : tone
+      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md transition duration-150 active:scale-[0.94] ${
+        disabled ? "cursor-not-allowed text-white/30" : tone
       }`}
     >
       {icon}
@@ -274,7 +307,7 @@ function IconBtn({
 function Chip({ children, mono }: { children: React.ReactNode; mono?: boolean }) {
   return (
     <span
-      className={`flex h-9 shrink-0 items-center whitespace-nowrap rounded-md bg-white/10 px-3 text-[11.5px] text-white/90 ${
+      className={`flex h-11 shrink-0 items-center whitespace-nowrap rounded-md bg-white/10 px-3.5 text-[15px] text-white ${
         mono ? "font-mono tabular-nums" : "font-medium"
       }`}
     >
@@ -317,56 +350,65 @@ function PanelInspector({
   onToggleHidden: (id: PanelId) => void;
 }) {
   const t = useT();
+  const placeRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const meta = PANEL_META[panelId];
   const cfg = panelConfig(config, panelId);
   const eyebrow = t(panelId === "episodes" ? "Series tab" : "Watch Together panel");
+  const sides = ["left", "right"] as const;
+  const placeCommit = (i: number) => {
+    if (meta.placementMode === "side") onSetCorner(panelId, sides[i] === "left" ? "top-left" : "top-right");
+    else onSetCorner(panelId, PANEL_CORNERS[i]);
+  };
   return (
     <div className="pointer-events-none absolute inset-x-0 top-6 z-40 flex flex-col items-center gap-2 px-6">
-      <div className="pointer-events-auto flex max-w-full items-stretch gap-1 overflow-x-auto rounded-md border border-white/12 bg-black/85 p-2 harbor-float backdrop-blur-2xl">
+      <div className="pointer-events-auto flex max-w-full flex-wrap items-stretch gap-1 rounded-md border border-white/12 bg-black/85 p-2 harbor-float backdrop-blur-2xl">
         <div className="flex shrink-0 flex-col items-start justify-center px-3 py-1">
-          <span className="text-[9.5px] font-semibold uppercase tracking-[0.18em] text-white/40">
-            {eyebrow}
-          </span>
-          <span className="whitespace-nowrap text-[13px] font-semibold text-white">
-            {t(meta.label)}
-          </span>
+          <span className={`${OVERLAY_LABEL} text-white/60`}>{eyebrow}</span>
+          <span className={`whitespace-nowrap ${OVERLAY_TITLE}`}>{t(meta.label)}</span>
         </div>
 
         <Divider />
 
         <div className="flex shrink-0 flex-col items-center gap-1 px-1.5 py-1">
-          <span className="text-[8.5px] font-semibold uppercase tracking-[0.18em] text-white/35">
+          <span className={`${OVERLAY_LABEL} text-white/60`}>
             {t(meta.placementMode === "side" ? "Side" : "Corner")}
           </span>
-          <div className="flex items-center gap-1">
+          <div onKeyDown={stripArrowKeys(placeRefs, placeCommit)} className="flex items-center gap-1">
             {meta.placementMode === "side"
-              ? (["left", "right"] as const).map((side) => {
+              ? sides.map((side, i) => {
                   const active = sideFromCorner(cfg.corner) === side;
                   const targetCorner: PanelCorner = side === "left" ? "top-left" : "top-right";
                   return (
                     <button
                       key={side}
+                      ref={(el) => {
+                        placeRefs.current[i] = el;
+                      }}
                       type="button"
                       onClick={() => onSetCorner(panelId, targetCorner)}
                       title={t(SIDE_LABEL[side])}
-                      className={`flex h-9 items-center whitespace-nowrap rounded-md px-2.5 text-[11.5px] font-medium transition-colors ${
-                        active ? "bg-white/18 text-white" : "text-white/55 hover:text-white/85"
+                      className={`${SEG_BTN} ${
+                        active ? "bg-white/18 text-white" : "text-white/70 hover:text-white"
                       }`}
                     >
                       {t(SIDE_LABEL[side])}
                     </button>
                   );
                 })
-              : PANEL_CORNERS.map((c) => {
+              : PANEL_CORNERS.map((c, i) => {
                   const active = cfg.corner === c;
                   return (
                     <button
                       key={c}
+                      ref={(el) => {
+                        placeRefs.current[i] = el;
+                      }}
                       type="button"
                       onClick={() => onSetCorner(panelId, c)}
                       title={t(CORNER_LABEL[c])}
-                      className={`flex h-9 items-center whitespace-nowrap rounded-md px-2.5 text-[11.5px] font-medium transition-colors ${
-                        active ? "bg-white/18 text-white" : "text-white/55 hover:text-white/85"
+                      className={`${SEG_BTN} ${
+                        active ? "bg-white/18 text-white" : "text-white/70 hover:text-white"
                       }`}
                     >
                       {t(CORNER_LABEL[c])}
@@ -382,9 +424,9 @@ function PanelInspector({
           <IconBtn
             icon={
               cfg.hidden ? (
-                <EyeOff size={14} strokeWidth={2.3} />
+                <EyeOff size={18} strokeWidth={2.3} />
               ) : (
-                <Eye size={14} strokeWidth={2.3} />
+                <Eye size={18} strokeWidth={2.3} />
               )
             }
             onClick={() => onToggleHidden(panelId)}
@@ -396,8 +438,12 @@ function PanelInspector({
         <Divider />
 
         <IconBtn
-          icon={<X size={14} strokeWidth={2.3} />}
-          onClick={() => onSelect(null)}
+          btnRef={closeRef}
+          icon={<X size={18} strokeWidth={2.3} />}
+          onClick={() => {
+            handOff(closeRef.current, document.querySelector(`[data-panel-id="${panelId}"]`));
+            onSelect(null);
+          }}
           title={t("Deselect")}
         />
       </div>
@@ -419,17 +465,24 @@ function VariantPicker({
   onChange: (v: ControlVariant) => void;
 }) {
   const t = useT();
+  const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
   return (
-    <div className="flex items-center gap-0.5 rounded-md bg-white/8 p-0.5">
-      {VARIANT_OPTIONS.map((opt) => {
+    <div
+      onKeyDown={stripArrowKeys(btnRefs, (i) => onChange(VARIANT_OPTIONS[i].value))}
+      className="flex items-center gap-0.5 rounded-md bg-white/8 p-0.5"
+    >
+      {VARIANT_OPTIONS.map((opt, i) => {
         const active = value === opt.value;
         return (
           <button
             key={opt.value}
+            ref={(el) => {
+              btnRefs.current[i] = el;
+            }}
             type="button"
             onClick={() => onChange(opt.value)}
-            className={`h-8 whitespace-nowrap rounded-md px-2.5 text-[11.5px] font-medium transition-colors ${
-              active ? "bg-white/18 text-white" : "text-white/55 hover:text-white/85"
+            className={`${SEG_BTN} ${
+              active ? "bg-white/18 text-white" : "text-white/70 hover:text-white"
             }`}
           >
             {t(opt.label)}

@@ -1835,6 +1835,15 @@ const sweep: Record<string, string> = {
     "Khi đổi ngôn ngữ siêu dữ liệu, Harbor sẽ tải lại để áp dụng ngôn ngữ mới. Hãy áp dụng sau khi hoàn tất các tùy chọn ở trên.",
   Colored: "Có màu",
   "Content advisory style": "Kiểu cảnh báo nội dung",
+  "Ignored titles": "Tựa phim đã bỏ qua",
+  "Titles you ignore on the advisory card never show it again.":
+    "Những tựa phim bạn bỏ qua trên thẻ cảnh báo sẽ không hiện lại cảnh báo nữa.",
+  "{count} titles will never show the content advisory again.":
+    "{count} tựa phim sẽ không bao giờ hiện lại cảnh báo nội dung.",
+  "{count} titles will never show the content advisory again.#one":
+    "{count} tựa phim sẽ không bao giờ hiện lại cảnh báo nội dung.",
+  "{count} titles will never show the content advisory again.#few":
+    "{count} tựa phim sẽ không bao giờ hiện lại cảnh báo nội dung.",
   "Cursor speed": "Tốc độ con trỏ",
   "Export your Harbor setup to a single file — pick exactly what goes in. Restore brings back only what the file contains. Your Stremio sign-in is always left out.":
     "Xuất cấu hình Harbor vào một tệp duy nhất, với nội dung do bạn chọn. Khi khôi phục, chỉ những nội dung có trong tệp mới được phục hồi. Thông tin đăng nhập Stremio luôn bị loại trừ.",

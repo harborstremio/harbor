@@ -1,6 +1,15 @@
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Check, Filter, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { advanceFocus, tvFocus } from "@/lib/keyboard-navigation";
+import {
+  findBest,
+  getDirection,
+  getFocusable,
+  isBackKey,
+  navOwnsFocus,
+} from "@/lib/keyboard-navigation/geometry";
 import type { StoreTheme } from "@/lib/theme-store";
 import { MOOD_RAILS, themeMoods, type Mood } from "./color-rank";
 import { MarketCard } from "./market/market-card";
@@ -14,6 +23,40 @@ const SORTS = [
 ] as const;
 
 type SortId = (typeof SORTS)[number]["id"];
+
+type MenuBox = { top: number; left: number; width: number; maxHeight: number; dropUp: boolean };
+
+const MENU_WIDTH = 360;
+const MENU_GAP = 6;
+const MENU_MARGIN = 12;
+
+function measureMenu(anchor: HTMLElement): MenuBox {
+  const rect = anchor.getBoundingClientRect();
+  const scroller = anchor.closest(".hset-main");
+  const scrollRect = scroller?.getBoundingClientRect();
+  const topLimit = Math.max(MENU_MARGIN, scrollRect ? scrollRect.top : 0);
+  const bottomLimit = Math.min(
+    window.innerHeight - MENU_MARGIN,
+    scrollRect ? scrollRect.bottom : window.innerHeight,
+  );
+  const preferred = Math.min(380, (bottomLimit - topLimit) * 0.9);
+  const above = Math.max(0, rect.top - topLimit - MENU_GAP);
+  const below = Math.max(0, bottomLimit - rect.bottom - MENU_GAP);
+  const dropUp = below < preferred && above > below;
+  const width = Math.min(MENU_WIDTH, window.innerWidth - MENU_MARGIN * 2);
+  const rtl = getComputedStyle(document.documentElement).direction === "rtl";
+  const left = Math.min(
+    Math.max(MENU_MARGIN, rtl ? rect.left : rect.right - width),
+    window.innerWidth - width - MENU_MARGIN,
+  );
+  const maxHeight = Math.max(120, Math.min(preferred, dropUp ? above : below));
+  const rawTop = dropUp ? rect.top - MENU_GAP - maxHeight : rect.bottom + MENU_GAP;
+  const top = Math.min(
+    Math.max(MENU_MARGIN, rawTop),
+    Math.max(MENU_MARGIN, window.innerHeight - MENU_MARGIN - maxHeight),
+  );
+  return { top, left, width, maxHeight, dropUp };
+}
 
 function sortThemes(list: StoreTheme[], sort: SortId): StoreTheme[] {
   const copy = [...list];
@@ -45,48 +88,57 @@ export function StoreBrowse({
   const [sort, setSort] = useState<SortId>("top");
   const [behavior, setBehavior] = useState<ThemeBehavior | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [filterDropUp, setFilterDropUp] = useState(false);
-  const [filterMenuMaxHeight, setFilterMenuMaxHeight] = useState(360);
+  const [filterBox, setFilterBox] = useState<MenuBox | null>(null);
   const filterRootRef = useRef<HTMLDivElement>(null);
+  const filterMenuRef = useRef<HTMLDivElement>(null);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const filterOptionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const filterMenuId = useId();
   const q = query.trim().toLowerCase();
 
+  const closeFilter = useCallback(() => {
+    const active = document.activeElement;
+    const ring = active instanceof HTMLElement && navOwnsFocus(active);
+    setFilterOpen(false);
+    requestAnimationFrame(() => {
+      const trigger = filterButtonRef.current;
+      if (!trigger) return;
+      if (ring) tvFocus(trigger);
+      else trigger.focus();
+    });
+  }, []);
+
   useEffect(() => {
     if (!filterOpen) return;
     const activeIndex = THEME_BEHAVIORS.findIndex((option) => option.id === behavior);
-    queueMicrotask(() => filterOptionRefs.current[Math.max(0, activeIndex)]?.focus());
+    queueMicrotask(() => {
+      const option = filterOptionRefs.current[Math.max(0, activeIndex)];
+      if (option) advanceFocus(option);
+    });
     const onPointerDown = (event: PointerEvent) => {
-      if (!filterRootRef.current?.contains(event.target as Node)) setFilterOpen(false);
+      const target = event.target as Node;
+      if (filterRootRef.current?.contains(target) || filterMenuRef.current?.contains(target)) return;
+      setFilterOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setFilterOpen(false);
-      filterButtonRef.current?.focus();
+      if (!isBackKey(event)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      closeFilter();
     };
     window.addEventListener("pointerdown", onPointerDown);
-    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown, true);
     return () => {
       window.removeEventListener("pointerdown", onPointerDown);
-      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keydown", onKeyDown, true);
     };
-  }, [filterOpen, behavior]);
+  }, [filterOpen, behavior, closeFilter]);
 
   useLayoutEffect(() => {
     if (!filterOpen) return;
     const updatePlacement = () => {
-      const rect = filterRootRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const viewportMargin = 12;
-      const menuGap = 6;
-      const preferredHeight = Math.min(360, window.innerHeight * 0.6);
-      const above = Math.max(0, rect.top - viewportMargin - menuGap);
-      const below = Math.max(0, window.innerHeight - rect.bottom - viewportMargin - menuGap);
-      const dropUp = below < preferredHeight && above > below;
-      const available = dropUp ? above : below;
-      setFilterDropUp(dropUp);
-      setFilterMenuMaxHeight(Math.min(preferredHeight, available));
+      const anchor = filterButtonRef.current;
+      if (anchor) setFilterBox(measureMenu(anchor));
     };
     updatePlacement();
     window.addEventListener("resize", updatePlacement);
@@ -96,6 +148,17 @@ export function StoreBrowse({
       window.removeEventListener("scroll", updatePlacement, true);
     };
   }, [filterOpen]);
+
+  const onFilterMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const dir = getDirection(event.nativeEvent);
+    const menu = filterMenuRef.current;
+    const from = event.target as HTMLElement;
+    if (!dir || !menu || !menu.contains(from)) return;
+    const next = findBest(from, getFocusable(menu), dir);
+    if (!next) return;
+    event.preventDefault();
+    advanceFocus(next, dir);
+  };
 
   const shown = useMemo(() => {
     const byMood = mood ? themes.filter((t) => themeMoods(t).has(mood)) : themes;
@@ -114,7 +177,7 @@ export function StoreBrowse({
             key={s.id}
             type="button"
             onClick={() => setSort(s.id)}
-            className={`h-8 rounded-full px-3.5 text-[12px] font-semibold transition-colors ${
+            className={`h-11 rounded-full px-4 text-[15.5px] font-semibold transition-colors ${
               sort === s.id
                 ? "bg-ink text-canvas"
                 : "bg-surface text-ink-muted ring-1 ring-edge-soft hover:text-ink hover:ring-edge"
@@ -127,10 +190,10 @@ export function StoreBrowse({
           <button
             type="button"
             onClick={onClearMood}
-            className="inline-flex h-8 items-center gap-1.5 rounded-full bg-accent-soft px-3 text-[12px] font-semibold text-accent transition-opacity hover:opacity-85"
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-accent-soft px-4 text-[15.5px] font-semibold text-accent transition-opacity hover:opacity-85"
           >
             {t(MOOD_RAILS.find((r) => r.mood === mood)?.title ?? mood)}
-            <X size={12} strokeWidth={2.6} />
+            <X size={16} strokeWidth={2.6} />
           </button>
         )}
         <div className="ms-auto flex items-center gap-2.5">
@@ -142,91 +205,100 @@ export function StoreBrowse({
               aria-haspopup="menu"
               aria-expanded={filterOpen}
               aria-controls={filterOpen ? filterMenuId : undefined}
-              className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold transition-colors ${
+              className={`inline-flex h-11 items-center gap-2 rounded-full px-4 text-[15.5px] font-semibold transition-colors ${
                 behavior
                   ? "bg-accent-soft text-accent ring-1 ring-accent/25"
                   : "bg-surface text-ink-muted ring-1 ring-edge-soft hover:text-ink hover:ring-edge"
               }`}
             >
-              <Filter size={13} strokeWidth={2.3} />
+              <Filter size={16} strokeWidth={2.3} />
               {t("Filter")}
             </button>
 
-            {filterOpen && (
-              <div
-                id={filterMenuId}
-                role="menu"
-                aria-label={t("Filter")}
-                style={{ maxHeight: filterMenuMaxHeight }}
-                className={`absolute end-0 z-40 w-[min(288px,calc(100vw-32px))] overflow-y-auto overscroll-contain rounded-xl border border-edge bg-elevated p-1 shadow-[0_22px_55px_-18px_rgba(0,0,0,0.7)] [scrollbar-width:thin] animate-popover-in ${
-                  filterDropUp ? "bottom-[calc(100%+6px)]" : "top-[calc(100%+6px)]"
-                }`}
-              >
-                <div className="grid grid-cols-2 gap-0.5">
-                  {THEME_BEHAVIORS.map((option, index) => {
-                    const active = behavior === option.id;
-                    return (
-                      <button
-                        key={option.id}
-                        ref={(element) => {
-                          filterOptionRefs.current[index] = element;
-                        }}
-                        type="button"
-                        role="menuitemradio"
-                        aria-checked={active}
-                        onClick={() => {
-                          setBehavior(active ? null : option.id);
-                          setFilterOpen(false);
-                          queueMicrotask(() => filterButtonRef.current?.focus());
-                        }}
-                        className={`relative flex min-w-0 flex-col gap-1.5 rounded-lg p-1.5 text-start text-[12px] font-medium transition-colors ${
-                          active
-                            ? "bg-accent-soft text-accent"
-                            : "text-ink-muted hover:bg-raised hover:text-ink"
-                        }`}
-                      >
-                        <div
-                          aria-hidden="true"
-                          className="aspect-[4/3] w-full overflow-hidden rounded-lg border border-edge-soft bg-surface"
+            {filterOpen &&
+              filterBox &&
+              createPortal(
+                <div
+                  ref={filterMenuRef}
+                  id={filterMenuId}
+                  role="menu"
+                  aria-label={t("Filter")}
+                  onKeyDown={onFilterMenuKeyDown}
+                  style={{
+                    position: "fixed",
+                    top: filterBox.top,
+                    left: filterBox.left,
+                    width: filterBox.width,
+                    maxHeight: filterBox.maxHeight,
+                  }}
+                  className={`z-[10000] overflow-y-auto overscroll-contain rounded-xl border border-edge bg-elevated p-1.5 harbor-float [scrollbar-width:thin] ${
+                    filterBox.dropUp ? "animate-menu-in-up" : "animate-menu-in"
+                  }`}
+                >
+                  <div className="grid grid-cols-2 gap-1">
+                    {THEME_BEHAVIORS.map((option, index) => {
+                      const active = behavior === option.id;
+                      return (
+                        <button
+                          key={option.id}
+                          ref={(element) => {
+                            filterOptionRefs.current[index] = element;
+                          }}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={active}
+                          onClick={() => {
+                            setBehavior(active ? null : option.id);
+                            closeFilter();
+                          }}
+                          className={`relative flex min-h-11 min-w-0 flex-col gap-2 rounded-lg p-2 text-start text-[15.5px] font-medium leading-[22px] transition-colors ${
+                            active
+                              ? "bg-accent-soft text-accent"
+                              : "text-ink-muted hover:bg-raised hover:text-ink"
+                          }`}
                         >
-                          <Diagram active={active} kind={option.id} />
-                        </div>
-                        <span className="flex w-full items-center justify-between gap-2 px-0.5 pb-0.5">
-                          <span>{t(option.label)}</span>
-                          {active && <Check size={13} strokeWidth={2.6} />}
-                        </span>
+                          <div
+                            aria-hidden="true"
+                            className="aspect-[4/3] w-full overflow-hidden rounded-lg border border-edge-soft bg-surface"
+                          >
+                            <Diagram active={active} kind={option.id} />
+                          </div>
+                          <span className="flex w-full items-center justify-between gap-2 px-0.5 pb-0.5">
+                            <span className="min-w-0 truncate">{t(option.label)}</span>
+                            {active && <Check size={16} strokeWidth={2.6} className="shrink-0" />}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {behavior && (
+                    <>
+                      <div className="my-1.5 h-px bg-edge-soft" />
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setBehavior(null);
+                          closeFilter();
+                        }}
+                        className="flex h-11 w-full items-center justify-center rounded-lg text-[15.5px] font-semibold text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
+                      >
+                        {t("Clear filter")}
                       </button>
-                    );
-                  })}
-                </div>
-                {behavior && (
-                  <>
-                    <div className="my-1 h-px bg-edge-soft" />
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        setBehavior(null);
-                        setFilterOpen(false);
-                        queueMicrotask(() => filterButtonRef.current?.focus());
-                      }}
-                      className="flex h-8 w-full items-center justify-center rounded-lg text-[11.5px] font-semibold text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
-                    >
-                      {t("Clear filter")}
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
+                    </>
+                  )}
+                </div>,
+                document.body,
+              )}
           </div>
-          <span className="tabular-nums text-[12px] text-ink-subtle">
+          <span className="tabular-nums text-[15.5px] leading-[22px] text-ink-subtle">
             {shown.length} {shown.length === 1 ? t("theme") : t("themes")}
           </span>
         </div>
       </div>
 
       {shown.length === 0 ? (
-        <p className="rounded-[14px] bg-surface/40 px-4 py-14 text-center text-[13px] text-ink-subtle ring-1 ring-edge-soft">
+        <p className="rounded-[14px] border border-dashed border-edge px-4 py-14 text-center text-[15.5px] leading-[22px] text-ink-subtle">
           {q || mood || behavior
             ? t("No themes match your search.")
             : t("No community themes yet. Be the first to share one.")}

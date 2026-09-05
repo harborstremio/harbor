@@ -1,8 +1,9 @@
 import { Award, Medal, Star } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { ROW_TITLE } from "../../../../shared";
 import type { BundleKind } from "./icon-keys";
 
-const MAX_SWATCH = 8;
+const MAX_SWATCH = 6;
 
 export function BundleListingPreview({
   kind,
@@ -25,33 +26,31 @@ export function BundleListingPreview({
   const extra = previews.length - shown.length;
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
-        {t("How it'll look")}
-      </span>
-      <div className="w-full max-w-[280px] overflow-hidden rounded-md border border-edge-soft bg-surface shadow-[0_18px_40px_-24px_rgba(0,0,0,0.5)]">
-        <div className="relative aspect-video w-full overflow-hidden bg-elevated">
+      <span className="harbor-settings-label">{t("How it'll look")}</span>
+      <div className="w-full max-w-[288px] overflow-hidden rounded-md bg-elevated">
+        <div className="relative aspect-video w-full overflow-hidden bg-surface">
           {coverUrl ? (
             <img src={coverUrl} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="grid h-full w-full place-items-center bg-gradient-to-br from-elevated to-surface text-ink-subtle">
+            <div className="grid h-full w-full place-items-center bg-gradient-to-br from-surface to-elevated text-ink-subtle">
               <Icon size={30} strokeWidth={1.6} />
             </div>
           )}
-          <div className="absolute bottom-2 end-2 flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10.5px] font-semibold text-white backdrop-blur-sm">
-            <Star size={10} className="fill-accent text-accent" /> {t("new")}
-          </div>
+          <span className="absolute bottom-2 end-2 flex h-[22px] items-center gap-1 rounded-[8px] bg-black/55 px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-white backdrop-blur-sm">
+            <Star size={13} className="fill-accent text-accent" /> {t("new")}
+          </span>
         </div>
-        <div className="flex min-w-0 flex-col gap-2 px-4 py-3">
-          <div className="flex min-w-0 flex-col">
-            <span className="truncate text-[14.5px] font-semibold text-ink">
+        <div className="flex min-w-0 flex-col gap-2 px-3.5 pb-3 pt-2.5">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className={`truncate ${ROW_TITLE}`}>
               {name || (kind === "badge" ? t("Your badge pack") : t("Your award pack"))}
             </span>
-            <span className="truncate text-[11.5px] text-ink-subtle">
+            <span className="truncate text-[15.5px] leading-[22px] text-ink-subtle">
               {t("{author} · 0 installs", { author: author || t("you") })}
             </span>
           </div>
           {description && (
-            <span className="line-clamp-2 text-[12px] leading-snug text-ink-muted">
+            <span className="line-clamp-2 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
               {description}
             </span>
           )}
@@ -60,13 +59,15 @@ export function BundleListingPreview({
               {shown.map((p, i) => (
                 <span
                   key={i}
-                  className="grid h-8 w-8 place-items-center overflow-hidden rounded-md border border-edge-soft bg-elevated/60"
+                  className="grid h-[36px] w-[36px] shrink-0 place-items-center overflow-hidden rounded-md bg-surface"
                 >
                   <img src={p} alt="" className="h-full w-full object-contain p-1" />
                 </span>
               ))}
               {extra > 0 && (
-                <span className="text-[11.5px] font-medium text-ink-subtle">+{extra}</span>
+                <span className="text-[15.5px] font-medium leading-[22px] tabular-nums text-ink-subtle">
+                  +{extra}
+                </span>
               )}
             </div>
           )}

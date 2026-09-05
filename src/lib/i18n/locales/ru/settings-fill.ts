@@ -285,6 +285,9 @@ const settingsFill: Record<string, string> = {
     "Настоящий полноэкранный режим занимает весь экран и скрывает панель задач. Режим «Развернуть» заполняет экран, но оставляет панель задач и заголовок окна, поэтому можно переключаться между приложениями.",
   "True fullscreen": "Настоящий полноэкранный режим",
   Maximize: "Развернуть",
+  "Borderless window": "Окно без рамки",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "Настоящий полноэкранный режим занимает весь экран и скрывает панель задач, но при переключении между приложениями возможно мерцание. Окно без рамки закрывает ту же область, оставаясь обычным окном, поэтому alt-tab и оверлеи срабатывают мгновенно. Режим «Развернуть» заполняет экран, но оставляет панель задач и заголовок окна.",
   "Dual subtitles": "Двойные субтитры",
   "Show a second subtitle in another language at the same time. Handy when you are learning a language: keep the one you are learning as your main subtitle, and put your own language here.":
     "Показывать одновременно вторые субтитры на другом языке. Удобно при изучении языка: оставьте изучаемый язык основными субтитрами, а родной укажите здесь.",

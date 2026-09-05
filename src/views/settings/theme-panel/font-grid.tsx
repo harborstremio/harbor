@@ -21,17 +21,13 @@ export function FontGrid({
           <button
             key={p.id}
             onClick={() => onPickPair(p.id)}
-            className={`flex flex-col gap-3 rounded-md border p-5 text-start transition-colors ${
+            className={`flex flex-col gap-3 rounded-[10px] border p-5 text-start transition-colors ${
               active ? "border-ink bg-elevated" : "border-edge-soft bg-elevated hover:border-edge"
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[13.5px] font-semibold text-ink">{p.name}</span>
-              {active && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-ink text-canvas">
-                  <Check size={12} strokeWidth={3} />
-                </span>
-              )}
+              <span className="text-[16.5px] font-semibold leading-[24px] text-ink">{p.name}</span>
+              {active && <Check size={18} strokeWidth={2.6} className="shrink-0 text-accent" />}
             </div>
             <div className="flex flex-col gap-1">
               <span
@@ -40,11 +36,11 @@ export function FontGrid({
               >
                 Harbor
               </span>
-              <span className="text-[13px] text-ink-muted" style={{ fontFamily: p.sans }}>
+              <span className="text-[15.5px] leading-[22px] text-ink-muted" style={{ fontFamily: p.sans }}>
                 The quick brown fox jumps over the lazy dog
               </span>
             </div>
-            <p className="text-[11.5px] text-ink-subtle">{p.blurb}</p>
+            <p className="text-[15.5px] leading-[22px] text-ink-subtle">{p.blurb}</p>
           </button>
         );
       })}

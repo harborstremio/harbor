@@ -4,7 +4,7 @@ import { downloadShader } from "@/lib/shaders";
 import { SHADER_CATALOG, type ShaderCatalogEntry } from "@/lib/player/shader-catalog";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { ExtLink } from "../shared";
+import { ExtLink, RowDesc, RowNote, RowText, RowTitle } from "../shared";
 import { ModalButton, SettingGroup, SettingsModal } from "../kit";
 import { ActionButton, Pill } from "./action-button";
 import { BeforeAfter } from "./before-after";
@@ -47,65 +47,56 @@ function LibraryEntry({ entry }: { entry: ShaderCatalogEntry }) {
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-md bg-elevated p-4">
-      <div className="flex items-start gap-3">
-        <span className="mt-0.5 shrink-0 text-ink-muted">
-          <Icon size={16} strokeWidth={2.2} />
+    <div className="flex flex-col gap-3 py-3">
+      <RowText lead={<Icon size={18} strokeWidth={2.2} />}>
+        <RowTitle>
+          <span className="min-w-0">{t(entry.name)}</span>
+          <Pill>{t(CONTENT_LABEL[entry.content])}</Pill>
+          <Pill>{t(TIER_LABEL[entry.tier])}</Pill>
+          {entry.verify && <Pill>{t("Unverified")}</Pill>}
+          {installed && <Pill on={!!state?.enabled}>{state?.enabled ? t("On") : t("Installed")}</Pill>}
+        </RowTitle>
+        <RowDesc>{t(entry.description)}</RowDesc>
+        <span className="flex flex-wrap items-center">
+          <ExtLink href={entry.source.url}>{entry.source.label}</ExtLink>
         </span>
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[13.5px] font-semibold text-ink">{t(entry.name)}</span>
-            <Pill>{t(CONTENT_LABEL[entry.content])}</Pill>
-            <Pill>{t(TIER_LABEL[entry.tier])}</Pill>
-            {entry.verify && <Pill>{t("Unverified")}</Pill>}
-            {installed && <Pill on={!!state?.enabled}>{state?.enabled ? t("On") : t("Installed")}</Pill>}
-          </div>
-          <span className="text-[12.5px] leading-relaxed text-ink-subtle">
-            {t(entry.description)}
-          </span>
-          <span className="text-[11.5px] text-ink-muted">
-            <ExtLink href={entry.source.url}>{entry.source.label}</ExtLink>
-          </span>
-        </div>
-      </div>
+      </RowText>
 
       {entry.demo && <BeforeAfter demo={entry.demo} />}
 
-      {error && (
-        <span className="rounded-md bg-canvas px-3 py-2 text-[12.5px] leading-relaxed text-danger">
-          {error}
-        </span>
-      )}
+      {error && <RowNote>{error}</RowNote>}
 
-      {!installed ? (
-        <ActionButton onClick={() => install(false)} disabled={busy}>
-          {busy ? (
-            <Loader2 size={14} className="animate-spin motion-reduce:hidden" strokeWidth={2.4} />
-          ) : (
-            <Download size={14} strokeWidth={2.4} />
-          )}
-          {busy ? t("Downloading…") : t("Download shader")}
-        </ActionButton>
-      ) : (
-        <ActionButton ghost onClick={() => install(true)} disabled={busy}>
-          {busy ? (
-            <>
-              <Loader2 size={14} className="animate-spin motion-reduce:hidden" strokeWidth={2.4} />
-              {t("Updating…")}
-            </>
-          ) : justUpdated ? (
-            <>
-              <Check size={14} strokeWidth={3} className="text-success" />
-              {t("Updated")}
-            </>
-          ) : (
-            <>
-              <RefreshCw size={14} strokeWidth={2.4} />
-              {t("Re-download")}
-            </>
-          )}
-        </ActionButton>
-      )}
+      <span className="flex flex-wrap items-center gap-2.5">
+        {!installed ? (
+          <ActionButton onClick={() => install(false)} disabled={busy}>
+            {busy ? (
+              <Loader2 size={17} className="animate-spin motion-reduce:hidden" strokeWidth={2.4} />
+            ) : (
+              <Download size={17} strokeWidth={2.4} />
+            )}
+            {busy ? t("Downloading…") : t("Download shader")}
+          </ActionButton>
+        ) : (
+          <ActionButton ghost onClick={() => install(true)} disabled={busy}>
+            {busy ? (
+              <>
+                <Loader2 size={17} className="animate-spin motion-reduce:hidden" strokeWidth={2.4} />
+                {t("Updating…")}
+              </>
+            ) : justUpdated ? (
+              <>
+                <Check size={17} strokeWidth={2.6} className="text-success" />
+                {t("Updated")}
+              </>
+            ) : (
+              <>
+                <RefreshCw size={17} strokeWidth={2.6} />
+                {t("Re-download")}
+              </>
+            )}
+          </ActionButton>
+        )}
+      </span>
     </div>
   );
 }

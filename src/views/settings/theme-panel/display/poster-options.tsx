@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { tvFocus } from "@/lib/keyboard-navigation";
+import { CENTER_KEYCODES, isBackKey, navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
 
 export const POSTER_RADII = [
@@ -28,9 +30,17 @@ export function PxField({
   const t = useT();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(value));
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const ringRef = useRef(false);
   useEffect(() => {
     if (!editing) setDraft(String(value));
   }, [value, editing]);
+  useLayoutEffect(() => {
+    if (!ringRef.current) return;
+    const el = editing ? inputRef.current : btnRef.current;
+    if (el) tvFocus(el);
+  }, [editing]);
   const commit = () => {
     const n = Math.max(min, Math.min(max, Math.round(Number(draft) || value)));
     onCommit(n);
@@ -39,6 +49,7 @@ export function PxField({
   if (editing) {
     return (
       <input
+        ref={inputRef}
         type="number"
         autoFocus
         value={draft}
@@ -47,19 +58,29 @@ export function PxField({
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => {
-          if (e.key === "Enter") commit();
-          else if (e.key === "Escape") setEditing(false);
+          e.stopPropagation();
+          if (e.key === "Enter" || CENTER_KEYCODES.has(e.nativeEvent.keyCode)) {
+            e.preventDefault();
+            commit();
+          } else if (isBackKey(e.nativeEvent)) {
+            e.preventDefault();
+            setEditing(false);
+          }
         }}
-        className="h-8 w-[74px] rounded-md bg-raised px-2.5 text-[13px] font-semibold tabular-nums text-ink outline-none"
+        className="h-11 w-[96px] rounded-[10px] border border-edge bg-raised px-3 text-center text-[16.5px] font-semibold tabular-nums text-ink outline-none"
       />
     );
   }
   return (
     <button
+      ref={btnRef}
       type="button"
-      onClick={() => setEditing(true)}
+      onClick={() => {
+        ringRef.current = navOwnsFocus(btnRef.current);
+        setEditing(true);
+      }}
       title={t("Click to edit")}
-      className="h-8 w-[74px] rounded-md bg-elevated text-[13px] font-semibold tabular-nums text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+      className="h-11 w-[96px] rounded-[10px] border border-edge-soft bg-elevated text-center text-[16.5px] font-semibold tabular-nums text-ink-muted transition-colors hover:border-edge hover:bg-raised hover:text-ink"
     >
       {value}px
     </button>

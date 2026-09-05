@@ -32,6 +32,7 @@ const profileFill: Record<string, string> = {
   "Choose which stats show in the row at the top of your profile":
     "Wähle aus, welche Statistiken oben in deinem Profil angezeigt werden",
   "Clear status": "Status löschen",
+  "Connect Letterboxd": "Mit Letterboxd verbinden",
   "Contains spoilers": "Enthält Spoiler",
   "Copied for Discord": "Für Discord kopiert",
   "Copy for Discord": "Für Discord kopieren",
@@ -98,6 +99,8 @@ const profileFill: Record<string, string> = {
   "Leave group": "Gruppe verlassen",
   "Like comment": "Kommentar liken",
   "Like list": "Liste mit „Gefällt mir“ markieren",
+  "Link Letterboxd and the films and lists you keep there show up right here.":
+    "Verknüpfe Letterboxd und die Filme und Listen, die du dort pflegst, erscheinen genau hier.",
   "Link Simkl and everything you watch shows up right here.":
     "Verknüpfe Simkl und alles, was du ansiehst, erscheint genau hier.",
   "Link and social": "Links und soziale Netzwerke",
@@ -111,6 +114,7 @@ const profileFill: Record<string, string> = {
   "Music search needs an API key before it can run.":
     "Für die Musiksuche ist ein API-Schlüssel erforderlich.",
   "My lists": "Meine Listen",
+  "No Letterboxd lists shared yet": "Noch keine Letterboxd-Listen geteilt",
   "No artists match that search": "Keine Künstler für diese Suche gefunden",
   "No badges earned yet": "Noch keine Abzeichen erhalten",
   "No badges to show yet": "Noch keine Abzeichen verfügbar",
@@ -128,11 +132,15 @@ const profileFill: Record<string, string> = {
   "No status": "Kein Status",
   "No such captain": "Diesen Kapitän gibt es nicht",
   "Nothing tracked on Simkl yet": "Noch nichts auf Simkl erfasst",
+  "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
+    "Standardmäßig deaktiviert. Zeigt allen Besuchern deines Profils deinen Letterboxd-Namen, deine Listen und deine Filmanzahl. Die Verbindung selbst verwaltest du unter Einstellungen, Letterboxd.",
   "Off by default. Shows your Simkl avatar, name and watch stats on your profile for anyone who visits. Manage the connection itself in Settings, Simkl.":
     "Standardmäßig deaktiviert. Zeigt allen Besuchern deines Profils deinen Simkl-Avatar, deinen Namen und deine Wiedergabestatistiken. Die Verbindung selbst verwaltest du unter Einstellungen, Simkl.",
+  "On Letterboxd": "Auf Letterboxd",
   "On Simkl": "Auf Simkl",
   "Online now": "Jetzt online",
   "Open @{handle} profile": "Profil von @{handle} öffnen",
+  "Open Letterboxd profile": "Letterboxd-Profil öffnen",
   "Open Simkl profile": "Simkl-Profil öffnen",
   "Open account settings": "Kontoeinstellungen öffnen",
   "Open {alias} profile": "Profil von {alias} öffnen",
@@ -195,6 +203,7 @@ const profileFill: Record<string, string> = {
   "Share profile": "Profil teilen",
   "Share your thoughts (optional)": "Teile deine Gedanken (optional)",
   "Show spoiler": "Spoiler anzeigen",
+  "Show your Letterboxd card": "Deine Letterboxd-Karte anzeigen",
   "Show your Simkl card": "Deine Simkl-Karte anzeigen",
   "Show your favourite games, books and music on your profile":
     "Deine Lieblingsspiele, -bücher und -musik in deinem Profil anzeigen",

@@ -45,6 +45,8 @@ const settings: Record<string, string> = {
   "A community subtitle source. Off until you add your Subsource API key.":
     "Topluluk tabanlı bir altyazı kaynağı. Subsource API anahtarınızı ekleyene kadar kapalıdır.",
   "A country releases something": "Bir ülkede yeni bir yapım yayımlanır",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "Birkaç dakikalık ön yükleme. Oynatma başlamadan önce uzun süre beklemeden kısa kesintileri atlatır.",
   "A fast community subtitle index. Off by default; turn it on for extra coverage on newer or niche releases.":
     "Hızlı bir topluluk altyazı dizini. Varsayılan olarak kapalıdır; yeni veya niş yapımlarda daha fazla sonuç için açın.",
   "A free Cloudflare account.": "Ücretsiz bir Cloudflare hesabı.",
@@ -113,6 +115,7 @@ const settings: Record<string, string> = {
   "Active torrents": "Etkin torrentler",
   "Ad, analytics, and tracking requests pass through untouched.":
     "Reklam, analiz ve izleme isteklerine müdahale edilmez.",
+  Adaptive: "Uyarlamalı",
   "Adaptive Sharpen": "Uyarlamalı Keskinleştirme",
   "Add Custom Source": "Özel Kaynak Ekle",
   "Add Source": "Kaynak Ekle",
@@ -377,6 +380,7 @@ const settings: Record<string, string> = {
   "Book search needs an API key before it can run.":
     "Kitap aramasının çalışması için bir API anahtarı gerekiyor.",
   "Boost SDR video toward HDR": "SDR videoyu HDR'ye yaklaştır",
+  "Borderless window": "Kenarlıksız pencere",
   "Bot token": "Bot token'ı",
   "BotFather replies with a token like": "BotFather şuna benzer bir token ile yanıt verir:",
   "Both go in the boxes above. Harbor builds the URL for you.":
@@ -399,6 +403,7 @@ const settings: Record<string, string> = {
   "Browse pull requests": "Pull request'lere göz at",
   "Browse sources": "Kaynaklara göz at",
   "Budget exhausted, resets at midnight UTC.": "Kota tükendi, UTC gece yarısında sıfırlanır.",
+  "Buffer size": "Arabellek boyutu",
   "Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.":
     "Hata bildirimleri yayımlanmış bir düzeltmeyle sonuçlanan kişilerin adları sürüm notlarında yer alır. Anonim kalmak için boş bırakın.",
   "Bug reports": "Hata raporları",
@@ -564,6 +569,7 @@ const settings: Record<string, string> = {
   "Connect AniList": "AniList'i bağla",
   "Connect Discord or Telegram and Harbor posts a message when something you follow is about to drop. Hit Test to send yourself a sample first.":
     "Discord veya Telegram'ı bağlayın; takip ettiğiniz bir içerik yayınlanmak üzereyken Harbor mesaj göndersin. Önce kendinize örnek göndermek için Test'e basın.",
+  "Connect Letterboxd": "Letterboxd'u bağla",
   "Connect Simkl": "Simkl'ı bağla",
   "Connect Trakt": "Trakt'ı bağla",
   "Connect Trakt first.": "Önce Trakt'ı bağlayın.",
@@ -1187,6 +1193,8 @@ const settings: Record<string, string> = {
   "HTML5 plays everything WebView2 supports. mpv handles TrueHD, DTS-HD, AV1, weird containers, and HDR. Auto picks based on the source.":
     "HTML5, WebView2'nin desteklediği her şeyi oynatır. mpv; TrueHD, DTS-HD, AV1, sıra dışı kapsayıcılar ve HDR'ı destekler. Otomatik, kaynağa göre seçim yapar.",
   "Hairline cards": "İnce çizgili kartlar",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "Yarım saatlik ön yükleme. Yalnızca çok kararsız bağlantılarda buna değer.",
   "Hand-tuned colors. Edit them in the section above.":
     "Özenle ayarlanmış renkler. Bunları yukarıdaki bölümden düzenleyin.",
   Harbor: "Harbor",
@@ -1253,6 +1261,8 @@ const settings: Record<string, string> = {
     "Harbor her ödül için sade bir kupa sunar. Ödülleri kişiselleştirmek için bir simge paketi yükleyin veya her ödüle kendi görselinizi ekleyin. Paketleri oluşturan kişiler barındırır; dolayısıyla görseller onlara aittir ve Harbor'a dahil değildir.",
   "Harbor shows your AniList lists on the Anime page and keeps your progress in sync.":
     "Harbor, AniList listelerinizi Anime sayfasında gösterir ve ilerlemenizi eşit tutar.",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "Harbor, ön yükleme süresini her içerik için ayrı ayarlar ve oynatma oturduktan sonra artırır. Neredeyse herkes için doğru seçim.",
   "Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.":
     "Harbor, Stremio'nun eklenti protokolünü kullanır ve tüm eklenti ekosistemi onların çalışmalarından doğmuştur. Stremio topluluğu tarafından finanse edilir ve katkıda bulunan destekçiler deneysel özelliklere erken erişim kazanır. İmkânınız varsa onlara da destek olun.",
   "Harbor still finds and loads subtitles so they're one click away in the player, it just won't turn them on automatically.":
@@ -1348,6 +1358,8 @@ const settings: Record<string, string> = {
   "Hitting Play opens the source list so you can choose quality, debrid, and audio yourself.":
     "Oynat'a bastığınızda kaynak listesi açılır; kaliteyi, debrid hizmetini ve sesi kendiniz seçebilirsiniz.",
   "Hold or right-click for models": "Modeller için basılı tutun veya sağ tıklayın",
+  "Holds up to {size} in memory while a video plays.":
+    "Video oynatılırken bellekte en fazla {size} tutar.",
   "Home hero": "Ana Sayfa öne çıkan alanı",
   "Home hero audio": "Ana sayfa öne çıkan içeriğinin sesi",
   "Home hero featured source": "Ana sayfa vitrinindeki öne çıkan içeriklerin kaynağı",
@@ -1606,6 +1618,8 @@ const settings: Record<string, string> = {
   "Liked Films": "Beğenilen Filmler",
   "Likely cam": "Muhtemelen kamera çekimi",
   "Line-free video mode": "Çizgisiz video modu",
+  "Link Letterboxd and the films and lists you keep there show up right here.":
+    "Letterboxd'u bağladığınızda orada tuttuğunuz filmler ve listeler tam burada görünür.",
   "Link Simkl and everything you watch shows up right here.":
     "Simkl'yi bağladığınızda izlediğiniz her şey burada görünür.",
   "Link and social": "Bağlantılar ve sosyal medya",
@@ -1715,6 +1729,8 @@ const settings: Record<string, string> = {
   "Maybe later": "Belki daha sonra",
   "Media type": "Medya türü",
   "Media types": "Medya türleri",
+  Medium: "Orta",
+  "Memory cap": "Bellek sınırı",
   Merged: "Birleştirilmiş",
   "Metadata language": "Meta veri dili",
   "Metadata providers": "Meta veri sağlayıcıları",
@@ -1809,6 +1825,7 @@ const settings: Record<string, string> = {
     "Docker yok, sunucu yok, yapılandırılacak hiçbir şey yok.",
   "No Integrations option? You need the Manage Webhooks permission. Ask whoever owns the server.":
     "Entegrasyonlar seçeneği yok mu? Webhook'ları Yönet iznine ihtiyacınız var. Sunucu sahibinden isteyin.",
+  "No Letterboxd lists shared yet": "Henüz paylaşılan Letterboxd listesi yok",
   "No Suwayomi server at this address": "Bu adreste Suwayomi sunucusu yok",
   "No Way Out": "Çıkış Yok",
   "No affiliation, no referral links, and Harbor gets nothing from these. They are just places where money goes further than it does here.":

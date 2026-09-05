@@ -3,6 +3,7 @@ import { useT } from "@/lib/i18n";
 
 export function StudioHeader({
   name,
+  minimizeRef,
   onCancel,
   onHidePanel,
   onUndo,
@@ -12,6 +13,7 @@ export function StudioHeader({
   dragHandleProps,
 }: {
   name: string;
+  minimizeRef?: React.Ref<HTMLButtonElement>;
   onCancel: () => void;
   onHidePanel: () => void;
   onUndo: () => void;
@@ -24,22 +26,23 @@ export function StudioHeader({
   return (
     <header
       {...dragHandleProps}
-      className="flex h-14 shrink-0 items-center gap-1 bg-canvas px-2.5 cursor-grab select-none active:cursor-grabbing"
+      className="flex h-[60px] shrink-0 items-center gap-1 bg-canvas px-2 cursor-grab select-none active:cursor-grabbing"
     >
       <button
         type="button"
+        ref={minimizeRef}
         onClick={onHidePanel}
         aria-label={t("Minimize panel")}
         title={t("Minimize to preview (Esc)")}
-        className="flex h-10 w-10 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
       >
         <PanelRightClose size={18} strokeWidth={2.2} className="dir-icon" />
       </button>
       <div className="flex min-w-0 flex-1 flex-col px-1">
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-ink-subtle">
+        <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">
           {t("Theme studio")}
         </span>
-        <span className="truncate text-[13.5px] font-semibold text-ink">
+        <span className="truncate text-[16.5px] font-semibold leading-[24px] tracking-[-0.1px] text-ink">
           {name || t("Untitled theme")}
         </span>
       </div>
@@ -50,7 +53,7 @@ export function StudioHeader({
           disabled={!canUndo}
           aria-label={t("Undo")}
           title={t("Undo (Ctrl/Cmd + Z)")}
-          className="flex h-10 w-9 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:pointer-events-none disabled:opacity-30"
+          className="flex h-11 w-9 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:pointer-events-none disabled:opacity-30"
         >
           <Undo2 size={18} strokeWidth={2.2} />
         </button>
@@ -60,7 +63,7 @@ export function StudioHeader({
           disabled={!canRedo}
           aria-label={t("Redo")}
           title={t("Redo (Ctrl/Cmd + Shift + Z)")}
-          className="flex h-10 w-9 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:pointer-events-none disabled:opacity-30"
+          className="flex h-11 w-9 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:pointer-events-none disabled:opacity-30"
         >
           <Redo2 size={18} strokeWidth={2.2} />
         </button>
@@ -71,7 +74,7 @@ export function StudioHeader({
         onClick={onCancel}
         aria-label={t("Close studio")}
         title={t("Close")}
-        className="flex h-10 w-10 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-danger/25 hover:text-danger"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-danger/25 hover:text-danger"
       >
         <X size={18} strokeWidth={2.4} />
       </button>

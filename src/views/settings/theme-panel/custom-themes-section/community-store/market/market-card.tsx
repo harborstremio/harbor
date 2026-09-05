@@ -4,6 +4,7 @@ import { useT } from "@/lib/i18n";
 import { downloadTheme, type StoreTheme } from "@/lib/theme-store";
 import { getBundle, installBundle, type StoreBundle } from "@/lib/bundle-store";
 import { UserHoverCard } from "@/views/profile/user-hover-card";
+import { ROW_TITLE } from "../../../../shared";
 import { fmtCount } from "../format";
 import { Fit } from "./fit";
 import { PaletteSeam } from "./palette-seam";
@@ -21,7 +22,7 @@ function RankChip({ rank }: { rank: number }) {
   const top = rank <= 3;
   return (
     <span
-      className={`absolute start-2.5 top-2.5 z-10 grid h-7 min-w-7 place-items-center rounded-[8px] px-1.5 text-[12.5px] font-bold tabular-nums ${
+      className={`absolute start-2.5 top-2.5 z-10 grid h-7 min-w-7 place-items-center rounded-[8px] px-2 text-[13px] font-bold leading-[17px] tabular-nums ${
         top ? "bg-accent text-canvas" : "bg-black/55 text-white backdrop-blur-sm"
       }`}
     >
@@ -32,8 +33,8 @@ function RankChip({ rank }: { rank: number }) {
 
 function RatingChip({ avg }: { avg: number }) {
   return (
-    <span className="absolute end-2.5 top-2.5 z-10 flex items-center gap-1 rounded-[8px] bg-black/55 px-1.5 py-0.5 text-[11.5px] font-semibold text-white backdrop-blur-sm transition-opacity duration-200 group-hover/card:opacity-0">
-      <Star size={12} className="fill-accent text-accent" />
+    <span className="absolute end-2.5 top-2.5 z-10 flex h-[22px] items-center gap-1 rounded-[8px] bg-black/55 px-2 text-[13px] font-bold leading-[17px] text-white backdrop-blur-sm transition-opacity duration-200 group-hover/card:opacity-0">
+      <Star size={14} className="fill-accent text-accent" />
       {avg.toFixed(1)}
     </span>
   );
@@ -83,10 +84,10 @@ function ThemeMarketCard({
         </div>
       </div>
       <div className="flex min-w-0 flex-col gap-0.5 px-3.5 pb-3 pt-2.5">
-        <span className="truncate text-[14.5px] font-semibold tracking-tight text-ink">
+        <span className={`truncate ${ROW_TITLE}`}>
           {theme.name}
         </span>
-        <span className="flex items-center gap-1.5 truncate text-[11.5px] text-ink-subtle">
+        <span className="flex items-center gap-1.5 truncate text-[15.5px] leading-[22px] text-ink-subtle">
           {theme.authorHandle ? (
             <UserHoverCard handle={theme.authorHandle}>
               <span className="truncate text-ink-muted transition-colors hover:text-ink">
@@ -98,7 +99,7 @@ function ThemeMarketCard({
           )}
           <span className="text-ink-subtle/60">·</span>
           <span className="inline-flex shrink-0 items-center gap-1 tabular-nums">
-            <Download size={10.5} strokeWidth={2.2} />
+            <Download size={14} strokeWidth={2.2} />
             {fmtCount(theme.downloads)}
           </span>
         </span>
@@ -139,22 +140,22 @@ function BundleMarketCard({
         </div>
       </div>
       <div className="flex min-w-0 flex-col gap-0.5 px-3.5 pb-3 pt-2.5">
-        <span className="truncate text-[14.5px] font-semibold tracking-tight text-ink">
+        <span className={`truncate ${ROW_TITLE}`}>
           {bundle.name}
         </span>
-        <span className="flex items-center gap-1.5 truncate text-[11.5px] text-ink-subtle">
+        <span className="flex items-center gap-1.5 truncate text-[15.5px] leading-[22px] text-ink-subtle">
           {bundle.authorAvatar && (
             <img
               src={bundle.authorAvatar}
               alt=""
               draggable={false}
-              className="h-4 w-4 shrink-0 rounded-full object-cover ring-1 ring-edge-soft"
+              className="h-5 w-5 shrink-0 rounded-full object-cover ring-1 ring-edge-soft"
             />
           )}
           <span className="truncate text-ink-muted">{bundle.author || t("Anonymous")}</span>
           <span className="text-ink-subtle/60">·</span>
           <span className="inline-flex shrink-0 items-center gap-1 tabular-nums">
-            <Download size={10.5} strokeWidth={2.2} />
+            <Download size={14} strokeWidth={2.2} />
             {fmtCount(bundle.downloads)}
           </span>
         </span>

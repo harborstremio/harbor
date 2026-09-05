@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
-import { Award, Check, Eye, HardDrive, Tag, Trophy, Type } from "lucide-react";
+import { Award, Captions, Check, Eye, HardDrive, Sparkles, Tag, Trophy, Type } from "lucide-react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { Section, Segmented, ToggleRow } from "../shared";
+import { ROW_DESC, Section, Segmented, ToggleRow } from "../shared";
 import { SettingGroup, SettingRow, Nested } from "../kit";
 import { SongCardStylePicker } from "../song-card-style-picker";
 import { HoverStyleGallery } from "../hover-style-preview";
@@ -52,7 +52,7 @@ export function CardsTab() {
         <CardOverlayPreview />
         <ToggleRow
           label={t("Show tags on cards")}
-          leading={<Tag size={16} strokeWidth={2.2} className="text-ink-muted" />}
+          leading={<Tag size={18} strokeWidth={2} />}
           sub={t(
             "The New, In Cinema, Rerun, and Awards chips. Turn off for a cleaner grid. Score chips are separate, below.",
           )}
@@ -62,7 +62,7 @@ export function CardsTab() {
         <ToggleRow
           label={t("Award tab on cards")}
           newId="library:award-tab"
-          leading={<Award size={16} strokeWidth={2.2} className="text-ink-muted" />}
+          leading={<Award size={18} strokeWidth={2} />}
           sub={t(
             "Show a laurel award tab on winning titles, like Netflix. Replaces the corner award chip and sits centered so it clears the rating and watchlist pills. Pick where it sits below.",
           )}
@@ -71,7 +71,11 @@ export function CardsTab() {
         />
         {settings.awardTabs && (
           <Nested>
-            <SettingRow label={t("Award tab position")}>
+            <SettingRow
+              wide
+              label={t("Award tab position")}
+              desc={t("Where the laurel tab sits relative to the score chips on the poster.")}
+            >
               <Segmented
                 value={settings.awardTabPosition}
                 options={[
@@ -87,7 +91,7 @@ export function CardsTab() {
         <ToggleRow
           label={t("Top 10 ribbon")}
           newId="library:top-10"
-          leading={<Trophy size={16} strokeWidth={2.2} className="text-ink-muted" />}
+          leading={<Trophy size={18} strokeWidth={2} />}
           sub={t(
             "A TOP 10 corner ribbon on the Top 10 rail posters. The watchlist marker auto-moves to the opposite corner so nothing overlaps.",
           )}
@@ -96,7 +100,11 @@ export function CardsTab() {
         />
         {settings.top10Ribbon && (
           <Nested>
-            <SettingRow label={t("Ribbon corner")}>
+            <SettingRow
+              wide
+              label={t("Ribbon corner")}
+              desc={t("Which top corner of the poster the ribbon folds over.")}
+            >
               <Segmented
                 value={settings.top10RibbonSide}
                 options={[
@@ -115,13 +123,13 @@ export function CardsTab() {
         <ToggleRow
           label={t("Watched badge")}
           sub={t("Puts a check on titles you have already finished.")}
-          leading={<Check size={16} strokeWidth={2.6} className="text-ink-muted" />}
+          leading={<Check size={18} strokeWidth={2.4} />}
           value={settings.showWatchedBadge}
           onChange={(v) => update({ showWatchedBadge: v })}
         />
         <ToggleRow
           label={t("Show an “on disk” badge on cards")}
-          leading={<HardDrive size={16} strokeWidth={2.2} className="text-ink-muted" />}
+          leading={<HardDrive size={18} strokeWidth={2} />}
           sub={t(
             "Marks movies and shows across Home, the catalogs, and detail pages when a matching file already exists in your local library.",
           )}
@@ -130,11 +138,7 @@ export function CardsTab() {
         />
         <ToggleRow
           label={t("Show DUB badge on anime cards")}
-          leading={
-            <span className="rounded bg-accent-soft px-1 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.1em] text-canvas">
-              DUB
-            </span>
-          }
+          leading={<Captions size={18} strokeWidth={2} />}
           sub={t("Flags anime with an English dub. Also tags dub / sub / dual on stream sources.")}
           value={settings.showDubBadge}
           onChange={(v) => update({ showDubBadge: v })}
@@ -171,7 +175,7 @@ export function CardsTab() {
       <Section title={t("Titles")}>
         <ToggleRow
           label={t("Hide titles under posters")}
-          leading={<Type size={16} strokeWidth={2.2} className="text-ink-muted" />}
+          leading={<Type size={18} strokeWidth={2} />}
           sub={t("Cleaner grid when your poster service already prints the title on the artwork.")}
           value={settings.hidePosterTitles}
           onChange={(v) => update({ hidePosterTitles: v })}
@@ -179,44 +183,38 @@ export function CardsTab() {
       </Section>
 
       <SongCardStylePicker />
-      <Section
-        title={t("Hover preview")}
-        subtitle={t("Rest the cursor on a poster to peek at it without opening. Off by default.")}
-      >
+
+      <Section title={t("Hover preview")}>
         <ToggleRow
-          label={t("Hover preview")}
+          label={t("Peek at a title on hover")}
+          leading={<Eye size={18} strokeWidth={2} />}
           sub={t(
-            "Rest the cursor on a poster to peek at the rating, story, and quick actions without opening it.",
+            "Rest the cursor on a poster to peek at the rating, story, and quick actions without opening it. Off by default.",
           )}
           value={settings.hoverPreviewEnabled}
           onChange={(v) => update({ hoverPreviewEnabled: v })}
         />
         {settings.hoverPreviewEnabled && (
           <Nested>
-            <SettingGroup label={t("Preview style")}>
-              <SettingRow
-                wide
-                icon={<Eye size={16} />}
-                label={t("Hover style")}
-                desc={t("Pick the card that appears. Each tile previews the real thing.")}
-              >
-                <div className="w-full">
-                  <HoverStyleGallery
-                    value={settings.cardHoverStyle}
-                    customHoverId={settings.customHoverId}
-                    onChange={(style, customId) =>
-                      update(
-                        customId != null
-                          ? { cardHoverStyle: style, customHoverId: customId }
-                          : { cardHoverStyle: style },
-                      )
-                    }
-                  />
-                </div>
-              </SettingRow>
+            <SettingGroup label={t("Hover style")}>
+              <p className={`max-w-[70ch] ${ROW_DESC}`}>
+                {t("Pick the card that appears. Each tile previews the real thing.")}
+              </p>
+              <HoverStyleGallery
+                value={settings.cardHoverStyle}
+                customHoverId={settings.customHoverId}
+                onChange={(style, customId) =>
+                  update(
+                    customId != null
+                      ? { cardHoverStyle: style, customHoverId: customId }
+                      : { cardHoverStyle: style },
+                  )
+                }
+              />
               {(settings.cardHoverStyle === "default" ||
                 settings.cardHoverStyle === "marquee") && (
                 <SettingRow
+                  wide
                   label={t("Open preview")}
                   desc={t("Whether the card grows over the poster or slides out beside it.")}
                 >
@@ -235,6 +233,7 @@ export function CardsTab() {
         )}
         <ToggleRow
           label={t("Poster shine on hover")}
+          leading={<Sparkles size={18} strokeWidth={2} />}
           sub={t(
             "A subtle tvOS style light sweep across a poster when you hover it. Off by default; the card lift stays either way.",
           )}

@@ -4,6 +4,7 @@ import { isRtxHdrBlocked, isRtxVsrBlocked } from "@/lib/player/rtx-video-policy"
 import { useT } from "@/lib/i18n";
 import { SettingGroup } from "../kit";
 import { ToggleRow } from "../shared";
+import { ChoiceBlock, Tag } from "./choice";
 import { DisplayPanelSelector } from "./display-panel-selector";
 
 type HdrMode = "sdr" | "hdrWindow" | "hdrEmbedded";
@@ -24,18 +25,6 @@ function deriveMode(s: {
   if (s.playerHdrOpaqueWindow) return "hdrWindow";
   if (s.playerHdrToSdr) return "sdr";
   return "hdrEmbedded";
-}
-
-function Tag({ text, accent }: { text: string; accent?: boolean }) {
-  return (
-    <span
-      className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider ${
-        accent ? "bg-accent-soft text-accent" : "bg-canvas text-ink-muted"
-      }`}
-    >
-      {text}
-    </span>
-  );
 }
 
 export function HdrModePicker() {
@@ -73,63 +62,51 @@ export function HdrModePicker() {
     },
   ];
 
-  const rtxHdrSub = t("Upconverts SDR video to HDR on an Nvidia RTX GPU (turn on RTX Video HDR in the Nvidia app; needs GPU decode). Experimental. Unavailable while SVP is active for the current video.");
-  const rtxVsrSub = t("Upscales SDR video with AI on an Nvidia RTX GPU (turn on RTX Video Super Resolution in the Nvidia app; needs GPU decode). Experimental. Unavailable while SVP is active for the current video.");
+  const rtxHdrSub = t("Nvidia RTX GPUs only. Upconverts SDR video to HDR on the GPU (turn on RTX Video HDR in the Nvidia app; needs GPU decode). Experimental. Unavailable while SVP is active for the current video.");
+  const rtxVsrSub = t("Nvidia RTX GPUs only. Upscales SDR video with AI on the GPU (turn on RTX Video Super Resolution in the Nvidia app; needs GPU decode). Experimental. Unavailable while SVP is active for the current video.");
 
   return (
-    <div className="flex flex-col gap-3">
+    <>
       <SettingGroup label={t("HDR")}>
-        {options.map((o) => {
-          const selected = current === o.id;
-          return (
-            <button
-              key={o.id}
-              type="button"
-              onClick={() => update(MODE_FLAGS[o.id])}
-              className={`flex items-start gap-3.5 rounded-md px-4 py-3.5 text-start transition-colors ${
-                selected ? "bg-raised" : "bg-elevated hover:bg-raised"
-              }`}
-            >
-              <span
-                className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full transition-colors ${
-                  selected ? "bg-accent" : "bg-canvas"
-                }`}
-              >
-                {selected && <span className="h-2 w-2 rounded-full bg-canvas" />}
-              </span>
-              <span className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="flex flex-wrap items-center gap-2">
-                  <span className="text-[13.5px] font-medium leading-snug text-ink">{o.label}</span>
-                  {o.recommended && <Tag accent text={t("Recommended")} />}
-                  {o.experimental && <Tag text={t("Experimental")} />}
-                </span>
-                <span className="text-[12.5px] leading-relaxed text-ink-subtle">{o.sub}</span>
-              </span>
-            </button>
-          );
-        })}
+        {options.map((o) => (
+          <ChoiceBlock
+            key={o.id}
+            selected={current === o.id}
+            onClick={() => update(MODE_FLAGS[o.id])}
+            label={o.label}
+            sub={o.sub}
+            tags={
+              o.recommended ? (
+                <Tag accent text={t("Recommended")} />
+              ) : o.experimental ? (
+                <Tag text={t("Experimental")} />
+              ) : undefined
+            }
+          />
+        ))}
       </SettingGroup>
-      <DisplayPanelSelector />
-      {isWindowsDesktop() && (
-        <ToggleRow
-          label={t("RTX Video HDR")}
-          leading={<Tag text={t("Nvidia only")} />}
-          sub={rtxHdrSub}
-          lockReason={rtxHdrUnavailable ? rtxHdrSub : undefined}
-          value={settings.playerRtxHdr}
-          onChange={(v) => update({ playerRtxHdr: v })}
-        />
-      )}
-      {isWindowsDesktop() && (
-        <ToggleRow
-          label={t("RTX Video Super Resolution")}
-          leading={<Tag text={t("Nvidia only")} />}
-          sub={rtxVsrSub}
-          lockReason={rtxVsrUnavailable ? rtxVsrSub : undefined}
-          value={settings.playerRtxVsr}
-          onChange={(v) => update({ playerRtxVsr: v })}
-        />
-      )}
-    </div>
+
+      <SettingGroup label={t("Display")}>
+        <DisplayPanelSelector />
+        {isWindowsDesktop() && (
+          <ToggleRow
+            label={t("RTX Video HDR")}
+            sub={rtxHdrSub}
+            lockReason={rtxHdrUnavailable ? rtxHdrSub : undefined}
+            value={settings.playerRtxHdr}
+            onChange={(v) => update({ playerRtxHdr: v })}
+          />
+        )}
+        {isWindowsDesktop() && (
+          <ToggleRow
+            label={t("RTX Video Super Resolution")}
+            sub={rtxVsrSub}
+            lockReason={rtxVsrUnavailable ? rtxVsrSub : undefined}
+            value={settings.playerRtxVsr}
+            onChange={(v) => update({ playerRtxVsr: v })}
+          />
+        )}
+      </SettingGroup>
+    </>
   );
 }

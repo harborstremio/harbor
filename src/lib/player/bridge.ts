@@ -117,6 +117,7 @@ export type PlayerBridge = {
   setSubtitleTrack: (id: string | null) => void;
   setSecondarySubtitleTrack: (id: string | null) => void;
   setSubVisible: (on: boolean) => void;
+  setSubHideSdh?: (on: boolean) => void;
   setSubDelay: (sec: number) => void;
   setAudioDelay: (sec: number) => void;
   setPanscan: (value: number) => void;

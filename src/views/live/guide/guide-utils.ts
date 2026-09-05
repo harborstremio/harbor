@@ -1,7 +1,9 @@
 export const PX_PER_MIN = 5;
 export const PX_PER_MS = PX_PER_MIN / 60_000;
 export const CHANNEL_COL_PX = 200;
-export const ROW_HEIGHT_PX = 76;
+export const ROW_HEIGHT_PX = 110;
+export const CARD_GAP_Y = 10;
+export const CARD_GAP_X = 3;
 export const RULER_HEIGHT_PX = 52;
 export const HISTORY_HOURS = 12;
 export const WINDOW_HOURS = 48;

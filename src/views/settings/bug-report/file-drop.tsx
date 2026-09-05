@@ -1,5 +1,7 @@
-import { ImagePlus, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { AlertTriangle, ImagePlus, X } from "lucide-react";
+import { useLayoutEffect, useRef, useState } from "react";
+import { tvFocus } from "@/lib/keyboard-navigation";
+import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
 
 const ACCEPT = "image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/quicktime";
@@ -15,8 +17,21 @@ function fmtBytes(n: number): string {
 export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: File[]) => void }) {
   const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropRef = useRef<HTMLButtonElement>(null);
+  const tileRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const back = useRef<number | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [reject, setReject] = useState<string | null>(null);
+
+  useLayoutEffect(() => {
+    const at = back.current;
+    if (at === null) return;
+    back.current = null;
+    const target = files.length
+      ? tileRefs.current[Math.min(at, files.length - 1)]
+      : dropRef.current;
+    if (target) tvFocus(target);
+  }, [files]);
 
   const add = (incoming: FileList | File[]) => {
     setReject(null);
@@ -40,11 +55,16 @@ export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: 
     onChange(next);
   };
 
-  const remove = (ix: number) => onChange(files.filter((_, i) => i !== ix));
+  const remove = (ix: number) => {
+    const el = document.activeElement;
+    back.current = el instanceof HTMLElement && navOwnsFocus(el) ? ix : null;
+    onChange(files.filter((_, i) => i !== ix));
+  };
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-3">
       <button
+        ref={dropRef}
         type="button"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
@@ -57,17 +77,17 @@ export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: 
           setDragOver(false);
           if (e.dataTransfer?.files?.length) add(e.dataTransfer.files);
         }}
-        className={`flex flex-col items-center justify-center gap-2 rounded-md px-6 py-9 text-center transition-colors ${
+        className={`flex flex-col items-center justify-center gap-2 rounded-[10px] border px-6 py-9 text-center transition-colors ${
           dragOver
-            ? "bg-raised text-ink"
-            : "bg-elevated text-ink-muted hover:bg-raised hover:text-ink"
+            ? "border-edge bg-raised text-ink"
+            : "border-edge-soft bg-elevated text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
-        <ImagePlus size={22} strokeWidth={1.7} />
-        <span className="text-[13.5px] font-medium">
+        <ImagePlus size={24} strokeWidth={1.7} />
+        <span className="max-w-[66ch] text-[16.5px] font-medium leading-[24px]">
           {t("Drop screenshots or screen recordings, or click to browse")}
         </span>
-        <span className="text-[11.5px] text-ink-subtle">
+        <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
           {t("PNG, JPG, WebP, GIF, MP4, WebM, MOV. Up to {count} files, 100 MB each.", {
             count: MAX_FILES,
           })}
@@ -84,28 +104,36 @@ export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: 
           e.target.value = "";
         }}
       />
-      {reject && <p className="text-[11.5px] text-danger">{reject}</p>}
+      {reject && (
+        <p className="flex max-w-[66ch] items-start gap-2 text-[15.5px] leading-[22px] text-danger">
+          <AlertTriangle size={17} strokeWidth={2.2} className="mt-[3px] shrink-0" />
+          {reject}
+        </p>
+      )}
       {files.length > 0 && (
-        <ul className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+        <ul className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
           {files.map((f, i) => (
             <li
               key={`${f.name}-${i}`}
-              className="group relative overflow-hidden rounded-md bg-elevated"
+              className="relative flex flex-col overflow-hidden rounded-[10px] border border-edge-soft bg-elevated"
             >
               <FilePreview file={f} />
-              <div className="flex items-center gap-2 px-2.5 py-2 text-[11.5px] text-ink-muted">
-                <span className="truncate" title={f.name}>
-                  {f.name}
+              <div className="flex min-w-0 flex-col gap-0.5 px-3 py-2.5">
+                <span className="break-words text-[15.5px] leading-[22px] text-ink">{f.name}</span>
+                <span className="text-[15.5px] leading-[22px] tabular-nums text-ink-subtle">
+                  {fmtBytes(f.size)}
                 </span>
-                <span className="ms-auto shrink-0 text-ink-subtle">{fmtBytes(f.size)}</span>
               </div>
               <button
+                ref={(el) => {
+                  tileRefs.current[i] = el;
+                }}
                 type="button"
                 onClick={() => remove(i)}
-                aria-label={t("Remove")}
-                className="absolute end-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-canvas text-ink-muted opacity-0 transition-opacity hover:text-ink group-hover:opacity-100"
+                aria-label={t("Remove {name}", { name: f.name })}
+                className="absolute end-1 top-1 grid h-11 w-11 place-items-center rounded-[10px] bg-canvas text-ink-muted transition-colors hover:text-ink"
               >
-                <X size={14} strokeWidth={2.2} />
+                <X size={18} strokeWidth={2.2} />
               </button>
             </li>
           ))}
@@ -132,11 +160,6 @@ function FilePreview({ file }: { file: File }) {
     );
   }
   return (
-    <img
-      src={url}
-      alt=""
-      className="aspect-video w-full bg-canvas object-cover"
-      draggable={false}
-    />
+    <img src={url} alt="" className="aspect-video w-full bg-canvas object-cover" draggable={false} />
   );
 }

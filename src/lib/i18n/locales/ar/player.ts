@@ -502,6 +502,18 @@ const player: Record<string, string> = {
     "هذا تقدير مبني على بيانات الإصدار، وليس قياسًا لمزامنة التوقيت.",
   "Couldn't save the synced subtitle. Try again.": "تعذّر حفظ الترجمة المتزامنة. حاول مرة أخرى.",
   "Saving...": "جارٍ الحفظ...",
+  "Reloading the stream…": "جارٍ إعادة تحميل البث…",
+  "Couldn't reload the stream. Try picking another source.":
+    "تعذّر إعادة تحميل البث. جرّب اختيار مصدر آخر.",
+  "Harbor's streaming server only runs in the desktop app.":
+    "لا يعمل خادم البث الخاص بـ Harbor إلا في تطبيق الكمبيوتر.",
+  "Restarting the streaming server…": "جارٍ إعادة تشغيل خادم البث…",
+  "Couldn't restart the streaming server.": "تعذّر إعادة تشغيل خادم البث.",
+  "The streaming server didn't come back up.": "لم يعد خادم البث إلى العمل.",
+  "Streaming server restarted.": "تمت إعادة تشغيل خادم البث.",
+  "Ignore this title": "تجاهل هذا العنوان",
+  "Never show the content advisory for this title again":
+    "عدم إظهار تنبيه المحتوى لهذا العنوان مرة أخرى",
 };
 
 export default player;

@@ -1028,6 +1028,11 @@ const settings: Record<string, string> = {
   "Auto-skip intros": "Автопропуск заставок",
   "Jump past openings automatically the moment one starts. The Skip button still shows either way, and seeking back into an intro replays it without skipping again.":
     "Автоматически перематывает заставку, как только она начинается. Кнопка «Пропустить» показывается в любом случае, а при перемотке назад заставка проигрывается снова без пропуска.",
+  "Timing sources": "Источники таймингов",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · тайминги заставки и титров",
+  "Paste your TheIntroDB API key": "Вставьте свой API-ключ TheIntroDB",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "Необязательно. TheIntroDB отвечает и без ключа, но с ключом лимит запросов выше, поэтому тайминги продолжают приходить при просмотре запоем. Получить его можно на",
   "Next episode prompt": "Подсказка о следующей серии",
   "When the Up Next pill appears before an episode ends. Auto scales to the episode length, so short episodes stop prompting so early. Off hides it.":
     "Когда плашка «Далее» появляется перед концом серии. «Авто» подстраивается под длину серии, чтобы короткие серии не предлагали переход слишком рано. «Выкл.» скрывает её.",
@@ -2058,6 +2063,25 @@ const settings: Record<string, string> = {
   "Build a bigger buffer": "Увеличить буфер",
   "Loads more of the video ahead of time before playing. Smoother on weak connections, uses a little more memory and takes a moment longer to start.":
     "Загружает больше видео заранее, до начала воспроизведения. Плавнее на слабом соединении, но требует чуть больше памяти и дольше стартует.",
+  "Buffer size": "Размер буфера",
+  Small: "Маленький",
+  Medium: "Средний",
+  Adaptive: "Адаптивно",
+  "Reads ahead": "Читает вперёд",
+  "Memory cap": "Лимит памяти",
+  "Wait before playing": "Ожидание перед запуском",
+  "Holds up to {size} in memory while a video plays.":
+    "Во время воспроизведения держит в памяти до {size}.",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "Harbor сам подбирает запас для каждого названия и увеличивает его, когда воспроизведение стабилизируется. Подходит почти всем.",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "Самый быстрый старт и минимум памяти. Хорошо при быстром стабильном соединении или на машине, где мало памяти.",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "Пара минут запаса. Переживает короткие сбои, почти не задерживая начало воспроизведения.",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "Десять минут запаса. Рассчитано на нестабильный Wi-Fi или далёкий сервер ценой более долгого ожидания перед началом воспроизведения.",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "Полчаса запаса. Имеет смысл только при совсем ненадёжном соединении.",
   "For laptop speakers and headphones. Movies mixed for 5.1 or 7.1 surround can sound hollow or have quiet dialogue on two speakers. This folds them down properly.":
     "Для динамиков ноутбука и наушников. Фильмы, сведённые в 5.1 или 7.1, на двух динамиках звучат пусто, а диалоги в них слишком тихие. Это корректно сворачивает звук в стерео.",
   "Mix surround sound down to stereo": "Сводить объёмный звук в стерео",
@@ -2286,6 +2310,13 @@ const settings: Record<string, string> = {
     "Шаг назад на один кадр с паузой. Покадровая точность в mpv.",
   "Step forward one frame and pause. Frame-accurate on mpv.":
     "Шаг вперёд на один кадр с паузой. Покадровая точность в mpv.",
+  Recovery: "Восстановление",
+  "Reload source": "Перезагрузить источник",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "Заново открыть текущий поток и продолжить с того места, где вы остановились.",
+  "Restart streaming server": "Перезапустить стриминг-сервер",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "Перезапустить собственный стриминг-сервер Harbor, а когда он снова заработает, перезагрузить поток. Только в десктопном приложении.",
 };
 
 export default settings;

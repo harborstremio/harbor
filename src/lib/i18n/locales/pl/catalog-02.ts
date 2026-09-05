@@ -454,6 +454,7 @@ const catalog02: Record<string, string> = {
   "Books you save will appear here": "Zapisane książki pojawią się tutaj",
   "Boost SDR video toward HDR": "Wzmocnij obraz SDR w kierunku HDR",
   Border: "Obramowanie",
+  "Borderless window": "Okno bez ramki",
   Born: "Data urodzenia",
   "Born {date}": "Data urodzenia: {date}",
   "Bot token": "Token bota",
@@ -547,6 +548,7 @@ const catalog02: Record<string, string> = {
     "Limit wyczerpany, zostanie odnowiony o północy czasu UTC.",
   "Buffer fill": "Wypełnienie bufora",
   "Buffer fill brightness": "Jasność wypełnienia bufora",
+  "Buffer size": "Rozmiar bufora",
   Buffering: "Buforowanie",
   "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and torrent streams. Uses more disk and bandwidth; cleared when you switch or close.":
     "Buforuje cały plik w tle podczas oglądania, nawet po wstrzymaniu, dzięki czemu duże remuksy są wstępnie wczytywane, a przewijanie zbuforowanego pliku nie powoduje ponownego buforowania. Działa ze strumieniami debrid i torrent. Zużywa więcej miejsca na dysku i transferu, dane są usuwane po zmianie lub zamknięciu.",

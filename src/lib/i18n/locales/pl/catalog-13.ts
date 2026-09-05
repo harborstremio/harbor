@@ -260,6 +260,8 @@ const catalog13: Record<string, string> = {
     "Opisz zmiany w tej wersji. Osoby weryfikujące również zobaczą ten opis.",
   Template: "Szablon",
   "Temporary files": "Pliki tymczasowe",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "Dziesięć minut zapasu danych. Rozwiązanie z myślą o niestabilnej sieci Wi-Fi lub odległym serwerze, kosztem dłuższego oczekiwania na rozpoczęcie odtwarzania.",
   "Tennis tournaments": "Turnieje tenisowe",
   "Tense Performances": "Trzymające w napięciu kreacje",
   Test: "Test",
@@ -507,6 +509,8 @@ const catalog13: Record<string, string> = {
     "Serwer dostawcy zwrócił błąd. Nie można tego naprawić po stronie Harbor. Wybierz inne źródło.",
   "The quick brown fox jumps": "Pchnąć w tę łódź jeża",
   "The quick brown fox jumps over the lazy dog": "Pchnąć w tę łódź jeża lub ośm skrzyń fig",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "Najszybsze uruchomienie i najmniejsze zużycie pamięci. Dobre przy szybkim, stabilnym połączeniu lub na komputerze z małą ilością pamięci.",
   "The ratings row on a title's detail page, next to runtime and genre.":
     "Wiersz ocen na stronie szczegółów tytułu, obok czasu trwania i gatunku.",
   "The real footage": "Autentyczne nagrania",
@@ -543,6 +547,7 @@ const catalog13: Record<string, string> = {
     "Źródło zwróciło nieprawidłową odpowiedź dla tej mangi. Problem może być tymczasowy albo tytuł mógł zostać przeniesiony. Wypróbuj inne źródło lub wróć i wybierz coś innego.",
   "The streaming engine is still starting up. Give it a moment and press Play again.":
     "Silnik strumieniowania nadal się uruchamia. Poczekaj chwilę i ponownie naciśnij Odtwórz.",
+  "The streaming server didn't come back up.": "Serwer strumieniowania nie wrócił do działania.",
   "The stronger fix when streams refuse to load. Cached stream files and the DHT cache are removed, so the next stream starts from scratch.":
     "Skuteczniejsze rozwiązanie, gdy strumienie nie chcą się wczytać. Pliki strumieni i pamięć podręczna DHT zostaną usunięte, więc następny strumień zacznie od początku.",
   "The test calls": "Test wywołuje",
@@ -561,6 +566,7 @@ const catalog13: Record<string, string> = {
   "The window and taskbar icon updates right away. The installed shortcut refreshes on the next update.":
     "Ikona okna i paska zadań zostanie zaktualizowana od razu. Zainstalowany skrót odświeży się przy następnej aktualizacji.",
   "The yellow chip in the poster corner.": "Żółta etykieta w rogu plakatu.",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · czasy czołówek i napisów końcowych",
   TheTVDB: "TheTVDB",
   "TheTVDB · episode data": "TheTVDB · dane odcinków",
   "Theatrical Capture": "Nagranie kinowe",
@@ -824,6 +830,7 @@ const catalog13: Record<string, string> = {
     "Czas jest zsynchronizowany. Jeśli napisy zaczną później wyprzedzać lub opóźniać obraz, powtórz tę czynność przy innym wierszu.",
   "Timing looks aligned": "Synchronizacja wygląda na prawidłową",
   "Timing rate": "Tempo synchronizacji",
+  "Timing sources": "Źródła czasów",
   Title: "Tytuł",
   "Title & info": "Tytuł i informacje",
   "Title (optional)": "Tytuł (opcjonalnie)",

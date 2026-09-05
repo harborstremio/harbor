@@ -20,17 +20,17 @@ export function P2PPanel() {
   useSubTabs(tabs, tab, (id) => setTab(id as Tab));
   return (
     <div key={tab} className="harbor-cascade flex flex-col gap-10">
-        {tab === "engine" && (
-          <>
-            <LocalEngineSection />
-            <P2PPowerToolsSection />
-          </>
-        )}
-        {tab === "server" && (
-          <>
-            <ServerAddressSection />
-            <RemoteServerSection />
-          </>
+      {tab === "engine" && (
+        <>
+          <LocalEngineSection />
+          <P2PPowerToolsSection />
+        </>
+      )}
+      {tab === "server" && (
+        <>
+          <ServerAddressSection />
+          <RemoteServerSection />
+        </>
       )}
     </div>
   );

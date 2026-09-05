@@ -4,7 +4,7 @@ import { isWindowsDesktop } from "@/lib/platform";
 import { probeMpv, type MpvProbe } from "@/lib/player/mpv";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { SettingGroup } from "../kit";
+import { ROW_DESC, SettingGroup } from "../kit";
 import { ToggleRow } from "../shared";
 import { BandwidthInput } from "./bandwidth-section";
 import { ChoiceBlock, Tag } from "./choice";
@@ -66,29 +66,29 @@ export function PlayerEnginePanel() {
               tags={c.recommended ? <Tag accent text={t("Recommended")} /> : undefined}
             />
           ))}
+          <ToggleRow
+            label={t("Embed mpv inside Harbor window")}
+            sub={t("Renders mpv inline so playback lives in Harbor itself. Turn off to open it in a separate window instead.")}
+            value={settings.playerMpvEmbed}
+            onChange={(v) => update({ playerMpvEmbed: v })}
+          />
           {mpvProbe && !mpvProbe.available && (
-            <div className="flex items-start gap-2.5 rounded-md bg-elevated px-4 py-3.5 text-[12.5px] leading-relaxed text-ink">
-              <AlertTriangle size={14} strokeWidth={2.4} className="mt-[2px] shrink-0 text-danger" />
+            <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+              <AlertTriangle size={18} strokeWidth={2.2} className="mt-[2px] shrink-0 text-danger" />
               <span className="flex min-w-0 flex-1 flex-col gap-2">
-                <span>
+                <span className={`max-w-[66ch] ${ROW_DESC}`}>
                   {t(
                     "libmpv did not load, so playback falls back to HTML5 and formats like MKV may refuse to play. On Linux, install your distribution's libmpv package, then restart Harbor.",
                   )}
                 </span>
                 {mpvProbe.error && (
-                  <span className="break-words rounded-md bg-canvas px-2.5 py-1.5 font-mono text-[11.5px] text-ink-subtle ring-1 ring-inset ring-edge-soft">
+                  <span className="break-words rounded-[6px] bg-canvas px-2.5 py-1.5 font-mono text-[15.5px] leading-[22px] text-ink-subtle">
                     {mpvProbe.error}
                   </span>
                 )}
               </span>
             </div>
           )}
-          <ToggleRow
-            label={t("Embed mpv inside Harbor window")}
-            sub={t("Renders mpv inline so playback lives in Harbor itself. Disable to open it in a separate window instead.")}
-            value={settings.playerMpvEmbed}
-            onChange={(v) => update({ playerMpvEmbed: v })}
-          />
         </SettingGroup>
 
         {isWindowsDesktop() ? (
@@ -107,7 +107,7 @@ export function PlayerEnginePanel() {
 
         <SettingGroup label={t("Casting")}>
           <ToggleRow
-            label={t("Always re-encode when casting (recommended)")}
+            label={t("Always re-encode when casting")}
             sub={t("On by default. Pipes every cast through ffmpeg as H.264 + AAC + MPEG-TS so Samsung, LG, Sony, and other DLNA TVs accept the stream regardless of source codec. Turn off only if you have a beefy receiver that handles raw HEVC/DTS and want max quality. Requires ffmpeg in PATH.")}
             value={settings.castAlwaysTranscode}
             onChange={(v) => update({ castAlwaysTranscode: v })}
@@ -122,7 +122,7 @@ export function PlayerEnginePanel() {
           <SettingGroup label={t("Picture")}>
             <ToggleRow
               label={t("Line-free video mode")}
-              sub={t("Forces a compatibility present mode that removes a thin bright line some monitors show at the screen edge. Side effects: 4K playback can drop to a slideshow and HDR content looks dimmer (this mode bypasses the HDR display path). Leave OFF unless you see that line. Restart playback to apply.")}
+              sub={t("Forces a compatibility present mode that removes a thin bright line some monitors show at the screen edge. Side effects: 4K playback can drop to a slideshow and HDR content looks dimmer, because this mode bypasses the HDR display path. Leave off unless you see that line. Restart playback to apply.")}
               value={settings.playerD3d11Flip}
               onChange={(v) => update({ playerD3d11Flip: v })}
             />

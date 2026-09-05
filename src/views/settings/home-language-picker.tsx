@@ -37,8 +37,8 @@ export function HomeLanguagePicker() {
   return (
     <div className="flex flex-col gap-3">
  <div className="flex items-center gap-2.5 rounded-md bg-canvas px-3.5 py-2.5">
-        <Globe size={16} className={count ? "text-accent" : "text-ink-subtle"} />
-        <span className="text-[12.5px] text-ink-muted">
+        <Globe size={18} className={`shrink-0 ${count ? "text-accent" : "text-ink-subtle"}`} />
+        <span className="text-[15.5px] leading-[22px] text-ink-muted">
           {count === 0 ? (
             t("No filter. Home shows every language.")
           ) : (
@@ -51,14 +51,14 @@ export function HomeLanguagePicker() {
         {count > 0 && (
           <button
             onClick={() => update({ homeLanguages: [] })}
-            className="ms-auto rounded-md px-2 py-1 text-[11.5px] font-medium text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+            className="ms-auto flex h-11 shrink-0 items-center rounded-[8px] px-3 text-[15px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
           >
             {t("Clear")}
           </button>
         )}
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(138px,1fr))] gap-2">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-2">
         {LANGS.map(({ code, native, name, flags }) => {
           const on = selected.includes(code);
           return (
@@ -73,21 +73,21 @@ export function HomeLanguagePicker() {
             >
               <span className="flex w-full items-center justify-between gap-2">
                 <span
-                  className={`text-[15px] font-medium leading-tight ${on ? "text-ink" : "text-ink-muted group-hover:text-ink"}`}
+                  className={`text-[16.5px] font-medium leading-[24px] ${on ? "text-ink" : "text-ink-muted group-hover:text-ink"}`}
                 >
                   {native}
                 </span>
                 <span
-                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full transition ${
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition ${
                     on ? "bg-accent text-canvas" : "bg-transparent text-transparent ring-1 ring-edge-soft"
                   }`}
                 >
-                  <Check size={12} strokeWidth={3} />
+                  <Check size={14} strokeWidth={3} />
                 </span>
               </span>
               <span className="flex w-full items-center gap-1.5">
                 <LangFlags codes={flags} />
-                <span className="truncate text-[11.5px] text-ink-subtle">{t(name)}</span>
+                <span className="truncate text-[15.5px] leading-[22px] text-ink-subtle">{t(name)}</span>
               </span>
             </button>
           );

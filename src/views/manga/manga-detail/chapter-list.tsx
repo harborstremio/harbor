@@ -512,6 +512,10 @@ export function ChapterList({
     );
   }
 
+  const volumeSizes = new Map<string, number>();
+  for (const c of ordered) if (c.volume) volumeSizes.set(c.volume, (volumeSizes.get(c.volume) ?? 0) + 1);
+  const volumeCount = volumeSizes.size;
+
   return (
     <section className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -673,9 +677,23 @@ export function ChapterList({
         </div>
       ) : view === "list" ? (
         <div className="overflow-hidden rounded-2xl border border-edge-soft bg-surface/40">
-          {ordered.map((c) => {
+          {ordered.map((c, i) => {
             const cur = isCurrentChapter(progress, c);
-            return (
+            const volumeHead =
+              volumeCount > 1 && c.volume && (i === 0 || ordered[i - 1].volume !== c.volume) ? (
+                <div
+                  key={`vol:${c.volume}:${c.id}`}
+                  className="flex items-center gap-3 border-b border-edge-soft/60 bg-canvas/50 px-5 py-2"
+                >
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+                    {t("Volume {n}", { n: c.volume })}
+                  </span>
+                  <span className="text-[11px] tabular-nums text-ink-subtle">
+                    {t("{n} chapters", { n: volumeSizes.get(c.volume) ?? 0 })}
+                  </span>
+                </div>
+              ) : null;
+            const row = (
               <button
                 key={c.id}
                 type="button"
@@ -715,6 +733,7 @@ export function ChapterList({
                 </div>
               </button>
             );
+            return volumeHead ? [volumeHead, row] : row;
           })}
         </div>
       ) : (

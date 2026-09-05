@@ -307,6 +307,16 @@ const profileFill: Record<string, string> = {
   Books: "書籍",
   "Show your favourite games, books and music on your profile":
     "お気に入りのゲーム、本、音楽をプロフィールに表示",
+  "On Letterboxd": "Letterboxdで見る",
+  "Open Letterboxd profile": "Letterboxdプロフィールを開く",
+  "Connect Letterboxd": "Letterboxdに接続",
+  "No Letterboxd lists shared yet": "共有されているLetterboxdのリストはまだありません",
+  "Link Letterboxd and the films and lists you keep there show up right here.":
+    "Letterboxdを連携すると、そこに記録している映画やリストがここに表示されます。",
+  "Show your Letterboxd card": "Letterboxdカードを表示",
+  "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
+    "初期設定ではオフです。プロフィールを訪れた人に、Letterboxdの名前、リスト、映画の本数を表示します。接続自体は「設定」の「Letterboxd」で管理できます。",
+  "Letterboxd": "Letterboxd",
 };
 
 export default profileFill;

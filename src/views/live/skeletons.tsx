@@ -6,6 +6,8 @@ import {
   RULER_HEIGHT_PX,
   WINDOW_HOURS,
   WINDOW_PX,
+  CARD_GAP_X,
+  CARD_GAP_Y,
 } from "./guide/guide-utils";
 
 export function GridSkeleton() {
@@ -104,21 +106,22 @@ export function ProgramBlocksRow({ seed }: { seed: number }) {
   for (let total = 0, i = 0; total < WINDOW_PX; i += 1) {
     const w = base[i % base.length];
     widths.push(w);
-    total += w + 6;
+    total += w + CARD_GAP_X;
   }
   let x = 0;
   return (
     <div className="relative flex h-full" style={{ width: WINDOW_PX }}>
       {widths.map((w, i) => {
         const left = x;
-        x += w + 6;
+        x += w + CARD_GAP_X;
         return (
           <div
             key={i}
-            className="absolute top-1.5 bottom-1.5 animate-pulse rounded-md bg-elevated/50"
+            className="absolute top-0 animate-pulse bg-elevated/50"
             style={{
               left,
               width: w,
+              bottom: CARD_GAP_Y,
               animationDelay: `${seed * 80 + i * 60}ms`,
             }}
           />

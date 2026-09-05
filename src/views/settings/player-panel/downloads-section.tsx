@@ -5,7 +5,10 @@ import { FolderOpen, RotateCcw } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { SettingGroup, SettingRow } from "../kit";
+import { SButton } from "../ui";
 import { ToggleRow } from "@/views/settings/shared";
+import { BADGE_BASE } from "./choice";
 
 export function DownloadsSection() {
   const { settings, update } = useSettings();
@@ -53,7 +56,7 @@ export function DownloadsSection() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       <DownloadLocation
         title={t("Movies & TV")}
         current={settings.downloadDir || systemDefault}
@@ -64,7 +67,9 @@ export function DownloadsSection() {
       >
         <ToggleRow
           label={t("Create folders for movies and shows")}
-          note={t("Organize downloads into folders by movie or series name")}
+          sub={t(
+            "Files land in a folder named after the movie or series instead of loose in the download folder.",
+          )}
           value={settings.downloadCreateFolders}
           onChange={(v) => update({ downloadCreateFolders: v })}
         />
@@ -81,7 +86,7 @@ export function DownloadsSection() {
       >
         <ToggleRow
           label={t("Create folders for eBooks")}
-          note={t("Store each title in its own folder with its EPUB or PDF")}
+          sub={t("Each title gets its own folder holding its EPUB or PDF.")}
           value={settings.ebookDownloadCreateFolders}
           onChange={(value) => update({ ebookDownloadCreateFolders: value })}
         />
@@ -109,50 +114,40 @@ function DownloadLocation({
 }) {
   const t = useT();
   return (
-    <section className="flex flex-col gap-3">
-      <h3 className="text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
-        {title}
-      </h3>
+    <SettingGroup label={title}>
       {children}
-      <div className="flex items-center justify-between gap-3 rounded-md bg-canvas px-4 py-3">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-            {custom ? t("Custom location") : t("Default location")}
+      <SettingRow
+        wide
+        label={
+          <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
+            <span className="min-w-0">{t("Download folder")}</span>
+            <span className={`${BADGE_BASE} bg-elevated text-ink-subtle`}>
+              {custom ? t("Custom") : t("Default")}
+            </span>
           </span>
-          <span className="truncate font-mono text-[13px] text-ink" title={current}>
+        }
+        desc={
+          <span className="block break-all font-mono text-[15.5px] leading-[22px] text-ink">
             {current || t("Detecting...")}
           </span>
-        </div>
-        {current && (
-          <button
-            type="button"
-            onClick={onReveal}
-            className="flex h-9 shrink-0 items-center gap-1.5 rounded-md px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
-          >
-            <FolderOpen size={14} strokeWidth={2.2} />
-            {t("Open")}
-          </button>
-        )}
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={onChoose}
-          className="flex h-10 items-center gap-2 rounded-md bg-ink px-4 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
-        >
-          {t("Choose folder")}
-        </button>
-        {custom && (
-          <button
-            type="button"
-            onClick={onReset}
-            className="flex h-10 items-center gap-1.5 rounded-md px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
-          >
-            <RotateCcw size={14} strokeWidth={2.2} />
-            {t("Reset to default")}
-          </button>
-        )}
-      </div>
-    </section>
+        }
+      >
+        <span className="flex flex-wrap items-center gap-2.5">
+          <SButton onClick={onChoose}>{t("Choose folder")}</SButton>
+          {current && (
+            <SButton onClick={onReveal}>
+              <FolderOpen size={16} strokeWidth={2.2} />
+              {t("Open")}
+            </SButton>
+          )}
+          {custom && (
+            <SButton onClick={onReset}>
+              <RotateCcw size={16} strokeWidth={2.2} />
+              {t("Reset to default")}
+            </SButton>
+          )}
+        </span>
+      </SettingRow>
+    </SettingGroup>
   );
 }

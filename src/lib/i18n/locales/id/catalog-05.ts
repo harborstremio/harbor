@@ -421,6 +421,8 @@ const catalog: Record<string, string> = {
   "Lineups not available yet.": "Susunan acara belum tersedia.",
   Link: "Tautkan",
   "Link Discord": "Tautkan Discord",
+  "Link Letterboxd and the films and lists you keep there show up right here.":
+    "Tautkan Letterboxd dan film serta daftar yang Anda simpan di sana akan muncul di sini.",
   "Link Simkl and everything you watch shows up right here.":
     "Tautkan Simkl dan semua yang Anda tonton akan muncul di sini.",
   "Link a title": "Tautkan judul",
@@ -774,8 +776,10 @@ const catalog: Record<string, string> = {
   Media: "Media",
   "Media type": "Jenis media",
   "Media types": "Jenis media",
+  Medium: "Sedang",
   Member: "Anggota",
   Members: "Anggota",
+  "Memory cap": "Batas memori",
   "Men of History": "Tokoh Sejarah",
   Menu: "Menu",
   "Menu / Options": "Menu / Opsi",

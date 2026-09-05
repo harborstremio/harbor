@@ -134,7 +134,7 @@ export function ResizableSubtitlePanel({
 
   return (
     <div className={className} style={{ width: `${size.width}px`, height: `${size.height}px` }}>
-      <div className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-15px_rgba(0,0,0,0.85)] backdrop-blur-xl">
+      <div className="relative flex h-full w-full flex-col overflow-hidden rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]">
         <button
           type="button"
           aria-label={tr("Resize subtitle menu")}

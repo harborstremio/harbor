@@ -15,7 +15,7 @@ const SUN = "oklch(0.9 0.12 100)";
 const LEAF = "oklch(0.8 0.15 145)";
 const MIST = "oklch(0.72 0.05 150)";
 
-const PRIMARY_IDS = new Set<string>(["home", "discover", "movies", "shows", "kids", "anime", "live", "vod"]);
+const PRIMARY_IDS = new Set<string>(["home", "discover", "movies", "shows", "kids", "anime", "live", "sports", "vod"]);
 
 export function ForestSidebar() {
   const { view, setView, chromeHidden } = useView();

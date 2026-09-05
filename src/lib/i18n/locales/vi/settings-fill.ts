@@ -276,6 +276,9 @@ const settingsFill: Record<string, string> = {
     "Toàn màn hình thực sự phủ kín toàn bộ màn hình và ẩn thanh tác vụ. Phóng to lấp đầy màn hình nhưng vẫn giữ thanh tác vụ và thanh tiêu đề để bạn vẫn có thể chuyển ứng dụng.",
   "True fullscreen": "Toàn màn hình thực sự",
   Maximize: "Phóng to",
+  "Borderless window": "Cửa sổ không viền",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "Toàn màn hình thực sự phủ kín toàn bộ màn hình và ẩn thanh tác vụ, nhưng khi chuyển ứng dụng có thể bị nháy hình. Cửa sổ không viền phủ kín đúng vùng đó bằng một cửa sổ không khung, nhờ vậy alt-tab và các lớp phủ luôn hiện tức thì. Phóng to lấp đầy màn hình nhưng vẫn giữ thanh tác vụ và thanh tiêu đề.",
   "Dual subtitles": "Phụ đề kép",
   "Show a second subtitle in another language at the same time. Handy when you are learning a language: keep the one you are learning as your main subtitle, and put your own language here.":
     "Hiển thị đồng thời phụ đề thứ hai bằng ngôn ngữ khác. Hữu ích khi học ngoại ngữ: đặt ngôn ngữ đang học làm phụ đề chính và chọn ngôn ngữ của bạn tại đây.",

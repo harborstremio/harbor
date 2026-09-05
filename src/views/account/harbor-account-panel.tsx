@@ -28,8 +28,11 @@ export function HarborAccountPanel() {
   if (!author) {
     return (
       <>
-        <SignedOutHero onSignIn={() => setAuthOpen(true)} />
-        {authOpen && <AccountAuthForm onRecovery={setReveal} onClose={() => setAuthOpen(false)} />}
+        {authOpen ? (
+          <AccountAuthForm inline onRecovery={setReveal} onClose={() => setAuthOpen(false)} />
+        ) : (
+          <SignedOutHero onSignIn={() => setAuthOpen(true)} />
+        )}
         {reveal && <RecoveryReveal code={reveal} onDone={() => setReveal(null)} />}
       </>
     );

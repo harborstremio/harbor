@@ -64,6 +64,7 @@ const settingsFill: Record<string, string> = {
   "Badge art packs you installed from the community store. Remove one to put its badges back to default.":
     "Abzeichen-Grafikpakete, die du aus dem Community-Store installiert hast. Entferne eines, um seine Abzeichen auf die Standardeinstellung zurückzusetzen.",
   "Badges for giving": "Abzeichen fürs Schenken",
+  "Borderless window": "Rahmenloses Fenster",
   "Browse ElfHosted": "ElfHosted durchsuchen",
   "Built on Stremio": "Basierend auf Stremio",
   "Cached chapter lists and browse pages. Downloads stay untouched.":
@@ -402,6 +403,8 @@ const settingsFill: Record<string, string> = {
   Trakt: "Trakt",
   "Trial for ${n}": "Testversion für ${n}",
   "True fullscreen": "Echter Vollbildmodus",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "Der echte Vollbildmodus nimmt den gesamten Bildschirm ein und blendet die Taskleiste aus, beim Wechseln zwischen Apps kann es jedoch flackern. Das rahmenlose Fenster deckt denselben Bereich mit einem Fenster ohne Rahmen ab, sodass Alt+Tab und Overlays sofort reagieren. Ein maximiertes Fenster füllt den Bildschirm, lässt aber Taskleiste und Titelleiste sichtbar.",
   "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.":
     "Der echte Vollbildmodus nimmt den gesamten Bildschirm ein und blendet die Taskleiste aus. Ein maximiertes Fenster füllt den Bildschirm, lässt aber Taskleiste und Titelleiste sichtbar, damit du weiterhin zwischen Apps wechseln kannst.",
   "Try it for ${n}": "Für ${n} testen",

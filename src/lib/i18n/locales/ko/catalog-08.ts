@@ -14,6 +14,8 @@ const catalog08: Record<string, string> = {
   "Re-configure this addon and apply the updated link":
     "이 애드온을 다시 설정하고 업데이트된 링크 적용",
   "Re-download": "다시 다운로드",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "보고 있던 스트림을 다시 열어 중단한 지점부터 이어서 재생합니다.",
   "Re-run deploy or paste the correct URL": "다시 배포하거나 올바른 URL 붙여 넣기",
   "Re-runs the welcome flow and clears every dismissed tip.":
     "환영 절차를 다시 실행하고 닫은 모든 팁을 초기화합니다.",
@@ -63,6 +65,7 @@ const catalog08: Record<string, string> = {
   "Reading your search": "검색어 분석 중",
   "Reading {chapter}": "{chapter} 읽는 중",
   "Reading…": "읽는 중…",
+  "Reads ahead": "미리 읽기",
   Ready: "준비됨",
   "Ready to play": "재생 준비 완료",
   "Ready to save": "저장 준비 완료",
@@ -120,6 +123,7 @@ const catalog08: Record<string, string> = {
   Recordings: "녹화물",
   "Recover via Discord": "Discord로 복구",
   "Recover via a code sent to Discord": "Discord로 전송된 코드로 복구",
+  Recovery: "복구",
   "Recovery code": "복구 코드",
   "Recovery key": "복구 키",
   "Recovery key block {current} of {total}": "복구 키 블록 {current}/{total}",
@@ -185,6 +189,8 @@ const catalog08: Record<string, string> = {
   Reload: "다시 불러오기",
   "Reload list": "목록 새로고침",
   "Reload original link": "원본 링크 다시 불러오기",
+  "Reload source": "소스 다시 불러오기",
+  "Reloading the stream…": "스트림을 다시 불러오는 중…",
   "Remaining only": "남은 시간만",
   Remap: "리맵",
   "Remap stream badges": "스트림 배지 재지정",
@@ -409,9 +415,13 @@ const catalog08: Record<string, string> = {
     "포스터에 커서를 올리면 열지 않고도 평점, 줄거리, 빠른 작업을 미리 볼 수 있습니다.",
   Restart: "다시 시작",
   "Restart Harbor after the install completes.": "설치가 완료되면 Harbor를 다시 시작하세요.",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "Harbor 자체 스트리밍 서버를 다시 시작한 뒤 서버가 돌아오면 스트림을 다시 불러옵니다. 데스크톱 전용입니다.",
   "Restart engine": "엔진 다시 시작",
   "Restart game": "게임 다시 시작",
+  "Restart streaming server": "스트리밍 서버 다시 시작",
   Restarting: "재시작 중",
+  "Restarting the streaming server…": "스트리밍 서버를 다시 시작하는 중…",
   Restore: "복원",
   "Restore + upscale. The best all-rounder for most anime.":
     "복원 + 업스케일링. 대부분의 애니메이션에 가장 무난합니다.",

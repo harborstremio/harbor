@@ -137,8 +137,10 @@ const catalogMO: Record<string, string> = {
   Media: "मीडिया",
   "Media type": "मीडिया प्रकार",
   "Media types": "मीडिया प्रकार",
+  Medium: "मध्यम",
   Member: "सदस्य",
   Members: "सदस्य",
+  "Memory cap": "मेमोरी की सीमा",
   "Men of History": "ऐतिहासिक पुरुष",
   Menu: "मेन्यू",
   "Menu / Options": "मेन्यू / विकल्प",
@@ -413,6 +415,8 @@ const catalogMO: Record<string, string> = {
   "Never contact the community server in either direction. Nothing is looked up and nothing is contributed from this device.":
     "किसी भी दिशा में कम्युनिटी सर्वर से कभी संपर्क न करें। इस डिवाइस से न कुछ खोजा जाता है, न कोई जानकारी साझा की जाती है।",
   "Never hide the next episode": "अगला एपिसोड कभी न छिपाएँ",
+  "Never show the content advisory for this title again":
+    "इस शीर्षक के लिए कॉन्टेंट संबंधी चेतावनी दोबारा कभी न दिखाएँ",
   "Never target official or licensed publisher sites.":
     "आधिकारिक या लाइसेंसधारी प्रकाशकों की साइटों को कभी निशाना न बनाएँ।",
   Nevermind: "कोई बात नहीं",
@@ -506,6 +510,7 @@ const catalogMO: Record<string, string> = {
   "No JavaScript. Scripts, inline handlers, and javascript: URLs are removed.":
     "JavaScript की अनुमति नहीं है। स्क्रिप्ट, इनलाइन हैंडलर और javascript: URLs हटा दिए जाते हैं।",
   "No Label": "कोई लेबल नहीं",
+  "No Letterboxd lists shared yet": "अभी तक कोई Letterboxd सूची शेयर नहीं की गई",
   "No Live TV playlists yet": "अभी कोई लाइव TV प्लेलिस्ट नहीं है",
   "No PIN set.": "कोई PIN सेट नहीं है।",
   "No PiP session. Closing.": "कोई PiP सेशन नहीं है। बंद किया जा रहा है।",
@@ -967,6 +972,8 @@ const catalogMO: Record<string, string> = {
     "डिफ़ॉल्ट रूप से बंद। विज़िटर को देखने दें कि आप क्या देखते रहे हैं",
   "Off by default. Show what you are watching right now, or your watch party, on your profile. Applies instantly":
     "डिफ़ॉल्ट रूप से बंद। आप अभी जो देख रहे हैं या अपनी वॉच पार्टी को अपनी प्रोफ़ाइल पर दिखाएँ। तुरंत लागू होता है",
+  "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
+    "डिफ़ॉल्ट रूप से बंद। चालू करने पर आपके प्रोफ़ाइल पर आने वाला कोई भी व्यक्ति आपका Letterboxd नाम, सूचियाँ और फ़िल्मों की गिनती देख सकता है। कनेक्शन को सेटिंग्स में Letterboxd के तहत प्रबंधित करें।",
   "Off by default. Shows your Simkl avatar, name and watch stats on your profile for anyone who visits. Manage the connection itself in Settings, Simkl.":
     "डिफ़ॉल्ट रूप से बंद। चालू करने पर आपके प्रोफ़ाइल पर आने वाला कोई भी व्यक्ति आपका Simkl अवतार, नाम और देखने के आँकड़े देख सकता है। कनेक्शन को सेटिंग्स में Simkl के तहत प्रबंधित करें।",
   "Off keeps your font, background, and canvas as a private preview.":
@@ -988,6 +995,7 @@ const catalogMO: Record<string, string> = {
     "Cloudflare में {b1} पर क्लिक करें, फिर {b2} ढूँढें और {b3} पर क्लिक करें।",
   "On Edge": "Edge पर",
   "On Hold": "होल्ड पर",
+  "On Letterboxd": "Letterboxd पर",
   "On Shelf": "शेल्फ़ पर",
   "On Simkl": "Simkl पर",
   "On Stremio-Addons": "Stremio-Addons पर",
@@ -1119,6 +1127,7 @@ const catalogMO: Record<string, string> = {
     "अपने ब्राउज़र में स्वामित्व सत्यापित करने के लिए डेस्कटॉप पर Harbor खोलें।",
   "Open Harbor's settings outside playback.": "प्लेबैक के बाहर Harbor की सेटिंग्स खोलें।",
   "Open Languages": "भाषाएँ खोलें",
+  "Open Letterboxd profile": "Letterboxd प्रोफ़ाइल खोलें",
   "Open Library settings": "लाइब्रेरी सेटिंग्स खोलें",
   "Open MAL profile": "MAL प्रोफ़ाइल खोलें",
   "Open MyAnimeList again": "MyAnimeList फिर से खोलें",
@@ -1251,6 +1260,8 @@ const catalogMO: Record<string, string> = {
     "वैकल्पिक। कोई भी स्क्रीनशॉट जोड़ने पर आपका मौजूदा सेट बदल जाएगा।",
   "Optional. Skip this step to keep your current cover.":
     "वैकल्पिक। अपना मौजूदा कवर बनाए रखने के लिए यह चरण छोड़ दें।",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "वैकल्पिक। TheIntroDB बिना कुंजी के भी जवाब देता है, लेकिन कुंजी जोड़ने पर आपकी रेट लिमिट बढ़ जाती है, जिससे लगातार कई एपिसोड देखते समय भी टाइमिंग मिलती रहती है। कुंजी यहाँ से लें:",
   Options: "विकल्प",
   "Options for the Library → Local tab: folders you scan from your own drive. When you export metadata, Harbor writes a Kodi-style .nfo and downloads artwork next to each file at the sizes below.":
     "लाइब्रेरी → लोकल टैब के विकल्प: वे फ़ोल्डर जिन्हें आप अपनी ड्राइव से स्कैन करते हैं। मेटाडेटा एक्सपोर्ट करने पर Harbor हर फ़ाइल के पास Kodi-शैली की .nfo फ़ाइल बनाता है और नीचे दिए गए आकारों में आर्टवर्क डाउनलोड करता है।",

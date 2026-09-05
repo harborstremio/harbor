@@ -969,6 +969,7 @@ const misc: Record<string, string> = {
   "Remove tag": "Remover tag",
   "Tag limit reached": "Limite de tags atingido",
   "Add a tag": "Adicionar uma tag",
+  "Paused on Trakt": "Pausado no Trakt",
 };
 
 export default misc;

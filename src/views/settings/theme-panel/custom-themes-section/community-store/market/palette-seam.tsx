@@ -6,9 +6,9 @@ export function PaletteSeam({ swatch, labeled = false }: { swatch: string[]; lab
 
   const t = useT();
   if (labeled) {
-    const canvas = cols[0] ?? "#20222a";
+    const canvas = cols[0] ?? "var(--color-canvas)";
     const surface = cols[1] ?? canvas;
-    const elevated = `color-mix(in srgb, ${surface} 84%, #ffffff)`;
+    const elevated = `color-mix(in srgb, ${surface} 84%, var(--color-elevated))`;
     const accent = cols[2] ?? cols[1] ?? canvas;
     const ramp: Array<{ name: string; color: string }> = [
       { name: "Canvas", color: canvas },
@@ -21,10 +21,10 @@ export function PaletteSeam({ swatch, labeled = false }: { swatch: string[]; lab
         {ramp.map((cell) => (
           <div key={cell.name} className="flex min-w-0 flex-col gap-1.5">
             <span
-              className="h-10 w-full rounded-[8px] ring-1 ring-edge-soft"
+              className="h-11 w-full rounded-[8px] ring-1 ring-edge-soft"
               style={{ background: cell.color }}
             />
-            <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.1em] text-ink-subtle">
+            <span className="harbor-settings-label truncate">
               {t(cell.name)}
             </span>
           </div>

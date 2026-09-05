@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { applyAppIcon } from "@/lib/app-icon";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { SettingRow } from "../kit";
+import { SButton, SRow } from "../ui";
 import { processLogoImage } from "./image-utils";
 import { APP_ICON_PRESETS } from "./app-icon-presets";
 import { LogoPreview } from "./logo-preview";
@@ -53,25 +55,7 @@ function LogoSlot({
     }
   };
   return (
-    <div className="flex items-center gap-4">
-      <div
-        className={`flex ${square ? "h-14 w-14" : "h-14 w-24"} shrink-0 items-center justify-center overflow-hidden rounded-md border border-edge-soft bg-elevated`}
-      >
-        {value ? (
-          <img
-            src={value}
-            alt=""
-            draggable={false}
-            className="max-h-full max-w-full object-contain p-1.5"
-          />
-        ) : (
-          <ImageDown size={18} strokeWidth={1.6} className="text-ink-subtle" />
-        )}
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[13px] font-medium text-ink">{label}</span>
-        <span className="text-[11.5px] leading-relaxed text-ink-subtle">{hint}</span>
-      </div>
+    <SettingRow label={label} desc={hint}>
       <input
         ref={inputRef}
         type="file"
@@ -83,23 +67,29 @@ function LogoSlot({
           void onFile(f);
         }}
       />
-      <button
-        onClick={() => inputRef.current?.click()}
-        disabled={busy}
-        className="shrink-0 rounded-full bg-ink px-4 py-2 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-60"
+      <span
+        className={`flex ${square ? "h-14 w-14" : "h-14 w-24"} shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-edge-soft bg-elevated`}
       >
-        {busy ? "…" : value ? t("Replace") : t("Upload")}
-      </button>
+        {value ? (
+          <img
+            src={value}
+            alt=""
+            draggable={false}
+            className="max-h-full max-w-full object-contain p-1.5"
+          />
+        ) : (
+          <ImageDown size={20} strokeWidth={1.6} className="text-ink-subtle" />
+        )}
+      </span>
+      <SButton onClick={() => inputRef.current?.click()} disabled={busy}>
+        {busy ? t("Working…") : value ? t("Replace") : t("Upload")}
+      </SButton>
       {value && !busy && (
-        <button
-          onClick={() => onChange("")}
-          aria-label={t("Remove")}
-          className="shrink-0 rounded-md bg-canvas p-2 text-ink-muted transition-colors hover:text-ink"
-        >
-          <Trash2 size={14} strokeWidth={2.2} />
-        </button>
+        <SButton variant="danger" onClick={() => onChange("")} title={t("Remove")}>
+          <Trash2 size={18} strokeWidth={2.2} />
+        </SButton>
       )}
-    </div>
+    </SettingRow>
   );
 }
 
@@ -144,10 +134,9 @@ function AppIconPicker() {
   const active = presetId || hasCustom;
 
   useEffect(() => {
-    if (open) return;
     const id = window.setInterval(() => setRot((i) => (i + 1) % APP_ICON_PRESETS.length), 3000);
     return () => window.clearInterval(id);
-  }, [open]);
+  }, []);
 
   const pickPreset = async (id: string, src: string) => {
     if (busy) return;
@@ -181,92 +170,83 @@ function AppIconPicker() {
   };
 
   return (
-    <div className="flex flex-col gap-3.5">
-      <div className="flex items-center gap-4">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center">
-          {settings.customAppIcon ? (
-            <img
-              src={settings.customAppIcon}
-              alt=""
-              draggable={false}
-              className="h-full w-full object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]"
-            />
-          ) : (
-            <span className="flex h-full w-full items-center justify-center rounded-md border border-dashed border-edge-soft bg-elevated">
-              <ImageDown size={18} strokeWidth={1.6} className="text-ink-subtle" />
-            </span>
+    <div className="harbor-settings-group">
+      <SettingRow
+        wide
+        label={t("App icon")}
+        desc={t(
+          "The window and taskbar icon updates right away. The installed shortcut refreshes on the next update.",
+        )}
+      >
+        <div className="flex w-full flex-wrap items-center gap-3">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center">
+            {settings.customAppIcon ? (
+              <img
+                src={settings.customAppIcon}
+                alt=""
+                draggable={false}
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center rounded-[10px] border border-dashed border-edge-soft bg-elevated">
+                <ImageDown size={20} strokeWidth={1.6} className="text-ink-subtle" />
+              </span>
+            )}
+          </span>
+          <SButton
+            onClick={() => inputRef.current?.click()}
+            disabled={busy}
+            title={t("Use your own image as the app icon")}
+          >
+            <Upload size={18} strokeWidth={2.2} />
+            {hasCustom ? t("Replace") : t("Upload")}
+          </SButton>
+          {active && (
+            <SButton
+              variant={failed ? "danger" : "secondary"}
+              onClick={() => void applyNow()}
+              title={t("Re-apply to the window and taskbar now")}
+            >
+              {applied ? (
+                <Check size={18} strokeWidth={2.6} className="text-accent" />
+              ) : (
+                <RefreshCw size={18} strokeWidth={2.2} />
+              )}
+              {applied ? t("Applied") : failed ? t("Could not apply") : t("Apply now")}
+            </SButton>
+          )}
+          {active && (
+            <SButton onClick={() => update({ customAppIcon: "", customAppIconPreset: "" })}>
+              {t("Reset")}
+            </SButton>
           )}
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="text-[13px] font-medium text-ink">{t("App icon")}</span>
-          <span className="text-[11.5px] leading-relaxed text-ink-subtle">
-            {t(
-              "The window and taskbar icon updates right away. The installed shortcut refreshes on the next update.",
-            )}
-          </span>
-        </div>
-        <button
-          onClick={() => inputRef.current?.click()}
-          disabled={busy}
-          title={t("Use your own image as the app icon")}
-          className="flex shrink-0 items-center gap-1.5 rounded-md bg-canvas px-3 py-1.5 text-[11.5px] font-medium text-ink-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-60"
-        >
-          <Upload size={12} strokeWidth={2.2} />
-          {hasCustom ? t("Replace") : t("Upload")}
-        </button>
-        {active && (
-          <button
-            onClick={() => void applyNow()}
-            title={t("Re-apply to the window and taskbar now")}
-            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11.5px] font-medium transition-colors ${
-              applied
-                ? "border-accent bg-accent-soft text-accent"
-                : failed
-                  ? "border-danger bg-danger/15 text-danger"
-                  : "border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
-            }`}
-          >
-            {applied ? (
-              <Check size={12} strokeWidth={2.6} />
-            ) : (
-              <RefreshCw size={12} strokeWidth={2.2} />
-            )}
-            {applied ? t("Applied") : failed ? t("Could not apply") : t("Apply now")}
-          </button>
-        )}
-        {active && (
-          <button
-            onClick={() => update({ customAppIcon: "", customAppIconPreset: "" })}
-            className="shrink-0 rounded-md bg-canvas px-3 py-1.5 text-[11.5px] font-medium text-ink-muted transition-colors hover:bg-surface hover:text-ink"
-          >
-            {t("Reset")}
-          </button>
-        )}
-      </div>
+      </SettingRow>
 
-      <button
-        type="button"
+      <SRow
+        title={t("Or try one of ours")}
+        description={t("{n} Harbor icons", { n: APP_ICON_PRESETS.length })}
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-4 rounded-md bg-canvas p-3 text-start transition-colors hover:bg-surface"
-      >
-        <div className="w-[172px] shrink-0">
-          <TaskbarPreview srcs={PRESET_SRCS} active={rot} />
-        </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="text-[13.5px] font-semibold text-ink">{t("Or try one of ours")}</span>
-          <span className="text-[11.5px] text-ink-subtle">
-            {t("{n} Harbor icons", { n: APP_ICON_PRESETS.length })}
-          </span>
-        </div>
-        <ChevronDown
-          size={18}
-          strokeWidth={2.2}
-          className={`shrink-0 text-ink-subtle transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-        />
-      </button>
+        trailing={
+          <ChevronDown
+            size={20}
+            strokeWidth={2.2}
+            className={`shrink-0 text-ink-subtle transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          />
+        }
+      />
 
       {open && (
-        <div className="grid grid-cols-4 gap-x-3 gap-y-3.5 pt-1 sm:grid-cols-6 animate-fade-in">
+        <div className="animate-fade-in flex flex-col gap-3 pt-1">
+          <span className="harbor-settings-label">{t("On the taskbar")}</span>
+          <div className="w-[172px]">
+            <TaskbarPreview srcs={PRESET_SRCS} active={rot} />
+          </div>
+        </div>
+      )}
+
+      {open && (
+        <div className="animate-fade-in grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3 pt-1">
           {APP_ICON_PRESETS.map((p) => {
             const selected = presetId === p.id;
             return (
@@ -282,19 +262,19 @@ function AppIconPicker() {
                     src={p.src}
                     alt=""
                     draggable={false}
-                    className="h-full w-full object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]"
+                    className="h-full w-full object-contain"
                   />
                   {selected && (
                     <span className="pointer-events-none absolute -inset-[3px] rounded-[28%] ring-2 ring-accent" />
                   )}
                   {selected && (
-                    <span className="absolute -end-1 -top-1 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-accent text-canvas shadow-[0_1px_3px_rgba(0,0,0,0.45)]">
-                      <Check size={12} strokeWidth={3} />
+                    <span className="absolute -end-1 -top-1 flex h-[22px] w-[22px] items-center justify-center rounded-full bg-accent text-canvas">
+                      <Check size={14} strokeWidth={3} />
                     </span>
                   )}
                 </span>
                 <span
-                  className={`w-full truncate text-center text-[10.5px] font-medium ${
+                  className={`w-full break-words text-center text-[15.5px] font-medium leading-[22px] ${
                     selected ? "text-accent" : "text-ink-subtle"
                   }`}
                 >
@@ -333,7 +313,7 @@ function AppIconPicker() {
               )}
             </span>
             <span
-              className={`text-[10.5px] font-medium ${hasCustom ? "text-accent" : "text-ink-subtle"}`}
+              className={`text-[15.5px] font-medium leading-[22px] ${hasCustom ? "text-accent" : "text-ink-subtle"}`}
             >
               {t("Upload")}
             </span>
@@ -365,7 +345,7 @@ export function LogoPicker() {
         wordmark={settings.customLogoWordmark}
         icon={settings.customAppIcon}
       />
-      <div className="flex flex-col gap-4">
+      <div className="harbor-settings-group">
         <LogoSlot
           label={t("App logo")}
           hint={t("Square mark in the sidebar. Transparent PNG or SVG works best.")}

@@ -155,6 +155,8 @@ const miscB: Record<string, string> = {
     "Bir içeriği zaten puanladıysanız içe aktarılan puan mevcut puanın yerini alır.",
   "Ignore the paid tiers. Personal use is free, you are not a company. Just pick the first option and keep going.":
     "Ücretli paketleri dikkate almayın. Kişisel kullanım ücretsizdir ve siz bir şirket değilsiniz. İlk seçeneği seçip devam etmeniz yeterli.",
+  "Ignore this title": "Bu içeriği yoksay",
+  "Ignored titles": "Yoksayılan içerikler",
   Image: "Görsel",
   "Image languages": "Görsel dilleri",
   "Image links need to start with https.": "Görsel bağlantıları https ile başlamalıdır.",
@@ -603,6 +605,8 @@ const miscB: Record<string, string> = {
   "Network's best": "Kanalın en iyileri",
   Never: "Asla",
   "Never hide the next episode": "Sonraki bölümü asla gizleme",
+  "Never show the content advisory for this title again":
+    "Bu içerik için içerik uyarısını bir daha gösterme",
   Nevermind: "Vazgeç",
   New: "Yeni",
   "New Episodes": "Yeni Bölümler",
@@ -997,6 +1001,7 @@ const miscB: Record<string, string> = {
   "Pause narration": "Seslendirmeyi duraklat",
   Paused: "Duraklatıldı",
   "Paused on Simkl": "Simkl'de duraklatıldı",
+  "Paused on Trakt": "Trakt'ta duraklatıldı",
   "Pay a one-time fee to reserve it": "Ayırtmak için tek seferlik ücret ödersiniz",
   "Pay a set amount yourself first": "Önce belirli bir tutarı kendiniz ödersiniz",
   "Pay if the friend defaults": "Arkadaşınız borcunu ödemezse ödemek",

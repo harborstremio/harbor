@@ -45,6 +45,8 @@ export type HotkeyId =
   | "playerDvr"
   | "playerSleep"
   | "playerScreenLock"
+  | "playerReloadSource"
+  | "playerRestartServer"
   | "globalUiScaleUp"
   | "globalUiScaleDown"
   | "globalUiScaleReset"
@@ -463,6 +465,24 @@ export const HOTKEYS: HotkeyDef[] = [
     label: "Sleep at end of episode",
     description: "Toggle a sleep timer that pauses when this episode ends.",
     defaultBinding: "l",
+  },
+
+  {
+    id: "playerReloadSource",
+    scope: "Player",
+    group: "Recovery",
+    label: "Reload source",
+    description: "Re-open the stream you are watching and pick it back up where you left off.",
+    defaultBinding: "ctrl+alt+r",
+  },
+  {
+    id: "playerRestartServer",
+    scope: "Player",
+    group: "Recovery",
+    label: "Restart streaming server",
+    description:
+      "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.",
+    defaultBinding: "ctrl+alt+s",
   },
 ];
 

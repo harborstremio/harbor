@@ -1,4 +1,7 @@
-const coverage: Record<string, string> = {
+const coverage: Record<string, string> = {
+  "Sound descriptions": "Descripciones de sonido",
+  "Hide sound effects and speaker names": "Ocultar efectos de sonido y nombres de personajes",
+  "Removes bracketed descriptions like [door creaks] and shouted speaker labels like JOHN: while subtitles play, so a release that only ships an SDH track still reads as plain dialogue. Song lyrics, ordinary parentheses and non-Latin scripts are left alone. Skipped on forced and picture-based tracks.": "Elimina las descripciones entre corchetes como [la puerta cruje] y los nombres de personajes en mayúsculas como JOHN: mientras se reproducen los subtítulos, para que una versión que solo trae una pista SDH se lea como diálogo normal. Las letras de canciones, los paréntesis normales y los alfabetos no latinos se dejan intactos. No se aplica a pistas forzadas ni a pistas de imagen.",
   "Play from": "Reproducir desde",
   end: "fin",
   "m:ss": "m:ss",

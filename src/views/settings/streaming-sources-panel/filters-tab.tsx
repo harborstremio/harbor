@@ -1,8 +1,9 @@
+import { Check } from "lucide-react";
 import { useSettings } from "@/lib/settings";
 import { Section } from "../shared";
+import { SRow } from "../ui";
 import { AddonTimeoutSetting } from "../addon-timeout-setting";
 import { StreamFilterPreview } from "../stream-filter-preview";
-import { ChoiceBlock } from "../player-panel/choice";
 import { useT } from "@/lib/i18n";
 
 export function FiltersTab() {
@@ -12,7 +13,9 @@ export function FiltersTab() {
     <>
       <Section
         title={t("Stream safety filter")}
-        subtitle={t("How aggressively Harbor rejects shady or mismatched streams before showing them in the picker.")}
+        subtitle={t(
+          "How aggressively Harbor rejects shady or mismatched streams before showing them in the picker.",
+        )}
       >
         <StreamFilterPicker
           value={settings.streamFilterLevel}
@@ -38,30 +41,40 @@ function StreamFilterPicker({
     {
       id: "strict",
       label: t("Strict"),
-      sub: t("Default. Rejects size outliers, suspicious extensions, year/episode mismatches, season packs (for episode requests), trailers, and likely cams."),
+      sub: t(
+        "Default. Rejects size outliers, suspicious extensions, year/episode mismatches, season packs (for episode requests), trailers, and likely cams.",
+      ),
     },
     {
       id: "balanced",
       label: t("Balanced"),
-      sub: t("Keeps the malware/year/episode-mismatch checks but allows season packs and oversized files. Same as hitting Search wider in the picker."),
+      sub: t(
+        "Keeps the malware/year/episode-mismatch checks but allows season packs and oversized files. Same as hitting Search wider in the picker.",
+      ),
     },
     {
       id: "off",
       label: t("Off"),
-      sub: t("No filtering. Every stream every addon returns shows up, including obvious junk. You'll be on your own."),
+      sub: t(
+        "No filtering. Every stream every addon returns shows up, including obvious junk. You'll be on your own.",
+      ),
     },
   ];
   return (
-    <div className="flex flex-col gap-1.5">
+    <>
       {options.map((opt) => (
-        <ChoiceBlock
+        <SRow
           key={opt.id}
-          selected={value === opt.id}
           onClick={() => onChange(opt.id)}
-          label={opt.label}
-          sub={opt.sub}
+          title={opt.label}
+          description={opt.sub}
+          trailing={
+            <span className="grid h-11 w-11 place-items-center">
+              {value === opt.id && <Check size={20} strokeWidth={2.4} className="text-accent" />}
+            </span>
+          }
         />
       ))}
-    </div>
+    </>
   );
 }

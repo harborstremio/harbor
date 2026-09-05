@@ -375,6 +375,15 @@ const player: Record<string, string> = {
     "Đây là ước tính bản phát hành dựa trên siêu dữ liệu, không phải điểm thời gian được đo lường.",
   "Couldn't save the synced subtitle. Try again.": "Không thể lưu phụ đề đã đồng bộ. Hãy thử lại.",
   "Saving...": "Đang lưu...",
+  "Reloading the stream…": "Đang tải lại luồng phát…",
+  "Couldn't reload the stream. Try picking another source.":
+    "Không thể tải lại luồng phát. Hãy thử chọn nguồn khác.",
+  "Harbor's streaming server only runs in the desktop app.":
+    "Máy chủ phát trực tuyến của Harbor chỉ chạy trong ứng dụng máy tính.",
+  "Restarting the streaming server…": "Đang khởi động lại máy chủ phát trực tuyến…",
+  "Couldn't restart the streaming server.": "Không thể khởi động lại máy chủ phát trực tuyến.",
+  "The streaming server didn't come back up.": "Máy chủ phát trực tuyến không hoạt động trở lại.",
+  "Streaming server restarted.": "Đã khởi động lại máy chủ phát trực tuyến.",
 };
 
 export default player;

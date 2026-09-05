@@ -10,6 +10,7 @@ const NEW_SETTINGS = new Set([
   "theme:drag-anywhere",
   "theme:liquid-glass",
   "tv:subtitle-look",
+  "mpv:buffer-size",
 ]);
 
 const LS = "harbor.settingsNew.v1";

@@ -100,12 +100,12 @@ export function StreamPriorityCard() {
                 update({ streamPriority: [] });
                 setAnnounce(t("Following addon order"));
               }}
-              className="flex h-9 items-center rounded-full px-3 text-[12.5px] font-semibold text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+              className="flex h-11 items-center rounded-full px-4 text-[15px] font-semibold text-ink-muted transition-colors hover:bg-raised hover:text-ink"
             >
               {t("Use addon order")}
             </button>
           )}
-          <span className="rounded-full bg-raised px-3 py-1 text-[12.5px] font-semibold text-ink-muted">
+          <span className="inline-flex h-[22px] shrink-0 items-center rounded-[6px] bg-raised px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink-muted">
             {custom ? t("Custom") : t("Following addon order")}
           </span>
         </div>
@@ -114,7 +114,7 @@ export function StreamPriorityCard() {
       {loading ? (
         <SkeletonRows />
       ) : tooFew ? (
-        <p className="rounded-md border border-dashed border-edge-soft bg-canvas px-5 py-4 text-[13.5px] text-ink-subtle">
+        <p className="max-w-[70ch] rounded-md border border-dashed border-edge-soft bg-canvas px-5 py-4 text-[15.5px] leading-[22px] text-ink-subtle">
           {t("Priority applies once you have two or more stream addons.")}
         </p>
       ) : (
@@ -133,7 +133,7 @@ export function StreamPriorityCard() {
                   onClick={() => commit(entries.filter((_, n) => n !== i))}
                   className="flex h-11 w-11 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
                 >
-                  <X size={16} strokeWidth={2.4} />
+                  <X size={18} strokeWidth={2.4} />
                 </button>
               </HoverTooltip>
             ) : null
@@ -141,7 +141,7 @@ export function StreamPriorityCard() {
         />
       )}
       {otherCount > 0 && !loading && (
-        <p className="mt-3 text-[12.5px] text-ink-subtle">
+        <p className="mt-3 max-w-[70ch] text-[15.5px] leading-[22px] text-ink-subtle">
           {t("{n} addons don't provide streams and aren't listed.", { n: otherCount })}
         </p>
       )}

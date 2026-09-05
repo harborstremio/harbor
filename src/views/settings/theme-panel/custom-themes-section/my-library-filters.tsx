@@ -31,14 +31,14 @@ export function MyLibraryFilters({
   const t = useT();
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="flex h-9 items-center gap-2 rounded-md bg-canvas px-3.5">
-        <Search size={16} className="text-ink-subtle" />
+      <div className="flex h-11 items-center gap-2 rounded-md bg-canvas px-3.5">
+        <Search size={18} className="text-ink-subtle" />
         <input
           value={query}
           onChange={(e) => onQuery(e.target.value)}
           placeholder={t("Search your library")}
           aria-label={t("Search your library")}
-          className="w-48 bg-transparent text-[13px] text-ink placeholder:text-ink-subtle focus:outline-none"
+          className="h-11 w-48 min-w-0 bg-transparent text-[15.5px] text-ink placeholder:text-ink-subtle focus:outline-none"
         />
       </div>
       {CATS.map((c) => {
@@ -50,7 +50,7 @@ export function MyLibraryFilters({
             key={c.id}
             type="button"
             onClick={() => onCat(c.id)}
-            className={`inline-flex h-9 items-center gap-1.5 rounded-md px-3.5 text-[12.5px] font-semibold transition-colors ${
+            className={`inline-flex h-11 shrink-0 items-center gap-1.5 rounded-md px-3.5 text-[15.5px] font-semibold transition-colors ${
               on
                 ? "border-ink bg-ink text-canvas"
                 : "border-edge-soft bg-elevated text-ink-muted hover:bg-raised hover:text-ink"
@@ -63,7 +63,7 @@ export function MyLibraryFilters({
           </button>
         );
       })}
-      <span className="ms-auto text-[12.5px] tabular-nums text-ink-subtle">
+      <span className="ms-auto text-[15.5px] leading-[22px] tabular-nums text-ink-subtle">
         {t("{shown} of {total}", { shown, total })}
       </span>
     </div>

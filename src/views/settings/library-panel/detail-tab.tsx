@@ -1,10 +1,10 @@
-import { Check, Ruler } from "lucide-react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { Section, Segmented, ToggleRow } from "../shared";
 import { SettingGroup, SettingRow, Nested } from "../kit";
 import { SpoilerPreview } from "../spoiler-preview";
 import { EpisodeCardPreview } from "../episode-card-previews";
+import { EpisodeScalePreview } from "./episode-scale-preview";
 
 export function DetailTab() {
   const { settings, update } = useSettings();
@@ -17,7 +17,6 @@ export function DetailTab() {
       >
         <ToggleRow
           label={t("Mark watched button")}
-          leading={<Check size={16} strokeWidth={2.6} className="text-ink-muted" />}
           sub={t(
             "Show a button on the detail page to mark a title or episode as watched. Syncs to Trakt and Simkl if connected.",
           )}
@@ -61,16 +60,19 @@ export function DetailTab() {
             <SettingGroup label={t("What gets blurred")}>
               <ToggleRow
                 label={t("Blur thumbnails")}
+                sub={t("Frosts the still image on each unwatched episode in the list.")}
                 value={settings.spoilerHideThumbnails}
                 onChange={(v) => update({ spoilerHideThumbnails: v })}
               />
               <ToggleRow
                 label={t("Blur titles")}
+                sub={t("Hides the episode name, which often gives the twist away on its own.")}
                 value={settings.spoilerHideTitles}
                 onChange={(v) => update({ spoilerHideTitles: v })}
               />
               <ToggleRow
                 label={t("Blur descriptions")}
+                sub={t("Hides the synopsis text under each unwatched episode.")}
                 value={settings.spoilerHideDescriptions}
                 onChange={(v) => update({ spoilerHideDescriptions: v })}
               />
@@ -124,7 +126,7 @@ export function DetailTab() {
             preview={<EpisodeCardPreview kind="description" />}
           />
           <SettingRow
-            icon={<Ruler size={16} />}
+            wide
             label={t("Card size")}
             desc={t(
               "How big episode cards are in the strip and grid layouts. Bigger cards show larger artwork.",
@@ -140,6 +142,7 @@ export function DetailTab() {
               onChange={(v) => update({ episodeCardScale: parseFloat(v) })}
             />
           </SettingRow>
+          <EpisodeScalePreview />
           <ToggleRow
             label={t("High-quality episode images")}
             sub={t(

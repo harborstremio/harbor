@@ -276,6 +276,12 @@ const catalogSymbols: Record<string, string> = {
   "{count} slot reskinned": "{count} स्लॉट रीस्किन किया गया",
   "{count} slots reskinned": "{count} स्लॉट रीस्किन किए गए",
   "{count} sources": "{count} स्रोत",
+  "{count} titles will never show the content advisory again.":
+    "{count} शीर्षकों पर कॉन्टेंट संबंधी चेतावनी दोबारा कभी नहीं दिखेगी।",
+  "{count} titles will never show the content advisory again.#few":
+    "{count} शीर्षकों पर कॉन्टेंट संबंधी चेतावनी दोबारा कभी नहीं दिखेगी।",
+  "{count} titles will never show the content advisory again.#one":
+    "{count} शीर्षक पर कॉन्टेंट संबंधी चेतावनी दोबारा कभी नहीं दिखेगी।",
   "{count} tracker request blocked this session. Harbor itself sends zero telemetry.":
     "इस सत्र में {count} ट्रैकर अनुरोध ब्लॉक किए गए। Harbor खुद कोई टेलीमेट्री नहीं भेजता।",
   "{count} views": "{count} व्यू",

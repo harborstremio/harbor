@@ -13,14 +13,19 @@ import {
   getNavFocusTarget,
   getSoundType,
   getSpatialOrder,
-  hasLeftNeighborInRow,
+  hasInlineStartNeighbor,
   isBackKey,
   isEditable,
   isInHero,
   isInNav,
   isLocallyManaged,
+  isNativeArrowKey,
+  isRangeInput,
+  isRtl,
   isSearchLikeField,
   navOwnsFocus,
+  navZoneReentry,
+  scrollFocusIntoView,
   scrollNavItemIntoView,
   zoneOf,
   type Dir,
@@ -69,8 +74,10 @@ export function dispatchTvNav(
     hoveredEl = null;
   }
   const key = TV_NAV_KEY[action];
+  const focused = document.activeElement;
+  const sink: EventTarget = focused instanceof HTMLElement ? focused : window;
   suppressFocusScroll = fromHover;
-  window.dispatchEvent(
+  sink.dispatchEvent(
     new KeyboardEvent("keydown", { key, code: key, bubbles: true, cancelable: true, repeat }),
   );
   suppressFocusScroll = false;
@@ -169,11 +176,28 @@ function focusElement(el: HTMLElement) {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     return;
   }
-  if (isInNav(el)) {
-    scrollNavItemIntoView(el);
+  if (isInNav(el) && scrollNavItemIntoView(el)) return;
+  scrollFocusIntoView(el);
+}
+
+export function advanceFocus(el: HTMLElement, dir?: Dir) {
+  const active = document.activeElement;
+  if (!(active instanceof HTMLElement) || !navOwnsFocus(active)) {
+    el.focus({ preventScroll: true });
     return;
   }
-  el.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
+  if (dir) SFX.navigate(dir, getSoundType(el));
+  focusElement(el);
+}
+
+export function captureFocusReturn(): () => void {
+  const el = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const ring = !!el && navOwnsFocus(el);
+  return () => {
+    if (!el || !el.isConnected) return;
+    if (ring) focusElement(el);
+    else el.focus({ preventScroll: true });
+  };
 }
 
 function getScrollParent(el: HTMLElement): HTMLElement | null {
@@ -186,6 +210,17 @@ function getScrollParent(el: HTMLElement): HTMLElement | null {
     node = node.parentElement;
   }
   return null;
+}
+
+function stepRange(el: HTMLInputElement, forward: boolean) {
+  try {
+    if (forward) el.stepUp();
+    else el.stepDown();
+  } catch {
+    return;
+  }
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+  el.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 let activeSearchEditEl: HTMLElement | null = null;
@@ -250,8 +285,21 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
 
       if (editingSearch) return;
 
-      const navSearch = isSearchLikeField(active) && navOwnsFocus(active);
-      if (isEditable(active) && !navSearch) return;
+      const navOwned = navOwnsFocus(active);
+      const navSearch = isSearchLikeField(active) && navOwned;
+      const dir = getDirection(e);
+      const slider = arrowsRef.current && isRangeInput(active) ? active : null;
+
+      if (slider && (dir === "left" || dir === "right")) {
+        if (e.isTrusted && isNativeArrowKey(e)) return;
+        e.preventDefault();
+        stepRange(slider, (dir === "right") !== isRtl(slider));
+        return;
+      }
+
+      const sliderExit = !!slider && (dir === "up" || dir === "down");
+      const backEscape = navOwned && isBackKey(e);
+      if (isEditable(active) && !navSearch && !sliderExit && !backEscape) return;
 
       if (isBackKey(e)) {
         if (activeModal) return;
@@ -269,8 +317,6 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         return;
       }
 
-      const dir = getDirection(e);
-
       if (dir) {
         setKeysModality();
         if (!arrowsRef.current) return;
@@ -278,9 +324,19 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         e.preventDefault();
 
         const root = activeModal ?? document;
+        const rtl = isRtl();
+        const startDir: Dir = rtl ? "right" : "left";
+        const endDir: Dir = rtl ? "left" : "right";
 
-        if (active && dir === "left" && !isInNav(active) && !hasLeftNeighborInRow(active, root)) {
-          const toNav = findClosestByY(active, getNavCandidates(root));
+        if (
+          active &&
+          dir === startDir &&
+          !isInNav(active) &&
+          !hasInlineStartNeighbor(active, root, rtl)
+        ) {
+          const navs = getNavCandidates(root);
+          const nearest = findClosestByY(active, navs);
+          const toNav = nearest ? navZoneReentry(nearest, navs) : null;
           if (toNav) {
             SFX.navigate(dir, getSoundType(toNav));
             focusElement(toNav);
@@ -288,7 +344,7 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
           }
         }
 
-        if (active && dir === "right" && isInNav(active)) {
+        if (active && dir === endDir && isInNav(active)) {
           const toContent = findClosestByY(active, getFocusable(root).filter((el) => !isInNav(el)));
           if (toContent) {
             SFX.navigate(dir, getSoundType(toContent));
@@ -361,8 +417,11 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         return;
       }
       if (!isCenter) return;
-      if (isLocallyManaged(target)) return;
       if (!active) return;
+
+      const nativeCenter =
+        e.key === "Enter" || e.key === " " || e.code === "Enter" || e.code === "Space";
+      if (isLocallyManaged(target) && nativeCenter) return;
 
       if (navSearch) {
         e.preventDefault();
@@ -377,8 +436,7 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         'button, a[href], input[type="button"], input[type="submit"], input[type="checkbox"], input[type="radio"]',
       );
 
-      if (e.key === " " && nativeClickable) return;
-      if (e.key === "Enter" && nativeClickable) return;
+      if (nativeCenter && nativeClickable) return;
 
       e.preventDefault();
       active.click();

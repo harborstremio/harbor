@@ -82,6 +82,7 @@ const catalog07: Record<string, string> = {
     "데스크톱에서 Harbor를 열어 브라우저에서 소유권을 확인하세요.",
   "Open Harbor's settings outside playback.": "재생 화면 밖에서 Harbor 설정을 엽니다.",
   "Open Languages": "언어 열기",
+  "Open Letterboxd profile": "Letterboxd 프로필 열기",
   "Open Library settings": "라이브러리 설정 열기",
   "Open MAL profile": "MAL 프로필 열기",
   "Open MyAnimeList again": "MyAnimeList 다시 열기",
@@ -210,6 +211,8 @@ const catalog07: Record<string, string> = {
     "선택 사항입니다. 스크린샷을 하나라도 추가하면 현재 세트가 교체됩니다.",
   "Optional. Skip this step to keep your current cover.":
     "선택 사항입니다. 현재 표지를 유지하려면 이 단계를 건너뛰세요.",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "선택 사항입니다. TheIntroDB는 키가 없어도 응답하지만, 키를 등록하면 요청 한도가 늘어나 몰아 볼 때도 구간 정보가 끊기지 않습니다. 키 발급:",
   Options: "옵션",
   "Options for the Library → Local tab: folders you scan from your own drive. When you export metadata, Harbor writes a Kodi-style .nfo and downloads artwork next to each file at the sizes below.":
     "라이브러리 → 로컬 탭의 옵션입니다. 자체 드라이브에서 스캔할 폴더를 설정합니다. 메타데이터를 내보내면 Harbor가 Kodi 형식의 .nfo를 작성하고 아래 크기로 각 파일 옆에 아트워크를 다운로드합니다.",
@@ -372,6 +375,7 @@ const catalog07: Record<string, string> = {
   "Paste your OpenSubtitles API key": "OpenSubtitles API 키를 붙여 넣으세요",
   "Paste your SUBDL API key": "SUBDL API 키 붙여넣기",
   "Paste your Subsource API key": "Subsource API 키 붙여넣기",
+  "Paste your TheIntroDB API key": "TheIntroDB API 키 붙여넣기",
   "Paste your key": "키를 붙여 넣으세요",
   "Paste your repo.json URL into Extensions above, then install. That is how you bring any site's sources back.":
     "위 확장 프로그램에 repo.json URL을 붙여 넣은 다음 설치하세요. 이 방법으로 어떤 사이트의 소스든 다시 추가할 수 있습니다.",
@@ -388,6 +392,7 @@ const catalog07: Record<string, string> = {
   "Pause · Space": "일시 정지 · Space",
   Paused: "일시 정지됨",
   "Paused on Simkl": "Simkl에서 일시 정지됨",
+  "Paused on Trakt": "Trakt에서 일시 정지됨",
   "Pausing after {n} more": "{n}개 더 재생한 후 일시 정지",
   "Pausing in {time}": "{time} 후 일시 정지",
   "Pausing when this one ends": "현재 항목이 끝나면 일시 정지",

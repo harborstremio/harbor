@@ -17,6 +17,7 @@ export function useSubStyleApply(params: {
   svpActive: boolean;
   assScale?: number;
   subTrackId?: string;
+  sdhFilterAllowed: boolean;
 }) {
   const {
     engine,
@@ -30,13 +31,19 @@ export function useSubStyleApply(params: {
     svpActive,
     assScale,
     subTrackId,
+    sdhFilterAllowed,
   } = params;
 
   useEffect(() => {
     if (engine !== "mpv") return;
     if (!bridgeReady) return;
     if (!mediaReady) return;
-    void applySubStyle(settings, { assNativeActive, imageNativeActive, assScale });
+    void applySubStyle(settings, {
+      assNativeActive,
+      imageNativeActive,
+      assScale,
+      sdhFilterAllowed,
+    });
   }, [
     engine,
     bridgeReady,
@@ -46,6 +53,8 @@ export function useSubStyleApply(params: {
     imageNativeActive,
     assScale,
     subTrackId,
+    sdhFilterAllowed,
+    settings.subHideSdh,
     settings.subAssNormalizeSize,
     settings.subFontSize,
     settings.subFontColor,

@@ -84,6 +84,7 @@ const catalogVZ: Record<string, string> = {
   WHEN: "कब",
   WIN: "जीत",
   "WWII on Film": "फ़िल्मों में WWII",
+  "Wait before playing": "चलने से पहले इंतज़ार",
   "Wait for the upload to finish. The relay URL gets written to":
     "अपलोड पूरा होने तक प्रतीक्षा करें। रिले URL यहाँ लिखा जाता है",
   "Wait for the upload to finish. The relay URL gets written to {code} in Harbor settings.":

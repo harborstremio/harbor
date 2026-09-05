@@ -70,7 +70,7 @@ export const TOP_GROUPS: TopGroup[] = [
     section: "HELP",
     label: "Help & support",
     sub: "Report something broken, or support the project.",
-    children: ["bug", "support"],
+    children: ["bug", "support", "licenses", "icons"],
   },
   {
     id: "updates",

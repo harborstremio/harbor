@@ -18,10 +18,12 @@ export function HoverTip({
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [tip, setTip] = useState<{ x: number; y: number } | null>(null);
+  const rtl =
+    typeof document !== "undefined" && document.documentElement.getAttribute("dir") === "rtl";
   const place = (e: MouseEvent) => {
     if (side === "left") {
       const r = ref.current?.getBoundingClientRect();
-      if (r) setTip({ x: r.left, y: r.top + r.height / 2 });
+      if (r) setTip({ x: rtl ? r.right : r.left, y: r.top + r.height / 2 });
     } else {
       setTip({ x: e.clientX, y: e.clientY });
     }
@@ -47,11 +49,13 @@ export function HoverTip({
               top: tip.y,
               transform:
                 side === "left"
-                  ? "translate(calc(-100% - 10px), -50%)"
+                  ? rtl
+                    ? "translate(10px, -50%)"
+                    : "translate(calc(-100% - 10px), -50%)"
                   : "translate(-50%, calc(-100% - 16px))",
               ...SUITE_CHROME,
             }}
-            className="pointer-events-none z-[260] whitespace-nowrap rounded-md bg-raised px-2.5 py-1 text-[12.5px] font-medium text-ink harbor-float"
+            className="pointer-events-none z-[260] whitespace-nowrap rounded-md bg-raised px-3 py-1.5 text-[15.5px] font-medium leading-[22px] text-ink harbor-float"
           >
             {label}
           </span>,
@@ -78,7 +82,7 @@ export function CopyName({ text }: { text: string }) {
         className="group/cn relative inline-grid cursor-pointer justify-items-start text-start [perspective:600px]"
       >
         <code
-          className="col-start-1 row-start-1 font-mono text-[13.5px] font-semibold text-ink transition-[transform,opacity,color] duration-300 group-hover/cn:text-accent"
+          className="col-start-1 row-start-1 font-mono text-[15.5px] font-semibold leading-[22px] text-ink transition-[transform,opacity,color] duration-300 group-hover/cn:text-accent"
           style={{
             transform: copied ? "rotateX(90deg)" : "rotateX(0deg)",
             opacity: copied ? 0 : 1,
@@ -95,7 +99,7 @@ export function CopyName({ text }: { text: string }) {
           }}
         >
           <Check size={14} strokeWidth={2.6} className="text-accent" />
-          <code className="font-mono text-[13px] font-semibold text-accent">{t("Copied")}</code>
+          <code className="font-mono text-[15.5px] font-semibold leading-[22px] text-accent">{t("Copied")}</code>
         </span>
       </button>
     </HoverTip>
@@ -128,15 +132,15 @@ export function CodeBlock({
   };
   return (
     <div className={`overflow-hidden rounded-md bg-elevated ${compact ? "mt-2.5" : ""}`}>
-      <div className="flex items-center gap-2 px-3 pb-0.5 pt-2">
-        <span className="flex-1 truncate font-mono text-[12.5px] text-ink-subtle">
+      <div className="flex items-center gap-2 px-3 pb-0.5 pt-1">
+        <span className="flex-1 truncate font-mono text-[15.5px] leading-[22px] text-ink-subtle">
           {filename ?? t("example")}
         </span>
         {filename && (
           <button
             type="button"
             onClick={download}
-            className="flex h-7 items-center gap-1.5 rounded-md px-2 text-[12.5px] font-semibold text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+            className="flex h-11 items-center gap-1.5 rounded-md px-2.5 text-[15.5px] font-semibold text-ink-muted transition-colors hover:bg-raised hover:text-ink"
           >
             <Download size={14} strokeWidth={2.2} />
             {t("Download")}
@@ -145,13 +149,13 @@ export function CodeBlock({
         <button
           type="button"
           onClick={copy}
-          className="flex h-7 items-center gap-1.5 rounded-md px-2 text-[12.5px] font-semibold text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+          className="flex h-11 items-center gap-1.5 rounded-md px-2.5 text-[15.5px] font-semibold text-ink-muted transition-colors hover:bg-raised hover:text-ink"
         >
           {copied ? <Check size={14} strokeWidth={2.6} /> : <Copy size={14} strokeWidth={2.2} />}
           {copied ? t("Copied") : t("Copy")}
         </button>
       </div>
-      <pre className="overflow-auto px-4 pb-3 pt-1 font-mono text-[13px] leading-relaxed text-ink-muted">
+      <pre className="overflow-auto px-4 pb-3 pt-1 font-mono text-[15.5px] leading-[24px] text-ink-muted">
         {code}
       </pre>
     </div>

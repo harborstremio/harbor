@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { captureFocusReturn } from "@/lib/keyboard-navigation";
+import { getDirection, isBackKey, isRtl } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
+
+const SV_STEP = 0.02;
+const HUE_STEP = 3;
+const DRAG_FOCUS =
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+
+function clamp01(n: number) {
+  return Math.max(0, Math.min(1, n));
+}
 
 export const HARBOR_COLOR_SWATCHES = [
   "#7dd3fc",
@@ -26,9 +37,7 @@ export function ColorPicker({
   const isPreset = HARBOR_COLOR_SWATCHES.includes(value.toLowerCase());
   return (
     <div className="flex flex-col gap-2 pt-1">
-      <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-        {t("Your color")}
-      </span>
+      <span className="harbor-settings-label">{t("Your color")}</span>
       <div className="flex flex-wrap items-center gap-2">
         {HARBOR_COLOR_SWATCHES.map((hex) => {
           const selected = value.toLowerCase() === hex;
@@ -38,13 +47,18 @@ export function ColorPicker({
               type="button"
               onClick={() => onChange(hex)}
               aria-label={hex}
-              className={`relative h-7 w-7 rounded-full transition-transform ${
-                selected
-                  ? "scale-110 ring-2 ring-ink ring-offset-2 ring-offset-canvas"
-                  : "hover:scale-105"
-              }`}
-              style={{ background: hex }}
-            />
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full"
+            >
+              <span
+                aria-hidden
+                className={`block h-7 w-7 rounded-full transition-transform ${
+                  selected
+                    ? "scale-110 ring-2 ring-ink ring-offset-2 ring-offset-canvas"
+                    : "hover:scale-105"
+                }`}
+                style={{ background: hex }}
+              />
+            </button>
           );
         })}
         <ColorPopoverTrigger
@@ -54,7 +68,7 @@ export function ColorPicker({
           highlighted={!isPreset}
         />
       </div>
-      <span className="text-[11.5px] text-ink-subtle">
+      <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
         {t("Used for your cursor in Watch Together, your draw color, and your name pill in chat.")}
       </span>
     </div>
@@ -86,7 +100,11 @@ export function ColorPopoverTrigger({
   useEffect(() => {
     if (!open) return;
     document.body.setAttribute("data-color-popover", "");
-    return () => document.body.removeAttribute("data-color-popover");
+    const restore = captureFocusReturn();
+    return () => {
+      document.body.removeAttribute("data-color-popover");
+      restore();
+    };
   }, [open]);
 
   useEffect(() => {
@@ -97,18 +115,21 @@ export function ColorPopoverTrigger({
       setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (!isBackKey(e)) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      setOpen(false);
     };
     window.addEventListener("mousedown", close);
-    window.addEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
     return () => {
       window.removeEventListener("mousedown", close);
-      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keydown", onKey, true);
     };
   }, [open]);
 
   useEffect(() => {
-    if (!open || !portal) return;
+    if (!open) return;
     const place = () => {
       const r = wrapRef.current?.getBoundingClientRect();
       if (!r) return;
@@ -132,6 +153,8 @@ export function ColorPopoverTrigger({
   const panel = (
     <div
       ref={panelRef}
+      role="dialog"
+      aria-modal="true"
       className="animate-nudge-in w-[280px] rounded-md bg-surface p-3 harbor-float"
     >
       <CustomColorPanel value={value} onChange={onChange} />
@@ -143,7 +166,7 @@ export function ColorPopoverTrigger({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[11.5px] font-medium transition-colors ${
+        className={`flex h-11 items-center gap-2 rounded-full border px-4 text-[15px] font-semibold transition-colors ${
           open || highlighted
             ? "border-ink text-ink"
             : "border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
@@ -151,31 +174,12 @@ export function ColorPopoverTrigger({
       >
         <span
           aria-hidden
-          className="h-3 w-3 rounded-full ring-1 ring-black/30"
+          className="h-4 w-4 shrink-0 rounded-full ring-1 ring-edge"
           style={{ background: value }}
         />
         {label}
       </button>
-      {open && !portal && (
-        <>
-          <div
-            className="fixed inset-0 z-20"
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              setOpen(false);
-            }}
-          />
-          <div
-            className={`absolute z-30 ${
-              direction === "up" ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"
-            } ${align === "right" ? "end-0" : "start-0"}`}
-          >
-            {panel}
-          </div>
-        </>
-      )}
       {open &&
-        portal &&
         pos &&
         createPortal(
           <>
@@ -210,6 +214,7 @@ export function CustomColorPanel({
   value: string;
   onChange: (hex: string) => void;
 }) {
+  const t = useT();
   const [hsv, setHsv] = useState(() => {
     const { r, g, b } = hexToRgb(value);
     return rgbToHsv(r, g, b);
@@ -263,10 +268,44 @@ export function CustomColorPanel({
     emit(next);
   };
 
+  const onSlKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const dir = getDirection(e.nativeEvent);
+    if (!dir) return;
+    const horizontal = dir === "left" || dir === "right";
+    const forward = horizontal ? (dir === "right") !== isRtl(e.currentTarget) : dir === "up";
+    const step = forward ? SV_STEP : -SV_STEP;
+    const s = horizontal ? clamp01(hsv.s + step) : hsv.s;
+    const v = horizontal ? hsv.v : clamp01(hsv.v + step);
+    if (s === hsv.s && v === hsv.v) return;
+    e.preventDefault();
+    const next = { h: hsv.h, s, v };
+    setHsv(next);
+    emit(next);
+  };
+
+  const onHueKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const dir = getDirection(e.nativeEvent);
+    if (dir !== "left" && dir !== "right") return;
+    const forward = (dir === "right") !== isRtl(e.currentTarget);
+    const h = Math.max(0, Math.min(360, hsv.h + (forward ? HUE_STEP : -HUE_STEP)));
+    if (h === hsv.h) return;
+    e.preventDefault();
+    const next = { h, s: hsv.s, v: hsv.v };
+    setHsv(next);
+    emit(next);
+  };
+
   return (
     <div className="flex flex-col gap-2.5">
       <div
         ref={slRef}
+        role="slider"
+        tabIndex={0}
+        aria-label={t("Saturation and brightness")}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(hsv.s * 100)}
+        onKeyDown={onSlKey}
         onPointerDown={(e) => {
           slRef.current?.setPointerCapture(e.pointerId);
           onSLMove(e.clientX, e.clientY);
@@ -275,7 +314,7 @@ export function CustomColorPanel({
           if (e.buttons !== 1) return;
           onSLMove(e.clientX, e.clientY);
         }}
-        className="relative h-36 w-full cursor-crosshair touch-none rounded-md"
+        className={`relative h-36 w-full cursor-crosshair touch-none rounded-md ${DRAG_FOCUS}`}
         style={{
           background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${baseHue})`,
         }}
@@ -288,6 +327,13 @@ export function CustomColorPanel({
       </div>
       <div
         ref={hueRef}
+        role="slider"
+        tabIndex={0}
+        aria-label={t("Hue")}
+        aria-valuemin={0}
+        aria-valuemax={360}
+        aria-valuenow={Math.round(hsv.h)}
+        onKeyDown={onHueKey}
         onPointerDown={(e) => {
           hueRef.current?.setPointerCapture(e.pointerId);
           onHueMove(e.clientX);
@@ -296,7 +342,7 @@ export function CustomColorPanel({
           if (e.buttons !== 1) return;
           onHueMove(e.clientX);
         }}
-        className="relative h-3 w-full cursor-pointer touch-none rounded-full"
+        className={`relative h-3 w-full cursor-pointer touch-none rounded-full ${DRAG_FOCUS}`}
         style={{
           background:
             "linear-gradient(to right, #ff0000 0%, #ffff00 16.67%, #00ff00 33.33%, #00ffff 50%, #0000ff 66.67%, #ff00ff 83.33%, #ff0000 100%)",
@@ -309,7 +355,7 @@ export function CustomColorPanel({
         />
       </div>
       <div className="flex items-center gap-2">
-        <span className="h-9 w-9 shrink-0 rounded-md" style={{ background: value }} />
+        <span className="h-11 w-11 shrink-0 rounded-md" style={{ background: value }} />
         <input
           value={hexDraft.toUpperCase()}
           onChange={(e) => {
@@ -317,7 +363,7 @@ export function CustomColorPanel({
             setHexDraft(v);
             if (/^#[0-9a-f]{6}$/i.test(v)) onChange(v.toLowerCase());
           }}
-          className="h-9 min-w-0 flex-1 rounded-md bg-canvas px-3 font-mono text-[12.5px] uppercase text-ink outline-none transition-colors focus:bg-elevated"
+          className="h-11 min-w-0 flex-1 rounded-md bg-canvas px-3 font-mono text-[15.5px] uppercase text-ink outline-none transition-colors focus:bg-elevated"
         />
       </div>
     </div>

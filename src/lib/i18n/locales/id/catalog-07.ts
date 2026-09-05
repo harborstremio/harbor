@@ -298,6 +298,8 @@ const catalog: Record<string, string> = {
   "HTTP {status}: {body}": "HTTP {status}: {body}",
   "HW decode": "Dekode HW",
   "Hairline cards": "Kartu bergaris tipis",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "Muatan awal setengah jam. Hanya sepadan pada koneksi yang benar-benar tidak dapat diandalkan.",
   "Half-hours, anthologies, and a few epics for the morning routine.":
     "Episode setengah jam, antologi, dan beberapa kisah epik untuk rutinitas pagi.",
   "Hall of Fame": "Hall of Fame",
@@ -474,6 +476,8 @@ const catalog: Record<string, string> = {
     "Harbor menampilkan daftar AniList Anda di halaman Anime dan menjaga progres Anda tetap tersinkron.",
   "Harbor signed you up but returned no session. Try signing in instead.":
     "Harbor berhasil mendaftarkan Anda, tetapi tidak mengembalikan sesi. Coba masuk saja.",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "Harbor menentukan besar muatan awal untuk setiap judul dan menambahnya setelah pemutaran stabil. Tepat untuk hampir semua orang.",
   "Harbor snippet": "Cuplikan Harbor",
   "Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.":
     "Harbor menggunakan protokol addon Stremio, dan seluruh ekosistem addon tumbuh dari karya mereka. Stremio didanai oleh komunitasnya, dan para pendukung yang turut menyumbang mendapat akses awal ke fitur eksperimental. Jika ada dana lebih, pertimbangkan juga untuk mendukung mereka.",
@@ -535,6 +539,8 @@ const catalog: Record<string, string> = {
     "Relay publik Harbor belum menerapkan protokol terbaru.",
   "Harbor's public relay updates automatically; nothing to do.":
     "Relay publik Harbor diperbarui secara otomatis; Anda tidak perlu melakukan apa pun.",
+  "Harbor's streaming server only runs in the desktop app.":
+    "Server streaming Harbor hanya berjalan di aplikasi desktop.",
   "Harbor's temporary viewer requires HTTPS.": "Penampil sementara Harbor memerlukan HTTPS.",
   "Harbor, from a public domain frame": "Harbor, dari frame domain publik",
   "Harbors on your network": "Harbor di jaringan Anda",
@@ -729,6 +735,8 @@ const catalog: Record<string, string> = {
   "Hold to skip or continue": "Tahan untuk melewati atau melanjutkan",
   "Holding the funds before settling": "Menahan dana sebelum penyelesaian",
   "Holdover Picks": "Pilihan yang Masih Bertahan",
+  "Holds up to {size} in memory while a video plays.":
+    "Menyimpan hingga {size} di memori selama video diputar.",
   "Holdup Matey!": "Tunggu Dulu, Kawan!",
   "Holiday Classics": "Film Klasik Liburan",
   "Holiday Warmth": "Kehangatan Liburan",
@@ -941,6 +949,8 @@ const catalog: Record<string, string> = {
   "If you would rather give it away": "Jika Anda lebih memilih menyumbangkannya",
   "Ignore the paid tiers. Personal use is free, you are not a company. Just pick the first option and keep going.":
     "Abaikan paket berbayar. Penggunaan pribadi gratis, Anda bukan perusahaan. Cukup pilih opsi pertama dan lanjutkan.",
+  "Ignore this title": "Abaikan judul ini",
+  "Ignored titles": "Judul yang diabaikan",
   Image: "Gambar",
   "Image URL (optional)": "URL gambar (opsional)",
   "Image bar active. Pick a style above to switch back, or clear the image below.":

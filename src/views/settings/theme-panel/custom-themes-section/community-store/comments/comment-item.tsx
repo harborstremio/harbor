@@ -5,6 +5,8 @@ import type { ThemeComment } from "@/lib/theme-store";
 import { UserHoverCard } from "@/views/profile/user-hover-card";
 import { Avatar } from "@/views/profile/profile-bits";
 import { requestOpenProfile } from "@/lib/social/open-profile";
+import { ROW_ACTION, ROW_ACTION_DANGER } from "@/views/settings/kit";
+import { ROW_TITLE } from "@/views/settings/shared";
 import { CommentBody } from "./comment-render";
 import { CommentComposer } from "./comment-composer";
 import { timeAgo } from "../time-ago";
@@ -62,14 +64,14 @@ export function CommentItem({
         type="button"
         onClick={() => requestOpenProfile(handle)}
         aria-label={t("Open {name} profile", { name: displayName })}
-        className="mt-0.5 shrink-0"
+        className="grid h-11 w-11 shrink-0 place-items-center"
       >
-        <Avatar src={comment.authorAvatar ?? undefined} size={32} alias={displayName} />
+        <Avatar src={comment.authorAvatar ?? undefined} size={44} alias={displayName} />
       </button>
     </UserHoverCard>
   ) : (
     <span
-      className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full text-[12.5px] font-bold text-white ring-1 ring-white/15"
+      className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-[16.5px] font-bold text-white ring-1 ring-white/15"
       style={{ background: `oklch(0.58 0.15 ${hue})` }}
     >
       {(displayName.trim()[0] || "?").toUpperCase()}
@@ -81,26 +83,28 @@ export function CommentItem({
       <button
         type="button"
         onClick={() => requestOpenProfile(handle)}
-        className="truncate text-[13px] font-semibold text-ink transition-colors hover:text-accent"
+        className={`truncate ${ROW_TITLE} transition-colors hover:text-accent`}
       >
         {displayName}
       </button>
     </UserHoverCard>
   ) : (
-    <span className="truncate text-[13px] font-semibold text-ink">{displayName}</span>
+    <span className={`truncate ${ROW_TITLE}`}>{displayName}</span>
   );
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="group flex items-start gap-3">
+      <div className="flex items-start gap-3">
         {avatarEl}
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             {nameEl}
             {handle && (
-              <span className="shrink-0 font-display text-[11.5px] text-ink-subtle">@{handle}</span>
+              <span className="shrink-0 font-display text-[15.5px] leading-[22px] text-ink-subtle">
+                @{handle}
+              </span>
             )}
-            <span className="shrink-0 text-[11.5px] text-ink-subtle">
+            <span className="shrink-0 text-[15.5px] leading-[22px] text-ink-subtle">
               {timeAgo(comment.createdAt)}
             </span>
             {comment.canDelete && (
@@ -108,13 +112,10 @@ export function CommentItem({
                 type="button"
                 onClick={del}
                 disabled={busy}
-                className={`ms-auto flex h-7 items-center gap-1 rounded-[4px] px-2 text-[11.5px] font-semibold transition ${
-                  confirm
-                    ? "bg-danger/15 text-danger"
-                    : "text-ink-subtle opacity-0 hover:bg-elevated hover:text-ink group-hover:opacity-100 focus-visible:opacity-100"
-                }`}
+                aria-label={t("Remove comment")}
+                className={`ms-auto ${ROW_ACTION_DANGER} ${confirm ? "border-danger/40 text-danger" : ""}`}
               >
-                {busy ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                {busy ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
                 {confirm && t("Remove?")}
               </button>
             )}
@@ -126,9 +127,9 @@ export function CommentItem({
                 type="button"
                 onClick={() => setReplying((v) => !v)}
                 aria-expanded={replying}
-                className="flex h-7 items-center gap-1 rounded-[4px] px-1.5 text-[11.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+                className={ROW_ACTION}
               >
-                <ReplyIcon size={12} /> {replying ? t("Cancel") : t("Reply")}
+                <ReplyIcon size={18} /> {replying ? t("Cancel") : t("Reply")}
               </button>
             </div>
           )}
@@ -145,15 +146,15 @@ export function CommentItem({
         </div>
       </div>
       {replies && replies.length > 0 && (
-        <div className="ms-11 flex flex-col gap-3">
+        <div className="ms-14 flex flex-col gap-3">
           <button
             type="button"
             onClick={() => setShowReplies((v) => !v)}
             aria-expanded={showReplies}
-            className="flex h-7 w-fit items-center gap-1.5 rounded-[4px] px-1.5 text-[11.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+            className={`w-fit ${ROW_ACTION}`}
           >
             <ChevronDown
-              size={14}
+              size={18}
               className={`transition-transform duration-200 ${showReplies ? "rotate-180" : ""}`}
             />
             {showReplies

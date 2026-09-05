@@ -1,5 +1,16 @@
 import { Dropdown } from "@/components/dropdown";
-import { ExternalLink, Link2, LogOut } from "lucide-react";
+import {
+  ExternalLink,
+  Info,
+  Languages,
+  Link2,
+  LogOut,
+  PenLine,
+  Radio,
+  Star,
+  Trash2,
+  UserRound,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { SimklDeviceModal } from "@/components/simkl/simkl-device-modal";
 import { useProfiles } from "@/lib/profiles";
@@ -9,11 +20,8 @@ import { useSimkl } from "@/lib/simkl/provider";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { Section, ToggleRow } from "./shared";
-import simklLogo from "@/assets/simkl.png";
-import { ModalButton, SettingGroup, SettingRow, SettingsModal } from "./kit";
-import { TrackerIdentity } from "./tracker-identity";
-import { Disclosure } from "./disclosure";
-import { CardsArt, RailsArt, RatingArt, ScrobbleArt } from "./group-art";
+import { ModalButton, ROW_DESC, SettingGroup, SettingRow, SettingsModal } from "./kit";
+import { SButton } from "./ui";
 import { clearCalendarCache } from "@/lib/simkl/calendar";
 import { clearHomeRailsCache } from "@/lib/simkl/home-rails";
 import { clearCalendarSourceCache } from "@/lib/calendar-sources";
@@ -62,269 +70,288 @@ export function SimklPanel() {
     }
   };
 
+  const filters = settings.simklGranularFilters;
+  const railsOn = settings.simklHomeRailsEnabled;
+
   return (
     <>
       {!isConnected ? (
-        <section className="flex flex-col gap-5 rounded-md bg-elevated p-7">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">
-              {t("Connect your Simkl account")}
-            </h2>
-            <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Sync and track movies, shows, and anime across everything you use. Harbor marks what you finish as watched on Simkl and keeps your plan-to-watch list in step. Free at simkl.com.")}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setModalOpen(true)}
-              className="flex h-11 items-center gap-2.5 rounded-md bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
-            >
-              <Link2 size={16} strokeWidth={2.2} />
+        <Section
+          title={t("Not connected")}
+          subtitle={t("Sync and track movies, shows, and anime across everything you use. Harbor marks what you finish as watched on Simkl and keeps your plan-to-watch list in step. Free at simkl.com.")}
+        >
+          <SettingRow
+            icon={<Link2 size={20} strokeWidth={2.1} />}
+            label={t("Connect your Simkl account")}
+            desc={t("Sign in once with a short device code. Harbor then marks what you finish as watched and keeps your plan-to-watch list in step.")}
+          >
+            <SButton variant="primary" onClick={() => setModalOpen(true)}>
+              <Link2 size={18} strokeWidth={2.2} />
               {t("Connect Simkl")}
-            </button>
-            <button
-              onClick={() => openUrl("https://simkl.com")}
-              className="flex h-11 items-center gap-2 rounded-md bg-raised px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:text-ink"
-            >
-              {t("About Simkl")}
-              <ExternalLink size={14} strokeWidth={2.2} />
-            </button>
-          </div>
-        </section>
+            </SButton>
+          </SettingRow>
+          <SettingRow
+            icon={<Info size={20} strokeWidth={2.1} />}
+            label={t("About Simkl")}
+            desc={t("Simkl is a free site for tracking the movies, shows, and anime you watch. Open it to read more or to make an account.")}
+          >
+            <SButton onClick={() => openUrl("https://simkl.com")}>
+              {t("Open simkl.com")}
+              <ExternalLink size={18} strokeWidth={2.2} />
+            </SButton>
+          </SettingRow>
+        </Section>
       ) : (
         <>
           <Section
             title={t("Connected")}
             subtitle={t("Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.")}
           >
-            <TrackerIdentity
-              logo={simklLogo}
-              service="Simkl"
-              handle={username || undefined}
-              avatar={simklAvatar}
-              meta={t("Authorized on this device")}
-              profileUrl={
-                username ? `https://simkl.com/${encodeURIComponent(username)}` : undefined
-              }
-              onDisconnect={() => setConfirmDisconnect(true)}
-            />
+            <SettingRow
+              icon={<UserRound size={20} strokeWidth={2.1} />}
+              label={username ? `@${username}` : t("Your Simkl account")}
+              desc={t("Harbor is authorized on this device and syncing with Simkl.")}
+            >
+              {username && (
+                <SButton
+                  onClick={() => openUrl(`https://simkl.com/${encodeURIComponent(username)}`)}
+                >
+                  {t("Open profile")}
+                  <ExternalLink size={18} strokeWidth={2.2} />
+                </SButton>
+              )}
+            </SettingRow>
+
             {simklAvatar && (
               <ToggleRow
                 label={t("Use my Simkl avatar as my Harbor avatar")}
                 sub={t("Wear your Simkl profile picture across Harbor instead of the default.")}
                 value={settings.useSimklAvatar}
                 onChange={toggleSimklAvatar}
+                leading={
+                  <img
+                    src={simklAvatar}
+                    alt=""
+                    draggable={false}
+                    className="h-6 w-6 rounded-full object-cover"
+                  />
+                }
               />
             )}
 
-            <Disclosure
-              art={<RailsArt />}
-              title={t("Rows on Home")}
-              summary={t("Which Simkl lists show up as rows on your home screen.")}
-              defaultOpen
-            >
-              <ToggleRow
-                label={t("Show Simkl rails on Home")}
-                sub={t("Display your Watching, Plan to Watch, Up Next, and Trending rows on the home screen.")}
-                value={settings.simklHomeRailsEnabled}
-                onChange={(val) => update({ simklHomeRailsEnabled: val })}
-              />
-              <ToggleRow
-                label={t("Show Up Next on Simkl rail")}
-                sub={t("Display upcoming episodes from your watching and plan-to-watch lists.")}
-                value={settings.simklUpNextRailEnabled}
-                onChange={(val) => update({ simklUpNextRailEnabled: val })}
-              />
-              <ToggleRow
-                label={t("Show Simkl Trending Today rail")}
-                sub={t("Display today's trending movies, TV shows, and anime from Simkl.")}
-                value={settings.simklTrendingRailEnabled}
-                onChange={(val) => update({ simklTrendingRailEnabled: val })}
-              />
-            </Disclosure>
+            <ToggleRow
+              label={t("Scrobble to Simkl")}
+              sub={t("Automatically track what you are playing and save watch progress in real-time.")}
+              value={settings.simklScrobbleEnabled}
+              onChange={(val) => update({ simklScrobbleEnabled: val })}
+              leading={<Radio size={20} strokeWidth={2.1} />}
+            />
 
-            <Disclosure
-              art={<ScrobbleArt />}
-              title={t("Tracking what you watch")}
-              summary={t("Whether Harbor reports playback to Simkl while you watch.")}
-            >
-              <ToggleRow
-                label={t("Scrobble to SIMKL")}
-                sub={t("Automatically track what you are playing and save watch progress in real-time.")}
-                value={settings.simklScrobbleEnabled}
-                onChange={(val) => update({ simklScrobbleEnabled: val })}
-              />
-            </Disclosure>
+            <ToggleRow
+              label={t("Display Simkl Community Ratings")}
+              sub={t("Display SIMKL community score badge on details pages.")}
+              value={settings.showSimklBadge}
+              onChange={(val) => update({ showSimklBadge: val, simklShowCommunityRatings: val })}
+              leading={<Star size={20} strokeWidth={2.1} />}
+            />
 
-            <Disclosure
-              art={<RatingArt />}
-              title={t("Ratings")}
-              summary={t("Simkl community scores on detail pages, and your own star ratings.")}
-            >
-              <ToggleRow
-                label={t("Display SIMKL Community Ratings")}
-                sub={t("Display SIMKL community score badge on details pages.")}
-                value={settings.showSimklBadge}
-                onChange={(val) => update({ showSimklBadge: val, simklShowCommunityRatings: val })}
-              />
-              <ToggleRow
-                label={t("Enable User Ratings")}
-                sub={t("Allow rating movies, shows, and anime directly using the star picker.")}
-                value={settings.simklEnableUserRatings}
-                onChange={(val) => update({ simklEnableUserRatings: val })}
-              />
-            </Disclosure>
+            <ToggleRow
+              label={t("Enable User Ratings")}
+              sub={t("Allow rating movies, shows, and anime directly using the star picker.")}
+              value={settings.simklEnableUserRatings}
+              onChange={(val) => update({ simklEnableUserRatings: val })}
+              leading={<PenLine size={20} strokeWidth={2.1} />}
+            />
 
-            <Disclosure
-              art={<CardsArt />}
-              title={t("Anime titles")}
-              summary={t("Which language anime titles appear in on poster cards.")}
+            <SettingRow
+              icon={<Languages size={20} strokeWidth={2.1} />}
+              label={t("Anime Title Language")}
+              desc={t("Preferred language for anime titles displayed on poster cards.")}
             >
-              <SettingRow
-                label={t("Anime Title Language")}
-                desc={t("Preferred language for anime titles displayed on poster cards.")}
-              >
+              <div className="w-[280px] max-w-full">
                 <Dropdown
-                  size="sm"
                   value={settings.simklAnimeTitleLanguage}
-                  onChange={(v) => update({ simklAnimeTitleLanguage: v as "english" | "romaji" | "native" })}
-                  className="w-[200px] shrink-0"
+                  onChange={(v) =>
+                    update({ simklAnimeTitleLanguage: v as "english" | "romaji" | "native" })
+                  }
+                  className="w-full"
                   options={[
                     { value: "english", label: t("English") },
                     { value: "romaji", label: t("Romaji") },
                     { value: "native", label: t("Native/Japanese") },
                   ]}
                 />
-              </SettingRow>
-            </Disclosure>
+              </div>
+            </SettingRow>
 
-            <SettingsModal
-              open={confirmDisconnect}
-              onClose={() => setConfirmDisconnect(false)}
-              title={t("Disconnect from Simkl")}
-              actions={
-                <>
-                  <ModalButton ghost onClick={() => setConfirmDisconnect(false)}>
-                    {t("Cancel")}
-                  </ModalButton>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (settings.useSimklAvatar && settings.harborAvatar === simklAvatar) {
-                        pushAvatar(null);
-                      }
-                      update({
-                        useSimklAvatar: false,
-                        simklScrobbleEnabled: true,
-                        simklShowCommunityRatings: true,
-                        simklEnableUserRatings: true,
-                        simklHomeRailsEnabled: false,
-                        simklUpNextRailEnabled: false,
-                        simklTrendingRailEnabled: false,
-                        showSimklBadge: true,
-                        simklAnimeTitleLanguage: "english",
-                        simklGranularFilters: {
-                          movies: { plantowatch: true },
-                          shows: { watching: true, plantowatch: true },
-                          anime: { watching: true, plantowatch: true },
-                        },
-                      });
-                      clearCalendarCache();
-                      clearHomeRailsCache();
-                      clearCalendarSourceCache();
-                      clearAnimeGroupingCache();
-                      disconnect();
-                      setConfirmDisconnect(false);
-                    }}
-                    className="harbor-press-pop flex h-9 items-center gap-1.5 rounded-md bg-danger/15 px-4 text-[12.5px] font-semibold text-danger transition-colors hover:bg-danger/25"
-                  >
-                    <LogOut size={12} strokeWidth={2.4} />
-                    {t("Disconnect")}
-                  </button>
-                </>
-              }
+            <SettingRow
+              icon={<LogOut size={20} strokeWidth={2.1} />}
+              label={t("Disconnect from Simkl")}
+              desc={t("Harbor signs out and stops syncing. Your lists on Simkl are left exactly as they are.")}
             >
-              <p className="rounded-md bg-elevated px-4 py-3.5 text-[13px] leading-relaxed text-ink-muted">
-                {t("Disconnect Simkl? Syncing will stop until you reconnect.")}
-              </p>
-            </SettingsModal>
+              <SButton variant="danger" onClick={() => setConfirmDisconnect(true)}>
+                <Trash2 size={18} strokeWidth={2.2} />
+                {t("Disconnect")}
+              </SButton>
+            </SettingRow>
           </Section>
 
           <Section
             title={t("Home Rail Settings")}
             subtitle={t("Choose which Simkl rails appear on your home screen.")}
           >
-            <div className="flex flex-col gap-4">
-              <SettingGroup label={t("Movies")}>
-                <ToggleRow
-                  label={t("Plan to Watch")}
-                  value={settings.simklGranularFilters.movies.plantowatch}
-                  onChange={(val) =>
-                    update({
-                      simklGranularFilters: {
-                        ...settings.simklGranularFilters,
-                        movies: { ...settings.simklGranularFilters.movies, plantowatch: val },
-                      },
-                    })
-                  }
-                />
-              </SettingGroup>
+            <ToggleRow
+              label={t("Show Simkl rails on Home")}
+              sub={t("Display your Watching, Plan to Watch, Up Next, and Trending rows on the home screen.")}
+              value={settings.simklHomeRailsEnabled}
+              onChange={(val) => update({ simklHomeRailsEnabled: val })}
+            />
+            <ToggleRow
+              label={t("Show Up Next on Simkl rail")}
+              sub={t("Display upcoming episodes from your watching and plan-to-watch lists.")}
+              value={settings.simklUpNextRailEnabled}
+              onChange={(val) => update({ simklUpNextRailEnabled: val })}
+            />
+            <ToggleRow
+              label={t("Show Simkl Trending Today rail")}
+              sub={t("Display today's trending movies, TV shows, and anime from Simkl.")}
+              value={settings.simklTrendingRailEnabled}
+              onChange={(val) => update({ simklTrendingRailEnabled: val })}
+            />
 
-              <SettingGroup label={t("TV Shows")}>
-                <ToggleRow
-                  label={t("Watching")}
-                  value={settings.simklGranularFilters.shows.watching}
-                  onChange={(val) =>
-                    update({
-                      simklGranularFilters: {
-                        ...settings.simklGranularFilters,
-                        shows: { ...settings.simklGranularFilters.shows, watching: val },
-                      },
-                    })
-                  }
-                />
-                <ToggleRow
-                  label={t("Plan to Watch")}
-                  value={settings.simklGranularFilters.shows.plantowatch}
-                  onChange={(val) =>
-                    update({
-                      simklGranularFilters: {
-                        ...settings.simklGranularFilters,
-                        shows: { ...settings.simklGranularFilters.shows, plantowatch: val },
-                      },
-                    })
-                  }
-                />
-              </SettingGroup>
+            {!railsOn && (
+              <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+                <Info size={18} className="mt-[2px] shrink-0 text-ink-subtle" />
+                <p className={`max-w-[66ch] ${ROW_DESC}`}>
+                  {t("Simkl rails are turned off, so none of the rows below appear on Home yet.")}
+                </p>
+              </div>
+            )}
 
-              <SettingGroup label={t("Anime")}>
-                <ToggleRow
-                  label={t("Watching")}
-                  value={settings.simklGranularFilters.anime.watching}
-                  onChange={(val) =>
-                    update({
-                      simklGranularFilters: {
-                        ...settings.simklGranularFilters,
-                        anime: { ...settings.simklGranularFilters.anime, watching: val },
-                      },
-                    })
-                  }
-                />
-                <ToggleRow
-                  label={t("Plan to Watch")}
-                  value={settings.simklGranularFilters.anime.plantowatch}
-                  onChange={(val) =>
-                    update({
-                      simklGranularFilters: {
-                        ...settings.simklGranularFilters,
-                        anime: { ...settings.simklGranularFilters.anime, plantowatch: val },
-                      },
-                    })
-                  }
-                />
-              </SettingGroup>
-            </div>
+            <SettingGroup label={t("Movies")}>
+              <ToggleRow
+                label={t("Plan to Watch")}
+                sub={t("Show a row of the movies on your Simkl plan-to-watch list.")}
+                value={filters.movies.plantowatch}
+                onChange={(val) =>
+                  update({
+                    simklGranularFilters: {
+                      ...filters,
+                      movies: { ...filters.movies, plantowatch: val },
+                    },
+                  })
+                }
+              />
+            </SettingGroup>
+
+            <SettingGroup label={t("TV Shows")}>
+              <ToggleRow
+                label={t("Watching")}
+                sub={t("Show a row of the shows you are part way through.")}
+                value={filters.shows.watching}
+                onChange={(val) =>
+                  update({
+                    simklGranularFilters: {
+                      ...filters,
+                      shows: { ...filters.shows, watching: val },
+                    },
+                  })
+                }
+              />
+              <ToggleRow
+                label={t("Plan to Watch")}
+                sub={t("Show a row of the shows on your Simkl plan-to-watch list.")}
+                value={filters.shows.plantowatch}
+                onChange={(val) =>
+                  update({
+                    simklGranularFilters: {
+                      ...filters,
+                      shows: { ...filters.shows, plantowatch: val },
+                    },
+                  })
+                }
+              />
+            </SettingGroup>
+
+            <SettingGroup label={t("Anime")}>
+              <ToggleRow
+                label={t("Watching")}
+                sub={t("Show a row of the anime you are part way through.")}
+                value={filters.anime.watching}
+                onChange={(val) =>
+                  update({
+                    simklGranularFilters: {
+                      ...filters,
+                      anime: { ...filters.anime, watching: val },
+                    },
+                  })
+                }
+              />
+              <ToggleRow
+                label={t("Plan to Watch")}
+                sub={t("Show a row of the anime on your Simkl plan-to-watch list.")}
+                value={filters.anime.plantowatch}
+                onChange={(val) =>
+                  update({
+                    simklGranularFilters: {
+                      ...filters,
+                      anime: { ...filters.anime, plantowatch: val },
+                    },
+                  })
+                }
+              />
+            </SettingGroup>
           </Section>
+
+          <SettingsModal
+            open={confirmDisconnect}
+            onClose={() => setConfirmDisconnect(false)}
+            title={t("Disconnect from Simkl")}
+            actions={
+              <>
+                <ModalButton ghost onClick={() => setConfirmDisconnect(false)}>
+                  {t("Cancel")}
+                </ModalButton>
+                <SButton
+                  variant="danger"
+                  onClick={() => {
+                    if (settings.useSimklAvatar && settings.harborAvatar === simklAvatar) {
+                      pushAvatar(null);
+                    }
+                    update({
+                      useSimklAvatar: false,
+                      simklScrobbleEnabled: true,
+                      simklShowCommunityRatings: true,
+                      simklEnableUserRatings: true,
+                      simklHomeRailsEnabled: false,
+                      simklUpNextRailEnabled: false,
+                      simklTrendingRailEnabled: false,
+                      showSimklBadge: true,
+                      simklAnimeTitleLanguage: "english",
+                      simklGranularFilters: {
+                        movies: { plantowatch: true },
+                        shows: { watching: true, plantowatch: true },
+                        anime: { watching: true, plantowatch: true },
+                      },
+                    });
+                    clearCalendarCache();
+                    clearHomeRailsCache();
+                    clearCalendarSourceCache();
+                    clearAnimeGroupingCache();
+                    disconnect();
+                    setConfirmDisconnect(false);
+                  }}
+                >
+                  <LogOut size={18} strokeWidth={2.2} />
+                  {t("Disconnect")}
+                </SButton>
+              </>
+            }
+          >
+            <p className={`max-w-[66ch] ${ROW_DESC}`}>
+              {t("Disconnect Simkl? Syncing will stop until you reconnect.")}
+            </p>
+          </SettingsModal>
         </>
       )}
 

@@ -75,8 +75,8 @@ function points(list: Array<[number, number]>): string {
   return list.map(([x, y]) => `${x},${y}`).join(" ");
 }
 
-const CHIP_W = 104;
-const CHIP_H = 48;
+const CHIP_W = 116;
+const CHIP_H = 54;
 const CHIP_GAP = 132;
 
 function isCap(part: PadPart, art: PadArt): boolean {
@@ -226,7 +226,7 @@ export function ControllerSvg({ layout, compact }: { layout: Layout; compact?: b
         y={chipY + CHIP_H / 2 + 1}
         dominantBaseline="central"
         textAnchor="middle"
-        fontSize={24}
+        fontSize={32}
         fontWeight={700}
         className={on ? "fill-canvas" : "fill-ink-muted"}
       >

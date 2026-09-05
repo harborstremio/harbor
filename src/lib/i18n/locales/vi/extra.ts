@@ -232,6 +232,9 @@ const extra: Record<string, string> = {
   Connecting: "Đang kết nối",
   "Content advisory": "Cảnh báo nội dung",
   "Content advisory on start": "Cảnh báo nội dung khi bắt đầu",
+  "Ignore this title": "Bỏ qua tựa phim này",
+  "Never show the content advisory for this title again":
+    "Không bao giờ hiện cảnh báo nội dung cho tựa phim này nữa",
   "Continue from last watched": "Tiếp tục từ nội dung xem gần nhất",
   "Continue in your browser...": "Tiếp tục trong trình duyệt...",
   "Copy diagnostics": "Sao chép thông tin chẩn đoán",

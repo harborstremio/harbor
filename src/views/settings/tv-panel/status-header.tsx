@@ -5,18 +5,19 @@ import { useProfiles } from "@/lib/profiles";
 import { useSyncStatus } from "@/lib/profile-sync/use-sync-status";
 import { Section, useSettingsActiveContext } from "../shared";
 import { SettingRow } from "../kit";
+import { SButton } from "../ui";
 import { pushTvNow, tvSyncReady, tvWiresBlocked, type TvWireName } from "./store";
 
 function BlockedBanner({ blocked }: { blocked: TvWireName[] }) {
   const t = useT();
   return (
-    <div className="flex items-start gap-3 rounded-md bg-danger/15 px-4 py-3.5">
-      <CloudOff size={16} strokeWidth={2.2} className="mt-[2px] shrink-0 text-danger" />
-      <div className="flex flex-col gap-1">
-        <span className="text-[13.5px] font-semibold text-danger">
+    <div className="flex items-start gap-3 rounded-[10px] bg-danger/15 px-4 py-3.5">
+      <CloudOff size={18} strokeWidth={2.2} className="mt-[3px] shrink-0 text-danger" />
+      <div className="flex min-w-0 flex-col gap-1">
+        <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-danger">
           {t("This page cannot reach your TV")}
         </span>
-        <span className="text-[12.5px] leading-relaxed text-ink-muted">
+        <span className="max-w-[70ch] text-[15.5px] font-normal leading-[22px] text-ink-muted">
           {t(
             "Changes you make below will be saved on this computer, but they will not reach your TV. This is a fault in Harbor, not something you did.",
           )}{" "}
@@ -105,22 +106,11 @@ export function TvStatusHeader() {
         }
         desc={t(read.line)}
       >
-        <button
-          type="button"
-          onClick={pushTvNow}
-          disabled={!ready || !scoped}
-          className="shrink-0 rounded-md bg-ink px-3.5 py-2 text-[12.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
-        >
+        <SButton variant="primary" onClick={pushTvNow} disabled={!ready || !scoped}>
           {t("Send to TV now")}
-        </button>
+        </SButton>
         {read.fix && (
-          <button
-            type="button"
-            onClick={() => setActive("account")}
-            className="shrink-0 rounded-md bg-raised px-3.5 py-2 text-[12.5px] font-semibold text-ink transition-opacity hover:opacity-90"
-          >
-            {t("Open Account")}
-          </button>
+          <SButton onClick={() => setActive("account")}>{t("Open Account")}</SButton>
         )}
       </SettingRow>
     </Section>

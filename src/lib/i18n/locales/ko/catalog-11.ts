@@ -67,6 +67,8 @@ const catalog11: Record<string, string> = {
   "True Stories": "실화",
   "True black menus": "완전한 검은색 메뉴",
   "True fullscreen": "진정한 전체 화면",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "진정한 전체 화면은 화면 전체를 채우고 작업 표시줄을 숨기지만, 앱을 전환할 때 화면이 깜박일 수 있습니다. 테두리 없는 창은 프레임이 없는 창으로 같은 영역을 채우므로 Alt+Tab과 오버레이가 즉시 반응합니다. 최대화는 화면을 채우지만 작업 표시줄과 제목 표시줄은 그대로 유지합니다.",
   "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.":
     "진정한 전체 화면은 화면 전체를 채우고 작업 표시줄을 숨깁니다. 최대화는 작업 표시줄과 제목 표시줄을 유지한 채 화면을 채우므로 앱을 계속 전환할 수 있습니다.",
   "True stories": "실화",
@@ -484,6 +486,7 @@ const catalog11: Record<string, string> = {
   WHEN: "조건",
   WIN: "수상",
   "WWII on Film": "영상으로 보는 제2차 세계대전",
+  "Wait before playing": "재생 전 대기",
   "Wait for the upload to finish. The relay URL gets written to":
     "업로드가 끝날 때까지 기다리세요. 릴레이 URL은 Harbor 설정의",
   "Wait for the upload to finish. The relay URL gets written to {code} in Harbor settings.":

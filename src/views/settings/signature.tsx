@@ -7,23 +7,23 @@ export function Signature() {
   const t = useT();
   return (
     <div className="flex flex-col items-center gap-2 pt-2 pb-1">
-      <p className="flex items-center gap-1.5 text-center text-[12.5px] tracking-wide text-ink-subtle">
+      <p className="flex items-center gap-1.5 text-center text-[15.5px] leading-[22px] text-ink-subtle">
         {t("Made with")}
         <HeartGlyph label={t("love")} />
         {t("by Harbor contributors")}
       </p>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 text-[11.5px] text-ink-subtle/80 transition-colors hover:text-ink-muted"
+        className="flex h-11 items-center gap-1.5 text-[15.5px] text-ink-subtle transition-colors hover:text-ink-muted"
       >
         {t("Know more")}
         <ChevronDown
-          size={12}
+          size={16}
           className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
-        <div className="mt-1 max-w-md space-y-3 px-2 text-[12.5px] leading-relaxed text-ink-subtle">
+        <div className="mt-1 max-w-[70ch] space-y-3 px-2 text-[15.5px] leading-[22px] text-ink-subtle">
           <p>
             {t(
               "{app} is a completely free and open source project. {app} is under the {license} and you can repurpose and reuse it as you wish. By all means profit from this, shape it to your wishes and needs, whatever your heart desires. It is truly open source.",

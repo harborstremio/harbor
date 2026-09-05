@@ -34,6 +34,13 @@ export function ServiceView({ service }: { service: StreamingService }) {
   return (
     <main ref={scrollRef} className="absolute inset-0 overflow-y-auto pb-14">
       <div className="relative px-12 pt-28 pb-6">
+        <div
+          aria-hidden
+          className="harbor-service-glow harbor-bleed-stremio pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(ellipse 90% 100% at 30% 0%, ${meta.tint}38 0%, transparent 65%)`,
+          }}
+        />
         <div className="relative flex items-end justify-between gap-8">
           <div className="flex flex-col gap-3">
             <span className="text-[12.5px] font-medium uppercase tracking-[0.18em] text-ink-subtle">

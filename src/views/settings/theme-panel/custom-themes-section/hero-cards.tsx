@@ -32,7 +32,7 @@ export function HeroCards({
       <div className="flex flex-col gap-4">
         <ActionCard
           visual={<PaletteVisual />}
-          icon={<Palette size={16} strokeWidth={2} />}
+          icon={<Palette size={18} strokeWidth={2} />}
           title={t("Build a theme")}
           body={t("Colors, layout, and fonts. No code.")}
           cta={t("Open studio")}
@@ -40,7 +40,7 @@ export function HeroCards({
         />
         <ActionCard
           visual={<ImportVisual />}
-          icon={<FileDown size={16} strokeWidth={2} />}
+          icon={<FileDown size={18} strokeWidth={2} />}
           title={t("Import a theme")}
           body={t("Got one a friend shared? Drop it in.")}
           cta={t("Choose file")}
@@ -102,8 +102,8 @@ function BrowseHero({
       <div className="relative flex-1 overflow-hidden bg-canvas">
         <ThemeDeck themes={themes} />
         {imported && (
-          <span className="absolute end-3 top-3 z-30 inline-flex items-center gap-1.5 rounded-[3px] bg-canvas px-2.5 py-1 text-[11.5px] font-semibold text-ink">
-            <Check size={12} strokeWidth={2.8} className="text-success" />
+          <span className="absolute end-3 top-3 z-30 inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-[6px] bg-canvas px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink">
+            <Check size={14} strokeWidth={2.8} className="text-success" />
             {t("{name} added", { name: imported })}
           </span>
         )}
@@ -113,15 +113,15 @@ function BrowseHero({
           <span className="flex items-center gap-2 text-[18px] font-semibold tracking-tight text-ink">
             <Library size={18} strokeWidth={2} className="text-ink-subtle" /> {t("Theme Library")}
           </span>
-          <span className="text-[13px] text-ink-muted">
+          <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
             {count === 1
               ? t("Browse 1 theme. Apply in one click.")
               : t("Browse all {count} themes. Apply in one click.", { count })}
           </span>
         </div>
-        <span className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-semibold text-ink transition-transform group-hover/hero:translate-x-0.5 rtl:group-hover/hero:-translate-x-0.5">
+        <span className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-[15.5px] font-semibold text-ink transition-transform group-hover/hero:translate-x-0.5 rtl:group-hover/hero:-translate-x-0.5">
           {t("Open library")}
-          <ArrowRight size={14} strokeWidth={2.2} className="dir-icon" />
+          <ArrowRight size={18} strokeWidth={2.2} className="dir-icon" />
         </span>
       </div>
     </button>
@@ -153,14 +153,14 @@ function ActionCard({
         {visual}
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1 p-4">
-        <span className="flex items-center gap-2 text-[14.5px] font-semibold tracking-tight text-ink">
+        <span className="flex items-center gap-2 text-[16.5px] font-semibold leading-[24px] tracking-tight text-ink">
           <span className="text-ink-subtle">{icon}</span>
           {title}
         </span>
-        <span className="text-[12.5px] leading-snug text-ink-muted">{body}</span>
-        <span className="mt-auto inline-flex items-center gap-1.5 pt-2 text-[12.5px] font-semibold text-ink transition-transform group-hover/act:translate-x-0.5 rtl:group-hover/act:-translate-x-0.5">
+        <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{body}</span>
+        <span className="mt-auto inline-flex min-h-11 items-center gap-1.5 pt-2 text-[15.5px] font-semibold text-ink transition-transform group-hover/act:translate-x-0.5 rtl:group-hover/act:-translate-x-0.5">
           {cta}
-          <ArrowRight size={14} strokeWidth={2.2} className="dir-icon" />
+          <ArrowRight size={18} strokeWidth={2.2} className="dir-icon" />
         </span>
       </div>
     </button>
@@ -175,7 +175,7 @@ function PaletteVisual() {
       {PALETTE_BARS.map((c, i) => (
         <span
           key={i}
-          className={`h-9 flex-1 rounded-[3px] transition-transform duration-300 ease-in-out group-hover/act:-translate-y-0.5 motion-reduce:transition-none ${c}`}
+          className={`h-[36px] flex-1 rounded-[3px] transition-transform duration-300 ease-in-out group-hover/act:-translate-y-0.5 motion-reduce:transition-none ${c}`}
           style={{ transitionDelay: `${i * 40}ms` }}
         />
       ))}
@@ -187,9 +187,9 @@ function ImportVisual() {
   const t = useT();
   return (
     <div className="flex h-full w-full items-center justify-center px-4">
-      <div className="flex h-9 w-full items-center justify-center gap-2 rounded-md border border-dashed border-edge-soft text-ink-subtle transition-colors group-hover/act:text-ink-muted">
-        <FileDown size={16} strokeWidth={2} />
-        <span className="text-[11.5px] font-semibold uppercase tracking-[0.14em]">
+      <div className="flex h-11 w-full items-center justify-center gap-2 rounded-[10px] border border-dashed border-edge-soft text-ink-subtle transition-colors group-hover/act:text-ink-muted">
+        <FileDown size={18} strokeWidth={2} />
+        <span className="text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px]">
           {t("Drop a {extension}", { extension: ".harborstyle" })}
         </span>
       </div>

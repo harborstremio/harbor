@@ -1,13 +1,19 @@
-import { lazy, startTransition, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, startTransition, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { LibraryKey } from "./settings/library-panel";
 import type { RelayMode } from "./settings/relay-section";
 import type { DebridKey } from "./settings/streaming-sources-panel";
-import { SettingsNav } from "./settings/nav";
-import { groupForSection } from "./settings/groups";
+import { SettingsTools } from "./settings/nav";
+import { groupForSection, TOP_GROUPS } from "./settings/groups";
 import { requestTracker } from "./settings/tracker-request";
 import { SubTabsProvider, type SubTabReg } from "./settings/sub-tabs";
-import { SubTabBar } from "./settings/sub-tab-bar";
+import { SettingsSidebar } from "./settings/settings-sidebar";
+import { tabsFor } from "./settings/tab-registry";
+import { PageActionsProvider, type PageActionReg } from "./settings/page-actions";
+import { SettingsFooter } from "./settings/settings-footer";
 import { SettingsActiveContext, type SectionId } from "./settings/shared";
+import { SectionCards } from "./settings/section-cards";
+import { LicensesPanel } from "./settings/licenses-panel";
+import { IconsPanel } from "./settings/icons-panel";
 import "./settings/tv-panel/store";
 import { useThemeLibraryOpen } from "./settings/theme-panel/library-open-store";
 import { BackToTop } from "@/components/back-to-top";
@@ -17,6 +23,25 @@ import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 
 const IS_WEB = typeof window !== "undefined" && !("__TAURI_INTERNALS__" in window);
+
+const SCROLL_TOP_MS = 420;
+
+function glideToTop(el: HTMLElement): void {
+  const from = el.scrollTop;
+  if (from <= 0) return;
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+    el.scrollTo({ top: 0 });
+    return;
+  }
+  const started = performance.now();
+  const step = (now: number) => {
+    const p = Math.min(1, (now - started) / SCROLL_TOP_MS);
+    const eased = p < 0.5 ? 2 * p * p : 1 - (-2 * p + 2) ** 2 / 2;
+    el.scrollTop = from * (1 - eased);
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
 
 const BasicsPanel = lazy(() => import("./settings/basics-panel").then((m) => ({ default: m.BasicsPanel })));
 const AccountStub = lazy(() => import("./settings/account").then((m) => ({ default: m.AccountStub })));
@@ -71,6 +96,8 @@ const SECTION_PRELOAD: Partial<Record<SectionId, () => Promise<unknown>>> = {
   webhooks: () => import("./settings/webhooks-panel"),
   bug: () => import("./settings/bug-report-panel"),
   support: () => import("./settings/support-panel"),
+  licenses: () => import("./settings/licenses-panel"),
+  icons: () => import("./settings/icons-panel"),
   remotes: () => import("./settings/remotes-panel"),
   tv: () => import("./settings/tv-panel"),
   storage: () => import("./settings/storage-panel"),
@@ -197,6 +224,14 @@ const SECTION_META: Record<SectionId, { label: string; sub: string }> = {
     label: "Support Harbor",
     sub: "Who keeps the lights on, what Harbor is built on, and where to put money if you want to.",
   },
+  licenses: {
+    label: "Licenses & attribution",
+    sub: "Harbor's licence, the projects it is built on, and the people and services that make it possible.",
+  },
+  icons: {
+    label: "Icons & animation",
+    sub: "Every icon and animation drawn for Harbor, who drew them, and how to take one with you.",
+  },
   remotes: {
     label: "Remotes",
     sub: "Harbor on your other devices: the web app, the phone remote, and the manga reader remote.",
@@ -223,9 +258,31 @@ const SECTION_META: Record<SectionId, { label: string; sub: string }> = {
   },
 };
 
+const CHROME_QUERY = 'header, [data-harbor-topchrome], [class~="fixed"]';
+const CHROME_GAP = 4;
+const CHROME_FLOOR = 40;
+const CHROME_CEIL = 200;
+const CHROME_TOP_EDGE = 12;
+
+function measureTopChrome(shell: HTMLElement): number {
+  let bottom = 0;
+  for (const el of Array.from(document.querySelectorAll<HTMLElement>(CHROME_QUERY))) {
+    if (el === shell || shell.contains(el) || el.contains(shell)) continue;
+    const cs = getComputedStyle(el);
+    if (cs.position !== "fixed" || cs.visibility === "hidden" || cs.opacity === "0") continue;
+    const rect = el.getBoundingClientRect();
+    if (rect.height <= 0 || rect.height > CHROME_CEIL) continue;
+    if (rect.top > CHROME_TOP_EDGE) continue;
+    if (rect.bottom > bottom) bottom = rect.bottom;
+  }
+  const ornament =
+    Number.parseFloat(getComputedStyle(shell).getPropertyValue("--harbor-chrome-ornament")) || 0;
+  return Math.max(CHROME_FLOOR, Math.min(CHROME_CEIL, Math.round(bottom + ornament)) + CHROME_GAP);
+}
+
 type SavedKey = LibraryKey | DebridKey;
 
-export function Settings() {
+export function Settings({ visible = true }: { visible?: boolean }) {
   const t = useT();
   const { settings, update } = useSettings();
   const [tmdbDraft, setTmdbDraft] = useState(settings.tmdbKey);
@@ -239,7 +296,7 @@ export function Settings() {
   const [pmDraft, setPmDraft] = useState(settings.pmKey);
   const [dlDraft, setDlDraft] = useState(settings.dlKey);
   const [savedKey, setSavedKey] = useState<SavedKey | null>(null);
-  const { settingsSectionRequest } = useView();
+  const { settingsSectionRequest, topKind, chromeHidden: viewChromeHidden } = useView();
   const TRACKER_IDS = ["trakt", "anilist", "mal", "simkl", "letterboxd"];
   const resolveSection = (id: string | null | undefined): SectionId => {
     if (!id) return "account";
@@ -249,32 +306,110 @@ export function Settings() {
     }
     return id as SectionId;
   };
+  const [landing, setLanding] = useState<string | null>(null);
   const [active, setActive] = useState<SectionId>(
     resolveSection(settingsSectionRequest.section),
   );
   const [relayMode, setRelayMode] = useState<RelayMode>("panel");
   const [pendingAnchor, setPendingAnchor] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
   const scrollRef = useRef<HTMLElement>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const shell = shellRef.current;
+    if (!shell) return;
+    let raf = 0;
+    let last = -1;
+    const apply = () => {
+      raf = 0;
+      const next = measureTopChrome(shell);
+      if (next === last) return;
+      last = next;
+      shell.style.setProperty("--hset-chrome-h", `${next}px`);
+    };
+    const schedule = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(apply);
+    };
+    apply();
+    const ro = new ResizeObserver(schedule);
+    ro.observe(document.documentElement);
+    ro.observe(shell);
+    for (const el of Array.from(document.querySelectorAll<HTMLElement>(CHROME_QUERY))) {
+      if (el !== shell && !shell.contains(el)) ro.observe(el);
+    }
+    window.addEventListener("resize", schedule);
+    schedule();
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener("resize", schedule);
+    };
+  }, [
+    settings.theme,
+    settings.hybridTitleBar,
+    settings.useNativeTitleBar,
+    settings.customCss,
+    topKind,
+    viewChromeHidden,
+  ]);
 
   const handleNav = (id: SectionId, anchor?: string) => {
+    setLanding(null);
     startTransition(() => {
       setActive(id);
       setPendingAnchor(anchor ?? null);
     });
   };
 
+  const pendingTab = useRef<string | null>(null);
+  const selectFromRail = (id: SectionId, tab?: string) => {
+    pendingTab.current = tab ?? null;
+    if (id === active) {
+      if (tab) subRegRef.current?.onChange(tab);
+      pendingTab.current = null;
+      return;
+    }
+    handleNav(id);
+  };
+
   useEffect(() => {
-    if (settingsSectionRequest.section) setActive(resolveSection(settingsSectionRequest.section));
+    if (!settingsSectionRequest.section) return;
+    setLanding(null);
+    setActive(resolveSection(settingsSectionRequest.section));
   }, [settingsSectionRequest]);
 
   useEffect(() => {
     if (active !== "relay") setRelayMode("panel");
   }, [active]);
 
+  const [pageActions, setPageActions] = useState<PageActionReg>(null);
   const [subRegRaw, setSubReg] = useState<SubTabReg>(null);
   const subReg = subRegRaw && subRegRaw.tabs.length > 0 ? subRegRaw : null;
   const subRegRef = useRef<SubTabReg>(null);
   subRegRef.current = subReg;
+  useEffect(() => {
+    if (!import.meta.env.DEV || !subReg) return;
+    const listed = tabsFor(active).map((tab) => tab.id);
+    if (listed.length === 0) return;
+    const live = subReg.tabs.map((tab) => tab.id);
+    const missing = live.filter((id) => !listed.includes(id));
+    const stale = listed.filter((id) => !live.includes(id));
+    if (missing.length || stale.length) {
+      console.warn(
+        `[settings] tab-registry drift on "${active}" - sidebar missing [${missing.join(", ")}] stale [${stale.join(", ")}]`,
+      );
+    }
+  }, [active, subReg]);
+  useEffect(() => {
+    const want = pendingTab.current;
+    if (!want || !subReg) return;
+    if (subReg.tabs.some((tab) => tab.id === want)) {
+      pendingTab.current = null;
+      if (subReg.value !== want) subReg.onChange(want);
+    }
+  }, [subReg]);
   const triedTabs = useRef<Set<string>>(new Set());
   const restoreTab = useRef<string | null>(null);
   const pendingAnchorRef = useRef<string | null>(null);
@@ -284,6 +419,25 @@ export function Settings() {
     if (pendingAnchorRef.current) return;
     scrollRef.current?.scrollTo({ top: 0 });
   }, [active]);
+
+  const lastSubTab = useRef<string | null>(null);
+  useEffect(() => {
+    const next = subReg?.value ?? null;
+    const prev = lastSubTab.current;
+    lastSubTab.current = next;
+    if (prev === null || next === null || next === prev) return;
+    if (pendingAnchorRef.current) return;
+    const el = scrollRef.current;
+    if (el) glideToTop(el);
+  }, [subReg?.value]);
+
+  const wasVisible = useRef(visible);
+  useEffect(() => {
+    if (visible && !wasVisible.current && !pendingAnchorRef.current) {
+      scrollRef.current?.scrollTo({ top: 0 });
+    }
+    wasVisible.current = visible;
+  }, [visible]);
 
   useEffect(() => {
     if (!pendingAnchor) return;
@@ -309,15 +463,10 @@ export function Settings() {
       const el = findTarget();
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
-        el.style.transition = "box-shadow 0.5s ease";
-        el.style.boxShadow = "0 0 0 2px var(--color-accent)";
-        window.setTimeout(() => {
-          el.style.boxShadow = "0 0 0 0 transparent";
-        }, 1300);
-        window.setTimeout(() => {
-          el.style.transition = "";
-          el.style.boxShadow = "";
-        }, 1900);
+        el.classList.remove("hset-jumped");
+        void el.offsetWidth;
+        el.classList.add("hset-jumped");
+        window.setTimeout(() => el.classList.remove("hset-jumped"), 1400);
         setPendingAnchor(null);
         return;
       }
@@ -371,6 +520,7 @@ export function Settings() {
   const themeLibOpen = useThemeLibraryOpen();
   const wide = active === "theme" && themeLibOpen;
   const activeGroup = groupForSection(active);
+  const landingGroup = landing ? (TOP_GROUPS.find((g) => g.id === landing) ?? null) : null;
   useEffect(() => {
     if (!activeGroup) return;
     const run = () => activeGroup.children.forEach((child) => preloadSettingsSection(child));
@@ -384,28 +534,40 @@ export function Settings() {
     if (themeLibOpen) scrollRef.current?.scrollTo({ top: 0 });
   }, [themeLibOpen]);
 
+  const chromeHidden = wide || (active === "relay" && relayMode !== "panel");
+  const caption = landingGroup ? null : SECTION_META[active].sub;
+
   return (
     <SettingsActiveContext.Provider value={{ setActive }}>
+    <PageActionsProvider value={{ reg: pageActions, setReg: setPageActions }}>
     <SubTabsProvider value={{ reg: subReg, setReg: setSubReg }}>
-    <div className="flex h-full bg-surface">
-      <SettingsNav active={active} onChange={handleNav} />
-      <main
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto pt-28 pb-16"
-      >
-        <div
-          data-tauri-drag-region
-          className={wide ? "mx-auto flex w-full max-w-[1500px] flex-col gap-8 px-8" : "mx-auto flex max-w-3xl flex-col gap-10 px-12"}
-        >
-          {!wide && !(active === "relay" && relayMode !== "panel") && (
-            <header className="flex flex-col gap-4">
-              <h1 className="font-display text-[32px] font-medium leading-[1.1] tracking-tight text-ink">
-                {t(SECTION_META[active].label)}
-              </h1>
-              {subReg && (
-                <SubTabBar tabs={subReg.tabs} value={subReg.value} onChange={subReg.onChange} />
-              )}
-            </header>
+    <div ref={shellRef} className="harbor-settings-shell flex h-full flex-col bg-canvas">
+      <div
+        data-tauri-drag-region
+        className="shrink-0"
+        style={{ blockSize: "var(--hset-chrome-h, 92px)" }}
+      />
+      <div className="hset-grid">
+        <SettingsTools query={query} setQuery={setQuery} onSubmit={handleNav} />
+        <div className="hset-heading">
+          <div className="hset-content">
+            <h1 className="hset-title">
+              {landingGroup ? t(landingGroup.label) : t(SECTION_META[active].label)}
+            </h1>
+          </div>
+        </div>
+        <SettingsSidebar
+          active={active}
+          activeTab={subReg?.value ?? null}
+          meta={SECTION_META}
+          query={query}
+          onSelect={selectFromRail}
+          onJump={handleNav}
+        />
+        <main ref={scrollRef} className="hset-main" data-hset-wide={wide ? "" : undefined}>
+        <div className="hset-content">
+          {caption && !chromeHidden && (
+            <p className="hset-caption">{t(caption)}</p>
           )}
 
           <Suspense
@@ -416,7 +578,17 @@ export function Settings() {
               />
             }
           >
-          <div key={active} className="harbor-cascade flex flex-col gap-10">
+          {landingGroup && (
+            <SectionCards
+              sections={landingGroup.children}
+              meta={SECTION_META}
+              onOpen={(id) => handleNav(id)}
+            />
+          )}
+          <div
+            key={active}
+            className={`harbor-cascade flex flex-col ${landingGroup ? "hidden" : ""}`}
+          >
           {active === "basics" && <BasicsPanel />}
 
           {active === "account" && <AccountStub />}
@@ -506,13 +678,19 @@ export function Settings() {
           {active === "updates" && <UpdatesPanel />}
 
           {active === "advanced" && <AdvancedPanel />}
+
+          {active === "licenses" && <LicensesPanel />}
+          {active === "icons" && <IconsPanel />}
           </div>
           </Suspense>
         </div>
-      </main>
+        {pageActions && !chromeHidden && <SettingsFooter reg={pageActions} />}
+        </main>
+      </div>
       <BackToTop scrollRef={scrollRef} />
     </div>
     </SubTabsProvider>
+    </PageActionsProvider>
     </SettingsActiveContext.Provider>
   );
 }

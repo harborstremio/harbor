@@ -1,8 +1,9 @@
-import { get, IMG } from "./tmdb-client";
+import { get } from "./tmdb-client";
+import { tmdbBackdropUrl, tmdbPosterThumbUrl } from "./tmdb-image-rungs";
 
-const poster = (p: string | null | undefined) => (p ? `${IMG}/w342${p}` : null);
-const still = (p: string | null | undefined) => (p ? `${IMG}/w780${p}` : null);
-const backdrop = (p: string | null | undefined) => (p ? `${IMG}/w780${p}` : null);
+const poster = (p: string | null | undefined) => tmdbPosterThumbUrl(p) ?? null;
+const still = (p: string | null | undefined) => tmdbBackdropUrl(p) ?? null;
+const backdrop = (p: string | null | undefined) => tmdbBackdropUrl(p) ?? null;
 
 const ANIMATION_GENRE_ID = 16;
 

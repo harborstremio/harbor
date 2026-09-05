@@ -122,6 +122,8 @@ export function CatalogRows({
   kids = false,
   injectAfter = -1,
   injectNode,
+  injectAfter2 = -1,
+  injectNode2,
 }: {
   rows: CatalogRow[];
   editMode: boolean;
@@ -133,6 +135,8 @@ export function CatalogRows({
   kids?: boolean;
   injectAfter?: number;
   injectNode?: React.ReactNode;
+  injectAfter2?: number;
+  injectNode2?: React.ReactNode;
 }) {
   const t = useT();
   const { openGrid } = useView();
@@ -212,6 +216,9 @@ export function CatalogRows({
         );
         if (i === injectAfter && injectNode) {
           return [node, <div key={`${row.key}::inject`}>{injectNode}</div>];
+        }
+        if (i === injectAfter2 && injectNode2) {
+          return [node, <div key={`${row.key}::inject2`}>{injectNode2}</div>];
         }
         return node;
       })}

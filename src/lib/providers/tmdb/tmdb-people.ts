@@ -1,6 +1,7 @@
 import type { Meta } from "../../cinemeta";
 import { lruSet } from "../../cache";
-import { effectiveTmdbLanguage, get, IMG } from "./tmdb-client";
+import { effectiveTmdbLanguage, get } from "./tmdb-client";
+import { tmdbBackdropUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
 
 const PERSON_NAME_CACHE_MAX = 3000;
 const PERSON_CACHE_MAX = 10;
@@ -181,8 +182,8 @@ async function fetchPerson(key: string, personId: number): Promise<PersonDetail 
     id: c.id,
     mediaType: c.media_type,
     title: c.title ?? c.name ?? "",
-    poster: c.poster_path ? `${IMG}/w342${c.poster_path}` : undefined,
-    background: c.backdrop_path ? `${IMG}/w780${c.backdrop_path}` : undefined,
+    poster: tmdbPosterUrl(c.poster_path),
+    background: tmdbBackdropUrl(c.backdrop_path),
     releaseInfo: (c.release_date ?? c.first_air_date)?.slice(0, 4),
     releaseDate: c.release_date ?? c.first_air_date,
     imdbRating: c.vote_average > 0 ? Number(c.vote_average).toFixed(1) : undefined,

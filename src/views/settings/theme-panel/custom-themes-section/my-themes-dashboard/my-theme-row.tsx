@@ -13,8 +13,14 @@ import {
 import { authToken } from "@/lib/theme-auth";
 import { deleteUpload, setVisibility, themeVersions, type StoreTheme } from "@/lib/theme-store";
 import { useT } from "@/lib/i18n";
+import { ROW_ACTION_DANGER, ROW_DESC, ROW_TITLE } from "../../../kit";
+import { RowNote } from "../../../shared";
+import { SButton, SRow } from "../../../ui";
 
 type Version = { v: number; changelog: string; createdAt: string };
+
+const QUAL =
+  "inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
 
 const STATUS: Record<StoreTheme["status"], { label: string; className: string }> = {
   pending: { label: "In review", className: "bg-accent-soft text-accent" },
@@ -88,7 +94,7 @@ export function MyThemeRow({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-md bg-elevated p-4">
+    <div className="flex flex-col gap-4 rounded-md bg-surface p-4 ring-1 ring-edge-soft">
       <div className="flex gap-4">
         <div className="relative h-[68px] w-28 shrink-0 overflow-hidden rounded-md bg-canvas">
           {t.cover ? (
@@ -102,118 +108,100 @@ export function MyThemeRow({
           )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="truncate text-[15px] font-semibold text-ink">{t.name}</span>
-            <span
-              className={`rounded-full px-2 py-0.5 text-[11.5px] font-semibold ${badge.className}`}
-            >
-              {tr(badge.label)}
-            </span>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className={`min-w-0 truncate ${ROW_TITLE}`}>{t.name}</span>
+            <span className={`${QUAL} ${badge.className}`}>{tr(badge.label)}</span>
             {t.hasPendingUpdate && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-[11.5px] font-semibold text-accent">
-                <RefreshCw size={12} strokeWidth={2.4} /> {tr("Update in review")}
+              <span className={`${QUAL} bg-accent-soft text-accent`}>
+                <RefreshCw size={13} strokeWidth={2.4} /> {tr("Update in review")}
               </span>
             )}
           </div>
-          <span className="flex items-center gap-1 text-[12.5px] text-ink-subtle">
+          <span className={`flex flex-wrap items-center gap-1.5 ${ROW_DESC}`}>
             {t.downloads === 1 ? tr("1 download") : tr("{count} downloads", { count: t.downloads })}
-            <span className="text-ink-subtle/60">·</span>
-            <Star size={12} className="fill-accent text-accent" />
+            <span className="text-ink-subtle">·</span>
+            <Star size={15} className="fill-accent text-accent" />
             {t.ratingAvg || "-"}
-            <span className="text-ink-subtle/60">({t.ratingCount})</span>
+            <span className="text-ink-subtle">({t.ratingCount})</span>
           </span>
-          {t.blurb && <span className="line-clamp-1 text-[12.5px] text-ink-muted">{t.blurb}</span>}
+          {t.blurb && (
+            <span className={`line-clamp-1 max-w-[66ch] ${ROW_DESC}`}>{t.blurb}</span>
+          )}
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5">
-        <button
-          onClick={() => onUpdate(t)}
-          className="flex h-9 items-center gap-1.5 rounded-md bg-ink px-3.5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
-        >
-          <PencilLine size={14} /> {tr("Update")}
-        </button>
-        <button
-          onClick={toggleVisibility}
-          disabled={busy === "vis"}
-          className="flex h-9 items-center gap-1.5 rounded-md bg-canvas px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:text-ink hover:ring-edge disabled:opacity-50"
-        >
+      <div className="flex flex-wrap items-center gap-2">
+        <SButton variant="primary" onClick={() => onUpdate(t)}>
+          <PencilLine size={17} /> {tr("Update")}
+        </SButton>
+        <SButton onClick={toggleVisibility} disabled={busy === "vis"}>
           {busy === "vis" ? (
-            <Loader2 size={14} className="animate-spin" />
+            <Loader2 size={17} className="animate-spin" />
           ) : t.visibility === "public" ? (
-            <Eye size={14} />
+            <Eye size={17} />
           ) : (
-            <EyeOff size={14} />
+            <EyeOff size={17} />
           )}
           {t.visibility === "public" ? tr("Public") : tr("Unlisted")}
-        </button>
-        <button
-          onClick={openVersions}
-          className="flex h-9 items-center gap-1.5 rounded-md bg-canvas px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:text-ink hover:ring-edge"
-        >
-          <History size={14} />{" "}
+        </SButton>
+        <SButton onClick={openVersions}>
+          <History size={17} />
           {versionsCount > 0 ? tr("Versions ({count})", { count: versionsCount }) : tr("Versions")}
           <ChevronDown
-            size={14}
+            size={17}
             className={`transition-transform ${versionsOpen ? "rotate-180" : ""}`}
           />
-        </button>
-        <div className="ms-auto flex items-center gap-1.5">
+        </SButton>
+        <div className="ms-auto flex flex-wrap items-center gap-2">
           {confirmDel ? (
             <>
-              <button
-                onClick={del}
-                disabled={busy === "del"}
-                className="flex h-9 items-center gap-1.5 rounded-md bg-danger px-3 text-[12.5px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-              >
-                {busy === "del" && <Loader2 size={14} className="animate-spin" />} {tr("Delete")}
-              </button>
-              <button
-                onClick={() => setConfirmDel(false)}
-                className="h-9 rounded-md px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:text-ink"
-              >
-                {tr("Cancel")}
-              </button>
+              <SButton variant="danger" onClick={del} disabled={busy === "del"}>
+                {busy === "del" && <Loader2 size={17} className="animate-spin" />}
+                <Trash2 size={17} /> {tr("Delete")}
+              </SButton>
+              <SButton onClick={() => setConfirmDel(false)}>{tr("Cancel")}</SButton>
             </>
           ) : (
             <button
+              type="button"
               onClick={() => setConfirmDel(true)}
               aria-label={tr("Delete theme")}
-              className="flex h-9 w-9 items-center justify-center rounded-md bg-canvas text-ink-muted transition-colors hover:text-danger hover:ring-danger"
+              className={ROW_ACTION_DANGER}
             >
-              <Trash2 size={14} />
+              <Trash2 size={17} />
             </button>
           )}
         </div>
       </div>
 
-      {error && <p className="text-[12.5px] text-danger">{error}</p>}
+      {error && <RowNote>{error}</RowNote>}
 
       {versionsOpen && (
-        <div className="flex flex-col gap-2.5 border-t border-edge-soft pt-3">
+        <div className="border-t border-edge-soft pt-2">
           {versionsBusy ? (
-            <span className="flex items-center gap-2 text-[12.5px] text-ink-subtle">
-              <Loader2 size={14} className="animate-spin" /> {tr("Loading history")}
+            <span className={`flex items-center gap-2 pt-2 ${ROW_DESC}`}>
+              <Loader2 size={17} className="animate-spin" /> {tr("Loading history")}
             </span>
           ) : versions && versions.length > 0 ? (
-            versions
-              .slice()
-              .sort((a, b) => b.v - a.v)
-              .map((v) => (
-                <div key={v.v} className="flex gap-3">
-                  <span className="mt-0.5 flex h-6 shrink-0 items-center rounded-md bg-elevated px-2 text-[11.5px] font-bold text-ink-muted">
-                    v{v.v}
-                  </span>
-                  <div className="flex min-w-0 flex-col">
-                    <span className="text-[12.5px] text-ink">{v.changelog || tr("No notes")}</span>
-                    <span className="text-[11.5px] text-ink-subtle">
-                      {new Date(v.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))
+            <div className="harbor-settings-group">
+              {versions
+                .slice()
+                .sort((a, b) => b.v - a.v)
+                .map((v) => (
+                  <SRow
+                    key={v.v}
+                    title={
+                      <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
+                        <span className={`${QUAL} bg-elevated text-ink-subtle`}>v{v.v}</span>
+                        <span className="min-w-0">{v.changelog || tr("No notes")}</span>
+                      </span>
+                    }
+                    description={new Date(v.createdAt).toLocaleDateString()}
+                  />
+                ))}
+            </div>
           ) : (
-            <span className="text-[12.5px] text-ink-subtle">
+            <span className={`block max-w-[66ch] pt-2 ${ROW_DESC}`}>
               {tr("No previous versions yet. Your next update starts the history.")}
             </span>
           )}

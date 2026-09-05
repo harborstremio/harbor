@@ -76,24 +76,24 @@ export function CommunityStore({ initialTab = "discover" }: { initialTab?: Store
         {themeTab && (
           <div className="flex items-center gap-2.5">
             <div
-              className={`flex h-9 items-center gap-2 rounded-full bg-elevated px-3.5 transition-opacity ${
+              className={`flex h-11 items-center gap-2 rounded-full bg-elevated px-4 transition-opacity ${
                 interactive ? "" : "pointer-events-none opacity-40"
               }`}
             >
-              <Search size={16} className="text-ink-subtle" />
+              <Search size={18} className="text-ink-subtle" />
               <input
                 value={query}
                 onChange={(e) => onSearch(e.target.value)}
                 placeholder={t("Search themes")}
-                className="w-44 bg-transparent text-[13px] text-ink placeholder:text-ink-subtle focus:outline-none"
+                className="w-48 bg-transparent text-[15.5px] leading-[22px] text-ink placeholder:text-ink-subtle focus:outline-none"
               />
             </div>
             <button
               type="button"
               onClick={() => setUploadOpen(true)}
-              className="flex h-9 items-center gap-1.5 rounded-full bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
+              className="flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[15.5px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
             >
-              <Upload size={14} strokeWidth={2.2} /> {t("Share a theme")}
+              <Upload size={16} strokeWidth={2.2} /> {t("Share a theme")}
             </button>
             <NotificationBell onOpenTheme={openThemeById} />
           </div>
@@ -103,9 +103,9 @@ export function CommunityStore({ initialTab = "discover" }: { initialTab?: Store
             <button
               type="button"
               onClick={() => setBundleUpload(bundleKind)}
-              className="flex h-9 items-center gap-1.5 rounded-full bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
+              className="flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[15.5px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
             >
-              <Upload size={14} strokeWidth={2.2} /> {t("Share a pack")}
+              <Upload size={16} strokeWidth={2.2} /> {t("Share a pack")}
             </button>
             <NotificationBell onOpenTheme={openThemeById} />
           </div>
@@ -155,13 +155,13 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
       <span className="grid h-12 w-12 place-items-center rounded-full bg-danger/15 text-danger">
         <AlertCircle size={22} />
       </span>
-      <p className="text-[13.5px] text-ink-muted">{message}</p>
+      <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{message}</p>
       <button
         type="button"
         onClick={onRetry}
-        className="flex h-10 items-center gap-2 rounded-full bg-ink px-5 text-[13px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
+        className="flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[15.5px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
       >
-        <RefreshCw size={14} strokeWidth={2.2} /> {t("Try again")}
+        <RefreshCw size={16} strokeWidth={2.2} /> {t("Try again")}
       </button>
     </div>
   );
@@ -178,14 +178,14 @@ function EmptyState({ onShare }: { onShare: () => void }) {
         <h3 className="text-[18px] font-semibold tracking-tight text-ink">
           {t("No community themes yet")}
         </h3>
-        <p className="text-[13.5px] leading-relaxed text-ink-muted">
+        <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
           {t("Be the first to share a look. Publish a theme and it shows up here for everyone.")}
         </p>
       </div>
       <button
         type="button"
         onClick={onShare}
-        className="flex h-11 items-center gap-2 rounded-full bg-ink px-6 text-[13.5px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
+        className="flex h-11 items-center gap-2 rounded-full bg-ink px-6 text-[15.5px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
       >
         <Upload size={16} strokeWidth={2.2} /> {t("Share a theme")}
       </button>

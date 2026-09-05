@@ -1,11 +1,12 @@
-import { ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Activity, AlertTriangle, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import allDebridLogo from "@/assets/addon-logos/alldebrid.webp";
 import debridLinkLogo from "@/assets/addon-logos/debridlink.png";
 import premiumizeLogo from "@/assets/addon-logos/premiumize.png";
 import realDebridLogo from "@/assets/addon-logos/realdebrid.png";
 import torboxLogo from "@/assets/addon-logos/torbox.png";
 import { useAuth } from "@/lib/auth";
+import { captureFocusReturn } from "@/lib/keyboard-navigation";
 import { userAddons, type Addon } from "@/lib/addons";
 import { SERVICES } from "@/lib/providers/streaming";
 import { useSettings, type StreamingService } from "@/lib/settings";
@@ -15,6 +16,8 @@ import {
   type ServiceHealth,
 } from "@/lib/streams/aiostatus";
 import { ExtLink, KeyField, Section } from "../shared";
+import { SettingRow } from "../kit";
+import { SRow } from "../ui";
 import { ManualAddonCard, ServiceCard } from "../streaming-panel";
 import { AioStatusModal } from "../aiostatus-modal";
 import { useT } from "@/lib/i18n";
@@ -194,7 +197,7 @@ export function DebridTab({
         title={t("Streaming catalogs")}
         subtitle={t("Top titles per service. Toggle off the ones you don't pay for.")}
       >
-        <div className="grid grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
           {(Object.keys(SERVICES) as StreamingService[]).map((svc) => (
             <ServiceCard
               key={svc}
@@ -205,9 +208,10 @@ export function DebridTab({
           ))}
         </div>
         {!settings.tmdbKey && (
-          <p className="mt-3 text-[13px] text-ink-subtle">
-            {t("Save a TMDB key in Library & metadata to turn on streaming catalogs.")}
-          </p>
+          <SettingRow
+            label={t("Streaming catalogs need a TMDB key")}
+            warn={t("Save a TMDB key in Library & metadata to turn on streaming catalogs.")}
+          />
         )}
       </Section>
     </>
@@ -238,40 +242,53 @@ function useAioStatusHealth(): AioStatusSnapshot | null {
 function AioStatusBanner({ snapshot }: { snapshot: AioStatusSnapshot }) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  const restore = useRef<(() => void) | null>(null);
   const total = snapshot.services.length;
   if (total === 0) return null;
   const expiringSoon = snapshot.services.filter(
     (s) => s.status === "expiring" || s.status === "expired",
   );
   const hasWarning = expiringSoon.length > 0;
+  const summary = hasWarning
+    ? expiringSoon.length === 1
+      ? t("{n} service needs attention", { n: expiringSoon.length })
+      : t("{n} services need attention", { n: expiringSoon.length })
+    : total === 1
+      ? t("Health for {n} service", { n: total })
+      : t("Health for {n} services", { n: total });
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={`animate-banner-in flex w-full items-center gap-2.5 rounded-md px-3.5 py-2.5 text-start text-[12.5px] transition-colors ${
-          hasWarning
-            ? "bg-accent-soft text-accent hover:bg-accent-soft"
-            : "bg-elevated text-ink-muted hover:bg-raised"
-        }`}
-      >
-        <span className="shrink-0 font-semibold tracking-wide">{snapshot.addonName}</span>
-        <span className="text-ink-subtle">·</span>
-        <span className="min-w-0 flex-1 truncate">
-          {hasWarning
-            ? expiringSoon.length === 1
-              ? t("{n} service needs attention", { n: expiringSoon.length })
-              : t("{n} services need attention", { n: expiringSoon.length })
-            : total === 1
-              ? t("Health for {n} service", { n: total })
-              : t("Health for {n} services", { n: total })}
-        </span>
-        <span className="flex shrink-0 items-center gap-0.5 font-semibold text-ink-subtle">
-          {t("View all")}
-          <ChevronRight size={14} strokeWidth={2.4} />
-        </span>
-      </button>
-      {open && <AioStatusModal snapshot={snapshot} onClose={() => setOpen(false)} />}
+      <SRow
+        onClick={() => {
+          restore.current = captureFocusReturn();
+          setOpen(true);
+        }}
+        leading={
+          hasWarning ? (
+            <AlertTriangle size={18} strokeWidth={2.2} className="text-accent" />
+          ) : (
+            <Activity size={18} strokeWidth={2.2} className="text-ink-subtle" />
+          )
+        }
+        title={snapshot.addonName}
+        description={summary}
+        trailing={
+          <span className="flex items-center gap-1.5 text-[15.5px] font-medium text-ink-muted">
+            {t("View all")}
+            <ChevronRight size={18} strokeWidth={2.2} className="rtl:-scale-x-100" />
+          </span>
+        }
+      />
+      {open && (
+        <AioStatusModal
+          snapshot={snapshot}
+          onClose={() => {
+            setOpen(false);
+            restore.current?.();
+            restore.current = null;
+          }}
+        />
+      )}
     </>
   );
 }
@@ -304,15 +321,15 @@ function HealthBadge({ health, logo }: { health: ServiceHealth | undefined; logo
     return health.rawLine.slice(0, 40);
   })();
   return (
-    <span className="flex items-center gap-2 text-[11.5px] font-medium">
-      <span className={`flex items-center gap-1.5 ${palette}`}>
-        <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+    <span className="flex items-center gap-3 text-[15.5px] font-medium leading-[22px]">
+      <span className={`flex items-center gap-2 ${palette}`}>
+        <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} />
         <span>{label}</span>
         {health.quotaUsedPercent != null && (
-          <span className="text-ink-subtle">· {health.quotaUsedPercent}%</span>
+          <span className="text-ink-subtle tabular-nums">{health.quotaUsedPercent}%</span>
         )}
       </span>
-      <span className="flex items-center gap-1.5 text-ink-muted">
+      <span className="flex items-center gap-2 text-ink-muted">
         {logo && (
           <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full bg-canvas">
             <img

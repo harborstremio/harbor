@@ -1,6 +1,8 @@
 import { Check, ChevronDown } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { advanceFocus } from "@/lib/keyboard-navigation";
+import { getDirection, isBackKey } from "@/lib/keyboard-navigation/geometry";
 
 export type DropdownOption = { value: string; label: string };
 
@@ -36,23 +38,36 @@ export function Dropdown({
   const [box, setBox] = useState<MenuBox | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const selected = options.find((o) => o.value === value) ?? null;
+
+  const holdsFocus = () => !!listRef.current?.contains(document.activeElement);
+
+  const close = (restore: boolean) => {
+    setOpen(false);
+    const trigger = btnRef.current;
+    if (restore && trigger) advanceFocus(trigger);
+  };
 
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
       const t = e.target as Node;
       if (ref.current?.contains(t) || listRef.current?.contains(t)) return;
-      setOpen(false);
+      close(holdsFocus());
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (!isBackKey(e)) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      close(true);
     };
     document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
     return () => {
       document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("keydown", onKey, true);
     };
   }, [open]);
 
@@ -104,6 +119,32 @@ export function Dropdown({
     listRef.current?.querySelector('[data-selected="true"]')?.scrollIntoView({ block: "nearest" });
   }, [open, placed]);
 
+  const entered = useRef(false);
+  useEffect(() => {
+    if (!open) {
+      entered.current = false;
+      return;
+    }
+    if (!placed || entered.current) return;
+    entered.current = true;
+    const at = options.findIndex((o) => o.value === value);
+    const el = optionRefs.current[at < 0 ? 0 : at];
+    if (el) advanceFocus(el);
+  }, [open, placed, options, value]);
+
+  const onMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const dir = getDirection(e.nativeEvent);
+    const edge = e.key === "Home" ? 0 : e.key === "End" ? options.length - 1 : null;
+    if (edge === null && dir !== "up" && dir !== "down") return;
+    e.preventDefault();
+    const from = optionRefs.current.indexOf(e.target as HTMLButtonElement);
+    if (from < 0) return;
+    const at = edge ?? from + (dir === "down" ? 1 : -1);
+    const el = optionRefs.current[at];
+    if (!el || at === from) return;
+    advanceFocus(el, at > from ? "down" : "up");
+  };
+
   const chevRef = useRef<HTMLSpanElement>(null);
   const spinChevron = (next: boolean) => {
     const chev = chevRef.current;
@@ -125,10 +166,12 @@ export function Dropdown({
   return (
     <div ref={ref} className={`relative ${className}`}>
       <button
+        ref={btnRef}
         type="button"
         onClick={() => {
           spinChevron(!open);
-          setOpen((v) => !v);
+          if (open) close(holdsFocus());
+          else setOpen(true);
         }}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -154,6 +197,7 @@ export function Dropdown({
             ref={listRef}
             role="listbox"
             data-dropdown-menu
+            onKeyDown={onMenuKeyDown}
             style={{
               position: "fixed",
               top: box ? box.top : -9999,
@@ -172,21 +216,24 @@ export function Dropdown({
               return (
                 <button
                   key={o.value}
+                  ref={(el) => {
+                    optionRefs.current[i] = el;
+                  }}
                   type="button"
                   role="option"
                   aria-selected={active}
                   data-selected={active}
                   onClick={() => {
                     onChange(o.value);
-                    setOpen(false);
+                    close(true);
                   }}
                   style={{ animationDelay: `${Math.min(i, 8) * 22}ms` }}
-                  className={`animate-item-in flex w-full items-center justify-between gap-3 rounded-[4px] px-3 text-start transition-colors ${
+                  className={`animate-item-in flex w-full items-center justify-between gap-3 rounded-[4px] px-3 text-start outline-none transition-colors ${
                     size === "sm" ? "h-9 text-[12.5px]" : "h-10 text-[13.5px]"
                   } ${
                     active
                       ? "bg-ink font-semibold text-canvas"
-                      : "text-ink-muted hover:bg-raised hover:text-ink"
+                      : "text-ink-muted hover:bg-raised hover:text-ink focus:bg-raised focus:text-ink"
                   }`}
                 >
                   <span className="truncate">{o.label}</span>

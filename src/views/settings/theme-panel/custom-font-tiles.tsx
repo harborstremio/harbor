@@ -40,10 +40,9 @@ export function CustomFontTiles({
   };
 
   const pad = compact ? "p-4" : "p-5";
-  const radius = compact ? "rounded-md" : "rounded-md";
+  const radius = "rounded-[10px]";
   const previewSize = compact ? "text-[22px]" : "text-[28px]";
-  const activeCls = compact ? "border-accent bg-accent-soft" : "border-ink bg-elevated";
-  const checkCls = compact ? "bg-accent" : "bg-ink";
+  const activeCls = compact ? "border-accent bg-elevated" : "border-ink bg-elevated";
 
   return (
     <>
@@ -61,7 +60,7 @@ export function CustomFontTiles({
             <button
               type="button"
               onClick={() => onSelect(f.id)}
-              className="flex flex-1 flex-col gap-1.5 pe-8 text-start"
+              className="flex min-h-11 flex-1 flex-col gap-1.5 pe-12 text-start"
             >
               <span
                 className={`${previewSize} font-medium leading-none tracking-tight text-ink`}
@@ -70,35 +69,35 @@ export function CustomFontTiles({
                 Harbor
               </span>
               {!compact && (
-                <span className="text-[13px] text-ink-muted" style={{ fontFamily: family }}>
+                <span className="text-[15.5px] leading-[22px] text-ink-muted" style={{ fontFamily: family }}>
                   {t("The quick brown fox jumps over the lazy dog")}
                 </span>
               )}
               <span
-                className={`truncate ${
+                className={`min-w-0 break-words ${
                   compact
-                    ? "mt-1 text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle"
-                    : "text-[11.5px] text-ink-subtle"
+                    ? "mt-1 text-[15.5px] font-medium leading-[22px] text-ink-subtle"
+                    : "text-[15.5px] leading-[22px] text-ink-subtle"
                 }`}
               >
                 {f.name}
               </span>
             </button>
-            <div className="absolute end-3 top-3 flex items-center">
+            <div className="absolute end-2 top-2 flex items-center">
               {active && (
-                <span
-                  className={`flex h-5 w-5 items-center justify-center rounded-full ${checkCls} text-canvas group-hover/font:hidden`}
-                >
-                  <Check size={12} strokeWidth={3} />
-                </span>
+                <Check
+                  size={18}
+                  strokeWidth={2.6}
+                  className="me-2 shrink-0 text-accent group-hover/font:hidden [html[data-input-modality=keys]_&]:hidden"
+                />
               )}
               <button
                 type="button"
                 onClick={() => remove(f.id)}
                 aria-label={t("Remove {name}", { name: f.name })}
-                className="hidden h-7 w-7 items-center justify-center rounded-full bg-canvas text-ink-subtle transition-colors hover:bg-danger/25 hover:text-danger group-hover/font:flex"
+                className="hidden h-11 w-11 items-center justify-center rounded-full bg-canvas text-ink-subtle transition-colors hover:bg-danger/25 hover:text-danger group-hover/font:flex [html[data-input-modality=keys]_&]:flex"
               >
-                <Trash2 size={14} strokeWidth={2.2} />
+                <Trash2 size={18} strokeWidth={2.2} />
               </button>
             </div>
           </div>
@@ -113,27 +112,27 @@ export function CustomFontTiles({
           busy ? "opacity-80" : "hover:border-edge hover:bg-elevated"
         }`}
       >
-        <span
-          className={`flex items-center justify-center rounded-full bg-elevated text-ink-muted ${
-            compact ? "h-9 w-9" : "h-11 w-11"
-          }`}
-        >
+        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-elevated text-ink-muted">
           {busy ? (
-            <Loader2 size={compact ? 16 : 18} className="animate-spin" />
+            <Loader2 size={20} className="animate-spin" />
           ) : (
-            <Upload size={compact ? 16 : 18} strokeWidth={2.2} />
+            <Upload size={20} strokeWidth={2.2} />
           )}
         </span>
-        <span className="text-[13px] font-semibold text-ink">
+        <span className="text-[16.5px] font-semibold leading-[24px] text-ink">
           {busy ? t("Adding font…") : t("Upload a font")}
         </span>
         {!busy && (
-          <span className="text-[11.5px] text-ink-subtle">{t("TTF, OTF, WOFF or WOFF2")}</span>
+          <span className="text-[15.5px] leading-[22px] text-ink-subtle">
+            {t("TTF, OTF, WOFF or WOFF2")}
+          </span>
         )}
       </button>
 
       {localizedError && (
-        <p className="col-span-full text-[12.5px] font-medium text-danger">{localizedError}</p>
+        <p className="col-span-full max-w-[66ch] text-[15.5px] leading-[22px] font-medium text-danger">
+          {localizedError}
+        </p>
       )}
 
       <input

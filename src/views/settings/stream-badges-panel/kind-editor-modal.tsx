@@ -1,12 +1,20 @@
-import { useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import { badgeLabel, FormatBadge, type BadgeKind } from "@/components/format-badge";
 import { emitListToast } from "@/components/lists/list-toast";
 import { setBadgeOverride, useBadgeState } from "@/lib/stream-badges";
+import { tvFocus } from "@/lib/keyboard-navigation";
 import { useT } from "@/lib/i18n";
-import { ModalButton, SettingsModal } from "../kit";
+import { ModalButton, ROW_ACTION_DANGER, ROW_ACTION_PRIMARY, SettingsModal } from "../kit";
+import { ROW_DESC } from "../shared";
+import { handoffFocus, ringActive } from "./focus-handoff";
 
 const MAX_UPLOAD_BYTES = 260_000;
+
+const FIELD =
+  "h-11 min-w-0 rounded-[10px] border border-edge-soft bg-canvas px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+
+const FIELD_LABEL = "harbor-settings-label";
 
 export function KindEditorModal({ kind, onClose }: { kind: BadgeKind; onClose: () => void }) {
   const t = useT();
@@ -14,6 +22,15 @@ export function KindEditorModal({ kind, onClose }: { kind: BadgeKind; onClose: (
   const override = state.overrides[kind];
   const [url, setUrl] = useState(override?.image ?? "");
   const fileRef = useRef<HTMLInputElement>(null);
+  const urlRef = useRef<HTMLInputElement>(null);
+  const fieldId = useId();
+
+  useEffect(() => {
+    const el = urlRef.current;
+    if (!el) return;
+    if (ringActive()) tvFocus(el);
+    else el.focus({ preventScroll: true });
+  }, []);
 
   const onFile = (f: File | undefined) => {
     if (!f) return;
@@ -40,35 +57,52 @@ export function KindEditorModal({ kind, onClose }: { kind: BadgeKind; onClose: (
       title={badgeLabel(kind)}
       sub={override?.image ? t("Custom art") : override?.hidden ? t("Hidden") : t("Default art")}
     >
-      <div className="grid min-h-[96px] place-items-center rounded-md bg-elevated px-4 py-6">
+      <div
+        data-tv-skip
+        className="grid min-h-[112px] place-items-center rounded-[10px] bg-elevated px-4 py-6"
+      >
         <FormatBadge kind={kind} size="lg" />
       </div>
-      <div className="mt-1 flex items-center gap-2">
-        <input
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder={t("Paste an image URL (png, webp, svg)")}
-          className="h-10 min-w-0 flex-1 rounded-md bg-canvas px-3.5 text-[13px] text-ink outline-none placeholder:text-ink-subtle"
-        />
-        <button
-          onClick={() => {
-            const v = url.trim();
-            if (!/^https?:\/\//.test(v) && !v.startsWith("data:image/")) {
-              emitListToast(t("That doesn't look like an image URL"));
-              return;
-            }
-            setBadgeOverride(kind, { image: v });
-            emitListToast(t("Badge updated"));
-          }}
-          className="harbor-press-pop h-10 shrink-0 rounded-md bg-ink px-5 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90"
-        >
-          {t("Apply")}
-        </button>
+
+      <div className="flex flex-col gap-2.5">
+        <label htmlFor={fieldId} className={FIELD_LABEL}>
+          {t("Image address")}
+        </label>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <input
+            id={fieldId}
+            ref={urlRef}
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://example.com/badge.png"
+            spellCheck={false}
+            className={`${FIELD} min-w-[240px] flex-1`}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const v = url.trim();
+              if (!/^https?:\/\//.test(v) && !v.startsWith("data:image/")) {
+                emitListToast(t("That doesn't look like an image URL"));
+                return;
+              }
+              setBadgeOverride(kind, { image: v });
+              emitListToast(t("Badge updated"));
+            }}
+            className={ROW_ACTION_PRIMARY}
+          >
+            {t("Apply")}
+          </button>
+        </div>
+        <p className={`max-w-[70ch] ${ROW_DESC}`}>
+          {t("Paste a link to a png, webp, or svg. Harbor will use it for this badge everywhere streams show format chips.")}
+        </p>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
+
+      <div className="flex flex-wrap items-center gap-2.5">
         <ModalButton ghost onClick={() => fileRef.current?.click()}>
           <span className="inline-flex items-center gap-2">
-            <Upload size={14} />
+            <Upload size={18} />
             {t("Upload image")}
           </span>
         </ModalButton>
@@ -87,16 +121,22 @@ export function KindEditorModal({ kind, onClose }: { kind: BadgeKind; onClose: (
         </ModalButton>
         {(override?.image || override?.hidden) && (
           <button
-            onClick={() => {
-              setBadgeOverride(kind, null);
-              setUrl("");
-            }}
-            className="h-9 rounded-md px-4 text-[12.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+            type="button"
+            onClick={() =>
+              handoffFocus(() => {
+                setBadgeOverride(kind, null);
+                setUrl("");
+              }, urlRef.current)
+            }
+            className={ROW_ACTION_DANGER}
           >
             {t("Reset to default")}
           </button>
         )}
       </div>
+      <p className={`max-w-[70ch] ${ROW_DESC}`}>
+        {t("Uploads stay on this computer. Keep the file under 250 KB.")}
+      </p>
     </SettingsModal>
   );
 }

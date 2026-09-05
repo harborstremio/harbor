@@ -114,7 +114,7 @@ export function LiveView({ active }: { active: boolean }) {
     () => sources.filter((s) => s.kind === "epg").map((s) => s.epgUrl || s.url),
     [sources],
   );
-  const { index: baseEpg, error: epgError } = useEpg(active ? activeSource : null, epgOnlyUrls);
+  const { index: baseEpg, loading: epgLoading, error: epgError } = useEpg(active ? activeSource : null, epgOnlyUrls);
   const [epgErrorHidden, setEpgErrorHidden] = useState<string | null>(null);
   const epgErrorShown = epgError && epgError !== epgErrorHidden ? epgError : null;
   const epg = useXtreamEpgFallback(activeSource, playlist?.channels ?? EMPTY_CHANNELS, baseEpg);
@@ -326,7 +326,11 @@ export function LiveView({ active }: { active: boolean }) {
                     setQuery(e.target.value);
                     if (e.target.value && mode === "home") setMode("grid");
                   }}
-                  placeholder={t("Search {n} channels", { n: playlist?.channels.length ?? 0 })}
+                  placeholder={
+                    playlist
+                      ? t("Search {n} channels", { n: playlist.channels.length })
+                      : t("Search channels")
+                  }
                   className="flex-1 bg-transparent text-[14px] text-ink placeholder:text-ink-subtle focus:outline-none"
                 />
                 {query && (
@@ -437,6 +441,7 @@ export function LiveView({ active }: { active: boolean }) {
                   <GuideView
                     channels={visible}
                     epg={epg}
+                    epgLoading={epgLoading}
                     nowMs={nowMs}
                     onPlay={handlePlay}
                     onPlayCatchup={handlePlayCatchup}

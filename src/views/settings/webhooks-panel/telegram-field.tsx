@@ -1,9 +1,20 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { StatusBadge, TelegramMark, TelegramTutorial, type FieldStatus } from "./webhook-field";
+import {
+  FIELD_HELP,
+  FIELD_LABEL,
+  StatusBadge,
+  TelegramMark,
+  TelegramTutorial,
+  type FieldStatus,
+} from "./webhook-field";
+import { ROW_ACTION_PRIMARY } from "../kit";
 import { useT } from "@/lib/i18n";
 
 const URL_RE = /^https?:\/\/api\.telegram\.org\/bot([^/]+)\/sendMessage(?:\?chat_id=(.+))?$/;
+
+const SUB_INPUT =
+  "h-11 w-full min-w-0 max-w-[520px] rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] tracking-wide text-ink outline-none transition-colors placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 function compose(token: string, chatId: string): string {
   const t = token.trim();
@@ -60,41 +71,42 @@ export function TelegramComposedField({
   };
 
   const ready = token.length > 0 && chatId.length > 0;
+  const busy = status.state === "busy";
 
   return (
- <div className="flex flex-col gap-3 rounded-md bg-canvas p-4">
-      <div className="flex items-center justify-between gap-3">
-        <span className="flex items-center gap-2 text-[13px] font-semibold text-ink">
+    <div className="flex flex-col gap-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <span className="flex items-center gap-2">
           <TelegramMark />
-          {t("Telegram bot")}
+          <span className={FIELD_LABEL}>{t("Telegram bot")}</span>
         </span>
         <StatusBadge status={status} />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <SubField
           label={t("Bot token")}
           placeholder="1234567890:AAExampleTokenFromBotFather"
           value={token}
           onChange={onTokenChange}
-          monospace
         />
         <SubField
           label={t("Chat ID")}
           placeholder="123456789"
           value={chatId}
           onChange={onChatIdChange}
-          monospace
         />
       </div>
       <button
-        onClick={onTest}
-        disabled={!ready || status.state === "busy"}
-        className="flex h-10 items-center justify-center gap-1.5 self-start rounded-md bg-ink px-5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        type="button"
+        onClick={busy ? undefined : onTest}
+        aria-disabled={busy}
+        disabled={!ready}
+        className={`${ROW_ACTION_PRIMARY} self-start${busy ? " pointer-events-none opacity-40" : ""}`}
       >
-        {status.state === "busy" && <Loader2 size={12} strokeWidth={2.4} className="animate-spin" />}
+        {busy && <Loader2 size={17} strokeWidth={2.4} className="shrink-0 animate-spin" />}
         {t("Send test")}
       </button>
-      <div className="rounded-md bg-canvas p-3 text-[12.5px] leading-relaxed text-ink-muted">
+      <div className={FIELD_HELP}>
         <TelegramTutorial />
       </div>
     </div>
@@ -106,19 +118,15 @@ function SubField({
   placeholder,
   value,
   onChange,
-  monospace,
 }: {
   label: string;
   placeholder: string;
   value: string;
   onChange: (v: string) => void;
-  monospace?: boolean;
 }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        {label}
-      </span>
+    <label className="flex flex-col gap-2">
+      <span className={FIELD_LABEL}>{label}</span>
       <input
         type="text"
         value={value}
@@ -126,9 +134,7 @@ function SubField({
         placeholder={placeholder}
         spellCheck={false}
         autoComplete="off"
- className={`h-10 rounded-md bg-canvas px-3 text-[12.5px] text-ink outline-none transition-colors focus:border-ink-subtle ${
-          monospace ? "font-mono text-[12.5px]" : ""
-        }`}
+        className={SUB_INPUT}
       />
     </label>
   );

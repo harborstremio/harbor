@@ -91,6 +91,10 @@ const plurals: Record<string, string> = {
     "{count} film, dans l’ordre choisi. Rien ne sera lu avant que vous lanciez la lecture.",
   "{count} friends in common#few": "{count} amis en commun",
   "{count} friends in common#one": "{count} ami en commun",
+  "{count} titles will never show the content advisory again.#few":
+    "{count} titres n’afficheront plus jamais l’avertissement sur le contenu.",
+  "{count} titles will never show the content advisory again.#one":
+    "{count} titre n’affichera plus jamais l’avertissement sur le contenu.",
   "{label} · {n} collection#few": "{label} · {n} collections",
   "{label} · {n} collection#one": "{label} · {n} collection",
   "{label} · {n} collections#few": "{label} · {n} collections",

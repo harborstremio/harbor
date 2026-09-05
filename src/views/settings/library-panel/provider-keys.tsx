@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { UiIcon } from "@/components/ui-icon";
 import fanartLogo from "@/assets/addon-logos/fanarttv.svg";
 import mdblistLogo from "@/assets/addon-logos/mdblist.png";
 import omdbLogo from "@/assets/addon-logos/omdb.png";
@@ -6,17 +7,21 @@ import rpdbLogo from "@/assets/addon-logos/rpdb.png";
 import auddLogo from "@/assets/addon-logos/auddio.webp";
 import tmdbLogo from "@/assets/addon-logos/tmdb.png";
 import tvdbLogo from "@/assets/addon-logos/tvdb.svg";
-import { HelpCircle } from "lucide-react";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { useSettings } from "@/lib/settings";
+import { tvFocus } from "@/lib/keyboard-navigation";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
 import { ExtLink, KeyField } from "../shared";
-import { ModalButton, SettingsModal } from "../kit";
+import { ModalButton, ROW_ACTION, SettingsModal } from "../kit";
 import { TmdbGuideModal } from "../tmdb-tutorial-modal";
 import { TvdbGuideModal } from "../tvdb-tutorial-modal";
 import { ProviderKeyRow, type KeyEntry, type KeyId } from "./provider-key-row";
 import { PosterServiceMark } from "./poster-mark";
 import type { LibraryKey } from "../library-panel";
+import nytLogo from "@/assets/service-logos/nyt.png";
+import apiSportsLogo from "@/assets/service-logos/apisports.png";
+import geminiLogo from "@/assets/ai-logos/gemini.png";
 
 export type ProviderKeysArgs = {
   tmdbDraft: string;
@@ -52,17 +57,38 @@ export function useProviderKeys({
 
   const [mdblistDraft, setMdblistDraft] = useState(settings.mdblistKey);
   const [nytDraft, setNytDraft] = useState(settings.nytKey);
+  const [sportsDraft, setSportsDraft] = useState(settings.sportsApiKey);
   const [posterSrvDraft, setPosterSrvDraft] = useState(settings.posterBaseUrl);
   const [auddDraft, setAuddDraft] = useState(settings.auddKey);
   const [songAiDraft, setSongAiDraft] = useState(settings.songIdAiKey);
   const [extraSaved, setExtraSaved] = useState<
-    "mdblist" | "postersrv" | "ai" | "audd" | "songai" | "nyt" | null
+    "mdblist" | "postersrv" | "ai" | "audd" | "songai" | "nyt" | "sports" | null
   >(null);
   const [tmdbGuide, setTmdbGuide] = useState(false);
   const [tvdbGuide, setTvdbGuide] = useState(false);
   const [keyModal, setKeyModal] = useState<KeyId | null>(null);
+  const keyFieldRef = useRef<HTMLDivElement | null>(null);
   const extraTimerRef = useRef<number | null>(null);
-  const flashExtra = (k: "mdblist" | "postersrv" | "ai" | "audd" | "songai" | "nyt") => {
+
+  useEffect(() => {
+    if (!keyModal) return;
+    const field = keyFieldRef.current?.querySelector<HTMLInputElement>("input");
+    if (field) tvFocus(field);
+  }, [keyModal]);
+
+  useEffect(() => {
+    if (!keyModal && !tmdbGuide && !tvdbGuide) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || !isBackKey(e)) return;
+      if (tmdbGuide) setTmdbGuide(false);
+      else if (tvdbGuide) setTvdbGuide(false);
+      else setKeyModal(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [keyModal, tmdbGuide, tvdbGuide]);
+
+  const flashExtra = (k: "mdblist" | "postersrv" | "ai" | "audd" | "songai" | "nyt" | "sports") => {
     setExtraSaved(k);
     if (extraTimerRef.current) window.clearTimeout(extraTimerRef.current);
     extraTimerRef.current = window.setTimeout(() => setExtraSaved(null), 1800);
@@ -70,12 +96,8 @@ export function useProviderKeys({
 
   const guideButton = (onClick: () => void, tip: string) => (
     <HoverTooltip side="top" align="center" label={tip}>
-      <button
-        type="button"
-        onClick={onClick}
-        className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-canvas px-3.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
-      >
-        <HelpCircle size={14} strokeWidth={2.4} />
+      <button type="button" onClick={onClick} className={ROW_ACTION}>
+        <UiIcon name="help" className="h-[18px] w-[18px]" />
         {t("How to get this")}
       </button>
     </HoverTooltip>
@@ -266,7 +288,7 @@ export function useProviderKeys({
       name: t("Custom poster service"),
       desc: t("Swap in Better Posters, PostersPlus, or your own URL template."),
       value: posterSrvDraft,
-      mark: <PosterServiceMark />,
+      mark: <PosterServiceMark size={20} />,
       field: (
         <KeyField
           label={t("Custom poster service")}
@@ -306,6 +328,7 @@ export function useProviderKeys({
         <KeyField
           label={t("New York Times · bestseller lists")}
           placeholder={t("NYT Books API key")}
+          iconSrc={nytLogo}
           value={nytDraft}
           onChange={setNytDraft}
           onSave={() => {
@@ -315,12 +338,47 @@ export function useProviderKeys({
           saved={extraSaved === "nyt"}
           help={
             <>
-              Adds the New York Times bestseller lists to the eBook page, on the hero and as a
-              row, with rank and weeks on the list. Free key at{" "}
+              {t(
+                "Adds the New York Times bestseller lists to the eBook page, on the hero and as a row, with rank and weeks on the list. Free key at",
+              )}{" "}
               <ExtLink href="https://developer.nytimes.com/get-started">
                 developer.nytimes.com
               </ExtLink>
-              . Enable the Books API on your app. Lists refresh weekly.
+              . {t("Enable the Books API on your app. Lists refresh weekly.")}
+            </>
+          }
+        />
+      ),
+    },
+    {
+      id: "sports",
+      name: t("API-Sports"),
+      desc: t("Egyptian, Qatari, Emirati and Korean football plus the KHL on the sports page."),
+      value: sportsDraft,
+      field: (
+        <KeyField
+          label={t("API-Sports · leagues ESPN does not carry")}
+          placeholder={t("API-Sports key")}
+          iconSrc={apiSportsLogo}
+          value={sportsDraft}
+          onChange={setSportsDraft}
+          onSave={() => {
+            update({ sportsApiKey: sportsDraft.trim() });
+            flashExtra("sports");
+          }}
+          saved={extraSaved === "sports"}
+          help={
+            <>
+              {t(
+                "Fills the sports page where ESPN has no feed: Egyptian Premier League, Qatar Stars League, UAE Pro League, K League and the KHL, with lineups and live minutes. Free key at",
+              )}{" "}
+              <ExtLink href="https://dashboard.api-football.com/register">
+                dashboard.api-football.com
+              </ExtLink>
+              .{" "}
+              {t(
+                "One account covers football and hockey. The free plan allows 100 requests a day and Harbor paces itself to stay inside it.",
+              )}
             </>
           }
         />
@@ -334,6 +392,7 @@ export function useProviderKeys({
       field: (
         <KeyField
           label={t("Gemini · in-player song ID")}
+          iconSrc={geminiLogo}
           placeholder={t("Gemini API key")}
           value={songAiDraft}
           onChange={setSongAiDraft}
@@ -372,7 +431,6 @@ export function useProviderKeys({
           }}
           saved={extraSaved === "audd"}
           iconSrc={auddLogo}
-          iconBg="#EE1066"
           help={
             <>
               {t("Powers the Identify-song button in the player. Get a token at")}{" "}
@@ -392,19 +450,24 @@ export function useProviderKeys({
 
   const modals = (
     <>
-      <TmdbGuideModal open={tmdbGuide} onClose={() => setTmdbGuide(false)} />
-      <TvdbGuideModal open={tvdbGuide} onClose={() => setTvdbGuide(false)} />
       {openEntry && (
         <SettingsModal
           open
           onClose={() => setKeyModal(null)}
           title={openEntry.name}
           sub={openEntry.desc}
-          actions={<ModalButton onClick={() => setKeyModal(null)}>{t("Done")}</ModalButton>}
+          actions={
+            <>
+              {openEntry.guide && <span className="me-auto flex">{openEntry.guide}</span>}
+              <ModalButton onClick={() => setKeyModal(null)}>{t("Done")}</ModalButton>
+            </>
+          }
         >
-          {openEntry.field}
+          <div ref={keyFieldRef}>{openEntry.field}</div>
         </SettingsModal>
       )}
+      <TmdbGuideModal open={tmdbGuide} onClose={() => setTmdbGuide(false)} />
+      <TvdbGuideModal open={tvdbGuide} onClose={() => setTvdbGuide(false)} />
     </>
   );
 

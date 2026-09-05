@@ -1,6 +1,8 @@
-import { AlertTriangle, Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
+import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { t, useT } from "@/lib/i18n";
+import { ROW_ACTION } from "../kit";
+import { RowNote } from "../shared";
 
 const ACCEPTED_TYPES = "image/png,image/gif,image/webp,image/jpeg,image/svg+xml,.svg";
 const MAX_GIF_SIZE = 2 * 1024 * 1024;
@@ -14,16 +16,12 @@ export function SeekImageUpload({
   value,
   onSelect,
   onClear,
-  emptyTitle,
-  hint,
   targetDim = 512,
   targetQuality = 0.9,
 }: {
   value: string;
   onSelect: (dataUrl: string) => void;
   onClear: () => void;
-  emptyTitle: string;
-  hint: string;
   targetDim?: number;
   targetQuality?: number;
 }) {
@@ -51,20 +49,9 @@ export function SeekImageUpload({
   };
 
   return (
-    <div
-      className={`flex flex-col gap-2 rounded-md border bg-canvas p-3 transition-colors duration-200 ${
-        error ? "border-danger" : "border-edge-soft"
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        <div
-          className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-raised transition-colors duration-200"
-          style={{
-            backgroundImage: value
-              ? `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.04), transparent 70%)`
-              : undefined,
-          }}
-        >
+    <div className="flex w-full min-w-0 flex-col gap-2.5">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-elevated">
           <ImageIcon
             size={20}
             strokeWidth={1.6}
@@ -83,24 +70,18 @@ export function SeekImageUpload({
             }`}
           />
           {busy && (
-            <div className="absolute inset-0 flex items-center justify-center bg-canvas/60 backdrop-blur-sm">
+            <div className="absolute inset-0 flex items-center justify-center bg-canvas/60">
               <Loader2 size={16} className="animate-spin text-ink-muted" />
             </div>
           )}
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <p className="text-[12.5px] font-medium text-ink">
-            {value ? tr("Custom image loaded") : emptyTitle}
-          </p>
-          <p className="text-[11.5px] leading-snug text-ink-subtle">{hint}</p>
-        </div>
         <button
           type="button"
-          disabled={busy}
-          onClick={() => fileInputRef.current?.click()}
-          className="flex h-9 items-center gap-1.5 rounded-full bg-raised px-3 text-[12.5px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:cursor-wait disabled:opacity-60"
+          aria-disabled={busy}
+          onClick={busy ? undefined : () => fileInputRef.current?.click()}
+          className={`${ROW_ACTION}${busy ? " pointer-events-none opacity-45" : ""}`}
         >
-          <Upload size={12} strokeWidth={2.2} />
+          <Upload size={16} strokeWidth={2.2} />
           {busy ? tr("Processing") : value ? tr("Replace") : tr("Upload")}
         </button>
         <button
@@ -110,18 +91,13 @@ export function SeekImageUpload({
             onClear();
           }}
           disabled={!value}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-raised text-ink-muted transition duration-200 hover:bg-danger hover:text-white disabled:pointer-events-none disabled:scale-90 disabled:opacity-0"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] border border-edge-soft bg-elevated text-ink-muted transition duration-200 hover:border-danger/40 hover:text-danger disabled:pointer-events-none disabled:scale-90 disabled:opacity-0"
           aria-label={tr("Remove image")}
         >
-          <X size={14} strokeWidth={2.2} />
+          <X size={17} strokeWidth={2.2} />
         </button>
       </div>
-      {error && (
-        <div className="flex items-start gap-2 rounded-md bg-danger/15 px-2.5 py-2 text-[11.5px] leading-snug text-danger ring-1 ring-danger">
-          <AlertTriangle size={14} strokeWidth={2.4} className="mt-0.5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
+      {error && <RowNote>{error}</RowNote>}
       <input
         ref={fileInputRef}
         type="file"

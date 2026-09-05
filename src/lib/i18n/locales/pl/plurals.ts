@@ -333,6 +333,12 @@ const plurals: Record<string, string> = {
     "{word} {n} sekundy. Przytrzymaj, aby wyświetlić opcje",
   "{n} episodes on home servers#one": "{n} odcinek na serwerach domowych",
   "{n} episodes on home servers#few": "{n} odcinki na serwerach domowych",
+  "{count} titles will never show the content advisory again.":
+    "Przy {count} tytułach ostrzeżenie o treści nie pojawi się ponownie.",
+  "{count} titles will never show the content advisory again.#one":
+    "Przy {count} tytule ostrzeżenie o treści nie pojawi się ponownie.",
+  "{count} titles will never show the content advisory again.#few":
+    "Przy {count} tytułach ostrzeżenie o treści nie pojawi się ponownie.",
 };
 
 export default plurals;

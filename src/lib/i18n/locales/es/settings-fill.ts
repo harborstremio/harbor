@@ -69,6 +69,7 @@ const settingsFill: Record<string, string> = {
   "Badge art packs you installed from the community store. Remove one to put its badges back to default.":
     "Paquetes de imágenes para insignias que instalaste desde la tienda de la comunidad. Elimina uno para restablecer sus insignias a las predeterminadas.",
   "Badges for giving": "Insignias para otorgar",
+  "Borderless window": "Ventana sin bordes",
   "Browse ElfHosted": "Explorar ElfHosted",
   "Built on Stremio": "Creado sobre Stremio",
   "Cached chapter lists and browse pages. Downloads stay untouched.":
@@ -411,6 +412,8 @@ const settingsFill: Record<string, string> = {
   "Top-right controls": "Controles de la esquina superior derecha",
   "Trial for ${n}": "Prueba por ${n}",
   "True fullscreen": "Pantalla completa real",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "La pantalla completa real ocupa toda la pantalla y oculta la barra de tareas, pero cambiar de aplicación puede provocar parpadeos. La ventana sin bordes cubre la misma área con una ventana sin marco, de modo que Alt-Tab y las superposiciones siguen siendo instantáneos. Maximizar ocupa la pantalla, pero mantiene la barra de tareas y la barra de título.",
   "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.":
     "La pantalla completa real ocupa toda la pantalla y oculta la barra de tareas. Maximizar ocupa la pantalla, pero mantiene la barra de tareas y la barra de título para que puedas cambiar de aplicación.",
   "Try it for ${n}": "Probar por ${n}",

@@ -1,4 +1,7 @@
-const coverage: Record<string, string> = {
+const coverage: Record<string, string> = {
+  "Sound descriptions": "Mô tả âm thanh",
+  "Hide sound effects and speaker names": "Ẩn hiệu ứng âm thanh và tên người nói",
+  "Removes bracketed descriptions like [door creaks] and shouted speaker labels like JOHN: while subtitles play, so a release that only ships an SDH track still reads as plain dialogue. Song lyrics, ordinary parentheses and non-Latin scripts are left alone. Skipped on forced and picture-based tracks.": "Xóa các mô tả trong ngoặc vuông như [tiếng cửa kẽo kẹt] và tên người nói viết hoa như JOHN: khi phụ đề đang chạy, để một bản chỉ có phụ đề SDH vẫn đọc như hội thoại bình thường. Lời bài hát, ngoặc đơn thông thường và chữ viết không phải Latinh được giữ nguyên. Không áp dụng cho phụ đề bắt buộc và phụ đề dạng ảnh.",
   "Play from": "Phát từ",
   end: "kết thúc",
   "m:ss": "m:ss",

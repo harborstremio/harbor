@@ -1,8 +1,11 @@
 import { BookOpen, Check, Copy, Download, Play, Redo2, Undo2, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CodeEditor, type CodeLang } from "@/components/code-editor";
 import { downloadText } from "@/lib/download-text";
 import { useT } from "@/lib/i18n";
+import { tvFocus } from "@/lib/keyboard-navigation";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
+import { useSettings } from "@/lib/settings";
 import { CheatSheet } from "./cheat-sheet";
 import { FileTree } from "./code-popout/file-tree";
 import { THEME_FILES } from "./code-popout/files";
@@ -37,15 +40,37 @@ export function CodePopout({
   canRedo: boolean;
 }) {
   const t = useT();
+  const { settings } = useSettings();
+  const tvNav = settings.tvNavigation;
   const [tab, setTab] = useState<CodeLang>(initialTab);
   const [caret, setCaret] = useState({ line: 1, col: 1 });
   const [copied, setCopied] = useState(false);
   const [cheatOpen, setCheatOpen] = useState(false);
   const [closing, setClosing] = useState(false);
+  const doneRef = useRef<HTMLButtonElement>(null);
   const requestClose = () => {
     setClosing(true);
     window.setTimeout(onClose, 150);
   };
+  const closeRef = useRef(requestClose);
+  closeRef.current = requestClose;
+
+  useEffect(() => {
+    if (tvNav && doneRef.current) tvFocus(doneRef.current);
+  }, [tvNav]);
+
+  useEffect(() => {
+    if (cheatOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (!isBackKey(e)) return;
+      if (document.querySelector("[data-search-editing]")) return;
+      e.preventDefault();
+      e.stopPropagation();
+      closeRef.current();
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [cheatOpen]);
   const values: Record<CodeLang, string> = { css, html, js };
   const value = values[tab];
   const meta = THEME_FILES.find((f) => f.id === tab) ?? THEME_FILES[0];
@@ -64,6 +89,9 @@ export function CodePopout({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("Code")}
       style={SUITE_CHROME}
       className={`pointer-events-auto fixed inset-0 z-[244] flex flex-col bg-surface text-ink-muted ${
         closing ? "animate-[editorOut_150ms_ease-in_forwards]" : "animate-[editorIn_220ms_ease-out]"
@@ -71,21 +99,20 @@ export function CodePopout({
     >
       <header className="flex shrink-0 items-start gap-4 px-6 pb-5 pt-6">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
-            {t("Code")}
-          </span>
+          <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">{t("Code")}</span>
           <h2 className="truncate text-[17px] font-semibold tracking-tight text-ink">
             {themeName}
           </h2>
         </div>
         <button
           type="button"
+          ref={doneRef}
           onClick={requestClose}
           aria-label={t("Done")}
           title={t("Done")}
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
         >
-          <X size={16} />
+          <X size={18} />
         </button>
       </header>
 
@@ -100,7 +127,7 @@ export function CodePopout({
         />
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex h-12 shrink-0 items-center px-3">
+          <div className="flex h-14 shrink-0 items-center px-3">
             <div className="flex items-center gap-1">
               {THEME_FILES.map((f) => {
                 const Icon = f.icon;
@@ -110,7 +137,7 @@ export function CodePopout({
                     key={f.id}
                     type="button"
                     onClick={() => setTab(f.id)}
-                    className={`flex h-9 items-center gap-2 rounded-md px-3 text-[13px] transition-colors ${
+                    className={`flex h-11 items-center gap-2 rounded-md px-3.5 text-[15.5px] transition-colors ${
                       on
                         ? "bg-elevated font-semibold text-ink"
                         : "font-medium text-ink-subtle hover:text-ink"
@@ -129,7 +156,7 @@ export function CodePopout({
                 onClick={onUndo}
                 disabled={!canUndo}
                 title={t("Undo (Ctrl/Cmd + Z)")}
-                className="grid h-9 w-9 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink disabled:pointer-events-none disabled:opacity-30"
+                className="grid h-11 w-11 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink disabled:pointer-events-none disabled:opacity-30"
               >
                 <Undo2 size={16} strokeWidth={2.2} />
               </button>
@@ -138,14 +165,14 @@ export function CodePopout({
                 onClick={onRedo}
                 disabled={!canRedo}
                 title={t("Redo (Ctrl/Cmd + Shift + Z)")}
-                className="grid h-9 w-9 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink disabled:pointer-events-none disabled:opacity-30"
+                className="grid h-11 w-11 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink disabled:pointer-events-none disabled:opacity-30"
               >
                 <Redo2 size={16} strokeWidth={2.2} />
               </button>
               <button
                 type="button"
                 onClick={() => setCheatOpen(true)}
-                className="flex h-9 items-center gap-1.5 rounded-md px-3 text-[12.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+                className="flex h-11 items-center gap-1.5 rounded-md px-3 text-[15.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
               >
                 <BookOpen size={16} strokeWidth={2.2} />
                 {t("Cheat sheet")}
@@ -155,16 +182,16 @@ export function CodePopout({
                   type="button"
                   onClick={onRunJs}
                   disabled={!value.trim()}
-                  className="harbor-press-pop flex h-9 items-center gap-1.5 rounded-md bg-success px-3.5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-30"
+                  className="harbor-press-pop flex h-11 items-center gap-1.5 rounded-md bg-success px-4 text-[15.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-30"
                 >
-                  <Play size={14} strokeWidth={2.6} fill="currentColor" />
+                  <Play size={16} strokeWidth={2.6} fill="currentColor" />
                   {t("Run")}
                 </button>
               )}
               <button
                 type="button"
                 onClick={copy}
-                className={`flex h-9 items-center gap-1.5 rounded-md px-3 text-[12.5px] font-semibold transition-colors hover:bg-elevated ${
+                className={`flex h-11 items-center gap-1.5 rounded-md px-3 text-[15.5px] font-semibold transition-colors hover:bg-elevated ${
                   copied ? "text-success" : "text-ink-subtle hover:text-ink"
                 }`}
               >
@@ -178,7 +205,7 @@ export function CodePopout({
               <button
                 type="button"
                 onClick={() => download(tab)}
-                className="flex h-9 items-center gap-1.5 rounded-md px-3 text-[12.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+                className="flex h-11 items-center gap-1.5 rounded-md px-3 text-[15.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
               >
                 <Download size={16} strokeWidth={2.2} />
                 {t("Download")}
@@ -192,13 +219,13 @@ export function CodePopout({
               value={value}
               onChange={(v) => onChange({ [tab]: v })}
               language={tab}
-              autoFocus
+              autoFocus={!tvNav}
               onCaret={(line, col) => setCaret({ line, col })}
               className="h-full"
             />
             {!value && (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <span className="text-[13px] text-ink-subtle">
+                <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
                   {t("{file} is empty. Start typing to restyle Harbor.", { file: meta.name })}
                 </span>
               </div>

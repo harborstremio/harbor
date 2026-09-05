@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { Download, Link2, Trash2, Upload } from "lucide-react";
-import { badgeLabel, defaultBadgeSrc, type BadgeKind } from "@/components/format-badge";
+import {
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Download,
+  ExternalLink,
+  Link2,
+  Package,
+  Store,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { emitListToast } from "@/components/lists/list-toast";
 import { safeFetch } from "@/lib/safe-fetch";
 import {
@@ -17,17 +27,17 @@ import {
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { removeStreamBadgePack, useStreamBadgePacks } from "@/lib/community-badge-packs";
-import { Section, useSettingsActiveContext } from "../shared";
-import { SettingRow } from "../kit";
+import { tvFocus } from "@/lib/keyboard-navigation";
+import { Section, settingsAnchor, useSettingsActiveContext } from "../shared";
+import { ROW_ACTION_PRIMARY, SettingRow } from "../kit";
+import { SButton, SRow } from "../ui";
+import { usePageActions } from "../page-actions";
 import { requestThemeLibrary } from "@/views/settings/theme-panel/library-open-store";
-import { MarketCta } from "@/views/settings/theme-panel/custom-themes-section/community-store/market/market-cta";
-import type { IconThumb } from "@/views/settings/theme-panel/custom-themes-section/community-store/market/icon-fan";
-import { ConfirmButton } from "./confirm-button";
+import { handoffFocus, ringActive } from "./focus-handoff";
 import { PackCard } from "./pack-card";
 
-const BADGE_DOORWAY_PREVIEW: IconThumb[] = (
-  ["4k-uhd", "dv", "atmos", "remux", "hevc"] as BadgeKind[]
-).map((kind) => ({ src: defaultBadgeSrc(kind), alt: badgeLabel(kind) }));
+const FIELD =
+  "h-11 min-w-0 rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 function importToast(t: ReturnType<typeof useT>, r: BadgeImportResult): void {
   if (r.remapped === 0 && r.rules === 0) {
@@ -43,10 +53,16 @@ function PacksSection() {
   const [busy, setBusy] = useState<string | null>(null);
   const [installed, setInstalled] = useState<Record<string, boolean>>({});
   const fileRef = useRef<HTMLInputElement>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const packsRef = useRef<HTMLDivElement>(null);
+  const anchor = settingsAnchor(t("Packs & import"));
   useEffect(() => {
-    rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
+    const first = ringActive() ? packsRef.current?.querySelector("button") : null;
+    if (first) {
+      tvFocus(first);
+      return;
+    }
+    document.getElementById(anchor)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [anchor]);
 
   const installFromUrl = async (packUrl: string, id: string) => {
     setBusy(id);
@@ -97,12 +113,11 @@ function PacksSection() {
   };
 
   return (
-    <div ref={rootRef} className="scroll-mt-24">
     <Section
       title={t("Packs & import")}
-      subtitle={t("One-click community packs. Rulesets bring full badge sets with their own matching; art remaps only swap the pictures on Harbor's built-in badges. Anything shared as a badges.json link on the Nuvio Discord or Reddit imports here too.")}
+      subtitle={t("Rulesets bring a full badge set with their own matching. Art remaps only swap the pictures on Harbor's built-in badges. Anything shared as a badges.json link imports here too.")}
     >
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <div ref={packsRef} className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {COMMUNITY_PACKS.map((p) => (
           <PackCard
             key={p.id}
@@ -113,21 +128,18 @@ function PacksSection() {
           />
         ))}
       </div>
+
       <SettingRow
         wide
         label={t("Make your own")}
-        desc={t("Build a pack in any of these, export the JSON, host it as a gist, and paste the raw link below.")}
+        desc={t("Build a pack in one of these tools, export the JSON, host it as a gist, then paste the raw link below.")}
       >
-        <div className="flex w-full flex-wrap gap-x-5 gap-y-1.5">
+        <div className="flex w-full flex-wrap items-center gap-2.5">
           {BADGE_STUDIOS.map((s) => (
-            <button
-              key={s.url}
-              onClick={() => openUrl(s.url)}
-              title={s.blurb}
-              className="text-[13px] font-medium text-accent transition-opacity hover:opacity-80"
-            >
-              {s.name} ↗
-            </button>
+            <SButton key={s.url} onClick={() => openUrl(s.url)} title={s.blurb}>
+              {s.name}
+              <ExternalLink size={16} className="text-ink-subtle" />
+            </SButton>
           ))}
         </div>
       </SettingRow>
@@ -135,67 +147,66 @@ function PacksSection() {
       <SettingRow
         wide
         icon={<Link2 size={18} strokeWidth={2} />}
-        label={t("Import any pack")}
-        desc={t("Any badges.json link works: a raw gist, Pastebin, or repo file. Broken JSON gets auto-repaired.")}
+        label={t("Import from a link")}
+        desc={t("Any badges.json address works: a raw gist, Pastebin, or a file in a repo. Broken JSON gets repaired automatically.")}
       >
-        <div className="flex w-full flex-col gap-2.5">
-          <div className="flex items-stretch gap-1.5">
-            <input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && url.trim()) void installFromUrl(url.trim(), "url");
-              }}
-              placeholder="https://gist.githubusercontent.com/…/badges.json"
-              spellCheck={false}
-              className="h-12 min-w-0 flex-1 rounded-md bg-canvas px-4 font-mono text-[12.5px] text-ink outline-none placeholder:font-sans placeholder:text-ink-subtle"
-            />
-            <button
-              onClick={() => url.trim() && void installFromUrl(url.trim(), "url")}
-              disabled={!url.trim() || busy === "url"}
-              className="harbor-press-pop inline-flex h-12 shrink-0 items-center gap-2 rounded-md bg-ink px-6 text-[13.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
-            >
-              <Download size={16} />
-              {busy === "url" ? t("Fetching…") : t("Import")}
-            </button>
-          </div>
-          <div className="flex flex-wrap items-center gap-1">
-            <button
-              onClick={() => fileRef.current?.click()}
-              className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-[12.5px] font-medium text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
-            >
-              <Upload size={14} />
-              {t("Import a file instead")}
-            </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".json,application/json"
-              className="hidden"
-              onChange={(e) => onFile(e.target.files?.[0])}
-            />
-            <button
-              onClick={() => {
-                void navigator.clipboard?.writeText(exportBadgesJson());
-                emitListToast(t("Setup copied to clipboard as JSON"));
-              }}
-              className="h-9 rounded-md px-3 text-[12.5px] font-medium text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
-            >
-              {t("Export my setup")}
-            </button>
-            <ConfirmButton
-              label={t("Reset everything")}
-              confirmLabel={t("Tap again to reset everything")}
-              onConfirm={() => {
-                resetAllBadges();
-                emitListToast(t("All badges back to default"));
-              }}
-            />
-          </div>
+        <div className="flex w-full max-w-[680px] flex-wrap items-center gap-2.5">
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && url.trim()) void installFromUrl(url.trim(), "url");
+            }}
+            placeholder="https://gist.githubusercontent.com/…/badges.json"
+            spellCheck={false}
+            className={`${FIELD} min-w-[260px] flex-1 font-mono`}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              if (url.trim() && busy !== "url") void installFromUrl(url.trim(), "url");
+            }}
+            disabled={!url.trim()}
+            aria-busy={busy === "url"}
+            className={ROW_ACTION_PRIMARY}
+          >
+            <Download size={18} />
+            {busy === "url" ? t("Fetching…") : t("Import")}
+          </button>
         </div>
       </SettingRow>
+
+      <SettingRow
+        label={t("Import from a file")}
+        desc={t("Pick a badges.json that is already saved on this computer.")}
+      >
+        <SButton onClick={() => fileRef.current?.click()}>
+          <Upload size={18} />
+          {t("Choose a file")}
+        </SButton>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".json,application/json"
+          className="hidden"
+          onChange={(e) => onFile(e.target.files?.[0])}
+        />
+      </SettingRow>
+
+      <SettingRow
+        label={t("Export my setup")}
+        desc={t("Copies your badge art and rules to the clipboard as JSON, ready to paste into a gist and share.")}
+      >
+        <SButton
+          onClick={() => {
+            void navigator.clipboard?.writeText(exportBadgesJson());
+            emitListToast(t("Setup copied to clipboard as JSON"));
+          }}
+        >
+          {t("Copy JSON")}
+        </SButton>
+      </SettingRow>
     </Section>
-    </div>
   );
 }
 
@@ -206,28 +217,31 @@ function CommunityInstalledSection() {
   return (
     <Section
       title={t("Downloaded from community")}
-      subtitle={t("Badge art packs you installed from the community store. Remove one to put its badges back to default.")}
+      subtitle={t("Badge art packs you installed from the community store. Remove one to put its badges back to Harbor's default.")}
     >
       {packs.map((p) => (
-        <div key={p.id} className="flex items-center gap-3 rounded-md bg-elevated px-4 py-3">
-          <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink" title={p.name}>
-            {p.name}
-            {p.author ? <span className="text-ink-subtle"> {t("by {name}", { name: p.author })}</span> : null}
-          </span>
-          <span className="shrink-0 text-[12.5px] tabular-nums text-ink-subtle">
-            {t("{n} badges", { n: p.kinds.length })}
-          </span>
-          <button
-            onClick={() => {
-              removeStreamBadgePack(p.id);
-              emitListToast(t("Pack removed, badges back to default"));
-            }}
-            aria-label={t("Remove pack")}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-danger/25 hover:text-danger"
+        <SettingRow
+          key={p.id}
+          label={p.name}
+          desc={
+            p.author
+              ? t("{n} badges, by {name}", { n: p.kinds.length, name: p.author })
+              : t("{n} badges", { n: p.kinds.length })
+          }
+        >
+          <SButton
+            variant="danger"
+            onClick={() =>
+              handoffFocus(() => {
+                removeStreamBadgePack(p.id);
+                emitListToast(t("Pack removed, badges back to default"));
+              })
+            }
           >
-            <Trash2 size={14} />
-          </button>
-        </div>
+            <Trash2 size={18} />
+            {t("Remove")}
+          </SButton>
+        </SettingRow>
       ))}
     </Section>
   );
@@ -236,29 +250,65 @@ function CommunityInstalledSection() {
 export function PacksTab() {
   const t = useT();
   const [browseOpen, setBrowseOpen] = useState(false);
+  const [armed, setArmed] = useState(false);
   const { setActive } = useSettingsActiveContext();
   const onMarketplace = () => {
     setActive("theme");
     requestThemeLibrary({ tab: "community", storeTab: "badges" });
   };
 
+  usePageActions(
+    [
+      {
+        id: "badges-reset-all",
+        tone: "danger",
+        label: armed ? "Tap again to reset" : "Reset everything to default",
+        onSelect: () => {
+          if (!armed) {
+            setArmed(true);
+            window.setTimeout(() => setArmed(false), 3000);
+            return;
+          }
+          setArmed(false);
+          resetAllBadges();
+          emitListToast(t("All badges back to default"));
+        },
+      },
+    ],
+    armed
+      ? "Every badge goes back to Harbor's art and every custom rule is removed. There is no undo."
+      : undefined,
+  );
+
   return (
     <>
-      <MarketCta
-        variant="browse"
-        label={t("View community badge packs")}
-        sublabel={t("User-made badge packs from the community store")}
-        preview={BADGE_DOORWAY_PREVIEW}
-        onClick={onMarketplace}
-      />
-
-      <button
-        type="button"
-        onClick={() => setBrowseOpen((v) => !v)}
-        className="-mt-3 self-start text-[13px] font-semibold text-accent transition-opacity hover:opacity-80"
+      <Section
+        title={t("Where badges come from")}
+        subtitle={t("A pack swaps Harbor's built-in badge art, or adds whole new badges of its own.")}
       >
-        {browseOpen ? t("Hide curated packs") : t("Or browse curated packs and import a link")}
-      </button>
+        <SRow
+          title={t("Browse community badge packs")}
+          description={t("User-made packs from the community store, refreshed every week.")}
+          leading={<Store size={20} strokeWidth={2} />}
+          trailing={
+            <ChevronRight size={18} className="shrink-0 text-ink-subtle rtl:-scale-x-100" />
+          }
+          onClick={onMarketplace}
+        />
+        <SRow
+          title={t("Curated packs and link import")}
+          description={t("A short hand-picked list, plus a box for pasting any badges.json link you were sent.")}
+          leading={<Package size={20} strokeWidth={2} />}
+          trailing={
+            browseOpen ? (
+              <ChevronUp size={18} className="shrink-0 text-ink-subtle" />
+            ) : (
+              <ChevronDown size={18} className="shrink-0 text-ink-subtle" />
+            )
+          }
+          onClick={() => setBrowseOpen((v) => !v)}
+        />
+      </Section>
 
       <CommunityInstalledSection />
 

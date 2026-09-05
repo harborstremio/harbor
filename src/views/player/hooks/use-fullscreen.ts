@@ -4,6 +4,8 @@ import {
   enterWindowFullscreen,
   exitWindowFullscreenOnPlayerClose,
   getWindowFullscreen,
+  isBorderlessFullscreen,
+  reassertFullscreenMode,
   setWindowFullscreen,
   subscribeFullscreen,
   toggleWindowFullscreen,
@@ -29,6 +31,7 @@ export function useFullscreen() {
 
   useEffect(() => {
     const onChange = () => {
+      if (isBorderlessFullscreen()) return;
       if (!document.fullscreenElement) setWindowFullscreen(false);
     };
     document.addEventListener("fullscreenchange", onChange);
@@ -54,15 +57,7 @@ export function useFullscreen() {
         /* not tauri */
       }
     };
-    const reassertOs = async () => {
-      try {
-        const { invoke } = await import("@tauri-apps/api/core");
-        await invoke("window_fullscreen_enter").catch(() => {});
-      } catch {
-        /* not tauri */
-      }
-    };
-    void reassertOs();
+    void reassertFullscreenMode();
     void mpvKick();
     const onResize = () => {
       if (kickDebounce != null) window.clearTimeout(kickDebounce);

@@ -183,6 +183,8 @@ const catalog01: Record<string, string> = {
   "A compact upright slider that boosts past 100 percent.":
     "Kompaktowy pionowy suwak umożliwiający zwiększenie powyżej 100 procent.",
   "A country releases something": "Pojawia się tytuł z określonego kraju",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "Kilka minut zapasu danych. Pozwala przetrwać krótkie zacięcie bez długiego oczekiwania na rozpoczęcie odtwarzania.",
   "A dead source is dropped and the next one starts.":
     "Niedziałające źródło zostaje pominięte i uruchamia się następne.",
   "A debrid service is connected. You'll get instant, high-quality streams.":
@@ -364,6 +366,7 @@ const catalog01: Record<string, string> = {
   "Ad, analytics, and tracking requests pass through untouched.":
     "Żądania reklamowe, analityczne i śledzące są przepuszczane bez zmian.",
   Adaptations: "Adaptacje",
+  Adaptive: "Adaptacyjnie",
   "Adaptive Sharpen": "Adaptacyjne wyostrzanie",
   Add: "Dodaj",
   "Add a Discord or Telegram URL above before creating rules.":

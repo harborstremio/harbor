@@ -38,8 +38,7 @@ export function passwordStrength(pw: string): PasswordStrength {
 }
 
 export function strengthColor(score: number): string {
-  if (score >= 4) return "#34d399";
-  if (score === 3) return "var(--color-accent)";
-  if (score === 2) return "#f0b23c";
+  if (score >= 4) return "var(--color-success)";
+  if (score >= 2) return "var(--color-accent)";
   return "var(--color-danger)";
 }

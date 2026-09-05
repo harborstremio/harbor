@@ -714,6 +714,8 @@ const catalog05: Record<string, string> = {
   "HTTP {status}: {body}": "HTTP {status}: {body}",
   "HW decode": "Dekodowanie sprzętowe",
   "Hairline cards": "Karty z cienkim obrysem",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "Pół godziny zapasu danych. Warto tylko przy wyjątkowo zawodnym połączeniu.",
   "Half-hours, anthologies, and a few epics for the morning routine.":
     "Półgodzinne odcinki, antologie i kilka epickich historii na poranny rozruch.",
   "Hand-tuned colors. Edit them in the section above.":

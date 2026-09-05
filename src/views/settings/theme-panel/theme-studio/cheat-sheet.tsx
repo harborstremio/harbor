@@ -3,6 +3,7 @@ import { useModalExit } from "@/components/modal-shell";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { CodeBlock, CopyName, HoverTip } from "./cheat-sheet-parts";
 import {
   COLOR_TOKENS,
@@ -59,10 +60,13 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
+      if (!isBackKey(e)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      close();
     };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [close]);
 
   useEffect(() => {
@@ -110,7 +114,7 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
             <BookOpen size={16} strokeWidth={2.2} className="shrink-0 text-ink-subtle" />
             {t("Cheat sheet")}
           </h2>
-          <span className="hidden text-[12.5px] leading-snug text-ink-subtle md:block">
+          <span className="hidden max-w-[70ch] text-[15.5px] leading-[22px] text-ink-subtle md:block">
             {t("Every variable, selector, hook, and recipe for building custom Harbor themes.")}
           </span>
         </div>
@@ -119,15 +123,15 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
           onClick={close}
           aria-label={t("Done")}
           title={t("Done")}
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
         >
-          <X size={16} />
+          <X size={18} />
         </button>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
         <aside className="hidden w-60 shrink-0 px-3 pb-6 pt-2 lg:block">
-          <span className="block px-3 pb-2 text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+          <span className="block px-3 pb-2 text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">
             {t("Contents")}
           </span>
           <nav className="flex flex-col gap-0.5">
@@ -136,7 +140,7 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                 key={s.id}
                 type="button"
                 onClick={() => jump(s.id)}
-                className={`relative rounded-md px-3 py-2.5 text-start text-[13.5px] font-medium transition-colors ${
+                className={`relative flex min-h-11 items-center rounded-md px-3 py-2 text-start text-[15.5px] font-medium leading-[22px] transition-colors ${
                   active === s.id
                     ? "bg-elevated text-ink"
                     : "text-ink-muted hover:bg-elevated hover:text-ink"
@@ -185,7 +189,7 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                 {WINDOW_HARBOR.map((a) => (
                   <div key={a.call} className="rounded-md bg-canvas px-3.5 py-2.5">
                     <CopyName text={a.call} />
-                    <p className="mt-1 text-[12.5px] leading-snug text-ink-muted">{t(a.desc)}</p>
+                    <p className="mt-1 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t(a.desc)}</p>
                   </div>
                 ))}
               </div>
@@ -203,19 +207,19 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                   <div key={d.attr} className="rounded-md bg-canvas p-4">
                     <div className="flex flex-wrap items-baseline gap-2">
                       <CopyName text={d.attr} />
-                      <span className="text-[11.5px] text-ink-subtle">·</span>
+                      <span className="text-[15.5px] leading-[22px] text-ink-subtle">·</span>
                       <span className="flex flex-wrap gap-1">
                         {d.values.map((v) => (
                           <code
                             key={v}
-                            className="rounded-md bg-elevated px-1.5 py-0.5 font-mono text-[11.5px] text-ink-muted"
+                            className="rounded-md bg-elevated px-1.5 py-0.5 font-mono text-[15.5px] leading-[22px] text-ink-muted"
                           >
                             {v}
                           </code>
                         ))}
                       </span>
                     </div>
-                    <p className="mt-1.5 text-[12.5px] leading-snug text-ink-muted">{t(d.desc)}</p>
+                    <p className="mt-1.5 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t(d.desc)}</p>
                     <CodeBlock code={d.example} compact />
                   </div>
                 ))}
@@ -233,12 +237,12 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                 {TAILWIND_UTILITIES.map((u) => (
                   <div
                     key={u.class}
-                    className="flex items-center justify-between gap-3 rounded-md bg-canvas px-3 py-1.5"
+                    className="flex min-h-11 items-center justify-between gap-3 rounded-md bg-canvas px-3 py-2"
                   >
-                    <code className="font-mono text-[11.5px] font-semibold text-ink">
+                    <code className="font-mono text-[15.5px] font-semibold leading-[22px] text-ink">
                       .{u.class}
                     </code>
-                    <code className="truncate text-end font-mono text-[11.5px] text-ink-subtle">
+                    <code className="truncate text-end font-mono text-[15.5px] leading-[22px] text-ink-subtle">
                       {u.mapsTo}
                     </code>
                   </div>
@@ -258,10 +262,10 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                   <div key={s.selector} className="rounded-md bg-canvas px-3.5 py-2.5">
                     <div className="flex flex-wrap items-baseline gap-3">
                       <CopyName text={s.selector} />
-                      <span className="text-[11.5px] text-ink-muted">{t(s.where)}</span>
+                      <span className="text-[15.5px] leading-[22px] text-ink-muted">{t(s.where)}</span>
                     </div>
                     {s.tip && (
-                      <p className="mt-1 text-[11.5px] italic text-ink-subtle">{t(s.tip)}</p>
+                      <p className="mt-1 max-w-[66ch] text-[15.5px] italic leading-[22px] text-ink-subtle">{t(s.tip)}</p>
                     )}
                   </div>
                 ))}
@@ -279,12 +283,12 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                     key={l.name}
                     className="flex items-center gap-3 rounded-md bg-canvas px-3.5 py-2"
                   >
-                    <code className="w-12 shrink-0 text-center font-mono text-[12.5px] font-bold text-accent">
+                    <code className="w-14 shrink-0 text-center font-mono text-[15.5px] font-bold leading-[22px] text-accent">
                       {l.z}
                     </code>
                     <div className="flex min-w-0 flex-col">
-                      <span className="text-[12.5px] font-semibold text-ink">{t(l.name)}</span>
-                      <span className="text-[11.5px] text-ink-subtle">{t(l.what)}</span>
+                      <span className="text-[15.5px] font-semibold leading-[22px] text-ink">{t(l.name)}</span>
+                      <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t(l.what)}</span>
                     </div>
                   </div>
                 ))}
@@ -304,12 +308,12 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                     <div className="flex flex-wrap items-baseline gap-2">
                       <CopyName text={e.name} />
                       {e.payload && (
-                        <code className="rounded-md bg-elevated px-1.5 py-0.5 font-mono text-[10.5px] text-ink-muted">
+                        <code className="rounded-md bg-elevated px-1.5 py-0.5 font-mono text-[15.5px] leading-[22px] text-ink-muted">
                           {e.payload}
                         </code>
                       )}
                     </div>
-                    <p className="mt-1 text-[11.5px] text-ink-muted">{t(e.when)}</p>
+                    <p className="mt-1 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t(e.when)}</p>
                   </div>
                 ))}
               </div>
@@ -326,10 +330,10 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                     key={v.id}
                     className="flex items-center gap-2 rounded-full bg-canvas py-1 pe-3 ps-1.5"
                   >
-                    <code className="rounded-full bg-elevated px-2 py-0.5 font-mono text-[11.5px] text-ink">
+                    <code className="rounded-full bg-elevated px-2.5 py-0.5 font-mono text-[15.5px] leading-[22px] text-ink">
                       {v.id}
                     </code>
-                    <span className="text-[11.5px] text-ink-muted">{t(v.label)}</span>
+                    <span className="text-[15.5px] leading-[22px] text-ink-muted">{t(v.label)}</span>
                   </span>
                 ))}
               </div>
@@ -344,12 +348,14 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                 {RECIPES.map((r) => (
                   <div key={r.title} className="rounded-md bg-canvas p-4">
                     <div className="mb-1 flex items-center gap-2">
-                      <span className="rounded-md bg-accent-soft px-1.5 py-0.5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-accent">
+                      <span className="rounded-md bg-accent-soft px-2 py-0.5 text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-accent">
                         {r.lang}
                       </span>
-                      <span className="text-[13px] font-semibold text-ink">{t(r.title)}</span>
+                      <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">
+                        {t(r.title)}
+                      </span>
                     </div>
-                    <p className="mb-2 text-[12.5px] text-ink-muted">{t(r.why)}</p>
+                    <p className="mb-2 max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t(r.why)}</p>
                     <CodeBlock
                       code={r.code}
                       filename={`${slug(r.title)}.${RECIPE_EXT[r.lang.toLowerCase()] ?? "txt"}`}
@@ -362,14 +368,14 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      <div className="pointer-events-auto fixed bottom-6 end-6 z-[50] flex flex-col items-center gap-1 rounded-md bg-elevated p-1.5 harbor-float">
+      <div className="pointer-events-auto fixed bottom-6 end-6 z-[50] flex flex-col items-center rounded-md bg-elevated p-1 harbor-float lg:hidden">
         {SECTIONS.map((s) => (
           <HoverTip key={s.id} label={t(s.label)} side="left">
             <button
               type="button"
               onClick={() => jump(s.id)}
               aria-label={t(s.label)}
-              className="flex h-5 w-5 items-center justify-center"
+              className="flex h-11 w-11 items-center justify-center rounded-md"
             >
               <span
                 className="block h-2 w-2 rounded-full transition"
@@ -402,7 +408,7 @@ function Section({
     <section id={`cs-${id}`} className="flex flex-col gap-4 scroll-mt-4">
       <div className="flex flex-col gap-0.5">
         <h3 className="text-[19px] font-semibold tracking-tight text-ink">{title}</h3>
-        {sub && <span className="text-[13px] leading-snug text-ink-muted">{sub}</span>}
+        {sub && <span className="max-w-[70ch] text-[15.5px] leading-[22px] text-ink-muted">{sub}</span>}
       </div>
       {children}
     </section>
@@ -428,11 +434,11 @@ function TokenTable({ rows, swatch }: { rows: TokenRow[]; swatch?: boolean }) {
           )}
           <div className="flex min-w-0 flex-col">
             <CopyName text={r.name} />
-            <code className="truncate font-mono text-[12.5px] text-ink-subtle">
+            <code className="truncate font-mono text-[15.5px] leading-[22px] text-ink-subtle">
               {r.defaultValue}
             </code>
           </div>
-          <span className="text-[13px] leading-snug text-ink-muted">{t(r.desc)}</span>
+          <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t(r.desc)}</span>
         </div>
       ))}
     </div>

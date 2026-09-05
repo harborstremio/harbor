@@ -121,7 +121,7 @@ export function SubPreview({ doc }: { doc: TvDoc }) {
                 backgroundColor: edge === "Box" ? rgba(boxInk, boxOpacity) : "transparent",
                 padding: edge === "Box" ? `${fontPx * 0.12}px ${fontPx * 0.4}px` : undefined,
                 borderRadius: edge === "Box" ? `${fontPx * 0.14}px` : undefined,
-                textAlign: align === "Left" ? "left" : align === "Right" ? "right" : "center",
+                textAlign: align === "Left" ? "start" : align === "Right" ? "end" : "center",
               }}
             >
               {line}

@@ -30,6 +30,8 @@ const settings: Record<string, string> = {
   "A Cloudflare Worker on your own account that hosts your Watch Together rooms.":
     "Un Worker Cloudflare sur votre propre compte, qui héberge vos salons de visionnage à plusieurs.",
   "A country releases something": "Un pays sort quelque chose",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "Quelques minutes d’avance. Absorbe une brève coupure sans trop retarder le début de la lecture.",
   "A free Cloudflare account.": "Un compte Cloudflare gratuit.",
   "A free TMDB key is highly recommended. It unlocks the full Harbor experience. The rest are optional, and Cinemeta works out of the box without any.":
     "Une clé TMDB gratuite est vivement recommandée. Elle donne accès à l’expérience Harbor complète. Les autres sont facultatives, et Cinemeta fonctionne immédiatement sans aucune clé.",
@@ -70,6 +72,7 @@ const settings: Record<string, string> = {
   "Active torrents": "Torrents actifs",
   "Ad, analytics, and tracking requests pass through untouched.":
     "Les requêtes publicitaires, d’analyse et de suivi transitent sans modification.",
+  Adaptive: "Adaptatif",
   "Adaptive Sharpen": "Accentuation adaptative",
   "Add a Discord or Telegram URL above before creating rules.":
     "Ajoutez ci-dessus une URL Discord ou Telegram avant de créer des règles.",
@@ -243,6 +246,7 @@ const settings: Record<string, string> = {
     "Rétablit les petites astuces dans l’application que vous avez ignorées, sans relancer le parcours de bienvenue.",
   "Browse pull requests": "Parcourir les pull requests",
   "Budget exhausted, resets at midnight UTC.": "Budget épuisé, réinitialisation à minuit UTC.",
+  "Buffer size": "Taille de la mémoire tampon",
   "Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.":
     "Les personnes signalant un bug sont mentionnées dans les notes de version lorsque leur signalement aboutit à un correctif publié. Laissez ce champ vide pour rester anonyme.",
   "Bug reports": "Signalements de bugs",
@@ -696,6 +700,8 @@ const settings: Record<string, string> = {
   "Group Refresh on the left beside Back instead of the far right of the header.":
     "Placer Actualiser à gauche, à côté de Retour, plutôt que tout à droite de l’en-tête.",
   "Hairline cards": "Cartes à contour fin",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "Une demi-heure d’avance. N’en vaut la peine qu’avec une connexion vraiment peu fiable.",
   "Hand-tuned colors. Edit them in the section above.":
     "Couleurs réglées avec soin. Modifiez-les dans la section ci-dessus.",
   "Harbor catches stremio:// install links so the configure-and-install flow stays inside the app.":
@@ -727,6 +733,8 @@ const settings: Record<string, string> = {
     "Harbor n’envoie aucune donnée de télémétrie. Cette option bloque aussi les requêtes sortantes de publicité, d’analyse et de suivi que les extensions ou fournisseurs de métadonnées tentent d’effectuer, avant qu’elles ne quittent votre machine.",
   "Harbor shows your AniList lists on the Anime page and keeps your progress in sync.":
     "Harbor affiche vos listes AniList sur la page Anime et synchronise votre progression.",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "Harbor adapte l’avance à chaque titre, puis l’augmente une fois la lecture stabilisée. Convient à presque tout le monde.",
   "Harbor still finds and loads subtitles so they're one click away in the player, it just won't turn them on automatically.":
     "Harbor continue de rechercher et de charger les sous-titres pour qu’ils restent accessibles en un clic dans le lecteur, mais ne les active simplement plus automatiquement.",
   "Harbor test message (Discord). If you can read this, your webhook is wired up.":
@@ -799,6 +807,8 @@ const settings: Record<string, string> = {
     "Appuyer sur Lecture démarre directement la lecture avec le meilleur flux trouvé par Harbor.",
   "Hitting Play opens the source list so you can choose quality, debrid, and audio yourself.":
     "Appuyer sur Lecture ouvre la liste des sources afin que vous puissiez choisir vous-même la qualité, le débrideur et la piste audio.",
+  "Holds up to {size} in memory while a video plays.":
+    "Conserve jusqu’à {size} en mémoire pendant la lecture d’une vidéo.",
   "Home hero": "Bannière principale de l’accueil",
   "Home hero audio": "Audio de la bannière principale de l’accueil",
   "Home hero featured source": "Source mise en avant dans la bannière principale de l’accueil",
@@ -859,6 +869,7 @@ const settings: Record<string, string> = {
     "Si la vidéo s’interrompt souvent pour charger la mémoire tampon, ou si votre Wi-Fi est instable ou votre serveur éloigné, cette option donne davantage d’avance à Harbor pour assurer une lecture fluide malgré les perturbations.",
   "If you exceed free tier, the Workers Paid plan is $5 per month and bumps the request allowance to 10 million per day.":
     "Si vous dépassez l’offre gratuite, l’abonnement Workers Paid coûte 5 $ par mois et porte le quota à 10 millions de requêtes par jour.",
+  "Ignored titles": "Titres ignorés",
   "Image bar active. Pick a style above to switch back, or clear the image below.":
     "Barre d’image active. Choisissez un style ci-dessus pour revenir au style précédent, ou supprimez l’image ci-dessous.",
   "Image size": "Taille de l’image",
@@ -1028,6 +1039,8 @@ const settings: Record<string, string> = {
   "MDBList · Letterboxd and Trakt scores": "MDBList · Notes Letterboxd et Trakt",
   "Media type": "Type de média",
   "Media types": "Types de médias",
+  Medium: "Moyen",
+  "Memory cap": "Limite de mémoire",
   "Metadata language": "Langue des métadonnées",
   "Metadata providers": "Fournisseurs de métadonnées",
   "Min seeders": "Nombre minimal de seeders",
@@ -1180,6 +1193,8 @@ const settings: Record<string, string> = {
   "Optional keys that unlock TMDB rails, baked-in poster ratings, fanart, and TVDB episode data.":
     "Clés facultatives donnant accès aux rangées TMDB, aux notes intégrées aux affiches, aux fanarts et aux données d’épisodes TVDB.",
   "Optional overlays that appear over the video.": "Éléments facultatifs superposés à la vidéo.",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "Facultatif. TheIntroDB répond sans clé, mais une clé augmente votre limite de débit afin que le minutage continue d’arriver quand vous enchaînez les épisodes. Obtenez-en une sur",
   "Or just zip up images": "Ou créez simplement un fichier ZIP avec des images",
   "Or try one of ours": "Ou essayez l’un des nôtres",
   "or use one of our avatars": "ou utiliser l’un de nos avatars",
@@ -1200,6 +1215,7 @@ const settings: Record<string, string> = {
     "Collez l’URL dans le champ ci-dessus et envoyez un test.",
   "Paste the URL with": "Collez l’URL avec",
   "Paste your API token first.": "Collez d’abord votre jeton d’API.",
+  "Paste your TheIntroDB API key": "Collez votre clé API TheIntroDB",
   "Pause when minimized": "Mettre en pause lorsque l’application est réduite",
   "Pause when unfocused": "Mettre en pause lorsque l’application n’est pas active",
   "PDF (print)": "PDF (impression)",
@@ -1296,9 +1312,12 @@ const settings: Record<string, string> = {
   "Re-apply to the window and taskbar now":
     "Réappliquer maintenant à la fenêtre et à la barre des tâches",
   "Re-authenticate": "Se réauthentifier",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "Rouvrir le flux en cours de lecture et le reprendre là où vous vous étiez arrêté.",
   "Re-run deploy or paste the correct URL": "Relancez le déploiement ou collez l’URL correcte",
   "Re-runs the welcome flow and clears every dismissed tip.":
     "Relance le parcours de bienvenue et réaffiche toutes les astuces masquées.",
+  "Reads ahead": "Lecture anticipée",
   "Ready to send": "Prêt à envoyer",
   "Real-Debrid API token": "Jeton d’API Real-Debrid",
   "Real-Debrid, TorBox, AllDebrid, Premiumize, Debrid-Link. Cached streams play direct. Keys stay local.":
@@ -1309,6 +1328,7 @@ const settings: Record<string, string> = {
     "Recevez en avant-première des versions intégrant les tout derniers correctifs, avant leur arrivée dans la version stable. Les versions bêta peuvent comporter des défauts, désactivez cette option pour revenir à la version stable lors de la prochaine mise à jour.",
   "Recommended for You": "Recommandé pour vous",
   "Record GIF": "Enregistrer un GIF",
+  Recovery: "Récupération",
   "Redeploy instructions": "Instructions de redéploiement",
   "Redeploy relay": "Redéployer le relais",
   "Redeploy to pick up the latest Watch Together fixes. The in-app banner clears once the new version is live.":
@@ -1333,6 +1353,7 @@ const settings: Record<string, string> = {
   "Relay version status": "État de la version du relais",
   "Relay version {version}. Update available.":
     "Version {version} du relais. Mise à jour disponible.",
+  "Reload source": "Recharger la source",
   "Remaining only": "Restants uniquement",
   "Remember last stream": "Mémoriser le dernier flux",
   "Remote server": "Serveur distant",
@@ -1374,6 +1395,9 @@ const settings: Record<string, string> = {
     "Redimensionnez les titres des sections de l’accueil et le titre affiché dans le lecteur sans modifier l’échelle du reste de l’interface. Vous pouvez aussi afficher le nom de la série avant celui de l’épisode dans le lecteur.",
   "Resolution filter": "Filtre de résolution",
   "Restart engine": "Redémarrer le moteur",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "Redémarrer le serveur de streaming intégré à Harbor, puis recharger le flux dès qu’il est de nouveau disponible. Ordinateur uniquement.",
+  "Restart streaming server": "Redémarrer le serveur de streaming",
   "Restore and reload": "Restaurer et recharger",
   "Restore dismissed hints": "Rétablir les conseils masqués",
   "Restore from a backup": "Restaurer depuis une sauvegarde",
@@ -1591,6 +1615,7 @@ const settings: Record<string, string> = {
     "L’emplacement commence à être chargé ({n}/{limit}). Il risque de déborder sur les écrans étroits.",
   "Slow or unstable connection": "Connexion lente ou instable",
   "Slow playback by 0.25x.": "Ralentir la lecture de 0,25x.",
+  Small: "Petit",
   "Smooth motion": "Fluidité des mouvements",
   "Smooth on weak PCs": "Fluide sur les PC peu puissants",
   "Smooth scrolling": "Défilement fluide",
@@ -1721,6 +1746,8 @@ const settings: Record<string, string> = {
   "Telegram bot": "Bot Telegram",
   "Telegram sends through a bot you create. You need two things: a":
     "Telegram effectue les envois via un bot que vous créez. Il vous faut deux éléments : un",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "Dix minutes d’avance. Conçu pour un Wi-Fi instable ou un serveur éloigné, au prix d’une attente plus longue avant le début de la lecture.",
   Test: "Tester",
   "Test badge rules (Try it)": "Tester les règles des badges (Essayer)",
   "Test connection": "Tester la connexion",
@@ -1760,6 +1787,8 @@ const settings: Record<string, string> = {
   "The picker tags each stream with resolution, HDR flavor, codec, and audio format. Off hides them all.":
     "Le sélecteur indique pour chaque flux la résolution, le type de HDR, le codec et le format audio. Désactivé les masque tous.",
   "The quick brown fox jumps over the lazy dog": "Portez ce vieux whisky au juge blond qui fume",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "Le démarrage le plus rapide et la plus faible consommation de mémoire. Idéal avec une connexion rapide et stable, ou sur une machine qui manque de mémoire.",
   "The ratings row on a title's detail page, next to runtime and genre.":
     "La ligne des notes sur la page de détails d’un titre, à côté de la durée et du genre.",
   "The resolution Harbor downloads for each image when you export a title's metadata next to the file on disk.":
@@ -1775,6 +1804,8 @@ const settings: Record<string, string> = {
   "The window and taskbar icon updates right away. The installed shortcut refreshes on the next update.":
     "L’icône de la fenêtre et de la barre des tâches est mise à jour immédiatement. Le raccourci installé sera actualisé lors de la prochaine mise à jour.",
   "The yellow chip in the poster corner.": "La pastille jaune dans le coin de l’affiche.",
+  "TheIntroDB · intro and credits timing":
+    "TheIntroDB · minutage des génériques de début et de fin",
   "Theme & appearance": "Thème et apparence",
   "Theme cheat sheet": "Aide-mémoire des thèmes",
   "Theme Library": "Bibliothèque de thèmes",
@@ -1796,7 +1827,10 @@ const settings: Record<string, string> = {
   "Tiles horizontally; the bar's height crops it vertically. Animated GIFs up to 2 MB play.":
     "Se répète horizontalement ; la hauteur de la barre la recadre verticalement. Les GIF animés jusqu’à 2 Mo sont lus.",
   "Time format": "Format de l’heure",
+  "Timing sources": "Sources de minutage",
   "Title text": "Texte du titre",
+  "Titles you ignore on the advisory card never show it again.":
+    "Les titres que vous ignorez depuis la carte d’avertissement ne l’affichent plus jamais.",
   "Titles, overviews, and taglines from TMDB display in this language when a translation exists. Needs a TMDB key.":
     "Les titres, résumés et slogans de TMDB s’affichent dans cette langue lorsqu’une traduction existe. Nécessite une clé TMDB.",
   "TMDB asks for an app URL when you create the key. Put any URL at all, like https://harbor.app. The only thing you need back is the API key.":
@@ -1924,6 +1958,7 @@ const settings: Record<string, string> = {
   "Vocal clarity": "Clarté des voix",
   VOLUME: "VOLUME",
   "Volume control": "Réglage du volume",
+  "Wait before playing": "Attente avant lecture",
   "Wait for the upload to finish. The relay URL gets written to":
     "Attendez la fin de l’envoi. L’URL du relais est enregistrée dans",
   "Wait for the upload to finish. The relay URL gets written to {code} in Harbor settings.":
@@ -2055,6 +2090,8 @@ const settings: Record<string, string> = {
     "{code} : renvoie du JSON avec la version du worker. Utilisé par le bouton de test.",
   "{count} frames stored. Wiping rebuilds them next time you watch.":
     "{count} images enregistrées. Si vous les effacez, elles seront recréées lors du prochain visionnage.",
+  "{count} titles will never show the content advisory again.":
+    "{count} titres n’afficheront plus jamais l’avertissement sur le contenu.",
   "{name} imported to your library": "{name} importé dans votre bibliothèque",
   "{name} will be removed from Harbor. Anything you've set to use it will fall back to Inter.":
     "{name} sera supprimé de Harbor. Tout ce qui était configuré pour l’utiliser repassera à Inter.",

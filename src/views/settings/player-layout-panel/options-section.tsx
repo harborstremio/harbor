@@ -39,9 +39,9 @@ export function OptionsSection({ config, theme, onTimeFormat, onVolumeStyle }: P
     <>
       <SettingRow
         wide
-        icon={<Clock3 size={16} strokeWidth={1.9} />}
+        icon={<Clock3 size={18} strokeWidth={1.9} />}
         label={t("Time format")}
-        desc={t("What the clock labels show on the seek bar.")}
+        desc={timeSub}
         tip={t("The two clock labels are ordinary controls. Move or hide either of them in the layout editor.")}
       >
         <div className="flex w-full flex-col gap-3">
@@ -51,12 +51,12 @@ export function OptionsSection({ config, theme, onTimeFormat, onVolumeStyle }: P
             options={TIME_OPTIONS.map((o) => ({ value: o.id, label: o.label }))}
             onChange={onTimeFormat}
           />
-          <span className="w-full text-[12.5px] leading-relaxed text-ink-subtle">{timeSub}</span>
         </div>
       </SettingRow>
 
       <SettingRow
-        icon={<Volume2 size={16} strokeWidth={1.9} />}
+        wide
+        icon={<Volume2 size={18} strokeWidth={1.9} />}
         label={t("Volume control")}
         desc={volumeSub}
         tip={t("How the volume widget behaves on click and hover.")}
@@ -83,7 +83,7 @@ function TimeFormatPreview({ theme, value }: { theme: ThemeId; value: TimeFormat
         : `${ELAPSED} / ${value === "remaining" ? REMAINING : TOTAL}`;
     return (
       <PreviewShell>
-        <span className="shrink-0 text-[12.5px] font-semibold tabular-nums text-ink">{combined}</span>
+        <span className="shrink-0 text-[15.5px] font-semibold tabular-nums text-ink">{combined}</span>
         <Track />
       </PreviewShell>
     );
@@ -91,10 +91,10 @@ function TimeFormatPreview({ theme, value }: { theme: ThemeId; value: TimeFormat
   const end = value === "remaining" ? REMAINING : value === "start-end" ? TOTAL : null;
   return (
     <PreviewShell>
-      <span className="shrink-0 text-[12.5px] font-semibold tabular-nums text-ink">{ELAPSED}</span>
+      <span className="shrink-0 text-[15.5px] font-semibold tabular-nums text-ink">{ELAPSED}</span>
       <Track />
       {end && (
-        <span className="shrink-0 text-[12.5px] font-semibold tabular-nums text-ink-muted">{end}</span>
+        <span className="shrink-0 text-[15.5px] font-semibold tabular-nums text-ink-muted">{end}</span>
       )}
     </PreviewShell>
   );

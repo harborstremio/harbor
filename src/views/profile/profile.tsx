@@ -40,6 +40,7 @@ import { WatchNowCard } from "./watch-now-card";
 import { ProfileAudioCard } from "./profile-audio-card";
 import { MinecraftCard } from "./minecraft-card";
 import { SimklCard } from "./simkl-card";
+import { LetterboxdCard } from "./letterboxd-card";
 import { ProfileHero } from "./profile-hero";
 import { ProfileSettings } from "./profile-settings";
 import { ScrollToTop } from "./scroll-to-top";
@@ -370,6 +371,19 @@ export function ProfileView({
                 <SimklCard isOwner hideTitle={c.hideCardTitles} published={summary.simkl} />
               ) : !summary.isOwner && summary.simkl ? (
                 <SimklCard isOwner={false} hideTitle={c.hideCardTitles} published={summary.simkl} />
+              ) : null}
+              {summary.isOwner && settings.showLetterboxdCard ? (
+                <LetterboxdCard
+                  isOwner
+                  hideTitle={c.hideCardTitles}
+                  published={summary.letterboxd}
+                />
+              ) : !summary.isOwner && summary.letterboxd ? (
+                <LetterboxdCard
+                  isOwner={false}
+                  hideTitle={c.hideCardTitles}
+                  published={summary.letterboxd}
+                />
               ) : null}
               <FriendsPanel
                 friends={summary.isOwner || summary.friendsPublic ? friends : []}

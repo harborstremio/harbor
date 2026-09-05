@@ -16,6 +16,9 @@ import "@/lib/awards-history-eager";
 import "@/index.css";
 import "flag-icons/css/flag-icons.min.css";
 import { startTaskbarProgress } from "@/lib/download/taskbar-progress";
+import { completeBetaReturnPreferences } from "@/lib/updater/beta-return";
+
+let returnPreferencesReady = true;
 
 function detectRemoteMode(): boolean {
   try {
@@ -138,15 +141,36 @@ function MainRoot() {
       setTimeout(() => boot.remove(), 280);
     }
     if ("__TAURI_INTERNALS__" in window) {
-      void import("@tauri-apps/api/core").then(({ invoke }) =>
-        invoke("harbor_startup_ready").catch(() => {}),
-      );
+      void import("@tauri-apps/api/core").then(async ({ invoke }) => {
+        await invoke("harbor_startup_ready").catch(() => {});
+        if (returnPreferencesReady) {
+          try {
+            await invoke("handoff_confirm");
+            const pending = JSON.parse(localStorage.getItem("harbor.update.pending") ?? "null");
+            if (pending?.recoverable && pending.version === __APP_VERSION__) {
+              localStorage.removeItem("harbor.update.pending");
+            }
+          } catch {
+            /* Keep pending state and recovery files if startup cannot be acknowledged. */
+          }
+        }
+      });
     }
   }, [appReady]);
   return <App onReady={markAppReady} />;
 }
 
 async function mount() {
+  if (
+    "__TAURI_INTERNALS__" in window &&
+    !isHdrOverlay &&
+    !isModal &&
+    !isCaptions &&
+    !isPip &&
+    !isRemote
+  ) {
+    returnPreferencesReady = completeBetaReturnPreferences(__APP_VERSION__);
+  }
   await Promise.all([
     loadSecrets(),
     hydrateCustomThemes().catch(() => {}),

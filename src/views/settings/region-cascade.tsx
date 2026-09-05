@@ -1,7 +1,9 @@
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useEscape, useModalExit } from "@/components/modal-shell";
+import { useModalExit } from "@/components/modal-shell";
+import { captureFocusReturn } from "@/lib/keyboard-navigation";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { normalizeLanguage, setUiLanguage, useT } from "@/lib/i18n";
 import { localeForRegion, localeLabel, type LocaleProfile } from "@/lib/region/locale-map";
 import { useSettings } from "@/lib/settings";
@@ -110,7 +112,16 @@ function LocaleConfirm({
   t: (key: string, vars?: Record<string, string | number>) => string;
 }) {
   const { closing, close } = useModalExit(onDismiss);
-  useEscape(close);
+  useEffect(() => captureFocusReturn(), []);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!isBackKey(e)) return;
+      e.stopPropagation();
+      close();
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [close]);
   return createPortal(
     <div
       className={`${closing ? "animate-scrim-out" : "animate-scrim-in"} fixed inset-0 z-[240] flex items-center justify-center p-6`}
@@ -119,37 +130,39 @@ function LocaleConfirm({
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
         dir={rtl ? "rtl" : undefined}
         className={`${closing ? "animate-dialog-out" : "animate-dialog-in"} flex max-h-[86vh] w-[min(640px,100%)] flex-col overflow-hidden rounded-md bg-surface harbor-float`}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex shrink-0 items-start justify-between gap-4 px-6 pt-5">
-          <h2 className="min-w-0 text-[17px] font-semibold tracking-tight text-ink">
+          <h2 className="min-w-0 text-[19px] font-semibold leading-[26px] tracking-tight text-ink">
             {t("Switch Harbor to {language}?", { language: label })}
           </h2>
           <button
             onClick={close}
             aria-label={t("Close")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
           >
-            <X size={16} strokeWidth={2.2} />
+            <X size={18} strokeWidth={2.2} />
           </button>
         </div>
         <div className="min-h-0 grow overflow-y-auto px-6 pt-1.5 [scrollbar-width:thin]">
-          <p className="text-[12.5px] leading-relaxed text-ink-subtle">
+          <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
             {t("This sets the interface, metadata, subtitle, and audio languages to match.")}
           </p>
         </div>
         <div className="flex shrink-0 items-center justify-end gap-2 px-6 pb-5 pt-5">
           <button
             onClick={close}
-            className="h-9 rounded-md bg-elevated px-4 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
+            className="h-11 rounded-[8px] bg-elevated px-4 text-[15px] font-semibold text-ink-muted transition-colors hover:text-ink"
           >
             {t("Just change region")}
           </button>
           <button
             onClick={onConfirm}
-            className="h-9 rounded-md bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+            className="h-11 rounded-[8px] bg-ink px-4 text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90"
           >
             {t("Apply {language}", { language: label })}
           </button>

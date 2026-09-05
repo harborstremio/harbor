@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Harbor",
-  "version": "0.9.121",
+  "version": "0.9.124",
   "identifier": "app.harbor",
   "build": {
     "beforeDevCommand": "pnpm dev",

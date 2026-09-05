@@ -2273,6 +2273,41 @@ const settings: Record<string, string> = {
     "1フレーム戻して一時停止します。mpvではフレーム単位で正確に操作できます。",
   "Step forward one frame and pause. Frame-accurate on mpv.":
     "1フレーム進めて一時停止します。mpvではフレーム単位で正確に操作できます。",
+  "Recovery": "復旧",
+  "Reload source": "ソースを再読み込み",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "視聴中のストリームを開き直し、中断したところから再生を再開します。",
+  "Restart streaming server": "ストリーミングサーバーを再起動",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "Harbor内蔵のストリーミングサーバーを再起動し、復帰後にストリームを再読み込みします。デスクトップアプリでのみ利用できます。",
+  "Buffer size": "バッファサイズ",
+  "Small": "小",
+  "Medium": "中",
+  "Adaptive": "自動調整",
+  "Reads ahead": "先読み",
+  "Memory cap": "メモリ上限",
+  "Wait before playing": "再生開始までの待機",
+  "Holds up to {size} in memory while a video plays.":
+    "動画の再生中、最大{size}をメモリに保持します。",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "Harborが作品ごとに先読み量を調整し、再生が安定してから増やします。ほとんどの場合はこの設定が最適です。",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "最も早く再生が始まり、メモリ使用量も最小です。高速で安定した接続や、メモリに余裕のないパソコンに向いています。",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "数分ぶんを先読みします。再生開始までほとんど待つことなく、短い通信の乱れを乗り切れます。",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "10分ぶんを先読みします。不安定なWi-Fiや遠方のサーバー向けですが、再生が始まるまでの待ち時間は長くなります。",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "30分ぶんを先読みします。接続が極端に不安定な場合にのみ効果があります。",
+  "Ignored titles": "非表示にした作品",
+  "Titles you ignore on the advisory card never show it again.":
+    "コンテンツに関する注意カードで非表示にした作品には、以降このカードは表示されません。",
+  "{count} titles will never show the content advisory again.":
+    "{count}件の作品では、今後コンテンツに関する注意が表示されません。",
+  "{count} titles will never show the content advisory again.#one":
+    "{count}件の作品では、今後コンテンツに関する注意が表示されません。",
+  "{count} titles will never show the content advisory again.#few":
+    "{count}件の作品では、今後コンテンツに関する注意が表示されません。",
 };
 
 export default settings;

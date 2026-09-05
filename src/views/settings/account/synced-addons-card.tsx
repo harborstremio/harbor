@@ -1,12 +1,18 @@
-import { ArrowRight, Loader2, Puzzle } from "lucide-react";
+import { ArrowRight, Loader2, Puzzle, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { AddonLogo, AddonLogoStack, resolveAddonLogo } from "@/components/addon-logo";
+import { AnchoredMenu } from "@/components/anchored-menu";
 import type { Addon } from "@/lib/addons";
 import { useAuth } from "@/lib/auth";
+import { captureFocusReturn, tvFocus } from "@/lib/keyboard-navigation";
+import { isBackKey, navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { requestAddonsTab } from "@/views/addons";
 import { SettingRow } from "../kit";
+import { SButton } from "../ui";
+
+const CAPTION = "text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink-subtle";
 
 export function SyncedAddonsCard() {
   const t = useT();
@@ -17,7 +23,7 @@ export function SyncedAddonsCard() {
   const { setView } = useView();
 
   const sync = async () => {
-    if (!authKey) return;
+    if (!authKey || busy) return;
     setBusy(true);
     try {
       const mod = await import("@/lib/addons");
@@ -38,7 +44,7 @@ export function SyncedAddonsCard() {
   if (!authKey) {
     return (
       <SettingRow
-        icon={<Puzzle size={16} strokeWidth={2} />}
+        icon={<Puzzle size={18} strokeWidth={2} />}
         label={t("Your collection")}
         desc={t("Sign in to Stremio first. Your installed addons sync from there.")}
       />
@@ -51,7 +57,7 @@ export function SyncedAddonsCard() {
   return (
     <SettingRow
       wide
-      icon={<Puzzle size={16} strokeWidth={2} />}
+      icon={<Puzzle size={18} strokeWidth={2} />}
       label={t("Your collection")}
       desc={
         lastSynced
@@ -62,34 +68,25 @@ export function SyncedAddonsCard() {
       <div className="flex w-full flex-wrap items-center gap-x-5 gap-y-3">
         <div className="flex shrink-0 items-baseline gap-2">
           <span className="font-display text-[28px] font-medium leading-none tracking-tight text-ink">
-            {count != null ? count : "–"}
+            {count != null ? count : "…"}
           </span>
-          <span className="text-[11.5px] uppercase tracking-[0.16em] text-ink-subtle">
-            {count === 1 ? t("addon synced") : t("addons synced")}
-          </span>
+          <span className={CAPTION}>{count === 1 ? t("addon synced") : t("addons synced")}</span>
         </div>
         {addons && addons.length > 0 && <AddonStackPeek addons={addons} max={MAX_VISIBLE} />}
-        <div className="ms-auto flex shrink-0 items-center gap-1.5">
-          <button
-            type="button"
-            onClick={sync}
-            disabled={busy}
-            className="flex h-9 items-center gap-1.5 rounded-md bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] disabled:opacity-60"
-          >
-            {busy ? <Loader2 size={14} className="animate-spin" /> : null}
+        <div aria-busy={busy} className="ms-auto flex shrink-0 flex-wrap items-center gap-2.5">
+          <SButton variant="primary" onClick={sync}>
+            {busy ? <Loader2 size={16} className="animate-spin" /> : null}
             {busy ? t("Syncing…") : t("Sync now")}
-          </button>
-          <button
-            type="button"
+          </SButton>
+          <SButton
             onClick={() => {
               requestAddonsTab("installed");
               setView("addons");
             }}
-            className="flex h-9 items-center gap-1.5 rounded-md bg-canvas px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:text-ink"
           >
             {t("Manage")}
-            <ArrowRight size={12} strokeWidth={2.2} className="dir-icon" />
-          </button>
+            <ArrowRight size={16} strokeWidth={2.2} className="dir-icon" />
+          </SButton>
         </div>
       </div>
     </SettingRow>
@@ -99,37 +96,11 @@ export function SyncedAddonsCard() {
 function AddonStackPeek({ addons, max }: { addons: Addon[]; max: number }) {
   const t = useT();
   const [open, setOpen] = useState(false);
-  const [placement, setPlacement] = useState<"up" | "down">("down");
   const wrap = useRef<HTMLDivElement>(null);
   const overflow = addons.length - max;
 
-  const toggle = () => {
-    if (!open && wrap.current) {
-      const r = wrap.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - r.bottom;
-      setPlacement(spaceBelow < 380 && r.top > spaceBelow ? "up" : "down");
-    }
-    setOpen((v) => !v);
-  };
-
-  useEffect(() => {
-    if (!open) return;
-    const close = (e: MouseEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const esc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("mousedown", close);
-    window.addEventListener("keydown", esc);
-    return () => {
-      window.removeEventListener("mousedown", close);
-      window.removeEventListener("keydown", esc);
-    };
-  }, [open]);
-
   return (
-    <div ref={wrap} className="relative flex shrink-0 items-center gap-1.5">
+    <div ref={wrap} className="flex shrink-0 items-center gap-2.5">
       <AddonLogoStack
         addons={addons.map((a) => ({
           id: a.manifest.id,
@@ -140,60 +111,72 @@ function AddonStackPeek({ addons, max }: { addons: Addon[]; max: number }) {
         max={max}
       />
       {overflow > 0 && (
-        <button
-          type="button"
-          onClick={toggle}
-          aria-label={t("Show {n} more addons", { n: overflow })}
-          className={`flex h-9 min-w-[44px] items-center justify-center rounded-md px-2.5 text-[12.5px] font-semibold transition-colors ${
-            open ? "bg-ink text-canvas" : "bg-canvas text-ink-muted hover:text-ink"
-          }`}
+        <SButton
+          variant={open ? "primary" : "secondary"}
+          onClick={() => setOpen((v) => !v)}
+          title={t("Show {n} more addons", { n: overflow })}
         >
           +{overflow}
-        </button>
+        </SButton>
       )}
-      {open && <AddonListTooltip addons={addons} placement={placement} onClose={() => setOpen(false)} />}
+      {overflow > 0 && (
+        <AnchoredMenu anchorRef={wrap} open={open} onClose={() => setOpen(false)} width={340}>
+          <AddonList addons={addons} onClose={() => setOpen(false)} />
+        </AnchoredMenu>
+      )}
     </div>
   );
 }
 
-function AddonListTooltip({
-  addons,
-  placement,
-  onClose,
-}: {
-  addons: Addon[];
-  placement: "up" | "down";
-  onClose: () => void;
-}) {
+function AddonList({ addons, onClose }: { addons: Addon[]; onClose: () => void }) {
   const t = useT();
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const restore = captureFocusReturn();
+    const active = document.activeElement;
+    const el = closeRef.current;
+    if (el) {
+      if (active instanceof HTMLElement && navOwnsFocus(active)) tvFocus(el);
+      else el.focus({ preventScroll: true });
+    }
+    return restore;
+  }, []);
+
   return (
     <div
-      className={`absolute start-0 z-30 flex w-[320px] flex-col overflow-hidden rounded-md bg-raised harbor-float animate-in fade-in duration-150 ${
-        placement === "up"
-          ? "bottom-[calc(100%+10px)] slide-in-from-bottom-1"
-          : "top-[calc(100%+10px)] slide-in-from-top-1"
-      }`}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("All addons ({n})", { n: addons.length })}
+      onKeyDown={(e) => {
+        if (!isBackKey(e.nativeEvent)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }}
+      className="harbor-float flex flex-col overflow-hidden rounded-[10px] bg-raised"
     >
-      <div className="flex items-center justify-between gap-3 px-4 pt-3 pb-2">
-        <span className="text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
+      <div className="flex items-center justify-between gap-3 ps-4 pe-2 pt-2">
+        <span className={CAPTION}>
           {t("All addons ({n})", { n: addons.length })}
         </span>
         <button
+          ref={closeRef}
           type="button"
           onClick={onClose}
           aria-label={t("Close")}
-          className="flex h-6 w-6 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
         >
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
+          <X size={18} strokeWidth={2.2} />
         </button>
       </div>
-      <div className="flex max-h-[320px] flex-col gap-1 overflow-y-auto px-2 pb-2">
+      <div className="flex max-h-[360px] flex-col overflow-y-auto p-2">
         {addons.map((a) => (
           <div
             key={a.manifest.id}
-            className="flex items-center gap-3 rounded-md bg-elevated px-3 py-2.5"
+            tabIndex={-1}
+            data-focusable="true"
+            className="flex min-h-11 items-center gap-3 rounded-[8px] px-2 outline-none"
           >
             <AddonLogo
               addonId={a.manifest.id}
@@ -201,7 +184,7 @@ function AddonListTooltip({
               manifestLogo={resolveAddonLogo(a.manifest.logo, a.transportUrl)}
               size="sm"
             />
-            <span className="truncate text-[13px] font-medium text-ink">{a.manifest.name}</span>
+            <span className="min-w-0 text-[15.5px] leading-[22px] text-ink">{a.manifest.name}</span>
           </div>
         ))}
       </div>

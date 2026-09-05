@@ -3,7 +3,7 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
 import { Section, ToggleRow } from "../shared";
-import { SettingRow } from "../kit";
+import { ROW_ACTION, SettingRow } from "../kit";
 import { LanguagesPicker } from "../streaming-panel";
 import { HomeLanguagePicker } from "../home-language-picker";
 
@@ -45,17 +45,20 @@ export function DiscoveryLanguageTab() {
 
       <Section title={t("Help translate Harbor")}>
         <SettingRow
+          wide
           label={t("Fill the gaps")}
           desc={t("Harbor was built in English. Multi-language support is partial, so your addons usually catch what Harbor's own filters miss. If you speak another language and want to help, the source is open.")}
         >
-          <button
-            type="button"
-            onClick={() => openUrl("https://github.com/harborstremio/harbor")}
-            className="harbor-press-pop flex h-9 shrink-0 items-center gap-2 rounded-md bg-canvas px-4 text-[12.5px] font-semibold text-ink transition-colors hover:bg-surface"
-          >
-            <GitHubIcon size={14} strokeWidth={2.2} />
-            {t("Contribute on GitHub")}
-          </button>
+          <span className="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => openUrl("https://github.com/harborstremio/harbor")}
+              className={ROW_ACTION}
+            >
+              <GitHubIcon size={18} />
+              {t("Contribute on GitHub")}
+            </button>
+          </span>
         </SettingRow>
       </Section>
     </>

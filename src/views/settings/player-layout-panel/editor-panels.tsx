@@ -63,6 +63,11 @@ function PanelMount({
   return (
     <div
       data-panel-id={id}
+      role="button"
+      tabIndex={-1}
+      data-focusable="true"
+      aria-pressed={selected}
+      data-tv-initial-focus={selected ? "" : undefined}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -107,7 +112,7 @@ function episodeTabStyle(corner: PanelCorner): React.CSSProperties {
     : { right: 0, top: "50%", transform: "translateY(-50%)" };
 }
 
-const AVATAR_COLORS = ["#f97316", "#22d3ee", "#a78bfa"];
+const AVATAR_COLORS = ["oklch(0.70 0.19 42)", "oklch(0.79 0.14 212)", "oklch(0.71 0.15 293)"];
 
 function AvatarDockBody() {
   const t = useT();
@@ -116,14 +121,14 @@ function AvatarDockBody() {
       {AVATAR_COLORS.map((c, i) => (
         <span
           key={i}
-          className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-[13.5px] font-semibold text-black ring-2 ring-white/15"
+          className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-[15px] font-semibold text-black ring-2 ring-white/15"
           style={{ background: c }}
         >
           {["A", "J", "Y"][i]}
           {i === 0 && (
             <span
               aria-label={t("Host")}
-              className="pointer-events-none absolute -top-2 -right-1 z-10 inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent text-black shadow-[0_2px_6px_rgba(0,0,0,0.45)] ring-2 ring-black/35"
+              className="pointer-events-none absolute -top-2 -end-1 z-10 inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent text-black shadow-[0_2px_6px_rgba(0,0,0,0.45)] ring-2 ring-black/35"
             >
               <Crown size={12} strokeWidth={2.4} fill="currentColor" />
             </span>
@@ -139,7 +144,7 @@ function EpisodesTabBody({ side }: { side: "left" | "right" }) {
   return (
     <div
       className={`pointer-events-none flex h-32 flex-col items-center justify-center gap-2.5 bg-canvas/90 text-ink ring-1 ring-edge-soft harbor-float ${
-        side === "right" ? "rounded-l-md pl-2.5 pr-2" : "rounded-r-md pl-2 pr-2.5"
+        side === "right" ? "rounded-l-md px-2.5" : "rounded-r-md px-2.5"
       }`}
     >
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -152,7 +157,7 @@ function EpisodesTabBody({ side }: { side: "left" | "right" }) {
         />
       </svg>
       <span
-        className="text-[11.5px] font-semibold uppercase tracking-[0.28em]"
+        className="text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px]"
         style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
       >
         {t("Up Next")}
@@ -164,22 +169,28 @@ function EpisodesTabBody({ side }: { side: "left" | "right" }) {
 function ChatPanelBody() {
   const t = useT();
   return (
-    <div className="pointer-events-none flex w-[280px] flex-col gap-2 rounded-md border border-white/12 bg-black/45 p-3 backdrop-blur-xl harbor-float">
-      <div className="flex flex-col gap-1.5 text-[12.5px] leading-snug">
+    <div className="pointer-events-none flex w-[320px] flex-col gap-2 rounded-md border border-white/12 bg-black/45 p-3 backdrop-blur-xl harbor-float">
+      <div className="flex flex-col gap-1.5 text-[15.5px] leading-[22px]">
         <p>
-          <span className="font-semibold text-accent">Alex</span>
+          <span className="font-semibold" style={{ color: AVATAR_COLORS[0] }}>
+            Alex
+          </span>
           <span className="ms-1.5 text-white/90">{t("this scene is wild")}</span>
         </p>
         <p>
-          <span className="font-semibold text-cyan-300">Jamie</span>
+          <span className="font-semibold" style={{ color: AVATAR_COLORS[1] }}>
+            Jamie
+          </span>
           <span className="ms-1.5 text-white/90">{t("no way 😂")}</span>
         </p>
         <p>
-          <span className="font-semibold text-violet-300">{t("You")}</span>
+          <span className="font-semibold" style={{ color: AVATAR_COLORS[2] }}>
+            {t("You")}
+          </span>
           <span className="ms-1.5 text-white/90">{t("didn't see that coming")}</span>
         </p>
       </div>
-      <div className="mt-1 rounded-md border border-white/10 bg-white/4 px-2.5 py-1.5 text-[12.5px] text-white/40">
+      <div className="mt-1 rounded-md border border-white/10 bg-white/4 px-3 py-2 text-[15.5px] leading-[22px] text-white/55">
         {t("Press T to chat...")}
       </div>
     </div>

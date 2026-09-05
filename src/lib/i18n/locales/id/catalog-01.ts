@@ -418,6 +418,7 @@ const catalog: Record<string, string> = {
   Books: "Buku",
   "Boost SDR video toward HDR": "Tingkatkan video SDR mendekati HDR",
   Border: "Bingkai",
+  "Borderless window": "Jendela tanpa bingkai",
   Born: "Lahir",
   "Born {date}": "Lahir {date}",
   "Bot token": "Token bot",
@@ -498,6 +499,7 @@ const catalog: Record<string, string> = {
   "Budget exhausted, resets at midnight UTC.": "Anggaran habis, direset pada tengah malam UTC.",
   "Buffer fill": "Isi buffer",
   "Buffer fill brightness": "Kecerahan isi buffer",
+  "Buffer size": "Ukuran buffer",
   Buffering: "Buffering",
   "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and torrent streams. Uses more disk and bandwidth; cleared when you switch or close.":
     "Menyimpan seluruh file ke buffer di latar belakang saat Anda menonton, bahkan ketika dijeda, sehingga remux besar dimuat lebih awal dan Anda dapat menggeser posisi pada file yang sudah tersimpan di cache tanpa buffering ulang. Berfungsi untuk stream debrid dan torrent. Menggunakan lebih banyak ruang disk dan bandwidth; dihapus saat Anda beralih atau menutupnya.",

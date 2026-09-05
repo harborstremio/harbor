@@ -35,7 +35,7 @@ export function CardOverlayPreview() {
         )}
         {settings.awardTabs && (
           <span
-            className={`pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 ${
+            className={`pointer-events-none absolute start-1/2 z-10 -translate-x-1/2 rtl:translate-x-1/2 ${
               settings.awardTabPosition === "top"
                 ? "top-1.5"
                 : settings.awardTabPosition === "below"
@@ -47,7 +47,7 @@ export function CardOverlayPreview() {
           </span>
         )}
       </div>
-      <span className="text-[11.5px] font-medium text-ink-subtle">{t("Live preview")}</span>
+      <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t("Live preview")}</span>
     </div>
   );
 }

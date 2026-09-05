@@ -111,6 +111,7 @@ const catalogPR: Record<string, string> = {
   "Paste your OpenSubtitles API key": "अपनी OpenSubtitles API की पेस्ट करें",
   "Paste your SUBDL API key": "अपनी SUBDL API की पेस्ट करें",
   "Paste your Subsource API key": "अपनी Subsource API की पेस्ट करें",
+  "Paste your TheIntroDB API key": "अपनी TheIntroDB API की पेस्ट करें",
   "Paste your key": "अपनी की पेस्ट करें",
   "Paste your repo.json URL into Extensions above, then install. That is how you bring any site's sources back.":
     "ऊपर एक्सटेंशन में अपने repo.json का URL पेस्ट करें, फिर इंस्टॉल करें। इसी तरह आप किसी भी साइट के सोर्स फिर से जोड़ सकते हैं।",
@@ -128,6 +129,7 @@ const catalogPR: Record<string, string> = {
   Paused: "पॉज़ किया गया",
   "Paused on": "यहाँ रुका है",
   "Paused on Simkl": "Simkl पर पॉज़ किया गया",
+  "Paused on Trakt": "Trakt पर पॉज़ किया गया",
   "Pausing after {n} more": "{n} और पूरे होने के बाद पॉज़ होगा",
   "Pausing in {time}": "{time} बाद पॉज़ होगा",
   "Pausing when this one ends": "यह खत्म होने पर पॉज़ होगा",
@@ -766,6 +768,8 @@ const catalogPR: Record<string, string> = {
   "Re-configure this addon and apply the updated link":
     "इस ऐडऑन को फिर से कॉन्फ़िगर करें और अपडेट किया गया लिंक लागू करें",
   "Re-download": "फिर से डाउनलोड करें",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "आप जो स्ट्रीम देख रहे हैं उसे फिर से खोलें और वहीं से जारी रखें जहाँ आपने छोड़ा था।",
   "Re-run deploy or paste the correct URL": "डिप्लॉय फिर से चलाएँ या सही URL पेस्ट करें",
   "Re-runs the welcome flow and clears every dismissed tip.":
     "स्वागत प्रक्रिया फिर से चलाता है और खारिज की गई हर टिप मिटा देता है।",
@@ -817,6 +821,7 @@ const catalogPR: Record<string, string> = {
   "Reading your search": "आपकी खोज पढ़ी जा रही है",
   "Reading {chapter}": "{chapter} पढ़ा जा रहा है",
   "Reading…": "पढ़ा जा रहा है…",
+  "Reads ahead": "पहले से लोड",
   Ready: "तैयार",
   "Ready to play": "चलाने के लिए तैयार",
   "Ready to save": "सहेजने के लिए तैयार",
@@ -876,6 +881,7 @@ const catalogPR: Record<string, string> = {
   Recordings: "रिकॉर्डिंग",
   "Recover via Discord": "Discord के ज़रिए रिकवर करें",
   "Recover via a code sent to Discord": "Discord पर भेजे गए कोड से रिकवर करें",
+  Recovery: "रिकवरी",
   "Recovery code": "रिकवरी कोड",
   "Recovery key": "रिकवरी कुंजी",
   "Recovery key block {current} of {total}": "रिकवरी की ब्लॉक {current}, कुल {total}",
@@ -941,6 +947,8 @@ const catalogPR: Record<string, string> = {
   Reload: "रीलोड करें",
   "Reload list": "सूची फिर से लोड करें",
   "Reload original link": "मूल लिंक फिर से लोड करें",
+  "Reload source": "स्रोत फिर से लोड करें",
+  "Reloading the stream…": "स्ट्रीम फिर से लोड हो रही है…",
   "Relocate if they ask": "अगर वे कहें तो जगह बदलें",
   "Remaining only": "केवल बाकी",
   Remap: "रीमैप करें",
@@ -1170,10 +1178,14 @@ const catalogPR: Record<string, string> = {
     "पोस्टर खोले बिना उसकी रेटिंग, कहानी और क्विक ऐक्शन की झलक देखने के लिए उस पर कर्सर रखें।",
   Restart: "रीस्टार्ट करें",
   "Restart Harbor after the install completes.": "इंस्टॉल पूरा होने के बाद Harbor रीस्टार्ट करें।",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "Harbor का अपना स्ट्रीमिंग सर्वर रीस्टार्ट करें, फिर सर्वर वापस आते ही स्ट्रीम दोबारा लोड करें। केवल डेस्कटॉप।",
   "Restart engine": "इंजन रीस्टार्ट करें",
   "Restart game": "गेम रीस्टार्ट करें",
+  "Restart streaming server": "स्ट्रीमिंग सर्वर रीस्टार्ट करें",
   "Restart to update": "अपडेट करने के लिए रीस्टार्ट करें",
   Restarting: "रीस्टार्ट हो रहा है",
+  "Restarting the streaming server…": "स्ट्रीमिंग सर्वर रीस्टार्ट हो रहा है…",
   Restore: "बहाल करें",
   "Restore + upscale. The best all-rounder for most anime.":
     "रिस्टोर + अपस्केल करें। अधिकांश एनीमे के लिए सबसे अच्छा ऑल-राउंड विकल्प।",

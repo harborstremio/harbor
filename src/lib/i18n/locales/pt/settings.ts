@@ -2296,6 +2296,46 @@ const settings: Record<string, string> = {
     "Volta um quadro e pausa. Preciso por quadro no mpv.",
   "Step forward one frame and pause. Frame-accurate on mpv.":
     "Avança um quadro e pausa. Preciso por quadro no mpv.",
+  Recovery: "Recuperação",
+  "Reload source": "Recarregar fonte",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "Reabrir o stream que você está assistindo e retomar de onde parou.",
+  "Restart streaming server": "Reiniciar servidor de streaming",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "Reiniciar o servidor de streaming do próprio Harbor e recarregar o stream assim que ele voltar. Apenas no app para computador.",
+  "Buffer size": "Tamanho do buffer",
+  Small: "Pequeno",
+  Medium: "Médio",
+  Adaptive: "Adaptável",
+  "Reads ahead": "Leitura antecipada",
+  "Memory cap": "Limite de memória",
+  "Wait before playing": "Espera antes de reproduzir",
+  "Holds up to {size} in memory while a video plays.":
+    "Mantém até {size} na memória enquanto um vídeo é reproduzido.",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "O Harbor ajusta a folga para cada título e a aumenta quando a reprodução estabiliza. Ideal para quase todo mundo.",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "O início mais rápido e o menor uso de memória. Bom em uma conexão rápida e estável, ou em um computador com pouca memória.",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "Alguns minutos de folga. Aguenta uma falha rápida sem muita espera antes de a reprodução começar.",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "Dez minutos de folga. Feito para Wi-Fi instável ou servidor distante, ao custo de uma espera maior antes de a reprodução começar.",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "Meia hora de folga. Só vale a pena em uma conexão muito instável.",
+  "Timing sources": "Fontes de horários",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · horários de abertura e créditos",
+  "Paste your TheIntroDB API key": "Cole sua chave de API do TheIntroDB",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "Opcional. O TheIntroDB responde sem chave, mas uma chave aumenta seu limite de requisições para que os horários continuem chegando durante uma maratona. Obtenha uma em",
+  "Ignored titles": "Títulos ignorados",
+  "Titles you ignore on the advisory card never show it again.":
+    "Títulos que você ignora no cartão de aviso nunca mais mostram esse aviso.",
+  "{count} titles will never show the content advisory again.":
+    "{count} títulos nunca mais mostrarão o aviso de conteúdo.",
+  "{count} titles will never show the content advisory again.#one":
+    "{count} título nunca mais mostrará o aviso de conteúdo.",
+  "{count} titles will never show the content advisory again.#few":
+    "{count} títulos nunca mais mostrarão o aviso de conteúdo.",
 };
 
 export default settings;

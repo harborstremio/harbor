@@ -1815,6 +1815,9 @@ const sweep: Record<string, string> = {
   "Video links need to start with https.": "Ссылки на видео должны начинаться с https.",
   "Video tuning": "Настройка видео",
   "Violence & Gore": "Насилие и жестокость",
+  "Ignore this title": "Игнорировать это название",
+  "Never show the content advisory for this title again":
+    "Больше не показывать предупреждение о контенте для этого названия",
   Volume: "Громкость",
   WATCHING: "Просмотр",
   "Waiting for the next line": "Ожидание следующей строки",

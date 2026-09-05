@@ -28,7 +28,7 @@ export function AdvisoryPreview() {
           <ContentAdvisoryToast preview categories={SAMPLE} playKey="advisory-preview" />
         </div>
       </div>
-      <span className="text-[11.5px] font-medium text-ink-subtle">{t("Live preview")}</span>
+      <span className="harbor-settings-label">{t("Live preview")}</span>
     </div>
   );
 }

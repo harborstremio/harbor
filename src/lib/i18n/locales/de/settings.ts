@@ -33,6 +33,8 @@ const settings: Record<string, string> = {
   "A TOP 10 corner ribbon on the Top 10 rail posters. The watchlist marker auto-moves to the opposite corner so nothing overlaps.":
     "Ein TOP-10-Eckbanner auf den Postern der Top-10-Reihe. Die Merkliste-Markierung wechselt automatisch in die gegenüberliegende Ecke, damit sich nichts überlappt.",
   "A country releases something": "Ein Land veröffentlicht etwas",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "Ein paar Minuten Vorlauf. Überbrückt kurze Störungen, ohne dass du lange auf den Start der Wiedergabe warten musst.",
   "A debrid service is connected. You'll get instant, high-quality streams.":
     "Ein Debrid-Dienst ist verbunden. Du erhältst sofort hochwertige Streams.",
   "A free Cloudflare account.": "Ein kostenloses Cloudflare-Konto.",
@@ -86,6 +88,7 @@ const settings: Record<string, string> = {
   "Active torrents": "Aktive Torrents",
   "Ad, analytics, and tracking requests pass through untouched.":
     "Werbe-, Analyse- und Tracking-Anfragen werden unverändert weitergeleitet.",
+  Adaptive: "Adaptiv",
   "Adaptive Sharpen": "Adaptives Schärfen",
   "Add Custom Source": "Benutzerdefinierte Quelle hinzufügen",
   "Add Source": "Quelle hinzufügen",
@@ -309,6 +312,7 @@ const settings: Record<string, string> = {
     "Budget aufgebraucht. Es wird um Mitternacht (UTC) zurückgesetzt.",
   "Buffer fill": "Pufferfüllstand",
   "Buffer fill brightness": "Helligkeit der Pufferfüllung",
+  "Buffer size": "Puffergröße",
   "Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.":
     "Personen, die Fehler melden, werden in den Versionshinweisen genannt, wenn ihre Meldung zu einer veröffentlichten Fehlerbehebung führt. Leer lassen, um anonym zu bleiben.",
   "Bug reports": "Fehlerberichte",
@@ -909,6 +913,8 @@ const settings: Record<string, string> = {
   "HTML5 plays everything WebView2 supports. mpv handles TrueHD, DTS-HD, AV1, weird containers, and HDR. Auto picks based on the source.":
     "HTML5 spielt alles ab, was WebView2 unterstützt. mpv verarbeitet TrueHD, DTS-HD, AV1, ungewöhnliche Container und HDR. „Automatisch“ wählt anhand der Quelle aus.",
   "Hairline cards": "Karten mit feiner Kontur",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "Eine halbe Stunde Vorlauf. Lohnt sich nur bei einer sehr unzuverlässigen Verbindung.",
   "Hand-tuned colors. Edit them in the section above.":
     "Manuell abgestimmte Farben. Bearbeite sie im Bereich oben.",
   "Harbor Relay": "Harbor Relay",
@@ -944,6 +950,8 @@ const settings: Record<string, string> = {
     "Harbor sendet keine Telemetriedaten. Außerdem werden ausgehende Werbe-, Analyse- und Trackinganfragen, die Add-ons oder Metadatenanbieter zu senden versuchen, blockiert, bevor sie deinen Computer verlassen.",
   "Harbor shows your AniList lists on the Anime page and keeps your progress in sync.":
     "Harbor zeigt deine AniList-Listen auf der Anime-Seite an und hält deinen Fortschritt synchron.",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "Harbor bemisst den Vorlauf für jeden Titel einzeln und vergrößert ihn, sobald die Wiedergabe stabil läuft. Für fast alle die richtige Wahl.",
   "Harbor still finds and loads subtitles so they're one click away in the player, it just won't turn them on automatically.":
     "Harbor sucht und lädt weiterhin Untertitel, sodass sie im Player mit nur einem Klick verfügbar sind. Sie werden lediglich nicht automatisch aktiviert.",
   "Harbor test message (Discord). If you can read this, your webhook is wired up.":
@@ -1023,6 +1031,8 @@ const settings: Record<string, string> = {
     "Beim Starten der Wiedergabe wird die Quellenliste geöffnet, damit du Qualität, Debrid und Tonspur selbst auswählen kannst.",
   "Hold Ctrl or Cmd and scroll to resize Harbor's interface smoothly.":
     "Halte Ctrl oder Cmd gedrückt und scrolle, um Harbors Oberfläche stufenlos zu skalieren.",
+  "Holds up to {size} in memory while a video plays.":
+    "Belegt während der Videowiedergabe bis zu {size} Arbeitsspeicher.",
   "Home Rail Settings": "Einstellungen für Startseitenreihen",
   "Home hero": "Aufmacher auf der Startseite",
   "Home hero audio": "Audio des Startseiten-Aufmachers",
@@ -1097,6 +1107,7 @@ const settings: Record<string, string> = {
     "Wenn das Video immer wieder zum Puffern pausiert oder du eine instabile WLAN-Verbindung beziehungsweise einen weit entfernten Server nutzt, verschafft dies Harbor einen größeren Vorlauf, damit die Wiedergabe Unterbrechungen besser überbrückt.",
   "If you exceed free tier, the Workers Paid plan is $5 per month and bumps the request allowance to 10 million per day.":
     "Wenn du das kostenlose Kontingent überschreitest, kostet der Tarif Workers Paid 5 US-Dollar pro Monat und erhöht das Anfragelimit auf 10 Millionen pro Tag.",
+  "Ignored titles": "Ignorierte Titel",
   "Image URL (optional)": "Bild-URL (optional)",
   "Image bar active. Pick a style above to switch back, or clear the image below.":
     "Bildleiste aktiv. Wähle oben einen Stil, um zurückzuwechseln, oder entferne unten das Bild.",
@@ -1296,6 +1307,8 @@ const settings: Record<string, string> = {
   "Maximum volume boost": "Maximale Lautstärkeverstärkung",
   "Media type": "Medientyp",
   "Media types": "Medientypen",
+  Medium: "Mittel",
+  "Memory cap": "Speicherlimit",
   Merged: "Zusammengeführt",
   "Metadata language": "Metadatensprache",
   "Metadata providers": "Metadatenanbieter",
@@ -1476,6 +1489,8 @@ const settings: Record<string, string> = {
   "Optional keys that unlock TMDB rails, baked-in poster ratings, fanart, and TVDB episode data.":
     "Optionale Schlüssel, die TMDB-Reihen, integrierte Posterbewertungen, Fanart und TVDB-Folgendaten freischalten.",
   "Optional overlays that appear over the video.": "Optionale Einblendungen über dem Video.",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "Optional. TheIntroDB antwortet auch ohne Schlüssel, aber ein Schlüssel erhöht dein Anfragelimit, damit die Zeitangaben auch bei einem Serienmarathon weiter eintreffen. Erhältlich unter",
   "Options for the Library → Local tab: folders you scan from your own drive. When you export metadata, Harbor writes a Kodi-style .nfo and downloads artwork next to each file at the sizes below.":
     "Optionen für die Registerkarte Mediathek → Lokal: Ordner, die du auf deinem eigenen Laufwerk scannst. Beim Exportieren von Metadaten schreibt Harbor eine .nfo-Datei im Kodi-Stil und lädt Grafiken in den unten angegebenen Größen neben jede Datei herunter.",
   "Or just zip up images": "Oder die Bilder einfach zippen",
@@ -1511,6 +1526,7 @@ const settings: Record<string, string> = {
   "Paste the manifest URL the configure page gave you":
     "Füge die Manifest-URL ein, die dir die Konfigurationsseite angezeigt hat",
   "Paste your API token first.": "Füge zuerst dein API-Token ein.",
+  "Paste your TheIntroDB API key": "TheIntroDB-API-Schlüssel einfügen",
   "Pause when minimized": "Bei minimiertem Fenster pausieren",
   "Pause when unfocused": "Bei inaktivem Fenster pausieren",
   "Peers, speed and progress chip on the player during torrent playback. Turn off to keep the player clean.":
@@ -1641,10 +1657,13 @@ const settings: Record<string, string> = {
   "Random avatar": "Zufälliger Avatar",
   "Re-apply to the window and taskbar now": "Jetzt erneut auf Fenster und Taskleiste anwenden",
   "Re-authenticate": "Erneut authentifizieren",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "Den laufenden Stream erneut öffnen und dort fortsetzen, wo du aufgehört hast.",
   "Re-run deploy or paste the correct URL":
     "Deployment erneut ausführen oder die richtige URL einfügen",
   "Re-runs the welcome flow and clears every dismissed tip.":
     "Führt den Willkommensdialog erneut aus und setzt alle ausgeblendeten Tipps zurück.",
+  "Reads ahead": "Vorlauf",
   "Ready to send": "Sendebereit",
   "Real-Debrid API token": "Real-Debrid-API-Token",
   "Real-Debrid, TorBox, AllDebrid, Premiumize, Debrid-Link. Cached streams play direct. Keys stay local.":
@@ -1657,6 +1676,7 @@ const settings: Record<string, string> = {
     "Alles neu einfärben, Schriftarten wechseln, Poster skalieren und ein Hintergrundbild festlegen.",
   "Recommended for You": "Für dich empfohlen",
   "Record GIF": "GIF aufnehmen",
+  Recovery: "Wiederherstellung",
   Redeploy: "Erneut bereitstellen",
   "Redeploy instructions": "Anleitung zur erneuten Bereitstellung",
   "Redeploy relay": "Relay erneut bereitstellen",
@@ -1684,6 +1704,7 @@ const settings: Record<string, string> = {
   "Relay verified end-to-end": "Relay Ende-zu-Ende-verifiziert",
   "Relay version status": "Status der Relay-Version",
   "Relay version {version}. Update available.": "Relay-Version {version}. Update verfügbar.",
+  "Reload source": "Quelle neu laden",
   "Remaining only": "Nur verbleibende",
   Remap: "Neu zuweisen",
   "Remember last stream": "Letzten Stream merken",
@@ -1737,7 +1758,10 @@ const settings: Record<string, string> = {
     "Lass den Mauszeiger auf einem Poster ruhen, um eine Vorschau zu sehen, ohne es zu öffnen. Standardmäßig deaktiviert.",
   "Rest the cursor on a poster to peek at the rating, story, and quick actions without opening it.":
     "Bewege den Mauszeiger über ein Poster, um Bewertung, Handlung und Schnellaktionen zu sehen, ohne es zu öffnen.",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "Harbors eigenen Streaming-Server neu starten und den Stream neu laden, sobald er wieder läuft. Nur Desktop.",
   "Restart engine": "Engine neu starten",
+  "Restart streaming server": "Streaming-Server neu starten",
   Restarting: "Wird neu gestartet",
   Restore: "Wiederherstellen",
   "Restore and reload": "Wiederherstellen und neu laden",
@@ -2041,6 +2065,7 @@ const settings: Record<string, string> = {
     "Der Platz wird knapp ({n}/{limit}). Auf schmalen Bildschirmen kann der Inhalt überlaufen.",
   "Slow or unstable connection": "Langsame oder instabile Verbindung",
   "Slow playback by 0.25x.": "Wiedergabe um 0,25× verlangsamen.",
+  Small: "Klein",
   "Smooth motion": "Flüssige Bewegungen",
   "Smooth on weak PCs": "Flüssig auf leistungsschwachen PCs",
   "Smooth scrolling": "Sanftes Scrollen",
@@ -2198,6 +2223,8 @@ const settings: Record<string, string> = {
   "Telegram bot": "Telegram-Bot",
   "Telegram sends through a bot you create. You need two things: a":
     "Telegram sendet über einen von dir erstellten Bot. Du brauchst zwei Dinge: einen",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "Zehn Minuten Vorlauf. Gedacht für ein instabiles WLAN oder einen weit entfernten Server, dafür dauert es länger, bis die Wiedergabe startet.",
   Test: "Testen",
   "Test badge rules (Try it)": "Badge-Regeln testen (Ausprobieren)",
   "Test connection": "Verbindung testen",
@@ -2242,6 +2269,8 @@ const settings: Record<string, string> = {
     "Die Auswahl kennzeichnet jeden Stream mit Auflösung, HDR-Variante, Codec und Audioformat. Bei „Aus“ werden alle Kennzeichnungen ausgeblendet.",
   "The quick brown fox jumps over the lazy dog":
     "Franz jagt im komplett verwahrlosten Taxi quer durch Bayern",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "Startet am schnellsten und braucht am wenigsten Arbeitsspeicher. Gut bei einer schnellen, stabilen Verbindung oder auf einem Computer mit wenig Arbeitsspeicher.",
   "The ratings row on a title's detail page, next to runtime and genre.":
     "Die Bewertungszeile auf der Detailseite eines Titels, neben Laufzeit und Genre.",
   "The resolution Harbor downloads for each image when you export a title's metadata next to the file on disk.":
@@ -2256,6 +2285,7 @@ const settings: Record<string, string> = {
   "The window and taskbar icon updates right away. The installed shortcut refreshes on the next update.":
     "Das Fenster- und das Taskleistensymbol werden sofort aktualisiert. Die installierte Verknüpfung wird beim nächsten Update aktualisiert.",
   "The yellow chip in the poster corner.": "Das gelbe Feld in der Posterecke.",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · Zeitpunkte von Intro und Abspann",
   "TheTVDB · episode data": "TheTVDB · Episodendaten",
   Theme: "Design",
   "Theme & appearance": "Design und Erscheinungsbild",
@@ -2279,7 +2309,10 @@ const settings: Record<string, string> = {
   "Tiles horizontally; the bar's height crops it vertically. Animated GIFs up to 2 MB play.":
     "Das Bild wird horizontal gekachelt und durch die Höhe der Leiste vertikal beschnitten. Animierte GIFs bis 2 MB werden abgespielt.",
   "Time format": "Zeitformat",
+  "Timing sources": "Timing-Quellen",
   "Title text": "Titeltext",
+  "Titles you ignore on the advisory card never show it again.":
+    "Titel, die du auf der Hinweiskarte ignorierst, zeigen den Inhaltshinweis nie wieder an.",
   "Titles, overviews, and taglines from TMDB display in this language when a translation exists. Needs a TMDB key.":
     "Titel, Inhaltsangaben und Slogans von TMDB werden in dieser Sprache angezeigt, wenn eine Übersetzung vorhanden ist. Erfordert einen TMDB-Schlüssel.",
   "To run a public relay, post the": "Um ein öffentliches Relay zu betreiben, veröffentliche die",
@@ -2450,6 +2483,7 @@ const settings: Record<string, string> = {
   "Volume control": "Lautstärkeregelung",
   "Volume pop-up while watching": "Lautstärke-Pop-up während der Wiedergabe",
   WHEN: "WANN",
+  "Wait before playing": "Wartezeit vor Start",
   "Wait for the upload to finish. The relay URL gets written to":
     "Warte, bis der Upload abgeschlossen ist. Die Relay-URL wird an folgendem Ort eingetragen:",
   "Wait for the upload to finish. The relay URL gets written to {code} in Harbor settings.":
@@ -2687,6 +2721,12 @@ const settings: Record<string, string> = {
     "{code}: Gibt JSON mit der Worker-Version zurück. Wird für die Schaltfläche „Testen“ verwendet.",
   "{count} frames stored. Wiping rebuilds them next time you watch.":
     "{count} Einzelbilder gespeichert. Beim Löschen werden sie beim nächsten Ansehen neu erstellt.",
+  "{count} titles will never show the content advisory again.":
+    "Bei {count} Titeln wird der Inhaltshinweis nie wieder angezeigt.",
+  "{count} titles will never show the content advisory again.#few":
+    "Bei {count} Titeln wird der Inhaltshinweis nie wieder angezeigt.",
+  "{count} titles will never show the content advisory again.#one":
+    "Bei {count} Titel wird der Inhaltshinweis nie wieder angezeigt.",
   "{count} tracker request blocked this session. Harbor itself sends zero telemetry.":
     "Blockierte Tracker-Anfragen in dieser Sitzung: {count}. Harbor selbst sendet keinerlei Telemetrie.",
   "{name} imported to your library": "{name} in deine Mediathek importiert",

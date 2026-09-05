@@ -258,6 +258,9 @@ const extra: Record<string, string> = {
   Connecting: "Подключение",
   "Content advisory": "Предупреждение о контенте",
   "Content advisory on start": "Предупреждение о контенте при запуске",
+  "Ignored titles": "Игнорируемые названия",
+  "Titles you ignore on the advisory card never show it again.":
+    "Названия, скрытые на карточке предупреждения, больше никогда его не покажут.",
   "Continue from last watched": "Продолжить с последнего просмотренного",
   "Continue in your browser...": "Продолжите в браузере...",
   "Copy diagnostics": "Копировать диагностику",

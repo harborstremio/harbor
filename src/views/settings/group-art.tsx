@@ -1,6 +1,6 @@
 function Plate({ children }: { children: React.ReactNode }) {
   return (
-    <span className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-md bg-canvas">
+    <span className="relative grid h-11 w-11 place-items-center overflow-hidden rounded-md bg-canvas">
       {children}
     </span>
   );

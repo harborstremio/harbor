@@ -321,6 +321,7 @@ const catalog: Record<string, string> = {
     "Tampilkan foto profil AniList Anda sebagai avatar Harbor.",
   "Show your Harbor profile picture on the community":
     "Tampilkan foto profil Harbor Anda di komunitas",
+  "Show your Letterboxd card": "Tampilkan kartu Letterboxd Anda",
   "Show your Simkl card": "Tampilkan kartu Simkl Anda",
   "Show your favourite games, books and music on your profile":
     "Tampilkan game, buku, dan musik favorit Anda di profil",
@@ -548,6 +549,7 @@ const catalog: Record<string, string> = {
     "Dunia yang berkembang perlahan dan bab-bab cerah yang layak dibuka sambil minum kopi.",
   "Slowly fade between a show's backdrop images while you read the page, instead of holding one still. Only runs when the show has more than one backdrop, and never when you have pinned one or asked for reduced motion.":
     "Transisikan gambar latar acara secara perlahan saat Anda membaca halaman, alih-alih menampilkan satu gambar saja. Hanya berjalan jika acara memiliki lebih dari satu gambar latar, dan tidak pernah saat Anda menyematkan salah satunya atau meminta pengurangan gerakan.",
+  Small: "Kecil",
   "Small controls that sit around playback rather than in the picture.":
     "Kontrol kecil yang berada di sekitar pemutaran, bukan di dalam gambar.",
   Smaller: "Lebih kecil",
@@ -867,6 +869,7 @@ const catalog: Record<string, string> = {
   "Streaming now": "Sedang streaming",
   "Streaming quality": "Kualitas streaming",
   "Streaming server": "Server streaming",
+  "Streaming server restarted.": "Server streaming telah dimulai ulang.",
   "Streaming services on the TV": "Layanan streaming di TV",
   "Streaming sources": "Sumber streaming",
   Streams: "Stream",

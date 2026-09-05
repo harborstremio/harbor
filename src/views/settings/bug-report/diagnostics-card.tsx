@@ -1,18 +1,44 @@
 import { ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { Diagnostics } from "@/lib/bug-report";
+import { getDirection } from "@/lib/keyboard-navigation/geometry";
 import { ModalButton, SettingRow, SettingsModal } from "../kit";
+import { SButton } from "../ui";
 import { useT } from "@/lib/i18n";
 
 export function DiagnosticsCard({ diag }: { diag: Diagnostics | null }) {
   const [open, setOpen] = useState(false);
+  const [scrolls, setScrolls] = useState(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
   const t = useT();
+
+  useEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    const measure = () => setScrolls(el.scrollHeight > el.clientHeight + 1);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open]);
+
+  const onListKey = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    const el = bodyRef.current;
+    const dir = getDirection(e.nativeEvent);
+    if (!el || (dir !== "up" && dir !== "down")) return;
+    const atStart = el.scrollTop <= 1;
+    const atEnd = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+    if (dir === "up" ? atStart : atEnd) return;
+    e.preventDefault();
+    el.scrollBy({ top: (dir === "down" ? 0.8 : -0.8) * el.clientHeight, behavior: "smooth" });
+  };
+
   if (!diag) {
     return (
       <SettingRow
-        icon={<ShieldCheck size={14} strokeWidth={1.9} />}
+        icon={<ShieldCheck size={18} strokeWidth={1.9} />}
         label={t("What gets sent")}
-        desc={t("Loading environment details…")}
+        desc={t("Reading your environment details…")}
       />
     );
   }
@@ -26,17 +52,11 @@ export function DiagnosticsCard({ diag }: { diag: Diagnostics | null }) {
   return (
     <>
       <SettingRow
-        icon={<ShieldCheck size={14} strokeWidth={1.9} />}
+        icon={<ShieldCheck size={18} strokeWidth={1.9} />}
         label={t("What gets sent")}
         desc={compact}
       >
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="shrink-0 rounded-md bg-raised px-3 py-1.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
-        >
-          {t("Review")}
-        </button>
+        <SButton onClick={() => setOpen(true)}>{t("Review")}</SButton>
       </SettingRow>
       <SettingsModal
         open={open}
@@ -51,22 +71,29 @@ export function DiagnosticsCard({ diag }: { diag: Diagnostics | null }) {
           </ModalButton>
         }
       >
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-md bg-elevated px-4 py-3.5 font-mono text-[11.5px] text-ink-muted">
-          <Pair k={t("App")} v={diag.appVersion} />
-          <Pair k={t("OS")} v={`${diag.os} ${diag.osVersion}`} />
-          <Pair k={t("Viewport")} v={diag.viewport} />
-          <Pair k={t("Locale")} v={diag.locale} />
-          <Pair k={t("Player")} v={diag.flags.playerEngine} />
-          <Pair k="libmpv" v={mpvLine} />
-          <Pair k={t("Region")} v={diag.flags.region} />
-          <Pair k={t("TMDB key")} v={diag.flags.hasTmdb ? t("yes") : t("no")} />
-          <Pair k={t("RPDB key")} v={diag.flags.hasRpdb ? t("yes") : t("no")} />
-          <Pair k="Trakt" v={diag.flags.hasTrakt ? t("yes") : t("no")} />
-          <Pair k="Stremio" v={diag.flags.hasStremio ? t("signed in") : t("guest")} />
-          <Pair k={t("Debrid keys")} v={String(diag.flags.debridCount)} />
-          <Pair k={t("Addons")} v={String(diag.flags.addonCount)} />
-          <Pair k={t("IPTV lists")} v={String(diag.flags.iptvCount)} />
-          <Pair k={t("Recent errors")} v={String(diag.recentErrors.length)} />
+        <div
+          ref={bodyRef}
+          tabIndex={scrolls ? 0 : undefined}
+          onKeyDown={scrolls ? onListKey : undefined}
+          className="max-h-[46vh] overflow-y-auto"
+        >
+          <dl className="m-0 grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-x-5 gap-y-2 text-[15.5px] leading-[22px]">
+            <Pair k={t("App")} v={diag.appVersion} />
+            <Pair k={t("OS")} v={`${diag.os} ${diag.osVersion}`} />
+            <Pair k={t("Viewport")} v={diag.viewport} />
+            <Pair k={t("Locale")} v={diag.locale} />
+            <Pair k={t("Player")} v={diag.flags.playerEngine} />
+            <Pair k="libmpv" v={mpvLine} />
+            <Pair k={t("Region")} v={diag.flags.region} />
+            <Pair k={t("TMDB key")} v={diag.flags.hasTmdb ? t("yes") : t("no")} />
+            <Pair k={t("RPDB key")} v={diag.flags.hasRpdb ? t("yes") : t("no")} />
+            <Pair k="Trakt" v={diag.flags.hasTrakt ? t("yes") : t("no")} />
+            <Pair k="Stremio" v={diag.flags.hasStremio ? t("signed in") : t("guest")} />
+            <Pair k={t("Debrid keys")} v={String(diag.flags.debridCount)} />
+            <Pair k={t("Addons")} v={String(diag.flags.addonCount)} />
+            <Pair k={t("IPTV lists")} v={String(diag.flags.iptvCount)} />
+            <Pair k={t("Recent errors")} v={String(diag.recentErrors.length)} />
+          </dl>
         </div>
       </SettingsModal>
     </>
@@ -77,8 +104,8 @@ function Pair({ k, v }: { k: string; v: string }) {
   const t = useT();
   return (
     <>
-      <span className="text-ink-subtle">{k}</span>
-      <span className="truncate text-ink">{v || t("n/a")}</span>
+      <dt className="min-w-0 text-ink-subtle">{k}</dt>
+      <dd className="m-0 min-w-0 break-words text-ink">{v || t("n/a")}</dd>
     </>
   );
 }

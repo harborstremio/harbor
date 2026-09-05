@@ -66,7 +66,7 @@ export function AiSearchSection() {
     <>
       <Section title={t("AI search")}>
         <SettingRow
-          icon={<Sparkles size={16} strokeWidth={2} />}
+          icon={<Sparkles size={18} strokeWidth={2} />}
           label={t("Provider")}
           desc={t(
             "Type what you want in plain language and let a model find it. Bring your own API key from either service.",
@@ -175,12 +175,12 @@ export function AiSearchSection() {
               spellCheck={false}
               autoCapitalize="off"
               autoCorrect="off"
-              className="min-w-0 h-10 flex-1 rounded-md bg-canvas px-3 font-mono text-[12.5px] text-ink placeholder:text-ink-subtle focus:outline-none transition-colors focus:bg-elevated"
+              className="h-11 min-w-0 flex-1 rounded-[8px] bg-canvas px-3 font-mono text-[15.5px] text-ink placeholder:text-ink-subtle focus:outline-none transition-colors focus:bg-elevated"
             />
             <button
               type="submit"
               disabled={!customDraft.trim()}
-              className="flex h-10 shrink-0 items-center rounded-md bg-canvas px-3.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:text-ink disabled:opacity-40"
+              className="flex h-11 shrink-0 items-center rounded-[8px] bg-canvas px-4 text-[15px] font-semibold text-ink-muted transition-colors hover:text-ink disabled:opacity-40"
             >
               {t("Use model")}
             </button>
@@ -191,7 +191,7 @@ export function AiSearchSection() {
       <Section title={t("Live web")}>
         <SettingRow
           wide
-          icon={<Globe size={16} strokeWidth={2} />}
+          icon={<Globe size={18} strokeWidth={2} />}
           label={t("Jina Reader")}
           desc={
             <>

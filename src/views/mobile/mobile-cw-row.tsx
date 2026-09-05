@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { X } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
+import simklLogo from "@/assets/simkl.png";
+import traktLogo from "@/assets/trakt.svg";
 import type { Meta } from "@/lib/cinemeta";
 import { useAuth } from "@/lib/auth";
 import { useHideAnime } from "@/lib/anime-hide";
 import { useHeroLogos } from "@/components/anime-hero/use-hero-logos";
 import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
 import { listLocalCw, subscribeLocalCw, type LocalCwEntry } from "@/lib/local-cw";
+import { useExternalCw } from "@/lib/feed/external-cw";
 import { readSnapshot, useSnapshotVersion } from "@/lib/snapshots";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
@@ -89,6 +92,7 @@ export function useMobileCw(limit = 14): LibraryItem[] {
   const { settings } = useSettings();
   const cwPerProfile = settings.cwPerProfile;
   const hideAnime = useHideAnime();
+  const externalCw = useExternalCw(!cwPerProfile && settings.externalContinueWatching);
   const [items, setItems] = useState<LibraryItem[]>(() =>
     authKey && cloudKey === authKey ? cloudCache : [],
   );
@@ -124,7 +128,9 @@ export function useMobileCw(limit = 14): LibraryItem[] {
   return useMemo(() => {
     void localVersion;
     void dismissVersion;
-    const base = cwPerProfile ? [] : items.filter((i) => !ANIME_CLOUD_ID.test(i._id));
+    const base = cwPerProfile
+      ? []
+      : [...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)), ...externalCw];
     const merged = [...base, ...listLocalCw().map(localToLibraryItem)]
       .filter(
         (i) =>
@@ -146,7 +152,7 @@ export function useMobileCw(limit = 14): LibraryItem[] {
       if (out.length >= limit) break;
     }
     return out;
-  }, [items, localVersion, dismissVersion, limit, hideAnime, cwPerProfile]);
+  }, [items, externalCw, localVersion, dismissVersion, limit, hideAnime, cwPerProfile]);
 }
 
 function toMeta(item: LibraryItem): Meta {
@@ -211,7 +217,7 @@ function MobileCwCard({
   const dur = item.state?.duration ?? 0;
   const off = item.state?.timeOffset ?? 0;
   const progress = dur > 0 ? Math.min(1, off / dur) : 0;
-  const external = item.external === "simkl";
+  const external = !!item.external;
   const remaining = dur > 0 && !external ? formatRemaining(dur - off, t) : "";
   const ep = episodeInfo(item);
   const sub =
@@ -253,7 +259,16 @@ function MobileCwCard({
             </div>
           )}
           <span className="absolute bottom-2.5 start-2.5 flex max-w-[calc(100%-20px)] items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
-            <Play size={11} strokeWidth={0} fill="currentColor" className="shrink-0" />
+            {item.external ? (
+              <img
+                src={item.external === "trakt" ? traktLogo : simklLogo}
+                alt=""
+                title={item.external === "trakt" ? t("Paused on Trakt") : t("Paused on Simkl")}
+                className="h-3.5 w-3.5 shrink-0 rounded-sm"
+              />
+            ) : (
+              <Play size={11} strokeWidth={0} fill="currentColor" className="shrink-0" />
+            )}
             {sub ? (
               <>
                 <span className="shrink-0">{sub}</span>

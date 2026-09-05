@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, MessageSquare } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { RowNote } from "@/views/settings/shared";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import type { ThemeComment } from "@/lib/theme-store";
 import { useComments } from "./use-comments";
@@ -28,7 +29,7 @@ export function CommentsSection({ themeId }: { themeId: string }) {
 
   return (
     <section className="flex flex-col gap-4">
-      <h3 className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-ink">
+      <h3 className="harbor-settings-label flex items-center gap-2">
         <MessageSquare size={16} className="text-ink-subtle" />
         {t("Comments")}
         {comments.length > 0 && (
@@ -39,7 +40,7 @@ export function CommentsSection({ themeId }: { themeId: string }) {
       {author ? (
         <CommentComposer onSubmit={add} />
       ) : (
-        <p className="rounded-sm border border-dashed border-edge bg-surface px-4 py-5 text-center text-[13px] text-ink-subtle">
+        <p className="max-w-[70ch] rounded-sm bg-surface px-4 py-5 text-[15.5px] font-normal leading-[22px] tracking-[-0.02px] text-ink-muted ring-1 ring-edge-soft">
           {t("Sign in from the My themes tab to join the conversation.")}
         </p>
       )}
@@ -49,9 +50,9 @@ export function CommentsSection({ themeId }: { themeId: string }) {
           <Loader2 size={18} className="animate-spin" />
         </div>
       ) : error ? (
-        <p className="text-[13px] text-danger">{error}</p>
+        <RowNote>{error}</RowNote>
       ) : comments.length === 0 ? (
-        <p className="py-4 text-center text-[13px] text-ink-subtle">
+        <p className="max-w-[70ch] py-4 text-[15.5px] font-normal leading-[22px] tracking-[-0.02px] text-ink-subtle">
           {t("No comments yet. Start the conversation.")}
         </p>
       ) : (

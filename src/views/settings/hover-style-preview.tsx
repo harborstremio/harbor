@@ -73,10 +73,10 @@ export function HoverStyleGallery({
           onClick={() => setEditing("new")}
           className="flex aspect-[2/3] flex-col items-center justify-center gap-2 rounded-md border border-dashed border-edge-soft bg-canvas/40 text-ink-subtle transition-colors hover:border-edge hover:text-ink"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-raised">
-            <Plus size={18} strokeWidth={2.4} />
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-raised">
+            <Plus size={20} strokeWidth={2.4} />
           </span>
-          <span className="text-[12px] font-semibold">{t("Custom")}</span>
+          <span className="text-[15.5px] font-semibold">{t("Custom")}</span>
         </button>
       </div>
       {editing && (
@@ -139,8 +139,8 @@ function Tile({
         {meta && inCard && <CardHoverOverlay meta={meta} style={style} onPlay={() => {}} preview />}
       </div>
       <div className="flex items-center justify-between px-0.5">
-        <span className={`text-[12px] font-semibold ${selected ? "text-accent" : "text-ink"}`}>{label}</span>
-        <span className="hidden text-[10px] text-ink-subtle sm:inline">{sub}</span>
+        <span className={`min-w-0 truncate text-[15.5px] font-semibold ${selected ? "text-accent" : "text-ink"}`}>{label}</span>
+        <span className="hidden shrink-0 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink-subtle sm:inline">{sub}</span>
       </div>
     </button>
   );
@@ -163,35 +163,36 @@ function CustomTile({
   const props = customHoverPosterProps(config, true);
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick()}
-      aria-pressed={selected}
-      className={`group/tile flex cursor-pointer flex-col gap-2 rounded-md border p-2 text-start transition-colors ${
+      className={`group/tile relative flex rounded-md border transition-colors ${
         selected ? "border-accent bg-accent/10" : "border-edge-soft bg-canvas/50 hover:border-edge"
       }`}
     >
-      <div className={`relative aspect-[2/3] w-full overflow-hidden rounded-md bg-elevated ring-1 ring-edge-soft/60 ${props.className}`} style={props.style}>
-        {meta?.poster && (
-          <img src={meta.poster} alt="" draggable={false} className="absolute inset-0 h-full w-full rounded-md object-cover" />
-        )}
-        {meta && <CustomHoverOverlay config={config} meta={meta} onPlay={() => {}} preview />}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit();
-          }}
-          aria-label={t("Edit")}
-          className="absolute end-1.5 top-1.5 z-30 flex h-6 w-6 items-center justify-center rounded-md bg-black/55 text-white opacity-0 transition-opacity hover:bg-black/80 group-hover/tile:opacity-100"
-        >
-          <Pencil size={12} />
-        </button>
-      </div>
-      <div className="flex items-center justify-between px-0.5">
-        <span className={`line-clamp-1 text-[12px] font-semibold ${selected ? "text-accent" : "text-ink"}`}>{config.name}</span>
-      </div>
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={selected}
+        className="flex w-full flex-col gap-2 p-2 text-start"
+      >
+        <div className={`relative aspect-[2/3] w-full overflow-hidden rounded-md bg-elevated ring-1 ring-edge-soft/60 ${props.className}`} style={props.style}>
+          {meta?.poster && (
+            <img src={meta.poster} alt="" draggable={false} className="absolute inset-0 h-full w-full rounded-md object-cover" />
+          )}
+          {meta && <CustomHoverOverlay config={config} meta={meta} onPlay={() => {}} preview />}
+        </div>
+        <div className="flex items-center justify-between px-0.5">
+          <span className={`line-clamp-1 text-[15.5px] font-semibold ${selected ? "text-accent" : "text-ink"}`}>{config.name}</span>
+        </div>
+      </button>
+      <button
+        type="button"
+        onClick={onEdit}
+        aria-label={t("Edit")}
+        className="group/pencil absolute end-2 top-2 z-30 grid h-11 w-11 place-items-center opacity-60 transition-opacity hover:opacity-100 group-hover/tile:opacity-100"
+      >
+        <span className="grid h-7 w-7 place-items-center rounded-md bg-black/55 text-white transition-colors group-hover/pencil:bg-black/80">
+          <Pencil size={14} />
+        </span>
+      </button>
     </div>
   );
 }

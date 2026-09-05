@@ -25,7 +25,7 @@ export function EpisodeCardPreview({ kind }: { kind: EpisodeCardKind }) {
 }
 
 function Caption({ children }: { children: ReactNode }) {
-  return <p className="mt-3 text-[12px] leading-relaxed text-ink-muted">{children}</p>;
+  return <p className="mt-3 max-w-[70ch] text-[15.5px] leading-[22px] text-ink-muted">{children}</p>;
 }
 
 function Still({ src, soft }: { src?: string; soft?: boolean }) {

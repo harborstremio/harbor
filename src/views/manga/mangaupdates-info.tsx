@@ -116,6 +116,22 @@ export function MangaUpdatesRank({ rank, onClick }: { rank: number; onClick: () 
   );
 }
 
+function scriptFlag(text: string, format?: string): string | null {
+  if (/[\u3040-\u30ff]/.test(text)) return "\u{1F1EF}\u{1F1F5}";
+  if (/[\uac00-\ud7af\u1100-\u11ff]/.test(text)) return "\u{1F1F0}\u{1F1F7}";
+  if (/[\u4e00-\u9fff]/.test(text)) {
+    const kind = (format ?? "").toLowerCase();
+    if (kind.includes("manhua")) return "\u{1F1E8}\u{1F1F3}";
+    if (kind.includes("manhwa")) return "\u{1F1F0}\u{1F1F7}";
+    return "\u{1F1EF}\u{1F1F5}";
+  }
+  if (/[\u0400-\u04ff]/.test(text)) return "\u{1F1F7}\u{1F1FA}";
+  if (/[\u0600-\u06ff]/.test(text)) return "\u{1F1F8}\u{1F1E6}";
+  if (/[\u0e00-\u0e7f]/.test(text)) return "\u{1F1F9}\u{1F1ED}";
+  if (/[\u0590-\u05ff]/.test(text)) return "\u{1F1EE}\u{1F1F1}";
+  return null;
+}
+
 function Block({ label, children }: { label?: string; children: ReactNode }) {
   return (
     <div className="mt-6 flex flex-col gap-3 border-t border-edge-soft pt-6 first:mt-0 first:border-t-0 first:pt-0">
@@ -378,14 +394,27 @@ export function MangaUpdatesSection({
 
               {alts.length > 0 && (
                 <Block label={t("Also known as")}>
-                  <p className="text-[14px] leading-relaxed text-ink-muted">
-                    {(showAlts ? alts : alts.slice(0, ALT_CAP)).join(", ")}
-                    {alts.length > ALT_CAP && (
-                      <button type="button" onClick={() => setShowAlts((v) => !v)} className={MORE}>
-                        {showAlts ? t("Show less") : t("+{n} more", { n: alts.length - ALT_CAP })}
-                      </button>
-                    )}
-                  </p>
+                  <ul className="flex flex-col gap-1">
+                    {(showAlts ? alts : alts.slice(0, ALT_CAP)).map((alt) => {
+                      const flag = scriptFlag(alt, info.type);
+                      return (
+                        <li
+                          key={alt}
+                          className="flex items-start gap-2 text-[14px] leading-relaxed text-ink-muted"
+                        >
+                          <span className="w-5 shrink-0 text-center" aria-hidden>
+                            {flag ?? "\u00b7"}
+                          </span>
+                          <span className="min-w-0 break-words">{alt}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  {alts.length > ALT_CAP && (
+                    <button type="button" onClick={() => setShowAlts((v) => !v)} className={MORE}>
+                      {showAlts ? t("Show less") : t("+{n} more", { n: alts.length - ALT_CAP })}
+                    </button>
+                  )}
                 </Block>
               )}
 

@@ -9,6 +9,13 @@ import {
   setSlug,
   type ImportEntry,
 } from "./avatar-import";
+import {
+  AvatarPackError,
+  pickPackNative,
+  readPackFromFile,
+  resolvePackGroups,
+} from "./avatar-pack-file";
+import type { ImportGroup } from "./avatar-import";
 import { useT } from "@/lib/i18n";
 
 export function useAvatarImport(section: string) {
@@ -16,8 +23,10 @@ export function useAvatarImport(section: string) {
   const [importing, setImporting] = useState<{ done: number; total: number } | null>(null);
   const [flashIds, setFlashIds] = useState<string[]>([]);
   const [uploadsBadge, setUploadsBadge] = useState(0);
+  const [packError, setPackError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const folderRef = useRef<HTMLInputElement>(null);
+  const packRef = useRef<HTMLInputElement>(null);
   const flashTimer = useRef<number>(0);
 
   useEffect(() => {
@@ -25,11 +34,7 @@ export function useAvatarImport(section: string) {
   }, [section]);
   useEffect(() => () => window.clearTimeout(flashTimer.current), []);
 
-  const runImport = async (entries: ImportEntry[]) => {
-    if (!entries.length) return;
-    setImporting({ done: 0, total: entries.length });
-    const groups = await buildGroups(entries, (done, total) => setImporting({ done, total }));
-    setImporting(null);
+  const commitGroups = async (groups: ImportGroup[]) => {
     const touched: string[] = [];
     let uploaded = 0;
     for (const g of groups) {
@@ -44,6 +49,58 @@ export function useAvatarImport(section: string) {
       window.clearTimeout(flashTimer.current);
       flashTimer.current = window.setTimeout(() => setFlashIds([]), 1400);
     }
+  };
+
+  const runPackImport = async (source: { pack: Parameters<typeof resolvePackGroups>[0]; baseDir: string } | null) => {
+    if (!source) return;
+    setPackError(null);
+    setImporting({ done: 0, total: 0 });
+    try {
+      const { groups, skipped } = await resolvePackGroups(source.pack, source.baseDir, (done, total) =>
+        setImporting({ done, total }),
+      );
+      setImporting(null);
+      if (!groups.length) {
+        setPackError(t("None of the images in that pack could be loaded."));
+        return;
+      }
+      await commitGroups(groups);
+      if (skipped > 0) setPackError(t("{n} images in that pack could not be loaded.", { n: skipped }));
+    } catch (err) {
+      setImporting(null);
+      setPackError(err instanceof AvatarPackError ? err.message : t("That pack could not be imported."));
+    }
+  };
+
+  const importPack = async () => {
+    setPackError(null);
+    if (isNativePick()) {
+      try {
+        await runPackImport(await pickPackNative());
+      } catch (err) {
+        setPackError(err instanceof AvatarPackError ? err.message : t("That pack could not be imported."));
+      }
+    } else packRef.current?.click();
+  };
+
+  const onPackInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setPackError(null);
+    try {
+      await runPackImport(await readPackFromFile(file));
+    } catch (err) {
+      setPackError(err instanceof AvatarPackError ? err.message : t("That pack could not be imported."));
+    }
+  };
+
+  const runImport = async (entries: ImportEntry[]) => {
+    if (!entries.length) return;
+    setImporting({ done: 0, total: entries.length });
+    const groups = await buildGroups(entries, (done, total) => setImporting({ done, total }));
+    setImporting(null);
+    await commitGroups(groups);
   };
 
   const importImages = async () => {
@@ -66,9 +123,14 @@ export function useAvatarImport(section: string) {
     uploadsBadge,
     fileRef,
     folderRef,
+    packRef,
+    packError,
+    clearPackError: () => setPackError(null),
     importImages,
     importFolder,
+    importPack,
     onInputChange,
+    onPackInputChange,
     runImport,
   };
 }

@@ -1,4 +1,4 @@
-import { Check, ExternalLink, Link2, LogOut, Trash2 } from "lucide-react";
+import { ExternalLink, Info, Link2, LogOut, RefreshCw, Trash2, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { MalConnectModal } from "@/components/mal/mal-connect-modal";
 import { fetchMalAvatar } from "@/lib/mal/profile";
@@ -8,7 +8,8 @@ import { useSettings } from "@/lib/settings";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { Section, ToggleRow } from "./shared";
-import { ModalButton, SettingRow, SettingsModal } from "./kit";
+import { ModalButton, ROW_DESC, SettingRow, SettingsModal } from "./kit";
+import { SButton } from "./ui";
 import { SyncIndicatorSetting } from "./sync-indicator-setting";
 
 export function MalPanel() {
@@ -55,46 +56,67 @@ export function MalPanel() {
     }
   };
 
+  const authorized = sessionAge(t, session?.createdAt);
+
   return (
     <>
       {!isConnected ? (
-        <section className="flex flex-col gap-5 rounded-md bg-elevated p-7">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">
-              {t("Connect your MyAnimeList account")}
-            </h2>
-            <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Sync your MyAnimeList watch progress and list as you finish episodes.")}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setModalOpen(true)}
-              className="flex h-11 items-center gap-2.5 rounded-md bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
-            >
-              <Link2 size={16} strokeWidth={2.2} />
+        <Section
+          title={t("Not connected")}
+          subtitle={t("Sync your MyAnimeList watch progress and list as you finish episodes.")}
+        >
+          <SettingRow
+            icon={<Link2 size={20} strokeWidth={2.1} />}
+            label={t("Connect your MyAnimeList account")}
+            desc={t("Sign in once with MyAnimeList. Harbor then updates your episode count as you watch, and never lowers a count you already have.")}
+          >
+            <SButton variant="primary" onClick={() => setModalOpen(true)}>
+              <Link2 size={18} strokeWidth={2.2} />
               {t("Connect MyAnimeList")}
-            </button>
-            <button
-              onClick={() => openUrl("https://myanimelist.net")}
-              className="flex h-11 items-center gap-2 rounded-md bg-raised px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:text-ink"
-            >
-              {t("About MyAnimeList")}
-              <ExternalLink size={14} strokeWidth={2.2} />
-            </button>
-          </div>
-        </section>
+            </SButton>
+          </SettingRow>
+          <SettingRow
+            icon={<Info size={20} strokeWidth={2.1} />}
+            label={t("About MyAnimeList")}
+            desc={t("MyAnimeList is a free site for tracking the anime you watch. Open it to read more or to make an account.")}
+          >
+            <SButton onClick={() => openUrl("https://myanimelist.net")}>
+              {t("Open myanimelist.net")}
+              <ExternalLink size={18} strokeWidth={2.2} />
+            </SButton>
+          </SettingRow>
+        </Section>
       ) : (
         <Section
           title={t("Connected")}
           subtitle={t("Harbor keeps your MyAnimeList watch progress in sync.")}
         >
+          <SettingRow
+            icon={<UserRound size={20} strokeWidth={2.1} />}
+            label={userName ? `@${userName}` : t("Your MyAnimeList account")}
+            desc={
+              authorized
+                ? t("Authorized {when}", { when: authorized })
+                : t("Harbor is signed in to your MyAnimeList account.")
+            }
+          >
+            {userName && (
+              <SButton
+                onClick={() =>
+                  openUrl(`https://myanimelist.net/profile/${encodeURIComponent(userName)}`)
+                }
+              >
+                {t("Open profile")}
+                <ExternalLink size={18} strokeWidth={2.2} />
+              </SButton>
+            )}
+          </SettingRow>
           <ToggleRow
             label={t("Sync watch progress")}
             sub={t("Finishing an anime episode updates your MyAnimeList progress. Forward only: it never lowers a count you already have.")}
             value={settings.malAutoSync}
             onChange={(v) => update({ malAutoSync: v })}
+            leading={<RefreshCw size={20} strokeWidth={2.1} />}
           />
           {malAvatar && (
             <ToggleRow
@@ -107,40 +129,20 @@ export function MalPanel() {
                   src={malAvatar}
                   alt=""
                   draggable={false}
-                  className="h-9 w-9 rounded-full object-cover"
+                  className="h-6 w-6 rounded-full object-cover"
                 />
               }
             />
           )}
           <SettingRow
-            icon={
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-success/15 text-success">
-                <Check size={16} strokeWidth={2.4} />
-              </span>
-            }
-            label={userName || t("Connected")}
-            desc={t("Authorized {when}", { when: sessionAge(t, session?.createdAt) })}
+            icon={<LogOut size={20} strokeWidth={2.1} />}
+            label={t("Disconnect from MyAnimeList")}
+            desc={t("Harbor signs out and stops updating your progress. Your list on MyAnimeList is left as it is.")}
           >
-            {userName && (
-              <button
-                onClick={() =>
-                  openUrl(`https://myanimelist.net/profile/${encodeURIComponent(userName)}`)
-                }
-                className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-raised px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:text-ink"
-              >
-                {t("Open profile")}
-                <ExternalLink size={12} strokeWidth={2.2} />
-              </button>
-            )}
-          </SettingRow>
-          <SettingRow label={t("Disconnect from MyAnimeList")}>
-            <button
-              onClick={() => setConfirmDisconnect(true)}
-              className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-raised px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:text-danger"
-            >
-              <Trash2 size={12} />
+            <SButton variant="danger" onClick={() => setConfirmDisconnect(true)}>
+              <Trash2 size={18} strokeWidth={2.2} />
               {t("Disconnect")}
-            </button>
+            </SButton>
           </SettingRow>
           <SettingsModal
             open={confirmDisconnect}
@@ -151,8 +153,8 @@ export function MalPanel() {
                 <ModalButton ghost onClick={() => setConfirmDisconnect(false)}>
                   {t("Cancel")}
                 </ModalButton>
-                <button
-                  type="button"
+                <SButton
+                  variant="danger"
                   onClick={() => {
                     if (settings.useMalAvatar && settings.harborAvatar === malAvatar) {
                       pushAvatar(null);
@@ -161,15 +163,14 @@ export function MalPanel() {
                     disconnect();
                     setConfirmDisconnect(false);
                   }}
-                  className="harbor-press-pop flex h-9 items-center gap-1.5 rounded-md bg-danger/15 px-4 text-[12.5px] font-semibold text-danger transition-colors hover:bg-danger/25"
                 >
-                  <LogOut size={12} strokeWidth={2.4} />
+                  <LogOut size={18} strokeWidth={2.2} />
                   {t("Disconnect")}
-                </button>
+                </SButton>
               </>
             }
           >
-            <p className="rounded-md bg-elevated px-4 py-3.5 text-[13px] leading-relaxed text-ink-muted">
+            <p className={`max-w-[66ch] ${ROW_DESC}`}>
               {t("Disconnect MyAnimeList? Your progress will stop syncing until you reconnect.")}
             </p>
           </SettingsModal>

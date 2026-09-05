@@ -47,9 +47,9 @@ export function Disclosure({
       >
         {art && <span className="shrink-0 text-ink-muted">{art}</span>}
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="text-[13.5px] font-medium leading-snug text-ink">{title}</span>
+          <span className="text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink">{title}</span>
           {summary && (
-            <span className="max-w-[70ch] text-[12.5px] leading-relaxed text-ink-subtle">
+            <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
               {summary}
             </span>
           )}

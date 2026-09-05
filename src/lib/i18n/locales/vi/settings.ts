@@ -970,6 +970,11 @@ const settings: Record<string, string> = {
   "Skip intros": "Bỏ qua phần mở đầu",
   "Harbor finds intro and credits timing from AniSkip, TheIntroDB, and the file's own chapters, then shows a Skip button at the right moment.":
     "Harbor lấy thời điểm phần mở đầu và danh đề từ AniSkip, TheIntroDB cùng các chương trong tệp, rồi hiện nút Bỏ qua đúng lúc.",
+  "Timing sources": "Nguồn dữ liệu thời điểm",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · thời điểm phần mở đầu và danh đề",
+  "Paste your TheIntroDB API key": "Dán khóa API TheIntroDB của bạn",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "Không bắt buộc. TheIntroDB vẫn phản hồi khi không có khóa, nhưng khóa sẽ nâng giới hạn tốc độ để dữ liệu thời điểm tiếp tục được gửi về khi bạn cày phim liên tục. Lấy khóa tại",
   "Auto-skip intros": "Tự động bỏ qua phần mở đầu",
   "Jump past openings automatically the moment one starts. The Skip button still shows either way, and seeking back into an intro replays it without skipping again.":
     "Tự động chuyển qua phần mở đầu ngay khi bắt đầu. Nút Bỏ qua vẫn luôn hiển thị, và nếu tua lại phần mở đầu thì nội dung sẽ phát lại mà không bị bỏ qua lần nữa.",
@@ -1264,6 +1269,13 @@ const settings: Record<string, string> = {
   "Sleep at end of episode": "Hẹn giờ ngủ khi hết tập",
   "Toggle a sleep timer that pauses when this episode ends.":
     "Bật/tắt hẹn giờ ngủ để tạm dừng khi tập này kết thúc.",
+  Recovery: "Khôi phục",
+  "Reload source": "Tải lại nguồn",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "Mở lại luồng phát bạn đang xem và tiếp tục từ đúng chỗ bạn đã dừng.",
+  "Restart streaming server": "Khởi động lại máy chủ phát trực tuyến",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "Khởi động lại máy chủ phát trực tuyến của riêng Harbor, rồi tải lại luồng phát khi máy chủ hoạt động trở lại. Chỉ dành cho máy tính.",
   Low: "Thấp",
   "cosmetic, minor": "thẩm mỹ, nhỏ",
   annoying: "gây khó chịu",
@@ -1945,6 +1957,25 @@ const settings: Record<string, string> = {
   "Build a bigger buffer": "Tăng bộ đệm",
   "Loads more of the video ahead of time before playing. Smoother on weak connections, uses a little more memory and takes a moment longer to start.":
     "Tải trước nhiều nội dung video hơn trước khi phát. Mượt hơn khi kết nối yếu, dùng thêm một chút bộ nhớ và mất thêm chút thời gian để bắt đầu.",
+  "Buffer size": "Kích thước bộ đệm",
+  Small: "Nhỏ",
+  Medium: "Vừa",
+  Adaptive: "Thích ứng",
+  "Reads ahead": "Tải trước",
+  "Memory cap": "Giới hạn bộ nhớ",
+  "Wait before playing": "Chờ trước khi phát",
+  "Holds up to {size} in memory while a video plays.":
+    "Giữ tối đa {size} trong bộ nhớ khi video đang phát.",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "Harbor tự chọn mức tải trước cho từng tựa phim và tăng dần khi việc phát đã ổn định. Phù hợp với hầu hết mọi người.",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "Khởi động nhanh nhất và dùng ít bộ nhớ nhất. Phù hợp khi kết nối nhanh, ổn định hoặc khi máy có ít bộ nhớ.",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "Tải trước vài phút. Vượt qua được những gián đoạn ngắn mà không phải chờ lâu trước khi bắt đầu phát.",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "Tải trước mười phút. Dành cho Wi-Fi chập chờn hoặc máy chủ ở xa, đổi lại phải chờ lâu hơn trước khi bắt đầu phát.",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "Tải trước nửa giờ. Chỉ đáng dùng khi kết nối cực kỳ không ổn định.",
   "For laptop speakers and headphones. Movies mixed for 5.1 or 7.1 surround can sound hollow or have quiet dialogue on two speakers. This folds them down properly.":
     "Dành cho loa laptop và tai nghe. Phim phối âm vòm 5.1 hoặc 7.1 có thể nghe rỗng hoặc lời thoại quá nhỏ trên hai loa. Tùy chọn này sẽ trộn âm xuống đúng cách.",
   "Mix surround sound down to stereo": "Trộn âm thanh vòm xuống stereo",

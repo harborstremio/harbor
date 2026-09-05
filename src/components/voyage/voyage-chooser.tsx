@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "@/components/spinner";
 import { VOYAGE_THEMES, THEME_PALETTE } from "@/lib/voyage/themes";
 import { startVoyage } from "@/lib/voyage/store";
 import type { VoyageTheme } from "@/lib/voyage/types";
@@ -152,7 +152,7 @@ function ThemeTile({
       </span>
       {busy && (
         <span className="absolute inset-0 z-10 grid place-items-center bg-canvas/50">
-          <Loader2 size={20} className="animate-spin text-ink motion-reduce:animate-none" />
+          <Spinner size={20} className="text-ink" />
         </span>
       )}
     </button>

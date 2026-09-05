@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { EyeOff, Palette } from "lucide-react";
 import { badgeLabel, FormatBadge, type BadgeKind } from "@/components/format-badge";
 import { emitListToast } from "@/components/lists/list-toast";
 import { setBadgeOverride, useBadgeState } from "@/lib/stream-badges";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { Section, ToggleRow } from "../shared";
-import { SettingGroup } from "../kit";
-import { ConfirmButton } from "./confirm-button";
+import { SettingGroup, SettingRow } from "../kit";
+import { usePageActions } from "../page-actions";
+import { handoffFocus } from "./focus-handoff";
 import { KindEditorModal } from "./kind-editor-modal";
+import { StreamRowPreview } from "./stream-row-preview";
 
 const GROUPS: Array<{ label: string; kinds: BadgeKind[] }> = [
   {
@@ -27,12 +30,43 @@ const GROUPS: Array<{ label: string; kinds: BadgeKind[] }> = [
   { label: "Flags", kinds: ["extended", "remastered", "repack", "no-label", "unknown"] },
 ];
 
+const TILE_GRID = "grid grid-cols-[repeat(auto-fill,minmax(112px,1fr))] gap-2.5";
+
 export function BadgesTab() {
   const t = useT();
   const state = useBadgeState();
   const { settings, update } = useSettings();
   const [selected, setSelected] = useState<BadgeKind | null>(null);
+  const [armed, setArmed] = useState(false);
+  const firstTileRef = useRef<HTMLButtonElement>(null);
   const overrideCount = Object.keys(state.overrides).length;
+
+  usePageActions(
+    overrideCount > 0
+      ? [
+          {
+            id: `badges-reset-art-${overrideCount}`,
+            tone: "danger",
+            label: armed ? "Tap again to reset" : "Reset all badge art",
+            onSelect: () => {
+              if (!armed) {
+                setArmed(true);
+                window.setTimeout(() => setArmed(false), 3000);
+                return;
+              }
+              setArmed(false);
+              handoffFocus(() => {
+                for (const k of Object.keys(state.overrides) as BadgeKind[]) {
+                  setBadgeOverride(k, null);
+                }
+                emitListToast(t("Badge art back to default"));
+              }, firstTileRef.current);
+            },
+          },
+        ]
+      : [],
+    armed ? "There is no undo for this." : undefined,
+  );
 
   return (
     <>
@@ -41,6 +75,9 @@ export function BadgesTab() {
         subtitle={t("The little 4K, HDR, codec, and audio chips that ride along each stream in the play picker.")}
         newId="badges:stream-format-chips"
       >
+        <StreamRowPreview
+          caption={t("Every change on this page shows up here first. The art you pick below rides on rows exactly like this one.")}
+        />
         <ToggleRow
           label={t("Show format chips on stream rows")}
           sub={t("The picker tags each stream with resolution, HDR flavor, codec, and audio format. Off hides them all.")}
@@ -51,50 +88,44 @@ export function BadgesTab() {
 
       <Section
         title={t("Badge art")}
-        subtitle={t("Every format badge Harbor can show on streams. Click one to swap its art, hide it, or reset it. Changes apply everywhere badges appear.")}
+        subtitle={t("Every format badge Harbor can show on streams. Pick one to swap its art, hide it, or put it back. Changes apply everywhere badges appear.")}
       >
         {overrideCount > 0 && (
-          <div className="flex items-center justify-between gap-3 rounded-md bg-elevated px-4 py-2.5">
-            <span className="text-[12.5px] text-ink-subtle">
-              {t("{n} badges customized", { n: overrideCount })}
-            </span>
-            <ConfirmButton
-              label={t("Reset all art")}
-              confirmLabel={t("Tap again to reset {n} badges", { n: overrideCount })}
-              onConfirm={() => {
-                for (const k of Object.keys(state.overrides) as BadgeKind[]) {
-                  setBadgeOverride(k, null);
-                }
-                emitListToast(t("Badge art back to default"));
-              }}
-            />
-          </div>
+          <SettingRow
+            icon={<Palette size={18} strokeWidth={2} />}
+            label={t("Badges you have changed")}
+            desc={t("{n} badges use art you picked instead of Harbor's default.", { n: overrideCount })}
+          />
         )}
-        {GROUPS.map((g) => (
+        {GROUPS.map((g, gi) => (
           <SettingGroup key={g.label} label={t(g.label)}>
-            <div className="flex flex-wrap gap-1.5">
-              {g.kinds.map((k) => {
+            <div className={TILE_GRID}>
+              {g.kinds.map((k, ki) => {
                 const o = state.overrides[k];
-                const isSel = selected === k;
+                const customized = !!(o?.image || o?.hidden);
                 return (
                   <button
                     key={k}
+                    ref={gi === 0 && ki === 0 ? firstTileRef : undefined}
+                    type="button"
                     onClick={() => setSelected(k)}
-                    title={badgeLabel(k)}
-                    className={`relative flex h-16 min-w-[74px] items-center justify-center rounded-md px-3 transition-colors ${
-                      isSel ? "bg-accent-soft" : "bg-elevated hover:bg-raised"
-                    } ${o?.hidden ? "opacity-40" : ""}`}
+                    className={`flex flex-col items-center gap-2 rounded-[10px] border bg-elevated p-2.5 text-center transition-colors ${
+                      selected === k ? "border-accent" : "border-edge-soft hover:border-edge"
+                    }`}
                   >
-                    {o?.hidden ? (
-                      <span className="text-[11.5px] font-semibold uppercase tracking-wide text-ink-subtle">
-                        {badgeLabel(k)}
-                      </span>
-                    ) : (
-                      <FormatBadge kind={k} size="sm" />
-                    )}
-                    {(o?.image || o?.hidden) && (
-                      <span className="absolute -end-1 -top-1 h-2.5 w-2.5 rounded-full bg-accent" />
-                    )}
+                    <span className="relative grid h-14 w-full place-items-center rounded-[6px] bg-canvas">
+                      {o?.hidden ? (
+                        <EyeOff size={20} strokeWidth={2} className="text-ink-subtle" />
+                      ) : (
+                        <FormatBadge kind={k} size="sm" />
+                      )}
+                      {customized && (
+                        <span className="absolute end-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-accent" />
+                      )}
+                    </span>
+                    <span className="w-full text-[15.5px] leading-[20px] text-ink">
+                      {badgeLabel(k)}
+                    </span>
                   </button>
                 );
               })}

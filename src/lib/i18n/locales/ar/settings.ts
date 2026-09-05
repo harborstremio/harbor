@@ -2771,6 +2771,45 @@ const settings: Record<string, string> = {
   "Monochrome (White)": "أحادي (أبيض)",
   "When a movie or episode starts, briefly show its Common Sense Media parental guide (violence, nudity, profanity, substances) with severity. Fades on its own.":
     "عند بدء فيلم أو حلقة، اعرض لفترة وجيزة إرشادات المحتوى من Common Sense Media (العنف والعري والألفاظ والمواد) مع مستوى الشدة، ثم أخفها تلقائياً.",
+  Recovery: "الاستعادة",
+  "Reload source": "إعادة تحميل المصدر",
+  "Re-open the stream you are watching and pick it back up where you left off.":
+    "إعادة فتح البث الذي تشاهده ومتابعته من حيث توقّفت.",
+  "Restart streaming server": "إعادة تشغيل خادم البث",
+  "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.":
+    "إعادة تشغيل خادم البث الخاص بـ Harbor، ثم إعادة تحميل البث بعد عودته. سطح المكتب فقط.",
+  "Buffer size": "حجم التخزين المؤقت",
+  Small: "صغير",
+  Medium: "متوسط",
+  Adaptive: "تكيّفي",
+  "Reads ahead": "القراءة المسبقة",
+  "Memory cap": "حدّ الذاكرة",
+  "Wait before playing": "الانتظار قبل التشغيل",
+  "Holds up to {size} in memory while a video plays.":
+    "يحتفظ بما يصل إلى {size} في الذاكرة أثناء تشغيل الفيديو.",
+  "Harbor sizes the head start for each title and grows it once playback settles. Right for almost everyone.":
+    "يحدّد Harbor حجم البداية المسبقة لكل عنوان ثم يزيدها بعد استقرار التشغيل. مناسب للجميع تقريبًا.",
+  "The quickest start and the least memory used. Good on a fast, steady connection, or on a machine that is short on memory.":
+    "أسرع بداية وأقل استهلاك للذاكرة. مناسب مع اتصال سريع ومستقر، أو على جهاز ذاكرته محدودة.",
+  "A couple of minutes of head start. Rides out a brief hiccup without much of a wait before playback begins.":
+    "بداية مسبقة بمقدار دقيقتين. تتجاوز التقطّع القصير دون انتظار طويل قبل بدء التشغيل.",
+  "Ten minutes of head start. Built for spotty Wi-Fi or a far-away server, at the cost of a longer wait before playback begins.":
+    "بداية مسبقة بمقدار عشر دقائق. مُعدّة لشبكة Wi-Fi غير مستقرة أو خادم بعيد، مقابل انتظار أطول قبل بدء التشغيل.",
+  "Half an hour of head start. Only worth it on a badly unreliable connection.":
+    "بداية مسبقة بمقدار نصف ساعة. لا تستحق العناء إلا مع اتصال سيّئ للغاية.",
+  "Ignored titles": "العناوين المتجاهَلة",
+  "Titles you ignore on the advisory card never show it again.":
+    "العناوين التي تتجاهلها من بطاقة التنبيه لن يظهر لها التنبيه مرة أخرى.",
+  "{count} titles will never show the content advisory again.":
+    "لن يظهر تنبيه المحتوى مرة أخرى لـ {count} عنوانًا.",
+  "Borderless window": "نافذة بلا إطار",
+  "True fullscreen covers the whole screen and hides the taskbar, but switching apps can flicker. Borderless window covers the same area with a frameless window, so alt-tab and overlays stay instant. Maximize fills the screen but keeps the taskbar and title bar.":
+    "ملء الشاشة الحقيقي يغطّي الشاشة بالكامل ويخفي شريط المهام، لكن التبديل بين التطبيقات قد يسبّب وميضًا. النافذة بلا إطار تغطّي المساحة نفسها بنافذة بلا حواف، فيبقى التبديل بـ Alt+Tab والطبقات فوريًا. أما التكبير فيملأ الشاشة مع إبقاء شريط المهام وشريط العنوان.",
+  "Timing sources": "مصادر التوقيت",
+  "TheIntroDB · intro and credits timing": "TheIntroDB · توقيت المقدمة وأسماء الطاقم",
+  "Paste your TheIntroDB API key": "الصق مفتاح API الخاص بـ TheIntroDB",
+  "Optional. TheIntroDB answers without a key, but a key raises your rate limit so timing keeps arriving when you binge. Get one at":
+    "اختياري. يستجيب TheIntroDB بدون مفتاح، لكن المفتاح يرفع حدّ الطلبات ليستمر وصول التوقيتات أثناء المشاهدة المتواصلة. احصل على مفتاح من",
 };
 
 export default settings;

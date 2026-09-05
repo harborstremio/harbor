@@ -1,12 +1,20 @@
-import { AlertTriangle, Cpu, ExternalLink, Filter, Loader2, Play } from "lucide-react";
+import { AlertTriangle, ExternalLink, Loader2, Play } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { isLinuxDesktop } from "@/lib/platform";
 import { openUrl } from "@/lib/window";
 import { svpApply, svpLaunch, svpStatus, type SvpStatus } from "@/lib/svp";
-import { Section, ToggleRow, Segmented } from "../shared";
-import { ModalButton, SettingGroup, SettingRow, SettingsModal, Nested } from "../kit";
+import { ROW_DESC, Section, ToggleRow, Segmented } from "../shared";
+import {
+  ModalButton,
+  ROW_ACTION,
+  ROW_ACTION_PRIMARY,
+  SettingGroup,
+  SettingRow,
+  SettingsModal,
+  Nested,
+} from "../kit";
 
 type Tone = "neutral" | "ok" | "bad";
 
@@ -33,6 +41,7 @@ export function SvpSection() {
   const getUrl = linux ? "https://www.svp-team.com/wiki/SVP:Linux" : "https://www.svp-team.com/get/";
 
   const openSvp = async () => {
+    if (busy) return;
     setBusy(true);
     setError(null);
     try {
@@ -124,26 +133,39 @@ export function SvpSection() {
       }
     >
       <SettingGroup label={t("Setup")}>
-        <SettingRow icon={<Cpu size={16} />} label={t("SVP engine")} desc={engine.desc}>
-          <StatusPill tone={engine.tone}>{engine.pill}</StatusPill>
-          {loadFailed && (
-            <RowAction onClick={() => setFixOpen(true)}>{t("How to fix")}</RowAction>
-          )}
-          {!supported ? null : installed ? (
-            <RowAction onClick={openSvp} disabled={busy}>
-              {busy ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <Play size={14} strokeWidth={2.2} />
-              )}
-              {t("Open SVP")}
-            </RowAction>
-          ) : (
-            <RowAction primary onClick={() => openUrl(getUrl)}>
-              {t("Get SVP (free)")}
-              <ExternalLink size={12} strokeWidth={2.2} />
-            </RowAction>
-          )}
+        <SettingRow wide label={t("SVP engine")} desc={engine.desc}>
+          <span className="flex w-full min-w-0 flex-wrap items-center gap-2.5">
+            <StatusReadout tone={engine.tone}>{engine.pill}</StatusReadout>
+            {loadFailed && (
+              <button type="button" onClick={() => setFixOpen(true)} className={ROW_ACTION}>
+                {t("How to fix")}
+              </button>
+            )}
+            {!supported ? null : installed ? (
+              <button
+                type="button"
+                onClick={busy ? undefined : openSvp}
+                aria-disabled={busy}
+                className={`${ROW_ACTION}${busy ? " pointer-events-none opacity-45" : ""}`}
+              >
+                {busy ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Play size={18} strokeWidth={2.2} />
+                )}
+                {t("Open SVP")}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => openUrl(getUrl)}
+                className={ROW_ACTION_PRIMARY}
+              >
+                {t("Get SVP (free)")}
+                <ExternalLink size={16} strokeWidth={2.2} />
+              </button>
+            )}
+          </span>
         </SettingRow>
       </SettingGroup>
 
@@ -176,7 +198,7 @@ export function SvpSection() {
 
         <Nested>
           <SettingRow
-            icon={<Filter size={16} />}
+            wide
             label={t("Apply SVP to")}
             desc={t(
               "Frame interpolation shines on anime but can look off on live-action film. Limit it to the content you want, then restart playback.",
@@ -189,7 +211,7 @@ export function SvpSection() {
           >
             <div
               inert={!settings.playerSvp}
-              className={settings.playerSvp ? "" : "pointer-events-none"}
+              className={`w-full min-w-0 ${settings.playerSvp ? "" : "pointer-events-none"}`}
             >
               <Segmented
                 value={settings.svpScope}
@@ -206,9 +228,9 @@ export function SvpSection() {
       </SettingGroup>
 
       {error && (
-        <div className="flex items-start gap-2.5 rounded-md bg-elevated px-4 py-3.5 text-[12.5px] leading-relaxed text-ink">
-          <AlertTriangle size={14} strokeWidth={2.4} className="mt-[2px] shrink-0 text-danger" />
-          <span className="min-w-0">{error}</span>
+        <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+          <AlertTriangle size={18} strokeWidth={2.4} className="mt-[2px] shrink-0 text-danger" />
+          <p className={`max-w-[66ch] ${ROW_DESC}`}>{error}</p>
         </div>
       )}
 
@@ -226,50 +248,26 @@ export function SvpSection() {
           </>
         }
       >
-        <div className="rounded-md bg-elevated px-4 py-3.5 text-[12.5px] leading-relaxed text-ink-muted">
+        <p className={`max-w-[70ch] ${ROW_DESC}`}>
           {t(
             "SVP's files are here but its VapourSynth engine won't load ({err}). This usually means a stale VapourSynth entry or a missing Microsoft VC++ runtime. Reinstall SVP, or install the latest \"Visual C++ Redistributable (x64)\" from Microsoft, then reopen Harbor.",
             { err: status?.load_error ?? "load error" },
           )}
-        </div>
+        </p>
       </SettingsModal>
     </Section>
   );
 }
 
-function StatusPill({ tone, children }: { tone: Tone; children: ReactNode }) {
+function StatusReadout({ tone, children }: { tone: Tone; children: ReactNode }) {
   return (
-    <span
-      className={`shrink-0 rounded-full bg-canvas px-2.5 py-1 text-[11.5px] font-semibold tracking-wide ${
-        tone === "ok" ? "text-success" : tone === "bad" ? "text-danger" : "text-ink-subtle"
-      }`}
-    >
+    <span className="flex h-11 shrink-0 items-center gap-2 text-[15.5px] leading-[22px] text-ink-muted">
+      <span
+        className={`h-2 w-2 shrink-0 rounded-full ${
+          tone === "ok" ? "bg-success" : tone === "bad" ? "bg-danger" : "bg-edge"
+        }`}
+      />
       {children}
     </span>
-  );
-}
-
-function RowAction({
-  onClick,
-  primary,
-  disabled,
-  children,
-}: {
-  onClick: () => void;
-  primary?: boolean;
-  disabled?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`harbor-press-pop flex h-9 shrink-0 items-center gap-1.5 rounded-md px-3.5 text-[12.5px] font-semibold transition-opacity disabled:opacity-60 ${
-        primary ? "bg-ink text-canvas hover:opacity-90" : "bg-canvas text-ink-muted hover:text-ink"
-      }`}
-    >
-      {children}
-    </button>
   );
 }

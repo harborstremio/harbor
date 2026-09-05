@@ -2,7 +2,10 @@ import { useEffect, useState, useMemo } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
-import { fetchMatchSummary, type SportsGame, type SportsMatchDetail } from "@/lib/sports/espn";
+import type { SportsGame, SportsMatchDetail } from "@/lib/sports/espn";
+import { fetchGameSummary, sportsLeagueByTag } from "@/lib/sports/provider";
+import { MatchPanel } from "@/views/sports/match-panel";
+import { WatchSources } from "@/views/sports/watch-sources";
 import { TennisMatchPanel } from "./match-detail-view/tennis-match-panel";
 
 export function MatchDetailView({ game }: { game: SportsGame }) {
@@ -12,9 +15,10 @@ export function MatchDetailView({ game }: { game: SportsGame }) {
   const [loading, setLoading] = useState(true);
   const isCombat = game.league === "UFC";
   const isTennis = game.league === "ATP" || game.league === "WTA";
+  const isSoccer = sportsLeagueByTag(game.league)?.group === "soccer";
   const tabs = isCombat
     ? (["summary", "profile", "stats"] as const)
-    : isTennis
+    : isTennis || isSoccer
       ? (["match"] as const)
       : (["summary", "lineups", "stats"] as const);
   const [tab, setTab] = useState<"summary" | "lineups" | "stats" | "profile" | "match">(tabs[0]);
@@ -22,7 +26,7 @@ export function MatchDetailView({ game }: { game: SportsGame }) {
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetchMatchSummary(game.league, game.id)
+    fetchGameSummary(game)
       .then((res) => {
         if (!active) return;
         if (res) setDetail(res);
@@ -43,7 +47,6 @@ export function MatchDetailView({ game }: { game: SportsGame }) {
 
   return (
     <div className="flex h-full flex-col bg-canvas pb-8">
-      {/* Header */}
       <div className="relative shrink-0 pb-10 pt-24">
         <div className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-brand/10 via-brand/5 to-transparent opacity-80" />
         <button
@@ -156,10 +159,10 @@ export function MatchDetailView({ game }: { game: SportsGame }) {
               </div>
             </div>
           </div>
+          <WatchSources game={game} />
         </div>
       </div>
 
-      {/* Tabs */}
       <div
         className={`mx-auto mt-8 flex w-full max-w-4xl shrink-0 gap-6 border-b border-edge-soft/50 px-6 ${
           tabs.length > 1 ? "" : "hidden"
@@ -179,7 +182,6 @@ export function MatchDetailView({ game }: { game: SportsGame }) {
         ))}
       </div>
 
-      {/* Content */}
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-y-auto px-6 py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {loading ? (
           <div className="flex flex-1 items-center justify-center">
@@ -191,7 +193,12 @@ export function MatchDetailView({ game }: { game: SportsGame }) {
           </div>
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-            {tab === "match" && <TennisMatchPanel detail={detail} />}
+            {tab === "match" &&
+              (isSoccer ? (
+                <MatchPanel game={game} detail={detail} />
+              ) : (
+                <TennisMatchPanel detail={detail} />
+              ))}
             {tab === "summary" && <SummaryTab detail={detail} />}
             {tab === "lineups" && <LineupsTab detail={detail} />}
             {tab === "stats" && <StatsTab detail={detail} />}
@@ -360,7 +367,6 @@ function LineupsTab({ detail }: { detail: SportsMatchDetail }) {
         </div>
       )}
 
-      {/* Full Roster List */}
       <div className="flex flex-col gap-8 md:flex-row">
         <div className="flex flex-1 flex-col gap-4 rounded-2xl bg-elevated/30 p-4 ring-1 ring-edge-soft/50">
           <div className="text-sm font-bold uppercase tracking-wider text-ink-muted border-b border-edge-soft/50 pb-2">
@@ -450,7 +456,6 @@ function TeamPitch({
 
   const pitchRows = useMemo(() => {
     if (!formation) {
-      // Fallback: Group by position if formation string is missing (e.g. old matches)
       const defs = field.filter((p) => p.position && p.position.toUpperCase().includes("D"));
       const mids = field.filter((p) => p.position && p.position.toUpperCase().includes("M"));
       const fwds = field.filter(
@@ -487,7 +492,6 @@ function TeamPitch({
 
   return (
     <div className="relative mx-auto flex w-full max-w-sm flex-col items-center rounded-3xl border border-edge-soft/50 bg-[#2b4c30] p-4 shadow-xl aspect-[3/4]">
-      {/* Pitch Lines (Half Pitch Blueprint) */}
       <div className="pointer-events-none absolute inset-4 rounded-xl border-2 border-white/20"></div>
       <div className="pointer-events-none absolute left-1/2 top-4 h-24 w-48 -translate-x-1/2 rounded-b-xl border-2 border-t-0 border-white/20"></div>
       <div className="pointer-events-none absolute left-1/2 bottom-4 h-32 w-64 -translate-x-1/2 rounded-t-xl border-2 border-b-0 border-white/20"></div>
@@ -552,9 +556,7 @@ function MmaProfileTab({ detail }: { detail: SportsMatchDetail }) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Full Body Images */}
       <div className="flex justify-between items-end bg-elevated/20 rounded-2xl p-4 overflow-hidden relative">
-        {/* Background gradient effect for depth */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-ink/5" />
 
         <div className="flex-1 flex flex-col items-center z-10">
@@ -588,7 +590,6 @@ function MmaProfileTab({ detail }: { detail: SportsMatchDetail }) {
         </div>
       </div>
 
-      {/* Tale of the Tape */}
       <div className="flex flex-col gap-1 rounded-2xl bg-elevated/20 p-4 ring-1 ring-edge-soft/50 shadow-sm">
         <StatRow label="Height" hVal={hP.height} aVal={aP.height} />
         <StatRow label="Weight" hVal={hP.weight} aVal={aP.weight} />
