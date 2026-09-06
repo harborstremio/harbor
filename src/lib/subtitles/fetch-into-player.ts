@@ -400,6 +400,7 @@ export async function fetchSubtitlesIntoPlayer(
         subtitleTitleOf(item.candidate),
         shouldSelect,
         itemMeta,
+        "automatic",
       );
       if (ok === true) {
         keep.add(item);

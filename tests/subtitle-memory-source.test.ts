@@ -132,7 +132,7 @@ test("remembered external subtitles remain authoritative until selection is obse
   );
   assert.match(
     autoload,
-    /attempts < 4 && elapsed >= 750[\s\S]*bridge\.setSubtitleTrack\(existing\.id\)/,
+    /attempts < 4 && elapsed >= 750[\s\S]*bridge\.setSubtitleTrack\(existing\.id, "restore"\)/,
     "a track-list race must retry the remembered selection with a bound",
   );
   assert.match(

@@ -714,7 +714,9 @@ export function createHtml5Bridge(): PlayerBridge {
       }
       refreshSnapshot();
     },
-    setSubtitleTrack(id) {
+    canAutoSelectSubtitle: () => mainSubtitleSelection.canAutoSelect(mediaRevision),
+    setSubtitleTrack(id, origin = "manual") {
+      if (!mainSubtitleSelection.claim(mediaRevision, origin)) return;
       if (id == null) {
         mainSubtitleSelection.invalidate();
         activeSubId = null;
@@ -795,11 +797,13 @@ export function createHtml5Bridge(): PlayerBridge {
     },
     setVideoEq() {},
     setAnime4kShaders() {},
-    async addSubtitle(url, lang, title, select, metadata): Promise<boolean> {
+    async addSubtitle(url, lang, title, select, metadata, origin = "manual"): Promise<boolean> {
       const requestMediaRevision = mediaRevision;
       const id = `ext-${subTracks.length}-${Date.now()}`;
       const selectionRequest =
-        select === true ? mainSubtitleSelection.begin(mediaRevision, id, activeSubId) : null;
+        select === true && mainSubtitleSelection.claim(mediaRevision, origin)
+          ? mainSubtitleSelection.begin(mediaRevision, id, activeSubId)
+          : null;
       const prepared = takePreparedSubtitle(url);
       const providerDerived = metadata?.providerDerived ?? Boolean(metadata?.provider);
       if (!prepared && providerDerived && !isSafeProviderSubtitleUrl(url)) return false;
@@ -1054,7 +1058,7 @@ export function createHtml5Bridge(): PlayerBridge {
     },
     subscribe(l) {
       listeners.add(l);
-      l(snap);
+      l({ ...snap });
       return () => {
         listeners.delete(l);
       };

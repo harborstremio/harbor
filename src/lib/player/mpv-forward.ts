@@ -189,7 +189,7 @@ export function createForwardingMpvBridge(): ForwardingBridge {
     },
     subscribe(l) {
       listeners.add(l);
-      l(snap);
+      l({ ...snap });
       return () => {
         listeners.delete(l);
       };

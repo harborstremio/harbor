@@ -1,3 +1,5 @@
+export type SubtitleSelectionOrigin = "manual" | "automatic" | "restore";
+
 export type SubtitleSelectionRequest = Readonly<{
   mediaRevision: number;
   selectionRevision: number;
@@ -12,6 +14,17 @@ export type SubtitleSelectionSettlement =
 /** Keeps async subtitle loads from committing after a newer selection or media load. */
 export class SubtitleSelectionCoordinator {
   private selectionRevision = 0;
+  private manualMediaRevision: number | null = null;
+
+  canAutoSelect(mediaRevision: number): boolean {
+    return this.manualMediaRevision !== mediaRevision;
+  }
+
+  claim(mediaRevision: number, origin: SubtitleSelectionOrigin): boolean {
+    if (origin !== "manual") return this.canAutoSelect(mediaRevision);
+    this.manualMediaRevision = mediaRevision;
+    return true;
+  }
 
   begin(
     mediaRevision: number,
