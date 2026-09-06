@@ -9,6 +9,7 @@ import {
   Database,
   ExternalLink,
   Heart,
+  Headphones,
   LayoutGrid,
   Library,
   List,
@@ -89,7 +90,12 @@ import {
   toggleEBookFavorite,
   toggleEBookLibrary,
 } from "@/lib/ebook/library";
-import { loadEBookProgress, loadEBookResume, saveEBookResume } from "@/lib/ebook/reader-state";
+import {
+  loadCompletedEBookChapters,
+  loadEBookProgress,
+  loadEBookResume,
+  saveEBookResume,
+} from "@/lib/ebook/reader-state";
 import {
   listEBookProviders,
   loadSourceEBookCatalogPage,
@@ -97,10 +103,12 @@ import {
   prefetchSourceEBookContent,
   searchSourceEBookCatalog,
   sourceEBookChapters,
+  sourceEBookAudiobookChapters,
   sourceEBookContent,
   sourceEBookDetail,
   type EBookChapter,
   type EBookChapterContent,
+  type EBookAudioChapter,
   type EBookCursor,
   type EBookProvider,
   ebookProviderIcon,
@@ -119,6 +127,8 @@ import { openUrl } from "@/lib/window";
 import { EBookSourcesView } from "./ebook/ebook-sources-panel";
 import { EBookSetup } from "./ebook/ebook-setup";
 import { EBookReader } from "./ebook/ebook-reader";
+import { EBookAudiobookPlayer } from "./ebook/audiobook-player";
+import { loadEBookListeningProgress } from "@/lib/ebook/audiobook-state";
 import { EBookWheelMenu, type EBookWheelTarget } from "./ebook/ebook-wheel-menu";
 import { MangaRail } from "./manga/manga-rail";
 
@@ -316,6 +326,12 @@ export function EBookView() {
       favorites.map((ebook) => currentItems.get(ebook.id) ?? mergeEBookMetadata([ebook], [])[0]),
     [currentItems, favorites],
   );
+  const currentItemsRef = useRef(currentItems);
+  const displaySavedRef = useRef(displaySaved);
+  const displayFavoritesRef = useRef(displayFavorites);
+  currentItemsRef.current = currentItems;
+  displaySavedRef.current = displaySaved;
+  displayFavoritesRef.current = displayFavorites;
   const continueBookmarks = useMemo(() => {
     const candidates = new Map<string, EBook>();
     for (const ebook of [
@@ -560,8 +576,10 @@ export function EBookView() {
       return;
     }
     const cached =
-      currentItems.get(ebookId) ??
-      [...displayFavorites, ...displaySaved].find((ebook) => ebook.id === ebookId);
+      currentItemsRef.current.get(ebookId) ??
+      [...displayFavoritesRef.current, ...displaySavedRef.current].find(
+        (ebook) => ebook.id === ebookId,
+      );
     setSelected(cached ?? null);
     const source = ebookId.startsWith("source:");
     void (source ? sourceEBookDetail(ebookId) : ebookDetail(ebookId))
@@ -575,7 +593,7 @@ export function EBookView() {
         });
       })
       .catch(() => {});
-  }, [currentItems, ebookId, displayFavorites, displaySaved, uiLanguage]);
+  }, [ebookId, uiLanguage]);
 
   useEffect(() => {
     const onBack = (event: Event) => {
@@ -1863,19 +1881,22 @@ function EBookCard({
       onContextMenu={(event) => openMenu(ebook, event)}
       className="group flex w-full min-w-0 flex-col gap-2 text-start"
     >
-      <EBookBook3D
-        cover={ebook.cover}
-        seed={`ebook:${ebook.id}`}
-        title={displayTitle}
-        author={ebook.authors[0]}
-        text={ebook.description}
-        imprint={ebook.providerName}
-        thickness={7}
-        mode="lift"
-        lazy
-      >
-        {readStatus && <EBookReadMark status={readStatus} />}
-      </EBookBook3D>
+      <div className="relative">
+        <EBookBook3D
+          cover={ebook.cover}
+          seed={`ebook:${ebook.id}`}
+          title={displayTitle}
+          author={ebook.authors[0]}
+          text={ebook.description}
+          imprint={ebook.providerName}
+          thickness={7}
+          mode="lift"
+          lazy
+        >
+          {readStatus && <EBookReadMark status={readStatus} />}
+        </EBookBook3D>
+        {ebook.audiobook && <EBookAudiobookMark />}
+      </div>
       <p className="line-clamp-2 min-h-9 text-[13px] font-medium leading-snug text-ink">
         {displayTitle}
       </p>
@@ -1912,6 +1933,20 @@ function EBookCard({
         </div>
       )}
     </button>
+  );
+}
+
+function EBookAudiobookMark() {
+  const t = useT();
+  return (
+    <span
+      aria-label={t("Audiobook")}
+      title={t("Audiobook")}
+      className="pointer-events-none absolute bottom-2 left-2 z-20 inline-flex h-7 items-center gap-1.5 rounded-full border border-white/15 bg-canvas/85 px-2.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/90 shadow-lg shadow-black/30 backdrop-blur-md"
+    >
+      <Headphones size={12} strokeWidth={2.25} />
+      {t("Audiobook")}
+    </span>
   );
 }
 
@@ -1998,6 +2033,8 @@ function EBookChapterSection({
   selectedVolume,
   onSelectVolume,
   sourceRoute,
+  bookId,
+  profile,
   onRead,
 }: {
   chapters: EBookChapter[] | null;
@@ -2006,12 +2043,15 @@ function EBookChapterSection({
   selectedVolume: string | null;
   onSelectVolume: (volume: string) => void;
   sourceRoute: string | null;
+  bookId: string;
+  profile: string;
   onRead: (chapter: EBookChapter) => void;
 }) {
   const t = useT();
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"newest" | "oldest">("oldest");
   const [pagination, setPagination] = useState({ key: "", count: 30 });
+  const [progressVersion, setProgressVersion] = useState(0);
   const [view, setView] = useState<"grid" | "list">(() =>
     typeof localStorage !== "undefined" &&
     localStorage.getItem("harbor.ebook.chapterview") === "list"
@@ -2019,6 +2059,20 @@ function EBookChapterSection({
       : "grid",
   );
   useEffect(() => localStorage.setItem("harbor.ebook.chapterview", view), [view]);
+  useEffect(() => {
+    const refresh = (event: Event) => {
+      const detail = (event as CustomEvent<string>).detail;
+      if (!detail || detail === bookId) setProgressVersion((version) => version + 1);
+    };
+    window.addEventListener("harbor:ebook-resume", refresh);
+    return () => window.removeEventListener("harbor:ebook-resume", refresh);
+  }, [bookId]);
+  const completed = useMemo(() => {
+    const result = loadCompletedEBookChapters(profile, bookId);
+    const resume = loadEBookResume(profile, bookId);
+    if ((resume?.chapterProgress ?? 0) >= 100) result.add(resume!.chapterId);
+    return result;
+  }, [bookId, profile, progressVersion]);
   const hasVolumes = volumeGroups.some((group) => group.volume);
   const selected = hasVolumes
     ? (volumeGroups.find((group) => group.volume === selectedVolume)?.chapters ?? [])
@@ -2224,8 +2278,9 @@ function EBookChapterSection({
             >
               <div className="flex min-w-0 flex-col gap-0.5">
                 {chapter.chapter && (
-                  <span className="text-[12px] text-ink-subtle">
-                    {t("Ch. {chapter}", { chapter: chapter.chapter })}
+                  <span className="flex items-center gap-2 text-[12px] text-ink-subtle">
+                    <span>{t("Ch. {chapter}", { chapter: chapter.chapter })}</span>
+                    {completed.has(chapter.id) && <EBookChapterReadMark />}
                   </span>
                 )}
                 <span className="truncate text-[16px] font-semibold text-ink">{chapter.title}</span>
@@ -2254,8 +2309,9 @@ function EBookChapterSection({
             >
               <div className="flex flex-col gap-0.5">
                 {chapter.chapter && (
-                  <span className="text-[12px] text-ink-subtle">
-                    {t("Ch. {chapter}", { chapter: chapter.chapter })}
+                  <span className="flex items-center gap-2 text-[12px] text-ink-subtle">
+                    <span>{t("Ch. {chapter}", { chapter: chapter.chapter })}</span>
+                    {completed.has(chapter.id) && <EBookChapterReadMark />}
                   </span>
                 )}
                 <span className="line-clamp-1 text-[15px] font-semibold text-ink">
@@ -2300,6 +2356,16 @@ function EBookChapterSection({
         </div>
       )}
     </section>
+  );
+}
+
+function EBookChapterReadMark() {
+  const t = useT();
+  return (
+    <span className="inline-flex h-6 shrink-0 items-center gap-1 rounded-full bg-accent/12 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-accent ring-1 ring-inset ring-accent/25">
+      <Check size={11} strokeWidth={2.5} />
+      {t("Read")}
+    </span>
   );
 }
 
@@ -2671,6 +2737,8 @@ function EBookDetails({
   const [recommendationsError, setRecommendationsError] = useState(false);
   const [recommendationsAttempt, setRecommendationsAttempt] = useState(0);
   const [chapters, setChapters] = useState<EBookChapter[] | null>(null);
+  const [audioChapters, setAudioChapters] = useState<EBookAudioChapter[]>([]);
+  const [listening, setListening] = useState<EBookAudioChapter | null>(null);
   const [sourceOptions, setSourceOptions] = useState<EBook[]>([]);
   const [sourceRoute, setSourceRoute] = useState<string | null>(null);
   const [selectedVolume, setSelectedVolume] = useState<string | null>(null);
@@ -2693,10 +2761,8 @@ function EBookDetails({
   ].join("\0");
   const genreKey = ebook?.genres.join("\0");
   const authorKey = ebook?.authors.join("\0");
-  const sourceCandidateKey = sourceCandidates
-    .map((book) => book.id)
-    .sort()
-    .join("\0");
+  const sourceCandidatesRef = useRef(sourceCandidates);
+  sourceCandidatesRef.current = sourceCandidates;
   useEffect(() => {
     const element = detailScrollRef.current;
     if (!element) return;
@@ -2825,6 +2891,7 @@ function EBookDetails({
   }, [ebookId, genreKey, recommendationsAttempt]);
   useEffect(() => {
     setReading(null);
+    setListening(null);
   }, [ebookId]);
   useEffect(() => {
     if (!ebook) return;
@@ -2854,7 +2921,7 @@ function EBookDetails({
       .then(async (results) => {
         if (!active) return;
         const searched = results.flat().flatMap((item) => item.books ?? [item]);
-        const candidates = [...existing, ...searched, ...sourceCandidates];
+        const candidates = [...existing, ...searched, ...sourceCandidatesRef.current];
         const uniqueCandidates = [...new Map(candidates.map((item) => [item.id, item])).values()];
         const promising = uniqueCandidates
           .filter((candidate) => {
@@ -2897,12 +2964,13 @@ function EBookDetails({
     return () => {
       active = false;
     };
-  }, [ebookId, ebook?.source, ebook?.title, sourceAliasKey, sourceKey, sourceCandidateKey]);
+  }, [ebookId, ebook?.source, ebook?.title, sourceAliasKey, sourceKey]);
   useEffect(() => {
     let active = true;
     if (!sourceRoute) {
       setSelectedVolume(null);
       setChapters(null);
+      setAudioChapters([]);
       return;
     }
     setSelectedVolume(null);
@@ -2910,13 +2978,96 @@ function EBookDetails({
     void sourceEBookChapters(sourceRoute)
       .then((items) => active && setChapters(items))
       .catch(() => active && setChapters([]));
+    void sourceEBookAudiobookChapters(sourceRoute)
+      .then((items) => active && setAudioChapters(items))
+      .catch(() => active && setAudioChapters([]));
     return () => {
       active = false;
     };
   }, [sourceRoute]);
+  const { displayedChapters, combinedChapterParts } = useMemo(() => {
+    const parts = new Map<string, EBookChapter[]>();
+    if (chapters === null) return { displayedChapters: null, combinedChapterParts: parts };
+    if (!chapters.length)
+      return {
+        displayedChapters: audioChapters.map((chapter, position) => ({
+          id: chapter.id,
+          title: chapter.title,
+          chapter: chapter.chapter,
+          volume: chapter.volume,
+          volumeTitle: chapter.volume ? `Book ${chapter.volume}` : undefined,
+          position,
+        })),
+        combinedChapterParts: parts,
+      };
+    const consumed = new Set<string>();
+    const displayed: EBookChapter[] = [];
+    for (const chapter of chapters) {
+      if (consumed.has(chapter.id)) continue;
+      const number = labelNumber(chapter.chapter ?? chapter.title);
+      const audio = audioChapters.find((candidate) => {
+        const start = labelNumber(candidate.chapterStart ?? "");
+        const end = labelNumber(candidate.chapterEnd ?? "");
+        return number !== undefined && start !== undefined && end !== undefined && number >= start && number <= end;
+      });
+      const start = labelNumber(audio?.chapterStart ?? "");
+      const end = labelNumber(audio?.chapterEnd ?? "");
+      const grouped = audio && start !== undefined && end !== undefined && end > start
+          ? chapters.filter((candidate) => {
+            const candidateNumber = labelNumber(candidate.chapter ?? candidate.title);
+            return candidate.volume === chapter.volume &&
+              candidateNumber !== undefined && candidateNumber >= start && candidateNumber <= end;
+          })
+        : [];
+      if (audio && grouped.length > 1) {
+        const id = `harbor-combined-audio:${audio.id}`;
+        grouped.forEach((candidate) => consumed.add(candidate.id));
+        parts.set(id, grouped);
+        displayed.push({
+          ...grouped[0],
+          id,
+          title: audio.title,
+          chapter: `${audio.chapterStart}-${audio.chapterEnd}`,
+        });
+      } else {
+        consumed.add(chapter.id);
+        displayed.push(chapter);
+      }
+    }
+    return { displayedChapters: displayed, combinedChapterParts: parts };
+  }, [audioChapters, chapters]);
+  const readingAudioChapter = useMemo(() => {
+    if (!reading || !audioChapters.length) return null;
+    const normalize = (value?: string) =>
+      (value ?? "").toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+    const current = reading.chapter;
+    const currentNumber = labelNumber(current.chapter ?? current.title);
+    const exact = audioChapters.find(
+      (audio) => {
+        if (audio.id === current.id) return true;
+        const hasNamedRange = audio.chapterStart !== undefined && audio.chapterEnd !== undefined;
+        if (hasNamedRange)
+          return currentNumber !== undefined &&
+          audio.chapterStart !== undefined &&
+          audio.chapterEnd !== undefined &&
+          currentNumber >= (labelNumber(audio.chapterStart) ?? Number.POSITIVE_INFINITY) &&
+          currentNumber <= (labelNumber(audio.chapterEnd) ?? Number.NEGATIVE_INFINITY);
+        return (
+          (audio.chapter && current.chapter && normalize(audio.chapter) === normalize(current.chapter)) ||
+          (audio.title && current.title && normalize(audio.title) === normalize(current.title))
+        );
+      },
+    );
+    if (exact) return exact;
+    if (chapters?.length === audioChapters.length) {
+      const position = chapters.findIndex((chapter) => chapter.id === current.id);
+      return position >= 0 ? audioChapters[position] : null;
+    }
+    return null;
+  }, [audioChapters, chapters, reading]);
   const volumeGroups = useMemo(() => {
     const groups = new Map<string, { title?: string; chapters: EBookChapter[] }>();
-    for (const chapter of chapters ?? []) {
+    for (const chapter of displayedChapters ?? []) {
       const volume = chapter.volume?.trim() ?? "";
       const group = groups.get(volume) ?? { chapters: [] };
       groups.set(volume, {
@@ -2945,7 +3096,7 @@ function EBookDetails({
           sensitivity: "base",
         });
       });
-  }, [chapters]);
+  }, [displayedChapters]);
   useEffect(() => {
     if (selectedVolume !== null && !volumeGroups.some((group) => group.volume === selectedVolume))
       setSelectedVolume(null);
@@ -2961,16 +3112,36 @@ function EBookDetails({
           chapter.volumeTitle || (chapter.volume ? `Volume ${chapter.volume}` : undefined),
       });
       setReading({ chapter, content: null });
-      void sourceEBookContent(sourceRoute, chapter.id, chapter.title)
-        .then((content) => {
+      const chapterParts = combinedChapterParts.get(chapter.id) ?? [chapter];
+      void Promise.all(
+        chapterParts.map((part) => sourceEBookContent(sourceRoute, part.id, part.title)),
+      )
+        .then((contents) => {
+          const allTranslated = contents.every((content) => content.translated);
+          const content: EBookChapterContent = {
+            text: contents
+              .map((item) => allTranslated ? item.text : (item.originalText ?? item.text))
+              .filter(Boolean)
+              .join("\n\n"),
+            images: contents.flatMap((item) => item.images ?? []),
+            translated: allTranslated || undefined,
+            originalText: allTranslated
+              ? contents.map((item) => item.originalText ?? "").join("\n\n")
+              : undefined,
+            translatedTitle: allTranslated ? chapter.title : undefined,
+          };
           setReading((current) =>
             current?.chapter.id === chapter.id ? { chapter, content } : current,
           );
-          const position = chapters?.findIndex((item) => item.id === chapter.id) ?? -1;
-          const next = position >= 0 ? chapters?.[position + 1] : undefined;
+          const position = displayedChapters?.findIndex((item) => item.id === chapter.id) ?? -1;
+          const next = position >= 0 ? displayedChapters?.[position + 1] : undefined;
           if (next) {
             const prefetch = () =>
-              void prefetchSourceEBookContent(sourceRoute, next.id).catch(() => undefined);
+              void Promise.all(
+                (combinedChapterParts.get(next.id) ?? [next]).map((part) =>
+                  prefetchSourceEBookContent(sourceRoute, part.id),
+                ),
+              ).catch(() => undefined);
             const idle = window as typeof window & {
               requestIdleCallback?: (
                 callback: () => void,
@@ -2989,24 +3160,24 @@ function EBookDetails({
           ),
         );
     },
-    [chapters, ebook, profile, sourceRoute],
+    [combinedChapterParts, displayedChapters, ebook, profile, sourceRoute],
   );
   useEffect(() => {
-    if (!autoRead || !ebook || chapters === null || !sourceRoute) return;
-    if (!chapters.length) {
+    if (!autoRead || !ebook || displayedChapters === null || !sourceRoute) return;
+    if (!displayedChapters.length) {
       onAutoReadConsumed();
       return;
     }
     const resume = loadEBookResume(profile, ebook.id);
     const target =
-      chapters.find((chapter) => chapter.id === resume?.chapterId) ??
-      [...chapters].sort(
+      displayedChapters.find((chapter) => chapter.id === resume?.chapterId) ??
+      [...displayedChapters].sort(
         (left, right) =>
           (left.position ?? Number.MAX_SAFE_INTEGER) - (right.position ?? Number.MAX_SAFE_INTEGER),
       )[0];
     onAutoReadConsumed();
     if (target) readChapter(target);
-  }, [autoRead, chapters, ebook, onAutoReadConsumed, profile, readChapter, sourceRoute]);
+  }, [autoRead, displayedChapters, ebook, onAutoReadConsumed, profile, readChapter, sourceRoute]);
   if (!ebook)
     return (
       <div className="flex flex-1 items-center justify-center text-ink-muted">
@@ -3139,6 +3310,22 @@ function EBookDetails({
                     {saved ? <Library size={19} /> : <Bookmark size={19} />}
                     {saved ? t("Bookmarked") : t("Bookmark")}
                   </button>
+                  {sourceRoute && audioChapters.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const saved = loadEBookListeningProgress(profile, ebook.id);
+                        setListening(
+                          audioChapters.find((chapter) => chapter.id === saved?.chapterId) ??
+                            audioChapters[0],
+                        );
+                      }}
+                      className="inline-flex h-12 items-center gap-2.5 rounded-full bg-accent px-6 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+                    >
+                      <Headphones size={19} />
+                      {t("Listen")}
+                    </button>
+                  )}
                   {sourceOptions.length > 0 && sourceRoute && (
                     <EBookDetailDropdown
                       options={sourceOptions.map((source) => ({
@@ -3203,13 +3390,19 @@ function EBookDetails({
         <div className="flex flex-col gap-10">
           {(resolvingSource || sourceRoute) && (
             <EBookChapterSection
-              chapters={chapters}
+              chapters={displayedChapters}
               loading={resolvingSource}
               volumeGroups={volumeGroups}
               selectedVolume={selectedVolume}
               onSelectVolume={setSelectedVolume}
               sourceRoute={sourceRoute}
-              onRead={readChapter}
+              bookId={ebook.id}
+              profile={profile}
+              onRead={(chapter) => {
+                const audio = audioChapters.find((item) => item.id === chapter.id);
+                if (audio && !chapters?.length) setListening(audio);
+                else readChapter(chapter);
+              }}
             />
           )}
           {(ebook.books?.length ?? 0) > 1 && (
@@ -3323,7 +3516,24 @@ function EBookDetails({
               : [{ volume: "", label: t("Chapters"), chapters: chapters ?? [reading.chapter] }]
           }
           onSelectChapter={readChapter}
+          originalAudio={
+            readingAudioChapter && sourceRoute
+              ? { sourceRoute, chapter: readingAudioChapter }
+              : undefined
+          }
           onClose={() => setReading(null)}
+        />
+      )}
+      {listening && sourceRoute && (
+        <EBookAudiobookPlayer
+          profile={profile}
+          bookId={ebook.id}
+          bookTitle={ebook.title}
+          cover={ebook.cover}
+          sourceRoute={sourceRoute}
+          chapters={audioChapters}
+          initialChapter={listening}
+          onClose={() => setListening(null)}
         />
       )}
       {showScrollTop && !reading && (

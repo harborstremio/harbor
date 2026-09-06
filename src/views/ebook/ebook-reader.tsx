@@ -1,4 +1,8 @@
-import type { EBookChapter, EBookChapterContent } from "@/lib/ebook/providers";
+import type {
+  EBookAudioChapter,
+  EBookChapter,
+  EBookChapterContent,
+} from "@/lib/ebook/providers";
 import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
 import { HarborReader, type EBookReaderVolume } from "./harbor-reader";
@@ -19,6 +23,7 @@ export function EBookReader({
   error,
   volumes,
   onSelectChapter,
+  originalAudio,
   onClose,
 }: {
   bookId: string;
@@ -30,6 +35,7 @@ export function EBookReader({
   error?: string;
   volumes: EBookReaderVolume[];
   onSelectChapter: (chapter: EBookChapter) => void;
+  originalAudio?: { sourceRoute: string; chapter: EBookAudioChapter };
   onClose: () => void;
 }) {
   const t = useT();
@@ -70,6 +76,7 @@ export function EBookReader({
       direction={direction}
       volumes={volumes}
       onSelectChapter={onSelectChapter}
+      originalAudio={originalAudio}
       onClose={onClose}
     />
   );

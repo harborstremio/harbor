@@ -42,8 +42,15 @@ export async function fetchImageObjectUrl(
 function aspectOf(src: string): Promise<number | null> {
   return new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => resolve(img.naturalHeight / (img.naturalWidth || 1));
-    img.onerror = () => resolve(null);
+    const timeout = window.setTimeout(() => finish(null), MEASURE_TIMEOUT_MS);
+    const finish = (aspect: number | null) => {
+      window.clearTimeout(timeout);
+      img.onload = null;
+      img.onerror = null;
+      resolve(aspect);
+    };
+    img.onload = () => finish(img.naturalHeight / (img.naturalWidth || 1));
+    img.onerror = () => finish(null);
     img.src = src;
   });
 }

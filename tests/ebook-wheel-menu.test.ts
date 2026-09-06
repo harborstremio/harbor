@@ -79,6 +79,10 @@ test("book details resolve source metadata and chapter statistics without a load
   assert.match(wheel, /sourceEBookChapters\(route\)/);
   assert.match(wheel, /authors: detail\.authors\.length \? detail\.authors : ebook\.authors/);
   assert.match(view, /if \(current\.id !== detail\.id\) return \{ \.\.\.current, books \}/);
+  assert.match(view, /currentItemsRef\.current\.get\(ebookId\)/);
+  assert.match(view, /\}, \[ebookId, uiLanguage\]\);/);
+  assert.doesNotMatch(view, /sourceCandidateKey/);
+  assert.match(view, /\.\.\.sourceCandidatesRef\.current/);
   assert.doesNotMatch(wheel, /\[ebook, mode, stats, statsLoading\]/);
   assert.match(wheel, /if \(active\) setStatsLoading\(false\)/);
 });

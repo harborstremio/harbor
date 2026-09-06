@@ -602,7 +602,7 @@ function LocalFolderTutorial({ onClose, onChoose }: { onClose: () => void; onCho
         </div>
         <p className="text-[14px] leading-relaxed text-ink-muted">
           {t(
-            "Pick one library folder. Each subfolder is one eBook. Put its chapters inside as TXT, Markdown, HTML, or EPUB files and optionally add a cover image.",
+            "Pick one library folder. Add EPUB books, audiobook ZIPs, or M4B and common audio files. A subfolder groups multiple volumes or audiobook tracks into one title.",
           )}
         </p>
         <div className="flex flex-col gap-2 rounded-xl bg-canvas p-4 text-[13.5px] ring-1 ring-edge-soft">

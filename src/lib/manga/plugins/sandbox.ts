@@ -339,7 +339,7 @@ export const SANDBOX_SOURCE = String.raw`(function () {
           id: String(provider.id),
           name: String(provider.name),
           hasTags: typeof provider.tags === "function",
-          methods: ["popular", "search", "detail", "chapters", "content", "pageUrls", "tags"]
+          methods: ["popular", "search", "detail", "chapters", "content", "pageUrls", "tags", "audiobookChapters", "audiobookStream"]
             .filter(function (name) { return typeof provider[name] === "function"; })
         }
       });

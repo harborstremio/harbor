@@ -112,6 +112,8 @@ export function BookFlip({
   soundEnabled,
   instanceName = NAME,
   zoom = 1,
+  textureSize = 2048,
+  pixelRatio = 2,
   onProgress,
   onReady,
 }: {
@@ -122,6 +124,8 @@ export function BookFlip({
   soundEnabled: boolean;
   instanceName?: string;
   zoom?: number;
+  textureSize?: number;
+  pixelRatio?: number;
   onProgress: (page: number, spread: string) => void;
   onReady?: (api: BookApi) => void;
 }) {
@@ -258,9 +262,9 @@ export function BookFlip({
         autoEnableThumbnail: false,
         lightboxCloseOnBack: false,
         deeplinkingEnabled: false,
-        pageTextureSize: 2048,
-        pageTextureSizeSmall: 2048,
-        minPixelRatio: 2,
+        pageTextureSize: textureSize,
+        pageTextureSizeSmall: textureSize,
+        minPixelRatio: pixelRatio,
         loadPagesF: 4,
         loadPagesB: 2,
       });
@@ -366,7 +370,7 @@ export function BookFlip({
       }
       ref.current?.replaceChildren();
     };
-  }, [pages, rtl, bg, resumePage, instanceName]);
+  }, [pages, rtl, bg, resumePage, instanceName, pixelRatio, textureSize]);
 
   return (
     <div className="relative h-full w-full overflow-hidden">

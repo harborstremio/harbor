@@ -13,6 +13,7 @@ import {
   Languages,
   Link2,
   Loader2,
+  LocateFixed,
   MessageSquareText,
   Moon,
   Pause,
@@ -27,8 +28,13 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useT } from "@/lib/i18n";
-import type { EBookChapter, EBookChapterContent } from "@/lib/ebook/providers";
+import { getUiLanguage, useT } from "@/lib/i18n";
+import {
+  sourceEBookAudiobookStream,
+  type EBookAudioChapter,
+  type EBookChapter,
+  type EBookChapterContent,
+} from "@/lib/ebook/providers";
 import { createEBookFlipPages, type EBookFlipPages } from "@/lib/ebook/book-pages";
 import {
   addEBookBookmark,
@@ -36,6 +42,7 @@ import {
   loadEBookBookmarks,
   loadEBookProgress,
   loadEBookReaderPrefs,
+  markEBookChapterRead,
   removeEBookBookmark,
   removeEBookAnnotation,
   saveEBookAnnotation,
@@ -46,6 +53,7 @@ import {
   type EBookReaderPrefs,
 } from "@/lib/ebook/reader-state";
 import { translateEBookChapter } from "@/lib/ebook/translation";
+import { explainPassage, type WordExplanation } from "@/lib/ebook/explain";
 import { BookFlip, type BookApi } from "@/views/manga/manga-reader/book-view";
 import { useCustomFonts } from "@/lib/custom-fonts";
 import { Flag } from "@/components/flag";
@@ -69,6 +77,7 @@ type Props = {
   direction: "ltr" | "rtl";
   volumes: EBookReaderVolume[];
   onSelectChapter: (chapter: EBookChapter) => void;
+  originalAudio?: { sourceRoute: string; chapter: EBookAudioChapter };
   onClose: () => void;
 };
 
@@ -125,6 +134,7 @@ const trackerColors = [
   "#8fc9c2",
   "#b4cfa2",
 ];
+const playbackRates = [1, 1.5, 2, 3] as const;
 const narrationVoices = [
   { id: "en-US-AvaNeural", label: "Ava", tone: "American · Female", locale: "en-US" },
   { id: "en-US-AndrewNeural", label: "Andrew", tone: "American · Male", locale: "en-US" },
@@ -428,6 +438,7 @@ const formatAudioTime = (seconds: number) => {
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
 };
 const trackerGutter = 8;
+const EDGE_BOUNDARY_LEAD_SECONDS = 0.12;
 const trackerRect = (rect: DOMRect) => ({
   top: rect.top - 2,
   left: rect.left - trackerGutter,
@@ -515,6 +526,7 @@ export function HarborReader({
   direction,
   volumes,
   onSelectChapter,
+  originalAudio,
   onClose,
 }: Props) {
   const t = useT();
@@ -568,6 +580,7 @@ export function HarborReader({
   const [query, setQuery] = useState("");
   const [showFutureResults, setShowFutureResults] = useState(false);
   const [current, setCurrent] = useState(0);
+  const [readThrough, setReadThrough] = useState(0);
   const [speaking, setSpeaking] = useState(false);
   const [narrationPaused, setNarrationPaused] = useState(false);
   const [narrationLoading, setNarrationLoading] = useState(false);
@@ -575,7 +588,10 @@ export function HarborReader({
   const [generationPercent, setGenerationPercent] = useState(0);
   const [audioPosition, setAudioPosition] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState<(typeof playbackRates)[number]>(1);
   const audio = useRef<HTMLAudioElement | null>(null);
+  const audioStart = useRef(0);
+  const lastAudioUiUpdate = useRef(0);
   const audioUrl = useRef("");
   const voicePreviewAudio = useRef<HTMLAudioElement | null>(null);
   const voicePreviewUrl = useRef("");
@@ -586,13 +602,6 @@ export function HarborReader({
   const narrationRun = useRef(0);
   const narrationRequestId = useRef("");
   const narrationLine = useRef(-1);
-  const narrationStep = useRef(0);
-  const narrationAhead = useRef<{
-    start: number;
-    end: number;
-    voice: string;
-    promise: ReturnType<typeof synthesizeNarration>;
-  } | null>(null);
   const [readerText, setReaderText] = useState(content.text ?? "");
   const originalTitle = chapter.title || bookTitle;
   const originalText = content.originalText ?? content.text ?? "";
@@ -614,6 +623,13 @@ export function HarborReader({
   const [bookmarks, setBookmarks] = useState(() => loadEBookBookmarks(profile, bookId));
   const [annotations, setAnnotations] = useState(() => loadEBookAnnotations(profile, bookId));
   const [selection, setSelection] = useState<ReaderSelection | null>(null);
+  const [explanation, setExplanation] = useState<{
+    loading: boolean;
+    results?: WordExplanation[];
+    error?: string;
+    x: number;
+    y: number;
+  } | null>(null);
   const [editing, setEditing] = useState<EBookAnnotation | null>(null);
   const [trace, setTrace] = useState<{
     top: number;
@@ -628,6 +644,10 @@ export function HarborReader({
   const tracedLine = useRef(-1);
   const smartTarget = useRef<number | null>(null);
   const chromeTimer = useRef<number | undefined>(undefined);
+  const progressTimer = useRef<number | undefined>(undefined);
+  const pendingProgress = useRef<number | null>(null);
+  const audioFollowScrolling = useRef(false);
+  const audioFollowScrollTimer = useRef<number | undefined>(undefined);
   const traceFrame = useRef(0);
   const traceY = useRef<number | null>(null);
   const annotationHoverTimer = useRef<number | undefined>(undefined);
@@ -666,6 +686,7 @@ export function HarborReader({
         ((chapterIndex + chapterProgress / 100) / bookChapters.length) * 100,
       );
       saveEBookProgress(profile, bookId, progressId, safeLine);
+      if (chapterProgress >= 100) markEBookChapterRead(profile, bookId, chapter.id);
       saveEBookResume(profile, bookId, {
         chapterId: chapter.id,
         chapterTitle: chapter.title,
@@ -687,6 +708,17 @@ export function HarborReader({
       progressId,
       resumeVolumeLabel,
     ],
+  );
+  const scheduleReadingPosition = useCallback(
+    (line: number) => {
+      pendingProgress.current = line;
+      window.clearTimeout(progressTimer.current);
+      progressTimer.current = window.setTimeout(() => {
+        if (pendingProgress.current != null) persistReadingPosition(pendingProgress.current);
+        pendingProgress.current = null;
+      }, 180);
+    },
+    [persistReadingPosition],
   );
   const colors = paper[prefs.background];
   const effectiveDirection =
@@ -846,8 +878,11 @@ export function HarborReader({
     setTranslationProgress({ percent: 0, etaMs: null });
   }, [content.text, content.translated, content.translatedTitle, originalTitle]);
 
+  const usesOriginalAudiobook = Boolean(originalAudio && !(translation && !showOriginal));
+  const lineTrackerEnabled = !usesOriginalAudiobook || prefs.audiobookLineTracker;
   const updateTrace = useCallback(
     (mouseY?: number) => {
+      if (!lineTrackerEnabled) return;
       if (mouseY != null) {
         traceY.current = mouseY;
         smartTarget.current = null;
@@ -917,7 +952,7 @@ export function HarborReader({
         if (Number.isInteger(line) && tracedLine.current !== line) {
           tracedLine.current = line;
           setCurrent(line);
-          persistReadingPosition(line);
+          scheduleReadingPosition(line);
         }
         const next = trackerRect(paragraphRect);
         setTrace((previous) =>
@@ -931,8 +966,15 @@ export function HarborReader({
         );
       });
     },
-    [persistReadingPosition],
+    [lineTrackerEnabled, scheduleReadingPosition],
   );
+
+  useEffect(() => {
+    if (lineTrackerEnabled) return;
+    smartTarget.current = null;
+    traceY.current = null;
+    setTrace(null);
+  }, [lineTrackerEnabled]);
 
   const patchPrefs = (patch: Partial<EBookReaderPrefs>) => {
     setPrefs((value) => {
@@ -949,7 +991,7 @@ export function HarborReader({
   }, [prefs.focusMode]);
 
   const goTo = useCallback(
-    (index: number) => {
+    (index: number, followAudio = false) => {
       const next = Math.max(0, Math.min(paragraphs.length - 1, index));
       if (prefs.mode === "book" && flipPages.urls.length) {
         const page = pageForParagraph(flipPages.paragraphStarts, next);
@@ -960,15 +1002,46 @@ export function HarborReader({
         return;
       }
       smartTarget.current = next;
+      if (followAudio) {
+        audioFollowScrolling.current = true;
+        window.clearTimeout(audioFollowScrollTimer.current);
+        audioFollowScrollTimer.current = window.setTimeout(() => {
+          audioFollowScrolling.current = false;
+          updateTrace();
+        }, 120);
+      }
       blocks.current[next]?.scrollIntoView({ block: "center", behavior: "smooth" });
       tracedLine.current = next;
       setCurrent(next);
     },
-    [flipPages.paragraphStarts, flipPages.urls.length, paragraphs.length, prefs.mode],
+    [flipPages.paragraphStarts, flipPages.urls.length, paragraphs.length, prefs.mode, updateTrace],
   );
 
   useEffect(() => {
+    setReadThrough((line) => Math.max(line, current));
+  }, [current]);
+
+  useEffect(() => {
+    const saveCurrentPassage = () => {
+      window.clearTimeout(progressTimer.current);
+      pendingProgress.current = null;
+      if (tracedLine.current >= 0) persistReadingPosition(tracedLine.current);
+    };
+    const saveWhenHidden = () => {
+      if (document.visibilityState === "hidden") saveCurrentPassage();
+    };
+    window.addEventListener("pagehide", saveCurrentPassage);
+    document.addEventListener("visibilitychange", saveWhenHidden);
+    return () => {
+      saveCurrentPassage();
+      window.removeEventListener("pagehide", saveCurrentPassage);
+      document.removeEventListener("visibilitychange", saveWhenHidden);
+    };
+  }, [persistReadingPosition]);
+
+  useEffect(() => {
     const saved = loadEBookProgress(profile, bookId, progressId);
+    setReadThrough(saved);
     const timer = window.setTimeout(() => {
       goTo(saved);
       persistReadingPosition(saved);
@@ -978,23 +1051,33 @@ export function HarborReader({
   }, [bookId, goTo, persistReadingPosition, profile, progressId, updateTrace]);
 
   useEffect(() => {
+    if (!lineTrackerEnabled) return;
     const root = scroller.current;
     if (!root) return;
-    let frame = 0;
+    let timer = 0;
     const update = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
+      window.clearTimeout(timer);
+      if (audioFollowScrolling.current) {
+        window.clearTimeout(audioFollowScrollTimer.current);
+        audioFollowScrollTimer.current = window.setTimeout(() => {
+          audioFollowScrolling.current = false;
+          updateTrace();
+        }, 80);
+        return;
+      }
+      timer = window.setTimeout(() => {
         updateTrace();
-      });
+      }, 50);
     };
     root.addEventListener("scroll", update, { passive: true });
     return () => {
       root.removeEventListener("scroll", update);
-      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
     };
-  }, [bookId, prefs.mode, profile, progressId, updateTrace]);
+  }, [bookId, lineTrackerEnabled, prefs.mode, profile, progressId, updateTrace]);
 
   useEffect(() => {
+    if (!lineTrackerEnabled) return;
     const page = article.current;
     if (!page) return;
     let frame = 0;
@@ -1010,9 +1093,10 @@ export function HarborReader({
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [prefs.mode, updateTrace]);
+  }, [lineTrackerEnabled, prefs.mode, updateTrace]);
 
   useEffect(() => {
+    if (!lineTrackerEnabled) return;
     const root = scroller.current;
     if (!root) return;
     let wheel = 0;
@@ -1040,7 +1124,7 @@ export function HarborReader({
       smartTarget.current = next;
       tracedLine.current = next;
       setCurrent(next);
-      persistReadingPosition(next);
+      scheduleReadingPosition(next);
       const rect = paragraph.getBoundingClientRect();
       const safeTop = 88;
       const safeBottom = window.innerHeight - 104;
@@ -1048,7 +1132,7 @@ export function HarborReader({
       if (rect.height > safeBottom - safeTop) offset = rect.top - safeTop;
       else if (rect.bottom > safeBottom) offset = rect.bottom - safeBottom;
       else if (rect.top < safeTop) offset = rect.top - safeTop;
-      if (offset) root.scrollBy({ top: offset, behavior: "smooth" });
+      if (offset) root.scrollBy({ top: offset, behavior: "auto" });
       updateTrace();
     };
     root.addEventListener("wheel", onWheel, { passive: false });
@@ -1056,9 +1140,10 @@ export function HarborReader({
       root.removeEventListener("wheel", onWheel);
       window.clearTimeout(reset);
     };
-  }, [paragraphs.length, persistReadingPosition, prefs.mode, updateTrace]);
+  }, [lineTrackerEnabled, paragraphs.length, prefs.mode, scheduleReadingPosition, updateTrace]);
 
   useEffect(() => {
+    if (!lineTrackerEnabled) return;
     const root = scroller.current;
     if (!root) return;
     let hold = 0;
@@ -1144,13 +1229,14 @@ export function HarborReader({
       root.removeEventListener("pointercancel", up);
       root.removeEventListener("click", click, true);
     };
-  }, [prefs.mode, updateTrace]);
+  }, [lineTrackerEnabled, prefs.mode, updateTrace]);
 
   useEffect(() => {
     return () => {
       window.clearTimeout(chromeTimer.current);
       window.clearTimeout(annotationHoverTimer.current);
       window.clearTimeout(annotationHideTimer.current);
+      window.clearTimeout(audioFollowScrollTimer.current);
       cancelAnimationFrame(traceFrame.current);
       window.speechSynthesis?.cancel();
       if (narrationRequestId.current) void cancelNarration(narrationRequestId.current);
@@ -1190,8 +1276,9 @@ export function HarborReader({
     setGenerationPercent(0);
     setAudioPosition(0);
     setAudioDuration(0);
+    audioStart.current = 0;
     narrationLine.current = -1;
-    if (!prefs.mouseLineTrack) setTrace(null);
+    setTrace(null);
   };
 
   const previewVoice = async (voice: ReaderNarrationVoice) => {
@@ -1289,22 +1376,6 @@ export function HarborReader({
     onSelectChapter(target);
   };
 
-  const NARRATION_BUDGETS = [700, 1500, 3000, 4000];
-  const narrationBudget = (step: number) =>
-    NARRATION_BUDGETS[Math.min(step, NARRATION_BUDGETS.length - 1)];
-
-  const narrationWindowEnd = (start: number, budget: number) => {
-    let end = start;
-    let chars = 0;
-    while (end < paragraphs.length) {
-      const size = paragraphs[end].length + 2;
-      if (chars && chars + size > budget) break;
-      chars += size;
-      end += 1;
-    }
-    return end;
-  };
-
   const speakWithDevice = (index = current) => {
     if (!("speechSynthesis" in window) || !paragraphs.length) return;
     window.speechSynthesis.cancel();
@@ -1335,11 +1406,8 @@ export function HarborReader({
       globalThis.crypto?.randomUUID?.() ??
       `reader-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     narrationRequestId.current = requestId;
-    const ready = narrationAhead.current;
-    const usePrefetched = !!ready && ready.start === index;
-    if (!usePrefetched) narrationStep.current = 0;
-    const windowEnd = usePrefetched ? ready!.end : narrationWindowEnd(index, narrationBudget(0));
-    const chapterText = paragraphs.slice(index, windowEnd).join("\n\n").trim();
+    const windowEnd = paragraphs.length;
+    const chapterText = paragraphs.join("\n\n").trim();
     if (!chapterText) {
       setNarrationNotice("There is nothing to read aloud on this page.");
       return;
@@ -1348,12 +1416,14 @@ export function HarborReader({
       availableNarrationVoices.find((voice) => voice.id === prefs.narrationVoice) ??
       fallbackNarrationVoices.find((voice) => voice.id === prefs.narrationVoice) ??
       fallbackNarrationVoices[0];
-    const spokenParagraphs = paragraphs.slice(index, windowEnd);
-    const spokenWeights = spokenParagraphs.map((text) => Math.max(1, text.trim().length));
+    const spokenParagraphs = paragraphs;
+    const timingLocale = originalAudio?.chapter.language ?? selectedVoice.locale;
+    const spokenWeights = spokenParagraphs.map((text) =>
+      Math.max(1, narrationWordCount(text, timingLocale)),
+    );
     const totalWeight = spokenWeights.reduce((total, weight) => total + weight, 0);
     const spokenWordEnds: number[] = [];
-    spokenParagraphs.reduce((total, text) => {
-      const count = Math.max(1, narrationWordCount(text, selectedVoice.locale));
+    spokenWeights.reduce((total, count) => {
       const next = total + count;
       spokenWordEnds.push(next);
       return next;
@@ -1373,17 +1443,58 @@ export function HarborReader({
           else high = middle;
         }
         const spokenWord = Math.max(0, low - 1);
-        const paragraphOffset = spokenWordEnds.findIndex((end) => spokenWord < end);
-        if (paragraphOffset >= 0) return index + paragraphOffset;
+        let paragraphLow = 0;
+        let paragraphHigh = spokenWordEnds.length;
+        while (paragraphLow < paragraphHigh) {
+          const middle = (paragraphLow + paragraphHigh) >>> 1;
+          if (spokenWordEnds[middle] <= spokenWord) paragraphLow = middle + 1;
+          else paragraphHigh = middle;
+        }
+        if (paragraphLow < spokenWordEnds.length) return paragraphLow;
       }
-      if (!duration || !totalWeight) return index;
+      if (!duration || !totalWeight) return 0;
       const target = Math.min(1, Math.max(0, position / duration)) * totalWeight;
       let accumulated = 0;
       for (let offset = 0; offset < spokenWeights.length; offset += 1) {
         accumulated += spokenWeights[offset];
-        if (target <= accumulated) return index + offset;
+        if (target <= accumulated) return offset;
       }
       return windowEnd - 1;
+    };
+    const timeForParagraph = (
+      duration: number,
+      boundaries: Array<{ offsetMs: number; text?: string }>,
+    ) => {
+      const firstWord = index > 0 ? spokenWordEnds[index - 1] : 0;
+      const normalizeWord = (value: string) =>
+        stripMarks(value).replace(/[^\p{L}\p{N}'’]+/gu, "");
+      const passageWords =
+        spokenParagraphs[index]
+          ?.match(/[\p{L}\p{M}\p{N}'’]+/gu)
+          ?.map(normalizeWord)
+          .filter(Boolean) ?? [];
+      const boundaryWords = boundaries.map((boundary) => normalizeWord(boundary.text ?? ""));
+      let matched = -1;
+      for (let length = Math.min(4, passageWords.length); length > 0 && matched < 0; length -= 1) {
+        let distance = Number.POSITIVE_INFINITY;
+        for (let cursor = 0; cursor <= boundaryWords.length - length; cursor += 1) {
+          if (!passageWords.slice(0, length).every((word, offset) => boundaryWords[cursor + offset] === word))
+            continue;
+          const nextDistance = Math.abs(cursor - firstWord);
+          if (nextDistance < distance) {
+            matched = cursor;
+            distance = nextDistance;
+          }
+        }
+      }
+      const boundary = boundaries[matched >= 0 ? matched : firstWord];
+      if (boundary)
+        return Math.max(0, boundary.offsetMs / 1_000 - EDGE_BOUNDARY_LEAD_SECONDS);
+      if (!duration || !totalWeight) return 0;
+      const precedingWeight = spokenWeights
+        .slice(0, index)
+        .reduce((total, weight) => total + weight, 0);
+      return (precedingWeight / totalWeight) * duration;
     };
     setSpeaking(true);
     setNarrationPaused(false);
@@ -1391,85 +1502,116 @@ export function HarborReader({
     setGenerationPercent(1);
     setNarrationNotice("");
     try {
-      const ahead = narrationAhead.current;
-      narrationAhead.current = null;
-      const pending =
-        ahead && ahead.start === index && ahead.voice === selectedVoice.id
-          ? ahead.promise
-          : synthesizeNarration(
-              requestId,
-              chapterText,
-              selectedVoice.id,
-              selectedVoice.locale,
-              (progress) => setGenerationPercent(progress.percent),
-            );
-      const { blob, boundaries } = await pending;
+      const useOriginalAudio = originalAudio && !(translation && !showOriginal);
+      const stream = useOriginalAudio
+        ? await sourceEBookAudiobookStream(
+            originalAudio.sourceRoute,
+            originalAudio.chapter.id,
+          )
+        : null;
+      if (useOriginalAudio && !stream) throw new Error(t("Audio is unavailable"));
+      const generated = stream
+        ? null
+        : await synthesizeNarration(
+            requestId,
+            chapterText,
+            selectedVoice.id,
+            selectedVoice.locale,
+            (progress) => setGenerationPercent(progress.percent),
+          );
       if (run !== narrationRun.current) return;
       if (narrationRequestId.current === requestId) narrationRequestId.current = "";
       setGenerationPercent(100);
-      const url = URL.createObjectURL(blob);
-      audioUrl.current = url;
+      const boundaries = generated?.boundaries ?? [];
+      const url = stream?.url ?? URL.createObjectURL(generated!.blob);
+      audioUrl.current = stream ? "" : url;
+      const start = stream?.start ?? 0;
+      const end = stream?.end ?? Number.POSITIVE_INFINITY;
+      audioStart.current = start;
       const player = new Audio(url);
+      player.playbackRate = playbackRate;
       audio.current = player;
       setAudioPosition(0);
       setAudioDuration(0);
-      player.ondurationchange = () =>
-        setAudioDuration(Number.isFinite(player.duration) ? player.duration : 0);
-      player.ontimeupdate = () => {
-        setAudioPosition(player.currentTime);
-        const line = paragraphForTime(player.currentTime, player.duration, boundaries);
-        if (line === narrationLine.current) return;
-        narrationLine.current = line;
-        goTo(line);
-        window.requestAnimationFrame(() => updateTrace());
+      let positioned = false;
+      player.ondurationchange = () => {
+        const duration = Number.isFinite(end)
+          ? Math.max(0, end - start)
+          : (stream?.duration ?? (Number.isFinite(player.duration) ? player.duration - start : 0));
+        setAudioDuration(duration);
+        if (!positioned && duration > 0) {
+          positioned = true;
+          const position = timeForParagraph(duration, boundaries);
+          player.currentTime = start + position;
+          setAudioPosition(position);
+          void player.play();
+        }
       };
+      let finish: () => void = () => {};
+      let trackingTimer = 0;
+      const stopTracking = () => window.clearInterval(trackingTimer);
+      const trackPlayback = () => {
+        if (player.paused || player.ended) return;
+        const position = Math.max(0, player.currentTime - start);
+        const duration = Number.isFinite(end)
+          ? end - start
+          : (stream?.duration ?? player.duration - start);
+        if (player.currentTime >= end - 0.05) {
+          player.pause();
+          finish();
+          return;
+        }
+        if (lineTrackerEnabled) {
+          const timingPosition = position + (boundaries.length ? EDGE_BOUNDARY_LEAD_SECONDS : 0);
+          const line = paragraphForTime(timingPosition, duration, boundaries);
+          if (line !== narrationLine.current) {
+            narrationLine.current = line;
+            goTo(line, true);
+          }
+        }
+      };
+      player.onplay = () => {
+        stopTracking();
+        trackPlayback();
+        trackingTimer = window.setInterval(trackPlayback, 50);
+      };
+      player.onpause = stopTracking;
+      player.ontimeupdate = () => {
+        const position = Math.max(0, player.currentTime - start);
+        const now = performance.now();
+        if (now - lastAudioUiUpdate.current >= 500) {
+          lastAudioUiUpdate.current = now;
+          setAudioPosition(position);
+        }
+      };
+      narrationLine.current = index;
       goTo(index);
       setNarrationLoading(false);
-      if (windowEnd < paragraphs.length) {
-        const aheadEnd = narrationWindowEnd(windowEnd, narrationBudget(narrationStep.current + 1));
-        const aheadText = paragraphs.slice(windowEnd, aheadEnd).join("\n\n").trim();
-        if (aheadText) {
-          const promise = synthesizeNarration(
-            `${requestId}-ahead`,
-            aheadText,
-            selectedVoice.id,
-            selectedVoice.locale,
-            () => {},
-          );
-          promise.catch(() => {
-            if (narrationAhead.current?.promise === promise) narrationAhead.current = null;
-          });
-          narrationAhead.current = {
-            start: windowEnd,
-            end: aheadEnd,
-            voice: selectedVoice.id,
-            promise,
-          };
-        }
-      }
       await new Promise<void>((resolve, reject) => {
-        player.onended = () => resolve();
-        player.onerror = () => reject(new Error(t("The generated audio could not be played")));
+        finish = resolve;
+        player.onended = () => {
+          stopTracking();
+          resolve();
+        };
+        player.onerror = () => {
+          stopTracking();
+          reject(new Error(t("The generated audio could not be played")));
+        };
       });
-      URL.revokeObjectURL(url);
+      stopTracking();
+      if (!stream) URL.revokeObjectURL(url);
       audioUrl.current = "";
-      if (run === narrationRun.current && windowEnd < paragraphs.length) {
-        narrationStep.current += 1;
-        void speakFrom(windowEnd).catch(() => setSpeaking(false));
-        return;
-      }
       if (run === narrationRun.current) {
         setSpeaking(false);
         setGenerationPercent(0);
         narrationLine.current = -1;
-        if (!prefs.mouseLineTrack) setTrace(null);
+        setTrace(null);
       }
     } catch (error) {
       if (run !== narrationRun.current) return;
       setSpeaking(false);
       setNarrationLoading(false);
       setGenerationPercent(0);
-      narrationAhead.current = null;
       const message = error instanceof Error ? error.message : t("Edge TTS failed");
       if (/desktop app/i.test(message)) {
         setNarrationNotice(
@@ -1488,6 +1630,7 @@ export function HarborReader({
   };
 
   const addBookmark = (index = current) => {
+    persistReadingPosition(index);
     setBookmarks(
       addEBookBookmark(profile, {
         bookId,
@@ -1534,12 +1677,10 @@ export function HarborReader({
     return () => window.clearTimeout(timer);
   }, [chapter.id, chaptersOpen, sidebarVolume]);
   useEffect(() => {
-    if (!prefs.mouseLineTrack) {
-      traceY.current = null;
-      setTrace(null);
-    }
+    traceY.current = null;
+    setTrace(null);
     updateTrace();
-  }, [prefs.mouseLineTrack, prefs.fontSize, prefs.lineHeight, prefs.width, updateTrace]);
+  }, [prefs.fontSize, prefs.lineHeight, prefs.width, updateTrace]);
 
   useEffect(() => {
     if (prefs.mode !== "harbor") return;
@@ -1577,6 +1718,7 @@ export function HarborReader({
     });
     if (!ranges.length) return setSelection(null);
     const rect = source.getBoundingClientRect();
+    setExplanation(null);
     setSelection({
       ranges,
       text: selected.toString().trim(),
@@ -1604,6 +1746,25 @@ export function HarborReader({
       reference,
       createdAt: Date.now(),
     };
+
+  const explainSelection = async () => {
+    if (!selection) return;
+    const selected = selection;
+    const line = selected.ranges[0]?.line ?? current;
+    const context = paragraphs.slice(Math.max(0, line - 1), line + 2).join("\n\n");
+    setExplanation({ loading: true, x: selected.x, y: selected.y });
+    try {
+      const results = await explainPassage(selected.text, context, getUiLanguage());
+      setExplanation({ loading: false, results, x: selected.x, y: selected.y });
+    } catch (error) {
+      setExplanation({
+        loading: false,
+        error: error instanceof Error ? error.message : t("Wiktionary lookup failed."),
+        x: selected.x,
+        y: selected.y,
+      });
+    }
+  };
 
   const storeAnnotation = (annotation: EBookAnnotation) => {
     setAnnotations(saveEBookAnnotation(profile, bookId, annotation));
@@ -1821,6 +1982,8 @@ export function HarborReader({
                   bg={layer.presentation.background}
                   resumePage={layer.resumePage}
                   soundEnabled={isActive}
+                  textureSize={1024}
+                  pixelRatio={1}
                   onReady={(api) => activateFlipLayer(layer.id, api)}
                   onProgress={(page) => {
                     if (activeFlipLayerIdRef.current !== layer.id) return;
@@ -1859,7 +2022,6 @@ export function HarborReader({
               } as CSSProperties
             }
             onMouseUp={captureSelection}
-            onMouseMove={(event) => prefs.mouseLineTrack && updateTrace(event.clientY)}
           >
             <div className="pointer-events-none absolute inset-y-0 start-0 w-px bg-gradient-to-b from-transparent via-black/10 to-transparent" />
             {chapterIndex === 0 && (internalCover || bookCover) && (
@@ -1893,9 +2055,22 @@ export function HarborReader({
                 ref={(node) => {
                   blocks.current[index] = node;
                 }}
-                className={`relative mb-[1.1em] scroll-mt-24 text-pretty transition-colors ${index === current ? "reader-current" : index < current ? "reader-read" : ""}`}
+                className={`relative mb-[1.1em] scroll-mt-24 text-pretty transition-colors ${lineTrackerEnabled ? (index === current ? "reader-current" : index <= readThrough ? "reader-read" : "") : ""}`}
                 style={{ textAlign: "start" }}
-                onMouseEnter={() => prefs.mouseLineTrack && setCurrent(index)}
+                onContextMenu={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  tracedLine.current = index;
+                  setCurrent(index);
+                  persistReadingPosition(index);
+                  setExplanation(null);
+                  setSelection({
+                    ranges: [{ line: index, start: 0, end: text.length }],
+                    text,
+                    x: event.clientX,
+                    y: event.clientY - 12,
+                  });
+                }}
                 onDoubleClick={() => {
                   setCurrent(index);
                   addBookmark(index);
@@ -1916,10 +2091,10 @@ export function HarborReader({
         </div>
       )}
 
-      {prefs.mode === "harbor" && trace && (
+      {prefs.mode === "harbor" && lineTrackerEnabled && trace && (
         <div
           dir={effectiveDirection}
-          className="pointer-events-none fixed z-20 rounded-md transition-[top,height] duration-100"
+          className="pointer-events-none fixed z-20 rounded-md transition-[top,left,width,height] duration-200 ease-out will-change-[top,height]"
           style={{
             ...trace,
             background: `color-mix(in srgb, ${prefs.lineTrackColor} 15%, transparent)`,
@@ -1927,7 +2102,7 @@ export function HarborReader({
         />
       )}
 
-      {selection && !editing && (
+      {selection && !editing && !explanation && (
         <SelectionToolbar
           selection={selection}
           direction={effectiveDirection}
@@ -1938,6 +2113,12 @@ export function HarborReader({
             utterance.lang = effectiveDirection === "rtl" ? "ar" : "en";
             window.speechSynthesis.speak(utterance);
           }}
+          onListenFrom={() => {
+            const line = selection.ranges[0]?.line ?? current;
+            setSelection(null);
+            void speakFrom(line);
+          }}
+          onExplain={() => void explainSelection()}
           onNote={() => setEditing(selectedAnnotation ?? draftAnnotation(false))}
           onReference={() =>
             setEditing(
@@ -1946,11 +2127,26 @@ export function HarborReader({
                 : draftAnnotation(true),
             )
           }
+          onBookmark={() => {
+            addBookmark(selection.ranges[0]?.line ?? current);
+            setSelection(null);
+          }}
           onCopy={() => navigator.clipboard.writeText(selection.text)}
           onHoverStart={cancelAnnotationDismiss}
           onHoverEnd={() =>
             selection.annotationId && scheduleAnnotationDismiss(selection.annotationId)
           }
+        />
+      )}
+
+      {explanation && (
+        <ExplanationCard
+          explanation={explanation}
+          direction={effectiveDirection}
+          onClose={() => {
+            setExplanation(null);
+            setSelection(null);
+          }}
         />
       )}
 
@@ -1971,6 +2167,7 @@ export function HarborReader({
           className="reader-icon"
           onClick={() => addBookmark()}
           aria-label={t("Bookmark current passage")}
+          title={t("Continue from this passage next time")}
         >
           <Bookmark size={18} />
         </button>
@@ -2070,12 +2267,17 @@ export function HarborReader({
                 ? narrationPaused
                   ? t("Resume narration")
                   : t("Pause narration")
-                : t("Read chapter with Edge TTS")
+                : originalAudio && !(translation && !showOriginal)
+                  ? t("Play original audiobook chapter")
+                  : t("Read chapter with Edge TTS")
           }
           title={
             narrationLoading
               ? t("Cancel audio generation")
-              : narrationNotice || t("Read the complete chapter with Edge TTS")
+              : narrationNotice ||
+                (originalAudio && !(translation && !showOriginal)
+                  ? t("Play original audiobook chapter")
+                  : t("Read the complete chapter with Edge TTS"))
           }
         >
           {narrationLoading ? (
@@ -2097,7 +2299,7 @@ export function HarborReader({
           </div>
         )}
         {(speaking || audioDuration > 0) && (
-          <div className="flex w-[clamp(170px,19vw,280px)] items-center gap-2 px-2">
+          <div className="flex w-[clamp(210px,22vw,330px)] items-center gap-2 px-2">
             <span className="w-9 text-end text-[10px] tabular-nums" style={{ color: colors.muted }}>
               {formatAudioTime(audioPosition)}
             </span>
@@ -2111,7 +2313,8 @@ export function HarborReader({
               onChange={(event) => {
                 const next = Number(event.target.value);
                 if (!audio.current || !Number.isFinite(next)) return;
-                audio.current.currentTime = next;
+                audio.current.currentTime = audioStart.current + next;
+                lastAudioUiUpdate.current = performance.now();
                 setAudioPosition(next);
               }}
               aria-label={t("Audio position")}
@@ -2125,8 +2328,37 @@ export function HarborReader({
             <span className="w-9 text-[10px] tabular-nums" style={{ color: colors.muted }}>
               -{formatAudioTime(Math.max(0, audioDuration - audioPosition))}
             </span>
+            <button
+              type="button"
+              className="min-w-9 rounded-lg px-1.5 py-1 text-[11px] font-semibold tabular-nums hover:bg-white/[.08]"
+              onClick={() => {
+                const next = playbackRates[(playbackRates.indexOf(playbackRate) + 1) % playbackRates.length];
+                setPlaybackRate(next);
+                if (audio.current) audio.current.playbackRate = next;
+              }}
+              aria-label={t("Playback speed: {speed}x", { speed: playbackRate })}
+              title={t("Change playback speed")}
+            >
+              {playbackRate}×
+            </button>
           </div>
         )}
+        {prefs.mode === "harbor" &&
+          audioDuration > 0 &&
+          narrationLine.current >= 0 &&
+          current !== narrationLine.current && (
+            <button
+              className="reader-icon"
+              onClick={() => {
+                goTo(narrationLine.current);
+                window.requestAnimationFrame(() => updateTrace());
+              }}
+              aria-label={t("Return to the audio line")}
+              title={t("Return to the audio line")}
+            >
+              <LocateFixed size={18} />
+            </button>
+          )}
         <div className="px-3 text-xs tabular-nums" style={{ color: colors.muted }}>
           {Math.round(
             prefs.mode === "book"
@@ -2321,7 +2553,14 @@ export function HarborReader({
             </button>
           </div>
           <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {panel === "settings" && <Settings prefs={prefs} patch={patchPrefs} colors={colors} />}
+            {panel === "settings" && (
+              <Settings
+                prefs={prefs}
+                patch={patchPrefs}
+                colors={colors}
+                audiobook={Boolean(originalAudio)}
+              />
+            )}
             {panel === "search" && (
               <div>
                 <div
@@ -2496,6 +2735,20 @@ export function HarborReader({
                           {bookmark.preview}
                         </div>
                       </button>
+                      {bookmark.chapterId === chapter.id && (
+                        <button
+                          onClick={() => {
+                            setPanel(null);
+                            void speakFrom(bookmark.line);
+                          }}
+                          className="flex shrink-0 items-center gap-1.5 self-start rounded-lg px-2 py-2 text-xs hover:bg-white/[.06]"
+                          aria-label={t("Listen from here")}
+                          title={t("Listen from here")}
+                        >
+                          <Play size={14} fill="currentColor" />
+                          <span>{t("Listen from here")}</span>
+                        </button>
+                      )}
                       <button
                         onClick={() =>
                           setBookmarks(removeEBookBookmark(profile, bookId, bookmark.id))
@@ -2537,8 +2790,11 @@ function SelectionToolbar({
   direction,
   onColor,
   onListen,
+  onListenFrom,
+  onExplain,
   onNote,
   onReference,
+  onBookmark,
   onCopy,
   onHoverStart,
   onHoverEnd,
@@ -2547,8 +2803,11 @@ function SelectionToolbar({
   direction: "ltr" | "rtl";
   onColor: (color: string) => void;
   onListen: () => void;
+  onListenFrom: () => void;
+  onExplain: () => void;
   onNote: () => void;
   onReference: () => void;
+  onBookmark: () => void;
   onCopy: () => Promise<void>;
   onHoverStart: () => void;
   onHoverEnd: () => void;
@@ -2593,6 +2852,16 @@ function SelectionToolbar({
       <div className="flex items-center overflow-x-auto p-1.5 text-xs">
         <SelectionAction icon={<Headphones size={15} />} label={t("Listen")} onClick={onListen} />
         <SelectionAction
+          icon={<Play size={15} fill="currentColor" />}
+          label={t("Listen from here")}
+          onClick={onListenFrom}
+        />
+        <SelectionAction
+          icon={<BookOpen size={15} />}
+          label={t("Explain")}
+          onClick={onExplain}
+        />
+        <SelectionAction
           icon={<MessageSquareText size={15} />}
           label={t("Note")}
           onClick={onNote}
@@ -2603,12 +2872,108 @@ function SelectionToolbar({
           onClick={onReference}
         />
         <SelectionAction
+          icon={<Bookmark size={15} />}
+          label={t("Passage bookmark")}
+          onClick={onBookmark}
+        />
+        <SelectionAction
           icon={copied ? <Check size={15} /> : <Copy size={15} />}
           label={copied ? t("Copied!") : t("Copy")}
           onClick={() => void copy()}
           active={copied}
         />
       </div>
+    </div>
+  );
+}
+
+function ExplanationCard({
+  explanation,
+  direction,
+  onClose,
+}: {
+  explanation: {
+    loading: boolean;
+    results?: WordExplanation[];
+    error?: string;
+    x: number;
+    y: number;
+  };
+  direction: "ltr" | "rtl";
+  onClose: () => void;
+}) {
+  const t = useT();
+  const results = explanation.results ?? [];
+  const single = results.length === 1;
+  return (
+    <div
+      dir={direction}
+      className="fixed z-[80] w-[min(380px,calc(100vw-24px))] -translate-x-1/2 rounded-2xl border border-white/10 bg-[#101011]/95 p-4 text-[#e8e3d9] shadow-[0_22px_70px_rgba(0,0,0,.62)] backdrop-blur-2xl"
+      style={{
+        left: Math.min(window.innerWidth - 202, Math.max(202, explanation.x)),
+        top: Math.min(window.innerHeight - 280, Math.max(88, explanation.y)),
+      }}
+    >
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">
+            {t("Explain")}
+          </p>
+          {single && (
+            <h3 className="mt-1 text-lg font-semibold">
+              {results[0].word}{" "}
+              <span className="text-xs font-normal text-white/50">
+                · {results[0].partOfSpeech}
+              </span>
+            </h3>
+          )}
+          {!single && results.length > 0 && (
+            <h3 className="mt-1 text-lg font-semibold">{t("Passage context")}</h3>
+          )}
+        </div>
+        <button className="reader-icon -m-2" onClick={onClose} aria-label={t("Close")}>
+          <X size={16} />
+        </button>
+      </div>
+      {explanation.loading && (
+        <div className="flex items-center gap-2 py-6 text-sm text-white/60">
+          <Loader2 size={16} className="animate-spin" /> {t("Checking Wiktionary…")}
+        </div>
+      )}
+      {explanation.error && <p className="text-sm text-red-300">{explanation.error}</p>}
+      {results.length > 0 && (
+        <div className="max-h-[min(55vh,520px)] space-y-3 overflow-y-auto text-sm leading-relaxed">
+          {results.map((result) => (
+            <div
+              key={`${result.word}:${result.partOfSpeech}`}
+              className="rounded-xl bg-white/[.06] p-3"
+            >
+              {!single && (
+                <strong className="mb-1 block">
+                  {result.word}{" "}
+                  <span className="text-xs font-normal text-white/45">
+                    · {result.partOfSpeech}
+                  </span>
+                </strong>
+              )}
+              <p>{result.meaning}</p>
+              <p className="mt-2 text-white/65">{result.contextMeaning}</p>
+              {result.translation && (
+                <p className="mt-2">
+                  <strong>{t("Arabic")}:</strong>{" "}
+                  <span dir="rtl">{result.translation}</span>
+                </p>
+              )}
+              <span className="mt-2 block text-[10px] uppercase tracking-wider text-white/35">
+                {t("{confidence} confidence", { confidence: result.confidence })}
+              </span>
+            </div>
+          ))}
+          <div className="text-end text-[10px] uppercase tracking-wider text-white/35">
+            {t("Source: Wiktionary")}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -2776,10 +3141,12 @@ function Settings({
   prefs,
   patch,
   colors,
+  audiobook,
 }: {
   prefs: EBookReaderPrefs;
   patch: (value: Partial<EBookReaderPrefs>) => void;
   colors: (typeof paper)[keyof typeof paper];
+  audiobook: boolean;
 }) {
   const t = useT();
   const [adjustmentsOpen, setAdjustmentsOpen] = useState(true);
@@ -3031,21 +3398,23 @@ function Settings({
           className="h-5 w-5 accent-[var(--color-accent)]"
         />
       </label>
-      <Setting label={t("Line tracker")}>
+      {audiobook && (
+        <label className="flex items-center justify-between gap-4">
+          <span>{t("Line tracker")}</span>
+          <input
+            type="checkbox"
+            checked={prefs.audiobookLineTracker}
+            onChange={(event) => patch({ audiobookLineTracker: event.target.checked })}
+            className="h-5 w-5 accent-[var(--color-accent)]"
+          />
+        </label>
+      )}
+      {(!audiobook || prefs.audiobookLineTracker) && <Setting label={t("Line tracker")}>
         <div
           className="rounded-2xl border p-4"
           style={{ background: `${colors.desk}55`, borderColor: `${colors.muted}30` }}
         >
-          <label className="flex items-center justify-between gap-4">
-            <span className="text-sm font-medium">{t("Mouse tracker")}</span>
-            <input
-              type="checkbox"
-              checked={prefs.mouseLineTrack}
-              onChange={(event) => patch({ mouseLineTrack: event.target.checked })}
-              className="h-5 w-5 accent-[var(--color-accent)]"
-            />
-          </label>
-          <div className="mt-4 border-t pt-4" style={{ borderColor: `${colors.muted}25` }}>
+          <div>
             <div className="mb-3 flex items-center justify-between text-xs">
               <span style={{ color: colors.muted }}>{t("Tracker color")}</span>
               <span className="font-mono uppercase" style={{ color: prefs.lineTrackColor }}>
@@ -3089,7 +3458,7 @@ function Settings({
             </div>
           </div>
         </div>
-      </Setting>
+      </Setting>}
     </div>
   );
 }

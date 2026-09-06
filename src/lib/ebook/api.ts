@@ -43,6 +43,7 @@ export type EBook = {
   genres: string[];
   chapters?: number;
   volumes?: number;
+  audiobook?: boolean;
   score?: number;
   trendingScore?: number;
   siteUrl?: string;
@@ -2134,12 +2135,13 @@ function sourceFallback(ebook: EBook): EBook {
   try {
     slug =
       decodeURIComponent(ebook.sourceItemId ?? "")
-        .split("/")
+        .split(/[\\/]/)
         .filter(Boolean)
         .at(-1)
+        ?.replace(/\.(?:epub|m4b|m4a|mp3|aac|ogg|opus|flac|wav)$/i, "")
         ?.replace(/[-_]+/g, " ") ?? "";
   } catch {}
-  const alternatives = [...(ebook.altTitle?.split("|") ?? []), slug].filter(Boolean);
+  const alternatives = [ebook.title, ...(ebook.altTitle?.split("|") ?? []), slug].filter(Boolean);
   const localized = alternatives.find((title) =>
     language === "ar"
       ? /\p{Script=Arabic}/u.test(title)

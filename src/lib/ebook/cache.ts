@@ -209,7 +209,6 @@ export async function ebookBookPageCacheGet(key: string): Promise<CachedEBookBoo
   if (!entry?.blobs?.length || entry.blobs.some((blob) => !(blob instanceof Blob))) return null;
   entry = { ...entry, accessedAt: now };
   remember(pageMemory, key, entry, 4);
-  void write(BOOK_PAGES, key, entry);
   return { blobs: entry.blobs, paragraphStarts: entry.paragraphStarts };
 }
 

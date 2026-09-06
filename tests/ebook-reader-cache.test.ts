@@ -93,12 +93,13 @@ test("Book Mode generation is cached and cancellable", async () => {
   assert.match(pages, /AbortError/);
 });
 
-test("the line tracker marks every completed line with the tracker color", async () => {
+test("the line tracker keeps completed lines marked after moving backward", async () => {
   const reader = await readFile(
     new URL("../src/views/ebook/harbor-reader.tsx", import.meta.url),
     "utf8",
   );
-  assert.match(reader, /index < current \? "reader-read"/);
+  assert.match(reader, /setReadThrough\(\(line\) => Math\.max\(line, current\)\)/);
+  assert.match(reader, /index <= readThrough \? "reader-read"/);
   assert.match(reader, /--reader-read-color/);
   assert.match(reader, /\.reader-read\{color:var\(--reader-read-color\)\}/);
 });
@@ -114,6 +115,147 @@ test("narrator voices exist only in the reader controller, not Reading settings"
   assert.doesNotMatch(settings, /Narrator voice/);
   assert.match(reader.slice(0, settingsStart), /<VoicePicker/);
   assert.match(settings, /Setting label=\{t\("Saved audio"\)\}/);
+});
+
+test("the eBook reader has no mouse-driven tracker or setting", async () => {
+  const reader = await readFile("src/views/ebook/harbor-reader.tsx", "utf8");
+  const state = await readFile("src/lib/ebook/reader-state.ts", "utf8");
+
+  assert.doesNotMatch(reader, /mouseLineTrack|Mouse tracker/);
+  assert.doesNotMatch(state, /mouseLineTrack/);
+});
+
+test("right-click opens the passage toolbar and bookmarks become the resume point", async () => {
+  const reader = await readFile("src/views/ebook/harbor-reader.tsx", "utf8");
+
+  assert.match(reader, /onContextMenu=\{\(event\) => \{[\s\S]*?tracedLine\.current = index;[\s\S]*?persistReadingPosition\(index\);[\s\S]*?setSelection\(\{[\s\S]*?ranges: \[\{ line: index, start: 0, end: text\.length \}\]/);
+  assert.match(reader, /label=\{t\("Passage bookmark"\)\}/);
+  assert.match(reader, /onBookmark=\{\(\) => \{\s*addBookmark\(selection\.ranges\[0\]\?\.line \?\? current\)/);
+  assert.match(reader, /label=\{t\("Listen from here"\)\}/);
+  assert.match(reader, /onListenFrom=\{\(\) => \{[\s\S]*?void speakFrom\(line\)/);
+  assert.match(reader, /const addBookmark = \(index = current\) => \{\s*persistReadingPosition\(index\)/);
+  assert.match(reader, /window\.addEventListener\("pagehide", saveCurrentPassage\)/);
+  assert.match(reader, /document\.visibilityState === "hidden"/);
+  assert.match(reader, /return \(\) => \{\s*saveCurrentPassage\(\)/);
+});
+
+test("only bookmarks in the open chapter can continue narration", async () => {
+  const reader = await readFile("src/views/ebook/harbor-reader.tsx", "utf8");
+
+  assert.match(reader, /bookmark\.chapterId === chapter\.id && \(\s*<button/);
+  assert.match(reader, /aria-label=\{t\("Listen from here"\)\}/);
+  assert.match(reader, /void speakFrom\(bookmark\.line\)/);
+  assert.doesNotMatch(reader, /pendingBookmarkNarration/);
+});
+
+test("narration playback cycles through the supported speeds", async () => {
+  const reader = await readFile("src/views/ebook/harbor-reader.tsx", "utf8");
+
+  assert.match(reader, /const playbackRates = \[1, 1\.5, 2, 3\] as const/);
+  assert.match(reader, /player\.playbackRate = playbackRate/);
+  assert.match(reader, /if \(audio\.current\) audio\.current\.playbackRate = next/);
+  assert.match(reader, /\{playbackRate\}×/);
+});
+
+test("Edge TTS reuses one complete chapter track and seeks to the selected line", async () => {
+  const reader = await readFile(
+    new URL("../src/views/ebook/harbor-reader.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(reader, /const windowEnd = paragraphs\.length/);
+  assert.match(reader, /const chapterText = paragraphs\.join/);
+  assert.match(reader, /const position = timeForParagraph\(duration, boundaries\)/);
+  assert.match(reader, /player\.currentTime = start \+ position/);
+  assert.match(reader, /boundaryWords\[cursor \+ offset\] === word/);
+  assert.match(
+    reader,
+    /Math\.max\(0, boundary\.offsetMs \/ 1_000 - EDGE_BOUNDARY_LEAD_SECONDS\)/,
+  );
+  assert.doesNotMatch(reader, /NARRATION_BUDGETS|narrationWindowEnd|narrationAhead/);
+});
+
+test("Edge TTS merged chunk boundaries use the actual MP3 timeline", async () => {
+  const native = await readFile("src-tauri/src/ebook_tts.rs", "utf8");
+  const narration = await readFile("src/lib/ebook/narration.ts", "utf8");
+
+  assert.match(native, /edge_mp3_duration_ticks\(chunk_audio\.len\(\)\)/);
+  assert.doesNotMatch(native, /timeline_ticks\.saturating_add\(chunk_end\)/);
+  assert.match(narration, /harbor-ebook-edge-narration-v2/);
+});
+
+test("reader prefers original audiobook audio unless translated text is displayed", async () => {
+  const reader = await readFile("src/views/ebook/harbor-reader.tsx", "utf8");
+  const ebook = await readFile("src/views/ebook.tsx", "utf8");
+
+  assert.match(reader, /originalAudio && !\(translation && !showOriginal\)/);
+  assert.match(reader, /sourceEBookAudiobookStream/);
+  assert.match(reader, /audio\.current\.currentTime = audioStart\.current \+ next/);
+  assert.match(ebook, /audio\.chapter && current\.chapter/);
+  assert.match(ebook, /chapters\?\.length === audioChapters\.length/);
+  assert.match(ebook, /originalAudio=/);
+});
+
+test("original audiobook tracking weights passages by spoken words", async () => {
+  const reader = await readFile("src/views/ebook/harbor-reader.tsx", "utf8");
+
+  assert.match(reader, /const timingLocale = originalAudio\?\.chapter\.language \?\? selectedVoice\.locale/);
+  assert.match(reader, /Math\.max\(1, narrationWordCount\(text, timingLocale\)\)/);
+  assert.doesNotMatch(reader, /spokenParagraphs\.map\(\(text\) => Math\.max\(1, text\.trim\(\)\.length\)\)/);
+});
+
+test("audiobooks can disable line tracking without disabling playback", async () => {
+  const reader = await readFile("src/views/ebook/harbor-reader.tsx", "utf8");
+  const state = await readFile("src/lib/ebook/reader-state.ts", "utf8");
+
+  assert.match(state, /audiobookLineTracker: true/);
+  assert.match(reader, /audiobook=\{Boolean\(originalAudio\)\}/);
+  assert.match(reader, /patch\(\{ audiobookLineTracker: event\.target\.checked \}\)/);
+  assert.match(reader, /const usesOriginalAudiobook = Boolean\(originalAudio && !\(translation && !showOriginal\)\)/);
+  assert.match(reader, /const lineTrackerEnabled = !usesOriginalAudiobook \|\| prefs\.audiobookLineTracker/);
+  assert.match(reader, /if \(!lineTrackerEnabled\) return;[\s\S]*?root\.addEventListener\("wheel"/);
+  assert.match(reader, /lineTrackerEnabled \? \(index === current/);
+});
+
+test("Edge TTS throttles playback UI renders without throttling line tracking", async () => {
+  const reader = await readFile("src/views/ebook/harbor-reader.tsx", "utf8");
+  const update = reader.slice(reader.indexOf("player.ontimeupdate"), reader.indexOf("player.ontimeupdate") + 700);
+
+  assert.match(update, /now - lastAudioUiUpdate\.current >= 500/);
+  assert.doesNotMatch(update, /paragraphForTime/);
+  assert.match(reader, /setInterval\(trackPlayback, 50\)/);
+  assert.doesNotMatch(reader, /requestAnimationFrame\(trackPlayback\)/);
+  assert.doesNotMatch(reader, /spokenWordEnds\.findIndex/);
+  assert.match(reader, /position \+ \(boundaries\.length \? EDGE_BOUNDARY_LEAD_SECONDS : 0\)/);
+  assert.match(reader, /player\.onpause = stopTracking/);
+  assert.match(reader, /goTo\(line, true\)/);
+  assert.match(reader, /if \(audioFollowScrolling\.current\)/);
+  assert.doesNotMatch(reader, /audioFollowScrolling\.current = true;\s*setTrace\(null\)/);
+});
+
+test("rapid tracker scrolling defers storage and avoids stacked smooth scrolling", async () => {
+  const reader = await readFile("src/views/ebook/harbor-reader.tsx", "utf8");
+  assert.match(reader, /setTimeout\(\(\) => \{\s*updateTrace\(\);\s*\}, 50\)/);
+  assert.match(reader, /scheduleReadingPosition\(next\)/);
+  assert.match(reader, /setTimeout\(\(\) => \{[\s\S]*?persistReadingPosition\(pendingProgress\.current\)[\s\S]*?\}, 180\)/);
+  assert.match(reader, /scrollBy\(\{ top: offset, behavior: "auto" \}\)/);
+});
+
+test("the visible line tracker eases between passage geometry", async () => {
+  const reader = await readFile("src/views/ebook/harbor-reader.tsx", "utf8");
+  assert.match(
+    reader,
+    /transition-\[top,left,width,height\] duration-200 ease-out will-change-\[top,height\]/,
+  );
+});
+
+test("the reader can return a displaced line tracker to the active audio line", async () => {
+  const reader = await readFile(
+    new URL("../src/views/ebook/harbor-reader.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(reader, /current !== narrationLine\.current/);
+  assert.match(reader, /goTo\(narrationLine\.current\)/);
+  assert.match(reader, /Return to the audio line/);
 });
 
 test("Book Mode keeps the current pages visible while settings regenerate replacements", async () => {
@@ -150,6 +292,22 @@ test("Book Mode double-buffers the WebGL book until replacement pages are ready"
   assert.match(bookView, /instanceName = NAME/);
   assert.match(bookView, /name: instanceName/);
   assert.match(bookView, /d\.name !== instanceName/);
+});
+
+test("Book Mode uses lightweight encoded pages and eBook-only textures", async () => {
+  const pages = await readFile("src/lib/ebook/book-pages.ts", "utf8");
+  const reader = await readFile("src/views/ebook/harbor-reader.tsx", "utf8");
+
+  assert.match(pages, /const WIDTH = 1050/);
+  assert.match(pages, /"image\/jpeg", 0\.92/);
+  assert.match(pages, /"v4"/);
+  assert.match(reader, /textureSize=\{1024\}/);
+  assert.match(reader, /pixelRatio=\{1\}/);
+});
+
+test("Book Mode cache hits do not rewrite every page blob", async () => {
+  const cache = await readFile("src/lib/ebook/cache.ts", "utf8");
+  assert.doesNotMatch(cache, /void write\(BOOK_PAGES, key, entry\)/);
 });
 
 test("returning from Book Mode remounts and restores the Harbor line tracker", async () => {

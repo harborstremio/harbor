@@ -2,10 +2,10 @@ import type { EBookChapterContent } from "./providers";
 import { ebookBookPageCacheGet, ebookBookPageCachePut } from "./cache";
 
 export type EBookFlipPages = { urls: string[]; paragraphStarts: number[] };
-const WIDTH = 1200;
-const HEIGHT = 1600;
-const PAD_X = 118;
-const PAD_Y = 124;
+const WIDTH = 1050;
+const HEIGHT = 1400;
+const PAD_X = 104;
+const PAD_Y = 109;
 const ABORT_GRACE_MS = 75;
 
 type Options = {
@@ -52,7 +52,7 @@ function hash(value: string): string {
 
 function pageCacheKey(options: Options): string {
   return [
-    "v2",
+    "v4",
     hash(options.content.text ?? ""),
     hash(options.title),
     options.direction,
@@ -72,7 +72,7 @@ function canvasBlob(canvas: HTMLCanvasElement, signal: AbortSignal): Promise<Blo
       if (signal.aborted) reject(abortError());
       else if (blob) resolve(blob);
       else reject(new Error("Book page image encoding failed"));
-    }, "image/png"),
+    }, "image/jpeg", 0.92),
   );
 }
 
@@ -104,7 +104,7 @@ async function generate(options: Options, signal: AbortSignal): Promise<Generate
   canvas.height = HEIGHT;
   const context = canvas.getContext("2d");
   if (!context) return { blobs: [], paragraphStarts: [] };
-  const bodySize = Math.round(options.fontSize * 1.72);
+  const bodySize = Math.round(options.fontSize * 1.5);
   const rowHeight = Math.round(bodySize * options.lineHeight);
   const rowsPerPage = Math.max(8, Math.floor((HEIGHT - PAD_Y * 2) / rowHeight));
   try {
@@ -151,9 +151,9 @@ async function generate(options: Options, signal: AbortSignal): Promise<Generate
     context.font = `${bodySize}px ${options.fontFamily}`;
     pageRows.forEach((row, index) => context.fillText(row.text, x, PAD_Y + index * rowHeight));
     context.fillStyle = options.muted;
-    context.font = `22px ${options.fontFamily}`;
+    context.font = `20px ${options.fontFamily}`;
     context.textAlign = "center";
-    context.fillText(`${options.title}  ·  ${blobs.length + 1}`, WIDTH / 2, HEIGHT - 62);
+    context.fillText(`${options.title}  ·  ${blobs.length + 1}`, WIDTH / 2, HEIGHT - 55);
     blobs.push(await canvasBlob(canvas, signal));
     paragraphStarts.push(pageRows[0]?.paragraph ?? 0);
     if (blobs.length % 4 === 0)

@@ -1,4 +1,5 @@
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
+use futures_util::{stream, StreamExt};
 use kothok_edge_tts::{init_tls, list_voices, EdgeTts, Engine, TtsEvent};
 use serde::Serialize;
 use std::{
@@ -10,6 +11,15 @@ use tokio_util::sync::CancellationToken;
 
 const MAX_CHAPTER_CHARS: usize = 500_000;
 const MAX_CHUNK_BYTES: usize = 3_600;
+const MAX_CONCURRENT_CHUNKS: usize = 3;
+const EDGE_MP3_BITS_PER_SECOND: u64 = 48_000;
+
+fn edge_mp3_duration_ticks(bytes: usize) -> u64 {
+    (bytes as u64)
+        .saturating_mul(8)
+        .saturating_mul(10_000_000)
+        / EDGE_MP3_BITS_PER_SECOND
+}
 
 fn jobs() -> &'static Mutex<HashMap<String, CancellationToken>> {
     static JOBS: OnceLock<Mutex<HashMap<String, CancellationToken>>> = OnceLock::new();
@@ -150,7 +160,10 @@ pub async fn ebook_tts_synthesize(
     }
     let rate = rate.unwrap_or(0).clamp(-50, 100);
     let rate = format!("{rate:+}%");
-    let chunks = chapter_chunks(text);
+    let chunks = chapter_chunks(text)
+        .into_iter()
+        .map(str::to_owned)
+        .collect::<Vec<_>>();
     let total = chunks.len();
     let mut audio = Vec::new();
     let mut boundaries = Vec::new();
@@ -166,23 +179,33 @@ pub async fn ebook_tts_synthesize(
     }
     init_tls();
     let outcome = async {
-        for (index, chunk) in chunks.into_iter().enumerate() {
-            let events = tokio::select! {
-                _ = cancellation.cancelled() => return Err("Edge TTS generation cancelled".into()),
-                result = EdgeTts.synthesize(chunk, &voice, &rate, &locale) =>
-                    result.map_err(|error| format!("Edge TTS failed: {error}"))?,
-            };
-            let mut chunk_end = 0_u64;
+        let mut completed = 0;
+        let mut results = stream::iter(chunks.into_iter().map(|chunk| {
+            let cancellation = cancellation.clone();
+            let voice = &voice;
+            let rate = &rate;
+            let locale = &locale;
+            async move {
+                let events = tokio::select! {
+                    _ = cancellation.cancelled() => return Err("Edge TTS generation cancelled".into()),
+                    result = EdgeTts.synthesize(&chunk, voice, rate, locale) =>
+                        result.map_err(|error| format!("Edge TTS failed: {error}"))?,
+                };
+                Ok::<_, String>(events)
+            }
+        }))
+        .buffered(MAX_CONCURRENT_CHUNKS);
+        while let Some(result) = results.next().await {
+            let events = result?;
+            let mut chunk_audio = Vec::new();
             for event in events {
                 match event {
-                    TtsEvent::Audio(bytes) => audio.extend_from_slice(&bytes),
+                    TtsEvent::Audio(bytes) => chunk_audio.extend_from_slice(&bytes),
                     TtsEvent::WordBoundary {
                         offset,
                         duration,
                         text,
                     } => {
-                        let end = offset.saturating_add(duration);
-                        chunk_end = chunk_end.max(end);
                         boundaries.push(EBookWordBoundary {
                             offset_ms: (timeline_ticks + offset) as f64 / 10_000.0,
                             duration_ms: duration as f64 / 10_000.0,
@@ -192,8 +215,9 @@ pub async fn ebook_tts_synthesize(
                     TtsEvent::TurnEnd => {}
                 }
             }
-            timeline_ticks = timeline_ticks.saturating_add(chunk_end);
-            let completed = index + 1;
+            timeline_ticks = timeline_ticks.saturating_add(edge_mp3_duration_ticks(chunk_audio.len()));
+            audio.extend_from_slice(&chunk_audio);
+            completed += 1;
             let _ = on_progress.send(EBookTtsProgress {
                 completed,
                 total,
@@ -234,6 +258,11 @@ pub fn ebook_tts_cancel(request_id: String) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn edge_mp3_bytes_advance_the_merged_audio_clock() {
+        assert_eq!(edge_mp3_duration_ticks(6_000), 10_000_000);
+    }
 
     #[test]
     fn chunks_preserve_unicode_text_and_limit_bytes() {

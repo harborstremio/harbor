@@ -23,7 +23,7 @@ type NativeNarrationResult = {
   audioBase64: string;
   boundaries: NarrationBoundary[];
 };
-const CACHE = "harbor-ebook-edge-narration-v1";
+const CACHE = "harbor-ebook-edge-narration-v2";
 const CACHE_MAX_AGE = 30 * 24 * 60 * 60 * 1_000;
 const CACHED_AT = "X-Harbor-Cached-At";
 const CACHED_VOICE = "X-Harbor-Voice";
