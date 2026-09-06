@@ -1,4 +1,5 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { HarborMark } from "@/components/icons/harbor-mark";
 import uploadGlyph from "@/assets/nav-icons/download.svg?raw";
 import { resizeAvatar } from "./account/avatar-utils";
 import { ProfileAvatar, SubtitleText } from "@/chrome/account-menu/account-menu-parts";
@@ -9,7 +10,7 @@ import { useSettings } from "@/lib/settings";
 import { TOP_GROUPS } from "./groups";
 import { SECTION_ICONS } from "./section-icons";
 import { SetIcon } from "./set-icon";
-import { tabsFor } from "./tab-registry";
+import type { TabEntry } from "./tab-registry";
 import { useNavSearch } from "./nav";
 import { settingsAnchor, type SectionId } from "./shared";
 
@@ -18,6 +19,28 @@ function Glyph({ name, size }: { name: string; size: number }) {
 }
 
 type Band = { section: string; sections: SectionId[] };
+
+const BAND_LABELS: Record<string, string> = {
+  SETUP: "Account & setup",
+  WATCHING: "Playback",
+  LANGUAGE: "Languages",
+  CONTENT: "Sources & library",
+  "LOOK & FEEL": "Appearance",
+  DEVICES: "Controls & devices",
+  SYSTEM: "System",
+  HELP: "Help & about",
+};
+
+const BAND_ICONS: Record<string, string> = {
+  SETUP: "Users",
+  WATCHING: "Play",
+  LANGUAGE: "Languages",
+  CONTENT: "Library",
+  "LOOK & FEEL": "Palette",
+  DEVICES: "Gamepad2",
+  SYSTEM: "SlidersHorizontal",
+  HELP: "Heart",
+};
 
 function bands(): Band[] {
   const out: Band[] = [];
@@ -126,6 +149,7 @@ function SectionRow({
 export function SettingsSidebar({
   active,
   activeTab,
+  activeTabs,
   meta,
   query = "",
   onSelect,
@@ -133,6 +157,7 @@ export function SettingsSidebar({
 }: {
   active: SectionId;
   activeTab: string | null;
+  activeTabs: TabEntry[];
   meta: Record<SectionId, { label: string; sub: string }>;
   query?: string;
   onSelect: (section: SectionId, tab?: string) => void;
@@ -142,13 +167,16 @@ export function SettingsSidebar({
   const trimmed = query.trim().toLowerCase();
   const { matches, optionMatches } = useNavSearch(trimmed);
   const searching = trimmed.length > 0;
+  const activeBand = bands().find((band) => band.sections.includes(active))?.section ?? "SETUP";
+  const [openBand, setOpenBand] = useState<string | null>(activeBand);
+  useEffect(() => setOpenBand(activeBand), [activeBand, active, searching]);
 
   if (searching) {
     const sections = matches ?? [];
     const options = optionMatches ?? [];
     const empty = sections.length === 0 && options.length === 0;
     return (
-      <nav className="hset-rail" aria-label={t("Settings")}>
+      <nav id="hset-page-navigation" className="hset-rail" aria-label={t("Settings")}>
         <RailAccount />
         <div className="hset-rail-nav" key="search">
           <div className="hset-rail-band hset-rail-results">
@@ -201,15 +229,28 @@ export function SettingsSidebar({
   }
 
   return (
-    <nav className="hset-rail" aria-label={t("Settings")}>
+    <nav id="hset-page-navigation" className="hset-rail" aria-label={t("Settings")}>
       <RailAccount />
       <div className="hset-rail-nav" key="browse">
         {bands().map((band) => (
           <div key={band.section} className="hset-rail-band">
-            <h2 className="hset-rail-band-title">{t(band.section)}</h2>
+            <button
+              type="button"
+              className={`hset-rail-category ${activeBand === band.section ? "is-current" : ""}`}
+              aria-expanded={openBand === band.section}
+              aria-controls={`hset-category-${band.section.replaceAll(" ", "-")}`}
+              onClick={() => setOpenBand(openBand === band.section ? null : band.section)}
+            >
+              <span className="hset-category-icon" aria-hidden>
+                <Glyph name={BAND_ICONS[band.section]} size={20} />
+              </span>
+              <span className="hset-category-name">{t(BAND_LABELS[band.section] ?? band.section)}</span>
+              <span className="hset-category-caret" aria-hidden />
+            </button>
+            <div id={`hset-category-${band.section.replaceAll(" ", "-")}`} className="hset-category-pages" hidden={openBand !== band.section}>
             {band.sections.map((id) => {
               const on = id === active;
-              const tabs = on ? tabsFor(id) : [];
+              const tabs = on ? activeTabs : [];
               return (
                 <div key={id} className="hset-rail-item">
                   <SectionRow id={id} label={t(meta[id].label)} on={on} onPick={onSelect} />
@@ -224,7 +265,9 @@ export function SettingsSidebar({
                           className={`hset-rail-kid ${activeTab === tab.id ? "is-on" : ""}`}
                         >
                           <span className="hset-rail-kid-chip">
-                            {tab.img ? (
+                            {tab.icon === "Harbor" ? (
+                              <HarborMark className="h-[18px] w-[18px]" />
+                            ) : tab.img ? (
                               <img
                                 src={tab.img}
                                 alt=""
@@ -243,6 +286,7 @@ export function SettingsSidebar({
                 </div>
               );
             })}
+            </div>
           </div>
         ))}
       </div>

@@ -1,5 +1,5 @@
 import { useT } from "@/lib/i18n";
-import { AtSign, BadgeCheck, RefreshCw } from "lucide-react";
+import { AtSign, BadgeCheck, RefreshCw } from "@/views/settings/icons";
 
 const PROPS = [
   { icon: AtSign, title: "Claim your @handle", body: "A name people can find you by across Harbor." },

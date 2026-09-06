@@ -1,10 +1,6 @@
 import { fillStyle } from "@/components/slider";
 import { useEffect, useRef } from "react";
-import previewPoster1 from "@/assets/preview/poster1.webp";
-import previewPoster2 from "@/assets/preview/poster2.webp";
-import previewPoster3 from "@/assets/preview/poster3.webp";
-import previewPoster4 from "@/assets/preview/poster4.webp";
-import { useSampleArtwork } from "@/lib/sample-artwork";
+import { SETTINGS_FILMS, useSampleArtwork } from "@/lib/sample-artwork";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { resetPosterDock, updatePosterDock } from "@/lib/poster-dock";
@@ -276,7 +272,7 @@ function PosterDockPreview({ transitionMs }: { transitionMs: number }) {
           }}
           className="grid grid-cols-4 items-start gap-3"
         >
-          {[previewPoster1, previewPoster2, previewPoster3, previewPoster4].map((poster, index) => (
+          {SETTINGS_FILMS.map(({ poster }, index) => (
             <div key={`${poster}-${index}`} className="min-w-0">
               <div
                 data-preview-anchor
@@ -291,4 +287,3 @@ function PosterDockPreview({ transitionMs }: { transitionMs: number }) {
     </div>
   );
 }
-

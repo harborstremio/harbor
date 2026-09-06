@@ -1,20 +1,17 @@
-import { ExternalLink, Link2, LogOut } from "./icons";
+import { TrackerConnect } from "./tracker-connect";
+import { LogOut } from "./icons";
 import { useEffect, useState } from "react";
 import { TraktDeviceModal } from "@/components/trakt/trakt-device-modal";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { fetchTraktAvatar } from "@/lib/trakt/profile";
 import { useTrakt } from "@/lib/trakt/provider";
-import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, ToggleRow } from "./shared";
 import traktLogo from "@/assets/trakt.svg";
 import {
   ModalButton,
-  ROW_ACTION,
   ROW_ACTION_DANGER,
-  ROW_ACTION_PRIMARY,
-  SettingRow,
   SettingsModal,
 } from "./kit";
 import { TrackerIdentity } from "./tracker-identity";
@@ -66,33 +63,14 @@ export function TraktPanel() {
   return (
     <>
       {!isConnected ? (
-        <Section
-          title={t("Connect your Trakt account")}
-          subtitle={t("Track everything you watch, see your watchlist, and get personalized recommendations on Harbor's home page. Free at trakt.tv.")}
-        >
-          <SettingRow
-            label={t("Connect Trakt")}
-            desc={t("Harbor shows you a short code to type in at trakt.tv. Scrobbling and watchlist sync begin the moment you approve it.")}
-          >
-            <button type="button" onClick={() => setModalOpen(true)} className={ROW_ACTION_PRIMARY}>
-              <Link2 size={18} strokeWidth={2.2} />
-              {t("Connect")}
-            </button>
-          </SettingRow>
-
-          <SettingRow
-            label={t("About Trakt")}
-            desc={t("Opens trakt.tv in your browser, where you can read what Trakt does and make a free account.")}
-          >
-            <button
-              type="button"
-              onClick={() => openUrl("https://trakt.tv")}
-              className={ROW_ACTION}
-            >
-              {t("Open trakt.tv")}
-              <ExternalLink size={18} strokeWidth={2.2} />
-            </button>
-          </SettingRow>
+        <Section title={t("Connect your Trakt account")} bare>
+          <TrackerConnect
+            service="Trakt"
+            logo={traktLogo}
+            description={t("Track what you watch, bring in your watchlist, and see recommendations on Home. Connect with a short code at trakt.tv.")}
+            onConnect={() => setModalOpen(true)}
+            website="https://trakt.tv"
+          />
         </Section>
       ) : (
         <Section

@@ -22,22 +22,27 @@ export function SvpSection() {
   const { settings, update } = useSettings();
   const t = useT();
   const [status, setStatus] = useState<SvpStatus | null>(null);
+  const [statusFailed, setStatusFailed] = useState(false);
+  const [checkAttempt, setCheckAttempt] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fixOpen, setFixOpen] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    setStatusFailed(false);
     svpStatus()
-      .then(setStatus)
-      .catch(() => {});
-  }, []);
+      .then((next) => { if (!cancelled) setStatus(next); })
+      .catch(() => { if (!cancelled) setStatusFailed(true); });
+    return () => { cancelled = true; };
+  }, [checkAttempt]);
 
   const installed = status?.installed ?? false;
   const ready = status?.ready ?? false;
-  const checking = status === null;
+  const checking = status === null && !statusFailed;
   const supported = status?.supported ?? false;
   const linux = isLinuxDesktop();
-  const loadFailed = ready && status?.loadable === false;
+  const loadFailed = status?.loadable === false;
   const getUrl = linux ? "https://www.svp-team.com/wiki/SVP:Linux" : "https://www.svp-team.com/get/";
 
   const openSvp = async () => {
@@ -54,6 +59,7 @@ export function SvpSection() {
   };
 
   const onToggle = async (on: boolean) => {
+    if (busy) return;
     setError(null);
     if (!on) {
       update({ playerSvp: false });
@@ -73,7 +79,13 @@ export function SvpSection() {
     }
   };
 
-  const engine: { pill: string; tone: Tone; desc: string } = checking
+  const engine: { pill: string; tone: Tone; desc: string } = statusFailed
+    ? {
+        pill: t("Check failed"),
+        tone: "bad",
+        desc: t("Harbor couldn't check the SVP installation. Try again."),
+      }
+    : checking
     ? {
         pill: t("Checking"),
         tone: "neutral",
@@ -115,7 +127,7 @@ export function SvpSection() {
                 pill: t("Not installed"),
                 tone: "neutral",
                 desc: t(
-                  "Install SVP once (the free tier is enough). It bundles VapourSynth + svpflow; Harbor reuses them, no extra setup.",
+                  "Install SVP with its VapourSynth components, then check again so Harbor can find them.",
                 ),
               };
 
@@ -125,10 +137,10 @@ export function SvpSection() {
       subtitle={
         linux
           ? t(
-              "Native 48/60fps motion through your Linux SVP and VapourSynth installation, rendered inside Harbor's embedded player.",
+              "Uses your Linux SVP and VapourSynth installation to smooth motion inside Harbor's player.",
             )
           : t(
-              "Genuine 48/60fps motion on anime, rendered right inside Harbor's player. SVP supplies the engine (VapourSynth + svpflow) and runs in your tray for licensing; Harbor's own player applies the interpolation, so it stays embedded and fully under your control. One-time install, then flip it on.",
+              "Uses SVP to smooth motion inside Harbor's player. Install SVP once; Harbor uses its engine and opens SVP Manager when needed.",
             )
       }
     >
@@ -136,6 +148,15 @@ export function SvpSection() {
         <SettingRow wide label={t("SVP engine")} desc={engine.desc}>
           <span className="flex w-full min-w-0 flex-wrap items-center gap-2.5">
             <StatusReadout tone={engine.tone}>{engine.pill}</StatusReadout>
+            {!checking && (
+              <button
+                type="button"
+                onClick={() => { setStatus(null); setCheckAttempt((n) => n + 1); }}
+                className={ROW_ACTION}
+              >
+                {t("Check again")}
+              </button>
+            )}
             {loadFailed && (
               <button type="button" onClick={() => setFixOpen(true)} className={ROW_ACTION}>
                 {t("How to fix")}
@@ -161,7 +182,7 @@ export function SvpSection() {
                 onClick={() => openUrl(getUrl)}
                 className={ROW_ACTION_PRIMARY}
               >
-                {t("Get SVP (free)")}
+                {t("Get SVP")}
                 <ExternalLink size={16} strokeWidth={2.2} />
               </button>
             )}
@@ -176,23 +197,31 @@ export function SvpSection() {
             ready
               ? linux
                 ? t(
-                    "Harbor loads the native svpflow filter through VapourSynth and starts SVP Manager when available. Restart playback to apply.",
+                    "Uses SVP's motion engine through VapourSynth. Restart playback to apply.",
                   )
                 : t(
-                    "Harbor's player applies the interpolation itself, embedded like normal playback, and starts SVP Manager in the tray for licensing. Restart playback to apply. If video goes black or won't start, turn this off.",
+                    "Smooths motion using SVP. Restart playback to apply; turn this off if video will not play.",
                   )
               : t(
-                  "Finish the install above first. Flipping this on now won't do anything until Harbor can find SVP's engine.",
+                  "Install SVP and check again before enabling it.",
                 )
           }
           value={settings.playerSvp}
           onChange={(v) => void onToggle(v)}
           lockReason={
-            checking
-              ? t("Checking SVP installation...")
-              : !supported
-                ? (status?.reason ?? t("SVP is not supported by this Harbor package."))
-                : undefined
+            busy
+              ? t("Setting up SVP…")
+              : settings.playerSvp
+                ? undefined
+                : checking
+                  ? t("Checking SVP installation…")
+                  : statusFailed
+                    ? t("Check the SVP installation above before enabling it.")
+                    : !supported
+                      ? (status?.reason ?? t("SVP is not supported by this Harbor package."))
+                      : !ready || loadFailed
+                        ? t("Finish setting up the SVP engine above before enabling it.")
+                        : undefined
           }
         />
 
@@ -201,7 +230,7 @@ export function SvpSection() {
             wide
             label={t("Apply SVP to")}
             desc={t(
-              "Frame interpolation shines on anime but can look off on live-action film. Limit it to the content you want, then restart playback.",
+              "Choose which videos use motion smoothing. Restart playback to apply.",
             )}
             lockReason={
               settings.playerSvp
@@ -209,8 +238,8 @@ export function SvpSection() {
                 : t("Turn on SVP above to choose where interpolation applies.")
             }
           >
-            <div
-              inert={!settings.playerSvp}
+            <fieldset
+              disabled={!settings.playerSvp}
               className={`w-full min-w-0 ${settings.playerSvp ? "" : "pointer-events-none"}`}
             >
               <Segmented
@@ -222,13 +251,13 @@ export function SvpSection() {
                 ]}
                 onChange={(v) => update({ svpScope: v as "all" | "anime" | "non-anime" })}
               />
-            </div>
+            </fieldset>
           </SettingRow>
         </Nested>
       </SettingGroup>
 
       {error && (
-        <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+        <div role="alert" className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
           <AlertTriangle size={18} strokeWidth={2.4} className="mt-[2px] shrink-0 text-danger" />
           <p className={`max-w-[66ch] ${ROW_DESC}`}>{error}</p>
         </div>

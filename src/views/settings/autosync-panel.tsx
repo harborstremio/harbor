@@ -44,6 +44,7 @@ export function AutoSyncPanel() {
   const [urlDraft, setUrlDraft] = useState(settings.communitySyncUrl);
   const [urlSaved, setUrlSaved] = useState(false);
   const [serverOpen, setServerOpen] = useState(false);
+  const [urlError, setUrlError] = useState(false);
   const savedTimer = useRef<number | null>(null);
   const flashSaved = () => {
     setUrlSaved(true);
@@ -59,10 +60,20 @@ export function AutoSyncPanel() {
 
   const openServer = () => {
     setUrlDraft(settings.communitySyncUrl);
+    setUrlError(false);
     setServerOpen(true);
   };
-  const closeServer = () => {
+  const saveServer = () => {
     const next = urlDraft.trim();
+    if (next) {
+      try {
+        const url = new URL(next);
+        if (!['http:', 'https:'].includes(url.protocol) || !url.hostname) throw new Error('Invalid URL');
+      } catch {
+        setUrlError(true);
+        return;
+      }
+    }
     if (next !== storedUrl) {
       update({ communitySyncUrl: next });
       flashSaved();
@@ -80,7 +91,7 @@ export function AutoSyncPanel() {
       <Section
         title={t("Subtitle auto-sync")}
         subtitle={t(
-          "Harbor times out-of-sync subtitles to the audio for you, on any external subtitle. It works on the mpv player and leaves embedded tracks alone, since those are already in sync.",
+          "Match downloaded subtitles to the audio in the mpv player. Embedded subtitle tracks keep their existing timing.",
         )}
       >
         <ToggleRow
@@ -110,9 +121,9 @@ export function AutoSyncPanel() {
           <Nested>
             <SettingGroup label={t("While auto-sync is on")}>
               <ToggleRow
-                label={t("Let structural tiers auto-apply")}
+                label={t("Apply audio-based corrections automatically")}
                 sub={t(
-                  "Identity matches from content hashing and the community database always apply on their own. Timing worked out from the audio only offers a fix until it has earned trust. Turn this on to let those audio-derived fixes apply automatically too.",
+                  "Apply timing corrections estimated from the audio automatically. Leave off to review these suggestions yourself. Verified exact matches still apply automatically.",
                 )}
                 value={settings.autoSyncApplyStructural}
                 onChange={(v) => update({ autoSyncApplyStructural: v })}
@@ -149,7 +160,7 @@ export function AutoSyncPanel() {
       <Section
         title={t("Community sync")}
         subtitle={t(
-          "A good correction only has to be found once. Harbor can share verified fixes so the next person with the same file and subtitle gets an instant result. Records are keyed by salted fingerprints, never your files or anything personal.",
+          "Find and share verified timing corrections for matching video and subtitle files. Turn on Private mode to stop community lookups and contributions.",
         )}
       >
         <ToggleRow
@@ -190,22 +201,27 @@ export function AutoSyncPanel() {
 
         <SettingsModal
           open={serverOpen}
-          onClose={closeServer}
+          onClose={() => setServerOpen(false)}
           title={t("Community sync server")}
           sub={t(
             "Leave this blank to use Harbor's own community server, or enter the address of a server you run yourself.",
           )}
-          actions={<ModalButton onClick={closeServer}>{t("Save")}</ModalButton>}
+          actions={<>
+            <ModalButton ghost onClick={() => setServerOpen(false)}>{t("Cancel")}</ModalButton>
+            <ModalButton onClick={saveServer}>{t("Save")}</ModalButton>
+          </>}
         >
           <div className="flex flex-col gap-2.5">
             <input
               type="url"
+              aria-label={t("Server address")}
+              aria-invalid={urlError}
               value={urlDraft}
-              onChange={(e) => setUrlDraft(e.target.value)}
+              onChange={(e) => { setUrlDraft(e.target.value); setUrlError(false); }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  closeServer();
+                  saveServer();
                 }
               }}
               placeholder={t("https://sync.harbor.site")}
@@ -213,6 +229,9 @@ export function AutoSyncPanel() {
               autoComplete="off"
               className="h-11 w-full min-w-0 max-w-[520px] rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             />
+            {urlError && <p role="alert" className="text-[15px] text-danger">
+              {t("Enter a full http:// or https:// address, or leave blank to use Harbor's server.")}
+            </p>}
             <p className={`max-w-[70ch] ${ROW_DESC}`}>
               {t("Private mode stops all contact with this server in either direction.")}
             </p>

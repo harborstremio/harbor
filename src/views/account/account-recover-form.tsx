@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "@/views/settings/icons";
 import { recoverIdentity } from "@/lib/account/identity";
 import { finishDiscordRecovery, startDiscordRecovery } from "@/lib/account/discord-link";
 import { accountErrorMessage, type AccountErrorMessage } from "@/lib/account/error-messages";
@@ -102,19 +102,19 @@ export function AccountRecoverForm({
         : t("We sent a 6-digit code to your Discord DMs. It expires in 10 minutes.");
 
   return (
-    <div className="flex flex-col gap-5 rounded-[16px] border border-edge-soft bg-surface p-6">
+    <div className="flex flex-col gap-6 bg-surface p-6">
       <div className="flex items-start gap-3">
         <button
           type="button"
           onClick={() => (mode === "key" ? onBack() : switchMode("key"))}
           aria-label={t("Back")}
-          className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-elevated hover:text-ink active:scale-90"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
         >
           <ArrowLeft size={17} strokeWidth={2} />
         </button>
         <div className="flex flex-col">
-          <h3 className="text-[16px] font-semibold tracking-tight text-ink">{heading}</h3>
-          <p className="text-[12.5px] text-ink-subtle">{subheading}</p>
+          <h2 className="text-[20px] font-semibold leading-7 tracking-tight text-ink">{heading}</h2>
+          <p className="mt-1 text-[15px] leading-[22px] text-ink-muted">{subheading}</p>
         </div>
       </div>
 

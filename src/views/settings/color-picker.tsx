@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { captureFocusReturn } from "@/lib/keyboard-navigation";
 import { getDirection, isBackKey, isRtl } from "@/lib/keyboard-navigation/geometry";
@@ -47,6 +47,7 @@ export function ColorPicker({
               type="button"
               onClick={() => onChange(hex)}
               aria-label={hex}
+              aria-pressed={selected}
               className="grid h-11 w-11 shrink-0 place-items-center rounded-full"
             >
               <span
@@ -92,6 +93,7 @@ export function ColorPopoverTrigger({
   direction?: "up" | "down";
   portal?: boolean;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -101,7 +103,9 @@ export function ColorPopoverTrigger({
     if (!open) return;
     document.body.setAttribute("data-color-popover", "");
     const restore = captureFocusReturn();
+    const frame = requestAnimationFrame(() => panelRef.current?.focus());
     return () => {
+      cancelAnimationFrame(frame);
       document.body.removeAttribute("data-color-popover");
       restore();
     };
@@ -115,6 +119,24 @@ export function ColorPopoverTrigger({
       setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Tab") {
+        const panel = panelRef.current;
+        if (!panel) return;
+        const items = Array.from(panel.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), input:not(:disabled), [tabindex="0"]',
+        )).filter((el) => el.getClientRects().length > 0);
+        const first = items[0];
+        const last = items.at(-1);
+        if (!first || !last) return;
+        if (!panel.contains(document.activeElement) || document.activeElement === panel ||
+            (e.shiftKey && document.activeElement === first) ||
+            (!e.shiftKey && document.activeElement === last)) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          (e.shiftKey ? last : first).focus();
+        }
+        return;
+      }
       if (!isBackKey(e)) return;
       e.preventDefault();
       e.stopImmediatePropagation();
@@ -128,17 +150,27 @@ export function ColorPopoverTrigger({
     };
   }, [open]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open) return;
     const place = () => {
       const r = wrapRef.current?.getBoundingClientRect();
       if (!r) return;
-      const width = 280;
-      const left =
-        align === "right"
-          ? Math.max(8, r.right - width)
-          : Math.min(Math.max(8, r.left), window.innerWidth - width - 8);
-      const top = direction === "up" ? r.top - 8 : r.bottom + 8;
+      const panel = panelRef.current;
+      const width = panel?.offsetWidth ?? 280;
+      const height = panel?.offsetHeight ?? 260;
+      const left = Math.max(8, Math.min(
+        align === "right" ? r.right - width : r.left,
+        window.innerWidth - width - 8,
+      ));
+      const below = r.bottom + 8;
+      const above = r.top - height - 8;
+      const preferred = direction === "up" ? above : below;
+      const alternate = direction === "up" ? below : above;
+      const fits = (y: number) => y >= 8 && y + height <= window.innerHeight - 8;
+      const top = Math.max(8, Math.min(
+        fits(preferred) ? preferred : fits(alternate) ? alternate : preferred,
+        window.innerHeight - height - 8,
+      ));
       setPos({ top, left });
     };
     place();
@@ -155,7 +187,9 @@ export function ColorPopoverTrigger({
       ref={panelRef}
       role="dialog"
       aria-modal="true"
-      className="animate-nudge-in w-[280px] rounded-md bg-surface p-3 harbor-float"
+      aria-label={t("Custom color")}
+      tabIndex={-1}
+      className="animate-nudge-in max-h-[calc(100vh-16px)] w-[280px] max-w-[calc(100vw-16px)] overflow-y-auto rounded-md bg-surface p-3 harbor-float"
     >
       <CustomColorPanel value={value} onChange={onChange} />
     </div>
@@ -166,6 +200,8 @@ export function ColorPopoverTrigger({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="dialog"
         className={`flex h-11 items-center gap-2 rounded-full border px-4 text-[15px] font-semibold transition-colors ${
           open || highlighted
             ? "border-ink text-ink"
@@ -180,7 +216,6 @@ export function ColorPopoverTrigger({
         {label}
       </button>
       {open &&
-        pos &&
         createPortal(
           <>
             <div
@@ -193,9 +228,9 @@ export function ColorPopoverTrigger({
             <div
               className="fixed z-[320]"
               style={{
-                top: pos.top,
-                left: pos.left,
-                ...(direction === "up" ? { transform: "translateY(-100%)" } : null),
+                top: pos?.top ?? 0,
+                left: pos?.left ?? 0,
+                visibility: pos ? "visible" : "hidden",
               }}
             >
               {panel}
@@ -305,6 +340,9 @@ export function CustomColorPanel({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(hsv.s * 100)}
+        aria-valuetext={t("Saturation {s}%, brightness {v}%", {
+          s: Math.round(hsv.s * 100), v: Math.round(hsv.v * 100),
+        })}
         onKeyDown={onSlKey}
         onPointerDown={(e) => {
           slRef.current?.setPointerCapture(e.pointerId);
@@ -342,7 +380,7 @@ export function CustomColorPanel({
           if (e.buttons !== 1) return;
           onHueMove(e.clientX);
         }}
-        className={`relative h-3 w-full cursor-pointer touch-none rounded-full ${DRAG_FOCUS}`}
+        className={`relative my-1.5 h-5 w-full cursor-pointer touch-none rounded-full before:absolute before:inset-x-0 before:-inset-y-3 ${DRAG_FOCUS}`}
         style={{
           background:
             "linear-gradient(to right, #ff0000 0%, #ffff00 16.67%, #00ff00 33.33%, #00ffff 50%, #0000ff 66.67%, #ff00ff 83.33%, #ff0000 100%)",
@@ -357,7 +395,10 @@ export function CustomColorPanel({
       <div className="flex items-center gap-2">
         <span className="h-11 w-11 shrink-0 rounded-md" style={{ background: value }} />
         <input
+          aria-label={t("Hex color")}
+          aria-invalid={!/^#[0-9a-f]{6}$/i.test(hexDraft)}
           value={hexDraft.toUpperCase()}
+          onBlur={() => setHexDraft(value)}
           onChange={(e) => {
             const v = e.target.value;
             setHexDraft(v);

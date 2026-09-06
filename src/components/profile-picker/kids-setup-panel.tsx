@@ -1,4 +1,4 @@
-import { Check, Clock, Lock } from "lucide-react";
+import { Check, Clock, Lock } from "@/views/settings/icons";
 import { useT } from "@/lib/i18n";
 import type { KidConfig } from "@/lib/profiles";
 
@@ -51,12 +51,14 @@ export function KidsSetupPanel({
       <div className="relative flex flex-col gap-5 text-white">
         <Section icon={null} label={t("Pick an avatar")}>
           <div className="flex flex-wrap gap-3">
-            {KID_AVATARS.map((src) => {
+            {KID_AVATARS.map((src, index) => {
               const on = avatar === src;
               return (
                 <button
                   key={src}
                   type="button"
+                  aria-label={t("Kids avatar {number}", { number: index + 1 })}
+                  aria-pressed={on}
                   onClick={() => setAvatar(src)}
                   className="relative h-16 w-16 shrink-0 transition-transform duration-200 hover:scale-105"
                 >
@@ -86,8 +88,8 @@ export function KidsSetupPanel({
               </Pill>
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-white/75">
-            {t("Shows titles suitable up to age {age}.", { age: kid.age })}
+          <p className="mt-2 text-[14px] leading-5 text-white/90">
+            {t("Sets the age level for the kids space.")}
           </p>
         </Section>
 
@@ -104,14 +106,18 @@ export function KidsSetupPanel({
               </Pill>
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-white/75">
-            {t("When time's up, the ship sails away until a parent unlocks it.")}
+          <p className="mt-2 text-[14px] leading-5 text-white/90">
+            {t("Stops playback when the daily limit is reached. A parent PIN lets you allow more time.")}
           </p>
         </Section>
 
         <Section icon={<Lock size={15} strokeWidth={2.4} />} label={t("Parent PIN")}>
           <div className="flex items-center gap-3">
             <input
+              type="password"
+              aria-label={t("Parent PIN")}
+              aria-invalid={!!parentPin && parentPin.length !== 4}
+              autoComplete="new-password"
               inputMode="numeric"
               pattern="[0-9]*"
               maxLength={4}
@@ -130,8 +136,10 @@ export function KidsSetupPanel({
               </span>
             )}
           </div>
-          <p className="mt-2 text-[11px] text-white/75">
-            {t("Used to lift Time's Up and to leave the kids space.")}
+          <p className="mt-2 text-[14px] leading-5 text-white/90" role="status">
+            {parentPin && parentPin.length !== 4
+              ? t("Enter all 4 digits to save this PIN.")
+              : t("Optional. Used to allow more watch time. Without a PIN, switch profiles when time is up.")}
           </p>
         </Section>
       </div>
@@ -150,7 +158,7 @@ function Section({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <span className="flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.14em] text-white/85">
+      <span className="flex items-center gap-1.5 text-[15px] font-semibold text-white">
         {icon}
         {label}
       </span>
@@ -173,8 +181,9 @@ function Pill({
   return (
     <button
       type="button"
+      aria-pressed={on}
       onClick={onClick}
-      className={`h-10 rounded-xl text-[14px] font-extrabold transition ${
+      className={`min-h-11 rounded-xl text-[14px] font-semibold transition ${
         wide ? "px-4" : "flex-1"
       } ${
         on

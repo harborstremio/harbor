@@ -12,7 +12,7 @@ export function PrivacyTab() {
       <Section
         title={t("Privacy")}
         subtitle={t(
-          "Harbor sends no telemetry. This also drops outbound ad, analytics, and tracker requests that addons or metadata providers try to make, before they leave your machine.",
+          "Choose whether to block requests to known advertising, analytics, and tracking services.",
         )}
       >
         <PrivacyRow />
@@ -22,7 +22,7 @@ export function PrivacyTab() {
         <Section
           title={t("Discord Rich Presence")}
           subtitle={t(
-            "Let your Discord friends see what you are watching, with the show poster and a live progress bar. Desktop only, and only your own Discord client is involved (nothing touches a Harbor server).",
+            "Control what appears on your Discord profile while you use Harbor.",
           )}
         >
           <DiscordPresenceRow />
@@ -74,18 +74,18 @@ function DiscordPresenceRow() {
             value={settings.discordShowWhenBrowsing}
             onChange={(discordShowWhenBrowsing) => update({ discordShowWhenBrowsing })}
           />
-          <ToggleRow
+          {!settings.discordHideTitle && <ToggleRow
             label={t("Show poster")}
             sub={t("Reveal the show or movie artwork. Off keeps the title but hides the poster.")}
             value={settings.discordShowPoster}
             onChange={(discordShowPoster) => update({ discordShowPoster })}
-          />
-          <ToggleRow
+          />}
+          {!settings.discordHideTitle && <ToggleRow
             label={t("Show elapsed time")}
             sub={t("Display the live progress bar showing how far into the title you are.")}
             value={settings.discordShowTimestamp}
             onChange={(discordShowTimestamp) => update({ discordShowTimestamp })}
-          />
+          />}
           <ToggleRow
             label={t("Watch party join button")}
             sub={t("Add a Join button with your room link while you're in a watch party.")}
@@ -94,7 +94,7 @@ function DiscordPresenceRow() {
           />
           <p className={`max-w-[70ch] ${ROW_DESC}`}>
             {t(
-              "And for the naughty ones: browsing or rating an adult addon never shows on Discord.",
+              "Activity from adult addons is never shown on Discord.",
             )}
           </p>
         </>

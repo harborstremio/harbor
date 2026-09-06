@@ -11,10 +11,10 @@ export function DisplayLanguageSection() {
     <Section
       title={t("Display language")}
       subtitle={t(
-        "Sets the language of Harbor's own interface: menus, buttons, and labels. Arabic switches the layout to right to left. This is separate from subtitle and metadata languages below.",
+        "The language of Harbor's menus, buttons, and labels. Audio, subtitles, and title information have their own language settings.",
       )}
     >
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-2.5">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-2.5">
         {LANGUAGES.map((lang) => {
           const selected = settings.uiLanguage === lang.code;
           return (

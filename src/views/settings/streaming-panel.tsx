@@ -1,4 +1,4 @@
-import { Check, Download, ExternalLink, Key, Loader2, Trash2, X } from "./icons";
+import { ArrowLeft, Check, Download, ExternalLink, Key, Loader2, Plus, Trash2, X } from "./icons";
 import { Search } from "@/components/icons/search-icon";
 import { useEffect, useState } from "react";
 import { AddonLogo } from "@/components/addon-logo";
@@ -265,71 +265,75 @@ export function LanguagesPicker({
 }) {
   const t = useT();
   const [query, setQuery] = useState("");
+  const [expanded, setExpanded] = useState(false);
   const selected = new Set(value);
-  const toggle = (lang: string) => {
-    const next = new Set(selected);
-    if (next.has(lang)) next.delete(lang);
-    else next.add(lang);
-    onChange([...next]);
-  };
   const q = query.trim().toLowerCase();
-  const available = options.filter((l) => !selected.has(l));
-  const matches = q ? available.filter((l) => l.toLowerCase().includes(q)) : available;
-  const COMMON = 24;
-  const shown = q ? matches : matches.slice(0, COMMON);
-  const moreCount = q ? 0 : matches.length - shown.length;
+  const matches = options.filter((lang) => !selected.has(lang) && lang.toLowerCase().includes(q));
+  const moveEarlier = (index: number) => {
+    const next = [...value];
+    [next[index - 1], next[index]] = [next[index], next[index - 1]];
+    onChange(next);
+  };
 
   return (
-    <div className="flex flex-col gap-2.5 rounded-[10px] border border-edge-soft bg-elevated p-3">
-      {value.length > 0 && (
-        <div className="flex flex-wrap gap-2.5">
-          {value.map((lang) => (
-            <button
-              key={lang}
-              type="button"
-              onClick={() => toggle(lang)}
-              className="group inline-flex h-11 items-center gap-2 rounded-[8px] bg-ink px-3.5 text-[15.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
-            >
-              <Flag language={lang} size="md" showLabel={false} />
+    <div className="flex w-full max-w-[680px] flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <ol aria-label={t("Language preference order")} className="flex flex-wrap gap-2">
+          {value.map((lang, index) => (
+            <li key={lang} className="inline-flex min-h-11 items-center gap-2 rounded-[8px] border border-edge-soft bg-elevated ps-3 text-[15px] text-ink">
+              <span className="w-3 text-[13px] tabular-nums text-ink-subtle">{index + 1}</span>
+              <span aria-hidden><Flag language={lang} size="md" showLabel={false} /></span>
               <span>{lang}</span>
-              <X size={16} strokeWidth={2.4} className="opacity-70 group-hover:opacity-100" />
-            </button>
+              {index > 0 && <button
+                type="button"
+                onClick={() => moveEarlier(index)}
+                aria-label={t("Move {language} earlier", { language: lang })}
+                title={t("Move earlier")}
+                className="grid size-11 place-items-center text-ink-muted hover:text-ink"
+              ><ArrowLeft size={15} className="rtl:rotate-180" /></button>}
+              <button
+                type="button"
+                onClick={() => onChange(value.filter((v) => v !== lang))}
+                aria-label={t("Remove {language}", { language: lang })}
+                className="grid size-11 place-items-center rounded-e-[8px] text-ink-subtle hover:bg-raised hover:text-ink"
+              ><X size={15} /></button>
+            </li>
           ))}
-        </div>
-      )}
-      <div className="flex h-11 items-center gap-2.5 rounded-[10px] bg-canvas px-3.5">
-        <Search size={18} strokeWidth={2.2} className="shrink-0 text-ink-subtle" />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder ?? t("Search languages (Tamil, Telugu, ...)")}
-          spellCheck={false}
-          className="h-11 min-w-0 flex-1 bg-transparent text-[16.5px] text-ink outline-none placeholder:text-ink-subtle/55"
-        />
+        </ol>
+        <button type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className={ROW_ACTION}>
+          {expanded ? <Check size={16} /> : <Plus size={16} />}
+          {expanded ? t("Done") : t("Add language")}
+        </button>
       </div>
-      <div className="flex flex-wrap gap-2.5">
-        {shown.map((lang) => (
-          <button
+      {value.length === 0 && !expanded && <p className="text-[15px] text-ink-muted">{t("No preferred languages selected.")}</p>}
+      {expanded && <div className="overflow-hidden rounded-[10px] border border-edge-soft bg-elevated">
+        <div className="flex h-12 items-center gap-3 border-b border-edge-soft px-4">
+          <Search size={18} className="shrink-0 text-ink-subtle" />
+          <input
+            aria-label={t("Search languages")}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={placeholder ?? t("Search languages")}
+            spellCheck={false}
+            className="h-11 min-w-0 flex-1 bg-transparent text-[15.5px] text-ink outline-none placeholder:text-ink-subtle"
+          />
+        </div>
+        <div className="grid max-h-[240px] grid-cols-2 gap-1 overflow-y-auto p-2">
+          {matches.map((lang) => <button
             key={lang}
             type="button"
-            onClick={() => toggle(lang)}
-            className="inline-flex h-11 items-center gap-2 rounded-[8px] bg-canvas px-3.5 text-[15.5px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+            onClick={() => { onChange([...value, lang]); setQuery(""); }}
+            aria-label={t("Add {language}", { language: lang })}
+            className="flex min-h-11 items-center gap-3 rounded-[6px] px-3 text-start text-[15px] text-ink-muted hover:bg-raised hover:text-ink"
           >
-            <Flag language={lang} size="md" showLabel={false} />
+            <span aria-hidden><Flag language={lang} size="md" showLabel={false} /></span>
             <span>{lang}</span>
-          </button>
-        ))}
-        {moreCount > 0 && (
-          <span className="inline-flex h-11 max-w-[66ch] items-center text-[15.5px] leading-[22px] text-ink-subtle">
-            {t("+{n} more, search to find yours", { n: moreCount })}
-          </span>
-        )}
-        {q.length > 0 && matches.length === 0 && (
-          <span className="inline-flex h-11 max-w-[66ch] items-center text-[15.5px] leading-[22px] text-ink-subtle">
-            {t("No language matches that search.")}
-          </span>
-        )}
-      </div>
+          </button>)}
+          {matches.length === 0 && <p className="col-span-2 px-3 py-4 text-[15px] text-ink-muted" role="status">
+            {q ? t("No language matches that search.") : t("All languages have been added.")}
+          </p>}
+        </div>
+      </div>}
     </div>
   );
 }

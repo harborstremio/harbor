@@ -36,14 +36,15 @@ export function AudioLanguageTab() {
           <div className="flex w-full flex-col gap-2.5">
             <input
               type="text"
+              aria-label={t("Never auto-select tracks containing")}
               value={blockDraft}
               onChange={(e) => {
                 setBlockDraft(e.target.value);
                 update({
-                  trackBlockWords: e.target.value
+                  trackBlockWords: [...new Set(e.target.value
                     .split(",")
                     .map((w) => w.trim())
-                    .filter(Boolean),
+                    .filter(Boolean))],
                 });
               }}
               placeholder={t("commentary, descriptive")}

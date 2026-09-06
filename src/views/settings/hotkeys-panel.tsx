@@ -18,7 +18,7 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { Dropdown } from "@/components/dropdown";
 import { Section, ToggleRow } from "./shared";
-import { ROW_DESC, SettingRow } from "./kit";
+import { ModalButton, ROW_DESC, SettingRow, SettingsModal } from "./kit";
 import { SSection } from "./ui";
 import { usePageActions } from "./page-actions";
 
@@ -50,7 +50,8 @@ export function HotkeysPanel() {
   const { settings, update } = useSettings();
   const overrides = settings.hotkeys ?? {};
   const [capturing, setCapturing] = useState<HotkeyId | null>(null);
-  const [conflict, setConflict] = useState<HotkeyId | null>(null);
+  const [conflict, setConflict] = useState<{ target: HotkeyId; existing: HotkeyId; binding: string } | null>(null);
+  const [resetOpen, setResetOpen] = useState(false);
 
   const grouped = useMemo(() => {
     const scopes: Record<HotkeyScope, HotkeyDef[]> = { Global: [], Player: [] };
@@ -83,8 +84,12 @@ export function HotkeysPanel() {
       const dupe = HOTKEYS.find(
         (h) => h.id !== capturing && h.scope === HOTKEY_MAP[capturing].scope && effectiveBinding(h.id, overrides) === binding,
       );
+      if (dupe) {
+        setConflict({ target: capturing, existing: dupe.id, binding });
+        return;
+      }
       setBinding(capturing, binding);
-      setConflict(dupe ? dupe.id : null);
+      setConflict(null);
       setCapturing(null);
     };
     window.addEventListener("keydown", onKey, true);
@@ -100,7 +105,7 @@ export function HotkeysPanel() {
             id: "hotkeys-reset-all",
             label: t("Reset all ({n})", { n: overrideCount }),
             tone: "danger",
-            onSelect: resetAll,
+            onSelect: () => setResetOpen(true),
             icon: <RotateCcw size={18} strokeWidth={2.2} />,
           },
         ]
@@ -119,6 +124,18 @@ export function HotkeysPanel() {
 
   return (
     <div key={tab} className="harbor-cascade flex flex-col gap-10">
+      <SettingsModal
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
+        title={t("Reset keyboard shortcuts?")}
+        sub={t("Your {n} custom shortcuts will return to their defaults.", { n: overrideCount })}
+        actions={<>
+          <ModalButton ghost onClick={() => setResetOpen(false)}>{t("Keep my shortcuts")}</ModalButton>
+          <ModalButton onClick={() => { resetAll(); setResetOpen(false); }}>{t("Reset shortcuts")}</ModalButton>
+        </>}
+      >
+        <p className={ROW_DESC}>{t("Playback and navigation preferences stay as they are.")}</p>
+      </SettingsModal>
       {tab === "keys" && (
         <>
           <p className={`max-w-[70ch] ${ROW_DESC}`}>
@@ -150,12 +167,18 @@ export function HotkeysPanel() {
                         binding={effectiveBinding(def.id, overrides)}
                         isCustom={def.id in overrides}
                         isCapturing={capturing === def.id}
-                        conflict={conflict === def.id}
+                        conflict={conflict?.target === def.id
+                          ? t("{key} is used for {action}. Press another key or cancel.", {
+                              key: formatBindingForDisplay(conflict.binding),
+                              action: t(HOTKEY_MAP[conflict.existing].label),
+                            })
+                          : undefined}
                         onStartCapture={() => {
                           setConflict(null);
                           setCapturing(def.id);
                         }}
                         onReset={() => setBinding(def.id, null)}
+                        onCancel={() => { setCapturing(null); setConflict(null); }}
                       />
                     ))}
                     {scope === "Global" && groupName === "Interface" && (
@@ -322,14 +345,16 @@ function HotkeyRow({
   conflict,
   onStartCapture,
   onReset,
+  onCancel,
 }: {
   def: HotkeyDef;
   binding: string;
   isCustom: boolean;
   isCapturing: boolean;
-  conflict: boolean;
+  conflict?: string;
   onStartCapture: () => void;
   onReset: () => void;
+  onCancel: () => void;
 }) {
   const t = useT();
   const pillRef = useRef<HTMLButtonElement>(null);
@@ -347,12 +372,9 @@ function HotkeyRow({
         </span>
       }
       desc={t(def.description)}
-      warn={
-        conflict
-          ? t("Another shortcut in this list now uses the same key. Change one of them.")
-          : undefined
-      }
+      warn={conflict}
     >
+      {isCapturing && <button type="button" onClick={onCancel} className={QUIET_ACTION}>{t("Cancel")}</button>}
       {isCustom && !isCapturing && (
         <button type="button" onClick={onReset} className={QUIET_ACTION}>
           <RotateCcw size={17} strokeWidth={2.2} />

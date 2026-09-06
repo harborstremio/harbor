@@ -1,5 +1,5 @@
 import { AlertTriangle, Check, Download, Info, Upload } from "./icons";
-import { useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import {
   applyBackup,
   BACKUP_SECTIONS,
@@ -30,6 +30,13 @@ export function BackupRow() {
   const [pending, setPending] = useState<Backup | null>(null);
   const [applying, setApplying] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [restoreError, setRestoreError] = useState(false);
+
+  useEffect(() => {
+    if (!exported) return;
+    const timer = window.setTimeout(() => setExported(false), 1600);
+    return () => window.clearTimeout(timer);
+  }, [exported]);
 
   const doExport = async (selected: BackupSectionKey[]) => {
     setError(null);
@@ -38,7 +45,6 @@ export function BackupRow() {
       const saved = await downloadBackup(selected);
       if (saved) {
         setExported(true);
-        window.setTimeout(() => setExported(false), 1600);
       }
     } catch {
       setError("Could not build the backup file.");
@@ -58,6 +64,7 @@ export function BackupRow() {
         return;
       }
       setPending(res.backup);
+      setRestoreError(false);
     };
     reader.onerror = () => setError("Could not read that file.");
     reader.readAsText(file);
@@ -66,8 +73,12 @@ export function BackupRow() {
   const confirmRestore = () => {
     if (!pending) return;
     setApplying(true);
+    setRestoreError(false);
     void applyBackup(pending).then(() => {
       window.setTimeout(() => window.location.reload(), 280);
+    }).catch(() => {
+      setApplying(false);
+      setRestoreError(true);
     });
   };
 
@@ -77,7 +88,7 @@ export function BackupRow() {
         icon={<Download size={20} strokeWidth={2.1} className="text-ink-muted" />}
         label={t("Export your setup")}
         desc={t(
-          "Pick what to save, then everything you choose lands in one file: theme, home layout, settings, addons, profiles, watchlist, player layouts, watch progress, and more. Your Stremio sign-in is left out on purpose.",
+          "Choose which parts of your setup to save in one backup file. Your Stremio sign-in is excluded.",
         )}
       >
         <SButton variant="primary" onClick={() => setPickerOpen(true)}>
@@ -94,7 +105,7 @@ export function BackupRow() {
         icon={<Upload size={20} strokeWidth={2.1} className="text-ink-muted" />}
         label={t("Restore from a backup")}
         desc={t(
-          "Loads a backup file and restores exactly what it contains, without touching the rest of your setup. Your Stremio sign-in on this device stays as is.",
+          "Choose a Harbor backup and review what it contains before restoring. Your Stremio sign-in stays on this device.",
         )}
       >
         <SButton onClick={() => fileRef.current?.click()}>
@@ -104,7 +115,7 @@ export function BackupRow() {
       </SettingRow>
 
       {error && (
-        <p className="max-w-[70ch] text-[15.5px] leading-[22px] text-danger">{t(error)}</p>
+        <p role="alert" className="max-w-[70ch] text-[15.5px] leading-[22px] text-danger">{t(error)}</p>
       )}
 
       <input
@@ -121,6 +132,7 @@ export function BackupRow() {
         <RestoreConfirm
           backup={pending}
           applying={applying}
+          error={restoreError}
           onConfirm={confirmRestore}
           onCancel={() => setPending(null)}
         />
@@ -162,8 +174,9 @@ function ExportPicker({
       open
       onClose={onCancel}
       title={t("What should the backup include?")}
+      width={800}
       sub={t(
-        "Everything you pick is saved into one file. Restoring it later only touches what is in the file. Your Stremio sign-in is always left out.",
+        "Choose the sections to save in one file. Your Stremio sign-in is excluded.",
       )}
       actions={
         <>
@@ -190,7 +203,7 @@ function ExportPicker({
             strokeWidth={2.6}
             className={allSelected ? "text-accent" : "text-ink-subtle"}
           />
-          {allSelected ? t("All selected") : t("Select all")}
+          {allSelected ? t("Deselect all") : t("Select all")}
         </button>
         <span className="text-[15.5px] leading-[22px] tabular-nums text-ink-subtle">
           {t("{n} of {total} chosen", { n: selected.size, total: BACKUP_SECTIONS.length })}
@@ -204,7 +217,7 @@ function ExportPicker({
             <label
               key={section.key}
               className={`flex min-h-[44px] cursor-pointer flex-col gap-1 rounded-[10px] border px-3.5 py-3 transition-colors ${
-                on ? "border-accent" : "border-edge-soft hover:border-edge"
+                on ? "border-edge bg-elevated" : "border-edge-soft hover:border-edge"
               }`}
             >
               <span className="flex items-start gap-2.5">
@@ -242,11 +255,13 @@ function ExportPicker({
 function RestoreConfirm({
   backup,
   applying,
+  error,
   onConfirm,
   onCancel,
 }: {
   backup: Backup;
   applying: boolean;
+  error: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -260,6 +275,7 @@ function RestoreConfirm({
     <SettingsModal
       open
       onClose={onCancel}
+      dismissible={!applying}
       title={t("Restore this backup?")}
       sub={t(
         "This file restores its {n} saved entries and replaces only those parts of your setup. Anything it does not contain stays exactly as it is.",
@@ -276,6 +292,7 @@ function RestoreConfirm({
         </>
       }
     >
+      {error && <p role="alert" className="text-[15px] text-danger">{t("Restore did not finish. Some settings may already have changed. Free some storage, then try again.")}</p>}
       <div className="flex flex-wrap gap-2">
         {sections.map((key) => (
           <span

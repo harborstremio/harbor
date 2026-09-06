@@ -37,11 +37,11 @@ export function HeroShadowPreview() {
             />
           ) : (
             <span className="font-display text-[19px] font-semibold leading-[26px] text-ink">
-              {t("The Last Stand")}
+              {t("The General")}
             </span>
           )}
           <span className="line-clamp-2 max-w-[46ch] text-[12px] leading-[17px] text-ink-muted">
-            {t("With the city surrounded, an unlikely alliance forms as a long-buried secret finally comes to light.")}
+            {t("Buster Keaton sets off to recover his stolen locomotive.")}
           </span>
           <span className="mt-1 flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-[11px] font-semibold text-canvas">

@@ -52,24 +52,23 @@ export function MpvPanel() {
         <>
           <Section
             title={t("Picture quality")}
-            subtitle={t("One choice that sets how hard your computer works to make video look its best. Pick the one that matches your machine. Takes effect on the next thing you play.")}
+            subtitle={t("Balance picture quality and performance. Changes apply to the next video you play.")}
           >
             <QualityProfile />
           </Section>
 
           <Section
             title={t("Hardware acceleration")}
-            subtitle={t("Let your graphics card do the heavy lifting of decoding video. It saves battery and keeps the CPU cool. Auto is right for almost everyone; only switch if playback looks wrong or won't start.")}
           >
             <SettingRow
               wide
               label={t("Hardware acceleration")}
               desc={
                 settings.mpvHwdec === "off"
-                  ? t("The CPU decodes everything. Most compatible, but it runs hot and can stutter on 4K. Use this only if the picture glitches with hardware decoding on.")
+                  ? t("Uses the processor to decode video. Try this if hardware decoding causes picture problems.")
                   : settings.mpvHwdec === "on"
-                    ? t("Forces the graphics card on. Smoothest and coolest, but a few old or unusual files may refuse to play. Switch back to Auto if something won't start.")
-                    : t("Harbor uses the graphics card when it's safe and falls back to the CPU when it isn't. The right call for almost everyone.")
+                    ? t("Always requests hardware decoding. Switch back to Auto if a video will not play.")
+                    : t("Uses the graphics card when supported, with a processor fallback. Recommended for most computers.")
               }
             >
               <Segmented
@@ -86,15 +85,15 @@ export function MpvPanel() {
 
           <Section
             title={t("Compatibility")}
-            subtitle={t("Fallbacks for machines where the modern video path misbehaves. Leave these alone unless the picture is wrong or a file won't start.")}
+            subtitle={t("Try these if video shows a black screen, incorrect colors, or other picture problems.")}
           >
             <SettingRow
               wide
               label={t("Renderer")}
               desc={
                 settings.mpvRenderer === "gpu"
-                  ? t("Older, simpler renderer. Use it only if the modern one shows a black screen, wrong colors, or won't start on your graphics card.")
-                  : t("Modern renderer with higher-quality processing. The right choice for almost every machine.")
+                  ? t("Uses the older GPU renderer for graphics cards that have trouble with the modern renderer.")
+                  : t("Uses the modern GPU renderer for higher-quality video processing.")
               }
             >
               <Segmented
@@ -108,7 +107,7 @@ export function MpvPanel() {
             </SettingRow>
             <ToggleRow
               label={t("Simple color mode")}
-              sub={t("Converts video to plain 8-bit before display for graphics cards that glitch on 10-bit or unusual formats. Fixes some visual artifacts, but turns off HDR. Leave off unless you need it.")}
+              sub={t("Converts video to 8-bit color for compatibility with older graphics cards. This disables HDR.")}
               value={settings.mpvForceYuv420p === true}
               onChange={(v) => update({ mpvForceYuv420p: v })}
             />

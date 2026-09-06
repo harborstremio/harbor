@@ -54,7 +54,7 @@ export type SectionId =
   | "updates"
   | "advanced";
 
-export const SettingsActiveContext = createContext<{ setActive: (s: SectionId) => void } | null>(
+export const SettingsActiveContext = createContext<{ setActive: (s: SectionId, anchor?: string) => void } | null>(
   null,
 );
 
@@ -257,7 +257,7 @@ export function Section({
         >
           {showHeading && (
             <div className="flex items-center gap-2">
-              <h2 className="harbor-settings-label">{title}</h2>
+              <h2 className="hset-section-title">{title}</h2>
               {newId && <NewBadge id={newId} />}
             </div>
           )}
@@ -301,15 +301,17 @@ export function KeyField({
   const t = useT();
   const [reveal, setReveal] = useState(false);
   const [focused, setFocused] = useState(false);
+  const fieldId = useId();
   const [initialValue, setInitialValue] = useState(value);
-  useEffect(() => {
-    if (saved) setInitialValue(value);
-  }, [saved, value]);
   const dirty = value.trim() !== initialValue.trim();
   const showSave = dirty;
+  const showSaved = saved && !dirty;
 
   const onSaveRef = useRef(onSave);
-  onSaveRef.current = onSave;
+  onSaveRef.current = () => {
+    onSave();
+    setInitialValue(value);
+  };
   const stateRef = useRef({ dirty, value });
   stateRef.current = { dirty, value };
 
@@ -331,7 +333,7 @@ export function KeyField({
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <label className="harbor-settings-label">
+          <label htmlFor={fieldId} className="harbor-settings-label">
             {label}
           </label>
           {badge && (
@@ -345,7 +347,7 @@ export function KeyField({
           {value.length > 0 && !showSave && (
             <span className="flex items-center gap-2 text-[15.5px] font-medium text-ink-subtle transition-colors">
               <span className="h-2 w-2 rounded-full bg-success" />
-              {saved ? t("Saved") : t("Active")}
+              {t("Saved")}
             </span>
           )}
         </div>
@@ -385,6 +387,7 @@ export function KeyField({
           </span>
         )}
         <input
+          id={fieldId}
           type={reveal ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -396,7 +399,7 @@ export function KeyField({
           onKeyDown={(e) => {
             if (e.key === "Enter" && dirty) {
               e.preventDefault();
-              onSave();
+              onSaveRef.current();
             }
           }}
           placeholder={placeholder}
@@ -443,31 +446,35 @@ export function KeyField({
           </button>
         )}
         <div
+          style={{ display: showSave || showSaved ? undefined : "none" }}
           className={`flex shrink-0 items-center transition-all ${
-            showSave || saved ? "ms-1 w-auto opacity-100" : "w-0 overflow-hidden opacity-0"
+            showSave || showSaved ? "ms-1 w-auto opacity-100" : "w-0 overflow-hidden opacity-0"
           }`}
         >
           <button
             type="button"
-            onClick={onSave}
+            onClick={() => onSaveRef.current()}
             disabled={!showSave && !saved}
+            aria-label={showSaved ? t("Saved") : t("Save")}
             className={`relative flex h-11 items-center justify-center overflow-hidden rounded-md px-4 text-[15px] font-semibold transition ${
-              saved
+              showSaved
                 ? "bg-accent-soft text-accent"
                 : "bg-ink text-canvas hover:scale-[1.02] active:scale-[0.97]"
             }`}
           >
             <span
+              aria-hidden
               className={`flex items-center gap-1.5 transition ${
-                saved ? "translate-y-0 opacity-100" : "absolute translate-y-3 opacity-0"
+                showSaved ? "translate-y-0 opacity-100" : "absolute translate-y-3 opacity-0"
               }`}
             >
               <Check size={15} strokeWidth={2.6} />
               {t("Saved")}
             </span>
             <span
+              aria-hidden
               className={`flex items-center transition ${
-                saved ? "absolute -translate-y-3 opacity-0" : "translate-y-0 opacity-100"
+                showSaved ? "absolute -translate-y-3 opacity-0" : "translate-y-0 opacity-100"
               }`}
             >
               {t("Save")}

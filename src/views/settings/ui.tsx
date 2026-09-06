@@ -48,6 +48,7 @@ export function SRow({
   trailing,
   onClick,
   disabled,
+  selected,
   className = "",
 }: {
   title: ReactNode;
@@ -56,6 +57,7 @@ export function SRow({
   trailing?: ReactNode;
   onClick?: () => void;
   disabled?: boolean;
+  selected?: boolean;
   className?: string;
 }) {
   useRegisterRowTitle(title);
@@ -76,6 +78,7 @@ export function SRow({
       type="button"
       onClick={onClick}
       disabled={disabled}
+      aria-pressed={selected}
       data-interactive=""
       className={`hset-row text-start ${disabled ? "cursor-default opacity-60" : ""} ${className}`}
     >

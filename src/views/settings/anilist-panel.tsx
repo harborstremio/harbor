@@ -1,19 +1,16 @@
-import { ExternalLink, Link2, LogOut } from "./icons";
+import { TrackerConnect } from "./tracker-connect";
+import { LogOut } from "./icons";
 import { useState } from "react";
 import { AnilistConnectModal } from "@/components/anilist/anilist-connect-modal";
 import { useAnilist } from "@/lib/anilist/provider";
 import { useSettings } from "@/lib/settings";
-import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, ToggleRow } from "./shared";
 import anilistLogo from "@/assets/anilist.png";
 import {
   ModalButton,
-  ROW_ACTION,
   ROW_ACTION_DANGER,
-  ROW_ACTION_PRIMARY,
   SettingGroup,
-  SettingRow,
   SettingsModal,
 } from "./kit";
 import { TrackerIdentity } from "./tracker-identity";
@@ -30,33 +27,14 @@ export function AnilistPanel() {
   return (
     <>
       {!isConnected ? (
-        <Section
-          title={t("Connect your AniList account")}
-          subtitle={t("Show your AniList lists as rails on the Anime page, keep your watch progress in sync as you finish episodes, and use your AniList avatar as your Harbor photo. Free at anilist.co.")}
-        >
-          <SettingRow
-            label={t("Connect AniList")}
-            desc={t("Sign in at anilist.co and authorize Harbor. Your anime lists show up on the Anime page as soon as you are back.")}
-          >
-            <button type="button" onClick={() => setModalOpen(true)} className={ROW_ACTION_PRIMARY}>
-              <Link2 size={18} strokeWidth={2.2} />
-              {t("Connect")}
-            </button>
-          </SettingRow>
-
-          <SettingRow
-            label={t("About AniList")}
-            desc={t("Opens anilist.co in your browser, where you can read what AniList does and make a free account.")}
-          >
-            <button
-              type="button"
-              onClick={() => openUrl("https://anilist.co")}
-              className={ROW_ACTION}
-            >
-              {t("Open anilist.co")}
-              <ExternalLink size={18} strokeWidth={2.2} />
-            </button>
-          </SettingRow>
+        <Section title={t("Connect your AniList account")} bare>
+          <TrackerConnect
+            service="AniList"
+            logo={anilistLogo}
+            description={t("Browse your anime lists in Harbor and update your episode progress as you watch. Sign in to AniList to connect.")}
+            onConnect={() => setModalOpen(true)}
+            website="https://anilist.co"
+          />
         </Section>
       ) : (
         <Section

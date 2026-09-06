@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertCircle, Check, Loader2, Lock, X } from "lucide-react";
+import { AlertCircle, Check, Loader2, Lock, X } from "@/views/settings/icons";
 import { claimHandle } from "@/lib/account/handle";
 import { accountErrorMessage, type AccountErrorMessage } from "@/lib/account/error-messages";
 import type { Author } from "@/lib/theme-auth";

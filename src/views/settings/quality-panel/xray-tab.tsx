@@ -11,7 +11,7 @@ export function XrayTab() {
   return (
     <Section
       title={t("X-Ray (experimental)")}
-      subtitle={t("Amazon-style X-Ray: open the cast while you watch and tap anyone for their bio and everything they have been in. On-device face matching to show who is on screen is coming next. Off by default.")}
+      subtitle={t("Open the cast while you watch and tap anyone for their bio and other titles. You can also enable on-device face matching to show who is on screen. Off by default.")}
     >
       <ToggleRow
         label={t("Enable X-Ray")}

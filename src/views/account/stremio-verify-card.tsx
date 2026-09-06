@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from "react";
-import { Check, ExternalLink, Loader2 } from "lucide-react";
+import { Check, ExternalLink, Loader2 } from "@/views/settings/icons";
 import stremioLogo from "@/assets/stremio.png";
 import { verifyWithCurrentStremio, verifyWithStremioBrowser } from "@/lib/account/stremio-link";
 import { accountErrorMessage, type AccountErrorMessage } from "@/lib/account/error-messages";

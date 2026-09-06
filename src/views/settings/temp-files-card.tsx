@@ -16,6 +16,7 @@ export function TempFilesCard() {
   const t = useT();
   const [bytes, setBytes] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const load = useCallback(() => {
     void invoke<number>("temp_usage_bytes")
@@ -27,11 +28,12 @@ export function TempFilesCard() {
 
   const clear = async () => {
     setBusy(true);
+    setFailed(false);
     try {
       await invoke<number>("temp_clear");
       load();
     } catch {
-      /* leave the figure as is */
+      setFailed(true);
     } finally {
       setBusy(false);
     }
@@ -70,6 +72,7 @@ export function TempFilesCard() {
           </button>
         </SettingRow>
       </SettingGroup>
+      {failed && <p role="alert" className="mt-3 text-[15px] text-danger">{t("Could not clear temporary files. Close any active downloads or playback and try again.")}</p>}
     </Section>
   );
 }

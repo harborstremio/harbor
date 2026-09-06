@@ -3,12 +3,12 @@ import { Award, Captions, Check, Eye, HardDrive, Sparkles, Tag, Trophy, Type } f
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, Segmented, ToggleRow } from "../shared";
-import { SettingGroup, SettingRow, Nested } from "../kit";
+import { SettingGroup, SettingRow, Nested, SettingsWorkbench } from "../kit";
 import { SongCardStylePicker } from "../song-card-style-picker";
 import { HoverStyleGallery } from "../hover-style-preview";
 import { CardOverlayPreview } from "../card-overlay-preview";
 import { RatingsMatrix } from "../ratings-matrix";
-import { CardBadgesPanel, WatchlistControl, type PreviewFlags } from "../card-badges-panel";
+import { CardBadgesPanel, CardScoresPreview, WatchlistControl, type PreviewFlags } from "../card-badges-panel";
 
 export function CardsTab() {
   const { settings, update } = useSettings();
@@ -49,7 +49,6 @@ export function CardsTab() {
   return (
     <>
       <Section title={t("On the poster")}>
-        <CardOverlayPreview />
         <ToggleRow
           label={t("Show tags on cards")}
           leading={<Tag size={18} strokeWidth={2} />}
@@ -59,67 +58,69 @@ export function CardsTab() {
           value={settings.showCardBadges}
           onChange={(v) => update({ showCardBadges: v })}
         />
-        <ToggleRow
-          label={t("Award tab on cards")}
-          newId="library:award-tab"
-          leading={<Award size={18} strokeWidth={2} />}
-          sub={t(
-            "Show a laurel award tab on winning titles, like Netflix. Replaces the corner award chip and sits centered so it clears the rating and watchlist pills. Pick where it sits below.",
+        <SettingsWorkbench compact preview={<CardOverlayPreview />}>
+          <ToggleRow
+            label={t("Award tab on cards")}
+            newId="library:award-tab"
+            leading={<Award size={18} strokeWidth={2} />}
+            sub={t(
+              "Show a laurel tab on award-winning titles. Choose its position below.",
+            )}
+            value={settings.awardTabs}
+            onChange={(v) => update({ awardTabs: v })}
+          />
+          {settings.awardTabs && (
+            <Nested>
+              <SettingRow
+                wide
+                label={t("Award tab position")}
+                desc={t("Where the laurel tab sits relative to the score chips on the poster.")}
+              >
+                <Segmented
+                  value={settings.awardTabPosition}
+                  options={[
+                    { value: "above", label: t("Above ratings") },
+                    { value: "below", label: t("Below ratings") },
+                    { value: "top", label: t("Top of card") },
+                  ]}
+                  onChange={(v) => update({ awardTabPosition: v as "above" | "below" | "top" })}
+                />
+              </SettingRow>
+            </Nested>
           )}
-          value={settings.awardTabs}
-          onChange={(v) => update({ awardTabs: v })}
-        />
-        {settings.awardTabs && (
-          <Nested>
-            <SettingRow
-              wide
-              label={t("Award tab position")}
-              desc={t("Where the laurel tab sits relative to the score chips on the poster.")}
-            >
-              <Segmented
-                value={settings.awardTabPosition}
-                options={[
-                  { value: "above", label: t("Above ratings") },
-                  { value: "below", label: t("Below ratings") },
-                  { value: "top", label: t("Top of card") },
-                ]}
-                onChange={(v) => update({ awardTabPosition: v as "above" | "below" | "top" })}
-              />
-            </SettingRow>
-          </Nested>
-        )}
-        <ToggleRow
-          label={t("Top 10 ribbon")}
-          newId="library:top-10"
-          leading={<Trophy size={18} strokeWidth={2} />}
-          sub={t(
-            "A TOP 10 corner ribbon on the Top 10 rail posters. The watchlist marker auto-moves to the opposite corner so nothing overlaps.",
+          <ToggleRow
+            label={t("Top 10 ribbon")}
+            newId="library:top-10"
+            leading={<Trophy size={18} strokeWidth={2} />}
+            sub={t(
+              "Mark Top 10 titles with a corner ribbon. Bookmarks move down when they share its corner.",
+            )}
+            value={settings.top10Ribbon}
+            onChange={(v) => update({ top10Ribbon: v })}
+          />
+          {settings.top10Ribbon && (
+            <Nested>
+              <SettingRow
+                wide
+                label={t("Ribbon corner")}
+                desc={t("Which top corner of the poster the ribbon folds over.")}
+              >
+                <Segmented
+                  value={settings.top10RibbonSide}
+                  options={[
+                    { value: "left", label: t("Top left") },
+                    { value: "right", label: t("Top right") },
+                  ]}
+                  onChange={(v) => update({ top10RibbonSide: v as "left" | "right" })}
+                />
+              </SettingRow>
+            </Nested>
           )}
-          value={settings.top10Ribbon}
-          onChange={(v) => update({ top10Ribbon: v })}
-        />
-        {settings.top10Ribbon && (
-          <Nested>
-            <SettingRow
-              wide
-              label={t("Ribbon corner")}
-              desc={t("Which top corner of the poster the ribbon folds over.")}
-            >
-              <Segmented
-                value={settings.top10RibbonSide}
-                options={[
-                  { value: "left", label: t("Top left") },
-                  { value: "right", label: t("Top right") },
-                ]}
-                onChange={(v) => update({ top10RibbonSide: v as "left" | "right" })}
-              />
-            </SettingRow>
-          </Nested>
-        )}
-        <WatchlistControl
-          value={settings.watchlistBadge}
-          onChange={(v) => update({ watchlistBadge: v })}
-        />
+          <WatchlistControl
+            value={settings.watchlistBadge}
+            onChange={(v) => update({ watchlistBadge: v })}
+          />
+        </SettingsWorkbench>
         <ToggleRow
           label={t("Watched badge")}
           sub={t("Puts a check on titles you have already finished.")}
@@ -146,11 +147,11 @@ export function CardsTab() {
       </Section>
 
       <Section title={t("Scores")}>
+        <SettingsWorkbench compact preview={<CardScoresPreview settings={settings} flags={badgeFlags} enabledBadgeCount={enabledBadgeCount} />}>
         <RatingsMatrix settings={settings} update={update} />
         <CardBadgesPanel
           settings={settings}
           update={update}
-          flags={badgeFlags}
           enabledBadgeCount={enabledBadgeCount}
         />
         {settings.showMalBadge && (
@@ -170,6 +171,7 @@ export function CardsTab() {
             />
           </SettingRow>
         )}
+        </SettingsWorkbench>
       </Section>
 
       <Section title={t("Titles")}>

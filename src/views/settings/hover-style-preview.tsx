@@ -1,7 +1,8 @@
 import { ChevronDown, Pencil, Plus, Star, ThumbsUp } from "./icons";
 import { Play } from "@/components/icons/play-filled";
-import { useEffect, useState, useSyncExternalStore } from "react";
-import { topMovies, type Meta } from "@/lib/cinemeta";
+import { useState, useSyncExternalStore } from "react";
+import type { Meta } from "@/lib/cinemeta";
+import { SETTINGS_SAMPLE_META } from "@/lib/sample-artwork";
 import {
   CardHoverOverlay,
   cardHoverPosterClass,
@@ -31,19 +32,9 @@ export function HoverStyleGallery({
   onChange: (style: CardHoverStyle, customId?: string) => void;
 }) {
   const t = useT();
-  const [sample, setSample] = useState<Meta | null>(null);
+  const sample: Meta = SETTINGS_SAMPLE_META;
   const customs = useSyncExternalStore(subscribeCustomHovers, listCustomHovers);
   const [editing, setEditing] = useState<CustomHoverConfig | null | "new">(null);
-  useEffect(() => {
-    let alive = true;
-    topMovies()
-      .then((list) => alive && list[0] && setSample(list[0]))
-      .catch(() => {});
-    return () => {
-      alive = false;
-    };
-  }, []);
-
   return (
     <>
       <div className="grid grid-cols-3 gap-3 max-[560px]:grid-cols-2">

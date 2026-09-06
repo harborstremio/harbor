@@ -1,5 +1,5 @@
-import still1 from "@/assets/preview/blur1.webp";
-import still2 from "@/assets/preview/blur2.webp";
+import still1 from "@/assets/settings-preview/steamboat-river.webp";
+import still2 from "@/assets/settings-preview/steamboat-deck.webp";
 import {
   SPOILER_TEXT_CLASS,
   SPOILER_THUMB_CLASS,
@@ -16,10 +16,10 @@ export function SpoilerPreview() {
   const mask = spoilerMaskFor(settings, { watched: false, isNextUp: false });
   const active = mask.thumb || mask.title || mask.desc;
   return (
-    <div className="mt-1 flex flex-col gap-3 rounded-md border border-edge-soft bg-canvas/30 p-4">
+    <div className="flex flex-col gap-4 rounded-[12px] bg-elevated p-4">
       <div className="flex items-center justify-between gap-2">
         <span className="harbor-settings-label">
-          {t("Preview")}
+          {t("Unwatched episodes")}
         </span>
         {active && (
           <span className="flex items-center gap-2 text-[15.5px] leading-[22px] text-ink-subtle">
@@ -28,29 +28,29 @@ export function SpoilerPreview() {
           </span>
         )}
       </div>
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-5">
         <PreviewCard
           mask={mask}
           n={7}
-          title={t("The Last Stand")}
+          title={t("Down the river")}
           rating="8.9"
           runtime={48}
           img={still1}
           imgPos="object-center"
           synopsis={t(
-            "With the city surrounded, an unlikely alliance forms as a long-buried secret finally comes to light.",
+            "A small steamboat makes its way down the river.",
           )}
         />
         <PreviewCard
           mask={mask}
           n={8}
-          title={t("No Way Out")}
+          title={t("All hands on deck")}
           rating="9.1"
           runtime={51}
           img={still2}
           imgPos="object-center"
           synopsis={t(
-            "Loyalties shatter as the survivors realize the enemy has been among them all along.",
+            "The captain interrupts a quiet morning at the wheel.",
           )}
         />
       </div>
@@ -95,14 +95,14 @@ function PreviewCard({
         </span>
       </div>
       <div className="mt-2.5 flex flex-col gap-0.5 px-0.5">
-        <span className={`text-[13.5px] font-semibold text-ink ${mask.title ? SPOILER_TEXT_CLASS : ""}`}>
+        <span className={`text-[15px] font-semibold text-ink ${mask.title ? SPOILER_TEXT_CLASS : ""}`}>
           {title}
         </span>
-        <span className="text-[11.5px] text-ink-subtle">
+        <span className="text-[13px] text-ink-subtle">
           E{n} · {t("{n} min", { n: runtime })}
         </span>
         <p
-          className={`mt-0.5 line-clamp-2 min-h-[40px] text-[12px] leading-relaxed text-ink-muted ${
+          className={`mt-0.5 line-clamp-2 text-[14px] leading-[20px] text-ink-muted ${
             mask.desc ? SPOILER_TEXT_CLASS : ""
           }`}
         >

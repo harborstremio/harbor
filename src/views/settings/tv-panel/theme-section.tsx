@@ -80,6 +80,7 @@ function Tile({
     <button
       ref={btnRef}
       type="button"
+      aria-pressed={on}
       onClick={onPick}
       className={`flex flex-col gap-2 rounded-[10px] p-2.5 text-start transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
         on ? "bg-raised" : "bg-elevated hover:bg-raised"
@@ -127,7 +128,7 @@ export function TvThemeSection({
   return (
     <Section
       title={t("Theme on the TV")}
-      subtitle={t("Pick the palette Big Picture wears on the television. A theme this computer knows but the TV does not is sent whole, colors and all.")}
+      subtitle={t("Choose a theme for Big Picture on your TV, or copy this computer's colors.")}
     >
       {mine && (
         <SettingRow

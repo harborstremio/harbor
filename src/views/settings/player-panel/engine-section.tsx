@@ -4,7 +4,7 @@ import { isWindowsDesktop } from "@/lib/platform";
 import { probeMpv, type MpvProbe } from "@/lib/player/mpv";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { ROW_DESC, SettingGroup } from "../kit";
+import { ROW_DESC, SettingGroup, SettingRow } from "../kit";
 import { ToggleRow } from "../shared";
 import { BandwidthInput } from "./bandwidth-section";
 import { ChoiceBlock, Tag } from "./choice";
@@ -106,12 +106,9 @@ export function PlayerEnginePanel() {
         )}
 
         <SettingGroup label={t("Casting")}>
-          <ToggleRow
-            label={t("Always re-encode when casting")}
-            sub={t("On by default. Pipes every cast through ffmpeg as H.264 + AAC + MPEG-TS so Samsung, LG, Sony, and other DLNA TVs accept the stream regardless of source codec. Turn off only if you have a beefy receiver that handles raw HEVC/DTS and want max quality. Requires ffmpeg in PATH.")}
-            value={settings.castAlwaysTranscode}
-            onChange={(v) => update({ castAlwaysTranscode: v })}
-          />
+          <SettingRow label={t("Device compatibility")} desc={t("Harbor checks the receiving device and uses ffmpeg when the stream needs conversion.")}>
+            <span className="text-[15px] text-ink-muted">{t("Automatic")}</span>
+          </SettingRow>
         </SettingGroup>
 
         <SettingGroup label={t("Connection")}>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, LogOut, Pencil } from "lucide-react";
+import { Loader2, LogOut, Pencil } from "@/views/settings/icons";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { logoutAuthor, type Author } from "@/lib/theme-auth";
 import { useT } from "@/lib/i18n";
@@ -7,7 +7,7 @@ import { VerifiedBadge } from "./verified-badge";
 import { HandleClaimCard } from "./handle-claim-card";
 
 const CHIP =
-  "harbor-press-pop flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-canvas px-3.5 text-[12.5px] font-medium text-ink-muted transition-colors";
+  "harbor-press-pop flex h-11 shrink-0 items-center gap-2 rounded-lg bg-elevated px-4 text-[15px] font-medium text-ink-muted transition-colors";
 
 export function AccountIdentityCard({ author }: { author: Author }) {
   const t = useT();
@@ -20,7 +20,7 @@ export function AccountIdentityCard({ author }: { author: Author }) {
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-md bg-elevated px-5 py-5">
+    <div className="flex flex-col gap-6 border-b border-edge-soft pb-6 pt-3">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-4">
         <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-canvas text-ink">
           <HarborMark className="h-7 w-7" />
@@ -28,12 +28,12 @@ export function AccountIdentityCard({ author }: { author: Author }) {
 
         <span className="flex min-w-[160px] flex-1 flex-col gap-1">
           <span className="flex items-center gap-2">
-            <span className="truncate font-display text-[21px] font-medium leading-tight tracking-tight text-ink">
+            <span className="truncate text-[24px] font-semibold leading-8 tracking-tight text-ink">
               {author.handle ? `@${author.handle}` : author.username}
             </span>
             {author.verified && <VerifiedBadge size="sm" />}
           </span>
-          <span className="flex items-center gap-1.5 text-[12.5px] leading-snug text-ink-subtle">
+          <span className="flex items-center gap-1.5 text-[15px] leading-snug text-ink-muted">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
             {author.handle
               ? t("Signed in as {username}", { username: author.username })

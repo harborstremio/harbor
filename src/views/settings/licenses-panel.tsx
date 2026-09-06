@@ -359,6 +359,12 @@ const LICENSES: LicenseDoc[] = [
     used: "The full list of bundled components, their versions and their licences.",
     file: "third-party",
   },
+  {
+    id: "settings-artwork",
+    title: "Preview artwork",
+    used: "Sources and credits for the original film stills and posters in settings.",
+    file: "settings-artwork",
+  },
 ];
 
 export function LicensesPanel() {

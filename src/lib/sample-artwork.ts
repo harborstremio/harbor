@@ -1,124 +1,37 @@
-import { useEffect, useState } from "react";
-import { meta as fetchCinemeta } from "@/lib/cinemeta";
-import previewPoster1 from "@/assets/preview/poster1.webp";
+import generalPoster from "@/assets/settings-preview/the-general-poster.webp";
+import generalStill from "@/assets/settings-preview/the-general-still.webp";
+import sherlockPoster from "@/assets/settings-preview/sherlock-jr-poster.webp";
+import kidPoster from "@/assets/settings-preview/the-kid-poster.webp";
+import safetyPoster from "@/assets/settings-preview/safety-last-poster.webp";
+import namakuraStill from "@/assets/settings-preview/namakura-gatana.webp";
 
-const SAMPLE_ID = "tt0468569";
-const CACHE_KEY = "harbor.sample-artwork.v1";
+export type SampleArtwork = { poster: string; background: string; logo: string | null };
 
-export type SampleArtwork = { poster: string; background: string | null; logo: string | null };
-
-const FALLBACK: SampleArtwork = { poster: previewPoster1, background: null, logo: null };
-
-let cache: SampleArtwork | null = null;
-let inflight: Promise<SampleArtwork> | null = null;
-
-function readCache(): SampleArtwork | null {
-  if (cache) return cache;
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (raw) {
-      cache = JSON.parse(raw) as SampleArtwork;
-      return cache;
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
-async function load(): Promise<SampleArtwork> {
-  const cached = readCache();
-  if (cached) return cached;
-  if (inflight) return inflight;
-  inflight = (async () => {
-    const m = await fetchCinemeta("movie", SAMPLE_ID).catch(() => null);
-    const art: SampleArtwork = {
-      poster: m?.poster ?? previewPoster1,
-      background: m?.background ?? null,
-      logo: m?.logo ?? null,
-    };
-    cache = art;
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(art));
-    } catch {
-      /* preview art is best-effort */
-    }
-    return art;
-  })();
-  return inflight;
-}
+const ARTWORK: SampleArtwork = {
+  poster: generalPoster,
+  background: generalStill,
+  logo: null,
+};
 
 export function useSampleArtwork(): SampleArtwork {
-  const [art, setArt] = useState<SampleArtwork>(() => readCache() ?? FALLBACK);
-  useEffect(() => {
-    let cancel = false;
-    void load().then((a) => {
-      if (!cancel) setArt(a);
-    });
-    return () => {
-      cancel = true;
-    };
-  }, []);
-  return art;
+  return ARTWORK;
 }
 
-const POSTER_PREFIX = "harbor.sample-poster.v1.";
-const posterMem = new Map<string, string>();
-const posterInflight = new Map<string, Promise<string>>();
+export const SETTINGS_SAMPLE_META = {
+  id: "settings-preview-the-general",
+  type: "movie" as const,
+  name: "The General",
+  poster: generalPoster,
+  background: generalStill,
+  releaseInfo: "1926",
+  description: "Buster Keaton sets off to recover his stolen locomotive.",
+};
 
-function readPoster(imdbId: string): string | null {
-  const mem = posterMem.get(imdbId);
-  if (mem) return mem;
-  try {
-    const raw = localStorage.getItem(POSTER_PREFIX + imdbId);
-    if (raw) {
-      posterMem.set(imdbId, raw);
-      return raw;
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
+export const ANIME_PREVIEW = namakuraStill;
 
-async function loadPoster(imdbId: string, type: "movie" | "series", fallback: string): Promise<string> {
-  const have = readPoster(imdbId);
-  if (have) return have;
-  const pending = posterInflight.get(imdbId);
-  if (pending) return pending;
-  const p = (async () => {
-    const m = await fetchCinemeta(type, imdbId).catch(() => null);
-    if (m?.poster) {
-      posterMem.set(imdbId, m.poster);
-      try {
-        localStorage.setItem(POSTER_PREFIX + imdbId, m.poster);
-      } catch {
-        /* best-effort */
-      }
-      return m.poster;
-    }
-    return fallback;
-  })();
-  posterInflight.set(imdbId, p);
-  const out = await p;
-  posterInflight.delete(imdbId);
-  return out;
-}
-
-export function useHydratedPoster(
-  imdbId: string,
-  fallback: string = previewPoster1,
-  type: "movie" | "series" = "movie",
-): string {
-  const [poster, setPoster] = useState<string>(() => readPoster(imdbId) ?? fallback);
-  useEffect(() => {
-    let cancel = false;
-    void loadPoster(imdbId, type, fallback).then((p) => {
-      if (!cancel) setPoster(p);
-    });
-    return () => {
-      cancel = true;
-    };
-  }, [imdbId, type, fallback]);
-  return poster;
-}
+export const SETTINGS_FILMS = [
+  { id: "the-general", name: "The General", poster: generalPoster },
+  { id: "sherlock-jr", name: "Sherlock Jr.", poster: sherlockPoster },
+  { id: "the-kid", name: "The Kid", poster: kidPoster },
+  { id: "safety-last", name: "Safety Last!", poster: safetyPoster },
+];

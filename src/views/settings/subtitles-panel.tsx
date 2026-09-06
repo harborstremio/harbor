@@ -36,7 +36,7 @@ function LookTab() {
     <>
       <Section
         title={t("Subtitle style")}
-        subtitle={t("How subtitles are drawn over the picture. The still below updates as you change anything, so you can judge the size and the contrast before you start a film.")}
+        subtitle={t("Adjust the text and background. The preview shows your changes as you make them.")}
       >
         <SubtitleStylePanel />
       </Section>

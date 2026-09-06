@@ -9,7 +9,7 @@ import {
   Trash2,
   Unlock,
   User as UserIcon,
-} from "lucide-react";
+} from "@/views/settings/icons";
 import { useEffect, useRef, useState } from "react";
 import traktLogo from "@/assets/trakt.svg";
 import simklLogo from "@/assets/simkl.png";
@@ -67,6 +67,7 @@ import { ColorPicker } from "@/views/settings/color-picker";
 import { KidToggle } from "./kid-toggle";
 import { KidsSetupPanel } from "./kids-setup-panel";
 import { PinEntry } from "./pin-entry";
+import { isBackKey, navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 
 type SubView =
   | { kind: "main" }
@@ -151,8 +152,22 @@ export function EditorView({
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (subView.kind === "main") return;
+    const onBack = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || !isBackKey(e)) return;
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest('[data-profile-picker]') || target.closest('[data-search-editing]')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setSubView({ kind: subView.kind === "security" ? "main" : "security" });
+    };
+    document.addEventListener("keydown", onBack);
+    return () => document.removeEventListener("keydown", onBack);
+  }, [subView.kind]);
+
   const trimmed = name.trim();
-  const canSave = trimmed.length > 0;
+  const canSave = trimmed.length > 0 && (!draftKid || !draftParentPin || draftParentPin.length === 4);
   const isPrimary = editing?.isPrimary === true;
   const canShare = !isPrimary && !!primary && primary.id !== editing?.id;
   const locked = editing ? !!editing.passwordHash : draftPin != null;
@@ -477,19 +492,16 @@ export function EditorView({
   const showAdvanced = canEditAdvanced || mode.kind === "create";
 
   return (
-    <div className="flex w-full max-w-[680px] flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div data-profile-editor="" className="flex w-full max-w-[680px] flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="flex flex-col items-center gap-1">
-        <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
-          {t("Harbor identity")}
-        </span>
-        <h1 className="font-display text-[28px] font-medium leading-tight tracking-tight text-ink">
+        <h1 className="text-[28px] font-semibold leading-tight tracking-tight text-ink">
           {editing ? t("Edit {name}", { name: editing.name }) : t("profile.new")}
         </h1>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
-        <div className="flex items-center gap-5">
-          <AvatarRing src={avatar} size={96} onClick={() => fileRef.current?.click()} />
+      <div className="flex flex-col gap-4 border-b border-edge-soft pb-6">
+        <div className="hset-profile-editor-identity flex items-center gap-5">
+          <AvatarRing src={avatar} size={76} onClick={() => fileRef.current?.click()} />
           <input
             ref={fileRef}
             type="file"
@@ -497,22 +509,30 @@ export function EditorView({
             onChange={onPickFile}
             className="hidden"
           />
-          <div className="flex min-w-0 flex-1 flex-col gap-2.5">
+          <div className="hset-profile-editor-fields flex min-w-0 flex-1 flex-col gap-2.5">
+            <label className="flex flex-col gap-2 text-[14px] text-ink-muted">
+              {t("Display name")}
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && void submit()}
-              autoFocus
+              onKeyDown={(e) => {
+                if (e.key !== "Enter" || navOwnsFocus(e.currentTarget) || e.currentTarget.hasAttribute("data-search-editing")) return;
+                e.preventDefault();
+                e.stopPropagation();
+                void submit();
+              }}
+              aria-label={t("Display name")}
               placeholder={t("Display name")}
               maxLength={32}
               className="h-12 rounded-xl border border-edge bg-canvas px-4 text-[15.5px] font-medium text-ink outline-none transition-colors focus:border-ink-subtle"
             />
+            </label>
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="h-8 rounded-lg border border-edge-soft px-2.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                className="h-8 rounded-lg border border-edge-soft px-2.5 text-[14px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Upload photo")}
               </button>
@@ -521,7 +541,7 @@ export function EditorView({
                   type="button"
                   onClick={() => void onUseTraktAvatar()}
                   disabled={loadingTraktAvatar}
-                  className="flex h-8 items-center gap-1.5 rounded-lg border border-edge-soft px-2.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-edge-soft px-2.5 text-[14px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
                 >
                   {loadingTraktAvatar ? (
                     <Loader2 size={12} className="animate-spin" />
@@ -536,7 +556,7 @@ export function EditorView({
                   type="button"
                   onClick={() => void onUseAnilistAvatar()}
                   disabled={loadingAnilistAvatar}
-                  className="flex h-8 items-center gap-1.5 rounded-lg border border-edge-soft px-2.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-edge-soft px-2.5 text-[14px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
                 >
                   {loadingAnilistAvatar ? (
                     <Loader2 size={12} className="animate-spin" />
@@ -557,7 +577,7 @@ export function EditorView({
                   type="button"
                   onClick={() => void onUseSimklAvatar()}
                   disabled={loadingSimklAvatar}
-                  className="flex h-8 items-center gap-1.5 rounded-lg border border-edge-soft px-2.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-edge-soft px-2.5 text-[14px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
                 >
                   {loadingSimklAvatar ? (
                     <Loader2 size={12} className="animate-spin" />
@@ -574,13 +594,14 @@ export function EditorView({
                     setAvatar(null);
                     setAvatarSource("removed");
                   }}
-                  className="h-8 rounded-lg border border-edge-soft px-2.5 text-[12px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:text-danger"
+                  className="h-8 rounded-lg border border-edge-soft px-2.5 text-[14px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:text-danger"
                 >
                   {t("common.remove")}
                 </button>
               )}
             </div>
             <AvatarFan
+              label={t("Choose an avatar")}
               onClick={() => setAvatarPickerOpen(true)}
               onRandomize={(value) => {
                 setAvatar(value);
@@ -588,13 +609,13 @@ export function EditorView({
               }}
             />
             {traktAvatarError && (
-              <p className="text-[11.5px] text-amber-200/85">{traktAvatarError}</p>
+              <p className="text-[14px] text-amber-200/85">{traktAvatarError}</p>
             )}
             {anilistAvatarError && (
-              <p className="text-[11.5px] text-amber-200/85">{anilistAvatarError}</p>
+              <p className="text-[14px] text-amber-200/85">{anilistAvatarError}</p>
             )}
             {simklAvatarError && (
-              <p className="text-[11.5px] text-amber-200/85">{simklAvatarError}</p>
+              <p className="text-[14px] text-amber-200/85">{simklAvatarError}</p>
             )}
           </div>
         </div>
@@ -630,7 +651,7 @@ export function EditorView({
 
       {showAdvanced && !draftKid && canShare && primary && (
         <div className="flex flex-col gap-1.5">
-          <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+          <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
             {t("Stremio account")}
           </span>
           <div className="flex flex-col gap-1.5">
@@ -660,7 +681,7 @@ export function EditorView({
               sub={t("Sign in from the sidebar after saving. Library and addons stay separate.")}
             />
             {confirmingShare && (
-              <div className="flex items-center gap-2 rounded-lg border border-edge-soft bg-canvas/40 px-3 py-2 text-[12px]">
+              <div className="flex items-center gap-2 rounded-lg border border-edge-soft bg-canvas/40 px-3 py-2 text-[14px]">
                 <span className="min-w-0 flex-1 leading-snug text-ink-subtle">
                   {t(
                     "Switch to sharing? This profile will use {name}'s library, watchlist and addons. Its own data is kept but hidden until you switch back.",
@@ -691,14 +712,14 @@ export function EditorView({
               <button
                 type="button"
                 onClick={() => setImportExpanded(true)}
-                className="h-9 self-start rounded-lg border border-edge-soft px-3 text-[12.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                className="h-9 self-start rounded-lg border border-edge-soft px-3 text-[15px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Import data from {name}", { name: primary.name })}
               </button>
             )}
             {importPanelOpen && importExpanded && (
               <div className="mt-1 flex flex-col gap-2 rounded-xl border border-edge-soft bg-canvas/40 p-3">
-                <span className="text-[12.5px] font-semibold text-ink">
+                <span className="text-[15px] font-semibold text-ink">
                   {t(isCreate ? "Start with data from {name}" : "Import data from {name}", {
                     name: primary?.name ?? "",
                   })}
@@ -775,7 +796,7 @@ export function EditorView({
                     onChange={(v) => setDomainChoices((prev) => ({ ...prev, addons: v }))}
                   />
                 )}
-                <p className="text-[11px] leading-snug text-ink-subtle">
+                <p className="text-[14px] leading-snug text-ink-subtle">
                   {t(
                     isCreate
                       ? "Copied once — afterwards this profile keeps its own copy. Nothing stays linked to Primary."
@@ -783,7 +804,7 @@ export function EditorView({
                   )}
                 </p>
                 {!isCreate && (
-                  <div className="flex items-center justify-end gap-2 pt-1 text-[12px]">
+                  <div className="flex items-center justify-end gap-2 pt-1 text-[14px]">
                     {!confirmingImport ? (
                       <>
                         <button
@@ -834,7 +855,7 @@ export function EditorView({
 
       {showAdvanced && !draftKid && editing && !isPrimary && (
         <div className="flex flex-col gap-1.5">
-          <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+          <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
             {t("Primary profile")}
           </span>
           <div className="flex items-center gap-3 rounded-xl border border-edge-soft bg-elevated/30 p-3">
@@ -842,10 +863,10 @@ export function EditorView({
               <Crown size={16} strokeWidth={2.2} />
             </span>
             <div className="flex min-w-0 flex-1 flex-col">
-              <span className="text-[13px] font-semibold text-ink">
+              <span className="text-[15px] font-semibold text-ink">
                 {t("Make this the primary profile")}
               </span>
-              <span className="text-[11.5px] leading-snug text-ink-subtle">
+              <span className="text-[14px] leading-snug text-ink-subtle">
                 {t(
                   "The primary manages profiles and can't be deleted. Transfer it here to delete the old one.",
                 )}
@@ -855,12 +876,12 @@ export function EditorView({
               <button
                 type="button"
                 onClick={() => setConfirmingPrimary(true)}
-                className="h-9 shrink-0 rounded-lg border border-edge-soft px-3 text-[12.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                className="h-9 shrink-0 rounded-lg border border-edge-soft px-3 text-[15px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Set as primary")}
               </button>
             ) : (
-              <div className="flex shrink-0 items-center gap-2 text-[12px]">
+              <div className="flex shrink-0 items-center gap-2 text-[14px]">
                 <button
                   type="button"
                   onClick={() => setConfirmingPrimary(false)}
@@ -886,7 +907,7 @@ export function EditorView({
 
       {showAdvanced && !draftKid && editing && isPrimary && transferTargets.length > 0 && (
         <div className="flex flex-col gap-1.5">
-          <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+          <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
             {t("Primary profile")}
           </span>
           <div className="flex flex-col gap-2.5 rounded-xl border border-edge-soft bg-elevated/30 p-3">
@@ -895,10 +916,10 @@ export function EditorView({
                 <Crown size={16} strokeWidth={2.2} />
               </span>
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="text-[13px] font-semibold text-ink">
+                <span className="text-[15px] font-semibold text-ink">
                   {t("This is the primary profile")}
                 </span>
-                <span className="text-[11.5px] leading-snug text-ink-subtle">
+                <span className="text-[14px] leading-snug text-ink-subtle">
                   {t(
                     "It manages profiles and can't be deleted. Hand primary to another profile to delete this one.",
                   )}
@@ -909,7 +930,7 @@ export function EditorView({
               <button
                 type="button"
                 onClick={() => setTransferOpen(true)}
-                className="h-9 self-start rounded-lg border border-edge-soft px-3 text-[12.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                className="h-9 self-start rounded-lg border border-edge-soft px-3 text-[15px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Transfer to another profile")}
               </button>
@@ -943,7 +964,7 @@ export function EditorView({
                           <CatAvatar className="h-full w-full" />
                         )}
                       </span>
-                      <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
+                      <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-ink">
                         {p.name}
                       </span>
                       {sel && (
@@ -952,7 +973,7 @@ export function EditorView({
                     </button>
                   );
                 })}
-                <div className="flex items-center justify-end gap-2 pt-1 text-[12px]">
+                <div className="flex items-center justify-end gap-2 pt-1 text-[14px]">
                   <button
                     type="button"
                     onClick={() => {
@@ -987,7 +1008,7 @@ export function EditorView({
           <button
             type="button"
             onClick={onCancel}
-            className="h-10 rounded-xl border border-edge-soft px-4 text-[13px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+            className="h-11 rounded-xl border border-edge-soft px-4 text-[15px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
           >
             {t("common.cancel")}
           </button>
@@ -998,13 +1019,13 @@ export function EditorView({
               <button
                 type="button"
                 onClick={() => setConfirmingDelete(true)}
-                className="flex items-center gap-1.5 text-[12px] font-medium text-ink-subtle transition-colors hover:text-red-300"
+                className="flex items-center gap-1.5 text-[14px] font-medium text-ink-subtle transition-colors hover:text-red-300"
               >
                 <Trash2 size={12} />
                 {t("Delete profile")}
               </button>
             ) : (
-              <div className="flex items-center gap-2 text-[12px]">
+              <div className="flex items-center gap-2 text-[14px]">
                 <span className="text-red-200">{t("Delete this profile?")}</span>
                 <button
                   type="button"
@@ -1030,7 +1051,7 @@ export function EditorView({
           type="button"
           onClick={() => void submit()}
           disabled={!canSave}
-          className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-5 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-5 text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {editing ? t("Save changes") : t("Create profile")}
         </button>
@@ -1060,7 +1081,7 @@ function BlockedView({ onBack }: { onBack: () => void }) {
       <button
         type="button"
         onClick={onBack}
-        className="h-10 rounded-xl bg-ink px-5 text-[13px] font-semibold text-canvas"
+        className="h-11 rounded-xl bg-ink px-5 text-[15px] font-semibold text-canvas"
       >
         {t("common.back")}
       </button>
@@ -1103,8 +1124,8 @@ function SecurityRow({
           )}
         </span>
         <div className="flex flex-col gap-0.5">
-          <span className="text-[13.5px] font-semibold text-ink">{t("Security")}</span>
-          <span className="text-[12px] text-ink-subtle">
+          <span className="text-[16px] font-semibold text-ink">{t("Security")}</span>
+          <span className="text-[14px] text-ink-subtle">
             {pinLabel} · {tabsLabel}
           </span>
         </div>
@@ -1145,20 +1166,17 @@ function SecurityView({
         <button
           type="button"
           onClick={onBack}
-          className="flex h-9 items-center gap-1.5 rounded-lg px-2 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-elevated/40 hover:text-ink"
+          className="flex h-11 items-center gap-1.5 rounded-lg px-2 text-[15px] font-medium text-ink-muted transition-colors hover:bg-elevated/40 hover:text-ink"
         >
           <ChevronLeft size={14} strokeWidth={2.2} className="dir-icon" />
           {t("common.back")}
         </button>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
-          {t("Profile security")}
-        </span>
-        <h1 className="font-display text-[28px] font-medium tracking-tight text-ink">
+        <h1 className="text-[28px] font-semibold tracking-tight text-ink">
           {t("PIN & sidebar locks")}
         </h1>
-        <p className="text-center text-[13.5px] text-ink-muted">
+        <p className="text-center text-[16px] text-ink-muted">
           {t("Pick a PIN and which sidebar tabs require it.")}
         </p>
       </div>
@@ -1181,8 +1199,8 @@ function SecurityView({
                 )}
               </span>
               <div className="flex flex-col gap-0.5">
-                <span className="text-[13.5px] font-semibold text-ink">{t("PIN")}</span>
-                <span className="text-[12px] text-ink-subtle">
+                <span className="text-[16px] font-semibold text-ink">{t("PIN")}</span>
+                <span className="text-[14px] text-ink-subtle">
                   {locked ? t("4-digit PIN is set.") : t("No PIN set.")}
                 </span>
               </div>
@@ -1192,7 +1210,7 @@ function SecurityView({
                 <button
                   type="button"
                   onClick={onSetPin}
-                  className="h-9 rounded-lg bg-ink px-3.5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+                  className="h-11 rounded-lg bg-ink px-3.5 text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90"
                 >
                   {t("Set PIN")}
                 </button>
@@ -1201,14 +1219,14 @@ function SecurityView({
                   <button
                     type="button"
                     onClick={onChangePin}
-                    className="h-9 rounded-lg border border-edge-soft px-3.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                    className="h-11 rounded-lg border border-edge-soft px-3.5 text-[15px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
                   >
                     {t("Change")}
                   </button>
                   <button
                     type="button"
                     onClick={onRemovePin}
-                    className="h-9 rounded-lg border border-edge-soft px-3.5 text-[12.5px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:text-danger"
+                    className="h-11 rounded-lg border border-edge-soft px-3.5 text-[15px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:text-danger"
                   >
                     {editing ? t("common.remove") : t("Clear")}
                   </button>
@@ -1234,8 +1252,8 @@ function SecurityView({
               <ShieldCheck size={14} strokeWidth={2.2} />
             </span>
             <div className="flex flex-col gap-0.5">
-              <span className="text-[13.5px] font-semibold text-ink">{t("Sidebar access")}</span>
-              <span className="text-[12px] text-ink-subtle">
+              <span className="text-[16px] font-semibold text-ink">{t("Sidebar access")}</span>
+              <span className="text-[14px] text-ink-subtle">
                 {lockedCount === 0
                   ? t("No locks. All sidebar tabs open without a PIN.")
                   : t("{n} tabs require this profile's PIN.", { n: lockedCount })}
@@ -1268,6 +1286,7 @@ function ImportRow({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={checked}
       className={`flex items-center gap-2.5 rounded-lg border px-3 text-start transition-colors ${
         checked
           ? "border-ink/40 bg-canvas/60"
@@ -1281,7 +1300,7 @@ function ImportRow({
       >
         {checked && <Check size={10} strokeWidth={3} />}
       </span>
-      <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-ink">{label}</span>
+      <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-ink">{label}</span>
     </button>
   );
 }
@@ -1302,14 +1321,15 @@ function ConflictRow({
   ];
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl border border-edge-soft bg-elevated/30 p-2.5">
-      <span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold text-ink">{label}</span>
+      <span className="min-w-0 flex-1 truncate text-[15px] font-semibold text-ink">{label}</span>
       <div className="flex shrink-0 items-center gap-1 rounded-lg bg-canvas/50 p-1">
         {options.map((o) => (
           <button
             key={o.value}
             type="button"
             onClick={() => onChange(o.value)}
-            className={`rounded-md px-2 py-1 text-[11.5px] font-semibold transition-colors ${
+            aria-pressed={value === o.value}
+            className={`rounded-md px-2 py-1 text-[14px] font-semibold transition-colors ${
               value === o.value ? "bg-accent/20 text-accent" : "text-ink-muted hover:text-ink"
             }`}
           >
@@ -1338,6 +1358,7 @@ function ShareOption({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={`flex items-start gap-3 rounded-xl border px-3.5 py-3 text-start transition-colors ${
         active
           ? "border-ink/40 bg-canvas/60"
@@ -1353,8 +1374,8 @@ function ShareOption({
       </span>
       <span className={`mt-0.5 ${active ? "text-ink" : "text-ink-muted"}`}>{icon}</span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[13.5px] font-semibold text-ink">{title}</span>
-        <span className="text-[12px] leading-snug text-ink-subtle">{sub}</span>
+        <span className="text-[16px] font-semibold text-ink">{title}</span>
+        <span className="text-[14px] leading-snug text-ink-subtle">{sub}</span>
       </span>
     </button>
   );
@@ -1402,20 +1423,20 @@ function TabsView({
         <button
           type="button"
           onClick={onBack}
-          className="flex h-9 items-center gap-1.5 rounded-lg px-2 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-elevated/40 hover:text-ink"
+          className="flex h-11 items-center gap-1.5 rounded-lg px-2 text-[15px] font-medium text-ink-muted transition-colors hover:bg-elevated/40 hover:text-ink"
         >
           <ChevronLeft size={14} strokeWidth={2.2} className="dir-icon" />
           {t("common.back")}
         </button>
       </div>
       <div className="flex flex-col items-center gap-1">
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
+        <span className="text-[13px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
           {t("Sidebar access")}
         </span>
         <h1 className="font-display text-[24px] font-medium tracking-tight text-ink">
           {t("Lock sidebar tabs")}
         </h1>
-        <p className="text-center text-[12.5px] text-ink-muted">
+        <p className="text-center text-[15px] text-ink-muted">
           {t("Locks only activate once a PIN is set.")}
         </p>
       </div>
@@ -1446,20 +1467,20 @@ function TabsView({
               >
                 <TabIcon iconKey={tab.iconKey} />
               </span>
-              <span className="text-[13.5px] font-medium text-ink">{t(tab.label)}</span>
+              <span className="text-[16px] font-medium text-ink">{t(tab.label)}</span>
             </div>
             {tabs[tab.key] && <Lock size={13} strokeWidth={2.2} className="text-ink-muted" />}
           </button>
         ))}
       </div>
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[12.5px] text-ink-subtle">
+        <span className="text-[15px] text-ink-subtle">
           {count === 0 ? t("No tabs selected") : t("{n} tabs locked", { n: count })}
         </span>
         <button
           type="button"
           onClick={() => onSave(tabs)}
-          className="h-10 rounded-xl bg-ink px-5 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90"
+          className="h-10 rounded-xl bg-ink px-5 text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90"
         >
           {t("common.save")}
         </button>

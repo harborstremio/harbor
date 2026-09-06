@@ -1,31 +1,34 @@
-import { useState, type ReactNode } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useId, useState, type ReactNode } from "react";
+import { Eye, EyeOff } from "@/views/settings/icons";
 import { useT } from "@/lib/i18n";
+import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 
 export const inputClass =
-  "h-11 w-full rounded-md bg-canvas px-3.5 text-[14px] text-ink placeholder:text-ink-subtle transition-colors duration-150 focus:bg-elevated focus:outline-none";
+  "h-12 w-full rounded-lg border border-edge-soft bg-canvas px-3.5 text-[16px] text-ink placeholder:text-ink-subtle transition-colors duration-150 focus:border-accent focus:outline-none";
 
 export function Field({
   label,
+  id,
   hint,
   tone,
   children,
 }: {
   label: string;
+  id: string;
   hint?: string;
   tone?: "muted" | "danger";
   children: ReactNode;
 }) {
   return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-[12.5px] font-semibold text-ink">{label}</span>
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-[15px] font-medium text-ink">{label}</label>
       {children}
       {hint && (
-        <span className={`text-[11.5px] ${tone === "danger" ? "text-danger" : "text-ink-subtle"}`}>
+        <span className={`text-[13px] leading-5 ${tone === "danger" ? "text-danger" : "text-ink-muted"}`}>
           {hint}
         </span>
       )}
-    </label>
+    </div>
   );
 }
 
@@ -54,13 +57,19 @@ export function TextField({
   inputMode?: "text" | "email";
   onEnter?: () => void;
 }) {
+  const id = useId();
   return (
-    <Field label={label} hint={hint} tone={tone}>
+    <Field id={id} label={label} hint={hint} tone={tone}>
       <input
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && onEnter) onEnter();
+          if (e.key === "Enter" && onEnter && !navOwnsFocus(e.currentTarget)) {
+            e.preventDefault();
+            e.stopPropagation();
+            onEnter();
+          }
         }}
         placeholder={placeholder}
         maxLength={maxLength}
@@ -91,16 +100,22 @@ export function PasswordField({
   onEnter?: () => void;
 }) {
   const [reveal, setReveal] = useState(false);
+  const id = useId();
   const t = useT();
   return (
-    <Field label={label}>
+    <Field id={id} label={label}>
       <div className="relative">
         <input
+          id={id}
           type={reveal ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && onEnter) onEnter();
+            if (e.key === "Enter" && onEnter && !navOwnsFocus(e.currentTarget)) {
+              e.preventDefault();
+              e.stopPropagation();
+              onEnter();
+            }
           }}
           placeholder={placeholder}
           maxLength={200}
@@ -112,7 +127,6 @@ export function PasswordField({
         />
         <button
           type="button"
-          tabIndex={-1}
           onClick={() => setReveal((r) => !r)}
           aria-label={reveal ? t("Hide password") : t("Show password")}
           className="absolute inset-y-0 end-0 flex w-11 items-center justify-center text-ink-subtle transition-all duration-150 hover:text-ink active:scale-90"

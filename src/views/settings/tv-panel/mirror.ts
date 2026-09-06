@@ -15,9 +15,17 @@ function snap(value: number, min: number, max: number, step: number): number {
 const ALIGN: Record<string, string> = { left: "Left", center: "Center", right: "Right" };
 const EDGE: Record<string, string> = { shadow: "Shadow", outline: "Outline", box: "Box" };
 
+function tvLanguages(languages: string[]): string[] {
+  return [...new Set(languages.flatMap((language) => {
+    if (LANG_SET.has(language)) return [language];
+    const found = TV_LANGS.find((option) => option.label.toLowerCase() === language.toLowerCase());
+    return found ? [found.value] : [];
+  }))];
+}
+
 export function buildMirrorPlan(s: Settings): MirrorPlan {
-  const langs = s.preferredSubLangs.filter((l) => LANG_SET.has(l));
-  const audio = s.preferredAudioLangs.filter((l) => LANG_SET.has(l));
+  const langs = tvLanguages(s.preferredSubLangs);
+  const audio = tvLanguages(s.preferredAudioLangs);
   const services = Object.entries(s.streaming)
     .filter(([k, on]) => on && SERVICE_SET.has(k))
     .map(([k]) => k);

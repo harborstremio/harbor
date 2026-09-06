@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { settingsSearchEntries } from "./settings-search-entries.mjs";
 
 const ROOT = path.resolve(process.argv[2] ?? ".");
 const SRC = path.join(ROOT, "src");
@@ -197,8 +198,7 @@ for (const f of settingsSrc) {
   for (const m of s.matchAll(/(?:TITLE|LABEL)\s*=\s*"([^"]+)"/g)) headings.add(m[1]);
   for (const m of s.matchAll(/settingsAnchor\("([^"]+)"\)/g)) headings.add(m[1]);
 }
-const entries = [...nav.matchAll(/\{\s*label:\s*"([^"]+)",\s*section:\s*"([a-zA-Z]+)"(?:,\s*anchorTitle:\s*"([^"]+)")?/g)]
-  .map((m) => ({ label: m[1], section: m[2], anchor: m[3] }));
+const entries = settingsSearchEntries(nav);
 
 report(
   "search entries pointing at a heading that does not exist",

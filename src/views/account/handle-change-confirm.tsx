@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useModalExit } from "@/components/modal-shell";
 import { createPortal } from "react-dom";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X } from "@/views/settings/icons";
 import { useT } from "@/lib/i18n";
 
 export function HandleChangeConfirm({

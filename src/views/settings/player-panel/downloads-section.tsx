@@ -14,6 +14,8 @@ export function DownloadsSection() {
   const { settings, update } = useSettings();
   const t = useT();
   const [systemDefault, setSystemDefault] = useState<string>("");
+  const [loadingDefault, setLoadingDefault] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -21,13 +23,15 @@ export function DownloadsSection() {
       .then((d) => {
         if (!cancelled) setSystemDefault(d);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoadingDefault(false); });
     return () => {
       cancelled = true;
     };
   }, []);
 
   const pickFolder = async (kind: "video" | "ebook") => {
+    setError(null);
     const current =
       kind === "ebook"
         ? settings.ebookDownloadDir || settings.downloadDir || systemDefault
@@ -42,16 +46,17 @@ export function DownloadsSection() {
         else update({ downloadDir: picked });
       }
     } catch {
-      return;
+      setError(t("Could not open the folder picker. Try again."));
     }
   };
 
   const revealCurrent = async (current: string) => {
     if (!current) return;
+    setError(null);
     try {
       await revealItemInDir(current);
     } catch {
-      return;
+      setError(t("Could not open that folder. Check that the drive is connected."));
     }
   };
 
@@ -60,6 +65,7 @@ export function DownloadsSection() {
       <DownloadLocation
         title={t("Movies & TV")}
         current={settings.downloadDir || systemDefault}
+        loading={loadingDefault}
         custom={!!settings.downloadDir}
         onChoose={() => void pickFolder("video")}
         onReset={() => update({ downloadDir: "" })}
@@ -77,6 +83,7 @@ export function DownloadsSection() {
       <DownloadLocation
         title={t("eBooks")}
         current={settings.ebookDownloadDir || settings.downloadDir || systemDefault}
+        loading={loadingDefault}
         custom={!!settings.ebookDownloadDir}
         onChoose={() => void pickFolder("ebook")}
         onReset={() => update({ ebookDownloadDir: "" })}
@@ -91,6 +98,7 @@ export function DownloadsSection() {
           onChange={(value) => update({ ebookDownloadCreateFolders: value })}
         />
       </DownloadLocation>
+      {error && <p role="alert" className="text-[15px] text-danger">{error}</p>}
     </div>
   );
 }
@@ -98,6 +106,7 @@ export function DownloadsSection() {
 function DownloadLocation({
   title,
   current,
+  loading,
   custom,
   onChoose,
   onReset,
@@ -106,6 +115,7 @@ function DownloadLocation({
 }: {
   title: string;
   current: string;
+  loading: boolean;
   custom: boolean;
   onChoose: () => void;
   onReset: () => void;
@@ -115,9 +125,7 @@ function DownloadLocation({
   const t = useT();
   return (
     <SettingGroup label={title}>
-      {children}
       <SettingRow
-        wide
         label={
           <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
             <span className="min-w-0">{t("Download folder")}</span>
@@ -128,7 +136,7 @@ function DownloadLocation({
         }
         desc={
           <span className="block break-all font-mono text-[15.5px] leading-[22px] text-ink">
-            {current || t("Detecting...")}
+            {current || (loading ? t("Finding your Downloads folder…") : t("Default Downloads folder"))}
           </span>
         }
       >
@@ -148,6 +156,7 @@ function DownloadLocation({
           )}
         </span>
       </SettingRow>
+      {children}
     </SettingGroup>
   );
 }

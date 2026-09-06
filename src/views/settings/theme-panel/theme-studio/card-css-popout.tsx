@@ -1,9 +1,9 @@
 import { Sparkles, X } from "../../icons";
 import { useModalExit } from "@/components/modal-shell";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { CodeEditor } from "@/components/code-editor";
-import { topMovies, type Meta } from "@/lib/cinemeta";
+import { SETTINGS_FILMS } from "@/lib/sample-artwork";
 import { useT } from "@/lib/i18n";
 import { tvFocus } from "@/lib/keyboard-navigation";
 import { isBackKey } from "@/lib/keyboard-navigation/geometry";
@@ -28,39 +28,6 @@ const HOOKS = [
   { sel: ".harbor-poster", note: "poster image" },
 ];
 
-const FALLBACK: Array<{ id: string; name: string; poster: string }> = [
-  {
-    id: "tt0111161",
-    name: "The Shawshank Redemption",
-    poster: "https://images.metahub.space/poster/medium/tt0111161/img",
-  },
-  {
-    id: "tt0468569",
-    name: "The Dark Knight",
-    poster: "https://images.metahub.space/poster/medium/tt0468569/img",
-  },
-  {
-    id: "tt1375666",
-    name: "Inception",
-    poster: "https://images.metahub.space/poster/medium/tt1375666/img",
-  },
-  {
-    id: "tt0816692",
-    name: "Interstellar",
-    poster: "https://images.metahub.space/poster/medium/tt0816692/img",
-  },
-  {
-    id: "tt0137523",
-    name: "Fight Club",
-    poster: "https://images.metahub.space/poster/medium/tt0137523/img",
-  },
-  {
-    id: "tt0110912",
-    name: "Pulp Fiction",
-    poster: "https://images.metahub.space/poster/medium/tt0110912/img",
-  },
-];
-
 export function CardCssPopout({
   css,
   onChange,
@@ -73,24 +40,8 @@ export function CardCssPopout({
   const t = useT();
   const { settings } = useSettings();
   const tvNav = settings.tvNavigation;
-  const [picks, setPicks] = useState(FALLBACK);
+  const picks = SETTINGS_FILMS;
   const doneRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    topMovies()
-      .then((metas: Meta[]) => {
-        const out = metas
-          .filter((m) => m.poster)
-          .slice(0, 6)
-          .map((m) => ({ id: m.id, name: m.name, poster: m.poster as string }));
-        if (!cancelled && out.length >= 4) setPicks(out);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const { closing, close } = useModalExit(onClose);
 
@@ -191,7 +142,7 @@ export function CardCssPopout({
               ))}
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-6 pt-1">
-              <div data-tv-skip className="grid grid-cols-3 gap-5">
+              <div data-tv-skip className="grid grid-cols-2 gap-5">
                 {picks.map((p) => (
                   <button
                     key={p.id}

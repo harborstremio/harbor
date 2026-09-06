@@ -1,9 +1,8 @@
 import { Check, Copy, ExternalLink } from "../icons";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { QR_DARK, QR_LIGHT, buildHandoffQr } from "@/lib/tv-handoff/handoff-qr";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
-import { SettingRow } from "../kit";
 import { Section } from "../shared";
 import { SButton } from "../ui";
 import { DeviceArt, type DeviceKind } from "./device-art";
@@ -42,27 +41,22 @@ export function RemoteCard({
 }) {
   const t = useT();
   const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const share = lanUrl ?? localUrl;
+  useEffect(() => () => { if (copyTimer.current) clearTimeout(copyTimer.current); }, []);
 
   const copy = () => {
+    setCopyFailed(false);
     void navigator.clipboard.writeText(share).then(() => {
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
-    });
+      if (copyTimer.current) clearTimeout(copyTimer.current);
+      copyTimer.current = setTimeout(() => setCopied(false), 1600);
+    }).catch(() => setCopyFailed(true));
   };
 
   return (
-    <Section title={title}>
-      <SettingRow
-        wide
-        label={title}
-        desc={blurb}
-        warn={
-          probed && !lanUrl
-            ? t("No Wi-Fi address yet. Other devices cannot reach this computer.")
-            : undefined
-        }
-      >
+    <Section title={title} subtitle={blurb}>
         <div className="flex w-full flex-wrap items-start gap-5">
           <div className="flex shrink-0 items-center gap-3">
             <span className="block h-[80px] w-[80px] shrink-0">
@@ -90,7 +84,7 @@ export function RemoteCard({
                 ) : (
                   <Copy size={18} strokeWidth={1.9} />
                 )}
-                {copied ? t("Copied") : t("Copy")}
+                {copied ? t("Copied") : lanUrl ? t("Copy address") : t("Copy local address")}
               </SButton>
               <SButton onClick={() => openUrl(localUrl)}>
                 <ExternalLink size={18} strokeWidth={1.9} />
@@ -103,9 +97,14 @@ export function RemoteCard({
                 {t("Scan with your phone camera, or type the address above.")}
               </p>
             )}
+            {probed && !lanUrl && <p className="text-[15px] leading-[22px] text-ink-muted">
+              {t("Local address for this computer. Connect to a local network to get an address for your other devices.")}
+            </p>}
+            {copyFailed && <p role="alert" className="text-[15px] leading-[22px] text-danger">
+              {t("Couldn't copy the address. Select it above and copy it manually.")}
+            </p>}
           </div>
         </div>
-      </SettingRow>
     </Section>
   );
 }

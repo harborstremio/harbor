@@ -1,4 +1,4 @@
-import { ExternalLink, Trash2 } from "./icons";
+import { ExternalLink, LogOut } from "./icons";
 import { useEffect, useState, type ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
@@ -31,7 +31,7 @@ export function TrackerIdentity({
   }, [avatar]);
   const showAvatar = !!avatar && !broken;
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-md bg-elevated px-5 py-5">
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-4 border-b border-edge-soft pb-6 pt-2">
       <span className="relative block h-14 w-14 shrink-0">
         <span className="grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-canvas">
           {showAvatar ? (
@@ -95,7 +95,7 @@ export function TrackerIdentity({
           onClick={onDisconnect}
           className="harbor-press-pop flex h-11 items-center gap-2 rounded-[8px] bg-canvas px-4 text-[15px] font-semibold text-ink-muted transition-colors hover:text-danger"
         >
-          <Trash2 size={16} strokeWidth={2.2} />
+          <LogOut size={16} strokeWidth={2.2} />
           {t("Disconnect")}
         </button>
       </span>

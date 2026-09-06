@@ -101,7 +101,7 @@ export function AppLanguageTab() {
         <SettingRow
           wide
           label={t("Language")}
-          desc={t("Anything TMDB has not translated stays in English. Picking a new language reloads Harbor.")}
+          desc={t("Untranslated text stays in English. Choose a language, then select Apply and reload.")}
         >
           <div ref={anchorRef}>
             <Dropdown
@@ -114,7 +114,7 @@ export function AppLanguageTab() {
         </SettingRow>
         <ToggleRow
           label={t("Translate titles")}
-          sub={t("On shows titles in your metadata language (English by default). Off keeps each title's original language, so anime and foreign films show their native names.")}
+          sub={t("Show translated names in the language selected above. Turn off to keep original titles.")}
           value={settings.translateTitles}
           onChange={(v) => update({ translateTitles: v })}
         />

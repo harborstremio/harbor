@@ -13,6 +13,7 @@ export function usePanelDrag(opts?: { width?: number; gap?: number }) {
     return { x: Math.max(g, window.innerWidth - w - g), y: g };
   });
   const [dragging, setDragging] = useState(false);
+  const stopDrag = useRef<(() => void) | null>(null);
 
   const clamp = (x: number, y: number): PanelPosition => {
     const g = opts?.gap ?? DEFAULT_GAP;
@@ -29,18 +30,24 @@ export function usePanelDrag(opts?: { width?: number; gap?: number }) {
     const el = e.target as HTMLElement;
     if (el.closest('button, input, textarea, a, select, [role="button"]')) return;
     const start = { px: e.clientX, py: e.clientY, x: position.x, y: position.y };
+    stopDrag.current?.();
+    const previousUserSelect = document.body.style.userSelect;
     setDragging(true);
     document.body.style.userSelect = "none";
     const move = (ev: PointerEvent) =>
       setPosition(clamp(start.x + (ev.clientX - start.px), start.y + (ev.clientY - start.py)));
     const up = () => {
       setDragging(false);
-      document.body.style.userSelect = "";
+      document.body.style.userSelect = previousUserSelect;
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      stopDrag.current = null;
     };
+    stopDrag.current = up;
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
   };
 
   useLayoutEffect(() => {
@@ -66,7 +73,7 @@ export function usePanelDrag(opts?: { width?: number; gap?: number }) {
 
   useEffect(() => {
     return () => {
-      document.body.style.userSelect = "";
+      stopDrag.current?.();
     };
   }, []);
 

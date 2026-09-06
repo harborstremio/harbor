@@ -1,9 +1,11 @@
-import { ChevronDown, Plus, X } from "lucide-react";
+import { ChevronDown, Plus, X } from "@/views/settings/icons";
 import { KawaiiBunny } from "./kawaii-bunny";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
+import { captureFocusReturn } from "@/lib/keyboard-navigation";
+import { isBackKey, isVisible } from "@/lib/keyboard-navigation/geometry";
 import { EditorView } from "./editor-view";
 import { PasswordPrompt } from "./password-prompt";
 import { ProfileTile } from "./profile-tile";
@@ -15,6 +17,7 @@ export function ProfilePickerModal() {
   const { profiles, pickerOpen, pickerView, setPickerView, selectProfile, closePicker } = useProfiles();
   const t = useT();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [moreBelow, setMoreBelow] = useState(false);
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const [exiting, setExiting] = useState(false);
@@ -31,6 +34,12 @@ export function ProfilePickerModal() {
     }
   }, [pickerOpen]);
   useEffect(() => () => timers.current.forEach((id) => window.clearTimeout(id)), []);
+  useEffect(() => {
+    if (!pickerOpen) return;
+    const restore = captureFocusReturn();
+    dialogRef.current?.focus({ preventScroll: true });
+    return restore;
+  }, [pickerOpen]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -75,21 +84,54 @@ export function ProfilePickerModal() {
         exiting ? "opacity-0" : "animate-in fade-in duration-500"
       }`}
     >
-      <div className="relative flex max-h-[calc(100vh-3rem)] w-full max-w-[860px] flex-col animate-in fade-in zoom-in-95 slide-in-from-bottom-3 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t(pickerView.kind === "create" ? "New profile" : pickerView.kind === "edit" ? "Edit profile" : "Choose a profile")}
+        data-profile-picker=""
+        tabIndex={-1}
+        onKeyDown={(e) => {
+          if (e.defaultPrevented) return;
+          const target = e.target as HTMLElement;
+          if (target.closest('[role="dialog"]') !== e.currentTarget) return;
+          if (e.key === "Tab") {
+            const controls = Array.from(e.currentTarget.querySelectorAll<HTMLElement>(
+              'button:not([disabled]), a[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]',
+            )).filter(isVisible);
+            const first = controls[0];
+            const last = controls[controls.length - 1];
+            if (!first) { e.preventDefault(); return; }
+            if (e.shiftKey && (target === first || target === e.currentTarget)) {
+              e.preventDefault(); last.focus();
+            } else if (!e.shiftKey && target === last) {
+              e.preventDefault(); first.focus();
+            }
+          }
+          if (isBackKey(e.nativeEvent) && !target.closest('[data-search-editing]')) {
+            if (showClose && e.currentTarget.querySelector('[data-profile-editor]')) {
+              e.preventDefault(); e.stopPropagation(); finishEditor();
+            } else if (pickerView.kind === "unlock") {
+              e.preventDefault(); e.stopPropagation(); goList();
+            }
+          }
+        }}
+        className={`relative flex max-h-[calc(100vh-3rem)] w-full max-w-[860px] flex-col outline-none animate-in fade-in zoom-in-95 slide-in-from-bottom-3 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${showClose ? "rounded-xl bg-canvas ring-1 ring-edge-soft" : ""}`}
+      >
         <KawaiiBunny />
         {showClose && (
           <button
             type="button"
             onClick={closePicker}
             aria-label={t("common.close")}
-            className="absolute end-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-canvas/70 text-ink-muted ring-1 ring-edge-soft backdrop-blur transition-colors hover:bg-elevated hover:text-ink"
+            className="absolute end-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-canvas/70 text-ink-muted ring-1 ring-edge-soft backdrop-blur transition-colors hover:bg-elevated hover:text-ink"
           >
             <X size={16} strokeWidth={2.4} />
           </button>
         )}
         <div
           ref={scrollRef}
-          className="flex min-h-0 w-full flex-1 flex-col items-center overflow-y-auto overscroll-contain px-10 py-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex min-h-0 w-full flex-1 flex-col items-center overflow-y-auto overscroll-contain px-4 py-8 sm:px-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {pickerView.kind === "list" && (
             <ListView

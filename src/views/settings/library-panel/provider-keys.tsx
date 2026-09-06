@@ -70,6 +70,10 @@ export function useProviderKeys({
   const keyFieldRef = useRef<HTMLDivElement | null>(null);
   const extraTimerRef = useRef<number | null>(null);
 
+  useEffect(() => () => {
+    if (extraTimerRef.current) window.clearTimeout(extraTimerRef.current);
+  }, []);
+
   useEffect(() => {
     if (!keyModal) return;
     const field = keyFieldRef.current?.querySelector<HTMLInputElement>("input");
@@ -108,7 +112,7 @@ export function useProviderKeys({
       id: "tmdb",
       name: t("TMDB"),
       desc: t("Trending, Popular, In Theaters, and the per service rails."),
-      value: tmdbDraft,
+      value: settings.tmdbKey,
       logo: tmdbLogo,
       badge: t("Recommended"),
       guide: guideButton(
@@ -145,7 +149,7 @@ export function useProviderKeys({
       id: "omdb",
       name: t("OMDb"),
       desc: t("Real IMDb and Rotten Tomatoes scores."),
-      value: omdbDraft,
+      value: settings.omdbKey,
       logo: omdbLogo,
       field: (
         <KeyField
@@ -172,7 +176,7 @@ export function useProviderKeys({
       id: "tvdb",
       name: t("TheTVDB"),
       desc: t("Episode titles, network info, and the alternate orderings."),
-      value: tvdbDraft,
+      value: settings.tvdbKey,
       logo: tvdbLogo,
       guide: guideButton(
         () => setTvdbGuide(true),
@@ -205,7 +209,7 @@ export function useProviderKeys({
       id: "mdblist",
       name: t("MDBList"),
       desc: t("Letterboxd, Trakt, Metacritic, and audience scores."),
-      value: mdblistDraft,
+      value: settings.mdblistKey,
       logo: mdblistLogo,
       field: (
         <KeyField
@@ -235,7 +239,7 @@ export function useProviderKeys({
       id: "fanart",
       name: t("Fanart.tv"),
       desc: t("Logos and backdrops where TMDB comes up empty."),
-      value: fanartDraft,
+      value: settings.fanartKey,
       logo: fanartLogo,
       field: (
         <KeyField
@@ -260,7 +264,7 @@ export function useProviderKeys({
       id: "rpdb",
       name: t("RPDB"),
       desc: t("Paid. Bakes scores into the poster image itself."),
-      value: rpdbDraft,
+      value: settings.rpdbKey,
       logo: rpdbLogo,
       field: (
         <KeyField
@@ -287,7 +291,7 @@ export function useProviderKeys({
       id: "postersrv",
       name: t("Custom poster service"),
       desc: t("Swap in Better Posters, PostersPlus, or your own URL template."),
-      value: posterSrvDraft,
+      value: settings.posterBaseUrl,
       mark: <PosterServiceMark size={20} />,
       field: (
         <KeyField
@@ -323,7 +327,7 @@ export function useProviderKeys({
       id: "nyt",
       name: t("New York Times"),
       desc: t("Bestseller lists in the eBook section."),
-      value: nytDraft,
+      value: settings.nytKey,
       field: (
         <KeyField
           label={t("New York Times · bestseller lists")}
@@ -354,7 +358,7 @@ export function useProviderKeys({
       id: "sports",
       name: t("API-Sports"),
       desc: t("Egyptian, Qatari, Emirati and Korean football plus the KHL on the sports page."),
-      value: sportsDraft,
+      value: settings.sportsApiKey,
       field: (
         <KeyField
           label={t("API-Sports · leagues ESPN does not carry")}
@@ -387,8 +391,8 @@ export function useProviderKeys({
     {
       id: "songai",
       name: t("Gemini"),
-      desc: t("Free tier, no usage cap. Windows only."),
-      value: songAiDraft,
+      desc: t("Identify songs with Gemini on Windows. Your provider's usage limits apply."),
+      value: settings.songIdAiKey,
       field: (
         <KeyField
           label={t("Gemini · in-player song ID")}
@@ -403,7 +407,7 @@ export function useProviderKeys({
           saved={extraSaved === "songai"}
           help={
             <>
-              {t("Identifies the song with Google Gemini (free tier, no usage cap). Get a key at")}{" "}
+              {t("Identifies the song with Google Gemini. Get a key at")}{" "}
               <ExtLink href="https://aistudio.google.com/apikey">
                 aistudio.google.com/apikey
               </ExtLink>
@@ -417,7 +421,7 @@ export function useProviderKeys({
       id: "audd",
       name: t("AudD"),
       desc: t("Powers the Identify song button in the player."),
-      value: auddDraft,
+      value: settings.auddKey,
       logo: auddLogo,
       field: (
         <KeyField

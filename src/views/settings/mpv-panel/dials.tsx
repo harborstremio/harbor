@@ -5,7 +5,7 @@ import { advanceFocus } from "@/lib/keyboard-navigation";
 import { isRtl, navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { useSampleArtwork } from "@/lib/sample-artwork";
+import pictureStill from "@/assets/settings-preview/the-toll-of-the-sea.webp";
 import { Section, ToggleRow } from "../shared";
 import { ROW_ACTION, ROW_ACTION_PRIMARY, SettingRow } from "../kit";
 
@@ -176,7 +176,7 @@ const DIALS: Array<{
   {
     mpvKey: "brightness",
     label: "Brightness",
-    desc: "Lifts or lowers the whole picture at once. A small nudge is usually enough; too much washes the blacks out to grey.",
+    desc: "Lightens or darkens the whole picture.",
     min: -50,
     max: 50,
     step: 1,
@@ -185,7 +185,7 @@ const DIALS: Array<{
   {
     mpvKey: "contrast",
     label: "Contrast",
-    desc: "Widens the gap between the darkest and brightest parts of the picture. Too much crushes detail at both ends.",
+    desc: "Adjusts the difference between dark and light areas.",
     min: -50,
     max: 50,
     step: 1,
@@ -194,7 +194,7 @@ const DIALS: Array<{
   {
     mpvKey: "saturation",
     label: "Saturation",
-    desc: "How strong the colors are. Push it up for a vivid look, or all the way down for black and white.",
+    desc: "Makes colors more vivid or more muted.",
     min: -50,
     max: 50,
     step: 1,
@@ -203,7 +203,7 @@ const DIALS: Array<{
   {
     mpvKey: "gamma",
     label: "Gamma (midtones)",
-    desc: "Brightens the middle tones and leaves black and white alone. This is the dial for movies whose night scenes are too dark to follow.",
+    desc: "Adjusts middle tones to make dark scenes easier to see.",
     min: -50,
     max: 50,
     step: 1,
@@ -212,7 +212,7 @@ const DIALS: Array<{
   {
     mpvKey: "sharpen",
     label: "Sharpen",
-    desc: "Adds edge definition to a soft source. A little helps; a lot looks crunchy and adds halos around outlines.",
+    desc: "Adds definition to edges. High values can create visible halos.",
     min: 0,
     max: 2,
     step: 0.05,
@@ -237,7 +237,6 @@ function matchesLook(tweaks: Record<string, string>, patch: Record<string, strin
 
 function PicturePreview({ tweaks }: { tweaks: Record<string, string> }) {
   const t = useT();
-  const art = useSampleArtwork();
   const rawId = useId();
   const filterId = `harbor-mpv-eq-${rawId.replace(/[^a-zA-Z0-9]/g, "")}`;
   const brightness = tweakNumber(tweaks, "brightness");
@@ -263,7 +262,7 @@ function PicturePreview({ tweaks }: { tweaks: Record<string, string> }) {
     <div className="flex w-full max-w-[420px] flex-col gap-2">
       <div className="relative aspect-video w-full overflow-hidden rounded-[10px] bg-canvas">
         <img
-          src={art.background ?? art.poster}
+          src={pictureStill}
           alt=""
           draggable={false}
           className="h-full w-full object-cover"
@@ -307,12 +306,12 @@ export function PictureDialsSection() {
   return (
     <Section
       title={t("Picture adjustments")}
-      subtitle={t("Nudge the image to taste. Start with a one-tap look below, then fine-tune with the dials. Everything resets cleanly, so you can't break anything.")}
+      subtitle={t("Choose a look or adjust each setting. Reset picture restores the original values.")}
     >
       <SettingRow
         wide
         label={t("One-tap looks")}
-        desc={t("A starting point for the dials. Hover one to see what it changes.")}
+        desc={t("Choose a starting point, then adjust it below.")}
       >
         <div className="flex w-full flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2.5">
@@ -325,6 +324,7 @@ export function PictureDialsSection() {
                     lookRefs.current[i] = el;
                   }}
                   type="button"
+                  aria-pressed={on}
                   onClick={() => applyPreset(PICTURE_KEYS, tpl.patch)}
                   onMouseEnter={() => setPointed(tpl.sub)}
                   onMouseLeave={() => setPointed(null)}
@@ -349,8 +349,11 @@ export function PictureDialsSection() {
         </div>
       </SettingRow>
 
-      <PicturePreview tweaks={tweaks} />
-
+      <div className="hset-picture-workbench">
+        <div className="hset-picture-preview">
+          <PicturePreview tweaks={tweaks} />
+        </div>
+        <div className="hset-picture-sliders">
       {DIALS.map((d) => (
         <SettingRow key={d.mpvKey} wide label={t(d.label)} desc={t(d.desc)}>
           <TweakSlider
@@ -366,6 +369,8 @@ export function PictureDialsSection() {
           />
         </SettingRow>
       ))}
+        </div>
+      </div>
     </Section>
   );
 }
@@ -442,12 +447,12 @@ export function ColorHdrSection() {
   return (
     <Section
       title={t("Color & HDR")}
-      subtitle={t("How Harbor squeezes HDR movies onto a normal screen. Auto is right for almost everyone; the curves below just change the look (punchy vs soft). Only matters on HDR sources.")}
+      subtitle={t("Adjust how HDR video appears on your screen. Auto is recommended.")}
     >
       <SettingRow
         wide
         label={t("Tone-mapping curve")}
-        desc={`${t("Each curve shows how much of the bright range it keeps before rolling off.")} ${t("The dotted line is a flat squeeze of the whole range. A curve that stays high keeps midtones punchy and compresses the highlights late; a lower curve rolls off early and looks gentler.")}`}
+        desc={t("Controls how bright highlights are reduced to fit your display. The diagrams illustrate each curve.")}
         icon={<Contrast size={18} />}
       >
         <div className="grid w-full gap-2.5 [grid-template-columns:repeat(auto-fit,minmax(172px,1fr))]">
@@ -457,6 +462,7 @@ export function ColorHdrSection() {
               <button
                 key={o.value || "auto"}
                 type="button"
+                aria-pressed={selected}
                 onClick={() => setTweak("tone-mapping", o.value || null)}
                 className={`flex flex-col items-stretch gap-2 rounded-[10px] p-3 text-start transition-colors ${
                   selected ? "bg-ink text-canvas" : "bg-canvas text-ink-muted hover:text-ink"
@@ -471,7 +477,7 @@ export function ColorHdrSection() {
       </SettingRow>
       <ToggleRow
         label={t("Boost SDR video toward HDR")}
-        sub={t("On an HDR display, stretches normal (non-HDR) movies to use the extra brightness range. Leave off on a regular screen; it can look washed out.")}
+        sub={t("Expands the brightness range of standard video. Use only with an HDR display.")}
         leading={<Sun size={18} className="text-ink-muted" />}
         value={tweaks["inverse-tone-mapping"] === "yes"}
         onChange={(on) => setTweak("inverse-tone-mapping", on ? "yes" : null)}

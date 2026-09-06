@@ -110,10 +110,22 @@ export function TvGroupSection({
   children?: React.ReactNode;
 }) {
   const t = useT();
+  const parents: Record<string, string> = {
+    stillWatchingAfter: "stillWatching",
+    skipButtonHideSec: "showSkipButton",
+    spoilerHideThumbnails: "hideSpoilers",
+    spoilerHideTitles: "hideSpoilers",
+    spoilerHideDescriptions: "hideSpoilers",
+    spoilerSkipNext: "hideSpoilers",
+  };
+  const visibleRows = group.rows.filter((row) => {
+    const parent = group.rows.find((candidate) => candidate.key === parents[row.key]);
+    return !parent || readRow(doc, parent) === true;
+  });
   return (
     <Section title={t(group.title)} subtitle={group.subtitle} newId={newId}>
       {children}
-      {group.rows.map((row) => (
+      {visibleRows.map((row) => (
         <TvRowControl key={row.key} group={group} row={row} doc={doc} profileId={profileId} />
       ))}
     </Section>

@@ -1,15 +1,14 @@
+import { TrackerIdentity } from "./tracker-identity";
+import simklLogo from "@/assets/simkl.png";
+import { TrackerConnect } from "./tracker-connect";
 import { Dropdown } from "@/components/dropdown";
 import {
-  ExternalLink,
   Info,
   Languages,
-  Link2,
   LogOut,
   PenLine,
   Radio,
   Star,
-  Trash2,
-  UserRound,
 } from "./icons";
 import { useEffect, useState } from "react";
 import { SimklDeviceModal } from "@/components/simkl/simkl-device-modal";
@@ -17,7 +16,6 @@ import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { fetchSimklAvatar } from "@/lib/simkl/profile";
 import { useSimkl } from "@/lib/simkl/provider";
-import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { Section, ToggleRow } from "./shared";
 import { ModalButton, ROW_DESC, SettingGroup, SettingRow, SettingsModal } from "./kit";
@@ -76,30 +74,14 @@ export function SimklPanel() {
   return (
     <>
       {!isConnected ? (
-        <Section
-          title={t("Not connected")}
-          subtitle={t("Sync and track movies, shows, and anime across everything you use. Harbor marks what you finish as watched on Simkl and keeps your plan-to-watch list in step. Free at simkl.com.")}
-        >
-          <SettingRow
-            icon={<Link2 size={20} strokeWidth={2.1} />}
-            label={t("Connect your Simkl account")}
-            desc={t("Sign in once with a short device code. Harbor then marks what you finish as watched and keeps your plan-to-watch list in step.")}
-          >
-            <SButton variant="primary" onClick={() => setModalOpen(true)}>
-              <Link2 size={18} strokeWidth={2.2} />
-              {t("Connect Simkl")}
-            </SButton>
-          </SettingRow>
-          <SettingRow
-            icon={<Info size={20} strokeWidth={2.1} />}
-            label={t("About Simkl")}
-            desc={t("Simkl is a free site for tracking the movies, shows, and anime you watch. Open it to read more or to make an account.")}
-          >
-            <SButton onClick={() => openUrl("https://simkl.com")}>
-              {t("Open simkl.com")}
-              <ExternalLink size={18} strokeWidth={2.2} />
-            </SButton>
-          </SettingRow>
+        <Section title={t("Not connected")} bare>
+          <TrackerConnect
+            service="Simkl"
+            logo={simklLogo}
+            description={t("Keep your movie, show, and anime lists in sync. Connect with a short code to update Simkl as you watch.")}
+            onConnect={() => setModalOpen(true)}
+            website="https://simkl.com"
+          />
         </Section>
       ) : (
         <>
@@ -107,20 +89,15 @@ export function SimklPanel() {
             title={t("Connected")}
             subtitle={t("Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.")}
           >
-            <SettingRow
-              icon={<UserRound size={20} strokeWidth={2.1} />}
-              label={username ? `@${username}` : t("Your Simkl account")}
-              desc={t("Harbor is authorized on this device and syncing with Simkl.")}
-            >
-              {username && (
-                <SButton
-                  onClick={() => openUrl(`https://simkl.com/${encodeURIComponent(username)}`)}
-                >
-                  {t("Open profile")}
-                  <ExternalLink size={18} strokeWidth={2.2} />
-                </SButton>
-              )}
-            </SettingRow>
+            <TrackerIdentity
+              service="Simkl"
+              logo={simklLogo}
+              handle={username || undefined}
+              avatar={simklAvatar}
+              profileUrl={username ? `https://simkl.com/${encodeURIComponent(username)}` : undefined}
+              onDisconnect={() => setConfirmDisconnect(true)}
+            />
+
 
             {simklAvatar && (
               <ToggleRow
@@ -184,16 +161,7 @@ export function SimklPanel() {
               </div>
             </SettingRow>
 
-            <SettingRow
-              icon={<LogOut size={20} strokeWidth={2.1} />}
-              label={t("Disconnect from Simkl")}
-              desc={t("Harbor signs out and stops syncing. Your lists on Simkl are left exactly as they are.")}
-            >
-              <SButton variant="danger" onClick={() => setConfirmDisconnect(true)}>
-                <Trash2 size={18} strokeWidth={2.2} />
-                {t("Disconnect")}
-              </SButton>
-            </SettingRow>
+
           </Section>
 
           <Section

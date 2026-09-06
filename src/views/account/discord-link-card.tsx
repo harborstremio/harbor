@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink, Loader2 } from "@/views/settings/icons";
 import { DiscordIcon } from "@/components/discord-icon";
 import { linkDiscord, unlinkDiscord } from "@/lib/account/discord-link";
 import { accountErrorMessage, type AccountErrorMessage } from "@/lib/account/error-messages";

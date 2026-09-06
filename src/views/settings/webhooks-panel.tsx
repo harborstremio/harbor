@@ -139,7 +139,7 @@ export function WebhooksPanel() {
         <Section
           title={t("Where alerts go")}
           subtitle={t(
-            "Connect Discord or Telegram and Harbor posts a message when something you follow is about to drop. Hit Send test to send yourself a sample first.",
+            "Get release alerts in Discord or Telegram. Connect a destination, then choose the sources and rules for your alerts.",
           )}
         >
           <WebhookField
@@ -165,7 +165,7 @@ export function WebhooksPanel() {
           <Section
             title={t("What to send")}
             subtitle={t(
-              "Pick which calendars feed your alerts. Items are deduped across sources before sending.",
+              "Choose the calendars to follow. A release appears once in your alerts, even if several calendars list it.",
             )}
           >
             {SOURCES.map((s) => (
@@ -182,7 +182,7 @@ export function WebhooksPanel() {
           <Section
             title={t("Media types")}
             subtitle={t(
-              "Filter by type after the sources merge. Leave them all on to send everything.",
+              "Choose which types of releases to include in calendar alerts.",
             )}
           >
             <ToggleRow
@@ -213,6 +213,7 @@ export function WebhooksPanel() {
           trackedPeople={settings.customCalendar.trackedPeople}
           canDiscord={!!settings.webhooks.discordUrl}
           canTelegram={!!settings.webhooks.telegramUrl}
+          onSetUp={() => setTab("destinations")}
         />
       )}
     </div>

@@ -1,12 +1,15 @@
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { Section, ToggleRow } from "./shared";
-
-type SongCardStyle = "compact" | "cinematic";
+import { Section, ToggleRow, settingsAnchor, useSettingsActiveContext } from "./shared";
+import { ROW_ACTION } from "./kit";
+import { SongIdCard, type SongCardStyle } from "@/components/song-id-card";
+import songArtwork from "@/assets/settings-preview/maple-leaf-rag.webp";
+import filmStill from "@/assets/settings-preview/steamboat-river.webp";
 
 export function SongCardStylePicker() {
   const { settings, update } = useSettings();
   const t = useT();
+  const { setActive } = useSettingsActiveContext();
   const enabled = settings.songIdEnabled ?? false;
   const value = (settings.songCardStyle ?? "cinematic") as SongCardStyle;
 
@@ -14,12 +17,12 @@ export function SongCardStylePicker() {
     {
       v: "compact",
       label: t("Compact"),
-      desc: t("Spinning disc beside the title with a small control bar."),
+      desc: t("A small card with artwork beside the song title."),
     },
     {
       v: "cinematic",
       label: t("Cinematic"),
-      desc: t("Large centered cover on a dark card with the disc behind it."),
+      desc: t("Larger artwork with the song title below it."),
     },
   ];
 
@@ -27,18 +30,21 @@ export function SongCardStylePicker() {
     <Section
       title={t("Now Playing card")}
       subtitle={t(
-        "Adds an Identify-song button to the player that recognizes the current music via AudD and shows a Now Playing card. Off by default; needs an AudD key below.",
+        "Show the song and artist when you identify music in the player. Choose your recognition service in Metadata.",
       )}
     >
       <ToggleRow
         label={t("Identify the current song")}
-        sub={t("Show the in-player Identify-song button and Now Playing card.")}
+        sub={t("Adds the song identification button to the player.")}
         value={enabled}
         onChange={(v) => update({ songIdEnabled: v })}
       />
 
-      <div inert={!enabled} className={`flex flex-col gap-4 ${enabled ? "" : "opacity-40"}`}>
-        <div className="grid grid-cols-2 gap-3">
+      {enabled && <div className="flex w-full flex-col items-start gap-4">
+        <button type="button" className={ROW_ACTION} onClick={() => setActive("library", settingsAnchor("Song identification"))}>
+          {t("Set up song identification")}
+        </button>
+        <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-4">
           {options.map((o) => {
             const active = value === o.v;
             return (
@@ -46,14 +52,15 @@ export function SongCardStylePicker() {
                 key={o.v}
                 type="button"
                 aria-pressed={active}
+                aria-label={o.label}
                 onClick={() => update({ songCardStyle: o.v })}
-                className={`flex flex-col gap-3 rounded-md border p-3 text-start transition-colors ${
+                className={`flex min-w-0 flex-col gap-3 rounded-[12px] border p-4 text-start transition-colors ${
                   active
                     ? "border-accent bg-accent-soft"
                     : "border-edge-soft bg-canvas hover:border-edge"
                 }`}
               >
-                <StyleThumb kind={o.v} />
+                <StyleThumb kind={o.v} showDetails={settings.songCardDetails ?? true} />
                 <div className="flex items-center gap-2">
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
@@ -76,49 +83,23 @@ export function SongCardStylePicker() {
           value={settings.songCardDetails ?? true}
           onChange={(v) => update({ songCardDetails: v })}
         />
-      </div>
+      </div>}
     </Section>
   );
 }
 
-function StyleThumb({ kind }: { kind: SongCardStyle }) {
-  if (kind === "compact") {
-    return (
-      <div className="flex h-24 w-full items-center gap-2.5 rounded-md bg-black p-3">
-        <Disc />
-        <div className="flex flex-1 flex-col gap-1.5">
-          <div className="h-2 w-3/4 rounded bg-white/70" />
-          <div className="h-1.5 w-1/2 rounded bg-white/30" />
-          <MiniControls />
-        </div>
+function StyleThumb({ kind, showDetails }: { kind: SongCardStyle; showDetails: boolean }) {
+  return (
+    <div aria-hidden className="relative flex h-[280px] w-full items-center justify-center overflow-hidden rounded-[8px] bg-black">
+      <img src={filmStill} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover opacity-35" />
+      <div className="relative" style={{ zoom: 0.72 }}>
+        <SongIdCard
+          message={{ kind: "result", title: "Maple Leaf Rag", body: "Scott Joplin", art: songArtwork }}
+          style={kind}
+          showDetails={showDetails}
+          animateArtwork={false}
+        />
       </div>
-    );
-  }
-  return (
-    <div className="flex h-24 w-full flex-col items-center justify-center gap-1.5 rounded-md bg-black p-3">
-      <Disc />
-      <div className="h-1.5 w-2/3 rounded bg-white/70" />
-      <div className="h-1 w-1/2 rounded bg-white/30" />
-      <MiniControls />
-    </div>
-  );
-}
-
-function Disc() {
-  return (
-    <div className="relative h-9 w-9 flex-none rounded-full bg-canvas">
-      <div className="absolute start-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink/[0.10] rtl:translate-x-1/2" />
-      <div className="absolute start-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink/40 rtl:translate-x-1/2" />
-    </div>
-  );
-}
-
-function MiniControls() {
-  return (
-    <div className="mt-1 flex items-center gap-1.5">
-      <div className="h-1.5 w-1.5 rounded-full bg-white/30" />
-      <div className="h-2.5 w-2.5 rounded-full bg-white" />
-      <div className="h-1.5 w-1.5 rounded-full bg-white/30" />
     </div>
   );
 }

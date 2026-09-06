@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import { ExternalLink, KeyRound, Loader2, X } from "lucide-react";
+import { ExternalLink, KeyRound, Loader2, X } from "@/views/settings/icons";
 import { ModalShell, useModalExit } from "@/components/modal-shell";
 import { DiscordIcon } from "@/components/discord-icon";
 import { loginIdentity, registerIdentity } from "@/lib/account/identity";
@@ -54,7 +54,7 @@ function Shell({
     );
   }
   return (
-    <div className="animate-lift-in mx-auto flex w-full max-w-[520px] flex-col overflow-hidden rounded-md bg-surface ring-1 ring-edge-soft">
+    <div className="hset-account-auth animate-lift-in flex w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-edge-soft bg-surface">
       {children}
     </div>
   );
@@ -64,10 +64,12 @@ export function AccountAuthForm({
   onRecovery,
   onClose,
   inline = false,
+  initialMode = "register",
 }: {
   onRecovery?: (code: string) => void;
   onClose?: () => void;
   inline?: boolean;
+  initialMode?: Mode;
 }) {
   const t = useT();
   const { closing, close } = useModalExit(() => onClose?.());
@@ -76,7 +78,7 @@ export function AccountAuthForm({
   const thumbRef = useRef<HTMLSpanElement | null>(null);
   const prevMode = useRef(-1);
   const [view, setView] = useState<"auth" | "recover">("auth");
-  const [mode, setMode] = useState<Mode>("register");
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -202,17 +204,14 @@ export function AccountAuthForm({
     <Shell inline={inline} closing={closing} onDismiss={close}>
       <div className="flex items-start gap-4 px-6 pt-6">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
-            {t("Harbor account")}
-          </span>
-          <h3 className="text-[17px] font-semibold tracking-tight text-ink">
+          <h2 className="text-[20px] font-semibold leading-7 tracking-tight text-ink">
             {discordPending
               ? t("Choose your username")
               : mode === "register"
-                ? t("Join Harbor")
-                : t("Welcome back")}
-          </h3>
-          <p className="text-[12.5px] leading-relaxed text-ink-subtle">
+                ? t("Create your Harbor account")
+                : t("Sign in to Harbor")}
+          </h2>
+          <p className="text-[15px] leading-[22px] text-ink-muted">
             {discordPending
               ? t("Discord confirmed. Pick a username and password to finish.")
               : mode === "register"
@@ -225,7 +224,7 @@ export function AccountAuthForm({
             type="button"
             onClick={close}
             aria-label={t("Close")}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
           >
             <X size={16} />
           </button>
@@ -233,7 +232,7 @@ export function AccountAuthForm({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-6">
-        {!discordPending && mode === "register" && <AccountValueProps />}
+        {!inline && !discordPending && mode === "register" && <AccountValueProps />}
 
         {!discordPending && (
           <div
@@ -249,6 +248,7 @@ export function AccountAuthForm({
               <button
                 key={m.id}
                 type="button"
+                aria-pressed={mode === m.id}
                 ref={(el) => {
                   modeRefs.current[i] = el;
                 }}
@@ -256,7 +256,7 @@ export function AccountAuthForm({
                   setMode(m.id);
                   setError(null);
                 }}
-                className={`relative z-10 h-8 flex-1 rounded-[4px] text-[12.5px] font-semibold transition-colors duration-200 ${
+                className={`relative z-10 h-11 flex-1 rounded-[4px] text-[15px] font-semibold transition-colors duration-200 ${
                   mode === m.id ? "text-canvas" : "text-ink-muted hover:text-ink"
                 }`}
               >
@@ -298,20 +298,20 @@ export function AccountAuthForm({
                 setView("recover");
                 setError(null);
               }}
-              className="-mt-1 self-end text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink"
+              className="-mt-1 min-h-11 self-end text-[14px] font-medium text-ink-muted transition-colors hover:text-ink"
             >
-              {t("Forgot password ?")}
+              {t("Forgot password?")}
             </button>
           )}
 
           {error && (
-            <p className="rounded-md bg-danger/10 px-3.5 py-2.5 text-[12.5px] leading-snug text-danger">
+            <p role="alert" className="rounded-md bg-danger/10 px-3.5 py-2.5 text-[14px] leading-snug text-danger">
               {error.kind === "built-in" ? t(error.key) : error.detail}
             </p>
           )}
 
           {(discordPending || mode === "register") && (
-            <p className="flex items-start gap-2 rounded-md bg-canvas px-3.5 py-2.5 text-[11.5px] leading-snug text-ink-subtle">
+            <p className="flex items-start gap-2 rounded-md bg-canvas px-3.5 py-3 text-[14px] leading-[21px] text-ink-muted">
               <KeyRound size={13} className="mt-0.5 shrink-0" />
               {discordPending
                 ? t(
@@ -340,7 +340,7 @@ export function AccountAuthForm({
             <button
               type="submit"
               disabled={!ready || busy || discordBusy}
-              className="harbor-press-pop flex h-9 items-center justify-center gap-2 rounded-md bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-opacity duration-150 hover:opacity-90 disabled:opacity-40"
+              className="harbor-press-pop flex min-h-11 items-center justify-center gap-2 rounded-md bg-ink px-4 py-2 text-[15px] font-semibold text-canvas transition-opacity duration-150 hover:opacity-90 disabled:opacity-40"
             >
               {busy && <Loader2 size={16} className="animate-spin" />}
               {discordPending ? t("Finish creating my account") : t(active.action)}
@@ -361,7 +361,7 @@ export function AccountAuthForm({
               type="button"
               onClick={() => void runDiscord()}
               disabled={busy || discordBusy}
-              className="harbor-press-pop flex h-9 items-center justify-center gap-2 rounded-md bg-canvas px-4 text-[12.5px] font-semibold text-ink transition-colors hover:bg-elevated disabled:opacity-40"
+              className="harbor-press-pop flex min-h-11 items-center justify-center gap-2 rounded-md bg-canvas px-4 py-2 text-[15px] font-semibold text-ink transition-colors hover:bg-elevated disabled:opacity-40"
             >
               {discordBusy ? (
                 <>

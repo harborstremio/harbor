@@ -1,6 +1,6 @@
-import { AlertTriangle, Check, ExternalLink, Loader2 } from "../icons";
+import { AlertTriangle, Check, ChevronRight, ExternalLink, Loader2 } from "../icons";
 import { openUrl } from "@/lib/window";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { ROW_ACTION_PRIMARY } from "../kit";
 import { ROW_DESC } from "../shared";
@@ -8,7 +8,7 @@ import { SButton } from "../ui";
 
 export type FieldStatus = { state: "idle" | "busy" | "ok" | "error"; message: string | null };
 
-export const FIELD_LABEL = "harbor-settings-label";
+export const FIELD_LABEL = "text-[15px] font-medium leading-[22px] text-ink";
 
 export const FIELD_BOX =
   "flex min-h-[56px] w-full flex-wrap items-center gap-2.5 rounded-[10px] border border-edge-soft bg-elevated px-3 transition-colors focus-within:border-edge";
@@ -38,18 +38,20 @@ export function WebhookField({
   help: ReactNode;
 }) {
   const t = useT();
+  const fieldId = useId();
   const busy = status.state === "busy";
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="flex items-center gap-2">
           {logo}
-          <span className={FIELD_LABEL}>{label}</span>
+          <label htmlFor={fieldId} className={FIELD_LABEL}>{label}</label>
         </span>
         <StatusBadge status={status} />
       </div>
       <div className={FIELD_BOX}>
         <input
+          id={fieldId}
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -62,14 +64,14 @@ export function WebhookField({
           type="button"
           onClick={busy ? undefined : onTest}
           aria-disabled={busy}
-          disabled={!value}
+          disabled={!value || busy}
           className={`${ROW_ACTION_PRIMARY} my-1.5${busy ? " pointer-events-none opacity-40" : ""}`}
         >
           {busy && <Loader2 size={17} strokeWidth={2.4} className="shrink-0 animate-spin" />}
           {t("Send test")}
         </button>
       </div>
-      <div className={FIELD_HELP}>{help}</div>
+      <SetupHelp label={t("How to connect Discord")}>{help}</SetupHelp>
     </div>
   );
 }
@@ -85,6 +87,7 @@ export function StatusBadge({ status }: { status: FieldStatus }) {
         : "text-ink-muted";
   return (
     <span
+      role={status.state === "error" ? "alert" : "status"}
       className={`flex items-center gap-2 text-[15.5px] font-medium leading-[22px] ${tone}`}
     >
       {status.state === "ok" && <Check size={17} strokeWidth={2.6} className="shrink-0" />}
@@ -96,6 +99,18 @@ export function StatusBadge({ status }: { status: FieldStatus }) {
       )}
       {status.message ? t(status.message) : null}
     </span>
+  );
+}
+
+export function SetupHelp({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <details className="group max-w-[70ch]">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-[6px] text-[15px] font-medium text-ink-muted hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
+        <ChevronRight size={16} className="shrink-0 transition-transform group-open:rotate-90 rtl:rotate-180" />
+        {label}
+      </summary>
+      <div className={`${FIELD_HELP} pb-4 ps-6`}>{children}</div>
+    </details>
   );
 }
 

@@ -48,14 +48,14 @@ export const TV_GROUPS: TvGroup[] = [
     id: "picture",
     title: "Picture and feel",
     subtitle:
-      "How hard the television works to render, how far the image sits from the bezel, and what it sounds like to move around.",
+      "Adjust the screen edges and the artwork shown while browsing.",
     wire: "settings",
     rows: [
       {
         kind: "choice",
         key: "overscan",
         label: "Edge margin",
-        sub: "TV only. Older sets crop the outer edge of the picture. Nudge Harbor inward until nothing is cut off.",
+        sub: "If your TV cuts off the edges, add a margin to keep everything visible.",
         tvOnly: true,
         def: "0",
         options: [
@@ -69,7 +69,7 @@ export const TV_GROUPS: TvGroup[] = [
         kind: "choice",
         key: "quality",
         label: "Backdrop detail",
-        sub: "How large a backdrop image the TV fetches. It does not change video quality. Balanced is the safe choice on older hardware.",
+        sub: "High loads sharper artwork. Choose Balanced if browsing feels slow. This does not affect video quality.",
         def: "high",
         options: [
           { value: "balanced", label: "Balanced" },
@@ -88,7 +88,7 @@ export const TV_GROUPS: TvGroup[] = [
   {
     id: "around",
     title: "Getting around the TV",
-    subtitle: "What the television shows the second it wakes up, and how you move through it.",
+    subtitle: "Choose your home layout, previews, and language for titles.",
     wire: "settings",
     rows: [
       {
@@ -105,14 +105,14 @@ export const TV_GROUPS: TvGroup[] = [
         kind: "toggle",
         key: "hideWatched",
         label: "Hide watched in catalogs",
-        sub: "Drops anything already finished out of the browse rows.",
+        sub: "Remove titles you have finished from browse rows.",
         def: false,
       },
       {
         kind: "toggle",
         key: "heroPreview",
         label: "Hero trailer preview",
-        sub: "Plays the trailer behind the hero after a short pause.",
+        sub: "Play a trailer in the featured area after a short pause.",
         def: true,
       },
       {
@@ -149,8 +149,8 @@ export const TV_GROUPS: TvGroup[] = [
   },
   {
     id: "bingeing",
-    title: "Bingeing",
-    subtitle: "How far the television carries on without you.",
+    title: "Between episodes",
+    subtitle: "Choose when the next episode starts and when Harbor checks that you are still watching.",
     wire: "settings",
     rows: [
       { kind: "toggle", key: "autoNext", label: "Auto-play next episode", def: true },
@@ -158,7 +158,7 @@ export const TV_GROUPS: TvGroup[] = [
         kind: "toggle",
         key: "stillWatching",
         label: "Ask if you are still watching",
-        sub: "Stops the TV playing to an empty room all night.",
+        sub: "Pause after several episodes and ask before continuing.",
         def: true,
       },
       {
@@ -178,7 +178,7 @@ export const TV_GROUPS: TvGroup[] = [
   {
     id: "controls",
     title: "Player controls on the TV",
-    subtitle: "The furniture that appears over the picture while something is playing.",
+    subtitle: "Choose which controls appear during playback.",
     wire: "settings",
     rows: [
       { kind: "toggle", key: "showSkipButton", label: "Skip intros and credits", def: true },
@@ -214,7 +214,7 @@ export const TV_GROUPS: TvGroup[] = [
         kind: "toggle",
         key: "hideSpoilers",
         label: "Hide spoilers",
-        sub: "Turn this on to arm the four rules below.",
+        sub: "Keep unwatched episode details hidden. Choose what to hide below.",
         def: false,
       },
       { kind: "toggle", key: "spoilerHideThumbnails", label: "Hide thumbnails", def: true },
@@ -239,7 +239,7 @@ export const TV_GROUPS: TvGroup[] = [
         kind: "multi",
         key: "audioLang",
         label: "Audio languages",
-        sub: "Ranked in the order you turn them on.",
+        sub: "Put your preferred language first. The TV tries the others in order.",
         def: [],
         options: TV_LANGS,
       },
@@ -255,7 +255,7 @@ export const TV_GROUPS: TvGroup[] = [
   {
     id: "services",
     title: "Services on the TV",
-    subtitle: "Turn off what you do not pay for and the television stops surfacing it.",
+    subtitle: "Choose the services you want to see while browsing on your TV.",
     wire: "settings",
     rows: [
       {

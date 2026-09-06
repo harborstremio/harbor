@@ -47,18 +47,22 @@ export function ModalShell({
   closing,
   onDismiss,
   width = 640,
+  labelledBy,
+  backdropClassName,
   children,
 }: {
   closing: boolean;
   onDismiss: () => void;
   width?: number;
+  labelledBy?: string;
+  backdropClassName?: string;
   children: ReactNode;
 }) {
   useEscape(onDismiss);
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[240] grid place-items-center p-8 ${
+      className={`fixed inset-0 z-[240] grid place-items-center p-8 ${backdropClassName ?? ""} ${
         closing ? "animate-scrim-out" : "animate-scrim-in"
       }`}
       onMouseDown={(e) => {
@@ -68,6 +72,7 @@ export function ModalShell({
       <div
         role="dialog"
         aria-modal="true"
+        aria-labelledby={labelledBy}
         onMouseDown={(e) => e.stopPropagation()}
         style={{ width: `min(${width}px, 100%)` }}
         className={`flex max-h-[86vh] flex-col overflow-hidden rounded-md bg-surface ${

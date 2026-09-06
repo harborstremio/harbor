@@ -43,7 +43,7 @@ export function IntrosTab() {
       />
       <ToggleRow
         label={t("Auto-skip intros")}
-        sub={t("Jump past openings automatically the moment one starts. The Skip button still shows either way, and seeking back into an intro replays it without skipping again.")}
+        sub={t("Jump past openings automatically the moment one starts. Seeking back into an intro replays it without skipping again. The Skip button follows the setting above.")}
         value={settings.autoSkipIntro}
         onChange={(v) => update({ autoSkipIntro: v })}
       />

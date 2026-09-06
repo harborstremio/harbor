@@ -1,14 +1,16 @@
-import { ExternalLink, Info, Link2, LogOut, RefreshCw, Trash2, UserRound } from "./icons";
+import { TrackerIdentity } from "./tracker-identity";
+import malLogo from "@/assets/mal.png";
+import { TrackerConnect } from "./tracker-connect";
+import { LogOut, RefreshCw } from "./icons";
 import { useEffect, useState } from "react";
 import { MalConnectModal } from "@/components/mal/mal-connect-modal";
 import { fetchMalAvatar } from "@/lib/mal/profile";
 import { useMal } from "@/lib/mal/provider";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
-import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { Section, ToggleRow } from "./shared";
-import { ModalButton, ROW_DESC, SettingRow, SettingsModal } from "./kit";
+import { ModalButton, ROW_DESC, SettingsModal } from "./kit";
 import { SButton } from "./ui";
 import { SyncIndicatorSetting } from "./sync-indicator-setting";
 
@@ -56,61 +58,34 @@ export function MalPanel() {
     }
   };
 
-  const authorized = sessionAge(t, session?.createdAt);
 
   return (
     <>
       {!isConnected ? (
-        <Section
-          title={t("Not connected")}
-          subtitle={t("Sync your MyAnimeList watch progress and list as you finish episodes.")}
-        >
-          <SettingRow
-            icon={<Link2 size={20} strokeWidth={2.1} />}
-            label={t("Connect your MyAnimeList account")}
-            desc={t("Sign in once with MyAnimeList. Harbor then updates your episode count as you watch, and never lowers a count you already have.")}
-          >
-            <SButton variant="primary" onClick={() => setModalOpen(true)}>
-              <Link2 size={18} strokeWidth={2.2} />
-              {t("Connect MyAnimeList")}
-            </SButton>
-          </SettingRow>
-          <SettingRow
-            icon={<Info size={20} strokeWidth={2.1} />}
-            label={t("About MyAnimeList")}
-            desc={t("MyAnimeList is a free site for tracking the anime you watch. Open it to read more or to make an account.")}
-          >
-            <SButton onClick={() => openUrl("https://myanimelist.net")}>
-              {t("Open myanimelist.net")}
-              <ExternalLink size={18} strokeWidth={2.2} />
-            </SButton>
-          </SettingRow>
+        <Section title={t("Not connected")} bare>
+          <TrackerConnect
+            service="MyAnimeList"
+            logo={malLogo}
+            description={t("Bring your anime list into Harbor and update your episode count as you watch. Your existing progress is kept.")}
+            onConnect={() => setModalOpen(true)}
+            website="https://myanimelist.net"
+          />
         </Section>
       ) : (
         <Section
           title={t("Connected")}
           subtitle={t("Harbor keeps your MyAnimeList watch progress in sync.")}
         >
-          <SettingRow
-            icon={<UserRound size={20} strokeWidth={2.1} />}
-            label={userName ? `@${userName}` : t("Your MyAnimeList account")}
-            desc={
-              authorized
-                ? t("Authorized {when}", { when: authorized })
-                : t("Harbor is signed in to your MyAnimeList account.")
-            }
-          >
-            {userName && (
-              <SButton
-                onClick={() =>
-                  openUrl(`https://myanimelist.net/profile/${encodeURIComponent(userName)}`)
-                }
-              >
-                {t("Open profile")}
-                <ExternalLink size={18} strokeWidth={2.2} />
-              </SButton>
-            )}
-          </SettingRow>
+          <TrackerIdentity
+            service="MyAnimeList"
+            logo={malLogo}
+            handle={userName || undefined}
+            avatar={malAvatar}
+            meta={session?.createdAt ? t("Authorized {when}", { when: sessionAge(t, session.createdAt) }) : undefined}
+            profileUrl={userName ? `https://myanimelist.net/profile/${encodeURIComponent(userName)}` : undefined}
+            onDisconnect={() => setConfirmDisconnect(true)}
+          />
+
           <ToggleRow
             label={t("Sync watch progress")}
             sub={t("Finishing an anime episode updates your MyAnimeList progress. Forward only: it never lowers a count you already have.")}
@@ -134,16 +109,7 @@ export function MalPanel() {
               }
             />
           )}
-          <SettingRow
-            icon={<LogOut size={20} strokeWidth={2.1} />}
-            label={t("Disconnect from MyAnimeList")}
-            desc={t("Harbor signs out and stops updating your progress. Your list on MyAnimeList is left as it is.")}
-          >
-            <SButton variant="danger" onClick={() => setConfirmDisconnect(true)}>
-              <Trash2 size={18} strokeWidth={2.2} />
-              {t("Disconnect")}
-            </SButton>
-          </SettingRow>
+
           <SettingsModal
             open={confirmDisconnect}
             onClose={() => setConfirmDisconnect(false)}

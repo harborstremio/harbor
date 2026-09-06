@@ -53,7 +53,7 @@ export function KidToggle({
           <span className={`font-display text-[16px] font-semibold ${on ? "text-white" : "text-ink"}`}>
             {t("Kids profile")}
           </span>
-          <span className={`max-w-[320px] text-[12px] leading-snug ${on ? "text-white/85" : "text-ink-subtle"}`}>
+          <span className={`max-w-[360px] text-[14px] leading-[21px] ${on ? "text-white/85" : "text-ink-muted"}`}>
             {t("A safe, simple space: kid-friendly titles, big art, one-tap play, and a watch-time limit.")}
           </span>
         </div>
@@ -64,10 +64,12 @@ export function KidToggle({
 }
 
 function Switch({ on, onClick }: { on: boolean; onClick: () => void }) {
+  const t = useT();
   return (
     <button
       type="button"
       role="switch"
+      aria-label={t("Kids profile")}
       aria-checked={on}
       onClick={onClick}
       className={`relative h-7 w-12 shrink-0 rounded-full transition-colors duration-300 ${

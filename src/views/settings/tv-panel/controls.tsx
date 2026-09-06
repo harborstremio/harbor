@@ -7,6 +7,7 @@ import { NewBadge } from "../new-badge";
 import { SettingRow } from "../kit";
 import { SButton } from "../ui";
 import { Segmented } from "../shared";
+import { LanguagesPicker } from "../streaming-panel";
 import type { TvChoice } from "./model-lists";
 
 const QUAL =
@@ -96,7 +97,7 @@ export function StepRow({
       desc={sub ? t(sub) : undefined}
     >
       <div className="flex h-11 w-full max-w-[520px] items-center gap-4">
-        <StepButton glyph="minus" label={t("Minus")} onClick={() => onChange(clamp(value - step))} />
+        <StepButton glyph="minus" label={t("Decrease {name}", { name: t(label) })} disabled={value <= min} onClick={() => onChange(clamp(value - step))} />
         <input
           type="range"
           min={min}
@@ -104,11 +105,12 @@ export function StepRow({
           step={step}
           value={value}
           aria-label={t(label)}
+          aria-valuetext={`${value}${unit ?? ""}`}
           onChange={(e) => onChange(clamp(Number.parseInt(e.target.value, 10)))}
           className="harbor-slider min-w-0 flex-1"
           style={fillStyle(value, min, max, step)}
         />
-        <StepButton glyph="plus" label={t("Plus")} onClick={() => onChange(clamp(value + step))} />
+        <StepButton glyph="plus" label={t("Increase {name}", { name: t(label) })} disabled={value >= max} onClick={() => onChange(clamp(value + step))} />
         <span className="w-14 shrink-0 text-end text-[15.5px] font-semibold tabular-nums leading-[22px] text-ink">
           {value}
           {unit ?? ""}
@@ -122,15 +124,18 @@ function StepButton({
   glyph,
   label,
   onClick,
+  disabled,
 }: {
   glyph: "minus" | "plus";
   label: string;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-label={label}
       data-tv-skip
       className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-raised text-ink-muted transition-colors hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
@@ -174,6 +179,17 @@ export function ChipMulti({
     if (back && navOwnsFocus(document.activeElement as HTMLElement | null)) tvFocus(back);
     onChange([]);
   };
+  if (ordered) {
+    return (
+      <SettingRow wide label={<RowLabel label={label} tvOnly={tvOnly} newId={newId} />} desc={sub ? t(sub) : undefined}>
+        <LanguagesPicker
+          value={value.map((v) => options.find((option) => option.value === v)?.label ?? v)}
+          options={options.map((option) => option.label)}
+          onChange={(labels) => onChange(labels.map((name) => options.find((option) => option.label === name)?.value ?? name))}
+        />
+      </SettingRow>
+    );
+  }
   return (
     <SettingRow
       wide
@@ -190,6 +206,7 @@ export function ChipMulti({
               ref={i === 0 ? firstChip : undefined}
               type="button"
               onClick={() => toggle(o.value)}
+              aria-pressed={on}
               className={`flex h-11 items-center gap-2 rounded-full px-4 text-[15px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                 on ? "bg-ink text-canvas" : "bg-canvas text-ink-muted hover:text-ink"
               }`}

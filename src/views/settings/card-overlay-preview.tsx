@@ -10,11 +10,21 @@ export function CardOverlayPreview() {
   const t = useT();
   const art = useSampleArtwork();
   const ribbonSide = settings.top10RibbonSide;
-  const markCorner = ribbonSide === "left" ? "end-1.5" : "start-1.5";
+  const watchlist = settings.watchlistBadge;
+  const sharesRibbonCorner = settings.top10Ribbon &&
+    ((watchlist === "topStart" && ribbonSide === "left") ||
+      (watchlist === "topEnd" && ribbonSide === "right"));
+  const markCorner = {
+    off: "",
+    topStart: `${sharesRibbonCorner ? "top-[34px]" : "top-1.5"} start-1.5`,
+    topEnd: `${sharesRibbonCorner ? "top-[34px]" : "top-1.5"} end-1.5`,
+    bottomStart: "bottom-1.5 start-1.5",
+    bottomEnd: "bottom-1.5 end-1.5",
+  }[watchlist];
   return (
-    <div className="mb-5 flex flex-col items-center gap-2 rounded-md border border-edge-soft bg-canvas/40 p-5">
+    <div className="flex flex-col items-center gap-4 rounded-[12px] bg-elevated px-5 py-6">
       <div
-        className="relative w-32 shrink-0 overflow-hidden rounded-md ring-1 ring-edge-soft"
+        className="relative w-[164px] shrink-0 overflow-hidden rounded-md ring-1 ring-edge-soft"
         style={{ aspectRatio: "2 / 3" }}
       >
         <img
@@ -25,9 +35,9 @@ export function CardOverlayPreview() {
         />
         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/55 to-transparent" />
         {settings.top10Ribbon && <TopTenRibbon side={ribbonSide} />}
-        {settings.top10Ribbon && (
+        {watchlist !== "off" && (
           <span
-            className={`absolute top-1.5 ${markCorner} flex h-5 w-5 items-center justify-center rounded-full bg-canvas/85 text-ink ring-1 ring-edge-soft/70`}
+            className={`absolute ${markCorner} flex h-5 w-5 items-center justify-center rounded-full bg-canvas/85 text-ink ring-1 ring-edge-soft/70`}
             title={t("In watchlist")}
           >
             <Bookmark size={10} strokeWidth={2.6} fill="currentColor" />
@@ -47,7 +57,7 @@ export function CardOverlayPreview() {
           </span>
         )}
       </div>
-      <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t("Live preview")}</span>
+      <span className="text-center text-[14px] leading-5 text-ink-muted">{t("Ribbon, award and bookmark preview")}</span>
     </div>
   );
 }

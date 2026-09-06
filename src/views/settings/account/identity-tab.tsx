@@ -7,11 +7,12 @@ import { useT } from "@/lib/i18n";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import { useAuth } from "@/lib/auth";
 import { nameEquals } from "@/lib/account/name-sync";
+import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 import { AvatarFan } from "@/components/avatar-picker/avatar-fan";
 import { AvatarCatalogModal } from "@/components/avatar-picker/avatar-catalog-modal";
 import { CustomColorPanel, HARBOR_COLOR_SWATCHES } from "../color-picker";
 import { ModalButton, SettingsModal, SettingRow, ROW_ACTION, ROW_ACTION_DANGER, ROW_ACTION_PRIMARY } from "../kit";
-import { ROW_DESC, Section } from "../shared";
+import { Section } from "../shared";
 import { ProfileAudioSetting } from "../profile-audio-setting";
 import { AvatarRing } from "./avatar-ring";
 import { resizeAvatar } from "./avatar-utils";
@@ -83,47 +84,47 @@ export function IdentityTab() {
   return (
     <>
       <Section
-        title={t("Harbor identity")}
+        title={t("Your profile")}
         subtitle={t("Your avatar, name, and handle across Harbor.")}
       >
-        <div className="flex flex-wrap items-center gap-5 py-3">
+        <div className="hset-profile-identity flex items-center gap-5 pt-2">
           <AvatarRing src={effectiveAvatar} size={76} onClick={() => fileRef.current?.click()} />
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2">
-            <span className="inline-grid max-w-full">
-              <span
-                aria-hidden
-                className="invisible col-start-1 row-start-1 h-11 whitespace-pre rounded-[10px] px-2 font-display text-[22px] font-medium leading-[44px] tracking-tight"
-              >
-                {nameDraft || " "}
-              </span>
+          <div className="flex min-w-0 max-w-[440px] flex-1 flex-col gap-2">
+            <div className="flex flex-wrap items-end gap-2">
+            <label className="flex w-full max-w-[340px] flex-col gap-2 text-[14px] text-ink-muted">
+              <span>{t("Display name")}</span>
+              <span className="flex h-12 w-full min-w-0 items-center gap-3 rounded-[10px] border border-edge-soft bg-elevated px-3 transition-colors hover:border-edge focus-within:border-ink-muted">
               <input
                 value={nameDraft}
-                size={1}
                 maxLength={32}
                 aria-label={t("Display name")}
+                aria-describedby={harborAuthor?.handle ? "hset-profile-handle" : undefined}
                 onChange={(e) => setDraft(e.target.value)}
                 onBlur={commitName}
                 onKeyDown={(e) => {
-                  if (e.currentTarget.hasAttribute("data-search-editing")) return;
+                  if (e.currentTarget.hasAttribute("data-search-editing") || navOwnsFocus(e.currentTarget)) return;
                   if (e.key === "Enter") {
+                    e.preventDefault();
+                    e.stopPropagation();
                     commitName();
                     e.currentTarget.blur();
                   }
                   if (e.key === "Escape") {
+                    e.preventDefault();
+                    e.stopPropagation();
                     setDraft(displayName);
                     e.currentTarget.blur();
                   }
                 }}
-                className="col-start-1 row-start-1 h-11 w-full min-w-0 rounded-[10px] bg-transparent px-2 font-display text-[22px] font-medium leading-[44px] tracking-tight text-ink outline-none transition-colors hover:bg-elevated focus:bg-elevated"
+                className="h-full min-w-0 flex-1 border-0 bg-transparent p-0 text-[17px] font-medium text-ink outline-none"
               />
-            </span>
-            {harborAuthor?.handle ? (
-              <span className={`${ROW_DESC} shrink-0`}>@{harborAuthor.handle}</span>
-            ) : user ? (
-              <span className={`${ROW_DESC} shrink-0`}>
-                ({user.fullname || user.email.split("@")[0]})
+              {harborAuthor?.handle && (
+                <span id="hset-profile-handle" title={`@${harborAuthor.handle}`} className="max-w-[45%] shrink-0 truncate text-[14px] leading-5 text-ink-muted">
+                  @{harborAuthor.handle}
+                </span>
+              )}
               </span>
-            ) : null}
+            </label>
             {nameDirty && (
               <button
                 type="button"
@@ -134,6 +135,7 @@ export function IdentityTab() {
                 {t("Save")}
               </button>
             )}
+            </div>
           </div>
         </div>
 

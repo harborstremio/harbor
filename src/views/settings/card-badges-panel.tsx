@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-import { Bookmark, Eye, Hash, MoveVertical, Popcorn } from "./icons";
-import { useHydratedPoster, useSampleArtwork } from "@/lib/sample-artwork";
-import previewPoster3 from "@/assets/preview/poster3.webp";
+import { useState } from "react";
+import { Bookmark, Hash, MoveVertical, Popcorn } from "./icons";
+import { ANIME_PREVIEW, useSampleArtwork } from "@/lib/sample-artwork";
 import letterboxdLogo from "@/assets/addon-logos/letterboxd.png";
 import mdblistLogo from "@/assets/addon-logos/mdblist.png";
 import traktLogo from "@/assets/trakt.svg";
@@ -134,7 +133,7 @@ function PreviewCard({
   limit: number;
 }) {
   const normalPoster = useSampleArtwork().poster;
-  const animePoster = useHydratedPoster("tt0245429", previewPoster3);
+  const animePoster = ANIME_PREVIEW;
   const extras = previewExtras(flags);
   const normal: React.ReactNode[] = [];
   if (flags.showImdb)
@@ -289,48 +288,54 @@ export function WatchlistControl({
   );
 }
 
-export function CardBadgesPanel({
+export function CardScoresPreview({
   settings,
-  update,
   flags,
   enabledBadgeCount,
 }: {
   settings: Settings;
-  update: (patch: Partial<Settings>) => void;
   flags: PreviewFlags;
   enabledBadgeCount: number;
 }) {
   const t = useT();
   const [phase, setPhase] = useState<"normal" | "anime">("normal");
-  useEffect(() => {
-    const id = window.setInterval(() => setPhase((p) => (p === "normal" ? "anime" : "normal")), 4000);
-    return () => window.clearInterval(id);
-  }, []);
+  return (
+    <div className="flex flex-col items-center gap-4 rounded-[12px] bg-elevated p-4">
+      <Segmented
+        value={phase}
+        options={[{ value: "normal", label: t("Movies") }, { value: "anime", label: t("Anime") }]}
+        onChange={(v) => setPhase(v as "normal" | "anime")}
+      />
+      <div className="w-[184px] max-w-full">
+        <PreviewCard
+          position={settings.badgePlacement === "top" ? "top" : "bottom"}
+          phase={phase}
+          flags={flags}
+          watchlistBadge={settings.watchlistBadge}
+          limit={Math.min(settings.cardBadgeLimit, Math.max(2, enabledBadgeCount))}
+        />
+      </div>
+      <p className="text-center text-[14px] leading-5 text-ink-muted">{t("Example scores with your settings.")}</p>
+    </div>
+  );
+}
+
+export function CardBadgesPanel({
+  settings,
+  update,
+  enabledBadgeCount,
+}: {
+  settings: Settings;
+  update: (patch: Partial<Settings>) => void;
+  enabledBadgeCount: number;
+}) {
+  const t = useT();
   const placement: "top" | "bottom" = settings.badgePlacement === "top" ? "top" : "bottom";
   const maxN = Math.max(2, enabledBadgeCount);
   const effLimit = Math.min(settings.cardBadgeLimit, maxN);
 
   return (
     <>
-      <SettingRow
-        wide
-        icon={<Eye size={18} strokeWidth={2.2} />}
-        label={t("Live preview")}
-        desc={t(
-          "A real poster with your scores on it. It swaps to an anime title every few seconds so you can check both sets.",
-        )}
-      >
-        <div className="w-[200px] max-w-full">
-          <PreviewCard
-            position={placement}
-            phase={phase}
-            flags={flags}
-            watchlistBadge={settings.watchlistBadge}
-            limit={effLimit}
-          />
-        </div>
-      </SettingRow>
-
       <SettingRow
         icon={<MoveVertical size={18} strokeWidth={2.2} />}
         label={t("Score position")}

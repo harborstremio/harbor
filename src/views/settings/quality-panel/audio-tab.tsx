@@ -98,7 +98,7 @@ function AudioOutputRow() {
       desc={
         loading
           ? t("Detecting devices...")
-          : t("Send audio to specific speakers, headphones or a receiver. System default follows Windows.")
+          : t("Send audio to specific speakers, headphones or a receiver. System default follows your system's audio output.")
       }
     >
       <div className="w-full max-w-[420px]">

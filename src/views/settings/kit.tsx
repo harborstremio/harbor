@@ -1,6 +1,6 @@
 import { Lock, X } from "./icons";
 import { UiIcon } from "@/components/ui-icon";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { ModalShell, useModalExit } from "@/components/modal-shell";
 import { captureFocusReturn } from "@/lib/keyboard-navigation";
@@ -20,6 +20,19 @@ import {
 } from "./shared";
 
 export { ROW_DESC, ROW_TITLE };
+
+export function SettingsWorkbench({ preview, children, compact = false }: {
+  preview: ReactNode;
+  children: ReactNode;
+  compact?: boolean;
+}) {
+  return (
+    <div className={`hset-workbench${compact ? " hset-workbench-compact" : ""}`}>
+      <div className="hset-workbench-preview">{preview}</div>
+      <div className="hset-workbench-controls">{children}</div>
+    </div>
+  );
+}
 
 const CTL_FOCUS =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
@@ -144,6 +157,7 @@ export function SettingGroup({ label, children }: { label?: string; children: Re
 export function SettingsModal({
   open,
   onClose,
+  dismissible = true,
   title,
   sub,
   actions,
@@ -152,6 +166,7 @@ export function SettingsModal({
 }: {
   open: boolean;
   onClose: () => void;
+  dismissible?: boolean;
   title: string;
   sub?: string;
   actions?: ReactNode;
@@ -160,7 +175,7 @@ export function SettingsModal({
 }) {
   if (!open) return null;
   return (
-    <SettingsModalBody onClose={onClose} title={title} sub={sub} actions={actions} width={width}>
+    <SettingsModalBody onClose={onClose} dismissible={dismissible} title={title} sub={sub} actions={actions} width={width}>
       {children}
     </SettingsModalBody>
   );
@@ -168,6 +183,7 @@ export function SettingsModal({
 
 function SettingsModalBody({
   onClose,
+  dismissible,
   title,
   sub,
   actions,
@@ -175,6 +191,7 @@ function SettingsModalBody({
   children,
 }: {
   onClose: () => void;
+  dismissible: boolean;
   title: string;
   sub?: string;
   actions?: ReactNode;
@@ -183,21 +200,45 @@ function SettingsModalBody({
 }) {
   const t = useT();
   const { closing, close } = useModalExit(onClose);
+  const dismiss = () => { if (dismissible) close(); };
+  const titleId = useId();
+  const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => captureFocusReturn(), []);
+  useEffect(() => {
+    const dialog = titleRef.current?.closest<HTMLElement>('[role="dialog"]');
+    if (!dialog) return;
+    titleRef.current?.focus({ preventScroll: true });
+    const keepFocus = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || event.defaultPrevented) return;
+      const candidates = [...dialog.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled):not([type="hidden"]), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])')]
+        .filter((el) => el.getClientRects().length > 0 && !el.closest('[inert]') && el.tabIndex >= 0);
+      const first = candidates[0];
+      const last = candidates[candidates.length - 1];
+      if (!first) { event.preventDefault(); titleRef.current?.focus(); return; }
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === titleRef.current)) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    dialog.addEventListener("keydown", keepFocus);
+    return () => dialog.removeEventListener("keydown", keepFocus);
+  }, []);
   return (
-    <ModalShell closing={closing} onDismiss={close} width={width}>
+    <ModalShell closing={closing} onDismiss={dismiss} width={width} labelledBy={titleId} backdropClassName="bg-black/60">
       <div className="flex items-start gap-4 px-6 pt-6">
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <h2 className="text-[19px] font-semibold leading-[26px] tracking-tight text-ink">
+          <h2 id={titleId} ref={titleRef} tabIndex={-1} className="text-[19px] font-semibold leading-[26px] tracking-tight text-ink outline-none">
             {title}
           </h2>
           {sub && <p className={`max-w-[66ch] ${ROW_DESC}`}>{sub}</p>}
         </div>
         <button
           type="button"
-          onClick={close}
+          onClick={dismiss}
+          disabled={!dismissible}
           aria-label={t("Close")}
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-[8px] text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-[8px] text-ink-subtle transition-colors hover:bg-elevated hover:text-ink disabled:opacity-40"
         >
           <X size={18} />
         </button>

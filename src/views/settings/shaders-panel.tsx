@@ -78,11 +78,11 @@ export function ShadersPanel() {
         <>
           <Section
             title={t("Anime4K upscaling")}
-            subtitle={t("Real-time GPU upscaling that sharpens lines and cleans up gradients on anime, built right into Harbor's player. The one-tap setup below grabs the shaders; nothing else to install.")}
+            subtitle={t("Sharpen lines and clean up color gradients in anime. Enable Anime4K to download its shader pack and choose a preset.")}
           >
             <ToggleRow
               label={t("Enable Anime4K")}
-              sub={t("Sharper lines and cleaner gradients on anime, in real time. Heaviest on the graphics card of everything here.")}
+              sub={t("Processes video while it plays. Uses extra graphics power.")}
               value={settings.playerAnime4k}
               onChange={(v) => update({ playerAnime4k: v })}
             />
@@ -90,7 +90,7 @@ export function ShadersPanel() {
               <ToggleRow
                 label={t("Only on anime")}
                 sub={t(
-                  "Anime4K is tuned for drawn animation. Leave this on to skip live action, or turn it off to run it on everything you watch.",
+                  "Skip live-action video. Turn this off to apply Anime4K to all videos.",
                 )}
                 value={settings.playerAnime4kAnimeOnly}
                 onChange={(v) => update({ playerAnime4kAnimeOnly: v })}
@@ -99,7 +99,7 @@ export function ShadersPanel() {
             {settings.playerAnime4k && (
               <ToggleRow
                 label={t("Show Anime4K indicator")}
-                sub={t("A small badge over the video (with live FPS) that only appears when Anime4K is actually running. Follows your anime-only setting.")}
+                sub={t("Show a badge and frame rate while Anime4K is running.")}
                 value={settings.playerAnime4kIndicator}
                 onChange={(v) => update({ playerAnime4kIndicator: v })}
               />
@@ -119,7 +119,7 @@ export function ShadersPanel() {
       {tab === "more" && (
         <Section
           title={t("More picture shaders")}
-          subtitle={t("Neural upscalers, sharpeners, and HDR tone-mapping ported for mpv. Each is hosted by its author, not bundled with Harbor. Download the ones you want; Harbor chains them in the right order and applies them in the player.")}
+          subtitle={t("Optional video effects downloaded from their authors. Harbor applies enabled shaders in the order shown below.")}
         >
           {STAGE_SEQUENCE.map((stage) => {
             const items = SHADER_CATALOG.filter((e) => e.stage === stage && !ANIME_IDS.has(e.id));

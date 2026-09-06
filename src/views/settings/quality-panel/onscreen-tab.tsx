@@ -3,6 +3,7 @@ import { useT } from "@/lib/i18n";
 import { SettingRow } from "../kit";
 import { Section, Segmented, ToggleRow } from "../shared";
 import { QualityBadgePreview } from "./quality-badge-preview";
+import { PlayerWindowOptions } from "./window-options";
 
 export function OnScreenTab() {
   const t = useT();
@@ -54,6 +55,7 @@ export function OnScreenTab() {
           onChange={(v) => update({ navbarSleepTimer: v })}
         />
       </Section>
+      <PlayerWindowOptions />
     </>
   );
 }

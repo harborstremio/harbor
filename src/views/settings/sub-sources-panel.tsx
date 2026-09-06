@@ -5,7 +5,7 @@ import type { Addon } from "@/lib/addons";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { ExtLink, KeyField, Section, ToggleRow, useSettingsActiveContext } from "./shared";
+import { ExtLink, KeyField, Section, ToggleRow, settingsAnchor, useSettingsActiveContext } from "./shared";
 import { Nested, SettingGroup } from "./kit";
 import { SRow } from "./ui";
 import openSubtitlesLogo from "@/assets/opensubtitles.png";
@@ -122,7 +122,7 @@ export function SubSourcesPanel() {
     <>
       <Section
         title={t("Subtitle sources")}
-        subtitle={t("Harbor searches every source you enable at the same time, then merges and de-duplicates the results into one clean list. Turn a source off to stop pulling from it.")}
+        subtitle={t("Choose where Harbor searches for subtitles. Results from enabled sources appear together, with duplicates removed.")}
       >
         <SettingGroup label={t("Built into Harbor")}>
           <ToggleRow
@@ -185,11 +185,11 @@ export function SubSourcesPanel() {
         <SettingGroup label={t("Needs an API key")}>
           <ToggleRow
             label={t("SUBDL")}
-            sub={t("A large multi-language subtitle database. Off until you add your free SUBDL API key.")}
+            sub={t("Search SUBDL for subtitles in multiple languages. Requires an API key.")}
             value={subdlOn}
             onChange={(v) => setProv("subdl", v)}
             leading={<img src={subdlLogo} alt="" draggable={false} className={LEAD_IMG} />}
-            warn={subdlOn && !subdlKey ? t("This source stays quiet until you add a key.") : undefined}
+            warn={subdlOn && !subdlKey ? t("Add an API key to use this source.") : undefined}
           />
           {subdlOn && (
             <Nested>
@@ -212,13 +212,13 @@ export function SubSourcesPanel() {
           )}
           <ToggleRow
             label={t("Subsource")}
-            sub={t("A community subtitle source. Off until you add your Subsource API key.")}
+            sub={t("Search the Subsource community database. Requires an API key.")}
             value={subsourceOn}
             onChange={(v) => setProv("subsource", v)}
             leading={<img src={subsourceLogo} alt="" draggable={false} className={LEAD_IMG} />}
             warn={
               subsourceOn && !subsourceKey
-                ? t("This source stays quiet until you add a key.")
+                ? t("Add an API key to use this source.")
                 : undefined
             }
           />
@@ -246,14 +246,14 @@ export function SubSourcesPanel() {
 
       <Section
         title={t("Preferred languages")}
-        subtitle={t("Every source above follows one language order, and it lives on the Languages page.")}
+        subtitle={t("All subtitle sources use the same preferred language order.")}
       >
         <SRow
           leading={<Languages size={20} strokeWidth={2} />}
           title={t("Subtitle language order")}
           description={t("Pick which languages Harbor looks for first, and which ones it falls back to.")}
           trailing={<NavChevron />}
-          onClick={() => setActive("language")}
+          onClick={() => setActive("subtitles", settingsAnchor("Subtitle languages"))}
         />
       </Section>
     </>

@@ -1,7 +1,7 @@
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { Section, Segmented, ToggleRow } from "../shared";
-import { SettingGroup, SettingRow, Nested } from "../kit";
+import { SettingGroup, SettingRow, Nested, SettingsWorkbench } from "../kit";
 import { SpoilerPreview } from "../spoiler-preview";
 import { EpisodeCardPreview } from "../episode-card-previews";
 import { EpisodeScalePreview } from "./episode-scale-preview";
@@ -26,7 +26,7 @@ export function DetailTab() {
         <ToggleRow
           label={t("Remember your place on show pages")}
           sub={t(
-            "When you reopen a show you were already browsing, jump straight back to your spot (usually the episode list) instead of starting at the top. The jump happens before the page shows, so there is no flash.",
+            "Reopen a show at the position where you left it, including its episode list.",
           )}
           value={settings.resumeDetailScroll}
           onChange={(v) => update({ resumeDetailScroll: v })}
@@ -34,17 +34,23 @@ export function DetailTab() {
         <ToggleRow
           label={t("Cycle the backdrop")}
           sub={t(
-            "Slowly fade between a show's backdrop images while you read the page, instead of holding one still. Only runs when the show has more than one backdrop, and never when you have pinned one or asked for reduced motion.",
+            "Fade between available backdrops. A pinned backdrop or reduced-motion preference keeps the image still.",
           )}
           value={settings.heroBackdropCarousel}
           onChange={(v) => update({ heroBackdropCarousel: v })}
+        />
+        <ToggleRow
+          label={t("Blur stream backdrop")}
+          sub={t("Soften the artwork behind the stream picker.")}
+          value={settings.streamBackdropBlur}
+          onChange={(v) => update({ streamBackdropBlur: v })}
         />
       </Section>
 
       <Section
         title={t("Spoilers")}
         subtitle={t(
-          "Blur episode artwork, titles, and descriptions for episodes you have not watched yet, on both shows and anime. Hover an episode to peek.",
+          "Keep unwatched episode details hidden. Hover a card in the preview to reveal it temporarily.",
         )}
       >
         <ToggleRow
@@ -56,7 +62,8 @@ export function DetailTab() {
           onChange={(v) => update({ hideSpoilers: v })}
         />
         {settings.hideSpoilers && (
-          <Nested>
+          <SettingsWorkbench preview={<SpoilerPreview />}>
+            <Nested>
             <SettingGroup label={t("What gets blurred")}>
               <ToggleRow
                 label={t("Blur thumbnails")}
@@ -90,16 +97,10 @@ export function DetailTab() {
                 value={settings.spoilerSkipNext}
                 onChange={(v) => update({ spoilerSkipNext: v })}
               />
-              <ToggleRow
-                label={t("Blur stream backdrop")}
-                sub={t("Adds a blurred glass effect behind the stream picker panel.")}
-                value={settings.streamBackdropBlur}
-                onChange={(v) => update({ streamBackdropBlur: v })}
-              />
             </SettingGroup>
-          </Nested>
+            </Nested>
+          </SettingsWorkbench>
         )}
-        <SpoilerPreview />
       </Section>
 
       <Section
@@ -146,7 +147,7 @@ export function DetailTab() {
           <ToggleRow
             label={t("High-quality episode images")}
             sub={t(
-              "Loads full-resolution episode artwork (original) instead of lighter w300 images. Turn off for slow connections or low-end devices.",
+              "Use sharper artwork for large cards. Uses more data and may load more slowly.",
             )}
             value={settings.hdEpisodeImages}
             onChange={(v) => update({ hdEpisodeImages: v })}
@@ -166,7 +167,7 @@ export function DetailTab() {
           <ToggleRow
             label={t("Group episodes by story arc")}
             sub={t(
-              "Adds a Seasons/Arcs switch on shows that have a story-arc grouping (like One Piece), so you can browse by saga instead of scrolling seasons. Needs a TMDB key. Off by default.",
+              "Browse by story arc on supported shows, such as One Piece. Requires a TMDB key.",
             )}
             value={settings.episodeArcGroups}
             onChange={(v) => update({ episodeArcGroups: v })}

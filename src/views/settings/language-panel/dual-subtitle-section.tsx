@@ -43,7 +43,7 @@ export function DualSubtitleSection() {
   return (
     <Section
       title={t("Dual subtitles")}
-      subtitle={t("Show a second subtitle in another language at the same time. Handy when you are learning a language: keep the one you are learning as your main subtitle, and put your own language here.")}
+      subtitle={t("Show two subtitle languages at once. Useful for learning a language or watching together.")}
     >
       <SettingRow
         wide

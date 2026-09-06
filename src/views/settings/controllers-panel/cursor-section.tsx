@@ -86,7 +86,7 @@ export function CursorSection() {
             <button
               key={id}
               type="button"
-              onClick={() => update({ controllerCursor: id })}
+              onClick={() => empty ? openPicker() : update({ controllerCursor: id })}
               aria-pressed={on}
               className={`flex min-h-[104px] flex-col items-center justify-center gap-2 rounded-[10px] border bg-elevated px-3 py-4 transition-colors duration-150 ${
                 on ? "border-accent text-ink" : "border-edge-soft text-ink-muted hover:border-edge"

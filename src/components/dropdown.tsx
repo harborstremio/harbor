@@ -198,6 +198,7 @@ export function Dropdown({
             ref={listRef}
             role="listbox"
             data-dropdown-menu
+            data-settings-menu={btnRef.current?.closest(".harbor-settings-shell") ? "" : undefined}
             onKeyDown={onMenuKeyDown}
             style={{
               position: "fixed",

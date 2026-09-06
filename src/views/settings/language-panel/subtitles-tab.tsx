@@ -11,7 +11,7 @@ export function SubtitlesLanguageTab() {
     <>
       <Section
         title={t("Subtitle languages")}
-        subtitle={t("When playback starts, Harbor finds and loads a subtitle in one of these languages. The first available match wins, so put your main language first.")}
+        subtitle={t("Harbor looks for subtitles in this order. Put your preferred language first.")}
       >
         <LanguagesPicker
           value={settings.preferredSubLangs}
@@ -27,7 +27,7 @@ export function SubtitlesLanguageTab() {
       >
         <ToggleRow
           label={t("Prefer embedded subtitles")}
-          sub={t("When the file ships its own subtitle track, keep it selected instead of switching to a downloaded one. Embedded tracks are usually the best synced.")}
+          sub={t("Keep the subtitle track included in the video file instead of switching to a downloaded one.")}
           value={settings.preferEmbeddedSubs}
           onChange={(v) => update({ preferEmbeddedSubs: v })}
         />
@@ -39,7 +39,7 @@ export function SubtitlesLanguageTab() {
         />
         <ToggleRow
           label={t("Upgrade subtitles when better ones load")}
-          sub={t("Downloaded subtitles can arrive a moment after playback starts. Leave this off to keep whatever subtitle is already showing; turn it on to switch to the best language match as soon as it loads.")}
+          sub={t("Switch to a better language match if it arrives after playback starts. Leave off to keep the current track.")}
           value={settings.subtitleAutoUpgrade}
           onChange={(v) => update({ subtitleAutoUpgrade: v })}
         />
@@ -51,19 +51,19 @@ export function SubtitlesLanguageTab() {
       >
         <ToggleRow
           label={t("Start with subtitles off")}
-          sub={t("Harbor still finds and loads subtitles so they're one click away in the player, it just won't turn them on automatically.")}
+          sub={t("Find subtitles without showing them automatically. You can turn them on in the player.")}
           value={settings.subtitlesOffByDefault}
           onChange={(v) => update({ subtitlesOffByDefault: v })}
         />
         <ToggleRow
           label={t("Choose subtitles before playback")}
-          sub={t("After you pick a source, show a subtitle picker so you can set the exact track and language before the video starts. Off by default, Harbor keeps picking one for you automatically.")}
+          sub={t("Choose the exact track and language after picking a source, before the video starts.")}
           value={settings.subtitlePreselect}
           onChange={(v) => update({ subtitlePreselect: v })}
         />
         <ToggleRow
           label={t("Subtitle indicator dot")}
-          sub={t("Shows a small green dot on the player's subtitle button while a subtitle track is active. Turn it off if you would rather keep the controls clean.")}
+          sub={t("Show a green dot on the player's subtitle button when subtitles are active.")}
           value={settings.showSubtitleIndicator}
           onChange={(v) => update({ showSubtitleIndicator: v })}
         />

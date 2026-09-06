@@ -14,6 +14,7 @@ export function HarborAccountPanel() {
   const [author, setAuthor] = useState(currentAuthor);
   const [reveal, setReveal] = useState<string | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"register" | "signin">("register");
 
   useEffect(() => subscribeAuthor(() => setAuthor(currentAuthor())), []);
 
@@ -29,9 +30,9 @@ export function HarborAccountPanel() {
     return (
       <>
         {authOpen ? (
-          <AccountAuthForm inline onRecovery={setReveal} onClose={() => setAuthOpen(false)} />
+          <AccountAuthForm inline initialMode={authMode} onRecovery={setReveal} onClose={() => setAuthOpen(false)} />
         ) : (
-          <SignedOutHero onSignIn={() => setAuthOpen(true)} />
+          <SignedOutHero onSignIn={(mode) => { setAuthMode(mode); setAuthOpen(true); }} />
         )}
         {reveal && <RecoveryReveal code={reveal} onDone={() => setReveal(null)} />}
       </>

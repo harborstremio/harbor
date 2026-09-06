@@ -10,26 +10,102 @@ const FILLER = new Set([
   "turn", "want", "wants", "need", "needs", "please", "make", "makes", "off",
 ]);
 
+const APOSTROPHES = /[‘’‚‛′‵']/g;
+const QUOTES = /[“”„‟″‶"]/g;
+const DIACRITICS = /[̀-ͯ]/g;
+const WORD_SPLIT = /[^\p{L}\p{N}]+/u;
+
 function normalizeSearchText(value: string): string {
-  return value.trim().toLowerCase();
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(DIACRITICS, "")
+    .replace(APOSTROPHES, "")
+    .replace(QUOTES, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function tokens(text: string): string[] {
+  return text.split(WORD_SPLIT).filter((w) => w.length > 1);
 }
 
 let vocabulary: Set<string> | null = null;
+let lastNeedle = "";
+let lastRequired: string[] = [];
 
 export function setSettingsSearchVocabulary(values: Iterable<string>): void {
   const next = new Set<string>();
   for (const value of values) {
-    for (const word of normalizeSearchText(value).split(/[^\p{L}\p{N}]+/u)) {
-      if (word.length > 1) next.add(word);
-    }
+    for (const word of tokens(normalizeSearchText(value))) next.add(word);
   }
   vocabulary = next;
+  lastNeedle = "";
+  lastRequired = [];
 }
 
 function forms(word: string): string[] {
   const out = [word];
   if (word.length > 3 && word.endsWith("s")) out.push(word.slice(0, -1));
   return out;
+}
+
+function fuzzBudget(word: string): number {
+  if (word.length >= 8) return 2;
+  if (word.length >= 4) return 1;
+  return 0;
+}
+
+function editDistance(a: string, b: string, max: number): number {
+  const la = a.length;
+  const lb = b.length;
+  if (Math.abs(la - lb) > max) return max + 1;
+  let prevPrev: number[] = [];
+  let prev: number[] = [];
+  for (let j = 0; j <= lb; j++) prev.push(j);
+  for (let i = 1; i <= la; i++) {
+    const cur: number[] = [i];
+    let rowMin = i;
+    for (let j = 1; j <= lb; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      let v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        v = Math.min(v, prevPrev[j - 2] + 1);
+      }
+      cur.push(v);
+      if (v < rowMin) rowMin = v;
+    }
+    if (rowMin > max) return max + 1;
+    prevPrev = prev;
+    prev = cur;
+  }
+  return prev[lb];
+}
+
+function fuzzyIn(word: string, candidates: Iterable<string>): boolean {
+  const budget = fuzzBudget(word);
+  if (!budget) return false;
+  for (const candidate of candidates) {
+    if (editDistance(word, candidate, budget) <= budget) return true;
+  }
+  return false;
+}
+
+function wordHits(word: string, haystack: string, hayTokens: string[]): boolean {
+  if (forms(word).some((f) => haystack.includes(f))) return true;
+  return fuzzyIn(word, hayTokens);
+}
+
+function requiredWords(needle: string): string[] {
+  if (needle === lastNeedle) return lastRequired;
+  const words = tokens(needle).filter((w) => !forms(w).some((f) => FILLER.has(f)));
+  const vocab = vocabulary;
+  const known = vocab
+    ? words.filter((w) => forms(w).some((f) => vocab.has(f)) || fuzzyIn(w, vocab))
+    : words;
+  lastNeedle = needle;
+  lastRequired = known.length ? known : words;
+  return lastRequired;
 }
 
 export function matchesSettingsSearch(
@@ -51,15 +127,11 @@ export function matchesSettingsSearch(
 
   if (haystack.includes(needle)) return true;
 
-  const words = needle
-    .split(/[^\p{L}\p{N}]+/u)
-    .filter((w) => w.length > 1 && !forms(w).some((f) => FILLER.has(f)));
-  if (!words.length) return false;
+  const required = requiredWords(needle);
+  if (!required.length) return false;
 
-  const vocab = vocabulary;
-  const known = vocab ? words.filter((w) => forms(w).some((f) => vocab.has(f))) : words;
-  const required = known.length ? known : words;
-  const hits = required.filter((word) => forms(word).some((f) => haystack.includes(f))).length;
+  const hayTokens = tokens(haystack);
+  const hits = required.filter((word) => wordHits(word, haystack, hayTokens)).length;
   const allowedMisses = Math.floor(required.length / 4);
   return hits >= required.length - allowedMisses;
 }
@@ -86,9 +158,10 @@ export function rankSettingsSearch(
   }
 
   // a whole-phrase match failed, so rank on how much of the query the label itself carries
-  const words = needle
-    .split(/[^\p{L}\p{N}]+/u)
-    .filter((w) => w.length > 1 && !forms(w).some((f) => FILLER.has(f)));
-  const inLabel = words.filter((w) => forms(w).some((f) => name.includes(f))).length;
+  const words = tokens(needle).filter((w) => !forms(w).some((f) => FILLER.has(f)));
+  const nameTokens = tokens(name);
+  const inLabel = words.filter(
+    (w) => forms(w).some((f) => name.includes(f)) || fuzzyIn(w, nameTokens),
+  ).length;
   return 5000 - inLabel * 100 + name.length / 500;
 }

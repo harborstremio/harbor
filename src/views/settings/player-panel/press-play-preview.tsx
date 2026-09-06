@@ -1,5 +1,7 @@
 import { useT } from "@/lib/i18n";
 import { PreviewScreen, PreviewShell } from "../preview-shell";
+import filmStill from "@/assets/settings-preview/steamboat-willie.webp";
+import { Play } from "@/components/icons/play-filled";
 
 const FADE = "absolute inset-0 transition-opacity duration-300 ease-in-out";
 
@@ -16,8 +18,10 @@ export function PressPlayPreview({ instant }: { instant: boolean }) {
     >
       <PreviewScreen>
         <span className={`${FADE} bg-raised ${instant ? "opacity-100" : "opacity-0"}`}>
+          <img src={filmStill} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
+          <span className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
           <span className="absolute inset-0 grid place-items-center">
-            <span className="h-0 w-0 border-y-[9px] border-s-[14px] border-y-transparent border-s-ink-subtle" />
+            <Play size={24} className="text-white" />
           </span>
           <span className="absolute inset-x-[8%] bottom-[12%] h-[4px] rounded-full bg-canvas/70">
             <span className="block h-full w-[38%] rounded-full bg-accent" />
@@ -28,17 +32,15 @@ export function PressPlayPreview({ instant }: { instant: boolean }) {
             instant ? "opacity-0" : "opacity-100"
           }`}
         >
-          {[0, 1, 2, 3].map((i) => (
+          {["1080p", "720p", "480p"].map((quality, i) => (
             <span
               key={i}
-              className={`flex h-[14%] items-center gap-[6px] rounded-[3px] px-[6px] ${
+              className={`flex h-[23%] items-center justify-between gap-2 rounded-[4px] px-2 ${
                 i === 0 ? "bg-accent-soft" : "bg-elevated"
               }`}
             >
-              <span
-                className={`h-[4px] rounded-full ${i === 0 ? "w-[46%] bg-accent" : "w-[36%] bg-ink-subtle/70"}`}
-              />
-              <span className="h-[4px] w-[22%] rounded-full bg-ink-subtle/40" />
+              <span className="text-[11px] font-medium text-ink">Steamboat Willie</span>
+              <span className="text-[10px] tabular-nums text-ink-muted">{quality}</span>
             </span>
           ))}
         </span>

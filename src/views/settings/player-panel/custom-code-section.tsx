@@ -2,7 +2,7 @@ import { AlertTriangle, ChevronDown, Eraser } from "../icons";
 import { useState } from "react";
 import { useSettings, type Settings } from "@/lib/settings";
 import { Section } from "../shared";
-import { ROW_ACTION, ROW_DESC } from "../kit";
+import { ModalButton, ROW_ACTION, ROW_ACTION_DANGER, ROW_DESC, SettingsModal } from "../kit";
 import { SRow } from "../ui";
 import { SubField } from "./internals";
 import { useT } from "@/lib/i18n";
@@ -48,7 +48,7 @@ export function CustomCodeCard() {
     <Section
       title={t("Custom code")}
       subtitle={t(
-        "Power-user knob. Inject your own CSS, JS, and HTML into Harbor. Lives in your local settings; nothing leaves your machine.",
+        "Customize Harbor with your own CSS, JavaScript, and HTML. Changes apply as you type.",
       )}
     >
       <SRow
@@ -73,6 +73,7 @@ export function CustomCodeCard() {
 export function CustomCodePanel() {
   const t = useT();
   const { settings, update } = useSettings();
+  const [clearField, setClearField] = useState<Field | null>(null);
 
   return (
     <div className="flex flex-col gap-6">
@@ -90,6 +91,7 @@ export function CustomCodePanel() {
           value={t("{n} chars", { n: String((settings[f.id] ?? "").length) })}
         >
           <textarea
+            aria-label={t(f.label)}
             value={settings[f.id] ?? ""}
             onChange={(e) => update({ [f.id]: e.target.value } as Partial<Settings>)}
             placeholder={f.placeholder}
@@ -101,9 +103,9 @@ export function CustomCodePanel() {
             <span className={`max-w-[70ch] ${ROW_DESC}`}>{t(f.hint)}</span>
             <button
               type="button"
-              onClick={
-                settings[f.id] ? () => update({ [f.id]: "" } as Partial<Settings>) : undefined
-              }
+              onClick={() => setClearField(f.id)}
+              disabled={!settings[f.id]}
+              aria-label={t("Clear {name}", { name: t(f.label) })}
               aria-disabled={!settings[f.id]}
               className={`${ROW_ACTION}${settings[f.id] ? "" : " pointer-events-none opacity-45"}`}
             >
@@ -113,6 +115,15 @@ export function CustomCodePanel() {
           </div>
         </SubField>
       ))}
+      <SettingsModal
+        open={clearField !== null}
+        onClose={() => setClearField(null)}
+        title={t("Clear this code?")}
+        sub={clearField === "customJs" ? t("The saved JavaScript will be removed. Restart Harbor to clear any effects from scripts that already ran.") : t("The saved {name} will be removed and its changes will stop applying.", { name: t(FIELDS.find((f) => f.id === clearField)?.label ?? "code") })}
+        actions={<><ModalButton ghost onClick={() => setClearField(null)}>{t("Keep code")}</ModalButton><button type="button" className={ROW_ACTION_DANGER} onClick={() => { if (clearField) update({ [clearField]: "" } as Partial<Settings>); setClearField(null); }}>{t("Clear code")}</button></>}
+      >
+        <p className={ROW_DESC}>{t("Copy any code you want to keep before clearing it.")}</p>
+      </SettingsModal>
     </div>
   );
 }

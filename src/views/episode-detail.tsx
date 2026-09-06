@@ -79,6 +79,8 @@ export function EpisodeDetailView({
   }, [settings.omdbKey, episodeImdbId]);
 
   const episodeKey = `${seriesId}:${season}:${episode}`;
+  const [revealedArtwork, setRevealedArtwork] = useState<string | null>(null);
+  const artworkHidden = settings.hideSpoilers && settings.blurEpisodes && revealedArtwork !== episodeKey;
   const { tmdbKey } = settings;
 
   useEffect(() => {
@@ -227,7 +229,7 @@ export function EpisodeDetailView({
               alt=""
               decoding="async"
               fetchPriority="high"
-              className="absolute inset-0 h-full w-full object-cover"
+              className={`absolute inset-0 h-full w-full object-cover ${artworkHidden ? "scale-105 blur-[24px]" : ""}`}
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-canvas via-canvas/55 via-45% to-transparent" />
@@ -268,7 +270,7 @@ export function EpisodeDetailView({
                 />
               </div>
 
-              <div className="mt-9 flex gap-3">
+              <div className="mt-9 flex flex-wrap items-center gap-3">
                 <PlayModeHint>
                   <button
                     onClick={handlePlay}
@@ -278,6 +280,15 @@ export function EpisodeDetailView({
                     {t("Play Episode")}
                   </button>
                 </PlayModeHint>
+                {artworkHidden && (
+                  <button
+                    type="button"
+                    onClick={() => setRevealedArtwork(episodeKey)}
+                    className="h-12 rounded-full border border-edge bg-canvas/80 px-5 text-[15px] font-semibold text-ink hover:bg-raised"
+                  >
+                    {t("Reveal episode artwork")}
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -310,7 +321,18 @@ export function EpisodeDetailView({
 
         {episodeData.stills && episodeData.stills.length > 0 && (
           <section>
-            <h2 className="mb-6 text-[20px] font-bold text-ink">{t("Stills")}</h2>
+            <div className="mb-6 flex flex-wrap items-center gap-4">
+              <h2 className="text-[20px] font-bold text-ink">{t("Stills")}</h2>
+              {artworkHidden && (
+                <button
+                  type="button"
+                  onClick={() => setRevealedArtwork(episodeKey)}
+                  className="min-h-11 rounded-lg bg-elevated px-4 text-[15px] font-semibold text-ink hover:bg-raised"
+                >
+                  {t("Reveal episode artwork")}
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
               {episodeData.stills.slice(0, 12).map((still, idx) => (
                 <div
@@ -321,7 +343,7 @@ export function EpisodeDetailView({
                     src={getImageUrl(still.filePath, "w780")}
                     alt={`${episodeData.name} — ${t("Still {n}", { n: idx + 1 })}`}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className={`h-full w-full object-cover ${artworkHidden ? "scale-105 blur-[24px]" : "transition-transform duration-300 group-hover:scale-105"}`}
                   />
                 </div>
               ))}

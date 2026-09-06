@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { settingsSearchEntries } from "./settings-search-entries.mjs";
 
 const ROOT = path.resolve(process.argv[2] ?? ".");
 
@@ -90,14 +91,7 @@ try {
   const { matchesSettingsSearch, rankSettingsSearch, setSettingsSearchVocabulary } = mod;
 
   const nav = fs.readFileSync(path.join(ROOT, "src/views/settings/nav.tsx"), "utf8");
-  const entries = [
-    ...nav.matchAll(
-      /\{\s*label:\s*"([^"]+)",\s*section:\s*"([a-zA-Z]+)"(?:,\s*anchorTitle:\s*"([^"]+)")?(?:,\s*keywords:\s*\[([^\]]*)\])?\s*\}/g,
-    ),
-  ].map((m) => ({
-    label: m[1],
-    keywords: m[4] ? [...m[4].matchAll(/"([^"]*)"/g)].map((k) => k[1]) : [],
-  }));
+  const entries = settingsSearchEntries(nav);
 
   setSettingsSearchVocabulary(entries.flatMap((e) => [e.label, ...e.keywords]));
   const identity = (s) => s;
@@ -120,7 +114,7 @@ try {
     if (hits.length > MAX_HITS) broad.push(q + " (" + hits.length + ")");
   }
 
-  const checked = QUERIES.length - NO_SETTING.size;
+  const checked = QUERIES.filter((q) => !NO_SETTING.has(q)).length;
   console.log("Harbor settings search\n");
   console.log("  entries indexed: " + entries.length);
   console.log("  queries checked: " + checked);

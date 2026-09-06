@@ -3,7 +3,7 @@ import { CloudOff } from "../icons";
 import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
 import { useSyncStatus } from "@/lib/profile-sync/use-sync-status";
-import { Section, useSettingsActiveContext } from "../shared";
+import { settingsAnchor, useSettingsActiveContext } from "../shared";
 import { SettingRow } from "../kit";
 import { SButton } from "../ui";
 import { pushTvNow, tvSyncReady, tvWiresBlocked, type TvWireName } from "./store";
@@ -19,10 +19,10 @@ function BlockedBanner({ blocked }: { blocked: TvWireName[] }) {
         </span>
         <span className="max-w-[70ch] text-[15.5px] font-normal leading-[22px] text-ink-muted">
           {t(
-            "Changes you make below will be saved on this computer, but they will not reach your TV. This is a fault in Harbor, not something you did.",
+                "Some TV settings cannot sync in this build. Your changes remain saved on this computer.",
           )}{" "}
           {t("Affected settings:")}{" "}
-          <span className="font-medium text-ink">{blocked.join(", ")}</span>.
+          <span className="font-medium text-ink">{blocked.map((wire) => t(wire === "settings" ? "TV options" : wire === "theme" ? "Theme" : "Player layout")).join(", ")}</span>.
         </span>
       </div>
     </div>
@@ -66,53 +66,58 @@ export function TvStatusHeader() {
   const read: Read = !ready
     ? {
         tone: "warn",
-        line: "This build cannot carry TV settings to the account yet. Everything on this page saves on this computer and will go up the moment the sync section names are enabled.",
+        line: "Cloud sync for TV settings is unavailable in this build. Changes stay saved on this computer.",
       }
+    : status.phase === "off"
+      ? {
+          tone: "off",
+          line: "Cloud sync is off. TV settings stay saved on this computer.",
+          fix: "account",
+        }
     : status.phase === "signed-out"
       ? {
           tone: "warn",
-          line: "You are not signed in to a Harbor account, so nothing here can reach the TV.",
+          line: "Sign in to Harbor to sync these settings through your account.",
           fix: "account",
         }
       : status.phase === "no-refresh"
         ? {
             tone: "warn",
-            line: "This session cannot refresh its token. Sign out and back in, or the TV will never see these changes.",
+            line: "Sign in again to resume cloud sync. Your changes are saved on this computer.",
             fix: "account",
           }
         : !scoped
           ? {
               tone: "warn",
-              line: "These settings belong to a profile, and this computer is not in one. Pick a profile and the TV will follow it.",
+              line: "Choose a profile to sync its TV settings.",
             }
+          : status.lastError
+            ? { tone: "warn", line: "Cloud sync couldn't finish. Your changes are saved here; try syncing again." }
           : status.queued > 0
-            ? { tone: "on", line: `${status.queued} change${status.queued === 1 ? "" : "s"} waiting to go up.` }
+            ? { tone: "on", line: `${status.queued} change${status.queued === 1 ? "" : "s"} waiting to sync.` }
             : status.lastPushAt > 0
               ? { tone: "on", line: `Sent to your account ${ago(status.lastPushAt, now)}.` }
-              : { tone: "off", line: "Nothing sent yet. Change something and it goes up on its own." };
+              : { tone: "off", line: "Changes sync automatically through your Harbor account." };
 
   return (
-    <Section
-      title={t("The link to your TV")}
-      subtitle={t("Everything on this page is written to your Harbor account. Your TV reads it on its next check-in, so you can set the whole thing up from here and never touch the remote.")}
-    >
+    <div id={settingsAnchor("The link to your TV")} className="flex flex-col gap-3 border-b border-edge-soft pb-5">
       {blocked.length > 0 && <BlockedBanner blocked={blocked} />}
       <SettingRow
         icon={<Dot tone={read.tone} />}
         label={
           scoped && activeProfile
-            ? t("Editing the TV for {name}", { name: activeProfile.name })
-            : t("Editing the TV")
+            ? t("TV settings for {name}", { name: activeProfile.name })
+            : t("TV settings sync")
         }
         desc={t(read.line)}
       >
-        <SButton variant="primary" onClick={pushTvNow} disabled={!ready || !scoped}>
-          {t("Send to TV now")}
+        <SButton onClick={pushTvNow} disabled={!ready || !scoped || !status.armed || !!read.fix || status.phase === "pushing"}>
+          {status.phase === "pushing" ? t("Syncing…") : t("Sync now")}
         </SButton>
         {read.fix && (
-          <SButton onClick={() => setActive("account")}>{t("Open Account")}</SButton>
+          <SButton variant="primary" onClick={() => setActive("account", settingsAnchor("Harbor account"))}>{t("Open Harbor account")}</SButton>
         )}
       </SettingRow>
-    </Section>
+    </div>
   );
 }

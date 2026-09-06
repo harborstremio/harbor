@@ -1,9 +1,9 @@
 import { Loader2 } from "../icons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  FIELD_HELP,
   FIELD_LABEL,
   StatusBadge,
+  SetupHelp,
   TelegramMark,
   TelegramTutorial,
   type FieldStatus,
@@ -42,12 +42,20 @@ export function TelegramComposedField({
   const t = useT();
   const [token, setToken] = useState(() => parse(fullUrl).token);
   const [chatId, setChatId] = useState(() => parse(fullUrl).chatId);
+  const emittedUrl = useRef<string | null>(null);
 
   useEffect(() => {
+    if (fullUrl === emittedUrl.current) return;
     const next = parse(fullUrl);
     setToken((prev) => (prev === next.token ? prev : next.token));
     setChatId((prev) => (prev === next.chatId ? prev : next.chatId));
   }, [fullUrl]);
+
+  const publish = (nextToken: string, nextChatId: string) => {
+    const url = compose(nextToken, nextChatId);
+    emittedUrl.current = url;
+    onUrlChange(url);
+  };
 
   const onTokenChange = (raw: string) => {
     const v = raw.trim();
@@ -57,24 +65,24 @@ export function TelegramComposedField({
       const c = m[2] ?? chatId;
       setToken(t);
       if (m[2]) setChatId(m[2]);
-      onUrlChange(compose(t, c));
+      publish(t, c);
       return;
     }
     setToken(v);
-    onUrlChange(compose(v, chatId));
+    publish(v, chatId);
   };
 
   const onChatIdChange = (raw: string) => {
     const v = raw.trim();
     setChatId(v);
-    onUrlChange(compose(token, v));
+    publish(token, v);
   };
 
   const ready = token.length > 0 && chatId.length > 0;
   const busy = status.state === "busy";
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="mt-6 flex flex-col gap-2.5 border-t border-edge-soft pt-7">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="flex items-center gap-2">
           <TelegramMark />
@@ -82,7 +90,7 @@ export function TelegramComposedField({
         </span>
         <StatusBadge status={status} />
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] gap-4">
         <SubField
           label={t("Bot token")}
           placeholder="1234567890:AAExampleTokenFromBotFather"
@@ -100,15 +108,15 @@ export function TelegramComposedField({
         type="button"
         onClick={busy ? undefined : onTest}
         aria-disabled={busy}
-        disabled={!ready}
+        disabled={!ready || busy}
         className={`${ROW_ACTION_PRIMARY} self-start${busy ? " pointer-events-none opacity-40" : ""}`}
       >
         {busy && <Loader2 size={17} strokeWidth={2.4} className="shrink-0 animate-spin" />}
         {t("Send test")}
       </button>
-      <div className={FIELD_HELP}>
+      <SetupHelp label={t("How to connect Telegram")}>
         <TelegramTutorial />
-      </div>
+      </SetupHelp>
     </div>
   );
 }

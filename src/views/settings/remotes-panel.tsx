@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle } from "./icons";
+import { AlertTriangle, RotateCw } from "./icons";
 import { invoke } from "@tauri-apps/api/core";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { ROW_DESC } from "./kit";
+import { ROW_ACTION, ROW_DESC } from "./kit";
 import { Section, ToggleRow } from "./shared";
 import { isTauri } from "./player-panel/internals";
 import { RemoteCard } from "./remotes-panel/remote-card";
@@ -16,6 +16,7 @@ export function RemotesPanel() {
   const { settings, update } = useSettings();
   const [lanIp, setLanIp] = useState<string | null | undefined>(undefined);
   const [webError, setWebError] = useState(false);
+  const [retry, setRetry] = useState(0);
   const aliveRef = useRef(true);
 
   const enabled = settings.serveWebUi || settings.remoteControlEnabled;
@@ -36,19 +37,21 @@ export function RemotesPanel() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     if (!isTauri || !enabled) {
       setWebError(false);
       return;
     }
+    setWebError(false);
     const timer = window.setTimeout(() => {
       void invoke<boolean>("web_serve_status")
         .then((ok) => {
-          if (aliveRef.current) setWebError(!ok);
+          if (!cancelled) setWebError(!ok);
         })
-        .catch(() => {});
+        .catch(() => { if (!cancelled) setWebError(true); });
     }, 800);
-    return () => window.clearTimeout(timer);
-  }, [enabled]);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [enabled, retry]);
 
   if (!isTauri) {
     return (
@@ -107,18 +110,21 @@ export function RemotesPanel() {
         />
 
         {webError && (
-          <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+          <div role="status" className="flex items-center gap-3 rounded-[10px] bg-elevated px-4 py-3">
             <AlertTriangle
               size={18}
               strokeWidth={2.2}
               className="mt-[2px] shrink-0 text-danger"
             />
-            <p className="max-w-[66ch] text-[15.5px] font-normal leading-[22px] text-danger">
+            <p className="min-w-0 flex-1 text-[15.5px] font-normal leading-[22px] text-danger">
               {t(
-                "Couldn't start on port {WEB_PORT}. Another app may be using it; toggle off and on to retry.",
+                "Harbor's remote server isn't responding on port {WEB_PORT}. Check that the desktop server is running, or turn this setting off and on to restart it.",
                 { WEB_PORT: String(WEB_PORT) },
               )}
             </p>
+            <button type="button" onClick={() => setRetry((v) => v + 1)} className={ROW_ACTION}>
+              <RotateCw size={17} />{t("Check again")}
+            </button>
           </div>
         )}
 

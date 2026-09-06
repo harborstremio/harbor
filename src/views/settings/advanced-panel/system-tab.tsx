@@ -16,7 +16,7 @@ export function SystemTab() {
       <Section
         title={t("Downloads")}
         subtitle={t(
-          "Where Harbor saves videos when you hit Download in the player. Pick any folder, including one on a different drive.",
+          "Choose where videos and eBooks are saved, and how their folders are organized.",
         )}
       >
         {isTauri ? (
@@ -32,9 +32,9 @@ export function SystemTab() {
 
       {isTauri && (
         <Section
-          title={t("System tray")}
+          title={t("Window behavior")}
           subtitle={t(
-            "Keep Harbor a click away. Close it to the system tray instead of quitting, and control it from the tray menu. These also mirror into the tray menu live.",
+            "Choose what happens when you close, minimize, or switch away from Harbor.",
           )}
         >
           <TrayRow />
@@ -44,7 +44,7 @@ export function SystemTab() {
         <Section
           title={t("Graphics")}
           subtitle={t(
-            "How Harbor draws its own interface. Leave this on Automatic unless the app itself stutters, flickers or tears while scrolling, which some G-SYNC and high refresh rate setups do. Switching backends usually settles it. This does not affect video playback.",
+            "Leave this on Automatic unless Harbor's interface flickers or stutters. This controls the app window, not video playback.",
           )}
         >
           <Segmented<GfxBackend>

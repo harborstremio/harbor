@@ -77,7 +77,7 @@ export const SUB_LOOK_GROUP: TvGroup = {
   id: "subtitle-look",
   title: "Subtitle look on the TV",
   subtitle:
-    "Thirteen controls for how a subtitle sits on the TV screen. The preview is the real shape, at TV distance.",
+    "Adjust subtitle size, color, and position for your TV. The preview follows each change.",
   wire: "playerlayout",
   rows: SUB_LOOK_ROWS,
 };

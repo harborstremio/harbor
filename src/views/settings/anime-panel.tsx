@@ -50,16 +50,16 @@ export function AnimePanel() {
         <>
       <Section
         title={t("Smooth motion")}
-        subtitle={t("Anime is drawn on twos and threes, so fast pans can judder. Smoothing fills in the gaps so motion glides.")}
+        subtitle={t("Reduce judder during camera movement. The comparison below illustrates the effect.")}
       >
         <ToggleRow
           label={t("Motion smoothing")}
-          sub={t("Harbor's built-in frame interpolation. Smooths panning, best on anime. Needs a display refresh rate above the video's frame rate, and can stutter on weak GPUs. Lighter than SVP.")}
+          sub={t("Smooths camera movement using Harbor's player. Works best when your screen refreshes faster than the video's frame rate.")}
           value={settings.playerMotionInterp}
           onChange={(v) => update({ playerMotionInterp: v })}
           lockReason={
             svpDriving
-              ? t("SVP is already handling frame interpolation. Turn off SVP below to use this instead. Running both delays the audio.")
+              ? t("SVP is handling motion smoothing. Turn it off on the SVP page to use Harbor's smoothing instead.")
               : undefined
           }
         />

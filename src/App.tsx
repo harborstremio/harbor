@@ -1785,7 +1785,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
             <WindowControls />
           </div>
         )}
-        {!immersive && (
+        {!immersive && !settingsTop && (
           <div
             aria-hidden
             className="pointer-events-none absolute inset-x-0 top-0 z-30 h-24 bg-gradient-to-b from-canvas/85 via-canvas/40 to-transparent"

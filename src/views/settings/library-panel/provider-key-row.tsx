@@ -50,7 +50,7 @@ export function ProviderKeyRow({ entry, onOpen }: { entry: KeyEntry; onOpen: () 
     >
       <span className="flex shrink-0 items-center gap-2 text-[15.5px] text-ink-muted">
         <span className={`h-2 w-2 shrink-0 rounded-full ${set ? "bg-success" : "bg-edge"}`} />
-        {set ? t("Active") : t("Not set")}
+        {set ? t("Saved") : t("Not set")}
       </span>
       <button type="button" onClick={onOpen} className={ROW_ACTION}>
         {set ? t("Manage") : t("Add key")}

@@ -7,7 +7,7 @@ import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 import { Dropdown } from "@/components/dropdown";
 import type { Settings, WebhookTrigger } from "@/lib/settings";
 import { ROW_DESC, Section, Segmented, ToggleRow } from "../shared";
-import { SettingGroup, SettingRow } from "../kit";
+import { ModalButton, ROW_ACTION_DANGER, SettingGroup, SettingRow, SettingsModal } from "../kit";
 import { usePageActions } from "../page-actions";
 import { SButton, SRow } from "../ui";
 
@@ -165,12 +165,14 @@ export function RuleBuilder({
   trackedPeople,
   canDiscord,
   canTelegram,
+  onSetUp,
 }: {
   rules: Rule[];
   onChange: (rules: Rule[]) => void;
   trackedPeople: TrackedPerson[];
   canDiscord: boolean;
   canTelegram: boolean;
+  onSetUp: () => void;
 }) {
   const t = useT();
   const [editing, setEditing] = useState<Rule | null>(null);
@@ -232,7 +234,7 @@ export function RuleBuilder({
       name: "",
       enabled: true,
       trigger: { event: "newMovie" },
-      channels: { discord: canDiscord, telegram: false },
+      channels: { discord: canDiscord, telegram: !canDiscord && canTelegram },
     });
   };
 
@@ -240,7 +242,7 @@ export function RuleBuilder({
     <Section
       title={t("Automations")}
       subtitle={t(
-        "A rule watches for one kind of release and pings the channels you pick. Each rule fires on its own.",
+        "Choose which releases trigger an alert and where each alert goes.",
       )}
     >
       {editing ? (
@@ -267,7 +269,7 @@ export function RuleBuilder({
           {rules.length === 0 ? (
             <p className={`max-w-[70ch] ${ROW_DESC}`}>
               {t(
-                "You have no automations yet. Create one and Harbor will message you the moment something matches.",
+                "No rules yet. Add one to choose which releases you hear about.",
               )}
             </p>
           ) : (
@@ -281,10 +283,10 @@ export function RuleBuilder({
             ))
           )}
           <div ref={listRef} className="flex">
-            <SButton variant="primary" onClick={startNew} disabled={noChannel}>
+            {noChannel ? <SButton variant="primary" onClick={onSetUp}>{t("Set up a destination")}</SButton> : <SButton variant="primary" onClick={startNew}>
               <Plus size={18} strokeWidth={2.4} className="shrink-0" />
               {t("New rule")}
-            </SButton>
+            </SButton>}
           </div>
         </>
       )}
@@ -359,9 +361,10 @@ function RuleEditor({
   onCancel: () => void;
 }) {
   const [draft, setDraft] = useState<Rule>(rule);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const t = useT();
 
-  const noChannel = !draft.channels.discord && !draft.channels.telegram;
+  const noChannel = !(draft.channels.discord && canDiscord) && !(draft.channels.telegram && canTelegram);
   const live = useRef({ draft, onSave, onDelete, onCancel });
   live.current = { draft, onSave, onDelete, onCancel };
 
@@ -375,7 +378,7 @@ function RuleEditor({
               label: "Delete rule",
               tone: "danger" as const,
               icon: <Trash2 size={18} strokeWidth={2.2} />,
-              onSelect: () => live.current.onDelete(),
+              onSelect: () => setConfirmDelete(true),
             },
           ]),
       {
@@ -407,6 +410,15 @@ function RuleEditor({
 
   return (
     <>
+      <SettingsModal
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        title={t("Delete this rule?")}
+        sub={t("{name} will be removed. Alerts from your other rules will continue.", { name: rule.name || t(EVENT_LABELS[rule.trigger.event]) })}
+        actions={<><ModalButton ghost onClick={() => setConfirmDelete(false)}>{t("Keep rule")}</ModalButton><button type="button" className={ROW_ACTION_DANGER} onClick={onDelete}>{t("Delete rule")}</button></>}
+      >
+        <p className={ROW_DESC}>{t("You can also turn off Rule is active to pause it without deleting it.")}</p>
+      </SettingsModal>
       <SettingGroup label={isNew ? t("New rule") : t("Edit rule")}>
         <SettingRow
           wide
@@ -416,6 +428,7 @@ function RuleEditor({
           )}
         >
           <input
+            aria-label={t("Rule name")}
             ref={nameRef}
             type="text"
             value={draft.name}

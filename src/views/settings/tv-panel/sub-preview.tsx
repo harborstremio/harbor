@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { readNumber, readRow, type TvDoc } from "./model";
 import { SUB_FAMILY_CSS, SUB_LOOK_ROWS, tintCss } from "./model-look";
+import subtitleStill from "@/assets/settings-preview/steamboat-willie.webp";
 
-const STILL = "https://image.tmdb.org/t/p/w780/eGX66zonvc4bXg3rM08RUxdYSDx.jpg";
 const TV_BASE_PX = 32;
 const TV_WIDTH = 1920;
 const LEGIBILITY_LIFT = 1.55;
@@ -69,7 +69,7 @@ export function SubPreview({ doc }: { doc: TvDoc }) {
   const edgeInk = tintCss(pick(doc, "subLookEdgeTint"));
   const boxInk = tintCss(pick(doc, "subLookBoxTint"));
 
-  const fontPx = (width / TV_WIDTH) * TV_BASE_PX * (sizePct / 100) * LEGIBILITY_LIFT;
+  const fontPx = (Math.max(width, 600) / TV_WIDTH) * TV_BASE_PX * (sizePct / 100) * LEGIBILITY_LIFT;
   const strokePx = outline * fontPx * 0.012;
 
   const shadow =
@@ -88,12 +88,13 @@ export function SubPreview({ doc }: { doc: TvDoc }) {
     align === "Left" ? "flex-start" : align === "Right" ? "flex-end" : "center";
 
   return (
-    <div
+    <div className="flex flex-col gap-3">
+      <div
       ref={ref}
       className="relative aspect-video w-full overflow-hidden rounded-md bg-canvas"
     >
       <img
-        src={STILL}
+        src={subtitleStill}
         alt=""
         draggable={false}
         className="absolute inset-0 h-full w-full object-cover opacity-80"
@@ -107,7 +108,7 @@ export function SubPreview({ doc }: { doc: TvDoc }) {
           paddingInline: "6%",
         }}
       >
-        {[t("They said the harbour would be quiet tonight."), t("Nobody told the sea.")].map(
+        {[t("This is how your subtitles"), t("will look on your TV.")].map(
           (line, i) => (
             <span
               key={i}
@@ -129,6 +130,8 @@ export function SubPreview({ doc }: { doc: TvDoc }) {
           ),
         )}
       </div>
+      </div>
+      <p className="text-[14px] leading-5 text-ink-muted">{t("Text is enlarged in this preview so you can judge the style.")}</p>
     </div>
   );
 }

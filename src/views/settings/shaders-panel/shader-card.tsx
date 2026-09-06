@@ -9,7 +9,6 @@ import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
 import { RowNote, Segmented, ToggleRow } from "../shared";
 import { Nested, ROW_ACTION, ROW_ACTION_PRIMARY, SettingRow } from "../kit";
-import { SRow } from "../ui";
 import { BeforeAfter } from "./before-after";
 import { appliesLabel, segmentedWide, TIER_LOAD } from "./stages";
 import amdLogo from "@/assets/shader-logos/amd.svg?url";
@@ -158,6 +157,7 @@ export function ShaderCard({ entry }: { entry: ShaderCatalogEntry }) {
             ref={downloadRef}
             type="button"
             onClick={startDownload}
+            aria-label={t("Download {name}", { name: entry.name })}
             aria-busy={busy}
             className={ROW_ACTION_PRIMARY}
           >
@@ -226,12 +226,14 @@ export function ShaderCard({ entry }: { entry: ShaderCatalogEntry }) {
           </SettingRow>
         )}
 
-        <SRow
-          title={t("Source")}
-          description={entry.source.label}
+        <button
+          type="button"
+          className="flex min-h-11 w-fit items-center gap-2 text-start text-[14px] text-ink-muted hover:text-ink"
           onClick={() => openUrl(entry.source.url)}
-          trailing={<ExternalLink size={18} className="shrink-0 text-ink-subtle" />}
-        />
+        >
+          <span>{t("Source")}: {entry.source.label}</span>
+          <ExternalLink size={15} className="shrink-0" />
+        </button>
       </Nested>
     </>
   );

@@ -24,12 +24,14 @@ const CLEAR_DONE = `${CLEAR_BTN} border-edge-soft bg-elevated text-success`;
 const READOUT = "shrink-0 text-[15.5px] tabular-nums text-ink-muted";
 
 function fmtBytes(n: number): string {
+  if (n >= 1024 * 1024 * 1024) return `${(n / (1024 * 1024 * 1024)).toFixed(1)} GB`;
   if (n >= 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
   if (n >= 1024) return `${Math.round(n / 1024)} KB`;
   return `${n} B`;
 }
 
 function fmtPercent(pct: number): string {
+  if (pct > 0 && pct < 0.1) return "<0.1%";
   return pct >= 10 ? `${Math.round(pct)}%` : `${pct.toFixed(1)}%`;
 }
 
@@ -52,9 +54,20 @@ function localStorageBreakdown(): { total: number; top: { key: string; bytes: nu
 }
 
 function friendlyKey(key: string): string {
+  const known: Record<string, string> = {
+    "harbor.jikancatalog2": "Anime catalog cache",
+    "harbor.awards.wikidata": "Awards cache",
+    "harbor.heroPool": "Featured titles cache",
+    "harbor.settings.shared": "Shared preferences",
+    "harbor.settings": "Profile preferences",
+    "harbor.armcache": "Anime title matching",
+  };
+  const base = key.replace(/\.v\d+$/, "");
+  if (known[base]) return known[base];
   const words = key
     .replace(/^harbor\./, "")
     .replace(/\.v\d+$/, "")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
     .replace(/[-_.]/g, " ")
     .trim();
   if (!words) return key;
@@ -73,6 +86,7 @@ function ClearRow({
   const t = useT();
   const [armed, setArmed] = useState(false);
   const [done, setDone] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!armed) return;
@@ -80,27 +94,39 @@ function ClearRow({
     return () => window.clearTimeout(timer);
   }, [armed]);
 
+  useEffect(() => {
+    if (!done) return;
+    const timer = window.setTimeout(() => setDone(false), 2200);
+    return () => window.clearTimeout(timer);
+  }, [done]);
+
   const click = () => {
     if (done) return;
     if (!armed) {
       setArmed(true);
       return;
     }
-    onClear();
     setArmed(false);
-    setDone(true);
-    window.setTimeout(() => setDone(false), 2200);
+    setFailed(false);
+    try {
+      onClear();
+      setDone(true);
+    } catch {
+      setFailed(true);
+    }
   };
 
   return (
-    <SettingRow label={title} desc={sub}>
+    <SettingRow label={title} desc={<>{sub}{failed && <span role="alert" className="mt-1 block text-danger">{t("Could not clear this cache. Try again.")}</span>}</>}>
       <button
         type="button"
         onClick={click}
+        onBlur={() => setArmed(false)}
+        aria-label={done ? t("{name} cleared", { name: title }) : armed ? t("Confirm clearing {name}", { name: title }) : t("Clear {name}", { name: title })}
         className={done ? CLEAR_DONE : armed ? CLEAR_ARMED : CLEAR_IDLE}
       >
         {done ? <Check size={18} strokeWidth={2.4} /> : <Trash2 size={18} strokeWidth={1.9} />}
-        {done ? t("Cleared") : armed ? t("Sure?") : t("Clear")}
+        {done ? t("Cleared") : armed ? t("Confirm clear") : t("Clear")}
       </button>
     </SettingRow>
   );
@@ -151,7 +177,7 @@ export function StoragePanel() {
           <Section
             title={t("Storage overview")}
             subtitle={t(
-              "Everything Harbor saves lives on this computer. If space runs low, clear a cache below; Harbor rebuilds them as you browse.",
+              "Review local app data and caches. Cached pages rebuild as you browse; temporary video files are managed separately.",
             )}
           >
             <SettingGroup>
@@ -159,17 +185,17 @@ export function StoragePanel() {
                 <SettingRow
                   wide
                   icon={<HardDrive size={18} strokeWidth={1.9} />}
-                  label={t("App storage")}
-                  desc={t("Harbor is using {used} of the {quota} this computer allows.", {
+                  label={t("App data cache")}
+                  desc={t("{used} used within a {quota} storage allowance. Video downloads and other files on disk are not included.", {
                     used: fmtBytes(estimate.usage),
                     quota: fmtBytes(estimate.quota),
                   })}
                 >
                   <div className="flex w-full max-w-[520px] items-center gap-4">
-                    <div className="h-2 min-w-0 flex-1 rounded-full bg-canvas">
+                    <div role="meter" aria-label={t("App data cache usage")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-valuetext={fmtPercent(pct)} className="h-2 min-w-0 flex-1 rounded-full bg-raised">
                       <div
                         className="h-full rounded-full bg-accent transition-[width] duration-500"
-                        style={{ width: `${Math.max(1, pct)}%` }}
+                        style={{ width: `${pct}%`, minWidth: pct > 0 ? 2 : 0 }}
                       />
                     </div>
                     <span className={`w-[72px] text-end ${READOUT}`}>{fmtPercent(pct)}</span>
@@ -193,12 +219,12 @@ export function StoragePanel() {
             <Section
               title={t("Settings storage breakdown")}
               subtitle={t(
-                "The entries taking the most room right now. Most of them are caches that rebuild themselves, so this list changes as you browse.",
+                "The six largest local settings entries, including preferences and lookup data.",
               )}
             >
               <SettingGroup>
                 {ls.top.map((row) => (
-                  <SettingRow key={row.key} label={friendlyKey(row.key)}>
+                  <SettingRow key={row.key} label={t(friendlyKey(row.key))}>
                     <span className={READOUT}>{fmtBytes(row.bytes)}</span>
                   </SettingRow>
                 ))}
