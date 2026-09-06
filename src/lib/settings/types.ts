@@ -182,6 +182,7 @@ export type Settings = {
   heroTrailerAudio: boolean;
   navIconAnimations: boolean;
   screensaver: boolean;
+  screensaverStyle: "ambient" | "catBoat";
   screensaverDelayMin: number;
   resumePrompt: boolean;
   resumePlayback: boolean;

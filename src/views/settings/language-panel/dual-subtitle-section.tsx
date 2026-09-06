@@ -1,6 +1,7 @@
 import { fillStyle } from "@/components/slider";
 import { ArrowUpDown, Languages, Type } from "lucide-react";
 import { Dropdown } from "@/components/dropdown";
+import { Flag } from "@/components/flag";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { ALL_LANGUAGE_NAMES } from "@/lib/subtitles/language";
@@ -57,7 +58,11 @@ export function DualSubtitleSection() {
             onChange={(v) => update({ secondarySubLang: v })}
             options={[
               { value: "", label: t("Off") },
-              ...ALL_LANGUAGE_NAMES.map((name) => ({ value: name, label: name })),
+              ...ALL_LANGUAGE_NAMES.map((name) => ({
+                value: name,
+                label: name,
+                left: <Flag language={name} size="md" showLabel={false} />,
+              })),
             ]}
             className="w-[420px] max-w-full"
           />

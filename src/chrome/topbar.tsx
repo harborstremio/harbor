@@ -10,7 +10,6 @@ import { DownloadsButton } from "@/components/downloads-popover";
 import { BookmarksButton } from "@/components/bookmarks-popover";
 import { NotificationCenter } from "@/components/notification-center/notification-center";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
-import { ProfileButton } from "@/chrome/profile-button";
 import { RecordingPill } from "@/chrome/recording-pill";
 import { SleepTimerButton } from "@/chrome/sleep-timer-button";
 import {
@@ -182,7 +181,6 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
               {!kid && <NotificationCenter />}
               {!kid && <BookmarksButton />}
               {!onLiveRoot && !kid && <TogetherButton />}
-              {!kid && <ProfileButton />}
             </div>
           )}
             {IS_TAURI && !settings.useNativeTitleBar && !settings.hybridTitleBar && (

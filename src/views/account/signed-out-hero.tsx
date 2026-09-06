@@ -1,25 +1,6 @@
-import { Palette, RefreshCw, UserRound } from "lucide-react";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { DeviceScene } from "./device-scene";
 import { useT } from "@/lib/i18n";
-
-const PERKS = [
-  {
-    icon: <UserRound size={15} strokeWidth={2} />,
-    title: "Your handle",
-    body: "One @name that finds you across Harbor.",
-  },
-  {
-    icon: <Palette size={15} strokeWidth={2} />,
-    title: "Publish themes",
-    body: "Share what you build and see who is using it.",
-  },
-  {
-    icon: <RefreshCw size={15} strokeWidth={2} />,
-    title: "Sync everywhere",
-    body: "Settings, lists and progress follow you between machines.",
-  },
-];
 
 export function SignedOutHero({ onSignIn }: { onSignIn: () => void }) {
   const t = useT();
@@ -56,21 +37,6 @@ export function SignedOutHero({ onSignIn }: { onSignIn: () => void }) {
           </div>
         </div>
         <DeviceScene />
-      </div>
-
-      <div className="grid gap-1.5 sm:grid-cols-3">
-        {PERKS.map((perk) => (
-          <div
-            key={perk.title}
-            className="harbor-perk flex flex-col gap-2.5 rounded-md bg-elevated px-4 py-4 transition-colors hover:bg-raised"
-          >
-            <span className="harbor-perk__icon grid h-9 w-9 place-items-center rounded-md bg-canvas text-ink-muted">
-              {perk.icon}
-            </span>
-            <span className="text-[13px] font-medium text-ink">{t(perk.title)}</span>
-            <span className="text-[12.5px] leading-relaxed text-ink-subtle">{t(perk.body)}</span>
-          </div>
-        ))}
       </div>
     </div>
   );

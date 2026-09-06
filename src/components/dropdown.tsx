@@ -1,10 +1,10 @@
 import { Check, ChevronDown } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { advanceFocus } from "@/lib/keyboard-navigation";
 import { getDirection, isBackKey } from "@/lib/keyboard-navigation/geometry";
 
-export type DropdownOption = { value: string; label: string };
+export type DropdownOption = { value: string; label: string; left?: ReactNode };
 
 const MENU_MAX = 320;
 const GAP = 6;
@@ -179,8 +179,9 @@ export function Dropdown({
           size === "sm" ? "h-9 px-3 text-[12.5px]" : "h-11 px-3.5 text-[13.5px]"
         } ${open ? "bg-raised" : "bg-canvas hover:bg-elevated"}`}
       >
-        <span className={`truncate ${selected ? "text-ink" : "text-ink-subtle"}`}>
-          {selected?.label ?? placeholder ?? ""}
+        <span className={`flex min-w-0 items-center gap-2 ${selected ? "text-ink" : "text-ink-subtle"}`}>
+          {selected?.left}
+          <span className="truncate">{selected?.label ?? placeholder ?? ""}</span>
         </span>
         <span
           ref={chevRef}
@@ -236,7 +237,10 @@ export function Dropdown({
                       : "text-ink-muted hover:bg-raised hover:text-ink focus:bg-raised focus:text-ink"
                   }`}
                 >
-                  <span className="truncate">{o.label}</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    {o.left}
+                    <span className="truncate">{o.label}</span>
+                  </span>
                   {active && (
                     <Check size={15} strokeWidth={2.4} className="animate-badge-pop shrink-0" />
                   )}

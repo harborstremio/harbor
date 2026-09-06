@@ -12,6 +12,8 @@ import { Anime4kShaderList } from "./player-panel/anime4k-shader-list";
 import { ShaderCard } from "./shaders-panel/shader-card";
 import { STAGE_LABEL, STAGE_SEQUENCE } from "./shaders-panel/stages";
 
+const ANIME_IDS = new Set(["fsrcnnx", "ravu", "nnedi3"]);
+
 type Tab = "anime4k" | "more";
 
 export function ShadersPanel() {
@@ -46,7 +48,7 @@ export function ShadersPanel() {
   useSubTabs(
     isTauri
       ? [
-          { id: "anime4k", label: t("Anime4K") },
+          { id: "anime4k", label: t("Anime Shaders") },
           { id: "more", label: t("More shaders") },
         ]
       : [],
@@ -105,6 +107,12 @@ export function ShadersPanel() {
           </Section>
 
           {settings.playerAnime4k && <Anime4kShaderList />}
+
+          <Section title={t("Anime upscalers")}>
+            {SHADER_CATALOG.filter((e) => ANIME_IDS.has(e.id)).map((entry) => (
+              <ShaderCard key={entry.id} entry={entry} />
+            ))}
+          </Section>
         </>
       )}
 
@@ -114,7 +122,7 @@ export function ShadersPanel() {
           subtitle={t("Neural upscalers, sharpeners, and HDR tone-mapping ported for mpv. Each is hosted by its author, not bundled with Harbor. Download the ones you want; Harbor chains them in the right order and applies them in the player.")}
         >
           {STAGE_SEQUENCE.map((stage) => {
-            const items = SHADER_CATALOG.filter((e) => e.stage === stage);
+            const items = SHADER_CATALOG.filter((e) => e.stage === stage && !ANIME_IDS.has(e.id));
             if (items.length === 0) return null;
             return (
               <SettingGroup key={stage} label={t(STAGE_LABEL[stage])}>

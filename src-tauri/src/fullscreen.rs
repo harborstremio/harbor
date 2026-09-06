@@ -3,12 +3,14 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 pub struct FullscreenState {
     saved: Arc<Mutex<Option<(i32, i32, u32, u32)>>>,
+    was_maximized: Arc<Mutex<bool>>,
 }
 
 impl FullscreenState {
     pub fn new() -> Self {
         Self {
             saved: Arc::new(Mutex::new(None)),
+            was_maximized: Arc::new(Mutex::new(false)),
         }
     }
 }
@@ -24,10 +26,9 @@ pub async fn window_fullscreen_enter(
 
     let already_fs = main.is_fullscreen().unwrap_or(false);
     if !already_fs {
-        if main.is_maximized().unwrap_or(false) {
-            let _ = main.unmaximize();
-        }
-        let saved = if main.is_maximized().unwrap_or(false) {
+        let was_max = main.is_maximized().unwrap_or(false);
+        *state.was_maximized.lock().unwrap() = was_max;
+        let saved = if was_max {
             None
         } else if let (Ok(pos), Ok(sz)) = (main.outer_position(), main.inner_size()) {
             Some((pos.x, pos.y, sz.width, sz.height))
@@ -58,6 +59,18 @@ pub async fn window_fullscreen_exit(
         main.set_fullscreen(false)
             .map_err(|e| format!("set_fullscreen(false): {}", e))?;
         let saved = state.saved.lock().unwrap().take();
+        let was_max = {
+            let mut g = state.was_maximized.lock().unwrap();
+            let v = *g;
+            *g = false;
+            v
+        };
+        if was_max {
+            let _ = main.maximize();
+            let _ = main.set_focus();
+            let _ = app.emit_to("main", "fs://exited", ());
+            return Ok(());
+        }
         if let Some((x, y, w, h)) = saved {
             let _ = main.set_size(tauri::PhysicalSize {
                 width: w,
@@ -69,6 +82,10 @@ pub async fn window_fullscreen_exit(
                 let _ = main.center();
             }
         } else {
+            let _ = main.set_size(tauri::LogicalSize {
+                width: 1280.0,
+                height: 800.0,
+            });
             let _ = main.center();
         }
         let _ = main.set_focus();

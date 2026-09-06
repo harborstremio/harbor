@@ -4564,67 +4564,77 @@ textarea.hset-field {
    ========================================================================== */
 
 .hset-jumped {
-  border-radius: 10px;
-  animation: hset-jump-wash 1250ms var(--ease-out) forwards;
+  border-radius: 14px;
+  animation: hset-jump 1400ms ease-in-out forwards;
 }
 
-[dir="ltr"] .hset-jumped,
-html:not([dir="rtl"]) .hset-jumped {
-  animation-name: hset-jump-wash, hset-jump-rail-ltr;
-}
-
-[dir="rtl"] .hset-jumped {
-  animation-name: hset-jump-wash, hset-jump-rail-rtl;
-}
-
-@keyframes hset-jump-wash {
+@keyframes hset-jump {
   0% {
-    background-color: color-mix(in srgb, var(--color-accent) 9%, transparent);
+    background-color: color-mix(in srgb, var(--color-accent) 11%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 44%, transparent);
   }
-  55% {
+  12% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 44%, transparent);
+  }
+  26% {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 34%, transparent);
+  }
+  64% {
     background-color: color-mix(in srgb, var(--color-accent) 7%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 24%, transparent);
   }
   100% {
     background-color: transparent;
-  }
-}
-
-@keyframes hset-jump-rail-ltr {
-  0% {
-    box-shadow: inset 0 0 0 0 transparent;
-  }
-  10% {
-    box-shadow: inset 3px 0 0 0 var(--color-accent);
-  }
-  62% {
-    box-shadow: inset 3px 0 0 0 var(--color-accent);
-  }
-  100% {
-    box-shadow: inset 3px 0 0 0 transparent;
-  }
-}
-
-@keyframes hset-jump-rail-rtl {
-  0% {
-    box-shadow: inset 0 0 0 0 transparent;
-  }
-  10% {
-    box-shadow: inset -3px 0 0 0 var(--color-accent);
-  }
-  62% {
-    box-shadow: inset -3px 0 0 0 var(--color-accent);
-  }
-  100% {
-    box-shadow: inset -3px 0 0 0 transparent;
+    box-shadow: 0 0 0 0 transparent;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hset-jumped,
-  [dir="ltr"] .hset-jumped,
-  [dir="rtl"] .hset-jumped,
-  html:not([dir="rtl"]) .hset-jumped {
-    animation: hset-jump-wash 700ms linear forwards;
+  .hset-jumped {
+    animation: hset-jump 700ms linear forwards;
+  }
+}
+
+.hset-postertune {
+  display: flex;
+  align-items: stretch;
+  gap: 22px;
+}
+
+.hset-postertune-stage {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  inline-size: 186px;
+  padding: 18px 14px;
+  border-radius: 12px;
+  background: var(--color-elevated);
+}
+
+.hset-postertune-dials {
+  display: flex;
+  min-inline-size: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+@media (max-width: 720px) {
+  .hset-postertune {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .hset-postertune-stage {
+    inline-size: 100%;
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hset-postertune-stage img {
+    transition: none !important;
   }
 }
 

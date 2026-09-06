@@ -4,13 +4,14 @@ import previewPoster1 from "@/assets/preview/poster1.webp";
 import previewPoster2 from "@/assets/preview/poster2.webp";
 import previewPoster3 from "@/assets/preview/poster3.webp";
 import previewPoster4 from "@/assets/preview/poster4.webp";
+import { useSampleArtwork } from "@/lib/sample-artwork";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { resetPosterDock, updatePosterDock } from "@/lib/poster-dock";
 import { Section, Segmented, ToggleRow } from "../../shared";
 import { SettingRow } from "../../kit";
 import { SButton } from "../../ui";
-import { POSTER_RADII, POSTER_SIZES, PxField, posterSizeKey, radiusKey } from "./poster-options";
+import { POSTER_RADII, POSTER_SIZES, posterSizeKey, radiusKey } from "./poster-options";
 import { PreviewImage } from "../../preview-image";
 
 function sizeIndex(scale: number): number {
@@ -29,53 +30,15 @@ function RADIUS_LABEL(t: (s: string) => string, px: number): string {
   return `${t(found?.label ?? "Classic")} · ${px}px`;
 }
 
-export function PosterCardSection({ previewPoster }: { previewPoster: string }) {
+export function PosterCardSection() {
   const t = useT();
   const { settings, update } = useSettings();
-  const cardW = Math.round(150 * settings.posterScale);
-  const cardH = Math.round(225 * settings.posterScale);
-  const previewW = Math.min(cardW, 178);
+  const art = useSampleArtwork();
   const tv = settings.rowCardStyle === "tv";
 
   return (
     <>
       <Section title={t("Poster card style")}>
-        <div className="flex flex-col gap-3">
-          <span className="harbor-settings-label">{t("Live preview")}</span>
-          <div className="flex flex-wrap items-center gap-6 rounded-[10px] bg-elevated px-5 py-5">
-            <span className="grid min-h-[248px] w-[220px] shrink-0 place-items-center rounded-[10px] bg-canvas py-3">
-              <PreviewImage
-                src={previewPoster}
-                className="aspect-[2/3] object-cover transition-[width,border-radius] duration-300 ease-in-out"
-                style={{ width: previewW, borderRadius: settings.posterRadius }}
-              />
-            </span>
-            <div className="flex min-w-0 flex-1 flex-wrap gap-x-8 gap-y-4">
-              <PxRow
-                label={t("Width")}
-                value={cardW}
-                min={90}
-                max={300}
-                onCommit={(px) => update({ posterScale: Math.round((px / 150) * 100) / 100 })}
-              />
-              <PxRow
-                label={t("Height")}
-                value={cardH}
-                min={135}
-                max={450}
-                onCommit={(px) => update({ posterScale: Math.round((px / 225) * 100) / 100 })}
-              />
-              <PxRow
-                label={t("Radius")}
-                value={settings.posterRadius}
-                min={0}
-                max={40}
-                onCommit={(px) => update({ posterRadius: px })}
-              />
-            </div>
-          </div>
-        </div>
-
         <SettingRow
           label={t("Row card style")}
           desc={t("TV shows wide art cards with the logo on them. Poster is the classic grid.")}
@@ -107,51 +70,68 @@ export function PosterCardSection({ previewPoster }: { previewPoster: string }) 
           </SettingRow>
         )}
 
-        <SettingRow
-          wide
-          label={t("Size")}
-          desc={t("How large every poster card is drawn across Home and search.")}
-        >
-          <div className="flex w-full max-w-[520px] flex-wrap items-center gap-4">
-            <input
-              type="range"
-              min={0}
-              max={POSTER_SIZES.length - 1}
-              step={1}
-              aria-label={t("Size")}
-              value={sizeIndex(settings.posterScale)}
-              onChange={(e) => update({ posterScale: POSTER_SIZES[Number(e.target.value)].scale })}
-              className="harbor-slider h-11 min-w-0 flex-1"
-              style={fillStyle(sizeIndex(settings.posterScale), 0, POSTER_SIZES.length - 1)}
+        <div className="hset-postertune">
+          <div className="hset-postertune-stage">
+            <PreviewImage
+              src={art.poster}
+              className="aspect-[2/3] object-cover"
+              style={{
+                width: Math.round(118 * settings.posterScale),
+                borderRadius: settings.posterRadius,
+                transition: "width 260ms ease-in-out, border-radius 260ms ease-in-out",
+              }}
             />
-            <span className="w-[104px] shrink-0 text-end text-[15.5px] font-semibold text-ink">
-              {SIZE_LABEL(t, settings.posterScale)}
-            </span>
           </div>
-        </SettingRow>
+          <div className="hset-postertune-dials">
+            <SettingRow
+              wide
+              label={t("Size")}
+              desc={t("How large every poster card is drawn across Home and search.")}
+            >
+              <div className="flex w-full items-center gap-4">
+                <input
+                  type="range"
+                  min={0}
+                  max={POSTER_SIZES.length - 1}
+                  step={1}
+                  aria-label={t("Size")}
+                  value={sizeIndex(settings.posterScale)}
+                  onChange={(e) =>
+                    update({ posterScale: POSTER_SIZES[Number(e.target.value)].scale })
+                  }
+                  className="harbor-slider h-11 min-w-0 flex-1"
+                  style={fillStyle(sizeIndex(settings.posterScale), 0, POSTER_SIZES.length - 1)}
+                />
+                <span className="w-[92px] shrink-0 text-end text-[15.5px] font-semibold text-ink">
+                  {SIZE_LABEL(t, settings.posterScale)}
+                </span>
+              </div>
+            </SettingRow>
 
-        <SettingRow
-          wide
-          label={t("Corner radius")}
-          desc={t("How rounded the corners of every poster card are.")}
-        >
-          <div className="flex w-full max-w-[520px] flex-wrap items-center gap-4">
-            <input
-              type="range"
-              min={0}
-              max={40}
-              step={2}
-              aria-label={t("Corner radius")}
-              value={settings.posterRadius}
-              onChange={(e) => update({ posterRadius: Number(e.target.value) })}
-              className="harbor-slider h-11 min-w-0 flex-1"
-              style={fillStyle(settings.posterRadius, 0, 40, 2)}
-            />
-            <span className="w-[136px] shrink-0 text-end text-[15.5px] font-semibold tabular-nums text-ink">
-              {RADIUS_LABEL(t, settings.posterRadius)}
-            </span>
+            <SettingRow
+              wide
+              label={t("Corner radius")}
+              desc={t("How rounded the corners of every poster card are.")}
+            >
+              <div className="flex w-full items-center gap-4">
+                <input
+                  type="range"
+                  min={0}
+                  max={40}
+                  step={2}
+                  aria-label={t("Corner radius")}
+                  value={settings.posterRadius}
+                  onChange={(e) => update({ posterRadius: Number(e.target.value) })}
+                  className="harbor-slider h-11 min-w-0 flex-1"
+                  style={fillStyle(settings.posterRadius, 0, 40, 2)}
+                />
+                <span className="w-[124px] shrink-0 text-end text-[15.5px] font-semibold tabular-nums text-ink">
+                  {RADIUS_LABEL(t, settings.posterRadius)}
+                </span>
+              </div>
+            </SettingRow>
           </div>
-        </SettingRow>
+        </div>
 
         <SettingRow
           wide
@@ -312,23 +292,3 @@ function PosterDockPreview({ transitionMs }: { transitionMs: number }) {
   );
 }
 
-function PxRow({
-  label,
-  value,
-  min,
-  max,
-  onCommit,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  onCommit: (px: number) => void;
-}) {
-  return (
-    <span className="flex min-w-[112px] flex-col gap-2">
-      <span className="text-[15.5px] font-medium text-ink-muted">{label}</span>
-      <PxField value={value} min={min} max={max} onCommit={onCommit} />
-    </span>
-  );
-}

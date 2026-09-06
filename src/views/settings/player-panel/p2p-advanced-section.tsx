@@ -423,12 +423,3 @@ export function P2PPowerToolsSection() {
     </Section>
   );
 }
-
-export function P2PAdvancedSection() {
-  return (
-    <>
-      <StreamCacheSection />
-      <P2PPowerToolsSection />
-    </>
-  );
-}

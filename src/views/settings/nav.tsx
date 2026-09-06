@@ -1054,6 +1054,26 @@ const NAV_ITEM_BY_ID = new Map(NAV_GROUPS.flatMap((g) => g.items).map((i) => [i.
 
 const SETTINGS_OPTIONS: SettingsOption[] = [
   {
+    label: "Screensaver style",
+    section: "theme",
+    anchorTitle: "Screensaver style",
+    keywords: [
+      "screensaver",
+      "screen saver",
+      "idle screen",
+      "when harbor sits idle",
+      "cat",
+      "cat and boat",
+      "boat",
+      "illustration",
+      "animation while idle",
+      "cinematic backdrops",
+      "ambient",
+      "what shows when idle",
+      "change the screensaver",
+    ],
+  },
+  {
     label: "Set up my TV from this computer",
     section: "tv",
     anchorTitle: "The link to your TV",

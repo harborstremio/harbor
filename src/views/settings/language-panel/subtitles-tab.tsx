@@ -19,6 +19,8 @@ export function SubtitlesLanguageTab() {
         />
       </Section>
 
+      <DualSubtitleSection />
+
       <Section
         title={t("Choosing a track")}
         subtitle={t("Which subtitle Harbor lands on when more than one is available.")}
@@ -66,8 +68,6 @@ export function SubtitlesLanguageTab() {
           onChange={(v) => update({ showSubtitleIndicator: v })}
         />
       </Section>
-
-      <DualSubtitleSection />
     </>
   );
 }

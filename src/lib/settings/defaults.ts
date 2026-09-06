@@ -114,6 +114,7 @@ export const DEFAULT: Settings = {
   heroTrailerAudio: false,
   navIconAnimations: true,
   screensaver: true,
+  screensaverStyle: "ambient",
   screensaverDelayMin: 5,
   resumePrompt: false,
   resumePlayback: true,

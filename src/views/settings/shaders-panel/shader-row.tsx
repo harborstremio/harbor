@@ -4,14 +4,13 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { Segmented, ToggleRow } from "../shared";
 import { SettingRow, Nested } from "../kit";
-import { appliesLabel, segmentedWide, STAGE_ICON, TIER_LOAD } from "./stages";
+import { appliesLabel, segmentedWide, TIER_LOAD } from "./stages";
 
 export function ShaderRow({ entry }: { entry: ShaderCatalogEntry }) {
   const { settings, update } = useSettings();
   const t = useT();
   const state = settings.playerShaders?.[entry.id];
   const enabled = !!state?.enabled;
-  const Icon = STAGE_ICON[entry.stage];
 
   const conflicted = entry.conflictsWith?.some((c) =>
     c === "hdrToSdr" ? settings.playerHdrToSdr : c === "rtxHdr" ? settings.playerRtxHdr : false,
@@ -35,7 +34,6 @@ export function ShaderRow({ entry }: { entry: ShaderCatalogEntry }) {
     <>
       <ToggleRow
         label={t(entry.name)}
-        leading={<Icon size={18} strokeWidth={2.2} />}
         sub={`${t(TIER_LOAD[entry.tier])} ${t(appliesLabel(entry.content))}`}
         value={enabled}
         onChange={(v) => patch({ enabled: v })}

@@ -33,7 +33,7 @@ export const SECTION_TABS: Partial<Record<SectionId, TabEntry[]>> = {
     { id: "advanced", label: "mpv.conf", icon: "FileCode" },
   ],
   shaders: [
-    { id: "anime4k", label: "Anime4K", icon: "Sparkles" },
+    { id: "anime4k", label: "Anime Shaders", icon: "Sparkles" },
     { id: "more", label: "More shaders", icon: "Layers" },
   ],
   anime: [
