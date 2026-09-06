@@ -4,6 +4,7 @@ import { Check, RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { IS_BETA_BUILD } from "@/lib/build-info";
 import { useT } from "@/lib/i18n";
+import { readBetaReturnContext } from "@/lib/updater/beta-return";
 import { ROW_DESC, Section } from "../shared";
 import { SettingRow } from "../kit";
 import { Signature } from "../signature";
@@ -36,11 +37,16 @@ export function AboutTab() {
 
 function AboutRow() {
   const t = useT();
+  const experimental = readBetaReturnContext(__APP_VERSION__);
   return (
     <>
       <InfoLine
         label={t("Version")}
-        value={`${__APP_VERSION__}${IS_BETA_BUILD ? ` (${t("Beta")})` : ""}`}
+        value={
+          experimental
+            ? `${experimental.experimentalVersion} (${t("Experimental")})`
+            : `${__APP_VERSION__}${IS_BETA_BUILD ? ` (${t("Beta")})` : ""}`
+        }
       />
       <InfoLine label={t("Build")} value={isTauri ? t("Desktop (Tauri 2 / WebView2)") : t("Web")} />
       <InfoLine label={t("Bug reports")} value="bugs@harbor.site" />

@@ -59,6 +59,9 @@ export function UpdateRoot() {
   }, [pillVisible, u.status, u.version]);
 
   if (isLinuxDesktop()) return null;
+  // Explicit returns stay in their settings confirmation, never in an
+  // "update available" toast with the ordinary retry/manual-download actions.
+  if (u.intent === "return-beta" && u.status !== "error") return null;
 
   if (u.panelOpen) return createPortal(<UpdateCard />, document.body);
   if (!pillVisible) return null;

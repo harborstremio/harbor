@@ -6,12 +6,17 @@ import { RollbackRow } from "./rollback-row";
 import { BuildFeedback } from "./build-feedback";
 import { BackupRow } from "./backup-row";
 import { SettingsRecoverRow } from "./settings-recover-row";
+import { ExperimentalBuildsSection } from "./experimental-builds-section";
+import { readBetaReturnContext } from "@/lib/updater/beta-return";
+import { useExperimentalAccess } from "@/lib/updater/experimental-access";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 export function UpdatesPanel() {
   const t = useT();
   const supportsInAppUpdates = isTauri && !isLinuxDesktop();
+  const experimentalInstalled = readBetaReturnContext(__APP_VERSION__) !== null;
+  const experimentalAccess = useExperimentalAccess();
 
   return (
     <>
@@ -24,10 +29,12 @@ export function UpdatesPanel() {
         >
           <UpdatesRow />
           <BetaChannelRow />
-          <RollbackRow />
+          {!experimentalInstalled && <RollbackRow />}
           <BuildFeedback />
         </Section>
       )}
+
+      {(experimentalAccess || experimentalInstalled) && <ExperimentalBuildsSection />}
 
       <Section
         title={t("Backup & restore")}

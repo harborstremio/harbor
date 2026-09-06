@@ -1,6 +1,6 @@
 [package]
 name = "harbor"
-version = "0.9.123"
+version = "0.9.124"
 description = "A Stremio client built for adventure"
 edition = "2021"
 
@@ -62,6 +62,7 @@ rustls = { version = "0.23", default-features = false, features = [
   "logging",
 ] }
 harbor-core = { path = "../harbor-core" }
+harbor-install-recovery = { path = "../harbor-install-recovery" }
 librqbit = { version = "=8.1.1", default-features = false, features = ["rust-tls"] }
 url = "2"
 realfft = "3"

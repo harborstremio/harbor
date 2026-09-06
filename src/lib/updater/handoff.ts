@@ -18,6 +18,7 @@ export type HandoffPlan = {
   size: number | null;
   payloadVersion: number;
   verifiable: boolean;
+  recoveryProtocol?: 1;
 };
 
 type ManifestEntry = {
@@ -103,6 +104,7 @@ export function stageHandoff(
     url: plan.url,
     signature: plan.signature,
     version: plan.version,
+    recoverable: plan.recoveryProtocol === 1,
     onEvent: channel,
   });
 }

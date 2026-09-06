@@ -730,6 +730,20 @@ pub(crate) fn install_core(
 
     fs::create_dir_all(&dest).map_err(|e| format!("cannot create {}: {e}", dest.display()))?;
 
+    let (total, shipped) = extract_payload(&dest, progress)?;
+    if replacing {
+        progress(86.0, "Clearing files from the old version");
+        prune_stale(&dest, &shipped);
+    }
+    finish_install(&dest, desktop_shortcut, total, progress)
+}
+
+#[cfg(feature = "payload")]
+fn extract_payload(
+    dest: &Path,
+    progress: &mut dyn FnMut(f64, &str),
+) -> Result<(u64, std::collections::BTreeSet<PathBuf>), String> {
+
     let mut archive = open_payload()?;
 
     let mut total: u64 = 0;
@@ -768,11 +782,11 @@ pub(crate) fn install_core(
         progress(pct, &format!("Copying {name}"));
     }
 
-    if replacing {
-        progress(86.0, "Clearing files from the old version");
-        prune_stale(&dest, &shipped);
-    }
+    Ok((total, shipped))
+}
 
+#[cfg(feature = "payload")]
+fn finish_install(dest: &Path, desktop_shortcut: bool, total: u64, progress: &mut dyn FnMut(f64, &str)) -> Result<(), String> {
     progress(88.0, "Registering shortcuts");
     let exe = dest.join(MAIN_EXE);
     let mut lnks: Vec<PathBuf> = Vec::new();
@@ -800,6 +814,32 @@ pub(crate) fn install_core(
 
     progress(100.0, "Finished");
     Ok(())
+}
+
+#[cfg(feature = "payload")]
+pub(crate) fn prepare_recoverable(tx: &harbor_install_recovery::Transaction) -> Result<u64, String> {
+    let dest = tx.stage();
+    let (total, _) = extract_payload(&dest, &mut |_, _| {})?;
+    if !dest.join(MAIN_EXE).is_file() { return Err("payload is missing harbor.exe".into()); }
+    write_install_marker(&dest, &shipped_version())?;
+    // Keep a standalone recovery tool outside the application tree. It can
+    // restore an interrupted swap even when the normal shortcut cannot launch.
+    let setup = std::env::current_exe().map_err(|e| e.to_string())?;
+    fs::copy(setup, tx.root().join("Recover-Harbor.exe")).map_err(|e| e.to_string())?;
+    Ok(total)
+}
+
+#[cfg(feature = "payload")]
+pub(crate) fn finish_recoverable(dest: &Path, desktop: bool, total: u64) -> Result<(), String> {
+    finish_install(dest, desktop, total, &mut |_, _| {})
+}
+
+#[cfg(feature = "payload")]
+pub(crate) fn restore_registration(dest: &Path) -> Result<(), String> {
+    let text = fs::read_to_string(dest.join(MARKER)).map_err(|e| e.to_string())?;
+    let marker: serde_json::Value = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+    let version = marker.get("version").and_then(|v| v.as_str()).ok_or("missing previous version")?;
+    write_uninstall_entry(dest, version, 0)
 }
 
 #[cfg(feature = "payload")]

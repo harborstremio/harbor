@@ -2137,7 +2137,7 @@ dependencies = [
 
 [[package]]
 name = "harbor"
-version = "0.9.123"
+version = "0.9.124"
 dependencies = [
  "axum",
  "base64 0.22.1",
@@ -2150,6 +2150,7 @@ dependencies = [
  "gilrs",
  "gtk",
  "harbor-core",
+ "harbor-install-recovery",
  "hound",
  "kothok-edge-tts",
  "libc",
@@ -2214,6 +2215,10 @@ dependencies = [
  "unicode-normalization",
  "wasm-bindgen",
 ]
+
+[[package]]
+name = "harbor-install-recovery"
+version = "0.1.0"
 
 [[package]]
 name = "hashbrown"

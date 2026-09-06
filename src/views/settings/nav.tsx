@@ -11,6 +11,7 @@ import {
 import { settingsAnchor, type SectionId } from "./shared";
 import { TOP_GROUPS } from "./groups";
 import { markSectionSeen, useSettingsNew } from "./settings-new";
+import { useExperimentalAccess } from "@/lib/updater/experimental-access";
 
 type IconProps = { size?: number; strokeWidth?: number };
 
@@ -2813,6 +2814,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
 
+  {
+    label: "Experimental builds",
+    section: "updates",
+    anchorTitle: "Experimental builds",
+    keywords: ["experimental", "developer builds", "test builds", "preview", "early fixes"],
+  },
   {
     label: "Updates & rollback",
     section: "updates",
@@ -9934,6 +9941,7 @@ setSettingsSearchVocabulary([
 
 export function useNavSearch(trimmed: string) {
   const t = useT();
+  const experimentalAccess = useExperimentalAccess();
   const matches = useMemo<NavItem[] | null>(() => {
     if (!trimmed) return null;
     const out: NavItem[] = [];
@@ -9953,14 +9961,16 @@ export function useNavSearch(trimmed: string) {
   }, [t, trimmed]);
   const optionMatches = useMemo<SettingsOption[] | null>(() => {
     if (!trimmed) return null;
-    return SETTINGS_OPTIONS.filter((o) =>
-      matchesSettingsSearch(trimmed, [o.label], t, o.keywords ?? []),
+    return SETTINGS_OPTIONS.filter(
+      (o) =>
+        (o.label !== "Experimental builds" || experimentalAccess) &&
+        matchesSettingsSearch(trimmed, [o.label], t, o.keywords ?? []),
     ).sort(
       (a, b) =>
         rankSettingsSearch(trimmed, a.label, a.keywords ?? []) -
         rankSettingsSearch(trimmed, b.label, b.keywords ?? []),
     );
-  }, [t, trimmed]);
+  }, [experimentalAccess, t, trimmed]);
   return { matches, optionMatches };
 }
 

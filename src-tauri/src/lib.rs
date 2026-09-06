@@ -826,6 +826,8 @@ pub fn run() {
             installer_handoff::handoff_probe,
             installer_handoff::handoff_stage,
             installer_handoff::handoff_launch,
+            installer_handoff::handoff_confirm,
+            installer_handoff::handoff_save_backup,
             power::power_inhibit,
             harbor_set_webview_memory_low,
             harbor_set_webview_visible,

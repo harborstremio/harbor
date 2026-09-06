@@ -268,6 +268,8 @@ export type Backup = {
 
 function isPortable(key: string): boolean {
   if (!key.startsWith("harbor.")) return false;
+  // Update enrollment and staged-install state belong to this installation.
+  if (key.startsWith("harbor.update.")) return false;
   if (key === "harbor.auth" || key.startsWith("harbor.auth.")) return false;
   if (key === "harbor.together.clientId") return false;
   return true;
