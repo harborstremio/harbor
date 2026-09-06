@@ -25,6 +25,7 @@ import { configureLayoutStore } from "./layout-sync/store";
 import { SYNCED_SETTINGS_FIELDS } from "./layout-sync/sections";
 
 export type {
+  AnimeIdPriorityEntry,
   ContentCategory,
   ContentFilters,
   Settings,
@@ -105,7 +106,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(STORAGE_KEY, raw);
         seedSharedFromLegacy();
         setSettings(loadEffective(sourceRef.current.profileId, sourceRef.current.linked));
-      } catch {}
+      } catch { }
     });
     return () => {
       cancelled = true;
@@ -184,7 +185,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
       void import("@tauri-apps/api/webview")
         .then(({ getCurrentWebview }) => getCurrentWebview().setZoom(scale))
-        .catch(() => {});
+        .catch(() => { });
       if (root) root.style.zoom = scale !== 1 ? "1" : "";
     } else if (root) {
       root.style.zoom = scale !== 1 ? String(scale) : "";
@@ -195,8 +196,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return;
     const shouldServe = settings.serveWebUi || settings.remoteControlEnabled;
     void import("@tauri-apps/api/core").then(({ invoke }) => {
-      if (shouldServe) invoke("web_serve_start").catch(() => {});
-      else invoke("web_serve_stop").catch(() => {});
+      if (shouldServe) invoke("web_serve_start").catch(() => { });
+      else invoke("web_serve_stop").catch(() => { });
     });
   }, [settings.serveWebUi, settings.remoteControlEnabled]);
 
@@ -381,7 +382,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
       const push = () => {
         const themes = getCustomThemes().map((t) => ({ id: t.id, name: t.name }));
-        void invoke("tray_set_custom_themes", { themes }).catch(() => {});
+        void invoke("tray_set_custom_themes", { themes }).catch(() => { });
       };
       push();
       unsub = subscribeCustomThemes(push);

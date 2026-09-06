@@ -1,6 +1,7 @@
 import { Check, Info } from "lucide-react";
 import { useSettings } from "@/lib/settings";
 import { Section } from "../shared";
+import { AnimeIdPriorityCard } from "../anime-id-priority-card";
 import { SettingRow } from "../kit";
 import { SRow } from "../ui";
 import { StreamPriorityCard } from "../stream-priority-card";
@@ -18,6 +19,7 @@ export function SortingTab() {
     >
       <StreamSortPicker value={settings.streamSort} onChange={(v) => update({ streamSort: v })} />
       <StreamPriorityCard />
+      <AnimeIdPriorityCard />
       <SettingRow
         icon={<Info size={18} strokeWidth={2.2} className="text-ink-subtle" />}
         label={t("Aggregator addons")}
