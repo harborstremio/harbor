@@ -1,4 +1,4 @@
-import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
+import { Image as ImageIcon, Loader2, Upload, X } from "../icons";
 import { useRef, useState } from "react";
 import { t, useT } from "@/lib/i18n";
 import { ROW_ACTION } from "../kit";

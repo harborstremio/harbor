@@ -1,4 +1,4 @@
-import { BookOpen, X } from "lucide-react";
+import { BookOpen, X } from "../../icons";
 import { useModalExit } from "@/components/modal-shell";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";

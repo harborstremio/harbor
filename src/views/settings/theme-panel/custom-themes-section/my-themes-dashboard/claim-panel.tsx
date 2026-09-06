@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Link2, Loader2 } from "lucide-react";
+import { ChevronDown, Link2, Loader2 } from "../../../icons";
 import { claimTheme, forgetUpload, getMyUploads } from "@/lib/theme-store";
 import { useT } from "@/lib/i18n";
 import { ROW_ACTION_PRIMARY, ROW_DESC, ROW_TITLE, SettingRow } from "../../../kit";

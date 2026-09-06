@@ -1,4 +1,4 @@
-import { BookOpen, Check, Copy, Download, RotateCcw, Trash2, Upload } from "lucide-react";
+import { BookOpen, Check, Copy, Download, RotateCcw, Trash2, Upload } from "./icons";
 import { useRef, useState } from "react";
 import { defaultAwardIcon } from "@/components/icons/award-logo";
 import { isNativePick } from "@/components/avatar-picker/avatar-import";

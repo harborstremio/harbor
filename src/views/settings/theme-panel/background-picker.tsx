@@ -1,5 +1,5 @@
 import { fillStyle } from "@/components/slider";
-import { AlertCircle, ImageDown, Trash2 } from "lucide-react";
+import { AlertCircle, ImageDown, Trash2 } from "../icons";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { ROW_ACTION, ROW_ACTION_PRIMARY, SettingRow } from "../kit";

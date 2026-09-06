@@ -1,5 +1,5 @@
 import { fillStyle } from "@/components/slider";
-import { ArrowUpDown, Languages, Type } from "lucide-react";
+import { ArrowUpDown, Languages, Type } from "../icons";
 import { Dropdown } from "@/components/dropdown";
 import { Flag } from "@/components/flag";
 import { useSettings } from "@/lib/settings";

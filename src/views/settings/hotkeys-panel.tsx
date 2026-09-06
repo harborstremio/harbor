@@ -1,5 +1,5 @@
 import { useSubTabs } from "./sub-tabs";
-import { Keyboard, RotateCcw } from "lucide-react";
+import { Keyboard, RotateCcw } from "./icons";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   HOTKEYS,

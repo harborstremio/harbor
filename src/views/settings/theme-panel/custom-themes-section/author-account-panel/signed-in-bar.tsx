@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ImagePlus, KeyRound, Loader2, LogOut, RefreshCw, Trash2 } from "lucide-react";
+import { Check, ImagePlus, KeyRound, Loader2, LogOut, RefreshCw, Trash2 } from "../../../icons";
 import { useT } from "@/lib/i18n";
 import { changeAuthorPassword, logoutAuthor, type Author } from "@/lib/theme-auth";
 import { removeAvatar as removeEcosystemAvatar, uploadAvatar } from "@/lib/social/avatar";

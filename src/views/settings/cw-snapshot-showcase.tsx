@@ -1,4 +1,4 @@
-import { Camera } from "lucide-react";
+import { Camera } from "./icons";
 import { useT } from "@/lib/i18n";
 import { useSettingsPreviewArt } from "@/lib/settings-preview-art";
 import { PreviewImage } from "./preview-image";

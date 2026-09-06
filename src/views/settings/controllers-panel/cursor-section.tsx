@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, RotateCcw, Upload } from "lucide-react";
+import { Check, RotateCcw, Upload } from "../icons";
 import { GamepadCursor } from "@/components/gamepad-cursor";
 import { fillStyle } from "@/components/slider";
 import {

@@ -1,4 +1,4 @@
-import { Check, Pencil, Plus } from "lucide-react";
+import { Check, Pencil, Plus } from "../icons";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { tvFocus } from "@/lib/keyboard-navigation";
 import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";

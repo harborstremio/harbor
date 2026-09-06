@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Loader2, Reply as ReplyIcon, Trash2 } from "lucide-react";
+import { ChevronDown, Loader2, Reply as ReplyIcon, Trash2 } from "../../../../icons";
 import { useT } from "@/lib/i18n";
 import type { ThemeComment } from "@/lib/theme-store";
 import { UserHoverCard } from "@/views/profile/user-hover-card";

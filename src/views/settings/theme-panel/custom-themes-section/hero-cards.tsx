@@ -1,4 +1,4 @@
-import { ArrowRight, Check, FileDown, Library, Palette } from "lucide-react";
+import { ArrowRight, Check, FileDown, Library, Palette } from "../../icons";
 import type { ReactNode } from "react";
 import type { ThemePreset } from "@/lib/theme";
 import { useT } from "@/lib/i18n";

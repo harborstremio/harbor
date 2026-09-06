@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUpRight, Check, Download } from "lucide-react";
+import { ArrowUpRight, Check, Download } from "./icons";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { downloadText } from "@/lib/download-text";

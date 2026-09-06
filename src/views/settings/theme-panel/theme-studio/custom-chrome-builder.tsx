@@ -8,7 +8,7 @@ import {
   RotateCcw,
   Shapes,
   X,
-} from "lucide-react";
+} from "../../icons";
 import { useState } from "react";
 import type { ChromeConfig, ChromeNavId } from "@/lib/theme";
 import { useT } from "@/lib/i18n";

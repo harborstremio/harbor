@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Download, Link2 } from "lucide-react";
+import { Check, Download, Link2 } from "../icons";
 import { type CommunityPack } from "@/lib/stream-badges";
 import { useT } from "@/lib/i18n";
 import { ROW_ACTION, ROW_ACTION_PRIMARY } from "../kit";

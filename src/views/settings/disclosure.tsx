@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "./icons";
 import { useRef, useState, type ReactNode } from "react";
 
 export function Disclosure({

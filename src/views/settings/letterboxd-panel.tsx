@@ -1,4 +1,4 @@
-import { Check, ExternalLink, Link2, Loader2, LogOut, Plus, Trash2, X } from "lucide-react";
+import { Check, ExternalLink, Link2, Loader2, LogOut, Plus, Trash2, X } from "./icons";
 import { useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useLetterboxd } from "@/lib/stremboxd/provider";

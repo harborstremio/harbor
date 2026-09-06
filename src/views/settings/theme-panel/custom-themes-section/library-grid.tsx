@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Copy, FilePlus2, Palette, Trash2 } from "lucide-react";
+import { ArrowRight, Check, Copy, FilePlus2, Palette, Trash2 } from "../../icons";
 import { useState } from "react";
 import type { ThemePreset } from "@/lib/theme";
 import { useT } from "@/lib/i18n";

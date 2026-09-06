@@ -1,5 +1,5 @@
 import { fillStyle } from "@/components/slider";
-import { Contrast, RotateCcw, Sun } from "lucide-react";
+import { Contrast, RotateCcw, Sun } from "../icons";
 import { useId, useRef, useState, type ChangeEvent } from "react";
 import { advanceFocus } from "@/lib/keyboard-navigation";
 import { isRtl, navOwnsFocus } from "@/lib/keyboard-navigation/geometry";

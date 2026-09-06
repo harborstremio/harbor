@@ -1,4 +1,4 @@
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2 } from "../../icons";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { ROW_TITLE } from "../../shared";

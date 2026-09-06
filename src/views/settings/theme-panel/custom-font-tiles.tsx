@@ -1,4 +1,4 @@
-import { Check, Loader2, Trash2, Upload } from "lucide-react";
+import { Check, Loader2, Trash2, Upload } from "../icons";
 import { useRef, type ChangeEvent } from "react";
 import { useCustomFonts } from "@/lib/custom-fonts";
 import { useT } from "@/lib/i18n";

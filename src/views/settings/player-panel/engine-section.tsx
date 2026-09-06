@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "../icons";
 import { useEffect, useState } from "react";
 import { isWindowsDesktop } from "@/lib/platform";
 import { probeMpv, type MpvProbe } from "@/lib/player/mpv";

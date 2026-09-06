@@ -1,4 +1,4 @@
-import { History } from "lucide-react";
+import { History } from "./icons";
 import { IS_BETA_BUILD } from "@/lib/build-info";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";

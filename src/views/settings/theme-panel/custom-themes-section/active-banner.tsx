@@ -1,4 +1,4 @@
-import { Check, Copy } from "lucide-react";
+import { Check, Copy } from "../../icons";
 import { getThemeById, type ThemePreset } from "@/lib/theme";
 import { useT } from "@/lib/i18n";
 

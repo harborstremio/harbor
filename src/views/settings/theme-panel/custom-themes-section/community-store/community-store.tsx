@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertCircle, RefreshCw, Sparkles, Upload } from "lucide-react";
+import { AlertCircle, RefreshCw, Sparkles, Upload } from "../../../icons";
 import { Search } from "@/components/icons/search-icon";
 import { useT } from "@/lib/i18n";
 import { getTheme, type StoreTheme } from "@/lib/theme-store";

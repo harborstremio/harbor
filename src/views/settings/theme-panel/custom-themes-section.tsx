@@ -1,4 +1,4 @@
-import { AlertCircle } from "lucide-react";
+import { AlertCircle } from "../icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActiveBanner } from "./custom-themes-section/active-banner";
 import { ExportBlock } from "./custom-themes-section/export-block";

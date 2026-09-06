@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "../../../icons";
 import { useT } from "@/lib/i18n";
 import { Field, inputClass } from "../field";
 import { passwordStrength, strengthColor } from "./password-strength";

@@ -1,4 +1,4 @@
-import { Check, Filter, FilterX, Pencil, Plus, Trash2 } from "lucide-react";
+import { Check, Filter, FilterX, Pencil, Plus, Trash2 } from "./icons";
 import { useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";

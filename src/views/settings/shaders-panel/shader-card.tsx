@@ -1,4 +1,4 @@
-import { Check, Download, ExternalLink, Loader2, RefreshCw } from "lucide-react";
+import { Check, Download, ExternalLink, Loader2, RefreshCw } from "../icons";
 import { useEffect, useRef, useState } from "react";
 import { downloadShader } from "@/lib/shaders";
 import { tvFocus } from "@/lib/keyboard-navigation";

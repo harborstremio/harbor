@@ -1,4 +1,4 @@
-import { BookOpen, Check, Copy, Download, Play, Redo2, Undo2, X } from "lucide-react";
+import { BookOpen, Check, Copy, Download, Play, Redo2, Undo2, X } from "../../icons";
 import { useEffect, useRef, useState } from "react";
 import { CodeEditor, type CodeLang } from "@/components/code-editor";
 import { downloadText } from "@/lib/download-text";

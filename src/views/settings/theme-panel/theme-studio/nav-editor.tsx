@@ -1,4 +1,4 @@
-import { RotateCcw } from "lucide-react";
+import { RotateCcw } from "../../icons";
 import { useState } from "react";
 import {
   NAV_ITEMS,

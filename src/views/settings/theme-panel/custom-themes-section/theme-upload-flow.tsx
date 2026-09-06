@@ -17,7 +17,7 @@ import {
   Trash2,
   Upload,
   X,
-} from "lucide-react";
+} from "../../icons";
 import { useT } from "@/lib/i18n";
 import { getActiveModal, isBackKey, isEditable } from "@/lib/keyboard-navigation/geometry";
 import { exportThemeJson, getCustomThemes, type CustomTheme } from "@/lib/custom-themes";

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSubTabs } from "./sub-tabs";
 import { fillStyle, SliderReset } from "@/components/slider";
 import { DEFAULT } from "@/lib/settings/defaults";
-import { Gamepad2 } from "lucide-react";
+import { Gamepad2 } from "./icons";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { useGamepads } from "@/lib/gamepad/store";

@@ -1,4 +1,4 @@
-import { LayoutGrid, LayoutTemplate, Pencil, RotateCcw, Save, Undo2 } from "lucide-react";
+import { LayoutGrid, LayoutTemplate, Pencil, RotateCcw, Save, Undo2 } from "../icons";
 import type { PlayerChromeConfig, ThemeId } from "@/lib/player-chrome";
 import { useT } from "@/lib/i18n";
 import { Segmented } from "../shared";

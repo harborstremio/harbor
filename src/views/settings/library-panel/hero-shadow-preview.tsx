@@ -1,5 +1,5 @@
 import { Play } from "@/components/icons/play-filled";
-import { Plus } from "lucide-react";
+import { Plus } from "../icons";
 import { useSettings } from "@/lib/settings";
 import { useSampleArtwork } from "@/lib/sample-artwork";
 import { useT } from "@/lib/i18n";

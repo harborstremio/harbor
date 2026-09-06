@@ -8,7 +8,7 @@ import {
   Sparkles,
   Star,
   Upload,
-} from "lucide-react";
+} from "../../../icons";
 import { Search } from "@/components/icons/search-icon";
 import { useT } from "@/lib/i18n";
 import { type BundleKind, type StoreBundle } from "@/lib/bundle-store";

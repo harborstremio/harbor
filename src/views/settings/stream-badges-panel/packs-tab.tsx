@@ -10,7 +10,7 @@ import {
   Store,
   Trash2,
   Upload,
-} from "lucide-react";
+} from "../icons";
 import { emitListToast } from "@/components/lists/list-toast";
 import { safeFetch } from "@/lib/safe-fetch";
 import {

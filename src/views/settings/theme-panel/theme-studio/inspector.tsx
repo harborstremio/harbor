@@ -1,4 +1,4 @@
-import { RotateCcw, Shuffle } from "lucide-react";
+import { RotateCcw, Shuffle } from "../../icons";
 import { useState, type ReactNode } from "react";
 import type { CodeLang } from "@/components/code-editor";
 import { useT } from "@/lib/i18n";

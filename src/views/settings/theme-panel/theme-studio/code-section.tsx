@@ -1,4 +1,4 @@
-import { BookOpen, Code2 } from "lucide-react";
+import { BookOpen, Code2 } from "../../icons";
 import { useState } from "react";
 import type { CodeLang } from "@/components/code-editor";
 import { useT } from "@/lib/i18n";

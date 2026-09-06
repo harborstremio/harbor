@@ -1,4 +1,4 @@
-import { ArrowDownToLine, MessageSquare, Star } from "lucide-react";
+import { ArrowDownToLine, MessageSquare, Star } from "../../../../icons";
 import { useT } from "@/lib/i18n";
 import type { ThemeNotification } from "@/lib/theme-store";
 import { ROW_DESC, ROW_TITLE } from "@/views/settings/shared";

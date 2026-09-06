@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useModalExit } from "@/components/modal-shell";
 import { createPortal } from "react-dom";
-import { ArrowDownToLine, Check, RefreshCw, Share2, Star, X } from "lucide-react";
+import { ArrowDownToLine, Check, RefreshCw, Share2, Star, X } from "../../../icons";
 import { useT } from "@/lib/i18n";
 import { isBackKey, isEditable } from "@/lib/keyboard-navigation/geometry";
 import { downloadTheme, rateTheme, type StoreTheme } from "@/lib/theme-store";

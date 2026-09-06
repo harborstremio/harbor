@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertCircle, Check, Loader2, UserRound } from "lucide-react";
+import { AlertCircle, Check, Loader2, UserRound } from "../../../icons";
 import { useT } from "@/lib/i18n";
 import { loginAuthor, recoverAuthor, registerAuthor } from "@/lib/theme-auth";
 import { ROW_ACTION_PRIMARY } from "../../../kit";

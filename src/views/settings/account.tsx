@@ -1,7 +1,7 @@
 import { SettingGroup } from "./kit";
 import { useSettings } from "@/lib/settings";
 import { useState } from "react";
-import { Info, Link2 } from "lucide-react";
+import { Info, Link2 } from "./icons";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, ToggleRow } from "./shared";
 import { useSubTabs } from "./sub-tabs";

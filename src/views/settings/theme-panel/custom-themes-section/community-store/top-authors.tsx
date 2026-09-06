@@ -1,4 +1,4 @@
-import { ArrowDownToLine } from "lucide-react";
+import { ArrowDownToLine } from "../../../icons";
 import { useT } from "@/lib/i18n";
 import { UserHoverCard } from "@/views/profile/user-hover-card";
 import { requestOpenProfile } from "@/lib/social/open-profile";

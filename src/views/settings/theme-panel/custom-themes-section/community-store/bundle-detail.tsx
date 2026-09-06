@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useModalExit } from "@/components/modal-shell";
 import { createPortal } from "react-dom";
-import { Check, Flag, Package, Share2, Star, X } from "lucide-react";
+import { Check, Flag, Package, Share2, Star, X } from "../../../icons";
 import { useT } from "@/lib/i18n";
 import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import {

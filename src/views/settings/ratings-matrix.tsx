@@ -1,4 +1,4 @@
-import { AlignLeft, Image as ImageIcon, Popcorn, Sparkles } from "lucide-react";
+import { AlignLeft, Image as ImageIcon, Popcorn, Sparkles } from "./icons";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { useKnobAnim } from "@/lib/knob-anim";
 import { InfoTip, SettingRow } from "./kit";

@@ -1,4 +1,4 @@
-import { AppWindow, Check, Clock3, Hourglass, Timer } from "lucide-react";
+import { AppWindow, Check, Clock3, Hourglass, Timer } from "../icons";
 import { useState } from "react";
 import { ClockDisplay, FullscreenClock } from "@/components/player/fullscreen-clock";
 import { useT } from "@/lib/i18n";

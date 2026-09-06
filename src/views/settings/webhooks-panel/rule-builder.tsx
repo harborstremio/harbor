@@ -1,4 +1,4 @@
-import { Check, ChevronRight, Info, Plus, Trash2 } from "lucide-react";
+import { Check, ChevronRight, Info, Plus, Trash2 } from "../icons";
 import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { useT } from "@/lib/i18n";
 import { MOVIE_GENRES } from "@/lib/feed/tags";

@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "../icons";
 import { useEffect, useState } from "react";
 import {
   FIELD_HELP,

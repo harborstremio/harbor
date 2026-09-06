@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BookOpen, RefreshCw, UploadCloud } from "lucide-react";
+import { BookOpen, RefreshCw, UploadCloud } from "../../icons";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import { myThemes, type StoreTheme } from "@/lib/theme-store";
 import { useT } from "@/lib/i18n";

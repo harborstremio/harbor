@@ -1,4 +1,4 @@
-import { Check, Loader2, Wifi, X } from "lucide-react";
+import { Check, Loader2, Wifi, X } from "../icons";
 import { useEffect, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { t as tr } from "@/lib/i18n";

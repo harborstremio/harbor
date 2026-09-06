@@ -1,4 +1,4 @@
-import { ExternalLink, Link2, LogOut } from "lucide-react";
+import { ExternalLink, Link2, LogOut } from "./icons";
 import { useState } from "react";
 import { AnilistConnectModal } from "@/components/anilist/anilist-connect-modal";
 import { useAnilist } from "@/lib/anilist/provider";

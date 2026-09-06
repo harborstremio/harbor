@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Filter, X } from "lucide-react";
+import { Check, Filter, X } from "../../../icons";
 import { useT } from "@/lib/i18n";
 import { advanceFocus, tvFocus } from "@/lib/keyboard-navigation";
 import {

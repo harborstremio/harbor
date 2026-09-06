@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import { icons } from "lucide-react";
 import uploadGlyph from "@/assets/nav-icons/download.svg?raw";
 import { resizeAvatar } from "./account/avatar-utils";
 import { ProfileAvatar, SubtitleText } from "@/chrome/account-menu/account-menu-parts";
@@ -9,13 +8,13 @@ import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { TOP_GROUPS } from "./groups";
 import { SECTION_ICONS } from "./section-icons";
+import { SetIcon } from "./set-icon";
 import { tabsFor } from "./tab-registry";
 import { useNavSearch } from "./nav";
 import { settingsAnchor, type SectionId } from "./shared";
 
 function Glyph({ name, size }: { name: string; size: number }) {
-  const Icon = icons[name as keyof typeof icons] ?? icons.Circle;
-  return <Icon size={size} strokeWidth={2} />;
+  return <SetIcon name={name} size={size} />;
 }
 
 type Band = { section: string; sections: SectionId[] };

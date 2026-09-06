@@ -1,4 +1,4 @@
-import { Check, Info } from "lucide-react";
+import { Check, Info } from "../icons";
 import { useSettings } from "@/lib/settings";
 import { Section } from "../shared";
 import { SettingRow } from "../kit";

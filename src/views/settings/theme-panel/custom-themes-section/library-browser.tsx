@@ -1,4 +1,4 @@
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "../../icons";
 import { useEffect, useState } from "react";
 import { BETA_THEMES } from "@/lib/theme";
 import { getActiveModal, isBackKey } from "@/lib/keyboard-navigation/geometry";

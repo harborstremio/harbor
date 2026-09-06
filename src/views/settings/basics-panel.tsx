@@ -1,4 +1,4 @@
-import { Check, ChevronRight, Eye, EyeOff } from "lucide-react";
+import { Check, ChevronRight, Eye, EyeOff } from "./icons";
 import { useState, type ReactNode } from "react";
 import { Flag } from "@/components/flag";
 import tmdbLogo from "@/assets/addon-logos/tmdb.png";

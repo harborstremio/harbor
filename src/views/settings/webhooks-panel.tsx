@@ -1,5 +1,5 @@
 import { useSubTabs } from "./sub-tabs";
-import { Globe, Library, Star } from "lucide-react";
+import { Globe, Library, Star } from "./icons";
 import { useRef, useState } from "react";
 import traktLogo from "@/assets/trakt.svg";
 import { fireWebhook, type WebhookKind, type WebhookPayload } from "@/lib/calendar";

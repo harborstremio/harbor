@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   Trash2,
   Zap,
-} from "lucide-react";
+} from "../icons";
 import { appCacheDir, join } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";

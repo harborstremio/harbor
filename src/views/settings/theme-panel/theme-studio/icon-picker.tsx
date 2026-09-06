@@ -1,4 +1,4 @@
-import { Ban, Upload } from "lucide-react";
+import { Ban, Upload } from "../../icons";
 import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";

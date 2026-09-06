@@ -1,4 +1,4 @@
-import { AlertTriangle, ImagePlus, X } from "lucide-react";
+import { AlertTriangle, ImagePlus, X } from "../icons";
 import { useLayoutEffect, useRef, useState } from "react";
 import { tvFocus } from "@/lib/keyboard-navigation";
 import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";

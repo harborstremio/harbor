@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ArrowDownToLine, Star } from "lucide-react";
+import { ArrowDownToLine, Star } from "../../../../icons";
 import { useT } from "@/lib/i18n";
 import type { StoreTheme } from "@/lib/theme-store";
 import type { StoreBundle } from "@/lib/bundle-store";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare } from "../../../../icons";
 import { useT } from "@/lib/i18n";
 import { RowNote } from "@/views/settings/shared";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";

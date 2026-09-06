@@ -1,4 +1,4 @@
-import { Check, Copy, ExternalLink, Globe, Loader2, Play, RotateCw, Server, Square } from "lucide-react";
+import { Check, Copy, ExternalLink, Globe, Loader2, Play, RotateCw, Server, Square } from "../icons";
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {

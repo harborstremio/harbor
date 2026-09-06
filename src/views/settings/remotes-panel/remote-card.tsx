@@ -1,4 +1,4 @@
-import { Check, Copy, ExternalLink } from "lucide-react";
+import { Check, Copy, ExternalLink } from "../icons";
 import { useMemo, useState } from "react";
 import { QR_DARK, QR_LIGHT, buildHandoffQr } from "@/lib/tv-handoff/handoff-qr";
 import { useT } from "@/lib/i18n";

@@ -1,4 +1,4 @@
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown } from "./icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnchoredMenu } from "@/components/anchored-menu";
 import { advanceFocus } from "@/lib/keyboard-navigation";

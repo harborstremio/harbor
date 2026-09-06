@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Blocks, ChevronRight, Languages, Puzzle } from "lucide-react";
+import { Blocks, ChevronRight, Languages, Puzzle } from "./icons";
 import { useAuth } from "@/lib/auth";
 import type { Addon } from "@/lib/addons";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";

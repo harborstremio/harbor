@@ -1,4 +1,4 @@
-import { AlertTriangle, ChevronDown, Eraser } from "lucide-react";
+import { AlertTriangle, ChevronDown, Eraser } from "../icons";
 import { useState } from "react";
 import { useSettings, type Settings } from "@/lib/settings";
 import { Section } from "../shared";

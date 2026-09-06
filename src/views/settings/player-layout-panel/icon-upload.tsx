@@ -1,4 +1,4 @@
-import { Image as ImageIcon, Layers, RotateCcw, Upload } from "lucide-react";
+import { Image as ImageIcon, Layers, RotateCcw, Upload } from "../icons";
 import { useRef, useState, type ChangeEvent } from "react";
 import type { PlayerControlId } from "@/lib/player-chrome";
 import { getIconPresets, presetThumb, type IconPreset } from "@/lib/player-icon-presets";

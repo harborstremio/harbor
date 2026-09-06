@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, Download, Loader2, RefreshCw } from "lucide-react";
+import { AlertTriangle, Check, Download, Loader2, RefreshCw } from "../icons";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { tvFocus } from "@/lib/keyboard-navigation";

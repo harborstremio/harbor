@@ -1,6 +1,6 @@
 import { fillStyle } from "@/components/slider";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ImagePlus, Move, ZoomIn } from "lucide-react";
+import { ImagePlus, Move, ZoomIn } from "../../../icons";
 import { useT } from "@/lib/i18n";
 import { getDirection, isRtl } from "@/lib/keyboard-navigation/geometry";
 import { ROW_ACTION } from "@/views/settings/kit";

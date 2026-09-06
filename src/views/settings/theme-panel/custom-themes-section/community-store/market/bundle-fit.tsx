@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Package } from "lucide-react";
+import { Package } from "../../../../icons";
 import type { StoreBundle } from "@/lib/bundle-store";
 
 function IconTile({ url, className }: { url: string; className: string }) {

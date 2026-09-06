@@ -1,4 +1,4 @@
-import { AlertTriangle, AtSign, Award, FileText, User } from "lucide-react";
+import { AlertTriangle, AtSign, Award, FileText, User } from "./icons";
 import { GitHubIcon } from "@/components/github-icon";
 import { useEffect, useState, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";

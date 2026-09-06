@@ -1,4 +1,4 @@
-import { Captions } from "lucide-react";
+import { Captions } from "../icons";
 import { SubtitleOffsetIndicator } from "@/components/player/subtitle-offset-indicator";
 import { useT } from "@/lib/i18n";
 import type { SubtitleOffsetPosition, SubtitleOffsetSize } from "@/lib/player/subtitle-offset";

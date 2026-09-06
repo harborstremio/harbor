@@ -1,4 +1,4 @@
-import { Check, Download, Info, Loader2, Upload } from "lucide-react";
+import { Check, Download, Info, Loader2, Upload } from "../icons";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
 import { library } from "@/lib/stremio";

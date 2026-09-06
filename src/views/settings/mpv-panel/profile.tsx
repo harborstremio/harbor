@@ -1,4 +1,4 @@
-import { Check, Feather, Gauge, Sparkles, type LucideIcon } from "lucide-react";
+import { Check, Feather, Gauge, Sparkles, type LucideIcon } from "../icons";
 import { useSettings, type Settings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { SRow } from "../ui";

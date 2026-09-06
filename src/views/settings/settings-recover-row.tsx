@@ -1,4 +1,4 @@
-import { History } from "lucide-react";
+import { History } from "./icons";
 import { useMemo, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { applyLegacyToActive, recoverableLegacyBlob } from "@/lib/settings/profile-store";

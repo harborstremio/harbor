@@ -1,4 +1,4 @@
-import { RotateCcw, Trash2 } from "lucide-react";
+import { RotateCcw, Trash2 } from "../icons";
 import { useEffect, useRef, useState } from "react";
 import { applyCustomColorsPreview, CustomColors, type FontPairId } from "@/lib/theme";
 import { useT } from "@/lib/i18n";

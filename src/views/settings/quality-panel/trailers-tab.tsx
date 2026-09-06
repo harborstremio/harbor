@@ -1,5 +1,5 @@
 import { Dropdown } from "@/components/dropdown";
-import { Film, MousePointerClick, PlayCircle, Volume2 } from "lucide-react";
+import { Film, MousePointerClick, PlayCircle, Volume2 } from "../icons";
 import { Nested, SettingRow } from "../kit";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";

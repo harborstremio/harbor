@@ -1,4 +1,4 @@
-import { ArrowUpRight, Check, Mail } from "lucide-react";
+import { ArrowUpRight, Check, Mail } from "./icons";
 import type { ReactNode } from "react";
 import elfLogo from "@/assets/elfhosted.svg";
 import stremioLogo from "@/assets/stremio.png";

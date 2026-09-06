@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, ArrowRight, BookOpen, Loader2, UploadCloud, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Loader2, UploadCloud, X } from "../../icons";
 import { getActiveModal, isBackKey, isEditable } from "@/lib/keyboard-navigation/geometry";
 import { exportThemeJson, getCustomThemes, type CustomTheme } from "@/lib/custom-themes";
 import { optimizeBackgroundForShare } from "../image-utils";

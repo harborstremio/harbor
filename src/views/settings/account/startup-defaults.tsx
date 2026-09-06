@@ -1,5 +1,5 @@
 import { Dropdown } from "@/components/dropdown";
-import { Clock, UserCheck } from "lucide-react";
+import { Clock, UserCheck } from "../icons";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";

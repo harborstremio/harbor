@@ -1,4 +1,4 @@
-import { Crown } from "lucide-react";
+import { Crown } from "../icons";
 import { useT } from "@/lib/i18n";
 import {
   PANEL_META,

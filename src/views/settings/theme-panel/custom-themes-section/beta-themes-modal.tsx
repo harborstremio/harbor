@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, FlaskConical, X } from "lucide-react";
+import { ArrowLeft, Check, FlaskConical, X } from "../../icons";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useEscape, useModalExit } from "@/components/modal-shell";

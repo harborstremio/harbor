@@ -1,4 +1,4 @@
-import { Loader2, Wrench } from "lucide-react";
+import { Loader2, Wrench } from "../icons";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import {

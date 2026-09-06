@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from "react";
-import { FlaskConical } from "lucide-react";
+import { FlaskConical } from "./icons";
 import { useT } from "@/lib/i18n";
 import { isWindowsDesktop } from "@/lib/platform";
 import { normalUpdateChannel, selectedUpdateChannel } from "@/lib/updater/channel";

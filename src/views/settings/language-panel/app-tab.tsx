@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { RotateCw } from "lucide-react";
+import { RotateCw } from "../icons";
 import { Dropdown, type DropdownOption } from "@/components/dropdown";
 import { tvFocus } from "@/lib/keyboard-navigation";
 import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";

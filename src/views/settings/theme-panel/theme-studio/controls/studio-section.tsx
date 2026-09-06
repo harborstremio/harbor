@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "../../../icons";
 import { useState, type ReactNode } from "react";
 import { ROW_DESC } from "@/views/settings/shared";
 

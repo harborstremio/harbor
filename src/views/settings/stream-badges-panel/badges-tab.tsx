@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { EyeOff, Palette } from "lucide-react";
+import { EyeOff, Palette } from "../icons";
 import { badgeLabel, FormatBadge, type BadgeKind } from "@/components/format-badge";
 import { emitListToast } from "@/components/lists/list-toast";
 import { setBadgeOverride, useBadgeState } from "@/lib/stream-badges";

@@ -1,4 +1,4 @@
-import { Clock3, Volume2 } from "lucide-react";
+import { Clock3, Volume2 } from "../icons";
 import type { PlayerChromeConfig, ThemeId, TimeFormat, VolumeStyle } from "@/lib/player-chrome";
 import { useT } from "@/lib/i18n";
 import { Segmented } from "../shared";

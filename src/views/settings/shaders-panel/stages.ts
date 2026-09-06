@@ -1,4 +1,4 @@
-import { Maximize2, Palette, Sparkles, Sun, Wand2, type LucideIcon } from "lucide-react";
+import { Maximize2, Palette, Sparkles, Sun, Wand2, type LucideIcon } from "../icons";
 import type {
   ShaderCatalogEntry,
   ShaderContent,

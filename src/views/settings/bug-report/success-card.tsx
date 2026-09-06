@@ -1,4 +1,4 @@
-import { Check, GitPullRequest } from "lucide-react";
+import { Check, GitPullRequest } from "../icons";
 import { useLayoutEffect, useRef } from "react";
 import { openUrl } from "@/lib/window";
 import { tvFocus } from "@/lib/keyboard-navigation";

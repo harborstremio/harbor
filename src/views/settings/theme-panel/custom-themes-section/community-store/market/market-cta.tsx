@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowDownToLine, Check, ChevronRight, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowDownToLine, Check, ChevronRight, Loader2 } from "../../../../icons";
 import type { ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { IconFan, type IconThumb } from "./icon-fan";

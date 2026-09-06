@@ -1,4 +1,4 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight } from "./icons";
 import { useT } from "@/lib/i18n";
 import type { TopGroup } from "./groups";
 import type { SectionId } from "./shared";

@@ -1,4 +1,4 @@
-import { Ban } from "lucide-react";
+import { Ban } from "../icons";
 import { useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";

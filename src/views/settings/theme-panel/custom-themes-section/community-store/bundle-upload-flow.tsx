@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   Upload,
   X,
-} from "lucide-react";
+} from "../../../icons";
 import { useT } from "@/lib/i18n";
 import { getActiveModal, isBackKey, isEditable } from "@/lib/keyboard-navigation/geometry";
 import { currentAuthor, subscribeAuthor, type Author } from "@/lib/theme-auth";

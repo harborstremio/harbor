@@ -1,4 +1,4 @@
-import { Check, Globe } from "lucide-react";
+import { Check, Globe } from "./icons";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { LangFlags } from "./home-language-flags";

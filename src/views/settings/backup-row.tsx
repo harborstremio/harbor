@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, Download, Info, Upload } from "lucide-react";
+import { AlertTriangle, Check, Download, Info, Upload } from "./icons";
 import { useRef, useState, type ChangeEvent } from "react";
 import {
   applyBackup,

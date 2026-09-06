@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Gamepad2, Square } from "lucide-react";
+import { Gamepad2, Square } from "../icons";
 import { useT } from "@/lib/i18n";
 import { setGamepadCapture, useGamepadCapture } from "@/lib/gamepad/capture";
 import { useLiveButtons } from "@/lib/gamepad/live";

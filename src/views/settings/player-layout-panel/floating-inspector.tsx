@@ -1,5 +1,5 @@
 import { useT } from "@/lib/i18n";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Eye, EyeOff, RotateCcw, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Eye, EyeOff, RotateCcw, X } from "../icons";
 import { useRef } from "react";
 import { tvFocus } from "@/lib/keyboard-navigation";
 import {

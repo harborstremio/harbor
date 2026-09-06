@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check } from "../../../icons";
 import type { ReactNode } from "react";
 
 export function PickGrid({ cols = 2, children }: { cols?: 1 | 2; children: ReactNode }) {

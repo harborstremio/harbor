@@ -10,7 +10,7 @@ import {
   Star,
   Trash2,
   UserRound,
-} from "lucide-react";
+} from "./icons";
 import { useEffect, useState } from "react";
 import { SimklDeviceModal } from "@/components/simkl/simkl-device-modal";
 import { useProfiles } from "@/lib/profiles";

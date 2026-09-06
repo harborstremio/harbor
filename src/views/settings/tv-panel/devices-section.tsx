@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw } from "../icons";
 import { useT } from "@/lib/i18n";
 import { forgetPairing } from "@/lib/lan-trust";
 import { useSettings } from "@/lib/settings";

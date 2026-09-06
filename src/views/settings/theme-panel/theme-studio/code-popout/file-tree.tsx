@@ -1,4 +1,4 @@
-import { ChevronDown, Download, Folder } from "lucide-react";
+import { ChevronDown, Download, Folder } from "../../../icons";
 import type { CodeLang } from "@/components/code-editor";
 import { useT } from "@/lib/i18n";
 import { IDE, type ThemeFile } from "./files";

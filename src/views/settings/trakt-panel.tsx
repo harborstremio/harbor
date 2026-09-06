@@ -1,4 +1,4 @@
-import { ExternalLink, Link2, LogOut } from "lucide-react";
+import { ExternalLink, Link2, LogOut } from "./icons";
 import { useEffect, useState } from "react";
 import { TraktDeviceModal } from "@/components/trakt/trakt-device-modal";
 import { useProfiles } from "@/lib/profiles";

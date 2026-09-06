@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Star } from "../../../icons";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, ROW_TITLE } from "@/views/settings/shared";
 

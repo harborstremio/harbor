@@ -1,4 +1,4 @@
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal } from "../icons";
 import type { ShaderCatalogEntry } from "@/lib/player/shader-catalog";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";

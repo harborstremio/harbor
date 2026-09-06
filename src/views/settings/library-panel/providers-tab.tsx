@@ -1,6 +1,6 @@
 import { resetOmdbBudget, subscribeOmdbBudget, type OmdbBudget, omdbBudget as readOmdbBudget } from "@/lib/providers/omdb";
 import { useEffect, useState } from "react";
-import { Music, Check, RotateCw } from "lucide-react";
+import { Music, Check, RotateCw } from "../icons";
 import { useSettings } from "@/lib/settings";
 import { hasCustomMetaAddon } from "@/lib/meta-resource";
 import { useT } from "@/lib/i18n";

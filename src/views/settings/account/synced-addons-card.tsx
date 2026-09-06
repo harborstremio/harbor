@@ -1,4 +1,4 @@
-import { ArrowRight, Loader2, Puzzle, X } from "lucide-react";
+import { ArrowRight, Loader2, Puzzle, X } from "../icons";
 import { useEffect, useRef, useState } from "react";
 import { AddonLogo, AddonLogoStack, resolveAddonLogo } from "@/components/addon-logo";
 import { AnchoredMenu } from "@/components/anchored-menu";

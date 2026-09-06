@@ -1,4 +1,4 @@
-import { AlertTriangle, ExternalLink, Loader2, Play } from "lucide-react";
+import { AlertTriangle, ExternalLink, Loader2, Play } from "../icons";
 import { useEffect, useState, type ReactNode } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";

@@ -1,6 +1,6 @@
 import { useSubTabs } from "./sub-tabs";
 import { StreamCacheSection } from "./player-panel/p2p-advanced-section";
-import { Check, Database, HardDrive, Trash2 } from "lucide-react";
+import { Check, Database, HardDrive, Trash2 } from "./icons";
 import { useEffect, useMemo, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { clearPickerCache } from "@/lib/picker-cache";

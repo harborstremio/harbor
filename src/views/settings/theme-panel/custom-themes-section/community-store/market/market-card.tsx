@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Download, Star } from "lucide-react";
+import { Download, Star } from "../../../../icons";
 import { useT } from "@/lib/i18n";
 import { downloadTheme, type StoreTheme } from "@/lib/theme-store";
 import { getBundle, installBundle, type StoreBundle } from "@/lib/bundle-store";

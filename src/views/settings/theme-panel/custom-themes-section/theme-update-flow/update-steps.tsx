@@ -1,4 +1,4 @@
-import { Check, Copy, ImagePlus, Plus, Trash2 } from "lucide-react";
+import { Check, Copy, ImagePlus, Plus, Trash2 } from "../../../icons";
 import type { CustomTheme } from "@/lib/custom-themes";
 import { useT } from "@/lib/i18n";
 import { Field } from "../field";

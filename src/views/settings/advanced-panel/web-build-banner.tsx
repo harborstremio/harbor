@@ -1,4 +1,4 @@
-import { Download, Lock } from "lucide-react";
+import { Download, Lock } from "../icons";
 import { GitHubIcon } from "@/components/github-icon";
 import cornerSvg from "@/assets/corner.svg";
 import { openUrl } from "@/lib/window";

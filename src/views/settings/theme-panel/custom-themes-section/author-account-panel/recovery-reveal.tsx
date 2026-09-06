@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy } from "../../../icons";
 import { useT } from "@/lib/i18n";
 import { useModalExit } from "@/components/modal-shell";
 import { ROW_ACTION, ROW_ACTION_PRIMARY } from "../../../kit";

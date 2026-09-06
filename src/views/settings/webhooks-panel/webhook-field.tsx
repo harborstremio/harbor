@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, ExternalLink, Loader2 } from "lucide-react";
+import { AlertTriangle, Check, ExternalLink, Loader2 } from "../icons";
 import { openUrl } from "@/lib/window";
 import type { ReactNode } from "react";
 import { useT } from "@/lib/i18n";

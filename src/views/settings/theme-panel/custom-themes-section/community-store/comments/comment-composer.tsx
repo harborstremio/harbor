@@ -11,7 +11,7 @@ import {
   Quote,
   Strikethrough,
   Underline,
-} from "lucide-react";
+} from "../../../../icons";
 import { useT } from "@/lib/i18n";
 import { tvFocus } from "@/lib/keyboard-navigation";
 import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";

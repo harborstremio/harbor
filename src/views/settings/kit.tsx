@@ -1,4 +1,4 @@
-import { Lock, X } from "lucide-react";
+import { Lock, X } from "./icons";
 import { UiIcon } from "@/components/ui-icon";
 import { useEffect, useRef, type ReactNode } from "react";
 import { HoverTooltip } from "@/components/hover-tooltip";

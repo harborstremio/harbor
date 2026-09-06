@@ -1,4 +1,4 @@
-import { Music } from "lucide-react";
+import { Music } from "./icons";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import type { ProfileAudioMode } from "@/lib/settings/types";

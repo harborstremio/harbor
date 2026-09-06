@@ -1,7 +1,7 @@
 import { fillStyle, SliderReset } from "@/components/slider";
 import { DEFAULT } from "@/lib/settings/defaults";
 import { Dropdown } from "@/components/dropdown";
-import { Droplet, Hourglass, MousePointer2, Moon, Palette, Sailboat, Play, Sparkles, Text, Tv, Type, Volume1, Volume2, Waves, ZoomIn } from "lucide-react";
+import { Droplet, Hourglass, MousePointer2, Moon, Palette, Sailboat, Play, Sparkles, Text, Tv, Type, Volume1, Volume2, Waves, ZoomIn } from "../icons";
 import type { ReactNode } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";

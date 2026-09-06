@@ -15,7 +15,7 @@ import {
   Users,
   Wifi,
   X,
-} from "lucide-react";
+} from "./icons";
 import { useState } from "react";
 import cloudflareLogo from "@/assets/cloudflare.webp";
 import { deleteRelay } from "@/lib/together/cf-deploy";

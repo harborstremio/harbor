@@ -1,6 +1,6 @@
 import { fillStyle, SliderReset } from "@/components/slider";
 import { DEFAULT } from "@/lib/settings/defaults";
-import { Plus, RotateCcw, X } from "lucide-react";
+import { Plus, RotateCcw, X } from "../icons";
 import { useEffect, useRef, useState } from "react";
 import godfatherStill from "@/assets/godfather-offer.svg";
 import { sfntFamilyName } from "@/lib/font-family-name";

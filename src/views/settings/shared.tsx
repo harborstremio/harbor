@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, ExternalLink, Eye, Key, Lock } from "lucide-react";
+import { AlertTriangle, Check, ExternalLink, Eye, Key, Lock } from "./icons";
 import {
   createContext,
   useContext,

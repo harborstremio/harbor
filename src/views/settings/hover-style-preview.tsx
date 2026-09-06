@@ -1,4 +1,4 @@
-import { ChevronDown, Pencil, Plus, Star, ThumbsUp } from "lucide-react";
+import { ChevronDown, Pencil, Plus, Star, ThumbsUp } from "./icons";
 import { Play } from "@/components/icons/play-filled";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { topMovies, type Meta } from "@/lib/cinemeta";

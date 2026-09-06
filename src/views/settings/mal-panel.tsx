@@ -1,4 +1,4 @@
-import { ExternalLink, Info, Link2, LogOut, RefreshCw, Trash2, UserRound } from "lucide-react";
+import { ExternalLink, Info, Link2, LogOut, RefreshCw, Trash2, UserRound } from "./icons";
 import { useEffect, useState } from "react";
 import { MalConnectModal } from "@/components/mal/mal-connect-modal";
 import { fetchMalAvatar } from "@/lib/mal/profile";

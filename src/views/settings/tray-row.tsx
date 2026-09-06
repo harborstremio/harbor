@@ -1,4 +1,4 @@
-import { Minimize2 } from "lucide-react";
+import { Minimize2 } from "./icons";
 import { useSettings } from "@/lib/settings";
 import { ToggleRow } from "./shared";
 import { SettingGroup } from "./kit";

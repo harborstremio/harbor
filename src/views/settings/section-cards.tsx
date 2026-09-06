@@ -1,4 +1,4 @@
-import { icons } from "lucide-react";
+import { icons } from "./icons";
 import { useT } from "@/lib/i18n";
 import { SECTION_ICONS } from "./section-icons";
 import type { SectionId } from "./shared";

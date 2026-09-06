@@ -1,4 +1,4 @@
-import { ShieldCheck, Upload } from "lucide-react";
+import { ShieldCheck, Upload } from "../../../icons";
 import { useT } from "@/lib/i18n";
 
 export function StoreFeatureCards({ onShare }: { onShare: () => void }) {

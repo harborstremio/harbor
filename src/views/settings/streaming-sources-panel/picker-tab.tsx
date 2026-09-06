@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check } from "../icons";
 import { useSettings } from "@/lib/settings";
 import { Section, Segmented, ToggleRow } from "../shared";
 import { SettingRow } from "../kit";

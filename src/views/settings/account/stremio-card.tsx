@@ -1,7 +1,7 @@
 import { ROW_ACTION_PRIMARY, ROW_DESC, SettingRow } from "../kit";
 import { SButton } from "../ui";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Fingerprint, LogIn, LogOut, UserRound } from "lucide-react";
+import { Fingerprint, LogIn, LogOut, UserRound } from "../icons";
 import { AuthModal } from "@/components/auth-modal";
 import { useAuth } from "@/lib/auth";
 import { tvFocus } from "@/lib/keyboard-navigation";

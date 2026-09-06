@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Eye, EyeOff, GripVertical } from "lucide-react";
+import { ChevronDown, ChevronUp, Eye, EyeOff, GripVertical } from "../../../icons";
 import { useEffect, useRef, useState } from "react";
 import type { NavItem } from "@/chrome/nav-items";
 import { useT } from "@/lib/i18n";

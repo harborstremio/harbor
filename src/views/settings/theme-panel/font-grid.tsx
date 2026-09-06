@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check } from "../icons";
 import { FONT_PAIRS, type FontPairId } from "@/lib/theme";
 import { CustomFontTiles } from "./custom-font-tiles";
 

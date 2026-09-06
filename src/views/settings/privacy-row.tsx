@@ -1,4 +1,4 @@
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "./icons";
 import { useEffect, useState } from "react";
 import { blockedTrackerCount, subscribeBlockedTrackers } from "@/lib/privacy/blocklist";
 import { useSettings } from "@/lib/settings";

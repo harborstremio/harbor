@@ -1,4 +1,4 @@
-import { AppWindow, Frame, Move, PanelTop, PanelTopDashed } from "lucide-react";
+import { AppWindow, Frame, Move, PanelTop, PanelTopDashed } from "./icons";
 import { useEffect, useState, type ReactNode } from "react";
 import { getCustomThemes, subscribeCustomThemes } from "@/lib/custom-themes";
 import { useSettings } from "@/lib/settings";

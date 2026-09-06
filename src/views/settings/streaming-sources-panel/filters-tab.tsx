@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check } from "../icons";
 import { useSettings } from "@/lib/settings";
 import { Section } from "../shared";
 import { SRow } from "../ui";

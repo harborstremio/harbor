@@ -1,4 +1,4 @@
-import { Check, Lock, Pencil, Plus } from "lucide-react";
+import { Check, Lock, Pencil, Plus } from "../icons";
 import { CatAvatar } from "@/components/icons/cat-avatar";
 import { useProfiles } from "@/lib/profiles";
 import { useT } from "@/lib/i18n";

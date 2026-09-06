@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Copy, Download, ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { Check, Copy, Download, ImagePlus, Loader2, Trash2 } from "../../icons";
 import { setCustomThemePreview } from "@/lib/custom-themes";
 import type { ThemePreset } from "@/lib/theme";
 import { useT } from "@/lib/i18n";

@@ -1,4 +1,4 @@
-import { Film, Maximize, Minimize, Plus, Save, Tv, Users, X } from "lucide-react";
+import { Film, Maximize, Minimize, Plus, Save, Tv, Users, X } from "../icons";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { captureFocusReturn, tvFocus } from "@/lib/keyboard-navigation";

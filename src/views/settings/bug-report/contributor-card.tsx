@@ -1,4 +1,4 @@
-import { ChevronRight, GitPullRequest } from "lucide-react";
+import { ChevronRight, GitPullRequest } from "../icons";
 import { GitHubIcon } from "@/components/github-icon";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";

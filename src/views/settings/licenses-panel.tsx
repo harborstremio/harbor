@@ -1,5 +1,5 @@
 import { useCallback, useState, type CSSProperties } from "react";
-import { ArrowUpRight, Check, Download } from "lucide-react";
+import { ArrowUpRight, Check, Download } from "./icons";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { APP_VERSION } from "@/lib/build-info";

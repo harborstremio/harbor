@@ -4,7 +4,7 @@ import {
   Plus,
   RefreshCw,
   Trash2,
-} from "lucide-react";
+} from "../icons";
 import { UiIcon } from "@/components/ui-icon";
 import {
   useCallback,

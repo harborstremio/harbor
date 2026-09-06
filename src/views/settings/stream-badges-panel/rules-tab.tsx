@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Info, Plus } from "lucide-react";
+import { Info, Plus } from "../icons";
 import { Search } from "@/components/icons/search-icon";
 import { type BadgeKind } from "@/components/format-badge";
 import { emitListToast } from "@/components/lists/list-toast";

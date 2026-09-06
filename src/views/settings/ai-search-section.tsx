@@ -13,7 +13,7 @@ import openrouterLogo from "@/assets/ai-logos/openrouter.png";
 import groqLogo from "@/assets/ai-logos/groq.png";
 import jinaLogo from "@/assets/ai-logos/jina.png";
 import { AiModelSelect } from "./ai-model-select";
-import { Globe, Sparkles } from "lucide-react";
+import { Globe, Sparkles } from "./icons";
 import { ExtLink, KeyField, Section, Segmented, ToggleRow } from "./shared";
 import { SettingRow } from "./kit";
 

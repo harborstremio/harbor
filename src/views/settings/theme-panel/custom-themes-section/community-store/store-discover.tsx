@@ -8,7 +8,7 @@ import {
   Sun,
   Zap,
   type LucideIcon,
-} from "lucide-react";
+} from "../../../icons";
 import { t as translate, useT } from "@/lib/i18n";
 import type { StoreTheme } from "@/lib/theme-store";
 import type { Mood } from "./color-rank";

@@ -1,4 +1,4 @@
-import { Check, RotateCw } from "lucide-react";
+import { Check, RotateCw } from "../icons";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";

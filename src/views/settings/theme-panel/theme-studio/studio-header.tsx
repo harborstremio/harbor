@@ -1,4 +1,4 @@
-import { PanelRightClose, Redo2, Undo2, X } from "lucide-react";
+import { PanelRightClose, Redo2, Undo2, X } from "../../icons";
 import { useT } from "@/lib/i18n";
 
 export function StudioHeader({

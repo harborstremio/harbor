@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Bell, Check, Loader2, X } from "lucide-react";
+import { Bell, Check, Loader2, X } from "../../../../icons";
 import { useT } from "@/lib/i18n";
 import { advanceFocus } from "@/lib/keyboard-navigation";
 import { isBackKey } from "@/lib/keyboard-navigation/geometry";

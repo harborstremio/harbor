@@ -1,4 +1,4 @@
-import { Download, FlaskConical, Loader2, RotateCw } from "lucide-react";
+import { Download, FlaskConical, Loader2, RotateCw } from "../icons";
 import { useId, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { readChannelPreference, selectedUpdateChannel } from "@/lib/updater/channel";

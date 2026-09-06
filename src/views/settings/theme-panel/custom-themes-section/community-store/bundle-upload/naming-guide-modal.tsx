@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useModalExit } from "@/components/modal-shell";
 import { createPortal } from "react-dom";
-import { Check, FileType2, Film, FolderArchive, Sparkles, Tag, Wand2, X } from "lucide-react";
+import { Check, FileType2, Film, FolderArchive, Sparkles, Tag, Wand2, X } from "../../../../icons";
 import { useT } from "@/lib/i18n";
 import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { ROW_TITLE } from "../../../../shared";

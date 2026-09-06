@@ -1,4 +1,4 @@
-import { Check, ExternalLink, X } from "lucide-react";
+import { Check, ExternalLink, X } from "./icons";
 import { useModalExit } from "@/components/modal-shell";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";

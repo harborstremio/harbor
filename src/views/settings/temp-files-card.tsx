@@ -1,4 +1,4 @@
-import { HardDrive, Loader2, Trash2 } from "lucide-react";
+import { HardDrive, Loader2, Trash2 } from "./icons";
 import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useT } from "@/lib/i18n";

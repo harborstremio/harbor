@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check } from "../icons";
 import { Flag } from "@/components/flag";
 import { useSettings } from "@/lib/settings";
 import { LANGUAGES, setUiLanguage, useT } from "@/lib/i18n";

@@ -1,5 +1,5 @@
 import { useSubTabs } from "./sub-tabs";
-import { Info } from "lucide-react";
+import { Info } from "./icons";
 import { useEffect, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";

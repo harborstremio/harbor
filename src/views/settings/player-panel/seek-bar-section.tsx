@@ -1,5 +1,5 @@
 import { fillStyle } from "@/components/slider";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw } from "../icons";
 import { useRef, useState } from "react";
 import seekPreviewBg from "@/assets/preview/seek-preview.webp";
 import { SeekBarVisual } from "@/components/player/transport/seek-bar-visual";

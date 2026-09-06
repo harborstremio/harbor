@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react";
+import { Trash2 } from "../../../icons";
 import { useT } from "@/lib/i18n";
 import { PickCard } from "./pick-grid";
 

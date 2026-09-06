@@ -10,7 +10,7 @@ import {
   Upload,
   Wand2,
   X,
-} from "lucide-react";
+} from "../../../../icons";
 import { useT } from "@/lib/i18n";
 import { tvFocus } from "@/lib/keyboard-navigation";
 import { isBackKey, navOwnsFocus } from "@/lib/keyboard-navigation/geometry";

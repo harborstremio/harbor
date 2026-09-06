@@ -9,7 +9,7 @@ import {
   RefreshCw,
   Star,
   Trash2,
-} from "lucide-react";
+} from "../../../icons";
 import { authToken } from "@/lib/theme-auth";
 import { deleteUpload, setVisibility, themeVersions, type StoreTheme } from "@/lib/theme-store";
 import { useT } from "@/lib/i18n";

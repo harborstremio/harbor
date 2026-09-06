@@ -1,4 +1,4 @@
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown } from "./icons";
 import { useCallback, useRef, useState } from "react";
 import { advanceFocus } from "@/lib/keyboard-navigation";
 import { getDirection, isBackKey } from "@/lib/keyboard-navigation/geometry";

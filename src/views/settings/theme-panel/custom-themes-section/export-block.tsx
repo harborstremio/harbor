@@ -1,4 +1,4 @@
-import { Check, Copy, X } from "lucide-react";
+import { Check, Copy, X } from "../../icons";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { ROW_ACTION, ROW_ACTION_PRIMARY } from "../../kit";

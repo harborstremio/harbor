@@ -1,4 +1,4 @@
-import { Loader2, RotateCw } from "lucide-react";
+import { Loader2, RotateCw } from "../icons";
 import { useEffect, useState } from "react";
 import cloudflareLogo from "@/assets/cloudflare.webp";
 import { useT } from "@/lib/i18n";

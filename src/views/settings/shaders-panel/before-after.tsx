@@ -1,5 +1,5 @@
 import { fillStyle } from "@/components/slider";
-import { ChevronDown, Images } from "lucide-react";
+import { ChevronDown, Images } from "../icons";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
 

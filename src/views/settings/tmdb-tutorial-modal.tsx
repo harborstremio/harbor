@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, ExternalLink, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ExternalLink, X } from "./icons";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useModalExit } from "@/components/modal-shell";

@@ -2,7 +2,7 @@ import { SliderRow } from "../theme-panel/display-section";
 import { useEffect, useRef, useState } from "react";
 import harborStyleImg from "@/assets/onboarding/harborstyle.webp";
 import traditionalStyleImg from "@/assets/onboarding/traditional.webp";
-import { Check, Contrast, Image as ImageIcon, LayoutTemplate, Maximize, Play, Volume2 } from "lucide-react";
+import { Check, Contrast, Image as ImageIcon, LayoutTemplate, Maximize, Play, Volume2 } from "../icons";
 import { useSettings } from "@/lib/settings";
 import { clearAllSnapshots, snapshotCount } from "@/lib/snapshots";
 import { useT } from "@/lib/i18n";

@@ -1,4 +1,4 @@
-import { ArrowDownToLine, Check, Info, X } from "lucide-react";
+import { ArrowDownToLine, Check, Info, X } from "../icons";
 import { ModalShell, useModalExit } from "@/components/modal-shell";
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { RichNote } from "@/components/update/rich-notes";

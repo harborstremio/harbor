@@ -1,4 +1,4 @@
-import { ExternalLink, Trash2 } from "lucide-react";
+import { ExternalLink, Trash2 } from "./icons";
 import { useEffect, useState, type ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";

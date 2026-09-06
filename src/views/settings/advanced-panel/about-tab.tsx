@@ -1,6 +1,6 @@
 import { ActionRow } from "./action-row";
 import { useOnboarding } from "@/lib/onboarding";
-import { Check, RotateCw } from "lucide-react";
+import { Check, RotateCw } from "../icons";
 import { useEffect, useState } from "react";
 import { IS_BETA_BUILD } from "@/lib/build-info";
 import { useT } from "@/lib/i18n";

@@ -1,4 +1,4 @@
-import { Bookmark, Check, ListVideo, Play, Sparkles } from "lucide-react";
+import { Bookmark, Check, ListVideo, Play, Sparkles } from "./icons";
 import type { ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { useSettingsPreviewArt, type PreviewArt } from "@/lib/settings-preview-art";

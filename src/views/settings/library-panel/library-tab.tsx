@@ -1,7 +1,7 @@
 import animeCatIcon from "@/assets/category/anime.svg";
 import livetvCatIcon from "@/assets/category/livetv.svg";
 import adultCatIcon from "@/assets/category/adult.svg";
-import { BookOpen, Download, HardDrive, Minus, Plus } from "lucide-react";
+import { BookOpen, Download, HardDrive, Minus, Plus } from "../icons";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { useSampleArtwork } from "@/lib/sample-artwork";

@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { AnchoredMenu } from "@/components/anchored-menu";
-import { Check, FolderOpen, X } from "lucide-react";
+import { Check, FolderOpen, X } from "./icons";
 import { saveTextFileWithPath } from "@/lib/download-text";
 import { advanceFocus } from "@/lib/keyboard-navigation";
 import { getDirection, isBackKey } from "@/lib/keyboard-navigation/geometry";

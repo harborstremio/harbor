@@ -1,4 +1,4 @@
-import { Check, ChevronDown, ImageDown, RefreshCw, Trash2, Upload } from "lucide-react";
+import { Check, ChevronDown, ImageDown, RefreshCw, Trash2, Upload } from "../icons";
 import { useEffect, useRef, useState } from "react";
 import { applyAppIcon } from "@/lib/app-icon";
 import { useSettings } from "@/lib/settings";

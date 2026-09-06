@@ -8,7 +8,7 @@ import {
   Trash2,
   Upload,
   X,
-} from "lucide-react";
+} from "../icons";
 import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from "react";
 import { createPortal } from "react-dom";
 import type { LayoutProfile } from "@/lib/player-chrome-profiles";

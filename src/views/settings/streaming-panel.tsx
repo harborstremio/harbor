@@ -1,4 +1,4 @@
-import { Check, Download, ExternalLink, Key, Loader2, Trash2, X } from "lucide-react";
+import { Check, Download, ExternalLink, Key, Loader2, Trash2, X } from "./icons";
 import { Search } from "@/components/icons/search-icon";
 import { useEffect, useState } from "react";
 import { AddonLogo } from "@/components/addon-logo";

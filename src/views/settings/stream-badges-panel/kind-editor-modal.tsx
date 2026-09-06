@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Upload } from "lucide-react";
+import { Upload } from "../icons";
 import { badgeLabel, FormatBadge, type BadgeKind } from "@/components/format-badge";
 import { emitListToast } from "@/components/lists/list-toast";
 import { setBadgeOverride, useBadgeState } from "@/lib/stream-badges";

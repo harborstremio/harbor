@@ -1,6 +1,6 @@
 import { fillStyle } from "@/components/slider";
 import { useModalExit } from "@/components/modal-shell";
-import { Trash2, X } from "lucide-react";
+import { Trash2, X } from "./icons";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { captureFocusReturn } from "@/lib/keyboard-navigation";

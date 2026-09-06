@@ -1,4 +1,4 @@
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "../icons";
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { Diagnostics } from "@/lib/bug-report";
 import { getDirection } from "@/lib/keyboard-navigation/geometry";

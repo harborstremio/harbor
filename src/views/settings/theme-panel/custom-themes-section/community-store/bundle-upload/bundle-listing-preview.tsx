@@ -1,4 +1,4 @@
-import { Award, Medal, Star } from "lucide-react";
+import { Award, Medal, Star } from "../../../../icons";
 import { useT } from "@/lib/i18n";
 import { ROW_TITLE } from "../../../../shared";
 import type { BundleKind } from "./icon-keys";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CloudOff } from "lucide-react";
+import { CloudOff } from "../icons";
 import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
 import { useSyncStatus } from "@/lib/profile-sync/use-sync-status";

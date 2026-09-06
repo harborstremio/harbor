@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, Check, Download, Loader2, Star, Upload } from "lucide-react";
+import { AlertCircle, Check, Download, Loader2, Star, Upload } from "../../icons";
 import { Search } from "@/components/icons/search-icon";
 import { browseThemes, downloadTheme, rateTheme, type StoreTheme } from "@/lib/theme-store";
 import { useT } from "@/lib/i18n";

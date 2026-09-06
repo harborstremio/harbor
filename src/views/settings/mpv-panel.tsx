@@ -1,4 +1,4 @@
-import { Info } from "lucide-react";
+import { Info } from "./icons";
 import { useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";

@@ -10,7 +10,7 @@ import {
   RotateCw,
   Timer,
   X,
-} from "lucide-react";
+} from "../icons";
 import { useEffect, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";

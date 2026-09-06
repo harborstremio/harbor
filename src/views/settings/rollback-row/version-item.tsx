@@ -1,4 +1,4 @@
-import { ArrowDownToLine, Check } from "lucide-react";
+import { ArrowDownToLine, Check } from "../icons";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { installerUrl, type VersionEntry } from "@/lib/updater/versions";

@@ -1,4 +1,4 @@
-import { Angry, Frown, Laugh, Meh, Smile, ThumbsUp } from "lucide-react";
+import { Angry, Frown, Laugh, Meh, Smile, ThumbsUp } from "./icons";
 import { GitHubIcon } from "@/components/github-icon";
 import { useRef, useState, type ComponentType } from "react";
 import { APP_VERSION, BUILD_LABEL, IS_BETA_BUILD } from "@/lib/build-info";

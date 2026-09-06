@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bookmark, Eye, Hash, MoveVertical, Popcorn } from "lucide-react";
+import { Bookmark, Eye, Hash, MoveVertical, Popcorn } from "./icons";
 import { useHydratedPoster, useSampleArtwork } from "@/lib/sample-artwork";
 import previewPoster3 from "@/assets/preview/poster3.webp";
 import letterboxdLogo from "@/assets/addon-logos/letterboxd.png";

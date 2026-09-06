@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "./icons";
 import { invoke } from "@tauri-apps/api/core";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";

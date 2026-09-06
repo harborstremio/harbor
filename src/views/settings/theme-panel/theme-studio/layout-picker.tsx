@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check } from "../../icons";
 import { useT } from "@/lib/i18n";
 import type { ThemeLayout } from "@/lib/theme";
 

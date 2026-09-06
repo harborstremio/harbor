@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useEscape, useModalExit } from "@/components/modal-shell";
 import { createPortal } from "react-dom";
-import { Check, Download, Loader2, Share2, Star, X } from "lucide-react";
+import { Check, Download, Loader2, Share2, Star, X } from "../../icons";
 import { useT } from "@/lib/i18n";
 import { downloadTheme, rateTheme, type StoreTheme } from "@/lib/theme-store";
 import { subscribeOpenProfile } from "@/lib/social/open-profile";
