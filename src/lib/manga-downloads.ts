@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { chapterPages } from "@/lib/manga/api";
+import { isSuwayomiServerUrl } from "@/lib/manga/sources/suwayomi/auth-registry";
 
 export type MangaDownloadStatus = "idle" | "downloading" | "paused" | "done" | "error";
 
@@ -824,7 +825,7 @@ export async function downloadMangaPage(
       try {
         const { invoke } = await import("@tauri-apps/api/core");
         const resp = (await invoke("harbor_fetch", {
-          args: { url: pageUrl, method: "GET", headers: fetchHeaders, responseType: "base64", timeoutMs: 30000 },
+          args: { url: pageUrl, method: "GET", headers: fetchHeaders, responseType: "base64", timeoutMs: 30000, allowLocalNetwork: isSuwayomiServerUrl(pageUrl) },
         })) as { status: number; ok: boolean; body: string; ContentType?: string; headers?: Record<string, string> };
         if (resp.ok && typeof resp.body === "string" && resp.body) {
           const bin = atob(resp.body.trim());

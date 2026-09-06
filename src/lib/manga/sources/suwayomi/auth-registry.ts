@@ -43,3 +43,11 @@ export function suwayomiAuthFor(url: string): string | undefined {
   }
   return best;
 }
+
+export function isSuwayomiServerUrl(url: string): boolean {
+  if (!url || knownBases.size === 0) return false;
+  for (const base of knownBases) {
+    if (url.startsWith(base + "/") || url === base) return true;
+  }
+  return false;
+}
