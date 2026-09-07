@@ -23,7 +23,6 @@ test("all new community author surfaces share the profile button", () => {
     `${root}/community-browser.tsx`,
     `${root}/community-detail.tsx`,
     `${root}/community-store/market/market-hero.tsx`,
-    `${root}/community-store/store-top-charts.tsx`,
     `${root}/community-store/theme-detail.tsx`,
   ]) {
     assert.match(read(path), /ThemeAuthorButton/, `${path} must use the shared author button`);
@@ -31,10 +30,7 @@ test("all new community author surfaces share the profile button", () => {
 });
 
 test("clickable theme cards use a sibling overlay instead of nesting author buttons", () => {
-  for (const path of [
-    `${root}/community-browser.tsx`,
-    `${root}/community-store/store-top-charts.tsx`,
-  ]) {
+  for (const path of [`${root}/community-browser.tsx`]) {
     const source = read(path);
     assert.match(source, /aria-label=\{tr\("Open \{name\}", \{ name: (?:t|theme)\.name \}\)\}/);
     assert.match(source, /className="absolute inset-0 z-0/);

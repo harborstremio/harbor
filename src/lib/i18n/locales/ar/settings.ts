@@ -1,4 +1,8 @@
 const settings: Record<string, string> = {
+  "Content advisory theme": "سمة التنبيه بالمحتوى",
+  "Choose whether the content advisory appears in full color or a restrained monochrome tone.":
+    "اختر ما إذا كان التنبيه بالمحتوى سيظهر بألوان كاملة أو بنمط أحادي اللون هادئ.",
+  Monochrome: "أحادي اللون",
   "Smooth scrolling": "تمرير سلس",
   "Eases mouse-wheel scrolling instead of jumping line by line. Turn off if you prefer an instant response or notice any lag.":
     "تمرير سلس بعجلة الفأرة بدلا من القفز سطرا بسطر. عطله إذا كنت تفضل استجابة فورية أو لاحظت بطئا.",

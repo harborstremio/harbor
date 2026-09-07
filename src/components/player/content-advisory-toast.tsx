@@ -30,9 +30,9 @@ const SEV_STYLE_COLORED: Record<string, SeverityStyle> = {
 };
 
 const SEV_STYLE_MONO: Record<string, SeverityStyle> = {
-  Severe: { text: "text-ink", bar: "bg-ink" },
-  Moderate: { text: "text-ink-muted", bar: "bg-ink-muted" },
-  Mild: { text: "text-ink-subtle", bar: "bg-ink-subtle/70" },
+  Severe: { text: "text-ink font-bold", bar: "bg-ink" },
+  Moderate: { text: "text-ink-muted font-medium", bar: "bg-ink-muted" },
+  Mild: { text: "text-ink-subtle font-medium", bar: "bg-ink-subtle/70" },
   None: { text: "text-ink-subtle/70", bar: "bg-ink-subtle/40" },
 };
 
@@ -92,7 +92,9 @@ export function ContentAdvisoryToast({
   const rated = useMemo(
     () =>
       (categories ?? [])
-        .filter((category) => SEV_RANK[category.severity] !== undefined)
+        .filter(
+          (category) => SEV_RANK[category.severity] !== undefined && category.severity !== "None",
+        )
         .sort((a, b) => (SEV_RANK[b.severity] ?? 0) - (SEV_RANK[a.severity] ?? 0)),
     [categories],
   );
@@ -130,7 +132,6 @@ export function ContentAdvisoryToast({
     setHasTriggered(true);
     setActive(true);
     setPhase("holding");
-    setProgress(1);
     startTimeRef.current = performance.now();
     durationRef.current = HOLD_MS;
   }, [hasPlaybackStarted, hasContent, hasTriggered, playKey, preview]);
@@ -166,12 +167,12 @@ export function ContentAdvisoryToast({
   if (!hasContent || !active || !hasPlaybackStarted || phase === "done") return null;
 
   const isCardExiting = phase === "collapsing";
-  const countdownWidth = Math.max(0, Math.min(1, 1 - progress)) * 100;
   const handleInteractionEnd = () => {
     setPaused(false);
     if (phase === "holding") {
       durationRef.current = HOVER_TAIL_MS;
       startTimeRef.current = performance.now();
+      setProgress(1);
     }
   };
   const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
@@ -183,6 +184,8 @@ export function ContentAdvisoryToast({
     if (titleId) ignoreAdvisory(titleId);
     setPhase("collapsing");
   };
+  const countdownWidth = Math.max(0, Math.min(100, progress * 100));
+  void countdownWidth;
   const positionClass =
     position === "top-end"
       ? "end-6 top-20"
@@ -269,10 +272,10 @@ export function ContentAdvisoryToast({
               const style = severityStyles[category.severity] ?? severityStyles.Mild;
               const rank = SEV_RANK[category.severity] ?? 1;
               return (
-                <li key={category.category} className="flex items-center justify-between gap-3">
-                  <span className="flex min-w-0 items-center gap-2">
+                <li key={category.category} className="flex items-center justify-between gap-2.5">
+                  <span className="flex min-w-0 items-center gap-2" title={t(label)}>
                     <Icon size={14} strokeWidth={2} className={`shrink-0 ${style.text}`} />
-                    <span className="truncate text-[12.5px] text-ink">{t(label)}</span>
+                    <span className="truncate text-[12px] text-ink">{t(label)}</span>
                   </span>
                   <span className="flex shrink-0 items-center gap-1.5">
                     <span className="flex gap-[3px]" aria-hidden="true">
@@ -296,7 +299,13 @@ export function ContentAdvisoryToast({
         )}
 
         {canIgnore && (
-          <div className={rated.length > 0 ? "mt-3 border-t border-edge-soft/70 pt-2.5" : "mt-2.5"}>
+          <div
+            className={
+              rated.length > 0
+                ? "mt-3 border-t border-edge-soft/50 pt-2 text-center"
+                : "mt-2 text-center"
+            }
+          >
             <button
               type="button"
               onClick={(event) => {
@@ -304,26 +313,17 @@ export function ContentAdvisoryToast({
                 handleIgnore();
               }}
               title={t("Never show the content advisory for this title again")}
-              className="flex w-full items-center justify-center gap-1.5 rounded-md bg-white/[0.06] px-3 py-1.5 text-[11.5px] font-semibold text-ink-muted transition-[color,background-color,transform] duration-150 hover:bg-white/[0.10] hover:text-ink active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ink"
+              className="group inline-flex items-center justify-center gap-1.5 border-0 bg-transparent p-0 text-[11px] font-medium text-ink-subtle transition-all duration-200 hover:text-white focus-visible:outline-none"
             >
-              <EyeOff size={12} strokeWidth={2.2} className="shrink-0" />
-              {t("Ignore this title")}
+              <EyeOff
+                size={11.5}
+                strokeWidth={2.2}
+                className="shrink-0 transition-all duration-200 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+              />
+              <span className="transition-all duration-200 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]">
+                {t("Ignore this title")}
+              </span>
             </button>
-          </div>
-        )}
-
-        {!preview && phase === "holding" && (
-          <div
-            dir="ltr"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-edge-soft"
-          >
-            <div
-              className="h-full bg-ink-muted"
-              style={{
-                width: `${countdownWidth}%`,
-                transition: paused ? "none" : "width 60ms linear",
-              }}
-            />
           </div>
         )}
       </div>

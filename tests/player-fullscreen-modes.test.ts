@@ -8,6 +8,7 @@ import test from "node:test";
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8");
 
 function body(source: string, signature: string): string {
+  source = source.replace(/\r\n/g, "\n");
   const start = source.indexOf(signature);
   assert.ok(start >= 0, `missing ${signature}`);
   const end = source.indexOf("\n}\n", start);
@@ -63,7 +64,10 @@ test("a borderless session survives a stray DOM fullscreenchange", () => {
 });
 
 test("exiting any fullscreen also leaves borderless", () => {
-  assert.match(stateSource, /if \(windowFullscreen \|\| borderlessActive\) await exitWindowFullscreen\(\);/);
+  assert.match(
+    stateSource,
+    /if \(windowFullscreen \|\| borderlessActive\) await exitWindowFullscreen\(\);/,
+  );
 });
 
 test("the fullscreen mode setting exposes borderless to the user", () => {

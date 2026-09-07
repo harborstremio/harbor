@@ -34,7 +34,7 @@ import { AdvisoryPreview } from "./advisory-preview";
 import { AdvisoryIgnoreRow } from "./advisory-ignore-row";
 import { SeekBarPanel } from "../player-panel";
 import { FullscreenClockSettings } from "../theme-panel/fullscreen-clock-settings";
-import { Section, ToggleRow } from "../shared";
+import { Section, Segmented, ToggleRow } from "../shared";
 import { pushActivityHint } from "@/lib/discord/activity-hint";
 import { useT } from "@/lib/i18n";
 
@@ -331,6 +331,20 @@ export function PlayerLayoutPanel() {
           preview={<AdvisoryPreview />}
         />
         <AdvisoryIgnoreRow featureOn={settings.contentAdvisoryToast} />
+        {settings.contentAdvisoryToast && (
+          <Segmented
+            label={t("Content advisory theme")}
+            sub={t(
+              "Choose whether the content advisory appears in full color or a restrained monochrome tone.",
+            )}
+            value={settings.contentAdvisoryTheme}
+            options={[
+              { value: "colored", label: t("Colored") },
+              { value: "monochrome", label: t("Monochrome") },
+            ]}
+            onChange={(v) => update({ contentAdvisoryTheme: v })}
+          />
+        )}
       </Section>
 
       <Section
