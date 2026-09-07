@@ -22,6 +22,7 @@ export type SourceFolder = {
   focusGifUrl: string | null;
   coverEmoji?: string | null;
   tileShape: "LANDSCAPE" | "POSTER";
+  layout?: "CLASSIC" | "GRID";
   hideTitle?: boolean;
   catalogSources?: CatalogSource[];
   sources?: NativeSource[];
@@ -76,13 +77,49 @@ export function isValidSourceRow(data: any): data is SourceRow {
   return true;
 }
 
+export function migrateData(data: any): any {
+  if (data && typeof data === "object" && data.folders && Array.isArray(data.folders)) {
+    data.folders.forEach((folder: any) => {
+      if (folder.sources && Array.isArray(folder.sources)) {
+        folder.sources.forEach((source: any) => {
+          if (source.provider === "tmdb" && !source.mediaType) {
+            // Drop invalid sources without throwing, handled gracefully in isValidSourceRow later
+          }
+        });
+      }
+    });
+  }
+  return data;
+}
+
+export function updateSourceFolder(
+  customSources: SourceRow[],
+  sourceId: string,
+  folderId: string,
+  updates: Partial<SourceFolder>
+): SourceRow[] {
+  return customSources.map((sr) => {
+    if (sr.id !== sourceId) return sr;
+    return {
+      ...sr,
+      folders: sr.folders.map((f) => {
+        if (f.id !== folderId) return f;
+        return { ...f, ...updates };
+      }),
+    };
+  });
+}
+
 export function parseSourceRows(jsonString: string): SourceRow[] {
   try {
-    const data = JSON.parse(jsonString);
-    if (Array.isArray(data)) {
-      return data.filter(isValidSourceRow);
-    } else if (isValidSourceRow(data)) {
-      return [data];
+    const rawData = JSON.parse(jsonString);
+    if (Array.isArray(rawData)) {
+      return rawData.map(migrateData).filter(isValidSourceRow);
+    } else {
+      const migrated = migrateData(rawData);
+      if (isValidSourceRow(migrated)) {
+        return [migrated];
+      }
     }
     return [];
   } catch {

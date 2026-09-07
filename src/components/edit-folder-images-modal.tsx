@@ -2,30 +2,35 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { Segmented } from "@/views/settings/shared";
 
 export function EditFolderImagesModal({
   isOpen,
   onClose,
   initialCover,
   initialGif,
+  initialLayout,
   onSave,
 }: {
   isOpen: boolean;
   onClose: () => void;
   initialCover: string | null;
   initialGif: string | null;
-  onSave: (cover: string, gif: string) => void;
+  initialLayout?: "CLASSIC" | "GRID";
+  onSave: (cover: string, gif: string, layout?: "CLASSIC" | "GRID") => void;
 }) {
   const t = useT();
   const [cover, setCover] = useState(initialCover || "");
   const [gif, setGif] = useState(initialGif || "");
+  const [layout, setLayout] = useState<"CLASSIC" | "GRID">(initialLayout || "CLASSIC");
 
   useEffect(() => {
     if (isOpen) {
       setCover(initialCover || "");
       setGif(initialGif || "");
+      setLayout(initialLayout || "CLASSIC");
     }
-  }, [isOpen, initialCover, initialGif]);
+  }, [isOpen, initialCover, initialGif, initialLayout]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -84,7 +89,24 @@ export function EditFolderImagesModal({
             />
           </div>
 
-          <div className="mt-2 flex justify-end gap-3">
+          <div className="space-y-4 pt-4 border-t border-edge-soft">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-ink">
+                {t("Layout Style")}
+              </label>
+              <Segmented
+                options={[
+                  { label: t("Classic"), value: "CLASSIC" },
+                  { label: t("Grid"), value: "GRID" },
+                ]}
+                value={layout}
+                onChange={(val: string) => setLayout(val as "CLASSIC" | "GRID")}
+                
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-6">
             <button
               onClick={onClose}
               className="rounded-full border border-edge bg-transparent px-5 py-2 text-[13px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
@@ -93,7 +115,7 @@ export function EditFolderImagesModal({
             </button>
             <button
               onClick={() => {
-                onSave(cover.trim(), gif.trim());
+                onSave(cover.trim(), gif.trim(), layout);
                 onClose();
               }}
               className="rounded-full bg-accent px-5 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
