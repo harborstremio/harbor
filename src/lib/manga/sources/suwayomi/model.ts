@@ -1,4 +1,4 @@
-import { safeFetch } from "@/lib/safe-fetch";
+import { safeFetchLocal } from "@/lib/safe-fetch";
 import { mangaThrottle, type MangaSummary } from "@/lib/manga/types";
 import { normalizeSuwayomiBase } from "./base-url";
 import { registerSuwayomiAuth, suwayomiAuthFor } from "./auth-registry";
@@ -94,7 +94,7 @@ export function makeClient(server: SuwayomiServer, gapMs = 150): SuwayomiClient 
     getJson(path) {
       return throttle(async () => {
         try {
-          const res = await safeFetch(server.base + path, headers ? { headers } : undefined);
+          const res = await safeFetchLocal(server.base + path, headers ? { headers } : undefined);
           if (!res.ok) return null;
           return await res.json();
         } catch {
@@ -105,7 +105,7 @@ export function makeClient(server: SuwayomiServer, gapMs = 150): SuwayomiClient 
     getOk(path) {
       return throttle(async () => {
         try {
-          const res = await safeFetch(server.base + path, headers ? { headers } : undefined);
+          const res = await safeFetchLocal(server.base + path, headers ? { headers } : undefined);
           return res.ok;
         } catch {
           return false;
@@ -115,7 +115,7 @@ export function makeClient(server: SuwayomiServer, gapMs = 150): SuwayomiClient 
     deleteOk(path) {
       return throttle(async () => {
         try {
-          const res = await safeFetch(server.base + path, {
+          const res = await safeFetchLocal(server.base + path, {
             method: "DELETE",
             headers,
           });
@@ -128,7 +128,7 @@ export function makeClient(server: SuwayomiServer, gapMs = 150): SuwayomiClient 
     postJson(path, body) {
       return throttle(async () => {
         try {
-          const res = await safeFetch(server.base + path, {
+          const res = await safeFetchLocal(server.base + path, {
             method: "POST",
             headers: { ...headers, "content-type": "application/json" },
             body: JSON.stringify(body),
@@ -143,7 +143,7 @@ export function makeClient(server: SuwayomiServer, gapMs = 150): SuwayomiClient 
     probeStatus(path) {
       return throttle(async () => {
         try {
-          const res = await safeFetch(server.base + path, headers ? { headers } : undefined);
+          const res = await safeFetchLocal(server.base + path, headers ? { headers } : undefined);
           return res.status;
         } catch {
           return null;

@@ -1,4 +1,4 @@
-export type HotkeyScope = "Player" | "Global";
+export type HotkeyScope = "Player" | "Global" | "Manga";
 
 export type HotkeyId =
   | "playerClose"
@@ -51,7 +51,8 @@ export type HotkeyId =
   | "globalUiScaleDown"
   | "globalUiScaleReset"
   | "globalSearchFocus"
-  | "globalSettingsOpen";
+  | "globalSettingsOpen"
+  | "mangaMatch";
 
 export type HotkeyDef = {
   id: HotkeyId;
@@ -483,6 +484,15 @@ export const HOTKEYS: HotkeyDef[] = [
     description:
       "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.",
     defaultBinding: "ctrl+alt+s",
+  },
+
+  {
+    id: "mangaMatch",
+    scope: "Manga",
+    group: "Reader",
+    label: "Manga match",
+    description: "Open the match picker to map the current manga to AniList or MyAnimeList.",
+    defaultBinding: "c",
   },
 ];
 

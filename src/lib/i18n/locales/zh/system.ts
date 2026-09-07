@@ -320,7 +320,7 @@ const system: Record<string, string> = {
     "服务器停止响应，其余内容仍保留在此设备上。",
   "API budget (OMDb)": "API 配额（OMDb）",
   "Add a TMDB key in Setup to power this view.": "在设置向导中添加 TMDB 密钥以启用此视图。",
-  "Also joins Harbor's Discord server.": "同时加入 Harbor 的 Discord 服务器。",
+  "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.": "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
   "AniList connection": "AniList 连接",
   "Apply and reload": "应用并重新加载",
   "Auto follows your connection speed.": "自动模式会根据你的连接速度调整。",

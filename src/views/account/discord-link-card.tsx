@@ -86,7 +86,9 @@ export function DiscordLinkCard({
     <div aria-busy={busy}>
       <SettingRow
         label={t("Link Discord")}
-        desc={t("Also joins Harbor's Discord server.")}
+        desc={t(
+          "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
+        )}
         icon={<DiscordIcon size={24} className="text-[#5865F2]" />}
       >
         {canDesktop ? (

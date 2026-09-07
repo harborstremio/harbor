@@ -22,16 +22,19 @@ function toggleLang(current: string[], code: string): string[] {
 export function LanguageDropdown() {
   const t = useT();
   const [open, setOpen] = useState(false);
-  const [filter, setFilter] = useState<string[]>(() => loadMangaLangFilter());
+  const serverBase = activeMangaSource()?.baseUrl;
+  const [filter, setFilter] = useState<string[]>(() => loadMangaLangFilter(serverBase));
   const [langs, setLangs] = useState<string[] | null>(null);
   const ref = useOutsideClose(open, () => setOpen(false));
+
+  useEffect(() => setFilter(loadMangaLangFilter(serverBase)), [serverBase]);
 
   useEffect(
     () =>
       subscribeMangaLangFilter(() => {
-        setFilter(loadMangaLangFilter());
+        setFilter(loadMangaLangFilter(serverBase));
       }),
-    [],
+    [serverBase],
   );
 
   useEffect(() => {
@@ -83,7 +86,7 @@ export function LanguageDropdown() {
         <div className="absolute start-0 z-30 mt-1.5 max-h-[320px] min-w-[220px] overflow-y-auto rounded-lg border border-edge-soft bg-raised py-1 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)]">
           <button
             type="button"
-            onClick={() => saveMangaLangFilter([ALL_LANGS])}
+            onClick={() => saveMangaLangFilter([ALL_LANGS], serverBase)}
             className="flex w-full items-center justify-between gap-3 px-3 py-2 text-start text-[13px] text-ink hover:bg-elevated/60"
           >
             <span>{t("All languages")}</span>
@@ -97,7 +100,7 @@ export function LanguageDropdown() {
             <button
               key={row.code}
               type="button"
-              onClick={() => saveMangaLangFilter(toggleLang(filter, row.code))}
+              onClick={() => saveMangaLangFilter(toggleLang(filter, row.code), serverBase)}
               className="flex w-full items-center justify-between gap-3 px-3 py-2 text-start text-[13px] text-ink hover:bg-elevated/60"
             >
               <span className="flex min-w-0 items-center gap-2">

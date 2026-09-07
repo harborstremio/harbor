@@ -2,7 +2,6 @@
 export const ALL_LANGS = "*";
 
 const STORAGE_KEY = "harbor.manga.langfilter.v1";
-const DEFAULT_FILTER: string[] = ["en"];
 
 let revision = 0;
 const listeners = new Set<() => void>();
@@ -11,22 +10,30 @@ export function mangaLangFilterRevision(): number {
   return revision;
 }
 
-export function loadMangaLangFilter(): string[] {
+function storageKey(serverBase?: string): string {
+  if (!serverBase) return STORAGE_KEY;
+  return `${STORAGE_KEY}:${serverBase}`;
+}
+
+/** Fresh servers default to "All languages". */
+const NEW_SERVER_DEFAULT: string[] = [ALL_LANGS];
+
+export function loadMangaLangFilter(serverBase?: string): string[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [...DEFAULT_FILTER];
+    const raw = localStorage.getItem(storageKey(serverBase));
+    if (!raw) return [...NEW_SERVER_DEFAULT];
     const arr: unknown = JSON.parse(raw);
-    if (!Array.isArray(arr)) return [...DEFAULT_FILTER];
+    if (!Array.isArray(arr)) return [...NEW_SERVER_DEFAULT];
     const langs = arr.filter((v): v is string => typeof v === "string" && v.trim() !== "");
     return langs.length > 0 ? langs : [ALL_LANGS];
   } catch {
-    return [...DEFAULT_FILTER];
+    return [...NEW_SERVER_DEFAULT];
   }
 }
 
-export function saveMangaLangFilter(langs: string[]): void {
+export function saveMangaLangFilter(langs: string[], serverBase?: string): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(langs));
+    localStorage.setItem(storageKey(serverBase), JSON.stringify(langs));
   } catch {
     return;
   }

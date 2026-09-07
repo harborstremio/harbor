@@ -74,7 +74,7 @@ const coverage: Record<string, string> = {
   "All-time bests": "Il meglio di sempre",
   "All-time body of work, not who is trending. Trending and Top on TMDB are the live tabs.":
     "Conta l'intera carriera, non chi è di tendenza. Di tendenza e Top su TMDB sono le schede aggiornate in tempo reale.",
-  "Also joins Harbor's Discord server.": "Entra anche nel server Discord di Harbor.",
+  "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.": "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
   "An agreement between landlord and tenant": "Un contratto tra locatore e conduttore",
   "An unexpected error occurred": "Si è verificato un errore imprevisto",
   "And for the naughty ones: browsing or rating an adult addon never shows on Discord.":

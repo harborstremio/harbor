@@ -80,7 +80,7 @@ const coverage: Record<string, string> = {
   "All-time body of work, not who is trending. Trending and Top on TMDB are the live tabs.":
     "पूरे करियर का काम, न कि अभी कौन ट्रेंड कर रहा है. TMDB पर ट्रेंडिंग और टॉप लाइव टैब हैं.",
   "Almost done": "लगभग पूरा हो गया",
-  "Also joins Harbor's Discord server.": "Harbor के Discord सर्वर से भी जुड़ता है.",
+  "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.": "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
   "An agreement between landlord and tenant": "मकान मालिक और किरायेदार के बीच समझौता",
   "An unexpected error occurred": "एक अनपेक्षित त्रुटि हुई",
   "AniList Comments": "AniList टिप्पणियाँ",

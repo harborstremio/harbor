@@ -70,6 +70,7 @@ import { AnilistSyncToast } from "@/components/anilist/anilist-sync-toast";
 import { AnilistAvatarSync } from "@/components/anilist/anilist-avatar-sync";
 import { MalAvatarSync } from "@/components/mal/mal-avatar-sync";
 import { MalSyncToast } from "@/components/mal/mal-sync-toast";
+import { MangaSyncToast } from "@/components/manga/manga-sync-toast";
 import { TogetherLeaveForLiveModal } from "@/components/together-leave-for-live-modal";
 import { ThemeBackdrop } from "@/components/theme-backdrop";
 import { TopRankModal } from "@/components/top-rank-modal";
@@ -400,6 +401,8 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                   <TogetherParticipantLeftToast />
                                                   <AnilistSyncToast />
                                                   <MalSyncToast />
+                                                  <MangaSyncToast tracker="anilist" />
+                                                  <MangaSyncToast tracker="mal" />
                                                   <ListToastHost />
                                                   <DiagnosticsConsentHost />
                                                   <TogetherLeaveForLiveModal />

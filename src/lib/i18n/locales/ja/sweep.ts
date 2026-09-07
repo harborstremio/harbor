@@ -133,7 +133,7 @@ const sweep: Record<string, string> = {
   "All times": "全期間",
   "All video": "すべての動画",
   "All-time bests": "歴代ベスト",
-  "Also joins Harbor's Discord server.": "HarborのDiscordサーバーにも参加します。",
+  "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.": "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
   "Always re-encode when casting": "キャスト時は常に再エンコード",
   "Always stream P2P": "常にP2Pでストリーミング",
   Amber: "アンバー",

@@ -1,28 +1,43 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Bookmark } from "lucide-react";
+import { Bookmark, Download } from "lucide-react";
 import { chapterPages, type MangaChapter } from "@/lib/manga/api";
 import { pageHeadersFor } from "@/lib/manga/plugins/adapter";
 import { t, useT } from "@/lib/i18n";
-import { downloadedPages } from "@/lib/manga-downloads";
+import { downloadedPages, downloadMangaPage } from "@/lib/manga-downloads";
 import { recordMangaProgress, resumePageForChapter } from "@/lib/manga-progress";
 import { clearMangaReading } from "@/lib/manga-reading-state";
+import {
+  subscribeMangaMatchRequest,
+  normalizeTitle as normalizeMatchTitle,
+  getMangaMatchEntry,
+  type MangaMatchRequest,
+} from "@/lib/manga-match";
+import { anilistMangaAuthed } from "@/lib/manga/tracking-anilist";
+import { malMangaAuthed } from "@/lib/manga/tracking-mal";
+import type { MangaTracker } from "@/lib/manga/sync";
 import { activeMangaSourceId, listMangaSources } from "@/lib/manga/sources";
 import { useProfiles } from "@/lib/profiles";
-import { readWindowFullscreen, setWindowFullscreen } from "@/lib/window";
+import { effectiveBinding, formatBindingForDisplay, matchesBinding } from "@/lib/hotkeys";
+import { useSettings } from "@/lib/settings";
+import { toggleWindowFullscreen } from "@/lib/fullscreen-state";
+import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
 import { ReaderBar } from "./manga-reader/reader-bar";
 import { ReaderFooter } from "./manga-reader/reader-footer";
+import { ReaderProgressMeter } from "./manga-reader/reader-progress-meter";
 import { ReaderPageJump } from "./manga-reader/reader-page-jump";
 import { ReaderSettings } from "./manga-reader/reader-settings";
 import { PageImage } from "./manga-reader/page-image";
 import { BookFlip, type BookApi } from "./manga-reader/book-view";
 import { ReaderNav } from "./manga-reader/reader-nav";
 import { BookmarksPanel, BookmarkPagePicker } from "./manga-reader/reader-bookmarks";
+import { ReaderMatchPicker } from "./manga-reader/reader-match-picker";
 import { useReaderProgress } from "./manga-reader/hooks/use-reader-progress";
 import { useReaderPaging } from "./manga-reader/hooks/use-reader-paging";
 import { detectWebtoon } from "./manga-reader/reader-utils";
 import { addMangaBookmark, type MangaBookmark } from "@/lib/manga-bookmarks";
 import { chapterSourceOf } from "./manga-reader/reader-source-menu";
+import { chapterGroupKey, resolveReaderChapters } from "@/lib/manga/chapter-identity";
 import { useMangaRemoteBinding } from "@/lib/remote/use-manga-remote-binding";
 import { useBookTurnQueue } from "./manga-reader/hooks/use-book-turn-queue";
 import {
@@ -76,13 +91,15 @@ export function MangaReader({
   const [currentPage, setCurrentPage] = useState(0);
   const [bookSpread, setBookSpread] = useState("");
   const [chromeOpen, setChromeOpen] = useState(true);
+  const [manualHide, setManualHide] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [bookmarksOpen, setBookmarksOpen] = useState(false);
+  const [matchQueue, setMatchQueue] = useState<MangaMatchRequest[]>([]);
   const [hintDismissed, setHintDismissed] = useState(false);
   useEffect(() => setHintDismissed(false), [index]);
   const [pickBookmark, setPickBookmark] = useState(false);
   const [autoLong, setAutoLong] = useState(false);
-  const [fullscreen, setFullscreen] = useState(false);
+  const fullscreen = useWindowFullscreen();
   const [edge, setEdge] = useState({ top: false, bottom: false });
   const scrollRef = useRef<HTMLDivElement>(null);
   const pageEls = useRef<Array<HTMLDivElement | null>>([]);
@@ -92,17 +109,72 @@ export function MangaReader({
   const bookApi = useRef<BookApi | null>(null);
   const { activeId } = useProfiles();
   const pid = activeId ?? "default";
+  const { settings } = useSettings();
+  const matchBinding = effectiveBinding("mangaMatch", settings.hotkeys);
+
+  const titleKey = manga.title ? normalizeMatchTitle(manga.title) : "";
+  const hasStoredDecision = useCallback(
+    (tracker: MangaTracker) => {
+      return getMangaMatchEntry(pid, tracker, titleKey) != null;
+    },
+    [pid, titleKey],
+  );
+  const enqueueMatchWith = useCallback((trackers: MangaTracker[]) => {
+    setMatchQueue((q) => {
+      const next = [...q];
+      for (const tracker of trackers) {
+        if (!next.some((r) => r.tracker === tracker)) {
+          next.push({ tracker, title: manga.title, chapter: 0 });
+        }
+      }
+      return next;
+    });
+  }, [manga.title]);
+  const enqueueMatch = useCallback(
+    (trackers: MangaTracker[]) => {
+      enqueueMatchWith(trackers.filter((tr) => !hasStoredDecision(tr)));
+    },
+    [enqueueMatchWith, hasStoredDecision],
+  );
 
   const total = pages.length;
   const pageUrls = useMemo(() => pages.map((p) => p.url), [pages]);
+  // The reader collapses provider copies itself: callers pass the raw
+  // interleaved list, and navigation walks one representative per chapter
+  // group - the group's newest winner. When the caller opened a specific
+  // scanlator copy, its group is kept for the whole read session so
+  // consecutive chapters stay on the same provider.
+  const pickedGroup = useMemo(
+    () => (index >= 0 && index < chapters.length ? chapters[index]?.group ?? undefined : undefined),
+    // Captured on mount only - the index changes as the user navigates, but
+    // the intended provider is the one that was picked when the reader opened.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+  const collapsed = useMemo(
+    () => resolveReaderChapters(chapters, { group: pickedGroup }),
+    [chapters, pickedGroup],
+  );
   const readingOrder = useMemo(() => {
-    const num = (c: MangaChapter) => parseFloat(c.chapter ?? "") || 0;
-    return chapters.map((_, i) => i).sort((a, b) => num(chapters[a]) - num(chapters[b]) || a - b);
-  }, [chapters]);
-  const orderPos = readingOrder.indexOf(index);
+    const idToIdx = new Map(chapters.map((c, i) => [c.id, i]));
+    return collapsed
+      .map((c) => idToIdx.get(c.id))
+      .filter((i): i is number => i != null);
+  }, [chapters, collapsed]);
+  const orderPos = useMemo(() => {
+    const current = chapters[index];
+    if (!current) return -1;
+    const key = chapterGroupKey(current);
+    const pos = collapsed.findIndex((c) => chapterGroupKey(c) === key);
+    return pos >= 0 ? pos : readingOrder.indexOf(index);
+  }, [chapters, index, collapsed, readingOrder]);
   const prevIndex = orderPos > 0 ? readingOrder[orderPos - 1] : null;
   const nextIndex =
-    orderPos >= 0 && orderPos < readingOrder.length - 1 ? readingOrder[orderPos + 1] : null;
+    orderPos >= 0 && orderPos < readingOrder.length - 1
+      ? readingOrder[orderPos + 1]
+      : orderPos === -1 && readingOrder.length > 0
+        ? readingOrder[0]
+        : null;
   const atFirstChapter = orderPos <= 0;
   const atLastChapter = orderPos === -1 || orderPos === readingOrder.length - 1;
   const effMode = autoLong ? "long" : prefs.mode;
@@ -273,22 +345,32 @@ export function MangaReader({
     return () => window.removeEventListener("mousemove", onMove);
   }, [prefs.focusMode]);
 
-  useEffect(() => {
-    readWindowFullscreen().then(setFullscreen);
-  }, []);
-
   const toggleFullscreen = () => {
-    const nf = !fullscreen;
-    setFullscreen(nf);
-    void setWindowFullscreen(nf);
+    void toggleWindowFullscreen();
   };
 
   useEffect(() => {
     if (paged || loading || failed) return;
     const root = scrollRef.current;
     if (!root) return;
+    const vertical = !horizontal;
+    const atStart = () => Math.abs(vertical ? root.scrollTop : root.scrollLeft) <= 2;
+    const atEnd = () =>
+      vertical
+        ? root.scrollTop + root.clientHeight >= root.scrollHeight - 2
+        : Math.abs(root.scrollLeft) + root.clientWidth >= root.scrollWidth - 2;
+    // The middle-band observer below can never register an edge page (its box
+    // never enters the band), so short first/last pages are pinned explicitly.
+    const syncEdge = () => {
+      if (atStart()) setCurrentPage(0);
+      else if (atEnd()) setCurrentPage(Math.max(0, total - 1));
+    };
     const obs = new IntersectionObserver(
       (entries) => {
+        if (atStart() || atEnd()) {
+          syncEdge();
+          return;
+        }
         for (const e of entries) {
           if (e.isIntersecting) {
             const i = Number((e.target as HTMLElement).dataset.page);
@@ -298,9 +380,14 @@ export function MangaReader({
       },
       { root, rootMargin: horizontal ? "0px -45% 0px -45%" : "-45% 0px -45% 0px" },
     );
+    root.addEventListener("scroll", syncEdge, { passive: true });
     pageEls.current.forEach((el) => el && obs.observe(el));
-    return () => obs.disconnect();
-  }, [paged, horizontal, loading, failed, pages]);
+    syncEdge();
+    return () => {
+      root.removeEventListener("scroll", syncEdge);
+      obs.disconnect();
+    };
+  }, [paged, horizontal, loading, failed, pages, total]);
 
   useEffect(
     () => (disableMangaPersistence ? undefined : clearMangaReading),
@@ -366,7 +453,7 @@ export function MangaReader({
         document.activeElement.blur();
       }
       if (e.key === "Escape") {
-        if (!settingsOpen) onExit();
+        if (matchQueue.length === 0 && !settingsOpen) onExit();
       } else if (bookAtEnd && (e.key === " " || e.key === (rtl ? "ArrowLeft" : "ArrowRight"))) {
         e.preventDefault();
         advanceFromBookEnd();
@@ -383,11 +470,25 @@ export function MangaReader({
         else prevPage();
       } else if (e.key === "f") {
         toggleFullscreen();
+      } else if (matchesBinding(e, matchBinding)) {
+        e.preventDefault();
+        if (manga.title) enqueueMatchWith(connectedTrackers());
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   });
+
+  useEffect(() => {
+    return subscribeMangaMatchRequest((req) => {
+      if (!manga.title || normalizeMatchTitle(req.title) !== normalizeMatchTitle(manga.title)) return;
+      enqueueMatchWith([req.tracker]);
+    });
+  }, [manga.title]);
+
+  useEffect(() => {
+    enqueueMatch(connectedTrackers());
+  }, [manga.id, enqueueMatch]);
 
   const pStyle = pageStyle(prefs.fit, prefs.zoom);
   const longStyle = { width: "100%", maxWidth: `${Math.round(880 * prefs.zoom)}px` };
@@ -399,9 +500,21 @@ export function MangaReader({
   const dStyle = doublePageStyle(prefs.fit, prefs.zoom);
   const displayPage = Math.min(currentPage, Math.max(0, total - 1));
   const focus = prefs.focusMode;
-  const barVisible = focus ? edge.top : chromeOpen;
-  const footerVisible = focus ? edge.bottom : chromeOpen;
-  const controlsVisible = focus ? edge.top || edge.bottom : chromeOpen;
+  const autoShown = !manualHide && chromeOpen;
+  const barVisible = focus ? edge.top && !manualHide : autoShown;
+  const footerVisible = focus ? edge.bottom && !manualHide : autoShown;
+  const controlsVisible = focus ? (edge.top || edge.bottom) && !manualHide : autoShown;
+  const chromeVisible = (focus ? edge.top || edge.bottom : chromeOpen) && !manualHide;
+  const toggleChrome = () => {
+    if (chromeVisible) {
+      setManualHide(true);
+    } else {
+      setManualHide(false);
+      setChromeOpen(true);
+      window.clearTimeout(hideTimer.current);
+      hideTimer.current = window.setTimeout(() => setChromeOpen(false), 2600);
+    }
+  };
   const bookResume = useMemo(
     () =>
       startPage ??
@@ -534,11 +647,11 @@ export function MangaReader({
       const src = known.find((s) => s.provider === id || s.id === id);
       return src?.name ?? id;
     };
-    return chapters.map((c, i) => {
+    return collapsed.map((c, i) => {
       const sourceId = chapterSourceOf(c) || undefined;
       return {
         id: c.id,
-        index: i,
+        index: readingOrder[i] ?? 0,
         label: chapterLabel(c),
         chapter: c.chapter,
         title: c.title,
@@ -548,7 +661,7 @@ export function MangaReader({
         downloaded: c.downloaded,
       };
     });
-  }, [chapters]);
+  }, [collapsed, readingOrder]);
 
   const bookTurn = useBookTurnQueue(bookApi);
 
@@ -623,6 +736,12 @@ export function MangaReader({
         className={`absolute inset-0 overscroll-contain ${
           book ? "overflow-hidden" : horizontal ? "overflow-auto" : "overflow-y-auto"
         }`}
+        onClick={(e) => {
+          if (paged) return;
+          const t = e.target as HTMLElement;
+          if (t.closest("button, a, [role='button']")) return;
+          toggleChrome();
+        }}
       >
         {loading ? (
           <ReaderLoading />
@@ -716,12 +835,34 @@ export function MangaReader({
                 }}
                 className="flex w-full justify-center"
               >
-                <PageImage
-                  url={page.url}
-                  headers={page.headers}
-                  className="mx-auto block"
-                  style={longStyle}
-                />
+                <div className="relative inline-block">
+                  <PageImage
+                    url={page.url}
+                    headers={page.headers}
+                    className="block"
+                    style={longStyle}
+                  />
+                  {i === displayPage && prefs.enablePageDownload && page.url && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void downloadMangaPage(
+                          manga.id,
+                          manga.title,
+                          chapter.chapter,
+                          page.url,
+                          i,
+                          page.headers,
+                          chapter.id,
+                        )
+                      }
+                      className="absolute -right-12 top-16 z-10 grid h-9 w-9 place-items-center bg-canvas/85 text-accent shadow-[0_4px_16px_-4px_rgba(0,0,0,0.5)] backdrop-blur-md transition duration-150 hover:bg-accent hover:text-canvas active:scale-90"
+                      aria-label={t("Download current page")}
+                    >
+                      <Download size={17} />
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
             <div className="flex w-full justify-center py-16">{completeCard}</div>
@@ -752,13 +893,14 @@ export function MangaReader({
       <div className="absolute inset-x-0 top-0 z-40">
         <ReaderBar
           visible={barVisible}
-          chapters={chapters}
-          index={index}
-          onJumpChapter={onChangeIndex}
+          chapters={collapsed}
+          index={orderPos}
+          onJumpChapter={(pos) => onChangeIndex(readingOrder[pos] ?? 0)}
           fullscreen={fullscreen}
           onToggleFullscreen={toggleFullscreen}
           onOpenSettings={() => setSettingsOpen((v) => !v)}
           onExit={onExit}
+          onOpenDetail={onExit}
           flipSound={book ? prefs.flipSound : null}
           onToggleFlipSound={() => patchPrefs({ flipSound: !prefs.flipSound })}
         />
@@ -787,6 +929,23 @@ export function MangaReader({
         </button>
       )}
 
+      {!disableMangaPersistence &&
+        controlsVisible &&
+        !loading &&
+        !failed &&
+        effMode === "long" && (
+          <button
+            type="button"
+            onClick={() => patchPrefs({ enablePageDownload: !prefs.enablePageDownload })}
+            onMouseDown={(e) => e.preventDefault()}
+            className={`absolute end-6 top-[124px] z-[92] grid h-11 w-11 place-items-center rounded-full bg-canvas/85 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.5)] backdrop-blur-md transition duration-150 hover:text-accent active:scale-90 ${prefs.enablePageDownload ? "text-accent" : "text-ink-muted"}`}
+            aria-label={t("Download page")}
+            aria-pressed={prefs.enablePageDownload}
+          >
+            <Download size={19} />
+          </button>
+        )}
+
       {bookmarksOpen && (
         <BookmarksPanel
           mangaId={manga.id}
@@ -805,6 +964,23 @@ export function MangaReader({
           onCancel={() => setPickBookmark(false)}
         />
       )}
+
+      {matchQueue.length > 0 && (
+        <ReaderMatchPicker
+          title={matchQueue[0].title}
+          pid={pid}
+          trackers={matchQueue.map((r) => r.tracker)}
+          shortcut={formatBindingForDisplay(matchBinding)}
+          onClose={() => setMatchQueue([])}
+        />
+      )}
+
+      {!loading && !failed && !book && <ReaderProgressMeter
+        currentPage={currentPage}
+        totalPages={total}
+        chapterNumber={chapter.chapter}
+        visible={!controlsVisible}
+      />}
 
       {!book && (
         <div className="absolute inset-x-0 bottom-0 z-40">
@@ -849,4 +1025,11 @@ export function MangaReader({
 function chapterLabel(c: MangaChapter): string {
   if (c.chapter) return t("Chapter {n}", { n: c.chapter });
   return c.title || t("Oneshot");
+}
+
+function connectedTrackers(): MangaTracker[] {
+  const out: MangaTracker[] = [];
+  if (anilistMangaAuthed()) out.push("anilist");
+  if (malMangaAuthed()) out.push("mal");
+  return out;
 }

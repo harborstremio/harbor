@@ -126,7 +126,7 @@ const sweep: Record<string, string> = {
   "All times": "Mọi thời điểm",
   "All video": "Tất cả video",
   "All-time bests": "Hay nhất mọi thời đại",
-  "Also joins Harbor's Discord server.": "Đồng thời tham gia máy chủ Discord của Harbor.",
+  "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.": "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
   "Always re-encode when casting": "Luôn mã hóa lại khi truyền phát",
   "Always stream P2P": "Luôn phát trực tuyến P2P",
   Amber: "Hổ phách",

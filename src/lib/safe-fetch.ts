@@ -221,6 +221,7 @@ async function tauriHarborFetch(
   responseType?: "base64",
   timeoutMs = 30000,
   maxResponseBytes?: number,
+  allowLocalNetwork = false,
 ): Promise<Response> {
   countCrossing("harborFetch", input);
   const headers: Record<string, string> = {};
@@ -267,6 +268,7 @@ async function tauriHarborFetch(
       maxResponseBytes,
       credentialHandle,
       publicNetworkOnly,
+      allowLocalNetwork,
     },
   });
   return new Response(responseType === "base64" ? base64ToBytes(resp.body) : resp.body, {
@@ -413,6 +415,34 @@ export const safeFetch: typeof fetch = (input, init) => {
     webStringFetch(request.url, request.init),
   );
 };
+
+export function safeFetchLocal(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const target = urlOf(input);
+  if (isBlockedUrl(target)) {
+    noteBlocked();
+    let host = target;
+    try {
+      host = new URL(target).hostname;
+    } catch {}
+    return Promise.reject(new TrackerBlockedError(host));
+  }
+  if (isTauri) {
+    const fetchPart =
+      typeof input === "string"
+        ? tauriHarborFetch(input, init, undefined, 30000, undefined, true)
+        : input instanceof URL
+          ? tauriHarborFetch(input.href, init, undefined, 30000, undefined, true)
+          : materializeRequest(input, init).then((request) =>
+              tauriHarborFetch(request.url, request.init, undefined, 30000, undefined, true),
+            );
+    return withDeadline(fetchPart, init?.signal);
+  }
+  if (typeof input === "string") return webStringFetch(input, init);
+  if (input instanceof URL) return webStringFetch(input.href, init);
+  return materializeRequest(input, init).then((request) =>
+    webStringFetch(request.url, request.init),
+  );
+}
 
 export const safeFetchStream: typeof fetch = (input, init) => {
   const target = typeof input === "string" ? input : input instanceof URL ? input.href : null;

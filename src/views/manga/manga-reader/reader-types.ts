@@ -17,6 +17,7 @@ export type ReaderPrefs = {
   flipSound: boolean;
   focusMode: boolean;
   hideChapterEndHint: boolean;
+  enablePageDownload: boolean;
 };
 
 export type { MangaChapter, MangaPage };

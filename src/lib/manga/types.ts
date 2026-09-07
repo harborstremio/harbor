@@ -11,6 +11,11 @@ export {
   type MangaTag,
 } from "./model";
 
+export type SearchAllOpts = {
+  /** Skip the stop-on-first-strong-match early exit and query every source. */
+  exhaustive?: boolean;
+};
+
 export type MangaProvider = {
   id: string;
   name: string;
@@ -20,7 +25,7 @@ export type MangaProvider = {
   chapters(id: string): Promise<MangaChapter[]>;
   pageUrls(chapterId: string): Promise<string[]>;
   tags?(): Promise<MangaTag[]>;
-  searchAll?(query: string): Promise<MangaSummary[]>;
+  searchAll?(query: string, opts?: SearchAllOpts): Promise<MangaSummary[]>;
   setLibrary?(id: string, inLibrary: boolean): Promise<void>;
 };
 

@@ -1,5 +1,5 @@
 import { Loader2, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { Poster } from "@/components/poster";
 import { RailChevron } from "@/components/nav-arrow";
@@ -63,20 +63,27 @@ function ContinueCard({
 }) {
   const [busy, setBusy] = useState(false);
   const t = useT();
-  const mounted = useRef(true);
-  useEffect(
-    () => () => {
-      mounted.current = false;
-    },
-    [],
-  );
   const pct =
     entry.totalPages > 0 ? Math.min(100, Math.round((entry.page / entry.totalPages) * 100)) : 0;
   const open = () => {
     if (busy) return;
     setBusy(true);
+    /**
+     * The "Opening…" state shows while we hand off to the reader. A stalled
+     * chapter lookup would otherwise keep the button stuck on "Opening…" until
+     * the app restarts, so we clear it on the promise settling (fast path) and
+     * force it back off after a bounded window so it can never wedge.
+     */
+    let settled = false;
+    const clear = () => {
+      if (settled) return;
+      settled = true;
+      setBusy(false);
+    };
+    const guard = setTimeout(clear, 8_000);
     Promise.resolve(onResume(entry)).finally(() => {
-      if (mounted.current) setBusy(false);
+      clearTimeout(guard);
+      clear();
     });
   };
   return (

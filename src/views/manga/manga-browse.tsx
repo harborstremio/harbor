@@ -13,6 +13,12 @@ import {
 } from "@/lib/manga/api";
 import { useMangaFavorites } from "@/lib/manga-favorites";
 import { activeMangaSource, activeMangaSourceId, subscribeMangaSources } from "@/lib/manga/sources";
+import type { SuwayomiSource } from "@/lib/manga/sources/suwayomi/provider";
+import {
+  loadSuwayomiSourceOrder,
+  saveSuwayomiSourceOrder,
+  subscribeSuwayomiSourceOrder,
+} from "@/lib/manga/sources/suwayomi/source-order";
 import {
   FAVORITES,
   ManageServersButton,
@@ -20,7 +26,7 @@ import {
   TagDropdown,
 } from "./manga-browse/filters";
 import { BrowseEmpty, BrowseError, SkeletonGrid } from "./manga-browse/states";
-import { AllExtensionsView, sourceDisplayName } from "./manga-browse/all-extensions";
+import { AllExtensionsView, ReorderMenu, sourceDisplayName } from "./manga-browse/all-extensions";
 import { searchExtensions } from "./manga-browse/extensions-search";
 import { LanguageDropdown } from "./manga-browse/language-dropdown";
 import {
@@ -41,9 +47,11 @@ type SearchResultGroup = { sourceId: string; name: string; items: MangaSummary[]
 export function MangaBrowse({
   onOpen,
   onManageSources,
+  onBrowseExtension,
 }: {
   onOpen: (mangaId: string) => void;
   onManageSources: () => void;
+  onBrowseExtension: (source: SuwayomiSource) => void;
 }) {
   const t = useT();
   const [query, setQuery] = useState("");
@@ -57,6 +65,10 @@ export function MangaBrowse({
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [reloadTick, setReloadTick] = useState(0);
+  const [orderedIds, setOrderedIds] = useState<string[]>(() =>
+    loadSuwayomiSourceOrder(activeMangaSource()?.baseUrl ?? ""),
+  );
+  const [reorderSources, setReorderSources] = useState<SuwayomiSource[]>([]);
 
   const offsetRef = useRef(0);
   const seenRef = useRef(new Set<string>());
@@ -110,6 +122,17 @@ export function MangaBrowse({
     [reload],
   );
 
+  // The ReorderMenu lives here (parent), so re-read the per-server order here when
+  // the active server changes. The parent remounts AllExtensionsView via `key`, but
+  // this component state persists, so we resync the order on server switch.
+  useEffect(
+    () =>
+      subscribeSuwayomiSourceOrder(() => {
+        setOrderedIds(loadSuwayomiSourceOrder(activeMangaSource()?.baseUrl ?? ""));
+      }),
+    [],
+  );
+
   useEffect(() => {
     const id = ++reqRef.current;
     if (tagId === FAVORITES) {
@@ -139,7 +162,7 @@ export function MangaBrowse({
           .then((all) => {
             if (id !== reqRef.current) return { okSources: 0, failedSources: 0 };
             const filtered = all.filter((source) =>
-              langFilterMatches(loadMangaLangFilter(), source.lang),
+              langFilterMatches(loadMangaLangFilter(config.baseUrl), source.lang),
             );
             return searchExtensions(
               config,
@@ -320,39 +343,64 @@ export function MangaBrowse({
         <ManageServersButton onClick={onManageSources} className="ms-auto me-2" />
       </div>
       <div className="-mt-3 flex flex-wrap items-center gap-2 border-b border-edge-soft/60 pb-4">
-        <FilterButton
-          active={sortMode === "latest"}
-          onClick={() => setSortMode("latest")}
-          icon={<Clock3 size={14} />}
-          label={t("Latest")}
-        />
-        <FilterButton
-          active={sortMode === "new"}
-          onClick={() => setSortMode("new")}
-          icon={<Sparkles size={14} />}
-          label={t("New releases")}
-        />
-        <FilterButton
-          active={sortMode === "chapters"}
-          onClick={() => setSortMode("chapters")}
-          icon={<BookCheck size={14} />}
-          label={t("Latest chapters")}
-        />
-        <span className="mx-1 h-5 w-px bg-edge-soft" />
-        <FilterButton
-          active={statusFilter === "completed"}
-          onClick={() => setStatusFilter(statusFilter === "completed" ? "all" : "completed")}
-          label={t("Completed")}
-        />
-        <FilterButton
-          active={statusFilter === "ongoing"}
-          onClick={() => setStatusFilter(statusFilter === "ongoing" ? "all" : "ongoing")}
-          label={t("Ongoing")}
-        />
+        {!allExtensionsMode ? (
+          <>
+            <FilterButton
+              active={sortMode === "latest"}
+              onClick={() => setSortMode("latest")}
+              icon={<Clock3 size={14} />}
+              label={t("Latest")}
+            />
+            <FilterButton
+              active={sortMode === "new"}
+              onClick={() => setSortMode("new")}
+              icon={<Sparkles size={14} />}
+              label={t("New releases")}
+            />
+            <FilterButton
+              active={sortMode === "chapters"}
+              onClick={() => setSortMode("chapters")}
+              icon={<BookCheck size={14} />}
+              label={t("Latest chapters")}
+            />
+            <span className="mx-1 h-5 w-px bg-edge-soft" />
+            <FilterButton
+              active={statusFilter === "completed"}
+              onClick={() => setStatusFilter(statusFilter === "completed" ? "all" : "completed")}
+              label={t("Completed")}
+            />
+            <FilterButton
+              active={statusFilter === "ongoing"}
+              onClick={() => setStatusFilter(statusFilter === "ongoing" ? "all" : "ongoing")}
+              label={t("Ongoing")}
+            />
+          </>
+        ) : (
+          <div className="ms-auto">
+            <ReorderMenu
+              sources={reorderSources}
+              order={orderedIds}
+              onOrder={(ids) => {
+                setOrderedIds(ids);
+                saveSuwayomiSourceOrder(activeMangaSource()?.baseUrl ?? "", ids);
+              }}
+              onReset={() => {
+                setOrderedIds([]);
+                saveSuwayomiSourceOrder(activeMangaSource()?.baseUrl ?? "", []);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {allExtensionsMode ? (
-        <AllExtensionsView key={activeSource?.id ?? ""} onOpen={onOpen} />
+        <AllExtensionsView
+          key={activeSource?.id ?? ""}
+          onOpen={onOpen}
+          onBrowseExtension={onBrowseExtension}
+          orderedIds={orderedIds}
+          onSources={setReorderSources}
+        />
       ) : extensionsSearchMode && sortedSearchGroups.length > 0 ? (
         <div className="flex flex-col gap-9">
           {sortedSearchGroups.map((group) => (

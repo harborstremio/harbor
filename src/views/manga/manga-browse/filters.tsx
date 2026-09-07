@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Globe, Layers, Settings, Star, Tag } from "lucide-react";
+import { Check, ChevronDown, Globe, Layers, Settings, Star } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { mangaTags, type MangaTag } from "@/lib/manga/api";
@@ -150,11 +150,13 @@ export function TagDropdown({
         });
     };
     load();
+    const unsubMangaSources = subscribeMangaSources(() => load({ clear: true }));
     const unsubSources = subscribeSuwayomiSourcesChanged(() => load());
     const unsubLibrary = subscribeMangaLibraryChanged(() => load());
     const unsubLang = subscribeMangaLangFilter(() => load({ clear: true }));
     return () => {
       alive = false;
+      unsubMangaSources();
       unsubSources();
       unsubLibrary();
       unsubLang();
@@ -162,8 +164,7 @@ export function TagDropdown({
   }, []);
 
   const active = tags.find((t) => t.id === tagId);
-  const sourceMode = tags.length > 0 && tags.every((tg) => tg.group === "Sources");
-  const allLabel = sourceMode ? "All Extensions" : "All tags";
+  const allLabel = "All Extensions";
   const shown = useMemo(() => {
     const q = filter.trim().toLowerCase();
     const list = q ? tags.filter((t) => t.name.toLowerCase().includes(q)) : tags;
@@ -173,11 +174,7 @@ export function TagDropdown({
   return (
     <div ref={ref} className="relative">
       <button type="button" onClick={() => setOpen((v) => !v)} className={TRIGGER}>
-        {sourceMode ? (
-          <Layers size={15} className="text-ink-subtle" />
-        ) : (
-          <Tag size={15} className="text-ink-subtle" />
-        )}
+        <Layers size={15} className="text-ink-subtle" />
         <span className="max-w-[140px] truncate font-medium">
           {tagId === FAVORITES ? t("Favorites") : active ? active.name : t(allLabel)}
         </span>
@@ -190,7 +187,7 @@ export function TagDropdown({
               autoFocus
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder={t(sourceMode ? "Filter sources..." : "Filter tags...")}
+              placeholder={t("Filter sources...")}
               className="w-full rounded-md bg-elevated/50 px-3 py-1.5 text-[12.5px] text-ink placeholder:text-ink-subtle outline-none focus:ring-1 focus:ring-edge"
             />
           </div>

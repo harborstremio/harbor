@@ -276,7 +276,7 @@ const coverage: Record<string, string> = {
   "6-digit code": "6-cyfrowy kod",
   "Addons ({n})": "Dodatki ({n})",
   "All selected": "Wybrano wszystkie",
-  "Also joins Harbor's Discord server.": "Dołącza też do serwera Harbor na Discordzie.",
+  "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.": "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
   "Apply and reload": "Zastosuj i wczytaj ponownie",
   "Changing the metadata language reloads Harbor so the new language takes effect. Apply when you're done with the options above.":
     "Zmiana języka metadanych powoduje ponowne wczytanie Harbor, aby nowy język zaczął obowiązywać. Po skonfigurowaniu powyższych opcji wybierz Zastosuj.",

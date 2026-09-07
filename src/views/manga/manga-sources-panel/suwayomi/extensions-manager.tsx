@@ -1,8 +1,9 @@
-import { AlertCircle, Blocks, ChevronDown, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, ArrowUpCircle, Blocks, ChevronDown, Loader2, RefreshCw } from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   listExtensions,
+  updateExtension,
   type ServerConfig,
   type SuwayomiExtension,
 } from "@/lib/manga/sources/suwayomi/provider";
@@ -32,6 +33,7 @@ function Group({
   expanded = true,
   onExpandedChange,
   contentId,
+  action,
 }: {
   label: string;
   count: number;
@@ -42,33 +44,40 @@ function Group({
   expanded?: boolean;
   onExpandedChange?: () => void;
   contentId?: string;
+  action?: ReactNode;
 }) {
   if (items.length === 0) return null;
   return (
     <div className="flex flex-col gap-2">
       {collapsible ? (
-        <button
-          type="button"
-          aria-expanded={expanded}
-          aria-controls={contentId}
-          onClick={onExpandedChange}
-          className="group flex min-h-10 w-full items-center justify-between rounded-xl px-2 text-start text-ink-subtle transition-colors hover:bg-raised/60 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-        >
-          <span className="text-[12px] font-bold uppercase tracking-[0.12em]">
-            {label} · {count}
-          </span>
-          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-raised/70 ring-1 ring-edge-soft transition-colors group-hover:bg-elevated">
-            <ChevronDown
-              aria-hidden="true"
-              size={16}
-              className={`transition-transform duration-150 motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`}
-            />
-          </span>
-        </button>
+        <div className="flex min-h-10 w-full items-center justify-between gap-2 rounded-xl px-2 transition-colors hover:bg-raised/60">
+          <button
+            type="button"
+            aria-expanded={expanded}
+            aria-controls={contentId}
+            onClick={onExpandedChange}
+            className="group flex min-h-10 flex-1 items-center justify-between text-start text-ink-subtle transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            <span className="text-[12px] font-bold uppercase tracking-[0.12em]">
+              {label} · {count}
+            </span>
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-raised/70 ring-1 ring-edge-soft transition-colors group-hover:bg-elevated">
+              <ChevronDown
+                aria-hidden="true"
+                size={16}
+                className={`transition-transform duration-150 motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`}
+              />
+            </span>
+          </button>
+          {action}
+        </div>
       ) : (
-        <p className="px-1 text-[12px] font-bold uppercase tracking-[0.12em] text-ink-subtle">
-          {label} · {count}
-        </p>
+        <div className="flex items-center justify-between gap-2 px-1">
+          <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-ink-subtle">
+            {label} · {count}
+          </p>
+          {action}
+        </div>
       )}
       <div
         id={contentId}
@@ -90,6 +99,8 @@ export function ExtensionsManager({ config }: { config: ServerConfig }) {
   const [query, setQuery] = useState("");
   const [reload, setReload] = useState(0);
   const [availableExpanded, setAvailableExpanded] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [updatedCount, setUpdatedCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -113,6 +124,21 @@ export function ExtensionsManager({ config }: { config: ServerConfig }) {
   const installed = filtered.filter((e) => e.installed);
   const updatable = installed.filter((e) => e.hasUpdate);
   const available = filtered.filter((e) => !e.installed);
+
+  const updateAll = async () => {
+    if (updating || updatable.length === 0) return;
+    setUpdating(true);
+    setUpdatedCount(0);
+    try {
+      for (const ext of updatable) {
+        await updateExtension(config, ext.pkgName);
+        setUpdatedCount((n) => n + 1);
+      }
+      setReload((n) => n + 1);
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -177,6 +203,29 @@ export function ExtensionsManager({ config }: { config: ServerConfig }) {
             config={config}
             items={updatable}
             onChanged={() => setReload((n) => n + 1)}
+            action={
+              updatable.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => void updateAll()}
+                  disabled={updating}
+                  aria-label={t("Update all")}
+                  className="flex shrink-0 items-center gap-1.5 rounded-lg bg-raised px-2.5 py-1.5 text-[12px] font-semibold text-accent ring-1 ring-edge-soft transition-all hover:bg-elevated active:scale-95 motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-60"
+                >
+                  {updating ? (
+                    <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                  ) : (
+                    <ArrowUpCircle size={14} aria-hidden="true" />
+                  )}
+                  {updating
+                    ? t("Updating... ({n}/{total})", {
+                        n: updatedCount,
+                        total: updatable.length,
+                      })
+                    : t("Update all ({n})", { n: updatable.length })}
+                </button>
+              ) : undefined
+            }
           />
           <Group
             label={t("Installed")}

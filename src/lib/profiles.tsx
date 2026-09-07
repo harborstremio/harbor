@@ -53,6 +53,8 @@ const PROFILE_KEY_PREFIXES = [
   "harbor.charfavorites.v1.",
   "harbor.mangafav.v1.",
   "harbor.mangaread.v1.",
+  "harbor.manga.match.mal.v1.",
+  "harbor.manga.match.anilist.v1.",
   "harbor.localwatchlist.v1.",
   "harbor.settings.",
   "harbor.trakt.session.v1.",
