@@ -10,6 +10,7 @@ export const CONTROLLER_CURSOR_PRESETS: ReadonlyArray<ControllerCursorId> = [
 export const CONTROLLER_CURSOR_SIZE_MIN = 16;
 export const CONTROLLER_CURSOR_SIZE_MAX = 72;
 export const DEFAULT_CONTROLLER_CURSOR_SIZE = 30;
+export const DEFAULT_CONTROLLER_CURSOR_HIDE_MS = 3000;
 
 const IMAGE_MAX_CHARS = 200_000;
 
@@ -32,6 +33,13 @@ export function sanitizeControllerCursorImage(value: unknown): string {
   if (typeof value !== "string") return "";
   if (!value.startsWith("data:image/")) return "";
   return value.length > IMAGE_MAX_CHARS ? "" : value;
+}
+
+export function sanitizeControllerCursorHideMs(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return DEFAULT_CONTROLLER_CURSOR_HIDE_MS;
+  }
+  return Math.min(60_000, Math.max(500, Math.round(value)));
 }
 
 export async function cursorImageFromFile(file: File): Promise<string | null> {

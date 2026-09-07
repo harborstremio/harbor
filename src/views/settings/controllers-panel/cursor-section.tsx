@@ -14,9 +14,13 @@ import { useT } from "@/lib/i18n";
 import { captureFocusReturn, tvFocus } from "@/lib/keyboard-navigation";
 import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 import { useSettings } from "@/lib/settings";
-import { Section } from "../shared";
+import { Section, ToggleRow } from "../shared";
 import { SettingRow } from "../kit";
 import { SButton } from "../ui";
+
+const IDLE_MS_MIN = 1000;
+const IDLE_MS_MAX = 10_000;
+const IDLE_MS_STEP = 500;
 
 function presetLabel(id: ControllerCursorId, t: (s: string) => string): string {
   if (id === "ring") return t("Ring");
@@ -38,6 +42,9 @@ export function CursorSection() {
   const current = settings.controllerCursor;
   const image = settings.controllerCursorImage;
   const size = settings.controllerCursorSize;
+  const enabled = settings.controllerCursorEnabled;
+  const hideMs = settings.controllerCursorHideMs;
+  const hideSec = Math.round(hideMs / 100) / 10;
 
   const pick = async (f: File | undefined) => {
     if (!f) return;
@@ -78,120 +85,156 @@ export function CursorSection() {
         "The pointer your right stick moves around Harbor. Pick a shape or use your own image.",
       )}
     >
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
-        {tiles.map((id) => {
-          const on = current === id;
-          const empty = id === "custom" && !image;
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => empty ? openPicker() : update({ controllerCursor: id })}
-              aria-pressed={on}
-              className={`flex min-h-[104px] flex-col items-center justify-center gap-2 rounded-[10px] border bg-elevated px-3 py-4 transition-colors duration-150 ${
-                on ? "border-accent text-ink" : "border-edge-soft text-ink-muted hover:border-edge"
-              }`}
-            >
-              <span className="flex h-11 w-11 items-center justify-center text-accent">
-                {empty ? (
-                  <Upload size={22} strokeWidth={1.9} className="text-ink-subtle" />
-                ) : (
-                  <GamepadCursor id={id} image={image} className="h-full w-full" />
-                )}
-              </span>
-              <span className="flex items-center gap-1.5 text-center text-[15.5px] font-medium leading-[22px]">
-                {presetLabel(id, t)}
-                {on && <Check size={18} strokeWidth={2.4} className="shrink-0 text-accent" />}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      <input
-        ref={file}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => {
-          void pick(e.target.files?.[0]);
-          e.target.value = "";
-          closePicker();
-        }}
+      <ToggleRow
+        label={t("Show cursor")}
+        sub={t("When off, the right stick no longer shows a cursor on screen. Focus navigation still works.")}
+        value={enabled}
+        onChange={(v) => update({ controllerCursorEnabled: v })}
       />
 
-      <SettingRow
-        label={t("Your own image")}
-        desc={t("PNG, WEBP, SVG or GIF. Harbor shrinks it to 128px so it stays small on disk.")}
-        warn={failed ? t("That image could not be used. Try a smaller PNG or WEBP.") : undefined}
-      >
-        <span ref={upload} className="contents">
-          <SButton onClick={openPicker}>
-            <Upload size={17} strokeWidth={2} />
-            {image ? t("Replace") : t("Upload")}
-          </SButton>
-        </span>
-        {image && (
-          <SButton
-            onClick={() => {
-              update({ controllerCursorImage: "", controllerCursor: "dot" });
-              handOff(upload.current?.querySelector("button"));
-            }}
-          >
-            <RotateCcw size={17} strokeWidth={2} />
-            {t("Remove image")}
-          </SButton>
-        )}
-      </SettingRow>
+      {enabled && (
+        <>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
+            {tiles.map((id) => {
+              const on = current === id;
+              const empty = id === "custom" && !image;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => empty ? openPicker() : update({ controllerCursor: id })}
+                  aria-pressed={on}
+                  className={`flex min-h-[104px] flex-col items-center justify-center gap-2 rounded-[10px] border bg-elevated px-3 py-4 transition-colors duration-150 ${
+                    on ? "border-accent text-ink" : "border-edge-soft text-ink-muted hover:border-edge"
+                  }`}
+                >
+                  <span className="flex h-11 w-11 items-center justify-center text-accent">
+                    {empty ? (
+                      <Upload size={22} strokeWidth={1.9} className="text-ink-subtle" />
+                    ) : (
+                      <GamepadCursor id={id} image={image} className="h-full w-full" />
+                    )}
+                  </span>
+                  <span className="flex items-center gap-1.5 text-center text-[15.5px] font-medium leading-[22px]">
+                    {presetLabel(id, t)}
+                    {on && <Check size={18} strokeWidth={2.4} className="shrink-0 text-accent" />}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-      <SettingRow
-        wide
-        label={t("Cursor size")}
-        desc={t("Make it bigger for a TV across the room, smaller for a desk monitor.")}
-      >
-        <div className="flex w-full flex-wrap items-center gap-4">
-          <div className="flex h-11 min-w-[260px] max-w-[520px] flex-1 items-center gap-4">
-            <input
-              ref={slider}
-              type="range"
-              aria-label={t("Cursor size")}
-              min={CONTROLLER_CURSOR_SIZE_MIN}
-              max={CONTROLLER_CURSOR_SIZE_MAX}
-              step={2}
-              value={size}
-              onChange={(e) => update({ controllerCursorSize: parseInt(e.target.value, 10) })}
-              className="harbor-slider min-w-0 flex-1"
-              style={fillStyle(size, CONTROLLER_CURSOR_SIZE_MIN, CONTROLLER_CURSOR_SIZE_MAX, 2)}
-            />
-            <span className="w-[64px] shrink-0 text-end text-[15.5px] font-medium tabular-nums text-ink">
-              {t("{n} px", { n: size })}
+          <input
+            ref={file}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              void pick(e.target.files?.[0]);
+              e.target.value = "";
+              closePicker();
+            }}
+          />
+
+          <SettingRow
+            label={t("Your own image")}
+            desc={t("PNG, WEBP, SVG or GIF. Harbor shrinks it to 128px so it stays small on disk.")}
+            warn={failed ? t("That image could not be used. Try a smaller PNG or WEBP.") : undefined}
+          >
+            <span ref={upload} className="contents">
+              <SButton onClick={openPicker}>
+                <Upload size={17} strokeWidth={2} />
+                {image ? t("Replace") : t("Upload")}
+              </SButton>
+            </span>
+            {image && (
+              <SButton
+                onClick={() => {
+                  update({ controllerCursorImage: "", controllerCursor: "dot" });
+                  handOff(upload.current?.querySelector("button"));
+                }}
+              >
+                <RotateCcw size={17} strokeWidth={2} />
+                {t("Remove image")}
+              </SButton>
+            )}
+          </SettingRow>
+
+          <SettingRow
+            wide
+            label={t("Cursor size")}
+            desc={t("Make it bigger for a TV across the room, smaller for a desk monitor.")}
+          >
+            <div className="flex w-full flex-wrap items-center gap-4">
+              <div className="flex h-11 min-w-[260px] max-w-[520px] flex-1 items-center gap-4">
+                <input
+                  ref={slider}
+                  type="range"
+                  aria-label={t("Cursor size")}
+                  min={CONTROLLER_CURSOR_SIZE_MIN}
+                  max={CONTROLLER_CURSOR_SIZE_MAX}
+                  step={2}
+                  value={size}
+                  onChange={(e) => update({ controllerCursorSize: parseInt(e.target.value, 10) })}
+                  className="harbor-slider min-w-0 flex-1"
+                  style={fillStyle(size, CONTROLLER_CURSOR_SIZE_MIN, CONTROLLER_CURSOR_SIZE_MAX, 2)}
+                />
+                <span className="w-[64px] shrink-0 text-end text-[15.5px] font-medium tabular-nums text-ink">
+                  {t("{n} px", { n: size })}
+                </span>
+              </div>
+              {size !== DEFAULT_CONTROLLER_CURSOR_SIZE && (
+                <SButton
+                  onClick={() => {
+                    update({ controllerCursorSize: DEFAULT_CONTROLLER_CURSOR_SIZE });
+                    handOff(slider.current);
+                  }}
+                >
+                  <RotateCcw size={17} strokeWidth={2} />
+                  {t("Reset size")}
+                </SButton>
+              )}
+            </div>
+          </SettingRow>
+
+          <SettingRow
+            wide
+            label={t("Hide after idle")}
+            desc={t("The cursor fades away when you stop moving the stick. Move it again to bring it back.")}
+          >
+            <div className="flex w-full flex-wrap items-center gap-4">
+              <div className="flex h-11 min-w-[260px] max-w-[520px] flex-1 items-center gap-4">
+                <input
+                  type="range"
+                  aria-label={t("Hide after idle")}
+                  min={IDLE_MS_MIN}
+                  max={IDLE_MS_MAX}
+                  step={IDLE_MS_STEP}
+                  value={hideMs}
+                  onChange={(e) => update({ controllerCursorHideMs: parseInt(e.target.value, 10) })}
+                  className="harbor-slider min-w-0 flex-1"
+                  style={fillStyle(hideMs, IDLE_MS_MIN, IDLE_MS_MAX, 2)}
+                />
+                <span className="w-[64px] shrink-0 text-end text-[15.5px] font-medium tabular-nums text-ink">
+                  {t("{n} s", { n: hideSec })}
+                </span>
+              </div>
+            </div>
+          </SettingRow>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 rounded-[10px] border border-edge-soft bg-elevated px-4 py-6">
+            <span
+              className="flex shrink-0 items-center justify-center text-accent"
+              style={{ width: size, height: size }}
+            >
+              <GamepadCursor id={current} image={image} className="h-full w-full" />
+            </span>
+            <span className="text-[15.5px] font-normal leading-[22px] text-ink-muted">
+              {t("Actual size on screen")}
             </span>
           </div>
-          {size !== DEFAULT_CONTROLLER_CURSOR_SIZE && (
-            <SButton
-              onClick={() => {
-                update({ controllerCursorSize: DEFAULT_CONTROLLER_CURSOR_SIZE });
-                handOff(slider.current);
-              }}
-            >
-              <RotateCcw size={17} strokeWidth={2} />
-              {t("Reset size")}
-            </SButton>
-          )}
-        </div>
-      </SettingRow>
-
-      <div className="flex flex-wrap items-center justify-center gap-4 rounded-[10px] border border-edge-soft bg-elevated px-4 py-6">
-        <span
-          className="flex shrink-0 items-center justify-center text-accent"
-          style={{ width: size, height: size }}
-        >
-          <GamepadCursor id={current} image={image} className="h-full w-full" />
-        </span>
-        <span className="text-[15.5px] font-normal leading-[22px] text-ink-muted">
-          {t("Actual size on screen")}
-        </span>
-      </div>
+        </>
+      )}
     </Section>
   );
 }

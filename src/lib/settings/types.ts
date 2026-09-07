@@ -167,6 +167,8 @@ export type Settings = {
   controllerCursor: ControllerCursorId;
   controllerCursorImage: string;
   controllerCursorSize: number;
+  controllerCursorEnabled: boolean;
+  controllerCursorHideMs: number;
   controllerKeyboardSize: number;
   controllerRepeatMs: number;
   controllerInitialDelayMs: number;
