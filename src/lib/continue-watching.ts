@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { listLocalCw, subscribeLocalCw } from "@/lib/local-cw";
 import { setExternalCwSources } from "@/lib/feed/external-cw";
@@ -97,12 +98,13 @@ let cwCacheItems: LibraryItem[] = [];
 export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
   const { authKey } = useAuth();
   const { settings } = useSettings();
-  const cwPerProfile = settings.cwPerProfile;
+  const { activeProfile, profiles } = useProfiles();
+  const hideSharedCw = settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
   const cwSources = settings.cwSources;
   useEffect(() => {
     setExternalCwSources({ trakt: cwSources.trakt, simkl: cwSources.simkl });
   }, [cwSources.trakt, cwSources.simkl]);
-  const externalCw = useExternalCw(!cwPerProfile && (cwSources.trakt || cwSources.simkl));
+  const externalCw = useExternalCw(!hideSharedCw && (cwSources.trakt || cwSources.simkl));
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [localVersion, setLocalVersion] = useState(0);
 
@@ -157,7 +159,7 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
 
   return useMemo(() => {
     void localVersion;
-    const base = cwPerProfile
+    const base = hideSharedCw
       ? []
       : [
           ...(cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
@@ -177,5 +179,5 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       if (out.length >= limit) break;
     }
     return out;
-  }, [items, externalCw, localVersion, excludeId, limit, cwPerProfile, cwSources]);
+  }, [items, externalCw, localVersion, excludeId, limit, hideSharedCw, cwSources]);
 }

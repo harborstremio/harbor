@@ -711,3 +711,10 @@ export function sharesStremioStorage(
   if (!a || !b) return false;
   return stremioSourceProfileId(a, profiles) === stremioSourceProfileId(b, profiles);
 }
+
+export function anyProfileSharesStremioWith(active: Profile | null, profiles: Profile[]): boolean {
+  if (!active) return false;
+  const source = stremioSourceProfileId(active, profiles);
+  if (!source) return false;
+  return profiles.some((p) => p.id !== active.id && stremioSourceProfileId(p, profiles) === source);
+}
