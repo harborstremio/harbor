@@ -1,6 +1,6 @@
 import { AlertCircle, ChevronLeft, Loader2, RefreshCw, SearchX } from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import type { ServerConfig, SuwayomiSource } from "@/lib/manga/sources/suwayomi/provider";
 import type { MangaSummary } from "@/lib/manga/types";
 import { useT } from "@/lib/i18n";
@@ -39,11 +39,13 @@ export function BrowseResults({
   source,
   onBack,
   onOpen,
+  scrollRef,
 }: {
   config: ServerConfig;
   source: SuwayomiSource;
   onBack: () => void;
   onOpen?: (item: MangaSummary) => void;
+  scrollRef?: RefObject<HTMLElement | null>;
 }) {
   const t = useT();
   const [sort, setSort] = useState<BrowseSort>("popular");
@@ -58,6 +60,23 @@ export function BrowseResults({
         : feed.items,
     [feed.items, sort],
   );
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Auto-load more when the sentinel scrolls into view (800px root margin
+  // prefetches before the user reaches the end) instead of a manual button.
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !feed.hasNext || feed.loadingMore || feed.loadMoreFailed) return;
+    const root = scrollRef?.current ?? null;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) feed.loadMore();
+      },
+      { root, rootMargin: "800px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [feed, scrollRef]);
 
   const submit = () => setQuery(draft.trim());
   const clear = () => {
@@ -148,23 +167,17 @@ export function BrowseResults({
         </div>
       ) : (
         <>
-          <MangaGrid items={items} onOpen={onOpen} />
+          <MangaGrid items={items} onOpen={onOpen} scrollRef={scrollRef} />
           {feed.loadMoreFailed && (
             <p className="text-center text-[12.5px] font-medium text-danger">
               {t("Could not load results")}
             </p>
           )}
-          {feed.hasNext && (
-            <button
-              type="button"
-              onClick={feed.loadMore}
-              disabled={feed.loadingMore}
-              className="mx-auto inline-flex h-11 items-center gap-2 rounded-xl bg-raised px-6 text-[14px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-all hover:text-ink active:scale-95 disabled:opacity-60 motion-reduce:active:scale-100"
-            >
-              {feed.loadingMore && <Loader2 size={16} className="animate-spin" />}
-              {feed.loadMoreFailed ? t("Retry") : t("Load more")}
-            </button>
-          )}
+          <div ref={sentinelRef} className="flex justify-center py-4">
+            {feed.hasNext && feed.loadingMore && (
+              <Loader2 size={20} className="animate-spin text-ink-muted" />
+            )}
+          </div>
         </>
       )}
     </div>

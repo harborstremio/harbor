@@ -32,6 +32,7 @@ import {
 import { loadSources, pickTransport, sourceLang, withTransportFallback } from "./transport";
 import { registerServerPageHeaders } from "@/lib/manga/plugins/adapter";
 import { langFilterMatches, loadMangaLangFilter } from "@/lib/manga/lang-filter";
+import { subscribeSuwayomiSourcesChanged } from "./source-events";
 
 const SEARCH_ALL_CONCURRENCY = 4;
 
@@ -114,8 +115,15 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
   const POPULAR_SOURCE_CAP = 20;
   const POPULAR_MAX_TOTAL = 150;
 
+  // An extension install/update/uninstall changes what sources (and their
+  // popular data) are reachable behind the merged feed, so drop the cached
+  // aggregate and page cursors for this server whenever its sources change.
+  subscribeSuwayomiSourcesChanged((base) => {
+    if (base === server.base) popularCache = null;
+  });
+
   async function mergedPopular(): Promise<MangaSummary[]> {
-    const filter = loadMangaLangFilter();
+    const filter = loadMangaLangFilter(server.base);
     const cacheKey = `${server.base}|${[...filter].sort().join("+")}`;
     if (
       popularCache &&
@@ -132,12 +140,17 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
       popularCache = { key: cacheKey, at: Date.now(), items: [] };
       return [];
     }
+    // Give every source an equal slice of the budget so one extension's
+    // popular list cannot crowd out the others up front (the hard global cap
+    // alone lets the first few sources consume the whole merged row).
+    const perSourceCap = Math.ceil(POPULAR_MAX_TOTAL / sources.length);
     const seen = new Set<string>();
     const out: MangaSummary[] = [];
     let next = 0;
     const worker = async () => {
-      while (next < sources.length) {
+      while (next < sources.length && out.length < POPULAR_MAX_TOTAL) {
         const source = sources[next++];
+        let sourceCount = 0;
         try {
           let offset = 0;
           for (let page = 0; page < POPULAR_PAGES; page++) {
@@ -147,9 +160,10 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
               if (seen.has(m.id)) continue;
               seen.add(m.id);
               out.push(m);
+              sourceCount++;
             }
             offset += items.length;
-            if (out.length >= POPULAR_MAX_TOTAL) return;
+            if (out.length >= POPULAR_MAX_TOTAL || sourceCount >= perSourceCap) return;
           }
         } catch {
           /* skip source that fails to return popular */
@@ -157,6 +171,12 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
       }
     };
     await Promise.all(Array.from({ length: Math.min(4, sources.length) }, () => worker()));
+    // The workers fill `out` in contiguous per-source blocks, so shuffle the
+    // merged result to interleave titles from different extensions in a row.
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [out[i], out[j]] = [out[j], out[i]];
+    }
     popularCache = { key: cacheKey, at: Date.now(), items: out };
     return out;
   }
@@ -265,7 +285,7 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
 
   async function tags(): Promise<MangaTag[]> {
     const t = await pickTransport(client);
-    const filter = loadMangaLangFilter();
+    const filter = loadMangaLangFilter(server.base);
     return (await loadSources(client, t))
       .filter((s) => langFilterMatches(filter, s.lang))
       .map((s) => ({

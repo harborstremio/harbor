@@ -128,7 +128,7 @@ const sweep: Record<string, string> = {
   "All times": "Toutes les périodes",
   "All video": "Toutes les vidéos",
   "All-time bests": "Les meilleurs de tous les temps",
-  "Also joins Harbor's Discord server.": "Rejoint également le serveur Discord de Harbor.",
+  "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.": "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
   "Always re-encode when casting": "Toujours réencoder lors du cast",
   "Always stream P2P": "Toujours diffuser en P2P",
   Amber: "Ambre",

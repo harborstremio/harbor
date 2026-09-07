@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
 import { CoverImg } from "@/components/cover-img";
-import { BookOpen, ChevronLeft, FolderOpen, HardDrive, Trash2 } from "lucide-react";
+import { BookOpen, ChevronLeft, FolderOpen, HardDrive, Pause, Play, Trash2, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { MangaChapter } from "@/lib/manga/model";
 import {
+  cancelMangaDownload,
   defaultMangaDownloadDir,
   deleteMangaDownload,
+  hydrateDownloadProgress,
+  importMangaDownloadsFromDisk,
+  pauseChapterDownload,
+  pauseMangaDownloadBatch,
+  resumeChapterDownload,
+  resumeMangaDownloadBatch,
   setMangaDownloadDir,
+  useMangaDownloadBatch,
   useMangaDownloadDir,
   useMangaDownloadGroups,
   type MangaDownloadGroup,
@@ -21,6 +29,192 @@ function readerChapters(group: MangaDownloadGroup): MangaChapter[] {
     pages: c.pages,
     language: "en",
   }));
+}
+
+function DownloadGroupSection({
+  group,
+  onOpenManga,
+  onRead,
+}: {
+  group: MangaDownloadGroup;
+  onOpenManga: (id: string) => void;
+  onRead: (chapters: MangaChapter[], index: number, manga: MangaMeta) => void;
+}) {
+  const t = useT();
+  const batch = useMangaDownloadBatch(group.key);
+  const batchDownloading = batch.status === "downloading";
+  const batchPaused = batch.status === "paused";
+
+  return (
+    <section className="overflow-hidden rounded-2xl border border-edge-soft bg-surface/40">
+      <div className="flex items-center gap-4 border-b border-edge-soft/60 px-5 py-4">
+        <button
+          type="button"
+          onClick={() => onOpenManga(group.key)}
+          className="flex min-w-0 flex-1 items-center gap-4 text-start"
+        >
+          {group.cover ? (
+            <CoverImg
+              src={group.cover}
+              alt=""
+              className="h-16 w-11 shrink-0 rounded-lg object-cover ring-1 ring-edge-soft"
+            />
+          ) : (
+            <span className="grid h-16 w-11 shrink-0 place-items-center rounded-lg bg-elevated/60 text-ink-subtle ring-1 ring-edge-soft">
+              <BookOpen size={18} />
+            </span>
+          )}
+          <span className="flex min-w-0 flex-col gap-0.5">
+            <span className="truncate text-[16px] font-semibold text-ink">{group.title}</span>
+            <span className="text-[12.5px] text-ink-subtle">
+              {group.chapters.length === 1
+                ? t("{n} chapter", { n: group.chapters.length })
+                : t("{n} chapters", { n: group.chapters.length })}{" "}
+              · {t("{n} pages", { n: group.chapters.reduce((n, c) => n + c.pages, 0) })}
+            </span>
+          </span>
+        </button>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {(batchDownloading || batchPaused) && (
+            <button
+              type="button"
+              aria-label={batchPaused ? t("Resume downloads") : t("Pause downloads")}
+              onClick={() =>
+                batchPaused
+                  ? resumeMangaDownloadBatch(group.key)
+                  : pauseMangaDownloadBatch(group.key)
+              }
+              className="grid h-9 w-9 place-items-center rounded-lg text-ink-muted transition-colors hover:bg-elevated/60 hover:text-ink"
+            >
+              {batchPaused ? <Play size={16} /> : <Pause size={16} />}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              for (const c of group.chapters) {
+                if (c.rec && c.rec.status !== "idle" && c.rec.status !== "done") {
+                  cancelMangaDownload(c.chapterId);
+                } else {
+                  deleteMangaDownload(c.chapterId);
+                }
+              }
+            }}
+            className="rounded-lg px-3 py-2 text-[12.5px] font-medium text-ink-subtle transition-colors hover:bg-danger/10 hover:text-danger"
+          >
+            {t("Remove all")}
+          </button>
+        </div>
+      </div>
+      {group.chapters.map((c, i) => {
+        const active = c.rec && c.rec.status !== "idle" && c.rec.status !== "done";
+        const downloading = c.rec?.status === "downloading";
+        const paused = c.rec?.status === "paused";
+        const failed = c.rec?.status === "error";
+        const pct = c.rec && c.rec.total > 0 ? Math.round((c.rec.done / c.rec.total) * 100) : 0;
+        return (
+          <div
+            key={c.chapterId}
+            className="flex flex-col gap-2 border-b border-edge-soft/40 px-5 py-3 last:border-b-0"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex min-w-0 flex-col">
+                <span
+                  className={
+                    failed
+                      ? "truncate text-[14.5px] font-medium text-danger"
+                      : "truncate text-[14.5px] font-medium text-ink"
+                  }
+                >
+                  {c.label}
+                </span>
+                {!active && (
+                  <span className="text-[12px] text-ink-subtle">
+                    {t("{n} pages", { n: c.pages })}
+                  </span>
+                )}
+              </div>
+              <div className="flex shrink-0 items-center gap-1.5">
+                {active ? (
+                  <>
+                    <span className="mr-1 text-[12px] tabular-nums text-ink-muted">
+                      {c.rec!.total > 0
+                        ? `${Math.min(c.rec!.done, c.rec!.total)} / ${c.rec!.total}`
+                        : t("Resolving pages")}
+                    </span>
+                    {(downloading || paused) && (
+                      <button
+                        type="button"
+                        aria-label={paused ? t("Resume download") : t("Pause download")}
+                        onClick={() =>
+                          paused
+                            ? resumeChapterDownload(c.chapterId)
+                            : pauseChapterDownload(c.chapterId)
+                        }
+                        className="grid h-9 w-9 place-items-center rounded-lg text-ink-muted transition-colors hover:bg-elevated/60 hover:text-ink"
+                      >
+                        {paused ? <Play size={15} /> : <Pause size={15} />}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      aria-label={t("Cancel download")}
+                      onClick={() => cancelMangaDownload(c.chapterId)}
+                      className="grid h-9 w-9 place-items-center rounded-lg text-ink-subtle transition-colors hover:bg-danger/10 hover:text-danger"
+                    >
+                      <X size={16} />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onRead(readerChapters(group), i, {
+                          id: group.key,
+                          title: group.title,
+                          cover: group.cover,
+                        })
+                      }
+                      className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium text-ink-muted transition-colors hover:bg-elevated/60 hover:text-ink"
+                    >
+                      <BookOpen size={15} />
+                      {t("Read")}
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={t("Delete download")}
+                      onClick={() => deleteMangaDownload(c.chapterId)}
+                      className="grid h-9 w-9 place-items-center rounded-lg text-ink-subtle transition-colors hover:bg-danger/10 hover:text-danger"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+            {active && (
+              <div className="flex items-center gap-3">
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-elevated/60">
+                  <div
+                    className={
+                      failed
+                        ? "h-full rounded-full bg-danger"
+                        : "h-full rounded-full bg-accent transition-[width] duration-200"
+                    }
+                    style={{ width: `${failed ? 100 : pct}%` }}
+                  />
+                </div>
+                <span className="w-10 text-end text-[11.5px] tabular-nums text-ink-subtle">
+                  {failed ? t("Failed") : `${pct}%`}
+                </span>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </section>
+  );
 }
 
 function LocationCard() {
@@ -107,6 +301,10 @@ export function MangaDownloadsView({
 }) {
   const t = useT();
   const groups = useMangaDownloadGroups();
+  useEffect(() => {
+    void importMangaDownloadsFromDisk();
+    hydrateDownloadProgress();
+  }, []);
   const totalChapters = groups.reduce((n, g) => n + g.chapters.length, 0);
   const totalPages = groups.reduce((n, g) => n + g.chapters.reduce((p, c) => p + c.pages, 0), 0);
 
@@ -148,76 +346,7 @@ export function MangaDownloadsView({
         </div>
       ) : (
         groups.map((g) => (
-          <section key={g.key} className="overflow-hidden rounded-2xl border border-edge-soft bg-surface/40">
-            <div className="flex items-center gap-4 border-b border-edge-soft/60 px-5 py-4">
-              <button
-                type="button"
-                onClick={() => onOpenManga(g.key)}
-                className="flex min-w-0 flex-1 items-center gap-4 text-start"
-              >
-                {g.cover ? (
-                  <CoverImg
-                    src={g.cover}
-                    alt=""
-                    className="h-16 w-11 shrink-0 rounded-lg object-cover ring-1 ring-edge-soft"
-                  />
-                ) : (
-                  <span className="grid h-16 w-11 shrink-0 place-items-center rounded-lg bg-elevated/60 text-ink-subtle ring-1 ring-edge-soft">
-                    <BookOpen size={18} />
-                  </span>
-                )}
-                <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="truncate text-[16px] font-semibold text-ink">{g.title}</span>
-                  <span className="text-[12.5px] text-ink-subtle">
-                    {g.chapters.length === 1
-                      ? t("{n} chapter", { n: g.chapters.length })
-                      : t("{n} chapters", { n: g.chapters.length })}{" "}
-                    · {t("{n} pages", { n: g.chapters.reduce((n, c) => n + c.pages, 0) })}
-                  </span>
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  for (const c of g.chapters) deleteMangaDownload(c.chapterId);
-                }}
-                className="shrink-0 rounded-lg px-3 py-2 text-[12.5px] font-medium text-ink-subtle transition-colors hover:bg-danger/10 hover:text-danger"
-              >
-                {t("Remove all")}
-              </button>
-            </div>
-            {g.chapters.map((c, i) => (
-              <div
-                key={c.chapterId}
-                className="group flex items-center justify-between gap-4 border-b border-edge-soft/40 px-5 py-3 last:border-b-0"
-              >
-                <div className="flex min-w-0 flex-col">
-                  <span className="truncate text-[14.5px] font-medium text-ink">{c.label}</span>
-                  <span className="text-[12px] text-ink-subtle">{t("{n} pages", { n: c.pages })}</span>
-                </div>
-                <div className="flex shrink-0 items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onRead(readerChapters(g), i, { id: g.key, title: g.title, cover: g.cover })
-                    }
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium text-ink-muted transition-colors hover:bg-elevated/60 hover:text-ink"
-                  >
-                    <BookOpen size={15} />
-                    {t("Read")}
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={t("Delete download")}
-                    onClick={() => deleteMangaDownload(c.chapterId)}
-                    className="grid h-9 w-9 place-items-center rounded-lg text-ink-subtle transition-colors hover:bg-danger/10 hover:text-danger"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </section>
+          <DownloadGroupSection key={g.key} group={g} onOpenManga={onOpenManga} onRead={onRead} />
         ))
       )}
     </div>

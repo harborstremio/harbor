@@ -333,7 +333,7 @@ const miscA: Record<string, string> = {
   Allowed: "İzin verilenler",
   "Already have a TMDB login? Sign in and skip ahead. Otherwise press Register and fill in a username, password and email.":
     "Zaten bir TMDB hesabınız var mı? Oturum açıp sonraki adımlara geçin. Yoksa Kaydol'a basıp kullanıcı adı, parola ve e-posta adresi girin.",
-  "Also joins Harbor's Discord server.": "Harbor'ın Discord sunucusuna da katılır.",
+  "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.": "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
   Alternate: "Alternatif",
   "Always re-encode when casting": "Yayınlarken her zaman yeniden kodla",
   "Always show the report button": "Bildir düğmesini her zaman göster",

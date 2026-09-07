@@ -1,12 +1,12 @@
 import { setItemWithRecovery } from "@/lib/storage-recovery";
 import {
   activeMangaProvider,
+  activeMangaSource,
   activeMangaSourceId,
   aggregateSubProviders,
   ensureMangaSources,
 } from "./sources";
 import {
-  ownSourceChapters,
   routeById,
   streamAll,
   streamAggregateChapters,
@@ -191,10 +191,14 @@ export function clearMangaCache(): void {
 
 export function popularManga(offset = 0, tagId?: string) {
   const tag = tagId ?? "";
-  return cached("pop2", `${offset}|${tag}`, 5 * MIN, (p) => p.popular(offset, tagId), {
+  // Extension installs/updates/uninstalls change the sources behind the merged
+  // popular feed, so include the source revision in the key (same pattern as
+  // searchMangaEverywhere) to invalidate both the in-memory and disk caches.
+  const revision = suwayomiSourcesRevision();
+  return cached("pop2", `${revision}|${offset}|${tag}`, 5 * MIN, (p) => p.popular(offset, tagId), {
     tries: 3,
     timeout: 10_000,
-    disk: offset === 0 ? { key: `pop2|${tag}`, ...POPULAR_DISK } : undefined,
+    disk: offset === 0 ? { key: `pop2|${revision}|${tag}`, ...POPULAR_DISK } : undefined,
   });
 }
 
@@ -341,11 +345,29 @@ export function mangaChapters(id: string, opts?: { tries?: number; timeout?: num
 }
 
 export function resumeChapters(id: string): Promise<MangaChapter[]> {
-  if (activeMangaSourceId() === "all") {
-    return cached("chapters.own", id, 20 * MIN, () => ownSourceChapters(id), {
-      tries: 1,
-      timeout: 9_000,
-    });
+  // With a single configured source the details page streams raw provider
+  // chapter ids (no provider prefix) and the progress record's chapterId is a
+  // verbatim copy from that list, so the resume lookup must use the same id
+  // namespace. mangaChapters shares that list's cache entry, so a resume
+  // after a details visit is served from memory and the exact copy id hits.
+  // With several sources the aggregate view labels every copy with its
+  // provider id, own copies through the active provider (see streamChapters),
+  // so resume must search the same prefixed namespace.
+  if (aggregateSubProviders().length > 1) {
+    return cached(
+      "chapters.own",
+      id,
+      20 * MIN,
+      async () => {
+        const all: MangaChapter[] = [];
+        await streamAggregateChapters(id, (chunk) => all.push(...chunk), activeMangaProvider().id);
+        return all;
+      },
+      {
+        tries: 1,
+        timeout: 9_000,
+      },
+    );
   }
   return mangaChapters(id, { tries: 1, timeout: 9_000 });
 }
@@ -392,7 +414,8 @@ export function mangaTags() {
   const lib = mangaLibraryRevision();
   const langRev = mangaLangFilterRevision();
   // Key by the selection itself (not just a counter) so entries stay valid across app restarts.
-  const langKey = encodeURIComponent(loadMangaLangFilter().slice().sort().join("+"));
+  const serverBase = activeMangaSource()?.baseUrl;
+  const langKey = encodeURIComponent(loadMangaLangFilter(serverBase).slice().sort().join("+"));
   return cached(
     "tags",
     `${revision}|${lib}|${langRev}|${langKey}`,

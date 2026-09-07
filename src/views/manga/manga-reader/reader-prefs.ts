@@ -15,6 +15,7 @@ export const DEFAULT_PREFS: ReaderPrefs = {
   flipSound: true,
   focusMode: false,
   hideChapterEndHint: false,
+  enablePageDownload: false,
 };
 
 export function loadPrefs(key = PREFS_KEY): ReaderPrefs {

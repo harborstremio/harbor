@@ -1,4 +1,4 @@
-import type { MangaChapter, MangaProvider, MangaSummary } from "@/lib/manga/types";
+import type { MangaChapter, MangaProvider, MangaSummary, MangaTag } from "@/lib/manga/types";
 import { aggregateSubProviders } from "@/lib/manga/sources";
 
 const SEP = "::";
@@ -144,7 +144,10 @@ function labelChapters(chs: MangaChapter[], p: MangaProvider): MangaChapter[] {
   return chs.map((c) => ({
     ...c,
     id: prefixId(p.id, c.id),
-    group: c.group ? `${p.name} · ${c.group}` : p.name,
+    // The scanlator group stands alone: the server name was previously
+    // prepended here ("My Server · Webtoon"), which is noise on the details
+    // page. Server identity is retained in the prefixed chapter id.
+    group: c.group,
   }));
 }
 
@@ -194,10 +197,14 @@ async function mergeSearchLists(query: string): Promise<MangaSummary[]> {
   return [...lists.entries()].sort(([a], [b]) => a - b).flatMap(([, items]) => items);
 }
 
-export async function ownSourceChapters(id: string): Promise<MangaChapter[]> {
-  const { source, orig } = parseId(id);
-  const ownP = subById(source);
-  return labelChapters(await ownP.chapters(orig).catch(() => []), ownP);
+async function mergeTags(): Promise<MangaTag[]> {
+  const lists = await Promise.all(
+    aggregateSubProviders().map((p) =>
+      withTimeout(p.tags?.() ?? Promise.resolve([]), [] as MangaTag[]),
+    ),
+  );
+  const seen = new Set<string>();
+  return lists.flat().filter((tg) => (seen.has(tg.id) ? false : (seen.add(tg.id), true)));
 }
 
 export const aggregateProvider: MangaProvider = {
@@ -246,5 +253,5 @@ export const aggregateProvider: MangaProvider = {
     const { source, orig } = parseId(id);
     await subById(source).setLibrary?.(orig, inLibrary);
   },
-  tags: () => aggregateSubProviders()[0]?.tags?.() ?? Promise.resolve([]),
+  tags: mergeTags,
 };

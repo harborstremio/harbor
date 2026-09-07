@@ -36,7 +36,10 @@ import {
   type ExtensionRepo,
 } from "./graphql";
 import { normalizeExtensionRepoUrl } from "./base-url";
-import { notifySuwayomiSourcesChanged } from "./source-events";
+import {
+  notifySuwayomiSourcesChanged,
+  subscribeSuwayomiSourcesChanged,
+} from "./source-events";
 
 export type { ExtensionRepo } from "./graphql";
 
@@ -95,13 +98,43 @@ export async function sourcePopular(
   sourceId: string,
   page: number,
 ): Promise<SuwayomiPage> {
+  return cachedSourceBrowse(config, sourceId, "popular", page);
+}
+
+const FEED_TTL = 5 * 60_000;
+const feedCache = new Map<string, { at: number; data: SuwayomiPage }>();
+subscribeSuwayomiSourcesChanged(() => feedCache.clear());
+
+// The per-extension Popular/Latest feeds are requested once for every source on
+// every visit to the All-Extensions view, so memoize them briefly (5 min) to
+// avoid 2xN HTTP calls on each mount. Cleared on any Suwayomi extension change.
+//
+// Suwayomi's REST browse endpoint re-queries MangaTable without ORDER BY, so
+// rows come back in SQLite primary-key order rather than the source extension's
+// intended "latest first" / "most popular first" order. The GraphQL
+// fetchSourceManga mutation explicitly preserves source order via
+// `.sortedBy { mangaIds.indexOf(it.id) }` — the same mutation both official
+// Suwayomi UIs (WebUI, JUI) use. Prefer GraphQL for browse so the feed rows
+// match what the user sees in Suwayomi; fall back to REST if unavailable.
+async function cachedSourceBrowse(
+  config: ServerConfig,
+  sourceId: string,
+  kind: "popular" | "latest",
+  page: number,
+): Promise<SuwayomiPage> {
+  const key = `${config.baseUrl}|${sourceId}|${kind}|${page}`;
+  const hit = feedCache.get(key);
+  if (hit && Date.now() - hit.at < FEED_TTL) return hit.data;
   const client = configClient(config);
-  const res = await withTransportFallback(client, (t) =>
-    t === "rest"
-      ? restBrowse(client, sourceId, "popular", page)
-      : gqlBrowse(client, sourceId, "popular", page),
-  );
-  return mapPage(config, sourceId, res);
+  let res: RestPage;
+  try {
+    res = await gqlBrowse(client, sourceId, kind, page);
+  } catch {
+    res = await restBrowse(client, sourceId, kind, page);
+  }
+  const data = mapPage(config, sourceId, res);
+  feedCache.set(key, { at: Date.now(), data });
+  return data;
 }
 
 export async function sourceLatest(
@@ -109,13 +142,7 @@ export async function sourceLatest(
   sourceId: string,
   page: number,
 ): Promise<SuwayomiPage> {
-  const client = configClient(config);
-  const res = await withTransportFallback(client, (t) =>
-    t === "rest"
-      ? restBrowse(client, sourceId, "latest", page)
-      : gqlBrowse(client, sourceId, "latest", page),
-  );
-  return mapPage(config, sourceId, res);
+  return cachedSourceBrowse(config, sourceId, "latest", page);
 }
 
 export async function sourceSearch(

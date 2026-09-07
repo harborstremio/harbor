@@ -5,7 +5,7 @@ const uiFallback: Record<string, string> = {
   "6-digit code": "6-digit code",
   "Addons ({n})": "Addons ({n})",
   "All selected": "All selected",
-  "Also joins Harbor's Discord server.": "Also joins Harbor's Discord server.",
+  "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.": "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
   "Apply and reload": "Apply and reload",
   "Changing the metadata language reloads Harbor so the new language takes effect. Apply when you're done with the options above.":
     "Changing the metadata language reloads Harbor so the new language takes effect. Apply when you're done with the options above.",

@@ -88,7 +88,7 @@ export async function gqlBrowse(
 ): Promise<RestPage> {
   if (!isDigits(sourceId)) return { items: [], hasNextPage: false };
   const q = `mutation($page: Int!, $query: String) {
-    fetchSourceManga(input: { source: ${sourceId}, type: ${KIND_ENUM[kind]}, page: $page, query: $query }) {
+    fetchSourceManga(input: { source: "${sourceId}", type: ${KIND_ENUM[kind]}, page: $page, query: $query }) {
       hasNextPage
       mangas { id title thumbnailUrl author artist status description }
     }

@@ -61,6 +61,7 @@ function proxyImage(url: string): Promise<string | null> {
           responseType: "base64",
           timeoutMs: 30000,
           headers: auth ? { authorization: auth } : undefined,
+          allowLocalNetwork: Boolean(auth),
         },
       });
       if (!resp.ok) throw new Error(`status ${resp.status}`);

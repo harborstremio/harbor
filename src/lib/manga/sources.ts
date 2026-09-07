@@ -28,6 +28,7 @@ import { credentialFreeBase, normalizeSuwayomiBase } from "./sources/suwayomi/ba
 import { reconcileSuwayomiServers } from "./sources/suwayomi/server-link";
 import { setSuwayomiBaseResolver } from "./sources/suwayomi/progress-bridge";
 import { makeServer } from "./sources/suwayomi/model";
+import { subscribeSuwayomiSourcesChanged } from "./sources/suwayomi/source-events";
 
 export type MangaSourceKind = "suwayomi" | "local" | "plugin" | "html" | "mangayomi";
 
@@ -58,6 +59,10 @@ const listeners = new Set<() => void>();
 subscribeCommunity(() => notify());
 subscribePlugins(() => notify());
 subscribeMangayomiSources(() => notify());
+// A Suwayomi extension install/update/uninstall changes which sources back the
+// merged feed, so re-notify the view (bumping its sourceTick) to re-request the
+// popular hero/rail instead of waiting for a manual remount.
+subscribeSuwayomiSourcesChanged(() => notify());
 
 export function subscribeMangaSources(cb: () => void): () => void {
   listeners.add(cb);
@@ -244,7 +249,11 @@ export function hasConfiguredMangaSources(): boolean {
 export function listMangaSources(): MangaSource[] {
   const subs = configuredSources();
   const out: MangaSource[] = [];
-  if (subs.length >= 2) out.push({ id: "all", name: "All Sources", baseUrl: "", builtin: true });
+  if (subs.length >= 2) {
+    // A Suwayomi server hosts many sources, so "All" pairs whole servers here, not sources.
+    const allServers = subs.every((s) => s.kind === "suwayomi");
+    out.push({ id: "all", name: allServers ? "All Servers" : "All Sources", baseUrl: "", builtin: true });
+  }
   out.push(...subs);
   return out;
 }

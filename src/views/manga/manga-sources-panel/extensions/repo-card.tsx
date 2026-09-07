@@ -1,6 +1,6 @@
-import { AlertCircle, Loader2, PackageOpen, RefreshCw, ServerCog, Trash2 } from "lucide-react";
+import { AlertCircle, ArrowUpCircle, Loader2, PackageOpen, RefreshCw, ServerCog, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { browseRepo, installedPluginsSync, type PluginRepo } from "@/lib/manga/plugins";
+import { browseRepo, installPlugin, installedPluginsSync, type PluginRepo } from "@/lib/manga/plugins";
 import type { ForeignRepoKind } from "@/lib/manga/plugins/types";
 import { CARD } from "../shared";
 import { PluginRow } from "./plugin-row";
@@ -42,6 +42,9 @@ export function RepoCard({ url, onRemove }: { url: string; onRemove: () => void 
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [attempt, setAttempt] = useState(0);
   const [removing, setRemoving] = useState(false);
+  const [updateBusy, setUpdateBusy] = useState(false);
+  const [updateProgress, setUpdateProgress] = useState<{ done: number; total: number } | null>(null);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,7 +64,36 @@ export function RepoCard({ url, onRemove }: { url: string; onRemove: () => void 
   }, [url, attempt]);
 
   const installed = installedPluginsSync();
+  void tick;
   const byId = new Map(installed.map((p) => [p.id, p]));
+
+  const outdated = repo
+    ? repo.plugins.filter((m) => {
+        const ins = byId.get(m.id);
+        return ins && ins.version !== m.version;
+      })
+    : [];
+
+  const updateAll = async () => {
+    if (outdated.length === 0) return;
+    setUpdateBusy(true);
+    setUpdateProgress({ done: 0, total: outdated.length });
+    try {
+      for (let i = 0; i < outdated.length; i++) {
+        const m = outdated[i];
+        try {
+          await installPlugin(m, url);
+        } catch {
+          /* empty */
+        }
+        setUpdateProgress({ done: i + 1, total: outdated.length });
+        setTick((n) => n + 1);
+      }
+    } finally {
+      setUpdateBusy(false);
+      setUpdateProgress(null);
+    }
+  };
 
   const remove = () => {
     setRemoving(true);
@@ -90,6 +122,27 @@ export function RepoCard({ url, onRemove }: { url: string; onRemove: () => void 
             className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-raised text-ink-subtle ring-1 ring-edge-soft transition-all hover:text-ink active:scale-95"
           >
             <RefreshCw size={16} />
+          </button>
+        )}
+        {state === "ready" && outdated.length > 0 && (
+          <button
+            type="button"
+            onClick={updateAll}
+            disabled={updateBusy}
+            aria-label={t("Update all")}
+            className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-raised px-3 text-[13px] font-semibold text-accent ring-1 ring-edge-soft transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
+          >
+            {updateBusy ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                {updateProgress && `${updateProgress.done}/${updateProgress.total}`}
+              </>
+            ) : (
+              <>
+                <ArrowUpCircle size={15} />
+                {t("Update all")}
+              </>
+            )}
           </button>
         )}
         <button

@@ -1,12 +1,13 @@
-import { ArrowDownToLine, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowDownToLine, BookOpen, ChevronLeft, ChevronRight, Layers } from "lucide-react";
 import { CoverImg } from "@/components/cover-img";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { useMangaDownloadsCount } from "@/lib/manga-downloads";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
-import { useView } from "@/lib/view";
+import { useScrollMemory, useView } from "@/lib/view";
 import {
+  activeMangaSource,
   activeMangaSourceId,
   hasAnyMangaSource,
   initMangaSource,
@@ -28,6 +29,8 @@ import { takeMangaReadIntent } from "@/lib/manga/read-intent";
 import { MangaHero } from "./manga/manga-hero";
 import { MangaBootstrap, MangaBootstrapError } from "./manga/manga-boot";
 import { MangaBrowse } from "./manga/manga-browse";
+import { BrowseResults } from "./manga/manga-sources-panel/suwayomi/browse-results";
+import type { SuwayomiSource } from "@/lib/manga/sources/suwayomi/provider";
 import { MangaCollections } from "./manga/manga-collections";
 import { MangaContinue } from "./manga/manga-continue";
 import { MangaDetail } from "./manga/manga-detail";
@@ -39,15 +42,19 @@ import { MangaUniverses, UniversesCta } from "./manga/manga-universes";
 import { AnilistMangaRows } from "./manga/anilist-manga-rows";
 import { MangaHiddenRows } from "./manga/manga-row-visibility";
 import { BecauseYouWatched } from "./manga/because-you-watched";
+import { MyListsTab } from "./library/my-lists-tab";
+import { useCustomLists } from "@/lib/custom-lists";
 
 type MangaMeta = { id: string; title: string; cover?: string };
 
 type Mode =
   | { screen: "browse" }
   | { screen: "collections" }
+  | { screen: "lists" }
   | { screen: "universes" }
   | { screen: "sources" }
   | { screen: "downloads"; from?: string }
+  | { screen: "browse-extension"; source: SuwayomiSource }
   | { screen: "detail"; mangaId: string }
   | {
       screen: "reader";
@@ -77,7 +84,12 @@ export function MangaView() {
   topKindRef.current = topKind;
   const detailScrollRef = useRef<HTMLElement>(null);
   const browseScrollRef = useRef<HTMLElement>(null);
+  const browseExtensionScrollRef = useRef<HTMLElement>(null);
   const resumeRef = useRef<(entry: MangaProgressEntry) => void>(() => {});
+  const isBrowse = mode.screen === "browse";
+  const isDetail = mode.screen === "detail";
+  useScrollMemory("manga", browseScrollRef, isBrowse);
+  useScrollMemory("manga-detail", detailScrollRef, isDetail);
 
   const openMangaItem = (item: MangaSummary) => {
     setMode({ screen: "detail", mangaId: item.id });
@@ -229,12 +241,14 @@ export function MangaView() {
     const target = entry.sourceId || activeMangaSourceId();
     if (target && activeMangaSourceId() !== target) setActiveMangaSource(target);
     try {
-      const chs = await resumeChapters(entry.id);
-      const i = chs.findIndex(
-        (c) =>
-          c.id === entry.chapterId ||
-          (entry.chapterNumber != null && c.chapter != null && c.chapter === entry.chapterNumber),
-      );
+      let chs = await resumeChapters(entry.id);
+      let i = chs.findIndex((c) => c.id === entry.chapterId);
+      if (i < 0) {
+        i = chs.findIndex(
+          (c) =>
+            entry.chapterNumber != null && c.chapter != null && c.chapter === entry.chapterNumber,
+        );
+      }
       if (i >= 0) {
         setMode({
           screen: "reader",
@@ -254,158 +268,188 @@ export function MangaView() {
   };
   resumeRef.current = resume;
 
-  if (mode.screen === "reader") {
-    return (
-      <MangaReader
-        chapters={mode.chapters}
-        index={mode.index}
-        manga={mode.manga}
-        startPage={mode.startPage}
-        startScroll={mode.startScroll}
-        onExit={() => setMode({ screen: "detail", mangaId: mode.mangaId })}
-        onChangeIndex={(i) => setMode({ ...mode, index: i })}
-      />
-    );
-  }
-
-  if (mode.screen === "detail") {
-    return (
-      <main
-        ref={detailScrollRef}
-        className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24"
-      >
-        <MangaDetail
-          mangaId={mode.mangaId}
-          onBack={() => setMode({ screen: "browse" })}
-          onResume={resume}
-          onOpenDownloads={() => setMode({ screen: "downloads", from: mode.mangaId })}
-          onOpenManga={(id) => setMode({ screen: "detail", mangaId: id })}
-          onRead={(chapters, index, manga) =>
-            setMode({
-              screen: "reader",
-              mangaId: mode.mangaId,
-              manga: manga ?? { id: mode.mangaId, title: "" },
-              chapters,
-              index,
-            })
-          }
-        />
-        <BackToTop scrollRef={detailScrollRef} />
-      </main>
-    );
-  }
-
-  if (mode.screen === "collections") {
-    return (
-      <main className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24">
-        <button
-          type="button"
-          onClick={() => setMode({ screen: "browse" })}
-          className="mb-7 inline-flex items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/40 px-4 py-2 text-[14px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
-        >
-          <ChevronLeft size={18} />
-          {t("Back")}
-        </button>
-        <h1 className="mb-8 font-display text-[32px] font-medium tracking-tight text-ink">
-          {t("Collections")}
-        </h1>
-        <MangaCollections onOpen={openMangaItem} />
-      </main>
-    );
-  }
-
-  if (mode.screen === "universes") {
-    return (
-      <main className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24">
-        <MangaUniverses
-          onOpen={(id) => setMode({ screen: "detail", mangaId: id })}
-          onBack={() => setMode({ screen: "browse" })}
-        />
-      </main>
-    );
-  }
-
   return (
-    <main
-      ref={browseScrollRef}
-      className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-28"
-    >
-      <MangaHero featured={featured} onOpen={(id) => setMode({ screen: "detail", mangaId: id })} />
-      <div className="mt-8">
-        <MangaContinue onResume={resume} />
-      </div>
-      <MangaHiddenRows />
-      <AnilistMangaRows onOpen={openMangaByTitle} />
-      <BecauseYouWatched onOpen={openMangaItem} />
-      <div className="mt-8">
-        <MangaRail
-          title={t("Popular Manga")}
-          subtitle={t("Most read right now")}
-          collapsibleKey="harbor.manga.popularRowOpen"
-          hideKey="popular"
-          scrollKey="manga:Popular Manga"
-          load={() => popularManga(0)}
-          onOpen={openMangaItem}
-        />
-      </div>
-      <div className="mb-9 mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <button
-          type="button"
-          onClick={() => setMode({ screen: "collections" })}
-          className="group flex h-full min-h-[84px] items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 px-6 py-4 text-start transition-all duration-300 hover:bg-elevated/70 active:scale-[0.99]"
-        >
-          <span className="relative grid h-12 w-16 shrink-0 place-items-center">
-            <span className="absolute h-10 w-7 -translate-x-2.5 -rotate-[18deg] overflow-hidden rounded-[5px] bg-elevated shadow-[0_4px_10px_-4px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft transition-transform duration-300 ease-out group-hover:-translate-x-4 group-hover:-rotate-[28deg]">
-              {featured[1]?.cover && (
-                <CoverImg src={featured[1].cover} alt="" className="h-full w-full object-cover" />
-              )}
-            </span>
-            <span className="absolute h-10 w-7 translate-x-2.5 rotate-[18deg] overflow-hidden rounded-[5px] bg-raised shadow-[0_4px_10px_-4px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft transition-transform duration-300 ease-out group-hover:translate-x-4 group-hover:rotate-[28deg]">
-              {featured[2]?.cover && (
-                <CoverImg src={featured[2].cover} alt="" className="h-full w-full object-cover" />
-              )}
-            </span>
-            <span className="absolute h-10 w-7 overflow-hidden rounded-[5px] bg-gradient-to-br from-accent to-accent/60 shadow-[0_6px_14px_-4px_rgba(0,0,0,0.7)] ring-1 ring-white/10 transition-transform duration-300 ease-out group-hover:-translate-y-1">
-              {featured[0]?.cover && (
-                <CoverImg src={featured[0].cover} alt="" className="h-full w-full object-cover" />
-              )}
-            </span>
-          </span>
-          <div className="flex min-w-0 flex-1 flex-col">
-            <span className="text-[15.5px] font-semibold text-ink">{t("Collections")}</span>
-            <span className="truncate text-[13px] text-ink-muted">
-              {t("Most popular, critically acclaimed, award winners and more")}
-            </span>
-          </div>
-          <ChevronRight
-            size={22}
-            className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-1"
+    <>
+      {/* Browse home main — kept mounted (hidden when a sub-page is active) so its
+          scroll position and loaded posters survive back-navigation. */}
+      <main
+        ref={browseScrollRef}
+        className={"flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-28" + (isBrowse ? "" : " hidden")}
+      >
+        <MangaHero featured={featured} onOpen={(id) => setMode({ screen: "detail", mangaId: id })} />
+        <div className="mt-8">
+          <MangaContinue onResume={resume} />
+        </div>
+        <MangaHiddenRows />
+        <AnilistMangaRows onOpen={openMangaByTitle} />
+        <BecauseYouWatched onOpen={openMangaItem} />
+        <div className="mt-8">
+          <MangaRail
+            title={t("Popular Manga")}
+            subtitle={t("Most read right now")}
+            collapsibleKey="harbor.manga.popularRowOpen"
+            hideKey="popular"
+            scrollKey="manga:Popular Manga"
+            load={() => popularManga(0)}
+            onOpen={openMangaItem}
           />
-        </button>
-        <UniversesCta onClick={() => setMode({ screen: "universes" })} />
-      </div>
-      <div className="mb-6 mt-3 flex items-center justify-between gap-4">
-        <h2 className="text-[22px] font-medium tracking-tight text-ink">{t("Browse manga")}</h2>
-        <button
-          type="button"
-          onClick={() => setMode({ screen: "downloads" })}
-          className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-edge-soft bg-surface/60 px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:bg-elevated/60 hover:text-ink"
-        >
-          <ArrowDownToLine size={16} strokeWidth={2} />
-          {t("Downloads")}
-          {downloadsCount > 0 && (
-            <span className="rounded-full bg-elevated px-2 py-0.5 text-[11.5px] font-semibold tabular-nums text-ink ring-1 ring-edge-soft">
-              {downloadsCount}
+        </div>
+        <div className="mb-9 mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <button
+            type="button"
+            onClick={() => setMode({ screen: "collections" })}
+            className="group flex h-full min-h-[84px] items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 px-6 py-4 text-start transition-all duration-300 hover:bg-elevated/70 active:scale-[0.99]"
+          >
+            <span className="relative grid h-12 w-16 shrink-0 place-items-center">
+              <span className="absolute h-10 w-7 -translate-x-2.5 -rotate-[18deg] overflow-hidden rounded-[5px] bg-elevated shadow-[0_4px_10px_-4px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft transition-transform duration-300 ease-out group-hover:-translate-x-4 group-hover:-rotate-[28deg]">
+                {featured[1]?.cover && (
+                  <CoverImg src={featured[1].cover} alt="" className="h-full w-full object-cover" />
+                )}
+              </span>
+              <span className="absolute h-10 w-7 translate-x-2.5 rotate-[18deg] overflow-hidden rounded-[5px] bg-raised shadow-[0_4px_10px_-4px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft transition-transform duration-300 ease-out group-hover:translate-x-4 group-hover:rotate-[28deg]">
+                {featured[2]?.cover && (
+                  <CoverImg src={featured[2].cover} alt="" className="h-full w-full object-cover" />
+                )}
+              </span>
+              <span className="absolute h-10 w-7 overflow-hidden rounded-[5px] bg-gradient-to-br from-accent to-accent/60 shadow-[0_6px_14px_-4px_rgba(0,0,0,0.7)] ring-1 ring-white/10 transition-transform duration-300 ease-out group-hover:-translate-y-1">
+                {featured[0]?.cover && (
+                  <CoverImg src={featured[0].cover} alt="" className="h-full w-full object-cover" />
+                )}
+              </span>
             </span>
-          )}
-        </button>
-      </div>
-      <MangaBrowse
-        onOpen={(id) => setMode({ screen: "detail", mangaId: id })}
-        onManageSources={() => setMode({ screen: "sources" })}
-      />
-      <BackToTop scrollRef={browseScrollRef} />
-    </main>
+            <div className="flex min-w-0 flex-1 flex-col">
+              <span className="text-[15.5px] font-semibold text-ink">{t("Collections")}</span>
+              <span className="truncate text-[13px] text-ink-muted">
+                {t("Most popular, critically acclaimed, award winners and more")}
+              </span>
+            </div>
+            <ChevronRight
+              size={22}
+              className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-1"
+            />
+          </button>
+          <UniversesCta onClick={() => setMode({ screen: "universes" })} />
+          <MyListsCta onClick={() => setMode({ screen: "lists" })} />
+        </div>
+        <div className="mb-6 mt-3 flex items-center justify-between gap-4">
+          <h2 className="text-[22px] font-medium tracking-tight text-ink">{t("Browse manga")}</h2>
+          <button
+            type="button"
+            onClick={() => setMode({ screen: "downloads" })}
+            className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-edge-soft bg-surface/60 px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:bg-elevated/60 hover:text-ink"
+          >
+            <ArrowDownToLine size={16} strokeWidth={2} />
+            {t("Downloads")}
+            {downloadsCount > 0 && (
+              <span className="rounded-full bg-elevated px-2 py-0.5 text-[11.5px] font-semibold tabular-nums text-ink ring-1 ring-edge-soft">
+                {downloadsCount}
+              </span>
+            )}
+          </button>
+        </div>
+        <MangaBrowse
+          onOpen={(id) => setMode({ screen: "detail", mangaId: id })}
+          onManageSources={() => setMode({ screen: "sources" })}
+          onBrowseExtension={(source) => setMode({ screen: "browse-extension", source })}
+        />
+        <BackToTop scrollRef={browseScrollRef} />
+      </main>
+
+      {mode.screen === "reader" && (
+        <MangaReader
+          chapters={mode.chapters}
+          index={mode.index}
+          manga={mode.manga}
+          startPage={mode.startPage}
+          startScroll={mode.startScroll}
+          onExit={() => setMode({ screen: "detail", mangaId: mode.mangaId })}
+          onChangeIndex={(i) => setMode({ ...mode, index: i })}
+        />
+      )}
+
+      {isDetail && (
+        <main
+          ref={detailScrollRef}
+          className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24"
+        >
+          <MangaDetail
+            mangaId={mode.mangaId}
+            onBack={() => setMode({ screen: "browse" })}
+            onResume={resume}
+            onOpenDownloads={() => setMode({ screen: "downloads", from: mode.mangaId })}
+            onOpenManga={(id) => setMode({ screen: "detail", mangaId: id })}
+            onRead={(chapters, index, manga) =>
+              setMode({
+                screen: "reader",
+                mangaId: mode.mangaId,
+                manga: manga ?? { id: mode.mangaId, title: "" },
+                chapters,
+                index,
+              })
+            }
+          />
+          <BackToTop scrollRef={detailScrollRef} />
+        </main>
+      )}
+
+      {mode.screen === "collections" && (
+        <main className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24">
+          <button
+            type="button"
+            onClick={() => setMode({ screen: "browse" })}
+            className="mb-7 inline-flex items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/40 px-4 py-2 text-[14px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+          >
+            <ChevronLeft size={18} />
+            {t("Back")}
+          </button>
+          <h1 className="mb-8 font-display text-[32px] font-medium tracking-tight text-ink">
+            {t("Collections")}
+          </h1>
+          <MangaCollections onOpen={openMangaItem} />
+        </main>
+      )}
+
+      {mode.screen === "lists" && (
+        <main className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24">
+          <button
+            type="button"
+            onClick={() => setMode({ screen: "browse" })}
+            className="mb-7 inline-flex items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/40 px-4 py-2 text-[14px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+          >
+            <ChevronLeft size={18} />
+            {t("Back")}
+          </button>
+          <h1 className="mb-8 font-display text-[32px] font-medium tracking-tight text-ink">
+            {t("My lists")}
+          </h1>
+          <MyListsTab />
+        </main>
+      )}
+
+      {mode.screen === "universes" && (
+        <main className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24">
+          <MangaUniverses
+            onOpen={(id) => setMode({ screen: "detail", mangaId: id })}
+            onBack={() => setMode({ screen: "browse" })}
+          />
+        </main>
+      )}
+
+      {mode.screen === "browse-extension" && (
+        <main
+          ref={browseExtensionScrollRef}
+          className="flex-1 overflow-y-auto overflow-x-hidden px-12 pb-16 pt-24"
+        >
+          <BrowseResults
+            config={{ baseUrl: activeMangaSource()?.baseUrl ?? "" }}
+            source={mode.source}
+            onBack={() => setMode({ screen: "browse" })}
+            onOpen={(item) => setMode({ screen: "detail", mangaId: item.id })}
+            scrollRef={browseExtensionScrollRef}
+          />
+        </main>
+      )}
+    </>
   );
 }
 
@@ -434,5 +478,69 @@ function EnableGate({ onEnable }: { onEnable: () => void }) {
       </button>
       </div>
     </main>
+  );
+}
+
+function MyListsCta({ onClick }: { onClick: () => void }) {
+  const t = useT();
+  const lists = useCustomLists();
+  const covers = useMemo(() => {
+    const manga = lists
+      .flatMap((l) => l.items)
+      .filter((it) => it.type === "manga" && it.poster)
+      .map((it) => it.poster!);
+    const any = lists
+      .flatMap((l) => l.items)
+      .filter((it) => it.poster)
+      .map((it) => it.poster!);
+    const seen = new Set<string>();
+    for (const c of [...manga, ...any]) {
+      if (c && !seen.has(c)) seen.add(c);
+      if (seen.size === 3) break;
+    }
+    return [...seen];
+  }, [lists]);
+
+  const [a, b, center] = covers;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex h-full min-h-[84px] items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 px-6 py-4 text-start transition-all duration-300 hover:bg-elevated/70 active:scale-[0.99]"
+    >
+      {covers.length > 0 ? (
+        <span className="relative grid h-12 w-16 shrink-0 place-items-center">
+          {a && (
+            <span className="absolute h-10 w-7 -translate-x-2.5 -rotate-[18deg] overflow-hidden rounded-[5px] bg-elevated shadow-[0_4px_10px_-4px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft transition-transform duration-300 ease-out group-hover:-translate-x-4 group-hover:-rotate-[28deg]">
+              <CoverImg src={a} alt="" className="h-full w-full object-cover" />
+            </span>
+          )}
+          {b && (
+            <span className="absolute h-10 w-7 translate-x-2.5 rotate-[18deg] overflow-hidden rounded-[5px] bg-raised shadow-[0_4px_10px_-4px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft transition-transform duration-300 ease-out group-hover:translate-x-4 group-hover:rotate-[28deg]">
+              <CoverImg src={b} alt="" className="h-full w-full object-cover" />
+            </span>
+          )}
+          {center && (
+            <span className="absolute h-10 w-7 overflow-hidden rounded-[5px] bg-gradient-to-br from-accent to-accent/60 shadow-[0_6px_14px_-4px_rgba(0,0,0,0.7)] ring-1 ring-white/10 transition-transform duration-300 ease-out group-hover:-translate-y-1">
+              <CoverImg src={center} alt="" className="h-full w-full object-cover" />
+            </span>
+          )}
+        </span>
+      ) : (
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-elevated ring-1 ring-edge-soft">
+          <Layers size={20} className="text-ink-subtle" />
+        </span>
+      )}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <span className="text-[15.5px] font-semibold text-ink">{t("My lists")}</span>
+        <span className="truncate text-[13px] text-ink-muted">
+          {t("The lists you created, full of saved manga")}
+        </span>
+      </div>
+      <ChevronRight
+        size={22}
+        className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-1"
+      />
+    </button>
   );
 }

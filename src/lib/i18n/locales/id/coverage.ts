@@ -670,7 +670,7 @@ const coverage: Record<string, string> = {
   "Already have a TMDB login? Sign in and skip ahead. Otherwise press Register and fill in a username, password and email.":
     "Sudah punya akun TMDB? Masuk dan lewati langkah berikutnya. Jika belum, tekan Daftar lalu isi nama pengguna, kata sandi, dan email.",
   "Already on the closest match for this release": "Sudah pada kecocokan terdekat untuk rilis ini",
-  "Also joins Harbor's Discord server.": "Juga bergabung ke server Discord Harbor.",
+  "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.": "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
   "Also known as": "Juga dikenal sebagai",
   "Also won": "Juga menang",
   Alternate: "Alternatif",

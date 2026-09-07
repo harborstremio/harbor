@@ -92,8 +92,10 @@ export function DiscordLinkCard({
         </span>
         <div className="flex min-w-0 flex-col">
           <span className="text-[13px] font-semibold text-ink">{t("Link Discord")}</span>
-          <span className="truncate text-[12px] text-ink-subtle">
-            {t("Also joins Harbor's Discord server.")}
+          <span className="truncate text-[14px] text-ink-subtle">
+            {t(
+              "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
+            )}
           </span>
         </div>
       </div>

@@ -579,7 +579,7 @@ const catalogAC: Record<string, string> = {
     "TMDB लॉगिन पहले से है? साइन इन करके आगे बढ़ें. नहीं तो रजिस्टर दबाएँ और उपयोगकर्ता नाम, पासवर्ड और ईमेल भरें.",
   "Already on the closest match for this release": "आप इस रिलीज़ के सबसे करीबी मिलान पर पहले से हैं",
   "Also Nominated": "अन्य नामांकन",
-  "Also joins Harbor's Discord server.": "Harbor के Discord सर्वर से भी जुड़ता है.",
+  "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.": "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
   "Also known as": "इस नाम से भी जाना जाता है",
   "Also won": "यह भी जीता",
   Alternate: "वैकल्पिक",

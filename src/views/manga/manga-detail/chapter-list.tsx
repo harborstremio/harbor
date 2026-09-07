@@ -11,11 +11,12 @@ import {
   downloadChapter,
   pauseMangaDownloadBatch,
   resumeMangaDownloadBatch,
-  useMangaDownload,
   useMangaDownloadBatch,
+  useMangaDownloadGroup,
   type MangaDownloadInfo,
 } from "@/lib/manga-downloads";
 import { listMangaSources, sourceIconUrl } from "@/lib/manga/sources";
+import { chapterGroupKey, chapterNumberKey } from "@/lib/manga/chapter-identity";
 
 type ChapterView = "grid" | "list";
 const VIEW_KEY = "harbor.manga.chapterview";
@@ -42,6 +43,14 @@ function relativeDate(iso?: string): string | null {
 
 function chapterLabel(chapter: string | null): string {
   return chapter == null ? t("Oneshot") : t("Chapter {n}", { n: chapter });
+}
+
+// Scanlator labels used to arrive prefixed with the server name ("My Server ·
+// Webtoon") via the aggregate provider; strip that prefix for display and for
+// the scanlator filter so the scanlator alone is compared and shown.
+function displayGroup(group?: string | null): string {
+  const g = (group ?? "").trim();
+  return g.replace(/^(?:my\s+server)[\s·|:/-]*/i, "").trim();
 }
 
 function flagLanguageName(code: string): string {
@@ -136,10 +145,15 @@ function LangDropdown({
 
 function ChapterMeta({ chapter }: { chapter: MangaChapter }) {
   const rel = relativeDate(chapter.publishAt);
+  const group = displayGroup(chapter.group);
   return (
     <span className="flex min-w-0 items-center gap-1.5 text-[12.5px] text-ink-subtle">
-      {chapter.group && <span className="truncate">{chapter.group}</span>}
-      {chapter.group && rel && (
+      {group && (
+        <span className="shrink-0 rounded-full bg-accent/12 px-2 py-[3px] text-[11px] font-semibold text-accent ring-1 ring-accent/25">
+          {group}
+        </span>
+      )}
+      {group && rel && (
         <span aria-hidden className="text-ink-subtle/50">
           ·
         </span>
@@ -171,23 +185,27 @@ function chapterSourceId(id: string): string {
 function isCurrentChapter(progress: MangaProgressEntry | undefined, c: MangaChapter): boolean {
   if (!progress) return false;
   if (progress.chapterId === c.id) return true;
-  return (
-    progress.chapterNumber != null && c.chapter != null && progress.chapterNumber === c.chapter
-  );
+  if (progress.chapterNumber == null || c.chapter == null) return false;
+  const a = chapterNumberKey(progress.chapterNumber);
+  const b = chapterNumberKey(c.chapter);
+  if (a != null && b != null) return a === b;
+  return progress.chapterNumber === c.chapter;
 }
 
 function ChapterDownloadButton({
   mangaId,
   chapterId,
+  altChapterIds,
   info,
   serverDownloaded,
 }: {
   mangaId: string;
   chapterId: string;
+  altChapterIds?: string[];
   info?: MangaDownloadInfo;
   serverDownloaded?: boolean;
 }) {
-  const rec = useMangaDownload(chapterId);
+  const rec = useMangaDownloadGroup([chapterId, ...(altChapterIds ?? [])]);
   const t = useT();
   if (rec.status === "done") {
     return <Check size={16} className="shrink-0 text-accent" aria-label={t("Downloaded")} />;
@@ -370,7 +388,7 @@ export function ChapterList({
   const [view, setView] = useState<ChapterView>(readView);
   const [range, setRange] = useState<number | null>(null);
   const [sourceFilter, setSourceFilter] = useState("");
-  const [sourceChoice, setSourceChoice] = useState<MangaChapter | null>(null);
+  const [scanFilter, setScanFilter] = useState("");
   const batch = useMangaDownloadBatch(mangaId ?? "");
 
   useEffect(() => {
@@ -379,7 +397,7 @@ export function ChapterList({
 
   useEffect(() => {
     setRange(null);
-  }, [selectedLang]);
+  }, [selectedLang, scanFilter]);
 
   const progress = useMangaProgressEntry(mangaId, mangaTitle);
 
@@ -403,28 +421,33 @@ export function ChapterList({
     [chapters, sourceFilter],
   );
 
-  const chapterGroups = useMemo(() => {
-    const groups = new Map<string, MangaChapter[]>();
+  const sameChapterIds = useMemo(() => {
+    const ids = new Map<string, string[]>();
     for (const c of rawScoped) {
-      const number = c.chapter == null ? NaN : Number(c.chapter);
-      const identity = Number.isFinite(number) ? String(number) : c.chapter ?? c.title?.trim().toLowerCase() ?? "oneshot";
-      const key = `${c.language}|${identity}`;
-      groups.set(key, [...(groups.get(key) ?? []), c]);
+      const key = chapterGroupKey(c);
+      ids.set(key, [...(ids.get(key) ?? []), c.id]);
     }
-    const list: MangaChapter[] = [], options = new Map<string, MangaChapter[]>();
-    for (const group of groups.values()) {
-      const sources = new Set(group.map((c) => chapterSourceId(c.id)).filter(Boolean));
-      if (sources.size < 2) {
-        for (const c of group) { list.push(c); options.set(c.id, [c]); }
-        continue;
-      }
-      const sorted = [...group].sort((a, b) => new Date(b.publishAt ?? 0).getTime() - new Date(a.publishAt ?? 0).getTime());
-      list.push(sorted[0]);
-      options.set(sorted[0].id, sorted);
-    }
-    return { list, options };
+    return ids;
   }, [rawScoped]);
-  const scoped = chapterGroups.list;
+
+  const scanOptions = useMemo(() => {
+    const byName = new Map<string, number>();
+    for (const c of rawScoped) {
+      const name = displayGroup(c.group);
+      if (!name) continue;
+      byName.set(name, (byName.get(name) ?? 0) + 1);
+    }
+    return [...byName.entries()].map(([name, count]) => ({ name, count }));
+  }, [rawScoped]);
+
+  useEffect(() => {
+    if (scanFilter && !scanOptions.some((o) => o.name === scanFilter)) setScanFilter("");
+  }, [scanOptions, scanFilter]);
+
+  const scoped = useMemo(
+    () => (scanFilter ? rawScoped.filter((c) => displayGroup(c.group) === scanFilter) : rawScoped),
+    [rawScoped, scanFilter],
+  );
 
   const animeEndId = useMemo(() => {
     if (animeEndChapter == null) return null;
@@ -483,11 +506,9 @@ export function ChapterList({
     () => (sort === "newest" ? [...ascending].reverse() : ascending),
     [ascending, sort],
   );
-  const readChapter = (chapter: MangaChapter, selected = chapter) => {
-    const options = chapterGroups.options.get(chapter.id) ?? [chapter];
-    if (selected === chapter && options.length > 1) { setSourceChoice(chapter); return; }
-    const list = ascending.map((c) => c.id === chapter.id ? selected : c);
-    onRead(list, list.findIndex((c) => c.id === selected.id));
+  const readChapter = (chapter: MangaChapter) => {
+    const index = ascending.findIndex((c) => c.id === chapter.id);
+    onRead(ascending, index >= 0 ? index : 0);
   };
 
   if (chapters.length === 0) {
@@ -640,6 +661,40 @@ export function ChapterList({
         />
       </div>
 
+      {scanOptions.length > 1 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-[13px] font-medium text-ink-subtle">{t("Scanlator")}</span>
+          <button
+            type="button"
+            onClick={() => setScanFilter("")}
+            className={`h-9 rounded-lg px-3.5 text-[13px] font-medium transition-colors ${
+              scanFilter === ""
+                ? "bg-accent text-canvas"
+                : "bg-elevated/50 text-ink-muted hover:text-ink"
+            }`}
+          >
+            {t("All")}
+          </button>
+          {scanOptions.map((o) => (
+            <button
+              key={o.name}
+              type="button"
+              onClick={() => setScanFilter(o.name)}
+              className={`h-9 rounded-lg px-3.5 text-[13px] font-medium transition-colors ${
+                scanFilter === o.name
+                  ? "bg-accent text-canvas"
+                  : "bg-elevated/50 text-ink-muted hover:text-ink"
+              }`}
+            >
+              {o.name}
+              <span className="ml-1.5 text-[11px] font-normal tabular-nums text-ink-subtle">
+                {o.count}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {showPager && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="mr-1 text-[13px] font-medium text-ink-subtle">{t("Jump to")}</span>
@@ -723,6 +778,9 @@ export function ChapterList({
                   <ChapterDownloadButton
                     mangaId={mangaId ?? ""}
                     chapterId={c.id}
+                    altChapterIds={(sameChapterIds.get(chapterGroupKey(c)) ?? [c.id]).filter(
+                      (id) => id !== c.id,
+                    )}
                     info={{ title: mangaTitle, cover: mangaCover, chapter: c.chapter }}
                     serverDownloaded={c.downloaded}
                   />
@@ -775,6 +833,9 @@ export function ChapterList({
                     <ChapterDownloadButton
                       mangaId={mangaId ?? ""}
                       chapterId={c.id}
+                      altChapterIds={(sameChapterIds.get(chapterGroupKey(c)) ?? [c.id]).filter(
+                        (id) => id !== c.id,
+                      )}
                       info={{ title: mangaTitle, cover: mangaCover, chapter: c.chapter }}
                       serverDownloaded={c.downloaded}
                     />
@@ -789,26 +850,6 @@ export function ChapterList({
           })}
         </div>
       )}
-      {sourceChoice && (
-        <div className="fixed inset-0 z-[80] grid place-items-center bg-black/65 p-6 backdrop-blur-sm" onClick={() => setSourceChoice(null)}>
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_80px_rgba(0,0,0,0.65)]" onClick={(e) => e.stopPropagation()}>
-            <div className="border-b border-edge-soft px-5 py-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">{t("Choose source")}</p>
-              <h3 className="mt-1 text-[18px] font-semibold text-ink">{chapterLabel(sourceChoice.chapter)}</h3>
-            </div>
-            <div className="max-h-[55vh] overflow-y-auto p-2">
-              {(chapterGroups.options.get(sourceChoice.id) ?? [sourceChoice]).map((option) => {
-                const source = sourceOptions.find((s) => s.id === chapterSourceId(option.id));
-                return <button key={option.id} type="button" onClick={() => { setSourceChoice(null); readChapter(sourceChoice, option); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-start transition-colors hover:bg-raised">
-                  <SourceIcon iconUrl={source?.iconUrl} />
-                  <span className="min-w-0 flex-1"><span className="block truncate text-[14px] font-semibold text-ink">{source?.name ?? option.group ?? t("Source")}</span><span className="block truncate text-[12px] text-ink-subtle">{relativeDate(option.publishAt) ?? option.group}</span></span>
-                  <BookOpen size={17} className="text-ink-subtle" />
-                </button>;
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-    </section>
+      </section>
   );
 }

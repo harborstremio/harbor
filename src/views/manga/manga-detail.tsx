@@ -18,6 +18,7 @@ import { mangaBackdrop } from "@/lib/manga/backdrop";
 import { collectionsForTitle } from "@/lib/manga/collections";
 import { useIsMangaFavorite, useMangaFavorites } from "@/lib/manga-favorites";
 import { useMangaProgressEntry, type MangaProgressEntry } from "@/lib/manga-progress";
+import { setMangaDetails } from "@/lib/manga-downloads";
 import {
   chapterLanguages,
   mangaDetail,
@@ -272,6 +273,11 @@ export function MangaDetail({
       largeText: detail.title,
     });
   }, [detail?.title, detail?.cover]);
+
+  useEffect(() => {
+    if (!detail?.title) return;
+    void setMangaDetails(mangaId, detail.title, detail.cover);
+  }, [mangaId, detail?.title, detail?.cover]);
 
   const langs = useMemo(() => chapterLanguages(chapters), [chapters]);
   const langFiltered = useMemo(
