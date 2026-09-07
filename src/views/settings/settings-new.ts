@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 
 const NEW_BADGE_RESET_GENERATION = 1;
 
-const NEW_SECTIONS = new Set(["library", "badges", "theme", "tv"]);
+const NEW_SECTIONS = new Set(["library", "badges", "theme", "tv", "bigPicture"]);
 const NEW_SETTINGS = new Set([
   "library:award-tab",
   "library:top-10",

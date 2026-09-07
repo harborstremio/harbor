@@ -1,16 +1,29 @@
 use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter, Manager, State};
 
+struct SavedGeometry {
+    x: i32,
+    y: i32,
+    w: u32,
+    h: u32,
+}
+
+struct SavedWindowState {
+    // Whether the window was maximized before fullscreen. When true the window
+    // is restored by re-maximizing; the normal (restored) bounds of a maximized
+    // window are owned by the OS and cannot be read via the window API.
+    maximized: bool,
+    geometry: Option<SavedGeometry>,
+}
+
 pub struct FullscreenState {
-    saved: Arc<Mutex<Option<(i32, i32, u32, u32)>>>,
-    was_maximized: Arc<Mutex<bool>>,
+    saved: Arc<Mutex<Option<SavedWindowState>>>,
 }
 
 impl FullscreenState {
     pub fn new() -> Self {
         Self {
             saved: Arc::new(Mutex::new(None)),
-            was_maximized: Arc::new(Mutex::new(false)),
         }
     }
 }
@@ -26,16 +39,26 @@ pub async fn window_fullscreen_enter(
 
     let already_fs = main.is_fullscreen().unwrap_or(false);
     if !already_fs {
-        let was_max = main.is_maximized().unwrap_or(false);
-        *state.was_maximized.lock().unwrap() = was_max;
-        let saved = if was_max {
+        // Capture whether the window is maximized before unmaximizing. On
+        // Windows unmaximize() is async, so reading is_maximized() right after
+        // would still report true and drop the saved geometry.
+        let maximized = main.is_maximized().unwrap_or(false);
+        if maximized {
+            let _ = main.unmaximize();
+        }
+        let geometry = if maximized {
             None
         } else if let (Ok(pos), Ok(sz)) = (main.outer_position(), main.inner_size()) {
-            Some((pos.x, pos.y, sz.width, sz.height))
+            Some(SavedGeometry {
+                x: pos.x,
+                y: pos.y,
+                w: sz.width,
+                h: sz.height,
+            })
         } else {
             None
         };
-        *state.saved.lock().unwrap() = saved;
+        *state.saved.lock().unwrap() = Some(SavedWindowState { maximized, geometry });
         main.set_fullscreen(true)
             .map_err(|e| format!("set_fullscreen(true): {}", e))?;
         let _ = main.set_focus();
@@ -58,34 +81,26 @@ pub async fn window_fullscreen_exit(
     if is_fs {
         main.set_fullscreen(false)
             .map_err(|e| format!("set_fullscreen(false): {}", e))?;
-        let saved = state.saved.lock().unwrap().take();
-        let was_max = {
-            let mut g = state.was_maximized.lock().unwrap();
-            let v = *g;
-            *g = false;
-            v
-        };
-        if was_max {
+    }
+
+    // Restore even when the window is already unfullscreen'd: frontend paths
+    // like exitAnyFullscreen call setFullscreen(false) directly before this
+    // command runs, and the saved geometry must still be applied.
+    let saved = state.saved.lock().unwrap().take();
+    if let Some(saved) = saved {
+        if saved.maximized {
             let _ = main.maximize();
-            let _ = main.set_focus();
-            let _ = app.emit_to("main", "fs://exited", ());
-            return Ok(());
-        }
-        if let Some((x, y, w, h)) = saved {
+        } else if let Some(geo) = saved.geometry {
             let _ = main.set_size(tauri::PhysicalSize {
-                width: w,
-                height: h,
+                width: geo.w,
+                height: geo.h,
             });
             if restore_position.unwrap_or(true) {
-                let _ = main.set_position(tauri::PhysicalPosition { x, y });
+                let _ = main.set_position(tauri::PhysicalPosition { x: geo.x, y: geo.y });
             } else {
                 let _ = main.center();
             }
-        } else {
-            let _ = main.set_size(tauri::LogicalSize {
-                width: 1280.0,
-                height: 800.0,
-            });
+        } else if is_fs {
             let _ = main.center();
         }
         let _ = main.set_focus();

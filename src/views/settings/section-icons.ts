@@ -32,6 +32,7 @@ export const SECTION_ICONS: Record<SectionId, string> = {
   icons: "Shapes",
   remotes: "SmartphoneNfc",
   tv: "Tv",
+  bigPicture: "MonitorPlay",
   storage: "HardDrive",
   trackers: "Activity",
   updates: "ArrowUpCircle",

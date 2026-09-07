@@ -71,6 +71,17 @@ function IconTvSettings(p: IconProps) {
   );
 }
 
+function IconBigPicture(p: IconProps) {
+  return (
+    <IconBase {...p}>
+      <rect x="2.5" y="4.5" width="19" height="12.5" rx="2.2" />
+      <path d="M8.5 20.5h7" />
+      <path d="M12 17v3.5" />
+      <path d="M10 8.6l4.1 2.5-4.1 2.5z" />
+    </IconBase>
+  );
+}
+
 function IconStorage(p: IconProps) {
   return (
     <IconBase {...p}>
@@ -664,6 +675,32 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
           "from my computer",
         ],
       },
+      {
+        id: "bigPicture",
+        label: "Big Picture",
+        Icon: IconBigPicture,
+        keywords: [
+          "big picture",
+          "couch",
+          "ten foot",
+          "10 foot",
+          "fullscreen",
+          "full screen",
+          "monitor",
+          "laptop",
+          "handheld",
+          "steam deck",
+          "launch",
+          "auto start",
+          "interface sounds",
+          "overscan",
+          "mosaic",
+          "edge margin",
+          "big picture button",
+          "open big picture",
+          "play on boot",
+        ],
+      },
     ],
   },
   {
@@ -1093,6 +1130,33 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "remote setup",
       "edit tv settings",
       "tv not signed in",
+    ],
+  },
+  {
+    label: "Open in Big Picture",
+    section: "bigPicture",
+    anchorTitle: "Launch",
+    keywords: [
+      "big picture",
+      "couch",
+      "ten foot",
+      "10 foot",
+      "fullscreen",
+      "full screen",
+      "monitor",
+      "handheld",
+      "steam deck",
+      "open big picture",
+      "big picture button",
+      "auto start",
+      "launch harbor",
+      "interface sounds",
+      "ui sounds",
+      "overscan",
+      "edge margin",
+      "mosaic",
+      "animated backdrop",
+      "20 percent",
     ],
   },
   {
@@ -10278,6 +10342,7 @@ export function SettingsNav({
     support: null,
     remotes: settings.serveWebUi || settings.remoteControlEnabled ? "live" : null,
     tv: null,
+    bigPicture: null,
     storage: null,
     advanced: null,
   };

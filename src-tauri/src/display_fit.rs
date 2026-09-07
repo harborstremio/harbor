@@ -1,4 +1,5 @@
 use tauri::{LogicalSize, Manager, PhysicalPosition, WebviewWindow};
+use tauri_plugin_window_state::AppHandleExt;
 
 const CONFIG_MIN_W: f64 = 960.0;
 const CONFIG_MIN_H: f64 = 600.0;
@@ -9,6 +10,33 @@ const MARGIN: f64 = 0.94;
 fn clamp_origin(current: f64, visible_start: f64, visible_len: f64, window_len: f64) -> f64 {
     let max = visible_start + (visible_len - window_len).max(0.0);
     current.clamp(visible_start, max)
+}
+
+/// True when the window-state plugin has a non-default saved geometry for the
+/// `main` window. `tauri-plugin-window-state` restores that saved geometry
+/// while the window is being created (before our `setup` code runs) and only
+/// ever persists a state that differs from `WindowState::default()`, so when
+/// this returns true the restore already happened and fitting must not run.
+fn has_saved_window_state(app: &tauri::AppHandle) -> bool {
+    let Ok(dir) = app.path().app_config_dir() else {
+        return false;
+    };
+    let Ok(text) = std::fs::read_to_string(dir.join(app.filename())) else {
+        return false;
+    };
+    let Ok(states) = serde_json::from_str::<serde_json::Map<String, serde_json::Value>>(&text) else {
+        return false;
+    };
+    let Some(state) = states.get("main") else {
+        return false;
+    };
+    let number = |key: &str| state.get(key).and_then(serde_json::Value::as_f64).unwrap_or(0.0);
+    let flag = |key: &str| state.get(key).and_then(serde_json::Value::as_bool).unwrap_or(false);
+    number("width") > 0.0
+        || number("height") > 0.0
+        || number("x") != 0.0
+        || number("y") != 0.0
+        || flag("maximized")
 }
 
 #[cfg(target_os = "macos")]
@@ -42,6 +70,37 @@ fn macos_screen_insets(window: &WebviewWindow) -> Option<(f64, f64, f64, f64)> {
     }
 }
 
+#[cfg(target_os = "windows")]
+fn windows_work_area_insets(window: &WebviewWindow) -> (f64, f64, f64, f64) {
+    use windows::Win32::Graphics::Gdi::{
+        GetMonitorInfoW, MonitorFromWindow, MONITORINFO, MONITOR_DEFAULTTONEAREST,
+    };
+    let Ok(hwnd) = window.hwnd() else {
+        return (0.0, 0.0, 0.0, 0.0);
+    };
+    let scale = window.current_monitor().ok().flatten().map(|m| m.scale_factor()).unwrap_or(1.0);
+    if !(scale > 0.0) {
+        return (0.0, 0.0, 0.0, 0.0);
+    }
+    let monitor = unsafe { MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST) };
+    let mut mi = MONITORINFO {
+        cbSize: std::mem::size_of::<MONITORINFO>() as u32,
+        ..Default::default()
+    };
+    if !unsafe { GetMonitorInfoW(monitor, &mut mi) }.as_bool() {
+        return (0.0, 0.0, 0.0, 0.0);
+    }
+    // rcWork excludes the taskbar and other reserved screen areas; rcMonitor
+    // is the full rect. Both are physical pixels, so divide by scale to report
+    // logical insets like macos_screen_insets does.
+    (
+        ((mi.rcWork.top - mi.rcMonitor.top).max(0) as f64) / scale,
+        ((mi.rcMonitor.bottom - mi.rcWork.bottom).max(0) as f64) / scale,
+        ((mi.rcWork.left - mi.rcMonitor.left).max(0) as f64) / scale,
+        ((mi.rcMonitor.right - mi.rcWork.right).max(0) as f64) / scale,
+    )
+}
+
 fn logical_monitor(window: &WebviewWindow) -> Option<(f64, f64, PhysicalPosition<i32>, f64)> {
     let monitor = window.current_monitor().ok().flatten()?;
     let scale = monitor.scale_factor();
@@ -61,6 +120,11 @@ fn logical_monitor(window: &WebviewWindow) -> Option<(f64, f64, PhysicalPosition
 }
 
 pub fn fit_to_monitor(window: &WebviewWindow) {
+    // A maximized window already fills the work area; the size/position calls
+    // below would un-maximize it, which is what overwrites a restored state.
+    if let Ok(true) = window.is_maximized() {
+        return;
+    }
     let Some((mon_w, mon_h, mon_pos, scale)) = logical_monitor(window) else {
         return;
     };
@@ -68,7 +132,9 @@ pub fn fit_to_monitor(window: &WebviewWindow) {
     #[cfg(target_os = "macos")]
     let (top_inset, bottom_inset, left_inset, right_inset) =
         macos_screen_insets(window).unwrap_or((0.0, 0.0, 0.0, 0.0));
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(target_os = "windows")]
+    let (top_inset, bottom_inset, left_inset, right_inset) = windows_work_area_insets(window);
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
     let (top_inset, bottom_inset, left_inset, right_inset) = (0.0, 0.0, 0.0, 0.0);
 
     let vis_w = (mon_w - left_inset - right_inset).max(FLOOR_W);
@@ -130,6 +196,12 @@ pub fn install(app: &tauri::AppHandle) {
     let Some(window) = app.get_webview_window("main") else {
         return;
     };
+    // Only fit on the very first launch, when there is no saved geometry yet.
+    // Once the user has a saved position/size, the plugin's restore already
+    // ran during window creation and fitting would clobber it.
+    if has_saved_window_state(app) {
+        return;
+    }
     #[cfg(target_os = "macos")]
     {
         let win = window.clone();

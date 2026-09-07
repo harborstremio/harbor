@@ -69,6 +69,7 @@ const BugReportPanel = lazy(() => import("./settings/bug-report-panel").then((m)
 const SupportPanel = lazy(() => import("./settings/support-panel").then((m) => ({ default: m.SupportPanel })));
 const RemotesPanel = lazy(() => import("./settings/remotes-panel").then((m) => ({ default: m.RemotesPanel })));
 const TvPanel = lazy(() => import("./settings/tv-panel").then((m) => ({ default: m.TvPanel })));
+const BigPicturePanel = lazy(() => import("./settings/big-picture-panel").then((m) => ({ default: m.BigPicturePanel })));
 const StoragePanel = lazy(() => import("./settings/storage-panel").then((m) => ({ default: m.StoragePanel })));
 const TrackersPanel = lazy(() => import("./settings/trackers-panel").then((m) => ({ default: m.TrackersPanel })));
 const UpdatesPanel = lazy(() => import("./settings/updates-panel").then((m) => ({ default: m.UpdatesPanel })));
@@ -102,6 +103,7 @@ const SECTION_PRELOAD: Partial<Record<SectionId, () => Promise<unknown>>> = {
   icons: () => import("./settings/icons-panel"),
   remotes: () => import("./settings/remotes-panel"),
   tv: () => import("./settings/tv-panel"),
+  bigPicture: () => import("./settings/big-picture-panel"),
   storage: () => import("./settings/storage-panel"),
   trackers: () => import("./settings/trackers-panel"),
   updates: () => import("./settings/updates-panel"),
@@ -241,6 +243,10 @@ const SECTION_META: Record<SectionId, { label: string; sub: string }> = {
   tv: {
     label: "TV Settings",
     sub: "Set up your television from here. Everything on this page is written to your Harbor account and picked up by Big Picture on the TV, so you never have to type on a remote.",
+  },
+  bigPicture: {
+    label: "Big Picture",
+    sub: "A full screen, couch friendly Harbor for TVs, handhelds and big monitors. How it launches, the top-bar button, the interface sounds, and how it fills your screen.",
   },
   storage: {
     label: "Storage",
@@ -726,6 +732,8 @@ export function Settings({ visible = true }: { visible?: boolean }) {
           {active === "remotes" && <RemotesPanel />}
 
           {active === "tv" && <TvPanel />}
+
+          {active === "bigPicture" && <BigPicturePanel />}
 
           {active === "storage" && <StoragePanel />}
 

@@ -198,18 +198,6 @@ export function HotkeysPanel() {
       )}
       {tab === "behaviour" && (
         <>
-          <Section
-            title={t("Big Picture")}
-            subtitle={t("A full screen, couch friendly Harbor for TVs, handhelds and big monitors.")}
-          >
-            <ToggleRow
-              label={t("Show the Big Picture button")}
-              sub={t("Puts a Big Picture button in the top bar so you can switch to the ten-foot layout in one click. The keyboard shortcut keeps working either way.")}
-              value={settings.bigPictureButton}
-              onChange={(bigPictureButton) => update({ bigPictureButton })}
-            />
-          </Section>
-
           <Section title={t("Navigation")} subtitle={t("Move focus with the keyboard, like a TV remote.")}>
             <ToggleRow
               label={t("TV navigation")}

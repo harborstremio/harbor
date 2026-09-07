@@ -69,7 +69,7 @@ const SOUND_LABELS: Record<string, string> = {
   retro: "Retro",
 };
 
-const SOUND_VALUES = ["none", "glass", "modern", "cinematic", "retro"] as const;
+export const SOUND_VALUES = ["none", "glass", "modern", "cinematic", "retro"] as const;
 
 export function bpSoundLabel(t: BpT, value: string): string {
   return t(SOUND_LABELS[value] ?? "Off");
