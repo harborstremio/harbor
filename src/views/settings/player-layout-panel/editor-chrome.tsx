@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { SeekBarVisual } from "@/components/player/transport/seek-bar-visual";
 import {
+  CONTROL_META,
   type PlayerChromeConfig,
   type PlayerControlId,
   type PlayerSlot,
   type ThemeId,
 } from "@/lib/player-chrome";
 import { useSettings } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
 
 export function TopRow({
   theme,
@@ -285,27 +287,30 @@ function ControlPick({
   onSelect: (id: PlayerControlId | null) => void;
   children: React.ReactNode;
 }) {
+  const t = useT();
   return (
     <div
-      data-control-id={id}
-      role="button"
-      tabIndex={-1}
-      data-focusable="true"
-      aria-pressed={selected}
-      data-tv-initial-focus={selected ? "" : undefined}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onSelect(selected ? null : id);
-      }}
       className={`relative cursor-pointer rounded-md p-1 transition duration-150 ${
         selected ? "bg-accent-soft ring-2 ring-accent" : "ring-2 ring-transparent hover:bg-white/8"
       }`}
     >
-      <div data-tv-skip="" className="pointer-events-none">
+      <div inert aria-hidden="true" data-tv-skip="" className="pointer-events-none">
         {children}
       </div>
-      <span className="pointer-events-auto absolute inset-0 z-10" />
+      <button
+        type="button"
+        data-control-id={id}
+        data-focusable="true"
+        aria-label={t("Edit {label}", { label: t(CONTROL_META[id]?.label ?? id) })}
+        aria-pressed={selected}
+        data-tv-initial-focus={selected ? "" : undefined}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onSelect(selected ? null : id);
+        }}
+        className="pointer-events-auto absolute inset-0 z-10 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      />
     </div>
   );
 }

@@ -16,7 +16,7 @@ export const SECTION_ICONS: Record<SectionId, string> = {
   language: "Languages",
   subtitles: "Captions",
   player: "Play",
-  mpv: "Cpu",
+  mpv: "Gauge",
   anime: "Sparkles",
   shaders: "Wand2",
   playerLayout: "LayoutDashboard",

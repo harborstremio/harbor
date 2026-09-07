@@ -2,11 +2,13 @@ import { useState, type ReactNode } from "react";
 import { ColorPopover } from "./color-popover";
 
 export function SwatchField({
+  label,
   value,
   onChange,
   className = "",
   children,
 }: {
+  label: string;
   value: string;
   onChange: (hex: string) => void;
   className?: string;
@@ -14,7 +16,7 @@ export function SwatchField({
 }) {
   const [hover, setHover] = useState(false);
   return (
-    <ColorPopover value={value} onChange={onChange} className={`overflow-hidden ${className}`}>
+    <ColorPopover label={label} value={value} onChange={onChange} className={`overflow-hidden ${className}`}>
       {(open) => (
         <span
           className="block h-full min-h-11 w-full"

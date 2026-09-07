@@ -15,6 +15,7 @@ export function EBookReader({
   bookCover,
   internalCover,
   chapter,
+  savedChapters,
   content,
   error,
   volumes,
@@ -26,6 +27,7 @@ export function EBookReader({
   bookCover?: string;
   internalCover?: string;
   chapter: EBookChapter;
+  savedChapters?: EBookChapter[];
   content: EBookChapterContent | null;
   error?: string;
   volumes: EBookReaderVolume[];
@@ -66,6 +68,7 @@ export function EBookReader({
       bookCover={bookCover}
       internalCover={internalCover}
       chapter={chapter}
+      savedChapters={savedChapters}
       content={content}
       direction={direction}
       volumes={volumes}

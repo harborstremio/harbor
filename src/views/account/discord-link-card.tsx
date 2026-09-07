@@ -6,6 +6,7 @@ import { accountErrorMessage, type AccountErrorMessage } from "@/lib/account/err
 import { canDiscordAuth } from "@/lib/discord-auth";
 import type { Author } from "@/lib/theme-auth";
 import { useT } from "@/lib/i18n";
+import { ROW_ACTION, ROW_ACTION_DANGER, SettingRow } from "@/views/settings/kit";
 
 export function DiscordLinkCard({
   author,
@@ -39,31 +40,28 @@ export function DiscordLinkCard({
     };
 
     return (
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-3">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#5865F2]/15 text-[#5865F2]">
-            <DiscordIcon size={18} />
-          </span>
-          <div className="flex min-w-0 flex-col">
-            <span className="text-[13px] font-semibold text-ink">{t("Discord linked")}</span>
-            <span className="truncate text-[12px] text-ink-subtle">
-              {author.discordUsername
-                ? t("Linked as {username}", { username: author.discordUsername })
-                : t("Linked to your Harbor account.")}
-            </span>
-          </div>
+      <div aria-busy={busy}>
+        <SettingRow
+          label={t("Discord linked")}
+          desc={
+            author.discordUsername
+              ? t("Linked as {username}", { username: author.discordUsername })
+              : t("Linked to your Harbor account.")
+          }
+          icon={<DiscordIcon size={24} className="text-[#5865F2]" />}
+        >
           <button
             type="button"
             onClick={() => void unlink()}
             disabled={busy}
-            className="ms-auto flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-danger/40 px-3 text-[12px] font-medium text-danger transition-colors duration-150 hover:border-danger hover:bg-danger/10 disabled:opacity-50"
+            className={ROW_ACTION_DANGER}
           >
-            {busy && <Loader2 size={13} className="animate-spin" />}
+            {busy && <Loader2 size={16} className="animate-spin" />}
             {t("Unlink")}
           </button>
-        </div>
+        </SettingRow>
         {error && (
-          <p className="text-[12px] text-danger">
+          <p role="alert" className="pb-4 text-[15px] leading-[22px] text-danger">
             {error.kind === "built-in" ? t(error.key) : error.detail}
           </p>
         )}
@@ -85,47 +83,39 @@ export function DiscordLinkCard({
   };
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-3">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#5865F2]/15 text-[#5865F2]">
-          <DiscordIcon size={18} />
-        </span>
-        <div className="flex min-w-0 flex-col">
-          <span className="text-[13px] font-semibold text-ink">{t("Link Discord")}</span>
-          <span className="truncate text-[12px] text-ink-subtle">
-            {t("Also joins Harbor's Discord server.")}
-          </span>
-        </div>
-      </div>
-
-      {canDesktop ? (
-        <button
-          type="button"
-          onClick={() => void run()}
-          disabled={busy}
-          className="flex h-11 items-center justify-center gap-2 rounded-xl bg-ink text-[13.5px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
-        >
-          {busy ? (
-            <>
-              <Loader2 size={15} className="animate-spin" />
-              {t("Continue in your browser...")}
-            </>
-          ) : (
-            <>
-              <DiscordIcon size={16} />
-              {t("Link Discord")}
-              <ExternalLink size={14} />
-            </>
-          )}
-        </button>
-      ) : (
-        <p className="rounded-xl border border-edge-soft bg-canvas/40 px-3.5 py-3 text-[12px] text-ink-subtle">
-          {t("Open Harbor on desktop to link Discord.")}
-        </p>
-      )}
-
+    <div aria-busy={busy}>
+      <SettingRow
+        label={t("Link Discord")}
+        desc={t("Also joins Harbor's Discord server.")}
+        icon={<DiscordIcon size={24} className="text-[#5865F2]" />}
+      >
+        {canDesktop ? (
+          <button
+            type="button"
+            onClick={() => void run()}
+            disabled={busy}
+            className={ROW_ACTION}
+          >
+            {busy ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                {t("Continue in your browser...")}
+              </>
+            ) : (
+              <>
+                {t("Link Discord")}
+                <ExternalLink size={16} />
+              </>
+            )}
+          </button>
+        ) : (
+          <p className="max-w-[30ch] text-[15px] leading-[22px] text-ink-muted">
+            {t("Open Harbor on desktop to link Discord.")}
+          </p>
+        )}
+      </SettingRow>
       {error && (
-        <p className="text-[12px] text-danger">
+        <p role="alert" className="pb-4 text-[15px] leading-[22px] text-danger">
           {error.kind === "built-in" ? t(error.key) : error.detail}
         </p>
       )}

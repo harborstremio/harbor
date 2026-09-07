@@ -4,6 +4,7 @@ use std::time::Duration;
 use futures_util::StreamExt;
 use librqbit::dht::{Dht, DhtBuilder, DhtConfig, Id20};
 use tokio::time::{timeout_at, Instant};
+use tokio_util::sync::CancellationToken;
 
 const BOOTSTRAP: &[&str] = &[
     "router.bittorrent.com:6881",
@@ -15,15 +16,20 @@ const BOOTSTRAP: &[&str] = &[
     "router.silotis.us:6881",
 ];
 
-pub async fn build() -> Option<Dht> {
+pub async fn build(cancellation: CancellationToken) -> Option<Dht> {
+    let guard = cancellation.clone().drop_guard();
     let boot = BOOTSTRAP.iter().map(|s| s.to_string()).collect::<Vec<_>>();
     match DhtBuilder::with_config(DhtConfig {
         bootstrap_addrs: Some(boot),
+        cancellation_token: Some(cancellation),
         ..Default::default()
     })
     .await
     {
-        Ok(d) => Some(d),
+        Ok(d) => {
+            let _ = guard.disarm();
+            Some(d)
+        }
         Err(e) => {
             eprintln!("[torrent-engine] side DHT unavailable: {e:#}");
             None

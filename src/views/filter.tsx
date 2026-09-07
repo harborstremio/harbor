@@ -4,6 +4,7 @@ import { selectSpotlights } from "@/lib/feed/genre-spotlights";
 import { SeenIdsProvider } from "@/lib/feed/seen-ids";
 import { useScrollMemory, type MetaFilter } from "@/lib/view";
 import { Header } from "./filter/header";
+import { BrandBrowse } from "./filter/brand-browse";
 import { Rails } from "./filter/rails";
 import {
   SPOTLIGHT_TIMEOUT_MS,
@@ -38,6 +39,9 @@ export function FilterView({ filter }: { filter: MetaFilter }) {
           <Header filter={filter} />
           <div className="flex flex-col gap-12 px-12 pb-24">
             <Rails filter={filter} />
+            {(filter.kind === "studio" || filter.kind === "network") && (
+              <BrandBrowse filter={filter} />
+            )}
           </div>
           <BackToTop scrollRef={scrollRef} />
         </main>

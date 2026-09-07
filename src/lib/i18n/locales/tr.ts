@@ -1,3 +1,4 @@
+import settingsRefinements from "./tr/settings-refinements";
 import miscA from "./tr/misc-a";
 import miscB from "./tr/misc-b";
 import miscC from "./tr/misc-c";
@@ -30,6 +31,7 @@ const tr: Record<string, string> = {
   ...residual,
   ...finalResidual,
   ...coverage,
+  ...settingsRefinements,
 };
 
 export default tr;

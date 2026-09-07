@@ -8,18 +8,20 @@ import {
   resetNavCustomization,
   toggleNavHidden,
   type NavItem,
+  type NavCustomization,
 } from "@/chrome/nav-items";
 import { useT } from "@/lib/i18n";
-import { useSettings } from "@/lib/settings";
 import type { ThemeLayout } from "@/lib/theme";
 import { NavRow } from "./nav-editor/nav-row";
 
 const ICON_ONLY: ReadonlySet<ThemeLayout> = new Set(["minui"]);
 
-export function NavEditor({ layout }: { layout: ThemeLayout }) {
-  const { settings, update } = useSettings();
+export function NavEditor({ layout, value: cfg, onChange }: {
+  layout: ThemeLayout;
+  value: NavCustomization;
+  onChange: (value: NavCustomization) => void;
+}) {
   const t = useT();
-  const cfg = settings.navCustomization;
   const [dragId, setDragId] = useState<string | null>(null);
   const [drop, setDrop] = useState<{ id: string; pos: "before" | "after" } | null>(null);
 
@@ -30,11 +32,11 @@ export function NavEditor({ layout }: { layout: ThemeLayout }) {
     cfg.order.length > 0 || cfg.hidden.length > 0 || Object.keys(cfg.renamed).length > 0;
 
   const moveTo = (id: string, targetId: string, pos: "before" | "after") =>
-    update({ navCustomization: moveNavItem(cfg, id, targetId, pos) });
+    onChange(moveNavItem(cfg, id, targetId, pos));
 
   const commitDrop = (targetId: string, pos: "before" | "after") => {
     if (dragId && dragId !== targetId) {
-      update({ navCustomization: moveNavItem(cfg, dragId, targetId, pos) });
+      onChange(moveNavItem(cfg, dragId, targetId, pos));
     }
     setDragId(null);
     setDrop(null);
@@ -53,7 +55,7 @@ export function NavEditor({ layout }: { layout: ThemeLayout }) {
         <div className="flex justify-end">
           <button
             type="button"
-            onClick={() => update({ navCustomization: resetNavCustomization() })}
+            onClick={() => onChange(resetNavCustomization())}
             className="flex h-11 items-center gap-1.5 rounded-md bg-canvas px-3 text-[15.5px] font-medium text-ink-muted transition-colors hover:bg-surface hover:text-ink"
           >
             <RotateCcw size={16} strokeWidth={2.2} />
@@ -75,8 +77,8 @@ export function NavEditor({ layout }: { layout: ThemeLayout }) {
             dropAfter={drop?.id === item.id && drop.pos === "after" && dragId !== item.id}
             isFirst={i === 0}
             isLast={i === rows.length - 1}
-            onRename={(label) => update({ navCustomization: renameNavItem(cfg, item.id, label) })}
-            onToggleHidden={() => update({ navCustomization: toggleNavHidden(cfg, item.id) })}
+            onRename={(label) => onChange(renameNavItem(cfg, item.id, label))}
+            onToggleHidden={() => onChange(toggleNavHidden(cfg, item.id))}
             onMoveUp={() => moveTo(item.id, rows[i - 1].id, "before")}
             onMoveDown={() => moveTo(item.id, rows[i + 1].id, "after")}
             onDragStart={() => setDragId(item.id)}

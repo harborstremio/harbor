@@ -8,6 +8,10 @@ use types::{finish, step, warn_step};
 
 pub use types::SelfTestResult;
 
+pub fn unavailable(error: String) -> SelfTestResult {
+    finish(vec![step("engine up", false, error)])
+}
+
 pub async fn run(app: AppHandle) -> SelfTestResult {
     let mut steps = Vec::new();
     let session = match ensure_session(&app).await {

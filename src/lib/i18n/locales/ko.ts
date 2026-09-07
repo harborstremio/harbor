@@ -1,3 +1,4 @@
+import settingsRefinements from "./ko/settings-refinements";
 import coverage from "./ko/coverage";
 import catalog01 from "./ko/catalog-01";
 import catalog02 from "./ko/catalog-02";
@@ -30,6 +31,7 @@ const ko: Record<string, string> = {
   ...catalog12,
   ...catalog13,
   ...currentTail,
+  ...settingsRefinements,
 };
 
 export default ko;

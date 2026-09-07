@@ -4,10 +4,12 @@ import { useT } from "@/lib/i18n";
 export function AvatarRing({
   src,
   size,
+  color,
   onClick,
 }: {
   src: string | null;
   size: number;
+  color?: string;
   onClick?: () => void;
 }) {
   const t = useT();
@@ -15,8 +17,9 @@ export function AvatarRing({
     <button
       onClick={onClick}
       type="button"
-      className="group relative shrink-0 overflow-hidden rounded-full ring-2 ring-edge-soft transition hover:ring-ink focus-visible:ring-ink"
-      style={{ width: size, height: size }}
+      aria-label={t("Change your picture")}
+      className={`group relative shrink-0 overflow-hidden rounded-full ring-2 transition hover:ring-ink focus-visible:ring-ink ${color ? "border-[3px] ring-canvas" : "ring-edge-soft"}`}
+      style={{ width: size, height: size, borderColor: color }}
     >
       {src ? (
         <img src={src} alt="" className="h-full w-full object-cover" draggable={false} />

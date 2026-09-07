@@ -4,36 +4,6 @@ import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, ToggleRow } from "./shared";
 import { ModalButton, ROW_ACTION, SettingGroup, SettingRow, SettingsModal, Nested } from "./kit";
 
-const SPEECH: ReadonlyArray<readonly [number, number]> = [
-  [1, 12],
-  [19, 8],
-  [32, 16],
-  [55, 10],
-  [70, 7],
-  [82, 14],
-];
-const DRIFT = 5;
-
-function SyncTrack({ label, shift, lit }: { label: string; shift: number; lit?: boolean }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="w-[84px] shrink-0 text-[13px] font-bold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">
-        {label}
-      </span>
-      <span className="relative h-3 min-w-0 flex-1">
-        {SPEECH.map(([left, width], i) => (
-          <span
-            key={i}
-            aria-hidden
-            className={`absolute top-0 h-full rounded-full ${lit ? "bg-ink" : "bg-raised"}`}
-            style={{ insetInlineStart: `${left + shift}%`, width: `${width}%` }}
-          />
-        ))}
-      </span>
-    </div>
-  );
-}
-
 export function AutoSyncPanel() {
   const t = useT();
   const { settings, update } = useSettings();
@@ -87,7 +57,7 @@ export function AutoSyncPanel() {
       t("Harbor uses its own community server. You can point it at a server you run yourself.");
 
   return (
-    <>
+    <div className="hset-form-page">
       <Section
         title={t("Subtitle auto-sync")}
         subtitle={t(
@@ -102,20 +72,6 @@ export function AutoSyncPanel() {
           value={master}
           onChange={(v) => update({ subtitleAutoSync: v })}
         />
-
-        <SettingRow
-          wide
-          label={t("How it works")}
-          desc={t(
-            "Harbor reads the speech in the audio, then slides the subtitle track until the two line up.",
-          )}
-        >
-          <div className="flex w-full flex-col gap-3 rounded-[10px] bg-elevated px-4 py-4">
-            <SyncTrack label={t("Speech")} shift={0} />
-            <SyncTrack label={t("Before")} shift={DRIFT} />
-            <SyncTrack label={t("After")} shift={0} lit />
-          </div>
-        </SettingRow>
 
         {master && (
           <Nested>
@@ -177,27 +133,25 @@ export function AutoSyncPanel() {
           }
         />
 
-        <SettingGroup label={t("Server and privacy")}>
-          <SettingRow
-            label={t("Community sync server")}
-            desc={serverDesc}
-            tip={t(
-              "Leave blank to use Harbor's own community server. Enter a URL to point at your own server instead. Private mode below stops all contact either way.",
-            )}
-          >
-            <button type="button" onClick={openServer} className={ROW_ACTION}>
-              {storedUrl ? t("Change server") : t("Use my own server")}
-            </button>
-          </SettingRow>
-          <ToggleRow
-            label={t("Private mode")}
-            sub={t(
-              "Never contact the community server in either direction. Nothing is looked up and nothing is contributed from this device.",
-            )}
-            value={priv}
-            onChange={(v) => update({ communitySyncOptOut: v })}
-          />
-        </SettingGroup>
+        <SettingRow
+          label={t("Community sync server")}
+          desc={serverDesc}
+          tip={t(
+            "Leave blank to use Harbor's own community server. Enter a URL to point at your own server instead. Private mode below stops all contact either way.",
+          )}
+        >
+          <button type="button" onClick={openServer} className={ROW_ACTION}>
+            {storedUrl ? t("Change server") : t("Use my own server")}
+          </button>
+        </SettingRow>
+        <ToggleRow
+          label={t("Private mode")}
+          sub={t(
+            "Never contact the community server in either direction. Nothing is looked up and nothing is contributed from this device.",
+          )}
+          value={priv}
+          onChange={(v) => update({ communitySyncOptOut: v })}
+        />
 
         <SettingsModal
           open={serverOpen}
@@ -238,6 +192,6 @@ export function AutoSyncPanel() {
           </div>
         </SettingsModal>
       </Section>
-    </>
+    </div>
   );
 }

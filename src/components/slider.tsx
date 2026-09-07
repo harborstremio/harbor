@@ -15,12 +15,13 @@ function trackStyle(value: number, min: number, max: number, step?: number): CSS
   } as CSSProperties;
 }
 
-export function SliderReset({ show, onReset }: { show: boolean; onReset: () => void }) {
+export function SliderReset({ show, onReset, settingName }: { show: boolean; onReset: () => void; settingName?: string }) {
   const t = useT();
   return (
     <button
       type="button"
       onClick={onReset}
+      aria-label={settingName ? t("Reset {setting}", { setting: settingName }) : t("Reset")}
       tabIndex={show ? 0 : -1}
       aria-hidden={!show}
       className={`shrink-0 text-[11.5px] text-ink-subtle underline-offset-2 transition-opacity duration-150 hover:text-ink hover:underline ${
@@ -68,7 +69,7 @@ export function Slider({
         className={`harbor-slider ${disabled ? "opacity-40" : ""} ${className}`}
       />
       {resetTo !== undefined && (
-        <SliderReset show={value !== resetTo} onReset={() => onChange(resetTo)} />
+        <SliderReset settingName={ariaLabel} show={value !== resetTo} onReset={() => onChange(resetTo)} />
       )}
     </>
   );

@@ -9,8 +9,7 @@ import { tvFocus } from "@/lib/keyboard-navigation";
 import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { useSettings } from "@/lib/settings";
 
-const STARTER = `/* Custom cards: .your-card targets each poster. */
-.your-card {
+const STARTER = `.your-card {
   border-radius: 10px;
   box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.7);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -41,6 +40,7 @@ export function CardCssPopout({
   const { settings } = useSettings();
   const tvNav = settings.tvNavigation;
   const picks = SETTINGS_FILMS;
+  const hasStarter = css.includes(STARTER.trim());
   const doneRef = useRef<HTMLButtonElement>(null);
 
   const { closing, close } = useModalExit(onClose);
@@ -70,12 +70,13 @@ export function CardCssPopout({
     >
       <div
         role="dialog"
+        aria-label={t("Custom cards")}
         aria-modal="true"
         className={`${closing ? "animate-dialog-out" : "animate-dialog-in"} flex h-[min(680px,86vh)] w-[min(1080px,100%)] flex-col overflow-hidden rounded-md bg-surface`}
       >
         <header className="flex shrink-0 items-start gap-4 px-6 pb-5 pt-6">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">{t("Custom cards")}</span>
+            <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-muted">{t("Custom cards")}</span>
             <h2 className="truncate text-[17px] font-semibold tracking-tight text-ink">
               {t("Write CSS, watch real posters react")}
             </h2>
@@ -83,10 +84,10 @@ export function CardCssPopout({
           <button
             type="button"
             ref={doneRef}
-            onClick={onClose}
+            onClick={close}
             aria-label={t("Done")}
             title={t("Done")}
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
           >
             <X size={18} />
           </button>
@@ -95,14 +96,15 @@ export function CardCssPopout({
         <div className="flex min-h-0 flex-1 gap-3 px-6 pb-6">
           <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-md bg-canvas">
             <div className="flex h-14 shrink-0 items-center gap-2 px-3">
-              <span className="font-mono text-[15.5px] leading-[22px] text-ink-subtle">styles.css</span>
+              <span className="font-mono text-[15.5px] leading-[22px] text-ink-muted">styles.css</span>
               <button
                 type="button"
-                onClick={() => onChange({ css: css.trim() ? css : STARTER })}
-                className="harbor-press-pop ms-auto flex h-11 items-center gap-1.5 rounded-md bg-elevated px-3 text-[15.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
+                onClick={() => onChange({ css: css.trim() ? `${css.trimEnd()}\n\n${STARTER}` : STARTER })}
+                disabled={hasStarter}
+                className="harbor-press-pop ms-auto flex h-11 items-center gap-1.5 rounded-md bg-elevated px-3 text-[15.5px] font-semibold text-ink-muted transition-colors hover:text-ink disabled:opacity-50 disabled:cursor-default"
               >
                 <Sparkles size={16} strokeWidth={2.2} />
-                {t("Insert starter")}
+                {hasStarter ? t("Starter added") : t("Insert starter")}
               </button>
             </div>
             <div className="relative min-h-0 flex-1">
@@ -115,7 +117,7 @@ export function CardCssPopout({
               />
               {!css && (
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-8 text-center">
-                  <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
+                  <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
                     {t(
                       "Style {selector} and the posters on the right update live. Hit Insert starter for a head start.",
                       {
@@ -137,7 +139,7 @@ export function CardCssPopout({
                   title={t(h.note)}
                 >
                   <code className="font-mono text-ink">{h.sel}</code>
-                  <span className="text-ink-subtle">{t(h.note)}</span>
+                  <span className="text-ink-muted">{t(h.note)}</span>
                 </span>
               ))}
             </div>

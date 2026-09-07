@@ -1,3 +1,4 @@
+import { usePreviewNavCustomization } from "@/lib/theme-preview";
 import { useState } from "react";
 import { Monitor } from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
@@ -47,7 +48,7 @@ export function CinematicOverlay() {
 
   const navEntries: NavEntry[] = applyNavCustomization(
     NAV_ITEMS,
-    settings.navCustomization,
+    usePreviewNavCustomization(settings.navCustomization),
   )
     .filter(
       (item) =>

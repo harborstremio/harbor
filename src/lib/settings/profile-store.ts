@@ -21,9 +21,9 @@ export function serializeSettings(settings: Settings): string {
 
 export function seedSharedFromLegacy(): void {
   try {
-    if (localStorage.getItem(SHARED_KEY) != null) return;
+    if (localStorage.getItem(SHARED_KEY)) return;
     const legacy = localStorage.getItem(MIRROR_KEY);
-    if (legacy != null) localStorage.setItem(SHARED_KEY, legacy);
+    if (legacy) localStorage.setItem(SHARED_KEY, legacy);
   } catch {
     return;
   }

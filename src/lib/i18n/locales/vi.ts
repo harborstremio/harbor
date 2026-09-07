@@ -1,3 +1,4 @@
+import settingsRefinements from "./vi/settings-refinements";
 import coverage from "./vi/coverage";
 import gap from "./vi/gap";
 import plurals from "./vi/plurals";
@@ -70,6 +71,7 @@ const vi: Record<string, string> = {
   ...controllers,
   ...bpSources,
   ...ageGate,
+  ...settingsRefinements,
 };
 
 export default vi;

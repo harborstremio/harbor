@@ -323,6 +323,8 @@ export function SliderRow({
       <div className="flex w-full max-w-[520px] flex-wrap items-center gap-4">
         <input
           type="range"
+          aria-label={label}
+          aria-valuetext={readout}
           min={min}
           max={max}
           step={step}
@@ -335,7 +337,7 @@ export function SliderRow({
           {readout}
         </span>
         {resetTo !== undefined && (
-          <SliderReset show={value !== resetTo} onReset={() => onChange(resetTo)} />
+          <SliderReset settingName={label} show={value !== resetTo} onReset={() => onChange(resetTo)} />
         )}
       </div>
     </SettingRow>

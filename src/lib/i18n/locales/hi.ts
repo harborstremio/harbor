@@ -1,3 +1,4 @@
+import settingsRefinements from "./hi/settings-refinements";
 import catalogSymbols from "./hi/catalog-symbols";
 import catalogAC from "./hi/catalog-a-c";
 import catalogDF from "./hi/catalog-d-f";
@@ -20,6 +21,7 @@ const hi: Record<string, string> = {
   ...catalogSU,
   ...catalogVZ,
   ...coverage,
+  ...settingsRefinements,
 };
 
 export default hi;

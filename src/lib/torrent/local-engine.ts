@@ -67,6 +67,11 @@ export type SelfTestResult = {
   steps: SelfTestStep[];
 };
 
+export async function torrentEngineSetEnabled(enabled: boolean): Promise<EngineStatus | null> {
+  if (!isTauri) return null;
+  return invoke<EngineStatus>("torrent_engine_set_enabled", { enabled });
+}
+
 export async function torrentEngineStatus(): Promise<EngineStatus | null> {
   if (!isTauri) return null;
   try {

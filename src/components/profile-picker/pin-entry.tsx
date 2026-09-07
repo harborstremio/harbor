@@ -148,7 +148,9 @@ export function PinEntry({
             autoComplete="one-time-code"
             maxLength={4}
             value={pin}
+            readOnly={busy}
             onChange={(e) => {
+              if (busy) return;
               const v = e.target.value.replace(/\D/g, "").slice(0, 4);
               setError(null);
               setPin(v);

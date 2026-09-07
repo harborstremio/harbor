@@ -1,8 +1,10 @@
 import { AlertTriangle, AtSign, Award, FileText, User } from "./icons";
 import { GitHubIcon } from "@/components/github-icon";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useAuth } from "@/lib/auth";
+import { loadInstalled } from "@/lib/addon-store";
+import { userAddons } from "@/lib/addons";
 import {
   collectDiagnostics,
   installBugReportErrorCapture,
@@ -26,10 +28,10 @@ const QUAL =
   "inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
 
 const FIELD =
-  "h-11 w-full max-w-[520px] min-w-0 rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+  "h-11 w-full min-w-0 rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 const AREA =
-  "w-full max-w-[520px] min-w-0 resize-y rounded-[10px] border border-edge-soft bg-elevated px-4 py-3 text-[16.5px] leading-[25px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+  "w-full min-w-0 resize-y rounded-[10px] border border-edge-soft bg-elevated px-4 py-3 text-[16.5px] leading-[25px] text-ink outline-none placeholder:text-ink-subtle focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 export function BugReportPanel() {
   const t = useT();
@@ -54,7 +56,13 @@ export function BugReportPanel() {
 
   useEffect(() => {
     let cancelled = false;
-    void collectDiagnostics({
+    const localAddons = loadInstalled();
+    const addonCount = auth.authKey
+      ? userAddons(auth.authKey)
+          .then((addons) => new Set([...localAddons, ...addons].map((addon) => addon.transportUrl)).size)
+          .catch(() => null)
+      : Promise.resolve(localAddons.length);
+    void Promise.all([collectDiagnostics({
       playerEngine: settings.playerEngine,
       region: settings.region,
       hasTmdb: !!settings.tmdbKey,
@@ -62,10 +70,10 @@ export function BugReportPanel() {
       hasTrakt: !!settings.traktAccessToken,
       hasStremio: !!auth.authKey,
       debridCount: [settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey].filter(Boolean).length,
-      addonCount: 0,
+      addonCount: null,
       iptvCount: settings.iptvPlaylists.length,
-    }).then((d) => {
-      if (!cancelled) setDiag(d);
+    }), addonCount]).then(([d, count]) => {
+      if (!cancelled) setDiag({ ...d, flags: { ...d.flags, addonCount: count } });
     });
     return () => {
       cancelled = true;
@@ -140,11 +148,13 @@ export function BugReportPanel() {
         ],
     submittedId
       ? undefined
-      : canSubmit
-        ? "Ready to send"
-        : summary.trim().length < 6
-          ? "Summary needs at least 6 characters"
-          : "Preparing…",
+      : error
+        ? t("Could not send: {error}", { error })
+        : canSubmit
+          ? "Ready to send"
+          : summary.trim().length < 6
+            ? "Summary needs at least 6 characters"
+            : "Preparing…",
   );
 
   if (submittedId) return <SuccessCard id={submittedId} onAnother={reset} />;
@@ -153,82 +163,92 @@ export function BugReportPanel() {
     <>
       <Section
         title={t("What broke?")}
-        subtitle={t("A specific summary lands faster than a long paragraph. Steps to reproduce help most of all.")}
+        subtitle={t("Tell us what you were doing and what happened. Only the summary is required.")}
       >
-        <SettingRow
-          wide
-          label={
-            <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
-              <span className="min-w-0">{t("Summary")}</span>
-              <span className={`${QUAL} bg-accent-soft text-accent`}>{t("Required")}</span>
-            </span>
-          }
-          desc={t("Name what broke in one sentence. Maintainers read this line first.")}
-        >
-          <input
-            type="text"
-            value={summary}
-            onChange={(e) => setSummary(e.target.value)}
-            maxLength={240}
-            placeholder={t("Player freezes after the second episode autoplays")}
-            className={FIELD}
-          />
-        </SettingRow>
+        <div className="max-w-[960px]">
+          <SettingRow
+            wide
+            label={
+              <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
+                <label htmlFor="bug-report-summary" className="min-w-0">{t("Summary")}</label>
+                <span className={`${QUAL} bg-accent-soft text-accent`}>{t("Required")}</span>
+              </span>
+            }
+            desc={t("Describe the problem in one sentence.")}
+          >
+            <input
+              id="bug-report-summary"
+              type="text"
+              required
+              minLength={6}
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              maxLength={240}
+              placeholder={t("Player freezes after the second episode autoplays")}
+              className={FIELD}
+            />
+          </SettingRow>
 
-        <SettingRow
-          wide
-          label={t("Severity")}
-          desc={t("Low is cosmetic. Normal is annoying. High means a feature is broken. Critical means Harbor is unusable.")}
-        >
-          <SeverityPicker value={severity} onChange={setSeverity} />
-        </SettingRow>
+          <SettingRow
+            wide
+            label={t("Severity")}
+            desc={t("How much does this affect your use of Harbor?")}
+          >
+            <SeverityPicker value={severity} onChange={setSeverity} />
+          </SettingRow>
 
-        <SettingRow
-          wide
-          label={t("Steps to reproduce")}
-          desc={t("Number every step from a fresh start. This is the single most useful thing in a report.")}
-        >
-          <textarea
-            value={steps}
-            onChange={(e) => setSteps(e.target.value)}
-            rows={6}
-            placeholder={`1. Open Movies\n2. Click The Substance\n3. Press Play\n4. ...`}
-            className={AREA}
-          />
-        </SettingRow>
+          <SettingRow
+            wide
+            label={<label htmlFor="bug-report-steps">{t("Steps to reproduce")}</label>}
+            desc={t("List the steps that lead to the problem, starting from when you open Harbor.")}
+          >
+            <textarea
+              id="bug-report-steps"
+              value={steps}
+              onChange={(e) => setSteps(e.target.value)}
+              rows={4}
+              placeholder={t("1. Open Movies\n2. Select a title\n3. Press Play\n4. Describe what happens")}
+              className={AREA}
+            />
+          </SettingRow>
 
-        <SettingRow
-          wide
-          label={t("What you expected")}
-          desc={t("Describe the result you were after.")}
-        >
-          <textarea
-            value={expected}
-            onChange={(e) => setExpected(e.target.value)}
-            rows={4}
-            placeholder={t("Stream should start playing within a few seconds.")}
-            className={AREA}
-          />
-        </SettingRow>
+          <div className="hset-report-outcomes grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 border-t border-edge-soft">
+            <SettingRow
+              wide
+              label={<label htmlFor="bug-report-expected">{t("What you expected")}</label>}
+              desc={t("Describe the result you were after.")}
+            >
+              <textarea
+                id="bug-report-expected"
+                value={expected}
+                onChange={(e) => setExpected(e.target.value)}
+                rows={4}
+                placeholder={t("Stream should start playing within a few seconds.")}
+                className={AREA}
+              />
+            </SettingRow>
 
-        <SettingRow
-          wide
-          label={t("What actually happened")}
-          desc={t("Describe what Harbor did instead, including any message on screen.")}
-        >
-          <textarea
-            value={actual}
-            onChange={(e) => setActual(e.target.value)}
-            rows={4}
-            placeholder={t("Spinner stays forever and nothing in the player loads.")}
-            className={AREA}
-          />
-        </SettingRow>
+            <SettingRow
+              wide
+              label={<label htmlFor="bug-report-actual">{t("What actually happened")}</label>}
+              desc={t("Describe what Harbor did instead, including any message on screen.")}
+            >
+              <textarea
+                id="bug-report-actual"
+                value={actual}
+                onChange={(e) => setActual(e.target.value)}
+                rows={4}
+                placeholder={t("Spinner stays forever and nothing in the player loads.")}
+                className={AREA}
+              />
+            </SettingRow>
+          </div>
+        </div>
       </Section>
 
       <Section
-        title={t("Screenshots and recordings")}
-        subtitle={t("Drop a clip of the bug if you can. A 5-second screen recording usually says more than five paragraphs.")}
+        title={t("Attachments")}
+        subtitle={t("Add screenshots, a short recording, or a player log to help explain the problem.")}
       >
         <FileDrop files={files} onChange={setFiles} />
       </Section>
@@ -241,43 +261,45 @@ export function BugReportPanel() {
       </Section>
 
       <Section
-        title={t("Credit (optional)")}
-        subtitle={t("Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.")}
+        title={t("Contact & credit")}
+        subtitle={t("Optional. Leave your contact details if we may follow up, and choose whether you want public credit.")}
       >
-        <CreditField
-          icon={<User size={18} strokeWidth={1.9} />}
-          label={t("Display name")}
-          desc={t("Appears in the release notes. Use whatever name you want credit under.")}
-          value={reporterName}
-          onChange={setReporterName}
-          placeholder={t("Your name")}
-          maxLength={120}
-        />
-        <CreditField
-          icon={<GitHubIcon size={18} />}
-          label={t("GitHub username")}
-          desc={t("We tag this account on the issue so you see the fix land.")}
-          value={reporterGithub}
-          onChange={setReporterGithub}
-          placeholder={t("username")}
-          maxLength={60}
-        />
-        <CreditField
-          icon={<AtSign size={18} strokeWidth={1.9} />}
-          label={t("Contact email or Discord")}
-          desc={t("Used only if we need one more detail to reproduce the bug.")}
-          value={reporterContact}
-          onChange={setReporterContact}
-          placeholder={t("Email address or Discord handle")}
-          maxLength={200}
-        />
-        <ToggleRow
-          leading={<Award size={18} strokeWidth={1.9} />}
-          label={t("Credit me in the release notes if this report leads to a fix.")}
-          sub={t("Turn this off and the report ships with no name attached.")}
-          value={consentCredit}
-          onChange={setConsentCredit}
-        />
+        <div className="max-w-[720px]">
+          <CreditField
+            icon={<User size={18} strokeWidth={1.9} />}
+            label={t("Display name")}
+            desc={t("Appears in the release notes. Use whatever name you want credit under.")}
+            value={reporterName}
+            onChange={setReporterName}
+            placeholder={t("Your name")}
+            maxLength={120}
+          />
+          <CreditField
+            icon={<GitHubIcon size={18} />}
+            label={t("GitHub username")}
+            desc={t("We tag this account on the issue so you see the fix land.")}
+            value={reporterGithub}
+            onChange={setReporterGithub}
+            placeholder={t("username")}
+            maxLength={60}
+          />
+          <CreditField
+            icon={<AtSign size={18} strokeWidth={1.9} />}
+            label={t("Contact email or Discord")}
+            desc={t("Used only if we need one more detail to reproduce the bug.")}
+            value={reporterContact}
+            onChange={setReporterContact}
+            placeholder={t("Email address or Discord handle")}
+            maxLength={200}
+          />
+          <ToggleRow
+            leading={<Award size={18} strokeWidth={1.9} />}
+            label={t("Credit me in the release notes if this report leads to a fix.")}
+            sub={t("Turn off to keep your name out of the release notes. Contact details can still be used to follow up.")}
+            value={consentCredit}
+            onChange={setConsentCredit}
+          />
+        </div>
       </Section>
 
       <Section title={t("What gets sent")}>
@@ -287,14 +309,13 @@ export function BugReportPanel() {
       <ContributorCard />
 
       {error && (
-        <div className="mt-7 flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+        <div role="alert" className="mt-7 flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
           <AlertTriangle size={18} strokeWidth={2.2} className="mt-[3px] shrink-0 text-danger" />
           <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-danger">
             {t("Could not send: {error}", { error })}
           </p>
         </div>
       )}
-
     </>
   );
 }
@@ -358,9 +379,11 @@ function CreditField({
   placeholder: string;
   maxLength?: number;
 }) {
+  const id = useId();
   return (
-    <SettingRow wide icon={icon} label={label} desc={desc}>
+    <SettingRow wide icon={icon} label={<label htmlFor={id}>{label}</label>} desc={desc}>
       <input
+        id={id}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}

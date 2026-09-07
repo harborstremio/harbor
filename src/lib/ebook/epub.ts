@@ -11,6 +11,7 @@ export type EpubBook = {
   cover?: string;
   chapters: EpubChapter[];
   entries: Map<string, Uint8Array>;
+  chapterContents?: Map<string, string>;
 };
 
 const decoder = new TextDecoder();
@@ -72,6 +73,151 @@ function dataUrl(bytes: Uint8Array, mediaType: string): string {
   return `data:${mediaType};base64,${btoa(binary)}`;
 }
 
+type NavigationLink = { path: string; fragment: string; title: string };
+type ChapterTarget = NavigationLink & { node: Element };
+const ignoredNames = new Set(["script", "style", "noscript", "nav", "form", "svg"]);
+const blockNames = new Set([
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "p",
+  "blockquote",
+  "li",
+  "pre",
+  "div",
+  "section",
+  "article",
+  "header",
+  "footer",
+  "aside",
+  "table",
+  "tr",
+]);
+
+function decoded(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function navigationLink(base: string, href: string, title: string): NavigationLink[] {
+  if (!title.trim()) return [];
+  try {
+    const target = new URL(href, `https://epub.invalid/${base}`);
+    if (target.origin !== "https://epub.invalid") return [];
+    return [
+      {
+        path: decoded(target.pathname.slice(1)),
+        fragment: decoded(target.hash.slice(1)),
+        title: title.replace(/\s+/g, " ").trim(),
+      },
+    ];
+  } catch {
+    return [];
+  }
+}
+
+function navigationLinks(
+  document: Document | null,
+  path: string,
+  ncx = false,
+): NavigationLink[] {
+  if (!document) return [];
+  if (ncx)
+    return elements(document, "navPoint").flatMap((point) => {
+      const children = Array.from(point.children);
+      const href = children.find((item) => item.localName === "content")?.getAttribute("src");
+      const title = children.find((item) => item.localName === "navLabel")?.textContent ?? "";
+      return href ? navigationLink(path, href, title) : [];
+    });
+  return elements(document, "nav")
+    .filter((item) => {
+      const type =
+        item.getAttributeNS("http://www.idpf.org/2007/ops", "type") ??
+        item.getAttribute("epub:type") ??
+        "";
+      return (
+        type.split(/\s+/).includes("toc") ||
+        (item.getAttribute("role") ?? "").split(/\s+/).includes("doc-toc")
+      );
+    })
+    .flatMap((nav) => Array.from(nav.getElementsByTagName("*")))
+    .filter((item) => item.localName === "a" && item.hasAttribute("href"))
+    .flatMap((item) => navigationLink(path, item.getAttribute("href")!, item.textContent ?? ""));
+}
+
+function chapterRoot(document: Document): Element {
+  return element(document, "body") ?? document.documentElement;
+}
+
+function targetNode(document: Document, fragment: string): Element | undefined {
+  const root = chapterRoot(document);
+  if (!fragment) return root;
+  let target = [root, ...Array.from(root.getElementsByTagName("*"))].find(
+    (item) =>
+      item.getAttribute("id") === fragment ||
+      item.getAttribute("xml:id") === fragment ||
+      (item.localName === "a" && item.getAttribute("name") === fragment),
+  );
+  for (let node = target; node; node = node.parentElement ?? undefined) {
+    if (ignoredNames.has(node.localName.toLowerCase())) return undefined;
+    if (/^h[1-6]$/i.test(node.localName)) target = node;
+    if (node === root) break;
+  }
+  return target;
+}
+
+function documentSections(
+  document: Document,
+  targets: Map<Element, ChapterTarget> = new Map(),
+): Array<{ target?: ChapterTarget; text: string }> {
+  const sections: Array<{ target?: ChapterTarget; text: string }> = [];
+  let target: ChapterTarget | undefined;
+  let chunks: string[] = [];
+  const flush = () => {
+    sections.push({
+      target,
+      text: chunks
+        .join("")
+        .replace(/[\t ]+/g, " ")
+        .replace(/ *\n */g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim(),
+    });
+    chunks = [];
+  };
+  const visit = (node: Node, preserve = false): void => {
+    if (node.nodeType === 3 || node.nodeType === 4) {
+      chunks.push(
+        preserve ? node.textContent ?? "" : (node.textContent ?? "").replace(/\s+/g, " "),
+      );
+      return;
+    }
+    if (node.nodeType !== 1) return;
+    const item = node as Element;
+    const name = item.localName.toLowerCase();
+    if (ignoredNames.has(name)) return;
+    const next = targets.get(item);
+    if (next) {
+      flush();
+      target = next;
+    }
+    const block = blockNames.has(name);
+    if (block) chunks.push("\n\n");
+    if (name === "br") chunks.push("\n");
+    else for (const child of Array.from(node.childNodes)) visit(child, preserve || name === "pre");
+    if (block) chunks.push("\n\n");
+  };
+  visit(chapterRoot(document));
+  flush();
+  return sections;
+}
+
 export async function parseEpub(buffer: ArrayBuffer): Promise<EpubBook> {
   const entries = await unzip(buffer);
   const container = xml(entry(entries, "META-INF/container.xml"));
@@ -100,35 +246,8 @@ export async function parseEpub(buffer: ArrayBuffer): Promise<EpubBook> {
         : [];
     }),
   );
-  const titles = new Map<string, string>();
   const nav = [...manifest.values()].find((item) => item.properties.split(/\s+/).includes("nav"));
   const ncx = [...manifest.values()].find((item) => item.mediaType === "application/x-dtbncx+xml");
-  const navigation = xml(entry(entries, nav?.path ?? ncx?.path ?? ""));
-  if (navigation) {
-    const pageListLinks = new Set(
-      elements(navigation, "nav")
-        .filter((item) => /page-list/i.test(item.getAttribute("epub:type") ?? ""))
-        .flatMap((item) =>
-          Array.from(item.getElementsByTagName("*")).filter((node) => node.localName === "a"),
-        ),
-    );
-    for (const link of elements(navigation, "a").filter((item) => item.hasAttribute("href"))) {
-      if (pageListLinks.has(link)) continue;
-      const target = archivePath(
-        (nav?.path ?? "").replace(/[^/]*$/, ""),
-        link.getAttribute("href")!,
-      );
-      const label = link.textContent?.trim() ?? "";
-      if (label && !titles.has(target)) titles.set(target, label);
-    }
-    for (const point of elements(navigation, "navPoint")) {
-      const descendants = Array.from(point.getElementsByTagName("*"));
-      const path = descendants.find((item) => item.localName === "content")?.getAttribute("src");
-      const title = descendants.find((item) => item.localName === "text")?.textContent?.trim();
-      if (path && title)
-        titles.set(archivePath((ncx?.path ?? "").replace(/[^/]*$/, ""), path), title);
-    }
-  }
   const spine = elements(packageDocument, "itemref")
     .filter((item) => item.getAttribute("linear")?.toLowerCase() !== "no")
     .map((item) => manifest.get(item.getAttribute("idref") ?? ""))
@@ -140,7 +259,9 @@ export async function parseEpub(buffer: ArrayBuffer): Promise<EpubBook> {
     );
   const documents = spine.length
     ? spine
-    : [...manifest.values()].filter((item) => /xhtml|html/.test(item.mediaType));
+    : [...manifest.values()].filter(
+        (item) => /xhtml|html/.test(item.mediaType) && !item.properties.split(/\s+/).includes("nav"),
+      );
   const scanned = documents.map((item, index) => {
     const document = contentDocument(entry(entries, item.path));
     const heading = document
@@ -152,15 +273,60 @@ export async function parseEpub(buffer: ArrayBuffer): Promise<EpubBook> {
     const words = document?.documentElement?.textContent?.replace(/\s+/g, " ").trim() ?? "";
     return {
       path: item.path,
-      title: titles.get(item.path) || heading || `Chapter ${index + 1}`,
+      title: heading || `Chapter ${index + 1}`,
       readable: words.length > 24,
+      document,
     };
   });
+  const resolveTargets = (links: NavigationLink[]): ChapterTarget[] => {
+    const seen = new Set<Element>();
+    return links.flatMap((link) => {
+      const item = scanned.find((item) => item.path.toLowerCase() === link.path.toLowerCase());
+      const node = item?.document ? targetNode(item.document, link.fragment) : undefined;
+      if (!node || !item || seen.has(node)) return [];
+      seen.add(node);
+      return [{ ...link, path: item.path, node }];
+    });
+  };
+  let targets = nav
+    ? resolveTargets(navigationLinks(contentDocument(entry(entries, nav.path)), nav.path))
+    : [];
+  if (!targets.length && ncx)
+    targets = resolveTargets(navigationLinks(xml(entry(entries, ncx.path)), ncx.path, true));
   const readable = scanned.filter((item) => item.readable);
-  const chapters = (readable.length ? readable : scanned).map(({ path, title }) => ({
+  let chapters = (readable.length ? readable : scanned).map(({ path, title }) => ({
     path,
     title,
   }));
+  const chapterContents = new Map<string, string>();
+  if (targets.length) {
+    const boundaries = new Map(targets.map((target) => [target.node, target]));
+    const drafts: Array<EpubChapter & { parts: string[] }> = [];
+    let active: (typeof drafts)[number] | undefined;
+    for (const item of scanned) {
+      if (!item.document) continue;
+      for (const section of documentSections(item.document, boundaries)) {
+        if (section.target) {
+          active = {
+            path: `${section.target.path}#${encodeURIComponent(section.target.fragment)}`,
+            title: section.target.title,
+            parts: [],
+          };
+          drafts.push(active);
+        }
+        if (!section.text) continue;
+        if (!active) {
+          active = { path: `${item.path}#`, title: item.title, parts: [] };
+          drafts.push(active);
+        }
+        active.parts.push(section.text);
+      }
+    }
+    chapters = drafts.filter((item) => item.parts.length).map(({ path, title, parts }) => {
+      chapterContents.set(path, parts.join("\n\n"));
+      return { path, title };
+    });
+  }
   const coverId = elements(packageDocument, "meta")
     .find((item) => item.getAttribute("name")?.toLowerCase() === "cover")
     ?.getAttribute("content");
@@ -184,10 +350,92 @@ export async function parseEpub(buffer: ArrayBuffer): Promise<EpubBook> {
         : undefined,
     chapters,
     entries,
+    chapterContents,
   };
 }
 
+export function legacyEpubChapterTitle(book: EpubBook, path: string): string | undefined {
+  const container = xml(entry(book.entries, "META-INF/container.xml"));
+  const packagePath = container && element(container, "rootfile")?.getAttribute("full-path");
+  if (!packagePath) return undefined;
+  const packageDocument = xml(entry(book.entries, packagePath));
+  if (!packageDocument) return undefined;
+  const packageBase = packagePath.replace(/[^/]*$/, "");
+  const manifest = new Map(
+    elements(packageDocument, "item").flatMap((item) => {
+      const id = item.getAttribute("id");
+      const href = item.getAttribute("href");
+      return id && href
+        ? [
+            [
+              id,
+              {
+                path: archivePath(packageBase, href),
+                mediaType: item.getAttribute("media-type") ?? "",
+                properties: item.getAttribute("properties") ?? "",
+              },
+            ] as const,
+          ]
+        : [];
+    }),
+  );
+  const nav = [...manifest.values()].find((item) => item.properties.split(/\s+/).includes("nav"));
+  const ncx = [...manifest.values()].find((item) => item.mediaType === "application/x-dtbncx+xml");
+  const navigation = xml(entry(book.entries, nav?.path ?? ncx?.path ?? ""));
+  let title: string | undefined;
+  if (navigation) {
+    const pageListLinks = new Set(
+      elements(navigation, "nav")
+        .filter((item) => /page-list/i.test(item.getAttribute("epub:type") ?? ""))
+        .flatMap((item) =>
+          Array.from(item.getElementsByTagName("*")).filter((node) => node.localName === "a"),
+        ),
+    );
+    for (const link of elements(navigation, "a").filter((item) => item.hasAttribute("href"))) {
+      if (pageListLinks.has(link)) continue;
+      const target = archivePath(
+        (nav?.path ?? "").replace(/[^/]*$/, ""),
+        link.getAttribute("href")!,
+      );
+      const label = link.textContent?.trim() ?? "";
+      if (target === path && label && !title) title = label;
+    }
+    for (const point of elements(navigation, "navPoint")) {
+      const descendants = Array.from(point.getElementsByTagName("*"));
+      const href = descendants.find((item) => item.localName === "content")?.getAttribute("src");
+      const label = descendants.find((item) => item.localName === "text")?.textContent?.trim();
+      if (href && label && archivePath((ncx?.path ?? "").replace(/[^/]*$/, ""), href) === path)
+        title = label;
+    }
+  }
+  if (title) return title;
+  const document = contentDocument(entry(book.entries, path));
+  const heading = document
+    ? ["h1", "h2", "h3", "title"]
+        .flatMap((name) => elements(document, name))
+        .find((item) => item.textContent?.trim())
+        ?.textContent?.trim()
+    : undefined;
+  if (heading) return heading;
+  const spine = elements(packageDocument, "itemref")
+    .filter((item) => item.getAttribute("linear")?.toLowerCase() !== "no")
+    .map((item) => manifest.get(item.getAttribute("idref") ?? ""))
+    .filter(
+      (item): item is NonNullable<typeof item> =>
+        !!item &&
+        /xhtml|html/.test(item.mediaType) &&
+        !item.properties.split(/\s+/).includes("nav"),
+    );
+  const documents = spine.length
+    ? spine
+    : [...manifest.values()].filter((item) => /xhtml|html/.test(item.mediaType));
+  const index = documents.findIndex((item) => item.path === path);
+  return index >= 0 ? `Chapter ${index + 1}` : undefined;
+}
+
 export function readEpubChapter(book: EpubBook, path: string): string {
+  const content = book.chapterContents?.get(path);
+  if (content !== undefined) return content;
   const document = contentDocument(entry(book.entries, path));
   if (!document) return "";
   const ignored = new Set(["script", "style", "noscript", "nav", "form", "svg"]);

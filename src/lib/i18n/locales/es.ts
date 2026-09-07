@@ -1,3 +1,4 @@
+import settingsRefinements from "./es/settings-refinements";
 import sweep from "./es/sweep";
 import used from "./es/used";
 import extra from "./es/extra";
@@ -58,6 +59,7 @@ const es: Record<string, string> = {
   ...controllers,
   ...bpSources,
   ...coverage,
+  ...settingsRefinements,
 };
 
 export default es;

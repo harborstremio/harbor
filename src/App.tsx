@@ -345,7 +345,7 @@ function useIdleEvict(active: boolean, pin = false): boolean {
 
 export function App({ onReady }: { onReady?: () => void }) {
   return (
-    <SettingsProvider>
+    <SettingsProvider syncTorrentEnginePolicy>
       <ProfilesProvider>
         <ParentalProvider>
           <TraktProvider>

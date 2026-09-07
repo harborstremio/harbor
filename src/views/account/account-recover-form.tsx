@@ -8,6 +8,8 @@ import { DiscordIcon } from "@/components/discord-icon";
 import { PasswordField, TextField } from "./fields";
 import { RECOVERY_KEY_LENGTH, RecoveryKeyInput } from "./recovery-key-input";
 import { useT } from "@/lib/i18n";
+import { Section } from "@/views/settings/shared";
+import { ROW_ACTION, ROW_ACTION_PRIMARY } from "@/views/settings/kit";
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,24}$/;
 const PIN_RE = /^\d{6}$/;
@@ -17,9 +19,11 @@ type Mode = "key" | "discord-request" | "discord-confirm";
 export function AccountRecoverForm({
   onBack,
   onReset,
+  inline = false,
 }: {
   onBack: () => void;
   onReset: (newCode: string) => void;
+  inline?: boolean;
 }) {
   const t = useT();
   const [mode, setMode] = useState<Mode>("key");
@@ -101,9 +105,9 @@ export function AccountRecoverForm({
           )
         : t("We sent a 6-digit code to your Discord DMs. It expires in 10 minutes.");
 
-  return (
-    <div className="flex flex-col gap-6 bg-surface p-6">
-      <div className="flex items-start gap-3">
+  const content = (
+    <div className={inline ? "flex min-w-0 flex-col gap-6 pt-4" : "flex flex-col gap-6 bg-surface p-6"}>
+      {!inline && <div className="flex items-start gap-3">
         <button
           type="button"
           onClick={() => (mode === "key" ? onBack() : switchMode("key"))}
@@ -116,7 +120,7 @@ export function AccountRecoverForm({
           <h2 className="text-[20px] font-semibold leading-7 tracking-tight text-ink">{heading}</h2>
           <p className="mt-1 text-[15px] leading-[22px] text-ink-muted">{subheading}</p>
         </div>
-      </div>
+      </div>}
 
       {mode === "key" && (
         <form
@@ -134,7 +138,7 @@ export function AccountRecoverForm({
             maxLength={24}
             autoComplete="username"
           />
-          <RecoveryKeyInput onChange={setKey} />
+          <RecoveryKeyInput onChange={setKey} inline={inline} />
           <PasswordField
             label={t("New password")}
             value={password}
@@ -144,7 +148,7 @@ export function AccountRecoverForm({
           />
 
           {error && (
-            <p className="text-[12.5px] text-danger">
+            <p role={inline ? "alert" : undefined} className={inline ? "rounded-md bg-danger/10 px-3.5 py-3 text-[15.5px] leading-[22px] text-danger" : "text-[12.5px] text-danger"}>
               {error.kind === "built-in" ? t(error.key) : error.detail}
             </p>
           )}
@@ -152,7 +156,7 @@ export function AccountRecoverForm({
           <button
             type="submit"
             disabled={!keyReady || busy}
-            className="flex h-11 items-center justify-center gap-2 rounded-md bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
+            className={inline ? `${ROW_ACTION_PRIMARY} self-end justify-center` : "flex h-11 items-center justify-center gap-2 rounded-md bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"}
           >
             {busy && <Loader2 size={16} className="animate-spin" />}
             {t("Reset password")}
@@ -162,7 +166,7 @@ export function AccountRecoverForm({
             <>
               <div className="flex items-center gap-3">
                 <span className="h-px flex-1 bg-edge-soft" />
-                <span className="text-[11px] font-medium uppercase tracking-wide text-ink-subtle">
+                <span className={inline ? "text-[15px] text-ink-muted" : "text-[11px] font-medium uppercase tracking-wide text-ink-subtle"}>
                   {t("or")}
                 </span>
                 <span className="h-px flex-1 bg-edge-soft" />
@@ -170,7 +174,7 @@ export function AccountRecoverForm({
               <button
                 type="button"
                 onClick={() => switchMode("discord-request")}
-                className="flex h-11 items-center justify-center gap-2 rounded-[11px] border border-edge-soft text-[13.5px] font-semibold text-ink transition-all duration-150 hover:bg-elevated/60 active:scale-[0.99]"
+                className={inline ? `${ROW_ACTION} justify-center` : "flex h-11 items-center justify-center gap-2 rounded-[11px] border border-edge-soft text-[13.5px] font-semibold text-ink transition-all duration-150 hover:bg-elevated/60 active:scale-[0.99]"}
               >
                 <DiscordIcon size={16} />
                 {t("Recover via a code sent to Discord")}
@@ -198,7 +202,7 @@ export function AccountRecoverForm({
           />
 
           {error && (
-            <p className="text-[12.5px] text-danger">
+            <p role={inline ? "alert" : undefined} className={inline ? "rounded-md bg-danger/10 px-3.5 py-3 text-[15.5px] leading-[22px] text-danger" : "text-[12.5px] text-danger"}>
               {error.kind === "built-in" ? t(error.key) : error.detail}
             </p>
           )}
@@ -206,7 +210,7 @@ export function AccountRecoverForm({
           <button
             type="submit"
             disabled={!usernameOk || busy}
-            className="flex h-11 items-center justify-center gap-2 rounded-md bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
+            className={inline ? `${ROW_ACTION_PRIMARY} self-end justify-center` : "flex h-11 items-center justify-center gap-2 rounded-md bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"}
           >
             {busy && <Loader2 size={16} className="animate-spin" />}
             {t("Send code")}
@@ -239,7 +243,7 @@ export function AccountRecoverForm({
           />
 
           {error && (
-            <p className="text-[12.5px] text-danger">
+            <p role={inline ? "alert" : undefined} className={inline ? "rounded-md bg-danger/10 px-3.5 py-3 text-[15.5px] leading-[22px] text-danger" : "text-[12.5px] text-danger"}>
               {error.kind === "built-in" ? t(error.key) : error.detail}
             </p>
           )}
@@ -247,7 +251,7 @@ export function AccountRecoverForm({
           <button
             type="submit"
             disabled={!confirmReady || busy}
-            className="flex h-11 items-center justify-center gap-2 rounded-md bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
+            className={inline ? `${ROW_ACTION_PRIMARY} self-end justify-center` : "flex h-11 items-center justify-center gap-2 rounded-md bg-accent text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"}
           >
             {busy && <Loader2 size={16} className="animate-spin" />}
             {t("Reset password")}
@@ -257,12 +261,27 @@ export function AccountRecoverForm({
             type="button"
             onClick={() => void requestDiscordCode()}
             disabled={busy}
-            className="self-center text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink disabled:opacity-40"
+            className={inline ? "min-h-11 self-end text-[15px] font-medium text-ink-muted transition-colors hover:text-ink disabled:opacity-40" : "self-center text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink disabled:opacity-40"}
           >
             {t("Didn't get it? Send another code")}
           </button>
         </form>
       )}
+    </div>
+  );
+
+  if (!inline) return content;
+  return (
+    <div className="hset-account-auth relative w-full max-w-[560px] [&_.hset-section-title]:pe-14 [&_.harbor-settings-section>p]:pe-14 [&_label]:text-[16.5px] [&_label]:leading-6 [&_label~span]:text-[15.5px] [&_label~span]:leading-[22px] [&_input]:bg-elevated [&_input]:rounded-[10px]">
+      <Section title={heading} subtitle={subheading}>{content}</Section>
+      <button
+        type="button"
+        onClick={() => (mode === "key" ? onBack() : switchMode("key"))}
+        aria-label={t("Back")}
+        className="absolute end-0 top-0 grid h-11 w-11 place-items-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+      >
+        <ArrowLeft size={17} strokeWidth={2} className="rtl:rotate-180" />
+      </button>
     </div>
   );
 }

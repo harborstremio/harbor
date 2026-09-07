@@ -1,13 +1,9 @@
-import { Check } from "../icons";
+import { useId } from "react";
+import { PickerLayoutPreview } from "./picker-layout-preview";
 import { useSettings } from "@/lib/settings";
+import { tvHover } from "@/lib/keyboard-navigation";
 import { Section, Segmented, ToggleRow } from "../shared";
 import { SettingRow } from "../kit";
-import { SRow } from "../ui";
-import {
-  PickerLayoutPreview,
-  StreamDescriptionPreview,
-  TorrentNamePreview,
-} from "../picker-previews";
 import { useT } from "@/lib/i18n";
 import type { StreamMode } from "@/lib/streams/mode";
 
@@ -22,11 +18,13 @@ export function PickerTab() {
           "Condensed shows a top pick, quality tiles, and a drawer. Stremio is a flat list grouped by addon, no scoring.",
         )}
       >
-        <PickerLayoutPicker
-          value={settings.pickerLayout}
-          onChange={(v) => update({ pickerLayout: v })}
-        />
-        <PickerLayoutPreview value={settings.pickerLayout} />
+        <div className="grid items-center gap-6 min-[900px]:grid-cols-[minmax(0,1fr)_340px]">
+          <PickerLayoutPicker
+            value={settings.pickerLayout}
+            onChange={(v) => update({ pickerLayout: v })}
+          />
+          <PickerLayoutPreview layout={settings.pickerLayout} />
+        </div>
       </Section>
 
       <Section title={t("Source mode")}>
@@ -49,7 +47,7 @@ export function PickerTab() {
         </SettingRow>
       </Section>
 
-      <Section title={t("Refresh button")}>
+      <Section title={t("Picker details")}>
         <ToggleRow
           label={t("Move Refresh next to Back")}
           sub={t(
@@ -58,30 +56,18 @@ export function PickerTab() {
           value={settings.pickerRefreshNextToBack}
           onChange={(v) => update({ pickerRefreshNextToBack: v })}
         />
-      </Section>
-
-      <Section title={t("Torrent name")}>
         <ToggleRow
           label={t("Show torrent name")}
-          sub={t(
-            "Displays the raw release filename under each source in the condensed picker. Off keeps rows compact. The Stremio layout always shows it.",
-          )}
+          sub={t("Show release filenames in the Condensed picker and Big Picture.")}
           value={settings.pickerShowFilename}
           onChange={(v) => update({ pickerShowFilename: v })}
         />
-        <TorrentNamePreview on={settings.pickerShowFilename} />
-      </Section>
-
-      <Section title={t("Stream descriptions")}>
         <ToggleRow
           label={t("Show full descriptions")}
-          sub={t(
-            "Shows everything the addon sends in the Stremio picker layout instead of trimming it to a few lines. That matters for AIOStreams and other custom formats. Off gives shorter, tidier rows.",
-          )}
+          sub={t("Show complete addon descriptions in the Stremio picker, downloads, and Big Picture.")}
           value={settings.fullStreamDescription}
           onChange={(v) => update({ fullStreamDescription: v })}
         />
-        <StreamDescriptionPreview full={settings.fullStreamDescription} />
       </Section>
     </>
   );
@@ -95,37 +81,35 @@ function PickerLayoutPicker({
   onChange: (v: "condensed" | "stremio") => void;
 }) {
   const t = useT();
-  const options: Array<{ id: "condensed" | "stremio"; label: string; sub: string }> = [
-    {
-      id: "condensed",
-      label: t("Condensed"),
-      sub: t(
-        "Default. Top pick at the top, quality tiles, and an All-Sources drawer. Harbor scores and ranks results.",
-      ),
-    },
-    {
-      id: "stremio",
-      label: "Stremio",
-      sub: t(
-        "Flat list of sources grouped by addon, with a filter dropdown. No re-ranking. Closest match to the Stremio app's stream picker.",
-      ),
-    },
-  ];
+  const name = useId();
+  const options = [
+    { id: "condensed", label: t("Condensed") },
+    { id: "stremio", label: t("Stremio") },
+  ] as const;
+
   return (
-    <>
-      {options.map((opt) => (
-        <SRow
-          key={opt.id}
-          onClick={() => onChange(opt.id)}
-          title={opt.label}
-          description={opt.sub}
-          trailing={
-            <span className="grid h-11 w-11 place-items-center">
-              {value === opt.id && <Check size={20} strokeWidth={2.4} className="text-accent" />}
-            </span>
-          }
-        />
+    <div className="hset-source-options" role="radiogroup" aria-label={t("Picker layout")}>
+      {options.map((option) => (
+        <label key={option.id} className="hset-source-option">
+          <input
+            type="radio"
+            name={name}
+            value={option.id}
+            checked={value === option.id}
+            onChange={() => onChange(option.id)}
+            onBlur={(event) => {
+              if (event.currentTarget.hasAttribute("data-tv-focused")) tvHover(null);
+            }}
+            onKeyDown={(event) => {
+              if (event.nativeEvent.isTrusted && event.key.startsWith("Arrow")) event.stopPropagation();
+            }}
+            aria-labelledby={name + option.id}
+          />
+          <span id={name + option.id} className="text-[16.5px] font-medium leading-6 text-ink">
+            {option.label}
+          </span>
+        </label>
       ))}
-    </>
+    </div>
   );
 }

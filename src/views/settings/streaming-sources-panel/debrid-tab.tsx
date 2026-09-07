@@ -222,6 +222,7 @@ function useAioStatusHealth(): AioStatusSnapshot | null {
   const { authKey } = useAuth();
   const [snapshot, setSnapshot] = useState<AioStatusSnapshot | null>(null);
   useEffect(() => {
+    setSnapshot(null);
     if (!authKey) return;
     const ac = new AbortController();
     let cancelled = false;

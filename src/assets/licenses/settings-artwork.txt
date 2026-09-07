@@ -4,7 +4,7 @@ Sources for the film footage, posters and music artwork in Harbor's settings pre
 
 | Local asset | Work and source |
 | --- | --- |
-| `harbor-discover.webp` | Harbor Discover screenshot, with media artwork from Steamboat Willie and The General. Film sources are listed below. |
+| `harbor-profile.png` | Harbor profile screenshot supplied by the project owner. |
 | `steamboat-willie.webp`, `steamboat-river.webp`, `steamboat-deck.webp` | **Steamboat Willie (1928)**, Walt Disney and Ub Iwerks. Frames at approximately 00:35, 00:25 and 01:00 from the [Internet Archive film](https://archive.org/details/SteamboatWillie). [Wikimedia Commons film and public-domain record](https://commons.wikimedia.org/wiki/File:Steamboat_Willie_(1928)_by_Walt_Disney.webm). Source pillarboxing removed; lossless WebP. |
 | `the-general-still.webp` | **The General (1926)**, Buster Keaton and Clyde Bruckman. [Original still and rights record](https://commons.wikimedia.org/wiki/File:The_General,_front.jpg). Resized and converted to WebP. |
 | `the-general-poster.webp` | **The General (1926)**, original theatrical artwork by Alvan “Hap” Hadley (signed). [Original poster and rights record](https://commons.wikimedia.org/wiki/File:The_general_movie_poster.jpg). Resized and converted to WebP. |
@@ -14,5 +14,7 @@ Sources for the film footage, posters and music artwork in Harbor's settings pre
 | `namakura-gatana.webp` | **Namakura Gatana / The Dull Sword (1917)**, Jun'ichi Kōuchi. [Original frame and rights record](https://commons.wikimedia.org/wiki/File:Anime_cell_1917.jpg). The source identifies public-domain status in Japan and the United States. Resized and converted to WebP. |
 | `the-toll-of-the-sea.webp` | **The Toll of the Sea (1922)**. Anna May Wong, Priscilla Moran and Beatrice Bentley; cinematography J. A. Ball, editing Hal C. Kern, distributed by Metro Pictures. [Original frame and rights record](https://commons.wikimedia.org/wiki/File:Anna_May_Wong_holds_child_in_The_Toll_of_the_Sea.jpg). Converted to WebP. |
 | `maple-leaf-rag.webp` | **Maple Leaf Rag**, Scott Joplin; sheet music published by Stark, 1911. [Original cover and catalog record](https://www.loc.gov/item/2023864251/). Library of Congress, Music Division. Converted to WebP. |
+| `sherlock-jr-theater.webp` | **Sherlock Jr. (1924)**, Buster Keaton. Theater publicity still; photographer unknown. [Original still and public-domain record](https://commons.wikimedia.org/wiki/File:Silent_film_theater_in_Sherlock_Jr.,_1924_(cropped).jpg). Resized to 960 pixels wide and converted to WebP. |
+| `a-trip-to-the-moon.webp` | **A Trip to the Moon / Le Voyage dans la Lune (1902)**, Georges Méliès. Film frame supplied by Breve Storia del Cinema. [Original frame and public-domain record](https://commons.wikimedia.org/wiki/File:A_Trip_to_the_Moon_(Le_Voyage_dans_la_Lune).jpg). Resized to 960 pixels wide and converted to WebP. |
 
 The subtitle text, episode labels and badge values in settings are illustrative controls, not quotations or factual metadata for these films. Existing custom controller drawings, service logos, theme screenshots and user-uploaded images are separate assets and retain their existing provenance.

@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, ToggleRow } from "./shared";
-import { SettingRow } from "./kit";
 import { isTauri } from "./player-panel/internals";
 import { SvpSection } from "./anime-panel/svp-section";
 import { MotionCompare } from "./anime-panel/motion-compare";
@@ -50,7 +49,6 @@ export function AnimePanel() {
         <>
       <Section
         title={t("Smooth motion")}
-        subtitle={t("Reduce judder during camera movement. The comparison below illustrates the effect.")}
       >
         <ToggleRow
           label={t("Motion smoothing")}
@@ -64,14 +62,7 @@ export function AnimePanel() {
           }
         />
 
-        <SettingRow
-          wide
-          label={t("Before and after")}
-          desc={t("The same camera pan on each setting. The lit lane is what you get right now.")}
-          tip={t("Interpolation invents frames between the drawn ones, so a pan travels in many small moves instead of a few big jumps.")}
-        >
-          <MotionCompare smoothed={svpDriving || settings.playerMotionInterp} />
-        </SettingRow>
+        <MotionCompare />
       </Section>
         </>
       )}

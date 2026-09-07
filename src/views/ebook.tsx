@@ -97,6 +97,7 @@ import {
   prefetchSourceEBookContent,
   searchSourceEBookCatalog,
   sourceEBookChapters,
+  restoreSourceEBookChapters,
   sourceEBookContent,
   sourceEBookDetail,
   type EBookChapter,
@@ -2671,6 +2672,7 @@ function EBookDetails({
   const [recommendationsError, setRecommendationsError] = useState(false);
   const [recommendationsAttempt, setRecommendationsAttempt] = useState(0);
   const [chapters, setChapters] = useState<EBookChapter[] | null>(null);
+  const [savedChapters, setSavedChapters] = useState<EBookChapter[]>([]);
   const [sourceOptions, setSourceOptions] = useState<EBook[]>([]);
   const [sourceRoute, setSourceRoute] = useState<string | null>(null);
   const [selectedVolume, setSelectedVolume] = useState<string | null>(null);
@@ -2907,13 +2909,22 @@ function EBookDetails({
     }
     setSelectedVolume(null);
     setChapters(null);
+    setSavedChapters([]);
     void sourceEBookChapters(sourceRoute)
-      .then((items) => active && setChapters(items))
+      .then(async (items) => {
+        if (!active) return;
+        const saved = ebook
+          ? await restoreSourceEBookChapters(sourceRoute, profile, ebook.id, items).catch(() => [])
+          : [];
+        if (!active) return;
+        setSavedChapters(saved);
+        setChapters(items);
+      })
       .catch(() => active && setChapters([]));
     return () => {
       active = false;
     };
-  }, [sourceRoute]);
+  }, [sourceRoute, profile, ebook?.id]);
   const volumeGroups = useMemo(() => {
     const groups = new Map<string, { title?: string; chapters: EBookChapter[] }>();
     for (const chapter of chapters ?? []) {
@@ -2998,15 +3009,32 @@ function EBookDetails({
       return;
     }
     const resume = loadEBookResume(profile, ebook.id);
+    if (
+      resume &&
+      ![...chapters, ...savedChapters].some((chapter) => chapter.id === resume.chapterId)
+    ) {
+      onAutoReadConsumed();
+      return;
+    }
     const target =
       chapters.find((chapter) => chapter.id === resume?.chapterId) ??
+      savedChapters.find((chapter) => chapter.id === resume?.chapterId) ??
       [...chapters].sort(
         (left, right) =>
           (left.position ?? Number.MAX_SAFE_INTEGER) - (right.position ?? Number.MAX_SAFE_INTEGER),
       )[0];
     onAutoReadConsumed();
     if (target) readChapter(target);
-  }, [autoRead, chapters, ebook, onAutoReadConsumed, profile, readChapter, sourceRoute]);
+  }, [
+    autoRead,
+    chapters,
+    ebook,
+    onAutoReadConsumed,
+    profile,
+    readChapter,
+    savedChapters,
+    sourceRoute,
+  ]);
   if (!ebook)
     return (
       <div className="flex flex-1 items-center justify-center text-ink-muted">
@@ -3303,6 +3331,7 @@ function EBookDetails({
           bookCover={ebook.cover}
           internalCover={ebook.internalCover}
           chapter={reading.chapter}
+          savedChapters={savedChapters}
           content={reading.content}
           error={
             reading.error === "This chapter could not be loaded."

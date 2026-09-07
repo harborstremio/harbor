@@ -32,7 +32,10 @@ export function HoverStyleGallery({
   onChange: (style: CardHoverStyle, customId?: string) => void;
 }) {
   const t = useT();
-  const sample: Meta = SETTINGS_SAMPLE_META;
+  const sample: Meta = {
+    ...SETTINGS_SAMPLE_META,
+    description: t(SETTINGS_SAMPLE_META.description),
+  };
   const customs = useSyncExternalStore(subscribeCustomHovers, listCustomHovers);
   const [editing, setEditing] = useState<CustomHoverConfig | null | "new">(null);
   return (

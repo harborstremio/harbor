@@ -2,6 +2,7 @@ import { DEFAULT_CHROME } from "./chrome-config";
 import { DEFAULT_CUSTOM_COLORS, type ThemePreset } from "@/lib/theme";
 import { t } from "@/lib/i18n";
 import type { Draft } from "./studio-types";
+import type { NavCustomization } from "@/chrome/nav-items";
 
 export function cssColorToHex(input: string): string {
   const s = input.trim();
@@ -23,9 +24,12 @@ export function cssColorToHex(input: string): string {
   }
 }
 
-export function emptyDraft(seed?: ThemePreset): Draft {
+export function emptyDraft(seed?: ThemePreset, navigation: NavCustomization = { order: [], hidden: [], renamed: {} }): Draft {
+  const nav = seed?.navCustomization ?? navigation;
+  const navCustomization = { order: [...nav.order], hidden: [...nav.hidden], renamed: { ...nav.renamed } };
   if (!seed) {
     return {
+      navCustomization,
       name: "",
       blurb: "",
       layout: "sidebar",
@@ -50,6 +54,7 @@ export function emptyDraft(seed?: ThemePreset): Draft {
     customFontId?: string | null;
   };
   return {
+    navCustomization,
     name: t("{name} copy", { name: t(seed.name) }),
     blurb: seed.blurb ? t(seed.blurb) : "",
     layout: seed.layout ?? "sidebar",

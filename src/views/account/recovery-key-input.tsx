@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState } from "react";
 import { ClipboardPaste } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { ROW_ACTION } from "@/views/settings/kit";
 
 const GROUPS = 4;
 const LEN = 5;
@@ -11,9 +12,11 @@ const clean = (s: string) => s.toUpperCase().replace(/[^0-9A-Z]/g, "");
 export function RecoveryKeyInput({
   onChange,
   autoFocus,
+  inline = false,
 }: {
   onChange: (code: string) => void;
   autoFocus?: boolean;
+  inline?: boolean;
 }) {
   const t = useT();
   const [segs, setSegs] = useState<string[]>(() => Array(GROUPS).fill(""));
@@ -67,11 +70,11 @@ export function RecoveryKeyInput({
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-[12.5px] font-semibold text-ink">{t("Recovery key")}</span>
+        <span className={inline ? "text-[16.5px] font-medium leading-6 text-ink" : "text-[12.5px] font-semibold text-ink"}>{t("Recovery key")}</span>
         <button
           type="button"
           onClick={pasteButton}
-          className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[11.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
+          className={inline ? ROW_ACTION : "inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[11.5px] font-medium text-ink-subtle transition-colors hover:text-ink"}
         >
           <ClipboardPaste size={12} strokeWidth={2} /> {t("Paste")}
         </button>
@@ -113,7 +116,7 @@ export function RecoveryKeyInput({
           </Fragment>
         ))}
       </div>
-      <span className="text-[11.5px] text-ink-subtle">
+      <span className={inline ? "text-[15.5px] leading-[22px] text-ink-muted" : "text-[11.5px] text-ink-subtle"}>
         {t("The 20-character key from when you created your account. Paste it or type each block.")}
       </span>
     </div>

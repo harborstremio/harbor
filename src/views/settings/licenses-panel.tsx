@@ -1,11 +1,11 @@
-import { useCallback, useState, type CSSProperties } from "react";
+import { useCallback, type CSSProperties } from "react";
 import { ArrowUpRight, Check, Download } from "./icons";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { APP_VERSION } from "@/lib/build-info";
-import { downloadText } from "@/lib/download-text";
 import { Section } from "./shared";
 import { ROW_DESC } from "./kit";
+import { AssetDownloadFeedback, useAssetDownload, type AssetDownload } from "./asset-download";
 import harborWordmark from "@/assets/harbor-wordmark.svg";
 import crowdinLogo from "@/assets/crowdin-mark.png";
 import cloudsmithLogo from "@/assets/cloudsmith.png";
@@ -178,16 +178,30 @@ function Group({ title, subtitle, items }: { title: string; subtitle: string; it
 
 function LicenseRow({
   doc,
-  saved,
+  download,
   onSave,
 }: {
   doc: LicenseDoc;
-  saved: boolean;
+  download: AssetDownload;
   onSave: (doc: LicenseDoc) => void;
 }) {
   const t = useT();
+  const saved = download.savedId === doc.id;
+  const pending = download.pendingId === doc.id;
+  const action = pending
+    ? t("Saving…")
+    : saved
+      ? download.status?.phase === "downloaded" ? t("Download started") : t("Saved")
+      : t("Save");
   return (
-    <button type="button" onClick={() => onSave(doc)} className="hset-row text-start" data-interactive="">
+    <button
+      type="button"
+      onClick={() => { if (download.pendingId === null) onSave(doc); }}
+      className="hset-row text-start aria-disabled:cursor-wait aria-disabled:opacity-60"
+      data-interactive=""
+      aria-disabled={download.pendingId !== null}
+      aria-busy={pending}
+    >
       <span className="hset-row-text">
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="text-[16.5px] font-medium leading-[22px] tracking-[-0.12px] text-ink">{doc.title}</span>
@@ -197,7 +211,7 @@ function LicenseRow({
       <span className="hset-row-control">
         <span className="hset-license-save">
           {saved ? <Check size={16} strokeWidth={2.5} aria-hidden /> : <Download size={16} strokeWidth={2} aria-hidden />}
-          {saved ? t("Saved") : t("Save")}
+          {action}
         </span>
       </span>
     </button>
@@ -369,17 +383,15 @@ const LICENSES: LicenseDoc[] = [
 
 export function LicensesPanel() {
   const t = useT();
-  const [savedId, setSavedId] = useState<string | null>(null);
+  const download = useAssetDownload();
 
-  const save = useCallback(async (doc: LicenseDoc) => {
-    const load = LICENSE_TEXT[`../../assets/licenses/${doc.file}.txt`];
-    if (!load) return;
-    const text = (await load()) as string;
-    const ok = await downloadText(`${doc.file}.txt`, text, ["txt"], "Licence");
-    if (!ok) return;
-    setSavedId(doc.id);
-    window.setTimeout(() => setSavedId((cur) => (cur === doc.id ? null : cur)), 1600);
-  }, []);
+  const save = useCallback((doc: LicenseDoc) => {
+    void download.save(doc.id, `${doc.file}.txt`, async () => {
+      const load = LICENSE_TEXT[`../../assets/licenses/${doc.file}.txt`];
+      if (!load) throw new Error("Licence source unavailable");
+      return (await load()) as string;
+    }, ["txt"], t("Licence"));
+  }, [download.save, t]);
 
   return (
     <>
@@ -435,8 +447,9 @@ export function LicensesPanel() {
         )}
       >
         {LICENSES.map((doc) => (
-          <LicenseRow key={doc.id} doc={doc} saved={savedId === doc.id} onSave={save} />
+          <LicenseRow key={doc.id} doc={doc} download={download} onSave={save} />
         ))}
+        <AssetDownloadFeedback status={download.status} />
       </Section>
 
       <Section title={t("Independence")}>

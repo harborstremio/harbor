@@ -6,7 +6,7 @@ import {
   mergeEBookMetadata,
   type EBook,
 } from "./api";
-import { parseEpub, readEpubChapter, type EpubBook } from "./epub";
+import { legacyEpubChapterTitle, parseEpub, readEpubChapter, type EpubBook } from "./epub";
 import {
   gutendexDetail,
   gutendexEpub,
@@ -22,9 +22,16 @@ import {
   shouldAutomaticallyTranslateEBookChapter,
   translateEBookChapter,
 } from "./translation";
-import { ebookChapterCacheGet, ebookChapterCachePut } from "./cache";
+import { ebookChapterCacheGet, ebookChapterCachePut, ebookHasCachedTranslations } from "./cache";
 import { PluginWorker } from "@/lib/manga/plugins/worker-host";
 import type { InstalledPlugin } from "@/lib/manga/plugins/types";
+import {
+  ebookLocationResolver,
+  ebookLegacyNavigation,
+  ebookParagraphs,
+  type EBookChapterLocationSource,
+} from "./chapter-locations";
+import { migrateEBookChapterLocations, savedEBookChapters } from "./reader-state";
 
 export type EBookChapter = {
   id: string;
@@ -35,6 +42,8 @@ export type EBookChapter = {
   volumeTitle?: string;
   publishAt?: string;
   views?: number | string;
+  legacy?: boolean;
+  legacyNext?: { chapterId: string; line: number };
 };
 
 export type EBookChapterContent = {
@@ -54,6 +63,7 @@ type Provider = {
   detail(id: string): Promise<EBook | null>;
   chapters(id: string): Promise<EBookChapter[]>;
   content(id: string): Promise<EBookChapterContent>;
+  chapterLocations?(id: string, chapters: EBookChapter[]): Promise<EBookChapterLocationSource[]>;
 };
 
 const workers = new Map<string, PluginWorker>();
@@ -343,6 +353,9 @@ function gutendexPackage(id: string, url: string): Promise<EpubBook> {
   if (!pending) {
     pending = gutendexEpub(url).then((buffer) => parseEpub(buffer));
     gutendexEpubs.set(id, pending);
+    void pending.catch(() => {
+      if (gutendexEpubs.get(id) === pending) gutendexEpubs.delete(id);
+    });
     if (gutendexEpubs.size > LOCAL_EPUB_CACHE_LIMIT) {
       const oldest = gutendexEpubs.keys().next().value;
       if (oldest !== undefined) gutendexEpubs.delete(oldest);
@@ -382,7 +395,6 @@ function gutendexProvider(source: EBookSource): Provider {
     return epub.chapters.map((chapter, index) => ({
       id: JSON.stringify([id, chapter.path]),
       title: chapter.title,
-      chapter: String(index + 1),
       position: index,
     }));
   };
@@ -390,6 +402,10 @@ function gutendexProvider(source: EBookSource): Provider {
     const [bookId, chapter] = JSON.parse(id) as [string, string];
     const { epub } = await resolve(bookId);
     return { text: cleanSourceText(readEpubChapter(epub, chapter)) };
+  };
+  provider.chapterLocations = async (id, chapters) => {
+    const { epub } = await resolve(id);
+    return epubChapterLocationSources(chapters, new Map([[id, epub]]));
   };
   return provider;
 }
@@ -450,11 +466,10 @@ function localProvider(source: EBookSource): Provider {
     const chapters: EBookChapter[] = [];
     for (const [volumeIndex, path] of book.paths.entries()) {
       const epub = await localPackage(path);
-      for (const [chapterIndex, chapter] of epub.chapters.entries())
+      for (const chapter of epub.chapters)
         chapters.push({
           id: JSON.stringify([path, chapter.path]),
           title: chapter.title,
-          chapter: String(chapterIndex + 1),
           position: chapters.length,
           volume: book.paths.length > 1 ? String(volumeIndex + 1) : undefined,
           volumeTitle: book.paths.length > 1 ? epub.title : undefined,
@@ -466,7 +481,44 @@ function localProvider(source: EBookSource): Provider {
     const [path, chapter] = JSON.parse(id) as [string, string];
     return { text: cleanSourceText(readEpubChapter(await localPackage(path), chapter)) };
   };
+  provider.chapterLocations = async (id, chapters) => {
+    const book = await find(id);
+    if (!book) return [];
+    const packages = new Map(
+      await Promise.all(book.paths.map(async (path) => [path, await localPackage(path)] as const)),
+    );
+    return epubChapterLocationSources(chapters, packages);
+  };
   return provider;
+}
+
+async function epubChapterLocationSources(
+  chapters: EBookChapter[],
+  packages: Map<string, EpubBook>,
+): Promise<EBookChapterLocationSource[]> {
+  return (
+    await Promise.all(
+      chapters.map(async (chapter) => {
+        try {
+          const [owner, path] = JSON.parse(chapter.id) as [string, string];
+          const epub = packages.get(owner);
+          if (!epub || typeof path !== "string") return null;
+          const text = cleanSourceText(readEpubChapter(epub, path));
+          if (!text) return null;
+          const legacy = !path.includes("#");
+          const title =
+            chapter.title ||
+            (legacy ? legacyEpubChapterTitle(epub, path) : undefined) ||
+            ebookParagraphs(text)[0] ||
+            epub.title;
+          const translated = legacy && Boolean(await cachedEBookTranslation(text, title));
+          return { chapter: { ...chapter, title, legacy }, text, translated };
+        } catch {
+          return null;
+        }
+      }),
+    )
+  ).filter((source): source is NonNullable<typeof source> => source !== null);
 }
 
 function pluginProvider(plugin: InstalledPlugin): Provider {
@@ -902,6 +954,33 @@ export async function sourceEBookChapters(route: string): Promise<EBookChapter[]
     await new Promise((resolve) => window.setTimeout(resolve, 250));
   }
   return [];
+}
+
+export async function restoreSourceEBookChapters(
+  route: string,
+  profile: string,
+  bookId: string,
+  chapters: EBookChapter[],
+): Promise<EBookChapter[]> {
+  const ids = new Set(chapters.map((chapter) => chapter.id));
+  const saved = savedEBookChapters(profile, bookId).filter((chapter) => !ids.has(chapter.id));
+  if (!saved.length) return [];
+  const found = await providerFor(route);
+  if (!found?.provider.chapterLocations) return [];
+  const sources = await found.provider.chapterLocations(found.itemId, chapters);
+  const legacy = await found.provider.chapterLocations(found.itemId, saved);
+  const translationsExist = await ebookHasCachedTranslations();
+  for (const source of legacy) {
+    const cached = await ebookChapterCacheGet(chapterCacheKey(route, source.chapter.id));
+    if (cached?.content.text) source.text = cached.content.text;
+    source.translated = Boolean(await cachedEBookTranslation(source.text, source.chapter.title));
+    source.progressKnownOriginal = !translationsExist;
+  }
+  const resolve = ebookLocationResolver(sources);
+  for (const source of legacy) {
+    Object.assign(source.chapter, ebookLegacyNavigation(source, sources, resolve));
+  }
+  return migrateEBookChapterLocations(profile, bookId, chapters, sources, legacy);
 }
 
 const chapterCacheKey = (route: string, chapterId: string) => `${route}\n${chapterId}`;

@@ -6,6 +6,7 @@ import { Section } from "@/views/settings/shared";
 import { RecoveryReveal } from "@/views/settings/theme-panel/custom-themes-section/author-account-panel/recovery-reveal";
 import { AccountAuthForm } from "./account-auth-form";
 import { AccountIdentityCard } from "./account-identity-card";
+import { AccountThemeCta } from "./account-theme-cta";
 import { DiscordLinkCard } from "./discord-link-card";
 import { SignedOutHero } from "./signed-out-hero";
 
@@ -42,9 +43,8 @@ export function HarborAccountPanel() {
   return (
     <Section title={t("Harbor account")} subtitle={t("Your handle across Harbor.")}>
       <AccountIdentityCard author={author} />
-      <div className="rounded-md bg-elevated px-5 py-5">
-        <DiscordLinkCard author={author} onRecovery={setReveal} />
-      </div>
+      <DiscordLinkCard author={author} onRecovery={setReveal} />
+      <AccountThemeCta />
       {authOpen && <AccountAuthForm onRecovery={setReveal} onClose={() => setAuthOpen(false)} />}
       {reveal && <RecoveryReveal code={reveal} onDone={() => setReveal(null)} />}
     </Section>

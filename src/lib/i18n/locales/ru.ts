@@ -1,3 +1,4 @@
+import settingsRefinements from "./ru/settings-refinements";
 import gap from "./ru/gap";
 import experimentalUpdates from "./ru/experimental-updates";
 import coverage from "./ru/coverage";
@@ -83,6 +84,7 @@ const ru: Record<string, string> = {
   ...surfaces4,
   ...surfaces5,
   ...experimentalUpdates,
+  ...settingsRefinements,
 };
 
 export default ru;

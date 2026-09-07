@@ -1,3 +1,4 @@
+import settingsRefinements from "./de/settings-refinements";
 import sweep from "./de/sweep";
 import used from "./de/used";
 import surfaces from "./de/surfaces";
@@ -70,6 +71,7 @@ const de: Record<string, string> = {
   ...bpSources,
   ...together,
   ...coverage,
+  ...settingsRefinements,
 };
 
 export default de;

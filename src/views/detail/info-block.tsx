@@ -1,5 +1,6 @@
 import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
-import type { TmdbDetail } from "@/lib/providers/tmdb";
+import { tmdbCompanyIdByName, type TmdbDetail } from "@/lib/providers/tmdb";
+import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 
@@ -33,13 +34,28 @@ export function InfoBlock({ detail, isAnime = false }: { detail: TmdbDetail; isA
   const fmtMoney = (n?: number) =>
     n && n > 0 ? `$${(n / 1_000_000).toFixed(n >= 1_000_000_000 ? 2 : 0)}${n >= 1_000_000_000 ? "B" : "M"}` : null;
 
+  const { settings } = useSettings();
+  const tmdbKey = settings.tmdbKey;
   const networkChips = detail.networksRich.slice(0, 4).map((n) => ({
     label: n.name,
     onClick: () => openFilter({ kind: "network", mediaType, name: n.name, id: n.id }),
   }));
-  const studioChips = detail.productionCompaniesRich.slice(0, 3).map((c) => ({
+  const namedStudios =
+    detail.productionCompaniesRich.length > 0
+      ? detail.productionCompaniesRich.slice(0, 3)
+      : detail.productionCompanies.slice(0, 3).map((name) => ({ id: 0, name }));
+  const studioChips = namedStudios.map((c) => ({
     label: c.name,
-    onClick: () => openFilter({ kind: "studio", mediaType, name: c.name, id: c.id }),
+    onClick: () => {
+      if (c.id > 0) {
+        openFilter({ kind: "studio", mediaType, name: c.name, id: c.id });
+        return;
+      }
+      if (!tmdbKey) return;
+      void tmdbCompanyIdByName(tmdbKey, c.name).then((id) => {
+        if (id) openFilter({ kind: "studio", mediaType, name: c.name, id });
+      });
+    },
   }));
   const countryChips = detail.productionCountriesRich.map((c) => ({
     label: c.name,

@@ -4,10 +4,24 @@ import { useT } from "@/lib/i18n";
 import { MOVIE_GENRES } from "@/lib/feed/tags";
 import { useView, type MetaFilter } from "@/lib/view";
 import { runtimeRange } from "./rails-config";
+import { BrandHero, useBrandArt } from "./brand-hero";
 
 export function Header({ filter }: { filter: MetaFilter }) {
   const t = useT();
   const { kicker, title, subtitle, Icon } = describe(filter, t);
+  const branded = filter.kind === "studio" || filter.kind === "network";
+  const art = useBrandArt(
+    branded ? filter.id : 0,
+    filter.mediaType,
+    filter.kind === "network" ? "network" : "studio",
+  );
+  if (branded) {
+    return (
+      <BrandHero art={art} kicker={kicker} title={title} subtitle={subtitle}>
+        <MediaTypeToggle filter={filter} />
+      </BrandHero>
+    );
+  }
   return (
     <div className="relative px-12 pb-10 pt-28">
       <div className="flex items-center gap-2.5">

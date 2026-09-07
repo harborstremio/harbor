@@ -94,11 +94,9 @@ function BusyButton({
     <button
       type="button"
       aria-busy={busy || undefined}
-      disabled={disabled}
+      disabled={disabled || busy}
       onClick={onClick}
-      className={`${variant === "primary" ? ROW_ACTION_PRIMARY : ROW_ACTION} ${
-        busy ? "pointer-events-none" : ""
-      }`}
+      className={variant === "primary" ? ROW_ACTION_PRIMARY : ROW_ACTION}
     >
       {children}
     </button>
@@ -198,6 +196,7 @@ export function HomeServersTab() {
                   )}
                 </>
               }
+              warn={connection.lastSyncResult?.ok === false ? connection.lastSyncResult.message : undefined}
             >
               <div className="flex flex-wrap items-center gap-2.5">
                 <BusyButton busy={syncing} onClick={() => void sync(connection)}>
@@ -282,16 +281,11 @@ export function HomeServersTab() {
                     desc={t("Days to wait between automatic refreshes of this library.")}
                   >
                     <div className="flex items-center gap-2.5">
-                      <input
-                        aria-label={t("Refresh interval in days")}
-                        type="number"
-                        min={1}
-                        max={365}
-                        className={`${FIELD_BASE} w-[96px] px-3 text-center tabular-nums`}
+                      <RefreshDaysField
                         value={connection.refreshEveryDays ?? 1}
-                        onChange={(event) =>
+                        onChange={(days) =>
                           updateMediaServerConnection(connection.id, {
-                            refreshEveryDays: Math.max(1, Number(event.target.value) || 1),
+                            refreshEveryDays: days,
                           })
                         }
                       />
@@ -316,7 +310,16 @@ export function HomeServersTab() {
           </span>
         </SettingRow>
       </Section>
-      {editing != null && <ConnectionEditor value={editing} onClose={() => setEditing(null)} />}
+      {editing != null && (
+        <ConnectionEditor
+          value={editing}
+          onClose={() => setEditing(null)}
+          onSaved={(connection) => {
+            setEditing(null);
+            void sync(connection);
+          }}
+        />
+      )}
       {removeTarget && (
         <HomeServerRemoveDialog
           connection={removeTarget}
@@ -337,6 +340,39 @@ export function HomeServersTab() {
         />
       )}
     </>
+  );
+}
+
+function RefreshDaysField({ value, onChange }: { value: number; onChange: (days: number) => void }) {
+  const t = useT();
+  const [draft, setDraft] = useState(String(value));
+  useEffect(() => setDraft(String(value)), [value]);
+  const commit = () => {
+    const parsed = Number(draft);
+    const next = draft.trim() && Number.isFinite(parsed)
+      ? Math.min(365, Math.max(1, Math.round(parsed)))
+      : value;
+    setDraft(String(next));
+    if (next !== value) onChange(next);
+  };
+  return (
+    <input
+      aria-label={t("Refresh interval in days")}
+      type="number"
+      min={1}
+      max={365}
+      step={1}
+      className={`${FIELD_BASE} w-[96px] px-3 text-center tabular-nums`}
+      value={draft}
+      onChange={(event) => setDraft(event.target.value)}
+      onBlur={commit}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          commit();
+        }
+      }}
+    />
   );
 }
 
@@ -524,9 +560,11 @@ function TokenHelpButton({ open, setOpen }: { open: boolean; setOpen: (open: boo
 function ConnectionEditor({
   value,
   onClose,
+  onSaved,
 }: {
   value: MediaServerConnection | "new";
   onClose: () => void;
+  onSaved: (connection: MediaServerConnection) => void;
 }) {
   const t = useT();
   const existing = value !== "new" ? value : null;
@@ -541,6 +579,17 @@ function ConnectionEditor({
   const [error, setError] = useState("");
   const [plexStatus, setPlexStatus] = useState<"idle" | "opening" | "waiting" | "ready">("idle");
   const plexAbort = useRef<AbortController | null>(null);
+  const connectionAbort = useRef<AbortController | null>(null);
+  const profileId = useRef(activeProfileId());
+  const close = () => {
+    connectionAbort.current?.abort();
+    plexAbort.current?.abort();
+    onClose();
+  };
+  useEffect(() => () => {
+    connectionAbort.current?.abort();
+    plexAbort.current?.abort();
+  }, []);
   useEffect(() => {
     setProvider(existing?.provider ?? "jellyfin");
     setOrigin(existing?.origin ?? "");
@@ -551,26 +600,29 @@ function ConnectionEditor({
     setError("");
   }, [existing, value]);
   const save = async () => {
-    if (busy) return;
+    if (connectionAbort.current || !origin.trim()) return;
+    const abort = new AbortController();
+    connectionAbort.current = abort;
     setBusy(true);
     setError("");
     try {
       let connection: MediaServerConnection;
       let secret: string | undefined;
       if (existing) {
-        const discoveredOrigin = await discoverExistingConnection(existing, origin);
+        const discoveredOrigin = await discoverExistingConnection(existing, origin, abort.signal);
         connection = { ...existing, origin: discoveredOrigin, name: name.trim() || existing.name };
       } else {
         const found = await discoverAndAuthenticate(
           provider,
           origin,
           provider === "plex" ? { token } : { username, password },
+          abort.signal,
         );
         const auth = found.auth;
         secret = auth.token;
         connection = {
           id: crypto.randomUUID(),
-          profileId: activeProfileId(),
+          profileId: profileId.current,
           provider,
           name: name.trim() || auth.userName || provider,
           origin: found.origin,
@@ -588,21 +640,24 @@ function ConnectionEditor({
           refreshInterval: "launch",
         };
       }
+      if (abort.signal.aborted || profileId.current !== activeProfileId()) return;
       saveMediaServerConnection(connection, secret);
-      await synchronizeMediaServer(connection);
-      onClose();
+      onSaved(connection);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
+      if (!abort.signal.aborted) setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
-      setBusy(false);
+      if (connectionAbort.current === abort) {
+        connectionAbort.current = null;
+        if (!abort.signal.aborted) setBusy(false);
+      }
     }
   };
   const addressHint =
     provider === "plex"
-      ? "plex.local or 192.168.1.20:32400"
+      ? "plex.local:32400"
       : provider === "emby"
-        ? "emby.local or 192.168.1.20:8096"
-        : "home.local or 192.168.1.20:8096";
+        ? "emby.local:8096"
+        : "home.local:8096";
   const browserSignIn = async () => {
     if (plexStatus === "opening" || plexStatus === "waiting") return;
     plexAbort.current?.abort();
@@ -611,13 +666,17 @@ function ConnectionEditor({
     setError("");
     setPlexStatus("opening");
     try {
-      const servers = await signInWithPlex(abort.signal, () => setPlexStatus("waiting"));
+      const servers = await signInWithPlex(abort.signal, () => {
+        if (!abort.signal.aborted) setPlexStatus("waiting");
+      });
+      if (abort.signal.aborted || plexAbort.current !== abort) return;
       const credential = servers.find((server) => server.available)?.token ?? servers[0]?.token;
       if (credential) setToken(credential);
       setPlexStatus("ready");
       if (!credential)
         setError(t("Plex sign-in succeeded, but no server credential was returned."));
     } catch (cause) {
+      if (abort.signal.aborted || plexAbort.current !== abort) return;
       if ((cause as Error).name !== "AbortError")
         setError(cause instanceof Error ? cause.message : String(cause));
       setPlexStatus("idle");
@@ -626,7 +685,7 @@ function ConnectionEditor({
   return (
     <SettingsModal
       open
-      onClose={onClose}
+      onClose={close}
       width={640}
       title={existing ? t("Edit home server") : t("Connect home server")}
       sub={t(
@@ -634,7 +693,7 @@ function ConnectionEditor({
       )}
       actions={
         <>
-          <SButton onClick={onClose}>{t("Cancel")}</SButton>
+          <SButton onClick={close}>{t("Cancel")}</SButton>
           <BusyButton
             variant="primary"
             busy={busy}
@@ -649,16 +708,26 @@ function ConnectionEditor({
       {!existing && (
         <FieldBlock label={t("Provider")} htmlLabel={false}>
           <div className="w-full max-w-[420px]">
-            <Dropdown
-              size="md"
+            <select
+              aria-label={t("Provider")}
+              className={`${FIELD} appearance-auto`}
+              disabled={busy}
               value={provider}
-              onChange={(next) => setProvider(next as MediaServerProvider)}
-              options={[
-                { value: "jellyfin", label: "Jellyfin" },
-                { value: "emby", label: "Emby" },
-                { value: "plex", label: "Plex" },
-              ]}
-            />
+              onChange={(event) => {
+                plexAbort.current?.abort();
+                setProvider(event.target.value as MediaServerProvider);
+                setUsername("");
+                setPassword("");
+                setToken("");
+                setTokenHelp(false);
+                setPlexStatus("idle");
+                setError("");
+              }}
+            >
+              <option value="jellyfin">Jellyfin</option>
+              <option value="emby">Emby</option>
+              <option value="plex">Plex</option>
+            </select>
           </div>
         </FieldBlock>
       )}
@@ -675,6 +744,7 @@ function ConnectionEditor({
           <div className="flex flex-wrap items-center gap-2.5">
             <BusyButton
               busy={plexStatus === "opening" || plexStatus === "waiting"}
+              disabled={busy}
               onClick={() => void browserSignIn()}
             >
               {plexStatus === "opening"
@@ -708,20 +778,19 @@ function ConnectionEditor({
           placeholder={addressHint}
           className={FIELD}
           value={origin}
+          readOnly={busy}
+          dir="ltr"
+          autoComplete="off"
+          spellCheck={false}
           onChange={(event) => setOrigin(event.target.value)}
         />
       </FieldBlock>
       <FieldBlock label={t("Display name")}>
         <input
-          placeholder={
-            provider === "plex"
-              ? "Living room Plex"
-              : provider === "emby"
-                ? "Home Emby"
-                : "Home Jellyfin"
-          }
+          placeholder={mediaServerProviderName(provider)}
           className={FIELD}
           value={name}
+          readOnly={busy}
           onChange={(event) => setName(event.target.value)}
         />
       </FieldBlock>
@@ -740,6 +809,8 @@ function ConnectionEditor({
                 type="password"
                 className={FIELD}
                 value={token}
+                readOnly={busy}
+                autoComplete="off"
                 onChange={(event) => setToken(event.target.value)}
               />
             </div>
@@ -751,6 +822,8 @@ function ConnectionEditor({
                 placeholder={t("Server username")}
                 className={FIELD}
                 value={username}
+                readOnly={busy}
+                autoComplete="username"
                 onChange={(event) => setUsername(event.target.value)}
               />
             </FieldBlock>
@@ -760,6 +833,8 @@ function ConnectionEditor({
                 type="password"
                 className={FIELD}
                 value={password}
+                readOnly={busy}
+                autoComplete="current-password"
                 onChange={(event) => setPassword(event.target.value)}
               />
             </FieldBlock>

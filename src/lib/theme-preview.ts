@@ -1,9 +1,11 @@
 import { useSyncExternalStore } from "react";
 import type { ThemeLayout } from "./theme";
+import type { NavCustomization } from "@/chrome/nav-items";
 
 export type ThemePreviewState = {
   layout: ThemeLayout;
   bokeh: boolean;
+  navCustomization?: NavCustomization;
 };
 
 let current: ThemePreviewState | null = null;
@@ -27,4 +29,8 @@ function subscribe(fn: () => void): () => void {
 
 export function useThemePreview(): ThemePreviewState | null {
   return useSyncExternalStore(subscribe, getThemePreview, getThemePreview);
+}
+
+export function usePreviewNavCustomization(saved: NavCustomization): NavCustomization {
+  return useThemePreview()?.navCustomization ?? saved;
 }

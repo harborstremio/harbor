@@ -1,3 +1,4 @@
+import settingsRefinements from "./fr/settings-refinements";
 import inventory from "./fr/inventory";
 import wired from "./fr/wired";
 import sweep from "./fr/sweep";
@@ -64,6 +65,7 @@ const fr: Record<string, string> = {
   ...plurals,
   ...bpSources,
   ...coverage,
+  ...settingsRefinements,
 };
 
 export default fr;

@@ -39,14 +39,15 @@ const STUDIO_AUTHORITY_ID = "harbor-studio-authority-css";
 export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: () => void }) {
   const t = useT();
   const { settings, update } = useSettings();
-  const { draft, setDraft, undo, redo, canUndo, canRedo } = useDraftHistory(() => emptyDraft(seed));
+  const [initialDraft] = useState(() => emptyDraft(seed, settings.navCustomization));
+  const { draft, setDraft, undo, redo, canUndo, canRedo } = useDraftHistory(() => initialDraft);
   const drag = usePanelDrag();
   const restoreRef = useState(() => settings.theme.preset)[0];
   const liveThemeRef = useRef(settings.theme);
   liveThemeRef.current = settings.theme;
   const [popoutTab, setPopoutTab] = useState<CodeLang | null>(null);
-  const { inspectorHidden, setInspectorHidden } = useStudioPreview(draft.layout, draft.bokeh);
-  const [initialJson] = useState(() => JSON.stringify(emptyDraft(seed)));
+  const { inspectorHidden, setInspectorHidden } = useStudioPreview(draft.layout, draft.bokeh, draft.navCustomization);
+  const [initialJson] = useState(() => JSON.stringify(initialDraft));
   const [confirmClose, setConfirmClose] = useState(false);
   const minimizeRef = useRef<HTMLButtonElement>(null);
   const editThemeRef = useRef<HTMLButtonElement>(null);
@@ -211,7 +212,7 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
       }
       return next;
     });
-  const onSeed = (t: ThemePreset) => setDraft(emptyDraft(t));
+  const onSeed = (t: ThemePreset) => setDraft(emptyDraft(t, draft.navCustomization));
 
   const onChromeChange = (config: ChromeConfig) =>
     setDraft((d) => {
@@ -237,7 +238,7 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "")
         .slice(0, 40) || "theme";
-    const nav = settings.navCustomization;
+    const nav = draft.navCustomization;
     const hasNav =
       nav.order.length > 0 || nav.hidden.length > 0 || Object.keys(nav.renamed).length > 0;
     return {
@@ -276,6 +277,7 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
     const image = nextBackgroundImage(settings.theme.backgroundImage, previous, theme);
     saveCustomTheme(theme);
     update({
+      navCustomization: draft.navCustomization,
       theme: {
         ...settings.theme,
         preset: theme.id as ActiveThemeId,
@@ -295,9 +297,6 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
 
   return createPortal(
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={t("Theme studio")}
       className="pointer-events-none fixed inset-0 z-[210]"
     >
       {!inspectorHidden && (

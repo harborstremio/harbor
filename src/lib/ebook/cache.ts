@@ -173,6 +173,20 @@ export async function ebookChapterCachePut(
     void prune(CHAPTERS, CHAPTER_MAX_ENTRIES, CHAPTER_MAX_BYTES, chapterMemory);
 }
 
+export async function ebookHasCachedTranslations(): Promise<boolean> {
+  if (translationMemory.size) return true;
+  for (let index = 0; index < localStorage.length; index++) {
+    if (localStorage.key(index)?.startsWith("harbor.ebook.translation.cache.v1.")) return true;
+  }
+  const db = await openDb();
+  if (!db) return false;
+  return new Promise((resolve) => {
+    const request = db.transaction(TRANSLATIONS, "readonly").objectStore(TRANSLATIONS).count();
+    request.onsuccess = () => resolve(request.result > 0);
+    request.onerror = () => resolve(true);
+  });
+}
+
 export async function ebookTranslationCacheGet(
   key: string,
 ): Promise<CachedEBookTranslation | null> {

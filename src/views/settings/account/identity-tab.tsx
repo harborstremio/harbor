@@ -87,11 +87,11 @@ export function IdentityTab() {
         title={t("Your profile")}
         subtitle={t("Your avatar, name, and handle across Harbor.")}
       >
-        <div className="hset-profile-identity flex items-center gap-5 pt-2">
-          <AvatarRing src={effectiveAvatar} size={76} onClick={() => fileRef.current?.click()} />
-          <div className="flex min-w-0 max-w-[440px] flex-1 flex-col gap-2">
-            <div className="flex flex-wrap items-end gap-2">
-            <label className="flex w-full max-w-[340px] flex-col gap-2 text-[14px] text-ink-muted">
+        <div className="hset-profile-identity flex items-center gap-6 py-3">
+          <AvatarRing src={effectiveAvatar} size={88} color={color} onClick={() => fileRef.current?.click()} />
+          <div className="flex min-w-0 max-w-[560px] flex-1 flex-col gap-2">
+            <div className="flex items-end gap-3">
+            <label className="flex min-w-0 max-w-[420px] flex-1 flex-col gap-2 text-[15.5px] leading-[22px] text-ink-muted">
               <span>{t("Display name")}</span>
               <span className="flex h-12 w-full min-w-0 items-center gap-3 rounded-[10px] border border-edge-soft bg-elevated px-3 transition-colors hover:border-edge focus-within:border-ink-muted">
               <input
@@ -119,7 +119,7 @@ export function IdentityTab() {
                 className="h-full min-w-0 flex-1 border-0 bg-transparent p-0 text-[17px] font-medium text-ink outline-none"
               />
               {harborAuthor?.handle && (
-                <span id="hset-profile-handle" title={`@${harborAuthor.handle}`} className="max-w-[45%] shrink-0 truncate text-[14px] leading-5 text-ink-muted">
+                <span id="hset-profile-handle" dir="ltr" title={`@${harborAuthor.handle}`} className="max-w-[45%] shrink-0 truncate text-[14px] leading-5 text-ink-muted">
                   @{harborAuthor.handle}
                 </span>
               )}
@@ -130,7 +130,7 @@ export function IdentityTab() {
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={commitName}
-                className={ROW_ACTION_PRIMARY}
+                className={`${ROW_ACTION_PRIMARY} shrink-0`}
               >
                 {t("Save")}
               </button>
@@ -191,7 +191,7 @@ export function IdentityTab() {
                   className="grid h-11 w-11 shrink-0 place-items-center rounded-[10px] transition-colors hover:bg-elevated"
                 >
                   <span
-                    className="grid h-7 w-7 place-items-center rounded-full"
+                    className="grid h-8 w-8 place-items-center rounded-full"
                     style={{ background: hex }}
                   >
                     {selected && (

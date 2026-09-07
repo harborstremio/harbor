@@ -33,7 +33,7 @@ export function StudioHeader({
         ref={minimizeRef}
         onClick={onHidePanel}
         aria-label={t("Minimize panel")}
-        title={t("Minimize to preview (Esc)")}
+        title={t("Minimize to preview (Ctrl/Cmd + P)")}
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
       >
         <PanelRightClose size={18} strokeWidth={2.2} className="dir-icon" />

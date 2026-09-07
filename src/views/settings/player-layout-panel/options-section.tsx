@@ -6,9 +6,9 @@ import { SettingRow } from "../kit";
 
 export function getOptions(t: (k: string) => string) {
   const TIME_OPTIONS: Array<{ id: TimeFormat; label: string; sub: string }> = [
-    { id: "start-end", label: t("Elapsed and remaining"), sub: t("00:23 on the left, -1:12 on the right.") },
-    { id: "remaining", label: t("Remaining only"), sub: t("Single -1:12 label, both ends collapse.") },
-    { id: "elapsed-only", label: t("Elapsed only"), sub: t("Single 00:23 label, both ends collapse.") },
+    { id: "start-end", label: t("Elapsed and total"), sub: t("Shows elapsed time and the full duration.") },
+    { id: "remaining", label: t("Elapsed and remaining"), sub: t("Shows elapsed time and how much is left.") },
+    { id: "elapsed-only", label: t("Elapsed only"), sub: t("Shows elapsed time without a second time label.") },
   ];
 
   const VOLUME_OPTIONS: Array<{ id: VolumeStyle; label: string; sub: string }> = [
@@ -71,9 +71,9 @@ export function OptionsSection({ config, theme, onTimeFormat, onVolumeStyle }: P
   );
 }
 
-const ELAPSED = "00:23";
+const ELAPSED = "23:32";
 const TOTAL = "1:47:00";
-const REMAINING = "-1:12";
+const REMAINING = "-1:23:28";
 
 function TimeFormatPreview({ theme, value }: { theme: ThemeId; value: TimeFormat }) {
   if (theme === "stremio") {

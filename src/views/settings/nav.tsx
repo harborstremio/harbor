@@ -4145,13 +4145,13 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Show torrent name",
     section: "streaming",
-    anchorTitle: "Torrent name",
+    anchorTitle: "Picker details",
     keywords: ["torrent name", "filename", "release name", "raw title", "release filename"],
   },
   {
     label: "Show full descriptions",
     section: "streaming",
-    anchorTitle: "Stream descriptions",
+    anchorTitle: "Picker details",
     keywords: [
       "full description",
       "aiostreams",
@@ -6630,9 +6630,9 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["actual behavior", "what went wrong", "actual result", "instead"],
   },
   {
-    label: "Screenshots and recordings",
+    label: "Attachments",
     section: "bug",
-    anchorTitle: "Screenshots and recordings",
+    anchorTitle: "Attachments",
     keywords: [
       "attach screenshot",
       "screen recording",
@@ -6661,15 +6661,15 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Credit (optional)",
+    label: "Contact & credit",
     section: "bug",
-    anchorTitle: "Credit (optional)",
+    anchorTitle: "Contact & credit",
     keywords: ["reporter name", "github username", "contact", "anonymous report", "display name"],
   },
   {
     label: "Credit me in the release notes if this report leads to a fix.",
     section: "bug",
-    anchorTitle: "Credit (optional)",
+    anchorTitle: "Contact & credit",
     keywords: ["release notes credit", "attribution consent", "credit reporter", "name in notes"],
   },
   {
@@ -7680,7 +7680,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Move Refresh next to Back",
     section: "streaming",
-    anchorTitle: "Refresh button",
+    anchorTitle: "Picker details",
     keywords: [
       "refresh button",
       "refresh position",
@@ -8827,7 +8827,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   {
     label: "Contact email or Discord",
     section: "bug",
-    anchorTitle: "Credit (optional)",
+    anchorTitle: "Contact & credit",
     keywords: [
       "email",
       "discord",

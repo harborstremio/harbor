@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { EBookChapter, EBookChapterContent } from "@/lib/ebook/providers";
+import { ebookTextIdentity } from "@/lib/ebook/chapter-locations";
 import { createEBookFlipPages, type EBookFlipPages } from "@/lib/ebook/book-pages";
 import {
   addEBookBookmark,
@@ -65,6 +66,7 @@ type Props = {
   bookCover?: string;
   internalCover?: string;
   chapter: EBookChapter;
+  savedChapters?: EBookChapter[];
   content: EBookChapterContent;
   direction: "ltr" | "rtl";
   volumes: EBookReaderVolume[];
@@ -511,6 +513,7 @@ export function HarborReader({
   bookCover,
   internalCover,
   chapter,
+  savedChapters = [],
   content,
   direction,
   volumes,
@@ -563,8 +566,13 @@ export function HarborReader({
   const shownChapters = shownVolume?.chapters ?? [];
   const bookChapters = useMemo(() => volumes.flatMap((volume) => volume.chapters), [volumes]);
   const chapterIndex = bookChapters.findIndex((item) => item.id === chapter.id);
-  const previousChapter = chapterIndex > 0 ? bookChapters[chapterIndex - 1] : undefined;
-  const nextChapter = chapterIndex >= 0 ? bookChapters[chapterIndex + 1] : undefined;
+  const firstPosition = chapterIndex >= 0 ? chapterIndex : (chapter.position ?? -1);
+  const previousChapter = firstPosition > 0 ? bookChapters[firstPosition - 1] : undefined;
+  const nextChapter = chapter.legacyNext
+    ? bookChapters.find((item) => item.id === chapter.legacyNext?.chapterId)
+    : chapterIndex >= 0
+      ? bookChapters[chapterIndex + 1]
+      : undefined;
   const [query, setQuery] = useState("");
   const [showFutureResults, setShowFutureResults] = useState(false);
   const [current, setCurrent] = useState(0);
@@ -644,6 +652,7 @@ export function HarborReader({
   const flipGeneration = useRef(0);
   const [flipPage, setFlipPage] = useState(0);
   const progressId = `${chapter.id}:harbor`;
+  const textIdentity = useMemo(() => ebookTextIdentity(readerText), [readerText]);
   const paragraphs = useMemo(
     () =>
       readerText
@@ -658,7 +667,7 @@ export function HarborReader({
     (chapter.volume ? t("Volume {volume}", { volume: chapter.volume }) : undefined);
   const persistReadingPosition = useCallback(
     (line: number) => {
-      if (!paragraphs.length || chapterIndex < 0 || !bookChapters.length) return;
+      if (!paragraphs.length || (!chapter.legacy && chapterIndex < 0) || !bookChapters.length) return;
       const safeLine = Math.max(0, Math.min(paragraphs.length - 1, line));
       const chapterProgress =
         paragraphs.length <= 1 ? 100 : Math.round((safeLine / (paragraphs.length - 1)) * 100);
@@ -672,9 +681,10 @@ export function HarborReader({
         chapterLabel: chapter.chapter,
         volumeLabel: resumeVolumeLabel,
         chapterProgress,
-        bookProgress,
-        chapterIndex,
-        totalChapters: bookChapters.length,
+        ...(!chapter.legacy
+          ? { bookProgress, chapterIndex, totalChapters: bookChapters.length }
+          : {}),
+        textIdentity,
       });
     },
     [
@@ -686,6 +696,7 @@ export function HarborReader({
       profile,
       progressId,
       resumeVolumeLabel,
+      textIdentity,
     ],
   );
   const colors = paper[prefs.background];
@@ -1286,6 +1297,8 @@ export function HarborReader({
     stopSpeech();
     setSelection(null);
     setEditing(null);
+    if (target.id === chapter.legacyNext?.chapterId)
+      saveEBookProgress(profile, bookId, `${target.id}:harbor`, chapter.legacyNext.line);
     onSelectChapter(target);
   };
 
@@ -2387,9 +2400,9 @@ export function HarborReader({
                   const savedVolume = volumes.find((volume) =>
                     volume.chapters.some((item) => item.id === annotation.chapterId),
                   );
-                  const savedChapter = savedVolume?.chapters.find(
-                    (item) => item.id === annotation.chapterId,
-                  );
+                  const savedChapter =
+                    savedVolume?.chapters.find((item) => item.id === annotation.chapterId) ??
+                    savedChapters.find((item) => item.id === annotation.chapterId);
                   const chapterLabel =
                     annotation.chapterLabel ??
                     (savedChapter?.chapter
@@ -2399,7 +2412,17 @@ export function HarborReader({
                   return (
                     <button
                       key={annotation.id}
-                      onClick={() => setEditing(annotation)}
+                      onClick={() => {
+                        if (savedChapter?.legacy && savedChapter.id !== chapter.id) {
+                          saveEBookProgress(
+                            profile,
+                            bookId,
+                            `${savedChapter.id}:harbor`,
+                            annotation.ranges[0]?.line ?? 0,
+                          );
+                          onSelectChapter(savedChapter);
+                        } else setEditing(annotation);
+                      }}
                       className="w-full rounded-xl border p-3 text-start"
                       style={{ borderColor: `${colors.muted}25` }}
                     >
@@ -2451,9 +2474,9 @@ export function HarborReader({
                   const savedVolume = volumes.find((volume) =>
                     volume.chapters.some((item) => item.id === bookmark.chapterId),
                   );
-                  const savedChapter = savedVolume?.chapters.find(
-                    (item) => item.id === bookmark.chapterId,
-                  );
+                  const savedChapter =
+                    savedVolume?.chapters.find((item) => item.id === bookmark.chapterId) ??
+                    savedChapters.find((item) => item.id === bookmark.chapterId);
                   const chapterLabel =
                     bookmark.chapterLabel ??
                     (savedChapter?.chapter
@@ -2468,7 +2491,8 @@ export function HarborReader({
                       <button
                         className="min-w-0 flex-1 text-start"
                         onClick={() => {
-                          if (!savedChapter || savedChapter.id === chapter.id) goTo(bookmark.line);
+                          if (!savedChapter) return;
+                          if (savedChapter.id === chapter.id) goTo(bookmark.line);
                           else {
                             saveEBookProgress(
                               profile,

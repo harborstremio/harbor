@@ -1,3 +1,4 @@
+import { usePreviewNavCustomization } from "@/lib/theme-preview";
 import { useState } from "react";
 import { Monitor } from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
@@ -42,7 +43,7 @@ export function TopDock() {
     setView(item.view);
   };
 
-  const navEntries: NavEntry[] = applyNavCustomization(NAV_ITEMS, settings.navCustomization)
+  const navEntries: NavEntry[] = applyNavCustomization(NAV_ITEMS, usePreviewNavCustomization(settings.navCustomization))
     .filter(
       (item) =>
         item.id !== "settings" &&

@@ -1,5 +1,5 @@
 import { Check, Filter, FilterX, Pencil, Plus, Trash2 } from "./icons";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { isFilterEmpty, type CustomStreamFilter } from "@/lib/streams/custom-filters";
@@ -46,10 +46,12 @@ function FilterSummary({ filter }: { filter: CustomStreamFilter }) {
 
 function ActiveButton({
   on,
+  label,
   disabled,
   onClick,
 }: {
   on: boolean;
+  label: string;
   disabled?: boolean;
   onClick: () => void;
 }) {
@@ -58,6 +60,7 @@ function ActiveButton({
     <button
       type="button"
       onClick={onClick}
+      aria-label={label}
       aria-pressed={on}
       disabled={disabled}
       className={`${on ? ROW_ACTION_PRIMARY : ROW_ACTION} ${ACTIVE_BUTTON}`}
@@ -72,10 +75,12 @@ export function StreamFiltersPanel() {
   const t = useT();
   const { settings, update } = useSettings();
   const filters = settings.customStreamFilters ?? [];
-  const activeId = settings.activeStreamFilterId;
+  const activeFilter = filters.find((filter) => filter.id === settings.activeStreamFilterId && !isFilterEmpty(filter));
+  const activeId = activeFilter?.id ?? null;
   const [editing, setEditing] = useState<CustomStreamFilter | null>(null);
   const [building, setBuilding] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<CustomStreamFilter | null>(null);
+  const createButtonRef = useRef<HTMLButtonElement>(null);
 
   const upsert = (filter: CustomStreamFilter) => {
     const exists = filters.some((f) => f.id === filter.id);
@@ -83,7 +88,9 @@ export function StreamFiltersPanel() {
       customStreamFilters: exists
         ? filters.map((f) => (f.id === filter.id ? filter : f))
         : [...filters, filter],
-      ...(isFilterEmpty(filter) ? {} : { activeStreamFilterId: filter.id }),
+      activeStreamFilterId: isFilterEmpty(filter)
+        ? activeId === filter.id ? null : activeId
+        : filter.id,
     });
     setEditing(null);
     setBuilding(false);
@@ -95,7 +102,7 @@ export function StreamFiltersPanel() {
   const remove = (id: string) => {
     update({
       customStreamFilters: filters.filter((f) => f.id !== id),
-      ...(activeId === id ? { activeStreamFilterId: null } : {}),
+      ...(settings.activeStreamFilterId === id ? { activeStreamFilterId: null } : {}),
     });
   };
 
@@ -114,20 +121,22 @@ export function StreamFiltersPanel() {
     remove(pendingDelete.id);
     setPendingDelete(null);
     closeBuilder();
+    requestAnimationFrame(() => createButtonRef.current?.focus({ preventScroll: true }));
   };
 
   return (
     <Section
       title={t("Saved stream filters")}
-      subtitle={t("Build a named quality preference once and set it active. The picker prefers streams that match it, including the instant pick, and falls back to the next best source when nothing matches. Each filter ANDs its dimensions and ignores any you leave blank.")}
+      subtitle={t("Save the stream quality you prefer. Streams must match every category you set; leave a category blank to accept any value. If nothing matches, Harbor uses the next best available source.")}
     >
       <SettingRow
         label={t("No filter")}
         icon={<FilterX size={18} />}
-        desc={t("Show every stream, with no quality preference applied.")}
+        desc={t("Remove the saved quality preference. Your other stream settings still apply.")}
       >
         <ActiveButton
           on={activeId == null}
+          label={t("Use no saved stream filter")}
           onClick={() => update({ activeStreamFilterId: null })}
         />
       </SettingRow>
@@ -142,7 +151,7 @@ export function StreamFiltersPanel() {
           label={f.name.trim() || t("Untitled filter")}
           desc={
             isFilterEmpty(f) ? (
-              t("No dimensions set. This filter matches every stream.")
+              t("No preferences selected. Edit this filter to choose the streams you prefer.")
             ) : (
               <FilterSummary filter={f} />
             )
@@ -151,11 +160,15 @@ export function StreamFiltersPanel() {
           <span className="flex flex-wrap items-center gap-2.5">
             <ActiveButton
               on={activeId === f.id}
+              label={activeId === f.id
+                ? t("Turn off {name}", { name: f.name.trim() || t("Untitled filter") })
+                : t("Use {name}", { name: f.name.trim() || t("Untitled filter") })}
               disabled={isFilterEmpty(f)}
               onClick={() => toggleActive(f.id)}
             />
             <button
               type="button"
+              aria-label={t("Edit {name}", { name: f.name.trim() || t("Untitled filter") })}
               onClick={() => {
                 setBuilding(false);
                 setEditing(f);
@@ -165,7 +178,7 @@ export function StreamFiltersPanel() {
               <Pencil size={18} strokeWidth={2} />
               {t("Edit")}
             </button>
-            <button type="button" onClick={() => askDelete(f.id)} className={ROW_ACTION_DANGER}>
+            <button type="button" onClick={() => askDelete(f.id)} aria-label={t("Delete {name}", { name: f.name.trim() || t("Untitled filter") })} className={ROW_ACTION_DANGER}>
               <Trash2 size={18} strokeWidth={2} />
               {t("Delete")}
             </button>
@@ -178,13 +191,15 @@ export function StreamFiltersPanel() {
         icon={<Plus size={18} />}
         desc={
           filters.length === 0
-            ? t("No saved filters yet. Hit New filter to build one.")
-            : t("Name it, tick the resolutions, sources, codecs and audio you want, and leave the rest blank.")
+            ? t("Create your first filter with the stream quality you prefer.")
+            : t("Choose a name, then select the resolutions, sources, codecs and audio you prefer.")
         }
         tip={t("A filter applies everywhere Harbor picks a stream: the source picker, the instant pick, and Big Picture on TV.")}
       >
         <button
           type="button"
+          ref={createButtonRef}
+          aria-label={t("Create a stream filter")}
           onClick={() => {
             setEditing(null);
             setBuilding(true);
@@ -198,6 +213,7 @@ export function StreamFiltersPanel() {
 
       <FilterBuilder
         open={building || editing != null}
+        dismissible={pendingDelete == null}
         initial={editing}
         onSave={upsert}
         onDelete={askDelete}

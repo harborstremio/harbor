@@ -220,6 +220,7 @@ export function ManualAddonCard({
           <div className="flex w-full flex-wrap items-center gap-2.5">
             <input
               type="text"
+              aria-label={t("Manifest URL")}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onPaste={(e) => {

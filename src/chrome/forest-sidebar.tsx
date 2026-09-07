@@ -1,3 +1,4 @@
+import { usePreviewNavCustomization } from "@/lib/theme-preview";
 import { Lock } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { HarborMark } from "@/components/icons/harbor-mark";
@@ -41,7 +42,7 @@ export function ForestSidebar() {
     setView(item.view);
   };
 
-  const items = applyNavCustomization(NAV_ITEMS, settings.navCustomization);
+  const items = applyNavCustomization(NAV_ITEMS, usePreviewNavCustomization(settings.navCustomization));
   const primary = items.filter((i) => PRIMARY_IDS.has(i.id) && isVisible(i));
   const collections = items.filter((i) => !PRIMARY_IDS.has(i.id) && isVisible(i));
 

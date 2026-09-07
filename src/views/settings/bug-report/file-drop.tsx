@@ -1,12 +1,16 @@
-import { AlertTriangle, ImagePlus, X } from "../icons";
-import { useLayoutEffect, useRef, useState } from "react";
+import { AlertTriangle, FileText, ImagePlus, X } from "../icons";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { tvFocus } from "@/lib/keyboard-navigation";
 import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
 
-const ACCEPT = "image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/quicktime";
+const ACCEPT = "image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/quicktime,text/plain,.txt,.log";
 const MAX_BYTES = 100 * 1024 * 1024;
 const MAX_FILES = 6;
+
+function isLog(file: File) {
+  return /\.(txt|log)$/i.test(file.name) && (!file.type || file.type === "text/plain" || file.type === "application/octet-stream");
+}
 
 function fmtBytes(n: number): string {
   if (n < 1024) return `${n} B`;
@@ -46,8 +50,8 @@ export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: 
         setReject(t("{name} is over 100 MB.", { name: f.name }));
         continue;
       }
-      if (!f.type.startsWith("image/") && !f.type.startsWith("video/")) {
-        setReject(t("{name} is not an image or video.", { name: f.name }));
+      if (!f.type.startsWith("image/") && !f.type.startsWith("video/") && !isLog(f)) {
+        setReject(t("{name} is not an image, video, or text log.", { name: f.name }));
         continue;
       }
       next.push(f);
@@ -85,10 +89,10 @@ export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: 
       >
         <ImagePlus size={24} strokeWidth={1.7} />
         <span className="max-w-[66ch] text-[16.5px] font-medium leading-[24px]">
-          {t("Drop screenshots or screen recordings, or click to browse")}
+          {t("Drop attachments here, or click to browse")}
         </span>
         <span className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
-          {t("PNG, JPG, WebP, GIF, MP4, WebM, MOV. Up to {count} files, 100 MB each.", {
+          {t("Images, videos, TXT or LOG files. Up to {count} files, 100 MB each.", {
             count: MAX_FILES,
           })}
         </span>
@@ -105,7 +109,7 @@ export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: 
         }}
       />
       {reject && (
-        <p className="flex max-w-[66ch] items-start gap-2 text-[15.5px] leading-[22px] text-danger">
+        <p role="alert" className="flex max-w-[66ch] items-start gap-2 text-[15.5px] leading-[22px] text-danger">
           <AlertTriangle size={17} strokeWidth={2.2} className="mt-[3px] shrink-0" />
           {reject}
         </p>
@@ -144,7 +148,17 @@ export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: 
 }
 
 function FilePreview({ file }: { file: File }) {
-  const url = URL.createObjectURL(file);
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (isLog(file)) return;
+    const next = URL.createObjectURL(file);
+    setUrl(next);
+    return () => URL.revokeObjectURL(next);
+  }, [file]);
+  if (isLog(file)) {
+    return <div className="grid aspect-video w-full place-items-center bg-canvas text-ink-muted"><FileText size={32} /></div>;
+  }
+  if (!url) return <div className="aspect-video w-full bg-canvas" />;
   if (file.type.startsWith("video/")) {
     return (
       <video

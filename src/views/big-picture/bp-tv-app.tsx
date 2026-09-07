@@ -50,8 +50,12 @@ const BigPictureShell = lazy(() =>
 
 type BpTvProvider = ComponentType<{ children: ReactNode }>;
 
+function BpTvSettingsProvider({ children }: { children: ReactNode }) {
+  return <SettingsProvider syncTorrentEnginePolicy>{children}</SettingsProvider>;
+}
+
 const BP_TV_PROVIDERS: BpTvProvider[] = [
-  SettingsProvider,
+  BpTvSettingsProvider,
   ProfilesProvider,
   ParentalProvider,
   TraktProvider,

@@ -54,7 +54,10 @@ export type SectionId =
   | "updates"
   | "advanced";
 
-export const SettingsActiveContext = createContext<{ setActive: (s: SectionId, anchor?: string) => void } | null>(
+export const SettingsActiveContext = createContext<{
+  setActive: (s: SectionId, anchor?: string) => void;
+  openPage: (s: SectionId, tab?: string) => void;
+} | null>(
   null,
 );
 

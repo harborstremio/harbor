@@ -38,7 +38,10 @@ export function NavLottie({
       },
     });
     anim.current = a;
-    a.addEventListener("DOMLoaded", () => setReady(true));
+    a.addEventListener("DOMLoaded", () => {
+      if (anim.current === a) setReady(true);
+    });
+    if (a.isLoaded) setReady(true);
   }, [play, reduce, data, loop]);
 
   useEffect(() => {
@@ -51,10 +54,12 @@ export function NavLottie({
 
   useEffect(
     () => () => {
-      anim.current?.destroy();
+      const a = anim.current;
       anim.current = null;
+      setReady(false);
+      a?.destroy();
     },
-    [],
+    [data, reduce],
   );
 
   if (reduce) return <>{fallback}</>;

@@ -35,7 +35,7 @@ export type Diagnostics = {
     hasTrakt: boolean;
     hasStremio: boolean;
     debridCount: number;
-    addonCount: number;
+    addonCount: number | null;
     iptvCount: number;
   };
   mpvProbe: { available: boolean; version: string | null; error: string | null } | null;
@@ -79,7 +79,7 @@ export async function collectDiagnostics(opts: {
   hasTrakt: boolean;
   hasStremio: boolean;
   debridCount: number;
-  addonCount: number;
+  addonCount: number | null;
   iptvCount: number;
 }): Promise<Diagnostics> {
   let osName = "unknown";

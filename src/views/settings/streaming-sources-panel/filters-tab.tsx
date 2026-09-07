@@ -1,9 +1,8 @@
-import { Check } from "../icons";
+import { useId } from "react";
 import { useSettings } from "@/lib/settings";
+import { tvHover } from "@/lib/keyboard-navigation";
 import { Section } from "../shared";
-import { SRow } from "../ui";
 import { AddonTimeoutSetting } from "../addon-timeout-setting";
-import { StreamFilterPreview } from "../stream-filter-preview";
 import { useT } from "@/lib/i18n";
 
 export function FiltersTab() {
@@ -13,68 +12,70 @@ export function FiltersTab() {
     <>
       <Section
         title={t("Stream safety filter")}
-        subtitle={t(
-          "How aggressively Harbor rejects shady or mismatched streams before showing them in the picker.",
-        )}
+        subtitle={t("Choose which addon results appear when you pick a stream.")}
       >
         <StreamFilterPicker
           value={settings.streamFilterLevel}
-          onChange={(v) => update({ streamFilterLevel: v })}
+          onChange={(value) => update({ streamFilterLevel: value })}
         />
-        <StreamFilterPreview level={settings.streamFilterLevel} />
       </Section>
-
       <AddonTimeoutSetting />
     </>
   );
 }
 
-function StreamFilterPicker({
-  value,
-  onChange,
-}: {
+function StreamFilterPicker({ value, onChange }: {
   value: "strict" | "balanced" | "off";
-  onChange: (v: "strict" | "balanced" | "off") => void;
+  onChange: (value: "strict" | "balanced" | "off") => void;
 }) {
   const t = useT();
-  const options: Array<{ id: "strict" | "balanced" | "off"; label: string; sub: string }> = [
+  const name = useId();
+  const options = [
     {
       id: "strict",
       label: t("Strict"),
-      sub: t(
-        "Default. Rejects size outliers, suspicious extensions, year/episode mismatches, season packs (for episode requests), trailers, and likely cams.",
-      ),
+      description: t("Hide suspicious files, mismatched releases, likely camera recordings and trailers. Also check file sizes and season packs."),
     },
     {
       id: "balanced",
       label: t("Balanced"),
-      sub: t(
-        "Keeps the malware/year/episode-mismatch checks but allows season packs and oversized files. Same as hitting Search wider in the picker.",
-      ),
+      description: t("Keep the suspicious-file and release checks, but allow more results, including larger files and season packs."),
     },
     {
       id: "off",
       label: t("Off"),
-      sub: t(
-        "No filtering. Every stream every addon returns shows up, including obvious junk. You'll be on your own.",
-      ),
+      description: t("Show all results returned by addons, including releases that do not match or may be suspicious."),
     },
-  ];
+  ] as const;
+
   return (
-    <>
-      {options.map((opt) => (
-        <SRow
-          key={opt.id}
-          onClick={() => onChange(opt.id)}
-          title={opt.label}
-          description={opt.sub}
-          trailing={
-            <span className="grid h-11 w-11 place-items-center">
-              {value === opt.id && <Check size={20} strokeWidth={2.4} className="text-accent" />}
+    <div className="hset-source-options" role="radiogroup" aria-label={t("Stream safety filter")}>
+      {options.map((option) => (
+        <label key={option.id} className="hset-source-option">
+          <input
+            type="radio"
+            name={name}
+            value={option.id}
+            checked={value === option.id}
+            onChange={() => onChange(option.id)}
+            onBlur={(event) => {
+              if (event.currentTarget.hasAttribute("data-tv-focused")) tvHover(null);
+            }}
+            onKeyDown={(event) => {
+              if (event.nativeEvent.isTrusted && event.key.startsWith("Arrow")) event.stopPropagation();
+            }}
+            aria-labelledby={name + option.id}
+            aria-describedby={name + option.id + "-description"}
+          />
+          <span className="flex min-w-0 flex-col gap-1">
+            <span className="flex items-baseline gap-3">
+              <span id={name + option.id} className="text-[16px] font-semibold leading-6 text-ink">{option.label}</span>
+              {option.id === "strict" && <span className="text-[13px] text-ink-muted">{t("Default")}</span>}
             </span>
-          }
-        />
+            <span id={name + option.id + "-description"} className="max-w-[68ch] text-[15px] leading-[22px] text-ink-muted">{option.description}</span>
+          </span>
+        </label>
       ))}
-    </>
+    </div>
   );
 }

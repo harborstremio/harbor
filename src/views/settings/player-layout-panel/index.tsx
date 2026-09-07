@@ -55,7 +55,11 @@ export function PlayerLayoutPanel() {
   const [justSaved, setJustSaved] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [profileVersion, setProfileVersion] = useState(0);
-  const bumpProfiles = useCallback(() => setProfileVersion((v) => v + 1), []);
+  const [configVersion, setConfigVersion] = useState(0);
+  const bumpProfiles = useCallback((reloadConfig = true) => {
+    setProfileVersion((v) => v + 1);
+    if (reloadConfig) setConfigVersion((v) => v + 1);
+  }, []);
 
   const profiles = useMemo(() => listProfiles(theme), [theme, profileVersion]);
   const activeProfileId = useMemo(
@@ -70,7 +74,7 @@ export function PlayerLayoutPanel() {
     setSelectedId(null);
     setSelectedPanelId(null);
     setConfirmingReset(false);
-  }, [theme, profileVersion]);
+  }, [theme, configVersion]);
 
   useEffect(() => {
     setTheme(appTheme);
@@ -166,15 +170,13 @@ export function PlayerLayoutPanel() {
         void alertDialog(t("Couldn't rename the profile. {error}", { error: res.error }));
         return;
       }
-      bumpProfiles();
+      bumpProfiles(false);
     },
     [activeProfileId, bumpProfiles],
   );
 
-  const onDeleteProfile = useCallback(async () => {
+  const onDeleteProfile = useCallback(() => {
     if (!activeProfileId) return;
-    const ok = await confirmDialog(t("Delete this profile permanently? This cannot be undone."));
-    if (!ok) return;
     const res = deleteProfileApi(activeProfileId);
     if (!res.ok) {
       void alertDialog(t("Couldn't delete the profile. {error}", { error: res.error }));
@@ -272,7 +274,14 @@ export function PlayerLayoutPanel() {
         />
         <ThemeTabs
           value={theme}
-          onChange={(id) => {
+          onChange={async (id) => {
+            if (id === theme) return;
+            if (!sameConfig(draft, saved)) {
+              const ok = await confirmDialog(
+                t("You have unsaved changes that will be lost when switching player styles. Continue?"),
+              );
+              if (!ok) return;
+            }
             update({ playerChromeTheme: id });
             setTheme(id);
           }}

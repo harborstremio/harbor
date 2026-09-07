@@ -31,6 +31,7 @@ export function ColorsGrid({
         {SURFACES.map((s) => (
           <SwatchField
             key={s.key}
+            label={t(s.label)}
             value={colors[s.key]}
             onChange={(v) => set(s.key, v)}
             className="flex-1"
@@ -51,7 +52,7 @@ export function ColorsGrid({
         style={{ background: colors.canvas }}
       >
         {INK.map((l) => (
-          <ColorPopover key={l.key} value={colors[l.key]} onChange={(v) => set(l.key, v)}>
+          <ColorPopover key={l.key} label={t(l.sample)} value={colors[l.key]} onChange={(v) => set(l.key, v)}>
             {(open) => (
               <span
                 className={`block truncate rounded-md px-1.5 py-2.5 transition-shadow ${l.cls} ${
@@ -69,6 +70,7 @@ export function ColorsGrid({
       <div className="grid grid-cols-3 gap-2.5">
         <div className="flex flex-col gap-1.5">
           <SwatchField
+            label={t("Accent")}
             value={colors.accent}
             onChange={(v) => set("accent", v)}
             className="h-14 rounded-md"
@@ -77,6 +79,7 @@ export function ColorsGrid({
         </div>
         <div className="flex flex-col gap-1.5">
           <SwatchField
+            label={t("Danger")}
             value={colors.danger}
             onChange={(v) => set("danger", v)}
             className="h-14 rounded-md"
@@ -85,6 +88,7 @@ export function ColorsGrid({
         </div>
         <div className="flex flex-col gap-1.5">
           <ColorPopover
+            label={t("Border")}
             value={colors.edge}
             onChange={(v) => set("edge", v)}
             className="h-14 overflow-hidden rounded-md ring-1 ring-edge-soft"

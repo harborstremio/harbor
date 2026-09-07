@@ -1,3 +1,4 @@
+import { usePreviewNavCustomization } from "@/lib/theme-preview";
 import { useEffect, useRef, useState } from "react";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { useT } from "@/lib/i18n";
@@ -29,7 +30,7 @@ export function MinUIDock() {
     return () => window.cancelAnimationFrame(id);
   }, []);
 
-  const items = applyNavCustomization(NAV_ITEMS, settings.navCustomization);
+  const items = applyNavCustomization(NAV_ITEMS, usePreviewNavCustomization(settings.navCustomization));
   const visible = items.filter((it) => {
     if (it.id === "kids") return false;
     if (it.view === "vod" && !settings.showPlaylistsTab) return false;

@@ -314,6 +314,7 @@ export function Settings({ visible = true }: { visible?: boolean }) {
   );
   const [relayMode, setRelayMode] = useState<RelayMode>("panel");
   const [pendingAnchor, setPendingAnchor] = useState<string | null>(null);
+  const [pendingPage, setPendingPage] = useState<{ section: SectionId; tab?: string } | null>(null);
   const [query, setQuery] = useState("");
   const compact = useMediaQuery("(max-width: 899px)");
   const [browseOpen, setBrowseOpen] = useState(false);
@@ -387,6 +388,7 @@ export function Settings({ visible = true }: { visible?: boolean }) {
   const handleNav = (id: SectionId, anchor?: string) => {
     closeBrowse();
     setLanding(null);
+    setPendingPage(null);
     startTransition(() => {
       setActive(id);
       setPendingAnchor(anchor ?? null);
@@ -396,6 +398,7 @@ export function Settings({ visible = true }: { visible?: boolean }) {
   const pendingTab = useRef<string | null>(null);
   const selectFromRail = (id: SectionId, tab?: string) => {
     closeBrowse();
+    setPendingPage(null);
     pendingTab.current = tab ?? null;
     if (id === active) {
       if (tab) subRegRef.current?.onChange(tab);
@@ -403,6 +406,12 @@ export function Settings({ visible = true }: { visible?: boolean }) {
       return;
     }
     handleNav(id);
+  };
+
+  const openPage = (id: SectionId, tab?: string) => {
+    selectFromRail(id, tab);
+    setPendingAnchor(null);
+    setPendingPage({ section: id, tab });
   };
 
   useEffect(() => {
@@ -440,6 +449,15 @@ export function Settings({ visible = true }: { visible?: boolean }) {
       if (subReg.value !== want) subReg.onChange(want);
     }
   }, [subReg]);
+
+  useEffect(() => {
+    if (!pendingPage || active !== pendingPage.section) return;
+    if (pendingPage.tab && subReg?.value !== pendingPage.tab) return;
+    scrollRef.current?.scrollTo({ top: 0 });
+    titleRef.current?.focus({ preventScroll: true });
+    setPendingPage(null);
+  }, [active, pendingPage, subReg?.value]);
+
   const triedTabs = useRef<Set<string>>(new Set());
   const restoreTab = useRef<string | null>(null);
   const pendingAnchorRef = useRef<string | null>(null);
@@ -565,10 +583,9 @@ export function Settings({ visible = true }: { visible?: boolean }) {
   }, [themeLibOpen]);
 
   const chromeHidden = wide || (active === "relay" && relayMode !== "panel");
-  const activeTabs = tabsFor(active).filter((tab) => subReg?.tabs.some((live) => live.id === tab.id));
 
   return (
-    <SettingsActiveContext.Provider value={{ setActive: handleNav }}>
+    <SettingsActiveContext.Provider value={{ setActive: handleNav, openPage }}>
     <PageActionsProvider value={{ reg: pageActions, setReg: setPageActions }}>
     <SubTabsProvider value={{ section: active, reg: subReg, setReg: setSubReg }}>
     <div ref={shellRef} className="harbor-settings-shell flex h-full flex-col bg-canvas">
@@ -602,7 +619,6 @@ export function Settings({ visible = true }: { visible?: boolean }) {
         <SettingsSidebar
           active={active}
           activeTab={subReg?.value ?? null}
-          activeTabs={activeTabs}
           meta={SECTION_META}
           query={query}
           onSelect={selectFromRail}

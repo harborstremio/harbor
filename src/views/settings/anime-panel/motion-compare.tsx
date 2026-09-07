@@ -1,57 +1,55 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import animeFrame from "@/assets/settings-preview/harbor-coast-anime.png";
 import { useT } from "@/lib/i18n";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { ROW_ACTION } from "../kit";
+import { ROW_DESC, ROW_TITLE } from "../shared";
 
-const PITCH = 32;
-
-function useStripePan(stepped: boolean) {
-  const ref = useRef<HTMLSpanElement | null>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    const anim = el.animate(
-      [{ transform: "translateX(0px)" }, { transform: `translateX(-${PITCH}px)` }],
-      {
-        duration: 1400,
-        iterations: Infinity,
-        easing: stepped ? "steps(4, end)" : "linear",
-      },
-    );
-    return () => anim.cancel();
-  }, [stepped]);
-  return ref;
-}
-
-function Lane({ stepped, label, live }: { stepped: boolean; label: string; live: boolean }) {
-  const ref = useStripePan(stepped);
-  return (
-    <span className="flex min-w-[190px] flex-1 flex-col gap-2">
-      <span className="flex items-center gap-2 text-[15.5px] font-medium leading-[22px]">
-        <span className={`h-2 w-2 shrink-0 rounded-full ${live ? "bg-accent" : "bg-edge"}`} />
-        <span className={live ? "text-ink" : "text-ink-muted"}>{label}</span>
-      </span>
-      <span className="relative block h-12 overflow-hidden rounded-[10px] bg-canvas">
-        <span
-          ref={ref}
-          aria-hidden
-          className={`absolute inset-y-0 -start-16 -end-16 ${
-            live ? "text-ink" : "text-ink-subtle"
-          }`}
-          style={{
-            backgroundImage: `repeating-linear-gradient(90deg, currentColor 0 7px, transparent 7px ${PITCH}px)`,
-          }}
-        />
-      </span>
-    </span>
-  );
-}
-
-export function MotionCompare({ smoothed }: { smoothed: boolean }) {
+export function MotionCompare() {
   const t = useT();
+  const reducedMotion = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const [paused, setPaused] = useState(false);
+  const [inView, setInView] = useState(false);
+  const [pageVisible, setPageVisible] = useState(true);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.1 });
+    if (ref.current) observer.observe(ref.current);
+    const updateVisibility = () => setPageVisible(document.visibilityState === "visible");
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", updateVisibility);
+    };
+  }, []);
+
+  const playing = !paused && !reducedMotion && inView && pageVisible;
+
   return (
-    <span className="flex w-full flex-wrap items-end gap-x-4 gap-y-3">
-      <Lane stepped label={t("Smoothing off")} live={!smoothed} />
-      <Lane stepped={false} label={t("Smoothing on")} live={smoothed} />
-    </span>
+    <div ref={ref} className="hset-motion-comparison pt-4" role="group" aria-label={t("Before and after")} data-paused={paused ? "" : undefined} style={{ animationPlayState: playing ? "running" : "paused" }}>
+      <div className="flex items-center justify-between gap-4">
+        <h3 className={ROW_TITLE}>{t("Before and after")}</h3>
+        {!reducedMotion && (
+          <button type="button" className={ROW_ACTION} onClick={() => setPaused((value) => !value)}>
+            {paused ? t("Play preview") : t("Pause preview")}
+          </button>
+        )}
+      </div>
+      <p className={`mt-2 ${ROW_DESC}`}>{t("The same slow camera pan, with motion smoothing off and on.")}</p>
+      <div className="mt-4 grid grid-cols-2 gap-4">
+        {[false, true].map((smooth) => (
+          <figure key={String(smooth)} className="min-w-0">
+            <div className="hset-motion-viewport">
+              <div className="hset-motion-scene">
+                <img src={animeFrame} alt="" draggable={false} className={`hset-motion-image${smooth ? "" : " hset-motion-image-original"}`} />
+              </div>
+            </div>
+            <figcaption className={`mt-2.5 ${ROW_TITLE}`}>{smooth ? t("Smoothing on") : t("Smoothing off")}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
   );
 }

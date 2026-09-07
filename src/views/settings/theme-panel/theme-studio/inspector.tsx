@@ -67,6 +67,7 @@ export function Inspector({
                 key={item.id}
                 type="button"
                 onClick={() => setTab(item.id)}
+                aria-pressed={active}
                 className={`harbor-studio-tab flex h-11 flex-1 items-center justify-center rounded-md text-[15.5px] font-semibold transition-colors ${
                   active
                     ? "bg-canvas text-ink ring-1 ring-edge"
@@ -172,7 +173,7 @@ export function Inspector({
                   title={t("Navigation items")}
                   hint={t("Reorder, rename, or hide what appears in your nav.")}
                 >
-                  <NavEditor layout={draft.layout} />
+                  <NavEditor layout={draft.layout} value={draft.navCustomization} onChange={(navCustomization) => onPatch({ navCustomization })} />
                 </StudioSection>
               )}
             </div>

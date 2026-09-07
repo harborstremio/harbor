@@ -6,13 +6,19 @@ export async function discoverAndAuthenticate(
   provider: MediaServerProvider,
   address: string,
   credentials: Record<string, string>,
+  signal?: AbortSignal,
 ): Promise<{ origin: string; auth: AuthResult }> {
   const failures: string[] = [];
+  signal?.throwIfAborted();
   for (const origin of candidateServerOrigins(address, provider)) {
     try {
+      signal?.throwIfAborted();
       const adapter = mediaServerAdapter({ provider, origin } as MediaServerConnection);
-      return { origin, auth: await adapter.authenticate(credentials) };
+      const auth = await adapter.authenticate(credentials);
+      signal?.throwIfAborted();
+      return { origin, auth };
     } catch (cause) {
+      signal?.throwIfAborted();
       failures.push(cause instanceof Error ? cause.message : String(cause));
     }
   }
@@ -22,13 +28,18 @@ export async function discoverAndAuthenticate(
 export async function discoverExistingConnection(
   connection: MediaServerConnection,
   address: string,
+  signal?: AbortSignal,
 ): Promise<string> {
   let lastError: unknown;
+  signal?.throwIfAborted();
   for (const origin of candidateServerOrigins(address, connection.provider)) {
     try {
+      signal?.throwIfAborted();
       await mediaServerAdapter({ ...connection, origin }).libraries({ ...connection, origin });
+      signal?.throwIfAborted();
       return origin;
     } catch (cause) {
+      signal?.throwIfAborted();
       lastError = cause;
     }
   }

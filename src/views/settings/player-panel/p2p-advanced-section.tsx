@@ -276,7 +276,7 @@ export function StreamCacheSection() {
 }
 
 export function P2PPowerToolsSection() {
-  const { settings, update } = useSettings();
+  const { settings, update, torrentEnginePolicyPending, torrentEnginePolicyError } = useSettings();
   const t = useT();
   const strictRemote = !!settings.remoteStreamServerUrl && settings.remoteStreamServerStrict;
   const [copied, setCopied] = useState(false);
@@ -329,16 +329,12 @@ export function P2PPowerToolsSection() {
           )}
           leading={<Ban size={18} strokeWidth={2.2} />}
           value={settings.torrentsDisabled}
-          onChange={(v) => {
-            update({ torrentsDisabled: v });
-            if (isTauri && v) {
-              void import("@tauri-apps/api/core").then(({ invoke }) =>
-                invoke("torrent_engine_hard_reset").catch(() => {}),
-              );
-            }
-          }}
+          onChange={(v) => update({ torrentsDisabled: v })}
+          note={torrentEnginePolicyPending ? t("Applying torrent setting…") : undefined}
           warn={
-            settings.torrentsDisabled
+            torrentEnginePolicyError
+              ? t("Harbor could not apply the torrent setting. Reopen Harbor to try again.")
+              : settings.torrentsDisabled
               ? t(
                   "Torrents are disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use torrents, toggle this off.",
                 )
@@ -347,9 +343,9 @@ export function P2PPowerToolsSection() {
         />
 
         <ToggleRow
-          label={t("Direct torrent streaming")}
+          label={t("Local torrent streaming")}
           sub={t(
-            "Stream torrents straight from Harbor's built-in engine when you have no debrid set up, or a torrent isn't cached. This connects to peers over your own connection. Turn off to only ever play debrid and direct links.",
+            "Let Harbor stream torrents from this device when a debrid link is unavailable. Turn off to prevent local torrent playback. A configured remote server can still stream torrents.",
           )}
           leading={<Zap size={18} strokeWidth={2.2} />}
           value={settings.directTorrentStream}
@@ -366,7 +362,7 @@ export function P2PPowerToolsSection() {
         <ToggleRow
           label={t("Auto-confirm peer-to-peer streaming")}
           sub={t(
-            "Skip the 'stream over peer-to-peer?' prompt and start uncached torrents immediately. Harbor remembers your choice after the first confirmation anyway.",
+            "Start eligible peer-to-peer streams without asking for confirmation each time.",
           )}
           leading={<ShieldCheck size={18} strokeWidth={2.2} />}
           value={settings.p2pAutoConsent}

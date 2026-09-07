@@ -39,7 +39,10 @@ export function CustomHoverEditor({
   const [draft, setDraft] = useState<CustomHoverConfig>(() =>
     initial ? { ...DEFAULT_CUSTOM, ...initial } : { id: "", name: "", ...DEFAULT_CUSTOM },
   );
-  const sample = SETTINGS_SAMPLE_META;
+  const sample = {
+    ...SETTINGS_SAMPLE_META,
+    description: t(SETTINGS_SAMPLE_META.description),
+  };
   useEffect(() => captureFocusReturn(), []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => isBackKey(e) && close();

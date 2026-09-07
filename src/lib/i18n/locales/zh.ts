@@ -1,3 +1,4 @@
+import settingsRefinements from "./zh/settings-refinements";
 import coverage from "./zh/coverage";
 import sweepA from "./zh/sweep-a";
 import sweepB from "./zh/sweep-b";
@@ -34,6 +35,7 @@ const zh: Record<string, string> = {
   ...live,
   ...books,
   ...system,
+  ...settingsRefinements,
 };
 
 export default zh;

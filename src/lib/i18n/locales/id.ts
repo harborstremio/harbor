@@ -1,3 +1,4 @@
+import settingsRefinements from "./id/settings-refinements";
 import coverage from "./id/coverage";
 import catalog01 from "./id/catalog-01";
 import catalog02 from "./id/catalog-02";
@@ -32,6 +33,7 @@ const id: Record<string, string> = {
   ...catalog13,
   ...audit,
   ...identityAudit,
+  ...settingsRefinements,
 };
 
 export default id;

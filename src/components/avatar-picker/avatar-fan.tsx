@@ -50,7 +50,7 @@ export function AvatarFan({
             );
           })}
         </span>
-        <span className="text-start text-[12.5px] font-medium leading-tight text-ink-muted transition-colors group-hover:text-ink">
+        <span className="text-start text-[15px] font-medium leading-5 text-ink-muted transition-colors group-hover:text-ink">
           {label ?? t("or use one of our avatars")}
         </span>
       </button>

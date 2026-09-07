@@ -8,6 +8,7 @@ use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::Router;
+use futures_util::StreamExt;
 use librqbit::api::TorrentIdOrHash;
 use librqbit::Session;
 use serde::Deserialize;
@@ -111,12 +112,12 @@ fn urldecode(input: &str) -> Option<String> {
 }
 
 async fn h_create(
-    State(_session): State<Arc<Session>>,
+    State(session): State<Arc<Session>>,
     Path(hash): Path<String>,
     Json(body): Json<CreateBody>,
 ) -> Response {
     let trackers = trackers_from_sources(body.peer_search.and_then(|p| p.sources));
-    match super::ensure_added(&hash, trackers, None).await {
+    match super::ensure_added(&session, &hash, trackers, None).await {
         Ok((_info_hash, files)) => {
             let guessed = files.iter().max_by_key(|f| f.length).map(|f| f.idx);
             let out = serde_json::json!({
@@ -141,7 +142,7 @@ async fn h_remote_stream(
     headers: HeaderMap,
 ) -> Response {
     let trackers = trackers_from_query(query);
-    if let Err(e) = super::ensure_added(&hash, trackers, Some(file_id)).await {
+    if let Err(e) = super::ensure_added(&session, &hash, trackers, Some(file_id)).await {
         return (StatusCode::NOT_FOUND, e).into_response();
     }
     stream_file(&session, &hash, file_id, &headers).await
@@ -156,6 +157,22 @@ async fn h_stream(
 }
 
 async fn stream_file(
+    session: &Arc<Session>,
+    hash: &str,
+    file_id: usize,
+    headers: &HeaderMap,
+) -> Response {
+    match super::run_session(session, async {
+        Ok(stream_file_inner(session, hash, file_id, headers).await)
+    })
+    .await
+    {
+        Ok(response) => response,
+        Err(error) => (StatusCode::SERVICE_UNAVAILABLE, error).into_response(),
+    }
+}
+
+async fn stream_file_inner(
     session: &Arc<Session>,
     hash: &str,
     file_id: usize,
@@ -225,10 +242,10 @@ async fn stream_file(
             HeaderValue::from_str(&format!("bytes {}-{}/{}", start, end - 1, len)).unwrap(),
         );
     }
-    let body = Body::from_stream(tokio_util::io::ReaderStream::with_capacity(
-        stream.take(to_take),
-        65536,
-    ));
+    let body = Body::from_stream(
+        tokio_util::io::ReaderStream::with_capacity(stream.take(to_take), 65536)
+            .take_until(session.cancellation_token().clone().cancelled_owned()),
+    );
     (status, out, body).into_response()
 }
 

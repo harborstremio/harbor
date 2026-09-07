@@ -1,6 +1,7 @@
 import { fillStyle } from "@/components/slider";
 import { useEffect, useRef } from "react";
-import { SETTINGS_FILMS, useSampleArtwork } from "@/lib/sample-artwork";
+import { SETTINGS_FILMS, SETTINGS_SAMPLE_META, useSampleArtwork } from "@/lib/sample-artwork";
+import { TvCardArtwork } from "@/components/tv-card";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { resetPosterDock, updatePosterDock } from "@/lib/poster-dock";
@@ -66,19 +67,40 @@ export function PosterCardSection() {
           </SettingRow>
         )}
 
-        <div className="hset-postertune">
-          <div className="hset-postertune-stage">
-            <PreviewImage
-              src={art.poster}
-              className="aspect-[2/3] object-cover"
-              style={{
-                width: Math.round(118 * settings.posterScale),
-                borderRadius: settings.posterRadius,
-                transition: "width 260ms ease-in-out, border-radius 260ms ease-in-out",
-              }}
-            />
+        <div className="hset-postertune" style={tv ? { flexWrap: "wrap" } : undefined}>
+          <div
+            className="hset-postertune-stage"
+            style={tv ? { inlineSize: Math.round(236 * settings.posterScale), maxWidth: "100%", alignSelf: "center", padding: 0, background: "transparent" } : undefined}
+          >
+            {tv ? (
+              <div
+                role="img"
+                aria-label={t("TV card preview for {title}", { title: SETTINGS_SAMPLE_META.name })}
+                className="relative aspect-[16/9] max-w-full overflow-hidden bg-elevated ring-1 ring-edge-soft transition-[width,border-radius] duration-[260ms] ease-in-out motion-reduce:transition-none"
+                style={{
+                  width: Math.round(236 * settings.posterScale),
+                  borderRadius: settings.posterRadius,
+                }}
+              >
+                <TvCardArtwork
+                  meta={SETTINGS_SAMPLE_META}
+                  logo={art.logo ?? undefined}
+                  posterSrc={art.poster}
+                />
+              </div>
+            ) : (
+              <PreviewImage
+                src={art.poster}
+                className="aspect-[2/3] object-cover"
+                style={{
+                  width: Math.round(118 * settings.posterScale),
+                  borderRadius: settings.posterRadius,
+                  transition: "width 260ms ease-in-out, border-radius 260ms ease-in-out",
+                }}
+              />
+            )}
           </div>
-          <div className="hset-postertune-dials">
+          <div className="hset-postertune-dials" style={tv ? { flex: "1 1 280px" } : undefined}>
             <SettingRow
               wide
               label={t("Size")}

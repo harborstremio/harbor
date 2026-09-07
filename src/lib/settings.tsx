@@ -10,6 +10,7 @@ import { setUiLanguage } from "@/lib/i18n";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { STORAGE_KEY } from "./settings/defaults";
 import { readSettingsFile, writeSettingsFile } from "./settings/file-store";
+import { torrentEngineSetEnabled } from "./torrent/local-engine";
 import { loadFontData, saveFontData } from "./font-storage";
 import { isRemovedBuiltinAvatar } from "./avatars/catalog";
 import {
@@ -35,6 +36,8 @@ export type {
 
 type SettingsValue = {
   settings: Settings;
+  torrentEnginePolicyPending: boolean;
+  torrentEnginePolicyError: boolean;
   update: (patch: Partial<Settings>) => void;
   toggleStreaming: (s: StreamingService) => void;
   switchProfile: (profileId: string, linked: boolean) => void;
@@ -61,7 +64,7 @@ function readActiveSource(): SettingsSource {
 
 const Ctx = createContext<SettingsValue | null>(null);
 
-export function SettingsProvider({ children }: { children: ReactNode }) {
+export function SettingsProvider({ children, syncTorrentEnginePolicy = false }: { children: ReactNode; syncTorrentEnginePolicy?: boolean }) {
   const sourceRef = useRef<SettingsSource>({ profileId: "default", linked: true });
   const [settings, setSettings] = useState<Settings>(() => {
     seedSharedFromLegacy();
@@ -71,6 +74,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setUiLanguage(s.uiLanguage);
     return s;
   });
+  const [settingsReady, setSettingsReady] = useState(false);
+  const settingsReadyRef = useRef(settingsReady);
+  useEffect(() => { settingsReadyRef.current = settingsReady; }, [settingsReady]);
+  const [torrentEnginePolicyPending, setTorrentEnginePolicyPending] = useState(false);
+  const [torrentEnginePolicyError, setTorrentEnginePolicyError] = useState(false);
   const settingsRef = useRef(settings);
   useEffect(() => {
     settingsRef.current = settings;
@@ -97,15 +105,21 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (localStorage.getItem(STORAGE_KEY)) return;
+    if (localStorage.getItem(STORAGE_KEY)) {
+      setSettingsReady(true);
+      return;
+    }
     let cancelled = false;
     void readSettingsFile().then((raw) => {
-      if (cancelled || !raw || localStorage.getItem(STORAGE_KEY)) return;
-      try {
-        localStorage.setItem(STORAGE_KEY, raw);
-        seedSharedFromLegacy();
-        setSettings(loadEffective(sourceRef.current.profileId, sourceRef.current.linked));
-      } catch {}
+      if (cancelled) return;
+      if (raw && !localStorage.getItem(STORAGE_KEY)) {
+        try {
+          localStorage.setItem(STORAGE_KEY, raw);
+          seedSharedFromLegacy();
+          setSettings(loadEffective(sourceRef.current.profileId, sourceRef.current.linked));
+        } catch {}
+      }
+      setSettingsReady(true);
     });
     return () => {
       cancelled = true;
@@ -131,6 +145,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const fileTimerRef = useRef(0);
   useEffect(() => {
+    if (!settingsReady) return;
     try {
       const json = persistEffective(settings, sourceRef.current.profileId, sourceRef.current.linked);
       window.clearTimeout(fileTimerRef.current);
@@ -143,7 +158,25 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         }
       }
     }
-  }, [settings]);
+  }, [settings, settingsReady]);
+
+  useEffect(() => {
+    if (!syncTorrentEnginePolicy || !settingsReady || !("__TAURI_INTERNALS__" in window)) return;
+    let cancelled = false;
+    setTorrentEnginePolicyPending(true);
+    setTorrentEnginePolicyError(false);
+    void torrentEngineSetEnabled(!settings.torrentsDisabled)
+      .then(() => {
+        if (!cancelled) setTorrentEnginePolicyPending(false);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setTorrentEnginePolicyPending(false);
+          setTorrentEnginePolicyError(true);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [settings.torrentsDisabled, settingsReady, syncTorrentEnginePolicy]);
 
   const tmdbLangRef = useRef<string | null>(null);
   useEffect(() => {
@@ -445,14 +478,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (sourceKeyFor(cur.profileId, cur.linked) === sourceKeyFor(profileId, linked)) {
       sourceRef.current = { profileId, linked };
     } else {
-      persistEffective(settingsRef.current, cur.profileId, cur.linked);
+      if (settingsReadyRef.current) persistEffective(settingsRef.current, cur.profileId, cur.linked);
       const next = loadEffective(profileId, linked);
       setUiLanguage(next.uiLanguage);
       setTmdbLanguage(next.tmdbLanguage);
       tmdbLangRef.current = effectiveTmdbLanguage();
       imgLangRef.current = next.tmdbImageLangs.join(",");
       sourceRef.current = { profileId, linked };
-      persistEffective(next, profileId, linked);
+      if (settingsReadyRef.current) persistEffective(next, profileId, linked);
       settingsRef.current = next;
       setSettings(next);
     }
@@ -486,8 +519,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ settings, update, toggleStreaming, switchProfile, setSettingsLinked }),
-    [settings, update, toggleStreaming, switchProfile, setSettingsLinked],
+    () => ({ settings, torrentEnginePolicyPending, torrentEnginePolicyError, update, toggleStreaming, switchProfile, setSettingsLinked }),
+    [settings, torrentEnginePolicyPending, torrentEnginePolicyError, update, toggleStreaming, switchProfile, setSettingsLinked],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

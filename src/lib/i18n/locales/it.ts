@@ -1,3 +1,4 @@
+import settingsRefinements from "./it/settings-refinements";
 import catalog01 from "./it/catalog-01";
 import catalog02 from "./it/catalog-02";
 import catalog03 from "./it/catalog-03";
@@ -26,6 +27,7 @@ const it: Record<string, string> = {
   ...catalog11,
   ...catalog12,
   ...coverage,
+  ...settingsRefinements,
 };
 
 export default it;

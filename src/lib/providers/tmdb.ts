@@ -27,7 +27,7 @@ export {
   tmdbResolveKeywordIds,
 } from "./tmdb/tmdb-keywords";
 
-export { tmdbCompanyIdByName } from "./tmdb/tmdb-companies";
+export { tmdbCompanyIdByName, tmdbCompanyArt, type CompanyArt } from "./tmdb/tmdb-companies";
 
 export {
   tmdbMovieRow,

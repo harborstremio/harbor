@@ -1,3 +1,4 @@
+import settingsRefinements from "./ar/settings-refinements";
 import uiFallback from "./ui-fallback";
 import experimentalUpdates from "./ar/experimental-updates";
 import coverage from "./ar/coverage";
@@ -72,6 +73,7 @@ const ar: Record<string, string> = {
   ...plurals,
   ...audit,
   ...experimentalUpdates,
+  ...settingsRefinements,
 };
 
 export default ar;

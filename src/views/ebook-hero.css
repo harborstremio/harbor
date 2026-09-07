@@ -1,5 +1,6 @@
 .ebook-library-hero {
   position: relative;
+  display: grid;
   min-height: 520px;
   overflow: hidden;
   isolation: isolate;
@@ -82,20 +83,15 @@
 }
 
 .ebook-hero-copy h1 {
-  display: -webkit-box;
   max-width: 600px;
-  overflow: hidden;
   margin: 19px 0 0;
-  margin-bottom: -0.16em;
-  padding-bottom: 0.16em;
   font-family: var(--font-book);
   font-size: clamp(38px, 3vw, 58px);
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.02;
   text-wrap: wrap;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  overflow-wrap: anywhere;
 }
 
 .ebook-hero-byline {

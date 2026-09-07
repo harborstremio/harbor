@@ -57,10 +57,10 @@ export function AccountMenuPanel({
                   </span>
                 )}
               </span>
-              <div className="flex min-w-0 flex-1 flex-col">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
                 <span className="truncate text-[13.5px] font-medium text-ink">{p.name}</span>
                 {p.isPrimary && (
-                  <span className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: p.color }}>
+                  <span className="shrink-0 text-[9px] font-bold uppercase leading-none tracking-[0.18em]" style={{ color: p.color }}>
                     {t("profile.primary")}
                   </span>
                 )}

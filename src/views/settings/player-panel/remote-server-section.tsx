@@ -1,5 +1,5 @@
 import { Check, Loader2, Wifi, X } from "../icons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { t as tr } from "@/lib/i18n";
 import { useT } from "@/lib/i18n";
@@ -27,16 +27,17 @@ function normalizeServerUrl(raw: string): string {
 
 async function probeServer(url: string): Promise<TestResult> {
   const started = performance.now();
+  const ctrl = new AbortController();
+  const timer = window.setTimeout(() => ctrl.abort(), 1500);
   try {
-    const ctrl = new AbortController();
-    const timer = window.setTimeout(() => ctrl.abort(), 1500);
     const res = await fetch(`${url}/settings`, { method: "GET", signal: ctrl.signal });
-    window.clearTimeout(timer);
     if (!res.ok) return { ok: false, message: tr("The server answered with status {status}. Is that a streaming server?", { status: res.status }) };
     const ms = Math.max(1, Math.round(performance.now() - started));
-    return { ok: true, message: tr("Server reachable in {ms}ms. Harbor will use it for torrent streaming.", { ms }) };
+    return { ok: true, message: tr("The server responded in {ms} ms.", { ms }) };
   } catch {
     return { ok: false, message: tr("Could not reach the server within 1.5 seconds. Check the address and that the server machine is online.") };
+  } finally {
+    window.clearTimeout(timer);
   }
 }
 
@@ -48,19 +49,22 @@ export function RemoteServerSection() {
   const [reach, setReach] = useState<boolean | null>(null);
   const [testing, setTesting] = useState(false);
   const [result, setResult] = useState<TestResult | null>(null);
+  const requestRef = useRef(0);
 
   useEffect(() => setDraft(saved), [saved]);
 
   useEffect(() => {
+    const requestId = ++requestRef.current;
     setReach(null);
     setResult(null);
-    if (!saved) return;
-    let alive = true;
-    void probeServer(saved).then((r) => {
-      if (alive) setReach(r.ok);
-    });
+    setTesting(false);
+    if (saved) {
+      void probeServer(saved).then((r) => {
+        if (requestRef.current === requestId) setReach(r.ok);
+      });
+    }
     return () => {
-      alive = false;
+      requestRef.current++;
     };
   }, [saved]);
 
@@ -72,13 +76,16 @@ export function RemoteServerSection() {
 
   const test = async () => {
     if (!saved || testing) return;
+    const requestId = ++requestRef.current;
     setTesting(true);
+    setResult(null);
     try {
       const r = await probeServer(saved);
+      if (requestRef.current !== requestId) return;
       setResult(r);
       setReach(r.ok);
     } finally {
-      setTesting(false);
+      if (requestRef.current === requestId) setTesting(false);
     }
   };
 
@@ -123,6 +130,7 @@ export function RemoteServerSection() {
             {saved && (
               <button
                 type="button"
+                aria-label={t("Forget remote streaming server")}
                 onClick={() => update({ remoteStreamServerUrl: "" })}
                 className={ROW_ACTION}
               >
@@ -135,7 +143,7 @@ export function RemoteServerSection() {
         {saved && (
           <ToggleRow
             label={t("Use exclusively (never fall back to local)")}
-            sub={t("If the server is unreachable, playback fails instead of streaming locally. Use this when your VPN runs on the server machine and torrent traffic must never leave this one.")}
+            sub={t("If the remote server is unavailable, stop playback instead of streaming torrents from this device.")}
             value={settings.remoteStreamServerStrict}
             onChange={(v) => update({ remoteStreamServerStrict: v })}
           />
@@ -144,11 +152,13 @@ export function RemoteServerSection() {
         {saved && (
           <SettingRow
             label={t("Test connection")}
-            desc={t("Probes the server's settings endpoint from this device and reports what came back.")}
+            desc={t("Check whether this device can reach the saved server address.")}
           >
             <button
               type="button"
+              aria-label={testing ? t("Testing remote streaming server") : t("Test remote streaming server")}
               onClick={testing ? undefined : () => void test()}
+              disabled={testing}
               aria-disabled={testing}
               className={`${ROW_ACTION}${testing ? " pointer-events-none opacity-45" : ""}`}
             >
@@ -163,7 +173,7 @@ export function RemoteServerSection() {
         )}
 
         {saved && result && (
-          <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+          <div role="status" aria-live="polite" className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
             <span
               className={`mt-[2px] shrink-0 ${result.ok ? "text-success" : "text-danger"}`}
             >

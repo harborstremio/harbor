@@ -1,16 +1,15 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Loader2, LogOut, Pencil } from "@/views/settings/icons";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { logoutAuthor, type Author } from "@/lib/theme-auth";
 import { useT } from "@/lib/i18n";
+import { ROW_ACTION, ROW_ACTION_DANGER } from "@/views/settings/kit";
 import { VerifiedBadge } from "./verified-badge";
 import { HandleClaimCard } from "./handle-claim-card";
 
-const CHIP =
-  "harbor-press-pop flex h-11 shrink-0 items-center gap-2 rounded-lg bg-elevated px-4 text-[15px] font-medium text-ink-muted transition-colors";
-
 export function AccountIdentityCard({ author }: { author: Author }) {
   const t = useT();
+  const handleEditorId = useId();
   const [signingOut, setSigningOut] = useState(false);
   const [editing, setEditing] = useState(!author.handle);
 
@@ -20,50 +19,53 @@ export function AccountIdentityCard({ author }: { author: Author }) {
   };
 
   return (
-    <div className="flex flex-col gap-6 border-b border-edge-soft pb-6 pt-3">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-4">
-        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-canvas text-ink">
-          <HarborMark className="h-7 w-7" />
+    <div className="flex flex-col gap-6 border-b border-edge-soft py-7">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-5">
+        <span className="grid h-20 w-20 shrink-0 place-items-center rounded-[18px] border border-edge-soft bg-canvas text-ink">
+          <HarborMark className="h-14 w-14" />
         </span>
 
-        <span className="flex min-w-[160px] flex-1 flex-col gap-1">
-          <span className="flex items-center gap-2">
-            <span className="truncate text-[24px] font-semibold leading-8 tracking-tight text-ink">
+        <span className="flex min-w-0 flex-[1_1_240px] flex-col gap-2">
+          <span className="flex min-w-0 items-center gap-2">
+            <bdi dir="ltr" className="min-w-0 break-words text-[28px] font-semibold leading-[34px] tracking-[-0.5px] text-ink">
               {author.handle ? `@${author.handle}` : author.username}
-            </span>
-            {author.verified && <VerifiedBadge size="sm" />}
+            </bdi>
+            {author.verified && <VerifiedBadge />}
           </span>
-          <span className="flex items-center gap-1.5 text-[15px] leading-snug text-ink-muted">
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
+          <span className="flex items-start gap-2 text-[15.5px] leading-[23px] text-ink-muted">
+            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
             {author.handle
               ? t("Signed in as {username}", { username: author.username })
               : t("Signed in to your Harbor account")}
           </span>
         </span>
 
-        <span className="flex shrink-0 flex-wrap items-center gap-1.5">
+        <span className="flex max-w-full flex-wrap items-center gap-2.5">
           <button
             type="button"
             onClick={() => setEditing((v) => !v)}
-            className={`${CHIP} ${editing ? "text-ink" : "hover:text-ink"}`}
+            aria-expanded={editing}
+            aria-controls={handleEditorId}
+            className={ROW_ACTION}
           >
-            <Pencil size={12} strokeWidth={2.2} />
+            <Pencil size={16} strokeWidth={2.2} />
             {author.handle ? t("Change handle") : t("Claim a handle")}
           </button>
           <button
             type="button"
             onClick={signOut}
             disabled={signingOut}
-            className={`${CHIP} hover:text-danger disabled:opacity-50`}
+            aria-busy={signingOut}
+            className={ROW_ACTION_DANGER}
           >
-            {signingOut ? <Loader2 size={13} className="animate-spin" /> : <LogOut size={13} />}
+            {signingOut ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />}
             {t("Sign out")}
           </button>
         </span>
       </div>
 
       {editing && (
-        <div className="animate-lift-in rounded-md bg-canvas px-4 py-4">
+        <div id={handleEditorId} className="animate-lift-in w-full max-w-[560px] border-t border-edge-soft pt-6">
           <HandleClaimCard author={author} />
         </div>
       )}

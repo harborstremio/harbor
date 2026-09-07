@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { captureFocusReturn, tvFocus } from "@/lib/keyboard-navigation";
 import { isBackKey } from "@/lib/keyboard-navigation/geometry";
+import { useT } from "@/lib/i18n";
 import { CustomColorPanel } from "@/views/settings/color-picker";
 
 const PANEL_W = 280;
@@ -28,6 +29,7 @@ function clipBox(el: HTMLElement | null) {
 }
 
 export function ColorPopover({
+  label,
   value,
   onChange,
   align = "start",
@@ -35,6 +37,7 @@ export function ColorPopover({
   className = "",
   children,
 }: {
+  label: string;
   value: string;
   onChange: (hex: string) => void;
   align?: "start" | "end";
@@ -42,6 +45,7 @@ export function ColorPopover({
   className?: string;
   children: (open: boolean) => ReactNode;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -124,6 +128,9 @@ export function ColorPopover({
     <div ref={wrapRef} className={`relative ${className}`}>
       <button
         type="button"
+        aria-label={t("Edit {label} color", { label })}
+        aria-expanded={open}
+        aria-haspopup="dialog"
         onClick={() => setOpen((v) => !v)}
         className="relative block h-full min-h-11 w-full text-start outline-none"
       >
@@ -143,6 +150,7 @@ export function ColorPopover({
             <div
               ref={panelRef}
               role="dialog"
+              aria-label={t("{label} color", { label })}
               aria-modal="true"
               onBlur={(e) => {
                 const next = e.relatedTarget as Node | null;

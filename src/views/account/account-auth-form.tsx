@@ -14,6 +14,8 @@ import { PasswordField, TextField } from "./fields";
 import { AccountRecoverForm } from "./account-recover-form";
 import { AccountValueProps } from "./account-value-props";
 import { useT } from "@/lib/i18n";
+import { Section } from "@/views/settings/shared";
+import { ROW_ACTION, ROW_ACTION_PRIMARY } from "@/views/settings/kit";
 
 type Mode = "signin" | "register";
 
@@ -40,12 +42,19 @@ function Shell({
   closing,
   onDismiss,
   children,
+  heading,
+  subtitle,
+  dismissible = false,
 }: {
   inline: boolean;
   closing: boolean;
   onDismiss: () => void;
   children: React.ReactNode;
+  heading?: string;
+  subtitle?: string;
+  dismissible?: boolean;
 }) {
+  const t = useT();
   if (!inline) {
     return (
       <ModalShell closing={closing} onDismiss={onDismiss}>
@@ -54,8 +63,22 @@ function Shell({
     );
   }
   return (
-    <div className="hset-account-auth animate-lift-in flex w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-edge-soft bg-surface">
-      {children}
+    <div className="hset-account-auth animate-lift-in relative w-full max-w-[560px] [&_label]:text-[16.5px] [&_label]:leading-6 [&_label~span]:text-[15.5px] [&_label~span]:leading-[22px] [&_input]:bg-elevated [&_input]:rounded-[10px]">
+      {heading ? (
+        <div className={dismissible ? "[&_.hset-section-title]:pe-14 [&_.harbor-settings-section>p]:pe-14" : undefined}>
+          <Section title={heading} subtitle={subtitle}>{children}</Section>
+        </div>
+      ) : children}
+      {dismissible && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label={t("Close")}
+          className="absolute end-0 top-0 grid h-11 w-11 place-items-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+        >
+          <X size={16} />
+        </button>
+      )}
     </div>
   );
 }
@@ -189,6 +212,7 @@ export function AccountAuthForm({
       <Shell inline={inline} closing={closing} onDismiss={close}>
         <div className="overflow-y-auto">
           <AccountRecoverForm
+            inline={inline}
             onBack={() => setView("auth")}
             onReset={(code) => {
               setView("auth");
@@ -200,23 +224,26 @@ export function AccountAuthForm({
     );
   }
 
+  const heading = discordPending
+    ? t("Choose your username")
+    : mode === "register"
+      ? t("Create your Harbor account")
+      : t("Sign in to Harbor");
+  const subtitle = discordPending
+    ? t("Discord confirmed. Pick a username and password to finish.")
+    : mode === "register"
+      ? t("One free account for your handle, themes, and sync.")
+      : t("Sign in to pick up where you left off.");
+
   return (
-    <Shell inline={inline} closing={closing} onDismiss={close}>
-      <div className="flex items-start gap-4 px-6 pt-6">
+    <Shell inline={inline} closing={closing} onDismiss={close} heading={heading} subtitle={subtitle} dismissible={!!onClose}>
+      {!inline && <div className="flex items-start gap-4 px-6 pt-6">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <h2 className="text-[20px] font-semibold leading-7 tracking-tight text-ink">
-            {discordPending
-              ? t("Choose your username")
-              : mode === "register"
-                ? t("Create your Harbor account")
-                : t("Sign in to Harbor")}
+            {heading}
           </h2>
           <p className="text-[15px] leading-[22px] text-ink-muted">
-            {discordPending
-              ? t("Discord confirmed. Pick a username and password to finish.")
-              : mode === "register"
-                ? t("One free account for your handle, themes, and sync.")
-                : t("Sign in to pick up where you left off.")}
+            {subtitle}
           </p>
         </div>
         {onClose && (
@@ -229,9 +256,9 @@ export function AccountAuthForm({
             <X size={16} />
           </button>
         )}
-      </div>
+      </div>}
 
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-6">
+      <div className={inline ? "flex min-w-0 flex-col gap-6 pt-4" : "flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-6"}>
         {!inline && !discordPending && mode === "register" && <AccountValueProps />}
 
         {!discordPending && (
@@ -298,20 +325,20 @@ export function AccountAuthForm({
                 setView("recover");
                 setError(null);
               }}
-              className="-mt-1 min-h-11 self-end text-[14px] font-medium text-ink-muted transition-colors hover:text-ink"
+              className={inline ? "-mt-1 min-h-11 self-end text-[15px] font-medium text-ink-muted transition-colors hover:text-ink" : "-mt-1 min-h-11 self-end text-[14px] font-medium text-ink-muted transition-colors hover:text-ink"}
             >
               {t("Forgot password?")}
             </button>
           )}
 
           {error && (
-            <p role="alert" className="rounded-md bg-danger/10 px-3.5 py-2.5 text-[14px] leading-snug text-danger">
+            <p role="alert" className={inline ? "rounded-md bg-danger/10 px-3.5 py-3 text-[15.5px] leading-[22px] text-danger" : "rounded-md bg-danger/10 px-3.5 py-2.5 text-[14px] leading-snug text-danger"}>
               {error.kind === "built-in" ? t(error.key) : error.detail}
             </p>
           )}
 
           {(discordPending || mode === "register") && (
-            <p className="flex items-start gap-2 rounded-md bg-canvas px-3.5 py-3 text-[14px] leading-[21px] text-ink-muted">
+            <p className={inline ? "flex items-start gap-2.5 text-[15.5px] leading-[22px] text-ink-muted" : "flex items-start gap-2 rounded-md bg-canvas px-3.5 py-3 text-[14px] leading-[21px] text-ink-muted"}>
               <KeyRound size={13} className="mt-0.5 shrink-0" />
               {discordPending
                 ? t(
@@ -332,7 +359,7 @@ export function AccountAuthForm({
                   setDiscordPending(null);
                   setError(null);
                 }}
-                className="text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink disabled:opacity-40"
+                className={inline ? ROW_ACTION : "text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink disabled:opacity-40"}
               >
                 {t("Cancel")}
               </button>
@@ -340,7 +367,7 @@ export function AccountAuthForm({
             <button
               type="submit"
               disabled={!ready || busy || discordBusy}
-              className="harbor-press-pop flex min-h-11 items-center justify-center gap-2 rounded-md bg-ink px-4 py-2 text-[15px] font-semibold text-canvas transition-opacity duration-150 hover:opacity-90 disabled:opacity-40"
+              className={inline ? ROW_ACTION_PRIMARY : "harbor-press-pop flex min-h-11 items-center justify-center gap-2 rounded-md bg-ink px-4 py-2 text-[15px] font-semibold text-canvas transition-opacity duration-150 hover:opacity-90 disabled:opacity-40"}
             >
               {busy && <Loader2 size={16} className="animate-spin" />}
               {discordPending ? t("Finish creating my account") : t(active.action)}
@@ -352,7 +379,7 @@ export function AccountAuthForm({
           <>
             <div className="flex items-center gap-3">
               <span className="h-px flex-1 bg-edge-soft" />
-              <span className="text-[11px] font-medium uppercase tracking-wide text-ink-subtle">
+              <span className={inline ? "text-[15px] text-ink-muted" : "text-[11px] font-medium uppercase tracking-wide text-ink-subtle"}>
                 {t("or")}
               </span>
               <span className="h-px flex-1 bg-edge-soft" />
@@ -361,7 +388,7 @@ export function AccountAuthForm({
               type="button"
               onClick={() => void runDiscord()}
               disabled={busy || discordBusy}
-              className="harbor-press-pop flex min-h-11 items-center justify-center gap-2 rounded-md bg-canvas px-4 py-2 text-[15px] font-semibold text-ink transition-colors hover:bg-elevated disabled:opacity-40"
+              className={inline ? `${ROW_ACTION} justify-center` : "harbor-press-pop flex min-h-11 items-center justify-center gap-2 rounded-md bg-canvas px-4 py-2 text-[15px] font-semibold text-ink transition-colors hover:bg-elevated disabled:opacity-40"}
             >
               {discordBusy ? (
                 <>

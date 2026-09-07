@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { AlertCircle, Check, Loader2, Lock, X } from "@/views/settings/icons";
-import { claimHandle } from "@/lib/account/handle";
+import { claimHandle, HANDLE_MIN, HANDLE_MAX } from "@/lib/account/handle";
 import { accountErrorMessage, type AccountErrorMessage } from "@/lib/account/error-messages";
 import type { Author } from "@/lib/theme-auth";
 import { inputClass } from "./fields";
 import { useHandleAvailability, type HandleStatus } from "./use-handle-availability";
 import { HandleChangeConfirm } from "./handle-change-confirm";
 import { useT } from "@/lib/i18n";
+import { ROW_ACTION, ROW_ACTION_PRIMARY, ROW_DESC, ROW_TITLE } from "@/views/settings/kit";
 
 const COOLDOWN_LABEL = "once every 14 days";
 
@@ -56,15 +57,15 @@ export function HandleClaimCard({ author }: { author: Author }) {
 
   if (onCooldown) {
     return (
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-3">
         <HandleHeader hasCustom={hasCustom} />
-        <div className="flex items-center gap-3 rounded-md bg-elevated px-4 py-3.5">
+        <div className="flex items-center gap-3 py-2">
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-raised text-ink-muted">
             <Lock size={16} />
           </span>
           <div className="flex min-w-0 flex-col">
-            <span className="font-display text-[15px] text-ink">@{author.handle}</span>
-            <span className="text-[12px] text-ink-subtle">
+            <bdi dir="ltr" className={ROW_TITLE}>@{author.handle}</bdi>
+            <span className={ROW_DESC}>
               {t("Locked until")} {formatDate(availableAt)}. {t("You can change your handle")}{" "}
               {t(COOLDOWN_LABEL)}.
             </span>
@@ -75,53 +76,54 @@ export function HandleClaimCard({ author }: { author: Author }) {
   }
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-3">
       <HandleHeader hasCustom={hasCustom} />
 
-      <div className="relative">
-        <span className="pointer-events-none absolute inset-y-0 start-0 flex w-9 items-center justify-center font-display text-[18px] leading-none text-ink-muted">
-          @
-        </span>
-        <input
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            setError(null);
-          }}
-          placeholder={hasCustom ? (author.handle ?? t("yourhandle")) : t("yourhandle")}
-          maxLength={24}
-          autoComplete="off"
-          autoCapitalize="off"
-          spellCheck={false}
-          className={`${inputClass} ps-9 pe-[104px] font-display text-[15px]`}
-        />
-        <div className="absolute inset-y-0 end-1.5 flex items-center gap-2">
-          {value.length > 0 && <StatusIcon status={status} />}
-          <button
-            type="button"
-            onClick={() => startClaim(value)}
-            disabled={!canClaim}
-            className="harbor-press-pop flex h-8 items-center rounded-md bg-ink px-3.5 text-[12.5px] font-semibold text-canvas transition-opacity duration-150 hover:opacity-90 disabled:opacity-35"
-          >
-            {busy ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : hasCustom ? (
-              t("Change")
-            ) : (
-              t("Claim")
-            )}
-          </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <div dir="ltr" className="relative min-w-[220px] flex-1">
+          <span className="pointer-events-none absolute inset-y-0 start-0 flex w-10 items-center justify-center text-[18px] leading-none text-ink-muted">
+            @
+          </span>
+          <input
+            value={value}
+            onChange={(e) => {
+              setValue(e.target.value);
+              setError(null);
+            }}
+            aria-label={t("Handle")}
+            placeholder={hasCustom ? (author.handle ?? t("yourhandle")) : t("yourhandle")}
+            maxLength={24}
+            autoComplete="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            className={inputClass + " ps-10 pe-10"}
+          />
+          {value.length > 0 && (
+            <span className="pointer-events-none absolute inset-y-0 end-3.5 flex items-center">
+              <StatusIcon status={status} />
+            </span>
+          )}
         </div>
+        <button
+          type="button"
+          onClick={() => startClaim(value)}
+          disabled={!canClaim}
+          aria-busy={busy}
+          className={ROW_ACTION_PRIMARY}
+        >
+          {busy && <Loader2 size={16} className="animate-spin" />}
+          {hasCustom ? t("Change") : t("Claim")}
+        </button>
       </div>
 
       <StatusLine status={status} onPick={startClaim} />
-      <p className="text-[11.5px] text-ink-subtle">
+      <p className="text-[14px] leading-[21px] text-ink-muted">
         {hasCustom
           ? `${t("You can change your handle")} ${t(COOLDOWN_LABEL)}, ${t("so pick one you'll keep.")}`
           : `${t("You can change your handle")} ${t(COOLDOWN_LABEL)} ${t("after you claim it.")}`}
       </p>
       {error && (
-        <p className="text-[12px] text-danger">
+        <p role="alert" className="text-[15px] leading-[22px] text-danger">
           {error.kind === "built-in" ? t(error.key) : error.detail}
         </p>
       )}
@@ -142,9 +144,9 @@ export function HandleClaimCard({ author }: { author: Author }) {
 function HandleHeader({ hasCustom }: { hasCustom: boolean }) {
   const t = useT();
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[13px] font-semibold text-ink">{t("Handle")}</span>
-      <span className="text-[12px] text-ink-subtle">
+    <div className="flex flex-col gap-1">
+      <span className={ROW_TITLE}>{t("Handle")}</span>
+      <span className={ROW_DESC}>
         {hasCustom
           ? t("How people find you across Harbor.")
           : t("Claim one so people can find you across Harbor.")}
@@ -174,31 +176,36 @@ function StatusLine({ status, onPick }: { status: HandleStatus; onPick: (s: stri
   const t = useT();
   if (status.state === "idle") return null;
   if (status.state === "checking")
-    return <span className="text-[11.5px] text-ink-subtle">{t("Checking availability")}</span>;
+    return <span className="text-[14px] leading-[21px] text-ink-muted">{t("Checking availability")}</span>;
   if (status.state === "available")
     return (
-      <span className="text-[11.5px] font-medium text-accent">
+      <span className="text-[14px] font-medium leading-[21px] text-accent">
         {t("That handle is yours to claim.")}
       </span>
     );
   if (status.state === "error")
     return (
-      <span className="text-[11.5px] text-ink-subtle">
+      <span className="text-[14px] leading-[21px] text-ink-muted">
         {t("Sign in to Harbor to check availability.")}
       </span>
     );
 
+  const reason = status.reason === `Handles are at least ${HANDLE_MIN} characters.`
+    ? t("Handles are at least {count} characters.", { count: HANDLE_MIN })
+    : status.reason === `Handles are at most ${HANDLE_MAX} characters.`
+      ? t("Handles are at most {count} characters.", { count: HANDLE_MAX })
+      : status.reason ? t(status.reason) : undefined;
   const label =
     status.state === "taken"
-      ? (status.reason ?? t("That handle is taken."))
+      ? (reason ?? t("That handle is taken."))
       : status.state === "reserved"
-        ? (status.reason ?? t("That handle is reserved."))
-        : (status.reason ?? t("That handle is not valid."));
+        ? (reason ?? t("That handle is reserved."))
+        : (reason ?? t("That handle is not valid."));
   const suggestions = "suggestions" in status ? (status.suggestions ?? []) : [];
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-[11.5px] font-medium text-danger">{label}</span>
+      <span className="text-[14px] font-medium leading-[21px] text-danger">{label}</span>
       {suggestions.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {suggestions.map((s) => (
@@ -206,7 +213,8 @@ function StatusLine({ status, onPick }: { status: HandleStatus; onPick: (s: stri
               key={s}
               type="button"
               onClick={() => onPick(s)}
-              className="harbor-press-pop flex h-8 items-center rounded-md bg-elevated px-3 font-display text-[13px] text-ink-muted transition-colors duration-150 hover:text-ink"
+              className={ROW_ACTION}
+              dir="ltr"
             >
               @{s}
             </button>

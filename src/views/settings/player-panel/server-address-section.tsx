@@ -64,7 +64,7 @@ export function AddressRow({ label, url, openable }: { label: string; url: strin
         </span>
       }
     >
-      <button type="button" onClick={copy} className={ROW_ACTION}>
+      <button type="button" onClick={copy} aria-label={t("Copy {label} address", { label })} className={ROW_ACTION}>
         {copied ? (
           <Check size={16} strokeWidth={2.4} className="text-success" />
         ) : (
@@ -73,7 +73,7 @@ export function AddressRow({ label, url, openable }: { label: string; url: strin
         {copied ? t("Copied") : t("Copy")}
       </button>
       {openable && (
-        <button type="button" onClick={() => openUrl(url)} className={ROW_ACTION}>
+        <button type="button" onClick={() => openUrl(url)} aria-label={t("Open {label} address", { label })} className={ROW_ACTION}>
           <ExternalLink size={16} strokeWidth={1.9} />
           {t("Open")}
         </button>
@@ -185,7 +185,7 @@ export function ServerAddressSection() {
     <Section
       title={t("Your streaming server address")}
       subtitle={t(
-        "Harbor runs a small streaming server right on this computer. This is where it lives. To stream from this machine on another device, copy the Wi-Fi address and paste it into Remote streaming server in Harbor over there.",
+        "To stream from this computer on another device, copy its local network address and enter it in Remote streaming server on that device.",
       )}
     >
       <SettingGroup label={t("Server")}>
@@ -252,7 +252,7 @@ export function ServerAddressSection() {
 
       <SettingGroup label={t("Addresses")}>
         <AddressRow label={t("On this computer")} url={`http://127.0.0.1:${port}`} openable={running} />
-        {lanIp && <AddressRow label={t("From other devices on your Wi-Fi")} url={`http://${lanIp}:${port}`} />}
+        {lanIp && <AddressRow label={t("On your local network")} url={`http://${lanIp}:${port}`} />}
       </SettingGroup>
 
       <p className={`max-w-[70ch] ${ROW_DESC}`}>

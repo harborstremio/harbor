@@ -2,10 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpRight, Check, Download } from "./icons";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
-import { downloadText } from "@/lib/download-text";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { LottiePlayer } from "@/components/lottie-player";
 import { Section } from "./shared";
 import { ROW_DESC } from "./kit";
+import { AssetDownloadFeedback, useAssetDownload, type AssetDownload } from "./asset-download";
+
+import abiyyuAvatar from "@/assets/artists/abiyyu.webp";
+import stassAvatar from "@/assets/artists/stass-motion.jpg";
 
 type Glob = Record<string, string>;
 type LazyGlob = Record<string, () => Promise<unknown>>;
@@ -120,52 +124,42 @@ function entries(glob: Glob): Array<{ key: string; name: string; url: string }> 
 
 function useInView<T extends HTMLElement>(): [React.RefObject<T | null>, boolean] {
   const ref = useRef<T | null>(null);
-  const [seen, setSeen] = useState(false);
+  const [inView, setInView] = useState(false);
   useEffect(() => {
     const el = ref.current;
-    if (!el || seen) return;
+    if (!el) return;
     const io = new IntersectionObserver(
-      (rows) => {
-        if (rows.some((r) => r.isIntersecting)) {
-          setSeen(true);
-          io.disconnect();
-        }
-      },
-      { rootMargin: "300px" },
+      (rows) => setInView(rows.some((row) => row.isIntersecting)),
+      { root: el.closest(".hset-main") },
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [seen]);
-  return [ref, seen];
-}
-
-function useSaved(): [string | null, (id: string) => void] {
-  const [id, setId] = useState<string | null>(null);
-  const timer = useRef<number | null>(null);
-  useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current); }, []);
-  const flash = useCallback((next: string) => {
-    setId(next);
-    if (timer.current) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setId(null), 1500);
   }, []);
-  return [id, flash];
+  return [ref, inView];
 }
 
 function IconTile({
   item,
   saved,
+  pending,
+  disabled,
   onSave,
 }: {
   item: { key: string; name: string; url: string };
   saved: boolean;
+  pending: boolean;
+  disabled: boolean;
   onSave: (key: string, name: string) => void;
 }) {
   const t = useT();
   return (
     <button
       type="button"
-      className="hset-icon-tile"
-      onClick={() => onSave(item.key, item.name)}
+      className="hset-icon-tile aria-disabled:cursor-wait aria-disabled:opacity-60"
+      onClick={() => { if (!disabled) onSave(item.key, item.name); }}
+      aria-disabled={disabled}
+      aria-busy={pending}
+      aria-label={t("Save {name} as SVG", { name: pretty(item.name) })}
       title={t("Save as SVG")}
     >
       <span className="hset-icon-art">
@@ -183,40 +177,37 @@ function IconTile({
   );
 }
 
-function IconSet({
-  glob,
-  savedId,
-  flash,
-}: {
-  glob: Glob;
-  savedId: string | null;
-  flash: (id: string) => void;
-}) {
+function IconSet({ glob, download }: { glob: Glob; download: AssetDownload }) {
   const items = useMemo(() => entries(glob), [glob]);
   const save = useCallback(
-    async (key: string, name: string) => {
-      const load = SVG_RAW[key];
-      let raw: string;
-      if (load) {
-        raw = (await load()) as string;
-      } else if (key.startsWith("/")) {
-        const res = await fetch(key).catch(() => null);
-        if (!res || !res.ok) return;
-        raw = await res.text();
-      } else {
-        return;
-      }
-      const ok = await downloadText(`${name}.svg`, raw, ["svg"], "SVG");
-      if (ok) flash(key);
+    (key: string, name: string) => {
+      void download.save(key, `${name}.svg`, async () => {
+        const load = SVG_RAW[key];
+        if (load) return (await load()) as string;
+        if (!key.startsWith("/")) throw new Error("Icon source unavailable");
+        const res = await fetch(key);
+        if (!res.ok) throw new Error("Icon source unavailable");
+        return res.text();
+      }, ["svg"], "SVG");
     },
-    [flash],
+    [download.save],
   );
   return (
-    <div className="hset-icon-grid">
-      {items.map((it) => (
-        <IconTile key={it.key} item={it} saved={savedId === it.key} onSave={save} />
-      ))}
-    </div>
+    <>
+      <div className="hset-icon-grid">
+        {items.map((it) => (
+          <IconTile
+            key={it.key}
+            item={it}
+            saved={download.savedId === it.key}
+            pending={download.pendingId === it.key}
+            disabled={download.pendingId !== null}
+            onSave={save}
+          />
+        ))}
+      </div>
+      <AssetDownloadFeedback status={download.status && items.some((it) => it.key === download.status?.id) ? download.status : null} />
+    </>
   );
 }
 
@@ -224,71 +215,104 @@ function AnimationTile({
   path,
   load,
   saved,
+  pending,
+  disabled,
   onSave,
 }: {
   path: string;
   load: () => Promise<unknown>;
   saved: boolean;
+  pending: boolean;
+  disabled: boolean;
   onSave: (path: string, name: string, data: object) => void;
 }) {
   const t = useT();
+  const reducedMotion = useReducedMotion();
   const [ref, inView] = useInView<HTMLButtonElement>();
   const [data, setData] = useState<object | null>(null);
+  const [failed, setFailed] = useState(false);
   const name = stem(path);
 
   useEffect(() => {
-    if (!inView || data) return;
+    if (!inView || data || failed) return;
     let alive = true;
     void load().then((mod) => {
       if (!alive) return;
       const m = mod as { default?: object };
       setData(m.default ?? (mod as object));
+    }).catch(() => {
+      if (alive) setFailed(true);
     });
     return () => { alive = false; };
-  }, [inView, data, load]);
+  }, [inView, data, failed, load]);
+
+  const loading = !data && !failed;
+  const action = failed
+    ? t("Retry loading {name}", { name: pretty(name) })
+    : loading
+      ? t("Loading {name}…", { name: pretty(name) })
+      : t("Save {name} as JSON", { name: pretty(name) });
 
   return (
     <button
       ref={ref}
       type="button"
-      className="hset-anim-tile"
-      onClick={() => data && onSave(path, name, data)}
-      title={t("Save as JSON")}
+      className="hset-anim-tile aria-disabled:cursor-wait aria-disabled:opacity-60"
+      onClick={() => {
+        if (disabled || loading) return;
+        if (failed) setFailed(false);
+        else if (data) onSave(path, name, data);
+      }}
+      aria-disabled={disabled || loading}
+      aria-busy={pending || loading}
+      aria-label={action}
+      title={action}
     >
       <span className="hset-anim-stage">
-        {data ? <LottiePlayer data={data} className="h-full w-full" /> : <span className="hset-anim-idle" aria-hidden />}
-        <span className="hset-icon-save" aria-hidden>
-          {saved ? <Check size={14} strokeWidth={2.75} /> : <Download size={14} strokeWidth={2.25} />}
-        </span>
+        {data && inView ? (
+          <LottiePlayer data={data} className="h-full w-full" autoplay={!reducedMotion} loop={!reducedMotion} />
+        ) : (
+          <span className="hset-anim-idle" aria-hidden />
+        )}
+        {data && (
+          <span className="hset-icon-save" aria-hidden>
+            {saved ? <Check size={14} strokeWidth={2.75} /> : <Download size={14} strokeWidth={2.25} />}
+          </span>
+        )}
       </span>
       <span className="hset-icon-name">{pretty(name)}</span>
+      <span role="status" className={`min-h-[17px] text-[12px] leading-[17px] ${failed ? "text-danger" : "text-ink-subtle"}`}>
+        {failed ? t("Load failed. Retry") : loading ? t("Loading…") : ""}
+      </span>
     </button>
   );
 }
 
-function AnimationSet({
-  glob,
-  savedId,
-  flash,
-}: {
-  glob: LazyGlob;
-  savedId: string | null;
-  flash: (id: string) => void;
-}) {
+function AnimationSet({ glob, download }: { glob: LazyGlob; download: AssetDownload }) {
   const keys = useMemo(() => Object.keys(glob).sort(), [glob]);
   const save = useCallback(
-    async (path: string, name: string, data: object) => {
-      const ok = await downloadText(`${name}.json`, JSON.stringify(data), ["json"], "Lottie");
-      if (ok) flash(path);
+    (path: string, name: string, data: object) => {
+      void download.save(path, `${name}.json`, async () => JSON.stringify(data), ["json"], "Lottie");
     },
-    [flash],
+    [download.save],
   );
   return (
-    <div className="hset-anim-grid">
-      {keys.map((k) => (
-        <AnimationTile key={k} path={k} load={glob[k]} saved={savedId === k} onSave={save} />
-      ))}
-    </div>
+    <>
+      <div className="hset-anim-grid">
+        {keys.map((k) => (
+          <AnimationTile
+            key={k}
+            path={k}
+            load={glob[k]}
+            saved={download.savedId === k}
+            pending={download.pendingId === k}
+            disabled={download.pendingId !== null}
+            onSave={save}
+          />
+        ))}
+      </div>
+      <AssetDownloadFeedback status={download.status && keys.includes(download.status.id) ? download.status : null} />
+    </>
   );
 }
 
@@ -302,41 +326,46 @@ function AuthorCard({
   name,
   role,
   links,
+  avatar,
 }: {
   name: string;
   role: string;
+  avatar: string;
   links: Array<{ label: string; url: string }>;
 }) {
   const t = useT();
   return (
     <div className="hset-author">
-      <span className="hset-author-role">{t(role)}</span>
-      <span className="hset-author-name">{name}</span>
-      <span className="hset-author-links">
-        {links.map((l) => (
-          <button key={l.url} type="button" onClick={() => void openUrl(l.url)} className="hset-author-link">
-            {l.label}
-            <ArrowUpRight size={13} strokeWidth={2.25} aria-hidden />
-          </button>
-        ))}
-      </span>
+      <div className="grid min-w-0 gap-1.5">
+        <span className="hset-author-role">{t(role)}</span>
+        <span className="hset-author-name">{name}</span>
+        <span className="hset-author-links">
+          {links.map((l) => (
+            <button key={l.url} type="button" onClick={() => void openUrl(l.url)} className="hset-author-link">
+              {l.label}
+              <ArrowUpRight size={13} strokeWidth={2.25} aria-hidden />
+            </button>
+          ))}
+        </span>
+      </div>
+      <img src={avatar} alt="" width={64} height={64} draggable={false} className="size-16 shrink-0 select-none rounded-full object-cover" />
     </div>
   );
 }
 
 export function IconsPanel() {
   const t = useT();
-  const [savedId, flash] = useSaved();
+  const download = useAssetDownload();
 
   return (
     <>
       <Section
-        title={t("Who drew all this")}
-        subtitle={t("Harbor did not draw its own icons. Two people did, and they are worth hiring.")}
+        title={t("Who drew our Art")}
       >
         <div className="hset-authors">
-          <AuthorCard name="Abiyyu Suryowibisono" role="Icons, illustrations, and the cat" links={ABIYYU_LINKS} />
+          <AuthorCard avatar={abiyyuAvatar} name="Abiyyu Suryowibisono" role="Icons, illustrations, and the cat" links={ABIYYU_LINKS} />
           <AuthorCard
+            avatar={stassAvatar}
             name="stass_motion"
             role="Animation"
             links={[{ label: "Fiverr", url: "https://pro.fiverr.com/freelancers/stass_motion" }]}
@@ -348,33 +377,33 @@ export function IconsPanel() {
         title={t("Navigation")}
         subtitle={t("The sidebar set. Click any one to save the SVG.")}
       >
-        <IconSet glob={NAV_URL} savedId={savedId} flash={flash} />
+        <IconSet glob={NAV_URL} download={download} />
       </Section>
 
       <Section title={t("Interface")} subtitle={t("Buttons, states, and the things that live on a card.")}>
-        <IconSet glob={UI_URL} savedId={savedId} flash={flash} />
+        <IconSet glob={UI_URL} download={download} />
       </Section>
 
       <Section
         title={t("Player")}
         subtitle={t("The chrome abiyyu drew for the player: transport, subtitles, shaders, and the rest.")}
       >
-        <IconSet glob={PLAYER_URL} savedId={savedId} flash={flash} />
+        <IconSet glob={PLAYER_URL} download={download} />
       </Section>
 
       <Section title={t("Navigation animations")} subtitle={t("What the sidebar icons do when you land on them.")}>
-        <AnimationSet glob={LOTTIE_NAV} savedId={savedId} flash={flash} />
+        <AnimationSet glob={LOTTIE_NAV} download={download} />
       </Section>
 
       <Section title={t("Everything else that moves")} subtitle={t("Loaders, boats, and the bits between screens.")}>
-        <AnimationSet glob={LOTTIE_MAIN} savedId={savedId} flash={flash} />
+        <AnimationSet glob={LOTTIE_MAIN} download={download} />
       </Section>
 
       <Section
         title={t("Harbor and the installer")}
         subtitle={t("The Big Picture opener and the boat that builds itself while Harbor installs.")}
       >
-        <AnimationSet glob={LOTTIE_APP} savedId={savedId} flash={flash} />
+        <AnimationSet glob={LOTTIE_APP} download={download} />
       </Section>
 
       <Section title={t("Using these")}>

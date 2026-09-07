@@ -11,7 +11,7 @@ import {
   Timer,
   X,
 } from "../icons";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import {
@@ -61,6 +61,12 @@ export function LocalEngineSection() {
   const { settings, update } = useSettings();
   const t = useT();
   const strictRemote = !!settings.remoteStreamServerUrl && settings.remoteStreamServerStrict;
+  const selfTestReasonId = useId();
+  const selfTestLockReason = settings.torrentsDisabled
+    ? t("Enable torrent streaming to run the local engine self-test.")
+    : strictRemote
+      ? t("Self-test is disabled while strict remote streaming is on. It downloads a test torrent over peer-to-peer on this machine.")
+      : undefined;
   const [status, setStatus] = useState<EngineStatus | null>(null);
   const [running, setRunning] = useState(false);
   const [restarting, setRestarting] = useState(false);
@@ -213,24 +219,22 @@ export function LocalEngineSection() {
       <SettingGroup label={t("Maintenance")}>
         <SettingRow
           label={t("Run self-test")}
-          desc={t("Checks that this network can reach trackers and peers.")}
+          desc={selfTestLockReason
+            ? <span id={selfTestReasonId}>{selfTestLockReason}</span>
+            : t("Checks that this network can reach trackers and peers.")}
           tip={t(
             "Fetches a small public test torrent, then reports UDP and HTTPS egress, DHT bootstrap and tracker reachability step by step.",
           )}
-          lockReason={
-            strictRemote
-              ? t(
-                  "Self-test is disabled while strict remote streaming is on. It downloads a test torrent over peer-to-peer on this machine.",
-                )
-              : undefined
-          }
+          lockReason={selfTestLockReason}
         >
           <button
             type="button"
-            onClick={busy || strictRemote ? undefined : () => void runTest()}
-            aria-disabled={busy || strictRemote}
+            onClick={busy || selfTestLockReason ? undefined : () => void runTest()}
+            disabled={busy || !!selfTestLockReason}
+            aria-disabled={busy || !!selfTestLockReason}
+            aria-describedby={selfTestLockReason ? selfTestReasonId : undefined}
             className={`${ROW_ACTION_PRIMARY}${
-              busy || strictRemote ? " pointer-events-none opacity-40" : ""
+              busy || selfTestLockReason ? " pointer-events-none opacity-40" : ""
             }`}
           >
             {running ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} strokeWidth={2.4} />}

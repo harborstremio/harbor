@@ -1,3 +1,4 @@
+import settingsRefinements from "./ja/settings-refinements";
 import addons from "./ja/addons";
 import appFill from "./ja/app-fill";
 import awards from "./ja/awards";
@@ -66,6 +67,7 @@ const ja: Record<string, string> = {
   ...sync,
   ...together,
   ...questions,
+  ...settingsRefinements,
 };
 
 export default ja;
