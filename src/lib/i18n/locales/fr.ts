@@ -1,3 +1,4 @@
+import contextActionsFallback from "./context-actions-fallback";
 import ebookSources from "./fr/ebook-sources";
 import settingsRefinements from "./fr/settings-refinements";
 import inventory from "./fr/inventory";
@@ -36,6 +37,7 @@ import plugins from "./fr/plugins";
 import brands from "./fr/brands";
 
 const fr: Record<string, string> = {
+  ...contextActionsFallback,
   ...ebookSources,
   ...inventory,
   ...wired,

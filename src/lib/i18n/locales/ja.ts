@@ -1,3 +1,4 @@
+import contextActionsFallback from "./context-actions-fallback";
 import ebookSources from "./ja/ebook-sources";
 import settingsRefinements from "./ja/settings-refinements";
 import addons from "./ja/addons";
@@ -37,6 +38,7 @@ import plugins from "./ja/plugins";
 import brands from "./ja/brands";
 
 const ja: Record<string, string> = {
+  ...contextActionsFallback,
   ...ebookSources,
   ...coverage,
   ...sweep,

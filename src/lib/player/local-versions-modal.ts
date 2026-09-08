@@ -2,12 +2,14 @@ import type { LocalEntry } from "@/lib/local-library";
 import type { PlayableCopy } from "@/lib/media-server/types";
 
 export type LocalVersionsPayload = {
+  intent?: "play" | "download";
   title: string;
   poster?: string | null;
   entries: LocalEntry[];
-  onPlayLocal: (entry: LocalEntry) => void;
+  onPlayLocal: (entry: LocalEntry) => void | Promise<void>;
   serverCopies?: PlayableCopy[];
-  onPlayServer?: (copy: PlayableCopy) => void;
+  onPlayServer?: (copy: PlayableCopy) => void | Promise<void>;
+  onDownloadServer?: (copy: PlayableCopy) => void | Promise<void>;
   onStream?: () => void;
 };
 

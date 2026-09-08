@@ -13,6 +13,8 @@ tauri-build = { version = "2", features = [] }
 
 [features]
 default = []
+context-review = []
+context-fixture = ["context-review"]
 silero-vad = ["dep:ort", "dep:ndarray"]
 asr-whisper = ["dep:whisper-rs"]
 chromaprint = []

@@ -1,9 +1,14 @@
 import { Layers } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
-import { collectionNameMatches, tmdbCollection, tmdbSearchCollectionId } from "@/lib/providers/tmdb";
+import {
+  collectionNameMatches,
+  tmdbCollection,
+  tmdbSearchCollectionId,
+} from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
 
 export function CollectionCard({
   id,
@@ -18,6 +23,7 @@ export function CollectionCard({
 }) {
   const { settings } = useSettings();
   const { openCollection } = useView();
+  const { open } = useContextMenu();
   const t = useT();
   const ref = useRef<HTMLButtonElement>(null);
   const [inView, setInView] = useState(false);
@@ -71,6 +77,29 @@ export function CollectionCard({
     <button
       ref={ref}
       type="button"
+      onContextMenu={(event) =>
+        open(event, {
+          kind: "actions",
+          id: `tmdb-collection:${resolvedId}`,
+          label: name,
+          image: backdrop
+            ? {
+                src: backdrop.replace("/t/p/original/", "/t/p/w780/"),
+                originalSrc: backdrop,
+                publicUrl: backdrop,
+                label: name,
+              }
+            : undefined,
+          actions: () => [
+            {
+              id: `tmdb-collection:open:${resolvedId}`,
+              label: t("Open collection"),
+              disabled: resolvedId <= 0,
+              run: () => openCollection(resolvedId),
+            },
+          ],
+        })
+      }
       onClick={() => {
         if (resolvedId > 0) openCollection(resolvedId);
       }}
@@ -87,8 +116,14 @@ export function CollectionCard({
           onLoad={(e) => e.currentTarget.setAttribute("data-on", "true")}
         />
       )}
-      <div aria-hidden className="absolute inset-0 bg-black/15 transition-colors duration-300 group-hover/card:bg-black/0" />
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/30 to-transparent" />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-black/15 transition-colors duration-300 group-hover/card:bg-black/0"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/30 to-transparent"
+      />
       <span className="absolute start-3.5 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white/85 backdrop-blur-md">
         <Layers size={11} strokeWidth={2.4} />
         {count != null ? t("{count} films", { count }) : t("Collection")}

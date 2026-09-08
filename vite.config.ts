@@ -86,7 +86,9 @@ export default defineConfig(({ mode }) => {
             rollupOptions: { input: { tv: "index-tv.html", main: "index.html" } },
           },
         }
-      : {}),
+      : mode === "context-fixture"
+        ? { build: { rollupOptions: { input: { fixture: "context-review.html" } } } }
+        : {}),
     server: {
       host: devHost || "127.0.0.1",
       port: 1420,

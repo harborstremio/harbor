@@ -1,14 +1,17 @@
 import { invoke } from "@tauri-apps/api/core";
 import { safeFetch } from "@/lib/safe-fetch";
-import { authToken } from "@/lib/theme-auth";
+import { authToken, currentAuthor } from "@/lib/theme-auth";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 import {
   MAX_COLLECTIONS,
   MAX_COLLECTION_ITEMS,
   absCollectionImage,
+  readPersistedCollectionSnapshot,
   type Collection,
   type CollectionItem,
 } from "@/lib/collections";
+import { captureMembershipProfile, isMembershipProfileCurrent } from "@/lib/membership-operations";
+import { queueCollectionPublication } from "@/lib/collection-publication-queue";
 
 const BASE = `${HARBOR_API_BASE}/themes/api/social`;
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -89,11 +92,20 @@ function stripDataUrl(u: string | undefined): string | undefined {
 
 function trimForPublish(collections: Collection[]): Collection[] {
   return collections.slice(0, MAX_COLLECTIONS).map((c) => ({
-    ...c,
+    id: c.id,
+    name: c.name,
+    description: c.description,
+    tags: c.tags,
+    shared: !c.sourceHandle && !c.sourceId && c.shared === true ? true : undefined,
+    numbered: c.numbered,
+    createdAt: c.createdAt,
+    updatedAt: c.updatedAt,
     coverImage: stripDataUrl(c.coverImage),
     bgImage: stripDataUrl(c.bgImage),
     items: c.items.slice(0, MAX_COLLECTION_ITEMS).map((it) => ({
-      ...it,
+      id: it.id,
+      type: it.type,
+      name: it.name,
       poster: stripDataUrl(it.poster),
     })),
   }));
@@ -109,6 +121,52 @@ export async function fetchUserCollections(
   });
   if (!res.ok) throw new Error(`collections ${res.status}`);
   return extractCollections(await res.json());
+}
+
+/** A public or filtered profile response cannot prove that an account copy is absent. */
+export async function readOwnedCollectionMirror(token: string): Promise<Collection[]> {
+  const handle = currentAuthor()?.handle?.trim();
+  if (!handle || !token || authToken() !== token)
+    throw new Error("The Harbor account could not be verified.");
+  const response = await safeFetch(`${BASE}/u/${encodeURIComponent(handle)}`, {
+    headers: { authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error("The Harbor account collections could not be read.");
+  const data: unknown = await response.json();
+  if (
+    authToken() !== token ||
+    currentAuthor()?.handle?.trim().toLowerCase() !== handle.toLowerCase()
+  )
+    throw new Error("The Harbor account changed while reading its collections.");
+  if (
+    !data ||
+    typeof data !== "object" ||
+    !("isOwner" in data) ||
+    data.isOwner !== true ||
+    !("handle" in data) ||
+    typeof data.handle !== "string" ||
+    data.handle.toLowerCase() !== handle.toLowerCase() ||
+    !("collections" in data) ||
+    !Array.isArray(data.collections)
+  )
+    throw new Error("The server did not confirm access to your complete account collections.");
+  const raw = data.collections;
+  const collections = extractCollections(data);
+  if (
+    collections.length !== raw.length ||
+    new Set(collections.map((collection) => collection.id)).size !== collections.length ||
+    raw.some(
+      (entry, index) =>
+        !entry ||
+        typeof entry !== "object" ||
+        !Array.isArray(entry.items) ||
+        entry.items.length !== collections[index].items.length ||
+        new Set(collections[index].items.map((item) => item.id)).size !==
+          collections[index].items.length,
+    )
+  )
+    throw new Error("The account collection data could not be read safely.");
+  return collections;
 }
 
 export async function fetchSharedCollection(
@@ -159,20 +217,79 @@ export async function fetchCommunityCollections(
   return out;
 }
 
-export async function publishCollections(
+/** Only call while holding queueCollectionPublication. */
+export async function publishCollectionSnapshot(
   collections: Collection[],
+  token: string,
   clear = false,
 ): Promise<Collection[]> {
-  const body: Record<string, unknown> = { collections: trimForPublish(collections) };
+  if (!token || authToken() !== token)
+    throw new Error("The Harbor account changed. Reopen the collection action.");
+  const submitted = trimForPublish(collections);
+  const body: Record<string, unknown> = { collections: submitted };
   if (clear) body.clearCollections = true;
   const res = await safeFetch(`${BASE}/me/profile`, {
     method: "PATCH",
-    headers: { ...authHeaders(), "content-type": "application/json" },
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`publish collections ${res.status}`);
-  const echoed = extractCollections(await res.json());
-  return echoed.length || collections.length === 0 ? echoed : collections;
+  const response: unknown = await res.json();
+  const raw =
+    response && typeof response === "object" && "collections" in response
+      ? response.collections
+      : null;
+  const echoed = extractCollections(response);
+  if (
+    !Array.isArray(raw) ||
+    raw.length !== echoed.length ||
+    echoed.length !== submitted.length ||
+    new Set(echoed.map((entry) => entry.id)).size !== echoed.length ||
+    submitted.some((entry) => {
+      const stored = echoed.find((candidate) => candidate.id === entry.id);
+      return (
+        !stored ||
+        (stored.shared === true) !== (entry.shared === true) ||
+        stored.items.length !== entry.items.length ||
+        stored.items.some((item, index) => item.id !== entry.items[index].id)
+      );
+    })
+  )
+    throw new Error(
+      "The server response did not confirm the requested collections. Your local collections were kept; refresh the published collection before retrying.",
+    );
+  return echoed;
+}
+
+/** Editor synchronization must read after the queue lock, never retain a stale full-array payload. */
+export function publishCollections(): Promise<Collection[]> {
+  const profile = captureMembershipProfile();
+  const token = authToken();
+  if (!profile || !token) return Promise.reject(new Error("Sign in to publish your collections."));
+  return queueCollectionPublication(profile, token, async () => {
+    const snapshot = readPersistedCollectionSnapshot(profile);
+    if ("status" in snapshot)
+      throw new Error(
+        "Could not read saved collections safely. Resolve pending storage changes and try again.",
+      );
+    if (
+      snapshot.containers.length > MAX_COLLECTIONS ||
+      snapshot.containers.some((entry) => entry.items.length > MAX_COLLECTION_ITEMS)
+    )
+      throw new Error(
+        "The collections exceed the publication limit. No collections were published.",
+      );
+    const result = await publishCollectionSnapshot(
+      snapshot.containers as unknown as Collection[],
+      token,
+      snapshot.containers.length === 0,
+    );
+    if (!isMembershipProfileCurrent(profile) || authToken() !== token)
+      throw new Error(
+        "The server accepted the collection changes, but the local profile or account changed. Reopen the collection to reconcile its state.",
+      );
+    return result;
+  });
 }
 
 export function collectionShareUrl(handle: string, collectionId: string): string {

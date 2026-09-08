@@ -10,11 +10,20 @@ import { UserHoverCard } from "./user-hover-card";
 import { useSelfAvatar } from "./use-self-avatar";
 import type { Comment } from "./profile-types";
 import { VerifiedBadge } from "@/views/account/verified-badge";
+import { useContextTarget } from "@/lib/context-menu";
+import { copyContextText } from "@/components/context-menu/content-actions";
+import { confirmDialog } from "@/lib/dialog";
 
-function SafeBody({ body, onOpenAuthor }: { body: string; onOpenAuthor?: (handle: string) => void }) {
+function SafeBody({
+  body,
+  onOpenAuthor,
+}: {
+  body: string;
+  onOpenAuthor?: (handle: string) => void;
+}) {
   const t = useT();
   return (
-    <p className="mt-1 whitespace-pre-wrap break-words text-[14px] leading-relaxed text-ink-muted">
+    <p className="mt-1 select-text whitespace-pre-wrap break-words text-[14px] leading-relaxed text-ink-muted">
       {segmentMentions(body).map((seg, i) =>
         seg.handle ? (
           <MentionLink key={i} handle={seg.handle} label={seg.text} onOpen={onOpenAuthor} />
@@ -53,8 +62,8 @@ export function CommentItem({
   c: Comment;
   canDelete: boolean;
   signedIn?: boolean;
-  onDelete: (id: string) => void;
-  onToggleLike?: (id: string) => void;
+  onDelete: (id: string) => void | Promise<void>;
+  onToggleLike?: (id: string) => void | Promise<void>;
   onOpenAuthor?: (handle: string) => void;
   onReply?: (raw: string, parentId: string) => Promise<ComposeIssue>;
   replyToId?: string;
@@ -66,11 +75,76 @@ export function CommentItem({
   const [replying, setReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
   const mine = !!self.handle && self.handle.toLowerCase() === c.authorHandle.toLowerCase();
-  const avatarSrc = mine ? self.avatar ?? c.authorAvatarUrl : c.authorAvatarUrl;
+  const avatarSrc = mine ? (self.avatar ?? c.authorAvatarUrl) : c.authorAvatarUrl;
   const avatarFallback = mine ? c.authorAvatarUrl : undefined;
   const canReply = !!onReply && !!signedIn && !!replyToId;
+  const [actionError, setActionError] = useState("");
+  const removeComment = async () => {
+    if (await confirmDialog(t("Delete this comment? This cannot be undone."))) await onDelete(c.id);
+  };
+  const act = async (action: () => void | Promise<void>) => {
+    setActionError("");
+    try {
+      await action();
+    } catch (error) {
+      setActionError(
+        error instanceof Error ? t(error.message) : t("The action could not be completed."),
+      );
+    }
+  };
+  const contextRef = useContextTarget<HTMLDivElement>(() => ({
+    kind: "actions",
+    id: `comment:${c.id}`,
+    label: t("Comment"),
+    contentPolicy: "separate",
+    actions: () => [
+      { id: "comment:copy", label: t("Copy comment text"), run: () => copyContextText(c.body) },
+      ...(signedIn && onToggleLike
+        ? [
+            {
+              id: "comment:like",
+              label: c.liked ? t("Unlike comment") : t("Like comment"),
+              group: "comment",
+              run: () => onToggleLike(c.id),
+            },
+          ]
+        : []),
+      ...(canReply
+        ? [
+            {
+              id: "comment:reply",
+              label: t("Reply"),
+              group: "comment",
+              restoreFocus: false,
+              run: () => setReplying(true),
+            },
+          ]
+        : []),
+      ...(onOpenAuthor
+        ? [
+            {
+              id: "comment:author",
+              label: t("Open author profile"),
+              group: "author",
+              run: () => onOpenAuthor(c.authorHandle),
+            },
+          ]
+        : []),
+      ...(canDelete
+        ? [
+            {
+              id: "comment:delete",
+              label: t("Delete comment"),
+              group: "remove",
+              danger: true,
+              run: removeComment,
+            },
+          ]
+        : []),
+    ],
+  }));
   return (
-    <div className="flex flex-col">
+    <div ref={contextRef} className="flex flex-col" tabIndex={0}>
       <div className="group flex items-start gap-3 rounded-md p-2 transition-colors hover:bg-elevated/60">
         <UserHoverCard handle={c.authorHandle}>
           <button
@@ -104,12 +178,14 @@ export function CommentItem({
           <SafeBody body={c.body} onOpenAuthor={onOpenAuthor} />
           <div className="mt-1.5 flex items-center gap-1">
             <button
-              onClick={() => onToggleLike?.(c.id)}
+              onClick={() => void act(() => onToggleLike?.(c.id))}
               disabled={!signedIn}
               aria-pressed={!!c.liked}
               aria-label={c.liked ? t("Unlike comment") : t("Like comment")}
               className={`-ml-2 inline-flex h-8 items-center gap-1.5 rounded-[8px] px-2 text-[12px] tabular-nums transition-colors disabled:cursor-default ${
-                c.liked ? "text-danger" : `text-ink-subtle ${signedIn ? "hover:text-ink-muted" : ""}`
+                c.liked
+                  ? "text-danger"
+                  : `text-ink-subtle ${signedIn ? "hover:text-ink-muted" : ""}`
               } ${signedIn ? "hover:bg-elevated/70" : ""}`}
             >
               <Heart size={15} className={c.liked ? "fill-current" : ""} />
@@ -128,6 +204,7 @@ export function CommentItem({
           {canReply && replying && (
             <div className="mt-2">
               <CommentCompose
+                autoFocus
                 onSubmit={async (raw) => {
                   const res = await onReply!(raw, replyToId!);
                   if (!res) setReplying(false);
@@ -141,7 +218,7 @@ export function CommentItem({
         </div>
         {canDelete && (
           <button
-            onClick={() => onDelete(c.id)}
+            onClick={() => void act(removeComment)}
             aria-label={t("Delete comment")}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-subtle opacity-0 transition-all hover:bg-surface hover:text-danger focus-visible:opacity-100 group-hover:opacity-100"
           >
@@ -149,6 +226,11 @@ export function CommentItem({
           </button>
         )}
       </div>
+      {actionError && (
+        <p role="alert" className="px-2 py-1 text-[12px] text-danger">
+          {actionError}
+        </p>
+      )}
       {replies && replies.length > 0 && (
         <div className="ml-12 flex flex-col">
           <button

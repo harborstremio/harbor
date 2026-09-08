@@ -53,6 +53,10 @@ export function dispatchTvNav(
   repeat = false,
 ): void {
   if (typeof window === "undefined") return;
+  // A menu or image viewer owns controller focus even if the pointer last
+  // hovered a card underneath it.
+  if (document.querySelector("[data-harbor-context-layer],[data-harbor-image-viewer]"))
+    hoveredEl = null;
   if (action === "home") {
     const homeNav = document.querySelector('[data-harbor-nav="home"]');
     if (homeNav instanceof HTMLElement) homeNav.click();
@@ -345,7 +349,10 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         }
 
         if (active && dir === endDir && isInNav(active)) {
-          const toContent = findClosestByY(active, getFocusable(root).filter((el) => !isInNav(el)));
+          const toContent = findClosestByY(
+            active,
+            getFocusable(root).filter((el) => !isInNav(el)),
+          );
           if (toContent) {
             SFX.navigate(dir, getSoundType(toContent));
             focusElement(toContent);
@@ -391,8 +398,8 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
           if (idx >= 0) {
             const next =
               dir === "down" || dir === "right"
-                ? ordered[idx + 1] ?? ordered[0]
-                : ordered[idx - 1] ?? ordered[ordered.length - 1];
+                ? (ordered[idx + 1] ?? ordered[0])
+                : (ordered[idx - 1] ?? ordered[ordered.length - 1]);
             if (next) {
               SFX.navigate(dir, getSoundType(next));
               focusElement(next);

@@ -1,6 +1,8 @@
 import { Poster } from "@/components/poster";
 import { Row } from "@/components/row";
 import type { MangaSummary } from "@/lib/manga/types";
+import { registerContextTarget } from "@/lib/context-menu";
+import { useT } from "@/lib/i18n";
 
 export function MangaPosterRow({
   items,
@@ -15,6 +17,7 @@ export function MangaPosterRow({
   art?: string | null;
   scrollKey?: string;
 }) {
+  const t = useT();
   if (items && items.length === 0) return null;
 
   return (
@@ -29,6 +32,23 @@ export function MangaPosterRow({
         : items.map((m) => (
             <button
               key={m.id}
+              ref={(node) =>
+                node
+                  ? registerContextTarget(node, () => ({
+                      kind: "actions",
+                      id: `manga:${m.id}`,
+                      label: m.title,
+                      image: m.cover ? { src: m.cover, label: m.title } : undefined,
+                      actions: () => [
+                        {
+                          id: `manga:details:${m.id}`,
+                          label: t("View details"),
+                          run: () => onOpen(m),
+                        },
+                      ],
+                    }))
+                  : undefined
+              }
               type="button"
               onClick={() => onOpen(m)}
               className="group flex w-full flex-col gap-2 text-start"
@@ -50,7 +70,9 @@ export function MangaPosterRow({
                   />
                 )}
               </div>
-              <p className="line-clamp-2 text-[13px] font-medium leading-snug text-ink">{m.title}</p>
+              <p className="line-clamp-2 text-[13px] font-medium leading-snug text-ink">
+                {m.title}
+              </p>
             </button>
           ))}
     </Row>

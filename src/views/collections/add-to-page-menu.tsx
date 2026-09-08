@@ -1,13 +1,13 @@
 import { Check, LayoutGrid } from "lucide-react";
-import { type RefObject } from "react";
+import { useEffect, useState, type RefObject } from "react";
+import { captureMembershipProfile } from "@/lib/membership-operations";
+import { membershipFailureMessage } from "@/lib/membership-actions";
 import { useT } from "@/lib/i18n";
-import { AnchoredMenu } from "@/components/anchored-menu";
+import { MenuSurface } from "@/components/context-menu/menu-surface";
 import { emitListToast } from "@/components/lists/list-toast";
 import {
   COLLECTION_ROW_PAGES,
-  addCollectionToPage,
-  collectionPageCap,
-  removeCollectionFromPage,
+  setCollectionOnPageWithResult,
   usePagesForCollection,
   type CollectionRowPage,
 } from "@/lib/page-collection-rows";
@@ -25,23 +25,53 @@ export function AddToPageMenu({
 }) {
   const t = useT();
   const pages = usePagesForCollection(collectionId);
+  const [profile, setProfile] = useState(captureMembershipProfile);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    if (open) {
+      setProfile(captureMembershipProfile());
+      setError("");
+    }
+  }, [open]);
 
   const toggle = (page: CollectionRowPage, label: string) => {
-    if (pages.has(page)) {
-      removeCollectionFromPage(page, collectionId);
-      emitListToast(t("Removed from {page}", { page: t(label) }));
-    } else {
-      if (collectionPageCap(page)) {
-        emitListToast(t("That page is full"));
-        return;
-      }
-      addCollectionToPage(page, collectionId);
-      emitListToast(t("Added to {page}", { page: t(label) }));
+    if (!profile) {
+      setError(t("The active profile changed. Open the menu again."));
+      return;
     }
+    const result = setCollectionOnPageWithResult({
+      page,
+      collectionId,
+      present: !pages.has(page),
+      profile,
+    });
+    if (result.status === "error") {
+      setError(t(membershipFailureMessage(result)));
+      return;
+    }
+    setError("");
+    emitListToast(
+      t(
+        result.status === "removed" || result.status === "unchanged"
+          ? "Removed from {page}"
+          : "Added to {page}",
+        { page: t(label) },
+      ),
+    );
   };
 
+  const anchor = anchorRef.current?.getBoundingClientRect();
+  if (!open || !anchor) return null;
   return (
-    <AnchoredMenu anchorRef={anchorRef} open={open} onClose={onClose} width={272}>
+    <MenuSurface
+      point={{ x: anchor.left, y: anchor.bottom + 6 }}
+      onClose={(restore) => {
+        onClose();
+        if (restore) anchorRef.current?.focus({ preventScroll: true });
+      }}
+      width={272}
+      label={t("Show as a row on")}
+    >
       <div className="animate-popover-in overflow-hidden rounded-2xl border border-edge-soft bg-elevated shadow-[0_18px_50px_-15px_rgba(0,0,0,0.6)]">
         <div className="flex items-center gap-2 border-b border-edge-soft/55 px-3.5 pt-3 pb-2.5">
           <LayoutGrid size={14} strokeWidth={2} className="text-ink-subtle" />
@@ -50,12 +80,19 @@ export function AddToPageMenu({
           </span>
         </div>
         <div className="py-1.5">
+          {error && (
+            <p role="alert" className="px-3.5 py-2 text-xs text-danger">
+              {error}
+            </p>
+          )}
           {COLLECTION_ROW_PAGES.map(({ id, label }) => {
             const on = pages.has(id);
             return (
               <button
                 key={id}
                 type="button"
+                role="menuitem"
+                aria-pressed={on}
                 onClick={() => toggle(id, label)}
                 className="flex w-full items-center gap-3 px-3.5 py-2.5 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
               >
@@ -75,6 +112,6 @@ export function AddToPageMenu({
           {t("The collection shows up as its own row you can reorder or hide from that page.")}
         </p>
       </div>
-    </AnchoredMenu>
+    </MenuSurface>
   );
 }

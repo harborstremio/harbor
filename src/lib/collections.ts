@@ -2,6 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import { setItemWithRecovery, freeStorageSpace } from "@/lib/storage-recovery";
 import { randomUuid } from "@/lib/uuid";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+import { persistableAddonOrigin, persistableVideos, type Meta } from "@/lib/cinemeta";
+import {
+  isMembershipItemInput,
+  captureMembershipProfile,
+  performMembershipOperation,
+  performContainerOperation,
+  readMembershipSnapshot,
+  type MembershipProfile,
+  type MembershipResult,
+  type MoveMembershipRequest,
+  type RemoveMembershipRequest,
+} from "@/lib/membership-operations";
 
 // Server image URLs are root-relative (/themes/api/images/...); make them absolute so they
 // resolve against harbor.site in Tauri instead of the app origin. data:/blob:/http stay as-is.
@@ -47,6 +59,8 @@ export type CollectionItem = {
   type: CollectionItemType;
   name: string;
   poster?: string;
+  addonOrigin?: Meta["addonOrigin"];
+  videos?: Meta["videos"];
 };
 
 export type CollectionItemInput = {
@@ -54,6 +68,8 @@ export type CollectionItemInput = {
   type?: string;
   name?: string;
   poster?: string;
+  addonOrigin?: Meta["addonOrigin"];
+  videos?: Meta["videos"];
 };
 
 export type Collection = {
@@ -83,14 +99,50 @@ export const MAX_COLLECTION_TAGS = 8;
 export const MAX_TAG_LENGTH = 24;
 
 export function normalizeTag(raw: string): string {
-  return raw
-    .trim()
-    .replace(/\s+/g, " ")
-    .replace(/[<>]/g, "")
-    .slice(0, MAX_TAG_LENGTH);
+  return raw.trim().replace(/\s+/g, " ").replace(/[<>]/g, "").slice(0, MAX_TAG_LENGTH);
 }
 
 let memoryFallback: Collection[] | null = null;
+
+export function readPersistedCollectionSnapshot(profile: MembershipProfile) {
+  if (memoryFallback) return { status: "error", reason: "unsaved-changes" } as const;
+  return readMembershipSnapshot(KEY, profile);
+}
+
+export function deleteCollectionWithResult(
+  id: string,
+  profile: MembershipProfile,
+  expectedRaw?: string | null,
+) {
+  if (memoryFallback) return { status: "error", reason: "unsaved-changes" } as const;
+  const result = performContainerOperation(KEY, profile, { mode: "delete", id, expectedRaw });
+  if (result.status === "removed") for (const subscriber of subs) subscriber();
+  return result;
+}
+
+export function setCollectionSharedWithResult(
+  id: string,
+  shared: boolean,
+  profile: MembershipProfile,
+  expectedRaw: string | null,
+) {
+  const snapshot = readPersistedCollectionSnapshot(profile);
+  if ("status" in snapshot) return snapshot;
+  if (snapshot.raw !== expectedRaw) return { status: "error", reason: "unsaved-changes" } as const;
+  const collection = snapshot.containers.find((entry) => entry.id === id);
+  if (!collection) return { status: "error", reason: "missing-source" } as const;
+  if (collection.sourceHandle || collection.sourceId)
+    return { status: "error", reason: "invalid-data" } as const;
+  collection.shared = shared;
+  collection.updatedAt = Date.now();
+  try {
+    localStorage.setItem(snapshot.key, JSON.stringify(snapshot.containers));
+  } catch {
+    return { status: "error", reason: "storage-failed" } as const;
+  }
+  for (const subscriber of subs) subscriber();
+  return { status: "updated" } as const;
+}
 
 function inferType(id: string): "movie" | "series" {
   if (/^(kitsu|mal|anilist|anidb):/i.test(id)) return "series";
@@ -110,6 +162,8 @@ function toItem(input: CollectionItemInput): CollectionItem {
     type: normalizeType(input.type, input.id),
     name: input.name ?? "",
     poster: input.poster,
+    addonOrigin: persistableAddonOrigin(input.addonOrigin),
+    videos: persistableVideos(input.videos),
   };
 }
 
@@ -137,6 +191,8 @@ function read(): Collection[] {
             type: it.type === "series" ? "series" : it.type === "manga" ? "manga" : "movie",
             name: typeof it.name === "string" ? it.name : "",
             poster: typeof it.poster === "string" ? it.poster : undefined,
+            addonOrigin: persistableAddonOrigin(it.addonOrigin),
+            videos: persistableVideos(it.videos),
           });
         }
       }
@@ -217,7 +273,7 @@ export function createCollection(name: string): string | null {
   return id;
 }
 
-export function saveCommunityCollection(source: {
+type CommunityCollectionSource = {
   handle: string;
   id: string;
   name: string;
@@ -225,36 +281,59 @@ export function saveCommunityCollection(source: {
   coverImage?: string;
   bgImage?: string;
   tags?: string[];
+  numbered?: boolean;
   items: CollectionItem[];
-}): string | null {
-  const collections = read();
-  const existing = collections.find(
-    (c) => c.sourceHandle === source.handle && c.sourceId === source.id,
+};
+
+export function saveCommunityCollection(source: CommunityCollectionSource): string | null {
+  const profile = captureMembershipProfile();
+  return profile ? (saveCommunityCollectionWithResult(source, profile).id ?? null) : null;
+}
+
+export function saveCommunityCollectionWithResult(
+  source: CommunityCollectionSource,
+  profile: MembershipProfile,
+): { result: MembershipResult; id?: string } {
+  if (memoryFallback) return { result: { status: "error", reason: "unsaved-changes" } };
+  if (!source.handle || !source.id || !source.name.trim() || !Array.isArray(source.items)) {
+    return { result: { status: "error", reason: "invalid-data" } };
+  }
+  const snapshot = readPersistedCollectionSnapshot(profile);
+  if ("status" in snapshot) return { result: snapshot };
+  const existing = snapshot.containers.find(
+    (entry) => entry.sourceHandle === source.handle && entry.sourceId === source.id,
   );
-  if (existing) return existing.id;
-  if (collections.length >= MAX_COLLECTIONS) return null;
+  if (existing)
+    return { result: { status: "already-present", containerId: existing.id }, id: existing.id };
+  if (source.items.length > MAX_COLLECTION_ITEMS)
+    return { result: { status: "error", reason: "destination-full" } };
   const id = randomUuid();
   const now = Date.now();
-  collections.push({
-    id,
-    name: source.name.trim().slice(0, MAX_COLLECTION_NAME) || "Saved collection",
-    description: source.description,
-    coverImage: source.coverImage,
-    bgImage: source.bgImage,
-    tags: source.tags && source.tags.length ? source.tags.slice(0, MAX_COLLECTION_TAGS) : undefined,
-    sourceHandle: source.handle,
-    sourceId: source.id,
-    items: source.items.slice(0, MAX_COLLECTION_ITEMS).map((it) => ({
-      id: it.id,
-      type: it.type,
-      name: it.name,
-      poster: it.poster,
-    })),
-    createdAt: now,
-    updatedAt: now,
+  const result = performMembershipOperation(KEY, MAX_COLLECTION_ITEMS, {
+    mode: "create",
+    profile,
+    maxContainers: MAX_COLLECTIONS,
+    source: { handle: source.handle, id: source.id },
+    container: {
+      id,
+      name: source.name.trim().slice(0, MAX_COLLECTION_NAME) || "Saved collection",
+      description: source.description,
+      coverImage: source.coverImage,
+      bgImage: source.bgImage,
+      tags:
+        source.tags && source.tags.length ? source.tags.slice(0, MAX_COLLECTION_TAGS) : undefined,
+      numbered: source.numbered,
+      sourceHandle: source.handle,
+      sourceId: source.id,
+      items: source.items.map((it) => ({ ...it })),
+      createdAt: now,
+      updatedAt: now,
+    },
   });
-  write(collections);
-  return id;
+  if (result.status === "already-present") return { result, id: result.containerId };
+  if (result.status !== "added") return { result };
+  for (const subscriber of subs) subscriber();
+  return { result, id };
 }
 
 export function renameCollection(id: string, name: string): void {
@@ -285,14 +364,41 @@ export function deleteCollection(id: string): void {
   write(next);
 }
 
-export function addToCollection(collectionId: string, item: CollectionItemInput): void {
-  const collections = read();
-  const c = collections.find((x) => x.id === collectionId);
-  if (!c || c.items.length >= MAX_COLLECTION_ITEMS) return;
-  if (c.items.some((it) => it.id === item.id)) return;
-  c.items.push(toItem(item));
-  c.updatedAt = Date.now();
-  write(collections);
+export function addToCollection(
+  collectionId: string,
+  item: CollectionItemInput,
+  profile?: MembershipProfile,
+): MembershipResult {
+  if (!isMembershipItemInput(item)) return { status: "error", reason: "invalid-data" };
+  if (memoryFallback) return { status: "error", reason: "unsaved-changes" };
+  const result = performMembershipOperation(KEY, MAX_COLLECTION_ITEMS, {
+    mode: "add",
+    destinationId: collectionId,
+    item: toItem(item),
+    profile,
+  });
+  if (result.status === "added") for (const subscriber of subs) subscriber();
+  return result;
+}
+
+export function moveBetweenCollections(request: MoveMembershipRequest): MembershipResult {
+  if (memoryFallback) return { status: "error", reason: "unsaved-changes" };
+  const result = performMembershipOperation(KEY, MAX_COLLECTION_ITEMS, {
+    mode: "move",
+    ...request,
+  });
+  if (result.status === "moved") for (const subscriber of subs) subscriber();
+  return result;
+}
+
+export function removeCollectionMembership(request: RemoveMembershipRequest): MembershipResult {
+  if (memoryFallback) return { status: "error", reason: "unsaved-changes" };
+  const result = performMembershipOperation(KEY, MAX_COLLECTION_ITEMS, {
+    mode: "remove",
+    ...request,
+  });
+  if (result.status === "removed") for (const subscriber of subs) subscriber();
+  return result;
 }
 
 export function removeFromCollection(collectionId: string, itemId: string): void {
@@ -435,7 +541,7 @@ export function useCollections(): Collection[] {
 export function useCollection(id: string | null): Collection | null {
   const collections = useCollections();
   return useMemo(
-    () => (id ? collections.find((c) => c.id === id) ?? null : null),
+    () => (id ? (collections.find((c) => c.id === id) ?? null) : null),
     [collections, id],
   );
 }

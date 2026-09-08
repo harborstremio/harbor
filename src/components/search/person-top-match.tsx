@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import type { SearchPerson } from "@/lib/search";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
 
 export function matchPersonForQuery(
   people: SearchPerson[] | undefined,
@@ -30,6 +31,7 @@ export function PersonTopMatch({
   onOpenPerson?: (p: SearchPerson) => void;
 }) {
   const { openPerson } = useView();
+  const { open: openContext } = useContextMenu();
   const t = useT();
   const open = () => {
     if (onOpenPerson) {
@@ -44,6 +46,23 @@ export function PersonTopMatch({
       <button
         type="button"
         onClick={open}
+        onContextMenu={(event) =>
+          openContext(event, {
+            kind: "actions",
+            id: `person:${person.id}`,
+            label: person.name,
+            image: person.profile
+              ? {
+                  src: `https://image.tmdb.org/t/p/h632${person.profile}`,
+                  publicUrl: `https://image.tmdb.org/t/p/h632${person.profile}`,
+                  label: person.name,
+                }
+              : undefined,
+            actions: () => [
+              { id: `person:open:${person.id}`, label: t("View details"), run: open },
+            ],
+          })
+        }
         aria-label={t("Explore {name}", { name: person.name })}
         className="group flex w-full items-center gap-5 p-4 text-start transition-colors duration-150 hover:bg-raised active:scale-[0.997]"
       >

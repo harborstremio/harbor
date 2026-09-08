@@ -20,6 +20,8 @@ import { meta as fetchCinemetaMeta, type Meta } from "@/lib/cinemeta";
 import { lastPlayedEpisode, readResumeEntry } from "@/lib/resume";
 import { formatRelativeWatched } from "@/lib/episode-progress";
 import { episodeSpanLabel, parseEpisodeSpan } from "@/lib/episode-span";
+import { LocalFileContextRow, SourceContextRow } from "@/views/library/local-tab/card-actions";
+import { useView } from "@/lib/view";
 import {
   closeLocalEpisodes,
   getLocalEpisodes,
@@ -43,10 +45,21 @@ type SeasonMap = Map<number, Map<number, LocalEntry[]>>;
 
 function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
   const t = useT();
+  const { openSettings } = useView();
   const { settings, update } = useSettings();
   const { tmdbId, imdbId } = payload;
   const localLibrary = useLocalLibrary();
-  const all = payload.entries ?? localLibrary;
+  const all = useMemo(
+    () =>
+      payload.entries?.flatMap((target) => {
+        if (payload.entrySources?.[target.id]?.kind === "home-server") return [target];
+        const current = localLibrary.find(
+          (entry) => entry.id === target.id && entry.path === target.path,
+        );
+        return current ? [current] : [];
+      }) ?? localLibrary,
+    [payload.entries, payload.entrySources, localLibrary],
+  );
   const sortDesc = settings.localEpisodeSortDesc;
 
   const localEps = useMemo(
@@ -55,10 +68,12 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
         .filter(
           (e) =>
             e.type === "show" &&
-            ((tmdbId != null && e.tmdbId === tmdbId) || (imdbId != null && e.imdbId === imdbId)),
+            (!!payload.entries ||
+              (tmdbId != null && e.tmdbId === tmdbId) ||
+              (imdbId != null && e.imdbId === imdbId)),
         )
         .sort((a, b) => (a.season ?? 0) - (b.season ?? 0) || (a.episode ?? 0) - (b.episode ?? 0)),
-    [all, tmdbId, imdbId],
+    [all, tmdbId, imdbId, payload.entries],
   );
 
   const [videos, setVideos] = useState<Meta["videos"] | undefined>(payload.videos);
@@ -242,10 +257,10 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const play = (ep: LocalEntry) => {
+  const play = async (ep: LocalEntry) => {
     const fn = payload.onPlayLocal;
+    await fn(ep);
     closeLocalEpisodes();
-    fn(ep);
   };
   const stream = () => {
     const fn = payload.onStream;
@@ -441,9 +456,8 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
               const ratio =
                 pr && ep.runtime && ep.runtime > 0 ? Math.min(1, pr.ms / (ep.runtime * 60_000)) : 0;
               const watchedAgo = pr ? formatRelativeWatched(pr.t) : "";
-              return (
+              const renderRow = (playExact: () => void) => (
                 <button
-                  key={ep.id}
                   type="button"
                   onClick={() => {
                     if (payload.onDownload && downloadSelection.size > 0) {
@@ -453,7 +467,7 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
                         else next.add(ep.id);
                         return next;
                       });
-                    } else play(ep);
+                    } else playExact();
                   }}
                   autoFocus={isHighlight || (hlEpisode == null && ep.id === listEps[0]?.id)}
                   data-tv-initial-focus={
@@ -530,6 +544,52 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
                     </span>
                   )}
                 </button>
+              );
+              if (episodeSource?.kind === "home-server") {
+                const id = `server-episode:${ep.id}`;
+                return (
+                  <SourceContextRow
+                    key={ep.id}
+                    id={id}
+                    label={ep.filename}
+                    actions={() => [
+                      {
+                        id: `${id}:play`,
+                        label: t("Choose source for this episode"),
+                        restoreFocus: false,
+                        run: () => play(ep),
+                      },
+                      ...(payload.onDownload
+                        ? [
+                            {
+                              id: `${id}:download`,
+                              label: t("Choose version to download"),
+                              restoreFocus: false,
+                              run: async () => {
+                                await payload.onDownload?.(ep);
+                              },
+                            },
+                          ]
+                        : []),
+                      {
+                        id: `${id}:manage`,
+                        label: t("Manage home servers"),
+                        restoreFocus: false,
+                        run: () => {
+                          sessionStorage.setItem("harbor.settings.streaming.home-servers", "1");
+                          openSettings("streaming");
+                        },
+                      },
+                    ]}
+                  >
+                    {renderRow}
+                  </SourceContextRow>
+                );
+              }
+              return (
+                <LocalFileContextRow key={ep.id} entry={ep} onPlay={play}>
+                  {renderRow}
+                </LocalFileContextRow>
               );
             })}
             {listEps.length === 0 && (

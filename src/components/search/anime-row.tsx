@@ -5,6 +5,7 @@ import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import type { Meta } from "@/lib/cinemeta";
+import { useContextMenu } from "@/lib/context-menu";
 
 function animeHitMetaId(hit: AnimeHit): string {
   if (hit.kitsuId) return `kitsu:${hit.kitsuId}`;
@@ -50,11 +51,29 @@ export function AnimeRow({ items, onClose }: { items: AnimeHit[]; onClose: () =>
 
 function AnimeRowItem({ hit, onOpen }: { hit: AnimeHit; onOpen: (hit: AnimeHit) => void }) {
   const t = useT();
+  const { open } = useContextMenu();
   const { settings } = useSettings();
-  const poster = usePosterChain(settings.rpdbKey, animeHitMetaId(hit), hit.poster ?? undefined, "series");
+  const poster = usePosterChain(
+    settings.rpdbKey,
+    animeHitMetaId(hit),
+    hit.poster ?? undefined,
+    "series",
+  );
   return (
     <button
       onClick={() => onOpen(hit)}
+      onContextMenu={(event) =>
+        open(event, {
+          kind: "meta",
+          meta: {
+            id: animeHitMetaId(hit),
+            type: "anime",
+            name: hit.name,
+            poster: hit.poster ?? undefined,
+            background: hit.background ?? undefined,
+          },
+        })
+      }
       className="group flex min-w-0 items-center gap-4 rounded-2xl border border-transparent px-3 py-2.5 text-start transition-colors hover:border-edge-soft hover:bg-elevated/50 active:scale-[0.997]"
     >
       <span className="flex h-[96px] w-[64px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-canvas shadow-[0_6px_16px_-8px_rgba(0,0,0,0.55)] ring-1 ring-edge-soft">
@@ -75,7 +94,9 @@ function AnimeRowItem({ hit, onOpen }: { hit: AnimeHit; onOpen: (hit: AnimeHit) 
         <span className="truncate text-[16px] font-semibold text-ink">{hit.name}</span>
         <span className="flex items-center gap-2 text-[12.5px] text-ink-muted">
           {hit.year && <span>{hit.year}</span>}
-          {hit.year && hit.score > 0 && <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />}
+          {hit.year && hit.score > 0 && (
+            <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />
+          )}
           {hit.score > 0 && (
             <span className="flex items-center gap-1 text-ink">
               <Star size={11} className="fill-accent text-accent" />

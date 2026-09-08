@@ -1,0 +1,29 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Harbor Context Review",
+  "identifier": "app.harbor.context-review",
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Harbor Context Review",
+        "url": "index.html",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 960,
+        "minHeight": 600,
+        "visible": false,
+        "decorations": false,
+        "transparent": false,
+        "backgroundColor": [0, 0, 0, 255],
+        "shadow": true,
+        "resizable": true,
+        "maximizable": true,
+        "minimizable": true,
+        "center": true
+      }
+    ]
+  },
+  "bundle": { "active": false, "fileAssociations": [], "createUpdaterArtifacts": false },
+  "plugins": { "deep-link": { "mobile": [], "desktop": { "schemes": [] } }, "updater": null }
+}

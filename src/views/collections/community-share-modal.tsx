@@ -3,13 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import { copyText } from "@/components/player/copy-link-button";
-import { readCollections, setCollectionShared, useCollection } from "@/lib/collections";
-import {
-  collectionCode,
-  collectionShareUrl,
-  notifyCommunityChanged,
-  publishCollections,
-} from "@/lib/social/collections-sync";
+import { useCollection } from "@/lib/collections";
+import { setCollectionPublication } from "@/lib/collection-publication";
+import { captureMembershipProfile } from "@/lib/membership-operations";
+import { authToken } from "@/lib/theme-auth";
+import { collectionCode, collectionShareUrl } from "@/lib/social/collections-sync";
 import { useCurrentHandle } from "./community-share-button";
 
 function CopyField({
@@ -25,6 +23,7 @@ function CopyField({
 }) {
   const t = useT();
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
   const timer = useRef<number | null>(null);
 
   useEffect(
@@ -36,7 +35,11 @@ function CopyField({
 
   const copy = async () => {
     const ok = await copyText(value);
-    if (!ok) return;
+    if (!ok) {
+      setError(t("Could not copy. Select and copy the text manually."));
+      return;
+    }
+    setError("");
     setCopied(true);
     if (timer.current !== null) window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setCopied(false), 1800);
@@ -71,6 +74,11 @@ function CopyField({
         </button>
       </div>
       <p className="text-[12.5px] leading-snug text-ink-muted">{helper}</p>
+      {error && (
+        <p role="alert" className="text-xs text-danger">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -84,6 +92,10 @@ export function CommunityShareModal({
 }) {
   const t = useT();
   const handle = useCurrentHandle();
+  const [profile] = useState(captureMembershipProfile);
+  const [token] = useState(authToken);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const collection = useCollection(collectionId);
   const shared = collection?.shared === true;
   const isSaved = !!(collection?.sourceHandle && collection?.sourceId);
@@ -96,12 +108,21 @@ export function CommunityShareModal({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const toggleShared = () => {
-    const next = !shared;
-    setCollectionShared(collectionId, next);
-    void publishCollections(readCollections())
-      .then(() => notifyCommunityChanged())
-      .catch(() => {});
+  const toggleShared = async () => {
+    if (busy) return;
+    if (!profile || !token) {
+      setError(t("Sign in and reopen the share dialog."));
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      await setCollectionPublication({ collectionId, shared: !shared, profile, token });
+    } catch (error) {
+      setError(error instanceof Error ? t(error.message) : t("Could not publish the collection."));
+    } finally {
+      setBusy(false);
+    }
   };
 
   return createPortal(
@@ -132,7 +153,9 @@ export function CommunityShareModal({
             <CopyField
               label={t("Link")}
               value={collectionShareUrl(linkHandle, linkId)}
-              helper={t("Anyone with the link can open this collection once your Harbor server is live.")}
+              helper={t(
+                "Anyone with the link can open this collection once your Harbor server is live.",
+              )}
               icon={<Link size={12} strokeWidth={2} />}
             />
 
@@ -156,7 +179,8 @@ export function CommunityShareModal({
               <div className="flex flex-col gap-2 border-t border-edge-soft pt-5">
                 <button
                   type="button"
-                  onClick={toggleShared}
+                  onClick={() => void toggleShared()}
+                  disabled={busy}
                   aria-pressed={shared}
                   className={`flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-[14px] font-semibold transition-colors ${
                     shared
@@ -164,9 +188,22 @@ export function CommunityShareModal({
                       : "border-edge bg-raised text-ink hover:bg-elevated"
                   }`}
                 >
-                  {shared ? <Check size={16} strokeWidth={2.6} /> : <Users size={16} strokeWidth={2} />}
-                  {shared ? t("Shared to the community") : t("Share to the community")}
+                  {shared ? (
+                    <Check size={16} strokeWidth={2.6} />
+                  ) : (
+                    <Users size={16} strokeWidth={2} />
+                  )}
+                  {busy
+                    ? t("Saving…")
+                    : shared
+                      ? t("Shared to the community")
+                      : t("Share to the community")}
                 </button>
+                {error && (
+                  <p role="alert" className="text-xs text-danger">
+                    {error}
+                  </p>
+                )}
                 <p className="text-[12.5px] leading-snug text-ink-muted">
                   {t("Listed collections will appear in community browse when that rolls out.")}
                 </p>

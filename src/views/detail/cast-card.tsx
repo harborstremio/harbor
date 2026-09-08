@@ -3,9 +3,13 @@ import { RankBadge } from "@/components/rank-badge";
 import type { CastEntry } from "@/lib/providers/tmdb";
 import { useRankings } from "@/lib/rankings";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
+import { useT } from "@/lib/i18n";
 
 export function CastCard({ cast }: { cast: CastEntry }) {
   const { openPerson } = useView();
+  const { open } = useContextMenu();
+  const t = useT();
   const { rank } = useRankings();
   const isResolved = cast.id > 0;
   const r = isResolved ? rank(cast.id, "Acting") : undefined;
@@ -21,6 +25,18 @@ export function CastCard({ cast }: { cast: CastEntry }) {
   return (
     <Wrap
       {...wrapProps}
+      onContextMenu={(event) =>
+        open(event, {
+          kind: "actions",
+          id: `person:${cast.id}:${cast.name}`,
+          label: cast.name,
+          image: photo ? { src: photo, publicUrl: photo, label: cast.name } : undefined,
+          actions: () =>
+            isResolved
+              ? [{ id: "person:open", label: t("View person"), run: () => openPerson(cast.id) }]
+              : [],
+        })
+      }
       data-person-card
       className={`group flex w-full min-w-0 flex-col gap-2.5 text-start ${isResolved ? "" : "cursor-default"}`}
     >

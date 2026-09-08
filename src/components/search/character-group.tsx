@@ -5,9 +5,13 @@ import type { MangaSummary } from "@/lib/manga/model";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
 
 function norm(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function bestManga(hits: MangaSummary[], title: string): MangaSummary | null {
@@ -15,7 +19,9 @@ function bestManga(hits: MangaSummary[], title: string): MangaSummary | null {
   const target = norm(title);
   const exact = hits.find((m) => norm(m.title) === target);
   if (exact) return exact;
-  const starts = hits.find((m) => norm(m.title).startsWith(target) || target.startsWith(norm(m.title)));
+  const starts = hits.find(
+    (m) => norm(m.title).startsWith(target) || target.startsWith(norm(m.title)),
+  );
   return starts ?? hits[0];
 }
 
@@ -54,7 +60,12 @@ export function CharacterGroup({ items, onClose }: { items: CharacterHit[]; onCl
       </h3>
       <div className="flex flex-col gap-5">
         {items.map((c) => (
-          <FranchiseCard key={c.id} character={c} onOpenAnime={openAnime} onOpenManga={openMangaRef} />
+          <FranchiseCard
+            key={c.id}
+            character={c}
+            onOpenAnime={openAnime}
+            onOpenManga={openMangaRef}
+          />
         ))}
       </div>
     </section>
@@ -80,14 +91,22 @@ function FranchiseCard({
       <div className="mb-2.5 flex items-center gap-2.5">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-canvas ring-1 ring-edge-soft">
           {character.image ? (
-            <img src={character.image} alt="" loading="lazy" draggable={false} className="h-full w-full object-cover" />
+            <img
+              src={character.image}
+              alt=""
+              loading="lazy"
+              draggable={false}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <User size={15} className="text-ink-subtle" />
           )}
         </span>
         <div className="min-w-0">
           <div className="truncate text-[13.5px] font-semibold text-ink">{character.name}</div>
-          {character.native && <div className="truncate text-[11px] text-ink-subtle">{character.native}</div>}
+          {character.native && (
+            <div className="truncate text-[11px] text-ink-subtle">{character.native}</div>
+          )}
         </div>
       </div>
       <div className="flex gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -95,7 +114,7 @@ function FranchiseCard({
           <PosterTile
             key={`${kind}:${r.anilistId}`}
             media={r}
-            sub={kind === "manga" ? t("Manga") : r.year ?? t("Show")}
+            sub={kind === "manga" ? t("Manga") : (r.year ?? t("Show"))}
             onOpen={() => (kind === "anime" ? onOpenAnime(r) : onOpenManga(r))}
           />
         ))}
@@ -104,18 +123,48 @@ function FranchiseCard({
   );
 }
 
-function PosterTile({ media, sub, onOpen }: { media: CharacterMediaRef; sub: string; onOpen: () => void }) {
+function PosterTile({
+  media,
+  sub,
+  onOpen,
+}: {
+  media: CharacterMediaRef;
+  sub: string;
+  onOpen: () => void;
+}) {
   const t = useT();
+  const { open } = useContextMenu();
   return (
     <button
       onClick={onOpen}
+      onContextMenu={(event) =>
+        open(event, {
+          kind: "actions",
+          id: `related:${media.anilistId}:${sub}`,
+          label: media.name,
+          image: media.poster
+            ? { src: media.poster, publicUrl: media.poster, label: media.name }
+            : undefined,
+          actions: () => [
+            { id: `related:open:${media.anilistId}`, label: t("Open related title"), run: onOpen },
+          ],
+        })
+      }
       className="group w-[58px] shrink-0 text-start transition-transform duration-150 active:scale-[0.97] motion-reduce:active:scale-100"
     >
       <span className="block aspect-[2/3] overflow-hidden rounded-lg bg-canvas ring-1 ring-edge-soft/60 transition-[box-shadow] duration-150 group-hover:ring-2 group-hover:ring-accent">
         {media.poster ? (
-          <img src={media.poster} alt="" loading="lazy" draggable={false} className="h-full w-full object-cover" />
+          <img
+            src={media.poster}
+            alt=""
+            loading="lazy"
+            draggable={false}
+            className="h-full w-full object-cover"
+          />
         ) : (
-          <span className="flex h-full w-full items-center justify-center text-[9px] text-ink-subtle">{t("No art")}</span>
+          <span className="flex h-full w-full items-center justify-center text-[9px] text-ink-subtle">
+            {t("No art")}
+          </span>
         )}
       </span>
       <span className="mt-1 line-clamp-1 block text-[11px] font-medium leading-tight text-ink-muted group-hover:text-ink">

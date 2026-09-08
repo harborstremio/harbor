@@ -196,7 +196,9 @@ function normalizeComment(c: Record<string, unknown>): ThemeComment {
 }
 
 export async function listComments(themeId: string): Promise<ThemeComment[]> {
-  const r = await safeFetch(`${API}/themes/${themeId}/comments`, { headers: authHeaders() });
+  const r = await safeFetch(`${API}/themes/${encodeURIComponent(themeId)}/comments`, {
+    headers: authHeaders(),
+  });
   if (!r.ok) throw new Error("Could not load comments.");
   const d = await r.json();
   return ((d.comments as Record<string, unknown>[]) || []).map(normalizeComment);
@@ -207,7 +209,7 @@ export async function postComment(
   body: string,
   parentId?: string,
 ): Promise<ThemeComment> {
-  const r = await safeFetch(`${API}/themes/${themeId}/comments`, {
+  const r = await safeFetch(`${API}/themes/${encodeURIComponent(themeId)}/comments`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(parentId ? { body, parentId } : { body }),
@@ -218,10 +220,13 @@ export async function postComment(
 }
 
 export async function deleteComment(themeId: string, commentId: string): Promise<void> {
-  const r = await safeFetch(`${API}/themes/${themeId}/comments/${commentId}/delete`, {
-    method: "POST",
-    headers: authHeaders(),
-  });
+  const r = await safeFetch(
+    `${API}/themes/${encodeURIComponent(themeId)}/comments/${encodeURIComponent(commentId)}/delete`,
+    {
+      method: "POST",
+      headers: authHeaders(),
+    },
+  );
   if (!r.ok) throw new Error("Could not delete this comment.");
 }
 

@@ -356,7 +356,16 @@ export function MangaReader({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement) return;
+      if (
+        e.defaultPrevented ||
+        document.querySelector("[data-harbor-context-layer],[data-harbor-image-viewer]")
+      )
+        return;
+      if (
+        e.target instanceof Element &&
+        e.target.closest("input,textarea,[contenteditable]:not([contenteditable='false'])")
+      )
+        return;
       const navKey = e.key === " " || e.key === "ArrowRight" || e.key === "ArrowLeft";
       if (
         navKey &&

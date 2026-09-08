@@ -7,6 +7,7 @@ import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { usePlaylists } from "@/lib/iptv/playlists-store";
 import { useScrollMemory, useView } from "@/lib/view";
+import { usePageContextRefresh } from "@/lib/context-page";
 import { FAVORITES_GROUP_KEY, useFavorites } from "@/lib/iptv/favorites";
 import { clearPlaylistCache, getCachedPlaylist } from "@/lib/iptv/store";
 import { pushActivityHint } from "@/lib/discord/activity-hint";
@@ -114,7 +115,11 @@ export function LiveView({ active }: { active: boolean }) {
     () => sources.filter((s) => s.kind === "epg").map((s) => s.epgUrl || s.url),
     [sources],
   );
-  const { index: baseEpg, loading: epgLoading, error: epgError } = useEpg(active ? activeSource : null, epgOnlyUrls);
+  const {
+    index: baseEpg,
+    loading: epgLoading,
+    error: epgError,
+  } = useEpg(active ? activeSource : null, epgOnlyUrls);
   const [epgErrorHidden, setEpgErrorHidden] = useState<string | null>(null);
   const epgErrorShown = epgError && epgError !== epgErrorHidden ? epgError : null;
   const epg = useXtreamEpgFallback(activeSource, playlist?.channels ?? EMPTY_CHANNELS, baseEpg);
@@ -252,6 +257,18 @@ export function LiveView({ active }: { active: boolean }) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   useScrollMemory("live", scrollRef, active);
+  const refreshPlaylist = useCallback(() => {
+    if (activeId) clearPlaylistCache(activeId);
+    refresh();
+  }, [activeId, refresh]);
+  usePageContextRefresh({
+    id: `live:${activeId ?? "none"}`,
+    page: "live",
+    label: t("Refresh playlist"),
+    active: active && !!activeSource,
+    busy: state.kind === "loading",
+    run: refreshPlaylist,
+  });
 
   useEffect(() => {
     if (!active || mode !== "guide") return;
@@ -260,7 +277,11 @@ export function LiveView({ active }: { active: boolean }) {
 
   if (sources.length === 0) {
     return (
-      <main data-rail-flush data-live-page className="relative flex min-h-0 flex-1 flex-col overflow-y-auto pt-20">
+      <main
+        data-rail-flush
+        data-live-page
+        className="relative flex min-h-0 flex-1 flex-col overflow-y-auto pt-20"
+      >
         <PlaylistEmpty onSave={(entry) => addPlaylist(entry)} />
       </main>
     );
@@ -303,10 +324,7 @@ export function LiveView({ active }: { active: boolean }) {
               onRemove={removePlaylist}
               onMove={reorderPlaylist}
               onMoveTop={movePlaylistTop}
-              onRefresh={() => {
-                if (activeId) clearPlaylistCache(activeId);
-                refresh();
-              }}
+              onRefresh={refreshPlaylist}
               onExport={exportPlaylist}
               fetchedAt={playlist?.fetchedAt ?? null}
               channelCount={playlist?.channels.length ?? null}
@@ -349,7 +367,9 @@ export function LiveView({ active }: { active: boolean }) {
         {epgErrorShown && !epg && (
           <div className="mx-6 mt-2 flex items-center gap-2 rounded-xl border border-danger/40 bg-danger/10 py-2 pe-2 ps-4 text-[12.5px] text-ink-muted">
             <span className="font-semibold text-danger">{t("EPG failed:")}</span>
-            <span className="min-w-0 flex-1 truncate" title={epgErrorShown}>{epgErrorShown}</span>
+            <span className="min-w-0 flex-1 truncate" title={epgErrorShown}>
+              {epgErrorShown}
+            </span>
             <button
               type="button"
               onClick={() => setEpgErrorHidden(epgErrorShown)}
@@ -380,13 +400,7 @@ export function LiveView({ active }: { active: boolean }) {
             }`}
           >
             {state.kind === "error" ? (
-              <ErrorBlock
-                message={state.message}
-                onRetry={() => {
-                  if (activeId) clearPlaylistCache(activeId);
-                  refresh();
-                }}
-              />
+              <ErrorBlock message={state.message} onRetry={refreshPlaylist} />
             ) : state.kind === "loading" ? (
               mode === "guide" ? (
                 <GuideSkeleton />

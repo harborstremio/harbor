@@ -17,6 +17,13 @@ import { acceptFriend, removeFriend, sendFriendRequest } from "@/lib/social/frie
 import { PRESENCE_META, useMyPresence } from "@/lib/social/presence";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
+import {
+  userContextTarget,
+  friendContextActions,
+  publishFriendStatus,
+  subscribeFriendStatus,
+} from "./context-targets";
 import {
   sanitizeStatLayout,
   STAT_ORDER,
@@ -73,6 +80,18 @@ export function ProfileHero({
 }) {
   const t = useT();
   const { openFeed } = useView();
+  const { open: openContext } = useContextMenu();
+  const [relationship, setRelationship] = useState(p.friendStatus);
+  useEffect(() => setRelationship(p.friendStatus), [p.handle, p.friendStatus]);
+  useEffect(
+    () =>
+      subscribeFriendStatus((handle, status) => {
+        if (handle.toLowerCase() === p.handle.toLowerCase()) setRelationship(status);
+      }),
+    [p.handle],
+  );
+  const openUserContext = (event: React.MouseEvent) =>
+    openContext(event, userContextTarget(p.handle, friendContextActions(p.handle, relationship)));
   const nameFont = userFont ? { fontFamily: `"${userFont}", var(--font-display)` } : undefined;
   const nameBadges = orderShownBadges(badges ?? [], p.shownBadges)
     .filter((b) => b.iconUrl)
@@ -139,7 +158,11 @@ export function ProfileHero({
 
       <div className="relative mx-auto -mt-20 w-full max-w-6xl px-6 pb-6 lg:px-10">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:gap-6">
-          <div className="relative flex h-[124px] w-[124px] shrink-0">
+          <div
+            onContextMenu={openUserContext}
+            tabIndex={0}
+            className="relative flex h-[124px] w-[124px] shrink-0"
+          >
             <Avatar
               src={avatar}
               fallbackSrc={avatarFallback}
@@ -158,7 +181,12 @@ export function ProfileHero({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="font-display text-[30px] leading-tight text-ink" style={nameFont}>
+              <h1
+                onContextMenu={openUserContext}
+                tabIndex={0}
+                className="font-display text-[30px] leading-tight text-ink"
+                style={nameFont}
+              >
                 {p.alias}
               </h1>
               {p.verified && <VerifiedCheck size={22} />}
@@ -168,7 +196,9 @@ export function ProfileHero({
               {p.featured && <FeaturedBadge />}
             </div>
             <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-subtle">
-              <span className="text-ink-muted">@{p.handle}</span>
+              <span onContextMenu={openUserContext} className="text-ink-muted">
+                @{p.handle}
+              </span>
               {p.pronouns && <span>{p.pronouns}</span>}
               <span className={presenceText}>{presenceLabel}</span>
               {p.location && (
@@ -327,6 +357,14 @@ function FriendButton({
 }) {
   const t = useT();
   const [rel, setRel] = useState<FriendRel>(initial);
+  useEffect(() => setRel(initial), [handle, initial]);
+  useEffect(
+    () =>
+      subscribeFriendStatus((changed, status) => {
+        if (changed.toLowerCase() === handle.toLowerCase()) setRel(status);
+      }),
+    [handle],
+  );
   const [busy, setBusy] = useState(false);
   const [hover, setHover] = useState(false);
   const [error, setError] = useState(false);
@@ -339,6 +377,7 @@ function FriendButton({
     try {
       await fn();
       setRel(next);
+      publishFriendStatus(handle, next);
       setHover(false);
     } catch {
       setError(true);

@@ -1,3 +1,4 @@
+import contextActionsFallback from "./context-actions-fallback";
 import ebookSources from "./id/ebook-sources";
 import settingsRefinements from "./id/settings-refinements";
 import coverage from "./id/coverage";
@@ -20,6 +21,7 @@ import plugins from "./id/plugins";
 import brands from "./id/brands";
 
 const id: Record<string, string> = {
+  ...contextActionsFallback,
   ...ebookSources,
   ...coverage,
   ...catalog01,

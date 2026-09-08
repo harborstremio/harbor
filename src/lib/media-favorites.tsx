@@ -10,3 +10,4 @@ export const useIsFavorite = store.useIn;
 export const removeMediaFavorites = store.removeData;
 export const setMediaFavorite = store.setExternal;
 export const mediaFavoriteHas = store.hasExternal;
+export const setMediaFavoriteSafely = store.setExternalSafely;

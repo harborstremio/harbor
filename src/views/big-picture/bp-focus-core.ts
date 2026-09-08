@@ -442,7 +442,10 @@ export function focusFirstOf(
   return null;
 }
 
-export function setBpFocus(el: HTMLElement | null, opts?: { silent?: boolean; dir?: BpDir }): boolean {
+export function setBpFocus(
+  el: HTMLElement | null,
+  opts?: { silent?: boolean; dir?: BpDir },
+): boolean {
   if (!el) return false;
   if (applyBpFocus(el, opts)) return true;
   scheduleBpRecovery();
@@ -462,7 +465,7 @@ export function currentBpFocus(root: HTMLElement | null): HTMLElement | null {
 
 export function bpOverlayOpen(): boolean {
   if (typeof document === "undefined") return false;
-  return document.querySelector("[data-bp-overlay]") !== null;
+  return document.querySelector("[data-bp-overlay],[data-harbor-context-layer]") !== null;
 }
 
 export function bpFocusScope(root: HTMLElement | null): HTMLElement | null {
@@ -543,7 +546,15 @@ export function candidatesFor(from: HTMLElement, pool: Measured[], dir: BpDir): 
     const cells = pool.filter((m) => grid.contains(m.el));
     const at = cells.findIndex((m) => m.el === from);
     const rtl = getComputedStyle(grid).direction === "rtl";
-    const to = at < 0 ? -1 : gridStep(at, cells.map((m) => m.rect), dir as LogicDir, rtl);
+    const to =
+      at < 0
+        ? -1
+        : gridStep(
+            at,
+            cells.map((m) => m.rect),
+            dir as LogicDir,
+            rtl,
+          );
     if (to >= 0) return [cells[to].el];
     if (!gridEscapes(dir as LogicDir, false)) return [];
     const outside = pool.filter((m) => !grid.contains(m.el));
@@ -556,7 +567,11 @@ export function candidatesFor(from: HTMLElement, pool: Measured[], dir: BpDir): 
   // in a chip strip leaks into whatever happens to sit below it.
   const track = bpTrackScope(from, dir);
   if (!track) return rankMeasured(from, pool, dir);
-  return rankMeasured(from, pool.filter((m) => track.contains(m.el)), dir);
+  return rankMeasured(
+    from,
+    pool.filter((m) => track.contains(m.el)),
+    dir,
+  );
 }
 
 // A cell that leads a row rather than being content in it. Vertical entry steps

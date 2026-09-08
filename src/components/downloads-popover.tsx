@@ -1,19 +1,17 @@
-import { Download, FolderOpen, Trash2 } from "lucide-react";
+import { Download, Ellipsis, FolderOpen, Trash2 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { DownloadCancelIcon, DownloadPauseResumeIcon } from "@/components/download-action-icons";
 import { HarborLoader } from "@/components/harbor-loader";
 import type { Meta } from "@/lib/cinemeta";
 import {
-  cancelDownload,
-  pauseDownload,
-  removeDownload,
-  resumeDownload,
-  revealDownload,
+  downloadCapabilities,
   useDownloads,
   type DownloadItem,
 } from "@/lib/download/downloads-store";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
+import { useDownloadItemActions } from "@/views/downloads/download-actions";
 
 type T = (key: string) => string;
 
@@ -53,6 +51,10 @@ export function DownloadsButton() {
 
   const goToShow = (d: DownloadItem) => {
     setOpen(false);
+    if (d.kind === "ebook") {
+      setView("downloads");
+      return;
+    }
     openMeta({
       id: d.metaId,
       type: d.season != null ? "series" : "movie",
@@ -131,17 +133,33 @@ function compactEta(d: DownloadItem): string | null {
 }
 
 function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => void }) {
+  const contextMenu = useContextMenu();
+  const { source, run, pending } = useDownloadItemActions(d.id, d.title);
+  const caps = downloadCapabilities(d.id);
   const pct = d.totalBytes
     ? Math.min(100, Math.round((d.receivedBytes / d.totalBytes) * 100))
     : Math.round(d.ratio * 100);
   const active = d.status === "downloading" || d.status === "paused";
   const eta = compactEta(d);
   return (
-    <div className="group flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors hover:bg-raised/50">
+    <div
+      onContextMenu={(event) => contextMenu.open(event, source)}
+      onKeyDown={(event) => {
+        if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const rect = event.currentTarget.getBoundingClientRect();
+        contextMenu.open(
+          new MouseEvent("contextmenu", { clientX: rect.left + 16, clientY: rect.top + 16 }),
+          source,
+        );
+      }}
+      className="group flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors hover:bg-raised/50"
+    >
       <button
         type="button"
         onClick={onOpen}
-        title={t("Go to show")}
+        title={d.kind === "ebook" ? t("Downloads") : t("Go to show")}
         className="flex min-w-0 flex-1 items-center gap-3 text-start"
       >
         <span className="h-12 w-9 shrink-0 overflow-hidden rounded-md bg-canvas">
@@ -186,32 +204,62 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
       <div className="flex shrink-0 items-center gap-0.5">
         {active && (
           <>
+            {(caps?.pause || caps?.resume) && (
+              <RowBtn
+                label={d.status === "paused" ? t("Resume") : t("Pause")}
+                onClick={() => run(d.status === "paused" ? "resume" : "pause")}
+                disabled={pending}
+              >
+                <DownloadPauseResumeIcon paused={d.status === "paused"} size={14} />
+              </RowBtn>
+            )}
             <RowBtn
-              label={d.status === "paused" ? t("Resume") : t("Pause")}
-              onClick={() => {
-                if (d.status === "paused") void resumeDownload(d.id);
-                else pauseDownload(d.id);
-              }}
+              label={t("Cancel")}
+              onClick={() => run("cancel")}
+              disabled={pending || !caps?.cancel}
+              cancel
             >
-              <DownloadPauseResumeIcon paused={d.status === "paused"} size={14} />
-            </RowBtn>
-            <RowBtn label={t("Cancel")} onClick={() => cancelDownload(d.id)} cancel>
               <DownloadCancelIcon size={14} />
             </RowBtn>
           </>
         )}
         {d.status !== "downloading" && d.status !== "paused" && (
           <>
-            {d.status === "done" && (
-              <RowBtn label={t("Show in folder")} onClick={() => void revealDownload(d.id)}>
+            {caps?.reveal && (
+              <RowBtn label={t("Show in folder")} onClick={() => run("reveal")} disabled={pending}>
                 <FolderOpen size={14} strokeWidth={2} />
               </RowBtn>
             )}
-            <RowBtn label={t("Remove")} onClick={() => removeDownload(d.id)} danger>
+            <RowBtn
+              label={
+                caps?.printReceipt ? t("Remove from downloads") : t("Delete download and file")
+              }
+              onClick={() => run("delete")}
+              disabled={pending || !caps?.delete}
+              danger
+            >
               <Trash2 size={14} strokeWidth={2} className="download-delete-icon" />
             </RowBtn>
           </>
         )}
+        <button
+          type="button"
+          aria-label={t("More actions")}
+          title={t("More actions")}
+          aria-haspopup="menu"
+          aria-expanded={
+            contextMenu.state?.target.kind === "actions" &&
+            contextMenu.state.target.id === source.id
+          }
+          onClick={(event) => {
+            event.stopPropagation();
+            const rect = event.currentTarget.getBoundingClientRect();
+            contextMenu.openAt({ x: rect.left, y: rect.bottom }, source);
+          }}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
+        >
+          <Ellipsis size={14} />
+        </button>
       </div>
     </div>
   );
@@ -222,12 +270,14 @@ function RowBtn({
   onClick,
   danger = false,
   cancel = false,
+  disabled = false,
   children,
 }: {
   label: string;
   onClick: () => void;
   danger?: boolean;
   cancel?: boolean;
+  disabled?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -236,6 +286,7 @@ function RowBtn({
       aria-label={label}
       title={label}
       onClick={onClick}
+      disabled={disabled}
       className={`flex h-8 w-8 items-center justify-center rounded-lg transition-[color,background-color,transform] duration-150 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent ${
         danger
           ? "download-delete-trigger text-danger hover:bg-danger/10 hover:text-danger"

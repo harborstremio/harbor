@@ -1,3 +1,4 @@
+import contextActionsFallback from "./context-actions-fallback";
 import ebookSources from "./ru/ebook-sources";
 import settingsRefinements from "./ru/settings-refinements";
 import gap from "./ru/gap";
@@ -46,6 +47,7 @@ import plugins from "./ru/plugins";
 import brands from "./ru/brands";
 
 const ru: Record<string, string> = {
+  ...contextActionsFallback,
   ...ebookSources,
   ...coverage,
   ...uiFallback,

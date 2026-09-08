@@ -1,3 +1,4 @@
+import contextActionsFallback from "./context-actions-fallback";
 import ebookSources from "./tr/ebook-sources";
 import settingsRefinements from "./tr/settings-refinements";
 import miscA from "./tr/misc-a";
@@ -19,6 +20,7 @@ import plugins from "./tr/plugins";
 import brands from "./tr/brands";
 
 const tr: Record<string, string> = {
+  ...contextActionsFallback,
   ...ebookSources,
   ...miscA,
   ...miscB,

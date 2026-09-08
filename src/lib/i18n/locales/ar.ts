@@ -1,3 +1,4 @@
+import contextActionsFallback from "./context-actions-fallback";
 import ebookSources from "./ar/ebook-sources";
 import settingsRefinements from "./ar/settings-refinements";
 import uiFallback from "./ui-fallback";
@@ -38,8 +39,10 @@ import plurals from "./ar/plurals";
 import audit from "./ar/audit";
 import plugins from "./ar/plugins";
 import brands from "./ar/brands";
+import contextActions from "./ar/context-actions";
 
 const ar: Record<string, string> = {
+  ...contextActionsFallback,
   ...ebookSources,
   ...uiFallback,
   ...coverage,
@@ -80,6 +83,7 @@ const ar: Record<string, string> = {
   ...settingsRefinements,
   ...plugins,
   ...brands,
+  ...contextActions,
 };
 
 export default ar;

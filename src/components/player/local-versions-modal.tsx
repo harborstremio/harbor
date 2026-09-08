@@ -1,6 +1,6 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { Globe2, HardDrive, X } from "lucide-react";
+import { Download, Globe2, HardDrive, X } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import { MediaServerBrand } from "@/components/media-server-brand";
 import { MediaServerVersionBadges } from "@/components/media-server-version-badges";
@@ -11,6 +11,9 @@ import { LocalVersionBadges } from "@/components/local-version-badges";
 import { isBigPictureActive } from "@/lib/big-picture";
 import { pushBpBack } from "@/views/big-picture/bp-back";
 import { bpFocusables, currentBpFocus, setBpFocus } from "@/views/big-picture/use-bp-focus";
+import { LocalFileContextRow, SourceContextRow } from "@/views/library/local-tab/card-actions";
+import { useLocalLibrary } from "@/lib/local-library";
+import { useView } from "@/lib/view";
 import {
   closeLocalVersions,
   getLocalVersions,
@@ -26,7 +29,12 @@ export function LocalVersionsModal() {
 
 function VersionsModal({ payload }: { payload: LocalVersionsPayload }) {
   const t = useT();
-  const { entries } = payload;
+  const { openSettings } = useView();
+  const library = useLocalLibrary();
+  const entries = payload.entries.flatMap((target) => {
+    const current = library.find((entry) => entry.id === target.id && entry.path === target.path);
+    return current ? [current] : [];
+  });
   const connections = mediaServerConnections();
   const health = useMediaServerHealth(connections);
   const modalRef = useRef<HTMLDivElement | null>(null);
@@ -66,10 +74,10 @@ function VersionsModal({ payload }: { payload: LocalVersionsPayload }) {
     };
   }, [bigPicture]);
 
-  const play = (entry: LocalVersionsPayload["entries"][number]) => {
+  const play = async (entry: LocalVersionsPayload["entries"][number]) => {
     const fn = payload.onPlayLocal;
+    await fn(entry);
     closeLocalVersions();
-    fn(entry);
   };
 
   return createPortal(
@@ -102,9 +110,13 @@ function VersionsModal({ payload }: { payload: LocalVersionsPayload }) {
               {payload.title}
             </h2>
             <span className="text-[12px] text-ink-subtle">
-              {payload.onStream
-                ? t("Choose where to watch")
-                : t("{n} versions on your disk", { n: entries.length })}
+              {payload.intent === "download"
+                ? t("Choose version to download")
+                : payload.onStream
+                  ? t("Choose where to watch")
+                  : entries.length === 0 && payload.serverCopies?.length
+                    ? t("{n} versions on home servers", { n: payload.serverCopies.length })
+                    : t("{n} versions on your disk", { n: entries.length })}
             </span>
           </div>
           <button
@@ -126,28 +138,31 @@ function VersionsModal({ payload }: { payload: LocalVersionsPayload }) {
             </p>
           ) : null}
           {entries.map((entry, i) => (
-            <button
-              key={entry.id}
-              type="button"
-              data-bp-focusable={bigPicture || undefined}
-              onClick={() => play(entry)}
-              autoFocus={i === 0}
-              data-tv-initial-focus={i === 0 || undefined}
-              className="group/v flex items-center gap-3 rounded-xl px-3 py-3 text-start transition-colors hover:bg-raised"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
-                <HardDrive size={16} strokeWidth={2} />
-              </span>
-              <span className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="truncate text-[13.5px] text-ink" title={entry.path}>
-                  {entry.filename}
-                </span>
-                <LocalVersionBadges entry={entry} />
-              </span>
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors group-hover/v:bg-ink group-hover/v:text-canvas">
-                <Play size={13} strokeWidth={2.4} fill="currentColor" className="ml-0.5" />
-              </span>
-            </button>
+            <LocalFileContextRow key={entry.id} entry={entry} onPlay={play}>
+              {(playExact) => (
+                <button
+                  type="button"
+                  data-bp-focusable={bigPicture || undefined}
+                  onClick={playExact}
+                  autoFocus={i === 0}
+                  data-tv-initial-focus={i === 0 || undefined}
+                  className="group/v flex items-center gap-3 rounded-xl px-3 py-3 text-start transition-colors hover:bg-raised"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
+                    <HardDrive size={16} strokeWidth={2} />
+                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col gap-1">
+                    <span className="truncate text-[13.5px] text-ink" title={entry.path}>
+                      {entry.filename}
+                    </span>
+                    <LocalVersionBadges entry={entry} />
+                  </span>
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors group-hover/v:bg-ink group-hover/v:text-canvas">
+                    <Play size={13} strokeWidth={2.4} fill="currentColor" className="ml-0.5" />
+                  </span>
+                </button>
+              )}
+            </LocalFileContextRow>
           ))}
           {(payload.serverCopies?.length ?? 0) > 0 && (
             <p className="px-3 pt-3 text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
@@ -159,48 +174,100 @@ function VersionsModal({ payload }: { payload: LocalVersionsPayload }) {
             const status = connectionId ? health[connectionId] : "inactive";
             const connection = connections.find((entry) => entry.id === connectionId);
             const unavailable = !connection || !connection.enabled || status !== "active";
+            const id = `server-copy:${copy.key}`;
+            const playServer = async () => {
+              if (!payload.onPlayServer) throw new Error(t("Playback is unavailable."));
+              await payload.onPlayServer(copy);
+              closeLocalVersions();
+            };
+            const downloadServer = async () => {
+              if (!payload.onDownloadServer) throw new Error(t("Download is unavailable."));
+              await payload.onDownloadServer(copy);
+            };
             return (
-              <button
+              <SourceContextRow
                 key={copy.key}
-                type="button"
-                data-bp-focusable={bigPicture || undefined}
-                disabled={unavailable}
-                aria-label={unavailable ? `${copy.label} — ${t("Server unavailable")}` : copy.label}
-                autoFocus={!unavailable && entries.length === 0 && index === 0}
-                data-tv-initial-focus={
-                  (!unavailable && entries.length === 0 && index === 0) || undefined
-                }
-                onClick={() => {
-                  closeLocalVersions();
-                  payload.onPlayServer?.(copy);
-                }}
-                className="group/v flex items-center gap-3 rounded-xl px-3 py-3 text-start transition-colors enabled:hover:bg-raised disabled:cursor-not-allowed disabled:opacity-40"
+                id={id}
+                label={copy.label}
+                actions={() => [
+                  {
+                    id: `${id}:play`,
+                    label:
+                      payload.intent === "download"
+                        ? t("Download this version")
+                        : t("Play this version"),
+                    disabled: unavailable,
+                    reason: t("Server unavailable"),
+                    restoreFocus: false,
+                    run: payload.intent === "download" ? downloadServer : playServer,
+                  },
+                  ...(payload.onDownloadServer && payload.intent !== "download"
+                    ? [
+                        {
+                          id: `${id}:download`,
+                          label: t("Download this version"),
+                          disabled: unavailable,
+                          run: downloadServer,
+                        },
+                      ]
+                    : []),
+                  {
+                    id: `${id}:manage`,
+                    label: t("Manage home servers"),
+                    restoreFocus: false,
+                    run: () => {
+                      sessionStorage.setItem("harbor.settings.streaming.home-servers", "1");
+                      openSettings("streaming");
+                    },
+                  },
+                ]}
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
-                  {connection ? (
-                    <MediaServerBrand
-                      provider={connection.provider}
-                      name={connection.name}
-                      compact
-                    />
-                  ) : null}
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="truncate text-[13.5px] text-ink">{copy.label}</span>
-                  <span className="flex flex-wrap items-center gap-2 text-[10.5px] font-semibold text-ink-muted">
-                    {connection && <span className="max-w-28 truncate">{connection.name}</span>}
-                    {unavailable && (
-                      <span className="rounded bg-canvas px-1.5 py-0.5 text-[9.5px] uppercase tracking-wide">
-                        {status === "checking" ? t("Checking…") : t("Offline")}
+                {(runPrimary) => (
+                  <button
+                    type="button"
+                    data-bp-focusable={bigPicture || undefined}
+                    disabled={unavailable}
+                    aria-label={
+                      unavailable ? `${copy.label} — ${t("Server unavailable")}` : copy.label
+                    }
+                    autoFocus={!unavailable && entries.length === 0 && index === 0}
+                    data-tv-initial-focus={
+                      (!unavailable && entries.length === 0 && index === 0) || undefined
+                    }
+                    onClick={runPrimary}
+                    className="group/v flex items-center gap-3 rounded-xl px-3 py-3 text-start transition-colors enabled:hover:bg-raised disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
+                      {connection ? (
+                        <MediaServerBrand
+                          provider={connection.provider}
+                          name={connection.name}
+                          compact
+                        />
+                      ) : null}
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col gap-1">
+                      <span className="truncate text-[13.5px] text-ink">{copy.label}</span>
+                      <span className="flex flex-wrap items-center gap-2 text-[10.5px] font-semibold text-ink-muted">
+                        {connection && <span className="max-w-28 truncate">{connection.name}</span>}
+                        {unavailable && (
+                          <span className="rounded bg-canvas px-1.5 py-0.5 text-[9.5px] uppercase tracking-wide">
+                            {status === "checking" ? t("Checking…") : t("Offline")}
+                          </span>
+                        )}
+                        <MediaServerVersionBadges version={copy.version} filename={copy.label} />
                       </span>
-                    )}
-                    <MediaServerVersionBadges version={copy.version} filename={copy.label} />
-                  </span>
-                </span>
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors group-hover/v:bg-ink group-hover/v:text-canvas">
-                  <Play size={13} strokeWidth={2.4} fill="currentColor" className="ml-0.5" />
-                </span>
-              </button>
+                    </span>
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors group-hover/v:bg-ink group-hover/v:text-canvas">
+                      {payload.intent === "download" ? (
+                        <Download size={13} />
+                      ) : (
+                        <Play size={13} strokeWidth={2.4} fill="currentColor" className="ml-0.5" />
+                      )}
+                    </span>
+                  </button>
+                )}
+              </SourceContextRow>
             );
           })}
           {payload.onStream && (

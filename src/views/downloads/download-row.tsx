@@ -1,24 +1,19 @@
 import type { ReactNode } from "react";
-import { BookOpen, Check, FileText, FolderOpen, Trash2 } from "lucide-react";
+import { BookOpen, Check, Ellipsis, FileText, FolderOpen, Trash2 } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import { DownloadCancelIcon, DownloadPauseResumeIcon } from "@/components/download-action-icons";
 import { Poster, usePosterChain } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
-import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
 import { useT } from "@/lib/i18n";
-import {
-  cancelDownload,
-  pauseDownload,
-  removeDownload,
-  resumeDownload,
-  revealDownload,
-  type DownloadItem,
-} from "@/lib/download/downloads-store";
+import { downloadCapabilities, type DownloadItem } from "@/lib/download/downloads-store";
 import { fmtBytes, fmtEta, fmtSpeed } from "./downloads-format";
+import { useDownloadItemActions } from "./download-actions";
 
 export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolean }) {
   const t = useT();
-  const { openPlayer } = useView();
+  const contextMenu = useContextMenu();
+  const { source, run, pending } = useDownloadItemActions(d.id, d.title);
   const { settings } = useSettings();
   const poster = usePosterChain(
     settings.rpdbKey,
@@ -30,25 +25,24 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
   const pct = Math.round(d.ratio * 100);
   const downloading = d.status === "downloading";
   const active = downloading || d.status === "paused";
-  const playLocal = () =>
-    openPlayer({
-      meta: {
-        id: d.metaId,
-        type: d.season != null ? "series" : "movie",
-        name: d.title,
-        poster: d.poster ?? undefined,
-      },
-      url: d.path,
-      title: d.title,
-      subtitle: d.subtitle ?? undefined,
-      notWebReady: true,
-      episode:
-        d.season != null && d.episode != null
-          ? { season: d.season, episode: d.episode }
-          : undefined,
-    });
+  const caps = downloadCapabilities(d.id);
   return (
-    <li className="group flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-3 transition-colors hover:bg-elevated/70">
+    <li
+      tabIndex={0}
+      aria-label={compact ? `${d.title} ${d.subtitle ?? ""}` : d.title}
+      onContextMenu={(event) => contextMenu.open(event, source)}
+      onKeyDown={(event) => {
+        if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const rect = event.currentTarget.getBoundingClientRect();
+        contextMenu.open(
+          new MouseEvent("contextmenu", { clientX: rect.left + 16, clientY: rect.top + 16 }),
+          source,
+        );
+      }}
+      className="group flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-3 transition-colors hover:bg-elevated/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+    >
       <div
         className={`${compact ? "h-[44px] w-[30px]" : "h-[68px] w-[46px]"} shrink-0 overflow-hidden rounded-lg`}
       >
@@ -115,18 +109,21 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
       <div className="flex shrink-0 items-center gap-1">
         {active && (
           <>
-            {d.canPause !== false && (
+            {(caps?.pause || caps?.resume) && (
               <RowBtn
                 label={d.status === "paused" ? t("Resume download") : t("Pause download")}
-                onClick={() => {
-                  if (d.status === "paused") void resumeDownload(d.id);
-                  else pauseDownload(d.id);
-                }}
+                onClick={() => run(d.status === "paused" ? "resume" : "pause")}
+                disabled={pending}
               >
                 <DownloadPauseResumeIcon paused={d.status === "paused"} size={16} />
               </RowBtn>
             )}
-            <RowBtn label={t("Cancel download")} onClick={() => cancelDownload(d.id)} cancel>
+            <RowBtn
+              label={t("Cancel download")}
+              onClick={() => run("cancel")}
+              disabled={pending || !caps?.cancel}
+              cancel
+            >
               <DownloadCancelIcon size={16} />
             </RowBtn>
           </>
@@ -136,7 +133,11 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
             {d.status === "done" && (
               <>
                 {!isEBook && (
-                  <RowBtn label={t("Play")} onClick={playLocal}>
+                  <RowBtn
+                    label={t("Play")}
+                    onClick={() => run("play")}
+                    disabled={pending || !caps?.play}
+                  >
                     <Play size={16} strokeWidth={2.2} fill="currentColor" />
                   </RowBtn>
                 )}
@@ -148,7 +149,11 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
                     <FileText size={16} />
                   </span>
                 ) : (
-                  <RowBtn label={t("Show in folder")} onClick={() => void revealDownload(d.id)}>
+                  <RowBtn
+                    label={t("Show in folder")}
+                    onClick={() => run("reveal")}
+                    disabled={pending || !caps?.reveal}
+                  >
                     {isEBook ? (
                       <BookOpen size={16} strokeWidth={2} />
                     ) : (
@@ -158,26 +163,62 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
                 )}
               </>
             )}
-            <DeleteButton onClick={() => removeDownload(d.id)} />
+            {caps?.retry && (
+              <RowBtn label={t("Retry download")} onClick={() => run("retry")} disabled={pending}>
+                <DownloadPauseResumeIcon paused size={16} />
+              </RowBtn>
+            )}
+            <DeleteButton
+              onClick={() => run("delete")}
+              disabled={pending || !caps?.delete}
+              recordOnly={caps?.printReceipt}
+            />
           </>
         )}
+        <button
+          type="button"
+          aria-label={t("More actions")}
+          title={t("More actions")}
+          aria-haspopup="menu"
+          aria-expanded={
+            contextMenu.state?.target.kind === "actions" &&
+            contextMenu.state.target.id === source.id
+          }
+          onClick={(event) => {
+            event.stopPropagation();
+            const rect = event.currentTarget.getBoundingClientRect();
+            contextMenu.openAt({ x: rect.left, y: rect.bottom }, source);
+          }}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-ink/10 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
+        >
+          <Ellipsis size={16} />
+        </button>
       </div>
     </li>
   );
 }
 
-function DeleteButton({ onClick }: { onClick: () => void }) {
+function DeleteButton({
+  onClick,
+  disabled,
+  recordOnly,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  recordOnly?: boolean;
+}) {
   const t = useT();
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={t("Delete download and file")}
-      title={t("Delete download and file")}
+      disabled={disabled}
+      aria-label={recordOnly ? t("Remove from downloads") : t("Delete download and file")}
+      title={recordOnly ? t("Remove from downloads") : t("Delete download and file")}
       className="download-delete-trigger flex h-9 items-center justify-center gap-2.5 rounded-full border border-danger/10 bg-danger/5 px-4 text-[13px] font-medium tracking-tight text-danger transition-[transform,background-color] duration-150 ease-out hover:scale-[1.02] hover:bg-danger/10 active:scale-[0.96] motion-reduce:transition-none"
     >
       <Trash2 size={16} strokeWidth={2} className="download-delete-icon shrink-0" />
-      <span>{t("Delete")}</span>
+      <span>{recordOnly ? t("Remove") : t("Delete")}</span>
     </button>
   );
 }
@@ -186,17 +227,20 @@ function RowBtn({
   label,
   onClick,
   cancel = false,
+  disabled = false,
   children,
 }: {
   label: string;
   onClick: () => void;
   cancel?: boolean;
+  disabled?: boolean;
   children: ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-label={label}
       title={label}
       className={`flex h-9 w-9 items-center justify-center rounded-lg transition-[color,background-color,transform] duration-150 active:scale-[0.96] motion-reduce:transition-none ${

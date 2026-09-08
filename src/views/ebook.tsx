@@ -37,6 +37,7 @@ import { NavArrow } from "@/components/nav-arrow";
 import { CoverImg } from "@/components/cover-img";
 import { Poster } from "@/components/poster";
 import { EBookBook3D } from "./ebook/ebook-book3d";
+import { useContextTarget } from "@/lib/context-menu";
 import { Row } from "@/components/row";
 import { emitListToast } from "@/components/lists/list-toast";
 import { NytMark } from "@/components/icons/nyt-mark";
@@ -44,7 +45,12 @@ import { NYT_ATTRIBUTION, type NytList } from "@/lib/ebook/nyt";
 import { isNytPlaceholder } from "@/lib/ebook/nyt-rail";
 import { nytRailItems, nytRankFor } from "@/lib/ebook/nyt-rail";
 import { nytBestsellerFor } from "@/lib/ebook/nyt-match";
-import { useNytAvailability, useNytList, useNytSnapshot, useResolveNytBooks } from "@/lib/ebook/use-nyt";
+import {
+  useNytAvailability,
+  useNytList,
+  useNytSnapshot,
+  useResolveNytBooks,
+} from "@/lib/ebook/use-nyt";
 import { useAnilist } from "@/lib/anilist/provider";
 import { useT, useUiLanguage } from "@/lib/i18n";
 import {
@@ -139,8 +145,48 @@ type EBookTitleLanguage = "auto" | "en" | "ar" | "original";
 
 const EBookTitleLanguageContext = createContext<EBookTitleLanguage>("auto");
 const EBookCardMenuContext = createContext<
-  (ebook: EBook, event: ReactMouseEvent<HTMLElement>) => void
+  (
+    ebook: EBook,
+    event: Pick<
+      ReactMouseEvent<HTMLElement>,
+      "clientX" | "clientY" | "preventDefault" | "stopPropagation"
+    >,
+  ) => void
 >(() => {});
+
+function useEBookCardTarget(ebook: EBook | undefined, onOpen: (ebook: EBook) => void) {
+  const t = useT();
+  const openMenu = useContext(EBookCardMenuContext);
+  return useContextTarget<HTMLElement>(() => ({
+    kind: "actions",
+    id: `ebook:${ebook?.id ?? "loading"}`,
+    label: ebook?.title ?? t("eBook"),
+    image: ebook?.cover ? { src: ebook.cover, label: ebook.title } : undefined,
+    actions: () =>
+      ebook
+        ? [
+            { id: `ebook:details:${ebook.id}`, label: t("Book Details"), run: () => onOpen(ebook) },
+            {
+              id: `ebook:options:${ebook.id}`,
+              label: t("eBook actions"),
+              restoreFocus: false,
+              run: () => {
+                const rect =
+                  document.activeElement instanceof Element
+                    ? document.activeElement.getBoundingClientRect()
+                    : null;
+                openMenu(ebook, {
+                  clientX: rect?.left ?? 190,
+                  clientY: rect?.bottom ?? 190,
+                  preventDefault() {},
+                  stopPropagation() {},
+                });
+              },
+            },
+          ]
+        : [],
+  }));
+}
 
 function ebookTitleForLanguage(ebook: EBook, language: EBookTitleLanguage): string {
   if (language === "auto" || language === "original") return ebook.title;
@@ -248,11 +294,20 @@ export function EBookView() {
   const browseTagRef = useRef<string | undefined>(ebookSourceBrowseTag("any", "popular"));
   const awardSearchScopesRef = useRef(new Set<string>());
   const needsPopularMetadata = sourceCatalogItems !== null && sourceCatalogItems.length === 0;
-  const openCardMenu = useCallback((ebook: EBook, event: ReactMouseEvent<HTMLElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setWheelTarget({ ebook, x: event.clientX, y: event.clientY });
-  }, []);
+  const openCardMenu = useCallback(
+    (
+      ebook: EBook,
+      event: Pick<
+        ReactMouseEvent<HTMLElement>,
+        "clientX" | "clientY" | "preventDefault" | "stopPropagation"
+      >,
+    ) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setWheelTarget({ ebook, x: event.clientX, y: event.clientY });
+    },
+    [],
+  );
   const collectionScope = eBookCollectionCacheScope(
     providerId,
     providers.map((provider) => provider.id),
@@ -358,14 +413,6 @@ export function EBookView() {
     setSourceItems((current) => updateSourceItems(current, books, true));
     setSourceCatalogItems((current) => updateSourceItems(current, books, true));
     setResults((current) => (current ? updateSourceItems(current, books, true) : current));
-  }, []);
-  useEffect(() => {
-    const preventNativeMenu = (event: MouseEvent) => {
-      const target = event.target;
-      if (target instanceof Element && target.closest("[data-ebook-page]")) event.preventDefault();
-    };
-    document.addEventListener("contextmenu", preventNativeMenu, true);
-    return () => document.removeEventListener("contextmenu", preventNativeMenu, true);
   }, []);
   const loadAnilistLibrary = useCallback(() => {
     if (!isConnected || !session) {
@@ -990,40 +1037,40 @@ export function EBookView() {
   return (
     <EBookTitleLanguageContext.Provider value={titleLanguage}>
       <EBookCardMenuContext.Provider value={openCardMenu}>
-      <main
-        ref={listScrollRef}
-        data-ebook-page
-        className="bg-canvas flex-1 overflow-y-auto overflow-x-hidden pb-20"
-      >
-        <EBookLibraryHero
-          ebooks={heroBooks}
-          bestsellers={bestsellerList}
-          onOpen={(ebook) => {
-            if (isNytPlaceholder(String(ebook.id))) {
-              emitListToast("Not available in your sources yet");
-              return;
-            }
-            openEBook(String(ebook.id));
-          }}
-        />
+        <main
+          ref={listScrollRef}
+          data-ebook-page
+          className="bg-canvas flex-1 overflow-y-auto overflow-x-hidden pb-20"
+        >
+          <EBookLibraryHero
+            ebooks={heroBooks}
+            bestsellers={bestsellerList}
+            onOpen={(ebook) => {
+              if (isNytPlaceholder(String(ebook.id))) {
+                emitListToast("Not available in your sources yet");
+                return;
+              }
+              openEBook(String(ebook.id));
+            }}
+          />
 
-        <div className="flex w-full flex-col gap-9 px-12 pt-8">
-          {rails.map((rail) => (
-            <EBookRail
-              key={`${rail.title}:${providerId}`}
-              {...rail}
-              profile={activeId ?? "default"}
-              onOpen={(ebook) => {
-                if (isNytPlaceholder(String(ebook.id))) {
-                  emitListToast("Not available in your sources yet");
-                  return;
-                }
-                if (rail.resumeReading) setReadIntent(ebook.id);
-                openEBook(String(ebook.id));
-              }}
-            />
-          ))}
-          <div className="mb-9 mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex w-full flex-col gap-9 px-12 pt-8">
+            {rails.map((rail) => (
+              <EBookRail
+                key={`${rail.title}:${providerId}`}
+                {...rail}
+                profile={activeId ?? "default"}
+                onOpen={(ebook) => {
+                  if (isNytPlaceholder(String(ebook.id))) {
+                    emitListToast("Not available in your sources yet");
+                    return;
+                  }
+                  if (rail.resumeReading) setReadIntent(ebook.id);
+                  openEBook(String(ebook.id));
+                }}
+              />
+            ))}
+            <div className="mb-9 mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={() => setScreen("collections")}
@@ -1423,6 +1470,7 @@ function EBookLibraryHero({
   const [paused, setPaused] = useState(false);
   const pageVisible = usePageVisible();
   const current = ebooks[shown];
+  const contextTarget = useEBookCardTarget(current, onOpen);
   const loading = ebooks.length === 0;
   const currentTitle = current ? ebookTitleForLanguage(current, titleLanguage) : "";
   const authors = current?.authors.filter(Boolean).slice(0, 2).join(", ") ?? "";
@@ -1482,6 +1530,7 @@ function EBookLibraryHero({
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onContextMenu={(event) => current && openMenu(current, event)}
+      ref={contextTarget}
     >
       <div className="ebook-hero-library-photo" aria-hidden="true">
         <img src="/ebook-hero-open-books.png" alt="" draggable={false} decoding="async" />
@@ -1509,12 +1558,30 @@ function EBookLibraryHero({
           {loading && (
             <div className="ebook-hero-skeleton">
               <span className="harbor-shimmer ebook-hero-sk-title" />
-              <span className="harbor-shimmer ebook-hero-sk-title is-short" style={{ "--ai-delay": "90ms" } as CSSProperties} />
-              <span className="harbor-shimmer ebook-hero-sk-byline" style={{ "--ai-delay": "180ms" } as CSSProperties} />
-              <span className="harbor-shimmer ebook-hero-sk-line" style={{ "--ai-delay": "260ms" } as CSSProperties} />
-              <span className="harbor-shimmer ebook-hero-sk-line is-short" style={{ "--ai-delay": "330ms" } as CSSProperties} />
-              <span className="harbor-shimmer ebook-hero-sk-meta" style={{ "--ai-delay": "400ms" } as CSSProperties} />
-              <span className="harbor-shimmer ebook-hero-sk-button" style={{ "--ai-delay": "470ms" } as CSSProperties} />
+              <span
+                className="harbor-shimmer ebook-hero-sk-title is-short"
+                style={{ "--ai-delay": "90ms" } as CSSProperties}
+              />
+              <span
+                className="harbor-shimmer ebook-hero-sk-byline"
+                style={{ "--ai-delay": "180ms" } as CSSProperties}
+              />
+              <span
+                className="harbor-shimmer ebook-hero-sk-line"
+                style={{ "--ai-delay": "260ms" } as CSSProperties}
+              />
+              <span
+                className="harbor-shimmer ebook-hero-sk-line is-short"
+                style={{ "--ai-delay": "330ms" } as CSSProperties}
+              />
+              <span
+                className="harbor-shimmer ebook-hero-sk-meta"
+                style={{ "--ai-delay": "400ms" } as CSSProperties}
+              />
+              <span
+                className="harbor-shimmer ebook-hero-sk-button"
+                style={{ "--ai-delay": "470ms" } as CSSProperties}
+              />
             </div>
           )}
           {!loading && <h1>{currentTitle}</h1>}
@@ -1756,11 +1823,15 @@ function EBookGrid({
                 />
                 <div
                   className="harbor-shimmer relative mt-3 h-3.5 w-4/5"
-                  style={{ "--ai-delay": `${index * 70 + 60}ms`, borderRadius: 999 } as CSSProperties}
+                  style={
+                    { "--ai-delay": `${index * 70 + 60}ms`, borderRadius: 999 } as CSSProperties
+                  }
                 />
                 <div
                   className="harbor-shimmer relative mt-2 h-3 w-2/5"
-                  style={{ "--ai-delay": `${index * 70 + 120}ms`, borderRadius: 999 } as CSSProperties}
+                  style={
+                    { "--ai-delay": `${index * 70 + 120}ms`, borderRadius: 999 } as CSSProperties
+                  }
                 />
               </div>
             ))
@@ -1842,6 +1913,7 @@ function EBookCard({
   const titleLanguage = useContext(EBookTitleLanguageContext);
   const openMenu = useContext(EBookCardMenuContext);
   const { activeId } = useProfiles();
+  const contextTarget = useEBookCardTarget(ebook, onOpen);
   const profile = activeId ?? "default";
   const displayTitle = ebookTitleForLanguage(ebook, titleLanguage);
   const resume = resumeProfile ? loadEBookResume(resumeProfile, ebook.id) : null;
@@ -1862,6 +1934,7 @@ function EBookCard({
       type="button"
       onClick={() => onOpen(ebook)}
       onContextMenu={(event) => openMenu(ebook, event)}
+      ref={contextTarget}
       className="group flex w-full min-w-0 flex-col gap-2 text-start"
     >
       <EBookBook3D
@@ -2657,7 +2730,9 @@ function EBookDetails({
   const detailBestsellers = useNytList();
   const detailSnapshot = useNytSnapshot();
   const detailRank = ebook
-    ? (nytRankFor(detailBestsellers, ebook) ?? nytBestsellerFor(detailSnapshot, ebook)?.book ?? null)
+    ? (nytRankFor(detailBestsellers, ebook) ??
+      nytBestsellerFor(detailSnapshot, ebook)?.book ??
+      null)
     : null;
   const t = useT();
   const [saved, setSaved] = useState(() => (ebook ? ebookInLibrary(ebook.id) : false));

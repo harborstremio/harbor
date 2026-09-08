@@ -1,0 +1,15 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "context-fixture",
+  "description": "Minimal fixture permissions; HTTP restricted to the loopback PNG probe; no filesystem removal, shell, deep-link or updater access",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "dialog:allow-save",
+    "fs:allow-write-file",
+    "clipboard-manager:allow-write-image",
+    "clipboard-manager:allow-write-text",
+    "clipboard-manager:allow-read-image",
+    { "identifier": "http:default", "allow": [{ "url": "http://127.0.0.1:*/fixture.png" }] }
+  ]
+}

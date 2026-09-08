@@ -1,8 +1,15 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Download as DownloadIcon } from "lucide-react";
 import { Poster, usePosterChain } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
-import { useDownloads, type DownloadItem } from "@/lib/download/downloads-store";
+import {
+  downloadsSnapshot,
+  subscribeDownloads,
+  useDownloads,
+  type DownloadItem,
+} from "@/lib/download/downloads-store";
+import { useContextMenu } from "@/lib/context-menu";
+import { useDownloadActions } from "./downloads/download-actions";
 import { useT } from "@/lib/i18n";
 import { StreamingNowButton } from "./downloads/streaming-now";
 import { DownloadRow } from "./downloads/download-row";
@@ -162,7 +169,7 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
                   <DownloadRow d={g.item} />
                 </ul>
               ) : (
-                <ShowGroup key={g.metaId} group={g} />
+                <ShowGroup key={g.metaId} group={g} filter={effective} />
               ),
             )}
           </div>
@@ -230,9 +237,66 @@ function EmptyState() {
   );
 }
 
-function ShowGroup({ group }: { group: Extract<DownloadGroup, { kind: "show" }> }) {
+function ShowGroup({
+  group,
+  filter,
+}: {
+  group: Extract<DownloadGroup, { kind: "show" }>;
+  filter: Filter;
+}) {
   const { settings } = useSettings();
   const t = useT();
+  const contextMenu = useContextMenu();
+  const { batchActions } = useDownloadActions();
+  const latest = useRef({ batchActions, filter });
+  latest.current = { batchActions, filter };
+  const allDownloads = () =>
+    downloadsSnapshot().filter((item) => item.metaId === group.metaId && item.season != null);
+  const source = {
+    kind: "actions" as const,
+    id: `download-group:${group.metaId}`,
+    label: group.title,
+    subscribe: subscribeDownloads,
+    isValid: () => allDownloads().length > 0,
+    actions: () => {
+      const all = allDownloads();
+      const visible = all.filter((item) => matchesFilter(item, latest.current.filter));
+      const allLabel = t("All {count} downloads for this series", { count: all.length });
+      if (visible.length === all.length)
+        return latest.current.batchActions(
+          all.map((item) => item.id),
+          allLabel,
+          `${group.metaId}:all`,
+        );
+      return [
+        {
+          id: `download-group:${group.metaId}:visible`,
+          label: t("Visible downloads ({visible} of {all})", {
+            visible: visible.length,
+            all: all.length,
+          }),
+          children: latest.current.batchActions(
+            visible.map((item) => item.id),
+            t("{visible} visible downloads of {all} total", {
+              visible: visible.length,
+              all: all.length,
+            }),
+            `${group.metaId}:visible`,
+          ),
+        },
+        {
+          id: `download-group:${group.metaId}:all`,
+          label: allLabel,
+          children: latest.current.batchActions(
+            all.map((item) => item.id),
+            allLabel,
+            `${group.metaId}:all`,
+          ),
+        },
+      ];
+    },
+  };
+  const allCount = allDownloads().length;
   const poster = usePosterChain(
     settings.rpdbKey,
     group.metaId,
@@ -252,16 +316,35 @@ function ShowGroup({ group }: { group: Extract<DownloadGroup, { kind: "show" }> 
   );
   return (
     <div className="overflow-hidden rounded-2xl border border-edge-soft bg-elevated/25">
-      <div className="flex items-center gap-3 px-3 py-2.5">
+      <div
+        tabIndex={0}
+        role="group"
+        aria-label={t("Download actions for {title}", { title: group.title })}
+        onContextMenu={(event) => contextMenu.open(event, source)}
+        onKeyDown={(event) => {
+          if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) return;
+          event.preventDefault();
+          event.stopPropagation();
+          const rect = event.currentTarget.getBoundingClientRect();
+          contextMenu.open(
+            new MouseEvent("contextmenu", { clientX: rect.left + 16, clientY: rect.top + 16 }),
+            source,
+          );
+        }}
+        className="flex items-center gap-3 px-3 py-2.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+      >
         <div className="h-[52px] w-[36px] shrink-0 overflow-hidden rounded-md">
           <Poster src={poster.src} onError={poster.onError} seed={group.metaId} ratio="portrait" />
         </div>
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-[14px] font-semibold text-ink">{group.title}</span>
           <span className="text-[11.5px] tabular-nums text-ink-subtle">
-            {episodes.length === 1
-              ? t("1 episode")
-              : t("{count} episodes", { count: episodes.length })}
+            {episodes.length === allCount
+              ? t("{count} downloads", { count: episodes.length })
+              : t("{visible} visible of {all} downloads", {
+                  visible: episodes.length,
+                  all: allCount,
+                })}
             {totalBytes > 0 ? `  ·  ${fmtBytes(totalBytes)}` : ""}
           </span>
         </div>

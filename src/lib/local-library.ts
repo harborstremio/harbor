@@ -83,8 +83,10 @@ function notify(): void {
 }
 
 function persist(entries: LocalEntry[]): void {
-  const snapshot = entries;
   persistQueue = persistQueue.then(async () => {
+    // A scan may queue a write while an acknowledged removal is settling.
+    // Persist the current index so an older queued snapshot cannot resurrect it.
+    const snapshot = cache ?? entries;
     if (await saveLocalLibraryStore(snapshot)) {
       try {
         localStorage.removeItem(KEY);
@@ -206,6 +208,46 @@ export function addLocalEntries(entries: LocalEntry[]): void {
 
 export function removeLocalEntry(id: string): void {
   write(read().filter((e) => e.id !== id));
+}
+
+export function subscribeLocalLibrary(listener: () => void): () => void {
+  subs.add(listener);
+  return () => {
+    subs.delete(listener);
+  };
+}
+
+/** Remove only these exact index entries. No filesystem operation is performed. */
+export async function removeLocalEntriesAcknowledged(
+  entries: Array<Pick<LocalEntry, "id" | "path">>,
+): Promise<void> {
+  await localLibraryReady();
+  const selected = new Map(entries.map((entry) => [entry.id, entry.path]));
+  if (!selected.size) throw new Error("No local files are selected.");
+  const operation = persistQueue.then(async () => {
+    const current = read();
+    if (
+      [...selected].some(
+        ([id, path]) => !current.some((entry) => entry.id === id && entry.path === path),
+      )
+    )
+      throw new Error("A local library entry changed. Open the menu again.");
+    const keep = (entry: LocalEntry) => selected.get(entry.id) !== entry.path;
+    if (!(await saveLocalLibraryStore(current.filter(keep))))
+      throw new Error("The library change could not be saved. Your entries and files were kept.");
+    // Merge concurrent scan/match updates after storage acknowledges this removal.
+    cache = read().filter(keep);
+    generation += 1;
+    try {
+      localStorage.removeItem(KEY);
+    } catch {
+      /* IndexedDB is authoritative. */
+    }
+    notify();
+  });
+  // A failed command must not prevent later scans or retries from persisting.
+  persistQueue = operation.catch(() => {});
+  await operation;
 }
 
 export function removeLocalFolder(folder: string): void {

@@ -6,6 +6,7 @@ import { ResultPoster } from "./result-poster";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
 
 export function TopMatch({
   match,
@@ -17,6 +18,7 @@ export function TopMatch({
   collection?: { name: string; onOpen: () => void };
 }) {
   const { openMeta } = useView();
+  const { open } = useContextMenu();
   const t = useT();
   const yearTxt = match.meta.releaseInfo ?? "";
   const rating = match.voteAverage && match.voteAverage > 0 ? match.voteAverage.toFixed(1) : null;
@@ -31,6 +33,7 @@ export function TopMatch({
     <section className="overflow-hidden rounded-2xl border border-edge-soft bg-elevated">
       <button
         type="button"
+        onContextMenu={(event) => open(event, { kind: "meta", meta: match.meta })}
         onClick={handleOpen}
         aria-label={t("Open {name}", { name: match.meta.name })}
         className="group flex w-full items-center gap-5 p-4 text-start transition-colors duration-150 hover:bg-raised active:scale-[0.997]"

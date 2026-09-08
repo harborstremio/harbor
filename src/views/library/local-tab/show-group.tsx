@@ -4,19 +4,23 @@ import {
   Download,
   Info,
   ListVideo,
-  RefreshCw,
   Square,
   Trash2,
   Wand2,
 } from "lucide-react";
-import { memo, useMemo, useState } from "react";
+import { memo, useMemo } from "react";
 import { Poster } from "@/components/poster";
-import { removeLocalEntry, type LocalEntry } from "@/lib/local-library";
+import { type LocalEntry } from "@/lib/local-library";
 import { localGroupKey, sortVersions } from "@/lib/local-library/versions";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { LocalBadge } from "@/components/local-badge";
-import { CardIconButton, type LocalCardProps } from "./card-actions";
+import {
+  CardIconButton,
+  LocalMoreActions,
+  useLocalFileContext,
+  type LocalCardProps,
+} from "./card-actions";
 import { episodeLabel, localPlayerSrc } from "@/lib/local-library/player-src";
 import { openLocalEpisodes } from "@/lib/player/local-episodes-modal";
 import { useLocalPoster } from "./use-local-poster";
@@ -83,30 +87,33 @@ function ShowGroupCardImpl({
 }: { head: LocalEntry; episodes: LocalEntry[]; isSelected: boolean } & LocalCardProps) {
   const t = useT();
   const { openPlayer } = useView();
-  const [confirm, setConfirm] = useState(false);
   const poster = useLocalPoster(head);
   const episodeIds = useMemo(() => episodes.map((e) => e.id), [episodes]);
   const needsReview = episodes.some((e) => e.needsReview);
   const countLabel =
     episodes.length === 1 ? t("1 episode") : t("{n} episodes", { n: episodes.length });
+  const context = useLocalFileContext(episodes, head.title, {
+    onPlay: (current) => openPlayer(localPlayerSrc(current)),
+    onChoose: (current) =>
+      openLocalEpisodes({
+        title: head.title,
+        tmdbId: head.tmdbId ?? null,
+        imdbId: head.imdbId ?? null,
+        poster: poster.src,
+        entries: current,
+        onPlayLocal: (current) => openPlayer(localPlayerSrc(current)),
+      }),
+    chooseLabel: t("Choose episode"),
+    onOpenDetail,
+    onFixMatch,
+    onExport,
+  });
   const onActivate = (range = false) => {
-    if (selectMode) {
-      onToggleSelect(episodeIds, range);
-      return;
-    }
-    openLocalEpisodes({
-      title: head.title,
-      tmdbId: head.tmdbId ?? null,
-      imdbId: head.imdbId ?? null,
-      poster: poster.src,
-      onPlayLocal: (e) => openPlayer(localPlayerSrc(e)),
-    });
+    if (selectMode) onToggleSelect(episodeIds, range);
+    else context.run("open");
   };
   return (
-    <div
-      className="group relative flex flex-col gap-2 text-start"
-      onMouseLeave={() => confirm && setConfirm(false)}
-    >
+    <div className="group relative flex flex-col gap-2 text-start" ref={context.ref}>
       <div
         role="button"
         tabIndex={0}
@@ -178,43 +185,32 @@ function ShowGroupCardImpl({
                   <Download size={11} strokeWidth={2.2} />
                 </CardIconButton>
               )}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (confirm) {
-                    episodes.forEach((ep) => removeLocalEntry(ep.id));
-                    setConfirm(false);
-                  } else {
-                    setConfirm(true);
-                  }
-                }}
-                className={`flex h-7 w-7 items-center justify-center rounded-full text-white shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-[opacity,background-color] duration-200 ${
-                  confirm
-                    ? "bg-danger"
-                    : "bg-canvas/80 opacity-0 hover:bg-canvas/95 group-hover:opacity-100"
-                }`}
-                aria-label={confirm ? t("Confirm remove") : t("Remove from library")}
+              <CardIconButton
+                title={t("Remove from library; keep file")}
+                onClick={() => context.run("remove")}
               >
-                {confirm ? (
-                  <RefreshCw size={11} strokeWidth={2.4} />
-                ) : (
-                  <Trash2 size={11} strokeWidth={2.2} />
-                )}
-              </button>
+                <Trash2 size={11} strokeWidth={2.2} />
+              </CardIconButton>
             </div>
           </>
         )}
       </div>
-      <button type="button" onClick={(e) => onActivate(e.shiftKey)} className="text-start">
-        <p
-          className="truncate text-[13px] font-medium text-ink transition-colors hover:text-accent"
-          title={head.title}
+      <div className="flex items-start gap-1">
+        <button
+          type="button"
+          onClick={(e) => onActivate(e.shiftKey)}
+          className="min-w-0 flex-1 text-start"
         >
-          {head.title}
-        </p>
-        <p className="-mt-1.5 truncate text-[11.5px] text-ink-subtle">{countLabel}</p>
-      </button>
+          <p
+            className="truncate text-[13px] font-medium text-ink transition-colors hover:text-accent"
+            title={head.title}
+          >
+            {head.title}
+          </p>
+          <p className="-mt-1.5 truncate text-[11.5px] text-ink-subtle">{countLabel}</p>
+        </button>
+        {!selectMode && <LocalMoreActions target={context.source} />}
+      </div>
     </div>
   );
 }

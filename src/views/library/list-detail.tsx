@@ -26,7 +26,15 @@ function itemToMeta(it: ListItem): Meta {
   };
 }
 
-export function ListDetail({ listId, onBack }: { listId: string; onBack: () => void }) {
+export function ListDetail({
+  listId,
+  onBack,
+  initialSettingsAction,
+}: {
+  listId: string;
+  onBack: () => void;
+  initialSettingsAction?: "rename" | "delete";
+}) {
   const t = useT();
   const list = useList(listId);
   const [dragId, setDragId] = useState<string | null>(null);
@@ -38,6 +46,7 @@ export function ListDetail({ listId, onBack }: { listId: string; onBack: () => v
   const suppressClick = useRef(false);
 
   const onDown = (e: React.PointerEvent, id: string) => {
+    if (e.button !== 0) return;
     dragRef.current = { id, x: e.clientX, y: e.clientY, active: false };
   };
   const onMove = (e: React.PointerEvent) => {
@@ -106,7 +115,7 @@ export function ListDetail({ listId, onBack }: { listId: string; onBack: () => v
               ` · ${t("Updated {when}", { when: relativeTime(list.updatedAt) })}`}
           </p>
         </div>
-        <ListSettingsMenu list={list} onDeleted={onBack} />
+        <ListSettingsMenu list={list} onDeleted={onBack} initialAction={initialSettingsAction} />
       </div>
 
       <AddTitleSearch list={list} />
@@ -137,7 +146,7 @@ export function ListDetail({ listId, onBack }: { listId: string; onBack: () => v
                 dragId === it.id ? "opacity-40" : ""
               } ${dropTarget === it.id && dragId !== it.id ? "ring-2 ring-accent ring-offset-2 ring-offset-canvas" : ""}`}
             >
-              <PickCard meta={itemToMeta(it)} />
+              <PickCard meta={itemToMeta(it)} membership={{ kind: "list", id: list.id }} />
               <button
                 type="button"
                 aria-label={t("Remove from list")}

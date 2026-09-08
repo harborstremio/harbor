@@ -97,6 +97,7 @@ import { TrackerProfileBridge } from "@/lib/tracker-profile-bridge";
 import { ProfilePickerModal } from "@/components/profile-picker/picker-modal";
 import { WatchlistSync } from "@/lib/watchlist-sync";
 import { ContextMenuProvider } from "@/lib/context-menu";
+import { PageContextNavigationDialogs } from "@/chrome/context-page-navigation";
 import { TopRankModalProvider } from "@/lib/top-rank-modal";
 import { OnboardingProvider } from "@/lib/onboarding";
 import { RankingsProvider } from "@/lib/rankings";
@@ -420,6 +421,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                   <DiscordPresence />
                                                   <WatchPresenceRunner />
                                                   <ContextMenu />
+                                                  <PageContextNavigationDialogs />
                                                   <AnnouncementGlobal />
                                                   <WatchLocalModal />
                                                   <LocalEpisodesModal />

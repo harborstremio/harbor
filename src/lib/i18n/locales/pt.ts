@@ -1,3 +1,4 @@
+import contextActionsFallback from "./context-actions-fallback";
 import ebookSources from "./pt/ebook-sources";
 import settingsRefinements from "./pt/settings-refinements";
 import experimentalUpdates from "./pt/experimental-updates";
@@ -41,6 +42,7 @@ import plugins from "./pt/plugins";
 import brands from "./pt/brands";
 
 const pt: Record<string, string> = {
+  ...contextActionsFallback,
   ...ebookSources,
   ...coverage,
   ...chrome,

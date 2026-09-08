@@ -77,8 +77,7 @@ export const ContinueCard = memo(function ContinueCard({
   const snapshot = readSnapshot(item._id);
   const isExternal = !!item.external;
   const externalLogo = item.external === "trakt" ? traktLogo : simklLogo;
-  const externalLabel =
-    item.external === "trakt" ? t("Paused on Trakt") : t("Paused on Simkl");
+  const externalLabel = item.external === "trakt" ? t("Paused on Trakt") : t("Paused on Simkl");
   const dur = item.state?.duration ?? 0;
   const off = item.state?.timeOffset ?? 0;
   const progress = dur > 0 ? Math.min(1, off / dur) : 0;
@@ -452,8 +451,8 @@ export const ContinueCard = memo(function ContinueCard({
     await openAvailableSources(episode, true);
   };
 
-  const onPlay = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const onPlay = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     const episode = await resolveEpisode();
     if (onPlayOverride) {
       onPlayOverride(episode);
@@ -468,7 +467,38 @@ export const ContinueCard = memo(function ContinueCard({
         ref={cardRef}
         type="button"
         onClick={() => void onChooseSource()}
-        onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
+        onContextMenu={(e) =>
+          openContextMenu(e, {
+            kind: "meta",
+            meta,
+            watchScope: item.type === "series" ? "episode" : "title",
+            episode: kitsuVideo
+              ? {
+                  season: kitsuVideo.season || 1,
+                  episode: kitsuVideo.episode,
+                  kitsuStreamId: kitsuVideo.id,
+                  imdbId: kitsuVideo.imdb_id,
+                  imdbSeason: kitsuVideo.imdbSeason,
+                  imdbEpisode: kitsuVideo.imdbEpisode,
+                }
+              : (ep ?? undefined),
+            primary: {
+              actions: () => [
+                {
+                  id: `continue:play:${item._id}:${item.state?.video_id ?? ""}`,
+                  label: progress > 0 && !upNext ? t("Resume playback") : t("Play"),
+                  disabled: waitingForAir,
+                  run: () => onPlay(),
+                },
+                {
+                  id: `continue:sources:${item._id}`,
+                  label: t("Choose another source"),
+                  run: onChooseSource,
+                },
+              ],
+            },
+          })
+        }
         aria-label={`${t("Choose another source")}: ${displayTitle}`}
         title={t("Choose another source")}
         className="block w-full min-w-0 rounded-xl text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"

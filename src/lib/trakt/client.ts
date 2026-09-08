@@ -1,9 +1,4 @@
-import {
-  TRAKT_API_BASE,
-  TRAKT_API_VERSION,
-  TRAKT_CLIENT_ID,
-  TRAKT_TOKEN_PROXY,
-} from "./config";
+import { TRAKT_API_BASE, TRAKT_API_VERSION, TRAKT_CLIENT_ID, TRAKT_TOKEN_PROXY } from "./config";
 import { getSession, setSession } from "./session";
 import type { TraktSession } from "./types";
 
@@ -11,6 +6,7 @@ export type TraktRequestOptions = {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   body?: unknown;
   authed?: boolean;
+  assertCurrent?: () => void;
 };
 
 export class TraktApiError extends Error {
@@ -41,6 +37,9 @@ async function refreshAccessToken(): Promise<TraktSession | null> {
       grant_type: "refresh_token",
     }),
   });
+  // A refresh belongs to its captured session, including failed refreshes.
+  // Signing in elsewhere while it is pending must not replace that new session.
+  if (getSession() !== current) return null;
   if (!res.ok) {
     setSession(null);
     return null;
@@ -51,6 +50,7 @@ async function refreshAccessToken(): Promise<TraktSession | null> {
     created_at: number;
     expires_in: number;
   };
+  if (getSession() !== current) return null;
   const next: TraktSession = {
     accessToken: data.access_token,
     refreshToken: data.refresh_token,
@@ -73,6 +73,7 @@ function ensureRefreshed(): Promise<TraktSession | null> {
 }
 
 async function doFetch(path: string, opts: TraktRequestOptions): Promise<Response> {
+  opts.assertCurrent?.();
   const headers: Record<string, string> = { ...(baseHeaders() as Record<string, string>) };
   const useAuth = opts.authed !== false;
   if (useAuth) {
@@ -87,13 +88,11 @@ async function doFetch(path: string, opts: TraktRequestOptions): Promise<Respons
   return fetch(`${TRAKT_API_BASE}${path}`, init);
 }
 
-export async function traktRequest<T>(
-  path: string,
-  opts: TraktRequestOptions = {},
-): Promise<T> {
+export async function traktRequest<T>(path: string, opts: TraktRequestOptions = {}): Promise<T> {
   let res = await doFetch(path, opts);
 
   if (res.status === 401 && opts.authed !== false) {
+    opts.assertCurrent?.();
     const refreshed = await ensureRefreshed();
     if (refreshed) res = await doFetch(path, opts);
   }

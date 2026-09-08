@@ -3,6 +3,7 @@ import { CoverImg } from "@/components/cover-img";
 import type { MangaSummary } from "@/lib/manga/model";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
 
 export function MangaRow({ items, onClose }: { items: MangaSummary[]; onClose: () => void }) {
   const { openManga } = useView();
@@ -29,17 +30,38 @@ export function MangaRow({ items, onClose }: { items: MangaSummary[]; onClose: (
   );
 }
 
-function MangaRowItem({ manga, onOpen }: { manga: MangaSummary; onOpen: (m: MangaSummary) => void }) {
+function MangaRowItem({
+  manga,
+  onOpen,
+}: {
+  manga: MangaSummary;
+  onOpen: (m: MangaSummary) => void;
+}) {
   const t = useT();
+  const { open } = useContextMenu();
   const meta = [manga.year, manga.status, manga.author].filter(Boolean).join(" · ");
   return (
     <button
+      onContextMenu={(event) =>
+        open(event, {
+          kind: "actions",
+          id: `manga:${manga.id}`,
+          label: manga.title,
+          actions: () => [{ id: "manga:open", label: t("View details"), run: () => onOpen(manga) }],
+        })
+      }
       onClick={() => onOpen(manga)}
       className="group flex min-w-0 items-center gap-4 rounded-2xl border border-transparent px-3 py-2.5 text-start transition-colors hover:border-edge-soft hover:bg-elevated/50 active:scale-[0.997]"
     >
       <span className="flex h-[96px] w-[64px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-canvas shadow-[0_6px_16px_-8px_rgba(0,0,0,0.55)] ring-1 ring-edge-soft">
         {manga.cover ? (
-          <CoverImg src={manga.cover} alt="" loading="lazy" draggable={false} className="h-full w-full object-cover" />
+          <CoverImg
+            src={manga.cover}
+            alt=""
+            loading="lazy"
+            draggable={false}
+            className="h-full w-full object-cover"
+          />
         ) : (
           <BookOpen size={20} className="text-ink-subtle" />
         )}

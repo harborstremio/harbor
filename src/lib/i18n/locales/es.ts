@@ -1,3 +1,4 @@
+import contextActionsFallback from "./context-actions-fallback";
 import ebookSources from "./es/ebook-sources";
 import settingsRefinements from "./es/settings-refinements";
 import sweep from "./es/sweep";
@@ -33,6 +34,7 @@ import plugins from "./es/plugins";
 import brands from "./es/brands";
 
 const es: Record<string, string> = {
+  ...contextActionsFallback,
   ...ebookSources,
   ...sweep,
   ...used,

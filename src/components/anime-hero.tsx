@@ -17,6 +17,7 @@ import { useMalRating } from "@/lib/mal-rating";
 import { useSettings } from "@/lib/settings";
 import { useTitleLogo } from "@/lib/title-logo";
 import { useView } from "@/lib/view";
+import { useHeroContext } from "@/lib/context-menu";
 import { observe, usePageVisible } from "@/lib/visibility";
 import { useHeroLogos } from "./anime-hero/use-hero-logos";
 import { MalLogo } from "./icons/mal-logo";
@@ -51,10 +52,13 @@ export function AnimeHero({
     const AHEAD = 3;
     const BEHIND = 1;
     const set = new Set<number>();
-    if (n > 0) for (let d = -BEHIND; d <= AHEAD; d += 1) set.add(((active + d) % n + n) % n);
+    if (n > 0) for (let d = -BEHIND; d <= AHEAD; d += 1) set.add((((active + d) % n) + n) % n);
     return set;
   }, [active, n]);
-  const windowSlides = useMemo(() => slides.filter((_, i) => windowIdx.has(i)), [slides, windowIdx]);
+  const windowSlides = useMemo(
+    () => slides.filter((_, i) => windowIdx.has(i)),
+    [slides, windowIdx],
+  );
   const logos = useHeroLogos(windowSlides, settings);
 
   useEffect(() => {
@@ -76,6 +80,8 @@ export function AnimeHero({
 
   const malRating = useMalRating(slides[active]);
   const pinnedLogo = useTitleLogo(slides[active]?.id);
+  const contextMeta = slides[active] ?? slides[0];
+  const onContextMenu = useHeroContext(contextMeta, contextMeta?.background || contextMeta?.poster);
   if (slides.length === 0) return null;
 
   const current = slides[active] ?? slides[0];
@@ -89,6 +95,7 @@ export function AnimeHero({
   return (
     <section
       id="anime-hero-section"
+      onContextMenu={onContextMenu}
       className={`group relative harbor-hero-bleed ${topBleed ? "harbor-hero-bleed-top" : ""}`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -130,7 +137,11 @@ export function AnimeHero({
           className="flex max-w-[520px] flex-col gap-5"
           style={{ transition: `opacity ${FADE_MS}ms ease-out` }}
         >
-          <CrunchyrollBadge name={current.name} year={parseAwardYear(current.releaseInfo)} id={current.id} />
+          <CrunchyrollBadge
+            name={current.name}
+            year={parseAwardYear(current.releaseInfo)}
+            id={current.id}
+          />
           {!findTopAward(current.name, parseAwardYear(current.releaseInfo), current.id) &&
             trendingByMetaId?.[current.id] && (
               <TrendingBadge source={trendingByMetaId[current.id]} />
@@ -160,7 +171,9 @@ export function AnimeHero({
               aria-label={saved ? t("Remove from saved") : t("Save for later")}
               aria-pressed={saved}
               className={`flex h-12 w-12 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.98] ${
-                saved ? "bg-ink/15 text-ink hover:bg-ink/20" : "bg-canvas/80 text-ink hover:bg-canvas/95"
+                saved
+                  ? "bg-ink/15 text-ink hover:bg-ink/20"
+                  : "bg-canvas/80 text-ink hover:bg-canvas/95"
               }`}
             >
               <PopIcon
@@ -202,13 +215,17 @@ export function AnimeHero({
 
       <div className="relative z-10 flex flex-col gap-5 px-12 pb-12" data-saved={savedTick}>
         <div className="flex items-end justify-between gap-4">
-          <h2 className="text-[20px] font-medium tracking-tight text-ink">{t("Top Picks for You")}</h2>
+          <h2 className="text-[20px] font-medium tracking-tight text-ink">
+            {t("Top Picks for You")}
+          </h2>
           <div className="flex flex-col items-end gap-2.5">
             <div className="flex min-h-[48px] items-center gap-3">
               <HeroMangaAdaptation meta={current} />
               <HeroSlideBadges meta={current} />
             </div>
-            {slides.length > 1 && <HeroPips total={slides.length} active={active} onSelect={setActive} />}
+            {slides.length > 1 && (
+              <HeroPips total={slides.length} active={active} onSelect={setActive} />
+            )}
           </div>
         </div>
         {topPicks.length > 0 ? (
@@ -266,7 +283,10 @@ export function AnimeHeroSkeleton() {
         <div className="h-5 w-44 animate-pulse rounded-full bg-elevated/45" />
         <div className="flex gap-4 overflow-hidden">
           {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/35" />
+            <div
+              key={i}
+              className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/35"
+            />
           ))}
         </div>
       </div>
@@ -299,8 +319,7 @@ function CrunchyrollBadge({ name, year, id }: { name: string; year?: number; id?
     ? `${win.year} Anime of the Year`
     : `${win.year} ${win.categoryName.replace(/^Best\s+/i, "Best ")}`;
   const iconUrl = srcIcon ?? src.iconSmall;
-  const invert =
-    !srcIcon && win.source === "animation_kobe" ? "brightness-0 invert" : "";
+  const invert = !srcIcon && win.source === "animation_kobe" ? "brightness-0 invert" : "";
   const iconCls = `h-4 w-4 shrink-0 object-contain ${invert}`;
   const tipIconCls = `h-3.5 w-3.5 object-contain ${invert}`;
   return (
@@ -309,14 +328,7 @@ function CrunchyrollBadge({ name, year, id }: { name: string; year?: number; id?
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      <img
-        src={iconUrl}
-        alt=""
-        width={16}
-        height={16}
-        className={iconCls}
-        draggable={false}
-      />
+      <img src={iconUrl} alt="" width={16} height={16} className={iconCls} draggable={false} />
       <span className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-ink">
         {label}
       </span>
@@ -327,7 +339,14 @@ function CrunchyrollBadge({ name, year, id }: { name: string; year?: number; id?
         }`}
       >
         <div className="flex items-center gap-2">
-          <img src={iconUrl} alt="" width={14} height={14} className={tipIconCls} draggable={false} />
+          <img
+            src={iconUrl}
+            alt=""
+            width={14}
+            height={14}
+            className={tipIconCls}
+            draggable={false}
+          />
           <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent">
             {src.name}
           </span>
@@ -366,7 +385,11 @@ function HeroTags({ meta }: { meta: Meta }) {
     <div className="flex flex-wrap items-center gap-x-2 text-[13px] text-ink-muted">
       {parts.map((p, i) => (
         <span key={`${p}-${i}`} className="inline-flex items-center gap-2">
-          {i > 0 && <span aria-hidden className="text-ink-subtle">·</span>}
+          {i > 0 && (
+            <span aria-hidden className="text-ink-subtle">
+              ·
+            </span>
+          )}
           <span>{p}</span>
         </span>
       ))}

@@ -261,6 +261,39 @@ export function removeFromWatchlist(id: string): void {
   write(map);
 }
 
+/** Explicit local commit; callers decide when confirmed remote aggregate entries can be cleared. */
+export function setLocalWatchlistAcknowledged(input: WatchlistInput, on: boolean): void {
+  const key = storeKey();
+  const raw = localStorage.getItem(key);
+  const existing: unknown = raw == null ? [] : JSON.parse(raw);
+  if (
+    !Array.isArray(existing) ||
+    !existing.every((entry) => typeof entry === "string" || (entry && typeof entry.id === "string"))
+  )
+    throw new Error("The saved watchlist could not be read.");
+  const map = read();
+  if (on) {
+    if (!map.has(input.id)) map.set(input.id, toEntry(input));
+  } else {
+    map.delete(input.id);
+    if (input.imdbId) map.delete(input.imdbId);
+  }
+  const payload = JSON.stringify([...map.values()]);
+  localStorage.setItem(key, payload);
+  if (localStorage.getItem(key) !== payload) throw new Error("The watchlist was not saved.");
+  memoryFallback = null;
+  for (const listener of subs) listener();
+}
+
+export function clearWatchlistAggregate(input: WatchlistInput): void {
+  const next = new Set(aggregateIds);
+  next.delete(input.id);
+  if (input.imdbId) next.delete(input.imdbId);
+  localStorage.setItem(aggStoreKey(), JSON.stringify([...next]));
+  aggregateIds = next;
+  for (const listener of subs) listener();
+}
+
 export function toggleWatchlist(input: string | WatchlistInput): boolean {
   const map = read();
   const id = typeof input === "string" ? input : input.id;

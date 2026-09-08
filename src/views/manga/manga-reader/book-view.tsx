@@ -1,4 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useContextMenu, useContextTarget, type ContextMenuTarget } from "@/lib/context-menu";
+import { ContextImageViewer } from "@/components/context-image-viewer";
+import type { ContextImage } from "@/lib/context-image";
+import { useT } from "@/lib/i18n";
+import { visibleReaderPages } from "./reader-context";
 import {
   fitLevel,
   hasNativeZoom,
@@ -83,9 +88,12 @@ function sampledAspect(srcs: string[]): Promise<number> {
   if (srcs.length === 0) return Promise.resolve(1.4);
   const idxs = [
     ...new Set(
-      [0, Math.floor(srcs.length * 0.25), Math.floor(srcs.length * 0.5), Math.floor(srcs.length * 0.75)].filter(
-        (i) => i < srcs.length,
-      ),
+      [
+        0,
+        Math.floor(srcs.length * 0.25),
+        Math.floor(srcs.length * 0.5),
+        Math.floor(srcs.length * 0.75),
+      ].filter((i) => i < srcs.length),
     ),
   ];
   return Promise.all(idxs.map((i) => measureAspect(srcs[i]))).then((aspects) => {
@@ -136,6 +144,29 @@ export function BookFlip({
   const wrapRef = useRef<HTMLDivElement>(null);
   const panRef = useRef({ x: 0, y: 0 });
   const zoomRef = useRef(1);
+  const visiblePages = useRef<ReturnType<typeof visibleReaderPages>>([]);
+  const [image, setImage] = useState<ContextImage | null>(null);
+  const t = useT();
+  const { open } = useContextMenu();
+  const contextTarget = (): ContextMenuTarget => ({
+    kind: "actions",
+    id: `reader-pages:${instanceName}`,
+    label: t("Visible pages"),
+    actions: () =>
+      visiblePages.current.map((page) => ({
+        id: `reader-page:${instanceName}:${page.number}`,
+        label: t("View page {number}", { number: page.number }),
+        restoreFocus: false,
+        run: () =>
+          setImage({
+            src: page.src,
+            label: t("Page {number}", { number: page.number }),
+            filename: `page-${page.number}`,
+          }),
+      })),
+  });
+  const contextRef = useContextTarget(contextTarget);
+  const contextOrigin = useRef<HTMLDivElement | null>(null);
 
   const applyTransform = (smooth: boolean) => {
     const el = wrapRef.current;
@@ -195,6 +226,7 @@ export function BookFlip({
     ensureStyle();
     let cancelled = false;
     let inst: FlipInstance | null = null;
+    visiblePages.current = [];
 
     const origFetch = window.fetch;
     const origOnPopState = window.onpopstate;
@@ -209,8 +241,7 @@ export function BookFlip({
     const httpMod = hosts.size ? import("@tauri-apps/plugin-http") : null;
     if (httpMod) {
       window.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
-        const u =
-          typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+        const u = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
         const host = hostOf(u);
         if (host && hosts.has(host)) {
           return httpMod.then((m) =>
@@ -225,6 +256,7 @@ export function BookFlip({
       const d = (e as CustomEvent).detail as { page?: string | number; name?: string } | undefined;
       if (!d || d.name !== instanceName) return;
       const spread = String(d.page);
+      visiblePages.current = visibleReaderPages(pages, spread);
       const first = Number(spread.split("-")[0]);
       if (!Number.isFinite(first) || first <= 0) return;
       report.current(first - 1, spread);
@@ -369,7 +401,19 @@ export function BookFlip({
   }, [pages, rtl, bg, resumePage, instanceName]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div
+      ref={(node) => {
+        contextOrigin.current = node;
+        contextRef(node);
+      }}
+      tabIndex={0}
+      aria-label={t("Visible pages")}
+      className="relative h-full w-full overflow-hidden"
+      onContextMenuCapture={(event) => {
+        if (event.target instanceof Node && event.currentTarget.contains(event.target))
+          open(event, contextTarget());
+      }}
+    >
       <div
         ref={wrapRef}
         className="h-full w-full"
@@ -377,6 +421,13 @@ export function BookFlip({
       >
         <div ref={ref} className="harbor-flipbook h-full w-full" />
       </div>
+      {image && (
+        <ContextImageViewer
+          image={image}
+          returnFocus={contextOrigin.current}
+          onClose={() => setImage(null)}
+        />
+      )}
     </div>
   );
 }

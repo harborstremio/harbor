@@ -1,3 +1,4 @@
+import contextActionsFallback from "./context-actions-fallback";
 import ebookSources from "./ko/ebook-sources";
 import settingsRefinements from "./ko/settings-refinements";
 import coverage from "./ko/coverage";
@@ -19,6 +20,7 @@ import plugins from "./ko/plugins";
 import brands from "./ko/brands";
 
 const ko: Record<string, string> = {
+  ...contextActionsFallback,
   ...ebookSources,
   ...coverage,
   ...catalog01,

@@ -7,15 +7,23 @@
 mod binary_lookup;
 mod cast_hls;
 mod cast_subs;
+#[cfg(desktop)]
+mod context_review;
 mod crash_report;
 mod diagnostics;
 mod download;
+mod download_file_policy;
+mod download_files;
 mod ebook_tts;
 mod fonts;
 mod gamepad;
 mod http_fetch;
 mod local_lib;
 mod media_server;
+#[cfg(windows)]
+mod native_context_menu;
+#[cfg(windows)]
+mod native_context_policy;
 mod power;
 mod proc_guard;
 mod proc_mem;
@@ -99,8 +107,6 @@ mod sub_extract;
 mod subsync;
 #[cfg(desktop)]
 mod svp;
-#[cfg(windows)]
-mod win_graphics;
 #[cfg(desktop)]
 mod thumbs;
 #[cfg(desktop)]
@@ -109,6 +115,8 @@ mod trailer;
 mod tray;
 #[cfg(desktop)]
 mod webview_helpers;
+#[cfg(windows)]
+mod win_graphics;
 
 // http_fetch calls crate::cf_solver on the challenge path, and the real solver
 // needs a hidden webview window that Android does not have. Rather than edit
@@ -128,6 +136,9 @@ mod p2p_android;
 
 #[cfg(desktop)]
 pub(crate) fn release_stremio_scheme(app: &tauri::AppHandle) {
+    if cfg!(feature = "context-review") {
+        return;
+    }
     use std::io::Write;
     use tauri_plugin_deep_link::DeepLinkExt;
     let msg = match app.deep_link().unregister("stremio") {
@@ -194,6 +205,9 @@ fn close_aux_windows(app: tauri::AppHandle) {
 #[cfg(desktop)]
 #[tauri::command]
 async fn deeplink_set_stremio(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
+    if cfg!(feature = "context-review") {
+        return Ok(());
+    }
     use tauri_plugin_deep_link::DeepLinkExt;
     if enabled {
         app.deep_link()
@@ -208,6 +222,9 @@ async fn deeplink_set_stremio(app: tauri::AppHandle, enabled: bool) -> Result<()
 #[cfg(desktop)]
 #[tauri::command]
 async fn deeplink_is_stremio_registered(app: tauri::AppHandle) -> Result<bool, String> {
+    if cfg!(feature = "context-review") {
+        return Ok(false);
+    }
     use tauri_plugin_deep_link::DeepLinkExt;
     app.deep_link()
         .is_registered("stremio")
@@ -423,6 +440,23 @@ fn harbor_set_context_menu(app: tauri::AppHandle, enabled: bool) {
 }
 
 #[tauri::command]
+async fn harbor_ack_frame_context(
+    app: tauri::AppHandle,
+    request_id: u64,
+    handled: bool,
+) -> Result<bool, String> {
+    #[cfg(windows)]
+    {
+        native_context_menu::acknowledge(app, request_id, handled).await
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (app, request_id, handled);
+        Ok(false)
+    }
+}
+
+#[tauri::command]
 fn harbor_try_suspend_webview(app: tauri::AppHandle) {
     #[cfg(windows)]
     {
@@ -588,7 +622,15 @@ pub fn run() {
 
 #[cfg(desktop)]
 pub fn run() {
-    {
+    if cfg!(feature = "context-fixture") {
+        #[cfg(feature = "context-fixture")]
+        context_review::run_fixture();
+        return;
+    }
+    let context = tauri::generate_context!();
+    context_review::prepare(&context.config().identifier)
+        .expect("unsafe context review configuration");
+    if !cfg!(feature = "context-review") {
         let args: Vec<String> = std::env::args().skip(1).collect();
         if let Some(p) = media_file_from_args(&args) {
             if let Ok(mut g) = pending_open_file().lock() {
@@ -603,8 +645,10 @@ pub fn run() {
     #[cfg(windows)]
     win_graphics::configure_windows_graphics();
     let _ = rustls::crypto::ring::default_provider().install_default();
-    trailer::sweep_cache();
-    std::thread::spawn(temp_prune::sweep_temp);
+    if !cfg!(feature = "context-review") {
+        trailer::sweep_cache();
+        std::thread::spawn(temp_prune::sweep_temp);
+    }
 
     let proxy_state = tauri::async_runtime::block_on(stream_proxy::ProxyState::start())
         .unwrap_or_else(|e| {
@@ -633,6 +677,9 @@ pub fn run() {
                 app.exit(0);
                 return;
             }
+            if cfg!(feature = "context-review") {
+                return;
+            }
             if let Some(url) = args.iter().find(|a| a.starts_with("harbor://")) {
                 let _ = app.emit("harbor:stremio-deeplink", url.clone());
             }
@@ -648,7 +695,6 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_deep_link::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(
             tauri_plugin_window_state::Builder::default()
@@ -671,6 +717,12 @@ pub fn run() {
         .manage(discord_rp::DiscordState::new())
         .manage(download::DownloadState::new());
 
+    let app_builder = if cfg!(feature = "context-review") {
+        app_builder.plugin(context_review::plugin())
+    } else {
+        app_builder.plugin(tauri_plugin_updater::Builder::new().build())
+    };
+
     #[cfg(target_os = "macos")]
     let app_builder = app_builder.register_uri_scheme_protocol("stremio", |ctx, request| {
         use tauri::Emitter;
@@ -692,15 +744,22 @@ pub fn run() {
             }
         })
         .setup(move |app| {
+            context_review::initialize_downloads(app.handle())?;
+            #[cfg(windows)]
+            if let Err(error) = native_context_menu::install(app.handle()) {
+                eprintln!("[harbor::context-menu] install failed: {error}");
+            }
             if let Err(error) = crash_report::initialize(app.handle()) {
                 eprintln!("[harbor::crash-report] initialization failed: {error}");
             }
             proc_guard::init();
-            proc_guard::reap_orphans();
+            if !cfg!(feature = "context-review") {
+                proc_guard::reap_orphans();
+            }
             display_fit::install(app.handle());
             install_reveal_failsafe(app.handle());
             #[cfg(windows)]
-            {
+            if !cfg!(feature = "context-review") {
                 use tauri_plugin_deep_link::DeepLinkExt;
                 if let Err(e) = app.deep_link().register_all() {
                     eprintln!("[harbor::deep-link] register_all failed: {:?}", e);
@@ -708,7 +767,7 @@ pub fn run() {
             }
             #[cfg(target_os = "linux")]
             {
-                if std::env::var_os("FLATPAK_ID").is_none() {
+                if !cfg!(feature = "context-review") && std::env::var_os("FLATPAK_ID").is_none() {
                     use tauri_plugin_deep_link::DeepLinkExt;
                     if let Err(e) = app.deep_link().register_all() {
                         eprintln!("[harbor::deep-link] register_all failed: {:?}", e);
@@ -832,6 +891,7 @@ pub fn run() {
             harbor_set_webview_memory_low,
             harbor_set_webview_visible,
             harbor_set_context_menu,
+            harbor_ack_frame_context,
             harbor_try_suspend_webview,
             harbor_resume_webview,
             save_text_file,
@@ -878,6 +938,11 @@ pub fn run() {
             temp_prune::temp_clear,
             download::download_start,
             download::download_cancel,
+            download_files::download_file_info,
+            download_files::download_delete_file,
+            download_files::harbor_download_dir,
+            download_files::is_context_review,
+            download_files::harbor_validate_review_path,
             stream_proxy::proxy_register,
             stream_proxy::proxy_unregister,
             stream_proxy::proxy_gc_idle,
@@ -1010,7 +1075,7 @@ pub fn run() {
             deeplink_is_stremio_registered,
             harbor_take_pending_file,
         ])
-        .build(tauri::generate_context!())
+        .build(context)
         .expect("error while building tauri application")
         .run(|app_handle, event| {
             if matches!(event, tauri::RunEvent::Exit) {

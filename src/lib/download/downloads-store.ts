@@ -1,5 +1,5 @@
-import { downloadDir as systemDownloadDir } from "@tauri-apps/api/path";
-import { exists, mkdir, remove } from "@tauri-apps/plugin-fs";
+import { invoke } from "@tauri-apps/api/core";
+import { exists, mkdir } from "@tauri-apps/plugin-fs";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
@@ -44,6 +44,8 @@ export type DownloadItem = {
   phaseLabel?: string | null;
   etaSeconds?: number | null;
   canPause?: boolean;
+  /** Headers stay in memory; this flag prevents an incomplete restart after relaunch. */
+  requiresHeaders?: boolean;
 };
 
 export type ManagedDownloadProgress = {
@@ -89,16 +91,22 @@ const requestHeaders = new Map<string, Record<string, string>>();
 const speed = new Map<string, { bytes: number; at: number }>();
 const managedControllers = new Map<string, AbortController>();
 const managedRunners = new Map<string, ManagedDownloadRunner>();
+const removing = new Set<string>();
+const sessionSources = new Set<string>();
 const listeners = new Set<() => void>();
 
 let snapshot: DownloadItem[] = [];
 
 const PERSIST_KEY = "harbor.downloads.v1";
 
+function writeItems(next: DownloadItem[]) {
+  const durable = next.map((d) => ({ ...d, bytesPerSec: 0 }));
+  localStorage.setItem(PERSIST_KEY, JSON.stringify(durable));
+}
+
 function persist() {
   try {
-    const durable = [...items.values()].map((d) => ({ ...d, bytesPerSec: 0 }));
-    localStorage.setItem(PERSIST_KEY, JSON.stringify(durable));
+    writeItems([...items.values()]);
   } catch {
     /* ignore */
   }
@@ -141,6 +149,7 @@ function sep(): string {
 }
 
 async function resolveDir(): Promise<string> {
+  if (await invoke<boolean>("is_context_review")) return invoke<string>("harbor_download_dir");
   try {
     const raw = localStorage.getItem("harbor.settings");
     const fromSettings = raw
@@ -150,7 +159,7 @@ async function resolveDir(): Promise<string> {
   } catch {
     /* fall through to system default */
   }
-  return (await systemDownloadDir().catch(() => "")) || "";
+  return invoke<string>("harbor_download_dir");
 }
 
 async function pathTaken(path: string): Promise<boolean> {
@@ -344,8 +353,10 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
     startedAt: Date.now(),
     kind: "video",
     canPause: true,
+    requiresHeaders: !!headers && Object.keys(headers).length > 0,
   };
   items.set(id, item);
+  sessionSources.add(id);
   if (headers && Object.keys(headers).length > 0) requestHeaders.set(id, headers);
   rebuild();
 
@@ -492,7 +503,10 @@ function beginDownload(id: string): void {
       speed.delete(id);
       const current = items.get(id);
       if (current?.status !== "paused") {
-        requestHeaders.delete(id);
+        if (current?.status === "done") {
+          requestHeaders.delete(id);
+          sessionSources.delete(id);
+        }
         if (current) releaseDownloadTorrent(current);
       }
       reconcileFromUrl(item.url);
@@ -506,7 +520,6 @@ export function cancelDownload(id: string): void {
   const wasPaused = item.status === "paused";
   patch(id, { status: "canceled", bytesPerSec: 0 });
   managedControllers.get(id)?.abort();
-  requestHeaders.delete(id);
   handles.get(id)?.abort();
   if (wasPaused) releaseDownloadTorrent(item);
   reconcileFromUrl(item.url);
@@ -515,7 +528,14 @@ export function cancelDownload(id: string): void {
 export function pauseDownload(id: string): void {
   const item = items.get(id);
   const handle = handles.get(id);
-  if (!item || item.canPause === false || item.status !== "downloading" || !handle) return;
+  if (
+    !item ||
+    removing.has(id) ||
+    item.canPause === false ||
+    item.status !== "downloading" ||
+    !handle
+  )
+    return;
   patch(id, { status: "paused", bytesPerSec: 0 });
   handle.abort();
   const engine = downloadTorrentRef(item);
@@ -523,42 +543,220 @@ export function pauseDownload(id: string): void {
 }
 
 export async function resumeDownload(id: string): Promise<void> {
-  if (items.get(id)?.status !== "paused") return;
+  if (removing.has(id) || items.get(id)?.status !== "paused") return;
   await completions.get(id);
-  if (items.get(id)?.status !== "paused" || handles.has(id)) return;
+  if (removing.has(id) || items.get(id)?.status !== "paused" || handles.has(id)) return;
   patch(id, { status: "downloading", error: null, bytesPerSec: 0 });
   beginDownload(id);
   const url = items.get(id)?.url;
   if (url) reconcileFromUrl(url);
 }
 
-export function removeDownload(id: string): void {
+export function downloadById(id: string): DownloadItem | null {
+  return items.get(id) ?? null;
+}
+
+function isPrintReceipt(item: DownloadItem): boolean {
+  return item.kind === "ebook" && item.format === "pdf";
+}
+
+function retrySourceAvailable(item: DownloadItem): boolean {
+  if (item.kind === "ebook" || downloadTorrentRef(item)) return false;
+  if (!/^https?:\/\//i.test(item.url)) return false;
+  return sessionSources.has(item.id) || item.requiresHeaders === false;
+}
+
+export function downloadCapabilities(id: string) {
   const item = items.get(id);
-  handles.get(id)?.abort();
-  handles.delete(id);
-  completions.delete(id);
-  requestHeaders.delete(id);
-  speed.delete(id);
-  managedControllers.get(id)?.abort();
-  managedControllers.delete(id);
-  managedRunners.delete(id);
-  if (items.delete(id)) rebuild();
-  if (item) {
-    releaseDownloadTorrent(item);
-    reconcileFromUrl(item.url);
-    void remove(item.path).catch(() => {});
-    void remove(`${item.path}.part`).catch(() => {});
+  if (!item) return null;
+  const busy = removing.has(id);
+  const file = item.status === "done" && !isPrintReceipt(item);
+  return {
+    busy,
+    play: !busy && file && item.kind !== "ebook",
+    reveal: !busy && file,
+    pause: !busy && item.status === "downloading" && item.canPause !== false && handles.has(id),
+    resume: !busy && item.status === "paused" && item.kind !== "ebook",
+    cancel: !busy && (item.status === "downloading" || item.status === "paused"),
+    retry:
+      !busy &&
+      ["error", "interrupted", "canceled"].includes(item.status) &&
+      retrySourceAvailable(item),
+    delete: !busy,
+    printReceipt: isPrintReceipt(item),
+  };
+}
+
+export async function retryDownload(id: string): Promise<void> {
+  if (!downloadCapabilities(id)?.retry)
+    throw new Error("Choose a download source again to retry this item.");
+  await completions.get(id);
+  if (!downloadCapabilities(id)?.retry || handles.has(id))
+    throw new Error("This download has changed. Try again.");
+  patch(id, { status: "downloading", error: null, bytesPerSec: 0 });
+  beginDownload(id);
+}
+
+type DownloadFileInfo = { exists: boolean; isFile: boolean; canonicalPath: string | null };
+
+async function inspectFile(path: string): Promise<DownloadFileInfo> {
+  if (!path.trim()) throw new Error("This download has no file path.");
+  return invoke<DownloadFileInfo>("download_file_info", { path });
+}
+
+export async function completedDownloadById(id: string): Promise<DownloadItem> {
+  const item = items.get(id);
+  if (!item || item.status !== "done" || removing.has(id))
+    throw new Error("This download is no longer available.");
+  if (isPrintReceipt(item))
+    throw new Error("This item opened a PDF print dialog; Harbor has no saved file to open.");
+  const file = await inspectFile(item.path);
+  if (!file.exists) throw new Error("The downloaded file is missing or no longer exists.");
+  if (!file.isFile) throw new Error("The download path is not a regular file.");
+  const current = items.get(id);
+  if (!current || current.path !== item.path || current.status !== "done" || removing.has(id))
+    throw new Error("This download has changed. Try again.");
+  return current;
+}
+
+export type DownloadDeleteOptions = { protectedPaths?: () => string[] };
+
+function filePaths(item: DownloadItem): string[] {
+  if (isPrintReceipt(item)) return [];
+  return item.kind === "ebook" ? [item.path] : [item.path, `${item.path}.part`];
+}
+
+function pathKey(path: string): string {
+  const normalized = path.replace(/\\/g, "/");
+  return isWindowsDesktop() ? normalized.toLowerCase() : normalized;
+}
+
+async function checkFileOwnership(id: string, paths: string[], protectedPaths: string[]) {
+  const targets = await Promise.all(
+    paths.map(async (path) => ({ path, info: await inspectFile(path) })),
+  );
+  for (const target of targets) {
+    if (target.info.exists && !target.info.isFile)
+      throw new Error("The download path is not a regular file; folders cannot be deleted here.");
+  }
+  const otherPaths = [...items.values()].filter((d) => d.id !== id).flatMap(filePaths);
+  const protectedFiles = await Promise.all(
+    [...otherPaths, ...protectedPaths].map(async (path) => ({
+      path,
+      info: await inspectFile(path),
+    })),
+  );
+  for (const target of targets) {
+    for (const other of protectedFiles) {
+      const samePath = pathKey(target.path) === pathKey(other.path);
+      const sameFile =
+        target.info.canonicalPath &&
+        other.info.canonicalPath &&
+        pathKey(target.info.canonicalPath) === pathKey(other.info.canonicalPath);
+      if (samePath || sameFile)
+        throw new Error("This file is shared with another download or is in use by the player.");
+    }
+  }
+  return targets;
+}
+
+export async function removeDownload(
+  id: string,
+  options: DownloadDeleteOptions = {},
+): Promise<void> {
+  if (removing.has(id)) throw new Error("This download is already being deleted.");
+  const item = items.get(id);
+  if (!item) throw new Error("This download no longer exists.");
+  removing.add(id);
+  rebuild();
+  try {
+    cancelDownload(id);
+    // The completion includes native command settlement, after its writer is closed.
+    await completions.get(id);
+    const current = items.get(id);
+    if (!current || current.path !== item.path)
+      throw new Error("This download has changed. Try again.");
+    const paths = filePaths(current);
+    const targets = await checkFileOwnership(id, paths, options.protectedPaths?.() ?? []);
+    let deletedFiles = 0;
+    for (const target of targets) {
+      if (!target.info.exists) continue;
+      await invoke("download_delete_file", {
+        path: target.path,
+        expectedCanonicalPath: target.info.canonicalPath,
+        protectedPaths: [...items.values()]
+          .filter((d) => d.id !== id)
+          .flatMap(filePaths)
+          .concat(options.protectedPaths?.() ?? []),
+      });
+      deletedFiles++;
+    }
+    try {
+      // Keep the row and its retry state until its removal is durably acknowledged.
+      // A file deletion cannot be rolled back when browser storage is unavailable.
+      writeItems([...items.values()].filter((download) => download.id !== id));
+    } catch (cause) {
+      const message =
+        deletedFiles > 0
+          ? "Files were deleted, but the download record could not be removed. Retry removal."
+          : "The download record could not be removed. Retry removal.";
+      items.set(id, { ...current, status: "error", error: message, bytesPerSec: 0 });
+      throw new Error(message, { cause });
+    }
+    requestHeaders.delete(id);
+    sessionSources.delete(id);
+    speed.delete(id);
+    managedRunners.delete(id);
+    items.delete(id);
+    releaseDownloadTorrent(current);
+    reconcileFromUrl(current.url);
+  } finally {
+    removing.delete(id);
+    rebuild();
   }
 }
 
 export async function revealDownload(id: string): Promise<void> {
-  const d = items.get(id);
-  if (!d) return;
-  try {
-    await revealItemInDir(d.path);
-  } catch {
-    /* opener unavailable */
+  const item = await completedDownloadById(id);
+  await revealItemInDir(item.path);
+}
+
+export type DownloadBatchAction = "pause" | "resume" | "cancel" | "retry" | "delete";
+export type DownloadBatchResult = {
+  succeeded: string[];
+  skipped: string[];
+  failed: { id: string; error: string }[];
+};
+
+export async function runDownloadBatch(
+  ids: string[],
+  action: DownloadBatchAction,
+  options: DownloadDeleteOptions = {},
+): Promise<DownloadBatchResult> {
+  const result: DownloadBatchResult = { succeeded: [], skipped: [], failed: [] };
+  for (const id of new Set(ids)) {
+    if (!downloadCapabilities(id)?.[action]) {
+      result.skipped.push(id);
+      continue;
+    }
+    try {
+      if (action === "delete") await removeDownload(id, options);
+      else if (action === "retry") await retryDownload(id);
+      else if (action === "resume") await resumeDownload(id);
+      else {
+        if (action === "pause") pauseDownload(id);
+        else cancelDownload(id);
+        await completions.get(id);
+        const expected = action === "pause" ? "paused" : "canceled";
+        if (items.get(id)?.status !== expected)
+          throw new Error("The download finished or failed before this action completed.");
+      }
+      result.succeeded.push(id);
+    } catch (error) {
+      result.failed.push({ id, error: error instanceof Error ? error.message : String(error) });
+    }
   }
+  return result;
 }
 
 export function subscribeDownloads(listener: () => void): () => void {

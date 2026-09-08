@@ -10,6 +10,7 @@ export function MyListsTab() {
   const t = useT();
   const lists = useCustomLists();
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
+  const [initialListAction, setInitialListAction] = useState<"rename" | "delete">();
   const [creating, setCreating] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
@@ -20,6 +21,7 @@ export function MyListsTab() {
   const suppressClick = useRef(false);
 
   const onDown = (e: React.PointerEvent, id: string) => {
+    if (e.button !== 0) return;
     dragRef.current = { id, x: e.clientX, y: e.clientY, active: false };
   };
   const onMove = (e: React.PointerEvent) => {
@@ -37,7 +39,12 @@ export function MyListsTab() {
       const el = rowRefs.current.get(l.id);
       if (!el) continue;
       const r = el.getBoundingClientRect();
-      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+      if (
+        e.clientX >= r.left &&
+        e.clientX <= r.right &&
+        e.clientY >= r.top &&
+        e.clientY <= r.bottom
+      ) {
         target = l.id;
         break;
       }
@@ -60,7 +67,16 @@ export function MyListsTab() {
   };
 
   if (selectedListId) {
-    return <ListDetail listId={selectedListId} onBack={() => setSelectedListId(null)} />;
+    return (
+      <ListDetail
+        listId={selectedListId}
+        initialSettingsAction={initialListAction}
+        onBack={() => {
+          setSelectedListId(null);
+          setInitialListAction(undefined);
+        }}
+      />
+    );
   }
 
   const atMax = lists.length >= MAX_LISTS;
@@ -110,10 +126,19 @@ export function MyListsTab() {
                 }
               }}
               className={`cursor-grab touch-none rounded-2xl transition-[opacity,box-shadow] active:cursor-grabbing ${dragId === l.id ? "opacity-40" : ""} ${
-                dropTarget === l.id && dragId !== l.id ? "ring-2 ring-accent ring-offset-2 ring-offset-canvas" : ""
+                dropTarget === l.id && dragId !== l.id
+                  ? "ring-2 ring-accent ring-offset-2 ring-offset-canvas"
+                  : ""
               }`}
             >
-              <ListCard list={l} onOpen={setSelectedListId} />
+              <ListCard
+                list={l}
+                onOpen={setSelectedListId}
+                onManage={(id, action) => {
+                  setInitialListAction(action);
+                  setSelectedListId(id);
+                }}
+              />
             </div>
           ))}
         </div>
@@ -137,9 +162,13 @@ function EmptyLists({ onCreate }: { onCreate: () => void }) {
         <Layers size={24} strokeWidth={1.6} />
       </span>
       <div className="flex flex-col gap-1.5">
-        <h2 className="font-display text-[20px] font-medium text-ink">{t("Create your first list")}</h2>
+        <h2 className="font-display text-[20px] font-medium text-ink">
+          {t("Create your first list")}
+        </h2>
         <p className="max-w-sm text-[13px] leading-relaxed text-ink-muted">
-          {t("Group the movies and shows you love. Rewatch shelf, weekend picks, whatever keeps them close.")}
+          {t(
+            "Group the movies and shows you love. Rewatch shelf, weekend picks, whatever keeps them close.",
+          )}
         </p>
       </div>
       <button

@@ -1,7 +1,14 @@
 import { Clock } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { library, removeStremioLibraryItem, type LibraryItem } from "@/lib/stremio";
+import { library, type LibraryItem } from "@/lib/stremio";
+import { createPortal } from "react-dom";
+import {
+  clearStremioTitleHistory,
+  isStremioHistoryAccountCurrent,
+  HISTORY_PREVIOUS_ACCOUNT_MESSAGE,
+} from "@/lib/stremio-history";
+import { captureMembershipProfile, type MembershipProfile } from "@/lib/membership-operations";
 import { fetchWatchedHistory, type HistoryItem } from "@/lib/trakt/history";
 import { useTrakt } from "@/lib/trakt/provider";
 import { useSettings } from "@/lib/settings";
@@ -21,10 +28,11 @@ import {
 import { filterHistory, mergeHistory, type HistoryEntry } from "./history-merge";
 import { HistoryEpisodeCard } from "./history-episode-card";
 import { useReportFeatured } from "./featured-context";
+import { usePageContextRefresh } from "@/lib/context-page";
 
 type HistoryView = "posters" | "episodes";
 
-export function HistoryTab() {
+export function HistoryTab({ active = true }: { active?: boolean }) {
   const t = useT();
   const { authKey } = useAuth();
   const { settings } = useSettings();
@@ -34,7 +42,23 @@ export function HistoryTab() {
   const [traktStatus, setTraktStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [stremioLoading, setStremioLoading] = useState<boolean>(!!authKey);
   const [reloadKey, setReloadKey] = useState(0);
+  const [clearTarget, setClearTarget] = useState<{
+    id: string;
+    name: string;
+    authKey: string;
+    profile: MembershipProfile;
+  } | null>(null);
+  const [clearBusy, setClearBusy] = useState(false);
+  const [clearError, setClearError] = useState<string | null>(null);
   const refresh = useCallback(() => setReloadKey((k) => k + 1), []);
+  usePageContextRefresh({
+    id: "library:history",
+    page: "library",
+    label: t("Refresh history"),
+    active: active && (!!authKey || traktConnected),
+    busy: stremioLoading || traktStatus === "loading",
+    run: refresh,
+  });
 
   useEffect(() => {
     if (!authKey) {
@@ -58,19 +82,37 @@ export function HistoryTab() {
   }, [authKey, reloadKey]);
 
   const handleRemove = useCallback(
-    async (stremioId: string) => {
-      if (!authKey) return;
-      setStremio((prev) => prev.filter((i) => i._id !== stremioId));
-      try {
-        await removeStremioLibraryItem(authKey, stremioId);
-      } catch {
-        library(authKey)
-          .then((items) => setStremio(filterHistory(items)))
-          .catch(() => {});
-      }
+    (stremioId: string) => {
+      const profile = captureMembershipProfile();
+      const item = stremio.find((entry) => entry._id === stremioId);
+      if (!authKey || !profile || !item) return;
+      setClearError(null);
+      setClearTarget({ id: stremioId, name: item.name || stremioId, authKey, profile });
     },
-    [authKey],
+    [authKey, stremio],
   );
+  const confirmClear = async () => {
+    if (!clearTarget || clearBusy) return;
+    setClearBusy(true);
+    setClearError(null);
+    try {
+      await clearStremioTitleHistory(clearTarget);
+      if (!isStremioHistoryAccountCurrent(clearTarget))
+        throw new Error(HISTORY_PREVIOUS_ACCOUNT_MESSAGE);
+      setStremio((prev) =>
+        isStremioHistoryAccountCurrent(clearTarget)
+          ? prev.filter((item) => item._id !== clearTarget.id)
+          : prev,
+      );
+      setClearTarget(null);
+    } catch (error) {
+      setClearError(
+        error instanceof Error ? t(error.message) : t("Could not clear watch history."),
+      );
+    } finally {
+      setClearBusy(false);
+    }
+  };
 
   useEffect(() => {
     if (!traktConnected) {
@@ -196,10 +238,71 @@ export function HistoryTab() {
           {view === "episodes" ? (
             <EpisodesGrid groups={groups} onRemove={handleRemove} />
           ) : (
-            <GroupedGrid groups={groups} onRemove={handleRemove} />
+            <GroupedGrid
+              groups={groups}
+              onRemove={handleRemove}
+              removeLabel={t("Clear Stremio watch history for this title…")}
+              removeOpensDialog
+            />
           )}
         </div>
       )}
+      {clearTarget &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[230] flex items-center justify-center bg-canvas/80"
+            onClick={() => !clearBusy && setClearTarget(null)}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="clear-history-title"
+              className="flex w-[min(92vw,440px)] flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated p-7 shadow-xl"
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => {
+                if (event.key === "Escape" && !clearBusy) {
+                  event.stopPropagation();
+                  setClearTarget(null);
+                }
+              }}
+            >
+              <h2 id="clear-history-title" className="text-lg font-semibold">
+                {t("Clear Stremio watch history for this title?")}
+              </h2>
+              <p className="text-sm text-ink-muted">
+                {t(
+                  "This clears playback progress and watched status for all of “{title}” in Stremio, including every episode. Your watchlist membership and Trakt history are preserved.",
+                  { title: clearTarget.name },
+                )}
+              </p>
+              {clearError && (
+                <p role="alert" className="text-sm text-danger">
+                  {clearError}
+                </p>
+              )}
+              <div className="flex justify-end gap-3">
+                <button
+                  autoFocus
+                  disabled={clearBusy}
+                  type="button"
+                  onClick={() => setClearTarget(null)}
+                  className="rounded-lg border border-edge px-4 py-2"
+                >
+                  {t("Cancel")}
+                </button>
+                <button
+                  disabled={clearBusy}
+                  type="button"
+                  onClick={() => void confirmClear()}
+                  className="rounded-lg bg-danger px-4 py-2 text-white"
+                >
+                  {clearBusy ? t("Clearing…") : t("Clear title history")}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </section>
   );
 }
@@ -311,4 +414,3 @@ function EpisodesGrid({
     </div>
   );
 }
-

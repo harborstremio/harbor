@@ -3,13 +3,16 @@ import type { Meta } from "@/lib/cinemeta";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { ResultPoster } from "./result-poster";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
 
 function MetaRow({ m, onClose, index }: { m: Meta; onClose: () => void; index?: number }) {
   const { openMeta } = useView();
+  const { open } = useContextMenu();
   const description = useLocalizedOverview(m);
   const staggered = index != null;
   return (
     <button
+      onContextMenu={(event) => open(event, { kind: "meta", meta: m })}
       onClick={() => {
         openMeta(m);
         onClose();

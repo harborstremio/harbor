@@ -1,6 +1,7 @@
 import { Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { useContextTarget } from "@/lib/context-menu";
 import { Poster } from "@/components/poster";
 import { RailChevron } from "@/components/nav-arrow";
 import { useProfiles } from "@/lib/profiles";
@@ -75,13 +76,29 @@ function ContinueCard({
   const open = () => {
     if (busy) return;
     setBusy(true);
-    Promise.resolve(onResume(entry)).finally(() => {
+    return Promise.resolve(onResume(entry)).finally(() => {
       if (mounted.current) setBusy(false);
     });
   };
+  const contextTarget = useContextTarget<HTMLButtonElement>(() => ({
+    kind: "actions",
+    id: `manga-resume:${entry.id}`,
+    label: entry.title,
+    image: entry.cover ? { src: entry.cover, label: entry.title } : undefined,
+    actions: () => [
+      { id: `manga:resume:${entry.id}`, label: t("Continue reading"), disabled: busy, run: open },
+      {
+        id: `manga:remove-progress:${entry.id}`,
+        label: t("Remove from continue reading"),
+        disabled: busy,
+        run: onRemove,
+      },
+    ],
+  }));
   return (
     <div className="group relative w-[310px] shrink-0">
       <button
+        ref={contextTarget}
         type="button"
         onClick={open}
         aria-busy={busy}

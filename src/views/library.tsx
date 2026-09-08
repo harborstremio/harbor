@@ -153,7 +153,7 @@ export function LibraryView({ active }: { active: boolean }) {
           />
           {tab === "library" && <WatchlistTab mode="library" />}
           {tab === "watchlist" && <WatchlistTab mode="watchlist" />}
-          {tab === "history" && <HistoryTab />}
+          {tab === "history" && <HistoryTab active={active} />}
           {tab === "local" && <LocalTab scrollRef={scrollRef} />}
           {tab === "media-servers" && <MediaServersTab scrollRef={scrollRef} />}
           {tab === "lists" && <MyListsTab />}

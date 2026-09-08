@@ -4,7 +4,11 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 import { createPortal } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
 import { EpisodeWatchedMenu, type WatchedMenuTarget } from "@/components/episode-watched-menu";
-import { manualWatchedState, manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
+import {
+  manualWatchedState,
+  manualWatchedVersion,
+  subscribeManualWatched,
+} from "@/lib/manual-watched";
 import { getLastSeason, setLastSeason } from "@/lib/last-season";
 import { lastPlayedEpisode } from "@/lib/resume";
 import { Poster } from "@/components/poster";
@@ -39,9 +43,21 @@ export function CinemetaEpisodes({
   const t = useT();
   useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
   const [watchedMenu, setWatchedMenu] = useState<WatchedMenuTarget | null>(null);
-  const openWatchedMenu = (e: React.MouseEvent, season: number, episode: number, watched: boolean) => {
+  const openWatchedMenu = (
+    e: React.MouseEvent,
+    season: number,
+    episode: number,
+    watched: boolean,
+  ) => {
     e.preventDefault();
-    setWatchedMenu({ x: e.clientX, y: e.clientY, season, episode, watched });
+    setWatchedMenu({
+      x: e.clientX,
+      y: e.clientY,
+      season,
+      episode,
+      watched,
+      origin: e.currentTarget instanceof HTMLElement ? e.currentTarget : null,
+    });
   };
   const grouped = useMemo(() => {
     const map = new Map<number, CinemetaVideo[]>();
@@ -59,7 +75,9 @@ export function CinemetaEpisodes({
       .sort(([a], [b]) => a - b)
       .map(([s, eps]) => ({
         seasonNumber: s,
-        episodes: eps.slice().sort((a, b) => ((a.episode ?? a.number) ?? 0) - ((b.episode ?? b.number) ?? 0)),
+        episodes: eps
+          .slice()
+          .sort((a, b) => (a.episode ?? a.number ?? 0) - (b.episode ?? b.number ?? 0)),
       }));
     if (flat.length > 0 && numbered.length === 0) {
       flat.sort((a, b) => (a.released ?? "").localeCompare(b.released ?? ""));
@@ -81,7 +99,10 @@ export function CinemetaEpisodes({
   );
 
   const [active, setActive] = useState<number>(() =>
-    pickDefaultSeason(meta.id, grouped.map((g) => g.seasonNumber)),
+    pickDefaultSeason(
+      meta.id,
+      grouped.map((g) => g.seasonNumber),
+    ),
   );
   const userPickedRef = useRef(false);
 
@@ -91,7 +112,12 @@ export function CinemetaEpisodes({
 
   useEffect(() => {
     if (userPickedRef.current) return;
-    setActive(pickDefaultSeason(meta.id, grouped.map((g) => g.seasonNumber)));
+    setActive(
+      pickDefaultSeason(
+        meta.id,
+        grouped.map((g) => g.seasonNumber),
+      ),
+    );
   }, [meta.id, grouped.length]);
 
   if (grouped.length === 0) return null;
@@ -143,7 +169,12 @@ export function CinemetaEpisodes({
       {watchedMenu && (
         <EpisodeWatchedMenu
           metaId={meta.id}
-          meta={{ type: "series", name: meta.name, poster: meta.poster, background: meta.background }}
+          meta={{
+            type: "series",
+            name: meta.name,
+            poster: meta.poster,
+            background: meta.background,
+          }}
           target={watchedMenu}
           allEpisodes={allEpisodesOrdered}
           onClose={() => setWatchedMenu(null)}
@@ -245,7 +276,12 @@ function SeasonDropdown({
   onChange: (n: number) => void;
 }) {
   const t = useT();
-  const [menu, setMenu] = useState<{ right: number; top?: number; bottom?: number; maxH: number } | null>(null);
+  const [menu, setMenu] = useState<{
+    right: number;
+    top?: number;
+    bottom?: number;
+    maxH: number;
+  } | null>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const open = menu != null;

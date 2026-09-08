@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "context-images",
+  "description": "Write an explicitly selected image or link to the clipboard from the main window",
+  "windows": ["main"],
+  "permissions": ["clipboard-manager:allow-write-image", "clipboard-manager:allow-write-text"]
+}

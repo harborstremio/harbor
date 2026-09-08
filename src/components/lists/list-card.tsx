@@ -1,22 +1,66 @@
 import { Layers } from "lucide-react";
-import type { CustomList } from "@/lib/custom-lists";
+import { readLists, type CustomList } from "@/lib/custom-lists";
 import { relativeTime } from "@/lib/dates";
 import { useT } from "@/lib/i18n";
 import { Poster, posterPlate } from "@/components/poster";
+import { useContextTarget } from "@/lib/context-menu";
+import { captureMembershipProfile, isMembershipProfileCurrent } from "@/lib/membership-operations";
 
 export function ListCard({
   list,
   onOpen,
+  onManage,
 }: {
   list: CustomList;
   onOpen?: (id: string) => void;
+  onManage?: (id: string, action: "rename" | "delete") => void;
 }) {
   const t = useT();
   const covers = list.items.slice(0, 3);
   const count = list.items.length;
+  const contextRef = useContextTarget<HTMLButtonElement>(() => {
+    const profile = captureMembershipProfile();
+    return {
+      kind: "actions",
+      id: `list:${list.id}`,
+      label: list.name,
+      isValid: () =>
+        isMembershipProfileCurrent(profile) && readLists().some((entry) => entry.id === list.id),
+      actions: () => [
+        {
+          id: `list:open:${list.id}`,
+          label: t("Open list"),
+          disabled: !onOpen,
+          run: () => onOpen?.(list.id),
+          restoreFocus: false,
+          group: "list",
+        },
+        ...(onManage
+          ? [
+              {
+                id: `list:rename:${list.id}`,
+                label: t("Rename list"),
+                run: () => onManage(list.id, "rename"),
+                restoreFocus: false,
+                group: "list",
+              },
+              {
+                id: `list:delete:${list.id}`,
+                label: t("Delete list"),
+                run: () => onManage(list.id, "delete"),
+                restoreFocus: false,
+                danger: true,
+                group: "remove",
+              },
+            ]
+          : []),
+      ],
+    };
+  });
 
   return (
     <button
+      ref={contextRef}
       onClick={() => onOpen?.(list.id)}
       className="group flex w-full flex-col overflow-hidden rounded-xl border border-edge-soft bg-surface text-start transition-colors hover:bg-elevated"
     >

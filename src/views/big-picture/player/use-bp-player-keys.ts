@@ -70,7 +70,7 @@ export function useBpPlayerIdleKeys(params: {
         return;
       }
 
-      if (e.key === "Tab" || e.key === "ContextMenu") {
+      if (e.key === "Tab" || e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) {
         e.preventDefault();
         e.stopPropagation();
         onOptions();

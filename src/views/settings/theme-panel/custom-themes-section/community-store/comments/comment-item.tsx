@@ -1,4 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useContextMenu, useContextTarget, type ContextMenuTarget } from "@/lib/context-menu";
+import { captureMembershipProfile, isMembershipProfileCurrent } from "@/lib/membership-operations";
+import { authToken } from "@/lib/theme-auth";
+import { copyText } from "@/components/player/copy-link-button";
 import { ChevronDown, Loader2, Reply as ReplyIcon, Trash2 } from "../../../../icons";
 import { useT } from "@/lib/i18n";
 import type { ThemeComment } from "@/lib/theme-store";
@@ -37,11 +41,104 @@ export function CommentItem({
   const [busy, setBusy] = useState(false);
   const [replying, setReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
+  const [error, setError] = useState("");
+  const replyRef = useRef<HTMLDivElement>(null);
+  const { open } = useContextMenu();
   const name = comment.author || "Anonymous";
   const displayName = comment.author || t("Anonymous");
   const handle = comment.authorHandle || null;
   const hue = hueOf(name);
   const canReply = !!onReply && !!signedIn && !!replyToId;
+  const deleteConfirmed = async () => {
+    if (busy || !comment.canDelete) throw new Error(t("This comment cannot be deleted."));
+    setBusy(true);
+    setError("");
+    try {
+      await onDelete(comment.id);
+    } finally {
+      setBusy(false);
+      setConfirm(false);
+    }
+  };
+  const contextRef = useContextTarget<HTMLDivElement>(() => {
+    const profile = captureMembershipProfile();
+    const token = authToken();
+    return {
+      kind: "actions",
+      id: `theme-comment:${comment.themeId}:${comment.id}`,
+      label: t("Comment"),
+      contentPolicy: "separate",
+      isValid: () => isMembershipProfileCurrent(profile) && authToken() === token,
+      actions: () => [
+        {
+          id: `theme-comment:copy:${comment.id}`,
+          label: t("Copy comment text"),
+          run: async () => {
+            if (!(await copyText(comment.body))) throw new Error(t("Could not copy comment text."));
+          },
+        },
+        ...(canReply
+          ? [
+              {
+                id: `theme-comment:reply:${comment.id}`,
+                label: t("Reply"),
+                restoreFocus: false,
+                run: () => {
+                  setReplying(true);
+                  requestAnimationFrame(() =>
+                    replyRef.current?.querySelector<HTMLTextAreaElement>("textarea")?.focus(),
+                  );
+                },
+              },
+            ]
+          : []),
+        ...(handle
+          ? [
+              {
+                id: `theme-comment:author:${comment.id}`,
+                label: t("View author profile"),
+                run: () => requestOpenProfile(handle),
+              },
+            ]
+          : []),
+        ...(comment.canDelete
+          ? [
+              {
+                id: `theme-comment:delete:${comment.id}`,
+                label: t("Delete comment"),
+                danger: true,
+                group: "remove",
+                disabled: busy,
+                children: [
+                  {
+                    id: `theme-comment:delete:confirm:${comment.id}`,
+                    label: t("Confirm delete comment"),
+                    danger: true,
+                    run: deleteConfirmed,
+                  },
+                ],
+              },
+            ]
+          : []),
+      ],
+    };
+  });
+  const authorTarget = (): ContextMenuTarget => ({
+    kind: "actions",
+    id: `theme-comment:author:${comment.id}`,
+    label: displayName,
+    contentPolicy: "separate",
+    actions: () =>
+      handle
+        ? [
+            {
+              id: `theme-comment:open-author:${comment.id}`,
+              label: t("View author profile"),
+              run: () => requestOpenProfile(handle),
+            },
+          ]
+        : [],
+  });
 
   const del = async () => {
     if (!confirm) {
@@ -49,12 +146,10 @@ export function CommentItem({
       window.setTimeout(() => setConfirm(false), 2600);
       return;
     }
-    setBusy(true);
     try {
-      await onDelete(comment.id);
-    } catch {
-      setBusy(false);
-      setConfirm(false);
+      await deleteConfirmed();
+    } catch (error) {
+      setError(error instanceof Error ? t(error.message) : t("Could not delete comment."));
     }
   };
 
@@ -63,6 +158,7 @@ export function CommentItem({
       <button
         type="button"
         onClick={() => requestOpenProfile(handle)}
+        onContextMenu={(event) => open(event, authorTarget())}
         aria-label={t("Open {name} profile", { name: displayName })}
         className="grid h-11 w-11 shrink-0 place-items-center"
       >
@@ -83,6 +179,7 @@ export function CommentItem({
       <button
         type="button"
         onClick={() => requestOpenProfile(handle)}
+        onContextMenu={(event) => open(event, authorTarget())}
         className={`truncate ${ROW_TITLE} transition-colors hover:text-accent`}
       >
         {displayName}
@@ -93,7 +190,7 @@ export function CommentItem({
   );
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={contextRef} className="flex flex-col gap-3">
       <div className="flex items-start gap-3">
         {avatarEl}
         <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -121,6 +218,11 @@ export function CommentItem({
             )}
           </div>
           <CommentBody text={comment.body} />
+          {error && (
+            <p role="alert" className="text-sm text-danger">
+              {error}
+            </p>
+          )}
           {canReply && (
             <div className="mt-0.5 flex">
               <button
@@ -134,7 +236,7 @@ export function CommentItem({
             </div>
           )}
           {canReply && replying && (
-            <div className="mt-1">
+            <div ref={replyRef} className="mt-1">
               <CommentComposer
                 onSubmit={async (body) => {
                   await onReply!(body, replyToId!);

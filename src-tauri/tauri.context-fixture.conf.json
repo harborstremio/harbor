@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "build": { "beforeBuildCommand": "pnpm exec vite build --mode context-fixture" },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Harbor Context Review — Native fixture",
+        "url": "context-review.html",
+        "width": 1100,
+        "height": 760,
+        "minWidth": 700,
+        "minHeight": 500,
+        "visible": true,
+        "decorations": true,
+        "center": true
+      }
+    ],
+    "security": { "capabilities": ["context-fixture", "context-images"] }
+  }
+}

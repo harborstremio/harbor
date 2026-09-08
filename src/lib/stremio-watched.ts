@@ -33,15 +33,22 @@ function canonicalVideoOrder(videos: CinemetaVideo[]): CinemetaVideo[] {
 export async function decodeWatchedEpisodes(
   watchedField: string | null | undefined,
   videos: CinemetaVideo[] | undefined,
+  strict = false,
 ): Promise<Set<string>> {
   const keys = new Set<string>();
   if (!watchedField || !videos || videos.length === 0) return keys;
   const parts = watchedField.split(":");
-  if (parts.length < 3) return keys;
+  if (parts.length < 3) {
+    if (strict) throw new Error("The saved watched state is malformed.");
+    return keys;
+  }
   const b64 = parts[parts.length - 1];
   const anchorLength = Number.parseInt(parts[parts.length - 2], 10);
   const anchorVideoId = parts.slice(0, -2).join(":");
-  if (!Number.isFinite(anchorLength) || anchorLength <= 0) return keys;
+  if (!Number.isFinite(anchorLength) || anchorLength <= 0) {
+    if (strict) throw new Error("The saved watched state has an invalid anchor.");
+    return keys;
+  }
   let bytes: Uint8Array;
   try {
     const bin = atob(b64);
@@ -50,12 +57,15 @@ export async function decodeWatchedEpisodes(
     const inflated = new Blob([raw]).stream().pipeThrough(new DecompressionStream("deflate"));
     bytes = new Uint8Array(await new Response(inflated).arrayBuffer());
   } catch {
+    if (strict) throw new Error("The saved watched state could not be decoded.");
     return keys;
   }
   const bit = (i: number) =>
     i >= 0 && i < bytes.length * 8 && (bytes[i >> 3] & (1 << (i & 7))) !== 0;
   const sorted = canonicalVideoOrder(videos);
   const anchorIdx = sorted.findIndex((v) => v.id === anchorVideoId);
+  if (strict && (anchorIdx < 0 || anchorLength > bytes.length * 8))
+    throw new Error("The saved watched state cannot be aligned with this episode list.");
   const offset = anchorLength - anchorIdx - 1;
   for (let i = 0; i < sorted.length; i++) {
     const v = sorted[i];

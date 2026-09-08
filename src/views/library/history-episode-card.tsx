@@ -2,7 +2,8 @@ import { RotateCcw, Trash2 } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { type Meta } from "@/lib/cinemeta";
-import { useContextMenu } from "@/lib/context-menu";
+import { useContextMenu, useContextTarget, type ContextMenuTarget } from "@/lib/context-menu";
+import { captureMembershipProfile, isMembershipProfileCurrent } from "@/lib/membership-operations";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
@@ -90,13 +91,58 @@ export function HistoryEpisodeCard({
       entry.meta,
       isEpisode ? { episodeHint: { season: entry.season!, episode: entry.episode! } } : undefined,
     );
+  const contextTarget = (): ContextMenuTarget => {
+    const profile = captureMembershipProfile();
+    return {
+      kind: "meta",
+      meta: entry.meta,
+      ...(isEpisode
+        ? {
+            episode: { season: entry.season!, episode: entry.episode! },
+            watchScope: "episode" as const,
+          }
+        : {}),
+      extra: {
+        isValid: () => isMembershipProfileCurrent(profile),
+        actions: () => [
+          ...(isEpisode
+            ? [
+                {
+                  id: `history:episode:${entry.key}`,
+                  label: t("Open episode"),
+                  run: open,
+                  restoreFocus: false,
+                  group: "history",
+                },
+              ]
+            : []),
+          ...(onRemove && entry.stremioId
+            ? [
+                {
+                  id: `history:remove:${entry.stremioId}`,
+                  label: t("Clear Stremio watch history for this title…"),
+                  danger: true,
+                  group: "remove",
+                  run: () => onRemove(entry.stremioId!),
+                  restoreFocus: false,
+                },
+              ]
+            : []),
+        ],
+      },
+    };
+  };
+  const contextRef = useContextTarget<HTMLButtonElement>(contextTarget);
 
   return (
     <div className="group relative w-full min-w-0">
       <button
-        ref={cardRef}
+        ref={(element) => {
+          cardRef.current = element;
+          contextRef(element);
+        }}
         onClick={open}
-        onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta: entry.meta })}
+        onContextMenu={(e) => openContextMenu(e, contextTarget())}
         className="flex w-full min-w-0 flex-col gap-2.5 text-start"
       >
         <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-elevated shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] transition-transform duration-[220ms] ease-[cubic-bezier(0.22,0.61,0.36,1)] group-hover:scale-[1.02]">
@@ -175,29 +221,17 @@ export function HistoryEpisodeCard({
 
 function RemoveButton({ onRemove }: { onRemove: () => void }) {
   const t = useT();
-  const [confirm, setConfirm] = useState(false);
   return (
     <button
       type="button"
       onClick={(e) => {
         e.stopPropagation();
-        if (confirm) {
-          onRemove();
-          setConfirm(false);
-        } else {
-          setConfirm(true);
-        }
+        onRemove();
       }}
-      onMouseLeave={() => setConfirm(false)}
-      aria-label={confirm ? t("Confirm remove from history") : t("Remove from history")}
-      className={`absolute end-2 top-2 z-10 flex h-7 items-center justify-center gap-1 rounded-full text-white shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-all duration-200 ${
-        confirm
-          ? "bg-danger px-2.5 text-[11px] font-semibold"
-          : "w-7 bg-canvas/70 opacity-0 backdrop-blur-sm hover:bg-canvas/90 group-hover:opacity-100"
-      }`}
+      aria-label={t("Clear Stremio watch history for this title…")}
+      className="absolute end-2 top-2 z-10 flex h-7 w-7 items-center justify-center gap-1 rounded-full bg-canvas/70 text-white opacity-0 shadow-[0_2px_8px_rgba(0,0,0,0.4)] backdrop-blur-sm transition-all duration-200 hover:bg-canvas/90 group-hover:opacity-100"
     >
       <Trash2 size={12} strokeWidth={2.2} />
-      {confirm && t("Remove")}
     </button>
   );
 }

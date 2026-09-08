@@ -1,20 +1,24 @@
 import { Ban, Check, Eye, EyeOff } from "lucide-react";
-import { useEffect } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useRef } from "react";
 import { useT } from "@/lib/i18n";
 import {
-  recordManualWatchedMeta,
-  setManualWatched,
-  setManualWatchedMany,
-  setManualWatchedUpTo,
+  manualWatchedState,
+  subscribeManualWatched,
   type ManualWatchedMeta,
 } from "@/lib/manual-watched";
 import { isEpisodeHidden, setEpisodeHidden } from "@/lib/hidden-episodes";
 import { useSettings } from "@/lib/settings";
+import { useProfiles } from "@/lib/profiles";
 import { clearResume, readResumeEntry } from "@/lib/resume";
-import { markEpisodesWatched, unmarkEpisodeWatched } from "@/lib/simkl/history";
-import { stremioIdToSimklTarget } from "@/lib/simkl/ids";
-import { useSimkl } from "@/lib/simkl/provider";
+import { useTmdbImdbId } from "@/lib/providers/tmdb";
+import {
+  setContextWatched,
+  requireMediaActionSuccess,
+  type WatchedEpisode,
+} from "@/lib/media-context-actions";
+import type { ContextAction } from "@/lib/context-actions";
+import { MenuSurface } from "./context-menu/menu-surface";
+import { ActionItems } from "./context-menu/action-items";
 
 export type WatchedMenuTarget = {
   x: number;
@@ -23,175 +27,138 @@ export type WatchedMenuTarget = {
   episode: number;
   watched: boolean;
   metaId?: string;
+  origin?: HTMLElement | null;
 };
 
 function airedByNow(released?: string | null): boolean {
   if (!released) return true;
-  const t = Date.parse(released);
-  return !Number.isFinite(t) || t <= Date.now();
+  const date = Date.parse(released);
+  return !Number.isFinite(date) || date <= Date.now();
 }
 
 export function EpisodeWatchedMenu({
   metaId,
+  syncMetaId,
   meta,
   target,
   allEpisodes,
   onClose,
 }: {
   metaId: string;
+  syncMetaId?: string;
   meta: ManualWatchedMeta;
   target: WatchedMenuTarget;
-  allEpisodes?: Array<{ season: number; episode: number; released?: string | null }>;
+  allEpisodes?: Array<WatchedEpisode & { released?: string | null }>;
   onClose: () => void;
 }) {
   const t = useT();
-  const { isConnected: simklConnected } = useSimkl();
   const { settings } = useSettings();
-  const hidden = isEpisodeHidden(metaId, target.season, target.episode);
-
-  useEffect(() => {
-    const onDown = () => onClose();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("mousedown", onDown);
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("scroll", onClose, true);
-    return () => {
-      window.removeEventListener("mousedown", onDown);
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("scroll", onClose, true);
-    };
-  }, [onClose]);
-
-  const showIds = (() => {
-    if (!simklConnected) return null;
-    const r = stremioIdToSimklTarget(metaId, { season: target.season, episode: target.episode });
-    if (!r.ok) return null;
-    if (r.target.kind === "episode") return r.target.show.ids;
-    if (r.target.kind === "anime-episode") return r.target.anime.ids;
-    return null;
-  })();
-
-  const started = !target.watched && readResumeEntry(metaId, target.season, target.episode) != null;
-
-  const unmark = () => {
-    setManualWatched(metaId, target.season, target.episode, false);
-    clearResume(metaId, target.season, target.episode);
-    if (showIds) void unmarkEpisodeWatched(showIds, target.season, target.episode);
-    onClose();
-  };
-
-  const left = Math.min(target.x, window.innerWidth - 232);
-  const top = Math.min(target.y, window.innerHeight - 128);
-
-  return createPortal(
-    <div
-      role="menu"
-      style={{ left, top }}
-      onMouseDown={(e) => e.stopPropagation()}
-      className="fixed z-[320] flex w-[224px] flex-col rounded-xl border border-edge bg-elevated p-1 shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] animate-popover-in"
-    >
-      {target.watched ? (
-        <Item
-          icon={<EyeOff size={14} strokeWidth={2} />}
-          label={t("Mark as unwatched")}
-          onClick={unmark}
-        />
-      ) : (
-        <>
-          <Item
-            icon={<Check size={14} strokeWidth={2} />}
-            label={t("Mark as watched")}
-            onClick={() => {
-              recordManualWatchedMeta(metaId, meta);
-              setManualWatched(metaId, target.season, target.episode, true);
-              if (showIds) void markEpisodesWatched(showIds, target.season, [target.episode]);
-              onClose();
-            }}
-          />
-          <Item
-            icon={<Eye size={14} strokeWidth={2} />}
-            label={t("Mark watched up to here")}
-            onClick={() => {
-              recordManualWatchedMeta(metaId, meta);
-              if (allEpisodes && allEpisodes.length > 0) {
-                const upTo = allEpisodes.filter(
-                  (e) =>
-                    airedByNow(e.released) &&
-                    (e.season < target.season ||
-                      (e.season === target.season && e.episode <= target.episode)),
-                );
-                setManualWatchedMany(metaId, upTo, true);
-                if (showIds) {
-                  const eps = upTo.filter((e) => e.season === target.season).map((e) => e.episode);
-                  if (eps.length > 0) void markEpisodesWatched(showIds, target.season, eps);
-                }
-              } else {
-                setManualWatchedUpTo(metaId, target.season, target.episode, true);
-                if (showIds) {
-                  const eps = Array.from({ length: target.episode }, (_, i) => i + 1);
-                  void markEpisodesWatched(showIds, target.season, eps);
-                }
-              }
-              onClose();
-            }}
-          />
-          {started && (
-            <Item
-              icon={<EyeOff size={14} strokeWidth={2} />}
-              label={t("Mark as unwatched")}
-              onClick={unmark}
-            />
-          )}
-        </>
-      )}
-      {settings.episodeHiding && (
-        <>
-          <div className="mx-1 my-1 h-px bg-edge-soft/70" />
-          {hidden ? (
-            <Item
-              icon={<Eye size={14} strokeWidth={2} />}
-              label={t("Show episode")}
-              onClick={() => {
-                setEpisodeHidden(metaId, target.season, target.episode, false);
-                onClose();
-              }}
-            />
-          ) : (
-            <Item
-              icon={<Ban size={14} strokeWidth={2} />}
-              label={t("Hide episode")}
-              onClick={() => {
-                setEpisodeHidden(metaId, target.season, target.episode, true);
-                onClose();
-              }}
-            />
-          )}
-        </>
-      )}
-    </div>,
-    document.body,
+  const { activeId } = useProfiles();
+  const initialProfile = useRef(activeId);
+  const origin = useRef(
+    target.origin ??
+      (document.activeElement instanceof HTMLElement ? document.activeElement : null),
   );
-}
-
-function Item({
-  icon,
-  label,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}) {
+  const imdbId = useTmdbImdbId(metaId);
+  const close = (restoreFocus = true) => {
+    onClose();
+    if (restoreFocus && origin.current?.isConnected) origin.current.focus({ preventScroll: true });
+  };
+  useEffect(() => {
+    if (activeId !== initialProfile.current) onClose();
+  }, [activeId, onClose]);
+  const runWatched = async (watched: boolean, episodes?: WatchedEpisode[]) => {
+    const result = await setContextWatched({ id: metaId, ...meta, type: "series" }, watched, {
+      imdbId,
+      syncMetaId,
+      ...(episodes
+        ? { episodes }
+        : { episode: { season: target.season, episode: target.episode } }),
+    });
+    if (
+      !watched &&
+      result.outcomes.some(
+        (outcome) => outcome.provider === "Harbor" && outcome.status === "updated",
+      )
+    )
+      clearResume(metaId, target.season, target.episode);
+    requireMediaActionSuccess(result);
+  };
+  const actions = (): ContextAction[] => {
+    const watched = manualWatchedState(metaId, target.season, target.episode) ?? target.watched;
+    const started = !watched && readResumeEntry(metaId, target.season, target.episode) != null;
+    const upTo = [
+      ...new Map(
+        (allEpisodes ?? [])
+          .filter(
+            (episode) =>
+              airedByNow(episode.released) &&
+              (episode.season < target.season ||
+                (episode.season === target.season && episode.episode <= target.episode)),
+          )
+          .map((episode) => [
+            episode.season + ":" + episode.episode,
+            { season: episode.season, episode: episode.episode },
+          ]),
+      ).values(),
+    ];
+    const result: ContextAction[] = [];
+    if (!watched) {
+      result.push({
+        id: "episode:watched",
+        icon: <Check size={14} />,
+        label: t("Mark episode as watched"),
+        run: () => runWatched(true),
+        group: "watched",
+      });
+      result.push({
+        id: "episode:up-to",
+        icon: <Eye size={14} />,
+        label: t("Mark {count} episodes up to here", { count: upTo.length }),
+        disabled: upTo.length === 0,
+        reason: upTo.length ? undefined : t("Episode information is unavailable."),
+        run: () => runWatched(true, upTo),
+        group: "watched",
+      });
+    }
+    if (watched || started)
+      result.push({
+        id: "episode:unwatched",
+        icon: <EyeOff size={14} />,
+        label: t("Mark episode as unwatched"),
+        run: () => runWatched(false),
+        group: "watched",
+      });
+    if (settings.episodeHiding) {
+      const hidden = isEpisodeHidden(metaId, target.season, target.episode);
+      result.push({
+        id: "episode:hidden",
+        icon: hidden ? <Eye size={14} /> : <Ban size={14} />,
+        label: hidden ? t("Show episode") : t("Hide episode"),
+        run: () =>
+          setEpisodeHidden(
+            metaId,
+            target.season,
+            target.episode,
+            !isEpisodeHidden(metaId, target.season, target.episode),
+          ),
+        group: "visibility",
+      });
+    }
+    return result;
+  };
+  const latest = useRef(actions);
+  latest.current = actions;
   return (
-    <button
-      role="menuitem"
-      onClick={onClick}
-      className="flex h-9 items-center gap-2.5 rounded-lg px-3 text-start text-[13px] text-ink transition-colors hover:bg-raised"
-    >
-      <span className="text-ink-muted">{icon}</span>
-      {label}
-    </button>
+    <MenuSurface point={{ x: target.x, y: target.y }} onClose={close} label={t("Episode actions")}>
+      <ActionItems
+        source={{
+          actions: () => latest.current(),
+          isValid: () => activeId === initialProfile.current,
+          subscribe: subscribeManualWatched,
+        }}
+        onClose={close}
+      />
+    </MenuSurface>
   );
 }

@@ -241,9 +241,13 @@ export function GroupedGrid<
 >({
   groups,
   onRemove,
+  removeLabel,
+  removeOpensDialog,
 }: {
   groups: Array<{ label: string; items: T[] }>;
   onRemove?: (stremioId: string) => void;
+  removeLabel?: string;
+  removeOpensDialog?: boolean;
 }) {
   const t = useT();
   return (
@@ -258,6 +262,8 @@ export function GroupedGrid<
               <WatchlistCard
                 key={it.key}
                 meta={it.meta}
+                removeLabel={removeLabel}
+                removeOpensDialog={removeOpensDialog}
                 onRemove={
                   onRemove && it.stremioId ? () => onRemove(it.stremioId as string) : undefined
                 }

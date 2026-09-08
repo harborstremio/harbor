@@ -14,7 +14,7 @@ export type LocalEpisodesPayload = {
   videos?: Meta["videos"];
   initialSeason?: number | null;
   highlightEpisode?: number | null;
-  onPlayLocal: (entry: LocalEntry) => void;
+  onPlayLocal: (entry: LocalEntry) => void | Promise<void>;
   entries?: LocalEntry[];
   entrySources?: Record<string, EpisodeSource>;
   sourceLabel?: string;

@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { readImageResponse } from "@/lib/context-image-policy";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -34,9 +35,13 @@ export async function fetchImageObjectUrl(
   });
   if (!resp.ok) throw new Error(`status ${resp.status}`);
   const type = resp.headers?.["content-type"] || resp.contentType || "";
-  if (type && !type.startsWith("image/")) throw new Error(`type ${type}`);
-  const blob = new Blob([base64ToBytes(resp.body)], { type: type || "image/jpeg" });
-  return URL.createObjectURL(blob);
+  const loaded = await readImageResponse(
+    new Response(base64ToBytes(resp.body), {
+      status: resp.status,
+      headers: type ? { "content-type": type } : {},
+    }),
+  );
+  return URL.createObjectURL(loaded.blob);
 }
 
 function aspectOf(src: string): Promise<number | null> {

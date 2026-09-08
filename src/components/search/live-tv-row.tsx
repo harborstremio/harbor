@@ -2,9 +2,13 @@ import { Radio, Tv } from "lucide-react";
 import type { LiveTvHit } from "@/lib/search";
 import { useView } from "@/lib/view";
 import type { Meta } from "@/lib/cinemeta";
+import { useContextMenu } from "@/lib/context-menu";
+import { useT } from "@/lib/i18n";
 
 export function LiveTvRow({ items, onClose }: { items: LiveTvHit[]; onClose: () => void }) {
   const { openPlayer } = useView();
+  const { open } = useContextMenu();
+  const t = useT();
   if (items.length === 0) return null;
   const play = (hit: LiveTvHit) => {
     const meta: Meta = {
@@ -38,6 +42,21 @@ export function LiveTvRow({ items, onClose }: { items: LiveTvHit[]; onClose: () 
           <button
             key={`${hit.playlistId}:${hit.channelId}:${ix}`}
             onClick={() => play(hit)}
+            onContextMenu={(event) =>
+              open(event, {
+                kind: "actions",
+                id: `channel:${hit.playlistId}:${hit.channelId}`,
+                label: hit.name,
+                image: hit.logo ? { src: hit.logo, label: hit.name } : undefined,
+                actions: () => [
+                  {
+                    id: `channel:play:${hit.playlistId}:${hit.channelId}`,
+                    label: t("Play channel"),
+                    run: () => play(hit),
+                  },
+                ],
+              })
+            }
             className="group flex items-center gap-3 rounded-xl border border-edge-soft/60 bg-elevated/40 px-3 py-2.5 text-start transition-colors hover:border-edge hover:bg-elevated"
           >
             <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-canvas">

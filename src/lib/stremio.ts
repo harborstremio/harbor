@@ -197,7 +197,10 @@ export async function libraryGetOne(authKey: string, id: string): Promise<Librar
   return items?.find((it) => it._id === id) ?? null;
 }
 
-export async function libraryGetOneStrict(authKey: string, id: string): Promise<LibraryItem | null> {
+export async function libraryGetOneStrict(
+  authKey: string,
+  id: string,
+): Promise<LibraryItem | null> {
   const items = await call<LibraryItem[]>("datastoreGet", {
     authKey,
     collection: "libraryItem",
@@ -236,7 +239,11 @@ export async function removeStremioLibraryItem(authKey: string, id: string): Pro
 export const CLOUD_OK = /^(tt\d|kitsu:|mal:|anilist:|anidb:|tmdb:)/;
 
 export const ANIME_CLOUD_ID = /^(kitsu|mal|anilist|anidb):/;
-export function cloudWriteId(metaId: string, resolved: string | null, verified: boolean): string | null {
+export function cloudWriteId(
+  metaId: string,
+  resolved: string | null,
+  verified: boolean,
+): string | null {
   if (metaId.startsWith("tt")) return metaId;
   if (ANIME_CLOUD_ID.test(metaId)) return null;
   if (verified && resolved && resolved.startsWith("tt")) return resolved;
@@ -247,12 +254,14 @@ export async function saveStremioBookmark(
   authKey: string,
   id: string,
   input: { type?: string; name?: string; poster?: string },
+  strict = false,
 ): Promise<void> {
   const now = new Date().toISOString();
   let existing: LibraryItem | null;
   try {
     existing = await libraryGetOneStrict(authKey, id);
-  } catch {
+  } catch (error) {
+    if (strict) throw error;
     return;
   }
   if (existing) {
@@ -289,8 +298,14 @@ export async function saveStremioBookmark(
   await libraryPut(authKey, item as unknown as LibraryItem);
 }
 
-export async function removeStremioBookmark(authKey: string, id: string): Promise<void> {
-  const existing = await libraryGetOne(authKey, id).catch(() => null);
+export async function removeStremioBookmark(
+  authKey: string,
+  id: string,
+  strict = false,
+): Promise<void> {
+  const existing = strict
+    ? await libraryGetOneStrict(authKey, id)
+    : await libraryGetOne(authKey, id).catch(() => null);
   if (!existing) return;
   await libraryPut(authKey, {
     ...existing,

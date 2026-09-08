@@ -63,9 +63,7 @@ export async function fetchSummary(handle: string, signal?: AbortSignal) {
 }
 
 export function fetchFriends(handle: string, signal?: AbortSignal) {
-  return getJson<Friend[]>(`/u/${encodeURIComponent(handle)}/friends`, signal).catch(
-    () => [],
-  );
+  return getJson<Friend[]>(`/u/${encodeURIComponent(handle)}/friends`, signal).catch(() => []);
 }
 
 export function fetchBadges(handle: string, signal?: AbortSignal) {
@@ -117,7 +115,20 @@ export async function setCommentLike(
     { method: liked ? "POST" : "DELETE", headers: authHeaders() },
   );
   if (!res.ok) throw new ProfileApiError(res.status);
-  return (await res.json()) as { likeCount: number; liked: boolean };
+  const result: unknown = await res.json();
+  if (
+    !result ||
+    typeof result !== "object" ||
+    !("likeCount" in result) ||
+    !("liked" in result) ||
+    typeof result.liked !== "boolean" ||
+    typeof result.likeCount !== "number" ||
+    !Number.isSafeInteger(result.likeCount) ||
+    result.likeCount < 0 ||
+    result.liked !== liked
+  )
+    throw new Error("The comment update could not be confirmed. Refresh its current state.");
+  return { liked: result.liked, likeCount: result.likeCount };
 }
 
 export async function saveSettings(input: ProfileSettingsInput): Promise<ProfileSummary> {

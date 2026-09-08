@@ -2,6 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { setItemWithRecovery, freeStorageSpace } from "@/lib/storage-recovery";
 import { randomUuid } from "@/lib/uuid";
 import { persistableAddonOrigin, persistableVideos, type Meta } from "@/lib/cinemeta";
+import {
+  isMembershipItemInput,
+  performMembershipOperation,
+  performContainerOperation,
+  type MembershipProfile,
+  type MembershipResult,
+  type MoveMembershipRequest,
+  type RemoveMembershipRequest,
+} from "@/lib/membership-operations";
 
 const KEY = "harbor.customlists.v1";
 const PROFILES_KEY = "harbor.profiles.v1";
@@ -69,6 +78,20 @@ export const MAX_LISTS = 24;
 export const MAX_ITEMS = 100;
 
 let memoryFallback: CustomList[] | null = null;
+
+export function deleteListWithResult(id: string, profile: MembershipProfile) {
+  if (memoryFallback) return { status: "error", reason: "unsaved-changes" } as const;
+  const result = performContainerOperation(KEY, profile, { mode: "delete", id });
+  if (result.status === "removed") for (const subscriber of subs) subscriber();
+  return result;
+}
+
+export function renameListWithResult(id: string, name: string, profile: MembershipProfile) {
+  if (memoryFallback) return { status: "error", reason: "unsaved-changes" } as const;
+  const result = performContainerOperation(KEY, profile, { mode: "rename", id, name: name.trim() });
+  if (result.status === "updated") for (const subscriber of subs) subscriber();
+  return result;
+}
 
 function inferType(id: string): "movie" | "series" {
   if (/^(kitsu|mal|anilist|anidb):/i.test(id)) return "series";
@@ -217,6 +240,28 @@ export function createList(name: string): string | null {
   return id;
 }
 
+export function createListWithItem(
+  name: string,
+  item: ListItemInput,
+  profile: MembershipProfile,
+): { result: MembershipResult; id?: string } {
+  if (!name.trim() || !isMembershipItemInput(item)) {
+    return { result: { status: "error", reason: "invalid-data" } };
+  }
+  if (memoryFallback) return { result: { status: "error", reason: "unsaved-changes" } };
+  const id = randomUuid();
+  const now = Date.now();
+  const result = performMembershipOperation(KEY, MAX_ITEMS, {
+    mode: "create",
+    profile,
+    maxContainers: MAX_LISTS,
+    container: { id, name: name.trim(), createdAt: now, updatedAt: now, items: [toItem(item)] },
+  });
+  if (result.status !== "added") return { result };
+  for (const subscriber of subs) subscriber();
+  return { result, id };
+}
+
 export function renameList(id: string, name: string): void {
   const trimmed = name.trim();
   if (!trimmed) return;
@@ -235,14 +280,35 @@ export function deleteList(id: string): void {
   write(next);
 }
 
-export function addToList(listId: string, item: ListItemInput): void {
-  const lists = read();
-  const list = lists.find((l) => l.id === listId);
-  if (!list || list.items.length >= MAX_ITEMS) return;
-  if (list.items.some((it) => it.id === item.id)) return;
-  list.items.push(toItem(item));
-  list.updatedAt = Date.now();
-  write(lists);
+export function addToList(
+  listId: string,
+  item: ListItemInput,
+  profile?: MembershipProfile,
+): MembershipResult {
+  if (!isMembershipItemInput(item)) return { status: "error", reason: "invalid-data" };
+  if (memoryFallback) return { status: "error", reason: "unsaved-changes" };
+  const result = performMembershipOperation(KEY, MAX_ITEMS, {
+    mode: "add",
+    destinationId: listId,
+    item: toItem(item),
+    profile,
+  });
+  if (result.status === "added") for (const subscriber of subs) subscriber();
+  return result;
+}
+
+export function moveBetweenLists(request: MoveMembershipRequest): MembershipResult {
+  if (memoryFallback) return { status: "error", reason: "unsaved-changes" };
+  const result = performMembershipOperation(KEY, MAX_ITEMS, { mode: "move", ...request });
+  if (result.status === "moved") for (const subscriber of subs) subscriber();
+  return result;
+}
+
+export function removeListMembership(request: RemoveMembershipRequest): MembershipResult {
+  if (memoryFallback) return { status: "error", reason: "unsaved-changes" };
+  const result = performMembershipOperation(KEY, MAX_ITEMS, { mode: "remove", ...request });
+  if (result.status === "removed") for (const subscriber of subs) subscriber();
+  return result;
 }
 
 export function removeFromList(listId: string, itemId: string): void {

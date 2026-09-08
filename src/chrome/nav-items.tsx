@@ -33,6 +33,7 @@ import { TvIcon } from "@/components/icons/tv-icon";
 import { DownloadsNavIcon } from "@/chrome/downloads-nav-icon";
 import type { LockableTab } from "@/lib/parental";
 import type { View } from "@/lib/view";
+import { customizeNavigation } from "./navigation-policy";
 
 function CalendarNavIcon({ active }: { active: boolean }) {
   const unseen = useUnseenReminderCount();
@@ -84,7 +85,14 @@ export type NavCustomization = {
 };
 
 const NAV_ITEMS_ALL: NavItem[] = [
-  { id: "home", label: "nav.home", render: (active, hovered) => <NavLottie data={lotHome} hovered={hovered} fallback={<HomeIcon active={active} />} />, view: "home" },
+  {
+    id: "home",
+    label: "nav.home",
+    render: (active, hovered) => (
+      <NavLottie data={lotHome} hovered={hovered} fallback={<HomeIcon active={active} />} />
+    ),
+    view: "home",
+  },
   {
     id: "discover",
     label: "nav.discover",
@@ -95,21 +103,27 @@ const NAV_ITEMS_ALL: NavItem[] = [
   {
     id: "catalogs",
     label: "nav.catalogs",
-    render: (active, hovered) => <NavLottie data={lotCatalogs} hovered={hovered} fallback={<CatalogsIcon active={active} />} />,
+    render: (active, hovered) => (
+      <NavLottie data={lotCatalogs} hovered={hovered} fallback={<CatalogsIcon active={active} />} />
+    ),
     view: "catalogs",
     parentalKey: "discover",
   },
   {
     id: "movies",
     label: "nav.movies",
-    render: (active, hovered) => <NavLottie data={lotMovies} hovered={hovered} fallback={<MoviesIcon active={active} />} />,
+    render: (active, hovered) => (
+      <NavLottie data={lotMovies} hovered={hovered} fallback={<MoviesIcon active={active} />} />
+    ),
     view: "movies",
     parentalKey: "movies",
   },
   {
     id: "shows",
     label: "nav.shows",
-    render: (active, hovered) => <NavLottie data={lotShows} hovered={hovered} loop fallback={<TvIcon active={active} />} />,
+    render: (active, hovered) => (
+      <NavLottie data={lotShows} hovered={hovered} loop fallback={<TvIcon active={active} />} />
+    ),
     view: "shows",
     parentalKey: "shows",
   },
@@ -124,7 +138,9 @@ const NAV_ITEMS_ALL: NavItem[] = [
   {
     id: "anime",
     label: "nav.anime",
-    render: (active, hovered) => <NavLottie data={lotAnime} hovered={hovered} fallback={<AnimeIcon active={active} />} />,
+    render: (active, hovered) => (
+      <NavLottie data={lotAnime} hovered={hovered} fallback={<AnimeIcon active={active} />} />
+    ),
     view: "anime",
     hideKey: "anime",
     parentalKey: "anime",
@@ -132,7 +148,13 @@ const NAV_ITEMS_ALL: NavItem[] = [
   {
     id: "manga",
     label: "nav.manga",
-    render: (_active, hovered) => <NavLottie data={lotManga} hovered={hovered} fallback={<NavGlyph name="manga" className="h-[26px] w-[26px] p-[2px]" />} />,
+    render: (_active, hovered) => (
+      <NavLottie
+        data={lotManga}
+        hovered={hovered}
+        fallback={<NavGlyph name="manga" className="h-[26px] w-[26px] p-[2px]" />}
+      />
+    ),
     view: "manga",
     hideKey: "manga",
     parentalKey: "anime",
@@ -140,14 +162,27 @@ const NAV_ITEMS_ALL: NavItem[] = [
   {
     id: "ebook",
     label: "nav.ebook",
-    render: (_active, hovered) => <NavLottie data={lotEbook} hovered={hovered} fallback={<NavGlyph name="ebook" className="h-[26px] w-[26px] p-[2px]" />} />,
+    render: (_active, hovered) => (
+      <NavLottie
+        data={lotEbook}
+        hovered={hovered}
+        fallback={<NavGlyph name="ebook" className="h-[26px] w-[26px] p-[2px]" />}
+      />
+    ),
     view: "ebook",
     parentalKey: "anime",
   },
   {
     id: "live",
     label: "nav.live",
-    render: (active, hovered) => <NavLottie data={lotLiveTv} hovered={hovered} loop fallback={<LiveTvIcon active={active} />} />,
+    render: (active, hovered) => (
+      <NavLottie
+        data={lotLiveTv}
+        hovered={hovered}
+        loop
+        fallback={<LiveTvIcon active={active} />}
+      />
+    ),
     view: "live",
     hideKey: "liveTv",
     parentalKey: "liveTv",
@@ -155,46 +190,76 @@ const NAV_ITEMS_ALL: NavItem[] = [
   {
     id: "vod",
     label: "nav.playlists",
-    render: (active, hovered) => <NavLottie data={lotPlaylists} hovered={hovered} fallback={<PlaylistVodIcon active={active} />} />,
+    render: (active, hovered) => (
+      <NavLottie
+        data={lotPlaylists}
+        hovered={hovered}
+        fallback={<PlaylistVodIcon active={active} />}
+      />
+    ),
     view: "vod",
   },
   {
     id: "calendar",
     label: "nav.calendar",
-    render: (active, hovered) => <NavLottie data={lotCalendar} hovered={hovered} fallback={<CalendarNavIcon active={active} />} />,
+    render: (active, hovered) => (
+      <NavLottie
+        data={lotCalendar}
+        hovered={hovered}
+        fallback={<CalendarNavIcon active={active} />}
+      />
+    ),
     view: "calendar",
     parentalKey: "calendar",
   },
   {
     id: "library",
     label: "nav.library",
-    render: (active, hovered) => <NavLottie data={lotLibrary} hovered={hovered} fallback={<LibraryIcon active={active} />} />,
+    render: (active, hovered) => (
+      <NavLottie data={lotLibrary} hovered={hovered} fallback={<LibraryIcon active={active} />} />
+    ),
     view: "library",
     parentalKey: "library",
   },
   {
     id: "collections",
     label: "Collections",
-    render: (_active, hovered) => <NavLottie data={lotCollections} hovered={hovered} fallback={<NavGlyph name="collections" className="h-[26px] w-[26px] p-[2px]" />} />,
+    render: (_active, hovered) => (
+      <NavLottie
+        data={lotCollections}
+        hovered={hovered}
+        fallback={<NavGlyph name="collections" className="h-[26px] w-[26px] p-[2px]" />}
+      />
+    ),
     view: "collections-hub",
   },
   {
     id: "downloads",
     label: "nav.downloads",
-    render: (active, hovered) => <NavLottie data={lotDownloads} hovered={hovered} fallback={<DownloadsNavIcon active={active} />} />,
+    render: (active, hovered) => (
+      <NavLottie
+        data={lotDownloads}
+        hovered={hovered}
+        fallback={<DownloadsNavIcon active={active} />}
+      />
+    ),
     view: "downloads",
   },
   {
     id: "addons",
     label: "nav.addons",
-    render: (active, hovered) => <NavLottie data={lotAddons} hovered={hovered} fallback={<AddonsIcon active={active} />} />,
+    render: (active, hovered) => (
+      <NavLottie data={lotAddons} hovered={hovered} fallback={<AddonsIcon active={active} />} />
+    ),
     view: "addons",
     parentalKey: "addons",
   },
   {
     id: "settings",
     label: "nav.settings",
-    render: (active, hovered) => <NavLottie data={lotSettings} hovered={hovered} fallback={<SettingsIcon active={active} />} />,
+    render: (active, hovered) => (
+      <NavLottie data={lotSettings} hovered={hovered} fallback={<SettingsIcon active={active} />} />
+    ),
     view: "settings",
     pinGated: true,
   },
@@ -203,21 +268,7 @@ const NAV_ITEMS_ALL: NavItem[] = [
 export const NAV_ITEMS: NavItem[] = NAV_ITEMS_ALL;
 
 export function applyNavCustomization(items: NavItem[], cfg: NavCustomization): NavItem[] {
-  const shown = items
-    .filter((it) => !cfg.hidden.includes(it.id))
-    .map((it) => (cfg.renamed[it.id] ? { ...it, label: cfg.renamed[it.id] } : it));
-  if (cfg.order.length === 0) return shown;
-  const byId = new Map<string, NavItem>(shown.map((it) => [it.id, it]));
-  const ordered: NavItem[] = [];
-  for (const id of cfg.order) {
-    const it = byId.get(id);
-    if (it) ordered.push(it);
-  }
-  const inOrder = new Set(cfg.order);
-  for (const it of shown) {
-    if (!inOrder.has(it.id)) ordered.push(it);
-  }
-  return ordered;
+  return customizeNavigation(items, cfg);
 }
 
 export function effectiveNavOrder(cfg: NavCustomization): NavItemId[] {

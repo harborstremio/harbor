@@ -7,6 +7,9 @@ import { searchAll, type AnimeHit, type SearchResults } from "@/lib/search";
 import { useSettings } from "@/lib/settings";
 import { emitListToast } from "@/components/lists/list-toast";
 import { Poster } from "@/components/poster";
+import { MetaContextButton } from "@/components/context-menu/meta-context-button";
+import { captureMembershipProfile } from "@/lib/membership-operations";
+import { membershipFailureMessage } from "@/lib/membership-actions";
 
 import { releaseText } from "@/lib/release-info";
 function animeToMeta(a: AnimeHit): Meta {
@@ -25,6 +28,8 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResults | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [profile] = useState(captureMembershipProfile);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const memberIds = new Set(list.items.map((it) => it.id));
@@ -68,19 +73,37 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
       emitListToast(t("This list is full ({max} items)", { max: MAX_ITEMS }));
       return;
     }
-    addToList(list.id, {
-      id: m.id,
-      type: m.type,
-      name: m.name,
-      poster: m.poster,
-      addonOrigin: m.addonOrigin,
-      videos: m.videos,
-    });
+    if (!profile) {
+      setError(t("The active profile changed. Open the menu again."));
+      return;
+    }
+    const result = addToList(
+      list.id,
+      {
+        id: m.id,
+        type: m.type,
+        name: m.name,
+        poster: m.poster,
+        addonOrigin: m.addonOrigin,
+        videos: m.videos,
+      },
+      profile,
+    );
+    if (result.status === "error") {
+      setError(t(membershipFailureMessage(result)));
+      return;
+    }
+    setError("");
     emitListToast(t('Added to "{name}"', { name: list.name }));
   };
 
   return (
     <div className="flex flex-col gap-3">
+      {error && (
+        <p role="alert" className="text-xs text-danger">
+          {error}
+        </p>
+      )}
       <div className="relative">
         <SearchIcon
           size={17}
@@ -122,8 +145,10 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
               {hits.map((m) => {
                 const inList = memberIds.has(m.id);
                 return (
-                  <button
+                  <MetaContextButton
                     key={m.id}
+                    meta={m}
+                    membership={inList ? { kind: "list", id: list.id } : undefined}
                     onClick={() => !inList && add(m)}
                     disabled={inList}
                     className="flex w-full items-center gap-3 px-3 py-2 text-start transition-colors hover:bg-elevated disabled:cursor-default disabled:hover:bg-transparent"
@@ -151,7 +176,7 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
                         <Plus size={16} strokeWidth={2.2} />
                       )}
                     </span>
-                  </button>
+                  </MetaContextButton>
                 );
               })}
             </div>

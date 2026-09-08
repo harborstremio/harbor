@@ -28,11 +28,21 @@ test("eBook cards and the featured book open the dedicated wheel menu", () => {
   assert.match(view, /<EBookWheelMenu/);
 });
 
-test("eBook pages suppress the native context menu without removing wheel handlers", () => {
-  assert.match(view, /document\.addEventListener\("contextmenu", preventNativeMenu, true\)/);
-  assert.match(view, /closest\("\[data-ebook-page\]"\)/);
+test("eBook pages preserve native editing and delegate book commands to the wheel", () => {
+  // Capturing page-wide cancellation also cancels WebView2's native editing menu.
+  assert.doesNotMatch(view, /document\.addEventListener\("contextmenu"/);
   assert.match(view, /data-ebook-page/);
   assert.match(view, /onContextMenu=\{\(event\) => openMenu\(ebook, event\)\}/);
+  assert.match(
+    wheel,
+    /event\.target\.closest\("input,textarea,\[contenteditable\],img"\)[\s\S]*?return;[\s\S]*?event\.preventDefault\(\)/,
+  );
+  assert.match(
+    wheel,
+    /open\(event, \{ kind: "content", image: \{ src: ebook\.cover, label: ebook\.title \} \}\)/,
+  );
+  assert.match(view, /useEBookCardTarget/);
+  assert.match(view, /id: `ebook:options:\$\{ebook\.id\}`/);
 });
 
 test("duplicate books retain all readable sources and expose the details source picker", () => {

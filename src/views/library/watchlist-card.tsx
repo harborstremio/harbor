@@ -7,8 +7,20 @@ import { useView } from "@/lib/view";
 import { useInWatchlist } from "@/lib/watchlist";
 import { useT } from "@/lib/i18n";
 import { hydrateLibraryMeta } from "./hydrate-meta";
+import { useContextTarget, type ContextMenuTarget } from "@/lib/context-menu";
+import { captureMembershipProfile, isMembershipProfileCurrent } from "@/lib/membership-operations";
 
-export function WatchlistCard({ meta, onRemove }: { meta: Meta; onRemove?: () => void }) {
+export function WatchlistCard({
+  meta,
+  onRemove,
+  removeLabel,
+  removeOpensDialog,
+}: {
+  meta: Meta;
+  onRemove?: () => void;
+  removeLabel?: string;
+  removeOpensDialog?: boolean;
+}) {
   const t = useT();
   const { openMeta } = useView();
   const { settings } = useSettings();
@@ -85,6 +97,37 @@ export function WatchlistCard({ meta, onRemove }: { meta: Meta; onRemove?: () =>
       }
     : meta;
   const open = () => openMeta(display);
+  const contextTarget = (): ContextMenuTarget => {
+    const profile = captureMembershipProfile();
+    const target: ContextMenuTarget = { kind: "meta", meta: display };
+    if (onRemove)
+      target.extra = {
+        isValid: () => isMembershipProfileCurrent(profile),
+        actions: () => [
+          {
+            id: `library:remove:${display.id}`,
+            label: removeLabel ?? t("Remove from library"),
+            group: "remove",
+            danger: true,
+            ...(removeOpensDialog
+              ? { run: onRemove, restoreFocus: false }
+              : {
+                  children: [
+                    {
+                      id: `library:remove:confirm:${display.id}`,
+                      label: t("Confirm remove"),
+                      danger: true,
+                      run: onRemove,
+                    },
+                  ],
+                }),
+          },
+        ],
+      };
+    return target;
+  };
+  const contextRef = useContextTarget<HTMLDivElement>(contextTarget);
+  const titleContextRef = useContextTarget<HTMLButtonElement>(contextTarget);
   const poster = usePosterChain(
     settings.rpdbKey,
     display.id,
@@ -93,11 +136,14 @@ export function WatchlistCard({ meta, onRemove }: { meta: Meta; onRemove?: () =>
   );
   return (
     <div
-      ref={cardRef}
+      ref={(element) => {
+        cardRef.current = element;
+      }}
       className="group relative flex flex-col gap-2 text-start"
       onMouseLeave={() => setConfirm(false)}
     >
       <div
+        ref={contextRef}
         role="button"
         tabIndex={0}
         onClick={open}
@@ -128,7 +174,7 @@ export function WatchlistCard({ meta, onRemove }: { meta: Meta; onRemove?: () =>
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              if (confirm) {
+              if (confirm || removeOpensDialog) {
                 onRemove();
                 setConfirm(false);
               } else {
@@ -140,14 +186,16 @@ export function WatchlistCard({ meta, onRemove }: { meta: Meta; onRemove?: () =>
                 ? "bg-danger px-2.5 text-[11px] font-semibold"
                 : "w-7 bg-canvas/70 opacity-0 backdrop-blur-sm hover:bg-canvas/90 group-hover:opacity-100"
             }`}
-            aria-label={confirm ? t("Confirm remove from library") : t("Remove from library")}
+            aria-label={
+              removeLabel ?? (confirm ? t("Confirm remove from library") : t("Remove from library"))
+            }
           >
             <Trash2 size={12} strokeWidth={2.2} />
             {confirm && t("Remove")}
           </button>
         )}
       </div>
-      <button type="button" onClick={open} className="text-start">
+      <button ref={titleContextRef} type="button" onClick={open} className="text-start">
         <p className="truncate text-[13px] font-medium text-ink transition-colors hover:text-accent">
           {display.name || meta.id}
         </p>

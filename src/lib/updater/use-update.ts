@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { check } from "@tauri-apps/plugin-updater";
+import { isContextReview } from "@/lib/context-review";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 import { t } from "@/lib/i18n";
 import {
@@ -253,6 +254,7 @@ async function readExperimentalManifest(path = "latest-experimental.json"): Prom
 }
 
 export async function checkForUpdate(manual = false): Promise<void> {
+  if (isContextReview()) return;
   if (!IS_TAURI) return;
   if (
     state.status === "checking" ||
@@ -888,6 +890,7 @@ export function clearStagedUpdate(): void {
 
 let started = false;
 export function startUpdateWatcher(): void {
+  if (isContextReview()) return;
   if (started || !IS_TAURI) return;
   started = true;
   subscribeExperimentalAccess(() => {

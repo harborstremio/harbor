@@ -5,6 +5,7 @@ import { renderBbcode } from "@/lib/social/bbcode";
 import { handleLinkOutActivation } from "@/lib/social/link-out-activation";
 import { openLinkOut } from "@/lib/social/link-out";
 import { SectionHeader } from "./section-header";
+import { useRenderedContentContext } from "@/components/context-menu/rendered-content-context";
 
 export function AboutCard({
   description,
@@ -20,6 +21,7 @@ export function AboutCard({
   hideTitle?: boolean;
 }) {
   const t = useT();
+  const onContextMenu = useRenderedContentContext();
   const html = useMemo(() => (description ? renderBbcode(description) : ""), [description]);
   const copyFont = userFont ? { fontFamily: `"${userFont}", inherit` } : undefined;
 
@@ -28,8 +30,9 @@ export function AboutCard({
       {!hideTitle && <SectionHeader icon={<ScrollText size={20} />} label={t("About")} />}
       {html ? (
         <div
-          className="max-w-none break-words text-[14px] leading-relaxed text-ink-muted [&_a]:break-words"
+          className="max-w-none select-text break-words text-[14px] leading-relaxed text-ink-muted [&_a]:break-words"
           style={copyFont}
+          onContextMenu={onContextMenu}
           onClick={(e) => handleLinkOutActivation(e, openLinkOut)}
           onAuxClick={(e) => handleLinkOutActivation(e, openLinkOut)}
           dangerouslySetInnerHTML={{ __html: html }}

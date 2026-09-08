@@ -5,7 +5,12 @@ import { posterPlate } from "@/components/poster";
 import { ResultPoster } from "@/components/search/result-poster";
 import { BackToTop } from "@/components/back-to-top";
 import { useView } from "@/lib/view";
-import { useCollection, type CollectionItem, type CollectionItemType } from "@/lib/collections";
+import {
+  getCollection,
+  useCollection,
+  type CollectionItem,
+  type CollectionItemType,
+} from "@/lib/collections";
 import type { MetaType } from "@/lib/cinemeta";
 import { CommunityShareButton } from "./community-share-button";
 import { AddToPageMenu } from "./add-to-page-menu";
@@ -14,6 +19,10 @@ import { useSelfAvatar } from "@/views/profile/use-self-avatar";
 import { currentAuthor } from "@/lib/theme-auth";
 import { UserHoverCard } from "@/views/profile/user-hover-card";
 import { requestOpenProfile } from "@/lib/social/open-profile";
+import { MetaContextButton } from "@/components/context-menu/meta-context-button";
+import { useContextTarget } from "@/lib/context-menu";
+import { captureMembershipProfile, isMembershipProfileCurrent } from "@/lib/membership-operations";
+import { CommunityShareModal } from "./community-share-modal";
 
 const TYPE_DOT: Record<CollectionItemType, string> = {
   movie: "bg-sky-400",
@@ -41,6 +50,36 @@ export function CommunityCollectionPage({
   const scrollRef = useRef<HTMLElement>(null);
   const pageBtnRef = useRef<HTMLButtonElement>(null);
   const [pageMenu, setPageMenu] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const headerContextRef = useContextTarget<HTMLElement>(() => {
+    const profile = captureMembershipProfile();
+    return {
+      kind: "actions",
+      id: `collection:${id}`,
+      label: collection?.name ?? t("Collection"),
+      isValid: () => isMembershipProfileCurrent(profile) && !!getCollection(id),
+      actions: () => [
+        {
+          id: `collection:edit:${id}`,
+          label: t("Edit collection"),
+          run: () => onEdit(id),
+          restoreFocus: false,
+        },
+        {
+          id: `collection:page:${id}`,
+          label: t("Add to a page"),
+          run: () => setPageMenu(true),
+          restoreFocus: false,
+        },
+        {
+          id: `collection:share:${id}`,
+          label: t("Share"),
+          run: () => setSharing(true),
+          restoreFocus: false,
+        },
+      ],
+    };
+  });
   const [typeFilter, setTypeFilter] = useState<"all" | CollectionItemType>("all");
   const items = collection?.items ?? [];
   const typeCounts = useMemo(() => {
@@ -104,7 +143,7 @@ export function CommunityCollectionPage({
       return;
     }
     const type: MetaType = item.type === "series" ? "series" : "movie";
-    openMeta({ id: item.id, type, name: item.name, poster: item.poster });
+    openMeta({ ...item, type });
   };
 
   return (
@@ -162,7 +201,7 @@ export function CommunityCollectionPage({
           />
         </div>
 
-        <header className="flex min-w-0 max-w-4xl flex-col gap-4">
+        <header ref={headerContextRef} className="flex min-w-0 max-w-4xl flex-col gap-4">
           <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-ink-subtle">
             {t("Collection")}
           </span>
@@ -198,7 +237,9 @@ export function CommunityCollectionPage({
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-edge-soft bg-canvas/40 px-8 py-16 text-center">
             <p className="font-display text-[19px] font-medium text-ink">{t("Nothing here yet")}</p>
             <p className="max-w-sm text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Open the editor to add the movies, shows, and manga that belong in this collection.")}
+              {t(
+                "Open the editor to add the movies, shows, and manga that belong in this collection.",
+              )}
             </p>
             <button
               type="button"
@@ -250,8 +291,10 @@ export function CommunityCollectionPage({
                   style={{ gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))" }}
                 >
                   {filteredItems.map((item, i) => (
-                    <button
+                    <MetaContextButton
                       key={item.id}
+                      meta={item}
+                      membership={{ kind: "collection", id }}
                       type="button"
                       onClick={() => open(item)}
                       title={`${item.name}  ·  ${typeLabel(item.type)}`}
@@ -285,7 +328,7 @@ export function CommunityCollectionPage({
                       <span className="line-clamp-2 text-[12.5px] leading-tight text-ink-muted">
                         {item.name}
                       </span>
-                    </button>
+                    </MetaContextButton>
                   ))}
                 </div>
               </div>
@@ -294,6 +337,7 @@ export function CommunityCollectionPage({
         )}
       </div>
       <BackToTop scrollRef={scrollRef} />
+      {sharing && <CommunityShareModal collectionId={id} onClose={() => setSharing(false)} />}
     </main>
   );
 }

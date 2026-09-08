@@ -4,6 +4,7 @@ import { Poster } from "@/components/poster";
 import type { MangaSummary } from "@/lib/manga/api";
 import { useIsMangaFavorite, useMangaFavorites } from "@/lib/manga-favorites";
 import { CollectionBadges } from "../collection-badge";
+import { useContextMenu } from "@/lib/context-menu";
 
 export function MangaCard({
   manga,
@@ -15,9 +16,28 @@ export function MangaCard({
   const t = useT();
   const fav = useMangaFavorites();
   const isFav = useIsMangaFavorite(manga.id);
+  const { open } = useContextMenu();
   return (
     <button
       type="button"
+      onContextMenu={(event) =>
+        open(event, {
+          kind: "actions",
+          id: `manga:${manga.id}`,
+          label: manga.title,
+          image: manga.cover ? { src: manga.cover, label: manga.title } : undefined,
+          actions: () => [
+            { id: "manga:open", label: t("View details"), run: () => onOpen(manga.id) },
+            {
+              id: "manga:favorite",
+              label: isFav ? t("Remove from favorites") : t("Add to favorites"),
+              run: () => {
+                fav.toggle({ id: manga.id, title: manga.title, cover: manga.cover });
+              },
+            },
+          ],
+        })
+      }
       onClick={() => onOpen(manga.id)}
       className="group flex w-full min-w-0 flex-col gap-2.5 text-start"
     >

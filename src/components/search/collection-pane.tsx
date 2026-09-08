@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Poster } from "@/components/poster";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
+import { useContextMenu } from "@/lib/context-menu";
 import {
   entityToMeta,
   fetchTvdbCollection,
@@ -20,6 +21,7 @@ export function CollectionHitsRow({
   onOpen: (hit: TvdbCollectionHit) => void;
 }) {
   const t = useT();
+  const { open } = useContextMenu();
   if (hits.length === 0) return null;
   return (
     <section className="flex flex-col gap-3">
@@ -32,6 +34,23 @@ export function CollectionHitsRow({
             key={hit.id}
             type="button"
             onClick={() => onOpen(hit)}
+            onContextMenu={(event) =>
+              open(event, {
+                kind: "actions",
+                id: `tvdb-collection:${hit.id}`,
+                label: hit.name,
+                image: hit.image
+                  ? { src: hit.image, publicUrl: hit.image, label: hit.name }
+                  : undefined,
+                actions: () => [
+                  {
+                    id: `tvdb-collection:open:${hit.id}`,
+                    label: t("Open collection"),
+                    run: () => onOpen(hit),
+                  },
+                ],
+              })
+            }
             className="group relative flex h-[88px] items-end overflow-hidden rounded-2xl border border-edge-soft bg-elevated text-start transition-colors hover:border-edge"
           >
             {hit.image && (
@@ -62,6 +81,7 @@ function EntryCard({
   onOpen: (m: Meta) => void;
 }) {
   const [card, setCard] = useState<TvdbEntityCard | null>(null);
+  const { open } = useContextMenu();
   useEffect(() => {
     let cancelled = false;
     fetchTvdbEntity(entry.kind, entry.tvdbId)
@@ -80,6 +100,7 @@ function EntryCard({
     <button
       type="button"
       onClick={() => onOpen(entityToMeta(card))}
+      onContextMenu={(event) => open(event, { kind: "meta", meta: entityToMeta(card) })}
       className="group flex w-full min-w-0 flex-col gap-2 text-start"
     >
       <Poster
@@ -141,7 +162,9 @@ export function CollectionPane({
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-white/60">
           {t("Collection")}
         </span>
-        <h2 className="text-[30px] font-semibold leading-[1.08] text-white">{coll?.name ?? name}</h2>
+        <h2 className="text-[30px] font-semibold leading-[1.08] text-white">
+          {coll?.name ?? name}
+        </h2>
         {coll?.overview && (
           <p className="line-clamp-3 max-w-[70ch] text-[14px] leading-relaxed text-white/72">
             {coll.overview}

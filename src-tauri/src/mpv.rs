@@ -163,6 +163,29 @@ impl MpvState {
             inner: Arc::new(Mutex::new(None)),
         }
     }
+
+    pub(crate) async fn active_file_path(&self) -> Result<Option<String>, String> {
+        let session = self.inner.lock().await;
+        let Some(session) = session.as_ref() else {
+            return Ok(None);
+        };
+        let path = session
+            .mpv
+            .get_property::<String>("path")
+            .map_err(|_| "Could not verify the file currently in playback.".to_string())?;
+        if let Ok(url) = url::Url::parse(&path) {
+            if url.scheme() == "file" {
+                return Ok(url
+                    .to_file_path()
+                    .ok()
+                    .map(|path| path.to_string_lossy().into_owned()));
+            }
+            if !std::path::Path::new(&path).is_absolute() {
+                return Ok(None);
+            }
+        }
+        Ok(Some(path))
+    }
 }
 
 const OBSERVED_PROPS: &[(&str, u64, PropertyKind)] = &[
@@ -873,8 +896,7 @@ pub async fn mpv_start(
     if let Some(subs) = &args.subtitles {
         for subtitle in subs {
             let url = subtitle.url.replace('\\', "/");
-            if let Err(error) = mpv_argv_command(&mpv_arc, &["sub-add", &url, "auto"])
-            {
+            if let Err(error) = mpv_argv_command(&mpv_arc, &["sub-add", &url, "auto"]) {
                 eprintln!("[harbor::mpv] sub-add failed for {}: {}", url, error);
             }
         }

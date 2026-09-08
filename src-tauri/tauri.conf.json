@@ -31,7 +31,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com; img-src 'self' asset: https://asset.localhost data: blob: https: http:; media-src 'self' asset: https://asset.localhost blob: https: http:; connect-src 'self' ipc: http://ipc.localhost https: http: ws: wss:; font-src 'self' data: https://fonts.gstatic.com https://cdn.fontshare.com; object-src 'none'; frame-src 'self' https: http: stremio:; worker-src 'self' blob:; base-uri 'self'",
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com; img-src 'self' asset: https://asset.localhost data: blob: https: http:; media-src 'self' asset: https://asset.localhost blob: https: http:; connect-src 'self' ipc: http://ipc.localhost blob: https: http: ws: wss:; font-src 'self' data: https://fonts.gstatic.com https://cdn.fontshare.com; object-src 'none'; frame-src 'self' https: http: stremio:; worker-src 'self' blob:; base-uri 'self'",
       "dangerousDisableAssetCspModification": ["style-src"],
       "assetProtocol": {
         "enable": true,

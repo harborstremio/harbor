@@ -2,7 +2,7 @@ import { memo, useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { sizeImageUrl } from "@/lib/img-size";
-import { useContextMenu } from "@/lib/context-menu";
+import { useContextMenu, type MembershipContext } from "@/lib/context-menu";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { usePosterChain } from "@/components/poster";
@@ -15,7 +15,9 @@ const POS = {
 
 function useLogo(meta: Meta): string | undefined {
   const { settings } = useSettings();
-  const [logo, setLogo] = useState<string | undefined>(() => peekCachedLogo(settings.tmdbKey, meta));
+  const [logo, setLogo] = useState<string | undefined>(() =>
+    peekCachedLogo(settings.tmdbKey, meta),
+  );
   useEffect(() => {
     let cancelled = false;
     const cached = peekCachedLogo(settings.tmdbKey, meta);
@@ -36,12 +38,25 @@ function useLogo(meta: Meta): string | undefined {
   return logo;
 }
 
-export const TvCard = memo(function TvCard({ meta, kids = false }: { meta: Meta; kids?: boolean }) {
+export const TvCard = memo(function TvCard({
+  meta,
+  kids = false,
+  membership,
+}: {
+  meta: Meta;
+  kids?: boolean;
+  membership?: MembershipContext;
+}) {
   const { openMeta, openManga } = useView();
   const { open: openContextMenu } = useContextMenu();
   const { settings } = useSettings();
   const logo = useLogo(meta);
-  const poster = usePosterChain(settings.rpdbKey, meta.id, meta.poster, meta.type === "series" ? "series" : "movie");
+  const poster = usePosterChain(
+    settings.rpdbKey,
+    meta.id,
+    meta.poster,
+    meta.type === "series" ? "series" : "movie",
+  );
 
   const open = () => {
     if (meta.type === "manga") {
@@ -55,12 +70,18 @@ export const TvCard = memo(function TvCard({ meta, kids = false }: { meta: Meta;
     <button
       type="button"
       onClick={open}
-      onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
+      onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta, membership })}
       title={meta.name}
       style={{ borderRadius: settings.posterRadius }}
       className="group relative block aspect-[16/9] w-full overflow-hidden bg-elevated ring-1 ring-edge-soft transition-[box-shadow,--tw-ring-color] duration-200 ease-out hover:ring-edge hover:shadow-[0_10px_28px_-18px_rgba(0,0,0,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/70"
     >
-      <TvCardArtwork meta={meta} kids={kids} logo={logo} posterSrc={poster.src} onPosterError={poster.onError} />
+      <TvCardArtwork
+        meta={meta}
+        kids={kids}
+        logo={logo}
+        posterSrc={poster.src}
+        onPosterError={poster.onError}
+      />
     </button>
   );
 });
@@ -80,7 +101,8 @@ export function TvCardArtwork({
 }) {
   const { settings } = useSettings();
   const [artFailed, setArtFailed] = useState(false);
-  const wide = !artFailed && meta.background && meta.background !== meta.poster ? meta.background : undefined;
+  const wide =
+    !artFailed && meta.background && meta.background !== meta.poster ? meta.background : undefined;
   const pos = POS[settings.tvCardLogoPos] ?? POS.bottomStart;
 
   return (
@@ -118,7 +140,13 @@ export function TvCardArtwork({
 
       <span className={`absolute z-10 flex gap-2.5 ${pos}`}>
         <span className="h-[54px] w-[36px] shrink-0 overflow-hidden rounded-sm shadow-[0_8px_18px_-8px_rgba(0,0,0,0.9)] ring-1 ring-white/12">
-          <img src={posterSrc} onError={onPosterError} alt="" draggable={false} className="h-full w-full object-cover" />
+          <img
+            src={posterSrc}
+            onError={onPosterError}
+            alt=""
+            draggable={false}
+            className="h-full w-full object-cover"
+          />
         </span>
         <span className="flex min-w-0 flex-1 flex-col justify-end gap-1">
           {logo ? (

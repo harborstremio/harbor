@@ -1,9 +1,22 @@
-import { ArrowLeft, Check, Eye, GripVertical, ImagePlus, ListOrdered, Loader2, Plus, Trash2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Eye,
+  GripVertical,
+  ImagePlus,
+  ListOrdered,
+  Loader2,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { useContextMenu } from "@/lib/context-menu";
+import { MetaContextButton } from "@/components/context-menu/meta-context-button";
 import { ResultPoster } from "@/components/search/result-poster";
 import { BackToTop } from "@/components/back-to-top";
 import { searchAll } from "@/lib/search";
@@ -18,7 +31,6 @@ import {
   addCollectionTag,
   clearCollectionItems,
   normalizeTag,
-  readCollections,
   removeCollectionTag,
   removeFromCollection,
   renameCollection,
@@ -40,6 +52,8 @@ import {
   uploadCollectionBackground,
   uploadCollectionCover,
 } from "@/lib/social/collections-sync";
+import { alertDialog } from "@/lib/dialog";
+import { authToken } from "@/lib/theme-auth";
 
 type Hit = { id: string; type: CollectionItemType; name: string; poster?: string };
 
@@ -50,7 +64,10 @@ const TYPE_DOT: Record<CollectionItemType, string> = {
 };
 
 function syncSoon() {
-  void publishCollections(readCollections()).catch(() => {});
+  if (!authToken()) return;
+  void publishCollections().catch((error) =>
+    alertDialog(error instanceof Error ? error.message : String(error)),
+  );
 }
 
 export function CommunityCollectionEditor({
@@ -64,6 +81,7 @@ export function CommunityCollectionEditor({
 }) {
   const t = useT();
   const { settings } = useSettings();
+  const { open: openContextMenu } = useContextMenu();
   const collection = useCollection(id);
   const scrollRef = useRef<HTMLElement>(null);
 
@@ -104,8 +122,10 @@ export function CommunityCollectionEditor({
       if (!alive) return;
       const out: Hit[] = [];
       if (av) {
-        for (const m of av.movies) out.push({ id: m.id, type: "movie", name: m.name, poster: m.poster });
-        for (const s of av.series) out.push({ id: s.id, type: "series", name: s.name, poster: s.poster });
+        for (const m of av.movies)
+          out.push({ id: m.id, type: "movie", name: m.name, poster: m.poster });
+        for (const s of av.series)
+          out.push({ id: s.id, type: "series", name: s.name, poster: s.poster });
       }
       for (const mg of (manga ?? []).slice(0, 8)) {
         out.push({ id: mg.id, type: "manga", name: mg.title, poster: mg.cover });
@@ -235,7 +255,13 @@ export function CommunityCollectionEditor({
     if (els.some((el) => !el)) return;
     const slots = els.map((el) => {
       const r = el!.getBoundingClientRect();
-      return { x: r.left, y: r.top, cx: r.left + r.width / 2, cy: r.top + r.height / 2, h: r.height };
+      return {
+        x: r.left,
+        y: r.top,
+        cx: r.left + r.width / 2,
+        cy: r.top + r.height / 2,
+        h: r.height,
+      };
     });
     const startX = e.clientX;
     const startY = e.clientY;
@@ -378,13 +404,15 @@ export function CommunityCollectionEditor({
             onUpload={async (file) => {
               const local = await fileToCollectionCover(file);
               setCollectionCover(id, local);
-              await publishCollections(readCollections()).catch(() => {});
+              await publishCollections();
               try {
                 const { url } = await uploadCollectionCover(id, file);
                 if (url) setCollectionCover(id, url);
               } catch {
                 throw new Error(
-                  t("Saved on your device, but it couldn't be uploaded for others to see. Try again."),
+                  t(
+                    "Saved on your device, but it couldn't be uploaded for others to see. Try again.",
+                  ),
                 );
               }
               syncSoon();
@@ -403,13 +431,15 @@ export function CommunityCollectionEditor({
             onUpload={async (file) => {
               const local = await fileToCollectionBackground(file);
               setCollectionBackground(id, local);
-              await publishCollections(readCollections()).catch(() => {});
+              await publishCollections();
               try {
                 const { url } = await uploadCollectionBackground(id, file);
                 if (url) setCollectionBackground(id, url);
               } catch {
                 throw new Error(
-                  t("Saved on your device, but it couldn't be uploaded for others to see. Try again."),
+                  t(
+                    "Saved on your device, but it couldn't be uploaded for others to see. Try again.",
+                  ),
                 );
               }
               syncSoon();
@@ -440,7 +470,9 @@ export function CommunityCollectionEditor({
         <section className="flex flex-col gap-2.5">
           <label className="text-[13px] font-semibold text-ink">{t("Tags")}</label>
           <p className="text-[12px] text-ink-subtle">
-            {t("Add up to {max} tags so people can find this in the community.", { max: MAX_COLLECTION_TAGS })}
+            {t("Add up to {max} tags so people can find this in the community.", {
+              max: MAX_COLLECTION_TAGS,
+            })}
           </p>
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-1">
@@ -612,8 +644,10 @@ export function CommunityCollectionEditor({
                 {filteredHits.map((hit) => {
                   const inSet = memberIds.has(hit.id);
                   return (
-                    <button
+                    <MetaContextButton
                       key={hit.id}
+                      meta={hit}
+                      membership={inSet ? { kind: "collection", id } : undefined}
                       type="button"
                       onClick={() => toggleHit(hit)}
                       disabled={!inSet && atItemMax}
@@ -650,7 +684,7 @@ export function CommunityCollectionEditor({
                         </div>
                       </div>
                       <span className="line-clamp-1 text-[12px] text-ink-muted">{hit.name}</span>
-                    </button>
+                    </MetaContextButton>
                   );
                 })}
               </div>
@@ -683,6 +717,13 @@ export function CommunityCollectionEditor({
                       else itemElsRef.current.delete(item.id);
                     }}
                     onPointerDown={(e) => startItemDrag(e, item.id, i)}
+                    onContextMenu={(event) =>
+                      openContextMenu(event, {
+                        kind: "meta",
+                        meta: item,
+                        membership: { kind: "collection", id },
+                      })
+                    }
                     className="group/item flex cursor-grab touch-none select-none flex-col gap-1.5 active:cursor-grabbing"
                   >
                     <div className="relative">
@@ -712,7 +753,9 @@ export function CommunityCollectionEditor({
                     </div>
                     <span className="flex items-center gap-1.5 text-[12px] text-ink-muted">
                       {collection.numbered && (
-                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${TYPE_DOT[item.type]}`} />
+                        <span
+                          className={`h-1.5 w-1.5 shrink-0 rounded-full ${TYPE_DOT[item.type]}`}
+                        />
                       )}
                       <span className="line-clamp-1">{item.name}</span>
                     </span>
@@ -787,7 +830,12 @@ function ImageField({
       >
         {url ? (
           <>
-            <img src={url} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
+            <img
+              src={url}
+              alt=""
+              draggable={false}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
             {canUpload && (
               <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-[13px] font-semibold text-white opacity-0 transition-all duration-200 group-hover/img:bg-black/45 group-hover/img:opacity-100">
                 <ImagePlus size={16} strokeWidth={2} className="me-2" />
@@ -798,7 +846,9 @@ function ImageField({
         ) : (
           <span className="flex flex-col items-center gap-2 px-6 text-ink-muted">
             <ImagePlus size={26} strokeWidth={1.6} />
-            <span className="text-[13.5px] font-medium">{t("Add {label}", { label: label.toLowerCase() })}</span>
+            <span className="text-[13.5px] font-medium">
+              {t("Add {label}", { label: label.toLowerCase() })}
+            </span>
             <span className="text-[12px] text-ink-subtle">{hint}</span>
           </span>
         )}

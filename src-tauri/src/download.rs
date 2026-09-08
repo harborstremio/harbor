@@ -51,6 +51,7 @@ fn total_from_content_range(value: &str) -> Option<u64> {
 
 #[tauri::command]
 pub async fn download_start(
+    app: tauri::AppHandle,
     state: State<'_, DownloadState>,
     id: String,
     url: String,
@@ -58,6 +59,7 @@ pub async fn download_start(
     headers: Option<HashMap<String, String>>,
     on_event: Channel<DownloadEvent>,
 ) -> Result<(), String> {
+    crate::download_files::review_path_guard(&app, std::path::Path::new(&dest))?;
     let cancel = Arc::new(AtomicBool::new(false));
     state
         .tasks

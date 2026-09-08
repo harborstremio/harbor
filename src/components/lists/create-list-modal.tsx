@@ -7,9 +7,15 @@ import { emitListToast } from "./list-toast";
 export function CreateListModal({
   onClose,
   onCreated,
+  contextLayer = false,
+  create = createList,
+  error,
 }: {
   onClose: () => void;
   onCreated?: (id: string) => void;
+  contextLayer?: boolean;
+  create?: (name: string) => string | null;
+  error?: string;
 }) {
   const t = useT();
   const lists = useCustomLists();
@@ -26,7 +32,7 @@ export function CreateListModal({
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed || atMax) return;
-    const id = createList(trimmed);
+    const id = create(trimmed);
     if (!id) return;
     emitListToast(t('Created "{name}"', { name: trimmed }));
     onCreated?.(id);
@@ -35,11 +41,42 @@ export function CreateListModal({
 
   return createPortal(
     <div
+      data-harbor-context-layer={contextLayer || undefined}
+      data-context-submenu={contextLayer || undefined}
+      data-harbor-menu-panel={contextLayer || undefined}
+      style={contextLayer ? { zIndex: 2147482002 } : undefined}
       className="animate-fade-in fixed inset-0 z-[230] flex items-center justify-center bg-canvas/80"
       onClick={onClose}
+      onKeyDown={(event) => {
+        if (contextLayer && event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          onClose();
+        }
+      }}
     >
       <form
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("New list")}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(event) => {
+          if (!contextLayer || event.key !== "Tab") return;
+          const controls = Array.from(
+            event.currentTarget.querySelectorAll<HTMLElement>(
+              "input:not(:disabled),button:not(:disabled)",
+            ),
+          );
+          const first = controls[0];
+          const last = controls.at(-1);
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last?.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first?.focus();
+          }
+        }}
         onSubmit={submit}
         className="animate-modal-in flex w-[min(92vw,380px)] flex-col gap-5 rounded-2xl border border-edge-soft bg-elevated p-7 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]"
       >
@@ -68,6 +105,11 @@ export function CreateListModal({
           />
         </label>
 
+        {error && (
+          <p role="alert" className="text-[12.5px] text-danger">
+            {error}
+          </p>
+        )}
         {atMax && (
           <p className="rounded-lg bg-danger/12 px-3 py-2 text-[12.5px] text-danger">
             {t("You have reached {max} lists. Remove one to make room.", { max: MAX_LISTS })}
@@ -92,6 +134,6 @@ export function CreateListModal({
         </div>
       </form>
     </div>,
-    document.body,
+    contextLayer ? (document.fullscreenElement ?? document.body) : document.body,
   );
 }
