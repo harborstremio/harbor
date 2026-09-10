@@ -783,12 +783,22 @@ pub async fn mpv_start(
             let dvr = base.join("mpv-cache");
             let _ = std::fs::create_dir_all(&dvr);
             if let Some(s) = dvr.to_str() {
-                let _ = mpv.set_property("cache-dir", s);
+                // mpv renamed this to demuxer-cache-dir; the old name is
+                // rejected (M_PROPERTY_UNKNOWN) on 0.41, which leaves
+                // cache-on-disk enabled with no directory and logs
+                // "Failed to create file cache" on every load.
+                if mpv.set_property("demuxer-cache-dir", s).is_err() {
+                    let _ = mpv.set_property("cache-dir", s);
+                }
             }
         }
         let _ = mpv.set_property("cache-on-disk", "yes");
         let _ = mpv.set_property("network-timeout", network_timeout_for(&args.url));
-        let reconnect_opts = "reconnect=1,reconnect_streamed=1,reconnect_on_network_error=1,reconnect_on_http_error=429,reconnect_delay_max=10,reconnect_delay_total_max=60";
+        // No reconnect_streamed: on AES-128 HLS every segment ends in a normal
+        // EOF that ffmpeg then retries from offset 0, gets an empty body, and
+        // backs off 1/3/7s. Measured on a vixsrc stream: 7 segments and 55s of
+        // backoff per 100s with the flag, 94 segments and 0s without it.
+        let reconnect_opts = "reconnect=1,reconnect_on_network_error=1,reconnect_on_http_error=429,reconnect_delay_max=10,reconnect_delay_total_max=60";
         match mpv.set_property("stream-lavf-o", reconnect_opts) {
             Ok(()) => eprintln!("[harbor::mpv] stream-lavf-o set {}", reconnect_opts),
             Err(e) => eprintln!("[harbor::mpv] stream-lavf-o rejected: {:?}", e),

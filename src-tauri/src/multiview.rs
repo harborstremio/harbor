@@ -535,7 +535,8 @@ fn spawn_mpv(
         .arg("--cache-secs=20")
         .arg("--demuxer-readahead-secs=30")
         .arg("--network-timeout=60")
-        .arg("--stream-lavf-o=reconnect=1,reconnect_streamed=1,reconnect_delay_max=10")
+        // See mpv.rs: reconnect_streamed stalls AES-128 HLS segments.
+        .arg("--stream-lavf-o=reconnect=1,reconnect_delay_max=10")
         .arg("--vd-lavc-threads=2")
         .arg("--volume=100")
         .arg("--mute=yes")
