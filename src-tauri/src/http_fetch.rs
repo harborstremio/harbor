@@ -237,7 +237,7 @@ fn apply_redirect_method(
     }
 }
 
-fn http_client_builder() -> reqwest::ClientBuilder {
+pub(crate) fn http_client_builder() -> reqwest::ClientBuilder {
     reqwest::Client::builder()
         .no_proxy()
         .redirect(reqwest::redirect::Policy::none())
