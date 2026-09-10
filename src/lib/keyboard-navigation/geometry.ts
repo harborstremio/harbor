@@ -14,17 +14,32 @@ const SELECTOR = [
 ].join(", ");
 
 const KEY_TO_DIR: Record<string, Dir> = {
-  ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
-  Up: "up", Down: "down", Left: "left", Right: "right",
+  ArrowUp: "up",
+  ArrowDown: "down",
+  ArrowLeft: "left",
+  ArrowRight: "right",
+  Up: "up",
+  Down: "down",
+  Left: "left",
+  Right: "right",
 };
 
 const CODE_TO_DIR: Record<string, Dir> = {
-  ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
+  ArrowUp: "up",
+  ArrowDown: "down",
+  ArrowLeft: "left",
+  ArrowRight: "right",
 };
 
 const KEYCODE_TO_DIR: Record<number, Dir> = {
-  38: "up", 40: "down", 37: "left", 39: "right",
-  19: "up", 20: "down", 21: "left", 22: "right",
+  38: "up",
+  40: "down",
+  37: "left",
+  39: "right",
+  19: "up",
+  20: "down",
+  21: "left",
+  22: "right",
 };
 
 export const CENTER_KEYCODES = new Set([13, 23, 32]);
@@ -80,7 +95,8 @@ export function isVisible(el: HTMLElement) {
   if (!el.isConnected) return false;
   if (el.closest('[hidden], [inert], [aria-hidden="true"]')) return false;
   const style = window.getComputedStyle(el);
-  if (style.display === "none" || style.visibility === "hidden" || parseFloat(style.opacity) === 0) return false;
+  if (style.display === "none" || style.visibility === "hidden" || parseFloat(style.opacity) === 0)
+    return false;
   const rect = el.getBoundingClientRect();
   if (rect.width <= 0 || rect.height <= 0) return false;
   if (el.getClientRects().length === 0) return false;
@@ -141,15 +157,17 @@ export function zoneOf(el: HTMLElement): "nav" | "hero" | "content" {
 
 export function getSoundType(el: HTMLElement): "light" | "movie" {
   if (isInNav(el)) return "light";
-  if (el.closest('[role="dialog"], [role="menu"], [role="tablist"], [role="switch"], form')) return "light";
-  const container = el.closest('[data-media-card], [data-tv-hero-zone]');
+  if (el.closest('[role="dialog"], [role="menu"], [role="tablist"], [role="switch"], form'))
+    return "light";
+  const container = el.closest("[data-media-card], [data-tv-hero-zone]");
   if (container || el.querySelector("img")) return "movie";
   return "light";
 }
 
 export function getFocusable(root: ParentNode = document): HTMLElement[] {
   const all = Array.from(root.querySelectorAll<HTMLElement>(SELECTOR)).filter(
-    (el) => isVisible(el) && !el.closest("[data-tv-skip]") && (zoneOf(el) === "nav" || isOnScreen(el)),
+    (el) =>
+      isVisible(el) && !el.closest("[data-tv-skip]") && (zoneOf(el) === "nav" || isOnScreen(el)),
   );
   return all.filter((el) => !all.some((other) => other !== el && other.contains(el)));
 }
@@ -188,7 +206,8 @@ export function scrollNavItemIntoView(
   mode: "center" | "nearest" = "center",
 ): boolean {
   const sidebarRoot =
-    el.closest<HTMLElement>("[data-harbor-sidebar]") ?? el.closest<HTMLElement>("[data-tv-nav-zone]");
+    el.closest<HTMLElement>("[data-harbor-sidebar]") ??
+    el.closest<HTMLElement>("[data-tv-nav-zone]");
   if (!sidebarRoot) return false;
 
   let scroller: HTMLElement | null = el.parentElement;
@@ -212,7 +231,10 @@ export function scrollNavItemIntoView(
   if (mode === "center") {
     const itemCenter = itemRect.top + itemRect.height / 2;
     const scrollerCenter = scrollerRect.top + scrollerRect.height / 2;
-    scroller.scrollTo({ top: scroller.scrollTop + itemCenter - scrollerCenter, behavior: "smooth" });
+    scroller.scrollTo({
+      top: scroller.scrollTop + itemCenter - scrollerCenter,
+      behavior: "smooth",
+    });
     return true;
   }
 
@@ -220,7 +242,10 @@ export function scrollNavItemIntoView(
   if (itemRect.top < scrollerRect.top + edgePadding) {
     scroller.scrollBy({ top: itemRect.top - scrollerRect.top - edgePadding, behavior: "smooth" });
   } else if (itemRect.bottom > scrollerRect.bottom - edgePadding) {
-    scroller.scrollBy({ top: itemRect.bottom - scrollerRect.bottom + edgePadding, behavior: "smooth" });
+    scroller.scrollBy({
+      top: itemRect.bottom - scrollerRect.bottom + edgePadding,
+      behavior: "smooth",
+    });
   }
   return true;
 }
@@ -318,7 +343,9 @@ export function scrollFocusIntoView(el: HTMLElement) {
 export function getActiveModal(target: HTMLElement | null): HTMLElement | null {
   const owned = target?.closest<HTMLElement>(MODAL_SELECTOR);
   if (owned && isVisible(owned)) return owned;
-  const visible = Array.from(document.querySelectorAll<HTMLElement>(MODAL_SELECTOR)).filter(isVisible);
+  const visible = Array.from(document.querySelectorAll<HTMLElement>(MODAL_SELECTOR)).filter(
+    isVisible,
+  );
   return visible[visible.length - 1] ?? null;
 }
 
@@ -327,9 +354,11 @@ export function isLocallyManaged(target: HTMLElement | null): boolean {
 }
 
 function getRect(el: HTMLElement) {
-  const cell = el.closest<HTMLElement>("[data-tv-nav-base-width]");
+  const cell = el.closest<HTMLElement>(
+    "[data-tv-nav-cell], [data-tv-nav-base-width], [data-tv-text-field]",
+  );
   const r = cell?.getBoundingClientRect() ?? el.getBoundingClientRect();
-  const baseWidth = cell ? Number(cell.dataset.tvNavBaseWidth) : undefined;
+  const baseWidth = cell?.dataset.tvNavBaseWidth ? Number(cell.dataset.tvNavBaseWidth) : undefined;
   const rtl = cell ? window.getComputedStyle(cell).direction === "rtl" : false;
   return stableCardNavigationRect(r, baseWidth, rtl);
 }
@@ -388,7 +417,11 @@ export function getInitialFocus(list: HTMLElement[]) {
   return list.find((el) => el.hasAttribute("data-tv-initial-focus")) ?? list[0] ?? null;
 }
 
-export function findBest(focused: HTMLElement, candidates: HTMLElement[], dir: Dir): HTMLElement | null {
+export function findBest(
+  focused: HTMLElement,
+  candidates: HTMLElement[],
+  dir: Dir,
+): HTMLElement | null {
   const src = getRect(focused);
   const horizontal = dir === "left" || dir === "right";
   const rowSlop = Math.max(24, src.height * 0.6);
@@ -407,10 +440,13 @@ export function findBest(focused: HTMLElement, candidates: HTMLElement[], dir: D
     if (horizontal && Math.abs(dst.cy - src.cy) >= rowSlop) continue;
 
     const primary =
-      dir === "right" ? Math.max(0, dst.left - src.right) :
-      dir === "left" ? Math.max(0, src.left - dst.right) :
-      dir === "down" ? Math.max(0, dst.top - src.bottom) :
-      Math.max(0, src.top - dst.bottom);
+      dir === "right"
+        ? Math.max(0, dst.left - src.right)
+        : dir === "left"
+          ? Math.max(0, src.left - dst.right)
+          : dir === "down"
+            ? Math.max(0, dst.top - src.bottom)
+            : Math.max(0, src.top - dst.bottom);
 
     const secondary = horizontal ? Math.abs(dst.cy - src.cy) : Math.abs(dst.cx - src.cx);
 
