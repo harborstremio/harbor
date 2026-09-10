@@ -1959,6 +1959,7 @@ export function DetailView({
                 meta={playMeta}
                 videos={cinemetaFull.videos}
                 stremioWatched={stremioWatched}
+                resumeSeason={lastPlay?.season}
               />
             </FadeInUp>
           )}

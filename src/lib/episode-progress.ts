@@ -1,6 +1,5 @@
 import { manualWatchedState } from "@/lib/manual-watched";
 import { lastPlayedEpisode, readResumeEntry } from "@/lib/resume";
-import { getViewedSeason } from "@/lib/season-view-pref";
 
 export type EpisodeProgress = {
   ratio: number;
@@ -9,7 +8,6 @@ export type EpisodeProgress = {
 };
 
 const WATCHED_THRESHOLD = 0.85;
-const SEASON_DONE_RATIO = 0.9;
 
 export function resumeDefaultSeason(
   seriesId: string,
@@ -22,9 +20,6 @@ export function resumeDefaultSeason(
     .sort((a, b) => a.seasonNumber - b.seasonNumber);
   const first = real[0]?.seasonNumber ?? seasons[0]?.seasonNumber ?? 1;
 
-  const viewed = getViewedSeason(seriesId);
-  if (viewed != null && seasons.some((s) => s.seasonNumber === viewed)) return viewed;
-
   if (real.length <= 1) return first;
 
   const watchedInSeason = (sn: number): number => {
@@ -35,14 +30,23 @@ export function resumeDefaultSeason(
     return n;
   };
   const seasonDone = (s: { seasonNumber: number; episodeCount: number }): boolean =>
-    s.episodeCount > 0 && watchedInSeason(s.seasonNumber) / s.episodeCount >= SEASON_DONE_RATIO;
+    s.episodeCount > 0 && watchedInSeason(s.seasonNumber) >= s.episodeCount;
 
   const nextUnwatched = real.find((s) => !seasonDone(s))?.seasonNumber ?? null;
 
+  const latestWatchedSeason =
+    real.filter((season) => watchedInSeason(season.seasonNumber) > 0).at(-1)?.seasonNumber ?? null;
+
+  const localLastPlayedSeason = lastPlayedEpisode(seriesId)?.season ?? null;
+
   const hint =
-    lastPlayedSeasonHint != null && real.some((s) => s.seasonNumber === lastPlayedSeasonHint)
+    lastPlayedSeasonHint != null &&
+    real.some((season) => season.seasonNumber === lastPlayedSeasonHint)
       ? lastPlayedSeasonHint
-      : (lastPlayedEpisode(seriesId)?.season ?? null);
+      : localLastPlayedSeason != null &&
+          real.some((season) => season.seasonNumber === localLastPlayedSeason)
+        ? localLastPlayedSeason
+        : latestWatchedSeason;
 
   if (hint != null && real.some((s) => s.seasonNumber === hint)) {
     const hintObj = real.find((s) => s.seasonNumber === hint)!;
@@ -67,8 +71,7 @@ export function getEpisodeProgress(
   traktSeason?: number,
   traktEpisode?: number,
 ): EpisodeProgress {
-  const resumeIds =
-    traktImdbId && traktImdbId !== resumeId ? [resumeId, traktImdbId] : [resumeId];
+  const resumeIds = traktImdbId && traktImdbId !== resumeId ? [resumeId, traktImdbId] : [resumeId];
   let entry: { ms: number; t: number } | null = null;
   for (const id of resumeIds) {
     const e = readResumeEntry(id, season, episode);
@@ -88,7 +91,9 @@ export function getEpisodeProgress(
   const durationMs = runtimeMin && runtimeMin > 0 ? runtimeMin * 60 * 1000 : 0;
   const ratio = durationMs > 0 && ms > 0 ? Math.min(1, ms / durationMs) : 0;
 
-  const traktKey = traktImdbId ? `imdb:${traktImdbId}:${traktSeason ?? season}:${traktEpisode ?? episode}` : null;
+  const traktKey = traktImdbId
+    ? `imdb:${traktImdbId}:${traktSeason ?? season}:${traktEpisode ?? episode}`
+    : null;
   const traktDone = traktKey ? traktWatched.has(traktKey) : false;
   const stremioDone = stremioWatched ? stremioWatched.has(`${season}:${episode}`) : false;
   const anilistDone = anilistWatched ? anilistWatched.has(`${season}:${episode}`) : false;
