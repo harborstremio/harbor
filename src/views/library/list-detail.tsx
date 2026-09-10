@@ -1,5 +1,6 @@
 import { ArrowLeft, Layers, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
 import {
   MAX_ITEMS,
@@ -29,57 +30,127 @@ function itemToMeta(it: ListItem): Meta {
 export function ListDetail({ listId, onBack }: { listId: string; onBack: () => void }) {
   const t = useT();
   const list = useList(listId);
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<string | null>(null);
-  const dragRef = useRef<{ id: string; x: number; y: number; active: boolean } | null>(null);
-  const cellRefs = useRef<Map<string, HTMLElement>>(new Map());
-  const itemsRef = useRef<ListItem[]>([]);
-  itemsRef.current = list?.items ?? [];
+  const itemElsRef = useRef<Map<string, HTMLDivElement>>(new Map());
+  const dragCleanupRef = useRef<(() => void) | null>(null);
   const suppressClick = useRef(false);
+  useEffect(() => () => dragCleanupRef.current?.(), []);
+  const [order, setOrder] = useState<string[]>(() => list?.items.map((it) => it.id) ?? []);
 
-  const onDown = (e: React.PointerEvent, id: string) => {
-    dragRef.current = { id, x: e.clientX, y: e.clientY, active: false };
-  };
-  const onMove = (e: React.PointerEvent) => {
-    const d = dragRef.current;
-    if (!d) return;
-    if (!d.active) {
-      if (Math.abs(e.clientX - d.x) + Math.abs(e.clientY - d.y) < 8) return;
-      d.active = true;
-      e.currentTarget.setPointerCapture(e.pointerId);
-      setDragId(d.id);
-    }
-    let target: string | null = null;
-    for (const it of itemsRef.current) {
-      if (it.id === d.id) continue;
-      const el = cellRefs.current.get(it.id);
-      if (!el) continue;
-      const r = el.getBoundingClientRect();
-      if (
-        e.clientX >= r.left &&
-        e.clientX <= r.right &&
-        e.clientY >= r.top &&
-        e.clientY <= r.bottom
-      ) {
-        target = it.id;
-        break;
+  const itemIds = list?.items.map((it) => it.id).join(",") ?? "";
+  useEffect(() => {
+    if (dragCleanupRef.current) return;
+    setOrder(itemIds ? itemIds.split(",") : []);
+  }, [itemIds]);
+
+  const orderedItems = useMemo(() => {
+    const source = list?.items ?? [];
+    const byId = new Map(source.map((it) => [it.id, it] as const));
+    const seq = order.length ? order : source.map((it) => it.id);
+    const out = seq.map((oid) => byId.get(oid)).filter((x): x is ListItem => !!x);
+    for (const it of source) if (!out.some((existing) => existing.id === it.id)) out.push(it);
+    return out;
+  }, [list, order]);
+
+  const startItemDrag = (e: React.PointerEvent<HTMLDivElement>, itemId: string, index: number) => {
+    if (e.button !== 0) return;
+    if ((e.target as HTMLElement).closest('button[aria-label="Remove from list"]')) return;
+    const ids = orderedItems.map((it) => it.id);
+    if (ids.length < 2) return;
+    const els = ids.map((iid) => itemElsRef.current.get(iid));
+    if (els.some((el) => !el)) return;
+    const slots = els.map((el) => {
+      const r = el!.getBoundingClientRect();
+      return {
+        x: r.left,
+        y: r.top,
+        cx: r.left + r.width / 2,
+        cy: r.top + r.height / 2,
+        h: r.height,
+      };
+    });
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const dragged = itemElsRef.current.get(itemId)!;
+    let curOrder = ids;
+    let moved = false;
+
+    const applyShift = (next: string[]) => {
+      for (let oi = 0; oi < ids.length; oi++) {
+        const iid = ids[oi];
+        if (iid === itemId) continue;
+        const el = itemElsRef.current.get(iid);
+        if (!el) continue;
+        const ni = next.indexOf(iid);
+        const tx = slots[ni].x - slots[oi].x;
+        const ty = slots[ni].y - slots[oi].y;
+        el.style.transition = "transform 190ms cubic-bezier(0.2,0.9,0.2,1)";
+        el.style.transform = tx || ty ? `translate(${tx}px,${ty}px)` : "";
+      }
+    };
+
+    function onMove(ev: PointerEvent) {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      if (!moved) {
+        if (Math.hypot(dx, dy) < 4) return;
+        moved = true;
+        document.body.style.userSelect = "none";
+        dragged.style.zIndex = "50";
+        dragged.style.willChange = "transform";
+        dragged.style.boxShadow = "0 22px 45px -14px rgba(0,0,0,0.65)";
+      }
+      dragged.style.transition = "none";
+      dragged.style.transform = `translate(${dx}px,${dy}px) scale(1.05)`;
+      const cx = slots[index].cx + dx;
+      const cy = slots[index].cy + dy;
+      let toIndex = 0;
+      for (let i = 0; i < slots.length; i++) {
+        if (i === index) continue;
+        const s = slots[i];
+        const tol = s.h * 0.5;
+        if (s.cy < cy - tol || (Math.abs(s.cy - cy) <= tol && s.cx < cx)) toIndex++;
+      }
+      const next = ids.filter((x) => x !== itemId);
+      next.splice(toIndex, 0, itemId);
+      if (next.join("\u0001") !== curOrder.join("\u0001")) {
+        curOrder = next;
+        applyShift(next);
       }
     }
-    setDropTarget(target);
-  };
-  const onUp = () => {
-    const d = dragRef.current;
-    if (d?.active) {
-      suppressClick.current = true;
-      if (dropTarget && dropTarget !== d.id && list) {
-        const ids = itemsRef.current.map((it) => it.id).filter((x) => x !== d.id);
-        ids.splice(ids.indexOf(dropTarget), 0, d.id);
-        reorderListItems(list.id, ids);
+
+    function cleanup() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+      document.body.style.userSelect = "";
+      dragCleanupRef.current = null;
+    }
+
+    function onUp() {
+      cleanup();
+      const changed = moved && curOrder.join("\u0001") !== ids.join("\u0001");
+      suppressClick.current = changed;
+      flushSync(() => {
+        if (changed) setOrder(curOrder);
+      });
+      for (const iid of ids) {
+        const el = itemElsRef.current.get(iid);
+        if (!el) continue;
+        el.style.transition = "";
+        el.style.transform = "";
+        el.style.zIndex = "";
+        el.style.boxShadow = "";
+        el.style.willChange = "";
+      }
+      if (changed && list) {
+        reorderListItems(list.id, curOrder);
       }
     }
-    dragRef.current = null;
-    setDragId(null);
-    setDropTarget(null);
+
+    dragCleanupRef.current = cleanup;
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   };
 
   if (!list) return null;
@@ -111,21 +182,18 @@ export function ListDetail({ listId, onBack }: { listId: string; onBack: () => v
 
       <AddTitleSearch list={list} />
 
-      {list.items.length === 0 ? (
+      {orderedItems.length === 0 ? (
         <EmptyList />
       ) : (
         <Grid>
-          {list.items.map((it) => (
+          {orderedItems.map((it, index) => (
             <div
               key={it.id}
               ref={(el) => {
-                if (el) cellRefs.current.set(it.id, el);
-                else cellRefs.current.delete(it.id);
+                if (el) itemElsRef.current.set(it.id, el);
+                else itemElsRef.current.delete(it.id);
               }}
-              onPointerDown={(e) => onDown(e, it.id)}
-              onPointerMove={onMove}
-              onPointerUp={onUp}
-              onPointerCancel={onUp}
+              onPointerDown={(e) => startItemDrag(e, it.id, index)}
               onClickCapture={(e) => {
                 if (suppressClick.current) {
                   e.stopPropagation();
@@ -134,8 +202,8 @@ export function ListDetail({ listId, onBack }: { listId: string; onBack: () => v
                 }
               }}
               className={`group/item relative touch-none rounded-lg transition-[opacity,box-shadow] ${
-                dragId === it.id ? "opacity-40" : ""
-              } ${dropTarget === it.id && dragId !== it.id ? "ring-2 ring-accent ring-offset-2 ring-offset-canvas" : ""}`}
+                dragCleanupRef.current ? "opacity-40 cursor-grabbing" : "cursor-grab"
+              }`}
             >
               <PickCard meta={itemToMeta(it)} />
               <button
