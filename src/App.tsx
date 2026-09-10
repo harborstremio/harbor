@@ -1391,7 +1391,11 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const peopleAlive = useIdleEvict(peopleTop);
 
   return (
-    <div data-kids={kidsTop || kid ? "on" : undefined} className="relative flex h-full">
+    <div
+      data-harbor-shell
+      data-kids={kidsTop || kid ? "on" : undefined}
+      className="relative flex h-full"
+    >
       {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "sidebar" && (
         <Sidebar />
       )}

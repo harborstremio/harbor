@@ -79,7 +79,11 @@ export function AccountMenu({
           }
         >
           {avatar("lg")}
-          <div className={`hidden min-w-0 flex-1 ${collapsed ? "" : "lg:block"}`}>
+          <div
+            data-harbor-sidebar-label
+            aria-hidden={collapsed || undefined}
+            className={`hidden min-w-0 flex-1 ${collapsed ? "" : "lg:block"}`}
+          >
             <div className="truncate text-[14.5px] font-medium tracking-tight text-ink">{name}</div>
             <div className="truncate text-[12px] text-ink-subtle">
               <SubtitleText active={activeProfile} profiles={ctrl.profiles} user={user} />

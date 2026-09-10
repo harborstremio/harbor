@@ -132,12 +132,14 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
       )}
       <div
           {...dragProps}
+          data-harbor-topbar-content
           className={`relative z-10 grid h-full grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-8 ${
             hybridBar ? "pt-11" : ""
           }`}
         >
           <div
             {...dragProps}
+            data-harbor-topbar-leading
             className={
               sidebarHidden
                 ? "pointer-events-auto flex h-full min-w-0 items-center justify-start gap-3"
@@ -172,6 +174,7 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
           </div>
           <div
             {...dragProps}
+            data-harbor-topbar-actions
             className="pointer-events-auto flex h-full items-center justify-end gap-2"
           >
           {!inSettings && (
@@ -415,6 +418,7 @@ function SearchPill() {
     <button
       type="button"
       data-tauri-drag-region="false"
+      data-harbor-search
       onClick={() => setOpen(true)}
       className={
         settings.liquidGlass

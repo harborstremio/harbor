@@ -6,7 +6,13 @@ import { useActiveKid } from "@/lib/profiles";
 import { SFX } from "@/lib/sfx";
 import { shouldOfferBigPicture } from "@/views/big-picture/bp-logic";
 
-export function SidebarBigPictureEntry({ collapsed }: { collapsed: boolean }) {
+export function SidebarBigPictureEntry({
+  collapsed,
+  retainLabels = false,
+}: {
+  collapsed: boolean;
+  retainLabels?: boolean;
+}) {
   const { settings } = useSettings();
   const t = useT();
   const kid = useActiveKid();
@@ -33,8 +39,18 @@ export function SidebarBigPictureEntry({ collapsed }: { collapsed: boolean }) {
         collapsed ? "w-9" : "w-full lg:justify-start lg:px-3"
       }`}
     >
-      <Monitor size={17} strokeWidth={1.8} className="shrink-0" />
-      {!collapsed && <span className="hidden text-[13px] font-medium lg:inline">{label}</span>}
+      <span data-harbor-sidebar-icon className="inline-flex shrink-0">
+        <Monitor size={17} strokeWidth={1.8} className="shrink-0" />
+      </span>
+      {(!collapsed || retainLabels) && (
+        <span
+          data-harbor-sidebar-label
+          aria-hidden={collapsed || undefined}
+          className="hidden text-[13px] font-medium lg:inline"
+        >
+          {label}
+        </span>
+      )}
     </button>
   );
 }

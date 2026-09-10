@@ -348,6 +348,10 @@ const elegantFinCss = `@import url("https://fonts.googleapis.com/css2?family=Int
   --ef-panel-glass: rgba(30, 40, 54, 0.95);
   --ef-hairline: #47505c;
   --ef-border-w: 0.06em;
+  --ef-rail-width: 72px;
+  --ef-drawer-width: 260px;
+  --ef-rail-space: 0px;
+  --ef-header-inset: 1rem;
   --ef-shine: linear-gradient(
     0deg,
     transparent 0%,
@@ -384,9 +388,14 @@ aside[data-harbor-sidebar] {
   inset-block: 0 !important;
   inset-inline-start: 0 !important;
   z-index: 120 !important;
-  width: 260px !important;
+  width: var(--ef-drawer-width) !important;
   transform: translateX(-103%);
-  transition: transform 170ms ease !important;
+  visibility: hidden;
+  pointer-events: none;
+  transition: width var(--duration-base) var(--ease-in-out),
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    visibility 0s linear var(--duration-fast) !important;
   box-shadow: 0.5em 0 2.5em rgba(0, 0, 0, 0.5);
 }
 html[dir="rtl"] aside[data-harbor-sidebar] {
@@ -395,6 +404,104 @@ html[dir="rtl"] aside[data-harbor-sidebar] {
 html.ef-drawer-open aside[data-harbor-sidebar],
 html[dir="rtl"].ef-drawer-open aside[data-harbor-sidebar] {
   transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition-duration: var(--duration-base), var(--duration-base), var(--duration-fast), 0s !important;
+  transition-delay: 0s !important;
+}
+aside[data-harbor-sidebar][data-collapsed="true"]:not([aria-hidden="true"]) {
+  width: var(--ef-rail-width) !important;
+  transform: translateX(0) !important;
+  visibility: visible;
+  pointer-events: auto;
+  box-shadow: none;
+  transition-delay: 0s !important;
+}
+/* The drawer stays fixed during morphing; only the pinned rail occupies page space. */
+html:has(aside[data-harbor-sidebar]:not([aria-hidden="true"])) {
+  --ef-header-inset: 4.25rem;
+}
+html:has(aside[data-harbor-sidebar][data-collapsed="true"]:not([aria-hidden="true"])) {
+  --ef-rail-space: var(--ef-rail-width);
+  --ef-header-inset: calc(var(--ef-rail-width) + 1rem);
+}
+[data-harbor-shell]::before {
+  content: "";
+  flex: none;
+  width: var(--ef-rail-space);
+  pointer-events: none;
+  transition: width var(--duration-base) var(--ease-in-out);
+}
+aside[data-harbor-sidebar] [data-harbor-sidebar-brand] {
+  justify-content: flex-start !important;
+  padding-inline: 12px !important;
+  gap: 4px !important;
+}
+aside[data-harbor-sidebar] [data-harbor-sidebar-mark] {
+  flex: none;
+  width: 48px;
+  justify-content: center;
+}
+aside[data-harbor-sidebar] [data-harbor-sidebar-mark] > :is(svg, img) {
+  width: 36px !important;
+  height: 36px !important;
+}
+aside[data-harbor-sidebar] [data-harbor-sidebar-label] {
+  display: block !important;
+  flex-shrink: 0;
+  white-space: nowrap;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--duration-fast) var(--ease-out), visibility 0s;
+  transition-delay: calc(var(--duration-base) - var(--duration-fast)), 0s;
+}
+aside[data-harbor-sidebar][data-collapsed="true"] [data-harbor-sidebar-label] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition-delay: 0s, var(--duration-fast);
+}
+aside[data-harbor-sidebar] [data-harbor-sidebar-brand] [data-harbor-sidebar-label] {
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+}
+aside[data-harbor-sidebar] [data-harbor-nav] {
+  justify-content: flex-start !important;
+  padding-inline: 0 !important;
+  gap: 0 !important;
+  overflow: hidden;
+}
+aside[data-harbor-sidebar] [data-harbor-sidebar-icon] {
+  display: inline-flex;
+  flex: none;
+  width: 40px;
+  justify-content: center;
+}
+aside[data-harbor-sidebar] [data-harbor-sidebar-footer] {
+  padding-inline: 8px !important;
+}
+aside[data-harbor-sidebar] [data-harbor-sidebar-footer] > .flex {
+  align-items: stretch !important;
+}
+aside[data-harbor-sidebar] [data-harbor-sidebar-footer] > .flex > button {
+  width: 100% !important;
+  justify-content: flex-start !important;
+  padding-inline: 0 !important;
+  gap: 0 !important;
+  overflow: hidden;
+}
+aside[data-harbor-sidebar] [data-harbor-sidebar-footer] [data-harbor-sidebar-icon] {
+  width: 56px;
+}
+aside[data-harbor-sidebar] [data-harbor-sidebar-footer] > .relative > button {
+  justify-content: flex-start !important;
+  padding-inline: 4px !important;
+}
+aside[data-harbor-sidebar] [data-harbor-sidebar-footer] > .relative > button [data-harbor-sidebar-label] {
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
 }
 aside[data-harbor-sidebar] [data-tauri-drag-region] > span {
   font-family: "Inter", system-ui, sans-serif !important;
@@ -428,7 +535,7 @@ aside[data-harbor-sidebar] [data-tauri-drag-region] > span > span {
   background-color: color-mix(in srgb, var(--color-accent) 24%, transparent) !important;
   color: var(--color-accent) !important;
 }
-aside[data-harbor-sidebar].w-[72px] [data-harbor-nav][data-active],
+aside[data-harbor-sidebar][data-collapsed="true"] [data-harbor-nav][data-active],
 html:not(.lg) [data-harbor-nav][data-active] {
   box-shadow: inset 0 0 0 var(--ef-border-w) color-mix(in srgb, var(--color-accent) 55%, transparent) !important;
 }
@@ -449,13 +556,17 @@ aside[data-harbor-sidebar] > div:last-child .bg-elevated/50 {
 /* ==========================================================================
    TOP HEADER BAR  (glass it: blur10 + bottom hairline on the inner grid)
    ========================================================================== */
-header.fixed.inset-x-0.top-0 > div {
+[data-harbor-topbar-content] {
   background-color: transparent !important;
   background-image: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border-bottom: 0 !important;
-  padding-inline-start: 4.25rem !important;
+  padding-inline-start: var(--ef-header-inset) !important;
+  transition: padding-inline-start var(--duration-base) var(--ease-in-out);
+}
+[data-harbor-topbar-leading] {
+  padding-inline-start: 0 !important;
 }
 .harbor-search-pill {
   background-color: color-mix(in srgb, var(--color-raised) 45%, transparent) !important;
@@ -779,9 +890,6 @@ textarea {
   opacity: 1;
   background-color: rgba(255, 255, 255, 0.08);
 }
-header.fixed.inset-x-0.top-0 > div > :first-child button.rounded-full {
-  display: none !important;
-}
 .harbor-search-pill {
   display: none !important;
 }
@@ -830,9 +938,11 @@ header.fixed.inset-x-0.top-0 > div > :first-child button.rounded-full {
   object-fit: cover;
   border-radius: 999px;
 }
-html.ef-drawer-open #ef-topleft {
+html.ef-drawer-open #ef-topleft,
+html:has(aside[data-harbor-sidebar][data-collapsed="true"]) #ef-topleft {
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
 }
 #ef-scrim {
   pointer-events: none;
@@ -841,18 +951,30 @@ html.ef-drawer-open #ef-topleft {
   z-index: 85;
   background: rgba(9, 13, 21, 0.5);
   opacity: 0;
-  transition: opacity 170ms ease;
+  transition: opacity var(--duration-fast) var(--ease-out);
 }
-html.ef-drawer-open #ef-scrim {
+html.ef-drawer-open:has(aside[data-harbor-sidebar][data-collapsed="false"]:not([aria-hidden="true"])) #ef-scrim {
   pointer-events: auto;
   opacity: 1;
 }
 html:not(:has(header.fixed.inset-x-0.top-0)) #ef-topleft,
 html:not(:has(aside[data-harbor-sidebar])) #ef-menu,
-html:not(:has(aside[data-harbor-sidebar])) #ef-home,
 html:not(:has(aside[data-harbor-sidebar])) #ef-profile,
 html:not(:has(aside[data-harbor-sidebar])) #ef-scrim {
   display: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  aside[data-harbor-sidebar],
+  aside[data-harbor-sidebar] [data-harbor-sidebar-label],
+  html.ef-drawer-open aside[data-harbor-sidebar],
+  html[dir="rtl"].ef-drawer-open aside[data-harbor-sidebar],
+  [data-harbor-shell]::before,
+  [data-harbor-topbar-content],
+  #ef-topleft,
+  #ef-scrim {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
 }
 
 /* ==========================================================================
@@ -966,12 +1088,6 @@ main.absolute.inset-0 .rounded-xl.border.bg-elevated\\/70 {
 
 function buildElegantFinHtml(): string {
   return `<div id="ef-topleft">
-  <button id="ef-back" type="button" aria-label="${escapeGeneratedHtml(t("Back"))}" style="display:none">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M19 12H5m0 0l7 7m-7-7l7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </button>
-  <button id="ef-home" type="button" aria-label="${escapeGeneratedHtml(t("Home"))}" style="display:none">
-    <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M3 10.5L12 3l9 7.5M5.5 8.5V20a1 1 0 001 1H10v-6h4v6h3.5a1 1 0 001-1V8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </button>
   <button id="ef-menu" type="button" aria-label="${escapeGeneratedHtml(t("Menu"))}">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
   </button>
@@ -986,13 +1102,45 @@ function buildElegantFinJs(): string {
     try { w.__efChromeCleanup(); } catch (e) {}
   }
   var root = document.documentElement;
-  function setOpen(open) {
-    if (open === undefined) root.classList.toggle("ef-drawer-open");
-    else if (open) root.classList.add("ef-drawer-open");
-    else root.classList.remove("ef-drawer-open");
+  var sidebar = null;
+  var sidebarParent = null;
+  var previousCollapsed = null;
+  var originalInert = false;
+  var observer = new MutationObserver(syncSidebar);
+  function syncAccess() {
+    var open = root.classList.contains("ef-drawer-open");
+    var hidden = !sidebar || sidebar.getAttribute("aria-hidden") === "true";
+    var collapsed = sidebar && sidebar.getAttribute("data-collapsed") === "true";
+    if (sidebar) sidebar.inert = hidden || (!collapsed && !open);
+    var menu = document.getElementById("ef-menu");
+    if (menu) menu.setAttribute("aria-expanded", String(open && !hidden && !collapsed));
   }
-  function realBack() {
-    return document.querySelector("header.fixed.inset-x-0.top-0 > div > :first-child button.rounded-full");
+  function setOpen(open) {
+    if (open === undefined) open = !root.classList.contains("ef-drawer-open");
+    root.classList.toggle("ef-drawer-open", !!open && !!sidebar && sidebar.getAttribute("aria-hidden") !== "true");
+    syncAccess();
+  }
+  function syncSidebar() {
+    var next = document.querySelector("aside[data-harbor-sidebar]");
+    if (next !== sidebar) {
+      if (sidebar) sidebar.inert = originalInert;
+      observer.disconnect();
+      sidebar = next;
+      previousCollapsed = null;
+      originalInert = sidebar ? sidebar.inert : false;
+      if (sidebar) sidebarParent = sidebar.parentElement;
+      if (sidebarParent) observer.observe(sidebarParent, { childList: true });
+      if (sidebar) observer.observe(sidebar, { attributes: true, attributeFilter: ["data-collapsed", "aria-hidden"] });
+      setOpen(false);
+    }
+    if (!sidebar || sidebar.getAttribute("aria-hidden") === "true") {
+      setOpen(false);
+      return;
+    }
+    var collapsed = sidebar.getAttribute("data-collapsed") === "true";
+    if (previousCollapsed !== null && previousCollapsed !== collapsed) setOpen(!collapsed);
+    previousCollapsed = collapsed;
+    syncAccess();
   }
   function onClick(e) {
     var t = e.target;
@@ -1001,18 +1149,12 @@ function buildElegantFinJs(): string {
       setOpen();
       return;
     }
-    if (t.closest("#ef-back")) {
-      var rb = realBack();
-      if (rb) rb.click();
-      return;
-    }
-    if (t.closest("#ef-home")) {
-      var home = document.querySelector("aside[data-harbor-sidebar] [data-harbor-nav]");
-      if (home) home.click();
+    if (t.closest("[data-harbor-sidebar-toggle]")) {
+      // React owns the saved preference; the observer follows its committed state.
       return;
     }
     if (t.closest("#ef-search")) {
-      var pill = document.querySelector(".harbor-search-pill");
+      var pill = document.querySelector("[data-harbor-search]");
       if (pill) pill.click();
       return;
     }
@@ -1027,6 +1169,10 @@ function buildElegantFinJs(): string {
           opened = w.harbor.tryViewMyProfile() === true;
         }
       } catch (e) {}
+      if (!opened && sidebar && sidebar.getAttribute("data-collapsed") === "true") {
+        var expand = sidebar.querySelector("[data-harbor-sidebar-toggle]");
+        if (expand) expand.click();
+      }
       setOpen(!opened);
       return;
     }
@@ -1034,23 +1180,17 @@ function buildElegantFinJs(): string {
       setOpen(false);
       return;
     }
-    var bottom = t.closest("aside[data-harbor-sidebar] > div:last-child");
-    if (bottom && t.closest("button") && !t.closest("div.relative")) {
-      e.preventDefault();
-      e.stopPropagation();
-      setOpen(false);
-    }
   }
   function onKey(e) {
-    if (e.key === "Escape") setOpen(false);
+    if (e.key !== "Escape") return;
+    var restoreFocus = sidebar && sidebar.getAttribute("data-collapsed") !== "true" && sidebar.contains(document.activeElement);
+    setOpen(false);
+    var menu = document.getElementById("ef-menu");
+    if (restoreFocus && menu) menu.focus({ preventScroll: true });
   }
   function tick() {
-    var back = document.getElementById("ef-back");
-    var home = document.getElementById("ef-home");
-    var showNav = realBack() ? "flex" : "none";
-    if (back && back.style.display !== showNav) back.style.display = showNav;
-    if (home && home.style.display !== showNav) home.style.display = showNav;
-    var cluster = document.querySelector("header.fixed.inset-x-0.top-0 > div > :last-child");
+    syncSidebar();
+    var cluster = document.querySelector("[data-harbor-topbar-actions]");
     var prof = document.getElementById("ef-profile");
     if (!cluster) return;
     var search = document.getElementById("ef-search");
@@ -1096,6 +1236,8 @@ function buildElegantFinJs(): string {
   var iv = w.setInterval(tick, 800);
   tick();
   var cleanup = function () {
+    observer.disconnect();
+    if (sidebar) sidebar.inert = originalInert;
     root.classList.remove("ef-drawer-open");
     document.removeEventListener("click", onClick, true);
     window.removeEventListener("keydown", onKey);
