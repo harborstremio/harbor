@@ -179,6 +179,11 @@ export async function syncAnimeProgress(
     const media = cur?.Media;
     if (!media) return;
 
+    // Never overwrite an entry the user deliberately moved to Completed or
+    // Re-watching; auto-sync would otherwise flip it back to CURRENT.
+    const entryStatus = media.mediaListEntry?.status;
+    if (entryStatus === "COMPLETED" || entryStatus === "REPEATING") return;
+
     const current = media.mediaListEntry?.progress ?? 0;
     const total = media.episodes ?? 0;
     let target = ep;

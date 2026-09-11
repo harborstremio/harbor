@@ -54,7 +54,11 @@ function saveSent(map: SentMap): void {
 
 type EntryResponse = {
   num_episodes: number | null;
-  my_list_status: { num_episodes_watched: number; status: string } | null;
+  my_list_status: {
+    num_episodes_watched: number;
+    status: string;
+    is_rewatching: boolean;
+  } | null;
 };
 
 type SaveResponse = {
@@ -126,6 +130,11 @@ export async function syncMalProgress(
     const cur = await malRequest<EntryResponse>(
       `/anime/${malId}?fields=num_episodes,my_list_status`,
     );
+
+    // Never overwrite entries the user completed or marked as re-watching;
+    // auto-sync would otherwise flip completed/rewatching back to "watching".
+    const listStatus = cur?.my_list_status;
+    if (listStatus && (listStatus.status === "completed" || listStatus.is_rewatching)) return;
 
     const current = cur?.my_list_status?.num_episodes_watched ?? 0;
     const total = cur?.num_episodes ?? 0;
