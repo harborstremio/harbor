@@ -56,6 +56,7 @@ export type ListBgMode = "auto" | "custom";
 export type CustomList = {
   id: string;
   name: string;
+  description?: string;
   createdAt: number;
   updatedAt: number;
   order?: number;
@@ -127,6 +128,7 @@ function read(): CustomList[] {
       out.push({
         id: e.id,
         name: e.name,
+        description: typeof e.description === "string" ? e.description : undefined,
         createdAt: typeof e.createdAt === "number" ? e.createdAt : 0,
         updatedAt: typeof e.updatedAt === "number" ? e.updatedAt : 0,
         order: typeof e.order === "number" ? e.order : undefined,
@@ -205,14 +207,22 @@ export function subscribeLists(fn: () => void): () => void {
   };
 }
 
-export function createList(name: string): string | null {
+export function createList(name: string, description = ""): string | null {
   const trimmed = name.trim();
   if (!trimmed) return null;
+  const trimmedDescription = description.trim();
   const lists = read();
   if (lists.length >= MAX_LISTS) return null;
   const id = randomUuid();
   const now = Date.now();
-  lists.push({ id, name: trimmed, createdAt: now, updatedAt: now, items: [] });
+  lists.push({
+    id,
+    name: trimmed,
+    description: trimmedDescription || undefined,
+    createdAt: now,
+    updatedAt: now,
+    items: [],
+  });
   write(lists);
   return id;
 }
@@ -224,6 +234,16 @@ export function renameList(id: string, name: string): void {
   const list = lists.find((l) => l.id === id);
   if (!list) return;
   list.name = trimmed;
+  list.updatedAt = Date.now();
+  write(lists);
+}
+
+export function updateListDescription(id: string, description: string): void {
+  const lists = read();
+  const list = lists.find((l) => l.id === id);
+  if (!list) return;
+  const trimmed = description.trim();
+  list.description = trimmed || undefined;
   list.updatedAt = Date.now();
   write(lists);
 }

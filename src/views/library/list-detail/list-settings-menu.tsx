@@ -1,19 +1,13 @@
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { deleteList, renameList, type CustomList } from "@/lib/custom-lists";
+import { deleteList, renameList, updateListDescription, type CustomList } from "@/lib/custom-lists";
 import { useT } from "@/lib/i18n";
 import { unfeatureListByName } from "@/lib/social/featured-lists";
 import { AnchoredMenu } from "@/components/anchored-menu";
 import { emitListToast } from "@/components/lists/list-toast";
 
-export function ListSettingsMenu({
-  list,
-  onDeleted,
-}: {
-  list: CustomList;
-  onDeleted: () => void;
-}) {
+export function ListSettingsMenu({ list, onDeleted }: { list: CustomList; onDeleted: () => void }) {
   const t = useT();
   const anchorRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
@@ -57,9 +51,11 @@ export function ListSettingsMenu({
       {renaming && (
         <RenameModal
           initial={list.name}
+          initialDescription={list.description ?? ""}
           onClose={() => setRenaming(false)}
-          onSubmit={(name) => {
+          onSubmit={(name, description) => {
             renameList(list.id, name);
+            updateListDescription(list.id, description);
             emitListToast(t("List renamed"));
             setRenaming(false);
           }}
@@ -109,15 +105,18 @@ function MenuItem({
 
 function RenameModal({
   initial,
+  initialDescription,
   onClose,
   onSubmit,
 }: {
   initial: string;
+  initialDescription: string;
   onClose: () => void;
-  onSubmit: (name: string) => void;
+  onSubmit: (name: string, description: string) => void;
 }) {
   const t = useT();
   const [name, setName] = useState(initial);
+  const [description, setDescription] = useState(initialDescription);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -129,7 +128,7 @@ function RenameModal({
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) return;
-    onSubmit(trimmed);
+    onSubmit(trimmed, description);
   };
 
   return createPortal(
@@ -152,6 +151,14 @@ function RenameModal({
           onChange={(e) => setName(e.target.value)}
           spellCheck={false}
           className="h-11 w-full rounded-xl border border-edge bg-canvas px-3.5 text-[14px] text-ink outline-none transition-colors placeholder:text-ink-subtle focus:border-ink"
+        />
+        <textarea
+          value={description}
+          maxLength={240}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder={t("A short note about this list")}
+          rows={3}
+          className="w-full resize-none rounded-xl border border-edge bg-canvas px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors placeholder:text-ink-subtle focus:border-ink"
         />
         <div className="flex items-center justify-end gap-2 pt-1">
           <button
