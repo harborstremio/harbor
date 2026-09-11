@@ -41,6 +41,7 @@
       ]
     },
     "clipboard-manager:allow-read-text",
+    "clipboard-manager:allow-write-text",
     "dialog:default",
     "dialog:allow-open",
     "dialog:allow-save",
