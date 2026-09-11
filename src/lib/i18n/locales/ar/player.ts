@@ -3,7 +3,7 @@ const player: Record<string, string> = {
   "Violence & Gore": "العنف والدموية",
   "Sex & Nudity": "المحتوى الجنسي والعري",
   Profanity: "الألفاظ النابية",
-  "Alcohol, Drugs & Smoking": "الكحول والمخدرات والتدخين",
+  "Alcohol, Drugs & Smoking": "الكحول والمخدرات",
   "Frightening & Intense Scenes": "مشاهد مرعبة ومثيرة",
   Severe: "شديد",
   Moderate: "متوسط",

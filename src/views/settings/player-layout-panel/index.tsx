@@ -34,7 +34,7 @@ import { AdvisoryPreview } from "./advisory-preview";
 import { AdvisoryIgnoreRow } from "./advisory-ignore-row";
 import { SeekBarPanel } from "../player-panel";
 import { FullscreenClockSettings } from "../theme-panel/fullscreen-clock-settings";
-import { Section, ToggleRow } from "../shared";
+import { Section, Segmented, ToggleRow } from "../shared";
 import { pushActivityHint } from "@/lib/discord/activity-hint";
 import { useT } from "@/lib/i18n";
 
@@ -278,7 +278,9 @@ export function PlayerLayoutPanel() {
             if (id === theme) return;
             if (!sameConfig(draft, saved)) {
               const ok = await confirmDialog(
-                t("You have unsaved changes that will be lost when switching player styles. Continue?"),
+                t(
+                  "You have unsaved changes that will be lost when switching player styles. Continue?",
+                ),
               );
               if (!ok) return;
             }
@@ -339,7 +341,35 @@ export function PlayerLayoutPanel() {
           onChange={(v) => update({ contentAdvisoryToast: v })}
           preview={<AdvisoryPreview />}
         />
-        <AdvisoryIgnoreRow featureOn={settings.contentAdvisoryToast} />
+        {settings.contentAdvisoryToast && (
+          <Segmented
+            label={t("Content advisory theme")}
+            sub={t(
+              "Choose whether the content advisory appears in full color or a restrained monochrome tone.",
+            )}
+            value={settings.contentAdvisoryTheme}
+            options={[
+              { value: "colored", label: t("Colored") },
+              { value: "monochrome", label: t("Monochrome") },
+            ]}
+            onChange={(v) => update({ contentAdvisoryTheme: v })}
+          />
+        )}
+        {settings.contentAdvisoryToast && (
+          <ToggleRow
+            label={t("Show ignore title button")}
+            sub={t(
+              "Display a button on the content advisory card to permanently ignore the title.",
+            )}
+            value={settings.contentAdvisoryShowIgnore}
+            onChange={(v) => update({ contentAdvisoryShowIgnore: v })}
+          />
+        )}
+        {settings.contentAdvisoryToast && settings.contentAdvisoryShowIgnore && (
+          <AdvisoryIgnoreRow
+            featureOn={settings.contentAdvisoryToast && settings.contentAdvisoryShowIgnore}
+          />
+        )}
       </Section>
 
       <Section

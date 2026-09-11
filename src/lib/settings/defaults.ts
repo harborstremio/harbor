@@ -123,6 +123,7 @@ export const DEFAULT: Settings = {
   fullscreenRestorePosition: true,
   contentAdvisoryToast: false,
   contentAdvisoryTheme: "colored",
+  contentAdvisoryShowIgnore: true,
   playerVolumeHud: true,
   playerVolumeHudPosition: "top",
   customPlaybackSpeeds: [],

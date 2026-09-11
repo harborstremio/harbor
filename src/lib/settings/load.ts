@@ -163,8 +163,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       _playbackSourcePreferenceV2?: boolean;
     };
     if (!parsed._playbackSourcePreferenceV1) {
-      parsed.playbackSourcePreference =
-        parsed.localPlaybackMode === "local" ? "local" : "online";
+      parsed.playbackSourcePreference = parsed.localPlaybackMode === "local" ? "local" : "online";
       parsed.preferredMediaServerId = null;
       parsed._playbackSourcePreferenceV1 = true;
     }
@@ -203,6 +202,9 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
     }
     if (parsed.contentAdvisoryTheme !== "monochrome" && parsed.contentAdvisoryTheme !== "colored") {
       parsed.contentAdvisoryTheme = "colored";
+    }
+    if (typeof parsed.contentAdvisoryShowIgnore !== "boolean") {
+      parsed.contentAdvisoryShowIgnore = true;
     }
     if (!parsed._skipButtonHideSecV2) {
       if (

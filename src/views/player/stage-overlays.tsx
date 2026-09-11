@@ -51,7 +51,12 @@ export const StageOverlays = memo(function StageOverlays({
   volumeHudPosition: VolumeHudPosition;
   videoFillPill: string | null;
   subDropToast: string | null;
-  contentAdvisory: { categories: ParentalCategory[]; playKey: string; imdbId: string | null };
+  contentAdvisory: {
+    categories: ParentalCategory[];
+    playKey: string;
+    imdbId: string | null;
+    mpaRating?: string | null;
+  };
   contentAdvisoryPosition: ContentAdvisoryPosition;
   onSubDelay: (sec: number) => void;
   onEnterSync?: () => void;
@@ -113,6 +118,7 @@ export const StageOverlays = memo(function StageOverlays({
           playKey={contentAdvisory.playKey}
           titleId={contentAdvisory.imdbId}
           position={contentAdvisoryPosition}
+          mpaRating={contentAdvisory.mpaRating}
         />
       )}
       {!pipMode && <SubStyleBar />}

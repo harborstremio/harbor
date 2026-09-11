@@ -17,11 +17,11 @@ const overlayLayers = read("src/views/player/player-overlay-layers.tsx");
 
 test("content advisory uses the original Harbor presentation", () => {
   assert.match(toast, /start-6 top-20/);
-  assert.match(toast, /w-\[266px\] overflow-hidden rounded-2xl/);
-  assert.match(toast, /border-edge-soft\/70 bg-canvas\/85/);
+  assert.match(toast, /w-\[238px\]/);
+  assert.match(toast, /bg-black\/70/);
   assert.match(toast, /uppercase tracking-\[0\.16em\]/);
   assert.match(toast, /h-2\.5 w-1 rounded-full/);
-  assert.match(toast, /const HOLD_MS = 10_000/);
+  assert.match(toast, /const HOLD_MS = 28_000/);
   assert.match(toast, /const HOVER_TAIL_MS = 2_500/);
   assert.doesNotMatch(toast, /start-4 top-44|w-\[286px\]|bg-black\/80|ring-white/);
 });

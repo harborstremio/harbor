@@ -1,4 +1,11 @@
 const settings: Record<string, string> = {
+  "Content advisory theme": "سمة التنبيه بالمحتوى",
+  "Choose whether the content advisory appears in full color or a restrained monochrome tone.":
+    "اختر ما إذا كان التنبيه بالمحتوى سيظهر بألوان كاملة أو بنمط أحادي اللون هادئ.",
+  "Show ignore title button": "إظهار زر تجاهل العمل",
+  "Display a button on the content advisory card to permanently ignore the title.":
+    "عرض زر في بطاقة التوجيه لتجاهل العمل وعدم إظهار البطاقة له مجدداً.",
+  Monochrome: "أحادي اللون",
   "Smooth scrolling": "تمرير سلس",
   "Eases mouse-wheel scrolling instead of jumping line by line. Turn off if you prefer an instant response or notice any lag.":
     "تمرير سلس بعجلة الفأرة بدلا من القفز سطرا بسطر. عطله إذا كنت تفضل استجابة فورية أو لاحظت بطئا.",
@@ -1124,8 +1131,7 @@ const settings: Record<string, string> = {
   "Scans your Stremio library and rewrites any item whose shape doesn't match Stremio's exact schema.":
     "يفحص مكتبة Stremio ويُعيد كتابة أي عنصر لا يطابق مخطط Stremio الدقيق.",
   About: "حول",
-  "Build identity. Useful when filing a bug report.":
-    "معلومات البناء. مفيدة عند تقديم تقرير خطأ.",
+  "Build identity. Useful when filing a bug report.": "معلومات البناء. مفيدة عند تقديم تقرير خطأ.",
   "Reveal the show or movie artwork.": "إظهار صورة العرض أو الفيلم.",
   Legal: "إشعار قانوني",
   "Made with": "صُنع بـ",

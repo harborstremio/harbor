@@ -30,9 +30,9 @@ const SEV_STYLE_COLORED: Record<string, SeverityStyle> = {
 };
 
 const SEV_STYLE_MONO: Record<string, SeverityStyle> = {
-  Severe: { text: "text-white/90", bar: "bg-white/90" },
-  Moderate: { text: "text-white/65", bar: "bg-white/65" },
-  Mild: { text: "text-white/45", bar: "bg-white/45" },
+  Severe: { text: "text-white/90 font-bold", bar: "bg-white/90" },
+  Moderate: { text: "text-white/65 font-medium", bar: "bg-white/65" },
+  Mild: { text: "text-white/45 font-medium", bar: "bg-white/45" },
   None: { text: "text-white/35", bar: "bg-white/30" },
 };
 
@@ -60,11 +60,11 @@ function metaFor(category: string): { Icon: typeof Info; label: string } {
   return { Icon: Info, label: category };
 }
 
-const HOLD_MS = 10_000;
+const HOLD_MS = 28_000;
 const HOVER_TAIL_MS = 2_500;
 const EXIT_MS = 500;
 const CARD_CLASS =
-  "w-[264px] overflow-hidden rounded-[14px] bg-black/45 px-3.5 py-3 ring-1 ring-white/10 backdrop-blur-xl";
+  "w-[238px] max-w-[calc(100vw-2.5rem)] overflow-hidden rounded-xl border border-white/10 bg-black/70 px-3 py-2.5 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.85)] backdrop-blur-xl";
 
 type Phase = "idle" | "holding" | "collapsing" | "done";
 
@@ -92,7 +92,9 @@ export function ContentAdvisoryToast({
   const rated = useMemo(
     () =>
       (categories ?? [])
-        .filter((category) => SEV_RANK[category.severity] !== undefined)
+        .filter(
+          (category) => SEV_RANK[category.severity] !== undefined && category.severity !== "None",
+        )
         .sort((a, b) => (SEV_RANK[b.severity] ?? 0) - (SEV_RANK[a.severity] ?? 0)),
     [categories],
   );
@@ -130,7 +132,6 @@ export function ContentAdvisoryToast({
     setHasTriggered(true);
     setActive(true);
     setPhase("holding");
-    setProgress(1);
     startTimeRef.current = performance.now();
     durationRef.current = HOLD_MS;
   }, [hasPlaybackStarted, hasContent, hasTriggered, playKey, preview]);
@@ -166,23 +167,25 @@ export function ContentAdvisoryToast({
   if (!hasContent || !active || !hasPlaybackStarted || phase === "done") return null;
 
   const isCardExiting = phase === "collapsing";
-  const countdownWidth = Math.max(0, Math.min(1, 1 - progress)) * 100;
   const handleInteractionEnd = () => {
     setPaused(false);
     if (phase === "holding") {
       durationRef.current = HOVER_TAIL_MS;
       startTimeRef.current = performance.now();
+      setProgress(1);
     }
   };
   const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
     if (event.currentTarget.contains(event.relatedTarget)) return;
     handleInteractionEnd();
   };
-  const canIgnore = !preview && !!titleId;
+  const canIgnore = !preview && !!titleId && settings.contentAdvisoryShowIgnore !== false;
   const handleIgnore = () => {
     if (titleId) ignoreAdvisory(titleId);
     setPhase("collapsing");
   };
+  const countdownWidth = Math.max(0, Math.min(100, progress * 100));
+  void countdownWidth;
   const positionClass =
     position === "top-end"
       ? "end-6 top-20"
@@ -239,19 +242,19 @@ export function ContentAdvisoryToast({
         }
       >
         <div
-          className={`flex min-h-6 items-center justify-between gap-2.5 ${
-            rated.length > 0 ? "mb-2.5" : ""
+          className={`flex min-h-5 items-center justify-between gap-2 ${
+            rated.length > 0 ? "mb-2" : ""
           }`}
         >
-          <span className="flex min-w-0 items-center gap-1.5 text-white/45">
-            <ShieldAlert size={12} strokeWidth={2.2} className="shrink-0" />
-            <span className="truncate text-[10px] font-semibold uppercase tracking-[0.16em] rtl:tracking-normal">
+          <span className="flex min-w-0 items-center gap-1.5 text-white/50">
+            <ShieldAlert size={11.5} strokeWidth={2.2} className="shrink-0" />
+            <span className="truncate text-[9.5px] font-semibold uppercase tracking-[0.16em] rtl:tracking-normal">
               {t("Content advisory")}
             </span>
           </span>
-          <span className="flex shrink-0 items-center gap-1.5">
+          <span className="flex shrink-0 items-center gap-1">
             {mpaRating && (
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-white/70">
+              <span className="rounded bg-white/10 px-1.5 py-0.5 text-[9px] font-semibold tabular-nums text-white/80">
                 {mpaRating}
               </span>
             )}
@@ -263,16 +266,16 @@ export function ContentAdvisoryToast({
                   setPhase("collapsing");
                 }}
                 aria-label={t("Dismiss")}
-                className="flex h-6 w-6 items-center justify-center rounded-full text-white/45 transition-[color,background-color,transform] duration-150 hover:bg-white/10 hover:text-white active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white/60"
+                className="flex h-5 w-5 items-center justify-center rounded text-white/45 transition-[color,background-color,transform] duration-150 hover:bg-white/10 hover:text-white active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white/60"
               >
-                <X size={13} strokeWidth={2} />
+                <X size={12} strokeWidth={2} />
               </button>
             )}
           </span>
         </div>
 
         {rated.length > 0 && (
-          <ul className="flex flex-col gap-2.5">
+          <ul className="flex flex-col gap-1.5">
             {rated.map((category, index) => {
               const { Icon, label } = metaFor(category.category);
               const style = severityStyles[category.severity] ?? severityStyles.Mild;
@@ -280,27 +283,27 @@ export function ContentAdvisoryToast({
               return (
                 <li
                   key={category.category}
-                  className={`flex items-center justify-between gap-3 ${
+                  className={`flex items-center justify-between gap-2 ${
                     preview ? "" : "harbor-content-advisory-row"
                   }`}
                   style={preview ? undefined : { animationDelay: `${110 + index * 50}ms` }}
                 >
-                  <span className="flex min-w-0 items-center gap-2">
-                    <Icon size={14} strokeWidth={2} className={`shrink-0 ${style.text}`} />
-                    <span className="truncate text-[12.5px] text-white/85">{t(label)}</span>
+                  <span className="flex min-w-0 items-center gap-1.5" title={t(label)}>
+                    <Icon size={13} strokeWidth={2} className={`shrink-0 ${style.text}`} />
+                    <span className="truncate text-[11.5px] text-white/90">{t(label)}</span>
                   </span>
                   <span className="flex shrink-0 items-center gap-1.5">
-                    <span className="flex gap-[3px]" aria-hidden="true">
+                    <span className="flex gap-[2.5px]" aria-hidden="true">
                       {[1, 2, 3].map((level) => (
                         <span
                           key={level}
                           className={`h-2.5 w-1 rounded-full ${
-                            level <= rank ? style.bar : "bg-ink-subtle/25"
+                            level <= rank ? style.bar : "bg-white/10"
                           }`}
                         />
                       ))}
                     </span>
-                    <span className={`w-[54px] text-end text-[11px] font-semibold ${style.text}`}>
+                    <span className={`w-[46px] text-end text-[10px] font-semibold ${style.text}`}>
                       {t(category.severity)}
                     </span>
                   </span>
@@ -311,7 +314,13 @@ export function ContentAdvisoryToast({
         )}
 
         {canIgnore && (
-          <div className={rated.length > 0 ? "mt-2.5" : "mt-2"}>
+          <div
+            className={
+              rated.length > 0
+                ? "mt-2 border-t border-white/10 pt-1.5 text-center"
+                : "mt-1.5 text-center"
+            }
+          >
             <button
               type="button"
               onClick={(event) => {
@@ -319,26 +328,17 @@ export function ContentAdvisoryToast({
                 handleIgnore();
               }}
               title={t("Never show the content advisory for this title again")}
-              className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-white/[0.07] px-3 py-2 text-[11.5px] font-semibold text-white/60 transition-[color,background-color,transform] duration-150 hover:bg-white/[0.12] hover:text-white active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white/60"
+              className="group inline-flex items-center justify-center gap-1.5 border-0 bg-transparent p-0 text-[10.5px] font-medium text-white/50 transition-all duration-200 hover:text-white focus-visible:outline-none"
             >
-              <EyeOff size={12} strokeWidth={2.2} className="shrink-0" />
-              {t("Ignore this title")}
+              <EyeOff
+                size={11}
+                strokeWidth={2.2}
+                className="shrink-0 transition-all duration-200 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+              />
+              <span className="transition-all duration-200 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]">
+                {t("Ignore this title")}
+              </span>
             </button>
-          </div>
-        )}
-
-        {!preview && phase === "holding" && (
-          <div
-            dir="ltr"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-white/10"
-          >
-            <div
-              className="h-full bg-white/35"
-              style={{
-                width: `${countdownWidth}%`,
-                transition: paused ? "none" : "width 60ms linear",
-              }}
-            />
           </div>
         )}
       </div>
