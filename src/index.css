@@ -2084,15 +2084,15 @@ html:not([data-input-modality="pointer"]) #root [data-media-card] {
     filter 220ms ease;
 }
 
-html:not([data-input-modality="pointer"])
-  #root:has([data-focused-card]:is(:focus, [data-tv-focused="true"]))
+html:not([data-input-modality="pointer"])[data-card-focused]
+  #root
   [data-media-card]:not([data-focused-card]:is(:focus, [data-tv-focused="true"])) {
   opacity: 0.34;
   filter: brightness(0.68) saturate(0.78) blur(0.7px);
 }
 
-html:not([data-input-modality="pointer"])
-  #root:has([data-focused-card]:is(:focus, [data-tv-focused="true"]))
+html:not([data-input-modality="pointer"])[data-card-focused]
+  #root
   [data-media-card]:is([data-focused-card]:focus, [data-focused-card][data-tv-focused="true"]) {
   opacity: 1;
   filter: none;
@@ -3173,6 +3173,12 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
   transform: translateX(-100%);
   animation: harbor-shimmer-sweep 1.4s ease-in-out infinite;
   animation-delay: var(--ai-delay, 0ms);
+}
+.harbor-shimmer[data-idle]::after {
+  display: none;
+}
+.harbor-row-track[data-far] {
+  overflow-x: hidden;
 }
 .harbor-preview-img {
   background-color: var(--color-raised);

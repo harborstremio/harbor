@@ -75,17 +75,19 @@ export function startWebGamepadSource(h: WebGamepadHandlers): () => void {
   let padSignature = "";
   let raf = 0;
   let stopped = false;
+  let polling = false;
+
+  const readPads = (): (Gamepad | null)[] => {
+    try {
+      return navigator.getGamepads();
+    } catch {
+      return [];
+    }
+  };
 
   const poll = () => {
     if (stopped) return;
-    raf = requestAnimationFrame(poll);
-
-    let list: (Gamepad | null)[];
-    try {
-      list = navigator.getGamepads();
-    } catch {
-      return;
-    }
+    const list = readPads();
 
     const active: GamepadInfo[] = [];
     for (const pad of list) {
@@ -117,11 +119,22 @@ export function startWebGamepadSource(h: WebGamepadHandlers): () => void {
       padSignature = signature;
       h.onPads(active);
     }
+    polling = active.length > 0;
+    if (polling) raf = requestAnimationFrame(poll);
   };
 
-  raf = requestAnimationFrame(poll);
+  const start = () => {
+    if (stopped || polling) return;
+    polling = true;
+    raf = requestAnimationFrame(poll);
+  };
+
+  window.addEventListener("gamepadconnected", start);
+  start();
   return () => {
     stopped = true;
+    polling = false;
     cancelAnimationFrame(raf);
+    window.removeEventListener("gamepadconnected", start);
   };
 }

@@ -93,7 +93,7 @@ export function CollectionCard({
         <Layers size={11} strokeWidth={2.4} />
         {count != null ? t("{count} films", { count }) : t("Collection")}
       </span>
-      <h3 className="absolute inset-x-4 bottom-3.5 font-display text-[21px] font-medium leading-[1.08] tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.7)]">
+      <h3 className="absolute inset-x-4 bottom-3.5 font-display text-[21px] font-medium leading-[1.08] tracking-tight text-white [text-shadow:0_2px_14px_rgba(0,0,0,0.7)]">
         {name}
       </h3>
     </button>

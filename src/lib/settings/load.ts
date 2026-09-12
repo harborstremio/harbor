@@ -121,8 +121,21 @@ export function sanitizeTheme(t: Partial<ThemeSettings> | undefined): ThemeSetti
   };
 }
 
+let cachedKey: string | null = null;
+let cachedRaw: string | null = null;
+let cachedSettings: Settings | null = null;
+
 export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
   const raw = localStorage.getItem(rawKey);
+  if (cachedSettings && cachedKey === rawKey && cachedRaw === raw) return cachedSettings;
+  const settings = parseStoredSettings(raw);
+  cachedKey = rawKey;
+  cachedRaw = raw;
+  cachedSettings = settings;
+  return settings;
+}
+
+function parseStoredSettings(raw: string | null): Settings {
   if (!raw) {
     return {
       ...DEFAULT,

@@ -13,6 +13,7 @@ import { tmdbLocalizedPoster } from "@/lib/providers/tmdb/tmdb-images";
 import { sizeImageUrl, qualityMultiplier } from "@/lib/img-size";
 import { shouldLocalizePosters } from "@/lib/providers/tmdb/tmdb-image-lang";
 import { useProxiedImageSrc } from "@/lib/remote-image-proxy";
+import { observeResize, observeWithin } from "@/lib/visibility";
 
 type Ratio = "portrait" | "landscape" | "wide" | "square";
 
@@ -236,42 +237,26 @@ function PosterBody({
     if (inView) return;
     const el = rootRef.current;
     if (!el) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const e = entries.find((x) => x.isIntersecting);
-        if (!e) return;
-        const r = e.boundingClientRect;
-        if (r.top < (window.innerHeight || 0) && r.bottom > 0) setEager(true);
-        setInView(true);
-        obs.disconnect();
-      },
-      { rootMargin: "1200px" },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
+    return observeWithin(el, "1200px", (e) => {
+      if (!e.isIntersecting) return;
+      const r = e.boundingClientRect;
+      if (r.top < (window.innerHeight || 0) && r.bottom > 0) setEager(true);
+      setInView(true);
+    });
   }, [inView]);
   useEffect(() => {
     if (!lazy || eager || !inView) return;
     const el = rootRef.current;
     if (!el) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((x) => x.isIntersecting)) {
-          setEager(true);
-          obs.disconnect();
-        }
-      },
-      { rootMargin: "150px" },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
+    return observeWithin(el, "150px", (e) => {
+      if (e.isIntersecting) setEager(true);
+    });
   }, [lazy, eager, inView]);
   useEffect(() => {
     if (!inView || qMult === 0) return;
     const el = rootRef.current;
     if (!el) return;
-    const measure = () => {
-      const box = el.getBoundingClientRect();
+    return observeResize(el, (box) => {
       if (box.width <= 0) return;
       const need = Math.max(box.width, box.height * RATIO_AR[ratio]);
       // Capped at 2. An Android TV WebView reports devicePixelRatio 4 because it is
@@ -279,11 +264,7 @@ function PosterBody({
       // raw value asks for a bucket twice as wide and four times the pixels.
       const t = Math.ceil(need * Math.min(2, window.devicePixelRatio || 1) * qMult);
       setTargetPx((prev) => (t > prev ? t : prev));
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
+    });
   }, [inView, qMult, ratio]);
   const rawCandidates = [src, ...(fallbacks ?? [])].filter((u): u is string => !!u);
   const candidates =
@@ -313,31 +294,26 @@ function PosterBody({
     const el = rootRef.current;
     if (!el) return;
     let timer = 0;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const inside = entries.some((x) => x.isIntersecting);
-        if (inside) {
-          if (timer) {
-            window.clearTimeout(timer);
-            timer = 0;
-          }
-          return;
-        }
-        if (timer) return;
-        timer = window.setTimeout(() => {
+    const stop = observeWithin(el, "2400px", (e) => {
+      if (e.isIntersecting) {
+        if (timer) {
+          window.clearTimeout(timer);
           timer = 0;
-          if (el.closest("a,button,[tabindex]") === document.activeElement) return;
-          setInView(false);
-          setEager(false);
-          setLoaded(false);
-          setDisplayed(undefined);
-        }, 1500);
-      },
-      { rootMargin: "2400px" },
-    );
-    obs.observe(el);
+        }
+        return;
+      }
+      if (timer) return;
+      timer = window.setTimeout(() => {
+        timer = 0;
+        if (el.closest("a,button,[tabindex]") === document.activeElement) return;
+        setInView(false);
+        setEager(false);
+        setLoaded(false);
+        setDisplayed(undefined);
+      }, 1500);
+    });
     return () => {
-      obs.disconnect();
+      stop();
       if (timer) window.clearTimeout(timer);
     };
   }, [lazy]);
@@ -434,7 +410,9 @@ function PosterBody({
       style={showPlate ? { background: gradient(hue) } : undefined}
     >
       <div aria-hidden style={{ paddingTop: ASPECT_PAD[ratio] }} />
-      {showShimmer && <span aria-hidden className="harbor-shimmer absolute inset-0" />}
+      {showShimmer && (
+        <span aria-hidden className="harbor-shimmer absolute inset-0" data-idle={inView ? undefined : ""} />
+      )}
       {displayed && displayed !== current && displayedSrc && (
         <img
           src={displayedSrc}

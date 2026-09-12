@@ -106,6 +106,17 @@ let lastFocusedEl: HTMLElement | null = null;
 let hoveredEl: HTMLElement | null = null;
 let suppressFocusScroll = false;
 
+function reflectCardFocus() {
+  if (typeof document === "undefined") return;
+  const active = document.activeElement;
+  const ring =
+    lastFocusedEl?.isConnected && lastFocusedEl.getAttribute("data-tv-focused") === "true" ? lastFocusedEl : null;
+  const onCard =
+    (active instanceof HTMLElement && active.hasAttribute("data-focused-card")) ||
+    (ring?.hasAttribute("data-focused-card") ?? false);
+  document.documentElement.toggleAttribute("data-card-focused", onCard);
+}
+
 export function tvFocus(el: HTMLElement) {
   focusElement(el);
 }
@@ -119,6 +130,7 @@ function clearTvFocusRing() {
   lastFocusedEl?.removeAttribute("data-tv-focused");
   lastFocusedEl?.style.removeProperty("border-radius");
   lastFocusedEl = null;
+  reflectCardFocus();
 }
 
 function borrowRadius(el: HTMLElement) {
@@ -169,6 +181,7 @@ function focusElement(el: HTMLElement) {
   lastFocusedEl = el;
 
   el.focus({ preventScroll: true });
+  reflectCardFocus();
   if (suppressFocusScroll) return;
   if (isInHero(el)) {
     const scroller = getScrollParent(el);
@@ -269,6 +282,7 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
       if (e.defaultPrevented) return;
       if (e.altKey || e.ctrlKey || e.metaKey) return;
       if (e.key === "Tab") setKeysModality();
+      reflectCardFocus();
 
       const target = e.target instanceof HTMLElement ? e.target : null;
       const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -451,7 +465,13 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
       if (lastFocusedEl) {
         lastFocusedEl.removeAttribute("data-tv-focused");
         lastFocusedEl = null;
+        reflectCardFocus();
       }
+    };
+
+    const onFocusIn = () => reflectCardFocus();
+    const onFocusOut = (e: FocusEvent) => {
+      if (!e.relatedTarget) reflectCardFocus();
     };
 
     const onPointerMove = (e: PointerEvent) => notePointerMove(e.screenX, e.screenY);
@@ -461,11 +481,15 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
     window.addEventListener("pointerdown", onPointerDown, true);
     window.addEventListener("pointermove", onPointerMove, true);
     window.addEventListener("wheel", onWheel, { capture: true, passive: true });
+    window.addEventListener("focusin", onFocusIn, true);
+    window.addEventListener("focusout", onFocusOut, true);
     return () => {
       window.removeEventListener("keydown", onKeyDown, false);
       window.removeEventListener("pointerdown", onPointerDown, true);
       window.removeEventListener("pointermove", onPointerMove, true);
       window.removeEventListener("wheel", onWheel, true);
+      window.removeEventListener("focusin", onFocusIn, true);
+      window.removeEventListener("focusout", onFocusOut, true);
       if (activeSearchEditEl) {
         activeSearchEditEl.removeAttribute("data-search-editing");
         activeSearchEditEl = null;

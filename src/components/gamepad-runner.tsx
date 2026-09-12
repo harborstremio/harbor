@@ -73,6 +73,11 @@ export function GamepadRunner() {
   }, []);
 
   useEffect(() => {
+    if (pads.length === 0) {
+      active.current = false;
+      cursor.current?.style.setProperty("opacity", "0");
+      return;
+    }
     let frame = 0;
     let previous = performance.now();
     let refreshHover = false;
@@ -188,7 +193,7 @@ export function GamepadRunner() {
       cancelAnimationFrame(frame);
       window.removeEventListener("blur", refresh);
     };
-  }, [settings.controllerDeadzone, settings.controllerCursorSpeed]);
+  }, [pads.length, settings.controllerDeadzone, settings.controllerCursorSpeed]);
 
   useEffect(() => {
     if (captured || !live.buttons.south) return;

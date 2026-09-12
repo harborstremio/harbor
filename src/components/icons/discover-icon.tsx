@@ -5,71 +5,61 @@ const RING =
 const NEEDLE =
   "m350.297,137.382l-128.191,42.729c-9.771,3.305-18.732,8.849-25.927,16.034-7.286,7.293-12.862,16.307-16.108,26.063l-42.705,128.1c-2.303,6.906-.509,14.523,4.641,19.67,3.664,3.667,8.577,5.632,13.595,5.632,2.038,0,4.089-.321,6.079-.988l128.107-42.701c9.764-3.252,18.78-8.829,26.06-16.118,7.188-7.192,12.737-16.16,16.059-26.004l42.705-128.104c2.303-6.906.509-14.523-4.641-19.67-5.15-5.157-12.792-6.948-19.674-4.645Zm-72.666,158.068l-91.627,30.54,30.54-91.628c1.375-4.128,3.734-7.939,6.818-11.023.002-.002.004-.004.007-.006l65.292,65.292s-.002.002-.003.003c-3.084,3.085-6.902,5.444-11.027,6.822Z";
 
+const SPIN_MS = 1200;
+const SETTLE_MS = 460;
+const SVG_CLASS = "h-[26px] w-[26px] overflow-visible p-[2px]";
+
+function currentAngle(el: Element): number {
+  const m = new DOMMatrix(getComputedStyle(el).transform);
+  const deg = (Math.atan2(m.b, m.a) * 180) / Math.PI;
+  return ((deg % 360) + 360) % 360;
+}
+
 export function DiscoverIcon({ active = false }: { active?: boolean }) {
-  const needleRef = useRef<SVGGElement>(null);
-  const rotationRef = useRef(0);
+  const needleRef = useRef<HTMLSpanElement>(null);
+  const spinRef = useRef<Animation | null>(null);
 
   useEffect(() => {
     const el = needleRef.current;
     if (!el) return;
-
-    let rafId = 0;
-    let lastT = performance.now();
-    const apply = (deg: number) => {
-      el.setAttribute("transform", `rotate(${deg} 256 256)`);
-    };
-
     if (active) {
-      const degPerMs = 0.3;
-      const tick = (t: number) => {
-        const dt = t - lastT;
-        lastT = t;
-        rotationRef.current = (rotationRef.current + dt * degPerMs) % 360;
-        apply(rotationRef.current);
-        rafId = requestAnimationFrame(tick);
-      };
-      rafId = requestAnimationFrame(tick);
-    } else if (rotationRef.current !== 0) {
-      const start = rotationRef.current;
-      const target = start > 180 ? 360 : 0;
-      const startTime = performance.now();
-      const duration = 460;
-      const tick = (t: number) => {
-        const progress = Math.min(1, (t - startTime) / duration);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const cur = start + (target - start) * eased;
-        apply(cur);
-        if (progress < 1) {
-          rotationRef.current = cur;
-          rafId = requestAnimationFrame(tick);
-        } else {
-          rotationRef.current = 0;
-          apply(0);
-        }
-      };
-      rafId = requestAnimationFrame(tick);
+      spinRef.current?.cancel();
+      el.style.transform = "";
+      spinRef.current = el.animate(
+        [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
+        { duration: SPIN_MS, iterations: Infinity, easing: "linear" },
+      );
+      return;
     }
-
-    return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-    };
+    const spin = spinRef.current;
+    if (!spin) return;
+    const start = currentAngle(el);
+    spin.cancel();
+    spinRef.current = null;
+    if (start === 0) return;
+    const target = start > 180 ? 360 : 0;
+    const settle = el.animate(
+      [{ transform: `rotate(${start}deg)` }, { transform: `rotate(${target}deg)` }],
+      { duration: SETTLE_MS, easing: "cubic-bezier(0.33, 1, 0.68, 1)", fill: "forwards" },
+    );
+    settle.onfinish = () => settle.cancel();
+    return () => settle.cancel();
   }, [active]);
 
   return (
-    <svg
-      viewBox="0 0 512 512"
-      className="h-[26px] w-[26px] overflow-visible p-[2px]"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d={RING} />
-      <g ref={needleRef}>
-        <path
-          d={NEEDLE}
-          fill={active ? "var(--color-accent)" : "currentColor"}
-          style={{ transition: "fill 280ms ease" }}
-        />
-      </g>
-    </svg>
+    <span className="relative inline-flex leading-none">
+      <svg viewBox="0 0 512 512" className={SVG_CLASS} fill="currentColor" aria-hidden>
+        <path d={RING} />
+      </svg>
+      <span ref={needleRef} className="absolute inset-0 inline-flex leading-none">
+        <svg viewBox="0 0 512 512" className={SVG_CLASS} fill="currentColor" aria-hidden>
+          <path
+            d={NEEDLE}
+            fill={active ? "var(--color-accent)" : "currentColor"}
+            style={{ transition: "fill 280ms ease" }}
+          />
+        </svg>
+      </span>
+    </span>
   );
 }

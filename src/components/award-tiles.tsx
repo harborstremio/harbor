@@ -69,7 +69,7 @@ function AwardTile({ type, name, sub }: { type: AwardType; name: string; sub: st
       </div>
       <div className="absolute inset-x-5 bottom-4 flex items-end justify-between gap-2">
         <div className="flex min-w-0 flex-col">
-          <h3 className="truncate font-display text-[21px] font-medium leading-tight tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.5)]">
+          <h3 className="truncate font-display text-[21px] font-medium leading-tight tracking-tight text-white [text-shadow:0_2px_14px_rgba(0,0,0,0.5)]">
             {t(name)}
           </h3>
           <span className="truncate text-[11.5px] font-medium text-white/65">{t(sub)}</span>

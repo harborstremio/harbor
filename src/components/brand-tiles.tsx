@@ -107,7 +107,7 @@ export function BrandTile({ brand, facts }: { brand: BrandSummary; facts?: strin
             />
           </span>
         ) : (
-          <span className="text-center font-display text-[26px] font-medium leading-tight tracking-tight text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.5)]">
+          <span className="text-center font-display text-[26px] font-medium leading-tight tracking-tight text-white [text-shadow:0_2px_18px_rgba(0,0,0,0.5)]">
             {brand.name}
           </span>
         )}

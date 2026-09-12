@@ -143,7 +143,7 @@ function GenreTile({ genre }: { genre: string }) {
       />
       <div className="absolute inset-x-5 bottom-5 flex items-end justify-between">
         <h3
-          className="font-display text-[26px] font-medium leading-tight tracking-tight drop-shadow-[0_2px_18px_rgba(0,0,0,0.4)]"
+          className="font-display text-[26px] font-medium leading-tight tracking-tight [text-shadow:0_2px_18px_rgba(0,0,0,0.4)]"
           style={{ color: palette.ink }}
         >
           {t(genre)}

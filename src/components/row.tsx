@@ -10,12 +10,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { flushSync } from "react-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import { NavChevron } from "./nav-arrow";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { observeWithin } from "@/lib/visibility";
 import { resetPosterDock as resetPosterDockItems, updatePosterDock } from "@/lib/poster-dock";
 import { scrollDeltaToRevealCard } from "@/lib/poster-backdrop-expansion";
 import { RowCardExpansionProvider } from "@/components/row-card-expansion";
@@ -81,9 +83,11 @@ function LazyChild({
     const el = ref.current;
     if (!el) return;
     let hideTimer: number | null = null;
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
+    const stopIo = observeWithin(
+      el,
+      NEAR_MARGIN,
+      (entry) => {
+        if (entry.isIntersecting) {
           if (hideTimer != null) {
             window.clearTimeout(hideTimer);
             hideTimer = null;
@@ -96,9 +100,8 @@ function LazyChild({
           }, FAR_RELEASE_MS);
         }
       },
-      { root, rootMargin: NEAR_MARGIN },
+      root,
     );
-    io.observe(el);
     const recheck = window.setTimeout(() => {
       const rect = el.getBoundingClientRect();
       const rr = root.getBoundingClientRect();
@@ -112,7 +115,7 @@ function LazyChild({
       if (within) setVisible(true);
     }, 400);
     return () => {
-      io.disconnect();
+      stopIo();
       window.clearTimeout(recheck);
       if (hideTimer != null) window.clearTimeout(hideTimer);
     };
@@ -159,6 +162,20 @@ function LazyChild({
       )}
     </div>
   );
+}
+
+let pendingWrites: Array<() => void> = [];
+
+function batchWrite(fn: () => void): void {
+  pendingWrites.push(fn);
+  if (pendingWrites.length > 1) return;
+  queueMicrotask(() => {
+    const fns = pendingWrites;
+    pendingWrites = [];
+    flushSync(() => {
+      for (const f of fns) f();
+    });
+  });
 }
 
 function Skeleton({ shape }: { shape: RowShape }) {
@@ -255,6 +272,12 @@ export function Row({
   });
 
   const rtlRef = useRef(false);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    return observeWithin(el, "600px", (e) => setNear(e.isIntersecting));
+  }, []);
   const measure = () => {
     const container = containerRef.current;
     if (!container) return;
@@ -263,7 +286,8 @@ export function Row({
     if (available <= 0) return;
     const fits = Math.max(1, Math.floor((available + GAP) / (effMin + GAP)));
     const raw = (available - (fits - 1) * GAP) / fits;
-    setCellWidth((Math.ceil(raw * 64) + 1) / 64);
+    const next = (Math.ceil(raw * 64) + 1) / 64;
+    batchWrite(() => setCellWidth(next));
   };
 
   const readPos = (el: HTMLDivElement) => (rtlRef.current ? -el.scrollLeft : el.scrollLeft);
@@ -275,9 +299,11 @@ export function Row({
     const el = trackRef.current;
     if (!el) return;
     const pos = readPos(el);
-    setCanPrev(pos > 1);
     const remaining = el.scrollWidth - el.clientWidth - pos;
-    setCanNext(remaining > 1);
+    batchWrite(() => {
+      setCanPrev(pos > 1);
+      setCanNext(remaining > 1);
+    });
     if (el.clientWidth > 0 && remaining < 800) onEndRef.current?.();
   };
 
@@ -731,6 +757,7 @@ export function Row({
             }}
             onClickCapture={onClickCapture}
             onDragStart={(e) => e.preventDefault()}
+            data-far={near ? undefined : ""}
             className={`harbor-row-track items-start gap-5 overflow-x-auto overflow-y-hidden ${trackPad} [scroll-snap-type:x_mandatory] [&>*]:[scroll-snap-align:start] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [overflow-anchor:none] [overscroll-behavior-x:contain] [&_img]:select-none [&_img]:[-webkit-user-drag:none] ${
               expandingCards
                 ? "harbor-expanding-card-scope harbor-expanding-row flex flex-nowrap"
@@ -742,7 +769,7 @@ export function Row({
                 ...(expandingCards
                   ? {}
                   : { gridAutoColumns: cellWidth != null ? `${cellWidth}px` : `${effMin}px` }),
-                transform: "translateZ(0)",
+                transform: near ? "translateZ(0)" : undefined,
                 contain: expandingCards ? "style" : "layout style",
               } as React.CSSProperties
             }

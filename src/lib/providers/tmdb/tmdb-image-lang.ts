@@ -1,8 +1,13 @@
 import { loadStoredSettings } from "@/lib/settings/load";
 import { normalizeLang } from "@/lib/subtitles/language";
 
+const NO_LANGS: string[] = [];
+let lastNames: readonly string[] = NO_LANGS;
+let lastPriority: (string | null)[] | null = null;
+
 export function imageLangPriority(): (string | null)[] {
-  const names = loadStoredSettings().tmdbImageLangs ?? [];
+  const names = loadStoredSettings().tmdbImageLangs ?? NO_LANGS;
+  if (lastPriority && names === lastNames) return lastPriority;
   const out: (string | null)[] = [];
   for (const name of names) {
     if (/^original$/i.test(name.trim())) {
@@ -12,7 +17,9 @@ export function imageLangPriority(): (string | null)[] {
     const code = normalizeLang(name);
     if (code && !out.includes(code)) out.push(code);
   }
-  return out.length ? out : ["en", null];
+  lastNames = names;
+  lastPriority = out.length ? out : ["en", null];
+  return lastPriority;
 }
 
 function effectiveOrder(originalLang?: string | null): (string | null)[] {
