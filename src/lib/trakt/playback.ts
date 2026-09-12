@@ -1,5 +1,6 @@
 import { traktRequest, TraktApiError } from "./client";
 import { getSession } from "./session";
+import { isCwDismissed } from "@/lib/cw-dismiss";
 import { readResumeMs, saveResumeMs } from "@/lib/resume";
 import type { LibraryItem } from "@/lib/stremio";
 import type { TraktIds } from "./types";
@@ -65,7 +66,7 @@ function buildItem(
 
 function toLibraryItem(raw: RawPlayback): LibraryItem | null {
   const pct = Math.min(100, Math.max(0, raw.progress ?? 0));
-  if (pct < 2 || pct > 98) return null;
+  if (pct < 1 || pct > 98) return null;
   const when = raw.paused_at ?? new Date(0).toISOString();
 
   if (raw.movie && !raw.episode) {
@@ -110,8 +111,10 @@ export async function fetchTraktPlaybackItems(): Promise<LibraryItem[]> {
     if (seen.has(key)) continue;
     seen.add(key);
     items.push(item);
+    // Same dismiss guard as Simkl: no resume backfill for dismissed cards, so a
+    // background refresh cannot manufacture fresh activity that beats the dismissal.
     const existing = readResumeMs(item._id, item.state.season, item.state.episode);
-    if (existing <= 0) {
+    if (existing <= 0 && !isCwDismissed(item)) {
       saveResumeMs(item._id, item.state.timeOffset, item.state.season, item.state.episode);
     }
   }

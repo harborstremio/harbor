@@ -107,7 +107,9 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
   const [traktRows, setTraktRows] = useState<HomeRow[]>([]);
   const [simklRows, setSimklRows] = useState<HomeRow[]>([]);
   const [letterboxdRows, setLetterboxdRows] = useState<HomeRow[]>([]);
-  const externalCw = useExternalCw(!settings.cwPerProfile && settings.externalContinueWatching);
+  const externalCw = useExternalCw(
+    !settings.cwPerProfile && (settings.cwSources.trakt || settings.cwSources.simkl),
+  );
   const [traktWatched, setTraktWatched] = useState<Set<string>>(() => new Set());
   const [simklWatchedMap, setSimklWatchedMap] = useState<Map<string, Set<string>>>(() => new Map());
   const [simklStatusMap, setSimklStatusMap] = useState<Map<string, WatchlistStatus>>(() => new Map());

@@ -1,5 +1,6 @@
 import { simklRequest, SimklApiError } from "./client";
 import { getSession } from "./session";
+import { isCwDismissed } from "@/lib/cw-dismiss";
 import { readResumeMs, saveResumeMs } from "@/lib/resume";
 import type { LibraryItem } from "@/lib/stremio";
 
@@ -73,7 +74,7 @@ function buildItem(
 
 function toLibraryItem(raw: RawSession): LibraryItem | null {
   const pct = Math.min(100, Math.max(0, raw.progress ?? 0));
-  if (pct < 2 || pct > 98) return null;
+  if (pct < 1 || pct > 98) return null;
   const when = raw.watched_at ?? new Date(0).toISOString();
 
   if (raw.movie) {
@@ -127,8 +128,11 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
     if (seen.has(key)) continue;
     seen.add(key);
     items.push(item);
+    // A dismissed card must not be resurrected by this backfill: dismiss clears the
+    // resume entry, and rewriting it with t=now would manufacture fresh activity that
+    // beats the dismissal. Genuine new progress still surfaces via watched_at/ratio.
     const existing = readResumeMs(item._id, item.state.season, item.state.episode);
-    if (existing <= 0) {
+    if (existing <= 0 && !isCwDismissed(item)) {
       saveResumeMs(item._id, item.state.timeOffset, item.state.season, item.state.episode);
     }
   }

@@ -126,12 +126,14 @@ export const ContinueCard = memo(function ContinueCard({
   const [hydratedMeta, setHydratedMeta] = useState<Meta | null>(null);
   const [kitsuVideo, setKitsuVideo] = useState<AnimeKitsuVideo | null>(null);
   const [epTitle, setEpTitle] = useState<string | null>(null);
+  const [epStill, setEpStill] = useState<string | null>(null);
   const [translatedTitle, setTranslatedTitle] = useState<string | null>(null);
   const [imgIdx, setImgIdx] = useState(0);
   const cardRef = useRef<HTMLButtonElement>(null);
 
   const candidates = useMemo(() => {
     const thumb = upNext ? undefined : snapshot;
+    const still = upNext || !settings.cwPreferEpisodeStill ? undefined : hiResStill(epStill ?? undefined);
     const seen = new Set<string>();
     const out: string[] = [];
     for (const u of [thumb, metaBg, item.background, item.poster]) {
@@ -141,8 +143,9 @@ export const ContinueCard = memo(function ContinueCard({
       seen.add(d);
       out.push(d);
     }
+    if (still && !seen.has(still)) out.unshift(still);
     return out;
-  }, [snapshot, metaBg, item.background, item.poster, upNext]);
+  }, [snapshot, epStill, settings.cwPreferEpisodeStill, metaBg, item.background, item.poster, upNext]);
 
   const src = candidates[imgIdx];
 
@@ -263,6 +266,7 @@ export const ContinueCard = memo(function ContinueCard({
 
   useEffect(() => {
     setEpTitle(null);
+    setEpStill(null);
     if (!ep || kitsuThreeSeg) return;
     if (/^(kitsu|mal|anilist|anidb):/.test(item._id)) return;
     let cancelled = false;
@@ -272,6 +276,7 @@ export const ContinueCard = memo(function ContinueCard({
         if (cancelled) return;
         const found = eps.find((e) => e.episode === ep.episode);
         if (found?.name) setEpTitle(found.name);
+        if (found?.still) setEpStill(found.still);
       })
       .catch(() => {});
     return () => {
@@ -680,6 +685,11 @@ export const ContinueCard = memo(function ContinueCard({
     </div>
   );
 });
+
+function hiResStill(url?: string): string | undefined {
+  if (!url) return url;
+  return url.replace("/t/p/w300/", "/t/p/w780/");
+}
 
 function downscaleTmdb(url?: string): string | undefined {
   if (!url) return url;

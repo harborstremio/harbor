@@ -134,6 +134,18 @@ export function useExternalCw(enabled = true): LibraryItem[] {
     if (!enabled) return;
     lastConn = connSignature();
     void refreshExternalCw();
+    const onFocus = (): void => {
+      void refreshExternalCw();
+    };
+    const onVisible = (): void => {
+      if (document.visibilityState === "visible") void refreshExternalCw();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [enabled]);
   return enabled ? snapshot : EMPTY;
 }

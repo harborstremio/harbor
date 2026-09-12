@@ -73,7 +73,7 @@ import { useCollectionRowsForPage } from "@/lib/page-collection-rows";
 import { useContentDrag } from "@/lib/window-drag";
 import { isAdultAnime } from "@/lib/addons-store/adult-filter";
 import { absorbCloudAnimeCw } from "@/lib/anime-cw-absorb";
-import { ANIME_CLOUD_ID, isAnimeCwItem, isCwMember, library, type LibraryItem } from "@/lib/stremio";
+import { ANIME_CLOUD_ID, cwSortKey, isAnimeCwItem, isCwMember, library, type LibraryItem } from "@/lib/stremio";
 import { clearLocalCw, listLocalCw, localCwEntry, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
 import { dismissManualWatched, manualWatchedLibraryItems, manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
 import { fetchSimklPlaybackItems } from "@/lib/simkl/playback";
@@ -380,11 +380,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
         seen.add(i._id);
         return true;
       })
-      .sort(
-        (a, b) =>
-          Date.parse(b.state?.lastWatched ?? b._mtime) -
-          Date.parse(a.state?.lastWatched ?? a._mtime),
-      )
+      .sort((a, b) => cwSortKey(b) - cwSortKey(a))
       .filter((i) => {
         const root = franchiseRootSync(i._id);
         if (!root) return true;

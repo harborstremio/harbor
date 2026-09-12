@@ -79,11 +79,16 @@ function resumeForItem(i: LibraryItem): { ms: number; t: number } | null {
 
 export function cwSortKey(i: LibraryItem): number {
   const lastWatched = Date.parse(i.state?.lastWatched ?? "");
-  if (Number.isFinite(lastWatched)) return lastWatched;
   const m = i._mtime as unknown;
   const mtime = typeof m === "number" ? m : Date.parse(String(m ?? ""));
-  if (Number.isFinite(mtime)) return mtime;
-  return resumeForItem(i)?.t ?? 0;
+  // Recency must agree with the dismiss check's itemActivity: Harbor and external
+  // playback imports record freshness in `harbor.resume` without touching the cloud
+  // _mtime/lastWatched. Otherwise an item un-dismissed by fresh resume keeps sorting
+  // by its stale cloud timestamp and sinks to the end of Continue Watching.
+  let best = resumeForItem(i)?.t ?? 0;
+  if (Number.isFinite(lastWatched)) best = Math.max(best, lastWatched);
+  if (Number.isFinite(mtime)) best = Math.max(best, mtime);
+  return best;
 }
 
 export function isCwMember(i: LibraryItem): boolean {

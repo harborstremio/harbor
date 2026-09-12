@@ -456,6 +456,7 @@ export const DEFAULT: Settings = {
   pauseUnfocused: false,
   cwSnapshotRetentionDays: 30,
   cwSnapshotFullQuality: false,
+  cwPreferEpisodeStill: false,
   streamFilterLevel: "strict",
   blockTrackers: true,
   homeRows: {

@@ -12,6 +12,7 @@ const NEW_SETTINGS = new Set([
   "theme:liquid-glass",
   "tv:subtitle-look",
   "mpv:buffer-size",
+  "home:prefer-episode-still",
 ]);
 
 const LS = "harbor.settingsNew.v1";

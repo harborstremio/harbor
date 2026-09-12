@@ -304,6 +304,15 @@ export function HomeTab() {
           value={settings.cwSnapshotFullQuality}
           onChange={(v) => update({ cwSnapshotFullQuality: v })}
         />
+        <ToggleRow
+          label={t("Prefer episode still artwork")}
+          newId="home:prefer-episode-still"
+          sub={t(
+            "Show the detail page's episode still on the card instead of your saved frame. The saved frame is kept as a fallback when no still exists.",
+          )}
+          value={settings.cwPreferEpisodeStill}
+          onChange={(v) => update({ cwPreferEpisodeStill: v })}
+        />
         <ClearSnapshotsButton />
       </Section>
     </>
