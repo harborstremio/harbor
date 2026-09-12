@@ -496,6 +496,72 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     listeners.forEach((l) => l(next));
   };
 
+  // mpv's WASAPI output re-roots to the OS default audio device via its own
+  // hotplug notification. For device-topology changes (e.g. HDMI <-> Bluetooth,
+  // which differ in sample rate and format) that internal reload is unreliable
+  // and can leave audio routed to a now-unavailable endpoint, producing silence
+  // until the stream is restarted. When `audio-device-list` changes (mpv fires
+  // a property-change on every hotplug / default-device switch) we re-assert the
+  // device and force an `ao-reload`, which re-initializes the audio output onto
+  // the current default device — the same re-init a stream restart performs.
+  //
+  // After screensaver / system sleep, Windows can release the WASAPI endpoint
+  // without firing a hotplug event, leaving mpv with a stale device ID.  The
+  // `visibilitychange` listener below catches that case: when the app becomes
+  // visible again we schedule the same device re-assertion + ao-reload and
+  // re-select whichever audio track was active before the failure.
+  let audioDeviceReloadTimer: number | null = null;
+  const scheduleAudioDeviceReload = () => {
+    if (!isWindowsDesktop()) return;
+    if (!mpvStarted) return;
+    if (snap.status !== "playing" && snap.status !== "paused") return;
+    if (audioDeviceReloadTimer != null) window.clearTimeout(audioDeviceReloadTimer);
+    audioDeviceReloadTimer = window.setTimeout(() => {
+      audioDeviceReloadTimer = null;
+      void (async () => {
+        // Remember the selected audio track so we can restore it after the
+        // output reload deselects it (mpv drops the track on ao init failure).
+        const prevAid = snap.audioTracks.find((t) => t.selected)?.id ?? null;
+        await applyAudioDevice(appliedAudioDevice ?? "auto").catch(() => {});
+        await invoke("mpv_command", { cmd: ["ao-reload"] }).catch(() => {});
+        if (prevAid) {
+          await invoke("mpv_set_property", { name: "aid", value: prevAid }).catch(() => {});
+        }
+      })();
+    }, 300);
+  };
+
+  // After screensaver / system sleep Windows may silently release the WASAPI
+  // audio endpoint without firing a device-list hotplug event.  When the app
+  // becomes visible again we schedule an audio output reload so mpv re-binds
+  // to the current default device and restores audio.
+  const onVisibilityRestore = () => {
+    if (document.visibilityState !== "visible") return;
+    scheduleAudioDeviceReload();
+  };
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", onVisibilityRestore);
+  }
+
+  // A Windows screensaver paints over the window without hiding the document,
+  // so `visibilitychange` never fires for it. Dismissing the screensaver does
+  // return activation to the app window, so a refocus after a long absence is
+  // the wake signal here. The absence gate keeps ordinary alt-tab returns
+  // from paying for an `ao-reload` they don't need.
+  const FOCUS_RELOAD_MIN_ABSENT_MS = 60_000;
+  let lastWindowBlur = Date.now();
+  const onWindowBlur = () => {
+    lastWindowBlur = Date.now();
+  };
+  const onWindowFocusRestore = () => {
+    if (Date.now() - lastWindowBlur < FOCUS_RELOAD_MIN_ABSENT_MS) return;
+    scheduleAudioDeviceReload();
+  };
+  if (typeof window !== "undefined") {
+    window.addEventListener("blur", onWindowBlur);
+    window.addEventListener("focus", onWindowFocusRestore);
+  }
+
   const handleEvent = (raw: MpvEvent) => {
     if (raw.event === "log") {
       const prefix = String((raw as { prefix?: unknown }).prefix ?? "");
@@ -533,6 +599,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       if (name === "eof-reached" && data === true) snap.status = "ended";
       if (name === "volume" && typeof data === "number") snap.volume = data / 100;
       if (name === "mute" && typeof data === "boolean") snap.muted = data;
+      if (name === "audio-device-list") scheduleAudioDeviceReload();
       if (name === "track-list" && Array.isArray(data)) {
         const list = data as Array<Record<string, unknown>>;
         pendingTracks["track-list"] = list;
@@ -1326,6 +1393,13 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         }
       }
       geomTauriUnlisten = [];
+      document.removeEventListener("visibilitychange", onVisibilityRestore);
+      window.removeEventListener("blur", onWindowBlur);
+      window.removeEventListener("focus", onWindowFocusRestore);
+      if (audioDeviceReloadTimer != null) {
+        window.clearTimeout(audioDeviceReloadTimer);
+        audioDeviceReloadTimer = null;
+      }
       mpvStarted = false;
       currentIsLive = null;
       currentStartupProfile = null;
