@@ -2,6 +2,17 @@
 
 ## Status
 
+### September 5: beta handoff bootstrap merged and built
+
+The app-side legacy NSIS bootstrap and managed recovery handoff are merged into
+`beta-branch` through PR #1389. Signed `0.9.124` normal updater and managed
+installer artifacts were built from merge commit
+`5a55f9b812e91bac3ed452b4c9e75dba787090ec`; they remain local and unpublished.
+The experimental publisher and delivery-edge changes are still local and
+uncommitted, so no experimental upload, manifest publication or deployment has
+occurred. `0.9.124` is not an approved return target until its required packaged
+Windows tests pass.
+
 ### September 4: Harbor account badge gate
 
 Experimental enrollment, update checks, downloads and installation now require
@@ -36,12 +47,12 @@ experimental build there. The earlier cross-platform experimental-install
 descriptions below predate this safety gate and are not release-readiness claims.
 
 See [RETURN-TO-BETA.md](RETURN-TO-BETA.md) for the new installer protocol,
-publisher approval contract, recovery paths and required packaged tests. No real
-beta target, including 0.9.122, has been certified by this work.
+publisher approval contract, recovery paths and required packaged tests. No beta
+target is certified by this work yet.
 
-App, separate publisher and edge routing are implemented locally and uncommitted.
-No build, signing, push, deployment, artifact upload or publication has occurred.
-Signed builds were explicitly deferred until the user resumes tomorrow.
+Maintainers building a real beta or experimental candidate should follow
+[RELEASE-RUNBOOK.md](RELEASE-RUNBOOK.md) for the artifact, signing, versioning,
+publication and end-to-end test order.
 
 The read-only live check on September 3 still finds a 404 at the dedicated URL
 and a stable `0.9.20` response for `x-harbor-channel: experimental`. The app rejects

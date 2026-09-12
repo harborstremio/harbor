@@ -2,12 +2,14 @@
 
 ## Status and scope
 
-Implemented locally; not release-certified or published. Windows x86_64 only.
-A signed recoverable handoff can bootstrap an existing legacy NSIS installation;
-future experimental installs and returns then use the managed installer. No signed
-artifact was produced by this change, no real installer was run, and no stable,
-beta or experimental server object was changed. macOS and Linux builds remain
-release gates, not assumed successes.
+The app implementation is merged into `beta-branch` through PR #1389 but is not
+release-certified or published. Windows x86_64 only. A signed recoverable handoff
+can bootstrap an existing legacy NSIS installation; future experimental installs
+and returns then use the managed installer. Signed `0.9.124` artifacts were built
+locally from merge commit `5a55f9b812e91bac3ed452b4c9e75dba787090ec`,
+but no real installer round trip was run and no stable, beta or experimental
+server object was changed. macOS and Linux remain unsupported for automatic
+experimental installation and return.
 
 ## Tester flow
 
