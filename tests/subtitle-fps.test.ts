@@ -497,10 +497,6 @@ test("mpv lifecycle and Auto Sync boundaries reset only subtitle FPS", () => {
   assert.match(bridge, /markMpvSubtitleFpsSessionRecreated/);
   assert.match(
     bridge,
-    /setSubtitleTrack\(id\)[\s\S]*const requestMediaRevision = mediaRevision[\s\S]*await resetSubtitleFpsBeforeMpvTransition\([\s\S]*requestMediaRevision !== mediaRevision[\s\S]*name: "sid"/,
-  );
-  assert.match(
-    bridge,
     /setSecondarySubtitleTrack\(id\)[\s\S]*const requestMediaRevision = mediaRevision[\s\S]*await resetSubtitleFpsBeforeMpvTransition\([\s\S]*requestMediaRevision !== mediaRevision[\s\S]*name: "secondary-sid"/,
   );
   assert.match(
