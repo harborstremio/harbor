@@ -118,12 +118,7 @@ export function BpRow({
   // ten however it was fed, which is also why loadMore refuses below: reaching
   // the end of a ranked row would otherwise fetch a page nothing can draw.
   const all = useMemo(
-    () =>
-      ranked
-        ? metas.slice(0, RANK_MAX)
-        : extra.length > 0
-          ? [...metas, ...extra]
-          : metas,
+    () => (ranked ? metas.slice(0, RANK_MAX) : extra.length > 0 ? [...metas, ...extra] : metas),
     [ranked, metas, extra],
   );
 
@@ -167,7 +162,9 @@ export function BpRow({
       // write, so the settling event still gets through and pages exactly once.
       if (bpTrackGliding(track)) return;
       const width = track.clientWidth;
-      const remaining = track.scrollWidth - (track.scrollLeft + width);
+      const isRtl = getComputedStyle(track).direction === "rtl";
+      const scrolled = isRtl ? -track.scrollLeft : track.scrollLeft;
+      const remaining = track.scrollWidth - (scrolled + width);
       // A collapsed track (empty:hidden, a row still resolving) reports 0 and
       // would read as "at the end" on every scroll it never has.
       const near = tv ? (width >= 2 ? width * TV_NEAR_END : -1) : NEAR_END_PX;

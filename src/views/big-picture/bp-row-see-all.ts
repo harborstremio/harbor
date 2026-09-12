@@ -30,8 +30,9 @@ export function isBpRowSeeAll(el: HTMLElement | null): boolean {
  * Null for every other direction and for a row with no see-all, so the caller
  * falls through to the shake exactly as it did before.
  */
-export function bpSeeAllEnter(from: HTMLElement, dir: BpDir): HTMLElement | null {
-  if (dir !== "right") return null;
+export function bpSeeAllEnter(from: HTMLElement, dir: BpDir, rtl = false): HTMLElement | null {
+  const enterDir = rtl ? "left" : "right";
+  if (dir !== enterDir) return null;
   const row = from.closest<HTMLElement>(ROW);
   if (!row) return null;
   const link = row.querySelector<HTMLElement>(LINK);
@@ -54,8 +55,9 @@ export function bpSeeAllEnter(from: HTMLElement, dir: BpDir): HTMLElement | null
  * Reversed and offered whole rather than picked, so a cell that refuses focus
  * falls through to its neighbour instead of dropping the press.
  */
-export function bpSeeAllExit(link: HTMLElement, dir: BpDir): HTMLElement | null {
-  if (dir !== "left") return null;
+export function bpSeeAllExit(link: HTMLElement, dir: BpDir, rtl = false): HTMLElement | null {
+  const exitDir = rtl ? "right" : "left";
+  if (dir !== exitDir) return null;
   const track = link.closest<HTMLElement>(ROW)?.querySelector<HTMLElement>(TRACK);
   if (!track) return null;
   const cells = measureFocusables(track).map((m) => m.el);
