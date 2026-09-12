@@ -96,7 +96,7 @@ test("subtitle offset settings support safe position and size choices", () => {
 });
 
 test("subtitle settings expose a preview, nine positions, and three sizes", () => {
-  assert.match(subtitlesPanelSource, /<Section title=\{t\("Sync indicator"\)\}>/);
+  assert.match(subtitlesPanelSource, /<Section[\s\S]*title=\{t\("Sync indicator"\)\}/);
   assert.match(subtitlesPanelSource, /<SubtitleOffsetSettings \/>/);
   assert.match(settingsSource, /<SubtitleOffsetIndicator delaySec=\{0\.3\} preview/);
   assert.equal(

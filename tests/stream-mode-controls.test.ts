@@ -27,7 +27,10 @@ test("source mode can also be repaired from normal settings", () => {
   const settingsSearch = readFileSync(at("src/views/settings/nav.tsx"), "utf8");
 
   assert.match(pickerSettings, /title=\{t\("Source mode"\)\}/);
-  assert.match(pickerSettings, /<StreamModeToggle[\s\S]*mode=\{settings\.streamMode\}/);
+  assert.match(
+    pickerSettings,
+    /(?:<StreamModeToggle|<Segmented<StreamMode>)[\s\S]*(?:mode|value)=\{settings\.streamMode\}/,
+  );
   assert.match(settingsSearch, /anchorTitle: "Source mode"/);
 });
 

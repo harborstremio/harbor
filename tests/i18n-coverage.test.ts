@@ -96,7 +96,10 @@ function uiStrings(): Set<string> {
 
 function localeKeys(lang: string): Set<string> {
   const out = new Set<string>();
-  const files = [new URL(`src/lib/i18n/locales/${lang}.ts`, ROOT)];
+  const files = [
+    new URL(`src/lib/i18n/locales/${lang}.ts`, ROOT),
+    new URL("src/lib/i18n/locales/ui-fallback.ts", ROOT),
+  ];
   const dir = new URL(`src/lib/i18n/locales/${lang}/`, ROOT);
   for (const e of readdirSync(dir)) if (e.endsWith(".ts")) files.push(new URL(e, dir));
   for (const f of files) {

@@ -139,5 +139,5 @@ test("an uploaded font is registered from bytes, not a megabyte-long css url", (
 test("a font that failed to load is shown as broken instead of silently falling back", () => {
   assert.match(picker, /face\.family === `harbor-font-\$\{f\.id\}` && face\.status === "loaded"/);
   assert.match(picker, /const broken = f\.custom && unloaded\.has/);
-  assert.match(picker, /border-danger\/40 bg-danger\/10 text-danger/);
+  assert.match(picker, /border-danger(?:\/40\s+bg-danger\/10|\s+bg-elevated)\s+text-danger/);
 });

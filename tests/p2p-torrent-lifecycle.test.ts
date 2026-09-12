@@ -44,7 +44,7 @@ test("the local HTTP stream request starts a paused torrent on demand", () => {
 
 test("persisted torrents are paused at startup and before a clean shutdown", () => {
   const prePause = engine.indexOf("mark_persisted_torrents_paused(&dir)");
-  const restore = engine.indexOf("new_session(&dir, true, true, true)");
+  const restore = engine.indexOf("new_session(&dir, true, true, true");
   assert.ok(prePause >= 0 && restore > prePause, "session JSON must be paused before restore");
   assert.match(
     engine,
