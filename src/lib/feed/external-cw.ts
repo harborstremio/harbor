@@ -9,9 +9,10 @@ import {
   getSession as getTraktSession,
   subscribeSession as subscribeTraktSession,
 } from "@/lib/trakt/session";
-import type { LibraryItem } from "@/lib/stremio";
+import { episodeFromVideoId, type LibraryItem } from "@/lib/stremio";
 
 const STALE_MS = 300_000;
+const FOCUS_STALE_MS = 30_000;
 const EMPTY: LibraryItem[] = [];
 
 let items: LibraryItem[] = EMPTY;
@@ -40,15 +41,23 @@ function activityOf(i: LibraryItem): number {
   return Number.isFinite(m) ? m : 0;
 }
 
+function mergeKey(i: LibraryItem): string {
+  const se = episodeFromVideoId(i.state?.video_id);
+  const season = i.state?.season ?? se?.season;
+  const episode = i.state?.episode ?? se?.episode;
+  return `${i._id}|${season ?? ""}|${episode ?? ""}`;
+}
+
 function merge(lists: LibraryItem[][]): LibraryItem[] {
-  const byId = new Map<string, LibraryItem>();
+  const byKey = new Map<string, LibraryItem>();
   for (const list of lists) {
     for (const i of list) {
-      const held = byId.get(i._id);
-      if (!held || activityOf(i) > activityOf(held)) byId.set(i._id, i);
+      const key = mergeKey(i);
+      const held = byKey.get(key);
+      if (!held || activityOf(i) > activityOf(held)) byKey.set(key, i);
     }
   }
-  return [...byId.values()].sort((a, b) => activityOf(b) - activityOf(a));
+  return [...byKey.values()].sort((a, b) => activityOf(b) - activityOf(a));
 }
 
 let sourceMask = { trakt: true, simkl: true };
@@ -135,10 +144,13 @@ export function useExternalCw(enabled = true): LibraryItem[] {
     lastConn = connSignature();
     void refreshExternalCw();
     const onFocus = (): void => {
-      void refreshExternalCw();
+      if (Date.now() - fetchedAt > FOCUS_STALE_MS) void refreshExternalCw(true);
+      else void refreshExternalCw();
     };
     const onVisible = (): void => {
-      if (document.visibilityState === "visible") void refreshExternalCw();
+      if (document.visibilityState !== "visible") return;
+      if (Date.now() - fetchedAt > FOCUS_STALE_MS) void refreshExternalCw(true);
+      else void refreshExternalCw();
     };
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisible);

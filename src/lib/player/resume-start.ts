@@ -115,6 +115,11 @@ export async function resolveStartMs({
     const remoteMs = remote.state?.timeOffset ?? 0;
     if (remoteMs <= 0) continue;
     const remoteDuration = remote.state?.duration ?? 0;
+    const localPct = localEntry?.pct;
+    const effectiveLocal =
+      typeof localPct === "number" && Number.isFinite(localPct) && remoteDuration > 0
+        ? localPct * remoteDuration
+        : local;
     const flaggedWatched = (remote.state as { flaggedWatched?: number })?.flaggedWatched === 1;
     const finished =
       isEpisode &&
@@ -124,7 +129,7 @@ export async function resolveStartMs({
       typeof rawMtime === "number" ? rawMtime : Date.parse(String(rawMtime ?? ""));
     const remoteIsNewer =
       Number.isFinite(remoteMtime) && (!localEntry || remoteMtime > localEntry.t);
-    if (remoteIsNewer || remoteMs >= local) {
+    if (remoteIsNewer || remoteMs >= effectiveLocal) {
       saveResumeBatch([
         {
           id: metaId,
@@ -136,7 +141,7 @@ export async function resolveStartMs({
       ]);
       return { ms: remoteMs, fromRemote: true, finished };
     }
-    return { ms: local, fromRemote: false, finished };
+    return { ms: effectiveLocal, fromRemote: false, finished };
   }
   return { ms: local, fromRemote: false, finished: false };
 }

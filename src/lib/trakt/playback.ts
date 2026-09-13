@@ -1,7 +1,7 @@
 import { traktRequest, TraktApiError } from "./client";
 import { getSession } from "./session";
 import { isCwDismissed } from "@/lib/cw-dismiss";
-import { readResumeMs, saveResumeMs } from "@/lib/resume";
+import { readResumeEntry, saveResumeMs } from "@/lib/resume";
 import type { LibraryItem } from "@/lib/stremio";
 import type { TraktIds } from "./types";
 
@@ -113,9 +113,22 @@ export async function fetchTraktPlaybackItems(): Promise<LibraryItem[]> {
     items.push(item);
     // Same dismiss guard as Simkl: no resume backfill for dismissed cards, so a
     // background refresh cannot manufacture fresh activity that beats the dismissal.
-    const existing = readResumeMs(item._id, item.state.season, item.state.episode);
-    if (existing <= 0 && !isCwDismissed(item)) {
-      saveResumeMs(item._id, item.state.timeOffset, item.state.season, item.state.episode);
+    if (isCwDismissed(item)) continue;
+    // Newer-wins backfill: overwrite a stale entry when the remote pause is newer
+    // (paused_at) or, when the stored entry has no usable timestamp, further ahead.
+    const existing = readResumeEntry(item._id, item.state.season, item.state.episode);
+    const remoteT = Date.parse(item.state.lastWatched ?? "");
+    const remoteValid = Number.isFinite(remoteT) && remoteT > 0;
+    const shouldWrite =
+      !existing ||
+      (remoteValid && remoteT >= existing.t) ||
+      (!existing.t && item.state.timeOffset > existing.ms);
+    if (shouldWrite) {
+      // Persist the true remote percent alongside the synthetic ms so consumers
+      // can prefer pct x real runtime once migrated; pct rides along with the
+      // winning write and is never mixed with another entry's ms.
+      const pct01 = Math.min(100, Math.max(0, r.progress ?? 0)) / 100;
+      saveResumeMs(item._id, item.state.timeOffset, item.state.season, item.state.episode, undefined, pct01);
     }
   }
   return items;

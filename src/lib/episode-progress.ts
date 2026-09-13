@@ -69,7 +69,7 @@ export function getEpisodeProgress(
 ): EpisodeProgress {
   const resumeIds =
     traktImdbId && traktImdbId !== resumeId ? [resumeId, traktImdbId] : [resumeId];
-  let entry: { ms: number; t: number } | null = null;
+  let entry: { ms: number; t: number; pct?: number } | null = null;
   for (const id of resumeIds) {
     const e = readResumeEntry(id, season, episode);
     if (e && (!entry || e.t > entry.t)) entry = e;
@@ -84,9 +84,15 @@ export function getEpisodeProgress(
   const manual = manualSelf !== undefined ? manualSelf : manualCanon;
   if (manual === false) return { ratio: 0, watched: false, startedAt };
 
-  const ms = entry?.ms ?? 0;
   const durationMs = runtimeMin && runtimeMin > 0 ? runtimeMin * 60 * 1000 : 0;
-  const ratio = durationMs > 0 && ms > 0 ? Math.min(1, ms / durationMs) : 0;
+  const pct = entry?.pct;
+  const usePct = typeof pct === "number" && Number.isFinite(pct) && durationMs > 0;
+  const ms = usePct ? pct * durationMs : (entry?.ms ?? 0);
+  const ratio = usePct
+    ? Math.min(1, Math.max(0, pct))
+    : durationMs > 0 && ms > 0
+      ? Math.min(1, ms / durationMs)
+      : 0;
 
   const traktKey = traktImdbId ? `imdb:${traktImdbId}:${traktSeason ?? season}:${traktEpisode ?? episode}` : null;
   const traktDone = traktKey ? traktWatched.has(traktKey) : false;

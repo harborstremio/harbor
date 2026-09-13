@@ -123,7 +123,10 @@ function progressRatio(item: LibraryItem): number {
   const duration = item.state?.duration ?? 0;
   if (!(duration > 0)) return 0;
   const { season, episode } = resolveEpisode(item);
-  const resumeMs = readResumeEntry(item._id, season, episode)?.ms ?? 0;
+  const entry = readResumeEntry(item._id, season, episode);
+  const pct = entry?.pct;
+  const resumeMs =
+    typeof pct === "number" && Number.isFinite(pct) ? pct * duration : (entry?.ms ?? 0);
   return Math.min(1, Math.max(item.state?.timeOffset ?? 0, resumeMs) / duration);
 }
 

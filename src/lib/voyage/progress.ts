@@ -23,9 +23,14 @@ export function watchedOutright(id: string): boolean {
 }
 
 export function voyageProgress(id: string, meta: Meta | undefined): number {
-  const ms = readResumeEntry(id)?.ms ?? 0;
-  if (ms <= 0) return 0;
+  const entry = readResumeEntry(id);
+  const ms = entry?.ms ?? 0;
+  const pct = entry?.pct;
   const dur = runtimeMs(meta);
+  if (typeof pct === "number" && Number.isFinite(pct) && dur > 0) {
+    return Math.min(1, Math.max(0, pct));
+  }
+  if (ms <= 0) return 0;
   if (dur <= 0) return ms >= START_MS ? 0.5 : 0;
   return Math.min(1, ms / dur);
 }

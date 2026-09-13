@@ -64,13 +64,27 @@ function fallbackLookup(meta: Meta): PreviewResume | null {
     for (const id of ids) {
       const last = lastPlayedEpisode(id);
       if (!last || last.ms <= 0) continue;
-      const fraction = minutes ? Math.min(1, last.ms / (minutes * 60000)) : null;
+      const pct = last.pct;
+      const hasPct = typeof pct === "number" && Number.isFinite(pct);
+      const clampedPct = hasPct ? Math.min(1, Math.max(0, pct)) : null;
+      const fraction =
+        clampedPct != null && minutes != null
+          ? clampedPct
+          : minutes
+            ? Math.min(1, last.ms / (minutes * 60000))
+            : null;
       if (fraction !== null && fraction >= FRESH_FRACTION) return null;
+      const remainingMs =
+        clampedPct != null && minutes != null
+          ? Math.max(0, (1 - clampedPct) * minutes * 60000)
+          : minutes
+            ? Math.max(0, minutes * 60000 - last.ms)
+            : null;
       return {
         season: last.displaySeason ?? last.season,
         episode: last.episode,
         fraction,
-        remainingMs: minutes ? Math.max(0, minutes * 60000 - last.ms) : null,
+        remainingMs,
         upNext: false,
         external: false,
       };
@@ -80,11 +94,25 @@ function fallbackLookup(meta: Meta): PreviewResume | null {
   for (const id of ids) {
     const entry = readResumeEntry(id);
     if (!entry || entry.ms <= 0) continue;
-    const fraction = minutes ? Math.min(1, entry.ms / (minutes * 60000)) : null;
+    const pct = entry.pct;
+    const hasPct = typeof pct === "number" && Number.isFinite(pct);
+    const clampedPct = hasPct ? Math.min(1, Math.max(0, pct)) : null;
+    const fraction =
+      clampedPct != null && minutes != null
+        ? clampedPct
+        : minutes
+          ? Math.min(1, entry.ms / (minutes * 60000))
+          : null;
     if (fraction !== null && fraction >= FRESH_FRACTION) return null;
+    const remainingMs =
+      clampedPct != null && minutes != null
+        ? Math.max(0, (1 - clampedPct) * minutes * 60000)
+        : minutes
+          ? Math.max(0, minutes * 60000 - entry.ms)
+          : null;
     return {
       fraction,
-      remainingMs: minutes ? Math.max(0, minutes * 60000 - entry.ms) : null,
+      remainingMs,
       upNext: false,
       external: false,
     };

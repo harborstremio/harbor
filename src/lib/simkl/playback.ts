@@ -1,7 +1,7 @@
 import { simklRequest, SimklApiError } from "./client";
 import { getSession } from "./session";
 import { isCwDismissed } from "@/lib/cw-dismiss";
-import { readResumeMs, saveResumeMs } from "@/lib/resume";
+import { readResumeEntry, saveResumeMs } from "@/lib/resume";
 import type { LibraryItem } from "@/lib/stremio";
 
 type Ids = {
@@ -53,6 +53,8 @@ function buildItem(
   episode?: number,
   isAnime?: boolean,
 ): LibraryItem {
+  const hasEpisode =
+    type === "series" && season != null && season > 0 && episode != null && episode > 0;
   return {
     _id: id,
     type,
@@ -60,8 +62,10 @@ function buildItem(
     state: {
       timeOffset: Math.round((pct / 100) * durMs),
       duration: durMs,
-      season: season && season > 0 ? season : undefined,
-      episode: episode && episode > 0 ? episode : undefined,
+      season: hasEpisode ? season : undefined,
+      episode: hasEpisode ? episode : undefined,
+      video_id: hasEpisode ? `${id}:${season}:${episode}` : undefined,
+      lastWatched: when,
     },
     removed: false,
     temp: false,
@@ -131,9 +135,22 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
     // A dismissed card must not be resurrected by this backfill: dismiss clears the
     // resume entry, and rewriting it with t=now would manufacture fresh activity that
     // beats the dismissal. Genuine new progress still surfaces via watched_at/ratio.
-    const existing = readResumeMs(item._id, item.state.season, item.state.episode);
-    if (existing <= 0 && !isCwDismissed(item)) {
-      saveResumeMs(item._id, item.state.timeOffset, item.state.season, item.state.episode);
+    if (isCwDismissed(item)) continue;
+    // Newer-wins backfill: overwrite a stale entry when the remote pause is newer
+    // (watched_at) or, when the stored entry has no usable timestamp, further ahead.
+    const existing = readResumeEntry(item._id, item.state.season, item.state.episode);
+    const remoteT = Date.parse(item.state.lastWatched ?? "");
+    const remoteValid = Number.isFinite(remoteT) && remoteT > 0;
+    const shouldWrite =
+      !existing ||
+      (remoteValid && remoteT >= existing.t) ||
+      (!existing.t && item.state.timeOffset > existing.ms);
+    if (shouldWrite) {
+      // Persist the true remote percent alongside the synthetic ms so consumers
+      // can prefer pct x real runtime once migrated; pct rides along with the
+      // winning write and is never mixed with another entry's ms.
+      const pct01 = Math.min(100, Math.max(0, r.progress ?? 0)) / 100;
+      saveResumeMs(item._id, item.state.timeOffset, item.state.season, item.state.episode, undefined, pct01);
     }
   }
   return items;
