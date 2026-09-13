@@ -14,7 +14,9 @@ type Snap = {
 type LastAction = "start" | "pause" | "stop" | null;
 
 const STUB_MAX_SEC = 150;
-const WATCHED_MARK_PCT = 70;
+// Keep pause scrobbles (resumable on other devices) up to where Harbor's own
+// CW drops the card (CW_FINISHED_RATIO); only beyond that report stop/watched.
+const WATCHED_MARK_PCT = 90;
 
 export function useTraktScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }): void {
   const { isConnected, resolveTarget, scrobble } = useTrakt();
