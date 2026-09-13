@@ -119,7 +119,7 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
     raw = await simklRequest<RawSession[]>("/sync/playback?hide_watched=true&limit=40");
   } catch (e) {
     if (e instanceof SimklApiError && e.status === 404) return [];
-    return [];
+    throw e;
   }
   if (!Array.isArray(raw)) return [];
 

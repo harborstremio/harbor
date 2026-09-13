@@ -98,7 +98,7 @@ export async function fetchTraktPlaybackItems(): Promise<LibraryItem[]> {
     raw = await traktRequest<RawPlayback[]>("/sync/playback?limit=40");
   } catch (e) {
     if (e instanceof TraktApiError && e.status === 404) return [];
-    return [];
+    throw e;
   }
   if (!Array.isArray(raw)) return [];
 

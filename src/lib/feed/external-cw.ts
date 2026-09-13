@@ -13,11 +13,15 @@ import { episodeFromVideoId, type LibraryItem } from "@/lib/stremio";
 
 const STALE_MS = 300_000;
 const FOCUS_STALE_MS = 30_000;
+const RETRY_DELAYS_MS = [1000, 4000, 10000];
 const EMPTY: LibraryItem[] = [];
 
 let items: LibraryItem[] = EMPTY;
 let fetchedAt = 0;
 let inflight: Promise<void> | null = null;
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
+let retryAttempt = 0;
+let refreshGen = 0;
 const subs = new Set<() => void>();
 
 function emit(): void {
@@ -70,7 +74,57 @@ export function setExternalCwSources(mask: { trakt: boolean; simkl: boolean }): 
   void refreshExternalCw(true);
 }
 
+async function runRefresh(): Promise<boolean> {
+  const enabled: Array<() => Promise<LibraryItem[]>> = [];
+  if (getSimklSession() && sourceMask.simkl) enabled.push(fetchSimklPlaybackItems);
+  if (getTraktSession() && sourceMask.trakt) enabled.push(fetchTraktPlaybackItems);
+  const results = await Promise.all(
+    enabled.map(async (fetch) => {
+      try {
+        return await fetch();
+      } catch {
+        return null;
+      }
+    }),
+  );
+  const succeeded = results.filter((r): r is LibraryItem[] => r !== null);
+  if (succeeded.length === 0) return false;
+  retryAttempt = 0;
+  fetchedAt = Date.now();
+  setItems(merge(succeeded));
+  return true;
+}
+
+function cancelRetry(): void {
+  if (retryTimer !== null) {
+    clearTimeout(retryTimer);
+    retryTimer = null;
+  }
+  retryAttempt = 0;
+}
+
+// After a total failure, retry at 1s/4s/10s so a cold start with a dead network
+// self-heals once connectivity returns instead of caching the failure for STALE_MS.
+function scheduleRetry(): void {
+  if (retryTimer !== null) return;
+  if (retryAttempt >= RETRY_DELAYS_MS.length) return;
+  const gen = refreshGen;
+  const delay = RETRY_DELAYS_MS[retryAttempt];
+  retryAttempt += 1;
+  retryTimer = setTimeout(() => {
+    retryTimer = null;
+    void (async () => {
+      const ok = await runRefresh();
+      // A newer refresh supersedes this retry; let it own the outcome.
+      if (gen !== refreshGen) return;
+      if (!ok) scheduleRetry();
+    })();
+  }, delay);
+}
+
 export function refreshExternalCw(force = false): Promise<void> {
+  refreshGen += 1;
+  cancelRetry();
   if (!externalCwConnected()) {
     fetchedAt = 0;
     setItems(EMPTY);
@@ -79,16 +133,8 @@ export function refreshExternalCw(force = false): Promise<void> {
   if (inflight) return force ? inflight.then(() => refreshExternalCw(true)) : inflight;
   if (!force && fetchedAt > 0 && Date.now() - fetchedAt < STALE_MS) return Promise.resolve();
   inflight = (async () => {
-    const [simkl, trakt] = await Promise.all([
-      getSimklSession() && sourceMask.simkl
-        ? fetchSimklPlaybackItems().catch(() => EMPTY)
-        : Promise.resolve(EMPTY),
-      getTraktSession() && sourceMask.trakt
-        ? fetchTraktPlaybackItems().catch(() => EMPTY)
-        : Promise.resolve(EMPTY),
-    ]);
-    fetchedAt = Date.now();
-    setItems(merge([simkl, trakt]));
+    const ok = await runRefresh();
+    if (!ok) scheduleRetry();
   })().finally(() => {
     inflight = null;
   });
