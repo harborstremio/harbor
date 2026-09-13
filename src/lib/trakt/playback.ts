@@ -128,7 +128,7 @@ export async function fetchTraktPlaybackItems(): Promise<LibraryItem[]> {
       // can prefer pct x real runtime once migrated; pct rides along with the
       // winning write and is never mixed with another entry's ms.
       const pct01 = Math.min(100, Math.max(0, r.progress ?? 0)) / 100;
-      saveResumeMs(item._id, item.state.timeOffset, item.state.season, item.state.episode, undefined, pct01);
+      saveResumeMs(item._id, item.state.timeOffset, item.state.season, item.state.episode, undefined, pct01, "trakt");
     }
   }
   return items;

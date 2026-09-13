@@ -1,5 +1,5 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
-import { readResumeEntry } from "@/lib/resume";
+import { readResumeEntry, readResumeSource } from "@/lib/resume";
 import { isDetectedAnime } from "./anime-detect";
 
 const API = "https://api.strem.io/api";
@@ -75,6 +75,31 @@ function resumeForItem(i: LibraryItem): { ms: number; t: number } | null {
   const season = i.state?.season ?? (kitsuThreeSeg ? 1 : se?.season);
   const episode = i.state?.episode ?? (kitsuThreeSeg ? Number(vid.split(":")[2]) : se?.episode);
   return readResumeEntry(i._id, season, episode);
+}
+
+export function resumeSourceForItem(i: LibraryItem): ExternalCwSource | undefined {
+  const vid = i.state?.video_id ?? "";
+  const kitsuThreeSeg = /^(kitsu|mal|anilist|anidb):/.test(i._id) && vid.split(":").length === 3;
+  const se = kitsuThreeSeg ? null : episodeFromVideoId(i.state?.video_id);
+  const season = i.state?.season ?? (kitsuThreeSeg ? 1 : se?.season);
+  const episode = i.state?.episode ?? (kitsuThreeSeg ? Number(vid.split(":")[2]) : se?.episode);
+  return readResumeSource(i._id, season, episode);
+}
+
+// True only when CW eligibility comes from the harbor.resume fallback (no cloud
+// progress of its own), so a disabled source's backfill cannot resurrect library cards.
+export function cwMemberViaResume(i: LibraryItem): boolean {
+  if (i.removed && !i.temp) return false;
+  if (!i.state) return (resumeForItem(i)?.ms ?? 0) > 0;
+  const duration = i.state.duration ?? 0;
+  const finishedByRatio = duration > 0 && i.state.timeOffset / duration >= CW_FINISHED_RATIO;
+  if (i.type === "movie" && ((i.state.flaggedWatched ?? 0) > 0 || finishedByRatio)) return false;
+  if (i.state.timeOffset > 0) return false;
+  if ((i.state.flaggedWatched ?? 0) > 0) return false;
+  const local = resumeForItem(i)?.ms ?? 0;
+  if (local <= 0) return false;
+  if (duration > 0 && local / duration >= CW_FINISHED_RATIO) return false;
+  return true;
 }
 
 export function cwSortKey(i: LibraryItem): number {

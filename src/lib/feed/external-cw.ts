@@ -70,6 +70,14 @@ export function setExternalCwSources(mask: { trakt: boolean; simkl: boolean }): 
   if (mask.trakt === sourceMask.trakt && mask.simkl === sourceMask.simkl) return;
   sourceMask = { trakt: mask.trakt, simkl: mask.simkl };
   fetchedAt = 0;
+  // Drop items from newly-disabled sources synchronously so their cards vanish
+  // immediately instead of lingering until the next successful refresh.
+  if (items.length > 0) {
+    const kept = items.filter(
+      (i) => (mask.trakt || i.external !== "trakt") && (mask.simkl || i.external !== "simkl"),
+    );
+    if (kept.length !== items.length) setItems(kept);
+  }
   if (!externalCwConnected()) setItems(EMPTY);
   void refreshExternalCw(true);
 }

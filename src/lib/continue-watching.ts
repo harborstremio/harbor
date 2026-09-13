@@ -6,10 +6,13 @@ import { setExternalCwSources } from "@/lib/feed/external-cw";
 import { useExternalCw } from "@/lib/feed/external-cw";
 import {
   ANIME_CLOUD_ID,
+  cwMemberViaResume,
   cwSortKey,
   episodeFromVideoId,
   isCwMember,
   library,
+  resumeSourceForItem,
+  type ExternalCwSource,
   type LibraryItem,
 } from "@/lib/stremio";
 
@@ -157,14 +160,26 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
 
   return useMemo(() => {
     void localVersion;
+    const disabledSources = new Set<ExternalCwSource>();
+    if (!cwSources.simkl) disabledSources.add("simkl");
+    if (!cwSources.trakt) disabledSources.add("trakt");
     const base = cwPerProfile
       ? []
       : [
           ...(cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
-          ...externalCw,
+          ...externalCw.filter((i) => !(i.external && disabledSources.has(i.external))),
         ];
     const merged = [...base, ...(cwSources.local ? listLocalCw().map(localToLibraryItem) : [])]
-      .filter((i) => (i.type as string) !== "other" && !i._id.startsWith("iptv:") && isCwMember(i))
+      .filter((i) => {
+        if ((i.type as string) === "other" || i._id.startsWith("iptv:")) return false;
+        if (!isCwMember(i)) return false;
+        // A disabled source's backfilled resume entry must not resurrect library cards.
+        if (disabledSources.size > 0 && cwMemberViaResume(i)) {
+          const src = resumeSourceForItem(i);
+          if (src && disabledSources.has(src)) return false;
+        }
+        return true;
+      })
       .map((i) => ({ i, k: cwSortKey(i) }))
       .sort((a, b) => b.k - a.k)
       .map((e) => e.i);

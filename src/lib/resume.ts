@@ -1,6 +1,8 @@
+import type { ExternalCwSource } from "@/lib/stremio";
+
 const KEY = "harbor.resume";
 
-type Entry = { ms: number; t: number; s?: number; pct?: number };
+type Entry = { ms: number; t: number; s?: number; pct?: number; source?: ExternalCwSource };
 
 function entryKey(id: string, season?: number, episode?: number): string {
   if (typeof season === "number" && typeof episode === "number") {
@@ -33,6 +35,7 @@ export function saveResumeMs(
   episode?: number,
   displaySeason?: number,
   pct?: number,
+  source?: ExternalCwSource,
 ): void {
   if (!Number.isFinite(ms) || ms < 0) return;
   if (typeof season === "number" && typeof episode === "number") {
@@ -46,12 +49,21 @@ export function saveResumeMs(
     t: Date.now(),
     ...(s !== undefined ? { s } : {}),
     ...(p !== undefined ? { pct: p } : {}),
+    ...(source !== undefined ? { source } : {}),
   };
   writeAll(all);
 }
 
 export function saveResumeBatch(
-  entries: { id: string; ms: number; season?: number; episode?: number; t?: number; pct?: number }[],
+  entries: {
+    id: string;
+    ms: number;
+    season?: number;
+    episode?: number;
+    t?: number;
+    pct?: number;
+    source?: ExternalCwSource;
+  }[],
 ): void {
   if (entries.length === 0) return;
   const all = readAll();
@@ -66,6 +78,7 @@ export function saveResumeBatch(
       ms: e.ms,
       t: e.t ?? now,
       ...(p !== undefined ? { pct: p } : {}),
+      ...(e.source !== undefined ? { source: e.source } : {}),
     };
   }
   writeAll(all);
@@ -84,7 +97,7 @@ export function readResumeEntry(
   id: string,
   season?: number,
   episode?: number,
-): { ms: number; t: number; s?: number; pct?: number } | null {
+): { ms: number; t: number; s?: number; pct?: number; source?: ExternalCwSource } | null {
   const all = readAll();
   const e = all[entryKey(id, season, episode)];
   return e
@@ -93,8 +106,17 @@ export function readResumeEntry(
         t: e.t,
         ...(e.s !== undefined ? { s: e.s } : {}),
         ...(e.pct !== undefined ? { pct: e.pct } : {}),
+        ...(e.source !== undefined ? { source: e.source } : {}),
       }
     : null;
+}
+
+export function readResumeSource(
+  id: string,
+  season?: number,
+  episode?: number,
+): ExternalCwSource | undefined {
+  return readAll()[entryKey(id, season, episode)]?.source;
 }
 
 export function clearResume(id: string, season?: number, episode?: number): void {
@@ -105,10 +127,26 @@ export function clearResume(id: string, season?: number, episode?: number): void
 
 export function lastPlayedEpisode(
   seriesId: string,
-): { season: number; episode: number; ms: number; t: number; displaySeason?: number; pct?: number } | null {
+): {
+  season: number;
+  episode: number;
+  ms: number;
+  t: number;
+  displaySeason?: number;
+  pct?: number;
+  source?: ExternalCwSource;
+} | null {
   const all = readAll();
   const prefix = `${seriesId}|s`;
-  let best: { season: number; episode: number; ms: number; t: number; displaySeason?: number; pct?: number } | null = null;
+  let best: {
+    season: number;
+    episode: number;
+    ms: number;
+    t: number;
+    displaySeason?: number;
+    pct?: number;
+    source?: ExternalCwSource;
+  } | null = null;
   for (const [key, value] of Object.entries(all)) {
     if (!key.startsWith(prefix)) continue;
     const m = key.match(/\|s(\d+)e(\d+)$/);
@@ -117,7 +155,15 @@ export function lastPlayedEpisode(
     const episode = parseInt(m[2], 10);
     if (season < 1 || episode < 1) continue;
     if (!best || value.t > best.t) {
-      best = { season, episode, ms: value.ms, t: value.t, displaySeason: value.s, pct: value.pct };
+      best = {
+        season,
+        episode,
+        ms: value.ms,
+        t: value.t,
+        displaySeason: value.s,
+        pct: value.pct,
+        source: value.source,
+      };
     }
   }
   return best;
