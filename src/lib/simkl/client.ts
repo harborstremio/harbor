@@ -63,7 +63,19 @@ async function sendRequest<T>(path: string, opts: SimklRequestOptions): Promise<
   let res = await doFetch(path, opts);
 
   for (let attempt = 0; RETRY_STATUSES.has(res.status) && attempt < 5; attempt += 1) {
-    await new Promise((r) => setTimeout(r, Math.min(16, 2 ** attempt) * 1000));
+    const retryAfter = res.headers.get("Retry-After");
+    let delayMs = Math.min(16, 2 ** attempt) * 1000;
+    if (retryAfter) {
+      const secs = Number(retryAfter);
+      if (Number.isFinite(secs)) delayMs = Math.max(delayMs, secs * 1000);
+      else {
+        const date = Date.parse(retryAfter);
+        if (Number.isFinite(date)) delayMs = Math.max(delayMs, date - Date.now());
+      }
+    }
+    // jitter 0-1000ms to avoid thundering herd
+    delayMs += Math.floor(Math.random() * 1000);
+    await new Promise((r) => setTimeout(r, delayMs));
     res = await doFetch(path, opts);
   }
 

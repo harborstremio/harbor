@@ -28,7 +28,7 @@ export type SimklCdnItem = {
 const UA = `${SIMKL_APP_NAME}/${SIMKL_APP_VERSION}`;
 
 function cdnUrl(path: string): string {
-  return `https://data.simkl.in/calendar/${path}?client_id=${SIMKL_CLIENT_ID}&app-name=${SIMKL_APP_NAME}&app-version=${SIMKL_APP_VERSION}`;
+  return `https://data.simkl.in/calendar/v2/${path}?client_id=${SIMKL_CLIENT_ID}&app-name=${SIMKL_APP_NAME}&app-version=${SIMKL_APP_VERSION}`;
 }
 
 function pad(n: number): string {
@@ -50,7 +50,7 @@ function mapCdnItem(item: SimklCdnItem, type: "tv" | "movie", isAnime: boolean):
     name = `${item.title} S${pad(item.episode.season)}E${pad(item.episode.episode)}`;
   }
 
-  const poster = item.poster ? `https://simkl.in/posters/${item.poster}_m.jpg` : null;
+  const poster = item.poster ? `https://wsrv.nl/?url=https://simkl.in/posters/${item.poster}_m.webp&q=90` : null;
 
   return {
     id,

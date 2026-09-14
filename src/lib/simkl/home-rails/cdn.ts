@@ -119,7 +119,7 @@ export async function fetchCdnCalendarCombined(): Promise<SimklCdnItem[]> {
   }
 
   const fetchCatalog = async (catalog: "tv" | "anime"): Promise<SimklCdnItem[]> => {
-    const url = `https://data.simkl.in/calendar/${catalog}.json?${APP_QS}`;
+    const url = `https://data.simkl.in/calendar/v2/${catalog}.json?${APP_QS}`;
     try {
       const res = await safeFetch(url, { headers: { "User-Agent": UA } });
       if (!res.ok) return [];
