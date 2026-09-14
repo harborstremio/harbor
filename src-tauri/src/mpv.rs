@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 use std::ffi::CString;
 use std::path::PathBuf;
-use std::sync::{Arc, OnceLock};
+use std::sync::Arc;
+#[cfg(not(target_os = "macos"))]
+use std::sync::OnceLock;
 use std::time::Duration;
 
 use libmpv2::events::{Event, EventContext, PropertyData};
@@ -249,6 +251,7 @@ pub struct AudioDevice {
     pub description: String,
 }
 
+#[cfg(not(target_os = "macos"))]
 fn read_audio_devices(mpv: &Mpv) -> Vec<AudioDevice> {
     let node = match mpv.get_property::<MpvNode>("audio-device-list") {
         Ok(n) => n,
@@ -283,16 +286,20 @@ fn read_audio_devices(mpv: &Mpv) -> Vec<AudioDevice> {
 /// `struct ao *` as the listener context. CoreAudio delivers those
 /// notifications on its own serial dispatch queue, and
 /// `AudioObjectRemovePropertyListener` does not drain callbacks that are
-/// already in flight. Creating a throwaway `Mpv` here and dropping it at the
-/// end of the call therefore frees the `ao` out from under a callback that
-/// CoreAudio may already have queued, and `hotplug_cb`'s first statement is
-/// `MP_VERBOSE(ao, ...)` -> `mp_msg(ao->log, ...)` on freed memory.
+/// already in flight. Freeing an `ao` while a notification is still queued
+/// therefore leaves `hotplug_cb` dereferencing `ao->log` on freed memory —
+/// `mp_msg(ao->log, ...)` -> SIGSEGV (mpv-player/mpv#18274).
 ///
-/// Keeping a single context alive for the process lifetime means the listener
-/// is registered once and its context outlives every notification, so the
-/// race cannot be lost. The context is idle and holds no audio output.
+/// On macOS `mpv_audio_devices` never reads `audio-device-list` at all — it
+/// enumerates output devices through the CoreAudio HAL directly
+/// (audio_devices_mac.rs), which registers no listener. Elsewhere, keeping a
+/// single context alive for the process lifetime means the listener is
+/// registered once and its context outlives every notification, so the race
+/// cannot be lost. The context is idle and holds no audio output.
+#[cfg(not(target_os = "macos"))]
 static DEVICE_PROBE_MPV: OnceLock<Result<Arc<Mpv>, String>> = OnceLock::new();
 
+#[cfg(not(target_os = "macos"))]
 fn device_probe_mpv() -> Result<Arc<Mpv>, String> {
     DEVICE_PROBE_MPV
         .get_or_init(|| {
@@ -306,15 +313,23 @@ fn device_probe_mpv() -> Result<Arc<Mpv>, String> {
 
 #[tauri::command]
 pub async fn mpv_audio_devices(state: State<'_, MpvState>) -> Result<Vec<AudioDevice>, String> {
-    let existing = {
-        let g = state.inner.lock().await;
-        g.as_ref().map(|s| s.mpv.clone())
-    };
-    if let Some(mpv) = existing {
-        return Ok(read_audio_devices(&mpv));
+    #[cfg(target_os = "macos")]
+    {
+        let _ = state;
+        crate::audio_devices_mac::audio_output_devices()
     }
-    let mpv = device_probe_mpv()?;
-    Ok(read_audio_devices(&mpv))
+    #[cfg(not(target_os = "macos"))]
+    {
+        let existing = {
+            let g = state.inner.lock().await;
+            g.as_ref().map(|s| s.mpv.clone())
+        };
+        if let Some(mpv) = existing {
+            return Ok(read_audio_devices(&mpv));
+        }
+        let mpv = device_probe_mpv()?;
+        Ok(read_audio_devices(&mpv))
+    }
 }
 
 fn apply_pre_init(

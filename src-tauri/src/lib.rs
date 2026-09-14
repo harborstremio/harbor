@@ -30,6 +30,8 @@ mod pip;
 mod pip_mac;
 mod power;
 mod process;
+#[cfg(target_os = "macos")]
+mod audio_devices_mac;
 mod airplay;
 mod settings_store;
 mod song_id;
