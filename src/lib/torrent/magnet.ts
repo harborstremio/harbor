@@ -80,6 +80,22 @@ export function parseMagnet(value: string): ParsedMagnet | null {
   };
 }
 
+export function serializeMagnet(magnet: ParsedMagnet): string {
+  const params = new URLSearchParams();
+
+  params.append('xt', `urn:btih:${magnet.infoHash}`);
+
+  if (magnet.name) {
+    params.append('dn', magnet.name);
+  }
+
+  for (const tracker of magnet.trackers) {
+    params.append('tr', tracker);
+  }
+
+  return `magnet:?${params.toString()}`;
+}
+
 export function infoHashFromUrl(url: string): { infoHash: string; fileIdx?: number } | null {
   const m = url.match(/(?:^|[/=])([a-fA-F0-9]{40})(?:\/(\d+))?(?=[/?#]|$)/);
   if (!m) return null;
