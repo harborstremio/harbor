@@ -8,6 +8,7 @@ import {
   Share2,
   UserMinus,
   UserPlus,
+  Paintbrush,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -38,6 +39,8 @@ import {
 import { StatusBubble } from "./status-bubble";
 import type { ProfileSummary } from "./profile-types";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+import { socialPost } from "@/lib/social/client";
+import { emitListToast } from "@/components/lists/list-toast";
 
 type HeroBadge = { id: string; name: string; iconUrl?: string };
 
@@ -214,12 +217,17 @@ export function ProfileHero({
                 </EditProfileHint>
               </>
             ) : (
-              !p.isOwner && (
+                !p.isOwner && (
+                <>
+                    {p.customEnabled && (
+                      <UseStyleButton summary={p} />
+                    )}
                 <FriendButton
                   handle={p.handle}
                   initial={p.friendStatus ?? "none"}
                   edgeId={p.friendEdgeId}
-                />
+                    />
+                </>
               )
             )}
           </div>
@@ -315,6 +323,55 @@ type FriendRel = NonNullable<ProfileSummary["friendStatus"]>;
 
 const FRIEND_BTN =
   "inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-[14px] font-semibold transition-colors disabled:opacity-70";
+
+function UseStyleButton({ summary }: { summary: ProfileSummary }) {
+  const t = useT();
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const apply = async () => {
+    if (saving || done) return;
+    setSaving(true);
+    try {
+      await socialPost("/social/profile/customization", {
+        profileFont: summary.profileFont ?? "",
+        pageBgColor: summary.pageBgColor ?? "",
+        pageBgImage: summary.pageBgImage ?? "",
+        customHtml: summary.customHtml ?? "",
+        customCss: summary.customCss ?? "",
+        canvasHeight: summary.canvasHeight ?? 520,
+        customEnabled: true,
+        hideTopBanner: summary.hideTopBanner ?? false,
+        hideCardTitles: summary.hideCardTitles ?? false,
+      });
+      setDone(true);
+      emitListToast(t("Style applied!"));
+    } catch {
+      // silent — user can retry
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={apply}
+      disabled={saving || done}
+      className={`${FRIEND_BTN} ${
+        done
+          ? "bg-surface text-ink-muted ring-1 ring-edge"
+          : "bg-surface text-ink ring-1 ring-edge hover:bg-raised"
+      }`}
+    >
+      {saving ? (
+        <Loader2 size={18} className="animate-spin" />
+      ) : (
+        <Paintbrush size={18} />
+      )}
+      {saving ? t("Applying...") : done ? t("Applied") : t("Use profile style")}
+    </button>
+  );
+}
 
 function FriendButton({
   handle,
