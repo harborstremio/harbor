@@ -159,6 +159,9 @@ export function AnimeEpisodes({
     malWatched,
     mwVersion,
   });
+  // Preferred season must stay reactive to watched-data arrival (trakt/AniList/MAL
+  // load after first paint with empty sets). Do not latch it: latching the first
+  // value sticks Season 1 computed before progress loads and blocks navigation.
   const intentSeasonKey = useMemo(() => {
     const partScoped = splitFranchiseDisplaySeason(parseKitsuId(meta.id)) != null;
     const counts = new Map<number, number>();
@@ -329,6 +332,19 @@ export function AnimeEpisodes({
     activeEntryId,
     onSelectEntry,
   );
+  // Track explicit picker selections so renderCount only resets when the user
+  // changes season, not when async ordering resolves to a new activeKey.
+  const pickedKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    pickedKeyRef.current = null;
+  }, [meta.id]);
+  const onPickerSelect = useCallback(
+    (key: string) => {
+      pickedKeyRef.current = key;
+      selectPickerItem(key);
+    },
+    [selectPickerItem],
+  );
   const [watchedMenu, setWatchedMenu] = useState<WatchedMenuTarget | null>(null);
   const openWatchedMenu = (
     e: React.MouseEvent,
@@ -365,7 +381,13 @@ export function AnimeEpisodes({
   const [renderCount, setRenderCount] = useState(WINDOW_STEP);
   useEffect(() => {
     setRenderCount(WINDOW_STEP);
-  }, [meta.id, settings.episodeLayout, settings.episodeSort, order?.activeKey, activeEntryId]);
+  }, [meta.id, settings.episodeLayout, settings.episodeSort, activeEntryId]);
+  useEffect(() => {
+    if (pickedKeyRef.current == null) return;
+    if (order?.activeKey !== pickedKeyRef.current) return;
+    pickedKeyRef.current = null;
+    setRenderCount(WINDOW_STEP);
+  }, [order?.activeKey]);
   const grow = useCallback(
     () =>
       setRenderCount((c) =>
@@ -532,7 +554,7 @@ export function AnimeEpisodes({
               <SeasonArcPicker
                 items={pickerItems}
                 activeKey={franchiseActiveKey ?? effectiveOrder.activeKey}
-                onSelect={selectPickerItem}
+                onSelect={onPickerSelect}
               />
             ) : franchise.length > 1 ? (
               <AnimeSeasonPicker
