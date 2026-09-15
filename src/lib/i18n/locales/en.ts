@@ -293,6 +293,13 @@ const en: Record<string, string> = {
   "update.of": "{downloaded} of {total}",
   "mpv.conf": "mpv.conf",
   ...settingsRefinements,
+  "Imported from MyAnimeList": "Imported from MyAnimeList",
+  "Imported from AniList": "Imported from AniList",
+  "Imported from trackers": "Imported from trackers",
+  "MyAnimeList progress": "MyAnimeList progress",
+  "AniList progress": "AniList progress",
+  "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.": "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.",
+  "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.": "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.",
 };
 
 export default en;

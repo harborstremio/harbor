@@ -327,7 +327,17 @@ function parseStoredSettings(raw: string | null): Settings {
     }
     if (parsed.cwSources == null) {
       const ext = parsed.externalContinueWatching === true;
-      parsed.cwSources = { library: true, trakt: ext, simkl: ext, local: true };
+      parsed.cwSources = { library: true, trakt: ext, simkl: ext, local: true, mal: false, anilist: false };
+    } else {
+      const cur = parsed.cwSources;
+      parsed.cwSources = {
+        library: cur.library ?? true,
+        trakt: cur.trakt ?? false,
+        simkl: cur.simkl ?? false,
+        local: cur.local ?? true,
+        mal: cur.mal ?? false,
+        anilist: cur.anilist ?? false,
+      };
     }
     const posterCards = normalizePosterCardSettings(parsed);
     return {

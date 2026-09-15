@@ -860,6 +860,23 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "NYT Books API 密钥",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "选择 Harbor 优先使用直连和 debrid 来源、点对点种子，或同时显示两者。",
+
+  "Imported from MyAnimeList": "从 MyAnimeList 导入",
+  "Imported from AniList": "从 AniList 导入",
+  "Imported from trackers": "从追踪器导入",
+  "MyAnimeList progress": "MyAnimeList 进度",
+  "AniList progress": "AniList 进度",
+  "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.": "将在 MyAnimeList 上正在观看的动漫作为下一集未观看剧集导入到该行，并带有 MAL 徽标。需要已连接的 MAL 账户。",
+  "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.": "将在 AniList 上正在观看的动漫作为下一集未观看剧集导入到该行，并带有 AL 徽标。需要已连接的 AniList 账户。",
+  "Enable at least one anime Continue Watching source to use this.": "请至少启用一个动漫继续观看来源以使用此功能。",
+  "Re-queries the connected anime tracker(s) and updates the anime continue watching row.": "重新查询已连接的动漫追踪器并更新动漫继续观看行。",
+  "Anime continue watching: refresh result": "动漫继续观看：刷新结果",
+  "Error:": "错误：",
+  "No anime continue watching items were produced.": "未生成任何动漫继续观看条目。",
+  "Season {s}, Episode {e}": "第 {s} 季，第 {e} 集",
+  "Reload anime continue watching": "重新加载动漫继续观看",
+  "Unavailable while Continue Watching is kept private to each profile, because MAL progress is shared across every profile on this account.": "在继续观看对每个配置文件保持私有时不可用，因为 MAL 进度会在此账户的所有配置文件之间共享。",
+  "Unavailable while Continue Watching is kept private to each profile, because AniList progress is shared across every profile on this account.": "在继续观看对每个配置文件保持私有时不可用，因为 AniList 进度会在此账户的所有配置文件之间共享。",
 };
 
 export default coverage;

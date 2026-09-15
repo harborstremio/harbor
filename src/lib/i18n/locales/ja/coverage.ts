@@ -905,6 +905,23 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "NYT Books APIキー",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "Harborが直接およびdebridソース、P2Pトレントのどちらを優先するか、または両方を表示するかを選択します。",
+
+  "Imported from MyAnimeList": "MyAnimeListからインポート",
+  "Imported from AniList": "AniListからインポート",
+  "Imported from trackers": "トラッカーからインポート",
+  "MyAnimeList progress": "MyAnimeListの進捗",
+  "AniList progress": "AniListの進捗",
+  "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.": "MyAnimeListで視聴中のアニメを、次の未視聴エピソードとして行にインポートします（MALバッジ付き）。MALアカウントの連携が必要です。",
+  "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.": "AniListで視聴中のアニメを、次の未視聴エピソードとして行にインポートします（ALバッジ付き）。AniListアカウントの連携が必要です。",
+  "Enable at least one anime Continue Watching source to use this.": "これを使用するには、アニメの視聴を続けるソースを少なくとも 1 つ有効にしてください。",
+  "Re-queries the connected anime tracker(s) and updates the anime continue watching row.": "接続したアニメトラッカーに再問い合わせし、アニメの視聴を続ける行を更新します。",
+  "Anime continue watching: refresh result": "アニメの視聴を続ける：更新結果",
+  "Error:": "エラー:",
+  "No anime continue watching items were produced.": "アニメの視聴を続けるアイテムは生成されませんでした。",
+  "Season {s}, Episode {e}": "シーズン {s}、エピソード {e}",
+  "Reload anime continue watching": "アニメの視聴を続けるを再読み込み",
+  "Unavailable while Continue Watching is kept private to each profile, because MAL progress is shared across every profile on this account.": "視聴を続けるがプロファイルごとに非公開にされている間は利用できません。MAL の進捗はこのアカウントのすべてのプロファイルで共有されます。",
+  "Unavailable while Continue Watching is kept private to each profile, because AniList progress is shared across every profile on this account.": "視聴を続けるがプロファイルごとに非公開にされている間は利用できません。AniList の進捗はこのアカウントのすべてのプロファイルで共有されます。",
 };
 
 export default coverage;

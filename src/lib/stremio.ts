@@ -13,7 +13,7 @@ export type User = {
   avatar?: string;
 };
 
-export type ExternalCwSource = "simkl" | "trakt";
+export type ExternalCwSource = "simkl" | "trakt" | "mal" | "anilist" | "merged";
 
 export type LibraryItem = {
   _id: string;
@@ -118,6 +118,10 @@ export function cwSortKey(i: LibraryItem): number {
 
 export function isCwMember(i: LibraryItem): boolean {
   if (i.removed && !i.temp) return false;
+  // Imported tracker "next unwatched episode" cards have no playback position
+  // yet (timeOffset 0) but are members by construction; their eligibility is
+  // already gated by the anime-progress pipeline that produced them.
+  if (i.external && i.isAnime === true && i.upNext === true) return true;
   if (!i.state) {
     const local = resumeForItem(i)?.ms ?? 0;
     return local > 0;

@@ -1478,6 +1478,23 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "NYT Books API कुंजी",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "चुनें कि Harbor सीधे और debrid स्रोतों, peer-to-peer टोरेंट को प्राथमिकता दे या दोनों दिखाए।",
+
+  "Imported from MyAnimeList": "MyAnimeList से आयातित",
+  "Imported from AniList": "AniList से आयातित",
+  "Imported from trackers": "ट्रैकर से आयातित",
+  "MyAnimeList progress": "MyAnimeList प्रगति",
+  "AniList progress": "AniList प्रगति",
+  "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.": "MyAnimeList पर अभी देखे जा रहे ऐनिमे को अगली अनदेखी कड़ी के रूप में पंक्ति में आयात करता है, MAL बैज के साथ। कनेक्टेड MAL खाता आवश्यक है।",
+  "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.": "AniList पर अभी देखे जा रहे ऐनिमे को अगली अनदेखी कड़ी के रूप में पंक्ति में आयात करता है, AL बैज के साथ। कनेक्टेड AniList खाता आवश्यक है।",
+  "Enable at least one anime Continue Watching source to use this.": "इसका उपयोग करने के लिए कम से कम एक एनीमे देखना जारी रखें स्रोत सक्षम करें।",
+  "Re-queries the connected anime tracker(s) and updates the anime continue watching row.": "जुड़े हुए एनीमे ट्रैकर से दोबारा पूछताछ करता है और एनीमे देखना जारी रखें पंक्ति को अपडेट करता है।",
+  "Anime continue watching: refresh result": "एनीमे देखना जारी रखें: रिफ्रेश परिणाम",
+  "Error:": "त्रुटि:",
+  "No anime continue watching items were produced.": "कोई एनीमे देखना जारी रखें आइटम नहीं बनाए गए।",
+  "Season {s}, Episode {e}": "सीज़न {s}, एपिसोड {e}",
+  "Reload anime continue watching": "एनीमे देखना जारी रखें पुनः लोड करें",
+  "Unavailable while Continue Watching is kept private to each profile, because MAL progress is shared across every profile on this account.": "अनुपलब्ध जब देखना जारी रखें को हर प्रोफ़ाइल के लिए निजी रखा जाता है, क्योंकि MAL प्रगति इस खाते की हर प्रोफ़ाइल पर साझा की जाती है।",
+  "Unavailable while Continue Watching is kept private to each profile, because AniList progress is shared across every profile on this account.": "अनुपलब्ध जब देखना जारी रखें को हर प्रोफ़ाइल के लिए निजी रखा जाता है, क्योंकि AniList प्रगति इस खाते की हर प्रोफ़ाइल पर साझा की जाती है।",
 };
 
 export default coverage;
