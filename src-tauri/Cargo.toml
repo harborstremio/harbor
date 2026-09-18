@@ -127,6 +127,7 @@ webview2-com = "0.37"
 [target.'cfg(target_os = "linux")'.dependencies]
 gtk = { version = "0.18", features = ["v3_24"] }
 zbus = { version = "5", default-features = false, features = ["tokio"] }
+libpulse-binding = "2.30"
 
 [profile.dev]
 debug = "line-tables-only"
