@@ -310,6 +310,9 @@ pub async fn mpv_audio_devices(state: State<'_, MpvState>) -> Result<Vec<AudioDe
     Ok(read_audio_devices(&mpv))
 }
 
+// Also how song_id finds our playback stream on Linux, so keep it in one place.
+pub(crate) const AUDIO_CLIENT_NAME: &str = "Harbor";
+
 fn apply_pre_init(
     init: &MpvInitializer,
     args: &MpvStartArgs,
@@ -336,7 +339,7 @@ fn apply_pre_init(
         .unwrap_or_default();
     let joined_init_only = join_init_only_pairs(&init_only_pairs);
     set("title", "Harbor");
-    set("audio-client-name", "Harbor");
+    set("audio-client-name", AUDIO_CLIENT_NAME);
     set("terminal", "no");
     set("msg-level", "all=warn,vo=v,d3d11=v,gpu=v,win32=v");
     let is_live = args.is_live.unwrap_or(false);
