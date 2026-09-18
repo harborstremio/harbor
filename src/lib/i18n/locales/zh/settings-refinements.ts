@@ -209,7 +209,7 @@ const settingsRefinements: Record<string, string> = {
   "Icons & animation": "图标与动画",
   "Icons, illustrations, and the cat": "图标、插画和猫咪",
   "Identifies the song with Google Gemini. Get a key at": "使用 Google Gemini 识别歌曲。获取密钥：",
-  "Identify songs with Gemini on Windows. Your provider's usage limits apply.": "在 Windows 上使用 Gemini 识别歌曲。适用服务商的使用限制。",
+  "Identify songs with Gemini. Your provider's usage limits apply.": "使用 Gemini 识别歌曲。适用服务商的使用限制。",
   "If the remote server is unavailable, stop playback instead of streaming over P2P from this device.": "远程服务器不可用时停止播放，而不从此设备通过 P2P 播放。",
   "If your TV cuts off the edges, add a margin to keep everything visible.": "如果电视裁切了画面边缘，可添加边距以完整显示内容。",
   "Images, videos, TXT or LOG files. Up to {count} files, 100 MB each.": "图片、视频、TXT 或 LOG 文件。最多 {count} 个文件，每个不超过 100 MB。",

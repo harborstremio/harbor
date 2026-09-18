@@ -209,7 +209,7 @@ const settingsRefinements: Record<string, string> = {
   "Icons & animation": "아이콘 및 애니메이션",
   "Icons, illustrations, and the cat": "아이콘, 일러스트, 고양이",
   "Identifies the song with Google Gemini. Get a key at": "Google Gemini로 노래를 식별합니다. 키 발급:",
-  "Identify songs with Gemini on Windows. Your provider's usage limits apply.": "Windows에서 Gemini로 노래를 식별합니다. 제공업체의 사용 한도가 적용됩니다.",
+  "Identify songs with Gemini. Your provider's usage limits apply.": "Gemini로 노래를 식별합니다. 제공업체의 사용 한도가 적용됩니다.",
   "If the remote server is unavailable, stop playback instead of streaming over P2P from this device.": "원격 서버를 사용할 수 없으면 이 기기에서 P2P로 재생하지 않고 재생을 중지합니다.",
   "If your TV cuts off the edges, add a margin to keep everything visible.": "TV에서 화면 가장자리가 잘리면 여백을 추가해 모든 내용을 표시하세요.",
   "Images, videos, TXT or LOG files. Up to {count} files, 100 MB each.": "이미지, 동영상, TXT 또는 LOG 파일. 최대 {count}개, 파일당 100 MB.",
