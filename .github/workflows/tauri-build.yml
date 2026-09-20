@@ -10,7 +10,7 @@ jobs:
   build:
     name: ${{ matrix.platform.name }} (${{ matrix.platform.target }})
     runs-on: ${{ matrix.platform.runner }}
-    timeout-minutes: 90
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
@@ -24,7 +24,7 @@ jobs:
             target: aarch64-pc-windows-msvc
             bundle: msi
           - name: macOS-AppleSilicon
-            runner: macos-latest
+            runner: macos-15
             target: aarch64-apple-darwin
             bundle: dmg
           - name: macOS-Intel
@@ -57,9 +57,8 @@ jobs:
       - name: Install Mac deps
         if: contains(matrix.platform.runner, 'macos')
         run: |
-          brew install mpv pkg-config
-          # Make pkg-config find libmpv from homebrew
-          echo "PKG_CONFIG_PATH=$(brew --prefix mpv)/lib/pkgconfig:${PKG_CONFIG_PATH:-}" >> "$GITHUB_ENV"
+          brew install automake cmake libtool meson nasm ninja pkg-config
+          echo "MACOSX_DEPLOYMENT_TARGET=11.0" >> "$GITHUB_ENV"
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -84,6 +83,29 @@ jobs:
 
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Cache source-built macOS libraries
+        if: contains(matrix.platform.runner, 'macos')
+        uses: actions/cache@v5
+        with:
+          path: .cache/harbor-macos-deps/${{ matrix.platform.target }}
+          key: harbor-macos-11-${{ matrix.platform.target }}-${{ hashFiles('scripts/build-macos-libmpv.sh', 'scripts/macos-patches/**') }}
+
+      - name: Build macOS libraries from source
+        if: contains(matrix.platform.runner, 'macos')
+        shell: bash
+        run: |
+          if [[ "${{ matrix.platform.target }}" == "aarch64-apple-darwin" ]]; then
+            ARCH="arm64"
+          else
+            ARCH="x86_64"
+          fi
+          DEPS_ROOT=".cache/harbor-macos-deps/${{ matrix.platform.target }}"
+          scripts/build-macos-libmpv.sh \
+            --arch "$ARCH" \
+            --work-dir "$DEPS_ROOT"
+          echo "HARBOR_MACOS_LIB_DIR=$PWD/$DEPS_ROOT/deps-buildscripts/install/$ARCH/lib" >> "$GITHUB_ENV"
+          echo "HARBOR_MACOS_DYLIB_DIR=$PWD/$DEPS_ROOT/deps-buildscripts/output/$ARCH" >> "$GITHUB_ENV"
 
       # ARM64 links against libmpv too, but there is no bare ARM64 libmpv-2.dll
       # hosted by Harbor and the committed src-tauri/libmpv/mpv.lib is x64-only.
@@ -137,6 +159,8 @@ jobs:
           if [[ "$TARGET" == *"windows"* ]]; then
             curl --fail --location --retry 3 --retry-all-errors "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -o "yt-dlp-${TARGET}${EXT}"
           elif [[ "$TARGET" == *"apple"* ]]; then
+            # yt-dlp's regular universal build targets macOS 10.15+, which is
+            # compatible with Harbor's macOS 11 minimum.
             curl --fail --location --retry 3 --retry-all-errors "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos" -o "yt-dlp-${TARGET}${EXT}"
           else
             curl --fail --location --retry 3 --retry-all-errors "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp" -o "yt-dlp-${TARGET}${EXT}"
@@ -151,18 +175,11 @@ jobs:
             mv ffmpeg.exe "ffmpeg-${TARGET}${EXT}"
             mv ffprobe.exe "ffprobe-${TARGET}${EXT}"
           elif [[ "$TARGET" == *"apple"* ]]; then
-            if [[ "$TARGET" == *"aarch64"* ]]; then
-              curl --fail --location --retry 3 --retry-all-errors "https://www.osxexperts.net/ffmpeg6arm.zip" -o ffmpeg.zip
-              curl --fail --location --retry 3 --retry-all-errors "https://www.osxexperts.net/ffprobe6arm.zip" -o ffprobe.zip
-            else
-              curl --fail --location --retry 3 --retry-all-errors "https://www.osxexperts.net/ffmpeg6intel.zip" -o ffmpeg.zip
-              curl --fail --location --retry 3 --retry-all-errors "https://www.osxexperts.net/ffprobe6intel.zip" -o ffprobe.zip
-            fi
-            unzip ffmpeg.zip
-            unzip ffprobe.zip
-            mv ffmpeg "ffmpeg-${TARGET}${EXT}"
-            mv ffprobe "ffprobe-${TARGET}${EXT}"
-            chmod +x "ffmpeg-${TARGET}${EXT}" "ffprobe-${TARGET}${EXT}" || true
+            # The available prebuilt sidecars require macOS 12. Use the tools
+            # built from source with libmpv's macOS 11 deployment target.
+            cp "${HARBOR_MACOS_LIB_DIR%/lib}/bin/ffmpeg" "ffmpeg-${TARGET}${EXT}"
+            cp "${HARBOR_MACOS_LIB_DIR%/lib}/bin/ffprobe" "ffprobe-${TARGET}${EXT}"
+            chmod +x "ffmpeg-${TARGET}${EXT}" "ffprobe-${TARGET}${EXT}"
           else
             curl --fail --location --retry 3 --retry-all-errors "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz" -o ffmpeg.tar.xz
             tar -xf ffmpeg.tar.xz --strip-components=1 --wildcards '*/ffmpeg' '*/ffprobe'
@@ -187,13 +204,42 @@ jobs:
           cargo check
           cargo test --all-targets
 
+      - name: Prepare bundled macOS libraries
+        if: contains(matrix.platform.runner, 'macos')
+        id: macos-libraries
+        shell: bash
+        run: |
+          FRAMEWORKS_DIR="$RUNNER_TEMP/harbor-macos-frameworks-${{ matrix.platform.target }}"
+          CONFIG_PATH="$RUNNER_TEMP/tauri-macos-libmpv-${{ matrix.platform.target }}.json"
+          python3 scripts/macos-bundle-libmpv.py prepare \
+            --lib-dir "$HARBOR_MACOS_DYLIB_DIR" \
+            --frameworks "$FRAMEWORKS_DIR" \
+            --config "$CONFIG_PATH" \
+            --sidecar "src-tauri/binaries/ffmpeg-${{ matrix.platform.target }}" \
+            --sidecar "src-tauri/binaries/ffprobe-${{ matrix.platform.target }}"
+          echo "HARBOR_MACOS_FRAMEWORKS_DIR=$FRAMEWORKS_DIR" >> "$GITHUB_ENV"
+          echo "config=--config $CONFIG_PATH" >> "$GITHUB_OUTPUT"
+
       - name: Tauri build
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tauriScript: pnpm tauri
-          args: --target ${{ matrix.platform.target }}
+          args: --target ${{ matrix.platform.target }} ${{ steps.macos-libraries.outputs.config }}
+
+      - name: Verify macOS app compatibility
+        if: contains(matrix.platform.runner, 'macos')
+        shell: bash
+        run: |
+          APP_PATH="$(find "src-tauri/target/${{ matrix.platform.target }}/release/bundle" -type d -name 'Harbor.app' -print -quit)"
+          if [ -z "$APP_PATH" ]; then
+            echo "Harbor.app was not produced" >&2
+            exit 1
+          fi
+          python3 scripts/macos-bundle-libmpv.py verify-app \
+            --app "$APP_PATH" \
+            --minimum-system-version 11.0
 
       - name: Upload artifacts
         if: success()

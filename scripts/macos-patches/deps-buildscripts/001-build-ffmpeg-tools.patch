@@ -1,0 +1,13 @@
+diff --git a/buildscripts/build-ffmpeg.sh b/buildscripts/build-ffmpeg.sh
+index b25504e..b085ca8 100755
+--- a/buildscripts/build-ffmpeg.sh
++++ b/buildscripts/build-ffmpeg.sh
+@@ -38,6 +38,8 @@ build_for_arch() {
+         --enable-shared \
+         --disable-static \
+         --disable-programs \
++        --enable-ffmpeg \
++        --enable-ffprobe \
+         --disable-doc \
+         --disable-debug \
+         --enable-network \
