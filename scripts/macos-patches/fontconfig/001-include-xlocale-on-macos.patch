@@ -1,0 +1,15 @@
+diff --git a/src/fcint.h b/src/fcint.h
+index 775dd4a..bc3a3a0 100644
+--- a/src/fcint.h
++++ b/src/fcint.h
+@@ -36,6 +36,10 @@
+ #include <float.h>
+ #include <limits.h>
+ #include <locale.h>
++#ifdef __APPLE__
++/* Apple's extended locale API is declared separately from locale.h. */
++#include <xlocale.h>
++#endif
+ #include <math.h>
+ #include <stdio.h>
+ #include <stdlib.h>
