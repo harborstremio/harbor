@@ -255,6 +255,11 @@ async function readExperimentalManifest(path = "latest-experimental.json"): Prom
 
 export async function checkForUpdate(manual = false): Promise<void> {
   if (!IS_TAURI) return;
+  // The downloaded update package always installs to the real Harbor install
+  // location regardless of this build's identifier, so in dev it would silently
+  // update and relaunch the user's separately installed release build instead
+  // of this one. Never check for updates from a dev build.
+  if (import.meta.env.DEV) return;
   if (
     state.status === "checking" ||
     state.status === "downloading" ||
