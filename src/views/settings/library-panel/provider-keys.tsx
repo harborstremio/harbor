@@ -355,7 +355,7 @@ export function useProviderKeys({
     {
       id: "songai",
       name: t("Gemini"),
-      desc: t("Identify songs with Gemini on Windows. Your provider's usage limits apply."),
+      desc: t("Identify songs with Gemini. Your provider's usage limits apply."),
       value: settings.songIdAiKey,
       field: (
         <KeyField

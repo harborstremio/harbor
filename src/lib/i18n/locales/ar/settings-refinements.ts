@@ -308,8 +308,8 @@ const settingsRefinements: Record<string, string> = {
   "Icons, illustrations, and the cat": "الأيقونات والرسوم التوضيحية والقط",
   "Identifies the song with Google Gemini. Get a key at":
     "يتعرّف على الأغنية باستخدام Google Gemini. احصل على مفتاح من",
-  "Identify songs with Gemini on Windows. Your provider's usage limits apply.":
-    "تعرّف على الأغاني باستخدام Gemini على Windows. تسري حدود الاستخدام لدى مزوّد الخدمة.",
+  "Identify songs with Gemini. Your provider's usage limits apply.":
+    "تعرّف على الأغاني باستخدام Gemini. تسري حدود الاستخدام لدى مزوّد الخدمة.",
   "If the remote server is unavailable, stop playback instead of streaming over P2P from this device.":
     "إذا لم يكن الخادم البعيد متاحًا، أوقف التشغيل بدلًا من البث عبر P2P من هذا الجهاز.",
   "If your TV cuts off the edges, add a margin to keep everything visible.":

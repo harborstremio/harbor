@@ -209,7 +209,7 @@ const settingsRefinements: Record<string, string> = {
   "Icons & animation": "Значки и анимация",
   "Icons, illustrations, and the cat": "Иконки, иллюстрации и кот",
   "Identifies the song with Google Gemini. Get a key at": "Определяет песню с помощью Google Gemini. Получите ключ на",
-  "Identify songs with Gemini on Windows. Your provider's usage limits apply.": "Определяйте песни с помощью Gemini в Windows. Действуют лимиты использования вашего провайдера.",
+  "Identify songs with Gemini. Your provider's usage limits apply.": "Определяйте песни с помощью Gemini. Действуют лимиты использования вашего провайдера.",
   "If the remote server is unavailable, stop playback instead of streaming over P2P from this device.": "Если удалённый сервер недоступен, останавливает воспроизведение вместо P2P-стриминга с этого устройства.",
   "If your TV cuts off the edges, add a margin to keep everything visible.": "Если телевизор обрезает края, добавьте отступ, чтобы всё оставалось видно.",
   "Images, videos, TXT or LOG files. Up to {count} files, 100 MB each.": "Изображения, видео, файлы TXT или LOG. До {count} файлов по 100 МБ каждый.",

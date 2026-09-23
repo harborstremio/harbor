@@ -209,7 +209,7 @@ const settingsRefinements: Record<string, string> = {
   "Icons & animation": "Biểu tượng và hoạt ảnh",
   "Icons, illustrations, and the cat": "Biểu tượng, minh họa và chú mèo",
   "Identifies the song with Google Gemini. Get a key at": "Nhận diện bài hát bằng Google Gemini. Lấy khóa tại",
-  "Identify songs with Gemini on Windows. Your provider's usage limits apply.": "Nhận diện bài hát bằng Gemini trên Windows. Áp dụng giới hạn sử dụng của nhà cung cấp.",
+  "Identify songs with Gemini. Your provider's usage limits apply.": "Nhận diện bài hát bằng Gemini. Áp dụng giới hạn sử dụng của nhà cung cấp.",
   "If the remote server is unavailable, stop playback instead of streaming over P2P from this device.": "Nếu máy chủ từ xa không khả dụng, dừng phát thay vì phát qua P2P từ thiết bị này.",
   "If your TV cuts off the edges, add a margin to keep everything visible.": "Nếu TV cắt mất mép hình, thêm lề để hiển thị đầy đủ.",
   "Images, videos, TXT or LOG files. Up to {count} files, 100 MB each.": "Ảnh, video, tệp TXT hoặc LOG. Tối đa {count} tệp, mỗi tệp 100 MB.",
