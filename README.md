@@ -28,7 +28,7 @@ Offering things like a native player, a stream ranking engine, Wikidata, watch p
 </div>
 
 <br/>
-<h4 align="center">💬 New: By popular demand, join our community discord for support and help (https://discord.gg/gUGg4YSsg)!</h4>
+<h4 align="center">💬 New: By popular demand, join our community discord for support and help (https://discord.gg/harbor)!</h4>
 <p align="center">
   <img src="https://harbor.site/readme-media/hero.png" width="900">
   <br/>
