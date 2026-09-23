@@ -2,6 +2,7 @@ import { Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import godfatherStill from "@/assets/godfather-offer.svg";
 import { useSettings } from "@/lib/settings";
+import { formatSubBorderSize, normalizeSubBorderSize } from "@/lib/settings/border-size";
 import { useT } from "@/lib/i18n";
 import { ColorPopoverTrigger } from "../color-picker";
 import { ToggleRow } from "../shared";
@@ -12,9 +13,21 @@ export function SubtitleStylePanel() {
   const t = useT();
 
   const styles: Array<{ id: "shadow" | "outline" | "box"; label: string; sub: string }> = [
-    { id: "shadow", label: t("Drop shadow"), sub: t("Soft halo around the text. Cleanest on most content.") },
-    { id: "outline", label: t("Outline"), sub: t("Hard stroke around each letter. High contrast.") },
-    { id: "box", label: t("Black bar"), sub: t("Rounded background panel behind the text. Most readable.") },
+    {
+      id: "shadow",
+      label: t("Drop shadow"),
+      sub: t("Soft halo around the text. Cleanest on most content."),
+    },
+    {
+      id: "outline",
+      label: t("Outline"),
+      sub: t("Hard stroke around each letter. High contrast."),
+    },
+    {
+      id: "box",
+      label: t("Black bar"),
+      sub: t("Rounded background panel behind the text. Most readable."),
+    },
   ];
 
   const aligns: Array<{ id: "left" | "center" | "right"; label: string }> = [
@@ -24,9 +37,23 @@ export function SubtitleStylePanel() {
   ];
 
   const assModes: Array<{ id: "no" | "scale" | "force"; label: string; sub: string }> = [
-    { id: "no", label: t("Keep original"), sub: t("Styled (ASS) subs keep their own fonts, colors, and effects. Truest to the release.") },
-    { id: "scale", label: t("Resize only"), sub: t("Keep the original look but apply your size and position.") },
-    { id: "force", label: t("Use my style"), sub: t("Force your font, size, and color onto styled subs. Use this for Arabic or any subs showing boxes. Can affect karaoke and signs.") },
+    {
+      id: "no",
+      label: t("Keep original"),
+      sub: t("Styled (ASS) subs keep their own fonts, colors, and effects. Truest to the release."),
+    },
+    {
+      id: "scale",
+      label: t("Resize only"),
+      sub: t("Keep the original look but apply your size and position."),
+    },
+    {
+      id: "force",
+      label: t("Use my style"),
+      sub: t(
+        "Force your font, size, and color onto styled subs. Use this for Arabic or any subs showing boxes. Can affect karaoke and signs.",
+      ),
+    },
   ];
 
   const isDefault =
@@ -107,12 +134,17 @@ export function SubtitleStylePanel() {
           })}
         </div>
         <p className="text-[11.5px] leading-snug text-ink-muted">
-          {t("Seeing empty boxes instead of letters? Choose Arabic under Font and switch to Use my style.")}
+          {t(
+            "Seeing empty boxes instead of letters? Choose Arabic under Font and switch to Use my style.",
+          )}
         </p>
       </div>
 
       {settings.subStyle === "box" && (
-        <SubField label={t("Background opacity")} value={`${Math.round(settings.subBoxOpacity * 100)}%`}>
+        <SubField
+          label={t("Background opacity")}
+          value={`${Math.round(settings.subBoxOpacity * 100)}%`}
+        >
           <input
             type="range"
             min={0.2}
@@ -126,14 +158,19 @@ export function SubtitleStylePanel() {
       )}
 
       {settings.subStyle === "outline" && (
-        <SubField label={t("Outline thickness")} value={`${settings.subBorderSize}px`}>
+        <SubField
+          label={t("Outline thickness")}
+          value={formatSubBorderSize(settings.subBorderSize)}
+        >
           <input
             type="range"
             min={1}
             max={6}
-            step={1}
+            step={0.5}
             value={Math.max(1, settings.subBorderSize)}
-            onChange={(e) => update({ subBorderSize: parseInt(e.target.value, 10) })}
+            onChange={(e) =>
+              update({ subBorderSize: normalizeSubBorderSize(parseFloat(e.target.value)) })
+            }
             className="h-1 w-full appearance-none rounded-full bg-edge-soft accent-ink"
           />
         </SubField>
@@ -205,7 +242,9 @@ export function SubtitleStylePanel() {
                 type="button"
                 onClick={() => update({ subAlignX: a.id })}
                 className={`flex h-10 items-center justify-center rounded-xl border text-[12.5px] font-semibold transition-colors ${
-                  sel ? "border-ink bg-elevated text-ink" : "border-edge-soft bg-canvas/40 text-ink-muted hover:border-edge hover:text-ink"
+                  sel
+                    ? "border-ink bg-elevated text-ink"
+                    : "border-edge-soft bg-canvas/40 text-ink-muted hover:border-edge hover:text-ink"
                 }`}
               >
                 {a.label}
@@ -319,7 +358,8 @@ function SubtitlePreview() {
     }
     textShadow = offsets.map(([dx, dy]) => `${dx * 0.55}px ${dy * 0.55}px 0 ${c}`).join(", ");
   } else if (settings.subStyle === "shadow") {
-    textShadow = "0 1px 2px rgba(0,0,0,0.95), 0 2px 6px rgba(0,0,0,0.85), 0 0 18px rgba(0,0,0,0.55)";
+    textShadow =
+      "0 1px 2px rgba(0,0,0,0.95), 0 2px 6px rgba(0,0,0,0.85), 0 0 18px rgba(0,0,0,0.55)";
   }
 
   const boxRgb = (() => {
@@ -341,7 +381,8 @@ function SubtitlePreview() {
       : undefined;
 
   const align = settings.subAlignX || "center";
-  const justify = align === "left" ? "justify-start" : align === "right" ? "justify-end" : "justify-center";
+  const justify =
+    align === "left" ? "justify-start" : align === "right" ? "justify-end" : "justify-center";
 
   return (
     <div
@@ -349,7 +390,10 @@ function SubtitlePreview() {
       style={{ backgroundImage: `url(${godfatherStill})` }}
     >
       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-      <div className={`absolute inset-x-0 flex ${justify} px-[6%]`} style={{ bottom: `${settings.subMarginY}%`, opacity: settings.subOpacity }}>
+      <div
+        className={`absolute inset-x-0 flex ${justify} px-[6%]`}
+        style={{ bottom: `${settings.subMarginY}%`, opacity: settings.subOpacity }}
+      >
         <div style={boxStyle}>
           <div
             style={{
@@ -363,7 +407,7 @@ function SubtitlePreview() {
               textAlign: align as "left" | "center" | "right",
             }}
           >
-                  I&apos;m gonna make him an offer he can&apos;t refuse.
+            I&apos;m gonna make him an offer he can&apos;t refuse.
           </div>
         </div>
       </div>
@@ -371,7 +415,10 @@ function SubtitlePreview() {
   );
 }
 
-const PRESET_FONTS: Array<{ id: "inter" | "system" | "rounded" | "serif" | "arabic"; label: string }> = [
+const PRESET_FONTS: Array<{
+  id: "inter" | "system" | "rounded" | "serif" | "arabic";
+  label: string;
+}> = [
   { id: "inter", label: "Inter" },
   { id: "system", label: "System" },
   { id: "rounded", label: "Rounded" },
@@ -379,7 +426,8 @@ const PRESET_FONTS: Array<{ id: "inter" | "system" | "rounded" | "serif" | "arab
   { id: "arabic", label: "Arabic" },
 ];
 
-const FONT_ACCEPT = ".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2,application/x-font-ttf,application/x-font-otf,application/font-woff,application/font-woff2";
+const FONT_ACCEPT =
+  ".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2,application/x-font-ttf,application/x-font-otf,application/font-woff,application/font-woff2";
 const MAX_FONT_BYTES = 4 * 1024 * 1024;
 
 function FontPicker() {
@@ -416,7 +464,8 @@ function FontPicker() {
     try {
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const r = new FileReader();
-        r.onload = () => (typeof r.result === "string" ? resolve(r.result) : reject(new Error("read failed")));
+        r.onload = () =>
+          typeof r.result === "string" ? resolve(r.result) : reject(new Error("read failed"));
         r.onerror = () => reject(r.error);
         r.readAsDataURL(file);
       });
@@ -424,7 +473,12 @@ function FontPicker() {
       const baseName = file.name.replace(/\.(ttf|otf|woff2?|ttc)$/i, "");
       const next = [
         ...customFonts,
-        { id, name: baseName || `Custom ${customFonts.length + 1}`, dataUrl, format: formatMap[ext] },
+        {
+          id,
+          name: baseName || `Custom ${customFonts.length + 1}`,
+          dataUrl,
+          format: formatMap[ext],
+        },
       ];
       update({ customFonts: next, subFontFamily: `custom:${id}` });
     } catch (e) {
