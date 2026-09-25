@@ -73,25 +73,19 @@ test("provider records failed stops and flushes on session", () => {
 
 test("flush uses injected deps and honors session gate", async () => {
   clearPending();
-  let stops = 0;
-  let marks = 0;
+  let commits = 0;
   const deps = {
     hasSession: () => true,
     resolveTarget: () => ({ kind: "movie", ids: { imdb: "tt1234567" } }) as const,
-    stopScrobble: async () => {
-      stops += 1;
-      return "failed" as const;
-    },
-    markWatched: async () => {
-      marks += 1;
-      return true;
+    commit: async () => {
+      commits += 1;
+      return "recorded" as const;
     },
   };
   recordPendingStop("tt1234567", undefined, 100);
   assert.equal(listPendingStops().length, 1);
   const r = await flushPendingStops(deps);
-  assert.equal(stops, 1);
-  assert.equal(marks, 1);
+  assert.equal(commits, 1);
   assert.equal(r.flushed, 1);
   assert.equal(r.remaining, 0);
   assert.equal(listPendingStops().length, 0);

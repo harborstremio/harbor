@@ -73,12 +73,14 @@ import {
 import { useTrakt } from "@/lib/trakt/provider";
 import { buildTraktHomeRows } from "@/lib/trakt/home-rails";
 import { fetchWatchedKeySet } from "@/lib/trakt/history";
+import { peekTraktWatched, rememberTraktWatched } from "@/lib/trakt/watched-keys";
 import { recentlyPlayed, subscribePlayback, type WatchedSet } from "@/lib/playback-history";
 import { detectAnimeForCw, useDetectedAnimeVersion } from "@/lib/anime-detect";
 import { buildSimklHomeRows } from "@/lib/simkl/home-rails";
 import {
   loadSimklWatchedMap,
   loadSimklStatusMap,
+  peekSimklWatchedMap,
   type WatchlistStatus,
 } from "@/lib/simkl/list-status";
 import { useExternalCw } from "@/lib/feed/external-cw";
@@ -132,8 +134,10 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
   const externalCw = useExternalCw(
     !hideSharedCw && (settings.cwSources.trakt || settings.cwSources.simkl),
   );
-  const [traktWatched, setTraktWatched] = useState<Set<string>>(() => new Set());
-  const [simklWatchedMap, setSimklWatchedMap] = useState<Map<string, Set<string>>>(() => new Map());
+  const [traktWatched, setTraktWatched] = useState<Set<string>>(() => peekTraktWatched());
+  const [simklWatchedMap, setSimklWatchedMap] = useState<Map<string, Set<string>>>(() =>
+    peekSimklWatchedMap(),
+  );
   const [simklStatusMap, setSimklStatusMap] = useState<Map<string, WatchlistStatus>>(
     () => new Map(),
   );
@@ -370,7 +374,10 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
       .catch(() => {});
     fetchWatchedKeySet()
       .then((set) => {
-        if (!cancelled) setTraktWatched(set);
+        if (!cancelled) {
+          setTraktWatched(set);
+          rememberTraktWatched(set);
+        }
       })
       .catch(() => {});
     return () => {

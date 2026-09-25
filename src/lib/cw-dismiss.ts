@@ -130,6 +130,23 @@ function progressRatio(item: LibraryItem): number {
   return Math.min(1, Math.max(item.state?.timeOffset ?? 0, resumeMs) / duration);
 }
 
+// A dismissal is lifted only by moving forward. An entry reporting an earlier episode
+// than the one dismissed - a stale tracker copy, or a sibling entry sharing the same id -
+// is not new progress, so it must stay hidden instead of resurfacing.
+function isEpisodeAhead(
+  current: { season?: number; episode?: number },
+  dismissed: { season?: number; episode?: number },
+): boolean | null {
+  const { season: cs, episode: ce } = current;
+  const { season: ds, episode: de } = dismissed;
+  if (cs == null || ce == null || ds == null || de == null) return null;
+  if (!Number.isFinite(cs) || !Number.isFinite(ce) || !Number.isFinite(ds) || !Number.isFinite(de)) {
+    return null;
+  }
+  if (cs !== ds) return cs > ds;
+  return ce > de;
+}
+
 export function isCwDismissed(item: LibraryItem): boolean {
   const plain = dismissed.get(item._id);
   const ext = item.external ? dismissed.get(`${item.external}|${item._id}`) : undefined;
@@ -153,10 +170,16 @@ export function isCwDismissed(item: LibraryItem): boolean {
     }
   }
   if (vid && typeof curVid === "string" && curVid) {
-    if (vid !== curVid) return false;
+    if (vid !== curVid) {
+      const ahead = isEpisodeAhead(episodeFromVideoId(curVid) ?? {}, episodeFromVideoId(vid) ?? {});
+      if (ahead === null || ahead) return false;
+    }
   } else if (pos != null) {
     const { season, episode } = resolveEpisode(item);
-    if (season !== pos.s || episode !== pos.e) return false;
+    if (season !== pos.s || episode !== pos.e) {
+      const ahead = isEpisodeAhead({ season, episode }, { season: pos.s, episode: pos.e });
+      if (ahead === null || ahead) return false;
+    }
   }
   if (activity > 0) return activity <= dismissedAt;
   return true;

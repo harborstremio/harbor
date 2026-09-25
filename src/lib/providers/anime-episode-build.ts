@@ -6,6 +6,25 @@ import type { Episode as TmdbEpisode } from "@/lib/providers/tmdb/tmdb-details";
 
 export type EpisodeLocalizeOptions = { lang?: string | null };
 
+// Hunter x Hunter (2011) only: AniZip keys 59-78 carry the right Greed Island
+// titles ("Bid x and x Haste" = true ep 59) but Chimera-Ant-era identity
+// (absoluteNumber 117-136, tvdbId 4798644+, image .../4798644.jpg, S2E59-78,
+// airDate 2014). Copying that unchecked poisons TVDB matching, proxy overlay
+// and season buckets (59-78 repeats). Scoped to HxH so no other anime changes.
+function isHunterXHunter2011(aniZip: AniZipMapping | null): boolean {
+  const m = aniZip?.mappings;
+  if (!m) return false;
+  if (m.kitsu_id === 6448) return true;
+  if (m.mal_id === 11061) return true;
+  if (m.anilist_id === 11061) return true;
+  if (m.anidb_id === 8550) return true;
+  if (m.thetvdb_id === 252322) return true;
+  if (m.imdb_id === "tt2098220") return true;
+  const tmdb = m.themoviedb_id;
+  if (tmdb != null && String(tmdb) === "46298") return true;
+  return false;
+}
+
 // Opt-in gate: localized text applies only for non-English languages; English/empty keeps the old merge behavior.
 function wantsLocalized(opts?: EpisodeLocalizeOptions): boolean {
   const lang = opts?.lang?.trim();
@@ -132,6 +151,7 @@ export function mergeAniZipEpisodes(
   if (!aniZip?.episodes) return;
   const azImdb = aniZip.mappings?.imdb_id;
   const localized = wantsLocalized(opts);
+  const hxHGuard = isHunterXHunter2011(aniZip);
   for (const ep of episodes) {
     const az = aniZip.episodes[String(ep.number)];
     if (!az) continue;
@@ -150,6 +170,13 @@ export function mergeAniZipEpisodes(
     }
     if (az.overview && !ep.synopsis && (!localized || isTextInLanguage(az.overview, opts?.lang))) {
       ep.synopsis = az.overview;
+    }
+    const hxHMismatch =
+      hxHGuard && az.absoluteEpisodeNumber != null && az.absoluteEpisodeNumber !== ep.number;
+    if (hxHMismatch) {
+      if (az.runtime && !ep.length) ep.length = az.runtime;
+      if (az.filler) ep.filler = true;
+      continue;
     }
     if (az.image) {
       if (ep.thumbnail && ep.thumbnail !== az.image && !ep.thumbnailFallback) {

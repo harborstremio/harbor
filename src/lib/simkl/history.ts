@@ -1,7 +1,10 @@
+import { resolveForMeta } from "@/lib/tracker-resolve";
 import { currentActivitiesAll } from "./activities/gate";
 import { simklRequest } from "./client";
 import { simklTargetIds } from "./ids";
 import type { SimklIds, SimklTarget } from "./types";
+
+const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
 
 export type SimklHistoryItem = {
   id: number;
@@ -90,7 +93,7 @@ async function pullHistory(): Promise<SimklHistoryItem[]> {
   return out;
 }
 
-export async function addToHistory(target: SimklTarget): Promise<boolean> {
+async function postHistory(target: SimklTarget): Promise<boolean> {
   const watchedAt = new Date().toISOString();
   try {
     invalidateHistoryCache();
@@ -131,6 +134,19 @@ export async function addToHistory(target: SimklTarget): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+export async function addToHistory(target: SimklTarget, metaId?: string): Promise<boolean> {
+  if (await postHistory(target)) return true;
+  if (!metaId || target.kind !== "episode" || ANIME_ID.test(metaId)) return false;
+  const resolved = await resolveForMeta(metaId, target.season, target.number);
+  if (!resolved.ok) return false;
+  return postHistory({
+    kind: "episode",
+    show: { ids: resolved.episode.showIds },
+    season: resolved.episode.season,
+    number: resolved.episode.number,
+  });
 }
 
 export async function markEpisodesWatched(

@@ -229,7 +229,10 @@ export async function kitsuToMal(kitsuId: number): Promise<number | null> {
   const arm = await armFromKitsu(kitsuId);
   if (arm?.mal != null) return arm.mal;
   const az = await aniZipByKitsu(kitsuId).catch(() => null);
-  return az?.mappings?.mal_id ?? null;
+  if (az?.mappings?.mal_id != null) return az.mappings.mal_id;
+  const anilistId = await kitsuToAnilist(kitsuId).catch(() => null);
+  if (anilistId == null) return null;
+  return anilistToMal(anilistId).catch(() => null);
 }
 
 const ARM_SRC_KEY = "harbor.armsrcmalcache.v2";
@@ -260,11 +263,48 @@ async function armSourceToMal(source: "anilist" | "anidb", id: number): Promise<
   return p;
 }
 
+const ANILIST_MAL_KEY = "harbor.anilistmalcache.v1";
+const inflightAnilistMal = new Map<number, Promise<number | null>>();
+const anilistMalCache = mappingStore<{ mal: number | null; t: number }>(ANILIST_MAL_KEY);
+
+const ANILIST_IDMAL_QUERY = `query ($id: Int) { Media(id: $id, type: ANIME) { idMal } }`;
+
+// ARM and AniZip both miss some newer entries while AniList itself carries idMal.
+async function anilistIdMal(anilistId: number): Promise<number | null> {
+  const key = String(anilistId);
+  const hit = anilistMalCache.get(key);
+  if (hit && Date.now() - hit.t < ARM_TTL_MS) return hit.mal;
+  const existing = inflightAnilistMal.get(anilistId);
+  if (existing) return existing;
+  const p = (async () => {
+    try {
+      // Lazy: the AniList client is browser-only and must not enter every mapping graph.
+      const { anilistRequest } = await import("@/lib/anilist/client");
+      const data = await anilistRequest<{ Media: { idMal: number | null } | null }>(
+        ANILIST_IDMAL_QUERY,
+        { id: anilistId },
+        undefined,
+        true,
+      );
+      const mal = data?.Media?.idMal ?? null;
+      if (mal != null) anilistMalCache.set(key, { mal, t: Date.now() });
+      return mal;
+    } catch {
+      return null;
+    } finally {
+      inflightAnilistMal.delete(anilistId);
+    }
+  })();
+  inflightAnilistMal.set(anilistId, p);
+  return p;
+}
+
 export async function anilistToMal(anilistId: number): Promise<number | null> {
   const viaArm = await armSourceToMal("anilist", anilistId);
   if (viaArm != null) return viaArm;
   const az = await aniZipByAnilist(anilistId).catch(() => null);
-  return az?.mappings?.mal_id ?? null;
+  if (az?.mappings?.mal_id != null) return az.mappings.mal_id;
+  return anilistIdMal(anilistId);
 }
 
 export async function anidbToMal(anidbId: number): Promise<number | null> {

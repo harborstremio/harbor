@@ -1,6 +1,8 @@
 import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { savePlayback } from "@/lib/playback-history";
 import { pushWatched } from "@/lib/trakt/history";
+import { markEpisodeWatched } from "@/lib/trakt/resolve";
+import { stremioIdToTraktTarget } from "@/lib/trakt/ids";
 import { addToHistory as simklAddToHistory } from "@/lib/simkl/history";
 import { setMovieWatchedLocal } from "@/lib/movie-watched";
 import { recordManualWatchedMeta, setManualWatchedMany } from "@/lib/manual-watched";
@@ -92,12 +94,19 @@ export async function markMetaWatched(
   const isAnime = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
   const imdb = resolvedImdb ?? (meta.id.startsWith("tt") ? meta.id : undefined);
   const tmdb = typeof tmdbId === "string" ? Number(tmdbId) || undefined : tmdbId ?? undefined;
+  if (!isAnime && eps.length > 0) {
+    await Promise.allSettled(
+      eps.map((episode) => {
+        const resolved = stremioIdToTraktTarget(meta.id, episode);
+        return resolved.ok
+          ? markEpisodeWatched(resolved.target, meta.id)
+          : Promise.resolve(false);
+      }),
+    );
+  }
   if (!isAnime && (imdb || tmdb)) {
     const ids = { ...(imdb ? { imdb } : {}), ...(tmdb ? { tmdb } : {}) };
-    await Promise.allSettled([
-      pushWatched({ kind: "show", ids }),
-      simklAddToHistory({ kind: "show", ids }),
-    ]);
+    await simklAddToHistory({ kind: "show", ids }, meta.id);
   }
 }
 

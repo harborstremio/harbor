@@ -132,7 +132,7 @@ export function SimklProvider({ children }: { children: ReactNode }) {
       const target = resolveTarget(args.metaId, args.episode);
       if (!target) return;
       if (!getSession()) return;
-      await addToHistory(target);
+      await addToHistory(target, args.metaId);
     },
     [resolveTarget],
   );

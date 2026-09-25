@@ -22,6 +22,7 @@ import type { SimklTarget } from "@/lib/simkl/types";
 import traktLogo from "@/assets/trakt.png";
 import { useTrakt } from "@/lib/trakt/provider";
 import { pushWatched } from "@/lib/trakt/history";
+import { markSeriesWatched } from "@/lib/trakt/resolve";
 import { useT } from "@/lib/i18n";
 
 const ANILIST_LABELS: Record<MediaListStatus, string> = {
@@ -290,14 +291,15 @@ export function TraktMenuItems({
 }) {
   const t = useT();
   const { isConnected, resolveTarget } = useTrakt();
-  if (!isConnected || type !== "movie") return null;
-  const target = resolveTarget(harborId);
-  if (!target || target.kind !== "movie") return null;
+  if (!isConnected) return null;
+  const target = type === "movie" ? resolveTarget(harborId) : null;
+  if (type === "movie" && (!target || target.kind !== "movie")) return null;
   return (
     <button
       role="menuitem"
       onClick={() => {
-        void pushWatched(target).catch(() => {});
+        if (target && target.kind === "movie") void pushWatched(target).catch(() => {});
+        else void markSeriesWatched(harborId).catch(() => {});
         onAction();
       }}
       className="flex h-9 items-center gap-2.5 rounded-lg px-3 text-start text-[13px] text-ink transition-colors hover:bg-raised"

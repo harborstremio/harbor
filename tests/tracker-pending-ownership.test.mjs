@@ -25,12 +25,15 @@ for (const [service, queue, record, list, clear, flush] of [
     simkl.flushPendingWatches,
   ],
 ]) {
-  const deps = (stop) => ({
+  const deps = (service, stop) => ({
     hasSession: () => true,
     resolveTarget: (id) => ({ kind: "movie", ids: { imdb: id } }),
-    stopScrobble: stop,
-    markWatched: async () => true,
-    recordWatched: async () => true,
+    ...(service === "trakt"
+      ? { commit: async (_target, metaId) => stop(metaId) }
+      : {
+          stopScrobble: async (metaId) => stop(metaId),
+          recordWatched: async () => true,
+        }),
   });
   test(`${service}: pending watches stay with their profile and keep newest 50`, () => {
     localStorage.clear();
@@ -58,7 +61,7 @@ for (const [service, queue, record, list, clear, flush] of [
     let stops = 0;
     let history = 0;
     await flush({
-      ...deps(async () => {
+      ...deps(service, async () => {
         stops++;
         profile("second");
         return service === "trakt" ? "recorded" : true;
@@ -80,7 +83,7 @@ for (const [service, queue, record, list, clear, flush] of [
     record("tt2");
     let stops = 0;
     await flush(
-      deps(async () => {
+      deps(service, async () => {
         stops++;
         clear();
         record("tt3");

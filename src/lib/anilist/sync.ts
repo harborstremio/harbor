@@ -34,7 +34,25 @@ const SENT_KEY_BASE = "harbor.anilist.synced.v1";
 function sentKey(): string {
   return `${SENT_KEY_BASE}.${activeProfileId()}`;
 }
-type SentMap = Record<string, number>;
+type SentValue = number | { p: number; t: number };
+type SentMap = Record<string, SentValue>;
+
+// Only collapses the per-tick writes of one playback session. Kept indefinitely it
+// outlives the server, so removing the entry there could never be re-synced.
+const SENT_TTL_MS = 60 * 1000;
+
+function sentProgress(map: SentMap, key: string): { p: number; t: number } | null {
+  const value = map[key];
+  if (typeof value === "number") return { p: value, t: 0 };
+  if (value && typeof value === "object" && typeof value.p === "number") {
+    return { p: value.p, t: typeof value.t === "number" ? value.t : 0 };
+  }
+  return null;
+}
+
+function rememberSent(map: SentMap, key: string, progress: number): void {
+  map[key] = { p: progress, t: Date.now() };
+}
 
 function loadSent(): SentMap {
   try {
@@ -167,10 +185,15 @@ export async function syncAnimeProgress(
 
   const sent = loadSent();
   const sentKey = `${harborId}|${season ?? ""}|${ep}`;
-  if ((sent[sentKey] ?? 0) >= (abs ?? ep)) return;
+  const prevSent = sentProgress(sent, sentKey);
+  if (prevSent && Date.now() - prevSent.t < SENT_TTL_MS && prevSent.p >= (abs ?? ep)) {
+    return;
+  }
 
   const flightKey = `${harborId}|${ep}|${abs ?? ""}`;
-  if (inflight.has(flightKey)) return;
+  if (inflight.has(flightKey)) {
+    return;
+  }
   inflight.add(flightKey);
 
   try {
@@ -184,7 +207,9 @@ export async function syncAnimeProgress(
     // Never overwrite an entry the user deliberately moved to Completed or
     // Re-watching; auto-sync would otherwise flip it back to CURRENT.
     const entryStatus = media.mediaListEntry?.status;
-    if (entryStatus === "COMPLETED" || entryStatus === "REPEATING") return;
+    if (entryStatus === "COMPLETED" || entryStatus === "REPEATING") {
+      return;
+    }
 
     const current = media.mediaListEntry?.progress ?? 0;
     const total = media.episodes ?? 0;
@@ -195,7 +220,7 @@ export async function syncAnimeProgress(
       target = total;
     }
     if (target <= current) {
-      sent[sentKey] = Math.max(sent[sentKey] ?? 0, current);
+      rememberSent(sent, sentKey, Math.max(prevSent?.p ?? 0, current));
       saveSent(sent);
       return;
     }
@@ -210,12 +235,11 @@ export async function syncAnimeProgress(
     });
 
     if (saved?.SaveMediaListEntry?.progress === target) {
-      sent[sentKey] = target;
+      rememberSent(sent, sentKey, target);
       saveSent(sent);
       emit({ kind: "ok", title, episode: target });
     } else {
-      sent[sentKey] = Math.max(sent[sentKey] ?? 0, target);
-      saveSent(sent);
+      // Unconfirmed writes stay retryable; recording them as sent would suppress retries.
       emit({ kind: "error", title, error: "update-not-confirmed" });
     }
   } catch (e) {

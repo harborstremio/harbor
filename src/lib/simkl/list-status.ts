@@ -1,3 +1,4 @@
+import { activeProfileId } from "@/lib/active-profile-id";
 import { currentActivitiesAll } from "./activities/gate";
 import { simklRequest } from "./client";
 import { simklTargetIds } from "./ids";
@@ -106,6 +107,7 @@ async function pull(): Promise<SimklData> {
   add(data.movies, "movie");
   add(data.shows, "show");
   add(data.anime, "show");
+  rememberSimklWatched(watched);
   return { statuses, watched };
 }
 
@@ -124,6 +126,43 @@ export async function loadSimklStatusMap(): Promise<Map<string, WatchlistStatus>
 
 export async function loadSimklWatchedMap(): Promise<Map<string, Set<string>>> {
   return (await loadData()).watched;
+}
+
+function simklWatchedKey(): string {
+  return `harbor.simkl.watched.v1.${activeProfileId()}`;
+}
+
+// Synchronous starting point for the first paint. The async load still runs and replaces
+// this, so a stale copy can only delay a card, never leave it permanently wrong.
+export function peekSimklWatchedMap(): Map<string, Set<string>> {
+  if (typeof localStorage === "undefined") return new Map();
+  try {
+    const raw: unknown = JSON.parse(localStorage.getItem(simklWatchedKey()) ?? "null");
+    if (!raw || typeof raw !== "object") return new Map();
+    const map = new Map<string, Set<string>>();
+    for (const [key, episodes] of Object.entries(raw as Record<string, unknown>)) {
+      if (Array.isArray(episodes)) {
+        map.set(key, new Set(episodes.filter((e): e is string => typeof e === "string")));
+      }
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+function rememberSimklWatched(watched: Map<string, Set<string>>): void {
+  // An empty result is a failed pull (pull() catches request errors as {}), not "you
+  // watched nothing"; writing it would wipe a good cache and disable the peek.
+  if (watched.size === 0) return;
+  if (typeof localStorage === "undefined") return;
+  try {
+    const flat: Record<string, string[]> = {};
+    for (const [key, episodes] of watched) flat[key] = [...episodes];
+    localStorage.setItem(simklWatchedKey(), JSON.stringify(flat));
+  } catch {
+    /* ignore quota */
+  }
 }
 
 export function statusForId(

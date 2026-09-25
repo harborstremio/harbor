@@ -16,6 +16,17 @@ function node(ids: Record<string, unknown>, info?: ScrobbleInfo): Record<string,
   return out;
 }
 
+export function buildEpisodeBody(
+  showIds: Record<string, unknown>,
+  season: number,
+  number: number,
+  progress: number,
+  info?: ScrobbleInfo,
+): Record<string, unknown> {
+  const p = Math.min(100, Math.max(0, progress));
+  return { progress: p, show: node(showIds, info), episode: { season, number } };
+}
+
 export function buildBody(
   metaId: string,
   episode: EpisodeRef,

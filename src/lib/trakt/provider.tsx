@@ -17,8 +17,7 @@ import {
 } from "./device-auth";
 import { getSession, setSession, subscribeSession } from "./session";
 import { stremioIdToTraktTarget, type TraktEpisodeRef } from "./ids";
-import { scrobblePause, scrobbleStart, scrobbleStop } from "./scrobble";
-import { pushWatched } from "./history";
+import { commitPlaybackState, commitWatchedEpisode } from "./resolve";
 import { armOnlineFlush, flushPendingStops, recordPendingStop } from "./pending-sync";
 import type { DeviceCode, TraktSession, TraktTarget } from "./types";
 
@@ -120,13 +119,12 @@ export function TraktProvider({ children }: { children: ReactNode }) {
       if (!target) return;
       if (!getSession()) return;
       const progress = Math.max(0, Math.min(100, args.progress));
-      if (action === "start") await scrobbleStart(target, progress);
-      else if (action === "pause") await scrobblePause(target, progress);
+      if (action === "start") await commitPlaybackState("start", target, args.metaId, progress);
+      else if (action === "pause") await commitPlaybackState("pause", target, args.metaId, progress);
       else {
-        const outcome = await scrobbleStop(target, progress);
-        let confirmed = outcome === "recorded" || outcome === "already-recorded";
-        if (!confirmed) confirmed = await pushWatched(target);
-        if (!confirmed) recordPendingStop(args.metaId, args.episode, progress);
+        const outcome = await commitWatchedEpisode(target, args.metaId, progress);
+        const settled = outcome === "recorded" || outcome === "already-recorded" || outcome === "not-found";
+        if (!settled) recordPendingStop(args.metaId, args.episode, progress);
       }
     },
     [resolveTarget],
@@ -137,8 +135,7 @@ export function TraktProvider({ children }: { children: ReactNode }) {
       armOnlineFlush({
         hasSession: () => getSession() != null,
         resolveTarget,
-        stopScrobble: scrobbleStop,
-        markWatched: pushWatched,
+        commit: (target, metaId, progress) => commitWatchedEpisode(target, metaId, progress),
       }),
     [resolveTarget],
   );

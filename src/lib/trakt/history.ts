@@ -66,14 +66,30 @@ export async function fetchWatchedHistory(limit = 200): Promise<HistoryItem[]> {
   });
 }
 
+type HistoryWriteResponse = {
+  added?: { movies?: number; episodes?: number };
+  existing?: { movies?: number; episodes?: number };
+};
+
+// Trakt returns 200 with the miss listed under `not_found`, so the status alone cannot
+// distinguish a write from a no-op.
+function writtenCount(response: HistoryWriteResponse | undefined): number {
+  return (
+    (response?.added?.movies ?? 0) +
+    (response?.added?.episodes ?? 0) +
+    (response?.existing?.movies ?? 0) +
+    (response?.existing?.episodes ?? 0)
+  );
+}
+
 export async function pushWatched(target: TraktTarget): Promise<boolean> {
   try {
     if (target.kind === "movie") {
-      await traktRequest("/sync/history", {
+      const response = await traktRequest<HistoryWriteResponse>("/sync/history", {
         method: "POST",
         body: { movies: [{ ids: target.ids }] },
       });
-      return true;
+      return writtenCount(response) > 0;
     }
     if (target.kind === "episode") {
       const body =
@@ -89,8 +105,11 @@ export async function pushWatched(target: TraktTarget): Promise<boolean> {
                 },
               ],
             };
-      await traktRequest("/sync/history", { method: "POST", body });
-      return true;
+      const response = await traktRequest<HistoryWriteResponse>("/sync/history", {
+        method: "POST",
+        body,
+      });
+      return writtenCount(response) > 0;
     }
   } catch {
     return false;

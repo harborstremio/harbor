@@ -27,13 +27,12 @@ export type PendingStop = {
   at: number;
 };
 
-export type ScrobbleStopOutcome = "recorded" | "already-recorded" | "failed";
+export type ScrobbleStopOutcome = "recorded" | "already-recorded" | "not-found" | "failed";
 
 export type FlushDeps = {
   hasSession: () => boolean;
   resolveTarget: (metaId: string, episode?: TraktEpisodeRef) => TraktTarget | null;
-  stopScrobble: (target: TraktTarget, progress: number) => Promise<ScrobbleStopOutcome>;
-  markWatched: (target: TraktTarget) => Promise<boolean>;
+  commit: (target: TraktTarget, metaId: string, progress: number) => Promise<ScrobbleStopOutcome>;
 };
 
 function keyOf(p: Pick<PendingStop, "metaId" | "episode">): string {
@@ -102,16 +101,16 @@ export async function flushPendingStops(
       clearPending(key);
       continue;
     }
-    let confirmed = false;
+    let outcome: ScrobbleStopOutcome = "failed";
     try {
-      const outcome = await d.stopScrobble(target, p.progress >= WATCHED_PCT ? 100 : p.progress);
-      if (!stillOwned()) break;
-      confirmed = outcome === "recorded" || outcome === "already-recorded";
-      if (!confirmed && p.progress >= WATCHED_PCT) confirmed = await d.markWatched(target);
+      outcome = await d.commit(target, p.metaId, p.progress >= WATCHED_PCT ? 100 : p.progress);
     } catch {
-      confirmed = false;
+      outcome = "failed";
     }
-    if (confirmed && stillOwned()) {
+    if (!stillOwned()) break;
+    // not-found is terminal: the episode is absent from the catalog, so retrying is pointless.
+    const terminal = outcome !== "failed";
+    if (terminal) {
       flushed += 1;
       clearPending(key);
     }

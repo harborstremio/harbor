@@ -48,6 +48,26 @@ function currentEpisode(i: LibraryItem): { season: number; episode: number } | n
   return episodeFromVideoId(i.state?.video_id ?? "");
 }
 
+// True while an item still shows its own, already-finished episode and the hook has not
+// yet replaced it. The advance needs the episode list, which is a network fetch, so until
+// it lands the card would render the stale episode. Hiding it beats showing the wrong one.
+export function isPendingAdvance(
+  i: LibraryItem,
+  traktWatched: Set<string>,
+  simklWatched: Map<string, Set<string>>,
+  anilistWatched: Map<string, Set<string>>,
+  simklStatus: Map<string, WatchlistStatus>,
+): boolean {
+  if (i.upNext) return false;
+  if ((i as LibraryItem & { waitingForAir?: boolean }).waitingForAir) return false;
+  const cur = currentEpisode(i);
+  if (!cur) return false;
+  return watchedPredicate(i, cur, traktWatched, simklWatched, anilistWatched, simklStatus)(
+    cur.season,
+    cur.episode,
+  );
+}
+
 function scopedSplitItem(id: string): boolean {
   return isSplitFranchiseKitsu(parseKitsuId(id) ?? parseKitsuId(getAnimeCwId(id) ?? ""));
 }
@@ -173,7 +193,17 @@ export function useCwAdvance(
       return;
     }
     let cancelled = false;
-    const candidates = items.filter((i) => currentEpisode(i) != null && isFinishedSeries(i));
+    // Local completion alone must not decide eligibility: a completion on another device
+    // leaves local progress mid-episode, so the remote watched maps have to admit it too.
+    const candidates = items.filter((i) => {
+      const cur = currentEpisode(i);
+      if (!cur) return false;
+      if (isFinishedSeries(i)) return true;
+      return watchedPredicate(i, cur, traktWatched, simklWatched, anilistWatched, simklStatus)(
+        cur.season,
+        cur.episode,
+      );
+    });
     void (async () => {
       const next = new Map<string, LibraryItem>();
       const remove = new Set<string>();
@@ -263,12 +293,9 @@ export function useCwAdvance(
           effCur,
           (s: number, e: number): boolean => {
             if (s === effCur.season && e === effCur.episode) return true;
-            const prog = getEpisodeProgress(i._id, s, e, null, null, new Set());
-            if (prog.watched) return true;
+            if (checkWatched(s, e)) return true;
             if (!scoped) return false;
-            return providerAliasCoords(list, s, e).some(
-              (a) => getEpisodeProgress(i._id, a.season, a.episode, null, null, new Set()).watched,
-            );
+            return providerAliasCoords(list, s, e).some((a) => checkWatched(a.season, a.episode));
           },
           episodeHiding ? (s, e) => isEpisodeHidden(i._id, s, e) : undefined,
         );
@@ -378,10 +405,11 @@ export function useCwAdvance(
   ]);
 
   if (!enabled) return items;
-  const base =
+  const base = (
     advanced.size === 0 && removed.size === 0
       ? items
-      : items.map((i) => advanced.get(i._id) ?? i).filter((i) => !removed.has(i._id));
+      : items.map((i) => advanced.get(i._id) ?? i).filter((i) => !removed.has(i._id))
+  ).filter((i) => !isPendingAdvance(i, traktWatched, simklWatched, anilistWatched, simklStatus));
   if (extra.length === 0) return base;
   const keyOf = (i: LibraryItem) => `${i.type}|${franchiseDedupKey(i.name ?? "")}`;
   const baseKeys = new Set(base.map(keyOf));
