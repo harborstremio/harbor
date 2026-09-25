@@ -395,6 +395,7 @@ export const DEFAULT: Settings = {
   stillWatchingAfter: 3,
   keyboardPauseShowsControls: true,
   hideWatchedInCatalogs: false,
+  hideWatchedInHero: false,
   hideUnreleased: false,
   localEpisodeSortDesc: false,
   smoothScroll: false,

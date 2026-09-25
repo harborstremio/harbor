@@ -5,6 +5,7 @@ import traditionalStyleImg from "@/assets/onboarding/traditional.webp";
 import {
   Check,
   Contrast,
+  EyeOff,
   Image as ImageIcon,
   LayoutTemplate,
   Maximize,
@@ -69,6 +70,16 @@ export function HomeTab() {
             value={settings.heroFullQuality}
             onChange={(v) => update({ heroFullQuality: v })}
             leading={<ImageIcon size={18} strokeWidth={2} />}
+          />
+          <ToggleRow
+            label={t("Hide watched titles in the featured hero")}
+            newId="home:hero-hide-watched"
+            sub={t(
+              "Watched movies and shows you've made progress on are skipped in the featured hero and replaced with the next unwatched pick from the same row. Uses your local watch history, Trakt, and Simkl.",
+            )}
+            value={settings.hideWatchedInHero}
+            onChange={(v) => update({ hideWatchedInHero: v })}
+            leading={<EyeOff size={18} strokeWidth={2} />}
           />
         </SettingGroup>
 

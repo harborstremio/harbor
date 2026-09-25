@@ -13,6 +13,7 @@ const NEW_SETTINGS = new Set([
   "tv:subtitle-look",
   "mpv:buffer-size",
   "home:prefer-episode-still",
+  "home:hero-hide-watched",
 ]);
 
 const LS = "harbor.settingsNew.v1";

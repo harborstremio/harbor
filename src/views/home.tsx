@@ -74,11 +74,16 @@ import { useTrakt } from "@/lib/trakt/provider";
 import { buildTraktHomeRows } from "@/lib/trakt/home-rails";
 import { fetchWatchedKeySet } from "@/lib/trakt/history";
 import { recentlyPlayed, subscribePlayback, type WatchedSet } from "@/lib/playback-history";
+import { collapseWatchedKeys, isTitleWatched } from "@/lib/watched-title";
+import { useWatchedFlagIds } from "@/lib/watched-flag";
+import { useMovieWatchedIds } from "@/lib/movie-watched";
 import { detectAnimeForCw, useDetectedAnimeVersion } from "@/lib/anime-detect";
 import { buildSimklHomeRows } from "@/lib/simkl/home-rails";
 import {
   loadSimklWatchedMap,
   loadSimklStatusMap,
+  simklWatchedForId,
+  statusForId,
   type WatchlistStatus,
 } from "@/lib/simkl/list-status";
 import { useExternalCw } from "@/lib/feed/external-cw";
@@ -143,6 +148,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
   const [localWatched, setLocalWatched] = useState<WatchedSet>(() => recentlyPlayed());
   useEffect(() => subscribePlayback(() => setLocalWatched(recentlyPlayed())), []);
   const [heroPool, setHeroPool] = useState<Meta[]>([]);
+  const [heroRows, setHeroRows] = useState<string[]>([]);
   const [heroReady, setHeroReady] = useState(false);
   useEffect(() => {
     if (!active || !heroReady) return;
@@ -213,7 +219,10 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
     (async () => {
       const isClassic = settings.homeMode === "classic";
 
-      let built: { rows: HomeRow[]; hero: Meta[]; failed?: number } = { rows: [], hero: [] };
+      let built: { rows: HomeRow[]; hero: Meta[]; heroRows?: string[]; failed?: number } = {
+        rows: [],
+        hero: [],
+      };
       if (!isClassic) {
         built = settings.tmdbKey
           ? await buildTmdbRows(settings).catch(() => ({
@@ -239,11 +248,17 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
       const commitRows = (next: HomeRow[]) =>
         setRows((prev) => (degraded && next.length === 0 && prev.length > 0 ? prev : next));
       commitRows(mergeRows(built.rows, []));
-      if (!degraded || built.hero.length > 0) setHeroPool(built.hero);
+      if (!degraded || built.hero.length > 0) {
+        setHeroPool(built.hero);
+        setHeroRows(built.heroRows ?? []);
+      }
       setHeroReady(true);
       if (settings.heroFeed && settings.heroFeed !== "classic") {
         const feed = await fetchHeroFeed(settings.heroFeed).catch(() => [] as Meta[]);
-        if (!cancelled && feed.length >= 4) setHeroPool(feed);
+        if (!cancelled && feed.length >= 4) {
+          setHeroPool(feed);
+          setHeroRows([]);
+        }
       }
 
       const dedupRows = isClassic ? false : !settings.homeShowAllAddonRows;
@@ -806,19 +821,37 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
     animeRows,
   ]);
 
+  const watchedFlags = useWatchedFlagIds();
+  const movieWatchedIds = useMovieWatchedIds();
+  const heroWatched = useMemo(() => {
+    const traktKeys = collapseWatchedKeys(traktWatched);
+    return (m: Meta) =>
+      isTitleWatched(m, {
+        traktKeys,
+        localWatched,
+        stremioWatched: stremioWatchedIds,
+        watchedFlags,
+        movieWatched: movieWatchedIds,
+      }) ||
+      simklWatchedForId(simklWatchedMap, m.id).size > 0 ||
+      (m.type === "movie" && statusForId(simklStatusMap, m.id) === "completed");
+  }, [
+    traktWatched,
+    localWatched,
+    stremioWatchedIds,
+    simklWatchedMap,
+    simklStatusMap,
+    watchedFlags,
+    movieWatchedIds,
+  ]);
+
   const heroSlides = useMemo<Slide[]>(() => {
-    const pool = (
-      heroSourceRow
-        ? [
-            ...heroSourceRow.metas.filter((m) => m.background),
-            ...heroSourceRow.metas.filter((m) => !m.background && m.poster),
-          ]
-        : heroPool
-    ).filter((m) => typeof m.id === "string");
+    const skipWatched = settings.hideWatchedInHero;
+    const watched = (m: Meta) => skipWatched && heroWatched(m);
     const seen = new Set<string>();
     const out: Slide[] = [];
-    for (const m of pool) {
-      if (seen.has(m.id)) continue;
+    const push = (m: Meta) => {
+      if (typeof m.id !== "string" || seen.has(m.id)) return;
       seen.add(m.id);
       const fm = m as typeof m & {
         rank?: number;
@@ -833,10 +866,39 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
           sources: fm.sources,
         },
       });
-      if (out.length >= 4) break;
+    };
+    const ordered = (metas: Meta[]) => [
+      ...metas.filter((m) => m.background),
+      ...metas.filter((m) => !m.background && m.poster),
+    ];
+    if (heroSourceRow) {
+      for (const m of ordered(heroSourceRow.metas)) {
+        if (watched(m)) continue;
+        push(m);
+        if (out.length >= 4) break;
+      }
+    } else if (skipWatched && heroRows.length > 0) {
+      for (const key of heroRows) {
+        const row = rows.find((r) => r.key === key);
+        const next = row?.metas.find(
+          (m) =>
+            typeof m.id === "string" &&
+            (m.background || m.poster) &&
+            !seen.has(m.id) &&
+            !watched(m),
+        );
+        if (next) push(next);
+        if (out.length >= 4) break;
+      }
+    } else {
+      for (const m of heroPool) {
+        if (watched(m)) continue;
+        push(m);
+        if (out.length >= 4) break;
+      }
     }
     return out;
-  }, [heroPool, heroSourceRow]);
+  }, [heroPool, heroSourceRow, heroRows, rows, settings.hideWatchedInHero, heroWatched]);
 
   const scrollRef = useRef<HTMLElement>(null);
   const [scrollEl, setScrollEl] = useState<HTMLElement | null>(null);

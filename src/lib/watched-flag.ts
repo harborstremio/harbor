@@ -93,6 +93,12 @@ export function watchedFlagIds(): Set<string> {
   return load();
 }
 
+const EMPTY_FLAG_IDS: Set<string> = new Set();
+
+export function useWatchedFlagIds(): Set<string> {
+  return useSyncExternalStore(subscribe, load, () => EMPTY_FLAG_IDS);
+}
+
 export function setWatchedFlag(metaId: string, watched: boolean): void {
   const cur = load();
   if (cur.has(metaId) === watched) return;
