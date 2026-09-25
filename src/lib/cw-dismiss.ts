@@ -62,15 +62,20 @@ let version = 0;
   if (legacy) persistDismissed();
 })();
 
-function persistDismissed(): void {
+function persistDismissed(
+  times = dismissed,
+  videos = dismissedVid,
+  acknowledged = false,
+  positions = dismissedPos,
+): void {
   try {
     const out: Record<
       string,
       number | { t: number; v?: string; s?: number; e?: number; p?: number }
     > = {};
-    for (const [k, t] of dismissed) {
-      const v = dismissedVid.get(k);
-      const pos = dismissedPos.get(k);
+    for (const [k, t] of times) {
+      const v = videos.get(k);
+      const pos = positions.get(k);
       if (v || pos) {
         out[k] = { t };
         if (v) out[k].v = v;
@@ -83,8 +88,14 @@ function persistDismissed(): void {
         out[k] = t;
       }
     }
-    setItemWithRecovery(DISMISS_KEY, JSON.stringify(out));
-  } catch {}
+    const saved = setItemWithRecovery(DISMISS_KEY, JSON.stringify(out));
+    if (acknowledged && !saved) throw new Error("Storage could not save this dismissal.");
+  } catch (error) {
+    if (acknowledged)
+      throw new Error("Could not save the change. Check available storage and try again.", {
+        cause: error,
+      });
+  }
 }
 
 function emit(): void {
@@ -162,44 +173,85 @@ export function isCwDismissed(item: LibraryItem): boolean {
   return true;
 }
 
-export function dismissCw(item: LibraryItem, authKey: string | null): void {
+export type CwDismissResult = { sync: "not-required" | "synced" | "queued" };
+
+export function dismissCw(item: LibraryItem, authKey: string | null): void;
+export function dismissCw(
+  item: LibraryItem,
+  authKey: string | null,
+  options: { acknowledged: true },
+): Promise<CwDismissResult>;
+export function dismissCw(
+  item: LibraryItem,
+  authKey: string | null,
+  options: { acknowledged?: boolean } = {},
+): void | Promise<CwDismissResult> {
   const id = item._id;
   const now = new Date().toISOString();
   const nowMs = Date.parse(now);
-  dismissed.set(id, nowMs);
+  const times = new Map(dismissed);
+  const videos = new Map(dismissedVid);
+  times.set(id, nowMs);
   const dismissVid = item.state?.video_id;
-  if (typeof dismissVid === "string" && dismissVid) dismissedVid.set(id, dismissVid);
-  else dismissedVid.delete(id);
+  if (typeof dismissVid === "string" && dismissVid) videos.set(id, dismissVid);
+  else videos.delete(id);
+  const positions = new Map(dismissedPos);
   if (item.state) {
     const { season, episode } = resolveEpisode(item);
-    dismissedPos.set(id, { s: season, e: episode, p: progressRatio(item) });
-  } else {
-    dismissedPos.delete(id);
-  }
-  if (item.external) {
-    dismissed.set(`${item.external}|${id}`, nowMs);
-    const { season, episode } = resolveEpisode(item);
-    clearResume(id, season, episode);
-    persistDismissed();
-    emit();
-    return;
-  }
-  persistDismissed();
+    positions.set(id, { s: season, e: episode, p: progressRatio(item) });
+  } else positions.delete(id);
+  if (item.external) times.set(`${item.external}|${id}`, nowMs);
+  persistDismissed(times, videos, options.acknowledged, positions);
+  dismissed.clear();
+  dismissedVid.clear();
+  dismissedPos.clear();
+  for (const [key, value] of times) dismissed.set(key, value);
+  for (const [key, value] of videos) dismissedVid.set(key, value);
+  for (const [key, value] of positions) dismissedPos.set(key, value);
   emit();
-  if (!authKey || !item.state) return;
+  if (item.external) {
+    const { season, episode } = resolveEpisode(item);
+    try {
+      clearResume(id, season, episode, options);
+    } catch {
+      throw new Error(
+        "Removed from Continue Watching, but the saved position could not be cleared.",
+      );
+    }
+  }
+  if (item.external || !authKey || !item.state) {
+    return options.acknowledged ? Promise.resolve({ sync: "not-required" }) : undefined;
+  }
   const vid = item.state.video_id ?? "";
   const kitsuThreeSeg = /^(kitsu|mal|anilist|anidb):/.test(id) && vid.split(":").length === 3;
   const se = kitsuThreeSeg ? null : episodeFromVideoId(item.state.video_id);
-  clearResume(
-    id,
-    item.state.season ?? (kitsuThreeSeg ? 1 : se?.season),
-    item.state.episode ?? (kitsuThreeSeg ? Number(vid.split(":")[2]) : se?.episode),
+  try {
+    clearResume(
+      id,
+      item.state.season ?? (kitsuThreeSeg ? 1 : se?.season),
+      item.state.episode ?? (kitsuThreeSeg ? Number(vid.split(":")[2]) : se?.episode),
+      options,
+    );
+  } catch {
+    throw new Error("Removed from Continue Watching, but the saved position could not be cleared.");
+  }
+  const write = cloudLibraryPut(
+    authKey,
+    { ...item, state: { ...item.state, timeOffset: 0 }, _mtime: now },
+    options,
   );
-  void cloudLibraryPut(authKey, {
-    ...item,
-    state: { ...item.state, timeOffset: 0 },
-    _mtime: now,
-  });
+  if (!options.acknowledged) {
+    void write;
+    return;
+  }
+  return write.then(
+    (synced) => ({ sync: synced ? "synced" : "queued" }),
+    () => {
+      throw new Error(
+        "Removed from Continue Watching on this device, but synchronization could not be saved.",
+      );
+    },
+  );
 }
 
 function subscribe(cb: () => void): () => void {

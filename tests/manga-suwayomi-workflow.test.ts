@@ -51,7 +51,7 @@ test("Harbor favorites mirror the Suwayomi library state", () => {
   const favorites = source("../src/lib/manga-favorites.tsx");
   const rest = source("../src/lib/manga/sources/suwayomi/rest.ts");
   const graphql = source("../src/lib/manga/sources/suwayomi/graphql.ts");
-  assert.match(favorites, /syncLibrary\(input\.id, true\)/);
+  assert.match(favorites, /syncLibrary\(input\.id, !removing, sourceId\)/);
   assert.match(rest, /\/api\/v1\/manga\/\$\{mangaId\}\/library/);
   assert.match(
     graphql,

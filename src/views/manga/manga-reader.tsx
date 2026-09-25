@@ -60,6 +60,7 @@ import {
   ReaderLoading,
 } from "./manga-reader/reader-states";
 import type { ReaderPrefs, MangaPage } from "./manga-reader/reader-types";
+import { useMangaChapterContext } from "@/lib/use-manga-chapter-context";
 
 export function MangaReader({
   chapters,
@@ -87,6 +88,7 @@ export function MangaReader({
   onChangeIndex: (i: number) => void;
 }) {
   const chapter = chapters[index];
+  const chapterContext = useMangaChapterContext<HTMLDivElement>(manga, chapter);
   const t = useT();
   const [pages, setPages] = useState<MangaPage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -498,7 +500,16 @@ export function MangaReader({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement) return;
+      if (
+        e.defaultPrevented ||
+        document.querySelector("[data-harbor-context-layer],[data-harbor-image-viewer]")
+      )
+        return;
+      if (
+        e.target instanceof Element &&
+        e.target.closest("input,textarea,[contenteditable]:not([contenteditable='false'])")
+      )
+        return;
       const navKey = e.key === " " || e.key === "ArrowRight" || e.key === "ArrowLeft";
       if (
         navKey &&
@@ -838,7 +849,11 @@ export function MangaReader({
         followTarget.current = null;
         return;
       }
-      node.scrollTo({ top: node.scrollTop + dy * 0.5, left: node.scrollLeft + dx * 0.5, behavior: "auto" });
+      node.scrollTo({
+        top: node.scrollTop + dy * 0.5,
+        left: node.scrollLeft + dx * 0.5,
+        behavior: "auto",
+      });
       followRaf.current = requestAnimationFrame(step);
     };
     followRaf.current = requestAnimationFrame(step);
@@ -908,7 +923,10 @@ export function MangaReader({
   );
 
   return createPortal(
-    <div className={`fixed inset-0 z-[80] ${BG[prefs.bg]} text-ink`}>
+    <div
+      ref={disableMangaPersistence ? undefined : chapterContext}
+      className={`fixed inset-0 z-[80] ${BG[prefs.bg]} text-ink`}
+    >
       <div
         ref={scrollRef}
         dir={horizontal ? (rtl ? "rtl" : "ltr") : undefined}

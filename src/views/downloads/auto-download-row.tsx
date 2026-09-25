@@ -1,4 +1,5 @@
 import { RotateCw, X } from "lucide-react";
+import { saveAutoDownloadChange } from "./auto-download-feedback";
 import { Poster, usePosterChain } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
 import { removeAutoDownload, updateAutoDownload, type AutoDlSeries } from "@/lib/auto-download";
@@ -74,9 +75,9 @@ export function AutoDownloadRow({ series }: { series: AutoDlSeries }) {
           </div>
           <button
             type="button"
-            onClick={() => removeAutoDownload(series.id)}
-            aria-label={t("Stop auto-downloading {title}", { title: series.title })}
-            title={t("Stop auto-downloading")}
+            onClick={() => saveAutoDownloadChange(() => removeAutoDownload(series.id))}
+            aria-label={t("Disable automatic downloads for {title}", { title: series.title })}
+            title={t("Disable automatic downloads")}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-ink/10 hover:text-ink"
           >
             <X size={15} strokeWidth={2.2} />
@@ -88,21 +89,27 @@ export function AutoDownloadRow({ series }: { series: AutoDlSeries }) {
             label={qualityLabel(series.maxHeight)}
             options={QUALITY_OPTIONS}
             isActive={(v) => v === series.maxHeight}
-            onSelect={(v) => updateAutoDownload(series.id, { maxHeight: v })}
+            onSelect={(v) =>
+              saveAutoDownloadChange(() => updateAutoDownload(series.id, { maxHeight: v }))
+            }
           />{" "}
           {t("episodes")},{" "}
           <InlineChoice
             label={p2pLabel(series.allowP2p)}
             options={P2P_OPTIONS}
             isActive={(v) => v === series.allowP2p}
-            onSelect={(v) => updateAutoDownload(series.id, { allowP2p: v })}
+            onSelect={(v) =>
+              saveAutoDownloadChange(() => updateAutoDownload(series.id, { allowP2p: v }))
+            }
           />
           ,{" "}
           <InlineChoice
             label={stopLabel(series.stop)}
             options={STOP_OPTIONS}
             isActive={(v) => stopEquals(v, series.stop)}
-            onSelect={(v) => updateAutoDownload(series.id, { stop: v })}
+            onSelect={(v) =>
+              saveAutoDownloadChange(() => updateAutoDownload(series.id, { stop: v }))
+            }
           />
           .
         </p>

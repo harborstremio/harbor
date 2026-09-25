@@ -2,7 +2,7 @@ import { memo, useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { sizeImageUrl } from "@/lib/img-size";
-import { useContextMenu } from "@/lib/context-menu";
+import { useContextMenu, type MembershipContext } from "@/lib/context-menu";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { usePosterChain } from "@/components/poster";
@@ -42,7 +42,15 @@ function useLogo(meta: Meta): string | undefined {
   return logo;
 }
 
-export const TvCard = memo(function TvCard({ meta, kids = false }: { meta: Meta; kids?: boolean }) {
+export const TvCard = memo(function TvCard({
+  meta,
+  kids = false,
+  membership,
+}: {
+  meta: Meta;
+  kids?: boolean;
+  membership?: MembershipContext;
+}) {
   const { openMeta, openManga } = useView();
   const { open: openContextMenu } = useContextMenu();
   const { settings } = useSettings();
@@ -66,7 +74,7 @@ export const TvCard = memo(function TvCard({ meta, kids = false }: { meta: Meta;
     <button
       type="button"
       onClick={open}
-      onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
+      onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta, membership })}
       title={meta.name}
       style={{ borderRadius: settings.posterRadius }}
       className="group relative block aspect-[16/9] w-full overflow-hidden bg-elevated ring-1 ring-edge-soft transition-[box-shadow,--tw-ring-color] duration-200 ease-out hover:ring-edge hover:shadow-[0_10px_28px_-18px_rgba(0,0,0,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/70"

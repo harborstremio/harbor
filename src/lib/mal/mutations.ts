@@ -63,11 +63,27 @@ export async function resolveMalMediaId(harborId: string): Promise<number | null
   return null;
 }
 
-export async function fetchListEntry(malId: number): Promise<ListEntryInfo> {
+export async function fetchListEntry(malId: number, strict = false): Promise<ListEntryInfo> {
   const data = await malRequest<{
+    id: number;
     num_episodes: number | null;
-    my_list_status: RawStatus | null;
+    my_list_status?: RawStatus | null;
   }>(`/anime/${malId}?fields=num_episodes,my_list_status`);
+  if (
+    strict &&
+    (!data ||
+      data.id !== malId ||
+      (data.num_episodes !== null &&
+        (!Number.isInteger(data.num_episodes) || data.num_episodes < 0)) ||
+      (data.my_list_status != null &&
+        (!data.my_list_status ||
+          !["watching", "completed", "on_hold", "dropped", "plan_to_watch"].includes(
+            data.my_list_status.status,
+          ) ||
+          !Number.isInteger(data.my_list_status.num_episodes_watched) ||
+          data.my_list_status.num_episodes_watched < 0)))
+  )
+    throw new Error("The current MyAnimeList watched state could not be read safely.");
   return {
     numEpisodes: data.num_episodes ?? null,
     entry: data.my_list_status
@@ -86,7 +102,8 @@ export async function saveListEntry(input: {
 }): Promise<SavedEntry> {
   const params = new URLSearchParams();
   if (input.status) params.set("status", input.status);
-  if (input.numEpisodesWatched != null) params.set("num_watched_episodes", String(input.numEpisodesWatched));
+  if (input.numEpisodesWatched != null)
+    params.set("num_watched_episodes", String(input.numEpisodesWatched));
   const data = await malRequest<RawStatus>(`/anime/${input.malId}/my_list_status`, {
     method: "PATCH",
     body: params,

@@ -1,8 +1,8 @@
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, ListX } from "lucide-react";
 import { useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { useMangaContext } from "@/lib/use-manga-context";
 import { Poster } from "@/components/poster";
-import { useContextMenu } from "@/lib/context-menu";
 import { RailChevron } from "@/components/nav-arrow";
 import { useProfiles } from "@/lib/profiles";
 import {
@@ -64,7 +64,6 @@ function ContinueCard({
 }) {
   const [busy, setBusy] = useState(false);
   const t = useT();
-  const { open: openContextMenu } = useContextMenu();
   const pct =
     entry.totalPages > 0 ? Math.min(100, Math.round((entry.page / entry.totalPages) * 100)) : 0;
   const open = () => {
@@ -83,17 +82,30 @@ function ContinueCard({
       setBusy(false);
     };
     const guard = setTimeout(clear, 8_000);
-    Promise.resolve(onResume(entry)).finally(() => {
+    return Promise.resolve(onResume(entry)).finally(() => {
       clearTimeout(guard);
       clear();
     });
   };
+  const context = useMangaContext(entry, {
+    resume: onResume,
+    disabled: busy,
+    extra: () => [
+      {
+        id: `manga:remove-progress:${entry.id}`,
+        icon: <ListX size={16} />,
+        label: t("Remove from continue reading"),
+        disabled: busy,
+        run: onRemove,
+      },
+    ],
+  });
   return (
     <div className="group relative w-[310px] shrink-0">
       <button
+        ref={context.ref}
         type="button"
         onClick={open}
-        onContextMenu={(e) => openContextMenu(e, { kind: "manga-continue", entry })}
         aria-busy={busy}
         className={`flex w-full items-stretch gap-3.5 rounded-2xl border p-3 text-start transition-[transform,background-color,box-shadow] duration-200 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 ${
           busy
@@ -133,7 +145,9 @@ function ContinueCard({
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-edge-soft/60">
                 <div className="h-full rounded-full bg-accent" style={{ width: `${pct}%` }} />
               </div>
-              <span className="text-[11.5px] font-semibold tabular-nums text-ink-subtle">{pct}%</span>
+              <span className="text-[11.5px] font-semibold tabular-nums text-ink-subtle">
+                {pct}%
+              </span>
             </div>
           )}
         </div>

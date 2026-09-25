@@ -128,12 +128,15 @@ test("dismissing a local anime entry persists past re-absorb", () => {
     /const onDismissCw = useCallback\([\s\S]*?\[authKey\],\s*\);/,
   )?.[0];
   assert.ok(homeDismiss, "home onDismissCw must exist");
-  assert.match(homeDismiss, /clearLocalCw\(item\._id\);\s*dismissCw\(item, authKey\);/);
+  assert.match(
+    homeDismiss,
+    /clearLocalCw\(item\._id, \{ acknowledged: true \}\);\s*return dismissCw\(item, authKey, \{ acknowledged: true \}\);/,
+  );
   const animeDismiss = anime.match(/onDismiss=\{\(it\) => \{[\s\S]*?\}\}/)?.[0];
   assert.ok(animeDismiss, "anime room onDismiss must exist");
   assert.match(
     animeDismiss,
-    /if \(it\.local\) clearLocalCw\(it\._id\);\s*dismissCw\(it, authKey\);/,
+    /if \(it\.local\) clearLocalCw\(it\._id, \{ acknowledged: true \}\);\s*return dismissCw\(it, authKey, \{ acknowledged: true \}\);/,
   );
 });
 

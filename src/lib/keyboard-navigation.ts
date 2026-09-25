@@ -1528,6 +1528,39 @@ export function dispatchTvNav(
   repeat = false,
 ): void {
   hasTvNavigationIntent = true;
+  const contextLayer = document.querySelector(
+    "[data-harbor-context-layer],[data-harbor-image-viewer]",
+  );
+  if (contextLayer) {
+    hoveredEl = null;
+    const active = document.activeElement;
+    const sink = active instanceof HTMLElement ? active : window;
+    const key = action === "select" ? "Enter" : action === "home" ? "Home" : TV_NAV_KEY[action];
+    if (key) {
+      const event = new KeyboardEvent("keydown", {
+        key,
+        code: key,
+        bubbles: true,
+        cancelable: true,
+        repeat,
+      });
+      sink.dispatchEvent(event);
+      // Synthetic Enter has no native button activation. Give the owning layer
+      // first refusal, then activate its still-focused command exactly once.
+      if (
+        action === "select" &&
+        !repeat &&
+        !event.defaultPrevented &&
+        active instanceof HTMLElement &&
+        active.isConnected &&
+        document.activeElement === active &&
+        active.closest("[data-harbor-context-layer],[data-harbor-image-viewer]") &&
+        !isEditable(active)
+      )
+        active.click();
+    }
+    return;
+  }
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("harbor:user-activity"));
   }

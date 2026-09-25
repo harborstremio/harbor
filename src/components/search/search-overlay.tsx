@@ -106,6 +106,7 @@ export function SearchOverlay() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
+      if (document.activeElement?.closest("[data-harbor-context-layer]")) return;
       if (e.key !== "Escape") return;
       e.preventDefault();
       e.stopPropagation();

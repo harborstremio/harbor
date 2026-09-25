@@ -1,0 +1,242 @@
+.context-download-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: color-mix(in srgb, var(--color-canvas) 24%, transparent);
+}
+.context-download-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 500px);
+  max-height: min(82vh, 670px);
+  overflow: hidden;
+  border: 1px solid var(--color-edge-soft);
+  border-radius: 20px;
+  color: var(--color-ink);
+  background: var(--color-elevated);
+  box-shadow:
+    0 24px 70px -22px rgb(0 0 0 / 48%),
+    inset 0 1px rgb(255 255 255 / 5%);
+}
+@supports (backdrop-filter: blur(1px)) {
+  .context-download-panel {
+    background: color-mix(in srgb, var(--color-elevated) 92%, transparent);
+    backdrop-filter: blur(12px);
+  }
+}
+.context-download-header {
+  position: relative;
+  flex: none;
+  padding: 15px 18px 17px;
+  overflow: hidden;
+}
+.context-download-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.26;
+}
+.context-download-header-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-elevated) 20%, transparent),
+    var(--color-elevated)
+  );
+}
+.context-download-toolbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.context-download-close {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--color-elevated) 72%, transparent);
+  color: var(--color-ink-muted);
+}
+.context-download-auto {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 250px;
+  min-height: 30px;
+  padding: 5px 8px;
+  border-radius: 9px;
+  color: var(--color-ink-muted);
+  background: color-mix(in srgb, var(--color-elevated) 72%, transparent);
+  font-size: 11px;
+  line-height: 1.3;
+}
+.context-download-auto.is-enabled {
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, var(--color-elevated));
+}
+.context-download-title-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 90px;
+  height: 90px;
+  margin-block: 6px 10px;
+}
+.context-download-title-slot:has(.context-download-logo)::before {
+  content: "";
+  position: absolute;
+  inset: -8px -18px;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 80% 50% at 35% 50%,
+    rgb(20 24 28 / 52%) 12%,
+    rgb(20 24 28 / 40%) 45%,
+    rgb(20 24 28 / 14%) 74%,
+    transparent 100%
+  );
+}
+[dir="rtl"] .context-download-title-slot:has(.context-download-logo)::before {
+  transform: scaleX(-1);
+}
+.context-download-logo {
+  position: relative;
+  width: auto;
+  max-width: 80%;
+  max-height: 74px;
+  object-fit: contain;
+  object-position: left center;
+  filter: drop-shadow(0 3px 7px rgb(0 0 0 / 20%));
+}
+[dir="rtl"] .context-download-logo {
+  object-position: right center;
+}
+.context-download-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 29px;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+.context-download-seasons {
+  display: flex;
+  flex: none;
+  gap: 5px;
+  padding: 9px 12px;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  border-block: 1px solid var(--color-edge-soft);
+}
+.context-download-seasons button {
+  flex: none;
+  min-height: 32px;
+  padding: 6px 11px;
+  border-radius: 9px;
+  font-size: 12px;
+  color: var(--color-ink-muted);
+}
+.context-download-seasons button[aria-pressed="true"] {
+  color: var(--color-ink);
+  background: var(--color-raised);
+}
+.context-download-content {
+  min-height: 120px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding: 6px;
+}
+.context-download-content.is-movie {
+  min-height: auto;
+}
+.context-download-episode {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 76px;
+  padding: 9px 11px;
+  border-radius: 12px;
+  text-align: start;
+  transition: background-color 120ms;
+}
+.context-download-still {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 54px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--color-raised);
+}
+.context-download-still > div {
+  width: 100%;
+}
+.context-download-bottom {
+  flex: none;
+  border-top: 1px solid var(--color-edge-soft);
+  padding: 11px 14px;
+}
+.context-download-source {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 11px;
+  background: var(--color-raised);
+  font-size: 12px;
+  font-weight: 500;
+}
+.context-download-panel button:not(:disabled):hover {
+  background-color: var(--color-raised);
+}
+.context-download-panel button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+.context-download-panel button:disabled {
+  opacity: 0.48;
+}
+@media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+  .context-download-panel {
+    background: var(--color-elevated);
+    backdrop-filter: none;
+  }
+}
+@media (max-width: 460px) {
+  .context-download-overlay {
+    padding: 10px;
+  }
+  .context-download-toolbar {
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .context-download-auto {
+    max-width: 175px;
+  }
+  .context-download-header {
+    padding-inline: 14px;
+  }
+  .context-download-title {
+    font-size: 25px;
+  }
+  .context-download-still {
+    width: 80px;
+    height: 45px;
+  }
+}

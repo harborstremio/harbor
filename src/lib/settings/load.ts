@@ -130,19 +130,22 @@ let cachedSettings: Settings | null = null;
 export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
   const raw = localStorage.getItem(rawKey);
   if (cachedSettings && cachedKey === rawKey && cachedRaw === raw) return cachedSettings;
-  const settings = parseStoredSettings(raw);
+  const { settings, cacheable } = parseStoredSettings(raw);
   cachedKey = rawKey;
   cachedRaw = raw;
-  cachedSettings = settings;
+  cachedSettings = cacheable ? settings : null;
   return settings;
 }
 
-function parseStoredSettings(raw: string | null): Settings {
+function parseStoredSettings(raw: string | null): { settings: Settings; cacheable: boolean } {
   if (!raw) {
     return {
-      ...DEFAULT,
-      seekBackStepSec: sanitizeSeekStep(legacySeekStep("back"), DEFAULT.seekBackStepSec),
-      seekForwardStepSec: sanitizeSeekStep(legacySeekStep("forward"), DEFAULT.seekForwardStepSec),
+      settings: {
+        ...DEFAULT,
+        seekBackStepSec: sanitizeSeekStep(legacySeekStep("back"), DEFAULT.seekBackStepSec),
+        seekForwardStepSec: sanitizeSeekStep(legacySeekStep("forward"), DEFAULT.seekForwardStepSec),
+      },
+      cacheable: false,
     };
   }
   try {
@@ -178,6 +181,13 @@ function parseStoredSettings(raw: string | null): Settings {
       _playbackSourcePreferenceV1?: boolean;
       _playbackSourcePreferenceV2?: boolean;
     };
+    // Legacy defaults and playlist adoption depend on other stores. Re-read them
+    // until a self-contained settings blob has been persisted by the normal flow.
+    const cacheable =
+      parsed.seekBackStepSec != null &&
+      parsed.seekForwardStepSec != null &&
+      parsed._playlistsTabV1 === true &&
+      (!Array.isArray(parsed.iptvPlaylists) || parsed.iptvPlaylists.length === 0);
     if (!parsed._playbackSourcePreferenceV1) {
       parsed.playbackSourcePreference = parsed.localPlaybackMode === "local" ? "local" : "online";
       parsed.preferredMediaServerId = null;
@@ -346,7 +356,7 @@ function parseStoredSettings(raw: string | null): Settings {
       parsed.cwSources = { library: true, trakt: ext, simkl: ext, local: true };
     }
     const posterCards = normalizePosterCardSettings(parsed);
-    return {
+    const settings: Settings = {
       ...DEFAULT,
       ...parsed,
       ...posterCards,
@@ -511,7 +521,8 @@ function parseStoredSettings(raw: string | null): Settings {
         ? parsed.tmdbImageLangs.filter((l): l is string => typeof l === "string")
         : DEFAULT.tmdbImageLangs,
     };
+    return { settings, cacheable };
   } catch {
-    return DEFAULT;
+    return { settings: DEFAULT, cacheable: false };
   }
 }

@@ -5,6 +5,8 @@ import sportsStatistics from "./tr/sports-statistics";
 import sportsApi from "./tr/sports-api";
 import esportsArena from "./tr/esports-arena";
 import sportsHub from "./tr/sports-hub";
+import contextActionsFallback from "./context-actions-fallback";
+
 import ebookSources from "./tr/ebook-sources";
 import settingsRefinements from "./tr/settings-refinements";
 import miscA from "./tr/misc-a";
@@ -29,6 +31,8 @@ import bpSports from "./tr/bp-sports";
 const tr: Record<string, string> = {
   ...videoCast,
   ...music,
+  ...contextActionsFallback,
+
   ...ebookSources,
   ...miscA,
   ...miscB,

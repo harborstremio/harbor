@@ -1,4 +1,5 @@
 import { Layers } from "lucide-react";
+import { UiIcon } from "@/components/ui-icon";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import {
@@ -8,6 +9,7 @@ import {
 } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
 
 export function CollectionCard({
   id,
@@ -22,6 +24,7 @@ export function CollectionCard({
 }) {
   const { settings } = useSettings();
   const { openCollection } = useView();
+  const { open } = useContextMenu();
   const t = useT();
   const ref = useRef<HTMLButtonElement>(null);
   const [inView, setInView] = useState(false);
@@ -75,6 +78,30 @@ export function CollectionCard({
     <button
       ref={ref}
       type="button"
+      onContextMenu={(event) =>
+        open(event, {
+          kind: "actions",
+          id: `tmdb-collection:${resolvedId}`,
+          label: name,
+          image: backdrop
+            ? {
+                src: backdrop.replace("/t/p/original/", "/t/p/w780/"),
+                originalSrc: backdrop,
+                publicUrl: backdrop,
+                label: name,
+              }
+            : undefined,
+          actions: () => [
+            {
+              id: `tmdb-collection:open:${resolvedId}`,
+              icon: <UiIcon name="open-collection" className="size-4" />,
+              label: t("Open collection"),
+              disabled: resolvedId <= 0,
+              run: () => openCollection(resolvedId),
+            },
+          ],
+        })
+      }
       onClick={() => {
         if (resolvedId > 0) openCollection(resolvedId);
       }}

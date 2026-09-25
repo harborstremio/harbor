@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { ExternalLinkSplitButton } from "@/components/external-link-split-button";
 import { ExternalLinkViewer } from "@/components/external-link-viewer";
 import { pushBackHandler } from "@/lib/back-intercept";
+import { useLocalBackCapability } from "@/lib/use-local-back-capability";
 import { createExternalLinkViewerFocusScope } from "@/lib/external-link-viewer-modal";
 import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
@@ -106,6 +107,7 @@ function LinkOutJourneyInterstitial({
       closeJourney,
     });
   }, [closeJourney, setMenuOpenState]);
+  useLocalBackCapability(true);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

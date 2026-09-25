@@ -1,0 +1,27 @@
+/* The approved surface motion; legacy comparison styling remains in index.css. */
+.context-menu-position[data-menu-presentation="popout"] > .context-menu-motion {
+  animation: none;
+  clip-path: none;
+  transform-origin: var(--context-menu-reveal-x) var(--context-menu-reveal-origin);
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  [data-menu-presentation="popout"] > .context-menu-surface {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-ink) 3%, transparent),
+        transparent 100px,
+        color-mix(in srgb, var(--color-canvas) 2%, transparent)
+      ),
+      color-mix(in srgb, var(--color-elevated) 93%, transparent);
+    backdrop-filter: blur(10px);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+  [data-menu-presentation="popout"] > .context-menu-surface {
+    background: var(--color-elevated);
+    backdrop-filter: none;
+  }
+}

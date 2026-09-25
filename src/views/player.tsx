@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SportsDockControls } from "./sports/dock-controls";
 import { EmbeddedBroadcastPlayer } from "./sports/embedded-broadcast-player";
 import { resolveChromeTheme } from "@/lib/theme";
+import { useLocalBackCapability } from "@/lib/use-local-back-capability";
+import { playerLoadIdentity } from "@/lib/player/load-identity";
 import { useBigPicture } from "@/lib/big-picture";
 import { useActiveKid } from "@/lib/profiles";
 import { type PlayerBridge } from "@/lib/player/bridge";
@@ -74,6 +76,12 @@ import { useQueueAdvance } from "./player/hooks/use-queue-advance";
 import { useQueueNav } from "./player/hooks/use-queue-nav";
 import { usePipMode } from "./player/hooks/use-pip-mode";
 import { usePlaybackControls } from "./player/hooks/use-playback-controls";
+import { returnToActivePlayback, type PlayerReturnOptions } from "@/lib/player/return-to-playback";
+import {
+  capturePlaybackActor,
+  isPlaybackActorCurrent,
+  playbackSourceKey,
+} from "@/lib/playback-history";
 import { useRemotePlaybackBinding } from "@/lib/remote/use-remote-playback-binding";
 import { usePlaybackPresence } from "./player/hooks/use-playback-presence";
 import { usePlayerExit } from "./player/hooks/use-player-exit";
@@ -453,14 +461,26 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     [activeMediaSrc, liveUrl, src.url, transcodedUrl],
   );
   const cast = usePlayerCast({ src: castSource, debrids, snapRef, bridgeRef, settings });
+  const returnTargetRef = useRef(activeMediaSrc);
+  returnTargetRef.current = activeMediaSrc;
+  const returnToPlayerRef = useRef<(options?: PlayerReturnOptions) => Promise<void>>(
+    async () => {},
+  );
+  const returnToPlayer = useCallback(
+    (options?: PlayerReturnOptions) => returnToPlayerRef.current(options),
+    [],
+  );
+  const enterLiveSyncRef = useRef<() => void>(() => {});
+  const handleEnterSync = useCallback(() => enterLiveSyncRef.current(), []);
   const {
     resolvedImdbId,
     subAssNative,
     captureExitSnapshot,
     download,
     subDropToast,
-    suspendAutoSyncForManualTiming,
+    prepareLiveSync,
   } = usePlayerMedia({
+    onEnterSync: handleEnterSync,
     src: activeMediaSrc,
     snap,
     engine,
@@ -472,6 +492,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     svpActive,
     videoMountRef,
     toggleFullscreen,
+    returnToPlayer,
     castActiveRef: cast.castActiveRef,
     season,
     episode,
@@ -557,6 +578,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     }
     await closePlayer();
   }, [src, replacePlayerSrc, closePlayer]);
+  useLocalBackCapability(true);
   useEffect(() => {
     const onLocalBack = (e: Event) => {
       e.preventDefault();
@@ -742,7 +764,39 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
       sendCommand,
     });
 
-  const textSync = useTextSync(bridgeRef.current, src.meta.id, rememberSubChoice);
+  returnToPlayerRef.current = async (options = {}) => {
+    const actor = capturePlaybackActor();
+    const target = activeMediaSrc;
+    const activeBridge = bridgeRef.current;
+    await returnToActivePlayback(options, {
+      exitPip,
+      isCurrent: () => {
+        const current = returnTargetRef.current;
+        return (
+          activeBridge != null &&
+          bridgeRef.current === activeBridge &&
+          isPlaybackActorCurrent(actor) &&
+          playbackSourceKey(current) === playbackSourceKey(target) &&
+          current.meta.id === target.meta.id &&
+          current.episode?.season === target.episode?.season &&
+          current.episode?.episode === target.episode?.episode
+        );
+      },
+      canControl,
+      status: () => snapRef.current.status,
+      seekTo,
+      playPause: playPauseToggle,
+      focus: () => stageRef.current?.focus({ preventScroll: true }),
+    });
+  };
+  const textSync = useTextSync(bridgeRef.current, src.meta.id, rememberSubChoice, {
+    scopeKey: JSON.stringify([
+      bridgeKey,
+      playerLoadIdentity(activeMediaSrc, activeMediaSrc.url, season, episode),
+      capturePlaybackActor(),
+    ]),
+    beforeEnter: prepareLiveSync,
+  });
   const [syncToast, setSyncToast] = useState<ToastInfo | null>(null);
   const syncToastTimerRef = useRef<number | null>(null);
   const showSyncToast = useCallback((kind: "ok" | "error", text: string) => {
@@ -765,10 +819,9 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
       );
     };
   }, [showSyncToast, t]);
-  const handleEnterSync = useCallback(() => {
-    suspendAutoSyncForManualTiming();
-    void textSync.enter(src.url, src.headers);
-  }, [textSync.enter, src.url, src.headers, suspendAutoSyncForManualTiming]);
+  enterLiveSyncRef.current = () => {
+    void textSync.enter(activeMediaSrc.url, activeMediaSrc.headers);
+  };
 
   const volumeIndicatorTimerRef = useRef<number | null>(null);
   const [volumeIndicator, setVolumeIndicator] = useState<VolumeIndicatorState>({
@@ -1085,6 +1138,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
 
   usePendingSeekApply({
     pendingSeekSec,
+    preserveExactPosition: src.startPositionMs != null,
     clearPendingSeek,
     durationSec: snap.durationSec,
     bridgeRef,
@@ -1445,6 +1499,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
       data-docked={docked}
       data-native-dock={nativeDock}
       data-audio-only={docked && dockMinimized}
+      tabIndex={-1}
       dir="ltr"
       className={`fixed z-[100] overflow-hidden ${docked ? "sports-player-dock" : "inset-0"} ${stageBg}`}
       style={screenLocked ? { cursor: "default" } : cursorStyle}

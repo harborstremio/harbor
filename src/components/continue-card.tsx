@@ -1,5 +1,5 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { Check, X } from "lucide-react";
+import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Check, X, Play as ContextPlay, ListVideo } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
@@ -46,6 +46,16 @@ import {
 } from "@/lib/streams/anime-identity-core";
 import { classifyAnimeNumbering } from "@/lib/subtitles/anime-numbering";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
+import { emitListToast } from "@/components/lists/list-toast";
+import {
+  continueCardIdentity,
+  createContinueCardActions,
+  type ContinueDismiss,
+} from "@/lib/continue-card-actions";
+import { capturePlaybackActor, isPlaybackActorCurrent } from "@/lib/playback-history";
+import { isCwDismissed } from "@/lib/cw-dismiss";
+import { localCwEntry } from "@/lib/local-cw";
+import { isManualWatchedDismissed } from "@/lib/manual-watched";
 
 // Bleach: Thousand-Year Blood War is split across four cours that carry their
 // own arc name appended to the base title (e.g. "... - The Separation"). The
@@ -73,12 +83,15 @@ function escapeRegExp(s: string): string {
 type Props = {
   item: LibraryItem;
   watched?: boolean;
-  onDismiss?: (item: LibraryItem) => void;
+  onDismiss?: ContinueDismiss;
   /**
    * Overrides the default play behaviour. The local library row passes this
    * because it already knows the file on disk and can handle a `local:` id.
    */
-  onPlayOverride?: (episode: PlayEpisode | undefined) => void;
+  onPlayOverride?: (
+    episode: PlayEpisode | undefined,
+    assertCurrent: () => void,
+  ) => void | Promise<void>;
 };
 
 export const ContinueCard = memo(function ContinueCard({
@@ -457,9 +470,12 @@ export const ContinueCard = memo(function ContinueCard({
   const openAvailableSources = async (
     episode: PlayEpisode | undefined,
     chooseEveryTime: boolean,
+    assertCurrent: () => void,
   ) => {
-    const stream = () =>
+    const stream = () => {
+      assertCurrent();
       openPicker(meta, episode, { autoPlay: !chooseEveryTime, resume: !chooseEveryTime });
+    };
     const tmdbMatch = meta.id.match(/^tmdb:(?:movie|tv):(\d+)$/);
     const identity = {
       tmdbId: tmdbMatch ? Number(tmdbMatch[1]) : undefined,
@@ -468,6 +484,7 @@ export const ContinueCard = memo(function ContinueCard({
     const kind = episode ? "series" : "movie";
     const connections = mediaServerConnections();
     const indexed = await mediaServerItems();
+    assertCurrent();
     const serverItems = matchingServerItems(
       indexed,
       identity,
@@ -478,6 +495,7 @@ export const ContinueCard = memo(function ContinueCard({
     const serverCopies = serverPlayableCopies(serverItems, connections);
     const local = resolveLocalPlayVersions(meta, episode ?? null, identity.imdbId);
     const playLocal = (entry: (typeof local)[number]) => {
+      assertCurrent();
       const source = localPlayerSrc(entry, undefined, episode);
       openPlayer({
         ...source,
@@ -490,21 +508,22 @@ export const ContinueCard = memo(function ContinueCard({
       });
     };
     const playServer = async (copy: (typeof serverCopies)[number]) => {
+      assertCurrent();
       const connection = connections.find((entry) => entry.id === copy.connectionId);
       const item = serverItems.find(
         (entry) => entry.connectionId === copy.connectionId && entry.id === copy.itemId,
       );
       if (!connection || !item) return;
-      openPlayer(
-        await createMediaServerPlayerSrc({
-          meta,
-          imdbId: identity.imdbId,
-          episode,
-          connection,
-          item,
-          versionId: copy.version.id,
-        }),
-      );
+      const source = await createMediaServerPlayerSrc({
+        meta,
+        imdbId: identity.imdbId,
+        episode,
+        connection,
+        item,
+        versionId: copy.version.id,
+      });
+      assertCurrent();
+      openPlayer(source);
     };
     const showChooser = () => {
       if (local.length === 0 && serverCopies.length === 0) {
@@ -517,7 +536,7 @@ export const ContinueCard = memo(function ContinueCard({
         entries: local,
         onPlayLocal: playLocal,
         serverCopies,
-        onPlayServer: (copy) => void playServer(copy),
+        onPlayServer: (copy) => void playServer(copy).catch(reportActionError),
         onStream: stream,
       });
     };
@@ -532,32 +551,113 @@ export const ContinueCard = memo(function ContinueCard({
     else showChooser();
   };
 
-  const onChooseSource = async () => {
+  const onChooseSource = async (assertCurrent: () => void) => {
     const episode = await resolveEpisode();
+    assertCurrent();
     if (onPlayOverride) {
-      onPlayOverride(episode);
+      await onPlayOverride(episode, assertCurrent);
       return;
     }
-    await openAvailableSources(episode, true);
+    await openAvailableSources(episode, true, assertCurrent);
   };
 
-  const onPlay = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const onPlay = async (assertCurrent: () => void) => {
     const episode = await resolveEpisode();
+    assertCurrent();
     if (onPlayOverride) {
-      onPlayOverride(episode);
+      await onPlayOverride(episode, assertCurrent);
       return;
     }
-    await openAvailableSources(episode, false);
+    await openAvailableSources(episode, false, assertCurrent);
   };
+
+  const reportActionError = (error: unknown) =>
+    emitListToast(
+      t(error instanceof Error ? error.message : "Could not complete this action."),
+      "error",
+    );
+  const latest = useRef({ item, authKey, onPlay, onChooseSource, onDismiss });
+  latest.current = { item, authKey, onPlay, onChooseSource, onDismiss };
+  const identity = continueCardIdentity(item);
+  const commands = useMemo(() => {
+    const actor = capturePlaybackActor();
+    let afterDismiss: HTMLButtonElement | undefined;
+    return createContinueCardActions({
+      item,
+      getItem: () => latest.current.item,
+      isCurrent: () => isPlaybackActorCurrent(actor) && latest.current.authKey === authKey,
+      isAvailable: () => {
+        const current = latest.current.item;
+        if (current.manualWatched) return !isManualWatchedDismissed(current._id);
+        if (isCwDismissed(current)) return false;
+        return !current.local || !!localCwEntry(current._id);
+      },
+      t,
+      play: (assertCurrent) => latest.current.onPlay(assertCurrent),
+      chooseSource: (assertCurrent) => latest.current.onChooseSource(assertCurrent),
+      dismiss: onDismiss
+        ? () => {
+            const trigger = cardRef.current;
+            const siblings = Array.from(
+              trigger
+                ?.closest(".harbor-row-track")
+                ?.querySelectorAll<HTMLButtonElement>("[data-continue-card-trigger]") ?? [],
+            );
+            const index = trigger ? siblings.indexOf(trigger) : -1;
+            afterDismiss = index >= 0 ? (siblings[index + 1] ?? siblings[index - 1]) : undefined;
+            return latest.current.onDismiss?.(latest.current.item);
+          }
+        : undefined,
+      onDismissed: (result) => {
+        if (result?.sync === "queued")
+          emitListToast(t("Removed on this device. Stremio synchronization is pending."));
+        if (afterDismiss?.isConnected && !afterDismiss.disabled)
+          afterDismiss.focus({ preventScroll: true });
+      },
+      onError: reportActionError,
+      icons: {
+        play: <ContextPlay size={16} />,
+        sources: <ListVideo size={16} />,
+        dismiss: <X size={16} />,
+      },
+    });
+    // Item metadata and callbacks stay live; episode/provider/actor changes own a new command source.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [identity, authKey, activeProfile?.id, !!onDismiss, t]);
+  const pending = useSyncExternalStore(commands.subscribe, commands.isPending, commands.isPending);
+  const runControl = (event: React.MouseEvent, command: () => Promise<void>) => {
+    event.stopPropagation();
+    // Shared commands report errors for both original controls and context-menu execution.
+    void command().catch(() => {});
+  };
+  const onCardContext = (e: React.MouseEvent) =>
+    openContextMenu(e, {
+      kind: "meta",
+      meta,
+      isValid: commands.isValid,
+      watchScope: item.type === "series" ? "episode" : "title",
+      episode: kitsuVideo
+        ? {
+            season: kitsuVideo.season || 1,
+            episode: kitsuVideo.episode,
+            kitsuStreamId: kitsuVideo.id,
+            imdbId: kitsuVideo.imdb_id,
+            imdbSeason: kitsuVideo.imdbSeason,
+            imdbEpisode: kitsuVideo.imdbEpisode,
+          }
+        : (ep ?? undefined),
+      primary: commands.primary,
+      extra: commands.extra,
+    });
 
   return (
-    <div className="group relative w-full min-w-0">
+    <div className="group relative w-full min-w-0" onContextMenu={onCardContext}>
       <button
         ref={cardRef}
         type="button"
-        onClick={() => void onChooseSource()}
-        onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
+        data-continue-card-trigger
+        onClick={(event) => runControl(event, commands.chooseSource)}
+        disabled={pending || waitingForAir}
         aria-label={`${t("Choose another source")}: ${displayTitle}`}
         title={t("Choose another source")}
         className="block w-full min-w-0 rounded-xl text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -689,7 +789,8 @@ export const ContinueCard = memo(function ContinueCard({
               type="button"
               tabIndex={-1}
               data-tv-skip="true"
-              onClick={onPlay}
+              onClick={(event) => runControl(event, commands.play)}
+              disabled={pending || waitingForAir}
               aria-label={t("Play {name}", { name: displayTitle })}
               title={t("Play")}
               className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-ink outline-none transition-transform duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-accent"
@@ -704,7 +805,8 @@ export const ContinueCard = memo(function ContinueCard({
             type="button"
             tabIndex={-1}
             data-tv-skip="true"
-            onClick={onPlay}
+            onClick={(event) => runControl(event, commands.play)}
+            disabled={pending || waitingForAir}
             aria-label={t("Play {name}", { name: displayTitle })}
             title={t("Play")}
             className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-canvas ring-1 ring-white/15 shadow-[0_10px_28px_-8px_rgba(0,0,0,0.6)] transition-transform duration-150 hover:scale-[1.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -740,10 +842,8 @@ export const ContinueCard = memo(function ContinueCard({
                 type="button"
                 tabIndex={-1}
                 data-tv-skip="true"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDismiss(item);
-                }}
+                onClick={(event) => runControl(event, commands.dismiss)}
+                disabled={pending}
                 aria-label={t("Remove from Continue Watching")}
                 className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-ink-muted outline-none transition-colors duration-150 hover:text-ink active:scale-95"
               >
@@ -756,10 +856,8 @@ export const ContinueCard = memo(function ContinueCard({
             type="button"
             tabIndex={-1}
             data-tv-skip="true"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDismiss(item);
-            }}
+            onClick={(event) => runControl(event, commands.dismiss)}
+            disabled={pending}
             aria-label={t("Remove from Continue Watching")}
             className="group/x absolute end-0.5 top-0.5 z-10 flex h-11 w-11 items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100"
           >

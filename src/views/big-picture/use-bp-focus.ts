@@ -578,7 +578,10 @@ export function useBpFocusRoot(params: {
         onTab?.(e.key === "PageDown" ? 1 : -1);
         return;
       }
-      if ((e.key === "Tab" || e.key === "ContextMenu") && onOptions) {
+      if (
+        (e.key === "Tab" || e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) &&
+        onOptions
+      ) {
         e.preventDefault();
         e.stopPropagation();
         SFX.open();

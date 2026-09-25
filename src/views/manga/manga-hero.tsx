@@ -3,8 +3,8 @@ import { CoverImg } from "@/components/cover-img";
 import { useEffect, useState } from "react";
 import { usePageVisible } from "@/lib/visibility";
 import { useT } from "@/lib/i18n";
+import { useMangaContext } from "@/lib/use-manga-context";
 import { NavArrow } from "@/components/nav-arrow";
-import { useContextMenu } from "@/lib/context-menu";
 import { useIsMangaFavorite, useMangaFavorites } from "@/lib/manga-favorites";
 import type { MangaSummary } from "@/lib/manga/model";
 import { CollectionBadges } from "./collection-badge";
@@ -35,7 +35,6 @@ export function MangaHero({
   const [visible, setVisible] = useState(true);
   const [paused, setPaused] = useState(false);
   const { toggle } = useMangaFavorites();
-  const { open: openContextMenu } = useContextMenu();
 
   const pageVisible = usePageVisible();
   useEffect(() => {
@@ -60,6 +59,9 @@ export function MangaHero({
 
   const current = featured[shown];
   const fav = useIsMangaFavorite(current?.id);
+  const context = useMangaContext<HTMLElement>(current ?? { id: "", title: t("Manga") }, {
+    open: current ? () => onOpen(current.id) : undefined,
+  });
 
   const meta = current
     ? [
@@ -70,25 +72,18 @@ export function MangaHero({
     : [];
 
   const fade = {
-    transition: "opacity 420ms cubic-bezier(0.22,1,0.36,1), transform 420ms cubic-bezier(0.22,1,0.36,1)",
+    transition:
+      "opacity 420ms cubic-bezier(0.22,1,0.36,1), transform 420ms cubic-bezier(0.22,1,0.36,1)",
     opacity: visible ? 1 : 0,
     transform: visible ? "translateY(0)" : "translateY(14px)",
   };
 
   return (
     <section
+      ref={current ? context.ref : undefined}
       className="group relative harbor-hero-bleed harbor-hero-bleed-top overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      onContextMenu={(e) => {
-        if (!current) return;
-        openContextMenu(e, {
-          kind: "manga",
-          id: current.id,
-          title: current.title,
-          cover: current.cover,
-        });
-      }}
     >
       <div className="absolute inset-0 z-0">
         <img
@@ -112,75 +107,86 @@ export function MangaHero({
       <div className="relative z-10 flex min-h-[440px] items-center gap-10 px-20 pt-28 pb-14">
         {current && (
           <>
-        <div className="flex max-w-[540px] flex-1 flex-col gap-5" style={fade}>
-          <span className="inline-flex items-center gap-2 self-start text-[12px] font-semibold uppercase tracking-[0.18em] text-accent">
-            <BookOpen size={15} strokeWidth={2.4} />
-            {t("Featured manga")}
-          </span>
-          <h1
-            className="text-[48px] font-medium leading-[1.02] tracking-tight text-ink drop-shadow-[0_2px_22px_rgba(0,0,0,0.55)]"
-            style={{ fontFamily: '"QR Ames Beta", var(--font-display), serif' }}
-          >
-            {current.title}
-          </h1>
-          {current.author && (
-            <p className="text-[16px] font-medium text-ink-muted">{current.author}</p>
-          )}
-          {meta.length > 0 && (
-            <div className="flex flex-wrap items-center gap-x-2 text-[13.5px] text-ink-muted">
-              {meta.map((p, i) => (
-                <span key={`${p}-${i}`} className="inline-flex items-center gap-2">
-                  {i > 0 && <span aria-hidden className="text-ink-subtle">·</span>}
-                  <span>{p}</span>
-                </span>
-              ))}
+            <div className="flex max-w-[540px] flex-1 flex-col gap-5" style={fade}>
+              <span className="inline-flex items-center gap-2 self-start text-[12px] font-semibold uppercase tracking-[0.18em] text-accent">
+                <BookOpen size={15} strokeWidth={2.4} />
+                {t("Featured manga")}
+              </span>
+              <h1
+                className="text-[48px] font-medium leading-[1.02] tracking-tight text-ink drop-shadow-[0_2px_22px_rgba(0,0,0,0.55)]"
+                style={{ fontFamily: '"QR Ames Beta", var(--font-display), serif' }}
+              >
+                {current.title}
+              </h1>
+              {current.author && (
+                <p className="text-[16px] font-medium text-ink-muted">{current.author}</p>
+              )}
+              {meta.length > 0 && (
+                <div className="flex flex-wrap items-center gap-x-2 text-[13.5px] text-ink-muted">
+                  {meta.map((p, i) => (
+                    <span key={`${p}-${i}`} className="inline-flex items-center gap-2">
+                      {i > 0 && (
+                        <span aria-hidden className="text-ink-subtle">
+                          ·
+                        </span>
+                      )}
+                      <span>{p}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {current.description && (
+                <p className="line-clamp-3 max-w-lg text-[14.5px] leading-relaxed text-ink-muted">
+                  {current.description}
+                </p>
+              )}
+              <div className="mt-1 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => onOpen(current.id)}
+                  className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+                >
+                  <BookOpen size={16} strokeWidth={2.6} />
+                  {t("Read Now")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    toggle({ id: current.id, title: current.title, cover: current.cover })
+                  }
+                  aria-label={fav ? t("Remove from favorites") : t("Add to favorites")}
+                  aria-pressed={fav}
+                  className={`flex h-12 w-12 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.98] ${
+                    fav ? "bg-ink/15 hover:bg-ink/20" : "bg-canvas/80 hover:bg-canvas/95"
+                  }`}
+                >
+                  <Star
+                    size={18}
+                    strokeWidth={2.2}
+                    fill={fav ? "currentColor" : "none"}
+                    className={fav ? "text-accent" : "text-ink"}
+                  />
+                </button>
+              </div>
             </div>
-          )}
-          {current.description && (
-            <p className="line-clamp-3 max-w-lg text-[14.5px] leading-relaxed text-ink-muted">
-              {current.description}
-            </p>
-          )}
-          <div className="mt-1 flex items-center gap-3">
+
             <button
               type="button"
               onClick={() => onOpen(current.id)}
-              className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+              className="relative hidden shrink-0 lg:block"
+              aria-label={current.title}
+              style={fade}
             >
-              <BookOpen size={16} strokeWidth={2.6} />
-              {t("Read Now")}
+              <CoverImg
+                src={current.cover}
+                alt=""
+                decoding="async"
+                className="h-[340px] w-auto rounded-2xl object-cover shadow-[0_30px_60px_-20px_rgba(0,0,0,0.7)] ring-1 ring-edge-soft transition-transform duration-300 hover:-translate-y-1"
+              />
+              <span className="absolute -bottom-4 -end-4 z-10">
+                <CollectionBadges title={current.title} size={72} />
+              </span>
             </button>
-            <button
-              type="button"
-              onClick={() => toggle({ id: current.id, title: current.title, cover: current.cover })}
-              aria-label={fav ? t("Remove from favorites") : t("Add to favorites")}
-              aria-pressed={fav}
-              className={`flex h-12 w-12 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.98] ${
-                fav ? "bg-ink/15 hover:bg-ink/20" : "bg-canvas/80 hover:bg-canvas/95"
-              }`}
-            >
-              <Star size={18} strokeWidth={2.2} fill={fav ? "currentColor" : "none"} className={fav ? "text-accent" : "text-ink"} />
-            </button>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => onOpen(current.id)}
-          className="relative hidden shrink-0 lg:block"
-          aria-label={current.title}
-          style={fade}
-        >
-          <CoverImg
-            src={current.cover}
-            alt=""
-            decoding="async"
-            className="h-[340px] w-auto rounded-2xl object-cover shadow-[0_30px_60px_-20px_rgba(0,0,0,0.7)] ring-1 ring-edge-soft transition-transform duration-300 hover:-translate-y-1"
-          />
-          <span className="absolute -bottom-4 -end-4 z-10">
-            <CollectionBadges title={current.title} size={72} />
-          </span>
-        </button>
           </>
         )}
       </div>

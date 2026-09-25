@@ -42,7 +42,14 @@ export function CinemetaEpisodes({
     watched: boolean,
   ) => {
     e.preventDefault();
-    setWatchedMenu({ x: e.clientX, y: e.clientY, season, episode, watched });
+    setWatchedMenu({
+      x: e.clientX,
+      y: e.clientY,
+      season,
+      episode,
+      watched,
+      origin: e.currentTarget instanceof HTMLElement ? e.currentTarget : null,
+    });
   };
   const grouped = useMemo(() => {
     const map = new Map<number, CinemetaVideo[]>();

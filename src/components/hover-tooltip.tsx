@@ -1,5 +1,16 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import {
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
+import { MENU_FOCUS_INTENT } from "@/lib/menu-interaction";
 
 export function HoverTooltip({
   label,
@@ -11,6 +22,8 @@ export function HoverTooltip({
   delayMs = 260,
   disabled = false,
   large = false,
+  contextMenu = false,
+  intentional = false,
   className,
   children,
 }: {
@@ -23,15 +36,22 @@ export function HoverTooltip({
   delayMs?: number;
   disabled?: boolean;
   large?: boolean;
+  contextMenu?: boolean;
+  intentional?: boolean;
   className?: string;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{ top: number; left: number; anchor: number } | null>(null);
-  const [placed, setPlaced] = useState<{ top: number; left: number; flipped: boolean } | null>(null);
+  const [placed, setPlaced] = useState<{ top: number; left: number; flipped: boolean } | null>(
+    null,
+  );
   const wrapRef = useRef<HTMLDivElement>(null);
   const tipRef = useRef<HTMLDivElement>(null);
   const timer = useRef<number | null>(null);
+  const pointer = useRef<{ x: number; y: number } | null>(null);
+  const exploring = useRef(false);
+  const tooltipId = useId();
 
   const cancel = () => {
     if (timer.current != null) {
@@ -45,8 +65,7 @@ export function HoverTooltip({
     const r = el.getBoundingClientRect();
     setPos({
       top: side === "top" ? r.top - 8 : r.bottom + 8,
-      left:
-        align === "center" ? r.left + r.width / 2 : align === "end" ? r.right - 8 : r.left + 8,
+      left: align === "center" ? r.left + r.width / 2 : align === "end" ? r.right - 8 : r.left + 8,
       anchor: r.left + r.width / 2,
     });
   };
@@ -60,11 +79,46 @@ export function HoverTooltip({
   };
   const leave = () => {
     cancel();
+    pointer.current = null;
+    exploring.current = false;
     setOpen(false);
     setPlaced(null);
   };
 
   useEffect(() => () => cancel(), []);
+
+  useEffect(() => {
+    if (!intentional) return;
+    const element = wrapRef.current;
+    const explore = () => enter();
+    element?.addEventListener(MENU_FOCUS_INTENT, explore);
+    // A changed target must not inherit an old hover/focus timer or its description.
+    leave();
+    return () => {
+      cancel();
+      element?.removeEventListener(MENU_FOCUS_INTENT, explore);
+    };
+  }, [intentional, disabled, label, sublabel, delayMs]);
+
+  useEffect(() => {
+    if (!contextMenu || disabled) return;
+    const hide = () => {
+      cancel();
+      setOpen(false);
+      setPlaced(null);
+    };
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") hide();
+    };
+    window.addEventListener("scroll", hide, true);
+    window.addEventListener("resize", hide);
+    window.addEventListener("keydown", keydown, true);
+    return () => {
+      window.removeEventListener("scroll", hide, true);
+      window.removeEventListener("resize", hide);
+      window.removeEventListener("keydown", keydown, true);
+    };
+  }, [contextMenu, disabled]);
 
   useEffect(() => {
     if (disabled) {
@@ -100,7 +154,8 @@ export function HoverTooltip({
     setPlaced({ top, left, flipped });
   }, [open, pos, side, align]);
 
-  const shown = side === "top" ? (placed?.flipped ? "bottom" : "top") : placed?.flipped ? "top" : "bottom";
+  const shown =
+    side === "top" ? (placed?.flipped ? "bottom" : "top") : placed?.flipped ? "top" : "bottom";
   const originX = align === "center" ? "50%" : align === "end" ? "100%" : "14px";
   const arrowLeft = placed && pos ? Math.min(Math.max(12, pos.anchor - placed.left), 999) : 12;
 
@@ -108,21 +163,52 @@ export function HoverTooltip({
     <div
       ref={wrapRef}
       className={`relative inline-flex ${className ?? ""}`}
-      onMouseEnter={enter}
+      onMouseEnter={(event) => {
+        if (!intentional) enter();
+        else pointer.current = { x: event.clientX, y: event.clientY };
+      }}
+      onMouseMove={
+        intentional
+          ? (event) => {
+              if (exploring.current || !pointer.current) return;
+              const moved =
+                Math.abs(event.clientX - pointer.current.x) +
+                Math.abs(event.clientY - pointer.current.y);
+              if (moved < 2 && !event.movementX && !event.movementY) return;
+              exploring.current = true;
+              enter();
+            }
+          : undefined
+      }
       onMouseLeave={leave}
-      onFocus={enter}
+      onFocus={intentional ? undefined : enter}
       onBlur={leave}
+      onPointerDown={contextMenu ? leave : undefined}
     >
-      {children}
+      {contextMenu && open && isValidElement(children)
+        ? cloneElement(children as ReactElement<{ "aria-describedby"?: string }>, {
+            "aria-describedby": [
+              (children.props as { "aria-describedby"?: string })["aria-describedby"],
+              tooltipId,
+            ]
+              .filter(Boolean)
+              .join(" "),
+          })
+        : children}
       {open &&
         pos &&
         createPortal(
           <div
             ref={tipRef}
             className="pointer-events-none fixed z-[2000]"
+            data-harbor-context-layer={contextMenu || undefined}
             style={
               placed
-                ? { top: placed.top, left: placed.left }
+                ? {
+                    top: placed.top,
+                    left: placed.left,
+                    zIndex: contextMenu ? 2147482100 : undefined,
+                  }
                 : { top: pos.top, left: pos.left, visibility: "hidden" }
             }
           >
@@ -132,10 +218,13 @@ export function HoverTooltip({
             >
               <div
                 role="tooltip"
+                id={tooltipId}
                 className={`harbor-float relative w-max rounded-md bg-raised leading-snug font-medium text-ink ring-1 ring-edge ${
-                  large
-                    ? "max-w-[320px] rounded-xl px-4 py-3 text-[15px] font-semibold"
-                    : "max-w-[280px] px-3 py-2 text-[12px]"
+                  contextMenu
+                    ? "max-w-[280px] px-2 py-1 text-[11.5px]"
+                    : large
+                      ? "max-w-[320px] rounded-xl px-4 py-3 text-[15px] font-semibold"
+                      : "max-w-[280px] px-3 py-2 text-[12px]"
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -178,7 +267,7 @@ export function HoverTooltip({
               </div>
             </div>
           </div>,
-          document.body,
+          contextMenu ? (document.fullscreenElement ?? document.body) : document.body,
         )}
     </div>
   );

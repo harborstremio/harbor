@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { langScore, pickBestTrack, normalizeLang } from "@/lib/subtitles/language";
@@ -7,6 +7,8 @@ import { subtitleStreamDescriptor } from "@/lib/subtitles/provider-label";
 import { publishSubtitleSearch } from "@/components/player/subtitle-menu/subtitle-search-store";
 import { publishSubtitleContext } from "@/components/player/subtitle-menu/subtitle-context-store";
 import { readPlayerPrefs, type PerShowPrefs } from "@/lib/player-prefs";
+import { playbackSourceKey, readActualPlaybackFor } from "@/lib/playback-history";
+import { playbackAudioChoice, selectPlaybackAudio } from "@/lib/player/audio-choice";
 import { tmdbImdbId } from "@/lib/providers/tmdb";
 import type { Addon } from "@/lib/addons";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
@@ -45,6 +47,14 @@ export function useTrackAutoload(params: {
   authKey: string | null;
 }) {
   const { bridgeRef, src, snap, engine, settings, authKey } = params;
+  const sourceKey = playbackSourceKey(src);
+  const rememberedAudio = useMemo(
+    () =>
+      src.continuation?.sourceKey === sourceKey
+        ? src.continuation.audioTrack
+        : readActualPlaybackFor(src)?.audioTrack,
+    [sourceKey, src.meta.id, src.episode?.season, src.episode?.episode, src.continuation],
+  );
   const snapRef = useRef(snap);
   snapRef.current = snap;
   const selectedSubtitleId = snap.subtitleTracks.find((track) => track.selected)?.id ?? null;
@@ -736,7 +746,7 @@ export function useTrackAutoload(params: {
   useEffect(() => {
     const subIdSig = subtitleAutoSelectionSignature(snap.subtitleTracks);
     const audioIdSig = JSON.stringify(
-      snap.audioTracks.map((t) => [t.id, t.lang, t.title, t.label, t.default]),
+      snap.audioTracks.map((track) => [playbackAudioChoice(track), track.label, track.default]),
     );
     const preferenceSig = JSON.stringify([
       settings.preferredAudioLangs,
@@ -793,10 +803,14 @@ export function useTrackAutoload(params: {
       if (userPicked) {
         effAudio = cur;
       } else {
-        const want = pickBestTrack(allow(snap.audioTracks), audioLangs);
+        const want =
+          // A known choice is explicit user intent, even if its title matches
+          // an automatic-selection exclusion such as "commentary".
+          selectPlaybackAudio(snap.audioTracks, rememberedAudio) ??
+          pickBestTrack(allow(snap.audioTracks), audioLangs);
         effAudio = want ?? cur;
-        if (want && (!cur || cur.id !== want.id)) {
-          bridgeRef.current?.setAudioTrack(want.id);
+        if (want) {
+          if (!cur || cur.id !== want.id) bridgeRef.current?.setAudioTrack(want.id);
           autoAudioIdRef.current = want.id;
         }
       }
@@ -851,7 +865,16 @@ export function useTrackAutoload(params: {
         bridgeRef.current?.setRate(wanted);
       }
     }
-  }, [engine, src.url, src.meta.id, snap.audioTracks, snap.subtitleTracks, snap.rate, settings]);
+  }, [
+    engine,
+    src.url,
+    src.meta.id,
+    snap.audioTracks,
+    snap.subtitleTracks,
+    snap.rate,
+    settings,
+    rememberedAudio,
+  ]);
 
   useEffect(() => {
     bridgeRef.current?.setSubDelay(readPlayerPrefs(src.meta.id)?.subDelaySec ?? 0);

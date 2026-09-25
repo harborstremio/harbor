@@ -9,6 +9,7 @@ import { playbackStartupProfile } from "@/lib/player/startup-profile";
 import { isLivePlaybackSrc } from "@/lib/player/live-src";
 import { releaseStreamProxy, retainStreamProxy } from "@/lib/stream-proxy";
 import { playerLoadIdentity } from "@/lib/player/load-identity";
+import { isPlaybackActorCurrent } from "@/lib/playback-history";
 
 const RESUME_PROMPT_MIN_SEC = 30;
 const RESTART_THRESHOLD = 0.8;
@@ -78,6 +79,8 @@ export function useBridgeLoad(params: {
     const isAutoRetry = (src.attempt ?? 0) > 0;
     const isLive = isLivePlaybackSrc(src);
     let cancelled = false;
+    const isCurrent = () =>
+      !cancelled && (!src.continuation || isPlaybackActorCurrent(src.continuation.actor));
     (async () => {
       const openingVid = videoIdFor(
         src,
@@ -99,8 +102,9 @@ export function useBridgeLoad(params: {
             episode,
             openingVid,
           });
-      const loadMedia = () =>
-        bridge.load({
+      const loadMedia = () => {
+        if (!isCurrent()) return;
+        return bridge.load({
           url: playUrl,
           traceId: src.playbackTraceId,
           startupProfile: playbackStartupProfile(src.streamRef),
@@ -109,6 +113,7 @@ export function useBridgeLoad(params: {
           isLive,
           headers: src.headers,
         });
+      };
       let resolved: Awaited<typeof resumePromise>;
       try {
         const waitBeforeLoad =
@@ -121,7 +126,7 @@ export function useBridgeLoad(params: {
           [resolved] = await Promise.all([resumePromise, loadMedia()]);
         }
       } catch (e) {
-        if (cancelled) return;
+        if (!isCurrent()) return;
         console.warn("[player] load failed", e);
         return;
       }
@@ -146,13 +151,14 @@ export function useBridgeLoad(params: {
         resumePromptRef.current &&
         startSec > RESUME_PROMPT_MIN_SEC &&
         !guestInRoom;
-      if (cancelled) return;
+      if (!isCurrent()) return;
       if (eligibleForPrompt) {
         bridge.pause();
         setPendingResumeSec(startSec);
         ackRef.current = (action) => {
           ackRef.current = null;
           setPendingResumeSec(null);
+          if (!isCurrent()) return;
           if (action === "resume") {
             setPendingSeekSec(startSec);
           } else {
@@ -161,7 +167,7 @@ export function useBridgeLoad(params: {
         };
         return;
       }
-      if (!guestInRoom && startSec > 5) {
+      if (!guestInRoom && (hasExplicitStart ? startSec > 0 : startSec > 5)) {
         setPendingSeekSec(startSec);
         return;
       }

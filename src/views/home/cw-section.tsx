@@ -7,12 +7,13 @@ import { Row } from "@/components/row";
 import { useT } from "@/lib/i18n";
 import { type LibraryItem } from "@/lib/stremio";
 import { isLibraryItemWatched } from "@/lib/trakt/library-key";
+import type { ContinueDismiss } from "@/lib/continue-card-actions";
 
 type Props = {
   signedIn: boolean;
   items: LibraryItem[];
   watchedSet?: Set<string>;
-  onDismiss: (item: LibraryItem) => void;
+  onDismiss: ContinueDismiss;
 };
 
 export function CWSection({ signedIn, items, watchedSet, onDismiss }: Props) {

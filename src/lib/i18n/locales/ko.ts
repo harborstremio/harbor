@@ -5,6 +5,8 @@ import sportsStatistics from "./ko/sports-statistics";
 import sportsApi from "./ko/sports-api";
 import esportsArena from "./ko/esports-arena";
 import sportsHub from "./ko/sports-hub";
+import contextActionsFallback from "./context-actions-fallback";
+
 import ebookSources from "./ko/ebook-sources";
 import settingsRefinements from "./ko/settings-refinements";
 import coverage from "./ko/coverage";
@@ -29,6 +31,8 @@ import bpSports from "./ko/bp-sports";
 const ko: Record<string, string> = {
   ...videoCast,
   ...music,
+  ...contextActionsFallback,
+
   ...ebookSources,
   ...coverage,
   ...catalog01,

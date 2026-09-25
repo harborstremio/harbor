@@ -36,6 +36,7 @@ import { TvIcon } from "@/components/icons/tv-icon";
 import { DownloadsNavIcon } from "@/chrome/downloads-nav-icon";
 import type { LockableTab } from "@/lib/parental";
 import type { View } from "@/lib/view";
+import { customizeNavigation } from "./navigation-policy";
 
 function CalendarNavIcon({ active }: { active: boolean }) {
   const unseen = useUnseenReminderCount();
@@ -293,21 +294,7 @@ export function useAvailableNavItems(): NavItem[] {
 }
 
 export function applyNavCustomization(items: NavItem[], cfg: NavCustomization): NavItem[] {
-  const shown = items
-    .filter((it) => !cfg.hidden.includes(it.id))
-    .map((it) => (cfg.renamed[it.id] ? { ...it, label: cfg.renamed[it.id] } : it));
-  if (cfg.order.length === 0) return shown;
-  const byId = new Map<string, NavItem>(shown.map((it) => [it.id, it]));
-  const ordered: NavItem[] = [];
-  for (const id of cfg.order) {
-    const it = byId.get(id);
-    if (it) ordered.push(it);
-  }
-  const inOrder = new Set(cfg.order);
-  for (const it of shown) {
-    if (!inOrder.has(it.id)) ordered.push(it);
-  }
-  return ordered;
+  return customizeNavigation(items, cfg);
 }
 
 export function effectiveNavOrder(cfg: NavCustomization): NavItemId[] {

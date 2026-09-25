@@ -1,12 +1,26 @@
-import { AlertTriangle, CheckSquare, Download, Info, Layers, RefreshCw, Square, Trash2, Wand2 } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckSquare,
+  Download,
+  Info,
+  Layers,
+  Square,
+  Trash2,
+  Wand2,
+} from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useMemo } from "react";
 import { Poster } from "@/components/poster";
-import { removeLocalEntry, type LocalEntry } from "@/lib/local-library";
+import { type LocalEntry } from "@/lib/local-library";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { LocalBadge } from "@/components/local-badge";
-import { CardIconButton, type LocalCardProps } from "./card-actions";
+import {
+  CardIconButton,
+  LocalMoreActions,
+  useLocalFileContext,
+  type LocalCardProps,
+} from "./card-actions";
 import { episodeLabel, localPlayerSrc } from "./show-group";
 import { useLocalPoster } from "./use-local-poster";
 import { openLocalVersions } from "@/lib/player/local-versions-modal";
@@ -22,38 +36,36 @@ function OwnedCardImpl({
   onOpenDetail,
 }: { entry: LocalEntry; versions: LocalEntry[]; isSelected: boolean } & LocalCardProps) {
   const t = useT();
-  const [confirm, setConfirm] = useState(false);
   const { openPlayer } = useView();
   const poster = useLocalPoster(entry);
 
   const epLabel = episodeLabel(entry);
   const versionCount = versions.length;
   const ids = useMemo(() => versions.map((v) => v.id), [versions]);
-  const onActivate = useCallback(
-    (range = false) => {
-      if (selectMode) {
-        onToggleSelect(ids, range);
-        return;
-      }
-      if (versionCount > 1) {
-        openLocalVersions({
-          title: entry.title,
-          poster: poster.src,
-          entries: versions,
-          onPlayLocal: (v) => openPlayer(localPlayerSrc(v)),
-        });
-        return;
-      }
-      openPlayer(localPlayerSrc(entry));
-    },
-    [selectMode, entry, versions, versionCount, ids, poster.src, openPlayer, onToggleSelect],
-  );
-
+  const context = useLocalFileContext(versions, entry.title, {
+    onPlay: (current) => openPlayer(localPlayerSrc(current)),
+    ...(versionCount > 1
+      ? {
+          onChoose: (current: LocalEntry[]) =>
+            openLocalVersions({
+              title: entry.title,
+              poster: poster.src,
+              entries: current,
+              onPlayLocal: (current) => openPlayer(localPlayerSrc(current)),
+            }),
+          chooseLabel: t("Choose version"),
+        }
+      : {}),
+    onOpenDetail,
+    onFixMatch,
+    onExport,
+  });
+  const onActivate = (range = false) => {
+    if (selectMode) onToggleSelect(ids, range);
+    else context.run("open");
+  };
   return (
-    <div
-      className="group relative flex flex-col gap-2 text-start"
-      onMouseLeave={() => confirm && setConfirm(false)}
-    >
+    <div className="group relative flex flex-col gap-2 text-start" ref={context.ref}>
       <div
         role="button"
         tabIndex={0}
@@ -127,62 +139,45 @@ function OwnedCardImpl({
                   <Download size={11} strokeWidth={2.2} />
                 </CardIconButton>
               )}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (confirm) {
-                    for (const v of versions) removeLocalEntry(v.id);
-                    setConfirm(false);
-                  } else {
-                    setConfirm(true);
-                  }
-                }}
-                className={`flex h-7 w-7 items-center justify-center rounded-full text-white shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-[opacity,background-color] duration-200 ${
-                  confirm
-                    ? "bg-danger"
-                    : "bg-canvas/80 opacity-0 hover:bg-canvas/95 group-hover:opacity-100"
-                }`}
-                aria-label={
-                  confirm
-                    ? versionCount > 1
-                      ? t("Confirm removing {n} files", { n: versionCount })
-                      : t("Confirm remove")
-                    : t("Remove from library")
-                }
+              <CardIconButton
+                title={t("Remove from library; keep file")}
+                onClick={() => context.run("remove")}
               >
-                {confirm ? (
-                  <RefreshCw size={11} strokeWidth={2.4} />
-                ) : (
-                  <Trash2 size={11} strokeWidth={2.2} />
-                )}
-              </button>
+                <Trash2 size={11} strokeWidth={2.2} />
+              </CardIconButton>
             </div>
           </>
         )}
       </div>
-      <button type="button" onClick={(e) => onActivate(e.shiftKey)} className="text-start">
-        <p
-          className="truncate text-[13px] font-medium text-ink transition-colors hover:text-accent"
-          title={entry.filename}
+      <div className="flex items-start gap-1">
+        <button
+          type="button"
+          onClick={(e) => onActivate(e.shiftKey)}
+          className="min-w-0 flex-1 text-start"
         >
-          {entry.title}
-        </p>
-        {epLabel ? (
-          <p className="-mt-1.5 truncate text-[11.5px] text-ink-subtle">
-            {epLabel}
-            {entry.year ? ` · ${entry.year}` : ""}
-            {versionCount > 1 && ` · ${t("{n} versions", { n: versionCount })}`}
+          <p
+            className="truncate text-[13px] font-medium text-ink transition-colors hover:text-accent"
+            title={entry.filename}
+          >
+            {entry.title}
           </p>
-        ) : entry.year != null || versionCount > 1 ? (
-          <p className="-mt-1.5 truncate text-[11.5px] text-ink-subtle">
-            {entry.year ?? ""}
-            {entry.type === "show" && t(" · Series")}
-            {versionCount > 1 &&
-              `${entry.year != null ? " · " : ""}${t("{n} versions", { n: versionCount })}`}
-          </p>
-        ) : null}
-      </button>
+          {epLabel ? (
+            <p className="-mt-1.5 truncate text-[11.5px] text-ink-subtle">
+              {epLabel}
+              {entry.year ? ` · ${entry.year}` : ""}
+              {versionCount > 1 && ` · ${t("{n} versions", { n: versionCount })}`}
+            </p>
+          ) : entry.year != null || versionCount > 1 ? (
+            <p className="-mt-1.5 truncate text-[11.5px] text-ink-subtle">
+              {entry.year ?? ""}
+              {entry.type === "show" && t(" · Series")}
+              {versionCount > 1 &&
+                `${entry.year != null ? " · " : ""}${t("{n} versions", { n: versionCount })}`}
+            </p>
+          ) : null}
+        </button>
+        {!selectMode && <LocalMoreActions target={context.source} />}
+      </div>
     </div>
   );
 }

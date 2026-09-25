@@ -22,14 +22,10 @@ export function isFinaleEpisode(
   videos: { season?: number | null; episode?: number | null }[] | null | undefined,
   cur: { season: number; episode: number },
 ): boolean {
-  const vids = (videos ?? []).filter(
-    (v) => typeof v.episode === "number" && (v.season ?? 0) >= 1,
-  );
+  const vids = (videos ?? []).filter((v) => typeof v.episode === "number" && (v.season ?? 0) >= 1);
   if (vids.length === 0) return false;
   const key = (s: number, e: number) => s * 100000 + e;
-  const covered = vids.some(
-    (v) => (v.season ?? 1) === cur.season && v.episode === cur.episode,
-  );
+  const covered = vids.some((v) => (v.season ?? 1) === cur.season && v.episode === cur.episode);
   if (!covered) return false;
   const maxKey = vids.reduce((m, v) => Math.max(m, key(v.season ?? 1, v.episode ?? 0)), 0);
   return key(cur.season, cur.episode) >= maxKey;
@@ -460,7 +456,7 @@ async function writeLibraryItem(
         bestWatched = cached.watched;
         bestMtime = cached.mtime;
       }
-      const queued = queuedWatched(canonicalId);
+      const queued = queuedWatched(canonicalId, authKey);
       if (queued && queued.watched != null && queued.mtime >= bestMtime) {
         bestWatched = queued.watched;
         bestMtime = queued.mtime;

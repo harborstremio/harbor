@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Heart, Loader2, Pencil, Pin, PinOff, Trash2 } from "lucide-react";
+import { Copy, Heart, Loader2, Pencil, Pin, PinOff, Trash2, UserRound } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useAutosize } from "@/lib/use-autosize";
 import { PostBody } from "./post-body";
@@ -13,6 +13,16 @@ import {
 import { Avatar, timeAgo } from "@/views/profile/profile-bits";
 import { UserHoverCard } from "@/views/profile/user-hover-card";
 import { VerifiedBadge } from "@/views/account/verified-badge";
+import { useContextTarget, type ContextMenuTarget } from "@/lib/context-menu";
+import { copyContextText } from "@/components/context-menu/content-actions";
+import { ConfirmableAction } from "@/components/context-menu/action-items";
+import {
+  assertSocialActor,
+  captureSocialActor,
+  isSocialActorCurrent,
+} from "@/lib/social/action-actor";
+import { currentAuthor } from "@/lib/theme-auth";
+import { canOpenProfile, requestOpenProfile } from "@/lib/social/open-profile";
 
 const POST_MAX = 2000;
 
@@ -33,12 +43,15 @@ export function PostItem({
 }) {
   const t = useT();
   const [busy, setBusy] = useState(false);
-  const [confirming, setConfirming] = useState(false);
+  const pending = useRef(false);
+  const [actionError, setActionError] = useState("");
+  const bodyRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(post.body);
   const [editError, setEditError] = useState<string | null>(null);
   const editRef = useRef<HTMLTextAreaElement>(null);
   useAutosize(editRef, draft);
+  const actor = captureSocialActor();
 
   const beginEdit = () => {
     setDraft(post.body);
@@ -65,43 +78,143 @@ export function PostItem({
     }
   };
 
-  const toggleLike = async () => {
-    const next = !post.liked;
-    onChanged({ ...post, liked: next, likeCount: post.likeCount + (next ? 1 : -1) });
-    try {
-      onChanged(await likeGroupPost(groupId, post.id, next));
-    } catch {
-      onChanged(post);
-    }
-  };
-
-  const togglePin = async () => {
+  const mutate = async (command: "like" | "pin" | "delete") => {
+    assertSocialActor(actor);
+    if (pending.current) throw new Error(t("An update is already in progress."));
+    const author = currentAuthor()?.handle;
+    if (!author || (command === "pin" && !post.canPin) || (command === "delete" && !post.canDelete))
+      throw new Error(t("This action is no longer available."));
+    pending.current = true;
     setBusy(true);
+    setActionError("");
     try {
-      onChanged(await pinGroupPost(groupId, post.id, !post.pinned));
-    } catch {
+      if (command === "delete") {
+        const result = await deleteGroupPost(groupId, post.id);
+        if (result.ok !== true)
+          throw new Error(
+            t("The post deletion could not be confirmed. Refresh its current state."),
+          );
+        if (isSocialActorCurrent(actor)) onRemoved(post.id);
+      } else {
+        const updated =
+          command === "like"
+            ? await likeGroupPost(groupId, post.id, !post.liked)
+            : await pinGroupPost(groupId, post.id, !post.pinned);
+        if (isSocialActorCurrent(actor)) onChanged(updated);
+      }
+    } finally {
+      pending.current = false;
       setBusy(false);
-      return;
-    }
-    setBusy(false);
-  };
-
-  const remove = async () => {
-    setBusy(true);
-    try {
-      await deleteGroupPost(groupId, post.id);
-      onRemoved(post.id);
-    } catch {
-      setBusy(false);
-      setConfirming(false);
     }
   };
+  const runFromButton = (command: "like" | "pin" | "delete") => {
+    void mutate(command).catch((error: unknown) =>
+      setActionError(
+        error instanceof Error ? error.message : t("The action could not be completed."),
+      ),
+    );
+  };
+  const contextTarget = (): ContextMenuTarget & { kind: "actions" } => ({
+    kind: "actions",
+    id: `post:${groupId}:${post.id}`,
+    label: t("Post"),
+    contentPolicy: "separate",
+    isValid: () => isSocialActorCurrent(actor),
+    actions: () => [
+      ...(post.author && canOpenProfile(post.author.handle)
+        ? [
+            {
+              id: `post:author:${post.id}`,
+              label: t("Open profile"),
+              icon: <UserRound size={16} />,
+              run: () => requestOpenProfile(post.author!.handle),
+            },
+          ]
+        : []),
+      {
+        id: `post:copy:${post.id}`,
+        label: t("Copy Text"),
+        icon: <Copy size={14} />,
+        quickCopy: true,
+        run: () => copyContextText(bodyRef.current?.innerText ?? post.body),
+      },
+      ...(currentAuthor()
+        ? [
+            {
+              id: `post:like:${post.id}`,
+              label: post.liked ? t("Unlike") : t("Like"),
+              icon: <Heart size={16} fill={post.liked ? "currentColor" : "none"} />,
+              active: post.liked,
+              group: "post",
+              disabled: busy,
+              run: () => mutate("like"),
+            },
+          ]
+        : []),
+      ...(post.canEdit
+        ? [
+            {
+              id: `post:edit:${post.id}`,
+              label: t("Edit post"),
+              icon: <Pencil size={16} />,
+              group: "manage",
+              disabled: busy,
+              run: beginEdit,
+              restoreFocus: false,
+            },
+          ]
+        : []),
+      ...(post.canPin
+        ? [
+            {
+              id: `post:pin:${post.id}`,
+              label: post.pinned ? t("Unpin") : t("Pin"),
+              icon: post.pinned ? <PinOff size={16} /> : <Pin size={16} />,
+              active: post.pinned,
+              group: "manage",
+              disabled: busy,
+              run: () => mutate("pin"),
+            },
+          ]
+        : []),
+      ...(post.canDelete
+        ? [
+            {
+              id: `post:delete:${post.id}`,
+              label: t("Delete post…"),
+              icon: <Trash2 size={16} />,
+              group: "delete",
+              danger: true,
+              disabled: busy,
+              confirmation: {
+                key: JSON.stringify([actor, groupId, post.id, post.body, "delete"]),
+                title: t("Delete post…"),
+                description: `${t("Delete this post from the group?")}\n\n${post.body.slice(0, 160)}${post.body.length > 160 ? "…" : ""}`,
+                confirmLabel: t("Delete post"),
+                pendingLabel: t("Deleting…"),
+                successLabel: t("Post deleted"),
+              },
+              run: () => mutate("delete"),
+            },
+          ]
+        : []),
+    ],
+  });
+  const contextRef = useContextTarget<HTMLElement>(contextTarget);
 
   return (
     <article
-      style={{ animationDelay: `${Math.min(index * 40, 320)}ms`, animationDuration: "420ms", animationFillMode: "both" }}
+      ref={contextRef}
+      tabIndex={0}
+      style={{
+        animationDelay: `${Math.min(index * 40, 320)}ms`,
+        animationDuration: "420ms",
+        animationFillMode: "both",
+      }}
       className={`group/post relative flex gap-3 rounded-lg p-3.5 ring-1 transition-colors duration-200 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 ${
-        post.pinned ? "bg-elevated/60 ring-accent/25" : "bg-surface ring-edge-soft hover:bg-elevated/40"
+        post.pinned
+          ? "bg-elevated/60 ring-accent/25"
+          : "bg-surface ring-edge-soft hover:bg-elevated/40"
       }`}
     >
       <AuthorAvatar post={post} onOpenProfile={onOpenProfile} />
@@ -114,7 +227,9 @@ export function PostItem({
             </span>
           )}
           <AuthorName post={post} onOpenProfile={onOpenProfile} />
-          <span aria-hidden className="text-[12px] text-ink-subtle">·</span>
+          <span aria-hidden className="text-[12px] text-ink-subtle">
+            ·
+          </span>
           <span className="text-[12px] text-ink-subtle">{timeAgo(post.createdAt)}</span>
           {post.editedAt && <span className="text-[12px] text-ink-subtle">({t("edited")})</span>}
         </div>
@@ -153,13 +268,16 @@ export function PostItem({
             </div>
           </div>
         ) : (
-          <PostBody body={post.body} onOpenProfile={onOpenProfile} />
+          <div ref={bodyRef}>
+            <PostBody body={post.body} onOpenProfile={onOpenProfile} />
+          </div>
         )}
 
         <div className="mt-1 flex items-center gap-1">
           <button
             type="button"
-            onClick={() => void toggleLike()}
+            onClick={() => runFromButton("like")}
+            disabled={busy}
             aria-pressed={post.liked}
             className={`flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-semibold transition-colors active:scale-[0.95] ${
               post.liked ? "text-danger" : "text-ink-subtle hover:bg-elevated hover:text-ink"
@@ -183,7 +301,7 @@ export function PostItem({
             {post.canPin && (
               <button
                 type="button"
-                onClick={() => void togglePin()}
+                onClick={() => runFromButton("pin")}
                 disabled={busy}
                 className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink disabled:opacity-50"
               >
@@ -192,20 +310,21 @@ export function PostItem({
               </button>
             )}
             {post.canDelete && (
-              <button
-                type="button"
-                onClick={() => (confirming ? void remove() : setConfirming(true))}
-                onBlur={() => setConfirming(false)}
-                disabled={busy}
-                className={`flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-semibold transition-colors disabled:opacity-50 ${
-                  confirming ? "bg-danger/15 text-danger" : "text-ink-subtle hover:bg-elevated hover:text-danger"
-                }`}
+              <ConfirmableAction
+                source={contextTarget()}
+                actionId={`post:delete:${post.id}`}
+                className={`flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-semibold transition-colors disabled:opacity-50 ${"text-ink-subtle hover:bg-elevated hover:text-danger"}`}
               >
-                <Trash2 size={14} /> {confirming ? t("Confirm") : t("Delete")}
-              </button>
+                <Trash2 size={14} /> {t("Delete")}
+              </ConfirmableAction>
             )}
           </div>
         </div>
+        {actionError && (
+          <p role="alert" className="text-[12px] text-danger">
+            {actionError}
+          </p>
+        )}
       </div>
     </article>
   );
@@ -240,7 +359,8 @@ function AuthorName({
   onOpenProfile?: (handle: string) => void;
 }) {
   const t = useT();
-  if (!post.author) return <span className="text-[13.5px] font-semibold text-ink">{t("Someone")}</span>;
+  if (!post.author)
+    return <span className="text-[13.5px] font-semibold text-ink">{t("Someone")}</span>;
   return (
     <UserHoverCard handle={post.author.handle}>
       <button

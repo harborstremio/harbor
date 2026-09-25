@@ -1,10 +1,10 @@
 import { Star } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { Poster } from "@/components/poster";
-import { useContextMenu } from "@/lib/context-menu";
 import type { MangaSummary } from "@/lib/manga/api";
 import { useIsMangaFavorite, useMangaFavorites } from "@/lib/manga-favorites";
 import { CollectionBadges } from "../collection-badge";
+import { useMangaContext } from "@/lib/use-manga-context";
 
 export function MangaCard({
   manga,
@@ -16,19 +16,12 @@ export function MangaCard({
   const t = useT();
   const fav = useMangaFavorites();
   const isFav = useIsMangaFavorite(manga.id);
-  const { open: openContextMenu } = useContextMenu();
+  const context = useMangaContext(manga, { open: () => onOpen(manga.id) });
   return (
     <button
+      ref={context.ref}
       type="button"
       onClick={() => onOpen(manga.id)}
-      onContextMenu={(e) =>
-        openContextMenu(e, {
-          kind: "manga",
-          id: manga.id,
-          title: manga.title,
-          cover: manga.cover,
-        })
-      }
       className="group flex w-full min-w-0 flex-col gap-2.5 text-start"
     >
       <div className="relative w-full transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] group-hover:will-change-transform group-hover:[transform:translate3d(0,-0.5rem,0)] motion-reduce:transition-none motion-reduce:group-hover:[transform:none]">

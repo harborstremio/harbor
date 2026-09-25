@@ -7,6 +7,8 @@ import { ListHeart } from "./list-heart";
 import { ListShareButton } from "./list-share-button";
 import { SaveListButton } from "./save-list-button";
 import type { FeaturedItem, FeaturedList } from "@/lib/social/featured-lists";
+import { profileMediaMeta } from "@/lib/social/profile-media-meta";
+import { useTitleContext } from "@/components/context-menu/use-title-context";
 
 function ListPoster({
   item,
@@ -15,9 +17,14 @@ function ListPoster({
   item: FeaturedItem;
   onOpenMeta?: (id: string, kind?: string, hint?: { name?: string; poster?: string }) => void;
 }) {
+  const onContextMenu = useTitleContext(
+    profileMediaMeta(item.id, item.type, { name: item.name, poster: item.poster }),
+    item.poster,
+  );
   return (
     <button
       onClick={() => onOpenMeta?.(item.id, item.type, { name: item.name, poster: item.poster })}
+      onContextMenu={onContextMenu}
       disabled={!onOpenMeta}
       className="group w-full text-start disabled:cursor-default"
     >

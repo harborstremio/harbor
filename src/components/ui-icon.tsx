@@ -21,6 +21,13 @@ import saveBanner from "@/assets/ui-icons/save-banner.svg?raw";
 import showcase from "@/assets/ui-icons/showcase.svg?raw";
 import skipFwd from "@/assets/ui-icons/skip-fwd.svg?raw";
 import thumbsUp from "@/assets/ui-icons/thumbs-up.svg?raw";
+import goTo from "@/assets/ui-icons/go-to.svg?raw";
+import openCollection from "@/assets/ui-icons/open-collection.svg?raw";
+import saveToMyCollections from "@/assets/ui-icons/save-to-my-collections.svg?raw";
+import resumePlayback from "@/assets/ui-icons/resume-playback.svg?raw";
+import copyImage from "@/assets/ui-icons/copy-image.svg?raw";
+import addTo from "@/assets/ui-icons/add-to.svg?raw";
+import continueLastWatched from "@/assets/ui-icons/continue-last-watched.svg?raw";
 
 // These SVGs ship as solid #fff glyphs on a transparent canvas. Inline them and
 // swap the hardcoded white for currentColor so they tint like the lucide icons
@@ -57,6 +64,13 @@ const ICONS = {
   showcase: prep(showcase),
   "skip-fwd": prep(skipFwd),
   "thumbs-up": prep(thumbsUp),
+  "go-to": prep(goTo),
+  "open-collection": prep(openCollection),
+  "save-to-my-collections": prep(saveToMyCollections),
+  "resume-playback": prep(resumePlayback),
+  "copy-image": prep(copyImage),
+  "add-to": prep(addTo),
+  "continue-last-watched": prep(continueLastWatched),
 } as const;
 
 export type UiIconName = keyof typeof ICONS;

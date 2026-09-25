@@ -2,7 +2,7 @@ import { Check, Plus } from "lucide-react";
 import { ShowcaseIcon } from "@/components/icons/harbor-glyphs";
 import { useState, type RefObject } from "react";
 import {
-  addToList,
+  createListWithItem,
   toggleInList,
   useCustomLists,
   useListsContaining,
@@ -13,6 +13,8 @@ import { AnchoredMenu } from "@/components/anchored-menu";
 import { clearShowcase, setShowcase, useShowcaseMetaId } from "@/lib/social/showcase";
 import { CreateListModal } from "./create-list-modal";
 import { emitListToast } from "./list-toast";
+import { captureMembershipProfile, type MembershipProfile } from "@/lib/membership-operations";
+import { membershipFailureMessage } from "@/lib/membership-actions";
 
 export function AddToListMenu({
   item,
@@ -28,16 +30,18 @@ export function AddToListMenu({
   const t = useT();
   const lists = useCustomLists();
   const containing = useListsContaining(item.id);
-  const [creating, setCreating] = useState(false);
+  const [creating, setCreating] = useState<{
+    item: ListItemInput;
+    profile: MembershipProfile | null;
+  } | null>(null);
+  const [createError, setCreateError] = useState("");
   const [busy, setBusy] = useState(false);
   const showcaseMetaId = useShowcaseMetaId();
   const isShowcase = showcaseMetaId === item.id;
 
   const toggle = (listId: string, name: string) => {
     const nowIn = toggleInList(listId, item);
-    emitListToast(
-      nowIn ? t('Added to "{name}"', { name }) : t('Removed from "{name}"', { name }),
-    );
+    emitListToast(nowIn ? t('Added to "{name}"', { name }) : t('Removed from "{name}"', { name }));
   };
 
   const toggleShowcase = async () => {
@@ -116,7 +120,10 @@ export function AddToListMenu({
               {isShowcase ? t("Remove from showcase") : t("Set as showcase")}
             </button>
             <button
-              onClick={() => setCreating(true)}
+              onClick={() => {
+                setCreateError("");
+                setCreating({ item: { ...item }, profile: captureMembershipProfile() });
+              }}
               className="flex min-h-[44px] w-full items-center gap-2.5 px-3 py-2 text-start text-[13px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink"
             >
               <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center">
@@ -130,12 +137,19 @@ export function AddToListMenu({
 
       {creating && (
         <CreateListModal
-          onClose={() => {
-            setCreating(false);
-            onClose();
+          error={createError}
+          create={(name, description) => {
+            if (!creating.profile) {
+              setCreateError(t("The active profile changed. Open the menu again."));
+              return null;
+            }
+            const saved = createListWithItem(name, creating.item, creating.profile, description);
+            if (!saved.id) setCreateError(t(membershipFailureMessage(saved.result)));
+            return saved.id ?? null;
           }}
-          onCreated={(id) => {
-            addToList(id, item);
+          onClose={() => {
+            setCreating(null);
+            onClose();
           }}
         />
       )}

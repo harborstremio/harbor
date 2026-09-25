@@ -5,6 +5,8 @@ import sportsStatistics from "./ja/sports-statistics";
 import sportsApi from "./ja/sports-api";
 import esportsArena from "./ja/esports-arena";
 import sportsHub from "./ja/sports-hub";
+import contextActionsFallback from "./context-actions-fallback";
+
 import ebookSources from "./ja/ebook-sources";
 import settingsRefinements from "./ja/settings-refinements";
 import addons from "./ja/addons";
@@ -47,6 +49,8 @@ import bpSports from "./ja/bp-sports";
 const ja: Record<string, string> = {
   ...videoCast,
   ...music,
+  ...contextActionsFallback,
+
   ...ebookSources,
   ...coverage,
   ...sweep,

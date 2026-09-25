@@ -7,6 +7,7 @@ import { searchAll, searchCinemeta } from "@/lib/search";
 import { useSettings } from "@/lib/settings";
 import { addAutoDownload, isAutoDownloaded } from "@/lib/auto-download";
 import { useT } from "@/lib/i18n";
+import { saveAutoDownloadChange } from "./auto-download-feedback";
 
 const MAX_RESULTS = 8;
 
@@ -64,7 +65,7 @@ export function AutoDownloadAdd() {
   }, [query, settings.tmdbKey]);
 
   const pick = (m: Meta) => {
-    addAutoDownload(m);
+    if (!saveAutoDownloadChange(() => addAutoDownload(m))) return;
     setQuery("");
     setResults([]);
     inputRef.current?.blur();

@@ -28,6 +28,7 @@ import {
   X,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { copyText } from "@/lib/clipboard-text";
 import type { EBookChapter, EBookChapterContent } from "@/lib/ebook/providers";
 import { ebookTextIdentity } from "@/lib/ebook/chapter-locations";
 import { createEBookFlipPages, type EBookFlipPages } from "@/lib/ebook/book-pages";
@@ -667,7 +668,8 @@ export function HarborReader({
     (chapter.volume ? t("Volume {volume}", { volume: chapter.volume }) : undefined);
   const persistReadingPosition = useCallback(
     (line: number) => {
-      if (!paragraphs.length || (!chapter.legacy && chapterIndex < 0) || !bookChapters.length) return;
+      if (!paragraphs.length || (!chapter.legacy && chapterIndex < 0) || !bookChapters.length)
+        return;
       const safeLine = Math.max(0, Math.min(paragraphs.length - 1, line));
       const chapterProgress =
         paragraphs.length <= 1 ? 100 : Math.round((safeLine / (paragraphs.length - 1)) * 100);
@@ -1959,7 +1961,9 @@ export function HarborReader({
                 : draftAnnotation(true),
             )
           }
-          onCopy={() => navigator.clipboard.writeText(selection.text)}
+          onCopy={async () => {
+            if (!(await copyText(selection.text))) throw new Error("Could not copy selected text.");
+          }}
           onHoverStart={cancelAnnotationDismiss}
           onHoverEnd={() =>
             selection.annotationId && scheduleAnnotationDismiss(selection.annotationId)

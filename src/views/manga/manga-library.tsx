@@ -4,19 +4,24 @@ import { useT } from "@/lib/i18n";
 import { useMangaFavorites } from "@/lib/manga-favorites";
 import { mangaLists } from "@/lib/manga-lists";
 import { searchManga } from "@/lib/manga/api";
-import { hasAnyMangaSource } from "@/lib/manga/sources";
+import { hasAnyMangaSource, setActiveMangaSource } from "@/lib/manga/sources";
 import { useView } from "@/lib/view";
 import type { MangaSummary } from "@/lib/manga/types";
 import { MyListsTab } from "../library/my-lists-tab";
 import { VirtualGrid } from "@/components/virtual-grid";
-import { useContextMenu } from "@/lib/context-menu";
+import { useMangaContext } from "@/lib/use-manga-context";
 import { observeWithin } from "@/lib/visibility";
 import { useProxiedImageSrc } from "@/lib/remote-image-proxy";
 
 function useOpenTitle() {
   const { openManga } = useView();
   const busyRef = useRef<Set<string>>(new Set());
-  return async (id: string, title: string) => {
+  return async (id: string, title: string, sourceId?: string) => {
+    if (id.includes("::") || sourceId) {
+      if (sourceId && !id.includes("::")) setActiveMangaSource(sourceId);
+      openManga(id);
+      return;
+    }
     if (busyRef.current.has(id)) return;
     const name = title.trim();
     if (!name || !hasAnyMangaSource()) {
@@ -29,7 +34,8 @@ function useOpenTitle() {
       const results = await searchManga(name);
       const match =
         results.find(
-          (r) => norm(r.title) === norm(name) || (r.altTitle != null && norm(r.altTitle) === norm(name)),
+          (r) =>
+            norm(r.title) === norm(name) || (r.altTitle != null && norm(r.altTitle) === norm(name)),
         ) ?? results[0];
       openManga(match ? match.id : id);
     } catch {
@@ -47,8 +53,17 @@ type LibrarySection = "favorites" | "lists";
 // bucketing, retry timers, explicit decode) is pure overhead here. This gates
 // the <img> behind a shared viewport observer and lets the browser decode
 // lazily instead of hammering el.decode() for every mounted cell.
-function FavCell({ m, onOpen }: { m: MangaSummary; onOpen: (item: MangaSummary) => void }) {
-  const { open: openContextMenu } = useContextMenu();
+function FavCell({
+  m,
+  onOpen,
+}: {
+  m: MangaSummary & { sourceId?: string };
+  onOpen: (item: MangaSummary) => void;
+}) {
+  const context = useMangaContext(
+    { ...m, sourceId: m.sourceId ?? (m.id.includes("::") ? undefined : "") },
+    { open: () => onOpen(m) },
+  );
   const ref = useRef<HTMLDivElement | null>(null);
   const [near, setNear] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -62,14 +77,15 @@ function FavCell({ m, onOpen }: { m: MangaSummary; onOpen: (item: MangaSummary) 
   }, []);
   return (
     <button
+      ref={context.ref}
       type="button"
       onClick={() => onOpen(m)}
-      onContextMenu={(e) =>
-        openContextMenu(e, { kind: "manga", id: m.id, title: m.title, cover: m.cover })
-      }
       className="group flex w-full flex-col gap-2 text-start"
     >
-      <div ref={ref} className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-elevated/60">
+      <div
+        ref={ref}
+        className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-elevated/60"
+      >
         {!loaded && <span aria-hidden className="harbor-shimmer absolute inset-0" />}
         {near && src && (
           <img
@@ -95,11 +111,14 @@ export function MangaLibrary({ scrollRef }: { scrollRef: React.RefObject<HTMLEle
   const openRef = useRef(openTitle);
   openRef.current = openTitle;
   const openRailTitle = useCallback(
-    (m: MangaSummary) => void openRef.current(m.id, m.title),
+    (m: MangaSummary & { sourceId?: string }) => void openRef.current(m.id, m.title, m.sourceId),
     [],
   );
   const { items } = useMangaFavorites();
-  const favs = useMemo((): MangaSummary[] => [...items.values()].sort((a, b) => b.addedAt - a.addedAt), [items]);
+  const favs = useMemo(
+    (): MangaSummary[] => [...items.values()].sort((a, b) => b.addedAt - a.addedAt),
+    [items],
+  );
   const [active, setActive] = useState<LibrarySection>("favorites");
   const swapRef = useRef<HTMLDivElement | null>(null);
 
@@ -143,8 +162,7 @@ export function MangaLibrary({ scrollRef }: { scrollRef: React.RefObject<HTMLEle
       }
       const scroller = scrollerOf(lists);
       const maxed =
-        scroller != null &&
-        scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight <= 8;
+        scroller != null && scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight <= 8;
       if (maxed && rect.bottom > 160) {
         setActive("lists");
         return;

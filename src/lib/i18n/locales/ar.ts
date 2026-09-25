@@ -6,6 +6,8 @@ import sportsApi from "./ar/sports-api";
 import esportsArena from "./ar/esports-arena";
 import sportsHub from "./ar/sports-hub";
 import bpSports from "./ar/bp-sports";
+import contextActionsFallback from "./context-actions-fallback";
+
 import ebookSources from "./ar/ebook-sources";
 import settingsRefinements from "./ar/settings-refinements";
 import uiFallback from "./ui-fallback";
@@ -46,10 +48,13 @@ import plurals from "./ar/plurals";
 import audit from "./ar/audit";
 import plugins from "./ar/plugins";
 import brands from "./ar/brands";
+import contextActions from "./ar/context-actions";
 
 const ar: Record<string, string> = {
   ...videoCast,
   ...music,
+  ...contextActionsFallback,
+
   ...ebookSources,
   ...uiFallback,
   ...coverage,
@@ -97,6 +102,7 @@ const ar: Record<string, string> = {
   ...esportsArena,
   ...bpSports,
   ...listenTogether,
+  ...contextActions,
 };
 
 export default ar;

@@ -30,12 +30,14 @@ import { consumeRecentStubEvent } from "@/lib/dead-streams";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import {
   readPlayback,
+  isPlaybackActorCurrent,
   readLastSeriesPlayback,
   streamMatchesEntry,
   streamMatchesReleaseLineage,
   streamMatchesSource,
 } from "@/lib/playback-history";
 import { readSeasonLock } from "@/lib/season-lock";
+import { continuationStream } from "@/lib/player/continue-playback";
 import { useSettings } from "@/lib/settings";
 import type { ScoredStream, Tier } from "@/lib/streams/types";
 import { isAddonRanked } from "@/lib/streams/addon-detect";
@@ -115,6 +117,7 @@ export function PlayPicker({
   intent,
   seasonEpisodes,
   resume,
+  continuation,
   playerActive,
 }: {
   meta: Meta;
@@ -124,6 +127,7 @@ export function PlayPicker({
   intent?: "play" | "download";
   seasonEpisodes?: PlayEpisode[];
   resume?: boolean;
+  continuation?: import("@/lib/playback-history").PlaybackContinuation;
   playerActive?: boolean;
 }) {
   const t = useT();
@@ -454,8 +458,11 @@ export function PlayPicker({
   const isAnimeMetaId = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
   const previousPlayback = useMemo(
     () =>
-      settings.rememberLastStream ? readPlayback(meta.id, episode?.season, episode?.episode) : null,
-    [meta.id, episode?.season, episode?.episode, settings.rememberLastStream],
+      continuation?.source ??
+      (settings.rememberLastStream
+        ? readPlayback(meta.id, episode?.season, episode?.episode)
+        : null),
+    [meta.id, episode?.season, episode?.episode, settings.rememberLastStream, continuation],
   );
 
   const seasonLock = settings.seasonSourceLock && (meta.type === "series" || isAnimeMetaId);
@@ -517,7 +524,11 @@ export function PlayPicker({
 
   const previousMatch: ScoredStream | null = useMemo(() => {
     if (!filteredPicker || !previousPlayback) return null;
-    const m = filteredPicker.allRaw.find((s) => streamMatchesEntry(s, previousPlayback)) ?? null;
+    const m = continuation
+      ? (filteredPicker.allRaw
+          .map((s) => continuationStream(s, continuation))
+          .find((s) => s != null) ?? null)
+      : (filteredPicker.allRaw.find((s) => streamMatchesEntry(s, previousPlayback)) ?? null);
     if (!m || isAnimeMetaId || !episode) return m;
     if (
       m.episode != null &&
@@ -532,7 +543,7 @@ export function PlayPicker({
     )
       return null;
     return m;
-  }, [filteredPicker, previousPlayback, episode, isAnimeMetaId]);
+  }, [filteredPicker, previousPlayback, episode, isAnimeMetaId, continuation]);
 
   const sameSourceMatch: ScoredStream | null = useMemo(() => {
     if (!filteredPicker || !lastSeriesSource || previousMatch) return null;
@@ -590,6 +601,7 @@ export function PlayPicker({
     absoluteEpisode: animeAbsoluteEpisode,
     attempt,
     resume,
+    continuation,
     debrids,
     isCached,
     seasonLock,
@@ -638,7 +650,7 @@ export function PlayPicker({
   const rememberedFiredRef = useRef(false);
   const rememberedHandledFirst =
     !!previousMatch &&
-    settings.rememberLastStream &&
+    (settings.rememberLastStream || !!continuation) &&
     !!resume &&
     !wasInvitedTo(inviteKey) &&
     !isDownload &&
@@ -864,6 +876,10 @@ export function PlayPicker({
         absoluteEpisode={animeAbsoluteEpisode}
         onStart={(finalSrc) => {
           setPendingPreselect(null);
+          if (finalSrc.continuation && !isPlaybackActorCurrent(finalSrc.continuation.actor)) {
+            setResolveError(playError("The active profile changed. Open the menu again."));
+            return;
+          }
           openPlayer(finalSrc);
         }}
         onCancel={() => setPendingPreselect(null)}

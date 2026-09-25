@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   BookOpen,
@@ -17,7 +17,6 @@ import { Play } from "@/components/icons/play-filled";
 import { Search } from "@/components/icons/search-icon";
 import { t, useT } from "@/lib/i18n";
 import { Flag, flagSrc } from "@/components/flag";
-import { useContextMenu } from "@/lib/context-menu";
 import { languageName, type MangaChapter } from "@/lib/manga/model";
 import {
   useMangaProgressEntry,
@@ -35,6 +34,36 @@ import {
 } from "@/lib/manga-downloads";
 import { listMangaSources, sourceIconUrl } from "@/lib/manga/sources";
 import { chapterGroupKey } from "@/lib/manga/chapter-identity";
+import { useMangaChapterContext } from "@/lib/use-manga-chapter-context";
+
+function ChapterContextButton({
+  mangaId,
+  mangaTitle,
+  mangaCover,
+  chapter,
+  onClick,
+  className,
+  children,
+}: {
+  mangaId: string;
+  mangaTitle?: string;
+  mangaCover?: string;
+  chapter: MangaChapter;
+  onClick: () => void;
+  className: string;
+  children: ReactNode;
+}) {
+  const ref = useMangaChapterContext<HTMLButtonElement>(
+    { id: mangaId, title: mangaTitle ?? "", cover: mangaCover },
+    chapter,
+    onClick,
+  );
+  return (
+    <button ref={ref} type="button" onClick={onClick} className={className}>
+      {children}
+    </button>
+  );
+}
 
 type ChapterView = "grid" | "list";
 const VIEW_KEY = "harbor.manga.chapterview";
@@ -434,11 +463,6 @@ export function ChapterList({
   const progress = useMangaProgressEntry(mangaId, mangaTitle);
   const readIds = useReadMangaChapterIds(mangaId);
   const isRead = (c: MangaChapter) => c.serverRead === true || readIds.has(c.id);
-  const { open: openContextMenu } = useContextMenu();
-  const chapterMenu = (e: ReactMouseEvent, c: MangaChapter) => {
-    if (!mangaId) return;
-    openContextMenu(e, { kind: "manga-chapter", mangaId, mangaTitle, mangaCover, chapter: c });
-  };
 
   const sourceOptions = useMemo(() => {
     const all = listMangaSources();
@@ -606,11 +630,13 @@ export function ChapterList({
         </div>
       ) : null;
     const row = (
-      <button
+      <ChapterContextButton
         key={c.id}
-        type="button"
+        mangaId={mangaId ?? ""}
+        mangaTitle={mangaTitle}
+        mangaCover={mangaCover}
+        chapter={c}
         onClick={() => readChapter(c)}
-        onContextMenu={(e) => chapterMenu(e, c)}
         className={`group relative flex min-h-[64px] w-full items-center justify-between gap-4 ${last ? "" : "border-b border-edge-soft/60 "}px-5 py-3.5 text-start transition-colors hover:bg-elevated/40 ${
           cur ? "bg-accent/5" : ""
         }`}
@@ -652,7 +678,7 @@ export function ChapterList({
             className="shrink-0 text-ink-subtle transition-colors group-hover:text-accent"
           />
         </div>
-      </button>
+      </ChapterContextButton>
     );
     return volumeHead ? [volumeHead, row] : row;
   };
@@ -871,7 +897,9 @@ export function ChapterList({
               })}
             </div>
           ) : (
-            renderSource.map((c, i) => renderListRow(c, i, renderSource, i === renderSource.length - 1))
+            renderSource.map((c, i) =>
+              renderListRow(c, i, renderSource, i === renderSource.length - 1),
+            )
           )}
         </div>
       ) : (
@@ -882,11 +910,13 @@ export function ChapterList({
           {visible.map((c) => {
             const cur = isCurrentChapter(progress, c);
             return (
-              <button
+              <ChapterContextButton
                 key={c.id}
-                type="button"
+                mangaId={mangaId ?? ""}
+                mangaTitle={mangaTitle}
+                mangaCover={mangaCover}
+                chapter={c}
                 onClick={() => readChapter(c)}
-                onContextMenu={(e) => chapterMenu(e, c)}
                 className={`group relative flex min-h-[64px] flex-col justify-between gap-2 rounded-xl border bg-surface/60 px-4 py-3.5 text-start transition-colors hover:bg-elevated/60 ${
                   cur ? "border-accent/70" : "border-edge-soft hover:border-edge"
                 }`}
@@ -930,7 +960,7 @@ export function ChapterList({
                     />
                   </div>
                 </div>
-              </button>
+              </ChapterContextButton>
             );
           })}
         </div>

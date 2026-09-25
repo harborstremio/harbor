@@ -100,6 +100,16 @@ export function setMovieWatchedLocal(metaId: string, watched: boolean): void {
   persist(next);
 }
 
+export function setMovieWatchedLocalAcknowledged(metaId: string, watched: boolean): void {
+  const next = new Set(load());
+  if (watched) next.add(metaId);
+  else next.delete(metaId);
+  localStorage.setItem(storeKey(), JSON.stringify([...next]));
+  cache = next;
+  version += 1;
+  for (const fn of subs) fn();
+}
+
 export function subscribeMovieWatched(fn: () => void): () => void {
   subs.add(fn);
   return () => {

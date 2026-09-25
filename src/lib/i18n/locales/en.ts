@@ -1,4 +1,6 @@
 import music from "./en/music";
+import contextActionsFallback from "./context-actions-fallback";
+
 import settingsRefinements from "./en/settings-refinements";
 
 const en: Record<string, string> = {
@@ -7,6 +9,8 @@ const en: Record<string, string> = {
   Soccer: "Football",
   "Build identity. Useful when filing a bug report.":
     "Build identity. Useful when filing a bug report.",
+  ...contextActionsFallback,
+
   "nav.home": "Home",
   "nav.discover": "Discover",
   "nav.catalogs": "Catalogs",

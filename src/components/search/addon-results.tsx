@@ -5,6 +5,7 @@ import { Poster, usePosterChain } from "@/components/poster";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
 
 export function AddonResults({
   groups,
@@ -58,6 +59,7 @@ function AddonGroup({ group, onClose }: { group: AddonResultGroup; onClose: () =
 
 function AddonResultRow({ meta, onClose }: { meta: Meta; onClose: () => void }) {
   const { openMeta } = useView();
+  const { open } = useContextMenu();
   const { settings } = useSettings();
   const poster = usePosterChain(
     settings.rpdbKey,
@@ -67,6 +69,7 @@ function AddonResultRow({ meta, onClose }: { meta: Meta; onClose: () => void }) 
   );
   return (
     <button
+      onContextMenu={(event) => open(event, { kind: "meta", meta })}
       onClick={() => {
         openMeta(meta);
         onClose();

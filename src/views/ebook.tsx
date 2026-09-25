@@ -1,3 +1,4 @@
+import { useLocalBackCapability } from "@/lib/use-local-back-capability";
 import {
   ArrowUp,
   BookOpen,
@@ -17,6 +18,7 @@ import {
   Search,
   Settings,
   X,
+  Info,
 } from "lucide-react";
 import {
   createContext,
@@ -37,6 +39,8 @@ import { NavArrow } from "@/components/nav-arrow";
 import { CoverImg } from "@/components/cover-img";
 import { Poster } from "@/components/poster";
 import { EBookBook3D } from "./ebook/ebook-book3d";
+import { useContextTarget } from "@/lib/context-menu";
+import { usePageBackgroundContextMenu } from "@/chrome/context-page-navigation";
 import { Row } from "@/components/row";
 import { emitListToast } from "@/components/lists/list-toast";
 import { NytMark } from "@/components/icons/nyt-mark";
@@ -144,8 +148,54 @@ type EBookTitleLanguage = "auto" | "en" | "ar" | "original";
 
 const EBookTitleLanguageContext = createContext<EBookTitleLanguage>("auto");
 const EBookCardMenuContext = createContext<
-  (ebook: EBook, event: ReactMouseEvent<HTMLElement>) => void
+  (
+    ebook: EBook,
+    event: Pick<
+      ReactMouseEvent<HTMLElement>,
+      "clientX" | "clientY" | "preventDefault" | "stopPropagation"
+    >,
+  ) => void
 >(() => {});
+
+function useEBookCardTarget(ebook: EBook | undefined, onOpen: (ebook: EBook) => void) {
+  const t = useT();
+  const openMenu = useContext(EBookCardMenuContext);
+  return useContextTarget<HTMLElement>(() => ({
+    kind: "actions",
+    id: `ebook:${ebook?.id ?? "loading"}`,
+    label: ebook?.title ?? t("eBook"),
+    image: ebook?.cover ? { src: ebook.cover, label: ebook.title } : undefined,
+    actions: () =>
+      ebook
+        ? [
+            {
+              id: `ebook:details:${ebook.id}`,
+              icon: <Info size={16} />,
+              label: t("Book Details"),
+              run: () => onOpen(ebook),
+            },
+            {
+              id: `ebook:options:${ebook.id}`,
+              icon: <BookOpen size={16} />,
+              label: t("eBook actions"),
+              restoreFocus: false,
+              run: () => {
+                const rect =
+                  document.activeElement instanceof Element
+                    ? document.activeElement.getBoundingClientRect()
+                    : null;
+                openMenu(ebook, {
+                  clientX: rect?.left ?? 190,
+                  clientY: rect?.bottom ?? 190,
+                  preventDefault() {},
+                  stopPropagation() {},
+                });
+              },
+            },
+          ]
+        : [],
+  }));
+}
 
 function ebookTitleForLanguage(ebook: EBook, language: EBookTitleLanguage): string {
   if (language === "auto" || language === "original") return ebook.title;
@@ -253,11 +303,20 @@ export function EBookView() {
   const browseTagRef = useRef<string | undefined>(ebookSourceBrowseTag("any", "popular"));
   const awardSearchScopesRef = useRef(new Set<string>());
   const needsPopularMetadata = sourceCatalogItems !== null && sourceCatalogItems.length === 0;
-  const openCardMenu = useCallback((ebook: EBook, event: ReactMouseEvent<HTMLElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setWheelTarget({ ebook, x: event.clientX, y: event.clientY });
-  }, []);
+  const openCardMenu = useCallback(
+    (
+      ebook: EBook,
+      event: Pick<
+        ReactMouseEvent<HTMLElement>,
+        "clientX" | "clientY" | "preventDefault" | "stopPropagation"
+      >,
+    ) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setWheelTarget({ ebook, x: event.clientX, y: event.clientY });
+    },
+    [],
+  );
   const collectionScope = eBookCollectionCacheScope(
     providerId,
     providers.map((provider) => provider.id),
@@ -363,14 +422,6 @@ export function EBookView() {
     setSourceItems((current) => updateSourceItems(current, books, true));
     setSourceCatalogItems((current) => updateSourceItems(current, books, true));
     setResults((current) => (current ? updateSourceItems(current, books, true) : current));
-  }, []);
-  useEffect(() => {
-    const preventNativeMenu = (event: MouseEvent) => {
-      const target = event.target;
-      if (target instanceof Element && target.closest("[data-ebook-page]")) event.preventDefault();
-    };
-    document.addEventListener("contextmenu", preventNativeMenu, true);
-    return () => document.removeEventListener("contextmenu", preventNativeMenu, true);
   }, []);
   const loadAnilistLibrary = useCallback(() => {
     if (!isConnected || !session) {
@@ -597,6 +648,8 @@ export function EBookView() {
     window.addEventListener("harbor:local-back", onBack);
     return () => window.removeEventListener("harbor:local-back", onBack);
   }, [ebookId, openEBook, screen, topKind]);
+
+  useLocalBackCapability(topKind === "ebook" && (!!ebookId || screen !== "browse"));
 
   const search = (value: string) => {
     const wasSearching = query.trim().length >= 2;
@@ -1428,6 +1481,7 @@ function EBookLibraryHero({
   const [paused, setPaused] = useState(false);
   const pageVisible = usePageVisible();
   const current = ebooks[shown];
+  const contextTarget = useEBookCardTarget(current, onOpen);
   const loading = ebooks.length === 0;
   const currentTitle = current ? ebookTitleForLanguage(current, titleLanguage) : "";
   const authors = current?.authors.filter(Boolean).slice(0, 2).join(", ") ?? "";
@@ -1487,6 +1541,7 @@ function EBookLibraryHero({
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onContextMenu={(event) => current && openMenu(current, event)}
+      ref={contextTarget}
     >
       <div className="ebook-hero-library-photo" aria-hidden="true">
         <img src="/ebook-hero-open-books.png" alt="" draggable={false} decoding="async" />
@@ -1869,6 +1924,7 @@ function EBookCard({
   const titleLanguage = useContext(EBookTitleLanguageContext);
   const openMenu = useContext(EBookCardMenuContext);
   const { activeId } = useProfiles();
+  const contextTarget = useEBookCardTarget(ebook, onOpen);
   const profile = activeId ?? "default";
   const displayTitle = ebookTitleForLanguage(ebook, titleLanguage);
   const resume = resumeProfile ? loadEBookResume(resumeProfile, ebook.id) : null;
@@ -1889,6 +1945,7 @@ function EBookCard({
       type="button"
       onClick={() => onOpen(ebook)}
       onContextMenu={(event) => openMenu(ebook, event)}
+      ref={contextTarget}
       className="group flex w-full min-w-0 flex-col gap-2 text-start"
     >
       <EBookBook3D
@@ -2695,6 +2752,7 @@ function EBookDetails({
   const [descriptionClipped, setDescriptionClipped] = useState(false);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const detailScrollRef = useRef<HTMLElement>(null);
+  const onBackgroundContextMenu = usePageBackgroundContextMenu();
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [authorBooks, setAuthorBooks] = useState<EBook[] | null>(null);
   const [recommendations, setRecommendations] = useState<EBook[] | null>(null);
@@ -3080,6 +3138,7 @@ function EBookDetails({
     <main
       data-ebook-page
       ref={detailScrollRef}
+      onContextMenu={onBackgroundContextMenu}
       className="relative flex-1 overflow-y-auto overflow-x-hidden px-12 pb-20 pt-24"
     >
       <div className="flex flex-col gap-10 pb-4">

@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
-import { deleteComment, fetchComments, postComment, ProfileApiError, setCommentLike } from "./profile-api";
+import {
+  deleteComment,
+  fetchComments,
+  postComment,
+  ProfileApiError,
+  setCommentLike,
+} from "./profile-api";
 import type { Comment, LoadState } from "./profile-types";
 import { stripUrls, validateComment, type ComposeIssue } from "./text-safety";
 
@@ -12,8 +18,8 @@ export type CommentsController = {
   hasMore: boolean;
   loadMore: () => void;
   submit: (raw: string, parentId?: string) => Promise<ComposeIssue>;
-  remove: (id: string) => void;
-  toggleLike: (id: string) => void;
+  remove: (id: string) => Promise<void>;
+  toggleLike: (id: string) => Promise<void>;
   sending: boolean;
 };
 
@@ -26,8 +32,13 @@ export function useComments(handle: string): CommentsController {
   const [hasMore, setHasMore] = useState(false);
   const [sending, setSending] = useState(false);
   const lastSentAt = useRef(0);
+  const pending = useRef(new Set<string>());
+  const identity = `${handle}:${authKey}`;
+  const identityRef = useRef(identity);
+  identityRef.current = identity;
 
   useEffect(() => {
+    setSending(false);
     if (!handle) return;
     const ac = new AbortController();
     setState("loading");
@@ -48,12 +59,17 @@ export function useComments(handle: string): CommentsController {
 
   const loadMore = useCallback(() => {
     if (!cursor) return;
-    void fetchComments(handle, cursor).then((page) => {
-      setComments((cur) => [...cur, ...page.comments]);
-      if (typeof page.total === "number") setTotal(page.total);
-      setCursor(page.nextCursor);
-      setHasMore(!!page.nextCursor);
-    });
+    void fetchComments(handle, cursor)
+      .then((page) => {
+        if (identityRef.current !== identity) return;
+        setComments((cur) => [...cur, ...page.comments]);
+        if (typeof page.total === "number") setTotal(page.total);
+        setCursor(page.nextCursor);
+        setHasMore(!!page.nextCursor);
+      })
+      .catch(() => {
+        if (identityRef.current === identity) setState("error");
+      });
   }, [handle, cursor, authKey]);
 
   const submit = useCallback(
@@ -65,41 +81,76 @@ export function useComments(handle: string): CommentsController {
       setSending(true);
       try {
         const created = await postComment(handle, clean, parentId);
+        if (identityRef.current !== identity || currentAuthor()?.handle !== authKey) return null;
         lastSentAt.current = Date.now();
         setComments((cur) => [{ ...created, parentId: created.parentId ?? parentId }, ...cur]);
+        setTotal((value) => value + 1);
         setState("ready");
         return null;
       } catch (e) {
         return e instanceof ProfileApiError && e.status === 429 ? "cooldown" : "failed";
       } finally {
-        setSending(false);
+        if (identityRef.current === identity) setSending(false);
       }
     },
     [handle, authKey],
   );
 
   const remove = useCallback(
-    (id: string) => {
-      if (!authKey) return;
-      const prev = comments;
-      setComments((cur) => cur.filter((c) => c.id !== id));
-      void deleteComment(handle, id).catch(() => setComments(prev));
+    async (id: string) => {
+      if (!authKey || identityRef.current !== identity || currentAuthor()?.handle !== authKey)
+        throw new Error("Sign in to perform this action.");
+      if (authKey.toLowerCase() !== handle.toLowerCase())
+        throw new Error("You no longer have permission to delete this comment.");
+      if (pending.current.has(id)) throw new Error("This comment is being updated.");
+      if (!comments.some((comment) => comment.id === id))
+        throw new Error("This comment is no longer available.");
+      pending.current.add(id);
+      try {
+        await deleteComment(handle, id);
+        if (identityRef.current !== identity) return;
+        setComments((cur) => cur.filter((c) => c.id !== id));
+        setTotal((value) => Math.max(0, value - 1));
+        // The server owns reply deletion/orphaning semantics. Refresh its page
+        // rather than making assumptions about the removed comment's children.
+        try {
+          const page = await fetchComments(handle);
+          if (identityRef.current !== identity) return;
+          setComments(page.comments);
+          setTotal(page.total ?? page.comments.length);
+          setCursor(page.nextCursor);
+          setHasMore(!!page.nextCursor);
+          setState(page.comments.length ? "ready" : "empty");
+        } catch {
+          throw new Error("The comment was deleted, but replies could not be refreshed.");
+        }
+      } finally {
+        pending.current.delete(id);
+      }
     },
     [handle, authKey, comments],
   );
 
   const toggleLike = useCallback(
-    (id: string) => {
-      if (!authKey) return;
+    async (id: string) => {
+      if (!authKey || identityRef.current !== identity || currentAuthor()?.handle !== authKey)
+        throw new Error("Sign in to perform this action.");
+      if (pending.current.has(id)) throw new Error("This comment is being updated.");
       const cur = comments.find((c) => c.id === id);
-      if (!cur) return;
+      if (!cur) throw new Error("This comment is no longer available.");
       const nextLiked = !cur.liked;
-      const apply = (liked: boolean, count: number) =>
-        setComments((cs) => cs.map((c) => (c.id === id ? { ...c, liked, likeCount: count } : c)));
-      apply(nextLiked, Math.max(0, (cur.likeCount ?? 0) + (nextLiked ? 1 : -1)));
-      void setCommentLike(handle, id, nextLiked)
-        .then((r) => apply(r.liked, r.likeCount))
-        .catch(() => apply(!!cur.liked, cur.likeCount ?? 0));
+      pending.current.add(id);
+      try {
+        const result = await setCommentLike(handle, id, nextLiked);
+        if (identityRef.current !== identity) return;
+        setComments((cs) =>
+          cs.map((c) =>
+            c.id === id ? { ...c, liked: result.liked, likeCount: result.likeCount } : c,
+          ),
+        );
+      } finally {
+        pending.current.delete(id);
+      }
     },
     [handle, authKey, comments],
   );

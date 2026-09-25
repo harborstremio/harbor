@@ -338,7 +338,15 @@ export function AnimeEpisodes({
     sourceMetaId?: string,
   ) => {
     e.preventDefault();
-    setWatchedMenu({ x: e.clientX, y: e.clientY, season, episode, watched, metaId: sourceMetaId });
+    setWatchedMenu({
+      x: e.clientX,
+      y: e.clientY,
+      season,
+      episode,
+      watched,
+      metaId: sourceMetaId,
+      origin: e.currentTarget instanceof HTMLElement ? e.currentTarget : null,
+    });
   };
 
   const { progressFor, nextUpNum, nextUpId, spoilerFor, allWatched } = useAnimeProgressMap({
@@ -612,6 +620,14 @@ export function AnimeEpisodes({
       {watchedMenu && (
         <EpisodeWatchedMenu
           metaId={watchedMenu.metaId ?? meta.id}
+          syncMetaId={
+            (watchedMenu.metaId ?? meta.id) === meta.id &&
+            trackId &&
+            /^(kitsu|mal|anilist|anidb):/.test(trackId) &&
+            !/^(kitsu|mal|anilist|anidb):/.test(meta.id)
+              ? trackId
+              : undefined
+          }
           meta={
             watchedMenu.metaId
               ? routing.manualMetaFor(watchedMenu.metaId)

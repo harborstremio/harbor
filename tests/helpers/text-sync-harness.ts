@@ -21,6 +21,7 @@ export function textSyncHarness(
   let slots: unknown[] = [];
   let index = 0;
   let dirty = true;
+  const callbacks = new Map<number, { deps: unknown[]; value: unknown }>();
   const effects = new Map<number, { deps: unknown[]; cleanup?: () => void }>();
   let pending: Array<() => void> = [];
   const timers = new Map<number, () => void>();
@@ -75,12 +76,23 @@ export function textSyncHarness(
         return [
           slots[i],
           (next: unknown) => {
-            slots[i] = typeof next === "function" ? next(slots[i]) : next;
+            const value = typeof next === "function" ? next(slots[i]) : next;
+            if (Object.is(value, slots[i])) return;
+            slots[i] = value;
             dirty = true;
           },
         ];
       },
-      useCallback(fn: unknown) {
+      useCallback(fn: unknown, values: unknown[]) {
+        const i = index++;
+        const previous = callbacks.get(i);
+        if (
+          previous &&
+          values.length === previous.deps.length &&
+          values.every((value, n) => Object.is(value, previous.deps[n]))
+        )
+          return previous.value;
+        callbacks.set(i, { deps: values, value: fn });
         return fn;
       },
       useEffect(fn: () => (() => void) | void, values: unknown[]) {

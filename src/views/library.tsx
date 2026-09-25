@@ -140,7 +140,7 @@ export function LibraryView({ active }: { active: boolean }) {
       className="flex-1 overflow-y-auto px-5 pt-24 pb-14 sm:px-8 lg:px-12 lg:pt-28"
     >
       <LibraryFeaturedProvider>
-        <div {...contentDrag} className="flex flex-col gap-7">
+        <div {...contentDrag} data-context-page-background className="flex flex-col gap-7">
           {settings.libraryHero && <LibraryHero tabKey={tab} />}
           <Header
             tab={tab}

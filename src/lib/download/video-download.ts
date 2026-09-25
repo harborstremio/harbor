@@ -26,12 +26,13 @@ export function startDownload(
   headers?: Record<string, string>,
   mediaKind?: "audio",
 ): DownloadHandle {
-  let settle = () => {};
-  let fail = (_e: Error) => {};
-  const promise = new Promise<void>((res, rej) => {
-    settle = res;
-    fail = rej;
+  let finish = (_error: Error | null) => {};
+  // Channel events can arrive before the native command releases its writer.
+  const terminal = new Promise<Error | null>((resolve) => {
+    finish = resolve;
   });
+  const fail = (error: unknown) =>
+    finish(error instanceof Error ? error : new Error(String(error)));
 
   const emit = (received: number, total: number | null) =>
     onProgress({
@@ -51,7 +52,7 @@ export function startDownload(
         break;
       case "done":
         emit(ev.received, ev.received);
-        settle();
+        finish(null);
         break;
       case "canceled": {
         const e = new Error("Download canceled");
@@ -65,21 +66,23 @@ export function startDownload(
     }
   };
 
-  invoke("download_start", {
+  const command = invoke("download_start", {
     id,
     url,
     dest: destPath,
     headers: headers && Object.keys(headers).length > 0 ? headers : null,
     onEvent: channel,
     mediaKind: mediaKind ?? null,
-  }).catch((e: unknown) => {
-    fail(e instanceof Error ? e : new Error(String(e)));
+  });
+  const promise = command.then(async () => {
+    const error = await terminal;
+    if (error) throw error;
   });
 
   return {
     promise,
     abort: () => {
-      void invoke("download_cancel", { id });
+      void invoke("download_cancel", { id }).catch(fail);
     },
   };
 }

@@ -5,6 +5,7 @@ import {
   activeMangaSourceId,
   aggregateSubProviders,
   ensureMangaSources,
+  listMangaSources,
 } from "./sources";
 import { routeById, streamAll, streamAggregateChapters } from "./sources/aggregate";
 import { suwayomiSourcesRevision } from "./sources/suwayomi/source-events";
@@ -362,7 +363,7 @@ export function resumeChapters(id: string): Promise<MangaChapter[]> {
   // always exceeds the resume timeout, which pushed Continue Reading back to
   // the details page. Fetch just the owning provider's chapters here; the
   // details page already streams the full aggregate list separately.
-  if (aggregateSubProviders().length > 1) {
+  if (aggregateSubProviders().length > 1 || id.includes("::")) {
     return cached(
       "chapters.own",
       id,
@@ -447,12 +448,28 @@ export function mangaTags() {
   );
 }
 
-export async function setMangaInLibrary(id: string, inLibrary: boolean): Promise<boolean> {
+export async function setMangaInLibrary(
+  id: string,
+  inLibrary: boolean,
+  sourceId?: string,
+  expectedBaseUrl?: string,
+): Promise<boolean> {
   await ensureMangaSources();
   const routed = routeById(id);
-  const provider = routed?.provider ?? activeMangaProvider();
+  if (id.includes("::") && !routed) return false;
+  const owner = routed?.provider.id ?? sourceId;
+  if (
+    expectedBaseUrl !== undefined &&
+    listMangaSources().find((source) => source.id === owner)?.baseUrl !== expectedBaseUrl
+  )
+    return false;
+  const provider =
+    routed?.provider ??
+    (sourceId && sourceId !== "all"
+      ? aggregateSubProviders().find((source) => source.id === sourceId)
+      : activeMangaProvider());
   const mangaId = routed?.orig ?? id;
-  if (!provider.setLibrary) return false;
+  if (!provider?.setLibrary) return false;
   await provider.setLibrary(mangaId, inLibrary);
   return true;
 }

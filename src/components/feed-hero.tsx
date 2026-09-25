@@ -15,6 +15,7 @@ import { useLiveImdbRating } from "@/lib/live-imdb";
 import { ImdbIcon } from "./icons/imdb-icon";
 import { MetaAwardsCorner } from "./meta-awards-corner";
 import { Poster } from "./poster";
+import { useHeroContext } from "@/lib/context-menu";
 
 export function FeedHero({
   item,
@@ -41,9 +42,13 @@ export function FeedHero({
     ? meta.background.replace(/\/t\/p\/w\d+\//, "/t/p/w1280/")
     : meta.poster;
   const positionLabel = `${String(position + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
+  const onContextMenu = useHeroContext(meta, backdrop);
 
   return (
-    <article className="harbor-feed-hero relative h-full overflow-hidden rounded-2xl border border-edge-soft bg-canvas">
+    <article
+      onContextMenu={onContextMenu}
+      className="harbor-feed-hero relative h-full overflow-hidden rounded-2xl border border-edge-soft bg-canvas"
+    >
       <div className="absolute inset-0">
         <Poster
           src={backdrop}

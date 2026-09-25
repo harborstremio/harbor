@@ -21,12 +21,13 @@ export function LocalCwRow() {
   const cards = useLocalContinueWatching();
 
   const play = useCallback(
-    (entry: LocalEntry, item: LibraryItem) => {
+    (entry: LocalEntry, item: LibraryItem, assertCurrent: () => void) => {
       const versions =
         entry.type === "show" && entry.season != null && entry.episode != null
           ? findLocalEpisodeVersions(entry.season, entry.episode, entry.tmdbId, entry.imdbId)
           : findLocalMovieVersions(entry.tmdbId, entry.imdbId);
       const start = (target: LocalEntry) => {
+        assertCurrent();
         const src = localPlayerSrc(target);
         // Keep the CW id so playback resumes and updates the same entry.
         openPlayer({ ...src, meta: { ...src.meta, id: item._id } });
@@ -45,7 +46,10 @@ export function LocalCwRow() {
     [openPlayer],
   );
 
-  const onDismiss = useCallback((item: LibraryItem) => clearLocalCw(item._id), []);
+  const onDismiss = useCallback(
+    (item: LibraryItem) => clearLocalCw(item._id, { acknowledged: true }),
+    [],
+  );
 
   if (cards.length === 0) return null;
 
@@ -56,7 +60,7 @@ export function LocalCwRow() {
           key={item._id}
           item={item}
           onDismiss={onDismiss}
-          onPlayOverride={() => play(entry, item)}
+          onPlayOverride={(_episode, assertCurrent) => play(entry, item, assertCurrent)}
         />
       ))}
     </Row>

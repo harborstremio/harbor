@@ -3,6 +3,7 @@ import { SportsAccessGate } from "@/views/sports/access-gate";
 import { SportsReminderLoop } from "@/components/sports-reminder-loop";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { startIdleAway } from "@/lib/social/idle-away";
+import { requestAppBack } from "@/lib/app-back";
 import { FloatingBack } from "@/chrome/floating-back";
 import { ensureStaticHeroArt } from "@/lib/providers/anime-hero-art-static";
 import { ensureCuratedLogos } from "@/lib/curated-logos";
@@ -103,6 +104,7 @@ import { TrackerProfileBridge } from "@/lib/tracker-profile-bridge";
 import { ProfilePickerModal } from "@/components/profile-picker/picker-modal";
 import { WatchlistSync } from "@/lib/watchlist-sync";
 import { ContextMenuProvider } from "@/lib/context-menu";
+import { PageContextNavigationDialogs } from "@/chrome/context-page-navigation";
 import { TopRankModalProvider } from "@/lib/top-rank-modal";
 import { OnboardingProvider } from "@/lib/onboarding";
 import { RankingsProvider } from "@/lib/rankings";
@@ -139,6 +141,7 @@ import { getUnreadCount, subscribeUnread } from "@/lib/social/unread-bridge";
 import { fetchMe } from "@/lib/account/identity";
 import { ThemeChromeBridge } from "@/components/theme-chrome-bridge";
 import type { MetaType } from "@/lib/cinemeta";
+import { profileMediaMeta } from "@/lib/social/profile-media-meta";
 import { useDiscordPresence } from "@/lib/discord/use-discord-presence";
 import { useWatchShare } from "@/lib/social/watch-presence";
 import { Home } from "@/views/home";
@@ -440,6 +443,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                     <DiscordPresence />
                                                     <WatchPresenceRunner />
                                                     <ContextMenu />
+                                                    <PageContextNavigationDialogs />
                                                     <AnnouncementGlobal />
                                                     <WatchLocalModal />
                                                     <LocalEpisodesModal />
@@ -978,15 +982,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   useEffect(() => {
     const onMouseDown = (e: MouseEvent) => {
       if (e.button === 3) {
-        const localBack = new Event("harbor:local-back", { cancelable: true });
-        if (!window.dispatchEvent(localBack)) {
-          e.preventDefault();
-          return;
-        }
-        if (canGoBack) {
-          e.preventDefault();
-          goBack();
-        }
+        if (requestAppBack(canGoBack, goBack)) e.preventDefault();
       } else if (e.button === 4 && canGoForward) {
         e.preventDefault();
         goForward();
@@ -1714,12 +1710,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
                       openManga(id);
                       return;
                     }
-                    const animeIsh = /^(kitsu|mal|anilist|anidb):/i.test(id);
-                    const t: MetaType =
-                      kind === "series" || kind === "tv" || kind === "anime" || animeIsh
-                        ? "series"
-                        : "movie";
-                    openMeta({ id, type: t, name: hint?.name ?? "", poster: hint?.poster });
+                    openMeta(profileMediaMeta(id, kind, hint));
                   }}
                 />
               </Suspense>
@@ -1763,12 +1754,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
                       openManga(id);
                       return;
                     }
-                    const animeIsh = /^(kitsu|mal|anilist|anidb):/i.test(id);
-                    const t: MetaType =
-                      kind === "series" || kind === "tv" || kind === "anime" || animeIsh
-                        ? "series"
-                        : "movie";
-                    openMeta({ id, type: t, name: hint?.name ?? "", poster: hint?.poster });
+                    openMeta(profileMediaMeta(id, kind, hint));
                   }}
                 />
               </Suspense>
@@ -1871,7 +1857,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
             <div {...layerProps(pickerTop)}>
               <Suspense fallback={null}>
                 <PlayPicker
-                  key={`picker-${picker.meta.id}-${picker.episode?.season ?? ""}-${picker.episode?.episode ?? ""}-${picker.attempt ?? 0}-${picker.intent ?? "play"}-${picker.seasonEpisodes?.length ?? 0}`}
+                  key={`picker-${picker.meta.id}-${picker.episode?.season ?? ""}-${picker.episode?.episode ?? ""}-${picker.attempt ?? 0}-${picker.intent ?? "play"}-${picker.seasonEpisodes?.length ?? 0}-${picker.contextRequestId ?? ""}-${picker.continuation?.id ?? ""}`}
                   meta={picker.meta}
                   episode={picker.episode}
                   autoPlay={picker.intent === "download" ? false : picker.autoPlay}
@@ -1879,6 +1865,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
                   intent={picker.intent}
                   seasonEpisodes={picker.seasonEpisodes}
                   resume={picker.resume}
+                  continuation={picker.continuation}
                   playerActive={playerActive}
                 />
               </Suspense>

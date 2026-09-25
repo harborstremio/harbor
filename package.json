@@ -30,7 +30,7 @@
     "setup:fonts": "node scripts/fetch-fonts.mjs",
     "setup:all": "node scripts/fetch-libmpv.mjs && node scripts/fetch-mpv.mjs && node scripts/fetch-ffmpeg.mjs && node scripts/fetch-fonts.mjs",
     "typecheck": "tsc -b --pretty false",
-    "test": "node --experimental-loader ./scripts/node-test-loader.mjs --test tests/*.test.ts tests/*.test.mjs"
+    "test": "node --experimental-loader ./scripts/node-test-loader.mjs --test tests/*.test.ts tests/*.test.tsx tests/*.test.mjs"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "0.10.35",
@@ -74,6 +74,7 @@
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
     "cheerio": "^1.2.0",
+    "jsdom": "^30.0.1",
     "typescript": "~5.8.3",
     "vite": "^7.0.4",
     "vite-plugin-static-copy": "^2.0.0"

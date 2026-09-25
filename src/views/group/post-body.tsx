@@ -12,6 +12,7 @@ import { scanMentions } from "@/lib/social/mentions";
 import { openLinkOut } from "@/lib/social/link-out";
 import { requestOpenProfile } from "@/lib/social/open-profile";
 import { useView } from "@/lib/view";
+import { useRenderedContentContext } from "@/components/context-menu/rendered-content-context";
 import {
   HOVER_CARD_CLOSE_MS,
   HOVER_CARD_OPEN_MS,
@@ -34,11 +35,13 @@ export function PostBody({
   onOpenProfile?: (handle: string) => void;
 }) {
   const { openMeta, openManga } = useView();
+  const onContextMenu = useRenderedContentContext();
   const [card, setCard] = useState<{ handle: string; anchor: DOMRect } | null>(null);
   const openTimer = useRef<number | null>(null);
   const closeTimer = useRef<number | null>(null);
 
   const html = useMemo(() => renderBbcode(body, new Set(scanMentions(body).notified)), [body]);
+  const markup = useMemo(() => ({ __html: html }), [html]);
 
   const clearOpen = () => {
     if (openTimer.current) window.clearTimeout(openTimer.current);
@@ -135,13 +138,14 @@ export function PostBody({
   return (
     <>
       <div
-        className="max-w-none break-words text-[14px] leading-relaxed text-ink-muted [&_a]:break-words"
+        className="max-w-none select-text break-words text-[14px] leading-relaxed text-ink-muted [&_a]:break-words"
+        onContextMenu={onContextMenu}
         onClick={onClick}
         onAuxClick={(e) => handleLinkOutActivation(e, openLinkOut)}
         onKeyDown={onKeyDown}
         onMouseOver={onMouseOver}
         onMouseOut={onMouseOut}
-        dangerouslySetInnerHTML={{ __html: html }}
+        dangerouslySetInnerHTML={markup}
       />
       {card && (
         <ProfileHoverCard

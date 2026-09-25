@@ -12,7 +12,12 @@ import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
 import { omdbSeasonRatings } from "@/lib/providers/omdb";
 import type { Episode } from "@/lib/providers/tmdb";
 import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
-import { tvdbEpisodes, tvdbLangFromIso1, tvdbSeriesByImdb, type TvdbEpisode } from "@/lib/providers/tvdb";
+import {
+  tvdbEpisodes,
+  tvdbLangFromIso1,
+  tvdbSeriesByImdb,
+  type TvdbEpisode,
+} from "@/lib/providers/tvdb";
 
 export function useEpisodeEnrich({
   episodes,
@@ -22,6 +27,7 @@ export function useEpisodeEnrich({
   omdbKey,
   metaId,
   preferCustomMeta,
+  ratings = true,
 }: {
   episodes: Episode[];
   active: number;
@@ -30,12 +36,15 @@ export function useEpisodeEnrich({
   omdbKey: string;
   metaId: string;
   preferCustomMeta: boolean;
+  ratings?: boolean;
 }): {
   episodes: Episode[];
   imdbRatings: Map<string, number>;
   preferredVideos: Map<string, PreferredVideo>;
 } {
-  const [tvdbBySeason, setTvdbBySeason] = useState<Map<number, Map<number, TvdbEpisode>>>(new Map());
+  const [tvdbBySeason, setTvdbBySeason] = useState<Map<number, Map<number, TvdbEpisode>>>(
+    new Map(),
+  );
   const [omdbBySeason, setOmdbBySeason] = useState<Map<number, Map<number, number>>>(new Map());
   const [harborImdb, setHarborImdb] = useState<Map<string, number>>(new Map());
   const [preferredVideos, setPreferredVideos] = useState<Map<string, PreferredVideo>>(new Map());
@@ -61,7 +70,12 @@ export function useEpisodeEnrich({
     void (async () => {
       const seriesId = await tvdbSeriesByImdb(tvdbKey, imdbId);
       if (!seriesId || cancelled) return;
-      const eps = await tvdbEpisodes(tvdbKey, seriesId, active, tvdbLangFromIso1(tmdbLanguageIso()));
+      const eps = await tvdbEpisodes(
+        tvdbKey,
+        seriesId,
+        active,
+        tvdbLangFromIso1(tmdbLanguageIso()),
+      );
       if (cancelled) return;
       const map = new Map<number, TvdbEpisode>();
       for (const e of eps) map.set(e.number, e);
@@ -73,7 +87,7 @@ export function useEpisodeEnrich({
   }, [imdbId, active, tvdbKey, tvdbBySeason]);
 
   useEffect(() => {
-    if (!omdbKey || !imdbId) return;
+    if (!ratings || !omdbKey || !imdbId) return;
     if (omdbBySeason.has(active)) return;
     let cancelled = false;
     void (async () => {
@@ -84,10 +98,10 @@ export function useEpisodeEnrich({
     return () => {
       cancelled = true;
     };
-  }, [imdbId, active, omdbKey, omdbBySeason]);
+  }, [imdbId, active, omdbKey, omdbBySeason, ratings]);
 
   useEffect(() => {
-    if (!imdbId) return;
+    if (!ratings || !imdbId) return;
     let cancelled = false;
     void harborImdbEpisodes(imdbId).then((map) => {
       if (!cancelled && map.size > 0) setHarborImdb(map);
@@ -95,7 +109,7 @@ export function useEpisodeEnrich({
     return () => {
       cancelled = true;
     };
-  }, [imdbId]);
+  }, [imdbId, ratings]);
 
   const tvdbForSeason = tvdbBySeason.get(active);
   const omdbForSeason = omdbBySeason.get(active);

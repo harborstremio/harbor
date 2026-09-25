@@ -311,6 +311,7 @@ export function ProfileView({
     <div
       ref={scrollRef}
       data-harbor-no-context-menu
+      data-context-page-background
       className="h-full overflow-y-auto"
       style={c.background ? { background: c.background } : undefined}
     >
@@ -327,7 +328,7 @@ export function ProfileView({
       />
       <ScrollToTop targetRef={scrollRef} />
 
-      <div className="mx-auto w-full max-w-6xl px-6 pb-16 lg:px-10">
+      <div data-context-page-background className="mx-auto w-full max-w-6xl px-6 pb-16 lg:px-10">
         {locked ? (
           <div className="space-y-6">
             <ProfilePrivate alias={summary.alias} />
@@ -339,8 +340,11 @@ export function ProfileView({
             />
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
-            <div className="min-w-0 space-y-6">
+          <div
+            data-context-page-background
+            className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]"
+          >
+            <div data-context-page-background className="min-w-0 space-y-6">
               {orderedCards.map((k, i) => {
                 const isHidden = hiddenSet.has(k);
                 if (isHidden && !arranging) return null;

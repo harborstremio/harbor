@@ -1,11 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { t } from "@/lib/i18n";
-import { deleteComment, listComments, postComment, type ThemeComment } from "@/lib/theme-store";
+import { listComments, postComment, type ThemeComment } from "@/lib/theme-store";
+import { deleteThemeCommentAcknowledged } from "@/lib/theme-comment-actions";
+import { captureMembershipProfile, isMembershipProfileCurrent } from "@/lib/membership-operations";
+import { authToken } from "@/lib/theme-auth";
 
 export function useComments(themeId: string) {
   const [comments, setComments] = useState<ThemeComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const currentTheme = useRef(themeId);
+  currentTheme.current = themeId;
 
   useEffect(() => {
     let cancelled = false;
@@ -33,16 +38,19 @@ export function useComments(themeId: string) {
 
   const remove = useCallback(
     async (id: string) => {
-      const prev = comments;
-      setComments((cur) => cur.filter((c) => c.id !== id));
-      try {
-        await deleteComment(themeId, id);
-      } catch (e) {
-        setComments(prev);
-        throw e;
-      }
+      const profile = captureMembershipProfile();
+      const token = authToken();
+      if (!profile || !token || currentTheme.current !== themeId)
+        throw new Error(t("The account or theme changed. Reopen the comment menu."));
+      await deleteThemeCommentAcknowledged({ themeId, commentId: id, profile, token });
+      if (
+        currentTheme.current === themeId &&
+        isMembershipProfileCurrent(profile) &&
+        authToken() === token
+      )
+        setComments((cur) => cur.filter((c) => c.id !== id));
     },
-    [themeId, comments],
+    [themeId],
   );
 
   return { comments, loading, error, add, remove };

@@ -1,9 +1,10 @@
-import { User } from "lucide-react";
+import { User, UserRound } from "lucide-react";
 import { NavArrow } from "@/components/nav-arrow";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import type { SearchPerson } from "@/lib/search";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
 
 const CARD_WIDTH = 104;
 const GAP = 16;
@@ -18,6 +19,7 @@ export function PeopleRow({
   onOpenPerson?: (p: SearchPerson) => void;
 }) {
   const { openPerson } = useView();
+  const { open } = useContextMenu();
   const t = useT();
   const withPhotos = people.filter((p) => p.profile);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -74,6 +76,34 @@ export function PeopleRow({
           {withPhotos.map((p) => (
             <button
               key={p.id}
+              onContextMenu={(event) =>
+                open(event, {
+                  kind: "actions",
+                  id: `person:${p.id}`,
+                  label: p.name,
+                  image: p.profile
+                    ? {
+                        src: `https://image.tmdb.org/t/p/h632${p.profile}`,
+                        publicUrl: `https://image.tmdb.org/t/p/h632${p.profile}`,
+                        label: p.name,
+                      }
+                    : undefined,
+                  actions: () => [
+                    {
+                      id: `person:open:${p.id}`,
+                      icon: <UserRound size={16} />,
+                      label: t("View details"),
+                      run: () => {
+                        if (onOpenPerson) onOpenPerson(p);
+                        else {
+                          openPerson(p.id);
+                          onClose();
+                        }
+                      },
+                    },
+                  ],
+                })
+              }
               onClick={() => {
                 if (onOpenPerson) {
                   onOpenPerson(p);

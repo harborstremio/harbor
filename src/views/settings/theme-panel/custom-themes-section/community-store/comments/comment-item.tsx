@@ -1,10 +1,20 @@
-import { useState } from "react";
-import { ChevronDown, Loader2, Reply as ReplyIcon, Trash2 } from "../../../../icons";
+import { useRef, useState } from "react";
+import { Copy, UserRound } from "lucide-react";
+import { useContextMenu, useContextTarget, type ContextMenuTarget } from "@/lib/context-menu";
+import { ConfirmableAction } from "@/components/context-menu/action-items";
+import {
+  assertSocialActor,
+  captureSocialActor,
+  isSocialActorCurrent,
+  type SocialActionActor,
+} from "@/lib/social/action-actor";
+import { copyText } from "@/components/player/copy-link-button";
+import { ChevronDown, Reply as ReplyIcon, Trash2 } from "../../../../icons";
 import { useT } from "@/lib/i18n";
 import type { ThemeComment } from "@/lib/theme-store";
 import { UserHoverCard } from "@/views/profile/user-hover-card";
 import { Avatar } from "@/views/profile/profile-bits";
-import { requestOpenProfile } from "@/lib/social/open-profile";
+import { canOpenProfile, requestOpenProfile } from "@/lib/social/open-profile";
 import { ROW_ACTION, ROW_ACTION_DANGER } from "@/views/settings/kit";
 import { ROW_TITLE } from "@/views/settings/shared";
 import { CommentBody } from "./comment-render";
@@ -33,36 +43,122 @@ export function CommentItem({
   signedIn?: boolean;
 }) {
   const t = useT();
-  const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [replying, setReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
+  const [error, setError] = useState("");
+  const replyRef = useRef<HTMLDivElement>(null);
+  const { open } = useContextMenu();
   const name = comment.author || "Anonymous";
   const displayName = comment.author || t("Anonymous");
   const handle = comment.authorHandle || null;
   const hue = hueOf(name);
   const canReply = !!onReply && !!signedIn && !!replyToId;
-
-  const del = async () => {
-    if (!confirm) {
-      setConfirm(true);
-      window.setTimeout(() => setConfirm(false), 2600);
-      return;
-    }
+  const deleteConfirmed = async (actor: SocialActionActor) => {
+    assertSocialActor(actor);
+    if (busy || !comment.canDelete) throw new Error(t("This comment cannot be deleted."));
     setBusy(true);
+    setError("");
     try {
       await onDelete(comment.id);
-    } catch {
+    } finally {
       setBusy(false);
-      setConfirm(false);
     }
   };
+  const contextTarget = (): ContextMenuTarget & { kind: "actions" } => {
+    const actor = captureSocialActor();
+    return {
+      kind: "actions",
+      id: `theme-comment:${comment.themeId}:${comment.id}`,
+      label: t("Comment"),
+      contentPolicy: "separate",
+      isValid: () => isSocialActorCurrent(actor),
+      actions: () => [
+        ...(handle && canOpenProfile(handle, { fromOverlay: true })
+          ? [
+              {
+                id: `theme-comment:author:${comment.id}`,
+                label: t("Open profile"),
+                icon: <UserRound size={16} />,
+                run: () => requestOpenProfile(handle),
+              },
+            ]
+          : []),
+        {
+          id: `theme-comment:copy:${comment.id}`,
+          label: t("Copy Text"),
+          icon: <Copy size={16} />,
+          quickCopy: true,
+          run: async () => {
+            if (!(await copyText(comment.body))) throw new Error(t("Could not copy comment text."));
+          },
+        },
+        ...(canReply
+          ? [
+              {
+                id: `theme-comment:reply:${comment.id}`,
+                label: t("Reply"),
+                icon: <ReplyIcon size={16} />,
+                group: "comment",
+                restoreFocus: false,
+                run: () => {
+                  setReplying(true);
+                  requestAnimationFrame(() =>
+                    replyRef.current?.querySelector<HTMLTextAreaElement>("textarea")?.focus(),
+                  );
+                },
+              },
+            ]
+          : []),
+        ...(comment.canDelete
+          ? [
+              {
+                id: `theme-comment:delete:${comment.id}`,
+                label: t("Delete comment"),
+                icon: <Trash2 size={16} />,
+                danger: true,
+                group: "remove",
+                disabled: busy,
+                confirmation: {
+                  key: JSON.stringify([actor, comment.themeId, comment.id, comment.body, "delete"]),
+                  title: t("Delete comment"),
+                  description: `${t("Delete this comment? This cannot be undone.")}\n\n${comment.body.slice(0, 160)}${comment.body.length > 160 ? "…" : ""}`,
+                  confirmLabel: t("Delete comment"),
+                  pendingLabel: t("Deleting…"),
+                  successLabel: t("Comment deleted"),
+                },
+                run: () => deleteConfirmed(actor),
+              },
+            ]
+          : []),
+      ],
+    };
+  };
+  const contextRef = useContextTarget<HTMLDivElement>(contextTarget);
+  const authorTarget = (): ContextMenuTarget => ({
+    kind: "actions",
+    id: `theme-comment:author:${comment.id}`,
+    label: displayName,
+    contentPolicy: "separate",
+    actions: () =>
+      handle && canOpenProfile(handle, { fromOverlay: true })
+        ? [
+            {
+              id: `theme-comment:open-author:${comment.id}`,
+              label: t("Open profile"),
+              icon: <UserRound size={16} />,
+              run: () => requestOpenProfile(handle),
+            },
+          ]
+        : [],
+  });
 
   const avatarEl = handle ? (
     <UserHoverCard handle={handle}>
       <button
         type="button"
         onClick={() => requestOpenProfile(handle)}
+        onContextMenu={(event) => open(event, authorTarget())}
         aria-label={t("Open {name} profile", { name: displayName })}
         className="grid h-11 w-11 shrink-0 place-items-center"
       >
@@ -83,6 +179,7 @@ export function CommentItem({
       <button
         type="button"
         onClick={() => requestOpenProfile(handle)}
+        onContextMenu={(event) => open(event, authorTarget())}
         className={`truncate ${ROW_TITLE} transition-colors hover:text-accent`}
       >
         {displayName}
@@ -93,7 +190,7 @@ export function CommentItem({
   );
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={contextRef} className="flex flex-col gap-3">
       <div className="flex items-start gap-3">
         {avatarEl}
         <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -108,19 +205,21 @@ export function CommentItem({
               {timeAgo(comment.createdAt)}
             </span>
             {comment.canDelete && (
-              <button
-                type="button"
-                onClick={del}
-                disabled={busy}
-                aria-label={t("Remove comment")}
-                className={`ms-auto ${ROW_ACTION_DANGER} ${confirm ? "border-danger/40 text-danger" : ""}`}
+              <ConfirmableAction
+                source={contextTarget()}
+                actionId={`theme-comment:delete:${comment.id}`}
+                className={`ms-auto ${ROW_ACTION_DANGER}`}
               >
-                {busy ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
-                {confirm && t("Remove?")}
-              </button>
+                <Trash2 size={18} />
+              </ConfirmableAction>
             )}
           </div>
           <CommentBody text={comment.body} />
+          {error && (
+            <p role="alert" className="text-sm text-danger">
+              {error}
+            </p>
+          )}
           {canReply && (
             <div className="mt-0.5 flex">
               <button
@@ -134,7 +233,7 @@ export function CommentItem({
             </div>
           )}
           {canReply && replying && (
-            <div className="mt-1">
+            <div ref={replyRef} className="mt-1">
               <CommentComposer
                 onSubmit={async (body) => {
                   await onReply!(body, replyToId!);
