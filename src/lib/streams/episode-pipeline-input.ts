@@ -9,6 +9,7 @@ import { animeAbsoluteFromScopedId } from "./anime-identity-core";
 import type { PipelineInput } from "./pipeline";
 import { unverifiedAnimeSeasonId } from "./stream-ids";
 import type { Stream } from "./types";
+import { resolveAnimeIdPriority } from "@/views/settings/anime-id-priority-card";
 
 function runtimeMinutes(runtime: string | number | undefined): number | undefined {
   if (runtime == null) return undefined;
@@ -122,6 +123,7 @@ export function buildEpisodePipelineInput(params: {
         episode: effEpisode ?? null,
         absoluteEpisode: animeAbsoluteEpisode,
       },
+      animeIdPriority: resolveAnimeIdPriority(settings.animeIdPriority),
     },
     query: {
       type: episode ? "series" : meta.type === "series" ? "series" : "movie",

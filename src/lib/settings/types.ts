@@ -85,6 +85,8 @@ export type ProfileAudioMode = "auto" | "click" | "off";
 
 export type StreamPriorityEntry = { key: string; name: string };
 
+export type AnimeIdPriorityEntry = { prefix: string; label: string; enabled: boolean };
+
 export type ScreensaverMediaKind = "image" | "gif" | "video";
 
 export type ScreensaverMedia = {
@@ -582,6 +584,7 @@ export type Settings = {
   pickerLayout: "condensed" | "stremio";
   streamSort: "harbor" | "addon";
   streamPriority: StreamPriorityEntry[];
+  animeIdPriority: AnimeIdPriorityEntry[];
   fullStreamDescription: boolean;
   pickerShowFilename: boolean;
   pickerRefreshNextToBack: boolean;

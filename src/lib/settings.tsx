@@ -35,6 +35,7 @@ import { configureLayoutStore } from "./layout-sync/store";
 import { SYNCED_SETTINGS_FIELDS } from "./layout-sync/sections";
 
 export type {
+  AnimeIdPriorityEntry,
   ContentCategory,
   ContentFilters,
   Settings,
