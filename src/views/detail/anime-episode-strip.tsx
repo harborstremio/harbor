@@ -56,10 +56,10 @@ export function AnimeEpisodeStrip({
         const epMeta = metaForEp ? metaForEp(ep) : meta;
         return {
           key: String(ep.id),
-          number: ep.number,
+          number: ep.imdbEpisode ?? ep.number,
           season: animeSeasonKey(ep),
           seasonLabel: showSeason ? `S${ep.imdbSeason ?? ep.seasonNumber ?? 1}` : undefined,
-          title: ep.title || t("Episode {n}", { n: ep.number }),
+          title: ep.title || t("Episode {n}", { n: ep.imdbEpisode ?? ep.number }),
           stills: [ep.thumbnail, ep.thumbnailFallback, meta.background].filter((u): u is string => !!u),
           runtime: ep.length,
           airDate: ep.airdate,

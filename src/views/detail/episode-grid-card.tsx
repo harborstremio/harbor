@@ -40,7 +40,6 @@ export function EpisodeGridCard({
 }) {
   const t = useT();
   const { settings } = useSettings();
-  const cardMeta = g.meta ?? meta;
   const [imgIdx, setImgIdx] = useState(0);
   useEffect(() => setImgIdx(0), [g.key]);
   const [preview, setPreview] = useState(false);
@@ -56,7 +55,7 @@ export function EpisodeGridCard({
   const enter = () => {
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setPreview(true), HOVER_DELAY);
-    prefetchSegments(cardMeta, { season: g.season, episode: g.number });
+    prefetchSegments(meta, { season: g.season, episode: g.number });
   };
   const leave = () => {
     window.clearTimeout(timer.current);
@@ -79,7 +78,7 @@ export function EpisodeGridCard({
         data-no-card-ring
         onClick={() => g.play({ resume: partial })}
         onContextMenu={ctx}
-        onFocus={() => prefetchSegments(cardMeta, { season: g.season, episode: g.number })}
+        onFocus={() => prefetchSegments(meta, { season: g.season, episode: g.number })}
         className="flex w-full flex-col gap-2.5 text-start"
       >
         <div className="relative aspect-video overflow-hidden rounded-xl">
@@ -128,7 +127,7 @@ export function EpisodeGridCard({
       </button>
       {preview && !spoilered && (
         <EpisodePreview
-          meta={cardMeta}
+          meta={meta}
           g={g}
           still={still}
           watched={watched}
