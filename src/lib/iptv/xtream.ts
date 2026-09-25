@@ -250,7 +250,7 @@ export async function fetchXtreamLiveChannels(
     out.push({
       id: `${baseId}::xt::${s.stream_id}`,
       tvgId,
-      name: s.name?.trim() || `Stream ${s.stream_id}`,
+      name: decodeBase64(s.name?.trim()) || `Stream ${s.stream_id}`,
       logo: s.stream_icon?.trim() || null,
       group,
       url,
@@ -309,7 +309,7 @@ function hasControlChars(s: string): boolean {
   return false;
 }
 
-function decodeBase64(s: string | undefined): string {
+export function decodeBase64(s: string | undefined): string {
   if (!s) return "";
   const raw = s.trim();
   if (!/^[A-Za-z0-9+/]+={0,2}$/.test(raw) || raw.length % 4 !== 0) return raw;

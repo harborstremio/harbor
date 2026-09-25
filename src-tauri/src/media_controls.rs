@@ -1,6 +1,6 @@
 #[cfg(windows)]
 mod win {
-    use std::sync::OnceLock;
+    use std::sync::{Mutex, OnceLock};
     use tauri::{AppHandle, Emitter, Manager};
     use windows::core::HSTRING;
     use windows::Foundation::TypedEventHandler;
@@ -16,6 +16,7 @@ mod win {
     unsafe impl Sync for Holder {}
 
     static SMTC: OnceLock<Option<Holder>> = OnceLock::new();
+    static LAST_PUSHED: OnceLock<Mutex<(bool, String, String)>> = OnceLock::new();
 
     fn controls() -> Option<&'static SystemMediaTransportControls> {
         SMTC.get().and_then(|h| h.as_ref()).map(|h| &h.0)
@@ -75,8 +76,30 @@ mod win {
         Ok(smtc)
     }
 
+    fn sanitize(s: &str) -> String {
+        s.trim()
+            .chars()
+            .map(|c| if c.is_control() { ' ' } else { c })
+            .collect::<String>()
+            .chars()
+            .take(256)
+            .collect()
+    }
+
     pub fn update(playing: bool, title: &str, subtitle: &str) {
+        let title = sanitize(title);
+        let subtitle = sanitize(subtitle);
+
         let Some(smtc) = controls() else { return };
+
+        let last = LAST_PUSHED.get_or_init(|| Mutex::new((false, String::new(), String::new())));
+        if let Ok(mut guard) = last.lock() {
+            if *guard == (playing, title.clone(), subtitle.clone()) {
+                return;
+            }
+            *guard = (playing, title.clone(), subtitle.clone());
+        }
+
         let _ = smtc.SetIsEnabled(true);
         let _ = smtc.SetPlaybackStatus(if playing {
             MediaPlaybackStatus::Playing
@@ -86,12 +109,12 @@ mod win {
         if let Ok(du) = smtc.DisplayUpdater() {
             let _ = du.SetType(MediaPlaybackType::Video);
             if let Ok(vp) = du.VideoProperties() {
-                let _ = vp.SetTitle(&HSTRING::from(title));
-                let _ = vp.SetSubtitle(&HSTRING::from(subtitle));
+                let _ = vp.SetTitle(&HSTRING::from(title.as_str()));
+                let _ = vp.SetSubtitle(&HSTRING::from(subtitle.as_str()));
             }
-            let _ = du.Update();
-        }
+        let _ = du.Update();
     }
+}
 
     pub fn clear() {
         let Some(smtc) = controls() else { return };

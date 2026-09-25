@@ -79,7 +79,12 @@ import { usePlaybackPresence } from "./player/hooks/use-playback-presence";
 import { usePlayerExit } from "./player/hooks/use-player-exit";
 import { usePendingSeekApply } from "./player/hooks/use-pending-seek-apply";
 import { usePlayerHotkeys } from "./player/hooks/use-player-hotkeys";
-import { clearMediaControls, updateMediaControls } from "@/lib/media-session";
+import {
+  clearMediaControls,
+  isMediaSessionActive,
+  setMediaSessionWindowFocused,
+  updateMediaControls,
+} from "@/lib/media-session";
 import { usePlayerMedia } from "./player/hooks/use-player-media";
 import { useTrickplay } from "./player/hooks/use-trickplay";
 import { useStreamPill } from "./player/hooks/use-stream-pill";
@@ -1016,25 +1021,48 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     const artUrl = src.episode?.still || src.meta.background || src.meta.poster || null;
     const vol = snap.muted ? 0 : snap.volume;
     const isPlaying = snap.status === "playing" && (snap.firstFrameReady || snap.positionSec > 0.3);
+    if (!isMediaSessionActive(snap.status)) {
+      clearMediaControls();
+      return;
+    }
     const pos = getPlaybackPosition();
     updateMediaControls(isPlaying, src.meta.name, subtitle, artUrl, snap.durationSec, pos, vol);
 
     const unsub = subscribePlaybackClock(() => {
+      const s = snapRef.current;
+      if (!isMediaSessionActive(snapRef.current.status)) return;
       const livePos = getPlaybackPosition();
-      const currentSnap = snapRef.current;
-      const playingNow =
-        currentSnap.status === "playing" && (currentSnap.firstFrameReady || livePos > 0.3);
+      const playingNow = s.status === "playing" && (s.firstFrameReady || livePos > 0.3);
       updateMediaControls(
         playingNow,
         src.meta.name,
         subtitle,
         artUrl,
-        currentSnap.durationSec,
+        s.durationSec,
         livePos,
         vol,
       );
     });
-    return () => unsub();
+
+    let unlisten: (() => void) | undefined;
+    let cancelled = false;
+    if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
+      void import("@tauri-apps/api/event").then(({ listen }) =>
+        listen<{ focused: boolean; minimized: boolean }>("harbor://window-activity", (e) => {
+          const focused = e.payload.focused;
+          setMediaSessionWindowFocused(focused === true);
+        }).then((u) => {
+          if (cancelled) u();
+          else unlisten = u;
+        }),
+      );
+    }
+
+    return () => {
+      cancelled = true;
+      unlisten?.();
+      unsub();
+    };
   }, [
     snap.status,
     snap.firstFrameReady,
@@ -1046,6 +1074,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     snap.volume,
     snap.muted,
   ]);
+  // Unmount safety net: clear the OS media session when the player unmounts.
   useEffect(() => () => clearMediaControls(), []);
 
   const onPrevEpisode = useCallback(() => playPrevRef.current(), [playPrevRef]);
