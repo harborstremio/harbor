@@ -282,6 +282,36 @@ export function HomeTab() {
                 : undefined
             }
           />
+          <ToggleRow
+            label={t("MyAnimeList progress")}
+            sub={t(
+              "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.",
+            )}
+            value={settings.cwSources.mal}
+            onChange={(v) => update({ cwSources: { ...settings.cwSources, mal: v } })}
+            lockReason={
+              settings.cwPerProfile
+                ? t(
+                    "Unavailable while Continue Watching is kept private to each profile, because MAL progress is shared across every profile on this account.",
+                  )
+                : undefined
+            }
+          />
+          <ToggleRow
+            label={t("AniList progress")}
+            sub={t(
+              "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.",
+            )}
+            value={settings.cwSources.anilist}
+            onChange={(v) => update({ cwSources: { ...settings.cwSources, anilist: v } })}
+            lockReason={
+              settings.cwPerProfile
+                ? t(
+                    "Unavailable while Continue Watching is kept private to each profile, because AniList progress is shared across every profile on this account.",
+                  )
+                : undefined
+            }
+          />
         </SettingGroup>
 
         <SettingGroup label={t("Navigation")}>

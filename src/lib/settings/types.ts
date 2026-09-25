@@ -480,7 +480,14 @@ export type Settings = {
   showSimklCard: boolean;
   showLetterboxdCard: boolean;
   externalContinueWatching: boolean;
-  cwSources: { library: boolean; trakt: boolean; simkl: boolean; local: boolean };
+  cwSources: {
+    library: boolean;
+    trakt: boolean;
+    simkl: boolean;
+    local: boolean;
+    mal: boolean;
+    anilist: boolean;
+  };
   showPlaylistsTab: boolean;
   skipProfileScreen: boolean;
   profilePromptInterval: "launch" | "15m" | "30m" | "never";

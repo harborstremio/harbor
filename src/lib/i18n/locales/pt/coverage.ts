@@ -649,6 +649,23 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "Chave da API NYT Books",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "Escolha se o Harbor prefere fontes diretas e debrid, torrents ponto a ponto ou mostra ambos.",
+
+  "Imported from MyAnimeList": "Importado do MyAnimeList",
+  "Imported from AniList": "Importado do AniList",
+  "Imported from trackers": "Importado de trackers",
+  "MyAnimeList progress": "Progresso MyAnimeList",
+  "AniList progress": "Progresso AniList",
+  "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.": "Importa os animes que você está assistindo no MyAnimeList como o próximo episódio não visto, marcado com um selo MAL. Requiere uma conta MAL conectada.",
+  "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.": "Importa os animes que você está assistindo no AniList como o próximo episódio não visto, marcado com um selo AL. Requiere uma conta de AniList conectada.",
+  "Enable at least one anime Continue Watching source to use this.": "Ative pelo menos uma fonte de continuar assistindo animes para usar isto.",
+  "Re-queries the connected anime tracker(s) and updates the anime continue watching row.": "Reconsulta os rastreadores de anime conectados e atualiza a linha de continuar assistindo animes.",
+  "Anime continue watching: refresh result": "Continuar assistindo animes: resultado da atualização",
+  "Error:": "Erro:",
+  "No anime continue watching items were produced.": "Nenhum item de continuar assistindo animes foi gerado.",
+  "Season {s}, Episode {e}": "Temporada {s}, Episódio {e}",
+  "Reload anime continue watching": "Recarregar o continuar assistindo animes",
+  "Unavailable while Continue Watching is kept private to each profile, because MAL progress is shared across every profile on this account.": "Indisponível enquanto o continuar assistindo for mantido privado para cada perfil, porque o progresso do MAL é compartilhado entre todos os perfis desta conta.",
+  "Unavailable while Continue Watching is kept private to each profile, because AniList progress is shared across every profile on this account.": "Indisponível enquanto o continuar assistindo for mantido privado para cada perfil, porque o progresso do AniList é compartilhado entre todos os perfis desta conta.",
 };
 
 export default coverage;

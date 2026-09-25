@@ -1291,6 +1291,23 @@ const coverage: Record<string, string> = {
     "Facoltativo. TheIntroDB risponde anche senza chiave, ma una chiave aumenta il limite di richieste, così i tempi continuano ad arrivare durante le maratone. Ottienine una su",
   "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.":
     "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
+
+  "Imported from MyAnimeList": "Importato da MyAnimeList",
+  "Imported from AniList": "Importato da AniList",
+  "Imported from trackers": "Importato dai tracker",
+  "MyAnimeList progress": "Avanzamento MyAnimeList",
+  "AniList progress": "Avanzamento AniList",
+  "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.": "Importa gli anime che stai guardando su MyAnimeList come prossimo episodio non visto, contrassegnati con un badge MAL. Richiede un account MAL collegato.",
+  "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.": "Importa gli anime che stai guardando su AniList come prossimo episodio non visto, contrassegnati con un badge AL. Richiede un account AniList collegato.",
+  "Enable at least one anime Continue Watching source to use this.": "Abilita almeno una fonte «continua a guardare» di anime per usarlo.",
+  "Re-queries the connected anime tracker(s) and updates the anime continue watching row.": "Interroga nuovamente i tracker anime collegati e aggiorna la riga «continua a guardare» degli anime.",
+  "Anime continue watching: refresh result": "Continua a guardare anime: risultato dell'aggiornamento",
+  "Error:": "Errore:",
+  "No anime continue watching items were produced.": "Nessun elemento di «continua a guardare» anime è stato prodotto.",
+  "Season {s}, Episode {e}": "Stagione {s}, Episodio {e}",
+  "Reload anime continue watching": "Ricarica il continua a guardare degli anime",
+  "Unavailable while Continue Watching is kept private to each profile, because MAL progress is shared across every profile on this account.": "Non disponibile finché il «continua a guardare» resta privato per ogni profilo, perché i progressi MAL sono condivisi tra tutti i profili di questo account.",
+  "Unavailable while Continue Watching is kept private to each profile, because AniList progress is shared across every profile on this account.": "Non disponibile finché il «continua a guardare» resta privato per ogni profilo, perché i progressi AniList sono condivisi tra tutti i profili di questo account.",
 };
 
 export default coverage;

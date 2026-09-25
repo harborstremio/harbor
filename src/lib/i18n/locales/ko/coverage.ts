@@ -667,6 +667,23 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "NYT Books API 키",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "Harbor가 직접 및 debrid 소스, P2P 토렌트를 우선할지 또는 둘 다 표시할지 선택합니다.",
+
+  "Imported from MyAnimeList": "MyAnimeList에서 가져옴",
+  "Imported from AniList": "AniList에서 가져옴",
+  "Imported from trackers": "트래커에서 가져옴",
+  "MyAnimeList progress": "MyAnimeList 진행 상황",
+  "AniList progress": "AniList 진행 상황",
+  "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.": "MyAnimeList에서 시청 중인 애니메이션을 다음 미시청 에피소드로 행에 가져옵니다(MAL 배지 포함). 연결된 MAL 계정이 필요합니다.",
+  "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.": "AniList에서 시청 중인 애니메이션을 다음 미시청 에피소드로 행에 가져옵니다(AL 배지 포함). 연결된 AniList 계정이 필요합니다.",
+  "Enable at least one anime Continue Watching source to use this.": "이 기능을 사용하려면 애니 이어 보기 소스를 하나 이상 사용 설정하세요.",
+  "Re-queries the connected anime tracker(s) and updates the anime continue watching row.": "연결된 애니 트래커를 다시 조회하고 애니 이어 보기 행을 업데이트합니다.",
+  "Anime continue watching: refresh result": "애니 이어 보기: 새로 고침 결과",
+  "Error:": "오류:",
+  "No anime continue watching items were produced.": "애니 이어 보기 항목이 생성되지 않았습니다.",
+  "Season {s}, Episode {e}": "시즌 {s}, 에피소드 {e}",
+  "Reload anime continue watching": "애니 이어 보기 다시 불러오기",
+  "Unavailable while Continue Watching is kept private to each profile, because MAL progress is shared across every profile on this account.": "이어 보기가 프로필별로 비공개로 유지되는 동안에는 사용할 수 없습니다. MAL 진행 상황은 이 계정의 모든 프로필에서 공유됩니다.",
+  "Unavailable while Continue Watching is kept private to each profile, because AniList progress is shared across every profile on this account.": "이어 보기가 프로필별로 비공개로 유지되는 동안에는 사용할 수 없습니다. AniList 진행 상황은 이 계정의 모든 프로필에서 공유됩니다.",
 };
 
 export default coverage;

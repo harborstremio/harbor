@@ -401,7 +401,7 @@ export const DEFAULT: Settings = {
   showSimklCard: false,
   showLetterboxdCard: false,
   externalContinueWatching: false,
-  cwSources: { library: true, trakt: false, simkl: false, local: true },
+  cwSources: { library: true, trakt: false, simkl: false, local: true, mal: false, anilist: false },
   showPlaylistsTab: false,
   skipProfileScreen: false,
   profilePromptInterval: "launch",

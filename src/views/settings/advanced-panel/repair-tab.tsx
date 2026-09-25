@@ -2,6 +2,7 @@ import { useT } from "@/lib/i18n";
 import { Section } from "../shared";
 import { DesktopOnlyBlock, isTauri } from "../player-panel/internals";
 import { AnimeRepairRow, LibraryRepairRow } from "./library-repair-rows";
+import { AnimeCwReloadRow } from "./anime-cw-reload-row";
 
 export function RepairTab() {
   const t = useT();
@@ -9,6 +10,7 @@ export function RepairTab() {
     <>
       <LibraryRepairRow />
       <AnimeRepairRow />
+      <AnimeCwReloadRow />
     </>
   );
   return (
