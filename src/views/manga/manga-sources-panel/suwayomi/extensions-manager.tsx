@@ -101,6 +101,11 @@ export function ExtensionsManager({ config }: { config: ServerConfig }) {
   const [availableExpanded, setAvailableExpanded] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [updatedCount, setUpdatedCount] = useState(0);
+  const [updateSummary, setUpdateSummary] = useState<{
+    ok: number;
+    failed: number;
+    reason?: string;
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -129,11 +134,25 @@ export function ExtensionsManager({ config }: { config: ServerConfig }) {
     if (updating || updatable.length === 0) return;
     setUpdating(true);
     setUpdatedCount(0);
+    setUpdateSummary(null);
+    let ok = 0;
+    let failed = 0;
+    let reason: string | undefined;
     try {
       for (const ext of updatable) {
-        await updateExtension(config, ext.pkgName);
-        setUpdatedCount((n) => n + 1);
+        try {
+          await updateExtension(config, ext.pkgName);
+          ok += 1;
+          setUpdatedCount(ok);
+        } catch (err) {
+          // One extension the server refuses (e.g. a rebuild it considers the
+          // same version) must not stop the rest of the batch. Keep the first
+          // reason so the user learns why instead of just seeing it halt.
+          failed += 1;
+          reason ??= err instanceof Error && err.message ? err.message : undefined;
+        }
       }
+      if (failed > 0) setUpdateSummary({ ok, failed, reason });
       setReload((n) => n + 1);
     } finally {
       setUpdating(false);
@@ -197,6 +216,18 @@ export function ExtensionsManager({ config }: { config: ServerConfig }) {
         </div>
       ) : (
         <>
+          {updateSummary && (
+            <div className="flex items-start gap-2 rounded-xl bg-danger/10 px-3 py-2 text-[12.5px] text-danger ring-1 ring-danger/25">
+              <AlertCircle size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+              <span className="min-w-0">
+                {t("{ok} updated · {failed} failed", {
+                  ok: updateSummary.ok,
+                  failed: updateSummary.failed,
+                })}
+                {updateSummary.reason ? ` — ${updateSummary.reason}` : ""}
+              </span>
+            </div>
+          )}
           <Group
             label={t("Update available")}
             count={updatable.length}

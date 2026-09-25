@@ -75,6 +75,10 @@ export function useResumeAutosave(params: {
   anilistAutoSyncRef.current = settings.anilistAutoSync;
   const malAutoSyncRef = useRef(settings.malAutoSync);
   malAutoSyncRef.current = settings.malAutoSync;
+  const anilistCountRewatchesRef = useRef(settings.anilistCountRewatches);
+  anilistCountRewatchesRef.current = settings.anilistCountRewatches;
+  const malCountRewatchesRef = useRef(settings.malCountRewatches);
+  malCountRewatchesRef.current = settings.malCountRewatches;
   const latestRef = useRef({ src, snap, season, episode, resolvedImdbId, resolvedImdbVerified });
   latestRef.current = { src, snap, season, episode, resolvedImdbId, resolvedImdbVerified };
   const lastGoodPosRef = useRef(0);
@@ -232,8 +236,17 @@ export function useResumeAutosave(params: {
       if (anilistAutoSyncRef.current) void markAnimeWatching(tid, s.meta.name);
       if (malAutoSyncRef.current) void markMalWatching(tid, s.meta.name);
       if (!syncReady) return;
-      if (anilistAutoSyncRef.current) void syncAnimeProgress(tid, tep, s.meta.name, absEp, cs);
-      if (malAutoSyncRef.current) void syncMalProgress(tid, tep, s.meta.name, absEp, cs);
+      if (anilistAutoSyncRef.current)
+        void syncAnimeProgress(
+          tid,
+          tep,
+          s.meta.name,
+          absEp,
+          cs,
+          anilistCountRewatchesRef.current,
+        );
+      if (malAutoSyncRef.current)
+        void syncMalProgress(tid, tep, s.meta.name, absEp, cs, malCountRewatchesRef.current);
     };
     const useIdentity =
       (anilistAutoSyncRef.current || malAutoSyncRef.current) &&

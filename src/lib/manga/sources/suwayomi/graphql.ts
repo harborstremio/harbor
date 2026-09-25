@@ -8,6 +8,7 @@ import {
   type SuwayomiSource,
 } from "./model";
 import type { RestChapter, RestPage } from "./rest";
+import { cleanServerMessage } from "./server-message";
 
 const GQL = "/api/graphql";
 
@@ -29,6 +30,35 @@ async function gqlData(
   const data = await gql(client, query, variables);
   if (data == null) throw new Error("suwayomi_graphql_error");
   return data;
+}
+
+/** A server-side failure whose message is worth showing to the user. */
+export class SuwayomiServerError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "SuwayomiServerError";
+  }
+}
+
+/**
+ * GraphQL for mutations: unlike `gql`, a server error is thrown (with its message)
+ * rather than collapsing to null, because read paths can fall back but a mutation
+ * the user triggered cannot.
+ */
+async function gqlMutation(
+  client: SuwayomiClient,
+  query: string,
+  variables?: Record<string, unknown>,
+): Promise<any> {
+  const res = await client.postJson(GQL, { query, variables: variables ?? {} });
+  if (!res) throw new SuwayomiServerError("suwayomi_graphql_unreachable");
+  const errors = (res as { errors?: Array<{ message?: unknown }> }).errors;
+  if (Array.isArray(errors) && errors.length > 0) {
+    const message = cleanServerMessage(String(errors[0]?.message ?? ""));
+    throw new SuwayomiServerError(message || "suwayomi_graphql_error");
+  }
+  if (res.data == null) throw new SuwayomiServerError("suwayomi_graphql_error");
+  return res.data;
 }
 
 export async function gqlAvailable(client: SuwayomiClient): Promise<boolean> {
@@ -247,7 +277,7 @@ async function updateExtension(
       extension { pkgName isInstalled }
     }
   }`;
-  const data = await gql(client, q, { id: pkgName });
+  const data = await gqlMutation(client, q, { id: pkgName });
   const extension = data?.updateExtension?.extension;
   if (!extension) return false;
   return patch === "uninstall" ? extension.isInstalled === false : extension.isInstalled === true;

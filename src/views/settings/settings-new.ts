@@ -13,6 +13,8 @@ const NEW_SETTINGS = new Set([
   "tv:subtitle-look",
   "mpv:buffer-size",
   "home:prefer-episode-still",
+  "anilist:count-rewatches",
+  "mal:count-rewatches",
 ]);
 
 const LS = "harbor.settingsNew.v1";

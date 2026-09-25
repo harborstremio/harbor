@@ -1,5 +1,21 @@
 // Newly introduced UI copy remains usable until each locale provides an override.
 const uiFallback: Record<string, string> = {
+  "Rewatching on AniList": "Rewatching on AniList",
+  "Rewatched on AniList": "Rewatched on AniList",
+  "Rewatching on MyAnimeList": "Rewatching on MyAnimeList",
+  "Rewatched on MyAnimeList": "Rewatched on MyAnimeList",
+  "Count AniList rewatches": "Count AniList rewatches",
+  "Count MyAnimeList rewatches": "Count MyAnimeList rewatches",
+  "Watching an anime you already finished marks it as Rewatching and counts the rewatch, instead of resetting your progress.":
+    "Watching an anime you already finished marks it as Rewatching and counts the rewatch, instead of resetting your progress.",
+  "Turn on Sync watch progress first.": "Turn on Sync watch progress first.",
+  "A source couldn't be reached": "A source couldn't be reached",
+  "{n} sources couldn't be reached": "{n} sources couldn't be reached",
+  "blocked by the network policy": "blocked by the network policy",
+  "timed out": "timed out",
+  "returned an error": "returned an error",
+  "couldn't be reached": "couldn't be reached",
+  "{ok} updated · {failed} failed": "{ok} updated · {failed} failed",
   "Hide this tab": "Hide this tab",
   "Show this tab": "Show this tab",
   "Nothing hidden.": "Nothing hidden.",

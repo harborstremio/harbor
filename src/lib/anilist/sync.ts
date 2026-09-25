@@ -6,8 +6,8 @@ import { isAuthenticated } from "./session";
 export type SyncError = "update-not-confirmed" | "unreachable";
 
 export type SyncEvent =
-  | { kind: "syncing"; title: string; episode: number }
-  | { kind: "ok"; title: string; episode: number }
+  | { kind: "syncing"; title: string; episode: number; rewatch?: boolean }
+  | { kind: "ok"; title: string; episode: number; rewatch?: boolean }
   | { kind: "watching"; title: string }
   | { kind: "error"; title: string; error: SyncError };
 
@@ -52,6 +52,33 @@ function saveSent(map: SentMap): void {
   }
 }
 
+// Titles that have ever been Completed/Rewatching. The `sent` map is keyed by
+// episode, so it cannot tell a first watch from a rewatch — once a title is known
+// to be finished, the per-episode fast-path steps aside so a second pass over an
+// already-pinned episode is not skipped forever. Bounded by the number of finished
+// titles, and re-read per call, so it survives profile switches and reloads.
+const REWATCH_KEY_BASE = "harbor.anilist.rewatch.v1";
+function rewatchKey(): string {
+  return `${REWATCH_KEY_BASE}.${activeProfileId()}`;
+}
+type RewatchMap = Record<string, true>;
+
+function loadRewatch(): RewatchMap {
+  try {
+    return JSON.parse(localStorage.getItem(rewatchKey()) ?? "{}") as RewatchMap;
+  } catch {
+    return {};
+  }
+}
+
+function saveRewatch(map: RewatchMap): void {
+  try {
+    localStorage.setItem(rewatchKey(), JSON.stringify(map));
+  } catch {
+    return;
+  }
+}
+
 function leadingInt(value: string): number | null {
   const n = Number(value.split(":")[0]);
   return Number.isFinite(n) ? n : null;
@@ -85,7 +112,7 @@ const ENTRY_QUERY = `query ($id: Int) {
   Media(id: $id, type: ANIME) {
     id
     episodes
-    mediaListEntry { id progress status }
+    mediaListEntry { id progress status repeat }
   }
 }`;
 
@@ -94,6 +121,18 @@ const SAVE_MUTATION = `mutation ($mediaId: Int, $progress: Int, $status: MediaLi
     id
     progress
     status
+  }
+}`;
+
+// Finishing a rewatch: AniList counts it by flipping the entry to Completed and
+// bumping `repeat`. The counter is a plain input field, so it has to be sent —
+// a bare status change does not increment it.
+const SAVE_REWATCH_DONE_MUTATION = `mutation ($mediaId: Int, $progress: Int, $repeat: Int) {
+  SaveMediaListEntry(mediaId: $mediaId, progress: $progress, status: COMPLETED, repeat: $repeat) {
+    id
+    progress
+    status
+    repeat
   }
 }`;
 
@@ -108,7 +147,7 @@ type EntryResponse = {
   Media: {
     id: number;
     episodes: number | null;
-    mediaListEntry: { id: number; progress: number; status: string } | null;
+    mediaListEntry: { id: number; progress: number; status: string; repeat: number } | null;
   } | null;
 };
 
@@ -116,12 +155,20 @@ type SaveResponse = {
   SaveMediaListEntry: { id: number; progress: number; status: string } | null;
 };
 
+type RewatchDoneResponse = {
+  SaveMediaListEntry: { id: number; progress: number; status: string; repeat: number } | null;
+};
+
 const inflight = new Set<string>();
 const watchingMarked = new Set<string>();
+// A rewatch we just finished keeps its finale emitting progress events; without
+// this the next tick would read COMPLETED and start the rewatch all over again.
+const rewatchCompleted = new Map<string, number>();
 
 export function resetForProfile(): void {
   inflight.clear();
   watchingMarked.clear();
+  rewatchCompleted.clear();
 }
 
 export async function markAnimeWatching(harborId: string, title: string): Promise<void> {
@@ -156,6 +203,7 @@ export async function syncAnimeProgress(
   title: string,
   absoluteEpisode?: number,
   season?: number,
+  countRewatches = true,
 ): Promise<void> {
   if (!isAuthenticated()) return;
   const ep = episode ?? 1;
@@ -167,7 +215,9 @@ export async function syncAnimeProgress(
 
   const sent = loadSent();
   const sentKey = `${harborId}|${season ?? ""}|${ep}`;
-  if ((sent[sentKey] ?? 0) >= (abs ?? ep)) return;
+  const rewatch = loadRewatch();
+  // Finished/repeating titles skip the per-episode fast-path (see RewatchMap).
+  if (rewatch[harborId] !== true && (sent[sentKey] ?? 0) >= (abs ?? ep)) return;
 
   const flightKey = `${harborId}|${ep}|${abs ?? ""}`;
   if (inflight.has(flightKey)) return;
@@ -181,13 +231,72 @@ export async function syncAnimeProgress(
     const media = cur?.Media;
     if (!media) return;
 
-    // Never overwrite an entry the user deliberately moved to Completed or
-    // Re-watching; auto-sync would otherwise flip it back to CURRENT.
     const entryStatus = media.mediaListEntry?.status;
-    if (entryStatus === "COMPLETED" || entryStatus === "REPEATING") return;
-
     const current = media.mediaListEntry?.progress ?? 0;
     const total = media.episodes ?? 0;
+
+    // The user already finished (or is rewatching) this title. A plain watched
+    // push would send CURRENT and reset the entry's progress — AniList sets
+    // progress to whatever it is sent, lower numbers included — so keep the entry
+    // on REPEATING and only ever move the rewatch counter forward. That is what
+    // renders the episodes as Rewatched rather than Watched.
+    if (entryStatus === "COMPLETED" || entryStatus === "REPEATING") {
+      // Rewatch recording is off: leave the finished entry exactly as the user
+      // set it, the way the sync behaved before rewatches were supported.
+      if (!countRewatches) return;
+      if (rewatch[harborId] !== true) {
+        rewatch[harborId] = true;
+        saveRewatch(rewatch);
+      }
+      let target = ep;
+      if (abs != null && (total === 0 || abs <= total) && abs > target) target = abs;
+      if (total > 0 && target > total) {
+        if (target > total + 1) return;
+        target = total;
+      }
+      // The finale of a rewatch we just finished keeps emitting progress; without
+      // this the next tick would read COMPLETED and start the rewatch over.
+      const completedEp = rewatchCompleted.get(harborId);
+      if (completedEp != null && entryStatus === "COMPLETED" && ep >= completedEp) return;
+
+      // Watching the finale while already Rewatching finishes the pass: AniList
+      // counts a finished rewatch as Completed with `repeat` bumped.
+      if (entryStatus === "REPEATING" && total > 0 && target >= total) {
+        const repeat = (media.mediaListEntry?.repeat ?? 0) + 1;
+        emit({ kind: "syncing", title, episode: total, rewatch: true });
+        const saved = await anilistRequest<RewatchDoneResponse>(SAVE_REWATCH_DONE_MUTATION, {
+          mediaId,
+          progress: total,
+          repeat,
+        });
+        if (saved?.SaveMediaListEntry?.progress === total) {
+          rewatchCompleted.set(harborId, ep);
+          emit({ kind: "ok", title, episode: total, rewatch: true });
+        } else {
+          emit({ kind: "error", title, error: "update-not-confirmed" });
+        }
+        return;
+      }
+
+      // Starting a rewatch ignores the completed progress (AniList resets the
+      // rewatch counter); continuing one is forward-only, where equal is not
+      // backwards. A new pass clears the finished-rewatch guard above.
+      if (entryStatus === "REPEATING" && target <= current) return;
+      rewatchCompleted.delete(harborId);
+      emit({ kind: "syncing", title, episode: target, rewatch: true });
+      const saved = await anilistRequest<SaveResponse>(SAVE_MUTATION, {
+        mediaId,
+        progress: target,
+        status: "REPEATING",
+      });
+      if (saved?.SaveMediaListEntry?.progress === target) {
+        emit({ kind: "ok", title, episode: target, rewatch: true });
+      } else {
+        emit({ kind: "error", title, error: "update-not-confirmed" });
+      }
+      return;
+    }
+
     let target = ep;
     if (abs != null && total > 0 && abs <= total && ep <= current && abs > current) target = abs;
     if (total > 0 && target > total) {
@@ -201,6 +310,12 @@ export async function syncAnimeProgress(
     }
 
     const status = total > 0 && target >= total ? "COMPLETED" : "CURRENT";
+    // Mark the title finished so a later rewatch is not swallowed by this
+    // episode's first-watch entry in the fast-path above.
+    if (status === "COMPLETED") {
+      rewatch[harborId] = true;
+      saveRewatch(rewatch);
+    }
     emit({ kind: "syncing", title, episode: target });
 
     const saved = await anilistRequest<SaveResponse>(SAVE_MUTATION, {

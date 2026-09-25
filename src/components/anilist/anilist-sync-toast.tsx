@@ -35,6 +35,7 @@ export function AnilistSyncToast() {
   const watching = event.kind === "watching";
   const good = ok || watching;
   const syncing = event.kind === "syncing";
+  const rewatch = (event.kind === "syncing" || event.kind === "ok") && event.rewatch === true;
 
   return (
     <div className={syncToastWrapClass(settings.syncIndicatorPosition)}>
@@ -59,11 +60,15 @@ export function AnilistSyncToast() {
         <div className="flex min-w-0 flex-col">
           <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
             {syncing
-              ? t("Syncing to AniList")
+              ? rewatch
+                ? t("Rewatching on AniList")
+                : t("Syncing to AniList")
               : watching
                 ? t("Now watching on AniList")
                 : ok
-                  ? t("Synced to AniList")
+                  ? rewatch
+                    ? t("Rewatched on AniList")
+                    : t("Synced to AniList")
                   : t("AniList sync")}
           </span>
           <span className="max-w-[300px] truncate text-[12.5px] font-semibold text-ink">

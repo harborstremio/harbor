@@ -21,6 +21,35 @@ test("extension changes invalidate tags and refresh installed sources", () => {
   assert.match(picker, /subscribeSuwayomiSourcesChanged/);
 });
 
+test("a refused extension action surfaces the server's reason", () => {
+  const graphql = source("../src/lib/manga/sources/suwayomi/graphql.ts");
+  const manager = source("../src/views/manga/manga-sources-panel/suwayomi/extensions-manager.tsx");
+  const row = source("../src/views/manga/manga-sources-panel/suwayomi/extension-row.tsx");
+  // Mutations report the server error instead of collapsing to null like reads.
+  assert.match(graphql, /const data = await gqlMutation\(client, q, \{ id: pkgName \}\)/);
+  assert.match(
+    graphql,
+    /throw new SuwayomiServerError\(message \|\| "suwayomi_graphql_error"\)/,
+  );
+  // Update all keeps going after a failure and reports the first reason.
+  assert.match(manager, /for \(const ext of updatable\) \{/);
+  assert.match(
+    manager,
+    /reason \?\?= err instanceof Error && err\.message \? err\.message : undefined;/,
+  );
+  assert.match(manager, /t\("\{ok\} updated · \{failed\} failed"/);
+  assert.doesNotMatch(
+    manager,
+    /await updateExtension\(config, ext\.pkgName\);\s*\n\s*setUpdatedCount/,
+    "the batch must not sit in a single try that aborts on the first failure",
+  );
+  // Single-row actions show the server's sentence too.
+  assert.match(
+    row,
+    /setError\(err instanceof Error && err\.message \? err\.message : t\("Action failed"\)\)/,
+  );
+});
+
 test("manga phone joystick uses direct horizontal and vertical pan directions", () => {
   const joystick = source("../src/views/mobile/manga-remote/zoom-joystick.tsx");
   assert.match(joystick, /panRemXRef\.current \+= px \* PAN_SPEED \* dt/);

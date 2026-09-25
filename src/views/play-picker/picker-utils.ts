@@ -717,6 +717,14 @@ export function debridBanner(error: { name: string; code: string }): DebridBanne
   }
 }
 
+/** Short reason an addon answered with nothing, for the picker's failure banner. */
+export function addonFailureLabel(t: Translate, code: string): string {
+  if (code === "blocked") return t("blocked by the network policy");
+  if (code === "timeout") return t("timed out");
+  if (code === "http") return t("returned an error");
+  return t("couldn't be reached");
+}
+
 export function translateDebridBannerTitle(t: Translate, banner: DebridBanner): string {
   switch (banner.code) {
     case "traffic-limit":

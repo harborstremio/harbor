@@ -57,8 +57,24 @@ export function useAnimeWatchedRouting(meta: Meta, franchise: FranchiseEntry[], 
         const highest = Math.max(...eps.map((e) => e.episode));
         if (Number.isFinite(highest) && highest > 0) {
           const title = manualMetaFor(id).name;
-          if (settings.anilistAutoSync) void syncAnimeProgress(syncId, highest, title);
-          if (settings.malAutoSync) void syncMalProgress(syncId, highest, title);
+          if (settings.anilistAutoSync)
+            void syncAnimeProgress(
+              syncId,
+              highest,
+              title,
+              undefined,
+              undefined,
+              settings.anilistCountRewatches,
+            );
+          if (settings.malAutoSync)
+            void syncMalProgress(
+              syncId,
+              highest,
+              title,
+              undefined,
+              undefined,
+              settings.malCountRewatches,
+            );
         }
       }
     }

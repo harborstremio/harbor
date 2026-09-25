@@ -6,8 +6,8 @@ import { isAuthenticated } from "./session";
 export type SyncError = "update-not-confirmed" | "unreachable";
 
 export type SyncEvent =
-  | { kind: "syncing"; title: string; episode: number }
-  | { kind: "ok"; title: string; episode: number }
+  | { kind: "syncing"; title: string; episode: number; rewatch?: boolean }
+  | { kind: "ok"; title: string; episode: number; rewatch?: boolean }
   | { kind: "watching"; title: string }
   | { kind: "error"; title: string; error: SyncError };
 
@@ -52,12 +52,39 @@ function saveSent(map: SentMap): void {
   }
 }
 
+// Titles that have ever been completed/rewatching. The `sent` map is keyed by
+// episode, so it cannot tell a first watch from a rewatch — once a title is known
+// to be finished, the per-episode fast-path steps aside so a second pass over an
+// already-pinned episode is not skipped forever.
+const REWATCH_KEY_BASE = "harbor.mal.rewatch.v1";
+function rewatchKey(): string {
+  return `${REWATCH_KEY_BASE}.${activeProfileId()}`;
+}
+type RewatchMap = Record<string, true>;
+
+function loadRewatch(): RewatchMap {
+  try {
+    return JSON.parse(localStorage.getItem(rewatchKey()) ?? "{}") as RewatchMap;
+  } catch {
+    return {};
+  }
+}
+
+function saveRewatch(map: RewatchMap): void {
+  try {
+    localStorage.setItem(rewatchKey(), JSON.stringify(map));
+  } catch {
+    return;
+  }
+}
+
 type EntryResponse = {
   num_episodes: number | null;
   my_list_status: {
     num_episodes_watched: number;
     status: string;
     is_rewatching: boolean;
+    num_times_rewatched: number;
   } | null;
 };
 
@@ -68,10 +95,14 @@ type SaveResponse = {
 
 const inflight = new Set<string>();
 const watchingMarked = new Set<string>();
+// A rewatch we just finished keeps its finale emitting progress events; without
+// this the next tick would read completed and start the rewatch all over again.
+const rewatchCompleted = new Map<string, number>();
 
 export function resetForProfile(): void {
   inflight.clear();
   watchingMarked.clear();
+  rewatchCompleted.clear();
 }
 
 export async function markMalWatching(harborId: string, title: string): Promise<void> {
@@ -108,6 +139,7 @@ export async function syncMalProgress(
   title: string,
   absoluteEpisode?: number,
   season?: number,
+  countRewatches = true,
 ): Promise<void> {
   if (!isAuthenticated()) return;
   const ep = episode ?? 1;
@@ -119,7 +151,9 @@ export async function syncMalProgress(
 
   const sent = loadSent();
   const sentKey = `${harborId}|${season ?? ""}|${ep}`;
-  if ((sent[sentKey] ?? 0) >= (abs ?? ep)) return;
+  const rewatch = loadRewatch();
+  // Finished/rewatching titles skip the per-episode fast-path (see RewatchMap).
+  if (rewatch[harborId] !== true && (sent[sentKey] ?? 0) >= (abs ?? ep)) return;
 
   const flightKey = `${harborId}|${ep}|${abs ?? ""}`;
   if (inflight.has(flightKey)) return;
@@ -133,13 +167,77 @@ export async function syncMalProgress(
       `/anime/${malId}?fields=num_episodes,my_list_status`,
     );
 
-    // Never overwrite entries the user completed or marked as re-watching;
-    // auto-sync would otherwise flip completed/rewatching back to "watching".
     const listStatus = cur?.my_list_status;
-    if (listStatus && (listStatus.status === "completed" || listStatus.is_rewatching)) return;
-
-    const current = cur?.my_list_status?.num_episodes_watched ?? 0;
+    const current = listStatus?.num_episodes_watched ?? 0;
     const total = cur?.num_episodes ?? 0;
+
+    // The user already finished (or is rewatching) this title. A plain watching
+    // push would drop it back to "watching" and overwrite the progress, so keep
+    // the rewatch flag set and only move the rewatch counter forward.
+    if (listStatus && (listStatus.status === "completed" || listStatus.is_rewatching)) {
+      // Rewatch recording is off: leave the finished entry exactly as the user
+      // set it, the way the sync behaved before rewatches were supported.
+      if (!countRewatches) return;
+      if (rewatch[harborId] !== true) {
+        rewatch[harborId] = true;
+        saveRewatch(rewatch);
+      }
+      let target = ep;
+      if (abs != null && (total === 0 || abs <= total) && abs > target) target = abs;
+      if (total > 0 && target > total) {
+        if (target > total + 1) return;
+        target = total;
+      }
+      // The finale of a rewatch we just finished keeps emitting progress; without
+      // this the next tick would read completed and start the rewatch over.
+      const completedEp = rewatchCompleted.get(harborId);
+      if (completedEp != null && listStatus.status === "completed" && ep >= completedEp) return;
+
+      // Watching the finale while rewatching finishes the pass. MAL counts a
+      // finished rewatch as completed with `num_times_rewatched` bumped, and the
+      // counter is a plain field — completing alone does not increment it.
+      if (listStatus.is_rewatching && total > 0 && target >= total) {
+        const timesRewatched = (listStatus.num_times_rewatched ?? 0) + 1;
+        emit({ kind: "syncing", title, episode: total, rewatch: true });
+        const saved = await malRequest<SaveResponse>(`/anime/${malId}/my_list_status`, {
+          method: "PATCH",
+          body: new URLSearchParams({
+            num_watched_episodes: String(total),
+            status: "completed",
+            is_rewatching: "false",
+            num_times_rewatched: String(timesRewatched),
+          }),
+        });
+        if (saved?.num_episodes_watched === total) {
+          rewatchCompleted.set(harborId, ep);
+          emit({ kind: "ok", title, episode: total, rewatch: true });
+        } else {
+          emit({ kind: "error", title, error: "update-not-confirmed" });
+        }
+        return;
+      }
+
+      // Starting a rewatch ignores the completed progress; continuing one is
+      // forward-only, where equal is not backwards. A new pass clears the guard.
+      if (listStatus.is_rewatching && target <= current) return;
+      rewatchCompleted.delete(harborId);
+      emit({ kind: "syncing", title, episode: target, rewatch: true });
+      const saved = await malRequest<SaveResponse>(`/anime/${malId}/my_list_status`, {
+        method: "PATCH",
+        body: new URLSearchParams({
+          num_watched_episodes: String(target),
+          status: "watching",
+          is_rewatching: "true",
+        }),
+      });
+      if (saved?.num_episodes_watched === target) {
+        emit({ kind: "ok", title, episode: target, rewatch: true });
+      } else {
+        emit({ kind: "error", title, error: "update-not-confirmed" });
+      }
+      return;
+    }
+
     let target = ep;
     if (abs != null && total > 0 && abs <= total && ep <= current && abs > current) target = abs;
     if (total > 0 && target > total) {
@@ -153,6 +251,12 @@ export async function syncMalProgress(
     }
 
     const status = total > 0 && target >= total ? "completed" : "watching";
+    // Mark the title finished so a later rewatch is not swallowed by this
+    // episode's first-watch entry in the fast-path above.
+    if (status === "completed") {
+      rewatch[harborId] = true;
+      saveRewatch(rewatch);
+    }
     emit({ kind: "syncing", title, episode: target });
 
     const saved = await malRequest<{ num_episodes_watched: number }>(

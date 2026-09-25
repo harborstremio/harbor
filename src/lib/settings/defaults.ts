@@ -157,6 +157,8 @@ export const DEFAULT: Settings = {
   harborColor: "#7dd3fc",
   anilistAutoSync: true,
   malAutoSync: true,
+  anilistCountRewatches: true,
+  malCountRewatches: true,
   anilistBlurComments: false,
   showAnilistComments: false,
   useAnilistAvatar: false,

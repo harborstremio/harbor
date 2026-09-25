@@ -61,6 +61,16 @@ export function AnilistPanel() {
               onChange={(v) => update({ anilistAutoSync: v })}
             />
             <ToggleRow
+              label={t("Count AniList rewatches")}
+              sub={t("Watching an anime you already finished marks it as Rewatching and counts the rewatch, instead of resetting your progress.")}
+              value={settings.anilistCountRewatches}
+              onChange={(v) => update({ anilistCountRewatches: v })}
+              lockReason={
+                settings.anilistAutoSync ? undefined : t("Turn on Sync watch progress first.")
+              }
+              newId="anilist:count-rewatches"
+            />
+            <ToggleRow
               label={t("Use my AniList avatar as my Harbor avatar")}
               sub={t("Show your AniList profile picture as your Harbor avatar.")}
               value={settings.useAnilistAvatar}

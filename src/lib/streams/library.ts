@@ -1,5 +1,5 @@
 import { parse } from "parse-torrent-title";
-import type { DebridSlug, DebridStore, LibraryEntry } from "@/lib/debrid/types";
+import type { DebridResult, DebridSlug, DebridStore, LibraryEntry } from "@/lib/debrid/types";
 import type { Stream } from "./types";
 
 export type LibraryQuery = {
@@ -11,13 +11,20 @@ export type LibraryQuery = {
   episode?: number;
 };
 
+/** One `listLibrary` sweep per provider, shared between the library-stream matcher
+ *  and the cache cross-check so the provider is only asked once. */
+export type LibraryListings = Promise<Array<PromiseSettledResult<DebridResult<LibraryEntry[]>>>>;
+
 export async function fetchLibraryStreams(
   clients: DebridStore[],
   query: LibraryQuery,
   signal: AbortSignal,
+  sharedListings?: LibraryListings,
 ): Promise<Stream[]> {
   if (clients.length === 0) return [];
-  const settled = await Promise.allSettled(clients.map((c) => c.listLibrary(signal)));
+  const settled = sharedListings
+    ? await sharedListings
+    : await Promise.allSettled(clients.map((c) => c.listLibrary(signal)));
   const out: Stream[] = [];
   for (let i = 0; i < clients.length; i++) {
     const r = settled[i];

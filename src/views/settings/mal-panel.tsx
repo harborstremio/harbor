@@ -93,6 +93,15 @@ export function MalPanel() {
             onChange={(v) => update({ malAutoSync: v })}
             leading={<RefreshCw size={20} strokeWidth={2.1} />}
           />
+          <ToggleRow
+            label={t("Count MyAnimeList rewatches")}
+            sub={t("Watching an anime you already finished marks it as Rewatching and counts the rewatch, instead of resetting your progress.")}
+            value={settings.malCountRewatches}
+            onChange={(v) => update({ malCountRewatches: v })}
+            lockReason={settings.malAutoSync ? undefined : t("Turn on Sync watch progress first.")}
+            newId="mal:count-rewatches"
+            leading={<RefreshCw size={20} strokeWidth={2.1} />}
+          />
           {malAvatar && (
             <ToggleRow
               label={t("Use MyAnimeList avatar")}

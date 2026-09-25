@@ -54,6 +54,7 @@ import { CachedFilterPill, LanguageFilterPill } from "./play-picker/filter-pills
 import { PickerEmptyLadder } from "./play-picker/picker-empty-ladder";
 import { NoSourcesConfiguredModal } from "./play-picker/no-sources-modal";
 import {
+  addonFailureLabel,
   debridBanner,
   hasCachedMarker,
   hasUncachedMarker,
@@ -229,7 +230,8 @@ export function PlayPicker({
   const [resolving, setResolving] = useState<ResolvingSelection | null>(null);
   const [failedStreams, setFailedStreams] = useState<Set<ScoredStream>>(new Set());
   const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Condensed layout shows the full source list expanded by default; the user can collapse it.
+  const [drawerOpen, setDrawerOpen] = useState(true);
   const [strictMode, setStrictMode] = useState(settings.streamFilterLevel === "strict");
   const [forceShowAll, setForceShowAll] = useState(false);
   const filterDisabled = settings.streamFilterLevel === "off" || forceShowAll || isDownload;
@@ -1012,6 +1014,30 @@ export function PlayPicker({
                 {t(
                   "Some of your cached sources may be missing from this list. This is a debrid-side issue, not a problem with your subscription.",
                 )}
+              </p>
+            </div>
+            <button
+              onClick={refresh}
+              disabled={loading}
+              className="shrink-0 rounded-full bg-elevated px-4 py-2 text-[12.5px] font-semibold text-ink ring-1 ring-edge-soft transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 motion-reduce:transition-none motion-reduce:hover:scale-100"
+            >
+              {t("Recheck")}
+            </button>
+          </div>
+        )}
+
+        {result?.addonErrors && result.addonErrors.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/30 bg-amber-400/10 px-5 py-3.5 text-[13px] text-amber-100">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <p className="font-semibold">
+                {result.addonErrors.length === 1
+                  ? t("A source couldn't be reached")
+                  : t("{n} sources couldn't be reached", { n: result.addonErrors.length })}
+              </p>
+              <p className="text-[12.5px] leading-snug text-amber-100/85">
+                {result.addonErrors
+                  .map((e) => `${e.name} — ${addonFailureLabel(t, e.code)}`)
+                  .join(" · ")}
               </p>
             </div>
             <button

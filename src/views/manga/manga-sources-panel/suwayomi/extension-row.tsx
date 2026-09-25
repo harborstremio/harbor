@@ -44,8 +44,10 @@ export function ExtensionRow({
     try {
       await action();
       onChanged();
-    } catch {
-      setError(t("Action failed"));
+    } catch (err) {
+      // Suwayomi's refusal (e.g. "Extension can't be updated to the same version.
+      // Reinstall the extension instead") is far more useful than a generic label.
+      setError(err instanceof Error && err.message ? err.message : t("Action failed"));
     } finally {
       setBusy(false);
     }
