@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { EmptyState, FilteredOutState, NoSourcesState, TheatresEmptyState } from "./empty-states";
+import { SourceOutages } from "./source-outages";
 import type { usePipelineResult } from "./use-pipeline-result";
 
 type PipelineResult = ReturnType<typeof usePipelineResult>["result"];
@@ -69,6 +70,7 @@ export function PickerEmptyLadder({
 
   return (
     <>
+      {addonsSettled && allCount === 0 && <SourceOutages />}
       {addonsSettled && (!streamIds || streamIds.length === 0) && (
         <EmptyState
           message={t(

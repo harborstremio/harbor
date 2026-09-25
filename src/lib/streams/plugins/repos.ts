@@ -1,9 +1,9 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { assertSafeUrl } from "@/lib/manga/plugins/host-http";
-import { normalizeRepoUrl, parseStreamRepoManifest, pluginIdFor, repoUrlCandidates, type ParsedStreamRepo } from "./manifest";
+import { normalizeRepoUrl, parseAndroidExtensionList, parseStreamRepoManifest, pluginIdFor, repoUrlCandidates, type ParsedStreamRepo } from "./manifest";
 import { uninstallStreamPlugin } from "./install";
 import { installedStreamPluginsSync, saveStreamPlugin, deleteStreamRepoRecord, loadStreamRepoRecords, saveStreamRepoRecord } from "./store";
-import { PluginError, type StreamRepoRecord } from "./types";
+import { PluginError, type StreamRepoEntry, type StreamRepoRecord } from "./types";
 
 const FETCH_TIMEOUT = 20_000;
 
@@ -35,7 +35,7 @@ export async function loadStreamRepos(): Promise<StreamRepoRecord[]> {
   return repos;
 }
 
-export async function fetchStreamRepoManifest(url: string): Promise<ParsedStreamRepo> {
+async function fetchRepoJson(url: string): Promise<unknown> {
   const target = assertSafeUrl(url);
   let res: Response;
   try {
@@ -44,13 +44,37 @@ export async function fetchStreamRepoManifest(url: string): Promise<ParsedStream
     throw new PluginError("no-answer");
   }
   if (!res.ok) throw new PluginError("no-answer", `HTTP ${res.status}`);
-  let parsed: unknown;
   try {
-    parsed = JSON.parse(await res.text());
+    return JSON.parse(await res.text());
   } catch {
     throw new PluginError("not-a-repo");
   }
-  return parseStreamRepoManifest(parsed, target);
+}
+
+async function resolveLists(repo: ParsedStreamRepo): Promise<ParsedStreamRepo> {
+  const entries: StreamRepoEntry[] = [...repo.entries];
+  const seen = new Set(entries.map((e) => e.id));
+  for (const listUrl of repo.lists ?? []) {
+    let listed: StreamRepoEntry[];
+    try {
+      listed = parseAndroidExtensionList(await fetchRepoJson(listUrl), listUrl);
+    } catch {
+      continue;
+    }
+    for (const entry of listed) {
+      if (seen.has(entry.id)) continue;
+      seen.add(entry.id);
+      entries.push(entry);
+    }
+  }
+  return { ...repo, entries };
+}
+
+export async function fetchStreamRepoManifest(url: string): Promise<ParsedStreamRepo> {
+  const target = assertSafeUrl(url);
+  const parsed = await fetchRepoJson(target);
+  const repo = parseStreamRepoManifest(parsed, target);
+  return repo.lists?.length ? resolveLists(repo) : repo;
 }
 
 async function syncInstalled(record: StreamRepoRecord): Promise<void> {

@@ -49,7 +49,7 @@ export function RepositoriesTab() {
       <Section
         title={t("Add a repository")}
         subtitle={t(
-          "Paste the manifest link of a repository you trust. Harbor reads its own plugin repositories and provider-script repositories as they are, and installs nothing until you choose to.",
+          "Paste the manifest link of a repository you trust. Harbor reads its own plugin repositories, provider-script repositories and Android extension repositories as they are, and installs nothing until you choose to.",
         )}
       >
         <SettingRow

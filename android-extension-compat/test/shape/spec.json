@@ -1,0 +1,25 @@
+{
+ "note": "Synthetic contract for tools/selftest.sh. Every Good entry must resolve, every Bad entry must not.",
+ "required": {
+  "class|probe.Absent||": {"exts": []},
+  "class|probe.BadExtended||": {"exts": [], "extended": true},
+  "class|probe.BadImplemented||": {"exts": [], "implemented": true},
+  "class|probe.BadNew||": {"exts": [], "instantiated": true},
+  "class|probe.GoodExtended||": {"exts": [], "extended": true},
+  "class|probe.GoodImplemented||": {"exts": [], "implemented": true},
+  "class|probe.GoodNew||": {"exts": [], "instantiated": true},
+  "field|probe.BadPutField|f|I": {"exts": [], "access": ["put-instance"]},
+  "field|probe.BadStaticField|f|I": {"exts": [], "access": ["get-static"]},
+  "field|probe.GoodPutField|f|I": {"exts": [], "access": ["put-instance"]},
+  "field|probe.GoodStaticField|f|I": {"exts": [], "access": ["get-static"]},
+  "method|probe.BadItf|m|()V": {"exts": [], "invoke": ["interface"], "itf": true},
+  "method|probe.BadStatic|m|()V": {"exts": [], "invoke": ["static"]},
+  "method|probe.BadSuper|m|()V": {"exts": [], "invoke": ["special"]},
+  "method|probe.BadVirtual|m|()V": {"exts": [], "invoke": ["virtual"]},
+  "method|probe.GoodItf|m|()V": {"exts": [], "invoke": ["interface"], "itf": true},
+  "method|probe.GoodStatic|m|()V": {"exts": [], "invoke": ["static"]},
+  "method|probe.GoodSuper|m|()V": {"exts": [], "invoke": ["special"]},
+  "method|probe.GoodVirtual|m|()V": {"exts": [], "invoke": ["virtual"]},
+  "method|probe.Present|absent|()V": {"exts": [], "invoke": ["virtual"]}
+ }
+}

@@ -23,7 +23,7 @@ function foreignText(t: (k: string) => string, kind: RepoView["foreign"]): strin
     );
   }
   return t(
-    "This does not look like a plugin repository. Harbor expects { name, plugins } or a provider-script manifest with scrapers.",
+    "This does not look like a plugin repository. Harbor reads its own plugin manifests, provider-script manifests and Android extension repositories.",
   );
 }
 
@@ -86,15 +86,20 @@ export function RepoGroup({ repo, adapter }: { repo: RepoView; adapter: KindAdap
           return;
         }
         let done = 0;
+        let installed = 0;
+        let failure: unknown = null;
         for (const e of pending) {
           try {
             await adapter.install(repo.url, e.id);
-          } catch {
-            /* the row shows its own state on refresh */
+            installed += 1;
+          } catch (e2) {
+            failure ??= e2;
           }
           done += 1;
           setProgress({ done, total: pending.length });
         }
+        // One bad entry shows on its own row, but a run where nothing landed needs to say why.
+        if (!installed && failure) throw failure;
       } finally {
         setProgress(null);
       }
@@ -126,6 +131,7 @@ export function RepoGroup({ repo, adapter }: { repo: RepoView; adapter: KindAdap
             <span className="min-w-0">{repo.name}</span>
             <Chip>{kindLabel(t, repo.kind)}</Chip>
             {repo.format === "provider-script" && <Chip>{t("Script")}</Chip>}
+            {repo.format === "android-extension" && <Chip>{t("Android")}</Chip>}
             {repo.entries.length > 0 && <Chip>{t("{count} plugins", { count: repo.entries.length })}</Chip>}
             {repo.installedCount > 0 && (
               <Chip accent>{t("{count} installed", { count: repo.installedCount })}</Chip>

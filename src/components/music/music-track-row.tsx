@@ -33,7 +33,7 @@ export function MusicTrackRow({
   onAddToPlaylist,
   onGoToArtist,
   onGoToAlbum,
-  onStartRadio,
+  onMoreLikeThis,
   liked = false,
   onToggleFavorite,
   showDuration = false,
@@ -51,7 +51,7 @@ export function MusicTrackRow({
   onAddToPlaylist?: () => void;
   onGoToArtist?: () => void;
   onGoToAlbum?: () => void;
-  onStartRadio?: () => void;
+  onMoreLikeThis?: () => void;
   liked?: boolean;
   onToggleFavorite?: () => void;
   showDuration?: boolean;
@@ -71,7 +71,7 @@ export function MusicTrackRow({
     onAddToPlaylist,
     onGoToArtist,
     onGoToAlbum,
-    onStartRadio,
+    onMoreLikeThis,
   });
 
   const openMenu = (event: MouseEvent<HTMLElement>) => {

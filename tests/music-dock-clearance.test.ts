@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const DOCK = "var(--harbor-music-dock";
+const GAP = "var(--harbor-dock-gap";
 const NEWLINE = String.fromCharCode(10);
 const read = (p: string) => readFileSync(p, "utf8");
 
@@ -24,8 +25,14 @@ test("the dock publishes its height for everything else to clear", () => {
 test("settings content, rail and footer all clear the dock", () => {
   const css = read("src/index.css");
   for (const selector of [".hset-main", ".hset-rail", ".hset-footer"]) {
-    assert.ok(topLevelBlock(css, selector).includes(DOCK), selector + " sits under the music dock");
+    assert.ok(topLevelBlock(css, selector).includes(GAP), selector + " sits under the music dock");
   }
+});
+
+test("the composite gap covers both the dock and any viewport lift", () => {
+  const dock = read("src/components/music/music-dock.tsx");
+  assert.ok(dock.includes("--harbor-dock-gap"), "the dock must publish the composite gap");
+  assert.ok(dock.includes("var(--harbor-viewport-bottom, 0px)"), "the gap must fold in the lift");
 });
 
 test("floating bottom surfaces clear the dock", () => {

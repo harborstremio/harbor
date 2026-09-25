@@ -38,3 +38,14 @@ test("adoption re-parents rather than rebuilding, so playback survives the move"
   assert.match(body, /insertBefore/);
   assert.doesNotMatch(body, /createElement|\.src\s*=/);
 });
+
+test("the picture is adopted into the surface itself, never straight into the fullscreen stage", () => {
+  const at = surface.indexOf("return adoptMusicVideoHost(parent);");
+  const body = surface.slice(surface.lastIndexOf("useLayoutEffect", at), at);
+  assert.match(body, /const parent = shell\.current;/);
+  assert.doesNotMatch(
+    body,
+    /getMusicVideoFullscreen\(\)\.stage/,
+    "the stage holds the surface as a later sibling, so a picture parented there is painted over",
+  );
+});

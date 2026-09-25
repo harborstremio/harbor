@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { ListMusic } from "lucide-react";
+import { MoreLikeThisIcon } from "@/components/icons/more-like-this-icon";
 import { useT } from "@/lib/i18n";
+import { requestMusicPlaylist } from "@/lib/music/navigation";
 import { useArtistPlaylists, useTrackPlaylists } from "@/lib/music/playlist-membership";
+import { reopenMusicMix, useMusicTrackContext } from "@/lib/music/recent-context";
 import type { MusicTrack } from "@/lib/music/types";
 
 const NAME_LIMIT = 3;
@@ -32,15 +36,56 @@ export function MusicTrackPlaylistChip({
       ? t("music.playlists.inOne", { name: names[0] })
       : t("music.playlists.inMany", { count: playlists.length });
   return (
-    <span
+    <button
+      type="button"
       data-music-playlist-chip
-      className="inline-flex min-w-0 shrink items-center gap-1 text-[10px] font-medium leading-none text-ink-muted"
+      className="music-playlist-chip inline-flex min-w-0 shrink items-center gap-1 text-[10px] font-medium leading-none text-ink-muted"
       title={joinNames(names, t)}
       aria-label={joinNames(names, t)}
+      onClick={(event) => {
+        event.stopPropagation();
+        requestMusicPlaylist(playlists[0].id, track?.id);
+      }}
     >
       <ListMusic size={12} aria-hidden="true" className="shrink-0" />
       {!compact && <span className="truncate">{label}</span>}
-    </span>
+    </button>
+  );
+}
+
+export function MusicTrackMixChip({
+  track,
+  compact = false,
+}: {
+  track: Pick<MusicTrack, "id" | "connectorId" | "title" | "artist"> | null | undefined;
+  compact?: boolean;
+}) {
+  const t = useT();
+  const context = useMusicTrackContext(track);
+  const [busy, setBusy] = useState(false);
+  const seed = context?.kind === "similar" ? context.seed : undefined;
+  if (!context || !seed) return null;
+  const label = t("music.similar.fromMix", { name: context.name });
+  return (
+    <button
+      type="button"
+      data-music-mix-chip
+      disabled={busy}
+      className="music-playlist-chip inline-flex min-w-0 shrink items-center gap-1 text-[10px] font-medium leading-none text-ink-muted disabled:opacity-60"
+      title={label}
+      aria-label={label}
+      onClick={(event) => {
+        event.stopPropagation();
+        if (busy) return;
+        setBusy(true);
+        void reopenMusicMix(seed)
+          .catch(() => {})
+          .finally(() => setBusy(false));
+      }}
+    >
+      <MoreLikeThisIcon size={12} className="shrink-0" />
+      {!compact && <span className="truncate">{label}</span>}
+    </button>
   );
 }
 

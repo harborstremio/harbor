@@ -10818,7 +10818,7 @@ const NAV_CHIP =
   "inline-flex h-[22px] shrink-0 items-center rounded-md px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
 
 const NAV_FIELD =
-  "group/find flex h-11 min-w-0 flex-1 items-center rounded-[10px] bg-elevated px-3 transition-colors focus-within:bg-raised";
+  "group/find flex h-11 min-w-0 shrink-0 items-center rounded-[10px] bg-elevated px-3 transition-colors focus-within:bg-raised";
 
 const NAV_FIELD_GLYPH =
   "me-2.5 shrink-0 text-ink-subtle transition-colors group-focus-within/find:text-ink";

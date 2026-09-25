@@ -1,4 +1,8 @@
-export type MusicCheckpointOrigin = { kind: "playlist"; id: string; name: string };
+export type MusicCheckpointOrigin = {
+  kind: "playlist" | "similar";
+  id: string;
+  name: string;
+};
 
 export type MusicCheckpoint = {
   key?: string;

@@ -1,5 +1,6 @@
 import { PluginWorker } from "@/lib/manga/plugins/worker-host";
 import { dwarn } from "@/lib/debug";
+import { runExtensionPlugin } from "./extension/run";
 import { PRELUDE_VERSION } from "./provider-compat/prelude";
 import { settingsFingerprint, workerPluginFor } from "./source";
 import { saveStreamPlugin, streamPluginById } from "./store";
@@ -23,6 +24,7 @@ const MAX_BYTES = 8 * 1024 * 1024;
 type Slot = { worker: PluginWorker; key: string; lastUsed: number; requests: number };
 
 const slots = new Map<string, Slot>();
+const bridgeCalls = new Map<string, number>();
 const health = new Map<string, PluginHealth>();
 const logs = new Map<string, PluginLogLine[]>();
 const listeners = new Set<() => void>();
@@ -207,6 +209,11 @@ async function recordSuccess(plugin: InstalledStreamPlugin): Promise<void> {
   await saveStreamPlugin({ ...fresh, failures: 0 });
 }
 
+function requestCount(plugin: InstalledStreamPlugin): number {
+  if (plugin.format === "android-extension") return bridgeCalls.get(plugin.id) ?? 0;
+  return slots.get(plugin.id)?.requests ?? 0;
+}
+
 export function recordSkip(plugin: InstalledStreamPlugin, reason: string): void {
   const h = health.get(plugin.id) ?? emptyHealth();
   h.lastSkip = reason;
@@ -221,25 +228,41 @@ export async function runStreamPlugin(
   timeoutMs: number,
 ): Promise<unknown> {
   await acquire();
-  const worker = streamWorkerFor(plugin);
-  const slot = slots.get(plugin.id);
-  const requestsBefore = slot?.requests ?? 0;
+  const native = plugin.format === "android-extension";
+  let requestsBefore = requestCount(plugin);
   const started = performance.now();
   const h = health.get(plugin.id) ?? emptyHealth();
+  let outage: string | null = null;
   try {
-    const value = await worker.call("streams", [req], timeoutMs, signal);
+    let value: unknown;
+    if (native) {
+      value = await runExtensionPlugin(plugin, req, signal, timeoutMs, {
+        log: (level, text) => pushLog(plugin.id, level, text),
+        seen: (url) => learnHost(plugin.id, url),
+        call: () => bridgeCalls.set(plugin.id, (bridgeCalls.get(plugin.id) ?? 0) + 1),
+        outage: (text) => {
+          outage = text;
+        },
+      });
+    } else {
+      const worker = streamWorkerFor(plugin);
+      requestsBefore = requestCount(plugin);
+      value = await worker.call("streams", [req], timeoutMs, signal);
+    }
     const count = Array.isArray(value) ? value.length : 0;
     h.lastAt = Date.now();
     h.lastMs = Math.round(performance.now() - started);
     h.lastCount = count;
     h.lastError = null;
-    h.lastSkip = null;
+    // A named outage outlives the run that found it, because an empty answer with a reason is the
+    // one case a user can act on and "0 streams" on its own reads as a broken plugin.
+    h.lastSkip = count === 0 ? outage : null;
     h.lastTitle = req.title;
     health.set(plugin.id, h);
     pushLog(
       plugin.id,
       "info",
-      `${count} streams for ${req.title} in ${(h.lastMs / 1000).toFixed(1)}s, ${(slot?.requests ?? 0) - requestsBefore} requests`,
+      `${count} streams for ${req.title} in ${(h.lastMs / 1000).toFixed(1)}s, ${requestCount(plugin) - requestsBefore} requests`,
     );
     void recordSuccess(plugin);
     return value;
@@ -269,22 +292,21 @@ export async function checkStreamPlugin(
   timeoutMs = 30_000,
 ): Promise<PluginCheckResult> {
   const ac = new AbortController();
-  const slot = slots.get(plugin.id);
-  const requestsBefore = slot?.requests ?? 0;
+  const requestsBefore = requestCount(plugin);
   const started = performance.now();
   try {
     const value = await runStreamPlugin(plugin, req, ac.signal, timeoutMs);
     return {
       count: Array.isArray(value) ? value.length : 0,
       ms: Math.round(performance.now() - started),
-      requests: (slots.get(plugin.id)?.requests ?? 0) - requestsBefore,
+      requests: requestCount(plugin) - requestsBefore,
       error: null,
     };
   } catch (e) {
     return {
       count: 0,
       ms: Math.round(performance.now() - started),
-      requests: (slots.get(plugin.id)?.requests ?? 0) - requestsBefore,
+      requests: requestCount(plugin) - requestsBefore,
       error: errorText(e),
     };
   }

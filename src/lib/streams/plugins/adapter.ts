@@ -2,6 +2,7 @@ import { assertSafeUrl } from "@/lib/manga/plugins/host-http";
 import { sameSiteHost } from "@/lib/same-site-host";
 import { infoHashFromSources, parseMagnet } from "@/lib/torrent/magnet";
 import type { Stream, StreamSubtitle } from "../types";
+import type { BridgeLinkSet } from "./extension/bridge";
 import type { PluginStream, StreamPluginRequest } from "./types";
 
 const MAX_STREAMS = 150;
@@ -24,6 +25,7 @@ export type AdapterContext = {
   addonName: string;
   addonUrl: string;
   pluginName: string;
+  trustHeaders?: boolean;
 };
 
 function clean(v: unknown, max = MAX_TEXT): string | undefined {
@@ -58,7 +60,11 @@ function headerName(key: string): string {
   return key.replace(/(^|-)([a-z])/g, (_, sep: string, ch: string) => sep + ch.toUpperCase());
 }
 
-function pickHeaders(raw: unknown, url: string | undefined): Record<string, string> | null {
+function pickHeaders(
+  raw: unknown,
+  url: string | undefined,
+  trust = false,
+): Record<string, string> | null {
   if (!raw || typeof raw !== "object") return null;
   const out: Record<string, string> = {};
   const host = url ? hostOf(url) : "";
@@ -68,7 +74,8 @@ function pickHeaders(raw: unknown, url: string | undefined): Record<string, stri
     // eslint-disable-next-line no-control-regex -- Header values must not retain CR, LF, NUL or DEL.
     const value = typeof v === "string" ? v.replace(/[\x00-\x1f\x7f]/g, "").trim() : "";
     if (!value || value.includes(",")) continue;
-    if ((key === "referer" || key === "origin") && !sameSiteHost(hostOf(value), host)) continue;
+    if (!trust && (key === "referer" || key === "origin") && !sameSiteHost(hostOf(value), host))
+      continue;
     out[headerName(key)] = value.slice(0, 2000);
     if (Object.keys(out).length >= MAX_HEADERS) break;
   }
@@ -206,7 +213,7 @@ function oneStream(item: unknown, ctx: AdapterContext): Stream | null {
     typeof o.seeders === "number" && Number.isFinite(o.seeders)
       ? Math.max(0, Math.round(o.seeders))
       : undefined;
-  const headers = pickHeaders(o.headers, url);
+  const headers = pickHeaders(o.headers, url, ctx.trustHeaders === true);
   const bingeGroup = clean(o.bingeGroup, 120);
   const expiresAt =
     typeof o.expiresAt === "number" && Number.isFinite(o.expiresAt) ? o.expiresAt : undefined;
@@ -265,6 +272,48 @@ export function toStreams(raw: unknown, ctx: AdapterContext): Stream[] {
     if (out.length >= MAX_STREAMS) break;
     const s = oneStream(item, ctx);
     if (s) out.push(s);
+  }
+  return out;
+}
+
+function qualityLabel(value: unknown): string | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) return undefined;
+  return `${Math.round(value)}p`;
+}
+
+function withReferer(link: { headers?: Record<string, string>; referer?: string }) {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(link.headers ?? {})) {
+    if (typeof v === "string") out[k] = v;
+  }
+  const hasReferer = Object.keys(out).some((k) => k.toLowerCase() === "referer");
+  if (!hasReferer && link.referer) out.Referer = link.referer;
+  return Object.keys(out).length ? out : undefined;
+}
+
+export function extensionPluginStreams(
+  set: BridgeLinkSet,
+  label: { media: string; track: string; group: string },
+): PluginStream[] {
+  const subtitles = (set.subtitles ?? [])
+    .filter((s) => s && typeof s.url === "string" && s.url.length > 0)
+    .slice(0, 40)
+    .map((s) => ({ url: s.url, lang: clean(s.lang, 24) }));
+  const title = [clean(label.media, MAX_TEXT), clean(label.track, 40)].filter(Boolean).join(" ");
+  const out: PluginStream[] = [];
+  for (const link of set.links ?? []) {
+    if (!link || typeof link.url !== "string" || !link.url) continue;
+    const quality = qualityLabel(link.quality);
+    out.push({
+      url: link.url,
+      name: clean(link.name, 120) ?? clean(link.source, 120),
+      title: title || undefined,
+      provider: clean(link.source, 80),
+      quality,
+      headers: withReferer(link),
+      subtitles: subtitles.length ? subtitles : undefined,
+      bingeGroup: `${label.group}|${link.source}|${quality ?? link.type}`.slice(0, 120),
+    });
   }
   return out;
 }

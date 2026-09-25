@@ -195,3 +195,6 @@
     transition: none;
   }
 }
+.music-signal-stage h4 { display: inline-flex; align-items: center; gap: 5px; }
+.music-signal-stage h4 > svg { color: var(--color-ink-subtle); flex: none; }
+.music-signal-stages { padding-block-end: 10px; }

@@ -1,5 +1,7 @@
 export const VIEWPORT_BOTTOM_VAR = "--harbor-viewport-bottom";
 
+const KEYBOARD_FLOOR = 24;
+
 export function viewportBottomGap(
   layoutHeight: number,
   visualHeight: number,
@@ -7,8 +9,8 @@ export function viewportBottomGap(
 ): number {
   if (![layoutHeight, visualHeight, offsetTop].every(Number.isFinite)) return 0;
   const gap = layoutHeight - (visualHeight + Math.max(0, offsetTop));
-  if (!(gap > 0.5)) return 0;
-  return Math.min(Math.round(gap), Math.max(0, Math.round(layoutHeight)));
+  if (!(gap >= KEYBOARD_FLOOR)) return 0;
+  return Math.min(Math.floor(gap), Math.max(0, Math.floor(layoutHeight)));
 }
 
 export function trackViewportBottom(): () => void {

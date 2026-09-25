@@ -124,8 +124,13 @@ export async function runPluginAddon(
   const results = await Promise.allSettled(
     plugins.map(async (plugin) => {
       const request = await buildPluginRequest(req, pickedId, plugin, tmdbKey);
+      const native = plugin.format === "android-extension";
       if (plugin.format === "provider-script" && !request.tmdb) {
         recordSkip(plugin, `No TMDB id for ${request.title || pickedId}`);
+        return [];
+      }
+      if (native && !request.title.trim()) {
+        recordSkip(plugin, `No title to search for ${pickedId}`);
         return [];
       }
       const budget = plugin.timeoutMs ? Math.min(plugin.timeoutMs, timeoutMs) : timeoutMs;
@@ -136,6 +141,7 @@ export async function runPluginAddon(
         addonName: addon.manifest.name,
         addonUrl: addon.transportUrl,
         pluginName: plugin.name,
+        trustHeaders: native,
       });
     }),
   );

@@ -28,6 +28,17 @@ const FILES = [
   [UNINSTALLER, 'uninstall.exe'],
 ];
 
+// The NSIS bundle gets this from tauri.conf.json bundle.resources. This installer builds its own
+// payload, so it has to be named here or extensions are dead in every managed install.
+const CAPSTAN = join(APP, 'resources', 'capstan');
+const capstanStaged = existsSync(join(CAPSTAN, 'capstan.jar'));
+if (!capstanStaged && !process.env.HARBOR_CAPSTAN_OPTIONAL) {
+  console.error('No extension runtime is staged, so this installer would ship broken extensions.\n');
+  console.error('  ' + CAPSTAN + '\n');
+  console.error('Run "pnpm run setup:capstan" first, or set HARBOR_CAPSTAN_OPTIONAL=1 to ship without it.');
+  process.exit(1);
+}
+
 const missing = FILES.filter(([src]) => !existsSync(src)).map(([src]) => src);
 if (missing.length) {
   console.error('Missing inputs.\n');
@@ -50,6 +61,12 @@ function newestMtime(path, newest) {
     out = newestMtime(join(path, name), out);
   }
   return out;
+}
+
+function treeBytes(path) {
+  const info = statSync(path);
+  if (!info.isDirectory()) return info.size;
+  return readdirSync(path).reduce((sum, name) => sum + treeBytes(join(path, name)), 0);
 }
 
 const uninstallerStat = statSync(UNINSTALLER);
@@ -95,6 +112,13 @@ const fontsDir = join(APP, 'fonts');
 for (const f of readdirSync(fontsDir)) {
   cpSync(join(fontsDir, f), join(STAGE, 'fonts', f));
   total += statSync(join(fontsDir, f)).size;
+}
+
+if (capstanStaged) {
+  cpSync(CAPSTAN, join(STAGE, 'capstan'), { recursive: true });
+  total += treeBytes(CAPSTAN);
+} else {
+  console.error('SHIPPING WITHOUT EXTENSION SUPPORT: no runtime staged at ' + CAPSTAN);
 }
 
 const appVersion = JSON.parse(readFileSync(join(APP, 'tauri.conf.json'), 'utf8')).version;

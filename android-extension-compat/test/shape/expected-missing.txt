@@ -1,0 +1,11 @@
+class|probe.Absent||
+class|probe.BadExtended||
+class|probe.BadImplemented||
+class|probe.BadNew||
+field|probe.BadPutField|f|I
+field|probe.BadStaticField|f|I
+method|probe.BadItf|m|()V
+method|probe.BadStatic|m|()V
+method|probe.BadSuper|m|()V
+method|probe.BadVirtual|m|()V
+method|probe.Present|absent|()V

@@ -97,6 +97,7 @@ function fixture(respond?: (command: string, args?: any) => unknown, realCasting
       restoreMusicPlaybackOrigin: () => {},
     },
     "./preferences": { readMusicPreference: () => null, writeMusicPreference: () => {} },
+    "./hidden-recents": { unhideMusicRecent: () => {} },
     "./audio-settings": {
       initializeMusicAudioSettings: async () => {},
       clampMusicVolume: (n: number) => Math.max(0, Math.min(1, n)),

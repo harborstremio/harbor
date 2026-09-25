@@ -6,10 +6,13 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import { Copy, Disc3, Download, ListPlus, Play, Plus, Radio, UserRound } from "lucide-react";
+import { Copy, Disc3, Download, ListPlus, Play, Plus, UserRound } from "lucide-react";
+import { MoreLikeThisIcon } from "@/components/icons/more-like-this-icon";
 import { AnchoredMenu } from "@/components/anchored-menu";
 import { useT } from "@/lib/i18n";
 import { downloadMusic } from "@/lib/music/downloads";
+import { musicSimilarTracks } from "@/lib/music/player";
+import { requestMusicExplore } from "@/lib/music/navigation";
 import { useArtistCredits } from "./use-artist-credits";
 import { useMusicNavigate } from "./music-navigate";
 import type { MusicTrack } from "@/lib/music/types";
@@ -27,7 +30,7 @@ export type MusicTrackMenuHandlers = {
   onAddToPlaylist?: () => void;
   onGoToArtist?: () => void;
   onGoToAlbum?: () => void;
-  onStartRadio?: () => void;
+  onMoreLikeThis?: () => void;
 };
 
 export function useMusicTrackMenuItems(
@@ -37,7 +40,7 @@ export function useMusicTrackMenuItems(
   const t = useT();
   const { goToArtist, goToAlbum } = useMusicNavigate();
   const credits = useArtistCredits(track?.artist ?? "", track?.title ?? "");
-  const { onPlay, onAddToQueue, onAddToPlaylist, onGoToArtist, onGoToAlbum, onStartRadio } =
+  const { onPlay, onAddToQueue, onAddToPlaylist, onGoToArtist, onGoToAlbum, onMoreLikeThis } =
     handlers;
 
   const items: MusicTrackMenuItem[] = [];
@@ -92,14 +95,17 @@ export function useMusicTrackMenuItems(
       run: onGoToAlbum ?? (() => goToAlbum(album, track.artist)),
     });
   }
-  if (onStartRadio) {
-    items.push({
-      id: "radio",
-      label: t("music.card.startRadio"),
-      icon: <Radio size={14} />,
-      run: onStartRadio,
-    });
-  }
+  items.push({
+    id: "similar",
+    label: t("music.card.moreLikeThis"),
+    icon: <MoreLikeThisIcon size={14} />,
+    run:
+      onMoreLikeThis ??
+      (async () => {
+        const mix = await musicSimilarTracks(track);
+        requestMusicExplore({ kind: "similar", track, queue: mix });
+      }),
+  });
   items.push({
     id: "copy",
     label: t("music.card.copyTitle"),

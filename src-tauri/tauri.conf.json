@@ -6,7 +6,7 @@
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm build",
+    "beforeBuildCommand": "pnpm build:desktop",
     "frontendDist": "../dist"
   },
   "app": {
@@ -57,7 +57,8 @@
     "resources": {
       "fonts/*": "fonts/",
       "THIRD-PARTY-NOTICES.txt": "notices/",
-      "resources/harbor-stream-blocker/": "resources/harbor-stream-blocker/"
+      "resources/harbor-stream-blocker/": "resources/harbor-stream-blocker/",
+      "resources/capstan/": "resources/capstan/"
     },
     "licenseFile": "installer/eula.txt",
     "icon": [

@@ -58,6 +58,8 @@ mod asr_model;
 mod browser;
 mod browser_args;
 #[cfg(desktop)]
+mod capstan;
+#[cfg(desktop)]
 mod captions;
 #[cfg(desktop)]
 mod cast;
@@ -87,6 +89,8 @@ mod hdr_overlay;
 mod installer_handoff;
 #[cfg(desktop)]
 mod media_controls;
+#[cfg(target_os = "windows")]
+mod taskbar;
 mod modal_overlay;
 #[cfg(desktop)]
 mod mpv;
@@ -935,6 +939,8 @@ pub fn run() {
                 });
             }
             media_controls::ensure_started_on_setup(&app.handle());
+            #[cfg(target_os = "windows")]
+            taskbar::init(&app.handle());
             {
                 let handle = app.handle().clone();
                 std::thread::spawn(move || discord_rp::run_loop(handle));
@@ -1254,9 +1260,18 @@ pub fn run() {
             subtitle_credentials::subtitle_credential_bind,
             subtitle_credentials::subtitle_credentials_clear,
             cf_solver::cf_report,
+            capstan::capstan_ping,
+            capstan::capstan_install,
+            capstan::capstan_uninstall,
+            capstan::capstan_extensions,
+            capstan::capstan_providers,
+            capstan::capstan_search,
+            capstan::capstan_load,
+            capstan::capstan_load_links,
             discord_rp::discord_set_presence,
             discord_rp::discord_clear,
             media_controls::media_controls_update,
+            media_controls::media_controls_music_state,
             media_controls::media_controls_seeked,
             media_controls::media_controls_clear,
             gamepad::gamepad_list,

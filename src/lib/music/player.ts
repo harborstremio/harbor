@@ -677,6 +677,7 @@ export async function playMusic(
     const likedTracks = state.likedIds.includes(track.id)
       ? [track, ...state.likedTracks.filter((item) => item.id !== track.id)]
       : state.likedTracks;
+    void import("./hidden-recents").then(({ unhideMusicRecent }) => unhideMusicRecent(track.id));
     void invoke("music_add_recent", { track }).catch(() => {});
     if (request !== playRequest) return;
     publish({ recents, likedTracks });
@@ -915,6 +916,10 @@ export function enqueueMusic(track: MusicTrack): void {
  */
 export function musicRadioTracks(track: MusicTrack): Promise<MusicTrack[]> {
   return import("./radio").then(({ loadTrackRadio }) => loadTrackRadio(track));
+}
+
+export function musicSimilarTracks(track: MusicTrack): Promise<MusicTrack[]> {
+  return import("./radio").then(({ loadSimilarTracks }) => loadSimilarTracks(track));
 }
 
 export function setMusicVolume(volume: number): void {

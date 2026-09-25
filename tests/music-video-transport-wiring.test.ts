@@ -76,6 +76,7 @@ function loadPlayer() {
         usableCheckpointPosition: () => 0,
         writeCheckpointToDb: () => {},
       };
+    if (name === "./hidden-recents") return { unhideMusicRecent: () => {} };
     if (name === "./playback-origin")
       return { getMusicPlaybackOrigin: () => null, restoreMusicPlaybackOrigin: () => {} };
     if (name === "@/lib/cast-ownership") return { stopCastOwner: () => {} };

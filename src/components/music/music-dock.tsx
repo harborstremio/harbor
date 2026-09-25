@@ -49,6 +49,7 @@ import {
   previousMusic,
   playMusic,
   seekMusic,
+  musicSimilarTracks,
   setMusicVolume,
   toggleMusicLiked,
   toggleMusicPlayback,
@@ -199,6 +200,7 @@ export function MusicDock() {
   }, [topKind]);
   const appearance = useMusicAppearance();
   const dockParts = useMusicDockLayout();
+  const [similarPending, setSimilarPending] = useState(false);
   const { profile: recording, display } = useRecordingProfile(player.current);
   const artworkColor = useMusicArtworkColor(display?.artwork, appearance.artworkColors);
   const [scrub, setScrub] = useState<number | null>(null);
@@ -289,17 +291,42 @@ export function MusicDock() {
     const root = document.documentElement;
     if (visible) {
       root.dataset.musicDockActive = "on";
-      root.style.setProperty("--harbor-music-dock", `${collapsed ? TAB_HEIGHT : DOCK_HEIGHT}px`);
+      const fallback = collapsed ? TAB_HEIGHT : DOCK_HEIGHT;
+      const publish = (height: number) => {
+        root.style.setProperty("--harbor-music-dock", `${Math.max(0, Math.round(height))}px`);
+        root.style.setProperty(
+          "--harbor-dock-gap",
+          `calc(var(--harbor-music-dock, 0px) + var(--harbor-viewport-bottom, 0px))`,
+        );
+      };
+      publish(fallback);
+      const node = dockRef.current;
+      if (node) {
+        publish(node.getBoundingClientRect().height || fallback);
+        const observer = new ResizeObserver((entries) => {
+          const measured = entries[0]?.contentRect.height ?? 0;
+          publish(measured || fallback);
+        });
+        observer.observe(node);
+        return () => {
+          observer.disconnect();
+          delete root.dataset.musicDockActive;
+          root.style.removeProperty("--harbor-music-dock");
+          root.style.removeProperty("--harbor-dock-gap");
+        };
+      }
     } else {
       setQueueOpen(false);
       setExpanded(false);
       setCollapsed(false);
       delete root.dataset.musicDockActive;
       root.style.removeProperty("--harbor-music-dock");
+      root.style.removeProperty("--harbor-dock-gap");
     }
     return () => {
       delete root.dataset.musicDockActive;
       root.style.removeProperty("--harbor-music-dock");
+      root.style.removeProperty("--harbor-dock-gap");
     };
   }, [visible, collapsed]);
 
@@ -325,6 +352,18 @@ export function MusicDock() {
       setExpanded(false);
       setView("music");
       requestMusicExplore({ kind: "album", track: display, album: recording?.album });
+    },
+    onMoreLikeThis: () => {
+      if (!display || similarPending) return;
+      setSimilarPending(true);
+      void musicSimilarTracks(display)
+        .then((mix) => {
+          setExpanded(false);
+          setView("music");
+          requestMusicExplore({ kind: "similar", track: display, queue: mix });
+        })
+        .catch(() => {})
+        .finally(() => setSimilarPending(false));
     },
   });
 
@@ -560,6 +599,12 @@ export function MusicDock() {
                   const target = musicTitleTarget(getMusicPlaybackOrigin());
                   if (target.kind === "playlist")
                     requestMusicPlaylist(target.playlistId, display.id);
+                  else if (target.kind === "similar")
+                    void musicSimilarTracks(display)
+                      .then((mix) =>
+                        requestMusicExplore({ kind: "similar", track: display, queue: mix }),
+                      )
+                      .catch(() => {});
                   else
                     requestMusicExplore({ kind: "album", track: display, album: recording?.album });
                 }}

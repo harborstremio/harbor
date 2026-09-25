@@ -1,5 +1,6 @@
-import { Music2, Plus } from "lucide-react";
-import { MusicTrackPlaylistChip } from "@/components/music/music-playlist-chip";
+import { Music2, Plus, X } from "lucide-react";
+import { hideMusicRecent, isMusicRecentHidden } from "@/lib/music/hidden-recents";
+import { MusicTrackMixChip, MusicTrackPlaylistChip } from "@/components/music/music-playlist-chip";
 import { MusicMediaBadge } from "@/components/music/music-media-badge";
 import { MusicArtistLink } from "@/components/music/music-artist-link";
 import { MUSIC_SHELF_MIN, MusicCatalogRow } from "@/components/music/music-catalog-row";
@@ -8,6 +9,7 @@ import { Row } from "@/components/row";
 import { favoriteArtists } from "@/lib/music/sources";
 import type { MusicArtistRef, MusicCatalogItem, MusicTrack } from "@/lib/music/types";
 import { localRow, trackItem, type MusicBand, type MusicBandContext } from "./music-band-types";
+import { recentContextsBand } from "./music-recent-contexts-band";
 
 function artistRefs(ctx: MusicBandContext): MusicArtistRef[] {
   const t = ctx.t;
@@ -116,7 +118,7 @@ function NewPlaylistTile({
 }
 
 function recentsBand(ctx: MusicBandContext): MusicBand | null {
-  const recents = ctx.player.recents.slice(0, 18);
+  const recents = ctx.player.recents.filter((track) => !isMusicRecentHidden(track.id)).slice(0, 18);
   if (recents.length === 0) return null;
   const t = ctx.t;
   const items = recents.map(trackItem);
@@ -130,6 +132,18 @@ function recentsBand(ctx: MusicBandContext): MusicBand | null {
         <div className="music-quick-grid">
           {recents.slice(0, 8).map((item) => (
             <div key={item.id} className="music-quick-item">
+              <button
+                type="button"
+                className="music-quick-remove"
+                aria-label={t("music.recents.remove", { title: item.title })}
+                title={t("music.recents.remove", { title: item.title })}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  hideMusicRecent(item.id);
+                }}
+              >
+                <X size={13} aria-hidden="true" />
+              </button>
               <button
                 className="music-quick-art"
                 type="button"
@@ -150,6 +164,7 @@ function recentsBand(ctx: MusicBandContext): MusicBand | null {
                 <div className="music-quick-indicators">
                   <MusicMediaBadge kind={item.mediaKind} />
                   <MusicTrackPlaylistChip track={item} />
+                  <MusicTrackMixChip track={item} />
                 </div>
               </div>
             </div>
@@ -311,6 +326,7 @@ function playlistsBand(ctx: MusicBandContext): MusicBand {
 
 export function personalBands(ctx: MusicBandContext): {
   recents: MusicBand | null;
+  recentContexts: MusicBand | null;
   fresh: MusicBand | null;
   artists: MusicBand;
   queue: MusicBand;
@@ -318,6 +334,7 @@ export function personalBands(ctx: MusicBandContext): {
 } {
   return {
     recents: recentsBand(ctx),
+    recentContexts: recentContextsBand(ctx),
     fresh: freshBand(ctx),
     artists: artistsBand(ctx),
     queue: queueBand(ctx),

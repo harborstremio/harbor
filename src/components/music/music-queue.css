@@ -3,7 +3,7 @@
   z-index: 130;
   inset-inline-end: 16px;
   top: max(80px, env(safe-area-inset-top));
-  bottom: calc(var(--harbor-music-dock, 76px) + 12px);
+  bottom: calc(var(--harbor-dock-gap, 76px) + 12px);
   width: min(460px, calc(100vw - 32px));
   display: flex;
   flex-direction: column;
@@ -301,7 +301,7 @@
     inset-inline-end: 8px;
     width: calc(100vw - 16px);
     top: 68px;
-    bottom: calc(var(--harbor-music-dock, 76px) + 8px);
+    bottom: calc(var(--harbor-dock-gap, 76px) + 8px);
   }
   .music-queue-header {
     padding: 16px;

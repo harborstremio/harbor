@@ -71,6 +71,7 @@ function player() {
       restoreMusicPlaybackOrigin: () => {},
     },
     "./preferences": { readMusicPreference: () => null, writeMusicPreference: () => {} },
+    "./hidden-recents": { unhideMusicRecent: () => {} },
     "./audio-settings": {
       initializeMusicAudioSettings: async () => {},
       clampMusicVolume: (value: number) => Math.max(0, Math.min(1, value)),

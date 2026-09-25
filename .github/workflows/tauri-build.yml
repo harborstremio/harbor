@@ -11,6 +11,10 @@ permissions:
 
 env:
   NODE_OPTIONS: --max-old-space-size=6144
+  # The extension compat layer is not in this repository, so a runner cannot stage its runtime and
+  # these installers ship without extension support. The build says so on every run. Drop this line
+  # the day the layer ships with the checkout, and the build starts refusing to omit it.
+  HARBOR_CAPSTAN_OPTIONAL: "1"
 
 jobs:
   build:

@@ -1,3 +1,4 @@
+import { Info } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { MusicAudioSettingsValue } from "@/lib/music/audio-settings";
 import { musicMeterFraction, type MusicAudioMeterState } from "@/lib/music/audio-meter";
@@ -138,7 +139,11 @@ export function MusicSignalDetails({
           </dl>
         </div>
         <div className="music-signal-stage">
-          <h4>{t("music.quality.output")}</h4>
+          <h4 title={t("music.quality.outputHelp")}>
+            {t("music.quality.output")}
+            <Info size={12} aria-hidden="true" />
+            <span className="sr-only">{t("music.quality.outputHelp")}</span>
+          </h4>
           <dl>
             <div>
               <dt>{t("music.quality.selectedOutput")}</dt>
@@ -202,7 +207,6 @@ export function MusicSignalDetails({
               </div>
             )}
           </dl>
-          <p className="music-signal-note">{t("music.quality.outputHelp")}</p>
         </div>
       </div>
       {meter && showLevels && <MusicLevelMeter meter={meter} />}

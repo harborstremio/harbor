@@ -117,6 +117,7 @@ function player(localStorage: unknown) {
         restoreMusicPlaybackOrigin: () => {},
       },
       "./preferences": prefs,
+      "./hidden-recents": { unhideMusicRecent: () => {} },
       "./audio-settings": {
         initializeMusicAudioSettings: async () => {},
         clampMusicVolume: (value: number) => Math.max(0, Math.min(1, value)),

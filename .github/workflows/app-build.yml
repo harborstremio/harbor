@@ -12,6 +12,12 @@ on:
 permissions:
   contents: read
 
+env:
+  # The extension compat layer is not in this repository, so a runner cannot stage its runtime.
+  # This build compiles without it and says so. Drop this line once the layer ships with the
+  # checkout, and the build starts refusing to omit it.
+  HARBOR_CAPSTAN_OPTIONAL: "1"
+
 concurrency:
   group: app-build-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

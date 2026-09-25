@@ -4,6 +4,7 @@ import { loadInstalledStreamPlugins, subscribeStreamPluginStore } from "./store"
 
 export type {
   InstalledStreamPlugin,
+  NativeExtensionRef,
   PluginCheckResult,
   PluginHealth,
   PluginLogLine,

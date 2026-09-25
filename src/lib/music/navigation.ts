@@ -1,7 +1,7 @@
 import type { MusicTrack, MusicAlbumRef, MusicArtistRef } from "./types";
 
 export type MusicExploreRequest = {
-  kind: "home" | "artist" | "album" | "videos" | "watch";
+  kind: "home" | "artist" | "album" | "videos" | "watch" | "similar";
   track: MusicTrack;
   queue?: MusicTrack[];
   album?: MusicAlbumRef;

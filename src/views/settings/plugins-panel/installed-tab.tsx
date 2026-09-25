@@ -35,7 +35,7 @@ export function InstalledTab({ onAddRepository }: { onAddRepository: () => void 
       <Section
         title={t("Use plugins")}
         subtitle={t(
-          "Plugins are small scripts that look for streams on sites Harbor does not know about. Everything here was installed by you, from repositories you chose.",
+          "Plugins look for streams on sites Harbor does not know about. Everything here was installed by you, from repositories you chose.",
         )}
         newId="plugins:use-plugins"
       >

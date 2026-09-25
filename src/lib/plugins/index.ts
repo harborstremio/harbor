@@ -134,7 +134,7 @@ export async function detectRepoKind(rawUrl: string): Promise<{ kind: PluginKind
   const json = (
     parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {}
   ) as Record<string, unknown>;
-  if (looksLikeAndroidExtensionRepo(json, parsed)) throw new PluginError("android-extensions");
+  if (looksLikeAndroidExtensionRepo(json, parsed)) return { kind: "stream", url };
   if (looksLikeStremioAddon(json)) throw new PluginError("stremio-addon");
   if (Array.isArray(json.scrapers)) return { kind: "stream", url };
   if (Array.isArray(parsed) && parsed.some((e) => e && typeof e === "object" && "filename" in e)) {

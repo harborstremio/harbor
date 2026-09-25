@@ -1,4 +1,10 @@
-export type StreamPluginFormat = "harbor" | "provider-script";
+export type StreamPluginFormat = "harbor" | "provider-script" | "android-extension";
+
+export type NativeExtensionRef = {
+  extensionId: string;
+  providerIds: string[];
+  file: string;
+};
 
 export type StreamRepoEntry = {
   id: string;
@@ -51,6 +57,7 @@ export type InstalledStreamPlugin = {
   code: string;
   hash: string;
   etag?: string;
+  native: NativeExtensionRef | null;
   icon?: string;
   description?: string;
   author?: string;

@@ -24,6 +24,7 @@ import { MusicServiceLogo } from "./music-service-logo";
 import { pushBackHandler } from "@/lib/back-intercept";
 import { requestMusicExplore } from "@/lib/music/navigation";
 import { MusicSourcePopover } from "./music-source-popover";
+import { MusicSourcePossible } from "./music-source-possible";
 
 const SOURCE_KEY = "harbor.music.preferred-source.v1";
 function fromCollection(selected: MusicTrack, original: MusicTrack): MusicTrack {
@@ -321,11 +322,13 @@ export function MusicSourcePicker({
     );
   }, [candidates, preferred, failedSource]);
 
-  const select = (candidate: MusicSourceCandidate) => {
-    setPending(candidate.connectorId);
+  const start = (chosen: MusicTrack, connectorId?: string) => {
     setError(null);
-    writeMusicPreference(SOURCE_KEY, candidate.connectorId);
-    const selected = fromCollection(candidate.track, request.track);
+    if (connectorId) {
+      setPending(connectorId);
+      writeMusicPreference(SOURCE_KEY, connectorId);
+    }
+    const selected = fromCollection(chosen, request.track);
     const queue = request.queue.map((track) =>
       track.id === request.track.id && track.connectorId === request.track.connectorId
         ? selected
@@ -340,6 +343,9 @@ export function MusicSourcePicker({
         /* The persistent player exposes retry and other sources. */
       });
   };
+
+  const select = (candidate: MusicSourceCandidate) =>
+    start(candidate.track, candidate.connectorId);
 
   const connect = () => {
     onClose();
@@ -458,6 +464,13 @@ export function MusicSourcePicker({
           <div className="grid min-h-28 place-items-center px-6 text-center text-xs text-ink-muted">
             {t("music.source.none")}
           </div>
+        )}
+        {!loading && !error && (
+          <MusicSourcePossible
+            track={request.track}
+            covered={candidates.map((candidate) => candidate.connectorId).join(",")}
+            onPick={(found) => start(found, found.connectorId)}
+          />
         )}
         {error && (
           <div className="m-2 rounded-md border border-danger/30 bg-danger/5 px-4 py-3 text-xs text-danger">

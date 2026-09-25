@@ -1,0 +1,64 @@
+# Every host the sample extensions hand to loadExtractor.
+#
+# host | extensions that reach it | evidence | probe url
+#
+# evidence is how the host was established:
+#   bytecode  a string constant in the extension's own converted bytecode, on the path that
+#             reaches loadExtractor
+#   network   a real response from the extension's own site or api, captured 2026-09-24
+#   both      established one way and confirmed the other
+#
+# a probe url of - means no url could be captured, and the reason is in EXTRACTORS.md.
+# probe urls are episode scoped and expire; a failed live probe is not by itself a failed
+# extractor, which is why the registry column and the live column are reported separately.
+#
+# every probe url below was taken from a live run on 2026-09-24, either off an extension's own
+# resolve attempt or off the host's own index, and was confirmed to answer before being written
+# here. an id that has since expired shows up as an error page, not as a broken extractor.
+
+# two probe urls carry a code that was not handed out on that domain. the nine byse frontend
+# domains answer one api off one record pool, confirmed 2026-09-24 by asking all nine for the
+# same code and reading the same record back, so a code from one is a real url on the rest.
+# twitch.tv is probed with a vod rather than a channel, because a channel url resolves only
+# while that channel happens to be streaming; the live path is what livegate.sh drives.
+
+megaplay.buzz|AllWish,AniKoto,Anikage|network|https://megaplay.buzz/stream/s-2/73497/sub
+vidwish.live|AllWish,AniKoto|bytecode|-
+vidtube.site|AniKoto|bytecode|-
+player.sgsgsgsr.site|AllWish|bytecode|-
+animeav1.uns.bio|Animeav1|both|https://animeav1.uns.bio/#3zq51b
+player.zilla-networks.com|Animeav1|both|https://player.zilla-networks.com/play/7601658844858539e438dceee32e7924
+voe.sx|Animeav1|network|https://voe.sx/e/bkvxsyie9vmw
+byselapuix.com|Animeav1|network|https://byselapuix.com/e/3ro7ibvu2hhi
+mega.nz|Animeav1|network|https://mega.nz/embed/MnoChCpQ#S63JRkBV3kcc90w1aQnsEMjohfR6aaIHbbY-ieNnnmc
+www.mp4upload.com|Animeav1,Anichi|both|https://www.mp4upload.com/embed-vzg4t5cfe39g.html
+flixcloud.cc|Anikage|network|https://flixcloud.cc/e/rtt4nppua1i6?v=2&autoPlay=true
+playeng.animeapps.top|Anikage|network|https://playeng.animeapps.top/b2/play2.php?id=ani4&url=21eop1web
+play.echovideo.ru|Anikage|network|https://play.echovideo.ru/embed-1/ZG083zoDDxilShLvq2P6VbNBuUMFfSiF1fZxYqvt0_YFWR97ZuqP-y16RmztaNyXccTEWQ6DJCcUExwBo0Vh0_OJ0Q9OvIB3a3Ien1btSTdAPKHIVW0iQYwiGqhipkkicWayUMI2tSlBMRLpors3Zi7JuYhe5uOkq8Q8UOb4BCBS8KOxwbmX0GDTM8r1ZyY9?v=1&asi=0&autoPlay=0&ao=0
+gn1r5n.org|Anikage|network|https://gn1r5n.org/e/3ro7ibvu2hhi
+myvidplay.com|Anikage|network|https://myvidplay.com/e/8vh47lk0yu8e?v=1&asi=0&autoPlay=0&ao=0
+youtube.com|InvidiousProvider,YoutubeProvider|bytecode|https://youtube.com/watch?v=dQw4w9WgXcQ
+www.dailymotion.com|DailymotionProvider|bytecode|https://www.dailymotion.com/embed/video/xbasduq
+archive.org|InternetArchiveProvider|bytecode|https://archive.org/details/the-release-of-the-playstation-dual-analog-and-dual-shock-controllers
+twitch.tv|TwitchProvider|bytecode|https://twitch.tv/videos/2882890564
+ok.ru|Anichi|bytecode|https://ok.ru/video/14440854325803
+streamwish.to|Anichi|bytecode|https://streamwish.to/e/7wklr8vnruue
+strwish.com|Anichi|bytecode|https://strwish.com/e/7wklr8vnruue
+hlswish.com|Anichi|bytecode|https://hlswish.com/e/7wklr8vnruue
+flaswish.com|Anichi|bytecode|https://flaswish.com/e/dxb7r6b4rr3t
+swiftplayers.com|Anichi|bytecode|https://swiftplayers.com/e/7wklr8vnruue
+filemoon.sx|Anichi|bytecode|https://filemoon.sx/e/3ro7ibvu2hhi
+filemoon.to|Anichi|bytecode|https://filemoon.to/e/3ro7ibvu2hhi
+filemoon.in|Anichi|bytecode|https://filemoon.in/e/3ro7ibvu2hhi
+streamsb.net|Anichi|bytecode|-
+streamlare.com|Anichi|bytecode|-
+videobin.co|Anichi|bytecode|-
+dood.to|Anichi|bytecode|https://dood.to/e/8vh47lk0yu8e
+mkissa.to|Anichi|bytecode|-
+bysekoze.com|Anichi|bytecode|https://bysekoze.com/e/3ro7ibvu2hhi
+bysesukior.com|Anichi|bytecode|https://bysesukior.com/e/3ro7ibvu2hhi
+bysevepoin.com|Anichi|bytecode|https://bysevepoin.com/e/3ro7ibvu2hhi
+bysewihe.com|Anichi|bytecode|https://bysewihe.com/e/3ro7ibvu2hhi
+bysezejataos.com|Anichi|bytecode|https://bysezejataos.com/e/3ro7ibvu2hhi
+allanime.uns.bio|Anichi|bytecode|-
+watchanime.uns.bio|Anichi|bytecode|-

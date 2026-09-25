@@ -9,7 +9,9 @@ import musicCast from "./music-cast";
 import musicAudio from "./music-audio";
 import musicNowPlaying from "./music-now-playing";
 import musicQuality from "./music-quality";
+import musicSimilar from "./music-similar";
 import musicPlaylists from "./music-playlists";
+import musicPossible from "./music-possible";
 const music: Record<string, string> = {
   ...musicListeningLab,
   ...musicBillboard,
@@ -26,7 +28,9 @@ const music: Record<string, string> = {
   "music.search.resultCount": "{count} résultats",
   "music.transport.shuffle": "Lecture aléatoire",
   ...musicQuality,
+  ...musicSimilar,
   ...musicPlaylists,
+  ...musicPossible,
   ...musicNowPlaying,
   ...musicVideos,
   ...musicSpotifyLibrary,

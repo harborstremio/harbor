@@ -24,6 +24,13 @@ test("sub-pixel noise is not treated as a gap", () => {
   assert.equal(viewportBottomGap(900, 899.7, 0), 0);
 });
 
+test("a fractional ui zoom never lifts the dock", () => {
+  assert.equal(viewportBottomGap(900, 899.0, 0), 0);
+  assert.equal(viewportBottomGap(900, 898.2, 0), 0);
+  assert.equal(viewportBottomGap(829, 828.47, 0), 0);
+  assert.equal(viewportBottomGap(900, 877, 0), 0);
+});
+
 test("nonsense measurements are survivable", () => {
   assert.equal(viewportBottomGap(Number.NaN, 700, 0), 0);
   assert.equal(viewportBottomGap(900, Number.NaN, 0), 0);
@@ -37,9 +44,13 @@ test("the dock anchors to the visual viewport, not the layout viewport", () => {
   const dock = readFileSync("src/components/music/music-dock.tsx", "utf8");
   assert.ok(dock.includes("trackViewportBottom()"), "the tracker must be installed");
   assert.equal(
-    (dock.match(/var\(--harbor-viewport-bottom, 0px\)/g) ?? []).length,
+    (dock.match(/bottom: "var\(--harbor-viewport-bottom, 0px\)"/g) ?? []).length,
     2,
     "both the dock and its collapsed tab must anchor",
+  );
+  assert.ok(
+    dock.includes("--harbor-dock-gap"),
+    "the dock must publish a composite gap for everything else to clear",
   );
 });
 

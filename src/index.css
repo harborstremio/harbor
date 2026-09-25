@@ -4720,7 +4720,7 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
   overflow-x: hidden;
   overflow-y: auto;
   background: var(--color-canvas);
-  padding-block: 8px calc(48px + var(--harbor-music-dock, 0px));
+  padding-block: 8px calc(48px + var(--harbor-dock-gap, 0px));
   padding-inline: var(--hset-pad-inline);
   scroll-padding-block: 16px;
 }
@@ -4735,8 +4735,8 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
 }
 
 .hset-main:has(.hset-footer) {
-  padding-block-end: var(--harbor-music-dock, 0px);
-  scroll-padding-block-end: calc(var(--hset-footer-h) + 16px + var(--harbor-music-dock, 0px));
+  padding-block-end: var(--harbor-dock-gap, 0px);
+  scroll-padding-block-end: calc(var(--hset-footer-h) + 16px + var(--harbor-dock-gap, 0px));
 }
 
 .hset-main[data-hset-wide] {
@@ -5271,7 +5271,7 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
 
 .hset-footer {
   position: sticky;
-  inset-block-end: var(--harbor-music-dock, 0px);
+  inset-block-end: var(--harbor-dock-gap, 0px);
   z-index: 5;
   display: flex;
   align-items: center;
@@ -6437,7 +6437,7 @@ textarea.hset-field {
   gap: 0;
   inline-size: 100%;
   min-block-size: 0;
-  padding: 0 0 calc(16px + var(--harbor-music-dock, 0px));
+  padding: 0 0 calc(16px + var(--harbor-dock-gap, 0px));
   background: var(--hset-sidebar-bg);
   overflow: hidden;
 }

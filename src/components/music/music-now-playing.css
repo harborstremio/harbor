@@ -1,8 +1,10 @@
 .music-now-playing {
   position: fixed;
-  inset-block: 0 var(--harbor-music-dock, 76px);
+  inset-block: 0 var(--harbor-dock-gap, 76px);
   inset-inline-end: 0;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   overscroll-behavior: contain;
   padding: 72px clamp(20px, 3.8vw, 72px) 32px;
   background: var(--color-canvas);
@@ -27,6 +29,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  width: 100%;
+  flex: none;
   max-width: 1380px;
   margin: 0 auto 30px;
 }
@@ -71,7 +75,9 @@
   align-items: center;
   gap: clamp(32px, 5vw, 88px);
   max-width: 1240px;
-  min-height: calc(100% - 90px);
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
   margin: 0 auto;
 }
 .music-now-art-column {
@@ -101,6 +107,14 @@
 }
 .music-now-content {
   min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.music-now-art-column {
+  min-height: 0;
 }
 .music-now-source {
   display: flex;
@@ -218,11 +232,12 @@
   background: var(--color-elevated);
 }
 .music-now-panel {
-  min-height: 240px;
+  min-height: 0;
   padding-top: 8px;
   max-height: clamp(300px, 40vh, 470px);
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 .music-now-search-slot {
   display: flex;
@@ -249,6 +264,7 @@
   border-radius: 7px;
   padding: 8px;
 }
+.music-now-next-list li[data-menu-open],
 .music-now-next-list li:hover {
   background: var(--color-elevated);
 }
@@ -585,7 +601,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 2px 0 10px;
+  padding: 2px 12px 10px 0;
   color: var(--color-ink-subtle);
   font-size: 12px;
 }

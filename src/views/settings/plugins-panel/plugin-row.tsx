@@ -117,6 +117,7 @@ export function PluginRow({
             <span className="min-w-0">{plugin.name}</span>
             {plugin.nsfw && <Chip>18+</Chip>}
             {plugin.format === "provider-script" && <Chip>{t("Script")}</Chip>}
+            {plugin.format === "android-extension" && <Chip>{t("Android")}</Chip>}
             {plugin.verified && <Chip accent>{t("Verified")}</Chip>}
           </RowTitle>
           <RowDesc accent={!!copy.lock}>{copy.lock ?? sub}</RowDesc>

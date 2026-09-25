@@ -24,6 +24,7 @@ import { MusicQualityBadge } from "@/components/music/music-quality-badge";
 import { MusicReleaseMetadata } from "@/components/music/music-release-metadata";
 import { MusicArtistOverview, MusicWhereToBuy } from "@/components/music/music-artist-overview";
 import { MusicArtistLink } from "@/components/music/music-artist-link";
+import { useMusicTrackContextMenu } from "@/components/music/music-track-menu";
 import {
   MusicArtistPlaylistNote,
   MusicTrackPlaylistChip,
@@ -116,6 +117,12 @@ export function MusicDetail({
   const language = useUiLanguage();
   const [artistImage, setArtistImage] = useState<string | null>(null);
   const { item, tracks, loading, error } = detail;
+  const heroTrack = item.kind === "track" ? item : null;
+  const heroMenu = useMusicTrackContextMenu(heroTrack, {
+    onPlay: heroTrack ? () => onPlay(heroTrack, [heroTrack]) : undefined,
+    onAddToQueue: heroTrack ? () => enqueueMusic(heroTrack) : undefined,
+    onGoToArtist: heroTrack ? () => onArtistSearch(heroTrack.artist) : undefined,
+  });
   const trackNumbers = useMemo(
     () => new Map(tracks.map((track, index) => [track, index + 1])),
     [tracks],
@@ -219,7 +226,9 @@ export function MusicDetail({
         {t("music.watch.back")}
       </button>
       <header className="music-detail-hero">
+        {heroMenu.menu}
         <div
+          onContextMenu={heroMenu.onContextMenu}
           className={`music-detail-art grid size-48 shrink-0 place-items-center overflow-hidden bg-elevated ${item.kind === "artist" ? "rounded-full" : "rounded-lg"}`}
         >
           {heroArt ? (

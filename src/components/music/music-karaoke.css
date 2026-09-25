@@ -3,7 +3,7 @@
   inset-block-start: 0;
   inset-inline: 0;
   height: 100%;
-  max-height: calc(100dvh - var(--harbor-music-dock, 76px));
+  max-height: calc(100dvh - var(--harbor-dock-gap, 76px));
   z-index: 120;
   display: flex;
   flex-direction: column;

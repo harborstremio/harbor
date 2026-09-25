@@ -28,6 +28,7 @@ import { MusicYouTube } from "@/components/music/music-youtube";
 import { MusicPlaylistPickerProvider } from "@/components/music/music-playlist-picker";
 import { MusicWatch } from "@/components/music/music-watch";
 import { MusicVideoDiscovery } from "@/components/music/music-video-discovery";
+import { MusicSimilarPage } from "./music/music-similar-page";
 import {
   MUSIC_EXPLORE_EVENT,
   MUSIC_GENRE_EVENT,
@@ -72,6 +73,7 @@ import {
 import type { MusicCatalogItem, MusicSearchResults, MusicTrack } from "@/lib/music/types";
 import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
 import { useScrollMemory } from "@/lib/view";
+import { resetMusicScroll, useMusicScrollContinuity } from "@/lib/music/scroll-continuity";
 import { pushBackHandler } from "@/lib/back-intercept";
 import { MusicBandStack } from "./music/music-band-stack";
 import { gateBand, scrobbleShelf } from "./music/music-band-gates";
@@ -162,14 +164,10 @@ function MusicViewContent({
   >(null);
   const [billboardChart, setBillboardChart] = useState("hot-100");
   const [videoQuery, setVideoQuery] = useState("music videos");
-  const discoveryOrigin = useRef<{ top: number; text: string | null } | null>(null);
+  const discoveryOrigin = useRef<{ text: string | null } | null>(null);
   const openDiscovery = (page: "tastes" | "playlists" | "videos" | "billboard") => {
-    discoveryOrigin.current = {
-      top: scrollRef.current?.scrollTop ?? 0,
-      text: document.activeElement?.textContent ?? null,
-    };
+    discoveryOrigin.current = { text: document.activeElement?.textContent ?? null };
     setDiscoveryPage(page);
-    scrollRef.current?.scrollTo({ top: 0 });
   };
   const openBillboard = (chartId = "hot-100") => {
     setBillboardChart(chartId);
@@ -179,30 +177,22 @@ function MusicViewContent({
     setDiscoveryPage(null);
     const origin = discoveryOrigin.current;
     requestAnimationFrame(() => {
-      if (scrollRef.current) scrollRef.current.scrollTop = origin?.top ?? 0;
       [...(scrollRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? [])]
         .find((button) => button.textContent === origin?.text)
         ?.focus({ preventScroll: true });
     });
   }, []);
-  const connectionOrigin = useRef<{
-    scroll: number;
-    label: string | null;
-    text: string | null;
-  } | null>(null);
+  const connectionOrigin = useRef<{ label: string | null; text: string | null } | null>(null);
   useEffect(() => {
     if (connectionsPage) {
       connectionOrigin.current ??= {
-        scroll: scrollRef.current?.scrollTop ?? 0,
         label: connectionsPage.originLabel ?? null,
         text: connectionsPage.originText ?? null,
       };
-      scrollRef.current?.scrollTo({ top: 0 });
     } else if (connectionOrigin.current) {
       const origin = connectionOrigin.current;
       connectionOrigin.current = null;
       requestAnimationFrame(() => {
-        if (scrollRef.current) scrollRef.current.scrollTop = origin.scroll;
         const buttons = [
           ...(scrollRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? []),
           ...document.querySelectorAll<HTMLButtonElement>("[data-music-dock] button"),
@@ -226,13 +216,14 @@ function MusicViewContent({
   const [searching, setSearching] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [watch, setWatch] = useState<{ track: MusicTrack; queue: MusicTrack[] } | null>(null);
+  const [similar, setSimilar] = useState<{ seed: MusicTrack; tracks: MusicTrack[] } | null>(null);
   const watchFromVideos = useRef(false);
   const openVideo = (track: MusicTrack, queue: MusicTrack[]) => {
     watchFromVideos.current = discoveryPage === "videos";
     if (watchFromVideos.current) setDiscoveryPage(null);
     setWatch({ track, queue });
-    scrollRef.current?.scrollTo({ top: 0 });
   };
+  const closeSimilar = useCallback(() => setSimilar(null), []);
   const closeWatch = () => {
     setWatch(null);
     if (watchFromVideos.current) {
@@ -276,12 +267,7 @@ function MusicViewContent({
   }, []);
   const searchOrigin = useRef<MusicDetailState | null>(null);
   const detailTrail = useRef<
-    Array<{
-      detail: MusicDetailState | null;
-      scroll: number;
-      label: string | null;
-      text: string | null;
-    }>
+    Array<{ detail: MusicDetailState | null; label: string | null; text: string | null }>
   >([]);
   const closeDetail = useCallback(() => {
     resolveGeneration.current += 1;
@@ -291,7 +277,6 @@ function MusicViewContent({
     setDetail(restored ? { ...restored, loadingMore: false, releasesLoadingMore: false } : null);
     if (restored) loadPendingDetail(restored, resolveGeneration.current);
     requestAnimationFrame(() => {
-      if (scrollRef.current) scrollRef.current.scrollTop = previous?.scroll ?? 0;
       const buttons = [...(scrollRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? [])];
       const trigger = buttons.find((button) =>
         previous?.label
@@ -313,6 +298,7 @@ function MusicViewContent({
     const generation = ++searchGeneration.current;
     if (detailRef.current) searchOrigin.current = detailRef.current;
     setDetail(null);
+    setSimilar(null);
     if (!searchOrigin.current) detailTrail.current = [];
     resolveGeneration.current += 1;
     setNotice(null);
@@ -338,9 +324,9 @@ function MusicViewContent({
     setDetail(null);
     if (!searchOrigin.current) detailTrail.current = [];
     resolveGeneration.current += 1;
+    setSimilar(null);
     setSearch({ query: name, connector: null, results: null, error: "", mode: "genre" });
     setSearching(true);
-    scrollRef.current?.scrollTo({ top: 0 });
     searchTyped(name, 36, undefined)
       .then((results) => {
         if (searchGeneration.current !== generation) return;
@@ -387,7 +373,7 @@ function MusicViewContent({
     active &&
       discoveryPage !== null &&
       !connectionsPage &&
-      (discoveryPage === "videos" || (!detail && !search && !watch && !ytm)),
+      (discoveryPage === "videos" || (!detail && !search && !watch && !ytm && !similar)),
   );
   useMusicPageEscape(
     clearSearch,
@@ -396,6 +382,7 @@ function MusicViewContent({
       !connectionsPage &&
       search !== null &&
       detail === null &&
+      similar === null &&
       watch === null &&
       !ytm,
   );
@@ -405,6 +392,7 @@ function MusicViewContent({
       discoveryPage !== "videos" &&
       !connectionsPage &&
       detail !== null &&
+      similar === null &&
       watch === null &&
       !ytm,
   );
@@ -414,6 +402,15 @@ function MusicViewContent({
     active && discoveryPage !== "videos" && !connectionsPage && watch !== null && !ytm,
   );
   useMusicPageEscape(
+    closeSimilar,
+    active &&
+      discoveryPage !== "videos" &&
+      !connectionsPage &&
+      similar !== null &&
+      watch === null &&
+      !ytm,
+  );
+  useMusicPageEscape(
     () => setGenre(null),
     active &&
       tab === "explore" &&
@@ -421,6 +418,7 @@ function MusicViewContent({
       !connectionsPage &&
       !search &&
       !detail &&
+      !similar &&
       !watch &&
       !ytm,
   );
@@ -432,15 +430,36 @@ function MusicViewContent({
         ? closeYtm
         : watch
           ? closeWatch
-          : detail
-            ? closeDetail
-            : search
-              ? clearSearch
-              : discoveryPage
-                ? closeDiscovery
-                : tab === "explore" && genre !== null
-                  ? () => setGenre(null)
-                  : undefined;
+          : similar
+            ? closeSimilar
+            : detail
+              ? closeDetail
+              : search
+                ? clearSearch
+                : discoveryPage
+                  ? closeDiscovery
+                  : tab === "explore" && genre !== null
+                    ? () => setGenre(null)
+                    : undefined;
+
+  const layerKey = connectionsPage
+    ? `connections:${connectionsPage.focusId ?? "all"}`
+    : discoveryPage === "videos"
+      ? `videos:${videoQuery}`
+      : ytm
+        ? "ytm"
+        : watch
+          ? "watch"
+          : similar
+            ? `similar:${similar.seed.id}`
+            : detail
+              ? `detail:${detailTrail.current.length}|${detail.item.kind}:${detail.item.id}`
+              : search
+                ? `search:${search.mode ?? "search"}:${search.query}`
+                : discoveryPage
+                  ? `discovery:${discoveryPage}`
+                  : `tab:${tab}`;
+  useMusicScrollContinuity(scrollRef, layerKey);
 
   const retry = useCallback(() => {
     reloadConnections();
@@ -456,6 +475,7 @@ function MusicViewContent({
 
   const openItem = useCallback(
     (item: MusicCatalogItem, _siblings: MusicCatalogItem[], remember = true) => {
+      setSimilar(null);
       if (item.kind === "track" && item.mediaKind === "video") {
         watchFromVideos.current = false;
         setDiscoveryPage(null);
@@ -464,19 +484,16 @@ function MusicViewContent({
             entry.kind === "track" && entry.mediaKind === "video",
         );
         setWatch({ track: item, queue: queue.length ? queue : [item] });
-        scrollRef.current?.scrollTo({ top: 0 });
         return;
       }
       if (remember) {
         const trigger = document.activeElement;
         detailTrail.current.push({
           detail: detailRef.current,
-          scroll: scrollRef.current?.scrollTop ?? 0,
           label: trigger?.getAttribute("aria-label") ?? null,
           text: trigger?.textContent ?? null,
         });
       }
-      scrollRef.current?.scrollTo({ top: 0 });
       const generation = ++resolveGeneration.current;
       const view =
         !remember && detailRef.current?.item.id === item.id ? detailRef.current.view : undefined;
@@ -616,6 +633,7 @@ function MusicViewContent({
       searchGeneration.current += 1;
       if (detailRef.current) searchOrigin.current = detailRef.current;
       setDetail(null);
+      setSimilar(null);
       setSearching(false);
       setSearch({ query, connector: null, results, error, retry });
     },
@@ -692,6 +710,7 @@ function MusicViewContent({
             if (generation !== resolveGeneration.current) return;
             setWatch(null);
             setYtm(false);
+            setSimilar(null);
             setDiscoveryPage(null);
             setNotice(null);
             if (ranking.canonical && !(ranking.ambiguous && ranking.clusters.length > 1))
@@ -710,6 +729,7 @@ function MusicViewContent({
             if (generation !== resolveGeneration.current) return;
             setNotice(null);
             setWatch(null);
+            setSimilar(null);
             setDiscoveryPage(null);
             void ladderSearch({ artist: name }, name);
           });
@@ -717,6 +737,7 @@ function MusicViewContent({
       goToAlbum: (album: string, artist: string, track?: MusicTrack) => {
         setWatch(null);
         setYtm(false);
+        setSimilar(null);
         setDiscoveryPage(null);
         const typed = `${album} ${artist}`.trim();
         void ladderSearch({ title: track?.title, artist, album }, typed, (results, rung) => {
@@ -772,8 +793,8 @@ function MusicViewContent({
         setYtm(false);
         setGenre(null);
         setTab("forYou");
+        resetMusicScroll();
         requestAnimationFrame(() => {
-          scrollRef.current?.scrollTo({ top: 0 });
           scrollRef.current
             ?.querySelector<HTMLHeadingElement>("h1")
             ?.focus({ preventScroll: true });
@@ -781,6 +802,16 @@ function MusicViewContent({
         return;
       }
       closeConnections();
+      if (request.kind === "similar") {
+        setWatch(null);
+        setYtm(false);
+        setDiscoveryPage(null);
+        setSimilar({
+          seed: request.track,
+          tracks: request.queue?.length ? request.queue : [request.track],
+        });
+        return;
+      }
       if (request.kind === "watch") {
         watchFromVideos.current = false;
         setDiscoveryPage(null);
@@ -788,11 +819,11 @@ function MusicViewContent({
           track: request.track,
           queue: request.queue?.length ? request.queue : [request.track],
         });
-        scrollRef.current?.scrollTo({ top: 0 });
       } else if (request.kind === "artist") {
         if (request.artist) {
           setWatch(null);
           setYtm(false);
+          setSimilar(null);
           setDiscoveryPage(null);
           openItem({ ...request.artist, kind: "artist" }, []);
         } else navigate.goToArtist(request.track.artist, request.track);
@@ -810,9 +841,8 @@ function MusicViewContent({
           );
       } else {
         setVideoQuery(`${request.track.artist} ${request.track.title}`);
-        discoveryOrigin.current = { top: scrollRef.current?.scrollTop ?? 0, text: null };
+        discoveryOrigin.current = { text: null };
         setDiscoveryPage("videos");
-        scrollRef.current?.scrollTo({ top: 0 });
       }
     };
     window.addEventListener(MUSIC_EXPLORE_EVENT, receive);
@@ -831,7 +861,6 @@ function MusicViewContent({
       setNotice(null);
       setTab("forYou");
       runSearch(query, null);
-      requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0 }));
     };
     window.addEventListener(MUSIC_SEARCH_EVENT, receive);
     receive();
@@ -906,6 +935,7 @@ function MusicViewContent({
       render: () => <MusicSectionError onRetry={tasteRows.retry} />,
     });
   if (personal.recents) bands.push(personal.recents);
+  if (personal.recentContexts) bands.push(personal.recentContexts);
   if (slots.server.length) bands.push(...catalog.server);
   if (data.homeStatus !== "ready" || slots.newReleases.length) bands.push(catalog.newReleases);
   if (personal.fresh) bands.push(personal.fresh);
@@ -1030,6 +1060,8 @@ function MusicViewContent({
                 queue={watch.queue}
                 onClose={closeWatch}
               />
+            ) : similar ? (
+              <MusicSimilarPage seed={similar.seed} tracks={similar.tracks} onBack={closeSimilar} />
             ) : detail ? (
               <MusicDetail
                 onVideo={openVideo}
@@ -1080,12 +1112,12 @@ function MusicViewContent({
                 onChartChange={setBillboardChart}
               />
             ) : null}
-            {(!(connectionsPage || ytm || watch || detail || search || discoveryPage) ||
+            {(!(connectionsPage || ytm || watch || similar || detail || search || discoveryPage) ||
               tab === "library") && (
               <div
                 style={{
                   display:
-                    connectionsPage || ytm || watch || detail || search || discoveryPage
+                    connectionsPage || ytm || watch || similar || detail || search || discoveryPage
                       ? "none"
                       : "contents",
                 }}
@@ -1143,7 +1175,15 @@ function MusicViewContent({
                     <MusicLibrary
                       active={
                         active &&
-                        !(connectionsPage || ytm || watch || detail || search || discoveryPage)
+                        !(
+                          connectionsPage ||
+                          ytm ||
+                          watch ||
+                          similar ||
+                          detail ||
+                          search ||
+                          discoveryPage
+                        )
                       }
                       onOpen={openItem}
                       initialView={libraryTarget?.view}

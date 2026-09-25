@@ -2,11 +2,9 @@ import { isMusicLiked } from "@/lib/music/liked";
 import { artistCreditParts } from "@/lib/music/search-artists";
 import { MusicArtistLink } from "./music-artist-link";
 import { MusicDownloadButton } from "./music-download-button";
-import { MusicTrackLabels } from "./music-track-labels";
 import { MusicListeningDetails } from "./music-listening-details";
 import { useRecordingProfile } from "@/lib/music/use-recording-profile";
 import type { MusicArtistRef, MusicTrack } from "@/lib/music/types";
-import { MusicMediaBadge } from "./music-media-badge";
 import {
   type CSSProperties,
   type RefObject,
@@ -27,7 +25,6 @@ import {
   Maximize,
   Mic2,
   Palette,
-  Play,
   Search,
   SlidersHorizontal,
   Speaker,
@@ -37,6 +34,7 @@ import {
 import { Poster } from "@/components/poster";
 import { useMusicTrackContextMenu } from "./music-track-menu";
 import { useUpNextSuggestions } from "@/lib/music/up-next";
+import { MusicUpNextRow } from "./music-up-next-row";
 import { MusicVideoSurface } from "./music-video-surface";
 import { MusicVideoFullscreen } from "./music-video-fullscreen";
 import {
@@ -52,7 +50,6 @@ import { useT } from "@/lib/i18n";
 import { pushBackHandler } from "@/lib/back-intercept";
 import {
   useMusicPlayer,
-  playMusic,
   seekMusic,
   toggleMusicLiked,
   isMusicVideoActive,
@@ -285,15 +282,16 @@ export function MusicNowPlaying({
     list.scrollTo({ top, behavior: calm ? "auto" : "smooth" });
   }, [panel, activeLyric, lyricsState]);
 
+  const next = musicUpcoming(player.queue, player.queueIndex, 40);
+  const suggested = useUpNextSuggestions(current, panel === "queue" && next.length === 0);
+
   if (!current || !display) return null;
   const liked = isMusicLiked(player.likedIds, current);
   const output = speaker.active
     ? speaker.device?.name
     : outputs.find((device) => device.name === audio.settings.device)?.description;
-  const next = musicUpcoming(player.queue, player.queueIndex, 40);
-  const suggested = useUpNextSuggestions(current, panel === "queue" && next.length === 0);
   const upNext = next.length ? next : suggested.tracks;
-  const upNextQueue = next.length || !current ? player.queue : [current, ...suggested.tracks];
+  const upNextQueue = next.length ? player.queue : [current, ...suggested.tracks];
 
   return (
     <>
@@ -631,45 +629,12 @@ export function MusicNowPlaying({
                     {upNext.length ? (
                       <ol className="music-now-next-list">
                         {upNext.map((track, index) => (
-                          <li key={`${track.connectorId}:${track.id}:${index}`}>
-                            <button
-                              type="button"
-                              className="music-now-next-art"
-                              onClick={() => void playMusic(track, upNextQueue).catch(() => {})}
-                              aria-label={t("music.playTrack", {
-                                title: track.title,
-                                artist: track.artist,
-                              })}
-                            >
-                              <Poster
-                                src={track.artwork}
-                                seed={track.id}
-                                ratio="square"
-                                className="w-full [--poster-radius:0px]"
-                                lazy
-                              />
-                            </button>
-                            <span className="music-now-next-title">
-                              <button
-                                type="button"
-                                onClick={() => void playMusic(track, upNextQueue).catch(() => {})}
-                              >
-                                <strong>{track.title}</strong>
-                              </button>
-                              <span className="flex items-center gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => onExplore("artist", undefined, track)}
-                                >
-                                  {track.artist}
-                                </button>
-                                <MusicMediaBadge kind={track.mediaKind} compact />
-                                <MusicTrackLabels track={track} />
-                              </span>
-                            </span>
-                            <span className="music-now-next-time">{track.durationLabel}</span>
-                            <Play size={15} aria-hidden="true" />
-                          </li>
+                          <MusicUpNextRow
+                            key={`${track.connectorId}:${track.id}:${index}`}
+                            track={track}
+                            queue={upNextQueue}
+                            onArtist={() => onExplore("artist", undefined, track)}
+                          />
                         ))}
                       </ol>
                     ) : (

@@ -5,6 +5,7 @@ export type ParsedStreamRepo = {
   homepage?: string;
   format: StreamPluginFormat;
   entries: StreamRepoEntry[];
+  lists?: string[];
 };
 
 export function splitRepoLinks(text: string): string[] {
@@ -35,6 +36,7 @@ function rewriteGithub(u: URL): URL {
 export function normalizeRepoUrl(raw: string): string {
   let text = raw.trim();
   if (!text) throw new PluginError("only-https");
+  if (/^cloudstreamrepo:\/\//i.test(text)) throw new PluginError("android-extensions");
   if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(text)) text = "https://" + text;
   let u: URL;
   try {
@@ -207,6 +209,92 @@ function providerEntry(v: unknown, manifestUrl: string): StreamRepoEntry | null 
   };
 }
 
+const NATIVE_MOVIE_TYPES = new Set(["movie", "animemovie", "documentary", "torrent"]);
+const NATIVE_SERIES_TYPES = new Set(["tvseries", "anime", "ova", "cartoon", "asiandrama"]);
+const NATIVE_STATUS: Record<number, string> = { 0: "down", 2: "slow", 3: "beta" };
+
+function nativeTypes(tvTypes: string[]): string[] {
+  const out = new Set<string>();
+  for (const t of tvTypes) {
+    const key = t.toLowerCase().replace(/[^a-z]/g, "");
+    if (NATIVE_MOVIE_TYPES.has(key)) out.add("movie");
+    if (NATIVE_SERIES_TYPES.has(key)) out.add("series");
+  }
+  return out.size ? [...out] : ["movie", "series"];
+}
+
+function nativeNote(status: number, apiVersion: number | null): string | undefined {
+  const bits: string[] = [];
+  if (NATIVE_STATUS[status]) bits.push(NATIVE_STATUS[status]);
+  if (apiVersion != null && apiVersion !== 1) bits.push(`api ${apiVersion}`);
+  return bits.length ? bits.join(" · ") : undefined;
+}
+
+function nativeEntry(v: unknown, listUrl: string): StreamRepoEntry | null {
+  if (!v || typeof v !== "object") return null;
+  const o = v as Record<string, unknown>;
+  const file = str(o.url);
+  const entry = file ? entryUrl(file, listUrl) : null;
+  if (!entry) return null;
+  const id = str(o.internalName) || entry.replace(/^.*\//, "").replace(/\.[a-z0-9]+$/i, "");
+  if (!id) return null;
+  const status = typeof o.status === "number" ? o.status : 1;
+  const tvTypes = strList(o.tvTypes);
+  const authors = strList(o.authors);
+  return {
+    id,
+    name: str(o.name) || id,
+    version: typeof o.version === "number" ? String(o.version) : str(o.version, "0") || "0",
+    entry,
+    icon: str(o.iconUrl) || undefined,
+    description: str(o.description) || undefined,
+    author: authors.length ? authors.join(", ") : undefined,
+    lang: strList(o.language),
+    types: nativeTypes(tvTypes),
+    idPrefixes: ["tt", "tmdb:"],
+    hosts: [],
+    settings: false,
+    nsfw: tvTypes.some((t) => t.toLowerCase() === "nsfw"),
+    enabled: status !== 0,
+    format: "android-extension",
+    note: nativeNote(status, typeof o.apiVersion === "number" ? o.apiVersion : null),
+  };
+}
+
+export function androidExtensionListUrls(
+  json: Record<string, unknown>,
+  manifestUrl: string,
+): string[] {
+  const out: string[] = [];
+  for (const v of Array.isArray(json.pluginLists) ? json.pluginLists : []) {
+    const raw =
+      typeof v === "string"
+        ? v
+        : v && typeof v === "object"
+          ? str((v as Record<string, unknown>).url)
+          : "";
+    const url = raw ? entryUrl(raw, manifestUrl) : null;
+    if (url && !out.includes(url)) out.push(url);
+  }
+  return out;
+}
+
+export function parseAndroidExtensionList(parsed: unknown, listUrl: string): StreamRepoEntry[] {
+  const json = (
+    parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {}
+  ) as Record<string, unknown>;
+  const arr = Array.isArray(parsed) ? parsed : Array.isArray(json.plugins) ? json.plugins : [];
+  const out: StreamRepoEntry[] = [];
+  const seen = new Set<string>();
+  for (const v of arr) {
+    const entry = nativeEntry(v, listUrl);
+    if (!entry || seen.has(entry.id)) continue;
+    seen.add(entry.id);
+    out.push(entry);
+  }
+  return out;
+}
+
 export function looksLikeAndroidExtensionRepo(
   json: Record<string, unknown>,
   parsed: unknown,
@@ -272,6 +360,16 @@ export function parseStreamRepoManifest(parsed: unknown, manifestUrl: string): P
       entries,
     };
   }
+  if (looksLikeAndroidExtensionRepo(json, parsed)) {
+    const lists = androidExtensionListUrls(json, manifestUrl);
+    return {
+      name: repoTitle(str(json.name), manifestUrl),
+      homepage: str(json.homepage) || undefined,
+      format: "android-extension",
+      entries: lists.length ? [] : parseAndroidExtensionList(parsed, manifestUrl),
+      lists,
+    };
+  }
   if (Array.isArray(json.plugins)) {
     const type = str(json.type);
     if (type && type !== "stream")
@@ -286,7 +384,6 @@ export function parseStreamRepoManifest(parsed: unknown, manifestUrl: string): P
       entries,
     };
   }
-  if (looksLikeAndroidExtensionRepo(json, parsed)) throw new PluginError("android-extensions");
   if (looksLikeStremioAddon(json)) throw new PluginError("stremio-addon");
   if (looksLikeMangaRepo(json, parsed)) throw new PluginError("manga-repo");
   throw new PluginError("not-a-repo");

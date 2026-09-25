@@ -145,11 +145,11 @@ export function MusicVideoSurface({
     onShowing?.(showing);
     return () => onShowing?.(false);
   }, [onShowing, showing]);
-  // The picture is a module-level element, so taking it over is a re-parent. Fullscreen is just
-  // a different parent, which is what lets the watch page go fullscreen without moving its tree.
+  // The picture is a module-level element, so taking it over is a re-parent. Its home is always
+  // this surface: fullscreen carries the surface itself into the stage, so the parent never moves.
   useLayoutEffect(() => {
     if (!active || !selected) return;
-    const parent = (fullscreen ? getMusicVideoFullscreen().stage : null) ?? shell.current;
+    const parent = shell.current;
     if (!parent) return;
     return adoptMusicVideoHost(parent);
   }, [active, selected, fullscreen, key, stream]);

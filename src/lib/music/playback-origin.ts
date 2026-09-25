@@ -1,6 +1,11 @@
 import { useSyncExternalStore } from "react";
+import { musicContextArtwork, recordMusicRecentContext } from "./recent-context";
+import type { MusicTrack } from "./types";
 
-export type MusicPlaybackOrigin = { kind: "playlist"; id: string; name: string } | null;
+export type MusicPlaybackOrigin =
+  | { kind: "playlist"; id: string; name: string }
+  | { kind: "similar"; id: string; name: string }
+  | null;
 
 /**
  * Where the current queue came from, as opposed to where a track can be found. A track's
@@ -27,19 +32,51 @@ export function getMusicPlaybackOrigin(): MusicPlaybackOrigin {
 }
 
 export function recordMusicPlaylistPlayback(
-  playlist: { id: string; name: string } | null | undefined,
+  playlist: { id: string; name: string; tracks?: readonly MusicTrack[] } | null | undefined,
 ): void {
   setMusicPlaybackOrigin(
     playlist && playlist.id ? { kind: "playlist", id: playlist.id, name: playlist.name } : null,
   );
+  if (!playlist?.id) return;
+  const tracks = playlist.tracks ?? [];
+  recordMusicRecentContext(
+    {
+      kind: "playlist",
+      id: playlist.id,
+      name: playlist.name,
+      artwork: musicContextArtwork(tracks),
+    },
+    tracks,
+  );
 }
 
-export type MusicTitleTarget = { kind: "playlist"; playlistId: string } | { kind: "album" };
+export type MusicTitleTarget =
+  | { kind: "playlist"; playlistId: string }
+  | { kind: "similar"; seedId: string; name: string }
+  | { kind: "album" };
 
 export function musicTitleTarget(from: MusicPlaybackOrigin): MusicTitleTarget {
-  return from?.kind === "playlist" && from.id
-    ? { kind: "playlist", playlistId: from.id }
-    : { kind: "album" };
+  if (from?.kind === "playlist" && from.id) return { kind: "playlist", playlistId: from.id };
+  if (from?.kind === "similar" && from.id)
+    return { kind: "similar", seedId: from.id, name: from.name };
+  return { kind: "album" };
+}
+
+export function recordMusicSimilarPlayback(
+  seed: MusicTrack,
+  mix: readonly MusicTrack[] = [],
+): void {
+  setMusicPlaybackOrigin({ kind: "similar", id: seed.id, name: seed.title });
+  recordMusicRecentContext(
+    {
+      kind: "similar",
+      id: seed.id,
+      name: seed.title,
+      artwork: musicContextArtwork([seed, ...mix]),
+      seed,
+    },
+    mix,
+  );
 }
 
 export function useMusicPlaybackOrigin(): MusicPlaybackOrigin {

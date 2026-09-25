@@ -1,0 +1,23 @@
+# About 100MB of this directory is third party jars, test fixtures and build output. None of it
+# belongs in history: a binary blob committed once stays in every clone forever. tools/deps.sh
+# refetches the jars that come from Maven Central, and docs/THIRD-PARTY.md records where the rest
+# came from.
+#
+# Tracked: src/, test/, docs/, spec/, STATUS.md, and the scripts under tools/.
+
+# Build output, conversion caches, gate reports, staged test data.
+/out/
+
+# Dependency jars, compiled against and shipped inside the installer. tools/deps.sh
+/libs/
+
+# The Kotlin compiler and the Dalvik conversion tools. Used to build, never shipped.
+/tools/*.jar
+/tools/dex-tools/
+/tools/__pycache__/
+
+# Compiled output of the small Java helpers under tools/, rebuilt by the scripts that use them.
+*.class
+
+# The 13 real extension archives the gates run against, and their converted jars.
+/samples/

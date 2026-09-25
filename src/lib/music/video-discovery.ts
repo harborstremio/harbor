@@ -7,10 +7,27 @@ const pending = new Map<string, Promise<MusicTrack[]>>();
 
 const VIDEO_RESULT_CAP = 12;
 
+const NOISE =
+  /(official|video|audio|music|lyric|lyrics|visualizer|hd|hq|explicit|clean|edit|version|mv|m\/v|prod|dir)/g;
+
+/** Re-uploads of one song differ only by marketing words, so they collapse to a single entry. */
+export function musicVideoIdentity(title: string, artist: string): string {
+  const strip = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[\(\[][^\)\]]*[\)\]]/g, " ")
+      .replace(/(feat|ft|featuring|with)[^-]*/g, " ")
+      .replace(NOISE, " ")
+      .replace(/[^\p{L}\p{N}]+/gu, " ")
+      .trim();
+  return `${strip(title)}|${strip(artist)}`;
+}
+
 /** Only accepts exact YouTube identities returned by the native video-only endpoint. */
 export function musicVideoResults(value: unknown, cap = VIDEO_RESULT_CAP): MusicTrack[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
+  const songs = new Set<string>();
   return value
     .filter((track): track is MusicTrack => {
       if (
@@ -29,7 +46,10 @@ export function musicVideoResults(value: unknown, cap = VIDEO_RESULT_CAP): Music
         seen.has(track.sourceId)
       )
         return false;
+      const identity = musicVideoIdentity(track.title, track.artist);
+      if (identity.length > 1 && songs.has(identity)) return false;
       seen.add(track.sourceId);
+      songs.add(identity);
       return true;
     })
     .slice(0, cap)

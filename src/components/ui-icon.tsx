@@ -28,6 +28,7 @@ import resumePlayback from "@/assets/ui-icons/resume-playback.svg?raw";
 import copyImage from "@/assets/ui-icons/copy-image.svg?raw";
 import addTo from "@/assets/ui-icons/add-to.svg?raw";
 import continueLastWatched from "@/assets/ui-icons/continue-last-watched.svg?raw";
+import moreLikeThis from "@/assets/ui-icons/more-like-this.svg?raw";
 
 // These SVGs ship as solid #fff glyphs on a transparent canvas. Inline them and
 // swap the hardcoded white for currentColor so they tint like the lucide icons
@@ -71,6 +72,7 @@ const ICONS = {
   "copy-image": prep(copyImage),
   "add-to": prep(addTo),
   "continue-last-watched": prep(continueLastWatched),
+  "more-like-this": prep(moreLikeThis),
 } as const;
 
 export type UiIconName = keyof typeof ICONS;

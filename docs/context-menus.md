@@ -34,7 +34,9 @@ Reuse the shared menu surface for layering and interaction. Commands are availab
 
 ## Integration with the official beta baseline
 
-This contribution is based on official 0.9.127 commit `770ca0bd4beec9584494bf5059e2314008c6bd41`. It retains upstream dependency versions, routing and playback generations, music/sports navigation, manga stores and source handling, and profile-authentication refresh. The additional development dependency is `jsdom` for actual React/DOM interaction tests.
+This contribution integrates official 0.9.127 through `e28bc25df122ef5b6a5b102a8ecc369ddb2d11fe`. It retains upstream dependency versions, routing and playback generations, music/sports navigation, manga stores and source handling, profile-authentication refresh, and the Capstan integration. The additional development dependency is `jsdom` for actual React/DOM interaction tests.
+
+The independent Windows evaluation binary at contribution commit `203997fa3d0b21e9914ad7b39d9a830d0630fd7d` was built and tested on the preceding official base `770ca0bd4beec9584494bf5059e2314008c6bd41`. It does not include the subsequent Capstan update. Build and runtime verification must identify the source commit; that earlier binary is not evidence of a successful native build of the later merge.
 
 The Node loader supports the same SVG and stylesheet import boundaries used by those tests. DOM tests do not establish visual rendering or native clipboard/file behavior; those require browser and native verification respectively.
 

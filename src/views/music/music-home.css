@@ -287,9 +287,10 @@
 }
 .music-hero-video {
   position: absolute;
-  inset: 0;
+  inset: -1px;
   z-index: 1;
   overflow: hidden;
+  border-radius: inherit;
   opacity: 0;
   pointer-events: none;
   clip-path: inset(0 0 0 calc(100% - var(--hero-media-col, 43.5%)));
@@ -310,7 +311,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, #090c10f2 0%, #090c10c7 34%, #090c1055 62%, transparent 86%);
+  background: linear-gradient(90deg, #090c10 0%, #090c10f2 8%, #090c10c7 34%, #090c1055 62%, transparent 86%);
   opacity: 0;
   transition: opacity 560ms ease-out;
 }
@@ -545,8 +546,10 @@
 .music-quick-indicators [data-music-kind] {
   line-height: 1.4;
 }
-.music-quick-indicators [data-music-playlist-chip] {
+.music-quick-indicators [data-music-playlist-chip],
+.music-quick-indicators [data-music-mix-chip] {
   flex: 1;
+  min-width: 0;
 }
 .music-quick-grid strong,
 .music-quick-grid small {
@@ -659,3 +662,27 @@
     justify-self: start;
   }
 }
+.music-quick-item { position: relative; }
+.music-quick-remove {
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-end: 4px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--color-canvas);
+  color: var(--color-ink-muted);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease-out, color 160ms ease-out;
+}
+.music-quick-item:is(:hover, :focus-within) .music-quick-remove { opacity: 1; pointer-events: auto; }
+.music-quick-remove:is(:hover, :focus-visible) { color: var(--color-ink); }
+.music-quick-remove:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .music-quick-remove { transition: none; } }
+.music-playlist-chip { transition: color 160ms ease-out; }
+.music-playlist-chip:is(:hover, :focus-visible) { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; }
+.music-playlist-chip:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 4px; }

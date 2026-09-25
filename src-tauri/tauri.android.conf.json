@@ -18,6 +18,9 @@
   "bundle": {
     "externalBin": [],
     "fileAssociations": [],
+    "resources": {
+      "resources/capstan/": null
+    },
     "android": {
       "minSdkVersion": 24
     }
