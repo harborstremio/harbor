@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.net.ConnectivityManager
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
@@ -49,6 +50,8 @@ object PlatformHost {
     val packageManager: PackageManager by lazy { PackageManager() }
 
     val resources: Resources by lazy { Resources() }
+
+    val connectivityManager: ConnectivityManager by lazy { ConnectivityManager() }
 
     private val preferenceFiles = ConcurrentHashMap<String, SharedPreferences>()
 

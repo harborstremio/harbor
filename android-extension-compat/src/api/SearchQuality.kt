@@ -16,4 +16,7 @@ enum class SearchQuality {
     UHD,
     SDR,
     WebRip,
+    // Appended rather than grouped next to Cam: an extension asks for this by name, quality
+    // travels as that name, and keeping the existing ordinals stable costs nothing.
+    HdCam,
 }

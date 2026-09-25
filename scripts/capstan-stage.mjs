@@ -323,6 +323,11 @@ async function verifyOrDie() {
 // developer needs the layer built but not staged. Name whichever of those is missing, then let
 // the dev server start regardless.
 function devPreflight() {
+  // tauri.conf.json names resources/capstan/ unconditionally and tauri dev validates resource
+  // paths, so a missing directory stops the dev server before it starts. Git never tracks empty
+  // directories and resources/capstan/ is gitignored, so a fresh clone always lacks it: create
+  // the empty directory the bundler accepts and move on.
+  if (!existsSync(dest)) mkdirSync(dest, { recursive: true });
   const off = (...lines) => warn("extensions are off in this dev session.", ...lines);
   if (!existsSync(src)) {
     off(

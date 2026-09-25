@@ -69,6 +69,23 @@ export function extensionsSupported(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 }
 
+let warming: Promise<unknown> | null = null;
+
+/** Brings the bridge up and restores its extensions, before anything starts counting.
+ *
+ * The first call into the bridge spawns its runtime and loads every installed extension, which is
+ * measured in seconds, and every call after it is a millisecond. That is setup rather than a
+ * plugin's work, so it is paid here instead of out of a plugin's deadline: charged to the plugin,
+ * it left a slow one too little of its budget and made the first run report nothing while the
+ * second answered. A failed warm is forgotten so the next caller tries again. */
+export function warmBridge(): Promise<unknown> {
+  warming ??= invoke("capstan_ping").catch(() => {
+    warming = null;
+    return null;
+  });
+  return warming;
+}
+
 function list<T>(value: unknown, key: string): T[] {
   if (!value || typeof value !== "object") return [];
   const raw = (value as Record<string, unknown>)[key];

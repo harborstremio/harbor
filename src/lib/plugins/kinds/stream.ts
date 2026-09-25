@@ -167,14 +167,14 @@ export const streamKind: KindAdapter = {
     return p ? settingsValuesFor(p) : {};
   },
   saveSettings: saveStreamPluginSettings,
-  check: async (id) => {
+  check: async (id, timeoutMs) => {
     const p = streamPluginById(id);
     if (!p) return { count: 0, ms: 0, requests: 0, error: "missing" };
     const h = pluginHealth(id);
     const title = h?.lastTitle;
     const req = { ...SAMPLE, settings: settingsValuesFor(p) };
     if (title) req.title = title;
-    return checkStreamPlugin(p, req);
+    return checkStreamPlugin(p, req, timeoutMs);
   },
   health: pluginHealth,
   log: pluginLog,

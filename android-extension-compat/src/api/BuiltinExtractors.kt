@@ -62,6 +62,14 @@ fun builtinExtractors(): List<ExtractorApi> = listOf(
     MyVidPlay(),
     OkRu(),
 
+    // ported from upstream: hosts extensions hand to loadExtractor and expect to be answered for
+    PixelDrain(),
+    PixelDrainDev(),
+    Supervideo(),
+
+    // the link host the Hindi/English providers hand their sources to, ahead of the page readers
+    VCloud(),
+
     // sites that are their own host
     Dailymotion(),
     DailyMotionShort(),

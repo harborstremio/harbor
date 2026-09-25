@@ -7,11 +7,27 @@ rm -rf "$R/out/classes" "$R/out/capstan.jar"
 mkdir -p "$R/out/classes"
 SRC=$(find "$R/src" -name '*.kt' | sort)
 [ -n "$SRC" ] || { echo "no sources"; exit 1; }
-sh "$R/tools/kc.sh" $SRC -d "$R/out/classes"
+# A checkout can sit under a path with a space in it, and an unquoted expansion of a file list is
+# split on that space, which turns one path into several names the compiler cannot find. Read the
+# list into positional parameters a line at a time and quote "$@" at the call site. This is POSIX
+# sh, which has no arrays, and a here document keeps the loop in this shell rather than a subshell.
+set --
+while IFS= read -r f; do
+  if [ -n "$f" ]; then set -- "$@" "$f"; fi
+done <<SRC_EOF
+$SRC
+SRC_EOF
+sh "$R/tools/kc.sh" "$@" -d "$R/out/classes"
 JAVA=$(find "$R/src" -name '*.java' | sort)
 if [ -n "$JAVA" ]; then
+  set --
+  while IFS= read -r f; do
+    if [ -n "$f" ]; then set -- "$@" "$f"; fi
+  done <<JAVA_EOF
+$JAVA
+JAVA_EOF
   CP=$(for j in "$R"/libs/*.jar; do cygpath -w "$j"; done | tr '\n' ';')
-  "$JAVA_HOME/bin/javac" -nowarn -cp "$(cygpath -w "$R/out/classes");$CP" -d "$R/out/classes" $JAVA
+  "$JAVA_HOME/bin/javac" -nowarn -cp "$(cygpath -w "$R/out/classes");$CP" -d "$R/out/classes" "$@"
 fi
 # Service declarations travel with the classes they name, so they are merged in before the jar is
 # sealed rather than being a separate artifact the host would have to remember to ship.
@@ -23,7 +39,13 @@ TEST=$(ls "$R"/test/*.kt 2>/dev/null | sort)
 if [ -n "$TEST" ]; then
   rm -rf "$R/out/test-classes"
   mkdir -p "$R/out/test-classes"
+  set --
+  while IFS= read -r f; do
+    if [ -n "$f" ]; then set -- "$@" "$f"; fi
+  done <<TEST_EOF
+$TEST
+TEST_EOF
   KC_CLASSPATH="$(cygpath -w "$R/out/capstan.jar");$(for j in "$R"/libs/*.jar; do cygpath -w "$j"; done | tr '\n' ';')" \
-    sh "$R/tools/kc.sh" $TEST -d "$R/out/test-classes"
+    sh "$R/tools/kc.sh" "$@" -d "$R/out/test-classes"
 fi
 echo "BUILD ok  $(find "$R/out/classes" -name '*.class' | wc -l) classes"

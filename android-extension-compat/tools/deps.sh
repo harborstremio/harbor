@@ -29,9 +29,13 @@ maven com/fasterxml/jackson/core/jackson-core/2.17.2/jackson-core-2.17.2.jar "$R
 maven com/fasterxml/jackson/core/jackson-databind/2.17.2/jackson-databind-2.17.2.jar "$R/libs"
 maven com/fasterxml/jackson/module/jackson-module-kotlin/2.17.2/jackson-module-kotlin-2.17.2.jar "$R/libs"
 maven org/jsoup/jsoup/1.18.1/jsoup-1.18.1.jar "$R/libs"
-maven org/jetbrains/kotlin/kotlin-reflect/2.0.21/kotlin-reflect-2.0.21.jar "$R/libs"
-maven org/jetbrains/kotlin/kotlin-stdlib/2.0.21/kotlin-stdlib-2.0.21.jar "$R/libs"
-maven org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.8.1/kotlinx-coroutines-core-jvm-1.8.1.jar "$R/libs"
+maven org/jetbrains/kotlin/kotlin-reflect/2.2.20/kotlin-reflect-2.2.20.jar "$R/libs"
+maven org/jetbrains/kotlin/kotlin-stdlib/2.2.20/kotlin-stdlib-2.2.20.jar "$R/libs"
+# Extensions are built against CloudStream, which builds against current kotlinx-coroutines. A layer
+# that ships an older one loads them until the first coroutine call and then dies with
+# NoSuchMethodError: BuildersKt.runBlockingK, which only exists from 1.11.0. The version tracks what
+# the extensions are compiled against, not what is newest.
+maven org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.11.0/kotlinx-coroutines-core-jvm-1.11.0.jar "$R/libs"
 maven org/jetbrains/kotlinx/kotlinx-serialization-core-jvm/1.7.3/kotlinx-serialization-core-jvm-1.7.3.jar "$R/libs"
 maven org/jetbrains/kotlinx/kotlinx-serialization-json-jvm/1.7.3/kotlinx-serialization-json-jvm-1.7.3.jar "$R/libs"
 maven com/squareup/okhttp3/okhttp/4.12.0/okhttp-4.12.0.jar "$R/libs"
@@ -40,12 +44,12 @@ maven org/mozilla/rhino/1.8.1/rhino-1.8.1.jar "$R/libs"
 maven com/google/protobuf/protobuf-javalite/4.35.1/protobuf-javalite-4.35.1.jar "$R/libs"
 
 echo "tools/ (the compiler, used to build, never shipped)"
-maven org/jetbrains/kotlin/kotlin-compiler-embeddable/2.0.21/kotlin-compiler-embeddable-2.0.21.jar "$R/tools"
-maven org/jetbrains/kotlin/kotlin-daemon-embeddable/2.0.21/kotlin-daemon-embeddable-2.0.21.jar "$R/tools"
-maven org/jetbrains/kotlin/kotlin-script-runtime/2.0.21/kotlin-script-runtime-2.0.21.jar "$R/tools"
+maven org/jetbrains/kotlin/kotlin-compiler-embeddable/2.2.20/kotlin-compiler-embeddable-2.2.20.jar "$R/tools"
+maven org/jetbrains/kotlin/kotlin-daemon-embeddable/2.2.20/kotlin-daemon-embeddable-2.2.20.jar "$R/tools"
+maven org/jetbrains/kotlin/kotlin-script-runtime/2.2.20/kotlin-script-runtime-2.2.20.jar "$R/tools"
 maven org/jetbrains/intellij/deps/trove4j/1.0.20200330/trove4j-1.0.20200330.jar "$R/tools"
 maven org/jetbrains/annotations/24.1.0/annotations-24.1.0.jar "$R/tools"
-for j in kotlin-stdlib-2.0.21 kotlin-reflect-2.0.21 kotlinx-coroutines-core-jvm-1.8.1; do
+for j in kotlin-stdlib-2.2.20 kotlin-reflect-2.2.20 kotlinx-coroutines-core-jvm-1.11.0; do
   [ -s "$R/tools/$j.jar" ] || cp "$R/libs/$j.jar" "$R/tools/$j.jar"
 done
 

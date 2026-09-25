@@ -28,4 +28,6 @@ open class ContextWrapper @JvmOverloads constructor(private var base: Context? =
     override fun startActivity(intent: Intent) {
         getBaseContext().startActivity(intent)
     }
+
+    override fun getSystemService(name: String): Any? = getBaseContext().getSystemService(name)
 }

@@ -3,6 +3,7 @@ import { Loader2, RefreshCw, Settings2, Trash2 } from "../icons";
 import { AddonLogo } from "@/components/addon-logo";
 import { relativeTime } from "@/lib/dates";
 import { useT, useUiLanguage } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import type { CheckResult, KindAdapter, PluginView } from "@/lib/plugins";
 import { Nested, ROW_ACTION_PRIMARY, SettingRow } from "../kit";
 import { RowControl, RowDesc, RowNote, RowText, RowTitle } from "../shared";
@@ -24,6 +25,7 @@ export function PluginRow({
 }) {
   const t = useT();
   const uiLang = useUiLanguage();
+  const { settings } = useSettings();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<string | null>(null);
@@ -229,7 +231,11 @@ export function PluginRow({
                 disabled={busy === "check"}
                 onClick={() =>
                   void run("check", async () => {
-                    setCheck(await adapter.check!(plugin.id));
+                    // The same budget pressing Play would get. A check that answers with less than
+                    // playback does reports a plugin as broken while it works on Play.
+                    const waitMs =
+                      Math.max(8, Math.min(120, settings.addonTimeoutSec ?? 30)) * 1000;
+                    setCheck(await adapter.check!(plugin.id, waitMs));
                   })
                 }
               >

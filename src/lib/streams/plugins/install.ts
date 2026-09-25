@@ -1,4 +1,4 @@
-import { safeFetch } from "@/lib/safe-fetch";
+import { safeFetch, safeFetchBytes } from "@/lib/safe-fetch";
 import { assertSafeUrl } from "@/lib/manga/plugins/host-http";
 import { PluginWorker } from "@/lib/manga/plugins/worker-host";
 import { setSecret } from "@/lib/secret-store";
@@ -53,7 +53,15 @@ async function fetchArchive(
   const target = assertSafeUrl(entry.entry);
   let res: Response;
   try {
-    res = await safeFetch(target, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
+    // An archive is a zip of Dalvik bytecode, not text. safeFetch reads the body through
+    // harbor_fetch without responseType, which decodes it with from_utf8_lossy and replaces every
+    // byte that is not valid UTF-8, leaving a file the zip reader rejects as a bad CEN header.
+    // safeFetchBytes asks for base64 and returns the original bytes.
+    res = await safeFetchBytes(
+      target,
+      { signal: AbortSignal.timeout(FETCH_TIMEOUT) },
+      FETCH_TIMEOUT,
+    );
   } catch {
     throw new PluginError("fetch-failed");
   }

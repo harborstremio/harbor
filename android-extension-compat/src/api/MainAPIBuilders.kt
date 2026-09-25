@@ -34,17 +34,19 @@ fun List<SearchResponse>.toNewSearchResponseList(
     hasNext: Boolean? = null,
 ): SearchResponseList = SearchResponseList(this, hasNext)
 
-/** `data` is the handle the provider gets back in `loadLinks`, so a non string is carried as json. */
+/** The handle a provider hands back here is what `loadLinks` receives later, and that arrives as a
+ * string, so anything that is not one already is carried as json. */
+private fun dataHandle(data: Any?): String = when (data) {
+    null -> ""
+    is String -> data
+    else -> runCatching { mapper.writeValueAsString(data) }.getOrElse { data.toString() }
+}
+
 fun <T> MainAPI.newEpisode(
     data: T,
     initializer: Episode.() -> Unit = { },
 ): Episode {
-    val payload = when (data) {
-        null -> ""
-        is String -> data
-        else -> runCatching { mapper.writeValueAsString(data) }.getOrElse { data.toString() }
-    }
-    val episode = Episode(payload)
+    val episode = Episode(dataHandle(data))
     episode.initializer()
     return episode
 }
@@ -57,6 +59,18 @@ fun MainAPI.newMovieSearchResponse(
     initializer: MovieSearchResponse.() -> Unit = { },
 ): MovieSearchResponse {
     val response = MovieSearchResponse(name, if (fix) fixUrl(url) else url, this.name, type)
+    response.initializer()
+    return response
+}
+
+fun MainAPI.newTvSeriesSearchResponse(
+    name: String,
+    url: String,
+    type: TvType = TvType.TvSeries,
+    fix: Boolean = true,
+    initializer: TvSeriesSearchResponse.() -> Unit = { },
+): TvSeriesSearchResponse {
+    val response = TvSeriesSearchResponse(name, if (fix) fixUrl(url) else url, this.name, type)
     response.initializer()
     return response
 }
@@ -93,6 +107,23 @@ suspend fun MainAPI.newMovieLoadResponse(
     initializer: suspend MovieLoadResponse.() -> Unit = { },
 ): MovieLoadResponse {
     val response = MovieLoadResponse(name, url, this.name, type, dataUrl)
+    response.initializer()
+    return response
+}
+
+/** The same builder for builds that declare the handle as an object rather than a string. Those
+ * compile to a different descriptor, so this has to be a second function rather than a change to
+ * the one above: an extension asking for either signature finds it, and one asking for the other
+ * would otherwise die with NoSuchMethodError the first time it loads a page. No default on the
+ * initializer keeps a call from being ambiguous between the two. */
+suspend fun MainAPI.newMovieLoadResponse(
+    name: String,
+    url: String,
+    type: TvType,
+    data: Any?,
+    initializer: suspend MovieLoadResponse.() -> Unit,
+): MovieLoadResponse {
+    val response = MovieLoadResponse(name, url, this.name, type, dataHandle(data))
     response.initializer()
     return response
 }

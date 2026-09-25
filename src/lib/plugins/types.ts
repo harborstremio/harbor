@@ -110,7 +110,9 @@ export type KindAdapter = {
     values: Record<string, string | boolean>,
     fields: SettingsField[],
   ) => Promise<void>;
-  check?: (id: string) => Promise<CheckResult>;
+  /** [timeoutMs] lets a caller give the check the same budget playback gets, so that what it
+   * answers is what pressing Play would do rather than a ceiling of the check's own. */
+  check?: (id: string, timeoutMs?: number) => Promise<CheckResult>;
   health?: (id: string) => HealthView | null;
   log?: (id: string) => LogLine[];
 };

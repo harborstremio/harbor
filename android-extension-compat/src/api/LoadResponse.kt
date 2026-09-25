@@ -33,17 +33,25 @@ interface LoadResponse {
         const val ANILIST_ID = "aniListId"
         const val TMDB_ID = "tmdbId"
         const val IMDB_ID = "imdbId"
+        const val SIMKL_ID = "simklId"
 
-        /** Erasure leaves both of these taking a bare List, so the element type is not part of the
+        /** Erasure leaves all of these taking a bare List, so the element type is not part of the
          * binary contract and the extensions do not agree on it: one passes ActorData, another a
-         * pair of actor and role, another a pair of actor and role name. Only the value itself
-         * says which, so both entry points read it rather than cast it. */
+         * pair of actor and role, another a pair of actor and role name, another bare names. Only
+         * the value itself says which, so every entry point reads it rather than casts it. */
         fun LoadResponse.addActorsRole(actors: List<*>?) {
             if (actors.isNullOrEmpty()) return
             this.actors = actors.mapNotNull(::readActor)
         }
 
         fun LoadResponse.addActors(actors: List<*>?) {
+            if (actors.isNullOrEmpty()) return
+            this.actors = actors.mapNotNull(::readActor)
+        }
+
+        /** Upstream declares this as `addActors(List<String>)` renamed with `@JvmName`, which is
+         * the only reason the name-only variant carries a name of its own. */
+        fun LoadResponse.addActorNames(actors: List<*>?) {
             if (actors.isNullOrEmpty()) return
             this.actors = actors.mapNotNull(::readActor)
         }
@@ -62,6 +70,16 @@ interface LoadResponse {
 
         fun LoadResponse.addImdbId(id: String?) {
             this.syncData[IMDB_ID] = id ?: return
+        }
+
+        /** Given a url rather than an id, only the id inside it is kept, because that is what the
+         * key holds and what every reader of it expects. */
+        fun LoadResponse.addImdbUrl(url: String?) {
+            addImdbId(url?.let { IMDB_ID_IN_URL.find(it)?.value })
+        }
+
+        fun LoadResponse.addSimklId(id: Int?) {
+            this.syncData[SIMKL_ID] = (id ?: return).toString()
         }
 
         suspend fun LoadResponse.addTrailer(
@@ -89,6 +107,7 @@ interface LoadResponse {
 private fun readActor(value: Any?): ActorData? = when (value) {
     is ActorData -> value
     is Actor -> ActorData(value)
+    is String -> ActorData(Actor(value))
     is Pair<*, *> -> (value.first as? Actor)?.let { actor ->
         when (val role = value.second) {
             is ActorRole -> ActorData(actor, role = role)
@@ -98,3 +117,5 @@ private fun readActor(value: Any?): ActorData? = when (value) {
     }
     else -> null
 }
+
+private val IMDB_ID_IN_URL = Regex("""tt\d{5,}""", RegexOption.IGNORE_CASE)

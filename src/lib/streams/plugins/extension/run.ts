@@ -7,6 +7,7 @@ import {
   bridgeProviders,
   bridgeSearch,
   extensionsSupported,
+  warmBridge,
 } from "./bridge";
 import { identityKey, pickEpisodes, rankCandidates, yearRejects } from "./match";
 
@@ -180,6 +181,11 @@ export async function runExtensionPlugin(
     hooks.log("warn", "Extensions run in the desktop app only");
     return [];
   }
+  // Spawning the bridge and restoring every installed extension happens on the first call and
+  // costs seconds. That is setup, not this plugin's work, so it is paid before the clock starts:
+  // charged to the deadline it left a slow plugin with too little budget and made its first run
+  // report nothing while its second answered.
+  await warmBridge();
   const deadline = Date.now() + timeoutMs;
   const providers = await limit(providersFor(plugin), deadline, signal, "provider list");
   if (!providers.length) {
