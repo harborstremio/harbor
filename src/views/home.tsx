@@ -730,15 +730,14 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
   const onDismissCw = useCallback(
     (item: LibraryItem) => {
       if (item.manualWatched) {
-        dismissManualWatched(item._id);
+        dismissManualWatched(item._id, { acknowledged: true });
         return;
       }
       if (item.local) {
-        clearLocalCw(item._id);
-        dismissCw(item, authKey);
-        return;
+        clearLocalCw(item._id, { acknowledged: true });
+        return dismissCw(item, authKey, { acknowledged: true });
       }
-      dismissCw(item, authKey);
+      return dismissCw(item, authKey, { acknowledged: true });
     },
     [authKey],
   );
@@ -1156,7 +1155,11 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
       className="flex-1 overflow-y-auto overflow-x-hidden px-5 pt-24 pb-14 sm:px-8 lg:px-12 lg:pt-28"
     >
       <ScrollRootContext.Provider value={scrollEl}>
-        <div {...contentDrag} className="relative flex flex-col gap-12">
+        <div
+          {...contentDrag}
+          data-context-page-background
+          className="relative flex flex-col gap-12"
+        >
           <div className={tmdbNudgePosition}>
             <div className="pointer-events-auto">
               <TmdbNudge suppress={tmdbProvidedByAddon || settings.homeMode === "classic"} />

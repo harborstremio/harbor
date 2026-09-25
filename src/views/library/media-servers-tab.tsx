@@ -45,7 +45,14 @@ import { hydrateLibraryMeta } from "./hydrate-meta";
 import { FilterBar, type TypeKey } from "./shared";
 import { useReportFeatured } from "./featured-context";
 import { IdentifyModal, type IdentifyResolution } from "./local-tab/identify-modal";
-import { CardIconButton } from "./local-tab/card-actions";
+import { CardIconButton, LocalMoreActions } from "./local-tab/card-actions";
+import { useContextTarget } from "@/lib/context-menu";
+import { executeContextAction, type ContextAction } from "@/lib/context-actions";
+import { alertDialog } from "@/lib/dialog";
+import {
+  assertServerContextConnection,
+  resolveServerContextCopy,
+} from "@/lib/media-server/context-copy";
 import type { LocalEntry } from "@/lib/local-library";
 import { openLocalEpisodes } from "@/lib/player/local-episodes-modal";
 import { openLocalVersions } from "@/lib/player/local-versions-modal";
@@ -507,23 +514,28 @@ const ServerCard = memo(function ServerCard({
   onOpen: () => void;
   onReview: () => void;
 }) {
-  const { openPlayer } = useView();
+  const { openPlayer, openSettings } = useView();
   const t = useT();
   const matched =
     card.title.identity.tmdbId != null ||
     !!card.title.identity.imdbId ||
     card.title.identity.tvdbId != null;
-  const playCopy = (item: MediaServerItem, versionId?: string) => {
-    const connection = connections.find((entry) => entry.id === item.connectionId);
-    if (!connection) return;
+  const currentCopy = async (item: MediaServerItem, versionId?: string) => {
+    const expected = connections.find((connection) => connection.id === item.connectionId);
+    if (!expected) throw new Error(t("This server connection is no longer available."));
+    return resolveServerContextCopy(expected, item.id, versionId);
+  };
+  const playCopy = async (selected: MediaServerItem, versionId?: string) => {
+    const { connection, item } = await currentCopy(selected, versionId);
     const quality = connection.preferredQuality;
-    void mediaServerAdapter(connection)
+    await mediaServerAdapter(connection)
       .playback(connection, item, {
         versionId,
         quality,
         startPositionMs: item.progress?.positionMs,
       })
-      .then((source) =>
+      .then((source) => {
+        assertServerContextConnection(connection);
         openPlayer({
           meta: card.meta,
           imdbId: card.title.identity.imdbId,
@@ -550,51 +562,73 @@ const ServerCard = memo(function ServerCard({
             quality: source.effectiveQuality,
             playbackSessionId: source.playbackSessionId,
           },
-        }),
-      );
+        });
+      });
   };
-  const playItems = (playableItems: MediaServerItem[], direct = false) => {
-    const copies = serverPlayableCopies(playableItems, connections);
+  const playItems = (
+    playableItems: MediaServerItem[],
+    direct = false,
+    intent: "play" | "download" = "play",
+  ) => {
+    const copies = serverPlayableCopies(playableItems, mediaServerConnections());
     const selectedItem = (copy: (typeof copies)[number]) =>
       playableItems.find(
         (item) => item.connectionId === copy.connectionId && item.id === copy.itemId,
       );
     if (direct && copies.length === 1) {
       const item = selectedItem(copies[0]);
-      if (item) playCopy(item, copies[0].version.id);
+      if (item)
+        void playCopy(item, copies[0].version.id).catch((error) =>
+          alertDialog(error instanceof Error ? error.message : String(error)),
+        );
       return;
     }
     openLocalVersions({
+      intent,
       title: card.meta.name,
       poster: card.meta.poster,
       entries: [],
       onPlayLocal: () => {},
       serverCopies: copies,
-      onPlayServer: (copy) => {
+      onPlayServer: async (copy) => {
         const item = selectedItem(copy);
-        if (item) playCopy(item, copy.version.id);
+        if (!item) throw new Error(t("This server item is no longer available."));
+        await playCopy(item, copy.version.id);
+      },
+      onDownloadServer: async (copy) => {
+        const item = selectedItem(copy);
+        if (!item) throw new Error(t("This server item is no longer available."));
+        await downloadItem(item, undefined, copy.version.id);
       },
     });
   };
-  const downloadItem = async (item: MediaServerItem, episode?: LocalEntry) => {
-    const connection = connections.find((entry) => entry.id === item.connectionId);
-    if (!connection) return;
+  const downloadItem = async (
+    selected: MediaServerItem,
+    episode?: LocalEntry,
+    versionId?: string,
+  ) => {
+    const { connection, item } = await currentCopy(selected, versionId);
     const source = await mediaServerAdapter(connection).playback(connection, item, {
-      versionId: item.versions[0]?.id,
+      versionId,
       quality: "original",
     });
+    assertServerContextConnection(connection);
     await enqueueDownload({
       meta: card.meta,
       episode:
-        episode?.season != null && episode.episode != null
-          ? { season: episode.season, episode: episode.episode }
+        (episode?.season ?? item.identity.season) != null &&
+        (episode?.episode ?? item.identity.episode) != null
+          ? {
+              season: (episode?.season ?? item.identity.season)!,
+              episode: (episode?.episode ?? item.identity.episode)!,
+            }
           : undefined,
       url: source.url,
       headers: source.headers,
       streamLabel: connection.name,
     });
   };
-  const activate = () => {
+  const activate = (intent: "play" | "download" = "play") => {
     if (!matched) return onReview();
     if (card.title.kind === "series") {
       const episodes = dedupePhysicalEpisodeItems(
@@ -651,32 +685,109 @@ const ServerCard = memo(function ServerCard({
           const item = episodes.find(
             (candidate) => `${candidate.connectionId}:${candidate.id}` === entry.id,
           );
-          if (item) playCopy(item, item.versions[0]?.id);
+          if (!item) throw new Error(t("This server episode is no longer available."));
+          playItems(
+            physical.filter(
+              (candidate) =>
+                candidate.kind === "episode" &&
+                candidate.identity.season === item.identity.season &&
+                candidate.identity.episode === item.identity.episode,
+            ),
+            false,
+            intent,
+          );
         },
         onDownload: async (entry) => {
           const item = episodes.find(
             (candidate) => `${candidate.connectionId}:${candidate.id}` === entry.id,
           );
-          if (item) await downloadItem(item, entry);
+          if (!item) throw new Error(t("This server episode is no longer available."));
+          playItems(
+            physical.filter(
+              (candidate) =>
+                candidate.kind === "episode" &&
+                candidate.identity.season === item.identity.season &&
+                candidate.identity.episode === item.identity.episode,
+            ),
+            false,
+            "download",
+          );
         },
       });
     } else {
       const movies = physical.filter((item) => item.kind === "movie");
-      if (movies.length > 0) playItems(movies);
+      if (movies.length > 0) playItems(movies, false, intent);
     }
   };
-  const download = async () => {
-    const item = physical.find((entry) => entry.kind === "movie");
-    if (item) await downloadItem(item);
+  const download = () => activate("download");
+  const contextId = `home-server-title:${card.title.key}`;
+  const source = {
+    kind: "actions" as const,
+    id: contextId,
+    label: card.meta.name,
+    subscribe: subscribeMediaServerConnections,
+    isValid: () =>
+      card.title.connectionIds.some((id) =>
+        mediaServerConnections().some((connection) => connection.id === id),
+      ),
+    actions: (): ContextAction[] => [
+      {
+        id: `${contextId}:open`,
+        label: card.title.kind === "series" ? t("Choose episode") : t("Choose version"),
+        icon: <Play size={14} />,
+        restoreFocus: false,
+        run: activate,
+      },
+      {
+        id: `${contextId}:details`,
+        label: t("View details"),
+        icon: <Info size={14} />,
+        restoreFocus: false,
+        run: onOpen,
+      },
+      {
+        id: `${contextId}:match`,
+        label: t("Fix match"),
+        icon: <Wand2 size={14} />,
+        restoreFocus: false,
+        run: onReview,
+      },
+      {
+        id: `${contextId}:download`,
+        label: t("Choose version to download"),
+        icon: <Download size={14} />,
+        restoreFocus: false,
+        run: download,
+      },
+      {
+        id: `${contextId}:manage`,
+        label: t("Manage home servers"),
+        icon: <Server size={14} />,
+        restoreFocus: false,
+        run: () => {
+          sessionStorage.setItem("harbor.settings.streaming.home-servers", "1");
+          openSettings("streaming");
+        },
+      },
+    ],
+  };
+  const contextRef = useContextTarget(() => source);
+  const runOpen = () => {
+    void executeContextAction(source, `${contextId}:open`).catch((error) =>
+      alertDialog(error instanceof Error ? error.message : String(error)),
+    );
   };
   return (
-    <article className="group flex flex-col gap-2 text-start">
+    <article ref={contextRef} className="group flex flex-col gap-2 text-start">
       <div
         role="button"
         tabIndex={0}
-        onClick={activate}
+        onClick={runOpen}
         onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") activate();
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            runOpen();
+          }
         }}
         className="relative aspect-[2/3] overflow-hidden rounded-xl bg-elevated text-start outline-none focus-visible:ring-2 focus-visible:ring-ink"
       >
@@ -703,7 +814,7 @@ const ServerCard = memo(function ServerCard({
           aria-label={t("Play")}
           onClick={(event) => {
             event.stopPropagation();
-            activate();
+            runOpen();
           }}
           className="absolute start-1/2 top-1/2 grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-ink text-canvas opacity-0 shadow-xl transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
         >
@@ -720,25 +831,25 @@ const ServerCard = memo(function ServerCard({
           <CardIconButton title={t("Fix match")} onClick={onReview}>
             <Wand2 size={11} />
           </CardIconButton>
-          <CardIconButton
-            title={t("Download media")}
-            onClick={() => void (card.title.kind === "series" ? activate() : download())}
-          >
+          <CardIconButton title={t("Choose version to download")} onClick={download}>
             <Download size={11} />
           </CardIconButton>
         </div>
       </div>
-      <button onClick={activate} className="text-start">
-        <p className="truncate text-[13px] font-medium text-ink">{card.meta.name}</p>
-        <p className="truncate text-[11.5px] text-ink-subtle">
-          {card.meta.releaseInfo ?? ""}
-          {card.title.kind === "series"
-            ? ` · ${card.title.episodeCount} episodes`
-            : card.title.versionCount > 1
-              ? ` · ${card.title.versionCount} versions`
-              : ""}
-        </p>
-      </button>
+      <div className="flex items-start gap-1">
+        <button onClick={runOpen} className="min-w-0 flex-1 text-start">
+          <p className="truncate text-[13px] font-medium text-ink">{card.meta.name}</p>
+          <p className="truncate text-[11.5px] text-ink-subtle">
+            {card.meta.releaseInfo ?? ""}
+            {card.title.kind === "series"
+              ? ` · ${card.title.episodeCount} episodes`
+              : card.title.versionCount > 1
+                ? ` · ${card.title.versionCount} versions`
+                : ""}
+          </p>
+        </button>
+        <LocalMoreActions target={source} />
+      </div>
     </article>
   );
 });

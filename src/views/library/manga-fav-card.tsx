@@ -2,9 +2,10 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Poster } from "@/components/poster";
 import { searchManga } from "@/lib/manga/api";
-import { hasAnyMangaSource } from "@/lib/manga/sources";
+import { hasAnyMangaSource, setActiveMangaSource } from "@/lib/manga/sources";
 import type { MangaFavEntry } from "@/lib/manga-favorites";
 import { useView } from "@/lib/view";
+import { useMangaContext } from "@/lib/use-manga-context";
 
 export function MangaFavCard({ entry }: { entry: MangaFavEntry }) {
   const { openManga } = useView();
@@ -24,7 +25,9 @@ export function MangaFavCard({ entry }: { entry: MangaFavEntry }) {
       const results = await searchManga(title);
       const match =
         results.find(
-          (r) => norm(r.title) === norm(title) || (r.altTitle != null && norm(r.altTitle) === norm(title)),
+          (r) =>
+            norm(r.title) === norm(title) ||
+            (r.altTitle != null && norm(r.altTitle) === norm(title)),
         ) ?? results[0];
       if (match) target = match.id;
     } catch {
@@ -33,9 +36,21 @@ export function MangaFavCard({ entry }: { entry: MangaFavEntry }) {
     setBusy(false);
     openManga(target);
   };
+  const context = useMangaContext(
+    { ...entry, sourceId: entry.sourceId ?? (entry.id.includes("::") ? undefined : "") },
+    {
+      open: () => {
+        if (!entry.sourceId && !entry.id.includes("::")) return open();
+        if (entry.sourceId && !entry.id.includes("::")) setActiveMangaSource(entry.sourceId);
+        openManga(entry.id);
+      },
+      disabled: busy,
+    },
+  );
 
   return (
     <button
+      ref={context.ref}
       type="button"
       onClick={() => void open()}
       disabled={busy}

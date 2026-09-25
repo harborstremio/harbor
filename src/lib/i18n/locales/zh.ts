@@ -5,6 +5,8 @@ import sportsStatistics from "./zh/sports-statistics";
 import sportsApi from "./zh/sports-api";
 import esportsArena from "./zh/esports-arena";
 import sportsHub from "./zh/sports-hub";
+import contextActionsFallback from "./context-actions-fallback";
+
 import ebookSources from "./zh/ebook-sources";
 import settingsRefinements from "./zh/settings-refinements";
 import coverage from "./zh/coverage";
@@ -31,6 +33,8 @@ import bpSports from "./zh/bp-sports";
 const zh: Record<string, string> = {
   ...videoCast,
   ...music,
+  ...contextActionsFallback,
+
   ...ebookSources,
   ...coverage,
   ...sweepA,

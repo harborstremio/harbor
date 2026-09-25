@@ -14,7 +14,14 @@ async function unwrap<T>(r: Response, isCurrent: () => boolean): Promise<T> {
   const d = (await r.json().catch(() => ({}))) as Record<string, unknown>;
   if (!isCurrent()) throw new Error("Account changed");
   if (!r.ok) {
-    const message = typeof d.error === "string" ? d.error : `Request failed (${r.status}).`;
+    const message =
+      r.status === 401
+        ? "Your session could not be renewed. Sign in again and retry."
+        : r.status === 403
+          ? "You do not have permission to make this change."
+          : typeof d.error === "string"
+            ? d.error
+            : `Request failed (${r.status}).`;
     const err = new Error(message) as Error & { status?: number; body?: unknown };
     err.status = r.status;
     err.body = d;

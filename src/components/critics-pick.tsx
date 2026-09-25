@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, ExternalLink, Quote, Star } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
+import { useTitleContext } from "@/components/context-menu/use-title-context";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { pickRandom } from "@/lib/feed/tags";
@@ -35,9 +36,17 @@ export function CriticsPick({ meta, title }: { meta: Meta; title?: string }) {
   const { openMeta, openPicker, openPerson } = useView();
   const t = useT();
   const backdrop = upsizeTmdb(meta.background ?? meta.poster);
+  const artwork = rpdbPoster(settings.rpdbKey, meta.id, backdrop);
+  const onContextMenu = useTitleContext(meta, artwork);
 
   const [data, setData] = useState<CriticData | null>(null);
-  const [stills, setStills] = useState<string[]>([]);
+  const [loadedStills, setStills] = useState({
+    id: meta.id,
+    type: meta.type,
+    urls: [] as string[],
+  });
+  const stills =
+    loadedStills.id === meta.id && loadedStills.type === meta.type ? loadedStills.urls : [];
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [lightbox, setLightbox] = useState<LightboxState | null>(null);
   const castScrollRef = useRef<HTMLDivElement>(null);
@@ -86,17 +95,17 @@ export function CriticsPick({ meta, title }: { meta: Meta; title?: string }) {
 
   useEffect(() => {
     if (!settings.tmdbKey) {
-      setStills([]);
+      setStills({ id: meta.id, type: meta.type, urls: [] });
       return;
     }
     let cancelled = false;
     tmdbMovieImages(settings.tmdbKey, meta.id)
-      .then((urls) => !cancelled && setStills(urls))
-      .catch(() => !cancelled && setStills([]));
+      .then((urls) => !cancelled && setStills({ id: meta.id, type: meta.type, urls }))
+      .catch(() => !cancelled && setStills({ id: meta.id, type: meta.type, urls: [] }));
     return () => {
       cancelled = true;
     };
-  }, [meta.id, settings.tmdbKey]);
+  }, [meta.id, meta.type, settings.tmdbKey]);
 
   const tagline = data?.tagline?.trim();
   const overview = data?.overview ?? meta.description ?? "";
@@ -224,12 +233,13 @@ export function CriticsPick({ meta, title }: { meta: Meta; title?: string }) {
         <button
           type="button"
           onClick={() => openMeta({ ...meta, logo: logo ?? meta.logo })}
+          onContextMenu={onContextMenu}
           aria-label={t("Open {name}", { name: meta.name })}
           className="group relative min-h-[520px] overflow-hidden rounded-2xl border border-edge-soft bg-canvas text-start transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] hover:-translate-y-1"
           style={{ isolation: "isolate" }}
         >
           {(() => {
-            const src = rpdbPoster(settings.rpdbKey, meta.id, backdrop);
+            const src = artwork;
             return src ? (
               <img
                 src={src}
@@ -441,6 +451,7 @@ export function CriticsPick({ meta, title }: { meta: Meta; title?: string }) {
             {stillTiles.map((src, i) => (
               <Still
                 key={`${meta.id}-${i}`}
+                meta={meta}
                 src={src}
                 alt={meta.name}
                 onClick={lightboxImages.length > 0 ? () => openLightbox(src) : undefined}

@@ -4,15 +4,33 @@ import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { ResultPoster } from "../result-poster";
+import { useContextMenu } from "@/lib/context-menu";
 
-function AiResultRow({ result, onClose, index }: { result: AiResult; onClose: () => void; index: number }) {
+function AiResultRow({
+  result,
+  onClose,
+  index,
+}: {
+  result: AiResult;
+  onClose: () => void;
+  index: number;
+}) {
   const { openMeta } = useView();
+  const { open } = useContextMenu();
   const t = useT();
   const { meta, season, episode, episodeTitle } = result;
   const description = useLocalizedOverview(meta);
   const isEpisode = season != null && episode != null;
   return (
     <button
+      onContextMenu={(event) =>
+        open(event, {
+          kind: "meta",
+          meta,
+          watchScope: isEpisode ? "episode" : "title",
+          episode: isEpisode ? { season, episode } : undefined,
+        })
+      }
       onClick={() => {
         openMeta(meta, isEpisode ? { episodeHint: { season, episode } } : undefined);
         onClose();
@@ -34,7 +52,9 @@ function AiResultRow({ result, onClose, index }: { result: AiResult; onClose: ()
         </span>
         <div className="flex items-center gap-2 text-[12.5px] text-ink-muted">
           {isEpisode && <span className="truncate">{meta.name}</span>}
-          {isEpisode && meta.releaseInfo && <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />}
+          {isEpisode && meta.releaseInfo && (
+            <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />
+          )}
           {meta.releaseInfo && <span>{meta.releaseInfo}</span>}
           {meta.imdbRating && (
             <>
@@ -47,7 +67,9 @@ function AiResultRow({ result, onClose, index }: { result: AiResult; onClose: ()
           )}
         </div>
         {!isEpisode && description && (
-          <span className="line-clamp-2 text-[12.5px] leading-snug text-ink-subtle">{description}</span>
+          <span className="line-clamp-2 text-[12.5px] leading-snug text-ink-subtle">
+            {description}
+          </span>
         )}
       </div>
     </button>

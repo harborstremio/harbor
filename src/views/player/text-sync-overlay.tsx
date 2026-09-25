@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Check, Loader2, RotateCcw, Scissors, X } from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
 import { findActiveCue } from "@/lib/subtitles/parser";
@@ -26,6 +26,11 @@ export function TextSyncOverlay({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const cues = api.cues;
+  const dialog = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    if (api.focusRevision > 0) dialog.current?.focus({ preventScroll: true });
+  }, [api.focusRevision]);
 
   const handleSave = async () => {
     if (saving) return;
@@ -39,6 +44,8 @@ export function TextSyncOverlay({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        if (document.querySelector('[data-harbor-context-layer][data-menu-phase="open"]')) return;
+        e.preventDefault();
         e.stopPropagation();
         api.discard();
       }
@@ -78,6 +85,9 @@ export function TextSyncOverlay({
   return (
     <div className="pointer-events-none absolute inset-0 z-[70]">
       <aside
+        ref={dialog}
+        tabIndex={-1}
+        data-player-live-sync
         role="dialog"
         aria-modal="true"
         aria-label={t("Sync subtitles")}

@@ -945,11 +945,11 @@ export function AnimeView({ active = true }: { active?: boolean }) {
                         item={item}
                         onDismiss={(it) => {
                           if (it.manualWatched) {
-                            dismissManualWatched(it._id);
+                            dismissManualWatched(it._id, { acknowledged: true });
                             return;
                           }
-                          if (it.local) clearLocalCw(it._id);
-                          dismissCw(it, authKey);
+                          if (it.local) clearLocalCw(it._id, { acknowledged: true });
+                          return dismissCw(it, authKey, { acknowledged: true });
                         }}
                       />
                     ))}

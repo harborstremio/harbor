@@ -5,6 +5,8 @@ import sportsStatistics from "./vi/sports-statistics";
 import sportsApi from "./vi/sports-api";
 import esportsArena from "./vi/esports-arena";
 import sportsHub from "./vi/sports-hub";
+import contextActionsFallback from "./context-actions-fallback";
+
 import ebookSources from "./vi/ebook-sources";
 import settingsRefinements from "./vi/settings-refinements";
 import coverage from "./vi/coverage";
@@ -49,6 +51,8 @@ import bpSports from "./vi/bp-sports";
 const vi: Record<string, string> = {
   ...videoCast,
   ...music,
+  ...contextActionsFallback,
+
   ...ebookSources,
   ...coverage,
   ...gap,

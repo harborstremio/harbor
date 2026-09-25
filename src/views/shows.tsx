@@ -334,10 +334,10 @@ export function Shows({ active = true }: { active?: boolean }) {
                   item={it}
                   onDismiss={(item) =>
                     item.manualWatched
-                      ? dismissManualWatched(item._id)
+                      ? dismissManualWatched(item._id, { acknowledged: true })
                       : item.local
-                        ? clearLocalCw(item._id)
-                        : dismissCw(item, authKey)
+                        ? clearLocalCw(item._id, { acknowledged: true })
+                        : dismissCw(item, authKey, { acknowledged: true })
                   }
                 />
               ))}

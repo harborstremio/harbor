@@ -1,5 +1,10 @@
 import { useMemo, useSyncExternalStore } from "react";
-import { useCollections, type Collection } from "@/lib/collections";
+import {
+  readPersistedCollectionSnapshot,
+  useCollections,
+  type Collection,
+} from "@/lib/collections";
+import { type MembershipProfile, type MembershipResult } from "@/lib/membership-operations";
 
 const KEY = "harbor.pagecollrows.v1";
 const CAP_PER_PAGE = 6;
@@ -85,6 +90,64 @@ export function addCollectionToPage(page: CollectionRowPage, collectionId: strin
   next[page].push(collectionId);
   commit(next);
   return true;
+}
+
+export function setCollectionOnPageWithResult(request: {
+  page: CollectionRowPage;
+  collectionId: string;
+  present: boolean;
+  profile: MembershipProfile;
+}): MembershipResult {
+  const { page, collectionId, present, profile } = request;
+  if (!PAGE_IDS.includes(page) || !collectionId.trim())
+    return { status: "error", reason: "invalid-data" };
+  const collections = readPersistedCollectionSnapshot(profile);
+  if ("status" in collections) return collections;
+  if (!collections.containers.some((entry) => entry.id === collectionId))
+    return { status: "error", reason: "missing-source" };
+  let raw: string | null;
+  try {
+    raw = localStorage.getItem(KEY);
+  } catch {
+    return { status: "error", reason: "storage-failed" };
+  }
+  let parsed: unknown;
+  try {
+    parsed = raw ? JSON.parse(raw) : {};
+  } catch {
+    return { status: "error", reason: "invalid-data" };
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+    return { status: "error", reason: "invalid-data" };
+  const stored = parsed as Record<string, unknown>;
+  const next = empty();
+  for (const pageId of PAGE_IDS) {
+    const ids = stored[pageId] ?? [];
+    if (
+      !Array.isArray(ids) ||
+      ids.some((id) => typeof id !== "string" || !id.trim()) ||
+      new Set(ids).size !== ids.length
+    ) {
+      return { status: "error", reason: "invalid-data" };
+    }
+    next[pageId] = [...ids];
+  }
+  if (next[page].includes(collectionId) === present)
+    return { status: present ? "already-present" : "unchanged" };
+  const availableIds = new Set(collections.containers.map((entry) => entry.id));
+  if (present && next[page].filter((id) => availableIds.has(id)).length >= CAP_PER_PAGE)
+    return { status: "error", reason: "destination-full" };
+  next[page] = present
+    ? [...next[page], collectionId]
+    : next[page].filter((id) => id !== collectionId);
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ ...stored, ...next }));
+  } catch {
+    return { status: "error", reason: "storage-failed" };
+  }
+  cache = next;
+  for (const subscriber of subs) subscriber();
+  return { status: present ? "added" : "removed" };
 }
 
 export function removeCollectionFromPage(page: CollectionRowPage, collectionId: string): void {

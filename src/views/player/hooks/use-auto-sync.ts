@@ -66,6 +66,7 @@ export type AutoSyncHandle = {
   retry: () => void;
   run: () => void;
   stop: () => void;
+  prepareLiveSync: () => void;
   feedback: (good: boolean) => void;
 };
 
@@ -200,6 +201,7 @@ export function useAutoSync(params: {
 
   const isCurrentAutoSyncScope = useCallback((scope: AutoSyncScope | null) => {
     if (manualTimingMediaRef.current === autoSyncMediaKey(srcRef.current)) return false;
+    if (scope == null || statusScopeRef.current !== scope) return false;
     const currentSelected =
       liveSnapRef.current.subtitleTracks.find((track) => track.selected) ?? null;
     return isAutoSyncScopeCurrent(scope, {
@@ -590,6 +592,7 @@ export function useAutoSync(params: {
     manualTimingMediaRef.current = autoSyncMediaKey(srcRef.current);
     activeDisposeRef.current?.();
     stopDrift();
+    retryRef.current = null;
     statusScopeRef.current = null;
     setOffer(null);
     setStatus("idle");
@@ -665,6 +668,7 @@ export function useAutoSync(params: {
     retry,
     run,
     stop,
+    prepareLiveSync: suspendForManualTiming,
     feedback,
     suspendForManualTiming,
   };

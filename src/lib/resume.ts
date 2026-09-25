@@ -20,11 +20,11 @@ function readAll(): Record<string, Entry> {
   }
 }
 
-function writeAll(all: Record<string, Entry>): void {
+function writeAll(all: Record<string, Entry>, acknowledged = false): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(all));
-  } catch {
-    /* noop */
+  } catch (error) {
+    if (acknowledged) throw error;
   }
 }
 
@@ -116,10 +116,15 @@ export function readResumeSource(
   return readAll()[entryKey(id, season, episode)]?.source;
 }
 
-export function clearResume(id: string, season?: number, episode?: number): void {
+export function clearResume(
+  id: string,
+  season?: number,
+  episode?: number,
+  options: { acknowledged?: boolean } = {},
+): void {
   const all = readAll();
   delete all[entryKey(id, season, episode)];
-  writeAll(all);
+  writeAll(all, options.acknowledged);
 }
 
 export function lastPlayedEpisode(seriesId: string): {

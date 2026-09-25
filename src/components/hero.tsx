@@ -1,5 +1,14 @@
 import { memo, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Check, ChevronRight, Info, Plus, RotateCcw, TrendingUp, Volume2, VolumeX } from "lucide-react";
+import {
+  Check,
+  ChevronRight,
+  Info,
+  Plus,
+  RotateCcw,
+  TrendingUp,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import tmdbIcon from "@/assets/addon-logos/tmdb.png";
@@ -38,6 +47,7 @@ import {
 import { getHeroEnded, setHeroEnded } from "@/lib/hero-ended";
 import { usePageVisible } from "@/lib/visibility";
 import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
+import { useHeroContext } from "@/lib/context-menu";
 
 export const Hero = memo(function Hero({
   meta,
@@ -70,6 +80,7 @@ export const Hero = memo(function Hero({
   const resolvedImdb = useTmdbImdbId(meta.id);
   const inWatchlist = useInWatchlist(meta.id, [resolvedImdb]);
   const [bgUrl, setBgUrl] = useState<string | undefined>(meta.background);
+  const onContextMenu = useHeroContext(meta, bgUrl);
   const [bgResolved, setBgResolved] = useState<boolean>(!!meta.background);
   const bg = bgUrl
     ? upsizeTmdb(bgUrl, fullQuality)
@@ -286,6 +297,7 @@ export const Hero = memo(function Hero({
 
   return (
     <section
+      onContextMenu={onContextMenu}
       ref={sectionRef}
       onClick={() => openMeta({ ...meta, logo: logo ?? meta.logo })}
       className={`harbor-hero-stage group relative cursor-pointer overflow-hidden bg-canvas ${full ? "h-[78vh] min-h-[640px] rounded-none" : "h-[560px] rounded-2xl"}`}

@@ -22,6 +22,7 @@ function load(file, mocks = {}, globals = {}) {
 }
 const nav = load("src/chrome/nav-items.tsx", {
   "@/lib/sports/enabled": { useSportsEnabled: () => false },
+  "./navigation-policy": load("src/chrome/navigation-policy.ts"),
 });
 const cfg = () => ({ order: [], hidden: [], renamed: {} });
 
@@ -96,7 +97,12 @@ const layouts = [
 for (const name of layouts) {
   test(`${name} retains available navigation, keyboard menus, and checked activation`, () => {
     const source = read(`src/chrome/${name}.tsx`);
-    assert.match(source, /useAvailableNavItems\(\)/);
+    if (name === "sidebar") {
+      assert.match(source, /useSidebarNavigation\(\)/);
+      const shared = read("src/chrome/context-page-navigation.tsx");
+      assert.match(shared, /const items = useAvailableNavItems\(\)/);
+      assert.match(shared, /resolveSidebarNavigation\(items, customization, policy\)/);
+    } else assert.match(source, /useAvailableNavItems\(\)/);
     assert.match(source, /onKeyDown=\{drag.onKeyDown\}/);
     assert.match(source, /onOpen: (?:onClick|\(\) => navigate\(item\))/);
     const ast = ts.createSourceFile(name, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
@@ -120,11 +126,11 @@ test("nav menu invokes the supplied checked action rather than navigating direct
   const block = source.slice(begin, source.indexOf('key="nav-hide"', begin));
   assert.match(block, /target.onOpen\?\.\(\)/);
   assert.doesNotMatch(block, /setView\(/);
-  assert.match(source, /data-tv-focus-scope=\{state.target.kind === "nav"/);
-  assert.match(source, /<TvModalClose onClose=\{close\}/);
-  assert.match(source, /cancelAnimationFrame\(focusFrame\)/);
-  assert.match(source, /new ResizeObserver\(measure\)/);
-  assert.match(source, /anchorTop \+ el.offsetHeight/);
+  assert.match(source, /<MenuSurface[\s\S]*?onClose=\{close\}/);
+  const surface = read("src/components/context-menu/menu-surface.tsx");
+  assert.match(surface, /useMenuFocus\(ref, reveal != null\)/);
+  assert.match(surface, /new ResizeObserver\(measure\)/);
+  assert.match(surface, /fitMenu\(point, bounds/);
 });
 test("drag cleanup, reduced motion, and RTL handling are present", () => {
   const source = read("src/chrome/nav-edit.tsx");

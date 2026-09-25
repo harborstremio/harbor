@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { getEpisodeProgress } from "@/lib/episode-progress";
-import { spoilerMaskFor, type SpoilerMask } from "@/lib/spoilers";
+import { episodeSpoilerMasks, spoilerMaskFor, type SpoilerMask } from "@/lib/spoilers";
 import type { Episode } from "@/lib/providers/tmdb";
 import { airedOnly } from "../helpers";
 
@@ -51,11 +51,13 @@ export function useEpisodeProgressMap({
     return null;
   }, [episodes, progressByEp]);
 
+  const masks = episodeSpoilerMasks(
+    settings,
+    episodes.map((ep) => ep.episodeNumber),
+    (epNumber) => progressByEp.get(epNumber)?.watched ?? false,
+  );
   const spoilerFor = (epNumber: number): SpoilerMask =>
-    spoilerMaskFor(settings, {
-      watched: progressByEp.get(epNumber)?.watched ?? false,
-      isNextUp: epNumber === nextUpEp,
-    });
+    masks.get(epNumber) ?? spoilerMaskFor(settings, { watched: false, isNextUp: false });
 
   const airedEps = airedOnly(episodes, (ep) => ep.airDate);
   const allWatched =

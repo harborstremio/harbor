@@ -51,6 +51,7 @@ import { suwayomiBaseForSource } from "@/lib/manga/sources/suwayomi/auth-registr
 import { cachedSuwayomiSources } from "./manga-browse/langs";
 import { sourceDisplayName } from "./manga-browse/all-extensions";
 import { pushActivityHint } from "@/lib/discord/activity-hint";
+import { useMangaContext } from "@/lib/use-manga-context";
 
 const GRADIENT_SIDE =
   "bg-gradient-to-r from-[var(--color-canvas)] from-0% via-[color-mix(in_oklch,var(--color-canvas),transparent_45%)] via-55% to-[color-mix(in_oklch,var(--color-canvas),transparent_88%)] to-100%";
@@ -174,6 +175,7 @@ export function MangaDetail({
   onOpenManga,
   onOpenDownloads,
   scrollRoot,
+  downloadRequest,
 }: {
   mangaId: string;
   onRead: (
@@ -186,6 +188,7 @@ export function MangaDetail({
   onOpenManga: (id: string) => void;
   onOpenDownloads?: () => void;
   scrollRoot?: React.RefObject<HTMLElement | null>;
+  downloadRequest?: number;
 }) {
   const t = useT();
   const [detail, setDetail] = useState<MangaSummary | null>(null);
@@ -199,6 +202,28 @@ export function MangaDetail({
   const [expanded, setExpanded] = useState(false);
   const [topMangaOpen, setTopMangaOpen] = useState(false);
   const [extInfo, setExtInfo] = useState<{ name: string; icon?: string } | null>(null);
+  const chaptersRef = useRef<HTMLDivElement>(null);
+  const focusedDownloadRequest = useRef<number | undefined>(undefined);
+  const focusChapters = () => {
+    chaptersRef.current?.scrollIntoView({ block: "start" });
+    chaptersRef.current?.focus({ preventScroll: true });
+  };
+  const mangaMeta = { id: mangaId, title: detail?.title ?? "", cover: detail?.cover };
+  const context = useMangaContext<HTMLDivElement>(mangaMeta, {
+    resume: onResume,
+    download: focusChapters,
+  });
+
+  useEffect(() => {
+    if (
+      downloadRequest &&
+      focusedDownloadRequest.current !== downloadRequest &&
+      chaptersRef.current
+    ) {
+      focusChapters();
+      focusedDownloadRequest.current = downloadRequest;
+    }
+  }, [downloadRequest, detailPending, detail, chapters.length, mangaId]);
 
   const favorites = useMangaFavorites();
   const isFavorite = useIsMangaFavorite(mangaId);
@@ -334,7 +359,6 @@ export function MangaDetail({
   const descMaxWidth = awardArtCount
     ? `min(48rem, calc(100% - ${awardArtCount * 84 + (awardArtCount - 1) * 8 + 24}px))`
     : "48rem";
-  const mangaMeta = { id: mangaId, title: detail?.title ?? "", cover: detail?.cover };
   const resumeLabel = progress
     ? (progress.chapterNumber
         ? t("Resume Ch. {n}", { n: progress.chapterNumber })
@@ -373,7 +397,7 @@ export function MangaDetail({
 
   return (
     <div className="flex flex-col gap-10 pb-4">
-      <div className="relative -mx-12 -mt-24 min-h-[360px] overflow-hidden">
+      <div ref={context.ref} className="relative -mx-12 -mt-24 min-h-[360px] overflow-hidden">
         <div className="absolute inset-0 z-0">
           {bannerSrc && (
             <CoverImg
@@ -607,19 +631,26 @@ export function MangaDetail({
         />
       )}
 
-      <ChapterList
-        chapters={langFiltered}
-        langs={langs}
-        selectedLang={selectedLang}
-        onSelectLang={setSelectedLang}
-        onRead={(chs, i) => onRead(chs, i, mangaMeta)}
-        mangaId={mangaId}
-        mangaTitle={detail?.title}
-        mangaCover={detail?.cover}
-        animeEndChapter={coverage?.endChapter}
-        pending={chaptersPending}
-        scrollRoot={scrollRoot}
-      />
+      <div
+        ref={chaptersRef}
+        tabIndex={-1}
+        aria-label={t("Chapters")}
+        className="scroll-mt-24 outline-none"
+      >
+        <ChapterList
+          chapters={langFiltered}
+          langs={langs}
+          selectedLang={selectedLang}
+          onSelectLang={setSelectedLang}
+          onRead={(chs, i) => onRead(chs, i, mangaMeta)}
+          mangaId={mangaId}
+          mangaTitle={detail?.title}
+          mangaCover={detail?.cover}
+          animeEndChapter={coverage?.endChapter}
+          pending={chaptersPending}
+          scrollRoot={scrollRoot}
+        />
+      </div>
 
       {detail?.title && <MangaRecommendedRail title={detail.title} onOpen={onOpenManga} />}
 

@@ -9,6 +9,7 @@ import { useDownloads } from "@/lib/download/downloads-store";
 import { useView } from "@/lib/view";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { useT } from "@/lib/i18n";
+import { saveAutoDownloadChange } from "@/views/downloads/auto-download-feedback";
 
 export function EpisodeDownloadsMenu({ meta, episodes }: { meta: Meta; episodes: PlayEpisode[] }) {
   const t = useT();
@@ -58,7 +59,7 @@ export function EpisodeDownloadsMenu({ meta, episodes }: { meta: Meta; episodes:
   return (
     <>
       <HoverTooltip
-        label={autoOn ? t("Auto-downloading new episodes") : t("Download")}
+        label={autoOn ? t("Automatic downloads enabled") : t("Download")}
         side="top"
         align="center"
       >
@@ -104,13 +105,12 @@ export function EpisodeDownloadsMenu({ meta, episodes }: { meta: Meta; episodes:
               label={t("Auto-download new episodes")}
               sub={
                 autoOn
-                  ? t("On. New episodes grab themselves.")
+                  ? t("Enabled for newly released episodes")
                   : t("Grab each new episode as it airs")
               }
               active={autoOn}
               onClick={() => {
-                toggleAutoDownload(meta);
-                setMenu(null);
+                if (saveAutoDownloadChange(() => toggleAutoDownload(meta))) setMenu(null);
               }}
             />
             {autoOn && (

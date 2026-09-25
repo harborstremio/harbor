@@ -15,6 +15,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { useContextMenu } from "@/lib/context-menu";
+import { MetaContextButton } from "@/components/context-menu/meta-context-button";
 import { ResultPoster } from "@/components/search/result-poster";
 import { BackToTop } from "@/components/back-to-top";
 import { searchAll } from "@/lib/search";
@@ -32,7 +34,6 @@ import {
   addCollectionTag,
   clearCollectionItems,
   normalizeTag,
-  readCollections,
   removeCollectionTag,
   removeFromCollection,
   renameCollection,
@@ -54,6 +55,8 @@ import {
   uploadCollectionBackground,
   uploadCollectionCover,
 } from "@/lib/social/collections-sync";
+import { alertDialog } from "@/lib/dialog";
+import { authToken } from "@/lib/theme-auth";
 
 type Hit = { id: string; type: CollectionItemType; name: string; poster?: string };
 
@@ -64,7 +67,10 @@ const TYPE_DOT: Record<CollectionItemType, string> = {
 };
 
 function syncSoon() {
-  void publishCollections(readCollections()).catch(() => {});
+  if (!authToken()) return;
+  void publishCollections().catch((error) =>
+    alertDialog(error instanceof Error ? error.message : String(error)),
+  );
 }
 
 export function CommunityCollectionEditor({
@@ -78,6 +84,7 @@ export function CommunityCollectionEditor({
 }) {
   const t = useT();
   const { settings } = useSettings();
+  const { open: openContextMenu } = useContextMenu();
   const collection = useCollection(id);
   const scrollRef = useRef<HTMLElement>(null);
 
@@ -428,7 +435,7 @@ export function CommunityCollectionEditor({
             onUpload={async (file) => {
               const local = await fileToCollectionCover(file);
               setCollectionCover(id, local);
-              await publishCollections(readCollections()).catch(() => {});
+              await publishCollections();
               try {
                 const { url } = await uploadCollectionCover(id, file);
                 if (url) setCollectionCover(id, url);
@@ -455,7 +462,7 @@ export function CommunityCollectionEditor({
             onUpload={async (file) => {
               const local = await fileToCollectionBackground(file);
               setCollectionBackground(id, local);
-              await publishCollections(readCollections()).catch(() => {});
+              await publishCollections();
               try {
                 const { url } = await uploadCollectionBackground(id, file);
                 if (url) setCollectionBackground(id, url);
@@ -668,8 +675,10 @@ export function CommunityCollectionEditor({
                 {filteredHits.map((hit) => {
                   const inSet = memberIds.has(hit.id);
                   return (
-                    <button
+                    <MetaContextButton
                       key={hit.id}
+                      meta={hit}
+                      membership={inSet ? { kind: "collection", id } : undefined}
                       type="button"
                       onClick={() => toggleHit(hit)}
                       disabled={!inSet && atItemMax}
@@ -706,7 +715,7 @@ export function CommunityCollectionEditor({
                         </div>
                       </div>
                       <span className="line-clamp-1 text-[12px] text-ink-muted">{hit.name}</span>
-                    </button>
+                    </MetaContextButton>
                   );
                 })}
               </div>
@@ -739,6 +748,13 @@ export function CommunityCollectionEditor({
                       else itemElsRef.current.delete(item.id);
                     }}
                     onPointerDown={(e) => startItemDrag(e, item.id, i)}
+                    onContextMenu={(event) =>
+                      openContextMenu(event, {
+                        kind: "meta",
+                        meta: item,
+                        membership: { kind: "collection", id },
+                      })
+                    }
                     className="group/item flex cursor-grab touch-none select-none flex-col gap-1.5 active:cursor-grabbing"
                   >
                     <div className="relative">

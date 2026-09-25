@@ -1,21 +1,27 @@
 import { Star } from "lucide-react";
 import { Poster } from "@/components/poster";
+import type { Meta } from "@/lib/cinemeta";
+import { useTitleContext } from "@/components/context-menu/use-title-context";
 
 export function RatingPoster({
   title,
   posterUrl,
   score,
   onOpen,
+  meta,
 }: {
   title: string;
   posterUrl?: string;
   score: number;
   onOpen?: () => void;
+  meta?: Meta;
 }) {
+  const onContextMenu = useTitleContext(meta, posterUrl);
   return (
     <button
       type="button"
       onClick={onOpen}
+      onContextMenu={onContextMenu}
       disabled={!onOpen}
       className="group block w-full text-start disabled:cursor-default"
     >

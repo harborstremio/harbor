@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { chapterPages } from "@/lib/manga/api";
 import { isSuwayomiServerUrl } from "@/lib/manga/sources/suwayomi/auth-registry";
+import { pageHeadersFor } from "./manga/plugins/adapter";
 
 export type MangaDownloadStatus = "idle" | "downloading" | "paused" | "done" | "error";
 
@@ -154,11 +155,12 @@ function readManifest(): Record<string, string[]> {
   }
 }
 
-function writeManifest(m: Record<string, string[]>): void {
+function writeManifest(m: Record<string, string[]>): boolean {
   try {
     localStorage.setItem(MANIFEST_KEY, JSON.stringify(m));
+    return true;
   } catch {
-    return;
+    return false;
   }
 }
 
@@ -170,11 +172,12 @@ function readMeta(): Record<string, MangaDownloadMetaRec> {
   }
 }
 
-function writeMeta(m: Record<string, MangaDownloadMetaRec>): void {
+function writeMeta(m: Record<string, MangaDownloadMetaRec>): boolean {
   try {
     localStorage.setItem(META_KEY, JSON.stringify(m));
+    return true;
   } catch {
-    return;
+    return false;
   }
 }
 
@@ -186,7 +189,8 @@ function mutateManifest(fn: (m: Record<string, string[]>) => void): Promise<void
   const next = manifestMutex.then(() => {
     const m = readManifest();
     fn(m);
-    writeManifest(m);
+    if (!writeManifest(m))
+      throw new Error("Manga download could not be saved to the offline library");
   });
   manifestMutex = next.catch(() => {});
   return next;
@@ -195,7 +199,7 @@ function mutateMeta(fn: (m: Record<string, MangaDownloadMetaRec>) => void): Prom
   const next = manifestMutex.then(() => {
     const m = readMeta();
     fn(m);
-    writeMeta(m);
+    if (!writeMeta(m)) throw new Error("Manga download metadata could not be saved");
   });
   manifestMutex = next.catch(() => {});
   return next;
@@ -213,7 +217,7 @@ function writeProg(p: Record<string, MangaDownloadProg>): void {
   try {
     localStorage.setItem(PROG_KEY, JSON.stringify(p));
   } catch {
-    return;
+    throw new Error("Manga download progress could not be saved");
   }
 }
 
@@ -679,8 +683,8 @@ async function downloadChapterWithControl(
       ...groupInfo,
     });
     await waitForResume(chapterId, batchControl);
-    const urls = (await chapterPages(chapterId)).filter((u) => /^https?:/i.test(u));
-    if (!urls.length) {
+    const urls = await chapterPages(chapterId);
+    if (!urls.length || urls.some((url) => !/^https?:\/\//i.test(url))) {
       setRec({ status: "error", ...groupInfo });
       return false;
     }
@@ -702,7 +706,10 @@ async function downloadChapterWithControl(
       const signal = controller!.signal;
       if (signal.aborted) throw new DOMException("aborted", "AbortError");
       try {
-        const r = await tauriFetch(url, { headers: IMG_HEADERS, signal });
+        const r = await tauriFetch(url, {
+          headers: { ...IMG_HEADERS, ...pageHeadersFor(url) },
+          signal,
+        });
         if (r.ok) return new Uint8Array(await r.arrayBuffer());
       } catch (e) {
         if ((e as Error).name === "AbortError") throw e;

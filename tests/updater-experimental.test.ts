@@ -156,7 +156,13 @@ function deferred<T>() {
 }
 
 function harness(
-  options: { beta?: boolean; managed?: boolean; platform?: string; version?: string } = {},
+  options: {
+    beta?: boolean;
+    managed?: boolean;
+    platform?: string;
+    version?: string;
+    contextReview?: boolean;
+  } = {},
 ) {
   const localStorage = storage();
   localStorage.setItem("harbor.settings", JSON.stringify({ betaUpdates: !!options.beta }));
@@ -252,6 +258,7 @@ function harness(
   const updater = load<Updater>(
     "src/lib/updater/use-update.ts",
     {
+      "@/lib/context-review": { isContextReview: () => options.contextReview === true },
       react: { useSyncExternalStore: (_subscribe: unknown, snapshot: () => unknown) => snapshot() },
       "@tauri-apps/plugin-updater": {
         async check(init: unknown) {
@@ -422,6 +429,19 @@ test("verification distinguishes rejected sessions from network failures without
       status === 401 || status === 403 ? "denied" : "unavailable",
     );
   }
+});
+
+test("isolated context review never starts normal or experimental update requests", async () => {
+  const h = harness({ contextReview: true });
+  h.updater.startUpdateWatcher();
+  await h.updater.checkForUpdate(true);
+  h.updater.setExperimentalUpdates(true);
+  await h.updater.checkForUpdate(true);
+  assert.deepEqual(h.calls.headers, []);
+  assert.deepEqual(h.calls.fetchUrls, []);
+  assert.deepEqual(h.calls.nativeFetchUrls, []);
+  assert.equal(h.calls.download, 0);
+  assert.equal(h.calls.install, 0);
 });
 
 test("experimental access recognizes only the approved Harbor account badges", () => {

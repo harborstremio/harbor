@@ -1,9 +1,4 @@
-import {
-  createListStore,
-  readLists,
-  removeFromList,
-  type ListStore,
-} from "./custom-lists";
+import { createListStore, readLists, removeFromList, type ListStore } from "./custom-lists";
 
 export const mangaLists: ListStore = createListStore("harbor.mangalists.v1");
 
@@ -20,7 +15,7 @@ export function ensureMangaListsMigrated(): void {
       if (!targetId) targetId = mangaLists.createList(list.name, list.description ?? "");
       if (!targetId) continue;
       for (const it of moving) {
-        mangaLists.addToList(targetId, {
+        const result = mangaLists.addToList(targetId, {
           id: it.id,
           type: "manga",
           name: it.name,
@@ -28,7 +23,9 @@ export function ensureMangaListsMigrated(): void {
           addonOrigin: it.addonOrigin,
           videos: it.videos,
         });
-        removeFromList(list.id, it.id);
+        if (result.status === "added" || result.status === "already-present") {
+          removeFromList(list.id, it.id);
+        }
       }
     }
     const remaining = readLists().some((l) => l.items.some((it) => it.type === "manga"));

@@ -2,12 +2,7 @@ import { ArrowLeft, Layers, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
-import {
-  MAX_ITEMS,
-  sharedLists,
-  type ListItem,
-  type ListStore,
-} from "@/lib/custom-lists";
+import { MAX_ITEMS, sharedLists, type ListItem, type ListStore } from "@/lib/custom-lists";
 import { relativeTime } from "@/lib/dates";
 import { useT } from "@/lib/i18n";
 import { PickCard } from "@/components/pick-card";
@@ -31,11 +26,13 @@ export function ListDetail({
   onBack,
   store = sharedLists,
   showSearch = true,
+  initialSettingsAction,
 }: {
   listId: string;
   onBack: () => void;
   store?: ListStore;
   showSearch?: boolean;
+  initialSettingsAction?: "rename" | "delete";
 }) {
   const t = useT();
   const list = store.useList(listId);
@@ -191,7 +188,12 @@ export function ListDetail({
               ` · ${t("Updated {when}", { when: relativeTime(list.updatedAt) })}`}
           </p>
         </div>
-        <ListSettingsMenu list={list} onDeleted={onBack} store={store} />
+        <ListSettingsMenu
+          list={list}
+          onDeleted={onBack}
+          store={store}
+          initialAction={initialSettingsAction}
+        />
       </div>
 
       {showSearch && <AddTitleSearch list={list} store={store} />}
@@ -219,7 +221,7 @@ export function ListDetail({
                 dragCleanupRef.current ? "opacity-40 cursor-grabbing" : "cursor-grab"
               }`}
             >
-              <PickCard meta={itemToMeta(it)} />
+              <PickCard meta={itemToMeta(it)} membership={{ kind: "list", id: list.id, store }} />
               <button
                 type="button"
                 aria-label={t("Remove from list")}

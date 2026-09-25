@@ -57,7 +57,8 @@ function idKeys(ids: RawIds | undefined, kind: "movie" | "show"): string[] {
   if (!ids) return [];
   const keys: string[] = [];
   if (ids.imdb) keys.push(ids.imdb);
-  if (ids.tmdb != null) keys.push(kind === "movie" ? `tmdb:movie:${ids.tmdb}` : `tmdb:tv:${ids.tmdb}`);
+  if (ids.tmdb != null)
+    keys.push(kind === "movie" ? `tmdb:movie:${ids.tmdb}` : `tmdb:tv:${ids.tmdb}`);
   if (ids.mal != null) keys.push(`mal:${ids.mal}`);
   if (ids.kitsu != null) keys.push(`kitsu:${ids.kitsu}`);
   if (ids.anilist != null) keys.push(`anilist:${ids.anilist}`);
@@ -78,10 +79,13 @@ subscribeSession(() => {
   cacheMarker = null;
 });
 
-async function pull(): Promise<SimklData> {
+async function pull(strict = false): Promise<SimklData> {
   const data = await simklRequest<RawAllItems>(
     "/sync/all-items/all/all?extended=full&episode_watched_at=yes",
-  ).catch(() => ({}) as RawAllItems);
+  ).catch((error: unknown) => {
+    if (strict) throw error;
+    return {} as RawAllItems;
+  });
   const statuses = new Map<string, WatchlistStatus>();
   const watched = new Map<string, Set<string>>();
   const add = (entries: RawEntry[] | undefined, kind: "movie" | "show") => {
@@ -126,10 +130,22 @@ export async function loadSimklWatchedMap(): Promise<Map<string, Set<string>>> {
   return (await loadData()).watched;
 }
 
-export function statusForId(
-  map: Map<string, WatchlistStatus>,
-  id: string,
-): WatchlistStatus | null {
+/** Explicit mutations require a successful read, never the display cache's empty fallback. */
+export async function readSimklStateStrict(target: SimklTarget) {
+  const data = await pull(true);
+  const keys = targetKeys(target);
+  return {
+    status: keys.map((key) => data.statuses.get(key)).find(Boolean) ?? null,
+    watched: keys.map((key) => data.watched.get(key)).find(Boolean) ?? new Set<string>(),
+  };
+}
+
+export function invalidateSimklListStatus(): void {
+  cache = null;
+  cacheMarker = null;
+}
+
+export function statusForId(map: Map<string, WatchlistStatus>, id: string): WatchlistStatus | null {
   return map.get(id) ?? null;
 }
 

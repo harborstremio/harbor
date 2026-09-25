@@ -9,6 +9,7 @@ import { useLiveImdbRating } from "@/lib/live-imdb";
 import { useT } from "@/lib/i18n";
 import { ImdbIcon } from "../icons/imdb-icon";
 import type { LightboxState } from "./types";
+import { useTitleContext } from "@/components/context-menu/use-title-context";
 
 export function SidePanel({
   meta,
@@ -23,24 +24,28 @@ export function SidePanel({
 }) {
   const t = useT();
   const { settings } = useSettings();
-  const [stills, setStills] = useState<string[]>([]);
+  const [loadedStills, setStills] = useState<{ id: string; urls: string[] }>({
+    id: meta.id,
+    urls: [],
+  });
+  const stills = loadedStills.id === meta.id ? loadedStills.urls : [];
   const description = useLocalizedOverview(meta);
   const live = useLiveImdbRating(meta);
 
   useEffect(() => {
     if (!settings.tmdbKey) {
-      setStills([]);
+      setStills({ id: meta.id, urls: [] });
       return;
     }
     let cancelled = false;
     tmdbMovieImages(settings.tmdbKey, meta.id)
       .then((urls) => {
         if (cancelled) return;
-        setStills(urls);
+        setStills({ id: meta.id, urls });
       })
       .catch(() => {
         if (cancelled) return;
-        setStills([]);
+        setStills({ id: meta.id, urls: [] });
       });
     return () => {
       cancelled = true;
@@ -75,6 +80,7 @@ export function SidePanel({
       <div className="grid grid-cols-2 gap-2">
         {tiles.map((src, i) => (
           <Still
+            meta={meta}
             key={`${meta.id}-${i}`}
             src={src}
             alt={meta.name}
@@ -106,22 +112,28 @@ export function SidePanel({
 }
 
 function Still({
+  meta,
   src,
   alt,
   onClick,
   expandLabel,
 }: {
+  meta: Meta;
   src: string | undefined;
   alt: string;
   onClick?: () => void;
   expandLabel: string;
 }) {
+  const onContextMenu = useTitleContext(meta, src);
   if (!src) {
     return <div className="aspect-[16/9] rounded-md bg-elevated/45" />;
   }
   if (!onClick) {
     return (
-      <div className="relative aspect-[16/9] overflow-hidden rounded-md border border-edge-soft">
+      <div
+        onContextMenu={onContextMenu}
+        className="relative aspect-[16/9] overflow-hidden rounded-md border border-edge-soft"
+      >
         <img
           src={src}
           alt={alt}
@@ -135,6 +147,7 @@ function Still({
     <button
       type="button"
       onClick={onClick}
+      onContextMenu={onContextMenu}
       aria-label={expandLabel}
       className="group/still relative aspect-[16/9] overflow-hidden rounded-md border border-edge-soft transition-colors duration-200 hover:border-ink"
     >

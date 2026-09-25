@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { useContextTarget } from "@/lib/context-menu";
 import { fetchImageObjectUrl, IMAGE_FALLBACK_HEADERS } from "./reader-utils";
 
 type Status = "loading" | "loaded" | "error";
@@ -31,8 +32,7 @@ export function PageImage({
   const autoRetried = useRef(false);
   const prevUrl = useRef(url);
 
-  const wantHeaderFetch =
-    isTauri && !!headers && Object.keys(headers).length > 0 && !headerFailed;
+  const wantHeaderFetch = isTauri && !!headers && Object.keys(headers).length > 0 && !headerFailed;
   const nativeFetch = wantHeaderFetch || (isTauri && nativeFallback);
 
   const failHeaders = () => {
@@ -87,6 +87,13 @@ export function PageImage({
 
   const rawSrc = bust ? `${url}${url.includes("?") ? "&" : "?"}h=${bust}` : url;
   const src = nativeFetch ? blobUrl : rawSrc;
+  const imageTarget = useContextTarget<HTMLImageElement>(() => ({
+    kind: "content",
+    label: t("Manga page"),
+    // Header-authorized images stay tied to the bytes this reader already owns.
+    // Never add source headers or a private server URL to generic image metadata.
+    image: src ? { src, label: t("Manga page") } : undefined,
+  }));
 
   const retry = () => {
     setStatus("loading");
@@ -114,6 +121,7 @@ export function PageImage({
     >
       {src && (
         <img
+          ref={imageTarget}
           key={src}
           src={src}
           alt=""

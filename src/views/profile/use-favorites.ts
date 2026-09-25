@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { safeFetch } from "@/lib/safe-fetch";
 import { useT } from "@/lib/i18n";
-import { authToken } from "@/lib/theme-auth";
+import { authToken, currentAuthor } from "@/lib/theme-auth";
+import { activeProfileId } from "@/lib/active-profile-id";
+import { appendProfileFavorite, readOwnFavoriteSnapshot } from "@/lib/profile-favorite-actions";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 import {
   searchFavorites,
@@ -18,6 +20,88 @@ const BASE = `${HARBOR_API_BASE}/themes/api/social`;
 export const FAVORITE_DISPLAY_CAP = 12;
 export const FAVORITE_STORE_CAP = 12;
 export const FAVORITE_KINDS: FavoriteKind[] = ["game", "book", "music"];
+const favoriteChanges = new Set<(handle: string, lists: FavoriteLists) => void>();
+let changingFavorites = false;
+const ownFavorites = new Map<string, { lists: FavoriteLists; at: number }>();
+const loadingOwn = new Map<string, Promise<void>>();
+function ownKey() {
+  return `${activeProfileId() ?? ""}:${currentAuthor()?.handle ?? ""}`;
+}
+export function isInOwnProfile(item: FavoriteMedia): boolean | undefined {
+  const value = ownFavorites.get(ownKey());
+  return value?.lists[item.kind].some((entry) => entry.id === item.id);
+}
+/** Read once on demand for an opened menu, never once per poster render. */
+export function loadOwnFavoritesForContext(): Promise<void> {
+  const handle = currentAuthor()?.handle;
+  if (!handle) return Promise.resolve();
+  const key = ownKey();
+  const token = authToken();
+  const cached = ownFavorites.get(key);
+  if (cached && Date.now() - cached.at < 30_000) return Promise.resolve();
+  const pending = loadingOwn.get(key);
+  if (pending) return pending;
+  const request = fetchFavorites(handle)
+    .then((lists) => {
+      if (ownKey() === key && authToken() === token)
+        ownFavorites.set(key, { lists, at: Date.now() });
+    })
+    .finally(() => loadingOwn.delete(key));
+  loadingOwn.set(key, request);
+  return request;
+}
+
+async function changeOwnFavorites(
+  transform: (current: FavoriteLists) => FavoriteLists,
+): Promise<ProfileSummary | null> {
+  const handle = currentAuthor()?.handle;
+  const profile = activeProfileId();
+  const key = ownKey();
+  const token = authToken();
+  if (!handle) throw new Error("Sign in to Harbor to add items to your profile.");
+  if (changingFavorites) throw new Error("A profile update is already in progress.");
+  changingFavorites = true;
+  try {
+    const response = await safeFetch(`${BASE}/u/${encodeURIComponent(handle)}`, {
+      headers: authHeaders(),
+    });
+    if (!response.ok)
+      throw new Error("Your profile items could not be read safely. No changes were made.");
+    const previous = readOwnFavoriteSnapshot(await response.json(), handle);
+    if (
+      currentAuthor()?.handle !== handle ||
+      activeProfileId() !== profile ||
+      authToken() !== token
+    )
+      throw new Error("The active profile changed.");
+    const next = transform(previous);
+    if (next === previous) {
+      ownFavorites.set(key, { lists: previous, at: Date.now() });
+      return null;
+    }
+    if (FAVORITE_KINDS.some((kind) => next[kind].length > FAVORITE_STORE_CAP))
+      throw new Error("Your profile section is full. Remove an item before adding another.");
+    const summary = await saveFavorites(next);
+    const echoed = readOwnFavoriteSnapshot(summary, handle);
+    if (FAVORITE_KINDS.some((kind) => !persisted(next[kind], echoed[kind])))
+      throw new Error("The server did not save the requested profile items.");
+    ownFavorites.set(key, { lists: echoed, at: Date.now() });
+    if (
+      currentAuthor()?.handle !== handle ||
+      activeProfileId() !== profile ||
+      authToken() !== token
+    )
+      throw new Error("The update was saved to the previous profile. The active profile changed.");
+    for (const listener of favoriteChanges) listener(handle, echoed);
+    return summary;
+  } finally {
+    changingFavorites = false;
+  }
+}
+
+export async function addFavoriteToMyProfile(item: FavoriteMedia): Promise<void> {
+  await changeOwnFavorites((previous) => appendProfileFavorite(previous, item, FAVORITE_STORE_CAP));
+}
 
 const MIN_QUERY = 2;
 const DEBOUNCE_MS = 300;
@@ -130,8 +214,7 @@ export async function saveFavorites(lists: FavoriteLists): Promise<ProfileSummar
 function persisted(sent: FavoriteMedia[], echoed: FavoriteMedia[]): boolean {
   if (sent.length === 0) return echoed.length === 0;
   if (echoed.length !== sent.length) return false;
-  const ids = new Set(echoed.map((m) => m.id));
-  return sent.every((m) => ids.has(m.id));
+  return sent.every((item, index) => echoed[index].id === item.id);
 }
 
 export type FavoritesController = {
@@ -154,6 +237,15 @@ export function useFavorites(handle: string, initial?: FavoriteLists | null): Fa
   const [attempt, setAttempt] = useState(0);
   const entriesRef = useRef(entries);
   entriesRef.current = entries;
+  useEffect(() => {
+    const changed = (owner: string, next: FavoriteLists) => {
+      if (owner.toLowerCase() === handle.toLowerCase()) setEntries(next);
+    };
+    favoriteChanges.add(changed);
+    return () => {
+      favoriteChanges.delete(changed);
+    };
+  }, [handle]);
 
   useEffect(() => {
     if (attempt === 0 && hasSeed) {
@@ -190,7 +282,8 @@ export function useFavorites(handle: string, initial?: FavoriteLists | null): Fa
     setEntries(merged);
     setSaving(true);
     try {
-      const summary = await saveFavorites(merged);
+      const summary = await changeOwnFavorites((latest) => ({ ...latest, [kind]: capped }));
+      if (!summary) return null;
       const echoed = readFavorites(summary);
       if (!persisted(capped, echoed[kind])) {
         setEntries(prev);

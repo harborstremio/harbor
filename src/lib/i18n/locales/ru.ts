@@ -5,6 +5,8 @@ import sportsStatistics from "./ru/sports-statistics";
 import sportsApi from "./ru/sports-api";
 import esportsArena from "./ru/esports-arena";
 import sportsHub from "./ru/sports-hub";
+import contextActionsFallback from "./context-actions-fallback";
+
 import ebookSources from "./ru/ebook-sources";
 import settingsRefinements from "./ru/settings-refinements";
 import gap from "./ru/gap";
@@ -56,6 +58,8 @@ import bpSports from "./ru/bp-sports";
 const ru: Record<string, string> = {
   ...videoCast,
   ...music,
+  ...contextActionsFallback,
+
   ...ebookSources,
   ...coverage,
   ...uiFallback,

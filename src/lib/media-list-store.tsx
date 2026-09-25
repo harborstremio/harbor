@@ -1,6 +1,13 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useProfiles } from "./profiles";
 import { persistableAddonOrigin, persistableVideos, type Meta } from "./cinemeta";
+import {
+  captureMembershipProfile,
+  isMembershipItemInput,
+  type MembershipProfile,
+  type MembershipResult,
+  type MembershipFailureReason,
+} from "./membership-operations";
 
 export type MediaEntry = {
   id: string;
@@ -173,5 +180,118 @@ export function createMediaListStore(prefix: string) {
     return readMap(keyFor(pid)).has(id);
   }
 
-  return { Provider, useStore, useIn, removeData, setExternal, hasExternal };
+  function readExternalSnapshot(profile: MembershipProfile):
+    | {
+        status: "ready";
+        key: string;
+        entries: Array<string | { id: string; [key: string]: unknown }>;
+      }
+    | { status: "error"; reason: MembershipFailureReason } {
+    const current = captureMembershipProfile();
+    if (!current) return { status: "error", reason: "storage-failed" };
+    if (
+      current.activeId !== profile.activeId ||
+      current.settingsLinked !== profile.settingsLinked
+    ) {
+      return { status: "error", reason: "profile-changed" };
+    }
+    const key = keyFor(profile.activeId ?? "default");
+    let raw: string | null;
+    try {
+      raw = localStorage.getItem(key);
+    } catch {
+      return { status: "error", reason: "storage-failed" };
+    }
+    let entries: unknown;
+    try {
+      entries = raw == null ? [] : JSON.parse(raw);
+    } catch {
+      return { status: "error", reason: "invalid-data" };
+    }
+    if (
+      !Array.isArray(entries) ||
+      !entries.every(
+        (entry) => typeof entry === "string" || (entry && typeof entry.id === "string"),
+      )
+    ) {
+      return { status: "error", reason: "invalid-data" };
+    }
+    return { status: "ready", key, entries };
+  }
+
+  function readExternalMembership(profile: MembershipProfile, id: string) {
+    if (!isMembershipItemInput({ id })) return { status: "error", reason: "invalid-data" } as const;
+    const snapshot = readExternalSnapshot(profile);
+    return snapshot.status === "error"
+      ? snapshot
+      : {
+          status: "ready" as const,
+          present: snapshot.entries.some(
+            (entry) => (typeof entry === "string" ? entry : entry.id) === id,
+          ),
+        };
+  }
+
+  function subscribeExternal(listener: () => void): () => void {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  }
+
+  function setExternalSafely(
+    profile: MembershipProfile,
+    input: MediaInput,
+    on: boolean,
+  ): MembershipResult {
+    if (!isMembershipItemInput(input)) return { status: "error", reason: "invalid-data" };
+    const snapshot = readExternalSnapshot(profile);
+    if (snapshot.status === "error") return snapshot;
+    const { key, entries } = snapshot;
+    const index = entries.findIndex(
+      (entry) => (typeof entry === "string" ? entry : entry.id) === input.id,
+    );
+    if (on && index >= 0) return { status: "already-present" };
+    if (!on && index < 0) return { status: "removed" };
+    if (!on) {
+      for (let i = entries.length - 1; i >= 0; i--) {
+        const entry = entries[i];
+        if ((typeof entry === "string" ? entry : entry.id) === input.id) entries.splice(i, 1);
+      }
+    } else {
+      entries.push({
+        id: input.id,
+        type: coerceType(input.type, input.id),
+        name: input.name ?? "",
+        poster: input.poster,
+        addedAt: Date.now(),
+        addonOrigin: persistableAddonOrigin(input.addonOrigin),
+        videos: persistableVideos(input.videos),
+      });
+    }
+    try {
+      localStorage.setItem(key, JSON.stringify(entries));
+    } catch {
+      return { status: "error", reason: "storage-failed" };
+    }
+    emitExternal();
+    return { status: on ? "added" : "removed" };
+  }
+
+  function addExternalSafely(profile: MembershipProfile, input: MediaInput): MembershipResult {
+    return setExternalSafely(profile, input, true);
+  }
+
+  return {
+    Provider,
+    useStore,
+    useIn,
+    removeData,
+    setExternal,
+    hasExternal,
+    addExternalSafely,
+    setExternalSafely,
+    readExternalMembership,
+    subscribeExternal,
+  };
 }

@@ -8,6 +8,8 @@ import { useT } from "@/lib/i18n";
 import { fetchUserRatings } from "@/lib/social/ratings-api";
 import type { PublicRating, RatingCounts } from "@/lib/ratings/types";
 import { timeAgo } from "@/views/profile/profile-bits";
+import { profileMediaMeta } from "@/lib/social/profile-media-meta";
+import { useTitleContext } from "@/components/context-menu/use-title-context";
 
 const TABS: Array<{ id: string; label: string; countKey: keyof RatingCounts }> = [
   { id: "all", label: "All", countKey: "total" },
@@ -120,7 +122,9 @@ export function UserRatings({
                 }`}
               >
                 {t(tab.label)}
-                <span className={`tabular-nums ${active ? "text-canvas/70" : "text-ink-subtle"}`}>{n}</span>
+                <span className={`tabular-nums ${active ? "text-canvas/70" : "text-ink-subtle"}`}>
+                  {n}
+                </span>
               </button>
             );
           })}
@@ -174,21 +178,33 @@ function RatingRow({
     : undefined;
 
   const poster = useRatingPoster(r.itemKey, r.mediaType, r.title, r.posterUrl);
+  const onContextMenu = useTitleContext(
+    profileMediaMeta(r.itemKey, r.mediaType, { name: r.title, poster }),
+    poster,
+  );
   return (
     <div className="flex gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-3.5">
       <button
         type="button"
         onClick={open}
+        onContextMenu={onContextMenu}
         disabled={!open}
         className="w-16 shrink-0 disabled:cursor-default"
       >
-        <Poster src={poster} seed={r.title} ratio="portrait" lazy className="rounded-[8px] ring-1 ring-edge-soft" />
+        <Poster
+          src={poster}
+          seed={r.title}
+          ratio="portrait"
+          lazy
+          className="rounded-[8px] ring-1 ring-edge-soft"
+        />
       </button>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
           <button
             type="button"
             onClick={open}
+            onContextMenu={onContextMenu}
             disabled={!open}
             className="truncate text-start text-[15px] font-semibold text-ink hover:underline disabled:cursor-default disabled:no-underline"
           >

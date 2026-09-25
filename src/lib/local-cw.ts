@@ -93,14 +93,17 @@ function readAll(): Record<string, LocalCwEntry> {
   return next;
 }
 
-function writeAll(all: Record<string, LocalCwEntry>): void {
-  cache = all;
-  cacheProfile = activeProfileId();
+function writeAll(all: Record<string, LocalCwEntry>, acknowledged = false): void {
   try {
     localStorage.setItem(storeKey(), JSON.stringify(all));
-  } catch {
-    /* noop */
+  } catch (error) {
+    if (acknowledged)
+      throw new Error("Could not save the change. Check available storage and try again.", {
+        cause: error,
+      });
   }
+  cache = all;
+  cacheProfile = activeProfileId();
   version += 1;
   for (const fn of subs) fn();
 }
@@ -131,12 +134,12 @@ export function localCwEntry(id: string): LocalCwEntry | null {
   return readAll()[id] ?? null;
 }
 
-export function clearLocalCw(id: string): void {
+export function clearLocalCw(id: string, options: { acknowledged?: boolean } = {}): void {
   const all = readAll();
   if (!(id in all)) return;
   const next = { ...all };
   delete next[id];
-  writeAll(next);
+  writeAll(next, options.acknowledged);
 }
 
 export function subscribeLocalCw(fn: () => void): () => void {

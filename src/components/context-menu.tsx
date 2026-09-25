@@ -1,6 +1,5 @@
 import {
   ArrowDown,
-  ArrowDownToLine,
   ArrowLeft,
   ArrowUp,
   BookOpen,
@@ -11,14 +10,10 @@ import {
   ClipboardPaste,
   Copy,
   Download,
-  ExternalLink,
   Eye,
   EyeOff,
   Heart,
   Info,
-  Link2,
-  Magnet,
-  Maximize,
   Navigation,
   Pencil,
   RotateCcw,
@@ -27,30 +22,34 @@ import {
   Wallpaper,
   X,
 } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useActiveAddon } from "@/lib/active-addon";
 import { copyText } from "@/components/player/copy-link-button";
 import { emitListToast } from "@/components/lists/list-toast";
-import { TvModalClose } from "@/components/tv-modal-close";
 import { shareDeepLink } from "@/lib/deep-link";
-import { magnetFromHash } from "@/lib/debrid/types";
-import { openUrl } from "@/lib/window";
+import { useAuth } from "@/lib/auth";
 import {
   useContextMenu,
+  registeredContextTarget,
   type SubtitleContextDetails,
   type ViewSummonable,
 } from "@/lib/context-menu";
 import { t as translate, useT } from "@/lib/i18n";
-import { usePlayerActions } from "@/lib/player-actions";
+import { currentPlayerActions, usePlayerActions } from "@/lib/player-actions";
+import { capturePlaybackActor, isPlaybackActorCurrent } from "@/lib/playback-history";
 import { useTogether } from "@/lib/together/provider";
 import type { ParticipantLocation } from "@/lib/together/protocol";
 import { useView } from "@/lib/view";
-import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
-import { markMetaWatched, unmarkMetaWatched } from "@/lib/mark-watched";
-import { useMetaWatched } from "@/lib/watched-flag";
+import { useInWatchlist } from "@/lib/watchlist";
+import {
+  setContextFavorite,
+  setContextWatchlist,
+  setContextWatched,
+  requireMediaActionSuccess,
+} from "@/lib/media-context-actions";
+import { useContextWatchedState } from "@/lib/context-watched-state";
 import { useTmdbImdbId } from "@/lib/providers/tmdb";
-import { useIsFavorite, useMediaFavorites } from "@/lib/media-favorites";
-import { toggleAutoDownload, useIsAutoDownloaded } from "@/lib/auto-download";
+import { useIsFavorite } from "@/lib/media-favorites";
 import { clearTitleBackdrop, getTitleBackdrop, setTitleBackdrop } from "@/lib/title-backdrop";
 import { MyListSubmenu } from "./context-menu/my-list-submenu";
 import { useSettings } from "@/lib/settings";
@@ -62,7 +61,6 @@ import {
   toggleNavHidden,
 } from "@/chrome/nav-items";
 import { setNavEditMode, useNavEditMode } from "@/chrome/nav-edit-mode";
-import { useProfiles } from "@/lib/profiles";
 import { useIsMangaFavorite, useMangaFavorites } from "@/lib/manga-favorites";
 import {
   recordMangaChapterRead,
@@ -77,9 +75,36 @@ import { requestMangaChapterRead, setMangaReadIntent } from "@/lib/manga/read-in
 import { mangaLists } from "@/lib/manga-lists";
 import { mangaChapters } from "@/lib/manga/api";
 import { resolveReaderChapters } from "@/lib/manga/chapter-identity";
+import {
+  clickedContent,
+  contextPointerPoint,
+  dispatchKeyboardContextMenu,
+  editingTarget,
+} from "@/lib/context-content";
+import { useProfiles } from "@/lib/profiles";
+import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
+import { MenuSurface, menuItemClass, useMenuExecution } from "./context-menu/menu-surface";
+import { ActionItems, QuickActions, MenuIcon } from "./context-menu/action-items";
+import { findAction, type ActionSource } from "@/lib/context-actions";
+import {
+  contextNavigationFooter,
+  omitContextActions,
+  partitionContextActions,
+} from "@/lib/context-quick-actions";
+import { contentActions } from "./context-menu/content-actions";
+import { ContextImageViewer } from "./context-image-viewer";
+import type { ContextImage } from "@/lib/context-image";
+import { parseExternalLink } from "@/lib/social/external-link-policy";
+import { usePageContextTarget } from "@/chrome/context-page-navigation";
+import { isPageContextBackground } from "@/lib/context-page-background";
+import { useManualDownload } from "./context-menu/use-manual-download";
+import { LastPlaybackCommand } from "./context-menu/last-playback-command";
+import { MenuBrandFooter } from "./context-menu/menu-brand-footer";
+import { playerContextSources } from "./context-menu/player-actions";
 
 const MENU_WIDTH = 220;
 const SUBTITLE_MENU_WIDTH = 360;
+const UNSAFE_MEDIA_PROVIDER_POLICY = "block" as const;
 
 async function readClipboardText(): Promise<string> {
   if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
@@ -91,14 +116,6 @@ async function readClipboardText(): Promise<string> {
   return navigator.clipboard.readText();
 }
 
-function isEditableTarget(el: EventTarget | null): el is HTMLElement {
-  if (!(el instanceof HTMLElement)) return false;
-  if (el instanceof HTMLInputElement) return !el.disabled && !el.readOnly;
-  if (el instanceof HTMLTextAreaElement) return !el.disabled && !el.readOnly;
-  if (el.isContentEditable) return true;
-  return false;
-}
-
 const VIEW_LABELS: Record<ViewSummonable, string> = {
   home: "Home",
   discover: "Discover",
@@ -108,7 +125,11 @@ const VIEW_LABELS: Record<ViewSummonable, string> = {
 };
 
 export function ContextMenu() {
-  const { state, close, open } = useContextMenu();
+  const { state, close: closeCurrent, completeClose, open } = useContextMenu();
+  const close = useCallback(
+    (restoreFocus = true) => closeCurrent(restoreFocus, state?.session),
+    [closeCurrent, state?.session],
+  );
   const {
     openMeta,
     openManga,
@@ -120,30 +141,173 @@ export function ContextMenu() {
     openAddonDetail,
     openSettings,
     meta: currentMeta,
-    personId,
-    mangaId,
-    ebookId,
     topKind,
+    topPath,
     player,
   } = useView();
   const { snapshot, sendSummon, hostLocation, clientId } = useTogether();
-  const playerActions = usePlayerActions();
-  const menuMeta = currentMeta ?? player?.meta ?? null;
+  const availablePlayerActions = usePlayerActions();
+  const playerActions =
+    state?.target.kind === "meta" && state.target.player ? availablePlayerActions : null;
   const t = useT();
   const activeAddon = useActiveAddon();
-  const ref = useRef<HTMLDivElement>(null);
+  const { activeProfile } = useProfiles();
+  const { user: stremioUser } = useAuth();
+  const authorId = useSyncExternalStore(
+    subscribeAuthor,
+    () => currentAuthor()?.id ?? null,
+    () => null,
+  );
+  const pageContext = usePageContextTarget({ includePlayer: true });
+  const playerMenu = useRef({ session: state?.session, src: playerActions?.src });
+  if (playerMenu.current.session !== state?.session)
+    playerMenu.current = { session: state?.session, src: playerActions?.src };
+  const playerSource = playerMenu.current.src;
+  const readMenuPlayer = () => {
+    const current = currentPlayerActions();
+    return playerSource && current?.src === playerSource && state?.target.isValid?.() !== false
+      ? current
+      : null;
+  };
+  const { beginManualDownload, manualDownloadDialog } = useManualDownload({
+    actorKey: `${activeProfile?.id ?? ""}:${authorId ?? ""}:${stremioUser?._id ?? ""}`,
+  });
+  const [viewedImage, setViewedImage] = useState<{
+    image: ContextImage;
+    origin: HTMLElement | null;
+  } | null>(null);
+  const viewImage = (image: ContextImage) =>
+    setViewedImage({ image, origin: state?.origin ?? null });
+  useEffect(() => {
+    closeCurrent(false);
+    setViewedImage(null);
+  }, [topPath, activeProfile?.id, authorId, stremioUser?._id, closeCurrent]);
+  const { openAt } = useContextMenu();
+  useEffect(() => {
+    const keyboardContext = (event: KeyboardEvent) => {
+      if (
+        event.defaultPrevented ||
+        (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10"))
+      )
+        return;
+      const origin = document.activeElement;
+      if (
+        !(origin instanceof HTMLElement) ||
+        editingTarget(origin) ||
+        origin.closest("[data-harbor-context-layer],[data-bp-root]")
+      )
+        return;
+      event.preventDefault();
+      dispatchKeyboardContextMenu(origin);
+    };
+    document.addEventListener("keydown", keyboardContext);
+    return () => document.removeEventListener("keydown", keyboardContext);
+  }, []);
+  useEffect(() => {
+    if (!("__TAURI_INTERNALS__" in window)) return;
+    let cancelled = false;
+    let requestEpoch = 0;
+    const invalidateRequest = () => {
+      requestEpoch++;
+    };
+    // A delayed frame acknowledgement must not replace a newer menu or undo
+    // an Escape/click that the user made while the native request was pending.
+    document.addEventListener("contextmenu", invalidateRequest, true);
+    document.addEventListener("pointerdown", invalidateRequest, true);
+    document.addEventListener("keydown", invalidateRequest, true);
+    let unsubscribe: (() => void) | undefined;
+    void import("@tauri-apps/api/event")
+      .then(async ({ listen }) => {
+        unsubscribe = await listen<{
+          requestId: number;
+          clientX: number;
+          clientY: number;
+          imageSrc?: string;
+          linkUrl?: string;
+          selection?: string;
+        }>("harbor:frame-context-menu", async ({ payload }) => {
+          const epoch = ++requestEpoch;
+          if (
+            cancelled ||
+            !Number.isFinite(payload.requestId) ||
+            !Number.isFinite(payload.clientX) ||
+            !Number.isFinite(payload.clientY)
+          )
+            return;
+          const imageSrc =
+            typeof payload.imageSrc === "string" &&
+            /^(https?:|data:image\/)/i.test(payload.imageSrc)
+              ? payload.imageSrc
+              : undefined;
+          const link =
+            typeof payload.linkUrl === "string" && parseExternalLink(payload.linkUrl).ok
+              ? payload.linkUrl
+              : undefined;
+          const selection =
+            typeof payload.selection === "string" ? payload.selection.slice(0, 100_000) : undefined;
+          if (!imageSrc && !link && !selection) return;
+          const { invoke } = await import("@tauri-apps/api/core");
+          const accepted = await invoke<boolean>("harbor_ack_frame_context", {
+            requestId: payload.requestId,
+            handled: true,
+          }).catch(() => false);
+          if (!accepted || cancelled || epoch !== requestEpoch) return;
+          openAt(
+            { x: payload.clientX, y: payload.clientY },
+            {
+              kind: "content",
+              navigation: false,
+              link,
+              selection,
+              image: imageSrc ? { src: imageSrc } : undefined,
+            },
+          );
+        });
+        if (cancelled) unsubscribe();
+      })
+      .catch(() => {
+        /* Native frame menus retain their fallback if the bridge is unavailable. */
+      });
+    return () => {
+      cancelled = true;
+      document.removeEventListener("contextmenu", invalidateRequest, true);
+      document.removeEventListener("pointerdown", invalidateRequest, true);
+      document.removeEventListener("keydown", invalidateRequest, true);
+      unsubscribe?.();
+    };
+  }, [topPath, activeProfile?.id, authorId, openAt]);
 
   const inSession = snapshot.state === "joined";
   const isHost = inSession && snapshot.hostClientId === clientId;
   const canGoToHost = inSession && !isHost && hostLocation != null;
   const targetMetaId = state?.target.kind === "meta" ? state.target.meta.id : undefined;
   const targetType = state?.target.kind === "meta" ? state.target.meta.type : undefined;
+  const targetEpisode = state?.target.kind === "meta" ? state.target.episode : undefined;
+  const episodeMetaId = targetEpisode?.sourceMetaId || targetMetaId;
+  const resolvedEpisodeImdb = useTmdbImdbId(episodeMetaId);
+  const episodeImdb = targetEpisode?.imdbId ?? resolvedEpisodeImdb;
   const targetImdb = useTmdbImdbId(targetMetaId);
-  const isWatched = useMetaWatched(targetMetaId, targetType, targetImdb);
+  const episodeScope =
+    state?.target.kind === "meta" && (state.target.watchScope === "episode" || !!targetEpisode);
+  const watchedState = useContextWatchedState(
+    state?.target.kind === "meta" &&
+      !playerActions &&
+      (targetType === "movie" || targetType === "series" || targetType === "anime") &&
+      (!episodeScope || targetEpisode)
+      ? {
+          meta: state.target.meta,
+          imdbId: episodeScope ? episodeImdb : targetImdb,
+          episode: targetEpisode,
+          episodeScope,
+        }
+      : null,
+    state?.session,
+  );
+  const [watchedError, setWatchedError] = useState<{ session: number; message: string } | null>(
+    null,
+  );
   const isWatchlisted = useInWatchlist(targetMetaId, [targetImdb]);
-  const { toggle: toggleFavorite } = useMediaFavorites();
   const isFav = useIsFavorite(targetMetaId);
-  const isAutoDl = useIsAutoDownloaded(targetMetaId ?? "");
   const { settings: appSettings, update: updateSettings } = useSettings();
   const navEditing = useNavEditMode();
   const commitNav = (next: typeof appSettings.navCustomization) =>
@@ -186,31 +350,30 @@ export function ContextMenu() {
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (e.defaultPrevented) return;
-      if (topKind === "settings") {
-        const el = isEditableTarget(e.target) ? e.target : null;
-        if (!el) return;
-        e.preventDefault();
-        const selection = window.getSelection()?.toString() ?? "";
-        open(e, { kind: "edit", element: el, selection });
+      if (editingTarget(e.target)) {
+        closeCurrent(false);
         return;
       }
-      if (topKind === "person") {
-        if (personId == null) return;
-        e.preventDefault();
-        open(e, { kind: "person", id: personId });
+      const el = e.target instanceof Element ? e.target : null;
+      if (el?.closest("[data-harbor-context-layer]")) return;
+      const registered = registeredContextTarget(el);
+      if (registered) {
+        open(e, registered);
         return;
       }
-      if (topKind === "manga") {
-        e.preventDefault();
-        if (mangaId) open(e, { kind: "manga", id: mangaId });
+      const content = clickedContent(e.target, contextPointerPoint(e));
+      if (content.selection || content.link || content.image) {
+        open(e, { kind: "content", ...content });
         return;
       }
-      if (topKind === "ebook" && ebookId) {
-        e.preventDefault();
-        open(e, { kind: "ebook", id: ebookId });
+      if (
+        pageContext &&
+        isPageContextBackground(el) &&
+        !el?.closest("[role='dialog'],[data-ebook-page],[data-bp-focusable]")
+      ) {
+        open(e, pageContext);
         return;
       }
-      if (e.target instanceof HTMLElement && e.target.closest("[data-person-card]")) return;
       const backdropEl =
         e.target instanceof HTMLElement ? e.target.closest("[data-title-backdrop]") : null;
       if (backdropEl && currentMeta) {
@@ -221,12 +384,19 @@ export function ContextMenu() {
           return;
         }
       }
-      if (menuMeta) {
-        e.preventDefault();
-        open(e, { kind: "meta", meta: menuMeta });
+      if (el?.closest("[data-harbor-player]") && player?.meta) {
+        const source = currentPlayerActions()?.src;
+        const actor = capturePlaybackActor();
+        open(e, {
+          kind: "meta",
+          meta: player.meta,
+          player: true,
+          isValid: () =>
+            !!source && currentPlayerActions()?.src === source && isPlaybackActorCurrent(actor),
+        });
         return;
       }
-      if (topKind === "addon-detail") {
+      if (topKind === "addon-detail" && inSession && isPageContextBackground(el)) {
         if (activeAddon) {
           e.preventDefault();
           open(e, { kind: "addon", addonId: activeAddon.id, label: activeAddon.name });
@@ -234,76 +404,109 @@ export function ContextMenu() {
         return;
       }
       const view = topKindToView(topKind);
-      if (view) {
+      if (view && inSession && isPageContextBackground(el)) {
         e.preventDefault();
         open(e, { kind: "view", view, label: translate(VIEW_LABELS[view]) });
       }
+      // App surfaces without a useful target deliberately have no page menu.
+      // Fields, selections and isolated frames have already retained their own handling.
+      if (el?.closest("#root")) e.preventDefault();
     };
     document.addEventListener("contextmenu", handler);
     return () => document.removeEventListener("contextmenu", handler);
-  }, [open, currentMeta, menuMeta, topKind, activeAddon, personId, mangaId, ebookId]);
+  }, [open, closeCurrent, currentMeta, player?.meta, topKind, activeAddon, pageContext, inSession]);
 
-  useEffect(() => {
-    if (!state) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [state, close]);
-
-  const [flipUp, setFlipUp] = useState(0);
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el || !state) {
-      setFlipUp(0);
-      return;
-    }
-    const measure = () => {
-      const estimatedHeight = state.target.kind === "subtitle" && state.target.details ? 460 : 120;
-      const anchorTop = Math.max(
-        8,
-        Math.min(state.pos.y, window.innerHeight - estimatedHeight - 8),
-      );
-      // Use layout height, not the opening animation's scaled rectangle.
-      const overflow = anchorTop + el.offsetHeight - (window.innerHeight - 8);
-      setFlipUp(Math.min(Math.max(0, overflow), anchorTop - 8));
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [state]);
-
-  useLayoutEffect(() => {
-    if (state?.target.kind !== "nav") return;
-    const trigger = document.activeElement;
-    const buttons = ref.current?.querySelectorAll<HTMLButtonElement>(
-      'button[role="menuitem"]:not(:disabled)',
+  const viewer = viewedImage ? (
+    <ContextImageViewer
+      image={viewedImage.image}
+      returnFocus={viewedImage.origin}
+      onClose={() => setViewedImage(null)}
+    />
+  ) : null;
+  if (!state)
+    return (
+      <>
+        {viewer}
+        {manualDownloadDialog}
+      </>
     );
-    buttons?.forEach((button, index) => {
-      button.tabIndex = index === 0 ? 0 : -1;
-    });
-    // Let the opening pointer event finish before moving focus into the menu.
-    const focusFrame = requestAnimationFrame(() => buttons?.[0]?.focus({ preventScroll: true }));
-    return () => {
-      cancelAnimationFrame(focusFrame);
-      if (trigger instanceof HTMLElement && trigger.isConnected)
-        trigger.focus({ preventScroll: true });
-    };
-  }, [state]);
-
-  if (!state) return null;
 
   const subtitleDetails = state.target.kind === "subtitle" ? (state.target.details ?? null) : null;
-  const menuWidth = subtitleDetails ? SUBTITLE_MENU_WIDTH : MENU_WIDTH;
-  const estimatedHeight = subtitleDetails ? 460 : 120;
-  const left = Math.max(8, Math.min(state.pos.x, window.innerWidth - menuWidth - 8));
-  const top = Math.max(8, Math.min(state.pos.y, window.innerHeight - estimatedHeight - 8));
+  const target = state.target;
+  const artwork =
+    target.image ??
+    (target.kind === "meta" && target.meta.poster
+      ? { src: target.meta.poster, publicUrl: target.meta.poster, label: target.meta.name }
+      : undefined);
+  const isPlayer = target.kind === "meta" && !!target.player;
+  const allowQuick =
+    target.navigation !== false &&
+    target.kind !== "edit" &&
+    target.kind !== "subtitle" &&
+    target.kind !== "backdrop" &&
+    !(target.kind === "meta" && target.player);
+  const navigation = () =>
+    (allowQuick || isPlayer) && pageContext?.kind === "actions" && pageContext.isValid?.() !== false
+      ? pageContext.actions()
+      : [];
+  const playerSources = isPlayer
+    ? playerContextSources(readMenuPlayer, () => findAction(navigation(), "page:go:settings"))
+    : null;
+  const availableActions = (source?: ActionSource) =>
+    source?.isValid?.() === false ? [] : (source?.actions() ?? []);
+  const makeParts = () => {
+    const entity =
+      target.kind === "actions"
+        ? availableActions(target)
+        : target.kind === "meta"
+          ? [...availableActions(target.primary), ...availableActions(target.extra)]
+          : [];
+    const content = contentActions(
+      { ...target, image: artwork },
+      viewImage,
+      target.kind === "content",
+    );
+    return allowQuick
+      ? partitionContextActions(entity, content, navigation())
+      : { quick: [], entity, content };
+  };
+  const parts = makeParts();
+  const filteredSource = (source: ActionSource): ActionSource => ({
+    ...source,
+    actions: () =>
+      omitContextActions(
+        source.actions(),
+        new Set([
+          ...makeParts().quick.map((action) => action.id),
+          ...contextNavigationFooter(navigation(), makeParts().quick).map((action) => action.id),
+        ]),
+      ),
+  });
+  const quickSource: ActionSource = playerSources?.quick ?? {
+    actions: () => makeParts().quick,
+    isValid: target.isValid,
+  };
+  const menuWidth = subtitleDetails
+    ? SUBTITLE_MENU_WIDTH
+    : allowQuick || isPlayer
+      ? 264
+      : MENU_WIDTH;
 
   const items: React.ReactNode[] = [];
+  let membershipMenu: {
+    index: number;
+    props: React.ComponentProps<typeof MyListSubmenu>;
+  } | null = null;
+  if (state.target.kind === "meta" && state.target.primary)
+    items.push(
+      <ActionItems key="primary" source={filteredSource(state.target.primary)} onClose={close} />,
+      <Separator key="primary-separator" />,
+    );
 
-  if (canGoToHost) {
+  if (
+    canGoToHost &&
+    (state.target.kind === "view" || (state.target.kind === "meta" && state.target.player))
+  ) {
     items.push(
       <Item
         key="go-to-host"
@@ -318,20 +521,28 @@ export function ContextMenu() {
 
   if (state.target.kind === "meta") {
     const meta = state.target.meta;
+    const organizedMedia = meta.type === "movie" || meta.type === "series" || meta.type === "anime";
     const handleDetails = () => {
-      openMeta(meta);
+      if (meta.type === "manga") openManga(meta.id);
+      else openMeta(meta, targetEpisode ? { episodeHint: targetEpisode } : undefined);
       close();
     };
-    const handleWatchlist = () => {
-      toggleWatchlist({
-        id: meta.id,
-        type: meta.type,
-        name: meta.name,
-        poster: meta.poster,
-        imdbId: targetImdb,
-        addonOrigin: meta.addonOrigin,
-        videos: meta.videos,
-      });
+    const handleWatchlist = async () => {
+      requireMediaActionSuccess(
+        await setContextWatchlist(
+          {
+            id: meta.id,
+            type: meta.type,
+            name: meta.name,
+            poster: meta.poster,
+            imdbId: targetImdb,
+            addonOrigin: meta.addonOrigin,
+            videos: meta.videos,
+          },
+          !isWatchlisted,
+          UNSAFE_MEDIA_PROVIDER_POLICY,
+        ),
+      );
       close();
     };
     const handleBring = () => {
@@ -356,94 +567,179 @@ export function ContextMenu() {
         />,
       );
     }
-    items.push(
-      <Item
-        key="watchlist"
-        icon={
-          isWatchlisted ? (
-            <BookmarkCheck size={14} strokeWidth={2} />
-          ) : (
-            <Bookmark size={14} strokeWidth={2} />
-          )
-        }
-        label={isWatchlisted ? t("In watchlist") : t("Add to watchlist")}
-        onClick={handleWatchlist}
-        accent={isWatchlisted}
-      />,
-    );
-    items.push(
-      <Item
-        key="favorite"
-        icon={<Heart size={14} strokeWidth={2} fill={isFav ? "currentColor" : "none"} />}
-        label={isFav ? t("Favorited") : t("Favorite")}
-        onClick={() => {
-          toggleFavorite({
+    if (!state.target.player && (meta.type === "movie" || meta.type === "series")) {
+      items.push(
+        <Item
+          key="download"
+          icon={<Download size={14} strokeWidth={2} />}
+          label={t("Download")}
+          onClick={() => {
+            beginManualDownload(meta, targetEpisode, state.origin);
+            close(false);
+          }}
+        />,
+      );
+    }
+    if (organizedMedia)
+      items.push(
+        <Item
+          key="watchlist"
+          icon={
+            isWatchlisted ? (
+              <BookmarkCheck size={14} strokeWidth={2} />
+            ) : (
+              <Bookmark size={14} strokeWidth={2} />
+            )
+          }
+          label={isWatchlisted ? t("Remove from watchlist") : t("Add to watchlist")}
+          onClick={handleWatchlist}
+          accent={isWatchlisted}
+        />,
+      );
+    if (organizedMedia)
+      items.push(
+        <Item
+          key="favorite"
+          icon={<Heart size={14} strokeWidth={2} fill={isFav ? "currentColor" : "none"} />}
+          label={isFav ? t("Remove from favorites") : t("Add to favorites")}
+          onClick={async () => {
+            requireMediaActionSuccess(
+              await setContextFavorite(
+                {
+                  id: meta.id,
+                  type: meta.type,
+                  name: meta.name,
+                  poster: meta.poster,
+                  addonOrigin: meta.addonOrigin,
+                  videos: meta.videos,
+                },
+                !isFav,
+              ),
+            );
+            close();
+          }}
+          accent={isFav}
+        />,
+      );
+    if (organizedMedia || state.target.membership)
+      membershipMenu = {
+        index: items.length,
+        props: {
+          item: {
             id: meta.id,
             type: meta.type,
             name: meta.name,
             poster: meta.poster,
             addonOrigin: meta.addonOrigin,
             videos: meta.videos,
-          });
-          close();
-        }}
-        accent={isFav}
-      />,
-    );
-    items.push(
-      <MyListSubmenu
-        key="local-list"
-        item={{
-          id: meta.id,
-          type: meta.type,
-          name: meta.name,
-          poster: meta.poster,
-          addonOrigin: meta.addonOrigin,
-          videos: meta.videos,
-        }}
-        onClose={close}
-      />,
-    );
-    if (meta.type === "series" && !playerActions) {
-      items.push(
-        <Item
-          key="auto-download"
-          icon={<ArrowDownToLine size={14} strokeWidth={2} />}
-          label={isAutoDl ? t("Auto-downloading") : t("Auto-download new episodes")}
-          onClick={() => {
-            toggleAutoDownload(meta);
-            close();
-          }}
-          accent={isAutoDl}
-        />,
+          },
+          onClose: close,
+          membership: state.target.membership,
+          membershipOnly: !organizedMedia,
+        },
+      };
+    if (organizedMedia && !playerActions && (!episodeScope || targetEpisode)) {
+      items.push(<Separator key="title-state-separator" />);
+      const summary = watchedState.summary;
+      const status = watchedState.loading
+        ? t("Checking watched status…")
+        : summary?.status === "unknown"
+          ? t("Watched status unavailable")
+          : summary?.status === "partial"
+            ? t("{watched} of {total} released episodes known watched", {
+                watched: summary.watched,
+                total: summary.total,
+              })
+            : null;
+      if (status)
+        items.push(
+          <p key="watched-status" role="status" className="px-3 py-1.5 text-[12px] text-ink-subtle">
+            {status}
+          </p>,
+        );
+      if (summary?.unavailable.length)
+        items.push(
+          <p key="watched-unavailable" className="px-3 py-1.5 text-[12px] text-ink-subtle">
+            {t("Could not check watched status: {providers}", {
+              providers: summary.unavailable.map((provider) => t(provider)).join(", "),
+            })}
+          </p>,
+        );
+      const choices = watchedState.loading
+        ? []
+        : summary?.status === "watched"
+          ? [false]
+          : summary?.status === "unwatched"
+            ? [true]
+            : [true, false];
+      choices.forEach((on, index) =>
+        items.push(
+          <Item
+            key={index === 0 ? "watched" : "watched-alternate"}
+            icon={
+              on ? <CheckCheck size={14} strokeWidth={2} /> : <EyeOff size={14} strokeWidth={2} />
+            }
+            label={
+              episodeScope
+                ? on
+                  ? t("Mark episode as watched")
+                  : t("Mark episode as unwatched")
+                : on
+                  ? meta.type !== "movie"
+                    ? t("Mark released episodes as watched")
+                    : t("Mark as watched")
+                  : meta.type !== "movie"
+                    ? t("Mark released episodes as unwatched")
+                    : t("Mark as unwatched")
+            }
+            onClick={async () => {
+              setWatchedError(null);
+              try {
+                if (targetEpisode)
+                  requireMediaActionSuccess(
+                    await setContextWatched({ ...meta, id: episodeMetaId! }, on, {
+                      imdbId: episodeImdb,
+                      episode: { season: targetEpisode.season, episode: targetEpisode.episode },
+                      ...(episodeImdb &&
+                      (targetEpisode.imdbSeason != null || targetEpisode.imdbEpisode != null)
+                        ? {
+                            providerEpisode: {
+                              season: targetEpisode.imdbSeason ?? targetEpisode.season,
+                              episode: targetEpisode.imdbEpisode ?? targetEpisode.episode,
+                            },
+                          }
+                        : {}),
+                    }),
+                  );
+                else
+                  requireMediaActionSuccess(
+                    await setContextWatched(meta, on, {
+                      imdbId: targetImdb,
+                      onUnsafeProvider: UNSAFE_MEDIA_PROVIDER_POLICY,
+                    }),
+                  );
+                close();
+              } catch (cause) {
+                setWatchedError({
+                  session: state.session,
+                  message:
+                    cause instanceof Error
+                      ? t(cause.message)
+                      : t("The action could not be completed."),
+                });
+                watchedState.refresh();
+              }
+            }}
+            accent={!on}
+          />,
+        ),
       );
-    }
-    if (!playerActions) {
-      items.push(
-        <Item
-          key="watched"
-          icon={
-            isWatched ? (
-              <EyeOff size={14} strokeWidth={2} />
-            ) : (
-              <CheckCheck size={14} strokeWidth={2} />
-            )
-          }
-          label={
-            isWatched
-              ? t("Mark as unwatched")
-              : meta.type === "series"
-                ? t("Mark all watched")
-                : t("Mark as watched")
-          }
-          onClick={() => {
-            if (isWatched) void unmarkMetaWatched(meta, targetImdb);
-            else void markMetaWatched(meta, targetImdb);
-            close();
-          }}
-          accent={isWatched}
-        />,
-      );
+      if (watchedError?.session === state.session)
+        items.push(
+          <p key="watched-error" role="alert" className="px-3 py-2 text-[12px] text-danger">
+            {watchedError.message}
+          </p>,
+        );
     }
     items.push(
       <Item
@@ -453,7 +749,7 @@ export function ContextMenu() {
         onClick={() => shareLink(meta.type, meta.id)}
       />,
     );
-    if (inSession && !playerActions) {
+    if (organizedMedia && inSession && !playerActions) {
       items.push(
         <Item
           key="bring"
@@ -463,88 +759,11 @@ export function ContextMenu() {
         />,
       );
     }
-    if (playerActions) {
-      items.push(<Separator key="player-sep" />);
+    if (playerSources) {
       items.push(
-        <Item
-          key="fullscreen"
-          icon={<Maximize size={14} strokeWidth={2} />}
-          label={t("Full screen")}
-          onClick={() => {
-            playerActions.toggleFullscreen();
-            close();
-          }}
-        />,
+        <Separator key="player-sep" />,
+        <ActionItems key="player-tools" source={playerSources.rows} onClose={close} />,
       );
-      if (playerActions.canDownload) {
-        items.push(
-          <Item
-            key="download"
-            icon={<Download size={14} strokeWidth={2} />}
-            label={t("Download Video")}
-            onClick={() => {
-              playerActions.download();
-              close();
-            }}
-          />,
-        );
-      }
-      if (playerActions.canDownloadSubtitle) {
-        items.push(
-          <Item
-            key="download-subtitle"
-            icon={<Download size={14} strokeWidth={2} />}
-            label={t("Download Subtitle")}
-            onClick={() => {
-              playerActions.downloadSubtitle();
-              close();
-            }}
-          />,
-        );
-      }
-      const streamUrl = playerActions.streamUrl;
-      const httpUrl = streamUrl && /^https?:\/\//i.test(streamUrl) ? streamUrl : null;
-      const magnet = playerActions.infoHash ? magnetFromHash(playerActions.infoHash) : null;
-      if (httpUrl || magnet) {
-        items.push(<Separator key="stream-sep" />);
-        if (httpUrl) {
-          items.push(
-            <Item
-              key="copy-stream"
-              icon={<Link2 size={14} strokeWidth={2} />}
-              label={t("Copy stream link")}
-              onClick={() => {
-                void copyText(httpUrl);
-                close();
-              }}
-            />,
-          );
-          items.push(
-            <Item
-              key="open-browser"
-              icon={<ExternalLink size={14} strokeWidth={2} />}
-              label={t("Open in browser")}
-              onClick={() => {
-                openUrl(httpUrl);
-                close();
-              }}
-            />,
-          );
-        }
-        if (magnet) {
-          items.push(
-            <Item
-              key="copy-magnet"
-              icon={<Magnet size={14} strokeWidth={2} />}
-              label={t("Copy magnet link")}
-              onClick={() => {
-                void copyText(magnet);
-                close();
-              }}
-            />,
-          );
-        }
-      }
     }
   } else if (state.target.kind === "view") {
     const { view, label } = state.target;
@@ -925,7 +1144,7 @@ export function ContextMenu() {
         onClick={() => shareLink("ebook", target.id)}
       />,
     );
-  } else {
+  } else if (state.target.kind === "edit") {
     const { element, selection } = state.target;
     const canCopy = selection.length > 0;
     const canPaste = element != null;
@@ -975,61 +1194,124 @@ export function ContextMenu() {
     );
   }
 
-  if (items.length === 0) return null;
+  if (state.target.kind === "actions" && filteredSource(state.target).actions().length)
+    items.push(<ActionItems key="actions" source={filteredSource(state.target)} onClose={close} />);
+  if (state.target.kind === "actions" && state.target.manga) {
+    const manga = state.target.manga;
+    items.push(
+      <MyListSubmenu
+        key="manga-list"
+        item={{ id: manga.id, type: "manga", name: manga.title, poster: manga.cover }}
+        store={mangaLists}
+        onClose={close}
+      />,
+      <Item
+        key="share-manga"
+        icon={<Share2 size={14} />}
+        label={t("Share as link")}
+        onClick={() => shareLink("manga", manga.id)}
+      />,
+    );
+  }
+  if (state.target.kind === "meta" && state.target.extra)
+    items.push(
+      <ActionItems key="extra" source={filteredSource(state.target.extra)} onClose={close} />,
+    );
+  if (parts.content.some((action) => action.id === "selection:copy")) {
+    items.unshift(
+      <ActionItems
+        key="selection"
+        source={{ actions: () => contentActions({ selection: target.selection }, viewImage, true) }}
+        onClose={close}
+      />,
+      <Separator key="selection-separator" />,
+    );
+    if (membershipMenu) membershipMenu.index += 2;
+  }
+  const tools = parts.content.filter((action) => action.id !== "selection:copy");
+  if (tools.length)
+    items.push(
+      <ActionItems
+        key="content"
+        source={{
+          actions: () => makeParts().content.filter((action) => action.id !== "selection:copy"),
+        }}
+        onClose={close}
+      />,
+    );
+  // The player reuses navigation policy for Settings only, never browsing rows.
+  const navigationFooter = () =>
+    isPlayer ? [] : contextNavigationFooter(navigation(), makeParts().quick);
+  const footer = navigationFooter();
+  if (items.length === 0 && parts.quick.length === 0 && footer.length === 0)
+    return (
+      <>
+        {viewer}
+        {manualDownloadDialog}
+      </>
+    );
 
   return (
     <>
-      <div
-        aria-hidden
-        className="fixed inset-0 z-[144]"
-        // In fullscreen, some WebViews dispatch the secondary click after the
-        // contextmenu event. Dismiss on a new primary press instead so that
-        // event cannot immediately close the menu it just opened.
-        onMouseDown={(e) => {
-          if (e.button === 0) close();
-        }}
-        onWheel={close}
-      />
-      <div
-        ref={ref}
-        role="menu"
-        data-tv-focus-scope={state.target.kind === "nav" || undefined}
-        onKeyDown={(e) => {
-          if (state.target.kind !== "nav") return;
-          if (e.key === "Escape" || e.key === "Tab") {
-            if (e.key === "Escape") e.preventDefault();
-            e.stopPropagation();
-            close();
-            return;
-          }
-          if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
-          e.preventDefault();
-          e.stopPropagation();
-          const buttons = Array.from(
-            e.currentTarget.querySelectorAll<HTMLButtonElement>(
-              'button[role="menuitem"]:not(:disabled)',
-            ),
-          );
-          if (!buttons.length) return;
-          const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
-          const next =
-            e.key === "Home"
-              ? 0
-              : e.key === "End"
-                ? buttons.length - 1
-                : (index + (e.key === "ArrowDown" ? 1 : -1) + buttons.length) % buttons.length;
-          buttons.forEach((button, i) => {
-            button.tabIndex = i === next ? 0 : -1;
-          });
-          buttons[next].focus({ preventScroll: true });
-        }}
-        aria-label={subtitleDetails ? t("Subtitle details") : undefined}
-        style={{ left, top: top - flipUp, width: menuWidth, maxHeight: "calc(100vh - 16px)" }}
-        className={`fixed z-[145] flex flex-col overflow-y-auto rounded-xl border border-edge bg-elevated p-1 shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] ${state.target.kind === "nav" ? "" : "animate-popover-in"}`}
-      >
-        {state.target.kind === "nav" && <TvModalClose onClose={close} label={t("Close")} />}
-        {items}
-      </div>
+      {viewer}
+      {manualDownloadDialog}
+      <LastPlaybackCommand key={state.session} enabled={allowQuick} onClose={close}>
+        {(last) => (
+          <MenuSurface
+            key={state.session}
+            point={state.pos}
+            onClose={close}
+            phase={state.phase}
+            onExitComplete={() => completeClose(state.session)}
+            quickActions={
+              quickSource.actions().length ? (
+                <QuickActions source={quickSource} onClose={close} />
+              ) : undefined
+            }
+            isValid={state.target.isValid}
+            width={menuWidth}
+            label={
+              subtitleDetails
+                ? t("Subtitle details")
+                : state.target.kind === "meta"
+                  ? state.target.meta.name
+                  : "label" in state.target
+                    ? state.target.label
+                    : t("Actions")
+            }
+          >
+            {last && (
+              <>
+                <ActionItems source={{ actions: () => [last] }} onClose={close} />
+                {(items.length > 0 || footer.length > 0) && <Separator />}
+              </>
+            )}
+            {membershipMenu ? (
+              <>
+                {items.slice(0, membershipMenu.index)}
+                <MyListSubmenu {...membershipMenu.props}>
+                  {items.slice(membershipMenu.index)}
+                </MyListSubmenu>
+              </>
+            ) : (
+              items
+            )}
+            {footer.length > 0 && (
+              <>
+                {items.length > 0 && <Separator />}
+                <ActionItems
+                  source={{
+                    actions: navigationFooter,
+                    isValid: pageContext?.isValid,
+                  }}
+                  onClose={close}
+                />
+              </>
+            )}
+            <MenuBrandFooter />
+          </MenuSurface>
+        )}
+      </LastPlaybackCommand>
     </>
   );
 }
@@ -1187,31 +1469,55 @@ function Item({
 }: {
   icon: React.ReactNode;
   label: string;
-  onClick: () => void;
+  onClick: () => void | Promise<void>;
   accent?: boolean;
   disabled?: boolean;
 }) {
+  const pending = useRef(false);
+  const execution = useMenuExecution();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   return (
-    <button
-      role="menuitem"
-      onClick={onClick}
-      disabled={disabled}
-      className={`flex h-9 items-center gap-2.5 rounded-lg px-3 text-start text-[13px] transition-colors ${
-        disabled
-          ? "cursor-not-allowed text-ink-subtle/55"
-          : accent
-            ? "text-accent hover:bg-raised"
-            : "text-ink hover:bg-raised"
-      }`}
-    >
-      <span className={disabled ? "text-ink-subtle/40" : accent ? "text-accent" : "text-ink-muted"}>
-        {icon}
-      </span>
-      {label}
-    </button>
+    <>
+      <button
+        role="menuitem"
+        onClick={async () => {
+          if (disabled || busy || pending.current || (execution && !execution.acquire())) return;
+          pending.current = true;
+          setBusy(true);
+          setError("");
+          try {
+            await onClick();
+          } catch (cause) {
+            setError(
+              cause instanceof Error
+                ? translate(cause.message)
+                : translate("The action could not be completed."),
+            );
+          } finally {
+            pending.current = false;
+            setBusy(false);
+            execution?.release();
+          }
+        }}
+        disabled={disabled}
+        aria-disabled={disabled || busy || execution?.busy || undefined}
+        aria-busy={busy || undefined}
+        className={menuItemClass}
+        data-active={accent || undefined}
+      >
+        <MenuIcon action={{ icon, active: accent }} />
+        {label}
+      </button>
+      {error && (
+        <p role="alert" className="px-3 py-2 text-[12px] text-danger">
+          {error}
+        </p>
+      )}
+    </>
   );
 }
 
 function Separator() {
-  return <span aria-hidden className="my-1 h-px bg-edge-soft/60" />;
+  return <div role="separator" className="context-menu-separator" />;
 }

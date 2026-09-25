@@ -7,6 +7,7 @@ import { useMangaDownloadsCount } from "@/lib/manga-downloads";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory, useView } from "@/lib/view";
+import { useLocalBackCapability } from "@/lib/use-local-back-capability";
 import {
   activeMangaSource,
   activeMangaSourceId,
@@ -19,13 +20,15 @@ import {
 } from "@/lib/manga/sources";
 import {
   resumeChapters,
+  streamChapters,
   popularManga,
   searchManga,
   type MangaChapter,
   type MangaSummary,
 } from "@/lib/manga/api";
 import { listMangaProgress, type MangaProgressEntry } from "@/lib/manga-progress";
-import { chapterNumberKey } from "@/lib/manga/chapter-identity";
+import { MangaContextNavigation } from "@/lib/use-manga-context";
+import { mangaResumeChapterIndex } from "@/lib/manga-context-actions";
 import { useProfiles } from "@/lib/profiles";
 import { takeMangaReadIntent } from "@/lib/manga/read-intent";
 import { MangaHero } from "./manga/manga-hero";
@@ -58,7 +61,7 @@ type Mode =
   | { screen: "sources" }
   | { screen: "downloads"; from?: string }
   | { screen: "browse-extension"; source: SuwayomiSource }
-  | { screen: "detail"; mangaId: string }
+  | { screen: "detail"; mangaId: string; downloadRequest?: number }
   | {
       screen: "reader";
       mangaId: string;
@@ -90,6 +93,10 @@ export function MangaView() {
   const browseExtensionScrollRef = useRef<HTMLElement>(null);
   const libraryScrollRef = useRef<HTMLElement>(null);
   const resumeRef = useRef<(entry: MangaProgressEntry) => void>(() => {});
+  const resumeRequest = useRef(0);
+  const profileRef = useRef(activeId);
+  profileRef.current = activeId;
+  const downloadRequest = useRef(0);
   const isBrowse = mode.screen === "browse";
   const isDetail = mode.screen === "detail";
   useScrollMemory("manga", browseScrollRef, isBrowse);
@@ -129,18 +136,7 @@ export function MangaView() {
   }, []);
 
   useEffect(() => subscribeMangaSources(() => setSourceTick((n) => n + 1)), []);
-
-  useEffect(() => {
-    const suppressNativeMenu = (e: MouseEvent) => {
-      if (topKindRef.current !== "manga") return;
-      const t = e.target;
-      if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) return;
-      if (t instanceof HTMLElement && t.isContentEditable) return;
-      e.preventDefault();
-    };
-    document.addEventListener("contextmenu", suppressNativeMenu, true);
-    return () => document.removeEventListener("contextmenu", suppressNativeMenu, true);
-  }, []);
+  useLocalBackCapability(topKind === "manga" && mode.screen !== "browse");
 
   useEffect(() => {
     const onLocalBack = (e: Event) => {
@@ -254,25 +250,27 @@ export function MangaView() {
   }
 
   const resume = async (entry: MangaProgressEntry) => {
+    const request = ++resumeRequest.current;
+    const from = modeRef.current;
+    const profile = activeId;
+    const current = () =>
+      request === resumeRequest.current &&
+      modeRef.current === from &&
+      profileRef.current === profile;
     const target = entry.sourceId || activeMangaSourceId();
     if (target && activeMangaSourceId() !== target) setActiveMangaSource(target);
     try {
-      const chs = await resumeChapters(entry.id);
-      let i = chs.findIndex((c) => c.id === entry.chapterId);
-      if (i < 0) {
-        const want =
-          chapterNumberKey(entry.chapterNumber) ?? chapterNumberKey(entry.chapterLabel);
-        if (want != null) {
-          i = chs.findIndex(
-            (c) => chapterNumberKey(c.chapter ?? c.title ?? "") === want,
-          );
-        }
-      }
-      if (i < 0 && entry.chapterNumber != null) {
-        i = chs.findIndex(
-          (c) =>
-            c.chapter != null && c.chapter === entry.chapterNumber,
-        );
+      let chs = await resumeChapters(entry.id);
+      if (!current()) return;
+      let i = mangaResumeChapterIndex(chs, entry);
+      if (i < 0 && entry.chapterId.includes("::")) {
+        // The reader may have used another source offered by the chapter list.
+        // Reuse that source discovery instead of substituting another release.
+        const alternatives: MangaChapter[] = [];
+        await streamChapters(entry.id, (chunk) => alternatives.push(...chunk));
+        if (!current()) return;
+        i = mangaResumeChapterIndex(alternatives, entry);
+        chs = alternatives;
       }
       if (i >= 0) {
         setMode({
@@ -286,27 +284,21 @@ export function MangaView() {
         });
         return;
       }
-      if (chs.length > 0) {
-        setMode({
-          screen: "reader",
-          mangaId: entry.id,
-          manga: { id: entry.id, title: entry.title, cover: entry.cover },
-          chapters: chs,
-          index: 0,
-          startPage: Math.max(0, entry.page - 1),
-          startScroll: entry.scroll,
-        });
-        return;
-      }
     } catch {
       /* noop */
     }
-    setMode({ screen: "detail", mangaId: entry.id });
+    if (current()) setMode({ screen: "detail", mangaId: entry.id });
   };
   resumeRef.current = resume;
 
   return (
-    <>
+    <MangaContextNavigation.Provider
+      value={{
+        resume,
+        download: (id) =>
+          setMode({ screen: "detail", mangaId: id, downloadRequest: ++downloadRequest.current }),
+      }}
+    >
       {/* Browse home main — kept mounted (hidden when a sub-page is active) so its
           scroll position and loaded posters survive back-navigation. */}
       <main
@@ -423,6 +415,7 @@ export function MangaView() {
         >
           <MangaDetail
             mangaId={mode.mangaId}
+            downloadRequest={mode.downloadRequest}
             onBack={() => setMode({ screen: "browse" })}
             onResume={resume}
             onOpenDownloads={() => setMode({ screen: "downloads", from: mode.mangaId })}
@@ -502,7 +495,7 @@ export function MangaView() {
           />
         </main>
       )}
-    </>
+    </MangaContextNavigation.Provider>
   );
 }
 

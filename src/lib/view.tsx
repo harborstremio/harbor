@@ -16,7 +16,7 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import { subscribeOpenProfile } from "@/lib/social/open-profile";
+import { registerProfileDestination, subscribeOpenProfile } from "@/lib/social/open-profile";
 import { subscribeOpenGroup } from "@/lib/social/open-group";
 import type { Meta } from "./cinemeta";
 import type { PeopleDept, RankSource } from "./harbor-rank";
@@ -28,6 +28,7 @@ import { useTogether } from "./together/provider";
 import { beginMarathonAdvance } from "./fullscreen-state";
 import { consumeBack } from "./back-intercept";
 import type { SubtitleLoadMetadata } from "./subtitles/types";
+import { pickerExitStack, samePickerRequest } from "./picker-return";
 
 export type View =
   | "home"
@@ -76,6 +77,7 @@ export type PlayerSrc = {
   sportsDocked?: boolean;
   /** Official provider iframe; handled separately from native/media stream playback. */
   officialBroadcast?: import("./sports/esports-streams").EsportsStream;
+  continuation?: import("./playback-history").PlaybackContinuation;
   meta: Meta;
   playbackTraceId?: string;
   proxySessionId?: string;
@@ -139,6 +141,17 @@ export type PlayerStreamRef = {
   size?: number | null;
   bingeGroup?: string | null;
   cachedSlugs?: string[];
+};
+
+export type PickerOptions = {
+  autoPlay?: boolean;
+  attempt?: number;
+  intent?: "play" | "download";
+  seasonEpisodes?: PlayEpisode[];
+  resume?: boolean;
+  returnTo?: "previous";
+  contextRequestId?: string;
+  continuation?: import("./playback-history").PlaybackContinuation;
 };
 
 export type GridSpec = {
@@ -213,6 +226,9 @@ export type Frame =
       intent?: "play" | "download";
       seasonEpisodes?: PlayEpisode[];
       resume?: boolean;
+      returnTo?: "previous";
+      contextRequestId?: string;
+      continuation?: import("./playback-history").PlaybackContinuation;
     }
   | { kind: "player"; src: PlayerSrc }
   | { kind: "match-detail"; game: SportsGame };
@@ -316,18 +332,11 @@ type ViewValue = {
     intent?: "play" | "download";
     seasonEpisodes?: PlayEpisode[];
     resume?: boolean;
+    returnTo?: "previous";
+    contextRequestId?: string;
+    continuation?: import("./playback-history").PlaybackContinuation;
   } | null;
-  openPicker: (
-    meta: Meta,
-    episode?: PlayEpisode,
-    opts?: {
-      autoPlay?: boolean;
-      attempt?: number;
-      intent?: "play" | "download";
-      seasonEpisodes?: PlayEpisode[];
-      resume?: boolean;
-    },
-  ) => void;
+  openPicker: (meta: Meta, episode?: PlayEpisode, opts?: PickerOptions) => void;
   player: PlayerSrc | null;
   openPlayer: (src: PlayerSrc) => void;
   replacePlayerSrc: (src: PlayerSrc) => void;
@@ -635,6 +644,9 @@ export function ViewProvider({ children }: { children: ReactNode }) {
           intent: top.intent,
           seasonEpisodes: top.seasonEpisodes,
           resume: top.resume,
+          returnTo: top.returnTo,
+          contextRequestId: top.contextRequestId,
+          continuation: top.continuation,
         }
       : null;
   const player = playbackTop.kind === "player" ? playbackTop.src : null;
@@ -694,14 +706,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
 
   const exitPickerToDetail = useCallback(
     (m: Meta) => {
-      setNavStack((s) => {
-        let i = s.length - 1;
-        while (i > 0 && (s[i].kind === "player" || s[i].kind === "picker")) i--;
-        const base = s.slice(0, i + 1);
-        const top = base[base.length - 1];
-        if (top && top.kind === "meta") return base;
-        return [...base, { kind: "meta", meta: m }];
-      });
+      setNavStack((s) => pickerExitStack(s, m));
     },
     [setNavStack],
   );
@@ -963,6 +968,10 @@ export function ViewProvider({ children }: { children: ReactNode }) {
     [setNavStack],
   );
   useEffect(() => subscribeOpenProfile(openProfile), [openProfile]);
+  useLayoutEffect(
+    () => registerProfileDestination(() => (top.kind === "profile" ? top.handle : null)),
+    [top],
+  );
 
   const openFeed = useCallback(() => {
     setNavStack((cur) => {
@@ -1171,17 +1180,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   }, [setNavStack]);
 
   const openPicker = useCallback(
-    (
-      m: Meta,
-      ep?: PlayEpisode,
-      opts?: {
-        autoPlay?: boolean;
-        attempt?: number;
-        intent?: "play" | "download";
-        seasonEpisodes?: PlayEpisode[];
-        resume?: boolean;
-      },
-    ) => {
+    (m: Meta, ep?: PlayEpisode, opts?: PickerOptions) => {
       if (m.id?.startsWith("magnet:")) {
         setNavStack((s) => {
           let i = s.length - 1;
@@ -1193,13 +1192,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
       if (opts?.autoPlay) beginMarathonAdvance();
       setNavStack((cur) => {
         const t = cur[cur.length - 1];
-        if (
-          t.kind === "picker" &&
-          t.meta.id === m.id &&
-          (t.attempt ?? 0) === (opts?.attempt ?? 0) &&
-          (t.intent ?? "play") === (opts?.intent ?? "play") &&
-          Boolean(t.seasonEpisodes?.length) === Boolean(opts?.seasonEpisodes?.length)
-        ) {
+        if (samePickerRequest(t, m, ep, opts)) {
           return cur;
         }
         return pushFrame(cur, {
@@ -1211,6 +1204,9 @@ export function ViewProvider({ children }: { children: ReactNode }) {
           intent: opts?.intent,
           seasonEpisodes: opts?.seasonEpisodes,
           resume: opts?.resume,
+          returnTo: opts?.returnTo,
+          contextRequestId: opts?.contextRequestId,
+          continuation: opts?.continuation,
         });
       });
     },

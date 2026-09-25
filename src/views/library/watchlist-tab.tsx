@@ -251,7 +251,7 @@ export function WatchlistTab({
   })();
 
   return (
-    <section className="flex flex-col gap-4">
+    <section data-context-page-background className="flex flex-col gap-4">
       {merged.length > 0 && (
         <FilterBar
           type={type}

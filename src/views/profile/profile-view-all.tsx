@@ -9,6 +9,8 @@ import { ListShareButton } from "./list-share-button";
 import { timeAgo } from "./profile-bits";
 import { ACTIVITY_VERB, ActivityGlyph } from "./recent-activity";
 import type { ActivityItem, Badge } from "./profile-types";
+import { MetaContextButton } from "@/components/context-menu/meta-context-button";
+import { profileMediaMeta } from "@/lib/social/profile-media-meta";
 
 type Section = "lists" | "badges" | "activity";
 
@@ -147,7 +149,11 @@ function ListsSection({
           )}
           <div className="grid grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-x-4 gap-y-5">
             {list.items.map((item) => (
-              <button
+              <MetaContextButton
+                meta={profileMediaMeta(item.id, item.type, {
+                  name: item.name,
+                  poster: item.poster,
+                })}
                 key={item.id}
                 onClick={() =>
                   onOpenMeta?.(item.id, item.type, { name: item.name, poster: item.poster })
@@ -165,7 +171,7 @@ function ListsSection({
                 {item.name && (
                   <div className="mt-1.5 line-clamp-2 text-[12px] text-ink-muted">{item.name}</div>
                 )}
-              </button>
+              </MetaContextButton>
             ))}
           </div>
         </div>

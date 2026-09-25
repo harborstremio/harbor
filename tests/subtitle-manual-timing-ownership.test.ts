@@ -44,6 +44,7 @@ test("manual timing cancels background work without reverting the chosen delay",
     srcRef: { current: "movie-A" },
     autoSyncMediaKey: (src: string) => src,
     activeDisposeRef: { current: () => disposed++ },
+    retryRef: { current: () => {} },
     stopDrift: () => stopped++,
     setOffer() {},
     setStatus() {},
@@ -65,5 +66,8 @@ test("manual timing cancels background work without reverting the chosen delay",
     "late automatic work must not overwrite manual timing even on the same track",
   );
   scope.srcRef.current = "movie-B";
-  assert.equal(isCurrent({ mediaKey: "movie-B", trackId: "1" }), true);
+  const nextScope = { mediaKey: "movie-B", trackId: "1" };
+  statusScopeRef.current = nextScope;
+  assert.equal(isCurrent(nextScope), true);
+  assert.equal(isCurrent({ ...nextScope }), false, "superseded work on the same track is stale");
 });

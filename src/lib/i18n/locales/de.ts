@@ -5,6 +5,8 @@ import sportsStatistics from "./de/sports-statistics";
 import sportsApi from "./de/sports-api";
 import esportsArena from "./de/esports-arena";
 import sportsHub from "./de/sports-hub";
+import contextActionsFallback from "./context-actions-fallback";
+
 import ebookSources from "./de/ebook-sources";
 import settingsRefinements from "./de/settings-refinements";
 import sweep from "./de/sweep";
@@ -49,6 +51,8 @@ import bpSports from "./de/bp-sports";
 const de: Record<string, string> = {
   ...videoCast,
   ...music,
+  ...contextActionsFallback,
+
   ...ebookSources,
   ...sweep,
   ...used,

@@ -46,7 +46,9 @@ function normalize(e: Partial<AutoDlSeries> & { id: string }): AutoDlSeries {
     lastCheckedAt: typeof e.lastCheckedAt === "number" ? e.lastCheckedAt : null,
     lastGrabbed: typeof e.lastGrabbed === "string" ? e.lastGrabbed : null,
     grabbedCount: typeof e.grabbedCount === "number" ? e.grabbedCount : 0,
-    grabbedKeys: Array.isArray(e.grabbedKeys) ? e.grabbedKeys.filter((k) => typeof k === "string") : [],
+    grabbedKeys: Array.isArray(e.grabbedKeys)
+      ? e.grabbedKeys.filter((k) => typeof k === "string")
+      : [],
     nextAirDate: typeof e.nextAirDate === "number" ? e.nextAirDate : null,
     imdbId: typeof e.imdbId === "string" ? e.imdbId : null,
     lastError: typeof e.lastError === "string" ? e.lastError : null,
@@ -64,10 +66,10 @@ function load(): AutoDlSeries[] {
   }
 }
 
-function persist(): void {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(items));
-  } catch {}
+function persist(next: AutoDlSeries[]): void {
+  // The enabled state is a persisted rule, not an optimistic transfer status.
+  localStorage.setItem(KEY, JSON.stringify(next));
+  items = next;
   listeners.forEach((l) => l());
 }
 
@@ -99,13 +101,12 @@ export function addAutoDownload(meta: Meta): AutoDlSeries {
     imdbId: meta.id.startsWith("tt") ? meta.id : null,
     lastError: null,
   };
-  items = [entry, ...items];
-  persist();
+  persist([entry, ...items]);
   return entry;
 }
 
 export function recordGrab(id: string, key: string, grabbedLabel: string): void {
-  items = items.map((i) => {
+  const next = items.map((i) => {
     if (i.id !== id || i.grabbedKeys.includes(key)) return i;
     return {
       ...i,
@@ -114,17 +115,15 @@ export function recordGrab(id: string, key: string, grabbedLabel: string): void 
       lastGrabbed: grabbedLabel,
     };
   });
-  persist();
+  persist(next);
 }
 
 export function removeAutoDownload(id: string): void {
-  items = items.filter((i) => i.id !== id);
-  persist();
+  persist(items.filter((i) => i.id !== id));
 }
 
 export function updateAutoDownload(id: string, patch: Partial<AutoDlSeries>): void {
-  items = items.map((i) => (i.id === id ? { ...i, ...patch } : i));
-  persist();
+  persist(items.map((i) => (i.id === id ? { ...i, ...patch } : i)));
 }
 
 export function toggleAutoDownload(meta: Meta): boolean {

@@ -137,19 +137,24 @@ export function useGamepad(): void {
       stopRepeat(id);
       fire(false);
       const r: { delay: number | null; interval: number | null } = { delay: null, interval: null };
-      r.delay = window.setTimeout(() => {
-        r.delay = null;
-        r.interval = window.setInterval(() => fire(true), Math.max(40, cfgRef.current.repeatMs));
-      }, Math.max(0, cfgRef.current.initialDelayMs));
+      r.delay = window.setTimeout(
+        () => {
+          r.delay = null;
+          r.interval = window.setInterval(() => fire(true), Math.max(40, cfgRef.current.repeatMs));
+        },
+        Math.max(0, cfgRef.current.initialDelayMs),
+      );
       repeats.set(id, r);
     };
     const stopAll = () => {
       for (const id of [...repeats.keys()]) stopRepeat(id);
     };
 
+    const contentOverlayOpen = () =>
+      !!document.querySelector("[data-harbor-context-layer],[data-harbor-image-viewer]");
     const fireButton = (button: GpButton, repeat = false) => {
       if (isGamepadCaptured()) return;
-      if (playerRef.current) {
+      if (playerRef.current && !contentOverlayOpen()) {
         window.dispatchEvent(new Event(CONTROLLER_ACTIVITY));
         if (!(controlsUp() && NAV_WHEN_CONTROLS_UP.has(button))) {
           const key = PLAYER_BUTTON[button];
@@ -168,7 +173,7 @@ export function useGamepad(): void {
 
     const fireAxis = (axis: GpAxis, dir: "neg" | "pos", repeat = false) => {
       if (isGamepadCaptured()) return;
-      if (playerRef.current) {
+      if (playerRef.current && !contentOverlayOpen()) {
         window.dispatchEvent(new Event(CONTROLLER_ACTIVITY));
         if (!axisNavigates(axis)) {
           const key = PLAYER_AXIS[axis]?.[dir];
@@ -185,15 +190,18 @@ export function useGamepad(): void {
         stopRepeat(`btn:${button}`);
         return;
       }
-      const repeatable = playerRef.current
-        ? PLAYER_REPEATABLE.has(button)
-        : NAV_REPEATABLE.has(button);
+      const repeatable =
+        playerRef.current && !contentOverlayOpen()
+          ? PLAYER_REPEATABLE.has(button)
+          : NAV_REPEATABLE.has(button);
       if (repeatable) startRepeat(`btn:${button}`, (r) => fireButton(button, r));
       else fireButton(button);
     };
 
     const axisNavigates = (axis: GpAxis) =>
-      !playerRef.current || (controlsUp() && !!NAV_AXIS[axis] && axis !== "ry");
+      !playerRef.current ||
+      contentOverlayOpen() ||
+      (controlsUp() && !!NAV_AXIS[axis] && axis !== "ry");
 
     const onAxis = (axis: GpAxis, value: number) => {
       const mapped = axisNavigates(axis) ? NAV_AXIS[axis] : PLAYER_AXIS[axis];

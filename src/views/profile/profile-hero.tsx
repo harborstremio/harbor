@@ -10,13 +10,20 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { ConfirmableAction } from "@/components/context-menu/action-items";
 import { ShareModal } from "./share-modal";
 import { countryFlagSrc } from "@/components/flag";
 import { acceptFriend, removeFriend, sendFriendRequest } from "@/lib/social/friends";
 import { PRESENCE_META, useMyPresence } from "@/lib/social/presence";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
+import {
+  userContextTarget,
+  friendContextActions,
+  publishFriendStatus,
+  subscribeFriendStatus,
+} from "./context-targets";
 import {
   sanitizeStatLayout,
   STAT_ORDER,
@@ -73,6 +80,18 @@ export function ProfileHero({
 }) {
   const t = useT();
   const { openFeed } = useView();
+  const { open: openContext } = useContextMenu();
+  const [relationship, setRelationship] = useState(p.friendStatus);
+  useEffect(() => setRelationship(p.friendStatus), [p.handle, p.friendStatus]);
+  useEffect(
+    () =>
+      subscribeFriendStatus((handle, status) => {
+        if (handle.toLowerCase() === p.handle.toLowerCase()) setRelationship(status);
+      }),
+    [p.handle],
+  );
+  const openUserContext = (event: React.MouseEvent) =>
+    openContext(event, userContextTarget(p.handle, friendContextActions(p.handle, relationship)));
   const nameFont = userFont ? { fontFamily: `"${userFont}", var(--font-display)` } : undefined;
   const nameBadges = orderShownBadges(badges ?? [], p.shownBadges)
     .filter((b) => b.iconUrl)
@@ -139,7 +158,11 @@ export function ProfileHero({
 
       <div className="relative mx-auto -mt-20 w-full max-w-6xl px-6 pb-6 lg:px-10">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:gap-6">
-          <div className="relative flex h-[124px] w-[124px] shrink-0">
+          <div
+            onContextMenu={openUserContext}
+            tabIndex={0}
+            className="relative flex h-[124px] w-[124px] shrink-0"
+          >
             <Avatar
               src={avatar}
               fallbackSrc={avatarFallback}
@@ -158,7 +181,12 @@ export function ProfileHero({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="font-display text-[30px] leading-tight text-ink" style={nameFont}>
+              <h1
+                onContextMenu={openUserContext}
+                tabIndex={0}
+                className="font-display text-[30px] leading-tight text-ink"
+                style={nameFont}
+              >
                 {p.alias}
               </h1>
               {p.verified && <VerifiedCheck size={22} />}
@@ -168,7 +196,9 @@ export function ProfileHero({
               {p.featured && <FeaturedBadge />}
             </div>
             <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-subtle">
-              <span className="text-ink-muted">@{p.handle}</span>
+              <span onContextMenu={openUserContext} className="text-ink-muted">
+                @{p.handle}
+              </span>
               {p.pronouns && <span>{p.pronouns}</span>}
               <span className={presenceText}>{presenceLabel}</span>
               {p.location && (
@@ -327,10 +357,17 @@ function FriendButton({
 }) {
   const t = useT();
   const [rel, setRel] = useState<FriendRel>(initial);
+  useEffect(() => setRel(initial), [handle, initial]);
+  useEffect(
+    () =>
+      subscribeFriendStatus((changed, status) => {
+        if (changed.toLowerCase() === handle.toLowerCase()) setRel(status);
+      }),
+    [handle],
+  );
   const [busy, setBusy] = useState(false);
   const [hover, setHover] = useState(false);
   const [error, setError] = useState(false);
-  const [confirming, setConfirming] = useState(false);
 
   const act = async (fn: () => Promise<unknown>, next: FriendRel) => {
     if (busy) return;
@@ -339,6 +376,7 @@ function FriendButton({
     try {
       await fn();
       setRel(next);
+      publishFriendStatus(handle, next);
       setHover(false);
     } catch {
       setError(true);
@@ -351,35 +389,13 @@ function FriendButton({
 
   if (rel === "friends") {
     return (
-      <>
-        <button
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-          onClick={() => setConfirming(true)}
-          disabled={busy}
-          className={`${FRIEND_BTN} ${hover ? "bg-danger/12 text-danger ring-1 ring-danger/30" : "bg-surface text-ink ring-1 ring-edge"}`}
-        >
-          {busy ? (
-            <Loader2 size={18} className="animate-spin" />
-          ) : hover ? (
-            <UserMinus size={18} />
-          ) : (
-            <Check size={18} strokeWidth={2.6} />
-          )}
-          {busy ? t("Removing...") : hover ? t("Remove friend") : t("Friends")}
-        </button>
-        {confirming && (
-          <ConfirmRemoveFriend
-            handle={handle}
-            busy={busy}
-            onCancel={() => setConfirming(false)}
-            onConfirm={() => {
-              setConfirming(false);
-              void act(() => removeFriend(handle), "none");
-            }}
-          />
-        )}
-      </>
+      <ConfirmableAction
+        source={{ actions: () => friendContextActions(handle, rel) }}
+        actionId="friend:remove"
+        className={`${FRIEND_BTN} bg-surface text-ink ring-1 ring-edge hover:bg-danger/12 hover:text-danger`}
+      >
+        <Check size={18} strokeWidth={2.6} /> {t("Friends")}
+      </ConfirmableAction>
     );
   }
 
@@ -430,64 +446,5 @@ function FriendButton({
       {busy ? <Loader2 size={18} className="animate-spin" /> : <UserPlus size={18} />}
       {busy ? t("Sending...") : error ? t("Try again") : t("Add friend")}
     </button>
-  );
-}
-
-function ConfirmRemoveFriend({
-  handle,
-  busy,
-  onCancel,
-  onConfirm,
-}: {
-  handle: string;
-  busy: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
-}) {
-  const t = useT();
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCancel();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onCancel]);
-  return createPortal(
-    <div
-      role="dialog"
-      aria-modal="true"
-      onClick={onCancel}
-      className="fixed inset-0 z-[200] grid place-items-center bg-canvas/70 p-6 backdrop-blur-sm"
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[380px] rounded-[16px] bg-elevated p-5 shadow-[0_28px_70px_-20px_rgba(0,0,0,0.85)] ring-1 ring-edge-soft"
-      >
-        <h2 className="text-[15px] font-semibold text-ink">{t("Remove friend?")}</h2>
-        <p className="mt-1.5 text-[13px] leading-relaxed text-ink-subtle">
-          {t("@{handle} will be removed from your friends. You can add them again later.", {
-            handle,
-          })}
-        </p>
-        <div className="mt-4 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="flex h-10 items-center rounded-full px-4 text-[13px] font-semibold text-ink-muted transition-colors hover:text-ink"
-          >
-            {t("Cancel")}
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={busy}
-            className="flex h-10 items-center gap-2 rounded-full bg-danger px-4 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-50"
-          >
-            {busy && <Loader2 size={14} className="animate-spin" />} {t("Remove")}
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body,
   );
 }

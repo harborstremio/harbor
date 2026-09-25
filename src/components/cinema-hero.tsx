@@ -13,6 +13,7 @@ import { smartPlayEpisode } from "@/lib/smart-play";
 import { fetchTrailer, prefetchTrailer, trailerSrc, type TrailerInfo } from "@/lib/trailer";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { useHeroContext } from "@/lib/context-menu";
 import { observe, usePageVisible } from "@/lib/visibility";
 
 const ROTATE_MS = 11000;
@@ -224,8 +225,10 @@ function CinemaSlide({
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const pageVisible = usePageVisible();
-  const wantsPlayback = active && !!trailerInfo && pageVisible && inViewport && settings.heroTrailers;
+  const wantsPlayback =
+    active && !!trailerInfo && pageVisible && inViewport && settings.heroTrailers;
   const bg = upsizeTmdb(meta.background || meta.poster);
+  const onContextMenu = useHeroContext(meta, bg);
 
   useEffect(() => {
     if (!active) return;
@@ -317,10 +320,7 @@ function CinemaSlide({
   }, [trailerInfo]);
 
   return (
-    <div
-      aria-hidden={!active}
-      className="relative h-full w-full"
-    >
+    <div aria-hidden={!active} onContextMenu={onContextMenu} className="relative h-full w-full">
       {bg && (
         <img
           src={bg}
@@ -391,7 +391,9 @@ function CinemaSlide({
           )}
           <div className="mt-2 flex items-center gap-3">
             <button
-              onClick={() => openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay })}
+              onClick={() =>
+                openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay })
+              }
               className="flex h-12 items-center gap-2.5 rounded-md bg-ink px-7 text-[14.5px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]"
             >
               <Play size={17} fill="currentColor" />

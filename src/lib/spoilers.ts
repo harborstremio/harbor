@@ -32,3 +32,22 @@ export function spoilerMaskFor(
 export function spoilerActive(mask: SpoilerMask): boolean {
   return mask.thumb || mask.title || mask.desc;
 }
+
+/** Use the displayed episode order; a pending watched snapshot cannot identify next-up yet. */
+export function episodeSpoilerMasks<T>(
+  settings: SpoilerSettings,
+  episodes: readonly T[],
+  watched: (episode: T) => boolean,
+  pending = false,
+): Map<T, SpoilerMask> {
+  const next = pending ? undefined : episodes.find((episode) => !watched(episode));
+  return new Map(
+    episodes.map((episode) => [
+      episode,
+      spoilerMaskFor(settings, {
+        watched: watched(episode),
+        isNextUp: episode === next,
+      }),
+    ]),
+  );
+}

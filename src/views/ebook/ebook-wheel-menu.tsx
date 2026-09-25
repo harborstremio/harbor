@@ -31,6 +31,7 @@ import { loadEBookResume } from "@/lib/ebook/reader-state";
 import { useT } from "@/lib/i18n";
 import { getEBookTracking, saveEBookTracking } from "@/lib/ebook/tracking";
 import { useView } from "@/lib/view";
+import { useContextMenu } from "@/lib/context-menu";
 
 export type EBookWheelTarget = { ebook: EBook; x: number; y: number };
 
@@ -95,6 +96,7 @@ export function EBookWheelMenu({
   const { ebook } = target;
   const t = useT();
   const { setView } = useView();
+  const { open } = useContextMenu();
   const [mode, setMode] = useState<WheelMode>("wheel");
   const [onShelf, setOnShelf] = useState(() => ebookInLibrary(ebook.id));
   const [readLater, setReadLater] = useState(() => eBookIsReadLater(ebook.id));
@@ -125,6 +127,11 @@ export function EBookWheelMenu({
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (
+        event.defaultPrevented ||
+        document.querySelector("[data-harbor-context-layer],[data-harbor-image-viewer]")
+      )
+        return;
       if (event.key === "Escape") {
         if (mode === "wheel") onClose();
         else setMode("wheel");
@@ -258,7 +265,18 @@ export function EBookWheelMenu({
   );
 
   const node = (
-    <div className="fixed inset-0 z-[220]" onContextMenu={(event) => event.preventDefault()}>
+    <div
+      data-bp-overlay
+      className="fixed inset-0 z-[220]"
+      onContextMenu={(event) => {
+        if (
+          event.target instanceof Element &&
+          event.target.closest("input,textarea,[contenteditable],img")
+        )
+          return;
+        event.preventDefault();
+      }}
+    >
       <button
         type="button"
         aria-label={t("Close eBook menu")}
@@ -305,7 +323,13 @@ export function EBookWheelMenu({
           );
         })}
 
-        <div className="absolute left-1/2 top-1/2 grid h-[142px] w-[142px] -translate-x-1/2 -translate-y-1/2 place-items-center overflow-hidden rounded-full border border-edge bg-elevated shadow-[0_22px_55px_-22px_rgba(0,0,0,0.9)]">
+        <div
+          onContextMenu={(event) =>
+            ebook.cover &&
+            open(event, { kind: "content", image: { src: ebook.cover, label: ebook.title } })
+          }
+          className="absolute left-1/2 top-1/2 grid h-[142px] w-[142px] -translate-x-1/2 -translate-y-1/2 place-items-center overflow-hidden rounded-full border border-edge bg-elevated shadow-[0_22px_55px_-22px_rgba(0,0,0,0.9)]"
+        >
           <div className="absolute inset-0">
             {ebook.cover ? (
               <img
@@ -357,7 +381,17 @@ export function EBookWheelMenu({
                 <div className="mb-4 flex gap-4">
                   <div className="h-[112px] w-[76px] shrink-0 overflow-hidden rounded-lg bg-raised ring-1 ring-edge-soft">
                     {detailBook.cover ? (
-                      <img src={detailBook.cover} alt="" className="h-full w-full object-cover" />
+                      <img
+                        src={detailBook.cover}
+                        alt={detailBook.title}
+                        onContextMenu={(event) =>
+                          open(event, {
+                            kind: "content",
+                            image: { src: detailBook.cover!, label: detailBook.title },
+                          })
+                        }
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
                       <div className="grid h-full place-items-center">
                         <BookOpen className="text-ink-subtle" />

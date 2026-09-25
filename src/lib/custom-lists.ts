@@ -3,6 +3,17 @@ import { setItemWithRecovery, freeStorageSpace } from "@/lib/storage-recovery";
 import { randomUuid } from "@/lib/uuid";
 import { persistableAddonOrigin, persistableVideos, type Meta } from "@/lib/cinemeta";
 
+import {
+  isMembershipItemInput,
+  performMembershipOperation,
+  performContainerOperation,
+  readMembershipSnapshot,
+  type MembershipProfile,
+  type MembershipResult,
+  type MoveMembershipRequest,
+  type RemoveMembershipRequest,
+} from "@/lib/membership-operations";
+
 const KEY = "harbor.customlists.v1";
 const PROFILES_KEY = "harbor.profiles.v1";
 
@@ -44,6 +55,40 @@ export const MAX_LISTS = 24;
 export const MAX_ITEMS = 100;
 
 export type ListStore = {
+  storageKey: string;
+  readPersistedListSnapshot: (
+    profile: MembershipProfile,
+  ) => ReturnType<typeof readMembershipSnapshot>;
+  deleteListWithResult: (
+    id: string,
+    profile: MembershipProfile,
+  ) => ReturnType<typeof performContainerOperation>;
+  renameListWithResult: (
+    id: string,
+    name: string,
+    profile: MembershipProfile,
+    description?: string,
+  ) => ReturnType<typeof performContainerOperation>;
+  createListWithItem: (
+    name: string,
+    item: ListItemInput,
+    profile: MembershipProfile,
+    description?: string,
+  ) => { result: MembershipResult; id?: string };
+  createListWithItems: (
+    name: string,
+    items: ListItemInput[],
+    profile: MembershipProfile,
+    description?: string,
+  ) => { result: MembershipResult; id?: string };
+  moveBetweenLists: (request: MoveMembershipRequest) => MembershipResult;
+  setListMembership: (
+    listId: string,
+    item: ListItemInput,
+    present: boolean,
+    profile: MembershipProfile,
+  ) => MembershipResult;
+  removeListMembership: (request: RemoveMembershipRequest) => MembershipResult;
   readLists: () => CustomList[];
   reorderLists: (orderedIds: string[]) => void;
   reorderListItems: (listId: string, orderedIds: string[]) => void;
@@ -52,7 +97,7 @@ export type ListStore = {
   renameList: (id: string, name: string) => void;
   updateListDescription: (id: string, description: string) => void;
   deleteList: (id: string) => void;
-  addToList: (listId: string, item: ListItemInput) => void;
+  addToList: (listId: string, item: ListItemInput, profile?: MembershipProfile) => MembershipResult;
   removeFromList: (listId: string, itemId: string) => void;
   toggleInList: (listId: string, item: ListItemInput) => boolean;
   listContains: (listId: string, itemId: string) => boolean;
@@ -118,7 +163,8 @@ export function createListStore(storageKey: string): ListStore {
     if (memoryFallback) return memoryFallback.map((l) => ({ ...l, items: [...l.items] }));
     try {
       const key = activeKey();
-      const raw = localStorage.getItem(key) ?? (key !== storageKey ? localStorage.getItem(storageKey) : null);
+      const raw =
+        localStorage.getItem(key) ?? (key !== storageKey ? localStorage.getItem(storageKey) : null);
       if (!raw) return [];
       const arr = JSON.parse(raw) as unknown;
       if (!Array.isArray(arr)) return [];
@@ -246,6 +292,48 @@ export function createListStore(storageKey: string): ListStore {
     return id;
   }
 
+  function createListWithItem(
+    name: string,
+    item: ListItemInput,
+    profile: MembershipProfile,
+    description = "",
+  ): { result: MembershipResult; id?: string } {
+    return createListWithItems(name, [item], profile, description);
+  }
+
+  /** Persist the description and complete initial contents in the same write. */
+  function createListWithItems(
+    name: string,
+    items: ListItemInput[],
+    profile: MembershipProfile,
+    description = "",
+  ): { result: MembershipResult; id?: string } {
+    if (!name.trim() || !items.length || !items.every(isMembershipItemInput)) {
+      return { result: { status: "error", reason: "invalid-data" } };
+    }
+    if (items.length > MAX_ITEMS)
+      return { result: { status: "error", reason: "destination-full" } };
+    if (memoryFallback) return { result: { status: "error", reason: "unsaved-changes" } };
+    const id = randomUuid();
+    const now = Date.now();
+    const result = performMembershipOperation(storageKey, MAX_ITEMS, {
+      mode: "create",
+      profile,
+      maxContainers: MAX_LISTS,
+      container: {
+        id,
+        name: name.trim(),
+        description: description.trim() || undefined,
+        createdAt: now,
+        updatedAt: now,
+        items: items.map(toItem),
+      },
+    });
+    if (result.status !== "added") return { result };
+    for (const subscriber of subs) subscriber();
+    return { result, id };
+  }
+
   function renameList(id: string, name: string): void {
     const trimmed = name.trim();
     if (!trimmed) return;
@@ -274,14 +362,87 @@ export function createListStore(storageKey: string): ListStore {
     write(next);
   }
 
-  function addToList(listId: string, item: ListItemInput): void {
-    const lists = read();
-    const list = lists.find((l) => l.id === listId);
-    if (!list || list.items.length >= MAX_ITEMS) return;
-    if (list.items.some((it) => it.id === item.id)) return;
-    list.items.push(toItem(item));
-    list.updatedAt = Date.now();
-    write(lists);
+  function readPersistedListSnapshot(profile: MembershipProfile) {
+    if (memoryFallback) return { status: "error", reason: "unsaved-changes" } as const;
+    return readMembershipSnapshot(storageKey, profile);
+  }
+
+  function deleteListWithResult(id: string, profile: MembershipProfile) {
+    if (memoryFallback) return { status: "error", reason: "unsaved-changes" } as const;
+    const result = performContainerOperation(storageKey, profile, { mode: "delete", id });
+    if (result.status === "removed") for (const subscriber of subs) subscriber();
+    return result;
+  }
+
+  function renameListWithResult(
+    id: string,
+    name: string,
+    profile: MembershipProfile,
+    description?: string,
+  ) {
+    if (memoryFallback) return { status: "error", reason: "unsaved-changes" } as const;
+    const result = performContainerOperation(storageKey, profile, {
+      mode: "rename",
+      id,
+      name: name.trim(),
+      description,
+    });
+    if (result.status === "updated") for (const subscriber of subs) subscriber();
+    return result;
+  }
+
+  function addToList(
+    listId: string,
+    item: ListItemInput,
+    profile?: MembershipProfile,
+  ): MembershipResult {
+    if (!isMembershipItemInput(item)) return { status: "error", reason: "invalid-data" };
+    if (memoryFallback) return { status: "error", reason: "unsaved-changes" };
+    const result = performMembershipOperation(storageKey, MAX_ITEMS, {
+      mode: "add",
+      destinationId: listId,
+      item: toItem(item),
+      profile,
+    });
+    if (result.status === "added") for (const subscriber of subs) subscriber();
+    return result;
+  }
+
+  function moveBetweenLists(request: MoveMembershipRequest): MembershipResult {
+    if (memoryFallback) return { status: "error", reason: "unsaved-changes" };
+    const result = performMembershipOperation(storageKey, MAX_ITEMS, { mode: "move", ...request });
+    if (result.status === "moved") for (const subscriber of subs) subscriber();
+    return result;
+  }
+
+  function setListMembership(
+    listId: string,
+    item: ListItemInput,
+    present: boolean,
+    profile: MembershipProfile,
+  ): MembershipResult {
+    if (!isMembershipItemInput(item)) return { status: "error", reason: "invalid-data" };
+    if (memoryFallback) return { status: "error", reason: "unsaved-changes" };
+    const result = performMembershipOperation(storageKey, MAX_ITEMS, {
+      mode: "set",
+      destinationId: listId,
+      item: toItem(item),
+      present,
+      profile,
+    });
+    if (result.status === "added" || result.status === "removed")
+      for (const subscriber of subs) subscriber();
+    return result;
+  }
+
+  function removeListMembership(request: RemoveMembershipRequest): MembershipResult {
+    if (memoryFallback) return { status: "error", reason: "unsaved-changes" };
+    const result = performMembershipOperation(storageKey, MAX_ITEMS, {
+      mode: "remove",
+      ...request,
+    });
+    if (result.status === "removed") for (const subscriber of subs) subscriber();
+    return result;
   }
 
   function removeFromList(listId: string, itemId: string): void {
@@ -346,6 +507,15 @@ export function createListStore(storageKey: string): ListStore {
   }
 
   return {
+    storageKey,
+    readPersistedListSnapshot,
+    deleteListWithResult,
+    renameListWithResult,
+    createListWithItem,
+    createListWithItems,
+    moveBetweenLists,
+    setListMembership,
+    removeListMembership,
     readLists,
     reorderLists,
     reorderListItems,
@@ -369,6 +539,14 @@ const shared = createListStore(KEY);
 export const sharedLists = shared;
 
 export const {
+  readPersistedListSnapshot,
+  deleteListWithResult,
+  renameListWithResult,
+  createListWithItem,
+  createListWithItems,
+  moveBetweenLists,
+  setListMembership,
+  removeListMembership,
   readLists,
   reorderLists,
   reorderListItems,

@@ -9,6 +9,7 @@ import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { HARBOR_BUGS_BASE } from "@/lib/config/endpoints";
+import { reloadAppWindow } from "@/lib/app-reload";
 
 type Item =
   | { kind: "action"; label: string; hint?: string; onClick: () => void; danger?: boolean }
@@ -47,7 +48,7 @@ export function HybridMenuBar() {
           kind: "action",
           label: t("Reload"),
           hint: "Ctrl+R",
-          onClick: () => window.location.reload(),
+          onClick: reloadAppWindow,
         },
         { kind: "sep" },
         { kind: "action", label: t("Quit Harbor"), onClick: () => close(), danger: true },

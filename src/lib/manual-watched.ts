@@ -160,17 +160,28 @@ function undismiss(metaId: string): void {
   for (const fn of subs) fn();
 }
 
-export function dismissManualWatched(metaId: string): void {
+export function isManualWatchedDismissed(metaId: string): boolean {
+  return dismissedSet().has(metaId);
+}
+
+export function dismissManualWatched(
+  metaId: string,
+  options: { acknowledged?: boolean } = {},
+): void {
   const set = dismissedSet();
   if (set.has(metaId)) return;
   const next = new Set(set);
   next.add(metaId);
-  dismissedCache = next;
   try {
     localStorage.setItem(storeKey("dismissed"), JSON.stringify([...next]));
-  } catch {
+  } catch (error) {
+    if (options.acknowledged)
+      throw new Error("Could not save the change. Check available storage and try again.", {
+        cause: error,
+      });
     return;
   }
+  dismissedCache = next;
   version += 1;
   for (const fn of subs) fn();
 }
@@ -335,6 +346,54 @@ export function setManualWatchedMany(
 
 export function unwatchedAt(metaId: string, season: number, episode: number): number | undefined {
   return unwatchedAtMap()[key(metaId, season, episode)];
+}
+
+/** Each accepted storage write survives a later failure; reload the actual partial state. */
+export function setManualWatchedManyAcknowledged(
+  metaId: string,
+  episodes: Array<{ season: number; episode: number }>,
+  watched: boolean,
+): void {
+  const on = new Set(watchedSet());
+  const off = new Set(unwatchedSet());
+  const at = { ...unwatchedAtMap() };
+  const remote = new Set(remoteSet());
+  for (const { season, episode } of episodes) {
+    const k = key(metaId, season, episode);
+    if (watched) {
+      on.add(k);
+      off.delete(k);
+      delete at[k];
+    } else {
+      on.delete(k);
+      off.add(k);
+      at[k] = Date.now();
+    }
+    remote.delete(k);
+  }
+  try {
+    localStorage.setItem(storeKey("unwatchedAt"), JSON.stringify(at));
+    localStorage.setItem(storeKey("remote"), JSON.stringify([...remote]));
+    // Clear the opposing override before setting the requested state.
+    const pairs = watched
+      ? ([
+          ["unwatched", off],
+          ["watched", on],
+        ] as const)
+      : ([
+          ["watched", on],
+          ["unwatched", off],
+        ] as const);
+    for (const [name, values] of pairs)
+      localStorage.setItem(storeKey(name), JSON.stringify([...values]));
+  } finally {
+    watchedCache = null;
+    unwatchedCache = null;
+    unwatchedAtCache = null;
+    remoteCache = null;
+    version += 1;
+    for (const fn of subs) fn();
+  }
 }
 
 export function remoteWatchedKeys(metaId: string): Set<string> {

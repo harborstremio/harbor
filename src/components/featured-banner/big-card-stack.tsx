@@ -10,6 +10,7 @@ import { useView } from "@/lib/view";
 import { MetaAwardsCorner } from "../meta-awards-corner";
 import { ThumbsDock } from "./thumbs-dock";
 import { FADE_MS, upsizeTmdb } from "./types";
+import { useTitleContext } from "@/components/context-menu/use-title-context";
 
 type LogoMap = Record<string, string | null>;
 
@@ -37,6 +38,7 @@ export function BigCardStack({
   const { openMeta } = useView();
   const t = useT();
   const current = items[active] ?? items[0];
+  const onContextMenu = useTitleContext(current, upsizeTmdb(current.background ?? current.poster));
   const resolvedImdb = useTmdbImdbId(current.id);
   const [logos, setLogos] = useState<LogoMap>(() => seedLogos(settings.tmdbKey, items));
   const containerRef = useRef<HTMLDivElement>(null);
@@ -51,7 +53,7 @@ export function BigCardStack({
     let cancelled = false;
     const indices = new Set<number>();
     for (let i = -2; i <= 2; i++) {
-      indices.add(((active + i) % items.length + items.length) % items.length);
+      indices.add((((active + i) % items.length) + items.length) % items.length);
     }
     const pending = items.filter((m, i) => indices.has(i) && !(m.id in logos));
     if (pending.length === 0) return;
@@ -122,8 +124,10 @@ export function BigCardStack({
     <div
       ref={containerRef}
       role="button"
+      onContextMenu={onContextMenu}
       tabIndex={0}
       onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           openMeta({ ...current, logo: logos[current.id] ?? current.logo });
@@ -159,6 +163,7 @@ export function BigCardStack({
             className="absolute inset-[2px] overflow-hidden rounded-lg"
             style={{
               opacity: i === active ? 1 : 0,
+              pointerEvents: i === active ? "auto" : "none",
               transition: `opacity ${FADE_MS}ms cubic-bezier(0.32, 0.72, 0.24, 1)`,
             }}
           >
@@ -223,10 +228,22 @@ export function BigCardStack({
           data-no-drag
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
-          style={{ position: "absolute", insetInlineStart: 6, top: "50%", transform: "translateY(-50%)", zIndex: 10 }}
+          style={{
+            position: "absolute",
+            insetInlineStart: 6,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 10,
+          }}
           className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
         >
-          <NavArrow dir="left" onClick={onPrev} label={t("Previous")} size={34} className="h-12 w-12" />
+          <NavArrow
+            dir="left"
+            onClick={onPrev}
+            label={t("Previous")}
+            size={34}
+            className="h-12 w-12"
+          />
         </div>
       )}
       {onNext && items.length > 1 && (
@@ -234,10 +251,22 @@ export function BigCardStack({
           data-no-drag
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
-          style={{ position: "absolute", insetInlineEnd: 6, top: "50%", transform: "translateY(-50%)", zIndex: 10 }}
+          style={{
+            position: "absolute",
+            insetInlineEnd: 6,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 10,
+          }}
           className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
         >
-          <NavArrow dir="right" onClick={onNext} label={t("Next")} size={34} className="h-12 w-12" />
+          <NavArrow
+            dir="right"
+            onClick={onNext}
+            label={t("Next")}
+            size={34}
+            className="h-12 w-12"
+          />
         </div>
       )}
       <ThumbsDock meta={current} />
@@ -276,4 +305,3 @@ function TitlePlate({ title, logo }: { title: string; logo?: string }) {
     </div>
   );
 }
-

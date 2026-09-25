@@ -1,0 +1,35 @@
+.context-menu-brand-footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 16px;
+  padding: 3px 8px 1px;
+  color: var(--color-ink);
+  opacity: 0.68;
+  pointer-events: none;
+  user-select: none;
+}
+
+.context-menu-brand-mark {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  object-fit: contain;
+}
+
+.context-menu-brand-wordmark {
+  max-width: 56px;
+  height: 9px;
+  object-fit: contain;
+}
+
+/* Follow the actual chrome's monochrome mark; img assets retain their colors. */
+html:is([data-theme-layout="dracula"], [data-theme-layout="rail"]) .context-menu-brand-footer {
+  color: var(--color-accent);
+}
+
+html[data-theme-layout="stremio"] .context-menu-brand-footer {
+  color: rgb(255 255 255 / 90%);
+}

@@ -21,10 +21,12 @@ export function CommentCompose({
   onSubmit,
   sending,
   disabled,
+  autoFocus = false,
 }: {
   onSubmit: (raw: string) => Promise<ComposeIssue>;
   sending: boolean;
   disabled?: boolean;
+  autoFocus?: boolean;
 }) {
   const t = useT();
   const [text, setText] = useState("");
@@ -68,6 +70,7 @@ export function CommentCompose({
       <MentionPicker suggest={suggest} onPick={pick} />
       <textarea
         ref={boxRef}
+        autoFocus={autoFocus}
         value={text}
         onChange={(e) => {
           setText(e.target.value);

@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from "react";
 import type { AddonProgress } from "./streams/addons";
+import type { PlayerSrc } from "./view";
+import type { PlaybackAudioChoice } from "./player/audio-choice";
 
 export type PlaybackEntry = {
   infoHash?: string | null;
@@ -15,6 +17,36 @@ export type PlaybackEntry = {
   bingeGroup?: string | null;
   cachedSlugs?: string[];
   savedAt: number;
+  /** Written by observed player activity, never by source selection or watched edits. */
+  actual?: ActualPlayback;
+};
+
+export type PlaybackActor = {
+  profileId: string;
+  storageProfileId: string;
+  accountId: string | null;
+};
+
+export type ActualPlayback = {
+  id: string;
+  actor: PlaybackActor;
+  playedAt: number;
+  positionMs: number;
+  durationMs: number;
+  completed: boolean;
+  src: Omit<PlayerSrc, "continuation">;
+  requiresSourceRefresh?: boolean;
+  audioTrack?: PlaybackAudioChoice;
+};
+
+export type PlaybackContinuation = {
+  id: string;
+  positionMs: number;
+  source: Omit<PlaybackEntry, "actual">;
+  sourceKey: string;
+  actor: PlaybackActor;
+  restart?: boolean;
+  audioTrack?: PlaybackAudioChoice;
 };
 
 const STORAGE_KEY_PREFIX = "harbor.playback-history.v1.";
@@ -24,6 +56,36 @@ const TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 200;
 
 const listeners = new Set<() => void>();
+
+export function capturePlaybackActor(): PlaybackActor {
+  const storageProfileId = activeProfileId();
+  try {
+    const state = JSON.parse(localStorage.getItem(PROFILES_KEY) ?? "null") as {
+      activeId?: string;
+    } | null;
+    const session = JSON.parse(
+      localStorage.getItem(`harbor.auth.${storageProfileId}`) ?? "null",
+    ) as {
+      user?: { _id?: string };
+    } | null;
+    return {
+      profileId: state?.activeId ?? storageProfileId,
+      storageProfileId,
+      accountId: session?.user?._id ?? null,
+    };
+  } catch {
+    return { profileId: storageProfileId, storageProfileId, accountId: null };
+  }
+}
+
+export function isPlaybackActorCurrent(actor: PlaybackActor): boolean {
+  const current = capturePlaybackActor();
+  return (
+    current.profileId === actor.profileId &&
+    current.storageProfileId === actor.storageProfileId &&
+    current.accountId === actor.accountId
+  );
+}
 
 function activeProfileId(): string {
   try {
@@ -120,12 +182,9 @@ function writeAll(map: Record<string, PlaybackEntry>): void {
       map = Object.fromEntries(sorted.slice(0, MAX_ENTRIES));
     }
     localStorage.setItem(storeKey(), JSON.stringify(map));
-  } catch (e) {
-    if (e instanceof DOMException && (e.name === "QuotaExceededError" || e.code === 22)) {
-      try {
-        localStorage.removeItem(storeKey());
-      } catch {}
-    }
+  } catch {
+    // A failed replacement must leave the last persisted source/session intact.
+    return;
   }
   listeners.forEach((l) => l());
 }
@@ -160,8 +219,111 @@ export function savePlayback(
           parsedTitle: entry.parsedTitle ?? prev.parsedTitle,
           savedAt: Date.now(),
         }
-      : { ...entry, savedAt: Date.now() };
+      : { ...entry, actual: prev?.actual, savedAt: Date.now() };
   writeAll(all);
+}
+
+export function recordActualPlayback(playback: ActualPlayback): boolean {
+  if (!isPlaybackActorCurrent(playback.actor) || !validActualPlayback(playback)) return false;
+  const all = readAll();
+  const key = entryKey(
+    playback.src.meta.id,
+    playback.src.episode?.season,
+    playback.src.episode?.episode,
+  );
+  const previous = all[key];
+  const previousActual = previous?.actual;
+  // mpv can clear its track list at natural EOF. That is not a new audio
+  // choice; keep only the last observed choice from this exact session.
+  const actual =
+    playback.completed &&
+    !playback.audioTrack &&
+    previousActual?.audioTrack &&
+    validActualPlayback(previousActual) &&
+    previousActual.id === playback.id &&
+    isPlaybackActorCurrent(previousActual.actor) &&
+    playbackSourceKey(previousActual.src) === playbackSourceKey(playback.src)
+      ? { ...playback, audioTrack: previousActual.audioTrack }
+      : playback;
+  const next = {
+    ...all,
+    [key]: {
+      ...previous,
+      title: previous?.title ?? playback.src.meta.name,
+      savedAt: Math.max(previous?.savedAt ?? 0, playback.playedAt),
+      actual,
+    },
+  };
+  const entries = Object.entries(next).sort((a, b) => b[1].savedAt - a[1].savedAt);
+  try {
+    localStorage.setItem(
+      storeKey(),
+      JSON.stringify(Object.fromEntries(entries.slice(0, MAX_ENTRIES))),
+    );
+  } catch {
+    return false;
+  }
+  listeners.forEach((listener) => listener());
+  return true;
+}
+
+function validActualPlayback(value: ActualPlayback): boolean {
+  return (
+    !!value &&
+    typeof value.id === "string" &&
+    !!value.id &&
+    Number.isFinite(value.playedAt) &&
+    Number.isFinite(value.positionMs) &&
+    value.positionMs >= 0 &&
+    Number.isFinite(value.durationMs) &&
+    value.durationMs >= 0 &&
+    !!value.actor &&
+    typeof value.actor.storageProfileId === "string" &&
+    typeof value.src?.url === "string" &&
+    !!value.src.url &&
+    typeof value.src?.meta?.id === "string" &&
+    !!value.src.meta.id &&
+    typeof value.src.meta.name === "string"
+  );
+}
+
+export function readLastActualPlayback(): ActualPlayback | null {
+  const actor = capturePlaybackActor();
+  let last: ActualPlayback | null = null;
+  for (const entry of Object.values(readAll())) {
+    const actual = entry.actual;
+    if (
+      !actual ||
+      !validActualPlayback(actual) ||
+      actual.actor.storageProfileId !== actor.storageProfileId ||
+      actual.actor.accountId !== actor.accountId
+    )
+      continue;
+    if (!last || actual.playedAt > last.playedAt) last = actual;
+  }
+  return last;
+}
+
+export function playbackSourceKey(
+  src: Pick<PlayerSrc, "url" | "historyUrl" | "streamRef" | "homeServer">,
+): string {
+  if (src.homeServer)
+    return `server:${src.homeServer.connectionId}:${src.homeServer.itemId}:${src.homeServer.versionId}`;
+  if (src.streamRef?.infoHash)
+    return `torrent:${src.streamRef.infoHash.toLowerCase()}:${src.streamRef.fileIdx ?? ""}`;
+  return src.historyUrl ?? src.url;
+}
+
+export function readActualPlaybackFor(src: PlayerSrc): ActualPlayback | null {
+  const entry = readAll()[entryKey(src.meta.id, src.episode?.season, src.episode?.episode)]?.actual;
+  const actor = capturePlaybackActor();
+  return entry &&
+    validActualPlayback(entry) &&
+    entry.actor.storageProfileId === actor.storageProfileId &&
+    entry.actor.accountId === actor.accountId &&
+    playbackSourceKey(entry.src) === playbackSourceKey(src)
+    ? entry
+    : null;
 }
 
 export function readPlayback(
@@ -175,7 +337,10 @@ export function readPlayback(
 
 export function clearPlayback(metaId: string, season?: number, episode?: number): void {
   const all = readAll();
-  delete all[entryKey(metaId, season, episode)];
+  const key = entryKey(metaId, season, episode);
+  const actual = all[key]?.actual;
+  if (actual) all[key] = { savedAt: actual.playedAt, title: actual.src.meta.name, actual };
+  else delete all[key];
   writeAll(all);
 }
 
