@@ -1,5 +1,6 @@
 import { loadStoredSettings } from "./load";
 import { setItemWithRecovery } from "@/lib/storage-recovery";
+import { rosterSettingsLinkState } from "@/lib/profile-sync/roster-store";
 import type { Settings } from "./types";
 
 export const MIRROR_KEY = "harbor.settings";
@@ -14,17 +15,7 @@ export function sourceKeyFor(profileId: string, linked: boolean): string {
 }
 
 export function profileSettingsLinkState(profileId: string): boolean | null {
-  try {
-    const raw = localStorage.getItem("harbor.profiles.v1");
-    if (!raw) return null;
-    const state = JSON.parse(raw) as {
-      profiles?: Array<{ id: string; settingsLinked?: boolean }>;
-    };
-    const profile = state.profiles?.find((entry) => entry.id === profileId);
-    return profile ? profile.settingsLinked !== false : null;
-  } catch {
-    return null;
-  }
+  return rosterSettingsLinkState(profileId);
 }
 
 export function isProfileSettingsLinked(profileId: string): boolean {

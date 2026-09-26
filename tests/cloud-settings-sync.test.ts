@@ -9,6 +9,10 @@ import {
   hasCloudPreference,
 } from "../src/lib/settings/cloud-preferences.ts";
 import type { Settings } from "../src/lib/settings/types.ts";
+import {
+  configureRosterStore,
+  rosterSettingsLinkState,
+} from "../src/lib/profile-sync/roster-store.ts";
 
 test("cloud preferences round-trip without credentials or device settings", () => {
   const local = {
@@ -52,4 +56,28 @@ test("a malformed cloud document cannot apply settings", () => {
   assert.equal(decodeCloudPreferences("not json"), null);
   assert.equal(decodeCloudPreferences(JSON.stringify({ version: 1, values: { rdKey: "secret" } })), null);
   assert.equal(decodeCloudPreferences(JSON.stringify({ version: 1, values: [] })), null);
+});
+
+test("settings link state reads the live roster before its storage mirror is persisted", () => {
+  configureRosterStore({
+    read: () => [{
+      id: "new-profile",
+      name: "New profile",
+      avatar: null,
+      color: "green",
+      isPrimary: false,
+      kid: null,
+      hideContent: null,
+      lockedTabs: null,
+      settingsLinked: false,
+      createdAt: 1,
+    }],
+    apply: () => {},
+  });
+  try {
+    assert.equal(rosterSettingsLinkState("new-profile"), false);
+    assert.equal(rosterSettingsLinkState("not-on-this-account"), null);
+  } finally {
+    configureRosterStore(null);
+  }
 });

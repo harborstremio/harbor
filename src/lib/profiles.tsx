@@ -657,11 +657,16 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       read: () => profilesRef.current,
       apply: (plan) => {
         for (const id of plan.dropLocalIds) purgeProfileStorage(id);
+        // The sync engine applies the roster and its profile-scoped settings in
+        // the same pull. Publish the adopted roster to synchronous readers now;
+        // React's state update and the localStorage mirror land later.
+        const previous = profilesRef.current;
+        const byId = new Map(previous.map((p) => [p.id, p]));
+        const profiles = plan.replaceWith.map((next) =>
+          adoptProfile(next, byId.get(next.id), pickColor(previous)),
+        );
+        profilesRef.current = profiles;
         setState((s) => {
-          const byId = new Map(s.profiles.map((p) => [p.id, p]));
-          const profiles = plan.replaceWith.map((next) =>
-            adoptProfile(next, byId.get(next.id), pickColor(s.profiles)),
-          );
           const stillHere = profiles.some((p) => p.id === s.activeId);
           return { profiles, activeId: stillHere ? s.activeId : (profiles[0]?.id ?? null) };
         });
