@@ -9,6 +9,7 @@ import type { FullscreenClockFormat, FullscreenClockStyle } from "@/lib/local-ti
 import type { SubtitleOffsetPosition, SubtitleOffsetSize } from "@/lib/player/subtitle-offset";
 import type { BufferSizeId } from "@/lib/player/buffer-profile";
 import type { UiLanguage } from "@/lib/i18n/languages";
+import type { DisplaySelection } from "@/lib/monitors";
 
 export type StreamingService =
   | "netflix"
@@ -290,6 +291,10 @@ export type Settings = {
   playerAnime4kAnimeOnly: boolean;
   playerAnime4kIndicator: boolean;
   playerMpvEmbed: boolean;
+  /** Where the separate mpv window opens. Windows only; see src/lib/monitors.ts. */
+  playerSeparateDisplay: DisplaySelection;
+  /** Fill the whole monitor (cover the taskbar) for the separate mpv window. */
+  playerSeparateCoverTaskbar: boolean;
   playerP2pChip: boolean;
   showQualityInfo: boolean;
   stremioServerTranscode: boolean;
@@ -444,6 +449,8 @@ export type Settings = {
   playerTvNavigation: boolean;
   bigPictureButton: boolean;
   bigPictureAutoStart: boolean;
+  /** Which monitor Big Picture opens on at startup. Windows only. */
+  bigPictureDisplay: DisplaySelection;
   bigPictureSound: "none" | "glass" | "modern" | "retro" | "cinematic";
   bigPictureMosaic: boolean;
   /**

@@ -2,6 +2,7 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { Section, Segmented, ToggleRow } from "./shared";
 import { SettingRow } from "./kit";
+import { DisplayPickerRow } from "./player-panel/display-picker";
 import {
   BP_OVERSCAN_VALUES,
   SOUND_VALUES,
@@ -27,6 +28,15 @@ export function BigPicturePanel() {
           value={settings.bigPictureAutoStart}
           onChange={(v) => update({ bigPictureAutoStart: v })}
         />
+        {settings.bigPictureAutoStart && (
+          <DisplayPickerRow
+            label={t("Big Picture display")}
+            desc={t("Which monitor Big Picture opens on at startup.")}
+            newId="bigPicture:display"
+            value={settings.bigPictureDisplay}
+            onChange={(bigPictureDisplay) => update({ bigPictureDisplay })}
+          />
+        )}
       </Section>
 
       <Section title={t("Interface")}>

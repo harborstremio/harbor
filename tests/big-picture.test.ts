@@ -1,6 +1,8 @@
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
+import { readFileSync } from "node:fs";
+// @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 
 import {
@@ -369,4 +371,19 @@ test("the nav jump key stays off every other Big Picture binding", () => {
   for (const key of ["ArrowUp", "Enter", "Escape", "Backspace", "PageUp", "PageDown", "Tab"]) {
     assert.equal(isBpNavJumpKey(key), false, `${key} must not double as the nav jump`);
   }
+});
+
+test("Big Picture autostart is a launch-only check, not a live setting reaction", () => {
+  const app = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  // The launch check must be consumed before the outcome is known, so flipping
+  // "Open in Big Picture" on later never enters Big Picture immediately.
+  assert.match(
+    app,
+    /const alreadyBooted = bigPictureBootChecked\.current;\s*\n\s*bigPictureBootChecked\.current = true;/,
+  );
+  // The old shape set the flag only when it actually booted, which is the bug.
+  assert.doesNotMatch(
+    app,
+    /if \(!go\) return;\s*\n\s*bigPictureBootChecked\.current = true;/,
+  );
 });

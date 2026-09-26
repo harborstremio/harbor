@@ -70,6 +70,7 @@ export function DiscoverIcon({ active = false }: { active?: boolean }) {
         <svg viewBox="0 0 512 512" className={SVG_CLASS} fill="currentColor" aria-hidden>
           <path
             d={NEEDLE}
+            data-nav-needle
             fill={active ? "var(--color-accent)" : "currentColor"}
             style={{ transition: "fill 280ms ease" }}
           />

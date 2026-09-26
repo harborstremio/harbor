@@ -5,6 +5,7 @@ import { takePreparedSubtitle } from "@/lib/subtitles/prepared-registry";
 import { markLimitReached } from "@/lib/subtitles/limit-signal";
 import { mpvFailureSnapshot } from "./mpv-failure";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
+import type { MonitorInfo } from "@/lib/monitors";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import type { SubtitleLoadMetadata } from "@/lib/subtitles/types";
@@ -145,6 +146,8 @@ export type MpvOptions = {
   forceYuv420p?: boolean;
   extraOptions?: string;
   fullDownload?: boolean;
+  separateDisplay?: MonitorInfo | null;
+  separateCoverTaskbar?: boolean;
   getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
 };
 
@@ -935,6 +938,8 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             renderer: opts.renderer ?? "gpu-next",
             forceYuv420p: opts.forceYuv420p === true,
             extraOptions: opts.extraOptions || undefined,
+            separateDisplay: opts.embed === true ? null : (opts.separateDisplay ?? null),
+            separateCoverTaskbar: opts.separateCoverTaskbar ?? true,
           },
         });
         preparedSubtitleCleanups.clearBefore(activeLoadId);

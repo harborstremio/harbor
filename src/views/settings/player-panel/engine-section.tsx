@@ -11,6 +11,7 @@ import { ChoiceBlock, Tag } from "./choice";
 import { DesktopOnlyBlock, isTauri } from "./internals";
 import { HdrModePicker } from "./hdr-mode";
 import { DisplayPanelSelector } from "./display-panel-selector";
+import { DisplayPickerRow } from "./display-picker";
 
 export function PlayerEnginePanel() {
   const { settings, update } = useSettings();
@@ -71,7 +72,32 @@ export function PlayerEnginePanel() {
             sub={t("Renders mpv inline so playback lives in Harbor itself. Turn off to open it in a separate window instead.")}
             value={settings.playerMpvEmbed}
             onChange={(v) => update({ playerMpvEmbed: v })}
+            lockReason={
+              settings.playerHdrOpaqueWindow
+                ? t(
+                    "True HDR, separate window is selected. That mode always plays in its own window, so mpv cannot be embedded. Choose a different HDR mode to change this.",
+                  )
+                : undefined
+            }
           />
+          {(!settings.playerMpvEmbed || settings.playerHdrOpaqueWindow) && (
+            <>
+              <DisplayPickerRow
+                label={t("Separate window display")}
+                desc={t("Which monitor the separate mpv window opens on. Harbor's own window stays where it is.")}
+                newId="player:separate-display"
+                value={settings.playerSeparateDisplay}
+                onChange={(playerSeparateDisplay) => update({ playerSeparateDisplay })}
+              />
+              <ToggleRow
+                label={t("Cover the taskbar")}
+                sub={t("Span the whole screen including the taskbar. Turn off to keep the taskbar visible on that monitor.")}
+                value={settings.playerSeparateCoverTaskbar}
+                onChange={(v) => update({ playerSeparateCoverTaskbar: v })}
+                newId="player:cover-taskbar"
+              />
+            </>
+          )}
           {mpvProbe && !mpvProbe.available && (
             <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
               <AlertTriangle size={18} strokeWidth={2.2} className="mt-[2px] shrink-0 text-danger" />

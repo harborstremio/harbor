@@ -1,6 +1,7 @@
 import { createHtml5Bridge } from "@/lib/player/html5";
 import { createMpvBridge, probeMpv, type MpvRect } from "@/lib/player/mpv";
 import type { PlayerBridge } from "@/lib/player/bridge";
+import type { MonitorInfo } from "@/lib/monitors";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 
 export const SYNC_DRIFT_TOLERANCE_S = 0.6;
@@ -67,6 +68,8 @@ export async function pickBridge(
     forceYuv420p?: boolean;
     extraOptions?: string;
     fullDownload?: boolean;
+    separateDisplay?: MonitorInfo | null;
+    separateCoverTaskbar?: boolean;
     getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
   },
 ): Promise<{ bridge: PlayerBridge; engine: "html5" | "mpv" }> {

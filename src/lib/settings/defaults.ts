@@ -4,6 +4,7 @@ import {
 } from "@/lib/gamepad/cursor";
 import { DEFAULT_THEME } from "@/lib/theme";
 import { DEFAULT_FULLSCREEN_CLOCK_SIZE_PX } from "@/lib/local-time";
+import { AUTO_DISPLAY } from "@/lib/monitors";
 import type { Settings } from "./types";
 
 export const STORAGE_KEY = "harbor.settings";
@@ -236,6 +237,8 @@ export const DEFAULT: Settings = {
   playerAnime4kAnimeOnly: true,
   playerAnime4kIndicator: true,
   playerMpvEmbed: true,
+  playerSeparateDisplay: AUTO_DISPLAY,
+  playerSeparateCoverTaskbar: true,
   playerP2pChip: true,
   showQualityInfo: false,
   stremioServerTranscode: false,
@@ -376,6 +379,7 @@ export const DEFAULT: Settings = {
   playerTvNavigation: false,
   bigPictureButton: true,
   bigPictureAutoStart: false,
+  bigPictureDisplay: AUTO_DISPLAY,
   bigPictureSound: "cinematic",
   bigPictureMosaic: true,
   bigPictureOverscan: null,

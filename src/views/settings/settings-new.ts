@@ -13,6 +13,9 @@ const NEW_SETTINGS = new Set([
   "tv:subtitle-look",
   "mpv:buffer-size",
   "home:prefer-episode-still",
+  "bigPicture:display",
+  "player:separate-display",
+  "player:cover-taskbar",
 ]);
 
 const LS = "harbor.settingsNew.v1";

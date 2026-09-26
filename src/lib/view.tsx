@@ -18,6 +18,7 @@ import {
 } from "react";
 import { subscribeOpenProfile } from "@/lib/social/open-profile";
 import { subscribeOpenGroup } from "@/lib/social/open-group";
+import { useBigPicture } from "@/lib/big-picture";
 import type { Meta } from "./cinemeta";
 import type { PeopleDept, RankSource } from "./harbor-rank";
 import { profileFromMeta, trackEvent } from "./discover";
@@ -492,6 +493,12 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   stackRef.current = stack;
   forwardStackRef.current = forwardStack;
   const [chromeHidden, setChromeHidden] = useState(false);
+  // Big Picture is its own full-screen shell, so every layout's nav stands down
+  // for it. That is exactly what chromeHidden means to the chrome components,
+  // and routing it through here is what finally hides them: the MinUI dock read
+  // chromeHidden but nothing ever set it for Big Picture, so it kept painting
+  // over the shell as a bordered box.
+  const bigPictureActive = useBigPicture().active;
   const [homeResetTick, setHomeResetTick] = useState(0);
   const scrollMem = useRef<Map<string, ScrollSnapshot>>(new Map());
   const rowScrollMem = useRef<Map<string, number>>(new Map());
@@ -1361,7 +1368,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
       recallScroll,
       rememberRowScroll,
       recallRowScroll,
-      chromeHidden,
+      chromeHidden: chromeHidden || bigPictureActive,
       setChromeHidden,
       setNavStack,
     }),
@@ -1438,6 +1445,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
       rememberScroll,
       recallScroll,
       chromeHidden,
+      bigPictureActive,
       setNavStack,
     ],
   );

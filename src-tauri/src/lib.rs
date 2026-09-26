@@ -74,6 +74,8 @@ mod dvr;
 #[cfg(desktop)]
 mod fullscreen;
 #[cfg(desktop)]
+mod monitors;
+#[cfg(desktop)]
 mod harbor_lan;
 #[cfg(desktop)]
 mod hdr_overlay;
@@ -981,6 +983,8 @@ pub fn run() {
             privacy::privacy_status,
             privacy::privacy_set_enabled,
             set_maximize_clamp,
+            monitors::list_monitors,
+            monitors::move_main_to_monitor,
             crash_report::take_startup_crash_report,
             fonts::install_sub_font,
             fonts::remove_sub_font,
