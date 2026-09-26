@@ -52,14 +52,15 @@ export async function buildTmdbRows(settings: Settings) {
     }))
     .filter((r) => r.metas.length > 0);
 
+  const heroRows = [
+    "tmdb-trending-movies",
+    "tmdb-trending-tv",
+    "tmdb-now-playing",
+    "tmdb-on-the-air",
+  ];
   const byKey = (k: string) => rows.find((r) => r.key === k)?.metas ?? [];
-  const hero = [
-    byKey("tmdb-trending-movies")[0],
-    byKey("tmdb-trending-tv")[0],
-    byKey("tmdb-now-playing")[0],
-    byKey("tmdb-on-the-air")[0],
-  ].filter(Boolean) as Meta[];
-  return { rows, hero, failed };
+  const hero = heroRows.map((k) => byKey(k)[0]).filter(Boolean) as Meta[];
+  return { rows, hero, heroRows, failed };
 }
 
 export async function buildCinemetaRows() {
@@ -132,9 +133,17 @@ export async function buildCinemetaRows() {
     make("cm-comedy-tv", "series", "Comedy Series", sComedy.slice(0, 30)),
     make("cm-crime-tv", "series", "Crime Series", sCrime.slice(0, 30)),
   ].filter((r) => r.metas.length > 0);
+  const heroRows = [
+    "cm-top-movies",
+    "cm-trending-tv",
+    "cm-drama",
+    "cm-comedy",
+    "cm-action",
+    "cm-scifi",
+  ];
   const hero = [movies[0], series[0], mDrama[0], mComedy[0], mAction[0], mScifi[0]]
     .filter(Boolean) as Meta[];
-  return { rows, hero, failed };
+  return { rows, hero, heroRows, failed };
 }
 
 export async function buildAnimeHomeRows(): Promise<HomeRow[]> {

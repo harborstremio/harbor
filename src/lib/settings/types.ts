@@ -474,6 +474,7 @@ export type Settings = {
   stillWatchingAfter: number;
   keyboardPauseShowsControls: boolean;
   hideWatchedInCatalogs: boolean;
+  hideWatchedInHero: boolean;
   hideUnreleased: boolean;
   localEpisodeSortDesc: boolean;
   smoothScroll: boolean;
