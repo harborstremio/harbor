@@ -2,6 +2,9 @@ import { useSyncExternalStore } from "react";
 import { isSectionKey, registerSection } from "@/lib/profile-sync/sections";
 import { flushSyncNow, markSectionDirty, requestSyncPull } from "@/lib/profile-sync/scheduler";
 import { pushConfigToPairedHarbors } from "@/components/play-on-send";
+import { decodeCloudPreferences, encodeCloudPreferences } from "@/lib/settings/cloud-preferences";
+import type { Settings } from "@/lib/settings/types";
+import { writeSettingsFor } from "@/lib/layout-sync/store";
 import type { TvDoc, TvValue, TvWire } from "./model";
 
 export type TvWireName = TvWire;
@@ -20,6 +23,7 @@ export type TvBundle = {
 
 const LS = "harbor.tvsettings.v1.";
 const EMPTY: TvBundle = { settings: {}, playerlayout: {}, theme: null };
+const APP_PREFERENCES_KEY = "__harborPreferencesV1";
 
 const cache = new Map<string, TvBundle>();
 const subs = new Set<() => void>();
@@ -40,6 +44,17 @@ function coerceDoc(raw: unknown): TvDoc {
   for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
     if (typeof v === "boolean" || typeof v === "string") out[k] = v;
     else if (Array.isArray(v) && v.every((e) => typeof e === "string")) out[k] = v as string[];
+  }
+  return out;
+}
+
+function coerceSettingsDoc(raw: unknown): TvDoc {
+  const out = coerceDoc(raw);
+  const held = out[APP_PREFERENCES_KEY];
+  if (typeof held === "string") {
+    const patch = decodeCloudPreferences(held);
+    if (patch) out[APP_PREFERENCES_KEY] = JSON.stringify({ version: 1, values: patch });
+    else delete out[APP_PREFERENCES_KEY];
   }
   return out;
 }
@@ -71,7 +86,7 @@ function load(profileId: string): TvBundle {
     const raw = JSON.parse(localStorage.getItem(slot(profileId)) ?? "null");
     if (raw && typeof raw === "object") {
       parsed = {
-        settings: coerceDoc((raw as Record<string, unknown>).settings),
+        settings: coerceSettingsDoc((raw as Record<string, unknown>).settings),
         playerlayout: coerceDoc((raw as Record<string, unknown>).playerlayout),
         theme: coerceTheme((raw as Record<string, unknown>).theme),
       };
@@ -94,7 +109,19 @@ function commit(profileId: string, next: TvBundle): void {
 function queue(wire: TvWire, profileId: string): void {
   if (!isSectionKey(wire)) return;
   markSectionDirty(wire, profileId);
-  void pushConfigToPairedHarbors(load(profileId));
+  const bundle = load(profileId);
+  const tvSettings = { ...bundle.settings };
+  delete tvSettings[APP_PREFERENCES_KEY];
+  void pushConfigToPairedHarbors({ ...bundle, settings: tvSettings });
+}
+
+/** The existing TV settings wire also carries portable desktop preferences. */
+export function writeCloudPreferences(profileId: string, settings: Settings): void {
+  const encoded = encodeCloudPreferences(settings);
+  const held = load(profileId);
+  if (held.settings[APP_PREFERENCES_KEY] === encoded) return;
+  commit(profileId, { ...held, settings: { ...held.settings, [APP_PREFERENCES_KEY]: encoded } });
+  markSectionDirty("settings", profileId);
 }
 
 export function writeTvSettings(profileId: string, patch: TvDoc): void {
@@ -162,7 +189,23 @@ function adapterFor(wire: TvWire) {
         if (!next) return false;
         cache.set(profileId, { ...held, theme: next });
       } else {
-        const next = coerceDoc(value);
+        const next = wire === "settings" ? coerceSettingsDoc(value) : coerceDoc(value);
+        if (wire === "settings") {
+          const incoming = next[APP_PREFERENCES_KEY];
+          if (typeof incoming === "string") {
+            const patch = decodeCloudPreferences(incoming);
+            if (patch) {
+              if (!writeSettingsFor(profileId, patch)) return false;
+              next[APP_PREFERENCES_KEY] = JSON.stringify({ version: 1, values: patch });
+            } else {
+              delete next[APP_PREFERENCES_KEY];
+            }
+          }
+          // Old TV-only documents must not erase this device's desktop preferences.
+          if (!next[APP_PREFERENCES_KEY] && held.settings[APP_PREFERENCES_KEY]) {
+            next[APP_PREFERENCES_KEY] = held.settings[APP_PREFERENCES_KEY];
+          }
+        }
         if (Object.keys(next).length === 0) return false;
         cache.set(profileId, { ...held, [wire]: next });
       }

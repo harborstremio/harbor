@@ -13,6 +13,24 @@ export function sourceKeyFor(profileId: string, linked: boolean): string {
   return linked ? SHARED_KEY : profileKey(profileId);
 }
 
+export function profileSettingsLinkState(profileId: string): boolean | null {
+  try {
+    const raw = localStorage.getItem("harbor.profiles.v1");
+    if (!raw) return null;
+    const state = JSON.parse(raw) as {
+      profiles?: Array<{ id: string; settingsLinked?: boolean }>;
+    };
+    const profile = state.profiles?.find((entry) => entry.id === profileId);
+    return profile ? profile.settingsLinked !== false : null;
+  } catch {
+    return null;
+  }
+}
+
+export function isProfileSettingsLinked(profileId: string): boolean {
+  return profileSettingsLinkState(profileId) !== false;
+}
+
 export function serializeSettings(settings: Settings): string {
   const { backgroundImage: _drop, ...themeRest } = settings.theme;
   void _drop;
@@ -76,6 +94,10 @@ export function persistEffective(settings: Settings, profileId: string, linked: 
     );
   }
   return json;
+}
+
+export function persistInactive(settings: Settings, profileId: string, linked: boolean): boolean {
+  return setItemWithRecovery(sourceKeyFor(profileId, linked), serializeSettings(settings));
 }
 
 export function forkToProfile(profileId: string): void {
