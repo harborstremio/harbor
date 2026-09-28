@@ -141,7 +141,7 @@ export function SearchOverlay() {
             className={`shrink-0 transition-colors ${aiMode ? "text-accent" : "text-ink-muted"}`}
             strokeWidth={1.9}
           />
-          <div className="relative flex-1">
+          <div className="relative min-w-0 flex-1">
             <input
               data-search-input
               ref={inputRef}
@@ -208,11 +208,20 @@ export function SearchOverlay() {
               type="button"
               aria-label={t("Clear")}
               onClick={clear}
-              className="flex h-10 w-10 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
+              className="flex h-10 shrink-0 items-center justify-center rounded-full px-3 text-[13px] text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
             >
-              <X size={18} strokeWidth={2.2} />
+              {t("Clear")}
             </button>
           )}
+          <button
+            type="button"
+            aria-label={t("common.close")}
+            title={t("common.close")}
+            onClick={close}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-canvas/60 hover:text-ink"
+          >
+            <X size={20} strokeWidth={2.2} aria-hidden="true" />
+          </button>
         </div>
 
         <div className="relative mt-6 flex-1 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
