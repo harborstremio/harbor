@@ -98,6 +98,7 @@ function PillSelect({
             <div className="flex items-center gap-2 border-b border-edge-soft px-3.5 py-2.5">
               <Search size={14} className="text-ink-subtle" />
               <input
+                data-search-input
                 autoFocus
                 value={q}
                 onChange={(e) => setQ(e.target.value)}

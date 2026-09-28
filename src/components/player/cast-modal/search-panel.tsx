@@ -98,11 +98,12 @@ export function SearchPanel({
           className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/40"
         />
         <input
+          data-search-input
           ref={inputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("Search movies, shows, people...")}
-          className="w-full rounded-full bg-white/[0.07] py-3.5 pl-11 pr-11 text-[15px] text-white outline-none ring-1 ring-white/12 transition-shadow placeholder:text-white/40 focus:ring-2 focus:ring-white/30"
+          className="w-full rounded-full bg-white/[0.07] py-3.5 pl-11 pr-11 text-[15px] text-white outline-none ring-1 ring-white/12 transition-shadow placeholder:text-white/40"
         />
         {query && (
           <button

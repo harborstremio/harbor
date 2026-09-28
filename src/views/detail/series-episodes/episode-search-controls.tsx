@@ -66,6 +66,7 @@ export function EpisodeSearchBar({
     <div className="flex items-center gap-2.5 rounded-2xl bg-elevated px-3.5 ring-1 ring-edge-soft">
       <Search size={16} className="shrink-0 text-ink-subtle" />
       <input
+        data-search-input
         autoFocus
         value={value}
         onChange={(e) => onChange(e.target.value)}

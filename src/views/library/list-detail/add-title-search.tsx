@@ -80,11 +80,12 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
           className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-subtle"
         />
         <input
+          data-search-input
           ref={inputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("Add a movie or show to this list...")}
-          className="h-12 w-full rounded-full bg-elevated/40 pl-11 pr-11 text-[14px] text-ink outline-none ring-1 ring-edge-soft/60 transition-shadow placeholder:text-ink-subtle focus:ring-edge"
+          className="h-12 w-full rounded-full bg-elevated/40 pl-11 pr-11 text-[14px] text-ink outline-none ring-1 ring-edge-soft/60 transition-shadow placeholder:text-ink-subtle"
         />
         {query && (
           <button
@@ -106,7 +107,9 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
           {loading && hits.length === 0 ? (
             <p className="px-4 py-4 text-[13px] text-ink-muted">{t("Searching...")}</p>
           ) : hits.length === 0 ? (
-            <p className="px-4 py-4 text-[13px] text-ink-muted">{t("No matches. Try another title.")}</p>
+            <p className="px-4 py-4 text-[13px] text-ink-muted">
+              {t("No matches. Try another title.")}
+            </p>
           ) : (
             <div className="max-h-[360px] overflow-y-auto py-1.5">
               {hits.map((m) => {
@@ -133,7 +136,11 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
                         inList ? "text-accent" : "border border-edge text-ink-muted"
                       }`}
                     >
-                      {inList ? <Check size={16} strokeWidth={2.6} /> : <Plus size={16} strokeWidth={2.2} />}
+                      {inList ? (
+                        <Check size={16} strokeWidth={2.6} />
+                      ) : (
+                        <Plus size={16} strokeWidth={2.2} />
+                      )}
                     </span>
                   </button>
                 );

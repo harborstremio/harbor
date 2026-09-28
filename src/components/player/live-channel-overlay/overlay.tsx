@@ -218,6 +218,7 @@ export function LiveChannelOverlay({
         <div className="flex h-11 flex-1 items-center gap-2.5 rounded-xl border border-edge-soft/55 bg-elevated px-3.5">
           <Search size={15} strokeWidth={2} className="text-ink-subtle" />
           <input
+            data-search-input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}

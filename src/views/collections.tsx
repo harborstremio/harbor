@@ -70,10 +70,10 @@ export function CollectionsView() {
     const el = stickySentinelRef.current;
     const root = scrollRef.current;
     if (!el || !root) return;
-    const io = new IntersectionObserver(
-      (entries) => setStuck(!entries[0]?.isIntersecting),
-      { root, rootMargin: "-104px 0px 0px 0px" },
-    );
+    const io = new IntersectionObserver((entries) => setStuck(!entries[0]?.isIntersecting), {
+      root,
+      rootMargin: "-104px 0px 0px 0px",
+    });
     io.observe(el);
     return () => io.disconnect();
   }, []);
@@ -102,7 +102,10 @@ export function CollectionsView() {
                 const fresh = batch.filter(
                   (h) =>
                     !seen.has(h.id) &&
-                    !(remoteQuery === FEED_QUERY && curatedNames.has(stripSuffix(h.name).toLowerCase())),
+                    !(
+                      remoteQuery === FEED_QUERY &&
+                      curatedNames.has(stripSuffix(h.name).toLowerCase())
+                    ),
                 );
                 return [...prev, ...fresh];
               });
@@ -168,12 +171,13 @@ export function CollectionsView() {
                 className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-ink-subtle"
               />
               <input
+                data-search-input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t("Search every collection on TMDB...")}
                 spellCheck={false}
-                className="h-11 w-full rounded-full border border-edge bg-elevated/50 ps-11 pe-10 text-[14px] text-ink placeholder:text-ink-subtle transition-colors focus:border-ink-subtle focus:outline-none"
+                className="h-11 w-full rounded-full border border-edge bg-elevated/50 ps-11 pe-10 text-[14px] text-ink placeholder:text-ink-subtle transition-colors focus:outline-none"
               />
               {query && (
                 <button
@@ -236,7 +240,9 @@ export function CollectionsView() {
 
           {!searchActive && category !== "All" && (
             <section className="flex flex-col gap-5">
-              <p className="text-[13px] text-ink-subtle">{t("More {category}", { category: t(category) })}</p>
+              <p className="text-[13px] text-ink-subtle">
+                {t("More {category}", { category: t(category) })}
+              </p>
               {catFeed.hits.length > 0 && (
                 <div className="grid grid-cols-2 gap-5 lg:grid-cols-3 2xl:grid-cols-4">
                   {catFeed.hits.map((h) => (
@@ -263,7 +269,9 @@ export function CollectionsView() {
               {catFeed.done && (
                 <p className="py-4 text-center text-[12.5px] text-ink-subtle">
                   {catFeed.hits.length > 0
-                    ? t("That's every {category} collection we could find.", { category: t(category) })
+                    ? t("That's every {category} collection we could find.", {
+                        category: t(category),
+                      })
                     : t("No more found for this category.")}
                 </p>
               )}

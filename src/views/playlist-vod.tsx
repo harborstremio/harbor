@@ -63,11 +63,7 @@ export function PlaylistVodView({ active }: { active: boolean }) {
     setTab(t);
     setSelected(null);
   }, []);
-  const viewError = isXtream
-    ? tab === "movies"
-      ? xtream.movieError
-      : xtream.seriesError
-    : error;
+  const viewError = isXtream ? (tab === "movies" ? xtream.movieError : xtream.seriesError) : error;
   const tabLoading = isXtream
     ? tab === "movies"
       ? xtream.moviesLoading
@@ -240,6 +236,7 @@ export function PlaylistVodView({ active }: { active: boolean }) {
         <div className="flex h-11 flex-1 min-w-[220px] items-center gap-2.5 rounded-xl border border-edge-soft/55 bg-elevated px-3.5">
           <Search size={15} strokeWidth={2} className="text-ink-subtle" />
           <input
+            data-search-input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}

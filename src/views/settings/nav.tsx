@@ -5574,11 +5574,11 @@ export function SettingsNav({
             <path d="m20 20-3.5-3.5" />
           </svg>
           <input
+            data-search-input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("Search settings")}
-            aria-describedby="settings-search-mode"
             className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-subtle"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -5615,27 +5615,6 @@ export function SettingsNav({
               </svg>
             </button>
           )}
-        </div>
-        <div
-          id="settings-search-mode"
-          data-settings-search-mode
-          aria-live="polite"
-          className="flex min-h-5 items-center px-2 pt-1 text-[10.5px] leading-none"
-        >
-          <span
-            data-settings-search-nav-hint
-            className="hidden items-center gap-1.5 text-ink-subtle"
-          >
-            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-ink-subtle" />
-            {t("Press Enter or Space to type")}
-          </span>
-          <span
-            data-settings-search-edit-hint
-            className="hidden items-center gap-1.5 font-semibold text-accent"
-          >
-            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
-            {t("Text mode — Esc to exit")}
-          </span>
         </div>
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 pb-8">

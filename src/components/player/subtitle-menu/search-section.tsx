@@ -144,13 +144,14 @@ export function SearchSection(props: SubtitleMenuProps) {
             className="absolute start-3 top-1/2 -translate-y-1/2 text-ink-subtle"
           />
           <input
+            data-search-input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") void run();
             }}
             placeholder={metaImdbId ? t("Refine search") : t("Title")}
-            className="h-9 w-full rounded-lg border border-edge-soft bg-canvas/60 ps-9 pe-3 text-[13.5px] text-ink placeholder:text-ink-subtle focus:border-edge focus:outline-none"
+            className="h-9 w-full rounded-lg border border-edge-soft bg-canvas/60 ps-9 pe-3 text-[13.5px] text-ink placeholder:text-ink-subtle focus:outline-none"
           />
         </div>
         <button

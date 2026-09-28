@@ -194,9 +194,9 @@ test("settings search separates navigation focus from explicit text mode", () =>
 
   assert.match(settingsNavSource, /data-settings-search-field/);
   assert.match(settingsNavSource, /data-tv-text-field/);
-  assert.match(settingsNavSource, /data-settings-search-nav-hint/);
-  assert.match(settingsNavSource, /data-settings-search-edit-hint/);
-  assert.match(globalStylesSource, /data-tv-search-nav-focused/);
+  assert.doesNotMatch(settingsNavSource, /data-settings-search-nav-hint/);
+  assert.doesNotMatch(settingsNavSource, /data-settings-search-edit-hint/);
+  assert.match(navigationSource, /data-tv-search-nav-focused/);
   assert.match(globalStylesSource, /data-tv-search-editing-focused/);
 });
 

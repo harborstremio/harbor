@@ -143,6 +143,7 @@ export function SearchOverlay() {
           />
           <div className="relative flex-1">
             <input
+              data-search-input
               ref={inputRef}
               type="search"
               aria-label={t("Search")}

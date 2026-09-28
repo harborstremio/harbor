@@ -144,11 +144,12 @@ export function Catalogs({ active = true }: { active?: boolean }) {
                     className="absolute start-3.5 top-1/2 -translate-y-1/2 text-ink-subtle"
                   />
                   <input
+                    data-search-input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder={t("Search catalogs")}
                     spellCheck={false}
-                    className="h-full w-full rounded-full border border-edge-soft bg-elevated/40 ps-10 pe-9 text-[14px] text-ink outline-none transition-colors placeholder:text-ink-subtle focus:border-edge"
+                    className="h-full w-full rounded-full border border-edge-soft bg-elevated/40 ps-10 pe-9 text-[14px] text-ink outline-none transition-colors placeholder:text-ink-subtle"
                   />
                   {query && (
                     <button

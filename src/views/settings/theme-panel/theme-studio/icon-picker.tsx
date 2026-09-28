@@ -35,9 +35,10 @@ export function IconPicker({
   return (
     <div className="flex flex-col gap-2 border-t border-edge-soft px-2.5 py-2.5">
       <div className="flex items-center gap-1.5">
-        <div className="flex h-8 flex-1 items-center gap-1.5 rounded-md border border-edge-soft bg-canvas/50 px-2 transition-colors focus-within:border-accent/60">
+        <div className="flex h-8 flex-1 items-center gap-1.5 rounded-md border border-edge-soft bg-canvas/50 px-2 transition-colors">
           <Search size={13} className="shrink-0 text-ink-subtle" />
           <input
+            data-search-input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search icons"

@@ -46,12 +46,18 @@ export function TextSyncOverlay({
   const currentDelta = deltaFn(api.points, api.nudge)(position);
 
   const hint = sectionMode
-    ? t("Tap the first and last line of the section, then tap the line playing now and Sync from here.")
+    ? t(
+        "Tap the first and last line of the section, then tap the line playing now and Sync from here.",
+      )
     : api.pointCount === 0
       ? t("Find the line you hear right now, then Sync from here. Everything shifts to match.")
       : api.pointCount === 1
-        ? t("Set. If the subtitles drift later on, play ahead and Sync from here again at a later line to fix the drift.")
-        : t("Drift correction is on (2 points). Fine-tune with the buttons, or fix a stray section.");
+        ? t(
+            "Set. If the subtitles drift later on, play ahead and Sync from here again at a later line to fix the drift.",
+          )
+        : t(
+            "Drift correction is on (2 points). Fine-tune with the buttons, or fix a stray section.",
+          );
 
   return (
     <div className="pointer-events-none absolute inset-0 z-[70]">
@@ -105,6 +111,7 @@ export function TextSyncOverlay({
               <div className="flex items-center gap-2.5 rounded-2xl bg-elevated px-3.5 ring-1 ring-edge-soft">
                 <Search size={16} className="shrink-0 text-ink-subtle" />
                 <input
+                  data-search-input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t("Search a line by its words")}

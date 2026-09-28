@@ -4,9 +4,13 @@ import { useT } from "@/lib/i18n";
 export function SearchBar({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const t = useT();
   return (
-    <div className="relative h-10 w-full min-w-0 rounded-full border border-edge-soft bg-elevated/40 transition-colors focus-within:border-edge">
+    <div
+      data-addon-search-field
+      className="relative h-10 w-full min-w-0 rounded-full border border-edge-soft bg-elevated/40 transition-colors"
+    >
       <Search size={14} className="absolute start-3.5 top-1/2 -translate-y-1/2 text-ink-subtle" />
       <input
+        data-search-input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={t("Search addons")}

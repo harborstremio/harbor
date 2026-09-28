@@ -2439,20 +2439,20 @@ textarea:focus-visible,
 
 /* The search caret indicates editing. Keep navigation rings on buttons and
    fields in navigation mode, without drawing a second box while typing. */
+[data-search-input]:focus-visible,
 [data-search-overlay] input[type="search"]:focus-visible,
+[data-addon-search-field] input:focus-visible,
+[data-settings-search-field] input:focus-visible,
+html body [data-search-input][data-search-editing="true"]:not([data-tv-focused="true"]),
+html body [data-tv-search-editing-focused="true"]:has([data-search-input]),
 html [data-search-overlay] [data-tv-text-field][data-tv-search-editing-focused="true"],
-html [data-search-overlay] input[type="search"][data-search-editing="true"] {
+html [data-search-overlay] input[type="search"][data-search-editing="true"],
+html body [data-addon-search-field][data-tv-search-editing-focused="true"],
+html body [data-addon-search-field] input[data-search-editing="true"],
+html body [data-settings-search-field][data-tv-search-editing-focused="true"],
+html body [data-settings-search-field] input[data-search-editing="true"] {
   outline: none !important;
   box-shadow: none !important;
-}
-
-[data-settings-search-field][data-tv-search-nav-focused="true"]
-  + [data-settings-search-mode]
-  [data-settings-search-nav-hint],
-[data-settings-search-field][data-tv-search-editing-focused="true"]
-  + [data-settings-search-mode]
-  [data-settings-search-edit-hint] {
-  display: inline-flex;
 }
 
 /* Opaque-surface overrides for translucent "glass" facet (aurora + any user glass theme).

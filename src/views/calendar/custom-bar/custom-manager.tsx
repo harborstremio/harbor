@@ -214,6 +214,7 @@ export function CustomManager({
             <div className="flex h-12 items-center gap-2.5 rounded-xl border border-edge bg-canvas px-4">
               <Search size={15} className="text-ink-subtle" strokeWidth={2} />
               <input
+                data-search-input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -255,7 +256,9 @@ export function CustomManager({
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-ink">{p.name}</span>
-                        <span className="block truncate text-[11.5px] text-ink-subtle">{p.knownFor}</span>
+                        <span className="block truncate text-[11.5px] text-ink-subtle">
+                          {p.knownFor}
+                        </span>
                       </span>
                       {tracked ? (
                         <span className="text-[10.5px] uppercase tracking-[0.14em] text-ink-subtle">

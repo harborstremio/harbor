@@ -76,6 +76,7 @@ export function EpgMatchModal({
         <div className="flex items-center gap-2.5 border-b border-edge-soft/55 px-5 py-3">
           <Search size={14} strokeWidth={2} className="text-ink-subtle" />
           <input
+            data-search-input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}

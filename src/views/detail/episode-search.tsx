@@ -19,11 +19,12 @@ export function EpisodeSearch({
         className="pointer-events-none absolute start-3.5 text-ink-subtle"
       />
       <input
+        data-search-input
         type="text"
         value={query}
         onChange={(e) => onQuery(e.target.value)}
         placeholder={t("Search by episode number or title")}
-        className="h-11 w-full rounded-2xl border border-edge-soft bg-canvas/70 ps-10 pe-24 text-[14px] text-ink outline-none transition-colors duration-150 placeholder:text-ink-subtle focus:border-ink-subtle focus:bg-canvas"
+        className="h-11 w-full rounded-2xl border border-edge-soft bg-canvas/70 ps-10 pe-24 text-[14px] text-ink outline-none transition-colors duration-150 placeholder:text-ink-subtle focus:bg-canvas"
       />
       {query.trim() !== "" && (
         <div className="absolute end-2.5 flex items-center gap-2">
