@@ -39,13 +39,26 @@ export function combineSearchResults(
     ),
   );
   const topKeys = new Set(base.topMatch ? metaIdentityKeys(base.topMatch.meta) : []);
+  const otherSeries =
+    !nonLatin && !base.topMatch
+      ? [
+          ...base.series,
+          ...addon.series,
+          ...cinemeta.series,
+          ...groups.flatMap((group) => group.metas),
+        ].filter((meta) => meta.type === "series" && meta.addonOrigin?.id !== "org.cnative.tv")
+      : [];
   const preferred = query
     ? (native.find((meta) => normalizeSearchQuery(meta.name) === query) ??
-      native.find((meta) => metaIdentityKeys(meta).some((key) => topKeys.has(key))) ??
       (nonLatin
-        ? native.find((meta) => normalizeSearchQuery(meta.name).includes(query))
+        ? (native.find((meta) => metaIdentityKeys(meta).some((key) => topKeys.has(key))) ??
+          native.find((meta) => normalizeSearchQuery(meta.name).includes(query)))
         : undefined) ??
-      (!base.topMatch ? native[0] : undefined))
+      (!base.topMatch
+        ? (otherSeries.find((meta) => normalizeSearchQuery(meta.name) === query) ??
+          otherSeries.find((meta) => normalizeSearchQuery(meta.name).includes(query)) ??
+          native[0])
+        : undefined))
     : undefined;
 
   // Cinemeta may return a popular feed for unsupported native-language searches.
@@ -74,8 +87,7 @@ export function combineSearchResults(
   ]);
   const series = uniqueMetas([
     ...(preferred ? [preferred] : []),
-    ...native,
-    ...base.series,
+    ...(nonLatin ? [...native, ...base.series] : [...base.series, ...native]),
     ...addon.series.filter(relevantAddon),
     ...cinemeta.series.filter(relevantCinemeta),
   ]);

@@ -125,10 +125,19 @@ export function SearchOverlay() {
         data-tauri-drag-region
         className="harbor-search-backdrop absolute inset-0 cursor-default"
       />
+      <button
+        type="button"
+        aria-label={t("common.close")}
+        title={t("common.close")}
+        onClick={close}
+        className="absolute right-6 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-elevated/70 text-ink-muted transition-colors hover:bg-canvas/60 hover:text-ink sm:right-10 sm:top-6"
+      >
+        <X size={20} strokeWidth={2.2} aria-hidden="true" />
+      </button>
 
       <div
         data-tauri-drag-region
-        className="relative mx-auto flex h-full w-full max-w-[1080px] flex-col px-6 py-6 sm:px-10 sm:py-10"
+        className="relative mx-auto flex h-full w-full max-w-[1080px] flex-col px-6 pb-6 pt-20 sm:px-10 sm:pb-10"
       >
         <div
           data-tv-text-field
@@ -175,7 +184,7 @@ export function SearchOverlay() {
                 }
               }}
               placeholder={aiMode ? "" : t("Search movies, shows, people, genres, years...")}
-              className="h-16 w-full bg-transparent text-[20px] text-ink placeholder:text-ink-subtle focus:outline-none sm:text-[22px]"
+              className="h-16 w-full bg-transparent text-[20px] text-ink placeholder:text-ink-subtle focus:outline-none sm:text-[22px] [&::-webkit-search-cancel-button]:hidden"
               spellCheck={false}
               autoComplete="off"
             />
@@ -191,6 +200,16 @@ export function SearchOverlay() {
           {status === "loading" && (
             <Loader2 size={18} className="shrink-0 animate-spin text-ink-subtle" />
           )}
+          {query && (
+            <button
+              type="button"
+              aria-label={t("Clear")}
+              onClick={clear}
+              className="flex h-10 shrink-0 items-center justify-center rounded-full px-3 text-[13px] text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
+            >
+              {t("Clear")}
+            </button>
+          )}
           <Hint />
           {(settings.aiSearchKey.trim() || settings.aiGroqKey.trim()) && (
             <AiModeButton
@@ -203,25 +222,6 @@ export function SearchOverlay() {
               }}
             />
           )}
-          {query && (
-            <button
-              type="button"
-              aria-label={t("Clear")}
-              onClick={clear}
-              className="flex h-10 shrink-0 items-center justify-center rounded-full px-3 text-[13px] text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
-            >
-              {t("Clear")}
-            </button>
-          )}
-          <button
-            type="button"
-            aria-label={t("common.close")}
-            title={t("common.close")}
-            onClick={close}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-canvas/60 hover:text-ink"
-          >
-            <X size={20} strokeWidth={2.2} aria-hidden="true" />
-          </button>
         </div>
 
         <div className="relative mt-6 flex-1 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

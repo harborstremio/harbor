@@ -176,8 +176,8 @@ export function SearchProvider({ children }: { children: ReactNode }) {
           )
         : Promise.resolve([]);
       const addonsP = ensureAddons();
-      // cNative owns the preferred card. Resolve it before the first publication
-      // without waiting for unrelated addon searches or publishing an English placeholder.
+      // Resolve cNative before publishing so native-title matches never flash an
+      // English placeholder. Other addon searches can arrive later.
       const nativePromise = addonsP
         .then((a) =>
           searchAddonCatalogs(
