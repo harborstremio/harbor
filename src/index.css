@@ -1653,7 +1653,7 @@ button.group:not([data-no-card-ring]):hover .harbor-card-ring::after {
   transition: opacity var(--row-card-wide-fade-duration) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.harbor-expanding-card-scope [data-expanding-card-title-meta] {
+[data-expanding-card-title-meta] {
   display: none;
 }
 
@@ -2437,11 +2437,13 @@ textarea:focus-visible,
   outline-offset: 2px;
 }
 
-/* Search overlay: the editing indicator rings the whole search bar panel,
-   not the bare input. Keys/TV modality swaps this for the injected TV ring. */
-[data-search-overlay] [data-tv-search-editing-focused="true"] {
-  outline: 2px solid rgba(255, 255, 255, 0.55);
-  outline-offset: 3px;
+/* The search caret indicates editing. Keep navigation rings on buttons and
+   fields in navigation mode, without drawing a second box while typing. */
+[data-search-overlay] input[type="search"]:focus-visible,
+html [data-search-overlay] [data-tv-text-field][data-tv-search-editing-focused="true"],
+html [data-search-overlay] input[type="search"][data-search-editing="true"] {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 [data-settings-search-field][data-tv-search-nav-focused="true"]

@@ -5,6 +5,13 @@ import { safeFetch } from "./safe-fetch";
 const CAP_PER_CATALOG = 20;
 const MAX_CATALOGS = 12;
 
+function prioritizeNativeAddon(addons: Addon[]): Addon[] {
+  return [...addons].sort(
+    (a, b) =>
+      Number(b.manifest.id === "org.cnative.tv") - Number(a.manifest.id === "org.cnative.tv"),
+  );
+}
+
 function addonOrigin(addon: Addon) {
   return {
     id: addon.manifest.id,
@@ -22,7 +29,7 @@ export async function searchAddonCatalogs(
   if (!q) return { movies: [], series: [] };
 
   const targets: Array<{ addon: Addon; type: string; id: string }> = [];
-  for (const addon of addons) {
+  for (const addon of prioritizeNativeAddon(addons)) {
     for (const c of addon.manifest.catalogs ?? []) {
       if (!c?.type || !c?.id) continue;
       if (c.type !== "movie" && c.type !== "series") continue;
@@ -41,7 +48,11 @@ export async function searchAddonCatalogs(
       const res = await safeFetch(url, { headers: { Accept: "application/json" } });
       if (!res.ok) return { type, metas: [] as Meta[], origin: addonOrigin(addon) };
       const json = (await res.json()) as { metas?: Meta[] };
-      return { type, metas: (json.metas ?? []).slice(0, CAP_PER_CATALOG), origin: addonOrigin(addon) };
+      return {
+        type,
+        metas: (json.metas ?? []).slice(0, CAP_PER_CATALOG),
+        origin: addonOrigin(addon),
+      };
     }),
   );
 
@@ -61,17 +72,6 @@ export async function searchAddonCatalogs(
   return { movies, series };
 }
 
-export function mergeMetas(primary: Meta[], extra: Meta[], cap = 20): Meta[] {
-  const seen = new Set(primary.map((m) => m.id));
-  const out = [...primary];
-  for (const m of extra) {
-    if (!m.id || seen.has(m.id)) continue;
-    seen.add(m.id);
-    out.push(m);
-  }
-  return out.slice(0, cap);
-}
-
 export type AddonResultGroup = {
   id: string;
   name: string;
@@ -82,12 +82,15 @@ export type AddonResultGroup = {
 const MAX_GROUPS = 8;
 const CAP_PER_GROUP = 14;
 
-export async function searchAddonGroups(addons: Addon[], query: string): Promise<AddonResultGroup[]> {
+export async function searchAddonGroups(
+  addons: Addon[],
+  query: string,
+): Promise<AddonResultGroup[]> {
   const q = query.trim();
   if (!q) return [];
 
   const byAddon = new Map<string, { addon: Addon; targets: Array<{ type: string; id: string }> }>();
-  for (const addon of addons) {
+  for (const addon of prioritizeNativeAddon(addons)) {
     for (const c of addon.manifest.catalogs ?? []) {
       if (!c?.type || !c?.id) continue;
       if (c.type === "other") continue;

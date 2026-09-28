@@ -39,9 +39,9 @@ import {
   manualWatchedVersion,
   subscribeManualWatched,
 } from "@/lib/manual-watched";
+import { continueWatchingKey, mergeContinueWatchingItems } from "@/lib/continue-watching-items";
 import { repairLibraryNames } from "@/lib/stremio-repair";
 import {
-  cwSortKey,
   episodeFromVideoId,
   isAnimeCwItem,
   isCwMember,
@@ -504,37 +504,17 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
       _mtime: new Date(e.t).toISOString(),
       local: true,
     }));
-    const eligible = [...items, ...simklCw, ...localCwItems]
-      .filter(
+    return mergeContinueWatchingItems(
+      [...items, ...simklCw, ...localCwItems].filter(
         (i) =>
           (i.type as string) !== "other" &&
           !i._id.startsWith("iptv:") &&
           !isCwDismissed(i) &&
           isCwMember(i) &&
           !(settings.animeOnlyInAnimeRoom && isAnimeCwItem(i)),
-      )
-      .map((i) => ({ i, k: cwSortKey(i) }))
-      .sort((a, b) => b.k - a.k)
-      .map((e) => e.i);
-    const norm = (s: string) =>
-      s
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "")
-        .trim();
-    const seenId = new Set<string>();
-    const seenName = new Set<string>();
-    const out: typeof eligible = [];
-    for (const i of eligible) {
-      if (seenId.has(i._id)) continue;
-      const nm = norm(i.name ?? "");
-      const key = `${i.type}:${nm}`;
-      if (nm && seenName.has(key)) continue;
-      seenId.add(i._id);
-      if (nm) seenName.add(key);
-      out.push(i);
-      if (out.length >= 100) break;
-    }
-    return out;
+      ),
+      100,
+    );
   }, [items, simklCw, localCwVer, cwVersion, settings.animeOnlyInAnimeRoom, animeDetectVer]);
   const resurfaceLibrary = useMemo(() => {
     const manual = manualWatchedLibraryItems();
@@ -588,11 +568,23 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
 
   const onDismissCw = useCallback(
     (item: LibraryItem) => {
-      if (item.manualWatched) dismissManualWatched(item._id);
-      else if (item.local) clearLocalCw(item._id);
-      else dismissCw(item, authKey);
+      const key = continueWatchingKey(item);
+      // Dismiss every provider's entry so the other-language card cannot reappear.
+      const dismissedIds = new Set<string>();
+      for (const entry of [...items, ...simklCw, item]) {
+        const entryKey = `${entry.external ?? ""}:${entry._id}`;
+        if (continueWatchingKey(entry) !== key || dismissedIds.has(entryKey)) continue;
+        dismissedIds.add(entryKey);
+        if (entry.manualWatched) dismissManualWatched(entry._id);
+        else if (entry.local) clearLocalCw(entry._id);
+        else dismissCw(entry, authKey);
+      }
+      for (const entry of listLocalCw()) {
+        if (continueWatchingKey({ _id: entry.id, type: entry.type }) === key)
+          clearLocalCw(entry.id);
+      }
     },
-    [authKey],
+    [authKey, items, simklCw],
   );
 
   const { items: favItems } = useMediaFavorites();

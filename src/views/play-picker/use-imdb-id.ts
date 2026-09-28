@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { metaImdbId } from "@/lib/meta-identity";
 import { narrowMediaType, isAddonNativeMeta, type Meta } from "@/lib/cinemeta";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { kitsuToImdb } from "@/lib/providers/anime-mapping";
@@ -11,13 +12,14 @@ const UNRESOLVED: ResolvedImdb = { id: null, verified: false };
 
 export function useImdbId(meta: Meta, tmdbKey: string | undefined): ResolvedImdb {
   const [resolved, setResolved] = useState<ResolvedImdb>(UNRESOLVED);
+  const providedId = metaImdbId(meta);
   useEffect(() => {
     let cancelled = false;
     const set = (r: ResolvedImdb) => {
       if (!cancelled) setResolved(r);
     };
-    if (meta.id.startsWith("tt")) {
-      set({ id: meta.id, verified: true });
+    if (providedId) {
+      set({ id: providedId, verified: true });
       return;
     }
     if (meta.id.startsWith("kitsu:") || meta.id.startsWith("mal:")) {
@@ -63,6 +65,6 @@ export function useImdbId(meta: Meta, tmdbKey: string | undefined): ResolvedImdb
     return () => {
       cancelled = true;
     };
-  }, [meta.id, meta.type, meta.addonOrigin?.id, tmdbKey]);
+  }, [meta.id, providedId, meta.type, meta.addonOrigin?.id, tmdbKey]);
   return resolved;
 }

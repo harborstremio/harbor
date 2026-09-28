@@ -1,3 +1,4 @@
+import { metaImdbId } from "@/lib/meta-identity";
 import { Bookmark, Check, Popcorn, RefreshCcw } from "lucide-react";
 import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
@@ -123,7 +124,8 @@ export const PickCard = memo(function PickCard({
   const rerun = (inCinema || flagRerun) && isRerun(meta);
   const showCinema = inCinema && !rerun;
   const newBadge = !rerun && !inCinema ? deriveBadge(meta) : null;
-  const resolvedImdb = useTmdbImdbId(meta.id);
+  const ratingId = metaImdbId(meta) ?? meta.id;
+  const resolvedImdb = useTmdbImdbId(ratingId);
   const imdbId = resolvedImdb ?? undefined;
   const cached = useOmdbScores(imdbId);
   const [animeImdb, setAnimeImdb] = useState<string | undefined>();
@@ -152,7 +154,7 @@ export const PickCard = memo(function PickCard({
     settings.showMdblistBadge ||
     settings.showTraktBadge;
   const cardScores = useMdblistCardScores(wantMdblist ? imdbId : undefined, mediaKind);
-  const hasInlineImdb = meta.id.startsWith("tt") && !!meta.imdbRating;
+  const hasInlineImdb = !!metaImdbId(meta) && !!meta.imdbRating;
   const wantCinemetaRating = settings.showImdbBadge && !isAnimeCardId && !hasInlineImdb;
   const cinemetaRating = useCinemetaRating(wantCinemetaRating ? imdbId : undefined);
   const cardImdbValue = isAnimeCardId
@@ -160,7 +162,7 @@ export const PickCard = memo(function PickCard({
     : (harborRating ??
       cached?.imdbRating ??
       cinemetaRating ??
-      (meta.id.startsWith("tt") ? meta.imdbRating : undefined));
+      (metaImdbId(meta) ? meta.imdbRating : undefined));
   const cardRating = isAnimeCardId
     ? settings.showMalBadge
       ? animeWantsImdb && harborRating
@@ -461,7 +463,7 @@ export const PickCard = memo(function PickCard({
       if (wantTmdbPoster) {
         void tmdbIdFromImdb(settings.tmdbKey, meta.id, meta.type === "series" ? "series" : "movie");
       }
-      const id = await tmdbImdbId(settings.tmdbKey, meta.id);
+      const id = await tmdbImdbId(settings.tmdbKey, ratingId);
       if (!id) return;
       if (settings.omdbKey) omdbPrefetch(settings.omdbKey, id);
       if (settings.mdblistKey && wantMdblist) {
@@ -480,6 +482,7 @@ export const PickCard = memo(function PickCard({
     wantMdblist,
     settings.rpdbKey,
     wantCinemetaRating,
+    ratingId,
   ]);
 
   useEffect(() => {

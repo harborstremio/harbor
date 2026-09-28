@@ -6,6 +6,10 @@ export function buildStreamIds(
   imdbId: string | null,
   defaultVideoId?: string | null,
 ): string[] {
+  // cNative's prefix owns metadata only; stream addons use the upstream ID.
+  const nativeId = /^cnative:(tt\d{7,}|tmdb:[1-9]\d*)$/.exec(metaId);
+  if (nativeId) metaId = nativeId[1];
+
   const out: string[] = [];
   const seen = new Set<string>();
   const push = (s: string | undefined | null) => {

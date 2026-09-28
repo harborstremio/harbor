@@ -1,3 +1,4 @@
+import { metaImdbId } from "@/lib/meta-identity";
 import {
   useCallback,
   useEffect,
@@ -198,6 +199,7 @@ export function DetailView({
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
   const [detail, setDetail] = useState<TmdbDetail | null>(null);
+  const ratingImdbId = detail?.imdbId ?? metaImdbId(meta);
   const [animeEpisodes, setAnimeEpisodes] = useState<KitsuEpisode[]>([]);
   const [franchise, setFranchise] = useState<FranchiseEntry[]>([]);
   const [animeCanonicalId, setAnimeCanonicalId] = useState<string | null>(null);
@@ -234,7 +236,7 @@ export function DetailView({
   const [parentalGuide, setParentalGuide] = useState<ParentalGuide | null | undefined>(undefined);
   const mdblist = useMdblistScores(
     settings.mdblistKey,
-    detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null),
+    ratingImdbId,
     meta.type === "movie" ? "movie" : "show",
   );
   const scrollRef = useRef<HTMLElement>(null);
@@ -358,7 +360,7 @@ export function DetailView({
   }, [meta.id]);
   useEffect(() => {
     setHarborImdbRating(null);
-    const tt = detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null);
+    const tt = ratingImdbId;
     if (!tt || !tt.startsWith("tt")) return;
     let cancelled = false;
     harborImdbTitle(tt)
@@ -369,7 +371,7 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [detail?.imdbId, meta.id]);
+  }, [ratingImdbId]);
   const addonNative = liveContext || isAddonNativeMeta(meta);
   const trailerCandidate = detail?.trailerCandidates?.[0] ?? meta.trailerStreams?.[0]?.ytId ?? null;
   const actionRowRef = useRef<HTMLDivElement | null>(null);
@@ -452,7 +454,7 @@ export function DetailView({
   }, [idAnime, detectedKitsu, detail?.year, meta.releaseInfo]);
 
   useEffect(() => {
-    if (meta.type !== "series") return;
+    if (meta.type !== "series" || addonNative) return;
     const imdb = meta.id.startsWith("tt")
       ? meta.id
       : detail?.imdbId?.startsWith("tt")
@@ -470,7 +472,7 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [meta.id, detail?.imdbId, meta.type, cinemetaFull?.videos?.length]);
+  }, [meta.id, detail?.imdbId, meta.type, addonNative, cinemetaFull?.videos?.length]);
 
   useEffect(() => {
     if (meta.type !== "series" && !addonNative) return;
@@ -672,7 +674,7 @@ export function DetailView({
 
   useEffect(() => {
     setScores(null);
-    const imdbId = detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null);
+    const imdbId = ratingImdbId;
     if (!imdbId || !settings.omdbKey) return;
     let cancelled = false;
     omdbScores(settings.omdbKey, imdbId).then((s) => {
@@ -681,12 +683,12 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [detail?.imdbId, meta.id, settings.omdbKey]);
+  }, [ratingImdbId, settings.omdbKey]);
 
   useEffect(() => {
     setCinemetaRating(null);
     if (meta.id.startsWith("tt")) return;
-    const imdb = detail?.imdbId;
+    const imdb = ratingImdbId;
     if (!imdb || !imdb.startsWith("tt")) return;
     let cancelled = false;
     fetchCinemetaMeta(narrowMediaType(meta.type), imdb)
@@ -697,7 +699,7 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [meta.id, meta.type, detail?.imdbId]);
+  }, [meta.id, meta.type, ratingImdbId]);
 
   useEffect(() => {
     if (!settings.omdbKey || !detail) return;
@@ -790,7 +792,7 @@ export function DetailView({
     harborImdbRating ??
     scores?.imdbRating ??
     cinemetaRating ??
-    (meta.id.startsWith("tt") ? meta.imdbRating : undefined);
+    (metaImdbId(meta) ? meta.imdbRating : undefined);
   const malRating = useMalRating(
     isAnime
       ? { ...meta, id: animeCanonicalId ?? meta.id, imdbRating: detail?.rating ?? meta.imdbRating }

@@ -420,6 +420,7 @@ Harbor is a Tauri 2 app: a React + TypeScript frontend and a Rust shell, with th
 - [Node.js](https://nodejs.org/) 24 LTS and [pnpm](https://pnpm.io/)
 - The [Rust toolchain](https://rustup.rs/) (stable)
 - The [Tauri 2 system prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS
+- On macOS, system libmpv: `brew install mpv pkg-config` (`pnpm run setup` does not install it)
 - [`wasm-pack`](https://rustwasm.github.io/wasm-pack/) (only needed to rebuild the WASM stream core)
 
 > [!IMPORTANT]

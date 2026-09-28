@@ -18,7 +18,8 @@ import {
   searchLiveTvChannels,
   type SearchResults,
 } from "@/lib/search";
-import { searchAddonCatalogs, searchAddonGroups, mergeMetas } from "@/lib/search-addons";
+import { searchAddonCatalogs, searchAddonGroups } from "@/lib/search-addons";
+import { combineSearchResults } from "@/lib/search-results";
 import { searchAddonIndex } from "@/lib/search-addon-index";
 import { createSearchRequestGuard } from "@/lib/search-request-guard";
 import { normalizeSearchQuery } from "@/lib/search-query";
@@ -111,17 +112,24 @@ export function SearchProvider({ children }: { children: ReactNode }) {
   const cinemetaCacheRef = useRef(
     new Map<string, { expiresAt: number; result: Awaited<ReturnType<typeof searchCinemeta>> }>(),
   );
-  const addonsRef = useRef<{ key: string | null; addons: Addon[] } | null>(null);
+  const [addonRevision, setAddonRevision] = useState(0);
+  const addonsRef = useRef<{ key: string | null; revision: number; addons: Addon[] } | null>(null);
   const ensureAddons = useCallback(async (): Promise<Addon[]> => {
-    if (addonsRef.current && addonsRef.current.key === authKey) return addonsRef.current.addons;
+    if (
+      addonsRef.current &&
+      addonsRef.current.key === authKey &&
+      addonsRef.current.revision === addonRevision
+    )
+      return addonsRef.current.addons;
     const a = await gatherCatalogAddons(authKey).catch(() => [] as Addon[]);
-    addonsRef.current = { key: authKey, addons: a };
+    addonsRef.current = { key: authKey, revision: addonRevision, addons: a };
     return a;
-  }, [authKey]);
+  }, [authKey, addonRevision]);
 
   useEffect(() => {
     const onAddonsChanged = () => {
       addonsRef.current = null;
+      setAddonRevision((revision) => revision + 1);
     };
     window.addEventListener("harbor:addons-changed", onAddonsChanged);
     return () => window.removeEventListener("harbor:addons-changed", onAddonsChanged);
@@ -168,10 +176,25 @@ export function SearchProvider({ children }: { children: ReactNode }) {
           )
         : Promise.resolve([]);
       const addonsP = ensureAddons();
-      const addonPromise = addonsP
+      // cNative owns the preferred card. Resolve it before the first publication
+      // without waiting for unrelated addon searches or publishing an English placeholder.
+      const nativePromise = addonsP
+        .then((a) =>
+          searchAddonCatalogs(
+            a.filter((addon) => addon.manifest.id === "org.cnative.tv"),
+            trimmed,
+          ),
+        )
+        .catch(() => ({ movies: [], series: [] }));
+      const otherAddonsP = addonsP.then((a) =>
+        a.filter((addon) => addon.manifest.id !== "org.cnative.tv"),
+      );
+      const addonPromise = otherAddonsP
         .then((a) => searchAddonCatalogs(a, trimmed))
         .catch(() => ({ movies: [], series: [] }));
-      const addonGroupsPromise = addonsP.then((a) => searchAddonGroups(a, trimmed)).catch(() => []);
+      const addonGroupsPromise = otherAddonsP
+        .then((a) => searchAddonGroups(a, trimmed))
+        .catch(() => []);
       const cinemetaPromise = cachedSearch(
         cinemetaCacheRef.current,
         normalizedQuery,
@@ -179,33 +202,28 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         () => searchCinemeta(trimmed),
       ).catch(() => ({ movies: [], series: [] }));
       let tmdbResult: Awaited<typeof tmdbPromise> | null = null;
+      let nativeReady = false;
       const acc = {
+        native: { movies: [], series: [] } as Awaited<typeof nativePromise>,
         anime: [] as Awaited<typeof animePromise>,
         addon: { movies: [], series: [] } as Awaited<typeof addonPromise>,
         cine: { movies: [], series: [] } as Awaited<typeof cinemetaPromise>,
         groups: [] as Awaited<typeof addonGroupsPromise>,
       };
       const publish = () => {
-        if (!requestGuardRef.current.isCurrent(id) || !tmdbResult) return;
-        const mergedMovies = mergeMetas(
-          mergeMetas(tmdbResult.movies, acc.addon.movies),
-          acc.cine.movies,
-        );
-        const mergedSeries = mergeMetas(
-          mergeMetas(tmdbResult.series, acc.addon.series),
-          acc.cine.series,
-        );
-        const shown = new Set<string>([...mergedMovies, ...mergedSeries].map((m) => m.id));
-        const dedupedGroups = acc.groups
-          .map((g) => ({ ...g, metas: g.metas.filter((m) => !shown.has(m.id)) }))
-          .filter((g) => g.metas.length > 0);
+        if (!requestGuardRef.current.isCurrent(id) || !tmdbResult || !nativeReady) return;
         setResults({
-          ...tmdbResult,
-          movies: mergedMovies,
-          series: mergedSeries,
+          ...combineSearchResults(
+            tmdbResult,
+            {
+              movies: [...acc.native.movies, ...acc.addon.movies],
+              series: [...acc.native.series, ...acc.addon.series],
+            },
+            acc.cine,
+            acc.groups,
+          ),
           liveTv,
           anime: acc.anime,
-          addonGroups: dedupedGroups,
           addons: searchAddonIndex(trimmed),
         });
         setStatus("done");
@@ -235,6 +253,11 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         });
       void animePromise.then((a) => {
         acc.anime = a;
+        publish();
+      });
+      void nativePromise.then((a) => {
+        acc.native = a;
+        nativeReady = true;
         publish();
       });
       void addonPromise.then((a) => {

@@ -628,7 +628,7 @@ export function Row({
   return (
     <div className={`flex min-w-0 flex-col gap-5 ps-[9px] ${className}`}>
       {(title || onViewAll || headerRight) && (
-        <div className="flex items-baseline justify-between gap-4 pe-1">
+        <div className="relative z-10 flex items-baseline justify-between gap-4 pe-1">
           {title && (
             <div className="flex min-w-0 items-center gap-2">
               <h3

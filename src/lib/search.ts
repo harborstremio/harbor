@@ -1,3 +1,4 @@
+import { isBetterSearchMatch } from "./search-query";
 import { get } from "@/lib/providers/tmdb/tmdb-client";
 import {
   movieMeta,
@@ -274,23 +275,14 @@ export async function searchAll(
     | (RawMovie & { media_type: "movie"; popularity?: number })
     | (RawSeries & { media_type: "tv"; popularity?: number });
   let topRaw: Watchable | null = null;
-  let topPop = -1;
 
   for (const r of results) {
     if (r.media_type === "movie" && r.poster_path) {
       movies.push(movieMeta(r));
-      const pop = r.popularity ?? 0;
-      if (pop > topPop) {
-        topRaw = r;
-        topPop = pop;
-      }
+      if (isBetterSearchMatch(trimmed, r, topRaw)) topRaw = r;
     } else if (r.media_type === "tv" && r.poster_path) {
       series.push(seriesMeta(r));
-      const pop = r.popularity ?? 0;
-      if (pop > topPop) {
-        topRaw = r;
-        topPop = pop;
-      }
+      if (isBetterSearchMatch(trimmed, r, topRaw)) topRaw = r;
     } else if (r.media_type === "person") {
       const known = (r.known_for ?? [])
         .map(

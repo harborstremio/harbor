@@ -1,13 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { continueWatchingKey, mergeContinueWatchingItems } from "./continue-watching-items";
 import { useAuth } from "@/lib/auth";
 import { listLocalCw, subscribeLocalCw } from "@/lib/local-cw";
-import {
-  cwSortKey,
-  episodeFromVideoId,
-  isCwMember,
-  library,
-  type LibraryItem,
-} from "@/lib/stremio";
+import { episodeFromVideoId, isCwMember, library, type LibraryItem } from "@/lib/stremio";
 
 export type CwCard = {
   id: string;
@@ -100,19 +95,17 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
 
   return useMemo(() => {
     void localVersion;
-    const merged = [...items, ...listLocalCw().map(localToLibraryItem)]
-      .filter((i) => (i.type as string) !== "other" && !i._id.startsWith("iptv:") && isCwMember(i))
-      .map((i) => ({ i, k: cwSortKey(i) }))
-      .sort((a, b) => b.k - a.k)
-      .map((e) => e.i);
-    const seen = new Set<string>();
-    const out: CwCard[] = [];
-    for (const i of merged) {
-      if (i._id === excludeId || seen.has(i._id)) continue;
-      seen.add(i._id);
-      out.push(toCard(i));
-      if (out.length >= limit) break;
-    }
-    return out;
+    const merged = mergeContinueWatchingItems(
+      [...items, ...listLocalCw().map(localToLibraryItem)].filter(
+        (i) => (i.type as string) !== "other" && !i._id.startsWith("iptv:") && isCwMember(i),
+      ),
+    );
+    return merged
+      .filter(
+        (i) =>
+          !excludeId || continueWatchingKey(i) !== continueWatchingKey({ ...i, _id: excludeId }),
+      )
+      .slice(0, limit)
+      .map(toCard);
   }, [items, localVersion, excludeId, limit]);
 }

@@ -58,6 +58,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "cheerio": "^1.2.0",
+    "jsdom": "^26.1.0",
     "typescript": "~6.0.3",
     "vite": "catalog:",
     "vite-plus": "catalog:"

@@ -152,27 +152,19 @@ export function PlayPicker({
   const [strictMode, setStrictMode] = useState(settings.streamFilterLevel === "strict");
   const [forceShowAll, setForceShowAll] = useState(false);
   const filterDisabled = settings.streamFilterLevel === "off" || forceShowAll || isDownload;
-  const {
-    result,
-    loading,
-    pipelineDone,
-    firstResultAt,
-    autoSettleReady,
-    resolveError,
-    refresh,
-    setAutoSettleReady,
-    setResolveError,
-  } = usePipelineResult({
-    meta,
-    episode,
-    imdbId,
-    streamIds,
-    addons,
-    debrids,
-    settings,
-    strictMode,
-    filterDisabled,
-  });
+  const { result, loading, pipelineDone, resolveError, refresh, setResolveError } =
+    usePipelineResult({
+      meta,
+      episode,
+      imdbId,
+      streamIds,
+      // A saved partial addon list can finish empty before discovery finds stream addons.
+      addons: discoveringAddons ? null : addons,
+      debrids,
+      settings,
+      strictMode,
+      filterDisabled,
+    });
   const baseLangs = settings.preferredLanguages;
   const isAnimeRequest = useMemo(
     () => (streamIds ?? []).some((id) => id.startsWith("kitsu:") || id.startsWith("mal:")),
@@ -335,6 +327,7 @@ export function PlayPicker({
     preferredLangs,
     hostSource: hostSourceForMedia,
     prefer1080: !!kidProfile,
+    bandwidthLimited: settings.bandwidthMbps > 0,
     preferPacks: seasonLock,
     season: !isAnimeMetaId ? (episode?.season ?? null) : null,
     episode: !isAnimeMetaId ? (episode?.episode ?? null) : null,
@@ -484,20 +477,12 @@ export function PlayPicker({
     autoCandidates,
     resolving,
     autoAttemptIdx,
-    autoSettleReady,
     pipelineDone,
-    firstResultAt,
     isCached,
     p2pAutoConsent,
-    preferredLangs,
-    hasStrongAddon,
-    isTorrentioStream,
     expectHostSource,
     hostSource: hostSourceForMedia,
-    season: !isAnimeMetaId ? (episode?.season ?? null) : null,
-    episode: !isAnimeMetaId ? (episode?.episode ?? null) : null,
     autoFiredRef,
-    setAutoSettleReady,
     setAutoCancelled,
     onPlay,
   });

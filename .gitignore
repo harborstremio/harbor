@@ -41,3 +41,6 @@ pnpm-debug.log*
 /src-tauri/fonts/*.ttf
 local_docs/
 
+tests/
+graphify-out/
+docs/

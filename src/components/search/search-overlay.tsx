@@ -51,7 +51,7 @@ export function SearchOverlay() {
       input.removeAttribute("data-search-nav-mode");
       input.removeAttribute("data-tv-focused");
       input.setAttribute("data-search-editing", "true");
-      // Ring the whole search bar panel, not the bare input.
+      // Track editing separately from keyboard/remote navigation focus.
       panel = input.closest("[data-tv-text-field]");
       panel?.setAttribute("data-tv-search-editing-focused", "true");
       input.focus({ preventScroll: true });
