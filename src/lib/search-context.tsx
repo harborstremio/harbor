@@ -18,15 +18,11 @@ import {
   searchLiveTvChannels,
   type SearchResults,
 } from "@/lib/search";
-import {
-  searchAddonCatalogs,
-  searchAddonGroups,
-  mergeMetas,
-  type AddonQuery,
-} from "@/lib/search-addons";
+import { searchAddonCatalogs, searchAddonGroups, type AddonQuery } from "@/lib/search-addons";
 import { searchAddonIndex } from "@/lib/search-addon-index";
 import { createSearchRequestGuard } from "@/lib/search-request-guard";
 import { normalizeSearchQuery } from "@/lib/search-query";
+import { canPublishSearchResults, combineSearchResults } from "@/lib/search-results";
 import { searchManga } from "@/lib/manga/api";
 import type { MangaSummary } from "@/lib/manga/model";
 import { searchEBooks, type EBook } from "@/lib/ebook/api";
@@ -108,7 +104,7 @@ function dedupeByTitle<T extends TitledMeta>(list: T[]): T[] {
   const norm = (s: string) =>
     s
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, " ")
+      .replace(/[^\p{L}\p{N}]+/gu, " ")
       .trim();
   for (const m of list) {
     const key = norm(m.name ?? "");
@@ -153,7 +149,7 @@ function upsertAddonQuery(list: AddonQuery[], q: AddonQuery): AddonQuery[] {
 function normShow(s: string): string {
   return s
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
     .trim();
 }
 
@@ -336,6 +332,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         { movies: [], series: [] },
       );
       let tmdbResult: SearchResults | null = null;
+      let addonsReady = false;
       const acc = {
         anime: [] as Awaited<typeof animePromise>,
         manga: [] as MangaSummary[],
@@ -366,26 +363,20 @@ export function SearchProvider({ children }: { children: ReactNode }) {
           addons: [],
           intent: null,
         };
+        const combined = combineSearchResults(base, acc.addon, acc.cine, acc.groups);
+        if (!canPublishSearchResults(trimmed, addonsReady, combined.topMatch)) return;
         const animeTitleSet = new Set(acc.anime.map((a) => normShow(a.name)));
         const notAnimeDupe = (m: { name?: string }) =>
           animeTitleSet.size === 0 || !animeTitleSet.has(normShow(m.name ?? ""));
         const dropAnime = <T extends { id: string }>(list: T[]): T[] =>
           settings.hideContent.anime ? list.filter((m) => !metaLooksAnime(m)) : list;
-        const mergedMovies = dropAnime(
-          dedupeByTitle(
-            mergeMetas(mergeMetas(base.movies, acc.addon.movies), acc.cine.movies),
-          ).filter(notAnimeDupe),
-        );
-        const mergedSeries = dropAnime(
-          dedupeByTitle(
-            mergeMetas(mergeMetas(base.series, acc.addon.series), acc.cine.series),
-          ).filter(notAnimeDupe),
-        );
+        const mergedMovies = dropAnime(dedupeByTitle(combined.movies).filter(notAnimeDupe));
+        const mergedSeries = dropAnime(dedupeByTitle(combined.series).filter(notAnimeDupe));
         const shown = new Set<string>([...mergedMovies, ...mergedSeries].map((m) => m.id));
-        const dedupedGroups = acc.groups
+        const dedupedGroups = combined.addonGroups
           .map((g) => ({ ...g, metas: dropAnime(g.metas.filter((m) => !shown.has(m.id))) }))
           .filter((g) => g.metas.length > 0);
-        const topMatch = base.topMatch;
+        const topMatch = combined.topMatch;
         setResults({
           ...base,
           topMatch:
@@ -440,6 +431,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         publish();
       });
       void addonPromise.then((a) => {
+        addonsReady = true;
         acc.addon = a;
         publish();
       });

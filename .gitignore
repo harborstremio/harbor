@@ -113,3 +113,6 @@ crowdin_credentials.*
 gemini.key
 /.firecrawl
 /work
+
+#graphify
+graphify-out

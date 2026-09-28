@@ -16,29 +16,26 @@ fn set_macos_dock_icon(image_bytes: Option<Vec<u8>>) -> Result<(), String> {
             return Err("NSApplication sharedApplication returned nil".into());
         }
 
-        match image_bytes {
-            Some(bytes) if !bytes.is_empty() => {
-                let data: *mut AnyObject = msg_send![
-                    class!(NSData),
-                    dataWithBytes: bytes.as_ptr() as *const std::ffi::c_void,
-                    length: bytes.len()
-                ];
-                if data.is_null() {
-                    return Err("Failed to create NSData from icon bytes".into());
-                }
-                let alloc_img: *mut AnyObject = msg_send![class!(NSImage), alloc];
-                let img: *mut AnyObject = msg_send![alloc_img, initWithData: data];
-                if img.is_null() {
-                    return Err("Failed to create NSImage from icon data".into());
-                }
-                let _: () = msg_send![ns_app, setApplicationIconImage: img];
-                let _: () = msg_send![img, release];
-            }
-            _ => {
-                let nil: *mut AnyObject = std::ptr::null_mut();
-                let _: () = msg_send![ns_app, setApplicationIconImage: nil];
-            }
+        // A bare development executable has no bundle icon to restore with nil.
+        let bytes = image_bytes
+            .as_deref()
+            .filter(|bytes| !bytes.is_empty())
+            .unwrap_or(include_bytes!("../icons/icon.icns"));
+        let data: *mut AnyObject = msg_send![
+            class!(NSData),
+            dataWithBytes: bytes.as_ptr() as *const std::ffi::c_void,
+            length: bytes.len()
+        ];
+        if data.is_null() {
+            return Err("Failed to create NSData from icon bytes".into());
         }
+        let alloc_img: *mut AnyObject = msg_send![class!(NSImage), alloc];
+        let img: *mut AnyObject = msg_send![alloc_img, initWithData: data];
+        if img.is_null() {
+            return Err("Failed to create NSImage from icon data".into());
+        }
+        let _: () = msg_send![ns_app, setApplicationIconImage: img];
+        let _: () = msg_send![img, release];
     }
     Ok(())
 }

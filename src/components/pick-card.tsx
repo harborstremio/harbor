@@ -1,3 +1,4 @@
+import { metaImdbId } from "@/lib/meta-identity";
 import { Bookmark, Check, Popcorn, RefreshCcw } from "lucide-react";
 import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { animeHasDub, dubSetReady, ensureDubSet, subscribeDubSet } from "@/lib/providers/anime-dub-sub";
@@ -141,8 +142,9 @@ const PosterCard = memo(function PosterCard({
   const topLeftBadges = (hasDub ? 1 : 0) + (rerun || showCinema || newBadge ? 1 : 0);
   const ribbonLeft = showTop10 && settings.top10RibbonSide === "left";
   const ribbonRight = showTop10 && settings.top10RibbonSide === "right";
-  const resolvedImdb = useTmdbImdbId(meta.id);
-  const imdbId = resolvedImdb ?? undefined;
+  const providedImdb = metaImdbId(meta);
+  const resolvedImdb = useTmdbImdbId(providedImdb ?? meta.id);
+  const imdbId = providedImdb ?? resolvedImdb ?? undefined;
   const cached = useOmdbScores(imdbId);
   const [animeImdb, setAnimeImdb] = useState<string | undefined>();
   const [animeTvdb, setAnimeTvdb] = useState<string | undefined>();
@@ -171,7 +173,7 @@ const PosterCard = memo(function PosterCard({
     settings.showTraktBadge ||
     settings.showSimklBadge;
   const cardScores = useMdblistCardScores(wantMdblist ? imdbId : undefined, mediaKind);
-  const hasInlineImdb = meta.id.startsWith("tt") && !!meta.imdbRating;
+  const hasInlineImdb = !!providedImdb && !!meta.imdbRating;
   const wantCinemetaRating = settings.showImdbBadge && !isAnimeCardId && !hasInlineImdb;
   const cinemetaRating = useCinemetaRating(wantCinemetaRating ? imdbId : undefined);
   const cardImdbValue = isAnimeCardId
@@ -179,7 +181,7 @@ const PosterCard = memo(function PosterCard({
     : harborRating ??
       cached?.imdbRating ??
       cinemetaRating ??
-      (meta.id.startsWith("tt") ? meta.imdbRating : undefined);
+      (providedImdb ? meta.imdbRating : undefined);
   const animeRating = isAnimeCardId
     ? settings.showMalBadge
       ? animeWantsImdb && harborRating
