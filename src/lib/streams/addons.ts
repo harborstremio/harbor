@@ -8,6 +8,7 @@ import { infoHashFromSources, infoHashFromUrl } from "@/lib/torrent/magnet";
 import { isPluginAddon, runPluginAddon } from "./plugins/addon";
 import type { StreamRequestContext } from "./plugins/types";
 import type { Stream } from "./types";
+import type { AnimeIdPriorityEntry } from "@/lib/settings";
 
 const TIMEOUT_MS_FAST = 8000;
 const TIMEOUT_MS_SLOW = 22000;
@@ -35,6 +36,7 @@ export type StreamRequest = {
   ids: string[];
   animeIdUnverified?: boolean;
   context?: StreamRequestContext;
+  animeIdPriority: AnimeIdPriorityEntry[];
 };
 
 export type AddonProgress = {
@@ -44,9 +46,36 @@ export type AddonProgress = {
   settledAddonIds: string[];
 };
 
+type IdRanker = {
+  priorityOf: (id: string) => number;
+  sortByPriority: (ids: string[]) => string[];
+  enabledPrefixes: string[];
+};
+
+const NO_OP_RANKER: IdRanker = {
+  priorityOf: () => 0,
+  sortByPriority: (ids) => ids,
+  enabledPrefixes: [],
+};
+
+function makeIdRanker(animeIdPriority: AnimeIdPriorityEntry[], isAnime: boolean): IdRanker {
+  if (!isAnime) return NO_OP_RANKER;
+  const priorityOf = (id: string): number => {
+    const idx = animeIdPriority.findIndex((entry) => id.startsWith(entry.prefix));
+    return idx === -1 ? 999 : idx;
+  };
+  const sortByPriority = (ids: string[]): string[] =>
+    [...ids].sort((a, b) => priorityOf(a) - priorityOf(b));
+  const enabledPrefixes = animeIdPriority
+    .filter((entry) => entry.enabled)
+    .map((entry) => entry.prefix);
+  return { priorityOf, sortByPriority, enabledPrefixes };
+}
+
 export async function fetchAddonStreams(
   addons: Addon[],
   req: StreamRequest,
+  isAnime: boolean,
   signal: AbortSignal,
   onPartial?: (current: Stream[]) => void,
   onProgress?: (progress: AddonProgress) => void,
@@ -54,6 +83,7 @@ export async function fetchAddonStreams(
   ranks?: AddonRankFn | null,
   forced?: Array<{ base: string; id: string }>,
 ): Promise<Stream[]> {
+  const ranker = makeIdRanker(req.animeIdPriority, isAnime);
   const forcedBases = new Map((forced ?? []).map((f) => [f.base, f.id]));
   const namedTasks: Array<{ addonId: string; name: string; p: Promise<Stream[]>; plugin?: boolean }> = [];
   const skipped: string[] = [];
@@ -61,8 +91,8 @@ export async function fetchAddonStreams(
     const addon = addons[i];
     const priority = ranks ? ranks(i, addon) : i;
     if (isPluginAddon(addon)) {
-      const pluginIds = pickIds(addon, req.type, req.ids, req.animeIdUnverified === true);
-      const pluginId = pluginIds[0] ?? pickIdByDeclaredTypes(addon, req.ids)?.id;
+      const pluginIds = pickIds(addon, req.type, req.ids, req.animeIdUnverified === true, ranker);
+      const pluginId = pluginIds[0] ?? pickIdByDeclaredTypes(addon, req.ids, ranker)?.id;
       if (!pluginId) {
         skipped.push(`${addon.manifest.name}(no-matching-id)`);
         continue;
@@ -85,7 +115,7 @@ export async function fetchAddonStreams(
     const ids =
       forcedId != null
         ? [forcedId]
-        : pickIds(addon, req.type, req.ids, req.animeIdUnverified === true);
+        : pickIds(addon, req.type, req.ids, req.animeIdUnverified === true, ranker);
     if (ids.length > 0) {
       for (const id of ids) {
         // Local lists only persist movie/series, which can drop the type an addon's
@@ -110,7 +140,7 @@ export async function fetchAddonStreams(
 
     // No (type, id) pair matched the request, but a non-standard id may still be
     // served under a type the catalog declared. Query those types directly.
-    const anyType = pickIdByDeclaredTypes(addon, req.ids);
+    const anyType = pickIdByDeclaredTypes(addon, req.ids, ranker);
     if (anyType == null) {
       skipped.push(`${addon.manifest.name}(no-matching-id)`);
       continue;
@@ -173,28 +203,19 @@ export async function fetchAddonStreams(
   return dedupeStreams(accumulated);
 }
 
-export function addonSupportsStream(addon: Addon, req: StreamRequest): boolean {
-  return pickId(addon, req.type, req.ids) != null;
+export function addonSupportsStream(addon: Addon, req: StreamRequest, isAnime: boolean): boolean {
+  const ranker = makeIdRanker(req.animeIdPriority, isAnime);
+  return pickId(addon, req.type, req.ids, ranker) != null;
 }
 
-const PREFIX_PRIORITY = ["kitsu", "mal", "anidb", "anilist", "tt", "tmdb"];
-
-function idPriority(id: string): number {
-  for (let i = 0; i < PREFIX_PRIORITY.length; i++) {
-    if (id.startsWith(PREFIX_PRIORITY[i])) return i;
-  }
-  return 999;
-}
-
-function pickId(addon: Addon, type: string, ids: string[]): string | null {
-  const sorted = [...ids].sort((a, b) => idPriority(a) - idPriority(b));
+function pickId(addon: Addon, type: string, ids: string[], ranker: IdRanker): string | null {
+  const sorted = ranker.sortByPriority(ids);
   for (const id of sorted) {
     if (addonAcceptsId(addon, type, id)) return id;
   }
   return null;
 }
 
-const ANIME_SCHEMES = ["kitsu", "mal", "anidb", "anilist"];
 
 const STANDARD_ID_SCHEMES = [
   "tt",
@@ -211,8 +232,6 @@ function idScheme(id: string): string {
   return id.startsWith("tt") ? "imdb" : id.split(":")[0];
 }
 
-const SPECIALS_SCOPED_TT_RX = /^tt\d+:0:\d+$/;
-
 function hasStandardIdScheme(id: string): boolean {
   return STANDARD_ID_SCHEMES.some((p) => id.startsWith(p));
 }
@@ -222,24 +241,26 @@ function pickIds(
   type: string,
   ids: string[],
   animeIdUnverified = false,
+  ranker: IdRanker,
 ): string[] {
-  const sorted = [...ids].sort((a, b) => idPriority(a) - idPriority(b));
+  const sorted = ranker.sortByPriority(ids);
   const accepted = sorted.filter((id) => addonAcceptsId(addon, type, id));
   if (accepted.length === 0) return [];
-  const animeId = accepted.find((id) => ANIME_SCHEMES.some((s) => id.startsWith(s)));
   const ttId = accepted.find((id) => id.startsWith("tt"));
-  if (!animeId || !ttId) return [accepted[0]];
-  // Specials have no reliable kitsu numbering, so both identities stay.
-  if (SPECIALS_SCOPED_TT_RX.test(ttId)) return [animeId, ttId];
-  if (animeIdUnverified) return [ttId];
-  return [animeId];
+  if (animeIdUnverified && ttId) return [ttId];
+  const enabled = accepted.filter((id) =>
+    ranker.enabledPrefixes.some((prefix) => id.startsWith(prefix)),
+  );
+  if (enabled.length > 0) return enabled;
+  return accepted;
 }
 
 function pickIdByDeclaredTypes(
   addon: Addon,
   ids: string[],
+  ranker: IdRanker,
 ): { id: string; types: string[] } | null {
-  const sorted = [...ids].sort((a, b) => idPriority(a) - idPriority(b));
+  const sorted = ranker.sortByPriority(ids);
   for (const id of sorted) {
     const types = streamTypesAcceptingId(addon, id);
     if (types.length > 0) return { id, types };
