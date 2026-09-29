@@ -8,12 +8,14 @@ import { buildSoloAnimeOrder, buildAnimeOrder } from "./anime-order-utils";
 import { foreignAnimeProviderSeasons } from "@/lib/streams/anime-identity";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import { splitFranchiseDisplaySeason } from "@/lib/streams/anime-identity-core";
+import type { AnimeDownloadEpisode } from "@/lib/download/anime-series";
 
 export type AnimeOrder = {
   items: PickerItem[];
   activeKey: string;
   onSelect: (key: string) => void;
   visibleEpisodes: KitsuEpisode[];
+  downloadEpisodes: AnimeDownloadEpisode[];
 };
 
 export function useAnimeOrder(
@@ -68,7 +70,12 @@ export function useAnimeOrder(
     if (items.length === built.items.length || items.length === 0) return built;
     const subsetByKey = new Map(built.subsetByKey);
     for (const s of foreignSeasons) subsetByKey.delete(String(s));
-    return { ...built, items, subsetByKey };
+    return {
+      ...built,
+      items,
+      subsetByKey,
+      downloadEpisodes: built.downloadEpisodes.filter((ep) => !foreignSeasons.has(ep.season)),
+    };
   }, [built, foreignSeasons]);
   useEffect(() => {
     setSel(null);
@@ -92,5 +99,6 @@ export function useAnimeOrder(
     activeKey,
     onSelect,
     visibleEpisodes: filteredBuilt.subsetByKey.get(activeKey) ?? [],
+    downloadEpisodes: filteredBuilt.downloadEpisodes,
   };
 }

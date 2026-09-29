@@ -101,7 +101,7 @@ export function getEpisodeProgress(
     ? `imdb:${traktImdbId}:${traktSeason ?? season}:${traktEpisode ?? episode}`
     : null;
   const traktDone = traktKey ? traktWatched.has(traktKey) : false;
-  const stremioDone = stremioWatched ? stremioWatched.has(`${season}:${episode}`) : false;
+  const stremioDone = stremioWatched ? stremioWatched.has(`${canonS}:${canonE}`) : false;
   const anilistDone = anilistWatched ? anilistWatched.has(`${season}:${episode}`) : false;
   const simklDone = simklWatched ? simklWatched.has(`${season}:${episode}`) : false;
   const malDone = malWatched ? malWatched.has(`${season}:${episode}`) : false;

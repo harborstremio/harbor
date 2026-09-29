@@ -1,14 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ArrowDownToLine,
-  ArrowUp,
-  ChevronLeft,
-  Filter,
-  Loader2,
-  PackageX,
-  RefreshCw,
-  X,
-} from "lucide-react";
+import { ArrowUp, ChevronLeft, Filter, Loader2, RefreshCw, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { resolveAddonLogo } from "@/components/addon-logo";
 import { torrentEngineStatus } from "@/lib/torrent/local-engine";
@@ -88,9 +79,11 @@ import { findLocalEpisodeVersions, findLocalMovieVersions } from "@/lib/local-li
 import { localPlayerSrc } from "@/lib/local-library/player-src";
 import { downloadableSeasonPacks } from "@/lib/download/season-pack";
 import { downloadSeasonPerEpisode } from "@/lib/download/season-download";
+import { requiresPerEpisodeDownload } from "@/lib/download/episode-range";
 import { completedDownloadFor, type DownloadItem } from "@/lib/download/downloads-store";
 import { downloadLocalEntry, downloadPlayerSrc } from "@/lib/download/player-src";
 import { LocalStreamList } from "./play-picker/local-stream-card";
+import { SeasonDownloadReview } from "./play-picker/season-download-review";
 import { SubtitleSelectStep } from "./play-picker/subtitle-select-step";
 import { prefetchResumeStart } from "@/lib/player/resume-start";
 import { isLivePlaybackSrc } from "@/lib/player/live-src";
@@ -106,6 +99,33 @@ type PerEpisodeStatus =
   | { code: "no-source" }
   | { code: "queued"; queued: number; total: number }
   | { code: "failed" };
+
+function perEpisodeStatusText(
+  t: ReturnType<typeof useT>,
+  status: PerEpisodeStatus | null,
+): string | null {
+  if (!status) return null;
+  switch (status.code) {
+    case "checking":
+      return t("Checking {total} episodes for sources.", { total: status.total });
+    case "checked":
+      return t("Checked {done} of {total} episodes.", {
+        done: status.done,
+        total: status.total,
+      });
+    case "already-downloading":
+      return t("These episodes are already downloading.");
+    case "no-source":
+      return t("No source was found for any of these episodes. Try refreshing or another addon.");
+    case "queued":
+      return t("Queued {queued} of {total} episodes.", {
+        queued: status.queued,
+        total: status.total,
+      });
+    case "failed":
+      return t("Could not queue these episodes.");
+  }
+}
 
 export function PlayPicker({
   meta,
@@ -129,6 +149,8 @@ export function PlayPicker({
   const t = useT();
   const isDownload = intent === "download";
   const isSeasonDownload = isDownload && (seasonEpisodes?.length ?? 0) > 0;
+  const isMultiSeasonDownload =
+    isSeasonDownload && requiresPerEpisodeDownload(seasonEpisodes ?? []);
   const { openPlayer, openSettings, exitPickerToDetail } = useView();
   const backToDetail = () => {
     if (playerActive) void exitWindowFullscreen();
@@ -232,7 +254,8 @@ export function PlayPicker({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [strictMode, setStrictMode] = useState(settings.streamFilterLevel === "strict");
   const [forceShowAll, setForceShowAll] = useState(false);
-  const filterDisabled = settings.streamFilterLevel === "off" || forceShowAll || isDownload;
+  // Package discovery needs the widest source list; single-episode downloads use playback filters.
+  const filterDisabled = settings.streamFilterLevel === "off" || forceShowAll || isSeasonDownload;
   const animeTitles = useAnimeAltTitles(meta);
   const {
     result,
@@ -335,12 +358,14 @@ export function PlayPicker({
 
   const filteredPicker = useMemo(() => {
     if (!result) return null;
-    const candidatePool = isSeasonDownload
-      ? downloadableSeasonPacks(
-          result.picker.all,
-          /^(kitsu|mal|anilist|anidb):/.test(meta.id) ? null : (episode?.season ?? null),
-        )
-      : result.picker.all;
+    const candidatePool = isMultiSeasonDownload
+      ? []
+      : isSeasonDownload
+        ? downloadableSeasonPacks(
+            result.picker.all,
+            /^(kitsu|mal|anilist|anidb):/.test(meta.id) ? null : (episode?.season ?? null),
+          )
+        : result.picker.all;
     let all = filterStreamsByMode(candidatePool, settings.streamMode);
     if (langFilter && preferredLangs.length > 0) {
       const langFiltered = all.filter((s) => streamMatchesLangs(s, preferredLangs));
@@ -388,6 +413,7 @@ export function PlayPicker({
     activeStreamFilter,
     settings.streamMode,
     isSeasonDownload,
+    isMultiSeasonDownload,
     meta.id,
     episode?.season,
   ]);
@@ -614,12 +640,27 @@ export function PlayPicker({
     setResolving,
   });
 
+  const bulkActionRef = useRef<"auto" | "package" | "review" | null>(null);
+  const [reviewBusy, setReviewBusy] = useState(false);
+  useEffect(() => {
+    if (reviewBusy) bulkActionRef.current = "review";
+    else if (bulkActionRef.current === "review") bulkActionRef.current = null;
+  }, [reviewBusy]);
+  useEffect(() => {
+    if (bulkActionRef.current === "package" && resolving === null) {
+      bulkActionRef.current = null;
+    }
+  }, [resolving]);
   const playManually = useCallback(
     (s: ScoredStream) => {
+      if (isSeasonDownload) {
+        if (bulkActionRef.current) return;
+        bulkActionRef.current = "package";
+      }
       setAutoCancelled(true);
       onPlay(s);
     },
-    [onPlay],
+    [isSeasonDownload, onPlay],
   );
 
   useEffect(() => {
@@ -755,16 +796,23 @@ export function PlayPicker({
   const noResults =
     addonsSettled && !!streamIds && streamIds.length > 0 && allCount === 0 && debrids.length > 0;
   const terminalEmpty = noStreamIds || noDebrids || noResults;
-  const seasonPackEmpty = isSeasonDownload && addonsSettled && allCount === 0;
   const [perEpisodeBusy, setPerEpisodeBusy] = useState(false);
   const [perEpisodeStatus, setPerEpisodeStatus] = useState<PerEpisodeStatus | null>(null);
   const perEpisodeAcRef = useRef<AbortController | null>(null);
   useEffect(() => () => perEpisodeAcRef.current?.abort(), []);
   const startPerEpisodeSeason = useCallback(async () => {
     const targets = seasonEpisodes ?? [];
-    if (targets.length === 0 || perEpisodeAcRef.current) return;
+    if (
+      targets.length === 0 ||
+      perEpisodeAcRef.current ||
+      resolving ||
+      reviewBusy ||
+      bulkActionRef.current
+    )
+      return;
     const ac = new AbortController();
     perEpisodeAcRef.current = ac;
+    bulkActionRef.current = "auto";
     setPerEpisodeBusy(true);
     setPerEpisodeStatus({ code: "checking", total: targets.length });
     try {
@@ -794,10 +842,11 @@ export function PlayPicker({
     } finally {
       if (!ac.signal.aborted) {
         perEpisodeAcRef.current = null;
+        bulkActionRef.current = null;
         setPerEpisodeBusy(false);
       }
     }
-  }, [addons, debrids, meta, seasonEpisodes]);
+  }, [addons, debrids, meta, resolving, reviewBusy, seasonEpisodes]);
   const [stubBanner, setStubBanner] = useState(false);
   useEffect(() => {
     const ev = consumeRecentStubEvent(8000);
@@ -942,8 +991,8 @@ export function PlayPicker({
         <PickerNav onBack={backToDetail} onRefresh={refresh} refreshing={loading} />
         <PickerHeader
           meta={metaForDisplay}
-          episode={episode}
-          absoluteEpisode={animeAbsoluteEpisode}
+          episode={isSeasonDownload ? undefined : episode}
+          absoluteEpisode={isSeasonDownload ? null : animeAbsoluteEpisode}
         />
 
         {!isDownload && (
@@ -964,13 +1013,9 @@ export function PlayPicker({
 
         {hostSourceForMedia && <HostSourceBanner source={hostSourceForMedia} />}
 
-        {isDownload && (
+        {isDownload && !isSeasonDownload && (
           <div className="rounded-2xl border border-edge-soft bg-elevated/60 px-5 py-3.5 text-[13.5px] text-ink-muted">
-            {isSeasonDownload
-              ? t(
-                  "Choose one season package. Harbor will match and download every available episode from it.",
-                )
-              : t("Choose a source to save offline. You can track progress on the Downloads page.")}
+            {t("Choose a source to save offline. You can track progress on the Downloads page.")}
           </div>
         )}
 
@@ -1024,41 +1069,59 @@ export function PlayPicker({
           </div>
         )}
 
-        {seasonPackEmpty ? (
-          <SeasonPackEmptyState
-            season={episode?.season ?? null}
-            rawCount={rawCount}
-            refreshing={loading}
-            episodeCount={seasonEpisodes?.length ?? 0}
-            queueing={perEpisodeBusy}
-            queueStatus={perEpisodeStatus}
-            onQueueEpisodes={() => void startPerEpisodeSeason()}
-            onRefresh={refresh}
-            onOpenSettings={() => openSettings("streaming")}
+        {isSeasonDownload && (
+          <SeasonDownloadReview
+            meta={meta}
+            episodes={seasonEpisodes ?? []}
+            addons={addons ?? []}
+            debrids={debrids}
+            allowP2p={directTorrentEnabled()}
+            imdbId={imdbId}
+            disabled={perEpisodeBusy || resolving !== null || bulkActionRef.current === "package"}
+            onBusyChange={setReviewBusy}
+            autoDownload={{
+              busy: perEpisodeBusy,
+              ready: addons !== null,
+              status: perEpisodeStatusText(t, perEpisodeStatus),
+              onStart: () => void startPerEpisodeSeason(),
+            }}
           />
-        ) : (
-          !isSeasonDownload && (
-            <PickerEmptyLadder
-              meta={meta}
-              result={result}
-              addonsSettled={addonsSettled}
-              pipelineDone={pipelineDone}
-              streamIds={streamIds}
-              debridCount={debrids.length}
-              addonCount={addons?.length ?? 0}
-              allCount={allCount}
-              rawCount={rawCount}
-              strictMode={strictMode}
-              forceShowAll={forceShowAll}
-              onOpenLibrarySettings={() => openSettings("library")}
-              onOpenStreamingSettings={() => openSettings("streaming")}
-              onShowAll={() => setForceShowAll(true)}
-              onSearchWider={() => {
-                if (strictMode) setStrictMode(false);
-                else setForceShowAll(true);
-              }}
-            />
-          )
+        )}
+
+        {isSeasonDownload && !isMultiSeasonDownload && addonsSettled && (
+          <div className="space-y-2">
+            <h2 className="font-display text-xl font-semibold text-ink">
+              {t("Or choose a season package")}
+            </h2>
+            <p className="text-[13.5px] text-ink-muted">
+              {allCount > 0
+                ? t("Select one package to download the matching episode files in this range.")
+                : t("No compatible season package was found for this range.")}
+            </p>
+          </div>
+        )}
+
+        {!isSeasonDownload && (
+          <PickerEmptyLadder
+            meta={meta}
+            result={result}
+            addonsSettled={addonsSettled}
+            pipelineDone={pipelineDone}
+            streamIds={streamIds}
+            debridCount={debrids.length}
+            addonCount={addons?.length ?? 0}
+            allCount={allCount}
+            rawCount={rawCount}
+            strictMode={strictMode}
+            forceShowAll={forceShowAll}
+            onOpenLibrarySettings={() => openSettings("library")}
+            onOpenStreamingSettings={() => openSettings("streaming")}
+            onShowAll={() => setForceShowAll(true)}
+            onSearchWider={() => {
+              if (strictMode) setStrictMode(false);
+              else setForceShowAll(true);
+            }}
+          />
         )}
 
         {debrids.length > 0 && filteredPicker && filteredPicker.all.length > 0 && <CachedTip />}
@@ -1072,7 +1135,7 @@ export function PlayPicker({
           />
         )}
 
-        {!isDownload && result && result.picker.all.length > 0 && (
+        {result && filteredPicker && filteredPicker.all.length > 0 && (
           <div className="flex justify-end">
             <StreamModeToggle
               mode={settings.streamMode}
@@ -1199,121 +1262,6 @@ export function PlayPicker({
           />
         )}
     </main>
-  );
-}
-
-function SeasonPackEmptyState({
-  season,
-  rawCount,
-  refreshing,
-  episodeCount,
-  queueing,
-  queueStatus,
-  onQueueEpisodes,
-  onRefresh,
-  onOpenSettings,
-}: {
-  season: number | null;
-  rawCount: number;
-  refreshing: boolean;
-  episodeCount: number;
-  queueing: boolean;
-  queueStatus: PerEpisodeStatus | null;
-  onQueueEpisodes: () => void;
-  onRefresh: () => void;
-  onOpenSettings: () => void;
-}) {
-  const t = useT();
-  const seasonLabel = season == null ? t("this season") : t("Season {n}", { n: season });
-  const queueStatusText = (() => {
-    if (!queueStatus) return null;
-    switch (queueStatus.code) {
-      case "checking":
-        return t("Checking {total} episodes for sources.", { total: queueStatus.total });
-      case "checked":
-        return t("Checked {done} of {total} episodes.", {
-          done: queueStatus.done,
-          total: queueStatus.total,
-        });
-      case "already-downloading":
-        return t("These episodes are already downloading.");
-      case "no-source":
-        return t("No source was found for any of these episodes. Try refreshing or another addon.");
-      case "queued":
-        return t("Queued {queued} of {total} episodes.", {
-          queued: queueStatus.queued,
-          total: queueStatus.total,
-        });
-      case "failed":
-        return t("Could not queue these episodes.");
-    }
-  })();
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="rounded-3xl border border-edge-soft/70 bg-canvas/80 px-9 py-11"
-    >
-      <div className="flex flex-col items-center gap-5 text-center">
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-elevated text-ink-muted ring-1 ring-edge-soft">
-          <PackageX size={22} strokeWidth={1.8} aria-hidden />
-        </span>
-        <div className="flex max-w-lg flex-col gap-2">
-          <h2 className="font-display text-[30px] leading-tight text-ink">
-            {t("No season package found")}
-          </h2>
-          <p className="text-[13.5px] leading-relaxed text-ink-muted">
-            {rawCount > 0
-              ? t(
-                  "Harbor found episode sources for {season}, but none of them is a single downloadable package. It can still fetch the episodes one at a time.",
-                  { season: seasonLabel },
-                )
-              : t(
-                  "None of your addons returned a downloadable package for {season}. Harbor can still fetch the episodes one at a time, or you can refresh the sources.",
-                  { season: seasonLabel },
-                )}
-          </p>
-        </div>
-        <div className="flex flex-wrap justify-center gap-2.5">
-          {episodeCount > 0 && (
-            <button
-              type="button"
-              onClick={onQueueEpisodes}
-              disabled={queueing}
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-ink px-5 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55 motion-reduce:transition-none motion-reduce:hover:scale-100"
-            >
-              {queueing ? (
-                <Loader2 size={14} className="animate-spin" aria-hidden />
-              ) : (
-                <ArrowDownToLine size={14} strokeWidth={2.2} aria-hidden />
-              )}
-              {t("Download episode by episode")}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onRefresh}
-            disabled={refreshing}
-            className="inline-flex h-10 items-center gap-2 rounded-full border border-edge-soft bg-elevated px-5 text-[13px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:cursor-not-allowed disabled:opacity-55"
-          >
-            <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} aria-hidden />
-            {t("Refresh sources")}
-          </button>
-          <button
-            type="button"
-            onClick={onOpenSettings}
-            className="h-10 rounded-full border border-edge-soft bg-elevated px-5 text-[13px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
-          >
-            {t("Source settings")}
-          </button>
-        </div>
-        {queueStatusText && (
-          <p className="animate-lift-in max-w-lg text-[12.5px] leading-relaxed text-ink-subtle">
-            {queueStatusText}
-          </p>
-        )}
-      </div>
-    </div>
   );
 }
 

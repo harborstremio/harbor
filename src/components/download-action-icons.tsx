@@ -15,13 +15,9 @@ export function DownloadPauseResumeIcon({ paused, size }: { paused: boolean; siz
         data-icon="pause"
         className="download-pause-resume-glyph"
       />
-      <Play
-        size={size}
-        strokeWidth={2.2}
-        fill="currentColor"
-        data-icon="resume"
-        className="download-pause-resume-glyph"
-      />
+      <span data-icon="resume" className="download-pause-resume-glyph inline-flex">
+        <Play size={size} />
+      </span>
     </span>
   );
 }

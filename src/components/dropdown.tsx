@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { advanceFocus } from "@/lib/keyboard-navigation";
 import { getDirection, isBackKey } from "@/lib/keyboard-navigation/geometry";
 
-export type DropdownOption = { value: string; label: string; left?: ReactNode };
+export type DropdownOption = { value: string; label: string; left?: ReactNode; disabled?: boolean };
 
 const MENU_MAX = 320;
 const GAP = 6;
@@ -27,6 +27,9 @@ export function Dropdown({
   ariaLabel,
   className = "",
   menuClassName = "",
+  menuWidth,
+  menuMaxHeight = 360,
+  renderOption,
   size = "md",
 }: {
   value: string;
@@ -36,6 +39,9 @@ export function Dropdown({
   ariaLabel?: string;
   className?: string;
   menuClassName?: string;
+  menuWidth?: number;
+  menuMaxHeight?: number;
+  renderOption?: (option: DropdownOption) => ReactNode;
   size?: "sm" | "md";
 }) {
   const [open, setOpen] = useState(false);
@@ -85,14 +91,20 @@ export function Dropdown({
       if (!el) return;
       const r = el.getBoundingClientRect();
       const menu = listRef.current;
-      const maxWidth = Math.min(MENU_MAX, window.innerWidth - EDGE * 2);
-      const minWidth = Math.min(r.width, maxWidth);
+      const maxWidth = Math.min(
+        Math.max(MENU_MAX, menuWidth ?? 0, r.width),
+        window.innerWidth - EDGE * 2,
+      );
+      const minWidth = Math.min(Math.max(r.width, menuWidth ?? 0), maxWidth);
       const width = Math.min(maxWidth, Math.max(minWidth, menu?.offsetWidth ?? minWidth));
-      const natural = menu?.offsetHeight ?? options.length * (size === "sm" ? 36 : 40) + 8;
+      const natural = menu?.scrollHeight || options.length * (size === "sm" ? 36 : 40) + 8;
       const below = window.innerHeight - r.bottom - GAP - EDGE;
       const above = r.top - GAP - EDGE;
       const up = natural > below && above > below;
-      const maxHeight = Math.max(120, Math.min(360, window.innerHeight * 0.6, up ? above : below));
+      const maxHeight = Math.max(
+        0,
+        Math.min(menuMaxHeight, window.innerHeight * 0.75, up ? above : below),
+      );
       const top = up ? Math.max(EDGE, r.top - GAP - Math.min(natural, maxHeight)) : r.bottom + GAP;
       const rtl = getComputedStyle(el).direction === "rtl";
       const anchored = rtl ? r.right - width : r.left;
@@ -103,7 +115,10 @@ export function Dropdown({
       setBox({ top, left, minWidth, maxWidth, maxHeight, up });
     };
     place();
-    let raf = 0;
+    let raf = requestAnimationFrame(() => {
+      raf = 0;
+      place();
+    });
     const reflow = () => {
       if (raf) return;
       raf = requestAnimationFrame(() => {
@@ -118,7 +133,7 @@ export function Dropdown({
       window.removeEventListener("resize", reflow);
       window.removeEventListener("scroll", reflow, true);
     };
-  }, [open, options.length, size]);
+  }, [open, options.length, size, menuWidth, menuMaxHeight]);
 
   const placed = box != null;
   useLayoutEffect(() => {
@@ -134,8 +149,9 @@ export function Dropdown({
     }
     if (!placed || entered.current) return;
     entered.current = true;
-    const at = options.findIndex((o) => o.value === value);
-    const el = optionRefs.current[at < 0 ? 0 : at];
+    const selectedIndex = options.findIndex((o) => o.value === value && !o.disabled);
+    const at = selectedIndex < 0 ? options.findIndex((o) => !o.disabled) : selectedIndex;
+    const el = optionRefs.current[at];
     if (el) advanceFocus(el);
   }, [open, placed, options, value]);
 
@@ -146,7 +162,9 @@ export function Dropdown({
     e.preventDefault();
     const from = optionRefs.current.indexOf(e.target as HTMLButtonElement);
     if (from < 0) return;
-    const at = edge ?? from + (dir === "down" ? 1 : -1);
+    const step = edge === 0 || (edge === null && dir === "down") ? 1 : -1;
+    let at = edge ?? from + step;
+    while (at >= 0 && at < options.length && options[at]?.disabled) at += step;
     const el = optionRefs.current[at];
     if (!el || at === from) return;
     advanceFocus(el, at > from ? "down" : "up");
@@ -188,7 +206,7 @@ export function Dropdown({
         } ${open ? "bg-raised" : "bg-canvas hover:bg-elevated"}`}
       >
         <span
-          className={`flex min-w-0 items-center gap-2 ${selected ? "text-ink" : "text-ink-subtle"}`}
+          className={`flex min-w-0 items-center gap-2 ${selected && !selected.disabled ? "text-ink" : "text-ink-subtle"}`}
         >
           {selected?.left}
           <span className="truncate">{selected?.label ?? placeholder ?? ""}</span>
@@ -235,23 +253,32 @@ export function Dropdown({
                   type="button"
                   role="option"
                   aria-selected={active}
+                  aria-disabled={o.disabled || undefined}
+                  disabled={o.disabled}
                   data-selected={active}
                   onClick={() => {
+                    if (o.disabled) return;
                     onChange(o.value);
                     close(true);
                   }}
                   style={{ animationDelay: `${Math.min(i, 8) * 22}ms` }}
                   className={`animate-item-in flex w-full items-center justify-between gap-3 rounded-[4px] px-3 text-start outline-none transition-colors ${
-                    size === "sm" ? "h-9 text-[12.5px]" : "h-10 text-[13.5px]"
+                    renderOption
+                      ? "min-h-10 py-3 text-[13px]"
+                      : size === "sm"
+                        ? "h-9 text-[12.5px]"
+                        : "h-10 text-[13.5px]"
                   } ${
-                    active
-                      ? "bg-ink font-semibold text-canvas"
-                      : "text-ink-muted hover:bg-raised hover:text-ink focus:bg-raised focus:text-ink"
+                    o.disabled
+                      ? "cursor-not-allowed text-ink-subtle opacity-45"
+                      : active
+                        ? "bg-ink font-semibold text-canvas"
+                        : "text-ink-muted hover:bg-raised hover:text-ink focus:bg-raised focus:text-ink"
                   }`}
                 >
-                  <span className="flex min-w-0 items-center gap-2">
+                  <span className="flex min-w-0 flex-1 items-center gap-2">
                     {o.left}
-                    <span className="truncate">{o.label}</span>
+                    {renderOption ? renderOption(o) : <span className="truncate">{o.label}</span>}
                   </span>
                   {active && (
                     <Check size={15} strokeWidth={2.4} className="animate-badge-pop shrink-0" />

@@ -1,5 +1,10 @@
 import type { Addon } from "@/lib/addons";
-import { resolveBestDownload } from "@/lib/auto-download/resolve";
+import {
+  findDownloadSources,
+  resolveBestDownload,
+  resolveDownloadSource,
+  type ResolveOptions,
+} from "@/lib/auto-download/resolve";
 import type { Meta } from "@/lib/cinemeta";
 import type { DebridStore } from "@/lib/debrid/types";
 import { magnetFromHash } from "@/lib/debrid/types";
@@ -9,9 +14,15 @@ import type { ScoredStream } from "@/lib/streams/types";
 import type { PlayEpisode } from "@/lib/view";
 import { isVideoFile } from "@/lib/local-library";
 import { localTorrentAllowed, trackersFromSources } from "@/lib/torrent/stremio-stream";
-import { torrentEngineAdd, torrentEngineSelectSet, type EngineFile } from "@/lib/torrent/local-engine";
-import { activeDownloadFor, enqueueDownload } from "@/lib/download/downloads-store";
+import {
+  torrentEngineAdd,
+  torrentEngineSelectSet,
+  type EngineFile,
+} from "@/lib/torrent/local-engine";
+import { downloadsSnapshot, enqueueDownload } from "@/lib/download/downloads-store";
+import { episodeDownloadStatus } from "./episode-download-state";
 import { seasonPackFileMatchesEpisode, streamForSeasonPackEpisode } from "./season-pack";
+import { discoverReviewRows, resolveReviewSelections } from "./review-operations";
 
 const MAX_CONCURRENT = 2;
 
@@ -34,10 +45,8 @@ function limiter(max: number) {
 }
 
 export function pendingSeasonEpisodes(metaId: string, episodes: PlayEpisode[]): PlayEpisode[] {
-  return episodes.filter((ep) => {
-    const dl = activeDownloadFor(metaId, ep.season ?? null, ep.episode ?? null);
-    return !dl || dl.status === "error";
-  });
+  const downloads = downloadsSnapshot();
+  return episodes.filter((ep) => episodeDownloadStatus(downloads, metaId, ep) === null);
 }
 
 export type SeasonDownloadResult = {
@@ -45,6 +54,85 @@ export type SeasonDownloadResult = {
   queued: number;
   failed: number;
 };
+
+export type SeasonReviewCandidate = {
+  episode: PlayEpisode;
+  candidates: ScoredStream[];
+};
+
+export type SeasonReviewDownloadResult = {
+  episode: PlayEpisode;
+  status: "queued" | "failed" | "skipped" | "already-queued";
+};
+
+export async function findSeasonDownloadSources(
+  meta: Meta,
+  episodes: PlayEpisode[],
+  options: ResolveOptions,
+  onProgress?: (done: number, total: number) => void,
+): Promise<SeasonReviewCandidate[]> {
+  const targets = pendingSeasonEpisodes(meta.id, episodes);
+  return discoverReviewRows(
+    targets,
+    (episode) => findDownloadSources(meta, episode, options),
+    options.signal,
+    onProgress,
+  );
+}
+
+export async function downloadReviewedSeasonEpisodes(
+  meta: Meta,
+  selections: Array<{ episode: PlayEpisode; stream: ScoredStream | null }>,
+  options: ResolveOptions,
+  onProgress?: (done: number, total: number) => void,
+): Promise<SeasonReviewDownloadResult[]> {
+  const pendingKeys = new Set(
+    pendingSeasonEpisodes(
+      meta.id,
+      selections.map((selection) => selection.episode),
+    ).map((episode) => `${episode.season}:${episode.episode}`),
+  );
+  const targets = selections.filter(
+    (selection): selection is { episode: PlayEpisode; stream: ScoredStream } =>
+      selection.stream !== null &&
+      pendingKeys.has(`${selection.episode.season}:${selection.episode.episode}`),
+  );
+  const results: SeasonReviewDownloadResult[] = selections.map(({ episode, stream }) => ({
+    episode,
+    status: !stream
+      ? "skipped"
+      : pendingKeys.has(`${episode.season}:${episode.episode}`)
+        ? "failed"
+        : "already-queued",
+  }));
+  const queued = await resolveReviewSelections(
+    targets.map(({ episode, stream }) => ({ episode, candidate: stream })),
+    async (episode, stream) => {
+      const pick = await resolveDownloadSource(meta, episode, stream, options);
+      if (!pick || options.signal.aborted)
+        throw new Error("The selected source could not be resolved.");
+      await enqueueDownload({
+        meta,
+        episode,
+        streamLabel: pick.label,
+        url: pick.url,
+        headers: pick.headers ?? null,
+      });
+    },
+    options.signal,
+    onProgress,
+  );
+  for (const result of queued) {
+    if (!result) continue;
+    const index = results.findIndex(
+      (item) =>
+        item.episode.season === result.episode.season &&
+        item.episode.episode === result.episode.episode,
+    );
+    if (index >= 0) results[index] = result;
+  }
+  return results;
+}
 
 function packFileForEpisode(files: EngineFile[], ep: PlayEpisode): number {
   const vids = files.filter((f) => isVideoFile(f.name));
@@ -96,7 +184,13 @@ async function downloadPackViaEngine(
   for (const { ep, idx } of picks) {
     if (signal.aborted) break;
     try {
-      await enqueueDownload({ meta, episode: ep, streamLabel, url: `${base}/${idx}`, headers: null });
+      await enqueueDownload({
+        meta,
+        episode: ep,
+        streamLabel,
+        url: `${base}/${idx}`,
+        headers: null,
+      });
       result.queued += 1;
     } catch {
       result.failed += 1;
@@ -146,7 +240,10 @@ export async function downloadSeasonFromPack({
           signal,
           true,
           false,
-          { season: ep.season ?? null, episode: ep.episode ?? null },
+          {
+            season: ep.imdbSeason ?? ep.season ?? null,
+            episode: ep.imdbEpisode ?? ep.episode ?? null,
+          },
           true,
         ).catch(() => null);
         if (!resolved?.ok || signal.aborted) {

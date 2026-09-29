@@ -10,6 +10,10 @@ const navigationSource = readFileSync(
   new URL("../src/lib/keyboard-navigation.ts", import.meta.url),
   "utf8",
 );
+const modalShellSource = readFileSync(
+  new URL("../src/components/modal-shell.tsx", import.meta.url),
+  "utf8",
+);
 const searchHotkeySource = readFileSync(
   new URL("../src/components/search/search-hotkey.tsx", import.meta.url),
   "utf8",
@@ -142,6 +146,24 @@ test("keyboard navigation handles Back before applying the global eligibility gu
 
   assert.ok(backHandler >= 0, "keyboard navigation must handle Back keys");
   assert.ok(globalGuard > backHandler, "Back handling must precede the global eligibility guard");
+});
+
+test("global Escape defers to an open dropdown and modal Escape defers to its dropdown", () => {
+  const globalKeyHandler = navigationSource.match(
+    /const onKeyDown = \(e: KeyboardEvent\) => \{[\s\S]*?window\.addEventListener\("keydown", onKeyDown, true\);/,
+  )?.[0];
+  const dropdownGuard = globalKeyHandler?.indexOf('document.querySelector("[data-dropdown-menu]")');
+  const modalGuard = globalKeyHandler?.indexOf("data-harbor-modal-escape");
+  const backHandler = globalKeyHandler?.indexOf("if (isBackKey(e)) {");
+
+  assert.ok(globalKeyHandler, "global keyboard handler must exist");
+  assert.ok(dropdownGuard !== undefined && dropdownGuard >= 0 && dropdownGuard < backHandler!);
+  assert.ok(modalGuard !== undefined && modalGuard >= 0 && modalGuard < backHandler!);
+  assert.match(modalShellSource, /data-harbor-modal-escape/);
+  assert.match(
+    modalShellSource,
+    /e\.defaultPrevented \|\| document\.querySelector\("\[data-dropdown-menu\]"\)/,
+  );
 });
 
 test("vertical theme nav zones participate in sidebar edge navigation", () => {

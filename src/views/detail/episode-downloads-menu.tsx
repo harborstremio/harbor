@@ -9,13 +9,26 @@ import { useDownloads } from "@/lib/download/downloads-store";
 import { useView } from "@/lib/view";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { useT } from "@/lib/i18n";
+import type { DownloadEpisode } from "@/lib/download/episode-range";
+import { SeriesDownloadDialog } from "./series-download-dialog";
 
-export function EpisodeDownloadsMenu({ meta, episodes }: { meta: Meta; episodes: PlayEpisode[] }) {
+export function EpisodeDownloadsMenu({
+  meta,
+  episodes,
+  loadSeriesEpisodes,
+  resumeTarget,
+}: {
+  meta: Meta;
+  episodes: PlayEpisode[];
+  loadSeriesEpisodes: () => Promise<DownloadEpisode[]>;
+  resumeTarget?: { season: number; episode: number };
+}) {
   const t = useT();
   const { openPicker, setView } = useView();
   useDownloads();
   const autoOn = useIsAutoDownloaded(meta.id);
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+  const [rangeMode, setRangeMode] = useState<"all" | "remaining" | null>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const pendingEpisodes = pendingSeasonEpisodes(meta.id, episodes);
   const pending = pendingEpisodes.length;
@@ -41,7 +54,7 @@ export function EpisodeDownloadsMenu({ meta, episodes }: { meta: Meta; episodes:
     if (!r) return;
     setMenu({
       x: Math.max(8, Math.min(r.right - 240, window.innerWidth - 248)),
-      y: Math.min(r.bottom + 8, window.innerHeight - 180),
+      y: Math.max(8, Math.min(r.bottom + 8, window.innerHeight - 300)),
     });
   };
 
@@ -87,6 +100,22 @@ export function EpisodeDownloadsMenu({ meta, episodes }: { meta: Meta; episodes:
           >
             <MenuItem
               icon={<Download size={15} strokeWidth={2} />}
+              label={t("Download entire series")}
+              onClick={() => {
+                setMenu(null);
+                setRangeMode("all");
+              }}
+            />
+            <MenuItem
+              icon={<Download size={15} strokeWidth={2} />}
+              label={t("Download remaining episodes in this season")}
+              onClick={() => {
+                setMenu(null);
+                setRangeMode("remaining");
+              }}
+            />
+            <MenuItem
+              icon={<Download size={15} strokeWidth={2} />}
               label={pending > 0 ? t("Download this season") : t("Season saved offline")}
               sub={pending > 0 ? t("{n} episodes", { n: pending }) : undefined}
               disabled={pending === 0}
@@ -126,6 +155,20 @@ export function EpisodeDownloadsMenu({ meta, episodes }: { meta: Meta; episodes:
           </div>,
           document.body,
         )}
+      {rangeMode && (
+        <SeriesDownloadDialog
+          key={meta.id}
+          meta={meta}
+          mode={rangeMode}
+          loadEpisodes={loadSeriesEpisodes}
+          resumeTarget={resumeTarget}
+          currentSeason={episodes[0]?.season}
+          onClose={() => {
+            setRangeMode(null);
+            btnRef.current?.focus();
+          }}
+        />
+      )}
     </>
   );
 }

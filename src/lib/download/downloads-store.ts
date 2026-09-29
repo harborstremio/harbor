@@ -13,6 +13,7 @@ import {
   releaseTorrentUsage,
   retainTorrentUsage,
   torrentEnginePause,
+  torrentEngineAdd,
   torrentEngineSelectSet,
 } from "@/lib/torrent/local-engine";
 
@@ -26,6 +27,7 @@ export type DownloadItem = {
   episode: number | null;
   streamLabel: string | null;
   url: string;
+  requestHeaders?: Record<string, string>;
   torrentInfoHash?: string | null;
   torrentFileIdx?: number | null;
   path: string;
@@ -44,6 +46,7 @@ export type DownloadItem = {
   phaseLabel?: string | null;
   etaSeconds?: number | null;
   canPause?: boolean;
+  retry?: { attempt: number; delaySeconds: number } | null;
 };
 
 export type ManagedDownloadProgress = {
@@ -85,7 +88,7 @@ type EnqueueArgs = {
 const items = new Map<string, DownloadItem>();
 const handles = new Map<string, DownloadHandle>();
 const completions = new Map<string, Promise<void>>();
-const requestHeaders = new Map<string, Record<string, string>>();
+const restarting = new Set<string>();
 const speed = new Map<string, { bytes: number; at: number }>();
 const managedControllers = new Map<string, AbortController>();
 const managedRunners = new Map<string, ManagedDownloadRunner>();
@@ -119,7 +122,7 @@ function hydrate() {
     for (const d of arr) {
       if (!d || typeof d.id !== "string" || typeof d.path !== "string") continue;
       const status = d.status === "downloading" || d.status === "paused" ? "interrupted" : d.status;
-      items.set(d.id, { ...d, status, bytesPerSec: 0 });
+      items.set(d.id, { ...d, status, bytesPerSec: 0, retry: null });
     }
     snapshot = [...items.values()].sort((a, b) => b.startedAt - a.startedAt);
   } catch {
@@ -332,6 +335,7 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
     episode: episode?.episode ?? null,
     streamLabel: streamLabel ?? null,
     url,
+    requestHeaders: headers && Object.keys(headers).length > 0 ? headers : undefined,
     torrentInfoHash: torrentRef?.infoHash ?? null,
     torrentFileIdx: torrentRef?.fileIdx ?? null,
     path,
@@ -346,7 +350,6 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
     canPause: true,
   };
   items.set(id, item);
-  if (headers && Object.keys(headers).length > 0) requestHeaders.set(id, headers);
   rebuild();
 
   beginDownload(id);
@@ -455,6 +458,11 @@ function beginDownload(id: string): void {
     item.url,
     item.path,
     (p) => {
+      if (items.get(id)?.status !== "downloading") return;
+      if (p.retry) {
+        patch(id, { retry: p.retry, bytesPerSec: 0 });
+        return;
+      }
       const now = Date.now();
       const s = speed.get(id);
       let bps = 0;
@@ -466,24 +474,36 @@ function beginDownload(id: string): void {
         receivedBytes: p.receivedBytes,
         totalBytes: p.totalBytes,
         ratio: p.ratio,
+        retry: null,
         ...(bps > 0 ? { bytesPerSec: bps } : {}),
       });
     },
-    requestHeaders.get(id),
+    item.requestHeaders,
   );
   handles.set(id, handle);
   const completion = handle.promise
-    .then(() => patch(id, { status: "done", ratio: 1, bytesPerSec: 0 }))
+    .then(() => {
+      if (items.get(id)?.status === "downloading")
+        patch(id, {
+          status: "done",
+          ratio: 1,
+          bytesPerSec: 0,
+          retry: null,
+          requestHeaders: undefined,
+        });
+    })
     .catch((e: unknown) => {
       if (e instanceof Error && e.name === "AbortError") {
         if (items.get(id)?.status === "paused") return;
-        patch(id, { status: "canceled", bytesPerSec: 0 });
+        patch(id, { status: "canceled", bytesPerSec: 0, retry: null });
         return;
       }
+      if (items.get(id)?.status !== "downloading") return;
       patch(id, {
         status: "error",
         error: e instanceof Error ? e.message : "Download failed",
         bytesPerSec: 0,
+        retry: null,
       });
     })
     .finally(() => {
@@ -492,7 +512,6 @@ function beginDownload(id: string): void {
       speed.delete(id);
       const current = items.get(id);
       if (current?.status !== "paused") {
-        requestHeaders.delete(id);
         if (current) releaseDownloadTorrent(current);
       }
       reconcileFromUrl(item.url);
@@ -504,9 +523,8 @@ export function cancelDownload(id: string): void {
   const item = items.get(id);
   if (!item || (item.status !== "downloading" && item.status !== "paused")) return;
   const wasPaused = item.status === "paused";
-  patch(id, { status: "canceled", bytesPerSec: 0 });
+  patch(id, { status: "canceled", bytesPerSec: 0, retry: null });
   managedControllers.get(id)?.abort();
-  requestHeaders.delete(id);
   handles.get(id)?.abort();
   if (wasPaused) releaseDownloadTorrent(item);
   reconcileFromUrl(item.url);
@@ -516,7 +534,7 @@ export function pauseDownload(id: string): void {
   const item = items.get(id);
   const handle = handles.get(id);
   if (!item || item.canPause === false || item.status !== "downloading" || !handle) return;
-  patch(id, { status: "paused", bytesPerSec: 0 });
+  patch(id, { status: "paused", bytesPerSec: 0, retry: null });
   handle.abort();
   const engine = downloadTorrentRef(item);
   if (engine) pauseTorrentUsage(engine.infoHash, torrentOwnerId(id));
@@ -532,12 +550,63 @@ export async function resumeDownload(id: string): Promise<void> {
   if (url) reconcileFromUrl(url);
 }
 
+export function canRetryDownload(item: DownloadItem): boolean {
+  return (
+    item.kind !== "ebook" &&
+    (item.status === "error" || item.status === "interrupted" || item.status === "canceled")
+  );
+}
+
+export async function retryDownload(id: string): Promise<void> {
+  const item = items.get(id);
+  if (!item || !canRetryDownload(item) || restarting.has(id)) return;
+  restarting.add(id);
+  try {
+    await completions.get(id);
+    const current = items.get(id);
+    if (!current || !canRetryDownload(current) || handles.has(id)) return;
+    patch(id, { status: "downloading", error: null, bytesPerSec: 0, retry: null });
+    const torrent = downloadTorrentRef(current);
+    if (torrent) {
+      retainDownloadTorrent(current);
+      // A previous app session may have used a different local engine port.
+      const added = await torrentEngineAdd(
+        `magnet:?xt=urn:btih:${torrent.infoHash}`,
+        [],
+        torrent.fileIdx,
+      );
+      if (items.get(id)?.status !== "downloading") return;
+      if (!added)
+        throw new Error("Could not restart the torrent. Try again or choose another source.");
+      patch(id, {
+        url: `${added.stream_base}/${added.info_hash.toLowerCase()}/${torrent.fileIdx}`,
+      });
+    }
+    beginDownload(id);
+    const url = items.get(id)?.url;
+    if (url) reconcileFromUrl(url);
+  } catch (error) {
+    if (items.get(id)?.status === "downloading") {
+      patch(id, {
+        status: "error",
+        error: error instanceof Error ? error.message : "Download failed",
+      });
+    }
+  } finally {
+    restarting.delete(id);
+    const current = items.get(id);
+    if (current && current.status !== "downloading" && current.status !== "paused") {
+      releaseDownloadTorrent(current);
+      reconcileFromUrl(current.url);
+    }
+  }
+}
+
 export function removeDownload(id: string): void {
   const item = items.get(id);
   handles.get(id)?.abort();
   handles.delete(id);
   completions.delete(id);
-  requestHeaders.delete(id);
   speed.delete(id);
   managedControllers.get(id)?.abort();
   managedControllers.delete(id);

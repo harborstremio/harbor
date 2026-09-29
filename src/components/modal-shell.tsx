@@ -39,7 +39,7 @@ export function useEscape(
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      if ((e.target as Element | null)?.closest?.("[data-dropdown-menu]")) return;
+      if (e.defaultPrevented || document.querySelector("[data-dropdown-menu]")) return;
       if (scope) {
         // A nested career profile must not dismiss the event behind it as well.
         const dialogs = document.querySelectorAll('[role="dialog"][aria-modal="true"]');
@@ -86,6 +86,7 @@ export function ModalShell({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
+        data-harbor-modal-escape
         aria-labelledby={labelledBy}
         onMouseDown={(e) => e.stopPropagation()}
         style={{ width: `min(${width}px, 100%)` }}

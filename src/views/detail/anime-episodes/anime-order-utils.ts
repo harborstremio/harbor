@@ -2,8 +2,13 @@ import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { pickLocalizedText } from "@/lib/localized-text";
 import { seasonDateRange, type TvdbOrder } from "@/lib/providers/tvdb-order";
 import type { PickerItem } from "../series-episodes/season-arc-picker";
+import type { AnimeDownloadEpisode } from "@/lib/download/anime-series";
 
-export type AnimeOrderBuild = { items: PickerItem[]; subsetByKey: Map<string, KitsuEpisode[]> };
+export type AnimeOrderBuild = {
+  items: PickerItem[];
+  subsetByKey: Map<string, KitsuEpisode[]>;
+  downloadEpisodes: AnimeDownloadEpisode[];
+};
 
 export function buildAnimeOrder(
   ordering: TvdbOrder | null,
@@ -28,6 +33,7 @@ export function buildAnimeOrder(
 
   const items: PickerItem[] = [];
   const subsetByKey = new Map<string, KitsuEpisode[]>();
+  const downloadEpisodes: AnimeDownloadEpisode[] = [];
   const matched = new Set<number>();
   for (const s of ordering.seasons) {
     if (s.seasonNumber < 1) continue;
@@ -75,6 +81,13 @@ export function buildAnimeOrder(
       to,
     });
     subsetByKey.set(key, ordered);
+    ordered.forEach((episode, index) => {
+      downloadEpisodes.push({
+        episode,
+        season: s.seasonNumber,
+        number: bucket[index]!.episodeNumber,
+      });
+    });
   }
   if (items.length < 2) return null;
 
@@ -83,7 +96,7 @@ export function buildAnimeOrder(
     items.push({ key: "specials", name: specialsLabel, count: leftovers.length, extra: true });
     subsetByKey.set("specials", leftovers);
   }
-  return { items, subsetByKey };
+  return { items, subsetByKey, downloadEpisodes };
 }
 
 // Season order for a standalone split-franchise entry (e.g. Bleach TYBW opened
@@ -128,5 +141,11 @@ export function buildSoloAnimeOrder(
     subsetByKey.set("specials", specials);
   }
   if (items.length < 2) return null;
-  return { items, subsetByKey };
+  return {
+    items,
+    subsetByKey,
+    downloadEpisodes: [...bySeason.entries()].flatMap(([season, eps]) =>
+      eps.map((episode) => ({ episode, season, number: episode.number })),
+    ),
+  };
 }

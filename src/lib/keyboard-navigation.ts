@@ -70,7 +70,7 @@ const BACK_KEYS = new Set(["Escape", "Esc", "BrowserBack", "GoBack", "Back"]);
 const MODAL_SELECTOR = '[role="dialog"], [aria-modal="true"]';
 const LOCAL_KEYBOARD_SELECTOR = [
   // Embedded surfaces handle their own keys; shadow DOM retargets events to their host.
-  '[data-local-keyboard]',
+  "[data-local-keyboard]",
   '[role="listbox"]',
   '[role="menu"]',
   '[role="grid"]',
@@ -688,10 +688,7 @@ function scrollNavItemIntoView(el: HTMLElement, mode: "center" | "nearest" = "ce
 function getSearchFocusVisual(el: HTMLElement): HTMLElement | null {
   if (!isSearchLikeField(el)) return null;
 
-  return (
-    el.closest<HTMLElement>("label, [data-tv-text-field], [data-tv-focus-container]") ??
-    el
-  );
+  return el.closest<HTMLElement>("label, [data-tv-text-field], [data-tv-focus-container]") ?? el;
 }
 
 function clearSearchVisualFocus() {
@@ -1250,6 +1247,8 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented) return;
       if (e.altKey || e.ctrlKey || e.metaKey) return;
+      if (isBackKey(e) && document.querySelector("[data-dropdown-menu]")) return;
+      if (e.key === "Escape" && document.querySelector("[data-harbor-modal-escape]")) return;
 
       // Tab is native keyboard navigation, but does not call moveFocus().
       // Restore keyboard modality so its focus cues are not hidden after mouse use.

@@ -4,6 +4,7 @@ export type DownloadProgress = {
   receivedBytes: number;
   totalBytes: number | null;
   ratio: number;
+  retry?: { attempt: number; delaySeconds: number };
 };
 
 export type DownloadHandle = {
@@ -14,6 +15,7 @@ export type DownloadHandle = {
 type DownloadEvent =
   | { kind: "started"; total: number | null; resumed: number }
   | { kind: "progress"; received: number; total: number | null }
+  | { kind: "retrying"; attempt: number; delaySeconds: number }
   | { kind: "done"; received: number }
   | { kind: "error"; message: string }
   | { kind: "canceled"; received: number };
@@ -26,6 +28,10 @@ export function startDownload(
   headers?: Record<string, string>,
   mediaKind?: "audio",
 ): DownloadHandle {
+  let terminalError: Error | null = null;
+  let finished = false;
+  let receivedBytes = 0;
+  let totalBytes: number | null = null;
   let settle = () => {};
   let fail = (_e: Error) => {};
   const promise = new Promise<void>((res, rej) => {
@@ -33,15 +39,19 @@ export function startDownload(
     fail = rej;
   });
 
-  const emit = (received: number, total: number | null) =>
+  const emit = (received: number, total: number | null) => {
+    receivedBytes = received;
+    totalBytes = total;
     onProgress({
       receivedBytes: received,
       totalBytes: total,
       ratio: total ? Math.min(1, received / total) : 0,
     });
+  };
 
   const channel = new Channel<DownloadEvent>();
   channel.onmessage = (ev) => {
+    if (finished) return;
     switch (ev.kind) {
       case "started":
         emit(ev.resumed, ev.total);
@@ -49,18 +59,25 @@ export function startDownload(
       case "progress":
         emit(ev.received, ev.total);
         break;
+      case "retrying":
+        onProgress({
+          receivedBytes,
+          totalBytes,
+          ratio: totalBytes ? Math.min(1, receivedBytes / totalBytes) : 0,
+          retry: { attempt: ev.attempt, delaySeconds: ev.delaySeconds },
+        });
+        break;
       case "done":
         emit(ev.received, ev.received);
-        settle();
         break;
       case "canceled": {
         const e = new Error("Download canceled");
         e.name = "AbortError";
-        fail(e);
+        terminalError = e;
         break;
       }
       case "error":
-        fail(new Error(ev.message));
+        terminalError = new Error(ev.message);
         break;
     }
   };
@@ -72,13 +89,23 @@ export function startDownload(
     headers: headers && Object.keys(headers).length > 0 ? headers : null,
     onEvent: channel,
     mediaKind: mediaKind ?? null,
-  }).catch((e: unknown) => {
-    fail(e instanceof Error ? e : new Error(String(e)));
-  });
+  })
+    .then(() => {
+      finished = true;
+      // Wait for native task cleanup before a paused/failed download can restart.
+      if (terminalError) fail(terminalError);
+      else settle();
+    })
+    .catch((e: unknown) => {
+      finished = true;
+      fail(terminalError ?? (e instanceof Error ? e : new Error(String(e))));
+    });
 
   return {
     promise,
     abort: () => {
+      terminalError = new Error("Download canceled");
+      terminalError.name = "AbortError";
       void invoke("download_cancel", { id });
     },
   };

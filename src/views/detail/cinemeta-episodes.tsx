@@ -15,26 +15,59 @@ import { useSettings } from "@/lib/settings";
 import { useLocalAwareSeriesPlay } from "@/lib/local-library/use-series-play";
 import { useT } from "@/lib/i18n";
 import { EpisodeDownloadButton } from "./episode-download-button";
-import { resumeDefaultSeason } from "@/lib/episode-progress";
+import { getEpisodeProgress, resumeDefaultSeason } from "@/lib/episode-progress";
+import { EpisodeDownloadsMenu } from "./episode-downloads-menu";
+import type { DownloadEpisode } from "@/lib/download/episode-range";
+import type { PlayEpisode } from "@/lib/view";
+import { useTrakt } from "@/lib/trakt/provider";
+import { useSimkl } from "@/lib/simkl/provider";
+import { useWatchedSets } from "./series-episodes/use-watched-sets";
 
 type Translator = (key: string, vars?: Record<string, string | number>) => string;
 
 type CinemetaVideo = NonNullable<Meta["videos"]>[number];
+
+function numberedEpisode(ep: CinemetaVideo): { season: number; episode: number } | null {
+  const season = ep.season;
+  const episode = ep.episode ?? ep.number;
+  if (
+    typeof season !== "number" ||
+    !Number.isInteger(season) ||
+    season < 1 ||
+    typeof episode !== "number" ||
+    !Number.isInteger(episode) ||
+    episode < 1
+  ) {
+    return null;
+  }
+  return { season, episode };
+}
 
 export function CinemetaEpisodes({
   meta,
   videos,
   stremioWatched,
   resumeSeason,
+  resumeEpisode,
 }: {
   meta: Meta;
   videos: NonNullable<Meta["videos"]>;
   stremioWatched?: Set<string>;
   resumeSeason?: number;
+  resumeEpisode?: number;
 }) {
   const t = useT();
+  const { isConnected: traktConnected } = useTrakt();
+  const { isConnected: simklConnected } = useSimkl();
   const mwVersion = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
   const [watchedMenu, setWatchedMenu] = useState<WatchedMenuTarget | null>(null);
+  const traktKey = meta.id.startsWith("tt") ? meta.id : null;
+  const { traktWatched, simklWatched } = useWatchedSets({
+    traktConnected,
+    simklConnected,
+    imdbId: traktKey,
+    metaId: meta.id,
+  });
   const openWatchedMenu = (
     e: React.MouseEvent,
     season: number,
@@ -104,6 +137,49 @@ export function CinemetaEpisodes({
     resumeDefaultSeason(meta.id, seasonStats, combinedWatched, resumeSeason),
   );
   const userPickedRef = useRef(false);
+  const activeEps = grouped.find((g) => g.seasonNumber === active)?.episodes ?? [];
+  const currentSeasonEpisodes = useMemo<PlayEpisode[]>(
+    () =>
+      activeEps.map((ep, i) => ({
+        season: ep.season ?? 0,
+        episode: ep.episode ?? ep.number ?? (ep.season == null ? i + 1 : 1),
+        name: ep.name || ep.title || undefined,
+        videoId: ep.id || undefined,
+        airDate: ep.released ?? ep.firstAired ?? undefined,
+      })),
+    [activeEps],
+  );
+  const hasDownloadEpisodes = videos.some((ep) => numberedEpisode(ep) != null);
+  const runtimeMatch = meta.runtime?.match(/^(\d+)\s*(?:min(?:utes?)?)?$/i);
+  const runtime = runtimeMatch ? Number(runtimeMatch[1]) : null;
+
+  const loadSeriesEpisodes = async (): Promise<DownloadEpisode[]> =>
+    videos.flatMap((ep) => {
+      const numbers = numberedEpisode(ep);
+      if (!numbers) return [];
+
+      return [
+        {
+          season: numbers.season,
+          episode: numbers.episode,
+          name: ep.name || ep.title || undefined,
+          videoId: ep.id || undefined,
+          airDate: ep.released ?? ep.firstAired ?? undefined,
+          runtime: runtime ?? undefined,
+          watched: getEpisodeProgress(
+            meta.id,
+            numbers.season,
+            numbers.episode,
+            runtime,
+            traktKey,
+            traktWatched,
+            stremioWatched,
+            undefined,
+            simklWatched,
+          ).watched,
+        },
+      ];
+    });
 
   useEffect(() => {
     userPickedRef.current = false;
@@ -115,12 +191,25 @@ export function CinemetaEpisodes({
   }, [meta.id, seasonStats, combinedWatched, resumeSeason]);
 
   if (grouped.length === 0) return null;
-  const activeEps = grouped.find((g) => g.seasonNumber === active)?.episodes ?? [];
 
   return (
     <div data-episodes className="flex scroll-mt-24 flex-col gap-6">
       <div className="flex items-end justify-between gap-6">
-        <h3 className="text-[22px] font-medium tracking-tight text-ink">{t("Episodes")}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-[22px] font-medium tracking-tight text-ink">{t("Episodes")}</h3>
+          {hasDownloadEpisodes && (
+            <EpisodeDownloadsMenu
+              meta={meta}
+              episodes={currentSeasonEpisodes}
+              loadSeriesEpisodes={loadSeriesEpisodes}
+              resumeTarget={
+                resumeEpisode != null && resumeSeason != null
+                  ? { season: resumeSeason, episode: resumeEpisode }
+                  : undefined
+              }
+            />
+          )}
+        </div>
         {grouped.length > 1 && (
           <SeasonDropdown
             seasons={grouped.map((g) => g.seasonNumber)}

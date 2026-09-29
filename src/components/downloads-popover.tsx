@@ -1,13 +1,15 @@
-import { Download, FolderOpen, Trash2 } from "lucide-react";
+import { Download, FolderOpen, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { DownloadCancelIcon, DownloadPauseResumeIcon } from "@/components/download-action-icons";
 import { HarborLoader } from "@/components/harbor-loader";
 import type { Meta } from "@/lib/cinemeta";
 import {
   cancelDownload,
+  canRetryDownload,
   pauseDownload,
   removeDownload,
   resumeDownload,
+  retryDownload,
   revealDownload,
   useDownloads,
   type DownloadItem,
@@ -159,7 +161,11 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
                 />
               </span>
               <span className="shrink-0 text-[10.5px] tabular-nums text-ink-subtle">
-                {d.status === "paused" ? t("Paused") : `${pct}%${eta ? ` · ${eta}` : ""}`}
+                {d.status === "paused"
+                  ? t("Paused")
+                  : d.retry
+                    ? t("Retrying automatically")
+                    : `${pct}%${eta ? ` · ${eta}` : ""}`}
               </span>
             </span>
           ) : (
@@ -202,6 +208,11 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
         )}
         {d.status !== "downloading" && d.status !== "paused" && (
           <>
+            {canRetryDownload(d) && (
+              <RowBtn label={t("Retry download")} onClick={() => void retryDownload(d.id)}>
+                <RotateCcw size={14} />
+              </RowBtn>
+            )}
             {d.status === "done" && (
               <RowBtn label={t("Show in folder")} onClick={() => void revealDownload(d.id)}>
                 <FolderOpen size={14} strokeWidth={2} />

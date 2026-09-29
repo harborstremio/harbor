@@ -30,6 +30,55 @@ function canonicalVideoOrder(videos: CinemetaVideo[]): CinemetaVideo[] {
   );
 }
 
+export function watchedAnchorOffset(
+  sortedVideos: CinemetaVideo[],
+  anchorVideoId: string,
+  anchorLength: number,
+): number | null {
+  const anchorIndex = sortedVideos.findIndex((video) => video.id === anchorVideoId);
+  if (anchorIndex < 0 || !Number.isFinite(anchorLength) || anchorLength <= 0) return null;
+  return anchorLength - anchorIndex - 1;
+}
+
+export function watchedAnchorVideoId(watchedField: string | null | undefined): string | null {
+  if (!watchedField) return null;
+  const parts = watchedField.split(":");
+  if (parts.length < 3) return null;
+  const anchorLength = Number.parseInt(parts[parts.length - 2], 10);
+  const anchorVideoId = parts.slice(0, -2).join(":");
+  return anchorVideoId && Number.isFinite(anchorLength) && anchorLength > 0 ? anchorVideoId : null;
+}
+
+export function canonicalizeAnimeWatchedKeys(
+  watchedKeys: Set<string>,
+  sourceVideos: Array<{
+    id: string;
+    season: number;
+    episode: number;
+    imdbSeason?: number;
+    imdbEpisode?: number;
+  }>,
+  enrichedEpisodes: Array<{
+    streamId?: string;
+    imdbSeason?: number;
+    imdbEpisode?: number;
+  }> = [],
+): Set<string> {
+  const enrichedById = new Map(
+    enrichedEpisodes
+      .filter((episode) => episode.streamId)
+      .map((episode) => [episode.streamId!, episode]),
+  );
+  const canonicalByDisplayKey = new Map<string, string>();
+  for (const video of sourceVideos) {
+    const enriched = enrichedById.get(video.id);
+    const season = enriched?.imdbSeason ?? video.imdbSeason ?? video.season;
+    const episode = enriched?.imdbEpisode ?? video.imdbEpisode ?? video.episode;
+    canonicalByDisplayKey.set(`${video.season}:${video.episode}`, `${season}:${episode}`);
+  }
+  return new Set(Array.from(watchedKeys, (key) => canonicalByDisplayKey.get(key) ?? key));
+}
+
 export async function decodeWatchedEpisodes(
   watchedField: string | null | undefined,
   videos: CinemetaVideo[] | undefined,
@@ -55,8 +104,8 @@ export async function decodeWatchedEpisodes(
   const bit = (i: number) =>
     i >= 0 && i < bytes.length * 8 && (bytes[i >> 3] & (1 << (i & 7))) !== 0;
   const sorted = canonicalVideoOrder(videos);
-  const anchorIdx = sorted.findIndex((v) => v.id === anchorVideoId);
-  const offset = anchorLength - anchorIdx - 1;
+  const offset = watchedAnchorOffset(sorted, anchorVideoId, anchorLength);
+  if (offset == null) return keys;
   for (let i = 0; i < sorted.length; i++) {
     const v = sorted[i];
     if (v?.season != null && v?.episode != null && bit(i + offset)) {
@@ -100,4 +149,28 @@ export async function encodeWatchedEpisodes(
 export function stremioMovieWatched(item: LibraryItem | null | undefined): boolean {
   if (!item) return false;
   return (item.state?.flaggedWatched ?? 0) > 0 || (item.state?.timesWatched ?? 0) > 0;
+}
+
+export function chooseWatchedLibraryItem(
+  items: LibraryItem[],
+  preferredId: string,
+): LibraryItem | null {
+  const hasProgress = (item: LibraryItem) =>
+    (item.state?.timeOffset ?? 0) > 0 ||
+    !!item.state?.watched ||
+    (item.state?.flaggedWatched ?? 0) > 0 ||
+    (item.state?.timesWatched ?? 0) > 0;
+  return (
+    items
+      .filter((item) => item != null)
+      .sort((a, b) => {
+        const activity = Number(hasProgress(b)) - Number(hasProgress(a));
+        if (activity !== 0) return activity;
+        const timeOf = (item: LibraryItem) =>
+          typeof item._mtime === "number" ? item._mtime : Date.parse(item._mtime ?? "") || 0;
+        const freshness = timeOf(b) - timeOf(a);
+        if (freshness !== 0) return freshness;
+        return Number(b._id === preferredId) - Number(a._id === preferredId);
+      })[0] ?? null
+  );
 }

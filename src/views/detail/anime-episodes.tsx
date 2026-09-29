@@ -46,6 +46,7 @@ import { pickTvdbImage } from "@/lib/providers/tvdb-proxy";
 import { TvdbOrderPanel } from "./series-episodes/tvdb-order-panel";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import { aiIsGroq, aiKey, providerForModel } from "@/lib/ai-models";
+import { animeDownloadEpisodes, animeDownloadResumeTarget } from "@/lib/download/anime-series";
 
 const WINDOW_STEP = 60;
 
@@ -58,6 +59,8 @@ export function AnimeEpisodes({
   trackId,
   imdbId,
   episodeHint,
+  resumeTarget,
+  stremioWatched,
   localizedOverview,
   seasonOverviews,
   onSeasonArt,
@@ -70,6 +73,8 @@ export function AnimeEpisodes({
   trackId?: string;
   imdbId?: string | null;
   episodeHint?: { season: number; episode: number };
+  resumeTarget?: { season: number; episode: number };
+  stremioWatched?: Set<string>;
   localizedOverview?: string;
   seasonOverviews?: Record<number, string>;
   onSeasonArt?: (
@@ -179,9 +184,10 @@ export function AnimeEpisodes({
       }
     }
     if (best != null && best >= 2) return String(best);
-    if (episodeHint && episodeHint.season >= 2) return String(episodeHint.season);
+    const target = resumeTarget ?? episodeHint;
+    if (target && target.season >= 2) return String(target.season);
     return null;
-  }, [episodes, episodeHint]);
+  }, [episodes, episodeHint, resumeTarget]);
   const { settings, update } = useSettings();
   const order = useAnimeOrder(
     imdbId ?? null,
@@ -341,9 +347,27 @@ export function AnimeEpisodes({
     setWatchedMenu({ x: e.clientX, y: e.clientY, season, episode, watched, metaId: sourceMetaId });
   };
 
+  const seriesDownloadEntries = useMemo(
+    () =>
+      tvdbPanel.panel?.downloadEpisodes ??
+      effectiveOrder?.downloadEpisodes ??
+      entryEpisodes.map((episode) => ({
+        episode,
+        season: episode.seasonNumber || 1,
+        number: episode.number,
+      })),
+    [tvdbPanel.panel, effectiveOrder, entryEpisodes],
+  );
+  const progressEpisodes = useMemo(
+    () => seriesDownloadEntries.map((entry) => entry.episode),
+    [seriesDownloadEntries],
+  );
   const { progressFor, nextUpNum, nextUpId, spoilerFor, allWatched } = useAnimeProgressMap({
     episodes,
     displayEpisodes,
+    progressEpisodes,
+    imdbId,
+    stremioWatched,
     metaId: meta.id,
     trackId,
     traktWatched,
@@ -442,20 +466,14 @@ export function AnimeEpisodes({
   }, [nextUpNum, nextUpId, episodes, meta.id, reveal, scrollRef]);
 
   const isOneOff = meta.type === "movie" || episodes.length <= 1;
-  const downloadEpisodes = useMemo(
-    () =>
-      displayEpisodes.map((e) => ({
-        season: e.seasonNumber || 1,
-        episode: e.number,
-        name: e.title || undefined,
-        kitsuStreamId: e.streamId,
-        imdbId: e.imdbId,
-        imdbSeason: e.imdbSeason,
-        imdbEpisode: e.imdbEpisode,
-        tvdbEpisodeId: e.tvdbEpisodeId,
-      })),
-    [displayEpisodes],
-  );
+  const downloadEpisodes = useMemo(() => {
+    const displayed = new Set(displayEpisodes.map((ep) => ep.id));
+    return animeDownloadEpisodes(
+      seriesDownloadEntries.filter((entry) => displayed.has(entry.episode.id)),
+      () => false,
+      imdbId,
+    );
+  }, [displayEpisodes, seriesDownloadEntries, imdbId]);
   return (
     <div data-anime-episodes className="flex flex-col gap-6 scroll-mt-24">
       <div className="flex flex-col gap-4">
@@ -471,7 +489,26 @@ export function AnimeEpisodes({
                   : t("{n} episodes", { n: displayEpisodes.length })}
               </p>
             )}
-            {!isOneOff && <EpisodeDownloadsMenu meta={meta} episodes={downloadEpisodes} />}
+            {!isOneOff && (
+              <EpisodeDownloadsMenu
+                meta={meta}
+                episodes={downloadEpisodes}
+                resumeTarget={animeDownloadResumeTarget(
+                  seriesDownloadEntries,
+                  episodes,
+                  resumeTarget,
+                )}
+                loadSeriesEpisodes={async () => {
+                  if (tvdbPanel.active && !tvdbPanel.panel)
+                    throw new Error("Series episode metadata is still loading");
+                  return animeDownloadEpisodes(
+                    seriesDownloadEntries,
+                    (ep) => progressFor(ep).watched,
+                    imdbId,
+                  );
+                }}
+              />
+            )}
             {!isOneOff && (
               <AnimeRandomButton episodes={displayEpisodes} metaForEp={routing.metaForEp} />
             )}

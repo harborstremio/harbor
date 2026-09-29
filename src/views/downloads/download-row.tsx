@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { BookOpen, Check, FileText, FolderOpen, Trash2 } from "lucide-react";
+import { BookOpen, Check, FileText, FolderOpen, RotateCcw, Trash2 } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import { DownloadCancelIcon, DownloadPauseResumeIcon } from "@/components/download-action-icons";
 import { Poster, usePosterChain } from "@/components/poster";
@@ -8,9 +8,11 @@ import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import {
   cancelDownload,
+  canRetryDownload,
   pauseDownload,
   removeDownload,
   resumeDownload,
+  retryDownload,
   revealDownload,
   type DownloadItem,
 } from "@/lib/download/downloads-store";
@@ -77,7 +79,13 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
               />
             </div>
             <div className="flex flex-wrap items-center gap-x-2 text-[11.5px] tabular-nums text-ink-muted">
-              <span>{d.status === "paused" ? t("Paused") : `${pct}%`}</span>
+              <span>
+                {d.status === "paused"
+                  ? t("Paused")
+                  : d.retry
+                    ? t("Retrying automatically")
+                    : `${pct}%`}
+              </span>
               {d.phaseLabel && <span className="text-ink-subtle">· {t(d.phaseLabel)}</span>}
               {d.totalBytes != null && (
                 <span className="text-ink-subtle">
@@ -107,7 +115,7 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
             )}
             {d.status === "canceled" && <span className="text-ink-subtle">{t("Canceled")}</span>}
             {d.status === "interrupted" && (
-              <span className="text-amber-300/85">{t("Interrupted: re-download to finish")}</span>
+              <span className="text-amber-300/85">{t("Interrupted")}</span>
             )}
           </span>
         )}
@@ -133,6 +141,18 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
         )}
         {!active && (
           <>
+            {canRetryDownload(d) && (
+              <button
+                type="button"
+                onClick={() => void retryDownload(d.id)}
+                aria-label={t("Retry download")}
+                title={t("Retry download")}
+                className="flex h-9 items-center justify-center gap-2 rounded-full border border-edge bg-elevated px-4 text-[13px] font-medium text-ink transition-colors hover:bg-ink/10"
+              >
+                <RotateCcw size={16} />
+                <span>{t("Retry")}</span>
+              </button>
+            )}
             {d.status === "done" && (
               <>
                 {!isEBook && (

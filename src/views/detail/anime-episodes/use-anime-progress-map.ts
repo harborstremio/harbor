@@ -11,9 +11,12 @@ const NO_PROGRESS: EpisodeProgress = { ratio: 0, watched: false, startedAt: 0 };
 export function useAnimeProgressMap({
   episodes,
   displayEpisodes,
+  progressEpisodes,
   metaId,
   trackId,
+  imdbId,
   traktWatched,
+  stremioWatched,
   anilistWatched,
   malWatched,
   entrySourceId,
@@ -24,9 +27,12 @@ export function useAnimeProgressMap({
 }: {
   episodes: KitsuEpisode[];
   displayEpisodes: KitsuEpisode[];
+  progressEpisodes?: KitsuEpisode[];
   metaId: string;
   trackId?: string;
+  imdbId?: string | null;
   traktWatched: Set<string>;
+  stremioWatched?: Set<string>;
   anilistWatched?: Set<string>;
   malWatched?: Set<string>;
   entrySourceId?: string | null;
@@ -42,14 +48,16 @@ export function useAnimeProgressMap({
       const isCurrent = ep.sourceMetaId == null;
       const isEntry = entrySourceId != null && ep.sourceMetaId === entrySourceId;
       const seasonKey = animeSeasonKey(ep);
+      const applicableStremioWatched =
+        ep.imdbId && imdbId && ep.imdbId !== imdbId ? undefined : stremioWatched;
       let prog = getEpisodeProgress(
         ep.sourceMetaId ?? metaId,
         seasonKey,
         ep.number,
         ep.length ?? null,
-        ep.imdbId ?? null,
+        ep.imdbId ?? imdbId ?? null,
         traktWatched,
-        undefined,
+        applicableStremioWatched,
         isCurrent ? anilistWatched : isEntry ? entryAnilistWatched : undefined,
         undefined,
         isCurrent ? malWatched : isEntry ? entryMalWatched : undefined,
@@ -68,9 +76,9 @@ export function useAnimeProgressMap({
           seasonKey,
           ep.number,
           ep.length ?? null,
-          ep.imdbId ?? null,
+          ep.imdbId ?? imdbId ?? null,
           traktWatched,
-          undefined,
+          applicableStremioWatched,
           anilistWatched,
           undefined,
           malWatched,
@@ -83,13 +91,17 @@ export function useAnimeProgressMap({
     };
     for (const ep of episodes) add(ep);
     for (const ep of displayEpisodes) add(ep);
+    for (const ep of progressEpisodes ?? []) add(ep);
     return m;
   }, [
     episodes,
     displayEpisodes,
+    progressEpisodes,
     metaId,
     trackId,
+    imdbId,
     traktWatched,
+    stremioWatched,
     anilistWatched,
     malWatched,
     entrySourceId,
