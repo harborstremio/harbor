@@ -909,6 +909,23 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "API-Schlüssel für NYT Books",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "Wähle, ob Harbor direkte und Debrid-Quellen oder Peer-to-Peer-Torrents bevorzugt oder beides anzeigt.",
+
+  "Imported from MyAnimeList": "Von MyAnimeList importiert",
+  "Imported from AniList": "Von AniList importiert",
+  "Imported from trackers": "Von Tracker-Diensten importiert",
+  "MyAnimeList progress": "MyAnimeList-Fortschritt",
+  "AniList progress": "AniList-Fortschritt",
+  "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.": "Importiert Animes, die du auf MyAnimeList gerade schaust, als nächste ungesehene Episode in die Reihe – mit MAL-Kennzeichen. Erfordert ein verbundenes MAL-Konto.",
+  "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.": "Importiert Animes, die du auf AniList gerade schaust, als nächste ungesehene Episode in die Reihe – mit AL-Kennzeichen. Erfordert ein verbundenes AniList-Konto.",
+  "Enable at least one anime Continue Watching source to use this.": "Aktiviere mindestens eine Anime-Weiterschauen-Quelle, um dies zu verwenden.",
+  "Re-queries the connected anime tracker(s) and updates the anime continue watching row.": "Fragt die verbundenen Anime-Tracker erneut ab und aktualisiert die Anime-Weiterschauen-Zeile.",
+  "Anime continue watching: refresh result": "Anime-Weiterschauen: Aktualisierungsergebnis",
+  "Error:": "Fehler:",
+  "No anime continue watching items were produced.": "Es wurden keine Einträge für das Anime-Weiterschauen erzeugt.",
+  "Season {s}, Episode {e}": "Staffel {s}, Folge {e}",
+  "Reload anime continue watching": "Anime-Weiterschauen neu laden",
+  "Unavailable while Continue Watching is kept private to each profile, because MAL progress is shared across every profile on this account.": "Nicht verfügbar, solange das Weiterschauen privat pro Profil gehalten wird, weil der MAL-Fortschritt über alle Profile dieses Kontos geteilt wird.",
+  "Unavailable while Continue Watching is kept private to each profile, because AniList progress is shared across every profile on this account.": "Nicht verfügbar, solange das Weiterschauen privat pro Profil gehalten wird, weil der AniList-Fortschritt über alle Profile dieses Kontos geteilt wird.",
 };
 
 export default coverage;

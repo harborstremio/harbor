@@ -650,6 +650,23 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "Ключ API NYT Books",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "Выберите, должен ли Harbor предпочитать прямые и debrid-источники, одноранговые торренты или показывать оба варианта.",
+
+  "Imported from MyAnimeList": "Импортировано из MyAnimeList",
+  "Imported from AniList": "Импортировано из AniList",
+  "Imported from trackers": "Импортировано из трекеров",
+  "MyAnimeList progress": "Прогресс MyAnimeList",
+  "AniList progress": "Прогресс AniList",
+  "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.": "Импортирует аниме, которые вы сейчас смотрите на MyAnimeList, в ряд как следующий непросмотренный эпизод с бейджем MAL. Требуется подключённый аккаунт MAL.",
+  "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.": "Импортирует аниме, которые вы сейчас смотрите на AniList, в ряд как следующий непросмотренный эпизод с бейджем AL. Требуется подключённый аккаунт AniList.",
+  "Enable at least one anime Continue Watching source to use this.": "Включите хотя бы один источник продолжения просмотра аниме, чтобы использовать это.",
+  "Re-queries the connected anime tracker(s) and updates the anime continue watching row.": "Повторно опрашивает подключённые трекеры аниме и обновляет строку продолжения просмотра аниме.",
+  "Anime continue watching: refresh result": "Продолжение просмотра аниме: результат обновления",
+  "Error:": "Ошибка:",
+  "No anime continue watching items were produced.": "Элементы продолжения просмотра аниме не созданы.",
+  "Season {s}, Episode {e}": "Сезон {s}, Эпизод {e}",
+  "Reload anime continue watching": "Перезагрузить продолжение просмотра аниме",
+  "Unavailable while Continue Watching is kept private to each profile, because MAL progress is shared across every profile on this account.": "Недоступно, пока продолжение просмотра остаётся приватным для каждого профиля, поскольку прогресс MAL является общим для всех профилей этого аккаунта.",
+  "Unavailable while Continue Watching is kept private to each profile, because AniList progress is shared across every profile on this account.": "Недоступно, пока продолжение просмотра остаётся приватным для каждого профиля, поскольку прогресс AniList является общим для всех профилей этого аккаунта.",
 };
 
 export default coverage;

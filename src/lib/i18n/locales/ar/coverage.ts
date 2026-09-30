@@ -644,6 +644,23 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "مفتاح API لخدمة NYT Books",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "اختر ما إذا كان Harbor يفضّل المصادر المباشرة وdebrid أو تورنت الند للند أو يعرض كليهما.",
+
+  "Imported from MyAnimeList": "مستورد من MyAnimeList",
+  "Imported from AniList": "مستورد من AniList",
+  "Imported from trackers": "مستورد من خدمات التتبع",
+  "MyAnimeList progress": "تقدُّم MyAnimeList",
+  "AniList progress": "تقدُّم AniList",
+  "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.": "يستورد الأنمي الذي تشاهده حالياً على MyAnimeList إلى الصف كحلقة تالية غير مُشاهدة مع شارة MAL. يتطلب حساب MAL متصلاً.",
+  "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.": "يستورد الأنمي الذي تشاهده حالياً على AniList إلى الصف كحلقة تالية غير مُشاهدة مع شارة AL. يتطلب حساب AniList متصلاً.",
+  "Enable at least one anime Continue Watching source to use this.": "فعِّل مصدرًا واحدًا على الأقل لمتابعة مشاهدة الأنمي لاستخدام هذا.",
+  "Re-queries the connected anime tracker(s) and updates the anime continue watching row.": "يعيد الاستعلام عن خدمات تتبّع الأنمي المتصلة ويحدّث صف متابعة مشاهدة الأنمي.",
+  "Anime continue watching: refresh result": "متابعة مشاهدة الأنمي: نتيجة التحديث",
+  "Error:": "خطأ:",
+  "No anime continue watching items were produced.": "لم يتم إنشاء أي عناصر لمتابعة مشاهدة الأنمي.",
+  "Season {s}, Episode {e}": "الموسم {s}، الحلقة {e}",
+  "Reload anime continue watching": "إعادة تحميل متابعة مشاهدة الأنمي",
+  "Unavailable while Continue Watching is kept private to each profile, because MAL progress is shared across every profile on this account.": "غير متاح أثناء إبقاء متابعة المشاهدة خاصة بكل ملف شخصي، لأن تقدُّم MAL يُشارَك عبر كل الملفات الشخصية على هذا الحساب.",
+  "Unavailable while Continue Watching is kept private to each profile, because AniList progress is shared across every profile on this account.": "غير متاح أثناء إبقاء متابعة المشاهدة خاصة بكل ملف شخصي، لأن تقدُّم AniList يُشارَك عبر كل الملفات الشخصية على هذا الحساب.",
 };
 
 export default coverage;

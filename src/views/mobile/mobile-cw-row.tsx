@@ -3,6 +3,8 @@ import { X } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
+import malLogo from "@/assets/mal.png";
+import anilistLogo from "@/assets/anilist.png";
 import type { Meta } from "@/lib/cinemeta";
 import { useAuth } from "@/lib/auth";
 import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
@@ -11,6 +13,7 @@ import { useHeroLogos } from "@/components/anime-hero/use-hero-logos";
 import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
 import { listLocalCw, subscribeLocalCw, type LocalCwEntry } from "@/lib/local-cw";
 import { useExternalCw } from "@/lib/feed/external-cw";
+import { mergeImportedWithNative, setAnimeCwSources, useExternalAnimeCw } from "@/lib/anime-progress";
 import { readSnapshot, useSnapshotVersion } from "@/lib/snapshots";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
@@ -98,6 +101,26 @@ export function useMobileCw(limit = 14): LibraryItem[] {
   const externalCw = useExternalCw(
     !hideSharedCw && (settings.cwSources.trakt || settings.cwSources.simkl),
   );
+  useEffect(() => {
+    setAnimeCwSources({
+      trakt: settings.cwSources.trakt,
+      simkl: settings.cwSources.simkl,
+      mal: settings.cwSources.mal,
+      anilist: settings.cwSources.anilist,
+    });
+  }, [
+    settings.cwSources.trakt,
+    settings.cwSources.simkl,
+    settings.cwSources.mal,
+    settings.cwSources.anilist,
+  ]);
+  const animeExternalCw = useExternalAnimeCw(
+    !settings.cwPerProfile &&
+      (settings.cwSources.trakt ||
+        settings.cwSources.simkl ||
+        settings.cwSources.mal ||
+        settings.cwSources.anilist),
+  );
   const [items, setItems] = useState<LibraryItem[]>(() =>
     authKey && cloudKey === authKey ? cloudCache : [],
   );
@@ -135,7 +158,11 @@ export function useMobileCw(limit = 14): LibraryItem[] {
     void dismissVersion;
     const base = hideSharedCw
       ? []
-      : [...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)), ...externalCw];
+      : [
+          ...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)),
+          ...externalCw,
+          ...mergeImportedWithNative(items, animeExternalCw),
+        ];
     const merged = [...base, ...listLocalCw().map(localToLibraryItem)]
       .filter(
         (i) =>
@@ -157,7 +184,7 @@ export function useMobileCw(limit = 14): LibraryItem[] {
       if (out.length >= limit) break;
     }
     return out;
-  }, [items, externalCw, localVersion, dismissVersion, limit, hideAnime, hideSharedCw]);
+  }, [items, externalCw, animeExternalCw, localVersion, dismissVersion, limit, hideAnime, hideSharedCw]);
 }
 
 function toMeta(item: LibraryItem): Meta {
@@ -264,11 +291,30 @@ function MobileCwCard({
             </div>
           )}
           <span className="absolute bottom-2.5 start-2.5 flex max-w-[calc(100%-20px)] items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
-            {item.external ? (
+            {item.external === "trakt" ||
+            item.external === "simkl" ||
+            item.external === "mal" ||
+            item.external === "anilist" ? (
               <img
-                src={item.external === "trakt" ? traktLogo : simklLogo}
+                src={
+                  item.external === "trakt"
+                    ? traktLogo
+                    : item.external === "simkl"
+                      ? simklLogo
+                      : item.external === "mal"
+                        ? malLogo
+                        : anilistLogo
+                }
                 alt=""
-                title={item.external === "trakt" ? t("Paused on Trakt") : t("Paused on Simkl")}
+                title={
+                  item.external === "trakt"
+                    ? t("Paused on Trakt")
+                    : item.external === "simkl"
+                      ? t("Paused on Simkl")
+                      : item.external === "mal"
+                        ? t("Imported from MyAnimeList")
+                        : t("Imported from AniList")
+                }
                 className="h-3.5 w-3.5 shrink-0 rounded-sm"
               />
             ) : (

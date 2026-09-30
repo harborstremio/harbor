@@ -83,6 +83,7 @@ import {
   type WatchlistStatus,
 } from "@/lib/simkl/list-status";
 import { useExternalCw } from "@/lib/feed/external-cw";
+import { mergeImportedWithNative, setAnimeCwSources, useExternalAnimeCw } from "@/lib/anime-progress";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useAnilist } from "@/lib/anilist/provider";
 import { loadAnilistWatchedMap } from "@/lib/anilist/watched-map";
@@ -132,6 +133,26 @@ export function Home({ active = true, onReady, seasonalInvitation }: { active?: 
   const [letterboxdRows, setLetterboxdRows] = useState<HomeRow[]>([]);
   const externalCw = useExternalCw(
     !hideSharedCw && (settings.cwSources.trakt || settings.cwSources.simkl),
+  );
+  useEffect(() => {
+    setAnimeCwSources({
+      trakt: settings.cwSources.trakt,
+      simkl: settings.cwSources.simkl,
+      mal: settings.cwSources.mal,
+      anilist: settings.cwSources.anilist,
+    });
+  }, [
+    settings.cwSources.trakt,
+    settings.cwSources.simkl,
+    settings.cwSources.mal,
+    settings.cwSources.anilist,
+  ]);
+  const animeExternalCw = useExternalAnimeCw(
+    !settings.cwPerProfile &&
+      (settings.cwSources.trakt ||
+        settings.cwSources.simkl ||
+        settings.cwSources.mal ||
+        settings.cwSources.anilist),
   );
   const [traktWatched, setTraktWatched] = useState<Set<string>>(() => new Set());
   const [simklWatchedMap, setSimklWatchedMap] = useState<Map<string, Set<string>>>(() => new Map());
@@ -603,7 +624,11 @@ export function Home({ active = true, onReady, seasonalInvitation }: { active?: 
   const continueWatching = useMemo(() => {
     const cwBase = hideSharedCw
       ? []
-      : [...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)), ...externalCw];
+      : [
+          ...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)),
+          ...externalCw,
+          ...mergeImportedWithNative(items, animeExternalCw),
+        ];
     const eligible = [...cwBase, ...localCwItems]
       .filter(
         (i) =>
@@ -655,7 +680,7 @@ export function Home({ active = true, onReady, seasonalInvitation }: { active?: 
   }, [
     items,
     externalCw,
-    localCwItems,
+    animeExternalCw, localCwItems,
     cwVersion,
     cwRootVersion,
     settings.animeOnlyInAnimeRoom,
@@ -665,7 +690,7 @@ export function Home({ active = true, onReady, seasonalInvitation }: { active?: 
   ]);
   useEffect(() => {
     let cancelled = false;
-    const ids = [...localCwItems, ...externalCw].filter((i) => isCwMember(i)).map((i) => i._id);
+    const ids = [...localCwItems, ...externalCw, ...animeExternalCw].filter((i) => isCwMember(i)).map((i) => i._id);
     if (ids.length === 0) return;
     if (ids.every((id) => franchiseRootSync(id))) return;
     const load = async () => {
@@ -676,7 +701,7 @@ export function Home({ active = true, onReady, seasonalInvitation }: { active?: 
     return () => {
       cancelled = true;
     };
-  }, [localCwItems, externalCw]);
+  }, [localCwItems, externalCw, animeExternalCw]);
   const resurfaceLibrary = useMemo(() => {
     const pool = [
       ...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)),

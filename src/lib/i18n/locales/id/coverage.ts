@@ -748,6 +748,23 @@ const coverage: Record<string, string> = {
     "Pilih apakah Harbor mengutamakan sumber langsung dan debrid, torrent peer-to-peer, atau menampilkan keduanya.",
   "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.":
     "Linking your Discord account also joins you to Harbor's Discord server, so the bot can send your Backup keys privately.",
+
+  "Imported from MyAnimeList": "Geïmporteerd uit MyAnimeList",
+  "Imported from AniList": "Geïmporteerd uit AniList",
+  "Imported from trackers": "Geïmporteerd uit trackers",
+  "MyAnimeList progress": "MyAnimeList-voortgang",
+  "AniList progress": "AniList-voortgang",
+  "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.": "Importeert anime die je op MyAnimeList volgt naar de rij als de volgende nog niet bekeken aflevering, met een MAL-badge. Vereist een verbonden MAL-account.",
+  "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.": "Importeert anime die je op AniList volgt naar de rij als de volgende nog niet bekeken aflevering, met een AL-badge. Vereist een verbonden AniList-account.",
+  "Enable at least one anime Continue Watching source to use this.": "Aktifkan setidaknya satu sumber lanjutkan menonton anime untuk menggunakan ini.",
+  "Re-queries the connected anime tracker(s) and updates the anime continue watching row.": "Menanyakan ulang pelacak anime yang terhubung dan memperbarui baris lanjutkan menonton anime.",
+  "Anime continue watching: refresh result": "Lanjutkan menonton anime: hasil penyegaran",
+  "Error:": "Kesalahan:",
+  "No anime continue watching items were produced.": "Tidak ada item lanjutkan menonton anime yang dihasilkan.",
+  "Season {s}, Episode {e}": "Musim {s}, Episode {e}",
+  "Reload anime continue watching": "Muat ulang lanjutkan menonton anime",
+  "Unavailable while Continue Watching is kept private to each profile, because MAL progress is shared across every profile on this account.": "Tidak tersedia saat Lanjutkan Menonton dijaga privat untuk setiap profil, karena progres MAL dibagikan ke semua profil di akun ini.",
+  "Unavailable while Continue Watching is kept private to each profile, because AniList progress is shared across every profile on this account.": "Tidak tersedia saat Lanjutkan Menonton dijaga privat untuk setiap profil, karena progres AniList dibagikan ke semua profil di akun ini.",
 };
 
 export default coverage;

@@ -5,6 +5,8 @@ import { useSettings } from "@/lib/settings";
 import { listLocalCw, subscribeLocalCw } from "@/lib/local-cw";
 import { setExternalCwSources } from "@/lib/feed/external-cw";
 import { useExternalCw } from "@/lib/feed/external-cw";
+import { setAnimeCwSources, useExternalAnimeCw } from "@/lib/anime-progress";
+import { mergeImportedWithNative } from "@/lib/anime-progress";
 import {
   ANIME_CLOUD_ID,
   cwMemberViaResume,
@@ -110,6 +112,17 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
     setExternalCwSources({ trakt: cwSources.trakt, simkl: cwSources.simkl });
   }, [cwSources.trakt, cwSources.simkl]);
   const externalCw = useExternalCw(!cwPerProfile && (cwSources.trakt || cwSources.simkl));
+  useEffect(() => {
+    setAnimeCwSources({
+      trakt: cwSources.trakt,
+      simkl: cwSources.simkl,
+      mal: cwSources.mal,
+      anilist: cwSources.anilist,
+    });
+  }, [cwSources.trakt, cwSources.simkl, cwSources.mal, cwSources.anilist]);
+  const animeExternalCw = useExternalAnimeCw(
+    !cwPerProfile && (cwSources.trakt || cwSources.simkl || cwSources.mal || cwSources.anilist),
+  );
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [localVersion, setLocalVersion] = useState(0);
 
@@ -172,6 +185,8 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       : [
           ...(cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
           ...externalCw.filter((i) => !(i.external && disabledSources.has(i.external))),
+          ...externalCw,
+          ...mergeImportedWithNative(items, animeExternalCw),
         ];
     const merged = [...base, ...(cwSources.local ? listLocalCw().map(localToLibraryItem) : [])]
       .filter((i) => {
@@ -196,5 +211,5 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       if (out.length >= limit) break;
     }
     return out;
-  }, [items, externalCw, localVersion, excludeId, limit, hideSharedCw, cwSources]);
+  }, [items, externalCw, animeExternalCw, localVersion, excludeId, limit,hideSharedCw, cwPerProfile, cwSources]);
 }

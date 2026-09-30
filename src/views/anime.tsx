@@ -37,6 +37,7 @@ import { useWatchHistoryRecommendations } from "@/lib/use-watch-history-recs";
 import { AnilistRows } from "./anime/anilist-rows";
 import { MalRows } from "./anime/mal-rows";
 import { useCwAdvance } from "./home/hooks/use-cw-advance";
+import { mergeImportedWithNative, setAnimeCwSources, useExternalAnimeCw } from "@/lib/anime-progress";
 import { detectAnimeForCw, useDetectedAnimeVersion } from "@/lib/anime-detect";
 import { RowControls } from "./home/row-controls";
 import {
@@ -335,6 +336,13 @@ export function AnimeView({ active = true }: { active?: boolean }) {
   const { authKey } = useAuth();
   const cwVersion = useCwDismissVersion();
   const { isConnected: simklConnected } = useSimkl();
+  const animeExternalCwEnabled =
+    !settings.cwPerProfile &&
+    (settings.cwSources.trakt ||
+      settings.cwSources.simkl ||
+      settings.cwSources.mal ||
+      settings.cwSources.anilist);
+  const animeExternalCw = useExternalAnimeCw(animeExternalCwEnabled);
   const [libItems, setLibItems] = useState<LibraryItem[]>([]);
   const [simklCw, setSimklCw] = useState<LibraryItem[]>([]);
   const [simklWatchedMap, setSimklWatchedMap] = useState<Map<string, Set<string>>>(() => new Map());
@@ -369,6 +377,20 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     window.addEventListener("focus", refresh);
     return () => window.removeEventListener("focus", refresh);
   }, [authKey, hideSharedCw]);
+
+  useEffect(() => {
+    setAnimeCwSources({
+      trakt: settings.cwSources.trakt,
+      simkl: settings.cwSources.simkl,
+      mal: settings.cwSources.mal,
+      anilist: settings.cwSources.anilist,
+    });
+  }, [
+    settings.cwSources.trakt,
+    settings.cwSources.simkl,
+    settings.cwSources.mal,
+    settings.cwSources.anilist,
+  ]);
 
   useEffect(() => {
     if (!simklConnected) {
@@ -418,7 +440,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
   const continueWatching = useMemo(() => {
     const seen = new Set<string>();
     const seenRoot = new Set<string>();
-    return [...localAnimeCw, ...libItems.filter((i) => !ANIME_CLOUD_ID.test(i._id)), ...simklCw]
+    return [...localAnimeCw, ...libItems.filter((i) => !ANIME_CLOUD_ID.test(i._id)), ...mergeImportedWithNative(libItems, animeExternalCw), ...simklCw]
       .filter((i) => {
         if (!isCwMember(i)) return false;
         if (!i.local && !isAnimeCwItem(i)) return false;
@@ -440,7 +462,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
   }, [
     localAnimeCw,
     libItems,
-    simklCw,
+    animeExternalCw, simklCw,
     cwVersion,
     animeDetectVer,
     cwRootVersion,
