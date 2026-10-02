@@ -42,7 +42,7 @@ Offering things like a native player, a stream ranking engine, Wikidata, watch p
 > <br/>
 
 > [!NOTE]
-> Unofficial Linux `.deb`, `.rpm`, and Flatpak packages are maintained at [AdityaHebballe/harbor-linux-builds](https://github.com/AdityaHebballe/harbor-linux-builds). Official Linux packages are coming soon.
+> Official Linux `.deb`, `.rpm`, Flatpak, and AppImage builds are maintained at [harborstremio-linux/harbor-linux-builds](https://github.com/harborstremio-linux/harbor-linux-builds).
 
 ATTENTION: HARBOR DOES NOT AND WILL NOT ASK YOU FOR DONATIONS! If someone claims to be us and asks you for donations, IT IS NOT US. Have an issue? Open it on GitHub so everyone can see the report and follow its resolution. Want to donate to a good cause? Consider the National Pediatric Cancer Foundation (https://nationalpcf.org/), Electronic Frontier Foundation (https://www.eff.org/), or St. Jude's (https://www.stjude.org/). You can also find a charity at https://www.charitynavigator.org/.
 <br/>
@@ -402,17 +402,14 @@ Harbor is built to keep your data on your machine.
 
 ## Install
 
-Download the latest build for macOS or Windows from the [Releases page][releases], use the [unofficial Linux packages](https://github.com/AdityaHebballe/harbor-linux-builds), or open Harbor in your browser.
+Download the latest build for macOS or Windows from the [Releases page][releases], use the [official Linux builds](https://github.com/harborstremio-linux/harbor-linux-builds), or open Harbor in your browser.
 
 | Platform    | Format                                                                                                   |
 | ----------- | -------------------------------------------------------------------------------------------------------- |
 | **macOS**   | `.dmg` (macOS 15.0 or newer, Apple silicon)                                                              |
 | **Windows** | `.exe` NSIS installer (current user install), or `winget install HarborStremio.Harbor`                   |
 | **Web**     | Open in any modern browser, nothing to install                                                           |
-| **Linux**   | [Unofficial `.deb`, `.rpm`, and Flatpak packages](https://github.com/AdityaHebballe/harbor-linux-builds) |
-
-> [!NOTE]
-> Linux packages above are community-maintained. Official Harbor Linux packages are coming soon.
+| **Linux**   | [Official `.deb`, `.rpm`, Flatpak, and AppImage builds](https://github.com/harborstremio-linux/harbor-linux-builds) |
 
 > [!NOTE]
 > **First launch on macOS.** Harbor's macOS builds carry an ad-hoc code signature rather than an Apple Developer ID, so Gatekeeper reports it as coming from an unidentified developer and some antivirus tools flag the download. Drag Harbor to Applications, then either run `xattr -dr com.apple.quarantine /Applications/Harbor.app` in Terminal, or open **System Settings > Privacy & Security** and choose **Open Anyway**. If you would rather not trust a binary, [build from source](#build-from-source).
@@ -661,10 +658,17 @@ Thank you to everyone, named and unnamed, whose open work Harbor builds upon.
 <sub>Built with care for the people who love good cinema and an open web. <a href="#readme-top">&#9650; back to top</a></sub>
 </div>
 
+<br/>
+
+Package repository hosting for Linux is graciously provided by [Cloudsmith](https://cloudsmith.com).
+<br/>
+
+<a href="https://cloudsmith.com"><img alt="OSS hosting by Cloudsmith" src="https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith&amp;style=flat-square" /></a>
+
 <!-- reference links -->
 
 [releases]: https://github.com/harborstremio/harbor/releases
-[linux-packages]: https://github.com/AdityaHebballe/harbor-linux-builds
+[linux-packages]: https://github.com/harborstremio-linux/harbor-linux-builds
 [issues]: https://github.com/harborstremio/harbor/issues
 [discussions]: https://github.com/harborstremio/harbor/discussions
 [license]: ./LICENSE
