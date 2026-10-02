@@ -25,6 +25,7 @@ import { isRemovedBuiltinAvatar } from "./avatars/catalog";
 import {
   forkToProfile,
   loadEffective,
+  isProfileSettingsLinked,
   persistEffective,
   seedSharedFromLegacy,
   sourceKeyFor,
@@ -33,6 +34,10 @@ import type { Settings, StreamingService } from "./settings/types";
 import { markSectionDirty } from "./profile-sync/scheduler";
 import { configureLayoutStore } from "./layout-sync/store";
 import { SYNCED_SETTINGS_FIELDS } from "./layout-sync/sections";
+import { writeCloudPreferences } from "@/views/settings/tv-panel/store";
+import { useSyncStatus } from "./profile-sync/use-sync-status";
+import { syncIdFor } from "./profile-sync/id-map";
+import { syncAccountId } from "./profile-sync/engine";
 
 export type {
   ContentCategory,
@@ -76,9 +81,11 @@ const Ctx = createContext<SettingsValue | null>(null);
 export function SettingsProvider({
   children,
   syncTorrentEnginePolicy = false,
+  syncCloudPreferences = false,
 }: {
   children: ReactNode;
   syncTorrentEnginePolicy?: boolean;
+  syncCloudPreferences?: boolean;
 }) {
   const sourceRef = useRef<SettingsSource>({ profileId: "default", linked: true });
   const [settings, setSettings] = useState<Settings>(() => {
@@ -97,9 +104,32 @@ export function SettingsProvider({
   const [torrentEnginePolicyPending, setTorrentEnginePolicyPending] = useState(false);
   const [torrentEnginePolicyError, setTorrentEnginePolicyError] = useState(false);
   const settingsRef = useRef(settings);
+  const syncStatus = useSyncStatus();
+  const cloudSeedRef = useRef("");
   useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
+
+  useEffect(() => {
+    if (syncCloudPreferences && settingsReady) {
+      writeCloudPreferences(sourceRef.current.profileId, settings);
+    }
+  }, [settings, settingsReady, syncCloudPreferences]);
+
+  useEffect(() => {
+    if (!syncStatus.everPulled) {
+      cloudSeedRef.current = "";
+      return;
+    }
+    if (!syncCloudPreferences || !settingsReady) return;
+    const profileId = sourceRef.current.profileId;
+    const syncId = syncIdFor(profileId);
+    if (!syncId) return;
+    const seedKey = `${syncAccountId()}:${syncId}`;
+    if (cloudSeedRef.current === seedKey) return;
+    cloudSeedRef.current = seedKey;
+    markSectionDirty("settings", profileId);
+  }, [settings, settingsReady, syncCloudPreferences, syncStatus.everPulled]);
 
   useEffect(() => {
     setUiLanguage(settings.uiLanguage, settings.region);
@@ -488,7 +518,9 @@ export function SettingsProvider({
     configureLayoutStore({
       activeProfileId: () => sourceRef.current.profileId,
       isLinked: (profileId) =>
-        profileId === sourceRef.current.profileId ? sourceRef.current.linked : true,
+        profileId === sourceRef.current.profileId
+          ? sourceRef.current.linked
+          : isProfileSettingsLinked(profileId),
       readActive: () => settingsRef.current,
       writeActive: (patch) => setSettings((s) => ({ ...s, ...patch })),
     });
