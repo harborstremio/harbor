@@ -50,19 +50,22 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
     () => groups.find((g) => g.langKey === activeLang) ?? null,
     [groups, activeLang],
   );
+  const langScoped = useMemo(
+    () => (allLangs ? tracks : (activeGroup?.variants ?? [])),
+    [allLangs, tracks, activeGroup],
+  );
+  const scoped = useMemo(
+    () => langScoped.filter((t) => (!hideHI || !t.hearingImpaired) && (!forcedOnly || t.forced)),
+    [langScoped, hideHI, forcedOnly],
+  );
   const visibleVariants = useMemo(() => {
-    const list = allLangs ? tracks : (activeGroup?.variants ?? []);
-    return list.filter((t) => {
-      if (sourceFilter === "embedded" && t.external) return false;
-      if (sourceFilter === "external" && !t.external) return false;
-      if (hideHI && t.hearingImpaired) return false;
-      if (forcedOnly && !t.forced) return false;
-      return true;
-    });
-  }, [allLangs, tracks, activeGroup, sourceFilter, hideHI, forcedOnly]);
+    if (sourceFilter === "embedded") return scoped.filter((t) => !t.external);
+    if (sourceFilter === "external") return scoped.filter((t) => t.external);
+    return scoped;
+  }, [scoped, sourceFilter]);
 
-  const totalEmbedded = tracks.filter((t) => !t.external).length;
-  const totalExternal = tracks.filter((t) => t.external).length;
+  const totalEmbedded = useMemo(() => scoped.filter((t) => !t.external).length, [scoped]);
+  const totalExternal = scoped.length - totalEmbedded;
   const offSelected = selectedId == null;
   const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
   const [localError, setLocalError] = useState<string | null>(null);
@@ -229,7 +232,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
           {!searchOpen && tracks.length > 0 && (activeGroup || allLangs) && (
             <div className="flex flex-wrap items-center gap-1.5 border-b border-edge-soft bg-canvas/15 px-3 py-2">
               <Tab active={sourceFilter === "all"} onClick={() => setSourceFilter("all")}>
-                {tr("All")} <Count value={tracks.length} />
+                {tr("All")} <Count value={scoped.length} />
               </Tab>
               <Tab
                 active={sourceFilter === "embedded"}
