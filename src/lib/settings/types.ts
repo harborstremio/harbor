@@ -64,6 +64,8 @@ export type Settings = {
   experimentalLiquidGlassOpacity: number;
   defaultLiquidGlassBlur: number;
   defaultLiquidGlassTint: number;
+  posterBackdropExpansion: boolean;
+  posterFocusedCard: boolean;
   posterDockMagnification: boolean;
   posterDockTransitionMs: number;
   blurComments: boolean;

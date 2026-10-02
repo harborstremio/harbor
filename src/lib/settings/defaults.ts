@@ -11,6 +11,8 @@ export const DEFAULT: Settings = {
   experimentalLiquidGlassOpacity: 100,
   defaultLiquidGlassBlur: 2.5,
   defaultLiquidGlassTint: 40,
+  posterBackdropExpansion: false,
+  posterFocusedCard: false,
   posterDockMagnification: false,
   posterDockTransitionMs: 760,
   blurComments: false,

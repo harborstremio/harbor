@@ -9,6 +9,7 @@ import { languageName } from "@/lib/subtitles/language";
 import { sanitizeSeekStep } from "@/lib/seek-step";
 import { migrateModelId } from "@/lib/ai-models";
 import { resolveUiLanguage } from "@/lib/i18n";
+import { normalizePosterCardSettings } from "@/lib/poster-backdrop-expansion";
 import { DEFAULT, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
 
@@ -157,9 +158,11 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
     delete parsed.scrapers;
     delete parsed.scrapersAcknowledged;
     delete parsed._scrapersV2;
+    const posterCards = normalizePosterCardSettings(parsed);
     return {
       ...DEFAULT,
       ...parsed,
+      ...posterCards,
       posterDockTransitionMs: sanitizePosterDockTransition(parsed.posterDockTransitionMs),
       uiLanguage: resolveUiLanguage(parsed.uiLanguage),
       streaming: { ...DEFAULT.streaming, ...(parsed.streaming ?? {}) },

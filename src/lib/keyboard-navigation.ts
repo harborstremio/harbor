@@ -2,6 +2,7 @@ import { useEffect, useRef, type RefObject } from "react";
 import { shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
 import { SFX } from "@/lib/sfx";
 import { isModalOverlayOpen, modalOverlayClose } from "@/lib/modal-overlay";
+import { stableCardNavigationRect } from "@/lib/poster-backdrop-expansion";
 
 export type Dir = "up" | "down" | "left" | "right";
 
@@ -257,17 +258,11 @@ function getFocusableInZone(
 }
 
 function getRect(el: HTMLElement) {
-  const r = el.getBoundingClientRect();
-  return {
-    left: r.left,
-    right: r.right,
-    top: r.top,
-    bottom: r.bottom,
-    width: r.width,
-    height: r.height,
-    cx: r.left + r.width / 2,
-    cy: r.top + r.height / 2,
-  };
+  const cell = el.closest<HTMLElement>("[data-tv-nav-base-width]");
+  const r = cell?.getBoundingClientRect() ?? el.getBoundingClientRect();
+  const baseWidth = cell ? Number(cell.dataset.tvNavBaseWidth) : undefined;
+  const rtl = cell ? window.getComputedStyle(cell).direction === "rtl" : false;
+  return stableCardNavigationRect(r, baseWidth, rtl);
 }
 
 function overlap(aStart: number, aEnd: number, bStart: number, bEnd: number) {
@@ -559,6 +554,10 @@ function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "
 
   el.setAttribute("data-tv-focused", "true");
 
+  if (el.hasAttribute("data-focused-card")) {
+    document.getElementById("root")?.setAttribute("data-card-focus-active", "");
+  }
+
   if (isSearchLikeField(el) && activeSearchEditEl !== el) {
     // Navigation focus is not editing mode.
     el.removeAttribute("data-search-editing");
@@ -603,6 +602,10 @@ function clearTvFocusRing(except?: HTMLElement) {
   });
 
   clearSearchVisualFocus();
+
+  if (!except?.hasAttribute("data-focused-card")) {
+    document.getElementById("root")?.removeAttribute("data-card-focus-active");
+  }
 }
 
 function setSearchNavMode(el: HTMLElement) {
@@ -987,12 +990,32 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         return;
       }
 
+      const targetIsRange =
+        target instanceof HTMLInputElement &&
+        target.type === "range" &&
+        !target.disabled &&
+        document.activeElement === target;
+
+      const targetIsSelect =
+        target instanceof HTMLSelectElement &&
+        !target.disabled &&
+        document.activeElement === target;
+
+      const dir = getDirection(e);
+
+      if (dir && (targetIsRange || targetIsSelect)) {
+        if (!arrowsRef.current) return;
+        if (targetIsRange && (dir === "left" || dir === "right")) return;
+        e.preventDefault();
+        e.stopPropagation();
+        moveFocus(dir, wrapRef.current);
+        return;
+      }
+
       if (!isNavigatingSearch && !shouldHandleGlobalKeyboardEvent(e)) return;
       if (isLocallyManaged(target)) return;
       if (activeIsSearch && isEditingSearch) return;
       if (isEditable(target) && !isSearchLikeField(target)) return;
-
-      const dir = getDirection(e);
 
       if (dir) {
         if (!arrowsRef.current) return;

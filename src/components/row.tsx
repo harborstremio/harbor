@@ -15,8 +15,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { resetPosterDock as resetPosterDockItems, updatePosterDock } from "@/lib/poster-dock";
+import { POSTER_CARD_ANIMATION, scrollDeltaToRevealCard } from "@/lib/poster-backdrop-expansion";
 import { useView } from "@/lib/view";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
+import { RowCardExpansionProvider } from "@/components/row-card-expansion";
 
 const GAP = 20;
 const EAGER_COUNT = 6;
@@ -34,6 +36,11 @@ function writePos(el: HTMLDivElement, pos: number): void {
   el.scrollLeft = isRtlTrack(el) ? -pos : pos;
 }
 
+function columnSpan(value?: string): number {
+  const span = value?.match(/span\s+(\d+)/)?.[1];
+  return span ? Math.max(1, Number(span)) : 1;
+}
+
 export type RowShape = "portrait" | "landscape" | "service" | "rank" | "tile";
 
 const RowTrackContext = createContext<HTMLDivElement | null>(null);
@@ -44,11 +51,20 @@ function LazyChild({
   eager,
   shape,
   span,
+  expansion,
 }: {
   children: ReactNode;
   eager: boolean;
   shape: RowShape;
   span?: string;
+  expansion?: {
+    index: number;
+    baseWidth: number;
+    expandedWidth?: number;
+    expanded: boolean;
+    onExpand: (index: number, width: number) => void;
+    onCollapse: (index: number) => void;
+  };
 }) {
   const root = useContext(RowTrackContext);
   const [visible, setVisible] = useState(eager);
@@ -86,13 +102,45 @@ function LazyChild({
   return (
     <div
       ref={ref}
+      data-row-card-index={expansion?.index}
+      data-poster-card-cell={expansion ? "" : undefined}
+      data-tv-nav-base-width={expansion?.baseWidth}
+      className={
+        expansion
+          ? "relative min-w-0 transition-[flex-basis] [transition-duration:var(--row-card-expansion-duration)] ease-[cubic-bezier(0.16,1,0.3,1)]"
+          : undefined
+      }
       style={{
-        ...(span ? { gridColumn: span } : undefined),
+        ...(expansion
+          ? {
+              flex: "0 0 auto",
+              flexBasis: `${expansion.expandedWidth ?? expansion.baseWidth}px`,
+              "--row-card-base-width": `${expansion.baseWidth}px`,
+            }
+          : span
+            ? { gridColumn: span }
+            : undefined),
         contentVisibility: visible ? "visible" : "auto",
         containIntrinsicSize: visible ? undefined : "auto 200px",
       }}
     >
-      {visible ? children : <Skeleton shape={shape} />}
+      {visible ? (
+        expansion ? (
+          <RowCardExpansionProvider
+            index={expansion.index}
+            enabled
+            expanded={expansion.expanded}
+            onExpand={expansion.onExpand}
+            onCollapse={expansion.onCollapse}
+          >
+            {children}
+          </RowCardExpansionProvider>
+        ) : (
+          children
+        )
+      ) : (
+        <Skeleton shape={shape} />
+      )}
     </div>
   );
 }
@@ -158,6 +206,7 @@ export function Row({
   const { settings } = useSettings();
   const t = useT();
   const effMin = Math.max(72, Math.round(min * settings.posterScale));
+  const expandingCards = shape === "portrait" && settings.posterBackdropExpansion;
   const dockEnabled = shape === "portrait" && settings.posterDockMagnification;
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -169,6 +218,10 @@ export function Row({
   const [cellWidth, setCellWidth] = useState<number | null>(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
+  const [expandedCard, setExpandedCard] = useState<{
+    index: number;
+    width: number;
+  } | null>(null);
   const onEndRef = useRef(onEndReached);
   useEffect(() => {
     onEndRef.current = onEndReached;
@@ -193,10 +246,92 @@ export function Row({
     if (el.clientWidth > 0 && remaining < 800) onEndRef.current?.();
   };
 
-  // Keep native CSS grid rails — horizontal virtualization made posters look
-  // mid-scrolled / misaligned. LazyChild + IO is enough for row-sized lists.
+  const expandRowCard = useCallback(
+    (index: number, width: number) => {
+      if (!expandingCards) return;
+      const baseWidth = cellWidth ?? effMin;
+      const track = trackRef.current;
+      const maxWidth = track ? Math.max(baseWidth, track.clientWidth - GAP * 2) : width;
+      const expandedWidth = Math.max(baseWidth, Math.min(width, maxWidth));
+
+      // Shift the shelf before the width transition begins. Otherwise an edge
+      // card grows outside the viewport and is corrected a frame later, which
+      // makes the target width appear to jump during the animation.
+      const cell = track?.querySelector<HTMLElement>(`[data-row-card-index="${index}"]`);
+      if (track && cell) {
+        const card = cell.getBoundingClientRect();
+        const extraWidth = Math.max(0, expandedWidth - card.width);
+        const projectedCard = isRtlTrack(track)
+          ? { left: card.left - extraWidth, right: card.right }
+          : { left: card.left, right: card.right + extraWidth };
+        const delta = scrollDeltaToRevealCard(projectedCard, track.getBoundingClientRect(), GAP);
+        if (Math.abs(delta) > 0.5) track.scrollLeft += delta;
+      }
+
+      setExpandedCard((current) => {
+        if (current?.index === index && Math.abs(current.width - expandedWidth) < 0.5) {
+          return current;
+        }
+        return { index, width: expandedWidth };
+      });
+    },
+    [cellWidth, effMin, expandingCards],
+  );
+  const collapseRowCard = useCallback((index: number) => {
+    setExpandedCard((current) => (current?.index === index ? null : current));
+  }, []);
+  // Keep native, non-virtual rails. The expanding portrait variant uses flex so
+  // a real cell can widen and move its neighbors without covering them.
   const items = useMemo(() => Children.toArray(children), [children]);
   const childCount = items.length;
+  const drag = useRef({
+    active: false,
+    moved: false,
+    startX: 0,
+    startScroll: 0,
+    pointerId: -1,
+    lastX: 0,
+    lastT: 0,
+    vel: 0,
+  });
+  const expansionSettleRef = useRef<number | null>(null);
+  const hadExpandedCardRef = useRef(false);
+
+  useLayoutEffect(() => {
+    const track = trackRef.current;
+    const hasExpansion = expandedCard !== null;
+    if (!track || (!hasExpansion && !hadExpandedCardRef.current)) return;
+    hadExpandedCardRef.current = hasExpansion;
+    if (expansionSettleRef.current !== null) window.clearTimeout(expansionSettleRef.current);
+    track.style.scrollSnapType = "none";
+    track.style.scrollBehavior = "auto";
+    expansionSettleRef.current = window.setTimeout(() => {
+      expansionSettleRef.current = null;
+      if (expandedCard && !drag.current.active) {
+        const cell = track.querySelector<HTMLElement>(
+          `[data-row-card-index="${expandedCard.index}"]`,
+        );
+        if (cell) {
+          const delta = scrollDeltaToRevealCard(
+            cell.getBoundingClientRect(),
+            track.getBoundingClientRect(),
+            GAP,
+          );
+          if (Math.abs(delta) > 0.5) track.scrollLeft += delta;
+        }
+      }
+      if (!expandedCard) track.style.scrollSnapType = "";
+      track.style.scrollBehavior = "";
+      measureScroll();
+    }, POSTER_CARD_ANIMATION.expansionMs + POSTER_CARD_ANIMATION.settleMs);
+  }, [expandedCard]);
+
+  useEffect(
+    () => () => {
+      if (expansionSettleRef.current !== null) window.clearTimeout(expansionSettleRef.current);
+    },
+    [],
+  );
 
   const userInteractedRef = useRef(false);
   const { rememberRowScroll } = useView();
@@ -312,16 +447,6 @@ export function Row({
     el.scrollBy({ left: delta, behavior: "smooth" });
   };
 
-  const drag = useRef({
-    active: false,
-    moved: false,
-    startX: 0,
-    startScroll: 0,
-    pointerId: -1,
-    lastX: 0,
-    lastT: 0,
-    vel: 0,
-  });
   const rafId = useRef<number | null>(null);
   const strideRef = useRef(effMin + GAP);
   strideRef.current = (cellWidth ?? effMin) + GAP;
@@ -555,22 +680,71 @@ export function Row({
               dockPointerXRef.current = null;
               resetPosterDock();
             }}
+            onKeyDownCapture={() => {
+              // Poster Dock is pointer-only. Clear its last hover transform
+              // before global keyboard navigation moves focus through this row.
+              dockPointerXRef.current = null;
+              resetPosterDock();
+            }}
             onClickCapture={onClickCapture}
             onDragStart={(e) => e.preventDefault()}
-            className="harbor-row-track grid grid-flow-col items-start gap-5 overflow-x-auto px-5 pb-8 pt-14 -mx-5 -mb-8 -mt-14 scroll-ps-5 scroll-pe-5 [scroll-snap-type:x_mandatory] *:snap-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [overflow-anchor:none] overscroll-x-contain [&_img]:select-none [&_img]:[-webkit-user-drag:none]"
-            style={{
-              gridAutoColumns: cellWidth != null ? `${cellWidth}px` : `${effMin}px`,
-              willChange: "transform",
-              transform: "translateZ(0)",
-              contain: "layout style",
-            }}
+            className={`harbor-row-track items-start gap-5 overflow-x-auto px-5 pb-8 pt-14 -mx-5 -mb-8 -mt-14 scroll-ps-5 scroll-pe-5 [scroll-snap-type:x_mandatory] *:snap-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [overflow-anchor:none] overscroll-x-contain [&_img]:select-none [&_img]:[-webkit-user-drag:none] ${
+              expandingCards
+                ? "harbor-expanding-card-scope harbor-expanding-row flex flex-nowrap"
+                : "grid grid-flow-col"
+            }`}
+            style={
+              {
+                ...(expandingCards
+                  ? {
+                      "--row-poster-height": `${(cellWidth ?? effMin) * 1.5}px`,
+                      "--row-card-expansion-duration": `${POSTER_CARD_ANIMATION.expansionMs}ms`,
+                      "--row-card-wide-fade-duration": `${POSTER_CARD_ANIMATION.wideFadeMs}ms`,
+                      "--row-card-title-restore-duration": `${POSTER_CARD_ANIMATION.titleRestoreMs}ms`,
+                    }
+                  : { gridAutoColumns: cellWidth != null ? `${cellWidth}px` : `${effMin}px` }),
+                willChange: "transform",
+                transform: "translateZ(0)",
+                contain: expandingCards ? "style" : "layout style",
+              } as React.CSSProperties
+            }
           >
             {items.map((child, i) => {
               const span = isValidElement(child)
                 ? (child.props as { style?: { gridColumn?: string } }).style?.gridColumn
                 : undefined;
+              const spanCount = columnSpan(span);
+              const baseWidth = (cellWidth ?? effMin) * spanCount + GAP * (spanCount - 1);
+              const expanded = expandedCard?.index === i;
+              const desiredExpandedWidth =
+                expanded && expandedCard ? expandedCard.width : undefined;
+              const viewportLimit = Math.max(
+                baseWidth,
+                (trackEl?.clientWidth ?? desiredExpandedWidth ?? baseWidth) - GAP * 2,
+              );
+              const expandedWidth =
+                desiredExpandedWidth === undefined
+                  ? undefined
+                  : Math.max(baseWidth, Math.min(desiredExpandedWidth, viewportLimit));
               return (
-                <LazyChild key={i} eager={i < EAGER_COUNT} shape={shape} span={span}>
+                <LazyChild
+                  key={i}
+                  eager={i < EAGER_COUNT}
+                  shape={shape}
+                  span={span}
+                  expansion={
+                    expandingCards
+                      ? {
+                          index: i,
+                          baseWidth,
+                          expandedWidth,
+                          expanded,
+                          onExpand: expandRowCard,
+                          onCollapse: collapseRowCard,
+                        }
+                      : undefined
+                  }
+                >
                   {child}
                 </LazyChild>
               );
