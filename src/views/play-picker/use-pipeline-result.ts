@@ -2,7 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Addon } from "@/lib/addons";
 import type { Meta } from "@/lib/cinemeta";
 import { useDebridClients } from "@/lib/debrid/registry";
-import { buildPickerConfigHash, clearOnePickerCache, getPickerCache, setPickerCache } from "@/lib/picker-cache";
+import {
+  buildPickerConfigHash,
+  clearOnePickerCache,
+  getPickerCache,
+  setPickerCache,
+} from "@/lib/picker-cache";
 import { useSettings } from "@/lib/settings";
 import { runPipeline, type PipelineResult } from "@/lib/streams/pipeline";
 import { buildEpisodePipelineInput } from "@/lib/streams/episode-pipeline-input";
@@ -17,6 +22,7 @@ export function usePipelineResult({
   imdbId,
   streamIds,
   addons,
+  discoveringAddons,
   debrids,
   settings,
   strictMode,
@@ -27,6 +33,7 @@ export function usePipelineResult({
   imdbId: string | null;
   streamIds: string[] | null;
   addons: Addon[] | null;
+  discoveringAddons: boolean;
   debrids: ReturnType<typeof useDebridClients>;
   settings: Settings;
   strictMode: boolean;
@@ -52,7 +59,9 @@ export function usePipelineResult({
   );
 
   useEffect(() => {
-    if (!streamIds || addons === null) return;
+    // The initial addon list can be empty while account sync is still running.
+    // Do not cache that temporary state as a completed source search.
+    if (discoveringAddons || !streamIds || addons === null) return;
     const ac = new AbortController();
     const cached = getPickerCache(meta, episode, configHash);
     if (cached && cached.complete) {
@@ -104,7 +113,11 @@ export function usePipelineResult({
       })
       .catch((e) => {
         if (ac.signal.aborted) return;
-        setResolveError(e instanceof Error ? e.message : "Couldn't load streams. Check your addons and connection.");
+        setResolveError(
+          e instanceof Error
+            ? e.message
+            : "Couldn't load streams. Check your addons and connection.",
+        );
         setLoading(false);
         setPipelineDone(true);
         setAutoSettleReady(true);
@@ -114,6 +127,8 @@ export function usePipelineResult({
     streamIds,
     imdbId,
     addons,
+    discoveringAddons,
+    configHash,
     debrids,
     meta.id,
     meta.name,
@@ -136,8 +151,8 @@ export function usePipelineResult({
 
   return {
     result,
-    loading,
-    pipelineDone,
+    loading: loading || discoveringAddons,
+    pipelineDone: pipelineDone && !discoveringAddons,
     firstResultAt,
     autoSettleReady,
     resolveError,
