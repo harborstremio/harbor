@@ -168,6 +168,7 @@ export function PlayPicker({
     imdbId,
     streamIds,
     addons,
+    discoveringAddons,
     debrids,
     settings,
     strictMode,

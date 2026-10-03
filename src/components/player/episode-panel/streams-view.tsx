@@ -33,7 +33,7 @@ export function StreamsView({
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const debrids = useDebridClients();
-  const { addons } = useAddons(authKey, settings);
+  const { addons, discovering: discoveringAddons } = useAddons(authKey, settings);
   const imdbId = useImdbId(meta, settings.tmdbKey).id;
   const streamIds = useStreamIds(meta, episode, imdbId);
   const { result, loading, pipelineDone } = usePipelineResult({
@@ -42,6 +42,7 @@ export function StreamsView({
     imdbId,
     streamIds,
     addons,
+    discoveringAddons,
     debrids,
     settings,
     strictMode: settings.streamFilterLevel === "strict",
@@ -133,7 +134,10 @@ export function StreamsView({
               <span>
                 {totalStreams === 1
                   ? t("{n} source across {count} addons", { n: totalStreams, count: groups.length })
-                  : t("{n} sources across {count} addons", { n: totalStreams, count: groups.length })}
+                  : t("{n} sources across {count} addons", {
+                      n: totalStreams,
+                      count: groups.length,
+                    })}
               </span>
               {!pipelineDone && (
                 <span className="flex items-center gap-1.5">
