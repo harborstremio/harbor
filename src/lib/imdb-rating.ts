@@ -1,18 +1,21 @@
+import { metaImdbId } from "@/lib/meta-identity";
 import { useEffect, useState } from "react";
 import { meta as fetchCinemetaMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { useOmdbScores } from "@/lib/providers/omdb";
 import { harborImdbTitle } from "@/lib/providers/harbor-imdb";
 
 export function useImdbRating(meta: Meta, resolvedImdb?: string | null): string | undefined {
-  const omdb = useOmdbScores(resolvedImdb ?? undefined);
+  const providedImdb = metaImdbId(meta);
+  const ratingId = providedImdb ?? resolvedImdb;
+  const omdb = useOmdbScores(ratingId ?? undefined);
   const [cinemetaRating, setCinemetaRating] = useState<string | undefined>(undefined);
   const [harborRating, setHarborRating] = useState<string | undefined>(undefined);
-  const isImdbId = meta.id.startsWith("tt");
+  const isImdbId = !!providedImdb;
   useEffect(() => {
     setCinemetaRating(undefined);
-    if (isImdbId || !resolvedImdb || !resolvedImdb.startsWith("tt")) return;
+    if ((isImdbId && meta.imdbRating) || !ratingId || !ratingId.startsWith("tt")) return;
     let cancelled = false;
-    fetchCinemetaMeta(narrowMediaType(meta.type), resolvedImdb)
+    fetchCinemetaMeta(narrowMediaType(meta.type), ratingId)
       .then((full) => {
         if (!cancelled && full?.imdbRating) setCinemetaRating(full.imdbRating);
       })
@@ -20,10 +23,10 @@ export function useImdbRating(meta: Meta, resolvedImdb?: string | null): string 
     return () => {
       cancelled = true;
     };
-  }, [isImdbId, resolvedImdb, meta.type]);
+  }, [isImdbId, ratingId, meta.type, meta.imdbRating]);
   useEffect(() => {
     setHarborRating(undefined);
-    const tt = isImdbId ? meta.id : resolvedImdb;
+    const tt = ratingId;
     if (!tt || !tt.startsWith("tt")) return;
     let cancelled = false;
     harborImdbTitle(tt)
@@ -34,7 +37,7 @@ export function useImdbRating(meta: Meta, resolvedImdb?: string | null): string 
     return () => {
       cancelled = true;
     };
-  }, [isImdbId, meta.id, resolvedImdb]);
+  }, [ratingId]);
   return (
     harborRating ?? omdb?.imdbRating ?? cinemetaRating ?? (isImdbId ? meta.imdbRating : undefined)
   );

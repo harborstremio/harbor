@@ -19,9 +19,12 @@ export function buildStreamIds(
   imdbId: string | null,
   defaultVideoId?: string | null,
 ): string[] {
+  // cNative namespaces metadata; stream addons use its standard external IDs.
+  metaId = metaId.replace(/^cnative:/, "");
   const out: string[] = [];
   const seen = new Set<string>();
   const push = (s: string | undefined | null) => {
+    s = s?.replace(/^cnative:/, "");
     if (!s || seen.has(s)) return;
     seen.add(s);
     out.push(s);

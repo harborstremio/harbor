@@ -15,6 +15,8 @@ export type Meta = {
   id: string;
   type: MetaType;
   name: string;
+  imdb_id?: string;
+  tmdb_id?: number;
   poster?: string;
   background?: string;
   logo?: string;
@@ -116,14 +118,7 @@ export function persistableVideos(videos: unknown): Meta["videos"] {
   return safe;
 }
 
-export function isAddonNativeMeta(meta: Meta): boolean {
-  if (meta.type === "tv" || meta.type === "channel") return true;
-  if (!meta.addonOrigin) return false;
-  const id = meta.id || "";
-  const resolvable =
-    /^tt\d/.test(id) || id.startsWith("tmdb:") || id.startsWith("kitsu:") || id.startsWith("mal:");
-  return !resolvable;
-}
+export { isAddonNativeMeta } from "./meta-identity";
 
 async function catalog(path: string): Promise<Meta[]> {
   const res = await fetch(`${CINEMETA}/catalog/${path}.json`);

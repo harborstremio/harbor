@@ -1,5 +1,6 @@
 import { isCollectionCatalog, type Addon, type CatalogDef } from "./addons";
 import type { Meta } from "./cinemeta";
+import { normalizeSearchQuery } from "./search-query";
 import { safeFetch } from "./safe-fetch";
 
 const CAP_PER_CATALOG = 20;
@@ -86,8 +87,10 @@ export async function searchAddonCatalogs(
   for (const r of settled) {
     if (r.status !== "fulfilled") continue;
     for (const m of r.value.metas) {
-      if (!m?.id || seen.has(m.id)) continue;
-      seen.add(m.id);
+      if (!m?.id) continue;
+      const key = `${r.value.type}:${m.id}:${normalizeSearchQuery(m.name)}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
       const tagged = {
         ...m,
         addonOrigin: r.value.origin,
@@ -98,17 +101,6 @@ export async function searchAddonCatalogs(
     }
   }
   return { movies, series };
-}
-
-export function mergeMetas(primary: Meta[], extra: Meta[], cap = 20): Meta[] {
-  const seen = new Set(primary.map((m) => m.id));
-  const out = [...primary];
-  for (const m of extra) {
-    if (!m.id || seen.has(m.id)) continue;
-    seen.add(m.id);
-    out.push(m);
-  }
-  return out.slice(0, cap);
 }
 
 export type AddonResultGroup = {
