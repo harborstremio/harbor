@@ -131,6 +131,34 @@ function isJapaneseAnime(m: { genres?: string[]; country?: string; originalLangu
   return c.includes("japan") || c === "jp" || c === "jpn" || lang === "ja" || lang === "jpn";
 }
 
+export function isOrphanAnimeCandidate(meta: {
+  type?: string;
+  animeFormat?: string;
+  genres?: string[];
+  country?: string;
+  originalLanguage?: string;
+  productionCountries?: string[];
+}): boolean {
+  if (meta.type === "anime" || !!meta.animeFormat) return true;
+  if (!hasAnimationGenre(meta)) return false;
+
+  const lang = (meta.originalLanguage ?? "").toLowerCase();
+  const metaCountry = (meta.country ?? "").toLowerCase();
+  const countries = (meta.productionCountries ?? []).map((c) => c.toUpperCase());
+
+  return (
+    lang === "ja" ||
+    lang === "jpn" ||
+    lang === "zh" ||
+    lang === "zho" ||
+    lang === "chi" ||
+    lang === "ko" ||
+    lang === "kor" ||
+    countries.some((c) => ["JP", "CN", "KR", "TW"].includes(c)) ||
+    /japan|china|korea|taiwan/i.test(metaCountry)
+  );
+}
+
 function settled(id: string): boolean {
   return detected.has(id) || negatives.has(id) || checked.has(id);
 }

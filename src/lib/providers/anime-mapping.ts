@@ -7,7 +7,7 @@ import {
   aniZipByTmdbTv,
   type AniZipMapping,
 } from "@/lib/providers/anizip";
-import { kitsuMainTvSeries } from "@/lib/providers/kitsu";
+import { kitsuAnime, kitsuMainTvSeries } from "@/lib/providers/kitsu";
 import { selectSiblingWindows, type AnimeListWindow } from "@/lib/streams/anime-identity-core";
 import { mappingStore } from "./mapping-store";
 
@@ -15,6 +15,10 @@ const SIDE_ENTRY_TYPES = new Set(["ova", "ona", "special", "music"]);
 
 async function preferMainTv(kitsuId: number, type?: string): Promise<number> {
   if (type && SIDE_ENTRY_TYPES.has(type.toLowerCase())) {
+    const anime = await kitsuAnime(kitsuId).catch(() => null);
+    if (anime && anime.episodeCount != null && anime.episodeCount > 1) {
+      return kitsuId;
+    }
     const main = await kitsuMainTvSeries(kitsuId).catch(() => null);
     if (main != null) return main;
   }

@@ -361,7 +361,11 @@ export async function animeDetails(
   if (kitsuId == null) return null;
 
   let anime = await kitsuAnime(kitsuId);
-  if (anime && SIDE_ENTRY_SUBTYPES.has((anime.subtype ?? "").toLowerCase())) {
+  if (
+    anime &&
+    (anime.episodeCount == null || anime.episodeCount <= 1) &&
+    SIDE_ENTRY_SUBTYPES.has((anime.subtype ?? "").toLowerCase())
+  ) {
     const mainTv = await kitsuMainTvSeries(kitsuId).catch(() => null);
     if (mainTv != null && mainTv !== kitsuId) {
       const mainAnime = await kitsuAnime(mainTv);

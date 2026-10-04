@@ -19,6 +19,7 @@ import { isTextInLanguage } from "@/lib/providers/anime-episode-build";
 import { peekAnimeArt, saveAnimeArt } from "@/lib/providers/anime-art-cache";
 import { imdbToKitsu, tmdbTvToKitsu } from "@/lib/providers/anime-mapping";
 import { kitsuAnime, kitsuMainTvSeries } from "@/lib/providers/kitsu";
+import { isOrphanAnimeCandidate } from "@/lib/anime-detect";
 import { recordAnimeCwId } from "@/lib/anime-cw-ids";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
@@ -598,17 +599,18 @@ export function DetailView({
       // accept the hit only when the year verdict agrees.
       if (k == null) {
         const name = meta.name || detail?.title;
-        // Only trust the title-search fallback for titles that already look
-        // animation-like; a live-action show (e.g. Lioness) must never flip
-        // the detail page to an anime via a fuzzy name match.
-        const animeLike =
-          meta.type === "anime" ||
-          !!meta.animeFormat ||
-          (meta.genres ?? []).some((g) => g.toLowerCase() === "animation") ||
-          (detail?.genres ?? []).some((g) => g.toLowerCase() === "animation") ||
-          (detail?.genresRich ?? []).some(
-            (g) => g.id === 16 || g.name.toLowerCase() === "animation",
-          );
+        const animeLike = isOrphanAnimeCandidate({
+          type: meta.type,
+          animeFormat: meta.animeFormat,
+          genres: [
+            ...(meta.genres ?? []),
+            ...(detail?.genres ?? []),
+            ...(detail?.genresRich ?? []).map((g) => g.name),
+          ],
+          country: meta.country,
+          originalLanguage: detail?.originalLanguage,
+          productionCountries: (detail?.productionCountriesRich ?? []).map((c) => c.iso),
+        });
         if (animeLike && name && name.trim().length >= 2) {
           const hits = await searchAnime(name).catch(() => []);
           const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
@@ -662,6 +664,9 @@ export function DetailView({
     detail?.year,
     detail?.genres,
     detail?.genresRich,
+    detail?.originalLanguage,
+    detail?.productionCountriesRich,
+    meta.country,
     meta.releaseInfo,
   ]);
 

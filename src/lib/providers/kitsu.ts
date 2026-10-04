@@ -467,10 +467,20 @@ export async function kitsuMainTvSeries(id: number): Promise<number | null> {
   );
   let best: number | null = null;
   let bestEps = -1;
+  const animeById = new Map<string, { subtype?: string; episodeCount?: number }>();
   for (const inc of j?.included ?? []) {
-    if (inc.type !== "anime" || inc.attributes?.subtype !== "TV") continue;
-    const nid = Number(inc.id);
-    const eps = Number(inc.attributes?.episodeCount ?? 0);
+    if (inc.type === "anime") animeById.set(inc.id, inc.attributes ?? {});
+  }
+  for (const rel of j?.data ?? []) {
+    const role = (rel.attributes?.role ?? "").toLowerCase();
+    if (role !== "parent_story" && role !== "full_story") continue;
+    const destRef = rel.relationships?.destination?.data;
+    const destId = destRef && !Array.isArray(destRef) ? destRef.id : undefined;
+    if (!destId) continue;
+    const a = animeById.get(destId);
+    if (a?.subtype !== "TV") continue;
+    const nid = Number(destId);
+    const eps = Number(a?.episodeCount ?? 0);
     if (Number.isFinite(nid) && nid !== id && eps > bestEps) {
       bestEps = eps;
       best = nid;
