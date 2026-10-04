@@ -109,6 +109,7 @@ import { TopRankModalProvider } from "@/lib/top-rank-modal";
 import { OnboardingProvider } from "@/lib/onboarding";
 import { RankingsProvider } from "@/lib/rankings";
 import { SettingsProvider } from "@/lib/settings";
+import { DesktopSettingsSyncRunner } from "@/lib/profile-sync/desktop-settings-sync-runner";
 import { SearchProvider, useSearch } from "@/lib/search-context";
 import { SearchOverlay } from "@/components/search/search-overlay";
 import { SearchHotkey } from "@/components/search/search-hotkey";
@@ -374,8 +375,9 @@ function useIdleEvict(active: boolean, pin = false): boolean {
 
 export function App({ onReady }: { onReady?: () => void }) {
   return (
-    <SettingsProvider syncTorrentEnginePolicy>
+    <SettingsProvider syncTorrentEnginePolicy syncCloudPreferences>
       <ProfilesProvider>
+        <DesktopSettingsSyncRunner />
         <ParentalProvider>
           <TraktProvider>
             <AnilistProvider>

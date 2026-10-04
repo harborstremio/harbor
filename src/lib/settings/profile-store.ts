@@ -1,5 +1,6 @@
 import { loadStoredSettings } from "./load";
 import { setItemWithRecovery } from "@/lib/storage-recovery";
+import { rosterSettingsLinkState } from "@/lib/profile-sync/roster-store";
 import type { Settings } from "./types";
 
 export const MIRROR_KEY = "harbor.settings";
@@ -11,6 +12,14 @@ export function profileKey(id: string): string {
 
 export function sourceKeyFor(profileId: string, linked: boolean): string {
   return linked ? SHARED_KEY : profileKey(profileId);
+}
+
+export function profileSettingsLinkState(profileId: string): boolean | null {
+  return rosterSettingsLinkState(profileId);
+}
+
+export function isProfileSettingsLinked(profileId: string): boolean {
+  return profileSettingsLinkState(profileId) !== false;
 }
 
 export function serializeSettings(settings: Settings): string {
@@ -76,6 +85,10 @@ export function persistEffective(settings: Settings, profileId: string, linked: 
     );
   }
   return json;
+}
+
+export function persistInactive(settings: Settings, profileId: string, linked: boolean): boolean {
+  return setItemWithRecovery(sourceKeyFor(profileId, linked), serializeSettings(settings));
 }
 
 export function forkToProfile(profileId: string): void {

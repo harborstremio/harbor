@@ -9,6 +9,7 @@ import { AccountIdentityCard } from "./account-identity-card";
 import { AccountThemeCta } from "./account-theme-cta";
 import { JoinDiscordCard } from "./join-discord-card";
 import { SignedOutHero } from "./signed-out-hero";
+import { SettingsSyncCard } from "./settings-sync-card";
 
 export function HarborAccountPanel() {
   const t = useT();
@@ -53,6 +54,7 @@ export function HarborAccountPanel() {
   return (
     <Section title={t("Harbor account")} subtitle={t("Your handle across Harbor.")}>
       <AccountIdentityCard author={author} />
+      <SettingsSyncCard />
       <JoinDiscordCard />
       <AccountThemeCta />
       {authOpen && <AccountAuthForm onRecovery={setReveal} onClose={() => setAuthOpen(false)} />}

@@ -51,6 +51,12 @@ export function readLocalRoster(): LocalProfileLike[] {
   }
 }
 
+/** The live provider roster can be ahead of its localStorage mirror during a pull. */
+export function rosterSettingsLinkState(profileId: string): boolean | null {
+  const profile = readLocalRoster().find((entry) => entry.id === profileId);
+  return profile ? profile.settingsLinked !== false : null;
+}
+
 function readKid(raw: unknown): LocalProfileLike["kid"] {
   if (!raw || typeof raw !== "object") return null;
   const k = raw as Record<string, unknown>;

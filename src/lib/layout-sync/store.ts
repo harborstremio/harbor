@@ -1,4 +1,9 @@
-import { loadEffective, persistEffective } from "@/lib/settings/profile-store";
+import {
+  loadEffective,
+  persistInactive,
+  profileSettingsLinkState,
+  sourceKeyFor,
+} from "@/lib/settings/profile-store";
 import type { Settings } from "@/lib/settings";
 
 /**
@@ -28,6 +33,7 @@ export function layoutWired(): boolean {
 export function readSettingsFor(profileId: string): Settings | null {
   if (!store) return null;
   if (profileId === store.activeProfileId()) return store.readActive();
+  if (profileSettingsLinkState(profileId) == null) return null;
   try {
     return loadEffective(profileId, store.isLinked(profileId));
   } catch {
@@ -43,14 +49,20 @@ export function readSettingsFor(profileId: string): Settings | null {
  */
 export function writeSettingsFor(profileId: string, patch: Partial<Settings>): boolean {
   if (!store) return false;
-  if (profileId === store.activeProfileId()) {
+  if (profileId !== store.activeProfileId() && profileSettingsLinkState(profileId) == null) {
+    return false;
+  }
+  const linked = store.isLinked(profileId);
+  if (
+    profileId === store.activeProfileId() ||
+    sourceKeyFor(profileId, linked) ===
+      sourceKeyFor(store.activeProfileId(), store.isLinked(store.activeProfileId()))
+  ) {
     store.writeActive(patch);
     return true;
   }
   try {
-    const linked = store.isLinked(profileId);
-    persistEffective({ ...loadEffective(profileId, linked), ...patch }, profileId, linked);
-    return true;
+    return persistInactive({ ...loadEffective(profileId, linked), ...patch }, profileId, linked);
   } catch {
     return false;
   }
