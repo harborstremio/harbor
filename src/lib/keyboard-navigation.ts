@@ -83,6 +83,9 @@ const AXIS_TOLERANCE = 24;
 let activeSearchEditEl: HTMLElement | null = null;
 let focusStylesInjected = false;
 let hasTvNavigationIntent = false;
+// Exported helpers (tvFocus) run outside the hook's listeners; without the nav
+// listeners nothing ever clears nav mode, so arming must stay gated on it.
+let navEnabled = false;
 
 let lastFocusedEl: HTMLElement | null = null;
 let hoveredEl: HTMLElement | null = null;
@@ -727,7 +730,7 @@ function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "
     document.getElementById("root")?.setAttribute("data-card-focus-active", "");
   }
 
-  if (isSearchLikeField(el) && activeSearchEditEl !== el) {
+  if (navEnabled && isSearchLikeField(el) && activeSearchEditEl !== el) {
     // Navigation focus is not editing mode.
     el.removeAttribute("data-search-editing");
     setSearchNavMode(el);
@@ -1190,7 +1193,17 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
   arrowsRef.current = arrows;
 
   useEffect(() => {
-    if (!enabled) clearTvFocusRing();
+    navEnabled = enabled;
+    if (!enabled) {
+      clearTvFocusRing();
+      if (activeSearchEditEl) {
+        activeSearchEditEl.removeAttribute("data-search-editing");
+        activeSearchEditEl = null;
+      }
+      document.querySelectorAll<HTMLElement>('[data-search-nav-mode="true"]').forEach((field) => {
+        clearSearchNavMode(field);
+      });
+    }
   }, [enabled]);
 
   // F6 is WebView2 pane-focus: on this frameless window it tears down the

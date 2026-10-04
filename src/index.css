@@ -477,6 +477,13 @@ main[data-kids="on"]::-webkit-scrollbar-thumb:hover {
     outline: none;
   }
 
+  /* WebView2/Edge adds its own reveal/clear buttons to password fields;
+     the app renders its own toggle, so hide the native ones. */
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none;
+  }
+
   img {
     display: block;
     user-drag: none;
