@@ -20,6 +20,7 @@ export type Tab =
   | "trakt"
   | "anilist"
   | "simkl"
+  | "publicmetadb"
   | "letterboxd"
   | "mal";
 

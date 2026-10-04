@@ -3,6 +3,7 @@ import malLogo from "@/assets/mal.png";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
 import letterboxdLogo from "@/assets/addon-logos/letterboxd.png";
+import publicmetadbLogo from "@/assets/publicmetadb.svg";
 import stremioLogo from "@/assets/stremio.png";
 import type { SectionId } from "./shared";
 
@@ -123,6 +124,7 @@ export const SECTION_TABS: Partial<Record<SectionId, TabEntry[]>> = {
     { id: "anilist", label: "AniList", icon: "ListVideo", img: anilistLogo },
     { id: "mal", label: "MyAnimeList", icon: "BookMarked", img: malLogo },
     { id: "letterboxd", label: "Letterboxd", icon: "Clapperboard", img: letterboxdLogo },
+    { id: "publicmetadb", label: "PublicMetaDB", icon: "Database", img: publicmetadbLogo },
   ],
   advanced: [
     { id: "system", label: "System", icon: "MonitorCog" },

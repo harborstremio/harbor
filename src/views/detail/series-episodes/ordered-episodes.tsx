@@ -17,6 +17,7 @@ export function OrderedEpisodes({
   traktWatched,
   stremioWatched,
   simklWatched,
+  pmdbWatched,
   cinemetaVideos,
   seriesImdbId,
   onContextMenu,
@@ -28,6 +29,7 @@ export function OrderedEpisodes({
   traktWatched: Set<string>;
   stremioWatched?: Set<string>;
   simklWatched: Set<string>;
+  pmdbWatched?: Set<string>;
   cinemetaVideos?: NonNullable<Meta["videos"]>;
   seriesImdbId?: string | null;
   onContextMenu: (e: React.MouseEvent, season: number, episode: number, watched: boolean) => void;
@@ -50,12 +52,16 @@ export function OrderedEpisodes({
           stremioWatched,
           undefined,
           simklWatched,
+          undefined,
+          undefined,
+          undefined,
+          pmdbWatched,
         ),
       );
     }
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [episodes, meta.id, traktKey, traktWatched, stremioWatched, simklWatched, mwVersion]);
+  }, [episodes, meta.id, traktKey, traktWatched, stremioWatched, simklWatched, pmdbWatched, mwVersion]);
 
   const nextUpKey = useMemo(() => {
     for (const ep of episodes) {

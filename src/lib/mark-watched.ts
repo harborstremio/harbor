@@ -6,6 +6,8 @@ import { stremioIdToTraktTarget } from "@/lib/trakt/ids";
 import { getSession as getTraktSession } from "@/lib/trakt/session";
 import { activeProfileId } from "@/lib/active-profile-id";
 import { addToHistory as simklAddToHistory } from "@/lib/simkl/history";
+import { markPmdbWatched, unmarkPmdbWatched } from "@/lib/publicmetadb/history";
+import { stremioIdToPmdbTarget } from "@/lib/publicmetadb/ids";
 import { setMovieWatchedLocal } from "@/lib/movie-watched";
 import { recordManualWatchedMeta, setManualWatchedMany } from "@/lib/manual-watched";
 import { setWatchedFlag } from "@/lib/watched-flag";
@@ -41,6 +43,8 @@ export async function markMovieWatched(
     const ids = { ...(imdb ? { imdb } : {}), ...(tmdb ? { tmdb } : {}) };
     writes.push(pushWatched({ kind: "movie", ids }), simklAddToHistory({ kind: "movie", ids }));
   }
+  const pmdbTarget = stremioIdToPmdbTarget(meta.id, undefined, "movie");
+  if (pmdbTarget) writes.push(markPmdbWatched(pmdbTarget));
   await Promise.allSettled(writes);
 }
 
@@ -50,7 +54,11 @@ export async function unmarkMovieWatched(meta: Meta, imdbId?: string | null): Pr
   const imdb = imdbId ?? (meta.id.startsWith("tt") ? meta.id : undefined);
   const authKey = readActiveStremioAuthKey();
   const cid = authKey ? cloudWriteId(meta.id, imdb ?? null, !!imdb) : null;
-  if (authKey && cid) await markMovieWatchedStremio(authKey, meta, cid, false);
+  const pmdbTarget = stremioIdToPmdbTarget(meta.id, undefined, "movie");
+  await Promise.allSettled([
+    authKey && cid ? markMovieWatchedStremio(authKey, meta, cid, false) : Promise.resolve(),
+    pmdbTarget ? unmarkPmdbWatched(pmdbTarget) : Promise.resolve(),
+  ]);
 }
 
 function resolveSeriesImdb(meta: Meta, imdbId?: string | null): string | null {
@@ -124,6 +132,10 @@ export async function markMetaWatched(
     const ids = { ...(imdb ? { imdb } : {}), ...(tmdb ? { tmdb } : {}) };
     await simklAddToHistory({ kind: "show", ids }, meta.id);
   }
+  for (const episode of eps) {
+    const target = stremioIdToPmdbTarget(imdb ?? meta.id, episode, "tv");
+    if (target) void markPmdbWatched(target);
+  }
 }
 
 export async function unmarkMetaWatched(meta: Meta, imdbId?: string | null): Promise<void> {
@@ -136,4 +148,8 @@ export async function unmarkMetaWatched(meta: Meta, imdbId?: string | null): Pro
   const eps = await releasedEpisodes(meta, resolvedImdb);
   if (eps.length > 0) setManualWatchedMany(meta.id, eps, false);
   void syncSeriesWatchedToStremio(meta, resolvedImdb);
+  for (const episode of eps) {
+    const target = stremioIdToPmdbTarget(resolvedImdb ?? meta.id, episode, "tv");
+    if (target) void unmarkPmdbWatched(target);
+  }
 }

@@ -107,9 +107,15 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
     settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
   const cwSources = settings.cwSources;
   useEffect(() => {
-    setExternalCwSources({ trakt: cwSources.trakt, simkl: cwSources.simkl });
-  }, [cwSources.trakt, cwSources.simkl]);
-  const externalCw = useExternalCw(!hideSharedCw && (cwSources.trakt || cwSources.simkl));
+    setExternalCwSources({
+      trakt: cwSources.trakt,
+      simkl: cwSources.simkl,
+      publicmetadb: cwSources.publicmetadb,
+    });
+  }, [cwSources.trakt, cwSources.simkl, cwSources.publicmetadb]);
+  const externalCw = useExternalCw(
+    !hideSharedCw && (cwSources.trakt || cwSources.simkl || cwSources.publicmetadb),
+  );
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [localVersion, setLocalVersion] = useState(0);
 
@@ -167,6 +173,7 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
     const disabledSources = new Set<ExternalCwSource>();
     if (!cwSources.simkl) disabledSources.add("simkl");
     if (!cwSources.trakt) disabledSources.add("trakt");
+    if (!cwSources.publicmetadb) disabledSources.add("publicmetadb");
     const base = hideSharedCw
       ? []
       : [

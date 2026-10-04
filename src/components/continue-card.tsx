@@ -3,6 +3,7 @@ import { Check, X } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
+import publicmetadbLogo from "@/assets/publicmetadb.svg";
 import { narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { resolveMeta } from "@/lib/meta-resource";
 import { animeKitsuMeta, type AnimeKitsuVideo } from "@/lib/providers/anime-kitsu-addon";
@@ -106,8 +107,14 @@ export const ContinueCard = memo(function ContinueCard({
   const newEpisode = useHasNewEpisode(item);
   const snapshot = readSnapshot(item._id);
   const isExternal = !!item.external;
-  const externalLogo = item.external === "trakt" ? traktLogo : simklLogo;
-  const externalLabel = item.external === "trakt" ? t("Paused on Trakt") : t("Paused on Simkl");
+  const externalLogo =
+    item.external === "trakt" ? traktLogo : item.external === "publicmetadb" ? publicmetadbLogo : simklLogo;
+  const externalLabel =
+    item.external === "trakt"
+      ? t("Paused on Trakt")
+      : item.external === "publicmetadb"
+        ? t("Paused on PublicMetaDB")
+        : t("Paused on Simkl");
   const dur = item.state?.duration ?? 0;
   const off = item.state?.timeOffset ?? 0;
   const progress = dur > 0 ? Math.min(1, off / dur) : 0;

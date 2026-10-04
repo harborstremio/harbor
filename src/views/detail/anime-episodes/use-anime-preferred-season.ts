@@ -14,6 +14,7 @@ export function useAnimePreferredSeason({
   traktWatched,
   anilistWatched,
   malWatched,
+  pmdbWatched,
   mwVersion,
 }: {
   episodes: KitsuEpisode[];
@@ -22,6 +23,7 @@ export function useAnimePreferredSeason({
   traktWatched: Set<string>;
   anilistWatched?: Set<string>;
   malWatched?: Set<string>;
+  pmdbWatched?: Set<string>;
   mwVersion: number;
 }): string | null {
   return useMemo(() => {
@@ -96,6 +98,8 @@ export function useAnimePreferredSeason({
         isCurrent ? malWatched : undefined,
         ep.imdbSeason,
         ep.imdbEpisode,
+        pmdbWatched,
+        ep.absoluteNumber,
       );
       if (
         isCurrent &&
@@ -117,6 +121,8 @@ export function useAnimePreferredSeason({
           malWatched,
           ep.imdbSeason,
           ep.imdbEpisode,
+          pmdbWatched,
+          ep.absoluteNumber,
         );
         if (alt.watched) progress = alt;
       }
@@ -129,5 +135,5 @@ export function useAnimePreferredSeason({
     if (playedSeason != null) return String(playedSeason);
     return String(maxSeason);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [episodes, metaId, trackId, traktWatched, anilistWatched, malWatched, mwVersion]);
+  }, [episodes, metaId, trackId, traktWatched, anilistWatched, malWatched, pmdbWatched, mwVersion]);
 }

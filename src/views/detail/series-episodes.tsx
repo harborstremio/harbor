@@ -25,6 +25,7 @@ import { useSettings } from "@/lib/settings";
 import { effectiveOrderProvider, tvdbPanelEnabled } from "@/lib/settings/episode-order";
 import { useTrakt } from "@/lib/trakt/provider";
 import { useSimkl } from "@/lib/simkl/provider";
+import { usePublicMetaDb } from "@/lib/publicmetadb/provider";
 import { useT } from "@/lib/i18n";
 import { EpisodeGridControls } from "./episode-grid-controls";
 import { EpisodeLayoutToggle } from "./episode-layout-toggle";
@@ -73,6 +74,7 @@ export function SeriesEpisodes({
   const { settings, update } = useSettings();
   const { isConnected: traktConnected } = useTrakt();
   const { isConnected: simklConnected } = useSimkl();
+  const { isConnected: pmdbConnected } = usePublicMetaDb();
   const mwVersion = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
   const [watchedMenu, setWatchedMenu] = useState<WatchedMenuTarget | null>(null);
   const [epSearch, setEpSearch] = useState("");
@@ -97,15 +99,21 @@ export function SeriesEpisodes({
   );
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(true);
-  const { traktWatched, simklWatched } = useWatchedSets({
+  const { traktWatched, simklWatched, pmdbWatched } = useWatchedSets({
     traktConnected,
     simklConnected,
+    pmdbConnected,
     imdbId,
     metaId: meta.id,
   });
   const combinedWatched = useMemo(() => {
     const s = new Set<string>(stremioWatched ?? []);
     for (const k of simklWatched) s.add(k);
+    for (const k of pmdbWatched) {
+      if (!k.includes(":")) {
+        s.add(k);
+      }
+    }
     // Trakt answers with the whole account's history, not this show's.
     const mine = new Set<string>();
     if (imdbId) mine.add(`imdb:${imdbId}`);
@@ -118,11 +126,20 @@ export function SeriesEpisodes({
       if (!mine.has(k.slice(0, se))) continue;
       s.add(k.slice(se + 1));
     }
+    for (const k of pmdbWatched) {
+      if (k.includes(":")) {
+        const e = k.lastIndexOf(":");
+        const se = e > 0 ? k.lastIndexOf(":", e - 1) : -1;
+        if (se >= 0 && mine.has(k.slice(0, se))) {
+          s.add(k.slice(se + 1));
+        }
+      }
+    }
     const manual = manualEpisodeKeys(meta.id);
     for (const k of manual.watched) s.add(k);
     for (const k of manual.unwatched) s.delete(k);
     return s;
-  }, [stremioWatched, simklWatched, traktWatched, meta.id, imdbId, mwVersion]);
+  }, [stremioWatched, simklWatched, traktWatched, pmdbWatched, meta.id, imdbId, mwVersion]);
   const cache = useRef<Map<number, Episode[]>>(new Map());
 
   const traktKey = imdbId ?? meta.id;
@@ -333,6 +350,7 @@ export function SeriesEpisodes({
     traktWatched,
     stremioWatched,
     simklWatched,
+    pmdbWatched,
     mwVersion,
     settings,
   });
@@ -438,6 +456,7 @@ export function SeriesEpisodes({
           traktWatched={traktWatched}
           stremioWatched={stremioWatched}
           simklWatched={simklWatched}
+          pmdbWatched={pmdbWatched}
           cinemetaVideos={cinemetaVideos}
           seriesImdbId={imdbId}
           onContextMenu={openWatchedMenu}
@@ -479,6 +498,10 @@ export function SeriesEpisodes({
                   stremioWatched,
                   undefined,
                   simklWatched,
+                  undefined,
+                  undefined,
+                  undefined,
+                  pmdbWatched,
                 )
               }
               thumbnailFor={(ep) =>

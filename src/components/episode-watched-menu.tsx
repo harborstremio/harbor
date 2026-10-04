@@ -15,6 +15,9 @@ import { clearResume, readResumeEntry } from "@/lib/resume";
 import { markEpisodesWatched, unmarkEpisodeWatched } from "@/lib/simkl/history";
 import { stremioIdToSimklTarget } from "@/lib/simkl/ids";
 import { useSimkl } from "@/lib/simkl/provider";
+import { markPmdbWatched, unmarkPmdbWatched } from "@/lib/publicmetadb/history";
+import { resolvePmdbEpisodeTarget } from "@/lib/publicmetadb/ids";
+import { usePublicMetaDb } from "@/lib/publicmetadb/provider";
 
 export type WatchedMenuTarget = {
   x: number;
@@ -23,6 +26,7 @@ export type WatchedMenuTarget = {
   episode: number;
   watched: boolean;
   metaId?: string;
+  absoluteNumber?: number;
 };
 
 function airedByNow(released?: string | null): boolean {
@@ -41,11 +45,12 @@ export function EpisodeWatchedMenu({
   metaId: string;
   meta: ManualWatchedMeta;
   target: WatchedMenuTarget;
-  allEpisodes?: Array<{ season: number; episode: number; released?: string | null }>;
+  allEpisodes?: Array<{ season: number; episode: number; released?: string | null; absoluteNumber?: number }>;
   onClose: () => void;
 }) {
   const t = useT();
   const { isConnected: simklConnected } = useSimkl();
+  const { isConnected: pmdbConnected } = usePublicMetaDb();
   const { settings } = useSettings();
   const hidden = isEpisodeHidden(metaId, target.season, target.episode);
 
@@ -79,6 +84,15 @@ export function EpisodeWatchedMenu({
     setManualWatched(metaId, target.season, target.episode, false);
     clearResume(metaId, target.season, target.episode);
     if (showIds) void unmarkEpisodeWatched(showIds, target.season, target.episode);
+    if (pmdbConnected) {
+      void resolvePmdbEpisodeTarget(metaId, {
+        season: target.season,
+        episode: target.episode,
+        absoluteNumber: target.absoluteNumber,
+      }).then((pmTarget) => {
+        if (pmTarget) void unmarkPmdbWatched(pmTarget);
+      });
+    }
     onClose();
   };
 
@@ -107,6 +121,15 @@ export function EpisodeWatchedMenu({
               recordManualWatchedMeta(metaId, meta);
               setManualWatched(metaId, target.season, target.episode, true);
               if (showIds) void markEpisodesWatched(showIds, target.season, [target.episode]);
+              if (pmdbConnected) {
+                void resolvePmdbEpisodeTarget(metaId, {
+                  season: target.season,
+                  episode: target.episode,
+                  absoluteNumber: target.absoluteNumber,
+                }).then((pmTarget) => {
+                  if (pmTarget) void markPmdbWatched(pmTarget);
+                });
+              }
               onClose();
             }}
           />
@@ -127,11 +150,32 @@ export function EpisodeWatchedMenu({
                   const eps = upTo.filter((e) => e.season === target.season).map((e) => e.episode);
                   if (eps.length > 0) void markEpisodesWatched(showIds, target.season, eps);
                 }
+                if (pmdbConnected) {
+                  for (const ep of upTo) {
+                    void resolvePmdbEpisodeTarget(metaId, {
+                      season: ep.season,
+                      episode: ep.episode,
+                      absoluteNumber: ep.absoluteNumber,
+                    }).then((pmTarget) => {
+                      if (pmTarget) void markPmdbWatched(pmTarget);
+                    });
+                  }
+                }
               } else {
                 setManualWatchedUpTo(metaId, target.season, target.episode, true);
                 if (showIds) {
                   const eps = Array.from({ length: target.episode }, (_, i) => i + 1);
                   void markEpisodesWatched(showIds, target.season, eps);
+                }
+                if (pmdbConnected) {
+                  for (let i = 1; i <= target.episode; i++) {
+                    void resolvePmdbEpisodeTarget(metaId, {
+                      season: target.season,
+                      episode: i,
+                    }).then((pmTarget) => {
+                      if (pmTarget) void markPmdbWatched(pmTarget);
+                    });
+                  }
                 }
               }
               onClose();

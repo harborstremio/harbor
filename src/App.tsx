@@ -151,6 +151,7 @@ import { TraktProvider } from "@/lib/trakt/provider";
 import { AnilistProvider } from "@/lib/anilist/provider";
 import { MalProvider } from "@/lib/mal/provider";
 import { SimklProvider } from "@/lib/simkl/provider";
+import { PublicMetaDbProvider } from "@/lib/publicmetadb/provider";
 import { LetterboxdProvider } from "@/lib/stremboxd/provider";
 import {
   useKeyboardNavigation,
@@ -381,7 +382,8 @@ export function App({ onReady }: { onReady?: () => void }) {
             <AnilistProvider>
               <MalProvider>
                 <SimklProvider>
-                  <LetterboxdProvider>
+                  <PublicMetaDbProvider>
+                    <LetterboxdProvider>
                     <RankingsProvider>
                       <AuthProvider>
                         <OnboardingProvider>
@@ -490,7 +492,8 @@ export function App({ onReady }: { onReady?: () => void }) {
                       </AuthProvider>
                     </RankingsProvider>
                   </LetterboxdProvider>
-                </SimklProvider>
+                </PublicMetaDbProvider>
+              </SimklProvider>
               </MalProvider>
             </AnilistProvider>
           </TraktProvider>

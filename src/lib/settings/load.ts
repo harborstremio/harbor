@@ -350,7 +350,7 @@ function parseStoredSettings(raw: string | null): Settings {
     }
     if (parsed.cwSources == null) {
       const ext = parsed.externalContinueWatching === true;
-      parsed.cwSources = { library: true, trakt: ext, simkl: ext, local: true };
+      parsed.cwSources = { library: true, trakt: ext, simkl: ext, local: true, publicmetadb: false };
     }
     const posterCards = normalizePosterCardSettings(parsed);
     return {
@@ -408,6 +408,10 @@ function parseStoredSettings(raw: string | null): Settings {
           : DEFAULT.subOffsetIndicatorEnabled,
       subOffsetIndicatorPosition: sanitizeSubtitleOffsetPosition(parsed.subOffsetIndicatorPosition),
       subOffsetIndicatorSize: sanitizeSubtitleOffsetSize(parsed.subOffsetIndicatorSize),
+      cwSources: {
+        ...DEFAULT.cwSources,
+        ...parsed.cwSources,
+      },
       subProvidersEnabled: {
         ...DEFAULT.subProvidersEnabled,
         ...parsed.subProvidersEnabled,

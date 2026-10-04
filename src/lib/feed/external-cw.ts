@@ -10,6 +10,11 @@ import {
   getSession as getTraktSession,
   subscribeSession as subscribeTraktSession,
 } from "@/lib/trakt/session";
+import { fetchPublicMetaDbPlaybackItems } from "@/lib/publicmetadb/playback";
+import {
+  getSession as getPmdbSession,
+  subscribeSession as subscribePmdbSession,
+} from "@/lib/publicmetadb/session";
 import { episodeFromVideoId, type LibraryItem } from "@/lib/stremio";
 
 const STALE_MS = 300_000;
@@ -37,7 +42,11 @@ function setItems(next: LibraryItem[]): void {
 }
 
 export function externalCwConnected(): boolean {
-  return (sourceMask.simkl && !!getSimklSession()) || (sourceMask.trakt && !!getTraktSession());
+  return (
+    (sourceMask.simkl && !!getSimklSession()) ||
+    (sourceMask.trakt && !!getTraktSession()) ||
+    (sourceMask.publicmetadb && !!getPmdbSession())
+  );
 }
 
 function activityOf(i: LibraryItem): number {
@@ -66,17 +75,30 @@ function merge(lists: LibraryItem[][]): LibraryItem[] {
   return [...byKey.values()].sort((a, b) => activityOf(b) - activityOf(a));
 }
 
-let sourceMask = { trakt: true, simkl: true };
+let sourceMask = { trakt: true, simkl: true, publicmetadb: false };
 
-export function setExternalCwSources(mask: { trakt: boolean; simkl: boolean }): void {
-  if (mask.trakt === sourceMask.trakt && mask.simkl === sourceMask.simkl) return;
-  sourceMask = { trakt: mask.trakt, simkl: mask.simkl };
+export function setExternalCwSources(mask: {
+  trakt: boolean;
+  simkl: boolean;
+  publicmetadb?: boolean;
+}): void {
+  const pm = mask.publicmetadb ?? sourceMask.publicmetadb;
+  if (
+    mask.trakt === sourceMask.trakt &&
+    mask.simkl === sourceMask.simkl &&
+    pm === sourceMask.publicmetadb
+  )
+    return;
+  sourceMask = { trakt: mask.trakt, simkl: mask.simkl, publicmetadb: pm };
   fetchedAt = 0;
   // Drop items from newly-disabled sources synchronously so their cards vanish
   // immediately instead of lingering until the next successful refresh.
   if (items.length > 0) {
     const kept = items.filter(
-      (i) => (mask.trakt || i.external !== "trakt") && (mask.simkl || i.external !== "simkl"),
+      (i) =>
+        (sourceMask.trakt || i.external !== "trakt") &&
+        (sourceMask.simkl || i.external !== "simkl") &&
+        (sourceMask.publicmetadb || i.external !== "publicmetadb"),
     );
     if (kept.length !== items.length) setItems(kept);
   }
@@ -85,9 +107,16 @@ export function setExternalCwSources(mask: { trakt: boolean; simkl: boolean }): 
 }
 
 async function runRefresh(gen: number): Promise<boolean> {
-  const enabled: Array<{ source: "simkl" | "trakt"; fetch: () => Promise<LibraryItem[]> }> = [];
-  if (getSimklSession() && sourceMask.simkl) enabled.push({ source: "simkl", fetch: fetchSimklPlaybackItems });
-  if (getTraktSession() && sourceMask.trakt) enabled.push({ source: "trakt", fetch: fetchTraktPlaybackItems });
+  const enabled: Array<{
+    source: "simkl" | "trakt" | "publicmetadb";
+    fetch: () => Promise<LibraryItem[]>;
+  }> = [];
+  if (getSimklSession() && sourceMask.simkl)
+    enabled.push({ source: "simkl", fetch: fetchSimklPlaybackItems });
+  if (getTraktSession() && sourceMask.trakt)
+    enabled.push({ source: "trakt", fetch: fetchTraktPlaybackItems });
+  if (getPmdbSession() && sourceMask.publicmetadb)
+    enabled.push({ source: "publicmetadb", fetch: fetchPublicMetaDbPlaybackItems });
   const results = await Promise.all(
     enabled.map(async ({ fetch }) => {
       try {
@@ -174,7 +203,8 @@ export function subscribeExternalCw(fn: () => void): () => void {
 function connSignature(): string {
   const sm = sourceMask.simkl && getSimklSession() ? "s" : "-";
   const tm = sourceMask.trakt && getTraktSession() ? "t" : "-";
-  return `${sm}${tm}`;
+  const pm = sourceMask.publicmetadb && getPmdbSession() ? "p" : "-";
+  return `${sm}${tm}${pm}`;
 }
 
 let lastConn = "";
@@ -198,6 +228,7 @@ function onProfileChange(): void {
 if (typeof window !== "undefined") {
   subscribeSimklSession(onSessionChange);
   subscribeTraktSession(onSessionChange);
+  subscribePmdbSession(onSessionChange);
   window.addEventListener("harbor:active-profile-changed", onProfileChange);
   window.addEventListener("harbor:profiles-updated", onProfileChange);
 }

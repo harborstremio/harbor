@@ -4,6 +4,9 @@ import { recordManualWatchedMeta, setManualWatchedMany } from "@/lib/manual-watc
 import type { Episode } from "@/lib/providers/tmdb";
 import { markEpisodesWatched, unmarkEpisodesWatched } from "@/lib/simkl/history";
 import { stremioIdToSimklTarget } from "@/lib/simkl/ids";
+import { markPmdbWatched, unmarkPmdbWatched } from "@/lib/publicmetadb/history";
+import { stremioIdToPmdbTarget } from "@/lib/publicmetadb/ids";
+import { usePublicMetaDb } from "@/lib/publicmetadb/provider";
 import { airedOnly } from "../helpers";
 
 export function useMarkSeason({
@@ -17,6 +20,7 @@ export function useMarkSeason({
   enrichedEpisodes: Episode[];
   simklConnected: boolean;
 }): (watched: boolean) => void {
+  const { isConnected: pmdbConnected } = usePublicMetaDb();
   return useCallback(
     (watched: boolean) => {
       const airedEpisodes = watched
@@ -58,7 +62,20 @@ export function useMarkSeason({
           airedEpisodes.map((e) => e.episodeNumber),
         );
       }
+      if (pmdbConnected) {
+        for (const ep of airedEpisodes) {
+          const target = stremioIdToPmdbTarget(
+            meta.id,
+            { season: ep.seasonNumber, episode: ep.episodeNumber },
+            "tv",
+          );
+          if (target) {
+            if (watched) void markPmdbWatched(target);
+            else void unmarkPmdbWatched(target);
+          }
+        }
+      }
     },
-    [meta, active, enrichedEpisodes, simklConnected],
+    [meta, active, enrichedEpisodes, simklConnected, pmdbConnected],
   );
 }

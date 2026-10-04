@@ -111,6 +111,7 @@ import type { ListItemInput } from "@/lib/custom-lists";
 import { AddToAnilistButton } from "./detail/add-to-anilist-button";
 import { AddToMalButton } from "@/components/mal/add-to-mal-button";
 import { AddToSimklButton } from "./detail/add-to-simkl-button";
+import { AddToPmdbButton } from "./detail/add-to-publicmetadb-button";
 import { getLocalCache, saveLocalCache } from "@/lib/simkl/activities";
 import { simklRequest } from "@/lib/simkl/client";
 import { CollectionRow } from "./detail/collection-row";
@@ -1872,6 +1873,13 @@ export function DetailView({
                     type={meta.type === "movie" ? "movie" : "series"}
                   />
                 )}
+                {actionStage < 2 && (
+                  <AddToPmdbButton
+                    harborId={isAnime ? (animeCanonicalId ?? meta.id) : meta.id}
+                    title={title || meta.name}
+                    type={meta.type === "movie" ? "movie" : "series"}
+                  />
+                )}
                 {!liveContext && (
                   <RateButton
                     target={ratingTarget(
@@ -1919,6 +1927,10 @@ export function DetailView({
                       type: meta.type === "movie" ? "movie" : "series",
                     }}
                     anilist={isAnime ? { harborId: animeCanonicalId ?? meta.id } : null}
+                    pmdb={{
+                      harborId: isAnime ? (animeCanonicalId ?? meta.id) : meta.id,
+                      type: meta.type === "movie" ? "movie" : "series",
+                    }}
                   />
                 ) : (
                   <>

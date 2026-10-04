@@ -40,6 +40,7 @@ export function AnimeEpisodeStrip({
     episode: number,
     watched: boolean,
     sourceMetaId?: string,
+    absoluteNumber?: number,
   ) => void;
   layout?: "strip" | "grid";
   onReachEnd?: () => void;
@@ -58,6 +59,7 @@ export function AnimeEpisodeStrip({
           key: String(ep.id),
           number: ep.number,
           season: animeSeasonKey(ep),
+          absoluteNumber: ep.absoluteNumber,
           seasonLabel: showSeason ? `S${ep.imdbSeason ?? ep.seasonNumber ?? 1}` : undefined,
           title: ep.title || t("Episode {n}", { n: ep.number }),
           stills: [ep.thumbnail, ep.thumbnailFallback, meta.background].filter((u): u is string => !!u),
@@ -144,6 +146,7 @@ function AnimeEpisodeStripCard({
     episode: number,
     watched: boolean,
     sourceMetaId?: string,
+    absoluteNumber?: number,
   ) => void;
   showSeason?: boolean;
 }) {
@@ -165,7 +168,14 @@ function AnimeEpisodeStripCard({
       data-ep={ep.number}
       data-no-card-ring
       onContextMenu={(e) =>
-        onContextMenu?.(e, animeSeasonKey(ep), ep.number, progress.watched, ep.sourceMetaId)
+        onContextMenu?.(
+          e,
+          animeSeasonKey(ep),
+          ep.number,
+          progress.watched,
+          ep.sourceMetaId,
+          ep.absoluteNumber,
+        )
       }
       className="group flex w-full flex-col gap-2.5 text-start"
     >

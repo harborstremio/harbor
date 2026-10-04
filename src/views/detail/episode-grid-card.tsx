@@ -36,6 +36,7 @@ export function EpisodeGridCard({
     episode: number,
     watched: boolean,
     sourceMetaId?: string,
+    absoluteNumber?: number,
   ) => void;
 }) {
   const t = useT();
@@ -62,7 +63,8 @@ export function EpisodeGridCard({
     window.clearTimeout(timer.current);
     setPreview(false);
   };
-  const ctx = (e: React.MouseEvent) => onContextMenu?.(e, g.season, g.number, watched, g.sourceMetaId);
+  const ctx = (e: React.MouseEvent) =>
+    onContextMenu?.(e, g.season, g.number, watched, g.sourceMetaId, g.absoluteNumber);
 
   const thumbDim = spoiler?.thumb
     ? SPOILER_THUMB_CLASS
