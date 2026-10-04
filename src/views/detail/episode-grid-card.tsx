@@ -52,6 +52,7 @@ export function EpisodeGridCard({
   const partial = !watched && progress.ratio > 0.01;
   const minsLeft = partial && g.runtime ? Math.max(1, Math.round(g.runtime * (1 - progress.ratio))) : 0;
   const spoilered = !!spoiler && (spoiler.thumb || spoiler.title || spoiler.desc);
+  const episodeNumber = g.displayNumber ?? g.number;  // Using g.number for TV shows since they lack g.displayNumber
 
   const enter = () => {
     window.clearTimeout(timer.current);
@@ -75,7 +76,7 @@ export function EpisodeGridCard({
   return (
     <div onMouseEnter={enter} onMouseLeave={leave} className={`group relative ${preview ? "z-30" : ""}`}>
       <button
-        data-ep={g.number}
+        data-ep={episodeNumber}
         data-no-card-ring
         onClick={() => g.play({ resume: partial })}
         onContextMenu={ctx}
@@ -87,7 +88,7 @@ export function EpisodeGridCard({
             <Poster src={still} seed={g.key} ratio="landscape" lazy onError={() => setImgIdx((i) => i + 1)} />
           </div>
           <span className="absolute start-2 top-2 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[11px] font-semibold text-ink">
-            {g.number}
+            {episodeNumber}
           </span>
           {g.upcoming && (
             <span className="absolute bottom-2 start-2">
@@ -114,7 +115,7 @@ export function EpisodeGridCard({
             {g.filler && <FillerBadge />}
           </span>
           <span className="text-[11.5px] text-ink-subtle">
-            {g.seasonLabel ? `${g.seasonLabel} · E${g.number}` : `E${g.number}`}
+            {g.seasonLabel ? `${g.seasonLabel} · E${episodeNumber}` : `E${episodeNumber}`}
             {g.runtime ? ` · ${t("{n} min", { n: g.runtime })}` : ""}
           </span>
           {settings.showEpisodeDescription && g.overview && (
@@ -195,6 +196,8 @@ function EpisodePreview({
   t: T;
 }) {
   const { openEpisodeDetail } = useView();
+  const episodeNumber = g.displayNumber ?? g.number;
+
   return (
     <div className="animate-popover-in absolute -inset-x-2 -top-2 z-30 overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)]">
       <button onClick={() => g.play({ resume: !watched && ratio > 0.01 })} onContextMenu={onContext} className="block w-full text-start">
@@ -202,7 +205,7 @@ function EpisodePreview({
           <Poster src={still} seed={g.key} ratio="landscape" />
           {watched && <div className="absolute inset-0 bg-canvas/45" />}
           <span className="absolute start-2 top-2 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[11px] font-semibold text-ink">
-            {g.number}
+            {episodeNumber}
           </span>
           {minsLeft > 0 && (
             <>
@@ -223,7 +226,7 @@ function EpisodePreview({
         <h4 className="line-clamp-1 text-[14px] font-semibold leading-snug text-ink">{g.title}</h4>
         <span className="flex items-center gap-1.5 text-[11.5px] text-ink-subtle">
           <span className="font-semibold text-ink-muted">
-            {g.seasonLabel ? `${g.seasonLabel} · E${g.number}` : `E${g.number}`}
+            {g.seasonLabel ? `${g.seasonLabel} · E${episodeNumber}` : `E${episodeNumber}`}
           </span>
           {g.airDate && (
             <>
