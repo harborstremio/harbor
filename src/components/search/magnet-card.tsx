@@ -9,11 +9,14 @@ import {
   type TorrentFile,
 } from "@/lib/torrent/stremio-stream";
 import { useView, type PlayerSrc } from "@/lib/view";
+import { useSettings } from "@/lib/settings";
+import { readStreamSizeLimit, streamSizeAllowed } from "@/lib/streams/size-limit";
 
 type Mode = "idle" | "starting" | "picking" | "error";
 
 export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void }) {
   const { openPlayer } = useView();
+  const { settings } = useSettings();
   const parsed = useMemo(() => parseMagnet(raw), [raw]);
   const [mode, setMode] = useState<Mode>("idle");
   const [files, setFiles] = useState<TorrentFile[]>([]);
@@ -32,7 +35,14 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
 
   const title = parsed.name ?? "Magnet stream";
 
-  const startPlay = (fileIdx: number | null, name?: string) => {
+  const startPlay = (fileIdx: number | null, name?: string, size?: number) => {
+    if (!streamSizeAllowed(size, readStreamSizeLimit())) {
+      setError(
+        "This file exceeds your maximum stream size. Change the limit in Streaming sources to play it.",
+      );
+      setMode("error");
+      return;
+    }
     const src: PlayerSrc = {
       meta: { id: `magnet:${parsed.infoHash}`, type: "movie", name: title },
       url: buildTorrentStreamUrl({
@@ -42,7 +52,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
         filename: name ?? null,
       }),
       title: name ?? title,
-      streamRef: { infoHash: parsed.infoHash, fileIdx: fileIdx ?? null },
+      streamRef: { infoHash: parsed.infoHash, fileIdx: fileIdx ?? null, size: size ?? null },
     };
     onClose();
     openPlayer(src);
@@ -54,17 +64,29 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
     const ready = await awaitCastServerReady(8000);
     if (!ready) {
       setMode("error");
-      setError("The bundled streaming engine is not running. Direct torrent play needs the desktop app.");
+      setError(
+        "The bundled streaming engine is not running. Direct torrent play needs the desktop app.",
+      );
       return;
     }
     const created = await createAndListFiles(parsed.infoHash, parsed.trackers);
-    const videos = (created?.files ?? []).filter(isVideoFile).sort((a, b) => b.length - a.length);
+    const allVideos = (created?.files ?? []).filter(isVideoFile);
+    const videos = allVideos
+      .filter((file) => streamSizeAllowed(file.length, readStreamSizeLimit()))
+      .sort((a, b) => b.length - a.length);
+    if (allVideos.length > 0 && videos.length === 0) {
+      setError(
+        "Every video in this torrent exceeds your maximum stream size. Change the limit in Streaming sources to play it.",
+      );
+      setMode("error");
+      return;
+    }
     if (videos.length > 1) {
       setFiles(videos);
       setMode("picking");
       return;
     }
-    startPlay(videos[0]?.idx ?? null, videos[0]?.name);
+    startPlay(videos[0]?.idx ?? null, videos[0]?.name, videos[0]?.length);
   };
 
   if (mode === "picking") {
@@ -76,18 +98,22 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
             {files.length} playable files
           </span>
         </div>
-        {files.map((f) => (
-          <button
-            key={f.idx}
-            type="button"
-            onClick={() => startPlay(f.idx, f.name)}
-            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-start transition-colors hover:bg-canvas/60"
-          >
-            <Play size={18} className="shrink-0 text-ink-muted" />
-            <span className="min-w-0 flex-1 truncate text-[14px] text-ink">{f.name}</span>
-            <span className="shrink-0 text-[12px] tabular-nums text-ink-subtle">{formatSize(f.length)}</span>
-          </button>
-        ))}
+        {files
+          .filter((file) => streamSizeAllowed(file.length, settings.maxStreamSizeGb))
+          .map((f) => (
+            <button
+              key={f.idx}
+              type="button"
+              onClick={() => startPlay(f.idx, f.name, f.length)}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-start transition-colors hover:bg-canvas/60"
+            >
+              <Play size={18} className="shrink-0 text-ink-muted" />
+              <span className="min-w-0 flex-1 truncate text-[14px] text-ink">{f.name}</span>
+              <span className="shrink-0 text-[12px] tabular-nums text-ink-subtle">
+                {formatSize(f.length)}
+              </span>
+            </button>
+          ))}
       </div>
     );
   }
@@ -98,7 +124,9 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
         <Magnet size={22} />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">Torrent link</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+          Torrent link
+        </span>
         <span className="truncate text-[15px] font-semibold text-ink">{title}</span>
         <span className="text-[12.5px] text-ink-subtle">
           {error ?? "Streams directly from peers over your own connection."}

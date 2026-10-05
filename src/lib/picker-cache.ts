@@ -48,14 +48,19 @@ export function setPickerCache(
 ): void {
   if (result.picker.all.length === 0) return;
   const stripped: StoredResult = { picker: result.picker, rejected: result.rejected.slice(0, 60) };
-  lruSet(cache, entryKey(meta, episode), {
-    meta,
-    episode,
-    result: stripped,
-    fetchedAt: Date.now(),
-    configHash,
-    complete,
-  }, MAX_ENTRIES);
+  lruSet(
+    cache,
+    entryKey(meta, episode),
+    {
+      meta,
+      episode,
+      result: stripped,
+      fetchedAt: Date.now(),
+      configHash,
+      complete,
+    },
+    MAX_ENTRIES,
+  );
   notify();
 }
 
@@ -137,10 +142,12 @@ export function buildPickerConfigHash(parts: {
   debridSlugs: string[];
   scraperKeys: string[];
   filterMode: string;
+  maxStreamSizeGb?: number;
 }): string {
   const tokens = [
     TRUST_LOGIC_VERSION,
     `filter:${parts.filterMode}`,
+    `maxSize:${parts.maxStreamSizeGb ?? 0}`,
     ...parts.addonTransportUrls.slice().sort(),
     ...parts.debridSlugs.slice().sort(),
     ...parts.scraperKeys.slice().sort(),

@@ -12,6 +12,7 @@ import { resolveUiLanguage } from "@/lib/i18n";
 import { normalizePosterCardSettings } from "@/lib/poster-backdrop-expansion";
 import { DEFAULT, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
+import { normalizeStreamSizeLimit } from "@/lib/streams/size-limit";
 
 const HEX_RE = /^#[0-9a-f]{6}$/i;
 
@@ -163,6 +164,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       ...DEFAULT,
       ...parsed,
       ...posterCards,
+      maxStreamSizeGb: normalizeStreamSizeLimit(parsed.maxStreamSizeGb),
       posterDockTransitionMs: sanitizePosterDockTransition(parsed.posterDockTransitionMs),
       uiLanguage: resolveUiLanguage(parsed.uiLanguage),
       streaming: { ...DEFAULT.streaming, ...(parsed.streaming ?? {}) },

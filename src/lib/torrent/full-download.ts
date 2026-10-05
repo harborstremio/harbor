@@ -1,3 +1,5 @@
+import { readStreamSizeLimit, streamSizeAllowed } from "../streams/size-limit";
+
 const controllers = new Map<string, AbortController>();
 
 export function fullDownloadEnabled(): boolean {
@@ -17,11 +19,25 @@ export function startFullDownload(infoHash: string, url: string): void {
   void (async () => {
     try {
       const res = await fetch(url, { signal: ctrl.signal, headers: { Range: "bytes=0-" } });
+      const rangeSize = res.headers.get("content-range")?.match(/\/(\d+)$/)?.[1];
+      const size = Number(rangeSize ?? res.headers.get("content-length"));
+      if (!streamSizeAllowed(size, readStreamSizeLimit())) {
+        ctrl.abort();
+        await res.body?.cancel();
+        return;
+      }
       const reader = res.body?.getReader();
       if (!reader) return;
+      let received = 0;
       for (;;) {
-        const { done } = await reader.read();
+        const { done, value } = await reader.read();
         if (done) break;
+        received += value?.byteLength ?? 0;
+        if (!streamSizeAllowed(received, readStreamSizeLimit())) {
+          ctrl.abort();
+          await reader.cancel();
+          break;
+        }
       }
     } catch {
       /* aborted, stream ended, or network error - safe to drop */

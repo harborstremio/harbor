@@ -346,6 +346,7 @@ export type Settings = {
   pauseUnfocused: boolean;
   cwSnapshotRetentionDays: number;
   cwSnapshotFullQuality: boolean;
+  maxStreamSizeGb: number;
   streamFilterLevel: "strict" | "balanced" | "off";
   blockTrackers: boolean;
   homeRows: {
