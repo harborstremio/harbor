@@ -313,6 +313,7 @@ export const DEFAULT: Settings = {
   pauseUnfocused: false,
   cwSnapshotRetentionDays: 30,
   cwSnapshotFullQuality: false,
+  maxStreamSizeGb: 0,
   streamFilterLevel: "strict",
   blockTrackers: true,
   homeRows: {

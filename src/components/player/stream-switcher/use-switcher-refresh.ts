@@ -37,6 +37,7 @@ export function useSwitcherRefresh(params: {
       addonTransportUrls: addons.map((a) => a.transportUrl),
       debridSlugs: debrids.map((d) => d.slug),
       scraperKeys: [],
+      maxStreamSizeGb: settings.maxStreamSizeGb,
       filterMode: filterDisabled ? "off" : strictMode ? "strict" : "balanced",
     });
     acRef.current?.abort();
