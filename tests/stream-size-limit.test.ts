@@ -17,7 +17,11 @@ function load(file, modules, globals = {}) {
   const exports = {};
   runInNewContext(
     ts.transpileModule(source, {
-      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+      compilerOptions: {
+        module: ts.ModuleKind.CommonJS,
+        target: ts.ScriptTarget.ES2022,
+        jsx: ts.JsxEmit.ReactJSX,
+      },
     }).outputText,
     {
       exports,
@@ -256,4 +260,115 @@ test("full-download response size stops reading even when metadata omitted size"
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(cancel, 1);
   assert.equal(read, 0);
+});
+
+test("offline native download bridge sends the global cap and preserves unlimited behavior", () => {
+  let cap = 10;
+  const calls = [];
+  const { startDownload } = load("download/video-download.ts", {
+    "@tauri-apps/api/core": {
+      Channel: class {},
+      invoke: async (command, args) => calls.push({ command, args }),
+    },
+    "../streams/size-limit": { readStreamSizeLimit: () => cap },
+  });
+  startDownload("capped", "https://example.org/movie", "/tmp/movie", () => {});
+  assert.equal(calls[0].args.maxSizeBytes, 10 * GB);
+  cap = 0;
+  startDownload("unlimited", "https://example.org/movie", "/tmp/movie", () => {});
+  assert.equal(calls[1].args.maxSizeBytes, null);
+});
+
+test("full downloads with unknown response totals stop at the byte limit", async () => {
+  let cancel = 0;
+  let reads = 0;
+  const { startFullDownload } = load(
+    "torrent/full-download.ts",
+    {
+      "../streams/size-limit": { streamSizeAllowed, readStreamSizeLimit: () => 10 },
+    },
+    {
+      fetch: async () => ({
+        headers: new Headers(),
+        body: {
+          getReader: () => ({
+            async read() {
+              reads++;
+              return { done: false, value: { byteLength: 11 * GB } };
+            },
+            async cancel() {
+              cancel++;
+            },
+          }),
+        },
+      }),
+    },
+  );
+  startFullDownload("unknown-total", "https://example.org/movie");
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(cancel, 1);
+  assert.equal(reads, 1);
+});
+
+test("pasted magnets choose eligible files and refuse an oversized-only torrent", async () => {
+  for (const sizes of [[75 * GB, 8 * GB], [75 * GB]]) {
+    let cursor = 0;
+    const state = [];
+    const opened = [];
+    const jsx = (type, props) => ({ type, props });
+    const { MagnetCard } = load("../components/search/magnet-card.tsx", {
+      "react/jsx-runtime": { jsx, jsxs: jsx },
+      react: {
+        useMemo: (factory) => factory(),
+        useState(initial) {
+          const index = cursor++;
+          if (!(index in state)) state[index] = initial;
+          return [
+            state[index],
+            (value) => {
+              state[index] = value;
+            },
+          ];
+        },
+      },
+      "lucide-react": {
+        AlertCircle: "alert",
+        FileVideo: "file",
+        Loader2: "loader",
+        Magnet: "magnet",
+        Play: "play",
+      },
+      "@/lib/stremio-server": { awaitCastServerReady: async () => true },
+      "@/lib/torrent/magnet": { parseMagnet: () => ({ infoHash: "test", trackers: [] }) },
+      "@/lib/torrent/stremio-stream": {
+        isVideoFile: () => true,
+        buildTorrentStreamUrl: ({ fileIdx }) => `http://localhost/test/${fileIdx}`,
+        createAndListFiles: async () => ({
+          files: sizes.map((length, idx) => ({ idx, length, name: `${idx}.mkv` })),
+        }),
+      },
+      "@/lib/view": { useView: () => ({ openPlayer: (src) => opened.push(src) }) },
+      "@/lib/settings": { useSettings: () => ({ settings: { maxStreamSizeGb: 10 } }) },
+      "@/lib/streams/size-limit": { streamSizeAllowed, readStreamSizeLimit: () => 10 },
+    });
+    const tree = MagnetCard({ raw: "magnet:test", onClose() {} });
+    const nodes = [];
+    function visit(node) {
+      if (Array.isArray(node)) node.forEach(visit);
+      else if (node?.props) {
+        nodes.push(node);
+        visit(node.props.children);
+      }
+    }
+    visit(tree);
+    await nodes.find((node) => node.type === "button").props.onClick();
+    if (sizes.length === 2) {
+      assert.equal(opened.length, 1);
+      assert.equal(opened[0].streamRef.size, 8 * GB);
+    } else {
+      assert.equal(opened.length, 0);
+      assert.equal(state[0], "error");
+      assert.match(state[2], /maximum stream size/);
+    }
+  }
 });

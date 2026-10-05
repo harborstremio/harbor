@@ -1,4 +1,5 @@
 import { Channel, invoke } from "@tauri-apps/api/core";
+import { readStreamSizeLimit } from "../streams/size-limit";
 
 export type DownloadProgress = {
   receivedBytes: number;
@@ -70,6 +71,10 @@ export function startDownload(
     dest: destPath,
     headers: headers && Object.keys(headers).length > 0 ? headers : null,
     onEvent: channel,
+    maxSizeBytes:
+      readStreamSizeLimit() > 0
+        ? Math.min(Number.MAX_SAFE_INTEGER, Math.floor(readStreamSizeLimit() * 1024 ** 3))
+        : null,
   }).catch((e: unknown) => {
     fail(e instanceof Error ? e : new Error(String(e)));
   });

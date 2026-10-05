@@ -28,9 +28,16 @@ export function startFullDownload(infoHash: string, url: string): void {
       }
       const reader = res.body?.getReader();
       if (!reader) return;
+      let received = 0;
       for (;;) {
-        const { done } = await reader.read();
+        const { done, value } = await reader.read();
         if (done) break;
+        received += value?.byteLength ?? 0;
+        if (!streamSizeAllowed(received, readStreamSizeLimit())) {
+          ctrl.abort();
+          await reader.cancel();
+          break;
+        }
       }
     } catch {
       /* aborted, stream ended, or network error - safe to drop */

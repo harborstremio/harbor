@@ -384,14 +384,14 @@ function StreamFilterPicker({
       id: "balanced",
       label: t("Balanced"),
       sub: t(
-        "Keeps the malware/year/episode-mismatch checks but allows season packs and oversized files. Same as hitting Search wider in the picker.",
+        "Keeps the malware/year/episode-mismatch checks but allows season packs and size outliers. Same as Search wider. Your global size limit still applies.",
       ),
     },
     {
       id: "off",
       label: t("Off"),
       sub: t(
-        "No filtering. Every stream every addon returns shows up, including obvious junk. You'll be on your own.",
+        "No stream safety checks. Sources may include obvious junk. Your global size limit still applies.",
       ),
     },
   ];

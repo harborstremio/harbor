@@ -397,6 +397,9 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
           "iptv",
           "m3u",
           "xtream",
+          "maximum stream size",
+          "file size limit",
+          "download size",
         ],
       },
       {
@@ -1387,6 +1390,21 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "rejection",
       "aggression",
       "filter level",
+    ],
+  },
+  {
+    label: "Maximum stream size (GB)",
+    section: "streaming",
+    anchorTitle: "Maximum stream size",
+    keywords: [
+      "max size",
+      "maximum size",
+      "file size",
+      "size limit",
+      "download size",
+      "autoplay size",
+      "gb",
+      "remux",
     ],
   },
   {

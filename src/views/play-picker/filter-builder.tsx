@@ -304,7 +304,7 @@ export function FilterBuilder({
             />
             <NumberSection
               title="Max size (GB)"
-              sub="Caps file size. Unknown sizes still pass."
+              sub="Filters this manual list. Automatic play uses Maximum stream size in Settings → Streaming sources. Unknown sizes still pass."
               placeholder="Any"
               value={draft.maxSizeGb}
               onChange={(v) => setDraft((d) => ({ ...d, maxSizeGb: v }))}

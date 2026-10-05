@@ -4,11 +4,12 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { summarizeFilter, type CustomStreamFilter } from "@/lib/streams/custom-filters";
 import { FilterBuilder } from "../play-picker/filter-builder";
-import { Section } from "./shared";
+import { Section, useSettingsActiveContext } from "./shared";
 
 export function StreamFiltersPanel() {
   const t = useT();
   const { settings, update } = useSettings();
+  const { setActive } = useSettingsActiveContext();
   const filters = settings.customStreamFilters ?? [];
   const [editing, setEditing] = useState<CustomStreamFilter | null>(null);
   const [building, setBuilding] = useState(false);
@@ -35,8 +36,15 @@ export function StreamFiltersPanel() {
   return (
     <Section
       title={t("Saved stream filters")}
-      subtitle={t("Build a named filter once, then apply it in the source picker to hide everything that doesn't match. Each filter ANDs its dimensions and ignores any you leave blank.")}
+      subtitle={t("Build a named filter once, then apply it in the manual source picker. Saved filters do not control automatic play. For a global file size limit, use Maximum stream size in Streaming sources.")}
     >
+      <button
+        type="button"
+        onClick={() => setActive("streaming")}
+        className="mb-3 text-[13px] font-medium text-ink underline underline-offset-4"
+      >
+        {t("Manage global stream size limit")}
+      </button>
       <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-5">
         <div className="flex items-center justify-between gap-3">
           <span className="flex items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
