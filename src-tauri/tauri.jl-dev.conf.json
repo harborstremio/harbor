@@ -1,0 +1,41 @@
+{
+  "productName": "JL Network",
+  "identifier": "app.jlnetwork.dev",
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "JL Network",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 960,
+        "minHeight": 600,
+        "visible": false,
+        "decorations": false,
+        "transparent": false,
+        "backgroundColor": [0, 0, 0, 255],
+        "shadow": true,
+        "resizable": true,
+        "maximizable": true,
+        "minimizable": true,
+        "center": true,
+        "additionalBrowserArgs": "--disk-cache-size=104857600 --media-cache-size=52428800 --autoplay-policy=no-user-gesture-required --disable-features=HardwareMediaKeyHandling"
+      }
+    ]
+  },
+  "bundle": {
+    "fileAssociations": [
+      {
+        "ext": ["mkv", "mp4", "avi", "mov", "webm", "m4v"],
+        "name": "JLNetworkVideo",
+        "description": "Video file",
+        "role": "Viewer"
+      }
+    ]
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": ["https://watch.jl-stream.com/updates/latest.json"]
+    }
+  }
+}
