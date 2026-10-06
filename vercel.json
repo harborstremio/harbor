@@ -3,6 +3,14 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "mediavision.jl-stream.com" }],
+      "destination": "/site",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     { "source": "/api-proxy/:target*", "destination": "/api/proxy?__target=:target*" },
     {
