@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { Settings } from "../src/lib/settings/types.ts";
 import { compileMpvOptions, svpMpvLines } from "../src/lib/player/mpv-tuning.ts";
-import { resolvePlaybackDownloadedFraction } from "../src/lib/player/playback-clock.ts";
+import { resolvePlaybackDownloadedFraction } from "../src/lib/player/playback-download.ts";
 
 test("only the P2P engine reports whole-file download progress", () => {
   assert.equal(
