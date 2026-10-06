@@ -11,7 +11,7 @@ export function clamp(n: number, min: number, max: number): number {
 }
 
 export function resolveAccent(settings: Settings): string {
-  return (settings.seekBarColor || "").trim() || "oklch(0.78 0.13 60)";
+  return (settings.seekBarColor || "").trim() || "#ff6a1f";
 }
 
 export type SeekSegmentSpan = { startPct: number; endPct: number; color?: string };

@@ -18,8 +18,8 @@
   --color-ink-subtle: oklch(0.65 0.003 260);
   --color-edge: oklch(0.36 0.004 260 / 0.55);
   --color-edge-soft: oklch(0.36 0.004 260 / 0.25);
-  --color-accent: oklch(0.78 0.13 60);
-  --color-accent-soft: oklch(0.78 0.13 60 / 0.18);
+  --color-accent: #ff6a1f;
+  --color-accent-soft: rgba(255, 106, 31, 0.18);
   --color-danger: oklch(0.55 0.18 25);
   --color-success: oklch(0.68 0.15 150);
 
@@ -1371,15 +1371,15 @@ main[data-kids="on"]::-webkit-scrollbar-thumb:hover {
 @keyframes verified-pulse {
   0% {
     border-color: var(--color-edge);
-    box-shadow: 0 0 0 0 oklch(0.78 0.13 60 / 0);
+    box-shadow: 0 0 0 0 rgba(255, 106, 31, 0);
   }
   35% {
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 4px oklch(0.78 0.13 60 / 0.22);
+    box-shadow: 0 0 0 4px rgba(255, 106, 31, 0.22);
   }
   100% {
     border-color: var(--color-edge);
-    box-shadow: 0 0 0 0 oklch(0.78 0.13 60 / 0);
+    box-shadow: 0 0 0 0 rgba(255, 106, 31, 0);
   }
 }
 
@@ -1545,8 +1545,8 @@ html[data-theme-layout="stremio"] .harbor-hero-full {
 }
 
 .harbor-cinema-badge {
-  color: oklch(0.78 0.13 60);
-  border: 1px solid oklch(0.78 0.13 60 / 0.35);
+  color: #ff6a1f;
+  border: 1px solid rgba(255, 106, 31, 0.35);
 }
 
 .harbor-together-surface {

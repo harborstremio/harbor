@@ -232,7 +232,7 @@ const PIP_CSS = `
     height: 2px; background: rgba(255,255,255,0.12); pointer-events: none;
   }
   .pip-progress-fill {
-    height: 100%; background: oklch(0.78 0.13 60); width: 0%;
+    height: 100%; background: #ff6a1f; width: 0%;
     transition: width 200ms linear;
   }
 `;

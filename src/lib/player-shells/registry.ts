@@ -5,8 +5,8 @@ import type { PlayerShellMeta } from "./types";
 export const PLAYER_SHELLS: PlayerShellMeta[] = [
   {
     id: "default",
-    name: "Harbor default",
-    description: "The full transport bar Harbor ships with.",
+    name: "JL Media Vision",
+    description: "The full transport bar JL Media Vision ships with.",
     Component: Transport,
   },
   {

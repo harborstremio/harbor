@@ -112,8 +112,8 @@ export type FontPair = {
 export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
   "cool-grey": {
     id: "cool-grey",
-    name: "Harbor default",
-    blurb: "What ships out of the box.",
+    name: "JL Media Vision",
+    blurb: "What ships out of the box: graphite with JL's fiery orange.",
     previewImage: harborPreview,
     swatch: ["#2c2e36", "#3a3d47", "#dcdde4"],
     tokens: {
@@ -126,8 +126,9 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
       "--color-ink-subtle": "oklch(0.50 0.003 260)",
       "--color-edge": "oklch(0.36 0.004 260 / 0.55)",
       "--color-edge-soft": "oklch(0.36 0.004 260 / 0.25)",
-      "--color-accent": "oklch(0.78 0.13 60)",
-      "--color-accent-soft": "oklch(0.78 0.13 60 / 0.18)",
+      // JL fiery orange, from the JL Media Vision mark; kept clear of the red used for LIVE.
+      "--color-accent": "#ff6a1f",
+      "--color-accent-soft": "rgba(255,106,31,0.18)",
       "--color-danger": "oklch(0.55 0.18 25)",
     },
   },
