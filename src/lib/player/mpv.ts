@@ -120,6 +120,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let geomResizeObserver: ResizeObserver | null = null;
   let geomTauriUnlisten: Array<() => void> = [];
   let mpvStarted = false;
+  let paused = false;
   let suppressEndFileUntil = 0;
   let svpFilterFailed = false;
   const urlByExternalFilename = new Map<string, string>();
@@ -164,7 +165,8 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       if (name === "time-pos" && typeof data === "number") snap.positionSec = data;
       if (name === "duration" && typeof data === "number") snap.durationSec = data;
       if (name === "pause" && typeof data === "boolean") {
-        snap.status = data ? "paused" : "playing";
+        paused = Boolean(data);
+        snap.status = paused ? "paused" : "playing";
       }
       if (name === "eof-reached" && data === true) snap.status = "ended";
       if (name === "volume" && typeof data === "number") snap.volume = data / 100;
@@ -264,7 +266,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
       emit();
     } else if (raw.event === "file-loaded") {
-      snap.status = "playing";
+      snap.status = paused ? "paused" : "playing";
       snap.errorCode = null;
       snap.errorMessage = null;
       emit();
@@ -456,9 +458,11 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
     },
     async play() {
+      paused = false;
       await invoke("mpv_set_property", { name: "pause", value: false }).catch(() => {});
     },
     pause() {
+      paused = true;
       invoke("mpv_set_property", { name: "pause", value: true }).catch(() => {});
     },
     seek(sec) {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition, usePlaybackFlag } from "@/lib/player/playback-clock";
 import { pinPickerCache, unpinPickerCache } from "@/lib/picker-cache";
@@ -51,13 +51,21 @@ export function useStreamSwitcher(params: {
   const [swapResolvingKey, setSwapResolvingKey] = useState<string | null>(null);
   const [liveUrl, setLiveUrl] = useState(src.url);
   const [liveStreamRef, setLiveStreamRef] = useState(src.streamRef);
+  const [liveHeaders, setLiveHeaders] = useState(src.headers);
+  const [liveSubtitles, setLiveSubtitles] = useState(src.subtitles);
+  const [liveNotWebReady, setLiveNotWebReady] = useState(src.notWebReady);
   useEffect(() => {
     setLiveUrl(src.url);
     setLiveStreamRef(src.streamRef);
-  }, [src.url, src.streamRef]);
+    setLiveHeaders(src.headers);
+    setLiveSubtitles(src.subtitles);
+    setLiveNotWebReady(src.notWebReady);
+  }, [src.url, src.streamRef, src.headers, src.subtitles, src.notWebReady]);
 
   const swapAcRef = useRef<AbortController | null>(null);
   const swapGuardRef = useRef(new StreamSwitchGuard());
+  const switchGenerationRef = useRef(0);
+  const switchInProgressRef = useRef(false);
 
   // Pin this item's streams in the picker cache for the whole playback session
   // so they survive the 30-min stale sweep. Without this, opening the switcher
@@ -83,12 +91,17 @@ export function useStreamSwitcher(params: {
       const ac = new AbortController();
       swapAcRef.current = ac;
       const request = swapGuardRef.current.begin(snapRef.current.status === "playing");
+      switchGenerationRef.current = request;
+      switchInProgressRef.current = true;
+      const bridgeAtStart = bridgeRef.current;
       const isCurrentSwap = () =>
-        swapGuardRef.current.isCurrent(request) && swapAcRef.current === ac && !ac.signal.aborted;
+        swapGuardRef.current.isCurrent(request) &&
+        swapAcRef.current === ac &&
+        !ac.signal.aborted &&
+        bridgeRef.current === bridgeAtStart;
       // Pause the current stream up front: the swap loader covers the whole
       // stage, so the old stream's audio must not keep playing behind it.
       // Resumed below when the swap fails before the new stream took over.
-      const bridgeAtStart = bridgeRef.current;
       const resumeOnFailure = () => {
         if (swapGuardRef.current.shouldResumeOnFailure(request)) {
           bridgeAtStart?.play().catch(() => {});
@@ -139,7 +152,8 @@ export function useStreamSwitcher(params: {
             startAtSec: resumeAt > 5 ? resumeAt : undefined,
           });
           if (!isCurrentSwap()) return;
-          await b.play().catch(() => {});
+          if (swapGuardRef.current.shouldResumeOnFailure(request)) await b.play().catch(() => {});
+          else b.pause();
         } catch (e) {
           // The old stream is already gone here (load stops it), so there is
           // nothing to resume; the bridge error state drives the UI.
@@ -148,9 +162,14 @@ export function useStreamSwitcher(params: {
         }
         if (!isCurrentSwap()) return;
         setLiveUrl(playUrl);
+        // Proxy URLs already carry provider headers. Do not retain the old
+        // source's credentials or subtitle files when the stream changes.
+        setLiveHeaders(undefined);
+        setLiveSubtitles(r.data.subtitles);
+        setLiveNotWebReady(r.data.notWebReady);
         setLiveStreamRef({
           infoHash: stream.infoHash ?? null,
-          fileIdx: stream.fileIdx ?? null,
+          fileIdx: r.data.fileIdx ?? stream.fileIdx ?? null,
           addonId: stream.addonId ?? null,
           title: stream.title ?? null,
           parsedTitle: stream.parsedTitle ?? null,
@@ -167,7 +186,7 @@ export function useStreamSwitcher(params: {
             src.meta.id,
             {
               infoHash: stream.infoHash ?? null,
-              fileIdx: stream.fileIdx ?? null,
+              fileIdx: r.data.fileIdx ?? stream.fileIdx ?? null,
               addonId: stream.addonId ?? null,
               url: playUrl,
               title: src.meta.name,
@@ -191,16 +210,33 @@ export function useStreamSwitcher(params: {
         // The swap loader is keyed on swapResolvingKey, so it must always
         // clear — but only the latest swap may clear it, or an aborted swap
         // would hide the loader of the one that superseded it.
-        if (isCurrentSwap()) {
+        if (
+          swapGuardRef.current.isCurrent(request) &&
+          swapAcRef.current === ac &&
+          !ac.signal.aborted
+        ) {
           setSwapResolvingKey(null);
+          switchInProgressRef.current = false;
           swapGuardRef.current.finish(request);
         }
       }
     },
-    [debrids],
+    [debrids, src, bridgeRef],
   );
 
   useEffect(() => () => swapAcRef.current?.abort(), []);
+
+  const activeSrc = useMemo(
+    () => ({
+      ...src,
+      url: liveUrl,
+      streamRef: liveStreamRef,
+      headers: liveHeaders,
+      subtitles: liveSubtitles,
+      notWebReady: liveNotWebReady,
+    }),
+    [src, liveUrl, liveStreamRef, liveHeaders, liveSubtitles, liveNotWebReady],
+  );
 
   return {
     streamCheckOpen,
@@ -210,6 +246,9 @@ export function useStreamSwitcher(params: {
     swapResolvingKey,
     liveUrl,
     liveStreamRef,
+    activeSrc,
+    switchGenerationRef,
+    switchInProgressRef,
     pickAnother,
     onSwitchStream,
   };

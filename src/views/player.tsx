@@ -141,14 +141,28 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     src,
     settings,
   });
+  const {
+    streamCheckOpen,
+    setStreamCheckOpen,
+    switcherOpen,
+    setSwitcherOpen,
+    swapResolvingKey,
+    liveUrl,
+    liveStreamRef,
+    activeSrc,
+    switchGenerationRef,
+    switchInProgressRef,
+    pickAnother,
+    onSwitchStream,
+  } = useStreamSwitcher({ bridgeRef, src, snap, debrids });
   const isP2pEngine =
-    (isBundledEngineUrl(src.url) || isLocalEngineUrl(src.url)) &&
-    !src.url.includes("/hlsv2/") &&
-    !!src.streamRef?.infoHash;
+    (isBundledEngineUrl(activeSrc.url) || isLocalEngineUrl(activeSrc.url)) &&
+    !activeSrc.url.includes("/hlsv2/") &&
+    !!activeSrc.streamRef?.infoHash;
   const { stats: engineStats, genuineFailure } = useEngineStats({
-    url: src.url,
-    infoHash: src.streamRef?.infoHash ?? null,
-    fileIdx: src.streamRef?.fileIdx ?? null,
+    url: activeSrc.url,
+    infoHash: activeSrc.streamRef?.infoHash ?? null,
+    fileIdx: activeSrc.streamRef?.fileIdx ?? null,
     active: snap.status !== "ended" && (snap.videoWidth <= 0 || isP2pEngine),
   });
   useEffect(() => {
@@ -172,7 +186,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   const { pipMode, togglePipMode, exitPip } = usePipMode({ bridgeRef, setChromeHidden });
   const { slowLoad, transcodedUrl, sourceError, clearSourceError } = useAutoRetry({
     bridgeRef,
-    src,
+    src: activeSrc,
     snap,
     stremioServerTranscode: settings.stremioServerTranscode,
     instantPlay: settings.instantPlay,
@@ -183,9 +197,12 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     engineFailure: genuineFailure,
     isP2pEngine,
     engineStats,
+    suspended: swapResolvingKey !== null,
+    switchGenerationRef,
+    switchInProgressRef,
   });
 
-  useWakeReconnect({ bridgeRef, src, snap });
+  useWakeReconnect({ bridgeRef, src: activeSrc, snap });
 
   useEffect(() => {
     if (roomSnapshot.state !== "joined") return;
@@ -312,7 +329,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
 
   const { resolvedImdbId, subAssNative, captureExitSnapshot, download, subDropToast } =
     usePlayerMedia({
-      src,
+      src: activeSrc,
       snap,
       engine,
       settings,
@@ -334,23 +351,6 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     src.url,
     playing,
   );
-
-  const {
-    streamCheckOpen,
-    setStreamCheckOpen,
-    switcherOpen,
-    setSwitcherOpen,
-    swapResolvingKey,
-    liveUrl,
-    liveStreamRef,
-    pickAnother,
-    onSwitchStream,
-  } = useStreamSwitcher({
-    bridgeRef,
-    src,
-    snap,
-    debrids,
-  });
   const { hostSourceRef } = useHostSource({
     inRoom,
     isHost,
@@ -667,6 +667,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     bridgeReady,
     bridgeKey,
     src,
+    activeSrc,
     transcodedUrl,
     season,
     episode,
@@ -838,14 +839,14 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     const b = bridgeRef.current;
     if (b) {
       void b.load({
-        url: src.url,
-        subtitles: src.subtitles,
-        notWebReady: src.notWebReady,
-        isLive: src.meta.id?.startsWith("iptv:"),
-        headers: src.headers,
+        url: activeSrc.url,
+        subtitles: activeSrc.subtitles,
+        notWebReady: activeSrc.notWebReady,
+        isLive: activeSrc.meta.id?.startsWith("iptv:"),
+        headers: activeSrc.headers,
       });
     }
-  }, [src]);
+  }, [activeSrc]);
 
   const overlayProps: PlayerOverlayLayersProps = {
     snap,
