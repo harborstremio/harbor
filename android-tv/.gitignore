@@ -1,0 +1,7 @@
+.gradle/
+build/
+app/build/
+local.properties
+*.keystore
+*.jks
+!app/jl-mediavision-sideload.jks

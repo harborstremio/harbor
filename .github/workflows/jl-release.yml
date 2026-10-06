@@ -1,6 +1,6 @@
-# Builds the JL Media Vision Windows installer and publishes it as a GitHub release.
-# The download site links to releases/latest/download/JL-Media-Vision-Setup-x64.exe, a
-# stable-named copy of the installer uploaded next to the versioned one.
+# Builds the JL Media Vision Windows installer and Android TV app and publishes them as a
+# GitHub release. The download site links to releases/latest/download/JL-Media-Vision-Setup-x64.exe
+# and releases/latest/download/JL-Media-Vision-TV.apk.
 # Start it by pushing a tag that matches the app version, e.g. jl-v0.9.21.
 name: JL Release
 
@@ -21,6 +21,8 @@ jobs:
     name: Windows x64
     runs-on: windows-latest
     timeout-minutes: 90
+    outputs:
+      tag: jl-v${{ steps.tauri.outputs.appVersion }}
     env:
       TARGET: x86_64-pc-windows-msvc
     steps:
@@ -91,3 +93,47 @@ jobs:
           setup=$(ls src-tauri/target/${TARGET}/release/bundle/nsis/*-setup.exe | head -1)
           cp "$setup" JL-Media-Vision-Setup-x64.exe
           gh release upload "jl-v${{ steps.tauri.outputs.appVersion }}" JL-Media-Vision-Setup-x64.exe --clobber --repo "${{ github.repository }}"
+
+  android-tv:
+    name: Android TV
+    needs: windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-35 build-tools;34.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      # One permanent sideload key (android-tv/app/jl-mediavision-sideload.jks) so every build
+      # installs over the last one. JL_KEYSTORE_* secrets override it if set.
+      - name: Signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.JL_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.JL_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.JL_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.JL_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/jl.keystore"
+            { echo "JL_KEYSTORE_FILE=$RUNNER_TEMP/jl.keystore"; echo "JL_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD"; echo "JL_KEY_ALIAS=$KEY_ALIAS"; echo "JL_KEY_PASSWORD=$KEY_PASSWORD"; } >> "$GITHUB_ENV"
+            exit 0
+          fi
+          { echo "JL_KEYSTORE_FILE=$GITHUB_WORKSPACE/android-tv/app/jl-mediavision-sideload.jks"; echo "JL_KEYSTORE_PASSWORD=jl-mediavision-sideload"; echo "JL_KEY_ALIAS=jl-mediavision"; echo "JL_KEY_PASSWORD=jl-mediavision-sideload"; } >> "$GITHUB_ENV"
+
+      - name: Build APK
+        run: gradle -p android-tv assembleRelease --no-daemon
+
+      - name: Upload APK to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cp android-tv/app/build/outputs/apk/release/app-release.apk JL-Media-Vision-TV.apk
+          gh release upload "${{ needs.windows.outputs.tag }}" JL-Media-Vision-TV.apk --clobber --repo "${{ github.repository }}"
