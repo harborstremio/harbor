@@ -37,6 +37,7 @@ export type FontPairId =
   | "cabinet-switzer"
   | "plex"
   | "plus-jakarta"
+  | "orbitron-inter"
   | "system";
 
 export type ThemeBackground = {
@@ -1439,7 +1440,48 @@ export const BETA_THEMES: ThemePreset[] = [
   },
 ];
 
+// The watch.jl-stream.com look: deep navy, electric-blue glow, orange accent, silver text.
+const jlStreamCss = `:root { --jl-glow: oklch(0.68 0.21 258); }
+:focus-visible { outline-color: var(--jl-glow); }
+html.tv :focus-visible {
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--jl-glow) 35%, transparent), 0 0 32px 2px color-mix(in oklch, var(--jl-glow) 55%, transparent);
+}
+h1, h2, h3 { letter-spacing: 0.01em; }`;
+
 export const FEATURED_CUSTOM_THEMES: ThemePreset[] = [
+  {
+    id: "jl-stream" as ThemePresetId,
+    name: "JL Stream",
+    blurb: "The watch.jl-stream.com look: deep navy, electric-blue glow, orange accent, Orbitron headlines.",
+    logo: { mark: jlMark, wordmark: jlWordmark },
+    previewImage: jlHero,
+    swatch: ["#0b1220", "#3b7bff", "#ff7a2e"],
+    tokens: {
+      "--color-canvas": "oklch(0.15 0.03 262)",
+      "--color-surface": "oklch(0.19 0.033 262)",
+      "--color-elevated": "oklch(0.21 0.035 262)",
+      "--color-raised": "oklch(0.27 0.03 262)",
+      "--color-ink": "oklch(0.95 0.006 250)",
+      "--color-ink-muted": "oklch(0.8 0.012 250)",
+      "--color-ink-subtle": "oklch(0.6 0.015 250)",
+      "--color-edge": "oklch(0.86 0.01 250 / 0.16)",
+      "--color-edge-soft": "oklch(0.86 0.01 250 / 0.08)",
+      "--color-accent": "oklch(0.72 0.19 48)",
+      "--color-accent-soft": "oklch(0.72 0.19 48 / 0.18)",
+      "--color-danger": "oklch(0.63 0.22 20)",
+    },
+    background: {
+      image:
+        "radial-gradient(60rem 40rem at 0% 0%, oklch(0.55 0.2 258 / 0.3), transparent 70%), radial-gradient(50rem 36rem at 100% 35%, oklch(0.8 0.01 250 / 0.08), transparent 70%), radial-gradient(60rem 40rem at 15% 100%, oklch(0.68 0.18 48 / 0.14), transparent 70%)",
+      dim: 0,
+    },
+    layout: "sidebar",
+    cardStyle: "glass",
+    buttonStyle: "flat",
+    bokeh: false,
+    fontPair: "orbitron-inter",
+    css: jlStreamCss,
+  },
   {
     id: "aurora" as ThemePresetId,
     name: "Aurora",
@@ -1574,6 +1616,13 @@ export const FONT_PAIRS: Record<FontPairId, FontPair> = {
     blurb: "Stremio's typeface. Geometric humanist sans.",
     display: '"Plus Jakarta Sans", "Inter", system-ui, sans-serif',
     sans: '"Plus Jakarta Sans", "Inter", system-ui, sans-serif',
+  },
+  "orbitron-inter": {
+    id: "orbitron-inter",
+    name: "Orbitron + Inter",
+    blurb: "JL Stream. Wide techno headlines, clean body.",
+    display: '"Orbitron", "Inter", system-ui, sans-serif',
+    sans: '"Inter", system-ui, sans-serif',
   },
   system: {
     id: "system",
