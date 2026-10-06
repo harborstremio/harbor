@@ -7,6 +7,13 @@ export type SportsSide = {
   logo: string;
   score: string;
   winner: boolean;
+  id?: string;
+  /** School or city ("Ohio State", "Philadelphia"). */
+  location?: string;
+  /** Mascot or nickname ("Buckeyes", "Phillies"). */
+  nickname?: string;
+  /** AP/CFP poll rank, when ESPN lists one. */
+  rank?: number | null;
 };
 
 export type SportsGame = {
@@ -17,6 +24,10 @@ export type SportsGame = {
   home: SportsSide;
   away: SportsSide;
   startMs: number;
+  /** National broadcaster as ESPN names it ("ESPN", "FOX", "NFL Net"). */
+  network?: string | null;
+  /** Betting line, e.g. "KC -3.5 · O/U 47.5". */
+  odds?: string | null;
 };
 
 export type MatchPlayer = {
@@ -394,13 +405,34 @@ function toSide(c: Record<string, unknown> | undefined, group?: string): SportsS
       winner: c?.winner === true,
     };
   }
+  const curated = (c?.curatedRank as Record<string, unknown> | undefined)?.current;
   return {
     name: (team.displayName as string) ?? (team.name as string) ?? "",
     abbr: (team.abbreviation as string) ?? "",
     logo: typeof team.logo === "string" ? team.logo : "",
     score: scoreValue,
     winner: c?.winner === true,
+    id: team.id != null ? String(team.id) : undefined,
+    location: typeof team.location === "string" ? team.location : undefined,
+    nickname: typeof team.name === "string" ? team.name : undefined,
+    // ESPN marks unranked teams as 99.
+    rank: typeof curated === "number" && curated >= 1 && curated <= 25 ? curated : null,
   };
+}
+
+function broadcastNetwork(comp: Record<string, unknown>): string | null {
+  const list = (comp.broadcasts as Record<string, unknown>[] | undefined) ?? [];
+  const national = list.find((b) => b.market === "national") ?? list[0];
+  const names = national?.names;
+  return Array.isArray(names) && typeof names[0] === "string" ? names[0] : null;
+}
+
+function oddsLabel(comp: Record<string, unknown>): string | null {
+  const first = ((comp.odds as Record<string, unknown>[] | undefined) ?? [])[0];
+  if (!first) return null;
+  const details = typeof first.details === "string" ? first.details.trim() : "";
+  const total = typeof first.overUnder === "number" ? `O/U ${first.overUnder}` : "";
+  return [details, total].filter(Boolean).join(" · ") || null;
 }
 
 async function fetchLeagueRaw(league: string): Promise<SportsGame[]> {
@@ -581,6 +613,8 @@ function parseEvents(events: unknown[], def: LeagueDef): SportsGame[] {
         home: toSide(home, def.group),
         away: toSide(away, def.group),
         startMs: Date.parse((ev.date as string) ?? "") || 0,
+        network: broadcastNetwork(comp),
+        odds: oddsLabel(comp),
       });
     }
   }

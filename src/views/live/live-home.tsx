@@ -16,6 +16,8 @@ import { CountryBar } from "./live-home/country-bar";
 import { SportsMarquee } from "./live-home/sports/sports-marquee";
 import { useSports } from "./live-home/use-sports";
 import { GuideCard } from "./live-home/guide-card";
+import { JlSportsHub } from "./live-home/jl-sports/jl-sports-hub";
+import { useJlSports } from "./live-home/jl-sports/use-jl-sports";
 import { LiveHero } from "./live-home/live-hero";
 import { MoreOnNow } from "./live-home/more-on-now";
 import { NowCard } from "./live-home/now-card";
@@ -80,6 +82,7 @@ export function LiveHome({
     [sportsLeague, userSportsLeagues],
   );
   const sports = useSports({ enabled: true, leagues: sportsLeagues });
+  const jlSports = useJlSports({ channels, epg, nowMs });
 
   const heroHydrations = useChannelHydration(
     useMemo(() => {
@@ -107,6 +110,13 @@ export function LiveHome({
           </div>
         )}
       </div>
+      <JlSportsHub
+        top={jlSports.top}
+        ticker={jlSports.ticker}
+        favorites={jlSports.favorites}
+        onPlay={onPlay}
+        onOpenGame={openMatchDetail}
+      />
       {(sports.length > 0 || sportsLeague !== "all" || userSportsLeagues.length > 0) && (
         <SportsMarquee
           games={sports}
