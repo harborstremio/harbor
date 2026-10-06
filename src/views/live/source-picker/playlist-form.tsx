@@ -43,11 +43,13 @@ export function PlaylistForm({
   submitLabel,
   onCancel,
   onSubmit,
+  autoFocusName = true,
 }: {
   initial: PlaylistFormValue;
   submitLabel: string;
   onCancel: () => void;
   onSubmit: (v: PlaylistFormValue) => void;
+  autoFocusName?: boolean;
 }) {
   const t = useT();
   const [name, setName] = useState(initial.name);
@@ -113,7 +115,7 @@ export function PlaylistForm({
 
       <Field label={t("Name")}>
         <input
-          autoFocus
+          autoFocus={autoFocusName}
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}

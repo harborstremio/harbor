@@ -1,5 +1,7 @@
 import { useMemo } from "react";
+import { isInstalled } from "@/lib/addon-store";
 import { useT } from "@/lib/i18n";
+import { JL_DEBRID_OPTIONS, JL_TORRENTIO_ADDON_ID, summarizeJlSetup } from "@/lib/jl/onboarding";
 import { useSettings } from "@/lib/settings";
 
 export function DoneStep() {
@@ -9,6 +11,13 @@ export function DoneStep() {
     () => Object.values(settings.streaming).filter(Boolean).length,
     [settings.streaming],
   );
+  const jl = summarizeJlSetup({
+    playlists: settings.iptvPlaylists,
+    rdKey: settings.rdKey,
+    tbKey: settings.tbKey,
+    torrentioInstalled: isInstalled(JL_TORRENTIO_ADDON_ID),
+  });
+  const debridLabels = JL_DEBRID_OPTIONS.filter((o) => jl.debrid.includes(o.id)).map((o) => o.label);
   return (
     <div className="flex flex-col items-center gap-6 pt-4 text-center">
       <DoneCheck />
@@ -25,8 +34,33 @@ export function DoneStep() {
               })
             : t("Running on Cinemeta for now. Add a TMDB key from Settings whenever you're ready.")}
         </p>
+        <div className="flex flex-wrap justify-center gap-2 pt-1">
+          <SetupChip on={jl.playlists > 0}>
+            {jl.playlists === 0
+              ? t("No IPTV provider")
+              : jl.playlists === 1
+                ? t("1 IPTV provider")
+                : t("{n} IPTV providers", { n: jl.playlists })}
+          </SetupChip>
+          <SetupChip on={debridLabels.length > 0}>
+            {debridLabels.length > 0 ? debridLabels.join(" + ") : t("No debrid service")}
+          </SetupChip>
+          <SetupChip on={jl.torrentio}>{jl.torrentio ? "Torrentio" : t("Torrentio not installed")}</SetupChip>
+        </div>
       </div>
     </div>
+  );
+}
+
+function SetupChip({ on, children }: { on: boolean; children: React.ReactNode }) {
+  return (
+    <span
+      className={`rounded-full border px-3 py-1 text-[12.5px] ${
+        on ? "border-accent/40 bg-accent-soft text-accent" : "border-edge-soft text-ink-subtle"
+      }`}
+    >
+      {children}
+    </span>
   );
 }
 

@@ -1,19 +1,46 @@
 import { ArrowRight, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { DebridStep } from "@/components/onboarding/debrid-step";
 import { DoneStep } from "@/components/onboarding/done-step";
 import { Dots } from "@/components/onboarding/dots";
+import { IptvStep } from "@/components/onboarding/iptv-step";
 import { LayoutStep } from "@/components/onboarding/layout-step";
 import { SplashStep } from "@/components/onboarding/splash-step";
 import { StreamingStep } from "@/components/onboarding/streaming-step";
 import { StremioStep } from "@/components/onboarding/stremio-step";
 import { SubtitlesStep } from "@/components/onboarding/subtitles-step";
 import { TmdbStep } from "@/components/onboarding/tmdb-step";
+import { TorrentioStep } from "@/components/onboarding/torrentio-step";
 import { WelcomeStep } from "@/components/onboarding/welcome-step";
 import { useT } from "@/lib/i18n";
 import { useOnboarding } from "@/lib/onboarding";
 
-type StepId = "splash" | "welcome" | "layout" | "tmdb" | "stremio" | "streaming" | "subtitles" | "done";
-const STEPS: StepId[] = ["splash", "welcome", "layout", "tmdb", "stremio", "streaming", "subtitles", "done"];
+type StepId =
+  | "splash"
+  | "welcome"
+  | "iptv"
+  | "debrid"
+  | "torrentio"
+  | "layout"
+  | "tmdb"
+  | "stremio"
+  | "streaming"
+  | "subtitles"
+  | "done";
+const STEPS: StepId[] = [
+  "splash",
+  "welcome",
+  "iptv",
+  "debrid",
+  "torrentio",
+  "layout",
+  "tmdb",
+  "stremio",
+  "streaming",
+  "subtitles",
+  "done",
+];
+const SKIPPABLE = new Set<StepId>(["iptv", "debrid", "torrentio", "tmdb", "stremio", "streaming", "subtitles"]);
 
 export function OnboardingModal() {
   const { onboarded, finishOnboarding } = useOnboarding();
@@ -67,6 +94,9 @@ export function OnboardingModal() {
             <div className="flex min-h-[440px] flex-col justify-center px-12 py-10">
               <div key={step} className="animate-step-in">
                 {step === "welcome" && <WelcomeStep />}
+                {step === "iptv" && <IptvStep />}
+                {step === "debrid" && <DebridStep />}
+                {step === "torrentio" && <TorrentioStep />}
                 {step === "layout" && <LayoutStep />}
                 {step === "tmdb" && <TmdbStep />}
                 {step === "stremio" && <StremioStep />}
@@ -83,7 +113,7 @@ export function OnboardingModal() {
                 onJump={(i) => setStepIdx(i + 1)}
               />
               <div className="flex items-center gap-2.5">
-                {(step === "tmdb" || step === "stremio" || step === "streaming" || step === "subtitles") && (
+                {SKIPPABLE.has(step) && (
                   <button
                     key={`skip-${step}`}
                     onClick={next}

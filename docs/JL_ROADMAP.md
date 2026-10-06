@@ -56,13 +56,16 @@ Customer-owned keys (Real-Debrid, TorBox, TMDB, the M3U login) stay on the custo
 - [ ] JL icons in `src-tauri/icons/` and installer art in `src-tauri/installer/`.
 
 ### Phase 2: JL onboarding
-A first-run wizard that builds on `src/lib/onboarding.tsx`:
-1. Household sign-in (Supabase) or "use offline".
-2. Add an M3U or Xtream provider, using Harbor's IPTV ingest. Check the playlist and show the channel and group count.
-3. Connect Real-Debrid and/or TorBox using the `src/lib/debrid/` clients. Both take an API key today; add Real-Debrid's device-code sign-in so customers don't have to copy keys. Show "Key saved — not verified" until a real account call succeeds.
-4. Install Torrentio from one consent screen, with the debrid key kept on the device as the privacy fix requires.
-5. Optional: Trakt and TMDB.
-6. Profiles (name, avatar, favorite teams and players for the ticker).
+New screens in Harbor's first-run modal (`src/components/onboarding.tsx`), right after Welcome. Every screen can be skipped.
+- [x] **IPTV provider:** M3U or Xtream, using Harbor's own `PlaylistForm` and `materializePlaylistEntry`, so sources are saved exactly as in the Live view.
+- [x] **Real-Debrid / TorBox:** API key plus "Verify", which makes a real account call. Status reads "Key saved — not verified" until that call succeeds, then shows premium days left. Logic in `src/lib/jl/onboarding.ts`, tests in `tests/jl-onboarding.test.ts`.
+- [x] **Torrentio:** a consent screen that installs the plain manifest (no debrid key in the URL).
+- [x] **Done screen:** summarizes IPTV providers, debrid services and Torrentio.
+- [ ] Merge local commit `0f0de0b`. Until then, upstream `withDebridKeys` (`src/views/play-picker/use-addons.ts`) still adds saved keys to a plain Torrentio address when the picker loads sources.
+- [ ] Real-Debrid device-code sign-in, so customers don't have to copy keys.
+- [ ] Load the playlist after it's added and show the channel and group count.
+- [ ] Household sign-in (Supabase) moves to Phase 4. Favorite teams and players for the ticker move to Phase 3.
+- [ ] JL branding for the Welcome and Splash screens (still Harbor's).
 
 ### Phase 3: Hubs
 - **IPTV Live Hub:** Harbor's Live view with JL group ordering, favorites, now/next, and catch-up.
