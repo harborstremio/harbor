@@ -5,6 +5,12 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api-proxy/:target*", "destination": "/api/proxy?__target=:target*" },
+    {
+      "source": "/((?!site/|avatars/|favicon).*)",
+      "has": [{ "type": "host", "value": "mediavision.jl-stream.com" }],
+      "destination": "/site/index.html"
+    },
+    { "source": "/site", "destination": "/site/index.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [

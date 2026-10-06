@@ -1,0 +1,90 @@
+# Builds the JL Media Vision Windows installer and publishes it as a GitHub release.
+# The download site links to releases/latest/download/JL-Media-Vision-Setup-x64.exe, a
+# stable-named copy of the installer uploaded next to the versioned one.
+name: JL Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: jl-release
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    name: Windows x64
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      TARGET: x86_64-pc-windows-msvc
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            harbor-core
+            src-tauri
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch libmpv
+        run: pnpm run setup:libmpv
+
+      - name: Fetch mpv
+        run: pnpm run setup:mpv
+
+      - name: Fetch external binaries
+        shell: bash
+        run: |
+          mkdir -p src-tauri/binaries
+          cd src-tauri/binaries
+          curl --fail --location --retry 3 --retry-all-errors "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -o "yt-dlp-${TARGET}.exe"
+          curl --fail --location --retry 3 --retry-all-errors "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -o ffmpeg.zip
+          unzip -j ffmpeg.zip "*/bin/ffmpeg.exe" "*/bin/ffprobe.exe"
+          mv ffmpeg.exe "ffmpeg-${TARGET}.exe"
+          mv ffprobe.exe "ffprobe-${TARGET}.exe"
+          rm ffmpeg.zip
+
+      - name: Build and publish release
+        id: tauri
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tauriScript: pnpm tauri
+          args: --target x86_64-pc-windows-msvc --config src-tauri/tauri.jl-dev.conf.json --bundles nsis
+          tagName: jl-v__VERSION__
+          releaseName: JL Media Vision v__VERSION__
+          releaseBody: Windows installer for JL Media Vision. Download JL-Media-Vision-Setup-x64.exe and run it.
+          releaseDraft: false
+          prerelease: false
+
+      - name: Upload stable-named installer
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          setup=$(ls src-tauri/target/${TARGET}/release/bundle/nsis/*-setup.exe | head -1)
+          cp "$setup" JL-Media-Vision-Setup-x64.exe
+          gh release upload "jl-v${{ steps.tauri.outputs.appVersion }}" JL-Media-Vision-Setup-x64.exe --clobber --repo "${{ github.repository }}"

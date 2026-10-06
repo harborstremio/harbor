@@ -1,0 +1,42 @@
+JL MEDIA VISION
+End User License Agreement and Disclaimer
+
+Last updated: May 2026
+
+Please read this before installing JL Media Vision. By installing or using JL Media Vision, you agree to everything below. If you do not agree, close this installer and do not install it.
+
+
+1. WHAT JL MEDIA VISION IS
+
+JL Media Vision is a media client for the Stremio protocol and for IPTV playlists you provide. It is a viewer and an organizer. JL Media Vision does not host, store, upload, index, or provide any movies, shows, live channels, streams, or other media. It ships with no content and no content sources of its own. IPTV playlists and provider logins are yours, entered by you.
+
+Everything you browse and play comes from add-ons and services that YOU choose to install and configure: catalog add-ons, stream add-ons, debrid services, and similar. JL Media Vision is not affiliated with, and does not endorse, any add-on, indexer, tracker, debrid provider, or content source.
+
+
+2. YOUR RESPONSIBILITY
+
+You are solely responsible for the add-ons you install and for the content you access through them. You agree to use JL Media Vision only for lawful purposes and to respect the copyright and other laws that apply where you live. You are responsible for holding the rights to watch whatever you choose to stream or download.
+
+The people who make JL Media Vision do not monitor, control, or take responsibility for what any add-on returns or for how you use it.
+
+
+3. NETWORKING AND PRIVACY
+
+Some sources stream directly from peer to peer (torrent) networks. When you use those, your device connects to other peers over your own internet connection, and your IP address is visible to them, the same way it is with any torrent software. If that matters to you, use a VPN. Debrid and other third party services you connect to are governed by their own terms and privacy policies, not ours.
+
+JL Media Vision runs on your device. It talks only to the services you configure. The people who make JL Media Vision do not run a server that collects your viewing activity. If you sign in with a JL account, your profile, favorite teams and players, and app settings are stored with JL so they stay the same on every device you sign in to.
+
+
+4. NO WARRANTY
+
+JL Media Vision is provided "as is" and "as available", without warranty of any kind, whether express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, and non infringement.
+
+
+5. LIMITATION OF LIABILITY
+
+To the maximum extent permitted by law, the people who make JL Media Vision are not liable for any damages of any kind arising out of your use of, or inability to use, JL Media Vision, including any consequences of the add-ons or services you choose to use.
+
+
+6. ACCEPTANCE
+
+By installing JL Media Vision you confirm that you have read and understood this agreement and that you accept it in full.

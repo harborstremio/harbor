@@ -38,7 +38,15 @@
       "icons-jl/128x128@2x.png",
       "icons-jl/icon.icns",
       "icons-jl/icon.ico"
-    ]
+    ],
+    "licenseFile": "installer-jl/eula.txt",
+    "windows": {
+      "nsis": {
+        "installerIcon": "icons-jl/icon.ico",
+        "headerImage": "installer-jl/header.bmp",
+        "sidebarImage": "installer-jl/sidebar.bmp"
+      }
+    }
   },
   "plugins": {
     "updater": {
