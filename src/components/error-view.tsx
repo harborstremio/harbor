@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import snip404 from "@/assets/snip404.svg";
 import { HarborMark } from "@/components/icons/harbor-mark";
-import { submitErrorReport } from "@/lib/bug-report";
+import { BUG_REPORTS_ENABLED, submitErrorReport } from "@/lib/bug-report";
 import { loadStartupCrashReport, startupCrashToHarborError } from "@/lib/startup-crash";
 import { isStaleTauriListenerError } from "@/lib/tauri-unlisten";
 
@@ -159,14 +159,7 @@ export function ErrorView() {
           className="font-display text-[24px] font-medium leading-none tracking-tight sm:text-[28px]"
           style={{ transform: "translateY(1px)" }}
         >
-          Harb
-          <span
-            className="inline-block"
-            style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}
-          >
-            o
-          </span>
-          r
+          Media Vision
         </span>
       </div>
 
@@ -198,6 +191,7 @@ export function ErrorView() {
             <ArrowLeftIcon className="dir-icon h-[16px] w-[16px]" />
             Take me back
           </button>
+          {BUG_REPORTS_ENABLED && (
           <button
             type="button"
             onClick={reportBug}
@@ -223,6 +217,7 @@ export function ErrorView() {
                   ? "Try again"
                   : "Submit report"}
           </button>
+          )}
           <button
             type="button"
             onClick={reload}
@@ -233,6 +228,7 @@ export function ErrorView() {
           </button>
         </div>
 
+        {BUG_REPORTS_ENABLED && (
         <p className="text-[11.5px] text-ink-subtle">
           {report.kind === "sent" ? (
             <>
@@ -241,9 +237,10 @@ export function ErrorView() {
           ) : report.kind === "error" ? (
             <span className="text-danger/80">Could not send: {report.message}</span>
           ) : (
-            <>Sends the context above straight to the Harbor team. No keys or library data.</>
+            <>Sends the context above straight to the JL Media Vision team. No keys or library data.</>
           )}
         </p>
+        )}
       </div>
     </div>
   );

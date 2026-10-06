@@ -8,10 +8,9 @@ import {
   RotateCw,
   Wrench,
 } from "lucide-react";
-import { Github } from "@/components/icons/github-icon";
 import { useEffect, useState, type ReactNode } from "react";
 import cornerSvg from "@/assets/corner.svg";
-import harborDiscord from "@/assets/harbor-discord.svg";
+import jlMark from "@/assets/brand/jl-mark.webp";
 import { useAuth } from "@/lib/auth";
 import { useOnboarding } from "@/lib/onboarding";
 import {
@@ -29,7 +28,6 @@ import {
 import { findCorruptAnimeEntries, healCorruptAnimeEntries } from "@/lib/anime-cw-repair";
 import { clearResurfaceCache } from "@/lib/cw-resurface";
 import type { LibraryItem } from "@/lib/stremio";
-import { openUrl } from "@/lib/window";
 import {
   checkForUpdate,
   clearStagedUpdate,
@@ -42,19 +40,14 @@ import { IS_BETA_BUILD } from "@/lib/build-info";
 import { isLinuxDesktop } from "@/lib/platform";
 import { BackupRow } from "./backup-row";
 import { SettingsRecoverRow } from "./settings-recover-row";
-import { BuildFeedback } from "./build-feedback";
-import { RollbackRow } from "./rollback-row";
 import { PrivacyRow } from "./privacy-row";
 import { TrayRow } from "./tray-row";
 import { Section } from "./shared";
-import { Signature } from "./signature";
 import { CustomCodeCard, DownloadsSection } from "./player-panel";
 import { DesktopOnlyBlock } from "./player-panel/internals";
 import { useT } from "@/lib/i18n";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-const DOWNLOAD_URL = "https://harbor.site/download";
-const SOURCE_URL = "https://github.com/harborstremio/harbor";
 
 export function AdvancedPanel() {
   const t = useT();
@@ -67,14 +60,12 @@ export function AdvancedPanel() {
         <Section
           title={t("Updates")}
           subtitle={t(
-            "Harbor checks harbor.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.",
+            "JL Media Vision checks for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.",
           )}
         >
           <div className="flex flex-col gap-2.5">
             <UpdatesRow />
             <BetaChannelRow />
-            <RollbackRow />
-            <BuildFeedback />
           </div>
         </Section>
       )}
@@ -122,7 +113,7 @@ export function AdvancedPanel() {
         <Section
           title={t("Stremio install links")}
           subtitle={t(
-            "Harbor catches stremio:// install links so the configure-and-install flow stays inside the app. Every install also syncs to your Stremio account, so the official app remains the canonical home for your library.",
+            "JL Media Vision catches stremio:// install links so the configure-and-install flow stays inside the app. Every install also syncs to your Stremio account, so the official app remains the canonical home for your library.",
           )}
         >
           <StremioDeeplinkRow />
@@ -133,7 +124,7 @@ export function AdvancedPanel() {
         <Section
           title={t("Discord Rich Presence")}
           subtitle={t(
-            "Let your Discord friends see what you are watching, with the show poster and a live progress bar. Desktop only, and only your own Discord client is involved (nothing touches a Harbor server).",
+            "Let your Discord friends see what you are watching, with the show poster and a live progress bar. Desktop only, and only your own Discord client is involved.",
           )}
         >
           <DiscordPresenceRow />
@@ -172,14 +163,12 @@ export function AdvancedPanel() {
 
       <Section
         title={t("About")}
-        subtitle={t("Build identity. Useful when filing a bug report at bugs@harbor.site.")}
+        subtitle={t("Build identity.")}
       >
         <AboutRow />
       </Section>
 
       <LegalDisclaimer />
-
-      <Signature />
     </>
   );
 }
@@ -191,7 +180,7 @@ function LegalDisclaimer() {
         Legal
       </span>
       <p className="mt-2 text-[12px] leading-relaxed text-ink-muted">
-        Harbor is an independent, open-source desktop and web client. It is{" "}
+        JL Media Vision is an independent, open-source desktop and web client. It is{" "}
         <span className="font-semibold text-ink">
           not affiliated with, endorsed by, sponsored by, or in any way associated with Stremio Ltd.
         </span>
@@ -204,7 +193,7 @@ function LegalDisclaimer() {
         respective owners and are used here only for compatibility and identification.
       </p>
       <p className="mt-2 text-[12px] leading-relaxed text-ink-muted">
-        Harbor itself does not host, distribute, or index any media. All streams come from
+        JL Media Vision itself does not host, distribute, or index any media. All streams come from
         third-party addons, debrid services, or your own Stremio account that you configure
         yourself. You are responsible for what you choose to play and for complying with the laws of
         your jurisdiction.
@@ -240,7 +229,7 @@ function WebBuildBanner() {
         </h2>
         <p className="text-[13.5px] leading-relaxed text-ink-muted">
           {t(
-            "Everything you save here stays in this browser. Your Stremio login, API keys, watch progress, picker cache, dismissed tips. Harbor servers never see any of it. Clearing your browser data wipes it.",
+            "Everything you save here stays in this browser. Your Stremio login, API keys, watch progress, picker cache, dismissed tips. Clearing your browser data wipes it.",
           )}
         </p>
         <p className="text-[13.5px] leading-relaxed text-ink-muted">
@@ -248,24 +237,6 @@ function WebBuildBanner() {
             "The web build can't run mpv, the trickplay generator, the local bandwidth probe, or your own Cloudflare relay. If you want HDR passthrough, TrueHD or DTS-HD audio, and smoother seeking, grab the desktop app.",
           )}
         </p>
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => openUrl(DOWNLOAD_URL)}
-            className="flex h-10 w-fit items-center gap-2 rounded-xl bg-ink px-4 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
-          >
-            <Download size={14} strokeWidth={2.4} />
-            {t("Get Harbor for desktop")}
-          </button>
-          <button
-            type="button"
-            onClick={() => openUrl(SOURCE_URL)}
-            className="flex h-10 w-fit items-center gap-2 rounded-xl border border-edge bg-elevated/60 px-4 text-[13.5px] font-semibold text-ink transition-colors hover:border-ink hover:bg-elevated"
-          >
-            <Github size={14} strokeWidth={2.2} />
-            {t("Source code")}
-          </button>
-        </div>
       </div>
     </section>
   );
@@ -334,7 +305,7 @@ function StremioDeeplinkRow() {
           </span>
           <p className="text-[12.5px] leading-relaxed text-ink-subtle">
             {t(
-              "Harbor's in-app installer animates the manifest install and keeps you in context. Anything Harbor installs is also synced to your Stremio account, so the official app stays the canonical library. Turn this off and Stremio becomes the only handler for stremio:// links; Harbor still installs anything you trigger from inside the app (Configure & install, paste, drag-and-drop).",
+              "JL Media Vision's in-app installer animates the manifest install and keeps you in context. Anything JL Media Vision installs is also synced to your Stremio account, so the official app stays the canonical library. Turn this off and Stremio becomes the only handler for stremio:// links; JL Media Vision still installs anything you trigger from inside the app (Configure & install, paste, drag-and-drop).",
             )}
           </p>
         </div>
@@ -405,7 +376,7 @@ function UpdatesRow() {
         <span className="flex items-center gap-2 text-[14px] font-medium text-ink">
           {ready && u.version
             ? t("Harbor {version} available", { version: u.version })
-            : `Harbor ${__APP_VERSION__}`}
+            : `JL Media Vision ${__APP_VERSION__}`}
           <BetaTag />
         </span>
         <span className="text-[12.5px] text-ink-subtle">{status}</span>
@@ -443,7 +414,7 @@ function DiscordPresenceRow() {
     <div className="flex flex-col gap-2.5">
       <div className="flex items-start gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3.5">
         <img
-          src={harborDiscord}
+          src={jlMark}
           alt=""
           draggable={false}
           className="h-14 w-auto shrink-0 self-center object-contain"
@@ -650,7 +621,6 @@ function AboutRow() {
         value={`${__APP_VERSION__}${IS_BETA_BUILD ? " (Beta)" : ""}`}
       />
       <InfoLine label={t("Build")} value={isTauri ? t("Desktop (Tauri 2 / WebView2)") : t("Web")} />
-      <InfoLine label={t("Bug reports")} value="bugs@harbor.site" />
     </div>
   );
 }

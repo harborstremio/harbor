@@ -323,7 +323,7 @@ export function usePickHandler({
     }
     const target = debrids.find((d) => d.queueCache);
     if (!target?.queueCache) {
-      setResolveError("Your debrid service doesn't support queueing torrents from Harbor yet.");
+      setResolveError("Your debrid service doesn't support queueing torrents from JL Media Vision yet.");
       return;
     }
     setResolving({ stream });

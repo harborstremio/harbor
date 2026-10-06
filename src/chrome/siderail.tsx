@@ -79,7 +79,7 @@ export function SideRail() {
                 className="text-[25px] font-medium leading-none tracking-tight"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                Harbor
+                Media Vision
               </span>
             )}
           </button>

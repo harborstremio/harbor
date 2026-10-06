@@ -240,7 +240,7 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     });
 
     let mut builder = TrayIconBuilder::with_id("harbor-tray")
-        .tooltip("Harbor")
+        .tooltip("JL Media Vision")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| {

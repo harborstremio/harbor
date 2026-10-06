@@ -67,5 +67,5 @@ export function importForeignTheme(text: string, filename?: string): ForeignImpo
     return { ok: true, themes: [toTheme(bucket)], format: "Kodi" };
   }
 
-  return { ok: false, error: "Unrecognized theme format. Harbor imports its own themes plus Base16, Spicetify, and Kodi color files." };
+  return { ok: false, error: "Unrecognized theme format. JL Media Vision imports its own themes plus Base16, Spicetify, and Kodi color files." };
 }

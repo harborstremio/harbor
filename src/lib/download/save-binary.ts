@@ -32,7 +32,7 @@ async function writeBytes(bytes: Uint8Array, filename: string, ext: string, mime
   if (IS_TAURI) {
     const { save } = await import("@tauri-apps/plugin-dialog");
     const { writeFile } = await import("@tauri-apps/plugin-fs");
-    const path = await save({ defaultPath: filename, filters: [{ name: "Harbor", extensions: [ext] }] });
+    const path = await save({ defaultPath: filename, filters: [{ name: "JL Media Vision", extensions: [ext] }] });
     if (!path) return { saved: false, path: null };
     await writeFile(path, bytes);
     return { saved: true, path };

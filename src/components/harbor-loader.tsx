@@ -1,8 +1,5 @@
-import lottie, { type AnimationItem } from "lottie-web";
-import { useCallback, useEffect, useRef, useState } from "react";
-import whiteBoat from "@/assets/lottie/addons-boat-white.json";
-import darkBoat from "@/assets/lottie/addons-boat-dark.json";
-import harborBoat from "@/assets/lottie/harbor-loader.json";
+import { useEffect, useState } from "react";
+import jlMark from "@/assets/brand/jl-mark.webp";
 import {
   prefetchTopAddonLogos,
   prefetchedTopAddonLogos,
@@ -17,20 +14,7 @@ const SIZE_CLASS: Record<Size, string> = {
   xl: "h-60 w-60",
 };
 
-const XLINK = "http://www.w3.org/1999/xlink";
-
-function darkBackground(): boolean {
-  if (typeof document === "undefined") return true;
-  const probe = document.createElement("div");
-  probe.style.cssText =
-    "background-color:var(--color-canvas);position:absolute;opacity:0;pointer-events:none";
-  document.body.appendChild(probe);
-  const m = getComputedStyle(probe).backgroundColor.match(/[\d.]+/g);
-  probe.remove();
-  if (!m || m.length < 3) return true;
-  const [r, g, b] = m.map(Number);
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5;
-}
+const LOGO_CYCLE_MS = 1800;
 
 function useTopAddonLogos(enabled: boolean): string[] {
   const [logos, setLogos] = useState<string[]>(() => (enabled ? prefetchedTopAddonLogos() : []));
@@ -62,76 +46,49 @@ export function HarborLoader({
   logos?: string[];
   onReady?: () => void;
 }) {
-  const ref = useRef<HTMLDivElement | null>(null);
   const cargo = keyed || logos !== undefined;
   const fetched = useTopAddonLogos(keyed && logos === undefined);
-  const effective = logos ?? fetched;
-  const logosRef = useRef<string[]>([]);
-  const cycleRef = useRef(0);
-  const [dark] = useState(darkBackground);
+  const effective = cargo ? (logos ?? fetched) : [];
+  const [cycle, setCycle] = useState(0);
 
   useEffect(() => {
-    logosRef.current = effective;
-  }, [effective]);
+    if (effective.length <= 3) return;
+    const id = window.setInterval(() => setCycle((c) => c + 3), LOGO_CYCLE_MS);
+    return () => window.clearInterval(id);
+  }, [effective.length]);
 
-  const paint = useCallback(() => {
-    const root = ref.current;
-    if (!root) return;
-    const imgs = root.querySelectorAll<SVGImageElement>("image");
-    const list = logosRef.current;
-    const count = imgs.length;
-    imgs.forEach((img, k) => {
-      img.setAttribute("preserveAspectRatio", "xMidYMid meet");
-      img.setAttribute("referrerpolicy", "no-referrer");
-      const flyPos = count - 1 - k;
-      const url = flyPos < list.length ? list[(cycleRef.current + flyPos) % list.length] : "";
-      if (url) {
-        img.setAttributeNS(XLINK, "href", url);
-        img.setAttribute("href", url);
-        img.style.opacity = "1";
-      } else {
-        img.style.opacity = "0";
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    const container = ref.current;
-    if (!container) return;
-    container.replaceChildren();
-    const anim: AnimationItem = lottie.loadAnimation({
-      container,
-      renderer: "svg",
-      loop: true,
-      autoplay: true,
-      animationData: cargo ? (dark ? whiteBoat : darkBoat) : harborBoat,
-    });
-    const onLoaded = () => {
-      cycleRef.current = 0;
-      paint();
-      onReady?.();
-    };
-    const onLoop = () => {
-      cycleRef.current += 3;
-      paint();
-    };
-    anim.addEventListener("DOMLoaded", onLoaded);
-    anim.addEventListener("loopComplete", onLoop);
-    return () => {
-      anim.removeEventListener("DOMLoaded", onLoaded);
-      anim.removeEventListener("loopComplete", onLoop);
-      anim.destroy();
-      container.replaceChildren();
-    };
-  }, [dark, paint, cargo, onReady]);
-
-  useEffect(() => {
-    paint();
-  }, [effective, paint]);
+  const shown = effective.length
+    ? Array.from({ length: Math.min(3, effective.length) }, (_, k) => effective[(cycle + k) % effective.length])
+    : [];
 
   return (
     <div className={`flex flex-col items-center justify-center gap-2 ${className}`}>
-      <div ref={ref} className={SIZE_CLASS[size]} aria-hidden />
+      <div className={`relative flex items-center justify-center ${SIZE_CLASS[size]}`} aria-hidden>
+        <div className="jl-loader-glow absolute inset-[14%] rounded-full" />
+        <div className="jl-loader-ring absolute inset-[4%] rounded-full" />
+        <img
+          src={jlMark}
+          alt=""
+          draggable={false}
+          onLoad={() => onReady?.()}
+          onError={() => onReady?.()}
+          className="jl-loader-mark relative h-[58%] w-[58%] object-contain"
+        />
+      </div>
+      {shown.length > 0 && (
+        <div className="flex items-center gap-2" aria-hidden>
+          {shown.map((url, k) => (
+            <img
+              key={`${cycle}-${k}`}
+              src={url}
+              alt=""
+              referrerPolicy="no-referrer"
+              draggable={false}
+              className="h-6 w-6 rounded-md object-contain"
+            />
+          ))}
+        </div>
+      )}
       {caption && (
         <p className="mt-1 text-[12.5px] font-medium uppercase tracking-[0.18em] text-white/70">
           {caption}

@@ -83,7 +83,7 @@ mod linux {
         .await
         .ok()?;
         let cookie = proxy
-            .call("Inhibit", &("Harbor", "Harbor playback"))
+            .call("Inhibit", &("JL Media Vision", "JL Media Vision playback"))
             .await
             .ok()?;
 

@@ -30,7 +30,7 @@ export async function aiFindEpisodes(
       Authorization: `Bearer ${key.trim()}`,
       "Content-Type": "application/json",
       "HTTP-Referer": "https://harbor.site",
-      "X-Title": "Harbor",
+      "X-Title": "JL Media Vision",
     },
     body: JSON.stringify({
       model: migrateModelId(model.trim()) || DEFAULT_AI_MODEL,

@@ -8,7 +8,7 @@ export function Signature() {
       <p className="flex items-center gap-1.5 text-center text-[12px] tracking-wide text-ink-subtle">
         Made with
         <HeartGlyph />
-        by the Harbor team
+        by the JL Media Vision team
       </p>
       <button
         onClick={() => setOpen((v) => !v)}
@@ -23,7 +23,7 @@ export function Signature() {
       {open && (
         <div className="mt-1 max-w-md space-y-3 px-2 text-[12.5px] leading-relaxed text-ink-subtle">
           <p>
-            Harbor is a completely free and open source project. Harbor is under the MIT License and
+            JL Media Vision is a completely free and open source project. JL Media Vision is under the MIT License and
             you can repurpose and reuse as you wish. By all means profit off of this, shape it to
             your wishes and needs, whatever your heart desires. It is truly Open Source.
           </p>

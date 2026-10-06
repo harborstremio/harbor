@@ -129,7 +129,7 @@ const SECTION_META: Record<SectionId, { label: string; sub: string }> = {
   },
   p2p: {
     label: "P2P & servers",
-    sub: "Harbor's built-in peer-to-peer engine, its self-test, and any streaming server you point it at.",
+    sub: "JL Media Vision's built-in peer-to-peer engine, its self-test, and any streaming server you point it at.",
   },
   language: {
     label: "Languages",

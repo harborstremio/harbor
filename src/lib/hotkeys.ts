@@ -70,7 +70,7 @@ export const HOTKEYS: HotkeyDef[] = [
     scope: "Global",
     group: "Interface",
     label: "Increase interface scale",
-    description: "Make Harbor's interface larger.",
+    description: "Make JL Media Vision's interface larger.",
     defaultBinding: "ctrl+=",
   },
   {
@@ -78,7 +78,7 @@ export const HOTKEYS: HotkeyDef[] = [
     scope: "Global",
     group: "Interface",
     label: "Decrease interface scale",
-    description: "Make Harbor's interface smaller.",
+    description: "Make JL Media Vision's interface smaller.",
     defaultBinding: "ctrl+-",
   },
   {
@@ -86,7 +86,7 @@ export const HOTKEYS: HotkeyDef[] = [
     scope: "Global",
     group: "Interface",
     label: "Reset interface scale",
-    description: "Restore Harbor's interface scale to 100%.",
+    description: "Restore JL Media Vision's interface scale to 100%.",
     defaultBinding: "ctrl+0",
   },
 

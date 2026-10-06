@@ -1950,7 +1950,7 @@ html[data-theme-card="crunch"] header.fixed.top-0.z-\[60\].h-20 > div {
   gap: 0.25rem;
 }
 
-html[data-theme-card="crunch"] header.fixed.top-0.z-\[60\].h-20 button[aria-label="Harbor home"] {
+html[data-theme-card="crunch"] header.fixed.top-0.z-\[60\].h-20 button[aria-label="JL Media Vision home"] {
   color: var(--color-accent);
   padding-right: 0.75rem;
 }
@@ -2714,5 +2714,44 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
     animation: none;
     -webkit-text-fill-color: var(--color-ink-subtle);
     color: var(--color-ink-subtle);
+  }
+}
+
+/* JL Media Vision loader: the JL mark inside a fiery accent ring. */
+.jl-loader-ring {
+  background: conic-gradient(from 0deg, transparent 0deg, transparent 150deg, var(--color-accent) 330deg, #ffd3a8 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  animation: jl-loader-spin 1.1s linear infinite;
+}
+.jl-loader-glow {
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 38%, transparent) 0%, transparent 70%);
+  filter: blur(10px);
+  animation: jl-loader-breathe 2.2s ease-in-out infinite;
+}
+.jl-loader-mark {
+  animation: jl-loader-breathe 2.2s ease-in-out infinite;
+}
+@keyframes jl-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes jl-loader-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jl-loader-ring,
+  .jl-loader-glow,
+  .jl-loader-mark {
+    animation: none;
   }
 }

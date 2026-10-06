@@ -36,7 +36,7 @@ export const RECIPES: Recipe[] = [
               width:220px; display:flex; flex-direction:column; gap:18px;
               padding:26px 16px; background:var(--color-surface);
               border-right:1px solid var(--color-edge); z-index:60;">
-  <div style="font:600 26px var(--font-display); color:var(--color-ink);">Harbor</div>
+  <div style="font:600 26px var(--font-display); color:var(--color-ink);">JL Media Vision</div>
   <button onclick="window.harbor.navigate('home')">Home</button>
   <button onclick="window.harbor.navigate('movies')">Movies</button>
   <button onclick="window.harbor.navigate('shows')">Shows</button>
@@ -77,7 +77,7 @@ export const RECIPES: Recipe[] = [
     code: `window.addEventListener('harbor:scroll-top', (e) => {
   console.info('now viewing', e.detail.view);
 });`,
-    why: "Harbor dispatches lifecycle events on window. Listen from your theme JS.",
+    why: "JL Media Vision dispatches lifecycle events on window. Listen from your theme JS.",
   },
 ];
 
@@ -148,7 +148,7 @@ html[data-theme-layout="custom"]:not([data-chrome-hidden]) main { padding-left: 
 
 @html
 <aside class="rail">
-  <div style="font:600 26px var(--font-display); color:var(--color-ink); padding:2px 10px;">Harbor</div>
+  <div style="font:600 26px var(--font-display); color:var(--color-ink); padding:2px 10px;">JL Media Vision</div>
   <button onclick="window.harbor.navigate('home')">Home</button>
   <button onclick="window.harbor.navigate('movies')">Movies</button>
   <button onclick="window.harbor.navigate('shows')">Shows</button>

@@ -61,8 +61,8 @@ export function TogetherRelayPanel({
         apiToken: settings.togetherCfToken,
       },
       notes: [
-        "Keep this file safe and offline. Cloudflare shows API tokens only once at creation. Without this token, Harbor cannot stop, redeploy, or update this relay through its UI.",
-        "To restore: open Settings -> Harbor Relay, paste the relayUrl, and re-enter the API token if you plan to manage from Harbor.",
+        "Keep this file safe and offline. Cloudflare shows API tokens only once at creation. Without this token, JL Media Vision cannot stop, redeploy, or update this relay through its UI.",
+        "To restore: open Settings -> JL Media Vision Relay, paste the relayUrl, and re-enter the API token if you plan to manage from JL Media Vision.",
         "You can always delete the underlying Worker manually at dash.cloudflare.com -> Workers & Pages, even without this file.",
       ],
     };
@@ -70,7 +70,7 @@ export function TogetherRelayPanel({
       `harbor-relay-backup-${new Date().toISOString().slice(0, 10)}.json`,
       JSON.stringify(payload, null, 2),
       ["json"],
-      "Harbor relay backup",
+      "JL Media Vision relay backup",
     );
   };
 
@@ -99,7 +99,7 @@ export function TogetherRelayPanel({
             {isPubRelay ? (
               <img
                 src={pubRelaySvg}
-                alt="Harbor public relay"
+                alt="JL Media Vision public relay"
                 className="h-14 w-14 shrink-0 object-contain"
                 draggable={false}
               />

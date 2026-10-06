@@ -352,7 +352,7 @@ export async function runWebhookTick(
     if (aborted) return aborted;
     for (const channel of targets) {
       const url = channel === "discord" ? discordUrl! : telegramUrl!;
-      const text = `Harbor rule "${rule.name}": ${newMatched.length} new ${newMatched.length === 1 ? "release" : "releases"}`;
+      const text = `JL Media Vision rule "${rule.name}": ${newMatched.length} new ${newMatched.length === 1 ? "release" : "releases"}`;
       const result = await fireWebhook(channel, url, { text, items: newMatched });
       channelResults.push({ kind: `rule:${rule.id}/${channel}`, ...result });
       if (result.ok) totalFired += newMatched.length;
@@ -367,15 +367,15 @@ function headlineForSource(source: SourceKey, count: number): string {
   const noun = count === 1 ? "release" : "releases";
   switch (source) {
     case "library":
-      return `Harbor: ${count} upcoming ${noun} from your library`;
+      return `JL Media Vision: ${count} upcoming ${noun} from your library`;
     case "all":
-      return `Harbor: ${count} new upcoming ${noun}`;
+      return `JL Media Vision: ${count} new upcoming ${noun}`;
     case "trakt":
-      return `Harbor: ${count} upcoming ${noun} from your Trakt watchlist`;
+      return `JL Media Vision: ${count} upcoming ${noun} from your Trakt watchlist`;
     case "anticipated":
-      return `Harbor: ${count} new entries on Trakt Anticipated`;
+      return `JL Media Vision: ${count} new entries on Trakt Anticipated`;
     case "custom":
-      return `Harbor: ${count} new ${noun} in your custom feed`;
+      return `JL Media Vision: ${count} new ${noun} in your custom feed`;
   }
 }
 

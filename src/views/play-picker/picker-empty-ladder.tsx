@@ -132,7 +132,7 @@ export function PickerEmptyLadder({
                 ? "Clean releases for this title haven't surfaced yet. The result below may not match the title you're looking for, so confirm the filename and size before playing."
                 : "Clean releases for this title are still scarce. Confirm the filename and size before playing."}
               {rawCount - allCount > 0 && !forceShowAll
-                ? ` Harbor dropped ${rawCount - allCount} suspicious or mismatched result${rawCount - allCount === 1 ? "" : "s"}.`
+                ? ` JL Media Vision dropped ${rawCount - allCount} suspicious or mismatched result${rawCount - allCount === 1 ? "" : "s"}.`
                 : ""}
             </p>
           </div>

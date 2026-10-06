@@ -73,7 +73,7 @@ export function InstallOverlay({ phase, logo }: { phase: OverlayPhase; logo: str
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-white">
                 <Check size={11} strokeWidth={3} />
               </span>
-              Added to Harbor
+              Added to JL Media Vision
             </span>
           )}
           <span className="font-display text-[24px] leading-none tracking-tight text-ink">

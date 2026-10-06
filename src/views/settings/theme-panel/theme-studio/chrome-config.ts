@@ -27,7 +27,7 @@ export const NAV_CATALOG: ChromeNavId[] = [
 
 export const DEFAULT_CHROME: ChromeConfig = {
   position: "sidebar",
-  brand: "Harbor",
+  brand: "JL Media Vision",
   items: ["home", "movies", "shows", "library", "live", "settings"],
 };
 

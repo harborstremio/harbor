@@ -71,7 +71,7 @@ export function EpisodeOrderSetting() {
       <ToggleRow
         label={t("TVDB season and order panel")}
         sub={t(
-          "Turn the season button into a TVDB-style panel: order tabs (Aired, DVD, Absolute, and any the show has) plus a season table with air-date ranges and episode counts. On by default for anime through Harbor's TVDB service, no key needed. Add your own TVDB key to use it for regular shows too.",
+          "Turn the season button into a TVDB-style panel: order tabs (Aired, DVD, Absolute, and any the show has) plus a season table with air-date ranges and episode counts. On by default for anime through JL Media Vision's TVDB service, no key needed. Add your own TVDB key to use it for regular shows too.",
         )}
         value={settings.tvdbOrderPanel}
         onChange={(v) => update({ tvdbOrderPanel: v })}

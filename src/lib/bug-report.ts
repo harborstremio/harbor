@@ -1,8 +1,10 @@
 declare const __APP_VERSION__: string;
 
-const ENDPOINT =
-  (import.meta.env.VITE_BUG_REPORT_ENDPOINT as string | undefined) ||
-  "https://bugs.harbor.site";
+// Reports only go out when this build names its own endpoint; the JL build no longer
+// falls back to Harbor's tracker.
+const ENDPOINT = (import.meta.env.VITE_BUG_REPORT_ENDPOINT as string | undefined) || "";
+
+export const BUG_REPORTS_ENABLED = ENDPOINT !== "";
 
 export type Severity = "low" | "normal" | "high" | "critical";
 

@@ -34,7 +34,7 @@ test("startup keeps the app inert behind the existing loader until the first vie
   assert.match(appSource, /<Home active=\{homeTop\} onReady=\{onReady\}/);
   assert.match(homeSource, /if \(!active \|\| !heroReady\) return;[\s\S]*?onReady\?\.\(\)/);
   assert.match(loaderSource, /onReady\?\.\(\)/);
-  assert.match(loaderSource, /container\.replaceChildren\(\)/);
+  assert.match(loaderSource, /onLoad=\{\(\) => onReady\?\.\(\)\}/);
   assert.doesNotMatch(startupLoaderSource, /classList\.add\("gone"\)|setTimeout/);
 });
 

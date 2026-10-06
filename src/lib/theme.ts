@@ -1,14 +1,6 @@
-import auroraPreview from "@/assets/theme-previews/aurora.png";
-import crunchPreview from "@/assets/theme-previews/crunchy.png";
-import draculaPreview from "@/assets/theme-previews/dracula.png";
-import forestPreview from "@/assets/theme-previews/forest.png";
-import harborPreview from "@/assets/theme-previews/harbor.png";
-import minuiPreview from "@/assets/theme-previews/minui.png";
-import noirPreview from "@/assets/theme-previews/noir.png";
-import nordPreview from "@/assets/theme-previews/nord.png";
-import royalPreview from "@/assets/theme-previews/royal.png";
-import stremioPreview from "@/assets/theme-previews/stremio.png";
-import velvetPreview from "@/assets/theme-previews/velvet.png";
+import jlMark from "@/assets/brand/jl-mark.webp";
+import jlHero from "@/assets/brand/jl-hero.webp";
+import jlWordmark from "@/assets/brand/jl-wordmark-stacked.webp";
 import { getCustomThemes } from "./custom-themes";
 
 export type ThemePresetId =
@@ -114,7 +106,8 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "cool-grey",
     name: "JL Media Vision",
     blurb: "What ships out of the box: graphite with JL's fiery orange.",
-    previewImage: harborPreview,
+    logo: { mark: jlMark, wordmark: jlWordmark },
+    previewImage: jlHero,
     swatch: ["#2c2e36", "#3a3d47", "#dcdde4"],
     tokens: {
       "--color-canvas": "oklch(0.18 0.004 260)",
@@ -136,7 +129,6 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "nord",
     name: "Nord",
     blurb: "Cool grey-blue. Arctic and crisp.",
-    previewImage: nordPreview,
     swatch: ["#2e3440", "#434c5e", "#88c0d0"],
     tokens: {
       "--color-canvas": "#2e3440",
@@ -158,7 +150,6 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "stremio",
     name: "Stremio",
     blurb: "Purple accent, Indigo gradient, Narrow icon rail.",
-    previewImage: stremioPreview,
     swatch: ["#0c0b11", "#1a173e", "#7b5bf5"],
     tokens: {
       "--color-canvas": "#0c0b11",
@@ -186,7 +177,6 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "crunch",
     name: "Crunchy",
     blurb: "Charcoal chrome with a spice-orange accent. Bold and clean.",
-    previewImage: crunchPreview,
     swatch: ["#000000", "#272727", "#ff640a"],
     tokens: {
       "--color-canvas": "#000000",
@@ -215,7 +205,6 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "tokyo-night",
     name: "Royal",
     blurb: "Deep navy with a warm orange accent.",
-    previewImage: royalPreview,
     swatch: ["#0c1118", "#1c2230", "#f08032"],
     tokens: {
       "--color-canvas": "#0c1118",
@@ -237,7 +226,6 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "dracula",
     name: "Dracula",
     blurb: "Violet on graphite, bold accents. Easy on the eyes.",
-    previewImage: draculaPreview,
     swatch: ["#282a36", "#44475a", "#bd93f9"],
     tokens: {
       "--color-canvas": "#282a36",
@@ -259,7 +247,6 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "forest",
     name: "Forest",
     blurb: "Greens, low saturation.",
-    previewImage: forestPreview,
     swatch: ["#1a221d", "#26312a", "#dde7df"],
     tokens: {
       "--color-canvas": "oklch(0.18 0.018 145)",
@@ -281,7 +268,6 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "noir",
     name: "Noir",
     blurb: "Pure black. Clean.",
-    previewImage: noirPreview,
     swatch: ["#000000", "#0a0a0a", "#ffffff"],
     tokens: {
       "--color-canvas": "#000000",
@@ -311,7 +297,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
 const elegantFinCss = `@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 
 /* ==========================================================================
-   ElegantFin for Harbor  (after lscambo13's ElegantFin Jellyfin theme)
+   ElegantFin for JL Media Vision  (after lscambo13's ElegantFin Jellyfin theme)
    Dark navy glass, one purple accent, 1em rounded cards, white shine-sweep,
    Inter 425 body / 600 headings, calm 125ms motion, hairline + blur structure.
    Injected raw into <style id="harbor-theme-css"> so !important + any selector wins.
@@ -1482,13 +1468,11 @@ export const FEATURED_CUSTOM_THEMES: ThemePreset[] = [
     cardStyle: "glass",
     buttonStyle: "glossy",
     bokeh: true,
-    previewImage: auroraPreview,
   },
   {
     id: "minui" as ThemePresetId,
     name: "MinUI",
     blurb: "Floating icon dock. Crisp and light. Big targets, restrained chrome.",
-    previewImage: minuiPreview,
     swatch: ["#f7f7f8", "#ffffff", "#0d7c66"],
     tokens: {
       "--color-canvas": "#f6f6f7",
@@ -1545,7 +1529,6 @@ export const TEMPLATE_THEMES: ThemePreset[] = [
     buttonStyle: "flat",
     bokeh: false,
     fontPair: "sentient-switzer",
-    previewImage: velvetPreview,
   },
 ];
 

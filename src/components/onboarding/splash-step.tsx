@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { HarborMark } from "@/components/icons/harbor-mark";
+import jlParticle from "@/assets/brand/jl-particle.webp";
 import { Poster } from "@/components/poster";
 import { topMovies, topSeries, type Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
@@ -59,24 +59,14 @@ export function SplashStep({ onAdvance }: { onAdvance: () => void }) {
         }}
       />
       <div className="relative flex h-full flex-col items-center justify-center gap-3 text-center">
-        <h1 className="animate-splash-title flex items-center gap-3 font-display text-[88px] font-medium leading-none tracking-tight text-ink">
-          <HarborMark className="h-[1em] w-[1em] shrink-0" />
-          <span style={{ transform: "translateY(0.04em)" }}>
-            Harb
-            <span
-              className="inline-block"
-              style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}
-            >
-              o
-            </span>
-            r
-          </span>
+        <h1 className="animate-splash-title">
+          <img src={jlParticle} alt="JL Media Vision" draggable={false} className="h-[300px] w-auto object-contain" />
         </h1>
         <p
           className="animate-splash-title text-[14px] uppercase tracking-[0.42em] text-ink-muted"
           style={{ animationDelay: "260ms" }}
         >
-          {t("For watching things")}
+          {t("Your media. Your way.")}
         </p>
       </div>
     </div>

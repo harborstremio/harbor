@@ -6,7 +6,7 @@ export async function saveTextFileWithPath(
   filename: string,
   text: string,
   extensions: string[],
-  label = "Harbor",
+  label = "JL Media Vision",
 ): Promise<SaveResult> {
   if (IS_TAURI) {
     try {
@@ -36,7 +36,7 @@ export async function downloadText(
   filename: string,
   text: string,
   extensions: string[],
-  label = "Harbor",
+  label = "JL Media Vision",
 ): Promise<boolean> {
   const { saved } = await saveTextFileWithPath(filename, text, extensions, label);
   return saved;

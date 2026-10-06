@@ -109,7 +109,7 @@ export function LibraryBrowser({
           ) : (
           <>
           {featured.length > 0 && (
-            <BrowserSection title="Featured" subtitle="Hand-picked reskins from the Harbor crew.">
+            <BrowserSection title="Featured" subtitle="Hand-picked reskins from the JL Media Vision crew.">
               <BrowserGrid
                 entries={featured}
                 activeId={activeId}

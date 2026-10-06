@@ -21,8 +21,8 @@ const STEPS: { title: string; body: string; callout?: boolean }[] = [
     body: "After you submit, copy the value labelled API Key (v3 auth). It is the short one, not the long Read Access Token.",
   },
   {
-    title: "Paste it into Harbor",
-    body: "Drop it in the TMDB field right here. Harbor saves it on its own and the whole app lights up.",
+    title: "Paste it into JL Media Vision",
+    body: "Drop it in the TMDB field right here. JL Media Vision saves it on its own and the whole app lights up.",
   },
 ];
 
@@ -78,7 +78,7 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
                   <div className="mt-1 flex items-start gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3.5 py-3">
                     <Check size={15} strokeWidth={2.6} className="mt-0.5 shrink-0 text-accent" />
                     <p className="text-[12.5px] leading-relaxed text-ink">
-                      For Application URL, type any address at all, like https://harbor.app or
+                      For Application URL, type any address at all, like https://example.com or
                       http://localhost. TMDB never visits it. The only thing you actually need is the
                       API key.
                     </p>

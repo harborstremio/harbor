@@ -41,7 +41,7 @@ export async function aiSuggest(
   };
   if (!isGroq) {
     headers["HTTP-Referer"] = "https://harbor.site";
-    headers["X-Title"] = "Harbor";
+    headers["X-Title"] = "JL Media Vision";
   }
   const systemPrompt = webContext?.trim()
     ? `${SYSTEM_PROMPT}\n\nLive web context for this query (use it when relevant, fall back to your own knowledge otherwise):\n${webContext}`

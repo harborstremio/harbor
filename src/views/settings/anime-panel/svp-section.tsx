@@ -65,7 +65,7 @@ export function SvpSection() {
       subtitle={
         linux
           ? t(
-              "Native 48/60fps motion through your Linux SVP and VapourSynth installation, rendered inside Harbor's embedded player.",
+              "Native 48/60fps motion through your Linux SVP and VapourSynth installation, rendered inside JL Media Vision's embedded player.",
             )
           : t(
               "Genuine 48/60fps motion on anime, rendered right inside Harbor's player. SVP supplies the engine (VapourSynth + svpflow) and runs in your tray for licensing; Harbor's own player applies the interpolation, so it stays embedded and fully under your control. One-time install, then flip it on.",
@@ -77,16 +77,16 @@ export function SvpSection() {
           {checking
             ? t("Checking the local SVP and VapourSynth installation...")
             : !supported
-              ? t(status?.reason ?? "SVP is not supported by this Harbor package.")
+              ? t(status?.reason ?? "SVP is not supported by this JL Media Vision package.")
               : loadFailed
                 ? t(
-                    "SVP's files are here but its VapourSynth engine won't load ({err}). This usually means a stale VapourSynth entry or a missing Microsoft VC++ runtime. Reinstall SVP, or install the latest \"Visual C++ Redistributable (x64)\" from Microsoft, then reopen Harbor.",
+                    "SVP's files are here but its VapourSynth engine won't load ({err}). This usually means a stale VapourSynth entry or a missing Microsoft VC++ runtime. Reinstall SVP, or install the latest \"Visual C++ Redistributable (x64)\" from Microsoft, then reopen JL Media Vision.",
                     { err: status?.load_error ?? "load error" },
                   )
                 : ready
                   ? linux
                     ? t(
-                        "Installed and detected. Harbor found the native svpflow plugins and VapourSynth script library.",
+                        "Installed and detected. JL Media Vision found the native svpflow plugins and VapourSynth script library.",
                       )
                     : t(
                         "Installed and detected. Harbor found its interpolation engine and will drive it directly.",
@@ -131,7 +131,7 @@ export function SvpSection() {
           ready
             ? linux
               ? t(
-                  "Harbor loads the native svpflow filter through VapourSynth and starts SVP Manager when available. Restart playback to apply.",
+                  "JL Media Vision loads the native svpflow filter through VapourSynth and starts SVP Manager when available. Restart playback to apply.",
                 )
               : t(
                   "Harbor's player applies the interpolation itself, embedded like normal playback, and starts SVP Manager in the tray for licensing. Restart playback to apply. If video goes black or won't start, turn this off.",
@@ -146,7 +146,7 @@ export function SvpSection() {
           checking
             ? t("Checking SVP installation...")
             : !supported
-              ? (status?.reason ?? t("SVP is not supported by this Harbor package."))
+              ? (status?.reason ?? t("SVP is not supported by this JL Media Vision package."))
               : undefined
         }
       />

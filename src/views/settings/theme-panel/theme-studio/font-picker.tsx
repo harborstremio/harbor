@@ -33,7 +33,7 @@ export function FontPicker({
                 className="truncate text-[22px] leading-tight"
                 style={{ fontFamily: p.display, fontWeight: 600 }}
               >
-                Harbor
+                Media Vision
               </span>
               {active && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-canvas">

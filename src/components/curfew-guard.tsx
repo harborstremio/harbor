@@ -104,7 +104,7 @@ function CurfewLockdown({
       </h1>
       <p className="relative mt-4 max-w-md text-[18px] font-medium leading-relaxed text-white/90">
         {t(
-          "The ship is sailing away. Thanks for watching with Harbor, it's time to listen to your grown-ups.",
+          "The ship is sailing away. Thanks for watching with JL Media Vision, it's time to listen to your grown-ups.",
         )}
       </p>
 

@@ -24,7 +24,7 @@ export function startupCrashToHarborError(report: StartupCrashReport): HarborErr
     code: "NativePanic",
     title: "Previous native crash",
     message:
-      "Sorry — Harbor crashed the last time it was running. You can review the details and choose whether to send a report.",
+      "Sorry — JL Media Vision crashed the last time it was running. You can review the details and choose whether to send a report.",
     detail: [
       `Version: ${report.version}`,
       `Platform: ${report.platform}`,

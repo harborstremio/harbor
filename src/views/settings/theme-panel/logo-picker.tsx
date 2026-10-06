@@ -97,7 +97,7 @@ export function LogoPicker() {
       />
       <LogoSlot
         label="App icon"
-        hint="Window and taskbar icon while Harbor runs. Takes effect after the next update. The file's icon in Explorer stays the built-in one."
+        hint="Window and taskbar icon while JL Media Vision runs. Takes effect after the next update. The file's icon in Explorer stays the built-in one."
         value={settings.customAppIcon}
         square
         maxDim={256}

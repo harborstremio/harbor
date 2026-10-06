@@ -52,7 +52,7 @@ export function UpdateCard() {
                       : "Update available"}
             </span>
             {u.version && (
-              <span className="text-[12.5px] text-ink-subtle">Harbor {u.version}</span>
+              <span className="text-[12.5px] text-ink-subtle">JL Media Vision {u.version}</span>
             )}
           </div>
           {u.status !== "installing" && u.status !== "downloading" && (
@@ -119,7 +119,7 @@ export function UpdateCard() {
             </>
           )}
           {u.status === "installing" && (
-            <span className="text-[12px] text-ink-subtle">Harbor will restart automatically.</span>
+            <span className="text-[12px] text-ink-subtle">JL Media Vision will restart automatically.</span>
           )}
           {u.status === "error" && (
             <>
@@ -131,7 +131,7 @@ export function UpdateCard() {
           )}
           {u.status === "downloading" && (
             <span className="flex items-center gap-1.5 text-[12px] text-ink-subtle">
-              <Check size={14} strokeWidth={2.4} className="text-accent" /> Keep using Harbor while it downloads
+              <Check size={14} strokeWidth={2.4} className="text-accent" /> Keep using JL Media Vision while it downloads
             </span>
           )}
         </div>

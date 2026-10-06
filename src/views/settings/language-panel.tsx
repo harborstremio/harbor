@@ -1,9 +1,7 @@
-import { Github } from "@/components/icons/github-icon";
 import { useState } from "react";
 import { Dropdown, type DropdownOption } from "@/components/dropdown";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { openUrl } from "@/lib/window";
 import { Section, ToggleRow } from "./shared";
 import { SubtitleStylePanel } from "./player-panel";
 import { LanguagesPicker } from "./streaming-panel";
@@ -84,7 +82,7 @@ export function LanguagePanel() {
         <ToggleRow
           label={t("Choose subtitles before playback")}
           sub={t(
-            "After you pick a source, show a subtitle picker so you can set the exact track and language before the video starts. Off by default, Harbor keeps picking one for you automatically.",
+            "After you pick a source, show a subtitle picker so you can set the exact track and language before the video starts. Off by default, JL Media Vision keeps picking one for you automatically.",
           )}
           value={settings.subtitlePreselect}
           onChange={(v) => update({ subtitlePreselect: v })}
@@ -200,16 +198,9 @@ export function LanguagePanel() {
         <div className="mt-2 flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/30 p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[13px] leading-relaxed text-ink-muted sm:max-w-[480px]">
             {t(
-              "Heads up: Harbor was built in English. Multi-language support is partial, so your addons usually catch what Harbor's own filters miss. If you speak another language and want to help fill the gaps, the source is open.",
+              "Heads up: JL Media Vision was built in English. Multi-language support is partial, so your addons usually catch what its own filters miss.",
             )}
           </p>
-          <button
-            onClick={() => openUrl("https://github.com/harborstremio/harbor")}
-            className="flex shrink-0 items-center gap-2 self-start rounded-full border border-edge-soft px-4 py-2 text-[12.5px] font-semibold text-ink transition-colors hover:border-edge sm:self-auto"
-          >
-            <Github size={13} strokeWidth={2.2} />
-            {t("Contribute on GitHub")}
-          </button>
         </div>
       </Section>
     </>

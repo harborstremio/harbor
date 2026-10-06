@@ -95,7 +95,7 @@ export function HotkeysPanel() {
         />
         <ToggleRow
           label={t("TV navigation")}
-          sub={t("Use arrow keys and Select/Enter to move focus through Harbor. Turn this off to disable TV-style focus navigation everywhere.")}
+          sub={t("Use arrow keys and Select/Enter to move focus through JL Media Vision. Turn this off to disable TV-style focus navigation everywhere.")}
           value={settings.tvNavigation}
           onChange={(v) => update({ tvNavigation: v })}
         />

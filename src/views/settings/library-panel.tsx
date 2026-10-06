@@ -424,7 +424,7 @@ export function LibraryPanel({
           }
           help={
             <>
-              Highly recommended. This is what gives you the full Harbor experience: Popular,
+              Highly recommended. This is what gives you the full JL Media Vision experience: Popular,
               Trending, In Theaters, and per-service rails. Free at{" "}
               <ExtLink href="https://www.themoviedb.org/settings/api">
                 themoviedb.org/settings/api

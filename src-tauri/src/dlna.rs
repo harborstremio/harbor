@@ -432,7 +432,7 @@ pub async fn load(
     content_type: Option<String>,
     is_live: bool,
 ) -> Result<(), String> {
-    let display_title = title.unwrap_or_else(|| "Harbor".into());
+    let display_title = title.unwrap_or_else(|| "JL Media Vision".into());
     let vendor = recall_vendor(&control_url);
     let mime = content_type.unwrap_or_else(|| pick_vendor_mime(vendor, is_live));
     let metadata = build_didl(&url, &display_title, &mime, is_live, vendor);

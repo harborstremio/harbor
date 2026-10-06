@@ -57,7 +57,7 @@ export function CustomFontTiles({
                 className={`${previewSize} font-medium leading-none tracking-tight text-ink`}
                 style={{ fontFamily: family }}
               >
-                Harbor
+                Media Vision
               </span>
               {!compact && (
                 <span className="text-[13px] text-ink-muted" style={{ fontFamily: family }}>

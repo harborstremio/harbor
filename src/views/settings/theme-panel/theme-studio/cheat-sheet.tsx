@@ -102,7 +102,7 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
           <span className="text-[17px] font-semibold tracking-tight">Cheat sheet</span>
         </div>
         <span className="ms-2 hidden text-[13px] text-ink-muted md:inline">
-          Every variable, selector, hook, and recipe for building custom Harbor themes.
+          Every variable, selector, hook, and recipe for building custom JL Media Vision themes.
         </span>
         <button
           type="button"
@@ -139,7 +139,7 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
           <div className="mx-auto flex max-w-[960px] flex-col gap-12 px-6 py-9 lg:px-10">
-            <Section id="tokens-color" title="Color tokens" sub="Every surface in Harbor maps to one of these 12 variables.">
+            <Section id="tokens-color" title="Color tokens" sub="Every surface in JL Media Vision maps to one of these 12 variables.">
               <TokenTable rows={COLOR_TOKENS} swatch />
             </Section>
 
@@ -228,7 +228,7 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
               </div>
             </Section>
 
-            <Section id="events" title="Window events" sub="Dispatched on window. Listen from your theme JS to react to Harbor's lifecycle.">
+            <Section id="events" title="Window events" sub="Dispatched on window. Listen from your theme JS to react to JL Media Vision's lifecycle.">
               <div className="flex flex-col gap-1.5">
                 {WINDOW_EVENTS.map((e) => (
                   <div

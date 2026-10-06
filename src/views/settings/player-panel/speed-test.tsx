@@ -85,7 +85,7 @@ function SpeedResultBadge({ value }: { value: string }) {
             </span>
           </div>
           <p className="mb-2.5 text-[12.5px] leading-snug text-ink-muted">
-            Harbor opens 4 parallel HTTP streams to{" "}
+            JL Media Vision opens 4 parallel HTTP streams to{" "}
             <span className="font-medium text-ink">speed.cloudflare.com</span>, runs for 8 seconds,
             and discards the first 1.5s of warmup so TCP slow-start doesn't tank the result.
           </p>

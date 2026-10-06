@@ -332,13 +332,13 @@ export function importProfileJson(
     return { ok: false, error: "Not valid JSON. The file may be corrupted." };
   }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    return { ok: false, error: "File is not a Harbor layout profile." };
+    return { ok: false, error: "File is not a JL Media Vision layout profile." };
   }
   const obj = parsed as Record<string, unknown>;
   if (obj.harborProfileVersion !== undefined && obj.harborProfileVersion !== 1) {
     return {
       ok: false,
-      error: `Unsupported profile version (${String(obj.harborProfileVersion)}). Update Harbor or use an older profile.`,
+      error: `Unsupported profile version (${String(obj.harborProfileVersion)}). Update JL Media Vision or use an older profile.`,
     };
   }
   if (!obj.config || typeof obj.config !== "object") {

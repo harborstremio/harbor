@@ -40,7 +40,7 @@ export function NoSourcesState({
   const isWeb = typeof window !== "undefined" && !("__TAURI_INTERNALS__" in window);
   const libraryOnly = hasDebrid && addonCount === 0;
   const tip = libraryOnly
-    ? "Harbor searched your debrid library, but this title is not already saved there. Install a stream addon if you want to search for new torrents."
+    ? "JL Media Vision searched your debrid library, but this title is not already saved there. Install a stream addon if you want to search for new torrents."
     : isAnime
       ? "Anime sources are usually richer through Torrentio's anime config or AIOStreams. Make sure one is installed in Stremio."
       : isWeb
@@ -55,7 +55,7 @@ export function NoSourcesState({
         <h2 className="font-display text-[28px] leading-tight text-ink">
           {libraryOnly
             ? "Your library does not contain a matching file"
-            : `Harbor queried ${addonCount} addon${addonCount === 1 ? "" : "s"} and got nothing back`}
+            : `JL Media Vision queried ${addonCount} addon${addonCount === 1 ? "" : "s"} and got nothing back`}
         </h2>
         <p className="max-w-md text-[13.5px] leading-relaxed text-ink-muted">{tip}</p>
         <p className="text-[10.5px] font-mono uppercase tracking-[0.18em] text-ink-subtle/70">
@@ -89,7 +89,7 @@ export function FilteredOutState({
           Strict filters dropped everything
         </h2>
         <p className="max-w-lg text-[14px] leading-relaxed text-ink-muted">
-          Harbor blocks suspicious files and mismatched releases by default. For older shows and
+          JL Media Vision blocks suspicious files and mismatched releases by default. For older shows and
           unusual titles this is sometimes too tight.
         </p>
         {groups.length > 0 && (
@@ -152,7 +152,7 @@ export function TheatresEmptyState({
           {meta.name}
         </h2>
         <p className="max-w-md text-[14px] leading-relaxed text-ink-muted">
-          No clean release has surfaced yet. This may be too new. Harbor's filters dropped
+          No clean release has surfaced yet. This may be too new. JL Media Vision's filters dropped
           everything that came back as wrong-movie noise.
         </p>
         {onShowAll && !showingAll && (

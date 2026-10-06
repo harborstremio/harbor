@@ -4,6 +4,7 @@ import { useT } from "@/lib/i18n";
 import { activeLayout } from "@/lib/theme";
 import { useView } from "@/lib/view";
 import { matchesSettingsSearch } from "./search-match";
+import { BUG_REPORTS_ENABLED } from "@/lib/bug-report";
 import { settingsAnchor, type SectionId } from "./shared";
 import { markSectionSeen, useSettingsNew } from "./settings-new";
 
@@ -585,17 +586,21 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
       },
     ],
   },
-  {
-    heading: "Help",
-    items: [
-      {
-        id: "bug",
-        label: "Report a bug",
-        Icon: IconBug,
-        keywords: ["report", "feedback", "issue", "crash"],
-      },
-    ],
-  },
+  ...(BUG_REPORTS_ENABLED
+    ? [
+        {
+          heading: "Help",
+          items: [
+            {
+              id: "bug" as const,
+              label: "Report a bug",
+              Icon: IconBug,
+              keywords: ["report", "feedback", "issue", "crash"],
+            },
+          ],
+        },
+      ]
+    : []),
   {
     heading: "System",
     items: [
@@ -615,6 +620,8 @@ type SettingsOption = {
   anchorTitle?: string;
   keywords?: string[];
 };
+
+const HIDDEN_SECTIONS = new Set<SectionId>(BUG_REPORTS_ENABLED ? [] : ["bug"]);
 
 const SETTINGS_OPTIONS: SettingsOption[] = [
   {
@@ -1629,7 +1636,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
 
   {
-    label: "Harbor identity (avatar / color)",
+    label: "JL Media Vision identity (avatar / color)",
     section: "account",
     anchorTitle: "Harbor identity",
     keywords: ["avatar", "profile photo", "upload photo", "color", "identity", "picture"],
@@ -5404,8 +5411,9 @@ export function SettingsNav({
     if (!trimmed) return null;
     return SETTINGS_OPTIONS.filter(
       (o) =>
-        matchesSettingsSearch(trimmed, [o.label], t) ||
-        (o.keywords ?? []).some((k) => k.toLowerCase().includes(trimmed)),
+        !HIDDEN_SECTIONS.has(o.section) &&
+        (matchesSettingsSearch(trimmed, [o.label], t) ||
+          (o.keywords ?? []).some((k) => k.toLowerCase().includes(trimmed))),
     );
   }, [t, trimmed]);
 

@@ -31,6 +31,13 @@
         "description": "Video file",
         "role": "Viewer"
       }
+    ],
+    "icon": [
+      "icons-jl/32x32.png",
+      "icons-jl/128x128.png",
+      "icons-jl/128x128@2x.png",
+      "icons-jl/icon.icns",
+      "icons-jl/icon.ico"
     ]
   },
   "plugins": {

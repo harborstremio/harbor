@@ -175,7 +175,7 @@ export function StreamingSourcesPanel({
             <>
               Get yours at{" "}
               <ExtLink href="https://real-debrid.com/apitoken">real-debrid.com/apitoken</ExtLink>.
-              Used to check cache and unrestrict links. Harbor never adds or removes torrents on
+              Used to check cache and unrestrict links. JL Media Vision never adds or removes torrents on
               its own.
             </>
           }

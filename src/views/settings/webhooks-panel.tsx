@@ -97,7 +97,7 @@ export function WebhooksPanel() {
     inFlightRef.current[kind] = true;
     setStatus({ state: "busy", message: "Sending…" });
     const testPayload: WebhookPayload = {
-      text: `Harbor test message (${kind === "discord" ? "Discord" : "Telegram"}). If you can read this, your webhook is wired up.`,
+      text: `JL Media Vision test message (${kind === "discord" ? "Discord" : "Telegram"}). If you can read this, your webhook is wired up.`,
       items: [],
     };
     try {

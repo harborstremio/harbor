@@ -14,7 +14,7 @@ export function ContributorCard() {
         <div className="flex flex-col gap-1">
           <h3 className="text-[14px] font-semibold text-ink">Want to fix it yourself?</h3>
           <p className="text-[12.5px] leading-relaxed text-ink-muted">
-            Harbor is open source. PRs that reference a bug get reviewed within 48h and ship with
+            JL Media Vision is open source. PRs that reference a bug get reviewed within 48h and ship with
             credit in the release notes.
           </p>
         </div>

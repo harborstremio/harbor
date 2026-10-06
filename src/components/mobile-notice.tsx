@@ -8,7 +8,7 @@ export function MobileNotice() {
       <div className="flex items-center gap-3 text-ink">
         <HarborMark className="h-9 w-9" />
         <span className="font-display text-[36px] font-semibold leading-none tracking-tight">
-          Harbor
+          Media Vision
         </span>
       </div>
       <div className="flex max-w-md flex-col gap-3.5">
@@ -17,21 +17,13 @@ export function MobileNotice() {
         </h1>
         <p className="text-[14.5px] leading-relaxed text-ink-muted">
           {t(
-            "This instance of Harbor is made for desktop. Our standalone iOS and Android apps are coming soon, each with a bespoke, mobile-first experience built for its native platform.",
+            "This instance of JL Media Vision is made for desktop. Our standalone apps for phones and TVs are coming soon.",
           )}
         </p>
         <p className="text-[14.5px] leading-relaxed text-ink-muted">
-          {t("For now, please open this site on a desktop, or build Harbor from source.")}
+          {t("For now, please open this site on a desktop.")}
         </p>
       </div>
-      <a
-        href="https://github.com/harborstremio/harbor"
-        target="_blank"
-        rel="noreferrer"
-        className="flex h-11 items-center justify-center rounded-full bg-elevated px-6 text-[14px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
-      >
-        {t("Build from source")}
-      </a>
     </div>
   );
 }

@@ -26,7 +26,7 @@ function describe(status: number): { title: string; detail: string; offline: boo
   if (status >= 500)
     return {
       title: "This source is down",
-      detail: "The provider's server returned an error. Nothing on Harbor's side can fix this. Pick another source.",
+      detail: "The provider's server returned an error. Nothing on JL Media Vision's side can fix this. Pick another source.",
       offline: false,
     };
   if (status >= 400)
@@ -36,7 +36,7 @@ function describe(status: number): { title: string; detail: string; offline: boo
       offline: false,
     };
   return {
-    title: "Harbor couldn't play this source",
+    title: "JL Media Vision couldn't play this source",
     detail: "The source responded but the stream would not open. Try a different one.",
     offline: false,
   };

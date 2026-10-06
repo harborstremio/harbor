@@ -17,7 +17,7 @@ export async function startStremioWebAuth(): Promise<string> {
   const { listen } = await import("@tauri-apps/api/event");
   const port = await invoke<number>("stremio_auth_start");
   const callback = `http://127.0.0.1:${port}/cb`;
-  const url = `${LOGIN_URL}?appName=${encodeURIComponent("Harbor")}&appCallback=${encodeURIComponent(callback)}`;
+  const url = `${LOGIN_URL}?appName=${encodeURIComponent("JL Media Vision")}&appCallback=${encodeURIComponent(callback)}`;
 
   return new Promise<string>((resolve, reject) => {
     let settled = false;

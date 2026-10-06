@@ -62,14 +62,14 @@ export function Anime4kShaderList() {
         <span className="text-[14px] font-semibold text-ink">Anime4K presets</span>
         <span className="text-[12.5px] leading-snug text-ink-subtle">
           GPU shaders that sharpen lines and clean up gradients on anime as it plays. Pick a mode,
-          Harbor handles the shaders.
+          JL Media Vision handles the shaders.
         </span>
       </div>
 
       {!folder ? (
         <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/50 px-4 py-4">
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            One-time setup downloads the shader pack (about 1 MB) into Harbor. No files to hunt down.
+            One-time setup downloads the shader pack (about 1 MB) into JL Media Vision. No files to hunt down.
           </span>
           {error && (
             <span className="rounded-lg bg-danger/15 px-3 py-2 text-[12px] text-danger ring-1 ring-danger/30">

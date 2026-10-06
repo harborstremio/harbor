@@ -1,4 +1,4 @@
-import { HarborMark } from "@/components/icons/harbor-mark";
+import jlWordmark from "@/assets/brand/jl-wordmark-white.webp";
 import { useT } from "@/lib/i18n";
 
 export function WelcomeStep() {
@@ -6,32 +6,17 @@ export function WelcomeStep() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2 text-ink">
-          <HarborMark className="h-12 w-12 shrink-0" />
-          <span
-            className="font-display text-[44px] font-medium leading-none tracking-tight"
-            style={{ transform: "translateY(2px)" }}
-          >
-            Harb
-            <span
-              className="inline-block"
-              style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}
-            >
-              o
-            </span>
-            r
-          </span>
-        </div>
+        <img src={jlWordmark} alt="JL Media Vision" draggable={false} className="h-14 w-auto self-start object-contain" />
         <p className="text-[15.5px] leading-relaxed text-ink-muted">
           {t(
-            "A client for the Stremio protocol. Two minutes to set up; most of it optional. You stay in control of every key.",
+            "Live TV, sports, movies and shows in one place. A few minutes to set up, most of it optional. You stay in control of every key.",
           )}
         </p>
       </div>
       <div className="grid grid-cols-3 gap-3 pt-2">
-        <Bullet title={t("Current")}>{t("Trending, in theaters, what's on every streamer.")}</Bullet>
-        <Bullet title={t("Yours")}>{t("Your Stremio library + addons sync in untouched.")}</Bullet>
-        <Bullet title={t("Quiet")}>{t("No telemetry, no servers, no bundled keys.")}</Bullet>
+        <Bullet title={t("Live")}>{t("Your IPTV channels, the guide, and the Sports Hub.")}</Bullet>
+        <Bullet title={t("Yours")}>{t("Your provider, your debrid service, your addons.")}</Bullet>
+        <Bullet title={t("Synced")}>{t("Sign in to keep favorites the same on every device.")}</Bullet>
       </div>
     </div>
   );

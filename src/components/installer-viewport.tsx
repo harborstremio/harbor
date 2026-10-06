@@ -306,7 +306,7 @@ function InstallerViewport({
         {blocked && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-canvas px-6 text-center">
             <p className="text-[14px] font-semibold text-ink">
-              {title} won&apos;t load inside Harbor.
+              {title} won&apos;t load inside JL Media Vision.
             </p>
             <p className="max-w-[44ch] text-[12.5px] text-ink-muted">
               Open it in a regular browser, set it up there, then come back and paste the install

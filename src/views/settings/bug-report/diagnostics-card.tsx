@@ -11,7 +11,7 @@ export function DiagnosticsCard({ diag }: { diag: Diagnostics | null }) {
       </div>
     );
   }
-  const compact = `Harbor ${diag.appVersion} · ${diag.os}${diag.osVersion ? ` ${diag.osVersion}` : ""} · ${diag.viewport} · ${diag.locale}`;
+  const compact = `JL Media Vision ${diag.appVersion} · ${diag.os}${diag.osVersion ? ` ${diag.osVersion}` : ""} · ${diag.viewport} · ${diag.locale}`;
   return (
     <div className="rounded-xl border border-edge-soft/55 bg-canvas/30">
       <button

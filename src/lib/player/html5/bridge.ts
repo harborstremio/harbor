@@ -613,7 +613,7 @@ export function createHtml5Bridge(): PlayerBridge {
       try {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: info.title,
-          artist: info.artist ?? "Harbor",
+          artist: info.artist ?? "JL Media Vision",
           artwork: info.artwork ? [{ src: info.artwork, sizes: "512x512" }] : [],
         });
       } catch {}

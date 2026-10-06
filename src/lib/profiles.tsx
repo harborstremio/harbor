@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { isRemovedBuiltinAvatar } from "./avatars/catalog";
 import type { HiddenTabs } from "./lockable-tabs";
 import type { ContentFilters } from "./settings";
 
@@ -273,6 +274,7 @@ function readState(): ProfilesState {
       ) {
         next.avatar = null;
       }
+      if (isRemovedBuiltinAvatar(next.avatar)) next.avatar = null;
       return next;
     });
     return { profiles: migrated, activeId: parsed.activeId };

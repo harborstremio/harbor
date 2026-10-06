@@ -57,7 +57,7 @@ export function ThemePanel() {
 
       <Section
         title={t("Logo & app icon")}
-        subtitle={t("Make Harbor yours: swap the sidebar logo and the window/taskbar icon.")}
+        subtitle={t("Make JL Media Vision yours: swap the sidebar logo and the window/taskbar icon.")}
       >
         <LogoPicker />
       </Section>

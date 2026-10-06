@@ -237,7 +237,7 @@ export function P2PAdvancedSection() {
       >
         <ToggleRow
           label={t("Disable torrents entirely")}
-          sub={t("Harbor will not start the torrent engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable torrent streaming.")}
+          sub={t("JL Media Vision will not start the torrent engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable torrent streaming.")}
           value={settings.torrentsDisabled}
           onChange={(v) => {
             update({ torrentsDisabled: v });

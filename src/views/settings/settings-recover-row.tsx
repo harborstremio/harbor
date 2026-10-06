@@ -45,7 +45,7 @@ export function SettingsRecoverRow() {
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-[14px] font-medium text-ink">{t("Restore previous settings")}</span>
         <span className="text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("Updating separated settings per profile, which may have reset your theme and keys. Harbor still has your old setup saved. Bring it back on this profile, then reload.")}
+          {t("Updating separated settings per profile, which may have reset your theme and keys. JL Media Vision still has your old setup saved. Bring it back on this profile, then reload.")}
         </span>
       </div>
       <button

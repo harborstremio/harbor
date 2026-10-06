@@ -47,7 +47,7 @@ export function RollbackRow() {
 
       <p className="text-[11.5px] leading-relaxed text-ink-subtle">
         {t(
-          "While beta updates are on, Harbor offers the newest build again on its next check. Turn beta updates off above to stay on an earlier one.",
+          "While beta updates are on, JL Media Vision offers the newest build again on its next check. Turn beta updates off above to stay on an earlier one.",
         )}
       </p>
     </div>

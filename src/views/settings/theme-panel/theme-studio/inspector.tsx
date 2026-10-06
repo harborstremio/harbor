@@ -75,7 +75,7 @@ export function Inspector({
                 onSeed={onSeed}
               />
             </Group>
-            <Group title="Colors" sub="Every surface in Harbor maps to one of these.">
+            <Group title="Colors" sub="Every surface in JL Media Vision maps to one of these.">
               <ColorsGrid colors={draft.colors} onChange={(colors) => onPatch({ colors })} />
               <StyleSpecimen colors={draft.colors} />
             </Group>

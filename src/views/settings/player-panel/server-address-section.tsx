@@ -237,14 +237,14 @@ export function ServerAddressSection() {
 
       <ToggleRow
         label={t("Harbor in your browser")}
-        sub={t("Serves this exact install of Harbor as a web app on your network. Open it on a phone, laptop, or TV browser, sign in there, and it streams through this computer. You can also use the phone remote to control playback and cast to another device on this machine.")}
+        sub={t("Serves this exact install of JL Media Vision as a web app on your network. Open it on a phone, laptop, or TV browser, sign in there, and it streams through this computer. You can also use the phone remote to control playback and cast to another device on this machine.")}
         value={settings.serveWebUi || settings.remoteControlEnabled}
         onChange={(v) => update({ serveWebUi: v, remoteControlEnabled: v })}
       />
       {(settings.serveWebUi || settings.remoteControlEnabled) && (
         <>
-          <AddressRow label={t("Harbor in your browser (this computer)")} url={`http://127.0.0.1:${WEB_PORT}`} openable />
-          {lanIp && <AddressRow label={t("Harbor in your browser (Wi-Fi)")} url={`http://${lanIp}:${WEB_PORT}`} />}
+          <AddressRow label={t("JL Media Vision in your browser (this computer)")} url={`http://127.0.0.1:${WEB_PORT}`} openable />
+          {lanIp && <AddressRow label={t("JL Media Vision in your browser (Wi-Fi)")} url={`http://${lanIp}:${WEB_PORT}`} />}
           <AddressRow label={t("Phone remote (this computer)")} url={`http://127.0.0.1:${WEB_PORT}/remote`} openable />
           {lanIp && (
             <AddressRow label={t("Phone remote (Wi-Fi)")} url={`http://${lanIp}:${WEB_PORT}/remote`} />

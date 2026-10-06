@@ -45,7 +45,7 @@ export async function downloadBackup(): Promise<boolean> {
   const backup = await buildBackup();
   const text = JSON.stringify(backup, null, 2);
   const stamp = new Date().toISOString().slice(0, 10);
-  return downloadText(`harbor-backup-${stamp}.harbx`, text, ["harbx"], "Harbor backup");
+  return downloadText(`harbor-backup-${stamp}.harbx`, text, ["harbx"], "JL Media Vision backup");
 }
 
 export type ParsedBackup = { ok: true; backup: Backup } | { ok: false; error: string };
@@ -62,7 +62,7 @@ export function parseBackup(text: string): ParsedBackup {
   }
   const b = json as Partial<Backup>;
   if (b.format !== FORMAT) {
-    return { ok: false, error: "This is not a Harbor backup file." };
+    return { ok: false, error: "This is not a JL Media Vision backup file." };
   }
   if (!b.data || typeof b.data !== "object") {
     return { ok: false, error: "This backup has no data in it." };
