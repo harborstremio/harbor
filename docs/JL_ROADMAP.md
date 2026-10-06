@@ -1,8 +1,12 @@
-# JL Network roadmap
+# JL Media Vision roadmap
 
-JL Network is a branded fork of Harbor that adds JL's own features: onboarding, the IPTV Live Hub and Sports Hub, the sports data layer, households, and music. One codebase serves desktop, web/PWA, and Android TV / Nvidia Shield.
+JL Media Vision is a branded fork of Harbor that adds JL's own features: onboarding, the IPTV Live Hub and Sports Hub, the sports data layer, households, and music. One codebase serves desktop, web/PWA, and Android TV / Nvidia Shield.
 
-It replaces the JL Netfin streaming stack (Caddy → Stream Gateway → Dispatcharr → OVH). Video goes from the source straight to the player, the way Harbor already works.
+Names used here:
+- **JL Media Vision app:** this repository (the Harbor fork). Desktop, web and TV all come from it.
+- **JL API:** the Next.js project in `jafar-pixel/jl-netfin-iptv-streaming-frontend` (formerly JL Netfin). It keeps the paid API keys and serves shared data. It currently runs on `watch.jl-stream.com`.
+
+The app replaces the old streaming stack (Caddy → Stream Gateway → Dispatcharr → OVH). Video goes from the source straight to the player, the way Harbor already works.
 
 ## Decisions
 
@@ -11,7 +15,7 @@ It replaces the JL Netfin streaming stack (Caddy → Stream Gateway → Dispatch
 | Codebase | This Harbor fork. JL code lives in clearly named modules so upstream Harbor merges stay manageable. |
 | Customer accounts | Bring your own. Each customer adds their own M3U/Xtream provider and signs in to their own Real-Debrid or TorBox account. JL never supplies or shares provider or debrid accounts. |
 | Web playback | Same as Harbor web: a static site plus a small `/api-proxy` with an allow-list, for API calls only. Video plays in the browser (hls.js / mpegts.js) directly from the source. |
-| Android TV / Shield | Grow the existing JL Netfin Kotlin app: a TV shell that loads the JL web UI and plays video in native ExoPlayer. |
+| Android TV / Shield | Grow the existing Kotlin app in the JL API repo's `android/`: a TV shell that loads the JL web UI and plays video in native ExoPlayer. |
 | Server stack | Retire OVH, Dispatcharr, the Stream Gateway, and Caddy. Keep Vercel + Supabase for the web app, accounts, and the API that holds paid keys. |
 
 ## Platform targets
@@ -24,9 +28,9 @@ It replaces the JL Netfin streaming stack (Caddy → Stream Gateway → Dispatch
 
 **Web limit:** browsers block `http` streams on an `https` page, and many IPTV providers send no CORS headers. With no streaming server, those channels play on desktop and Shield but not on the web. The web app should spot them and offer "Play on my TV / desktop" rather than failing.
 
-## Where JL Netfin features go
+## Where the old JL Netfin features go
 
-| JL Netfin (`lib/…`) | Harbor fork destination | Notes |
+| JL API repo (`lib/…`) | JL Media Vision app destination | Notes |
 |---|---|---|
 | `dispatcharr.ts` (`parseM3U`, Xtream mapping) | `src/lib/iptv/` (already has `m3u.ts`, `xtream*.ts`, `xmltv.ts`) | Use Harbor's IPTV store. Port only the JL extras it lacks. |
 | `sports.ts`, `thesportsdb.ts`, `allsports.ts`, `as-*.ts`, `cfbd.ts`, `odds.ts`, `espn.ts` | Data comes from the JL API. UI goes in `src/views/live/live-home/sports/` | Harbor's ESPN sports marquee stays. JL adds its providers on top. |
@@ -42,14 +46,14 @@ It replaces the JL Netfin streaming stack (Caddy → Stream Gateway → Dispatch
 
 Any key built into the desktop EXE, the web bundle, or the Android app can be pulled out by a customer. That covers TheSportsDB, AllSports, CollegeFootballData, The Odds API, and Spotify.
 
-Keep these keys on the server: the existing JL Netfin `/api/v1/sports`, `/ticker`, `/game-*`, `/lyrics`, and `/spotify` routes on Vercel. The apps call those routes using the customer's JL session.
+Keep these keys on the JL API. Shared data (scores, schedules, odds, rankings) is the same for every customer, so it comes from a public, CDN-cached feed: upstream calls stay bounded however many people use the app. Anything personal (favorites, households) stays on the device or goes through a signed-in JL session.
 
 Customer-owned keys (Real-Debrid, TorBox, TMDB, the M3U login) stay on the customer's device. That means local app storage, sent only to the provider they belong to.
 
 ## Phases
 
 ### Phase 1: JL build baseline (this branch)
-- [x] `src-tauri/tauri.jl-dev.conf.json`: name "JL Network", ID `app.jlnetwork.dev`, own file association, and an updater URL on `watch.jl-stream.com`.
+- [x] `src-tauri/tauri.jl-dev.conf.json`: name "JL Media Vision", ID `app.jlnetwork.dev`, own file association, and an updater URL on `watch.jl-stream.com`.
 - [x] `pnpm tauri:build:jl` script.
 - [ ] Push the local Windows commit `0f0de0b` ("fix: keep debrid keys local to resolvers") to this branch. It exists only on the build machine. If both sides changed `tauri.jl-dev.conf.json`, keep the local values in the merge.
 - [ ] Updater signing: run `pnpm tauri signer generate`, set the JL public key in `plugins.updater.pubkey`, and host `latest.json` at the updater URL. Until then the config still holds Harbor's public key. Update checks fail safely, and the JL build never installs an upstream Harbor build.
@@ -68,28 +72,42 @@ New screens in Harbor's first-run modal (`src/components/onboarding.tsx`), right
 - [ ] JL branding for the Welcome and Splash screens (still Harbor's).
 
 ### Phase 3: Hubs
-- **IPTV Live Hub:** Harbor's Live view with JL group ordering, favorites, now/next, and catch-up.
-- **Sports Hub:** Harbor's sports marquee plus JL Game Day, the marquee ranking, match center, and odds. Each game links to the M3U channels that carry it.
-- **Ticker:** favorite teams and players across the app shell.
+**3a, on the device (done):** a Sports Hub section on the Live home, above Harbor's own marquee.
+- [x] ESPN game data gained team ids, location/nickname, AP rank, odds and national network (`src/lib/sports/espn.ts`; all optional fields).
+- [x] JL's event-channel parser ported (`src/lib/jl/sports/event-parse.ts`, JL's own tests carried over).
+- [x] JL's marquee ranking ported to ESPN games (`src/lib/jl/sports/rank.ts`): your teams, AP ranks, close lines, national TV, live/starting soon, day-of-week weighting.
+- [x] "Which of my channels has this game?" on the customer's own playlist (`src/lib/jl/sports/channels.ts`): provider event channels, the network's channel, guide listings.
+- [x] Follow stars per team (stored per profile), a "Your teams" ticker, and a **Watch on <channel>** button. Cards open Harbor's match page, so the field view stays.
+- Leagues: NFL, NCAAF, NBA, NCAAB, NHL, MLB.
+
+**3b, JL API feed (next):**
+- [ ] Public `GET /api/v1/feed/sports` on the JL API: CFBD classification and team pages, AllSports live scores and scoring plays, Odds API lines, TheSportsDB. No channels, no login; `s-maxage` caching and CORS for the app's web origin.
+- [ ] Merge that feed into the device ranking (FBS boost, scoring-play alerts for followed teams and players).
+- [ ] Follow players and student athletes; Game Day wall; ticker across the whole app shell.
+- [ ] Favorite-teams step in onboarding.
+- [ ] **IPTV Live Hub:** JL group ordering on top of Harbor's Live view.
 
 ### Phase 4: JL API and households
-- Vercel: keep the JL Netfin `/api/v1/*` routes that wrap paid APIs. Add CORS for the web origin. Desktop and Android call them with a Supabase session.
+- Keep the JL API's `/api/v1/*` routes that wrap paid APIs. Add CORS for the web origin. Personal routes use a Supabase session.
 - Turn off and remove the OVH-only routes (`/api/v1/play`, playback tickets, the relay).
 - Households and profile sync through Supabase.
 
 ### Phase 5: Web / PWA on `watch.jl-stream.com`
-- Deploy the `vp build` output to Vercel.
-- Turn Harbor's nginx `/api-proxy` allow-list (`src-tauri/relay/harbor-web.nginx`) into a Vercel route or Edge Function with the same host list. API calls only, never video.
-- Add a PWA manifest and service worker for the app shell.
-- Show "Play on device" for `http`-only and CORS-blocked IPTV channels.
+Plan: stage, then swap. Nothing live breaks in between.
+- [x] `vercel.json` (pnpm build to `dist`, single-page-app fallback) and `api/proxy.ts`: an Edge Function that replaces Harbor's nginx `/api-proxy` (`src-tauri/relay/harbor-web.nginx`). It uses the same host allow-list and `X-Harbor-Auth` → `Authorization` mapping. API calls only, never video.
+- [ ] New Vercel project for this repo, deploying this branch to `beta.jl-stream.com` (Cloudflare: CNAME `beta` → `cname.vercel-dns.com`, DNS only).
+- [ ] Give the JL API `api.jl-stream.com` alongside `watch.jl-stream.com`.
+- [ ] Sign-off on beta, then move `watch.jl-stream.com` from the JL API project to the app project.
+- [ ] Add a PWA manifest and service worker for the app shell.
+- [ ] Show "Play on device" for `http`-only and CORS-blocked IPTV channels.
 
 ### Phase 6: Nvidia Shield / Android TV
-- Grow `jl-netfin-iptv-streaming-frontend/android` (or move it here as `android/`): a WebView that loads the JL UI and a JS bridge for `play(url, headers)` into ExoPlayer/Media3, plus D-pad focus handling.
+- Grow the JL API repo's `android/` (or move it here as `android/`): a WebView that loads the JL UI and a JS bridge for `play(url, headers)` into ExoPlayer/Media3, plus D-pad focus handling.
 - Release signing stays in environment variables. Move `jl-sideload.jks` out of git.
 
 ### Phase 7: Retire OVH
 - When desktop, web, and Shield all play through direct sources, shut down Dispatcharr, the Stream Gateway, and the Caddy routes on `tv.jl-stream.com`.
-- Remove the matching code and the `ops/` workers from JL Netfin.
+- Remove the matching code and the `ops/` workers from the JL API repo.
 
 ## Each change must pass
 
