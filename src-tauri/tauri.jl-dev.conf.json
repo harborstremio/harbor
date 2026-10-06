@@ -1,11 +1,11 @@
 {
-  "productName": "JL Network",
+  "productName": "JL Media Vision",
   "identifier": "app.jlnetwork.dev",
   "app": {
     "windows": [
       {
         "label": "main",
-        "title": "JL Network",
+        "title": "JL Media Vision",
         "width": 1280,
         "height": 800,
         "minWidth": 960,
@@ -27,7 +27,7 @@
     "fileAssociations": [
       {
         "ext": ["mkv", "mp4", "avi", "mov", "webm", "m4v"],
-        "name": "JLNetworkVideo",
+        "name": "JLMediaVisionVideo",
         "description": "Video file",
         "role": "Viewer"
       }

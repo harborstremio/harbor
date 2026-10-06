@@ -45,7 +45,7 @@ export function TorrentioStep() {
         <ShieldCheck size={18} className="mt-0.5 shrink-0 text-accent" />
         <span className="text-[13px] leading-relaxed text-ink-muted">
           {t(
-            "JL Network installs Torrentio's standard address, without your debrid key in it. You can remove it anytime from Addons.",
+            "JL Media Vision installs Torrentio's standard address, without your debrid key in it. You can remove it anytime from Addons.",
           )}
         </span>
       </div>
