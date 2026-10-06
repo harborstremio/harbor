@@ -16,6 +16,7 @@ export function useBridgeLoad(params: {
   bridgeReady: boolean;
   bridgeKey: string;
   src: PlayerSrc;
+  activeSrc?: PlayerSrc;
   transcodedUrl: string | null;
   season: number | undefined;
   episode: number | undefined;
@@ -33,6 +34,7 @@ export function useBridgeLoad(params: {
     bridgeReady,
     bridgeKey,
     src,
+    activeSrc,
     transcodedUrl,
     season,
     episode,
@@ -46,6 +48,7 @@ export function useBridgeLoad(params: {
   resumePlaybackRef.current = settings.resumePlayback;
 
   const lastLoadedUrlRef = useRef<string | null>(null);
+  const lastLoadedBridgeKeyRef = useRef<string | null>(null);
   const firstLoadRef = useRef(true);
   const [pendingResumeSec, setPendingResumeSec] = useState<number | null>(null);
   const [pendingSeekSec, setPendingSeekSec] = useState<number | null>(null);
@@ -55,33 +58,46 @@ export function useBridgeLoad(params: {
     if (!bridgeReady) return;
     const bridge = bridgeRef.current;
     if (!bridge) return;
-    const playUrl = transcodedUrl ?? src.url;
+    if (lastLoadedBridgeKeyRef.current !== bridgeKey) {
+      lastLoadedBridgeKeyRef.current = bridgeKey;
+      lastLoadedUrlRef.current = null;
+    }
+    const loadSrc = activeSrc ?? src;
+    const playUrl = transcodedUrl ?? loadSrc.url;
     const loadKey = `${playUrl}|s${season ?? ""}e${episode ?? ""}`;
     if (lastLoadedUrlRef.current === loadKey) return;
+    if (lastLoadedUrlRef.current !== null && loadSrc.url !== src.url && !transcodedUrl) {
+      // The in-place switch already loaded this URL. Clearing a previous
+      // transcode or updating metadata must not reload the original source.
+      lastLoadedUrlRef.current = loadKey;
+      return;
+    }
     lastLoadedUrlRef.current = loadKey;
     const isFirstLoad = firstLoadRef.current;
     firstLoadRef.current = false;
     const isAutoRetry = (src.attempt ?? 0) > 0;
     const isLive =
       !!src.meta.id?.startsWith("iptv:") ||
-      (!!src.meta.type && !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
+      (!!src.meta.type &&
+        !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
     let cancelled = false;
     (async () => {
       const openingVid = videoIdFor(
         src,
         cloudWriteId(src.meta.id, src.imdbId ?? null, src.imdbIdVerified === true),
       );
-      const resolved = isLive || src.startFromZero
-        ? { ms: 0, fromRemote: false, finished: false }
-        : await resolveStartMs(
-            src.meta.id,
-            season,
-            episode,
-            authKey,
-            src.imdbId ?? null,
-            src.imdbIdVerified === true,
-            openingVid,
-          );
+      const resolved =
+        isLive || src.startFromZero
+          ? { ms: 0, fromRemote: false, finished: false }
+          : await resolveStartMs(
+              src.meta.id,
+              season,
+              episode,
+              authKey,
+              src.imdbId ?? null,
+              src.imdbIdVerified === true,
+              openingVid,
+            );
       const startMs = resolved.ms;
       const runtimeMin = src.episode?.runtime ?? null;
       const durationMs = runtimeMin && runtimeMin > 0 ? runtimeMin * 60_000 : 0;
@@ -97,12 +113,13 @@ export function useBridgeLoad(params: {
         startSec > RESUME_PROMPT_MIN_SEC &&
         !guestInRoom;
       try {
+        if (cancelled) return;
         await bridge.load({
           url: playUrl,
-          subtitles: src.subtitles,
-          notWebReady: src.notWebReady,
+          subtitles: loadSrc.subtitles,
+          notWebReady: loadSrc.notWebReady,
           isLive,
-          headers: src.headers,
+          headers: loadSrc.headers,
           startAtSec: guestInRoom
             ? undefined
             : eligibleForPrompt
@@ -127,6 +144,7 @@ export function useBridgeLoad(params: {
           unsub?.();
         };
         unsub = bridge.subscribe((s) => {
+          if (synced) return;
           if (cancelled) {
             stop();
             return;
@@ -159,11 +177,19 @@ export function useBridgeLoad(params: {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bridgeReady, bridgeKey, src.url, src.notWebReady, src.meta.id, src.subtitles, season, episode, transcodedUrl, authKey]);
-
-  useEffect(() => {
-    lastLoadedUrlRef.current = null;
-  }, [bridgeKey]);
+  }, [
+    bridgeReady,
+    bridgeKey,
+    src.url,
+    src.notWebReady,
+    src.meta.id,
+    src.subtitles,
+    activeSrc?.url,
+    season,
+    episode,
+    transcodedUrl,
+    authKey,
+  ]);
 
   const acknowledgeResume = (action: "resume" | "start-over") => {
     ackRef.current?.(action);
