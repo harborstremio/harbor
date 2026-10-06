@@ -17,6 +17,12 @@
       "permanent": false
     },
     {
+      "source": "/app",
+      "has": [{ "type": "host", "value": "mediavision.jl-stream.com" }],
+      "destination": "https://jl-media-vision.vercel.app/",
+      "permanent": false
+    },
+    {
       "source": "/windows",
       "has": [{ "type": "host", "value": "mediavision.jl-stream.com" }],
       "destination": "https://github.com/jafar-pixel/harbor/releases/latest/download/JL-Media-Vision-Setup-x64.exe",
