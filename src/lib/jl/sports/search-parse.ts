@@ -11,12 +11,12 @@ export type SportsSearchHit = {
   image: string | null;
 };
 
-/** ESPN league uids for the leagues the JL Sports Hub covers. */
+/** ESPN league uids for the leagues the JL Sports Hub covers, as the league tags games carry. */
 export const LEAGUE_BY_ESPN_UID: Record<string, string> = {
   "28": "NFL",
   "23": "NCAAF",
   "46": "NBA",
-  "41": "NCAAB",
+  "41": "NCAA",
   "90": "NHL",
   "10": "MLB",
 };
@@ -73,7 +73,7 @@ const HEADSHOT_PATH: Record<string, string> = {
   NFL: "nfl",
   NCAAF: "college-football",
   NBA: "nba",
-  NCAAB: "mens-college-basketball",
+  NCAA: "mens-college-basketball",
   NHL: "nhl",
   MLB: "mlb",
 };

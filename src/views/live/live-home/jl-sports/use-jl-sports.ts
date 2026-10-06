@@ -12,7 +12,7 @@ import { followedGamesThisWeek, selectTopGames, teamsMissingFromScoreboard } fro
 import { isFavoriteGame, rankGames, type JlFavoriteTeam, type RankedGame } from "@/lib/jl/sports/rank";
 import type { SportsGame } from "@/lib/sports/espn";
 
-export const JL_SPORTS_LEAGUES = ["NFL", "NCAAF", "NBA", "NCAAB", "NHL", "MLB"];
+export const JL_SPORTS_LEAGUES = ["NFL", "NCAAF", "NBA", "NCAAB", "NHL", "MLB", "EPL", "UCL", "MLS"];
 
 const POLL_MS = 30_000;
 const TICKER_GAMES = 16;

@@ -11,6 +11,7 @@ import type { PlayerSrc, PlayEpisode } from "@/lib/view";
 import { CastLayer } from "./cast-layer";
 import { BufferingIndicator } from "./buffering-indicator";
 import { DragClickStage } from "./drag-click-stage";
+import { JlLiveField } from "./jl-live-field";
 import { LiveLayer } from "./live-layer";
 import { LoaderLayer } from "./loader-layer";
 import { PanelsLayer } from "./panels-layer";
@@ -427,6 +428,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         srcUrl={p.src.url}
         channelName={p.src.meta.name ?? p.src.title}
       />
+      <JlLiveField channelId={p.liveOverlay.currentChannelId} chromeVisible={p.showChrome} />
       <StreamSwitcher
         open={p.switcherOpen}
         onClose={() => p.setSwitcherOpen(() => false)}

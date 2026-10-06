@@ -515,15 +515,20 @@ async function fetchLeagueLastResults(def: LeagueDef): Promise<SportsGame[]> {
   return [];
 }
 
-/** Scoreboard-shaped ESPN events for a league key, as games. Empty for an unknown league. */
+// Games carry the league tag ("NCAA" for college basketball), settings the key ("NCAAB"); both are unique.
+function leagueDef(keyOrTag: string): LeagueDef | undefined {
+  return BY_KEY.get(keyOrTag) ?? LEAGUES.find((l) => l.tag === keyOrTag);
+}
+
+/** Scoreboard-shaped ESPN events for a league key or tag, as games. Empty for an unknown league. */
 export function parseLeagueEvents(events: unknown[], league: string): SportsGame[] {
-  const def = BY_KEY.get(league);
+  const def = leagueDef(league);
   return def ? parseEvents(events, def) : [];
 }
 
-/** The ESPN site API path for a league key ("football/college-football"). */
+/** The ESPN site API path for a league key or tag ("football/college-football"). */
 export function leaguePath(league: string): string | null {
-  return BY_KEY.get(league)?.path ?? null;
+  return leagueDef(league)?.path ?? null;
 }
 
 function parseEvents(events: unknown[], def: LeagueDef): SportsGame[] {
