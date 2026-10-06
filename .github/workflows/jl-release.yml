@@ -1,10 +1,13 @@
 # Builds the JL Media Vision Windows installer and publishes it as a GitHub release.
 # The download site links to releases/latest/download/JL-Media-Vision-Setup-x64.exe, a
 # stable-named copy of the installer uploaded next to the versioned one.
+# Start it by pushing a tag that matches the app version, e.g. jl-v0.9.21.
 name: JL Release
 
 on:
   workflow_dispatch:
+  push:
+    tags: ["jl-v*"]
 
 permissions:
   contents: write
