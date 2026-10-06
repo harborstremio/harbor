@@ -1,13 +1,16 @@
 # Builds the JL Media Vision Windows installer and Android TV app and publishes them as a
 # GitHub release. The download site links to releases/latest/download/JL-Media-Vision-Setup-x64.exe
 # and releases/latest/download/JL-Media-Vision-TV.apk.
-# Start it by pushing a tag that matches the app version, e.g. jl-v0.9.21.
+# Start it by changing .github/jl-release (a one-line note) on the release branch, or by pushing
+# a jl-v* tag. The release and its jl-v<version> tag are created on GitHub by tauri-action.
 name: JL Release
 
 on:
   workflow_dispatch:
   push:
     tags: ["jl-v*"]
+    branches: ["claude/determined-planck-b1p158"]
+    paths: [".github/jl-release"]
 
 permissions:
   contents: write
@@ -80,6 +83,7 @@ jobs:
           tauriScript: pnpm tauri
           args: --target x86_64-pc-windows-msvc --config src-tauri/tauri.jl-dev.conf.json --bundles nsis
           tagName: jl-v__VERSION__
+          commitish: ${{ github.sha }}
           releaseName: JL Media Vision v__VERSION__
           releaseBody: Windows installer for JL Media Vision. Download JL-Media-Vision-Setup-x64.exe and run it.
           releaseDraft: false
