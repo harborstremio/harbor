@@ -308,8 +308,13 @@ code {
   margin-top: 28px;
 }
 
-.glass-chips span {
+.glass-chips a {
   padding: 10px 20px;
+  text-decoration: none;
+  transition:
+    transform 0.2s var(--ease),
+    box-shadow 0.3s,
+    filter 0.3s;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
@@ -322,6 +327,21 @@ code {
 .glass-chips .c1 { background: linear-gradient(180deg, rgba(255, 122, 46, 0.35), rgba(255, 122, 46, 0.08)); border-color: rgba(255, 150, 80, 0.55); }
 .glass-chips .c2 { background: linear-gradient(180deg, rgba(225, 29, 72, 0.35), rgba(225, 29, 72, 0.08)); border-color: rgba(244, 114, 182, 0.5); }
 .glass-chips .c3 { background: linear-gradient(180deg, rgba(124, 58, 237, 0.35), rgba(124, 58, 237, 0.08)); border-color: rgba(167, 139, 250, 0.55); }
+.glass-chips a:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.25);
+  box-shadow: 0 10px 30px -10px rgba(255, 122, 46, 0.6);
+}
+
+.glass-chips a:active {
+  transform: scale(0.96);
+}
+
+.glass-chips a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
 .glass-chips .c4 { background: linear-gradient(180deg, rgba(59, 123, 255, 0.35), rgba(59, 123, 255, 0.08)); border-color: rgba(125, 165, 255, 0.55); }
 
 .lede {
@@ -1353,7 +1373,7 @@ code {
   .cta .btn {
     flex: 1 1 100%;
   }
-  .glass-chips span {
+  .glass-chips a {
     padding: 8px 14px;
   }
 }
