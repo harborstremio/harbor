@@ -3,18 +3,25 @@ import { useT } from "@/lib/i18n";
 import type { IptvChannel } from "@/lib/iptv/types";
 import type { JlFavoritePlayer } from "@/lib/jl/sports/favorites";
 import type { SportsGame } from "@/lib/sports/espn";
+import { AccountDialog } from "./account-dialog";
 import { FollowPanel } from "./follow-panel";
 import { JlDialog } from "./jl-dialog";
 import { PregameInsightView } from "./pregame-insight";
 import type { JlHubGame } from "./use-jl-sports";
 import { WatchChooser } from "./watch-chooser";
 
-type Open = { kind: "watch"; item: JlHubGame } | { kind: "pregame"; item: JlHubGame } | { kind: "follow" } | null;
+type Open =
+  | { kind: "watch"; item: JlHubGame }
+  | { kind: "pregame"; item: JlHubGame }
+  | { kind: "follow" }
+  | { kind: "account" }
+  | null;
 
 export type JlSportsActions = {
   watch: (item: JlHubGame) => void;
   pregame: (item: JlHubGame) => void;
   follow: () => void;
+  account: () => void;
 };
 
 /** One place for the Sports Hub's dialogs, shared by the hero and the hub rows. */
@@ -31,6 +38,7 @@ export function useJlSportsDialogs(params: {
     watch: (item) => setOpen({ kind: "watch", item }),
     pregame: (item) => setOpen({ kind: "pregame", item }),
     follow: () => setOpen({ kind: "follow" }),
+    account: () => setOpen({ kind: "account" }),
   };
   let dialogs: ReactNode = null;
   if (open?.kind === "watch") {
@@ -44,6 +52,8 @@ export function useJlSportsDialogs(params: {
     );
   } else if (open?.kind === "follow") {
     dialogs = <FollowPanel onClose={close} />;
+  } else if (open?.kind === "account") {
+    dialogs = <AccountDialog onClose={close} />;
   }
   return { actions, dialogs };
 }

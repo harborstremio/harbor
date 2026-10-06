@@ -1,6 +1,8 @@
-import { Play, Sparkles, Star, Users } from "lucide-react";
+import { Cloud, Play, Sparkles, Star, Users } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
+import { useJlSession } from "@/lib/jl/account/client";
+import { useJlLink } from "@/lib/jl/account/sync";
 import { isFollowing, toggleFavoriteTeam } from "@/lib/jl/sports/favorites";
 import type { JlFavoriteTeam } from "@/lib/jl/sports/rank";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
@@ -24,6 +26,8 @@ export function JlSportsHub({
   onOpenGame: (game: SportsGame) => void;
 }) {
   const t = useT();
+  const session = useJlSession();
+  const link = useJlLink();
   return (
     <section className="flex flex-col gap-3 ps-[9px]">
       <div className="flex items-center gap-2.5 pe-[9px]">
@@ -35,6 +39,13 @@ export function JlSportsHub({
         >
           <Users size={13} />
           {t("Teams & players")}
+        </button>
+        <button
+          onClick={actions.account}
+          className="flex h-8 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+        >
+          <Cloud size={13} className={link && session ? "text-accent" : ""} />
+          {link && session ? t("Synced · {profile}", { profile: link.name }) : t("Sign in to sync")}
         </button>
       </div>
       {ticker.length > 0 && <FavoritesTicker items={ticker} onWatch={actions.watch} />}

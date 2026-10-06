@@ -77,20 +77,35 @@ New screens in Harbor's first-run modal (`src/components/onboarding.tsx`), right
 - [x] JL's event-channel parser ported (`src/lib/jl/sports/event-parse.ts`, JL's own tests carried over).
 - [x] JL's marquee ranking ported to ESPN games (`src/lib/jl/sports/rank.ts`): your teams, AP ranks, close lines, national TV, live/starting soon, day-of-week weighting.
 - [x] "Which of my channels has this game?" on the customer's own playlist (`src/lib/jl/sports/channels.ts`): provider event channels, the network's channel, guide listings.
-- [x] Follow stars per team (stored per profile), a "Your teams" ticker, and a **Watch on <channel>** button. Cards open Harbor's match page, so the field view stays.
-- Leagues: NFL, NCAAF, NBA, NCAAB, NHL, MLB.
+- [x] Follow stars per team (stored per profile), a "Your teams" ticker. Cards open Harbor's match page, so the field view stays.
+- Leagues: NFL, NCAAF, NBA, NCAAB, NHL, MLB, EPL, Champions League, MLS.
+
+**Game Day and players (done):**
+- [x] **Top 10** = the week's best games plus each followed team's next game this week, at any level (`src/lib/jl/sports/gameday.ts`). College football uses the full FBS week. Followed teams missing from the scoreboard (Division III schools like Gallaudet, ESPN team 417) come from their own ESPN schedules. Saturdays favor college football; Sunday, Monday and Thursday favor the NFL.
+- [x] **Teams & players:** ESPN search to follow teams, schools and players. Following a player follows their team for Game Day.
+- [x] **Pre-game insight** for your teams' games: records, ESPN's win projection, season leaders, injuries (your players' flagged), and your players' season lines.
+- [x] **Watch chooser:** M3U channels first (game feed, network, TV-guide matches, alternate language last), then other ways to watch (streaming services, game details). Nothing plays until a channel is picked.
+- [x] **Hero slider** at the top of the Live home: Top 10 games, your players, and the #1 game's leading players.
+
+**Live field (done):** opens over a game picked from the Watch chooser while it's live; Solid or See-through.
+- [x] US football: ball spot, line of scrimmage, first-down line, red zone, down and distance, last play, current leaders (ESPN game summary).
+- [x] Soccer: the players on the pitch now by formation (substitutions and red cards applied), goal and card badges, key match stats.
+- Positions are schematic. ESPN publishes ball spots and lineups, not player tracking; live player dots would need a licensed tracking feed.
 
 **3b, JL API feed (next):**
 - [ ] Public `GET /api/v1/feed/sports` on the JL API: CFBD classification and team pages, AllSports live scores and scoring plays, Odds API lines, TheSportsDB. No channels, no login; `s-maxage` caching and CORS for the app's web origin.
 - [ ] Merge that feed into the device ranking (FBS boost, scoring-play alerts for followed teams and players).
-- [ ] Follow players and student athletes; Game Day wall; ticker across the whole app shell.
+- [ ] Student athletes (SIDEARM rosters such as gallaudetbison.com); Game Day wall; ticker across the whole app shell.
 - [ ] Favorite-teams step in onboarding.
 - [ ] **IPTV Live Hub:** JL group ordering on top of Harbor's Live view.
 
 ### Phase 4: JL API and households
-- Keep the JL API's `/api/v1/*` routes that wrap paid APIs. Add CORS for the web origin. Personal routes use a Supabase session.
+- [x] **JL sign-in and sync** (`src/lib/jl/account/`): email and password against the JL Supabase project (the same accounts as the web app), then pick or create the household profile this device follows. Followed teams and players sync through the existing `sports_favorites` table, which row-level security limits to the profile's owner. The first link merges both sides; after that the account is the source of truth, changes push immediately, and the app pulls on focus and every 5 minutes.
+- [ ] Build settings: `VITE_JL_SUPABASE_URL` and `VITE_JL_SUPABASE_ANON_KEY` (the public anon key) for desktop builds and the Vercel project. Without them the sign-in screen says accounts aren't set up.
+- [ ] Customer sign-up: today membership is granted server-side only (`members` table), so each customer account must be added by the owner.
+- [ ] Sync settings beyond sports favorites (IPTV playlists stay on each device by design: they hold provider logins).
+- Keep the JL API's `/api/v1/*` routes that wrap paid APIs. Add CORS for the web origin.
 - Turn off and remove the OVH-only routes (`/api/v1/play`, playback tickets, the relay).
-- Households and profile sync through Supabase.
 
 ### Phase 5: Web / PWA on `watch.jl-stream.com`
 Plan: stage, then swap. Nothing live breaks in between.

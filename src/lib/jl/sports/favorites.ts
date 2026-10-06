@@ -19,6 +19,16 @@ type ListStore<T> = {
   write: (list: T[]) => void;
 };
 
+// Told about every write to either list (the account sync pushes changes from here).
+const changeListeners = new Set<() => void>();
+
+export function subscribeJlFavoriteChanges(fn: () => void): () => void {
+  changeListeners.add(fn);
+  return () => {
+    changeListeners.delete(fn);
+  };
+}
+
 function createProfileListStore<T>(baseKey: string, valid: (item: unknown) => item is T): ListStore<T> {
   const empty: T[] = [];
   const listeners = new Set<() => void>();
@@ -59,6 +69,7 @@ function createProfileListStore<T>(baseKey: string, valid: (item: unknown) => it
       /* storage unavailable: nothing can be saved */
     }
     for (const fn of listeners) fn();
+    for (const fn of changeListeners) fn();
   };
 
   return { read, write, useList: () => useSyncExternalStore(subscribe, read, () => empty) };

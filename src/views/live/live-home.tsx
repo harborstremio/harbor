@@ -8,6 +8,7 @@ import { isHydratableChannel } from "@/lib/iptv/channel-hydration";
 import { flagUrl } from "@/lib/iptv/country-detect";
 import { clearCountries, toggleCountry, useCountryPrefs } from "@/lib/iptv/country-prefs";
 import { useFavorites } from "@/lib/iptv/favorites";
+import { useJlSync } from "@/lib/jl/account/sync";
 import { DEFAULT_SPORTS_LEAGUES, LEAGUES } from "@/lib/sports/espn";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
@@ -84,6 +85,7 @@ export function LiveHome({
     [sportsLeague, userSportsLeagues],
   );
   const sports = useSports({ enabled: true, leagues: sportsLeagues });
+  useJlSync();
   const jlSports = useJlSports({ channels, epg, nowMs });
   const jlDialogs = useJlSportsDialogs({ players: jlSports.players, onPlay, onOpenGame: openMatchDetail });
 
