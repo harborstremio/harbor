@@ -1,24 +1,76 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { EpgIndex, IptvChannel } from "@/lib/iptv/types";
 import { buildSportsChannelIndex, channelsForGame, type GameChannel } from "@/lib/jl/sports/channels";
-import { useJlSportsFavorites } from "@/lib/jl/sports/favorites";
-import { isFavoriteGame, rankGames, type RankedGame } from "@/lib/jl/sports/rank";
+import {
+  effectiveTeams,
+  useJlFavoritePlayers,
+  useJlSportsFavorites,
+  type JlFavoritePlayer,
+} from "@/lib/jl/sports/favorites";
+import { fetchJlScoreboard, fetchTeamGames } from "@/lib/jl/sports/feed";
+import { followedGamesThisWeek, selectTopGames, teamsMissingFromScoreboard } from "@/lib/jl/sports/gameday";
+import { isFavoriteGame, rankGames, type JlFavoriteTeam, type RankedGame } from "@/lib/jl/sports/rank";
 import type { SportsGame } from "@/lib/sports/espn";
-import { useSports } from "../use-sports";
 
 export const JL_SPORTS_LEAGUES = ["NFL", "NCAAF", "NBA", "NCAAB", "NHL", "MLB"];
 
-const TOP_GAMES = 10;
+const POLL_MS = 30_000;
 const TICKER_GAMES = 16;
+const DAY_MS = 24 * 3600000;
 // Event channel names carry no year; the index is rebuilt at most every ten minutes.
 const INDEX_BUCKET_MS = 10 * 60000;
 
 export type JlHubGame = RankedGame & { channels: GameChannel[] };
 
+/** A followed player and their team's next game this week, if any. */
+export type JlPlayerSlide = { player: JlFavoritePlayer; next: JlHubGame | null };
+
+/** Scoreboards for JL's leagues plus the schedules of followed teams that aren't on them. */
+function useJlGames(favorites: JlFavoriteTeam[]): SportsGame[] {
+  const [games, setGames] = useState<SportsGame[]>([]);
+  const favoritesKey = favorites.map((f) => `${f.league}:${f.id}`).join(",");
+
+  useEffect(() => {
+    let cancelled = false;
+    const tick = async () => {
+      if (document.visibilityState !== "visible") return;
+      const boards = (await Promise.all(JL_SPORTS_LEAGUES.map((l) => fetchJlScoreboard(l)))).flat();
+      const missing = teamsMissingFromScoreboard(boards, favorites);
+      const extra = (await Promise.all(missing.map((f) => fetchTeamGames(f.league, f.id)))).flat();
+      const seen = new Set<string>();
+      const merged: SportsGame[] = [];
+      for (const g of [...boards, ...extra]) {
+        const key = `${g.league}:${g.id}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        merged.push(g);
+      }
+      if (!cancelled) setGames(merged);
+    };
+    void tick();
+    const timer = window.setInterval(() => void tick(), POLL_MS);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void tick();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+    // favoritesKey captures every change to the followed teams.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [favoritesKey]);
+
+  return games;
+}
+
 export function useJlSports(params: { channels: IptvChannel[]; epg: EpgIndex | null; nowMs: number }) {
   const { channels, epg, nowMs } = params;
-  const games = useSports({ enabled: true, leagues: JL_SPORTS_LEAGUES });
-  const favorites = useJlSportsFavorites();
+  const teams = useJlSportsFavorites();
+  const players = useJlFavoritePlayers();
+  const favorites = useMemo(() => effectiveTeams(teams, players), [teams, players]);
+  const games = useJlGames(favorites);
   const bucket = Math.floor(nowMs / INDEX_BUCKET_MS);
 
   const index = useMemo(
@@ -30,20 +82,32 @@ export function useJlSports(params: { channels: IptvChannel[]; epg: EpgIndex | n
     const now = new Date(nowMs);
     const channelCache = new Map<string, GameChannel[]>();
     const channelsOf = (g: SportsGame) => {
-      let found = channelCache.get(g.id);
+      const key = `${g.league}:${g.id}`;
+      let found = channelCache.get(key);
       if (!found) {
         found = channelsForGame(g, index, now);
-        channelCache.set(g.id, found);
+        channelCache.set(key, found);
       }
       return found;
     };
     const ranked = rankGames(games, favorites, { now, watchable: (g) => channelsOf(g).length > 0 });
-    const top: JlHubGame[] = ranked.slice(0, TOP_GAMES).map((r) => ({ ...r, channels: channelsOf(r.game) }));
-    // The ticker follows your teams through the whole day, finals included.
+    const followed = followedGamesThisWeek(games, favorites, now);
+    const top: JlHubGame[] = selectTopGames(ranked, followed).map((r) => ({ ...r, channels: channelsOf(r.game) }));
+    // The ticker follows your teams through the day: live, today's kick-offs, and today's finals.
     const ticker: JlHubGame[] = games
-      .filter((g) => isFavoriteGame(g, favorites))
+      .filter((g) => isFavoriteGame(g, favorites) && Math.abs(g.startMs - now.getTime()) < DAY_MS)
+      .sort((a, b) => a.startMs - b.startMs)
       .slice(0, TICKER_GAMES)
       .map((game) => ({ game, score: 0, reasons: [], mine: true, channels: channelsOf(game) }));
-    return { top, ticker, favorites };
-  }, [games, favorites, index, nowMs]);
+    const playerSlides: JlPlayerSlide[] = players.map((player) => {
+      const team = player.teamId ? [{ league: player.league, id: player.teamId, name: player.teamName ?? "" }] : [];
+      const next = followedGamesThisWeek(games, team, now)[0];
+      const ranked = next ? top.find((r) => r.game.id === next.id && r.game.league === next.league) : undefined;
+      return {
+        player,
+        next: ranked ?? (next ? { game: next, score: 0, reasons: [], mine: true, channels: channelsOf(next) } : null),
+      };
+    });
+    return { top, ticker, teams, players, playerSlides };
+  }, [games, favorites, index, nowMs, teams, players]);
 }

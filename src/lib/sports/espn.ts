@@ -515,6 +515,17 @@ async function fetchLeagueLastResults(def: LeagueDef): Promise<SportsGame[]> {
   return [];
 }
 
+/** Scoreboard-shaped ESPN events for a league key, as games. Empty for an unknown league. */
+export function parseLeagueEvents(events: unknown[], league: string): SportsGame[] {
+  const def = BY_KEY.get(league);
+  return def ? parseEvents(events, def) : [];
+}
+
+/** The ESPN site API path for a league key ("football/college-football"). */
+export function leaguePath(league: string): string | null {
+  return BY_KEY.get(league)?.path ?? null;
+}
+
 function parseEvents(events: unknown[], def: LeagueDef): SportsGame[] {
   const out: SportsGame[] = [];
   for (const evRaw of events) {

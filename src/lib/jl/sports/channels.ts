@@ -136,12 +136,17 @@ const PREFIX = "^((US|USA)[:| ]*)?";
 const QUALITY_SUFFIX = "( (HD|FHD|SD|EAST|4K))*( ?\\*)?";
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+/** A streaming-only service (ESPN+, Peacock, Prime Video…): watched in its own app, not on a channel. */
+export function isStreamingOnly(network: string): boolean {
+  return STREAMING_ONLY.test(network.trim());
+}
+
 function searchTerms(network: string): string[] {
   return ALIASES[network] ?? [network.replace(/^The /i, "").replace(/ (Network|Channel)$/i, "").toUpperCase()];
 }
 
 export function networkChannel(network: string, index: SportsChannelIndex): IptvChannel | null {
-  if (STREAMING_ONLY.test(network.trim())) return null;
+  if (isStreamingOnly(network)) return null;
   for (const term of searchTerms(network)) {
     const word = escapeRegex(term.trim());
     if (word.length < 2) continue;

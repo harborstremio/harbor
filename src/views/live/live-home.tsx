@@ -17,7 +17,9 @@ import { SportsMarquee } from "./live-home/sports/sports-marquee";
 import { useSports } from "./live-home/use-sports";
 import { GuideCard } from "./live-home/guide-card";
 import { JlSportsHub } from "./live-home/jl-sports/jl-sports-hub";
+import { JlSportsHero } from "./live-home/jl-sports/sports-hero";
 import { useJlSports } from "./live-home/jl-sports/use-jl-sports";
+import { useJlSportsDialogs } from "./live-home/jl-sports/use-jl-sports-dialogs";
 import { LiveHero } from "./live-home/live-hero";
 import { MoreOnNow } from "./live-home/more-on-now";
 import { NowCard } from "./live-home/now-card";
@@ -83,6 +85,7 @@ export function LiveHome({
   );
   const sports = useSports({ enabled: true, leagues: sportsLeagues });
   const jlSports = useJlSports({ channels, epg, nowMs });
+  const jlDialogs = useJlSportsDialogs({ players: jlSports.players, onPlay, onOpenGame: openMatchDetail });
 
   const heroHydrations = useChannelHydration(
     useMemo(() => {
@@ -96,6 +99,14 @@ export function LiveHome({
 
   return (
     <div className="flex flex-col gap-8 pb-12">
+      {(jlSports.top.length > 0 || jlSports.playerSlides.length > 0) && (
+        <JlSportsHero
+          top={jlSports.top}
+          playerSlides={jlSports.playerSlides}
+          actions={jlDialogs.actions}
+          onOpenGame={openMatchDetail}
+        />
+      )}
       <div className="flex flex-col gap-5">
         <div className="flex items-baseline gap-2.5 ps-[9px]">
           <h1 className="font-display text-[30px] font-medium leading-none tracking-tight text-ink">
@@ -113,8 +124,8 @@ export function LiveHome({
       <JlSportsHub
         top={jlSports.top}
         ticker={jlSports.ticker}
-        favorites={jlSports.favorites}
-        onPlay={onPlay}
+        favorites={jlSports.teams}
+        actions={jlDialogs.actions}
         onOpenGame={openMatchDetail}
       />
       {(sports.length > 0 || sportsLeague !== "all" || userSportsLeagues.length > 0) && (
@@ -149,6 +160,7 @@ export function LiveHome({
           <RailRow rail={rail} {...railProps} />
         </LazyRail>
       ))}
+      {jlDialogs.dialogs}
     </div>
   );
 }

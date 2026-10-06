@@ -2,73 +2,120 @@ import { useSyncExternalStore } from "react";
 import { activeProfileId } from "@/lib/active-profile-id";
 import type { JlFavoriteTeam } from "./rank";
 
-const BASE_KEY = "jl.sports.favorites.v1";
-const EMPTY: JlFavoriteTeam[] = [];
+/** A followed player. Following a player also follows their team for Game Day. */
+export type JlFavoritePlayer = {
+  league: string;
+  id: string;
+  name: string;
+  teamId: string | null;
+  teamName: string | null;
+  headshot: string | null;
+  position: string | null;
+};
 
-const listeners = new Set<() => void>();
-let cache: { key: string; raw: string | null; list: JlFavoriteTeam[] } | null = null;
+type ListStore<T> = {
+  useList: () => T[];
+  read: () => T[];
+  write: (list: T[]) => void;
+};
 
-function keyFor(): string {
-  return `${BASE_KEY}.${activeProfileId()}`;
-}
+function createProfileListStore<T>(baseKey: string, valid: (item: unknown) => item is T): ListStore<T> {
+  const empty: T[] = [];
+  const listeners = new Set<() => void>();
+  let cache: { key: string; raw: string | null; list: T[] } | null = null;
+  const keyFor = () => `${baseKey}.${activeProfileId()}`;
 
-function parse(raw: string | null): JlFavoriteTeam[] {
-  if (!raw) return EMPTY;
-  try {
-    const value = JSON.parse(raw) as unknown;
-    if (!Array.isArray(value)) return EMPTY;
-    return value.filter(
-      (f): f is JlFavoriteTeam =>
-        !!f && typeof f.league === "string" && typeof f.id === "string" && typeof f.name === "string",
-    );
-  } catch {
-    return EMPTY;
-  }
-}
-
-function snapshot(): JlFavoriteTeam[] {
-  const key = keyFor();
-  let raw: string | null = null;
-  try {
-    raw = localStorage.getItem(key);
-  } catch {
-    raw = null;
-  }
-  if (cache && cache.key === key && cache.raw === raw) return cache.list;
-  cache = { key, raw, list: parse(raw) };
-  return cache.list;
-}
-
-function subscribe(fn: () => void): () => void {
-  listeners.add(fn);
-  return () => {
-    listeners.delete(fn);
+  const read = (): T[] => {
+    const key = keyFor();
+    let raw: string | null = null;
+    try {
+      raw = localStorage.getItem(key);
+    } catch {
+      raw = null;
+    }
+    if (cache && cache.key === key && cache.raw === raw) return cache.list;
+    let list = empty;
+    try {
+      const value = raw ? (JSON.parse(raw) as unknown) : null;
+      if (Array.isArray(value)) list = value.filter(valid);
+    } catch {
+      list = empty;
+    }
+    cache = { key, raw, list };
+    return list;
   };
+
+  const subscribe = (fn: () => void) => {
+    listeners.add(fn);
+    return () => {
+      listeners.delete(fn);
+    };
+  };
+
+  const write = (list: T[]) => {
+    try {
+      localStorage.setItem(keyFor(), JSON.stringify(list));
+    } catch {
+      /* storage unavailable: nothing can be saved */
+    }
+    for (const fn of listeners) fn();
+  };
+
+  return { read, write, useList: () => useSyncExternalStore(subscribe, read, () => empty) };
 }
 
-function write(list: JlFavoriteTeam[]): void {
-  try {
-    localStorage.setItem(keyFor(), JSON.stringify(list));
-  } catch {
-    /* storage unavailable: nothing can be saved */
-  }
-  for (const fn of listeners) fn();
-}
+const isString = (v: unknown): v is string => typeof v === "string";
+const isNullableString = (v: unknown): v is string | null => v === null || typeof v === "string";
 
-export function isFollowing(list: JlFavoriteTeam[], league: string, id: string): boolean {
+const teams = createProfileListStore<JlFavoriteTeam>("jl.sports.favorites.v1", (f): f is JlFavoriteTeam => {
+  const r = f as Record<string, unknown> | null;
+  return !!r && isString(r.league) && isString(r.id) && isString(r.name);
+});
+
+const players = createProfileListStore<JlFavoritePlayer>("jl.sports.players.v1", (f): f is JlFavoritePlayer => {
+  const r = f as Record<string, unknown> | null;
+  return (
+    !!r &&
+    isString(r.league) &&
+    isString(r.id) &&
+    isString(r.name) &&
+    isNullableString(r.teamId) &&
+    isNullableString(r.teamName) &&
+    isNullableString(r.headshot) &&
+    isNullableString(r.position)
+  );
+});
+
+export function isFollowing(list: Array<{ league: string; id: string }>, league: string, id: string): boolean {
   return list.some((f) => f.league === league && f.id === id);
 }
 
-export function toggleFavoriteTeam(team: JlFavoriteTeam): void {
-  if (!team.id) return;
-  const list = snapshot();
-  write(
-    isFollowing(list, team.league, team.id)
-      ? list.filter((f) => !(f.league === team.league && f.id === team.id))
-      : [...list, team],
+function toggle<T extends { league: string; id: string }>(store: ListStore<T>, item: T): void {
+  if (!item.id) return;
+  const list = store.read();
+  store.write(
+    isFollowing(list, item.league, item.id)
+      ? list.filter((f) => !(f.league === item.league && f.id === item.id))
+      : [...list, item],
   );
 }
 
-export function useJlSportsFavorites(): JlFavoriteTeam[] {
-  return useSyncExternalStore(subscribe, snapshot, () => EMPTY);
+export const toggleFavoriteTeam = (team: JlFavoriteTeam) => toggle(teams, team);
+export const toggleFavoritePlayer = (player: JlFavoritePlayer) => toggle(players, player);
+export const useJlSportsFavorites = teams.useList;
+export const useJlFavoritePlayers = players.useList;
+export const readJlFavorites = () => ({ teams: teams.read(), players: players.read() });
+export const writeJlFavorites = (next: { teams?: JlFavoriteTeam[]; players?: JlFavoritePlayer[] }) => {
+  if (next.teams) teams.write(next.teams);
+  if (next.players) players.write(next.players);
+};
+
+/** Teams to rank and fetch for: followed teams plus followed players' teams. */
+export function effectiveTeams(teamList: JlFavoriteTeam[], playerList: JlFavoritePlayer[]): JlFavoriteTeam[] {
+  const out = [...teamList];
+  for (const p of playerList) {
+    if (!p.teamId || isFollowing(out, p.league, p.teamId)) continue;
+    out.push({ league: p.league, id: p.teamId, name: p.teamName ?? "" });
+  }
+  return out;
 }

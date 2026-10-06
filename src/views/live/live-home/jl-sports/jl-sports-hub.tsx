@@ -1,11 +1,11 @@
-import { Play, Star } from "lucide-react";
+import { Play, Sparkles, Star, Users } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
-import type { IptvChannel } from "@/lib/iptv/types";
 import { isFollowing, toggleFavoriteTeam } from "@/lib/jl/sports/favorites";
 import type { JlFavoriteTeam } from "@/lib/jl/sports/rank";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import { fmtClock } from "../now-format";
+import type { JlSportsActions } from "./use-jl-sports-dialogs";
 import type { JlHubGame } from "./use-jl-sports";
 
 type Translate = ReturnType<typeof useT>;
@@ -14,28 +14,40 @@ export function JlSportsHub({
   top,
   ticker,
   favorites,
-  onPlay,
+  actions,
   onOpenGame,
 }: {
   top: JlHubGame[];
   ticker: JlHubGame[];
   favorites: JlFavoriteTeam[];
-  onPlay: (channel: IptvChannel) => void;
+  actions: JlSportsActions;
   onOpenGame: (game: SportsGame) => void;
 }) {
   const t = useT();
-  if (top.length === 0 && ticker.length === 0) return null;
   return (
     <section className="flex flex-col gap-3 ps-[9px]">
-      <div className="flex items-baseline gap-2.5">
+      <div className="flex items-center gap-2.5 pe-[9px]">
         <h2 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">{t("Sports Hub")}</h2>
         <span className="text-[12px] text-ink-subtle/80">{t("Top games, ranked for you")}</span>
+        <button
+          onClick={actions.follow}
+          className="ms-auto flex h-8 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+        >
+          <Users size={13} />
+          {t("Teams & players")}
+        </button>
       </div>
-      {ticker.length > 0 && <FavoritesTicker items={ticker} onPlay={onPlay} onOpenGame={onOpenGame} />}
+      {ticker.length > 0 && <FavoritesTicker items={ticker} onWatch={actions.watch} />}
       {top.length > 0 && (
         <div className="flex gap-3 overflow-x-auto pb-2 pe-[9px]">
           {top.map((item) => (
-            <HubCard key={item.game.id} item={item} favorites={favorites} onPlay={onPlay} onOpenGame={onOpenGame} />
+            <HubCard
+              key={`${item.game.league}:${item.game.id}`}
+              item={item}
+              favorites={favorites}
+              actions={actions}
+              onOpenGame={onOpenGame}
+            />
           ))}
         </div>
       )}
@@ -43,15 +55,7 @@ export function JlSportsHub({
   );
 }
 
-function FavoritesTicker({
-  items,
-  onPlay,
-  onOpenGame,
-}: {
-  items: JlHubGame[];
-  onPlay: (channel: IptvChannel) => void;
-  onOpenGame: (game: SportsGame) => void;
-}) {
+function FavoritesTicker({ items, onWatch }: { items: JlHubGame[]; onWatch: (item: JlHubGame) => void }) {
   const t = useT();
   return (
     <div className="flex items-center gap-2 overflow-x-auto pe-[9px]">
@@ -59,13 +63,13 @@ function FavoritesTicker({
         <Star size={11} fill="currentColor" strokeWidth={0} />
         {t("Your teams")}
       </span>
-      {items.map(({ game, channels }) => {
-        const first = channels[0]?.channel;
+      {items.map((item) => {
+        const { game, channels } = item;
         return (
           <button
-            key={game.id}
-            onClick={() => (first ? onPlay(first) : onOpenGame(game))}
-            title={first ? t("Watch on {channel}", { channel: first.name }) : t("Game details")}
+            key={`${game.league}:${game.id}`}
+            onClick={() => onWatch(item)}
+            title={t("Ways to watch")}
             className="flex h-8 shrink-0 items-center gap-2 rounded-full border border-edge-soft bg-elevated px-3 text-[12px] text-ink transition-colors hover:border-edge"
           >
             <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-subtle">{game.league}</span>
@@ -77,7 +81,7 @@ function FavoritesTicker({
               {game.home.abbr || game.home.name} {game.home.score}
             </span>
             <span className={game.state === "in" ? "text-danger" : "text-ink-subtle"}>{statusText(game, t)}</span>
-            {first && <Play size={11} fill="currentColor" strokeWidth={0} className="text-accent" />}
+            {channels.length > 0 && <Play size={11} fill="currentColor" strokeWidth={0} className="text-accent" />}
           </button>
         );
       })}
@@ -88,17 +92,16 @@ function FavoritesTicker({
 function HubCard({
   item,
   favorites,
-  onPlay,
+  actions,
   onOpenGame,
 }: {
   item: JlHubGame;
   favorites: JlFavoriteTeam[];
-  onPlay: (channel: IptvChannel) => void;
+  actions: JlSportsActions;
   onOpenGame: (game: SportsGame) => void;
 }) {
   const t = useT();
-  const { game, reasons, channels } = item;
-  const first = channels[0]?.channel;
+  const { game, reasons, channels, mine } = item;
   const live = game.state === "in";
   return (
     <div className="flex w-[300px] shrink-0 flex-col gap-2.5 rounded-xl border border-edge-soft/55 bg-elevated p-3">
@@ -121,6 +124,15 @@ function HubCard({
       <div className="flex items-center gap-1.5">
         <FollowButton side={game.away} league={game.league} favorites={favorites} />
         <FollowButton side={game.home} league={game.league} favorites={favorites} />
+        {mine && game.state === "pre" && (
+          <button
+            onClick={() => actions.pregame(item)}
+            className="ms-auto flex h-7 items-center gap-1 rounded-full border border-edge-soft px-2.5 text-[11px] font-semibold text-ink-muted hover:text-ink"
+          >
+            <Sparkles size={11} />
+            {t("Pre-game")}
+          </button>
+        )}
       </div>
       {(reasons.length > 0 || game.odds) && (
         <div className="flex flex-wrap gap-1">
@@ -132,24 +144,29 @@ function HubCard({
           {game.odds && <span className="rounded-full bg-canvas/60 px-2 py-0.5 text-[10.5px] text-ink-subtle">{game.odds}</span>}
         </div>
       )}
-      {first ? (
-        <button
-          onClick={() => onPlay(first)}
-          title={first.name}
-          className="flex h-9 items-center justify-center gap-1.5 rounded-lg bg-ink px-3 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
-        >
-          <Play size={12} fill="currentColor" strokeWidth={0} />
-          <span className="truncate">{t("Watch on {channel}", { channel: first.name })}</span>
-          {channels.length > 1 && <span className="shrink-0 opacity-70">+{channels.length - 1}</span>}
-        </button>
-      ) : (
-        <span className="flex h-9 items-center justify-center text-[12px] text-ink-subtle">{t("Not on your channels")}</span>
+      <WatchButton item={item} onWatch={actions.watch} />
+      {channels.length === 0 && (
+        <span className="-mt-1 text-center text-[11px] text-ink-subtle">{t("Not on your channels")}</span>
       )}
     </div>
   );
 }
 
-function TeamLine({ side, active }: { side: SportsSide; active: boolean }) {
+export function WatchButton({ item, onWatch }: { item: JlHubGame; onWatch: (item: JlHubGame) => void }) {
+  const t = useT();
+  const count = item.channels.length;
+  return (
+    <button
+      onClick={() => onWatch(item)}
+      className="flex h-9 items-center justify-center gap-1.5 rounded-lg bg-ink px-3 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+    >
+      <Play size={12} fill="currentColor" strokeWidth={0} />
+      {count > 0 ? t("Watch · {n} channels", { n: count }) : t("Ways to watch")}
+    </button>
+  );
+}
+
+export function TeamLine({ side, active }: { side: SportsSide; active: boolean }) {
   const [err, setErr] = useState(false);
   return (
     <div className="flex items-center gap-2">
@@ -195,7 +212,7 @@ function FollowButton({
   );
 }
 
-function statusText(game: SportsGame, t: Translate): string {
+export function statusText(game: SportsGame, t: Translate): string {
   if (game.state === "in") return game.detail || t("Live");
   if (game.state === "post") return game.detail || t("Final");
   if (!game.startMs) return game.detail || t("Upcoming");
