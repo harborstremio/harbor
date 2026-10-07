@@ -11,6 +11,7 @@ import { useSettings } from "@/lib/settings";
 import type { ScoredStream } from "@/lib/streams/types";
 import { hasCachedMarker } from "@/lib/streams/cached";
 import { filterStreamsByMode } from "@/lib/streams/mode";
+import { loadStreamPlugins, pluginAddons, subscribeStreamPluginList } from "@/lib/streams/plugins";
 import type { SourceDescriptor } from "@/lib/together/protocol";
 import { buildMatchScores, matchBadge } from "@/lib/together/source-match";
 import { addonInstanceKey, buildAddonOptions } from "@/views/play-picker/picker-utils";
@@ -110,14 +111,29 @@ export function StreamSwitcher({
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
     (async () => {
       const installed = await fetchInstalledAddons().catch(() => [] as Addon[]);
       const stremio = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
+      await loadStreamPlugins();
       if (cancelled) return;
-      setAddonLogos(addonLogoMap([...installed, ...stremio]));
+      const updateLogos = () => {
+        // Cached streams can carry either an individual plugin id or a repository group id.
+        setAddonLogos(
+          addonLogoMap([
+            ...installed,
+            ...stremio,
+            ...pluginAddons({ groupByRepo: false, includeExtensions: true }),
+            ...pluginAddons({ groupByRepo: true, includeExtensions: true }),
+          ]),
+        );
+      };
+      updateLogos();
+      unsubscribe = subscribeStreamPluginList(updateLogos);
     })();
     return () => {
       cancelled = true;
+      unsubscribe?.();
     };
   }, [open, authKey]);
 
