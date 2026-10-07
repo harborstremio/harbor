@@ -1,5 +1,6 @@
 {
   "productName": "JL Media Vision",
+  "version": "0.9.22",
   "identifier": "app.jlnetwork.dev",
   "app": {
     "windows": [
