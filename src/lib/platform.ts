@@ -35,6 +35,8 @@ export function isWindowsDesktop(): boolean {
 export function isMobileDevice(): boolean {
   if (typeof navigator === "undefined" || typeof window === "undefined") return false;
   const ua = navigator.userAgent || "";
+  // The JL Media Vision Android TV app runs this web app in a WebView on a TV screen.
+  if (/JLMediaVisionTV/.test(ua)) return false;
   if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|iPad/i.test(ua)) return true;
   if (/Macintosh/i.test(ua) && (navigator.maxTouchPoints ?? 0) > 1) return true;
   if ((navigator.maxTouchPoints ?? 0) > 0 && Math.min(window.innerWidth, window.innerHeight) < 640) {
