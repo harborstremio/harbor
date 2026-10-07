@@ -9,7 +9,7 @@ import { useDebridClients } from "@/lib/debrid/registry";
 import { useTogether } from "@/lib/together/provider";
 import { buildMatchScores, matchBadge, MATCH_CLOSE } from "@/lib/together/source-match";
 import { HostSourceBanner } from "@/components/host-source-banner";
-import { consumeRecentStubEvent } from "@/lib/dead-streams";
+import { clearDeadStreamsFor, consumeRecentStubEvent } from "@/lib/dead-streams";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import {
   readPlayback,
@@ -324,6 +324,7 @@ export function PlayPicker({
 
   const kidProfile = useActiveKid();
   const p2pAutoConsent = settings.p2pAutoConsent || !!kidProfile;
+  const [deadRevision, setDeadRevision] = useState(0);
   const autoCandidates = useAutoCandidates({
     filteredPicker,
     previousPlayback,
@@ -338,6 +339,7 @@ export function PlayPicker({
     preferPacks: seasonLock,
     season: !isAnimeMetaId ? (episode?.season ?? null) : null,
     episode: !isAnimeMetaId ? (episode?.episode ?? null) : null,
+    deadRevision,
   });
 
   const autoFiredRef = useRef(false);
@@ -665,6 +667,14 @@ export function PlayPicker({
         triedCount={autoCandidates.length}
         onBrowseManually={() => {
           setAutoCancelled(true);
+          setAutoExhausted(false);
+        }}
+        onTryAgain={() => {
+          clearDeadStreamsFor(filteredPicker?.all ?? []);
+          autoFiredRef.current = false;
+          setAutoAttemptIdx(0);
+          setAutoCancelled(false);
+          setDeadRevision((r) => r + 1);
           setAutoExhausted(false);
         }}
       />

@@ -9,6 +9,7 @@ import {
   PictureInPicture2,
   PlayCircle,
   Replace,
+  Square,
   Tv,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -332,6 +333,14 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           disabled={!ctx.hasPrevEp}
           iconOnly={iconOnly}
         />
+      );
+    }
+    case "stop": {
+      if (ctx.tight || !ctx.onBack) return null;
+      return (
+        <BigButton onClick={ctx.onBack} ariaLabel={t("Stop")} tooltip={t("Stop")}>
+          <Square size={22} strokeWidth={2.2} />
+        </BigButton>
       );
     }
     case "seek-back": {

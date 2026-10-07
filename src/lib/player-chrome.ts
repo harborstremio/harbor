@@ -24,6 +24,7 @@ export type PlayerControlId =
   | "prev-episode"
   | "seek-back"
   | "play-pause"
+  | "stop"
   | "seek-forward"
   | "next-episode"
   | "pick-another"
@@ -180,6 +181,7 @@ export const DEFAULT_DEFAULT_CONFIG: PlayerChromeConfig = {
     { id: "prev-episode", slot: "bottom-center", order: 0 },
     { id: "seek-back", slot: "bottom-center", order: 10 },
     { id: "play-pause", slot: "bottom-center", order: 20 },
+    { id: "stop", slot: "bottom-center", order: 25 },
     { id: "seek-forward", slot: "bottom-center", order: 30 },
     { id: "next-episode", slot: "bottom-center", order: 40 },
     { id: "pick-another", slot: "bottom-right", order: 0 },
@@ -210,6 +212,7 @@ export const DEFAULT_STREMIO_CONFIG: PlayerChromeConfig = {
     { id: "fullscreen", slot: "top-right", order: 0 },
     { id: "window-controls", slot: "top-right", order: 100 },
     { id: "play-pause", slot: "bottom-left", order: 0 },
+    { id: "stop", slot: "bottom-left", order: 5 },
     { id: "volume", slot: "bottom-left", order: 10 },
     { id: "time-start", slot: "bottom-left", order: 20 },
     { id: "time-end", slot: "bottom-left", order: 30 },
@@ -252,6 +255,7 @@ export const CONTROL_META: Record<
   "prev-episode": { label: "Previous episode", group: "transport", defaultSlot: "bottom-center" },
   "seek-back": { label: "Seek back", group: "transport", defaultSlot: "bottom-center" },
   "play-pause": { label: "Play / Pause", group: "transport", defaultSlot: "bottom-center" },
+  stop: { label: "Stop", group: "transport", defaultSlot: "bottom-center" },
   "seek-forward": { label: "Seek forward", group: "transport", defaultSlot: "bottom-center" },
   "next-episode": { label: "Next episode", group: "transport", defaultSlot: "bottom-center" },
   "pick-another": {
@@ -289,9 +293,18 @@ function baselineFor(theme: ThemeId): PlayerChromeConfig {
   return theme === "stremio" ? DEFAULT_STREMIO_CONFIG : DEFAULT_DEFAULT_CONFIG;
 }
 
+// Layouts saved before a control existed don't list it; add it at its baseline spot so new
+// controls (like Stop) show up without resetting anyone's layout.
+function withNewControls(config: PlayerChromeConfig, baseline: PlayerChromeConfig): PlayerChromeConfig {
+  const have = new Set(config.controls.map((c) => c.id));
+  const missing = baseline.controls.filter((c) => !have.has(c.id));
+  return missing.length ? { ...config, controls: [...config.controls, ...missing] } : config;
+}
+
 export function readPlayerChromeConfig(theme: ThemeId): PlayerChromeConfig {
   const active = getActiveProfile(theme);
-  return active?.config ?? baselineFor(theme);
+  const baseline = baselineFor(theme);
+  return active?.config ? withNewControls(active.config, baseline) : baseline;
 }
 
 export function writePlayerChromeConfig(theme: ThemeId, config: PlayerChromeConfig): SaveResult {

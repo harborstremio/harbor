@@ -7,6 +7,7 @@ import { useSettings } from "@/lib/settings";
 import { useScrollMemory, useView } from "@/lib/view";
 import { FAVORITES_GROUP_KEY, useFavorites } from "@/lib/iptv/favorites";
 import { clearPlaylistCache, getCachedPlaylist } from "@/lib/iptv/store";
+import { readActiveId, toPlaylistSource, writeActiveId } from "@/lib/iptv/active-source";
 import { pushActivityHint } from "@/lib/discord/activity-hint";
 import type { IptvChannel, IptvPlaylistSource } from "@/lib/iptv/types";
 import { CategorySidebar } from "./live/category-sidebar";
@@ -26,24 +27,8 @@ import { MultiviewView } from "./multiview";
 import { ViewModeToggle, type ViewMode } from "./live/view-mode-toggle";
 import { isWindowsDesktop } from "@/lib/platform";
 
-const ACTIVE_KEY = "harbor.iptv.active";
 const MODE_KEY = "harbor.iptv.viewMode";
 const EMPTY_CHANNELS: IptvChannel[] = [];
-
-function readActiveId(): string | null {
-  try {
-    return localStorage.getItem(ACTIVE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function writeActiveId(id: string | null) {
-  try {
-    if (id) localStorage.setItem(ACTIVE_KEY, id);
-    else localStorage.removeItem(ACTIVE_KEY);
-  } catch {}
-}
 
 function readMode(): ViewMode {
   try {
@@ -88,9 +73,7 @@ export function LiveView({ active }: { active: boolean }) {
   const activeSource: IptvPlaylistSource | null = useMemo(() => {
     if (!activeId) return null;
     const found = sources.find((s) => s.id === activeId);
-    return found
-      ? { id: found.id, name: found.name, url: found.url, epgUrl: found.epgUrl, kind: found.kind, xtream: found.xtream }
-      : null;
+    return found ? toPlaylistSource(found) : null;
   }, [activeId, sources]);
 
   const { state, refresh } = useIptvPlaylist(active ? activeSource : null);

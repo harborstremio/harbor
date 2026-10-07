@@ -165,6 +165,7 @@ export const VIEW_NAMES: ViewName[] = [
   { id: "shows", label: "Shows" },
   { id: "anime", label: "Anime" },
   { id: "live", label: "Live TV" },
+  { id: "sports", label: "Sports" },
   { id: "calendar", label: "Calendar" },
   { id: "library", label: "My Library" },
   { id: "settings", label: "Settings" },

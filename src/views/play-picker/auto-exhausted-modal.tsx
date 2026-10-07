@@ -5,11 +5,13 @@ export function AutoExhaustedModal({
   meta,
   episode,
   onBrowseManually,
+  onTryAgain,
 }: {
   meta: Meta;
   episode?: PlayEpisode;
   triedCount: number;
   onBrowseManually: () => void;
+  onTryAgain: () => void;
 }) {
   const { goBack } = useView();
   const title = meta.name ?? "this title";
@@ -36,8 +38,14 @@ export function AutoExhaustedModal({
         </ul>
         <div className="mt-7 flex flex-col gap-2.5">
           <button
-            onClick={onBrowseManually}
+            onClick={onTryAgain}
             className="flex h-11 items-center justify-center rounded-full bg-ink text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
+          >
+            Try again
+          </button>
+          <button
+            onClick={onBrowseManually}
+            className="flex h-11 items-center justify-center rounded-full bg-elevated text-[14px] font-medium text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
           >
             Browse streams manually
           </button>

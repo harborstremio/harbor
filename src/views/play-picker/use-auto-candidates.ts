@@ -25,8 +25,10 @@ export function useAutoCandidates(args: {
   preferPacks?: boolean;
   season?: number | null;
   episode?: number | null;
+  /** Bumped when the dead-stream list is cleared, so the list is rebuilt. */
+  deadRevision?: number;
 }): ScoredStream[] {
-  const { filteredPicker, previousPlayback, sourceEntry, isCached, addons, hasStrongAddon, isTorrentioStream, preferredLangs, hostSource, prefer1080, preferPacks, season, episode } = args;
+  const { filteredPicker, previousPlayback, sourceEntry, isCached, addons, hasStrongAddon, isTorrentioStream, preferredLangs, hostSource, prefer1080, preferPacks, season, episode, deadRevision } = args;
   return useMemo(() => {
     const hostFallback = (): ScoredStream[] => {
       if (!hostSource) return [];
@@ -132,5 +134,5 @@ export function useAutoCandidates(args: {
       if (ownBest) return [ownBest];
     }
     return [];
-  }, [filteredPicker, previousPlayback, sourceEntry, isCached, addons, hasStrongAddon, isTorrentioStream, preferredLangs, hostSource, prefer1080, preferPacks, season, episode]);
+  }, [filteredPicker, previousPlayback, sourceEntry, isCached, addons, hasStrongAddon, isTorrentioStream, preferredLangs, hostSource, prefer1080, preferPacks, season, episode, deadRevision]);
 }

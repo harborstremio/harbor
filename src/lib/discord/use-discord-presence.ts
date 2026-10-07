@@ -40,6 +40,7 @@ const STATIC_LABELS: Record<string, BrowsePresence> = {
   shows: { details: "Browsing shows" },
   anime: { details: "Browsing anime" },
   live: { details: "Watching live TV" },
+  sports: { details: "Checking the scores" },
   library: { details: "Browsing their library" },
   calendar: { details: "Checking the calendar" },
   queue: { details: "Checking the queue" },

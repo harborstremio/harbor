@@ -933,6 +933,12 @@ export function LibraryPanel({
           onChange={(v) => pushHideContent("liveTv", v)}
         />
         <ToggleRow
+          label={t("Hide Sports")}
+          sub={t("Removes the Sports tab from the sidebar.")}
+          value={settings.hideContent.sports}
+          onChange={(v) => pushHideContent("sports", v)}
+        />
+        <ToggleRow
           label={t("Hide adult content")}
           sub={t("Filters out streams from adult catalogs and addons. On by default.")}
           value={settings.hideContent.adult}

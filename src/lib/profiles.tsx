@@ -52,6 +52,7 @@ export type Profile = {
 type ProfilesState = {
   profiles: Profile[];
   activeId: string | null;
+  _jlShowLiveSportsV1?: boolean;
 };
 
 export type PickerView =
@@ -237,8 +238,12 @@ function readState(): ProfilesState {
     const fallbackName = defaultPrimaryName();
     const identity = readSettingsIdentity();
     const legacyParental = readLegacyParental();
+    const unhideLiveSports = !parsed._jlShowLiveSportsV1;
     const migrated = parsed.profiles.map((p) => {
       const next = { ...p };
+      if (unhideLiveSports && p.hideContent) {
+        next.hideContent = { ...p.hideContent, liveTv: false, sports: false };
+      }
       if (typeof p.shareStremioWith === "undefined") {
         next.shareStremioWith = p.isPrimary ? null : primaryId;
       }
@@ -277,7 +282,7 @@ function readState(): ProfilesState {
       if (isRemovedBuiltinAvatar(next.avatar)) next.avatar = null;
       return next;
     });
-    return { profiles: migrated, activeId: parsed.activeId };
+    return { profiles: migrated, activeId: parsed.activeId, _jlShowLiveSportsV1: true };
   } catch {
     return { profiles: [], activeId: null };
   }
@@ -322,7 +327,11 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
         kid: null,
         createdAt: Date.now(),
       };
-      const initial: ProfilesState = { profiles: [primary], activeId: primary.id };
+      const initial: ProfilesState = {
+        profiles: [primary],
+        activeId: primary.id,
+        _jlShowLiveSportsV1: true,
+      };
       writeState(initial);
       return initial;
     }
@@ -457,7 +466,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
           .filter((p) => p.id !== id)
           .map((p) => (p.shareStremioWith === id ? { ...p, shareStremioWith: null } : p));
         const activeId = s.activeId === id ? (profiles[0]?.id ?? null) : s.activeId;
-        return { profiles, activeId };
+        return { ...s, profiles, activeId };
       });
     },
     [state.profiles],

@@ -33,6 +33,7 @@ export type View =
   | "kids"
   | "library"
   | "live"
+  | "sports"
   | "vod"
   | "downloads"
   | "wrapped";
@@ -121,6 +122,7 @@ export type Frame =
   | { kind: "kids" }
   | { kind: "library" }
   | { kind: "live" }
+  | { kind: "sports" }
   | { kind: "vod" }
   | { kind: "downloads" }
   | { kind: "service"; service: StreamingService }
@@ -167,6 +169,7 @@ const ROOT_VIEW_BY_KIND: Record<Frame["kind"], View | null> = {
   kids: "kids",
   library: "library",
   live: "live",
+  sports: "sports",
   vod: "vod",
   downloads: "downloads",
   service: null,
@@ -341,6 +344,8 @@ function frameKey(f: Frame): string {
       return "library";
     case "live":
       return "live";
+    case "sports":
+      return "sports";
     case "vod":
       return "vod";
     case "downloads":
@@ -652,6 +657,11 @@ export function ViewProvider({ children }: { children: ReactNode }) {
           scrollMem.current.clear();
           rowScrollMem.current.clear();
           return [{ kind: "live" }];
+        }
+        if (v === "sports") {
+          scrollMem.current.clear();
+          rowScrollMem.current.clear();
+          return [{ kind: "sports" }];
         }
         if (v === "vod") {
           scrollMem.current.clear();

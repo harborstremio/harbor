@@ -124,6 +124,7 @@ const importSettings = () => import("@/views/settings");
 const importShows = () => import("@/views/shows");
 const importLibrary = () => import("@/views/library");
 const importLive = () => import("@/views/live");
+const importSports = () => import("@/views/sports");
 const importVod = () => import("@/views/playlist-vod");
 const importDownloads = () => import("@/views/downloads");
 const importMatchDetail = () => import("@/views/live/match-detail-view");
@@ -161,6 +162,7 @@ const Settings = lazy(() => importSettings().then((m) => ({ default: m.Settings 
 const Shows = lazy(() => importShows().then((m) => ({ default: m.Shows })));
 const LibraryView = lazy(() => importLibrary().then((m) => ({ default: m.LibraryView })));
 const LiveView = lazy(() => importLive().then((m) => ({ default: m.LiveView })));
+const SportsView = lazy(() => importSports().then((m) => ({ default: m.SportsView })));
 const MatchDetailView = lazy(() =>
   importMatchDetail().then((m) => ({ default: m.MatchDetailView })),
 );
@@ -203,6 +205,7 @@ function useViewPreloader() {
       void importFilter();
       void importCalendar();
       void importLive();
+      void importSports();
       void importQueue();
       void importAward();
       void importAnimeAward();
@@ -924,6 +927,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const showsTop = topKind === "shows";
   const libraryTop = topKind === "library";
   const liveTop = topKind === "live";
+  const sportsTop = topKind === "sports";
   const vodTop = topKind === "vod";
   const downloadsTop = topKind === "downloads";
   const matchDetailTop = topKind === "match-detail";
@@ -987,6 +991,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const showsAlive = useIdleEvict(showsTop);
   const libraryAlive = useIdleEvict(libraryTop);
   const liveAlive = useIdleEvict(liveTop);
+  const sportsAlive = useIdleEvict(sportsTop);
   const vodAlive = useIdleEvict(vodTop);
   const downloadsAlive = useIdleEvict(downloadsTop);
 
@@ -1119,6 +1124,13 @@ function Shell({ onReady }: { onReady?: () => void }) {
           <div className={layer(liveTop)}>
             <Suspense fallback={null}>
               <LiveView active={liveTop} />
+            </Suspense>
+          </div>
+        )}
+        {sportsAlive && (
+          <div className={layer(sportsTop)}>
+            <Suspense fallback={null}>
+              <SportsView active={sportsTop} />
             </Suspense>
           </div>
         )}

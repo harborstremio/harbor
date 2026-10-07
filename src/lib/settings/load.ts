@@ -89,12 +89,16 @@ export function sanitizeTheme(t: Partial<ThemeSettings> | undefined): ThemeSetti
 export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
   const raw = localStorage.getItem(rawKey);
   if (!raw) {
-    return {
+    // Fresh settings already show Live TV and Sports, so the one-time unhide is marked done here;
+    // otherwise a hide chosen before the next launch would be undone.
+    const fresh: Settings & { _jlShowLiveSportsV1: boolean } = {
       ...DEFAULT,
       uiLanguage: resolveUiLanguage(undefined),
       seekBackStepSec: sanitizeSeekStep(legacySeekStep("back"), DEFAULT.seekBackStepSec),
       seekForwardStepSec: sanitizeSeekStep(legacySeekStep("forward"), DEFAULT.seekForwardStepSec),
+      _jlShowLiveSportsV1: true,
     };
+    return fresh;
   }
   try {
     const parsed = JSON.parse(raw) as Partial<Settings> & {
@@ -111,6 +115,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       _anilistSyncOnV1?: boolean;
       _rememberLastStreamOnV1?: boolean;
       _streamSortAddonV1?: boolean;
+      _jlShowLiveSportsV1?: boolean;
       scrapers?: unknown;
       scrapersAcknowledged?: boolean;
       _scrapersV2?: boolean;
@@ -135,6 +140,18 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
     if (!parsed._streamSortAddonV1) {
       if (parsed.streamSort === "harbor") parsed.streamSort = "addon";
       parsed._streamSortAddonV1 = true;
+    }
+    if (!parsed._jlShowLiveSportsV1) {
+      if (parsed.navCustomization && Array.isArray(parsed.navCustomization.hidden)) {
+        parsed.navCustomization = {
+          ...parsed.navCustomization,
+          hidden: parsed.navCustomization.hidden.filter((id) => id !== "live" && id !== "sports"),
+        };
+      }
+      if (parsed.hideContent) {
+        parsed.hideContent = { ...parsed.hideContent, liveTv: false, sports: false };
+      }
+      parsed._jlShowLiveSportsV1 = true;
     }
     if (parsed.aiSearchModel) parsed.aiSearchModel = migrateModelId(parsed.aiSearchModel);
     if (!parsed._mpvEmbedV3) {

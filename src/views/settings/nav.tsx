@@ -2429,6 +2429,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["hide live tv", "remove tv tab", "no live", "sidebar"],
   },
   {
+    label: "Hide Sports",
+    section: "library",
+    anchorTitle: "Content filters",
+    keywords: ["hide sports", "remove sports tab", "no sports", "sidebar"],
+  },
+  {
     label: "Hide adult content",
     section: "library",
     anchorTitle: "Content filters",

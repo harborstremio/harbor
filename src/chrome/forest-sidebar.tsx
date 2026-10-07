@@ -23,6 +23,7 @@ const PRIMARY_IDS = new Set<string>([
   "kids",
   "anime",
   "live",
+  "sports",
   "vod",
 ]);
 

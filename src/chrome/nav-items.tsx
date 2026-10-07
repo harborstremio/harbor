@@ -10,6 +10,7 @@ import { LiveTvIcon } from "@/components/icons/live-tv-icon";
 import { MoviesIcon } from "@/components/icons/movies-icon";
 import { PlaylistVodIcon } from "@/components/icons/playlist-vod-icon";
 import { SettingsIcon } from "@/components/icons/settings-icon";
+import { SportsIcon } from "@/components/icons/sports-icon";
 import { TvIcon } from "@/components/icons/tv-icon";
 import { KidsIcon } from "@/components/icons/kids-icon";
 import { DownloadsNavIcon } from "@/chrome/downloads-nav-icon";
@@ -25,6 +26,7 @@ export type NavItemId =
   | "kids"
   | "anime"
   | "live"
+  | "sports"
   | "vod"
   | "calendar"
   | "library"
@@ -94,6 +96,14 @@ export const NAV_ITEMS: NavItem[] = [
     view: "live",
     hideKey: "liveTv",
     parentalKey: "liveTv",
+  },
+  {
+    id: "sports",
+    label: "nav.sports",
+    render: (active) => <SportsIcon active={active} />,
+    view: "sports",
+    hideKey: "sports",
+    parentalKey: "sports",
   },
   {
     id: "vod",

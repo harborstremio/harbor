@@ -10,6 +10,7 @@ import {
   Replace,
   SkipBack,
   SkipForward,
+  Square,
   Tv,
 } from "lucide-react";
 import { realQualityLabel } from "@/lib/player/resolution-label";
@@ -458,6 +459,15 @@ export function RenderedStremioControl({
             ) : (
               <Maximize size={28} strokeWidth={2} />
             )}
+          </StremioBtn>
+        </Tooltip>
+      );
+    case "stop":
+      if (!ctx.onBack) return null;
+      return (
+        <Tooltip label={tr("Stop")}>
+          <StremioBtn onClick={ctx.onBack} ariaLabel={tr("Stop")}>
+            <Square size={24} strokeWidth={2} />
           </StremioBtn>
         </Tooltip>
       );

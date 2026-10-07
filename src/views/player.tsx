@@ -452,7 +452,9 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     exitPlayback();
     openPicker(src.meta, src.episode, {
       autoPlay: true,
-      attempt: (src.attempt ?? 0) + 1,
+      // A stream marked dead already drops out of the auto list; moving the attempt offset as
+      // well would skip the next good candidate.
+      attempt: src.streamRef ? (src.attempt ?? 0) : (src.attempt ?? 0) + 1,
       resume: src.resume,
     });
   }, [snap.status, src, hasStarted, inRoom, exitPlayback, openPicker]);

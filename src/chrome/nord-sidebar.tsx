@@ -21,6 +21,7 @@ const PRIMARY_IDS = new Set([
   "kids",
   "anime",
   "live",
+  "sports",
   "vod",
 ]);
 
