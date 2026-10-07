@@ -51,8 +51,12 @@ export function contributorLabel(s: ScoredStream): string {
   return `${contribs[0].name} + ${contribs.length - 1} more`;
 }
 
-export function addonInstanceKey(s: { addonUrl?: string; addonId: string }): string {
-  return s.addonUrl ?? s.addonId;
+export function addonInstanceKey(s: { addonId: string }): string {
+  //when addonUrl is returned as the id, the logo wont appear in filters.addonLogos.get(o.id)
+  //to fix this we return the addonId as the id
+  //also, this function is only used to assign opts.id and then used to
+  //filter addon list by using that id it assigned so No need for addonUrl
+  return s.addonId;
 }
 
 export function addonConfigHint(url?: string): string {

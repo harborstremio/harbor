@@ -4,6 +4,7 @@ import { addonLogoMap } from "@/components/addon-logo";
 import { HostSourceBanner } from "@/components/host-source-banner";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { fetchInstalledAddons } from "@/lib/addon-store";
+import { runnableStreamPlugins } from "@/lib/streams/plugins";
 import { userAddons, type Addon } from "@/lib/addons";
 import { useAuth } from "@/lib/auth";
 import { peekPickerCache, subscribePickerCache } from "@/lib/picker-cache";
@@ -114,7 +115,9 @@ export function StreamSwitcher({
       const installed = await fetchInstalledAddons().catch(() => [] as Addon[]);
       const stremio = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
       if (cancelled) return;
-      setAddonLogos(addonLogoMap([...installed, ...stremio]));
+      const logoMap = addonLogoMap([...installed, ...stremio]);
+      runnableStreamPlugins().forEach(({ id, icon }) => icon && logoMap.set(id, icon));
+      setAddonLogos(logoMap);
     })();
     return () => {
       cancelled = true;
