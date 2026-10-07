@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { isInstalled } from "@/lib/addon-store";
 import { useT } from "@/lib/i18n";
 import { JL_DEBRID_OPTIONS, JL_TORRENTIO_ADDON_ID, summarizeJlSetup } from "@/lib/jl/onboarding";
@@ -7,10 +6,6 @@ import { useSettings } from "@/lib/settings";
 export function DoneStep() {
   const { settings } = useSettings();
   const t = useT();
-  const enabled = useMemo(
-    () => Object.values(settings.streaming).filter(Boolean).length,
-    [settings.streaming],
-  );
   const jl = summarizeJlSetup({
     playlists: settings.iptvPlaylists,
     rdKey: settings.rdKey,
@@ -27,12 +22,7 @@ export function DoneStep() {
           {t("You're set.")}
         </h1>
         <p className="max-w-md text-[15px] leading-relaxed text-ink-muted">
-          {settings.tmdbKey
-            ? t("TMDB connected. {n} streaming {services} on. Welcome aboard.", {
-                n: enabled,
-                services: t(enabled === 1 ? "service" : "services"),
-              })
-            : t("Running on Cinemeta for now. Add a TMDB key from Settings whenever you're ready.")}
+          {t("Everything else is optional and lives in Settings whenever you want it.")}
         </p>
         <div className="flex flex-wrap justify-center gap-2 pt-1">
           <SetupChip on={jl.playlists > 0}>

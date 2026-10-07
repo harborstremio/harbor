@@ -1,52 +1,32 @@
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { DebridStep } from "@/components/onboarding/debrid-step";
+import { isInstalled } from "@/lib/addon-store";
 import { DoneStep } from "@/components/onboarding/done-step";
 import { Dots } from "@/components/onboarding/dots";
-import { IptvStep } from "@/components/onboarding/iptv-step";
-import { LayoutStep } from "@/components/onboarding/layout-step";
+import { LiveTvStep } from "@/components/onboarding/live-tv-step";
+import { MoviesStep } from "@/components/onboarding/movies-step";
+import { ProfileStep } from "@/components/onboarding/profile-step";
 import { SplashStep } from "@/components/onboarding/splash-step";
-import { StreamingStep } from "@/components/onboarding/streaming-step";
-import { StremioStep } from "@/components/onboarding/stremio-step";
-import { SubtitlesStep } from "@/components/onboarding/subtitles-step";
-import { TmdbStep } from "@/components/onboarding/tmdb-step";
-import { TorrentioStep } from "@/components/onboarding/torrentio-step";
-import { WelcomeStep } from "@/components/onboarding/welcome-step";
 import { useT } from "@/lib/i18n";
+import { JL_TORRENTIO_ADDON_ID } from "@/lib/jl/onboarding";
 import { useOnboarding } from "@/lib/onboarding";
+import { isPlaceholderName, useProfiles } from "@/lib/profiles";
+import { useSettings } from "@/lib/settings";
 
-type StepId =
-  | "splash"
-  | "welcome"
-  | "iptv"
-  | "debrid"
-  | "torrentio"
-  | "layout"
-  | "tmdb"
-  | "stremio"
-  | "streaming"
-  | "subtitles"
-  | "done";
-const STEPS: StepId[] = [
-  "splash",
-  "welcome",
-  "iptv",
-  "debrid",
-  "torrentio",
-  "layout",
-  "tmdb",
-  "stremio",
-  "streaming",
-  "subtitles",
-  "done",
-];
-const SKIPPABLE = new Set<StepId>(["iptv", "debrid", "torrentio", "tmdb", "stremio", "streaming", "subtitles"]);
+// Only what a working setup needs. Everything else keeps its default and lives in Settings.
+type StepId = "splash" | "profile" | "live" | "movies" | "done";
+const STEPS: StepId[] = ["splash", "profile", "live", "movies", "done"];
 
 export function OnboardingModal() {
   const { onboarded, finishOnboarding } = useOnboarding();
+  const { settings } = useSettings();
+  const { activeProfile } = useProfiles();
   const t = useT();
   const [stepIdx, setStepIdx] = useState(0);
   const [closing, setClosing] = useState(false);
+  const [noIptv, setNoIptv] = useState(false);
+  const [noDebrid, setNoDebrid] = useState(false);
+  const [torrentioAdded, setTorrentioAdded] = useState(false);
 
   useEffect(() => {
     if (!onboarded) document.body.style.overflow = "hidden";
@@ -60,10 +40,20 @@ export function OnboardingModal() {
   const step = STEPS[stepIdx];
   const isSplash = step === "splash";
   const next = () => setStepIdx((i) => Math.min(i + 1, STEPS.length - 1));
-  const back = () => setStepIdx((i) => Math.max(i - 1, 0));
+  const back = () => setStepIdx((i) => Math.max(i - 1, 1));
   const finish = () => {
     setClosing(true);
     setTimeout(finishOnboarding, 320);
+  };
+
+  const hasPlaylist = settings.iptvPlaylists.some((p) => (p.kind ?? "m3u") !== "epg");
+  const hasDebrid = !!(settings.rdKey.trim() || settings.tbKey.trim());
+  const ready: Record<StepId, boolean> = {
+    splash: true,
+    profile: !isPlaceholderName(activeProfile?.name),
+    live: hasPlaylist || noIptv,
+    movies: noDebrid || (hasDebrid && (torrentioAdded || isInstalled(JL_TORRENTIO_ADDON_ID))),
+    done: true,
   };
 
   return (
@@ -77,51 +67,37 @@ export function OnboardingModal() {
           closing ? "scale-[0.97] opacity-0 transition-all duration-300" : "animate-modal-in"
         }`}
       >
-        {!isSplash && (
-          <button
-            onClick={finish}
-            aria-label={t("Skip setup")}
-            className="absolute end-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
-          >
-            <X size={17} />
-          </button>
-        )}
-
         {isSplash ? (
           <SplashStep onAdvance={next} />
         ) : (
           <>
-            <div className="flex min-h-[440px] flex-col justify-center px-12 py-10">
+            <div className="flex max-h-[78vh] min-h-[440px] flex-col justify-center overflow-y-auto px-12 py-10">
               <div key={step} className="animate-step-in">
-                {step === "welcome" && <WelcomeStep />}
-                {step === "iptv" && <IptvStep />}
-                {step === "debrid" && <DebridStep />}
-                {step === "torrentio" && <TorrentioStep />}
-                {step === "layout" && <LayoutStep />}
-                {step === "tmdb" && <TmdbStep />}
-                {step === "stremio" && <StremioStep />}
-                {step === "streaming" && <StreamingStep />}
-                {step === "subtitles" && <SubtitlesStep />}
+                {step === "profile" && <ProfileStep />}
+                {step === "live" && (
+                  <LiveTvStep
+                    onNoIptv={() => {
+                      setNoIptv(true);
+                      next();
+                    }}
+                  />
+                )}
+                {step === "movies" && (
+                  <MoviesStep
+                    onNoDebrid={() => {
+                      setNoDebrid(true);
+                      next();
+                    }}
+                    onTorrentio={() => setTorrentioAdded(true)}
+                  />
+                )}
                 {step === "done" && <DoneStep />}
               </div>
             </div>
 
             <div className="flex items-center justify-between border-t border-edge-soft bg-canvas/40 px-8 py-5">
-              <Dots
-                count={STEPS.length - 1}
-                active={Math.max(stepIdx - 1, 0)}
-                onJump={(i) => setStepIdx(i + 1)}
-              />
+              <Dots count={STEPS.length - 1} active={Math.max(stepIdx - 1, 0)} onJump={(i) => i + 1 < stepIdx && setStepIdx(i + 1)} />
               <div className="flex items-center gap-2.5">
-                {SKIPPABLE.has(step) && (
-                  <button
-                    key={`skip-${step}`}
-                    onClick={next}
-                    className="animate-skip-in h-11 rounded-full px-4 text-[13px] font-medium text-ink-subtle transition-colors hover:text-ink"
-                  >
-                    {t("Skip for now")}
-                  </button>
-                )}
                 {stepIdx > 1 && stepIdx < STEPS.length - 1 && (
                   <button
                     onClick={back}
@@ -133,9 +109,10 @@ export function OnboardingModal() {
                 {stepIdx < STEPS.length - 1 ? (
                   <button
                     onClick={next}
-                    className="flex h-11 items-center gap-2 rounded-full bg-ink px-6 text-[14px] font-semibold text-canvas transition-transform hover:scale-[1.03] active:scale-[0.97]"
+                    disabled={!ready[step]}
+                    className="flex h-11 items-center gap-2 rounded-full bg-ink px-6 text-[14px] font-semibold text-canvas transition-transform hover:scale-[1.03] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
                   >
-                    {step === "welcome" ? t("Get Started") : t("Continue")}
+                    {t("Continue")}
                     <ArrowRight size={15} strokeWidth={2.4} className="dir-icon" />
                   </button>
                 ) : (
@@ -143,7 +120,7 @@ export function OnboardingModal() {
                     onClick={finish}
                     className="flex h-11 items-center gap-2 rounded-full bg-ink px-6 text-[14px] font-semibold text-canvas transition-transform hover:scale-[1.03] active:scale-[0.97]"
                   >
-                    {t("Enter Harbor")}
+                    {t("Start watching")}
                     <ArrowRight size={15} strokeWidth={2.4} className="dir-icon" />
                   </button>
                 )}
