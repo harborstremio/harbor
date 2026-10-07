@@ -19,13 +19,18 @@ if (process.platform !== "win32") {
   process.exit(0);
 }
 
-const RELEASE = "20260610";
+// shinchiro prunes old GitHub releases; the same builds are mirrored on SourceForge. The
+// checksum pins the exact archive, so either source is safe.
 const SPECS = {
   x64: {
-    asset: "mpv-x86_64-20260610-git-304426c.7z",
-    sha256: "facac536baa73c7b925771af5e39a3c9cb16b8d75b59a6e9800de89799dffca7",
+    release: "20261004",
+    mirrorDir: "64bit",
+    asset: "mpv-x86_64-20261004-git-413ff0b1cd.7z",
+    sha256: "0703a0d62c60b2c68511c6a101db82a31c32c69bcdd86941632a1e76bb1699b7",
   },
   arm64: {
+    release: "20260610",
+    mirrorDir: "aarch64",
     asset: "mpv-aarch64-20260610-git-304426c.7z",
     sha256: "0781fdffeef27a40a7f266631d1ca9e5c1d0f82868a1678c58d23e0b1bd1eb98",
   },
@@ -57,16 +62,30 @@ function findFile(dir, name) {
   return null;
 }
 
-const url = `https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/${RELEASE}/${spec.asset}`;
+const urls = [
+  `https://downloads.sourceforge.net/project/mpv-player-windows/${spec.mirrorDir}/${spec.asset}`,
+  `https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/${spec.release}/${spec.asset}`,
+];
 const temp = mkdtempSync(join(tmpdir(), "harbor-mpv-"));
 
-try {
-  console.log(`[mpv] fetching ${url}`);
-  const response = await fetch(url, { redirect: "follow" });
-  if (!response.ok) throw new Error(`[mpv] download failed (${response.status} ${response.statusText})`);
+async function download() {
+  const failures = [];
+  for (const url of urls) {
+    console.log(`[mpv] fetching ${url}`);
+    try {
+      const response = await fetch(url, { redirect: "follow" });
+      if (response.ok) return Buffer.from(await response.arrayBuffer());
+      failures.push(`${url}: ${response.status} ${response.statusText}`);
+    } catch (e) {
+      failures.push(`${url}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+  throw new Error(`[mpv] download failed\n  ${failures.join("\n  ")}`);
+}
 
+try {
+  const bytes = await download();
   const archive = join(temp, spec.asset);
-  const bytes = Buffer.from(await response.arrayBuffer());
   const digest = createHash("sha256").update(bytes).digest("hex");
   if (digest !== spec.sha256) throw new Error(`[mpv] checksum mismatch (expected ${spec.sha256}, got ${digest})`);
   writeFileSync(archive, bytes);
