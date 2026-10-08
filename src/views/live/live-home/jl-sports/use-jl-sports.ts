@@ -28,7 +28,7 @@ export type JlHubGame = RankedGame & { channels: GameChannel[] };
 export type JlPlayerSlide = { player: JlFavoritePlayer; next: JlHubGame | null };
 
 /** Scoreboards for JL's leagues plus the schedules of followed teams that aren't on them. */
-function useJlGames(favorites: JlFavoriteTeam[]): SportsGame[] {
+export function useJlGames(favorites: JlFavoriteTeam[]): SportsGame[] {
   const [games, setGames] = useState<SportsGame[]>([]);
   const favoritesKey = favorites.map((f) => `${f.league}:${f.id}`).join(",");
 
@@ -119,6 +119,9 @@ export function useJlSports(params: { channels: IptvChannel[]; epg: EpgIndex | n
       teams,
       players,
       playerSlides,
+      games,
+      favorites,
+      channelsFor: channelsOf,
     };
   }, [games, favorites, index, nowMs, teams, players, sportsTopGames, sportsScoreTicker]);
 

@@ -14,6 +14,7 @@ import { useEpg, useNowTick } from "./live/hooks/use-epg";
 import { useIptvPlaylist } from "./live/hooks/use-iptv-playlist";
 import { useLiveActions } from "./live/hooks/use-live-actions";
 import { useXtreamEpgFallback } from "./live/hooks/use-xtream-epg-fallback";
+import { GameStoriesRow, useGameStories } from "./live/live-home/jl-sports/game-stories";
 import { JlSportsHub } from "./live/live-home/jl-sports/jl-sports-hub";
 import { JlSportsHero } from "./live/live-home/jl-sports/sports-hero";
 import { useJlSports } from "./live/live-home/jl-sports/use-jl-sports";
@@ -102,6 +103,7 @@ export function SportsView({ active }: { active: boolean }) {
     onPlay: handlePlay,
     onOpenGame: openMatchDetail,
   });
+  const stories = useGameStories({ ...jlSports, nowMs });
 
   const scrollRef = useRef<HTMLElement>(null);
   useScrollMemory("sports", scrollRef, active);
@@ -111,6 +113,7 @@ export function SportsView({ active }: { active: boolean }) {
   return (
     <main ref={scrollRef} className="flex-1 overflow-y-auto px-12 pb-20 pt-28">
       <div className="flex flex-col gap-8">
+        <GameStoriesRow stories={stories} onWatch={jlDialogs.actions.watch} onOpenGame={openMatchDetail} />
         {(jlSports.top.length > 0 || jlSports.playerSlides.length > 0) && (
           <JlSportsHero
             top={jlSports.top}

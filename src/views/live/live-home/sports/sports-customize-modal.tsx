@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X, Check, Settings2 } from "lucide-react";
 import { useT, useUiLanguage } from "@/lib/i18n";
 import { LEAGUES, LEAGUE_GROUPS, getLeagueLabel, getGroupLabel, type LeagueDef } from "@/lib/sports/espn";
+import { SportsAlertsToggle } from "./sports-alerts-toggle";
 
 interface SportsCustomizeModalProps {
   selected: string[];
@@ -142,6 +143,10 @@ export function SportsCustomizeModal({ selected, onSave, onClose }: SportsCustom
               })}
             </div>
           )}
+        </div>
+
+        <div className="flex flex-col border-t border-edge-soft/30 px-4 py-3">
+          <SportsAlertsToggle />
         </div>
 
         <div className="flex items-center justify-between border-t border-edge-soft/30 px-6 py-3.5">

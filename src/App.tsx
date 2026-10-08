@@ -134,6 +134,7 @@ const importDownloads = () => import("@/views/downloads");
 const importMatchDetail = () => import("@/views/live/match-detail-view");
 const importSportsPages = () => import("@/views/sports-pages");
 const importOnboarding = () => import("@/components/onboarding");
+const SportsAlerts = lazy(() => import("@/components/sports-alerts").then((m) => ({ default: m.SportsAlerts })));
 
 const AnimeView = lazy(() => importAnime().then((m) => ({ default: m.AnimeView })));
 const CalendarView = lazy(() => importCalendar().then((m) => ({ default: m.CalendarView })));
@@ -340,6 +341,9 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                   <AnilistSyncToast />
                                                   <MalSyncToast />
                                                   <ListToastHost />
+                                                  <Suspense fallback={null}>
+                                                    <SportsAlerts />
+                                                  </Suspense>
                                                   <TogetherLeaveForLiveModal />
                                                   <TogetherLocationPublisher />
                                                   <DiscordPresence />

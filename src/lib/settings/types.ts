@@ -331,6 +331,8 @@ export type Settings = {
   profilePromptInterval: "launch" | "15m" | "30m" | "never";
   defaultProfileId: string;
   sportsLeagues: string[];
+  /** Pop-up alerts for followed teams, athletes and Top 10 games. */
+  sportsAlerts: boolean;
   hideSpoilers: boolean;
   spoilerHideThumbnails: boolean;
   spoilerHideTitles: boolean;
