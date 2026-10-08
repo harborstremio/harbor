@@ -5,6 +5,7 @@ import { activeLayout } from "@/lib/theme";
 import { useView } from "@/lib/view";
 import { matchesSettingsSearch } from "./search-match";
 import { BUG_REPORTS_ENABLED } from "@/lib/bug-report";
+import { countSportsKeys, SPORTS_KEYS } from "@/lib/jl/sports/sports-keys";
 import { settingsAnchor, type SectionId } from "./shared";
 import { markSectionSeen, useSettingsNew } from "./settings-new";
 
@@ -216,6 +217,16 @@ function IconTheme(p: IconProps) {
   );
 }
 
+function IconSports(p: IconProps) {
+  return (
+    <IconBase {...p}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.6l3.2 2.3-1.2 3.8h-4l-1.2-3.8z" />
+      <path d="M12 3.5v4.1M15.2 9.9l4.2-1.3M14 13.7l2.6 3.6M10 13.7l-2.6 3.6M8.8 9.9 4.6 8.6" />
+    </IconBase>
+  );
+}
+
 function IconWebhooks(p: IconProps) {
   return (
     <IconBase {...p}>
@@ -338,6 +349,24 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
           "api key",
           "ratings",
           "posters",
+        ],
+      },
+      {
+        id: "sports",
+        label: "Sports plugins & keys",
+        Icon: IconSports,
+        keywords: [
+          "sports",
+          "thesportsdb",
+          "odds",
+          "the odds api",
+          "allsports",
+          "college football",
+          "cfbd",
+          "fan art",
+          "plugins",
+          "channel finder",
+          "ticker",
         ],
       },
       {
@@ -1271,6 +1300,18 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "clear frames",
       "storage",
     ],
+  },
+  {
+    label: "Sports keys (TheSportsDB, The Odds API, CollegeFootballData, AllSports)",
+    section: "sports",
+    anchorTitle: "Sports keys",
+    keywords: ["sports", "fan art", "odds", "moneyline", "spread", "college football", "api key"],
+  },
+  {
+    label: "Sports Hub plugins",
+    section: "sports",
+    anchorTitle: "Sports Hub plugins",
+    keywords: ["top games", "ranked matchups", "channel finder", "score ticker", "odds overlay"],
   },
   {
     label: "Region & language",
@@ -5439,6 +5480,8 @@ export function SettingsNav({
     settings.dlKey,
   ].filter(Boolean).length;
 
+  const sportsKeys = countSportsKeys(settings);
+
   const debridChip = libraryKeys > 0 ? `${libraryKeys}/5` : null;
 
   const relayLive = settings.togetherRelayUrl ? "live" : null;
@@ -5450,6 +5493,7 @@ export function SettingsNav({
     basics: null,
     account: null,
     library: libraryKeys > 0 ? `${libraryKeys}/5` : null,
+    sports: sportsKeys > 0 ? `${sportsKeys}/${SPORTS_KEYS.length}` : null,
     trakt: null,
     anilist: null,
     mal: null,

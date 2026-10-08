@@ -10,7 +10,9 @@ import {
 import { fetchJlScoreboard, fetchTeamGames } from "@/lib/jl/sports/feed";
 import { followedGamesThisWeek, selectTopGames, teamsMissingFromScoreboard } from "@/lib/jl/sports/gameday";
 import { isFavoriteGame, rankGames, type JlFavoriteTeam, type RankedGame } from "@/lib/jl/sports/rank";
+import { useSettings } from "@/lib/settings";
 import type { SportsGame } from "@/lib/sports/espn";
+import { useOddsApiGames } from "./use-sports-extras";
 
 export const JL_SPORTS_LEAGUES = ["NFL", "NCAAF", "NBA", "NCAAB", "NHL", "MLB", "EPL", "UCL", "MLS"];
 
@@ -67,18 +69,21 @@ function useJlGames(favorites: JlFavoriteTeam[]): SportsGame[] {
 
 export function useJlSports(params: { channels: IptvChannel[]; epg: EpgIndex | null; nowMs: number }) {
   const { channels, epg, nowMs } = params;
+  const { settings } = useSettings();
+  const { sportsTopGames, sportsChannelFinder, sportsScoreTicker, sportsOdds } = settings;
   const teams = useJlSportsFavorites();
   const players = useJlFavoritePlayers();
   const favorites = useMemo(() => effectiveTeams(teams, players), [teams, players]);
   const games = useJlGames(favorites);
   const bucket = Math.floor(nowMs / INDEX_BUCKET_MS);
 
+  // Smart Channel Finder off: no channel matching, so every game offers "Ways to watch" only.
   const index = useMemo(
-    () => buildSportsChannelIndex(channels, epg, new Date(bucket * INDEX_BUCKET_MS)),
-    [channels, epg, bucket],
+    () => buildSportsChannelIndex(sportsChannelFinder ? channels : [], epg, new Date(bucket * INDEX_BUCKET_MS)),
+    [channels, epg, bucket, sportsChannelFinder],
   );
 
-  return useMemo(() => {
+  const hub = useMemo(() => {
     const now = new Date(nowMs);
     const channelCache = new Map<string, GameChannel[]>();
     const channelsOf = (g: SportsGame) => {
@@ -108,6 +113,20 @@ export function useJlSports(params: { channels: IptvChannel[]; epg: EpgIndex | n
         next: ranked ?? (next ? { game: next, score: 0, reasons: [], mine: true, channels: channelsOf(next) } : null),
       };
     });
-    return { top, ticker, teams, players, playerSlides };
-  }, [games, favorites, index, nowMs, teams, players]);
+    return {
+      top: sportsTopGames ? top : [],
+      ticker: sportsScoreTicker ? ticker : [],
+      teams,
+      players,
+      playerSlides,
+    };
+  }, [games, favorites, index, nowMs, teams, players, sportsTopGames, sportsScoreTicker]);
+
+  // Odds overlay: The Odds API's line when the viewer has a key, else ESPN's; none when off.
+  const oddsGames = useOddsApiGames(useMemo(() => (sportsOdds ? hub.top.map((r) => r.game) : []), [hub.top, sportsOdds]));
+  const top = useMemo(
+    () => hub.top.map((r, i) => ({ ...r, game: sportsOdds ? (oddsGames[i] ?? r.game) : { ...r.game, odds: null } })),
+    [hub.top, oddsGames, sportsOdds],
+  );
+  return useMemo(() => ({ ...hub, top }), [hub, top]);
 }

@@ -67,6 +67,9 @@ const StreamingSourcesPanel = lazy(() =>
 const StreamFiltersPanel = lazy(() =>
   import("./settings/stream-filters-panel").then((m) => ({ default: m.StreamFiltersPanel })),
 );
+const SportsPanel = lazy(() =>
+  import("./settings/sports-panel").then((m) => ({ default: m.SportsPanel })),
+);
 const ThemePanel = lazy(() =>
   import("./settings/theme-panel").then((m) => ({ default: m.ThemePanel })),
 );
@@ -92,6 +95,10 @@ const SECTION_META: Record<SectionId, { label: string; sub: string }> = {
   library: {
     label: "Library & metadata",
     sub: "Optional keys that unlock TMDB rails, baked-in poster ratings, fanart, and TVDB episode data.",
+  },
+  sports: {
+    label: "Sports plugins & keys",
+    sub: "Bring your own sports data keys for fan art, odds and college data, and switch Sports Hub features on or off.",
   },
   trakt: {
     label: "Trakt",
@@ -320,6 +327,8 @@ export function Settings() {
                   saveKey={saveKey}
                 />
               )}
+
+              {active === "sports" && <SportsPanel />}
 
               {active === "relay" && <RelaySection mode={relayMode} onModeChange={setRelayMode} />}
 

@@ -8,6 +8,7 @@ import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import { statusText, WatchButton } from "./jl-sports-hub";
 import type { JlSportsActions } from "./use-jl-sports-dialogs";
 import type { JlHubGame, JlPlayerSlide } from "./use-jl-sports";
+import { GameBackdrop } from "./game-backdrop";
 
 const ADVANCE_MS = 9000;
 const LEADER_SLIDES = 3;
@@ -66,7 +67,8 @@ export function JlSportsHero({
       onBlur={() => setPaused(false)}
       className="relative mx-[9px] overflow-hidden rounded-2xl border border-edge-soft/60 bg-gradient-to-br from-elevated via-canvas to-canvas"
     >
-      <div key={position} className="animate-fade-in flex min-h-[260px] flex-col justify-between gap-5 p-6 md:p-8">
+      {current.kind === "game" && <GameBackdrop key={`art-${position}`} game={current.item.game} />}
+      <div key={position} className="animate-fade-in relative flex min-h-[260px] flex-col justify-between gap-5 p-6 md:p-8">
         {current.kind === "game" && (
           <GameSlide item={current.item} place={current.place} actions={actions} onOpenGame={onOpenGame} />
         )}

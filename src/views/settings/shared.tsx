@@ -8,6 +8,7 @@ export type SectionId =
   | "basics"
   | "account"
   | "library"
+  | "sports"
   | "trakt"
   | "anilist"
   | "mal"
