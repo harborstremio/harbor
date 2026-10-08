@@ -7,7 +7,7 @@ import {
   aniZipByTmdbTv,
   type AniZipMapping,
 } from "@/lib/providers/anizip";
-import { kitsuAnime, kitsuMainTvSeries } from "@/lib/providers/kitsu";
+import { kitsuAnime, kitsuMainTvSeries, kitsuRelated, parseKitsuId } from "@/lib/providers/kitsu";
 import { selectSiblingWindows, type AnimeListWindow } from "@/lib/streams/anime-identity-core";
 import { mappingStore } from "./mapping-store";
 
@@ -320,14 +320,119 @@ export async function anidbToMal(anidbId: number): Promise<number | null> {
 
 let imdbAnidbIndex: Record<string, number> | null = null;
 
+export type SharedCourMapping = {
+  kitsu_id?: number | null;
+  anidb_id?: number | null;
+  imdb_id?: string | null;
+  themoviedb_id?: number | string | null;
+};
+
+/**
+ * Decide whether a Kitsu id resolved through a *shared* provider id (one
+ * IMDb/TMDB id claimed by several cours, so AniZip answers with
+ * `kitsu_id: null`) should be redirected to an earlier cour.
+ *
+ * Pure decision helper: the async caller walks the prequel chain and hands us
+ * the root plus its AniZip mappings; we only redirect when the root provably
+ * shares the same provider id. Explicit AniZip hits (`kitsu_id` set, e.g. a
+ * later cour with its own IMDb id) are always trusted as-is.
+ */
+export function sharedCourRedirectTarget(
+  original: SharedCourMapping | null | undefined,
+  resolvedKitsuId: number | null,
+  rootKitsuId: number | null,
+  rootMappings: SharedCourMapping | null | undefined,
+): number | null {
+  if (resolvedKitsuId == null) return null;
+  if (typeof original?.kitsu_id === "number") return null;
+  if (rootKitsuId == null || rootKitsuId === resolvedKitsuId) return null;
+  const oImdb = original?.imdb_id ?? null;
+  const rImdb = rootMappings?.imdb_id ?? null;
+  if (oImdb && rImdb && oImdb === rImdb) return rootKitsuId;
+  const oTmdb = original?.themoviedb_id;
+  const rTmdb = rootMappings?.themoviedb_id;
+  if (
+    oTmdb != null &&
+    String(oTmdb).trim() !== "" &&
+    String(oTmdb) === String(rTmdb ?? "")
+  ) {
+    return rootKitsuId;
+  }
+  return null;
+}
+
+async function firstCourViaPrequels(startKitsu: number): Promise<number> {
+  let current = startKitsu;
+  const visited = new Set<number>([startKitsu]);
+  for (let i = 0; i < 8; i++) {
+    const related = await kitsuRelated(current).catch(() => []);
+    const prequels: Array<{ id: number; year: number; series: boolean }> = [];
+    for (const r of related ?? []) {
+      if (r.role.toLowerCase() !== "prequel") continue;
+      const kid = parseKitsuId(r.meta.id);
+      if (kid == null || visited.has(kid)) continue;
+      prequels.push({
+        id: kid,
+        year: parseInt(r.meta.releaseInfo ?? "", 10) || 9999,
+        series: r.meta.type !== "movie",
+      });
+    }
+    if (prequels.length === 0) break;
+    prequels.sort((a, b) =>
+      a.series !== b.series
+        ? a.series
+          ? -1
+          : 1
+        : a.year !== b.year
+          ? a.year - b.year
+          : a.id - b.id,
+    );
+    current = prequels[0].id;
+    visited.add(current);
+  }
+  return current;
+}
+
+/**
+ * Shared provider ids (one IMDb/TMDB id across split cours) make AniZip
+ * answer with the *later* cour's mapping (`kitsu_id: null`). Following that
+ * id puts a TMDB-merged detail page on Season 2 Episode 1 while calling it
+ * Season 1 Episode 1. Walk to the earliest prequel and use it when it claims
+ * the same provider id.
+ */
+async function preferFirstCour(
+  resolved: number | null,
+  original: AniZipMapping | SharedCourMapping | null,
+): Promise<number | null> {
+  if (resolved == null) return null;
+  const originalMappings: SharedCourMapping | null =
+    original == null
+      ? null
+      : "mappings" in original
+        ? (original.mappings ?? null)
+        : (original as SharedCourMapping);
+  if (typeof originalMappings?.kitsu_id === "number") return resolved;
+  let root = resolved;
+  try {
+    root = await firstCourViaPrequels(resolved);
+  } catch {
+    return resolved;
+  }
+  if (root === resolved) return resolved;
+  const rootAz = await aniZipByKitsu(root).catch(() => null);
+  return sharedCourRedirectTarget(originalMappings, resolved, root, rootAz?.mappings) ?? resolved;
+}
+
 export async function imdbToKitsu(imdbId: string): Promise<number | null> {
   if (!imdbId.startsWith("tt")) return null;
   const az = await aniZipByImdb(imdbId).catch(() => null);
   if (typeof az?.mappings?.kitsu_id === "number") {
     return preferMainTv(az.mappings.kitsu_id, (az.mappings as { type?: string }).type);
   }
-  if (typeof az?.mappings?.anidb_id === "number")
-    return externalToKitsu("anidb", az.mappings.anidb_id);
+  if (typeof az?.mappings?.anidb_id === "number") {
+    const k = await externalToKitsu("anidb", az.mappings.anidb_id);
+    return preferFirstCour(k, az);
+  }
   const maps = await loadAnidbMaps();
   if (!imdbAnidbIndex) {
     const idx: Record<string, number> = {};
@@ -339,7 +444,9 @@ export async function imdbToKitsu(imdbId: string): Promise<number | null> {
   }
   const anidb = imdbAnidbIndex[imdbId];
   if (!anidb) return null;
-  return externalToKitsu("anidb", anidb);
+  const fallback = await externalToKitsu("anidb", anidb);
+  // No AniZip record for the shared id here, so verify against the id itself.
+  return preferFirstCour(fallback, { imdb_id: imdbId });
 }
 
 export async function tmdbTvToKitsu(tmdbId: number): Promise<number | null> {
@@ -347,8 +454,10 @@ export async function tmdbTvToKitsu(tmdbId: number): Promise<number | null> {
   if (typeof az?.mappings?.kitsu_id === "number") {
     return preferMainTv(az.mappings.kitsu_id, (az.mappings as { type?: string }).type);
   }
-  if (typeof az?.mappings?.anidb_id === "number")
-    return externalToKitsu("anidb", az.mappings.anidb_id);
+  if (typeof az?.mappings?.anidb_id === "number") {
+    const k = await externalToKitsu("anidb", az.mappings.anidb_id);
+    return preferFirstCour(k, az);
+  }
   return null;
 }
 
