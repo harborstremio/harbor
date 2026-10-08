@@ -19,11 +19,12 @@ concurrency:
   group: jl-release
   cancel-in-progress: false
 
-# JL Media Vision accounts (JL Vision Supabase project). The publishable key is public by design;
-# row-level security protects every account's data.
+# JL Media Vision accounts. Set in GitHub → Settings → Secrets and variables → Actions →
+# Variables; nothing is written into the code. Without them the app builds, and its sign-in
+# screen says accounts aren't set up.
 env:
-  VITE_JL_SUPABASE_URL: https://ajbjyjfiglzodbdcdapr.supabase.co
-  VITE_JL_SUPABASE_ANON_KEY: sb_publishable_Nzp9lbbMCuZ6fd03XeSxXw_r-YtRr0k
+  VITE_JL_SUPABASE_URL: ${{ vars.JL_SUPABASE_URL }}
+  VITE_JL_SUPABASE_ANON_KEY: ${{ vars.JL_SUPABASE_ANON_KEY }}
 
 jobs:
   windows:
@@ -122,8 +123,8 @@ jobs:
         with:
           gradle-version: "8.11.1"
 
-      # One permanent sideload key (android-tv/app/jl-mediavision-sideload.jks) so every build
-      # installs over the last one. JL_KEYSTORE_* secrets override it if set.
+      # The signing key comes only from repository secrets, never from the repository. Keep the
+      # same key for every release so each APK installs over the last one.
       - name: Signing key
         env:
           KEYSTORE_B64: ${{ secrets.JL_KEYSTORE_B64 }}
@@ -131,12 +132,12 @@ jobs:
           KEY_ALIAS: ${{ secrets.JL_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.JL_KEY_PASSWORD }}
         run: |
-          if [ -n "$KEYSTORE_B64" ]; then
-            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/jl.keystore"
-            { echo "JL_KEYSTORE_FILE=$RUNNER_TEMP/jl.keystore"; echo "JL_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD"; echo "JL_KEY_ALIAS=$KEY_ALIAS"; echo "JL_KEY_PASSWORD=$KEY_PASSWORD"; } >> "$GITHUB_ENV"
-            exit 0
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "::error::Add the JL_KEYSTORE_B64, JL_KEYSTORE_PASSWORD, JL_KEY_ALIAS and JL_KEY_PASSWORD repository secrets to sign the APK."
+            exit 1
           fi
-          { echo "JL_KEYSTORE_FILE=$GITHUB_WORKSPACE/android-tv/app/jl-mediavision-sideload.jks"; echo "JL_KEYSTORE_PASSWORD=jl-mediavision-sideload"; echo "JL_KEY_ALIAS=jl-mediavision"; echo "JL_KEY_PASSWORD=jl-mediavision-sideload"; } >> "$GITHUB_ENV"
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/jl.keystore"
+          { echo "JL_KEYSTORE_FILE=$RUNNER_TEMP/jl.keystore"; echo "JL_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD"; echo "JL_KEY_ALIAS=$KEY_ALIAS"; echo "JL_KEY_PASSWORD=$KEY_PASSWORD"; } >> "$GITHUB_ENV"
 
       - name: Build APK
         run: gradle -p android-tv assembleRelease --no-daemon

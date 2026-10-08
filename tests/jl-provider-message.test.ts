@@ -10,22 +10,22 @@ test("reads an emoji access-details message with two servers and two playlists",
 💠 Password: s3cr3tPass
 
 💠 Stream URLs:
-🔗 http://xtreme.ink
-🔗 http://cf.xtreme.ink (VPN Supported)
+🔗 http://provider-one.example
+🔗 http://vpn.provider-one.example (VPN Supported)
 
 🎼 M3U Playlist (Default):
-🔗 http://xtreme.ink/get.php?username=jl_user42&password=s3cr3tPass&type=m3u_plus&output=ts
+🔗 http://provider-one.example/get.php?username=jl_user42&password=s3cr3tPass&type=m3u_plus&output=ts
 
 🎼 M3U Playlist (VPN Supported):
-🔗 http://cf.xtreme.ink/get.php?username=jl_user42&password=s3cr3tPass&type=m3u_plus&output=ts`;
+🔗 http://vpn.provider-one.example/get.php?username=jl_user42&password=s3cr3tPass&type=m3u_plus&output=ts`;
   const d = parseProviderMessage(msg);
   assert.equal(d.username, "jl_user42");
   assert.equal(d.password, "s3cr3tPass");
   assert.deepEqual(
     d.logins.map((l) => (l.kind === "xtream" ? [l.server, l.note] : [l.url, l.note])),
     [
-      ["http://xtreme.ink", "Default"],
-      ["http://cf.xtreme.ink", "VPN Supported"],
+      ["http://provider-one.example", "Default"],
+      ["http://vpn.provider-one.example", "VPN Supported"],
     ],
   );
 });
@@ -34,23 +34,23 @@ test("reads a device-details message with a server on a port", () => {
   const msg = `Device Details:
 
 🔷 Device
-👤 Username: GH7Q2N
-🔒 Password: T9x4kLm
-🌐 Link: http://limited-name.com:80
+👤 Username: dev_user7
+🔒 Password: devPass9
+🌐 Link: http://provider-two.example:80
 📺 M3U Link:
-http://limited-name.com:80/get.php?username=GH7Q2N&password=T9x4kLm&type=m3u_plus&output=hls
+http://provider-two.example:80/get.php?username=dev_user7&password=devPass9&type=m3u_plus&output=hls
 
 If you have any questions, please let us know.`;
   const d = parseProviderMessage(msg);
-  assert.equal(d.username, "GH7Q2N");
-  assert.equal(d.password, "T9x4kLm");
+  assert.equal(d.username, "dev_user7");
+  assert.equal(d.password, "devPass9");
   assert.equal(d.logins.length, 1);
   assert.deepEqual(d.logins[0], {
     kind: "xtream",
     // Port 80 is the http default, so URL parsing drops it.
-    server: "http://limited-name.com",
-    username: "GH7Q2N",
-    password: "T9x4kLm",
+    server: "http://provider-two.example",
+    username: "dev_user7",
+    password: "devPass9",
     note: null,
   });
 });

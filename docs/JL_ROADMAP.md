@@ -118,7 +118,7 @@ Plan: stage, then swap. Nothing live breaks in between.
 
 ### Phase 6: Nvidia Shield / Android TV
 - Grow the JL API repo's `android/` (or move it here as `android/`): a WebView that loads the JL UI and a JS bridge for `play(url, headers)` into ExoPlayer/Media3, plus D-pad focus handling.
-- Release signing stays in environment variables. Move `jl-sideload.jks` out of git.
+- Release signing comes only from the JL_KEYSTORE_* repository secrets; no keystore is committed.
 
 ### Phase 7: Retire OVH
 - When desktop, web, and Shield all play through direct sources, shut down Dispatcharr, the Stream Gateway, and the Caddy routes on `tv.jl-stream.com`.
