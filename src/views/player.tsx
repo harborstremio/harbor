@@ -9,8 +9,10 @@ import { nameColor } from "@/lib/together/colors";
 import { useTogether } from "@/lib/together/provider";
 import { buildPlayInvite } from "@/lib/together/build-invite";
 import { useView, type PlayerSrc, type PlayEpisode } from "@/lib/view";
-import { setHeroDockSupported, wasExpandedFromDock } from "@/lib/hero-dock";
+import { heroDockSupported, setHeroDockSupported, wasExpandedFromDock } from "@/lib/hero-dock";
 import { isLinuxDesktop } from "@/lib/platform";
+import { nativeTvAvailable } from "@/lib/player/native-tv/bridge";
+import { NativeHeroBar } from "./player/native-hero-bar";
 import { queueShift, useQueue, useSleepAtEnd } from "@/lib/queue";
 import { useSkipSegments, useAdSegments } from "@/lib/skip-intro";
 import { withinAdWindow } from "@/lib/ad-report/window";
@@ -440,8 +442,9 @@ export function PlayerView({
     openPicker,
   });
   const requestLeave = useCallback(() => {
-    // Opened from the hero: Back returns there and keeps playing.
-    if (wasExpandedFromDock()) {
+    // Opened from the hero, Back returns there and keeps playing. On the TV app Back always
+    // moves the video into the hero; the hero's Stop button ends it.
+    if (wasExpandedFromDock() || (nativeTvAvailable() && heroDockSupported())) {
       dockPlayer();
       return true;
     }
@@ -893,6 +896,8 @@ export function PlayerView({
     }
   }, [src]);
 
+  const nativeTv = useMemo(() => nativeTvAvailable(), []);
+
   // Embedded mpv on Linux draws over the whole window, so it can't sit in the hero.
   useEffect(() => {
     setHeroDockSupported(!(engine === "mpv" && embedActive && isLinuxDesktop()));
@@ -1092,7 +1097,18 @@ export function PlayerView({
           if (resuming) hideForResume();
         }}
       />
-      {!hdrStageActive && <PlayerOverlayLayers {...overlayProps} />}
+      {/* The TV app's native video covers the web controls in the hero; its bar replaces them. */}
+      {!hdrStageActive && !(docked && nativeTv) && <PlayerOverlayLayers {...overlayProps} />}
+      {docked && nativeTv && (
+        <NativeHeroBar
+          title={src.meta.name}
+          playing={playing}
+          live={isLiveLike}
+          onPlayPause={playPauseToggle}
+          onExpand={expandDock}
+          onStop={() => void closePlayer()}
+        />
+      )}
       {sourceError && (
         <SourceErrorCard
           error={sourceError}

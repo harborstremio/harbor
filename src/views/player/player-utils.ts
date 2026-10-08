@@ -1,4 +1,5 @@
 import { createHtml5Bridge } from "@/lib/player/html5";
+import { createNativeTvBridge, nativeTvAvailable } from "@/lib/player/native-tv/bridge";
 import { createMpvBridge, probeMpv, type MpvRect } from "@/lib/player/mpv";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
@@ -65,6 +66,8 @@ export async function pickBridge(
     getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
   },
 ): Promise<{ bridge: PlayerBridge; engine: "html5" | "mpv" }> {
+  // Inside the JL Media Vision TV app every stream plays in the native player.
+  if (nativeTvAvailable()) return { bridge: createNativeTvBridge(), engine: "html5" };
   if (want === "html5") return { bridge: createHtml5Bridge(), engine: "html5" };
   if (want === "mpv") {
     const probe = await probeMpv();
