@@ -15,6 +15,7 @@ import { useIptvPlaylist } from "./live/hooks/use-iptv-playlist";
 import { useLiveActions } from "./live/hooks/use-live-actions";
 import { useXtreamEpgFallback } from "./live/hooks/use-xtream-epg-fallback";
 import { JlSportsHub } from "./live/live-home/jl-sports/jl-sports-hub";
+import { LiveSportsChannels } from "./live/live-home/jl-sports/live-sports-channels";
 import { JlSportsHero } from "./live/live-home/jl-sports/sports-hero";
 import { useJlSports } from "./live/live-home/jl-sports/use-jl-sports";
 import { useJlSportsDialogs } from "./live/live-home/jl-sports/use-jl-sports-dialogs";
@@ -143,6 +144,15 @@ export function SportsView({ active }: { active: boolean }) {
           favorites={jlSports.teams}
           actions={jlDialogs.actions}
           onOpenGame={openMatchDetail}
+        />
+        <LiveSportsChannels
+          active={active}
+          channels={shownChannels}
+          activeSourceId={activeSource?.id ?? null}
+          epg={epg}
+          nowMs={nowMs}
+          games={jlSports.top}
+          onPlay={handlePlay}
         />
         {(sports.length > 0 || sportsLeague !== "all" || userSportsLeagues.length > 0) && (
           <SportsMarquee

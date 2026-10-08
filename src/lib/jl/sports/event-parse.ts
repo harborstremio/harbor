@@ -70,7 +70,7 @@ function yearFor(monthIndex: number, now: Date): number {
 }
 
 /** Pulls the kick-off out of the name; returns the start and the name without it. */
-function takeTime(name: string, now: Date): { start: Date; rest: string } | null {
+export function takeTime(name: string, now: Date): { start: Date; rest: string } | null {
   let m = /\s*@\s*(\d{1,2})\s+([A-Za-z]{3})[a-z]*\s+(\d{1,2}):(\d{2})\s*(AM|PM)\s*ET\s*$/i.exec(name);
   if (m) {
     const mi = month(m[2]);
