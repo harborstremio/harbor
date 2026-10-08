@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 import { fetchMatchSummary, type SportsGame, type SportsMatchDetail } from "@/lib/sports/espn";
+import { MatchCenterLink } from "@/views/sports-pages/match-center-link";
 
 export function MatchDetailView({ game }: { game: SportsGame }) {
   const t = useT();
@@ -89,6 +90,7 @@ export function MatchDetailView({ game }: { game: SportsGame }) {
               </div>
             </div>
           </div>
+          <MatchCenterLink game={game} />
         </div>
       </div>
 
