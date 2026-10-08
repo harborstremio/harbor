@@ -27,6 +27,20 @@ export function QualityPanel() {
       </Section>
 
       <Section
+        title={t("Pinned video")}
+        subtitle={t("Pin a playing video and keep browsing. Wallpaper plays it behind the whole page and suits every theme; Hero plays it in a box at the top of the hubs.")}
+      >
+        <Segmented
+          value={settings.heroDockMode}
+          options={[
+            { value: "wallpaper", label: t("Wallpaper") },
+            { value: "hero", label: t("Hero") },
+          ]}
+          onChange={(v) => update({ heroDockMode: v })}
+        />
+      </Section>
+
+      <Section
         title={t("Stream quality in player")}
         subtitle={t("Show what you're actually watching, under the title in the player.")}
       >

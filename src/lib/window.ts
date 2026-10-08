@@ -71,9 +71,30 @@ export function useMaximized(): boolean {
   return maxed;
 }
 
+// A window kept on top (tray option or picture-in-picture) would cover the browser the link opens
+// in. Step back until the viewer returns to the app, then stay on top again.
+let onTopReleased = false;
+async function releaseOnTopForBrowser() {
+  if (!win || onTopReleased) return;
+  try {
+    if (!(await win.isAlwaysOnTop())) return;
+    onTopReleased = true;
+    await win.setAlwaysOnTop(false);
+    const unlisten = await win.onFocusChanged(({ payload: focused }) => {
+      if (!focused) return;
+      unlisten();
+      onTopReleased = false;
+      void win.setAlwaysOnTop(true).catch(() => {});
+    });
+  } catch {
+    onTopReleased = false;
+  }
+}
+
 export function openUrl(url: string) {
   if (!url) return;
   if (isTauri()) {
+    void releaseOnTopForBrowser();
     tauriOpenUrl(url).catch(() => {
       invoke("browser_open", { url }).catch(() => {
         try {

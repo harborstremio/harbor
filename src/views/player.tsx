@@ -13,6 +13,7 @@ import { heroDockSupported, setHeroDockSupported, wasExpandedFromDock } from "@/
 import { isLinuxDesktop } from "@/lib/platform";
 import { nativeTvAvailable } from "@/lib/player/native-tv/bridge";
 import { NativeHeroBar } from "./player/native-hero-bar";
+import { PinnedVideoPill } from "./player/pinned-video-pill";
 import { queueShift, useQueue, useSleepAtEnd } from "@/lib/queue";
 import { useSkipSegments, useAdSegments } from "@/lib/skip-intro";
 import { withinAdWindow } from "@/lib/ad-report/window";
@@ -93,11 +94,14 @@ let hdrFallbackNoticeShown = false;
 export function PlayerView({
   src,
   docked = false,
+  dockMode = "hero",
   dockStyle,
 }: {
   src: PlayerSrc;
-  /** Playing in the hub hero instead of full screen. */
+  /** Pinned while browsing the hubs instead of full screen. */
   docked?: boolean;
+  /** Pinned behind the whole page (wallpaper) or in the hub hero box. */
+  dockMode?: "wallpaper" | "hero";
   dockStyle?: CSSProperties;
 }) {
   const {
@@ -110,6 +114,8 @@ export function PlayerView({
     dockPlayer,
     expandDock,
   } = useView();
+  // Wallpaper: the video plays behind the page, under the theme's dimming, with a small control pill.
+  const wallpaper = docked && dockMode === "wallpaper";
   const dockedRef = useRef(docked);
   dockedRef.current = docked;
   // The hub's navigation stays visible while the video plays in the hero.
@@ -1074,9 +1080,11 @@ export function PlayerView({
       data-tv-focus-scope={docked ? undefined : ""}
       dir="ltr"
       className={
-        docked
-          ? `fixed z-[45] overflow-hidden ${stageBg}`
-          : `fixed inset-0 z-[100] overflow-hidden ${stageBg}`
+        wallpaper
+          ? `pointer-events-none fixed inset-0 -z-[15] overflow-hidden ${stageBg}`
+          : docked
+            ? `fixed z-[45] overflow-hidden ${stageBg}`
+            : `fixed inset-0 z-[100] overflow-hidden ${stageBg}`
       }
       style={docked ? { ...cursorStyle, ...dockStyle } : cursorStyle}
       onMouseMove={wakeChrome}
@@ -1098,7 +1106,17 @@ export function PlayerView({
         }}
       />
       {/* The TV app's native video covers the web controls in the hero; its bar replaces them. */}
-      {!hdrStageActive && !(docked && nativeTv) && <PlayerOverlayLayers {...overlayProps} />}
+      {!hdrStageActive && !(docked && nativeTv) && !wallpaper && <PlayerOverlayLayers {...overlayProps} />}
+      {wallpaper && (
+        <PinnedVideoPill
+          title={src.meta.name}
+          playing={playing}
+          live={isLiveLike}
+          onPlayPause={playPauseToggle}
+          onExpand={expandDock}
+          onStop={() => void closePlayer()}
+        />
+      )}
       {docked && nativeTv && (
         <NativeHeroBar
           title={src.meta.name}

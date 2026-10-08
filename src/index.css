@@ -62,13 +62,16 @@ body,
 
 html[data-mpv-embed="1"],
 html[data-mpv-embed="1"] body,
-html[data-mpv-embed="1"] #root {
+html[data-mpv-embed="1"] #root,
+html[data-pinned-wallpaper="1"],
+html[data-pinned-wallpaper="1"] body,
+html[data-pinned-wallpaper="1"] #root {
   background: transparent;
 }
 
-html[data-os="linux"]:not([data-mpv-embed="1"]),
-html[data-os="linux"]:not([data-mpv-embed="1"]) body,
-html[data-os="linux"]:not([data-mpv-embed="1"]) #root {
+html[data-os="linux"]:not([data-mpv-embed="1"]):not([data-pinned-wallpaper="1"]),
+html[data-os="linux"]:not([data-mpv-embed="1"]):not([data-pinned-wallpaper="1"]) body,
+html[data-os="linux"]:not([data-mpv-embed="1"]):not([data-pinned-wallpaper="1"]) #root {
   background: var(--color-canvas);
 }
 
@@ -2754,6 +2757,46 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
   .jl-loader-mark {
     animation: none;
   }
+}
+
+/* Pinned video as wallpaper: clear at the top so the picture shows, darker lower down where the
+   rows are read. */
+.theme-backdrop-scrim {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 35%,
+    color-mix(in srgb, var(--color-canvas) 40%, transparent) 62%,
+    color-mix(in srgb, var(--color-canvas) 55%, transparent) 100%
+  );
+}
+
+/* Pinned video as wallpaper: the rows stay see-through so the video shows behind them, and fade
+   out completely as they scroll up past the middle, leaving the top of the window to the video. */
+.wallpaper-dock-layer {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 0%;
+  flex-direction: column;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 34%, rgb(0 0 0 / 0.72) 58%);
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent 34%, rgb(0 0 0 / 0.72) 58%);
+}
+
+/* Pinned video in the hero on the desktop: the video plays behind the page, so the theme
+   background leaves the hero box (--hd-x/y/w/h, window coordinates) clear. */
+.theme-backdrop-hero {
+  -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  -webkit-mask-size: 100% 100%, var(--hd-w, 0px) var(--hd-h, 0px);
+  -webkit-mask-position: 0 0, var(--hd-x, 0px) var(--hd-y, 0px);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-composite: xor;
+  mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  mask-size: 100% 100%, var(--hd-w, 0px) var(--hd-h, 0px);
+  mask-position: 0 0, var(--hd-x, 0px) var(--hd-y, 0px);
+  mask-repeat: no-repeat;
+  mask-composite: exclude;
 }
 
 /* Sticky hero player: the current page sits under the docked video. The page is see-through in the

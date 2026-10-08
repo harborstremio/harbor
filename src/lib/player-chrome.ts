@@ -281,7 +281,7 @@ export const CONTROL_META: Record<
   screenshot: { label: "Screenshot", group: "actions", defaultSlot: "bottom-right" },
   "song-id": { label: "Identify song", group: "actions", defaultSlot: "bottom-right" },
   pip: { label: "Picture-in-picture", group: "actions", defaultSlot: "bottom-right" },
-  hero: { label: "Play in hero (keep watching while you browse)", group: "actions", defaultSlot: "bottom-right" },
+  hero: { label: "Pin video (keep watching while you browse)", group: "actions", defaultSlot: "bottom-right" },
   cast: { label: "Cast", group: "actions", defaultSlot: "bottom-right" },
   fullscreen: { label: "Fullscreen", group: "transport", defaultSlot: "bottom-right" },
   "window-controls": {

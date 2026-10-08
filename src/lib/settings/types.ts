@@ -208,6 +208,8 @@ export type Settings = {
   playerAnime4kAnimeOnly: boolean;
   playerAnime4kIndicator: boolean;
   playerMpvEmbed: boolean;
+  /** Where a pinned video plays while browsing: behind the whole page, or in the hub hero box. */
+  heroDockMode: "wallpaper" | "hero";
   playerP2pChip: boolean;
   showQualityInfo: boolean;
   stremioServerTranscode: boolean;

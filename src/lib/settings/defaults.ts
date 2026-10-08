@@ -170,6 +170,7 @@ export const DEFAULT: Settings = {
   playerAnime4kAnimeOnly: true,
   playerAnime4kIndicator: true,
   playerMpvEmbed: true,
+  heroDockMode: "wallpaper",
   playerP2pChip: true,
   showQualityInfo: false,
   stremioServerTranscode: false,

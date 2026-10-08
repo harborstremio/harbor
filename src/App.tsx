@@ -82,7 +82,7 @@ import { useSettings } from "@/lib/settings";
 import { effectiveBinding, eventToBinding, shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
 import { ViewProvider, useView, type Frame, type MetaFilter, type View } from "@/lib/view";
 import { isHubKind, setHeroDock, useHeroDock } from "@/lib/hero-dock";
-import { useHeroDockBox } from "@/lib/hero-dock-layout";
+import { useActiveHeroDockMode, useHeroDockBox } from "@/lib/hero-dock-layout";
 import type { MetaType } from "@/lib/cinemeta";
 import { useDiscordPresence } from "@/lib/discord/use-discord-presence";
 import { Home } from "@/views/home";
@@ -495,6 +495,7 @@ function parseDeepLinkEpisode(videoId?: string): { season: number; episode: numb
 
 // Until the hero box is measured, keep a docked player mounted but out of sight.
 const HIDDEN_DOCK = { left: 0, top: 0, width: 1, height: 1, visibility: "hidden" } as const;
+const WALLPAPER_DOCK = { inset: 0 } as const;
 
 function Shell({ onReady }: { onReady?: () => void }) {
   const {
@@ -913,7 +914,17 @@ function Shell({ onReady }: { onReady?: () => void }) {
     : layout === "topdock" || layout === "cinematic" || layout === "royal"
       ? 92
       : 16;
-  const dockStyle = useHeroDockBox(contentRef, docked, heroTop);
+  const dockMode = useActiveHeroDockMode();
+  const heroBoxed = docked && dockMode === "hero";
+  const dockStyle = useHeroDockBox(contentRef, heroBoxed, heroTop);
+  // The page's base background would hide a video pinned behind it.
+  useEffect(() => {
+    if (!docked || dockMode !== "wallpaper") return;
+    document.documentElement.dataset.pinnedWallpaper = "1";
+    return () => {
+      delete document.documentElement.dataset.pinnedWallpaper;
+    };
+  }, [docked, dockMode]);
   const playSrc = player ?? (docked && heroDock ? heroDock.src : null);
   useEffect(() => setNativeMemoryActive(playerActive), [playerActive]);
   useEffect(() => {
@@ -977,7 +988,8 @@ function Shell({ onReady }: { onReady?: () => void }) {
     });
   }, [topKind]);
 
-  const layer = (top: boolean) => (top ? (docked ? "hero-dock-layer" : "contents") : "hidden");
+  const layer = (top: boolean) =>
+    top ? (heroBoxed ? "hero-dock-layer" : docked && dockMode === "wallpaper" ? "wallpaper-dock-layer" : "contents") : "hidden";
 
   const overlayPinned = useOverlayPinned();
   const settingsAlive = useIdleEvict(settingsTop, overlayPinned);
@@ -1315,7 +1327,8 @@ function Shell({ onReady }: { onReady?: () => void }) {
             key={playSrc.meta.id.startsWith("iptv:") ? "player-live" : `player-${playSrc.meta.id}`}
             src={playSrc}
             docked={!player}
-            dockStyle={dockStyle ?? HIDDEN_DOCK}
+            dockMode={dockMode ?? "hero"}
+            dockStyle={dockMode === "wallpaper" ? WALLPAPER_DOCK : (dockStyle ?? HIDDEN_DOCK)}
           />
         </Suspense>
       )}
