@@ -39,6 +39,7 @@ export type PlayerControlId =
   | "screenshot"
   | "song-id"
   | "pip"
+  | "hero"
   | "cast"
   | "fullscreen"
   | "window-controls";
@@ -196,6 +197,7 @@ export const DEFAULT_DEFAULT_CONFIG: PlayerChromeConfig = {
     { id: "screenshot", slot: "bottom-right", order: 45, hidden: true },
     { id: "song-id", slot: "bottom-right", order: 46 },
     { id: "pip", slot: "bottom-right", order: 50 },
+    { id: "hero", slot: "bottom-right", order: 55 },
     { id: "cast", slot: "bottom-right", order: 60 },
     { id: "fullscreen", slot: "bottom-right", order: 70 },
   ],
@@ -232,6 +234,7 @@ export const DEFAULT_STREMIO_CONFIG: PlayerChromeConfig = {
     { id: "screenshot", slot: "bottom-right", order: 35, hidden: true },
     { id: "song-id", slot: "bottom-right", order: 36 },
     { id: "cast", slot: "bottom-right", order: 40 },
+    { id: "hero", slot: "bottom-right", order: 45 },
     { id: "pick-another", slot: "bottom-right", order: 50 },
     { id: "pip", slot: "bottom-right", order: 60 },
   ],
@@ -278,6 +281,7 @@ export const CONTROL_META: Record<
   screenshot: { label: "Screenshot", group: "actions", defaultSlot: "bottom-right" },
   "song-id": { label: "Identify song", group: "actions", defaultSlot: "bottom-right" },
   pip: { label: "Picture-in-picture", group: "actions", defaultSlot: "bottom-right" },
+  hero: { label: "Play in hero (keep watching while you browse)", group: "actions", defaultSlot: "bottom-right" },
   cast: { label: "Cast", group: "actions", defaultSlot: "bottom-right" },
   fullscreen: { label: "Fullscreen", group: "transport", defaultSlot: "bottom-right" },
   "window-controls": {

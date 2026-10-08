@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { isHeroDocked } from "@/lib/hero-dock";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { writePlayerPrefs } from "@/lib/player-prefs";
 import { writePlayerVolume } from "@/lib/player-volume";
@@ -100,6 +101,8 @@ export function useKeyboardShortcuts(params: {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isTypingTarget(e)) return;
+      // In the hub hero the keys belong to the page being browsed.
+      if (isHeroDocked()) return;
 
       const binding = eventToBinding(e);
       const match = (id: HotkeyId): boolean => effectiveBinding(id, overrides) === binding;
@@ -398,6 +401,7 @@ export function useKeyboardShortcuts(params: {
       return "held" as const;
     };
     const onKeyUp = (e: KeyboardEvent) => {
+      if (isHeroDocked()) return;
       const h = holdRef.current;
       if (h.key == null || e.key !== h.key) return;
       if (releaseHold() === "tap") playPauseToggle();

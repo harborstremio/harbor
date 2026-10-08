@@ -2755,3 +2755,28 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
     animation: none;
   }
 }
+
+/* Sticky hero player: the current page sits under the docked video. The page is see-through in the
+   hero box (so the video, native or HTML, shows) and fades back in just below it. */
+.hero-dock-layer {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 0%;
+  flex-direction: column;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 var(--hd-top, 0px),
+    transparent var(--hd-top, 0px),
+    transparent var(--hd-bottom, 0px),
+    #000 calc(var(--hd-bottom, 0px) + 96px)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 var(--hd-top, 0px),
+    transparent var(--hd-top, 0px),
+    transparent var(--hd-bottom, 0px),
+    #000 calc(var(--hd-bottom, 0px) + 96px)
+  );
+}

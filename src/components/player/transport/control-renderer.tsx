@@ -69,6 +69,7 @@ import { SeekStepBtn } from "./seek-step-btn";
 import { EpisodeNavBtn } from "./episode-nav-btn";
 import { TimeStart, TimeEnd } from "./time-display";
 import { WindowControlButtons } from "./window-control-buttons";
+import { HeroDockButton } from "./hero-dock-button";
 import { IdentifySongButton } from "@/components/identify-song-button";
 
 export type ControlContext = {
@@ -542,6 +543,10 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
     case "song-id": {
       if (ctx.tight) return null;
       return <IdentifySongButton editing={ctx.editing} />;
+    }
+    case "hero": {
+      if (ctx.tight) return null;
+      return <HeroDockButton variant="big" editing={ctx.editing} />;
     }
     case "pip": {
       if (!ctx.capabilities.pictureInPicture) return null;

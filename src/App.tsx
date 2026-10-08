@@ -81,6 +81,8 @@ import { LocalWatchlistProvider } from "@/lib/local-watchlist";
 import { useSettings } from "@/lib/settings";
 import { effectiveBinding, eventToBinding, shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
 import { ViewProvider, useView, type Frame, type MetaFilter, type View } from "@/lib/view";
+import { isHubKind, setHeroDock, useHeroDock } from "@/lib/hero-dock";
+import { useHeroDockBox } from "@/lib/hero-dock-layout";
 import type { MetaType } from "@/lib/cinemeta";
 import { useDiscordPresence } from "@/lib/discord/use-discord-presence";
 import { Home } from "@/views/home";
@@ -491,6 +493,9 @@ function parseDeepLinkEpisode(videoId?: string): { season: number; episode: numb
   return { season, episode };
 }
 
+// Until the hero box is measured, keep a docked player mounted but out of sight.
+const HIDDEN_DOCK = { left: 0, top: 0, width: 1, height: 1, visibility: "hidden" } as const;
+
 function Shell({ onReady }: { onReady?: () => void }) {
   const {
     topKind,
@@ -895,6 +900,21 @@ function Shell({ onReady }: { onReady?: () => void }) {
   }, [activeProfile?.id]);
 
   const playerActive = !!player;
+  // A video docked in the hero keeps playing while the viewer browses the hubs.
+  const heroDock = useHeroDock();
+  const hubTop = isHubKind(topKind);
+  const docked = !player && !!heroDock && hubTop;
+  useEffect(() => {
+    if (heroDock && !player && !hubTop) setHeroDock(null);
+  }, [heroDock, player, hubTop]);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const heroTop = themeHasTopbar
+    ? 80
+    : layout === "topdock" || layout === "cinematic" || layout === "royal"
+      ? 92
+      : 16;
+  const dockStyle = useHeroDockBox(contentRef, docked, heroTop);
+  const playSrc = player ?? (docked && heroDock ? heroDock.src : null);
   useEffect(() => setNativeMemoryActive(playerActive), [playerActive]);
   useEffect(() => {
     if (!playerActive) void exitWindowFullscreenOnPlayerClose();
@@ -957,7 +977,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
     });
   }, [topKind]);
 
-  const layer = (top: boolean) => (top ? "contents" : "hidden");
+  const layer = (top: boolean) => (top ? (docked ? "hero-dock-layer" : "contents") : "hidden");
 
   const overlayPinned = useOverlayPinned();
   const settingsAlive = useIdleEvict(settingsTop, overlayPinned);
@@ -1040,6 +1060,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
       )}
       {!playerActive && <WindowResizeEdges />}
       <div
+        ref={contentRef}
         className={`relative flex min-h-0 min-w-0 flex-1 flex-col ${playerActive ? "invisible" : ""}`}
       >
         <div className={layer(homeTop)}>
@@ -1288,11 +1309,13 @@ function Shell({ onReady }: { onReady?: () => void }) {
           />
         )}
       </div>
-      {player && (
-        <Suspense fallback={<PlayerRouteFallback src={player} />}>
+      {playSrc && (
+        <Suspense fallback={<PlayerRouteFallback src={playSrc} />}>
           <PlayerView
-            key={player.meta.id.startsWith("iptv:") ? "player-live" : `player-${player.meta.id}`}
-            src={player}
+            key={playSrc.meta.id.startsWith("iptv:") ? "player-live" : `player-${playSrc.meta.id}`}
+            src={playSrc}
+            docked={!player}
+            dockStyle={dockStyle ?? HIDDEN_DOCK}
           />
         </Suspense>
       )}

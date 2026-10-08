@@ -41,6 +41,7 @@ import { DrawToggle } from "./draw-toggle";
 import { CastButton } from "./cast-button";
 import { TimeStart } from "./time-display";
 import { StremioBtn } from "./stremio-btn";
+import { HeroDockButton } from "./hero-dock-button";
 import { StremioVolume } from "./stremio-volume";
 import { renderCustomIconControlStremio } from "./custom-icon-renderer";
 import { WindowControlButtons } from "./window-control-buttons";
@@ -440,6 +441,8 @@ export function RenderedStremioControl({
       );
     case "song-id":
       return <IdentifySongButton editing={ctx.editing} />;
+    case "hero":
+      return <HeroDockButton variant="stremio" editing={ctx.editing} />;
     case "pip":
       if (!ctx.capabilities.pictureInPicture) return null;
       return (

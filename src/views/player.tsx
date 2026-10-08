@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { resolveChromeTheme } from "@/lib/theme";
 import { useActiveKid } from "@/lib/profiles";
 import { type PlayerBridge } from "@/lib/player/bridge";
@@ -9,6 +9,8 @@ import { nameColor } from "@/lib/together/colors";
 import { useTogether } from "@/lib/together/provider";
 import { buildPlayInvite } from "@/lib/together/build-invite";
 import { useView, type PlayerSrc, type PlayEpisode } from "@/lib/view";
+import { setHeroDockSupported, wasExpandedFromDock } from "@/lib/hero-dock";
+import { isLinuxDesktop } from "@/lib/platform";
 import { queueShift, useQueue, useSleepAtEnd } from "@/lib/queue";
 import { useSkipSegments, useAdSegments } from "@/lib/skip-intro";
 import { withinAdWindow } from "@/lib/ad-report/window";
@@ -86,9 +88,38 @@ import { SFX } from "@/lib/sfx";
 
 let hdrFallbackNoticeShown = false;
 
-export function PlayerView({ src }: { src: PlayerSrc }) {
-  const { setChromeHidden, topPath, openPicker, exitPlayback, replacePlayerSrc, exitPlayer } =
-    useView();
+export function PlayerView({
+  src,
+  docked = false,
+  dockStyle,
+}: {
+  src: PlayerSrc;
+  /** Playing in the hub hero instead of full screen. */
+  docked?: boolean;
+  dockStyle?: CSSProperties;
+}) {
+  const {
+    setChromeHidden: setViewChromeHidden,
+    topPath,
+    openPicker,
+    exitPlayback,
+    replacePlayerSrc,
+    exitPlayer,
+    dockPlayer,
+    expandDock,
+  } = useView();
+  const dockedRef = useRef(docked);
+  dockedRef.current = docked;
+  // The hub's navigation stays visible while the video plays in the hero.
+  const setChromeHidden = useCallback(
+    (hidden: boolean) => {
+      if (!dockedRef.current) setViewChromeHidden(hidden);
+    },
+    [setViewChromeHidden],
+  );
+  useEffect(() => {
+    if (docked) setViewChromeHidden(false);
+  }, [docked, setViewChromeHidden]);
   const { settings, update } = useSettings();
   const isKid = useActiveKid() != null;
   const t = useT();
@@ -134,7 +165,12 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   const videoMountRef = useRef<HTMLDivElement>(null);
   const bridgeRef = useRef<PlayerBridge | null>(null);
   const selfFrameReadyRef = useRef(false);
-  const { fullscreen, toggleFullscreen } = useFullscreen();
+  const { fullscreen, toggleFullscreen: toggleWindowFullscreen } = useFullscreen();
+  // In the hero, the fullscreen button opens the full player.
+  const toggleFullscreen = useCallback(() => {
+    if (dockedRef.current) expandDock();
+    else toggleWindowFullscreen();
+  }, [expandDock, toggleWindowFullscreen]);
   const { snap, engine, bridgeReady, bridgeKey, embedActive, svpActive } = usePlayerBridge({
     bridgeRef,
     videoMountRef,
@@ -404,6 +440,11 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     openPicker,
   });
   const requestLeave = useCallback(() => {
+    // Opened from the hero: Back returns there and keeps playing.
+    if (wasExpandedFromDock()) {
+      dockPlayer();
+      return true;
+    }
     void requestPlayerClose({
       drawMode,
       setDrawMode,
@@ -420,12 +461,13 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     settings.playerEscExitsFullscreen,
     settings.playerConfirmLeave,
     update,
+    dockPlayer,
   ]);
 
   useKeyboardNavigation({
     // TV focus navigation intentionally owns arrows and Space while enabled.
     // Keep it opt-in so standard player hotkeys remain the default.
-    enabled: settings.tvNavigation && settings.playerTvNavigation,
+    enabled: settings.tvNavigation && settings.playerTvNavigation && !docked,
     wrap: true,
     arrows: chromeVisible && !pipMode,
     onBack: requestLeave,
@@ -433,6 +475,8 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
 
   useEffect(() => {
     const onLocalBack = (e: Event) => {
+      // In the hero, Back belongs to the page being browsed.
+      if (dockedRef.current) return;
       e.preventDefault();
       void requestLeave();
     };
@@ -849,6 +893,18 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     }
   }, [src]);
 
+  // Embedded mpv on Linux draws over the whole window, so it can't sit in the hero.
+  useEffect(() => {
+    setHeroDockSupported(!(engine === "mpv" && embedActive && isLinuxDesktop()));
+  }, [engine, embedActive]);
+
+  // The native video follows the box; tell it when the box moves between hero and full screen.
+  const dockKey = docked ? JSON.stringify(dockStyle ?? {}) : "";
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => window.dispatchEvent(new Event("harbor:mpv-refresh-geom")));
+    return () => window.cancelAnimationFrame(id);
+  }, [docked, dockKey]);
+
   const overlayProps: PlayerOverlayLayersProps = {
     snap,
     engine,
@@ -1009,10 +1065,15 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     <main
       ref={stageRef}
       data-harbor-player
-      data-tv-focus-scope
+      data-hero-docked={docked ? "" : undefined}
+      data-tv-focus-scope={docked ? undefined : ""}
       dir="ltr"
-      className={`fixed inset-0 z-[100] overflow-hidden ${stageBg}`}
-      style={cursorStyle}
+      className={
+        docked
+          ? `fixed z-[45] overflow-hidden ${stageBg}`
+          : `fixed inset-0 z-[100] overflow-hidden ${stageBg}`
+      }
+      style={docked ? { ...cursorStyle, ...dockStyle } : cursorStyle}
       onMouseMove={wakeChrome}
       onMouseEnter={wakeChrome}
       onScroll={(e) => {

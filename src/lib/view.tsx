@@ -17,6 +17,13 @@ import { useTogether } from "./together/provider";
 import type { SportsGame } from "./sports/espn";
 import { beginMarathonAdvance } from "./fullscreen-state";
 import { armRemoteStickyHop } from "./remote/session";
+import {
+  getHeroDock,
+  heroDockSupported,
+  isHubKind,
+  markExpandedFromDock,
+  setHeroDock,
+} from "./hero-dock";
 import { franchiseRoot, franchiseRootSync } from "./providers/anime-franchise-root";
 
 const isAnimeMetaId = (id: string) => /^(kitsu|mal|anilist|anidb):/.test(id);
@@ -285,6 +292,12 @@ type ViewValue = {
   exitPlayback: () => void;
   exitPickerToDetail: (m: Meta) => void;
   exitPlayer: () => void;
+  /** Moves the playing video into the hub hero and goes back to the hub it came from. */
+  dockPlayer: () => void;
+  /** Opens the docked hero video in the full player. */
+  expandDock: () => void;
+  /** Stops the docked hero video. */
+  stopDock: () => void;
   rememberScroll: (key: string, snap: ScrollSnapshot) => void;
   recallScroll: (key: string) => ScrollSnapshot | null;
   rememberRowScroll: (key: string, scrollLeft: number) => void;
@@ -541,6 +554,8 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   );
 
   const exitPlayback = useCallback(() => {
+    setHeroDock(null);
+    markExpandedFromDock(false);
     setNavStack((s) => stripPlaybackFrames(s));
   }, [setNavStack]);
 
@@ -557,6 +572,8 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   );
 
   const exitPlayer = useCallback(() => {
+    setHeroDock(null);
+    markExpandedFromDock(false);
     setNavStack((s) => {
       let i = s.length - 1;
       while (i > 0 && s[i].kind === "player") i--;
@@ -580,6 +597,13 @@ export function ViewProvider({ children }: { children: ReactNode }) {
         window.__harborProfiler?.recordNav(`view:${v}`);
       }
       if (v === "home") setHomeResetTick((n) => n + 1);
+      // Switching hubs while a video plays keeps it playing in the hero; anywhere else stops it.
+      const leaving = stackRef.current[stackRef.current.length - 1];
+      if (leaving?.kind === "player" && heroDockSupported() && isHubKind(v)) {
+        setHeroDock({ src: leaving.src });
+      } else if (!isHubKind(v)) {
+        setHeroDock(null);
+      }
       // Always clear horizontal poster rails when changing root tabs — keep-alive
       // pages were leaving mid-scrolled rows everywhere.
       rowScrollMem.current.clear();
@@ -674,6 +698,13 @@ export function ViewProvider({ children }: { children: ReactNode }) {
     },
     [setNavStack],
   );
+
+  const dockPlayer = useCallback(() => {
+    const cur = stackRef.current;
+    if (cur[cur.length - 1]?.kind !== "player" || !heroDockSupported()) return;
+    const root = rootViewFromStack(cur);
+    setView(isHubKind(root) ? root : "home");
+  }, [setView]);
 
   const openSettings = useCallback(
     (section?: SettingsSection) => {
@@ -944,6 +975,12 @@ export function ViewProvider({ children }: { children: ReactNode }) {
         setPendingLiveSrc(src);
         return;
       }
+      // A channel picked on a hub while the hero plays switches the hero instead of leaving it.
+      const current = stackRef.current[stackRef.current.length - 1];
+      if (getHeroDock() && isHubKind(current?.kind)) {
+        setHeroDock({ src });
+        return;
+      }
       setNavStack((cur) => pushFrame(cur, { kind: "player", src }));
     },
     [setNavStack],
@@ -969,6 +1006,19 @@ export function ViewProvider({ children }: { children: ReactNode }) {
     },
     [setNavStack],
   );
+
+  const expandDock = useCallback(() => {
+    const docked = getHeroDock();
+    if (!docked) return;
+    // Push the full player before clearing the dock so the same player instance carries on.
+    setNavStack((cur) => pushFrame(cur, { kind: "player", src: docked.src }));
+    setHeroDock(null);
+    markExpandedFromDock(true);
+  }, [setNavStack]);
+
+  const stopDock = useCallback(() => {
+    setHeroDock(null);
+  }, []);
 
   const openAddonDetail = useCallback(
     (id: string) => {
@@ -1041,6 +1091,9 @@ export function ViewProvider({ children }: { children: ReactNode }) {
       exitPlayback,
       exitPickerToDetail,
       exitPlayer,
+      dockPlayer,
+      expandDock,
+      stopDock,
       rememberScroll,
       recallScroll,
       rememberRowScroll,
@@ -1098,6 +1151,9 @@ export function ViewProvider({ children }: { children: ReactNode }) {
       exitPlayback,
       exitPickerToDetail,
       exitPlayer,
+      dockPlayer,
+      expandDock,
+      stopDock,
       rememberScroll,
       recallScroll,
       chromeHidden,
