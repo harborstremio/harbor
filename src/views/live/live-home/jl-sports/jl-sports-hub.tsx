@@ -5,8 +5,11 @@ import { useJlSession } from "@/lib/jl/account/client";
 import { useJlLink } from "@/lib/jl/account/sync";
 import { isFollowing, toggleFavoriteTeam } from "@/lib/jl/sports/favorites";
 import type { JlFavoriteTeam } from "@/lib/jl/sports/rank";
+import { useSettings } from "@/lib/settings";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import { fmtClock } from "../now-format";
+import { GameBackdrop } from "./game-backdrop";
+import { SportsKeysHint } from "./sports-keys-hint";
 import type { JlSportsActions } from "./use-jl-sports-dialogs";
 import type { JlHubGame } from "./use-jl-sports";
 
@@ -33,6 +36,7 @@ export function JlSportsHub({
       <div className="flex items-center gap-2.5 pe-[9px]">
         <h2 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">{t("Sports Hub")}</h2>
         <span className="text-[12px] text-ink-subtle/80">{t("Top games, ranked for you")}</span>
+        <SportsKeysHint />
         <button
           onClick={actions.follow}
           className="ms-auto flex h-8 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
@@ -112,10 +116,12 @@ function HubCard({
   onOpenGame: (game: SportsGame) => void;
 }) {
   const t = useT();
+  const { settings } = useSettings();
   const { game, reasons, channels, mine } = item;
   const live = game.state === "in";
   return (
-    <div className="flex w-[300px] shrink-0 flex-col gap-2.5 rounded-xl border border-edge-soft/55 bg-elevated p-3">
+    <div className="relative flex w-[300px] shrink-0 flex-col gap-2.5 overflow-hidden rounded-xl border border-edge-soft/55 bg-elevated p-3 [&>*:not([aria-hidden])]:relative">
+      <GameBackdrop game={game} surface="elevated" />
       <button onClick={() => onOpenGame(game)} className="flex flex-col gap-2 text-start" title={t("Game details")}>
         <div className="flex items-center justify-between gap-2">
           <span
@@ -156,7 +162,7 @@ function HubCard({
         </div>
       )}
       <WatchButton item={item} onWatch={actions.watch} />
-      {channels.length === 0 && (
+      {channels.length === 0 && settings.sportsChannelFinder && (
         <span className="-mt-1 text-center text-[11px] text-ink-subtle">{t("Not on your channels")}</span>
       )}
     </div>

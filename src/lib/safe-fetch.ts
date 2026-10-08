@@ -26,6 +26,11 @@ const PROXY_HOSTS = new Set([
   "api.alldebrid.com",
   "debrid-link.com",
   "www.premiumize.me",
+  // Sports data APIs the viewer brings a key for (Settings → Sports plugins & keys).
+  "www.thesportsdb.com",
+  "api.the-odds-api.com",
+  "api.collegefootballdata.com",
+  "prod.api.market",
 ]);
 
 const PROXY_SUFFIXES = [

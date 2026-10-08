@@ -222,6 +222,7 @@ export type SettingsSection =
   | "streaming"
   | "language"
   | "player"
+  | "sports"
   | "advanced";
 
 type ViewValue = {

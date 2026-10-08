@@ -14,6 +14,10 @@ const HOSTS = new Set([
   "api.alldebrid.com",
   "debrid-link.com",
   "www.premiumize.me",
+  "www.thesportsdb.com",
+  "api.the-odds-api.com",
+  "api.collegefootballdata.com",
+  "prod.api.market",
 ]);
 
 const SUFFIXES = [
@@ -53,6 +57,9 @@ export default async function handler(req: Request): Promise<Response> {
   const headers = new Headers({ "User-Agent": USER_AGENT, Accept: "application/json" });
   const auth = req.headers.get("x-harbor-auth");
   if (auth) headers.set("Authorization", auth);
+  // AllSports API (api.market) takes the viewer's key in its own header.
+  const marketKey = req.headers.get("x-api-market-key");
+  if (marketKey && host === "prod.api.market") headers.set("x-api-market-key", marketKey);
   const contentType = req.headers.get("content-type");
   if (contentType) headers.set("Content-Type", contentType);
 

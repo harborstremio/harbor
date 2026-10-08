@@ -80,6 +80,12 @@ export type Settings = {
   thesportsdbKey: string;
   oddsApiKey: string;
   cfbdKey: string;
+  /** Sports plugins (Settings → Sports plugins & keys). */
+  sportsTopGames: boolean;
+  sportsChannelFinder: boolean;
+  sportsScoreTicker: boolean;
+  sportsOdds: boolean;
+  sportsKeysHintDismissed: boolean;
   tvdbKey: string;
   rdKey: string;
   tbKey: string;
