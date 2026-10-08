@@ -1,8 +1,8 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, type ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
-import { fetchMatchSummary, type SportsGame, type SportsMatchDetail } from "@/lib/sports/espn";
+import { fetchMatchSummary, type MatchPlayer, type SportsGame, type SportsMatchDetail } from "@/lib/sports/espn";
 
 export function MatchDetailView({ game }: { game: SportsGame }) {
   const t = useT();
@@ -51,11 +51,13 @@ export function MatchDetailView({ game }: { game: SportsGame }) {
           </div>
           <div className="flex w-full items-center justify-center gap-4 md:gap-12">
             <div className="flex flex-1 flex-col items-center gap-4 text-center">
+              <TeamLink game={game} side="home">
               <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-elevated/40 p-3 shadow-xl ring-1 ring-edge-soft/50 backdrop-blur-sm md:h-32 md:w-32 md:p-5">
                 {game.home.logo ? <img src={game.home.logo} className="h-full w-full object-contain drop-shadow-md" alt="" /> : <div className="h-full w-full rounded-full bg-canvas" />}
               </div>
+              </TeamLink>
               <div className="flex flex-col items-center gap-2">
-                <span className="text-xl font-bold leading-tight md:text-2xl">{game.home.name}</span>
+                <TeamLink game={game} side="home"><span className="text-xl font-bold leading-tight md:text-2xl">{game.home.name}</span></TeamLink>
                 {detail && (hYellow > 0 || hRed > 0) && (
                   <div className="flex items-center gap-1">
                     {hYellow > 0 && Array.from({ length: hYellow }).map((_, i) => <div key={`y-${i}`} className="h-3.5 w-2.5 rounded-[2px] bg-yellow-400 shadow-sm ring-1 ring-black/20" />)}
@@ -75,11 +77,13 @@ export function MatchDetailView({ game }: { game: SportsGame }) {
               </div>
             </div>
             <div className="flex flex-1 flex-col items-center gap-4 text-center">
+              <TeamLink game={game} side="away">
               <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-elevated/40 p-3 shadow-xl ring-1 ring-edge-soft/50 backdrop-blur-sm md:h-32 md:w-32 md:p-5">
                 {game.away.logo ? <img src={game.away.logo} className="h-full w-full object-contain drop-shadow-md" alt="" /> : <div className="h-full w-full rounded-full bg-canvas" />}
               </div>
+              </TeamLink>
               <div className="flex flex-col items-center gap-2">
-                <span className="text-xl font-bold leading-tight md:text-2xl">{game.away.name}</span>
+                <TeamLink game={game} side="away"><span className="text-xl font-bold leading-tight md:text-2xl">{game.away.name}</span></TeamLink>
                 {detail && (aYellow > 0 || aRed > 0) && (
                   <div className="flex items-center gap-1">
                     {aYellow > 0 && Array.from({ length: aYellow }).map((_, i) => <div key={`y-${i}`} className="h-3.5 w-2.5 rounded-[2px] bg-yellow-400 shadow-sm ring-1 ring-black/20" />)}
@@ -240,7 +244,8 @@ function LineupsTab({ detail }: { detail: SportsMatchDetail }) {
             {detail.homeRoster.map((p) => (
               <div key={p.id} className="flex items-center gap-3 text-sm">
                 <span className="flex w-6 items-center justify-center text-xs font-bold text-ink-subtle">{p.jersey || "-"}</span>
-                <span className={`flex-1 ${p.starter ? "font-bold text-ink" : "font-medium text-ink-muted"}`}>{p.name}</span>
+                <PlayerLink league={detail.league} player={p} />
+
                 <span className="w-8 text-end text-[11px] font-semibold uppercase text-brand/80">{p.position}</span>
               </div>
             ))}
@@ -252,7 +257,8 @@ function LineupsTab({ detail }: { detail: SportsMatchDetail }) {
             {detail.awayRoster.map((p) => (
               <div key={p.id} className="flex items-center gap-3 text-sm">
                 <span className="flex w-6 items-center justify-center text-xs font-bold text-ink-subtle">{p.jersey || "-"}</span>
-                <span className={`flex-1 ${p.starter ? "font-bold text-ink" : "font-medium text-ink-muted"}`}>{p.name}</span>
+                <PlayerLink league={detail.league} player={p} />
+
                 <span className="w-8 text-end text-[11px] font-semibold uppercase text-brand/80">{p.position}</span>
               </div>
             ))}
@@ -260,6 +266,37 @@ function LineupsTab({ detail }: { detail: SportsMatchDetail }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** A team's logo or name, opening its team page when ESPN gave the side an id. */
+function TeamLink({ game, side, children }: { game: SportsGame; side: "home" | "away"; children: ReactNode }) {
+  const { openSportsPage } = useView();
+  const team = game[side];
+  if (!team.id) return <>{children}</>;
+  const teamId = team.id;
+  return (
+    <button
+      onClick={() => openSportsPage({ kind: "team", league: game.league, teamId, name: team.name })}
+      className="rounded-2xl hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+    >
+      {children}
+    </button>
+  );
+}
+
+/** A roster name, opening the player's page. */
+function PlayerLink({ league, player }: { league: string; player: MatchPlayer }) {
+  const { openSportsPage } = useView();
+  const cls = `flex-1 text-start ${player.starter ? "font-bold text-ink" : "font-medium text-ink-muted"}`;
+  if (!/^\d{1,12}$/.test(player.id)) return <span className={cls}>{player.name}</span>;
+  return (
+    <button
+      onClick={() => openSportsPage({ kind: "athlete", league, athleteId: player.id, name: player.name })}
+      className={`${cls} rounded hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink`}
+    >
+      {player.name}
+    </button>
   );
 }
 
