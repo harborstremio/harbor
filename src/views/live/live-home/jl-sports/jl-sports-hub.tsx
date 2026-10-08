@@ -1,4 +1,4 @@
-import { Cloud, Play, Sparkles, Star, Trophy, Users } from "lucide-react";
+import { Cloud, GraduationCap, Play, Sparkles, Star, Trophy, Users } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
@@ -52,6 +52,13 @@ export function JlSportsHub({
         >
           <Trophy size={13} />
           {t("Leagues")}
+        </button>
+        <button
+          onClick={() => openSportsPage({ kind: "colleges" })}
+          className="flex h-8 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+        >
+          <GraduationCap size={13} />
+          {t("Colleges")}
         </button>
         <button
           onClick={actions.account}
