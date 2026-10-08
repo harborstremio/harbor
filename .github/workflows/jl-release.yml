@@ -27,8 +27,43 @@ env:
   VITE_JL_SUPABASE_ANON_KEY: ${{ vars.JL_SUPABASE_ANON_KEY }}
 
 jobs:
+  # Stops the release before anything is built or published when a GitHub setting is missing or
+  # pasted into the wrong field.
+  settings:
+    name: Check release settings
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check variables and secrets
+        env:
+          KEYSTORE_B64: ${{ secrets.JL_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.JL_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.JL_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.JL_KEY_PASSWORD }}
+        run: |
+          ok=1
+          if ! [[ "$VITE_JL_SUPABASE_URL" =~ ^https://[a-z0-9-]+\.supabase\.co/?$ ]]; then
+            echo "::error::Variable JL_SUPABASE_URL must be the accounts project address (https://<project>.supabase.co)."
+            ok=0
+          fi
+          if [ -z "$VITE_JL_SUPABASE_ANON_KEY" ] || [[ "$VITE_JL_SUPABASE_ANON_KEY" == https://* ]]; then
+            echo "::error::Variable JL_SUPABASE_ANON_KEY must be the project's public (anon/publishable) key."
+            ok=0
+          fi
+          for name in KEYSTORE_B64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret JL_${name} is empty."
+              ok=0
+            fi
+          done
+          if [ -n "$KEYSTORE_B64" ] && ! echo "$KEYSTORE_B64" | base64 -d > /dev/null 2>&1; then
+            echo "::error::Secret JL_KEYSTORE_B64 is not valid base64 text."
+            ok=0
+          fi
+          [ "$ok" = 1 ]
+
   windows:
     name: Windows x64
+    needs: settings
     runs-on: windows-latest
     timeout-minutes: 90
     outputs:
