@@ -9,7 +9,9 @@ import {
   useJlSportsFavorites,
 } from "@/lib/jl/sports/favorites";
 import { playerForFollow, searchTeamsAndPlayers } from "@/lib/jl/sports/people";
+import type { SportsPage } from "@/lib/jl/sports/pages";
 import type { SportsSearchHit } from "@/lib/jl/sports/search-parse";
+import { useView } from "@/lib/view";
 import { JlDialog } from "./jl-dialog";
 
 const SEARCH_DELAY_MS = 350;
@@ -123,14 +125,19 @@ export function FollowPanel({ onClose }: { onClose: () => void }) {
             })}
           </ul>
         )}
-        <FollowingList />
+        <FollowingList onClose={onClose} />
       </div>
     </JlDialog>
   );
 }
 
-function FollowingList() {
+function FollowingList({ onClose }: { onClose: () => void }) {
   const t = useT();
+  const { openSportsPage } = useView();
+  const open = (page: SportsPage) => {
+    onClose();
+    openSportsPage(page);
+  };
   const teams = useJlSportsFavorites();
   const players = useJlFavoritePlayers();
   if (teams.length === 0 && players.length === 0) {
@@ -145,12 +152,18 @@ function FollowingList() {
       <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Following")}</h3>
       <div className="flex flex-wrap gap-1.5">
         {teams.map((f) => (
-          <Chip key={`t:${f.league}:${f.id}`} label={`${f.name} · ${f.league}`} onRemove={() => toggleFavoriteTeam(f)} />
+          <Chip
+            key={`t:${f.league}:${f.id}`}
+            label={`${f.name} · ${f.league}`}
+            onOpen={() => open({ kind: "team", league: f.league, teamId: f.id, name: f.name })}
+            onRemove={() => toggleFavoriteTeam(f)}
+          />
         ))}
         {players.map((p) => (
           <Chip
             key={`p:${p.league}:${p.id}`}
             label={[p.name, p.position, p.teamName].filter(Boolean).join(" · ")}
+            onOpen={() => open({ kind: "athlete", league: p.league, athleteId: p.id, name: p.name })}
             onRemove={() => toggleFavoritePlayer(p)}
           />
         ))}
@@ -159,11 +172,13 @@ function FollowingList() {
   );
 }
 
-function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
+function Chip({ label, onOpen, onRemove }: { label: string; onOpen: () => void; onRemove: () => void }) {
   const t = useT();
   return (
     <span className="flex items-center gap-1 rounded-full border border-accent/40 bg-accent-soft py-1 pe-1 ps-3 text-[12px] text-accent">
-      {label}
+      <button onClick={onOpen} className="rounded hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+        {label}
+      </button>
       <button
         onClick={onRemove}
         aria-label={t("Unfollow {team}", { team: label })}

@@ -1,6 +1,7 @@
-import { Cloud, Play, Sparkles, Star, Users } from "lucide-react";
+import { Cloud, Play, Sparkles, Star, Trophy, Users } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
+import { useView } from "@/lib/view";
 import { useJlSession } from "@/lib/jl/account/client";
 import { useJlLink } from "@/lib/jl/account/sync";
 import { isFollowing, toggleFavoriteTeam } from "@/lib/jl/sports/favorites";
@@ -28,6 +29,7 @@ export function JlSportsHub({
   const t = useT();
   const session = useJlSession();
   const link = useJlLink();
+  const { openSportsPage } = useView();
   return (
     <section className="flex flex-col gap-3 ps-[9px]">
       <div className="flex items-center gap-2.5 pe-[9px]">
@@ -39,6 +41,13 @@ export function JlSportsHub({
         >
           <Users size={13} />
           {t("Teams & players")}
+        </button>
+        <button
+          onClick={() => openSportsPage({ kind: "leagues" })}
+          className="flex h-8 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+        >
+          <Trophy size={13} />
+          {t("Leagues")}
         </button>
         <button
           onClick={actions.account}
