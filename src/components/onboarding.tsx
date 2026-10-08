@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { isInstalled } from "@/lib/addon-store";
+import { AccountStep } from "@/components/onboarding/account-step";
 import { DoneStep } from "@/components/onboarding/done-step";
 import { Dots } from "@/components/onboarding/dots";
 import { LiveTvStep } from "@/components/onboarding/live-tv-step";
@@ -8,22 +9,27 @@ import { MoviesStep } from "@/components/onboarding/movies-step";
 import { ProfileStep } from "@/components/onboarding/profile-step";
 import { SplashStep } from "@/components/onboarding/splash-step";
 import { useT } from "@/lib/i18n";
+import { jlAccountsConfigured, useJlSession } from "@/lib/jl/account/client";
 import { JL_TORRENTIO_ADDON_ID } from "@/lib/jl/onboarding";
 import { useOnboarding } from "@/lib/onboarding";
 import { isPlaceholderName, useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 
 // Only what a working setup needs. Everything else keeps its default and lives in Settings.
-type StepId = "splash" | "profile" | "live" | "movies" | "done";
-const STEPS: StepId[] = ["splash", "profile", "live", "movies", "done"];
+type StepId = "splash" | "account" | "profile" | "live" | "movies" | "done";
+const STEPS: StepId[] = jlAccountsConfigured()
+  ? ["splash", "account", "profile", "live", "movies", "done"]
+  : ["splash", "profile", "live", "movies", "done"];
 
 export function OnboardingModal() {
   const { onboarded, finishOnboarding } = useOnboarding();
   const { settings } = useSettings();
   const { activeProfile } = useProfiles();
+  const session = useJlSession();
   const t = useT();
   const [stepIdx, setStepIdx] = useState(0);
   const [closing, setClosing] = useState(false);
+  const [skipAccount, setSkipAccount] = useState(false);
   const [noIptv, setNoIptv] = useState(false);
   const [noDebrid, setNoDebrid] = useState(false);
   const [torrentioAdded, setTorrentioAdded] = useState(false);
@@ -50,6 +56,7 @@ export function OnboardingModal() {
   const hasDebrid = !!(settings.rdKey.trim() || settings.tbKey.trim());
   const ready: Record<StepId, boolean> = {
     splash: true,
+    account: !!session || skipAccount,
     profile: !isPlaceholderName(activeProfile?.name),
     live: hasPlaylist || noIptv,
     movies: noDebrid || (hasDebrid && (torrentioAdded || isInstalled(JL_TORRENTIO_ADDON_ID))),
@@ -73,6 +80,14 @@ export function OnboardingModal() {
           <>
             <div className="flex max-h-[78vh] min-h-[440px] flex-col justify-center overflow-y-auto px-12 py-10">
               <div key={step} className="animate-step-in">
+                {step === "account" && (
+                  <AccountStep
+                    onSkip={() => {
+                      setSkipAccount(true);
+                      next();
+                    }}
+                  />
+                )}
                 {step === "profile" && <ProfileStep />}
                 {step === "live" && (
                   <LiveTvStep

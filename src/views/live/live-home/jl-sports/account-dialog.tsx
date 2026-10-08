@@ -1,7 +1,8 @@
 import { Check, Loader2, Plus, RefreshCw, UserRound } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
+import { JlAccountForm } from "@/components/jl-account-form";
 import { useT } from "@/lib/i18n";
-import { jlAccountsConfigured, signInJl, signOutJl, useJlSession } from "@/lib/jl/account/client";
+import { jlAccountsConfigured, signOutJl, useJlSession } from "@/lib/jl/account/client";
 import {
   createJlProfile,
   linkJlProfile,
@@ -18,7 +19,7 @@ export function AccountDialog({ onClose }: { onClose: () => void }) {
   const session = useJlSession();
   const link = useJlLink();
   return (
-    <JlDialog title={t("JL account")} onClose={onClose}>
+    <JlDialog title={t("JL Media Vision account")} onClose={onClose}>
       {!jlAccountsConfigured() ? (
         <p className="text-[13px] text-ink-muted">{t("JL accounts aren't set up in this build.")}</p>
       ) : !session ? (
@@ -34,58 +35,7 @@ export function AccountDialog({ onClose }: { onClose: () => void }) {
 
 function SignInForm() {
   const t = useT();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !password) return;
-    setBusy(true);
-    setError(null);
-    try {
-      await signInJl(email, password);
-      setPassword("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("Sign-in failed"));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <form onSubmit={(e) => void submit(e)} className="flex flex-col gap-3">
-      <p className="text-[13px] leading-relaxed text-ink-muted">
-        {t("Sign in to keep your teams, players and favorites the same on every device.")}
-      </p>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder={t("Email")}
-        autoComplete="email"
-        className="h-11 rounded-xl border border-edge bg-canvas px-3.5 text-[14px] text-ink outline-none focus:border-ink-subtle"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder={t("Password")}
-        autoComplete="current-password"
-        className="h-11 rounded-xl border border-edge bg-canvas px-3.5 text-[14px] text-ink outline-none focus:border-ink-subtle"
-      />
-      {error && <p className="text-[12.5px] text-danger">{error}</p>}
-      <button
-        type="submit"
-        disabled={busy || !email.trim() || !password}
-        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-ink text-[14px] font-semibold text-canvas disabled:opacity-50"
-      >
-        {busy && <Loader2 size={14} className="animate-spin" />}
-        {t("Sign in")}
-      </button>
-    </form>
-  );
+  return <JlAccountForm intro={t("Sign in to keep your profiles, favorites, keys and TV logins the same on every device.")} />;
 }
 
 function ProfilePicker() {
@@ -102,7 +52,7 @@ function ProfilePicker() {
         if (!cancelled) setProfiles(list);
       })
       .catch(() => {
-        if (!cancelled) setError(t("This account isn't a JL household member yet, or JL is unreachable."));
+        if (!cancelled) setError(t("Couldn't reach your JL Media Vision account. Check your internet and try again."));
       });
     return () => {
       cancelled = true;
@@ -117,7 +67,7 @@ function ProfilePicker() {
     try {
       linkJlProfile(await createJlProfile(newName));
     } catch {
-      setError(t("The profile could not be created (an account has at most 6)."));
+      setError(t("The profile could not be created. Try again."));
     } finally {
       setBusy(false);
     }
@@ -125,7 +75,7 @@ function ProfilePicker() {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[13px] text-ink-muted">{t("Which JL profile is this?")}</p>
+      <p className="text-[13px] text-ink-muted">{t("Which profile is this?")}</p>
       {error && <p className="text-[12.5px] text-danger">{error}</p>}
       {!profiles && !error && <Loader2 size={16} className="animate-spin text-ink-subtle" />}
       {profiles?.map((p) => (

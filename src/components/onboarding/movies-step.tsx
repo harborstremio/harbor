@@ -49,10 +49,18 @@ export function MoviesStep({ onNoDebrid, onTorrentio }: { onNoDebrid: () => void
     }
   };
 
+  // A key that came with the account (set up on another device) needs Torrentio here too.
+  // Keys typed on this screen install it after they verify instead.
+  useEffect(() => {
+    if (hasKey && !isInstalled(JL_TORRENTIO_ADDON_ID)) void installTorrentio();
+    // Runs once, for the key this screen opened with.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="flex flex-col gap-4">
       <span className="text-[12.5px] font-medium uppercase tracking-[0.16em] text-ink-subtle">
-        {t("Step 3 of 3 · Movies & Shows")}
+        {t("Step 4 of 4 · Movies & Shows")}
       </span>
       <h1 className="font-display text-[34px] font-medium leading-[1.08] tracking-tight text-ink">
         {t("Connect Real-Debrid or TorBox")}

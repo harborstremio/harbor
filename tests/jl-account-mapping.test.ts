@@ -1,33 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  diffRows,
-  harborLeagueTag,
-  jlLeagueKey,
-  playerToRow,
-  rowsToFavorites,
-  teamToRow,
-} from "../src/lib/jl/account/mapping.ts";
+import { diffRows, playerToRow, rowsToFavorites, teamToRow } from "../src/lib/jl/account/mapping.ts";
 
 const PROFILE = "00000000-0000-0000-0000-000000000001";
-
-test("league tags and JL keys map both ways; unsupported leagues are skipped", () => {
-  assert.equal(jlLeagueKey("NCAAF"), "cfb");
-  assert.equal(jlLeagueKey("NCAA"), "cbb");
-  assert.equal(harborLeagueTag("cfb"), "NCAAF");
-  assert.equal(harborLeagueTag("wnba"), null);
-  assert.equal(teamToRow(PROFILE, { league: "F1", id: "1", name: "X" }), null);
-});
 
 test("favorites become rows the table accepts", () => {
   assert.deepEqual(teamToRow(PROFILE, { league: "NCAAF", id: "417", name: "Gallaudet Bison" }), {
     profile_id: PROFILE,
     kind: "team",
-    league: "cfb",
-    espn_id: "417",
-    name: "Gallaudet Bison",
+    item_id: "NCAAF:417",
+    meta: { name: "Gallaudet Bison" },
   });
-  assert.equal(teamToRow(PROFILE, { league: "NFL", id: "abc", name: "Bad id" }), null);
+  assert.equal(teamToRow(PROFILE, { league: "NFL", id: "a:b", name: "Bad id" }), null);
   assert.equal(
     playerToRow(PROFILE, {
       league: "NFL",
@@ -37,8 +21,8 @@ test("favorites become rows the table accepts", () => {
       teamName: "Kansas City Chiefs",
       headshot: null,
       position: "QB",
-    })?.kind,
-    "athlete",
+    })?.item_id,
+    "NFL:3139477",
   );
 });
 
@@ -54,10 +38,10 @@ test("remote rows become favorites; unknown players are flagged for a team looku
   };
   const out = rowsToFavorites(
     [
-      { kind: "team", league: "cfb", espn_id: "417", name: "Gallaudet Bison" },
-      { kind: "athlete", league: "nfl", espn_id: "1", name: "Known Player" },
-      { kind: "athlete", league: "nfl", espn_id: "2", name: "New Player" },
-      { kind: "team", league: "f1", espn_id: "9", name: "Skipped" },
+      { kind: "team", item_id: "NCAAF:417", meta: { name: "Gallaudet Bison" } },
+      { kind: "player", item_id: "NFL:1", meta: { name: "Known Player" } },
+      { kind: "player", item_id: "NFL:2", meta: { name: "New Player" } },
+      { kind: "team", item_id: "broken", meta: { name: "Skipped" } },
     ],
     [known],
   );
@@ -75,11 +59,11 @@ test("remote rows become favorites; unknown players are flagged for a team looku
 
 test("diff adds what's only local and removes what's only remote", () => {
   const local = [teamToRow(PROFILE, { league: "NCAAF", id: "417", name: "Gallaudet Bison" })!];
-  const remote = [{ kind: "team" as const, league: "nfl", espn_id: "12" }];
+  const remote = [{ kind: "team" as const, item_id: "NFL:12" }];
   const d = diffRows(local, remote);
   assert.deepEqual(
-    d.upsert.map((r) => r.espn_id),
-    ["417"],
+    d.upsert.map((r) => r.item_id),
+    ["NCAAF:417"],
   );
   assert.deepEqual(d.remove, remote);
 });

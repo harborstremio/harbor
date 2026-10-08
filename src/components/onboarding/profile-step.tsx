@@ -1,7 +1,9 @@
 import { Check } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AVATAR_CATALOG, avatarUrl } from "@/lib/avatars/catalog";
 import { useT } from "@/lib/i18n";
+import { useJlSession } from "@/lib/jl/account/client";
+import { listJlProfiles, type JlProfile } from "@/lib/jl/account/sync";
 import { isPlaceholderName, useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { useTogether } from "@/lib/together/provider";
@@ -17,6 +19,24 @@ export function ProfileStep() {
     activeProfile && !isPlaceholderName(activeProfile.name) ? activeProfile.name : "",
   );
   const selectedAvatar = activeProfile?.avatar ?? null;
+  const session = useJlSession();
+  const userId = session?.userId ?? "";
+  const [accountProfiles, setAccountProfiles] = useState<JlProfile[]>([]);
+
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    listJlProfiles()
+      .then((list) => {
+        if (!cancelled) setAccountProfiles(list);
+      })
+      .catch(() => {
+        /* offline: the viewer types a name instead */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const saveName = (next: string) => {
     setName(next);
@@ -26,21 +46,57 @@ export function ProfileStep() {
     updateProfile(activeProfile.id, { name: trimmed });
   };
 
-  const pickAvatar = (id: string) => {
-    const url = avatarUrl(id);
+  const setAvatar = (url: string) => {
     // The primary profile reads its avatar from the settings identity on load, so set both.
     update({ harborAvatar: url });
     if (activeProfile) updateProfile(activeProfile.id, { avatar: url });
+  };
+  const pickAvatar = (id: string) => setAvatar(avatarUrl(id));
+
+  // Picking a profile that already exists on the account links this device to it.
+  const pickAccountProfile = (p: JlProfile) => {
+    saveName(p.name);
+    if (p.avatar) setAvatar(p.avatar);
   };
 
   return (
     <div className="flex flex-col gap-5">
       <span className="text-[12.5px] font-medium uppercase tracking-[0.16em] text-ink-subtle">
-        {t("Step 1 of 3 · Your profile")}
+        {t("Step 2 of 4 · Your profile")}
       </span>
       <h1 className="font-display text-[34px] font-medium leading-[1.08] tracking-tight text-ink">
         {t("Who's watching?")}
       </h1>
+      {accountProfiles.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <span className="text-[13px] text-ink-muted">{t("On your account")}</span>
+          <div className="flex flex-wrap gap-2">
+            {accountProfiles.map((p) => {
+              const on = name.trim().toLowerCase() === p.name.trim().toLowerCase();
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => pickAccountProfile(p)}
+                  aria-pressed={on}
+                  className={`flex h-11 items-center gap-2 rounded-full border px-3 pe-4 text-[14px] transition-colors ${
+                    on ? "border-accent bg-accent-soft text-ink" : "border-edge text-ink-muted hover:text-ink"
+                  }`}
+                >
+                  {p.avatar ? (
+                    <img src={p.avatar} alt="" draggable={false} className="h-7 w-7 rounded-full object-cover" />
+                  ) : (
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-raised text-[12px] font-semibold">
+                      {p.name.slice(0, 1).toUpperCase()}
+                    </span>
+                  )}
+                  {p.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <label className="flex flex-col gap-2">
         <span className="text-[13px] text-ink-muted">{t("Your name")}</span>
         <input

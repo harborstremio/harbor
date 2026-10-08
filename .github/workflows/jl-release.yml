@@ -19,6 +19,12 @@ concurrency:
   group: jl-release
   cancel-in-progress: false
 
+# JL Media Vision accounts (JL Vision Supabase project). The publishable key is public by design;
+# row-level security protects every account's data.
+env:
+  VITE_JL_SUPABASE_URL: https://ajbjyjfiglzodbdcdapr.supabase.co
+  VITE_JL_SUPABASE_ANON_KEY: sb_publishable_Nzp9lbbMCuZ6fd03XeSxXw_r-YtRr0k
+
 jobs:
   windows:
     name: Windows x64

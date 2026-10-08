@@ -105,7 +105,7 @@ export function LiveTvStep({ onNoIptv }: { onNoIptv: () => void }) {
   return (
     <div className="flex flex-col gap-4">
       <span className="text-[12.5px] font-medium uppercase tracking-[0.16em] text-ink-subtle">
-        {t("Step 2 of 3 · Live TV")}
+        {t("Step 3 of 4 · Live TV")}
       </span>
       <h1 className="font-display text-[34px] font-medium leading-[1.08] tracking-tight text-ink">
         {t("Add your TV provider")}

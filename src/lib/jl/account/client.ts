@@ -1,9 +1,9 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * JL account sign-in against the JL Supabase project (the same accounts as the JL web app), over
- * Supabase's REST endpoints. The anon key is public by design; row-level security decides what a
- * signed-in user can read and write.
+ * JL Media Vision account sign-in against the JL Vision Supabase project, over Supabase's REST
+ * endpoints. App data lives in that project's `media` schema. The anon key is public by design;
+ * row-level security decides what a signed-in user can read and write.
  */
 const SUPABASE_URL = ((import.meta.env.VITE_JL_SUPABASE_URL as string | undefined) || "").replace(/\/+$/, "");
 const ANON_KEY = (import.meta.env.VITE_JL_SUPABASE_ANON_KEY as string | undefined) || "";
@@ -118,6 +118,37 @@ export async function signInJl(email: string, password: string): Promise<JlSessi
   return session;
 }
 
+type SignUpResponse = TokenResponse & { id?: string; email?: string };
+
+/**
+ * Creates an account. Returns the session when the project signs new accounts in straight away,
+ * or null when it first sends a confirmation email.
+ */
+export async function signUpJl(email: string, password: string): Promise<JlSession | null> {
+  if (!jlAccountsConfigured()) throw new Error("JL accounts are not configured in this build.");
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+    method: "POST",
+    headers: { apikey: ANON_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: email.trim(), password }),
+  });
+  const body = (await res.json().catch(() => ({}))) as SignUpResponse;
+  if (!res.ok) throw new Error(body.error_description || body.msg || `Sign-up failed (${res.status})`);
+  const session = toSession(body);
+  if (session) writeSession(session);
+  return session;
+}
+
+/** Emails a password-reset link. */
+export async function resetJlPassword(email: string): Promise<void> {
+  if (!jlAccountsConfigured()) throw new Error("JL accounts are not configured in this build.");
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+    method: "POST",
+    headers: { apikey: ANON_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: email.trim() }),
+  });
+  if (!res.ok) throw new Error(`Couldn't send the reset email (${res.status})`);
+}
+
 export async function signOutJl(): Promise<void> {
   const session = readSession();
   writeSession(null);
@@ -151,13 +182,23 @@ export async function freshJlSession(): Promise<JlSession | null> {
   return refreshing;
 }
 
-/** A PostgREST request as the signed-in user. */
+/** A PostgREST request against the account's `media` schema, as the signed-in user. */
 export async function jlRest(path: string, init: RequestInit = {}): Promise<Response> {
   const session = await freshJlSession();
   if (!session) throw new Error("Not signed in");
   const headers = new Headers(init.headers);
   headers.set("apikey", ANON_KEY);
   headers.set("Authorization", `Bearer ${session.accessToken}`);
+  headers.set("Accept-Profile", "media");
+  headers.set("Content-Profile", "media");
   if (init.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   return fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...init, headers });
+}
+
+/** Calls a `media` schema function as the signed-in user. */
+export async function jlRpc<T>(fn: string, args: Record<string, unknown> = {}): Promise<T> {
+  const res = await jlRest(`rpc/${fn}`, { method: "POST", body: JSON.stringify(args) });
+  if (!res.ok) throw new Error(`JL request failed (${res.status})`);
+  const text = await res.text();
+  return (text ? JSON.parse(text) : null) as T;
 }

@@ -8,17 +8,17 @@ import {
 } from "@/lib/jl/sports/favorites";
 import { playerForFollow } from "@/lib/jl/sports/people";
 import { currentJlSession, jlRest, useJlSession } from "./client";
-import { diffRows, playerToRow, rowsToFavorites, teamToRow, type SportsFavoriteRow } from "./mapping";
+import { diffRows, playerToRow, rowsToFavorites, teamToRow, type MediaFavoriteRow, type RemoteFavoriteRow } from "./mapping";
 
 /**
- * Keeps this device's followed teams and players in step with a JL household profile, so every
- * device signed in to the same profile shows the same favorites.
+ * Keeps this device's followed teams and players in step with a JL Media Vision account profile, so
+ * every device signed in to the same profile shows the same favorites.
  */
 
 const LINK_KEY = "jl.account.link.v1";
 const PULL_EVERY_MS = 5 * 60_000;
 
-export type JlProfile = { id: string; name: string };
+export type JlProfile = { id: string; name: string; avatar: string | null };
 /** The JL profile this app profile syncs with; `merged` once the first two-way merge is done. */
 export type JlLink = { profileId: string; name: string; merged: boolean };
 
@@ -80,18 +80,17 @@ async function ok(res: Response): Promise<Response> {
 }
 
 export async function listJlProfiles(): Promise<JlProfile[]> {
-  const res = await ok(await jlRest("profiles?select=id,name&order=created_at"));
+  const res = await ok(await jlRest("profiles?select=id,name,avatar&order=position,created_at"));
   return (await res.json()) as JlProfile[];
 }
 
-export async function createJlProfile(name: string): Promise<JlProfile> {
-  const session = currentJlSession();
-  if (!session) throw new Error("Not signed in");
+export async function createJlProfile(name: string, avatar: string | null = null): Promise<JlProfile> {
+  if (!currentJlSession()) throw new Error("Not signed in");
   const res = await ok(
-    await jlRest("profiles?select=id,name", {
+    await jlRest("profiles?select=id,name,avatar", {
       method: "POST",
       headers: { Prefer: "return=representation" },
-      body: JSON.stringify({ user_id: session.userId, name: name.trim().slice(0, 40) }),
+      body: JSON.stringify({ name: name.trim().slice(0, 40) || "Me", avatar }),
     }),
   );
   const [row] = (await res.json()) as JlProfile[];
@@ -107,28 +106,28 @@ export function unlinkJlProfile(): void {
   writeLink(null);
 }
 
-type RemoteRow = Pick<SportsFavoriteRow, "kind" | "league" | "espn_id" | "name">;
+type RemoteRow = RemoteFavoriteRow;
 
 async function pullRows(profileId: string): Promise<RemoteRow[]> {
   const res = await ok(
-    await jlRest(`sports_favorites?select=kind,league,espn_id,name&profile_id=eq.${encodeURIComponent(profileId)}`),
+    await jlRest(`favorites?select=kind,item_id,meta&kind=in.(team,player)&profile_id=eq.${encodeURIComponent(profileId)}`),
   );
   return (await res.json()) as RemoteRow[];
 }
 
-function localRows(profileId: string): SportsFavoriteRow[] {
+function localRows(profileId: string): MediaFavoriteRow[] {
   const { teams, players } = readJlFavorites();
   return [
     ...teams.map((t) => teamToRow(profileId, t)),
     ...players.map((p) => playerToRow(profileId, p)),
-  ].filter((r): r is SportsFavoriteRow => !!r);
+  ].filter((r): r is MediaFavoriteRow => !!r);
 }
 
 async function pushDiff(profileId: string, remote: RemoteRow[]): Promise<void> {
   const { upsert, remove } = diffRows(localRows(profileId), remote);
   if (upsert.length) {
     await ok(
-      await jlRest("sports_favorites?on_conflict=profile_id,kind,league,espn_id", {
+      await jlRest("favorites?on_conflict=profile_id,kind,item_id", {
         method: "POST",
         headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
         body: JSON.stringify(upsert),
@@ -139,10 +138,9 @@ async function pushDiff(profileId: string, remote: RemoteRow[]): Promise<void> {
     const q = [
       `profile_id=eq.${encodeURIComponent(profileId)}`,
       `kind=eq.${r.kind}`,
-      `league=eq.${encodeURIComponent(r.league)}`,
-      `espn_id=eq.${encodeURIComponent(r.espn_id)}`,
+      `item_id=eq.${encodeURIComponent(r.item_id)}`,
     ].join("&");
-    await ok(await jlRest(`sports_favorites?${q}`, { method: "DELETE", headers: { Prefer: "return=minimal" } }));
+    await ok(await jlRest(`favorites?${q}`, { method: "DELETE", headers: { Prefer: "return=minimal" } }));
   }
 }
 
@@ -221,7 +219,7 @@ async function pushLocalChange(): Promise<void> {
   if (applyingRemote || !link?.merged || !currentJlSession()) return;
   const base = lastRemote?.profileId === link.profileId ? lastRemote.rows : await pullRows(link.profileId);
   await pushDiff(link.profileId, base);
-  lastRemote = { profileId: link.profileId, rows: localRows(link.profileId) };
+  lastRemote = { profileId: link.profileId, rows: localRows(link.profileId).map(({ kind, item_id, meta }) => ({ kind, item_id, meta })) };
 }
 
 /** Runs the sync while signed in and linked: on start, on focus, every few minutes, and on each change. */

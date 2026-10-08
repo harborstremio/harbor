@@ -33,6 +33,7 @@ import { WatchLocalModal } from "@/components/player/watch-local-modal";
 import { LocalEpisodesModal } from "@/components/player/local-episodes-modal";
 import { CurfewGuard } from "@/components/curfew-guard";
 import { HoverPreview } from "@/components/hover-preview";
+import { JlAccountSync } from "@/components/jl-account-sync";
 import { CustomHoverCssMount } from "@/components/custom-hover-css-mount";
 import { EmbedViewportRoot } from "@/components/embed-viewport";
 import { InstallerViewportRoot } from "@/components/installer-viewport";
@@ -319,6 +320,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                   <MiddleClickScroll />
                                                   <ThemeBackdrop />
                                                   <WatchlistSync />
+                                                  <JlAccountSync />
                                                   <Shell onReady={onReady} />
                                                   <Suspense fallback={null}>
                                                     <OnboardingModal />

@@ -5,7 +5,6 @@ import { readActiveId, resolveActiveSource } from "@/lib/iptv/active-source";
 import { useFavorites } from "@/lib/iptv/favorites";
 import { getCachedPlaylist } from "@/lib/iptv/store";
 import type { IptvChannel, IptvPlaylist, IptvPlaylistSource } from "@/lib/iptv/types";
-import { useJlSync } from "@/lib/jl/account/sync";
 import { useParental } from "@/lib/parental";
 import { useSettings } from "@/lib/settings";
 import { DEFAULT_SPORTS_LEAGUES, LEAGUES } from "@/lib/sports/espn";
@@ -97,7 +96,6 @@ export function SportsView({ active }: { active: boolean }) {
     [sportsLeague, userSportsLeagues],
   );
   const sports = useSports({ enabled: active, leagues: sportsLeagues });
-  useJlSync();
   const jlSports = useJlSports({ channels: shownChannels, epg, nowMs });
   const jlDialogs = useJlSportsDialogs({
     players: jlSports.players,
