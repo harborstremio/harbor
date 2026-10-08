@@ -2771,8 +2771,8 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
   );
 }
 
-/* Pinned video as wallpaper: the rows stay see-through so the video shows behind them, and fade
-   out completely as they scroll up past the middle, leaving the top of the window to the video. */
+/* Pinned video as wallpaper: rows are solid at the bottom of the window and turn see-through as
+   they scroll up, gone past the middle, leaving the top of the window to the video. */
 .wallpaper-dock-layer {
   position: relative;
   display: flex;
@@ -2780,8 +2780,8 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
   min-width: 0;
   flex: 1 1 0%;
   flex-direction: column;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 34%, rgb(0 0 0 / 0.72) 58%);
-  mask-image: linear-gradient(to bottom, transparent 0%, transparent 34%, rgb(0 0 0 / 0.72) 58%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 30%, rgb(0 0 0 / 0.35) 55%, #000 92%);
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent 30%, rgb(0 0 0 / 0.35) 55%, #000 92%);
 }
 
 /* Pinned video in the hero on the desktop: the video plays behind the page, so the theme
