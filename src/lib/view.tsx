@@ -17,6 +17,7 @@ import { useTogether } from "./together/provider";
 import type { SportsGame } from "./sports/espn";
 import { beginMarathonAdvance } from "./fullscreen-state";
 import { armRemoteStickyHop } from "./remote/session";
+import { sportsPageKey, type SportsPage } from "./jl/sports/pages";
 import {
   getHeroDock,
   heroDockSupported,
@@ -158,7 +159,8 @@ export type Frame =
       resume?: boolean;
     }
   | { kind: "player"; src: PlayerSrc }
-  | { kind: "match-detail"; game: SportsGame };
+  | { kind: "match-detail"; game: SportsGame }
+  | { kind: "sports-page"; page: SportsPage };
 
 const ROOT_VIEW_BY_KIND: Record<Frame["kind"], View | null> = {
   home: "home",
@@ -192,6 +194,7 @@ const ROOT_VIEW_BY_KIND: Record<Frame["kind"], View | null> = {
   picker: null,
   player: null,
   "match-detail": null,
+  "sports-page": null,
 };
 
 function rootViewFromStack(stack: Frame[]): View {
@@ -247,6 +250,8 @@ type ViewValue = {
   openEpisodeDetail: (seriesId: string, season: number, episode: number, seriesMeta?: Meta) => void;
   matchDetailGame: SportsGame | null;
   openMatchDetail: (game: SportsGame) => void;
+  sportsPage: SportsPage | null;
+  openSportsPage: (page: SportsPage) => void;
   promoteMetaToRoot: () => void;
   personId: number | null;
   openPerson: (id: number | null) => void;
@@ -393,6 +398,8 @@ function frameKey(f: Frame): string {
       return `player:${f.src.meta.id}:${f.src.url.slice(-32)}`;
     case "match-detail":
       return `match-detail:${f.game.id}`;
+    case "sports-page":
+      return `sports-page:${sportsPageKey(f.page)}`;
   }
 }
 
@@ -501,6 +508,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   const grid = gridFrame ? gridFrame.grid : null;
   const awardType = top.kind === "award" ? top.awardType : null;
   const matchDetailGame = top.kind === "match-detail" ? top.game : null;
+  const sportsPage = top.kind === "sports-page" ? top.page : null;
   const picker =
     top.kind === "picker"
       ? {
@@ -841,6 +849,17 @@ export function ViewProvider({ children }: { children: ReactNode }) {
     [setNavStack],
   );
 
+  const openSportsPage = useCallback(
+    (page: SportsPage) => {
+      setNavStack((cur) => {
+        const t = cur[cur.length - 1];
+        if (t.kind === "sports-page" && sportsPageKey(t.page) === sportsPageKey(page)) return cur;
+        return pushFrame(cur, { kind: "sports-page", page });
+      });
+    },
+    [setNavStack],
+  );
+
   const openEpisodeDetail = useCallback(
     (seriesId: string, season: number, episode: number, seriesMeta?: Meta) => {
       setNavStack((cur) => {
@@ -1062,6 +1081,8 @@ export function ViewProvider({ children }: { children: ReactNode }) {
       openEpisodeDetail,
       matchDetailGame,
       openMatchDetail,
+      sportsPage,
+      openSportsPage,
       openQueue,
       filter,
       openFilter,
@@ -1119,6 +1140,8 @@ export function ViewProvider({ children }: { children: ReactNode }) {
       openEpisodeDetail,
       matchDetailGame,
       openMatchDetail,
+      sportsPage,
+      openSportsPage,
       filter,
       stackKinds,
       awardType,

@@ -75,6 +75,11 @@ export type Settings = {
   rpdbKey: string;
   imdbApiFallback: boolean;
   fanartKey: string;
+  /** Sports keys each viewer brings (Settings → Sports plugins & keys). Empty = feature off. */
+  allsportsKey: string;
+  thesportsdbKey: string;
+  oddsApiKey: string;
+  cfbdKey: string;
   tvdbKey: string;
   rdKey: string;
   tbKey: string;

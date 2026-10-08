@@ -83,6 +83,7 @@ import { effectiveBinding, eventToBinding, shouldHandleGlobalKeyboardEvent } fro
 import { ViewProvider, useView, type Frame, type MetaFilter, type View } from "@/lib/view";
 import { isHubKind, setHeroDock, useHeroDock } from "@/lib/hero-dock";
 import { useActiveHeroDockMode, useHeroDockBox } from "@/lib/hero-dock-layout";
+import { sportsPageKey } from "@/lib/jl/sports/pages";
 import type { MetaType } from "@/lib/cinemeta";
 import { useDiscordPresence } from "@/lib/discord/use-discord-presence";
 import { Home } from "@/views/home";
@@ -131,6 +132,7 @@ const importSports = () => import("@/views/sports");
 const importVod = () => import("@/views/playlist-vod");
 const importDownloads = () => import("@/views/downloads");
 const importMatchDetail = () => import("@/views/live/match-detail-view");
+const importSportsPages = () => import("@/views/sports-pages");
 const importOnboarding = () => import("@/components/onboarding");
 
 const AnimeView = lazy(() => importAnime().then((m) => ({ default: m.AnimeView })));
@@ -166,6 +168,9 @@ const Shows = lazy(() => importShows().then((m) => ({ default: m.Shows })));
 const LibraryView = lazy(() => importLibrary().then((m) => ({ default: m.LibraryView })));
 const LiveView = lazy(() => importLive().then((m) => ({ default: m.LiveView })));
 const SportsView = lazy(() => importSports().then((m) => ({ default: m.SportsView })));
+const SportsPageView = lazy(() =>
+  importSportsPages().then((m) => ({ default: m.SportsPageView })),
+);
 const MatchDetailView = lazy(() =>
   importMatchDetail().then((m) => ({ default: m.MatchDetailView })),
 );
@@ -964,6 +969,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const vodTop = topKind === "vod";
   const downloadsTop = topKind === "downloads";
   const matchDetailTop = topKind === "match-detail";
+  const sportsPageTop = topKind === "sports-page";
 
   const [immersive, setImmersive] = useState(false);
   useEffect(() => {
@@ -1015,6 +1021,8 @@ function Shell({ onReady }: { onReady?: () => void }) {
   );
   const { matchDetailGame } = useView();
   const matchDetailAlive = useKeepAlive(matchDetailTop, !!matchDetailGame);
+  const { sportsPage } = useView();
+  const sportsPageAlive = useKeepAlive(sportsPageTop, !!sportsPage);
   const filterAlive = useKeepAlive(filterTop, !!filter);
   const gridAlive = useKeepAlive(gridTop, !!grid, stackKinds.includes("grid"));
   const awardAlive = useKeepAlive(awardTop, awardTop);
@@ -1241,6 +1249,13 @@ function Shell({ onReady }: { onReady?: () => void }) {
                 episode={episodeDetail.episode}
                 seriesMeta={episodeDetail.seriesMeta}
               />
+            </Suspense>
+          </div>
+        )}
+        {sportsPageAlive && sportsPage && (
+          <div className={layer(sportsPageTop)}>
+            <Suspense fallback={null}>
+              <SportsPageView key={sportsPageKey(sportsPage)} page={sportsPage} />
             </Suspense>
           </div>
         )}

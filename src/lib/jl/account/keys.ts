@@ -18,6 +18,10 @@ export const SYNCED_SETTING_KEYS = [
   "tvdbKey",
   "mdblistKey",
   "opensubtitlesApiKey",
+  "allsportsKey",
+  "thesportsdbKey",
+  "oddsApiKey",
+  "cfbdKey",
   "iptvPlaylists",
 ] as const;
 
