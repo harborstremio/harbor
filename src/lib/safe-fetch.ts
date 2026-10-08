@@ -63,9 +63,23 @@ function rewriteForWeb(url: string, init?: RequestInit): { url: string; init?: R
     PROXY_HOSTS.has(parsed.hostname) || PROXY_SUFFIXES.some((s) => parsed.hostname.endsWith(s));
   if (!proxiable) return { url, init };
 
+  // Keys these APIs take in the URL travel to the proxy in a header instead, so they never show up
+  // in the host's request logs; api/proxy.ts puts them back (see KEY_IN_URL there).
+  let urlKey: string | null = null;
+  if (parsed.hostname === "api.the-odds-api.com") {
+    urlKey = parsed.searchParams.get("apiKey");
+    parsed.searchParams.delete("apiKey");
+  } else if (parsed.hostname === "www.thesportsdb.com") {
+    const m = /^(\/api\/v1\/json\/)([^/]+)(\/.*)$/.exec(parsed.pathname);
+    if (m) {
+      urlKey = decodeURIComponent(m[2]);
+      parsed.pathname = `${m[1]}_${m[3]}`;
+    }
+  }
   const proxied = `/api-proxy/${parsed.hostname}${parsed.pathname}${parsed.search}`;
-  if (!init?.headers) return { url: proxied, init };
-  const out = new Headers(init.headers as HeadersInit);
+  if (!init?.headers && !urlKey) return { url: proxied, init };
+  const out = new Headers(init?.headers as HeadersInit | undefined);
+  if (urlKey) out.set("x-harbor-key", urlKey);
   const auth = out.get("authorization");
   if (auth) {
     out.delete("authorization");

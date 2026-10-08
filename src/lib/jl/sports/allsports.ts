@@ -102,8 +102,11 @@ const imageInflight = new Map<string, Promise<string | null>>();
 async function fetchImage(key: string, path: string): Promise<string | null> {
   await gate();
   const init = { headers: { [ALLSPORTS_KEY_HEADER]: key } };
+  // On web, through the app's proxy (the key stays in a header) so the browser's CORS rules don't apply.
   const res = await (
-    isTauri ? tauriFetch(`${ALLSPORTS_BASE}${path}`, init) : fetch(`${ALLSPORTS_BASE}${path}`, init)
+    isTauri
+      ? tauriFetch(`${ALLSPORTS_BASE}${path}`, init)
+      : fetch(`/api-proxy/${new URL(ALLSPORTS_BASE).host}${new URL(ALLSPORTS_BASE).pathname}${path}`, init)
   ).catch(() => null);
   if (!res?.ok || !/^image\//.test(res.headers.get("content-type") ?? "")) return null;
   const blob = await res.blob().catch(() => null);

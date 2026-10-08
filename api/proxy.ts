@@ -60,12 +60,19 @@ export default async function handler(req: Request): Promise<Response> {
   // AllSports API (api.market) takes the viewer's key in its own header.
   const marketKey = req.headers.get("x-api-market-key");
   if (marketKey && host === "prod.api.market") headers.set("x-api-market-key", marketKey);
+  // Keys that these APIs take in the URL arrive here in a header (see safe-fetch.ts) so they stay
+  // out of request logs; put them back only for the host that needs them.
+  let path = match[2] ?? "/";
+  const urlKey = req.headers.get("x-harbor-key");
+  if (urlKey && host === "api.the-odds-api.com") url.searchParams.set("apiKey", urlKey);
+  if (urlKey && host === "www.thesportsdb.com")
+    path = path.replace(/^\/api\/v1\/json\/_\//, `/api/v1/json/${encodeURIComponent(urlKey)}/`);
   const contentType = req.headers.get("content-type");
   if (contentType) headers.set("Content-Type", contentType);
 
   const hasBody = req.method !== "GET" && req.method !== "HEAD";
   const query = url.searchParams.toString();
-  const upstream = await fetch(`https://${host}${match[2] ?? "/"}${query ? `?${query}` : ""}`, {
+  const upstream = await fetch(`https://${host}${path}${query ? `?${query}` : ""}`, {
     method: req.method,
     headers,
     body: hasBody ? await req.arrayBuffer() : undefined,

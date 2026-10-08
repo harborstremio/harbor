@@ -1,4 +1,5 @@
 import { safeFetch } from "@/lib/safe-fetch";
+import { allsportsGet } from "./allsports";
 import { fetchSports, LEAGUES, type LeagueDef, type SportsGame } from "@/lib/sports/espn";
 import { asBase, asSearchSlug, asSportFor, parseAsEvents, pickAsTeam, type AsTeamGame } from "./as-team-games";
 import { parseAthlete, parseGameLog, type AthleteProfile, type GameLog } from "./espn-athlete";
@@ -149,7 +150,6 @@ export async function fetchGameLog(league: string, athleteId: string): Promise<G
 
 // Minimal AllSports read for the team page when ESPN has no schedule; the viewer's own key.
 // TODO(sports): fold into the shared AllSports client (src/lib/jl/sports/allsports.ts).
-const ALLSPORTS = "https://prod.api.market/api/v1/recodex/allsportsapi";
 
 export type AsTeamSchedule = { sport: string; upcoming: AsTeamGame[]; results: AsTeamGame[] };
 
@@ -158,13 +158,14 @@ export async function fetchAsTeamSchedule(key: string, league: string, teamName:
   const sport = def ? asSportFor(def.tag, def.group) : null;
   const q = asSearchSlug(teamName);
   if (!key || !sport || q.length < 2) return null;
-  const init = { headers: { "x-api-market-key": key, Accept: "application/json" } };
-  const base = `${ALLSPORTS}${asBase(sport)}`;
-  const id = pickAsTeam(await getJson(`${base}/search/${q}`, 24 * 60 * MIN, init), teamName);
+  const base = asBase(sport);
+  // A rejected key or used-up plan just means no AllSports schedule here.
+  const asGet = (path: string, ttl: number) => allsportsGet(key, path, ttl).catch(() => null);
+  const id = pickAsTeam(await asGet(`${base}/search/${q}`, 24 * 60 * MIN), teamName);
   if (!id) return null;
   const [next, prev] = await Promise.all([
-    getJson(`${base}/team/${id}/matches/next/0`, 15 * MIN, init),
-    getJson(`${base}/team/${id}/matches/previous/0`, 15 * MIN, init),
+    asGet(`${base}/team/${id}/matches/next/0`, 15 * MIN),
+    asGet(`${base}/team/${id}/matches/previous/0`, 15 * MIN),
   ]);
   return {
     sport,

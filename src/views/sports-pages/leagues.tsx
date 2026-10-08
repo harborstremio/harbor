@@ -3,6 +3,7 @@ import type { SportsPage } from "@/lib/jl/sports/pages";
 import { getGroupLabel, getLeagueLabel, LEAGUE_GROUPS, LEAGUES } from "@/lib/sports/espn";
 import { useView } from "@/lib/view";
 import { Img, PageShell } from "./espn-page-parts";
+import { WorldSportsSection } from "./world-sports";
 
 /** Every league the Sports Hub covers, by sport; each opens its league page. */
 export function LeaguesPage(_props: { page: Extract<SportsPage, { kind: "leagues" }> }) {
@@ -37,6 +38,8 @@ export function LeaguesPage(_props: { page: Extract<SportsPage, { kind: "leagues
           </section>
         );
       })}
+      {/* AllSports leagues from around the world (shows how to add a key when there is none). */}
+      <WorldSportsSection />
     </PageShell>
   );
 }

@@ -1,4 +1,5 @@
 import { safeFetch } from "@/lib/safe-fetch";
+import { allsportsGet } from "./allsports";
 import { NCAA_DIRECTORY_URL, isCollege, parseNcaaDirectory, type College } from "./colleges";
 import snapshot from "./data/colleges.json";
 import {
@@ -187,18 +188,8 @@ export async function fetchSportSchedule(
 
 // ---- AllSports fallback (only with the viewer's own key) ----------------------------------
 
-const ALLSPORTS_BASE = "https://prod.api.market/api/v1/recodex/allsportsapi";
-
-async function allsports(key: string, path: string): Promise<unknown> {
-  const body = await getText(`${ALLSPORTS_BASE}${path}`, {
-    headers: { "x-api-market-key": key, Accept: "application/json" },
-  });
-  if (!body) return null;
-  try {
-    return JSON.parse(body) as unknown;
-  } catch {
-    return null;
-  }
+function allsports(key: string, path: string): Promise<unknown> {
+  return allsportsGet(key, path, 15 * 60_000).catch(() => null);
 }
 
 /** The team's season from AllSports, when the school's site has none; null when not found. */
