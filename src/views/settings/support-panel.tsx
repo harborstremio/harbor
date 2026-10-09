@@ -140,7 +140,11 @@ export function SupportPanel() {
       </Section>
 
       <Section title={t("Addon compatibility")}>
-        <Prose>{t("JL Media Vision uses the open addon protocol. Compatible manifests and configured addon links work without an external media account. Third-party notices are listed in Licenses.")}</Prose>
+        <Prose>
+          {t(
+            "JL Media Vision uses the open addon protocol. Compatible manifests and configured addon links work without an external media account. Third-party notices are listed in Licenses.",
+          )}
+        </Prose>
       </Section>
 
       <Section

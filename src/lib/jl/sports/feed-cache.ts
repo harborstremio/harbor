@@ -12,7 +12,8 @@ export function createSportsFeedCache(now: () => number = Date.now) {
     if (hit && now() - hit.at < hit.ttl) return hit.games;
     const running = inflight.get(key);
     if (running) return running;
-    const request = Promise.resolve().then(load)
+    const request = Promise.resolve()
+      .then(load)
       .then(({ games, ttl }) => {
         entries.set(key, { at: now(), ttl, games });
         return games;

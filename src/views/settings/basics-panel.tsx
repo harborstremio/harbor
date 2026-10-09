@@ -67,12 +67,9 @@ export function BasicsPanel() {
           title={t("JL Media Vision account")}
           description={
             user
-              ? t(
-                  "Signed in as {email} with your JL Media Vision account.",
-                  {
-                    email: maskEmail(user.email, reveal),
-                  },
-                )
+              ? t("Signed in as {email} with your JL Media Vision account.", {
+                  email: maskEmail(user.email, reveal),
+                })
               : t("Your library and addons work locally. Sign in to use JL account sync.")
           }
           trailing={

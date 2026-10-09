@@ -39,7 +39,7 @@ export function WebBuildBanner() {
         </h2>
         <p className={`max-w-[66ch] ${ROW_DESC}`}>
           {t(
-            "Everything you save here stays in this browser. Your JL session, API keys, watch progress, picker cache, dismissed tips. Harbor servers never see any of it. Clearing your browser data wipes it.",
+            "This browser stores your JL session and local settings. Signing in enables account sync for supported profile data and service credentials. Clearing browser data removes local copies, but does not delete data already synced to your JL account.",
           )}
         </p>
         <p className={`max-w-[66ch] ${ROW_DESC}`}>

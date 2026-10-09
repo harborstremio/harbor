@@ -22,15 +22,26 @@ const Ctx = createContext<AuthValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { activeProfile } = useProfiles();
   const session = useJlSession();
-  const value = useMemo<AuthValue>(() => ({
-    user: session ? { _id: session.userId, email: session.email ?? "", fullname: activeProfile?.name } : null,
-    authKey: localLibraryScope(activeProfile?.id ?? "default"),
-    signIn: async (email, password) => { await signInJl(email, password); },
-    signInWithKey: async () => {
-      throw new Error("External account tokens are not accepted. Sign in with your JL Media Vision account on this device.");
-    },
-    signOut: () => { void signOutJl(); },
-  }), [session, activeProfile?.id, activeProfile?.name]);
+  const value = useMemo<AuthValue>(
+    () => ({
+      user: session
+        ? { _id: session.userId, email: session.email ?? "", fullname: activeProfile?.name }
+        : null,
+      authKey: localLibraryScope(activeProfile?.id ?? "default"),
+      signIn: async (email, password) => {
+        await signInJl(email, password);
+      },
+      signInWithKey: async () => {
+        throw new Error(
+          "External account tokens are not accepted. Sign in with your JL Media Vision account on this device.",
+        );
+      },
+      signOut: () => {
+        void signOutJl();
+      },
+    }),
+    [session, activeProfile?.id, activeProfile?.name],
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

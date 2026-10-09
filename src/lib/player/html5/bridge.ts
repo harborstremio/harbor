@@ -562,7 +562,11 @@ export function createHtml5Bridge(): PlayerBridge {
       } else if (isTs && mpegts.isSupported()) {
         tsPlayer = mpegts.createPlayer(
           { type: "mpegts", url: src.url, isLive: src.isLive === true, cors: true },
-          { enableWorker: true, liveBufferLatencyChasing: src.isLive === true, lazyLoadMaxDuration: 4 },
+          {
+            enableWorker: true,
+            liveBufferLatencyChasing: src.isLive === true,
+            lazyLoadMaxDuration: 4,
+          },
         );
         tsPlayer.attachMediaElement(video);
         tsPlayer.on(mpegts.Events.ERROR, refreshSnapshot);

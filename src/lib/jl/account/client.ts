@@ -6,11 +6,21 @@ export type { JlSession, JlAccountContext } from "./session-client";
 let workspaceError: string | null = null;
 const workspaceListeners = new Set<() => void>();
 function workspaceFailed(): void {
-  workspaceError = "JL Media Vision could not safely open this account's saved workspace. Your data has been preserved. Check available device storage and restart. If this continues, contact support before resetting app data.";
+  workspaceError =
+    "JL Media Vision could not safely open this account's saved workspace. Your data has been preserved. Check available device storage and restart. If this continues, contact support before resetting app data.";
   for (const listener of workspaceListeners) listener();
 }
 export function useJlWorkspaceError(): string | null {
-  return useSyncExternalStore((listener) => { workspaceListeners.add(listener); return () => { workspaceListeners.delete(listener); }; }, () => workspaceError, () => null);
+  return useSyncExternalStore(
+    (listener) => {
+      workspaceListeners.add(listener);
+      return () => {
+        workspaceListeners.delete(listener);
+      };
+    },
+    () => workspaceError,
+    () => null,
+  );
 }
 
 // Public project configuration. Supabase RLS authorizes every media request.
@@ -23,7 +33,8 @@ const client = createJlSessionClient({
     removeItem: (key) => localStorage.removeItem(key),
   },
   fetch: (input, init) => fetch(input, init),
-  beforeIdentityChange: (previous, next) => stageJlWorkspace(localStorage, previous?.userId ?? null, next?.userId ?? null),
+  beforeIdentityChange: (previous, next) =>
+    stageJlWorkspace(localStorage, previous?.userId ?? null, next?.userId ?? null),
   onIdentityChange: () => {
     // Recreate legacy profile caches and providers before they can write into the
     // new workspace. Refreshing the same user never takes this path.
@@ -39,14 +50,21 @@ if (typeof window !== "undefined") {
   try {
     const userId = client.read()?.userId ?? null;
     const workspaceOwner = localStorage.getItem(WORKSPACE_OWNER);
-    if (!workspaceOwner || workspaceOwner !== (userId ?? "local")) switchJlWorkspace(localStorage, workspaceOwner === "local" ? null : workspaceOwner, userId);
-  } catch { workspaceFailed(); }
+    if (!workspaceOwner || workspaceOwner !== (userId ?? "local"))
+      switchJlWorkspace(localStorage, workspaceOwner === "local" ? null : workspaceOwner, userId);
+  } catch {
+    workspaceFailed();
+  }
 }
 
 if (typeof window !== "undefined") {
   window.addEventListener("storage", (event) => {
     if (event.key === SESSION_KEY || event.key === null) {
-      try { client.storageChanged(); } catch { workspaceFailed(); }
+      try {
+        client.storageChanged();
+      } catch {
+        workspaceFailed();
+      }
     }
   });
 }

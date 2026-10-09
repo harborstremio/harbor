@@ -52,11 +52,19 @@ test("live tv channel search shares the same normalizer", () => {
 
 test("the vod library search normalizes instead of raw lowercase", () => {
   const src = readFileSync(new URL("../src/views/playlist-vod.tsx", import.meta.url), "utf8");
-  assert.match(src, /vodSearchText\(deferredQuery\)/, "the query must use the tested VOD normalizer");
+  assert.match(
+    src,
+    /vodSearchText\(deferredQuery\)/,
+    "the query must use the tested VOD normalizer",
+  );
   assert.match(src, /vodSearchText\(m\.title\)/, "movie titles must use the same normalizer");
   assert.match(src, /vodSearchText\(s\.title\)/, "series titles must use the same normalizer");
   assert.match(src, /matchesVodSearch\(movieIndex\[i\], q\)/, "movies must use the tested matcher");
-  assert.match(src, /matchesVodSearch\(seriesIndex\[i\], q\)/, "series must use the tested matcher");
+  assert.match(
+    src,
+    /matchesVodSearch\(seriesIndex\[i\], q\)/,
+    "series must use the tested matcher",
+  );
   assert.doesNotMatch(
     src,
     /m\.title\.toLowerCase\(\)\.includes/,

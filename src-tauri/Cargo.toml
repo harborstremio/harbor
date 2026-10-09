@@ -48,7 +48,12 @@ tar = "0.4"
 plist = "1.9"
 zip = { version = "4", default-features = false, features = ["deflate-flate2", "aes-crypto"] }
 zeroize = "1"
-sevenz-rust2 = { version = "=0.20.2", default-features = false, features = ["aes256", "bzip2", "ppmd", "deflate"] }
+sevenz-rust2 = { version = "=0.20.2", default-features = false, features = [
+  "aes256",
+  "bzip2",
+  "ppmd",
+  "deflate",
+] }
 unrar_sys = { path = "vendor/unrar_sys" }
 hadris-iso = { version = "=2.5.0", default-features = false, features = ["std", "sync", "joliet"] }
 harbor-udfread = { path = "vendor/harbor-udfread" }

@@ -1,6 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useSettings, type Settings } from "@/lib/settings";
-import { assertJlAccountCurrent, jlAccountContext, jlRpc, useJlSession, type JlAccountContext } from "./client";
+import {
+  assertJlAccountCurrent,
+  jlAccountContext,
+  jlRpc,
+  useJlSession,
+  type JlAccountContext,
+} from "./client";
 import { claimKeySyncOwner, runKeySync } from "./key-sync-run";
 import {
   secretName,
@@ -73,7 +79,10 @@ function toPatch(values: KeyValues): Partial<Settings> {
 
 async function pullRemote(context: JlAccountContext): Promise<KeyValues> {
   const rows = await jlRpc<Array<{ name: string; value: string }>>("get_secrets", {}, context);
-  if (!Array.isArray(rows) || rows.some((row) => !row || typeof row.name !== "string" || typeof row.value !== "string")) {
+  if (
+    !Array.isArray(rows) ||
+    rows.some((row) => !row || typeof row.name !== "string" || typeof row.value !== "string")
+  ) {
     throw new Error("Invalid JL key response");
   }
   const out: KeyValues = {};
@@ -87,7 +96,11 @@ async function pullRemote(context: JlAccountContext): Promise<KeyValues> {
 const running = new Map<string, Promise<void>>();
 
 /** Pull and push now. Safe to call often; overlapping calls share one run. */
-export function syncJlKeys(settings: Settings, update: (patch: Partial<Settings>) => void, read = () => settings): Promise<void> {
+export function syncJlKeys(
+  settings: Settings,
+  update: (patch: Partial<Settings>) => void,
+  read = () => settings,
+): Promise<void> {
   const context = jlAccountContext();
   if (!context || !claimKeySyncOwner(localStorage, context.userId)) return Promise.resolve();
   const key = `${context.userId}:${context.generation}`;
@@ -99,7 +112,8 @@ export function syncJlKeys(settings: Settings, update: (patch: Partial<Settings>
     readBase: () => readBase(context.userId),
     writeBase: (base) => writeBase(context.userId, base),
     pull: () => pullRemote(context),
-    push: (setting, value) => jlRpc("set_secret", { p_name: secretName(setting), p_value: value }, context),
+    push: (setting, value) =>
+      jlRpc("set_secret", { p_name: secretName(setting), p_value: value }, context),
     apply: (values) => {
       const patch = toPatch(values);
       if (Object.keys(patch).length) update(patch);
@@ -126,7 +140,12 @@ export function useJlKeySync(): void {
 
   useEffect(() => {
     if (!userId) return;
-    const run = () => void syncJlKeys(latest.current.settings, latest.current.update, () => latest.current.settings);
+    const run = () =>
+      void syncJlKeys(
+        latest.current.settings,
+        latest.current.update,
+        () => latest.current.settings,
+      );
     run();
     const timer = window.setInterval(run, PULL_EVERY_MS);
     const onVisible = () => {
@@ -149,7 +168,12 @@ export function useJlKeySync(): void {
       return;
     }
     const timer = window.setTimeout(
-      () => void syncJlKeys(latest.current.settings, latest.current.update, () => latest.current.settings),
+      () =>
+        void syncJlKeys(
+          latest.current.settings,
+          latest.current.update,
+          () => latest.current.settings,
+        ),
       PUSH_DELAY_MS,
     );
     return () => window.clearTimeout(timer);

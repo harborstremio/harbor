@@ -3,13 +3,21 @@ import test from "node:test";
 import type { SportsGame } from "../src/lib/sports/espn-types.ts";
 import { createSportsFeedCache, scoreboardEvents } from "../src/lib/jl/sports/feed-cache.ts";
 import { heroPhotoCandidates } from "../src/lib/jl/sports/hub-sections.ts";
-import { isCurrentLiveGame, sportsSessionKey, visibleScore } from "../src/lib/jl/sports/presentation.ts";
+import {
+  isCurrentLiveGame,
+  sportsSessionKey,
+  visibleScore,
+} from "../src/lib/jl/sports/presentation.ts";
 import { detectAlerts, toAlertGame } from "../src/lib/jl/sports/sports-alerts.ts";
 import { storySlides, writeStory } from "../src/lib/jl/sports/game-story.ts";
 import { interpretKeyTest, testSportsKey } from "../src/lib/jl/sports/sports-keys.ts";
 
 const game = (extra: Partial<SportsGame> = {}): SportsGame => ({
-  id: "401000001", league: "NCAAF", state: "pre", detail: "Scheduled", startMs: 1791648000000,
+  id: "401000001",
+  league: "NCAAF",
+  state: "pre",
+  detail: "Scheduled",
+  startMs: 1791648000000,
   away: { id: "26", name: "UCLA Bruins", abbr: "UCLA", logo: "", score: "0", winner: false },
   home: { id: "2483", name: "Oregon Ducks", abbr: "ORE", logo: "", score: "0", winner: false },
   ...extra,
@@ -34,18 +42,37 @@ test("upcoming UCLA/Oregon provider zeroes are hidden; actual live/final zeroes 
 
 test("art candidates survive failed remote URLs and end at bundled football scenery", () => {
   const sources = heroPhotoCandidates({
-    curated: "/broken-curated.webp", event: "/broken-event.webp", team: "/broken-event.webp",
-    league: "  ", bundled: "/sports/hero-photos/football.webp",
+    curated: "/broken-curated.webp",
+    event: "/broken-event.webp",
+    team: "/broken-event.webp",
+    league: "  ",
+    bundled: "/sports/hero-photos/football.webp",
   });
-  assert.deepEqual(sources, ["/broken-curated.webp", "/broken-event.webp", "/sports/hero-photos/football.webp"]);
+  assert.deepEqual(sources, [
+    "/broken-curated.webp",
+    "/broken-event.webp",
+    "/sports/hero-photos/football.webp",
+  ]);
   const failed = new Set<string>();
-  assert.equal(sources.find((url) => !failed.has(url)), "/broken-curated.webp");
+  assert.equal(
+    sources.find((url) => !failed.has(url)),
+    "/broken-curated.webp",
+  );
   failed.add(sources[0]);
-  assert.equal(sources.find((url) => !failed.has(url)), "/broken-event.webp");
+  assert.equal(
+    sources.find((url) => !failed.has(url)),
+    "/broken-event.webp",
+  );
   failed.add(sources[1]);
-  assert.equal(sources.find((url) => !failed.has(url)), "/sports/hero-photos/football.webp");
+  assert.equal(
+    sources.find((url) => !failed.has(url)),
+    "/sports/hero-photos/football.webp",
+  );
   failed.add(sources[2]);
-  assert.equal(sources.find((url) => !failed.has(url)), undefined);
+  assert.equal(
+    sources.find((url) => !failed.has(url)),
+    undefined,
+  );
 });
 
 test("failed refresh keeps last successful score and original timestamp without mutating it", async () => {
@@ -55,7 +82,9 @@ test("failed refresh keeps last successful score and original timestamp without 
   const first = await cached("board:NCAAF", async () => ({ games: [original], ttl: 30 }));
   assert.equal(first[0], original);
   now = 1050;
-  const fail = async (): Promise<never> => { throw new Error("Synthetic network failure"); };
+  const fail = async (): Promise<never> => {
+    throw new Error("Synthetic network failure");
+  };
   const saved = await cached("board:NCAAF", fail);
   assert.equal(saved[0].savedAt, 1000);
   assert.equal(isCurrentLiveGame(saved[0]), false);
@@ -63,7 +92,10 @@ test("failed refresh keeps last successful score and original timestamp without 
   assert.equal(isCurrentLiveGame(original), true);
   now = 2000;
   assert.equal((await cached("board:NCAAF", fail))[0].savedAt, 1000);
-  const fresh = await cached("board:NCAAF", async () => ({ games: [game({ state: "post" })], ttl: 30 }));
+  const fresh = await cached("board:NCAAF", async () => ({
+    games: [game({ state: "post" })],
+    ttl: 30,
+  }));
   assert.equal(fresh[0].savedAt, undefined);
   assert.equal(fresh[0].state, "post");
 });
@@ -72,7 +104,10 @@ test("concurrent schedule consumers share one read, TTL applies, valid empty sch
   let now = 1000;
   let reads = 0;
   const cached = createSportsFeedCache(() => now);
-  const load = async () => { reads++; return { games: [game()], ttl: 30 }; };
+  const load = async () => {
+    reads++;
+    return { games: [game()], ttl: 30 };
+  };
   const [a, b] = await Promise.all([cached("board:NCAAF", load), cached("board:NCAAF", load)]);
   assert.equal(reads, 1);
   assert.equal(a, b);
@@ -89,7 +124,12 @@ test("malformed and missing event lists are failures, while a published empty li
   }
   assert.deepEqual(scoreboardEvents({ events: [] }), []);
   const cached = createSportsFeedCache();
-  assert.deepEqual(await cached("new:league", async () => { throw new Error("offline"); }), []);
+  assert.deepEqual(
+    await cached("new:league", async () => {
+      throw new Error("offline");
+    }),
+    [],
+  );
 });
 
 test("saved games and reconnect snapshots cannot generate live or score alerts", () => {

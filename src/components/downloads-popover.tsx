@@ -159,7 +159,11 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
                 />
               </span>
               <span className="shrink-0 text-[10.5px] tabular-nums text-ink-subtle">
-                {d.status === "paused" ? t("Paused") : d.status === "queued" ? t("Queued") : `${pct}%${eta ? ` · ${eta}` : ""}`}
+                {d.status === "paused"
+                  ? t("Paused")
+                  : d.status === "queued"
+                    ? t("Queued")
+                    : `${pct}%${eta ? ` · ${eta}` : ""}`}
               </span>
             </span>
           ) : (

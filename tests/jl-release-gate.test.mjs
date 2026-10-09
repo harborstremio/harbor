@@ -9,21 +9,38 @@ import test from "node:test";
 import vm from "node:vm";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const workflow = readFileSync(new URL("../.github/workflows/jl-release.yml", import.meta.url), "utf8").replace(/\r\n/g, "\n");
+const workflow = readFileSync(
+  new URL("../.github/workflows/jl-release.yml", import.meta.url),
+  "utf8",
+).replace(/\r\n/g, "\n");
 const bash = process.platform === "win32" ? "C:/Program Files/Git/bin/bash.exe" : "bash";
 
-function jobEnabled(job, { event = "workflow_dispatch", ref = "refs/heads/claude/determined-planck-b1p158", publish = false, windowsOnly = false } = {}) {
+function jobEnabled(
+  job,
+  {
+    event = "workflow_dispatch",
+    ref = "refs/heads/claude/determined-planck-b1p158",
+    publish = false,
+    windowsOnly = false,
+  } = {},
+) {
   const section = workflow.split(`\n  ${job}:\n`)[1];
   const condition = section?.match(/^    if: (.+)$/m)?.[1];
   assert.ok(condition, `Missing condition for ${job}`);
-  return vm.runInNewContext(condition, { github: { event_name: event, ref }, inputs: { publish, windows_only: windowsOnly } });
+  return vm.runInNewContext(condition, {
+    github: { event_name: event, ref },
+    inputs: { publish, windows_only: windowsOnly },
+  });
 }
 
 test("Windows-only verification never builds Android or publishes, even if publish is selected", () => {
   for (const publish of [false, true]) {
     assert.equal(jobEnabled("android-tv", { publish, windowsOnly: true }), false);
     assert.equal(jobEnabled("publish", { publish, windowsOnly: true }), false);
-    assert.equal(jobEnabled("android-tv", { publish, ref: "refs/heads/codex/jl-release-026" }), false);
+    assert.equal(
+      jobEnabled("android-tv", { publish, ref: "refs/heads/codex/jl-release-026" }),
+      false,
+    );
     assert.equal(jobEnabled("publish", { publish, ref: "refs/heads/codex/jl-release-026" }), false);
   }
 });
@@ -38,8 +55,13 @@ test("normal dual-platform builds keep explicit publication opt-in", () => {
 function runStep(name, overrides = {}, cwd = root) {
   const section = workflow.split(`      - name: ${name}\n`)[1];
   assert.ok(section, `Missing workflow step: ${name}`);
-  const script = section.split("        run: |\n")[1].split(/\n      - /)[0]
-    .split("\n").filter((line) => line.startsWith("          ")).map((line) => line.slice(10)).join("\n")
+  const script = section
+    .split("        run: |\n")[1]
+    .split(/\n      - /)[0]
+    .split("\n")
+    .filter((line) => line.startsWith("          "))
+    .map((line) => line.slice(10))
+    .join("\n")
     .replaceAll("${{ github.repository }}", "example/repo")
     .replaceAll("${{ github.sha }}", "built-commit")
     .replaceAll("${{ needs.windows.outputs.tag }}", "jl-v0.9.26");
@@ -64,9 +86,14 @@ gh() {
 }
 `;
   return spawnSync(bash, ["--noprofile", "--norc", "-e", "-o", "pipefail", "-c", mock + script], {
-    cwd, encoding: "utf8", windowsHide: true,
+    cwd,
+    encoding: "utf8",
+    windowsHide: true,
     env: {
-      ...process.env, MOCK_DRAFT: "", MOCK_REF: "", MOCK_TARGET: "built-commit",
+      ...process.env,
+      MOCK_DRAFT: "",
+      MOCK_REF: "",
+      MOCK_TARGET: "built-commit",
       MOCK_TAG_COMMIT: "built-commit",
       MOCK_ASSETS: "JL-Media-Vision-Setup-x64.exe\nJL-Media-Vision-TV.apk\n",
       ...overrides,
@@ -86,7 +113,11 @@ test("an already published release cannot be overwritten", () => {
 });
 
 test("a tag for another commit cannot be reused", () => {
-  const result = runStep("Check release destination", { MOCK_DRAFT: "true", MOCK_REF: "refs/tags/jl-v0.9.26", MOCK_TAG_COMMIT: "old-commit" });
+  const result = runStep("Check release destination", {
+    MOCK_DRAFT: "true",
+    MOCK_REF: "refs/tags/jl-v0.9.26",
+    MOCK_TAG_COMMIT: "old-commit",
+  });
   assert.equal(result.status, 1);
   assert.match(result.stdout, /different commit/);
 });
@@ -98,7 +129,9 @@ test("both assets and the exact draft target permit publication before the tag e
 });
 
 test("missing APK keeps the release unpublished", () => {
-  const result = runStep("Verify assets and publish release", { MOCK_ASSETS: "JL-Media-Vision-Setup-x64.exe\n" });
+  const result = runStep("Verify assets and publish release", {
+    MOCK_ASSETS: "JL-Media-Vision-Setup-x64.exe\n",
+  });
   assert.equal(result.status, 1);
   assert.doesNotMatch(result.stdout, /PUBLISHED/);
 });
@@ -115,7 +148,10 @@ function retainedInstallers(t) {
   for (const file of ["JL-Media-Vision-Setup-x64.exe", "JL-Media-Vision-TV.apk"]) {
     const content = Buffer.from("offline fixture for " + file);
     writeFileSync(join(directory, file), content);
-    writeFileSync(join(directory, file + ".sha256"), createHash("sha256").update(content).digest("hex") + "  " + file + "\n");
+    writeFileSync(
+      join(directory, file + ".sha256"),
+      createHash("sha256").update(content).digest("hex") + "  " + file + "\n",
+    );
   }
   for (const platform of ["windows", "android-tv"]) {
     writeFileSync(join(directory, platform + "-build-commit.txt"), "built-commit\n");

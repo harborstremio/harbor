@@ -162,7 +162,8 @@ export function EditorView({
     const onBack = (e: KeyboardEvent) => {
       if (e.defaultPrevented || !isBackKey(e)) return;
       const target = e.target as HTMLElement | null;
-      if (!target?.closest('[data-profile-picker]') || target.closest('[data-search-editing]')) return;
+      if (!target?.closest("[data-profile-picker]") || target.closest("[data-search-editing]"))
+        return;
       e.preventDefault();
       e.stopPropagation();
       setSubView({ kind: subView.kind === "security" ? "main" : "security" });
@@ -172,7 +173,8 @@ export function EditorView({
   }, [subView.kind]);
 
   const trimmed = name.trim();
-  const canSave = trimmed.length > 0 && (!draftKid || !draftParentPin || draftParentPin.length === 4);
+  const canSave =
+    trimmed.length > 0 && (!draftKid || !draftParentPin || draftParentPin.length === 4);
   const isPrimary = editing?.isPrimary === true;
   const canShare = !isPrimary && !!primary && primary.id !== editing?.id;
   const locked = editing ? !!editing.passwordHash : draftPin != null;
@@ -500,7 +502,10 @@ export function EditorView({
   const showAdvanced = canEditAdvanced || mode.kind === "create";
 
   return (
-    <div data-profile-editor="" className="flex w-full max-w-[680px] flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div
+      data-profile-editor=""
+      className="flex w-full max-w-[680px] flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300"
+    >
       <div className="flex flex-col items-center gap-1">
         <h1 className="text-[28px] font-semibold leading-tight tracking-tight text-ink">
           {editing ? t("Edit {name}", { name: editing.name }) : t("profile.new")}
@@ -520,21 +525,26 @@ export function EditorView({
           <div className="hset-profile-editor-fields flex min-w-0 flex-1 flex-col gap-2.5">
             <label className="flex flex-col gap-2 text-[14px] text-ink-muted">
               {t("Display name")}
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key !== "Enter" || navOwnsFocus(e.currentTarget) || e.currentTarget.hasAttribute("data-search-editing")) return;
-                e.preventDefault();
-                e.stopPropagation();
-                void submit();
-              }}
-              aria-label={t("Display name")}
-              placeholder={t("Display name")}
-              maxLength={32}
-              className="h-12 rounded-xl border border-edge bg-canvas px-4 text-[15.5px] font-medium text-ink outline-none transition-colors focus:border-ink-subtle"
-            />
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (
+                    e.key !== "Enter" ||
+                    navOwnsFocus(e.currentTarget) ||
+                    e.currentTarget.hasAttribute("data-search-editing")
+                  )
+                    return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  void submit();
+                }}
+                aria-label={t("Display name")}
+                placeholder={t("Display name")}
+                maxLength={32}
+                className="h-12 rounded-xl border border-edge bg-canvas px-4 text-[15.5px] font-medium text-ink outline-none transition-colors focus:border-ink-subtle"
+              />
             </label>
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -1129,11 +1139,7 @@ function SecurityRow({
               : "bg-canvas/60 text-ink-muted ring-edge-soft"
           }`}
         >
-          {locked ? (
-            <Lock size={14} strokeWidth={2.4} />
-          ) : (
-            <Unlock size={14} strokeWidth={2.2} />
-          )}
+          {locked ? <Lock size={14} strokeWidth={2.4} /> : <Unlock size={14} strokeWidth={2.2} />}
         </span>
         <div className="flex flex-col gap-0.5">
           <span className="text-[16px] font-semibold text-ink">{t("Security")}</span>

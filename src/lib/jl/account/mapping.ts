@@ -36,7 +36,12 @@ function splitItemId(item: string): { league: string; id: string } | null {
 export function teamToRow(profileId: string, team: JlFavoriteTeam): MediaFavoriteRow | null {
   const item = itemId(team.league, team.id);
   if (!item) return null;
-  return { profile_id: profileId, kind: "team", item_id: item, meta: { name: (team.name || team.id).slice(0, NAME_MAX) } };
+  return {
+    profile_id: profileId,
+    kind: "team",
+    item_id: item,
+    meta: { name: (team.name || team.id).slice(0, NAME_MAX) },
+  };
 }
 
 export function playerToRow(profileId: string, player: JlFavoritePlayer): MediaFavoriteRow | null {
@@ -57,9 +62,19 @@ export function parseFavoriteRows(value: unknown): RemoteFavoriteRow[] {
   if (!Array.isArray(value)) throw new Error("Invalid JL favorites response");
   const seen = new Set<string>();
   return value.map((row: Partial<RemoteFavoriteRow>) => {
-    if (!row || (row.kind !== "team" && row.kind !== "player") || typeof row.item_id !== "string" ||
-        !splitItemId(row.item_id) || typeof row.meta?.name !== "string") throw new Error("Invalid JL favorite");
-    const result: RemoteFavoriteRow = { kind: row.kind, item_id: row.item_id, meta: { name: row.meta.name.slice(0, NAME_MAX) } };
+    if (
+      !row ||
+      (row.kind !== "team" && row.kind !== "player") ||
+      typeof row.item_id !== "string" ||
+      !splitItemId(row.item_id) ||
+      typeof row.meta?.name !== "string"
+    )
+      throw new Error("Invalid JL favorite");
+    const result: RemoteFavoriteRow = {
+      kind: row.kind,
+      item_id: row.item_id,
+      meta: { name: row.meta.name.slice(0, NAME_MAX) },
+    };
     if (seen.has(rowKey(result))) throw new Error("Duplicate JL favorite");
     seen.add(rowKey(result));
     return result;

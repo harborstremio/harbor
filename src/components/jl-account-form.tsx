@@ -12,16 +12,25 @@ const inputClass =
 /** Turns Supabase auth errors into something a customer can act on. */
 function friendly(err: unknown, mode: Mode): string {
   const msg = err instanceof Error ? err.message : String(err);
-  if (/not configured/i.test(msg)) return "JL accounts aren't set up in this build. Contact JL Media Vision support.";
+  if (/not configured/i.test(msg))
+    return "JL accounts aren't set up in this build. Contact JL Media Vision support.";
   if (/timed out/i.test(msg)) return "The account service took too long to respond. Try again.";
-  if (/could not be saved/i.test(msg)) return "Your account could not be saved on this device. Free some storage and try again.";
-  if (/account changed/i.test(msg)) return "Your sign-in changed while this request was running. Try again.";
-  if (/invalid login|invalid credentials/i.test(msg)) return "That email and password don't match an account.";
-  if (/email not confirmed/i.test(msg)) return "Confirm your email first. Check your inbox for the link we sent.";
-  if (/already registered|already exists/i.test(msg)) return "There's already an account with that email. Sign in instead.";
+  if (/could not be saved/i.test(msg))
+    return "Your account could not be saved on this device. Free some storage and try again.";
+  if (/account changed/i.test(msg))
+    return "Your sign-in changed while this request was running. Try again.";
+  if (/invalid login|invalid credentials/i.test(msg))
+    return "That email and password don't match an account.";
+  if (/email not confirmed/i.test(msg))
+    return "Confirm your email first. Check your inbox for the link we sent.";
+  if (/already registered|already exists/i.test(msg))
+    return "There's already an account with that email. Sign in instead.";
   if (/rate limit|too many/i.test(msg)) return "Too many tries. Wait a minute and try again.";
-  if (/password/i.test(msg) && mode === "create") return `Use a password of at least ${MIN_PASSWORD} characters.`;
-  return mode === "create" ? "Couldn't create the account. Check your internet and try again." : "Couldn't sign in. Check your internet and try again.";
+  if (/password/i.test(msg) && mode === "create")
+    return `Use a password of at least ${MIN_PASSWORD} characters.`;
+  return mode === "create"
+    ? "Couldn't create the account. Check your internet and try again."
+    : "Couldn't sign in. Check your internet and try again.";
 }
 
 /** Email and password sign-in or sign-up for a JL Media Vision account. */
@@ -34,7 +43,8 @@ export function JlAccountForm({ intro }: { intro?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const valid = /\S+@\S+\.\S+/.test(email.trim()) && password.length >= (mode === "create" ? MIN_PASSWORD : 1);
+  const valid =
+    /\S+@\S+\.\S+/.test(email.trim()) && password.length >= (mode === "create" ? MIN_PASSWORD : 1);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -48,7 +58,9 @@ export function JlAccountForm({ intro }: { intro?: string }) {
       } else {
         const session = await signUpJl(email, password);
         if (!session) {
-          setNotice("Check your email and tap the link to confirm your account, then sign in here.");
+          setNotice(
+            "Check your email and tap the link to confirm your account, then sign in here.",
+          );
           setMode("signin");
         }
       }
@@ -81,7 +93,10 @@ export function JlAccountForm({ intro }: { intro?: string }) {
   return (
     <form onSubmit={(e) => void submit(e)} className="flex flex-col gap-3">
       {intro && <p className="text-[14.5px] leading-relaxed text-ink-muted">{intro}</p>}
-      <div role="tablist" className="flex w-fit gap-1 rounded-full border border-edge-soft bg-canvas/50 p-1">
+      <div
+        role="tablist"
+        className="flex w-fit gap-1 rounded-full border border-edge-soft bg-canvas/50 p-1"
+      >
         {(["signin", "create"] as const).map((m) => (
           <button
             key={m}

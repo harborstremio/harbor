@@ -3,7 +3,6 @@ import { useT } from "@/lib/i18n";
 import { type Profile } from "@/lib/profiles";
 import type { User } from "@/lib/stremio";
 
-
 export function ProfileAvatar({
   profile,
   user,

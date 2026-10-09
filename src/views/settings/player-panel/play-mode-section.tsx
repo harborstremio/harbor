@@ -27,7 +27,11 @@ export function PlayModeChoice() {
       <div className="flex min-w-0 flex-col items-start gap-3">
         <div className="flex flex-col gap-1">
           <RowTitle>{t("When you press Play")}</RowTitle>
-          <RowDesc>{t("Instant starts the best-ranked stream straight away. Pick a source opens the stream list every time, so you choose the release, quality and provider yourself.")}</RowDesc>
+          <RowDesc>
+            {t(
+              "Instant starts the best-ranked stream straight away. Pick a source opens the stream list every time, so you choose the release, quality and provider yourself.",
+            )}
+          </RowDesc>
         </div>
         <Segmented<"instant" | "manual">
           value={settings.instantPlay ? "instant" : "manual"}
@@ -216,8 +220,6 @@ export function PlayModePanel() {
         />
         {!isAndroid() && <PlaybackCacheFolder />}
       </SettingGroup>
-
-
     </div>
   );
 }

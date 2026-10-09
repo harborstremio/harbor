@@ -31,7 +31,8 @@ function useJlAutoLink(): void {
   const session = useJlSession();
   const link = useJlLink();
   const { activeProfile } = useProfiles();
-  const name = activeProfile && !isPlaceholderName(activeProfile.name) ? activeProfile.name.trim() : "";
+  const name =
+    activeProfile && !isPlaceholderName(activeProfile.name) ? activeProfile.name.trim() : "";
   const avatar = activeProfile?.avatar ?? null;
   const userId = session?.userId ?? "";
   const linked = !!link;
@@ -44,12 +45,18 @@ function useJlAutoLink(): void {
       try {
         const context = jlProfileContext();
         if (context.account.userId !== userId || context.localId !== localId) return;
-        void autoLinkJlProfile(name, avatar, { ...context, signal: controller.signal }).catch(() => {
-          /* offline or stale selection: retry on reconnect/focus while this context is active */
-        });
-      } catch { /* Signed out before the effect cleaned up. */ }
+        void autoLinkJlProfile(name, avatar, { ...context, signal: controller.signal }).catch(
+          () => {
+            /* offline or stale selection: retry on reconnect/focus while this context is active */
+          },
+        );
+      } catch {
+        /* Signed out before the effect cleaned up. */
+      }
     };
-    const onVisible = () => { if (document.visibilityState === "visible") retry(); };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") retry();
+    };
     retry();
     window.addEventListener("online", retry);
     document.addEventListener("visibilitychange", onVisible);

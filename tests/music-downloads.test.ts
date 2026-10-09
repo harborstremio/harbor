@@ -28,7 +28,12 @@ function fixture() {
   ).outputText;
   const mocks: any = {
     react: { useSyncExternalStore: (_: unknown, snapshot: () => unknown) => snapshot() },
-    "@/lib/download/owner": { downloadOwner: () => owner, subscribeDownloadOwner: (listener: () => void) => { changed = listener; } },
+    "@/lib/download/owner": {
+      downloadOwner: () => owner,
+      subscribeDownloadOwner: (listener: () => void) => {
+        changed = listener;
+      },
+    },
     "@/lib/download/offline-policy": offlinePolicy,
     "./preferences": {
       readMusicPreference: (k: string) => storage.get(k) ?? null,
@@ -105,7 +110,10 @@ function fixture() {
     fail: () => fail(),
     cancelled: () => cancelled,
     stream: (s: string) => (stream = s),
-    switchOwner: (next: string) => { owner = next; changed(); },
+    switchOwner: (next: string) => {
+      owner = next;
+      changed();
+    },
     wait: async () => {
       for (let i = 0; i < 30 && !calls.some((c) => c.kind); i++)
         await new Promise((r) => setTimeout(r, 1));

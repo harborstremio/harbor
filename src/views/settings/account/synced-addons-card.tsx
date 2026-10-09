@@ -29,13 +29,22 @@ export function SyncedAddonsCard() {
     setLastSynced(null);
     if (!authKey) return;
     setBusy(true);
-    void import("@/lib/addons").then((mod) => mod.userAddons(authKey)).then((list) => {
-      if (cancelled) return;
-      setAddons(list);
-      setLastSynced(Date.now());
-    }).catch(() => { if (!cancelled) setAddons(null); })
-      .finally(() => { if (!cancelled) setBusy(false); });
-    return () => { cancelled = true; };
+    void import("@/lib/addons")
+      .then((mod) => mod.userAddons(authKey))
+      .then((list) => {
+        if (cancelled) return;
+        setAddons(list);
+        setLastSynced(Date.now());
+      })
+      .catch(() => {
+        if (!cancelled) setAddons(null);
+      })
+      .finally(() => {
+        if (!cancelled) setBusy(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [authKey, refresh]);
 
   if (!authKey) {
@@ -67,11 +76,17 @@ export function SyncedAddonsCard() {
           <span className="font-display text-[28px] font-medium leading-none tracking-tight text-ink">
             {count != null ? count : "…"}
           </span>
-          <span className={CAPTION}>{count === 1 ? t("addon installed") : t("addons installed")}</span>
+          <span className={CAPTION}>
+            {count === 1 ? t("addon installed") : t("addons installed")}
+          </span>
         </div>
         {addons && addons.length > 0 && <AddonStackPeek addons={addons} max={MAX_VISIBLE} />}
         <div aria-busy={busy} className="ms-auto flex shrink-0 flex-wrap items-center gap-2.5">
-          <SButton variant="primary" disabled={busy} onClick={() => setRefresh((value) => value + 1)}>
+          <SButton
+            variant="primary"
+            disabled={busy}
+            onClick={() => setRefresh((value) => value + 1)}
+          >
             {busy ? <Loader2 size={16} className="animate-spin" /> : null}
             {busy ? t("Checking") : t("Refresh addons")}
           </SButton>
@@ -154,9 +169,7 @@ function AddonList({ addons, onClose }: { addons: Addon[]; onClose: () => void }
       className="harbor-float flex flex-col overflow-hidden rounded-[10px] bg-raised"
     >
       <div className="flex items-center justify-between gap-3 ps-4 pe-2 pt-2">
-        <span className={CAPTION}>
-          {t("All addons ({n})", { n: addons.length })}
-        </span>
+        <span className={CAPTION}>{t("All addons ({n})", { n: addons.length })}</span>
         <button
           ref={closeRef}
           type="button"

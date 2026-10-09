@@ -17,7 +17,11 @@ export function isLiveChannel(ch: IptvChannel): boolean {
 export function classifyChannel(ch: IptvChannel): VodKind {
   // Query strings may carry signatures or nested URLs; they are not this file's path.
   let url = (ch.url || "").split(/[?#]/)[0];
-  try { url = new URL(ch.url).pathname; } catch { /* Local/relative playlist path. */ }
+  try {
+    url = new URL(ch.url).pathname;
+  } catch {
+    /* Local/relative playlist path. */
+  }
   const group = ch.group || "";
   const name = ch.name || "";
   const declared = (ch.attrs["tvg-type"] || ch.attrs["type"] || "").toLowerCase();

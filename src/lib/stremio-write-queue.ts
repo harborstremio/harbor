@@ -78,7 +78,9 @@ export async function flushWriteQueue(): Promise<void> {
   const scope = loadedScope;
   const pendingQueue = queue;
   if (pendingQueue.size === 0) return;
-  for (const [id, pending] of [...pendingQueue.entries()]) {
+  // Freeze this pass so writes queued during an await are handled by the next flush.
+  const pendingEntries = Array.from(pendingQueue.entries());
+  for (const [id, pending] of pendingEntries) {
     if (scope !== activeLocalLibraryScope()) break;
     try {
       let remote: LibraryItem | null;

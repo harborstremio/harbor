@@ -27,7 +27,9 @@ export function AccountDialog({ onClose }: { onClose: () => void }) {
   return (
     <JlDialog title={t("JL Media Vision account")} onClose={onClose}>
       {!jlAccountsConfigured() ? (
-        <p className="text-[13px] text-ink-muted">{t("JL accounts aren't set up in this build.")}</p>
+        <p className="text-[13px] text-ink-muted">
+          {t("JL accounts aren't set up in this build.")}
+        </p>
       ) : !session ? (
         <SignInForm />
       ) : !link ? (
@@ -41,7 +43,13 @@ export function AccountDialog({ onClose }: { onClose: () => void }) {
 
 function SignInForm() {
   const t = useT();
-  return <JlAccountForm intro={t("Sign in to keep your profiles, favorites, keys and TV logins the same on every device.")} />;
+  return (
+    <JlAccountForm
+      intro={t(
+        "Sign in to keep your profiles, favorites, keys and TV logins the same on every device.",
+      )}
+    />
+  );
 }
 
 function ProfilePicker() {
@@ -59,7 +67,10 @@ function ProfilePicker() {
         if (!cancelled) setProfiles(list);
       })
       .catch(() => {
-        if (!cancelled) setError(t("Couldn't reach your JL Media Vision account. Check your internet and try again."));
+        if (!cancelled)
+          setError(
+            t("Couldn't reach your JL Media Vision account. Check your internet and try again."),
+          );
       });
     return () => {
       cancelled = true;
@@ -89,8 +100,15 @@ function ProfilePicker() {
         <button
           key={p.id}
           onClick={() => {
-            try { linkJlProfile(p, refreshJlProfileContext(context)); }
-            catch (error) { setError(error instanceof Error ? error.message : t("Your account or profile changed. Reopen this dialog to choose again.")); }
+            try {
+              linkJlProfile(p, refreshJlProfileContext(context));
+            } catch (error) {
+              setError(
+                error instanceof Error
+                  ? error.message
+                  : t("Your account or profile changed. Reopen this dialog to choose again."),
+              );
+            }
           }}
           className="flex items-center gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-3.5 py-2.5 text-start text-[14px] text-ink hover:border-edge focus:border-ink-subtle focus:outline-none"
         >
@@ -117,7 +135,14 @@ function ProfilePicker() {
           </button>
         </div>
       )}
-      <button onClick={() => void signOutJl().catch(() => setError(t("Sign-out could not be saved. Free some storage and try again.")))} className="self-start text-[12.5px] text-ink-subtle hover:text-ink">
+      <button
+        onClick={() =>
+          void signOutJl().catch(() =>
+            setError(t("Sign-out could not be saved. Free some storage and try again.")),
+          )
+        }
+        className="self-start text-[12.5px] text-ink-subtle hover:text-ink"
+      >
         {t("Sign out")}
       </button>
     </div>
@@ -136,10 +161,27 @@ function Linked({ name, email }: { name: string; email: string | null }) {
         {t("Syncing with {profile}", { profile: name })}
       </p>
       {email && <p className="text-[12.5px] text-ink-subtle">{email}</p>}
-      <p role="status" className="text-[12.5px] text-ink-muted">{t(status.message)}</p>
-      {error && <p role="alert" className="text-[12.5px] text-danger">{error}</p>}
+      <p role="status" className="text-[12.5px] text-ink-muted">
+        {t(status.message)}
+      </p>
+      {error && (
+        <p role="alert" className="text-[12.5px] text-danger">
+          {error}
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
-        {status.message.includes("saved conflicts") && <button onClick={() => void saveJlSyncConflictBackup().catch(() => setError(t("The conflict backup could not be saved. Try again.")))} className="flex h-9 items-center rounded-lg border border-edge px-3 text-[12.5px] font-semibold text-ink">{t("Save conflict backup")}</button>}
+        {status.message.includes("saved conflicts") && (
+          <button
+            onClick={() =>
+              void saveJlSyncConflictBackup().catch(() =>
+                setError(t("The conflict backup could not be saved. Try again.")),
+              )
+            }
+            className="flex h-9 items-center rounded-lg border border-edge px-3 text-[12.5px] font-semibold text-ink"
+          >
+            {t("Save conflict backup")}
+          </button>
+        )}
         <button
           onClick={() => {
             setSyncing(true);
@@ -158,7 +200,9 @@ function Linked({ name, email }: { name: string; email: string | null }) {
         </button>
         <button
           onClick={() => {
-            void signOutJl().catch(() => setError(t("Sign-out could not be saved. Free some storage and try again.")));
+            void signOutJl().catch(() =>
+              setError(t("Sign-out could not be saved. Free some storage and try again.")),
+            );
           }}
           className="flex h-9 items-center rounded-lg border border-edge px-3 text-[12.5px] font-semibold text-ink-muted"
         >

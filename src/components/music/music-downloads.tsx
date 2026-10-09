@@ -20,7 +20,13 @@ import { playMusic, closeMusicPlayer, getMusicState } from "@/lib/music/player";
 import { useMusicPlaylistPicker } from "./music-playlist-picker";
 import { Poster } from "@/components/poster";
 import { MusicTrackPlaybackMark } from "./music-now-playing-mark";
-export function MusicDownloads({ query = "", allowPlaylist = true }: { query?: string; allowPlaylist?: boolean }) {
+export function MusicDownloads({
+  query = "",
+  allowPlaylist = true,
+}: {
+  query?: string;
+  allowPlaylist?: boolean;
+}) {
   const t = useT(),
     entries = useMusicDownloads(),
     { openPlaylistPicker } = useMusicPlaylistPicker();
@@ -116,7 +122,11 @@ export function MusicDownloads({ query = "", allowPlaylist = true }: { query?: s
             onClick={() => void run(entry.id, () => play(entry))}
             aria-label={`${t("music.play")} · ${entry.track.title}`}
           >
-            <Poster src={entry.track.artwork} seed={entry.id} ratio="square" className="size-12"><MusicTrackPlaybackMark track={{...entry.track,id:`download:${entry.id}`,connectorId:"local"}}/></Poster>
+            <Poster src={entry.track.artwork} seed={entry.id} ratio="square" className="size-12">
+              <MusicTrackPlaybackMark
+                track={{ ...entry.track, id: `download:${entry.id}`, connectorId: "local" }}
+              />
+            </Poster>
           </button>
           <div className="min-w-0 flex-1">
             <strong className="block truncate">{entry.track.title}</strong>
@@ -128,12 +138,15 @@ export function MusicDownloads({ query = "", allowPlaylist = true }: { query?: s
               {t(
                 entry.status === "done"
                   ? "music.download.done"
-                  : entry.status === "paused" ? "Paused"
-                  : entry.status === "queued" ? "Queued"
-                  : entry.status === "interrupted" ? "Interrupted. Retry to resume safely."
-                  : entry.status === "error"
-                    ? (entry.error ?? "music.download.failed")
-                    : "music.download.busy",
+                  : entry.status === "paused"
+                    ? "Paused"
+                    : entry.status === "queued"
+                      ? "Queued"
+                      : entry.status === "interrupted"
+                        ? "Interrupted. Retry to resume safely."
+                        : entry.status === "error"
+                          ? (entry.error ?? "music.download.failed")
+                          : "music.download.busy",
               )}
               {entry.status === "downloading"
                 ? ` ${Math.round(entry.progress * 100)}%`
@@ -152,17 +165,19 @@ export function MusicDownloads({ query = "", allowPlaylist = true }: { query?: s
               >
                 <Play size={17} />
               </button>
-              {allowPlaylist && <button
-                aria-label={t("music.card.addToPlaylist")}
-                title={t("music.card.addToPlaylist")}
-                onClick={() =>
-                  void run(entry.id, async () =>
-                    openPlaylistPicker(await downloadedMusicTrack(entry)),
-                  )
-                }
-              >
-                <Plus size={17} />
-              </button>}
+              {allowPlaylist && (
+                <button
+                  aria-label={t("music.card.addToPlaylist")}
+                  title={t("music.card.addToPlaylist")}
+                  onClick={() =>
+                    void run(entry.id, async () =>
+                      openPlaylistPicker(await downloadedMusicTrack(entry)),
+                    )
+                  }
+                >
+                  <Plus size={17} />
+                </button>
+              )}
               <button
                 aria-label={t("music.download.folder")}
                 title={t("music.download.folder")}
@@ -173,7 +188,13 @@ export function MusicDownloads({ query = "", allowPlaylist = true }: { query?: s
             </>
           )}
           {["downloading", "queued"].includes(entry.status) && (
-            <button aria-label={t("Pause download")} title={t("Pause download")} onClick={() => pauseMusicDownload(entry.id)}><Pause size={17} /></button>
+            <button
+              aria-label={t("Pause download")}
+              title={t("Pause download")}
+              onClick={() => pauseMusicDownload(entry.id)}
+            >
+              <Pause size={17} />
+            </button>
           )}
           {["error", "interrupted", "paused", "canceled"].includes(entry.status) && (
             <button

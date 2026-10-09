@@ -1,4 +1,11 @@
-export type OfflineStatus = "queued" | "downloading" | "paused" | "done" | "error" | "canceled" | "interrupted";
+export type OfflineStatus =
+  | "queued"
+  | "downloading"
+  | "paused"
+  | "done"
+  | "error"
+  | "canceled"
+  | "interrupted";
 
 export function recoveredDownloadStatus(status: OfflineStatus): OfflineStatus {
   // Relaunch must not silently contact a provider or consume data. Resume is
@@ -27,10 +34,11 @@ export function visibleDownloads<T extends { owner?: string }>(items: T[], owner
   return items.filter((item) => item.owner === owner);
 }
 
-export function nextQueuedDownload<T extends { owner?: string; status: OfflineStatus; startedAt: number }>(
-  items: T[], owner: string, active: number, limit = 2,
-): T | undefined {
+export function nextQueuedDownload<
+  T extends { owner?: string; status: OfflineStatus; startedAt: number },
+>(items: T[], owner: string, active: number, limit = 2): T | undefined {
   if (active >= limit) return undefined;
-  return visibleDownloads(items, owner).filter((item) => item.status === "queued")
+  return visibleDownloads(items, owner)
+    .filter((item) => item.status === "queued")
     .sort((a, b) => a.startedAt - b.startedAt)[0];
 }

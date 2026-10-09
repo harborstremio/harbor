@@ -3,7 +3,15 @@ import { useEffect, useState } from "react";
 import { AVATAR_CATALOG, avatarUrl } from "@/lib/avatars/catalog";
 import { useT } from "@/lib/i18n";
 import { useJlSession } from "@/lib/jl/account/client";
-import { jlProfileContext, refreshJlProfileContext, linkJlProfile, listJlProfiles, useJlLink, type JlProfile, type JlProfileContext } from "@/lib/jl/account/sync";
+import {
+  jlProfileContext,
+  refreshJlProfileContext,
+  linkJlProfile,
+  listJlProfiles,
+  useJlLink,
+  type JlProfile,
+  type JlProfileContext,
+} from "@/lib/jl/account/sync";
 import { isPlaceholderName, useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { useTogether } from "@/lib/together/provider";
@@ -23,9 +31,15 @@ export function ProfileStep() {
   const userId = session?.userId ?? "";
   const link = useJlLink();
   const localId = activeProfile?.id ?? "";
-  const [selection, setSelection] = useState<{ context: JlProfileContext; profiles: JlProfile[] } | null>(null);
+  const [selection, setSelection] = useState<{
+    context: JlProfileContext;
+    profiles: JlProfile[];
+  } | null>(null);
   const [selectionError, setSelectionError] = useState<string | null>(null);
-  const accountProfiles = selection?.context.account.userId === userId && selection.context.localId === localId ? selection.profiles : [];
+  const accountProfiles =
+    selection?.context.account.userId === userId && selection.context.localId === localId
+      ? selection.profiles
+      : [];
 
   useEffect(() => {
     if (!userId) return;
@@ -94,11 +108,18 @@ export function ProfileStep() {
                   onClick={() => pickAccountProfile(p)}
                   aria-pressed={on}
                   className={`flex h-11 items-center gap-2 rounded-full border px-3 pe-4 text-[14px] transition-colors ${
-                    on ? "border-accent bg-accent-soft text-ink" : "border-edge text-ink-muted hover:text-ink"
+                    on
+                      ? "border-accent bg-accent-soft text-ink"
+                      : "border-edge text-ink-muted hover:text-ink"
                   }`}
                 >
                   {p.avatar ? (
-                    <img src={p.avatar} alt="" draggable={false} className="h-7 w-7 rounded-full object-cover" />
+                    <img
+                      src={p.avatar}
+                      alt=""
+                      draggable={false}
+                      className="h-7 w-7 rounded-full object-cover"
+                    />
                   ) : (
                     <span className="flex h-7 w-7 items-center justify-center rounded-full bg-raised text-[12px] font-semibold">
                       {p.name.slice(0, 1).toUpperCase()}
@@ -111,7 +132,11 @@ export function ProfileStep() {
           </div>
         </div>
       )}
-      {selectionError && <p role="alert" className="text-[13px] text-danger">{t(selectionError)}</p>}
+      {selectionError && (
+        <p role="alert" className="text-[13px] text-danger">
+          {t(selectionError)}
+        </p>
+      )}
       <label className="flex flex-col gap-2">
         <span className="text-[13px] text-ink-muted">{t("Your name")}</span>
         <input

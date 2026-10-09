@@ -1,6 +1,5 @@
 import { ANIME_CLOUD_ID, library, libraryPut, type LibraryItem } from "@/lib/stremio";
 
-
 export type RepairProgress = {
   phase: "fetching" | "normalizing" | "pushing" | "done";
   fetched?: number;
@@ -42,8 +41,13 @@ function normalizeItem(raw: unknown): Record<string, unknown> | null {
   const r = raw as Record<string, unknown>;
   const id = asString(r._id);
   if (!id) return null;
-  const srcState = (r.state && typeof r.state === "object" ? r.state : {}) as Record<string, unknown>;
-  const srcHints = (r.behaviorHints && typeof r.behaviorHints === "object" ? r.behaviorHints : {}) as Record<string, unknown>;
+  const srcState = (r.state && typeof r.state === "object" ? r.state : {}) as Record<
+    string,
+    unknown
+  >;
+  const srcHints = (
+    r.behaviorHints && typeof r.behaviorHints === "object" ? r.behaviorHints : {}
+  ) as Record<string, unknown>;
   return {
     _id: id,
     name: asString(r.name) ?? "",
@@ -97,7 +101,8 @@ export async function repairStremioLibrary(
       continue;
     }
     const nid = String((normalized as { _id?: unknown })._id ?? "");
-    if (ANIME_CLOUD_ID.test(nid) && (normalized as { removed?: unknown }).removed !== true) continue;
+    if (ANIME_CLOUD_ID.test(nid) && (normalized as { removed?: unknown }).removed !== true)
+      continue;
     if (differs(raw, normalized)) toPush.push(normalized);
   }
   onProgress?.({ phase: "normalizing", total: items.length, needsRepair: toPush.length });

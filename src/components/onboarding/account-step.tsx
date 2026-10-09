@@ -28,15 +28,25 @@ export function AccountStep({ onSkip }: { onSkip: () => void }) {
             <span className="min-w-0 truncate">{session.email ?? t("Signed in")}</span>
           </p>
           <p className="text-[14px] leading-relaxed text-ink-muted">
-            {t("Choose your JL profile to sync supported preferences, favorites, library and progress. Device files and configured addon URLs stay on this device.")}
+            {t(
+              "Choose your JL profile to sync supported preferences, favorites, library and progress. Device files and configured addon URLs stay on this device.",
+            )}
           </p>
           <button
-            onClick={() => void signOutJl().catch(() => setError(t("Sign-out could not be saved. Free some storage and try again.")))}
+            onClick={() =>
+              void signOutJl().catch(() =>
+                setError(t("Sign-out could not be saved. Free some storage and try again.")),
+              )
+            }
             className="w-fit text-[13px] text-ink-subtle underline-offset-4 hover:text-ink hover:underline"
           >
             {t("Use a different account")}
           </button>
-          {error && <p role="alert" className="text-[13px] text-danger">{error}</p>}
+          {error && (
+            <p role="alert" className="text-[13px] text-danger">
+              {error}
+            </p>
+          )}
         </div>
       ) : (
         <>

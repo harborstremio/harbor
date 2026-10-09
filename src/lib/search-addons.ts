@@ -69,10 +69,13 @@ export async function searchAddonCatalogs(
       const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
       const url = `${base}/catalog/${encodeURIComponent(type)}/${encodeURIComponent(id)}/search=${encodeURIComponent(q)}.json`;
       // The fused movie/show lanes need the same bounded body read as addon rows.
-      const json = await withDeadline((async () => {
-        const res = await safeFetch(url, { headers: { Accept: "application/json" } });
-        return res.ok ? await res.json() as { metas?: Meta[] } : null;
-      })(), GROUP_TIMEOUT_MS);
+      const json = await withDeadline(
+        (async () => {
+          const res = await safeFetch(url, { headers: { Accept: "application/json" } });
+          return res.ok ? ((await res.json()) as { metas?: Meta[] }) : null;
+        })(),
+        GROUP_TIMEOUT_MS,
+      );
       return {
         type,
         collection,
@@ -96,7 +99,8 @@ export async function searchAddonCatalogs(
         addonOrigin: r.value.origin,
         ...(r.value.collection ? { isCollection: true } : null),
       };
-      if (r.value.type.toLowerCase() === "series" || m.type?.toLowerCase() === "series") series.push(tagged);
+      if (r.value.type.toLowerCase() === "series" || m.type?.toLowerCase() === "series")
+        series.push(tagged);
       else movies.push(tagged);
     }
   }
@@ -219,7 +223,10 @@ export async function searchAddonGroups(
   }
   const startedAt = Date.now();
   const remainingBudget = () => ALL_GROUPS_BUDGET_MS - (Date.now() - startedAt);
-  const groups = await mapLimit(entries, GROUP_CONCURRENCY, async ({ addon, targets }): Promise<AddonResultGroup> => {
+  const groups = await mapLimit(
+    entries,
+    GROUP_CONCURRENCY,
+    async ({ addon, targets }): Promise<AddonResultGroup> => {
       const origin = addonOrigin(addon);
       const base = origin.base;
       const settled = await Promise.allSettled(
@@ -280,6 +287,7 @@ export async function searchAddonGroups(
         metas,
       });
       return group;
-  });
+    },
+  );
   return groups.filter((g) => g.metas.length > 0);
 }

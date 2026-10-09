@@ -177,7 +177,10 @@ export function AddonDetail({
       await navigator.clipboard.writeText(text);
       setCopied(kind);
       setTimeout(() => setCopied(null), 1600);
-      showToast("ok", kind === "stremio" ? t("Addon install link copied") : t("Manifest URL copied"));
+      showToast(
+        "ok",
+        kind === "stremio" ? t("Addon install link copied") : t("Manifest URL copied"),
+      );
     } catch {
       showToast("error", t("Couldn't copy. Select the URL manually."));
     }

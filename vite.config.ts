@@ -88,7 +88,9 @@ export default defineConfig(({ mode }) => {
             rollupOptions: { input: { tv: "index-tv.html", main: "index.html" } },
           },
         }
-      : { build: { rollupOptions: { input: { main: "index.html", retro: "retro-player.html" } } } }),
+      : {
+          build: { rollupOptions: { input: { main: "index.html", retro: "retro-player.html" } } },
+        }),
     server: {
       host: devHost || "127.0.0.1",
       port: 1420,
@@ -120,8 +122,8 @@ export default defineConfig(({ mode }) => {
           "help.steampowered.com",
           "worldofwarcraft.blizzard.com",
           "api.warframe.com",
-  "www.youtube.com",
-  "www.pcgamingwiki.com",
+          "www.youtube.com",
+          "www.pcgamingwiki.com",
           "kick.com",
           "prosettings.net",
           "www.speedrun.com",
@@ -136,29 +138,52 @@ export default defineConfig(({ mode }) => {
           {
             target: `https://${host}`,
             changeOrigin: true,
-            ...(["www.youtube.com", "kick.com", "prosettings.net"].includes(host) ? {
-              configure(proxy: HttpProxy.ProxyServer) {
-                proxy.on("proxyReq", (request) => {
-                  // Public guide fetches are server-to-server, like native Harbor.
-                  // Local webview fetch metadata describes our proxy, not the source.
-                  for (const name of ["origin", "referer", "sec-fetch-site", "sec-fetch-mode", "sec-fetch-dest"]) request.removeHeader(name);
-                });
-              },
-            } : {}),
-            ...(host === "steamcommunity.com" ? {
-              configure(proxy: HttpProxy.ProxyServer) {
-                proxy.on("proxyRes", (response, request) => {
-                  // Keep canonical achievement redirects (440 → TF2) inside the dev proxy.
-                  if (!/^\/stats\/[^/]+\/achievements\/?(?:\?|$)/.test(request.url ?? "") || !response.headers.location) return;
-                  try {
-                    const destination = new URL(response.headers.location, "https://steamcommunity.com");
-                    if (destination.origin === "https://steamcommunity.com" && /^\/stats\/[^/]+\/achievements\/?$/.test(destination.pathname)) {
-                      response.headers.location = `/api-proxy/steamcommunity.com${destination.pathname}${destination.search}`;
-                    }
-                  } catch { /* Leave malformed or unrelated upstream redirects unchanged. */ }
-                });
-              },
-            } : {}),
+            ...(["www.youtube.com", "kick.com", "prosettings.net"].includes(host)
+              ? {
+                  configure(proxy: HttpProxy.ProxyServer) {
+                    proxy.on("proxyReq", (request) => {
+                      // Public guide fetches are server-to-server, like native Harbor.
+                      // Local webview fetch metadata describes our proxy, not the source.
+                      for (const name of [
+                        "origin",
+                        "referer",
+                        "sec-fetch-site",
+                        "sec-fetch-mode",
+                        "sec-fetch-dest",
+                      ])
+                        request.removeHeader(name);
+                    });
+                  },
+                }
+              : {}),
+            ...(host === "steamcommunity.com"
+              ? {
+                  configure(proxy: HttpProxy.ProxyServer) {
+                    proxy.on("proxyRes", (response, request) => {
+                      // Keep canonical achievement redirects (440 → TF2) inside the dev proxy.
+                      if (
+                        !/^\/stats\/[^/]+\/achievements\/?(?:\?|$)/.test(request.url ?? "") ||
+                        !response.headers.location
+                      )
+                        return;
+                      try {
+                        const destination = new URL(
+                          response.headers.location,
+                          "https://steamcommunity.com",
+                        );
+                        if (
+                          destination.origin === "https://steamcommunity.com" &&
+                          /^\/stats\/[^/]+\/achievements\/?$/.test(destination.pathname)
+                        ) {
+                          response.headers.location = `/api-proxy/steamcommunity.com${destination.pathname}${destination.search}`;
+                        }
+                      } catch {
+                        /* Leave malformed or unrelated upstream redirects unchanged. */
+                      }
+                    });
+                  },
+                }
+              : {}),
             rewrite: (path: string) => path.replace(`/api-proxy/${host}`, ""),
           },
         ]),

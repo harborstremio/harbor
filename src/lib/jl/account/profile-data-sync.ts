@@ -4,15 +4,28 @@ import { applyProfileData, readProfileData, validateProfileData } from "./profil
 import { readSettingsFor, writeSettingsFor } from "@/lib/layout-sync/store";
 import type { Settings } from "@/lib/settings";
 import { createProfileDocumentRemote } from "./profile-data-remote";
-import { readJlProfileMetadata, writeJlProfileMetadata, type JlProfileMetadata } from "./profile-metadata";
+import {
+  readJlProfileMetadata,
+  writeJlProfileMetadata,
+  type JlProfileMetadata,
+} from "./profile-metadata";
 
 /** Uses the existing media.profiles.settings column. Conditional PATCH makes each revision atomic. */
-export async function syncJlProfileData(scope: { account: JlAccountContext; localId: string; profileId: string; assertCurrent: () => void }): Promise<number> {
+export async function syncJlProfileData(scope: {
+  account: JlAccountContext;
+  localId: string;
+  profileId: string;
+  assertCurrent: () => void;
+}): Promise<number> {
   const key = `jl.account.data.base.v1.${scope.account.userId}.${scope.localId}.${scope.profileId}`;
-  const remote = createProfileDocumentRemote((path, init) => {
-    scope.assertCurrent();
-    return jlRest(path, init, scope.account);
-  }, scope.profileId, scope.account.userId);
+  const remote = createProfileDocumentRemote(
+    (path, init) => {
+      scope.assertCurrent();
+      return jlRest(path, init, scope.account);
+    },
+    scope.profileId,
+    scope.account.userId,
+  );
   const settings = () => {
     const value = readSettingsFor(scope.localId);
     if (!value) throw new Error("JL settings are not ready");
@@ -20,7 +33,13 @@ export async function syncJlProfileData(scope: { account: JlAccountContext; loca
   };
   await syncProfileDocument({
     assertCurrent: scope.assertCurrent,
-    readLocal: () => readProfileData(localStorage, scope.localId, settings(), readJlProfileMetadata(scope.localId)),
+    readLocal: () =>
+      readProfileData(
+        localStorage,
+        scope.localId,
+        settings(),
+        readJlProfileMetadata(scope.localId),
+      ),
     readBase: () => {
       const raw = localStorage.getItem(key);
       return raw ? validateProfileData(JSON.parse(raw)) : null;
@@ -33,15 +52,30 @@ export async function syncJlProfileData(scope: { account: JlAccountContext; loca
     },
     apply: (values, expected) => {
       const metadata = readJlProfileMetadata(scope.localId);
-      const patch = applyProfileData(localStorage, scope.localId, values, expected, settings(), metadata);
-      if (!writeSettingsFor(scope.localId, patch as Partial<Settings>)) throw new Error("JL settings could not be applied");
+      const patch = applyProfileData(
+        localStorage,
+        scope.localId,
+        values,
+        expected,
+        settings(),
+        metadata,
+      );
+      if (!writeSettingsFor(scope.localId, patch as Partial<Settings>))
+        throw new Error("JL settings could not be applied");
       const metaPatch: Partial<JlProfileMetadata> = {};
       for (const field of ["name", "color"] as const) {
         const value = values[`profile:${field}`];
-        if (typeof value === "string" && sameValue(metadata[field], expected[`profile:${field}`]) && value !== metadata[field]) metaPatch[field] = value;
+        if (
+          typeof value === "string" &&
+          sameValue(metadata[field], expected[`profile:${field}`]) &&
+          value !== metadata[field]
+        )
+          metaPatch[field] = value;
       }
       if (Object.keys(metaPatch).length) writeJlProfileMetadata(scope.localId, metaPatch);
-      window.dispatchEvent(new CustomEvent("jl:profile-data-applied", { detail: { profileId: scope.localId } }));
+      window.dispatchEvent(
+        new CustomEvent("jl:profile-data-applied", { detail: { profileId: scope.localId } }),
+      );
     },
     pull: remote.pull,
     compareAndSwap: remote.compareAndSwap,

@@ -128,10 +128,7 @@ export function SetupUnreachable({
 export function SetupExpired({ chrome, onExit }: { chrome: SetupChrome; onExit: () => void }) {
   const t = useT();
   return (
-    <SetupShell
-      {...chrome}
-      action={<SetupButton onClick={onExit}>{t("Leave setup")}</SetupButton>}
-    >
+    <SetupShell {...chrome} action={<SetupButton onClick={onExit}>{t("Leave setup")}</SetupButton>}>
       <div className="setup-rise flex flex-col items-start gap-5 pt-6">
         <StateIcon tone="bad">
           <TimerOff size={28} />

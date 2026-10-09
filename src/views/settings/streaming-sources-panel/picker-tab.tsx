@@ -64,7 +64,9 @@ export function PickerTab() {
         />
         <ToggleRow
           label={t("Show full descriptions")}
-          sub={t("Show complete addon descriptions in the addon list picker, downloads, and Big Picture.")}
+          sub={t(
+            "Show complete addon descriptions in the addon list picker, downloads, and Big Picture.",
+          )}
           value={settings.fullStreamDescription}
           onChange={(v) => update({ fullStreamDescription: v })}
         />
@@ -101,7 +103,8 @@ function PickerLayoutPicker({
               if (event.currentTarget.hasAttribute("data-tv-focused")) tvHover(null);
             }}
             onKeyDown={(event) => {
-              if (event.nativeEvent.isTrusted && event.key.startsWith("Arrow")) event.stopPropagation();
+              if (event.nativeEvent.isTrusted && event.key.startsWith("Arrow"))
+                event.stopPropagation();
             }}
             aria-labelledby={name + option.id}
           />

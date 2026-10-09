@@ -224,17 +224,11 @@ export function AddonsView({ active = true }: { active?: boolean }) {
         }),
       );
       refetch();
-      showToast(
-        "ok",
-        result.replaced
-          ? t("Updated")
-          : t("Installed locally"),
-        {
-          id: result.addon.manifest.id,
-          name: result.addon.manifest.name,
-          logo: result.addon.manifest.logo ?? null,
-        },
-      );
+      showToast("ok", result.replaced ? t("Updated") : t("Installed locally"), {
+        id: result.addon.manifest.id,
+        name: result.addon.manifest.name,
+        logo: result.addon.manifest.logo ?? null,
+      });
       return result.addon.manifest.id;
     } catch (e) {
       const msg = e instanceof Error ? e.message : t("Install failed.");
@@ -533,17 +527,11 @@ export function AddonsView({ active = true }: { active?: boolean }) {
             try {
               const result = await installFromUrl(rawUrl, opts);
               refetch();
-              showToast(
-                "ok",
-                result.replaced
-                  ? t("Updated")
-                  : t("Installed locally"),
-                {
-                  id: result.addon.manifest.id,
-                  name: result.addon.manifest.name,
-                  logo: result.addon.manifest.logo ?? null,
-                },
-              );
+              showToast("ok", result.replaced ? t("Updated") : t("Installed locally"), {
+                id: result.addon.manifest.id,
+                name: result.addon.manifest.name,
+                logo: result.addon.manifest.logo ?? null,
+              });
               return { replaced: result.replaced, addon: result.addon };
             } catch (e) {
               const msg = e instanceof Error ? e.message : t("Install failed.");
@@ -614,9 +602,9 @@ function RemoteOrLocalDetail({
       if (carried) {
         const manifest =
           (carried.manifest as ResolvedAddon["manifest"] | null) ??
-          ((await fetchManifestAt(carried.manifestUrl).catch(
-            () => null,
-          )) as ResolvedAddon["manifest"] | null);
+          ((await fetchManifestAt(carried.manifestUrl).catch(() => null)) as
+            | ResolvedAddon["manifest"]
+            | null);
         if (cancelled) return;
         if (manifest) {
           setRemote({

@@ -2,8 +2,19 @@ import { useMemo, useState } from "react";
 import { Download as DownloadIcon } from "lucide-react";
 import { Poster, usePosterChain } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
-import { useDownloads, claimLegacyDownloads, unclaimedDownloadCount, downloadPersistenceError, verifyDownloadFiles, type DownloadItem } from "@/lib/download/downloads-store";
-import { claimLegacyMusicDownloads, unclaimedMusicDownloadCount, useMusicDownloads } from "@/lib/music/downloads";
+import {
+  useDownloads,
+  claimLegacyDownloads,
+  unclaimedDownloadCount,
+  downloadPersistenceError,
+  verifyDownloadFiles,
+  type DownloadItem,
+} from "@/lib/download/downloads-store";
+import {
+  claimLegacyMusicDownloads,
+  unclaimedMusicDownloadCount,
+  useMusicDownloads,
+} from "@/lib/music/downloads";
 import { MusicDownloads } from "@/components/music/music-downloads";
 import { downloadOwner } from "@/lib/download/owner";
 import { useT } from "@/lib/i18n";
@@ -20,7 +31,13 @@ type DownloadGroup =
 type Filter = "all" | "active" | "saved" | "issues";
 
 function statusRank(s: DownloadItem["status"]): number {
-  return ["downloading", "paused", "queued"].includes(s) ? 0 : s === "error" ? 1 : s === "done" ? 2 : 3;
+  return ["downloading", "paused", "queued"].includes(s)
+    ? 0
+    : s === "error"
+      ? 1
+      : s === "done"
+        ? 2
+        : 3;
 }
 
 function matchesFilter(d: DownloadItem, f: Filter): boolean {
@@ -64,7 +81,9 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
   const t = useT();
   const items = useDownloads();
   const music = useMusicDownloads();
-  const [room, setRoom] = useState<"video" | "music">(() => items.length === 0 && music.length > 0 ? "music" : "video");
+  const [room, setRoom] = useState<"video" | "music">(() =>
+    items.length === 0 && music.length > 0 ? "music" : "video",
+  );
   const [checking, setChecking] = useState(false);
   const legacy = unclaimedDownloadCount() + unclaimedMusicDownloadCount();
   const isLocal = JSON.parse(downloadOwner())[0] === "local";
@@ -115,7 +134,9 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
       <div className="mx-auto w-full max-w-4xl">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
           <div className="min-w-0">
-            <h1 className="text-[28px] font-semibold tracking-tight text-ink">{t("Offline Room")}</h1>
+            <h1 className="text-[28px] font-semibold tracking-tight text-ink">
+              {t("Offline Room")}
+            </h1>
             <p className="mt-1.5 text-[13.5px] tabular-nums text-ink-subtle">{subtitle}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -125,73 +146,117 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
           </div>
         </header>
 
-        <p className="mb-4 text-sm text-ink-muted">{t("Saved files belong to this account and profile on this device. Only completed files play offline. Direct, unencrypted files are supported; streaming playlists and protected sources are not.")}</p>
-        {downloadPersistenceError() && <p role="alert" className="mb-4 text-sm text-danger">{t(downloadPersistenceError()!)}</p>}
-        {legacy > 0 && isLocal && <div className="mb-4 rounded-xl border border-edge-soft p-4 text-sm text-ink-muted">
-          <p>{t("Older downloads have no profile owner. Add them to this local profile only if they are yours.")}</p>
-          <button className="mt-2 font-semibold text-accent" onClick={() => { claimLegacyDownloads(); claimLegacyMusicDownloads(); }}>{t("Add older downloads to this local profile")} ({legacy})</button>
-        </div>}
+        <p className="mb-4 text-sm text-ink-muted">
+          {t(
+            "Saved files belong to this account and profile on this device. Only completed files play offline. Direct, unencrypted files are supported; streaming playlists and protected sources are not.",
+          )}
+        </p>
+        {downloadPersistenceError() && (
+          <p role="alert" className="mb-4 text-sm text-danger">
+            {t(downloadPersistenceError()!)}
+          </p>
+        )}
+        {legacy > 0 && isLocal && (
+          <div className="mb-4 rounded-xl border border-edge-soft p-4 text-sm text-ink-muted">
+            <p>
+              {t(
+                "Older downloads have no profile owner. Add them to this local profile only if they are yours.",
+              )}
+            </p>
+            <button
+              className="mt-2 font-semibold text-accent"
+              onClick={() => {
+                claimLegacyDownloads();
+                claimLegacyMusicDownloads();
+              }}
+            >
+              {t("Add older downloads to this local profile")} ({legacy})
+            </button>
+          </div>
+        )}
         <div className="mb-5 flex flex-wrap items-center gap-2">
-          <FilterTab label={t("Movies, episodes and books")} count={items.length} active={room === "video"} onClick={() => setRoom("video")} />
-          <FilterTab label={t("Music")} count={music.length} active={room === "music"} onClick={() => setRoom("music")} />
-          {room === "video" && <button disabled={checking} className="px-3 text-sm text-accent disabled:opacity-50" onClick={() => {
-            setChecking(true); void verifyDownloadFiles().finally(() => setChecking(false));
-          }}>{t(checking ? "Checking saved files…" : "Check and recover saved files")}</button>}
+          <FilterTab
+            label={t("Movies, episodes and books")}
+            count={items.length}
+            active={room === "video"}
+            onClick={() => setRoom("video")}
+          />
+          <FilterTab
+            label={t("Music")}
+            count={music.length}
+            active={room === "music"}
+            onClick={() => setRoom("music")}
+          />
+          {room === "video" && (
+            <button
+              disabled={checking}
+              className="px-3 text-sm text-accent disabled:opacity-50"
+              onClick={() => {
+                setChecking(true);
+                void verifyDownloadFiles().finally(() => setChecking(false));
+              }}
+            >
+              {t(checking ? "Checking saved files…" : "Check and recover saved files")}
+            </button>
+          )}
         </div>
 
-        {room === "music" ? <MusicDownloads allowPlaylist={false} /> : <>
-
-        {items.length > 0 && (
-          <div className="mb-5 flex flex-wrap items-center gap-1.5">
-            <FilterTab
-              label={t("All")}
-              count={counts.all}
-              active={effective === "all"}
-              onClick={() => setFilter("all")}
-            />
-            {counts.active > 0 && (
-              <FilterTab
-                label={t("Active")}
-                count={counts.active}
-                active={effective === "active"}
-                onClick={() => setFilter("active")}
-              />
-            )}
-            {counts.saved > 0 && (
-              <FilterTab
-                label={t("Saved")}
-                count={counts.saved}
-                active={effective === "saved"}
-                onClick={() => setFilter("saved")}
-              />
-            )}
-            {counts.issues > 0 && (
-              <FilterTab
-                label={t("Issues")}
-                count={counts.issues}
-                active={effective === "issues"}
-                onClick={() => setFilter("issues")}
-              />
-            )}
-          </div>
-        )}
-
-        {items.length === 0 ? (
-          <EmptyState />
+        {room === "music" ? (
+          <MusicDownloads allowPlaylist={false} />
         ) : (
-          <div key={effective} className="animate-fade-in flex flex-col gap-2.5">
-            {groups.map((g) =>
-              g.kind === "movie" ? (
-                <ul key={g.item.id} className="contents">
-                  <DownloadRow d={g.item} />
-                </ul>
-              ) : (
-                <ShowGroup key={g.metaId} group={g} />
-              ),
+          <>
+            {items.length > 0 && (
+              <div className="mb-5 flex flex-wrap items-center gap-1.5">
+                <FilterTab
+                  label={t("All")}
+                  count={counts.all}
+                  active={effective === "all"}
+                  onClick={() => setFilter("all")}
+                />
+                {counts.active > 0 && (
+                  <FilterTab
+                    label={t("Active")}
+                    count={counts.active}
+                    active={effective === "active"}
+                    onClick={() => setFilter("active")}
+                  />
+                )}
+                {counts.saved > 0 && (
+                  <FilterTab
+                    label={t("Saved")}
+                    count={counts.saved}
+                    active={effective === "saved"}
+                    onClick={() => setFilter("saved")}
+                  />
+                )}
+                {counts.issues > 0 && (
+                  <FilterTab
+                    label={t("Issues")}
+                    count={counts.issues}
+                    active={effective === "issues"}
+                    onClick={() => setFilter("issues")}
+                  />
+                )}
+              </div>
             )}
-          </div>
+
+            {items.length === 0 ? (
+              <EmptyState />
+            ) : (
+              <div key={effective} className="animate-fade-in flex flex-col gap-2.5">
+                {groups.map((g) =>
+                  g.kind === "movie" ? (
+                    <ul key={g.item.id} className="contents">
+                      <DownloadRow d={g.item} />
+                    </ul>
+                  ) : (
+                    <ShowGroup key={g.metaId} group={g} />
+                  ),
+                )}
+              </div>
+            )}
+          </>
         )}
-        </>}
       </div>
     </main>
   );

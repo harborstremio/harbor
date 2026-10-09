@@ -29,8 +29,12 @@ export function EditLayoutCard({
       wide
       icon={<LayoutTemplate size={18} strokeWidth={1.9} />}
       label={t("Edit player layout")}
-      desc={t("A live preview of your player. Open the editor to move, hide, or reorder any control.")}
-      tip={t("The editor is a working copy of the player. Click any control on it to move, resize, restyle or hide that control.")}
+      desc={t(
+        "A live preview of your player. Open the editor to move, hide, or reorder any control.",
+      )}
+      tip={t(
+        "The editor is a working copy of the player. Click any control on it to move, resize, restyle or hide that control.",
+      )}
     >
       <div className="flex w-full flex-col gap-3">
         <div className="relative h-[188px] w-full overflow-hidden rounded-md bg-canvas">
@@ -44,8 +48,10 @@ export function EditLayoutCard({
               </>
             ) : null}
             {visibleCount} {t("visible")}
-            {hiddenCount > 0 ? t(", {hiddenCount} hidden", { hiddenCount: String(hiddenCount) }) : ""} ·{" "}
-            {t("{themeName} theme", { themeName: themeName })}
+            {hiddenCount > 0
+              ? t(", {hiddenCount} hidden", { hiddenCount: String(hiddenCount) })
+              : ""}{" "}
+            · {t("{themeName} theme", { themeName: themeName })}
           </span>
           <SButton variant="primary" onClick={onOpen}>
             <Pencil size={16} strokeWidth={2.4} />
@@ -63,10 +69,10 @@ export function ThemeTabs({ value, onChange }: { value: ThemeId; onChange: (v: T
     <SettingRow
       icon={<LayoutGrid size={18} strokeWidth={1.9} />}
       label={t("Player style")}
-      desc={
-        value === "stremio" ? t("Classic button order.") : t("Harbor's native player chrome.")
-      }
-      tip={t("Each style keeps its own arrangement, icons and profiles, so switching back and forth never loses work.")}
+      desc={value === "stremio" ? t("Classic button order.") : t("Harbor's native player chrome.")}
+      tip={t(
+        "Each style keeps its own arrangement, icons and profiles, so switching back and forth never loses work.",
+      )}
     >
       <Segmented
         value={value}

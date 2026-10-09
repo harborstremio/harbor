@@ -25,31 +25,65 @@ export function AccountStub() {
     { id: "harbor", label: t("Community account") },
   ];
   useSubTabs(tabs, tab, (id) => setTab(id as Tab));
-  return <div key={tab} className="harbor-cascade flex flex-col gap-10">
-    {tab === "you" && <IdentityTab />}
-    {tab === "profiles" && <ProfilesTab />}
-    {tab === "harbor" && <HarborAccountPanel />}
-    {tab === "stremio" && <JlAccountTab />}
-  </div>;
+  return (
+    <div key={tab} className="harbor-cascade flex flex-col gap-10">
+      {tab === "you" && <IdentityTab />}
+      {tab === "profiles" && <ProfilesTab />}
+      {tab === "harbor" && <HarborAccountPanel />}
+      {tab === "stremio" && <JlAccountTab />}
+    </div>
+  );
 }
 function ProfilesTab() {
   const t = useT();
-  return <Section title={t("Profiles")} subtitle={t("Each JL profile keeps its own settings, library, and PIN.")}>
-    <SettingGroup label={t("Profiles on this device")}><ProfilesStrip /></SettingGroup>
-    <StartupDefaults /><SettingsScopeCard />
-  </Section>;
+  return (
+    <Section
+      title={t("Profiles")}
+      subtitle={t("Each JL profile keeps its own settings, library, and PIN.")}
+    >
+      <SettingGroup label={t("Profiles on this device")}>
+        <ProfilesStrip />
+      </SettingGroup>
+      <StartupDefaults />
+      <SettingsScopeCard />
+    </Section>
+  );
 }
 function JlAccountTab() {
   const t = useT();
   const { settings, update } = useSettings();
-  return <>
-    <Section title={t("JL Media Vision account")} subtitle={t("Your local library remains available without an account.")}><StremioCard /></Section>
-    <Section title={t("Installed addons")} subtitle={t("Your addon configurations are kept on this device. Manage each installation in Addons.")}><SyncedAddonsCard /></Section>
-    <Section title={t("Addon install links")} subtitle={t("JL Media Vision supports compatible manifests and stremio:// install links without an external account.")}>
-      <ToggleRow label={t("Open compatible addon links in JL Media Vision")}
-        sub={t("Choose JL Media Vision when your operating system asks which app should open an addon link. You can also paste a manifest URL in Addons.")}
-        leading={<Link2 size={18} />} value={settings.stremioDeeplinkInstall}
-        onChange={(stremioDeeplinkInstall) => update({ stremioDeeplinkInstall })} />
-    </Section>
-  </>;
+  return (
+    <>
+      <Section
+        title={t("JL Media Vision account")}
+        subtitle={t("Your local library remains available without an account.")}
+      >
+        <StremioCard />
+      </Section>
+      <Section
+        title={t("Installed addons")}
+        subtitle={t(
+          "Your addon configurations are kept on this device. Manage each installation in Addons.",
+        )}
+      >
+        <SyncedAddonsCard />
+      </Section>
+      <Section
+        title={t("Addon install links")}
+        subtitle={t(
+          "JL Media Vision supports compatible manifests and stremio:// install links without an external account.",
+        )}
+      >
+        <ToggleRow
+          label={t("Open compatible addon links in JL Media Vision")}
+          sub={t(
+            "Choose JL Media Vision when your operating system asks which app should open an addon link. You can also paste a manifest URL in Addons.",
+          )}
+          leading={<Link2 size={18} />}
+          value={settings.stremioDeeplinkInstall}
+          onChange={(stremioDeeplinkInstall) => update({ stremioDeeplinkInstall })}
+        />
+      </Section>
+    </>
+  );
 }

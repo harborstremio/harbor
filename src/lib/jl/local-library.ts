@@ -10,7 +10,8 @@ export function localLibraryScope(profileId: string): string {
 }
 
 export function profileFromLocalScope(scope: string): string {
-  if (!scope.startsWith(SCOPE_PREFIX)) throw new Error("Choose a JL profile to access its library.");
+  if (!scope.startsWith(SCOPE_PREFIX))
+    throw new Error("Choose a JL profile to access its library.");
   const id = decodeURIComponent(scope.slice(SCOPE_PREFIX.length));
   if (!id) throw new Error("No JL profile selected.");
   return id;
@@ -22,7 +23,9 @@ export function activeLocalLibraryScope(): string {
     const raw = localStorage.getItem("harbor.profiles.v1");
     const state = raw ? JSON.parse(raw) : null;
     if (typeof state?.activeId === "string" && state.activeId) id = state.activeId;
-  } catch { /* The local default remains usable before onboarding. */ }
+  } catch {
+    /* The local default remains usable before onboarding. */
+  }
   return localLibraryScope(id);
 }
 
@@ -32,8 +35,10 @@ export function readJlLibrary(scope: string): LibraryItem[] {
   if (!raw) return [];
   const items: unknown = JSON.parse(raw);
   if (!Array.isArray(items)) throw new Error("The local library needs recovery from a backup.");
-  return items.filter((item): item is LibraryItem =>
-    !!item && typeof item === "object" && typeof item._id === "string");
+  return items.filter(
+    (item): item is LibraryItem =>
+      !!item && typeof item === "object" && typeof item._id === "string",
+  );
 }
 
 export function putJlLibraryItem(scope: string, item: LibraryItem): void {

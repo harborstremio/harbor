@@ -9,7 +9,14 @@ import { buildDefaultFilename, sanitizeName } from "./filename";
 import { startDownload, type DownloadHandle } from "./video-download";
 import { isWindowsDesktop } from "@/lib/platform";
 import { downloadOwner, subscribeDownloadOwner } from "./owner";
-import { canRetryDownload, directDownloadError, nextQueuedDownload, recoveredDownloadStatus, visibleDownloads, type OfflineStatus } from "./offline-policy";
+import {
+  canRetryDownload,
+  directDownloadError,
+  nextQueuedDownload,
+  recoveredDownloadStatus,
+  visibleDownloads,
+  type OfflineStatus,
+} from "./offline-policy";
 import {
   localEngineStreamRef,
   pauseTorrentUsage,
@@ -108,7 +115,8 @@ function persist() {
     localStorage.setItem(PERSIST_KEY, JSON.stringify(durable));
     persistenceError = null;
   } catch {
-    persistenceError = "Download history could not be saved. Keep the app open until storage is available.";
+    persistenceError =
+      "Download history could not be saved. Keep the app open until storage is available.";
   }
 }
 
@@ -129,7 +137,9 @@ function hydrate() {
       const status = recoveredDownloadStatus(d.status);
       items.set(d.id, { ...d, status, bytesPerSec: 0 });
     }
-    snapshot = visibleDownloads([...items.values()], owner).sort((a, b) => b.startedAt - a.startedAt);
+    snapshot = visibleDownloads([...items.values()], owner).sort(
+      (a, b) => b.startedAt - a.startedAt,
+    );
   } catch {
     /* ignore */
   }
@@ -154,7 +164,9 @@ subscribeDownloadOwner(() => {
   rebuild();
 });
 
-export function downloadPersistenceError(): string | null { return persistenceError; }
+export function downloadPersistenceError(): string | null {
+  return persistenceError;
+}
 export function unclaimedDownloadCount(): number {
   return [...items.values()].filter((item) => !item.owner).length;
 }
@@ -162,7 +174,8 @@ export function claimLegacyDownloads(): void {
   // Historical downloads have no reliable account identity. Only an explicit
   // local-profile action can adopt them; signing in never silently claims data.
   if (JSON.parse(downloadOwner())[0] !== "local") return;
-  for (const item of items.values()) if (!item.owner) items.set(item.id, { ...item, owner: downloadOwner() });
+  for (const item of items.values())
+    if (!item.owner) items.set(item.id, { ...item, owner: downloadOwner() });
   rebuild();
 }
 
@@ -378,7 +391,8 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
     destinationPath ??
     (await uniquePath(dir ? `${dir}${dir.endsWith(sep()) ? "" : sep()}${filename}` : filename));
   const id = randomId();
-  if (requestedOwner !== downloadOwner()) throw new Error("Profile changed. Start the download again from the current profile.");
+  if (requestedOwner !== downloadOwner())
+    throw new Error("Profile changed. Start the download again from the current profile.");
   const item: DownloadItem = {
     id,
     owner: requestedOwner,
@@ -512,7 +526,11 @@ function beginDownload(id: string): void {
   const item = items.get(id);
   if (!owns(item) || handles.has(id)) return;
   if (item.requiresHeaders && !requestHeaders.has(id)) {
-    patch(id, { status: "error", error: "This source needs headers that are not stored. Select the source again to reconnect safely." });
+    patch(id, {
+      status: "error",
+      error:
+        "This source needs headers that are not stored. Select the source again to reconnect safely.",
+    });
     return;
   }
   retainDownloadTorrent(item);
@@ -560,7 +578,8 @@ function beginDownload(id: string): void {
       speed.delete(id);
       const current = items.get(id);
       if (current?.status !== "paused") {
-        if (!current || current.status === "done" || current.status === "canceled") requestHeaders.delete(id);
+        if (!current || current.status === "done" || current.status === "canceled")
+          requestHeaders.delete(id);
         if (current) releaseDownloadTorrent(current);
       }
       reconcileFromUrl(item.url);
@@ -584,7 +603,8 @@ export function cancelDownload(id: string): void {
 export function pauseDownload(id: string): void {
   const item = items.get(id);
   const handle = handles.get(id);
-  if (!owns(item) || item.canPause === false || !["downloading", "queued"].includes(item.status)) return;
+  if (!owns(item) || item.canPause === false || !["downloading", "queued"].includes(item.status))
+    return;
   patch(id, { status: "paused", bytesPerSec: 0 });
   handle?.abort();
   const engine = downloadTorrentRef(item);
@@ -616,7 +636,10 @@ export async function removeDownload(id: string): Promise<void> {
       if (await exists(path)) await remove(path);
     }
   } catch {
-    patch(id, { status: "error", error: "Could not delete the file. Stop playback and check folder access, then retry Delete." });
+    patch(id, {
+      status: "error",
+      error: "Could not delete the file. Stop playback and check folder access, then retry Delete.",
+    });
     return;
   }
   requestHeaders.delete(id);
@@ -671,18 +694,32 @@ export async function verifyDownloadFiles(): Promise<void> {
       const recovered = await invoke<number | null>("download_verify", { dest: item.path });
       if (downloadOwner() !== capturedOwner) return;
       if (recovered != null) {
-        patch(item.id, { status: "done", receivedBytes: recovered, totalBytes: recovered, ratio: 1, bytesPerSec: 0, error: null });
+        patch(item.id, {
+          status: "done",
+          receivedBytes: recovered,
+          totalBytes: recovered,
+          ratio: 1,
+          bytesPerSec: 0,
+          error: null,
+        });
         continue;
       }
       if (item.status !== "done") continue;
       const info = await stat(item.path);
       if (downloadOwner() !== capturedOwner) return;
       if (!info.isFile || info.size !== item.receivedBytes) {
-        patch(item.id, { status: "error", error: "The saved file is missing or its size changed. Remove it and download again." });
+        patch(item.id, {
+          status: "error",
+          error: "The saved file is missing or its size changed. Remove it and download again.",
+        });
       }
     } catch {
       if (downloadOwner() !== capturedOwner) return;
-      patch(item.id, { status: "error", error: "The saved file could not be verified. Reconnect its drive, or remove the damaged file and download again." });
+      patch(item.id, {
+        status: "error",
+        error:
+          "The saved file could not be verified. Reconnect its drive, or remove the damaged file and download again.",
+      });
     }
   }
 }

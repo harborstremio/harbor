@@ -1,7 +1,11 @@
 import { rowKey, type RemoteFavoriteRow } from "./mapping.ts";
 
 /** Membership changes since the last acknowledged state; a missing base preserves both sets. */
-export function mergeFavoriteRows(base: RemoteFavoriteRow[] | null, local: RemoteFavoriteRow[], remote: RemoteFavoriteRow[]): RemoteFavoriteRow[] {
+export function mergeFavoriteRows(
+  base: RemoteFavoriteRow[] | null,
+  local: RemoteFavoriteRow[],
+  remote: RemoteFavoriteRow[],
+): RemoteFavoriteRow[] {
   const result = new Map(remote.map((row) => [rowKey(row), row]));
   const previous = new Set((base ?? []).map(rowKey));
   const current = new Set(local.map(rowKey));

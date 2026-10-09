@@ -14,7 +14,14 @@ import { ACCOUNT_KEY, removeKey } from "./keys";
 import { knownSyncIds, localIdFor } from "./id-map";
 import { clearAllParked, clearParked, park } from "./parked";
 import { MAX_PUSH_BYTES, MAX_WRITES_PER_PUSH, byteLength, sectionLimit } from "./limits";
-import { clearQueue, dropFromQueue, enqueueDirty, queueEntries, queueSize, queuedSince } from "./queue";
+import {
+  clearQueue,
+  dropFromQueue,
+  enqueueDirty,
+  queueEntries,
+  queueSize,
+  queuedSince,
+} from "./queue";
 import {
   bindAccount,
   boundAccount,
@@ -380,7 +387,9 @@ function onRejected(prepared: Prepared, current: SyncDoc): void {
   if (!adapter) return;
   const key = prepared.write.key;
   const mine = "value" in prepared.write ? prepared.write.value : undefined;
-  const next = adapter.merge ? adapter.merge(adapter.read(prepared.profileId), current.value) : current.value;
+  const next = adapter.merge
+    ? adapter.merge(adapter.read(prepared.profileId), current.value)
+    : current.value;
   let outcome: void | boolean;
   try {
     outcome = adapter.write(prepared.profileId, next);
@@ -437,7 +446,9 @@ export async function runPush(): Promise<PushOutcome> {
       const named = rejectedKeyOf(e);
       const victim =
         prepared.find((entry) => entry.write.key === named) ??
-        prepared.reduce((worst, entry) => ((entry.bytes ?? 0) > (worst.bytes ?? 0) ? entry : worst));
+        prepared.reduce((worst, entry) =>
+          (entry.bytes ?? 0) > (worst.bytes ?? 0) ? entry : worst,
+        );
       if (victim) {
         const mine = "value" in victim.write ? victim.write.value : undefined;
         if (mine !== undefined) park(victim.write.key, mine, revOf(victim.write.key));

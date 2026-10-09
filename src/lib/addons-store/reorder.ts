@@ -23,7 +23,9 @@ function scopedKey(base: string): string {
       localStorage.setItem(marker, primary.id);
     }
     return key;
-  } catch { throw new Error("Could not read the active addon profile."); }
+  } catch {
+    throw new Error("Could not read the active addon profile.");
+  }
 }
 
 const MAX_BACKUPS = 5;

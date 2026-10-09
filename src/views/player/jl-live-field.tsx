@@ -155,7 +155,8 @@ export function JlLiveField({
       {feed.failed && (
         <p role="status" className="text-[12px] text-white/80">
           {t("Live updates are unavailable. Retrying.")}
-          {feed.at > 0 && ` ${t("Last update")} ${new Date(feed.at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`}
+          {feed.at > 0 &&
+            ` ${t("Last update")} ${new Date(feed.at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`}
         </p>
       )}
       {live.kind === "football" && (
@@ -196,12 +197,13 @@ function useLiveData(game: SportsGame | null, sport: FieldSport | null, active: 
         }
         if (!signal.aborted) setResult({ key, data, at: Date.now(), failed: data.kind === "none" });
       } catch {
-        if (!signal.aborted) setResult((previous) => ({
-          key,
-          data: previous?.key === key ? previous.data : { kind: "none" },
-          at: previous?.key === key ? previous.at : 0,
-          failed: true,
-        }));
+        if (!signal.aborted)
+          setResult((previous) => ({
+            key,
+            data: previous?.key === key ? previous.data : { kind: "none" },
+            at: previous?.key === key ? previous.at : 0,
+            failed: true,
+          }));
       }
     };
     void load();

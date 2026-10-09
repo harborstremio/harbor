@@ -6,7 +6,10 @@ export function isCurrentLiveGame(game: SportsGame | null | undefined): boolean 
 }
 
 /** Providers commonly send 0-0 before kick-off. Those zeroes are not a played score. */
-export function visibleScore(game: Pick<SportsGame, "state">, side: Pick<SportsSide, "score">): string {
+export function visibleScore(
+  game: Pick<SportsGame, "state">,
+  side: Pick<SportsSide, "score">,
+): string {
   return game.state === "pre" ? "" : side.score;
 }
 

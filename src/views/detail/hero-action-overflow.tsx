@@ -140,7 +140,9 @@ export function HeroActionOverflow({
           className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-canvas/80 text-ink transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.94]"
         >
           <MoreHorizontal size={20} strokeWidth={1.9} />
-          {isFav && <span className="absolute end-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-accent" />}
+          {isFav && (
+            <span className="absolute end-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-accent" />
+          )}
         </button>
       </HoverTooltip>
       {menu &&

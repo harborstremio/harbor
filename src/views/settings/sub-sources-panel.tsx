@@ -5,7 +5,14 @@ import type { Addon } from "@/lib/addons";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { ExtLink, KeyField, Section, ToggleRow, settingsAnchor, useSettingsActiveContext } from "./shared";
+import {
+  ExtLink,
+  KeyField,
+  Section,
+  ToggleRow,
+  settingsAnchor,
+  useSettingsActiveContext,
+} from "./shared";
 import { Nested, SettingGroup } from "./kit";
 import { SRow } from "./ui";
 import openSubtitlesLogo from "@/assets/opensubtitles.png";
@@ -122,12 +129,16 @@ export function SubSourcesPanel() {
     <>
       <Section
         title={t("Subtitle sources")}
-        subtitle={t("Choose where Harbor searches for subtitles. Results from enabled sources appear together, with duplicates removed.")}
+        subtitle={t(
+          "Choose where Harbor searches for subtitles. Results from enabled sources appear together, with duplicates removed.",
+        )}
       >
         <SettingGroup label={t("Built into Harbor")}>
           <ToggleRow
             label={t("OpenSubtitles")}
-            sub={t("Harbor's built-in OpenSubtitles search, on by default. If you install an OpenSubtitles addon, this steps aside automatically so your results are never duplicated.")}
+            sub={t(
+              "Harbor's built-in OpenSubtitles search, on by default. If you install an OpenSubtitles addon, this steps aside automatically so your results are never duplicated.",
+            )}
             value={osOn}
             onChange={(v) => setProv("opensubtitles", v)}
             leading={<img src={opensubtitlesLogo} alt="" draggable={false} className={LEAD_IMG} />}
@@ -142,7 +153,9 @@ export function SubSourcesPanel() {
                 onCommit={(v) => update({ opensubtitlesApiKey: v })}
                 help={
                   <>
-                    {t("Searching works without a key. Adding one lets Harbor line subtitles up with the audio on its own.")}{" "}
+                    {t(
+                      "Searching works without a key. Adding one lets Harbor line subtitles up with the audio on its own.",
+                    )}{" "}
                     <ExtLink href="https://www.opensubtitles.com/consumers">
                       {t("Get a free key at opensubtitles.com")}
                     </ExtLink>
@@ -153,7 +166,9 @@ export function SubSourcesPanel() {
           )}
           <ToggleRow
             label={t("Wyzie")}
-            sub={t("A fast community subtitle index. Off by default; turn it on for extra coverage on newer or niche releases.")}
+            sub={t(
+              "A fast community subtitle index. Off by default; turn it on for extra coverage on newer or niche releases.",
+            )}
             value={wyzieOn}
             onChange={(v) => setProv("wyzie", v)}
             leading={<img src={wyzieLogo} alt="" draggable={false} className={LEAD_IMG} />}
@@ -217,9 +232,7 @@ export function SubSourcesPanel() {
             onChange={(v) => setProv("subsource", v)}
             leading={<img src={subsourceLogo} alt="" draggable={false} className={LEAD_IMG} />}
             warn={
-              subsourceOn && !subsourceKey
-                ? t("Add an API key to use this source.")
-                : undefined
+              subsourceOn && !subsourceKey ? t("Add an API key to use this source.") : undefined
             }
           />
           {subsourceOn && (
@@ -251,7 +264,9 @@ export function SubSourcesPanel() {
         <SRow
           leading={<Languages size={20} strokeWidth={2} />}
           title={t("Subtitle language order")}
-          description={t("Pick which languages Harbor looks for first, and which ones it falls back to.")}
+          description={t(
+            "Pick which languages Harbor looks for first, and which ones it falls back to.",
+          )}
           trailing={<NavChevron />}
           onClick={() => setActive("subtitles", settingsAnchor("Subtitle languages"))}
         />

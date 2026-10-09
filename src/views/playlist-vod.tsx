@@ -7,7 +7,13 @@ import { matchesVodSearch, vodSearchText } from "@/lib/iptv/vod-match";
 import { sortChannelsByGroupRelevance } from "@/lib/iptv/group-relevance";
 import { getCachedPlaylist } from "@/lib/iptv/store";
 import type { IptvPlaylistSource } from "@/lib/iptv/types";
-import { buildVodLibrary, vodEpisodeFromChannel, type VodEpisode, type VodMovie, type VodSeries } from "@/lib/iptv/vod";
+import {
+  buildVodLibrary,
+  vodEpisodeFromChannel,
+  type VodEpisode,
+  type VodMovie,
+  type VodSeries,
+} from "@/lib/iptv/vod";
 import { credsFromServer } from "@/lib/iptv/xtream";
 import { fetchXtreamSeriesEpisodes } from "@/lib/iptv/xtream-vod";
 import { useSettings } from "@/lib/settings";
@@ -70,11 +76,7 @@ export function PlaylistVodView({ active }: { active: boolean }) {
     setSelected(null);
     setEpisodeError(null);
   }, []);
-  const viewError = isXtream
-    ? tab === "movies"
-      ? xtream.movieError
-      : xtream.seriesError
-    : error;
+  const viewError = isXtream ? (tab === "movies" ? xtream.movieError : xtream.seriesError) : error;
   const tabLoading = isXtream
     ? tab === "movies"
       ? xtream.moviesLoading
@@ -118,17 +120,21 @@ export function PlaylistVodView({ active }: { active: boolean }) {
     [library.series],
   );
   const movies = useMemo(
-    () => sortChannelsByGroupRelevance(
-      q ? library.movies.filter((_, i) => matchesVodSearch(movieIndex[i], q)) : library.movies,
-      settings.region, settings.preferredLanguages,
-    ),
+    () =>
+      sortChannelsByGroupRelevance(
+        q ? library.movies.filter((_, i) => matchesVodSearch(movieIndex[i], q)) : library.movies,
+        settings.region,
+        settings.preferredLanguages,
+      ),
     [library.movies, movieIndex, q, settings.region, settings.preferredLanguages],
   );
   const series = useMemo(
-    () => sortChannelsByGroupRelevance(
-      q ? library.series.filter((_, i) => matchesVodSearch(seriesIndex[i], q)) : library.series,
-      settings.region, settings.preferredLanguages,
-    ),
+    () =>
+      sortChannelsByGroupRelevance(
+        q ? library.series.filter((_, i) => matchesVodSearch(seriesIndex[i], q)) : library.series,
+        settings.region,
+        settings.preferredLanguages,
+      ),
     [library.series, seriesIndex, q, settings.region, settings.preferredLanguages],
   );
   const visibleMovies = movies.slice(0, visibleCount);
@@ -151,8 +157,17 @@ export function PlaylistVodView({ active }: { active: boolean }) {
   const playEpisode = useCallback(
     (s: VodSeries, ep: VodEpisode) => {
       openPlayer({
-        meta: vodMeta(ep.numbered === false ? `vod:${ep.id || s.id}` : s.id, "series", s.title, s.logo, null),
-        episode: ep.numbered === false ? undefined : { season: ep.season, episode: ep.episode, name: ep.title },
+        meta: vodMeta(
+          ep.numbered === false ? `vod:${ep.id || s.id}` : s.id,
+          "series",
+          s.title,
+          s.logo,
+          null,
+        ),
+        episode:
+          ep.numbered === false
+            ? undefined
+            : { season: ep.season, episode: ep.episode, name: ep.title },
         url: ep.url,
         title: ep.title,
         subtitle: ep.numbered === false ? s.title : `${s.title} · S${ep.season} · E${ep.episode}`,
@@ -179,15 +194,21 @@ export function PlaylistVodView({ active }: { active: boolean }) {
       if (!creds) return;
 
       setLoadingSeriesId(series.id);
-      void fetchXtreamSeriesEpisodes(creds, activeSource.id, {
-        series_id: Number(series.xtreamSeriesId),
-        name: series.title,
-        cover: series.logo ?? undefined,
-        category_id: series.group ?? undefined,
-      }, controller.signal)
+      void fetchXtreamSeriesEpisodes(
+        creds,
+        activeSource.id,
+        {
+          series_id: Number(series.xtreamSeriesId),
+          name: series.title,
+          cover: series.logo ?? undefined,
+          category_id: series.group ?? undefined,
+        },
+        controller.signal,
+      )
         .then((channels) => {
           if (controller.signal.aborted) return;
-          const episodes = channels.map(vodEpisodeFromChannel)
+          const episodes = channels
+            .map(vodEpisodeFromChannel)
             .sort((a, b) => a.season - b.season || a.episode - b.episode);
           const seasons = [...new Set(episodes.map((episode) => episode.season))].sort(
             (a, b) => a - b,
@@ -301,7 +322,10 @@ export function PlaylistVodView({ active }: { active: boolean }) {
             loading={loadingSeriesId === selected.id}
             error={episodeError}
             onRetry={() => openSeries(selected)}
-            onBack={() => { seriesRequest.current?.abort(); setSelected(null); }}
+            onBack={() => {
+              seriesRequest.current?.abort();
+              setSelected(null);
+            }}
             onPlay={(ep) => playEpisode(selected, ep)}
           />
         ) : tab === "movies" ? (

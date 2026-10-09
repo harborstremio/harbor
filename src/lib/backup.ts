@@ -290,9 +290,11 @@ type BackupWorkspace = {
 function rosterProfileIds(raw: string | null): string[] {
   if (raw == null) return [];
   const state = JSON.parse(raw) as { profiles?: Array<{ id?: unknown }> };
-  if (!Array.isArray(state?.profiles)) throw new Error("The profile roster is damaged; existing data was preserved.");
+  if (!Array.isArray(state?.profiles))
+    throw new Error("The profile roster is damaged; existing data was preserved.");
   return state.profiles.map((profile) => {
-    if (typeof profile?.id !== "string" || !profile.id) throw new Error("The profile roster has an invalid ID.");
+    if (typeof profile?.id !== "string" || !profile.id)
+      throw new Error("The profile roster has an invalid ID.");
     return profile.id;
   });
 }
@@ -305,10 +307,15 @@ function backupWorkspace(): BackupWorkspace {
   const otherProfileIds = new Set<string>();
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (!key?.startsWith(WORKSPACE_PREFIX) || key === WORKSPACE_PREFIX + (owner ?? "local")) continue;
-    const snapshot = JSON.parse(localStorage.getItem(key) ?? "null") as Record<string, unknown> | null;
+    if (!key?.startsWith(WORKSPACE_PREFIX) || key === WORKSPACE_PREFIX + (owner ?? "local"))
+      continue;
+    const snapshot = JSON.parse(localStorage.getItem(key) ?? "null") as Record<
+      string,
+      unknown
+    > | null;
     const parkedRoster = snapshot?.[PROFILES_STATE_KEY];
-    if (parkedRoster != null && typeof parkedRoster !== "string") throw new Error("A parked workspace is damaged; existing data was preserved.");
+    if (parkedRoster != null && typeof parkedRoster !== "string")
+      throw new Error("A parked workspace is damaged; existing data was preserved.");
     for (const id of rosterProfileIds(parkedRoster ?? null)) otherProfileIds.add(id);
   }
   // Old/unclaimed profile data may predate the workspace snapshot registry.
@@ -326,8 +333,10 @@ function backupWorkspace(): BackupWorkspace {
 }
 
 function assertWorkspace(workspace: BackupWorkspace, checkRoster = true): void {
-  if (localStorage.getItem(WORKSPACE_OWNER_KEY) !== workspace.owner ||
-      (checkRoster && localStorage.getItem(PROFILES_STATE_KEY) !== workspace.roster)) {
+  if (
+    localStorage.getItem(WORKSPACE_OWNER_KEY) !== workspace.owner ||
+    (checkRoster && localStorage.getItem(PROFILES_STATE_KEY) !== workspace.roster)
+  ) {
     throw new Error("The JL account or profile changed during backup. Please try again.");
   }
 }
@@ -339,17 +348,20 @@ function keyProfileIds(key: string, known: Iterable<string>): string[] {
   for (const id of known) {
     for (const token of ["." + id, ":" + id, ":" + encodeURIComponent(id)]) {
       const at = key.indexOf(token);
-      if (at >= 0 && (at + token.length === key.length || /[.:]/.test(key[at + token.length]))) ids.add(id);
+      if (at >= 0 && (at + token.length === key.length || /[.:]/.test(key[at + token.length])))
+        ids.add(id);
     }
   }
-  for (const match of key.matchAll(/[.:](p_[a-z0-9]+_[a-z0-9]+|default)(?=$|[.:])/g)) ids.add(match[1]);
+  for (const match of key.matchAll(/[.:](p_[a-z0-9]+_[a-z0-9]+|default)(?=$|[.:])/g))
+    ids.add(match[1]);
   return [...ids];
 }
 
 function belongsToWorkspace(key: string, workspace: BackupWorkspace): boolean {
   if (!isPortable(key)) return false;
   const ids = keyProfileIds(key, [...workspace.profileIds, ...workspace.otherProfileIds]);
-  if (ids.some((id) => !workspace.profileIds.has(id) || workspace.otherProfileIds.has(id))) return false;
+  if (ids.some((id) => !workspace.profileIds.has(id) || workspace.otherProfileIds.has(id)))
+    return false;
   // Secret/session keys always carry a profile suffix. Unscoped legacy values
   // cannot be attributed after JL workspace adoption and stay on the device.
   if (isSecretKey(key) && ids.length === 0 && workspace.owner != null) return false;
@@ -514,18 +526,34 @@ const PROFILES_STATE_KEY = "harbor.profiles.v1";
  */
 const BARE_BASES = new Set(["harbor.watchlist.v1", "harbor.watchlist.aggregate.v1"]);
 
-function retargetProfileKeys(data: Record<string, string>, workspace: BackupWorkspace): Record<string, string> {
+function retargetProfileKeys(
+  data: Record<string, string>,
+  workspace: BackupWorkspace,
+): Record<string, string> {
   const target = activeProfileId();
   const profilesIncluded = data[PROFILES_STATE_KEY] != null;
   const sourceIds = profilesIncluded ? new Set(rosterProfileIds(data[PROFILES_STATE_KEY])) : null;
   if (sourceIds) {
     if (sourceIds.size === 0 || [...sourceIds].some((id) => workspace.otherProfileIds.has(id))) {
-      throw new Error("This backup's profile IDs overlap another local JL workspace. Restore individual sections without Profiles instead.");
+      throw new Error(
+        "This backup's profile IDs overlap another local JL workspace. Restore individual sections without Profiles instead.",
+      );
     }
-    const roster = JSON.parse(data[PROFILES_STATE_KEY]) as { activeId?: unknown; profiles: Array<{ id: string; shareStremioWith?: unknown }> };
-    if ((roster.activeId != null && (typeof roster.activeId !== "string" || !sourceIds.has(roster.activeId))) ||
-        roster.profiles.some((profile) => profile.shareStremioWith != null && !sourceIds.has(String(profile.shareStremioWith)))) {
-      throw new Error("This backup references profiles outside its own roster; existing data was preserved.");
+    const roster = JSON.parse(data[PROFILES_STATE_KEY]) as {
+      activeId?: unknown;
+      profiles: Array<{ id: string; shareStremioWith?: unknown }>;
+    };
+    if (
+      (roster.activeId != null &&
+        (typeof roster.activeId !== "string" || !sourceIds.has(roster.activeId))) ||
+      roster.profiles.some(
+        (profile) =>
+          profile.shareStremioWith != null && !sourceIds.has(String(profile.shareStremioWith)),
+      )
+    ) {
+      throw new Error(
+        "This backup references profiles outside its own roster; existing data was preserved.",
+      );
     }
   }
   const out: Record<string, string> = {};
@@ -535,15 +563,22 @@ function retargetProfileKeys(data: Record<string, string>, workspace: BackupWork
   };
   for (const [key, value] of Object.entries(data)) {
     if (!isPortable(key)) continue;
-    const ids = keyProfileIds(key, [...workspace.profileIds, ...workspace.otherProfileIds, ...(sourceIds ?? [])]);
+    const ids = keyProfileIds(key, [
+      ...workspace.profileIds,
+      ...workspace.otherProfileIds,
+      ...(sourceIds ?? []),
+    ]);
     if (sourceIds && ids.some((id) => !sourceIds.has(id))) continue;
     if (!profilesIncluded && ids.length > 0) {
       let destination = key;
       for (const id of ids) {
         for (const encoded of new Set([id, encodeURIComponent(id)])) {
           const escaped = encoded.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-          destination = destination.replace(new RegExp(`([.:])${escaped}(?=$|[.:])`, "g"),
-            (_match, separator: string) => separator + (separator === ":" ? encodeURIComponent(target) : target));
+          destination = destination.replace(
+            new RegExp(`([.:])${escaped}(?=$|[.:])`, "g"),
+            (_match, separator: string) =>
+              separator + (separator === ":" ? encodeURIComponent(target) : target),
+          );
         }
       }
       setMerged(destination, value);
@@ -617,8 +652,12 @@ export async function applyBackup(backup: Backup): Promise<void> {
   for (const [k, v] of Object.entries(data)) {
     if (!isPortable(k) || !isSecretKey(k)) continue;
     try {
-      const scoped = keyProfileIds(k, rosterProfileIds(data[PROFILES_STATE_KEY] ?? null)).length > 0;
-      setSecret(data[PROFILES_STATE_KEY] != null && scoped ? k : secretKeyForProfile(k, targetProfile), v);
+      const scoped =
+        keyProfileIds(k, rosterProfileIds(data[PROFILES_STATE_KEY] ?? null)).length > 0;
+      setSecret(
+        data[PROFILES_STATE_KEY] != null && scoped ? k : secretKeyForProfile(k, targetProfile),
+        v,
+      );
     } catch {
       /* keep restoring the rest even if one entry is rejected */
     }
@@ -627,9 +666,10 @@ export async function applyBackup(backup: Backup): Promise<void> {
     backup.sections == null || backup.sections.length === 0 || backup.sections.includes("theme");
   if (restoresTheme) {
     if (backup.bgImages) {
-      const restoredIds = data[PROFILES_STATE_KEY] != null
-        ? new Set(rosterProfileIds(data[PROFILES_STATE_KEY]))
-        : new Set([targetProfile]);
+      const restoredIds =
+        data[PROFILES_STATE_KEY] != null
+          ? new Set(rosterProfileIds(data[PROFILES_STATE_KEY]))
+          : new Set([targetProfile]);
       for (const [id, image] of Object.entries(backup.bgImages)) {
         if (!restoredIds.has(id) || workspace.otherProfileIds.has(id)) continue;
         assertWorkspace(workspace, false);

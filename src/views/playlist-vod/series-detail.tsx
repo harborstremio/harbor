@@ -72,12 +72,22 @@ export function SeriesDetail({ series, loading = false, error, onRetry, onBack, 
         {error ? (
           <div role="alert" className="px-3 py-4 text-[14px] text-ink-muted">
             <p>{error}</p>
-            {onRetry && <button type="button" onClick={onRetry} className="mt-3 rounded-lg bg-elevated px-4 py-2 text-ink">{t("Retry")}</button>}
+            {onRetry && (
+              <button
+                type="button"
+                onClick={onRetry}
+                className="mt-3 rounded-lg bg-elevated px-4 py-2 text-ink"
+              >
+                {t("Retry")}
+              </button>
+            )}
           </div>
         ) : loading ? (
           <p className="px-3 py-4 text-[14px] text-ink-muted">{t("Loading episodes...")}</p>
         ) : episodes.length === 0 ? (
-          <p className="px-3 py-4 text-[14px] text-ink-muted">{t("No episodes were returned for this season.")}</p>
+          <p className="px-3 py-4 text-[14px] text-ink-muted">
+            {t("No episodes were returned for this season.")}
+          </p>
         ) : (
           episodes.map((ep) => (
             <EpisodeRow

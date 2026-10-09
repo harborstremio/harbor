@@ -1,7 +1,11 @@
 /** notWebReady describes browser compatibility, not a container or live stream. */
 export function html5Transport(url: string, legacyLiveTs = false): "hls" | "mpegts" | "file" {
   let path = url.split(/[?#]/)[0];
-  try { path = new URL(url).pathname; } catch { /* Local or relative media path. */ }
+  try {
+    path = new URL(url).pathname;
+  } catch {
+    /* Local or relative media path. */
+  }
   path = path.toLowerCase();
   if (path.endsWith(".m3u8")) return "hls";
   if (path.endsWith(".ts") || path.endsWith(".m2ts")) return "mpegts";

@@ -41,7 +41,10 @@ function seenIds(scope: string): string[] {
 }
 function remember(scope: string, ids: string[]): void {
   try {
-    sessionStorage.setItem(`${SEEN_KEY}.${scope}`, JSON.stringify([...seenIds(scope), ...ids].slice(-300)));
+    sessionStorage.setItem(
+      `${SEEN_KEY}.${scope}`,
+      JSON.stringify([...seenIds(scope), ...ids].slice(-300)),
+    );
   } catch {
     /* storage unavailable: alerts may repeat after a reload */
   }
@@ -105,7 +108,10 @@ function SportsAlertsHost({ scope }: { scope: string }) {
       }).filter((a) => !seen.has(a.id));
       prev.current = snapshot;
       if (!fresh.length) return;
-      remember(scope, fresh.map((a) => a.id));
+      remember(
+        scope,
+        fresh.map((a) => a.id),
+      );
       setShown((s) => [...s, ...fresh].slice(-MAX_SHOWN));
     });
     return () => {

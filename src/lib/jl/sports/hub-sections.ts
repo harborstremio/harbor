@@ -113,10 +113,13 @@ type HeroPhotoSources = {
 
 /** Keep the entire fallback chain: a failed remote URL must not hide the bundled scenery. */
 export function heroPhotoCandidates(sources: HeroPhotoSources): string[] {
-  return [...new Set(
-    [sources.curated, sources.event, sources.team, sources.league, sources.bundled]
-      .filter((url): url is string => typeof url === "string" && url.trim().length > 0),
-  )];
+  return [
+    ...new Set(
+      [sources.curated, sources.event, sources.team, sources.league, sources.bundled].filter(
+        (url): url is string => typeof url === "string" && url.trim().length > 0,
+      ),
+    ),
+  ];
 }
 
 export function heroPhoto(sources: HeroPhotoSources): string | null {

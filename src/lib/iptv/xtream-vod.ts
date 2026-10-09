@@ -74,7 +74,7 @@ export function clearSeriesInfoCache(baseId?: string): void {
     return;
   }
   const prefix = `${baseId}::`;
-  for (const key of [...seriesInfoCache.keys()]) {
+  for (const key of seriesInfoCache.keys()) {
     if (key.startsWith(prefix)) seriesInfoCache.delete(key);
   }
 }
@@ -183,9 +183,14 @@ export async function fetchXtreamSeriesEpisodes(
   let info = cached?.source === source && cached.expires > Date.now() ? cached.info : undefined;
   if (!info) {
     info = (await xtreamFetch(
-      apiUrl(creds, "get_series_info", { series_id: String(series.series_id) }), signal,
+      apiUrl(creds, "get_series_info", { series_id: String(series.series_id) }),
+      signal,
     )) as SeriesInfo;
-    if (!info?.episodes || typeof info.episodes !== "object" || !Object.values(info.episodes).every(Array.isArray)) {
+    if (
+      !info?.episodes ||
+      typeof info.episodes !== "object" ||
+      !Object.values(info.episodes).every(Array.isArray)
+    ) {
       throw new Error("The provider did not return an episode list. Please retry.");
     }
     signal?.throwIfAborted();
@@ -207,7 +212,10 @@ export async function fetchXtreamSeriesEpisodes(
       out.push({
         id: `${baseId}::xtep::${ep.id}`,
         tvgId: null,
-        name: season != null && epNum != null ? `${seriesName} S${season}E${epNum}` : `${seriesName} - ${title || "Episode"}`,
+        name:
+          season != null && epNum != null
+            ? `${seriesName} S${season}E${epNum}`
+            : `${seriesName} - ${title || "Episode"}`,
         logo: ep.info?.movie_image?.trim() || series.cover?.trim() || null,
         group: series.category_id ?? null,
         url: buildSeriesUrl(creds, ep.id, ep.container_extension),

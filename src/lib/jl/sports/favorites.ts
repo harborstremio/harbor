@@ -29,7 +29,10 @@ export function subscribeJlFavoriteChanges(fn: () => void): () => void {
   };
 }
 
-function createProfileListStore<T>(baseKey: string, valid: (item: unknown) => item is T): ListStore<T> {
+function createProfileListStore<T>(
+  baseKey: string,
+  valid: (item: unknown) => item is T,
+): ListStore<T> {
   const empty: T[] = [];
   const listeners = new Set<() => void>();
   let cache: { key: string; raw: string | null; list: T[] } | null = null;
@@ -74,10 +77,15 @@ function createProfileListStore<T>(baseKey: string, valid: (item: unknown) => it
   };
 
   if (typeof window !== "undefined") {
-    const refresh = () => { cache = null; for (const fn of listeners) fn(); };
+    const refresh = () => {
+      cache = null;
+      for (const fn of listeners) fn();
+    };
     window.addEventListener("harbor:active-profile-changed", refresh);
     window.addEventListener("jl:account-changed", refresh);
-    window.addEventListener("storage", (event) => { if (event.key === null || event.key.startsWith(baseKey + ".")) refresh(); });
+    window.addEventListener("storage", (event) => {
+      if (event.key === null || event.key.startsWith(baseKey + ".")) refresh();
+    });
   }
 
   return { read, write, useList: () => useSyncExternalStore(subscribe, read, () => empty) };
@@ -86,26 +94,36 @@ function createProfileListStore<T>(baseKey: string, valid: (item: unknown) => it
 const isString = (v: unknown): v is string => typeof v === "string";
 const isNullableString = (v: unknown): v is string | null => v === null || typeof v === "string";
 
-const teams = createProfileListStore<JlFavoriteTeam>("jl.sports.favorites.v1", (f): f is JlFavoriteTeam => {
-  const r = f as Record<string, unknown> | null;
-  return !!r && isString(r.league) && isString(r.id) && isString(r.name);
-});
+const teams = createProfileListStore<JlFavoriteTeam>(
+  "jl.sports.favorites.v1",
+  (f): f is JlFavoriteTeam => {
+    const r = f as Record<string, unknown> | null;
+    return !!r && isString(r.league) && isString(r.id) && isString(r.name);
+  },
+);
 
-const players = createProfileListStore<JlFavoritePlayer>("jl.sports.players.v1", (f): f is JlFavoritePlayer => {
-  const r = f as Record<string, unknown> | null;
-  return (
-    !!r &&
-    isString(r.league) &&
-    isString(r.id) &&
-    isString(r.name) &&
-    isNullableString(r.teamId) &&
-    isNullableString(r.teamName) &&
-    isNullableString(r.headshot) &&
-    isNullableString(r.position)
-  );
-});
+const players = createProfileListStore<JlFavoritePlayer>(
+  "jl.sports.players.v1",
+  (f): f is JlFavoritePlayer => {
+    const r = f as Record<string, unknown> | null;
+    return (
+      !!r &&
+      isString(r.league) &&
+      isString(r.id) &&
+      isString(r.name) &&
+      isNullableString(r.teamId) &&
+      isNullableString(r.teamName) &&
+      isNullableString(r.headshot) &&
+      isNullableString(r.position)
+    );
+  },
+);
 
-export function isFollowing(list: Array<{ league: string; id: string }>, league: string, id: string): boolean {
+export function isFollowing(
+  list: Array<{ league: string; id: string }>,
+  league: string,
+  id: string,
+): boolean {
   return list.some((f) => f.league === league && f.id === id);
 }
 
@@ -124,13 +142,19 @@ export const toggleFavoritePlayer = (player: JlFavoritePlayer) => toggle(players
 export const useJlSportsFavorites = teams.useList;
 export const useJlFavoritePlayers = players.useList;
 export const readJlFavorites = () => ({ teams: teams.read(), players: players.read() });
-export const writeJlFavorites = (next: { teams?: JlFavoriteTeam[]; players?: JlFavoritePlayer[] }, requirePersistence = false) => {
+export const writeJlFavorites = (
+  next: { teams?: JlFavoriteTeam[]; players?: JlFavoritePlayer[] },
+  requirePersistence = false,
+) => {
   if (next.teams) teams.write(next.teams, requirePersistence);
   if (next.players) players.write(next.players, requirePersistence);
 };
 
 /** Teams to rank and fetch for: followed teams plus followed players' teams. */
-export function effectiveTeams(teamList: JlFavoriteTeam[], playerList: JlFavoritePlayer[]): JlFavoriteTeam[] {
+export function effectiveTeams(
+  teamList: JlFavoriteTeam[],
+  playerList: JlFavoritePlayer[],
+): JlFavoriteTeam[] {
   const out = [...teamList];
   for (const p of playerList) {
     if (!p.teamId || isFollowing(out, p.league, p.teamId)) continue;

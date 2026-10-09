@@ -562,9 +562,11 @@ export function TeamLine({ side, active }: { side: SportsSide; active: boolean }
       <span className="flex-1 truncate text-[13.5px] font-semibold text-ink">
         {side.location || side.name}
       </span>
-      {active && <span className="w-8 shrink-0 text-end text-[17px] font-bold tabular-nums text-ink">
-        {side.score}
-      </span>}
+      {active && (
+        <span className="w-8 shrink-0 text-end text-[17px] font-bold tabular-nums text-ink">
+          {side.score}
+        </span>
+      )}
     </div>
   );
 }

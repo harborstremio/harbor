@@ -10,7 +10,11 @@ import type { LibraryItem } from "../src/lib/stremio.ts";
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 function load(path: string, mocks: Record<string, unknown>): any {
   const code = ts.transpileModule(read(path), {
-    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
+    compilerOptions: {
+      target: ts.ScriptTarget.ES2022,
+      module: ts.ModuleKind.CommonJS,
+      jsx: ts.JsxEmit.ReactJSX,
+    },
   }).outputText;
   const exports = {};
   new Function("require", "exports", code)((id: string) => mocks[id] ?? {}, exports);
@@ -19,10 +23,22 @@ function load(path: string, mocks: Record<string, unknown>): any {
 
 function item(type = "movie", state: Partial<NonNullable<LibraryItem["state"]>> = {}): LibraryItem {
   return {
-    _id: "tt1", type, name: "Fixture title", removed: false, temp: false,
-    _ctime: "2026-01-01T00:00:00Z", _mtime: "2026-01-02T00:00:00Z",
-    state: { duration: 100_000, timeOffset: 100_000, timesWatched: 1, flaggedWatched: 1,
-      lastWatched: "2026-01-02T00:00:00Z", video_id: type === "movie" ? "tt1" : "tt1:2:3", ...state },
+    _id: "tt1",
+    type,
+    name: "Fixture title",
+    removed: false,
+    temp: false,
+    _ctime: "2026-01-01T00:00:00Z",
+    _mtime: "2026-01-02T00:00:00Z",
+    state: {
+      duration: 100_000,
+      timeOffset: 100_000,
+      timesWatched: 1,
+      flaggedWatched: 1,
+      lastWatched: "2026-01-02T00:00:00Z",
+      video_id: type === "movie" ? "tt1" : "tt1:2:3",
+      ...state,
+    },
   };
 }
 
@@ -46,13 +62,19 @@ function fixture(initial: LibraryItem | null) {
     "@/lib/resume": { readResumeEntry: () => null, readResumeSource: () => undefined },
   });
   const history = load("src/views/library/history-merge.ts", {
-    "@/lib/stremio": api, "./shared": { parseTs: Date.parse },
+    "@/lib/stremio": api,
+    "./shared": { parseTs: Date.parse },
   });
   const tab = load("src/views/library/watchlist-tab.tsx", { "@/lib/stremio": api });
   return {
-    api, tab, history, writes,
+    api,
+    tab,
+    history,
+    writes,
     stored: () => stored!,
-    failRead: () => { failedRead = true; },
+    failRead: () => {
+      failedRead = true;
+    },
     removeBookmark: () => api.removeStremioBookmark("fixture-auth", "tt1"),
     removeHistory: () => api.removeStremioLibraryItem("fixture-auth", "tt1"),
   };
@@ -87,7 +109,9 @@ test("unbookmarking retains in-progress Continue Watching but not completed movi
 });
 
 test("unplayed bookmarks do not acquire history or Continue Watching", async () => {
-  const f = fixture(item("movie", { timeOffset: 0, timesWatched: 0, flaggedWatched: 0, lastWatched: undefined }));
+  const f = fixture(
+    item("movie", { timeOffset: 0, timesWatched: 0, flaggedWatched: 0, lastWatched: undefined }),
+  );
   await f.removeBookmark();
   assert.equal(f.history.filterHistory([f.stored()]).length, 0);
   assert.equal(f.api.isCwMember(f.stored()), false);
@@ -132,7 +156,13 @@ test("failed reads reject for caller recovery and missing titles make no writes"
 
 test("Library tab removal uses the bookmark operation and preserves History", async () => {
   const f = fixture(item());
-  const source = ts.createSourceFile("watchlist-tab.tsx", read("src/views/library/watchlist-tab.tsx"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const source = ts.createSourceFile(
+    "watchlist-tab.tsx",
+    read("src/views/library/watchlist-tab.tsx"),
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
   let callback = "";
   const visit = (node: ts.Node) => {
     if (ts.isVariableDeclaration(node) && node.name.getText(source) === "handleRemove") {
@@ -142,17 +172,37 @@ test("Library tab removal uses the bookmark operation and preserves History", as
   };
   visit(source);
   assert.ok(callback);
-  const code = ts.transpileModule(callback, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+  const code = ts.transpileModule(callback, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  }).outputText;
   const scope = {
-    useCallback: (fn: unknown) => fn, authKey: "fixture-auth", guardSeq: { current: 0 }, pendingRemovals: { current: 0 },
-    readLocalEntries: () => [], filmClosure: (ids: string[]) => new Set(ids), evictWatchlistAggregate() {},
-    setStremio() {}, setLocalEntries() {}, setTrakt() {}, setRawCount() {}, setRefreshSeq() {},
-    stremioIdToTraktTarget: () => ({ ok: false }), simklConnected: () => false,
-    removeStremioLibraryItem: f.api.removeStremioLibraryItem, removeStremioBookmark: f.api.removeStremioBookmark,
-    removeFromWatchlist() {}, refreshWatchlistAggregates: async () => [],
-    settings: {}, mode: "library", stremio: [f.stored()], trakt: [], traktConnected: false,
+    useCallback: (fn: unknown) => fn,
+    authKey: "fixture-auth",
+    guardSeq: { current: 0 },
+    pendingRemovals: { current: 0 },
+    readLocalEntries: () => [],
+    filmClosure: (ids: string[]) => new Set(ids),
+    evictWatchlistAggregate() {},
+    setStremio() {},
+    setLocalEntries() {},
+    setTrakt() {},
+    setRawCount() {},
+    setRefreshSeq() {},
+    stremioIdToTraktTarget: () => ({ ok: false }),
+    simklConnected: () => false,
+    removeStremioLibraryItem: f.api.removeStremioLibraryItem,
+    removeStremioBookmark: f.api.removeStremioBookmark,
+    removeFromWatchlist() {},
+    refreshWatchlistAggregates: async () => [],
+    settings: {},
+    mode: "library",
+    stremio: [f.stored()],
+    trakt: [],
+    traktConnected: false,
   };
-  const remove = new Function(...Object.keys(scope), `${code}\nreturn handleRemove;`)(...Object.values(scope));
+  const remove = new Function(...Object.keys(scope), `${code}\nreturn handleRemove;`)(
+    ...Object.values(scope),
+  );
   await remove("tt1");
   assert.equal(f.history.filterHistory([f.stored()]).length, 1);
   assert.equal(f.tab.filterLibrary([f.stored()], true, "library").length, 0);

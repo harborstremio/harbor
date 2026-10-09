@@ -7,7 +7,12 @@ import { startDownload, type DownloadHandle } from "@/lib/download/video-downloa
 import { readMusicPreference, writeMusicPreference } from "./preferences";
 import type { MusicTrack, MusicSourceCandidate } from "./types";
 import { downloadOwner, subscribeDownloadOwner } from "@/lib/download/owner";
-import { directDownloadError, recoveredDownloadStatus, visibleDownloads, type OfflineStatus } from "@/lib/download/offline-policy";
+import {
+  directDownloadError,
+  recoveredDownloadStatus,
+  visibleDownloads,
+  type OfflineStatus,
+} from "@/lib/download/offline-policy";
 
 export type MusicDownload = {
   id: string;
@@ -85,7 +90,10 @@ async function freeTarget(folder: string, name: string): Promise<string> {
   const stem = dot > 0 ? name.slice(0, dot) : name;
   const extension = dot > 0 ? name.slice(dot) : "";
   for (let attempt = 0; attempt < 50; attempt += 1) {
-    const candidate = await join(folder, attempt === 0 ? name : `${stem} (${attempt + 1})${extension}`);
+    const candidate = await join(
+      folder,
+      attempt === 0 ? name : `${stem} (${attempt + 1})${extension}`,
+    );
     if (!(await exists(candidate))) return candidate;
   }
   return join(folder, `${stem} ${Date.now()}${extension}`);
@@ -127,8 +135,12 @@ function drainQueue() {
     if (running.size >= 2) break;
     waiting.delete(id);
     const entry = entries.find((item) => item.id === id);
-    if (!owns(entry) || entry.status !== "queued") { ready(false); continue; }
-    running.add(id); ready(true);
+    if (!owns(entry) || entry.status !== "queued") {
+      ready(false);
+      continue;
+    }
+    running.add(id);
+    ready(true);
   }
 }
 subscribeDownloadOwner(() => {
@@ -137,9 +149,11 @@ subscribeDownloadOwner(() => {
     if (entry.owner !== owner || !["downloading", "queued"].includes(entry.status)) continue;
     entry.status = "paused";
     handles.get(entry.id)?.abort();
-    waiting.get(entry.id)?.(false); waiting.delete(entry.id);
+    waiting.get(entry.id)?.(false);
+    waiting.delete(entry.id);
   }
-  owner = downloadOwner(); publish();
+  owner = downloadOwner();
+  publish();
 });
 if (typeof window !== "undefined") window.addEventListener("online", drainQueue);
 export function claimLegacyMusicDownloads(): void {
@@ -147,13 +161,16 @@ export function claimLegacyMusicDownloads(): void {
   for (const entry of entries) if (!entry.owner) entry.owner = downloadOwner();
   publish();
 }
-export function unclaimedMusicDownloadCount(): number { return entries.filter((entry) => !entry.owner).length; }
+export function unclaimedMusicDownloadCount(): number {
+  return entries.filter((entry) => !entry.owner).length;
+}
 export function pauseMusicDownload(id: string): void {
   const entry = entries.find((item) => item.id === id);
   if (!owns(entry) || !["downloading", "queued"].includes(entry.status)) return;
   entry.status = "paused";
   handles.get(id)?.abort();
-  waiting.get(id)?.(false); waiting.delete(id);
+  waiting.get(id)?.(false);
+  waiting.delete(id);
   publish();
 }
 const subscribe = (listener: () => void) => {
@@ -170,7 +187,8 @@ export const useMusicDownloads = () =>
   );
 export const musicDownloadFor = (track: MusicTrack) =>
   entries.find(
-    (entry) => owns(entry) && entry.track.id === track.id && entry.track.connectorId === track.connectorId,
+    (entry) =>
+      owns(entry) && entry.track.id === track.id && entry.track.connectorId === track.connectorId,
   );
 export async function musicDownloadPath(id: string) {
   if (!/^[a-f0-9-]{36}$/.test(id)) throw new Error("Invalid download");
@@ -199,10 +217,7 @@ export async function downloadedMusicTrack(entry: MusicDownload): Promise<MusicT
     mediaKind: "audio",
   };
 }
-export async function downloadMusic(
-  track: MusicTrack,
-  withFilters = false,
-): Promise<void> {
+export async function downloadMusic(track: MusicTrack, withFilters = false): Promise<void> {
   const requestedOwner = downloadOwner();
   const prior = musicDownloadFor(track);
   if (prior && ["downloading", "queued", "done"].includes(prior.status)) return;
@@ -227,9 +242,13 @@ export async function downloadMusic(
   publish();
   const job = (async () => {
     try {
-      const ready = await new Promise<boolean>((resolve) => { waiting.set(id, resolve); drainQueue(); });
+      const ready = await new Promise<boolean>((resolve) => {
+        waiting.set(id, resolve);
+        drainQueue();
+      });
       if (!ready || !owns(entry) || canceled.has(id)) return;
-      entry.status = "downloading"; publish();
+      entry.status = "downloading";
+      publish();
       let source = track;
       if (track.connectorId === "catalog") {
         const candidates = await invoke<MusicSourceCandidate[]>("music_source_candidates", {
@@ -261,10 +280,12 @@ export async function downloadMusic(
         throw new Error("music.download.unsupported");
       const folder = await musicDownloadFolder();
       await mkdir(folder, { recursive: true });
-      const path = entry.path ?? await freeTarget(
-        folder,
-        musicFileName(source, audioContainer(stream.mimeType, stream.url)),
-      );
+      const path =
+        entry.path ??
+        (await freeTarget(
+          folder,
+          musicFileName(source, audioContainer(stream.mimeType, stream.url)),
+        ));
       entry.path = path;
       publish();
       if (canceled.has(id) || !owns(entry) || entry.status !== "downloading") return;
@@ -318,7 +339,8 @@ export async function downloadMusic(
 export async function deleteMusicDownload(id: string): Promise<void> {
   if (!owns(entries.find((entry) => entry.id === id))) return;
   canceled.add(id);
-  waiting.get(id)?.(false); waiting.delete(id);
+  waiting.get(id)?.(false);
+  waiting.delete(id);
   handles.get(id)?.abort();
   await jobs.get(id);
   try {

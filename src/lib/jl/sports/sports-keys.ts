@@ -122,10 +122,16 @@ export function interpretKeyTest(
 ): KeyTestResult {
   const name = sportsKeyDef(provider).name;
   if (status === 0) {
-    return { ok: false, message: `Couldn't reach ${name}. Check your internet connection and try again.` };
+    return {
+      ok: false,
+      message: `Couldn't reach ${name}. Check your internet connection and try again.`,
+    };
   }
   if (status === 401 || status === 403) {
-    return { ok: false, message: `${name} didn't accept this key. Check for a typo or a missing character.` };
+    return {
+      ok: false,
+      message: `${name} didn't accept this key. Check for a typo or a missing character.`,
+    };
   }
   if (status === 429) {
     return {
@@ -134,7 +140,10 @@ export function interpretKeyTest(
     };
   }
   if (status >= 500) {
-    return { ok: false, message: `${name} is having trouble right now (error ${status}). Try again later.` };
+    return {
+      ok: false,
+      message: `${name} is having trouble right now (error ${status}). Try again later.`,
+    };
   }
   switch (provider) {
     case "thesportsdb": {
@@ -148,7 +157,9 @@ export function interpretKeyTest(
         const n = left != null && left !== "" ? Number(left) : NaN;
         return {
           ok: true,
-          message: Number.isFinite(n) ? `Key works. ${Math.floor(n)} requests left this month.` : "Key works.",
+          message: Number.isFinite(n)
+            ? `Key works. ${Math.floor(n)} requests left this month.`
+            : "Key works.",
         };
       }
       return { ok: false, message: `${name} didn't accept this key.` };
@@ -164,10 +175,16 @@ export function interpretKeyTest(
         const events = (body as { events?: unknown } | null)?.events;
         return Array.isArray(events)
           ? { ok: true, message: "Key works." }
-          : { ok: false, message: "AllSports returned an unexpected response. The key could not be verified." };
+          : {
+              ok: false,
+              message: "AllSports returned an unexpected response. The key could not be verified.",
+            };
       }
       if (status === 404) {
-        return { ok: false, message: "AllSports API was not found. Check the provider's service and your plan." };
+        return {
+          ok: false,
+          message: "AllSports API was not found. Check the provider's service and your plan.",
+        };
       }
       return { ok: false, message: `${name} answered with error ${status}.` };
     }
@@ -177,7 +194,11 @@ export function interpretKeyTest(
 type FetchLike = (
   url: string,
   init?: { headers?: Record<string, string>; signal?: AbortSignal },
-) => Promise<{ status: number; headers: { get(name: string): string | null }; text(): Promise<string> }>;
+) => Promise<{
+  status: number;
+  headers: { get(name: string): string | null };
+  text(): Promise<string>;
+}>;
 
 /** Runs the test request with the given fetch (safeFetch in the app). */
 export async function testSportsKey(
@@ -188,7 +209,11 @@ export async function testSportsKey(
 ): Promise<KeyTestResult> {
   if (!key.trim()) return { ok: false, message: "Enter a key first." };
   const req = keyTestRequest(provider, key);
-  if (!req) return { ok: false, message: "This key has characters TheSportsDB keys never have. Check it and try again." };
+  if (!req)
+    return {
+      ok: false,
+      message: "This key has characters TheSportsDB keys never have. Check it and try again.",
+    };
   let status = 0;
   let body: unknown = null;
   let headers: { get(name: string): string | null } | null = null;

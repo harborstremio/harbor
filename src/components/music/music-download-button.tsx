@@ -62,20 +62,30 @@ export function MusicDownloadButton({
       <MusicActionGlyph
         state={done ? "done" : busy ? "busy" : entry?.status === "error" ? "error" : "idle"}
         identity={`${track.connectorId}:${track.id}`}
-        idle={entry?.status === "error"
-          ? <MusicGlyph name="retry" size={18} />
-          : <MusicGlyph name="download" size={18} viewBox="-1 -1 26 26" />}
+        idle={
+          entry?.status === "error" ? (
+            <MusicGlyph name="retry" size={18} />
+          ) : (
+            <MusicGlyph name="download" size={18} viewBox="-1 -1 26 26" />
+          )
+        }
       />
       <span className="sr-only">{label}</span>
-      {!withTooltip && busy && entry.progress > 0 && <small>{Math.round(entry.progress * 100)}%</small>}
+      {!withTooltip && busy && entry.progress > 0 && (
+        <small>{Math.round(entry.progress * 100)}%</small>
+      )}
     </button>
   );
 
   return (
     <>
       {withTooltip ? (
-        <HoverTooltip label={tooltipLabel} side="top" align="center">{button}</HoverTooltip>
-      ) : button}
+        <HoverTooltip label={tooltipLabel} side="top" align="center">
+          {button}
+        </HoverTooltip>
+      ) : (
+        button
+      )}
       <AnchoredMenu anchorRef={anchor} open={asking} onClose={() => setAsking(false)} width={244}>
         <div role="menu" className="music-download-ask">
           <p>{t("music.download.askTitle")}</p>

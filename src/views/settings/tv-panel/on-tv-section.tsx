@@ -58,7 +58,9 @@ export function TvOnDeviceSection() {
   return (
     <Section
       title={t("Still done on the TV")}
-      subtitle={t("These need the television in front of you, either because they show a pairing code or because the credential should never leave the device.")}
+      subtitle={t(
+        "These need the television in front of you, either because they show a pairing code or because the credential should never leave the device.",
+      )}
     >
       {ITEMS.map((item) => (
         <SettingRow key={item.title} label={t(item.title)} desc={t(item.detail)}>

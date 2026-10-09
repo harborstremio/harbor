@@ -17,7 +17,9 @@ export function claimKeySyncOwner(storage: StoragePort, accountId: string): bool
     }
     storage.setItem(OWNER_KEY, accountId);
     return true;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 
 export async function runKeySync(ports: {

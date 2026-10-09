@@ -2,7 +2,6 @@ import { putJlLibraryItem, readJlLibrary } from "./jl/local-library";
 import { readResumeEntry, readResumeSource } from "@/lib/resume";
 import { isDetectedAnime } from "./anime-detect";
 
-
 const CW_FINISHED_RATIO = 0.9;
 
 export type User = {
@@ -133,21 +132,30 @@ export function isCwMember(i: LibraryItem): boolean {
 }
 
 // Historical exports are retained for library callers, with JL local persistence.
-export async function login(_email: string, _password: string): Promise<{ authKey: string; user: User }> {
+export async function login(
+  _email: string,
+  _password: string,
+): Promise<{ authKey: string; user: User }> {
   throw new Error("Use your JL Media Vision account sign-in.");
 }
 export async function getUser(_authKey: string): Promise<User> {
   throw new Error("External account credentials are not used by JL Media Vision.");
 }
 export async function logout(_authKey: string): Promise<void> {}
-export async function library(scope: string): Promise<LibraryItem[]> { return readJlLibrary(scope); }
-export async function libraryIfChanged(scope: string): Promise<LibraryItem[]> { return readJlLibrary(scope); }
+export async function library(scope: string): Promise<LibraryItem[]> {
+  return readJlLibrary(scope);
+}
+export async function libraryIfChanged(scope: string): Promise<LibraryItem[]> {
+  return readJlLibrary(scope);
+}
 export function invalidateLibraryCache(): void {}
 export async function libraryGetOne(scope: string, id: string): Promise<LibraryItem | null> {
   return readJlLibrary(scope).find((item) => item._id === id) ?? null;
 }
 export const libraryGetOneStrict = libraryGetOne;
-export async function libraryPut(scope: string, item: LibraryItem): Promise<void> { putJlLibraryItem(scope, item); }
+export async function libraryPut(scope: string, item: LibraryItem): Promise<void> {
+  putJlLibraryItem(scope, item);
+}
 
 export async function removeStremioLibraryItem(authKey: string, id: string): Promise<void> {
   const items = await library(authKey);

@@ -193,11 +193,7 @@ export function saveInstalled(list: InstalledAddon[]) {
         transportUrl: a.transportUrl,
         installedAt: a.installedAt,
       }));
-      try {
-        localStorage.setItem(storeKey("installed"), JSON.stringify(stripped));
-      } catch (e2) {
-        throw e2;
-      }
+      localStorage.setItem(storeKey("installed"), JSON.stringify(stripped));
     } else {
       throw e;
     }
@@ -349,7 +345,8 @@ export type InstallResult = {
 export async function installAddon(id: string, transportUrl: string): Promise<Addon> {
   const owner = storeKey("installed");
   const manifest = await fetchManifestAt(transportUrl);
-  if (owner !== storeKey("installed")) throw new Error("Profile changed during addon installation. Retry in the intended profile.");
+  if (owner !== storeKey("installed"))
+    throw new Error("Profile changed during addon installation. Retry in the intended profile.");
   const canonicalId = manifest.id || id;
   const before = loadInstalled();
   // Exact URLs identify installations. Distinct configurations with the same ID coexist.
@@ -373,13 +370,19 @@ export async function installFromUrl(
   if (parsed.kind === "error") throw new Error(parsed.message);
   const owner = storeKey("installed");
   const manifest = await fetchManifestAt(parsed.url);
-  if (owner !== storeKey("installed")) throw new Error("Profile changed during addon installation. Retry in the intended profile.");
+  if (owner !== storeKey("installed"))
+    throw new Error("Profile changed during addon installation. Retry in the intended profile.");
   const id = manifest.id;
   const before = loadInstalled();
   const byId = options.replaceId ? before.filter((a) => a.id === options.replaceId) : [];
-  if (!options.replaceUrl && byId.length > 1) throw new Error("Choose the addon configuration to replace. Other configurations will be kept.");
+  if (!options.replaceUrl && byId.length > 1)
+    throw new Error(
+      "Choose the addon configuration to replace. Other configurations will be kept.",
+    );
   const replaceUrl = options.replaceUrl ?? byId[0]?.transportUrl;
-  const replaced = before.filter((a) => a.transportUrl === parsed.url || a.transportUrl === replaceUrl);
+  const replaced = before.filter(
+    (a) => a.transportUrl === parsed.url || a.transportUrl === replaceUrl,
+  );
   const next = before.filter((a) => !replaced.includes(a));
   const replacedUrls = replaced.map((a) => a.transportUrl);
   if (replaced.length > 0) {
@@ -405,7 +408,6 @@ export async function uninstallAddon(id: string, transportUrl?: string): Promise
     for (const a of removed) if (disabled.delete(a.transportUrl)) touched = true;
     if (touched) saveDisabledAddons(disabled);
   }
-
 }
 
 export async function fetchInstalledAddons(): Promise<Addon[]> {
@@ -419,7 +421,9 @@ export async function fetchInstalledAddons(): Promise<Addon[]> {
     try {
       const manifest = await fetchManifestAt(entry.transportUrl);
       if (owner !== storeKey("installed")) return null;
-      const updated = loadInstalled().map((e) => (e.transportUrl === entry.transportUrl ? { ...e, manifest } : e));
+      const updated = loadInstalled().map((e) =>
+        e.transportUrl === entry.transportUrl ? { ...e, manifest } : e,
+      );
       saveInstalled(updated);
       return { manifest, transportUrl: entry.transportUrl };
     } catch {

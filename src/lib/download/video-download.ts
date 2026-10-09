@@ -57,7 +57,12 @@ export function startDownload(
         settle();
         break;
       case "verifying":
-        onProgress({ receivedBytes: ev.received, totalBytes: ev.received, ratio: 1, phaseLabel: "Verifying saved file" });
+        onProgress({
+          receivedBytes: ev.received,
+          totalBytes: ev.received,
+          ratio: 1,
+          phaseLabel: "Verifying saved file",
+        });
         break;
       case "canceled": {
         const e = new Error("Download canceled");

@@ -6,12 +6,7 @@ import { useBpT } from "../../bp-i18n";
 import { useBpHandoff } from "../bp-handoff-context";
 import { BpHandoffPanel, handoffNote } from "../bp-handoff-panel";
 import { BpOnboardAux } from "../bp-onboard-aux";
-import {
-  BpDecisionAction,
-  BpDecisionNote,
-  BpDecisionScroll,
-  BpTick,
-} from "../bp-step-parts";
+import { BpDecisionAction, BpDecisionNote, BpDecisionScroll, BpTick } from "../bp-step-parts";
 import { useBpOnboardFacts } from "../use-bp-onboard-facts";
 
 /**

@@ -2,12 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
 import { type Meta } from "@/lib/cinemeta";
-import {
-  library,
-  libraryMetaType,
-  removeStremioBookmark,
-  type LibraryItem,
-} from "@/lib/stremio";
+import { library, libraryMetaType, removeStremioBookmark, type LibraryItem } from "@/lib/stremio";
 import { fetchWatchlist } from "@/lib/trakt/watchlist";
 import { useTrakt } from "@/lib/trakt/provider";
 import { traktItemToMeta } from "@/lib/trakt/to-meta";

@@ -127,9 +127,10 @@ function StoryBubble({ item, onOpen }: { item: JlHubGame; onOpen: (el: HTMLEleme
   const t = useT();
   const { game, mine } = item;
   const live = isCurrentLiveGame(game);
-  const label = game.savedAt !== undefined || game.state !== "post"
-    ? statusText(game, t)
-    : t("Final {away}–{home}", { away: game.away.score, home: game.home.score });
+  const label =
+    game.savedAt !== undefined || game.state !== "post"
+      ? statusText(game, t)
+      : t("Final {away}–{home}", { away: game.away.score, home: game.home.score });
   return (
     <button
       onClick={(e) => onOpen(e.currentTarget)}

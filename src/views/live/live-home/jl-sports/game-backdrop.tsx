@@ -198,7 +198,8 @@ export function GameBackdrop({
     event: eventPhoto,
     team: art.photo,
     league: leaguePhoto,
-    bundled: variant === "hero" ? sportsSceneryPhoto(hubLeague(game.league)?.group, game.league) : null,
+    bundled:
+      variant === "hero" ? sportsSceneryPhoto(hubLeague(game.league)?.group, game.league) : null,
   });
   return (
     <ArtLayers

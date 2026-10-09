@@ -74,12 +74,14 @@ export function BackupRow() {
     if (!pending) return;
     setApplying(true);
     setRestoreError(false);
-    void applyBackup(pending).then(() => {
-      window.setTimeout(() => window.location.reload(), 280);
-    }).catch(() => {
-      setApplying(false);
-      setRestoreError(true);
-    });
+    void applyBackup(pending)
+      .then(() => {
+        window.setTimeout(() => window.location.reload(), 280);
+      })
+      .catch(() => {
+        setApplying(false);
+        setRestoreError(true);
+      });
   };
 
   return (
@@ -115,7 +117,9 @@ export function BackupRow() {
       </SettingRow>
 
       {error && (
-        <p role="alert" className="max-w-[70ch] text-[15.5px] leading-[22px] text-danger">{t(error)}</p>
+        <p role="alert" className="max-w-[70ch] text-[15.5px] leading-[22px] text-danger">
+          {t(error)}
+        </p>
       )}
 
       <input
@@ -175,9 +179,7 @@ function ExportPicker({
       onClose={onCancel}
       title={t("What should the backup include?")}
       width={800}
-      sub={t(
-        "Choose the sections to save in one file. Your account sign-in is excluded.",
-      )}
+      sub={t("Choose the sections to save in one file. Your account sign-in is excluded.")}
       actions={
         <>
           <SButton onClick={onCancel}>{t("Cancel")}</SButton>
@@ -292,7 +294,13 @@ function RestoreConfirm({
         </>
       }
     >
-      {error && <p role="alert" className="text-[15px] text-danger">{t("Restore did not finish. Some settings may already have changed. Free some storage, then try again.")}</p>}
+      {error && (
+        <p role="alert" className="text-[15px] text-danger">
+          {t(
+            "Restore did not finish. Some settings may already have changed. Free some storage, then try again.",
+          )}
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
         {sections.map((key) => (
           <span

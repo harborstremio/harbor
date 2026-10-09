@@ -45,16 +45,24 @@ test("cloudWriteId keeps non-anime behavior intact", () => {
 test("JL local library keeps anime IDs and removals without an external account write", async () => {
   const writes: unknown[] = [];
   const modules: Record<string, unknown> = {
-    "./jl/local-library": { putJlLibraryItem: (scope: string, item: unknown) => writes.push([scope, item]) },
+    "./jl/local-library": {
+      putJlLibraryItem: (scope: string, item: unknown) => writes.push([scope, item]),
+    },
     "@/lib/resume": {},
     "./anime-detect": {},
   };
-  const output = ts.transpileModule(stremio, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+  const output = ts.transpileModule(stremio, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  }).outputText;
   const exports: { libraryPut?: (scope: string, item: unknown) => Promise<void> } = {};
-  new Function("require", "exports", "fetch", output)((name: string) => {
-    assert.ok(name in modules, `Unexpected dependency ${name}`);
-    return modules[name];
-  }, exports, () => assert.fail("Local library writes must not contact an external account"));
+  new Function("require", "exports", "fetch", output)(
+    (name: string) => {
+      assert.ok(name in modules, `Unexpected dependency ${name}`);
+      return modules[name];
+    },
+    exports,
+    () => assert.fail("Local library writes must not contact an external account"),
+  );
   for (const id of ["kitsu:12", "mal:34", "anilist:56", "anidb:78"]) {
     for (const removed of [false, true]) {
       const item = { _id: id, removed };
@@ -113,7 +121,10 @@ test("every CW rail excludes cloud anime items", () => {
 
 test("anime room sources local CW entries", () => {
   assert.match(anime, /const localAnimeCw = useMemo<LibraryItem\[\]>/);
-  assert.match(anime, /listLocalCw\(hideSharedCw\)\s*\.filter\(\(e\) => ANIME_CLOUD_ID\.test\(e\.id\) \|\| e\.isAnime\)/);
+  assert.match(
+    anime,
+    /listLocalCw\(hideSharedCw\)\s*\.filter\(\(e\) => ANIME_CLOUD_ID\.test\(e\.id\) \|\| e\.isAnime\)/,
+  );
   assert.match(anime, /\[\s*\.\.\.localAnimeCw,\s*\.\.\.\(hideSharedCw \? \[\] : libItems\.filter/);
 });
 

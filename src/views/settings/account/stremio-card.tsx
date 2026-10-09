@@ -41,7 +41,9 @@ export function StremioCard() {
         <SettingRow
           icon={<LogIn size={18} strokeWidth={2} />}
           label={t("Not signed in")}
-          desc={t("Sign in with your JL Media Vision account. Your local library and addons remain available.")}
+          desc={t(
+            "Sign in with your JL Media Vision account. Your local library and addons remain available.",
+          )}
         >
           <button
             ref={signInRef}
@@ -69,7 +71,6 @@ export function StremioCard() {
         }
       >
         <SButton onClick={() => setReveal((v) => !v)}>{reveal ? t("Hide") : t("Reveal")}</SButton>
-
       </SettingRow>
 
       <SettingRow

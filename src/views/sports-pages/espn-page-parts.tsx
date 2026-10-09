@@ -11,7 +11,10 @@ import { isCurrentLiveGame } from "@/lib/jl/sports/presentation";
 /** Shared pieces for the team, athlete and league pages. */
 
 /** Load once per key; `null` data after a finished load means it failed or was empty. */
-export function useLoad<T>(key: string, load: () => Promise<T>): { data: T | null; loading: boolean } {
+export function useLoad<T>(
+  key: string,
+  load: () => Promise<T>,
+): { data: T | null; loading: boolean } {
   const [state, setState] = useState<{ key: string; data: T | null } | null>(null);
   useEffect(() => {
     let active = true;
@@ -73,7 +76,9 @@ export function PageHeader({
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-40"
-          style={{ background: `radial-gradient(120% 100% at 85% 30%, #${color}88 0%, #${color}22 45%, transparent 75%)` }}
+          style={{
+            background: `radial-gradient(120% 100% at 85% 30%, #${color}88 0%, #${color}22 45%, transparent 75%)`,
+          }}
         />
       )}
       <div className="relative flex flex-wrap items-center gap-6">
@@ -82,12 +87,19 @@ export function PageHeader({
           className={`h-24 w-24 shrink-0 object-contain drop-shadow-xl md:h-32 md:w-32 ${round ? "rounded-full bg-canvas/60 object-cover object-top" : ""}`}
         />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          {eyebrow && <div className="text-[12px] font-bold uppercase tracking-[0.18em] text-ink-subtle">{eyebrow}</div>}
+          {eyebrow && (
+            <div className="text-[12px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
+              {eyebrow}
+            </div>
+          )}
           <h1 className="text-3xl font-black leading-tight text-ink md:text-4xl">{title}</h1>
           {shown.length > 0 && (
             <p className="flex flex-wrap gap-x-3 gap-y-1 text-[14px] text-ink-muted">
               {shown.map((f, i) => (
-                <span key={`${i}:${f}`} className={i === 0 ? "rounded bg-canvas/60 px-2 font-semibold text-ink" : ""}>
+                <span
+                  key={`${i}:${f}`}
+                  className={i === 0 ? "rounded bg-canvas/60 px-2 font-semibold text-ink" : ""}
+                >
                   {f}
                 </span>
               ))}
@@ -100,11 +112,21 @@ export function PageHeader({
   );
 }
 
-export function Section({ title, children, aside }: { title: string; children: ReactNode; aside?: ReactNode }) {
+export function Section({
+  title,
+  children,
+  aside,
+}: {
+  title: string;
+  children: ReactNode;
+  aside?: ReactNode;
+}) {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-center gap-2.5">
-        <h2 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">{title}</h2>
+        <h2 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
+          {title}
+        </h2>
         {aside}
       </div>
       {children}
@@ -112,7 +134,15 @@ export function Section({ title, children, aside }: { title: string; children: R
   );
 }
 
-export function Img({ src, className, rounded = false }: { src: string | null | undefined; className: string; rounded?: boolean }) {
+export function Img({
+  src,
+  className,
+  rounded = false,
+}: {
+  src: string | null | undefined;
+  className: string;
+  rounded?: boolean;
+}) {
   const [err, setErr] = useState(false);
   if (!src || err) return <span className={`${className} block rounded-full bg-canvas/60`} />;
   return (
@@ -139,7 +169,15 @@ export function Note({ children }: { children: ReactNode }) {
   return <p className="text-[13px] text-ink-subtle">{children}</p>;
 }
 
-export function FollowToggle({ following, onToggle, name }: { following: boolean; onToggle: () => void; name: string }) {
+export function FollowToggle({
+  following,
+  onToggle,
+  name,
+}: {
+  following: boolean;
+  onToggle: () => void;
+  name: string;
+}) {
   const t = useT();
   return (
     <button
@@ -147,7 +185,9 @@ export function FollowToggle({ following, onToggle, name }: { following: boolean
       aria-pressed={following}
       title={following ? t("Unfollow {team}", { team: name }) : t("Follow {team}", { team: name })}
       className={`flex h-9 items-center gap-1.5 rounded-full border px-4 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink ${
-        following ? "border-accent/40 bg-accent-soft text-accent" : "border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
+        following
+          ? "border-accent/40 bg-accent-soft text-accent"
+          : "border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
       }`}
     >
       <Star size={13} fill={following ? "currentColor" : "none"} strokeWidth={2} />
@@ -190,14 +230,20 @@ export function GameCard({ game, teamId }: { game: SportsGame; teamId?: string }
         {result && (
           <span
             className={`rounded px-1.5 text-[10.5px] font-bold ${
-              result === "W" ? "bg-emerald-600 text-white" : result === "L" ? "bg-danger text-white" : "bg-canvas/60 text-ink-muted"
+              result === "W"
+                ? "bg-emerald-600 text-white"
+                : result === "L"
+                  ? "bg-danger text-white"
+                  : "bg-canvas/60 text-ink-muted"
             }`}
           >
             {result}
           </span>
         )}
         {!result && game.network && (
-          <span className="truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-subtle">{game.network}</span>
+          <span className="truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-subtle">
+            {game.network}
+          </span>
         )}
       </div>
       <TeamLine side={game.away} active={game.state !== "pre"} />
@@ -225,7 +271,9 @@ export function StandingsTable({
   const t = useT();
   return (
     <div className="overflow-x-auto rounded-xl border border-edge-soft/55 bg-elevated">
-      <p className="px-4 pt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-ink-subtle">{group.name}</p>
+      <p className="px-4 pt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-ink-subtle">
+        {group.name}
+      </p>
       <table className="w-full text-[13px] tabular-nums">
         <thead className="text-[11px] uppercase tracking-wider text-ink-subtle">
           <tr>
@@ -241,9 +289,13 @@ export function StandingsTable({
         <tbody>
           {group.rows.map((r, i) => {
             const me = !!highlightId && r.id === highlightId;
-            const open = onTeam && r.kind === "team" && r.id ? () => onTeam(r.id as string, r.name) : null;
+            const open =
+              onTeam && r.kind === "team" && r.id ? () => onTeam(r.id as string, r.name) : null;
             return (
-              <tr key={`${r.id ?? r.name}:${i}`} className={`border-t border-edge-soft/50 ${me ? "bg-accent-soft font-bold" : ""}`}>
+              <tr
+                key={`${r.id ?? r.name}:${i}`}
+                className={`border-t border-edge-soft/50 ${me ? "bg-accent-soft font-bold" : ""}`}
+              >
                 <td className="px-4 py-2 text-ink-subtle">{i + 1}</td>
                 <td className="px-2 py-1.5">
                   {open ? (
@@ -291,15 +343,21 @@ export function PersonTile({
 }) {
   const body = (
     <>
-      <Img src={image} className="h-11 w-11 shrink-0 rounded-full bg-canvas/60 object-cover object-top" />
+      <Img
+        src={image}
+        className="h-11 w-11 shrink-0 rounded-full bg-canvas/60 object-cover object-top"
+      />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-[13.5px] font-semibold text-ink">{name}</span>
         {line && <span className="truncate text-[11.5px] text-ink-subtle">{line}</span>}
       </span>
-      {value && <span className="shrink-0 text-[15px] font-bold tabular-nums text-ink">{value}</span>}
+      {value && (
+        <span className="shrink-0 text-[15px] font-bold tabular-nums text-ink">{value}</span>
+      )}
     </>
   );
-  const cls = "flex items-center gap-3 rounded-xl border border-edge-soft/55 bg-elevated px-3 py-2.5 text-start";
+  const cls =
+    "flex items-center gap-3 rounded-xl border border-edge-soft/55 bg-elevated px-3 py-2.5 text-start";
   if (!onOpen) return <div className={cls}>{body}</div>;
   return (
     <button
