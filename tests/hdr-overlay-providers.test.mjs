@@ -50,7 +50,12 @@ test("HDR shell mounts with the actual profile, auth and navigation contexts", (
     },
     { localStorage },
   );
-  const auth = load("src/lib/auth.tsx", { "./profiles": profiles }, { localStorage });
+  const localLibrary = load("src/lib/jl/local-library.ts", {}, { localStorage });
+  const auth = load("src/lib/auth.tsx", {
+    "./profiles": profiles,
+    "./jl/account/client": { useJlSession: () => null },
+    "./jl/local-library": localLibrary,
+  }, { localStorage });
   const view = load("src/lib/view.tsx");
   const forwarded = [];
   const payload = {
@@ -77,6 +82,7 @@ test("HDR shell mounts with the actual profile, auth and navigation contexts", (
         const { activeId } = profiles.useProfiles();
         assert.equal(activeId, "selected", "must not reselect the primary/default profile");
         assert.equal(auth.useAuth().user, null);
+        assert.equal(auth.useAuth().authKey, localLibrary.localLibraryScope("selected"));
         const nav = view.usePlayerNavigation();
         nav.exitPlayer();
         nav.openMeta({ id: "test" });

@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
+import ts from "typescript";
 
 const read = (p: string) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 
@@ -41,14 +42,27 @@ test("cloudWriteId keeps non-anime behavior intact", () => {
   assert.match(fn, /return CLOUD_OK\.test\(metaId\) \? metaId : null;/);
 });
 
-test("libraryPut refuses anime-scheme writes unless they are removals", () => {
-  const fn = stremio.match(/export async function libraryPut\([\s\S]*?\n\}/)?.[0];
-  assert.ok(fn, "libraryPut must exist");
-  const gateIdx = fn.indexOf("ANIME_CLOUD_ID.test(item._id)");
-  const putIdx = fn.indexOf("datastorePut");
-  assert.ok(gateIdx >= 0, "libraryPut must gate anime ids");
-  assert.ok(putIdx > gateIdx, "anime gate must run before datastorePut");
-  assert.match(fn, /item\.removed !== true\) return;/);
+test("JL local library keeps anime IDs and removals without an external account write", async () => {
+  const writes: unknown[] = [];
+  const modules: Record<string, unknown> = {
+    "./jl/local-library": { putJlLibraryItem: (scope: string, item: unknown) => writes.push([scope, item]) },
+    "@/lib/resume": {},
+    "./anime-detect": {},
+  };
+  const output = ts.transpileModule(stremio, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+  const exports: { libraryPut?: (scope: string, item: unknown) => Promise<void> } = {};
+  new Function("require", "exports", "fetch", output)((name: string) => {
+    assert.ok(name in modules, `Unexpected dependency ${name}`);
+    return modules[name];
+  }, exports, () => assert.fail("Local library writes must not contact an external account"));
+  for (const id of ["kitsu:12", "mal:34", "anilist:56", "anidb:78"]) {
+    for (const removed of [false, true]) {
+      const item = { _id: id, removed };
+      await exports.libraryPut!("jl-local:selected", item);
+      assert.deepEqual(writes.at(-1), ["jl-local:selected", item]);
+    }
+  }
+  assert.equal(writes.length, 8);
 });
 
 test("player sync clears a stale finished flag on a real resume", () => {
