@@ -312,7 +312,7 @@ export async function downloadMusic(track: MusicTrack, withFilters = false): Pro
           entry.error = error instanceof Error ? error.message : "music.download.filterFailed";
         }
       }
-      if (!canceled.has(id)) {
+      if (!canceled.has(id) && owns(entry) && entry.status === "downloading") {
         entry.status = "done";
         entry.progress = 1;
         publish();

@@ -12,7 +12,7 @@ const track = {
   durationSeconds: 120,
   durationLabel: "2:00",
 };
-function fixture() {
+function fixture(options: { deferFilter?: boolean } = {}) {
   const storage = new Map(),
     files = new Set<string>(),
     calls: any[] = [];
@@ -22,6 +22,8 @@ function fixture() {
   let stream = "https://example.test/audio";
   let owner = JSON.stringify(["account-a", "profile-a"]);
   let changed = () => {};
+  let finishFilter = () => {};
+  const filtering = new Promise<void>((resolve) => { finishFilter = resolve; });
   const code = ts.transpileModule(
     readFileSync(new URL("../src/lib/music/downloads.ts", import.meta.url), "utf8"),
     { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } },
@@ -42,6 +44,7 @@ function fixture() {
     "@tauri-apps/api/core": {
       invoke: async (cmd: string, args: any) => {
         calls.push({ cmd, args });
+        if (cmd === "music_export_filtered" && options.deferFilter) await filtering;
         return cmd === "music_source_candidates"
           ? [{ connectorId: "youtube_music", health: "healthy", track }]
           : { url: stream, httpHeaders: { Referer: "https://example.test" } };
@@ -107,6 +110,7 @@ function fixture() {
     files,
     calls,
     finish: () => finish(),
+    finishFilter: () => finishFilter(),
     fail: () => fail(),
     cancelled: () => cancelled,
     stream: (s: string) => (stream = s),
@@ -200,4 +204,36 @@ test("manifest streams and unavailable sources never produce a completed downloa
   );
   await assert.rejects(f.api.downloadMusic({ ...track, connectorId: "spotify" }), /unsupported/);
   await assert.rejects(f.api.musicDownloadPath("../../elsewhere"), /Invalid/);
+});
+
+test("profile change during music filtering preserves pause and hides the old owner", async () => {
+  const f = fixture({ deferFilter: true });
+  const job = f.api.downloadMusic(track, true);
+  await f.wait();
+  const entry = f.api.musicDownloadFor(track)!;
+  f.finish();
+  for (let i = 0; i < 30 && !f.calls.some((call) => call.cmd === "music_export_filtered"); i++)
+    await new Promise((resolve) => setTimeout(resolve, 1));
+  assert.ok(f.calls.some((call) => call.cmd === "music_export_filtered"));
+  f.switchOwner(JSON.stringify(["account-b", "profile-b"]));
+  assert.equal(entry.status, "paused");
+  f.finishFilter();
+  await job;
+  assert.equal(entry.status, "paused");
+  assert.equal(f.api.useMusicDownloads().length, 0);
+});
+
+test("pause during music filtering survives late completion", async () => {
+  const f = fixture({ deferFilter: true });
+  const job = f.api.downloadMusic(track, true);
+  await f.wait();
+  const entry = f.api.musicDownloadFor(track)!;
+  f.finish();
+  for (let i = 0; i < 30 && !f.calls.some((call) => call.cmd === "music_export_filtered"); i++)
+    await new Promise((resolve) => setTimeout(resolve, 1));
+  assert.ok(f.calls.some((call) => call.cmd === "music_export_filtered"));
+  f.api.pauseMusicDownload(entry.id);
+  f.finishFilter();
+  await job;
+  assert.equal(entry.status, "paused");
 });
