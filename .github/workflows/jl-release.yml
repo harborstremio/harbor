@@ -98,6 +98,14 @@ jobs:
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Prepare Capstan extension dependencies
+        shell: bash
+        run: sh android-extension-compat/tools/deps.sh
+
+      - name: Build and verify Capstan extension runtime
+        shell: bash
+        run: pnpm run setup:capstan
+
       - name: Fetch libmpv
         run: pnpm run setup:libmpv
 
@@ -125,10 +133,10 @@ jobs:
           tauriScript: pnpm tauri
           args: --target x86_64-pc-windows-msvc --config src-tauri/tauri.jl-dev.conf.json --bundles nsis
           tagName: jl-v__VERSION__
-          commitish: ${{ github.sha }}
+          releaseCommitish: ${{ github.sha }}
           releaseName: JL Media Vision v__VERSION__
-          releaseBody: Windows installer for JL Media Vision. Download JL-Media-Vision-Setup-x64.exe and run it.
-          releaseDraft: false
+          releaseBody: Download JL-Media-Vision-Setup-x64.exe for Windows or JL-Media-Vision-TV.apk for Android TV.
+          releaseDraft: true
           prerelease: false
 
       - name: Upload stable-named installer
@@ -183,3 +191,18 @@ jobs:
         run: |
           cp android-tv/app/build/outputs/apk/release/app-release.apk JL-Media-Vision-TV.apk
           gh release upload "${{ needs.windows.outputs.tag }}" JL-Media-Vision-TV.apk --clobber --repo "${{ github.repository }}"
+
+      # Keep the previous release as releases/latest until both stable website targets exist.
+      - name: Verify assets and publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ needs.windows.outputs.tag }}"
+          assets=$(gh release view "$tag" --repo "${{ github.repository }}" --json assets --jq '.assets[].name')
+          for required in JL-Media-Vision-Setup-x64.exe JL-Media-Vision-TV.apk; do
+            if ! grep -Fxq "$required" <<<"$assets"; then
+              echo "::error::$required is missing from the draft release."
+              exit 1
+            fi
+          done
+          gh release edit "$tag" --repo "${{ github.repository }}" --draft=false --latest

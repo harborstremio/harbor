@@ -6,19 +6,11 @@ R=$(cd "$(dirname "$0")/.." && pwd)
 . "$R/tools/portable.sh"
 rm -rf "$R/out/classes" "$R/out/capstan.jar"
 mkdir -p "$R/out/classes"
-SRC=$(find "$R/src" -name '*.kt' | sort)
-[ -n "$SRC" ] || { echo "no sources"; exit 1; }
-# A checkout can sit under a path with a space in it, and an unquoted expansion of a file list is
-# split on that space, which turns one path into several names the compiler cannot find. Read the
-# list into positional parameters a line at a time and quote "$@" at the call site. This is POSIX
-# sh, which has no arrays, and a here document keeps the loop in this shell rather than a subshell.
-set --
-while IFS= read -r f; do
-  if [ -n "$f" ]; then set -- "$@" "$f"; fi
-done <<SRC_EOF
-$SRC
-SRC_EOF
-sh "$R/tools/kc.sh" "$@" -d "$R/out/classes"
+find "$R/src" -name '*.kt' -print -quit | grep -q . || { echo "no sources"; exit 1; }
+# The Kotlin CLI accepts a source directory and walks it recursively. Passing the 300+ source
+# paths individually exceeds Windows' CreateProcess command-line limit before Java can start.
+# Quoting the single directory also keeps checkouts whose paths contain spaces working.
+sh "$R/tools/kc.sh" "$R/src" -d "$R/out/classes"
 JAVA=$(find "$R/src" -name '*.java' | sort)
 if [ -n "$JAVA" ]; then
   set --

@@ -4,8 +4,7 @@
 # libs/ and tools/ hold about 100MB of third party binaries. Committing them would put a binary
 # blob in every clone forever, so they are ignored and rebuilt here instead. Versions are pinned:
 # a floating version would change what the compat layer compiles against without anything in the
-# repository recording it. docs/THIRD-PARTY.md lists the licence of everything under libs/, which
-# is the set that ships inside the installer.
+# repository recording it. docs/THIRD-PARTY.md records the sources and licences.
 #
 # Run after a fresh clone, then tools/build.sh.
 set -e
@@ -21,6 +20,27 @@ get() {
 }
 
 maven() { get "$1" "$2" "$M/$1"; }
+
+digest() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | cut -d ' ' -f 1
+  else
+    shasum -a 256 "$1" | cut -d ' ' -f 1
+  fi
+}
+
+verified() {
+  get "$1" "$2" "$3"
+  out="$2/$(basename "$1")"
+  actual=$(digest "$out")
+  if [ "$actual" != "$4" ]; then
+    rm -f "$out"
+    echo "FAILED checksum for $(basename "$1")"
+    echo "  expected $4"
+    echo "  actual   $actual"
+    exit 1
+  fi
+}
 
 echo "libs/ (compiled against, and shipped inside the installer)"
 maven com/google/code/gson/gson/2.11.0/gson-2.11.0.jar "$R/libs"
@@ -42,6 +62,10 @@ maven com/squareup/okhttp3/okhttp/4.12.0/okhttp-4.12.0.jar "$R/libs"
 maven com/squareup/okio/okio-jvm/3.9.0/okio-jvm-3.9.0.jar "$R/libs"
 maven org/mozilla/rhino/1.8.1/rhino-1.8.1.jar "$R/libs"
 maven com/google/protobuf/protobuf-javalite/4.35.1/protobuf-javalite-4.35.1.jar "$R/libs"
+verified NewPipeExtractor-v0.26.5.jar "$R/libs" \
+  https://jitpack.io/com/github/TeamNewPipe/NewPipeExtractor/v0.26.5/NewPipeExtractor-v0.26.5.jar \
+  923bf0a60938d570ad176ed7b08fa9fec7d0772d7a386ca89a2dd3b9212979c7
+maven com/grack/nanojson/1.7/nanojson-1.7.jar "$R/libs"
 
 echo "tools/ (the compiler, used to build, never shipped)"
 maven org/jetbrains/kotlin/kotlin-compiler-embeddable/2.2.20/kotlin-compiler-embeddable-2.2.20.jar "$R/tools"
@@ -53,16 +77,20 @@ for j in kotlin-stdlib-2.2.20 kotlin-reflect-2.2.20 kotlinx-coroutines-core-jvm-
   [ -s "$R/tools/$j.jar" ] || cp "$R/libs/$j.jar" "$R/tools/$j.jar"
 done
 
-echo
-echo "Two things this script cannot fetch from Maven Central, because they are not there:"
-echo "  libs/NewPipeExtractor-v0.26.5.jar and libs/nanojson-*.jar  (needed by one extension)"
-echo "  tools/dex-tools/                                           (Dalvik to JVM conversion)"
-echo "  samples/*.cs3                                              (13 test fixtures)"
-echo "docs/THIRD-PARTY.md records where each came from and under what licence."
-echo
-if [ -d "$R/tools/dex-tools/lib" ] && [ -s "$R/libs/NewPipeExtractor-v0.26.5.jar" ]; then
-  echo "deps ok"
+echo "dex-tools/ (Dalvik to JVM conversion, used at runtime)"
+if [ -s "$R/tools/dex-tools/lib/dex-tools-v2.4.jar" ]; then
+  echo "  have dex-tools-v2.4"
 else
-  echo "deps incomplete: see the note above. tools/build.sh works without them;"
-  echo "loading a real archive does not."
+  archive="$R/tools/dex-tools-v2.4.zip"
+  verified dex-tools-v2.4.zip "$R/tools" \
+    https://github.com/pxb1988/dex2jar/releases/download/v2.4/dex-tools-v2.4.zip \
+    ee7c45eb3c1d2474a6145d8d447e651a736a22d9664b6d3d3be5a5a817dda23a
+  rm -rf "$R/tools/dex-tools" "$R/tools/dex-tools-v2.4"
+  unzip -q "$archive" -d "$R/tools"
+  mv "$R/tools/dex-tools-v2.4" "$R/tools/dex-tools"
+  rm -f "$archive"
 fi
+
+echo
+echo "deps ok"
+echo "samples/*.cs3 are optional live-test fixtures and are not fetched by this build bootstrap."
