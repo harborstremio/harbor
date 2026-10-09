@@ -146,6 +146,17 @@ jobs:
       - name: Verify Windows bundle resources
         run: node scripts/check-jl-bundle.mjs
 
+      - name: Test native offline downloads and stream transport
+        shell: pwsh
+        env:
+          TAURI_CONFIG: '{"bundle":{"externalBin":[],"resources":[]}}'
+        run: |
+          $env:PATH = "$env:GITHUB_WORKSPACE\src-tauri\libmpv;$env:PATH"
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --release --target x86_64-pc-windows-msvc --lib download::tests -- --test-threads=2
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --release --target x86_64-pc-windows-msvc --lib stream_proxy::tests -- --test-threads=2
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Build Windows installer
         id: tauri
         uses: tauri-apps/tauri-action@v0

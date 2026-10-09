@@ -1,3 +1,4 @@
+import { JlAccountWorkspaceBoundary } from "@/components/jl-account-workspace-boundary";
 import { GAMES_IN_NAV } from "@/chrome/nav-items";
 import { GameAccessProvider } from "@/views/games/game-access-context";
 import { GameLibraryDock } from "@/views/games/game-library-dock";
@@ -398,6 +399,14 @@ function useIdleEvict(active: boolean, pin = false): boolean {
 }
 
 export function App({ onReady }: { onReady?: () => void }) {
+  return (
+    <JlAccountWorkspaceBoundary onReady={onReady}>
+      <AppProviders onReady={onReady} />
+    </JlAccountWorkspaceBoundary>
+  );
+}
+
+function AppProviders({ onReady }: { onReady?: () => void }) {
   return (
     <SettingsProvider syncTorrentEnginePolicy>
       <ProfilesProvider>
