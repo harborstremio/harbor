@@ -282,8 +282,13 @@ async fn run_download(
     emit(DownloadEvent::Verifying { received });
     identity.digest = Some(file_digest(&part, cancel, received).await?);
     identity.total = Some(received);
-    tokio::fs::write(&sidecar, serde_json::to_vec(&identity).map_err(|_| failure("Could not save completed file state"))?).await
+    let mut completion = tokio::fs::File::create(&sidecar).await
         .map_err(|_| failure("Could not save completed file state"))?;
+    completion.write_all(&serde_json::to_vec(&identity).map_err(|_| failure("Could not save completed file state"))?).await
+        .map_err(|_| failure("Could not save completed file state"))?;
+    // The recovery marker must reach disk before the final file becomes visible.
+    completion.sync_all().await.map_err(|_| failure("Could not sync completed file state"))?;
+    drop(completion);
     if cancel.load(Ordering::Relaxed) { return Err(DownloadEnd::Canceled(received)); }
     // Same-folder, no-clobber publication is atomic on Windows, including
     // FAT/exFAT. Reuse the game transfer implementation instead of copying into
