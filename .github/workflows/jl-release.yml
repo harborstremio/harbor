@@ -1,19 +1,22 @@
-# Builds the JL Media Vision Windows installer and Android TV app and publishes them as a
-# GitHub release. The download site links to releases/latest/download/JL-Media-Vision-Setup-x64.exe
-# and releases/latest/download/JL-Media-Vision-TV.apk.
-# Start it by changing .github/jl-release (a one-line note) on the release branch, or by pushing
-# a jl-v* tag. The release and its jl-v<version> tag are created on GitHub by tauri-action.
+# Build both installers independently and retain them even while publication is blocked.
+# Pushes are build-only. Publication is an explicit dispatch after release authorization is resolved.
+# The website's stable asset names stay unchanged and publishing requires both verified files.
 name: JL Release
 
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish after both builds (requires authorized release access)
+        type: boolean
+        default: false
   push:
     tags: ["jl-v*"]
     branches: ["claude/determined-planck-b1p158"]
     paths: [".github/jl-release"]
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: jl-release
@@ -138,55 +141,40 @@ jobs:
       - name: Verify Windows bundle resources
         run: node scripts/check-jl-bundle.mjs
 
-      - name: Check release destination
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          tag="jl-v$(node -p "require('./src-tauri/tauri.jl-dev.conf.json').version")"
-          draft=$(gh api --paginate "repos/${{ github.repository }}/releases" --jq ".[] | select(.tag_name == \"$tag\") | .draft")
-          if [ -n "$draft" ] && [ "$draft" != true ]; then
-            echo "::error::Refusing to overwrite an already published release."
-            exit 1
-          fi
-          ref=$(gh api "repos/${{ github.repository }}/git/matching-refs/tags/$tag" --jq ".[] | select(.ref == \"refs/tags/$tag\") | .ref")
-          if [ -n "$ref" ]; then
-            tag_commit=$(gh api "repos/${{ github.repository }}/commits/$tag" --jq '.sha')
-            if [ "$tag_commit" != "${{ github.sha }}" ]; then
-              echo "::error::Existing release tag points to a different commit."
-              exit 1
-            fi
-          fi
-
-      - name: Build draft release
+      - name: Build Windows installer
         id: tauri
         uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tauriScript: pnpm tauri
           args: --target x86_64-pc-windows-msvc --config src-tauri/tauri.jl-dev.conf.json --bundles nsis
-          tagName: jl-v__VERSION__
-          releaseCommitish: ${{ github.sha }}
-          releaseName: JL Media Vision v__VERSION__
-          releaseBody: Download JL-Media-Vision-Setup-x64.exe for Windows or JL-Media-Vision-TV.apk for Android TV.
-          releaseDraft: true
-          prerelease: false
 
-      - name: Upload stable-named installer
+      - name: Prepare stable Windows artifact
         shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          setup=$(ls src-tauri/target/${TARGET}/release/bundle/nsis/*-setup.exe | head -1)
-          cp "$setup" JL-Media-Vision-Setup-x64.exe
-          # A prior failed attempt may have left a draft. Both assets are replaced by this run.
-          gh release edit "jl-v${{ steps.tauri.outputs.appVersion }}" --target "${{ github.sha }}" --repo "${{ github.repository }}"
-          gh release upload "jl-v${{ steps.tauri.outputs.appVersion }}" JL-Media-Vision-Setup-x64.exe --clobber --repo "${{ github.repository }}"
+          installers=(src-tauri/target/${TARGET}/release/bundle/nsis/*-setup.exe)
+          if [ "${#installers[@]}" != 1 ] || [ ! -s "${installers[0]}" ]; then
+            echo "::error::Expected exactly one nonempty Windows installer."
+            exit 1
+          fi
+          cp "${installers[0]}" JL-Media-Vision-Setup-x64.exe
+          sha256sum JL-Media-Vision-Setup-x64.exe > JL-Media-Vision-Setup-x64.exe.sha256
+          printf '%s\n' "${{ github.sha }}" > windows-build-commit.txt
+
+      - name: Retain Windows installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: jl-installers-windows-x64
+          path: |
+            JL-Media-Vision-Setup-x64.exe
+            JL-Media-Vision-Setup-x64.exe.sha256
+            windows-build-commit.txt
+          retention-days: 14
+          if-no-files-found: error
+          compression-level: 0
 
   android-tv:
     name: Android TV
-    needs: windows
+    needs: settings
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -221,12 +209,89 @@ jobs:
       - name: Build APK
         run: gradle -p android-tv assembleRelease --no-daemon
 
-      - name: Upload APK to the release
+      - name: Verify and prepare stable APK artifact
+        run: |
+          cp android-tv/app/build/outputs/apk/release/app-release.apk JL-Media-Vision-TV.apk
+          test -s JL-Media-Vision-TV.apk
+          "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --verbose JL-Media-Vision-TV.apk
+          "$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging JL-Media-Vision-TV.apk | grep '^package:'
+          sha256sum JL-Media-Vision-TV.apk > JL-Media-Vision-TV.apk.sha256
+          printf '%s\n' "${{ github.sha }}" > android-tv-build-commit.txt
+
+      - name: Retain Android TV APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: jl-installers-android-tv
+          path: |
+            JL-Media-Vision-TV.apk
+            JL-Media-Vision-TV.apk.sha256
+            android-tv-build-commit.txt
+          retention-days: 14
+          if-no-files-found: error
+          compression-level: 0
+
+  publish:
+    name: Publish verified installers
+    needs: [windows, android-tv]
+    if: github.event_name == 'workflow_dispatch' && inputs.publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Download installers from this run
+        uses: actions/download-artifact@v8
+        with:
+          pattern: jl-installers-*
+          merge-multiple: true
+
+      - name: Verify retained installers
+        run: |
+          for platform in windows android-tv; do
+            if [ "$(cat "$platform-build-commit.txt")" != "${{ github.sha }}" ]; then
+              echo "::error::Retained installer was built from a different commit."
+              exit 1
+            fi
+          done
+          for required in JL-Media-Vision-Setup-x64.exe JL-Media-Vision-TV.apk; do
+            test -s "$required"
+            sha256sum -c "$required.sha256"
+          done
+
+      - name: Check release destination
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cp android-tv/app/build/outputs/apk/release/app-release.apk JL-Media-Vision-TV.apk
-          gh release upload "${{ needs.windows.outputs.tag }}" JL-Media-Vision-TV.apk --clobber --repo "${{ github.repository }}"
+          tag="jl-v$(node -p "require('./src-tauri/tauri.jl-dev.conf.json').version")"
+          draft=$(gh api --paginate "repos/${{ github.repository }}/releases" --jq ".[] | select(.tag_name == \"$tag\") | .draft")
+          if [ -n "$draft" ] && [ "$draft" != true ]; then
+            echo "::error::Refusing to overwrite an already published release."
+            exit 1
+          fi
+          ref=$(gh api "repos/${{ github.repository }}/git/matching-refs/tags/$tag" --jq ".[] | select(.ref == \"refs/tags/$tag\") | .ref")
+          if [ -n "$ref" ]; then
+            tag_commit=$(gh api "repos/${{ github.repository }}/commits/$tag" --jq '.sha')
+            if [ "$tag_commit" != "${{ github.sha }}" ]; then
+              echo "::error::Existing release tag points to a different commit."
+              exit 1
+            fi
+          fi
+
+      # GitHub rejects workflow-changing targets with GITHUB_TOKEN. Keep publishing opt-in
+      # until an authorized maintainer has resolved that release-access requirement.
+      - name: Prepare draft and upload both installers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ needs.windows.outputs.tag }}"
+          draft=$(gh api --paginate "repos/${{ github.repository }}/releases" --jq ".[] | select(.tag_name == \"$tag\") | .draft")
+          if [ "$draft" = true ]; then
+            gh release edit "$tag" --target "${{ github.sha }}" --repo "${{ github.repository }}"
+          else
+            gh release create "$tag" --target "${{ github.sha }}" --draft --title "JL Media Vision ${tag#jl-}" --notes "Download JL-Media-Vision-Setup-x64.exe for Windows or JL-Media-Vision-TV.apk for Android TV." --repo "${{ github.repository }}"
+          fi
+          gh release upload "$tag" JL-Media-Vision-Setup-x64.exe JL-Media-Vision-TV.apk --clobber --repo "${{ github.repository }}"
 
       # Keep the previous release as releases/latest until both stable website targets exist.
       - name: Verify assets and publish release

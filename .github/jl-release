@@ -1,1 +1,1 @@
-JL Media Vision 0.9.26 rebuild: validate the draft target before publication and the created tag afterwards; keep both verified installer assets required.
+JL Media Vision 0.9.26 build-only: retain independent Windows and Android installers with checksums; publication stays paused pending authorized release access.
