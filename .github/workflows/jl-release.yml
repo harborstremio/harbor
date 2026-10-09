@@ -138,6 +138,26 @@ jobs:
       - name: Verify Windows bundle resources
         run: node scripts/check-jl-bundle.mjs
 
+      - name: Check release destination
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="jl-v$(node -p "require('./src-tauri/tauri.jl-dev.conf.json').version")"
+          draft=$(gh api --paginate "repos/${{ github.repository }}/releases" --jq ".[] | select(.tag_name == \"$tag\") | .draft")
+          if [ -n "$draft" ] && [ "$draft" != true ]; then
+            echo "::error::Refusing to overwrite an already published release."
+            exit 1
+          fi
+          ref=$(gh api "repos/${{ github.repository }}/git/matching-refs/tags/$tag" --jq ".[] | select(.ref == \"refs/tags/$tag\") | .ref")
+          if [ -n "$ref" ]; then
+            tag_commit=$(gh api "repos/${{ github.repository }}/commits/$tag" --jq '.sha')
+            if [ "$tag_commit" != "${{ github.sha }}" ]; then
+              echo "::error::Existing release tag points to a different commit."
+              exit 1
+            fi
+          fi
+
       - name: Build draft release
         id: tauri
         uses: tauri-apps/tauri-action@v0
@@ -160,6 +180,8 @@ jobs:
         run: |
           setup=$(ls src-tauri/target/${TARGET}/release/bundle/nsis/*-setup.exe | head -1)
           cp "$setup" JL-Media-Vision-Setup-x64.exe
+          # A prior failed attempt may have left a draft. Both assets are replaced by this run.
+          gh release edit "jl-v${{ steps.tauri.outputs.appVersion }}" --target "${{ github.sha }}" --repo "${{ github.repository }}"
           gh release upload "jl-v${{ steps.tauri.outputs.appVersion }}" JL-Media-Vision-Setup-x64.exe --clobber --repo "${{ github.repository }}"
 
   android-tv:
@@ -212,9 +234,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="${{ needs.windows.outputs.tag }}"
-          release_commit=$(gh api "repos/${{ github.repository }}/commits/$tag" --jq '.sha')
+          # GitHub creates a new draft's tag only when the draft is published.
+          release_commit=$(gh release view "$tag" --repo "${{ github.repository }}" --json targetCommitish --jq '.targetCommitish')
           if [ "$release_commit" != "${{ github.sha }}" ]; then
-            echo "::error::Release tag does not point to the commit built by this workflow."
+            echo "::error::Draft target does not match the commit built by this workflow."
             exit 1
           fi
           assets=$(gh release view "$tag" --repo "${{ github.repository }}" --json assets --jq '.assets[].name')
@@ -225,3 +248,8 @@ jobs:
             fi
           done
           gh release edit "$tag" --repo "${{ github.repository }}" --draft=false --latest
+          tag_commit=$(gh api "repos/${{ github.repository }}/commits/$tag" --jq '.sha')
+          if [ "$tag_commit" != "${{ github.sha }}" ]; then
+            echo "::error::Published release tag does not match the workflow commit."
+            exit 1
+          fi

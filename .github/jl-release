@@ -1,1 +1,1 @@
-JL Media Vision 0.9.26 rebuild: stage the pinned Pokemon engine, corresponding sources and subtitle fonts; verify all Windows resources and publish only after both stable assets match the release commit.
+JL Media Vision 0.9.26 rebuild: validate the draft target before publication and the created tag afterwards; keep both verified installer assets required.
