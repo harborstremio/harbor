@@ -136,7 +136,9 @@ function checkLocalScope(scope: string): void {
 // URLs/configuration stay local; account sync uses a separate explicit allowlist.
 export async function userAddons(scope: string): Promise<Addon[]> {
   checkLocalScope(scope);
-  return fetchInstalledAddons();
+  const addons = await fetchInstalledAddons();
+  checkLocalScope(scope);
+  return addons;
 }
 export async function setUserAddons(scope: string, addons: Addon[]): Promise<boolean> {
   checkLocalScope(scope);

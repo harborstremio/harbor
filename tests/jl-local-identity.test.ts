@@ -167,6 +167,15 @@ test("account collection compatibility API only accesses current JL local profil
   f.setProfile("other");
   await assert.rejects(addons.setUserAddons(scope, []), /profile changed/);
   assert.equal(f.values.has("harbor.installed-addons.other"), false);
+
+  f.setProfile("primary");
+  f.store.saveInstalled([{ id: "fixture", transportUrl: "https://fixture.invalid/manifest.json", installedAt: 1 }]);
+  let complete!: (response: Response) => void;
+  f.defer(() => new Promise(resolve => { complete = resolve; }));
+  const pending = addons.userAddons(scope);
+  f.setProfile("other");
+  complete(new Response(JSON.stringify({ id: "fixture", name: "Fixture" })));
+  await assert.rejects(pending, /profile changed/, "a late manifest read cannot return another profile's configuration");
 });
 
 test("addon order backups are profile scoped and legacy originals remain recoverable", () => {
