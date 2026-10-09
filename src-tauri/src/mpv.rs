@@ -685,6 +685,9 @@ pub async fn mpv_start(
         );
         let _ = mpv.set_property("stream-buffer-size", "32MiB");
     }
+    // Live sports channels are often sent interlaced (1080i); without deinterlacing, fast motion
+    // judders and combs. "auto" only touches frames flagged as interlaced, so films are unaffected.
+    let _ = mpv.set_property("deinterlace", "auto");
     if want_embed {
         let _ = mpv.set_property("sub-visibility", "no");
         let _ = mpv.set_property("secondary-sub-visibility", "no");
