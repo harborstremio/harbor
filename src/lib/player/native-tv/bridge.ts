@@ -178,6 +178,7 @@ export function createNativeTvBridge(): PlayerBridge {
     setRate() {},
     setAudioTrack() {},
     setSubtitleTrack() {},
+    setSecondarySubtitleTrack() {},
     setSubVisible() {},
     setSubDelay() {},
     setAudioDelay() {},

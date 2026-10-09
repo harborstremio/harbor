@@ -19,6 +19,13 @@ export type SportsSide = {
   /** A doubles pair or relay squad. ESPN ships these as ONE competitor carrying a roster rather
    *  than a team, so a side is 1..N people and the pair label is pre-formatted upstream. */
   members?: { id: string; name: string; flag: string }[];
+  /** School or city ("Ohio State", "Philadelphia"); team sides only. */
+  location?: string;
+  /** Mascot or nickname ("Buckeyes", "Phillies"); team sides only. */
+  nickname?: string;
+  /** Team colours as the provider lists them (lowercase hex without '#'). */
+  color?: string;
+  altColor?: string;
 };
 
 export type EventContext = {
@@ -54,6 +61,10 @@ export type SportsGame = {
   artwork?: string;
   poster?: string;
   broadcasts?: string[];
+  /** The national broadcaster when one is marked, else the first listed (one of `broadcasts`). */
+  network?: string | null;
+  /** Published betting line, e.g. "KC -3.5 · O/U 47.5". */
+  odds?: string | null;
 };
 
 export type MatchPlayer = {

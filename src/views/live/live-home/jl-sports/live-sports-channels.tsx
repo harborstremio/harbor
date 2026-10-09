@@ -6,6 +6,7 @@ import { computeTvgIdCounts, epgProgramsForChannel } from "@/lib/iptv/epg-resolv
 import { useEpgMapVersion } from "@/lib/iptv/epg-map";
 import { useFavorites } from "@/lib/iptv/favorites";
 import { useAllGroupPrefs } from "@/lib/iptv/group-order";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
 import type { EpgIndex, EpgProgram, IptvChannel } from "@/lib/iptv/types";
 import { isLiveChannel } from "@/lib/iptv/vod-classify";
 import { findCurrent } from "@/lib/iptv/xmltv";
@@ -23,7 +24,6 @@ import {
   type LiveSportsEntry,
   type SportsChip,
 } from "@/lib/jl/sports/sports-channels";
-import { useSettings } from "@/lib/settings";
 import type { SportsGame } from "@/lib/sports/espn";
 import { GuideView } from "../../guide/guide-view";
 import { useAllPlaylists } from "../../hooks/use-all-playlists";
@@ -85,20 +85,21 @@ export function LiveSportsChannels({
   onPlay: (channel: IptvChannel) => void;
 }) {
   const t = useT();
-  const { settings } = useSettings();
   const favorites = useFavorites();
   const epgMapVersion = useEpgMapVersion();
 
+  // Providers live in their own store now; the settings field is only a migration source.
+  const playlists = usePlaylists();
   const sourceNames = useMemo(
-    () => new Map(settings.iptvPlaylists.map((s) => [s.id, s.name] as const)),
-    [settings.iptvPlaylists],
+    () => new Map(playlists.map((s) => [s.id, s.name] as const)),
+    [playlists],
   );
   const otherSources = useMemo(
     () =>
-      settings.iptvPlaylists
+      playlists
         .filter((s) => (s.kind ?? "m3u") !== "epg" && s.id !== activeSourceId)
         .map(toPlaylistSource),
-    [settings.iptvPlaylists, activeSourceId],
+    [playlists, activeSourceId],
   );
   const otherPlaylists = useAllPlaylists(otherSources, active && otherSources.length > 0);
   const groupPrefs = useAllGroupPrefs();

@@ -80,8 +80,6 @@ export function ExperimentalLiquidGlassSurface({
   const normalizedSpeed = clamp(motionSpeed, 0, 3);
   const { transition: callerTransition, ...callerStyle } = style ?? {};
 
-  const { transition: callerTransition, ...callerStyle } = style ?? {};
-
   const active = alwaysActive || keyboardActive;
   const activeMix = active ? 1 : 0.55;
   const pressedMix = pressed ? 0.88 : 1;

@@ -4,6 +4,7 @@ export const SECTION_ICONS: Record<SectionId, string> = {
   basics: "Rocket",
   account: "UserRound",
   library: "Library",
+  sports: "Medal",
   trakt: "CircleUser",
   anilist: "ListVideo",
   mal: "BookMarked",

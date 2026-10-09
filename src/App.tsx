@@ -17,6 +17,7 @@ import { ensureStaticHeroArt } from "@/lib/providers/anime-hero-art-static";
 import { ensureCuratedLogos } from "@/lib/curated-logos";
 import { ensureAwardMaster } from "@/lib/anime-awards-source";
 import { WindowControls } from "@/chrome/window-controls";
+import { CustomLayoutSafetyNet } from "@/chrome/custom-layout-safety-net";
 import { HybridTitleBar } from "@/chrome/hybrid-title-bar";
 import { WindowResizeEdges } from "@/chrome/window-resize-edges";
 import { MinUIDock } from "@/chrome/minui-dock";
@@ -1644,6 +1645,9 @@ function Shell({ onReady }: { onReady?: () => void }) {
           <div className="fixed end-3 top-3 z-[120]">
             <WindowControls />
           </div>
+        )}
+        {!settingsTop && !playerActive && !pickerTop && layout === "custom" && (
+          <CustomLayoutSafetyNet />
         )}
         <MusicDock />
         <MusicSurprisePrompt />

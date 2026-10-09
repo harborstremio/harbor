@@ -431,15 +431,6 @@ export function Transport({
     if (control == null || id === "back" || id === "play-pause") return control;
     return <div className={fadeClassName}>{control}</div>;
   };
-  const fadeClassName = `transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`;
-  const renderFadedControl = (id: PlayerControlId) => {
-    const control = renderControl(id, ctx);
-
-    if (control == null || id === "back" || id === "play-pause") return control;
-
-    return <div className={fadeClassName}>{control}</div>;
-  };
-
   return (
     <>
       <SongIdToast />

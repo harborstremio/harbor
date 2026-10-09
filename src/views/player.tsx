@@ -630,15 +630,12 @@ function NativePlayerView({
     return () => window.removeEventListener("harbor:local-back", onLocalBack);
   }, [backFromPlayer]);
 
+  const playerDocked = src.pipDocked || heroDocked;
   useKeyboardNavigation({
     // TV focus navigation intentionally owns arrows and Space while enabled.
     // Keep it opt-in so standard player hotkeys remain the default.
-    enabled:
-      settings.tvNavigation &&
-      settings.playerTvNavigation &&
-      !screenLocked &&
-      !src.pipDocked &&
-      !heroDocked,
+    // A docked or pinned player leaves the arrows to the page around it.
+    enabled: settings.tvNavigation && settings.playerTvNavigation && !screenLocked && !playerDocked,
     wrap: true,
     arrows: chromeVisible && !pipMode,
     onBack: () => {

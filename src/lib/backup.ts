@@ -368,7 +368,7 @@ export function parseBackup(text: string): ParsedBackup {
   }
   const b = json as Partial<Backup>;
   if (b.format !== FORMAT) {
-    return { ok: false, error: "This is not a JL Media Vision backup file." };
+    return { ok: false, error: "This is not a Harbor backup file." };
   }
   if (!b.data || typeof b.data !== "object") {
     return { ok: false, error: "This backup has no data in it." };

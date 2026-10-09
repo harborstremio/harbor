@@ -90,6 +90,10 @@ export function toSide(c: Record<string, unknown> | undefined, group?: string): 
       ...(members.length > 0 ? { members } : {}),
     };
   }
+  const location = typeof team.location === "string" ? team.location.trim() : "";
+  const nickname = typeof team.name === "string" ? team.name.trim() : "";
+  const color = hexColor(team.color);
+  const altColor = hexColor(team.alternateColor);
   return {
     ...publishedSideContext(c),
     ...publishedScoreDetail(c, group),
@@ -99,7 +103,31 @@ export function toSide(c: Record<string, unknown> | undefined, group?: string): 
     logo: typeof team.logo === "string" ? team.logo : "",
     score: scoreValue,
     winner: c?.winner === true,
+    ...(location ? { location } : {}),
+    ...(nickname ? { nickname } : {}),
+    ...(color ? { color } : {}),
+    ...(altColor ? { altColor } : {}),
   };
+}
+
+const hexColor = (value: unknown): string | undefined =>
+  typeof value === "string" && /^[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : undefined;
+
+/** The national broadcaster when the scoreboard marks one, else the first listed name. */
+function broadcastNetwork(comp: Record<string, unknown>): string | null {
+  const list = Array.isArray(comp.broadcasts) ? (comp.broadcasts as Record<string, unknown>[]) : [];
+  const national = list.find((b) => b?.market === "national") ?? list[0];
+  const names = national?.names;
+  return Array.isArray(names) && typeof names[0] === "string" ? names[0] : null;
+}
+
+/** The provider's published line ("KC -3.5 · O/U 47.5"); never a computed prediction. */
+function oddsLabel(comp: Record<string, unknown>): string | null {
+  const first = Array.isArray(comp.odds) ? (comp.odds[0] as Record<string, unknown>) : undefined;
+  if (!first) return null;
+  const details = typeof first.details === "string" ? first.details.trim() : "";
+  const total = typeof first.overUnder === "number" ? `O/U ${first.overUnder}` : "";
+  return [details, total].filter(Boolean).join(" · ") || null;
 }
 
 /** Races and leaderboards place a whole field; a pair of them is not the result. */
@@ -241,6 +269,8 @@ export function parseEvents(events: unknown[], def: LeagueDef): SportsGame[] {
         broadcasts: Array.isArray(comp.broadcasts)
           ? comp.broadcasts.flatMap((b: { names?: string[] }) => b.names ?? [])
           : [],
+        network: broadcastNetwork(comp),
+        odds: oddsLabel(comp),
         startMs: Date.parse(((comp.date as string) || (ev.date as string)) ?? "") || 0,
         context:
           contextual || !!venue || !!round

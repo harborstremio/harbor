@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 import { navigateUnderPreview, previewPageStack } from "../src/lib/player/docked-navigation.ts";
+import { heroDockSupported, isHubKind, setHeroDock } from "../src/lib/hero-dock.ts";
 
 const source = ts.createSourceFile(
   "view.tsx",
@@ -37,6 +38,7 @@ function fixture(initial: any[]) {
   }).outputText;
   const scope = {
     stackRef, forwardStackRef, scrollMem, rowScrollMem, navigateUnderPreview, previewPageStack,
+    heroDockSupported, isHubKind, setHeroDock,
     useCallback: (fn: any) => fn,
     consumeBack: () => false,
     setStack: (value: any) => { stackRef.current = typeof value === "function" ? value(stackRef.current) : value; },
