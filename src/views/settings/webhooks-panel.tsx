@@ -34,9 +34,9 @@ const SOURCES: SourceMeta[] = [
   {
     id: "library",
     label: "My library",
-    description: "Episodes and movies from shows you've saved on Stremio.",
+    description: "Episodes and movies from shows saved in your JL library.",
     icon: () => <Library size={19} strokeWidth={2} />,
-    prereq: (_s, { authKey }) => (authKey ? null : "Sign in to Stremio first."),
+    prereq: (_s, { authKey }) => (authKey ? null : "Choose a JL profile first."),
   },
   {
     id: "all",

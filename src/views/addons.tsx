@@ -228,9 +228,7 @@ export function AddonsView({ active = true }: { active?: boolean }) {
         "ok",
         result.replaced
           ? t("Updated")
-          : result.syncedToStremio
-            ? t("Installed")
-            : t("Installed locally"),
+          : t("Installed locally"),
         {
           id: result.addon.manifest.id,
           name: result.addon.manifest.name,
@@ -539,9 +537,7 @@ export function AddonsView({ active = true }: { active?: boolean }) {
                 "ok",
                 result.replaced
                   ? t("Updated")
-                  : result.syncedToStremio
-                    ? t("Installed")
-                    : t("Installed locally"),
+                  : t("Installed locally"),
                 {
                   id: result.addon.manifest.id,
                   name: result.addon.manifest.name,
@@ -569,7 +565,7 @@ export function AddonsView({ active = true }: { active?: boolean }) {
             showToast(
               "ok",
               scope === "cloud"
-                ? t("Addon order synced to your Stremio account")
+                ? t("Addon order saved in this JL profile")
                 : t("Addon order saved on this device"),
             );
           }}

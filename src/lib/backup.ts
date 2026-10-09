@@ -121,6 +121,7 @@ export const BACKUP_SECTIONS: readonly BackupSection[] = [
     label: "Watchlist & favorites",
     description: "Your watchlist, local library, custom lists, collections, and favorites.",
     patterns: [
+      "harbor.jl.library.v1.",
       "harbor.watchlist.",
       "harbor.localwatchlist.",
       "harbor.localcw.",

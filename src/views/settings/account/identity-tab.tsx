@@ -86,9 +86,9 @@ export function IdentityTab() {
     }
   };
 
-  const stremioAvatar = user?.avatar ?? null;
+  const accountAvatar = user?.avatar ?? null;
   const customAvatar = activeProfile?.avatar ?? settings.harborAvatar ?? null;
-  const effectiveAvatar = customAvatar ?? stremioAvatar;
+  const effectiveAvatar = customAvatar ?? accountAvatar;
   const nameDirty = !nameEquals(nameDraft.trim(), displayName);
   const commitName = () => pushDisplayName(draftRef.current.trim() || displayName);
 
@@ -220,7 +220,7 @@ export function IdentityTab() {
                 onClick={() => pushIdentity({ harborAvatar: null })}
                 className={ROW_ACTION_DANGER}
               >
-                {stremioAvatar ? t("Reset to Stremio avatar") : t("Reset to default")}
+                {accountAvatar ? t("Reset to account avatar") : t("Reset to default")}
               </button>
             )}
           </div>

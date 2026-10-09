@@ -13,7 +13,7 @@ export function SortingTab() {
     <Section
       title={t("Result order")}
       subtitle={t(
-        "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, like the Stremio and Vidi apps. Stream priority below decides which addon leads, in both modes.",
+        "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, in a flat list. Stream priority below decides which addon leads, in both modes.",
       )}
     >
       <StreamSortPicker value={settings.streamSort} onChange={(v) => update({ streamSort: v })} />
@@ -47,7 +47,7 @@ function StreamSortPicker({
       id: "addon",
       label: t("Addon order"),
       sub: t(
-        "Show each addon's results in the order it returned them, grouped by your addon list. Matches the Stremio and Vidi apps.",
+        "Show each addon's results in the order it returned them, grouped by your addon list. Keeps the original addon ordering.",
       ),
     },
   ];

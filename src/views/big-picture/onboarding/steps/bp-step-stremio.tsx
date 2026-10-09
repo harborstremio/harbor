@@ -4,7 +4,6 @@ import type { BpOnboardStepProps } from "../../bp-onboarding-frame";
 import { useBpT } from "../../bp-i18n";
 import { BpOnboardField } from "../bp-onboard-field";
 import { BpOnboardKeyboard } from "../bp-onboard-keyboard";
-import { BpStremioShowcase } from "../bp-stremio-showcase";
 import {
   BpDecisionAction,
   BpDecisionNote,
@@ -98,7 +97,7 @@ export function BpStepStremio({ setSatisfied, setPrimaryGuard }: BpOnboardStepPr
       <BpOnboardField
         label={t("Password")}
         value={password}
-        placeholder={t("Your Stremio password")}
+        placeholder={t("Your JL Media Vision password")}
         secret
         revealed={reveal}
         onReveal={() => setReveal((r) => !r)}
@@ -118,7 +117,7 @@ export function BpStepStremio({ setSatisfied, setPrimaryGuard }: BpOnboardStepPr
         />
       </BpDecisionRow>
       <BpDecisionNote
-        text={error ?? t("Skip this and Harbor still works. Your library just stays local.")}
+        text={error ?? t("Skip this and JL Media Vision still works. Your library stays local.")}
         alert={error !== null}
       />
       <BpOnboardKeyboard
@@ -126,7 +125,6 @@ export function BpStepStremio({ setSatisfied, setPrimaryGuard }: BpOnboardStepPr
         onBackspace={() => write(current.slice(0, -1))}
         onClear={() => write("")}
       />
-      <BpStremioShowcase />
     </BpDecisionScroll>
   );
 }

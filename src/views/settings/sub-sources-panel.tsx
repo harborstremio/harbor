@@ -107,7 +107,7 @@ export function SubSourcesPanel() {
   const addonCount = addons?.length ?? null;
   const addonSub =
     addonCount === null
-      ? t("Any Stremio subtitle addons you have installed are searched here too.")
+      ? t("Any compatible subtitle addons you have installed are searched here too.")
       : addonCount > 0
         ? t("{count} installed. Their results are merged in with everything else.", {
             count: addonCount,

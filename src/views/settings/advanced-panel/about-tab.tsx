@@ -85,8 +85,8 @@ function LegalDisclaimer() {
       </p>
       <p className={`max-w-[70ch] ${ROW_DESC}`}>
         {t(
-          "{app} itself does not host, distribute, or index any media. All streams come from third-party addons, debrid services, or your own {service} account that you configure yourself. You are responsible for what you choose to play and for complying with the laws of your jurisdiction.",
-          { app: "Harbor", service: "Stremio" },
+          "{app} itself does not host, distribute, or index any media. All streams come from third-party addons, debrid services, or your own media sources that you configure yourself. You are responsible for what you choose to play and for complying with the laws of your jurisdiction.",
+          { app: "JL Media Vision" },
         )}
       </p>
     </Section>

@@ -13,9 +13,9 @@ export function RepairTab() {
   );
   return (
     <Section
-      title={t("Stremio library repair")}
+      title={t("Local library repair")}
       subtitle={t(
-        "Scans your Stremio library and rewrites any item whose shape doesn't match Stremio's exact schema. Safe to run anytime; only items that need fixing get touched.",
+        "Checks the active JL profile library for malformed item records and repairs compatible fields locally.",
       )}
     >
       {isTauri ? (

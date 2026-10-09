@@ -1,11 +1,12 @@
 import { libraryGetOneStrict, libraryPut, type LibraryItem } from "@/lib/stremio";
+import { activeLocalLibraryScope, profileFromLocalScope } from "./jl/local-library";
 
-const KEY = "harbor.stremio.write-queue.v1";
+const KEY = "harbor.jl.library-queue.v1.";
 
 type Pending = { authKey: string; item: LibraryItem };
 
-const queue = new Map<string, Pending>();
-let loaded = false;
+let queue = new Map<string, Pending>();
+let loadedScope = "";
 let started = false;
 
 function mtimeMs(item: LibraryItem): number {
@@ -15,14 +16,16 @@ function mtimeMs(item: LibraryItem): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function load(): void {
-  if (loaded) return;
-  loaded = true;
+function load(scope = activeLocalLibraryScope()): void {
+  if (loadedScope === scope) return;
+  const profileId = profileFromLocalScope(scope);
+  loadedScope = scope;
+  queue = new Map();
   try {
-    const raw = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    const raw = JSON.parse(localStorage.getItem(KEY + profileId) ?? "[]");
     if (Array.isArray(raw)) {
       for (const p of raw) {
-        if (p && p.item && typeof p.item._id === "string" && typeof p.authKey === "string") {
+        if (p && p.item && typeof p.item._id === "string" && p.authKey === scope) {
           queue.set(p.item._id, p);
         }
       }
@@ -30,9 +33,9 @@ function load(): void {
   } catch {}
 }
 
-function persist(): void {
+function persist(scope = loadedScope, entries = queue): void {
   try {
-    localStorage.setItem(KEY, JSON.stringify([...queue.values()]));
+    localStorage.setItem(KEY + profileFromLocalScope(scope), JSON.stringify([...entries.values()]));
   } catch {}
 }
 
@@ -49,21 +52,22 @@ export function queuedWatched(
 }
 
 export async function cloudLibraryPut(authKey: string, item: LibraryItem): Promise<boolean> {
-  load();
+  load(authKey);
+  const pendingQueue = queue;
   const id = item._id;
   try {
     await libraryPut(authKey, item);
-    const queued = queue.get(id);
+    const queued = pendingQueue.get(id);
     if (queued && mtimeMs(queued.item) <= mtimeMs(item)) {
-      queue.delete(id);
-      persist();
+      pendingQueue.delete(id);
+      persist(authKey, pendingQueue);
     }
     return true;
   } catch {
-    const existing = queue.get(id);
+    const existing = pendingQueue.get(id);
     if (!existing || mtimeMs(item) >= mtimeMs(existing.item)) {
-      queue.set(id, { authKey, item });
-      persist();
+      pendingQueue.set(id, { authKey, item });
+      persist(authKey, pendingQueue);
     }
     return false;
   }
@@ -71,8 +75,11 @@ export async function cloudLibraryPut(authKey: string, item: LibraryItem): Promi
 
 export async function flushWriteQueue(): Promise<void> {
   load();
-  if (queue.size === 0) return;
-  for (const [id, pending] of [...queue.entries()]) {
+  const scope = loadedScope;
+  const pendingQueue = queue;
+  if (pendingQueue.size === 0) return;
+  for (const [id, pending] of [...pendingQueue.entries()]) {
+    if (scope !== activeLocalLibraryScope()) break;
     try {
       let remote: LibraryItem | null;
       try {
@@ -83,8 +90,8 @@ export async function flushWriteQueue(): Promise<void> {
       const remoteSec = Math.floor((remote ? mtimeMs(remote) : 0) / 1000);
       const queuedSec = Math.floor(mtimeMs(pending.item) / 1000);
       const drop = () => {
-        const current = queue.get(id);
-        if (current && mtimeMs(current.item) <= mtimeMs(pending.item)) queue.delete(id);
+        const current = pendingQueue.get(id);
+        if (current && mtimeMs(current.item) <= mtimeMs(pending.item)) pendingQueue.delete(id);
       };
       if (remoteSec >= queuedSec) {
         drop();
@@ -94,7 +101,7 @@ export async function flushWriteQueue(): Promise<void> {
       drop();
     } catch {}
   }
-  persist();
+  persist(scope, pendingQueue);
 }
 
 export function startWriteQueueFlusher(): void {

@@ -27,7 +27,7 @@ export function BpStepDone() {
       on: facts.stremioName !== null,
       text: facts.stremioName
         ? t("Signed in as {name}", { name: facts.stremioName })
-        : t("Not signed in to Stremio. Your library stays local."),
+        : t("Using a local JL profile."),
     },
     {
       key: "harbor",

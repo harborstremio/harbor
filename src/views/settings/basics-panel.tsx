@@ -64,16 +64,16 @@ export function BasicsPanel() {
     <>
       <Section title={t("Essentials")} subtitle={t("Four things worth checking once.")}>
         <SRow
-          title={t("Stremio account")}
+          title={t("JL Media Vision account")}
           description={
             user
               ? t(
-                  "Signed in as {email}. Your library, add-ons and watch history sync with Stremio.",
+                  "Signed in as {email} with your JL Media Vision account.",
                   {
                     email: maskEmail(user.email, reveal),
                   },
                 )
-              : t("Sign in to sync your library, add-ons and watch history with Stremio.")
+              : t("Your library and addons work locally. Sign in to use JL account sync.")
           }
           trailing={
             <>

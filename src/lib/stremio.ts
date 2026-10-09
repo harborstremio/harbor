@@ -1,8 +1,7 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
+import { putJlLibraryItem, readJlLibrary } from "./jl/local-library";
 import { readResumeEntry, readResumeSource } from "@/lib/resume";
 import { isDetectedAnime } from "./anime-detect";
 
-const API = "https://api.strem.io/api";
 
 const CW_FINISHED_RATIO = 0.9;
 
@@ -133,129 +132,25 @@ export function isCwMember(i: LibraryItem): boolean {
   return true;
 }
 
-async function call<T>(path: string, body: object): Promise<T> {
-  const res = await fetch(`${API}/${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const text = await res.text();
-  let json: { error?: { message?: string }; result?: unknown };
-  try {
-    json = text ? JSON.parse(text) : {};
-  } catch {
-    throw new Error(`stremio ${path} ${res.status}: invalid response`);
-  }
-  if (json.error) throw new Error(json.error.message ?? "Request failed");
-  if (!res.ok) throw new Error(`stremio ${path} failed (${res.status})`);
-  return json.result as T;
+// Historical exports are retained for library callers, with JL local persistence.
+export async function login(_email: string, _password: string): Promise<{ authKey: string; user: User }> {
+  throw new Error("Use your JL Media Vision account sign-in.");
 }
-
-export function login(email: string, password: string) {
-  return call<{ authKey: string; user: User }>("login", {
-    email,
-    password,
-    facebook: false,
-  });
+export async function getUser(_authKey: string): Promise<User> {
+  throw new Error("External account credentials are not used by JL Media Vision.");
 }
-
-export function getUser(authKey: string) {
-  return call<User>("getUser", { authKey });
+export async function logout(_authKey: string): Promise<void> {}
+export async function library(scope: string): Promise<LibraryItem[]> { return readJlLibrary(scope); }
+export async function libraryIfChanged(scope: string): Promise<LibraryItem[]> { return readJlLibrary(scope); }
+export function invalidateLibraryCache(): void {}
+export async function libraryGetOne(scope: string, id: string): Promise<LibraryItem | null> {
+  return readJlLibrary(scope).find((item) => item._id === id) ?? null;
 }
-
-export function logout(authKey: string) {
-  return call<unknown>("logout", { authKey });
-}
-
-export async function library(authKey: string): Promise<LibraryItem[]> {
-  const ids = await call<Array<[string, string]>>("datastoreMeta", {
-    authKey,
-    collection: "libraryItem",
-  });
-  if (!ids?.length) return [];
-  return call<LibraryItem[]>("datastoreGet", {
-    authKey,
-    collection: "libraryItem",
-    ids: ids.map(([id]) => id),
-    all: true,
-  });
-}
-
-const LIBRARY_FORCE_REFETCH_MS = 300_000;
-let libraryCache: { authKey: string; sig: string; at: number; items: LibraryItem[] } | null = null;
-
-export async function libraryIfChanged(authKey: string): Promise<LibraryItem[]> {
-  const ids = await call<Array<[string, string]>>("datastoreMeta", {
-    authKey,
-    collection: "libraryItem",
-  });
-  if (!ids?.length) {
-    libraryCache = null;
-    return [];
-  }
-  const sig = ids
-    .map(([id, mtime]) => `${id}:${mtime}`)
-    .sort()
-    .join("|");
-  const hit =
-    libraryCache &&
-    libraryCache.authKey === authKey &&
-    libraryCache.sig === sig &&
-    Date.now() - libraryCache.at < LIBRARY_FORCE_REFETCH_MS;
-  if (hit) return libraryCache!.items;
-  const items = await call<LibraryItem[]>("datastoreGet", {
-    authKey,
-    collection: "libraryItem",
-    ids: ids.map(([id]) => id),
-    all: true,
-  });
-  libraryCache = { authKey, sig, at: Date.now(), items };
-  return items;
-}
-
-export function invalidateLibraryCache(): void {
-  libraryCache = null;
-}
-
-export async function libraryGetOne(authKey: string, id: string): Promise<LibraryItem | null> {
-  const items = await call<LibraryItem[]>("datastoreGet", {
-    authKey,
-    collection: "libraryItem",
-    ids: [id],
-    all: false,
-  }).catch(() => [] as LibraryItem[]);
-  return items?.find((it) => it._id === id) ?? null;
-}
-
-export async function libraryGetOneStrict(
-  authKey: string,
-  id: string,
-): Promise<LibraryItem | null> {
-  const items = await call<LibraryItem[]>("datastoreGet", {
-    authKey,
-    collection: "libraryItem",
-    ids: [id],
-    all: false,
-  });
-  return items?.find((it) => it._id === id) ?? null;
-}
-
-export async function libraryPut(authKey: string, item: LibraryItem): Promise<void> {
-  if (ANIME_CLOUD_ID.test(item._id) && item.removed !== true) return;
-  await call<unknown>("datastorePut", {
-    authKey,
-    collection: "libraryItem",
-    changes: [item],
-  });
-}
+export const libraryGetOneStrict = libraryGetOne;
+export async function libraryPut(scope: string, item: LibraryItem): Promise<void> { putJlLibraryItem(scope, item); }
 
 export async function removeStremioLibraryItem(authKey: string, id: string): Promise<void> {
-  const items = await call<LibraryItem[]>("datastoreGet", {
-    authKey,
-    collection: "libraryItem",
-    ids: [id],
-    all: false,
-  });
+  const items = await library(authKey);
   const item = items?.find((it) => it._id === id);
   if (!item) return;
   await libraryPut(authKey, {

@@ -15,7 +15,7 @@ const ITEMS: Item[] = [
   {
     title: "Accounts and TMDB",
     detail:
-      "Signing the TV in to Stremio, Trakt, AniList and the metadata keys. Scan the code with your phone from the TV itself.",
+      "Set up metadata keys on the TV. JL account sign-in happens directly on the TV. Scan the code with your phone from the TV itself.",
     jump: "account",
     jumpLabel: "Your accounts",
   },

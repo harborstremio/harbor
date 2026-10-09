@@ -22,31 +22,28 @@ export function SyncedAddonsCard() {
   const [lastSynced, setLastSynced] = useState<number | null>(null);
   const { setView } = useView();
 
-  const sync = async () => {
-    if (!authKey || busy) return;
+  const [refresh, setRefresh] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    setAddons(null);
+    setLastSynced(null);
+    if (!authKey) return;
     setBusy(true);
-    try {
-      const mod = await import("@/lib/addons");
-      const list = await mod.userAddons(authKey);
+    void import("@/lib/addons").then((mod) => mod.userAddons(authKey)).then((list) => {
+      if (cancelled) return;
       setAddons(list);
       setLastSynced(Date.now());
-    } catch {
-      setAddons(null);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  useEffect(() => {
-    if (authKey && addons == null) void sync();
-  }, [authKey]);
+    }).catch(() => { if (!cancelled) setAddons(null); })
+      .finally(() => { if (!cancelled) setBusy(false); });
+    return () => { cancelled = true; };
+  }, [authKey, refresh]);
 
   if (!authKey) {
     return (
       <SettingRow
         icon={<Puzzle size={18} strokeWidth={2} />}
         label={t("Your collection")}
-        desc={t("Sign in to Stremio first. Your installed addons sync from there.")}
+        desc={t("Choose a JL profile to manage installed addons.")}
       />
     );
   }
@@ -61,8 +58,8 @@ export function SyncedAddonsCard() {
       label={t("Your collection")}
       desc={
         lastSynced
-          ? t("Last synced {n}s ago.", { n: Math.round((Date.now() - lastSynced) / 1000) })
-          : t("Pulled from your Stremio account.")
+          ? t("Checked {n}s ago.", { n: Math.round((Date.now() - lastSynced) / 1000) })
+          : t("Installed in this JL profile.")
       }
     >
       <div className="flex w-full flex-wrap items-center gap-x-5 gap-y-3">
@@ -70,13 +67,13 @@ export function SyncedAddonsCard() {
           <span className="font-display text-[28px] font-medium leading-none tracking-tight text-ink">
             {count != null ? count : "…"}
           </span>
-          <span className={CAPTION}>{count === 1 ? t("addon synced") : t("addons synced")}</span>
+          <span className={CAPTION}>{count === 1 ? t("addon installed") : t("addons installed")}</span>
         </div>
         {addons && addons.length > 0 && <AddonStackPeek addons={addons} max={MAX_VISIBLE} />}
         <div aria-busy={busy} className="ms-auto flex shrink-0 flex-wrap items-center gap-2.5">
-          <SButton variant="primary" onClick={sync}>
+          <SButton variant="primary" disabled={busy} onClick={() => setRefresh((value) => value + 1)}>
             {busy ? <Loader2 size={16} className="animate-spin" /> : null}
-            {busy ? t("Syncing…") : t("Sync now")}
+            {busy ? t("Checking") : t("Refresh addons")}
           </SButton>
           <SButton
             onClick={() => {
@@ -173,7 +170,7 @@ function AddonList({ addons, onClose }: { addons: Addon[]; onClose: () => void }
       <div className="flex max-h-[360px] flex-col overflow-y-auto p-2">
         {addons.map((a) => (
           <div
-            key={a.manifest.id}
+            key={a.transportUrl}
             tabIndex={-1}
             data-focusable="true"
             className="flex min-h-11 items-center gap-3 rounded-[8px] px-2 outline-none"

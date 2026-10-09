@@ -146,7 +146,7 @@ function WatchlistSaved({ art }: { art: PreviewArt | null }) {
         <MiniPoster img={p[4]} faded dashed badge={auto} />
       </div>
       <Caption>
-        {t("On: only titles you bookmarked. Off: also keeps the ones Stremio added when you hit play.")}
+        {t("On: only titles you bookmarked. Off: also keeps titles added when you hit play.")}
       </Caption>
     </>
   );

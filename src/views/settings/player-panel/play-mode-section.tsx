@@ -158,7 +158,7 @@ export function PlayModePanel() {
           label={t("Ask to resume or start over")}
           preview={<ResumePromptArt />}
           sub={t(
-            "When you hit Play on something you've partly watched, show a prompt to resume from where you left off or start over. Also covers items synced from Stremio or Trakt.",
+            "When you hit Play on something you've partly watched, show a prompt to resume from where you left off or start over. Also covers saved JL progress and connected Trakt history.",
           )}
           value={settings.resumePrompt}
           onChange={(v) => update({ resumePrompt: v })}

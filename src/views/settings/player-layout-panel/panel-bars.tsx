@@ -23,7 +23,7 @@ export function EditLayoutCard({
   onOpen: () => void;
 }) {
   const t = useT();
-  const themeName = theme === "stremio" ? t("Stremio") : t("Default");
+  const themeName = theme === "stremio" ? t("Classic") : t("Default");
   return (
     <SettingRow
       wide
@@ -64,7 +64,7 @@ export function ThemeTabs({ value, onChange }: { value: ThemeId; onChange: (v: T
       icon={<LayoutGrid size={18} strokeWidth={1.9} />}
       label={t("Player style")}
       desc={
-        value === "stremio" ? t("Familiar Stremio button order.") : t("Harbor's native player chrome.")
+        value === "stremio" ? t("Classic button order.") : t("Harbor's native player chrome.")
       }
       tip={t("Each style keeps its own arrangement, icons and profiles, so switching back and forth never loses work.")}
     >
@@ -72,7 +72,7 @@ export function ThemeTabs({ value, onChange }: { value: ThemeId; onChange: (v: T
         value={value}
         options={[
           { value: "default", label: "Default" },
-          { value: "stremio", label: "Stremio" },
+          { value: "stremio", label: "Classic" },
         ]}
         onChange={onChange}
       />

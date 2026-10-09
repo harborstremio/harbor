@@ -91,10 +91,14 @@ export function WatchlistTab({
       loadStremio();
     };
     window.addEventListener("storage", onChange);
+    window.addEventListener("jl:library-changed", onChange);
+    window.addEventListener("jl:profile-data-applied", onChange);
     const unsub = subscribeWatchlist(onChange);
     return () => {
       cancelled = true;
       window.removeEventListener("storage", onChange);
+      window.removeEventListener("jl:library-changed", onChange);
+      window.removeEventListener("jl:profile-data-applied", onChange);
       unsub();
     };
   }, [authKey, settings.libraryBookmarkedOnly, mode, refreshSeq]);
@@ -246,7 +250,7 @@ export function WatchlistTab({
       );
     else parts.push(tr("Connect Trakt in Settings to sync"));
     parts.push(tr("{n} saved on this device", { n: localEntries.length }));
-    if (authKey && rawCount > 0) parts.push(tr("{n} in your Stremio library", { n: rawCount }));
+    if (authKey && rawCount > 0) parts.push(tr("{n} in your JL library", { n: rawCount }));
     return parts.join(" · ");
   })();
 

@@ -1,7 +1,6 @@
 import { safeFetch as fetch, safeFetchLocal } from "@/lib/safe-fetch";
 import { isLocalNetworkUrl } from "@/lib/local-network";
-import { readActiveStremioAuthKey } from "./auth";
-import { setUserAddons, userAddons, type Addon } from "./addons";
+import type { Addon } from "./addons";
 import {
   applyOrderToItems,
   loadDisplayOrder,
@@ -109,52 +108,6 @@ export async function seedDefaultAddonsIfFirstRun(): Promise<void> {
   }
 }
 
-function readAuthKey(): string | null {
-  return readActiveStremioAuthKey();
-}
-
-async function pushToStremio(
-  addon: Addon,
-  mode: "install" | "uninstall",
-  replacedUrls: string[] = [],
-): Promise<boolean> {
-  const authKey = readAuthKey();
-  if (!authKey) return true;
-  try {
-    const current = await userAddons(authKey);
-    const id = addon.manifest.id;
-    const replaced = new Set(replacedUrls.filter((u) => u !== addon.transportUrl));
-    // Only remove entries that are actually being replaced (same id, same transport
-    // URL, or an explicitly replaced transport URL), so an update keeps the addon's
-    // place in the collection rather than pushing a fresh copy to the end.
-    const insertIndex = current.findIndex(
-      (a) =>
-        a.manifest.id === id ||
-        a.transportUrl === addon.transportUrl ||
-        replaced.has(a.transportUrl),
-    );
-    const filtered = current.filter(
-      (a) =>
-        a.manifest.id !== id &&
-        a.transportUrl !== addon.transportUrl &&
-        !replaced.has(a.transportUrl),
-    );
-    let next: Addon[];
-    if (mode === "uninstall") {
-      next = filtered;
-    } else if (insertIndex === -1) {
-      next = [...filtered, addon];
-    } else {
-      next = filtered.slice(0, insertIndex);
-      next.push(addon);
-      next.push(...filtered.slice(insertIndex));
-    }
-    return await setUserAddons(authKey, next);
-  } catch {
-    return false;
-  }
-}
-
 export type InstalledAddon = {
   id: string;
   transportUrl: string;
@@ -229,7 +182,7 @@ export function loadInstalled(): InstalledAddon[] {
   }
 }
 
-function saveInstalled(list: InstalledAddon[]) {
+export function saveInstalled(list: InstalledAddon[]) {
   const slim = list.map((a) => ({ ...a, manifest: slimManifest(a.manifest) }));
   try {
     localStorage.setItem(storeKey("installed"), JSON.stringify(slim));
@@ -243,7 +196,7 @@ function saveInstalled(list: InstalledAddon[]) {
       try {
         localStorage.setItem(storeKey("installed"), JSON.stringify(stripped));
       } catch (e2) {
-        console.warn("[addons] localStorage still full after stripping manifests", e2);
+        throw e2;
       }
     } else {
       throw e;
@@ -346,15 +299,15 @@ export function parseAddonUrl(input: string): AddonUrlParse {
   if (!/^https?:\/\//i.test(raw)) {
     return { kind: "error", message: "URL must start with https:// or stremio://" };
   }
-  if (!/manifest\.json(\?.*)?$/i.test(raw)) {
-    raw = raw + "/manifest.json";
-  }
   try {
-    new URL(raw);
+    const url = new URL(raw);
+    if (!/\/manifest\.json$/i.test(url.pathname)) {
+      url.pathname = url.pathname.replace(/\/(?:configure)?\/?$/i, "") + "/manifest.json";
+    }
+    return { kind: "ok", url: url.href };
   } catch {
     return { kind: "error", message: "That doesn't look like a valid URL." };
   }
-  return { kind: "ok", url: raw };
 }
 
 function validateManifest(
@@ -389,17 +342,19 @@ export async function fetchManifestAt(transportUrl: string): Promise<Addon["mani
 
 export type InstallResult = {
   addon: Addon;
-  syncedToStremio: boolean;
+  savedLocally: true;
   replaced: boolean;
 };
 
 export async function installAddon(id: string, transportUrl: string): Promise<Addon> {
+  const owner = storeKey("installed");
   const manifest = await fetchManifestAt(transportUrl);
+  if (owner !== storeKey("installed")) throw new Error("Profile changed during addon installation. Retry in the intended profile.");
   const canonicalId = manifest.id || id;
   const before = loadInstalled();
-  // Deduplicate by ID (handles URL changes during updates) and by URL (re-installs)
-  const next = before.filter((a) => a.id !== canonicalId && a.transportUrl !== transportUrl);
-  const replaced = before.filter((a) => a.id === canonicalId || a.transportUrl === transportUrl);
+  // Exact URLs identify installations. Distinct configurations with the same ID coexist.
+  const next = before.filter((a) => a.transportUrl !== transportUrl);
+  const replaced = before.filter((a) => a.transportUrl === transportUrl);
   const replacedUrls = replaced.map((a) => a.transportUrl);
   if (replaced.length > 0) {
     preserveOrderOnReplace(replacedUrls, transportUrl);
@@ -407,30 +362,25 @@ export async function installAddon(id: string, transportUrl: string): Promise<Ad
   next.push({ id: canonicalId, transportUrl, installedAt: Date.now(), manifest });
   saveInstalled(next);
   const addon: Addon = { manifest, transportUrl };
-  await pushToStremio(addon, "install", replacedUrls);
   return addon;
 }
 
 export async function installFromUrl(
   rawUrl: string,
-  options: { replaceId?: string } = {},
+  options: { replaceId?: string; replaceUrl?: string } = {},
 ): Promise<InstallResult> {
   const parsed = parseAddonUrl(rawUrl);
   if (parsed.kind === "error") throw new Error(parsed.message);
+  const owner = storeKey("installed");
   const manifest = await fetchManifestAt(parsed.url);
+  if (owner !== storeKey("installed")) throw new Error("Profile changed during addon installation. Retry in the intended profile.");
   const id = manifest.id;
   const before = loadInstalled();
-  const replaceId = options.replaceId && options.replaceId !== id ? options.replaceId : null;
-  const replacedById = before.some((a) => a.id === id);
-  const replacedByOld = replaceId != null && before.some((a) => a.id === replaceId);
-  // Deduplicate by ID (updates), URL (re-installs), or explicit replaceId
-  const next = before.filter(
-    (a) => a.id !== id && a.transportUrl !== parsed.url && (!replaceId || a.id !== replaceId),
-  );
-  const replaced = before.filter(
-    (a) =>
-      a.id === id || a.transportUrl === parsed.url || (replaceId != null && a.id === replaceId),
-  );
+  const byId = options.replaceId ? before.filter((a) => a.id === options.replaceId) : [];
+  if (!options.replaceUrl && byId.length > 1) throw new Error("Choose the addon configuration to replace. Other configurations will be kept.");
+  const replaceUrl = options.replaceUrl ?? byId[0]?.transportUrl;
+  const replaced = before.filter((a) => a.transportUrl === parsed.url || a.transportUrl === replaceUrl);
+  const next = before.filter((a) => !replaced.includes(a));
   const replacedUrls = replaced.map((a) => a.transportUrl);
   if (replaced.length > 0) {
     preserveOrderOnReplace(replacedUrls, parsed.url);
@@ -438,8 +388,7 @@ export async function installFromUrl(
   next.push({ id, transportUrl: parsed.url, installedAt: Date.now(), manifest });
   saveInstalled(next);
   const addon: Addon = { manifest, transportUrl: parsed.url };
-  const syncedToStremio = await pushToStremio(addon, "install", replacedUrls);
-  return { addon, syncedToStremio, replaced: replacedById || replacedByOld };
+  return { addon, savedLocally: true, replaced: replaced.length > 0 };
 }
 
 export async function uninstallAddon(id: string, transportUrl?: string): Promise<void> {
@@ -456,18 +405,11 @@ export async function uninstallAddon(id: string, transportUrl?: string): Promise
     for (const a of removed) if (disabled.delete(a.transportUrl)) touched = true;
     if (touched) saveDisabledAddons(disabled);
   }
-  const authKey = readAuthKey();
-  if (!authKey) return;
-  const current = await userAddons(authKey).catch(() => [] as Addon[]);
-  const filtered = transportUrl
-    ? current.filter((a) => a.transportUrl !== transportUrl)
-    : current.filter((a) => a.manifest.id !== id);
-  if (filtered.length !== current.length) {
-    await setUserAddons(authKey, filtered).catch(() => {});
-  }
+
 }
 
 export async function fetchInstalledAddons(): Promise<Addon[]> {
+  const owner = storeKey("installed");
   const list = loadInstalled();
   if (list.length === 0) return [];
   const tasks = list.map(async (entry): Promise<Addon | null> => {
@@ -476,7 +418,8 @@ export async function fetchInstalledAddons(): Promise<Addon[]> {
     }
     try {
       const manifest = await fetchManifestAt(entry.transportUrl);
-      const updated = loadInstalled().map((e) => (e.id === entry.id ? { ...e, manifest } : e));
+      if (owner !== storeKey("installed")) return null;
+      const updated = loadInstalled().map((e) => (e.transportUrl === entry.transportUrl ? { ...e, manifest } : e));
       saveInstalled(updated);
       return { manifest, transportUrl: entry.transportUrl };
     } catch {

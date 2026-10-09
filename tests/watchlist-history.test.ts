@@ -31,20 +31,18 @@ function fixture(initial: LibraryItem | null) {
   let failedRead = false;
   const writes: LibraryItem[] = [];
   const api = load("src/lib/stremio.ts", {
-    "@/lib/safe-fetch": { safeFetch: async (url: string, options: { body: string }) => {
-      const body = JSON.parse(options.body);
-      assert.equal(body.authKey, "fixture-auth");
-      let result: unknown;
-      if (url.endsWith("/datastoreGet")) {
+    "./jl/local-library": {
+      readJlLibrary: (scope: string) => {
+        assert.equal(scope, "fixture-auth");
         if (failedRead) throw new Error("offline");
-        result = stored ? [stored] : [];
-      } else if (url.endsWith("/datastorePut")) {
-        stored = body.changes[0];
-        writes.push(stored!);
-        result = { success: true };
-      } else throw new Error(`Unexpected request: ${url}`);
-      return { ok: true, status: 200, text: async () => JSON.stringify({ result }) };
-    } },
+        return stored ? [stored] : [];
+      },
+      putJlLibraryItem: (scope: string, item: LibraryItem) => {
+        assert.equal(scope, "fixture-auth");
+        stored = item;
+        writes.push(item);
+      },
+    },
     "@/lib/resume": { readResumeEntry: () => null, readResumeSource: () => undefined },
   });
   const history = load("src/views/library/history-merge.ts", {

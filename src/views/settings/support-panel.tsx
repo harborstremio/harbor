@@ -1,7 +1,6 @@
 import { ArrowUpRight, Check } from "./icons";
 import type { ReactNode } from "react";
 import elfLogo from "@/assets/elfhosted.svg";
-import stremioLogo from "@/assets/stremio.png";
 import amfIcon from "@/assets/support/amf.png";
 import charityNavigatorIcon from "@/assets/support/charity-navigator.png";
 import effIcon from "@/assets/support/eff.png";
@@ -18,10 +17,9 @@ import { SButton, SRow } from "./ui";
 
 const ELF_STORE = "https://store.elfhosted.com/";
 const ELF_DONATE = "https://store.elfhosted.com/product/donation/";
-const STREMIO_DONATE = "https://www.stremio.com/donate";
 
 const ELF_PERKS = [
-  "Private Stremio add-ons with 10x the rate limits and built-in stream proxying, from $9 a month.",
+  "Private compatible addons with 10x the rate limits and built-in stream proxying, from $9 a month.",
   "Managed Plex, Emby, or Jellyfin, running in minutes with no hardware and no Docker.",
   "Over 100 self-hosted apps: the *arr stack, debrid tools, books and audiobooks, and more.",
   "Daily backups, automatic updates, and monitoring, all handled for you.",
@@ -96,15 +94,6 @@ function Prose({ children }: { children: ReactNode }) {
   return <p className={`max-w-[70ch] ${ROW_DESC}`}>{children}</p>;
 }
 
-function Callout({ icon, children }: { icon: ReactNode; children: ReactNode }) {
-  return (
-    <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
-      {icon}
-      <p className={`max-w-[66ch] ${ROW_DESC}`}>{children}</p>
-    </div>
-  );
-}
-
 export function SupportPanel() {
   const t = useT();
   return (
@@ -150,36 +139,8 @@ export function SupportPanel() {
         </SettingRow>
       </Section>
 
-      <Section
-        title={t("Built on Stremio")}
-        subtitle={t(
-          "Harbor would not be possible without Stremio. It is the foundation everything here is built on.",
-        )}
-      >
-        <Prose>
-          {t(
-            "Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.",
-          )}
-        </Prose>
-        <Callout
-          icon={
-            <img
-              src={badgeIconUrl("stremio_supporter")}
-              alt=""
-              draggable={false}
-              className="mt-[1px] h-5 w-5 shrink-0 object-contain"
-            />
-          }
-        >
-          {t("Stremio Supporters get a special badge on their Harbor profile.")}
-        </Callout>
-        <SettingRow
-          icon={<img src={stremioLogo} alt="" draggable={false} className={LEAD_IMG} />}
-          label={t("Support Stremio")}
-          desc={t("Opens Stremio's donation page in your browser.")}
-        >
-          <OpenButton label={t("Donate")} url={STREMIO_DONATE} primary />
-        </SettingRow>
+      <Section title={t("Addon compatibility")}>
+        <Prose>{t("JL Media Vision uses the open addon protocol. Compatible manifests and configured addon links work without an external media account. Third-party notices are listed in Licenses.")}</Prose>
       </Section>
 
       <Section
@@ -188,7 +149,7 @@ export function SupportPanel() {
       >
         <Prose>
           {t(
-            "If you were going to send something, send it to ElfHosted or Stremio above, or to one of the charities below. They all do more good with it.",
+            "If you were going to send something, send it to ElfHosted above, or to one of the charities below. They all do more good with it.",
           )}
         </Prose>
       </Section>
@@ -196,7 +157,7 @@ export function SupportPanel() {
       <Section
         title={t("Badges for giving")}
         subtitle={t(
-          "Support ElfHosted or Stremio, or give to any charity below, and the badge lands on your profile.",
+          "Support ElfHosted, or give to any charity below, and the badge lands on your profile.",
         )}
       >
         <SRow

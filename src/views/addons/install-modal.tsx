@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   fetchManifestAt,
   findHostnameMatch,
-  isInstalled,
+  loadInstalled,
   manifestToConfigureUrl,
   parseAddonUrl,
 } from "@/lib/addon-store";
@@ -22,6 +22,7 @@ type ResolveMatch = {
   url: string;
   matchKind: "fresh" | "id-match" | "hostname-match";
   replaceId: string | null;
+  replaceUrl: string | null;
   replaceName: string | null;
 };
 
@@ -36,7 +37,7 @@ export function AddonInstallModal({
   onClose: () => void;
   onInstall: (
     rawUrl: string,
-    opts: { replaceId?: string },
+    opts: { replaceId?: string; replaceUrl?: string },
   ) => Promise<{ replaced: boolean; addon: Addon } | null>;
 }) {
   const t = useT();
@@ -68,8 +69,10 @@ export function AddonInstallModal({
       const manifest = await fetchManifestAt(parsed.url);
       let matchKind: ResolveMatch["matchKind"] = "fresh";
       let replaceId: string | null = null;
+      let replaceUrl: string | null = null;
       let replaceName: string | null = null;
       if (mode.kind === "manage" && mode.existing.id) {
+        replaceUrl = mode.existing.transportUrl;
         if (mode.existing.id === manifest.id) {
           matchKind = "id-match";
         } else {
@@ -77,17 +80,18 @@ export function AddonInstallModal({
           replaceId = mode.existing.id;
           replaceName = mode.existing.name;
         }
-      } else if (isInstalled(manifest.id)) {
+      } else if (loadInstalled().some((item) => item.transportUrl === parsed.url)) {
         matchKind = "id-match";
       } else {
         const host = findHostnameMatch(parsed.url);
         if (host) {
           matchKind = "hostname-match";
           replaceId = host.id;
+          replaceUrl = host.transportUrl;
           replaceName = host.manifest?.name ?? host.id;
         }
       }
-      setResolved({ manifest, url: parsed.url, matchKind, replaceId, replaceName });
+      setResolved({ manifest, url: parsed.url, matchKind, replaceId, replaceUrl, replaceName });
     } catch (e) {
       setError(e instanceof Error ? e.message : t("Couldn't read that addon URL."));
     } finally {
@@ -109,7 +113,7 @@ export function AddonInstallModal({
     const stages: InstallStage[] = [
       { label: resolved.matchKind === "fresh" ? t("Reading manifest") : t("Reading new manifest"), done: true },
       { label: resolved.matchKind === "fresh" ? t("Saving to library") : t("Swapping configuration"), done: false },
-      { label: t("Syncing to Stremio"), done: false },
+      { label: t("Saving on this device"), done: false },
     ];
     setInstallStage(stages);
     await new Promise((r) => setTimeout(r, 220));
@@ -117,6 +121,7 @@ export function AddonInstallModal({
     try {
       const result = await onInstall(resolved.url, {
         replaceId: resolved.replaceId ?? undefined,
+        replaceUrl: resolved.replaceUrl ?? undefined,
       });
       setInstallStage((s) => (s ? s.map((x, i) => (i === 2 ? { ...x, done: true } : x)) : s));
       await new Promise((r) => setTimeout(r, 280));

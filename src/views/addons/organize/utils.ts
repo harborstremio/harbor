@@ -50,19 +50,19 @@ export function noticeFor(result: Exclude<SaveResult, { ok: true }>): Notice {
     case "fetch":
       return {
         tone: "danger",
-        text: t("Couldn't reach Stremio to confirm your collection. Nothing was written."),
+        text: t("Couldn't read your local addon collection. Nothing was written."),
         retry: true,
       };
     case "stale":
       return {
         tone: "danger",
-        text: t("Your addon collection changed on another device. Nothing was written."),
+        text: t("Your addon collection changed while the editor was open. Nothing was written."),
         reload: true,
       };
     case "write":
       return {
         tone: "danger",
-        text: t("Stremio didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again."),
+        text: t("Local storage didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again."),
         retry: true,
       };
     case "verify":
@@ -74,7 +74,7 @@ export function noticeFor(result: Exclude<SaveResult, { ok: true }>): Notice {
           }
         : {
             tone: "danger",
-            text: t("Stremio reports a different order than was saved."),
+            text: t("The local collection has a different order than was saved."),
             retry: true,
             reload: true,
           };

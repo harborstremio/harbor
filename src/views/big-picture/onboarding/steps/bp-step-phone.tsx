@@ -36,7 +36,7 @@ export function BpStepPhone({ setSatisfied }: BpOnboardStepProps) {
   };
   const waiting: Record<HandoffStepId, string> = {
     tmdb: t("Artwork and rows"),
-    stremio: t("Your Stremio library"),
+    stremio: t("JL account (sign in on the TV)"),
     harbor: t("A Harbor account"),
   };
 

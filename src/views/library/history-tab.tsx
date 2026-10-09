@@ -37,6 +37,15 @@ export function HistoryTab() {
   const refresh = useCallback(() => setReloadKey((k) => k + 1), []);
 
   useEffect(() => {
+    window.addEventListener("jl:library-changed", refresh);
+    window.addEventListener("jl:profile-data-applied", refresh);
+    return () => {
+      window.removeEventListener("jl:library-changed", refresh);
+      window.removeEventListener("jl:profile-data-applied", refresh);
+    };
+  }, [refresh]);
+
+  useEffect(() => {
     if (!authKey) {
       setStremio([]);
       return;
@@ -138,7 +147,7 @@ export function HistoryTab() {
         <Clock size={28} strokeWidth={1.6} className="text-ink-subtle" />
         <h2 className="text-[16px] font-semibold text-ink">{t("No history yet")}</h2>
         <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-          {t("Sign in to Stremio or connect Trakt to see what you've been watching here.")}
+          {t("Your playback history appears here. You can optionally connect Trakt.")}
         </p>
       </div>
     );

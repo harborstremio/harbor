@@ -3,7 +3,6 @@ import malLogo from "@/assets/mal.png";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
 import letterboxdLogo from "@/assets/addon-logos/letterboxd.png";
-import stremioLogo from "@/assets/stremio.png";
 import type { SectionId } from "./shared";
 
 export type TabEntry = { id: string; label: string; icon: string; img?: string };
@@ -12,8 +11,8 @@ export const SECTION_TABS: Partial<Record<SectionId, TabEntry[]>> = {
   account: [
     { id: "you", label: "Your profile", icon: "UserRound" },
     { id: "profiles", label: "Profiles", icon: "Users" },
-    { id: "harbor", label: "Harbor account", icon: "Harbor" },
-    { id: "stremio", label: "Stremio", icon: "Play", img: stremioLogo },
+    { id: "harbor", label: "Community account", icon: "Harbor" },
+    { id: "stremio", label: "JL account", icon: "UserRound" },
   ],
   player: [
     { id: "play", label: "Play", icon: "PlayStart" },

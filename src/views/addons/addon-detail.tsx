@@ -103,14 +103,14 @@ export function AddonDetail({
   useEffect(() => {
     const addonName = nameOf(resolved);
     if (isAdultAddon(resolved))
-      return pushActivityHint({ details: "Browsing the addon store", state: "Stremio addons" });
+      return pushActivityHint({ details: "Browsing the addon store", state: "JL addons" });
     const rawLogo = resolveAddonLogo(m?.logo, resolved.transportUrl);
     const largeImage = rawLogo && rawLogo.startsWith("https://") ? rawLogo : undefined;
     const shared = { largeImage, largeText: addonName };
     const hint =
       busy === "install"
         ? { details: `Installing ${addonName}`, ...shared }
-        : { details: `Browsing ${addonName}`, state: "Stremio addon", ...shared };
+        : { details: `Browsing ${addonName}`, state: "Compatible addon", ...shared };
     return pushActivityHint(hint);
   }, [resolved, m?.logo, busy]);
 
@@ -177,7 +177,7 @@ export function AddonDetail({
       await navigator.clipboard.writeText(text);
       setCopied(kind);
       setTimeout(() => setCopied(null), 1600);
-      showToast("ok", kind === "stremio" ? t("Stremio link copied") : t("Manifest URL copied"));
+      showToast("ok", kind === "stremio" ? t("Addon install link copied") : t("Manifest URL copied"));
     } catch {
       showToast("error", t("Couldn't copy. Select the URL manually."));
     }
@@ -483,7 +483,7 @@ export function AddonDetail({
           </div>
           <div className="mt-10 flex flex-col items-center gap-2 border-t border-edge-soft pt-6 text-center">
             <p className="text-[12px] text-ink-subtle">
-              {t("Stremio addon, packaged into Harbor's catalog.")}
+              {t("Compatible addon, listed in JL Media Vision.")}
             </p>
             <p className="text-[11.5px] leading-relaxed text-ink-subtle">
               {t(

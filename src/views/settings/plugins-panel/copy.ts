@@ -31,7 +31,7 @@ export function errorText(t: T, e: unknown): string {
     case "manga-repo":
       return t("This is a manga repository. Add it from the Manga page.");
     case "stremio-addon":
-      return t("This is a Stremio addon manifest. Add it from the Addons page instead.");
+      return t("This is a compatible addon manifest. Add it from the Addons page instead.");
     case "android-extensions":
       return t(
         "That is an app link, not a web address. Open the repository in a browser and paste the https link to its JSON file.",

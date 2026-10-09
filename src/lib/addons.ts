@@ -2,9 +2,9 @@ import { cachedCatalogRow, type CatalogLoad } from "@/lib/addon-catalog-cache";
 import { runLanes } from "@/lib/run-lanes";
 import { allowDirectHost, safeFetch as fetch } from "@/lib/safe-fetch";
 import type { AddonOrigin, Meta } from "./cinemeta";
-import { fetchManifestAt, filterEnabled, loadInstalled } from "./addon-store";
+import { fetchManifestAt, filterEnabled, loadInstalled, saveInstalled, fetchInstalledAddons } from "./addon-store";
+import { activeLocalLibraryScope, profileFromLocalScope } from "./jl/local-library";
 
-const STREMIO_API = "https://api.strem.io/api";
 const MAX_ROWS = 24;
 const CATALOG_LANES = 6;
 
@@ -127,68 +127,30 @@ export function addonAccepts(addon: Addon, resource: string, type: string, id: s
   return true;
 }
 
-async function call<T>(path: string, body: object): Promise<T | null> {
-  try {
-    const res = await fetch(`${STREMIO_API}/${path}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return (json.result ?? null) as T | null;
-  } catch {
-    return null;
-  }
+function checkLocalScope(scope: string): void {
+  profileFromLocalScope(scope);
+  if (scope !== activeLocalLibraryScope()) throw new Error("The active profile changed. Retry from the current profile.");
 }
 
-export async function userAddons(authKey: string): Promise<Addon[]> {
-  const result = await call<{ addons: Addon[] }>("addonCollectionGet", {
-    authKey,
-    type: "user",
-    update: false,
-  });
-  return result?.addons ?? [];
+// Existing collection callers now operate on the JL profile's installed addons.
+// URLs/configuration stay local; account sync uses a separate explicit allowlist.
+export async function userAddons(scope: string): Promise<Addon[]> {
+  checkLocalScope(scope);
+  return fetchInstalledAddons();
 }
-
-export async function setUserAddons(authKey: string, addons: Addon[]): Promise<boolean> {
-  const result = await call<{ success?: boolean }>("addonCollectionSet", {
-    authKey,
-    type: "user",
-    addons: addons.map((a) => {
-      const raw = a as Record<string, unknown>;
-      return {
-        transportUrl: a.transportUrl,
-        transportName: typeof raw.transportName === "string" ? raw.transportName : "",
-        manifest: a.manifest,
-        flags: (raw.flags as { official?: boolean; protected?: boolean } | undefined) ?? {
-          official: false,
-          protected: false,
-        },
-      };
-    }),
-  });
-  return result != null;
+export async function setUserAddons(scope: string, addons: Addon[]): Promise<boolean> {
+  checkLocalScope(scope);
+  const previous = loadInstalled();
+  saveInstalled(addons.map((addon) => ({
+    id: addon.manifest.id, transportUrl: addon.transportUrl, manifest: addon.manifest,
+    installedAt: previous.find((item) => item.transportUrl === addon.transportUrl)?.installedAt ?? Date.now(),
+  })));
+  window.dispatchEvent(new Event("harbor:addons-changed"));
+  return true;
 }
-
-export async function getUserAddonsRaw(authKey: string): Promise<Addon[] | null> {
-  const result = await call<{ addons: Addon[] }>("addonCollectionGet", {
-    authKey,
-    type: "user",
-    update: false,
-  });
-  if (!result || !Array.isArray(result.addons)) return null;
-  return result.addons;
-}
-
-export async function setUserAddonsRaw(authKey: string, addons: Addon[]): Promise<boolean> {
-  if (addons.length === 0) return false;
-  const result = await call<{ success?: boolean }>("addonCollectionSet", {
-    authKey,
-    type: "user",
-    addons,
-  });
-  return result != null;
+export async function getUserAddonsRaw(scope: string): Promise<Addon[] | null> { return userAddons(scope); }
+export async function setUserAddonsRaw(scope: string, addons: Addon[]): Promise<boolean> {
+  return setUserAddons(scope, addons);
 }
 
 const STRIP_WORDS = ["movies", "movie", "series", "shows", "show", "tv shows", "tv"];

@@ -170,7 +170,7 @@ export function HomeTab() {
           <ToggleRow
             label={t("Watchlist shows only saved titles")}
             sub={t(
-              "Keep the Library Watchlist tab limited to titles you added in Stremio. Turn this off to also include anything Stremio auto-added when you pressed play.",
+              "Keep the Library Watchlist tab limited to titles you bookmarked. Turn this off to also include anything automatically added when you pressed play.",
             )}
             value={settings.libraryBookmarkedOnly}
             onChange={(v) => update({ libraryBookmarkedOnly: v })}
@@ -224,7 +224,7 @@ export function HomeTab() {
           <ToggleRow
             label={t("Keep Continue Watching private to each profile")}
             sub={t(
-              "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this Stremio account.",
+              "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this device.",
             )}
             value={settings.cwPerProfile}
             onChange={(v) => update({ cwPerProfile: v })}
@@ -362,7 +362,7 @@ function HomeModePicker({
     },
     {
       id: "classic",
-      label: t("Classic Stremio"),
+      label: t("Classic rows"),
       sub: t(
         "Continue Watching, then your installed addons. Every catalog renders as its own row, install order, no dedup, no hero.",
       ),

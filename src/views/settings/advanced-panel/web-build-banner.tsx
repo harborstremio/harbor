@@ -39,7 +39,7 @@ export function WebBuildBanner() {
         </h2>
         <p className={`max-w-[66ch] ${ROW_DESC}`}>
           {t(
-            "Everything you save here stays in this browser. Your Stremio login, API keys, watch progress, picker cache, dismissed tips. Harbor servers never see any of it. Clearing your browser data wipes it.",
+            "Everything you save here stays in this browser. Your JL session, API keys, watch progress, picker cache, dismissed tips. Harbor servers never see any of it. Clearing your browser data wipes it.",
           )}
         </p>
         <p className={`max-w-[66ch] ${ROW_DESC}`}>

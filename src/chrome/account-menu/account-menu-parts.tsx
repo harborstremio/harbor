@@ -2,9 +2,7 @@ import { AvatarImage } from "@/components/avatar-image";
 import { useT } from "@/lib/i18n";
 import { type Profile } from "@/lib/profiles";
 import type { User } from "@/lib/stremio";
-import { openUrl } from "@/lib/window";
 
-const STREMIO_REGISTER_URL = "https://www.stremio.com/register";
 
 export function ProfileAvatar({
   profile,
@@ -39,32 +37,10 @@ export function SubtitleText({
   const t = useT();
   if (active?.shareStremioWith) {
     const src = profiles.find((p) => p.id === active.shareStremioWith);
-    if (src) return <>{t("Sharing {name}'s Stremio", { name: src.name })}</>;
+    if (src) return <>{t("Sharing {name}'s addon setup", { name: src.name })}</>;
   }
   if (user) {
     return <>{t("profile.signedIn")}</>;
   }
-  return (
-    <>
-      {t("Sign in to")}{" "}
-      <span
-        role="link"
-        tabIndex={0}
-        onClick={(e) => {
-          e.stopPropagation();
-          openUrl(STREMIO_REGISTER_URL);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            e.stopPropagation();
-            openUrl(STREMIO_REGISTER_URL);
-          }
-        }}
-        className="cursor-pointer text-ink transition-colors hover:text-accent"
-      >
-        Stremio
-      </span>
-    </>
-  );
+  return <>{t("Local JL profile")}</>;
 }

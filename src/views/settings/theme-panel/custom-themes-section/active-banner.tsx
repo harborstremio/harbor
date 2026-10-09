@@ -105,7 +105,7 @@ function labelForLayout(l?: string): string {
     case "rail":
       return "Side rail";
     case "stremio":
-      return "Stremio rail";
+      return "Classic rail";
     case "minui":
       return "Floating dock";
     case "dracula":
@@ -130,7 +130,7 @@ function labelForCard(c?: string): string {
     case "glass":
       return "Glass cards";
     case "stremio":
-      return "Stremio cards";
+      return "Classic cards";
     case "minui":
       return "Hairline cards";
     case "crunch":

@@ -1,32 +1,10 @@
-import { startStremioWebAuth } from "@/lib/stremio-auth";
-import { applyAuthResult, applyServerUser, type RawUser } from "@/lib/theme-auth";
-import { postJson } from "./client";
-
-type LoopbackStart = { state: string; callbackUrl: string };
-type LinkResult = { token: string; refresh: string; user: RawUser };
-
-async function linkWithKey(authKey: string): Promise<void> {
-  const key = authKey.trim();
-  if (!key) throw new Error("No Stremio sign-in received. Try again.");
-  const { state } = await postJson<LoopbackStart>("/identity/api/stremio/loopback/start", {}, { bearer: true });
-  const d = await postJson<LinkResult>(
-    "/identity/api/stremio/link",
-    { state, mode: "link", authKey: key },
-    { bearer: true },
-  );
-  applyAuthResult(d);
+/** Never forward local scope IDs or stored external tokens to an identity service. */
+export async function verifyWithCurrentStremio(_authKey: string): Promise<void> {
+  throw new Error("JL Media Vision does not link external media accounts.");
 }
-
-export async function verifyWithCurrentStremio(authKey: string): Promise<void> {
-  await linkWithKey(authKey);
-}
-
 export async function verifyWithStremioBrowser(): Promise<void> {
-  const key = await startStremioWebAuth();
-  await linkWithKey(key);
+  throw new Error("Use your JL Media Vision account on this device.");
 }
-
 export async function unlinkStremio(): Promise<void> {
-  const d = await postJson<{ user: RawUser }>("/identity/api/stremio/unlink", {}, { bearer: true });
-  applyServerUser(d.user);
+  throw new Error("External account linking is no longer used by JL Media Vision.");
 }

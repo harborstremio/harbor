@@ -264,7 +264,7 @@ export function EditorOverlay({
       >
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className={`${OVERLAY_LABEL} text-white/60`}>
-            {t("Layout editor")} · {theme === "stremio" ? t("Stremio") : t("Default")}
+            {t("Layout editor")} · {theme === "stremio" ? t("Classic") : t("Default")}
           </span>
           <h2 className="font-display text-[22px] font-medium tracking-tight">
             {t("Click any control to edit it.")}

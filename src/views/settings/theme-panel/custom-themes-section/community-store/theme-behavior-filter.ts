@@ -2,7 +2,7 @@ export const THEME_BEHAVIORS = [
   { id: "sidebar", label: "Sidebar" },
   { id: "topdock", label: "Top dock" },
   { id: "rail", label: "Side rail" },
-  { id: "stremio", label: "Stremio rail" },
+  { id: "stremio", label: "Classic rail" },
   { id: "minui", label: "Floating dock" },
   { id: "cinematic", label: "Cinematic" },
   { id: "custom", label: "Custom" },

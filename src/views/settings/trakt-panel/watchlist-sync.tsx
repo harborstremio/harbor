@@ -50,7 +50,7 @@ export function WatchlistSync() {
   const { authKey } = useAuth();
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
 
-  const signIn = t("Sign in to Stremio first so Harbor knows which watchlist to sync.");
+  const signIn = t("Choose a JL profile first so its watchlist can sync.");
   const locked = !authKey;
   const busy = phase.kind !== "idle" && phase.kind !== "result";
 

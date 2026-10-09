@@ -199,9 +199,9 @@ export function OrganizeAddonsPage({
           tone: "danger",
           text:
             result.stage === "fetch"
-              ? t("Couldn't reach Stremio to confirm your collection. Nothing was written.")
+              ? t("Couldn't read your local addon collection. Nothing was written.")
               : result.stage === "write"
-                ? t("Stremio didn't confirm the move. Your collection may be unchanged. Reload to see the current state.")
+                ? t("Local storage didn't confirm the move. Your collection may be unchanged. Reload to see the current state.")
                 : t("Moved, but Harbor couldn't confirm the result. Reload to see the current state."),
           reload: true,
         });
@@ -214,8 +214,8 @@ export function OrganizeAddonsPage({
       }
       const movedText =
         result.moved === 1
-          ? t("Moved 1 addon to your Stremio account. It now syncs everywhere you sign in.")
-          : t("Moved {n} addons to your Stremio account. They now sync everywhere you sign in.", {
+          ? t("Moved 1 addon to this JL profile. It is saved on this device.")
+          : t("Moved {n} addons to this JL profile. They are saved on this device.", {
               n: result.moved,
             });
       const skippedText =
@@ -345,7 +345,7 @@ export function OrganizeAddonsPage({
           {phase.kind === "loadError" ? (
             <div className="mx-auto flex max-w-md flex-col items-center gap-5 py-20 text-center">
               <p className="text-[15px] leading-relaxed text-ink-muted">
-                {t("Couldn't load your Stremio collection. Nothing can be reordered safely without it.")}
+                {t("Couldn't load your local addon collection. Nothing can be reordered safely without it.")}
               </p>
               <div className="flex items-center gap-3">
                 <button
@@ -399,15 +399,15 @@ export function OrganizeAddonsPage({
                 {authKey ? (
                   <>
                     <SectionCard
-                      title={t("Your Stremio account")}
-                      sub={t("This order syncs to every Stremio app signed into this account.")}
+                      title={t("This JL profile")}
+                      sub={t("This order is saved on this device for the active JL profile.")}
                       count={workingCloud.length}
                     >
                       {phase.kind === "loading" ? (
                         <SkeletonRows />
                       ) : workingCloud.length === 0 ? (
                         <p className="rounded-xl border border-dashed border-edge-soft bg-canvas/30 px-5 py-4 text-[13.5px] text-ink-subtle">
-                          {t("No addons are synced to this account yet.")}
+                          {t("No addons are installed in this profile yet.")}
                         </p>
                       ) : (
                         <OrganizeList
@@ -431,7 +431,7 @@ export function OrganizeAddonsPage({
                             title={
                               dirty
                                 ? t("Save or discard your order changes first")
-                                : t("Add every addon below to your Stremio account")
+                                : t("Add every addon below to this JL profile")
                             }
                             className="flex h-9 items-center gap-1.5 rounded-full bg-raised px-3.5 text-[12.5px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-elevated hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
                           >
@@ -466,7 +466,7 @@ export function OrganizeAddonsPage({
                 ) : (
                   <SectionCard
                     title={t("On this device")}
-                    sub={t("Sign in to Stremio to organize the addons synced to your account.")}
+                    sub={t("Choose a JL profile to organize its installed addons.")}
                     count={workingDevice.length}
                   >
                     {phase.kind === "loading" ? (
@@ -497,7 +497,7 @@ export function OrganizeAddonsPage({
                     <li>{t("The order also decides which addon's rows win on your Home screen.")}</li>
                     <li>{t("Nothing changes until you press Save. Leaving this page discards edits.")}</li>
                     <li>{t("The Backups button at the top keeps your last five orders. One click restores any of them.")}</li>
-                    <li>{t("Harbor double-checks with Stremio after saving, so a half-written order can't slip through.")}</li>
+                    <li>{t("JL Media Vision reads the saved local collection back to verify the order.")}</li>
                   </ul>
                 </section>
               </div>

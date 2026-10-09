@@ -41,7 +41,7 @@ export function StremioCard() {
         <SettingRow
           icon={<LogIn size={18} strokeWidth={2} />}
           label={t("Not signed in")}
-          desc={t("Sign in to sync your library, watch progress, and addons.")}
+          desc={t("Sign in with your JL Media Vision account. Your local library and addons remain available.")}
         >
           <button
             ref={signInRef}
@@ -69,13 +69,13 @@ export function StremioCard() {
         }
       >
         <SButton onClick={() => setReveal((v) => !v)}>{reveal ? t("Hide") : t("Reveal")}</SButton>
-        <SButton onClick={() => setShowAuth(true)}>{t("Re-authenticate")}</SButton>
+
       </SettingRow>
 
       <SettingRow
         icon={<Fingerprint size={18} strokeWidth={2} />}
-        label={t("Stremio ID")}
-        desc={t("The account identifier Stremio uses for your library and addon collection.")}
+        label={t("JL account ID")}
+        desc={t("Your stable JL account identifier.")}
       >
         <span className={`break-all font-mono ${ROW_DESC}`} dir="ltr">
           {user._id}
@@ -84,8 +84,8 @@ export function StremioCard() {
 
       <SettingRow
         icon={<LogOut size={18} strokeWidth={2} />}
-        label={t("Sign out of Stremio")}
-        desc={t("Stops syncing on this device. Your library stays safe in your Stremio account.")}
+        label={t("Sign out of JL Media Vision")}
+        desc={t("Stops account sync and returns to this device's local profiles.")}
       >
         <SButton variant="danger" onClick={onSignOut}>
           {t("Sign out")}

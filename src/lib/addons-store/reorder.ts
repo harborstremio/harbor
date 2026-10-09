@@ -2,6 +2,30 @@ import { getUserAddonsRaw, setUserAddonsRaw, type Addon } from "@/lib/addons";
 
 const BACKUP_KEY = "harbor.addonOrderBackups";
 const ORDER_KEY = "harbor.addonOrder";
+function scopedKey(base: string): string {
+  try {
+    const raw = localStorage.getItem("harbor.profiles.v1");
+    const state = raw ? JSON.parse(raw) : null;
+    const profiles = Array.isArray(state?.profiles) ? state.profiles : [];
+    const primary = profiles.find((p: { isPrimary?: boolean }) => p.isPrimary);
+    const active = profiles.find((p: { id?: string }) => p.id === state?.activeId) ?? primary;
+    const shared = profiles.find((p: { id?: string }) => p.id === active?.shareStremioWith);
+    const id = shared?.id ?? active?.id;
+    if (!id) return base;
+    const key = base + "." + id;
+    // Existing unscoped backup belongs to the original primary profile only.
+    // Keep the original bytes for recovery and never copy it to a new account.
+    const marker = base + ".jl-migrated-owner";
+    if (!localStorage.getItem(marker) && primary?.id) {
+      const legacy = localStorage.getItem(base);
+      const destination = base + "." + primary.id;
+      if (legacy && !localStorage.getItem(destination)) localStorage.setItem(destination, legacy);
+      localStorage.setItem(marker, primary.id);
+    }
+    return key;
+  } catch { throw new Error("Could not read the active addon profile."); }
+}
+
 const MAX_BACKUPS = 5;
 
 export type ReorderInvalid = "empty" | "length" | "null-item" | "url-multiset" | "item-identity";
@@ -131,7 +155,7 @@ export function moveItem<T>(list: T[], from: number, to: number): T[] {
 
 export function loadBackups(): AddonOrderBackup[] {
   try {
-    const raw = localStorage.getItem(BACKUP_KEY);
+    const raw = localStorage.getItem(scopedKey(BACKUP_KEY));
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -169,7 +193,7 @@ export function pushBackup(items: Addon[]): void {
   ];
   for (const list of attempts) {
     try {
-      localStorage.setItem(BACKUP_KEY, JSON.stringify(list));
+      localStorage.setItem(scopedKey(BACKUP_KEY), JSON.stringify(list));
       return;
     } catch {
       continue;
@@ -180,7 +204,7 @@ export function pushBackup(items: Addon[]): void {
 
 export function saveDisplayOrder(urls: string[]): void {
   try {
-    localStorage.setItem(ORDER_KEY, JSON.stringify(urls));
+    localStorage.setItem(scopedKey(ORDER_KEY), JSON.stringify(urls));
   } catch (e) {
     console.warn("[addons] couldn't persist addon display order", e);
   }
@@ -188,7 +212,7 @@ export function saveDisplayOrder(urls: string[]): void {
 
 export function loadDisplayOrder(): string[] {
   try {
-    const raw = localStorage.getItem(ORDER_KEY);
+    const raw = localStorage.getItem(scopedKey(ORDER_KEY));
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];

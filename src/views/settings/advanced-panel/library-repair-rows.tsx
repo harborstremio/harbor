@@ -40,7 +40,7 @@ export function LibraryRepairRow() {
     return (
       <ActionRow
         label={t("Repair library")}
-        sub={t("Sign in to Stremio first. The repair scans only the active profile's library.")}
+        sub={t("Select a JL profile first. The repair scans only its local library.")}
       />
     );
   }
@@ -60,7 +60,7 @@ export function LibraryRepairRow() {
     }
     if (!progress)
       return t(
-        "Rewrites every library item to match Stremio's exact schema. Run once if your Stremio app started crashing after Harbor synced playback.",
+        "Repairs malformed records in the active JL profile library. Existing provider IDs and playback progress are retained.",
       );
     if (progress.phase === "fetching") {
       return progress.total
@@ -142,7 +142,7 @@ export function AnimeRepairRow() {
     return (
       <ActionRow
         label={t("Repair anime library")}
-        sub={t("Sign in to Stremio first. This scans the active profile's library.")}
+        sub={t("Select a JL profile first. This scans its local library.")}
       />
     );
   }

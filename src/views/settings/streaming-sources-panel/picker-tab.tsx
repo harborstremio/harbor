@@ -15,7 +15,7 @@ export function PickerTab() {
       <Section
         title={t("Picker layout")}
         subtitle={t(
-          "Condensed shows a top pick, quality tiles, and a drawer. Stremio is a flat list grouped by addon, no scoring.",
+          "Condensed shows a top pick, quality tiles, and a drawer. Addon list groups sources by addon, no scoring.",
         )}
       >
         <div className="grid items-center gap-6 min-[900px]:grid-cols-[minmax(0,1fr)_340px]">
@@ -64,7 +64,7 @@ export function PickerTab() {
         />
         <ToggleRow
           label={t("Show full descriptions")}
-          sub={t("Show complete addon descriptions in the Stremio picker, downloads, and Big Picture.")}
+          sub={t("Show complete addon descriptions in the addon list picker, downloads, and Big Picture.")}
           value={settings.fullStreamDescription}
           onChange={(v) => update({ fullStreamDescription: v })}
         />
@@ -84,7 +84,7 @@ function PickerLayoutPicker({
   const name = useId();
   const options = [
     { id: "condensed", label: t("Condensed") },
-    { id: "stremio", label: t("Stremio") },
+    { id: "stremio", label: t("Addon list") },
   ] as const;
 
   return (

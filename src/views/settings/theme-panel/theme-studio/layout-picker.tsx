@@ -30,8 +30,8 @@ const LAYOUTS: LayoutDef[] = [
   },
   {
     id: "stremio",
-    name: "Stremio rail",
-    blurb: "Stremio-style narrow rail.",
+    name: "Classic rail",
+    blurb: "Classic narrow rail.",
     diagram: (a) => <Diagram active={a} kind="stremio" />,
   },
   {

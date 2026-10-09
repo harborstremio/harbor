@@ -19,7 +19,7 @@ import boat from "@/assets/app-icons/boat.png";
 export type AppIconPreset = { id: string; label: string; src: string };
 
 export const APP_ICON_PRESETS: AppIconPreset[] = [
-  { id: "diamond", label: "Stremio", src: diamond },
+  { id: "diamond", label: "Diamond", src: diamond },
   { id: "liquid-glass", label: "Liquid Glass", src: liquidGlass },
   { id: "dark-lumina", label: "Dark Lumina", src: darkLumina },
   { id: "fluent-blue", label: "Fluent Blue", src: fluentBlue },

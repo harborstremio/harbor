@@ -167,7 +167,7 @@ export function SetupNoToken({ chrome, onExit }: { chrome: SetupChrome; onExit: 
 
 const STEP_LABEL: Record<SetupStepId, string> = {
   tmdb: "TMDB connected",
-  stremio: "Stremio library signed in",
+  stremio: "JL account step completed",
   harbor: "Harbor account signed in",
 };
 

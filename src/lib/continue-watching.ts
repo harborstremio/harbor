@@ -151,11 +151,15 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       if (document.visibilityState === "visible") retryNow();
     };
     window.addEventListener("online", retryNow);
+    window.addEventListener("jl:library-changed", load);
+    window.addEventListener("jl:profile-data-applied", load);
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       cancelled = true;
       if (timer != null) window.clearTimeout(timer);
       window.removeEventListener("online", retryNow);
+      window.removeEventListener("jl:library-changed", load);
+      window.removeEventListener("jl:profile-data-applied", load);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, [authKey]);

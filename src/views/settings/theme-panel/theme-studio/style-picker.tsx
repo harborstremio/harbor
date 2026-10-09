@@ -5,7 +5,7 @@ import { PickCard, PickGrid } from "./controls/pick-grid";
 const CARD_STYLES = [
   { id: "flat", name: "Flat" },
   { id: "glass", name: "Glass" },
-  { id: "stremio", name: "Stremio" },
+  { id: "stremio", name: "Classic" },
   { id: "minui", name: "Hairline" },
   { id: "custom", name: "Custom" },
 ];

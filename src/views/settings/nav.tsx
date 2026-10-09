@@ -2962,7 +2962,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Picker layout (Condensed / Stremio)",
+    label: "Picker layout (Condensed / Addon list)",
     section: "streaming",
     tab: "picker",
     anchorTitle: "Picker layout",
@@ -3242,10 +3242,10 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Stremio install links",
+    label: "Addon install links",
     section: "account",
     tab: "stremio",
-    anchorTitle: "Stremio install links",
+    anchorTitle: "Addon install links",
     keywords: ["stremio install links", "deeplink", "protocol handler", "install addon"],
   },
   {
@@ -3288,10 +3288,10 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["onboarding", "walkthrough", "tutorial", "replay", "restore hints", "tips"],
   },
   {
-    label: "Stremio library repair",
+    label: "Local library repair",
     section: "advanced",
     tab: "repair",
-    anchorTitle: "Stremio library repair",
+    anchorTitle: "Local library repair",
     keywords: ["stremio library repair", "fix library", "schema", "repair"],
   },
   {
@@ -3310,10 +3310,10 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["avatar", "profile photo", "upload photo", "color", "identity", "picture"],
   },
   {
-    label: "Stremio account (email / sign out)",
+    label: "JL Media Vision account (email / sign out)",
     section: "account",
     tab: "stremio",
-    anchorTitle: "Stremio account",
+    anchorTitle: "JL Media Vision account",
     keywords: ["stremio", "email", "sign out", "logout", "re-authenticate", "login", "account"],
   },
   {
@@ -3334,10 +3334,10 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Synced addons",
+    label: "Installed addons",
     section: "account",
     tab: "stremio",
-    anchorTitle: "Synced addons",
+    anchorTitle: "Installed addons",
     keywords: ["synced addons", "addons", "stremio addons", "installed addons"],
   },
 
@@ -3478,7 +3478,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Sign in to Stremio",
+    label: "Sign in to JL Media Vision",
     section: "basics",
     keywords: ["sign in", "login", "stremio account", "sync", "manage account", "email", "log in"],
   },
@@ -3567,7 +3567,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["random", "shuffle", "surprise avatar", "dice"],
   },
   {
-    label: "Reset to Stremio avatar",
+    label: "Reset to account avatar",
     section: "account",
     tab: "you",
     anchorTitle: "Your profile",
@@ -3623,42 +3623,42 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Sign in",
     section: "account",
     tab: "stremio",
-    anchorTitle: "Stremio account",
+    anchorTitle: "JL Media Vision account",
     keywords: ["login", "sign in", "stremio", "connect account", "not signed in"],
   },
   {
     label: "Re-authenticate",
     section: "account",
     tab: "stremio",
-    anchorTitle: "Stremio account",
+    anchorTitle: "JL Media Vision account",
     keywords: ["reauth", "refresh session", "login again", "expired token", "re-login"],
   },
   {
     label: "Sign out",
     section: "account",
     tab: "stremio",
-    anchorTitle: "Stremio account",
+    anchorTitle: "JL Media Vision account",
     keywords: ["logout", "sign out", "log off", "disconnect account"],
   },
   {
     label: "Reveal",
     section: "account",
     tab: "stremio",
-    anchorTitle: "Stremio account",
+    anchorTitle: "JL Media Vision account",
     keywords: ["show email", "hide email", "mask email", "privacy", "stremio id"],
   },
   {
-    label: "Sync now",
+    label: "Refresh addons",
     section: "account",
     tab: "stremio",
-    anchorTitle: "Synced addons",
+    anchorTitle: "Installed addons",
     keywords: ["sync addons", "refresh addons", "pull collection", "addon sync", "last synced"],
   },
   {
     label: "Manage",
     section: "account",
     tab: "stremio",
-    anchorTitle: "Synced addons",
+    anchorTitle: "Installed addons",
     keywords: ["manage addons", "installed addons", "addons page", "open addons"],
   },
   {
@@ -6406,7 +6406,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Default / Stremio",
+    label: "Default / Classic",
     section: "playerLayout",
     keywords: [
       "player theme",
@@ -7666,9 +7666,9 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Built on Stremio",
+    label: "Addon compatibility",
     section: "support",
-    anchorTitle: "Built on Stremio",
+    anchorTitle: "Addon compatibility",
     keywords: ["stremio", "credit", "foundation", "upstream", "thanks", "support stremio"],
   },
   {
@@ -7846,10 +7846,10 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["pause on focus loss", "alt tab pause", "unfocused pause", "another window"],
   },
   {
-    label: "Catch stremio:// install links inside Harbor",
+    label: "Open compatible addon links in JL Media Vision",
     section: "account",
     tab: "stremio",
-    anchorTitle: "Stremio install links",
+    anchorTitle: "Addon install links",
     keywords: [
       "protocol handler",
       "stremio link handler",
@@ -7957,7 +7957,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Repair library",
     section: "advanced",
     tab: "repair",
-    anchorTitle: "Stremio library repair",
+    anchorTitle: "Local library repair",
     keywords: ["repair now", "rewrite items", "stremio crash fix", "library scan", "run again"],
   },
   {
@@ -8157,7 +8157,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Home style (Harbor curated / Classic Stremio)",
+    label: "Home style (JL curated / Classic rows)",
     section: "library",
     tab: "home",
     anchorTitle: "Home layout",
@@ -9993,7 +9993,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Fix corrupted anime",
     section: "advanced",
     tab: "repair",
-    anchorTitle: "Stremio library repair",
+    anchorTitle: "Local library repair",
     keywords: [
       "corrupted anime",
       "anime repair",

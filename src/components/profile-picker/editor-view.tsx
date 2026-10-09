@@ -118,7 +118,7 @@ export function EditorView({
   >(null);
   const [color, setColor] = useState<ProfileColor>(editing?.color ?? nextProfileColor(profiles));
   const [shareWith, setShareWith] = useState<string | null>(
-    editing ? editing.shareStremioWith : (primary?.id ?? null),
+    editing ? editing.shareStremioWith : null,
   );
   const [importSelection, setImportSelection] = useState<Record<ImportDomain, boolean>>({
     settings: false,
@@ -660,7 +660,7 @@ export function EditorView({
       {showAdvanced && !draftKid && canShare && primary && (
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-            {t("Stremio account")}
+            {t("Library and addon sharing")}
           </span>
           <div className="flex flex-col gap-1.5">
             <ShareOption
@@ -675,7 +675,7 @@ export function EditorView({
               }}
               icon={<Link2 size={14} strokeWidth={2.2} />}
               title={t("Share with {name}", { name: primary.name })}
-              sub={t("Use the primary profile's Stremio library, watchlist, and addons.")}
+              sub={t("Use the primary profile's saved addon setup and watchlist.")}
             />
             <ShareOption
               active={shareWith === null}
@@ -685,8 +685,8 @@ export function EditorView({
                 resetImportChoice();
               }}
               icon={<UserIcon size={14} strokeWidth={2.2} />}
-              title={t("Use a separate Stremio account")}
-              sub={t("Sign in from the sidebar after saving. Library and addons stay separate.")}
+              title={t("Keep this profile separate")}
+              sub={t("Library and addons stay separate. No additional account is needed.")}
             />
             {confirmingShare && (
               <div className="flex items-center gap-2 rounded-lg border border-edge-soft bg-canvas/40 px-3 py-2 text-[14px]">
