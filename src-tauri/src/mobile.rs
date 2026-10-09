@@ -124,6 +124,7 @@ pub fn run() {
             local_lib::harbor_scan_folder,
             download::download_start,
             download::download_cancel,
+            download::download_verify,
             diagnostics::diagnostics_collect,
             diagnostics::diagnostics_cleanup,
             proc_mem::harbor_process_memory,

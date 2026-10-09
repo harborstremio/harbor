@@ -31,6 +31,7 @@ mod subtitle_credentials;
 mod temp_prune;
 mod thumb_cache;
 mod torrent_engine;
+pub(crate) mod transfer_files;
 mod transcode;
 mod web_server;
 

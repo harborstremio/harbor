@@ -82,10 +82,10 @@ async fn file_digest(path: &str, cancel: &Arc<AtomicBool>, received: u64) -> Res
 #[tauri::command]
 pub async fn download_verify(dest: String) -> Result<Option<u64>, String> {
     if !std::path::Path::new(&dest).is_absolute() { return Err("Invalid download path".into()); }
-    let Some(size) = crate::games::transfer_files::ensure_regular(std::path::Path::new(&dest))
+    let Some(size) = crate::transfer_files::ensure_regular(std::path::Path::new(&dest))
         .map_err(|_| "The saved path is not a regular file")? else { return Ok(None); };
     let sidecar = format!("{dest}.part.meta.json");
-    crate::games::transfer_files::ensure_regular(std::path::Path::new(&sidecar))
+    crate::transfer_files::ensure_regular(std::path::Path::new(&sidecar))
         .map_err(|_| "The saved state is not a regular file")?;
     let record = tokio::fs::read(sidecar).await.ok().and_then(|bytes| serde_json::from_slice::<PartialIdentity>(&bytes).ok());
     let Some(record) = record.filter(|record| record.digest.is_some()) else { return Ok(None); };
@@ -164,9 +164,9 @@ async fn run_download(
         tokio::fs::create_dir_all(parent).await.map_err(|_| failure("Could not create the download folder"))?;
     }
     let source = source_identity(url, headers);
-    let existing = crate::games::transfer_files::ensure_regular(std::path::Path::new(&part))
+    let existing = crate::transfer_files::ensure_regular(std::path::Path::new(&part))
         .map_err(|_| failure("The partial download is not a regular file"))?.unwrap_or(0);
-    crate::games::transfer_files::ensure_regular(std::path::Path::new(&sidecar))
+    crate::transfer_files::ensure_regular(std::path::Path::new(&sidecar))
         .map_err(|_| failure("The download state is not a regular file"))?;
     let saved = tokio::fs::read(&sidecar).await.ok().and_then(|bytes| serde_json::from_slice::<PartialIdentity>(&bytes).ok());
     let saved = saved.filter(|identity| identity.source == source && identity.etag.is_some() && identity.total.is_some_and(|n| n >= existing));
@@ -228,7 +228,7 @@ async fn run_download(
     }
     let mut identity = PartialIdentity { source, etag: strong_etag(response.headers()), total, digest: None };
     if let (Some(total), Some(parent)) = (total, std::path::Path::new(dest).parent()) {
-        if crate::games::transfer_files::free_bytes(parent).is_some_and(|available| available < total.saturating_sub(start)) {
+        if crate::transfer_files::free_bytes(parent).is_some_and(|available| available < total.saturating_sub(start)) {
             return Err(failure("There is not enough free space in the download folder"));
         }
     }
@@ -288,7 +288,7 @@ async fn run_download(
     // Same-folder, no-clobber publication is atomic on Windows, including
     // FAT/exFAT. Reuse the game transfer implementation instead of copying into
     // a visible final file (which a crash could leave partially populated).
-    crate::games::transfer_files::publish(std::path::Path::new(&part), std::path::Path::new(dest))
+    crate::transfer_files::publish(std::path::Path::new(&part), std::path::Path::new(dest))
         .map_err(|_| failure("Could not finalize the file without overwriting an existing destination"))?;
     emit(DownloadEvent::Progress { received, total });
     emit(DownloadEvent::Done { received });
