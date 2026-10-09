@@ -1,1 +1,1 @@
-JL Media Vision 0.9.26 build-only: retain independent Windows and Android installers with checksums; publication stays paused pending authorized release access.
+JL Media Vision 0.9.26 desktop integration: verify native synthetic download and stream fixtures, build and retain the Windows installer with its checksum and exact source commit. Android is paused on codex/jl-release-026; publication remains disabled.
