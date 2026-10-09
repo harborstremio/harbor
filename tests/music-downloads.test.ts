@@ -23,7 +23,9 @@ function fixture(options: { deferFilter?: boolean } = {}) {
   let owner = JSON.stringify(["account-a", "profile-a"]);
   let changed = () => {};
   let finishFilter = () => {};
-  const filtering = new Promise<void>((resolve) => { finishFilter = resolve; });
+  const filtering = new Promise<void>((resolve) => {
+    finishFilter = resolve;
+  });
   const code = ts.transpileModule(
     readFileSync(new URL("../src/lib/music/downloads.ts", import.meta.url), "utf8"),
     { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } },
