@@ -119,6 +119,15 @@ test("profile metadata uses explicit safe fields and excludes PIN/avatar/device 
   assert.deepEqual(values, { "profile:name": "Viewer", "profile:color": "#7dd3fc" });
   assert.deepEqual(validateProfileData(values), values);
 });
+
+test("watch history keeps newest-first ordering after JSONB key reordering", () => {
+  const s = storage();
+  applyProfileData(s, "p", {
+    "history:older|se": { id: "older", type: "movie", name: "Old", at: 100 },
+    "history:newer|se": { id: "newer", type: "movie", name: "New", at: 200 },
+  }, {}, {});
+  assert.deepEqual(JSON.parse(s.getItem("harbor.watchevents.v1.p")!).map((v: { id: string }) => v.id), ["newer", "older"]);
+});
 test("malformed remote values, extra secret fields and invalid preferences fail closed", () => {
   assert.throws(() => validateProfileData({ "settings:rdKey": "private" }));
   assert.throws(() => validateProfileData({ "settings:uiLanguage": false }));

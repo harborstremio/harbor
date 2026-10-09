@@ -131,6 +131,7 @@ export function applyProfileData(storage: Port, localId: string, values: SyncVal
       const id = key.slice(section.length + 1);
       return [id, { ...(old.get(id) as object ?? {}), ...(value as object) }] as const;
     });
+    if (section === "history") entries.sort(([, a], [, b]) => Number((b as Record<string, unknown>).at ?? 0) - Number((a as Record<string, unknown>).at ?? 0));
     const localOnly = Object.entries(stored ?? {}).filter(([index, value]) => itemKey(value, index, section) === null);
     writes.set(prefix + targetId, JSON.stringify(shape === "array" ? [...entries.map(([, v]) => v), ...localOnly.map(([, v]) => v)] : Object.fromEntries([...entries, ...localOnly])));
   }
