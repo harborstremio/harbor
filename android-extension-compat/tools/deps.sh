@@ -16,7 +16,25 @@ get() {
   out="$2/$(basename "$1")"
   if [ -s "$out" ]; then echo "  have $(basename "$1")"; return; fi
   echo "  get  $(basename "$1")"
-  curl -sSL --fail --max-time 180 -o "$out" "$3" || { rm -f "$out"; echo "FAILED $1"; exit 1; }
+  # Retry outside curl: its own --retry cannot recover a crashed curl process.
+  # Keep incomplete bytes out of the nonempty-file cache, including after interruption.
+  partial="$out.part.$$"
+  attempt=1
+  while [ "$attempt" -le 3 ]; do
+    rm -f "$partial"
+    if curl -sSL --fail --max-time 180 -o "$partial" "$3" && [ -s "$partial" ]; then
+      mv "$partial" "$out"
+      return
+    fi
+    rm -f "$partial"
+    if [ "$attempt" -lt 3 ]; then
+      echo "  retry $(basename "$1") ($attempt/3 failed)"
+      sleep 2
+    fi
+    attempt=$((attempt + 1))
+  done
+  echo "FAILED $1 after 3 attempts"
+  exit 1
 }
 
 maven() { get "$1" "$2" "$M/$1"; }
