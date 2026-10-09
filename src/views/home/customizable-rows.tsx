@@ -13,7 +13,8 @@ import type { HomeRowCustomization } from "@/lib/home-customization";
 import { useView } from "@/lib/view";
 import type { HomeRow } from "./home-types";
 import { RowControls } from "./row-controls";
-import { watchTitleKey, type WatchedSet } from "@/lib/playback-history";
+import type { WatchedSet } from "@/lib/playback-history";
+import { collapseWatchedKeys, isTitleWatched } from "@/lib/watched-title";
 import { useSettings } from "@/lib/settings";
 
 type Translate = (key: string, vars?: Record<string, string | number>) => string;
@@ -67,17 +68,6 @@ const BUILT_IN_HOME_ROW_TITLES: Readonly<Record<string, string>> = {
 export function displayRowTitle(row: HomeRow, renamed: boolean, t: Translate): string {
   if (renamed) return row.name;
   return BUILT_IN_HOME_ROW_TITLES[row.key] === row.name ? t(row.name) : row.name;
-}
-
-function metaTitleKey(meta: { id?: string }): string | null {
-  const id = meta.id;
-  if (!id) return null;
-  if (/^tt\d+$/.test(id)) return `imdb:${id}`;
-  if (id.startsWith("tmdb:")) {
-    const num = Number(id.split(":")[2]);
-    if (Number.isFinite(num)) return `tmdb:${num}`;
-  }
-  return null;
 }
 
 function isUnreleased(m: { releaseDate?: string; releaseInfo?: string }): boolean {
@@ -202,26 +192,12 @@ export function CustomizableRows({
   const posterRow = usePosterRow();
   const { settings } = useSettings();
   const hideUnreleased = settings.hideUnreleased;
-  const watchedTitleKeys = useMemo(() => {
-    const out = new Set<string>();
-    if (!watchedSet) return out;
-    for (const k of watchedSet) {
-      const parts = k.split(":");
-      if (parts.length >= 2) out.add(`${parts[0]}:${parts[1]}`);
-    }
-    return out;
-  }, [watchedSet]);
-  const isWatched = (m: { id: string; name?: string }) => {
-    if (stremioWatched?.has(m.id)) return true;
-    const key = metaTitleKey(m);
-    if (key != null && watchedTitleKeys.has(key)) return true;
-    if (localWatched) {
-      if (localWatched.ids.has(m.id)) return true;
-      const tk = watchTitleKey(m.name);
-      if (tk && localWatched.titles.has(tk)) return true;
-    }
-    return false;
-  };
+  const traktKeys = useMemo(
+    () => collapseWatchedKeys(watchedSet ?? new Set<string>()),
+    [watchedSet],
+  );
+  const isWatched = (m: { id: string; name?: string }) =>
+    isTitleWatched(m, { traktKeys, localWatched, stremioWatched });
   return (
     <>
       {rows.map((row, rowIndex) => {

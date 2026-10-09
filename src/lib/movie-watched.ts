@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from "react";
 import { persistCritical } from "./storage-recovery";
 
 const KEY_PREFIX = "harbor.moviewatched.v1.";
@@ -89,6 +90,12 @@ export function isMovieWatchedLocal(metaId: string): boolean {
 
 export function movieWatchedIds(): Set<string> {
   return load();
+}
+
+const EMPTY_MOVIE_WATCHED_IDS: Set<string> = new Set();
+
+export function useMovieWatchedIds(): Set<string> {
+  return useSyncExternalStore(subscribeMovieWatched, load, () => EMPTY_MOVIE_WATCHED_IDS);
 }
 
 export function setMovieWatchedLocal(metaId: string, watched: boolean): void {

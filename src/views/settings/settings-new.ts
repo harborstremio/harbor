@@ -16,6 +16,7 @@ const NEW_SETTINGS = new Set([
   "tv:subtitle-look",
   "mpv:buffer-size",
   "home:prefer-episode-still",
+  "home:hero-hide-watched",
   "bigPicture:display",
   "player:separate-display",
   "player:cover-taskbar",
