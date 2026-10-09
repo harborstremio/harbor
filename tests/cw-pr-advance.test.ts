@@ -98,6 +98,14 @@ function harness() {
   const modules = new Map<string, any>();
   let params: any[] = [[], "", true, []];
   const mocks: Record<string, any> = {
+    "./jl/local-library": {
+      readJlLibrary: () => {
+        throw new Error("CW advancement must use its supplied items, not read the JL library");
+      },
+      putJlLibraryItem: () => {
+        throw new Error("CW advancement must not mutate the JL library");
+      },
+    },
     react: {
       useState: (initial: any) => {
         const slot = stateSlot++;
