@@ -35,6 +35,13 @@ import {
 import { SportsAccessGate } from "./sports/access-gate";
 import { SportsNoProviderNote } from "./sports/no-provider-note";
 import { SportsPersonalizeHint } from "./sports/personalize-hint";
+import { heroFeatured } from "@/lib/jl/sports/hub-sections";
+import { GameStoriesRow } from "./live/live-home/jl-sports/game-stories";
+import { AlsoToday, JlSportsHub } from "./live/live-home/jl-sports/jl-sports-hub";
+import { LiveSportsChannels } from "./live/live-home/jl-sports/live-sports-channels";
+import { JlSportsHero } from "./live/live-home/jl-sports/sports-hero";
+import type { JlHubGame } from "./live/live-home/jl-sports/use-jl-sports";
+import { useJlSportsPage } from "./live/live-home/jl-sports/use-jl-sports-page";
 
 const LIVE_SCOREBOARDS = liveScoreboardKeys(HUB_LEAGUES);
 
@@ -237,6 +244,34 @@ function SportsHubView({ active = false }: { active?: boolean }) {
       openMatchDetail(game, all.filter((item) => item.league === game.league && item.context?.id === game.context?.id));
     else openMatchDetail(game);
   };
+  // JL Media Vision's pieces of the hub: ranked Top 10, Game Stories, the viewer's own sports
+  // channels and the Watch chooser that plays a game on them.
+  const jl = useJlSportsPage({ active, onOpenGame: open, featured: heroes });
+  const jlTopKeys = new Set(jl.sports.top.map((r) => `${r.game.league}:${r.game.id}`));
+  const jlFeatured: JlHubGame[] = heroFeatured(heroes, jlTopKeys).map((game) => ({
+    game,
+    score: 0,
+    reasons: [],
+    mine: false,
+    channels: jl.sports.channelsFor(game),
+  }));
+  const jlHome = tab === "home" && group !== "esports";
+  // JL's pieces follow the viewer's own sports, not a single sport or league picked below.
+  const jlAll = jlHome && group === "all" && !scope.leagueFilter;
+  const jlHero =
+    jlHome &&
+    jl.sports.top.length +
+      jl.sports.teamSlides.length +
+      jl.sports.playerSlides.length +
+      jlFeatured.length >
+      0;
+  // Harbor's schedule already lists every game of the leagues it shows, so "Also today" only
+  // keeps the leagues it doesn't.
+  const scheduleTags = new Set([
+    ...board.games.map((g) => g.league),
+    ...HUB_LEAGUES.filter((l) => leagues.includes(l.key)).map((l) => l.tag),
+  ]);
+  const jlAlsoToday = jl.sports.alsoToday.filter((g) => !scheduleTags.has(g.league));
   const busy =
     tab !== "hot" &&
     tab !== "explore" &&
@@ -278,7 +313,19 @@ function SportsHubView({ active = false }: { active?: boolean }) {
       onScroll={(e) => setShowTop(e.currentTarget.scrollTop > 700)}
       aria-label={t("Sports")}
     >
-      <header className="sh-masthead">
+      {jlHero && (
+        <JlSportsHero
+          top={jl.sports.top}
+          teamSlides={jl.sports.teamSlides}
+          playerSlides={jl.sports.playerSlides}
+          featured={jlFeatured}
+          actions={jl.actions}
+          onOpenGame={open}
+          bleed
+          flush
+        />
+      )}
+      <header className={jlHero ? "sh-masthead sh-masthead-after-hero" : "sh-masthead"}>
         <div>
           <span className="sh-eyebrow">HARBOR SPORTS</span>
           <h1>{t("Every game. Your game.")}</h1>
@@ -491,6 +538,22 @@ function SportsHubView({ active = false }: { active?: boolean }) {
                 </span>
               </button>
             )}
+            {jlAll && (
+              <>
+                <JlSportsHub
+                  top={jl.sports.top}
+                  ticker={jl.sports.ticker}
+                  favorites={jl.sports.teams}
+                  actions={jl.actions}
+                  onOpenGame={open}
+                  onLeagues={() => {
+                    setTab("explore");
+                    setGroup("all");
+                  }}
+                />
+                <GameStoriesRow stories={jl.stories} onWatch={jl.actions.watch} onOpenGame={open} />
+              </>
+            )}
             <HubRow
               title={t(
                 live.some((game) => game.savedAt === undefined)
@@ -534,6 +597,17 @@ function SportsHubView({ active = false }: { active?: boolean }) {
                 stale={upcoming.stale}
               />
             )}
+            {jlAll && (
+              <LiveSportsChannels
+                active={active}
+                channels={jl.channels}
+                activeSourceId={jl.activeSourceId}
+                epg={jl.epg}
+                nowMs={jl.nowMs}
+                games={jl.sports.top}
+                onPlay={jl.play}
+              />
+            )}
             {pitchGame && <HubPitchSpotlight game={pitchGame} active={active} onOpen={open} />}
             {group === "all" && esportsLeagues.length > 0 && (
               <Suspense fallback={<SportsRailSkeleton />}>
@@ -558,6 +632,14 @@ function SportsHubView({ active = false }: { active?: boolean }) {
                 stale={board.stale}
                 loading={board.pending > 0}
                 failed={board.failed > 0}
+              />
+            )}
+            {jlAll && (
+              <AlsoToday
+                groups={jlAlsoToday}
+                favorites={jl.sports.teams}
+                actions={jl.actions}
+                onOpenGame={open}
               />
             )}
             {!filtered.length && (
@@ -678,6 +760,7 @@ function SportsHubView({ active = false }: { active?: boolean }) {
           {t("Back to top")}
         </button>
       )}
+      {jl.dialogs}
       <Suspense fallback={null}>
         {setup && <Personalize selected={selected} onClose={() => setSetup(false)} />}{" "}
       </Suspense>

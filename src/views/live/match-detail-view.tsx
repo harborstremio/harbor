@@ -32,6 +32,7 @@ import { EventOdds } from "@/views/sports/event-odds";
 import { AthleteProfileLink } from "@/views/sports/athlete-profile";
 import { TennisMatchPanel } from "./match-detail-view/tennis-match-panel";
 import { MatchDetailsPanel } from "./match-detail-view/match-details-panel";
+import { MatchCenterLink } from "@/views/sports-pages/match-center-link";
 
 const HubEventPage = lazy(() => import("@/views/sports/hub-event-page").then((module) => ({ default: module.HubEventPage })));
 
@@ -114,6 +115,10 @@ function HeadToHeadMatchDetail({
           </button>
         )}
         <span>{league ? getLeagueLabel(league) : game.league}</span>
+        {/* AllSports' match centre, when the viewer has its key and it lists this game. */}
+        <span className="ms-auto">
+          <MatchCenterLink game={game} />
+        </span>
       </header>
       <section className="sh-detail-scoreboard">
         <div className="sh-detail-competitor">

@@ -7582,3 +7582,7 @@ html[data-theme-layout="stremio"] .jl-sports-bleed {
 .jl-kenburns {
   animation: jl-kenburns 18s ease-out both;
 }
+/* The Sports page's masthead under JL's full-bleed hero: the hero already clears the top bar. */
+.sports-hub .sh-masthead-after-hero {
+  padding-top: 28px;
+}
