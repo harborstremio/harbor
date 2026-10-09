@@ -6,6 +6,7 @@ import { fetchPlayerLine, fetchPregameInsight } from "@/lib/jl/sports/people";
 import { espnHeadshot } from "@/lib/jl/sports/search-parse";
 import { mixHeroSlides, photoSlides } from "@/lib/jl/sports/hub-sections";
 import { teamLook } from "@/lib/jl/sports/team-look";
+import { isCurrentLiveGame } from "@/lib/jl/sports/presentation";
 import { isIndividualCompetition } from "@/lib/sports/competition-metadata";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import { getLeagueLabel, leagueByKey } from "@/lib/sports/espn-leagues";
@@ -382,7 +383,7 @@ function RoundAction({
 function watchLabel(item: JlHubGame, t: Translate): string {
   const n = item.channels.length;
   if (!n) return t("Ways to watch");
-  if (item.game.state === "in") return t("Watch live · {n} channels", { n });
+  if (isCurrentLiveGame(item.game)) return t("Watch live · {n} channels", { n });
   return t("Watch · {n} channels", { n });
 }
 
@@ -403,7 +404,7 @@ function GameSlide({
   const t = useT();
   const { game, reasons, mine } = item;
   const art = useGameArt(game);
-  const live = game.state === "in";
+  const live = isCurrentLiveGame(game);
   const atHome = game.state === "pre" ? t("at") : t("vs");
   // Races, fight cards and tournaments read by the event's name, not the leading pair.
   const eventName = isEventSlide(game) ? game.context?.name : "";
@@ -491,7 +492,7 @@ function FeaturedSlide({
   const { game } = item;
   const league = hubLeague(game.league);
   const name = league ? getLeagueLabel(league) : game.league;
-  const live = game.state === "in" && game.savedAt === undefined;
+  const live = isCurrentLiveGame(game);
   return (
     <GameSlide
       item={item}
@@ -554,7 +555,7 @@ function TeamSlide({ slide, actions }: { slide: JlTeamSlide; actions: JlSportsAc
     setProfile(identity);
   };
   const game = next?.game ?? null;
-  const live = game?.state === "in";
+  const live = isCurrentLiveGame(game);
   let status = t("No game scheduled");
   if (game) {
     const home = game.home.id === team.id;

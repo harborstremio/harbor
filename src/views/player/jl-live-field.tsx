@@ -11,6 +11,7 @@ import {
   type PitchPlayer,
 } from "@/lib/jl/sports/live-field";
 import { useWatchingGame } from "@/lib/jl/sports/now-watching";
+import { visibleScore } from "@/lib/jl/sports/presentation";
 import { fetchFootballLive } from "@/lib/jl/sports/people";
 import { fetchSoccerLive } from "@/lib/jl/sports/soccer-fetch";
 import type {
@@ -69,7 +70,8 @@ export function JlLiveField({
   const [closedFor, setClosedFor] = useState<string | null>(null);
   const [openedFor, setOpenedFor] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>(readMode);
-  const live = useLiveData(game, sport, !!game && closedFor !== gameKey);
+  const feed = useLiveData(game, sport, !!game && closedFor !== gameKey);
+  const live = feed.data;
 
   if (!game) return null;
   // The game as it was when Watch was pressed, refreshed by the live data.
@@ -122,10 +124,10 @@ export function JlLiveField({
       <div className="flex items-center gap-2">
         <span className="flex flex-1 items-center gap-1.5 truncate text-[13px] font-semibold">
           {colors && <TeamDot color={colors.away} />}
-          {now.away.abbr || now.away.name} {now.away.score}
+          {now.away.abbr || now.away.name} {visibleScore(now, now.away)}
           <span className="text-white/50">·</span>
           {colors && <TeamDot color={colors.home} />}
-          {now.home.abbr || now.home.name} {now.home.score}
+          {now.home.abbr || now.home.name} {visibleScore(now, now.home)}
           <span className="ms-1 truncate text-[11.5px] font-medium text-white/70">
             {now.detail}
           </span>
@@ -150,6 +152,12 @@ export function JlLiveField({
           <X size={13} />
         </button>
       </div>
+      {feed.failed && (
+        <p role="status" className="text-[12px] text-white/80">
+          {t("Live updates are unavailable. Retrying.")}
+          {feed.at > 0 && ` ${t("Last update")} ${new Date(feed.at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`}
+        </p>
+      )}
       {live.kind === "football" && (
         <>
           <FootballField situation={live.situation} clear={clear} />
@@ -157,15 +165,17 @@ export function JlLiveField({
         </>
       )}
       {live.kind === "soccer" && <SoccerLiveView live={live.live} clear={clear} />}
-      {live.kind === "none" && (
+      {live.kind === "none" && !feed.failed && (
         <p className="text-[12px] text-white/70">{t("Waiting for live data…")}</p>
       )}
     </div>
   );
 }
 
-function useLiveData(game: SportsGame | null, sport: FieldSport | null, active: boolean): LiveData {
-  const [result, setResult] = useState<{ key: string; data: LiveData } | null>(null);
+type LiveFeed = { data: LiveData; at: number; failed: boolean };
+
+function useLiveData(game: SportsGame | null, sport: FieldSport | null, active: boolean): LiveFeed {
+  const [result, setResult] = useState<(LiveFeed & { key: string }) | null>(null);
   const key = game ? `${game.league}:${game.id}` : "";
 
   useEffect(() => {
@@ -184,9 +194,14 @@ function useLiveData(game: SportsGame | null, sport: FieldSport | null, active: 
           const live = await fetchSoccerLive(game, signal);
           if (live) data = { kind: "soccer", game: soccerGame(game, live), live };
         }
-        if (!signal.aborted) setResult({ key, data });
+        if (!signal.aborted) setResult({ key, data, at: Date.now(), failed: data.kind === "none" });
       } catch {
-        /* keep the last good data; the next poll retries */
+        if (!signal.aborted) setResult((previous) => ({
+          key,
+          data: previous?.key === key ? previous.data : { kind: "none" },
+          at: previous?.key === key ? previous.at : 0,
+          failed: true,
+        }));
       }
     };
     void load();
@@ -199,12 +214,13 @@ function useLiveData(game: SportsGame | null, sport: FieldSport | null, active: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, sport, active]);
 
-  return result?.key === key ? result.data : { kind: "none" };
+  return result?.key === key ? result : { data: { kind: "none" }, at: 0, failed: false };
 }
 
 function soccerGame(game: SportsGame, live: SoccerLive): SportsGame {
   return {
     ...game,
+    savedAt: undefined,
     state: live.state,
     detail: live.clock || game.detail,
     home: { ...game.home, score: live.home.score || game.home.score },

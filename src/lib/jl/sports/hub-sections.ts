@@ -103,13 +103,24 @@ export function teamSlideInfo(
  * the team's own photo (TheSportsDB fan art, stadium or banner), then the league's photo. Null
  * leaves the designed backdrop of team colours and logos.
  */
-export function heroPhoto(sources: {
+type HeroPhotoSources = {
   curated?: string | null;
   event?: string | null;
   team?: string | null;
   league?: string | null;
-}): string | null {
-  return sources.curated || sources.event || sources.team || sources.league || null;
+  bundled?: string | null;
+};
+
+/** Keep the entire fallback chain: a failed remote URL must not hide the bundled scenery. */
+export function heroPhotoCandidates(sources: HeroPhotoSources): string[] {
+  return [...new Set(
+    [sources.curated, sources.event, sources.team, sources.league, sources.bundled]
+      .filter((url): url is string => typeof url === "string" && url.trim().length > 0),
+  )];
+}
+
+export function heroPhoto(sources: HeroPhotoSources): string | null {
+  return heroPhotoCandidates(sources)[0] ?? null;
 }
 
 /**

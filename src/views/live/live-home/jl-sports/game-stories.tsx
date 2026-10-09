@@ -17,6 +17,8 @@ import {
   type StorySummary,
 } from "@/lib/jl/sports/game-story";
 import { isFavoriteGame, type JlFavoriteTeam } from "@/lib/jl/sports/rank";
+import { isCurrentLiveGame } from "@/lib/jl/sports/presentation";
+import { useSportsSessionScope } from "@/lib/jl/sports/session-scope";
 import { fetchStorySummary } from "@/lib/jl/sports/story-feed";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import type { GameChannel } from "@/lib/jl/sports/channels";
@@ -28,6 +30,7 @@ const LIVE_REFRESH_MS = 20_000;
 
 // Games that were in the Top 10 at any point this session keep their story after the final.
 const seenTopKeys = new Set<string>();
+let seenTopScope = "";
 
 /** Story bubbles for the Sports Hub, from the games it already polls. */
 export function useGameStories(params: {
@@ -38,7 +41,12 @@ export function useGameStories(params: {
   nowMs: number;
 }): JlHubGame[] {
   const { games, top, favorites, channelsFor, nowMs } = params;
+  const scope = useSportsSessionScope();
   return useMemo(() => {
+    if (seenTopScope !== scope) {
+      seenTopKeys.clear();
+      seenTopScope = scope;
+    }
     for (const r of top) seenTopKeys.add(gameKey(r.game));
     return storyGames(games, { favorites, bigKeys: seenTopKeys, now: new Date(nowMs) }).map(
       (game) => ({
@@ -49,7 +57,7 @@ export function useGameStories(params: {
         channels: channelsFor(game),
       }),
     );
-  }, [games, top, favorites, channelsFor, nowMs]);
+  }, [games, top, favorites, channelsFor, nowMs, scope]);
 }
 
 export function GameStoriesRow({
@@ -62,12 +70,14 @@ export function GameStoriesRow({
   onOpenGame: (game: SportsGame) => void;
 }) {
   const t = useT();
-  const [openKey, setOpenKey] = useState<string | null>(null);
+  const scope = useSportsSessionScope();
+  const [selection, setSelection] = useState<{ scope: string; key: string } | null>(null);
+  const openKey = selection?.scope === scope ? selection.key : null;
   const opener = useRef<HTMLElement | null>(null);
   const index = openKey ? stories.findIndex((s) => gameKey(s.game) === openKey) : -1;
 
   const close = useCallback(() => {
-    setOpenKey(null);
+    setSelection(null);
     // Back on the bubble the story was opened from, for remotes.
     const el = opener.current;
     window.requestAnimationFrame(() => el?.isConnected && el.focus());
@@ -86,7 +96,7 @@ export function GameStoriesRow({
             item={item}
             onOpen={(el) => {
               opener.current = el;
-              setOpenKey(gameKey(item.game));
+              setSelection({ scope, key: gameKey(item.game) });
             }}
           />
         ))}
@@ -96,7 +106,7 @@ export function GameStoriesRow({
           <StoryViewer
             stories={stories}
             index={index}
-            onIndex={(i) => setOpenKey(gameKey(stories[i].game))}
+            onIndex={(i) => setSelection({ scope, key: gameKey(stories[i].game) })}
             onClose={close}
             onWatch={(item) => {
               close();
@@ -116,8 +126,8 @@ export function GameStoriesRow({
 function StoryBubble({ item, onOpen }: { item: JlHubGame; onOpen: (el: HTMLElement) => void }) {
   const t = useT();
   const { game, mine } = item;
-  const live = game.state === "in";
-  const label = live
+  const live = isCurrentLiveGame(game);
+  const label = game.savedAt !== undefined || game.state !== "post"
     ? statusText(game, t)
     : t("Final {away}–{home}", { away: game.away.score, home: game.home.score });
   return (
@@ -179,7 +189,7 @@ function useStorySummary(game: SportsGame): StorySummary | null {
     key: "",
     summary: null,
   });
-  const live = game.state === "in";
+  const live = isCurrentLiveGame(game);
   useEffect(() => {
     let alive = true;
     const load = () =>
@@ -285,7 +295,7 @@ function StoryViewer({
 
   const away = summary?.colors.away ?? "#1e293b";
   const home = summary?.colors.home ?? "#111827";
-  const live = game.state === "in";
+  const live = isCurrentLiveGame(game);
   return (
     <div
       role="dialog"

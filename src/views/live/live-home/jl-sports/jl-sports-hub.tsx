@@ -19,6 +19,7 @@ import { useJlLink } from "@/lib/jl/account/sync";
 import { isFollowing, toggleFavoriteTeam } from "@/lib/jl/sports/favorites";
 import type { JlFavoriteTeam } from "@/lib/jl/sports/rank";
 import { teamLook } from "@/lib/jl/sports/team-look";
+import { isCurrentLiveGame, visibleScore } from "@/lib/jl/sports/presentation";
 import { useSettings } from "@/lib/settings";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import { fmtClock } from "../now-format";
@@ -167,13 +168,13 @@ function FavoritesTicker({
               {game.league}
             </span>
             <span className="font-semibold">
-              {game.away.abbr || game.away.name} {game.away.score}
+              {game.away.abbr || game.away.name} {visibleScore(game, game.away)}
             </span>
             <span className="text-ink-subtle">·</span>
             <span className="font-semibold">
-              {game.home.abbr || game.home.name} {game.home.score}
+              {game.home.abbr || game.home.name} {visibleScore(game, game.home)}
             </span>
-            <span className={game.state === "in" ? "text-danger" : "text-ink-subtle"}>
+            <span className={isCurrentLiveGame(game) ? "text-danger" : "text-ink-subtle"}>
               {statusText(game, t)}
             </span>
             {channels.length > 0 && (
@@ -189,12 +190,12 @@ function FavoritesTicker({
 function ctaLabel(item: JlHubGame, t: Translate): string {
   const n = item.channels.length;
   if (!n) return t("Ways to watch");
-  return item.game.state === "in" ? t("Watch live") : t("Watch · {n} channels", { n });
+  return isCurrentLiveGame(item.game) ? t("Watch live") : t("Watch · {n} channels", { n });
 }
 
 function StatusChip({ game, className = "" }: { game: SportsGame; className?: string }) {
   const t = useT();
-  const live = game.state === "in";
+  const live = isCurrentLiveGame(game);
   return (
     <span
       className={`inline-flex h-[22px] items-center gap-1.5 rounded-full px-2 text-[11px] font-semibold ${
@@ -463,9 +464,9 @@ function WallCard({
         </div>
         <div className="relative flex items-center justify-between gap-2 bg-canvas/65 px-4 py-2 text-[12px] backdrop-blur">
           <span
-            className={`flex items-center gap-1.5 font-semibold ${game.state === "in" ? "text-danger" : "text-ink/85"}`}
+            className={`flex items-center gap-1.5 font-semibold ${isCurrentLiveGame(game) ? "text-danger" : "text-ink/85"}`}
           >
-            {game.state === "in" && (
+            {isCurrentLiveGame(game) && (
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-danger" />
             )}
             {statusText(game, t)}
@@ -561,11 +562,9 @@ export function TeamLine({ side, active }: { side: SportsSide; active: boolean }
       <span className="flex-1 truncate text-[13.5px] font-semibold text-ink">
         {side.location || side.name}
       </span>
-      <span
-        className={`w-8 shrink-0 text-end text-[17px] font-bold tabular-nums ${active ? "text-ink" : "text-ink-subtle"}`}
-      >
+      {active && <span className="w-8 shrink-0 text-end text-[17px] font-bold tabular-nums text-ink">
         {side.score}
-      </span>
+      </span>}
     </div>
   );
 }
@@ -605,6 +604,7 @@ function FollowButton({
 }
 
 export function statusText(game: SportsGame, t: Translate): string {
+  if (game.savedAt !== undefined) return `${t("Saved")} · ${fmtClock(game.savedAt)}`;
   if (game.state === "in") return game.detail || t("Live");
   if (game.state === "post") return game.detail || t("Final");
   if (!game.startMs) return game.detail || t("Upcoming");

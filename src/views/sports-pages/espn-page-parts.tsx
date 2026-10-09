@@ -6,6 +6,7 @@ import { resultFor } from "@/lib/jl/sports/espn-team";
 import type { SportsGame } from "@/lib/sports/espn";
 import { useView } from "@/lib/view";
 import { statusText, TeamLine } from "@/views/live/live-home/jl-sports/jl-sports-hub";
+import { isCurrentLiveGame } from "@/lib/jl/sports/presentation";
 
 /** Shared pieces for the team, athlete and league pages. */
 
@@ -170,7 +171,7 @@ export function Pill({ onClick, children }: { onClick: () => void; children: Rea
 export function GameCard({ game, teamId }: { game: SportsGame; teamId?: string }) {
   const t = useT();
   const { openMatchDetail } = useView();
-  const live = game.state === "in";
+  const live = isCurrentLiveGame(game);
   const result = teamId ? resultFor(game, teamId) : null;
   return (
     <button

@@ -8,6 +8,8 @@ import {
   useJlSportsFavorites,
 } from "@/lib/jl/sports/favorites";
 import { gameKey } from "@/lib/jl/sports/game-story";
+import { isCurrentLiveGame } from "@/lib/jl/sports/presentation";
+import { useSportsSessionScope } from "@/lib/jl/sports/session-scope";
 import { followedGamesThisWeek, selectTopGames } from "@/lib/jl/sports/gameday";
 import { isFavoriteGame, rankGames } from "@/lib/jl/sports/rank";
 import {
@@ -29,17 +31,17 @@ const MAX_SHOWN = 2;
 const SEEN_KEY = "jl.sports.alerts.seen";
 
 // Never shown twice, even after a reload in the same session.
-function seenIds(): string[] {
+function seenIds(scope: string): string[] {
   try {
-    const v = JSON.parse(sessionStorage.getItem(SEEN_KEY) ?? "[]") as unknown;
+    const v = JSON.parse(sessionStorage.getItem(`${SEEN_KEY}.${scope}`) ?? "[]") as unknown;
     return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
   } catch {
     return [];
   }
 }
-function remember(ids: string[]): void {
+function remember(scope: string, ids: string[]): void {
   try {
-    sessionStorage.setItem(SEEN_KEY, JSON.stringify([...seenIds(), ...ids].slice(-300)));
+    sessionStorage.setItem(`${SEEN_KEY}.${scope}`, JSON.stringify([...seenIds(scope), ...ids].slice(-300)));
   } catch {
     /* storage unavailable: alerts may repeat after a reload */
   }
@@ -48,11 +50,12 @@ function remember(ids: string[]): void {
 /** App-wide Sports alerts; polls only while "Sports alerts" is on and Sports isn't hidden. */
 export function SportsAlerts() {
   const { settings } = useSettings();
+  const scope = useSportsSessionScope();
   if (!settings.sportsAlerts || settings.hideContent.sports) return null;
-  return <SportsAlertsHost />;
+  return <SportsAlertsHost key={scope} scope={scope} />;
 }
 
-function SportsAlertsHost() {
+function SportsAlertsHost({ scope }: { scope: string }) {
   const t = useT();
   const { player, openMatchDetail } = useView();
   const teams = useJlSportsFavorites();
@@ -79,7 +82,7 @@ function SportsAlertsHost() {
     for (const r of selectTopGames(ranked, followedGamesThisWeek(games, favorites, now)))
       topKeys.current.add(gameKey(r.game));
     // Play-by-play only for live games of your teams (few): everything else diffs the scoreboard.
-    const live = games.filter((g) => g.state === "in" && isFavoriteGame(g, favorites));
+    const live = games.filter((g) => isCurrentLiveGame(g) && isFavoriteGame(g, favorites));
     void Promise.all(
       live.map((g) => fetchStorySummary(g).then((s) => [gameKey(g), s] as const)),
     ).then((pairs) => {
@@ -96,19 +99,19 @@ function SportsAlertsHost() {
           athletes,
         });
       });
-      const seen = new Set(seenIds());
+      const seen = new Set(seenIds(scope));
       const fresh = alertsToShow(detectAlerts(prev.current, snapshot), {
         playerActive: playerRef.current,
       }).filter((a) => !seen.has(a.id));
       prev.current = snapshot;
       if (!fresh.length) return;
-      remember(fresh.map((a) => a.id));
+      remember(scope, fresh.map((a) => a.id));
       setShown((s) => [...s, ...fresh].slice(-MAX_SHOWN));
     });
     return () => {
       cancelled = true;
     };
-  }, [games, favorites, athletes]);
+  }, [games, favorites, athletes, scope]);
 
   useEffect(() => {
     playerRef.current = playerActive;

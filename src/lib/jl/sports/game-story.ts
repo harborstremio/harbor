@@ -526,7 +526,9 @@ function liveStory(game: SportsGame, summary: StorySummary | null): WrittenStory
     headline = `${rankedName(lead, league)} ${agree(lead, league, "leads", "lead")} ${rankedName(trail, league)} ${dash(Math.max(a, h), Math.min(a, h))}`;
   }
   const paragraphs: string[] = [];
-  const now = [game.detail ? `Live, ${game.detail}.` : "Live now."];
+  const now = [game.savedAt !== undefined
+    ? `Last saved update${game.detail ? `, ${game.detail}` : ""}. Live updates are unavailable.`
+    : game.detail ? `Live, ${game.detail}.` : "Live now."];
   const last = summary?.plays[summary.plays.length - 1];
   if (last) {
     const at = last.away != null && last.home != null ? ` (${dash(last.away, last.home)})` : "";
@@ -596,7 +598,7 @@ export function storySlides(
     {
       kind: "story",
       key: "story",
-      label: game.state === "post" ? "Recap" : live ? "Live" : "Preview",
+      label: game.savedAt !== undefined ? "Saved" : game.state === "post" ? "Recap" : live ? "Live" : "Preview",
       headline: story.headline,
       paragraphs: story.paragraphs,
     },

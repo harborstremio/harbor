@@ -48,7 +48,7 @@ export async function fetchFootballLive(
   const competitions = summary?.header?.competitions ?? [];
   const fresh = parseLeagueEvents([{ id: game.id, date: competitions[0]?.date, competitions }], game.league)[0];
   return {
-    game: fresh ? { ...game, state: fresh.state, detail: fresh.detail, home: fresh.home, away: fresh.away } : game,
+    game: fresh ? { ...game, savedAt: undefined, state: fresh.state, detail: fresh.detail, home: fresh.home, away: fresh.away } : game,
     situation: parseFootballSituation(summary, {
       home: { id: game.home.id, abbr: game.home.abbr },
       away: { id: game.away.id, abbr: game.away.abbr },

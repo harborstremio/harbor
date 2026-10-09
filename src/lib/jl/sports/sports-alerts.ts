@@ -24,6 +24,8 @@ export type AlertSide = { name: string; score: number | null; singular: boolean 
 
 export type AlertGame = {
   key: string;
+  /** Failed refreshes must never trigger a new live or score notification. */
+  savedAt?: number;
   league: string;
   state: SportsGame["state"];
   away: AlertSide;
@@ -108,6 +110,7 @@ export function toAlertGame(
   });
   const out: AlertGame = {
     key: gameKey(game),
+    ...(game.savedAt !== undefined ? { savedAt: game.savedAt } : {}),
     league: game.league,
     state: game.state,
     away: side(game.away),
@@ -232,7 +235,7 @@ export function detectAlerts(prev: AlertGame[] | null, next: AlertGame[]): Sport
   const out: SportsAlert[] = [];
   for (const g of next) {
     const p = before.get(g.key);
-    if (!p) continue;
+    if (!p || g.savedAt !== undefined || p.savedAt !== undefined) continue;
     const watched = g.mine || g.top;
     if (watched && p.state === "pre" && g.state === "in") {
       out.push({

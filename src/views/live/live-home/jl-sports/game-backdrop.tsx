@@ -1,8 +1,11 @@
 import { useState, type CSSProperties } from "react";
 import { stableIndex, type TeamArt } from "@/lib/jl/sports/fanart";
-import { heroPhoto } from "@/lib/jl/sports/hub-sections";
+import { heroPhotoCandidates } from "@/lib/jl/sports/hub-sections";
 import { teamLook, type TeamLook } from "@/lib/jl/sports/team-look";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
+import { hubLeague } from "@/lib/sports/hub-data";
+import { sportsSceneryPhoto } from "@/views/sports/sports-hero-scenery";
+import { BackdropPhoto } from "./backdrop-photo";
 import { curatedTeamArt, useGameArt, useTeamArt } from "./use-sports-extras";
 
 /**
@@ -68,24 +71,6 @@ export function TeamMark({
     >
       {look.monogram}
     </span>
-  );
-}
-
-function Photo({ src, variant }: { src: string; variant: Variant }) {
-  const [failed, setFailed] = useState<string | null>(null);
-  if (failed === src) return null;
-  return (
-    <img
-      key={src}
-      src={src}
-      alt=""
-      draggable={false}
-      loading={variant === "hero" ? "eager" : "lazy"}
-      onError={() => setFailed(src)}
-      className={`animate-fade-in absolute inset-0 h-full w-full object-cover ${
-        variant === "hero" ? "jl-kenburns opacity-90" : "opacity-75"
-      }`}
-    />
   );
 }
 
@@ -163,12 +148,12 @@ function Veils({ variant }: { variant: Variant }) {
 }
 
 function ArtLayers({
-  photo,
+  photos,
   looks,
   variant,
   marks = true,
 }: {
-  photo: string | null;
+  photos: string[];
   looks: TeamLook[];
   variant: Variant;
   marks?: boolean;
@@ -176,7 +161,7 @@ function ArtLayers({
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       <Designed looks={looks} variant={variant} marks={marks} />
-      {photo && <Photo src={photo} variant={variant} />}
+      {photos.length > 0 && <BackdropPhoto sources={photos} hero={variant === "hero"} />}
       <Veils variant={variant} />
     </div>
   );
@@ -208,15 +193,16 @@ export function GameBackdrop({
   leaguePhoto?: string | null;
 }) {
   const art = useGameArt(game);
-  const photo = heroPhoto({
+  const photos = heroPhotoCandidates({
     curated: art.curated,
     event: eventPhoto,
     team: art.photo,
     league: leaguePhoto,
+    bundled: variant === "hero" ? sportsSceneryPhoto(hubLeague(game.league)?.group, game.league) : null,
   });
   return (
     <ArtLayers
-      photo={photo}
+      photos={photos}
       looks={gameLooks(game, art.home, art.away)}
       variant={variant}
       marks={marks}
@@ -235,10 +221,12 @@ export function TeamBackdrop({
   variant?: Variant;
 }) {
   const art = useTeamArt(league, side);
-  const photo =
-    curatedTeamArt(league, side) ??
-    (art?.fanart.length
+  const photos = heroPhotoCandidates({
+    curated: curatedTeamArt(league, side),
+    team: art?.fanart.length
       ? art.fanart[stableIndex(side.id ?? side.name, art.fanart.length)]
-      : (art?.stadium ?? art?.banner ?? null));
-  return <ArtLayers photo={photo} looks={[teamLook(side, art)]} variant={variant} />;
+      : (art?.stadium ?? art?.banner ?? null),
+    bundled: variant === "hero" ? sportsSceneryPhoto(hubLeague(league)?.group, league) : null,
+  });
+  return <ArtLayers photos={photos} looks={[teamLook(side, art)]} variant={variant} />;
 }

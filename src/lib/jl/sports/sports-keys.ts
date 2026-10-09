@@ -130,7 +130,7 @@ export function interpretKeyTest(
   if (status === 429) {
     return {
       ok: false,
-      message: `The key works, but its request limit is used up for now. Try again later.`,
+      message: `The request limit is used up for now. Try again later.`,
     };
   }
   if (status >= 500) {
@@ -159,9 +159,15 @@ export function interpretKeyTest(
     }
     case "allsports": {
       // 204 = the key works and nothing is live right now.
-      if (status === 200 || status === 204) return { ok: true, message: "Key works." };
+      if (status === 204) return { ok: true, message: "Key works." };
+      if (status === 200) {
+        const events = (body as { events?: unknown } | null)?.events;
+        return Array.isArray(events)
+          ? { ok: true, message: "Key works." }
+          : { ok: false, message: "AllSports returned an unexpected response. The key could not be verified." };
+      }
       if (status === 404) {
-        return { ok: false, message: "The key was accepted, but your plan doesn't include AllSports API." };
+        return { ok: false, message: "AllSports API was not found. Check the provider's service and your plan." };
       }
       return { ok: false, message: `${name} answered with error ${status}.` };
     }
