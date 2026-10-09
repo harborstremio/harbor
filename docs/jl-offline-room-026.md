@@ -1,0 +1,36 @@
+# JL 0.9.26 desktop Offline Room
+
+This feature extends the existing Tauri Downloads route and native player. It does not replace the desktop product with the hosted frontend. The navigation ID remains `downloads`, preserving detail/back navigation and a pinned sports player.
+
+Local source commit: `5958719175fe3aec4c73ca64fcb53444964c25d4` on `codex/jl-offline-026`, parent `33702fbe584e86eaac6758727bb1170271f9c0ce`. This acceptance document is retained locally because the repository ignores `docs`; the 22 source/test files are committed.
+
+## Implementation and acceptance map
+
+| Requirement | Source and implemented behavior | Evidence / remaining gate |
+| --- | --- | --- |
+| Intentional movie and episode downloads | Existing source picker and player actions feed `src/lib/download/downloads-store.ts`; at most two media transfers run, others queue. Pause, cancel, retry and fresh source selection are available. | Node queue/pause/retry tests pass. Native Windows CI required. |
+| Durable restart | Queue/history remain local. Active or queued work becomes interrupted after restart; no provider request starts automatically. Paused state survives. | Node restart tests pass. |
+| Safe actual resume | `src-tauri/src/download.rs` stores a source/header hash, strong ETag and total alongside the partial file. Append requires the same source/entity, an exact Content-Range start/end/total and consistent length. Missing validators, changed responses and 416 safely restart. All media final lengths are checked. | Native TCP fixtures authored, not executable on this machine because Cargo is absent. |
+| Integrity and crash recovery | Flush, disk sync and SHA-256 verification precede the existing atomic no-clobber publication helper. The completion sidecar survives publication. `download_verify` checks local bytes without URLs, headers or network; Check and recover saved files repairs an interrupted UI record after publication. | Native restart/corruption fixture authored. Node state/control checks pass. |
+| Owner isolation | `owner.ts` uses stable JL user ID plus active profile ID. Snapshots, lookup, retry, reveal, delete and local playback are scoped; account/profile changes pause old work. Filesystem lookup rechecks ownership after awaits. | Node isolation tests pass; additional integration race tests belong in the combined candidate. |
+| Existing local data | Historical records without owner IDs are retained and hidden until explicitly adopted into a signed-out local profile. Signing in never silently claims them. | Node migration test passes. |
+| Music | Existing native audio download/resolution/player paths remain. Music receives the same owner isolation, a two-transfer queue, pause/retry, persistent destination and validator-safe native resume. Offline Room has a Music tab with local play, queue, folder and delete controls. Original Music-page playlist actions remain there. | Music IPC tests pass; native synthetic audio/provider-independent check required before release. |
+| Offline startup/playback | Tauri bundles the app shell. Existing offline banner routes saved video or music to Offline Room; local file play does not resolve a provider. File existence checks give an actionable failure when storage is unavailable. | Local lookup and existing navigation regressions pass. Actual packaged EXE offline start/play requires approval; no installer launched. |
+| Storage management | Folder controls remain, native preflight checks available disk space, deletion waits until writers finish, removes partial/validator files and retains visible errors if files are locked. Check/recover validates saved files. | Node deletion/locked-file/missing-file tests pass. Native filesystem fixture gate remains. |
+| Honest unsupported sources | Direct HTTP(S), unencrypted files only. Reject manifest URLs/MIME, disguised playlist/page prefixes and known protected MP4 initialization markers. No DRM/license acquisition, manifest segment download, or protection bypass. Private request headers are not forwarded across origins. No response bodies or signed URLs enter error logs. | Policy tests pass; native refusal/redirect fixtures authored. No live provider downloads performed. |
+
+## Verification on AiQ-The_Lab
+
+- `node --experimental-loader ./scripts/node-test-loader.mjs --test --test-timeout=20000 tests/offline-room.test.ts tests/music-downloads.test.ts tests/download-loader.test.ts tests/season-download.test.ts tests/downloads-navigation.test.ts`: **21 passed, 0 failed**.
+- `pnpm run typecheck`: final isolated check passed (exit 0). Log: `offline-typecheck-final.log`. The combined release must run it again after integration.
+- `pnpm exec vite build`: final isolated production frontend passed (exit 0), with asset-resolution, dynamic/static-import and large-chunk warnings. Log: `offline-build-final.log`. Final combined build remains required.
+- `git diff --check`: passed.
+- `pnpm run check`: blocked because the repository script invokes `vp`, which is not installed.
+- `cargo check --manifest-path src-tauri/Cargo.toml` and required `pnpm tauri:build:linux-system`: blocked because `cargo` is unavailable.
+- Nine tests in `src-tauri/src/download_tests.rs` use a loopback TCP server and synthetic bytes. Run them on the configured Windows build runner with `cargo test --locked --release --target x86_64-pc-windows-msvc --lib download::tests`. These tests have **not been reported as passing locally**.
+
+No installer/PWA installation, real provider playback/download, publication, credential change or live account/database change was performed.
+
+## Boundaries
+
+Transfer headers are memory-only. If a restarted item needs private headers, use Choose a fresh download source; the app does not invent or persist replacement credentials. Signed source URLs can expire and must then be reselected. Refreshing a source can require a complete restart. Direct-file integrity checks do not make DRM sources supported, and downloaded files remain ordinary files protected by the operating system, not encrypted account storage. Queue records and native paths must remain excluded from cloud profile sync. Android and browser implementations are separate release workstreams.
