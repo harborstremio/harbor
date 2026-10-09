@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { safeFetch } from "@/lib/safe-fetch";
 import { useSettings } from "@/lib/settings";
-import { chooseGameArt, createTeamArtCache, teamArtCacheKey } from "@/lib/jl/sports/fanart";
+import {
+  chooseGameArt,
+  createTeamArtCache,
+  teamArtCacheKey,
+  type ArtSide,
+  type TeamArt,
+} from "@/lib/jl/sports/fanart";
+import { artKey, curatedArt } from "@/lib/jl/sports/curated-art";
 import {
   applyOddsLines,
   oddsLeaguesFor,
@@ -31,23 +38,67 @@ async function fetchJson(url: string): Promise<{ status: number; json: unknown }
 
 const teamArt = createTeamArtCache({ fetchJson, storage: browserStorage() });
 
-/** TheSportsDB fan art for a game (home team first), or null to keep ESPN's look. */
-export function useGameFanart(game: SportsGame | null): string | null {
+type ArtTeam = { league: string; side: ArtSide };
+
+function useArtKey(): string {
   const { settings } = useSettings();
-  const key = settings.thesportsdbKey.trim();
-  useSyncExternalStore(teamArt.subscribe, teamArt.version, teamArt.version);
-  const gameKey = game ? `${game.league}:${game.id}` : "";
+  return settings.thesportsdbKey.trim();
+}
+
+/**
+ * Asks TheSportsDB for every team on the page at once (one team list per league, then a search
+ * for any team the list lacks), so art doesn't depend on which card happens to be on screen.
+ */
+export function usePrefetchTeamArt(games: SportsGame[], extra: ArtTeam[] = []): void {
+  const key = useArtKey();
+  const teams: ArtTeam[] = [];
+  for (const g of games)
+    teams.push({ league: g.league, side: g.home }, { league: g.league, side: g.away });
+  teams.push(...extra);
+  const wanted = teams.filter((t) => t.side.name);
+  const teamsKey = wanted.map((t) => teamArtCacheKey(t.league, t.side)).join(",");
   useEffect(() => {
-    if (!key || !game) return;
-    void teamArt.request(key, game.league, game.home);
-    void teamArt.request(key, game.league, game.away);
-    // The game identity and key decide the request; score updates don't.
+    if (!key) return;
+    for (const t of wanted) void teamArt.request(key, t.league, t.side);
+    // teamsKey captures the team list; live score updates don't refetch.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, gameKey]);
-  if (!key || !game) return null;
-  const home = teamArt.get(teamArtCacheKey(game.league, game.home)) ?? null;
-  const away = teamArt.get(teamArtCacheKey(game.league, game.away)) ?? null;
-  return chooseGameArt(game, home, away);
+  }, [key, teamsKey]);
+}
+
+/** A team's TheSportsDB art once known (null without a key or art). */
+export function useTeamArt(league: string, side: ArtSide | null): TeamArt | null {
+  const key = useArtKey();
+  useSyncExternalStore(teamArt.subscribe, teamArt.version, teamArt.version);
+  const cacheKey = side ? teamArtCacheKey(league, side) : "";
+  useEffect(() => {
+    if (!key || !side) return;
+    void teamArt.request(key, league, side);
+    // The team identity and key decide the request.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, cacheKey]);
+  if (!key || !side) return null;
+  return teamArt.get(cacheKey) ?? null;
+}
+
+export type GameArt = { photo: string | null; home: TeamArt | null; away: TeamArt | null };
+
+/** A team's own curated wallpaper, when one is set. */
+export function curatedTeamArt(league: string, side: { id?: string } | null): string | null {
+  return side?.id ? curatedArt(artKey.team(league, side.id)) : null;
+}
+
+/**
+ * Art for a game: curated art (home team first), then TheSportsDB's photo; null leaves the
+ * designed backdrop. Each team's TheSportsDB art comes along for colours and badges.
+ */
+export function useGameArt(game: SportsGame | null): GameArt {
+  const league = game?.league ?? "";
+  const home = useTeamArt(league, game?.home ?? null);
+  const away = useTeamArt(league, game?.away ?? null);
+  const curated = game
+    ? (curatedTeamArt(league, game.home) ?? curatedTeamArt(league, game.away))
+    : null;
+  return { photo: curated ?? (game ? chooseGameArt(game, home, away) : null), home, away };
 }
 
 /* ---------------- The Odds API ---------------- */

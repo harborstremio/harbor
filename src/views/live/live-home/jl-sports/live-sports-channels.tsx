@@ -5,6 +5,7 @@ import { toPlaylistSource } from "@/lib/iptv/active-source";
 import { computeTvgIdCounts, epgProgramsForChannel } from "@/lib/iptv/epg-resolver";
 import { useEpgMapVersion } from "@/lib/iptv/epg-map";
 import { useFavorites } from "@/lib/iptv/favorites";
+import { useAllGroupPrefs } from "@/lib/iptv/group-order";
 import type { EpgIndex, EpgProgram, IptvChannel } from "@/lib/iptv/types";
 import { isLiveChannel } from "@/lib/iptv/vod-classify";
 import { findCurrent } from "@/lib/iptv/xmltv";
@@ -16,6 +17,7 @@ import {
   chipCounts,
   collectSportsChannels,
   filterSportsEntries,
+  listedSportsEntries,
   sourceIdOf,
   sportsChannelRows,
   type LiveSportsEntry,
@@ -99,15 +101,22 @@ export function LiveSportsChannels({
     [settings.iptvPlaylists, activeSourceId],
   );
   const otherPlaylists = useAllPlaylists(otherSources, active && otherSources.length > 0);
+  const groupPrefs = useAllGroupPrefs();
 
+  // Other providers' channels, minus the groups the viewer hid for them in Live TV (the active
+  // provider's channels arrive with its hidden groups already removed).
   const allChannels = useMemo(() => {
     const out = [...channels];
     for (const s of otherSources) {
       const pl = otherPlaylists.get(s.id);
-      if (pl) for (const c of pl.channels) if (isLiveChannel(c)) out.push(c);
+      if (!pl) continue;
+      const hidden = new Set(groupPrefs[s.id]?.hidden ?? []);
+      for (const c of pl.channels) {
+        if (isLiveChannel(c) && !hidden.has(c.group ?? "Uncategorized")) out.push(c);
+      }
     }
     return out;
-  }, [channels, otherSources, otherPlaylists]);
+  }, [channels, otherSources, otherPlaylists, groupPrefs]);
 
   // Classification is the expensive pass: only when the channels change (and once a day for the
   // year of event kick-offs).
@@ -139,13 +148,16 @@ export function LiveSportsChannels({
     [nowNextById],
   );
 
+  // Empty event slots are placeholders, not channels: they are neither listed nor counted.
   const entries = useMemo(
     () =>
-      applyLiveState(collected, {
-        now: minute * LIVE_BUCKET_MS,
-        currentTitle: (c) => nowNext(c).current?.title ?? null,
-        favoriteIds: favorites.ids,
-      }),
+      listedSportsEntries(
+        applyLiveState(collected, {
+          now: minute * LIVE_BUCKET_MS,
+          currentTitle: (c) => nowNext(c).current?.title ?? null,
+          favoriteIds: favorites.ids,
+        }),
+      ),
     [collected, minute, nowNext, favorites.ids],
   );
 
@@ -198,7 +210,7 @@ export function LiveSportsChannels({
     else play(e.channels[0]);
   };
 
-  if (collected.length === 0) return null;
+  if (entries.length === 0) return null;
 
   const browsing = chip === "all" && !query.trim();
   const chips: SportsChip[] = [

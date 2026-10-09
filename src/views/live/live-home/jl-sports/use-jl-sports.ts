@@ -9,9 +9,10 @@ import {
 } from "@/lib/jl/sports/favorites";
 import { fetchJlScoreboard, fetchTeamGames } from "@/lib/jl/sports/feed";
 import { followedGamesThisWeek, selectTopGames, teamsMissingFromScoreboard } from "@/lib/jl/sports/gameday";
+import { alsoTodayGroups, teamSlideInfo } from "@/lib/jl/sports/hub-sections";
 import { isFavoriteGame, rankGames, type JlFavoriteTeam, type RankedGame } from "@/lib/jl/sports/rank";
 import { useSettings } from "@/lib/settings";
-import type { SportsGame } from "@/lib/sports/espn";
+import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import { useOddsApiGames } from "./use-sports-extras";
 
 export const JL_SPORTS_LEAGUES = ["NFL", "NCAAF", "NBA", "NCAAB", "NHL", "MLB", "EPL", "UCL", "MLS"];
@@ -26,6 +27,12 @@ export type JlHubGame = RankedGame & { channels: GameChannel[] };
 
 /** A followed player and their team's next game this week, if any. */
 export type JlPlayerSlide = { player: JlFavoritePlayer; next: JlHubGame | null };
+
+/** A followed team: how ESPN lists it (logo, colours) and its game on now or next this week. */
+export type JlTeamSlide = { team: JlFavoriteTeam; side: SportsSide | null; next: JlHubGame | null };
+
+/** "Also today": the day's other games, one group per league. */
+export type JlAlsoToday = { league: string; label: string; live: number; items: JlHubGame[] };
 
 /** Scoreboards for JL's leagues plus the schedules of followed teams that aren't on them. */
 export function useJlGames(favorites: JlFavoriteTeam[]): SportsGame[] {
@@ -104,6 +111,24 @@ export function useJlSports(params: { channels: IptvChannel[]; epg: EpgIndex | n
       .sort((a, b) => a.startMs - b.startMs)
       .slice(0, TICKER_GAMES)
       .map((game) => ({ game, score: 0, reasons: [], mine: true, channels: channelsOf(game) }));
+    const hubItem = (g: SportsGame): JlHubGame =>
+      top.find((r) => r.game.id === g.id && r.game.league === g.league) ?? {
+        game: g,
+        score: 0,
+        reasons: [],
+        mine: isFavoriteGame(g, favorites),
+        channels: channelsOf(g),
+      };
+    const teamSlides: JlTeamSlide[] = teamSlideInfo(games, teams, now).map(({ team, side, next }) => ({
+      team,
+      side,
+      next: next ? hubItem(next) : null,
+    }));
+    const shownTop = sportsTopGames ? top : [];
+    const alsoToday: JlAlsoToday[] = alsoTodayGroups(games, {
+      now: now.getTime(),
+      exclude: new Set(shownTop.map((r) => `${r.game.league}:${r.game.id}`)),
+    }).map((g) => ({ league: g.league, label: g.label, live: g.live, items: g.games.map(hubItem) }));
     const playerSlides: JlPlayerSlide[] = players.map((player) => {
       const team = player.teamId ? [{ league: player.league, id: player.teamId, name: player.teamName ?? "" }] : [];
       const next = followedGamesThisWeek(games, team, now)[0];
@@ -114,11 +139,13 @@ export function useJlSports(params: { channels: IptvChannel[]; epg: EpgIndex | n
       };
     });
     return {
-      top: sportsTopGames ? top : [],
+      top: shownTop,
       ticker: sportsScoreTicker ? ticker : [],
       teams,
       players,
       playerSlides,
+      teamSlides,
+      alsoToday,
       games,
       favorites,
       channelsFor: channelsOf,

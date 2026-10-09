@@ -8,7 +8,9 @@ import {
   cleanChannelName,
   collectSportsChannels,
   filterSportsEntries,
+  isIdleEventTitle,
   isLiveGameTitle,
+  listedSportsEntries,
   isSportsChannel,
   sportOfText,
   sportsChannelRows,
@@ -169,4 +171,53 @@ test("guide titles: games vs studio shows and placeholders", () => {
   assert.ok(!isLiveGameTitle("Postgame: Texas vs. Tennessee"));
   assert.ok(!isLiveGameTitle("No Event Streaming"));
   assert.ok(!isLiveGameTitle("SportsCenter"));
+});
+
+test("empty event slots are placeholders: not listed or counted until they carry a game", () => {
+  const slots = Array.from({ length: 300 }, (_, i) => {
+    const n = String(i + 1).padStart(3, "0");
+    return [
+      ch(`a::espn${n}`, `USA ESPN+ ${n}`, "USA ESPN+ Events"),
+      ch(`b::espn${n}`, `ESPN+ ${n} | No Event Scheduled`, "ESPN+ PPV"),
+      ch(`c::ppv${n}`, `PPV ${n}: OFF AIR`, "PPV EVENTS"),
+    ];
+  }).flat();
+  const channels = [
+    ...slots,
+    ch("a::live", "USA ESPN+ 301: Iowa State vs. #8 BYU @ 26 Sep 12:00 PM ET", "USA ESPN+ Events"),
+    ch("a::guide", "PPV 400", "PPV EVENTS", "ppv400"),
+    ch("a::espn", "US: ESPN HD", "USA Sports", "espn.us"),
+    // The same network from a provider whose name has no country but whose group does.
+    ch("b::espn", "ESPN", "USA SPORTS"),
+  ];
+  const entries = collectSportsChannels(channels, { now: NOW });
+  const live = applyLiveState(entries, {
+    now: NOW.getTime(),
+    currentTitle: (c) => (c.tvgId === "ppv400" ? "UFC Fight Night: Main Card" : null),
+  });
+  const listed = listedSportsEntries(live);
+  assert.deepEqual(listed.map((e) => e.title).sort(), ["ESPN", "Iowa State vs. #8 BYU", "PPV 400"]);
+  assert.equal(listed.find((e) => e.title === "ESPN")?.channels.length, 2);
+  assert.equal(chipCounts(listed).get("all"), 3);
+  // A favourite empty slot stays where the viewer can find it.
+  const fav = listedSportsEntries(
+    applyLiveState(entries, {
+      now: NOW.getTime(),
+      currentTitle: () => null,
+      favoriteIds: new Set(["c::ppv007"]),
+    }),
+  );
+  assert.ok(fav.some((e) => e.channels[0].id === "c::ppv007"));
+});
+
+test("placeholder event titles are idle; real games are not", () => {
+  assert.ok(isIdleEventTitle(""));
+  assert.ok(isIdleEventTitle("ESPN+ 018"));
+  assert.ok(isIdleEventTitle("ESPN+ 018 | No Event Scheduled"));
+  assert.ok(isIdleEventTitle("OFF AIR"));
+  assert.ok(isIdleEventTitle("PPV 12 - Event starts soon"));
+  assert.ok(isIdleEventTitle("--"));
+  assert.ok(!isIdleEventTitle("Iowa State vs. BYU"));
+  assert.ok(!isIdleEventTitle("UFC 310: Pantoja vs. Asakura"));
+  assert.ok(!isIdleEventTitle("Big Ten Football"));
 });
