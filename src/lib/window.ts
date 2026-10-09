@@ -4,6 +4,12 @@ import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { getWindowFullscreen } from "@/lib/fullscreen-state";
 import { isMacDesktop } from "@/lib/platform";
+import {
+  openExternalUrlStrict as dispatchExternalUrlStrict,
+  type ExternalUrlOpenAdapter,
+} from "@/lib/social/external-system-opener";
+
+export type { ExternalUrlOpenAdapter } from "@/lib/social/external-system-opener";
 
 const win: Window | null = isTauri() ? getCurrentWindow() : null;
 
@@ -26,6 +32,27 @@ export const toggleMaximize = async () => {
 };
 
 export const close = () => win?.close();
+
+export async function focusWindow(): Promise<void> {
+  if (!win) {
+    try {
+      window.focus();
+    } catch {
+      /* no window to focus (e.g. non-browser context) */
+    }
+    return;
+  }
+  await win.show().catch(() => {});
+  await win.unminimize().catch(() => {});
+  await win.setFocus().catch(() => {});
+}
+
+export const setWindowFullscreen = async (fs: boolean) => {
+  await win?.setFullscreen(fs).catch(() => {});
+};
+
+export const readWindowFullscreen = async (): Promise<boolean> =>
+  win ? win.isFullscreen().catch(() => false) : false;
 
 export type ResizeDir =
   | "East"
@@ -65,7 +92,15 @@ export function useMaximized(): boolean {
     return () => {
       cancelled = true;
       if (timer != null) window.clearTimeout(timer);
-      unlisten.then((fn) => fn());
+      void unlisten
+        .then((fn) => {
+          try {
+            void Promise.resolve(fn()).catch(() => {});
+          } catch {
+            /* listener already torn down */
+          }
+        })
+        .catch(() => {});
     };
   }, []);
   return maxed;
@@ -96,13 +131,7 @@ export function openUrl(url: string) {
   if (isTauri()) {
     void releaseOnTopForBrowser();
     tauriOpenUrl(url).catch(() => {
-      invoke("browser_open", { url }).catch(() => {
-        try {
-          window.open(url, "_blank", "noopener,noreferrer");
-        } catch {
-          /* swallow */
-        }
-      });
+      void invoke("browser_open", { url }).catch(() => {});
     });
     return;
   }
@@ -111,6 +140,23 @@ export function openUrl(url: string) {
   } catch {
     /* swallow */
   }
+}
+
+function defaultExternalUrlOpenAdapter(): ExternalUrlOpenAdapter {
+  return {
+    isTauri: isTauri(),
+    openTauri: tauriOpenUrl,
+    openWeb: (href, target, features) => {
+      window.open(href, target, features);
+    },
+  };
+}
+
+export async function openExternalUrlStrict(
+  rawUrl: string,
+  adapter: ExternalUrlOpenAdapter = defaultExternalUrlOpenAdapter(),
+): Promise<void> {
+  return dispatchExternalUrlStrict(rawUrl, adapter);
 }
 
 // Hosts that aggressively block iframe embedding (X-Frame-Options DENY,
@@ -144,8 +190,6 @@ export function openInAppBrowser(url: string, title?: string) {
     return;
   }
   if (typeof window !== "undefined") {
-    window.dispatchEvent(
-      new CustomEvent("harbor:open-embed-viewport", { detail: { url, title } }),
-    );
+    window.dispatchEvent(new CustomEvent("harbor:open-embed-viewport", { detail: { url, title } }));
   }
 }

@@ -1,0 +1,20 @@
+const musicArtistExtras: Record<string, string> = {
+  "music.extras.merch": "艺人周边",
+  "music.extras.tour": "现场演出",
+  "music.extras.store": "访问商店",
+  "music.extras.tourLink": "巡演信息",
+  "music.extras.official": "艺人网站",
+  "music.extras.loading": "正在加载艺人动态…",
+  "music.extras.source": "来源：{source}",
+  "music.extras.event": "活动详情",
+  "music.credits.title": "制作人员",
+  "music.credits.main": "主要艺人",
+  "music.credits.featured": "合作艺人",
+  "music.credits.composer": "作曲",
+  "music.credits.lyricist": "作词",
+  "music.credits.producer": "制作人",
+  "music.credits.performer": "表演者",
+  "music.artist.readMore": "阅读更多",
+  "music.artist.readLess": "收起",
+};
+export default musicArtistExtras;

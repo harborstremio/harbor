@@ -239,6 +239,7 @@ pub struct ParsedStream {
     pub year_range: Option<(u16, u16)>,
     pub season: Option<i32>,
     pub episode: Option<i32>,
+    pub episode_end: Option<i32>,
     pub season_pack: bool,
     pub disc_index: Option<i32>,
     pub repack_iteration: i32,
@@ -320,10 +321,23 @@ pub struct TrustOptions {
     pub require_preferred_language: bool,
     #[serde(default)]
     pub is_anime: bool,
+    // The TS side sends `expectedTitles: null` (not just absent) for non-anime
+    // requests, so tolerate a literal JSON null and decode it to an empty list.
+    // Plain `#[serde(default)]` only covers absent keys, not present-but-null.
+    #[serde(default, deserialize_with = "null_default")]
+    pub expected_titles: Vec<String>,
 }
 
 fn default_true() -> bool {
     true
+}
+
+fn null_default<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+where
+    T: Default + Deserialize<'de>,
+    D: serde::Deserializer<'de>,
+{
+    Ok(Option::deserialize(deserializer)?.unwrap_or_default())
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

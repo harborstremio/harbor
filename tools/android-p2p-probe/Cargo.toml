@@ -1,0 +1,48 @@
+# Standalone. Not a member of any workspace, no path dependency on src-tauri,
+# its own target dir. Building or breaking this crate cannot affect the desktop
+# app in any way. The empty [workspace] table below is what guarantees that:
+# without it cargo walks up the tree looking for a parent to join.
+[workspace]
+
+[package]
+name = "android-p2p-probe"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "android-p2p-probe"
+path = "src/main.rs"
+
+# Pinned to exactly what src-tauri/Cargo.toml pins. The entire point of this
+# crate is to answer "does Harbor's librqbit cross-compile and run on Android",
+# so a looser pin here would answer a different question.
+[dependencies]
+librqbit = { version = "=8.1.1", default-features = false, features = ["rust-tls"] }
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+tokio-util = { version = "0.7", features = ["io"] }
+url = "2"
+
+# Transitive, declared only to pin. librqbit's "rust-tls" feature routes sha1
+# through librqbit-sha1-wrapper -> aws-lc-rs -> aws-lc-sys, which builds AWS-LC
+# from C and is the single most host-toolchain-sensitive crate in the graph.
+# Left to resolve freely it picks 0.43.0, which hard-panics on a Windows host
+# with no NASM. src-tauri/Cargo.lock pins 0.40.0, which builds here. Matching
+# the shipped lock is the whole point: unpinned, this crate would answer a
+# question about a dependency graph Harbor does not ship.
+aws-lc-rs = "=1.16.3"
+aws-lc-sys = "=0.40.0"
+
+# Host scaffolding, Windows x86_64 only, so it cannot reach the Android
+# cross-build. aws-lc-sys assembles x86_64 asm with NASM and panics outright
+# when NASM is absent; this feature makes it copy shipped .obj files instead.
+# src-tauri gets this feature for free somewhere in its larger graph, which is
+# why the desktop app builds on a machine with no NASM installed. The probe's
+# graph is smaller and does not, so it has to ask for it by name.
+# x86_64 asm is irrelevant to aarch64-linux-android: this entry evaporates there.
+[target.'cfg(all(windows, target_arch = "x86_64"))'.dependencies]
+aws-lc-sys = { version = "=0.40.0", features = ["prebuilt-nasm"] }
+
+[profile.release]
+strip = true

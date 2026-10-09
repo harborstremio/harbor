@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-action">
+<title id="title-action">Action anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <path class="coral" d="M31 5l5.8 13.1 13.9-4.2-5.4 13.5 12.1 7.8-13.7 4.8 1 14.5-11.4-9-10.4 10.1-.7-14.5-14.1-3.4 12.4-7.6-4.4-13.8 13.5 4.4z"/>
+  <path class="icon-stroke" d="M23 36l9-14 1 10h9L30 48l1-12z"/>
+
+</svg>

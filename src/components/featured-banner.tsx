@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { observe, usePageVisible } from "@/lib/visibility";
 import { BigCardStack } from "./featured-banner/big-card-stack";
 import { Lightbox } from "./featured-banner/lightbox";
@@ -15,6 +16,7 @@ export function FeaturedBanner({ items }: { items: Meta[] }) {
   const [inView, setInView] = useState(true);
   const [lightbox, setLightbox] = useState<LightboxState | null>(null);
   const visible = usePageVisible();
+  const t = useT();
   const ref = useRef<HTMLDivElement>(null);
   const hasLoadedRef = useRef(false);
   if (items.length > 0) hasLoadedRef.current = true;
@@ -35,7 +37,17 @@ export function FeaturedBanner({ items }: { items: Meta[] }) {
     if (active >= items.length && items.length > 0) setActive(items.length - 1);
   }, [items.length, active]);
 
-  if (items.length === 0) return hasLoadedRef.current ? null : <BannerSkeleton />;
+  if (items.length === 0) {
+    if (hasLoadedRef.current) return null;
+    return (
+      <section className="flex flex-col gap-5">
+        <h2 className="font-display text-[28px] font-medium leading-tight tracking-tight text-ink">
+          {t("Recommended")}
+        </h2>
+        <BannerSkeleton />
+      </section>
+    );
+  }
 
   const safeActive = Math.min(active, items.length - 1);
   const current = items[safeActive];
@@ -51,10 +63,10 @@ export function FeaturedBanner({ items }: { items: Meta[] }) {
       onMouseLeave={() => setPaused(false)}
     >
       <h2 className="font-display text-[28px] font-medium leading-tight tracking-tight text-ink">
-        Featured & Recommended
+        {t("Recommended")}
       </h2>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-4">
+      <div className="harbor-step grid grid-cols-[minmax(0,1fr)_320px] gap-4 motion-reduce:animate-none">
         <BigCardStack items={items} active={safeActive} onPrev={goPrev} onNext={goNext} />
         <SidePanel
           meta={current}
@@ -64,7 +76,9 @@ export function FeaturedBanner({ items }: { items: Meta[] }) {
         />
       </div>
 
-      <Dots count={items.length} active={safeActive} onJump={setActive} />
+      <div className="harbor-step motion-reduce:animate-none">
+        <Dots count={items.length} active={safeActive} onJump={setActive} />
+      </div>
 
       {lightbox && (
         <Lightbox

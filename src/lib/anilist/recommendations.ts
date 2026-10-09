@@ -1,6 +1,6 @@
 import type { Meta } from "@/lib/cinemeta";
 import { anilistRequest } from "./client";
-import { anilistMediaToMeta } from "./to-meta";
+import { buildAnimeRowMetas } from "./franchise-root";
 import type { AnilistMedia } from "./types";
 
 const RECS_QUERY = `query ($ids: [Int]) {
@@ -38,7 +38,7 @@ export async function fetchAnilistRecommendations(
 ): Promise<Meta[]> {
   if (seedIds.length === 0) return [];
   const ids = seedIds.slice(0, 40);
-  const data = await anilistRequest<RecsResponse>(RECS_QUERY, { ids }).catch(() => null);
+  const data = await anilistRequest<RecsResponse>(RECS_QUERY, { ids }, undefined, true).catch(() => null);
   const media = data?.Page?.media ?? [];
   const scored = new Map<number, { weight: number; media: AnilistMedia }>();
   for (const src of media) {
@@ -51,8 +51,8 @@ export async function fetchAnilistRecommendations(
       else scored.set(rec.id, { weight, media: rec });
     }
   }
-  return Array.from(scored.values())
+  const ordered = Array.from(scored.values())
     .sort((a, b) => b.weight - a.weight)
-    .map((x) => anilistMediaToMeta(x.media))
-    .filter((m): m is Meta => m != null);
+    .map((x) => x.media);
+  return buildAnimeRowMetas(ordered);
 }

@@ -1,0 +1,18 @@
+{
+  "bindings": "unrar_sys 0.5.8",
+  "source": {
+    "url": "https://www.rarlab.com/rar/unrarsrc-7.3.1.tar.gz",
+    "bytes": 273526,
+    "sha256": "634900842a3737d9cc15bbcc71d4c74cc713437e0bca296a573424fe5f2660ab",
+    "retrievedAt": "2026-10-03T09:29:20.086Z"
+  },
+  "changes": [
+    "Build upstream UnRAR 7.3.1 instead of crate-supplied 7.1",
+    "Compile without RAR_SMP to bound decoder CPU use",
+    "Link advapi32 on Windows",
+    "Rebuild when vendored source changes",
+    "Compile current upstream motw/largepage units",
+    "Match upstream packed DLL layouts in Rust FFI; compiler ABI regression test",
+    "Declare combined license file for MIT binding and distinct UnRAR license"
+  ]
+}

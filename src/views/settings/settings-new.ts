@@ -1,42 +1,95 @@
 import { useSyncExternalStore } from "react";
 
-const NEW_SECTIONS = new Set(["theme", "library"]);
-const LS = "harbor.settingsNewSeen";
+const NEW_BADGE_RESET_GENERATION = 1;
 
-function readSeen(): string[] {
+const NEW_SECTIONS = new Set(["library", "badges", "theme", "tv", "plugins", "bigPicture"]);
+const NEW_SETTINGS = new Set([
+  "plugins:use-plugins",
+  "plugins:outside-tab",
+  "plugins:poster-languages",
+  "plugins:poster-quality",
+  "library:award-tab",
+  "library:top-10",
+  "theme:hero-video",
+  "theme:drag-anywhere",
+  "theme:liquid-glass",
+  "tv:subtitle-look",
+  "mpv:buffer-size",
+  "home:prefer-episode-still",
+  "bigPicture:display",
+  "player:separate-display",
+  "player:cover-taskbar",
+]);
+
+const LS = "harbor.settingsNew.v1";
+
+type SeenStore = { gen: number; sections: string[]; items: string[] };
+
+function readStore(): SeenStore {
   try {
-    const v = JSON.parse(localStorage.getItem(LS) ?? "[]");
-    return Array.isArray(v) ? v : [];
+    const raw = JSON.parse(localStorage.getItem(LS) ?? "null");
+    if (raw && typeof raw === "object" && raw.gen === NEW_BADGE_RESET_GENERATION) {
+      return {
+        gen: NEW_BADGE_RESET_GENERATION,
+        sections: Array.isArray(raw.sections) ? raw.sections : [],
+        items: Array.isArray(raw.items) ? raw.items : [],
+      };
+    }
   } catch {
-    return [];
+    /* fall through to a fresh store */
   }
+  return { gen: NEW_BADGE_RESET_GENERATION, sections: [], items: [] };
 }
 
-let snapshot = readSeen().join(",");
+let store = readStore();
 const subs = new Set<() => void>();
+let snapshot = `${store.gen}|${store.sections.join(",")}|${store.items.join(",")}`;
 
-export function markSectionSeen(id: string): void {
-  if (!NEW_SECTIONS.has(id)) return;
-  const seen = readSeen();
-  if (seen.includes(id)) return;
+function persist(): void {
   try {
-    localStorage.setItem(LS, JSON.stringify([...seen, id]));
+    localStorage.setItem(LS, JSON.stringify(store));
   } catch {
     /* ignore */
   }
-  snapshot = readSeen().join(",");
+  snapshot = `${store.gen}|${store.sections.join(",")}|${store.items.join(",")}`;
   for (const fn of subs) fn();
+}
+
+persist();
+
+function subscribe(cb: () => void): () => void {
+  subs.add(cb);
+  return () => subs.delete(cb);
+}
+
+export function markSectionSeen(id: string): void {
+  if (!NEW_SECTIONS.has(id) || store.sections.includes(id)) return;
+  store.sections = [...store.sections, id];
+  persist();
+}
+
+export function markSettingSeen(id: string): void {
+  if (!NEW_SETTINGS.has(id) || store.items.includes(id)) return;
+  store.items = [...store.items, id];
+  persist();
 }
 
 export function useSettingsNew(): (id: string) => boolean {
   useSyncExternalStore(
-    (cb) => {
-      subs.add(cb);
-      return () => subs.delete(cb);
-    },
+    subscribe,
     () => snapshot,
     () => snapshot,
   );
-  const seen = new Set(snapshot ? snapshot.split(",") : []);
+  const seen = new Set(store.sections);
   return (id: string) => NEW_SECTIONS.has(id) && !seen.has(id);
+}
+
+export function useSettingNew(): (id: string) => boolean {
+  useSyncExternalStore(
+    subscribe,
+    () => snapshot,
+    () => snapshot,
+  );
+  const seen = new Set(store.items);
+  return (id: string) => NEW_SETTINGS.has(id) && !seen.has(id);
 }

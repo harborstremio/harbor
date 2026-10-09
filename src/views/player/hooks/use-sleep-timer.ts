@@ -1,12 +1,17 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
+import {
+  clearSleepMode,
+  getSleepMode,
+  registerSleepFireHandler,
+  setSleepMode,
+  useSleepMode,
+  useSleepRemainingMs,
+  type SleepMode,
+} from "@/lib/sleep-timer-store";
 
-export type SleepMode =
-  | { kind: "off" }
-  | { kind: "minutes"; total: number; firesAt: number }
-  | { kind: "end_episode" }
-  | { kind: "end_next_episode"; remaining: number };
+export type { SleepMode } from "@/lib/sleep-timer-store";
 
 export type SleepTimerState = {
   mode: SleepMode;
@@ -35,43 +40,22 @@ export function useSleepTimer(params: {
   srcUrl: string;
 }): SleepTimerState {
   const { bridgeRef, status, durationSec, srcUrl } = params;
-  const [mode, setMode] = useState<SleepMode>({ kind: "off" });
-  const [remainingMs, setRemainingMs] = useState<number | null>(null);
+  const mode = useSleepMode();
+  const remainingMs = useSleepRemainingMs();
   const lastUrlRef = useRef(srcUrl);
 
+  useEffect(() => {
+    registerSleepFireHandler(() => bridgeRef.current?.pause());
+    return () => registerSleepFireHandler(null);
+  }, [bridgeRef]);
+
   const set = useCallback((next: SleepMode) => {
-    if (next.kind === "minutes") {
-      setMode({ kind: "minutes", total: next.total, firesAt: Date.now() + next.total * 60_000 });
-    } else if (next.kind === "end_next_episode") {
-      setMode({ kind: "end_next_episode", remaining: 2 });
-    } else {
-      setMode(next);
-    }
+    setSleepMode(next);
   }, []);
 
   const cancel = useCallback(() => {
-    setMode({ kind: "off" });
-    setRemainingMs(null);
+    clearSleepMode();
   }, []);
-
-  useEffect(() => {
-    if (mode.kind !== "minutes") {
-      setRemainingMs(null);
-      return;
-    }
-    const tick = () => {
-      const r = mode.firesAt - Date.now();
-      setRemainingMs(Math.max(0, r));
-      if (r <= 0) {
-        bridgeRef.current?.pause();
-        setMode({ kind: "off" });
-        setRemainingMs(null);
-      }
-    };
-    tick();
-    const id = window.setInterval(tick, 1000);
-    return () => window.clearInterval(id);
-  }, [mode, bridgeRef]);
 
   useEffect(() => {
     if (mode.kind !== "end_episode" && mode.kind !== "end_next_episode") return;
@@ -80,25 +64,23 @@ export function useSleepTimer(params: {
     if (getPlaybackPosition() < durationSec - 2) return;
     if (mode.kind === "end_episode") {
       bridgeRef.current?.pause();
-      setMode({ kind: "off" });
+      clearSleepMode();
       return;
     }
-    setMode((cur) =>
-      cur.kind === "end_next_episode" && cur.remaining > 1
-        ? { kind: "end_next_episode", remaining: cur.remaining - 1 }
-        : { kind: "off" },
-    );
+    const cur = getSleepMode();
+    if (cur.kind === "end_next_episode" && cur.remaining > 1) {
+      setSleepMode({ kind: "end_next_episode", remaining: cur.remaining - 1 });
+    } else {
+      clearSleepMode();
+    }
     if (mode.remaining <= 1) bridgeRef.current?.pause();
   }, [status, durationSec, mode, bridgeRef]);
 
   useEffect(() => {
     if (lastUrlRef.current === srcUrl) return;
     lastUrlRef.current = srcUrl;
-    if (mode.kind === "end_episode") {
-      setMode({ kind: "off" });
-      setRemainingMs(null);
-    }
-  }, [srcUrl, mode.kind]);
+    if (getSleepMode().kind === "end_episode") clearSleepMode();
+  }, [srcUrl]);
 
   return { mode, remainingMs, set, cancel };
 }

@@ -8,10 +8,7 @@ export function SportsIcon({ active = false }: { active?: boolean }) {
       aria-hidden
       style={{ overflow: "visible" }}
     >
-      <g
-        key={active ? "active-ball" : "idle-ball"}
-        className={active ? "animate-ball-bounce" : ""}
-      >
+      <g key={active ? "active-ball" : "idle-ball"} className={active ? "animate-ball-bounce" : ""}>
         <g
           stroke="currentColor"
           strokeWidth="1.75"

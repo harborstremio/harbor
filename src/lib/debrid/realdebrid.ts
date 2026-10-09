@@ -169,7 +169,10 @@ export function createRealDebrid(apiKey: string): DebridStore {
     const all: RdTorrentSummary[] = [];
     for (let page = 1; page <= 5; page++) {
       const r = await get<RdTorrentSummary[]>(`/torrents?limit=100&page=${page}`, signal);
-      if (!r.ok) break;
+      if (!r.ok) {
+        if (page === 1) return r;
+        break;
+      }
       if (r.data.length === 0) break;
       all.push(...r.data);
       if (r.data.length < 100) break;
@@ -214,6 +217,7 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   }
   if (res.status === 402) return { ok: false, code: "not-premium", status: 402 };
   if (res.status === 429) return { ok: false, code: "rate-limited", status: 429 };
+  if (res.status === 509) return { ok: false, code: "traffic-limit", status: 509 };
   if (res.status === 503 || res.status === 504)
     return { ok: false, code: "upstream-unavailable", status: res.status };
   if (res.status === 204) return { ok: true, data: undefined as unknown as T };
@@ -254,11 +258,15 @@ function pickLinkIndex(files: RdFile[] | undefined, fileIdx: number | undefined,
 
 function sleep(ms: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve) => {
-    const t = setTimeout(resolve, ms);
-    signal.addEventListener("abort", () => {
+    const onAbort = () => {
       clearTimeout(t);
       resolve();
-    });
+    };
+    const t = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal.addEventListener("abort", onAbort, { once: true });
   });
 }
 

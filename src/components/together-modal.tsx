@@ -1,8 +1,9 @@
 import { Check, Copy, LogOut, MousePointer2, Plus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { TvModalClose } from "@/components/tv-modal-close";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
 import { useSettings } from "@/lib/settings";
+import { useKnobAnim } from "@/lib/knob-anim";
 import { useTogether } from "@/lib/together/provider";
 import { useSelfIdentity } from "@/lib/together/use-self-identity";
 import { useView } from "@/lib/view";
@@ -12,17 +13,48 @@ import { Avatar } from "./together-modal/avatar";
 import { ChatPanel } from "./together-modal/chat-panel";
 import { GuestPickToggle } from "./together-modal/guest-pick-toggle";
 import { InvitePanel } from "./together-modal/invite-panel";
-import { LinkGlyph } from "./together-modal/link-glyph";
 import { ReturnToVideo } from "./together-modal/return-to-video";
+import { ListenTogetherCta } from "./together-modal/listen-together-cta";
+import { useListenTogether } from "@/lib/listen-together/provider";
 import { TogetherRelayBanner } from "./together-relay-banner";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
+
+export function TogetherModalShell() {
+  const { closeModal } = useTogether();
+  const panelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeModal();
+    };
+    const onDown = (e: MouseEvent) => {
+      const target = e.target as Element | null;
+      if (panelRef.current?.contains(target as Node)) return;
+      if (target?.closest?.(".harbor-together-btn")) return;
+      closeModal();
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onDown);
+    };
+  }, [closeModal]);
+  return createPortal(
+    <div ref={panelRef} className="animate-panel-in fixed end-4 top-[88px] z-[220]">
+      <TogetherPopover modal />
+    </div>,
+    document.body,
+  );
+}
 
 export function TogetherPopover({
   placement = "below-right",
   connectStyle = "popover",
+  modal = false,
 }: {
   placement?: "below-right" | "above-left";
   connectStyle?: "tab" | "popover";
+  modal?: boolean;
 } = {}) {
   const {
     enabled,
@@ -40,42 +72,13 @@ export function TogetherPopover({
   } = useTogether();
   const { openSettings, openPicker, topKind } = useView();
   const { settings, update } = useSettings();
-  const liquidGlassEnabled = true;
-
-  const strongTextClass = liquidGlassEnabled
-    ? "text-white/[0.96] [text-shadow:0_1px_2px_rgba(0,0,0,0.72)]"
-    : "text-ink";
-
-  const mutedTextClass = liquidGlassEnabled
-    ? "text-white/[0.80] [text-shadow:0_1px_2px_rgba(0,0,0,0.66)]"
-    : "text-ink-muted";
-
-  const subtleTextClass = liquidGlassEnabled
-    ? "text-white/[0.64] [text-shadow:0_1px_2px_rgba(0,0,0,0.60)]"
-    : "text-ink-subtle";
-
-  const panelClass = liquidGlassEnabled
-    ? "border-white/[0.14] bg-black/[0.18] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
-    : "border-edge bg-canvas/60";
-
-  const inputClass = liquidGlassEnabled
-    ? "border-white/[0.16] bg-black/[0.24] text-white placeholder:text-white/35 hover:border-white/[0.24] focus:border-white/[0.36] focus:bg-black/[0.30] focus:ring-1 focus:ring-white/20"
-    : "border-edge bg-canvas text-ink focus:border-accent";
-
-  const primaryButtonClass = liquidGlassEnabled
-    ? "border border-white/[0.44] bg-white/[0.90] text-black shadow-[0_8px_24px_-12px_rgba(255,255,255,0.60)] hover:bg-white hover:shadow-[0_10px_28px_-12px_rgba(255,255,255,0.72)]"
-    : "bg-ink text-canvas";
-
-  const secondaryButtonClass = liquidGlassEnabled
-    ? "border border-white/[0.14] bg-white/[0.065] text-white/[0.86] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] hover:border-white/[0.24] hover:bg-white/[0.14] hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
-    : "border-edge text-ink-muted hover:bg-elevated hover:text-ink";
-
   const { avatar: selfAvatar, color: selfColor } = useSelfIdentity();
   const t = useT();
   const [joinCode, setJoinCode] = useState("");
   const [draftName, setDraftName] = useState(displayName);
   const [copied, setCopied] = useState(false);
   const [view, setView] = useState<"default" | "link">("default");
+  const cursorKnob = useKnobAnim(settings.togetherShareCursors);
 
   useEffect(() => {
     setDraftName(displayName);
@@ -122,7 +125,7 @@ export function TogetherPopover({
       setCopied(true);
       setTimeout(() => setCopied(false), 1400);
     } catch {
-      /* clipboard blocked */
+      void 0;
     }
   };
 
@@ -140,8 +143,49 @@ export function TogetherPopover({
     [snapshot.participants],
   );
 
+  const listen = useListenTogether();
   const roomMedia = snapshot.syncState;
   const canReturn = inSession && !!roomMedia?.mediaId && topKind !== "player";
+  const surfaceShape = modal
+    ? "rounded-md shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
+    : `animate-popover-in shadow-[0_24px_60px_-20px_rgba(0,0,0,0.7)] ${
+        connectStyle === "tab"
+          ? placement === "above-left"
+            ? "rounded-t-2xl rounded-b-none"
+            : "rounded-b-2xl rounded-t-none"
+          : placement === "above-left"
+            ? "rounded-2xl rounded-es-none"
+            : "rounded-2xl rounded-se-none"
+      }`;
+  const surfaceCorners: CSSProperties | undefined = modal
+    ? undefined
+    : connectStyle === "tab"
+      ? placement === "above-left"
+        ? {
+            borderStartStartRadius: "16px",
+            borderStartEndRadius: "16px",
+            borderEndStartRadius: 0,
+            borderEndEndRadius: 0,
+          }
+        : {
+            borderStartStartRadius: 0,
+            borderStartEndRadius: 0,
+            borderEndStartRadius: "16px",
+            borderEndEndRadius: "16px",
+          }
+      : placement === "above-left"
+        ? {
+            borderStartStartRadius: "16px",
+            borderStartEndRadius: "16px",
+            borderEndStartRadius: 0,
+            borderEndEndRadius: "16px",
+          }
+        : {
+            borderStartStartRadius: "16px",
+            borderStartEndRadius: 0,
+            borderEndStartRadius: "16px",
+            borderEndEndRadius: "16px",
+          };
 
   const returnToVideo = () => {
     if (!roomMedia?.mediaId) return;
@@ -155,11 +199,15 @@ export function TogetherPopover({
     closeModal();
   };
 
-  const popoverContent = (
-    <>
-      <TvModalClose onClose={closeModal} label={t("Close")} />
+  return (
+    <TogetherSurface
+      liquid={settings.liquidGlass}
+      label={t("Watch together")}
+      shapeClass={surfaceShape}
+      cornerStyle={surfaceCorners}
+    >
       <header className="flex items-center justify-between gap-3">
-        <h2 className={`text-[14px] font-semibold tracking-tight ${strongTextClass}`}>
+        <h2 className="text-[14px] font-semibold tracking-tight text-ink">
           {view === "link" ? t("Invite via link") : t("Watch together")}
         </h2>
         <Tooltip label={view === "link" ? t("Back") : t("Invite via link")} side="bottom">
@@ -171,10 +219,11 @@ export function TogetherPopover({
             }
             aria-pressed={view === "link"}
             className={`flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[10.5px] font-bold uppercase tracking-[0.16em] transition-colors ${
-              view === "link" ? primaryButtonClass : secondaryButtonClass
+              view === "link"
+                ? "bg-ink text-canvas"
+                : "bg-elevated text-ink-muted hover:bg-raised hover:text-ink"
             }`}
           >
-            <LinkGlyph />
             {t("Invite")}
           </button>
         </Tooltip>
@@ -191,12 +240,10 @@ export function TogetherPopover({
           />
         )}
         {view === "default" && !enabled && (
-          <div className={`flex flex-col gap-3 rounded-xl border p-3.5 ${panelClass}`}>
+          <div className="flex flex-col gap-3 rounded-lg bg-canvas/50 p-3.5">
             <div>
-              <p className={`text-[13px] ${strongTextClass}`}>
-                {t("Watch Together needs a relay.")}
-              </p>
-              <p className={`mt-1 text-[12px] leading-relaxed ${mutedTextClass}`}>
+              <p className="text-[13px] text-ink">{t("Watch Together needs a relay.")}</p>
+              <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
                 {t(
                   "A relay is a tiny Cloudflare Worker that passes play/pause/seek messages between you and your friends. No video data ever touches it. Deploy your own in one click (free tier is plenty), or paste a friend's invite link to use theirs.",
                 )}
@@ -207,19 +254,19 @@ export function TogetherPopover({
               onChange={(e) => setJoinCode(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleJoin()}
               placeholder={t("Paste invite link")}
-              className={`h-10 rounded-lg border px-3 text-[12px] transition-colors ${inputClass}`}
+              className="h-10 rounded-lg bg-canvas px-3 text-[12px] text-ink transition-colors focus:outline-none focus:ring-1 focus:ring-inset focus:ring-accent/50"
             />
             <div className="flex items-center gap-2">
               <button
                 onClick={handleJoin}
                 disabled={!joinCode.trim()}
-                className={`inline-flex h-9 items-center justify-center rounded-lg px-3 text-[13px] font-semibold transition-all hover:scale-[1.02] disabled:opacity-40 disabled:hover:scale-100 ${primaryButtonClass}`}
+                className="inline-flex h-9 items-center justify-center rounded-lg bg-ink px-3 text-[13px] font-medium text-canvas transition-transform hover:scale-[1.02] disabled:opacity-40 disabled:hover:scale-100"
               >
                 {t("Join")}
               </button>
               <button
                 onClick={goToSettings}
-                className={`inline-flex h-9 items-center justify-center rounded-lg px-3 text-[13px] font-medium transition-colors ${secondaryButtonClass}`}
+                className="inline-flex h-9 items-center justify-center rounded-lg bg-white/[0.06] px-3 text-[13px] font-medium text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
               >
                 {t("Open Settings")}
               </button>
@@ -230,9 +277,7 @@ export function TogetherPopover({
         {view === "default" && enabled && !inSession && (
           <>
             <label className="flex flex-col gap-1.5">
-              <span
-                className={`text-[11px] font-medium uppercase tracking-wider ${subtleTextClass}`}
-              >
+              <span className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
                 {t("Your name")}
               </span>
               <input
@@ -241,29 +286,23 @@ export function TogetherPopover({
                 onBlur={commitName}
                 onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
                 maxLength={32}
-                className={`h-10 rounded-lg border px-3 text-[13.5px] transition-colors ${inputClass}`}
+                className="h-10 rounded-lg bg-canvas px-3 text-[13.5px] text-ink transition-colors focus:outline-none focus:ring-1 focus:ring-inset focus:ring-accent/50"
               />
             </label>
 
             <button
               onClick={handleStart}
               disabled={connecting}
-              className={`flex h-11 items-center justify-center gap-2 rounded-xl text-[13.5px] font-semibold transition-all hover:scale-[1.01] disabled:opacity-40 disabled:hover:scale-100 ${primaryButtonClass}`}
+              className="harbor-press-pop flex h-11 items-center justify-center gap-2 rounded-xl bg-ink text-[13.5px] font-medium text-canvas transition-transform hover:scale-[1.01] disabled:opacity-40 disabled:hover:scale-100"
             >
               <Plus size={15} strokeWidth={2.2} />
               {connecting ? t("Starting…") : t("Start a new room")}
             </button>
 
-            <div
-              className={`flex items-center gap-3 text-[10.5px] uppercase tracking-wider ${subtleTextClass}`}
-            >
-              <span
-                className={`h-px flex-1 ${liquidGlassEnabled ? "bg-white/[0.14]" : "bg-edge-soft"}`}
-              />
+            <div className="flex items-center gap-3 text-[10.5px] uppercase tracking-wider text-ink-subtle">
+              <span className="h-px flex-1 bg-edge-soft" />
               <span>{t("or join")}</span>
-              <span
-                className={`h-px flex-1 ${liquidGlassEnabled ? "bg-white/[0.14]" : "bg-edge-soft"}`}
-              />
+              <span className="h-px flex-1 bg-edge-soft" />
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -276,7 +315,7 @@ export function TogetherPopover({
                   }}
                   onKeyDown={(e) => e.key === "Enter" && handleJoin()}
                   placeholder="ABCD23"
-                  className={`h-10 flex-1 rounded-lg border px-3 transition-colors ${inputClass} ${
+                  className={`h-10 flex-1 rounded-lg bg-canvas px-3 text-ink transition-colors focus:outline-none focus:ring-1 focus:ring-inset focus:ring-accent/50 ${
                     joinCode.length > 6 || joinCode.includes("/")
                       ? "text-[12px]"
                       : "text-center text-[15px] font-mono tracking-[0.3em]"
@@ -285,22 +324,32 @@ export function TogetherPopover({
                 <button
                   onClick={handleJoin}
                   disabled={joinCode.trim().length === 0 || connecting}
-                  className={`h-10 rounded-lg px-4 text-[13px] font-medium transition-colors disabled:opacity-40 disabled:hover:bg-transparent ${secondaryButtonClass}`}
+                  className="harbor-press-pop h-10 rounded-lg bg-white/[0.06] px-4 text-[13px] font-medium text-ink transition-colors hover:bg-white/[0.10] disabled:opacity-40 disabled:hover:bg-white/[0.06]"
                 >
                   {t("Join")}
                 </button>
               </div>
-              <p className={`px-1 text-[10.5px] ${subtleTextClass}`}>
-                {t("or paste an invite link")}
-              </p>
+              <p className="px-1 text-[10.5px] text-ink-subtle">{t("or paste an invite link")}</p>
             </div>
+
+            {listen.relayReady && !listen.watchingBlocks && (
+              <ListenTogetherCta
+                room={listen.room}
+                listeners={listen.listeners}
+                nowPlaying={listen.nowPlaying}
+                artwork={listen.nowPlaying?.artwork ?? null}
+                busy={listen.busy}
+                onStart={listen.start}
+                onOpen={() => setView("default")}
+              />
+            )}
 
             {errored && snapshot.lastError && (
               <div className="flex flex-col gap-2 rounded-lg bg-danger/15 px-3 py-2.5">
                 <p className="text-[12px] leading-snug text-danger">{snapshot.lastError}</p>
                 <button
                   onClick={retrySession}
-                  className="self-start rounded-md border border-danger/40 px-2.5 py-1 text-[11.5px] font-medium text-danger transition-colors hover:bg-danger/20"
+                  className="self-start rounded-md bg-danger/15 px-2.5 py-1 text-[11.5px] font-medium text-danger transition-colors hover:bg-danger/25"
                 >
                   {t("Try again")}
                 </button>
@@ -313,20 +362,30 @@ export function TogetherPopover({
           <>
             {canReturn && roomMedia && <ReturnToVideo media={roomMedia} onReturn={returnToVideo} />}
 
-            <div
-              className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 ${panelClass}`}
-            >
+            {listen.relayReady && !listen.watchingBlocks && (
+              <ListenTogetherCta
+                room={listen.room}
+                listeners={listen.listeners}
+                nowPlaying={listen.nowPlaying}
+                artwork={listen.nowPlaying?.artwork ?? null}
+                busy={listen.busy}
+                onStart={listen.start}
+                onOpen={() => setView("default")}
+              />
+            )}
+
+            <div className="flex items-center justify-between rounded-lg bg-canvas/50 px-3.5 py-2.5">
               <div className="flex flex-col">
-                <span className={`text-[10.5px] uppercase tracking-wider ${subtleTextClass}`}>
+                <span className="text-[10.5px] uppercase tracking-wider text-ink-subtle">
                   {t("Room code")}
                 </span>
-                <span className={`font-mono text-[18px] tracking-[0.35em] ${strongTextClass}`}>
+                <span className="font-mono text-[18px] tracking-[0.35em] text-ink">
                   {snapshot.room}
                 </span>
               </div>
               <button
                 onClick={handleCopy}
-                className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${secondaryButtonClass}`}
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.06] text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
                 aria-label={t("Copy room code")}
               >
                 {copied ? (
@@ -338,7 +397,7 @@ export function TogetherPopover({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <span className={`text-[10.5px] uppercase tracking-wider ${subtleTextClass}`}>
+              <span className="text-[10.5px] uppercase tracking-wider text-ink-subtle">
                 {t("{n} watching", { n: participants.length })}
               </span>
               <ul className="flex flex-wrap gap-1.5">
@@ -349,14 +408,10 @@ export function TogetherPopover({
                   return (
                     <li
                       key={p.id}
-                      className={`flex items-center gap-1.5 rounded-full py-0.5 ps-0.5 pe-2.5 ${
-                        liquidGlassEnabled
-                          ? "border border-white/[0.10] bg-white/[0.07]"
-                          : "bg-elevated/70"
-                      }`}
+                      className="flex items-center gap-1.5 rounded-full bg-elevated/70 py-0.5 ps-0.5 pe-2.5"
                     >
                       <Avatar name={p.name} src={avatarSrc} color={color} />
-                      <span className={`text-[12px] ${strongTextClass}`}>{p.name}</span>
+                      <span className="text-[12px] text-ink">{p.name}</span>
                     </li>
                   );
                 })}
@@ -376,7 +431,7 @@ export function TogetherPopover({
 
             <button
               onClick={() => update({ togetherShareCursors: !settings.togetherShareCursors })}
-              className={`flex h-10 items-center justify-between gap-2 rounded-lg px-3 text-[12.5px] transition-colors ${secondaryButtonClass}`}
+              className="flex h-10 items-center justify-between gap-2 rounded-lg bg-white/[0.06] px-3 text-[12.5px] text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
               aria-pressed={settings.togetherShareCursors}
             >
               <span className="flex items-center gap-2">
@@ -390,18 +445,18 @@ export function TogetherPopover({
                 }`}
               >
                 <span
-                  className={`block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                  className={`block h-4 w-4 rounded-full bg-white shadow-sm ${
                     settings.togetherShareCursors
                       ? "translate-x-4 rtl:-translate-x-4"
                       : "translate-x-0"
-                  }`}
+                  } ${cursorKnob}`}
                 />
               </span>
             </button>
 
             <button
               onClick={leaveSession}
-              className={`flex h-10 items-center justify-center gap-1.5 rounded-lg text-[12.5px] transition-colors ${secondaryButtonClass}`}
+              className="flex h-10 items-center justify-center gap-1.5 rounded-lg bg-white/[0.06] text-[12.5px] text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
             >
               <LogOut size={13} strokeWidth={1.9} />
               {t("Leave room")}
@@ -409,104 +464,56 @@ export function TogetherPopover({
           </>
         )}
       </div>
-    </>
+    </TogetherSurface>
   );
+}
 
-  return liquidGlassEnabled ? (
+function TogetherSurface({
+  liquid,
+  label,
+  shapeClass,
+  cornerStyle,
+  children,
+}: {
+  liquid: boolean;
+  label: string;
+  shapeClass: string;
+  cornerStyle?: CSSProperties;
+  children: React.ReactNode;
+}) {
+  const surfaceClass = `harbor-together-surface w-[400px] max-w-[calc(100vw-2rem)] ${shapeClass}`;
+  const contentClass =
+    "flex max-h-[85vh] w-full flex-col gap-4 overflow-y-auto p-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+
+  if (!liquid) {
+    return (
+      <div role="dialog" aria-modal="true" aria-label={label} className={surfaceClass}>
+        <div className={contentClass}>{children}</div>
+      </div>
+    );
+  }
+
+  return (
     <ThreeLiquidGlassSurface
       role="dialog"
       aria-modal="true"
-      data-tv-focus-scope
-      aria-label={t("Watch together")}
+      aria-label={label}
       radius="16px"
       shaderRadius={0.58}
       intensity={0.2}
       interactive={false}
       alwaysActive
       style={{
-        background: "rgba(7,11,17,0.18)",
+        ...cornerStyle,
+        background:
+          "linear-gradient(145deg, rgba(7,11,17,0.50), rgba(7,11,17,0.38) 56%, rgba(7,11,17,0.44))",
         boxShadow:
           "inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(110,185,255,0.07), 0 28px 72px -24px rgba(0,0,0,0.78)",
-        ...(connectStyle === "tab"
-          ? placement === "above-left"
-            ? {
-                borderStartStartRadius: "16px",
-                borderStartEndRadius: "16px",
-                borderEndStartRadius: 0,
-                borderEndEndRadius: 0,
-              }
-            : {
-                borderStartStartRadius: 0,
-                borderStartEndRadius: 0,
-                borderEndStartRadius: "16px",
-                borderEndEndRadius: "16px",
-              }
-          : placement === "above-left"
-            ? {
-                borderStartStartRadius: "16px",
-                borderStartEndRadius: "16px",
-                borderEndStartRadius: 0,
-                borderEndEndRadius: "16px",
-              }
-            : {
-                borderStartStartRadius: "16px",
-                borderStartEndRadius: 0,
-                borderEndStartRadius: "16px",
-                borderEndEndRadius: "16px",
-              }),
       }}
-      className="
-        harbor-together-surface
-        w-[400px] max-w-[calc(100vw-24px)]
-        border border-white/[0.16]
-        shadow-[0_28px_72px_-24px_rgba(0,0,0,0.78)]
-        animate-popover-in
-      "
-      contentClassName="
-        flex max-h-[80vh] w-full
-        flex-col gap-4
-        overflow-y-auto p-5
-        text-white/[0.94]
-        [text-shadow:0_1px_2px_rgba(0,0,0,0.66)]
-        [&_.text-ink]:!text-white/[0.96]
-        [&_.text-ink-muted]:!text-white/[0.80]
-        [&_.text-ink-subtle]:!text-white/[0.64]
-        [&_.border-edge]:!border-white/[0.16]
-        [&_.border-edge-soft]:!border-white/[0.10]
-        [&_input]:!border-white/[0.16]
-        [&_input]:!bg-black/[0.24]
-        [&_input]:!text-white
-        [&_input::placeholder]:!text-white/35
-        [&_textarea]:!border-white/[0.16]
-        [&_textarea]:!bg-black/[0.24]
-        [&_textarea]:!text-white
-        [&_textarea::placeholder]:!text-white/35
-        [&_button]:focus-visible:outline-none
-        [&_button]:focus-visible:ring-1
-        [&_button]:focus-visible:ring-white/30
-        [scrollbar-width:none]
-        [&::-webkit-scrollbar]:hidden
-      "
+      className={`${surfaceClass} border-white/[0.16]`}
+      contentClassName={`${contentClass} text-white/[0.94] [text-shadow:0_1px_2px_rgba(0,0,0,0.66)] [&_.text-ink]:!text-white/[0.96] [&_.text-ink-muted]:!text-white/[0.80] [&_.text-ink-subtle]:!text-white/[0.64] [&_.border-edge]:!border-white/[0.16] [&_.border-edge-soft]:!border-white/[0.10] [&_input]:!border-white/[0.16] [&_input]:!bg-black/[0.24] [&_input]:!text-white [&_input::placeholder]:!text-white/35 [&_textarea]:!border-white/[0.16] [&_textarea]:!bg-black/[0.24] [&_textarea]:!text-white [&_textarea::placeholder]:!text-white/35 [&_button]:focus-visible:outline-none [&_button]:focus-visible:ring-1 [&_button]:focus-visible:ring-white/30`}
     >
-      {popoverContent}
+      {children}
     </ThreeLiquidGlassSurface>
-  ) : (
-    <div
-      role="dialog"
-      aria-modal="true"
-      data-tv-focus-scope
-      aria-label={t("Watch together")}
-      className={`harbor-together-surface flex max-h-[80vh] w-[400px] max-w-[calc(100vw-24px)] flex-col gap-4 overflow-y-auto border border-edge bg-canvas/95 p-5 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl animate-popover-in [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-        connectStyle === "tab"
-          ? placement === "above-left"
-            ? "rounded-t-2xl rounded-b-none"
-            : "rounded-b-2xl rounded-t-none"
-          : placement === "above-left"
-            ? "rounded-2xl rounded-es-none"
-            : "rounded-2xl rounded-se-none"
-      }`}
-    >
-      {popoverContent}
-    </div>
   );
 }

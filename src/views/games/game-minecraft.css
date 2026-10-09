@@ -1,0 +1,38 @@
+.games-minecraft {min-width:0}
+.games-browser-minecraft:has(.games-minecraft[data-page=discover]) {position:relative;margin-top:calc(-1 * var(--games-chrome-inset));padding-top:var(--games-chrome-inset)}
+.games-browser-minecraft:has(.games-minecraft[data-page=discover])>.games-mast {position:absolute;inset-inline:0;top:var(--games-chrome-inset);color:#fff;z-index:3}
+.games-browser-minecraft:has(.games-minecraft[data-page=discover])>.games-mast nav button {color:#ffffffb8}
+.games-browser-minecraft:has(.games-minecraft[data-page=discover])>.games-mast nav button[aria-current] {color:#fff}
+.games-browser-minecraft .mc-world-hero {margin-top:calc(-1 * var(--games-chrome-inset));padding-top:calc(var(--games-chrome-inset) + 96px)}
+.mc-world-hero[hidden] {display:none}
+.mc-world-hero {position:relative;isolation:isolate;display:flex;align-items:center;overflow:hidden;color:#fff}
+.mc-world-art {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:-2}
+.mc-world-shade {position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(0deg,var(--color-canvas),transparent 90px),linear-gradient(90deg,#000d,#0009 48%,#0003)}
+.games-minecraft:dir(rtl) .mc-world-shade {background:linear-gradient(0deg,var(--color-canvas),transparent 90px),linear-gradient(270deg,#000d,#0009 48%,#0003)}
+.mc-world-actions {display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.mc-world-actions .games-button {background:#f4f4f4;color:#101313;padding:12px 16px;min-height:44px;font-size:13px;gap:10px}
+.mc-world-actions .games-button:hover {background:white}
+.mc-workspace-title {display:flex;align-items:center;gap:16px;padding-block:26px 22px}
+.mc-workspace-title img {width:180px;height:auto}
+.mc-workspace-title span {font-size:12px;color:var(--color-ink-muted)}
+.mc-world-nav {display:flex;gap:30px;position:relative;scroll-margin-top:30px;border-bottom:1px solid var(--color-edge-soft)}
+.mc-world-nav button {display:flex;align-items:center;gap:9px;min-height:54px;padding-block:12px;font-size:14px;font-weight:600;color:var(--color-ink-muted);border-bottom:2px solid transparent;white-space:nowrap}
+.mc-world-nav button[aria-current] {color:var(--color-ink);border-bottom-color:var(--color-accent)}
+.mc-world-nav button:hover {color:var(--color-ink)}
+.games-mods.is-embedded {padding-top:0}
+.mc-studio-loading {display:grid;grid-template-columns:1fr 1fr;gap:36px;padding-block:38px}
+.mc-studio-loading>div {height:520px;background:var(--color-surface);border-radius:10px}
+@media(max-width:740px) {.mc-world-nav {gap:22px}.mc-world-nav>button:not(.mc-account-button)>svg {display:none}.mc-world-nav>button {font-size:13px}.mc-studio-loading {grid-template-columns:1fr}.mc-studio-loading>div+div {display:none}.mc-workspace-title img {width:150px}}
+@media(max-width:420px) {.mc-world-nav {gap:15px}.mc-world-nav>button {font-size:12px}}
+
+/* One navigation row: browse by content, with installed tools in Manage. */
+.mc-world-nav{gap:20px;align-items:center;flex-wrap:wrap;margin-block:12px 0;padding-block:8px}
+.mc-navigation-wordmark{width:108px;height:30px;object-fit:contain;flex:none}
+.mc-browse-navigation{display:flex;gap:22px;flex-wrap:wrap;align-items:center}
+.mc-browse-navigation button{font-weight:550;font-size:13px;min-height:44px;gap:8px;padding-block:10px}
+.mc-browse-navigation button svg{flex:none}
+.mc-manage-navigation{margin-inline-start:auto}
+.mc-manage-navigation button{min-height:40px;font-size:13px;border:0}
+.mc-world-nav .mc-account-button{margin-inline-start:0;min-height:40px;border:0;font-size:13px;font-weight:500}
+@container(max-width:900px){.mc-world-nav{gap:8px 20px}.mc-navigation-wordmark{margin-inline-end:auto}.mc-browse-navigation{order:4;flex-basis:100%;gap:22px}.mc-manage-navigation{margin-inline-start:0}}
+@container(max-width:460px){.mc-browse-navigation{gap:4px 15px}.mc-browse-navigation button{font-size:12px}.mc-browse-navigation button svg{width:18px;height:18px}.mc-world-nav .mc-account-button span{display:none}}

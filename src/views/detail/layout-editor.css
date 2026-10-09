@@ -1,0 +1,121 @@
+.detail-layout-action {
+  transition: background-color 160ms ease, color 160ms ease, opacity 160ms ease;
+}
+
+.detail-layout-action:focus-visible {
+  outline: 2px solid var(--color-ink-muted);
+  outline-offset: 3px;
+}
+
+.detail-layout-glyph,
+.detail-layout-label {
+  display: grid;
+  align-items: center;
+}
+
+.detail-layout-glyph > *,
+.detail-layout-label > * {
+  grid-area: 1 / 1;
+  transition: opacity 140ms ease, transform 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.detail-layout-label > * {
+  opacity: 0;
+  transform: translateY(3px);
+}
+
+.detail-layout-toggle[data-state="idle"] [data-label="idle"],
+.detail-layout-toggle[data-state="editing"] [data-label="editing"],
+.detail-layout-toggle[data-state="finished"] [data-label="finished"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.detail-layout-glyph > :last-child,
+.detail-layout-toggle:not([data-state="idle"]) .detail-layout-glyph > :first-child {
+  opacity: 0;
+  transform: scale(0.85);
+}
+
+.detail-layout-toggle:not([data-state="idle"]) .detail-layout-glyph > :last-child {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.detail-layout-toggle[data-state="finished"] .detail-layout-glyph > :last-child path {
+  stroke-dasharray: 24;
+  animation: detail-layout-confirm 200ms ease-out both;
+}
+
+@keyframes detail-layout-confirm {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+
+.detail-layout-reset {
+  display: grid;
+  grid-template-columns: 0fr;
+  opacity: 0;
+  transition: grid-template-columns 180ms cubic-bezier(0.2, 0, 0, 1), opacity 140ms ease;
+}
+
+.detail-layout-reset > div {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.detail-layout-reset button {
+  margin-inline-end: 8px;
+  white-space: nowrap;
+}
+
+.detail-layout-reset[data-visible="true"] {
+  grid-template-columns: 1fr;
+  opacity: 1;
+}
+
+.detail-layout-controls {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 200ms cubic-bezier(0.2, 0, 0, 1), opacity 160ms ease;
+}
+
+.detail-layout-controls > div {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.detail-layout-controls[data-editing="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.detail-layout-controls-content {
+  padding-bottom: 12px;
+  transform: translateY(-4px);
+  transition: transform 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.detail-layout-controls[data-editing="true"] .detail-layout-controls-content {
+  transform: translateY(0);
+}
+
+.detail-layout-controls[data-hidden="true"] .detail-layout-controls-content {
+  padding-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail-layout-action,
+  .detail-layout-glyph > *,
+  .detail-layout-label > *,
+  .detail-layout-reset,
+  .detail-layout-controls,
+  .detail-layout-controls-content {
+    transition: none;
+  }
+
+  .detail-layout-toggle[data-state="finished"] .detail-layout-glyph > :last-child path {
+    animation: none;
+  }
+}

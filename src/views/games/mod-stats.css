@@ -1,0 +1,5 @@
+.mod-project-stats{display:flex;align-items:center;gap:12px 24px;flex-wrap:wrap;font-size:13px;color:var(--color-ink-muted);margin-top:22px}
+.mod-project-stats>span{display:inline-flex;align-items:center;gap:7px}.mod-project-stats strong{color:var(--color-ink);font-weight:600;font-variant-numeric:tabular-nums}.mod-project-stats svg{flex:none;stroke-width:1.65}
+.mod-project-stats.is-compact{gap:12px;font-size:12px;margin-top:0}
+.mod-poster-type,.mod-poster-downloads{position:absolute;display:flex;align-items:center;gap:5px;background:#101313e8;color:#fff;padding:6px 8px;border-radius:5px;font-size:11px;line-height:1.3;max-width:calc(100% - 20px);pointer-events:none}
+.mod-poster-type{inset-inline-start:10px;top:10px;max-width:calc(100% - 48px)}.mod-poster-type>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mod-poster-downloads{inset-inline-end:10px;bottom:10px;font-variant-numeric:tabular-nums}.mod-poster-downloads strong{font-size:12px;font-weight:600}.mod-poster-type svg,.mod-poster-downloads svg{flex:none;stroke-width:1.65}

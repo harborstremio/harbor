@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 30.8.1, SVG Export Plug-In . SVG Version: 9.03 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 48 48" enable-background="new 0 0 48 48" xml:space="preserve">
+<g id="candle">
+	<polygon fill="#DED1B8" points="17,20 31,20 30,39 18,40 	"/>
+	<path fill="none" stroke="#24272B" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+		M17,21c2.667,3.333,4.333,3.667,5,1s2.667-2,6,2l3-3"/>
+	<path fill="#EDC78B" d="M24,5c-1,6-8,9-4,13C26,23,32,14,24,5z"/>
+	<path fill="none" stroke="#EDC78B" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+		M11,41c9.333,3.333,18,2.667,26-2"/>
+	
+		<line fill="none" stroke="#EDC78B" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="9" y1="13" x2="6" y2="11"/>
+	
+		<line fill="none" stroke="#EDC78B" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="35" y1="16" x2="40" y2="15"/>
+</g>
+</svg>

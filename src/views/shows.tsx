@@ -7,15 +7,26 @@ import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss"
 import { PeekHero } from "@/components/peek-hero";
 import { Row, ScrollRootContext } from "@/components/row";
 import { TmdbNudge } from "@/components/nudge";
-import { TopRankCard } from "@/components/top-rank-card";
 import { useAuth } from "@/lib/auth";
+import { useProfiles, anyProfileSharesStremioWith } from "@/lib/profiles";
 import { topSeries, type Meta } from "@/lib/cinemeta";
-import { useCatalogPage, type CatalogRowSpec } from "@/lib/catalog-page";
+import { useHideAnimeMetas } from "@/lib/anime-hide";
 import { useT } from "@/lib/i18n";
 import { publishResumeStates } from "@/lib/hover-preview/store";
+import { listPager } from "@/lib/list-pager";
+import { CATALOG_REQUEST_TIMEOUT_MS, upsertOrdered, withTimeout } from "@/lib/progressive-rows";
 import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
 import { useSettings } from "@/lib/settings";
-import { cwSortKey, isAnimeCwItem, isCwMember, library, type LibraryItem } from "@/lib/stremio";
+import {
+  ANIME_CLOUD_ID,
+  cwSortKey,
+  isAnimeCwItem,
+  isCwMember,
+  library,
+  type LibraryItem,
+} from "@/lib/stremio";
+import { listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
+import { localToLibraryItem } from "@/lib/continue-watching";
 import { clearLocalCw } from "@/lib/local-cw";
 import {
   dismissManualWatched,
@@ -24,88 +35,44 @@ import {
   subscribeManualWatched,
 } from "@/lib/manual-watched";
 import { useCwAdvance } from "./home/hooks/use-cw-advance";
-import { useScrollMemory, useView } from "@/lib/view";
-import { bucketCopy, buildShowHero } from "./shows/hero-curation";
+import { useScrollMemory } from "@/lib/view";
+import { buildShowHero, bucketCopy } from "./shows/hero-curation";
 import { showSpecs } from "./shows/show-specs";
+import { useCollectionRowsForPage } from "@/lib/page-collection-rows";
 
 const HERO_POOL_TARGET = 6;
 const MAX_PER_ROW = 30;
 
-const CINEMETA_GENRES = [
-  "Drama",
-  "Comedy",
-  "Crime",
-  "Sci-Fi",
-  "Thriller",
-  "Mystery",
-  "Action",
-  "Animation",
-  "Adventure",
-  "Fantasy",
-  "Documentary",
-  "Romance",
-  "Horror",
-] as const;
-
-function cinemetaShowSpecs(): CatalogRowSpec[] {
-  return [
-    {
-      key: "cinemeta-top",
-      title: "Top Series",
-      noPaginate: true,
-      fetcher: async () => {
-        const top = await topSeries().catch(() => [] as Meta[]);
-        return top.slice(0, 30);
-      },
-    },
-    ...CINEMETA_GENRES.map(
-      (g): CatalogRowSpec => ({
-        key: `cinemeta-genre-${g.toLowerCase().replace(/[^a-z]/g, "")}`,
-        title: `Top ${g}`,
-        noPaginate: true,
-        fetcher: async () => {
-          const list = await topSeries(g).catch(() => [] as Meta[]);
-          return list.slice(0, 30);
-        },
-      }),
-    ),
-  ];
-}
+type ShowRow = {
+  key: string;
+  title: string;
+  metas: Meta[];
+  page: number;
+  hasMore: boolean;
+  fetcher?: (page: number) => Promise<Meta[]>;
+  variant?: "rank";
+};
 
 export function Shows({ active = true }: { active?: boolean }) {
   const { settings } = useSettings();
   const { authKey } = useAuth();
+  const { activeProfile, profiles } = useProfiles();
+  const hideSharedCw =
+    settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
   const cwVersion = useCwDismissVersion();
-  const { openGrid } = useView();
   const t = useT();
   const pageRows = usePageRows("shows");
+  const [hero, setHero] = useState<Meta[]>([]);
+  const [rows, setRows] = useState<ShowRow[]>([]);
   const [items, setItems] = useState<LibraryItem[]>([]);
+  const rowsRef = useRef<ShowRow[]>([]);
+  const loadingRef = useRef<Set<string>>(new Set());
   const scrollRef = useRef<HTMLElement>(null);
   const [scrollEl, setScrollEl] = useState<HTMLElement | null>(null);
 
-  const tmdbKey = settings.tmdbKey;
-  const region = settings.region;
-  const scope = tmdbKey ? `tmdb:${tmdbKey}:${region}` : "cinemeta";
-
-  const specs = useMemo<CatalogRowSpec[]>(
-    () => (tmdbKey ? showSpecs(tmdbKey) : cinemetaShowSpecs()),
-    [tmdbKey],
-  );
-
-  const heroFetcher = useCallback(async () => {
-    if (tmdbKey) return buildShowHero(tmdbKey);
-    const top = await topSeries().catch(() => [] as Meta[]);
-    return top.filter((m) => m.background).slice(0, HERO_POOL_TARGET);
-  }, [tmdbKey]);
-
-  const { hero, rows, loadMore, loading } = useCatalogPage({
-    pageId: "shows",
-    scope,
-    specs,
-    heroFetcher,
-    enabled: active,
-    maxPerRow: MAX_PER_ROW,
-  });
+  useEffect(() => {
+    rowsRef.current = rows;
+  }, [rows]);
 
   useScrollMemory("shows", scrollRef, active);
 
@@ -124,26 +91,120 @@ export function Shows({ active = true }: { active?: boolean }) {
       .catch(() => {});
   }, [authKey]);
 
+  useEffect(() => {
+    let cancelled = false;
+    setHero([]);
+    setRows([]);
+    (async () => {
+      if (settings.tmdbKey) {
+        const specs = showSpecs(settings.tmdbKey);
+        const order = specs.map((spec) => spec.key);
+        void withTimeout(buildShowHero(settings.tmdbKey), CATALOG_REQUEST_TIMEOUT_MS)
+          .then((heroPool) => {
+            if (!cancelled) setHero(heroPool);
+          })
+          .catch(() => {});
+        const results = await Promise.allSettled(
+          specs.map(async (spec) => {
+            const metas = await withTimeout(spec.fetcher(1), CATALOG_REQUEST_TIMEOUT_MS);
+            if (cancelled || metas.length === 0) return false;
+            const row: ShowRow = {
+              key: spec.key,
+              title: spec.title,
+              metas,
+              page: 1,
+              hasMore: !spec.noPaginate && metas.length >= 14,
+              fetcher: spec.noPaginate ? undefined : spec.fetcher,
+            };
+            setRows((current) => upsertOrdered(current, row, order));
+            return true;
+          }),
+        );
+        if (cancelled) return;
+        if (results.some((result) => result.status === "fulfilled" && result.value)) return;
+      }
+      {
+        const genreList = [
+          "Drama",
+          "Comedy",
+          "Crime",
+          "Sci-Fi",
+          "Thriller",
+          "Mystery",
+          "Action",
+          "Animation",
+          "Adventure",
+          "Fantasy",
+          "Documentary",
+          "Romance",
+          "Horror",
+        ];
+        const [top, ...byGenre] = await Promise.all([
+          withTimeout(topSeries(), CATALOG_REQUEST_TIMEOUT_MS).catch(() => [] as Meta[]),
+          ...genreList.map((g) =>
+            withTimeout(topSeries(g), CATALOG_REQUEST_TIMEOUT_MS).catch(() => [] as Meta[]),
+          ),
+        ]);
+        if (cancelled) return;
+        setHero(top.filter((m) => m.background).slice(0, HERO_POOL_TARGET));
+        const built: ShowRow[] = [
+          {
+            key: "cinemeta-top",
+            title: "Top Series",
+            metas: top.slice(0, 30),
+            page: 1,
+            hasMore: false,
+            fetcher: listPager(top),
+          },
+        ];
+        for (let i = 0; i < genreList.length; i++) {
+          const list = byGenre[i] ?? [];
+          if (list.length === 0) continue;
+          built.push({
+            key: `cinemeta-genre-${genreList[i].toLowerCase().replace(/[^a-z]/g, "")}`,
+            title: `Top ${genreList[i]}`,
+            metas: list.slice(0, 30),
+            page: 1,
+            hasMore: false,
+            fetcher: listPager(list),
+          });
+        }
+        setRows(built);
+      }
+    })().catch(console.error);
+    return () => {
+      cancelled = true;
+    };
+  }, [settings.tmdbKey]);
+
+  const localCwVer = useSyncExternalStore(subscribeLocalCw, localCwVersion);
   const continueWatching = useMemo(
     () =>
-      items
-        .filter((i) => i.type === "series" && isCwMember(i) && !isCwDismissed(i))
+      (hideSharedCw ? listLocalCw(true).map(localToLibraryItem) : items)
+        .filter(
+          (i) =>
+            i.type === "series" &&
+            !ANIME_CLOUD_ID.test(i._id) &&
+            isCwMember(i) &&
+            !isCwDismissed(i),
+        )
         .map((i) => ({ i, k: cwSortKey(i) }))
         .sort((a, b) => b.k - a.k)
         .map((e) => e.i)
         .slice(0, 16),
-    [items, cwVersion],
+    [items, cwVersion, hideSharedCw, localCwVer, activeProfile?.id],
   );
 
   const manualWatchedVer = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
   const resurfaceLibrary = useMemo(() => {
+    const base = items.filter((i) => !ANIME_CLOUD_ID.test(i._id));
     const manual = manualWatchedLibraryItems().filter((i) => !isAnimeCwItem(i));
-    if (manual.length === 0) return items;
-    const cwMemberIds = new Set(items.filter(isCwMember).map((i) => i._id));
+    if (manual.length === 0) return base;
+    const cwMemberIds = new Set(base.filter(isCwMember).map((i) => i._id));
     const usable = manual.filter((i) => !cwMemberIds.has(i._id));
-    if (usable.length === 0) return items;
+    if (usable.length === 0) return base;
     const overrideIds = new Set(usable.map((i) => i._id));
-    return [...items.filter((i) => !overrideIds.has(i._id)), ...usable];
+    return [...base.filter((i) => !overrideIds.has(i._id)), ...usable];
   }, [items, manualWatchedVer]);
   const cwItems = useCwAdvance(
     continueWatching,
@@ -158,11 +219,41 @@ export function Shows({ active = true }: { active?: boolean }) {
     publishResumeStates(cwItems);
   }, [cwItems]);
 
-  const top10 = useMemo(() => {
-    const trending = rows.find((r) => r.key === "trending");
-    if (!trending) return [] as Meta[];
-    return trending.metas.slice(0, 10);
-  }, [rows]);
+  const loadMore = useCallback((rowKey: string) => {
+    if (loadingRef.current.has(rowKey)) return;
+    const row = rowsRef.current.find((r) => r.key === rowKey);
+    if (!row || !row.fetcher || !row.hasMore || row.metas.length >= MAX_PER_ROW) return;
+    loadingRef.current.add(rowKey);
+    const next = row.page + 1;
+    row
+      .fetcher(next)
+      .then((more) => {
+        setRows((rs) =>
+          rs.map((r) => {
+            if (r.key !== rowKey) return r;
+            const ids = new Set(r.metas.map((m) => m.id));
+            const fresh = more.filter((m) => !ids.has(m.id));
+            const combined = [...r.metas, ...fresh];
+            const reachedCap = combined.length >= MAX_PER_ROW;
+            return {
+              ...r,
+              metas: reachedCap ? combined.slice(0, MAX_PER_ROW) : combined,
+              page: next,
+              hasMore: !reachedCap && more.length > 0,
+            };
+          }),
+        );
+      })
+      .catch(() => {})
+      .finally(() => {
+        loadingRef.current.delete(rowKey);
+      });
+  }, []);
+
+  const shownHero = useHideAnimeMetas(hero);
+  const trendingMetas = useMemo(() => rows.find((r) => r.key === "trending")?.metas ?? [], [rows]);
+  const shownTrending = useHideAnimeMetas(trendingMetas);
+  const top10 = useMemo(() => shownTrending.slice(0, 10), [shownTrending]);
 
   const restRows = useMemo(() => {
     const seen = new Set<string>();
@@ -173,20 +264,53 @@ export function Shows({ active = true }: { active?: boolean }) {
         ...r,
         metas: r.metas.filter((m) => !seen.has(m.id)),
       }))
-      .filter((r) => r.metas.length >= (loading && rows.length < 3 ? 1 : 4));
-  }, [rows, hero, top10.length, loading]);
+      .filter((r) => r.metas.length >= 4);
+  }, [rows, hero, top10.length]);
+
+  const showCollections = useCollectionRowsForPage("shows");
+  const collectionRows = useMemo<ShowRow[]>(
+    () =>
+      showCollections
+        .filter((c) => c.items.length > 0)
+        .map((c) => ({
+          key: `collection-${c.id}`,
+          title: c.name,
+          metas: c.items.map((it) => ({
+            id: it.id,
+            type: it.type,
+            name: it.name,
+            poster: it.poster,
+          })),
+          page: 1,
+          hasMore: false,
+        })),
+    [showCollections],
+  );
+  const allRestRows = useMemo(() => [...collectionRows, ...restRows], [collectionRows, restRows]);
+  const catalogRows = useMemo<ShowRow[]>(() => {
+    if (top10.length < 10) return allRestRows;
+    const trending = rows.find((r) => r.key === "trending");
+    return [
+      {
+        key: "top10",
+        title: "Top 10 Series Today",
+        metas: top10.slice(0, 10),
+        page: 1,
+        hasMore: false,
+        fetcher: trending?.fetcher,
+        variant: "rank",
+      },
+      ...allRestRows,
+    ];
+  }, [top10, rows, allRestRows]);
 
   return (
-    <main ref={scrollCb} className="relative h-full overflow-y-auto bg-canvas">
+    <main ref={scrollCb} className="relative h-full overflow-y-auto overflow-x-hidden bg-canvas">
       <ScrollRootContext.Provider value={scrollEl}>
         <div className="relative flex w-full flex-col gap-12 px-12 pb-32 pt-32">
           <PageMast />
           <div className="relative">
-            {hero.length > 0 ? (
-              <PeekHero slides={hero} />
-            ) : (
-              <div className="h-[36vh] min-h-[240px] w-full animate-pulse rounded-2xl bg-elevated/40" />
-            )}
+            <PeekHero slides={shownHero} />
             <div className="absolute bottom-3 end-3 z-20">
               <CatalogCustomizeBar
                 editMode={pageRows.editMode}
@@ -197,23 +321,6 @@ export function Shows({ active = true }: { active?: boolean }) {
             </div>
           </div>
           {!settings.tmdbKey && <TmdbNudge />}
-          {loading && restRows.length === 0 && (
-            <div className="flex flex-col gap-10">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex flex-col gap-4">
-                  <div className="h-5 w-48 animate-pulse rounded bg-elevated/50" />
-                  <div className="flex gap-5 overflow-hidden">
-                    {Array.from({ length: 7 }).map((_, j) => (
-                      <div
-                        key={j}
-                        className="h-52 w-36 shrink-0 animate-pulse rounded-xl bg-elevated/40"
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
           {cwItems.length > 0 && (
             <Row
               title={t("Pick up where you left off")}
@@ -236,31 +343,8 @@ export function Shows({ active = true }: { active?: boolean }) {
               ))}
             </Row>
           )}
-          {top10.length >= 10 && (
-            <Row
-              title={t("Top 10 Series Today")}
-              min={216}
-              shape="rank"
-              scrollKey="shows:top10"
-              onViewAll={(() => {
-                const trending = rows.find((r) => r.key === "trending");
-                return trending?.fetcher
-                  ? () =>
-                      openGrid({
-                        title: t(trending.title),
-                        fetcher: trending.fetcher!,
-                        initial: trending.metas,
-                      })
-                  : undefined;
-              })()}
-            >
-              {top10.slice(0, 10).map((m, i) => (
-                <TopRankCard key={m.id} meta={m} rank={i + 1} />
-              ))}
-            </Row>
-          )}
           <CatalogRows
-            rows={restRows}
+            rows={catalogRows}
             editMode={pageRows.editMode}
             custom={pageRows.custom}
             onPersist={pageRows.persist}

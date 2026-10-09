@@ -1,0 +1,45 @@
+.games-deadlock { padding-block: 30px 44px; color: var(--color-ink); }
+.games-deadlock-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.games-deadlock-heading h2 { font-size: 24px; font-weight: 600; margin: 0; }
+.games-deadlock-heading p { margin: 6px 0 0; font-size: 14px; color: var(--color-ink-muted); }
+.games-deadlock-tools { display: flex; justify-content: space-between; gap: 16px; margin-block: 24px; }
+.games-deadlock-tools label { display: flex; gap: 10px; align-items: center; background: var(--color-elevated); border-radius: 7px; padding: 10px 13px; width: min(100%, 360px); color: var(--color-ink-muted); }
+.games-deadlock-tools input { width: 100%; min-width: 0; background: transparent; border: 0; color: var(--color-ink); font-size: 14px; }
+.games-deadlock-tools label:focus-within { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.games-deadlock-tools input:focus { outline: none; }
+.games-deadlock-body { display: grid; grid-template-columns: minmax(260px, .95fr) minmax(0, 1.55fr); gap: 30px; align-items: start; }
+.games-deadlock-feature { display: flex; gap: 20px; align-items: flex-start; }
+.games-deadlock-feature > img, .games-deadlock-feature > .games-art-empty { width: 104px; height: 144px; object-fit: cover; border-radius: 6px; flex: 0 0 104px; background: var(--color-surface); }
+.games-deadlock-feature > div { min-width: 0; }
+.games-deadlock-feature h3 { margin: 0 0 9px; font-size: 24px; font-weight: 600; overflow-wrap: anywhere; }
+.games-deadlock-feature strong { font-size: 14px; font-weight: 500; line-height: 1.55; }
+.games-deadlock-feature p { font-size: 14px; line-height: 1.65; color: var(--color-ink-muted); margin: 12px 0; }
+.games-deadlock-feature dl { display: flex; gap: 24px; flex-wrap: wrap; margin: 18px 0 0; }
+.games-deadlock-feature dt { font-size: 12px; color: var(--color-ink-muted); }
+.games-deadlock-feature dd { margin: 5px 0 0; font-size: 22px; font-variant-numeric: tabular-nums; }
+.games-deadlock-roster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.games-deadlock-roster > button { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 6px; text-align: start; color: inherit; min-width: 0; }
+.games-deadlock-roster > button:hover, .games-deadlock-roster > button[aria-pressed="true"] { background: var(--color-elevated); }
+.games-deadlock-roster > button:focus-visible, .games-deadlock-more:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.games-deadlock-roster img, .games-deadlock-roster .games-art-empty { width: 40px; height: 48px; flex: 0 0 40px; object-fit: cover; border-radius: 4px; background: var(--color-surface); }
+.games-deadlock-roster button > span:not(.games-deadlock-rate):not(.games-art-empty) { min-width: 0; }
+.games-deadlock-roster strong { display: block; font-size: 14px; font-weight: 550; overflow-wrap: anywhere; }
+.games-deadlock-roster small { display: block; margin-top: 5px; color: var(--color-ink-muted); font-size: 12px; line-height: 1.4; }
+.games-deadlock-rate { margin-inline-start: auto; font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.games-deadlock-more { font-size: 14px; color: var(--color-ink-muted); padding: 14px 12px; margin-top: 6px; }
+.games-deadlock-more:hover { color: var(--color-ink); }
+.games-deadlock footer { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 24px; color: var(--color-ink-muted); font-size: 12px; line-height: 1.6; }
+.games-deadlock footer a { display: inline-flex; align-items: center; gap: 5px; }
+.games-deadlock footer a:hover { color: var(--color-ink); text-decoration: underline; }
+.games-deadlock footer p { flex-basis: 100%; margin: 0; }
+.games-deadlock-status { font-size: 14px; line-height: 1.6; margin-block: 20px; color: var(--color-ink-muted); }
+.games-deadlock-status button { color: var(--color-ink); text-decoration: underline; margin-inline-start: 8px; }
+.games-deadlock-loading { display: grid; grid-template-columns: .75fr repeat(2, 1fr); gap: 12px; margin-top: 24px; min-height: 350px; }
+.games-deadlock-loading i { min-height: 66px; border-radius: 6px; }
+.games-deadlock-loading i:first-child { grid-row: span 4; }
+@media (max-width: 1200px) { .games-deadlock-body { grid-template-columns: 1fr; }.games-deadlock-feature { max-width: 700px; } }
+@media (max-width: 650px) {
+  .games-deadlock-roster { grid-template-columns: 1fr; }.games-deadlock-tools { flex-wrap: wrap; }
+  .games-deadlock-feature > img, .games-deadlock-feature > .games-art-empty { width: 80px; height: 114px; flex-basis: 80px; }
+  .games-deadlock-loading { grid-template-columns: 1fr; }.games-deadlock-loading i:first-child { grid-row: auto; height: 170px; }
+}

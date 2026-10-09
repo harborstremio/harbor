@@ -1,9 +1,10 @@
 import { useEffect, useRef, type RefObject } from "react";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
+import { isNaturalEnd } from "@/lib/player/playback-end";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayEpisode, PlayerSrc } from "@/lib/view";
-import { getSleepAtEnd, queueShift, setSleepAtEnd, type QueueItem } from "@/lib/queue";
+import { getSleepAtEnd, queueItemAfter, setSleepAtEnd, type QueueItem } from "@/lib/queue";
 
 const STUB_MAX_SEC = 150;
 
@@ -33,16 +34,16 @@ export function useQueueAdvance(params: {
     if (snap.durationSec < STUB_MAX_SEC) return;
     if (startedNearEndRef.current) return;
     const pos = getPlaybackPosition();
-    const naturalEnd = snap.status === "ended";
+    const naturalEnd = isNaturalEnd(snap, getPlaybackPosition());
     const errorAtEnd = snap.errorCode != null && pos >= snap.durationSec - 2;
     const reachedEnd = snap.status !== "playing" && pos >= snap.durationSec - 1;
     if (!naturalEnd && !errorAtEnd && !reachedEnd) return;
     if (firedForRef.current === src.url) return;
 
-    if (queue.length > 0) {
+    const nextItem = queueItemAfter(src.meta, src.episode);
+    if (nextItem) {
       firedForRef.current = src.url;
-      const item = queueShift();
-      if (item) openPicker(item.meta, item.episode, { autoPlay: true, resume: true });
+      openPicker(nextItem.meta, nextItem.episode);
       return;
     }
     if (getSleepAtEnd()) {

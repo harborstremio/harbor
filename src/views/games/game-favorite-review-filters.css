@@ -1,0 +1,12 @@
+.games-highlights .games-favorite-review-trigger { min-height:36px; gap:7px; padding:8px 10px; font-size:12.5px; }
+.games-favorite-review-fields { overflow-y:auto; min-height:0; padding:8px; }
+.games-favorite-review-fields fieldset { border:0; margin:0; padding:0; min-width:0; }
+.games-favorite-review-fields fieldset+fieldset { margin-top:20px; }
+.games-favorite-review-fields legend { padding:0; margin-bottom:9px; color:var(--color-ink-muted); font-size:12px; }
+.games-favorite-review-fields [role="radiogroup"] { display:flex; flex-wrap:wrap; gap:5px; }
+.games-favorite-review-fields [role="radio"] { flex:1 0 auto; min-height:34px; padding:7px 8px; border-radius:5px; background:var(--color-canvas); color:var(--color-ink-muted); font-size:12px; transition:background 120ms ease,color 120ms ease; }
+.games-favorite-review-fields [role="radio"]:hover { background:var(--color-raised); color:var(--color-ink); }
+.games-favorite-review-fields [role="radio"][aria-checked="true"] { background:var(--color-ink); color:var(--color-canvas); font-weight:600; }
+.games-favorite-review-menu .games-filter-reset:disabled { cursor:default; opacity:.4; background:none; }
+.games-favorite-review-more { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:16px; color:var(--color-ink-muted); font-size:12px; }
+@media(prefers-reduced-motion:reduce) { .games-favorite-review-fields [role="radio"] { transition:none; } }

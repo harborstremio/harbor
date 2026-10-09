@@ -11,11 +11,21 @@ import {
 import { stremioIdToSimklTarget } from "@/lib/simkl/ids";
 import { isAuthenticated as simklConnected } from "@/lib/simkl/session";
 import { setItemWithRecovery, freeStorageSpace } from "@/lib/storage-recovery";
-import { cloudWriteId, saveStremioBookmark, removeStremioBookmark } from "@/lib/stremio";
+import {
+  ANIME_CLOUD_ID,
+  cloudWriteId,
+  saveStremioBookmark,
+  removeStremioBookmark,
+} from "@/lib/stremio";
 import { readActiveStremioAuthKey } from "@/lib/auth";
+import { cloudReachOf, watchlistImdbId } from "@/lib/watchlist-cloud-id";
+import { persistableAddonOrigin, persistableVideos, type Meta } from "@/lib/cinemeta";
 
-const KEY = "harbor.watchlist.v1";
-const AGG_KEY = "harbor.watchlist.aggregate.v1";
+const KEY_PREFIX = "harbor.watchlist.v1.";
+const LEGACY_KEY = "harbor.watchlist.v1";
+const AGG_KEY_PREFIX = "harbor.watchlist.aggregate.v1.";
+const LEGACY_AGG_KEY = "harbor.watchlist.aggregate.v1";
+const PROFILES_KEY = "harbor.profiles.v1";
 const subs = new Set<() => void>();
 
 export type LocalEntry = {
@@ -24,6 +34,9 @@ export type LocalEntry = {
   name: string;
   poster?: string;
   addedAt: number;
+  imdbId?: string | null;
+  addonOrigin?: Meta["addonOrigin"];
+  videos?: Meta["videos"];
 };
 
 export type WatchlistInput = {
@@ -32,12 +45,84 @@ export type WatchlistInput = {
   name?: string;
   poster?: string;
   imdbId?: string | null;
+  addonOrigin?: Meta["addonOrigin"];
+  videos?: Meta["videos"];
 };
 
 let memoryFallback: Map<string, LocalEntry> | null = null;
 
+function activeProfileId(): string {
+  try {
+    const raw = localStorage.getItem(PROFILES_KEY);
+    if (!raw) return "";
+    const s = JSON.parse(raw) as {
+      activeId?: string;
+      profiles?: Array<{ id?: string; isPrimary?: boolean; shareStremioWith?: string | null }>;
+    };
+    const profiles = Array.isArray(s.profiles) ? s.profiles : [];
+    const active = profiles.find((p) => p.id === s.activeId) ?? null;
+    const own = active?.id ?? profiles.find((p) => p?.isPrimary)?.id ?? "";
+    if (!own) return "";
+    if (active && typeof active.shareStremioWith === "string" && active.shareStremioWith) {
+      const shared = profiles.find((p) => p.id === active.shareStremioWith);
+      if (shared?.id) return shared.id;
+    }
+    return own;
+  } catch {
+    return "";
+  }
+}
+
+function primaryProfileId(): string {
+  try {
+    const raw = localStorage.getItem(PROFILES_KEY);
+    const s = raw
+      ? (JSON.parse(raw) as { profiles?: Array<{ id?: string; isPrimary?: boolean }> })
+      : null;
+    const primary = s?.profiles?.find((p) => p?.isPrimary);
+    return (primary && typeof primary.id === "string" && primary.id) || activeProfileId();
+  } catch {
+    return activeProfileId();
+  }
+}
+
+function storeKey(): string {
+  const id = activeProfileId();
+  return id ? KEY_PREFIX + id : LEGACY_KEY;
+}
+
+function aggStoreKey(): string {
+  const id = activeProfileId();
+  return id ? AGG_KEY_PREFIX + id : LEGACY_AGG_KEY;
+}
+
+function migrateLegacy(): void {
+  try {
+    const pid = primaryProfileId();
+    if (!pid) return;
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (legacy) {
+      const perKey = KEY_PREFIX + pid;
+      if (!localStorage.getItem(perKey)) localStorage.setItem(perKey, legacy);
+      localStorage.removeItem(LEGACY_KEY);
+    }
+    const legacyAgg = localStorage.getItem(LEGACY_AGG_KEY);
+    if (legacyAgg) {
+      const perKey = AGG_KEY_PREFIX + pid;
+      if (!localStorage.getItem(perKey)) localStorage.setItem(perKey, legacyAgg);
+      localStorage.removeItem(LEGACY_AGG_KEY);
+    }
+  } catch {
+    /* noop */
+  }
+}
+
 function inferType(id: string): "movie" | "series" {
   return id.includes(":tv:") || id.includes(":series:") ? "series" : "movie";
+}
+
+function validTt(v: unknown): string | null {
+  return typeof v === "string" && /^tt\d+$/.test(v) ? v : null;
 }
 
 function normalizeType(type: string | undefined, id: string): "movie" | "series" {
@@ -48,7 +133,7 @@ function normalizeType(type: string | undefined, id: string): "movie" | "series"
 
 function toEntry(input: string | WatchlistInput): LocalEntry {
   if (typeof input === "string") {
-    return { id: input, type: inferType(input), name: "", addedAt: Date.now() };
+    return { id: input, type: inferType(input), name: "", addedAt: Date.now(), imdbId: null };
   }
   return {
     id: input.id,
@@ -56,20 +141,24 @@ function toEntry(input: string | WatchlistInput): LocalEntry {
     name: input.name ?? "",
     poster: input.poster,
     addedAt: Date.now(),
+    imdbId: validTt(input.imdbId),
+    addonOrigin: persistableAddonOrigin(input.addonOrigin),
+    videos: persistableVideos(input.videos),
   };
 }
 
 function read(): Map<string, LocalEntry> {
   if (memoryFallback) return new Map(memoryFallback);
+  migrateLegacy();
   const map = new Map<string, LocalEntry>();
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(storeKey());
     if (!raw) return map;
     const arr = JSON.parse(raw) as unknown;
     if (!Array.isArray(arr)) return map;
     for (const el of arr) {
       if (typeof el === "string") {
-        map.set(el, { id: el, type: inferType(el), name: "", addedAt: 0 });
+        map.set(el, { id: el, type: inferType(el), name: "", addedAt: 0, imdbId: null });
       } else if (el && typeof el === "object" && typeof (el as { id?: unknown }).id === "string") {
         const e = el as {
           id: string;
@@ -77,6 +166,9 @@ function read(): Map<string, LocalEntry> {
           name?: string;
           poster?: string;
           addedAt?: number;
+          imdbId?: unknown;
+          addonOrigin?: unknown;
+          videos?: unknown;
         };
         map.set(e.id, {
           id: e.id,
@@ -84,6 +176,9 @@ function read(): Map<string, LocalEntry> {
           name: typeof e.name === "string" ? e.name : "",
           poster: typeof e.poster === "string" ? e.poster : undefined,
           addedAt: typeof e.addedAt === "number" ? e.addedAt : 0,
+          imdbId: validTt(e.imdbId),
+          addonOrigin: persistableAddonOrigin(e.addonOrigin),
+          videos: persistableVideos(e.videos),
         });
       }
     }
@@ -95,10 +190,10 @@ function read(): Map<string, LocalEntry> {
 
 function write(map: Map<string, LocalEntry>) {
   const payload = JSON.stringify(Array.from(map.values()));
-  const ok = setItemWithRecovery(KEY, payload);
+  const ok = setItemWithRecovery(storeKey(), payload);
   if (!ok) {
     freeStorageSpace();
-    const retry = setItemWithRecovery(KEY, payload);
+    const retry = setItemWithRecovery(storeKey(), payload);
     if (!retry) {
       memoryFallback = new Map(map);
       console.warn("[watchlist] localStorage exhausted, holding watchlist in memory only");
@@ -124,17 +219,10 @@ export function subscribeWatchlist(fn: () => void): () => void {
 
 let aggregateIds: Set<string> = readAggregateCache();
 
-function setsEqual(left: Set<string>, right: Set<string>): boolean {
-  if (left.size !== right.size) return false;
-  for (const id of left) {
-    if (!right.has(id)) return false;
-  }
-  return true;
-}
-
 function readAggregateCache(): Set<string> {
+  migrateLegacy();
   try {
-    const raw = localStorage.getItem(AGG_KEY);
+    const raw = localStorage.getItem(aggStoreKey());
     if (!raw) return new Set();
     const arr = JSON.parse(raw) as unknown;
     return new Set(
@@ -147,7 +235,7 @@ function readAggregateCache(): Set<string> {
 
 function writeAggregateCache(set: Set<string>) {
   try {
-    localStorage.setItem(AGG_KEY, JSON.stringify(Array.from(set)));
+    localStorage.setItem(aggStoreKey(), JSON.stringify(Array.from(set)));
   } catch {
     /* swallow */
   }
@@ -155,7 +243,9 @@ function writeAggregateCache(set: Set<string>) {
 
 export function setWatchlistAggregate(ids: Iterable<string>): void {
   const next = new Set(ids);
-  if (setsEqual(aggregateIds, next)) return;
+  // Library refreshes publish here and watchlist subscribers refresh the library.
+  // Do not turn an unchanged server response into another refresh cycle.
+  if (next.size === aggregateIds.size && [...next].every((id) => aggregateIds.has(id))) return;
   aggregateIds = next;
   writeAggregateCache(aggregateIds);
   for (const s of subs) s();
@@ -178,9 +268,31 @@ export function addToWatchlist(input: string | WatchlistInput): void {
   write(map);
 }
 
+export function noteLocalImdbId(id: string, imdbId: string | null | undefined): void {
+  const tt = validTt(imdbId);
+  if (!tt || tt === id) return;
+  const map = read();
+  const e = map.get(id);
+  if (!e || e.imdbId === tt) return;
+  e.imdbId = tt;
+  write(map);
+}
+
+export function evictWatchlistAggregate(ids: Iterable<string>): void {
+  let changed = false;
+  for (const id of ids) {
+    if (aggregateIds.delete(id)) changed = true;
+  }
+  if (!changed) return;
+  writeAggregateCache(aggregateIds);
+  for (const s of subs) s();
+}
+
 export function removeFromWatchlist(id: string): void {
   const map = read();
   map.delete(id);
+  aggregateIds.delete(id);
+  writeAggregateCache(aggregateIds);
   write(map);
 }
 
@@ -190,9 +302,30 @@ export function toggleWatchlist(input: string | WatchlistInput): boolean {
   const imdb = typeof input === "string" ? null : (input.imdbId ?? null);
   const has = map.has(id) || aggregateIds.has(id) || (!!imdb && aggregateIds.has(imdb));
   if (has) {
-    map.delete(id);
-    aggregateIds.delete(id);
-    if (imdb) aggregateIds.delete(imdb);
+    // Same film can be stored under two ID schemes (tmdb:… locally, tt… on
+    // Stremio); both must go or the card survives the removal.
+    const targets = new Set<string>([id]);
+    if (imdb) targets.add(imdb);
+    for (let pass = 0; pass < 3; pass++) {
+      let grew = false;
+      for (const [k, e] of map) {
+        if (targets.has(k) || (e.imdbId != null && targets.has(e.imdbId))) {
+          if (!targets.has(k)) {
+            targets.add(k);
+            grew = true;
+          }
+          if (e.imdbId != null && !targets.has(e.imdbId)) {
+            targets.add(e.imdbId);
+            grew = true;
+          }
+        }
+      }
+      if (!grew) break;
+    }
+    for (const t of targets) {
+      map.delete(t);
+      aggregateIds.delete(t);
+    }
     writeAggregateCache(aggregateIds);
   } else {
     map.set(id, toEntry(input));
@@ -232,17 +365,38 @@ async function syncWithStremio(input: string | WatchlistInput, added: boolean): 
   if (!authKey) return;
   const id = typeof input === "string" ? input : input.id;
   const imdb = typeof input === "string" ? null : (input.imdbId ?? null);
-  const writeId = cloudWriteId(id, imdb, !!imdb);
-  if (!writeId) return;
   try {
     if (added) {
+      const resolved = imdb ?? (await watchlistImdbId(id));
+      const writeId = cloudWriteId(id, resolved, !!resolved);
+      if (!writeId) {
+        console.warn(`[watchlist] ${id} stays local only (${cloudReachOf(id, writeId)})`);
+        return;
+      }
       const meta =
         typeof input === "string"
           ? {}
           : { type: input.type, name: input.name, poster: input.poster };
       await saveStremioBookmark(authKey, writeId, meta);
+      // The server id often differs from the local key (tt… vs tmdb:…);
+      // without this the badge/button checks never see the added title.
+      aggregateIds.add(writeId);
+      writeAggregateCache(aggregateIds);
+      for (const s of subs) s();
     } else {
-      await removeStremioBookmark(authKey, writeId);
+      const forms = new Set<string>();
+      const resolved = imdb ?? (await watchlistImdbId(id));
+      const withImdb = cloudWriteId(id, resolved, !!resolved);
+      const withMeta = cloudWriteId(id, resolved, false);
+      if (withImdb) forms.add(withImdb);
+      if (withMeta) forms.add(withMeta);
+      if (ANIME_CLOUD_ID.test(id)) forms.add(id);
+      for (const rid of forms) {
+        await removeStremioBookmark(authKey, rid);
+        aggregateIds.delete(rid);
+      }
+      writeAggregateCache(aggregateIds);
+      for (const s of subs) s();
     }
   } catch (e) {
     console.warn("[watchlist] stremio sync failed", e);
@@ -277,4 +431,18 @@ export function useInWatchlist(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [candidates.join("|")]);
   return has;
+}
+
+if (typeof window !== "undefined") {
+  let lastProfile = activeProfileId();
+  const onProfileChange = () => {
+    const p = activeProfileId();
+    if (p === lastProfile) return;
+    lastProfile = p;
+    memoryFallback = null;
+    aggregateIds = readAggregateCache();
+    for (const s of subs) s();
+  };
+  window.addEventListener("harbor:active-profile-changed", onProfileChange);
+  window.addEventListener("harbor:profiles-updated", onProfileChange);
 }

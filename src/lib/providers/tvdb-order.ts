@@ -2,9 +2,11 @@ import type { Episode, Season } from "@/lib/providers/tmdb";
 import { tvdbEpisodesByType, tvdbSeasonNames, tvdbSeriesByRemote, type TvdbEpisode } from "./tvdb";
 import { readOrderCache, writeOrderCache } from "./tvdb-order-cache";
 
+export type OrderedEpisode = Episode & { nameEn?: string; overviewEn?: string };
+
 export type TvdbOrder = {
   seasons: Season[];
-  bySeason: Map<number, Episode[]>;
+  bySeason: Map<number, OrderedEpisode[]>;
   absByEpId: Map<number, number>;
   imageByAbs: Map<number, string>;
 };
@@ -74,17 +76,27 @@ async function build(
   ]);
   const altEps = slug === "default" ? defaultEps : await tvdbEpisodesByType(apiKey, seriesId, slug);
   if (altEps.length === 0) return null;
-  const transAlt: TvdbEpisode[] = lang
-    ? await tvdbEpisodesByType(apiKey, seriesId, slug, lang).catch(() => [])
-    : [];
+  // Translations in the requested language. When a translation is missing, TVDB falls back to
+  // the original (e.g. Japanese for anime) name, which we keep so users see text in their
+  // requested language first. The English translation is always fetched as the base/fallback —
+  // the language-less default fetch returns the series' original language (Japanese for anime),
+  // so without this English users would see original-language names — and is carried alongside
+  // as nameEn/overviewEn for consumers that need an English fallback when no localized text exists.
+  const requestedLang = lang && lang !== "eng" ? lang : undefined;
+  const [transAlt, transEn] = await Promise.all([
+    requestedLang ? tvdbEpisodesByType(apiKey, seriesId, slug, requestedLang).catch(() => []) : Promise.resolve<TvdbEpisode[]>([]),
+    tvdbEpisodesByType(apiKey, seriesId, slug, "eng").catch(() => []),
+  ]);
   const transById = new Map(transAlt.map((e) => [e.id, e] as const));
+  const transEnById = new Map(transEn.map((e) => [e.id, e] as const));
 
   const canonical = new Map<number, { season: number; episode: number }>();
   for (const e of defaultEps) {
     if (e.seasonNumber >= 1) canonical.set(e.id, { season: e.seasonNumber, episode: e.number });
   }
 
-  const bySeason = new Map<number, Episode[]>();
+  const bySeason = new Map<number, OrderedEpisode[]>();
+  const altBySeason = new Map<number, Array<{ season: number; episode: number }>>();
   const seenEpisodeId = new Set<number>();
   for (const e of altEps) {
     if (seenEpisodeId.has(e.id)) continue;
@@ -93,19 +105,38 @@ async function build(
     if (joinedClean && c.season < 1) continue;
     const bucketKey = joinedClean || rawAbsolute ? 1 : e.seasonNumber;
     const bucket = bySeason.get(bucketKey) ?? [];
+    const altBucket = altBySeason.get(bucketKey) ?? [];
+    altBucket.push({ season: e.seasonNumber, episode: e.number });
+    altBySeason.set(bucketKey, altBucket);
     const tr = transById.get(e.id);
+    const trEn = transEnById.get(e.id);
     bucket.push({
       id: e.id,
       seasonNumber: c.season,
       episodeNumber: c.episode,
-      name: (tr?.name || e.name) ?? "",
-      overview: (tr?.overview || e.overview) ?? "",
-      stillPath: e.image ?? null,
+      name: (tr?.name || trEn?.name || e.name) ?? "",
+      overview: (tr?.overview || trEn?.overview || e.overview) ?? "",
+      nameEn: trEn?.name,
+      overviewEn: trEn?.overview,
+      stillPath: null,
+      stillUrl: e.image ?? undefined,
       airDate: e.aired ?? null,
       runtime: e.runtime ?? null,
       voteAverage: null,
     });
     bySeason.set(bucketKey, bucket);
+  }
+  for (const [key, bucket] of bySeason) {
+    const keys = bucket.map((x) => `${x.seasonNumber}:${x.episodeNumber}`);
+    if (new Set(keys).size === keys.length) continue;
+    const alt = altBySeason.get(key);
+    if (!alt || alt.length !== bucket.length) continue;
+    const altKeys = alt.map((x) => `${x.season}:${x.episode}`);
+    if (new Set(altKeys).size !== altKeys.length) continue;
+    bucket.forEach((ep, i) => {
+      ep.seasonNumber = alt[i].season;
+      ep.episodeNumber = alt[i].episode;
+    });
   }
   if (bySeason.size === 0) return null;
   if (joinedClean) {

@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AlertTriangle, Info } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import badge1080i from "@/assets/badges/1080i.png";
 import badge1080p from "@/assets/badges/1080p_fhd.webp";
 import badge2kQhd from "@/assets/badges/2k_qhd.png";
@@ -66,6 +67,14 @@ import badgeWebdl from "@/assets/badges/webdl.png";
 import badgeWebrip from "@/assets/badges/webrip.png";
 import badgeWp from "@/assets/badges/wp.png";
 import type { ParsedStream, ScoredStream } from "@/lib/streams/types";
+import {
+  aliasFor,
+  cssColor,
+  ruleTextForStream,
+  useBadgeOverride,
+  useMatchedRules,
+  type CustomBadgeRule,
+} from "@/lib/stream-badges";
 
 export type BadgeKind =
   | "8k"
@@ -131,7 +140,7 @@ export type BadgeKind =
   | "no-label"
   | "unknown";
 
-export type BadgeSize = "sm" | "md" | "lg";
+export type BadgeSize = "xs" | "sm" | "md" | "lg";
 
 const SRC: Record<BadgeKind, string> = {
   "8k": badge8k,
@@ -265,50 +274,17 @@ const ALT: Record<BadgeKind, string> = {
 };
 
 const WIDTH: Record<BadgeSize, number> = {
+  xs: 24,
   sm: 30,
   md: 42,
   lg: 60,
 };
 const MAX_HEIGHT: Record<BadgeSize, number> = {
+  xs: 20,
   sm: 28,
   md: 40,
   lg: 56,
 };
-// New-pack badges ship as 1248×1248 (square) with transparent padding around
-// the artwork. At the landscape footprint they read tiny next to the legacy
-// pack. Multiplier scales these specific kinds up so the inner art matches
-// the visual weight of the older landscape badges. Legacy kinds keep the
-// stock dimensions.
-const SCALE_UP: Partial<Record<BadgeKind, number>> = {
-  "1080i": 1.5,
-  "2k-qhd": 1.5,
-  "360p": 1.5,
-  "576p": 1.5,
-  uhd: 1.5,
-  webrip: 1.5,
-  hdtv: 1,
-  dvb: 1.5,
-  hdcam: 1.5,
-  hdts: 1.5,
-  scr: 1.5,
-  wp: 1.5,
-  hdr10: 1.5,
-  sdr: 1.5,
-  "atmos-912": 1.5,
-  "dts-hd-ma": 1.5,
-  dd: 1.5,
-  ddp: 1.5,
-  ac3: 1.5,
-  eac3: 1.5,
-  mp3: 1.5,
-  opus: 1.5,
-  pcm: 1.5,
-  lpcm: 1.5,
-  extended: 1.5,
-  remastered: 1.5,
-  repack: 1.5,
-};
-
 type QualityNote = { title: string; body: string; tone: "warn" | "info" };
 
 const QUALITY_NOTES: Partial<Record<BadgeKind, QualityNote>> = {
@@ -339,6 +315,16 @@ const QUALITY_NOTES: Partial<Record<BadgeKind, QualityNote>> = {
   },
 };
 
+export const ALL_BADGE_KINDS = Object.keys(SRC) as BadgeKind[];
+
+export function badgeLabel(kind: BadgeKind): string {
+  return ALT[kind];
+}
+
+export function defaultBadgeSrc(kind: BadgeKind): string {
+  return SRC[kind];
+}
+
 export function FormatBadge({
   kind,
   size = "md",
@@ -346,29 +332,99 @@ export function FormatBadge({
   kind: BadgeKind;
   size?: BadgeSize;
 }) {
+  const override = useBadgeOverride(kind);
   const note = QUALITY_NOTES[kind];
-  const scale = SCALE_UP[kind] ?? 1;
-  const w = Math.round(WIDTH[size] * scale);
-  const maxH = Math.round(MAX_HEIGHT[size] * scale);
+  if (override?.hidden) return null;
+  const maxH = MAX_HEIGHT[size];
   const imgEl = (
     <img
-      src={SRC[kind]}
+      src={override?.image ?? SRC[kind]}
       alt={ALT[kind]}
       style={{
-        width: w,
-        height: "auto",
+        width: "auto",
+        height: Math.round(maxH * 0.8),
+        maxWidth: WIDTH[size] * 1.8,
         maxHeight: maxH,
         objectFit: "contain",
         display: "inline-block",
         userSelect: "none",
         pointerEvents: "none",
         flexShrink: 0,
+        filter: "drop-shadow(0 0 1px rgba(0,0,0,0.55)) drop-shadow(0 1px 2px rgba(0,0,0,0.4))",
       }}
       draggable={false}
     />
   );
   if (!note) return imgEl;
   return <BadgeWithTooltip note={note}>{imgEl}</BadgeWithTooltip>;
+}
+
+export function RuleBadgeChip({ rule, size = "md" }: { rule: CustomBadgeRule; size?: BadgeSize }) {
+  const maxH = MAX_HEIGHT[size];
+  if (rule.image) {
+    return (
+      <img
+        src={rule.image}
+        alt={rule.name}
+        style={{
+          height: Math.round(maxH * 0.8),
+          width: "auto",
+          maxWidth: WIDTH[size] * 1.8,
+          objectFit: "contain",
+          display: "inline-block",
+          userSelect: "none",
+          pointerEvents: "none",
+          flexShrink: 0,
+          filter: "drop-shadow(0 0 1px rgba(0,0,0,0.55)) drop-shadow(0 1px 2px rgba(0,0,0,0.4))",
+        }}
+        draggable={false}
+      />
+    );
+  }
+  const style = rule.tagStyle ?? "filled";
+  const outline = style === "outlined" || style === "bordered";
+  const bg = !outline ? cssColor(rule.tagColor) : undefined;
+  const border =
+    style !== "filled" ? cssColor(rule.borderColor ?? rule.tagColor) : undefined;
+  return (
+    <span
+      className="inline-flex shrink-0 items-center rounded-md font-semibold uppercase tracking-wide"
+      style={{
+        background: bg ?? "transparent",
+        border: border ? `1px solid ${border}` : undefined,
+        color: cssColor(rule.textColor) ?? "#fff",
+        fontSize: size === "xs" ? 9 : size === "sm" ? 10 : size === "md" ? 11.5 : 13,
+        padding: size === "xs" ? "1px 5px" : size === "sm" ? "2px 6px" : "3px 8px",
+      }}
+    >
+      {rule.name}
+    </span>
+  );
+}
+
+export function RuleBadges({
+  stream,
+  size = "md",
+}: {
+  stream: ParsedStream | ScoredStream;
+  size?: BadgeSize;
+}) {
+  const { settings } = useSettings();
+  const matched = useMatchedRules(ruleTextForStream(stream));
+  if (matched.length === 0) return null;
+  const shown = settings.showQualityBadge ? new Set(streamBadges(stream)) : new Set<BadgeKind>();
+  const pills = matched.filter((r) => {
+    const kind = aliasFor(r.name);
+    return !(kind && shown.has(kind));
+  });
+  if (pills.length === 0) return null;
+  return (
+    <>
+      {pills.map((r) => (
+        <RuleBadgeChip key={r.id} rule={r} size={size} />
+      ))}
+    </>
+  );
 }
 
 const TOOLTIP_WIDTH = 280;
@@ -535,6 +591,15 @@ export function codecBadge(s: ParsedStream): BadgeKind | null {
   return null;
 }
 
+export function editionBadge(s: ParsedStream): BadgeKind | null {
+  if (!s.edition) return null;
+  const e = s.edition.toUpperCase();
+  if (e.includes("IMAX")) return "imax";
+  if (e.includes("EXTENDED")) return "extended";
+  if (e.includes("REMASTERED")) return "remastered";
+  return null;
+}
+
 export function streamBadges(s: ParsedStream | ScoredStream): BadgeKind[] {
   const out: BadgeKind[] = [];
   const src = sourceBadge(s);
@@ -557,5 +622,8 @@ export function streamBadges(s: ParsedStream | ScoredStream): BadgeKind[] {
   if (h) out.push(h);
   const a = audioBadge(s);
   if (a) out.push(a);
+  const ed = editionBadge(s);
+  if (ed) out.push(ed);
+  if (s.repackIteration > 0) out.push("repack");
   return out;
 }

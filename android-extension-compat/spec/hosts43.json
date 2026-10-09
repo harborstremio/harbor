@@ -1,0 +1,1141 @@
+{
+ "measured": "2026-09-25",
+ "what_this_is": "the 43 hosts the live pass over samples/repo86 handed to loadExtractor with no registry entry, each probed from this machine today. every evidence line names a request that was actually made. where a host refuses, the refusal was reproduced with three independent tls stacks: curl 8.16 on schannel, openssl 3.0 through python requests and through s_client, and the live gate's own jvm client as recorded in out/runA and out/runB.",
+ "states": {
+  "alive": "reachable, and the response is the real thing even where the last mile is hard work",
+  "alive_no_media": "the site answers but no request returned media or a media url, so it is not claimable",
+  "refusing": "reachable and refuses: a tls alert, an untrusted certificate, or a cloudflare interactive challenge",
+  "not_a_host": "answers, but what it serves is an advertising gate rather than media",
+  "parked": "the domain is for sale",
+  "origin_down": "the edge answers 522, the origin does not answer",
+  "gone": "no address record, or nothing listening"
+ },
+ "counts": {
+  "total": 43,
+  "alive": 25,
+  "dead": 18,
+  "by_state": {
+   "alive": 25,
+   "origin_down": 2,
+   "refusing": 10,
+   "not_a_host": 1,
+   "alive_no_media": 1,
+   "parked": 1,
+   "gone": 3
+  }
+ },
+ "families": {
+  "cf-challenge-shortener": {
+   "mechanism": "the indian drive shortener chain, behind a cloudflare interactive challenge or an advertising gate. refusing rather than gone",
+   "hosts": [
+    "en.thenaukriadda.in",
+    "filebee.xyz",
+    "gdflix.dev",
+    "gdlink.dev",
+    "new2.filepress.wiki"
+   ],
+   "living": [],
+   "archives": [
+    "Animedubhindi",
+    "BanglaPlex",
+    "DudeFilms",
+    "Microtv",
+    "ToonHub",
+    "UHDmoviesProvider"
+   ]
+  },
+  "gone-or-parked": {
+   "mechanism": "no address record, nothing listening, or a domain for sale",
+   "hosts": [
+    "mixdrop.is",
+    "oload.download",
+    "raretoonsindia.co",
+    "streamango.com"
+   ],
+   "living": [],
+   "archives": [
+    "AnimeDekhoProvider",
+    "Latanime",
+    "Pencurimovie"
+   ]
+  },
+  "hubcloud-drive": {
+   "mechanism": "a drive page whose download anchor points at gamerxyt.com/hubcloud.php with an id and a base64 token, which then names pixeldrain and a 10Gbps mirror. verified end to end on hubcloud.one",
+   "hosts": [
+    "hblinks.lol",
+    "hubcdn.wiki",
+    "hubcloud.ist",
+    "hubcloud.one"
+   ],
+   "living": [
+    "hblinks.lol",
+    "hubcdn.wiki",
+    "hubcloud.ist",
+    "hubcloud.one"
+   ],
+   "archives": [
+    "Animedubhindi",
+    "DudeFilms",
+    "HDhub4u"
+   ]
+  },
+  "jwt-gate-shell": {
+   "mechanism": "a 484 to 493 byte Loading document that replaces location with the same url plus ?ch=1&js=<jwt>&sid=<uuid>. one operator, four domains, and a per address 429 throttle across the 192.157.56.x block",
+   "hosts": [
+    "listeamed.net",
+    "sbbrisk.com",
+    "strmup.to",
+    "vidstreaming.xyz"
+   ],
+   "living": [
+    "listeamed.net",
+    "sbbrisk.com",
+    "strmup.to",
+    "vidstreaming.xyz"
+   ],
+   "archives": [
+    "AnimeDekhoProvider",
+    "Animekhor",
+    "Latanime",
+    "ToonHub",
+    "Toonstream"
+   ]
+  },
+  "known-family-domain": {
+   "mechanism": "a new domain of a mechanism the layer already implements. verified by finding the family's own fingerprint in the response: MDCore, pass_md5, the byse shell, the packed vidmoly sources, the lulustream expiry template",
+   "hosts": [
+    "luluvdo.com",
+    "mfw09.org",
+    "miiixdrop.net",
+    "swdyu.com",
+    "vidmoly.net",
+    "vvide0.com"
+   ],
+   "living": [
+    "luluvdo.com",
+    "mfw09.org",
+    "miiixdrop.net",
+    "swdyu.com",
+    "vidmoly.net",
+    "vvide0.com"
+   ],
+   "archives": [
+    "Anikage",
+    "Animexin",
+    "Aniworld",
+    "Goojara",
+    "Latanime",
+    "Pinoymoviepedia"
+   ]
+  },
+  "mirror-wrapper": {
+   "mechanism": "the page is not a host. it names or fetches the real embed, and the right move is to hand that url back to loadExtractor. verified on animeworld.site, animedekho.app and pinoystreaming.qzz.io",
+   "hosts": [
+    "animedekho.app",
+    "animeworld.site",
+    "filesforever.link",
+    "pinoystreaming.qzz.io"
+   ],
+   "living": [
+    "animedekho.app",
+    "animeworld.site",
+    "filesforever.link",
+    "pinoystreaming.qzz.io"
+   ],
+   "archives": [
+    "AnimeDekhoProvider",
+    "OnePace",
+    "Pinoymoviepedia",
+    "ToonHub",
+    "Toonstream"
+   ]
+  },
+  "origin-down": {
+   "mechanism": "the cloudflare edge answers with a valid certificate and returns 522 because the origin behind it does not answer",
+   "hosts": [
+    "as-cdn26.top",
+    "uptostream.com"
+   ],
+   "living": [],
+   "archives": [
+    "AnimeDekhoProvider",
+    "OnePace",
+    "Pencurimovie"
+   ]
+  },
+  "plain-source-player": {
+   "mechanism": "the media url is in the delivered document in the clear, with no crypto and no second call",
+   "hosts": [
+    "playeng.animeapps.top",
+    "yourupload.com"
+   ],
+   "living": [
+    "playeng.animeapps.top",
+    "yourupload.com"
+   ],
+   "archives": [
+    "Anikage",
+    "Animeav1"
+   ]
+  },
+  "sealed-config-player": {
+   "mechanism": "alive and serving, with the source sealed: in page AES with the key present, an encrypted blob with no key, a 245KB obfuscated builder, a request signature, or end to end encryption",
+   "hosts": [
+    "abyssplayer.com",
+    "flixcloud.cc",
+    "mega.nz",
+    "play.echovideo.ru",
+    "tryembed.us.cc"
+   ],
+   "living": [
+    "abyssplayer.com",
+    "flixcloud.cc",
+    "mega.nz",
+    "play.echovideo.ru",
+    "tryembed.us.cc"
+   ],
+   "archives": [
+    "Anikage",
+    "AnimeDekhoProvider",
+    "Animeav1",
+    "Animekhor",
+    "Animexin",
+    "Latanime",
+    "OnePace",
+    "StreamPlay",
+    "ToonHub",
+    "Toonstream"
+   ]
+  },
+  "tls-refuser": {
+   "mechanism": "refuses the tls handshake itself, with access_denied or a terminated handshake or an untrusted certificate, identically to three independent clients",
+   "hosts": [
+    "bestx.stream",
+    "boosterx.stream",
+    "new21.gdtot.dad",
+    "new6.gdtot.dad",
+    "streamhide.to",
+    "upstream.to",
+    "vidsrc.net"
+   ],
+   "living": [],
+   "archives": [
+    "AnimeDekhoProvider",
+    "BanglaPlex",
+    "Goojara",
+    "Pencurimovie",
+    "ToonHub"
+   ]
+  }
+ },
+ "groups": [
+  {
+   "group": "G1 known family domains",
+   "families": [
+    "known-family-domain"
+   ],
+   "hosts": [
+    "luluvdo.com",
+    "mfw09.org",
+    "miiixdrop.net",
+    "swdyu.com",
+    "vidmoly.net",
+    "vvide0.com"
+   ],
+   "archives_unblocked": [
+    "Anikage",
+    "Animexin",
+    "Aniworld",
+    "Goojara",
+    "Latanime",
+    "Pinoymoviepedia"
+   ],
+   "archive_count": 6,
+   "host_count": 6
+  },
+  {
+   "group": "G2 mirror wrappers",
+   "families": [
+    "mirror-wrapper"
+   ],
+   "hosts": [
+    "animedekho.app",
+    "animeworld.site",
+    "filesforever.link",
+    "pinoystreaming.qzz.io"
+   ],
+   "archives_unblocked": [
+    "AnimeDekhoProvider",
+    "OnePace",
+    "Pinoymoviepedia",
+    "ToonHub",
+    "Toonstream"
+   ],
+   "archive_count": 5,
+   "host_count": 4
+  },
+  {
+   "group": "G3 the hubcloud chain and the two plain players",
+   "families": [
+    "hubcloud-drive",
+    "plain-source-player"
+   ],
+   "hosts": [
+    "hblinks.lol",
+    "hubcdn.wiki",
+    "hubcloud.ist",
+    "hubcloud.one",
+    "playeng.animeapps.top",
+    "yourupload.com"
+   ],
+   "archives_unblocked": [
+    "Anikage",
+    "Animeav1",
+    "Animedubhindi",
+    "DudeFilms",
+    "HDhub4u"
+   ],
+   "archive_count": 5,
+   "host_count": 6
+  },
+  {
+   "group": "G4 the jwt gate operator",
+   "families": [
+    "jwt-gate-shell"
+   ],
+   "hosts": [
+    "listeamed.net",
+    "sbbrisk.com",
+    "strmup.to",
+    "vidstreaming.xyz"
+   ],
+   "archives_unblocked": [
+    "AnimeDekhoProvider",
+    "Animekhor",
+    "Latanime",
+    "ToonHub",
+    "Toonstream"
+   ],
+   "archive_count": 5,
+   "host_count": 4
+  },
+  {
+   "group": "G5 sealed config players",
+   "families": [
+    "sealed-config-player"
+   ],
+   "hosts": [
+    "abyssplayer.com",
+    "flixcloud.cc",
+    "mega.nz",
+    "play.echovideo.ru",
+    "tryembed.us.cc"
+   ],
+   "archives_unblocked": [
+    "Anikage",
+    "AnimeDekhoProvider",
+    "Animeav1",
+    "Animekhor",
+    "Animexin",
+    "Latanime",
+    "OnePace",
+    "StreamPlay",
+    "ToonHub",
+    "Toonstream"
+   ],
+   "archive_count": 10,
+   "host_count": 5
+  }
+ ],
+ "hosts": {
+  "abyssplayer.com": {
+   "state": "alive",
+   "usable": true,
+   "family": "sealed-config-player",
+   "evidence": "GET /kBXaHX-6c 200 text/html 9846B, title is the mp4 filename. the page carries a base64 datas whose json is {slug, md5_id, user_id, media:<binary>} and loads iamcdn.net/player-v2/core.bundle.js",
+   "note": "the media field is an encrypted blob the player bundle decodes, and no key material is in the page. an extractor means reversing core.bundle.js",
+   "dns": [
+    "104.21.56.60",
+    "172.67.178.198"
+   ],
+   "probe": "https://abyssplayer.com/kBXaHX-6c",
+   "archives": [
+    "AnimeDekhoProvider",
+    "Animekhor",
+    "OnePace",
+    "Toonstream"
+   ],
+   "registry_today": [
+    "Abyass",
+    "NONE"
+   ]
+  },
+  "animedekho.app": {
+   "state": "alive",
+   "usable": true,
+   "family": "mirror-wrapper",
+   "evidence": "GET /embed/video.php?id=5de310fd... 200 1951B whose whole body is an iframe to as-cdn26.top/video/<the same id>. GET /aaa/pixel/?slug=o4hAEF2b 200 1852B is new Playerjs({file:\"https://pixeldrain.net/api/file/o4hAEF2b\"}). GET /aaa/down/v/H3Dhki28fgJu/ 200 titled Server Down",
+   "note": "a wrapper, not a host. the video.php arm points at as-cdn26.top which answers 522. the pixel arm points at pixeldrain.net, which the layer already serves with PixelDrainNet",
+   "dns": [
+    "104.21.32.121",
+    "172.67.151.212"
+   ],
+   "probe": "https://animedekho.app/embed/video.php?id=5de310fd9365cd111d778791085b1eb3",
+   "archives": [
+    "AnimeDekhoProvider",
+    "OnePace"
+   ],
+   "registry_today": [
+    "NONE",
+    "VidStream"
+   ]
+  },
+  "animeworld.site": {
+   "state": "alive",
+   "usable": true,
+   "family": "mirror-wrapper",
+   "evidence": "GET /mirror/play.php?id=xrs6538 200 11890B carries five option values: zoro.rpmhub.site, zoro.streamcasthub.store, hanerix.com/e/, bysetayico.com/e/, morencius.com/embed/. three different ids each returned their own list, asked hours apart",
+   "note": "its localStorage key is filesforever_preferred_server, so the same author as filesforever.link. bysetayico.com is the byse frontend the layer already reads",
+   "dns": [
+    "104.21.26.205",
+    "172.67.168.137"
+   ],
+   "probe": "https://animeworld.site/mirror/play.php?id=xrs6538",
+   "archives": [
+    "AnimeDekhoProvider"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "as-cdn26.top": {
+   "state": "origin_down",
+   "usable": false,
+   "family": "origin-down",
+   "evidence": "root and the extension's own /video/<id> both 522 from the cloudflare edge with a 7225B error page, on two probes two hours apart. tls completes and the certificate is valid, the origin does not answer",
+   "note": "animedekho.app iframes this host, so one of that provider's two arms ends here",
+   "dns": [
+    "104.21.16.212",
+    "172.67.215.241"
+   ],
+   "probe": "https://as-cdn26.top/video/5de310fd9365cd111d778791085b1eb3",
+   "archives": [
+    "AnimeDekhoProvider",
+    "OnePace"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "bestx.stream": {
+   "state": "refusing",
+   "usable": false,
+   "family": "tls-refuser",
+   "evidence": "tls alert access_denied, alert 49, from three clients: curl on schannel with SEC_E_LOGON_DENIED, openssl 3.0 through requests and through s_client, and the live gate's own jvm client which logged SSLHandshakeException: (access_denied)",
+   "note": "refuses the handshake before any request is sent. there is nothing to observe",
+   "dns": [
+    "172.236.108.16",
+    "172.239.193.153",
+    "172.239.194.103"
+   ],
+   "probe": "https://bestx.stream/v/aIRLVYwhCyp6/",
+   "archives": [
+    "BanglaPlex"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "boosterx.stream": {
+   "state": "refusing",
+   "usable": false,
+   "family": "tls-refuser",
+   "evidence": "tls alert access_denied from the same three clients. shares 172.236.108.16 and 172.239.193.153 with bestx.stream",
+   "note": "same operator and same refusal as bestx.stream",
+   "dns": [
+    "172.236.108.16",
+    "172.239.193.153",
+    "172.239.194.103"
+   ],
+   "probe": "https://boosterx.stream/v/8mKATSZLnwk3/",
+   "archives": [
+    "AnimeDekhoProvider"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "en.thenaukriadda.in": {
+   "state": "not_a_host",
+   "usable": false,
+   "family": "cf-challenge-shortener",
+   "evidence": "GET /?sid=<blob> 200 1100B is a form that auto POSTs _lp_http back to /. posting it returns a 183920B wordpress blog with yoast markup",
+   "note": "an advertising gate rather than a media host, which is what BuiltinExtractors already records. no extractor should claim it",
+   "dns": [
+    "104.21.8.202",
+    "172.67.157.214"
+   ],
+   "probe": "https://en.thenaukriadda.in/?sid=THpveVRFRjJpV3pwVUxzNUZOQk5KN2ZKdDNxWFRHZnpaZjdqZDYyUzliWFcwRkJKK2dGcENBR1lXYzVaTXZZWWVqNDNnd2FndGVBN2lCR09ZYWdzSk9UaS9WanJnTTFIeDZzTVNwUkJHNFNYb2dxU3ptbjdMV1VnOXNhNmRodDdib2xMVHJLSzhsOVRrQkNNNEZNNndOZDBpZU41L3ZRY2RwYUVYNWJROFQ4Q3RVcURHemNnMTVkS2I5UTh5MlpIZDV1RWRvais1Rm16dUJXTDBVUzV3ZSt5Mit1SWh2TUFKbThCTjJheGxOdXArYVdBeDVIVklmbjhzN0swZVZibQ==",
+   "archives": [
+    "UHDmoviesProvider"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "filebee.xyz": {
+   "state": "alive_no_media",
+   "usable": false,
+   "family": "cf-challenge-shortener",
+   "evidence": "root and /embed/<id> both return the same 1457B react shell. /api/file/<id>, /api/files/<id>, /api/file/embed/<id> and /api/video/<id> all return that same shell, so whatever route answers is not on this origin. the 1563430B bundle names doodstream, streamTape, streamWish and googlefileId as its file types",
+   "note": "alive as a site, but no request made here returned media or a media url. claiming it would be claiming a host nobody has seen serve",
+   "dns": [
+    "104.21.62.6",
+    "172.67.217.124"
+   ],
+   "probe": "https://filebee.xyz//embed/640eb74d7d3e83a6aba5942d",
+   "archives": [
+    "Microtv",
+    "ToonHub"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "filesforever.link": {
+   "state": "alive",
+   "usable": true,
+   "family": "mirror-wrapper",
+   "evidence": "GET /embed/bawvzji 200 23986B carries input gdmrfid=bawvzji and input view_token=<64 hex> and POSTs both to /embeds/track_view.php. that endpoint answers json and checked our post, 400 with error file_slug required, so it is live and parameter validated",
+   "note": "the response carrying the embed url was not obtained: the endpoint wants a field spelling we have not matched yet. it shares animeworld.site's storage key, so the same option list is likely behind it",
+   "dns": [
+    "104.21.75.158",
+    "172.67.178.113"
+   ],
+   "probe": "https://filesforever.link/embed/bawvzji",
+   "archives": [
+    "OnePace",
+    "ToonHub",
+    "Toonstream"
+   ],
+   "registry_today": [
+    "Filesforever",
+    "NONE"
+   ]
+  },
+  "flixcloud.cc": {
+   "state": "alive",
+   "usable": true,
+   "family": "sealed-config-player",
+   "evidence": "GET /e/u6pohmficyxu 200 18429B titled [Judas]_One-Punch_Man_-_S01E01_encoded.mkv. an artplayer page whose config carries kf_<hex> as a base64 key, ivf_<hex> as a base64 iv and metadata encoding aes256cbc, with subtitles and fonts on vault92.slopnet.site in the clear",
+   "note": "key and iv are in the page, so this is decryptable. the field names are randomized per load, so an extractor has to find them by shape and never by name",
+   "dns": [
+    "104.21.71.246",
+    "172.67.172.152"
+   ],
+   "probe": "https://flixcloud.cc/e/u6pohmficyxu?v=2&autoPlay=true",
+   "archives": [
+    "Anikage"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "gdflix.dev": {
+   "state": "refusing",
+   "usable": false,
+   "family": "cf-challenge-shortener",
+   "evidence": "root 403 and /file/<id> 403, 5746B titled Just a moment, on three different ids",
+   "note": "a cloudflare interactive challenge. no pass so far has had a challenge host attached, so this is refusing rather than gone",
+   "dns": [
+    "104.21.52.244",
+    "172.67.205.213"
+   ],
+   "probe": "https://gdflix.dev/file/Gg9WNXQPK7Rwbqk",
+   "archives": [
+    "Animedubhindi",
+    "BanglaPlex",
+    "DudeFilms"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "gdlink.dev": {
+   "state": "refusing",
+   "usable": false,
+   "family": "cf-challenge-shortener",
+   "evidence": "root 403 and /file/<id> 403, 5731 to 5767B titled Just a moment, on two ids",
+   "note": "the same challenge as gdflix.dev",
+   "dns": [
+    "104.21.80.142",
+    "172.67.185.104"
+   ],
+   "probe": "https://gdlink.dev/file/gCRYhC4J0N9kRrf",
+   "archives": [
+    "BanglaPlex",
+    "DudeFilms"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "hblinks.lol": {
+   "state": "alive",
+   "usable": true,
+   "family": "hubcloud-drive",
+   "evidence": "GET /archives/80815 200 24930B titled Fight.Club.1999.720p.10bit.HEVC HUBLinks, whose body links hubcloud.ist/drive/ft4y24lgtyz424l, hubdrive.pics/file/1974414206 and gofile.io/d/vfVw9l0. three consecutive archive ids all answered",
+   "note": "an index page, not a host. two of the three hosts it names are already served, HubDrive and the hubcloud chain",
+   "dns": [
+    "104.21.19.152",
+    "172.67.186.201"
+   ],
+   "probe": "https://hblinks.lol/archives/80815",
+   "archives": [
+    "HDhub4u"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "hubcdn.wiki": {
+   "state": "alive",
+   "usable": true,
+   "family": "hubcloud-drive",
+   "evidence": "root 200 3056B titled HubCDN-Private Storage Server. the extension's own /file/<id> answers 200 473B saying No URL found, Failed to get data from gserver, File is Deleted or UnAvailable",
+   "note": "the host is up and the corpus id is dead. a fresh id has to come off an HDhub4u page before this one can be watched end to end",
+   "dns": [
+    "104.21.19.204",
+    "172.67.190.46"
+   ],
+   "probe": "https://hubcdn.wiki/file/OOprw8t6cVSJD9gOMoM271y46",
+   "archives": [
+    "HDhub4u"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "hubcloud.ist": {
+   "state": "alive",
+   "usable": true,
+   "family": "hubcloud-drive",
+   "evidence": "GET /drive/7xzgjctgq1xyz87 200 18893B titled [AnimeDubHindi] Naruto the Movie Ninja Clash in the Land of Snow. the /tg/go arm answers 200 10397B and is a telegram bot launcher",
+   "note": "the same page shape as hubcloud.one. the extension that ships its own HubCloud reached this host in the live run and still produced 0 links",
+   "dns": [
+    "104.21.93.131",
+    "172.67.210.45"
+   ],
+   "probe": "https://hubcloud.ist/tg/go?id=3Ofp3dyuoqThzuDY3N/K4aHZ3NCju+rPzODi6tHh2NXk4ajn59bf3bHDy9muyMfH37u5rKu+v8bDwp2/qsq5t7PKuKWev8rFxMfVvsjJwbe+xbqd4sbIx7y2pMm6wcHYucuy4LE=",
+   "archives": [
+    "Animedubhindi",
+    "DudeFilms",
+    "HDhub4u"
+   ],
+   "registry_today": [
+    "HubCloud",
+    "NONE"
+   ]
+  },
+  "hubcloud.one": {
+   "state": "alive",
+   "usable": true,
+   "family": "hubcloud-drive",
+   "evidence": "GET /drive/cclk0cb91s0h_sb 200 18782B titled From.S01.E01.Hindi.English.720p.WEB-DL.ESub-DudeFilms.mkv, carrying an anchor id=download to gamerxyt.com/hubcloud.php?host=hubcloud&id=<id>&token=<base64>. following that answered 200 15932B whose links are pixeldrain.dev/u/negn6f, snvhost.com and a hubcloud.ist/tg/go arm",
+   "note": "the whole chain is observable in two hops and it ends on pixeldrain.dev, which the layer already serves with PixelDrainDev",
+   "dns": [
+    "104.21.43.157",
+    "172.67.181.45"
+   ],
+   "probe": "https://hubcloud.one/drive/cclk0cb91s0h_sb",
+   "archives": [
+    "DudeFilms"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "listeamed.net": {
+   "state": "alive",
+   "usable": true,
+   "family": "jwt-gate-shell",
+   "evidence": "the first GET of /e/wP2050epzKLxdmy answered 200 492B, the identical Loading shell that sbbrisk.com and vidstreaming.xyz serve, replacing location with the same url plus ?ch=1&js=<jwt>&sid=<uuid>. every later request from this address answered 429 with a 17B Too many requests",
+   "note": "192.157.56.140, one address off strmup.to and sbbrisk.com. the throttle is per address and covers that whole block",
+   "dns": [
+    "192.157.56.140"
+   ],
+   "probe": "https://listeamed.net/e/wP2050epzKLxdmy",
+   "archives": [
+    "Animekhor",
+    "Latanime"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "luluvdo.com": {
+   "state": "alive",
+   "usable": true,
+   "family": "known-family-domain",
+   "evidence": "GET /q21dhw35eij8 200 9091B titled LuluStream, loading /static/js/app.js and xupload.js. the extension's own /e/cijzepr7lngx answers 200 1589B saying File is no longer available as it expired or has been deleted",
+   "note": "a live LuluStream mirror with a dead corpus id. the layer already has LuluStream and Filesim, so this is a domain entry plus a fresh id to verify",
+   "dns": [
+    "104.26.6.79",
+    "104.26.7.79",
+    "172.67.68.215"
+   ],
+   "probe": "https://luluvdo.com/e/cijzepr7lngx",
+   "archives": [
+    "Goojara",
+    "Latanime"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "mega.nz": {
+   "state": "alive",
+   "usable": true,
+   "family": "sealed-config-player",
+   "evidence": "GET /embed/<handle>#<key> 200 1598B, the mega web app shell that boots /secureboot.js. three different embed handles returned the identical shell",
+   "note": "the file is encrypted end to end: the key is in the fragment and the bytes need AES-CTR decryption as they stream. that is a decrypting local proxy, not an extractor, and there is no plain url to hand a player",
+   "dns": [
+    "31.216.145.5",
+    "66.203.127.18"
+   ],
+   "probe": "https://mega.nz/embed/#!ykAUGRbZ!fCtUcvJFz2PBcrTRP5TvjUpVsUqRl-S08d2RSZrrrHA",
+   "archives": [
+    "Animeav1",
+    "Animexin",
+    "Latanime",
+    "ToonHub"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "mfw09.org": {
+   "state": "alive",
+   "usable": true,
+   "family": "known-family-domain",
+   "evidence": "root 403, but GET /e/u48xqtv5b3t5 200 1972B titled Byse Frontend, the same one script and empty root div shell as the ten byse domains the layer already reads. three different ids all answered",
+   "note": "one domain entry on the existing Byse extractor",
+   "dns": [
+    "104.21.93.89",
+    "172.67.208.53"
+   ],
+   "probe": "https://mfw09.org/e/u48xqtv5b3t5?v=1&asi=0&autoPlay=0&ao=0",
+   "archives": [
+    "Anikage"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "miiixdrop.net": {
+   "state": "alive",
+   "usable": true,
+   "family": "known-family-domain",
+   "evidence": "GET /e/pmxmpe 200 78372B carrying MDCore.ref set to pmxmpe, MDCore.sublangs, and the packed eval(function(p,a,c,k,e,d) whose payload assigns MDCore.wurl to a delivery38-2 host path",
+   "note": "the MixDrop mechanism exactly. the layer already has MixDrop and MixDropTop, so this is a domain entry",
+   "dns": [
+    "104.21.87.181",
+    "172.67.170.129"
+   ],
+   "probe": "https://miiixdrop.net/e/pmxmpe",
+   "archives": [
+    "Pinoymoviepedia"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "mixdrop.is": {
+   "state": "parked",
+   "usable": false,
+   "family": "gone-or-parked",
+   "evidence": "GET /e/vnwjqnvrh4449d 200 27808B whose head loads assets.abovedomains.com/javascript/forsale.min.js with d=mixdrop.is, plus a consent manager. no MDCore, no player. single address 103.224.212.109",
+   "note": "the domain is parked for sale. Latanime hands links here. mixdrop.top, which the layer serves, is the live one",
+   "dns": [
+    "103.224.212.109"
+   ],
+   "probe": "https://mixdrop.is/e/vnwjqnvrh4449d",
+   "archives": [
+    "Latanime"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "new2.filepress.wiki": {
+   "state": "refusing",
+   "usable": false,
+   "family": "cf-challenge-shortener",
+   "evidence": "GET /file/6888cb0aeb010de4cf779c4f 403 5798B titled Just a moment",
+   "note": "a cloudflare interactive challenge, the same as the gdflix and gdlink pair",
+   "dns": [
+    "193.124.64.3"
+   ],
+   "probe": "https://new2.filepress.wiki/file/6888cb0aeb010de4cf779c4f",
+   "archives": [
+    "BanglaPlex"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "new21.gdtot.dad": {
+   "state": "refusing",
+   "usable": false,
+   "family": "tls-refuser",
+   "evidence": "tls alert access_denied from curl on schannel, from openssl s_client and from the jvm client. 103.224.182.250",
+   "note": "refuses the handshake. shares its address with new6.gdtot.dad",
+   "dns": [
+    "103.224.182.250"
+   ],
+   "probe": "https://new21.gdtot.dad/file/3066928185",
+   "archives": [
+    "BanglaPlex"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "new6.gdtot.dad": {
+   "state": "refusing",
+   "usable": false,
+   "family": "tls-refuser",
+   "evidence": "tls alert access_denied from the same three clients on three different embed ids. 103.224.182.250",
+   "note": "the same refusal as new21.gdtot.dad",
+   "dns": [
+    "103.224.182.250"
+   ],
+   "probe": "https://new6.gdtot.dad/embed/825641145",
+   "archives": [
+    "ToonHub"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "oload.download": {
+   "state": "gone",
+   "usable": false,
+   "family": "gone-or-parked",
+   "evidence": "dns resolves to 34.235.250.63 and nothing accepts a connection on 443 within 21 seconds, from curl, from openssl and from requests",
+   "note": "shares that address with streamango.com. both brands stopped operating years ago",
+   "dns": [
+    "34.235.250.63"
+   ],
+   "probe": "https://oload.download/embed/SJfZ87O2rPs",
+   "archives": [
+    "Pencurimovie"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "pinoystreaming.qzz.io": {
+   "state": "alive",
+   "usable": true,
+   "family": "mirror-wrapper",
+   "evidence": "GET /embed/movie?imdb=tt37971717 200 54481B whose script fetches /vs_src.php?type=movie&id=tt37971717. that endpoint answered 200 application/json 179B with src set to https://cloudorchestranova.com/embed/movie/tt37971717?vs=<token>",
+   "note": "one json hop to the real embed. three different imdb ids all returned the shell and the json arm was read live",
+   "dns": [
+    "104.21.65.131",
+    "172.67.145.127"
+   ],
+   "probe": "https://pinoystreaming.qzz.io/embed/movie?imdb=tt37971717",
+   "archives": [
+    "Pinoymoviepedia"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "play.echovideo.ru": {
+   "state": "alive",
+   "usable": true,
+   "family": "sealed-config-player",
+   "evidence": "GET /embed-1/<blob> 200 247419B titled Echovideo - One Punch Man Episode 1, jwplayer 8.18.4 plus cdnbye, and one 245632B inline obfuscator.io script with a rotating string array. no sources, file, m3u8 or setup literal anywhere in the document. a second id answered 404 File not found - Echovideo, so ids do expire",
+   "note": "the source is assembled at runtime by a script written to defeat reading. this is the mkissa.to case: do not write a speculative extractor without a js runtime",
+   "dns": [
+    "104.21.90.50",
+    "172.67.195.103"
+   ],
+   "probe": "https://play.echovideo.ru/embed-1/ip1nYjK_9x_B2HaDMaBmA5QM7DYKN5HsUXbBVuBls48zTxH9ityp9KrJIfJ9Z2usioQUHJc8Qcun5R1ydk_zXi8U5x6dtX1C2LLNhjNtkw-xGbkX5_hwpgneDDEUs5wm19G3WXS9NEpefQe3bp0cD3EH81vQgmQpJssDEzfnUtyFGi3sHYEWONucgPl_RPm5?v=1&asi=0&autoPlay=0&ao=0",
+   "archives": [
+    "Anikage"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "playeng.animeapps.top": {
+   "state": "alive",
+   "usable": true,
+   "family": "plain-source-player",
+   "evidence": "GET /r2/play2.php?id=ani5&url=21087ebd1 200 15771B, an artplayer page whose config is in the clear, videoUrl set to /r2/cachehd/21087ebd1/index.m3u8, passed to new Artplayer with type m3u8. the /b2/ path the corpus carries is 404 and /r2/ is the live one",
+   "note": "the easiest write in the set: one relative m3u8 off a named config, plus the path rename from b2 to r2",
+   "dns": [
+    "172.66.40.131",
+    "172.66.43.125"
+   ],
+   "probe": "https://playeng.animeapps.top/r2/play2.php?id=ani5&url=21087ebd1",
+   "archives": [
+    "Anikage"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "raretoonsindia.co": {
+   "state": "gone",
+   "usable": false,
+   "family": "gone-or-parked",
+   "evidence": "no address record at all: getaddrinfo 11001 from python, curl error 6 could not resolve, openssl BIO_lookup_ex No such host is known",
+   "note": "the zone answers for no name. gone, not refusing",
+   "dns": {
+    "error": "no address record"
+   },
+   "probe": "https://raretoonsindia.co/fx/xeti3UZ9n1EgSvs",
+   "archives": [
+    "AnimeDekhoProvider"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "sbbrisk.com": {
+   "state": "alive",
+   "usable": true,
+   "family": "jwt-gate-shell",
+   "evidence": "the first GET of /zb7f11qmar45.html answered 200 490B, the Loading shell replacing location with the same url plus ?ch=1&js=<jwt>&sid=<uuid>. following that gate returned 3084B whose head is a meta refresh to berht-shv.com/zokredirect. later requests answered 429 17B",
+   "note": "192.157.56.142. the gate hands non browser traffic to an advertising redirect rather than to a player, and that is the thing an extractor here has to get past",
+   "dns": [
+    "192.157.56.142"
+   ],
+   "probe": "https://sbbrisk.com/zb7f11qmar45.html",
+   "archives": [
+    "ToonHub"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "streamango.com": {
+   "state": "gone",
+   "usable": false,
+   "family": "gone-or-parked",
+   "evidence": "dns resolves to 34.235.250.63, nothing accepts a connection on 443 within 21 seconds, three clients",
+   "note": "the same dead address as oload.download",
+   "dns": [
+    "34.235.250.63"
+   ],
+   "probe": "https://streamango.com/embed/retreeansqsardmf",
+   "archives": [
+    "Pencurimovie"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "streamhide.to": {
+   "state": "refusing",
+   "usable": false,
+   "family": "tls-refuser",
+   "evidence": "the server terminates the handshake: openssl reports unexpected eof while reading, curl on schannel SEC_E_LOGON_DENIED, the jvm SSLHandshakeException Remote host terminated the handshake. three embed ids, same result",
+   "note": "refuses before any request, by a different mechanism than the access_denied group and with the same outcome",
+   "dns": [
+    "104.219.250.37",
+    "2.59.170.20"
+   ],
+   "probe": "https://streamhide.to/w/b0uny2fxy5xk",
+   "archives": [
+    "ToonHub"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "strmup.to": {
+   "state": "alive",
+   "usable": true,
+   "family": "jwt-gate-shell",
+   "evidence": "the live gate's jvm client fetched /G4jXb792UY8QV and got 200 text/html 484B, the Loading shell. every request from this address today answered 429 17B Too many requests",
+   "note": "192.157.56.139, the same block and the same shell as listeamed.net and sbbrisk.com. alive on the evidence of that jvm fetch, throttled for us now",
+   "dns": [
+    "192.157.56.139"
+   ],
+   "probe": "https://strmup.to/G4jXb792UY8QV",
+   "archives": [
+    "AnimeDekhoProvider"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "swdyu.com": {
+   "state": "alive",
+   "usable": true,
+   "family": "known-family-domain",
+   "evidence": "GET /e/vqu6240hc5sx 200 793B, the byte for byte same File is no longer available as it expired or has been deleted template that luluvdo.com serves for a dead id, down to the inline style",
+   "note": "a LuluStream family mirror with a dead corpus id. one domain entry plus a fresh id to verify",
+   "dns": [
+    "104.21.35.185",
+    "172.67.178.150"
+   ],
+   "probe": "https://swdyu.com/e/vqu6240hc5sx",
+   "archives": [
+    "Latanime"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "tryembed.us.cc": {
+   "state": "alive",
+   "usable": true,
+   "family": "sealed-config-player",
+   "evidence": "root 200 38813B titled TryEmbed Premium Anime Player. the embed /embed/anime/5040/1/sub answered 200 17891B and carries window.BOOTSTRAP_TICKET, which it POSTs to /api/bootstrap under the header X-TryEmbed-Bootstrap. that post answered 403 37B Forbidden: Invalid Request Signature",
+   "note": "alive and gated by a signature we did not produce. the bootstrap is the whole mechanism, so nothing can be claimed until that 403 becomes a 200",
+   "dns": [
+    "104.21.53.207",
+    "172.67.218.180"
+   ],
+   "probe": "https://tryembed.us.cc/embed/anime/5040/1/sub?autoplay=true&autoSkip=true",
+   "archives": [
+    "StreamPlay"
+   ],
+   "registry_today": [],
+   "source": "out/live-w1-unpack.log, where StreamPlay-Anime fetched it 200 text/html 17890B after kyren.moe/api/stream/5040/1?server=tryembed named it"
+  },
+  "upstream.to": {
+   "state": "refusing",
+   "usable": false,
+   "family": "tls-refuser",
+   "evidence": "tls alert access_denied from curl on schannel, from openssl and from the jvm client, on two embed ids. 185.178.208.135",
+   "note": "the layer already carries an Upstream class that is not in the registry. leave it out: the host refuses the handshake",
+   "dns": [
+    "185.178.208.135"
+   ],
+   "probe": "https://upstream.to/embed-8oz69zcxi2zx.html",
+   "archives": [
+    "Pencurimovie"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "uptostream.com": {
+   "state": "origin_down",
+   "usable": false,
+   "family": "origin-down",
+   "evidence": "root and three /iframe/<id> paths all 522 with an empty body, twice, two hours apart. tls completes against the cloudflare edge with a valid certificate",
+   "note": "edge up, origin gone",
+   "dns": [
+    "104.26.10.35",
+    "104.26.11.35",
+    "172.67.74.111"
+   ],
+   "probe": "https://uptostream.com/iframe/5f99fizloa19",
+   "archives": [
+    "Pencurimovie"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "vidmoly.net": {
+   "state": "alive",
+   "usable": true,
+   "family": "known-family-domain",
+   "evidence": "GET /embed-3uc7masntzp0.html 200 42575B titled Naruto S00E01 German Subbed 416p WebRip x264-NTFS, carrying the packed eval and, once unpacked, sources with file set to a prx-1590-for.vmnow.online hls2 master.m3u8 with t, s and e query parameters. a second id answered the same way",
+   "note": "the Vidmoly mechanism exactly. the layer already has Vidmoly and VidmolyBiz, so this is a domain entry",
+   "dns": [
+    "104.26.0.27",
+    "104.26.1.27",
+    "172.67.73.1"
+   ],
+   "probe": "https://vidmoly.net/embed-3uc7masntzp0.html",
+   "archives": [
+    "Aniworld"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "vidsrc.net": {
+   "state": "refusing",
+   "usable": false,
+   "family": "tls-refuser",
+   "evidence": "the certificate is self signed for CN=example.com: openssl verify error 18, the jvm PKIX path building failed, curl SEC_E_UNTRUSTED_ROOT. with verification off it answers 429 17B Too many requests, the same body the 192.157.56.x block serves",
+   "note": "192.157.56.141, inside the jwt gate block, but no client that checks certificates can reach it and we are not going to stop checking",
+   "dns": [
+    "192.157.56.141"
+   ],
+   "probe": "https://vidsrc.net/embed/movie?imdb=tt0137523",
+   "archives": [
+    "Goojara"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "vidstreaming.xyz": {
+   "state": "alive",
+   "usable": true,
+   "family": "jwt-gate-shell",
+   "evidence": "GET /v/2TVgNr3rI4NT/ 200 493B, the same Loading shell with a fresh jwt each time. following the gate and then re-requesting the original returned the shell again, with cookies sid, x3329517 and c1702032237 set",
+   "note": "216.245.197.46, off the throttled block, so this is the member of the family we can actually iterate against",
+   "dns": [
+    "216.245.197.46"
+   ],
+   "probe": "https://vidstreaming.xyz/v/2TVgNr3rI4NT/",
+   "archives": [
+    "Toonstream"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "vvide0.com": {
+   "state": "alive",
+   "usable": true,
+   "family": "known-family-domain",
+   "evidence": "root redirects to doodstream.com which refuses tls, but GET /e/z1vttagnex5j answered 200 52220B titled Soul Land Movie Sword Dao Chen Xin - DoodStream, carrying the /pass_md5/<hash>/<token> get, the /dood?op=watch arm, srt.doodcdn.io subtitles and i.doodcdn.io assets",
+   "note": "a DoodStream mirror. the layer already has DoodStream, DoodLi, DoodLa and DoodYt, so this is a domain entry",
+   "dns": [
+    "104.26.12.200",
+    "104.26.13.200",
+    "172.67.70.209"
+   ],
+   "probe": "https://vvide0.com/e/z1vttagnex5j",
+   "archives": [
+    "Animexin"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  },
+  "yourupload.com": {
+   "state": "alive",
+   "usable": true,
+   "family": "plain-source-player",
+   "evidence": "GET /embed/1V64jfw03ysp 200 8424B titled 190_1_SUB.mp4 with https://vidcache.net:8161/a20260925e80n031l6Ac/video.mp4 twice in the body. a second id answered the same shape",
+   "note": "a finished mp4 url in the page. note the non standard port 8161 and that the path carries today's date, so the url is short lived",
+   "dns": [
+    "104.26.4.192",
+    "104.26.5.192",
+    "172.67.73.5"
+   ],
+   "probe": "https://www.yourupload.com/embed/1V64jfw03ysp",
+   "archives": [
+    "Animeav1"
+   ],
+   "registry_today": [
+    "NONE"
+   ]
+  }
+ }
+}

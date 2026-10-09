@@ -1,0 +1,22 @@
+export default {
+  "games.playtime.title": "وقت اللعب",
+  "games.playtime.total": "إجمالي وقتك",
+  "games.playtime.tracked": "سجّله Harbor",
+  "games.playtime.adjusted": "عدّلته بنفسك",
+  "games.playtime.changed": "عُدّل في {date}",
+  "games.playtime.edit": "تعديل وقت اللعب",
+  "games.playtime.hours": "الساعات",
+  "games.playtime.minutes": "الدقائق",
+  "games.playtime.duration": "{hours} س {minutes} د",
+  "games.playtime.card": "وقت اللعب: {time}",
+  "games.playtime.note": "أضف وقتًا لعبته في مكان آخر أو صحّح إجمالي وقتك. يحتفظ Harbor بجلساته المسجلة ويضيف وقت الجلسات القادمة إلى هذا الإجمالي.",
+  "games.playtime.localNote": "ينطبق على هذه النسخة المحلية ضمن ملفك الشخصي في Harbor. لا تتغير بيانات Steam أو الحسابات الأخرى.",
+  "games.playtime.running": "أغلق هذه اللعبة قبل تعديل وقت لعبها.",
+  "games.playtime.save": "حفظ وقت اللعب",
+  "games.playtime.finishEdit": "احفظ تعديل وقت اللعب أو ألغِه قبل حفظ الإعدادات الأخرى.",
+  "games.playtime.reset": "استخدام الوقت المسجل",
+  "games.playtime.invalid": "أدخل عددًا صحيحًا من الساعات من 0 إلى 999,999، ودقائق من 0 إلى 59.",
+  "games.playtime.saved": "تم حفظ وقت اللعب.",
+  "games.playtime.resetDone": "يُستخدم الآن الوقت الذي سجّله Harbor.",
+  "games.custom.launch_playtime": "تعذّر حفظ وقت اللعب. تحقق من الساعات والدقائق وحاول مجددًا."
+} satisfies Record<string, string>;

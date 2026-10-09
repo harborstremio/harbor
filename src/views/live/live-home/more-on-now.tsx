@@ -1,4 +1,5 @@
-import { Play } from "lucide-react";
+import { useState } from "react";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import { Poster, usePosterChain } from "@/components/poster";
 import { useT } from "@/lib/i18n";
@@ -46,12 +47,19 @@ function Pick({
   const t = useT();
   const { settings } = useSettings();
   const { channel, current } = item;
+  const [programmeFailed, setProgrammeFailed] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
   const poster = usePosterChain(
     settings.rpdbKey,
     hydrated?.id ?? "",
     hydrated?.poster ?? undefined,
     hydrated?.type === "series" ? "series" : "movie",
   );
+  // A channel with no film or series behind it still has its own artwork, and the plate
+  // alone told the viewer nothing about what they were about to open.
+  const programmeArt = !programmeFailed && current?.iconUrl ? current.iconUrl : "";
+  const art = poster.src || programmeArt;
+  const logo = !logoFailed && channel.logo ? channel.logo : "";
   return (
     <button
       data-art={hydrated?.background || hydrated?.poster || channel.logo || ""}
@@ -61,12 +69,24 @@ function Pick({
     >
       <div className="relative overflow-hidden rounded-lg ring-1 ring-edge-soft/40 transition-shadow duration-200 group-hover/p:ring-edge group-hover/p:shadow-[0_8px_24px_-10px_rgba(0,0,0,0.6)]">
         <Poster
-          src={poster.src}
-          onError={poster.onError}
+          src={art}
+          onError={poster.src ? poster.onError : () => setProgrammeFailed(true)}
           seed={channel.id}
           ratio="portrait"
           className="harbor-card-ring rounded-lg shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4)]"
         />
+        {!art && logo && (
+          <span className="pointer-events-none absolute inset-0 grid place-items-center p-5">
+            <img
+              src={logo}
+              alt=""
+              draggable={false}
+              loading="lazy"
+              onError={() => setLogoFailed(true)}
+              className="max-h-[54%] max-w-[80%] object-contain drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]"
+            />
+          </span>
+        )}
         <div className="absolute inset-0 flex items-center justify-center bg-canvas/0 opacity-0 transition-all duration-200 group-hover/p:bg-canvas/35 group-hover/p:opacity-100">
           <span className="flex h-11 w-11 items-center justify-center rounded-full bg-ink text-canvas shadow-[0_4px_14px_rgba(0,0,0,0.4)]">
             <Play size={17} fill="currentColor" />

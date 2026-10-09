@@ -5,17 +5,16 @@ import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { Row } from "./row";
 
-export function CollectionsRow() {
+export function CollectionsRow({ title }: { title?: string }) {
   const { settings } = useSettings();
   const { openCollections } = useView();
   const t = useT();
   if (!settings.tmdbKey) return null;
   return (
     <Row
-      title={t("Collections")}
-      min={320}
+      title={title ?? t("Collections")}
+      min={250}
       shape="landscape"
-      arrowsAlways
       scrollKey="home:collections"
       onViewAll={openCollections}
     >

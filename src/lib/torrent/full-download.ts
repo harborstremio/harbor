@@ -38,3 +38,8 @@ export function stopFullDownload(infoHash: string): void {
     controllers.delete(infoHash);
   }
 }
+
+export function stopAllFullDownloads(): void {
+  for (const c of controllers.values()) c.abort();
+  controllers.clear();
+}

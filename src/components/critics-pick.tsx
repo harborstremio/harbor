@@ -1,11 +1,19 @@
-import { ChevronLeft, ChevronRight, ExternalLink, Play, Quote, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Quote, Star } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { pickRandom } from "@/lib/feed/tags";
+import { useImdbRating } from "@/lib/imdb-rating";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { useOmdbScores } from "@/lib/providers/omdb";
 import { rpdbPoster } from "@/lib/providers/rpdb";
-import { tmdbCriticData, tmdbMovieImages, useTmdbImdbId, type CriticData, type CriticReview } from "@/lib/providers/tmdb";
+import {
+  tmdbCriticData,
+  tmdbMovieImages,
+  useTmdbImdbId,
+  type CriticData,
+  type CriticReview,
+} from "@/lib/providers/tmdb";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
@@ -22,7 +30,7 @@ import { MetaAwardsCorner } from "./meta-awards-corner";
 import { Poster } from "./poster";
 import { RtBadge } from "./rt-badge";
 
-export function CriticsPick({ meta }: { meta: Meta }) {
+export function CriticsPick({ meta, title }: { meta: Meta; title?: string }) {
   const { settings } = useSettings();
   const { openMeta, openPicker, openPerson } = useView();
   const t = useT();
@@ -35,12 +43,12 @@ export function CriticsPick({ meta }: { meta: Meta }) {
   const castScrollRef = useRef<HTMLDivElement>(null);
   const resolvedImdb = useTmdbImdbId(meta.id);
   const omdb = useOmdbScores(resolvedImdb ?? undefined);
+  const imdbRating = useImdbRating(meta, resolvedImdb) ?? meta.imdbRating;
+  const hasImdbIdentity = meta.id.startsWith("tt") || !!resolvedImdb;
   const [logo, setLogo] = useState<string | null>(
     () => peekCachedLogo(settings.tmdbKey, meta) ?? null,
   );
-  const [logoLoaded, setLogoLoaded] = useState<boolean>(
-    !!peekCachedLogo(settings.tmdbKey, meta),
-  );
+  const [logoLoaded, setLogoLoaded] = useState<boolean>(!!peekCachedLogo(settings.tmdbKey, meta));
 
   useEffect(() => {
     const cached = peekCachedLogo(settings.tmdbKey, meta);
@@ -94,13 +102,31 @@ export function CriticsPick({ meta }: { meta: Meta }) {
   const overview = data?.overview ?? meta.description ?? "";
   const reviews = data?.reviews ?? [];
   const [reviewIdx, setReviewIdx] = useState(0);
+  const [reviewVisible, setReviewVisible] = useState(true);
   useEffect(() => {
     setReviewIdx(0);
   }, [meta.id]);
+  const changeReview = useCallback(
+    (dir: number) => {
+      setReviewVisible(false);
+      window.setTimeout(() => {
+        setReviewIdx((i) => (i + dir + reviews.length) % reviews.length);
+        setReviewVisible(true);
+      }, 190);
+    },
+    [reviews.length],
+  );
+  const reviewFade = {
+    transition: "opacity 200ms ease, transform 200ms ease",
+    opacity: reviewVisible ? 1 : 0,
+    transform: reviewVisible ? "translateY(0)" : "translateY(6px)",
+  };
   const activeReview: CriticReview | null = reviews[reviewIdx] ?? null;
   const quote = activeReview
     ? excerptReview(activeReview.content)
-    : tagline || (overview ? overview.split(/(?<=[.!?])\s+/)[0] : "A standout this week.");
+    : tagline || (overview ? overview.split(/(?<=[.!?])\s+/)[0] : t("A standout this week."));
+  const canOpenOverview = !!(overview || activeReview);
+  const openOverview = () => canOpenOverview && setOverviewOpen(true);
 
   const linkablePeople = useMemo<PersonRef[]>(() => {
     if (!data) return [];
@@ -188,16 +214,17 @@ export function CriticsPick({ meta }: { meta: Meta }) {
     <section className="flex flex-col gap-5">
       <div className="flex items-baseline justify-between">
         <h2 className="font-display text-[28px] font-medium leading-tight tracking-tight text-ink">
-          Critics' Pick
+          {title ?? t("Critics' Pick")}
         </h2>
         <span className="text-[12px] uppercase tracking-[0.22em] text-ink-subtle">
-          Loved by reviewers today
+          {t("Loved by reviewers today")}
         </span>
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)_360px] items-stretch gap-4">
         <button
           type="button"
           onClick={() => openMeta({ ...meta, logo: logo ?? meta.logo })}
+          aria-label={t("Open {name}", { name: meta.name })}
           className="group relative min-h-[520px] overflow-hidden rounded-2xl border border-edge-soft bg-canvas text-start transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] hover:-translate-y-1"
           style={{ isolation: "isolate" }}
         >
@@ -208,20 +235,20 @@ export function CriticsPick({ meta }: { meta: Meta }) {
                 src={src}
                 alt=""
                 decoding="async"
-                className="absolute inset-[2px] h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-[14px] object-cover"
+                className="absolute inset-[2px] h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-lg object-cover"
               />
             ) : (
               <Poster
                 src={undefined}
                 seed={meta.id}
                 ratio="landscape"
-                className="absolute inset-[2px] h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-[14px]"
+                className="absolute inset-[2px] h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-lg"
               />
             );
           })()}
           <div
             aria-hidden
-            className="absolute inset-[2px] rounded-[14px]"
+            className="absolute inset-[2px] rounded-lg"
             style={{
               background:
                 "linear-gradient(to top, oklch(0.10 0.02 260 / 0.92) 0%, oklch(0.10 0.02 260 / 0.30) 40%, transparent 70%)",
@@ -240,7 +267,7 @@ export function CriticsPick({ meta }: { meta: Meta }) {
                   decoding="async"
                   onLoad={() => setLogoLoaded(true)}
                   onError={() => setLogo(null)}
-                  className="max-h-[84px] w-auto max-w-[60%] object-contain object-left rtl:object-right drop-shadow-[0_4px_20px_rgba(0,0,0,0.55)]"
+                  className="max-h-[84px] w-auto max-w-[54%] object-contain object-left rtl:object-right drop-shadow-[0_4px_20px_rgba(0,0,0,0.55)]"
                   style={{
                     opacity: logoLoaded ? 1 : 0,
                     transition: "opacity 420ms cubic-bezier(0.32, 0.72, 0.24, 1)",
@@ -254,12 +281,24 @@ export function CriticsPick({ meta }: { meta: Meta }) {
             </div>
             <div className="flex items-center gap-2.5 text-[13px] text-ink/80">
               {meta.releaseInfo && <span>{meta.releaseInfo}</span>}
-              {meta.imdbRating && (
+              {imdbRating && (
                 <>
-                  <span aria-hidden className="text-ink/40">·</span>
+                  {meta.releaseInfo && (
+                    <span aria-hidden className="text-ink/40">
+                      ·
+                    </span>
+                  )}
                   <span className="inline-flex items-center gap-1.5">
-                    {meta.id.startsWith("tt") ? <ImdbIcon className="h-[12px] w-auto rounded-[2px]" /> : <Star className="h-[12px] w-[12px] text-amber-400" fill="currentColor" strokeWidth={0} />}
-                    {meta.imdbRating}
+                    {hasImdbIdentity ? (
+                      <ImdbIcon className="h-[12px] w-auto rounded-[2px]" />
+                    ) : (
+                      <Star
+                        className="h-[12px] w-[12px] text-amber-400"
+                        fill="currentColor"
+                        strokeWidth={0}
+                      />
+                    )}
+                    {imdbRating}
                   </span>
                 </>
               )}
@@ -269,12 +308,39 @@ export function CriticsPick({ meta }: { meta: Meta }) {
         <aside className="flex min-h-0 flex-col gap-4 overflow-hidden rounded-2xl border border-edge-soft bg-elevated/35 p-5">
           <div className="flex flex-col gap-2">
             <Quote size={22} className="shrink-0 text-accent" />
-            <p className="font-display text-[15px] italic leading-[1.5] text-ink/90 line-clamp-[5]">
-              <LinkedReview text={quote} people={linkablePeople} onPersonClick={handlePersonClick} />
+            <p
+              {...(canOpenOverview
+                ? {
+                    role: "button",
+                    tabIndex: 0,
+                    onClick: openOverview,
+                    onKeyDown: (e: React.KeyboardEvent) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openOverview();
+                      }
+                    },
+                  }
+                : {})}
+              className={`font-display text-[15px] italic leading-[1.5] text-ink/90 line-clamp-[5] ${
+                canOpenOverview
+                  ? "cursor-pointer rounded-sm outline-none transition-colors duration-150 hover:text-ink focus-visible:text-ink"
+                  : ""
+              }`}
+              style={reviewFade}
+            >
+              <LinkedReview
+                text={quote}
+                people={linkablePeople}
+                onPersonClick={handlePersonClick}
+              />
             </p>
             {activeReview ? (
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-ink-subtle">
+                <div
+                  className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-ink-subtle"
+                  style={reviewFade}
+                >
                   <span className="text-ink-muted">{activeReview.author}</span>
                   {typeof activeReview.rating === "number" && activeReview.rating > 0 && (
                     <span>· {activeReview.rating}/10</span>
@@ -298,7 +364,7 @@ export function CriticsPick({ meta }: { meta: Meta }) {
                     <div className="me-1 flex items-center gap-0.5">
                       <button
                         type="button"
-                        onClick={() => setReviewIdx((i) => (i - 1 + reviews.length) % reviews.length)}
+                        onClick={() => changeReview(-1)}
                         aria-label={t("Previous review")}
                         className="flex h-5 w-5 items-center justify-center rounded text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
                       >
@@ -309,7 +375,7 @@ export function CriticsPick({ meta }: { meta: Meta }) {
                       </span>
                       <button
                         type="button"
-                        onClick={() => setReviewIdx((i) => (i + 1) % reviews.length)}
+                        onClick={() => changeReview(1)}
                         aria-label={t("Next review")}
                         className="flex h-5 w-5 items-center justify-center rounded text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
                       >
@@ -329,10 +395,18 @@ export function CriticsPick({ meta }: { meta: Meta }) {
             ) : (
               <div className="flex items-center justify-between gap-3 text-[11.5px] text-ink-muted">
                 <div className="flex items-center gap-3">
-                  {meta.imdbRating && (
+                  {imdbRating && (
                     <span className="inline-flex items-center gap-1.5">
-                      {meta.id.startsWith("tt") ? <ImdbIcon className="h-[12px] w-auto rounded-[2px]" /> : <Star className="h-[12px] w-[12px] text-amber-400" fill="currentColor" strokeWidth={0} />}
-                      {meta.imdbRating}
+                      {hasImdbIdentity ? (
+                        <ImdbIcon className="h-[12px] w-auto rounded-[2px]" />
+                      ) : (
+                        <Star
+                          className="h-[12px] w-[12px] text-amber-400"
+                          fill="currentColor"
+                          strokeWidth={0}
+                        />
+                      )}
+                      {imdbRating}
                     </span>
                   )}
                   {settings.showRtBadge && omdb?.rtCritics != null && (
@@ -343,7 +417,9 @@ export function CriticsPick({ meta }: { meta: Meta }) {
                   )}
                   {omdb?.metascore != null && (
                     <span className="inline-flex items-center gap-1.5">
-                      <span className="rounded-[3px] bg-[#ffcc33] px-1 text-[9.5px] font-bold tracking-wider text-black">M</span>
+                      <span className="rounded-[3px] bg-[#ffcc33] px-1 text-[9.5px] font-bold tracking-wider text-black">
+                        M
+                      </span>
                       {omdb.metascore}
                     </span>
                   )}
@@ -375,7 +451,9 @@ export function CriticsPick({ meta }: { meta: Meta }) {
           {data && data.cast.length > 0 && (
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10.5px] uppercase tracking-[0.2em] text-ink-subtle">{t("Cast")}</span>
+                <span className="text-[10.5px] uppercase tracking-[0.2em] text-ink-subtle">
+                  {t("Cast")}
+                </span>
                 {data.cast.length > 4 && (
                   <div className="flex gap-1">
                     <button
@@ -415,7 +493,9 @@ export function CriticsPick({ meta }: { meta: Meta }) {
             <div className="flex flex-col gap-2 text-[12.5px]">
               {data.director && (
                 <div className="flex items-baseline justify-between gap-3">
-                  <span className="text-[10.5px] uppercase tracking-[0.2em] text-ink-subtle">{t("Director")}</span>
+                  <span className="text-[10.5px] uppercase tracking-[0.2em] text-ink-subtle">
+                    {t("Director")}
+                  </span>
                   <button
                     type="button"
                     onClick={() => openPerson(data.director!.id)}
@@ -449,7 +529,7 @@ export function CriticsPick({ meta }: { meta: Meta }) {
               }}
               className="rounded-full bg-ink px-6 py-2 text-[13px] font-semibold text-canvas transition-colors duration-200 hover:bg-ink/90"
             >
-              Play
+              {t("Play")}
             </button>
           </div>
         </aside>
@@ -471,7 +551,12 @@ export function CriticsPick({ meta }: { meta: Meta }) {
           overview={overview}
           review={activeReview}
           people={linkablePeople}
+          poster={rpdbPoster(settings.rpdbKey, meta.id, meta.poster) ?? meta.poster}
           onClose={() => setOverviewOpen(false)}
+          onOpenTitle={() => {
+            setOverviewOpen(false);
+            openMeta({ ...meta, logo: logo ?? meta.logo });
+          }}
           onPersonClick={handlePersonClick}
           reviewCount={reviews.length}
           reviewIndex={reviewIdx}

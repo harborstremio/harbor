@@ -1,4 +1,4 @@
-import { createAddonCatalogFetcher, normalizeName, type AddonRow } from "@/lib/addons";
+import { createAddonCatalogFetcher, isCollectionCatalog, normalizeName, type AddonRow } from "@/lib/addons";
 import { topMovies, topSeries, type Meta } from "@/lib/cinemeta";
 import {
   jikanNewReleases,
@@ -17,62 +17,28 @@ export function buildTmdbSpecs(settings: Settings): RowSpec[] {
   const key = settings.tmdbKey;
   const region = settings.region;
   return [
-    {
-      key: "tmdb-trending-movies",
-      type: "movie",
-      name: "Trending This Week",
-      fetcher: (p) => tmdbTrending(key, "movie", "week", p),
-    },
-    {
-      key: "tmdb-now-playing",
-      type: "movie",
-      name: "In Theaters Now",
-      noDedup: true,
-      fetcher: (p) => tmdbMovieRow(key, "now_playing", region, p),
-    },
-    {
-      key: "tmdb-popular-movies",
-      type: "movie",
-      name: "Popular Movies",
-      fetcher: (p) => tmdbMovieRow(key, "popular", region, p),
-    },
-    {
-      key: "tmdb-trending-tv",
-      type: "series",
-      name: "Trending Series",
-      fetcher: (p) => tmdbTrending(key, "tv", "week", p),
-    },
-    {
-      key: "tmdb-on-the-air",
-      type: "series",
-      name: "On The Air",
-      noDedup: true,
-      fetcher: (p) => tmdbSeriesRow(key, "on_the_air", p),
-    },
-    {
-      key: "tmdb-popular-tv",
-      type: "series",
-      name: "Popular Series",
-      fetcher: (p) => tmdbSeriesRow(key, "popular", p),
-    },
-    {
-      key: "tmdb-top-rated-tv",
-      type: "series",
-      name: "Top Rated Series",
-      fetcher: (p) => tmdbSeriesRow(key, "top_rated", p),
-    },
-    {
-      key: "tmdb-top-rated-movies",
-      type: "movie",
-      name: "Top Rated Movies",
-      fetcher: (p) => tmdbMovieRow(key, "top_rated", region, p),
-    },
+    { key: "tmdb-trending-movies", type: "movie", name: "Trending This Week", fetcher: (p) => tmdbTrending(key, "movie", "week", p) },
+    { key: "tmdb-now-playing", type: "movie", name: "In Theaters Now", noDedup: true, fetcher: (p) => tmdbMovieRow(key, "now_playing", region, p) },
+    { key: "tmdb-popular-movies", type: "movie", name: "Popular Movies", fetcher: (p) => tmdbMovieRow(key, "popular", region, p) },
+    { key: "tmdb-trending-tv", type: "series", name: "Trending Series", fetcher: (p) => tmdbTrending(key, "tv", "week", p) },
+    { key: "tmdb-on-the-air", type: "series", name: "On The Air", noDedup: true, fetcher: (p) => tmdbSeriesRow(key, "on_the_air", p) },
+    { key: "tmdb-popular-tv", type: "series", name: "Popular Series", fetcher: (p) => tmdbSeriesRow(key, "popular", p) },
+    { key: "tmdb-top-rated-tv", type: "series", name: "Top Rated Series", fetcher: (p) => tmdbSeriesRow(key, "top_rated", p) },
+    { key: "tmdb-top-rated-movies", type: "movie", name: "Top Rated Movies", fetcher: (p) => tmdbMovieRow(key, "top_rated", region, p) },
   ];
 }
 
 export async function buildTmdbRows(settings: Settings) {
   const specs = buildTmdbSpecs(settings);
-  const firstPages = await Promise.all(specs.map((s) => s.fetcher(1).catch(() => [] as Meta[])));
+  let failed = 0;
+  const firstPages = await Promise.all(
+    specs.map((s) =>
+      s.fetcher(1).catch(() => {
+        failed += 1;
+        return [] as Meta[];
+      }),
+    ),
+  );
   const rows: HomeRow[] = specs
     .map((spec, i) => ({
       key: spec.key,
@@ -93,10 +59,16 @@ export async function buildTmdbRows(settings: Settings) {
     byKey("tmdb-now-playing")[0],
     byKey("tmdb-on-the-air")[0],
   ].filter(Boolean) as Meta[];
-  return { rows, hero };
+  return { rows, hero, failed };
 }
 
 export async function buildCinemetaRows() {
+  let failed = 0;
+  const guard = (p: Promise<Meta[]>): Promise<Meta[]> =>
+    p.catch(() => {
+      failed += 1;
+      return [] as Meta[];
+    });
   const [
     movies,
     series,
@@ -116,32 +88,30 @@ export async function buildCinemetaRows() {
     sComedy,
     sCrime,
   ] = await Promise.all([
-    topMovies().catch(() => [] as Meta[]),
-    topSeries().catch(() => [] as Meta[]),
-    topMovies("Drama").catch(() => [] as Meta[]),
-    topMovies("Comedy").catch(() => [] as Meta[]),
-    topMovies("Action").catch(() => [] as Meta[]),
-    topMovies("Sci-Fi").catch(() => [] as Meta[]),
-    topMovies("Thriller").catch(() => [] as Meta[]),
-    topMovies("Animation").catch(() => [] as Meta[]),
-    topMovies("Horror").catch(() => [] as Meta[]),
-    topMovies("Romance").catch(() => [] as Meta[]),
-    topMovies("Adventure").catch(() => [] as Meta[]),
-    topMovies("Documentary").catch(() => [] as Meta[]),
-    topMovies("Mystery").catch(() => [] as Meta[]),
-    topMovies("Fantasy").catch(() => [] as Meta[]),
-    topSeries("Drama").catch(() => [] as Meta[]),
-    topSeries("Comedy").catch(() => [] as Meta[]),
-    topSeries("Crime").catch(() => [] as Meta[]),
+    guard(topMovies()),
+    guard(topSeries()),
+    guard(topMovies("Drama")),
+    guard(topMovies("Comedy")),
+    guard(topMovies("Action")),
+    guard(topMovies("Sci-Fi")),
+    guard(topMovies("Thriller")),
+    guard(topMovies("Animation")),
+    guard(topMovies("Horror")),
+    guard(topMovies("Romance")),
+    guard(topMovies("Adventure")),
+    guard(topMovies("Documentary")),
+    guard(topMovies("Mystery")),
+    guard(topMovies("Fantasy")),
+    guard(topSeries("Drama")),
+    guard(topSeries("Comedy")),
+    guard(topSeries("Crime")),
   ]);
-  const make = (key: string, type: "movie" | "series", name: string, metas: Meta[]): HomeRow => ({
-    key,
-    type,
-    name,
-    metas,
-    page: 1,
-    hasMore: false,
-  });
+  const make = (
+    key: string,
+    type: "movie" | "series",
+    name: string,
+    metas: Meta[],
+  ): HomeRow => ({ key, type, name, metas, page: 1, hasMore: false });
   const rows: HomeRow[] = [
     make("cm-top-movies", "movie", "Top 10 on Stremio", movies.slice(0, 10)),
     make("cm-popular", "movie", "Popular Movies", movies.slice(10, 40)),
@@ -162,10 +132,9 @@ export async function buildCinemetaRows() {
     make("cm-comedy-tv", "series", "Comedy Series", sComedy.slice(0, 30)),
     make("cm-crime-tv", "series", "Crime Series", sCrime.slice(0, 30)),
   ].filter((r) => r.metas.length > 0);
-  const hero = [movies[0], series[0], mDrama[0], mComedy[0], mAction[0], mScifi[0]].filter(
-    Boolean,
-  ) as Meta[];
-  return { rows, hero };
+  const hero = [movies[0], series[0], mDrama[0], mComedy[0], mAction[0], mScifi[0]]
+    .filter(Boolean) as Meta[];
+  return { rows, hero, failed };
 }
 
 export async function buildAnimeHomeRows(): Promise<HomeRow[]> {
@@ -281,10 +250,10 @@ export function mergeRows(
   const dedup = opts.dedup ?? true;
   const addonTypesByName = new Map<string, Set<string>>();
   for (const addon of addons) {
-    const name = addon.name.trim().toLowerCase();
-    const types = addonTypesByName.get(name) ?? new Set<string>();
+    const key = addon.name.trim().toLowerCase();
+    const types = addonTypesByName.get(key) ?? new Set<string>();
     types.add(addon.type);
-    addonTypesByName.set(name, types);
+    addonTypesByName.set(key, types);
   }
   const seen = new Set<string>();
   const out: HomeRow[] = [];
@@ -301,6 +270,7 @@ export function mergeRows(
     const step = a.metas.length;
     const more = a.more;
     const origin = a.metas[0]?.addonOrigin;
+    const collection = isCollectionCatalog({ type: a.type, id: more?.id, name: a.name });
     const canPage = !!more && step > 0;
     const sameNameTypes = addonTypesByName.get(a.name.trim().toLowerCase());
     const name =
@@ -318,7 +288,14 @@ export function mergeRows(
         canPage && more
           ? createAddonCatalogFetcher(more, {
               initialPageSize: step,
-              mapMeta: origin ? (m) => ({ ...m, addonOrigin: origin }) : undefined,
+              mapMeta:
+                origin || collection
+                  ? (m) => ({
+                      ...m,
+                      ...(origin ? { addonOrigin: origin } : null),
+                      ...(collection ? { isCollection: true } : null),
+                    })
+                  : undefined,
             })
           : undefined,
     });

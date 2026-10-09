@@ -1,0 +1,384 @@
+.sh-diamond {
+  scroll-margin-top: 90px;
+  margin: 24px 0;
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  overflow: hidden;
+}
+.sh-diamond summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  cursor: pointer;
+  list-style: none;
+}
+.sh-diamond summary::-webkit-details-marker {
+  display: none;
+}
+.sh-diamond summary:focus-visible,
+.sh-diamond button:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: -3px;
+}
+.sh-diamond-heading {
+  display: grid;
+  gap: 4px;
+}
+.sh-diamond-heading strong {
+  font-size: 16px;
+}
+.sh-diamond-heading small,
+.sh-diamond-toolbar > small {
+  color: var(--color-ink-muted);
+  font-size: 12px;
+}
+.sh-diamond-score {
+  margin-inline-start: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sh-diamond-score b {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.sh-diamond-score i {
+  font-style: normal;
+  color: var(--color-ink-subtle);
+  margin: 0 4px;
+}
+.sh-diamond-score > small {
+  font-size: 12px;
+  color: var(--color-ink-muted);
+}
+.sh-diamond[open] .sh-diamond-chevron {
+  transform: rotate(180deg);
+}
+.sh-diamond-body {
+  padding: 0 24px 24px;
+}
+.sh-diamond-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 0 20px;
+}
+.sh-diamond-teams {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+.sh-diamond-teams button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--color-ink-muted);
+  font-size: 13px;
+  min-width: 0;
+}
+.sh-diamond-teams button[aria-pressed="true"] {
+  background: var(--color-raised);
+  color: var(--color-ink);
+}
+.sh-diamond-teams img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+.sh-diamond-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 20px;
+  align-items: start;
+}
+.sh-diamond-field {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 1;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #14241e;
+}
+.sh-diamond-outfield {
+  position: absolute;
+  inset: 5% 2% 5%;
+  border-radius: 50% 50% 8% 8%;
+  clip-path: polygon(0 0, 100% 0, 100% 52%, 50% 91%, 0 52%);
+  background: repeating-linear-gradient(90deg, #224a34 0%, #224a34 10%, #28533b 10%, #28533b 20%);
+  border: 2px solid #90b79b55;
+}
+.sh-diamond-infield {
+  position: absolute;
+  inset: 37% 20% 10%;
+  background: #8a6550;
+  clip-path: polygon(50% 0, 100% 47%, 50% 94%, 0 47%);
+  border-radius: 22%;
+}
+.sh-diamond-grass {
+  position: absolute;
+  left: 37%;
+  top: 52%;
+  width: 26%;
+  height: 26%;
+  transform: rotate(45deg);
+  background: #315c3b;
+}
+.sh-diamond-path {
+  position: absolute;
+  left: 37.25%;
+  top: 52.25%;
+  width: 25.5%;
+  height: 25.5%;
+  border: 1px solid #fff9;
+  transform: rotate(45deg);
+}
+.sh-diamond-foul {
+  position: absolute;
+  height: 1px;
+  width: 60%;
+  bottom: 17%;
+  left: 50%;
+  transform-origin: left;
+  background: #ffffff99;
+}
+.sh-diamond-foul-left {
+  transform: rotate(-135deg);
+}
+.sh-diamond-foul-right {
+  transform: rotate(-45deg);
+}
+.sh-diamond-mound {
+  position: absolute;
+  left: 45.5%;
+  top: 60.5%;
+  width: 9%;
+  height: 9%;
+  border-radius: 50%;
+  background: #a87b5b;
+}
+.sh-diamond-home {
+  position: absolute;
+  left: 48.9%;
+  top: 82%;
+  width: 2.2%;
+  height: 2.2%;
+  background: #fff;
+  clip-path: polygon(0 0, 100% 0, 100% 55%, 50% 100%, 0 55%);
+}
+.sh-diamond-base {
+  position: absolute;
+  width: 1.8%;
+  height: 1.8%;
+  background: #fff;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.sh-diamond-base.is-occupied {
+  background: #ffc977;
+  outline: 3px solid #ffc97755;
+}
+.sh-diamond-position {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 26%;
+  text-align: center;
+}
+.sh-diamond-position button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  border-radius: 8px;
+  color: #fff;
+}
+.sh-diamond-portrait {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #19221e;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+.sh-diamond-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sh-diamond-position .sh-diamond-portrait {
+  width: clamp(28px, 8cqw, 48px);
+  height: clamp(28px, 8cqw, 48px);
+  border: 2px solid #fff9;
+}
+.sh-diamond-position button[aria-pressed="true"] .sh-diamond-portrait {
+  border-color: #ffc977;
+}
+.sh-diamond-name {
+  padding: 2px 5px;
+  background: #111e19ee;
+  border-radius: 4px;
+  font-size: clamp(10px, 2.1cqw, 13px);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 650;
+}
+.sh-diamond-position small {
+  color: #fff;
+  font-size: 10px;
+  background: #122019bb;
+  border-radius: 3px;
+  padding: 0 4px;
+}
+.sh-diamond-vacant {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px dashed #fff7;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 11px;
+  background: #14241e99;
+}
+.sh-diamond-order h3 {
+  font-size: 14px;
+  font-weight: 650;
+  padding: 4px 0 12px;
+}
+.sh-diamond-order p {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+.sh-diamond-order ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sh-diamond-order button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  border-radius: 7px;
+  padding: 6px;
+  text-align: start;
+}
+.sh-diamond-order button:hover,
+.sh-diamond-order button[aria-pressed="true"] {
+  background: var(--color-elevated);
+}
+.sh-diamond-order button > b {
+  width: 14px;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+}
+.sh-diamond-order .sh-diamond-portrait {
+  width: 30px;
+  height: 30px;
+}
+.sh-diamond-order button > span:not(.sh-diamond-portrait) {
+  flex: 1;
+  font-size: 12px;
+}
+.sh-diamond-order button > small {
+  font-size: 10px;
+  color: var(--color-ink-muted);
+}
+.sh-diamond-inspect {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-elevated);
+  border-radius: 8px;
+}
+.sh-diamond-inspect > div {
+  display: grid;
+  gap: 2px;
+}
+.sh-diamond-inspect small,
+.sh-diamond-inspect span:not(.sh-diamond-portrait) {
+  color: var(--color-ink-muted);
+  font-size: 12px;
+}
+.sh-diamond-game-state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 28px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-edge-soft);
+}
+.sh-diamond-game-state > div {
+  display: grid;
+  gap: 4px;
+}
+.sh-diamond-game-state small {
+  color: var(--color-ink-muted);
+  font-size: 11px;
+}
+.sh-diamond-game-state b {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+.sh-diamond-game-state strong {
+  font-size: 13px;
+}
+@media (max-width: 1150px) {
+  .sh-diamond-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sh-diamond-field {
+    max-width: 650px;
+    width: 100%;
+    margin: auto;
+  }
+  .sh-diamond-order ol {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 14px;
+  }
+}
+@media (max-width: 600px) {
+  .sh-diamond summary {
+    padding: 16px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .sh-diamond-score {
+    order: 2;
+    width: 100%;
+    margin: 0;
+    flex-wrap: wrap;
+  }
+  .sh-diamond-chevron {
+    margin-inline-start: auto;
+  }
+  .sh-diamond-body {
+    padding: 0 12px 16px;
+  }
+  .sh-diamond-teams button {
+    padding: 8px;
+    font-size: 12px;
+  }
+  .sh-diamond-order ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

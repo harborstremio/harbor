@@ -1,0 +1,92 @@
+.games-workspace.is-library:has(.games-emulation) .games-mast>.games-search { display:flex; }
+.games-retro-heading { display:flex; align-items:center; justify-content:space-between; gap:24px; margin:32px 0 25px; }
+.games-retro-heading h2 { margin:0; font-size:32px; font-weight:600; line-height:1.2; letter-spacing:-.035em; }
+.games-retro-heading p { color:var(--color-ink-muted); font-size:12px; margin:8px 0 0; }
+.games-retro-heading-actions { display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.games-retro-heading-actions .games-button { min-height:40px; }
+.games-retro-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px 24px; flex-wrap:wrap; margin-bottom:25px; }
+.games-retro-filters,.games-retro-sort { display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0; }
+.games-retro-filters>div:first-child { max-width:260px; }
+.games-retro-filters>div:first-child>button { max-width:100%; }
+.games-retro-filters>div:first-child>button>span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.games-retro-toolbar .games-library-select { background:transparent; font-size:12px; min-height:34px; padding-inline:9px; }
+.games-retro-workspace,.games-retro-content { min-width:0; }
+.games-retro-view { display:flex; gap:3px; }
+.games-retro-view button { width:34px; height:34px; display:grid; place-items:center; border-radius:6px; color:var(--color-ink-muted); }
+.games-retro-view button[aria-pressed=true] { color:var(--color-ink); background:var(--color-elevated); }
+.games-retro-view button:hover { color:var(--color-ink); }
+.games-retro-empty { display:flex; align-items:center; flex-direction:column; text-align:center; padding:65px 24px 76px; }
+.games-retro-empty>svg { color:var(--color-ink-muted); margin-bottom:20px; }
+.games-retro-empty h3 { margin:0 0 10px; font-weight:550; font-size:22px; letter-spacing:-.025em; }
+.games-retro-empty p { color:var(--color-ink-muted); font-size:13px; line-height:1.7; max-width:39ch; margin:0; }
+.games-retro-empty .games-button { margin-top:23px; }
+.games-retro-games,.games-retro-loading { display:grid; grid-template-columns:repeat(auto-fill,minmax(145px,1fr)); gap:28px 18px; }
+.games-retro-game { min-width:0; position:relative; }
+.games-retro-media { position:relative; aspect-ratio:3/4; }
+.games-retro-cover { width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--color-surface); border-radius:7px; overflow:hidden; position:relative; }
+.games-retro-cover>img { width:100%; height:100%; object-fit:cover; }
+.games-retro-file { display:flex; flex-direction:column; align-items:center; gap:12px; color:var(--color-ink-subtle); }
+.games-retro-file small { font-size:11px; letter-spacing:.06em; text-transform:uppercase; }
+.games-retro-game-info { min-width:0; padding-top:11px; }
+.games-retro-game h4 { font-size:13px; font-weight:550; line-height:1.45; margin:0 0 5px; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.games-retro-game-info>span,.games-retro-game-info>small { color:var(--color-ink-muted); font-size:11px; line-height:1.6; display:block; }
+.games-retro-game-info>small { color:var(--color-ink-subtle); }
+.games-retro-game-actions { display:flex; gap:5px; align-items:center; }
+.is-covers .games-retro-game-actions { position:absolute; inset-inline:0; top:0; aspect-ratio:3/4; pointer-events:none; }
+.is-covers .games-retro-game-actions>.games-icon-button { position:absolute; width:32px; height:32px; pointer-events:auto; background:rgb(17 18 19 / .88); color:#fff; opacity:0; transition:opacity 140ms ease; }
+.is-covers .games-retro-game-actions>.games-icon-button:first-child { inset-inline-end:8px; top:8px; }
+.is-covers .games-retro-game-actions>.games-icon-button:nth-child(2) { inset-inline-start:8px; bottom:8px; }
+.is-covers .games-retro-game-actions>.games-retro-play { inset-inline-end:8px; bottom:8px; width:36px; height:36px; border-radius:50%; background:#f5f5f2; color:#151616; }
+.is-covers .games-retro-game:is(:hover,:focus-within) .games-retro-game-actions>.games-icon-button { opacity:1; }
+.is-covers .games-retro-game:is(:hover,:focus-within) .games-retro-game-actions>.games-icon-button:disabled { opacity:.45; }
+.games-retro-games[data-selection=true] .games-retro-game-actions { display:none; }
+.games-retro-games.is-list { grid-template-columns:1fr; gap:6px; }
+.is-list .games-retro-game { display:flex; align-items:center; gap:16px; padding:10px 12px; background:var(--color-surface); border-radius:7px; }
+.is-list .games-retro-media { width:45px; flex:0 0 45px; }
+.is-list .games-retro-cover { border-radius:4px; }
+.is-list .games-retro-file svg { width:24px; }
+.is-list .games-retro-file small { display:none; }
+.is-list .games-retro-game-info { flex:1; padding:0; }
+.is-list .games-retro-game-actions { flex:0 0 auto; }
+.games-local-play { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.games-local-play .games-retro-running { background:currentColor; }
+.games-retro-running { width:8px; height:8px; background:var(--color-accent); border-radius:50%; }
+.games-retro-folders { margin-top:28px; font-size:12px; }
+.games-retro-folders summary { padding-block:12px; color:var(--color-ink-muted); cursor:pointer; }
+.games-retro-folders>div { display:flex; align-items:flex-start; gap:12px; padding-block:12px; }
+.games-retro-folders>div>span { flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; }
+.games-retro-folders strong { font-size:12px; font-weight:500; }
+.games-retro-folders small { font-size:11px; color:var(--color-ink-muted); overflow-wrap:anywhere; }
+.games-retro-folders p { font-size:11px; color:var(--color-ink-subtle); }
+.games-retro-setup { background:var(--color-surface); padding:24px; margin-bottom:24px; border-radius:9px; min-width:0; }
+.games-retro-setup>header { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.games-retro-setup h3 { font-size:20px; font-weight:550; letter-spacing:-.025em; margin:0; }
+.games-retro-setup>p { font-size:13px; line-height:1.65; color:var(--color-ink-muted); margin:8px 0 20px; max-width:70ch; }
+.games-retro-setup-controls { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.games-retro-setup-controls>div { max-width:100%; }
+.games-retro-setup-controls>div>button { max-width:100%; white-space:normal; text-align:start; }
+.games-retro-setup>p.games-retro-formats { font-size:11px; margin:14px 0 0; }
+.games-retro-app { display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-top:20px; }
+.games-retro-app>span { font-size:12px; color:var(--color-ink-muted); }
+.games-retro-app strong { font-size:13px; font-weight:500; overflow-wrap:anywhere; }
+.games-retro-app small { font-size:11px; line-height:1.5; color:var(--color-ink-muted); overflow-wrap:anywhere; }
+.games-retro-app .games-button { font-size:12px; min-height:36px; margin-top:4px; }
+.games-retro-detect { display:flex; align-items:center; gap:9px; font-size:12px; color:var(--color-ink-muted); margin:22px 0 16px; }
+.games-retro-detected { display:flex; align-items:center; gap:12px; text-align:start; width:100%; padding:14px; margin-block:6px; border-radius:7px; background:var(--color-elevated); }
+.games-retro-detected>span { font-size:12px; flex:1; min-width:0; }
+.games-retro-detected small { display:block; margin-top:5px; font-size:11px; color:var(--color-ink-muted); overflow-wrap:anywhere; }
+.games-retro-official { display:inline-flex; align-items:center; gap:8px; font-size:12px; margin-top:9px; }
+.games-retro-setup>p.games-retro-firmware { font-size:12px; margin:18px 0 0; }
+.games-retro-desktop { padding:40px 0; max-width:580px; }
+.games-retro-desktop h3 { font-size:23px; font-weight:500; margin-top:22px; }
+.games-retro-desktop p { font-size:14px; line-height:1.7; color:var(--color-ink-muted); margin-top:12px; }
+.games-retro-error { display:flex; align-items:center; gap:22px; background:var(--color-elevated); border-radius:8px; font-size:13px; line-height:1.6; padding:16px 18px; margin-top:25px; }
+.games-retro-error>span { flex:1; }
+.games-retro-maintenance { display:flex; align-items:center; flex-wrap:wrap; gap:24px; margin-top:22px; }
+.games-retro-rescan,.games-retro-maintenance .games-button { display:inline-flex; align-items:center; gap:8px; background:transparent; color:var(--color-ink-muted); font-size:12px; padding:8px 0; }
+.games-retro-loading>div>span { display:block; aspect-ratio:3/4; background:var(--color-surface); border-radius:7px; }
+.games-retro-loading i { display:block; width:70%; height:12px; margin-top:14px; background:var(--color-surface); border-radius:3px; }
+@media(hover:none) { .is-covers .games-retro-game-actions>.games-icon-button { opacity:1; } }
+@media(prefers-reduced-motion:reduce) { .is-covers .games-retro-game-actions>.games-icon-button { transition:none; } }
+@container(max-width:800px) { .games-retro-toolbar { align-items:flex-start; } .games-retro-sort { margin-inline-start:auto; } }
+@container(max-width:550px) { .games-retro-heading { gap:14px; align-items:flex-start; flex-wrap:wrap; margin-top:24px; } .games-retro-heading h2 { font-size:28px; } .games-retro-heading-actions { margin-inline-start:auto; } .games-retro-filters,.games-retro-sort { width:100%; justify-content:space-between; } .games-retro-filters>div:first-child { max-width:62%; } .games-retro-games,.games-retro-loading { grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px 14px; } .games-retro-games.is-list { grid-template-columns:1fr; gap:6px; } .is-list .games-retro-game { gap:10px; padding:10px; flex-wrap:wrap; } .is-list .games-retro-game-actions { margin-inline-start:auto; } .games-retro-setup { padding:18px; } .games-retro-empty { padding:50px 10px; } }

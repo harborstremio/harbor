@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState } from "react";
-import { Play } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { Poster } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
 import { enrichVod } from "@/lib/iptv/vod-enrich";

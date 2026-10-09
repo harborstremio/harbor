@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Harbor Setup, footer buttons</title>
+    <link rel="stylesheet" href="styles/fonts.css" />
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/base.css" />
+    <link rel="stylesheet" href="styles/buttons-candidates.css" />
+    <style>
+      body {
+        width: auto;
+        height: auto;
+        display: block;
+        margin: 0;
+        padding: 26px 0 60px;
+        background: #0b0c0e;
+        overflow: auto;
+        font-family: var(--font-sans);
+      }
+      .c-wrap { max-width: 1120px; margin: 0 auto; padding: 0 26px; }
+      .c-top h1 {
+        margin: 0 0 4px;
+        font-size: 19px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+      .c-top p {
+        margin: 0 0 22px;
+        font-size: 12.5px;
+        line-height: 18px;
+        color: var(--ink-muted);
+      }
+      .c-panel {
+        margin-bottom: 18px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--canvas);
+        box-shadow: inset 0 0 0 1px var(--edge-soft);
+      }
+      .c-head {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        padding: 14px 22px 12px;
+      }
+      .c-tag {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--accent);
+      }
+      .c-name { font-size: 14px; font-weight: 500; color: var(--ink); }
+      .c-line { font-size: 12.5px; color: var(--ink-subtle); }
+      .c-stage {
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 var(--gutter);
+      }
+      .c-note { font-size: 13.5px; line-height: 20px; color: var(--ink-muted); }
+      .c-variants {
+        display: flex;
+        gap: 26px;
+        padding: 0 22px 18px;
+        flex-wrap: wrap;
+      }
+      .c-variant {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .c-label {
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-subtle);
+        min-width: 74px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="c-wrap">
+      <div class="c-top">
+        <h1>Footer buttons</h1>
+        <p>
+          Each block is the real 120px footer band at real size. Hover and click them. The lower row
+          shows the label variants and the disabled primary.
+        </p>
+      </div>
+      <div id="panels"></div>
+    </div>
+
+    <script>
+      const CANDIDATES = [
+        { cls: 'btn-a', tag: 'A', name: 'Plate', line: 'Rockstar taken literally: solid white plate, outlined BACK, tracked caps.' },
+        { cls: 'btn-b', tag: 'B', name: 'Set', line: 'The quiet pair: sentence case, no outline, two solid pills at two densities.' },
+        { cls: 'btn-c', tag: 'C', name: 'Signal', line: 'One object: a warm amber plate, with Back reduced to bare tracked type.' }
+      ];
+
+      const LABELS = ['Continue', 'Install', 'Launch Harbor'];
+
+      function pill(cls, label, disabled) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = cls + ' t-btn';
+        if (disabled) b.disabled = true;
+        const s = document.createElement('span');
+        s.className = 'hb-pill-label';
+        s.textContent = label;
+        b.appendChild(s);
+        return b;
+      }
+
+      const host = document.getElementById('panels');
+
+      CANDIDATES.forEach((c) => {
+        const panel = document.createElement('div');
+        panel.className = 'c-panel ' + c.cls;
+
+        const head = document.createElement('div');
+        head.className = 'c-head';
+        head.innerHTML =
+          '<span class="c-tag">' + c.tag + '</span>' +
+          '<span class="c-name">' + (c.name || 'unnamed') + '</span>' +
+          '<span class="c-line">' + (c.line || '') + '</span>';
+
+        const stage = document.createElement('div');
+        stage.className = 'c-stage';
+
+        const note = document.createElement('p');
+        note.className = 'c-note';
+        note.textContent = '558 MB needed. Nothing is downloaded.';
+
+        const actions = document.createElement('div');
+        actions.className = 'hb-actions';
+        actions.append(pill('hb-pill-ghost', 'Back'), pill('hb-pill', 'Continue'));
+
+        stage.append(note, actions);
+
+        const variants = document.createElement('div');
+        variants.className = 'c-variants';
+
+        LABELS.forEach((label) => {
+          const v = document.createElement('div');
+          v.className = 'c-variant';
+          const l = document.createElement('span');
+          l.className = 'c-label';
+          l.textContent = label;
+          v.append(l, pill('hb-pill', label));
+          variants.appendChild(v);
+        });
+
+        const dis = document.createElement('div');
+        dis.className = 'c-variant';
+        const dl = document.createElement('span');
+        dl.className = 'c-label';
+        dl.textContent = 'Disabled';
+        dis.append(dl, pill('hb-pill', 'Continue', true));
+        variants.appendChild(dis);
+
+        panel.append(head, stage, variants);
+        host.appendChild(panel);
+      });
+
+      const html = document.documentElement;
+      html.setAttribute('data-input-modality', 'pointer');
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') html.removeAttribute('data-input-modality');
+      });
+      window.addEventListener('pointerdown', () => {
+        html.setAttribute('data-input-modality', 'pointer');
+      });
+    </script>
+  </body>
+</html>

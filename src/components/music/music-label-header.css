@@ -1,0 +1,79 @@
+.music-label-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--color-edge-soft);
+  border-radius: 14px;
+  background: var(--color-surface);
+}
+.music-label-header[data-loading] {
+  min-height: 92px;
+  border-style: dashed;
+  opacity: 0.55;
+}
+.music-label-logo {
+  height: 56px;
+  max-width: 168px;
+  object-fit: contain;
+  object-position: left center;
+  flex-shrink: 0;
+}
+.music-label-mark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--color-elevated);
+  color: var(--color-ink-muted);
+  font-size: 24px;
+  font-weight: 600;
+}
+.music-label-facts {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+}
+.music-label-line {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.music-label-note {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--color-ink-muted);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.music-label-facts button {
+  align-self: flex-start;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+.music-label-facts button:hover {
+  text-decoration: underline;
+}
+.music-label-count {
+  flex-shrink: 0;
+  font-size: 12.5px;
+  color: var(--color-ink-subtle);
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 640px) {
+  .music-label-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .music-label-count {
+    order: 3;
+  }
+}

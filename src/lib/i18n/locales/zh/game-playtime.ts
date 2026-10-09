@@ -1,0 +1,22 @@
+export default {
+  "games.playtime.title": "游玩时长",
+  "games.playtime.total": "你的总时长",
+  "games.playtime.tracked": "Harbor记录的时长",
+  "games.playtime.adjusted": "由你调整",
+  "games.playtime.changed": "调整于{date}",
+  "games.playtime.edit": "调整游玩时长",
+  "games.playtime.hours": "小时",
+  "games.playtime.minutes": "分钟",
+  "games.playtime.duration": "{hours}小时{minutes}分钟",
+  "games.playtime.card": "已游玩{time}",
+  "games.playtime.note": "补充在其他地方游玩的时间，或修正总时长。Harbor会保留已记录的游玩时长，并将今后的游玩时间累加到此总时长。",
+  "games.playtime.localNote": "仅适用于你的Harbor个人资料中的此本地副本。Steam和其他账户不会发生变化。",
+  "games.playtime.running": "请先关闭此游戏，再调整游玩时长。",
+  "games.playtime.save": "保存游玩时长",
+  "games.playtime.finishEdit": "保存其他设置前，请先保存或取消游玩时长的修改。",
+  "games.playtime.reset": "使用记录的时长",
+  "games.playtime.invalid": "小时请输入0至999,999之间的整数，分钟请输入0至59之间的数值。",
+  "games.playtime.saved": "游玩时长已保存。",
+  "games.playtime.resetDone": "正在使用Harbor记录的时长。",
+  "games.custom.launch_playtime": "无法保存此游玩时长。请检查小时和分钟后重试。"
+} satisfies Record<string, string>;

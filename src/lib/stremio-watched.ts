@@ -3,6 +3,33 @@ import type { LibraryItem } from "./stremio";
 
 type CinemetaVideo = NonNullable<Meta["videos"]>[number];
 
+function ordKey(v: number | null | undefined): number {
+  return typeof v === "number" && Number.isFinite(v) ? v : -Infinity;
+}
+
+function releasedMs(v: CinemetaVideo): number {
+  const r = v?.released ?? v?.firstAired;
+  if (!r) return -Infinity;
+  const t = Date.parse(r);
+  return Number.isNaN(t) ? -Infinity : t;
+}
+
+function cmpNum(a: number, b: number): number {
+  return a === b ? 0 : a < b ? -1 : 1;
+}
+
+// Stremio (library_item.rs LibraryItemState.watched_bitfield) indexes the watched
+// bitfield against videos sorted by (season, episode, released); bit i is the position
+// in THAT order. We must match it or checkmarks land on the wrong episode cross-client.
+function canonicalVideoOrder(videos: CinemetaVideo[]): CinemetaVideo[] {
+  return [...videos].sort(
+    (a, b) =>
+      cmpNum(ordKey(a?.season), ordKey(b?.season)) ||
+      cmpNum(ordKey(a?.episode), ordKey(b?.episode)) ||
+      cmpNum(releasedMs(a), releasedMs(b)),
+  );
+}
+
 export async function decodeWatchedEpisodes(
   watchedField: string | null | undefined,
   videos: CinemetaVideo[] | undefined,
@@ -27,10 +54,11 @@ export async function decodeWatchedEpisodes(
   }
   const bit = (i: number) =>
     i >= 0 && i < bytes.length * 8 && (bytes[i >> 3] & (1 << (i & 7))) !== 0;
-  const anchorIdx = videos.findIndex((v) => v.id === anchorVideoId);
-  const offset = anchorIdx >= 0 ? anchorLength - anchorIdx - 1 : 0;
-  for (let i = 0; i < videos.length; i++) {
-    const v = videos[i];
+  const sorted = canonicalVideoOrder(videos);
+  const anchorIdx = sorted.findIndex((v) => v.id === anchorVideoId);
+  const offset = anchorLength - anchorIdx - 1;
+  for (let i = 0; i < sorted.length; i++) {
+    const v = sorted[i];
     if (v?.season != null && v?.episode != null && bit(i + offset)) {
       keys.add(`${v.season}:${v.episode}`);
     }
@@ -43,11 +71,14 @@ export async function encodeWatchedEpisodes(
   videos: CinemetaVideo[] | undefined,
 ): Promise<string | null> {
   if (!videos || videos.length === 0) return null;
-  const bytes = new Uint8Array(Math.ceil(videos.length / 8));
-  for (let i = 0; i < videos.length; i++) {
-    const v = videos[i];
+  const sorted = canonicalVideoOrder(videos);
+  const bytes = new Uint8Array(Math.ceil(sorted.length / 8));
+  let lastWatched = -1;
+  for (let i = 0; i < sorted.length; i++) {
+    const v = sorted[i];
     if (v?.season != null && v?.episode != null && watchedKeys.has(`${v.season}:${v.episode}`)) {
       bytes[i >> 3] |= 1 << (i & 7);
+      lastWatched = i;
     }
   }
   let b64: string;
@@ -60,12 +91,13 @@ export async function encodeWatchedEpisodes(
   } catch {
     return null;
   }
-  const anchorVideoId = videos[videos.length - 1]?.id;
+  const anchorIdx = Math.max(0, lastWatched);
+  const anchorVideoId = sorted[anchorIdx]?.id;
   if (!anchorVideoId) return null;
-  return `${anchorVideoId}:${videos.length}:${b64}`;
+  return `${anchorVideoId}:${anchorIdx + 1}:${b64}`;
 }
 
 export function stremioMovieWatched(item: LibraryItem | null | undefined): boolean {
   if (!item) return false;
-  return (item.state?.flaggedWatched ?? 0) > 0;
+  return (item.state?.flaggedWatched ?? 0) > 0 || (item.state?.timesWatched ?? 0) > 0;
 }

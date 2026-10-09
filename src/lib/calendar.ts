@@ -1,6 +1,18 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
+import { invoke } from "@tauri-apps/api/core";
+import { safeFetch as fetch, safeFetchBytes } from "@/lib/safe-fetch";
+import { formatAirDate } from "@/lib/dates";
+import {
+  isPermissionGranted as tauriNotifyGranted,
+  requestPermission as tauriNotifyRequest,
+  sendNotification as tauriSendNotification,
+} from "@tauri-apps/plugin-notification";
+import { emitDeepLinkOpen, parseHarborOpen } from "@/lib/deep-link";
+import { isLinuxDesktop, isMacDesktop, isWeb, isWindowsDesktop } from "@/lib/platform";
+import { ensureNotifyPermission } from "@/lib/reminders";
 import { setItemWithRecovery } from "@/lib/storage-recovery";
+import { focusWindow } from "@/lib/window";
 import { tmdbImdbId } from "./providers/tmdb";
+import { automaticNotificationPermission } from "./notification-permission";
 
 const TMDB = "https://api.themoviedb.org/3";
 const IMG = "https://image.tmdb.org/t/p";
@@ -14,12 +26,15 @@ export type CalendarItem = {
   poster: string | null;
   background: string | null;
   releaseDate: string;
+  releaseTime?: string;
+  releaseAtMs?: number;
   isAnime: boolean;
   overview: string;
   voteAverage: number;
 };
 
 export type CalendarFilter = "all" | "movie" | "tv" | "anime";
+export type CalendarPosterSize = "default" | "large";
 
 const POSTER = (path: string | null | undefined) => (path ? `${IMG}/w342${path}` : null);
 const BACKDROP = (path: string | null | undefined) => (path ? `${IMG}/w780${path}` : null);
@@ -52,10 +67,13 @@ type DiscoverTvRow = {
   original_language?: string;
 };
 
-function isAnimeRow(row: { genre_ids?: number[]; original_language?: string; origin_country?: string[] }): boolean {
+function isAnimeRow(row: {
+  genre_ids?: number[];
+  original_language?: string;
+  origin_country?: string[];
+}): boolean {
   const animation = (row.genre_ids ?? []).includes(ANIMATION_GENRE);
-  const japanese =
-    row.original_language === "ja" || (row.origin_country ?? []).includes("JP");
+  const japanese = row.original_language === "ja" || (row.origin_country ?? []).includes("JP");
   return animation && japanese;
 }
 
@@ -108,7 +126,11 @@ async function fetchDiscoverTv(
   }
 }
 
-async function fetchUpcomingMovies(apiKey: string, region: string, page: number): Promise<DiscoverMovieRow[]> {
+async function fetchUpcomingMovies(
+  apiKey: string,
+  region: string,
+  page: number,
+): Promise<DiscoverMovieRow[]> {
   const url = new URL(`${TMDB}/movie/upcoming`);
   url.searchParams.set("api_key", apiKey);
   if (region) url.searchParams.set("region", region);
@@ -138,11 +160,7 @@ export async function fetchCalendarRange(
     fetchDiscoverTv(apiKey, start, end, 1),
     fetchDiscoverTv(apiKey, start, end, 2),
   ]);
-  const movieP1 = [
-    ...m1,
-    ...m2,
-    ...mu1.filter((m) => inRange(m.release_date)),
-  ];
+  const movieP1 = [...m1, ...m2, ...mu1.filter((m) => inRange(m.release_date))];
   const movieP2: DiscoverMovieRow[] = [];
   const tvP1 = [...t1, ...t2];
   const tvP2: DiscoverTvRow[] = [];
@@ -401,9 +419,9 @@ export async function fetchCustomCalendar(opts: {
   const wantTv = filters.mediaTypes.tv;
   const wantAnime = filters.mediaTypes.anime;
 
-  const tasks: Promise<CalendarItem[]>[] = [
-    ...filters.trackedPeople.map((p) => fetchPersonUpcoming(apiKey, p, start, end)),
-  ];
+  const tasks: Promise<CalendarItem[]>[] = filters.trackedPeople.map((p) =>
+    fetchPersonUpcoming(apiKey, p, start, end),
+  );
   if (wantMovie || wantAnime) {
     tasks.push(
       discoverFiltered({
@@ -475,13 +493,153 @@ export type WebhookPayload = {
   items: CalendarItem[];
 };
 
-export type WebhookKind = "discord" | "telegram";
+export type WebhookKind = "discord" | "telegram" | "desktop";
+
+const DESKTOP_NOTIFY_CAP = 10;
+const POSTER_FETCH_TIMEOUT_MS = 8000;
+const POSTER_MAX_BYTES = 2 * 1024 * 1024;
+const HARBOR_ICON_PATH = "/favicon.png";
+
+function desktopNotifyBody(item: CalendarItem): string {
+  const date = formatAirDate(item.releaseDate) || item.releaseDate;
+  return item.releaseTime ? `${date} · ${item.releaseTime}` : date;
+}
+
+async function fetchPosterBytes(url: string): Promise<number[] | undefined> {
+  try {
+    // A same-origin app asset (e.g. the Harbor icon) lives inside the webview's
+    // own bundle — safeFetchBytes's native-fetch routing is for external CDNs
+    // and can't reach it, so read it with a plain same-origin fetch instead.
+    const res = url.startsWith("/")
+      ? await window.fetch(url)
+      : await safeFetchBytes(url, undefined, POSTER_FETCH_TIMEOUT_MS, POSTER_MAX_BYTES);
+    if (!res.ok) return undefined;
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    return bytes.length > 0 ? Array.from(bytes) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function isDesktopTauri(): boolean {
+  return isWindowsDesktop() || isMacDesktop() || isLinuxDesktop();
+}
+
+export async function ensureDesktopNotifyPermission(): Promise<boolean> {
+  if (isWeb()) return ensureNotifyPermission();
+  try {
+    if (await tauriNotifyGranted()) return true;
+    return (await tauriNotifyRequest()) === "granted";
+  } catch {
+    return false;
+  }
+}
+
+/** Read permission for automatic events without prompting the user. */
+export async function hasDesktopNotifyPermission(): Promise<boolean> {
+  return automaticNotificationPermission(isDesktopTauri(), "Notification" in window ? Notification.permission : undefined,
+    () => invoke<boolean | null>("plugin:notification|is_permission_granted"));
+}
+
+function detailDeepLink(item: CalendarItem): string | undefined {
+  if (!item.imdbId) return undefined;
+  const metaType = item.type === "tv" ? "series" : "movie";
+  return `harbor://detail/${metaType}/${encodeURIComponent(item.imdbId)}`;
+}
+
+export async function sendDesktopNotification(
+  title: string,
+  body: string,
+  deepLink?: string,
+  posterUrl?: string,
+): Promise<boolean> {
+  if (isWeb()) {
+    try {
+      if (!("Notification" in window) || Notification.permission !== "granted") return false;
+      const n = new Notification(title, { body, icon: posterUrl || undefined });
+      n.onclick = () => {
+        if (deepLink) {
+          const open = parseHarborOpen(deepLink);
+          if (open) emitDeepLinkOpen(open);
+        }
+        void focusWindow();
+        n.close();
+      };
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  if (isDesktopTauri()) {
+    try {
+      const imageBytes = posterUrl ? await fetchPosterBytes(posterUrl) : undefined;
+      await invoke("send_clickable_notification", {
+        title,
+        body,
+        deepLink: deepLink ?? null,
+        imageBytes: imageBytes ?? null,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  try {
+    tauriSendNotification({ title, body });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export async function fireWebhook(
   kind: WebhookKind,
   url: string,
   payload: WebhookPayload,
+  signal?: AbortSignal,
 ): Promise<{ ok: boolean; status: number; error: string | null }> {
+  if (kind === "desktop") {
+    const granted = await ensureDesktopNotifyPermission();
+    if (!granted) {
+      return { ok: false, status: 0, error: "Notifications permission not granted" };
+    }
+    let delivered = 0;
+    let attempted = 0;
+    if (payload.items.length === 0) {
+      attempted = 1;
+      if (await sendDesktopNotification("Harbor", payload.text, undefined, HARBOR_ICON_PATH)) {
+        delivered = 1;
+      }
+    } else {
+      for (const i of payload.items.slice(0, DESKTOP_NOTIFY_CAP)) {
+        attempted++;
+        const tag = i.isAnime ? "🍙" : i.type === "movie" ? "🎬" : "📺";
+        if (
+          await sendDesktopNotification(
+            `${tag} ${i.name}`,
+            desktopNotifyBody(i),
+            detailDeepLink(i),
+            i.poster ?? undefined,
+          )
+        ) {
+          delivered++;
+        }
+      }
+      if (payload.items.length > DESKTOP_NOTIFY_CAP) {
+        attempted++;
+        if (await sendDesktopNotification("Harbor", payload.text)) delivered++;
+      }
+    }
+    if (delivered === 0) {
+      return { ok: false, status: 0, error: "Failed to show notification" };
+    }
+    return {
+      ok: true,
+      status: 0,
+      error:
+        delivered < attempted ? `${attempted - delivered} notification(s) failed to show` : null,
+    };
+  }
   if (!url) return { ok: false, status: 0, error: "No URL configured" };
   try {
     if (kind === "discord") {
@@ -511,6 +669,7 @@ export async function fireWebhook(
       if (embeds.length > 0) body.embeds = embeds;
       const res = await fetch(url, {
         method: "POST",
+        signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
@@ -525,6 +684,7 @@ export async function fireWebhook(
       const text = lines.join("\n");
       const res = await fetch(url, {
         method: "POST",
+        signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: extractTelegramChatId(url),

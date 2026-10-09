@@ -5,6 +5,7 @@ import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { artAtWidth } from "@/lib/image-rung";
 
 function shuffle<T>(arr: T[]): T[] {
   const out = [...arr];
@@ -68,7 +69,7 @@ function SurpriseTile({ meta }: { meta: Meta }) {
   const poster = usePosterChain(settings.rpdbKey, meta.id, meta.poster, meta.type === "series" ? "series" : "movie");
   return (
     <img
-      src={poster.src}
+      src={artAtWidth(poster.src, 40)}
       alt=""
       draggable={false}
       loading="lazy"

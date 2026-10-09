@@ -1,0 +1,66 @@
+.sports-nav-ball {
+  display: flex;
+  position: relative;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  vertical-align: middle;
+  overflow: visible;
+}
+.sports-nav-ball-art {
+  position: absolute;
+  inset: 2px;
+  background: currentColor;
+  mask-size: contain;
+  mask-position: center;
+  mask-repeat: no-repeat;
+}
+.sports-nav-ball-art {
+  transform-origin: center bottom;
+}
+.sports-nav-ball-art.is-bouncing {
+  animation:
+    sports-nav-bounce 700ms ease-in-out both,
+    sports-nav-compress 700ms ease-in-out both;
+}
+/* Two diminishing hops, using yui's authored jump stops. */
+@keyframes sports-nav-bounce {
+  from {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-40%) rotate(6deg);
+  }
+  60% {
+    transform: translateY(0);
+  }
+  80% {
+    transform: translateY(-20%) rotate(-3deg);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+/* Restrained impact at icon scale, anchored to its resting baseline. */
+@keyframes sports-nav-compress {
+  0%,
+  40%,
+  80%,
+  100% {
+    scale: 1 1;
+  }
+  12% {
+    scale: 1.08 0.92;
+  }
+  60% {
+    scale: 1.14 0.86;
+  }
+  68% {
+    scale: 0.96 1.04;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sports-nav-ball-art.is-bouncing {
+    animation: none;
+  }
+}

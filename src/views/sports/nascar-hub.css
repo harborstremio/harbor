@@ -1,0 +1,334 @@
+.sh-nascar {
+  min-width: 0;
+}
+.sh-nascar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 22px 0 16px;
+}
+.sh-nascar-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sh-nascar-tabs button {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 9px;
+  color: var(--color-ink-muted);
+}
+.sh-nascar-tabs button[aria-pressed="true"] {
+  background: var(--color-elevated);
+  color: var(--color-ink);
+  font-weight: 650;
+}
+.sh-nascar-tabs button:hover {
+  background: var(--color-elevated);
+}
+.sh-nascar-count {
+  font-size: 12px;
+  color: var(--color-ink-muted);
+}
+.sh-nascar-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 18px 0;
+}
+.sh-nascar-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 15px 17px;
+  background: var(--color-surface);
+  border-radius: 10px;
+}
+.sh-nascar-summary strong {
+  font-size: 24px;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.sh-nascar-summary small {
+  font-size: 11px;
+  color: var(--color-ink-muted);
+}
+.sh-nascar-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  border-radius: 10px;
+  background: var(--color-surface);
+}
+.sh-nascar-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.sh-nascar-table th {
+  padding: 13px 12px;
+  font-weight: 500;
+  font-size: 10px;
+  color: var(--color-ink-muted);
+  text-align: right;
+}
+.sh-nascar-table th:first-child,
+.sh-nascar-table th:nth-child(2) {
+  text-align: left;
+}
+.sh-nascar-table td {
+  height: 68px;
+  padding: 7px 12px;
+  border-top: 1px solid var(--color-edge-soft);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.sh-nascar-table td:first-child {
+  width: 36px;
+  color: var(--color-ink-muted);
+  text-align: left;
+}
+.sh-nascar-table td:nth-child(2) {
+  text-align: left;
+  min-width: 220px;
+}
+.sh-nascar-table tbody tr:hover {
+  background: var(--color-elevated);
+}
+.sh-nascar-table button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  min-height: 52px;
+  width: 100%;
+}
+.sh-nascar-table button strong {
+  display: block;
+  font-size: 13px;
+}
+.sh-nascar-table button small {
+  display: block;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-ink-muted);
+  font-size: 10px;
+  margin-top: 4px;
+}
+.sh-nascar-number {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 25px;
+  margin-right: 7px;
+  padding: 0 5px;
+  background: var(--color-canvas);
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.sh-racing-portrait {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 52px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--color-elevated);
+  color: var(--color-ink-muted);
+}
+.sh-racing-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+}
+.sh-racing-portrait.large {
+  width: 164px;
+  height: 190px;
+  background: transparent;
+  border-radius: 0;
+}
+.sh-nascar-driver-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 0 12px;
+}
+.sh-nascar-driver-hero h3 {
+  font-size: clamp(25px, 4vw, 40px);
+  line-height: 1.1;
+  margin: 8px 0 13px;
+  letter-spacing: -0.035em;
+}
+.sh-nascar-driver-hero p {
+  font-size: 12px;
+  color: var(--color-ink-muted);
+  margin: 5px 0;
+}
+.sh-nascar-section {
+  margin-top: 26px;
+}
+.sh-nascar-section > h3 {
+  margin-bottom: 14px;
+}
+.sh-nascar-sessions {
+  display: grid;
+  gap: 7px;
+}
+.sh-nascar-sessions > div {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 16px;
+  border-radius: 9px;
+  background: var(--color-surface);
+  font-size: 12px;
+}
+.sh-nascar-sessions > div strong {
+  flex: 1;
+}
+.sh-nascar-credit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  color: var(--color-ink-muted);
+  font-size: 11px;
+}
+.sh-nascar button:focus-visible,
+.sh-racing-venue button:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
+.sh-nascar-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 60px;
+  font-size: 12px;
+  color: var(--color-ink-muted);
+}
+.sh-racing-venue {
+  margin: 0 0 22px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+.sh-racing-venue-media {
+  position: relative;
+  background: var(--color-canvas);
+  min-height: 180px;
+  max-height: 330px;
+  overflow: hidden;
+}
+.sh-racing-venue-media img {
+  display: block;
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+}
+.sh-racing-venue-media.is-map img {
+  object-fit: contain;
+  padding: 16px;
+}
+/* NASCAR publishes transparent black track outlines. */
+:root:not([data-theme-mode="light"])
+  .sh-racing-venue[data-source="NASCAR"]
+  .sh-racing-venue-media.is-map
+  img {
+  filter: brightness(0) invert(1);
+}
+.sh-racing-venue-caption {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 16px 18px;
+}
+.sh-racing-venue-caption > div:first-child {
+  flex: 1;
+  min-width: 180px;
+}
+.sh-racing-venue-caption h3 {
+  font-size: 16px;
+  margin: 0 0 5px;
+}
+.sh-racing-venue-caption p {
+  font-size: 11px;
+  margin: 0;
+  color: var(--color-ink-muted);
+}
+.sh-racing-venue-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+}
+.sh-racing-venue-actions .sh-text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.sh-racing-venue-image {
+  display: block;
+  width: 100%;
+  cursor: zoom-in;
+}
+.sh-racing-venue-options {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+.sh-racing-venue-options button {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+.sh-racing-venue-options button[aria-pressed="true"] {
+  background: var(--color-raised);
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .sh-nascar-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sh-nascar-driver-hero {
+    gap: 12px;
+  }
+  .sh-racing-portrait.large {
+    width: 120px;
+    height: 150px;
+  }
+  .sh-nascar-toolbar {
+    align-items: flex-start;
+  }
+  .sh-nascar-table td,
+  .sh-nascar-table th {
+    padding-inline: 9px;
+  }
+  .sh-racing-venue-media img {
+    height: 210px;
+  }
+  .sh-nascar-sessions > div {
+    flex-wrap: wrap;
+    gap: 7px 14px;
+  }
+  .sh-nascar-sessions > div strong {
+    flex-basis: 100%;
+  }
+}

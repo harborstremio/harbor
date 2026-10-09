@@ -1,6 +1,8 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useT, useUiLanguage } from "@/lib/i18n";
 import { useDragScroll } from "@/lib/use-drag-scroll";
+import { horizontalScrollState } from "@/lib/horizontal-scroll";
 
 export function DragStrip({
   children,
@@ -16,6 +18,7 @@ export function DragStrip({
   onReachEnd?: () => void;
 }) {
   const { ref, handlers } = useDragScroll<HTMLDivElement>({ stride });
+  const language = useUiLanguage();
   const barTrackRef = useRef<HTMLDivElement | null>(null);
   const reachedRef = useRef(0);
   const barDrag = useRef<{ x: number; s: number } | null>(null);
@@ -24,24 +27,26 @@ export function DragStrip({
   const sync = useCallback(() => {
     const el = ref.current;
     if (!el) return;
-    const max = el.scrollWidth - el.clientWidth;
+    const { max, position, rtl } = horizontalScrollState(el);
     const show = max > 2;
     let thumb = 0;
     let pos = 0;
     const track = barTrackRef.current;
     if (show && track) {
       const tw = track.clientWidth;
-      thumb = Math.max(64, (el.clientWidth / el.scrollWidth) * tw);
-      pos = (el.scrollLeft / max) * (tw - thumb);
+      thumb = Math.min(tw, Math.max(64, (el.clientWidth / el.scrollWidth) * tw));
+      const travel = tw - thumb;
+      pos = (position / max) * travel;
+      if (rtl) pos = travel - pos;
     }
-    setBar({ left: el.scrollLeft > 4, right: el.scrollLeft < max - 4, thumb, pos, show });
-    if (onReachEnd && max > 0 && el.scrollLeft >= max - 600) {
+    setBar({ left: position > 4, right: position < max - 4, thumb, pos, show });
+    if (onReachEnd && max > 0 && position >= max - 600) {
       if (reachedRef.current !== el.scrollWidth) {
         reachedRef.current = el.scrollWidth;
         onReachEnd();
       }
     }
-  }, [ref, onReachEnd]);
+  }, [ref, onReachEnd, language]);
 
   useEffect(() => {
     sync();
@@ -49,12 +54,16 @@ export function DragStrip({
     if (!el) return;
     const ro = new ResizeObserver(sync);
     ro.observe(el);
+    if (barTrackRef.current) ro.observe(barTrackRef.current);
     return () => ro.disconnect();
-  }, [itemCount, sync]);
+  }, [itemCount, sync, bar.show]);
 
   const page = (dir: -1 | 1) => {
     const el = ref.current;
-    if (el) el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: "smooth" });
+    if (el) {
+      const { rtl } = horizontalScrollState(el);
+      el.scrollBy({ left: (rtl ? -dir : dir) * el.clientWidth * 0.85, behavior: "smooth" });
+    }
   };
 
   const onBarDown = (e: React.PointerEvent) => {
@@ -82,7 +91,7 @@ export function DragStrip({
   };
 
   return (
-    <div className="group/eps relative">
+    <div className="group/eps relative" data-tauri-drag-region="false">
       <div
         ref={ref}
         onScroll={sync}
@@ -118,13 +127,14 @@ function StripArrow({
   offset: string;
   onClick: () => void;
 }) {
+  const t = useT();
   return (
     <button
       type="button"
       onClick={onClick}
       onPointerDown={(e) => e.stopPropagation()}
-      aria-label={dir === -1 ? "Previous episodes" : "More episodes"}
-      className={`absolute ${offset} z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-canvas/85 text-ink opacity-0 shadow-[0_4px_18px_-4px_rgba(0,0,0,0.55)] backdrop-blur-md transition-opacity duration-200 group-hover/eps:opacity-100 ${
+      aria-label={dir === -1 ? t("Previous episodes") : t("More episodes")}
+      className={`absolute ${offset} z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-canvas/85 text-ink opacity-0 shadow-[0_4px_18px_-4px_rgba(0,0,0,0.55)] backdrop-blur-md transition-opacity duration-200 group-hover/eps:opacity-100 focus-visible:opacity-100 ${
         dir === -1 ? "start-1.5" : "end-1.5"
       }`}
     >

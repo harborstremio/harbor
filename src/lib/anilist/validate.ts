@@ -17,10 +17,11 @@ async function run(): Promise<void> {
   if (!session) return;
   try {
     const viewer = await fetchViewer(session.accessToken);
+    if (getSession()?.accessToken !== session.accessToken) return;
     if (viewer.avatar && viewer.avatar !== session.avatar) {
       setSession({ ...session, avatar: viewer.avatar });
     }
   } catch (e) {
-    if (e instanceof AnilistApiError && e.status === 401) setSession(null);
+    if (e instanceof AnilistApiError && e.isAuthenticationError && getSession()?.accessToken === session.accessToken) setSession(null);
   }
 }

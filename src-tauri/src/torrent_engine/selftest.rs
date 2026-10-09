@@ -8,6 +8,10 @@ use types::{finish, step, warn_step};
 
 pub use types::SelfTestResult;
 
+pub fn unavailable(error: String) -> SelfTestResult {
+    finish(vec![step("engine up", false, error)])
+}
+
 pub async fn run(app: AppHandle) -> SelfTestResult {
     let mut steps = Vec::new();
     let session = match ensure_session(&app).await {
@@ -22,7 +26,11 @@ pub async fn run(app: AppHandle) -> SelfTestResult {
         return finish(steps);
     };
     let client = reqwest::Client::new();
-    match client.get(format!("http://127.0.0.1:{port}/health")).send().await {
+    match client
+        .get(format!("http://127.0.0.1:{port}/health"))
+        .send()
+        .await
+    {
         Ok(r) if r.status().is_success() => {
             steps.push(step("engine up", true, format!("port {port}, /health ok")));
         }

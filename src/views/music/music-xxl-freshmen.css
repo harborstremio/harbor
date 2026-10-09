@@ -1,0 +1,9 @@
+.music-xxl-heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; padding-inline:9px 4px; }
+.music-xxl-heading > :first-child { min-width:0; }
+.music-xxl-years { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.music-xxl-year-picker { width:104px; font-variant-numeric:tabular-nums; }
+.music-xxl-year-picker > button { min-height:44px; }
+.music-xxl-year-step { display:grid; place-items:center; width:44px; height:44px; border-radius:8px; background:var(--color-elevated); color:var(--color-ink); }
+.music-xxl-year-step:hover:not(:disabled) { background:var(--color-raised); }
+.music-xxl-year-step:disabled { opacity:.35; cursor:default; }
+.music-xxl :is(.music-xxl-year-step,.music-xxl-artists button):focus-visible { outline:2px solid var(--color-accent); outline-offset:3px; }

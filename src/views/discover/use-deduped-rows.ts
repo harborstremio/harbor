@@ -42,6 +42,15 @@ export function useDedupedRows(
           takenIds.add(m.id);
         }
       }
+      if (taken.length < MIN_ROW) {
+        for (const m of raw) {
+          if (taken.length >= MIN_ROW) break;
+          if (!m.poster) continue;
+          if (takenIds.has(m.id)) continue;
+          taken.push(m);
+          takenIds.add(m.id);
+        }
+      }
       out[id] = taken;
     }
     return out;

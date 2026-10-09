@@ -1,4 +1,5 @@
-import { CalendarRange, List, Loader2, Search, X } from "lucide-react";
+import { CalendarRange, List, Loader2, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CategorySidebar } from "@/views/live/category-sidebar";
 import { GuideView } from "@/views/live/guide/guide-view";
@@ -7,7 +8,10 @@ import {
   promoteTopChannelsToFront,
   rowsForRegion,
 } from "@/lib/iptv/top-networks";
-import { sortChannelsByGroupRelevance, sortGroupsByRelevance } from "@/lib/iptv/group-relevance";
+import {
+  sortChannelsByGroupRelevance,
+  sortGroupsByRelevance,
+} from "@/lib/iptv/group-relevance";
 import { computeTvgIdCounts, epgProgramsForChannel } from "@/lib/iptv/epg-resolver";
 import { FAVORITES_GROUP_KEY, useFavorites } from "@/lib/iptv/favorites";
 import { getCachedPlaylist } from "@/lib/iptv/store";
@@ -184,27 +188,20 @@ export function LiveChannelOverlay({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.preventDefault();
-      e.stopPropagation();
-      onClose();
+      if (e.key === "Escape") onClose();
     };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   useScrollMemory(`live-overlay:${source.id}`, scrollRef, true);
 
   return (
-    <div
-      data-tv-focus-scope
-      className="pointer-events-auto absolute inset-0 z-[60] flex flex-col bg-canvas/95 text-ink"
-    >
+    <div className="pointer-events-auto absolute inset-0 z-[60] flex flex-col bg-canvas/95 text-ink">
       <div className="flex shrink-0 items-start gap-3 px-6 pt-6">
         <button
           onClick={onClose}
-          data-tv-modal-close
           aria-label={t("Close guide")}
           className="flex h-11 shrink-0 items-center gap-2 rounded-full border border-edge-soft/60 bg-canvas/80 ps-3 pe-4 text-[13.5px] font-medium text-ink-muted backdrop-blur transition-colors hover:bg-canvas hover:text-ink"
         >
@@ -214,7 +211,11 @@ export function LiveChannelOverlay({
         <CurrentChannelInfo channel={currentChannel} current={currentProgram} now={nowMs} />
       </div>
       <div className="flex shrink-0 items-center gap-2.5 px-6 pt-4 pb-3">
-        <InlineSourceSwitcher sources={sources} selectedId={source.id} onSelect={onSelectSource} />
+        <InlineSourceSwitcher
+          sources={sources}
+          selectedId={source.id}
+          onSelect={onSelectSource}
+        />
         <div className="flex h-11 flex-1 items-center gap-2.5 rounded-xl border border-edge-soft/55 bg-elevated px-3.5">
           <Search size={15} strokeWidth={2} className="text-ink-subtle" />
           <input
@@ -233,7 +234,6 @@ export function LiveChannelOverlay({
           />
           {query && (
             <button
-              type="button"
               onClick={() => setQuery("")}
               className="text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
             >
@@ -242,21 +242,12 @@ export function LiveChannelOverlay({
           )}
         </div>
         <button
-          type="button"
           onClick={toggleGuideStyle}
-          title={
-            guideStyle === "timeline"
-              ? t("Switch to channel list (hide program guide)")
-              : t("Switch to program guide")
-          }
+          title={guideStyle === "timeline" ? t("Switch to channel list (hide program guide)") : t("Switch to program guide")}
           aria-label={t("Toggle guide layout")}
           className="flex h-11 shrink-0 items-center gap-2 rounded-xl border border-edge-soft/55 bg-elevated px-3.5 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
         >
-          {guideStyle === "timeline" ? (
-            <List size={15} strokeWidth={2} />
-          ) : (
-            <CalendarRange size={15} strokeWidth={2} />
-          )}
+          {guideStyle === "timeline" ? <List size={15} strokeWidth={2} /> : <CalendarRange size={15} strokeWidth={2} />}
           {guideStyle === "timeline" ? t("List") : t("Guide")}
         </button>
       </div>
@@ -298,8 +289,8 @@ export function LiveChannelOverlay({
               {inFavorites && favorites.count === 0
                 ? t("No favorites yet. Star a channel to pin it here.")
                 : inFavorites && loadingFavorites
-                  ? t("Loading favorites…")
-                  : t("No channels match. Try a different category or clear the search.")}
+                ? t("Loading favorites…")
+                : t("No channels match. Try a different category or clear the search.")}
             </div>
           )}
         </div>

@@ -1,0 +1,72 @@
+.music-cover-card {
+  --music-play-reveal: 220ms;
+  --music-play-press: 110ms;
+}
+
+/* Hover/focus: rise 6px and settle at full size. Press: a short, quiet compression. */
+.music-cover-play {
+  position: absolute;
+  inset-inline-end: 10px;
+  bottom: 10px;
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px) scale(0.9);
+  transition:
+    opacity 160ms ease-out,
+    transform var(--music-play-reveal) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.music-cover-card:is(:hover, :focus-within) .music-cover-play,
+.music-cover-play[aria-busy="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.music-cover-play:hover:not(:disabled) {
+  transform: translateY(0) scale(1.06);
+}
+
+.music-cover-play:active:not(:disabled) {
+  transform: translateY(0) scale(0.96);
+  transition-duration: var(--music-play-press);
+}
+
+.music-cover-play:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.music-track-cover-symbol {
+  transform: translateY(3px) scale(0.9);
+  transition: transform 220ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.group:is(:hover, :focus-within, [data-menu-open]) .music-track-cover-symbol {
+  transform: translateY(0) scale(1);
+}
+
+.music-track-cover:active .music-track-cover-symbol {
+  transform: scale(0.96);
+}
+
+@media (hover: none) {
+  .music-cover-play {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-cover-card .music-cover-play,
+  .group .music-track-cover-symbol {
+    transform: none !important;
+    transition: none !important;
+  }
+}

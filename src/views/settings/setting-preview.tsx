@@ -44,7 +44,7 @@ export function HoverPreviewCard({
       ref={cardRef}
       role="tooltip"
       style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999 }}
-      className={`pointer-events-none fixed z-[120] w-[320px] rounded-2xl border border-edge-soft/80 bg-elevated/95 p-4 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.78)] backdrop-blur-xl transition-opacity duration-150 ${
+      className={`pointer-events-none fixed z-[120] w-[320px] rounded-md border border-edge-soft/80 bg-elevated/95 p-4 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.78)] backdrop-blur-xl transition-opacity duration-150 ${
         pos ? "animate-popover-in opacity-100" : "opacity-0"
       }`}
     >

@@ -1,0 +1,13 @@
+.games-download-storage { padding:18px 0 22px; border-bottom:1px solid var(--color-edge-soft); }
+.games-download-storage summary { width:max-content; max-width:100%; cursor:pointer; font-size:12px; font-weight:550; color:var(--color-ink-muted); }
+.games-download-storage details>p { max-width:68ch; margin:8px 0 0; font-size:12px; line-height:1.6; color:var(--color-ink-muted); }
+.games-storage-drives { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:16px 40px; margin-top:13px; }
+.games-storage-drive { min-width:0; font-size:12px; line-height:1.6; }
+.games-storage-drive>div { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 16px; }
+.games-storage-drive strong { min-width:0; overflow-wrap:anywhere; color:var(--color-ink); font-weight:550; }
+.games-storage-drive p,.games-storage-drive>div>span { color:var(--color-ink-muted); font-variant-numeric:tabular-nums; }
+.games-storage-drive p { display:flex; flex-wrap:wrap; gap:4px 16px; margin:4px 0 0; }
+.games-storage-drive .games-storage-shortfall { color:var(--color-danger); }
+.games-storage-error { color:var(--color-ink-muted); font-size:12px; line-height:1.6; margin-top:12px; }
+.games-storage-error button { color:var(--color-ink); text-decoration:underline; text-underline-offset:3px; padding:4px; }
+.games-download-storage :is(summary,button):focus-visible { outline:2px solid var(--color-accent); outline-offset:4px; }

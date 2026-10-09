@@ -1,0 +1,30 @@
+.mc-instance-menu {padding:6px;background:var(--color-elevated);color:var(--color-ink);border:1px solid var(--color-edge-soft);border-radius:9px;overflow:auto}
+.mc-instance-menu>button {display:flex;align-items:center;gap:12px;text-align:start;width:100%;padding:12px;font-size:13px;line-height:1.4;border-radius:5px}
+.mc-instance-menu>button:hover,.mc-instance-menu>button:focus-visible {background:var(--color-surface);outline:2px solid transparent}
+.mc-instance-menu>button:focus-visible {outline-color:var(--color-ink-muted);outline-offset:-2px}
+.mc-instance-menu>button>svg {flex-shrink:0;color:var(--color-ink-muted)}
+.mc-instance-menu>button:last-child {margin-top:5px;border-top:1px solid var(--color-edge-soft);border-radius:0 0 5px 5px}
+.mc-lifecycle-identity {display:flex;gap:16px;align-items:center;padding:0 0 22px;margin-bottom:22px;border-bottom:1px solid var(--color-edge-soft)}
+.mc-lifecycle-identity>img {width:64px;height:64px;object-fit:cover;border-radius:7px;flex-shrink:0}
+.mc-lifecycle-identity>div {min-width:0;display:flex;flex-direction:column;gap:7px}
+.mc-lifecycle-identity strong {font-size:19px;line-height:1.4;font-weight:600;overflow-wrap:anywhere}
+.mc-lifecycle-identity small {font-size:12px;color:var(--color-ink-muted);line-height:1.5}
+.mc-lifecycle-options {display:flex;flex-direction:column;margin-bottom:18px}
+.mc-lifecycle-options>label {display:flex;gap:12px;align-items:center;cursor:pointer;min-height:44px;font-size:13px}
+.mc-lifecycle-options input[type=checkbox] {width:16px;height:16px;flex-shrink:0;accent-color:var(--color-accent)}
+.mc-lifecycle-copy {display:flex;align-items:center;gap:15px;padding:17px 0;border-bottom:1px solid var(--color-edge-soft)}
+.mc-lifecycle-copy>svg {flex-shrink:0;color:var(--color-ink-muted)}
+.mc-lifecycle-copy>div {min-width:0;flex:1;display:flex;flex-direction:column;gap:7px}
+.mc-lifecycle-copy strong {font-size:15px;line-height:1.4;overflow-wrap:anywhere}
+.mc-lifecycle-copy small {font-size:12px;color:var(--color-ink-muted);line-height:1.6}
+.mc-lifecycle-copy .games-button {flex-shrink:0}
+.mc-lifecycle-success {padding-block:18px}
+.mc-lifecycle-success>svg {color:var(--color-ink-muted);margin-bottom:15px}
+.mc-lifecycle-success h3 {font-size:23px;line-height:1.4;font-weight:600}
+.mc-lifecycle-success p {font-size:13px;line-height:1.7;color:var(--color-ink-muted);margin-block:12px;overflow-wrap:anywhere}
+.mc-lifecycle-dialog .mc-update-files {max-height:220px}
+.mc-lifecycle-dialog footer .games-button {flex-shrink:0}
+@media(max-width:600px) {.mc-lifecycle-copy {gap:10px;flex-wrap:wrap}.mc-lifecycle-copy>div {flex-basis:calc(100% - 40px)}.mc-lifecycle-copy>.games-button {margin-inline-start:30px}.mc-lifecycle-identity strong {font-size:17px}.mc-lifecycle-dialog>footer {flex-wrap:wrap}}
+
+/* The surrounding search field already carries the keyboard focus ring. */
+.mc-instance-dialog.mc-lifecycle-dialog .mc-pack-filter input:focus-visible {outline:none !important}

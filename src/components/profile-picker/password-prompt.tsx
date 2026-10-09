@@ -1,5 +1,5 @@
 import { Lock } from "lucide-react";
-import { CatAvatar } from "@/components/icons/cat-avatar";
+import { AvatarImage } from "@/components/avatar-image";
 import { useT } from "@/lib/i18n";
 import { type Profile } from "@/lib/profiles";
 import { verifyProfilePassword } from "@/lib/profile-password";
@@ -24,11 +24,7 @@ export function PasswordPrompt({
           className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-elevated ring-[3px]"
           style={{ boxShadow: `0 0 0 3px ${profile.color}` }}
         >
-          {profile.avatar ? (
-            <img src={profile.avatar} alt="" className="h-full w-full object-cover" draggable={false} />
-          ) : (
-            <CatAvatar className="h-full w-full" />
-          )}
+          <AvatarImage src={profile.avatar} className="h-full w-full object-cover" />
         </span>
         <span className="absolute -bottom-1 -end-1 flex h-7 w-7 items-center justify-center rounded-full bg-canvas text-ink shadow-md ring-1 ring-edge">
           <Lock size={13} strokeWidth={2.4} />

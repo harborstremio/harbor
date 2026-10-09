@@ -1,0 +1,22 @@
+.games-archive-motion { display:flex;align-items:center;justify-content:center;width:252px;height:100px;margin:10px auto 18px;color:var(--color-ink-muted);direction:ltr; }
+.games-archive-motion-source { position:relative;z-index:2;display:grid;place-items:center;width:58px;height:60px; }
+.games-archive-motion-source>.games-file-mark { width:42px;height:52px; }
+.games-archive-motion-track { position:relative;width:120px;height:48px;overflow:hidden; }
+.games-archive-motion-track::before { content:"";position:absolute;inset:50% 0 auto;height:1px;background:var(--color-edge-soft); }
+.games-archive-motion-track>i { position:absolute;left:-20px;top:16px;width:16px;height:21px;border:1.4px solid currentColor;border-radius:2px;background:var(--color-surface);opacity:0; }
+.games-archive-motion-track>i::before,.games-archive-motion-track>i::after { content:"";position:absolute;left:3px;top:7px;width:7px;height:1px;background:currentColor;opacity:.6; }
+.games-archive-motion-track>i::after { top:11px;width:5px; }
+.games-archive-motion-folder { position:relative;z-index:2;width:62px;height:60px;display:grid;place-items:center; }
+.games-archive-motion-folder>svg+svg { position:absolute;right:0;bottom:4px;color:var(--color-success);background:var(--color-surface);border-radius:50%; }
+.games-archive-motion[data-phase=extracting] .games-archive-motion-track>i { animation:games-archive-file-travel 2.1s ease-in-out infinite; }
+.games-archive-motion[data-phase=extracting] .games-archive-motion-track>i:nth-child(2) { animation-delay:.55s; }
+.games-archive-motion[data-phase=extracting] .games-archive-motion-track>i:nth-child(3) { animation-delay:1.1s; }
+.games-archive-motion[data-phase=extracting] .games-archive-motion-folder { animation:games-archive-folder-settle 2.1s ease-in-out infinite;transform-origin:50% 85%; }
+.games-archive-motion[data-phase=checking] .games-archive-motion-source::after { content:"";position:absolute;left:4px;right:4px;top:9px;height:2px;background:var(--color-accent);animation:games-archive-scan 2s ease-in-out infinite; }
+.games-archive-motion[data-phase=publishing] .games-archive-motion-folder { animation:games-archive-folder-settle 1.5s ease-in-out infinite; }
+.games-archive-motion[data-phase=complete] .games-archive-motion-folder { color:var(--color-success); }
+@keyframes games-archive-file-travel { 0% { opacity:0;transform:translate(0,6px) rotate(-10deg); } 15% { opacity:1; } 50% { transform:translate(64px,-10px) rotate(3deg); } 80% { opacity:1; } 100% { opacity:0;transform:translate(144px,8px) rotate(0); } }
+@keyframes games-archive-folder-settle { 0%,60%,100% { transform:scale(1); } 76% { transform:scale(1.035,.96); } 88% { transform:scale(.99,1.02); } }
+@keyframes games-archive-scan { 0%,100% { transform:translateY(0);opacity:.3; } 50% { transform:translateY(38px);opacity:1; } }
+@media(prefers-reduced-motion:reduce) { .games-archive-motion *,.games-archive-motion *::after { animation:none!important; }.games-archive-motion[data-phase=extracting] .games-archive-motion-track>i:first-child { left:52px;opacity:.7; } }
+.games-archive-motion[data-active=false] *,.games-archive-motion[data-active=false] *::after { animation:none!important; }

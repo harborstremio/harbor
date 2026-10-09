@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useT } from "@/lib/i18n";
 
 export function SearchBar({ value, onChange }: { value: string; onChange: (v: string) => void }) {

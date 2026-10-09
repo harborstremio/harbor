@@ -1,0 +1,198 @@
+.music-skeleton-section {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  min-width: 0;
+}
+.music-skeleton-fill {
+  display: block;
+  flex-shrink: 0;
+  background: var(--color-elevated);
+  border-radius: 4px;
+}
+.music-skeleton-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.music-skeleton-track {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 68px;
+  padding: 8px 10px;
+}
+.music-skeleton-cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+}
+.music-skeleton-copy {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 10px;
+}
+.music-skeleton-title {
+  height: 10px;
+  max-width: 85%;
+}
+.music-skeleton-subtitle {
+  height: 8px;
+  max-width: 65%;
+  opacity: 0.65;
+}
+.music-skeleton-duration {
+  width: 28px;
+  height: 8px;
+  margin-inline: 16px;
+  opacity: 0.65;
+}
+.music-skeleton-cards {
+  display: flex;
+  gap: 16px;
+  overflow: hidden;
+  min-width: 0;
+  padding: 0 8px;
+}
+.music-skeleton-card {
+  display: flex;
+  flex: 0 0 160px;
+  flex-direction: column;
+  gap: 10px;
+}
+.music-skeleton-art {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  margin-bottom: 3px;
+}
+.music-skeleton-card .music-skeleton-title {
+  width: 75%;
+}
+.music-skeleton-card .music-skeleton-subtitle {
+  width: 48%;
+}
+.music-skeleton-card.is-round .music-skeleton-art {
+  border-radius: 50%;
+}
+.music-skeleton-card.is-round {
+  align-items: center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .music-skeleton-tracks,
+  .music-skeleton-cards {
+    animation: music-skeleton-breathe 2.4s ease-in-out infinite;
+  }
+  @keyframes music-skeleton-breathe {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.65;
+    }
+  }
+}
+@media (max-width: 600px) {
+  .music-skeleton-card {
+    flex-basis: 140px;
+  }
+  .music-skeleton-duration {
+    margin-inline: 4px;
+  }
+}
+
+.music-library-playlist-card.is-skeleton {
+  pointer-events: none;
+  cursor: default;
+}
+.music-skeleton-cover-square {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+}
+
+.music-home-feature.is-skeleton {
+  pointer-events: none;
+}
+.music-home-feature.is-skeleton h2,
+.music-home-feature.is-skeleton p,
+.music-home-feature.is-skeleton .music-home-eyebrow {
+  display: block;
+}
+.music-skeleton-line {
+  height: 0.7em;
+  margin-block: 0.17em;
+  border-radius: 6px;
+}
+.music-home-feature.is-skeleton .music-home-eyebrow .music-skeleton-line {
+  height: 12px;
+  margin-block: 0;
+}
+.music-home-feature.is-skeleton p .music-skeleton-line {
+  margin-block: 0.45em;
+}
+.music-skeleton-cta {
+  width: 172px;
+  height: 44px;
+  border-radius: 6px;
+}
+.music-skeleton-ghost {
+  width: 112px;
+  height: 18px;
+  border-radius: 6px;
+  opacity: 0.6;
+}
+.music-skeleton-hero-art {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+  opacity: 0.6;
+}
+.music-feature-choice.is-skeleton {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  align-items: flex-start;
+}
+.music-skeleton-choice-art {
+  width: 42px;
+  height: 42px;
+  border-radius: 4px;
+}
+.music-skeleton-choice-copy {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.music-skeleton-choice-line {
+  height: 10px;
+  border-radius: 5px;
+}
+.music-skeleton-choice-line.is-sub {
+  height: 8px;
+  opacity: 0.6;
+}
+.music-skeleton-hero-controls {
+  width: 132px;
+  height: 44px;
+  border-radius: 6px;
+  opacity: 0.6;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .music-home-feature.is-skeleton,
+  .music-feature-browse .music-feature-choice.is-skeleton {
+    animation: music-skeleton-breathe 2.4s ease-in-out infinite;
+  }
+}
+@media (max-width: 700px) {
+  .music-home-feature.is-skeleton .music-hero-media {
+    min-height: 200px;
+  }
+}

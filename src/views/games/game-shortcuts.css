@@ -1,0 +1,16 @@
+.games-shortcuts { margin-top:28px; }
+.games-shortcuts h4 { font-size:14px;font-weight:550; }
+.games-shortcuts>p { font-size:12px!important;line-height:1.5!important;margin-top:6px!important;color:var(--color-ink-muted); }
+.games-shortcuts>div { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:14px; }
+.games-shortcut { display:flex;align-items:center;gap:12px;text-align:start;padding:14px;min-height:78px;border-radius:7px;background:var(--color-elevated);color:var(--color-ink-muted);transition:background 180ms ease-in-out; }
+.games-shortcut:hover:not(:disabled) { background:var(--color-raised);color:var(--color-ink); }
+.games-shortcut:disabled { opacity:1!important;cursor:default; }
+.games-shortcut>span { flex:1;min-width:0; }
+.games-shortcut>svg { flex:none; }
+.games-shortcut strong { display:block;color:var(--color-ink);font-size:14px;font-weight:550; }
+.games-shortcut small { display:block;font-size:12px;line-height:1.5;min-height:18px;margin-top:4px; }
+.games-shortcut small>i { display:block;width:90px;height:10px;margin-top:4px;border-radius:3px;background:var(--color-raised);animation:games-setup-skeleton-pulse 1.5s ease-in-out infinite; }
+.games-shortcut-check { color:var(--color-success);animation:games-setup-link-in 220ms ease-in-out both; }
+.games-shortcuts>.games-shortcuts-error { color:var(--color-danger); }
+@media(max-width:520px) { .games-shortcuts>div { grid-template-columns:1fr; } }
+@media(prefers-reduced-motion:reduce) { .games-shortcut { transition:none; }.games-shortcut small>i,.games-shortcut-check { animation:none!important; } }

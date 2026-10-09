@@ -1,4 +1,4 @@
-export const SUBTITLE_PROVIDER_TIMEOUT_MS = 6_000;
+export const SUBTITLE_PROVIDER_TIMEOUT_MS = 16_000;
 
 export function subtitleSearchImdbId(
   imdbId: string | null | undefined,
@@ -10,9 +10,8 @@ export function subtitleSearchImdbId(
 export function canStartSubtitleAutoload(input: {
   imdbId: string | null | undefined;
   mediaReady: boolean;
-  addons: unknown[] | null;
 }): boolean {
-  return !!input.imdbId && input.mediaReady && input.addons !== null;
+  return !!input.imdbId && input.mediaReady;
 }
 
 export function withSubtitleTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {

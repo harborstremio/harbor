@@ -1,0 +1,10 @@
+.games-official-download { display: flex; gap: 18px; align-items: center; padding: 20px; margin-bottom: 18px; background: var(--color-surface); border-radius: 8px; text-decoration: none; }
+.games-official-download:hover { background: var(--color-elevated); }
+.games-official-download:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.games-official-download > img { width: 48px; height: 48px; object-fit: contain; }
+.games-official-download > span:first-of-type { min-width: 0; flex: 1; }
+.games-official-download strong { font-size: 15px; font-weight: 600; }
+.games-official-download small { display: block; margin-top: 4px; font-size: 12px; color: var(--color-ink-muted); }
+.games-official-action { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 550; }
+.games-detail-main-actions .games-official-hero-logo { width: 25px; height: 25px; object-fit: contain; }
+@media (max-width: 650px) { .games-official-download { flex-wrap: wrap; gap: 13px; }.games-official-action { flex-basis: 100%; padding-inline-start: 61px; } }

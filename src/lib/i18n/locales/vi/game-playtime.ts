@@ -1,0 +1,22 @@
+export default {
+  "games.playtime.title": "Thời gian chơi",
+  "games.playtime.total": "Tổng thời gian của bạn",
+  "games.playtime.tracked": "Do Harbor ghi nhận",
+  "games.playtime.adjusted": "Do bạn điều chỉnh",
+  "games.playtime.changed": "Đã điều chỉnh: {date}",
+  "games.playtime.edit": "Điều chỉnh thời gian chơi",
+  "games.playtime.hours": "Giờ",
+  "games.playtime.minutes": "Phút",
+  "games.playtime.duration": "{hours} giờ {minutes} phút",
+  "games.playtime.card": "Đã chơi {time}",
+  "games.playtime.note": "Thêm thời gian đã chơi ở nơi khác hoặc sửa tổng thời gian. Harbor giữ nguyên các phiên chơi đã ghi nhận và cộng các phiên sau vào tổng này.",
+  "games.playtime.localNote": "Áp dụng cho bản sao cục bộ này trong hồ sơ Harbor của bạn. Steam và các tài khoản khác không thay đổi.",
+  "games.playtime.running": "Đóng trò chơi này trước khi điều chỉnh thời gian chơi.",
+  "games.playtime.save": "Lưu thời gian chơi",
+  "games.playtime.finishEdit": "Lưu hoặc hủy chỉnh sửa thời gian chơi trước khi lưu các cài đặt khác.",
+  "games.playtime.reset": "Dùng thời gian đã ghi nhận",
+  "games.playtime.invalid": "Nhập số giờ nguyên từ 0 đến 999.999 và số phút từ 0 đến 59.",
+  "games.playtime.saved": "Đã lưu thời gian chơi.",
+  "games.playtime.resetDone": "Đang dùng thời gian do Harbor ghi nhận.",
+  "games.custom.launch_playtime": "Không thể lưu thời gian chơi này. Kiểm tra số giờ và phút rồi thử lại."
+} satisfies Record<string, string>;

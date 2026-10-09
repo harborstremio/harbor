@@ -1,0 +1,110 @@
+.sh-boxing-details {
+  padding: 24px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  container-type: inline-size;
+}
+.sh-boxing-details > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.sh-boxing-details h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+}
+.sh-boxing-details header p {
+  margin: 6px 0 0;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.sh-boxing-details .sh-button {
+  flex: none;
+  gap: 8px;
+}
+.sh-boxing-details .sh-button:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
+.sh-boxing-fighters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.sh-boxing-fighter {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+.sh-boxing-fighter + .sh-boxing-fighter {
+  border-inline-start: 1px solid var(--color-edge-soft);
+  padding-inline-start: 24px;
+}
+.sh-boxing-fighter .sh-competition-portrait {
+  width: 88px;
+  height: 104px;
+  flex-basis: 88px;
+  border-radius: 8px;
+}
+.sh-boxing-fighter .sh-competition-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+.sh-boxing-fighter-copy {
+  flex: 1;
+  min-width: 0;
+}
+.sh-boxing-fighter h4 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.sh-boxing-record {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.sh-boxing-record dt {
+  color: var(--color-ink-muted);
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.sh-boxing-record dd {
+  margin: 3px 0 0;
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.sh-boxing-record-text {
+  color: var(--color-ink-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+@container (max-width: 720px) {
+  .sh-boxing-fighters { grid-template-columns: 1fr; gap: 20px; }
+  .sh-boxing-fighter + .sh-boxing-fighter {
+    border-inline-start: 0;
+    border-top: 1px solid var(--color-edge-soft);
+    padding-inline-start: 0;
+    padding-top: 20px;
+  }
+}
+@container (max-width: 360px) {
+  .sh-boxing-fighter { gap: 12px; }
+  .sh-boxing-fighter .sh-competition-portrait { width: 64px; height: 84px; flex-basis: 64px; }
+  .sh-boxing-fighter h4 { font-size: 16px; margin-bottom: 12px; }
+  .sh-boxing-record { gap: 6px; }
+  .sh-boxing-record dd { font-size: 20px; }
+}

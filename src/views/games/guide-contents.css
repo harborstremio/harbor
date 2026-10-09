@@ -1,0 +1,20 @@
+.games-guide-reading-layout>.games-guide-contents{top:calc(var(--games-chrome-inset) + 12px);max-height:calc(100dvh - var(--games-chrome-inset) - 112px);padding:3px 5px 8px 0;overscroll-behavior:contain;scrollbar-gutter:stable}
+.games-guide-reading-layout .games-guide-contents h2{padding-inline-start:13px}
+.games-guide-reading-layout .games-guide-contents nav{display:block;position:relative;margin-inline:3px}
+.games-guide-reading-layout .games-guide-contents nav::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:1px;background:var(--color-edge-soft)}
+.games-guide-reading-layout .games-guide-contents nav ol{display:block;list-style:none;margin:0;padding:0}
+.games-guide-reading-layout .games-guide-contents nav li{list-style:none;margin:0;padding:0}
+.games-guide-reading-layout .games-guide-contents nav button{position:relative;width:100%;min-height:40px;gap:9px;margin-block:2px;padding:9px 8px;padding-inline-start:calc(13px + var(--guide-depth)*14px);align-items:flex-start;font-size:14px;line-height:1.5;transition:color 160ms var(--ease-out),background-color 160ms var(--ease-out)}
+.games-guide-reading-layout .games-guide-contents nav button>svg{margin-top:2px;color:var(--color-ink-subtle);transition:color 160ms var(--ease-out)}
+.games-guide-reading-layout .games-guide-contents nav button>span:last-child{min-width:0;overflow-wrap:anywhere}
+.games-guide-reading-layout .games-guide-contents nav button[aria-current="location"]{color:var(--color-ink);background:var(--color-surface);font-weight:550}
+.games-guide-reading-layout .games-guide-contents nav button[aria-current="location"]>svg{color:var(--color-accent)}
+.games-guide-subheading-mark{width:5px;height:5px;flex:0 0 5px;margin-top:8px;border-radius:50%;background:var(--color-ink-subtle);transition:background-color 160ms var(--ease-out)}
+.games-guide-reading-layout .games-guide-contents nav button[aria-current="location"]>.games-guide-subheading-mark{background:var(--color-accent)}
+.games-guide-position-marker{position:absolute;inset-block-start:0;inset-inline-start:-1px;width:3px;height:var(--guide-marker-height);border-radius:3px;background:var(--color-accent);transform:translateY(var(--guide-marker-top));transition:transform 220ms var(--ease-out),height 180ms var(--ease-out);z-index:1;pointer-events:none}
+.games-guide-prose [data-guide-heading]{scroll-margin-top:calc(var(--games-chrome-inset) + 24px)}
+.games-guide-prose [data-guide-heading]:focus{outline:none}
+.games-guide-steam .games-guide-prose [data-guide-heading]:not(:first-child){margin-block-start:28px}
+.games-guide-prose h5,.games-guide-prose h6{font-size:18px;line-height:1.45;margin:24px 0 12px}
+@container(max-width:760px){.games-guide-reading-layout>.games-guide-contents{position:static;max-height:260px;padding:17px}.games-guide-reading-layout .games-guide-contents nav{grid-template-columns:none}}
+@media(prefers-reduced-motion:reduce){.games-guide-position-marker,.games-guide-reading-layout .games-guide-contents nav button,.games-guide-reading-layout .games-guide-contents nav button>svg,.games-guide-subheading-mark{transition:none}}

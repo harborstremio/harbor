@@ -1,12 +1,20 @@
-import { Component, useEffect, useMemo, useRef, useState } from "react";
+import { Component, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthProvider } from "@/lib/auth";
+import { CompanionProfilesProvider } from "@/lib/profiles";
 import { SettingsProvider } from "@/lib/settings";
 import { ShellLayer } from "./player/shell-layer";
 import { DragClickStage } from "./player/drag-click-stage";
 import { emptySnapshot, type PlayerSnapshot } from "@/lib/player/bridge";
 import { createForwardingMpvBridge } from "@/lib/player/mpv-forward";
-import { hdrOverlayEmitAction, onHdrStageProps } from "@/lib/hdr-overlay";
-import type { PlayerSrc } from "@/lib/view";
+import { buildSubtitleTimingMediaKey } from "@/lib/player/subtitle-fps";
+import {
+  hdrOverlayEmitAction,
+  onHdrStageProps,
+  type HdrNavigationRequest,
+} from "@/lib/hdr-overlay";
+import { PlayerNavigationProvider, type PlayerNavigation, type PlayerSrc } from "@/lib/view";
+import { PlayerInteractionLockControls } from "@/components/player/player-interaction-lock";
+import { usePlayerInteractionBlocker } from "./player/hooks/use-player-interaction-lock";
 
 export type HdrStagePayload = {
   snap: PlayerSnapshot;
@@ -21,11 +29,26 @@ export type HdrStagePayload = {
   hasPrevEp: boolean;
   hasNextEp: boolean;
   pipMode: boolean;
+  screenLockEnabled: boolean;
+  screenLocked: boolean;
+  screenLockControlsVisible: boolean;
+  screenLockBinding: string;
 };
 
 function emitDead() {
-  void hdrOverlayEmitAction("hdr-stage://dead", {});
+  void hdrOverlayEmitAction("hdr-stage://dead", {
+    stageId: new URLSearchParams(window.location.search).get("stageId"),
+  });
 }
+
+const forwardNavigation = (request: HdrNavigationRequest) =>
+  void hdrOverlayEmitAction("hdr-stage://navigate", request);
+const navigation: PlayerNavigation = {
+  openMeta: (...args) => forwardNavigation({ action: "openMeta", args }),
+  exitPlayer: (...args) => forwardNavigation({ action: "exitPlayer", args }),
+  openPicker: (...args) => forwardNavigation({ action: "openPicker", args }),
+  replacePlayerSrc: (...args) => forwardNavigation({ action: "replacePlayerSrc", args }),
+};
 
 class OverlayErrorBoundary extends Component<{ children: React.ReactNode }, { crashed: boolean }> {
   state = { crashed: false };
@@ -54,50 +77,104 @@ export function HdrOverlayApp() {
     };
   }, []);
   return (
-    <AuthProvider>
-      <SettingsProvider>
-        <OverlayErrorBoundary>
-          <HdrOverlayChrome />
-        </OverlayErrorBoundary>
-      </SettingsProvider>
-    </AuthProvider>
+    <OverlayErrorBoundary>
+      <CompanionProfilesProvider>
+        <AuthProvider>
+          <SettingsProvider>
+            <PlayerNavigationProvider value={navigation}>
+              <HdrOverlayChrome />
+            </PlayerNavigationProvider>
+          </SettingsProvider>
+        </AuthProvider>
+      </CompanionProfilesProvider>
+    </OverlayErrorBoundary>
   );
 }
 
 function HdrOverlayChrome() {
-  const [payload, setPayload] = useState<HdrStagePayload | null>(null);
+  const [payload, setPayload] = useState<(HdrStagePayload & { stageId: string }) | null>(null);
   const bridge = useMemo(() => createForwardingMpvBridge(), []);
   const bridgeRef = useRef(bridge);
   const snapRef = useRef<PlayerSnapshot>(emptySnapshot);
   const gotPayloadRef = useRef(false);
+  const toggleLock = useCallback(() => {
+    const event = payload?.screenLocked ? "hdr-stage://unlock" : "hdr-stage://lock";
+    void hdrOverlayEmitAction(event, {});
+  }, [payload?.screenLocked]);
+  const reportLockedActivity = useCallback(
+    () => void hdrOverlayEmitAction("hdr-stage://activity", {}),
+    [],
+  );
+
+  usePlayerInteractionBlocker({
+    enabled: payload?.screenLockEnabled ?? false,
+    locked: payload?.screenLocked ?? false,
+    binding: payload?.screenLockBinding ?? "ctrl+l",
+    onToggle: toggleLock,
+    onLockedActivity: reportLockedActivity,
+  });
 
   useEffect(() => {
-    const un = onHdrStageProps<HdrStagePayload>((p) => {
+    let cancelled = false;
+    let off: (() => void) | undefined;
+    let id: number | undefined;
+    const stageId = new URLSearchParams(window.location.search).get("stageId");
+    void onHdrStageProps<HdrStagePayload & { stageId: string }>((p) => {
+      if (cancelled || p.stageId !== stageId) return;
       gotPayloadRef.current = true;
       setPayload(p);
       snapRef.current = p.snap;
-      bridge.pushSnapshot(p.snap);
-    });
-    void hdrOverlayEmitAction("hdr-stage://request", {});
-    let tries = 0;
-    const id = window.setInterval(() => {
-      if (gotPayloadRef.current || tries++ > 40) {
-        window.clearInterval(id);
-        return;
-      }
-      void hdrOverlayEmitAction("hdr-stage://request", {});
-    }, 150);
+      bridge.pushSnapshot(
+        p.snap,
+        buildSubtitleTimingMediaKey({
+          sourceUrl: p.src.url,
+          mediaId: p.src.meta.id,
+          season: p.src.episode?.season,
+          episode: p.src.episode?.episode,
+        }),
+      );
+    })
+      .then((unlisten) => {
+        if (cancelled) {
+          unlisten();
+          return;
+        }
+        off = unlisten;
+        // Register before requesting: the main window may reply immediately.
+        void hdrOverlayEmitAction("hdr-stage://request", {});
+        let tries = 0;
+        id = window.setInterval(() => {
+          if (gotPayloadRef.current || tries++ > 40) {
+            window.clearInterval(id);
+            return;
+          }
+          void hdrOverlayEmitAction("hdr-stage://request", {});
+        }, 150);
+      })
+      .catch(emitDead);
     return () => {
+      cancelled = true;
       window.clearInterval(id);
-      void un.then((fn) => fn()).catch(() => {});
+      off?.();
     };
   }, [bridge]);
 
   useEffect(() => {
-    if (!payload) return;
-    const id = requestAnimationFrame(() => void hdrOverlayEmitAction("hdr-stage://ready", {}));
-    return () => cancelAnimationFrame(id);
-  }, [payload]);
+    if (!payload?.stageId) return;
+    // This effect runs after the actual shell commits. Hidden WebViews may not
+    // receive animation frames, so rAF must not gate the first ready signal.
+    document.getElementById("harbor-boot")?.remove();
+    const root = document.getElementById("root");
+    if (root) {
+      root.removeAttribute("data-startup-hidden");
+      root.inert = false;
+    }
+    const ready = () =>
+      void hdrOverlayEmitAction("hdr-stage://ready", { stageId: payload.stageId });
+    ready();
+    const id = window.setInterval(ready, 1000);
+    return () => window.clearInterval(id);
+  }, [payload?.stageId]);
 
   useEffect(() => {
     let last = 0;
@@ -180,6 +257,14 @@ function HdrOverlayChrome() {
         episode={src.episode?.episode ?? null}
         download={download}
         sleep={undefined}
+      />
+      <PlayerInteractionLockControls
+        enabled={payload.screenLockEnabled}
+        locked={payload.screenLocked}
+        visible={payload.screenLocked ? payload.screenLockControlsVisible : payload.visible}
+        binding={payload.screenLockBinding}
+        onLock={() => act("hdr-stage://lock")}
+        onUnlock={() => act("hdr-stage://unlock")}
       />
     </div>
   );

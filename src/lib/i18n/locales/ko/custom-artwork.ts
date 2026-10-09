@@ -1,0 +1,21 @@
+export default {
+  "artwork.title": "로딩 및 시작 화면 이미지",
+  "artwork.hint": "Lottie 애니메이션, GIF 또는 이미지를 사용하세요. 최대 8 MB.",
+  "artwork.loading": "로딩 애니메이션",
+  "artwork.loadingHint": "연결 및 로딩 화면에 사용됩니다.",
+  "artwork.launch": "시작 로고",
+  "artwork.launchHint": "Big Picture를 포함하여 Harbor를 열 때 표시됩니다.",
+  "artwork.original": "Harbor 기본 이미지",
+  "artwork.choose": "파일 선택",
+  "artwork.saving": "저장 중…",
+  "artwork.reset": "초기화",
+  "artwork.chooseLoading": "로딩 애니메이션 선택",
+  "artwork.chooseLaunch": "시작 로고 선택",
+  "artwork.resetLoading": "로딩 애니메이션 초기화",
+  "artwork.resetLaunch": "시작 로고 초기화",
+  "artwork.local": "이 기기에 저장됩니다. 동작 줄이기를 사용하면 정지 이미지가 표시됩니다.",
+  "artwork.error.large": "더 작은 파일을 선택하세요. 최대 8 MB, 4096 × 4096 픽셀입니다.",
+  "artwork.error.external": "이 애니메이션은 외부 미디어를 사용합니다. 이미지를 포함하여 내보내세요.",
+  "artwork.error.storage": "이 기기에 파일을 저장할 수 없습니다. 이전 선택은 변경되지 않았습니다.",
+  "artwork.error.invalid": "파일을 읽을 수 없습니다. Lottie(.json 또는 .lottie), GIF, PNG, JPEG 또는 WebP를 선택하세요."
+};

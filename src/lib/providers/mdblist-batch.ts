@@ -6,6 +6,7 @@ export type CardScores = {
   metacritic: number | null;
   letterboxd: number | null;
   trakt: number | null;
+  simkl: number | null;
   score: number | null;
 };
 
@@ -121,11 +122,13 @@ async function flush(): Promise<void> {
         const id = extractImdb(item);
         if (!id) continue;
         got.add(id);
+        const simklRaw = ratingFrom(item, ["simkl"]);
         remember(`${kind}:${id}`, {
           rtAudience: ratingFrom(item, ["tomatoesaudience", "audience", "popcorn"]),
           metacritic: ratingFrom(item, ["metacritic"]),
           letterboxd: ratingFrom(item, ["letterboxd"]),
           trakt: ratingFrom(item, ["trakt"]),
+          simkl: simklRaw !== null ? (simklRaw > 10 ? simklRaw / 10 : simklRaw) : null,
           score: scoreFrom(item),
         });
       }

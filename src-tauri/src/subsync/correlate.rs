@@ -54,8 +54,11 @@ fn fft_xcorr(a: &[f32], b: &[f32], max_lag: usize) -> Vec<f32> {
     if fwd.process(&mut abuf, &mut aspec).is_err() || fwd.process(&mut bbuf, &mut bspec).is_err() {
         return vec![0f32; 2 * max_lag + 1];
     }
-    let mut prod: Vec<Complex<f32>> =
-        aspec.iter().zip(bspec.iter()).map(|(&x, &y)| x * y.conj()).collect();
+    let mut prod: Vec<Complex<f32>> = aspec
+        .iter()
+        .zip(bspec.iter())
+        .map(|(&x, &y)| x * y.conj())
+        .collect();
     let mut out = inv.make_output_vec();
     if inv.process(&mut prod, &mut out).is_err() {
         return vec![0f32; 2 * max_lag + 1];
@@ -93,7 +96,11 @@ fn peak_stats(corr: &[f32]) -> (usize, f32, f32) {
             second = v;
         }
     }
-    let dominance = if second > 1e-6 { peak / second } else { f32::INFINITY };
+    let dominance = if second > 1e-6 {
+        peak / second
+    } else {
+        f32::INFINITY
+    };
     (pidx, z, dominance)
 }
 
@@ -164,7 +171,77 @@ pub fn solve(
     if ncc < conf_min || z < Z_MIN || dom < DOMINANCE_MIN || offset_sec.abs() > MAX_LAG_SEC {
         return None;
     }
-    Some(SyncResult { offset_sec, ratio, confidence: ncc })
+    Some(SyncResult {
+        offset_sec,
+        ratio,
+        confidence: ncc,
+    })
+}
+
+#[derive(serde::Serialize)]
+pub struct AlignmentQuality {
+    pub ncc: f32,
+    pub coverage: f32,
+    pub z: f32,
+}
+
+fn coverage_at(a: &[f32], b: &[f32], lag: isize) -> f32 {
+    let (mut on_cue, mut on_both) = (0.0f32, 0.0f32);
+    for (i, &x) in a.iter().enumerate() {
+        let j = i as isize - lag;
+        if j < 0 || j as usize >= b.len() {
+            continue;
+        }
+        if b[j as usize] > 0.0 {
+            on_cue += 1.0;
+            if x > 0.0 {
+                on_both += 1.0;
+            }
+        }
+    }
+    if on_cue > 0.0 {
+        on_both / on_cue
+    } else {
+        0.0
+    }
+}
+
+fn z_at(a: &[f32], b: &[f32], lag: isize) -> f32 {
+    let max_lag = (MAX_LAG_SEC * GRID_HZ) as usize;
+    let corr = fft_xcorr(a, b, max_lag);
+    let n = corr.len();
+    if n == 0 {
+        return 0.0;
+    }
+    let mean = corr.iter().sum::<f32>() / n as f32;
+    let var = corr.iter().map(|&v| (v - mean).powi(2)).sum::<f32>() / n as f32;
+    let std = var.sqrt().max(1e-9);
+    let idx = (max_lag as isize + lag).clamp(0, n as isize - 1) as usize;
+    (corr[idx] - mean) / std
+}
+
+pub fn score_affine(
+    speech: &[(f32, f32)],
+    cues: &[(f32, f32)],
+    total_sec: f32,
+    offset: f32,
+    ratio: f32,
+) -> AlignmentQuality {
+    let len = ((total_sec * GRID_HZ).round() as usize).max(1);
+    if speech.is_empty() || cues.is_empty() || len < 2 {
+        return AlignmentQuality {
+            ncc: 0.0,
+            coverage: 0.0,
+            z: 0.0,
+        };
+    }
+    let amask = rasterize(speech, 1.0, len);
+    let bmask = rasterize(cues, ratio, len);
+    let lag = (offset * GRID_HZ).round() as isize;
+    let ncc = ncc_at(&amask, &bmask, lag).max(0.0);
+    let coverage = coverage_at(&amask, &bmask, lag);
+    let z = z_at(&amask, &bmask, lag);
+    AlignmentQuality { ncc, coverage, z }
 }
 
 #[cfg(test)]
@@ -172,7 +249,9 @@ mod tests {
     use super::*;
 
     fn cue_pattern() -> Vec<(f32, f32)> {
-        let gaps = [4.3f32, 6.1, 3.2, 7.4, 5.0, 3.9, 8.2, 4.7, 6.6, 3.5, 5.8, 7.1];
+        let gaps = [
+            4.3f32, 6.1, 3.2, 7.4, 5.0, 3.9, 8.2, 4.7, 6.6, 3.5, 5.8, 7.1,
+        ];
         let mut t = 5.0f32;
         let mut cues = Vec::new();
         for k in 0..26 {
@@ -205,5 +284,35 @@ mod tests {
         let cues = cue_pattern();
         let audio = vec![(0.0f32, 260.0f32)];
         assert!(solve(&audio, &cues, 260.0, 0.55).is_none());
+    }
+
+    #[test]
+    fn score_rewards_correct_offset() {
+        let cues = cue_pattern();
+        let audio: Vec<(f32, f32)> = cues.iter().map(|&(a, b)| (a + 7.3, b + 7.3)).collect();
+        let good = score_affine(&audio, &cues, 260.0, 7.3, 1.0);
+        let bad = score_affine(&audio, &cues, 260.0, 0.0, 1.0);
+        assert!(good.ncc > 0.9, "good ncc {}", good.ncc);
+        assert!(good.coverage > 0.8, "coverage {}", good.coverage);
+        assert!(
+            good.ncc > bad.ncc + 0.2,
+            "good {} bad {}",
+            good.ncc,
+            bad.ncc
+        );
+    }
+
+    #[test]
+    fn score_recovers_ratio_drift() {
+        let cues = cue_pattern();
+        let audio: Vec<(f32, f32)> = cues.iter().map(|&(a, b)| (a * 1.25, b * 1.25)).collect();
+        let good = score_affine(&audio, &cues, 340.0, 0.0, 1.25);
+        let flat = score_affine(&audio, &cues, 340.0, 0.0, 1.0);
+        assert!(
+            good.ncc > flat.ncc + 0.2,
+            "drift {} flat {}",
+            good.ncc,
+            flat.ncc
+        );
     }
 }

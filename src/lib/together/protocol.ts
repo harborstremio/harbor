@@ -17,6 +17,8 @@ export type EpisodeRef = {
   imdbId?: string;
   imdbSeason?: number;
   imdbEpisode?: number;
+  absoluteNumber?: number;
+  tvdbEpisodeId?: number;
 };
 
 export type SourceDescriptor = {

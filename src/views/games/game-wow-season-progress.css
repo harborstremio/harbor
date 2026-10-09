@@ -1,0 +1,26 @@
+.games-wow-season-progress { margin-top: 24px; }
+.games-wow-progress-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+.games-wow-progress-heading h4 { font-size: 18px; font-weight: 600; margin: 0 0 6px; }
+.games-wow-progress-heading p, .games-wow-progress-note { font-size: 13px; color: var(--color-ink-muted); line-height: 1.65; margin: 0; }
+.games-wow-progress-heading > button { max-width: 100%; }
+.games-wow-progress-note { margin-bottom: 18px; }
+.games-wow-progress-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 18px; }
+.games-wow-progress-grid > article { min-width: 0; background: var(--color-surface); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+.games-wow-progress-art { position: relative; height: 150px; flex-shrink: 0; isolation: isolate; color: #fff; background: #151c20; }
+.games-wow-progress-art img, .games-wow-progress-art .games-art-empty { position: absolute; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.games-wow-progress-art::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(transparent 20%, #080e14d9); }
+.games-wow-progress-art h5 { position: absolute; inset-inline: 16px; bottom: 15px; margin: 0; font-size: 17px; line-height: 1.4; font-weight: 600; overflow-wrap: anywhere; }
+.games-wow-progress-content { padding: 18px 16px 0; flex: 1; display: flex; flex-direction: column; }
+.games-wow-progress-best { display: flex; align-items: center; gap: 12px; min-height: 50px; }
+.games-wow-progress-best > strong { font-size: 30px; font-weight: 650; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.games-wow-progress-best > span { font-size: 13px; }
+.games-wow-progress-best small { display: block; margin-top: 4px; font-size: 12px; color: var(--color-ink-muted); }
+.games-wow-progress-best > p { font-size: 14px; line-height: 1.6; margin: 0; }
+.games-wow-progress-count { display: flex; align-items: center; gap: 6px; color: var(--color-ink-muted); font-size: 12px; line-height: 1.6; margin: 14px 0 8px; }
+.games-wow-progress-count svg { flex-shrink: 0; }
+.games-wow-progress-content > a { display: inline-flex; align-items: center; align-self: start; gap: 5px; font-size: 12px; line-height: 1.6; margin-bottom: 12px; }
+.games-wow-progress-content > a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.games-wow-progress-explore { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: calc(100% + 32px); margin: auto -16px 0; padding: 13px 16px; border-top: 1px solid var(--color-edge-soft); font-size: 13px; text-align: start; }
+.games-wow-progress-explore:hover { background: var(--color-elevated); }
+.games-wow-season-progress :is(button, a):focus-visible { outline: 2px solid var(--color-accent); outline-offset: -3px; }
+@media (max-width: 650px) { .games-wow-progress-art { height: 175px; } }

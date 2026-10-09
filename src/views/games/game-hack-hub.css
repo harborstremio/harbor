@@ -1,0 +1,194 @@
+.games-atlas-page.games-hack-hub{padding-top:0}
+.games-hack-lead{position:relative;isolation:isolate;display:flex;flex-direction:column;min-height:clamp(480px,43cqw,620px);margin-inline:calc(-1 * var(--games-gutter));margin-top:0;padding-top:20px;color:#f5f5f2;background:var(--color-canvas);overflow:hidden;margin-bottom:30px}
+.games-hack-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:0;padding-inline:var(--games-gutter)}
+.games-hack-heading h1{font-size:25px;font-weight:650;line-height:1.2;letter-spacing:-.035em;margin:7px 0 0;text-wrap:balance}
+.games-hack-heading .games-section-kicker{color:#ffffffa6}
+.games-hack-lead .games-hack-tools>.games-button{background:#ffffff16;color:#fff}
+.games-hack-lead .games-hack-tools .games-icon-button{color:#ffffffb3}
+.games-hack-heading h1:focus{outline:none}
+.games-hack-tools{display:flex;align-items:center;gap:10px;flex:none}
+.games-hack-feature{position:relative;flex:1;display:flex;flex-direction:column;justify-content:flex-end;margin:0;padding-top:30px}
+.games-hack-scene{position:absolute;inset:0;z-index:-2;animation:hack-scene-in 220ms ease-out}
+.games-hack-scene>img,.games-hack-scene>.games-art-empty{width:100%;height:100%;object-fit:cover;object-position:80% 45%}
+.games-hack-shade{position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(0deg,var(--color-canvas),#0a100dcc 12%,transparent 55%),linear-gradient(90deg,#08110ded,#08110db3 36%,#08110d12 76%),linear-gradient(180deg,#050a0e99,transparent 26%)}
+.games-hack-feature-copy{padding:32px var(--games-gutter) 40px;max-width:760px}
+.games-hack-feature-copy>.games-section-kicker{color:#d4dfda;font-size:11px;letter-spacing:.045em;display:block;margin-bottom:22px}
+.games-hack-feature-copy>.games-section-kicker>span{margin:0 8px;color:#91a39a}
+.games-hack-feature-title{display:flex;align-items:center;gap:20px}
+.games-hack-feature-title>img{width:72px;max-height:108px;object-fit:contain;border-radius:4px;flex:none}
+.games-hack-feature-title h2{font-size:clamp(36px,4.8cqw,66px);line-height:1.08;letter-spacing:-.045em;font-weight:700;text-wrap:balance;margin:0;max-width:17ch;min-width:0;overflow-wrap:anywhere}
+.games-hack-feature-copy>p{font-size:14px;line-height:1.7;color:#d2d9d6;margin:20px 0;max-width:52ch;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.games-hack-lineage{display:flex;align-items:center;gap:9px;text-align:start;font-size:10px;color:#bcc9c2;margin:0 0 23px}
+.games-hack-lineage>img{width:26px;height:36px;object-fit:cover;border-radius:2px}
+.games-hack-lineage>span{display:grid;gap:3px}
+.games-hack-lineage strong{font-size:12px;font-weight:550;color:#fff}
+.games-hack-lineage:hover strong{text-decoration:underline;text-underline-offset:3px}
+.games-hack-feature .games-actions{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.games-hack-primary,.games-hack-watch-button{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;font-size:13px;font-weight:600;border-radius:7px}
+.games-hack-primary{background:#f3f6f4;color:#141a16;padding:0 18px}
+.games-hack-primary:hover{background:#fff}
+.games-hack-watch-button{color:#f3f6f4;padding:0 4px}
+.games-hack-watch-button:hover{color:var(--color-accent)}
+.games-hack-feature-switcher{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:0 var(--games-gutter) 26px}
+.games-hack-feature-switcher>button{display:flex;align-items:center;gap:10px;min-width:0;text-align:start;padding:12px;color:#b5c2bb;border:0;border-radius:6px}
+.games-hack-feature-switcher>button[aria-pressed=true]{color:#fff;background:#ffffff17}
+.games-hack-feature-switcher>button:hover{background:#ffffff09}
+.games-hack-feature-switcher>button>span{font-size:10px;font-variant-numeric:tabular-nums}
+.games-hack-feature-switcher>button>img{width:28px;height:39px;object-fit:cover;border-radius:2px}
+.games-hack-feature-switcher strong{font-size:12px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.games-hack-feature-loading{padding:44px var(--games-gutter);justify-content:center;gap:18px}
+.games-hack-lead[data-state=loading]{color:var(--color-ink)}
+.games-hack-lead[data-state=loading] .games-hack-shade{background:linear-gradient(180deg,var(--color-surface),var(--color-canvas))}
+.games-hack-lead[data-state=empty]{min-height:0;padding-bottom:24px;color:var(--color-ink)}
+.games-hack-lead[data-state=empty] .games-hack-shade{display:none}
+.games-hack-lead:not([data-state=ready]) .games-section-kicker,.games-hack-lead:not([data-state=ready]) .games-icon-button{color:var(--color-ink-muted)}
+.games-hack-lead:not([data-state=ready]) .games-hack-tools>.games-button{background:var(--color-elevated);color:var(--color-ink)}
+.games-hack-lead>.games-inline-status,.games-hack-lead>.games-data-status{margin:28px var(--games-gutter) 0}
+.games-hack-feature-loading>div{height:44px;width:45%}
+.games-hack-feature-loading>div:nth-child(2){height:90px;width:52%}
+.games-hack-feature-loading>div:last-child{width:25%}
+.games-hack-parents{margin-bottom:36px}
+.games-hack-parents .games-section-heading{align-items:baseline;gap:16px;margin-bottom:18px}
+.games-hack-parents .games-section-heading>span{font-size:12px;color:var(--color-ink-muted)}
+.games-hack-originals article{position:relative;min-width:0}
+.games-hack-original{display:flex;flex-direction:column;gap:8px;text-align:start;width:100%}
+.games-hack-original>img,.games-hack-original>.games-art-empty{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;transition:filter 160ms}
+.games-hack-original:hover>img{filter:brightness(1.12)}
+.games-hack-original>strong{font-size:13px;line-height:1.4;font-weight:600;padding-inline-end:15px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.games-hack-original>span:not(.games-art-empty){font-size:11px;line-height:1.4;color:var(--color-ink-muted);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.games-hack-originals article>.relative,.games-hack-originals article>div{position:absolute;inset-inline-end:-2px;top:calc(100% - 50px)}
+.games-hack-original-info{width:25px;height:25px;display:grid;place-items:center;color:var(--color-ink-muted);border-radius:4px}
+.games-hack-original-info:hover{background:var(--color-elevated);color:var(--color-ink)}
+.games-hack-route-actions{display:flex;justify-content:space-between;gap:16px;margin:-15px 0 30px;flex-wrap:wrap}
+.games-hack-videos{margin-bottom:36px}
+.games-hack-videos .games-section-heading{margin-bottom:19px}
+.games-hack-video-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.games-hack-video-grid>button{text-align:start;min-width:0}
+.games-hack-video-art{display:block;position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:6px;background:var(--color-surface)}
+.games-hack-video-art>img{width:100%;height:100%;object-fit:cover}
+.games-hack-video-art>span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:43px;height:43px;display:grid;place-items:center;background:#111c;color:#fff;border-radius:50%;transition:background 150ms}
+.games-hack-video-grid>button:hover .games-hack-video-art>span{background:#111}
+.games-hack-video-grid small{display:block;color:var(--color-ink-muted);font-size:11px;margin:12px 0 5px}
+.games-hack-video-grid strong{display:block;font-size:14px;font-weight:600;line-height:1.4}
+.games-hack-video-caption{display:block;color:var(--color-ink-muted);font-size:11px;line-height:1.5;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.games-hack-guide{margin:0 0 38px;background:var(--color-surface);border-radius:8px;padding:18px 24px}
+.games-hack-guide summary{display:flex;align-items:center;gap:14px;cursor:pointer;list-style:none}
+.games-hack-guide summary::-webkit-details-marker{display:none}
+.games-hack-guide summary>span:nth-child(2){display:grid;gap:4px;flex:1}
+.games-hack-guide summary strong{font-size:14px;font-weight:600}
+.games-hack-guide summary small{font-size:12px;color:var(--color-ink-muted)}
+.games-hack-guide-formats{font-size:11px;color:var(--color-ink-muted);white-space:nowrap}
+.games-hack-guide summary::after{content:'+';font-size:20px;color:var(--color-ink-muted)}
+.games-hack-guide[open] summary::after{content:'−'}
+.games-hack-guide ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px;list-style:none;margin:26px 0 8px;padding:0}
+.games-hack-guide li{display:flex;align-items:start;gap:14px;min-width:0}
+.games-hack-guide li>span{font-size:11px;color:var(--color-ink-subtle);padding-top:4px}
+.games-hack-guide h3{font-size:14px;font-weight:600;line-height:1.45;margin:0 0 9px}
+.games-hack-guide p{font-size:12px;line-height:1.7;color:var(--color-ink-muted);margin:0 0 12px}
+.games-hack-guide .games-button{font-size:12px}
+.games-hack-catalog-heading h2{font-size:23px;font-weight:650;letter-spacing:-.025em;margin-bottom:7px}
+.games-hack-catalog-heading p{font-size:13px;line-height:1.6;color:var(--color-ink-muted);margin:0 0 15px}
+.games-hack-hub .games-atlas-toolbar{border:0;padding-block:8px;gap:12px;margin-bottom:15px}
+.games-hack-hub .games-atlas-toolbar .games-search{margin-inline:0 auto}
+.games-hack-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px}
+.games-hack-card{min-width:0;display:flex;flex-direction:column}
+.games-hack-card-main{display:block;text-align:start;width:100%}
+.games-hack-card-art{position:relative;display:block;aspect-ratio:16/10;background:var(--color-surface);border-radius:7px;overflow:hidden}
+.games-hack-card-art>img:first-child,.games-hack-card-art>.games-art-empty:first-child{width:100%;height:100%;object-fit:cover;transition:filter 160ms}
+.games-hack-card-main:hover .games-hack-card-art>img:first-child{filter:brightness(1.1)}
+.games-hack-card-art>.games-hack-card-cover{position:absolute;inset-inline-start:12px;bottom:12px;width:44px;height:64px;object-fit:cover;border-radius:3px}
+.games-hack-card-copy{display:block;padding-top:13px}
+.games-hack-card-main small{color:var(--color-ink-muted);font-size:11px;display:block;min-height:16px}
+.games-hack-card-main h3{font-size:17px;font-weight:600;line-height:1.35;letter-spacing:-.02em;margin:5px 0 9px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.games-hack-card-main p{font-size:12px;line-height:1.6;height:3.2em;color:var(--color-ink-muted);margin:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.games-hack-card footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;min-height:40px}
+.games-hack-base{display:flex;align-items:center;gap:9px;text-align:start;min-width:0}
+.games-hack-base>img{width:27px;height:38px;object-fit:cover;border-radius:2px;flex:none}
+.games-hack-base>span{display:grid;gap:4px;min-width:0}
+.games-hack-base small{font-size:10px;color:var(--color-ink-muted)}
+.games-hack-base strong{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.games-hack-base:hover strong{text-decoration:underline;text-underline-offset:3px}
+.games-hack-card .games-icon-button[aria-pressed=true]{color:var(--color-accent);background:var(--color-surface)}
+.games-hack-card-links{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-top:auto;padding-top:18px}
+.games-hack-card-secondary :is(a,button){display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-ink-muted);min-height:24px}
+.games-hack-card-secondary :is(a,button):hover{color:var(--color-ink)}
+.games-hack-skeleton .games-skeleton-poster{aspect-ratio:16/10}
+.games-hack-skeleton{min-height:365px}
+.games-hack-install{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.games-hack-install h2{font-size:24px;letter-spacing:-.03em;margin:0 0 10px}
+.games-hack-install p{font-size:13px;color:var(--color-ink-muted);max-width:62ch;line-height:1.65}
+.games-hack-install .games-text-action{font-size:12px}
+.games-hack-resources{margin:42px 0 20px}
+.games-hack-resources h2{font-size:19px;margin-bottom:18px;font-weight:600}
+.games-hack-resources>div{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.games-hack-resources a{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:17px;background:var(--color-surface);border-radius:7px}
+.games-hack-resources a:hover{background:var(--color-elevated)}
+.games-hack-resources a>span{display:grid;gap:6px}
+.games-hack-resources strong{font-size:13px;font-weight:600}
+.games-hack-resources small{font-size:11px;color:var(--color-ink-muted)}
+.games-hack-hub :is(button,a,summary):focus-visible,.games-hack-watch :is(button,a):focus-visible{outline:2px solid var(--color-accent);outline-offset:4px;border-radius:4px}
+@keyframes hack-scene-in{from{opacity:.5}to{opacity:1}}
+@container(max-width:900px){.games-hack-feature-copy{max-width:690px}.games-hack-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.games-hack-video-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.games-hack-feature-switcher>button>span{display:none}.games-hack-resources>div{grid-template-columns:repeat(2,minmax(0,1fr))}.games-hack-guide ol{grid-template-columns:1fr;gap:20px}.games-hack-guide li>div{max-width:65ch}}
+@container(max-width:580px){.games-hack-heading{align-items:start;gap:15px}.games-hack-tools{gap:5px}.games-hack-tools>.games-button{font-size:12px;padding:10px}.games-hack-heading .games-section-kicker{font-size:10px}.games-hack-lead{min-height:calc(650px + var(--games-chrome-inset))}.games-hack-feature-copy{padding:32px var(--games-gutter)}.games-hack-feature-copy>p{-webkit-line-clamp:3}.games-hack-feature-title h2{font-size:33px}.games-hack-feature-title>img{width:52px;max-height:80px}.games-hack-shade{background:linear-gradient(0deg,var(--color-canvas),#080e0f88 22%,transparent 70%),linear-gradient(90deg,#080e0fed,#080e0f55),linear-gradient(180deg,#050a0e88,transparent 36%)}.games-hack-feature-switcher{grid-template-columns:repeat(2,minmax(0,1fr));padding-inline:var(--games-gutter);padding-bottom:20px;gap:3px}.games-hack-feature-switcher>button{padding:9px}.games-hack-feature-switcher>button>img{width:21px;height:30px}.games-hack-feature-switcher strong{font-size:11px}.games-hack-originals{gap:15px}.games-hack-parents .games-section-heading{display:block}.games-hack-parents .games-section-heading>span{display:block;margin-top:8px}.games-hack-guide-formats{display:none}.games-hack-grid{grid-template-columns:1fr}.games-hack-install .games-actions{flex-wrap:wrap}}
+@media(max-width:580px){.games-hack-watch header{padding:15px}.games-hack-watch footer{padding:12px 15px;align-items:start;flex-direction:column}.games-hack-watch h2{font-size:14px}}
+@container(max-width:420px){.games-hack-heading{flex-wrap:wrap}.games-hack-heading>div:first-child{flex:1 1 100%}.games-hack-heading h1{font-size:26px}.games-hack-tools{width:100%;justify-content:space-between}.games-hack-video-grid{grid-template-columns:1fr}.games-hack-resources>div{grid-template-columns:1fr}}
+:dir(rtl) .games-hack-shade{transform:scaleX(-1)}
+@media(prefers-reduced-motion:reduce){.games-hack-scene{animation:none}.games-hack-card-art>img,.games-hack-original>img{transition:none}}
+
+.games-hack-mast{position:relative;z-index:5;background:var(--color-canvas)}
+.games-hack-guide-art{width:104px;height:82px;object-fit:contain;flex:none}
+.games-hack-guide summary>span:nth-child(2){min-width:0}
+.games-hack-community-logo{width:30px;height:30px;object-fit:contain;flex:none}
+.games-hack-resources a>span{flex:1;min-width:0}
+.games-hack-continuation{min-height:2px;margin-top:26px}
+.games-hack-base-filter{position:relative;min-width:0;margin-inline-end:auto;z-index:4}
+.games-hack-base-filter>.games-button{max-width:300px;text-align:start}
+.games-hack-base-menu{position:absolute;top:calc(100% + 8px);inset-inline-start:0;width:min(360px,80cqw);padding:12px;background:var(--color-elevated);border-radius:8px;box-shadow:0 12px 32px #0004}
+.games-hack-base-menu .games-search{width:100%;margin:0 0 8px!important}
+.games-hack-base-menu>button{width:100%;padding:12px;text-align:start;font-size:13px}
+.games-hack-base-results{max-height:340px;overflow:auto}
+.games-hack-base-results button{display:flex;width:100%;gap:12px;padding:10px;text-align:start;border-radius:5px;align-items:center}
+.games-hack-base-results button:hover,.games-hack-base-menu>button:hover{background:var(--color-raised)}
+.games-hack-base-results img{width:30px;height:42px;object-fit:cover;border-radius:3px}
+.games-hack-base-results span{display:grid;gap:4px;min-width:0}
+.games-hack-base-results strong{font-size:13px;font-weight:550}
+.games-hack-base-results small,.games-hack-base-results p{font-size:12px;color:var(--color-ink-muted)}
+@container(max-width:580px){.games-hack-guide{padding:12px 16px}.games-hack-guide-art{width:70px;height:66px}.games-hack-guide-formats{display:none}.games-hack-feature-switcher{grid-template-columns:repeat(2,minmax(0,1fr))}.games-hack-heading h1{font-size:24px}.games-hack-tools{width:auto}.games-hack-base-filter{width:100%}}
+
+/* Secondary navigation reveals its arrow without moving the label. */
+.games-hack-hover-arrow,.games-hack-project-action{opacity:0;transition:opacity 160ms ease-out}
+:is(button,a):is(:hover,:focus-visible)>.games-hack-hover-arrow,.games-hack-feature .games-actions:is(:hover,:focus-within) .games-hack-project-action{opacity:1}
+.games-hack-trailer-icon{display:inline-flex;width:18px;height:18px;flex:none}
+.games-hack-card-secondary{display:grid;gap:4px;min-width:0}
+.games-hack-card-links>.games-hack-get-files{min-height:46px;padding:0 18px;background:var(--color-ink);color:var(--color-canvas);font-size:13px;font-weight:600;white-space:nowrap;border-radius:6px;flex:none}
+.games-hack-card-links>.games-hack-get-files:hover{filter:brightness(.9)}
+.games-hack-video-card{display:block;text-align:start;width:100%;min-width:0}
+.games-hack-video-card strong{display:block;font-size:14px;font-weight:600;line-height:1.4;margin-top:12px}
+.games-hack-video-card small{display:block;color:var(--color-ink-muted);font-size:11px;margin-top:5px}
+.games-hack-video-card:hover .games-hack-video-art>span{background:#111}
+.games-hack-video-art>img{opacity:0;transition:opacity 220ms ease-out}
+.games-hack-video-art>img[data-loaded=true]{opacity:1}
+.games-hack-video-placeholder>div:first-child{width:100%;aspect-ratio:16/9;border-radius:6px}
+.games-hack-video-placeholder>div:last-child{height:14px;width:70%;margin-top:12px}
+@media(hover:none){.games-hack-project-action,.games-hack-hover-arrow{opacity:1}}
+@media(prefers-reduced-motion:reduce){.games-hack-hover-arrow,.games-hack-project-action,.games-hack-video-art>img{transition:none}}
+
+.games-hack-feature{min-height:420px}
+.games-hack-feature-copy{max-width:680px}
+.games-hack-feature-title h2{font-size:clamp(36px,4.8cqw,66px)}
+.games-hack-feature-copy>p{font-size:16px;line-height:1.65;max-width:50ch}
+.games-hack-primary{min-height:54px;padding-inline:26px;font-size:15px;border-radius:8px}
+.games-hack-watch-button{width:54px;height:54px;padding:0;background:#ffffff12;border-radius:8px}
+.games-hack-watch-button:hover{background:#ffffff20;color:#fff}
+.games-hack-watch-button .games-hack-trailer-icon{width:24px;height:24px}
+
+.games-hack-browser{position:relative;margin-top:calc(-1 * var(--games-chrome-inset));padding-top:var(--games-chrome-inset)}
+.games-hack-browser>.games-hack-mast{position:absolute;top:var(--games-chrome-inset);inset-inline:0;background:transparent;color:#fff}
+.games-hack-browser>.games-hack-mast .games-search{background:#111a;backdrop-filter:blur(12px)}
+.games-hack-browser .games-hack-lead{margin-top:calc(-1 * var(--games-chrome-inset));padding-top:calc(110px + var(--games-chrome-inset));min-height:calc(600px + var(--games-chrome-inset))}
+.games-hack-heading-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.games-hack-heading{justify-content:flex-end}
+.games-hack-primary{border-radius:999px}
+.games-hack-watch-button,.games-hack-watch-button:hover{background:none}
+.games-hack-watch-button .games-hack-trailer-icon{width:28px;height:28px}
+@container(max-width:750px){.games-hack-browser .games-hack-lead{padding-top:calc(160px + var(--games-chrome-inset))}}

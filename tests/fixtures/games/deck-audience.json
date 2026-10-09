@@ -1,0 +1,913 @@
+{
+  "queries": [
+    {
+      "state": {
+        "data": {
+          "rgRanks": [
+            {
+              "nRank": 1,
+              "itemKey": {
+                "appid": 2868840
+              },
+              "nRankLastPeriod": 1
+            },
+            {
+              "nRank": 2,
+              "itemKey": {
+                "appid": 292030
+              },
+              "nRankLastPeriod": 22
+            },
+            {
+              "nRank": 3,
+              "itemKey": {
+                "appid": 250900
+              },
+              "nRankLastPeriod": 2
+            },
+            {
+              "nRank": 4,
+              "itemKey": {
+                "appid": 4358690
+              },
+              "nRankLastPeriod": 8
+            },
+            {
+              "nRank": 5,
+              "itemKey": {
+                "appid": 413150
+              },
+              "nRankLastPeriod": 4
+            },
+            {
+              "nRank": 6,
+              "itemKey": {
+                "appid": 892970
+              },
+              "nRankLastPeriod": 5
+            },
+            {
+              "nRank": 7,
+              "itemKey": {
+                "appid": 2344520
+              },
+              "nRankLastPeriod": 3
+            },
+            {
+              "nRank": 8,
+              "itemKey": {
+                "appid": 1086940
+              },
+              "nRankLastPeriod": 7
+            },
+            {
+              "nRank": 9,
+              "itemKey": {
+                "appid": 2142790
+              },
+              "nRankLastPeriod": 6
+            },
+            {
+              "nRank": 10,
+              "itemKey": {
+                "appid": 275850
+              },
+              "nRankLastPeriod": 9
+            },
+            {
+              "nRank": 11,
+              "itemKey": {
+                "appid": 1623730
+              },
+              "nRankLastPeriod": 10
+            },
+            {
+              "nRank": 12,
+              "itemKey": {
+                "appid": 2379780
+              },
+              "nRankLastPeriod": 11
+            },
+            {
+              "nRank": 13,
+              "itemKey": {
+                "appid": 1401590
+              },
+              "nRankLastPeriod": 17
+            },
+            {
+              "nRank": 14,
+              "itemKey": {
+                "appid": 1942280
+              },
+              "nRankLastPeriod": 12
+            },
+            {
+              "nRank": 15,
+              "itemKey": {
+                "appid": 4126040
+              },
+              "nRankLastPeriod": 16
+            },
+            {
+              "nRank": 16,
+              "itemKey": {
+                "appid": 489830
+              },
+              "nRankLastPeriod": 15
+            },
+            {
+              "nRank": 17,
+              "itemKey": {
+                "appid": 1245620
+              },
+              "nRankLastPeriod": 13
+            },
+            {
+              "nRank": 18,
+              "itemKey": {
+                "appid": 1091500
+              },
+              "nRankLastPeriod": 14
+            },
+            {
+              "nRank": 19,
+              "itemKey": {
+                "appid": 1174180
+              },
+              "nRankLastPeriod": 18
+            },
+            {
+              "nRank": 20,
+              "itemKey": {
+                "appid": 4019220
+              },
+              "nRankLastPeriod": 63
+            },
+            {
+              "nRank": 21,
+              "itemKey": {
+                "appid": 1145350
+              },
+              "nRankLastPeriod": 24
+            },
+            {
+              "nRank": 22,
+              "itemKey": {
+                "appid": 230410
+              },
+              "nRankLastPeriod": 21
+            },
+            {
+              "nRank": 23,
+              "itemKey": {
+                "appid": 1145360
+              },
+              "nRankLastPeriod": 30
+            },
+            {
+              "nRank": 24,
+              "itemKey": {
+                "appid": 3405340
+              },
+              "nRankLastPeriod": 20
+            },
+            {
+              "nRank": 25,
+              "itemKey": {
+                "appid": 1794680
+              },
+              "nRankLastPeriod": 19
+            },
+            {
+              "nRank": 26,
+              "itemKey": {
+                "appid": 2552430
+              },
+              "nRankLastPeriod": 25
+            },
+            {
+              "nRank": 27,
+              "itemKey": {
+                "appid": 553850
+              },
+              "nRankLastPeriod": 23
+            },
+            {
+              "nRank": 28,
+              "itemKey": {
+                "appid": 108600
+              },
+              "nRankLastPeriod": 27
+            },
+            {
+              "nRank": 29,
+              "itemKey": {
+                "appid": 646570
+              },
+              "nRankLastPeriod": 26
+            },
+            {
+              "nRank": 30,
+              "itemKey": {
+                "appid": 377160
+              },
+              "nRankLastPeriod": 28
+            },
+            {
+              "nRank": 31,
+              "itemKey": {
+                "appid": 2062430
+              },
+              "nRankLastPeriod": 39
+            },
+            {
+              "nRank": 32,
+              "itemKey": {
+                "appid": 1868140
+              },
+              "nRankLastPeriod": 29
+            },
+            {
+              "nRank": 33,
+              "itemKey": {
+                "appid": 12210
+              },
+              "nRankLastPeriod": 31
+            },
+            {
+              "nRank": 34,
+              "itemKey": {
+                "appid": 1030300
+              },
+              "nRankLastPeriod": 33
+            },
+            {
+              "nRank": 35,
+              "itemKey": {
+                "appid": 1687950
+              },
+              "nRankLastPeriod": 43
+            },
+            {
+              "nRank": 36,
+              "itemKey": {
+                "appid": 599140
+              },
+              "nRankLastPeriod": 40
+            },
+            {
+              "nRank": 37,
+              "itemKey": {
+                "appid": 381210
+              },
+              "nRankLastPeriod": 34
+            },
+            {
+              "nRank": 38,
+              "itemKey": {
+                "appid": 367520
+              },
+              "nRankLastPeriod": 36
+            },
+            {
+              "nRank": 39,
+              "itemKey": {
+                "appid": 990080
+              },
+              "nRankLastPeriod": 38
+            },
+            {
+              "nRank": 40,
+              "itemKey": {
+                "appid": 2161700
+              },
+              "nRankLastPeriod": 53
+            },
+            {
+              "nRank": 41,
+              "itemKey": {
+                "appid": 2483190
+              },
+              "nRankLastPeriod": 37
+            },
+            {
+              "nRank": 42,
+              "itemKey": {
+                "appid": 3527290
+              },
+              "nRankLastPeriod": 35
+            },
+            {
+              "nRank": 43,
+              "itemKey": {
+                "appid": 4162040
+              },
+              "nRankLastPeriod": 44
+            },
+            {
+              "nRank": 44,
+              "itemKey": {
+                "appid": 686060
+              },
+              "nRankLastPeriod": 42
+            },
+            {
+              "nRank": 45,
+              "itemKey": {
+                "appid": 2767030
+              },
+              "nRankLastPeriod": 45
+            },
+            {
+              "nRank": 46,
+              "itemKey": {
+                "appid": 588650
+              },
+              "nRankLastPeriod": 46
+            },
+            {
+              "nRank": 47,
+              "itemKey": {
+                "appid": 105600
+              },
+              "nRankLastPeriod": 48
+            },
+            {
+              "nRank": 48,
+              "itemKey": {
+                "appid": 2321470
+              },
+              "nRankLastPeriod": 50
+            },
+            {
+              "nRank": 49,
+              "itemKey": {
+                "appid": 1374490
+              },
+              "nRankLastPeriod": 51
+            },
+            {
+              "nRank": 50,
+              "itemKey": {
+                "appid": 3240220
+              },
+              "nRankLastPeriod": 47
+            },
+            {
+              "nRank": 51,
+              "itemKey": {
+                "appid": 3699590
+              },
+              "nRankLastPeriod": 131
+            },
+            {
+              "nRank": 52,
+              "itemKey": {
+                "appid": 1313140
+              },
+              "nRankLastPeriod": 54
+            },
+            {
+              "nRank": 53,
+              "itemKey": {
+                "appid": 3195440
+              },
+              "nRankLastPeriod": 41
+            },
+            {
+              "nRank": 54,
+              "itemKey": {
+                "appid": 2050650
+              },
+              "nRankLastPeriod": 55
+            },
+            {
+              "nRank": 55,
+              "itemKey": {
+                "appid": 2357570
+              },
+              "nRankLastPeriod": 57
+            },
+            {
+              "nRank": 56,
+              "itemKey": {
+                "appid": 1462040
+              },
+              "nRankLastPeriod": 58
+            },
+            {
+              "nRank": 57,
+              "itemKey": {
+                "appid": 3624140
+              },
+              "nRankLastPeriod": 32
+            },
+            {
+              "nRank": 58,
+              "itemKey": {
+                "appid": 730
+              },
+              "nRankLastPeriod": 59
+            },
+            {
+              "nRank": 59,
+              "itemKey": {
+                "appid": 2536520
+              },
+              "nRankLastPeriod": 52
+            },
+            {
+              "nRank": 60,
+              "itemKey": {
+                "appid": 227300
+              },
+              "nRankLastPeriod": 71
+            },
+            {
+              "nRank": 61,
+              "itemKey": {
+                "appid": 976730
+              },
+              "nRankLastPeriod": 64
+            },
+            {
+              "nRank": 62,
+              "itemKey": {
+                "appid": 2638890
+              },
+              "nRankLastPeriod": 49
+            },
+            {
+              "nRank": 63,
+              "itemKey": {
+                "appid": 4557380
+              },
+              "nRankLastPeriod": 67
+            },
+            {
+              "nRank": 64,
+              "itemKey": {
+                "appid": 870780
+              },
+              "nRankLastPeriod": 75
+            },
+            {
+              "nRank": 65,
+              "itemKey": {
+                "appid": 270880
+              },
+              "nRankLastPeriod": 141
+            },
+            {
+              "nRank": 66,
+              "itemKey": {
+                "appid": 1446780
+              },
+              "nRankLastPeriod": 60
+            },
+            {
+              "nRank": 67,
+              "itemKey": {
+                "appid": 582010
+              },
+              "nRankLastPeriod": 62
+            },
+            {
+              "nRank": 68,
+              "itemKey": {
+                "appid": 2246340
+              },
+              "nRankLastPeriod": 56
+            },
+            {
+              "nRank": 69,
+              "itemKey": {
+                "appid": 1817070
+              },
+              "nRankLastPeriod": 61
+            },
+            {
+              "nRank": 70,
+              "itemKey": {
+                "appid": 374320
+              },
+              "nRankLastPeriod": 91
+            },
+            {
+              "nRank": 71,
+              "itemKey": {
+                "appid": 3472040
+              },
+              "nRankLastPeriod": 68
+            },
+            {
+              "nRank": 72,
+              "itemKey": {
+                "appid": 2694490
+              },
+              "nRankLastPeriod": 78
+            },
+            {
+              "nRank": 73,
+              "itemKey": {
+                "appid": 294100
+              },
+              "nRankLastPeriod": 69
+            },
+            {
+              "nRank": 74,
+              "itemKey": {
+                "appid": 570940
+              },
+              "nRankLastPeriod": 127
+            },
+            {
+              "nRank": 75,
+              "itemKey": {
+                "appid": 284160
+              },
+              "nRankLastPeriod": 74
+            },
+            {
+              "nRank": 76,
+              "itemKey": {
+                "appid": 2968420
+              },
+              "nRankLastPeriod": 88
+            },
+            {
+              "nRank": 77,
+              "itemKey": {
+                "appid": 4001890
+              },
+              "nRankLastPeriod": 66
+            },
+            {
+              "nRank": 78,
+              "itemKey": {
+                "appid": 2495100
+              },
+              "nRankLastPeriod": 81
+            },
+            {
+              "nRank": 79,
+              "itemKey": {
+                "appid": 883710
+              },
+              "nRankLastPeriod": 72
+            },
+            {
+              "nRank": 80,
+              "itemKey": {
+                "appid": 550
+              },
+              "nRankLastPeriod": 79
+            },
+            {
+              "nRank": 81,
+              "itemKey": {
+                "appid": 526870
+              },
+              "nRankLastPeriod": 95
+            },
+            {
+              "nRank": 82,
+              "itemKey": {
+                "appid": 1478500
+              },
+              "nRankLastPeriod": 65
+            },
+            {
+              "nRank": 83,
+              "itemKey": {
+                "appid": 1151340
+              },
+              "nRankLastPeriod": 80
+            },
+            {
+              "nRank": 84,
+              "itemKey": {
+                "appid": 1903340
+              },
+              "nRankLastPeriod": 73
+            },
+            {
+              "nRank": 85,
+              "itemKey": {
+                "appid": 22380
+              },
+              "nRankLastPeriod": 77
+            },
+            {
+              "nRank": 86,
+              "itemKey": {
+                "appid": 2163330
+              },
+              "nRankLastPeriod": 70
+            },
+            {
+              "nRank": 87,
+              "itemKey": {
+                "appid": 1771300
+              },
+              "nRankLastPeriod": 90
+            },
+            {
+              "nRank": 88,
+              "itemKey": {
+                "appid": 2186680
+              },
+              "nRankLastPeriod": 144
+            },
+            {
+              "nRank": 89,
+              "itemKey": {
+                "appid": 4225980
+              },
+              "nRankLastPeriod": 82
+            },
+            {
+              "nRank": 90,
+              "itemKey": {
+                "appid": 570
+              },
+              "nRankLastPeriod": 85
+            },
+            {
+              "nRank": 91,
+              "itemKey": {
+                "appid": 236390
+              },
+              "nRankLastPeriod": 94
+            },
+            {
+              "nRank": 92,
+              "itemKey": {
+                "appid": 2141910
+              },
+              "nRankLastPeriod": 105
+            },
+            {
+              "nRank": 93,
+              "itemKey": {
+                "appid": 632360
+              },
+              "nRankLastPeriod": 84
+            },
+            {
+              "nRank": 94,
+              "itemKey": {
+                "appid": 1057090
+              },
+              "nRankLastPeriod": -1
+            },
+            {
+              "nRank": 95,
+              "itemKey": {
+                "appid": 1808500
+              },
+              "nRankLastPeriod": 129
+            },
+            {
+              "nRank": 96,
+              "itemKey": {
+                "appid": 1422450
+              },
+              "nRankLastPeriod": -1
+            },
+            {
+              "nRank": 97,
+              "itemKey": {
+                "appid": 3513350
+              },
+              "nRankLastPeriod": 104
+            },
+            {
+              "nRank": 98,
+              "itemKey": {
+                "appid": 3070070
+              },
+              "nRankLastPeriod": 76
+            },
+            {
+              "nRank": 99,
+              "itemKey": {
+                "appid": 3241660
+              },
+              "nRankLastPeriod": 93
+            },
+            {
+              "nRank": 100,
+              "itemKey": {
+                "appid": 812140
+              },
+              "nRankLastPeriod": 89
+            }
+          ]
+        },
+        "dataUpdateCount": 1,
+        "dataUpdatedAt": 1790908760065,
+        "error": null,
+        "errorUpdateCount": 0,
+        "errorUpdatedAt": 0,
+        "fetchFailureCount": 0,
+        "fetchFailureReason": null,
+        "fetchMeta": null,
+        "isInvalidated": false,
+        "status": "success",
+        "fetchStatus": "idle"
+      },
+      "queryKey": [
+        "ChartsMostPlayedOnDeck",
+        1
+      ],
+      "queryHash": "[\"ChartsMostPlayedOnDeck\",1]"
+    },
+    {
+      "state": {
+        "data": {
+          "item_type": 0,
+          "id": 2868840,
+          "success": 1,
+          "visible": true,
+          "name": "Slay the Spire 2",
+          "store_url_path": "app/2868840/Slay_the_Spire_2",
+          "store_url_slug": "Slay_the_Spire_2",
+          "appid": 2868840,
+          "type": 0,
+          "included_types": [],
+          "included_appids": [],
+          "is_early_access": true,
+          "content_descriptorids": [],
+          "categories": {
+            "supported_player_categoryids": [
+              2,
+              1,
+              9,
+              38
+            ],
+            "feature_categoryids": [
+              68,
+              74,
+              76,
+              79,
+              80,
+              23,
+              15,
+              25,
+              62
+            ],
+            "controller_categoryids": [
+              28,
+              57,
+              59
+            ]
+          },
+          "best_purchase_option": {
+            "packageid": 1023134,
+            "purchase_option_name": "Slay the Spire 2",
+            "final_price_in_cents": "2499",
+            "formatted_final_price": "$24.99",
+            "active_discounts": [],
+            "user_can_purchase_as_gift": true,
+            "hide_discount_pct_for_compliance": false,
+            "included_game_count": 1,
+            "must_purchase_as_set": false,
+            "package_group": "default",
+            "price_cannot_be_displayed_as_discount": false
+          }
+        },
+        "dataUpdateCount": 1,
+        "dataUpdatedAt": 1790908760059,
+        "error": null,
+        "errorUpdateCount": 0,
+        "errorUpdatedAt": 0,
+        "fetchFailureCount": 0,
+        "fetchFailureReason": null,
+        "fetchMeta": null,
+        "isInvalidated": false,
+        "status": "success",
+        "fetchStatus": "idle"
+      },
+      "queryKey": [
+        "StoreItem",
+        "app_2868840",
+        "default_info"
+      ],
+      "queryHash": "[\"StoreItem\",\"app_2868840\",\"default_info\"]"
+    },
+    {
+      "state": {
+        "data": {
+          "short_description": "The iconic roguelike deckbuilder returns. Craft a unique deck, encounter bizarre creatures, and discover relics of immense power in Slay the Spire 2!",
+          "publishers": [
+            {
+              "name": "Mega Crit",
+              "creator_clan_account_id": 33974508
+            }
+          ],
+          "developers": [
+            {
+              "name": "Mega Crit",
+              "creator_clan_account_id": 33974508
+            }
+          ],
+          "franchises": []
+        },
+        "dataUpdateCount": 1,
+        "dataUpdatedAt": 1790908760059,
+        "error": null,
+        "errorUpdateCount": 0,
+        "errorUpdatedAt": 0,
+        "fetchFailureCount": 0,
+        "fetchFailureReason": null,
+        "fetchMeta": null,
+        "isInvalidated": false,
+        "status": "success",
+        "fetchStatus": "idle"
+      },
+      "queryKey": [
+        "StoreItem",
+        "app_2868840",
+        "include_basic_info"
+      ],
+      "queryHash": "[\"StoreItem\",\"app_2868840\",\"include_basic_info\"]"
+    },
+    {
+      "state": {
+        "data": {
+          "asset_url_format": "steam/apps/2868840/${FILENAME}?t=1787169309",
+          "main_capsule": "6a19172e7bc3045dd4625018ca82dce8a18ed0ab/capsule_616x353.jpg",
+          "main_capsule_2x": "6a19172e7bc3045dd4625018ca82dce8a18ed0ab/capsule_616x353_2x.jpg",
+          "small_capsule": "fb0ad136e9eaa4297a1ab3440d88ecb7209f44a2/capsule_231x87.jpg",
+          "small_capsule_2x": "fb0ad136e9eaa4297a1ab3440d88ecb7209f44a2/capsule_231x87_2x.jpg",
+          "header": "b0958d387dc366211e0f353443710cfcf9fdb020/header.jpg",
+          "header_2x": "b0958d387dc366211e0f353443710cfcf9fdb020/header_2x.jpg",
+          "page_background": "page_bg_generated_v6b.jpg",
+          "hero_capsule": "6c41d0ed8e10c375bbf0d39d6fc597faa5778c8d/hero_capsule.jpg",
+          "hero_capsule_2x": "6c41d0ed8e10c375bbf0d39d6fc597faa5778c8d/hero_capsule_2x.jpg",
+          "library_capsule": "4bf4dad2c9c82b1989eee4a664ca7ce7bf3cc4a7/library_600x900.jpg",
+          "library_capsule_2x": "4bf4dad2c9c82b1989eee4a664ca7ce7bf3cc4a7/library_600x900_2x.jpg",
+          "library_hero": "142685c713492a21940cf2c01e50f85aca5780c8/library_hero.jpg",
+          "library_hero_2x": "142685c713492a21940cf2c01e50f85aca5780c8/library_hero_2x.jpg",
+          "community_icon": "f92b09dab91f1d1738f72fe0dd9be18dcc2901f9",
+          "page_background_path": "app/2868840?t=1787169309",
+          "raw_page_background": "page_bg_raw.jpg",
+          "last_modified": 1787169309
+        },
+        "dataUpdateCount": 1,
+        "dataUpdatedAt": 1790908760059,
+        "error": null,
+        "errorUpdateCount": 0,
+        "errorUpdatedAt": 0,
+        "fetchFailureCount": 0,
+        "fetchFailureReason": null,
+        "fetchMeta": null,
+        "isInvalidated": false,
+        "status": "success",
+        "fetchStatus": "idle"
+      },
+      "queryKey": [
+        "StoreItem",
+        "app_2868840",
+        "include_assets"
+      ],
+      "queryHash": "[\"StoreItem\",\"app_2868840\",\"include_assets\"]"
+    },
+    {
+      "state": {
+        "data": {
+          "windows": true,
+          "mac": true,
+          "steamos_linux": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 3,
+          "steam_os_compat_category": 2,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 3
+        },
+        "dataUpdateCount": 1,
+        "dataUpdatedAt": 1790908760059,
+        "error": null,
+        "errorUpdateCount": 0,
+        "errorUpdatedAt": 0,
+        "fetchFailureCount": 0,
+        "fetchFailureReason": null,
+        "fetchMeta": null,
+        "isInvalidated": false,
+        "status": "success",
+        "fetchStatus": "idle"
+      },
+      "queryKey": [
+        "StoreItem",
+        "app_2868840",
+        "include_platforms"
+      ],
+      "queryHash": "[\"StoreItem\",\"app_2868840\",\"include_platforms\"]"
+    }
+  ],
+  "loaders": [
+    "{\"ePeriod\":1,\"rtRangeStart\":1790390360,\"rtRangeEnd\":1790908760,\"iPromoImage\":8}"
+  ]
+}

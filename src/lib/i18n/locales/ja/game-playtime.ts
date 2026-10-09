@@ -1,0 +1,22 @@
+export default {
+  "games.playtime.title": "プレイ時間",
+  "games.playtime.total": "あなたの合計時間",
+  "games.playtime.tracked": "Harborの記録時間",
+  "games.playtime.adjusted": "手動で調整済み",
+  "games.playtime.changed": "{date}に調整",
+  "games.playtime.edit": "プレイ時間を調整",
+  "games.playtime.hours": "時間",
+  "games.playtime.minutes": "分",
+  "games.playtime.duration": "{hours}時間{minutes}分",
+  "games.playtime.card": "プレイ時間：{time}",
+  "games.playtime.note": "ほかの環境でプレイした時間を加算したり、合計時間を修正できます。Harborは記録済みのプレイ履歴を保持し、今後プレイした時間をこの合計に加算します。",
+  "games.playtime.localNote": "Harborプロフィール内のこのローカルコピーに適用されます。Steamやほかのアカウントは変更されません。",
+  "games.playtime.running": "プレイ時間を調整する前に、このゲームを終了してください。",
+  "games.playtime.save": "プレイ時間を保存",
+  "games.playtime.finishEdit": "ほかの設定を保存する前に、プレイ時間の編集を保存するかキャンセルしてください。",
+  "games.playtime.reset": "記録された時間を使用",
+  "games.playtime.invalid": "時間は0～999,999の整数、分は0～59で入力してください。",
+  "games.playtime.saved": "プレイ時間を保存しました。",
+  "games.playtime.resetDone": "Harborが記録した時間を使用しています。",
+  "games.custom.launch_playtime": "このプレイ時間を保存できませんでした。時間と分を確認して、もう一度お試しください。"
+} satisfies Record<string, string>;

@@ -1,5 +1,16 @@
-import { Check, ChevronLeft, Loader2, Lock, Link2, ShieldCheck, Trash2, Unlock, User as UserIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import {
+  Check,
+  ChevronLeft,
+  Crown,
+  Loader2,
+  Lock,
+  Link2,
+  ShieldCheck,
+  Trash2,
+  Unlock,
+  User as UserIcon,
+} from "@/views/settings/icons";
+import { useEffect, useRef, useState } from "react";
 import traktLogo from "@/assets/trakt.svg";
 import simklLogo from "@/assets/simkl.png";
 import { AddonsIcon } from "@/components/icons/addons-icon";
@@ -9,7 +20,6 @@ import { DiscoverIcon } from "@/components/icons/discover-icon";
 import { LibraryIcon } from "@/components/icons/library-icon";
 import { LiveTvIcon } from "@/components/icons/live-tv-icon";
 import { MoviesIcon } from "@/components/icons/movies-icon";
-import { SportsIcon } from "@/components/icons/sports-icon";
 import { TvIcon } from "@/components/icons/tv-icon";
 import {
   anyTabLocked,
@@ -26,6 +36,18 @@ import {
   type Profile,
   type ProfileColor,
 } from "@/lib/profiles";
+import { emitListToast } from "@/components/lists/list-toast";
+import {
+  analyzeOverlaps,
+  defaultSelectedAddonUrls,
+  importDomains,
+  summarizeSource,
+  type DomainOverlap,
+  type ImportAddonPreview,
+  type ImportDomain,
+  type ImportDomainChoice,
+  type ImportSourceSummary,
+} from "@/lib/profile-import";
 import { useT } from "@/lib/i18n";
 import { hashProfilePassword, verifyProfilePassword } from "@/lib/profile-password";
 import { fetchTraktAvatar } from "@/lib/trakt/profile";
@@ -36,14 +58,15 @@ import { fetchSimklAvatar } from "@/lib/simkl/profile";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useSettings } from "@/lib/settings";
 import { AvatarRing } from "@/views/settings/account/avatar-ring";
+import { CatAvatar } from "@/components/icons/cat-avatar";
 import { resizeAvatar } from "@/views/settings/account/avatar-utils";
 import { AvatarFan } from "@/components/avatar-picker/avatar-fan";
 import { AvatarCatalogModal } from "@/components/avatar-picker/avatar-catalog-modal";
-import { avatarUrl } from "@/lib/avatars/catalog";
 import { ColorPicker } from "@/views/settings/color-picker";
 import { KidToggle } from "./kid-toggle";
 import { KidsSetupPanel } from "./kids-setup-panel";
 import { PinEntry } from "./pin-entry";
+import { isBackKey, navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 
 type SubView =
   | { kind: "main" }
@@ -62,8 +85,15 @@ export function EditorView({
   onCancel: () => void;
   onDone: () => void;
 }) {
-  const { profiles, activeProfile, createProfile, updateProfile, deleteProfile, selectProfile } =
-    useProfiles();
+  const {
+    profiles,
+    activeProfile,
+    createProfile,
+    updateProfile,
+    deleteProfile,
+    selectProfile,
+    setPrimary,
+  } = useProfiles();
   const { isConnected: traktConnected } = useTrakt();
   const { isConnected: anilistConnected, avatar: anilistAvatar } = useAnilist();
   const { isConnected: simklConnected } = useSimkl();
@@ -77,6 +107,7 @@ export function EditorView({
   const [simklAvatarError, setSimklAvatarError] = useState<string | null>(null);
   const editing = mode.kind === "edit" ? mode.profile : null;
   const primary = profiles.find((p) => p.isPrimary);
+  const transferTargets = profiles.filter((p) => !p.isPrimary);
   const activeIsPrimary = !!activeProfile?.isPrimary;
   const isOwnProfile = editing?.id === activeProfile?.id;
   const canEditAdvanced = activeIsPrimary;
@@ -85,13 +116,31 @@ export function EditorView({
   const [avatarSource, setAvatarSource] = useState<
     "trakt" | "anilist" | "simkl" | "upload" | "builtin" | "removed" | null
   >(null);
-  const [color, setColor] = useState<ProfileColor>(
-    editing?.color ?? nextProfileColor(profiles),
-  );
+  const [color, setColor] = useState<ProfileColor>(editing?.color ?? nextProfileColor(profiles));
   const [shareWith, setShareWith] = useState<string | null>(
-    editing ? editing.shareStremioWith : primary?.id ?? null,
+    editing ? editing.shareStremioWith : (primary?.id ?? null),
   );
+  const [importSelection, setImportSelection] = useState<Record<ImportDomain, boolean>>({
+    settings: false,
+    addons: false,
+    watchlist: false,
+    favorites: false,
+    watched: false,
+    continueWatching: false,
+  });
+  const [selectedAddons, setSelectedAddons] = useState<Set<string>>(new Set());
+  const [sourceSummary, setSourceSummary] = useState<ImportSourceSummary | null>(null);
+  const [overlaps, setOverlaps] = useState<Partial<Record<ImportDomain, DomainOverlap>>>({});
+  const [domainChoices, setDomainChoices] = useState<
+    Partial<Record<ImportDomain, ImportDomainChoice>>
+  >({});
+  const [importExpanded, setImportExpanded] = useState(mode.kind === "create");
+  const [confirmingImport, setConfirmingImport] = useState(false);
+  const [confirmingShare, setConfirmingShare] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [confirmingPrimary, setConfirmingPrimary] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [transferTarget, setTransferTarget] = useState<string | null>(null);
   const [draftPin, setDraftPin] = useState<string | null>(null);
   const [draftLockedTabs, setDraftLockedTabs] = useState<HiddenTabs | null>(
     editing?.lockedTabs ?? null,
@@ -102,11 +151,123 @@ export function EditorView({
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (document.activeElement === document.body) {
+      document.querySelector<HTMLElement>("[data-profile-picker]")?.focus({ preventScroll: true });
+    }
+  }, [subView.kind]);
+
+  useEffect(() => {
+    if (subView.kind === "main") return;
+    const onBack = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || !isBackKey(e)) return;
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest('[data-profile-picker]') || target.closest('[data-search-editing]')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setSubView({ kind: subView.kind === "security" ? "main" : "security" });
+    };
+    document.addEventListener("keydown", onBack);
+    return () => document.removeEventListener("keydown", onBack);
+  }, [subView.kind]);
+
   const trimmed = name.trim();
-  const canSave = trimmed.length > 0;
+  const canSave = trimmed.length > 0 && (!draftKid || !draftParentPin || draftParentPin.length === 4);
   const isPrimary = editing?.isPrimary === true;
   const canShare = !isPrimary && !!primary && primary.id !== editing?.id;
   const locked = editing ? !!editing.passwordHash : draftPin != null;
+  const isCreate = mode.kind === "create";
+  const importPanelOpen = !isPrimary && canShare && !!primary && shareWith === null;
+  const importSourceId = !isPrimary && primary ? primary.id : null;
+  const importAnySelected = (Object.keys(importSelection) as ImportDomain[]).some(
+    (d) => importSelection[d],
+  );
+
+  useEffect(() => {
+    setSourceSummary(importSourceId ? summarizeSource(importSourceId) : null);
+  }, [importSourceId]);
+
+  const targetProfileId = editing?.id ?? null;
+  useEffect(() => {
+    if (!importSourceId || !targetProfileId) {
+      setOverlaps({});
+      return;
+    }
+    const selectedMergeable = (Object.keys(importSelection) as ImportDomain[]).filter(
+      (d) => importSelection[d] && (d === "watchlist" || d === "favorites" || d === "addons"),
+    );
+    if (selectedMergeable.length === 0) {
+      setOverlaps({});
+      return;
+    }
+    setOverlaps(
+      analyzeOverlaps(importSourceId, targetProfileId, selectedMergeable, [...selectedAddons]),
+    );
+  }, [importSourceId, targetProfileId, importSelection, selectedAddons]);
+
+  const resetImportChoice = () => {
+    setImportSelection({
+      settings: false,
+      addons: false,
+      watchlist: false,
+      favorites: false,
+      watched: false,
+      continueWatching: false,
+    });
+    setSelectedAddons(new Set());
+    setOverlaps({});
+    setDomainChoices({});
+  };
+
+  const toggleImportDomain = (domain: ImportDomain) => {
+    const turningOn = !importSelection[domain];
+    setImportSelection((prev) => ({ ...prev, [domain]: !prev[domain] }));
+    if (!turningOn) {
+      setDomainChoices((prev) => {
+        if (!(domain in prev)) return prev;
+        const next = { ...prev };
+        delete next[domain];
+        return next;
+      });
+    }
+    if (domain === "addons" && turningOn) {
+      setSelectedAddons(defaultSelectedAddonUrls(sourceSummary?.addons ?? []));
+    }
+  };
+
+  const toggleImportAddon = (transportUrl: string) => {
+    setSelectedAddons((prev) => {
+      const next = new Set(prev);
+      if (next.has(transportUrl)) next.delete(transportUrl);
+      else next.add(transportUrl);
+      return next;
+    });
+    setDomainChoices((prev) => {
+      if (!("addons" in prev)) return prev;
+      const next = { ...prev };
+      delete next.addons;
+      return next;
+    });
+  };
+
+  const applyImportToExisting = () => {
+    if (!primary || !editing) return;
+    const list = (Object.keys(importSelection) as ImportDomain[]).filter((d) => importSelection[d]);
+    if (list.length === 0) return;
+    importDomains(primary.id, editing.id, list, {
+      addonTransportUrls: list.includes("addons") ? [...selectedAddons] : null,
+      choices: domainChoices,
+    });
+    if (list.includes("settings") && editing.settingsLinked !== false) {
+      updateProfile(editing.id, { settingsLinked: false });
+    }
+    window.dispatchEvent(new Event("harbor:addons-changed"));
+    window.dispatchEvent(new Event("harbor:active-profile-changed"));
+    emitListToast(t("Data copied from {name}", { name: primary.name }));
+    resetImportChoice();
+    setConfirmingImport(false);
+    setImportExpanded(false);
+  };
 
   const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -209,8 +370,22 @@ export function EditorView({
       if (canShare && shareWith !== p.shareStremioWith) patch.shareStremioWith = shareWith;
       if (draftPin) patch.passwordHash = await hashProfilePassword(draftPin);
       if (anyTabLocked(draftLockedTabs)) patch.lockedTabs = draftLockedTabs;
+      const importList =
+        shareWith === null && primary
+          ? (Object.keys(importSelection) as ImportDomain[]).filter((d) => importSelection[d])
+          : [];
+      if (importList.length > 0 && primary) {
+        importDomains(primary.id, p.id, importList, {
+          addonTransportUrls: importList.includes("addons") ? [...selectedAddons] : null,
+          choices: domainChoices,
+        });
+        if (importList.includes("settings")) patch.settingsLinked = false;
+        emitListToast(t("Data copied from {name}", { name: primary.name }));
+      }
       if (Object.keys(patch).length > 0) updateProfile(p.id, patch);
-      selectProfile(p.id);
+      // unlocked: the user set this PIN seconds ago in this very form. Without the flag
+      // selectProfile refuses the profile they just created and Save appears to fail.
+      selectProfile(p.id, { unlocked: true });
     }
     if (avatarSource && (isOwnProfile || mode.kind === "create")) {
       update({
@@ -225,7 +400,10 @@ export function EditorView({
   if (subView.kind === "pin-set") {
     return (
       <PinEntry
-        title={editing ? t("Set a PIN for {name}", { name: trimmed || editing.name }) : t("Set a PIN")}
+        key={subView.kind}
+        title={
+          editing ? t("Set a PIN for {name}", { name: trimmed || editing.name }) : t("Set a PIN")
+        }
         subtitle={t("Pick a 4-digit PIN. You'll be asked for it before this profile opens.")}
         mode="set"
         onBack={() => setSubView({ kind: "security" })}
@@ -246,6 +424,7 @@ export function EditorView({
     const targetHash = editing.passwordHash;
     return (
       <PinEntry
+        key={subView.kind}
         title={t("Enter current PIN")}
         subtitle={t("Confirm your current PIN, then pick a new one.")}
         mode="verify"
@@ -262,6 +441,7 @@ export function EditorView({
     const targetHash = editing.passwordHash;
     return (
       <PinEntry
+        key={subView.kind}
         title={t("Enter current PIN")}
         subtitle={t("Confirm your current PIN to remove the lock.")}
         mode="verify"
@@ -320,19 +500,16 @@ export function EditorView({
   const showAdvanced = canEditAdvanced || mode.kind === "create";
 
   return (
-    <div className="flex w-full max-w-[680px] flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div data-profile-editor="" className="flex w-full max-w-[680px] flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="flex flex-col items-center gap-1">
-        <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
-          {t("Harbor identity")}
-        </span>
-        <h1 className="font-display text-[28px] font-medium leading-tight tracking-tight text-ink">
+        <h1 className="text-[28px] font-semibold leading-tight tracking-tight text-ink">
           {editing ? t("Edit {name}", { name: editing.name }) : t("profile.new")}
         </h1>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
-        <div className="flex items-center gap-5">
-          <AvatarRing src={avatar} size={96} onClick={() => fileRef.current?.click()} />
+      <div className="flex flex-col gap-4 border-b border-edge-soft pb-6">
+        <div className="hset-profile-editor-identity flex items-center gap-5">
+          <AvatarRing src={avatar} size={76} onClick={() => fileRef.current?.click()} />
           <input
             ref={fileRef}
             type="file"
@@ -340,22 +517,30 @@ export function EditorView({
             onChange={onPickFile}
             className="hidden"
           />
-          <div className="flex min-w-0 flex-1 flex-col gap-2.5">
+          <div className="hset-profile-editor-fields flex min-w-0 flex-1 flex-col gap-2.5">
+            <label className="flex flex-col gap-2 text-[14px] text-ink-muted">
+              {t("Display name")}
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && void submit()}
-              autoFocus
+              onKeyDown={(e) => {
+                if (e.key !== "Enter" || navOwnsFocus(e.currentTarget) || e.currentTarget.hasAttribute("data-search-editing")) return;
+                e.preventDefault();
+                e.stopPropagation();
+                void submit();
+              }}
+              aria-label={t("Display name")}
               placeholder={t("Display name")}
               maxLength={32}
               className="h-12 rounded-xl border border-edge bg-canvas px-4 text-[15.5px] font-medium text-ink outline-none transition-colors focus:border-ink-subtle"
             />
+            </label>
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="h-8 rounded-lg border border-edge-soft px-2.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                className="h-8 rounded-lg border border-edge-soft px-2.5 text-[14px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Upload photo")}
               </button>
@@ -364,7 +549,7 @@ export function EditorView({
                   type="button"
                   onClick={() => void onUseTraktAvatar()}
                   disabled={loadingTraktAvatar}
-                  className="flex h-8 items-center gap-1.5 rounded-lg border border-edge-soft px-2.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-edge-soft px-2.5 text-[14px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
                 >
                   {loadingTraktAvatar ? (
                     <Loader2 size={12} className="animate-spin" />
@@ -379,12 +564,16 @@ export function EditorView({
                   type="button"
                   onClick={() => void onUseAnilistAvatar()}
                   disabled={loadingAnilistAvatar}
-                  className="flex h-8 items-center gap-1.5 rounded-lg border border-edge-soft px-2.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-edge-soft px-2.5 text-[14px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
                 >
                   {loadingAnilistAvatar ? (
                     <Loader2 size={12} className="animate-spin" />
                   ) : anilistAvatar ? (
-                    <img src={anilistAvatar} alt="" className="h-3.5 w-3.5 rounded-full object-cover" />
+                    <img
+                      src={anilistAvatar}
+                      alt=""
+                      className="h-3.5 w-3.5 rounded-full object-cover"
+                    />
                   ) : (
                     <Link2 size={12} />
                   )}
@@ -396,7 +585,7 @@ export function EditorView({
                   type="button"
                   onClick={() => void onUseSimklAvatar()}
                   disabled={loadingSimklAvatar}
-                  className="flex h-8 items-center gap-1.5 rounded-lg border border-edge-soft px-2.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-edge-soft px-2.5 text-[14px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
                 >
                   {loadingSimklAvatar ? (
                     <Loader2 size={12} className="animate-spin" />
@@ -413,27 +602,28 @@ export function EditorView({
                     setAvatar(null);
                     setAvatarSource("removed");
                   }}
-                  className="h-8 rounded-lg border border-edge-soft px-2.5 text-[12px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:text-danger"
+                  className="h-8 rounded-lg border border-edge-soft px-2.5 text-[14px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:text-danger"
                 >
                   {t("common.remove")}
                 </button>
               )}
             </div>
             <AvatarFan
+              label={t("Choose an avatar")}
               onClick={() => setAvatarPickerOpen(true)}
-              onRandomize={(id) => {
-                setAvatar(avatarUrl(id));
+              onRandomize={(value) => {
+                setAvatar(value);
                 setAvatarSource("builtin");
               }}
             />
             {traktAvatarError && (
-              <p className="text-[11.5px] text-amber-200/85">{traktAvatarError}</p>
+              <p className="text-[14px] text-amber-200/85">{traktAvatarError}</p>
             )}
             {anilistAvatarError && (
-              <p className="text-[11.5px] text-amber-200/85">{anilistAvatarError}</p>
+              <p className="text-[14px] text-amber-200/85">{anilistAvatarError}</p>
             )}
             {simklAvatarError && (
-              <p className="text-[11.5px] text-amber-200/85">{simklAvatarError}</p>
+              <p className="text-[14px] text-amber-200/85">{simklAvatarError}</p>
             )}
           </div>
         </div>
@@ -469,24 +659,354 @@ export function EditorView({
 
       {showAdvanced && !draftKid && canShare && primary && (
         <div className="flex flex-col gap-1.5">
-          <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+          <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
             {t("Stremio account")}
           </span>
           <div className="flex flex-col gap-1.5">
             <ShareOption
               active={shareWith === primary.id}
-              onClick={() => setShareWith(primary.id)}
+              onClick={() => {
+                if (!editing) {
+                  setShareWith(primary.id);
+                  resetImportChoice();
+                } else {
+                  setConfirmingShare(true);
+                }
+              }}
               icon={<Link2 size={14} strokeWidth={2.2} />}
               title={t("Share with {name}", { name: primary.name })}
               sub={t("Use the primary profile's Stremio library, watchlist, and addons.")}
             />
             <ShareOption
               active={shareWith === null}
-              onClick={() => setShareWith(null)}
+              onClick={() => {
+                setShareWith(null);
+                setConfirmingShare(false);
+                resetImportChoice();
+              }}
               icon={<UserIcon size={14} strokeWidth={2.2} />}
               title={t("Use a separate Stremio account")}
               sub={t("Sign in from the sidebar after saving. Library and addons stay separate.")}
             />
+            {confirmingShare && (
+              <div className="flex items-center gap-2 rounded-lg border border-edge-soft bg-canvas/40 px-3 py-2 text-[14px]">
+                <span className="min-w-0 flex-1 leading-snug text-ink-subtle">
+                  {t(
+                    "Switch to sharing? This profile will use {name}'s library, watchlist and addons. Its own data is kept but hidden until you switch back.",
+                    { name: primary.name },
+                  )}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setConfirmingShare(false)}
+                  className="shrink-0 text-ink-muted transition-colors hover:text-ink"
+                >
+                  {t("common.cancel")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShareWith(primary.id);
+                    resetImportChoice();
+                    setConfirmingShare(false);
+                  }}
+                  className="shrink-0 rounded-md bg-accent/20 px-2.5 py-1 font-semibold text-accent transition-colors hover:bg-accent/30"
+                >
+                  {t("common.confirm")}
+                </button>
+              </div>
+            )}
+            {importPanelOpen && !importExpanded && (
+              <button
+                type="button"
+                onClick={() => setImportExpanded(true)}
+                className="h-9 self-start rounded-lg border border-edge-soft px-3 text-[15px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+              >
+                {t("Import data from {name}", { name: primary.name })}
+              </button>
+            )}
+            {importPanelOpen && importExpanded && (
+              <div className="mt-1 flex flex-col gap-2 rounded-xl border border-edge-soft bg-canvas/40 p-3">
+                <span className="text-[15px] font-semibold text-ink">
+                  {t(isCreate ? "Start with data from {name}" : "Import data from {name}", {
+                    name: primary?.name ?? "",
+                  })}
+                </span>
+                <div className="flex flex-col gap-1">
+                  <ImportRow
+                    checked={importSelection.settings}
+                    label={t("Settings")}
+                    onClick={() => toggleImportDomain("settings")}
+                  />
+                  <ImportRow
+                    checked={importSelection.addons}
+                    label={t("Addons ({n})", { n: sourceSummary?.addons.length ?? 0 })}
+                    onClick={() => toggleImportDomain("addons")}
+                  />
+                  {importSelection.addons && (sourceSummary?.addons.length ?? 0) > 0 && (
+                    <div className="ms-6 flex flex-col gap-1">
+                      {(sourceSummary?.addons ?? []).map((addon: ImportAddonPreview) => (
+                        <ImportRow
+                          key={addon.transportUrl}
+                          compact
+                          checked={selectedAddons.has(addon.transportUrl)}
+                          label={addon.name}
+                          onClick={() => toggleImportAddon(addon.transportUrl)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  <ImportRow
+                    checked={importSelection.watchlist}
+                    label={t("Watchlist ({n})", { n: sourceSummary?.watchlistCount ?? 0 })}
+                    onClick={() => toggleImportDomain("watchlist")}
+                  />
+                  <ImportRow
+                    checked={importSelection.favorites}
+                    label={t("Favorites ({n})", { n: sourceSummary?.favoriteCount ?? 0 })}
+                    onClick={() => toggleImportDomain("favorites")}
+                  />
+                  <ImportRow
+                    checked={importSelection.watched}
+                    label={t("Watched history")}
+                    onClick={() => toggleImportDomain("watched")}
+                  />
+                  <ImportRow
+                    checked={importSelection.continueWatching}
+                    label={t("Continue watching")}
+                    onClick={() => toggleImportDomain("continueWatching")}
+                  />
+                </div>
+                {(overlaps.watchlist?.overlapCount ?? 0) > 0 && (
+                  <ConflictRow
+                    label={t("Watchlist overlaps ({n})", {
+                      n: overlaps.watchlist?.overlapCount ?? 0,
+                    })}
+                    value={domainChoices.watchlist ?? "merge"}
+                    onChange={(v) => setDomainChoices((prev) => ({ ...prev, watchlist: v }))}
+                  />
+                )}
+                {(overlaps.favorites?.overlapCount ?? 0) > 0 && (
+                  <ConflictRow
+                    label={t("Favorites overlap ({n})", {
+                      n: overlaps.favorites?.overlapCount ?? 0,
+                    })}
+                    value={domainChoices.favorites ?? "merge"}
+                    onChange={(v) => setDomainChoices((prev) => ({ ...prev, favorites: v }))}
+                  />
+                )}
+                {(overlaps.addons?.overlapCount ?? 0) > 0 && (
+                  <ConflictRow
+                    label={t("Addons overlap ({n})", {
+                      n: overlaps.addons?.overlapCount ?? 0,
+                    })}
+                    value={domainChoices.addons ?? "merge"}
+                    onChange={(v) => setDomainChoices((prev) => ({ ...prev, addons: v }))}
+                  />
+                )}
+                <p className="text-[14px] leading-snug text-ink-subtle">
+                  {t(
+                    isCreate
+                      ? "Copied once — afterwards this profile keeps its own copy. Nothing stays linked to Primary."
+                      : "Areas where data already exists let you choose how to combine it.",
+                  )}
+                </p>
+                {!isCreate && (
+                  <div className="flex items-center justify-end gap-2 pt-1 text-[14px]">
+                    {!confirmingImport ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            resetImportChoice();
+                            setImportExpanded(false);
+                          }}
+                          className="text-ink-muted transition-colors hover:text-ink"
+                        >
+                          {t("common.cancel")}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={!importAnySelected}
+                          onClick={() => setConfirmingImport(true)}
+                          className="rounded-md bg-accent/20 px-2.5 py-1 font-semibold text-accent transition-colors hover:bg-accent/30 disabled:opacity-40"
+                        >
+                          {t("Import")}
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-ink-subtle">{t("Import selected data?")}</span>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingImport(false)}
+                          className="text-ink-muted transition-colors hover:text-ink"
+                        >
+                          {t("common.cancel")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={applyImportToExisting}
+                          className="rounded-md bg-accent/20 px-2.5 py-1 font-semibold text-accent transition-colors hover:bg-accent/30"
+                        >
+                          {t("common.confirm")}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showAdvanced && !draftKid && editing && !isPrimary && (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+            {t("Primary profile")}
+          </span>
+          <div className="flex items-center gap-3 rounded-xl border border-edge-soft bg-elevated/30 p-3">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent/12 text-accent">
+              <Crown size={16} strokeWidth={2.2} />
+            </span>
+            <div className="flex min-w-0 flex-1 flex-col">
+              <span className="text-[15px] font-semibold text-ink">
+                {t("Make this the primary profile")}
+              </span>
+              <span className="text-[14px] leading-snug text-ink-subtle">
+                {t(
+                  "The primary manages profiles and can't be deleted. Transfer it here to delete the old one.",
+                )}
+              </span>
+            </div>
+            {!confirmingPrimary ? (
+              <button
+                type="button"
+                onClick={() => setConfirmingPrimary(true)}
+                className="h-9 shrink-0 rounded-lg border border-edge-soft px-3 text-[15px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+              >
+                {t("Set as primary")}
+              </button>
+            ) : (
+              <div className="flex shrink-0 items-center gap-2 text-[14px]">
+                <button
+                  type="button"
+                  onClick={() => setConfirmingPrimary(false)}
+                  className="text-ink-muted transition-colors hover:text-ink"
+                >
+                  {t("common.cancel")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPrimary(editing.id);
+                    onDone();
+                  }}
+                  className="rounded-md bg-accent/20 px-2 py-1 font-semibold text-accent transition-colors hover:bg-accent/30"
+                >
+                  {t("common.confirm")}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showAdvanced && !draftKid && editing && isPrimary && transferTargets.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+            {t("Primary profile")}
+          </span>
+          <div className="flex flex-col gap-2.5 rounded-xl border border-edge-soft bg-elevated/30 p-3">
+            <div className="flex items-center gap-3">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent/12 text-accent">
+                <Crown size={16} strokeWidth={2.2} />
+              </span>
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="text-[15px] font-semibold text-ink">
+                  {t("This is the primary profile")}
+                </span>
+                <span className="text-[14px] leading-snug text-ink-subtle">
+                  {t(
+                    "It manages profiles and can't be deleted. Hand primary to another profile to delete this one.",
+                  )}
+                </span>
+              </div>
+            </div>
+            {!transferOpen ? (
+              <button
+                type="button"
+                onClick={() => setTransferOpen(true)}
+                className="h-9 self-start rounded-lg border border-edge-soft px-3 text-[15px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+              >
+                {t("Transfer to another profile")}
+              </button>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                {transferTargets.map((p) => {
+                  const sel = transferTarget === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setTransferTarget(p.id)}
+                      className={`flex items-center gap-2.5 rounded-lg border p-2 text-start transition-colors ${
+                        sel
+                          ? "border-accent bg-accent/10"
+                          : "border-edge-soft hover:border-edge hover:bg-elevated/40"
+                      }`}
+                    >
+                      <span
+                        className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-elevated"
+                        style={{ boxShadow: `0 0 0 2px ${p.color}` }}
+                      >
+                        {p.avatar ? (
+                          <img
+                            src={p.avatar}
+                            alt=""
+                            className="h-full w-full object-cover"
+                            draggable={false}
+                          />
+                        ) : (
+                          <CatAvatar className="h-full w-full" />
+                        )}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-ink">
+                        {p.name}
+                      </span>
+                      {sel && (
+                        <Check size={15} className="shrink-0 text-accent" strokeWidth={2.6} />
+                      )}
+                    </button>
+                  );
+                })}
+                <div className="flex items-center justify-end gap-2 pt-1 text-[14px]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTransferOpen(false);
+                      setTransferTarget(null);
+                    }}
+                    className="text-ink-muted transition-colors hover:text-ink"
+                  >
+                    {t("common.cancel")}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!transferTarget}
+                    onClick={() => {
+                      if (!transferTarget) return;
+                      setPrimary(transferTarget);
+                      onDone();
+                    }}
+                    className="rounded-md bg-accent/20 px-2.5 py-1 font-semibold text-accent transition-colors hover:bg-accent/30 disabled:opacity-40"
+                  >
+                    {t("Transfer primary")}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -496,22 +1016,24 @@ export function EditorView({
           <button
             type="button"
             onClick={onCancel}
-            className="h-10 rounded-xl border border-edge-soft px-4 text-[13px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+            className="h-11 rounded-xl border border-edge-soft px-4 text-[15px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
           >
             {t("common.cancel")}
           </button>
-          {editing && !isPrimary && canEditAdvanced && (
-            !confirmingDelete ? (
+          {editing &&
+            !isPrimary &&
+            canEditAdvanced &&
+            (!confirmingDelete ? (
               <button
                 type="button"
                 onClick={() => setConfirmingDelete(true)}
-                className="flex items-center gap-1.5 text-[12px] font-medium text-ink-subtle transition-colors hover:text-red-300"
+                className="flex items-center gap-1.5 text-[14px] font-medium text-ink-subtle transition-colors hover:text-red-300"
               >
                 <Trash2 size={12} />
                 {t("Delete profile")}
               </button>
             ) : (
-              <div className="flex items-center gap-2 text-[12px]">
+              <div className="flex items-center gap-2 text-[14px]">
                 <span className="text-red-200">{t("Delete this profile?")}</span>
                 <button
                   type="button"
@@ -531,14 +1053,13 @@ export function EditorView({
                   {t("common.confirm")}
                 </button>
               </div>
-            )
-          )}
+            ))}
         </div>
         <button
           type="button"
           onClick={() => void submit()}
           disabled={!canSave}
-          className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-5 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-5 text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {editing ? t("Save changes") : t("Create profile")}
         </button>
@@ -546,8 +1067,8 @@ export function EditorView({
       {avatarPickerOpen && (
         <AvatarCatalogModal
           current={avatar}
-          onPick={(id) => {
-            setAvatar(avatarUrl(id));
+          onPick={(value) => {
+            setAvatar(value);
             setAvatarSource("builtin");
             setAvatarPickerOpen(false);
           }}
@@ -568,7 +1089,7 @@ function BlockedView({ onBack }: { onBack: () => void }) {
       <button
         type="button"
         onClick={onBack}
-        className="h-10 rounded-xl bg-ink px-5 text-[13px] font-semibold text-canvas"
+        className="h-11 rounded-xl bg-ink px-5 text-[15px] font-semibold text-canvas"
       >
         {t("common.back")}
       </button>
@@ -589,7 +1110,11 @@ function SecurityRow({
   const lockedCount = lockedTabs ? Object.values(lockedTabs).filter(Boolean).length : 0;
   const pinLabel = locked ? t("PIN on") : t("PIN off");
   const tabsLabel =
-    lockedCount === 0 ? t("no tab locks") : t("{n} tabs locked", { n: lockedCount });
+    lockedCount === 0
+      ? t("no tab locks")
+      : locked
+        ? t("{n} tabs locked", { n: lockedCount })
+        : t("Locks only activate once a PIN is set.");
   return (
     <button
       type="button"
@@ -599,25 +1124,29 @@ function SecurityRow({
       <div className="flex items-center gap-3">
         <span
           className={`flex h-9 w-9 items-center justify-center rounded-full ring-1 ${
-            locked || lockedCount > 0
+            locked
               ? "bg-emerald-400/15 text-emerald-200 ring-emerald-400/30"
               : "bg-canvas/60 text-ink-muted ring-edge-soft"
           }`}
         >
-          {locked || lockedCount > 0 ? (
+          {locked ? (
             <Lock size={14} strokeWidth={2.4} />
           ) : (
             <Unlock size={14} strokeWidth={2.2} />
           )}
         </span>
         <div className="flex flex-col gap-0.5">
-          <span className="text-[13.5px] font-semibold text-ink">{t("Security")}</span>
-          <span className="text-[12px] text-ink-subtle">
+          <span className="text-[16px] font-semibold text-ink">{t("Security")}</span>
+          <span className="text-[14px] text-ink-subtle">
             {pinLabel} · {tabsLabel}
           </span>
         </div>
       </div>
-      <ChevronLeft size={14} strokeWidth={2.2} className="rotate-180 rtl:rotate-0 text-ink-subtle" />
+      <ChevronLeft
+        size={14}
+        strokeWidth={2.2}
+        className="rotate-180 rtl:rotate-0 text-ink-subtle"
+      />
     </button>
   );
 }
@@ -649,20 +1178,17 @@ function SecurityView({
         <button
           type="button"
           onClick={onBack}
-          className="flex h-9 items-center gap-1.5 rounded-lg px-2 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-elevated/40 hover:text-ink"
+          className="flex h-11 items-center gap-1.5 rounded-lg px-2 text-[15px] font-medium text-ink-muted transition-colors hover:bg-elevated/40 hover:text-ink"
         >
           <ChevronLeft size={14} strokeWidth={2.2} className="dir-icon" />
           {t("common.back")}
         </button>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
-          {t("Profile security")}
-        </span>
-        <h1 className="font-display text-[28px] font-medium tracking-tight text-ink">
+        <h1 className="text-[28px] font-semibold tracking-tight text-ink">
           {t("PIN & sidebar locks")}
         </h1>
-        <p className="text-center text-[13.5px] text-ink-muted">
+        <p className="text-center text-[16px] text-ink-muted">
           {t("Pick a PIN and which sidebar tabs require it.")}
         </p>
       </div>
@@ -685,8 +1211,8 @@ function SecurityView({
                 )}
               </span>
               <div className="flex flex-col gap-0.5">
-                <span className="text-[13.5px] font-semibold text-ink">{t("PIN")}</span>
-                <span className="text-[12px] text-ink-subtle">
+                <span className="text-[16px] font-semibold text-ink">{t("PIN")}</span>
+                <span className="text-[14px] text-ink-subtle">
                   {locked ? t("4-digit PIN is set.") : t("No PIN set.")}
                 </span>
               </div>
@@ -696,7 +1222,7 @@ function SecurityView({
                 <button
                   type="button"
                   onClick={onSetPin}
-                  className="h-9 rounded-lg bg-ink px-3.5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+                  className="h-11 rounded-lg bg-ink px-3.5 text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90"
                 >
                   {t("Set PIN")}
                 </button>
@@ -705,14 +1231,14 @@ function SecurityView({
                   <button
                     type="button"
                     onClick={onChangePin}
-                    className="h-9 rounded-lg border border-edge-soft px-3.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                    className="h-11 rounded-lg border border-edge-soft px-3.5 text-[15px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
                   >
                     {t("Change")}
                   </button>
                   <button
                     type="button"
                     onClick={onRemovePin}
-                    className="h-9 rounded-lg border border-edge-soft px-3.5 text-[12.5px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:text-danger"
+                    className="h-11 rounded-lg border border-edge-soft px-3.5 text-[15px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:text-danger"
                   >
                     {editing ? t("common.remove") : t("Clear")}
                   </button>
@@ -730,7 +1256,7 @@ function SecurityView({
           <div className="flex items-center gap-3">
             <span
               className={`flex h-9 w-9 items-center justify-center rounded-full ring-1 ${
-                lockedCount > 0
+                locked && lockedCount > 0
                   ? "bg-amber-300/15 text-amber-200 ring-amber-300/30"
                   : "bg-canvas/60 text-ink-muted ring-edge-soft"
               }`}
@@ -738,16 +1264,92 @@ function SecurityView({
               <ShieldCheck size={14} strokeWidth={2.2} />
             </span>
             <div className="flex flex-col gap-0.5">
-              <span className="text-[13.5px] font-semibold text-ink">{t("Sidebar access")}</span>
-              <span className="text-[12px] text-ink-subtle">
+              <span className="text-[16px] font-semibold text-ink">{t("Sidebar access")}</span>
+              <span className="text-[14px] text-ink-subtle">
                 {lockedCount === 0
                   ? t("No locks. All sidebar tabs open without a PIN.")
-                  : t("{n} tabs require this profile's PIN.", { n: lockedCount })}
+                  : locked
+                    ? t("{n} tabs require this profile's PIN.", { n: lockedCount })
+                    : t("Locks only activate once a PIN is set.")}
               </span>
             </div>
           </div>
-          <ChevronLeft size={14} strokeWidth={2.2} className="rotate-180 rtl:rotate-0 text-ink-subtle" />
+          <ChevronLeft
+            size={14}
+            strokeWidth={2.2}
+            className="rotate-180 rtl:rotate-0 text-ink-subtle"
+          />
         </button>
+      </div>
+    </div>
+  );
+}
+
+function ImportRow({
+  checked,
+  label,
+  compact,
+  onClick,
+}: {
+  checked: boolean;
+  label: string;
+  compact?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={checked}
+      className={`flex items-center gap-2.5 rounded-lg border px-3 text-start transition-colors ${
+        checked
+          ? "border-ink/40 bg-canvas/60"
+          : "border-edge-soft hover:border-edge hover:bg-canvas/40"
+      } ${compact ? "py-1.5" : "py-2"}`}
+    >
+      <span
+        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
+          checked ? "border-ink bg-ink text-canvas" : "border-edge"
+        }`}
+      >
+        {checked && <Check size={10} strokeWidth={3} />}
+      </span>
+      <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-ink">{label}</span>
+    </button>
+  );
+}
+
+function ConflictRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: ImportDomainChoice;
+  onChange: (v: ImportDomainChoice) => void;
+}) {
+  const t = useT();
+  const options: { value: ImportDomainChoice; labelKey: string }[] = [
+    { value: "merge", labelKey: "Merge" },
+    { value: "replace", labelKey: "Replace" },
+  ];
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-edge-soft bg-elevated/30 p-2.5">
+      <span className="min-w-0 flex-1 truncate text-[15px] font-semibold text-ink">{label}</span>
+      <div className="flex shrink-0 items-center gap-1 rounded-lg bg-canvas/50 p-1">
+        {options.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => onChange(o.value)}
+            aria-pressed={value === o.value}
+            className={`rounded-md px-2 py-1 text-[14px] font-semibold transition-colors ${
+              value === o.value ? "bg-accent/20 text-accent" : "text-ink-muted hover:text-ink"
+            }`}
+          >
+            {t(o.labelKey)}
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -770,6 +1372,7 @@ function ShareOption({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={`flex items-start gap-3 rounded-xl border px-3.5 py-3 text-start transition-colors ${
         active
           ? "border-ink/40 bg-canvas/60"
@@ -785,8 +1388,8 @@ function ShareOption({
       </span>
       <span className={`mt-0.5 ${active ? "text-ink" : "text-ink-muted"}`}>{icon}</span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[13.5px] font-semibold text-ink">{title}</span>
-        <span className="text-[12px] leading-snug text-ink-subtle">{sub}</span>
+        <span className="text-[16px] font-semibold text-ink">{title}</span>
+        <span className="text-[14px] leading-snug text-ink-subtle">{sub}</span>
       </span>
     </button>
   );
@@ -802,8 +1405,6 @@ function TabIcon({ iconKey }: { iconKey: LockableTabMeta["iconKey"] }) {
       return <TvIcon active={false} />;
     case "anime":
       return <AnimeIcon active={false} />;
-    case "sports":
-      return <SportsIcon active={false} />;
     case "liveTv":
       return <LiveTvIcon active={false} />;
     case "calendar":
@@ -825,7 +1426,7 @@ function TabsView({
   onSave: (next: HiddenTabs) => void;
 }) {
   const t = useT();
-  const [tabs, setTabs] = useState<HiddenTabs>({ ...DEFAULT_HIDDEN, ...(initial ?? {}) });
+  const [tabs, setTabs] = useState<HiddenTabs>({ ...DEFAULT_HIDDEN, ...initial });
   const toggle = (key: LockableTab) => setTabs((prev) => ({ ...prev, [key]: !prev[key] }));
   const count = Object.values(tabs).filter(Boolean).length;
   return (
@@ -834,20 +1435,20 @@ function TabsView({
         <button
           type="button"
           onClick={onBack}
-          className="flex h-9 items-center gap-1.5 rounded-lg px-2 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-elevated/40 hover:text-ink"
+          className="flex h-11 items-center gap-1.5 rounded-lg px-2 text-[15px] font-medium text-ink-muted transition-colors hover:bg-elevated/40 hover:text-ink"
         >
           <ChevronLeft size={14} strokeWidth={2.2} className="dir-icon" />
           {t("common.back")}
         </button>
       </div>
       <div className="flex flex-col items-center gap-1">
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
+        <span className="text-[13px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
           {t("Sidebar access")}
         </span>
         <h1 className="font-display text-[24px] font-medium tracking-tight text-ink">
           {t("Lock sidebar tabs")}
         </h1>
-        <p className="text-center text-[12.5px] text-ink-muted">
+        <p className="text-center text-[15px] text-ink-muted">
           {t("Locks only activate once a PIN is set.")}
         </p>
       </div>
@@ -857,6 +1458,7 @@ function TabsView({
             key={tab.key}
             type="button"
             onClick={() => toggle(tab.key)}
+            aria-pressed={tabs[tab.key]}
             className={`flex shrink-0 items-center justify-between gap-3 rounded-xl border px-4 py-2.5 text-start transition-colors ${
               tabs[tab.key]
                 ? "border-ink/40 bg-canvas/60"
@@ -878,20 +1480,20 @@ function TabsView({
               >
                 <TabIcon iconKey={tab.iconKey} />
               </span>
-              <span className="text-[13.5px] font-medium text-ink">{t(tab.label)}</span>
+              <span className="text-[16px] font-medium text-ink">{t(tab.label)}</span>
             </div>
             {tabs[tab.key] && <Lock size={13} strokeWidth={2.2} className="text-ink-muted" />}
           </button>
         ))}
       </div>
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[12.5px] text-ink-subtle">
-          {count === 0 ? t("No tabs selected") : t("{n} tabs locked", { n: count })}
+        <span className="text-[15px] text-ink-subtle">
+          {count === 0 ? t("No tabs selected") : t("{n} selected", { n: count })}
         </span>
         <button
           type="button"
           onClick={() => onSave(tabs)}
-          className="h-10 rounded-xl bg-ink px-5 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90"
+          className="h-10 rounded-xl bg-ink px-5 text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90"
         >
           {t("common.save")}
         </button>

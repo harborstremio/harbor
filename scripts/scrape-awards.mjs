@@ -1,7 +1,7 @@
 // Scrapes Wikipedia award category pages into a clean per-year winners DB. pls use responsibly
 
 
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import * as cheerio from "cheerio";
 
@@ -75,6 +75,46 @@ const CATALOG = {
     { key: "golden_bear", name: "Golden Bear", page: "Golden_Bear", focus: "work" },
     { key: "silver_bear_director", name: "Silver Bear for Best Director", page: "Silver_Bear_for_Best_Director", focus: "person_with_work" },
   ],
+  bafta_tv: [
+    { key: "best_drama_series", name: "Best Drama Series", page: "British_Academy_Television_Award_for_Best_Drama_Series", focus: "work" },
+    { key: "best_scripted_comedy", name: "Best Scripted Comedy", page: "British_Academy_Television_Award_for_Best_Scripted_Comedy", focus: "work" },
+    { key: "best_actor", name: "Best Actor", page: "British_Academy_Television_Award_for_Best_Actor", focus: "person_with_work" },
+    { key: "best_actress", name: "Best Actress", page: "British_Academy_Television_Award_for_Best_Actress", focus: "person_with_work" },
+    { key: "best_international", name: "Best International Programme", page: "British_Academy_Television_Award_for_Best_International_Programme", focus: "work" },
+  ],
+  annie: [
+    { key: "best_animated_feature", name: "Best Animated Feature", page: "Annie_Award_for_Best_Animated_Feature", focus: "work" },
+    { key: "best_tv_production", name: "Best Animated Television Production", page: "Annie_Award_for_Best_Animated_Television_Production", focus: "work" },
+  ],
+  spirit: [
+    { key: "best_film", name: "Best Feature", page: "Independent_Spirit_Award_for_Best_Film", focus: "work" },
+    { key: "best_director", name: "Best Director", page: "Independent_Spirit_Award_for_Best_Director", focus: "person_with_work" },
+    { key: "best_first_film", name: "Best First Feature", page: "Independent_Spirit_Award_for_Best_First_Film", focus: "work" },
+  ],
+  saturn: [
+    { key: "best_scifi_film", name: "Best Science Fiction Film", page: "Saturn_Award_for_Best_Science_Fiction_Film", focus: "work" },
+    { key: "best_fantasy_film", name: "Best Fantasy Film", page: "Saturn_Award_for_Best_Fantasy_Film", focus: "work" },
+    { key: "best_horror_film", name: "Best Horror Film", page: "Saturn_Award_for_Best_Horror_Film", focus: "work" },
+  ],
+  cesar: [
+    { key: "best_film", name: "Best Film", page: "C%C3%A9sar_Award_for_Best_Film", focus: "work" },
+    { key: "best_director", name: "Best Director", page: "C%C3%A9sar_Award_for_Best_Director", focus: "person_with_work" },
+  ],
+  goya: [
+    { key: "best_film", name: "Best Film", page: "Goya_Award_for_Best_Film", focus: "work" },
+    { key: "best_director", name: "Best Director", page: "Goya_Award_for_Best_Director", focus: "person_with_work" },
+  ],
+  blue_dragon: [
+    { key: "best_film", name: "Best Film", page: "Blue_Dragon_Film_Award_for_Best_Film", focus: "work" },
+    { key: "best_director", name: "Best Director", page: "Blue_Dragon_Film_Award_for_Best_Director", focus: "person_with_work" },
+  ],
+  baeksang: [
+    { key: "best_film", name: "Best Film", page: "Baeksang_Arts_Award_for_Best_Film", focus: "work" },
+    { key: "best_drama", name: "Best Drama", page: "Baeksang_Arts_Award_for_Best_Drama", focus: "work" },
+  ],
+  bifa: [
+    { key: "best_film", name: "Best British Independent Film", page: "British_Independent_Film_Award_for_Best_British_Independent_Film", focus: "work" },
+  ],
 };
 
 const WIKIPEDIA_NOISE = new Set([
@@ -86,8 +126,19 @@ function cleanText(s) {
   if (!s) return "";
   return s
     .replace(/\[[^\]]*\]/g, "") // [1], [a], [edit]
+    .replace(/[‡†§¶♦◊‖¤★]/g, "") // wikipedia footnote markers
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function wikiTitleFromHref(href) {
+  if (!href || !href.startsWith("/wiki/")) return null;
+  const raw = href.slice("/wiki/".length).split("#")[0];
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
 }
 
 function parseYearFromText(text) {
@@ -115,18 +166,21 @@ function isPersonOrFilmLink($, $a) {
   return true;
 }
 
-function classifyLinks($, $row) {
+function classifyLinks($, $row, includeFirstCell = false) {
   const films = [];
+  const filmWikis = [];
   const people = [];
   const seen = new Set();
 
- 
-  $row.find("> td:not(:first-child) a, > th:not(:first-child) a").each((_, a) => {
+  const selector = includeFirstCell
+    ? "> td a, > th a"
+    : "> td:not(:first-child) a, > th:not(:first-child) a";
+  $row.find(selector).each((_, a) => {
     const $a = $(a);
     if (!isPersonOrFilmLink($, $a)) return;
     const text = cleanText($a.text());
     if (seen.has(text)) return;
-   
+
     if (/^\d{4}(\s*[(\[].*)?$/.test(text)) return;
     if (/^\d+(st|nd|rd|th)$/i.test(text)) return;
     if (/^\(.+\)$/.test(text)) return;
@@ -134,12 +188,13 @@ function classifyLinks($, $row) {
     const inItalic = $a.parents("i").length > 0;
     if (inItalic) {
       films.push(text);
+      filmWikis.push(wikiTitleFromHref($a.attr("href")));
     } else {
       people.push(text);
     }
   });
 
-  return { films, people };
+  return { films, filmWikis, people };
 }
 
 function classifyTextOnly($, $row) {
@@ -153,18 +208,24 @@ function classifyTextOnly($, $row) {
   return { films, people };
 }
 
-function extractRow($, $row, focus) {
-  let { films, people } = classifyLinks($, $row);
-  if (films.length === 0 && people.length === 0) {
+function extractRow($, $row, focus, includeFirstCell = false) {
+  let { films, filmWikis, people } = classifyLinks($, $row, includeFirstCell);
+  // Winner rows often italicize the title as plain text (no link) while linking the
+  // season/people; pull the italic text title whenever the links gave us no film.
+  if (films.length === 0) {
     const fallback = classifyTextOnly($, $row);
-    films = fallback.films;
-    people = fallback.people;
+    if (fallback.films.length > 0) {
+      films = fallback.films;
+      filmWikis = fallback.films.map(() => null);
+    }
+    if (people.length === 0 && fallback.people.length > 0) people = fallback.people;
   }
 
   if (focus === "work") {
     if (films.length === 0) return null;
     return {
       workTitle: films[0],
+      workWiki: filmWikis[0] ?? null,
       recipients: people.slice(0, 6),
     };
   }
@@ -173,6 +234,7 @@ function extractRow($, $row, focus) {
   if (people.length === 0 && films.length === 0) return null;
   return {
     workTitle: films[0] ?? null,
+    workWiki: filmWikis[0] ?? null,
     recipients: people.length > 0 ? [people[0]] : [],
   };
 }
@@ -233,6 +295,20 @@ async function fetchPageHtml(pageTitle) {
   return null;
 }
 
+const WINNER_HIGHLIGHT_RX =
+  /background(?:-color)?\s*:\s*(#(?:faeb86|eedd82|f0e68c|ffff99|ffd700|ffdead|fdd|cfc|ccffcc|b0c4de|d4af37|f9f9a0|e5d5a0|ffe4b5|f5deb3|f0f8a0|fadb86|ffffcc|d5f5d5|ccff99|e6ee9c)|gold|khaki)/i;
+
+function rowIsHighlighted($, $row) {
+  const rowStyle = ($row.attr("style") ?? "").toLowerCase();
+  if (WINNER_HIGHLIGHT_RX.test(rowStyle)) return true;
+  let hit = false;
+  $row.find("> td, > th").each((_, c) => {
+    const style = ($(c).attr("style") ?? "").toLowerCase();
+    if (WINNER_HIGHLIGHT_RX.test(style)) hit = true;
+  });
+  return hit;
+}
+
 async function scrapeCategory(category) {
   console.log(`  → ${category.key}: ${category.page}`);
   const html = await fetchPageHtml(category.page);
@@ -241,15 +317,34 @@ async function scrapeCategory(category) {
 
   const winners = [];
   const seenYears = new Set();
+  const nomineeCount = new Map();
+  const seenPairs = new Set();
+  const MAX_NOMINEES_PER_YEAR = 8;
 
   $("table.wikitable").each((_, table) => {
     let carryYear = null;
     let carryRowsLeft = 0;
+    let tableUsesHighlight = false;
+    $(table)
+      .find("> tbody > tr, > tr")
+      .each((_, row) => {
+        if (!tableUsesHighlight && rowIsHighlighted($, $(row))) tableUsesHighlight = true;
+      });
 
     $(table)
       .find("> tbody > tr, > tr")
       .each((_, row) => {
         const $row = $(row);
+        const soloCells = $row.find("> th, > td");
+        if (soloCells.length === 1 && soloCells.eq(0).is("th")) {
+          const soloYear = findCellYear($, soloCells.eq(0));
+          if (soloYear) {
+            const span = parseInt(soloCells.eq(0).attr("rowspan") ?? "1", 10);
+            carryYear = soloYear;
+            carryRowsLeft = Math.max(0, span - 1);
+            return;
+          }
+        }
         if (isHeaderRow($row)) return;
         const cells = $row.find("> th, > td");
         if (cells.length === 0) return;
@@ -273,22 +368,43 @@ async function scrapeCategory(category) {
           carryRowsLeft--;
         }
         if (!year) return;
-        if (seenYears.has(year)) return; // first row per year = winner
+        const isWinner = tableUsesHighlight
+          ? rowIsHighlighted($, $row) && !seenYears.has(year)
+          : !seenYears.has(year);
 
-        const data = extractRow($, $row, category.focus);
+        const data = extractRow($, $row, category.focus, !candidateYear);
         if (!data) return;
         if (!data.workTitle && data.recipients.length === 0) return;
 
-        seenYears.add(year);
-        winners.push({
-          year,
-          title: data.workTitle ?? null,
-          recipients: data.recipients,
-        });
+        const pairKey = `${year}|${(data.workTitle ?? data.recipients[0] ?? "").toLowerCase()}`;
+        if (seenPairs.has(pairKey)) return;
+        seenPairs.add(pairKey);
+
+        if (isWinner) {
+          seenYears.add(year);
+          winners.push({
+            year,
+            title: data.workTitle ?? null,
+            wiki: data.workWiki ?? null,
+            recipients: data.recipients,
+            won: true,
+          });
+        } else {
+          const n = nomineeCount.get(year) ?? 0;
+          if (n >= MAX_NOMINEES_PER_YEAR) return;
+          nomineeCount.set(year, n + 1);
+          winners.push({
+            year,
+            title: data.workTitle ?? null,
+            wiki: data.workWiki ?? null,
+            recipients: data.recipients,
+            won: false,
+          });
+        }
       });
   });
 
-  winners.sort((a, b) => b.year - a.year);
+  winners.sort((a, b) => b.year - a.year || (b.won === true ? 1 : 0) - (a.won === true ? 1 : 0));
   return winners;
 }
 
@@ -297,9 +413,14 @@ function sleep(ms) {
 }
 
 async function main() {
-  const out = {};
+  const only = process.env.ONLY_TYPE || null;
+  let out = {};
+  if (only) {
+    out = JSON.parse(await readFile(OUTPUT, "utf8"));
+  }
   let total = 0;
   for (const [type, categories] of Object.entries(CATALOG)) {
+    if (only && type !== only) continue;
     out[type] = {};
     console.log(`\n[${type}]`);
     for (const cat of categories) {

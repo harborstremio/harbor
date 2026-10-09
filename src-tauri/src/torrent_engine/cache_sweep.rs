@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, SystemTime};
 
-const KEEP: &[&str] = &["dht.json", "engine.json"];
+const KEEP: &[&str] = &["dht.json", "engine.json", "session.json"];
 
 #[derive(Debug, Default)]
 pub struct SweepStats {
@@ -12,6 +12,7 @@ pub struct SweepStats {
     pub reclaimed_bytes: u64,
     pub errors: u64,
     pub cancelled: bool,
+    pub first_error: Option<String>,
 }
 
 pub fn run_with_cancel(
@@ -21,9 +22,13 @@ pub fn run_with_cancel(
     cancelled: &AtomicBool,
 ) -> SweepStats {
     let mut stats = SweepStats::default();
-    let Ok(entries) = fs::read_dir(dir) else {
-        stats.errors = 1;
-        return stats;
+    let entries = match fs::read_dir(dir) {
+        Ok(entries) => entries,
+        Err(error) => {
+            stats.errors = 1;
+            stats.first_error = Some(format!("read_dir {}: {error}", dir.display()));
+            return stats;
+        }
     };
     let now = SystemTime::now();
     let max_age = Duration::from_secs(retention_hours.saturating_mul(3600));
@@ -33,9 +38,15 @@ pub fn run_with_cancel(
             stats.cancelled = true;
             return stats;
         }
-        let Ok(entry) = entry else {
-            stats.errors += 1;
-            continue;
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(error) => {
+                stats.errors += 1;
+                if stats.first_error.is_none() {
+                    stats.first_error = Some(format!("read_dir entry {}: {error}", dir.display()));
+                }
+                continue;
+            }
         };
         stats.scanned += 1;
         let path = entry.path();
@@ -134,13 +145,19 @@ fn record_remove(path: &Path, size: u64, stats: &mut SweepStats) -> bool {
     } else {
         fs::remove_file(path)
     };
-    if result.is_ok() {
-        stats.deleted += 1;
-        stats.reclaimed_bytes = stats.reclaimed_bytes.saturating_add(size);
-        true
-    } else {
-        stats.errors += 1;
-        false
+    match result {
+        Ok(()) => {
+            stats.deleted += 1;
+            stats.reclaimed_bytes = stats.reclaimed_bytes.saturating_add(size);
+            true
+        }
+        Err(error) => {
+            stats.errors += 1;
+            if stats.first_error.is_none() {
+                stats.first_error = Some(format!("remove {}: {error}", path.display()));
+            }
+            false
+        }
     }
 }
 
@@ -159,16 +176,19 @@ mod tests {
         ));
         fs::create_dir_all(&dir).unwrap();
         fs::write(dir.join("engine.json"), b"keep").unwrap();
+        fs::write(dir.join("session.json"), b"keep").unwrap();
         fs::write(dir.join("old.bin"), b"12345678").unwrap();
 
         let cancelled = AtomicBool::new(false);
         let stats = run_with_cancel(&dir, 0, 0, &cancelled);
 
-        assert_eq!(stats.scanned, 2);
+        assert_eq!(stats.scanned, 3);
         assert_eq!(stats.deleted, 1);
         assert_eq!(stats.reclaimed_bytes, 8);
         assert_eq!(stats.errors, 0);
+        assert_eq!(stats.first_error, None);
         assert!(dir.join("engine.json").exists());
+        assert!(dir.join("session.json").exists());
         assert!(!dir.join("old.bin").exists());
         fs::remove_dir_all(dir).unwrap();
     }

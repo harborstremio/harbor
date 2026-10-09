@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-sports">
+<title id="title-sports">Sports anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <circle class="coral" cx="35" cy="32" r="20"/>
+  <path class="icon-stroke" d="M35 12l8 7-3 10H30l-3-10 8-7zM30 29l-9 7 3 10M40 29l9 7-3 10M24 19l-9 2M19 29H8M19 39l-9 3"/>
+  <path class="gold" d="M43 19l8-3 4 9-6 11"/>
+
+</svg>

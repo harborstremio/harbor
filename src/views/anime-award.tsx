@@ -1,11 +1,14 @@
-import { ArrowUpRight, Search, Trophy, X } from "lucide-react";
+import { ArrowUpRight, Trophy, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import {
+  animeAwardId,
   readAnimeAwardSource,
   type AnimeAwardCategory,
   type AwardSourceId,
 } from "@/lib/anime-awards";
+import { resolveAwardIcon, useAwardPacks } from "@/lib/award-icons";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
@@ -113,6 +116,9 @@ function Banner({
   totalWins: number;
 }) {
   const t = useT();
+  useAwardPacks();
+  const bannerLogo =
+    resolveAwardIcon(`${data.meta.id}_logo`) ?? resolveAwardIcon(data.meta.id) ?? data.meta.icon;
   const yearSpan =
     data.years.length === 0
       ? ""
@@ -155,7 +161,7 @@ function Banner({
           </p>
         </div>
         <img
-          src={data.meta.icon}
+          src={bannerLogo}
           alt=""
           draggable={false}
           className="anime-award-banner-logo h-20 w-auto max-w-[280px] shrink-0 object-contain opacity-90"
@@ -280,10 +286,16 @@ function WinnerRow({ year, title, tint }: { year: number; title: string; tint: s
   const { settings } = useSettings();
   const { openMeta } = useView();
   const [resolving, setResolving] = useState(false);
-  const clickable = !!settings.tmdbKey;
+  const mappedId = animeAwardId(title);
+  const clickable = !!mappedId || !!settings.tmdbKey;
 
   const onClick = async () => {
-    if (!clickable || resolving) return;
+    if (resolving) return;
+    if (mappedId) {
+      openMeta({ id: mappedId, type: "series", name: title });
+      return;
+    }
+    if (!settings.tmdbKey) return;
     setResolving(true);
     try {
       const tv = await searchTmdb(settings.tmdbKey, title, year, "tv");

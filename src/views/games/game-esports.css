@@ -1,0 +1,55 @@
+.games-esports-entry { display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:27px;border-block:1px solid var(--color-edge-soft); }
+.games-esports-entry h2 { font-size:24px;font-weight:600;letter-spacing:-.025em; }
+.games-esports-entry p { margin-top:7px;font-size:13px;line-height:1.6;color:var(--color-ink-muted); }
+.games-esports-entry>.games-button { flex-shrink:0;font-size:13px;gap:18px; }
+.games-esports-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px; }
+.games-esports-card { overflow:hidden;display:flex;flex-direction:column;min-width:0;text-align:start;border-radius:7px;background:var(--color-surface);transition:background 200ms; }
+.games-esports-card:hover { background:var(--color-elevated); }
+.games-esports-cover { display:flex;align-items:center;justify-content:space-between;position:relative;isolation:isolate;min-height:105px;padding:24px;overflow:hidden;color:#fff; }
+.games-esports-cover>img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform 600ms var(--games-ease); }
+.games-esports-card:hover .games-esports-cover>img { transform:scale(1.04); }
+.games-esports-cover::after { content:"";position:absolute;inset:0;z-index:-1;background:#090e15a3; }
+.games-esports .ea-image { display:inline-flex;align-items:center;justify-content:center;flex-shrink:0; }
+.games-esports .ea-image>:is(img,svg) { width:100%;height:100%;object-fit:contain; }
+.games-esports .ea-game-logo { width:110px;height:38px; }
+.games-esports-state { display:flex;align-items:center;gap:6px;font-size:11px;background:#13191cbf;border-radius:3px;padding:5px 8px; }
+.games-esports-state.is-live { color:#edc294; }
+.games-esports-state>i { width:5px;height:5px;border-radius:50%;background:currentColor; }
+.games-esports-event { display:flex;align-items:center;gap:10px;min-height:66px;padding:18px 23px 0; }
+.games-esports-event>.ea-image { width:31px;height:31px; }
+.games-esports-event>strong { font-size:13px;line-height:1.4;font-weight:550; }
+.games-esports-teams { position:relative;display:grid;grid-template-columns:1fr 1fr;gap:30px;padding:22px 20px; }
+.games-esports-teams>span:not(.games-esports-versus) { display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;min-width:0; }
+.games-esports-teams .ea-image { width:48px;height:48px; }
+.games-esports-teams strong { font-size:14px;line-height:1.4;font-weight:550; }
+.games-esports-teams b { font-size:22px;font-weight:550;font-variant-numeric:tabular-nums; }
+.games-esports-versus { position:absolute;left:calc(50% - 9px);top:43px;width:18px;text-align:center;font-size:11px;color:var(--color-ink-subtle); }
+.games-esports .ea-image-fallback { display:grid;place-items:center;width:100%;height:100%;font-size:16px;color:var(--color-ink-muted); }
+.games-esports .ea-image-fallback>svg { display:none; }
+.games-esports-meta { display:flex;flex-direction:column;gap:7px;margin-top:auto;padding:0 23px;font-size:12px;line-height:1.45;color:var(--color-ink-muted); }
+.games-esports-meta>span:empty { display:none; }
+.games-esports-open { display:flex;align-items:center;justify-content:space-between;margin:17px 23px 20px;padding-top:13px;border-top:1px solid var(--color-edge-soft);font-size:12px; }
+.games-esports-open>svg { opacity:0;transform:translateX(-5px);transition:opacity 200ms,transform 300ms var(--games-ease); }
+.games-esports-card:is(:hover,:focus-visible) .games-esports-open>svg { opacity:1;transform:none; }
+.games-esports-source { margin-top:17px;font-size:11px;line-height:1.6;color:var(--color-ink-muted); }
+.games-esports-skeleton { height:340px;border-radius:7px;background:var(--color-surface); }
+@container(max-width:900px){.games-esports-grid{grid-template-columns:1fr}.games-esports-card-open{display:grid;grid-template-columns:170px 1fr}.games-esports-cover{grid-row:span 4;min-height:200px;flex-direction:column;justify-content:flex-start;gap:20px;padding:28px 18px}.games-esports-event{padding-top:17px;min-height:45px}.games-esports-teams{padding:16px 20px}.games-esports-teams>span:not(.games-esports-versus){flex-direction:row;text-align:start;gap:10px}.games-esports-teams .ea-image{width:34px;height:34px}.games-esports-teams strong{font-size:13px}.games-esports-versus{top:25px}.games-esports-open{margin-block:12px 17px}.games-esports-skeleton{height:230px}}
+@container(max-width:550px){.games-esports-card-open{display:flex}.games-esports-cover{min-height:90px;flex-direction:row;justify-content:space-between;padding:20px 23px}.games-esports-teams>span:not(.games-esports-versus){flex-direction:column;text-align:center}.games-esports-teams .ea-image{width:45px;height:45px}.games-esports-versus{top:32px}.games-esports-entry{align-items:flex-start;flex-direction:column;gap:17px}.games-esports .games-section-heading{align-items:flex-start;gap:12px}.games-esports .games-section-heading>.games-page-controls{flex-wrap:wrap;justify-content:flex-end}.games-esports .games-text-action{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.games-esports-cover>img,.games-esports-card,.games-esports-open>svg{transition:none}}
+
+.games-esports-card-open { display:flex;flex-direction:column;flex:1;min-width:0;text-align:start;padding:0;color:inherit; }
+.games-esports-card-open .games-esports-meta { padding-bottom:4px; }
+.games-esports-actions { display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 20px 18px;padding-top:12px;border-top:1px solid var(--color-edge-soft); }
+.games-esports-actions>.games-text-action { font-size:12px;flex-shrink:0; }
+.games-esports-actions .sh-reminder { display:flex;flex-direction:column;align-items:flex-end;gap:5px;text-align:end;margin-inline-start:auto;min-width:0; }
+.games-esports-actions .sh-button { display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:8px 10px;border-radius:5px;background:var(--color-elevated);font-size:12px; }
+.games-esports-actions .sh-button:hover { background:var(--color-raised); }
+.games-esports-actions .sh-reminder>small { font-size:10px;line-height:1.4;color:var(--color-ink-muted); }
+.games-esports button:focus-visible { outline:2px solid var(--color-accent);outline-offset:-2px; }
+.games-esports-card { animation:games-esports-reveal 240ms ease-out; }
+.games-esports-skeleton { background:linear-gradient(105deg,var(--color-surface) 30%,var(--color-elevated) 48%,var(--color-surface) 66%);background-size:250% 100%;animation:games-esports-shimmer 1.7s ease-in-out infinite; }
+@keyframes games-esports-reveal { from { opacity:.3; } to { opacity:1; } }
+@keyframes games-esports-shimmer { to { background-position:-170% 0; } }
+@container (max-width:900px) and (min-width:551px) { .games-esports-card-open { display:grid;grid-template-columns:170px 1fr; }.games-esports-cover { grid-row:span 3; }.games-esports-meta { padding-bottom:16px; } }
+@container(max-width:550px) { .games-esports .games-section-heading { flex-direction:column; }.games-esports .games-section-heading>.games-page-controls { justify-content:flex-start; } }
+@media(prefers-reduced-motion:reduce) { .games-esports-card,.games-esports-skeleton { animation:none; } }

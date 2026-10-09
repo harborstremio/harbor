@@ -36,9 +36,10 @@ export type Diagnostics = {
     hasTrakt: boolean;
     hasStremio: boolean;
     debridCount: number;
-    addonCount: number;
+    addonCount: number | null;
     iptvCount: number;
   };
+  mpvProbe: { available: boolean; version: string | null; error: string | null } | null;
   recentErrors: Array<{ ts: number; msg: string; src?: string }>;
 };
 
@@ -50,7 +51,10 @@ export function installBugReportErrorCapture() {
   if (installed || typeof window === "undefined") return;
   installed = true;
   window.addEventListener("error", (e) => {
-    push(`${e.message}${e.filename ? ` (${e.filename}:${e.lineno ?? "?"})` : ""}`, "window.onerror");
+    push(
+      `${e.message}${e.filename ? ` (${e.filename}:${e.lineno ?? "?"})` : ""}`,
+      "window.onerror",
+    );
   });
   window.addEventListener("unhandledrejection", (e) => {
     const r = e.reason as unknown;
@@ -76,7 +80,7 @@ export async function collectDiagnostics(opts: {
   hasTrakt: boolean;
   hasStremio: boolean;
   debridCount: number;
-  addonCount: number;
+  addonCount: number | null;
   iptvCount: number;
 }): Promise<Diagnostics> {
   let osName = "unknown";
@@ -102,6 +106,15 @@ export async function collectDiagnostics(opts: {
   const viewport =
     typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : "";
 
+  let mpvProbe: Diagnostics["mpvProbe"] = null;
+  try {
+    if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
+      const { probeMpv } = await import("@/lib/player/mpv");
+      const probe = await probeMpv();
+      mpvProbe = { available: probe.available, version: probe.version, error: probe.error };
+    }
+  } catch {}
+
   return {
     appVersion: typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : "dev",
     os: osName,
@@ -110,6 +123,7 @@ export async function collectDiagnostics(opts: {
     viewport,
     locale: typeof navigator !== "undefined" ? navigator.language : "",
     flags: opts,
+    mpvProbe,
     recentErrors: getRecentErrors().slice(-20),
   };
 }
@@ -161,10 +175,7 @@ export async function submitErrorReport(args: {
       code: args.code,
       title: args.title,
       detail: args.detail || null,
-      path:
-        typeof window !== "undefined"
-          ? window.location.pathname + window.location.hash
-          : "",
+      path: typeof window !== "undefined" ? window.location.pathname + window.location.hash : "",
       recentErrors: getRecentErrors().slice(-20),
     }),
   );
@@ -196,7 +207,14 @@ export async function submitBugReport(
   fd.set("ua", diag.ua);
   fd.set("viewport", diag.viewport);
   fd.set("locale", diag.locale);
-  fd.set("diagnostics", JSON.stringify({ flags: diag.flags, recentErrors: diag.recentErrors }));
+  fd.set(
+    "diagnostics",
+    JSON.stringify({
+      flags: diag.flags,
+      mpvProbe: diag.mpvProbe,
+      recentErrors: diag.recentErrors,
+    }),
+  );
   for (const f of input.files) fd.append("files", f, f.name);
 
   const res = await fetch(`${ENDPOINT}/v1/reports`, { method: "POST", body: fd });

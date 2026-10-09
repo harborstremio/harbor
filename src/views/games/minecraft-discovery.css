@@ -1,0 +1,78 @@
+.mc-discovery{min-width:0;scroll-margin-top:24px}
+.mc-servers{padding-block:24px 56px}
+.mc-discovery-heading{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:16px}
+.mc-discovery-heading>div{min-width:0}
+.mc-discovery-heading h2{display:flex;align-items:center;gap:14px;font-size:22px;font-weight:650;letter-spacing:-.025em;margin:0}
+.mc-discovery-heading h2>span+span{color:var(--color-ink-muted);font-size:14px;font-weight:400;letter-spacing:0}
+.mc-discovery-heading h2>.mod-provider-logo{font:inherit;color:var(--color-ink)}
+.mc-discovery-heading p{font-size:12px;line-height:1.6;color:var(--color-ink-muted);max-width:560px;margin:6px 0 0}
+.mc-discovery-back{display:flex;gap:8px;align-items:center;color:var(--color-ink-muted);font-size:12px;min-height:36px;margin-bottom:8px}
+.mc-discovery-back:hover{color:var(--color-ink)}
+.mc-discovery-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.mc-discovery-toolbar>div{flex:1;min-width:140px;max-width:260px}
+.mc-discovery-toolbar [aria-haspopup=listbox]{min-height:42px;font-size:12px}
+.mc-discovery-toolbar>.games-icon-button{margin-inline-start:auto;flex:none}
+.mc-source-list{display:grid;gap:12px}
+.mc-source-project{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:20px;padding:20px;border-radius:var(--radius-md);align-items:center;background:var(--color-elevated)}
+.mc-source-project:is(:hover,:focus-within){background:var(--color-raised)}
+.mc-server-row:hover{background:var(--color-surface)}
+.mc-source-project>img,.mc-source-project>.games-art-empty{width:96px;height:96px;object-fit:contain;border-radius:var(--radius-sm)}
+.mc-source-project-copy{min-width:0}
+.mc-source-project h3,.mc-server-row h3{font-size:16px;font-weight:600;line-height:1.35;margin:0 0 4px;overflow-wrap:anywhere}
+.mc-source-list h3 a{display:inline-flex;align-items:center;gap:8px}
+.mc-source-list h3 a>svg{flex:none;opacity:0;transition:opacity 140ms ease-out}
+.mc-source-list article:focus-within h3 a>svg,.mc-source-list article:hover h3 a>svg{opacity:.55}
+.mc-source-project-copy>span,.mc-source-project small,.mc-server-row small{font-size:11px;line-height:1.5;color:var(--color-ink-muted)}
+.mc-source-project-copy p,.mc-server-copy p{margin:6px 0;font-size:12px;line-height:1.5;color:var(--color-ink-muted);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.mc-source-project-meta{display:grid;gap:8px;justify-items:end;font-variant-numeric:tabular-nums}
+.mc-source-project-meta>span{display:flex;gap:7px;align-items:center;font-size:13px}
+.mc-source-project-meta svg{color:var(--color-ink-muted)}
+.mc-source-project h3{font-size:20px}
+.mc-source-project-copy>span{font-size:14px}
+.mc-source-project small{font-size:13px}
+.mc-source-project-copy p{font-size:16px;line-height:1.45;-webkit-line-clamp:2;margin-block:8px}
+.mc-source-project-meta>span{font-size:14px}
+.mc-curseforge .mc-discovery-skeletons{gap:12px}
+.mc-curseforge .mc-discovery-skeletons>div{padding:20px;background:var(--color-elevated);border-radius:var(--radius-md)}
+.mc-curseforge .mc-discovery-skeletons i{background:var(--color-raised)}
+.mc-curseforge .mc-discovery-skeletons>div>i{width:96px;height:96px}
+.mc-source-fallback{font-size:12px;color:var(--color-ink-muted);padding:8px 0}
+.mc-source-fallback a{display:inline-flex;gap:7px;align-items:center}
+.mc-discovery-more{display:flex;justify-content:center;padding-block:16px;min-height:1px}
+.mc-discovery-skeletons{display:grid;gap:6px}
+.mc-discovery-skeletons>div{display:flex;gap:16px;padding:14px 8px;align-items:center}
+.mc-discovery-skeletons i{display:block;background:var(--color-surface);border-radius:4px;animation:mc-discovery-pulse 1.6s ease-in-out infinite alternate}
+.mc-discovery-skeletons>div>i{width:64px;height:64px;flex:none}
+.mc-discovery-skeletons span{display:grid;gap:9px;flex:1}
+.mc-discovery-skeletons span i{height:10px;width:80%}
+.mc-discovery-skeletons span i:first-child{height:15px;width:35%}
+.mc-discovery-skeletons span i:last-child{width:55%}
+.mc-directory-mark{display:inline-flex;align-items:center;width:22px;height:24px;overflow:hidden;flex:none;direction:ltr}
+.mc-directory-mark img{width:22px;height:24px;object-fit:contain;max-width:none}
+.mc-directory-mark.is-org img{width:110px;flex:none}
+.mc-server-attribution{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;color:var(--color-ink-muted);margin-bottom:12px}
+.mc-server-attribution a{display:inline-flex;align-items:center;gap:8px}
+.mc-server-row{display:grid;grid-template-columns:32px 48px minmax(0,1fr) minmax(120px,200px) auto;align-items:center;gap:14px;padding:16px 8px;border-radius:5px}
+.mc-server-rank{font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-ink-subtle)}
+.mc-server-row>img:not(.mc-server-banner),.mc-server-row>.games-art-empty:not(.mc-server-banner){width:48px;height:48px;border-radius:4px;object-fit:contain}
+.mc-server-copy{min-width:0}
+.mc-server-copy>span[role=status]{display:block;font-size:11px;color:var(--color-ink-muted)}
+.mc-server-copy>span:empty{display:none}
+.mc-server-address{display:flex;align-items:center;gap:8px;max-width:100%;font-size:12px;color:var(--color-ink-muted);min-height:30px;text-align:start}
+.mc-server-address bdi{overflow-wrap:anywhere;user-select:text}
+.mc-server-address svg{flex:none}
+.mc-server-address:hover{color:var(--color-ink)}
+.mc-server-banner{grid-column:4;width:100%;max-height:52px;object-fit:contain;border-radius:3px}
+.mc-server-status{grid-column:5;display:grid;justify-items:end;gap:6px;min-width:110px;font-variant-numeric:tabular-nums}
+.mc-server-status>span{display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap}
+.mc-server-status svg{color:var(--color-ink-muted)}
+.mc-server-status .is-online{color:var(--color-ink-muted)}
+.mc-server-status .is-online:before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:#82b99a;margin-inline-end:6px;vertical-align:middle}
+.mc-discovery :is(button,a,input):focus-visible{outline:2px solid var(--color-ink);outline-offset:3px}
+[dir=rtl] .mc-discovery-back svg{transform:scaleX(-1)}
+@keyframes mc-discovery-pulse{to{opacity:.45}}
+@media(prefers-reduced-motion:reduce){.mc-discovery-skeletons i{animation:none}}
+@container(max-width:850px){.mc-server-row{grid-template-columns:26px 42px minmax(0,1fr) auto;gap:12px}.mc-server-banner{display:none}.mc-server-status{grid-column:4}.mc-server-row>img:not(.mc-server-banner){width:42px;height:42px}}
+@container(max-width:560px){.mc-discovery-heading{align-items:start;flex-direction:column;gap:12px}.mc-discovery-heading .mc-catalog-search{width:100%}.mc-discovery-toolbar{gap:6px}.mc-discovery-toolbar>*:not(button){max-width:100%;min-width:0;flex:1 1 42%}.mc-source-project{grid-template-columns:48px minmax(0,1fr);gap:12px;padding:12px 0}.mc-source-project>img{width:48px;height:48px}.mc-source-project-meta{grid-column:2;display:flex;align-items:center;gap:14px}.mc-server-row{grid-template-columns:22px 36px minmax(0,1fr);gap:10px;padding:12px 0}.mc-server-row>img:not(.mc-server-banner){width:36px;height:36px}.mc-server-status{grid-column:3;display:flex;flex-wrap:wrap;gap:12px;justify-items:start}.mc-server-status>span{font-size:12px}.mc-server-attribution{flex-wrap:wrap}.mc-server-row h3{font-size:14px}}
+@container(max-width:850px){.mc-source-project{grid-template-columns:88px minmax(0,1fr);gap:12px 18px;padding:18px}.mc-source-project>img,.mc-source-project>.games-art-empty{width:88px;height:88px;grid-row:1/3}.mc-source-project-meta{grid-column:2;display:flex;flex-wrap:wrap;align-items:center;justify-items:start;gap:8px 18px}}
+@container(max-width:520px){.mc-source-project{grid-template-columns:64px minmax(0,1fr);padding:16px;gap:12px}.mc-source-project>img,.mc-source-project>.games-art-empty{width:64px;height:64px;grid-row:1}.mc-source-project h3{font-size:18px}.mc-source-project-copy p{font-size:15px}.mc-source-project-meta{grid-column:1/-1}.mc-curseforge .mc-discovery-skeletons>div{padding:16px}.mc-curseforge .mc-discovery-skeletons>div>i{width:64px;height:64px}}

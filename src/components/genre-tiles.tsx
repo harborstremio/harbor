@@ -5,11 +5,12 @@ import { MOVIE_GENRES } from "@/lib/feed/tags";
 import { useT } from "@/lib/i18n";
 import { rpdbPoster } from "@/lib/providers/rpdb";
 import { useSettings } from "@/lib/settings";
+import { claimUniqueArt, releaseUniqueArt } from "@/lib/unique-art";
 import { useView } from "@/lib/view";
 import { Row } from "./row";
 import { Poster } from "./poster";
 
-const GENRE_PALETTE: Record<string, { from: string; to: string; ink: string }> = {
+export const GENRE_PALETTE: Record<string, { from: string; to: string; ink: string }> = {
   Action: { from: "oklch(0.40 0.18 25)", to: "oklch(0.18 0.10 20)", ink: "oklch(0.96 0.02 25)" },
   Adventure: {
     from: "oklch(0.45 0.14 145)",
@@ -75,10 +76,10 @@ const TILES: string[] = [
   "Music",
 ];
 
-export function GenreTiles() {
+export function GenreTiles({ title }: { title?: string }) {
   const t = useT();
   return (
-    <Row title={t("Browse by Genre")} min={210} shape="tile" alwaysActive>
+    <Row title={title ?? t("Browse by Genre")} min={210} shape="tile" alwaysActive>
       {TILES.map((g) => (
         <GenreTile key={g} genre={g} />
       ))}
@@ -95,14 +96,17 @@ function GenreTile({ genre }: { genre: string }) {
 
   useEffect(() => {
     let cancelled = false;
+    const key = `genre:${genre}`;
     fetchGenreSample(settings.tmdbKey, genre)
       .then((list) => {
         if (cancelled) return;
-        setBackdrops(list.filter((m) => m.background).slice(0, 3));
+        const pool = list.filter((m) => m.background);
+        setBackdrops(claimUniqueArt(key, pool, (m) => m.id, 3));
       })
       .catch(() => {});
     return () => {
       cancelled = true;
+      releaseUniqueArt(key);
     };
   }, [genre, settings.tmdbKey]);
 
@@ -139,7 +143,7 @@ function GenreTile({ genre }: { genre: string }) {
       />
       <div className="absolute inset-x-5 bottom-5 flex items-end justify-between">
         <h3
-          className="font-display text-[26px] font-medium leading-tight tracking-tight drop-shadow-[0_2px_18px_rgba(0,0,0,0.4)]"
+          className="font-display text-[26px] font-medium leading-tight tracking-tight [text-shadow:0_2px_18px_rgba(0,0,0,0.4)]"
           style={{ color: palette.ink }}
         >
           {t(genre)}
@@ -170,6 +174,7 @@ function CollageBackdrop({ backdrops, rpdbKey }: { backdrops: Meta[]; rpdbKey: s
             src={rpdbPoster(rpdbKey, m.id, m.background ?? m.poster)}
             seed={m.id}
             ratio="landscape"
+            lazy="release"
             className="h-full rounded-none [transform:skewX(8deg)_scale(1.4)]"
           />
         </div>

@@ -1,0 +1,1923 @@
+{
+ "collections": [
+  {
+   "id": "giallo",
+   "title": "Giallo",
+   "description": "Italian murder mysteries.",
+   "itemIds": [
+    "tt0073582",
+    "tt0065143",
+    "tt0058567",
+    "tt0057443",
+    "tt0084777",
+    "tt0069019",
+    "tt0068416",
+    "tt0069421",
+    "tt0066412",
+    "tt0069390",
+    "tt0066924",
+    "tt0067384",
+    "tt0067446",
+    "tt0068971"
+   ]
+  },
+  {
+   "id": "folk-horror",
+   "title": "Folk horror",
+   "description": "Horror rooted in rural folklore.",
+   "itemIds": [
+    "tt0070917",
+    "tt0066849",
+    "tt0063285",
+    "witch",
+    "tt1788391",
+    "tt2375574",
+    "tt0085515",
+    "tt0062453",
+    "tt0064546",
+    "tt8772262",
+    "tt5215952",
+    "tt5638642",
+    "tt6217306",
+    "tt1296899"
+   ]
+  },
+  {
+   "id": "body-horror",
+   "title": "Body horror",
+   "description": "Physical transformation becomes horror.",
+   "itemIds": [
+    "thing",
+    "tt0091064",
+    "tt0086541",
+    "tt0078908",
+    "tt0073705",
+    "tt0076590",
+    "tt0094761",
+    "tt0091083",
+    "tt0098354",
+    "tt0096251",
+    "tt4954522",
+    "tt10944760",
+    "tt17526714",
+    "tt0120907"
+   ]
+  },
+  {
+   "id": "found-footage",
+   "title": "Found footage",
+   "description": "Horror told through recovered recordings.",
+   "itemIds": [
+    "tt0185937",
+    "tt1179904",
+    "tt1038988",
+    "tt0816556",
+    "tt0930083",
+    "tt0200659",
+    "tt2781832",
+    "tt13446168",
+    "tt2428170",
+    "tt12749596",
+    "tt8119752",
+    "tt18968540",
+    "tt1713476",
+    "tt4267026"
+   ]
+  },
+  {
+   "id": "aliens-abductions",
+   "title": "Aliens & abductions",
+   "description": "Films about alien encounters.",
+   "itemIds": [
+    "tt0106912",
+    "tt0097100",
+    "tt1220198",
+    "tt2387433",
+    "tt14509110",
+    "tt10954984",
+    "tt0075860",
+    "tt0077745",
+    "tt0045917",
+    "tt6803046",
+    "tt1441395",
+    "tt0457275",
+    "tt1478964",
+    "tt0286106"
+   ]
+  }
+ ],
+ "items": [
+  {
+   "id": "tt0073582",
+   "imdbId": "tt0073582",
+   "title": "Deep Red",
+   "year": "1975",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Dario Argento",
+   "description": "A musician who witnesses a murder becomes caught in a killer's elaborate trail of clues.",
+   "source": "https://www.imdb.com/title/tt0073582/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "runtime": "127 min",
+   "imdbRating": "7.5",
+   "service": "Shudder",
+   "serviceLogo": "assets/services/shudder.svg",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "serviceAction": "Browse Shudder",
+   "poster": "https://images.metahub.space/poster/medium/tt0073582/img",
+   "background": "https://images.metahub.space/background/medium/tt0073582/img",
+   "logo": "https://images.metahub.space/logo/medium/tt0073582/img"
+  },
+  {
+   "id": "tt0065143",
+   "imdbId": "tt0065143",
+   "title": "The Bird with the Crystal Plumage",
+   "year": "1970",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Dario Argento",
+   "description": "An American in Rome sees a violent attack and struggles to understand what he witnessed.",
+   "source": "https://www.imdb.com/title/tt0065143/",
+   "runtime": "96 min",
+   "imdbRating": "7.1",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0065143/img"
+  },
+  {
+   "id": "tt0058567",
+   "imdbId": "tt0058567",
+   "title": "Blood and Black Lace",
+   "year": "1964",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Mario Bava",
+   "description": "A masked murderer stalks the models working at a Roman fashion house.",
+   "source": "https://www.imdb.com/title/tt0058567/",
+   "runtime": "88 min",
+   "imdbRating": "7.1",
+   "genres": [
+    "Crime",
+    "Drama",
+    "Horror"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0058567/img"
+  },
+  {
+   "id": "tt0057443",
+   "imdbId": "tt0057443",
+   "title": "The Girl Who Knew Too Much",
+   "year": "1963",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Mario Bava",
+   "description": "A visitor to Rome witnesses a killing that the police insist never happened.",
+   "source": "https://www.imdb.com/title/tt0057443/",
+   "runtime": "86 min",
+   "imdbRating": "6.9",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Romance"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0057443/img"
+  },
+  {
+   "id": "tt0084777",
+   "imdbId": "tt0084777",
+   "title": "Tenebrae",
+   "year": "1982",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Dario Argento",
+   "description": "An American crime writer arrives in Rome as murders begin to echo his latest novel.",
+   "source": "https://www.imdb.com/title/tt0084777/",
+   "runtime": "101 min",
+   "imdbRating": "7.0",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0084777/img"
+  },
+  {
+   "id": "tt0069019",
+   "imdbId": "tt0069019",
+   "title": "Don't Torture a Duckling",
+   "year": "1972",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Lucio Fulci",
+   "description": "A reporter investigates a series of child murders in a secretive southern Italian village.",
+   "source": "https://www.imdb.com/title/tt0069019/",
+   "runtime": "105 min",
+   "imdbRating": "7.0",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0069019/img"
+  },
+  {
+   "id": "tt0068416",
+   "imdbId": "tt0068416",
+   "title": "What Have You Done to Solange?",
+   "year": "1972",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Massimo Dallamano",
+   "description": "A teacher at a girls' school becomes entangled in a murder investigation.",
+   "source": "https://www.imdb.com/title/tt0068416/",
+   "runtime": "107 min",
+   "imdbRating": "6.9",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0068416/img"
+  },
+  {
+   "id": "tt0069421",
+   "imdbId": "tt0069421",
+   "title": "Your Vice Is a Locked Room and Only I Have the Key",
+   "year": "1972",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Sergio Martino",
+   "description": "A troubled writer and his wife draw their visiting niece into a web of suspicion.",
+   "source": "https://www.imdb.com/title/tt0069421/",
+   "runtime": "97 min",
+   "imdbRating": "6.6",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0069421/img"
+  },
+  {
+   "id": "tt0066412",
+   "imdbId": "tt0066412",
+   "title": "The Strange Vice of Mrs. Wardh",
+   "year": "1971",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Sergio Martino",
+   "description": "A woman in Vienna fears that a razor-wielding killer may be someone she knows.",
+   "source": "https://www.imdb.com/title/tt0066412/",
+   "runtime": "96 min",
+   "imdbRating": "6.9",
+   "genres": [
+    "Crime",
+    "Horror",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0066412/img"
+  },
+  {
+   "id": "tt0069390",
+   "imdbId": "tt0069390",
+   "title": "All the Colors of the Dark",
+   "year": "1972",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Sergio Martino",
+   "description": "A woman troubled by nightmares accepts an invitation to a mysterious ritual.",
+   "source": "https://www.imdb.com/title/tt0069390/",
+   "runtime": "94 min",
+   "imdbRating": "6.6",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0069390/img"
+  },
+  {
+   "id": "tt0066924",
+   "imdbId": "tt0066924",
+   "title": "The Case of the Scorpion's Tail",
+   "year": "1971",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Sergio Martino",
+   "description": "An insurance payout draws a widow and an investigator into a chain of murders.",
+   "source": "https://www.imdb.com/title/tt0066924/",
+   "runtime": "96 min",
+   "imdbRating": "6.7",
+   "genres": [
+    "Crime",
+    "Drama",
+    "Horror"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0066924/img"
+  },
+  {
+   "id": "tt0067384",
+   "imdbId": "tt0067384",
+   "title": "Short Night of Glass Dolls",
+   "year": "1971",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Aldo Lado",
+   "description": "A man believed to be dead tries to reconstruct the events that left him trapped in his own body.",
+   "source": "https://www.imdb.com/title/tt0067384/",
+   "runtime": "97 min",
+   "imdbRating": "6.6",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0067384/img"
+  },
+  {
+   "id": "tt0067446",
+   "imdbId": "tt0067446",
+   "title": "Death Walks on High Heels",
+   "year": "1971",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Luciano Ercoli",
+   "description": "A dancer flees Paris after a masked attacker demands her murdered father's stolen diamonds.",
+   "source": "https://www.imdb.com/title/tt0067446/",
+   "runtime": "108 min",
+   "imdbRating": "6.5",
+   "genres": [
+    "Crime",
+    "Horror",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0067446/img"
+  },
+  {
+   "id": "tt0068971",
+   "imdbId": "tt0068971",
+   "title": "Death Walks at Midnight",
+   "year": "1972",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Luciano Ercoli",
+   "description": "A model who witnesses a murder during a drug experiment struggles to convince anyone it happened.",
+   "source": "https://www.imdb.com/title/tt0068971/",
+   "runtime": "102 min",
+   "imdbRating": "6.3",
+   "genres": [
+    "Crime",
+    "Horror",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0068971/img"
+  },
+  {
+   "id": "tt0070917",
+   "title": "The Wicker Man",
+   "year": "1973",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Robin Hardy",
+   "description": "A police officer searching for a missing child encounters a remote island's unfamiliar rituals.",
+   "poster": "https://images.metahub.space/poster/medium/tt0070917/img",
+   "source": "https://www.imdb.com/title/tt0070917/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt0070917",
+   "runtime": "93 min",
+   "imdbRating": "7.5"
+  },
+  {
+   "id": "tt0066849",
+   "imdbId": "tt0066849",
+   "title": "The Blood on Satan's Claw",
+   "year": "1971",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Piers Haggard",
+   "description": "A strange discovery in a field unleashes a dangerous new belief among a village's children.",
+   "source": "https://www.imdb.com/title/tt0066849/",
+   "runtime": "96 min",
+   "imdbRating": "6.4",
+   "genres": [
+    "Horror"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0066849/img"
+  },
+  {
+   "id": "tt0063285",
+   "imdbId": "tt0063285",
+   "title": "Witchfinder General",
+   "year": "1968",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Michael Reeves",
+   "description": "A self-appointed witchfinder exploits fear and civil war in seventeenth-century England.",
+   "source": "https://www.imdb.com/title/tt0063285/",
+   "runtime": "87 min",
+   "imdbRating": "6.7",
+   "genres": [
+    "Drama",
+    "Horror"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0063285/img"
+  },
+  {
+   "id": "witch",
+   "title": "The Witch",
+   "year": "2016",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Robert Eggers",
+   "description": "A family banished to the edge of a forest begins to turn against itself.",
+   "poster": "https://images.metahub.space/poster/medium/tt4263482/img",
+   "source": "https://www.imdb.com/title/tt4263482/",
+   "backdrop": "https://images.metahub.space/poster/medium/tt4263482/img",
+   "runtime": "92 min",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbRating": "7.0",
+   "imdbId": "tt4263482"
+  },
+  {
+   "id": "tt1788391",
+   "title": "Kill List",
+   "year": "2011",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Ben Wheatley",
+   "description": "Two contract killers discover that their latest assignment follows an increasingly ritualistic pattern.",
+   "poster": "https://images.metahub.space/poster/medium/tt1788391/img",
+   "source": "https://www.imdb.com/title/tt1788391/",
+   "genres": [
+    "Crime",
+    "Drama",
+    "Horror"
+   ],
+   "imdbId": "tt1788391",
+   "runtime": "95 min",
+   "imdbRating": "6.4"
+  },
+  {
+   "id": "tt2375574",
+   "imdbId": "tt2375574",
+   "title": "A Field in England",
+   "year": "2013",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Ben Wheatley",
+   "description": "Deserters from the English Civil War search for treasure in a field under a sinister influence.",
+   "source": "https://www.imdb.com/title/tt2375574/",
+   "runtime": "90 min",
+   "imdbRating": "6.2",
+   "genres": [
+    "Drama",
+    "History",
+    "Horror"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt2375574/img"
+  },
+  {
+   "id": "tt0085515",
+   "imdbId": "tt0085515",
+   "title": "Eyes of Fire",
+   "year": "1983",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Avery Crounse",
+   "description": "Outcasts seeking a new home in the American wilderness enter a forest with its own powers.",
+   "source": "https://www.imdb.com/title/tt0085515/",
+   "runtime": "86 min",
+   "imdbRating": "6.3",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Western"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0085515/img"
+  },
+  {
+   "id": "tt0062453",
+   "imdbId": "tt0062453",
+   "title": "Viy",
+   "year": "1967",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Konstantin Ershov, Georgiy Kropachyov, Aleksandr Ptushko",
+   "description": "A student must spend three nights keeping vigil over a young woman's body.",
+   "source": "https://www.imdb.com/title/tt0062453/",
+   "runtime": "76 min",
+   "imdbRating": "7.2",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0062453/img"
+  },
+  {
+   "id": "tt0064546",
+   "imdbId": "tt0064546",
+   "title": "Witchhammer",
+   "year": "1970",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Otakar Vávra",
+   "description": "A witchcraft trial becomes a tool for ambition and persecution in seventeenth-century Moravia.",
+   "source": "https://www.imdb.com/title/tt0064546/",
+   "runtime": "107 min",
+   "imdbRating": "7.7",
+   "genres": [
+    "Drama",
+    "History",
+    "Horror"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0064546/img"
+  },
+  {
+   "id": "tt8772262",
+   "title": "Midsommar",
+   "year": "2019",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Ari Aster",
+   "description": "A grieving woman joins a Swedish midsummer gathering whose customs become increasingly disturbing.",
+   "poster": "https://images.metahub.space/poster/medium/tt8772262/img",
+   "source": "https://www.imdb.com/title/tt8772262/",
+   "runtime": "147 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "7.1",
+   "imdbId": "tt8772262"
+  },
+  {
+   "id": "tt5215952",
+   "title": "The Wailing",
+   "year": "2016",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Na Hong-jin",
+   "description": "A rural police officer seeks an explanation for violent illness spreading through his village.",
+   "poster": "https://images.metahub.space/poster/medium/tt5215952/img",
+   "source": "https://www.imdb.com/title/tt5215952/",
+   "runtime": "156 min",
+   "genres": [
+    "Drama",
+    "Horror"
+   ],
+   "imdbRating": "7.4",
+   "imdbId": "tt5215952"
+  },
+  {
+   "id": "tt5638642",
+   "title": "The Ritual",
+   "year": "2017",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "David Bruckner",
+   "description": "Four friends take a shortcut through a Swedish forest and encounter signs of an ancient presence.",
+   "poster": "https://images.metahub.space/poster/medium/tt5638642/img",
+   "source": "https://www.imdb.com/title/tt5638642/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt5638642",
+   "runtime": "94 min",
+   "imdbRating": "6.4"
+  },
+  {
+   "id": "tt6217306",
+   "title": "Apostle",
+   "year": "2018",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Gareth Evans",
+   "description": "A man travels to a remote island to rescue his sister from a religious sect.",
+   "poster": "https://images.metahub.space/poster/medium/tt6217306/img",
+   "source": "https://www.imdb.com/title/tt6217306/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt6217306",
+   "runtime": "129 min",
+   "imdbRating": "6.3"
+  },
+  {
+   "id": "tt1296899",
+   "imdbId": "tt1296899",
+   "title": "Wake Wood",
+   "year": "2009",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "David Keating",
+   "description": "A grieving couple learns of a village ritual that can briefly return their daughter to life.",
+   "source": "https://www.imdb.com/title/tt1296899/",
+   "runtime": "90 min",
+   "imdbRating": "5.5",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Thriller"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt1296899/img"
+  },
+  {
+   "id": "thing",
+   "title": "The Thing",
+   "year": "1982",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "John Carpenter",
+   "description": "Researchers in Antarctica discover an organism capable of imitating the people around it.",
+   "poster": "https://images.metahub.space/poster/medium/tt0084787/img",
+   "source": "https://www.imdb.com/title/tt0084787/",
+   "runtime": "109 min",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Sci-Fi"
+   ],
+   "imdbRating": "8.2",
+   "imdbId": "tt0084787"
+  },
+  {
+   "id": "tt0091064",
+   "title": "The Fly",
+   "year": "1986",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "David Cronenberg",
+   "description": "A scientist's teleportation experiment sets off a horrifying physical transformation.",
+   "poster": "https://images.metahub.space/poster/medium/tt0091064/img",
+   "source": "https://www.imdb.com/title/tt0091064/",
+   "runtime": "96 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbRating": "7.6",
+   "imdbId": "tt0091064"
+  },
+  {
+   "id": "tt0086541",
+   "title": "Videodrome",
+   "year": "1983",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "David Cronenberg",
+   "description": "A television programmer searching for extreme broadcasts loses his grip on the boundary between screen and flesh.",
+   "poster": "https://images.metahub.space/poster/medium/tt0086541/img",
+   "source": "https://www.imdb.com/title/tt0086541/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt0086541",
+   "runtime": "88 min",
+   "imdbRating": "7.2"
+  },
+  {
+   "id": "tt0078908",
+   "imdbId": "tt0078908",
+   "title": "The Brood",
+   "year": "1979",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "David Cronenberg",
+   "description": "A father investigates a series of murders connected to his estranged wife's unconventional therapy.",
+   "source": "https://www.imdb.com/title/tt0078908/",
+   "runtime": "92 min",
+   "imdbRating": "6.8",
+   "genres": [
+    "Horror",
+    "Sci-Fi"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0078908/img"
+  },
+  {
+   "id": "tt0073705",
+   "imdbId": "tt0073705",
+   "title": "Shivers",
+   "year": "1975",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "David Cronenberg",
+   "description": "A parasite spreads through a luxury apartment complex and changes its residents' behavior.",
+   "source": "https://www.imdb.com/title/tt0073705/",
+   "runtime": "88 min",
+   "imdbRating": "6.3",
+   "genres": [
+    "Horror",
+    "Sci-Fi"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0073705/img"
+  },
+  {
+   "id": "tt0076590",
+   "imdbId": "tt0076590",
+   "title": "Rabid",
+   "year": "1977",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "David Cronenberg",
+   "description": "Experimental surgery leaves a woman with a new hunger and a city facing an epidemic.",
+   "source": "https://www.imdb.com/title/tt0076590/",
+   "runtime": "91 min",
+   "imdbRating": "6.3",
+   "genres": [
+    "Horror",
+    "Sci-Fi"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0076590/img"
+  },
+  {
+   "id": "tt0094761",
+   "title": "The Blob",
+   "year": "1988",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Chuck Russell",
+   "description": "A growing mass from space consumes the inhabitants of a small town.",
+   "poster": "https://images.metahub.space/poster/medium/tt0094761/img",
+   "source": "https://www.imdb.com/title/tt0094761/",
+   "genres": [
+    "Horror",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "imdbId": "tt0094761",
+   "runtime": "95 min",
+   "imdbRating": "6.7"
+  },
+  {
+   "id": "tt0091083",
+   "imdbId": "tt0091083",
+   "title": "From Beyond",
+   "year": "1986",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Stuart Gordon",
+   "description": "Scientists build a machine that reveals a dimension with a disturbing appetite for human flesh.",
+   "source": "https://www.imdb.com/title/tt0091083/",
+   "runtime": "85 min",
+   "imdbRating": "6.6",
+   "genres": [
+    "Horror",
+    "Sci-Fi"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0091083/img"
+  },
+  {
+   "id": "tt0098354",
+   "imdbId": "tt0098354",
+   "title": "Society",
+   "year": "1989",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Brian Yuzna",
+   "description": "A teenager begins to suspect that his wealthy family's social circle hides something inhuman.",
+   "source": "https://www.imdb.com/title/tt0098354/",
+   "runtime": "100 min",
+   "imdbRating": "6.5",
+   "genres": [
+    "Comedy",
+    "Horror"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0098354/img"
+  },
+  {
+   "id": "tt0096251",
+   "imdbId": "tt0096251",
+   "title": "Tetsuo: The Iron Man",
+   "year": "1989",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Shin'ya Tsukamoto",
+   "description": "An encounter with a metal fetishist sends a salaryman's body into a violent mechanical transformation.",
+   "source": "https://www.imdb.com/title/tt0096251/",
+   "runtime": "67 min",
+   "imdbRating": "6.9",
+   "genres": [
+    "Horror",
+    "Sci-Fi"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0096251/img"
+  },
+  {
+   "id": "tt4954522",
+   "title": "Raw",
+   "year": "2016",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Julia Ducournau",
+   "description": "A vegetarian veterinary student develops an unsettling appetite after a hazing ritual.",
+   "poster": "https://images.metahub.space/poster/medium/tt4954522/img",
+   "source": "https://www.imdb.com/title/tt4954522/",
+   "genres": [
+    "Drama",
+    "Horror"
+   ],
+   "imdbId": "tt4954522",
+   "runtime": "98 min",
+   "imdbRating": "6.9"
+  },
+  {
+   "id": "tt10944760",
+   "title": "Titane",
+   "year": "2021",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Julia Ducournau",
+   "description": "A woman on the run assumes a missing person's identity as her body undergoes impossible changes.",
+   "poster": "https://images.metahub.space/poster/medium/tt10944760/img",
+   "source": "https://www.imdb.com/title/tt10944760/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt10944760",
+   "runtime": "108 min",
+   "imdbRating": "6.5"
+  },
+  {
+   "id": "tt17526714",
+   "title": "The Substance",
+   "year": "2024",
+   "type": "Film",
+   "section": "catalog",
+   "description": "An aging television star tries a treatment that promises a younger version of herself.",
+   "creator": "Coralie Fargeat",
+   "source": "https://www.imdb.com/title/tt17526714/",
+   "poster": "https://images.metahub.space/poster/medium/tt17526714/img",
+   "runtime": "141 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbRating": "7.2",
+   "background": "https://images.metahub.space/background/medium/tt17526714/img",
+   "logo": "https://images.metahub.space/logo/medium/tt17526714/img",
+   "service": "MUBI",
+   "serviceUrl": "https://mubi.com/en/us/films/the-substance",
+   "featureLine": "Be careful what you wish for.",
+   "serviceLogo": "assets/services/mubi.svg",
+   "imdbId": "tt17526714"
+  },
+  {
+   "id": "tt0120907",
+   "title": "eXistenZ",
+   "year": "1999",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "David Cronenberg",
+   "description": "A game designer and her protector enter a virtual world through living interfaces.",
+   "poster": "https://images.metahub.space/poster/medium/tt0120907/img",
+   "source": "https://www.imdb.com/title/tt0120907/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt0120907",
+   "runtime": "97 min",
+   "imdbRating": "6.8"
+  },
+  {
+   "id": "tt0185937",
+   "title": "The Blair Witch Project",
+   "year": "1999",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Daniel Myrick, Eduardo Sánchez",
+   "description": "Three student filmmakers vanish while documenting a local legend in the Maryland woods.",
+   "poster": "https://images.metahub.space/poster/medium/tt0185937/img",
+   "source": "https://www.imdb.com/title/tt0185937/",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt0185937",
+   "runtime": "81 min",
+   "imdbRating": "6.5"
+  },
+  {
+   "id": "tt1179904",
+   "title": "Paranormal Activity",
+   "year": "2007",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Oren Peli",
+   "description": "A couple records the strange events disturbing their home while they sleep.",
+   "poster": "https://images.metahub.space/poster/medium/tt1179904/img",
+   "source": "https://www.imdb.com/title/tt1179904/",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt1179904",
+   "runtime": "86 min",
+   "imdbRating": "6.3"
+  },
+  {
+   "id": "tt1038988",
+   "title": "REC",
+   "year": "2007",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jaume Balagueró, Paco Plaza",
+   "description": "A television reporter follows firefighters into an apartment building that is suddenly sealed off.",
+   "poster": "https://images.metahub.space/poster/medium/tt1038988/img",
+   "source": "https://www.imdb.com/title/tt1038988/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt1038988",
+   "runtime": "78 min",
+   "imdbRating": "7.4"
+  },
+  {
+   "id": "tt0816556",
+   "title": "Lake Mungo",
+   "year": "2008",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Joel Anderson",
+   "description": "Interviews and recordings trace a family's grief after a teenager's drowning.",
+   "poster": "https://images.metahub.space/poster/medium/tt0816556/img",
+   "source": "https://www.imdb.com/title/tt0816556/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt0816556",
+   "runtime": "87 min",
+   "imdbRating": "6.2"
+  },
+  {
+   "id": "tt0930083",
+   "imdbId": "tt0930083",
+   "title": "Noroi: The Curse",
+   "year": "2005",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Kôji Shiraishi",
+   "description": "A filmmaker follows scattered paranormal incidents toward a disturbing common explanation.",
+   "source": "https://www.imdb.com/title/tt0930083/",
+   "runtime": "115 min",
+   "imdbRating": "6.8",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0930083/img"
+  },
+  {
+   "id": "tt0200659",
+   "imdbId": "tt0200659",
+   "title": "Ghostwatch",
+   "year": "1992",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Lesley Manning",
+   "description": "A live television investigation of a supposedly haunted house loses control of its broadcast.",
+   "source": "https://www.imdb.com/title/tt0200659/",
+   "runtime": "91 min",
+   "imdbRating": "7.4",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0200659/img"
+  },
+  {
+   "id": "tt2781832",
+   "imdbId": "tt2781832",
+   "title": "The Borderlands",
+   "year": "2013",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Elliot Goldner",
+   "description": "Church investigators record their examination of unusual events at a remote parish.",
+   "source": "https://www.imdb.com/title/tt2781832/",
+   "runtime": "89 min",
+   "imdbRating": "5.8",
+   "genres": [
+    "Horror",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt2781832/img"
+  },
+  {
+   "id": "tt13446168",
+   "title": "The Medium",
+   "year": "2021",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Banjong Pisanthanakun",
+   "description": "A documentary crew follows a Thai shaman as her niece develops troubling symptoms.",
+   "poster": "https://images.metahub.space/poster/medium/tt13446168/img",
+   "source": "https://www.imdb.com/title/tt13446168/",
+   "runtime": "131 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "6.5",
+   "imdbId": "tt13446168"
+  },
+  {
+   "id": "tt2428170",
+   "title": "Creep",
+   "year": "2014",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Patrick Brice",
+   "description": "A videographer accepts a remote assignment from a client whose requests become increasingly alarming.",
+   "poster": "https://images.metahub.space/poster/medium/tt2428170/img",
+   "source": "https://www.imdb.com/title/tt2428170/",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt2428170",
+   "runtime": "82 min",
+   "imdbRating": "6.3"
+  },
+  {
+   "id": "tt12749596",
+   "title": "Host",
+   "year": "2020",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Rob Savage",
+   "description": "Friends holding a seance over a video call invite a presence into their separate homes.",
+   "poster": "https://images.metahub.space/poster/medium/tt12749596/img",
+   "source": "https://www.imdb.com/title/tt12749596/",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "runtime": "56 min",
+   "imdbRating": "6.5",
+   "background": "https://images.metahub.space/background/medium/tt12749596/img",
+   "logo": "https://images.metahub.space/logo/medium/tt12749596/img",
+   "service": "Shudder",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "serviceLogo": "assets/services/shudder.svg",
+   "imdbId": "tt12749596",
+   "serviceAction": "Browse Shudder"
+  },
+  {
+   "id": "tt8119752",
+   "title": "Gonjiam: Haunted Asylum",
+   "year": "2018",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jung Bum-shik",
+   "description": "A livestream crew enters an abandoned psychiatric hospital in search of an audience.",
+   "poster": "https://images.metahub.space/poster/medium/tt8119752/img",
+   "source": "https://www.imdb.com/title/tt8119752/",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt8119752",
+   "runtime": "95 min",
+   "imdbRating": "6.5"
+  },
+  {
+   "id": "tt18968540",
+   "title": "Incantation",
+   "year": "2022",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Kevin Ko",
+   "description": "A mother records her efforts to protect her daughter from a curse she helped unleash.",
+   "poster": "https://images.metahub.space/poster/medium/tt18968540/img",
+   "source": "https://www.imdb.com/title/tt18968540/",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt18968540",
+   "runtime": "111 min",
+   "imdbRating": "6.2"
+  },
+  {
+   "id": "tt1713476",
+   "imdbId": "tt1713476",
+   "title": "The Bay",
+   "year": "2012",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Barry Levinson",
+   "description": "Recovered recordings reconstruct a coastal town's catastrophic outbreak.",
+   "source": "https://www.imdb.com/title/tt1713476/",
+   "runtime": "85 min",
+   "imdbRating": "5.7",
+   "genres": [
+    "Horror",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt1713476/img"
+  },
+  {
+   "id": "tt4267026",
+   "title": "Hell House LLC",
+   "year": "2015",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Stephen Cognetti",
+   "description": "A documentary crew investigates the deaths at a haunted attraction's opening night.",
+   "poster": "https://images.metahub.space/poster/medium/tt4267026/img",
+   "source": "https://www.imdb.com/title/tt4267026/",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt4267026",
+   "runtime": "91 min",
+   "imdbRating": "6.4"
+  },
+  {
+   "id": "tt0106912",
+   "imdbId": "tt0106912",
+   "title": "Fire in the Sky",
+   "year": "1993",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Robert Lieberman",
+   "description": "A logger's disappearance and return leave his coworkers facing suspicion and a disturbing account of abduction.",
+   "source": "https://www.imdb.com/title/tt0106912/",
+   "runtime": "109 min",
+   "imdbRating": "6.5",
+   "genres": [
+    "Biography",
+    "Drama",
+    "Fantasy"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0106912/img",
+   "background": "https://images.metahub.space/background/medium/tt0106912/img",
+   "logo": "https://images.metahub.space/logo/medium/tt0106912/img",
+   "encounterType": "Abduction"
+  },
+  {
+   "id": "tt0097100",
+   "imdbId": "tt0097100",
+   "title": "Communion",
+   "year": "1989",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Philippe Mora",
+   "description": "A writer struggles to make sense of missing memories and encounters with strange visitors.",
+   "source": "https://www.imdb.com/title/tt0097100/",
+   "runtime": "103 min",
+   "imdbRating": "5.5",
+   "genres": [
+    "Biography",
+    "Drama",
+    "Horror"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0097100/img",
+   "encounterType": "Abduction"
+  },
+  {
+   "id": "tt1220198",
+   "imdbId": "tt1220198",
+   "title": "The Fourth Kind",
+   "year": "2009",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Olatunde Osunsanmi",
+   "description": "A psychologist investigates patients' unsettling accounts of nighttime visitors in an Alaskan town.",
+   "source": "https://www.imdb.com/title/tt1220198/",
+   "runtime": "98 min",
+   "imdbRating": "5.9",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Sci-Fi"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt1220198/img",
+   "encounterType": "Abduction"
+  },
+  {
+   "id": "tt2387433",
+   "title": "Dark Skies",
+   "year": "2013",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Scott Stewart",
+   "description": "A suburban family finds that the disturbances in their home may have an extraterrestrial source.",
+   "poster": "https://images.metahub.space/poster/medium/tt2387433/img",
+   "source": "https://www.imdb.com/title/tt2387433/",
+   "genres": [
+    "Horror",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "imdbId": "tt2387433",
+   "runtime": "97 min",
+   "imdbRating": "6.3",
+   "encounterType": "Abduction"
+  },
+  {
+   "id": "tt14509110",
+   "title": "No One Will Save You",
+   "year": "2023",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Brian Duffield",
+   "description": "An isolated young woman confronts an intruder from beyond Earth inside her home.",
+   "poster": "https://images.metahub.space/poster/medium/tt14509110/img",
+   "source": "https://www.imdb.com/title/tt14509110/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt14509110",
+   "runtime": "93 min",
+   "imdbRating": "6.2",
+   "encounterType": "Invasion"
+  },
+  {
+   "id": "tt10954984",
+   "title": "Nope",
+   "year": "2022",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jordan Peele",
+   "description": "Siblings at a California horse ranch try to capture evidence of a strange presence in the sky.",
+   "poster": "https://images.metahub.space/poster/medium/tt10954984/img",
+   "source": "https://www.imdb.com/title/tt10954984/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt10954984",
+   "runtime": "130 min",
+   "imdbRating": "6.8",
+   "background": "https://images.metahub.space/background/medium/tt10954984/img",
+   "logo": "https://images.metahub.space/logo/medium/tt10954984/img",
+   "encounterType": "Unexplained encounter"
+  },
+  {
+   "id": "tt0075860",
+   "imdbId": "tt0075860",
+   "title": "Close Encounters of the Third Kind",
+   "year": "1977",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Steven Spielberg",
+   "description": "An ordinary man becomes consumed by visions after an encounter with a mysterious light.",
+   "source": "https://www.imdb.com/title/tt0075860/",
+   "runtime": "137 min",
+   "imdbRating": "7.6",
+   "genres": [
+    "Drama",
+    "Sci-Fi"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0075860/img",
+   "background": "https://images.metahub.space/background/medium/tt0075860/img",
+   "logo": "https://images.metahub.space/logo/medium/tt0075860/img",
+   "encounterType": "Contact"
+  },
+  {
+   "id": "tt0077745",
+   "title": "Invasion of the Body Snatchers",
+   "year": "1978",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Philip Kaufman",
+   "description": "A San Francisco health inspector notices that familiar people are becoming eerily unfamiliar.",
+   "poster": "https://images.metahub.space/poster/medium/tt0077745/img",
+   "source": "https://www.imdb.com/title/tt0077745/",
+   "genres": [
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt0077745",
+   "runtime": "116 min",
+   "imdbRating": "7.4",
+   "encounterType": "Invasion"
+  },
+  {
+   "id": "tt0045917",
+   "imdbId": "tt0045917",
+   "title": "Invaders from Mars",
+   "year": "1953",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "William Cameron Menzies",
+   "description": "A boy sees a spacecraft land near his home and suspects the adults around him are changing.",
+   "source": "https://www.imdb.com/title/tt0045917/",
+   "runtime": "78 min",
+   "imdbRating": "6.3",
+   "genres": [
+    "Horror",
+    "Sci-Fi"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0045917/img",
+   "encounterType": "Invasion"
+  },
+  {
+   "id": "tt6803046",
+   "imdbId": "tt6803046",
+   "title": "The Vast of Night",
+   "year": "2019",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Andrew Patterson",
+   "description": "A switchboard operator and a radio host investigate a strange signal over a New Mexico town.",
+   "source": "https://www.imdb.com/title/tt6803046/",
+   "runtime": "91 min",
+   "imdbRating": "6.7",
+   "genres": [
+    "Drama",
+    "Mystery",
+    "Sci-Fi"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt6803046/img",
+   "encounterType": "Contact"
+  },
+  {
+   "id": "tt1441395",
+   "title": "Under the Skin",
+   "year": "2013",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jonathan Glazer",
+   "description": "An alien moving through Glasgow in human form begins to question her predatory routine.",
+   "poster": "https://images.metahub.space/poster/medium/tt1441395/img",
+   "source": "https://www.imdb.com/title/tt1441395/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt1441395",
+   "runtime": "108 min",
+   "imdbRating": "6.3",
+   "encounterType": "Alien visitor"
+  },
+  {
+   "id": "tt0457275",
+   "imdbId": "tt0457275",
+   "title": "Altered",
+   "year": "2006",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Eduardo Sánchez",
+   "description": "Former abductees capture an extraterrestrial and bring their unfinished trauma home.",
+   "source": "https://www.imdb.com/title/tt0457275/",
+   "runtime": "88 min",
+   "imdbRating": "5.6",
+   "genres": [
+    "Horror",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0457275/img",
+   "encounterType": "Abduction aftermath"
+  },
+  {
+   "id": "tt1478964",
+   "imdbId": "tt1478964",
+   "title": "Attack the Block",
+   "year": "2011",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Joe Cornish",
+   "description": "Teenagers on a London estate defend their block from creatures falling from the sky.",
+   "source": "https://www.imdb.com/title/tt1478964/",
+   "runtime": "88 min",
+   "imdbRating": "6.7",
+   "genres": [
+    "Action",
+    "Adventure",
+    "Comedy"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt1478964/img",
+   "encounterType": "Invasion"
+  },
+  {
+   "id": "tt0286106",
+   "title": "Signs",
+   "year": "2002",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "M. Night Shyamalan",
+   "description": "A former minister and his family face unexplained signs in their cornfields and beyond.",
+   "poster": "https://images.metahub.space/poster/medium/tt0286106/img",
+   "source": "https://www.imdb.com/title/tt0286106/",
+   "genres": [
+    "Drama",
+    "Mystery",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt0286106",
+   "runtime": "106 min",
+   "imdbRating": "6.8",
+   "encounterType": "Invasion"
+  }
+ ],
+ "checked": "2026-09-28",
+ "sources": [
+  {
+   "id": "bfi-giallo",
+   "publisher": "BFI",
+   "title": "Where to begin with giallo",
+   "url": "https://www.bfi.org.uk/features/where-begin-giallo",
+   "itemIds": [
+    "tt0073582",
+    "tt0065143",
+    "tt0058567",
+    "tt0057443",
+    "tt0084777",
+    "tt0069019",
+    "tt0068416",
+    "tt0069421",
+    "tt0067384"
+   ],
+   "basis": "Chris Gallant traces the Italian murder-mystery tradition and identifies these films within it. Genre boundaries are treated as flexible.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "arrow-martino",
+   "publisher": "Arrow Films",
+   "title": "The Strange Gialli of Sergio Martino",
+   "url": "https://www.arrowfilms.com/blog/features/the-strange-gialli-of-sergio-martino/",
+   "itemIds": [
+    "tt0066412",
+    "tt0069390",
+    "tt0066924",
+    "tt0069421"
+   ],
+   "basis": "Alexandra Heller-Nicholas discusses the films as Martino gialli, supporting selections beyond Argento and Bava.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "arrow-ercoli",
+   "publisher": "Arrow Films",
+   "title": "The Forbidden Gialli of a Filmmaker Above Suspicion",
+   "url": "https://www.arrowfilms.com/blog/features/the-forbidden-gialli-of-a-filmmaker-above-suspicion/",
+   "itemIds": [
+    "tt0067446",
+    "tt0068971"
+   ],
+   "basis": "Alexandra Heller-Nicholas identifies both films within Luciano Ercoli's giallo trilogy.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-folk",
+   "publisher": "BFI",
+   "title": "Where to begin with folk horror",
+   "url": "https://www.bfi.org.uk/features/where-begin-with-folk-horror",
+   "itemIds": [
+    "tt0070917",
+    "tt0066849",
+    "tt0063285",
+    "witch",
+    "tt1788391",
+    "tt2375574"
+   ],
+   "basis": "Adam Scovell outlines the British formative trio, landscape and isolation, then discusses these later examples.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "severin-folk",
+   "publisher": "Severin Films",
+   "title": "All the Haunts Be Ours: A Compendium of Folk Horror, Volume One",
+   "url": "https://severinfilms.com/collections/horror/products/folk-horror-box",
+   "itemIds": [
+    "tt0085515",
+    "tt0062453",
+    "tt0064546"
+   ],
+   "basis": "All three appear in the distributor's folk-horror collection curated by Kier-La Janisse. This is curatorial evidence, not a current streaming claim.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "a24-midsommar",
+   "publisher": "A24",
+   "title": "Midsommar",
+   "url": "https://a24films.com/films/midsommar?search=2023",
+   "itemIds": [
+    "tt8772262"
+   ],
+   "basis": "Official synopsis establishes the remote Swedish festival and secluded community; the folk-horror placement is editorial interpretation of these elements.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "wellgo-wailing",
+   "publisher": "Well Go USA",
+   "title": "The Wailing",
+   "url": "https://wellgousa.com/films/wailing",
+   "itemIds": [
+    "tt5215952"
+   ],
+   "basis": "Official synopsis establishes a rural village, supernatural illness and a shaman. Placement follows those folk-horror elements.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "netflix-ritual",
+   "publisher": "Netflix",
+   "title": "The Ritual",
+   "url": "https://www.netflix.com/title/80217312?cmp=rt_where_to_watch&fromWatch=true",
+   "itemIds": [
+    "tt5638642"
+   ],
+   "basis": "Official synopsis establishes the Swedish wilderness and a malevolent presence. The collection classification is editorial, not an exact Netflix genre label.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "netflix-apostle",
+   "publisher": "Netflix",
+   "title": "Gareth Evans biography in Havoc announcement",
+   "url": "https://about.netflix.com/en/news/tom-hardy-to-star-in-and-produce-havoc-from-gareth-evans-for-netflix",
+   "itemIds": [
+    "tt6217306"
+   ],
+   "basis": "The director biography explicitly identifies Apostle as a British folk-horror film.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-wakewood",
+   "publisher": "BFI",
+   "title": "10 great Irish horror films",
+   "url": "https://www.bfi.org.uk/lists/10-great-irish-horror-films",
+   "itemIds": [
+    "tt1296899"
+   ],
+   "basis": "Anton Bitel discusses the village's resurrection ritual within folk horror.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-body",
+   "publisher": "BFI",
+   "title": "10 great body horror films",
+   "url": "https://www.bfi.org.uk/lists/10-great-body-horror-films",
+   "itemIds": [
+    "tt0091064",
+    "tt0096251",
+    "tt10944760"
+   ],
+   "basis": "Matthew Thrift selects these films for bodily mutation and transformation. The Fly entry discusses its practical effects.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-cronenberg",
+   "publisher": "BFI",
+   "title": "Where to begin with David Cronenberg",
+   "url": "https://www.bfi.org.uk/features/where-begin-with-david-cronenberg",
+   "itemIds": [
+    "tt0091064",
+    "tt0073705",
+    "tt0076590",
+    "tt0078908",
+    "tt0086541"
+   ],
+   "basis": "Stephen Puddicombe connects the films to Cronenberg's recurring concern with bodily vulnerability, mutation and technology.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-thing",
+   "publisher": "BFI",
+   "title": "The Thing (1982)",
+   "url": "https://www.bfi.org.uk/film/0123a4ec-0162-5556-b29d-fc07d9f5aef4/the-thing",
+   "itemIds": [
+    "thing"
+   ],
+   "basis": "BFI describes assimilation and imitation, and identifies Rob Bottin's special makeup effects.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-blob",
+   "publisher": "BFI",
+   "title": "A great horror film for every year",
+   "url": "https://www.bfi.org.uk/lists/great-horror-film-from-every-year-from-1922-now",
+   "itemIds": [
+    "tt0094761"
+   ],
+   "basis": "The 1988 entry discusses the consuming creature and Tony Gardner's special-effects work, supporting the body-horror selection.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "vs-beyond",
+   "publisher": "Vinegar Syndrome",
+   "title": "From Beyond",
+   "url": "https://vinegarsyndrome.com/products/from-beyond?_pos=1&_psq=from+be&_ss=e&_v=1.0",
+   "itemIds": [
+    "tt0091083"
+   ],
+   "basis": "The official release describes Stuart Gordon's Lovecraft adaptation and documents its effects crew and bodily creature effects.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "arrow-body",
+   "publisher": "Arrow Films",
+   "title": "10 Defining Moments in Body Horror",
+   "url": "https://www.arrowfilms.com/blog/features/10-defining-moments-in-body-horror/",
+   "itemIds": [
+    "tt0098354"
+   ],
+   "basis": "The Society discussion identifies Screaming Mad George's special effects and the film's climactic bodily transformations.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "mondo-raw",
+   "publisher": "Mondo / Focus Features / Back Lot Music",
+   "title": "Raw Original Soundtrack",
+   "url": "https://mondoshop.com/blogs/news/new-music-release-raw-original-soundtrack",
+   "itemIds": [
+    "tt4954522"
+   ],
+   "basis": "The licensed soundtrack release describes Julia Ducournau's film as coming-of-age body horror.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-substance",
+   "publisher": "BFI",
+   "title": "10 great horror films of the decade so far",
+   "url": "https://www.bfi.org.uk/lists/10-great-horror-films-decade-so-far",
+   "itemIds": [
+    "tt17526714"
+   ],
+   "basis": "The Substance entry explicitly discusses Coralie Fargeat's body horror.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-existenz",
+   "publisher": "BFI",
+   "title": "10 great technothrillers",
+   "url": "https://www.bfi.org.uk/lists/10-great-technothrillers",
+   "itemIds": [
+    "tt0120907"
+   ],
+   "basis": "The entry describes organic game technology and spinal connections; this supports its inclusion at the intersection of body horror and science fiction.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-found",
+   "publisher": "BFI",
+   "title": "10 great found-footage films",
+   "url": "https://www.bfi.org.uk/lists/10-great-found-footage-films",
+   "itemIds": [
+    "tt0200659",
+    "tt0185937",
+    "tt0930083",
+    "tt1038988",
+    "tt0816556",
+    "tt2428170",
+    "tt18968540"
+   ],
+   "basis": "Billie Walker includes these examples, covering mock broadcasts, documentary forms and recovered recordings.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-paranormal",
+   "publisher": "BFI / Sight and Sound",
+   "title": "The Outwaters: this found-footage horror takes no prisoners",
+   "url": "https://www.bfi.org.uk/sight-and-sound/reviews/outwaters-this-found-footage-horror-takes-no-prisoners",
+   "itemIds": [
+    "tt1179904"
+   ],
+   "basis": "Kim Newman uses Paranormal Activity (2007) as a comparison when discussing the narrative construction of found-footage horror.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "secondsight-borderlands",
+   "publisher": "Second Sight Films",
+   "title": "The Borderlands (AKA Final Prayer)",
+   "url": "https://secondsightfilms.co.uk/products/the-borderlands-blu-ray-pre-order-available-april",
+   "itemIds": [
+    "tt2781832"
+   ],
+   "basis": "Official distributor confirms the alternate title, director and Vatican-investigation premise. Found-footage placement is editorial.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "shudder-medium",
+   "publisher": "Shudder",
+   "title": "The Medium",
+   "url": "https://watch.shudder.com/",
+   "itemIds": [
+    "tt13446168"
+   ],
+   "basis": "The official catalog synopsis describes the documentary team following a Thai shaman and filming her niece's changing behavior.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-host",
+   "publisher": "BFI / Sight and Sound",
+   "title": "Rob Savage on video call horror Host",
+   "url": "https://www.bfi.org.uk/sight-and-sound/interviews/rob-savage-host-zoom-video-call-horror",
+   "itemIds": [
+    "tt12749596"
+   ],
+   "basis": "A direct interview with the director documents the Zoom production; the introduction identifies the film as found footage.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "wellgo-gonjiam",
+   "publisher": "Well Go USA",
+   "title": "Gonjiam: Haunted Asylum",
+   "url": "https://wellgousa.com/films/gonjiam-haunted-asylum",
+   "itemIds": [
+    "tt8119752"
+   ],
+   "basis": "The official distributor synopsis describes a horror web-show crew livestreaming from the asylum.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "roadside-bay",
+   "publisher": "Roadside Attractions",
+   "title": "The Bay",
+   "url": "https://roadsideattractions.com/filmography/the-bay/",
+   "itemIds": [
+    "tt1713476"
+   ],
+   "basis": "The official distributor identifies the reconstructed outbreak through phone videos, emergency calls and webcams.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "shudder-hellhouse",
+   "publisher": "Shudder",
+   "title": "Hell House LLC",
+   "url": "https://www.shudder.com/movies/watch/hell-house-llc/3596928?pubDate=20250412",
+   "itemIds": [
+    "tt4267026"
+   ],
+   "basis": "Official synopsis identifies the found-footage investigation of deaths at a haunted attraction. No availability is inferred from this legacy detail page.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "arrow-abductions",
+   "publisher": "Arrow Films",
+   "title": "9 Alien Abduction Films with Deeper Meanings",
+   "url": "https://www.arrowfilms.com/blog/features/9-alien-abduction-films-with-deeper-meanings/",
+   "itemIds": [
+    "tt0106912",
+    "tt2387433",
+    "tt0457275"
+   ],
+   "basis": "The essay discusses these abduction narratives. They are film stories; claims of real abduction are not presented as verified facts.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "arrow-communion",
+   "publisher": "Arrow Films",
+   "title": "Christopher Walken: In The Lead",
+   "url": "https://www.arrowfilms.com/blog/features/christopher-walken-in-the-lead/",
+   "itemIds": [
+    "tt0097100"
+   ],
+   "basis": "The Communion section describes Walken's portrayal of a writer grappling with a perceived extraterrestrial encounter.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "universal-fourth",
+   "publisher": "Universal Pictures",
+   "title": "The Fourth Kind",
+   "url": "https://www.universalpicturesathome.com/movies/the-fourth-kind",
+   "itemIds": [
+    "tt1220198"
+   ],
+   "basis": "Official synopsis identifies the fictional film's alien-abduction premise. Its publicity's real-case framing is not endorsed or repeated in the card copy.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "20th-noone",
+   "publisher": "20th Century Studios",
+   "title": "No One Will Save You",
+   "url": "https://www.20thcenturystudios.com/movies/no-one-will-save-you",
+   "itemIds": [
+    "tt14509110"
+   ],
+   "basis": "Official synopsis describes Brynn's confrontation with extraterrestrial beings.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-nope",
+   "publisher": "BFI / Sight and Sound",
+   "title": "Nope: the horrors of being seen",
+   "url": "https://www.bfi.org.uk/sight-and-sound/reviews/nope-horrors-being-seen",
+   "itemIds": [
+    "tt10954984"
+   ],
+   "basis": "Ben Walters places the film in the UFO-picture tradition. The card avoids revealing the nature of its aerial threat.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "sony-close",
+   "publisher": "Sony Pictures",
+   "title": "Close Encounters of the Third Kind",
+   "url": "https://www.sonypictures.com/movies/closeencountersofthethirdkind",
+   "itemIds": [
+    "tt0075860"
+   ],
+   "basis": "Official synopsis distinguishes sightings, evidence and direct contact. Included as a contact film with suspense, not as an abduction-horror label.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "arrow-invasion",
+   "publisher": "Arrow Films",
+   "title": "In Pod We Trust: Revisiting Invasion of the Body Snatchers",
+   "url": "https://www.arrowfilms.com/blog/features/in-pod-we-trust-revisiting-invasion-of-the-body-snatchers/",
+   "itemIds": [
+    "tt0077745"
+   ],
+   "basis": "The essay identifies the 1978 film's extraterrestrial replacement and takeover premise.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-invaders",
+   "publisher": "BFI",
+   "title": "Invaders from Mars Blu-ray",
+   "url": "https://shop.bfi.org.uk/invaders-from-mars-blu-ray/",
+   "itemIds": [
+    "tt0045917"
+   ],
+   "basis": "Official BFI release identifies the 1953 film, a child's sighting and the adults changed by invading creatures.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-vast",
+   "publisher": "BFI / Sight and Sound",
+   "title": "The 50 best films of 2020",
+   "url": "https://www.bfi.org.uk/best-films-2020",
+   "itemIds": [
+    "tt6803046"
+   ],
+   "basis": "The entry identifies the radio-signal mystery as a retro UFO tale. The metadata year 2019 reflects the festival premiere, not the 2020 general release.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-visitors",
+   "publisher": "BFI",
+   "title": "10 great films about aliens visiting Earth",
+   "url": "https://www.bfi.org.uk/lists/10-great-films-about-aliens-visiting-earth",
+   "itemIds": [
+    "tt1478964",
+    "tt1441395"
+   ],
+   "basis": "Paul O'Callaghan discusses invasion in Attack the Block and an extraterrestrial predator's perspective in Under the Skin.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "universal-altered",
+   "publisher": "Universal Pictures",
+   "title": "Altered (2006)",
+   "url": "https://www.universalpicturesathome.com/movies/altered-2006",
+   "itemIds": [
+    "tt0457275"
+   ],
+   "basis": "Official distributor confirms the 2006 year, director and former abductees capturing the alien responsible for their ordeal.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-signs",
+   "publisher": "BFI",
+   "title": "Signs (2002)",
+   "url": "https://www.bfi.org.uk/film/00548ee5-9501-5978-b1ca-7316560f3f7b/signs",
+   "itemIds": [
+    "tt0286106"
+   ],
+   "basis": "BFI confirms the film, director and year. Its invasion-story placement is editorial and supported by the separate saved film metadata synopsis.",
+   "checked": "2026-09-28"
+  }
+ ]
+}

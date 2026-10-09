@@ -1,0 +1,84 @@
+.games-key-prices { margin: 16px 0; border-radius: 7px; background: var(--color-surface); overflow: clip; }
+.games-key-price-summary { display: block; width: 100%; padding: 17px; border-radius: 7px; background: var(--color-surface) url('/games/surface-grain.svg'); background-blend-mode: soft-light; text-align: start; color: var(--color-ink); }
+.games-key-price-summary:hover { background-color: var(--color-elevated); }
+.games-key-price-heading { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 650; }
+.games-key-price-heading > span { flex: 1; }
+.games-key-price-heading > svg { flex: 0 0 22px; }
+.games-key-price-value { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 9px; margin: 15px 0 5px; }
+.games-key-price-value strong { font-size: 28px; font-weight: 600; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.games-key-price-value small { color: var(--color-ink-muted); font-size: 13px; }
+.games-key-price-caption { display: block; font-size: 12px; line-height: 1.6; color: var(--color-ink-muted); }
+.games-price-steam-benchmark { display: flex; gap: 10px; align-items: center; padding: 13px 17px; background: color-mix(in srgb, var(--color-ink) 3%, transparent); color: var(--color-ink); }
+.games-price-steam-benchmark > svg, .games-price-steam-benchmark > img { width: 22px; height: 22px; flex: 0 0 22px; }
+.games-price-steam-benchmark > span { flex: 1; font-size: 14px; font-weight: 550; }.games-price-steam-benchmark small { display: block; font-size: 11px; margin-top: 2px; font-weight: 400; color: var(--color-ink-muted); }.games-price-steam-benchmark strong { font-size: 16px; font-variant-numeric: tabular-nums; font-weight: 550; }
+.games-price-steam-benchmark:hover { background: var(--color-elevated); }
+.games-price-sale { font-size: 12px; font-weight: 650; padding: 4px 6px; border-radius: 3px; color: var(--color-accent); background: var(--color-accent-soft); }
+.games-price-steam-benchmark:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -3px; }
+.games-key-price-loading { display: flex; gap: 10px; align-items: center; margin: 15px 0 8px; height: 34px; }
+.games-key-price-loading i:first-child { width: 96px; height: 28px; }.games-key-price-loading i:last-child { width: 80px; height: 13px; }
+.games-key-price-summary:focus-visible, .games-price-comparison a:focus-visible, .games-price-comparison button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.games-prices-backdrop { background: rgb(0 0 0 / .65); }
+.games-price-comparison { min-height: 0; display: flex; flex-direction: column; color: var(--color-ink); text-align: start; }
+.games-price-modal-heading { display: flex; align-items: center; gap: 16px; padding: 24px; background: var(--color-elevated); }
+.games-price-modal-heading > img, .games-price-modal-heading > .games-art-fallback { width: 96px; height: 55px; border-radius: 5px; object-fit: cover; }
+.games-price-modal-heading > div { flex: 1; min-width: 0; }
+.games-price-modal-heading h2 { font-size: 23px; font-weight: 650; line-height: 1.3; margin: 0; }
+.games-price-modal-heading p { font-size: 14px; margin-top: 4px; color: var(--color-ink-muted); }
+.games-price-close, .games-price-refresh { width: 42px; height: 42px; display: grid; place-items: center; flex-shrink: 0; border-radius: 6px; color: var(--color-ink-muted); }
+.games-price-close:hover, .games-price-refresh:hover { background: var(--color-raised); color: var(--color-ink); }
+.games-price-refresh:disabled { opacity: .45; cursor: wait; }
+.games-price-modal-scroll { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px; }
+.games-price-overview { display: flex; justify-content: space-between; gap: 20px; align-items: center; margin-bottom: 24px; }
+.games-price-overview > div:first-child { display: grid; gap: 5px; }
+.games-price-overview span { font-size: 13px; color: var(--color-ink-muted); }
+.games-price-overview strong { font-size: 38px; line-height: 1.15; font-weight: 600; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+.games-price-overview small { font-size: 13px; color: var(--color-ink-muted); }
+.games-price-overview i { width: 130px; height: 44px; }
+.games-price-market { display: flex; gap: 11px; align-items: center; max-width: 245px; }
+.games-price-market > svg { flex: 0 0 22px; color: var(--color-ink-muted); }
+.games-price-market > div { display: grid; gap: 6px; }.games-price-market b { font-weight: 550; font-size: 15px; }.games-price-market span { line-height: 1.6; }
+.games-price-filters { display: flex; align-items: end; gap: 12px; }
+.games-price-filters > label { flex: 1; min-width: 0; display: grid; gap: 8px; }
+.games-price-filters > label > span { font-size: 13px; font-weight: 550; color: var(--color-ink-muted); }
+.games-price-filter-hint { color: var(--color-ink-muted); font-size: 12px; line-height: 1.7; margin: 12px 0 20px; }
+.games-price-option-logo { width: 18px; height: 18px; object-fit: contain; }
+.games-price-results-heading { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 12px; font-size: 12px; color: var(--color-ink-muted); }
+.games-price-offer { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto auto; align-items: center; gap: 15px; padding: 18px 0; border-top: 1px solid var(--color-edge-soft); }
+.games-price-store-logo { width: 30px; height: 30px; object-fit: contain; }
+.games-price-offer-copy h3 { font-size: 16px; line-height: 1.4; font-weight: 600; margin: 0; }
+.games-price-offer-copy p { font-size: 13px; line-height: 1.5; color: var(--color-ink-muted); margin: 3px 0; }
+.games-price-offer-copy > span { font-size: 11px; color: var(--color-ink-muted); }
+.games-price-offer-price { display: grid; justify-items: end; gap: 3px; font-variant-numeric: tabular-nums; }
+.games-price-offer-price strong { font-size: 22px; font-weight: 600; letter-spacing: -.03em; }
+.games-price-offer-price del { font-size: 12px; color: var(--color-ink-subtle); }
+.games-price-offer .games-button { min-height: 38px; font-size: 13px; padding: 9px 14px; white-space: nowrap; background: var(--color-elevated); }
+.games-price-message { padding: 22px 0; font-size: 14px; line-height: 1.7; color: var(--color-ink-muted); }
+.games-price-coverage { font-size: 12px; line-height: 1.7; color: var(--color-ink-muted); margin: 14px 0 22px; }
+.games-price-more { display: flex; width: 100%; margin-bottom: 22px; text-align: start; align-items: center; gap: 14px; padding: 17px; border-radius: 6px; background: var(--color-elevated); }
+.games-price-more > span { display: grid; gap: 4px; flex: 1; }.games-price-more > svg { flex-shrink: 0; color: var(--color-ink-muted); }
+.games-price-more strong { font-size: 15px; font-weight: 600; }.games-price-more small { color: var(--color-ink-muted); line-height: 1.6; font-size: 12px; }
+.games-price-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 16px 24px; font-size: 12px; color: var(--color-ink-muted); background: var(--color-elevated); }
+.games-price-footer a:hover { text-decoration: underline; }
+.games-shop-context { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.games-shop-context > div { display: grid; gap: 6px; min-width: 0; }.games-shop-context span { font-size: 12px; color: var(--color-ink-muted); }.games-shop-context strong { font-size: 17px; font-weight: 600; }
+.games-shop-context .games-button { flex-shrink: 0; background: var(--color-elevated); font-size: 13px; }
+.games-shop-controls { display: flex; gap: 12px; align-items: center; }.games-shop-search { display: flex; flex: 1; align-items: center; gap: 10px; min-width: 0; padding: 0 12px; background: var(--color-elevated); border-radius: 6px; }.games-shop-search > svg { flex-shrink: 0; color: var(--color-ink-muted); }.games-shop-search input { background: none; width: 100%; min-width: 0; padding: 12px 0; outline: none; font-size: 14px; }.games-shop-search:focus-within { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.games-shop-note { font-size: 13px; line-height: 1.7; color: var(--color-ink-muted); margin: 15px 0 20px; }
+.games-shop-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.games-shop-card { display: flex; align-items: center; gap: 13px; padding: 17px 14px; border-radius: 6px; background: var(--color-elevated); min-height: 103px; }
+.games-shop-card:hover { background: var(--color-raised); }.games-shop-card > svg { color: var(--color-ink-muted); flex: 0 0 17px; opacity: 0; }.games-shop-card:hover > svg, .games-shop-card:focus-visible > svg { opacity: 1; }
+.games-shop-mark { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 40px; }.games-shop-mark img { width: 36px; height: 36px; object-fit: contain; }.games-shop-mark > span { font-size: 17px; font-weight: 750; letter-spacing: -.04em; }
+.games-shop-copy { display: grid; flex: 1; min-width: 0; gap: 4px; }.games-shop-copy strong { font-size: 16px; font-weight: 600; }.games-shop-copy small { font-size: 12px; color: var(--color-ink-muted); }.games-shop-copy > span { font-size: 11px; color: var(--color-ink-subtle); overflow-wrap: anywhere; }
+.games-price-skeleton { display: flex; align-items: center; gap: 15px; padding: 18px 0; height: 110px; border-top: 1px solid var(--color-edge-soft); }
+.games-price-skeleton > i:first-child { width: 32px; height: 32px; }.games-price-skeleton > span { display: grid; gap: 10px; flex: 1; }.games-price-skeleton > span i:first-child { width: 55%; height: 17px; }.games-price-skeleton > span i:last-child { width: 75%; height: 13px; }.games-price-skeleton > i:last-child { width: 75px; height: 25px; }
+@media (max-width: 600px) {
+  .games-shop-grid { grid-template-columns: 1fr; }.games-shop-controls { flex-wrap: wrap; }.games-shop-search { flex-basis: 100%; }.games-shop-context { align-items: start; flex-direction: column; }.games-shop-card { min-height: 98px; }.games-shop-card > svg { opacity: .7; }
+  .games-prices-backdrop { padding: 12px; }
+  .games-price-modal-heading { padding: 18px; gap: 12px; }.games-price-modal-heading > img, .games-price-modal-heading > .games-art-fallback { display: none; }
+  .games-price-modal-heading h2 { font-size: 21px; }.games-price-modal-scroll { padding: 18px; }
+  .games-price-overview { align-items: start; flex-direction: column; gap: 18px; }.games-price-market { max-width: none; }
+  .games-price-market > div { gap: 2px; }.games-price-filters { flex-wrap: wrap; gap: 10px; }.games-price-filters > label { flex-basis: calc(50% - 30px); }
+  .games-price-filters > label:first-child { flex-basis: 100%; }.games-price-offer { grid-template-columns: 28px minmax(0,1fr) auto; gap: 12px; }
+  .games-price-offer > .games-button { grid-column: 2 / -1; text-align: center; justify-content: center; }
+  .games-price-offer-price strong { font-size: 20px; }.games-price-footer { padding: 14px 18px; }
+}

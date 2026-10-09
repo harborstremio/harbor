@@ -1,6 +1,9 @@
-import { Eye, EyeOff, GripVertical } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronDown, ChevronUp, Eye, EyeOff, GripVertical } from "../../../icons";
+import { useEffect, useRef, useState } from "react";
 import type { NavItem } from "@/chrome/nav-items";
+import { useT } from "@/lib/i18n";
+import { tvFocus } from "@/lib/keyboard-navigation";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 
 export function NavRow({
   item,
@@ -11,8 +14,12 @@ export function NavRow({
   dragging,
   dropBefore,
   dropAfter,
+  isFirst,
+  isLast,
   onRename,
   onToggleHidden,
+  onMoveUp,
+  onMoveDown,
   onDragStart,
   onOver,
   onDropItem,
@@ -26,14 +33,21 @@ export function NavRow({
   dragging: boolean;
   dropBefore: boolean;
   dropAfter: boolean;
+  isFirst: boolean;
+  isLast: boolean;
   onRename: (label: string) => void;
   onToggleHidden: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
   onDragStart: () => void;
   onOver: (pos: "before" | "after") => void;
   onDropItem: (pos: "before" | "after") => void;
   onDragEnd: () => void;
 }) {
+  const t = useT();
   const [draft, setDraft] = useState(name);
+  const upRef = useRef<HTMLButtonElement>(null);
+  const downRef = useRef<HTMLButtonElement>(null);
   useEffect(() => setDraft(name), [name]);
 
   const posFrom = (e: { clientY: number; currentTarget: HTMLElement }): "before" | "after" => {
@@ -41,8 +55,19 @@ export function NavRow({
     return e.clientY < rect.top + rect.height / 2 ? "before" : "after";
   };
 
-  const commit = () => {
-    if (draft.trim() !== name) onRename(draft);
+  const commit = (value: string) => {
+    if (value.trim() !== name) onRename(value);
+  };
+
+  const move = (up: boolean) => {
+    if (up) onMoveUp();
+    else onMoveDown();
+    requestAnimationFrame(() => {
+      const self = up ? upRef.current : downRef.current;
+      if (!self || !self.disabled) return;
+      const other = up ? downRef.current : upRef.current;
+      if (other && !other.disabled) tvFocus(other);
+    });
   };
 
   return (
@@ -55,8 +80,8 @@ export function NavRow({
         e.preventDefault();
         onDropItem(posFrom(e));
       }}
-      className={`relative flex items-center gap-2 rounded-lg border bg-canvas/50 px-2 py-1.5 transition-colors ${
-        dragging ? "border-accent/60 opacity-50" : "border-edge-soft"
+      className={`relative flex items-center gap-2 rounded-md border bg-canvas px-2 py-1.5 transition-colors ${
+        dragging ? "border-accent opacity-50" : "border-edge-soft"
       } ${hidden ? "opacity-60" : ""}`}
     >
       {dropBefore && <DropLine className="top-[-4px]" />}
@@ -69,35 +94,37 @@ export function NavRow({
           onDragStart();
         }}
         onDragEnd={onDragEnd}
-        aria-label="Drag to reorder"
+        aria-label={t("Drag to reorder")}
         className="flex h-8 w-5 shrink-0 cursor-grab items-center justify-center text-ink-subtle transition-colors hover:text-ink active:cursor-grabbing"
       >
         <GripVertical size={16} strokeWidth={2} />
       </span>
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-edge-soft text-ink-muted">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md text-ink-muted">
         {item.render(false)}
       </span>
       {renamable ? (
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          onBlur={commit}
+          onBlur={(e) => commit(e.currentTarget.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              commit();
-              e.currentTarget.blur();
+              e.preventDefault();
+              commit(e.currentTarget.value);
             }
-            if (e.key === "Escape") {
+            if (isBackKey(e.nativeEvent)) {
+              e.preventDefault();
+              e.stopPropagation();
               setDraft(name);
-              e.currentTarget.blur();
+              e.currentTarget.value = name;
             }
           }}
-          aria-label={`Rename ${name}`}
-          className="min-w-0 flex-1 rounded-md bg-transparent px-1.5 py-1 text-[15px] font-medium text-ink outline-none transition-colors hover:bg-canvas/40 focus:bg-canvas/55"
+          aria-label={t("Rename {name}", { name })}
+          className="min-w-0 flex-1 rounded-md bg-transparent px-1.5 py-1 text-[15px] font-medium text-ink outline-none transition-colors hover:bg-canvas focus:bg-canvas"
         />
       ) : (
         <span
-          title="This layout shows icons only, so labels are not displayed."
+          title={t("This layout shows icons only, so labels are not displayed.")}
           className="min-w-0 flex-1 truncate px-1.5 py-1 text-[15px] font-medium text-ink-muted"
         >
           {name}
@@ -107,26 +134,61 @@ export function NavRow({
         <button
           type="button"
           onClick={() => onRename("")}
-          title="Reset to default name"
-          className="shrink-0 rounded-md bg-accent/15 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-accent transition-colors hover:bg-accent/25"
+          title={t("Reset to default name")}
+          className="shrink-0 rounded-md bg-accent-soft px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-accent transition-colors hover:bg-accent-soft"
         >
-          Renamed
+          {t("Renamed")}
         </button>
       )}
+      <MoveBtn ref={upRef} label={t("Move {name} up", { name })} disabled={isFirst} onClick={() => move(true)}>
+        <ChevronUp size={16} strokeWidth={2.4} />
+      </MoveBtn>
+      <MoveBtn ref={downRef} label={t("Move {name} down", { name })} disabled={isLast} onClick={() => move(false)}>
+        <ChevronDown size={16} strokeWidth={2.4} />
+      </MoveBtn>
       <button
         type="button"
         onClick={onToggleHidden}
-        title={hidden ? "Show in nav" : "Hide from nav"}
+        title={hidden ? t("Show in nav") : t("Hide from nav")}
+        aria-label={hidden ? t("Show {name} in navigation", { name }) : t("Hide {name} from navigation", { name })}
         aria-pressed={hidden}
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors ${
           hidden
             ? "bg-danger/15 text-danger hover:bg-danger/25"
             : "text-ink-subtle hover:bg-raised hover:text-ink"
         }`}
       >
-        {hidden ? <EyeOff size={15} strokeWidth={2.2} /> : <Eye size={15} strokeWidth={2.2} />}
+        {hidden ? <EyeOff size={16} strokeWidth={2.2} /> : <Eye size={16} strokeWidth={2.2} />}
       </button>
     </div>
+  );
+}
+
+function MoveBtn({
+  ref,
+  label,
+  disabled,
+  onClick,
+  children,
+}: {
+  ref: React.Ref<HTMLButtonElement>;
+  label: string;
+  disabled: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      ref={ref}
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+      className="flex h-9 w-7 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-raised hover:text-ink disabled:opacity-25 disabled:hover:bg-transparent"
+    >
+      {children}
+    </button>
   );
 }
 

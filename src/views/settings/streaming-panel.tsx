@@ -1,9 +1,11 @@
-import { Check, Download, ExternalLink, Key, Loader2, Search, Trash2, X, Zap } from "lucide-react";
+import { ArrowLeft, Check, Download, ExternalLink, Key, Loader2, Plus, Trash2, X } from "./icons";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useState } from "react";
 import { AddonLogo } from "@/components/addon-logo";
 import { Flag } from "@/components/flag";
 import { ALL_LANGUAGE_NAMES } from "@/lib/subtitles/language";
 import { ServiceLogo } from "@/components/service-logo";
+import { SERVICES } from "@/lib/providers/streaming";
 import {
   cometKeyFromUrl,
   installAddon,
@@ -12,7 +14,9 @@ import {
   uninstallAddon,
 } from "@/lib/addon-store";
 import { openUrl } from "@/lib/window";
+import { useT } from "@/lib/i18n";
 import { useSettings, type StreamingService } from "@/lib/settings";
+import { ROW_ACTION, ROW_ACTION_DANGER, ROW_ACTION_PRIMARY, SettingRow } from "./kit";
 
 export function pickDebridForAddon(s: ReturnType<typeof useSettings>["settings"]):
   | { service: string; key: string; label: string }
@@ -24,6 +28,12 @@ export function pickDebridForAddon(s: ReturnType<typeof useSettings>["settings"]
   if (s.dlKey) return { service: "debridlink", key: s.dlKey, label: "Debrid-Link" };
   return null;
 }
+
+const QUAL =
+  "inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
+
+const FIELD =
+  "h-11 min-w-[240px] max-w-[520px] flex-1 rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 export function RecommendedAddonCard({
   id,
@@ -38,6 +48,7 @@ export function RecommendedAddonCard({
   urlBuilder: (service: string, apiKey: string) => string;
   settings: ReturnType<typeof useSettings>["settings"];
 }) {
+  const t = useT();
   const [installed, setInstalled] = useState(() => isInstalled(id));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +73,7 @@ export function RecommendedAddonCard({
       await installAddon(id, urlBuilder(debrid.service, debrid.key));
       setInstalled(true);
     } catch (e: any) {
-      setError(e?.message ?? "Install failed");
+      setError(e?.message ?? t("Install failed"));
     } finally {
       setBusy(false);
     }
@@ -74,45 +85,49 @@ export function RecommendedAddonCard({
   };
 
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3.5">
-      <AddonLogo addonId={id} addonName={title} size="lg" />
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <div className="flex items-center gap-2">
-          <span className="text-[15px] font-medium text-ink">{title}</span>
+    <SettingRow
+      icon={<AddonLogo addonId={id} addonName={title} size="md" />}
+      label={
+        <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
+          <span className="min-w-0">{title}</span>
           {installed && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-accent ring-1 ring-accent/40">
-              <Zap size={9} fill="currentColor" strokeWidth={0} />
-              Installed via {debrid?.label ?? "debrid"}
+            <span className={`${QUAL} bg-accent-soft text-accent`}>
+              {t("Installed via {name}", { name: debrid?.label ?? t("debrid") })}
             </span>
           )}
-        </div>
-        <span className="text-[12.5px] leading-relaxed text-ink-muted">{blurb}</span>
-        {error && <span className="text-[12px] text-danger">{error}</span>}
-        {!debrid && !installed && (
-          <span className="text-[12px] text-ink-subtle">
-            Save a debrid key above (TorBox, Real-Debrid, AllDebrid, Premiumize, or Debrid-Link) to enable this.
-          </span>
-        )}
-      </div>
+        </span>
+      }
+      desc={
+        !debrid && !installed ? (
+          <>
+            {blurb}{" "}
+            {t(
+              "Save a debrid key above (TorBox, Real-Debrid, AllDebrid, Premiumize, or Debrid-Link) to enable this.",
+            )}
+          </>
+        ) : (
+          blurb
+        )
+      }
+      warn={error ?? undefined}
+    >
       {installed ? (
-        <button
-          onClick={onUninstall}
-          className="flex h-10 items-center gap-1.5 rounded-lg border border-edge bg-elevated px-3.5 text-[13px] font-medium text-ink-muted transition-colors hover:border-danger/60 hover:bg-danger/10 hover:text-danger"
-        >
-          <Trash2 size={13} strokeWidth={2.2} />
-          Remove
+        <button type="button" onClick={onUninstall} className={ROW_ACTION_DANGER}>
+          <Trash2 size={16} strokeWidth={2.2} />
+          {t("Remove")}
         </button>
       ) : (
         <button
+          type="button"
           onClick={onInstall}
           disabled={!debrid || busy}
-          className="flex h-10 items-center gap-1.5 rounded-lg bg-ink px-4 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          className={ROW_ACTION_PRIMARY}
         >
-          {busy ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} strokeWidth={2.2} />}
-          Install
+          {busy ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} strokeWidth={2.2} />}
+          {t("Install")}
         </button>
       )}
-    </div>
+    </SettingRow>
   );
 }
 
@@ -134,6 +149,7 @@ export function ManualAddonCard({
   blurb: string;
   configureUrl: string;
 }) {
+  const t = useT();
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   const localId = `harbor-manual-${slug}`;
   const [installedId, setInstalledId] = useState<string | null>(() => {
@@ -155,7 +171,7 @@ export function ManualAddonCard({
       setInstalledId(installed.manifest.id || localId);
       setDraft("");
     } catch (e: any) {
-      setError(e?.message ?? "Couldn't install. Double-check the URL and try again.");
+      setError(e?.message ?? t("Couldn't install. Double-check the URL and try again."));
     } finally {
       setBusy(false);
     }
@@ -167,46 +183,44 @@ export function ManualAddonCard({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3.5">
-      <div className="flex items-start gap-4">
-        <AddonLogo addonId={localId} addonName={title} size="lg" />
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <div className="flex items-center gap-2">
-            <span className="text-[15px] font-medium text-ink">{title}</span>
+    <>
+      <SettingRow
+        icon={<AddonLogo addonId={localId} addonName={title} size="md" />}
+        label={
+          <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
+            <span className="min-w-0">{title}</span>
             {installedId && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-accent ring-1 ring-accent/40">
-                <Check size={9} strokeWidth={3} />
-                Installed
-              </span>
+              <span className={`${QUAL} bg-accent-soft text-accent`}>{t("Installed")}</span>
             )}
-          </div>
-          <span className="text-[12.5px] leading-relaxed text-ink-muted">{blurb}</span>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <button
-            onClick={() => openUrl(configureUrl)}
-            className="flex h-10 items-center gap-1.5 rounded-lg border border-edge bg-elevated px-3.5 text-[13px] font-medium text-ink-muted transition-colors hover:border-ink-subtle hover:text-ink"
-          >
-            <ExternalLink size={13} strokeWidth={2.2} />
-            Configure
+          </span>
+        }
+        desc={blurb}
+      >
+        <button type="button" onClick={() => openUrl(configureUrl)} className={ROW_ACTION}>
+          <ExternalLink size={16} strokeWidth={2.2} />
+          {t("Configure")}
+        </button>
+        {installedId && (
+          <button type="button" onClick={onUninstall} className={ROW_ACTION_DANGER}>
+            <Trash2 size={16} strokeWidth={2.2} />
+            {t("Remove")}
           </button>
-          {installedId && (
-            <button
-              onClick={onUninstall}
-              className="flex h-10 items-center gap-1.5 rounded-lg border border-edge bg-elevated px-3.5 text-[13px] font-medium text-ink-muted transition-colors hover:border-danger/60 hover:bg-danger/10 hover:text-danger"
-            >
-              <Trash2 size={13} strokeWidth={2.2} />
-              Remove
-            </button>
-          )}
-        </div>
-      </div>
+        )}
+      </SettingRow>
       {!installedId && (
-        <div className="flex items-center gap-2">
-          <div className="flex flex-1 items-center gap-2.5 rounded-lg border border-edge bg-canvas px-3.5 transition-colors focus-within:border-ink-subtle">
-            <Key size={15} className="text-ink-subtle" />
+        <SettingRow
+          wide
+          icon={<Key size={18} strokeWidth={2} />}
+          label={t("Manifest URL")}
+          desc={t(
+            "Finish the setup on the configure page, then paste the manifest URL it hands back here.",
+          )}
+          warn={error ?? undefined}
+        >
+          <div className="flex w-full flex-wrap items-center gap-2.5">
             <input
               type="text"
+              aria-label={t("Manifest URL")}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onPaste={(e) => {
@@ -216,24 +230,24 @@ export function ManualAddonCard({
                   setDraft(text);
                 }
               }}
-              placeholder="Paste the manifest URL the configure page gave you"
+              placeholder={t("Paste the manifest URL the configure page gave you")}
               spellCheck={false}
               autoComplete="off"
-              className="h-11 flex-1 bg-transparent text-[14.5px] text-ink placeholder:text-ink-subtle/60 outline-none"
+              className={FIELD}
             />
+            <button
+              type="button"
+              onClick={onInstall}
+              disabled={!draft.trim() || busy}
+              className={ROW_ACTION_PRIMARY}
+            >
+              {busy ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} strokeWidth={2.2} />}
+              {t("Install")}
+            </button>
           </div>
-          <button
-            onClick={onInstall}
-            disabled={!draft.trim() || busy}
-            className="flex h-11 items-center gap-1.5 rounded-lg bg-ink px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {busy ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} strokeWidth={2.2} />}
-            Install
-          </button>
-        </div>
+        </SettingRow>
       )}
-      {error && <span className="text-[12px] text-danger">{error}</span>}
-    </div>
+    </>
   );
 }
 
@@ -243,85 +257,87 @@ export function LanguagesPicker({
   value,
   onChange,
   options = LANGUAGE_OPTIONS,
-  placeholder = "Search languages (Tamil, Telugu, ...)",
+  placeholder,
 }: {
   value: string[];
   onChange: (next: string[]) => void;
   options?: string[];
   placeholder?: string;
 }) {
+  const t = useT();
   const [query, setQuery] = useState("");
+  const [expanded, setExpanded] = useState(false);
   const selected = new Set(value);
-  const toggle = (lang: string) => {
-    const next = new Set(selected);
-    if (next.has(lang)) next.delete(lang);
-    else next.add(lang);
-    onChange([...next]);
-  };
   const q = query.trim().toLowerCase();
-  const available = options.filter((l) => !selected.has(l));
-  const matches = q ? available.filter((l) => l.toLowerCase().includes(q)) : available;
-  const COMMON = 24;
-  const shown = q ? matches : matches.slice(0, COMMON);
-  const moreCount = q ? 0 : matches.length - shown.length;
+  const matches = options.filter((lang) => !selected.has(lang) && lang.toLowerCase().includes(q));
+  const moveEarlier = (index: number) => {
+    const next = [...value];
+    [next[index - 1], next[index]] = [next[index], next[index - 1]];
+    onChange(next);
+  };
 
   return (
-    <div className="flex flex-col gap-3">
-      {value.length > 0 && (
-        <div className="flex flex-wrap gap-2 rounded-xl border border-edge-soft bg-canvas/40 px-3 py-2.5">
-          {value.map((lang) => (
-            <button
-              key={lang}
-              onClick={() => toggle(lang)}
-              className="group inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/15 px-3 py-1.5 text-[12.5px] font-semibold text-accent transition-colors hover:bg-accent/25"
-            >
-              <Flag language={lang} size="sm" showLabel={false} />
+    <div className="flex w-full max-w-[680px] flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <ol aria-label={t("Language preference order")} className="flex flex-wrap gap-2">
+          {value.map((lang, index) => (
+            <li key={lang} className="inline-flex min-h-11 items-center gap-2 rounded-[8px] border border-edge-soft bg-elevated ps-3 text-[15px] text-ink">
+              <span className="w-3 text-[13px] tabular-nums text-ink-subtle">{index + 1}</span>
+              <span aria-hidden><Flag language={lang} size="md" showLabel={false} /></span>
               <span>{lang}</span>
-              <X size={11} strokeWidth={2.4} className="opacity-70 group-hover:opacity-100" />
-            </button>
+              {index > 0 && <button
+                type="button"
+                onClick={() => moveEarlier(index)}
+                aria-label={t("Move {language} earlier", { language: lang })}
+                title={t("Move earlier")}
+                className="grid size-11 place-items-center text-ink-muted hover:text-ink"
+              ><ArrowLeft size={15} className="rtl:rotate-180" /></button>}
+              <button
+                type="button"
+                onClick={() => onChange(value.filter((v) => v !== lang))}
+                aria-label={t("Remove {language}", { language: lang })}
+                className="grid size-11 place-items-center rounded-e-[8px] text-ink-subtle hover:bg-raised hover:text-ink"
+              ><X size={15} /></button>
+            </li>
           ))}
+        </ol>
+        <button type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className={ROW_ACTION}>
+          {expanded ? <Check size={16} /> : <Plus size={16} />}
+          {expanded ? t("Done") : t("Add language")}
+        </button>
+      </div>
+      {value.length === 0 && !expanded && <p className="text-[15px] text-ink-muted">{t("No preferred languages selected.")}</p>}
+      {expanded && <div className="overflow-hidden rounded-[10px] border border-edge-soft bg-elevated">
+        <div className="flex h-12 items-center gap-3 border-b border-edge-soft px-4">
+          <Search size={18} className="shrink-0 text-ink-subtle" />
+          <input
+            aria-label={t("Search languages")}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={placeholder ?? t("Search languages")}
+            spellCheck={false}
+            className="h-11 min-w-0 flex-1 bg-transparent text-[15.5px] text-ink outline-none placeholder:text-ink-subtle"
+          />
         </div>
-      )}
-      <div className="relative">
-        <Search
-          size={15}
-          strokeWidth={2.2}
-          className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-ink-subtle"
-        />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder}
-          spellCheck={false}
-          className="h-10 w-full rounded-xl border border-edge bg-canvas ps-9 pe-3 text-[13.5px] text-ink outline-none transition-colors focus:border-ink placeholder:text-ink-subtle/60"
-        />
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {shown.map((lang) => (
-          <button
+        <div className="grid max-h-[240px] grid-cols-2 gap-1 overflow-y-auto p-2">
+          {matches.map((lang) => <button
             key={lang}
-            onClick={() => toggle(lang)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/30 px-2.5 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+            type="button"
+            onClick={() => { onChange([...value, lang]); setQuery(""); }}
+            aria-label={t("Add {language}", { language: lang })}
+            className="flex min-h-11 items-center gap-3 rounded-[6px] px-3 text-start text-[15px] text-ink-muted hover:bg-raised hover:text-ink"
           >
-            <Flag language={lang} size="sm" showLabel={false} />
+            <span aria-hidden><Flag language={lang} size="md" showLabel={false} /></span>
             <span>{lang}</span>
-          </button>
-        ))}
-        {moreCount > 0 && (
-          <span className="inline-flex items-center px-2 py-1.5 text-[12px] text-ink-subtle">
-            +{moreCount} more, search to find yours
-          </span>
-        )}
-        {q.length > 0 && matches.length === 0 && (
-          <span className="inline-flex items-center px-2 py-1.5 text-[12px] text-ink-subtle">
-            No language matches that search.
-          </span>
-        )}
-      </div>
+          </button>)}
+          {matches.length === 0 && <p className="col-span-2 px-3 py-4 text-[15px] text-ink-muted" role="status">
+            {q ? t("No language matches that search.") : t("All languages have been added.")}
+          </p>}
+        </div>
+      </div>}
     </div>
   );
 }
-
 
 export function ServiceCard({
   service,
@@ -332,20 +348,24 @@ export function ServiceCard({
   active: boolean;
   onToggle: () => void;
 }) {
+  const name = SERVICES[service]?.name ?? service;
   return (
     <button
+      type="button"
       onClick={onToggle}
       aria-pressed={active}
-      className={`relative flex h-20 items-center justify-center overflow-hidden rounded-xl border px-4 transition-all ${
-        active
-          ? "border-ink-subtle/50 bg-raised opacity-100"
-          : "border-edge-soft bg-canvas opacity-55 hover:opacity-90"
+      aria-label={name}
+      title={name}
+      className={`relative flex min-h-[84px] items-center justify-center rounded-[10px] border bg-elevated px-4 py-3 transition-colors ${
+        active ? "border-accent" : "border-edge-soft hover:bg-raised"
       }`}
     >
-      <ServiceLogo service={service} height={26} />
+      <span className={active ? "" : "opacity-40"}>
+        <ServiceLogo service={service} height={26} />
+      </span>
       {active && (
-        <span className="absolute end-2 top-2 flex h-4 w-4 items-center justify-center rounded-full bg-ink">
-          <Check size={11} strokeWidth={3} className="text-canvas" />
+        <span className="absolute end-2 top-2 flex h-[22px] w-[22px] items-center justify-center rounded-full bg-accent-soft text-accent">
+          <Check size={14} strokeWidth={3} />
         </span>
       )}
     </button>

@@ -1,8 +1,10 @@
-import { AtSign, User } from "lucide-react";
-import { Github } from "@/components/icons/github-icon";
-import { useEffect, useState } from "react";
+import { AlertTriangle, AtSign, Award, FileText, User } from "./icons";
+import { GitHubIcon } from "@/components/github-icon";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useAuth } from "@/lib/auth";
+import { loadInstalled } from "@/lib/addon-store";
+import { userAddons } from "@/lib/addons";
 import {
   collectDiagnostics,
   installBugReportErrorCapture,
@@ -12,12 +14,24 @@ import {
 } from "@/lib/bug-report";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { Section } from "./shared";
+import { SettingRow } from "./kit";
+import { Section, ToggleRow } from "./shared";
+import { SButton } from "./ui";
+import { usePageActions } from "./page-actions";
 import { ContributorCard } from "./bug-report/contributor-card";
 import { DiagnosticsCard } from "./bug-report/diagnostics-card";
 import { FileDrop } from "./bug-report/file-drop";
 import { SeverityPicker } from "./bug-report/severity-picker";
 import { SuccessCard } from "./bug-report/success-card";
+
+const QUAL =
+  "inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
+
+const FIELD =
+  "h-11 w-full min-w-0 rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+
+const AREA =
+  "w-full min-w-0 resize-y rounded-[10px] border border-edge-soft bg-elevated px-4 py-3 text-[16.5px] leading-[25px] text-ink outline-none placeholder:text-ink-subtle focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 export function BugReportPanel() {
   const t = useT();
@@ -42,24 +56,24 @@ export function BugReportPanel() {
 
   useEffect(() => {
     let cancelled = false;
-    void collectDiagnostics({
+    const localAddons = loadInstalled();
+    const addonCount = auth.authKey
+      ? userAddons(auth.authKey)
+          .then((addons) => new Set([...localAddons, ...addons].map((addon) => addon.transportUrl)).size)
+          .catch(() => null)
+      : Promise.resolve(localAddons.length);
+    void Promise.all([collectDiagnostics({
       playerEngine: settings.playerEngine,
       region: settings.region,
       hasTmdb: !!settings.tmdbKey,
       hasRpdb: !!settings.rpdbKey,
       hasTrakt: !!settings.traktAccessToken,
       hasStremio: !!auth.authKey,
-      debridCount: [
-        settings.rdKey,
-        settings.tbKey,
-        settings.adKey,
-        settings.pmKey,
-        settings.dlKey,
-      ].filter(Boolean).length,
-      addonCount: 0,
+      debridCount: [settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey].filter(Boolean).length,
+      addonCount: null,
       iptvCount: settings.iptvPlaylists.length,
-    }).then((d) => {
-      if (!cancelled) setDiag(d);
+    }), addonCount]).then(([d, count]) => {
+      if (!cancelled) setDiag({ ...d, flags: { ...d.flags, addonCount: count } });
     });
     return () => {
       cancelled = true;
@@ -120,148 +134,189 @@ export function BugReportPanel() {
     setSubmittedId(null);
   };
 
+  usePageActions(
+    submittedId
+      ? []
+      : [
+          {
+            id: "bug-report-submit",
+            label: submitting ? "Sending…" : "Submit bug report",
+            tone: "primary",
+            disabled: !canSubmit,
+            onSelect: () => void submit(),
+          },
+        ],
+    submittedId
+      ? undefined
+      : error
+        ? t("Could not send: {error}", { error })
+        : canSubmit
+          ? "Ready to send"
+          : summary.trim().length < 6
+            ? "Summary needs at least 6 characters"
+            : "Preparing…",
+  );
+
   if (submittedId) return <SuccessCard id={submittedId} onAnother={reset} />;
 
   return (
-    <div className="flex flex-col gap-6">
+    <>
       <Section
         title={t("What broke?")}
-        subtitle={t(
-          "A specific summary lands faster than a long paragraph. Steps to reproduce help most of all.",
-        )}
+        subtitle={t("Tell us what you were doing and what happened. Only the summary is required.")}
       >
-        <Field label={t("Summary")} required>
-          <input
-            type="text"
-            value={summary}
-            onChange={(e) => setSummary(e.target.value)}
-            maxLength={240}
-            placeholder={t("Player freezes after the second episode autoplays")}
-            className="h-12 rounded-xl border border-edge bg-canvas px-4 text-[14px] text-ink placeholder:text-ink-subtle outline-none focus:border-ink"
-          />
-        </Field>
-
-        <Field label={t("Severity")}>
-          <SeverityPicker value={severity} onChange={setSeverity} />
-        </Field>
-
-        <Field label={t("Steps to reproduce")}>
-          <TextArea
-            value={steps}
-            onChange={setSteps}
-            rows={6}
-            placeholder={`1. Open Movies\n2. Click The Substance\n3. Press Play\n4. ...`}
-          />
-        </Field>
-
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field label={t("What you expected")}>
-            <TextArea
-              value={expected}
-              onChange={setExpected}
-              rows={4}
-              placeholder={t("Stream should start playing within a few seconds.")}
+        <div className="max-w-[960px]">
+          <SettingRow
+            wide
+            label={
+              <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
+                <label htmlFor="bug-report-summary" className="min-w-0">{t("Summary")}</label>
+                <span className={`${QUAL} bg-accent-soft text-accent`}>{t("Required")}</span>
+              </span>
+            }
+            desc={t("Describe the problem in one sentence.")}
+          >
+            <input
+              id="bug-report-summary"
+              type="text"
+              required
+              minLength={6}
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              maxLength={240}
+              placeholder={t("Player freezes after the second episode autoplays")}
+              className={FIELD}
             />
-          </Field>
-          <Field label={t("What actually happened")}>
-            <TextArea
-              value={actual}
-              onChange={setActual}
+          </SettingRow>
+
+          <SettingRow
+            wide
+            label={t("Severity")}
+            desc={t("How much does this affect your use of Harbor?")}
+          >
+            <SeverityPicker value={severity} onChange={setSeverity} />
+          </SettingRow>
+
+          <SettingRow
+            wide
+            label={<label htmlFor="bug-report-steps">{t("Steps to reproduce")}</label>}
+            desc={t("List the steps that lead to the problem, starting from when you open Harbor.")}
+          >
+            <textarea
+              id="bug-report-steps"
+              value={steps}
+              onChange={(e) => setSteps(e.target.value)}
               rows={4}
-              placeholder={t("Spinner stays forever and nothing in the player loads.")}
+              placeholder={t("1. Open Movies\n2. Select a title\n3. Press Play\n4. Describe what happens")}
+              className={AREA}
             />
-          </Field>
+          </SettingRow>
+
+          <div className="hset-report-outcomes grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 border-t border-edge-soft">
+            <SettingRow
+              wide
+              label={<label htmlFor="bug-report-expected">{t("What you expected")}</label>}
+              desc={t("Describe the result you were after.")}
+            >
+              <textarea
+                id="bug-report-expected"
+                value={expected}
+                onChange={(e) => setExpected(e.target.value)}
+                rows={4}
+                placeholder={t("Stream should start playing within a few seconds.")}
+                className={AREA}
+              />
+            </SettingRow>
+
+            <SettingRow
+              wide
+              label={<label htmlFor="bug-report-actual">{t("What actually happened")}</label>}
+              desc={t("Describe what Harbor did instead, including any message on screen.")}
+            >
+              <textarea
+                id="bug-report-actual"
+                value={actual}
+                onChange={(e) => setActual(e.target.value)}
+                rows={4}
+                placeholder={t("Spinner stays forever and nothing in the player loads.")}
+                className={AREA}
+              />
+            </SettingRow>
+          </div>
         </div>
       </Section>
 
       <Section
-        title={t("Screenshots and recordings")}
-        subtitle={t(
-          "Drop a clip of the bug if you can. A 5-second screen recording usually says more than five paragraphs.",
-        )}
+        title={t("Attachments")}
+        subtitle={t("Add screenshots, a short recording, or a player log to help explain the problem.")}
       >
         <FileDrop files={files} onChange={setFiles} />
       </Section>
 
       <Section
         title={t("Player log")}
-        subtitle={t(
-          "If a stream or the video player misbehaves, export the player log and attach it above. It saves to your Downloads folder.",
-        )}
+        subtitle={t("If a stream or the video player misbehaves, the log usually names the cause.")}
       >
         <ExportLogButton />
       </Section>
 
       <Section
-        title={t("Credit (optional)")}
-        subtitle={t(
-          "Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.",
-        )}
+        title={t("Contact & credit")}
+        subtitle={t("Optional. Leave your contact details if we may follow up, and choose whether you want public credit.")}
       >
-        <div className="flex flex-col divide-y divide-edge overflow-hidden rounded-xl border border-edge bg-canvas focus-within:border-ink-subtle sm:flex-row sm:divide-y-0 sm:divide-x">
+        <div className="max-w-[720px]">
           <CreditField
-            icon={<User size={14} strokeWidth={1.9} />}
+            icon={<User size={18} strokeWidth={1.9} />}
+            label={t("Display name")}
+            desc={t("Appears in the release notes. Use whatever name you want credit under.")}
             value={reporterName}
             onChange={setReporterName}
-            placeholder={t("Display name")}
+            placeholder={t("Your name")}
             maxLength={120}
           />
           <CreditField
-            icon={<Github size={14} strokeWidth={1.9} />}
+            icon={<GitHubIcon size={18} />}
+            label={t("GitHub username")}
+            desc={t("We tag this account on the issue so you see the fix land.")}
             value={reporterGithub}
             onChange={setReporterGithub}
-            placeholder={t("GitHub username")}
+            placeholder={t("username")}
             maxLength={60}
           />
           <CreditField
-            icon={<AtSign size={14} strokeWidth={1.9} />}
+            icon={<AtSign size={18} strokeWidth={1.9} />}
+            label={t("Contact email or Discord")}
+            desc={t("Used only if we need one more detail to reproduce the bug.")}
             value={reporterContact}
             onChange={setReporterContact}
-            placeholder={t("Email or Discord")}
+            placeholder={t("Email address or Discord handle")}
             maxLength={200}
           />
-        </div>
-        <label className="mt-3 flex items-center gap-2.5 rounded-xl border border-edge-soft/60 bg-canvas/30 px-4 py-3">
-          <input
-            type="checkbox"
-            checked={consentCredit}
-            onChange={(e) => setConsentCredit(e.target.checked)}
-            className="h-4 w-4 accent-ink"
+          <ToggleRow
+            leading={<Award size={18} strokeWidth={1.9} />}
+            label={t("Credit me in the release notes if this report leads to a fix.")}
+            sub={t("Turn off to keep your name out of the release notes. Contact details can still be used to follow up.")}
+            value={consentCredit}
+            onChange={setConsentCredit}
           />
-          <span className="text-[12.5px] text-ink-muted">
-            {t("Credit me in the release notes if this report leads to a fix.")}
-          </span>
-        </label>
+        </div>
+      </Section>
+
+      <Section title={t("What gets sent")}>
+        <DiagnosticsCard diag={diag} />
       </Section>
 
       <ContributorCard />
 
-      <DiagnosticsCard diag={diag} />
-
       {error && (
-        <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-[12.5px] text-danger">
-          {t("Could not send: {error}", { error })}
+        <div role="alert" className="mt-7 flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+          <AlertTriangle size={18} strokeWidth={2.2} className="mt-[3px] shrink-0 text-danger" />
+          <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-danger">
+            {t("Could not send: {error}", { error })}
+          </p>
         </div>
       )}
-
-      <div className="sticky bottom-3 z-10 flex items-center justify-end gap-3 rounded-2xl border border-edge-soft bg-elevated/85 px-5 py-3 backdrop-blur">
-        <span className="me-auto text-[11.5px] text-ink-subtle">
-          {canSubmit
-            ? t("Ready to send")
-            : summary.trim().length < 6
-              ? t("Summary needs at least 6 characters")
-              : t("Preparing…")}
-        </span>
-        <button
-          type="button"
-          onClick={submit}
-          disabled={!canSubmit}
-          className="h-11 rounded-xl bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
-        >
-          {submitting ? t("Sending…") : t("Submit bug report")}
-        </button>
-      </div>
-    </div>
+    </>
   );
 }
 
@@ -276,90 +331,59 @@ function ExportLogButton() {
     try {
       await invoke<string>("mpv_export_log");
       setState("done");
-      setDetail(t("Saved to Downloads as harbor-mpv-log.txt"));
+      setDetail(t("Saved to Downloads as harbor-mpv-log.txt. Attach it above."));
     } catch (e) {
       setState("error");
       setDetail(e instanceof Error ? e.message : String(e));
     }
   };
 
-  const pill =
-    state === "exporting"
-      ? {
-          dot: "bg-amber-400 animate-pulse",
-          text: t("Exporting"),
-          chip: "bg-amber-500/15 text-amber-300",
-        }
-      : state === "done"
-        ? { dot: "bg-emerald-400", text: t("Exported"), chip: "bg-emerald-500/15 text-emerald-400" }
-        : state === "error"
-          ? { dot: "bg-danger", text: t("Failed"), chip: "bg-danger/15 text-danger" }
-          : null;
+  const done = state === "done" && detail;
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => void run()}
-          disabled={state === "exporting"}
-          className="h-11 w-fit rounded-xl border border-edge bg-canvas px-5 text-[13.5px] font-semibold text-ink transition-colors hover:border-ink-subtle disabled:opacity-50"
-        >
-          {t("Export player log")}
-        </button>
-        {pill && (
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${pill.chip}`}
-          >
-            <span className={`h-1.5 w-1.5 rounded-full ${pill.dot}`} />
-            {pill.text}
-          </span>
-        )}
-      </div>
-      {detail && <p className="text-[12px] leading-relaxed text-ink-muted">{detail}</p>}
-    </div>
-  );
-}
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        {label}
-        {required && <span className="ms-1 text-accent">*</span>}
-      </span>
-      {children}
-    </label>
+    <SettingRow
+      icon={<FileText size={18} strokeWidth={1.9} />}
+      label={t("Export player log")}
+      desc={
+        done
+          ? detail
+          : t("Writes the last playback session to your Downloads folder so you can attach it above.")
+      }
+      warn={state === "error" && detail ? t("Export failed: {error}", { error: detail }) : undefined}
+    >
+      <SButton onClick={() => void run()} disabled={state === "exporting"}>
+        {state === "exporting"
+          ? t("Exporting…")
+          : state === "done"
+            ? t("Export again")
+            : t("Export log")}
+      </SButton>
+    </SettingRow>
   );
 }
 
 function CreditField({
   icon,
+  label,
+  desc,
   value,
   onChange,
   placeholder,
   maxLength,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
+  label: string;
+  desc: string;
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
   maxLength?: number;
 }) {
+  const id = useId();
   return (
-    <label className="flex h-11 flex-1 items-center gap-2 px-3.5 transition-colors hover:bg-elevated/40">
-      <span className="flex h-5 w-5 shrink-0 items-center justify-center text-ink-subtle">
-        {icon}
-      </span>
+    <SettingRow wide icon={icon} label={<label htmlFor={id}>{label}</label>} desc={desc}>
       <input
+        id={id}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -367,30 +391,8 @@ function CreditField({
         maxLength={maxLength}
         spellCheck={false}
         autoComplete="off"
-        className="h-full min-w-0 flex-1 bg-transparent text-[13px] text-ink placeholder:text-ink-subtle outline-none"
+        className={FIELD}
       />
-    </label>
-  );
-}
-
-function TextArea({
-  value,
-  onChange,
-  rows,
-  placeholder,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  rows: number;
-  placeholder?: string;
-}) {
-  return (
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      rows={rows}
-      placeholder={placeholder}
-      className="resize-y rounded-xl border border-edge bg-canvas px-3.5 py-2.5 text-[13px] leading-relaxed text-ink placeholder:text-ink-subtle outline-none focus:border-ink"
-    />
+    </SettingRow>
   );
 }

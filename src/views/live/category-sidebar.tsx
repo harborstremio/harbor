@@ -1,4 +1,5 @@
-import { Eye, EyeOff, Layers, Pin, Search, Star, Tv, X } from "lucide-react";
+import { Eye, EyeOff, Layers, Pin, Star, Tv, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { FAVORITES_GROUP_KEY } from "@/lib/iptv/favorites";

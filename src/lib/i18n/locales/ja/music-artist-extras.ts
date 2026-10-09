@@ -1,0 +1,20 @@
+const musicArtistExtras: Record<string, string> = {
+  "music.extras.merch": "グッズ",
+  "music.extras.tour": "ライブ公演",
+  "music.extras.store": "ストアを見る",
+  "music.extras.tourLink": "ツアー情報",
+  "music.extras.official": "アーティストの公式サイト",
+  "music.extras.loading": "アーティストの最新情報を読み込み中…",
+  "music.extras.source": "提供元：{source}",
+  "music.extras.event": "イベントの詳細",
+  "music.credits.title": "クレジット",
+  "music.credits.main": "メインアーティスト",
+  "music.credits.featured": "参加アーティスト",
+  "music.credits.composer": "作曲",
+  "music.credits.lyricist": "作詞",
+  "music.credits.producer": "プロデューサー",
+  "music.credits.performer": "演奏者",
+  "music.artist.readMore": "続きを読む",
+  "music.artist.readLess": "折りたたむ",
+};
+export default musicArtistExtras;

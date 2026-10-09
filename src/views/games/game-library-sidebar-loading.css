@@ -1,0 +1,22 @@
+/* Share real sidebar geometry; only the content within each box is a placeholder. */
+.games-library-sidebar .games-skeleton { background:var(--color-elevated); animation:games-library-loading-breathe 1.8s ease-in-out infinite; }
+.games-library-sidebar-loading { pointer-events:none; }
+.games-library-sidebar-loading .games-library-section>button { display:flex; align-items:center; gap:12px; }
+.games-library-skeleton-mark { width:21px; height:21px; flex:none; }
+.games-library-skeleton-search { width:17px; height:17px; flex:none; }
+.games-library-skeleton-label { width:76px; height:12px; }
+.games-library-skeleton-count { width:48px; height:10px; }
+.games-library-skeleton-heading { width:58px; height:9px; }
+.games-library-side-list { scrollbar-gutter:stable; }
+.games-library-side-list[data-loading] { overflow:hidden; }
+.games-library-side-skeleton .games-library-side-group { min-height:39.5px; }
+.games-library-side-skeleton .games-library-side-row { pointer-events:none; }
+.games-library-side-game>.games-library-skeleton-name { flex:1; min-width:0; }
+.games-library-skeleton-name>.games-skeleton { width:78%; height:11px; }
+.games-library-side-skeleton .games-library-side-row:nth-child(3n) .games-library-skeleton-name>.games-skeleton { width:58%; }
+.games-library-side-skeleton .games-library-side-row:nth-child(3n + 1) .games-library-skeleton-name>.games-skeleton { width:88%; }
+.games-library-sidebar.is-collapsed .games-library-side-skeleton .games-library-side-group { display:none; }
+.games-library-sidebar.games-library-sidebar-loading.is-collapsed .games-library-destinations button>.games-library-skeleton-mark { display:block; }
+.games-library-sidebar.is-collapsed .games-library-side-game>.games-library-skeleton-art { display:block; width:32px; height:32px; }
+@keyframes games-library-loading-breathe { 0%,100% { opacity:.45; } 50% { opacity:.85; } }
+@media(prefers-reduced-motion:reduce) { .games-library-sidebar .games-skeleton { animation:none; opacity:.7; } }

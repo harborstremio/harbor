@@ -1,0 +1,331 @@
+.pitch {
+  --pitch-turf: color-mix(in oklab, var(--color-success) 20%, var(--color-canvas));
+  --pitch-turf-alt: color-mix(in oklab, var(--color-ink) 4%, var(--pitch-turf));
+  --pitch-line: color-mix(in oklab, var(--color-ink) 26%, transparent);
+  --pitch-stroke: 1.5px;
+  --pen-long: 15.7143%;
+  --pen-cross: 59.2941%;
+  --six-long: 5.2381%;
+  --six-cross: 26.9412%;
+  --goal-long: 1.6%;
+  --goal-cross: 10.7647%;
+  --spot-long: 10.4762%;
+  --circle-size: 17.4286%;
+  --arc-clip: 80.06%;
+
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--pitch-turf);
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--pitch-turf) 0 10%,
+    var(--pitch-turf-alt) 10% 20%
+  );
+}
+
+.pitch[data-orientation="horizontal"] {
+  aspect-ratio: 105 / 68;
+}
+
+.pitch[data-orientation="vertical"] {
+  aspect-ratio: 68 / 105;
+  background-image: repeating-linear-gradient(
+    0deg,
+    var(--pitch-turf) 0 10%,
+    var(--pitch-turf-alt) 10% 20%
+  );
+}
+
+.pitch-field,
+.pitch-players {
+  position: absolute;
+  inset: 1.6% 1.05%;
+}
+
+.pitch[data-orientation="vertical"] .pitch-field,
+.pitch[data-orientation="vertical"] .pitch-players {
+  inset: 1.05% 1.6%;
+}
+
+.pitch-field {
+  border: var(--pitch-stroke) solid var(--pitch-line);
+  pointer-events: none;
+}
+
+.pitch-field > * {
+  position: absolute;
+  border-color: var(--pitch-line);
+  border-style: solid;
+  border-width: 0;
+}
+
+.pitch-half {
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top-width: var(--pitch-stroke);
+}
+
+.pitch[data-orientation="horizontal"] .pitch-half {
+  left: 50%;
+  right: auto;
+  top: 0;
+  bottom: 0;
+  border-top-width: 0;
+  border-left-width: var(--pitch-stroke);
+}
+
+.pitch-circle {
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border-width: var(--pitch-stroke);
+}
+
+.pitch[data-orientation="horizontal"] .pitch-circle {
+  width: var(--circle-size);
+}
+
+.pitch[data-orientation="vertical"] .pitch-circle {
+  height: var(--circle-size);
+}
+
+.pitch-spot {
+  width: 0.9%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: var(--pitch-line);
+}
+
+.pitch[data-orientation="vertical"] .pitch-spot {
+  width: auto;
+  height: 0.9%;
+}
+
+.pitch-spot-c {
+  left: 50%;
+  top: 50%;
+}
+
+.pitch[data-orientation="horizontal"] .pitch-box,
+.pitch[data-orientation="horizontal"] .pitch-six,
+.pitch[data-orientation="horizontal"] .pitch-goal {
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.pitch[data-orientation="vertical"] .pitch-box,
+.pitch[data-orientation="vertical"] .pitch-six,
+.pitch[data-orientation="vertical"] .pitch-goal {
+  left: 50%;
+  translate: -50% 0;
+}
+
+.pitch[data-orientation="horizontal"] .pitch-box {
+  width: var(--pen-long);
+  height: var(--pen-cross);
+}
+
+.pitch[data-orientation="vertical"] .pitch-box {
+  width: var(--pen-cross);
+  height: var(--pen-long);
+}
+
+.pitch[data-orientation="horizontal"] .pitch-six {
+  width: var(--six-long);
+  height: var(--six-cross);
+}
+
+.pitch[data-orientation="vertical"] .pitch-six {
+  width: var(--six-cross);
+  height: var(--six-long);
+}
+
+.pitch[data-orientation="horizontal"] .pitch-goal {
+  width: var(--goal-long);
+  height: var(--goal-cross);
+}
+
+.pitch[data-orientation="vertical"] .pitch-goal {
+  width: var(--goal-cross);
+  height: var(--goal-long);
+}
+
+.pitch-box,
+.pitch-six,
+.pitch-goal {
+  border-width: var(--pitch-stroke);
+}
+
+.pitch-goal {
+  background: color-mix(in oklab, var(--color-canvas) 24%, transparent);
+}
+
+.pitch[data-orientation="horizontal"] .pitch-box-a,
+.pitch[data-orientation="horizontal"] .pitch-six-a,
+.pitch[data-orientation="horizontal"] .pitch-goal-a {
+  left: 0;
+  border-left-width: 0;
+}
+
+.pitch[data-orientation="horizontal"] .pitch-box-b,
+.pitch[data-orientation="horizontal"] .pitch-six-b,
+.pitch[data-orientation="horizontal"] .pitch-goal-b {
+  right: 0;
+  border-right-width: 0;
+}
+
+.pitch[data-orientation="vertical"] .pitch-box-a,
+.pitch[data-orientation="vertical"] .pitch-six-a,
+.pitch[data-orientation="vertical"] .pitch-goal-a {
+  bottom: 0;
+  border-bottom-width: 0;
+}
+
+.pitch[data-orientation="vertical"] .pitch-box-b,
+.pitch[data-orientation="vertical"] .pitch-six-b,
+.pitch[data-orientation="vertical"] .pitch-goal-b {
+  top: 0;
+  border-top-width: 0;
+}
+
+.pitch[data-orientation="horizontal"] .pitch-spot-a {
+  left: var(--spot-long);
+  top: 50%;
+}
+
+.pitch[data-orientation="horizontal"] .pitch-spot-b {
+  right: var(--spot-long);
+  top: 50%;
+  translate: 50% -50%;
+}
+
+.pitch[data-orientation="vertical"] .pitch-spot-a {
+  bottom: var(--spot-long);
+  left: 50%;
+  translate: -50% 50%;
+}
+
+.pitch[data-orientation="vertical"] .pitch-spot-b {
+  top: var(--spot-long);
+  left: 50%;
+}
+
+.pitch-arc {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border-width: var(--pitch-stroke);
+}
+
+.pitch[data-orientation="horizontal"] .pitch-arc {
+  width: var(--circle-size);
+  top: 50%;
+}
+
+.pitch[data-orientation="vertical"] .pitch-arc {
+  height: var(--circle-size);
+  left: 50%;
+}
+
+.pitch[data-orientation="horizontal"] .pitch-arc-a {
+  left: var(--spot-long);
+  translate: -50% -50%;
+  clip-path: inset(0 0 0 var(--arc-clip));
+}
+
+.pitch[data-orientation="horizontal"] .pitch-arc-b {
+  right: var(--spot-long);
+  translate: 50% -50%;
+  clip-path: inset(0 var(--arc-clip) 0 0);
+}
+
+.pitch[data-orientation="vertical"] .pitch-arc-a {
+  bottom: var(--spot-long);
+  translate: -50% 50%;
+  clip-path: inset(0 0 var(--arc-clip) 0);
+}
+
+.pitch[data-orientation="vertical"] .pitch-arc-b {
+  top: var(--spot-long);
+  translate: -50% -50%;
+  clip-path: inset(var(--arc-clip) 0 0 0);
+}
+
+.pitch-corner {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border-width: var(--pitch-stroke);
+  width: 2.9412%;
+}
+
+.pitch[data-orientation="horizontal"] .pitch-corner {
+  width: auto;
+  height: 2.9412%;
+}
+
+.pitch-corner-tl { left: 0; top: 0; translate: -50% -50%; clip-path: inset(50% 0 0 50%); }
+.pitch-corner-tr { right: 0; top: 0; translate: 50% -50%; clip-path: inset(50% 50% 0 0); }
+.pitch-corner-bl { left: 0; bottom: 0; translate: -50% 50%; clip-path: inset(0 0 50% 50%); }
+.pitch-corner-br { right: 0; bottom: 0; translate: 50% 50%; clip-path: inset(0 50% 50% 0); }
+
+.pitch-token {
+  position: absolute;
+  translate: -50% -50%;
+  animation: pitch-token-in 320ms ease-in-out backwards;
+  animation-delay: calc(var(--pitch-order, 0) * 14ms);
+}
+
+.pitch-token:hover,
+.pitch-token:focus-within,
+.pitch-token[data-open="true"] {
+  z-index: 20;
+}
+
+.pitch-card {
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+@keyframes pitch-token-in {
+  from { opacity: 0; }
+  35%, to { opacity: 1; }
+  from { transform: translateY(7px) scale(0.84, 0.9); }
+  50% { transform: translateY(-2px) scale(1.06, 1.03); }
+  75% { transform: translateY(1px) scale(0.98, 0.995); }
+  to { transform: translateY(0) scale(1, 1); }
+}
+
+@keyframes pitch-mark-pop {
+  from { opacity: 0; }
+  20%, to { opacity: 1; }
+  from { transform: scale(0.2, 0.26); }
+  50% { transform: scale(1.2, 1.26); }
+  75% { transform: scale(0.9, 0.95); }
+  to { transform: scale(1, 1); }
+}
+
+.pitch-mark-pop {
+  animation: pitch-mark-pop 340ms ease-in-out backwards;
+}
+
+@keyframes pitch-bar-grow {
+  from { transform: scaleX(0); }
+  50% { transform: scaleX(1.03); }
+  75% { transform: scaleX(0.992); }
+  to { transform: scaleX(1); }
+}
+
+.pitch-bar-grow {
+  transform-origin: var(--pitch-bar-origin, left center);
+  animation: pitch-bar-grow 420ms ease-in-out backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pitch-token,
+  .pitch-mark-pop,
+  .pitch-bar-grow { animation: none; }
+}

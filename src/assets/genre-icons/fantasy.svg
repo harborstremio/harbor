@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-fantasy">
+<title id="title-fantasy">Fantasy anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <path class="coral" d="M36 8l4.2 9.8L50 22l-9.8 4.2L36 36l-4.2-9.8L22 22l9.8-4.2L36 8z"/>
+  <path class="gold" d="M17 29l2.6 6.4L26 38l-6.4 2.6L17 47l-2.6-6.4L8 38l6.4-2.6L17 29z"/>
+  <path class="icon-stroke" d="M25 48l21-21M42 23l5 5"/>
+  <circle class="violet" cx="47" cy="48" r="5"/>
+
+</svg>

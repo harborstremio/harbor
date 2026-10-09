@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-slice-of-life">
+<title id="title-slice-of-life">Slice of Life anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <path class="coral" d="M13 27h34v12c0 10-7 17-17 17S13 49 13 39V27z"/>
+  <path class="icon-stroke" d="M47 31h4c8 0 8 13 0 13h-5M18 56h31M23 21c-4-5 4-7 0-12M34 21c-4-5 4-7 0-12"/>
+  <path class="gold" d="M45 10l1.7 3.3 3.3 1.7-3.3 1.7L45 20l-1.7-3.3L40 15l3.3-1.7L45 10z"/>
+
+</svg>

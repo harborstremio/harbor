@@ -1,0 +1,16 @@
+.sh-event-page-heading,
+.sh-event-page-body { max-width:1140px;margin-inline:auto;min-width:0; }
+.sh-event-page-heading { display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:36px 32px; }
+.sh-event-page-heading>div:first-child { min-width:0; }
+.sh-event-page-heading h1 { margin:0 0 12px;font-size:clamp(26px,3.2cqw,40px);line-height:1.16;font-weight:650;letter-spacing:-.025em;overflow-wrap:anywhere; }
+.sh-event-page-heading h1:focus { outline:none; }
+.sh-event-page-heading p { color:var(--color-ink-muted);font-size:14px;line-height:1.5; }
+.sh-event-page-heading>.sh-reminder { flex-shrink:0; }
+.sh-event-page-body h3 { font-size:17px;font-weight:650;margin-bottom:16px; }
+.sh-event-page-body>p { color:var(--color-ink-muted);line-height:1.6; }
+.sh-event-page-body>.sh-watch-panel { margin-bottom:28px; }
+.sh-event-page .sh-match-header { gap:12px; }
+.sh-event-page .ea-match-detail { max-height:none;overflow:visible;padding:24px 0; }
+@container(max-width:600px) {
+  .sh-event-page-heading { align-items:flex-start;flex-direction:column;gap:20px;padding-block:28px; }
+}

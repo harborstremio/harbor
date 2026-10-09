@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-mecha">
+<title id="title-mecha">Mecha anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <path class="coral" d="M14 23l10-9h16l10 9v26l-9 8H23l-9-8V23z"/>
+  <path class="icon-stroke" d="M23 14l-4-7M41 14l4-7M22 30h7v7h-7zM35 30h7v7h-7zM25 47h14M32 38v9"/>
+  <circle class="gold" cx="25.5" cy="33.5" r="2.5"/><circle class="gold" cx="38.5" cy="33.5" r="2.5"/>
+
+</svg>

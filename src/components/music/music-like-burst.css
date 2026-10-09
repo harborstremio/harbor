@@ -1,0 +1,85 @@
+[data-like-burst] {
+  position: relative;
+  isolation: isolate;
+}
+[data-like-burst] > svg {
+  position: relative;
+  z-index: 1;
+}
+[data-like-burst][data-burst] > svg,
+button.music-now-action[data-burst] > svg,
+button[data-music-dock-like][data-burst] > svg {
+  animation: dock-like-pop 460ms ease-in-out 40ms both;
+}
+@keyframes dock-like-pop {
+  0% { transform: scale(0.68, 0.62); }
+  35% { transform: scale(1.24, 1.3); }
+  60% { transform: scale(0.94, 0.9); }
+  82% { transform: scale(1.05, 1.04); }
+  100% { transform: scale(1, 1); }
+}
+.dock-like-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+.dock-like-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 2px solid var(--music-art-accent, var(--color-accent));
+  /* Callers release their one-shot state on this animation's end event, so it has to outlast the dots. */
+  animation: dock-like-ring 620ms ease-in-out both;
+}
+@keyframes dock-like-ring {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.25); }
+  22% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+  62% { opacity: 0.34; transform: translate(-50%, -50%) scale(1.3); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+}
+.dock-like-dot {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  animation: dock-like-move 460ms ease-in-out var(--d, 0s) both;
+}
+.dock-like-dot::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--music-art-accent, var(--color-accent));
+  animation: dock-like-spark 460ms ease-in-out var(--d, 0s) both;
+}
+@keyframes dock-like-move {
+  from { transform: rotate(var(--rotate, 0deg)) translateY(0); }
+  70% { transform: rotate(var(--rotate, 0deg)) translateY(var(--translate-y, -20px)); }
+  to { transform: rotate(var(--rotate, 0deg)) translateY(calc(var(--translate-y, -20px) * 1.1)); }
+}
+@keyframes dock-like-spark {
+  from { transform: scale(0); }
+  26% { transform: scale(1.2); }
+  46% { transform: scale(0.92); }
+  70% { transform: scale(0.96); }
+  to { transform: scale(0); }
+}
+.dock-like-dot:nth-child(2n) { --d: 0.05s; }
+.dock-like-dot:nth-child(3n) { --d: 0.09s; }
+@media (prefers-reduced-motion: reduce) {
+  [data-like-burst][data-burst] > svg,
+  button.music-now-action[data-burst] > svg,
+  button[data-music-dock-like][data-burst] > svg {
+    animation: none;
+  }
+  .dock-like-burst { visibility: hidden; }
+  /* Release the one-shot state even if motion is re-enabled later. */
+  .dock-like-ring { animation-duration: 1ms; }
+  .dock-like-dot,
+  .dock-like-dot::before { animation: none; }
+}

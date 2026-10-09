@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PenCursor } from "./pen-cursor";
 
 export type Stroke = {
@@ -14,22 +14,99 @@ export type Stroke = {
 const STROKE_LIFETIME_MS = 9000;
 const MIN_POINT_DIST_SQ = 0.004 * 0.004;
 
+type Box = { left: number; top: number; width: number; height: number };
+
+export type VideoTransform = { panscan?: number; zoom?: number; stretch?: boolean };
+
+export function videoContentBox(
+  boxW: number,
+  boxH: number,
+  videoW: number,
+  videoH: number,
+  transform?: VideoTransform,
+): Box {
+  const whole = { left: 0, top: 0, width: boxW, height: boxH };
+  if (boxW <= 0 || boxH <= 0) return whole;
+  if (videoW <= 0 || videoH <= 0) return whole;
+  if (transform?.stretch) return whole;
+
+  const scale = Math.min(boxW / videoW, boxH / videoH);
+  let w = videoW * scale;
+  let h = videoH * scale;
+
+  const panscan = Math.max(0, Math.min(1, transform?.panscan ?? 0));
+  if (panscan > 0) {
+    let area = boxH - h;
+    let fw = h > 0 ? w / h : 1;
+    let fh = 1;
+    if (Math.round(area) === 0) {
+      area = boxW - w;
+      fw = 1;
+      fh = w > 0 ? h / w : 1;
+    }
+    w += area * panscan * fw;
+    h += area * panscan * fh;
+  }
+
+  const zoom = transform?.zoom ?? 0;
+  if (zoom !== 0) {
+    const factor = Math.pow(2, zoom);
+    w *= factor;
+    h *= factor;
+  }
+
+  return { left: (boxW - w) / 2, top: (boxH - h) / 2, width: w, height: h };
+}
+
 export function StrokesLayer({
   strokes,
   hideOthers,
   selfId,
+  videoWidth = 0,
+  videoHeight = 0,
+  transform,
 }: {
   strokes: Stroke[];
   hideOthers: boolean;
   selfId: string;
+  videoWidth?: number;
+  videoHeight?: number;
+  transform?: VideoTransform;
 }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const box = useContentBox(hostRef, videoWidth, videoHeight, transform);
   const visibleStrokes = hideOthers ? strokes.filter((s) => s.authorId === selfId) : strokes;
-  if (visibleStrokes.length === 0) return null;
   return (
-    <div className="pointer-events-none absolute inset-0" style={{ zIndex: 15 }}>
-      <StrokesSvg strokes={visibleStrokes} />
+    <div ref={hostRef} className="pointer-events-none absolute inset-0" style={{ zIndex: 15 }}>
+      {visibleStrokes.length > 0 && (
+        <div
+          className="absolute"
+          style={{ left: box.left, top: box.top, width: box.width, height: box.height }}
+        >
+          <StrokesSvg strokes={visibleStrokes} />
+        </div>
+      )}
     </div>
   );
+}
+
+function useContentBox(
+  ref: React.RefObject<HTMLDivElement | null>,
+  videoWidth: number,
+  videoHeight: number,
+  transform?: VideoTransform,
+): Box {
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => setSize({ w: el.clientWidth, h: el.clientHeight });
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref]);
+  return videoContentBox(size.w, size.h, videoWidth, videoHeight, transform);
 }
 
 export function DrawCanvas({
@@ -39,6 +116,9 @@ export function DrawCanvas({
   selfColor,
   hideOthers,
   strokes,
+  videoWidth = 0,
+  videoHeight = 0,
+  transform,
   onStrokeStart,
   onStrokePoint,
   onStrokeEnd,
@@ -49,6 +129,9 @@ export function DrawCanvas({
   selfColor: string;
   hideOthers: boolean;
   strokes: Stroke[];
+  videoWidth?: number;
+  videoHeight?: number;
+  transform?: VideoTransform;
   onStrokeStart: (stroke: Stroke) => void;
   onStrokePoint: (id: string, x: number, y: number) => void;
   onStrokeEnd: (id: string) => void;
@@ -66,7 +149,12 @@ export function DrawCanvas({
   const norm = (e: React.PointerEvent) => {
     const r = surfaceRef.current?.getBoundingClientRect();
     if (!r || r.width === 0 || r.height === 0) return { x: 0, y: 0 };
-    return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+    const box = videoContentBox(r.width, r.height, videoWidth, videoHeight, transform);
+    if (box.width === 0 || box.height === 0) return { x: 0, y: 0 };
+    return {
+      x: (e.clientX - r.left - box.left) / box.width,
+      y: (e.clientY - r.top - box.top) / box.height,
+    };
   };
 
   const onDown = (e: React.PointerEvent) => {

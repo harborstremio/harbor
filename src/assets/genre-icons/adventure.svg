@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-adventure">
+<title id="title-adventure">Adventure anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <circle class="coral" cx="32" cy="32" r="24"/>
+  <circle class="icon-stroke" cx="32" cy="32" r="16"/>
+  <path class="gold" d="M37.3 26.7L48 16 32.5 23.5 27 37l10.3-10.3z"/>
+  <path class="ink" d="M26.7 37.3L16 48l15.5-7.5L37 27l-10.3 10.3z"/>
+  <circle class="dark" cx="32" cy="32" r="3"/>
+
+</svg>

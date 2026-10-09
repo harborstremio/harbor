@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import type { VolumeStyle } from "@/lib/player-chrome";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { Tooltip } from "./tooltip";
 import {
   fractionFromValue,
@@ -18,23 +19,27 @@ export function StremioVolume({
   onVolume,
   capabilities,
   style = "slider",
+  compact = false,
 }: {
   snap: PlayerSnapshot;
   onMute: () => void;
   onVolume: (v: number) => void;
   capabilities: PlayerCapabilities;
   style?: VolumeStyle;
+  compact?: boolean;
 }) {
   const tr = useT();
+  const { settings } = useSettings();
+  const boostMax = Math.max(1, Math.min(VOL_MAX, settings.volumeBoostMax || 2));
   const [hover, setHover] = useState(false);
   const [pinned, setPinned] = useState(false);
   const [barNear, setBarNear] = useState(false);
-  const allowBoost = capabilities.engine === "mpv";
-  const max = allowBoost ? VOL_MAX : 1;
+  const allowBoost = capabilities.engine === "mpv" && boostMax > 1;
+  const max = allowBoost ? boostMax : 1;
   const v = snap.muted ? 0 : Math.max(0, Math.min(max, snap.volume));
   const muted = snap.muted || v === 0;
   const trackRef = useRef<HTMLDivElement>(null);
-  const fill = allowBoost ? fractionFromValue(v) : v;
+  const fill = allowBoost ? fractionFromValue(v, boostMax) : v;
   const fillPct = fill * 100;
   const boosting = allowBoost && v > 1.001;
   const pct = Math.round(v * 100);
@@ -44,7 +49,7 @@ export function StremioVolume({
     if (!t) return;
     const r = t.getBoundingClientRect();
     const f = Math.max(0, Math.min(1, 1 - (clientY - r.top) / r.height));
-    const next = allowBoost ? valueFromFraction(f) : f;
+    const next = allowBoost ? valueFromFraction(f, boostMax) : f;
     onVolume(Math.round(Math.min(max, next) * 100) / 100);
   };
 
@@ -165,7 +170,7 @@ export function StremioVolume({
       )}
       <div
         aria-hidden={!showPopup}
-        className={`absolute bottom-full left-1/2 flex origin-bottom -translate-x-1/2 flex-col items-center rounded-[20px] border border-white/12 bg-black/85 px-3 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.7)] backdrop-blur-md transition-[opacity,transform] duration-200 ease-out ${
+        className={`absolute bottom-full left-1/2 flex origin-bottom -translate-x-1/2 flex-col items-center rounded-xl border border-white/12 bg-black/85 px-3 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.7)] backdrop-blur-md transition-[opacity,transform] duration-200 ease-out ${
           showPopup ? "scale-100 opacity-100" : "pointer-events-none scale-90 opacity-0"
         }`}
       >
@@ -177,7 +182,7 @@ export function StremioVolume({
           onPointerCancel={onPointerUp}
           onMouseEnter={() => setBarNear(true)}
           onMouseLeave={() => setBarNear(false)}
-          className="relative flex h-44 w-9 cursor-pointer touch-none items-stretch justify-center"
+          className={`relative flex ${compact ? "h-32 w-7" : "h-44 w-9"} cursor-pointer touch-none items-stretch justify-center`}
         >
           <div
             className="relative self-stretch rounded-full bg-white/25 transition-[width] duration-150 ease-out"
@@ -193,14 +198,14 @@ export function StremioVolume({
                 width: barWide ? "21px" : "15px",
                 height: barWide ? "21px" : "15px",
                 bottom: `${fillPct}%`,
-                backgroundColor: boosting ? boostColor(v) : "#ffffff",
+                backgroundColor: boosting ? boostColor(v, boostMax) : "#ffffff",
               }}
             />
           </div>
         </div>
         <div
           className="mt-2 text-[11.5px] font-semibold leading-none tabular-nums transition-colors"
-          style={{ color: boosting ? boostColor(v) : "rgba(255,255,255,0.92)" }}
+          style={{ color: boosting ? boostColor(v, boostMax) : "rgba(255,255,255,0.92)" }}
         >
           {pct}%
         </div>

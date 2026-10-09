@@ -1,0 +1,111 @@
+.games-detail-flow-block:has(> .games-valorant) { clear: both; }
+.games-valorant { padding-block: 52px; scroll-margin-top: 80px; }
+.games-valorant [hidden] { display: none !important; }
+.games-valorant button, .games-valorant a { -webkit-tap-highlight-color: transparent; }
+.games-valorant button:focus-visible, .games-valorant a:focus-visible, .games-valorant summary:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 4px; }
+.games-valorant-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.games-valorant-logo { display: block; width: 170px; height: 31px; background: var(--color-ink); mask: url('/games/valorant/wordmark.png') center / cover no-repeat; margin-bottom: 14px; }
+.games-valorant h2 { font-size: clamp(26px, 2.6vw, 36px); letter-spacing: -.035em; line-height: 1.15; font-weight: 650; }
+.games-valorant-heading-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; }
+.games-valorant-heading-actions a, .games-valorant-heading-actions button { display: inline-flex; align-items: center; gap: 8px; color: var(--color-ink-muted); font-size: 13px; }
+.games-valorant-heading-actions button { background: var(--color-elevated); color: var(--color-ink); border-radius: 7px; padding: 11px 14px; }
+.games-valorant-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--color-edge-soft); padding-block: 26px 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.games-valorant-tabs button { padding: 10px 19px; border-radius: 6px; color: var(--color-ink-muted); font-size: 14px; font-weight: 550; }
+.games-valorant-tabs button[aria-pressed=true] { color: var(--color-canvas); background: var(--color-ink); }
+.games-valorant-tools, .games-valorant-roster-tools { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.games-valorant-tools { margin-bottom: 20px; }
+.games-valorant-tools > .dropdown { min-width: 160px; }
+.games-valorant-option-icon { height: 23px; width: 23px; object-fit: contain; }
+.games-valorant-scope { font-size: 12px; color: var(--color-ink-muted); margin-inline-start: auto; }
+.games-valorant-refresh { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 6px; background: var(--color-elevated); }
+.games-valorant-refresh:disabled { opacity: .4; }
+.games-valorant-roster-tools { justify-content: space-between; margin-bottom: 24px; }
+.games-valorant-roles { display: flex; gap: 5px; flex-wrap: wrap; }
+.games-valorant-roles button { display: flex; align-items: center; gap: 7px; padding: 8px 11px; border-radius: 5px; font-size: 13px; color: var(--color-ink-muted); }
+.games-valorant-roles img { width: 16px; height: 16px; object-fit: contain; }
+.games-valorant-roles button[aria-pressed=true] { background: var(--color-elevated); color: var(--color-ink); }
+.games-valorant-search { display: flex; align-items: center; gap: 9px; color: var(--color-ink-muted); padding: 10px 12px; background: var(--color-elevated); border-radius: 6px; width: 210px; max-width: 100%; }
+.games-valorant-search input { width: 100%; min-width: 0; font-size: 13px; background: transparent; outline: none; color: var(--color-ink); }
+.games-valorant-search:focus-within { outline: 2px solid var(--color-ink-muted); outline-offset: 2px; }
+.games-valorant-meta-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 1fr); gap: 36px; align-items: start; }
+.games-valorant-spotlight { position: relative; overflow: hidden; border-radius: 9px; min-height: 520px; background: color-mix(in srgb, var(--agent-color) 22%, var(--color-surface)); }
+.games-valorant-agent-art { position: relative; height: 305px; overflow: hidden; }
+.games-valorant-agent-background { position: absolute; height: 430px; width: 100%; object-fit: contain; opacity: .18; }
+.games-valorant-agent-portrait { position: absolute; height: 480px; width: 100%; top: -26px; object-fit: contain; object-position: top center; }
+.games-valorant-portrait-loading { display: none; position: absolute; inset: 0; place-items: center; color: var(--color-ink-muted); pointer-events: none; }
+.games-valorant-agent-art:has(> .games-valorant-agent-portrait[data-loaded=false]) > .games-valorant-portrait-loading { display: grid; }
+.games-valorant-portrait-loading svg { animation: valorant-portrait-spin .9s linear infinite; }
+@keyframes valorant-portrait-spin { to { transform: rotate(360deg); } }
+.games-valorant-agent-copy { position: relative; padding: 0 26px 25px; background: linear-gradient(transparent, color-mix(in srgb, var(--agent-color) 8%, var(--color-surface)) 80px); }
+.games-valorant-agent-role { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--color-ink-muted); }
+.games-valorant-agent-role img { width: 18px; height: 18px; object-fit: contain; }
+.games-valorant-agent-copy h3 { font-size: clamp(32px, 3.2vw, 46px); line-height: 1.1; letter-spacing: -.04em; font-weight: 650; margin-block: 9px 11px; }
+.games-valorant-agent-copy p { font-size: 13px; line-height: 1.65; color: var(--color-ink-muted); max-width: 55ch; min-height: 64px; }
+.games-valorant-agent-copy dl { display: flex; gap: 28px; flex-wrap: wrap; margin-block: 22px 12px; font-variant-numeric: tabular-nums; }
+.games-valorant-agent-copy dt { font-size: 11px; color: var(--color-ink-muted); margin-bottom: 5px; }
+.games-valorant-agent-copy dd { font-size: 26px; font-weight: 600; line-height: 1.2; }
+.games-valorant-agent-copy > small { font-size: 11px; color: var(--color-ink-muted); }
+.games-valorant-ranking { min-width: 0; }
+.games-valorant-ranking-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-block: 1px 20px; }
+.games-valorant-ranking-heading h3, .games-valorant-abilities h3 { font-size: 18px; font-weight: 600; }
+.games-valorant-columns, .games-valorant-agent-row { display: grid; grid-template-columns: minmax(0, 1fr) 70px 70px; gap: 14px; align-items: center; width: 100%; text-align: start; }
+.games-valorant-columns { padding: 0 12px 10px; font-size: 11px; color: var(--color-ink-muted); }
+.games-valorant-columns > :not(:first-child), .games-valorant-agent-row > :not(:first-child) { text-align: end; }
+.games-valorant-agent-row { border-radius: 6px; padding: 9px 12px; min-height: 62px; color: var(--color-ink-muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.games-valorant-agent-row[aria-pressed=true] { background: var(--color-elevated); color: var(--color-ink); }
+.games-valorant-agent-row-name { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.games-valorant-agent-row-name > small { font-size: 10px; color: var(--color-ink-subtle); min-width: 14px; }
+.games-valorant-agent-row-name > img, .games-valorant-agent-row-name > .games-art-empty { width: 42px; height: 42px; object-fit: cover; flex-shrink: 0; border-radius: 5px; background: var(--color-surface); }
+.games-valorant-agent-row-name strong { display: block; font-size: 14px; color: var(--color-ink); font-weight: 550; overflow-wrap: anywhere; }
+.games-valorant-agent-row-name span small { display: block; font-size: 11px; color: var(--color-ink-muted); margin-top: 3px; }
+.games-valorant-more { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-ink-muted); padding: 16px 12px 9px; }
+.games-valorant-more[aria-expanded=true] svg { transform: rotate(180deg); }
+.games-valorant-meta-note { font-size: 11px; color: var(--color-ink-muted); line-height: 1.6; margin-top: 12px; }
+.games-valorant-abilities { display: grid; grid-template-columns: minmax(230px, .7fr) minmax(0, 1fr); gap: 36px; margin-top: 34px; padding-top: 28px; border-top: 1px solid var(--color-edge-soft); }
+.games-valorant-ability-picker > div { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.games-valorant-ability-picker button { display: flex; flex-direction: column; align-items: center; justify-content: start; gap: 9px; width: 82px; padding: 12px 6px; border-radius: 6px; color: var(--color-ink-muted); font-size: 10px; line-height: 1.4; }
+.games-valorant-ability-picker button[aria-pressed=true] { background: var(--color-elevated); color: var(--color-ink); }
+.games-valorant-ability-picker img, .games-valorant-ability-picker .games-art-empty { width: 34px; height: 34px; object-fit: contain; }
+.games-valorant-ability-detail h4 { font-size: 18px; font-weight: 550; margin-bottom: 13px; }
+.games-valorant-ability-detail > p { white-space: pre-line; font-size: 13px; line-height: 1.8; color: var(--color-ink-muted); }
+.games-valorant-text-button { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 550; padding: 11px 14px; background: var(--color-elevated); border-radius: 6px; margin-top: 18px; }
+.games-valorant-ability-video { position: relative; margin-top: 16px; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; background: var(--color-surface); }
+.games-valorant-ability-video .games-trailer { height: 100%; }
+.games-valorant-close { position: absolute; top: 10px; inset-inline-end: 10px; z-index: 12; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 5px; background: var(--color-elevated); }
+.games-valorant-source { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; color: var(--color-ink-muted); font-size: 11px; line-height: 1.7; margin-top: 25px; }
+.games-valorant-source a { display: inline-flex; gap: 5px; align-items: center; }
+.games-valorant-source p { flex-basis: 100%; max-width: 95ch; }
+.games-valorant-status { margin-block: 20px; color: var(--color-ink-muted); font-size: 13px; line-height: 1.6; }
+.games-valorant-status button { text-decoration: underline; margin-inline-start: 8px; color: var(--color-ink); }
+.games-valorant-loading { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; min-height: 520px; }
+.games-valorant-loading > i { border-radius: 9px; }.games-valorant-loading > div { display: grid; align-content: start; gap: 12px; }.games-valorant-loading > div i { height: 62px; border-radius: 6px; }
+.games-valorant-reference-loading { min-height: 480px; border-radius: 8px; }
+.games-valorant-map-picker { display: grid; grid-template-columns: repeat(auto-fill,minmax(118px,1fr)); gap: 10px; margin-bottom: 30px; }
+.games-valorant-map-picker button { position: relative; overflow: hidden; border-radius: 5px; min-height: 62px; background: var(--color-elevated); }
+.games-valorant-map-picker img { width: 100%; height: 70px; object-fit: cover; opacity: .5; transition: opacity 140ms ease-out; }
+.games-valorant-map-picker span:not(.games-art-empty) { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 600; background: #0003; text-shadow: 0 1px 5px #000; }
+.games-valorant-map-picker button[aria-pressed=true] { box-shadow: 0 0 0 2px var(--color-ink); }
+.games-valorant-map-picker button[aria-pressed=true] img { opacity: 1; }
+.games-valorant-map-detail { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(250px,.8fr); gap: 36px; align-items: start; }
+.games-valorant-map-art { background: #101a22; border-radius: 8px; padding: 12px; aspect-ratio: 1; }
+.games-valorant-map-art img { width: 100%; height: 100%; object-fit: contain; }
+.games-valorant-map-image { width: 100%; height: 100%; position: relative; }
+.games-valorant-map-pin { position: absolute; transform: translate(-50%,-50%); display: flex; flex-direction: column; align-items: center; gap: 5px; color: #fff; background: #101a22e8; border-radius: 5px; padding: 6px 10px; font-size: 12px; max-width: 130px; text-align: center; pointer-events: none; }
+.games-valorant-map-pin i { width: 7px; height: 7px; background: #ff4655; border-radius: 50%; }
+.games-valorant-map-scene { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 7px; margin-bottom: 22px; }
+.games-valorant-map-copy h3 { font-size: 30px; font-weight: 600; letter-spacing: -.03em; margin-bottom: 12px; }
+.games-valorant-map-copy > p { font-size: 13px; line-height: 1.7; color: var(--color-ink-muted); }
+.games-valorant-map-copy details { margin-top: 24px; border-top: 1px solid var(--color-edge-soft); padding-top: 18px; }
+.games-valorant-map-copy summary { display: flex; align-items: center; justify-content: space-between; list-style: none; font-size: 14px; cursor: pointer; }
+.games-valorant-callouts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 15px; }
+.games-valorant-callouts button { font-size: 11px; background: var(--color-elevated); padding: 6px 9px; border-radius: 4px; }
+.games-valorant-callouts button[aria-pressed=true] { background: var(--color-ink); color: var(--color-canvas); }
+.games-valorant-weapon-pair { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 32px; }
+.games-valorant-weapon-pair > div { min-width: 0; }.games-valorant-weapon-pair h3 { font-size: 26px; font-weight: 600; }.games-valorant-weapon-pair > div > span { color: var(--color-ink-muted); font-size: 12px; }
+.games-valorant-weapon-art { display: block; width: 100%; height: 170px; object-fit: contain; padding: 24px 10px; margin-block: 18px 10px; background: var(--color-surface); border-radius: 8px; }
+.games-valorant-distance { display: flex; align-items: center; flex-wrap: wrap; gap: 15px 28px; margin-block: 30px; }.games-valorant-distance label { font-size: 13px; color: var(--color-ink-muted); }.games-valorant-distance strong { margin-inline-start: 15px; color: var(--color-ink); font-weight: 550; }.games-valorant-distance input { width: min(360px,100%); accent-color: var(--color-ink); }
+.games-valorant-weapon-table { border-collapse: collapse; width: 100%; text-align: start; table-layout: fixed; font-size: 13px; font-variant-numeric: tabular-nums; }.games-valorant-weapon-table th { text-align: start; font-weight: 500; }.games-valorant-weapon-table :is(th,td) { padding: 13px 10px; border-bottom: 1px solid var(--color-edge-soft); overflow-wrap: anywhere; }.games-valorant-weapon-table tbody th { color: var(--color-ink-muted); }.games-valorant-weapon-table caption { caption-side: bottom; text-align: start; font-size: 11px; color: var(--color-ink-muted); padding-top: 18px; line-height: 1.7; }
+@media (hover:hover) { .games-valorant-agent-row:hover, .games-valorant-roles button:hover, .games-valorant-ability-picker button:hover { background: var(--color-elevated); }.games-valorant a:hover { color: var(--color-ink); }.games-valorant-map-picker button:hover img { opacity: .85; } }
+@media (max-width: 1000px) { .games-valorant-meta-layout { gap: 22px; }.games-valorant-agent-row, .games-valorant-columns { grid-template-columns: minmax(0,1fr) 55px 55px; gap: 8px; }.games-valorant-agent-row-name { gap: 7px; }.games-valorant-agent-row-name > small { display: none; }.games-valorant-agent-copy { padding-inline: 20px; }.games-valorant-abilities { grid-template-columns: 1fr; gap: 22px; }.games-valorant-map-detail { gap: 22px; } }
+@media (max-width: 740px) { .games-valorant-meta-layout, .games-valorant-map-detail { grid-template-columns: minmax(0,1fr); }.games-valorant-spotlight { min-height: 0; }.games-valorant-agent-art { height: 280px; }.games-valorant-agent-portrait { height: 450px; }.games-valorant-search { width: 100%; }.games-valorant-scope { margin-inline-start: 0; }.games-valorant-agent-row-name > small { display: block; }.games-valorant-agent-copy p { min-height: 0; }.games-valorant-map-art { max-height: 550px; }.games-valorant-weapon-pair { gap: 14px; }.games-valorant-weapon-art { height: 120px; }.games-valorant-tabs button { padding-inline: 14px; }.games-valorant-roles { gap: 2px; }.games-valorant-roles button { padding-inline: 8px; } }
+@media (prefers-reduced-motion:reduce) { .games-valorant * { transition: none !important; animation: none !important; } }

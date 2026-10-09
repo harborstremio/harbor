@@ -7,7 +7,10 @@ import {
   ChevronDown,
   Download,
   FlipHorizontal2,
+  Square,
+  Tags,
   Trash2,
+  X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
@@ -18,7 +21,9 @@ export type LocalSortKey = "added" | "title" | "year" | "rating" | "runtime";
 export type SortDir = "asc" | "desc";
 
 function groupSortEntry(g: LocalGroup): { entry: LocalEntry; added: number } {
-  if (g.kind === "movie") return { entry: g.entry, added: g.entry.addedAt };
+  if (g.kind === "movie") {
+    return { entry: g.entry, added: Math.max(...g.versions.map((v) => v.addedAt)) };
+  }
   return { entry: g.head, added: Math.max(...g.episodes.map((e) => e.addedAt)) };
 }
 
@@ -27,7 +32,10 @@ export function sortGroups(groups: LocalGroup[], key: LocalSortKey, dir: SortDir
   const decorated = groups.map((g) => ({ g, ...groupSortEntry(g) }));
   decorated.sort((a, b) => {
     if (key === "title") {
-      return mul * (a.entry.title ?? "").localeCompare(b.entry.title ?? "", undefined, { sensitivity: "base" });
+      return (
+        mul *
+        (a.entry.title ?? "").localeCompare(b.entry.title ?? "", undefined, { sensitivity: "base" })
+      );
     }
     if (key === "runtime") {
       const ra = a.g.kind === "show" ? 0 : 1;
@@ -35,7 +43,13 @@ export function sortGroups(groups: LocalGroup[], key: LocalSortKey, dir: SortDir
       if (ra !== rb) return ra - rb;
     }
     const pick = (e: LocalEntry, added: number): number | null =>
-      key === "year" ? e.year ?? null : key === "rating" ? e.rating ?? null : key === "runtime" ? e.runtime ?? null : added;
+      key === "year"
+        ? (e.year ?? null)
+        : key === "rating"
+          ? (e.rating ?? null)
+          : key === "runtime"
+            ? (e.runtime ?? null)
+            : added;
     const av = pick(a.entry, a.added);
     const bv = pick(b.entry, b.added);
     if (av == null && bv == null) return 0;
@@ -44,6 +58,100 @@ export function sortGroups(groups: LocalGroup[], key: LocalSortKey, dir: SortDir
     return mul * (av - bv);
   });
   return decorated.map((d) => d.g);
+}
+
+export type GenreOption = { name: string; count: number };
+
+/**
+ * Multi-select genre picker. Follows SortMenu's dropdown idiom (outside-click +
+ * Escape close) so it stays native to this toolbar; options are the genres
+ * actually present in the library, most common first.
+ */
+export function GenreMenu({
+  options,
+  selected,
+  onToggle,
+  onClear,
+}: {
+  options: GenreOption[];
+  selected: Set<string>;
+  onToggle: (genre: string) => void;
+  onClear: () => void;
+}) {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+  if (options.length === 0) return null;
+  const count = selected.size;
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={`flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[12.5px] font-semibold transition-colors ${
+          count > 0
+            ? "bg-ink text-canvas"
+            : "bg-raised text-ink-muted hover:bg-elevated hover:text-ink"
+        }`}
+      >
+        <Tags size={13} strokeWidth={2.2} />
+        {count === 0 ? t("Genre") : t("{n} genres", { n: count })}
+        <ChevronDown size={13} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="absolute end-0 top-[calc(100%+6px)] z-50 max-h-[320px] w-56 overflow-y-auto rounded-xl border border-edge bg-elevated p-1 shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] animate-popover-in">
+          {count > 0 && (
+            <button
+              type="button"
+              onClick={onClear}
+              className="flex h-9 w-full items-center gap-2 rounded-lg px-3 text-start text-[13px] text-ink-muted transition-colors hover:bg-raised/60 hover:text-ink"
+            >
+              <X size={13} strokeWidth={2.4} />
+              {t("Clear genres")}
+            </button>
+          )}
+          {options.map((o) => {
+            const on = selected.has(o.name);
+            return (
+              <button
+                key={o.name}
+                type="button"
+                onClick={() => onToggle(o.name)}
+                className={`flex h-9 w-full items-center justify-between gap-3 rounded-lg px-3 text-start text-[13px] transition-colors ${
+                  on ? "bg-raised text-ink" : "text-ink-muted hover:bg-raised/60 hover:text-ink"
+                }`}
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  {on ? (
+                    <CheckSquare size={14} strokeWidth={2.4} className="shrink-0 text-accent" />
+                  ) : (
+                    <Square size={14} strokeWidth={2.2} className="shrink-0" />
+                  )}
+                  <span className="truncate">{o.name}</span>
+                </span>
+                <span className="shrink-0 text-[11.5px] tabular-nums text-ink-subtle">
+                  {o.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function SortMenu({
@@ -105,7 +213,9 @@ export function SortMenu({
                   setOpen(false);
                 }}
                 className={`flex h-9 w-full items-center justify-between gap-3 rounded-lg px-3 text-start text-[13px] transition-colors ${
-                  sortKey === k ? "bg-raised text-ink" : "text-ink-muted hover:bg-raised/60 hover:text-ink"
+                  sortKey === k
+                    ? "bg-raised text-ink"
+                    : "text-ink-muted hover:bg-raised/60 hover:text-ink"
                 }`}
               >
                 <span>{label}</span>

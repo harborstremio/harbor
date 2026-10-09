@@ -15,6 +15,8 @@ function results(query: string, tmdbUnavailable = false): SearchResults {
     series: [],
     liveTv: [],
     anime: [],
+    manga: [],
+    characters: [],
     addonGroups: [],
     addons: [],
     intent: null,
@@ -43,4 +45,11 @@ test("shows no matches only after a complete successful search", () => {
 
   assert.equal(state.tmdbUnavailable, false);
   assert.equal(state.noResults, true);
+});
+
+test("ignores results for a superseded query", () => {
+  const state = getSearchDisplayState(results("Batman"), "superman", "done");
+  assert.equal(state.currentResults, null);
+  assert.equal(state.hasResults, false);
+  assert.equal(state.noResults, false);
 });

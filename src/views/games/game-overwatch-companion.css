@@ -1,0 +1,87 @@
+.games-overwatch { padding-block: 36px 48px; color: var(--color-ink); }
+.games-overwatch-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 26px; }
+.games-overwatch-logo { display: block; width: 220px; height: 56px; object-fit: contain; object-position: left center; margin-bottom: 24px; }
+[dir="rtl"] .games-overwatch-logo { object-position: right center; }
+.games-overwatch-heading h2 { margin: 0; font-size: clamp(26px, 3vw, 36px); font-weight: 650; letter-spacing: -.035em; line-height: 1.25; }
+.games-overwatch-heading p { color: var(--color-ink-muted); margin: 10px 0 0; font-size: 14px; line-height: 1.65; }
+.games-overwatch-tabs, .games-overwatch-roles { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.games-overwatch-tabs { flex-shrink: 0; }
+.games-overwatch-tabs button, .games-overwatch-roles button, .games-overwatch-stadium { display: inline-flex; justify-content: center; align-items: center; gap: 9px; min-height: 40px; padding: 9px 13px; border-radius: 6px; font-size: 13px; color: var(--color-ink-muted); background: var(--color-surface); }
+.games-overwatch button[aria-pressed="true"] { color: var(--color-ink); background: var(--color-elevated); }
+.games-overwatch-tabs button[aria-pressed="true"] { color: var(--color-canvas); background: var(--color-ink); }
+.games-overwatch-roles img { height: 17px; width: 17px; object-fit: contain; }
+.games-overwatch-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-block: 20px; }
+.games-overwatch-search { display: flex; align-items: center; gap: 9px; flex: 1 1 180px; min-width: 140px; min-height: 42px; background: var(--color-surface); color: var(--color-ink-muted); padding-inline: 13px; border-radius: 6px; }
+.games-overwatch-search > svg { flex-shrink: 0; }
+.games-overwatch-search input { width: 100%; min-width: 0; height: 42px; color: var(--color-ink); background: transparent; border: 0; outline: 0; font-size: 13px; }
+.games-overwatch-search:focus-within { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.games-overwatch .games-overwatch-search input:focus { outline: none !important; box-shadow: none !important; }
+.games-overwatch-status { color: var(--color-ink-muted); font-size: 14px; line-height: 1.7; margin-block: 20px; }
+.games-overwatch-status button { text-decoration: underline; color: var(--color-ink); margin-inline-start: 6px; }
+.games-overwatch-roster { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; }
+.games-overwatch-roster button { overflow: hidden; min-width: 0; padding: 0 0 9px; border-radius: 6px; background: var(--color-surface); position: relative; }
+.games-overwatch-roster button::after { content: ""; position: absolute; inset: auto 0 0; height: 3px; background: transparent; }
+.games-overwatch-roster button[aria-pressed="true"]::after { background: var(--color-accent); }
+.games-overwatch-roster img, .games-overwatch-roster .games-art-empty { display: block; aspect-ratio: 1.2; width: 100%; object-fit: contain; transition: transform 160ms ease-out; }
+.games-overwatch-roster button:hover img { transform: scale(1.045); }
+.games-overwatch-roster span:not(.games-art-empty) { display: block; padding-inline: 7px; margin-top: 4px; font-size: 12px; font-weight: 600; line-height: 1.4; min-height: 2.8em; align-content: center; overflow-wrap: anywhere; }
+.games-overwatch-roster > i { aspect-ratio: .87; border-radius: 6px; }
+.games-overwatch-more { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 18px auto 0; min-height: 40px; padding: 8px 14px; font-size: 13px; color: var(--color-ink-muted); border-radius: 6px; }
+.games-overwatch-more:hover { color: var(--color-ink); background: var(--color-surface); }
+.games-overwatch-hero { margin-top: 28px; }
+.games-overwatch-splash { position: relative; isolation: isolate; min-height: 355px; border-radius: 9px; background: #19212c; color: #fff; display: flex; align-items: end; }
+.games-overwatch-hero-art { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: center 25%; border-radius: inherit; }
+.games-overwatch-splash::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: linear-gradient(90deg, #10151eef, #10151e92 47%, #10151e00 85%), linear-gradient(0deg, #10151e65, transparent 65%); pointer-events: none; }
+[dir="rtl"] .games-overwatch-splash::after { background: linear-gradient(270deg, #10151eef, #10151e92 47%, #10151e00 85%), linear-gradient(0deg, #10151e65, transparent 65%); }
+.games-overwatch-hero-copy { width: min(52%, 510px); padding: 32px; }
+.games-overwatch-hero-copy > span { display: flex; gap: 9px; align-items: center; font-size: 13px; }
+.games-overwatch-hero-copy > span img { width: 18px; height: 18px; filter: brightness(0) invert(1); }
+.games-overwatch-hero-copy h3 { font-size: clamp(32px, 4vw, 48px); line-height: 1.15; letter-spacing: -.04em; font-weight: 650; margin: 12px 0; }
+.games-overwatch-hero-copy p { font-size: 14px; line-height: 1.7; color: #e1e6ec; margin: 0 0 20px; }
+.games-overwatch-hero-copy a { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; min-height: 32px; }
+.games-overwatch-copy-loading { display: grid; gap: 8px; margin-block: 20px; }
+.games-overwatch-copy-loading i { height: 13px; border-radius: 3px; }
+.games-overwatch-copy-loading i:last-child { width: 65%; }
+.games-overwatch h4 { margin: 28px 0 18px; font-size: 18px; font-weight: 600; }
+.games-overwatch-abilities, .games-overwatch-perks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 24px 30px; }
+.games-overwatch-ability { min-width: 0; }
+.games-overwatch-ability-copy { display: flex; align-items: start; gap: 16px; }
+.games-overwatch-ability-copy > img, .games-overwatch-ability-copy > .games-art-empty { flex: 0 0 46px; width: 46px; height: 46px; object-fit: contain; background: #252931; border-radius: 7px; padding: 7px; }
+.games-overwatch-ability h5 { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.5; }
+.games-overwatch-ability p { font-size: 13px; line-height: 1.7; color: var(--color-ink-muted); margin: 6px 0 0; }
+.games-overwatch-ability-copy button { display: inline-flex; align-items: center; gap: 7px; margin-top: 7px; min-height: 32px; font-size: 12px; font-weight: 600; }
+.games-overwatch-ability-copy button:hover { text-decoration: underline; text-underline-offset: 3px; }
+.games-overwatch-demo { position: relative; margin-top: 12px; background: #000; color: #fff; border-radius: 6px; overflow: hidden; }
+.games-overwatch-demo video { width: 100%; aspect-ratio: 16 / 9; object-fit: contain; display: block; }
+.games-overwatch-demo > p { padding: 26px; color: inherit; }
+.games-overwatch-close-demo { position: absolute; inset-block-start: 8px; inset-inline-end: 8px; background: #101318e6; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 5px; z-index: 1; }
+.games-overwatch-ability-loading { margin-top: 26px; }
+.games-overwatch-ability-loading i { height: 105px; border-radius: 6px; }
+.games-overwatch-disclosure { border-bottom: 1px solid var(--color-edge-soft); padding-block: 20px; }
+.games-overwatch-disclosure:first-of-type { margin-top: 20px; }
+.games-overwatch-disclosure summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 18px; font-size: 16px; font-weight: 600; cursor: pointer; min-height: 36px; }
+.games-overwatch-disclosure summary::-webkit-details-marker { display: none; }
+.games-overwatch-disclosure summary svg { transition: transform 160ms; flex-shrink: 0; }
+.games-overwatch-disclosure[open] summary svg { transform: rotate(180deg); }
+.games-overwatch-disclosure > .games-overwatch-abilities { margin-top: 20px; }
+.games-overwatch-perks h4 { font-size: 14px; color: var(--color-ink-muted); margin-block: 18px; }
+.games-overwatch-perks .games-overwatch-ability + .games-overwatch-ability { margin-top: 20px; }
+.games-overwatch-story { max-width: 75ch; font-size: 14px; color: var(--color-ink-muted); line-height: 1.85; margin-top: 14px; }
+.games-overwatch-mode { display: flex; align-items: start; gap: 16px; margin-block: 24px; max-width: 800px; }
+.games-overwatch-mode > img { width: 35px; height: 35px; flex-shrink: 0; object-fit: contain; }
+.games-overwatch-mode h3 { font-size: 17px; font-weight: 600; margin: 0 0 7px; }
+.games-overwatch-mode p { font-size: 14px; line-height: 1.7; color: var(--color-ink-muted); margin: 0; }
+.games-overwatch-maps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 18px; }
+.games-overwatch-maps article { min-width: 0; }
+.games-overwatch-maps article > img, .games-overwatch-maps article > .games-art-empty { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 6px; background: var(--color-surface); }
+.games-overwatch-maps h3 { font-size: 16px; font-weight: 600; margin: 12px 0 4px; line-height: 1.45; }
+.games-overwatch-maps p, .games-overwatch-maps span { font-size: 12px; color: var(--color-ink-muted); line-height: 1.7; margin: 0; }
+.games-overwatch-maps span { display: block; margin-top: 3px; }
+.games-overwatch-maps > i { aspect-ratio: 1.35; border-radius: 6px; }
+.games-overwatch footer { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 28px; color: var(--color-ink-muted); font-size: 12px; line-height: 1.7; }
+.games-overwatch footer a { display: inline-flex; align-items: center; gap: 6px; }
+.games-overwatch footer p { flex-basis: 100%; margin: 0; }
+.games-overwatch :is(a, button, summary):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+@media (max-width: 1100px) { .games-overwatch-roster { grid-template-columns: repeat(6, minmax(0, 1fr)); }.games-overwatch-hero-copy { width: 65%; }.games-overwatch-maps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 680px) { .games-overwatch-heading { align-items: start; flex-direction: column; gap: 18px; }.games-overwatch-logo { width: 180px; height: 44px; margin-bottom: 18px; }.games-overwatch-tools { gap: 10px; }.games-overwatch-roles { width: 100%; }.games-overwatch-roles button { flex: 1; padding-inline: 9px; font-size: 12px; gap: 6px; }.games-overwatch-roles img { width: 14px; height: 14px; }.games-overwatch-roster { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }.games-overwatch-roster span:not(.games-art-empty) { font-size: 11px; }.games-overwatch-splash { min-height: 425px; }.games-overwatch-splash::after, [dir="rtl"] .games-overwatch-splash::after { background: linear-gradient(0deg, #10151efa 0%, #10151ecd 39%, #10151e00 80%); }.games-overwatch-hero-copy { width: 100%; padding: 24px; }.games-overwatch-hero-art { object-position: 62% top; }.games-overwatch-abilities, .games-overwatch-perks { grid-template-columns: 1fr; gap: 22px; }.games-overwatch-perks { gap: 4px; }.games-overwatch-maps { gap: 22px 12px; }.games-overwatch-maps h3 { font-size: 14px; } }
+@media (prefers-reduced-motion: reduce) { .games-overwatch-roster img, .games-overwatch-disclosure summary svg { transition: none; }.games-overwatch-roster button:hover img { transform: none; } }

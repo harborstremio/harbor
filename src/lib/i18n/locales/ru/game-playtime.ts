@@ -1,0 +1,22 @@
+export default {
+  "games.playtime.title": "Время в игре",
+  "games.playtime.total": "Ваше общее время",
+  "games.playtime.tracked": "Записано Harbor",
+  "games.playtime.adjusted": "Скорректировано вами",
+  "games.playtime.changed": "Скорректировано: {date}",
+  "games.playtime.edit": "Скорректировать время в игре",
+  "games.playtime.hours": "Часы",
+  "games.playtime.minutes": "Минуты",
+  "games.playtime.duration": "{hours} ч {minutes} мин",
+  "games.playtime.card": "В игре: {time}",
+  "games.playtime.note": "Добавьте время, проведённое в игре в другом месте, или исправьте общее время. Harbor сохраняет записанные сеансы и прибавляет будущие к этому итогу.",
+  "games.playtime.localNote": "Применяется к этой локальной копии в вашем профиле Harbor. Данные в Steam и других аккаунтах остаются без изменений.",
+  "games.playtime.running": "Закройте эту игру, прежде чем корректировать время в ней.",
+  "games.playtime.save": "Сохранить время в игре",
+  "games.playtime.finishEdit": "Сохраните или отмените изменение времени в игре, прежде чем сохранять другие настройки.",
+  "games.playtime.reset": "Использовать записанное время",
+  "games.playtime.invalid": "Введите целое число часов от 0 до 999 999 и минуты от 0 до 59.",
+  "games.playtime.saved": "Время в игре сохранено.",
+  "games.playtime.resetDone": "Используется время, записанное Harbor.",
+  "games.custom.launch_playtime": "Не удалось сохранить это время в игре. Проверьте часы и минуты и попробуйте снова."
+} satisfies Record<string, string>;

@@ -1,11 +1,18 @@
-import { ArrowLeft, Search, Users } from "lucide-react";
-import { useEffect, useRef, useState, useLayoutEffect } from "react";
+import { ArrowLeft } from "lucide-react";
+import { WindowControlButton as Control, WindowControlGlyph } from "./window-control-button";
+import { Search } from "@/components/icons/search-icon";
+import { UiIcon } from "@/components/ui-icon";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BackChrome } from "@/chrome/back-chrome";
 import { HarborMark } from "@/components/icons/harbor-mark";
-import { TogetherPopover } from "@/components/together-modal";
+import { TogetherPopover, TogetherModalShell } from "@/components/together-modal";
 import { DownloadsButton } from "@/components/downloads-popover";
+import { BookmarksButton } from "@/components/bookmarks-popover";
+import { NotificationCenter } from "@/components/notification-center/notification-center";
+import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import { RecordingPill } from "@/chrome/recording-pill";
+import { SleepTimerButton } from "@/chrome/sleep-timer-button";
 import {
   effectiveBinding,
   eventToBinding,
@@ -16,31 +23,85 @@ import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
 import { useSearch } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
 import { useTogether } from "@/lib/together/provider";
 import { useSelfIdentity } from "@/lib/together/use-self-identity";
 import { activeLayout } from "@/lib/theme";
 import { useThemePreview } from "@/lib/theme-preview";
 import { useView } from "@/lib/view";
 import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
-import { toggleWindowFullscreen } from "@/lib/fullscreen-state";
-import { close, minimize } from "@/lib/window";
-import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
+import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
+function PresenceAvatar({ name, src, color }: { name: string; src: string | null; color: string }) {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
+  if (src && !failed) {
+    return (
+      <span
+        title={name}
+        className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full ring-2 ring-elevated"
+        style={{ boxShadow: `inset 0 0 0 1.5px ${color}` }}
+      >
+        <img
+          src={src}
+          alt=""
+          draggable={false}
+          className="h-full w-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      </span>
+    );
+  }
+
+  return (
+    <span
+      title={name}
+      className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-canvas ring-2 ring-elevated"
+      style={{ backgroundColor: color }}
+    >
+      {(name.trim()[0] || "?").toUpperCase()}
+    </span>
+  );
+}
+
 export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
   const { chromeHidden, canGoBack, view, setView, topKind } = useView();
+  const liveHasSources = usePlaylists().length > 0;
   const { settings } = useSettings();
   const kid = useActiveKid();
   const t = useT();
   const [closeConfirm, setCloseConfirm] = useState(false);
   const preview = useThemePreview();
   const fullscreen = useWindowFullscreen();
+  const maxed = useMaximized();
+  const [scrolled, setScrolled] = useState(false);
+  const scrolledRef = useRef(false);
+  useEffect(() => {
+    const onScroll = (e: Event) => {
+      const el = e.target;
+      if (!(el instanceof HTMLElement) || el.tagName !== "MAIN") return;
+      const next = el.scrollTop > 40;
+      if (next !== scrolledRef.current) {
+        scrolledRef.current = next;
+        setScrolled(next);
+      }
+    };
+    document.addEventListener("scroll", onScroll, true);
+    return () => document.removeEventListener("scroll", onScroll, true);
+  }, []);
   if (chromeHidden && !connecting) return null;
   const layout = kid ? "sidebar" : preview ? preview.layout : activeLayout(settings.theme);
-  const onLiveRoot = topKind === "live";
+  const onLiveRoot = topKind === "live" && liveHasSources;
   const sidebarHidden = connecting || view === "settings" || onLiveRoot || topKind === "picker";
-  const hideSearch = view === "addons" || connecting || topKind === "picker";
+  const inSettings = view === "settings";
+  const hideSearch =
+    view === "music" || view === "games" || view === "addons" || connecting || topKind === "picker" || inSettings;
   const sidebarOffset =
     layout === "stremio"
       ? "ps-[80px]"
@@ -51,20 +112,41 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
     ? "w-[14rem] sm:w-[18rem] lg:w-[22rem] xl:w-[24rem]"
     : "w-[14rem] sm:w-[20rem] lg:w-[24rem] xl:w-[28rem] hover:w-[18rem] sm:hover:w-[24rem] lg:hover:w-[28rem] xl:hover:w-[34rem] focus-within:w-[18rem] sm:focus-within:w-[24rem] lg:focus-within:w-[28rem] xl:focus-within:w-[34rem]";
   const dragProps = IS_TAURI && !fullscreen ? { "data-tauri-drag-region": true } : {};
+  const hybridBar =
+    IS_TAURI && !settings.useNativeTitleBar && settings.hybridTitleBar && !fullscreen;
   return (
     <header
-      className={`fixed inset-x-0 top-0 ${topKind === "picker" || connecting ? "z-[130]" : "z-[55]"} h-20`}
+      data-cleannav={settings.topbarAppearance === "transparent" ? "on" : undefined}
+      className={`pointer-events-none fixed inset-x-0 top-0 ${topKind === "picker" || connecting ? "z-[130]" : "z-[55]"} h-20`}
     >
+      {!inSettings && settings.topbarScrollBlur && settings.topbarAppearance !== "transparent" && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 transition-opacity duration-[350ms] ease-out"
+          style={{
+            opacity: scrolled ? 1 : 0,
+            background: "color-mix(in oklch, var(--color-canvas), transparent 20%)",
+            backdropFilter: "blur(14px) saturate(115%)",
+            WebkitBackdropFilter: "blur(14px) saturate(115%)",
+            maskImage: "linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%)",
+          }}
+        />
+      )}
       <div
         {...dragProps}
-        className="relative z-10 grid h-full grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-8"
+        data-harbor-topbar-content
+        className={`relative z-10 grid h-full grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-8 ${
+          hybridBar ? "pt-11" : ""
+        }`}
       >
         <div
           {...dragProps}
+          data-harbor-topbar-leading
           className={
             sidebarHidden
-              ? "flex h-full min-w-0 items-center justify-start gap-3"
-              : `flex h-full min-w-0 items-center justify-start ${sidebarOffset}`
+              ? "pointer-events-auto flex h-full min-w-0 items-center justify-start gap-3"
+              : `pointer-events-auto flex h-full min-w-0 items-center justify-start ${sidebarOffset}`
           }
         >
           {onLiveRoot && (
@@ -89,75 +171,42 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
         </div>
         <div
           {...dragProps}
-          className={`min-w-0 max-w-full transition-[width] duration-200 ease-out ${searchWidth}`}
+          className={`pointer-events-auto min-w-0 max-w-full transition-[width] duration-200 ease-out ${searchWidth}`}
         >
-          {!hideSearch && !kid && <SearchPill />}
+          {!hideSearch && !kid && !hybridBar && <SearchPill />}
         </div>
-        <div {...dragProps} className="flex h-full min-w-0 items-center justify-end gap-2">
-          <RecordingPill />
-          <DownloadsButton />
-          {!onLiveRoot && !kid && <TogetherButton />}
-          {IS_TAURI && !settings.useNativeTitleBar && (
-            <div className="ms-1 flex items-center gap-2">
+        <div
+          {...dragProps}
+          data-harbor-topbar-actions
+          className="pointer-events-auto flex h-full items-center justify-end gap-2"
+        >
+          {!inSettings && (
+            <div className="hidden items-center gap-2 min-[900px]:flex">
+              <RecordingPill />
+              {settings.navbarSleepTimer && <SleepTimerButton />}
+              <DownloadsButton />
+              {!kid && <NotificationCenter />}
+              {!kid && <BookmarksButton />}
+              {!onLiveRoot && !kid && <TogetherButton />}
+            </div>
+          )}
+          {IS_TAURI && !settings.useNativeTitleBar && !settings.hybridTitleBar && (
+            <div className="ms-1 flex shrink-0 items-center gap-2">
               <Control label={t("chrome.minimize")} onClick={minimize}>
-                <svg width="18" height="18" viewBox="0 0 13 13" fill="none">
-                  <path
-                    d="M3 6.5h7"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                  />
-                </svg>
+                <WindowControlGlyph kind="minimize" />
               </Control>
               <Control
-                label={fullscreen ? t("chrome.restore") : t("chrome.maximize")}
-                onClick={() => void toggleWindowFullscreen()}
+                label={maxed ? t("chrome.restore") : t("chrome.maximize")}
+                onClick={() => void toggleMaximize()}
               >
-                <svg width="18" height="18" viewBox="0 0 13 13" fill="none">
-                  {fullscreen ? (
-                    <>
-                      <rect
-                        x="2.5"
-                        y="4.5"
-                        width="6"
-                        height="6"
-                        stroke="currentColor"
-                        strokeWidth="1.4"
-                        rx="1"
-                      />
-                      <path
-                        d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
-                        stroke="currentColor"
-                        strokeWidth="1.4"
-                        fill="none"
-                      />
-                    </>
-                  ) : (
-                    <rect
-                      x="3"
-                      y="3"
-                      width="7"
-                      height="7"
-                      stroke="currentColor"
-                      strokeWidth="1.4"
-                      rx="1.2"
-                    />
-                  )}
-                </svg>
+                <WindowControlGlyph kind="maximize" maximized={maxed} />
               </Control>
               <Control
                 label={t("common.close")}
                 onClick={kid ? () => setCloseConfirm(true) : close}
                 danger
               >
-                <svg width="18" height="18" viewBox="0 0 13 13" fill="none">
-                  <path
-                    d="M3.5 3.5l6 6M9.5 3.5l-6 6"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                  />
-                </svg>
+                <WindowControlGlyph kind="close" />
               </Control>
             </div>
           )}
@@ -185,7 +234,7 @@ function CloseConfirmKids({
         if (e.target === e.currentTarget) onCancel();
       }}
     >
-      <div className="relative w-full max-w-md overflow-hidden rounded-[28px] bg-gradient-to-b from-[#3aa6c4] via-[#1c789f] to-[#0c4a6e] p-8 text-center text-white shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)]">
+      <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-gradient-to-b from-[#3aa6c4] via-[#1c789f] to-[#0c4a6e] p-8 text-center text-white shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)]">
         <img
           src="/kids/doodles/lilbluewhale.png"
           alt=""
@@ -229,141 +278,42 @@ export function TogetherButton({
   popoverPlacement?: "below-right" | "above-left";
   connectStyle?: "tab" | "popover";
 } = {}) {
-  const { snapshot, modalOpen, openModal, closeModal, clientId } = useTogether();
-
+  const { snapshot, modalOwner, openModal, closeModal, clientId } = useTogether();
   const { avatar: selfAvatar, color: selfColor } = useSelfIdentity();
-
+  const { settings } = useSettings();
+  const cleanModal = settings.topbarAppearance === "transparent";
+  const glassControls = settings.topbarAppearance === "glass";
   const t = useT();
-
   const live = snapshot.state === "joined";
-  const above = popoverPlacement === "above-left";
-
   const wrapRef = useRef<HTMLDivElement>(null);
-  const popoverPortalRef = useRef<HTMLDivElement>(null);
-
-  const [popoverPosition, setPopoverPosition] = useState({
-    top: 0,
-    left: 0,
-    visibility: "hidden" as "hidden" | "visible",
-  });
+  const modalId = useId();
+  const ownsModal = modalOwner === modalId;
 
   useEffect(() => {
-    if (!modalOpen) return;
+    if (modalOwner === "auto") openModal(modalId);
+  }, [modalId, modalOwner, openModal]);
 
-    const onDown = (event: MouseEvent) => {
-      const target = event.target as Node;
-
-      const insideButton = wrapRef.current?.contains(target) ?? false;
-
-      const insidePopover = popoverPortalRef.current?.contains(target) ?? false;
-
-      if (!insideButton && !insidePopover) {
-        closeModal();
-      }
+  useEffect(() => {
+    if (!ownsModal || cleanModal) return;
+    const onDown = (e: MouseEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) closeModal();
     };
-
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        closeModal();
-      }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeModal();
     };
-
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
-
     return () => {
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("keydown", onKey);
     };
-  }, [modalOpen, closeModal]);
-
-  useLayoutEffect(() => {
-    if (!modalOpen) return;
-
-    const anchor = wrapRef.current;
-    const popover = popoverPortalRef.current;
-
-    if (!anchor || !popover) return;
-
-    let frameId: number | null = null;
-
-    const updatePosition = () => {
-      const anchorRect = anchor.getBoundingClientRect();
-      const popoverRect = popover.getBoundingClientRect();
-
-      const viewportPadding = 12;
-      const gap = -1;
-
-      const direction = window.getComputedStyle(document.documentElement).direction;
-
-      const rtl = direction === "rtl";
-
-      let top: number;
-      let left: number;
-
-      if (above) {
-        top = anchorRect.top - popoverRect.height + gap;
-
-        left = rtl ? anchorRect.right - popoverRect.width : anchorRect.left;
-      } else {
-        top = anchorRect.bottom + gap;
-
-        left = rtl ? anchorRect.left : anchorRect.right - popoverRect.width;
-      }
-
-      top = Math.max(
-        viewportPadding,
-        Math.min(top, window.innerHeight - popoverRect.height - viewportPadding),
-      );
-
-      left = Math.max(
-        viewportPadding,
-        Math.min(left, window.innerWidth - popoverRect.width - viewportPadding),
-      );
-
-      setPopoverPosition({
-        top,
-        left,
-        visibility: "visible",
-      });
-    };
-
-    const schedulePositionUpdate = () => {
-      if (frameId !== null) {
-        cancelAnimationFrame(frameId);
-      }
-
-      frameId = requestAnimationFrame(updatePosition);
-    };
-
-    updatePosition();
-
-    const resizeObserver = new ResizeObserver(schedulePositionUpdate);
-
-    resizeObserver.observe(anchor);
-    resizeObserver.observe(popover);
-
-    window.addEventListener("resize", schedulePositionUpdate);
-
-    window.addEventListener("scroll", schedulePositionUpdate, true);
-
-    return () => {
-      if (frameId !== null) {
-        cancelAnimationFrame(frameId);
-      }
-
-      resizeObserver.disconnect();
-
-      window.removeEventListener("resize", schedulePositionUpdate);
-
-      window.removeEventListener("scroll", schedulePositionUpdate, true);
-    };
-  }, [modalOpen, above]);
+  }, [ownsModal, closeModal, cleanModal]);
 
   const visible = snapshot.participants.slice(0, TOPBAR_MAX_AVATARS);
-
   const overflow = Math.max(0, snapshot.participants.length - TOPBAR_MAX_AVATARS);
 
+  const above = popoverPlacement === "above-left";
+  const tabOpen = ownsModal && !cleanModal && !above;
   const idleSize = live
     ? variant === "ghost"
       ? "h-9 gap-2 ps-3 pe-2"
@@ -371,196 +321,100 @@ export function TogetherButton({
     : variant === "ghost"
       ? "h-9 w-9 justify-center"
       : "h-11 w-11 justify-center";
+  const sizing = idleSize;
+  const idleChrome = `${glassControls ? "border border-white/[0.10]" : "border border-transparent"} ${variant === "ghost" ? "rounded-full" : "rounded-xl"} ${
+    live
+      ? variant === "ghost"
+        ? "text-ink hover:bg-white/12"
+        : glassControls
+          ? "text-ink hover:text-ink"
+          : "bg-elevated/70 text-ink hover:bg-elevated"
+      : variant === "ghost"
+        ? "text-ink-muted hover:bg-white/12 hover:text-ink"
+        : glassControls
+          ? "text-ink-muted hover:text-ink"
+          : "bg-elevated/70 text-ink-muted hover:bg-elevated hover:text-ink"
+  }`;
+  const chrome = tabOpen
+    ? `z-[51] harbor-together-surface border border-edge text-ink ${
+        above ? "rounded-t-none rounded-b-lg border-t-0" : "rounded-b-none rounded-t-lg border-b-0"
+      }`
+    : idleChrome;
 
-  const sizing =
-    modalOpen && !above ? (live ? "h-14 gap-2 px-3" : "h-14 w-11 justify-center") : idleSize;
-
-  const glassRadius = modalOpen
-    ? above
-      ? "0 0 8px 8px"
-      : "8px 8px 0 0"
-    : variant === "ghost"
-      ? "9999px"
-      : "12px";
-
-  const glassChrome = modalOpen
-    ? `
-        z-[51]
-        harbor-together-surface
-        border border-edge
-        text-ink
-        ${above ? "border-t-0" : "border-b-0"}
-      `
-    : `
-        border border-white/[0.10]
-        ${live ? "text-ink" : "text-ink-muted hover:text-ink"}
-      `;
-
-  const toggleModal = () => {
-    if (modalOpen) {
-      closeModal();
-      return;
-    }
-
-    setPopoverPosition((current) => ({
-      ...current,
-      visibility: "hidden",
-    }));
-
-    openModal();
-  };
+  const trigger = (
+    <button
+      type="button"
+      data-tauri-drag-region="false"
+      aria-label={t("chrome.watchTogether")}
+      aria-haspopup="dialog"
+      aria-expanded={ownsModal}
+      onClick={() => (ownsModal ? closeModal() : openModal(modalId))}
+      className={`harbor-together-btn relative flex items-center transition-colors duration-150 ${tabOpen ? "harbor-wt-tab" : ""} ${sizing} ${glassControls ? "rounded-[inherit] bg-transparent outline-none hover:bg-white/[0.06]" : chrome}`}
+    >
+      {live ? (
+        <>
+          <span className="font-mono text-[11.5px] tracking-[0.22em] text-ink">
+            {snapshot.room}
+          </span>
+          <div className="flex -space-x-1.5">
+            {visible.map((p) => {
+              const self = p.id === clientId;
+              const fallbackColor = `oklch(0.78 0.13 ${nameHue(p.name)})`;
+              return (
+                <PresenceAvatar
+                  key={p.id}
+                  name={p.name}
+                  src={self ? selfAvatar : (p.avatar ?? null)}
+                  color={self ? (selfColor ?? fallbackColor) : (p.color ?? fallbackColor)}
+                />
+              );
+            })}
+            {overflow > 0 && (
+              <span className="flex h-6 min-w-[24px] items-center justify-center rounded-full bg-canvas px-1 text-[10px] font-semibold text-ink-muted ring-2 ring-elevated">
+                +{overflow}
+              </span>
+            )}
+          </div>
+        </>
+      ) : (
+        <UiIcon name="watch-together" className="h-[17px] w-[17px]" />
+      )}
+    </button>
+  );
 
   return (
-    <div
-      ref={wrapRef}
-      className={`relative ${
-        modalOpen && !above ? "harbor-wt-wrap flex flex-col self-stretch justify-end" : ""
-      }`}
-    >
-      <ThreeLiquidGlassSurface
-        radius={glassRadius}
-        shaderRadius={variant === "ghost" ? 1 : modalOpen ? 0.3 : 0.48}
-        intensity={0.9}
-        style={{
-          boxShadow: "none",
-        }}
-        className={`
-          relative inline-flex
-          transition-colors duration-150
-          ${glassChrome}
-          ${modalOpen && !above ? "harbor-wt-tab" : ""}
-        `}
-        contentClassName="h-full w-full"
-      >
-        <button
-          type="button"
-          data-tauri-drag-region="false"
-          aria-label={t("chrome.watchTogether")}
-          aria-haspopup="dialog"
-          aria-expanded={modalOpen}
-          onClick={toggleModal}
-          className={`
-            harbor-together-btn
-            relative flex items-center
-            rounded-[inherit]
-            border-0 bg-transparent
-            outline-none
-            transition-colors duration-150
-            ${sizing}
-          `}
+    <div ref={wrapRef} className="relative">
+      {glassControls ? (
+        <ThreeLiquidGlassSurface
+          radius={
+            tabOpen
+              ? above
+                ? "0 0 8px 8px"
+                : "8px 8px 0 0"
+              : variant === "ghost"
+                ? "9999px"
+                : "12px"
+          }
+          shaderRadius={variant === "ghost" ? 1 : tabOpen ? 0.3 : 0.48}
+          intensity={0.9}
+          className={`relative inline-flex transition-colors duration-150 ${chrome} ${tabOpen ? "harbor-wt-tab" : ""}`}
+          contentClassName="h-full w-full"
         >
-          {live ? (
-            <>
-              <span className="font-mono text-[11.5px] tracking-[0.22em] text-ink">
-                {snapshot.room}
-              </span>
-
-              <div className="flex -space-x-1.5">
-                {visible.map((participant) => {
-                  const self = participant.id === clientId;
-
-                  const fallbackColor = `oklch(0.78 0.13 ${nameHue(participant.name)})`;
-
-                  const avatarSrc = self ? selfAvatar : (participant.avatar ?? null);
-
-                  const color = self
-                    ? (selfColor ?? fallbackColor)
-                    : (participant.color ?? fallbackColor);
-
-                  if (avatarSrc) {
-                    return (
-                      <span
-                        key={participant.id}
-                        title={participant.name}
-                        className="
-                          flex h-6 w-6
-                          items-center justify-center
-                          overflow-hidden rounded-full
-                          ring-2 ring-elevated
-                        "
-                        style={{
-                          boxShadow: `inset 0 0 0 1.5px ${color}`,
-                        }}
-                      >
-                        <img
-                          src={avatarSrc}
-                          alt=""
-                          draggable={false}
-                          className="h-full w-full object-cover"
-                        />
-                      </span>
-                    );
-                  }
-
-                  return (
-                    <span
-                      key={participant.id}
-                      title={participant.name}
-                      className="
-                        flex h-6 w-6
-                        items-center justify-center
-                        rounded-full
-                        text-[10px] font-semibold
-                        text-canvas
-                        ring-2 ring-elevated
-                      "
-                      style={{
-                        backgroundColor: color,
-                      }}
-                    >
-                      {(participant.name.trim()[0] || "?").toUpperCase()}
-                    </span>
-                  );
-                })}
-
-                {overflow > 0 && (
-                  <span
-                    className="
-                      flex h-6 min-w-[24px]
-                      items-center justify-center
-                      rounded-full
-                      bg-canvas px-1
-                      text-[10px] font-semibold
-                      text-ink-muted
-                      ring-2 ring-elevated
-                    "
-                  >
-                    +{overflow}
-                  </span>
-                )}
-              </div>
-            </>
-          ) : (
-            <Users size={17} strokeWidth={1.9} />
-          )}
-        </button>
-      </ThreeLiquidGlassSurface>
-
-      {modalOpen &&
-        typeof document !== "undefined" &&
-        createPortal(
-          <div
-            ref={popoverPortalRef}
-            data-tv-focus-scope
-            data-tauri-drag-region="false"
-            data-together-popover-portal
-            className="
-              harbor-wt-modal
-              pointer-events-auto
-              fixed
-              z-[300]
-              isolate
-            "
-            style={{
-              top: popoverPosition.top,
-              left: popoverPosition.left,
-              visibility: popoverPosition.visibility,
-            }}
-          >
-            <TogetherPopover placement={popoverPlacement} connectStyle={connectStyle} />
-          </div>,
-          document.body,
-        )}
+          {trigger}
+        </ThreeLiquidGlassSurface>
+      ) : (
+        trigger
+      )}
+      {ownsModal && !cleanModal && (
+        <div
+          className={`harbor-wt-modal absolute z-50 ${
+            above ? "bottom-[calc(100%-1px)] start-0" : "end-0 top-[calc(100%-1px)]"
+          }`}
+        >
+          <TogetherPopover placement={popoverPlacement} connectStyle={connectStyle} />
+        </div>
+      )}
+      {ownsModal && cleanModal && <TogetherModalShell />}
     </div>
   );
 }
@@ -575,110 +429,57 @@ function SearchPill() {
   const { setOpen } = useSearch();
   const { settings } = useSettings();
   const t = useT();
-
   const binding = effectiveBinding("globalSearchFocus", settings.hotkeys ?? {});
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!shouldHandleGlobalKeyboardEvent(e)) return;
       if (eventToBinding(e) !== binding) return;
-
       e.preventDefault();
       setOpen(true);
     };
-
     window.addEventListener("keydown", onKey);
-
-    return () => {
-      window.removeEventListener("keydown", onKey);
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, [binding, setOpen]);
+
+  const pill = (
+    <button
+      type="button"
+      data-tauri-drag-region="false"
+      data-harbor-search
+      onClick={() => setOpen(true)}
+      className={
+        settings.liquidGlass
+          ? "flex h-full w-full items-center gap-3 rounded-full bg-transparent px-5 text-start outline-none"
+          : "harbor-search-pill flex h-11 w-full items-center gap-3 rounded-full border border-edge-soft/60 bg-elevated/80 px-5 text-start outline-none transition-colors duration-200 hover:bg-elevated"
+      }
+    >
+      <Search size={16} strokeWidth={1.75} className="shrink-0 text-ink-subtle" />
+      <span className="flex-1 truncate text-[14px] text-ink-subtle">{t("search.placeholder")}</span>
+      <kbd
+        aria-hidden
+        className="hidden h-[22px] min-w-[22px] shrink-0 items-center justify-center rounded-md border border-edge-soft/70 bg-canvas/60 px-1.5 font-mono text-[11px] font-medium leading-none text-ink-subtle sm:inline-flex"
+      >
+        {formatBindingForDisplay(binding)}
+      </kbd>
+    </button>
+  );
+
+  if (!settings.liquidGlass) return pill;
 
   return (
     <ThreeLiquidGlassSurface
       radius="9999px"
       shaderRadius={0.58}
       intensity={0.9}
+      onClick={() => setOpen(true)}
       style={{
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
       }}
-      className="
-        h-11 w-full
-        border border-white/[0.08]
-      "
+      className="harbor-search-pill h-11 w-full border border-white/[0.08]"
       contentClassName="flex h-full w-full"
     >
-      <button
-        type="button"
-        data-tauri-drag-region="false"
-        onClick={() => setOpen(true)}
-        className="
-          harbor-search-pill
-          flex h-full w-full
-          items-center gap-3
-          rounded-full
-          bg-transparent px-5
-          text-start outline-none
-        "
-      >
-        <Search size={16} strokeWidth={1.75} className="shrink-0 text-ink-subtle" />
-
-        <span className="flex-1 truncate text-[14px] text-ink-subtle">
-          {t("search.placeholder")}
-        </span>
-
-        <kbd
-          className="
-            hidden shrink-0
-            rounded-md
-            border border-white/[0.10]
-            bg-transparent
-            px-1.5 py-0.5
-            font-mono text-[10.5px]
-            font-medium text-ink-subtle
-            sm:inline
-          "
-        >
-          {formatBindingForDisplay(binding)}
-        </kbd>
-      </button>
-    </ThreeLiquidGlassSurface>
-  );
-}
-
-function Control({
-  label,
-  onClick,
-  danger = false,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  danger?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <ThreeLiquidGlassSurface
-      radius="12px"
-      shaderRadius={0.48}
-      intensity={0.9}
-      style={{
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
-      }}
-      className="h-11 w-12 shrink-0 border border-white/[0.10]"
-      contentClassName="h-full w-full"
-    >
-      <button
-        type="button"
-        data-tauri-drag-region="false"
-        aria-label={label}
-        onClick={onClick}
-        className={`harbor-win-control ${danger ? "harbor-win-close" : ""} flex h-full w-full items-center justify-center rounded-[12px] bg-transparent text-ink-muted outline-none transition-colors duration-150 ${
-          danger ? "hover:bg-[#e5484d] hover:text-white" : "hover:bg-white/[0.06] hover:text-ink"
-        }`}
-      >
-        {children}
-      </button>
+      {pill}
     </ThreeLiquidGlassSurface>
   );
 }

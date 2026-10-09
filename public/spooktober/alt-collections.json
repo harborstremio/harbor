@@ -1,0 +1,769 @@
+[
+ {
+  "id": "gothic",
+  "title": "Gothic romance",
+  "description": "Gothic films and dark romance.",
+  "featuredId": "tt0109506",
+  "background": "https://images.metahub.space/background/medium/tt0109506/img",
+  "logo": "https://images.metahub.space/logo/medium/tt0109506/img",
+  "itemIds": [
+   "tt0109506",
+   "tt1714915",
+   "tt0085701",
+   "tt2326554",
+   "tt2554274",
+   "tt0103874",
+   "tt0110148",
+   "tt0067690",
+   "tt1531901",
+   "tt1139797",
+   "tt0099487",
+   "tt0162661",
+   "tt0216651",
+   "tt0032976",
+   "tt0087075",
+   "tt0055018",
+   "ol-OL2895536W",
+   "vampire-lestat-book",
+   "dracula",
+   "ol-OL8193416W",
+   "frankenstein",
+   "poe-clan-vol-1"
+  ],
+  "items": [
+   {
+    "id": "tt0109506",
+    "title": "The Crow",
+    "year": "1994",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Alex Proyas",
+    "description": "A murdered musician returns to avenge the woman he loved.",
+    "poster": "https://images.metahub.space/poster/medium/tt0109506/img",
+    "source": "https://www.imdb.com/title/tt0109506/",
+    "genres": [
+     "Action",
+     "Crime",
+     "Drama"
+    ],
+    "runtime": "102 min",
+    "imdbRating": "7.5"
+   },
+   {
+    "id": "tt1714915",
+    "title": "Only Lovers Left Alive",
+    "year": "2013",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Jim Jarmusch",
+    "description": "Two vampire lovers reunite between Detroit and Tangier as their long lives grow harder to sustain.",
+    "poster": "https://images.metahub.space/poster/medium/tt1714915/img",
+    "source": "https://www.imdb.com/title/tt1714915/",
+    "genres": [
+     "Comedy",
+     "Drama",
+     "Fantasy"
+    ],
+    "runtime": "123 min",
+    "imdbRating": "7.2"
+   },
+   {
+    "id": "tt0067690",
+    "title": "Daughters of Darkness",
+    "year": "1971",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Harry Kümel",
+    "description": "A newly married couple encounters a mysterious countess and her companion at a seaside hotel.",
+    "poster": "https://images.metahub.space/poster/medium/tt0067690/img",
+    "source": "https://www.imdb.com/title/tt0067690/",
+    "genres": [
+     "Horror"
+    ],
+    "runtime": "100 min",
+    "imdbRating": "6.5"
+   },
+   {
+    "id": "tt0099487",
+    "title": "Edward Scissorhands",
+    "year": "1990",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Tim Burton",
+    "description": "A young man with scissors for hands is welcomed into a suburb that soon turns against him.",
+    "poster": "https://images.metahub.space/poster/medium/tt0099487/img",
+    "source": "https://www.imdb.com/title/tt0099487/",
+    "genres": [
+     "Drama",
+     "Fantasy",
+     "Romance"
+    ],
+    "runtime": "105 min",
+    "imdbRating": "7.8"
+   },
+   {
+    "id": "tt0087075",
+    "title": "The Company of Wolves",
+    "year": "1984",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Neil Jordan",
+    "description": "A girl dreams of wolves and dangerous strangers in this adaptation of Angela Carter’s stories.",
+    "poster": "https://images.metahub.space/poster/medium/tt0087075/img",
+    "source": "https://www.imdb.com/title/tt0087075/",
+    "genres": [
+     "Drama",
+     "Fantasy",
+     "Horror"
+    ],
+    "runtime": "95 min",
+    "imdbRating": "6.6"
+   },
+   {
+    "id": "tt0055018",
+    "title": "The Innocents",
+    "year": "1961",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Jack Clayton",
+    "description": "A governess suspects that two children in her care are being influenced by ghosts.",
+    "poster": "https://images.metahub.space/poster/medium/tt0055018/img",
+    "source": "https://www.imdb.com/title/tt0055018/",
+    "genres": [
+     "Drama",
+     "Horror",
+     "Mystery"
+    ],
+    "runtime": "100 min",
+    "imdbRating": "7.7"
+   },
+   {
+    "id": "vampire-lestat-book",
+    "title": "The Vampire Lestat",
+    "year": "1985",
+    "type": "Book",
+    "section": "catalog",
+    "creator": "Anne Rice",
+    "description": "Lestat recounts his life from eighteenth-century France to a rock stage in the 1980s.",
+    "poster": "https://covers.openlibrary.org/b/id/8579529-L.jpg",
+    "source": "https://annerice.com/Bookshelf-VampireLestat.html"
+   },
+   {
+    "id": "poe-clan-vol-1",
+    "title": "The Poe Clan, Vol. 1",
+    "year": "2019",
+    "type": "Manga",
+    "section": "catalog",
+    "creator": "Moto Hagio",
+    "description": "Two siblings become vampires before reaching adulthood. This first English omnibus of Moto Hagio’s manga is translated by Rachel Thorn.",
+    "poster": "https://covers.openlibrary.org/b/id/11319994-L.jpg",
+    "source": "https://www.fantagraphics.com/products/the-poe-clan-vol-1"
+   }
+  ]
+ },
+ {
+  "id": "cult",
+  "title": "Cult after dark",
+  "description": "Outsiders and midnight favorites.",
+  "featuredId": "tt0115963",
+  "background": "https://images.metahub.space/background/medium/tt0115963/img",
+  "logo": "https://images.metahub.space/logo/medium/tt0115963/img",
+  "itemIds": [
+   "tt0115963",
+   "tt0093437",
+   "tt1131734",
+   "tt0210070",
+   "tt0246578",
+   "tt0097493",
+   "tt21188080",
+   "tt3908142",
+   "tt0303361",
+   "tt4954522",
+   "tt1959332",
+   "tt0133751",
+   "tt0963194",
+   "tt0073629",
+   "tt0089907",
+   "tt0076786",
+   "tt0093605",
+   "tt0093177",
+   "we-have-always",
+   "ol-OL81626W",
+   "tomie",
+   "no-longer-human"
+  ],
+  "items": [
+   {
+    "id": "tt1131734",
+    "title": "Jennifer's Body",
+    "year": "2009",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Karyn Kusama",
+    "description": "A teenager becomes possessed after meeting a touring band, leaving her best friend to confront what she has become.",
+    "poster": "https://images.metahub.space/poster/medium/tt1131734/img",
+    "source": "https://www.imdb.com/title/tt1131734/",
+    "genres": [
+     "Comedy",
+     "Horror"
+    ],
+    "runtime": "107 min",
+    "imdbRating": "5.6"
+   },
+   {
+    "id": "tt0210070",
+    "title": "Ginger Snaps",
+    "year": "2000",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "John Fawcett",
+    "description": "A werewolf attack transforms one of two inseparable sisters and threatens their bond.",
+    "poster": "https://images.metahub.space/poster/medium/tt0210070/img",
+    "source": "https://www.imdb.com/title/tt0210070/",
+    "genres": [
+     "Drama",
+     "Fantasy",
+     "Horror"
+    ],
+    "runtime": "108 min",
+    "imdbRating": "6.8"
+   },
+   {
+    "id": "tt0246578",
+    "title": "Donnie Darko",
+    "year": "2001",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Richard Kelly",
+    "description": "A troubled teenager follows a rabbit-masked figure toward a deadline on Halloween.",
+    "poster": "https://images.metahub.space/poster/medium/tt0246578/img",
+    "source": "https://www.imdb.com/title/tt0246578/",
+    "genres": [
+     "Drama",
+     "Mystery",
+     "Sci-Fi"
+    ],
+    "runtime": "114 min",
+    "imdbRating": "8.0"
+   },
+   {
+    "id": "tt0097493",
+    "title": "Heathers",
+    "year": "1989",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Michael Lehmann",
+    "description": "A student joins her rebellious boyfriend in a deadly campaign against their school hierarchy.",
+    "poster": "https://images.metahub.space/poster/medium/tt0097493/img",
+    "source": "https://www.imdb.com/title/tt0097493/",
+    "genres": [
+     "Comedy",
+     "Crime"
+    ],
+    "runtime": "103 min",
+    "imdbRating": "7.1"
+   }
+  ]
+ },
+ {
+  "id": "slashers",
+  "title": "Slashers",
+  "description": "Slasher classics and deeper cuts.",
+  "featuredId": "halloween",
+  "background": "https://images.metahub.space/background/medium/tt0077651/img",
+  "logo": "https://images.metahub.space/logo/medium/tt0077651/img",
+  "itemIds": [
+   "halloween",
+   "tt0071222",
+   "tt0082782",
+   "tt0082118",
+   "tt0086320",
+   "tt0092576",
+   "tt0076150",
+   "tt0084695",
+   "tt0081383",
+   "tt0081617",
+   "tt0082951",
+   "tt0085694",
+   "tt0095379",
+   "tt0080040",
+   "tt0090655",
+   "tt0080761",
+   "tt0087800",
+   "tt0093629",
+   "tt0072271",
+   "tt0094862",
+   "tt0103919",
+   "scream",
+   "tt0120082",
+   "tt0437857",
+   "tt2118624",
+   "tt5308322",
+   "tt10919380",
+   "tt1448754"
+  ],
+  "items": [
+   {
+    "id": "tt0082782",
+    "title": "My Bloody Valentine",
+    "year": "1981",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "George Mihalka",
+    "description": "A mining town revives its Valentine’s dance despite a warning left after an earlier massacre.",
+    "poster": "https://images.metahub.space/poster/medium/tt0082782/img",
+    "source": "https://www.imdb.com/title/tt0082782/",
+    "genres": [
+     "Horror",
+     "Mystery",
+     "Thriller"
+    ],
+    "runtime": "90 min",
+    "imdbRating": "6.3"
+   },
+   {
+    "id": "tt0082118",
+    "title": "The Burning",
+    "year": "1981",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Tony Maylam",
+    "description": "A summer-camp caretaker returns years after a prank left him badly burned.",
+    "poster": "https://images.metahub.space/poster/medium/tt0082118/img",
+    "source": "https://www.imdb.com/title/tt0082118/",
+    "genres": [
+     "Horror"
+    ],
+    "runtime": "91 min",
+    "imdbRating": "6.3"
+   },
+   {
+    "id": "tt0092576",
+    "title": "StageFright",
+    "year": "1987",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Michele Soavi",
+    "description": "Performers rehearsing overnight become trapped in a theatre with a killer wearing an owl mask.",
+    "poster": "https://images.metahub.space/poster/medium/tt0092576/img",
+    "source": "https://www.imdb.com/title/tt0092576/",
+    "genres": [
+     "Drama",
+     "Horror",
+     "Thriller"
+    ],
+    "runtime": "90 min",
+    "imdbRating": "6.6"
+   },
+   {
+    "id": "tt0076150",
+    "title": "Alice, Sweet Alice",
+    "year": "1976",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Alfred Sole",
+    "description": "After a child is murdered during her first communion, suspicion falls on her older sister.",
+    "poster": "https://images.metahub.space/poster/medium/tt0076150/img",
+    "source": "https://www.imdb.com/title/tt0076150/",
+    "genres": [
+     "Crime",
+     "Drama",
+     "Horror"
+    ],
+    "runtime": "108 min",
+    "imdbRating": "6.4"
+   },
+   {
+    "id": "tt0084695",
+    "title": "The Slumber Party Massacre",
+    "year": "1982",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Amy Holden Jones",
+    "description": "A slumber party is interrupted by an escaped killer carrying a power drill.",
+    "poster": "https://images.metahub.space/poster/medium/tt0084695/img",
+    "source": "https://www.imdb.com/title/tt0084695/",
+    "genres": [
+     "Horror"
+    ],
+    "runtime": "76 min",
+    "imdbRating": "5.6"
+   },
+   {
+    "id": "tt0081383",
+    "title": "Prom Night",
+    "year": "1980",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Paul Lynch",
+    "description": "A masked killer stalks teenagers on prom night, years after a childhood death they concealed.",
+    "poster": "https://images.metahub.space/poster/medium/tt0081383/img",
+    "source": "https://www.imdb.com/title/tt0081383/",
+    "genres": [
+     "Horror",
+     "Mystery",
+     "Thriller"
+    ],
+    "runtime": "93 min",
+    "imdbRating": "5.3"
+   },
+   {
+    "id": "tt0081617",
+    "title": "Terror Train",
+    "year": "1980",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Roger Spottiswoode",
+    "description": "A killer changes disguises while stalking a college costume party aboard a moving train.",
+    "poster": "https://images.metahub.space/poster/medium/tt0081617/img",
+    "source": "https://www.imdb.com/title/tt0081617/",
+    "genres": [
+     "Horror",
+     "Mystery",
+     "Thriller"
+    ],
+    "runtime": "97 min",
+    "imdbRating": "5.8"
+   },
+   {
+    "id": "tt0082951",
+    "title": "The Prowler",
+    "year": "1981",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Joseph Zito",
+    "description": "A killer in military fatigues targets a graduation dance decades after an earlier double murder.",
+    "poster": "https://images.metahub.space/poster/medium/tt0082951/img",
+    "source": "https://www.imdb.com/title/tt0082951/",
+    "genres": [
+     "Horror",
+     "Mystery",
+     "Thriller"
+    ],
+    "runtime": "89 min",
+    "imdbRating": "5.9"
+   },
+   {
+    "id": "tt0085694",
+    "title": "The House on Sorority Row",
+    "year": "1982",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Mark Rosman",
+    "description": "A sorority’s prank ends in death, followed by attacks during their graduation party.",
+    "poster": "https://images.metahub.space/poster/medium/tt0085694/img",
+    "source": "https://www.imdb.com/title/tt0085694/",
+    "genres": [
+     "Horror",
+     "Mystery",
+     "Thriller"
+    ],
+    "runtime": "91 min",
+    "imdbRating": "5.9"
+   },
+   {
+    "id": "tt0095379",
+    "title": "Intruder",
+    "year": "1989",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Scott Spiegel",
+    "description": "A supermarket’s night crew is stalked while preparing the store for its closing sale.",
+    "poster": "https://images.metahub.space/poster/medium/tt0095379/img",
+    "source": "https://www.imdb.com/title/tt0095379/",
+    "genres": [
+     "Horror",
+     "Thriller"
+    ],
+    "runtime": "88 min",
+    "imdbRating": "6.1"
+   },
+   {
+    "id": "tt0080040",
+    "title": "Tourist Trap",
+    "year": "1979",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "David Schmoeller",
+    "description": "Stranded travellers seek help at a roadside museum filled with lifelike mannequins.",
+    "poster": "https://images.metahub.space/poster/medium/tt0080040/img",
+    "source": "https://www.imdb.com/title/tt0080040/",
+    "genres": [
+     "Horror"
+    ],
+    "runtime": "89 min",
+    "imdbRating": "6.0"
+   },
+   {
+    "id": "tt0090655",
+    "title": "April Fool's Day",
+    "year": "1986",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Fred Walton",
+    "description": "College friends visiting an island estate find that the weekend’s practical jokes may conceal real murders.",
+    "poster": "https://images.metahub.space/poster/medium/tt0090655/img",
+    "source": "https://www.imdb.com/title/tt0090655/",
+    "genres": [
+     "Horror",
+     "Mystery"
+    ],
+    "runtime": "89 min",
+    "imdbRating": "6.1"
+   },
+   {
+    "id": "tt0437857",
+    "title": "Behind the Mask: The Rise of Leslie Vernon",
+    "year": "2006",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Scott Glosserman",
+    "description": "A documentary crew follows a would-be serial killer as he plans a massacre.",
+    "poster": "https://images.metahub.space/poster/medium/tt0437857/img",
+    "source": "https://www.imdb.com/title/tt0437857/",
+    "genres": [
+     "Comedy",
+     "Horror",
+     "Thriller"
+    ],
+    "runtime": "91 min",
+    "imdbRating": "6.7"
+   }
+  ]
+ },
+ {
+  "id": "strange",
+  "title": "Strange worlds",
+  "description": "Animation and anime, from playful to unsettling.",
+  "featuredId": "coraline",
+  "background": "assets/posters/coraline-backdrop.jpg",
+  "itemIds": [
+   "coraline",
+   "nightmare",
+   "tt0121164",
+   "tt0235923",
+   "tt3718778",
+   "tt1623288",
+   "tt1142977",
+   "tt6739094",
+   "beetlejuice",
+   "tt1214085",
+   "tt0488477",
+   "tt0877057",
+   "tt0500092",
+   "tt0433722",
+   "tt0216651",
+   "tt6517102",
+   "tt11147852",
+   "tt0495212",
+   "parasyte"
+  ],
+  "items": [
+   {
+    "id": "tt0235923",
+    "title": "Invader ZIM",
+    "year": "2001",
+    "type": "Series",
+    "section": "catalog",
+    "creator": "Jhonen Vasquez",
+    "description": "An alien invader disguises himself as a schoolchild while his robot companion undermines his plans. Macabre animated comedy.",
+    "poster": "https://images.metahub.space/poster/medium/tt0235923/img",
+    "source": "https://www.imdb.com/title/tt0235923/",
+    "genres": [
+     "Animation",
+     "Action",
+     "Adventure"
+    ],
+    "contentNote": "Macabre comedy",
+    "runtime": null,
+    "imdbRating": "8.4",
+    "runtimeBasis": "Omitted: source metadata does not establish a valid per-episode runtime."
+   },
+   {
+    "id": "tt3718778",
+    "title": "Over the Garden Wall",
+    "year": "2014",
+    "type": "Series",
+    "section": "catalog",
+    "creator": "Katie Krentz, Patrick McHale",
+    "description": "Two brothers try to find their way home through a mysterious autumn forest. An animated folk tale with frightening moments.",
+    "poster": "https://images.metahub.space/poster/medium/tt3718778/img",
+    "source": "https://www.imdb.com/title/tt3718778/",
+    "genres": [
+     "Animation",
+     "Short",
+     "Adventure"
+    ],
+    "contentNote": "Spooky folk tale",
+    "runtime": "11 min",
+    "imdbRating": "8.7"
+   },
+   {
+    "id": "tt1623288",
+    "title": "ParaNorman",
+    "year": "2012",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Chris Butler, Sam Fell",
+    "description": "A boy who speaks to ghosts tries to stop a curse from overtaking his town. Spooky stop-motion adventure.",
+    "poster": "https://images.metahub.space/poster/medium/tt1623288/img",
+    "source": "https://www.imdb.com/title/tt1623288/",
+    "genres": [
+     "Animation",
+     "Adventure",
+     "Comedy"
+    ],
+    "runtime": "93 min",
+    "imdbRating": "7.0"
+   },
+   {
+    "id": "tt1142977",
+    "title": "Frankenweenie",
+    "year": "2012",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Tim Burton",
+    "description": "A boy brings his dog back to life, inspiring other children to repeat his experiment. A stop-motion monster story.",
+    "poster": "https://images.metahub.space/poster/medium/tt1142977/img",
+    "source": "https://www.imdb.com/title/tt1142977/",
+    "genres": [
+     "Animation",
+     "Comedy",
+     "Drama"
+    ],
+    "runtime": "87 min",
+    "imdbRating": "6.9"
+   },
+   {
+    "id": "tt6739094",
+    "title": "Invader ZIM: Enter the Florpus",
+    "year": "2019",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Hae Young Jung, Young Kyun Park, Jhonen Vasquez",
+    "description": "Zim’s latest scheme threatens Earth, with Dib and GIR caught in the chaos. Animated science-fiction comedy.",
+    "poster": "https://images.metahub.space/poster/medium/tt6739094/img",
+    "source": "https://www.imdb.com/title/tt6739094/",
+    "genres": [
+     "Animation",
+     "Action",
+     "Adventure"
+    ],
+    "runtime": "71 min",
+    "imdbRating": "7.4"
+   },
+   {
+    "id": "tt1214085",
+    "title": "Soul Eater",
+    "year": "2008",
+    "type": "Series",
+    "section": "catalog",
+    "creator": "Atsushi Ohkubo (original manga)",
+    "description": "Students who wield living weapons train to collect corrupted souls. Supernatural action anime with comic horror.",
+    "poster": "https://images.metahub.space/poster/medium/tt1214085/img",
+    "source": "https://www.imdb.com/title/tt1214085/",
+    "genres": [
+     "Animation",
+     "Action",
+     "Adventure"
+    ],
+    "runtime": null,
+    "imdbRating": "7.7",
+    "runtimeBasis": "Omitted: source metadata does not establish a valid per-episode runtime."
+   },
+   {
+    "id": "tt0488477",
+    "title": "XXXHOLiC",
+    "year": "2006",
+    "type": "Series",
+    "section": "catalog",
+    "creator": "CLAMP (original manga)",
+    "description": "A student haunted by spirits begins working for a woman who grants wishes. Supernatural anime about bargains and their consequences.",
+    "poster": "https://images.metahub.space/poster/medium/tt0488477/img",
+    "source": "https://www.imdb.com/title/tt0488477/",
+    "genres": [
+     "Animation",
+     "Comedy",
+     "Drama"
+    ],
+    "imdbRating": "7.6"
+   },
+   {
+    "id": "tt0877057",
+    "title": "Death Note",
+    "year": "2006",
+    "type": "Series",
+    "section": "catalog",
+    "creator": "Tsugumi Ohba, Takeshi Obata (original manga)",
+    "description": "A student discovers a notebook that kills anyone whose name he writes in it. A dark anime thriller about murder and power.",
+    "poster": "https://images.metahub.space/poster/medium/tt0877057/img",
+    "source": "https://www.imdb.com/title/tt0877057/",
+    "genres": [
+     "Animation",
+     "Crime",
+     "Drama"
+    ],
+    "runtime": "24 min",
+    "imdbRating": "8.9"
+   },
+   {
+    "id": "tt6517102",
+    "title": "Castlevania",
+    "year": "2017",
+    "type": "Series",
+    "section": "catalog",
+    "creator": "Warren Ellis",
+    "description": "A monster hunter joins the fight against Dracula’s army. Adult animated horror with graphic violence.",
+    "poster": "https://images.metahub.space/poster/medium/tt6517102/img",
+    "source": "https://www.imdb.com/title/tt6517102/",
+    "genres": [
+     "Animation",
+     "Action",
+     "Adventure"
+    ],
+    "contentNote": "Adult animation · graphic violence",
+    "runtime": "26 min",
+    "imdbRating": "8.3"
+   },
+   {
+    "id": "tt11147852",
+    "title": "Dorohedoro",
+    "year": "2020",
+    "type": "Series",
+    "section": "catalog",
+    "creator": "Kyu Hayashida",
+    "description": "A man with a reptile’s head searches for the sorcerer who transformed him. Adult fantasy anime with graphic violence.",
+    "poster": "https://images.metahub.space/poster/medium/tt11147852/img",
+    "source": "https://www.imdb.com/title/tt11147852/",
+    "genres": [
+     "Animation",
+     "Action",
+     "Comedy"
+    ],
+    "contentNote": "Adult animation · graphic violence",
+    "runtime": "25 min",
+    "imdbRating": "8.0"
+   },
+   {
+    "id": "tt0495212",
+    "title": "Hellsing Ultimate",
+    "year": "2006",
+    "type": "Series",
+    "section": "catalog",
+    "creator": "Kohta Hirano",
+    "description": "The Hellsing organization deploys a powerful vampire against supernatural enemies. Adult anime with graphic gore.",
+    "poster": "https://images.metahub.space/poster/medium/tt0495212/img",
+    "source": "https://www.imdb.com/title/tt0495212/",
+    "genres": [
+     "Animation",
+     "Action",
+     "Fantasy"
+    ],
+    "contentNote": "Adult animation · graphic violence",
+    "runtime": "50 min",
+    "imdbRating": "8.2"
+   }
+  ],
+  "contentNote": "Includes adult animation and manga with graphic violence."
+ }
+]

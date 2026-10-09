@@ -24,6 +24,7 @@ export function startDownload(
   destPath: string,
   onProgress: (p: DownloadProgress) => void,
   headers?: Record<string, string>,
+  mediaKind?: "audio",
 ): DownloadHandle {
   let settle = () => {};
   let fail = (_e: Error) => {};
@@ -70,6 +71,7 @@ export function startDownload(
     dest: destPath,
     headers: headers && Object.keys(headers).length > 0 ? headers : null,
     onEvent: channel,
+    mediaKind: mediaKind ?? null,
   }).catch((e: unknown) => {
     fail(e instanceof Error ? e : new Error(String(e)));
   });

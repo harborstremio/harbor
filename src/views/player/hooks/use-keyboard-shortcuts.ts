@@ -5,11 +5,16 @@ import { writePlayerPrefs } from "@/lib/player-prefs";
 import { writePlayerVolume } from "@/lib/player-volume";
 import { effectiveBinding, eventToBinding, isTypingTarget, type HotkeyId } from "@/lib/hotkeys";
 import { isWindowsDesktop } from "@/lib/platform";
-import { isRtxHdrBlocked } from "@/lib/player/rtx-hdr-policy";
+import { isRtxHdrBlocked, isRtxVsrBlocked } from "@/lib/player/rtx-video-policy";
+import { mediaKeyGate } from "@/lib/media-session";
+import { setVideoOwnsMediaKeys } from "@/lib/player/media-key-owner";
 import { useSettings } from "@/lib/settings";
+import { isAnyFullscreen, exitAnyFullscreen } from "@/lib/fullscreen-state";
+import { isBigPictureActive } from "@/lib/big-picture";
+import { getLeaveConfirm, openLeaveConfirm } from "@/lib/player/leave-confirm";
+import { isPlayerInteractionLocked } from "@/lib/player/interaction-lock";
 import { round2 } from "../player-utils";
 import { SFX } from "@/lib/sfx";
-import { requestPlayerClose } from "../request-player-close";
 
 export function useKeyboardShortcuts(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
@@ -17,6 +22,7 @@ export function useKeyboardShortcuts(params: {
   drawMode: boolean;
   setDrawMode: (v: boolean) => void;
   closePlayer: () => void;
+  returnToPreview?: () => void;
   playPauseToggle: () => void;
   seekStep: (delta: number) => void;
   seekTo: (sec: number) => void;
@@ -47,6 +53,8 @@ export function useKeyboardShortcuts(params: {
   onToggleAnime4k?: () => void;
   onAnime4kOn?: () => void;
   onAnime4kOff?: () => void;
+  onReloadSource?: () => void;
+  onRestartServer?: () => void;
   onVolumeFeedback?: (volume: number, muted: boolean) => void;
 }) {
   const {
@@ -55,6 +63,7 @@ export function useKeyboardShortcuts(params: {
     drawMode,
     setDrawMode,
     closePlayer,
+    returnToPreview,
     playPauseToggle,
     seekStep,
     seekTo,
@@ -84,12 +93,37 @@ export function useKeyboardShortcuts(params: {
     onToggleAnime4k,
     onAnime4kOn,
     onAnime4kOff,
+    onReloadSource,
+    onRestartServer,
     onVolumeFeedback,
   } = params;
   const { settings, update } = useSettings();
   const overrides = settings.hotkeys ?? {};
   const seekBackStepSec = settings.seekBackStepSec;
   const seekForwardStepSec = settings.seekForwardStepSec;
+  const seekBackStepShortSec = settings.seekBackStepShortSec;
+  const seekForwardStepShortSec = settings.seekForwardStepShortSec;
+  const [subtitleOffsetSec, setSubtitleOffsetSec] = useState<number | null>(null);
+  const subtitleOffsetTimerRef = useRef<number | null>(null);
+  const showSubtitleOffset = (delaySec: number) => {
+    setSubtitleOffsetSec(delaySec);
+    if (subtitleOffsetTimerRef.current != null) {
+      window.clearTimeout(subtitleOffsetTimerRef.current);
+    }
+    subtitleOffsetTimerRef.current = window.setTimeout(() => {
+      setSubtitleOffsetSec(null);
+      subtitleOffsetTimerRef.current = null;
+    }, 1800);
+  };
+  useEffect(
+    () => () => {
+      if (subtitleOffsetTimerRef.current != null) {
+        window.clearTimeout(subtitleOffsetTimerRef.current);
+      }
+    },
+    [],
+  );
+
   const holdRef = useRef<{
     key: string | null;
     timer: number | null;
@@ -97,9 +131,36 @@ export function useKeyboardShortcuts(params: {
     baseRate: number;
   }>({ key: null, timer: null, engaged: false, baseRate: 1 });
   const [holdSpeedActive, setHoldSpeedActive] = useState(false);
+  const mediaRef = useRef({
+    status: snap.status,
+    playPauseToggle,
+    seekStep,
+    seekTo,
+    onNextEp,
+    onPrevEp,
+    hasNextEp,
+    hasPrevEp,
+  });
+  mediaRef.current = {
+    status: snap.status,
+    playPauseToggle,
+    seekStep,
+    seekTo,
+    onNextEp,
+    onPrevEp,
+    hasNextEp,
+    hasPrevEp,
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (document.querySelector('[data-harbor-player][data-detached="true"]') && !e.key.startsWith("Media")) return;
+      const dock = document.querySelector('[data-harbor-player][data-docked="true"]');
+      if (dock && !dock.contains(e.target as Node) && !e.key.startsWith("Media")) return;
+      if (isPlayerInteractionLocked()) {
+        if (e.cancelable) e.preventDefault();
+        return;
+      }
       if (isTypingTarget(e)) return;
       // In the hub hero the keys belong to the page being browsed.
       if (isHeroDocked()) return;
@@ -109,31 +170,59 @@ export function useKeyboardShortcuts(params: {
 
       if (e.key === "MediaPlayPause") {
         e.preventDefault();
-        playPauseToggle();
+        if (mediaKeyGate()) playPauseToggle();
+        return;
+      }
+      if (e.key === "MediaPlay") {
+        e.preventDefault();
+        if (mediaRef.current.status !== "playing" && mediaKeyGate()) playPauseToggle();
+        return;
+      }
+      if (e.key === "MediaPause" || e.key === "MediaStop") {
+        e.preventDefault();
+        if (mediaRef.current.status === "playing" && mediaKeyGate()) playPauseToggle();
         return;
       }
       if (e.key === "MediaTrackNext" && hasNextEp && onNextEp) {
         e.preventDefault();
-        onNextEp();
+        if (mediaKeyGate()) onNextEp();
         return;
       }
       if (e.key === "MediaTrackPrevious" && hasPrevEp && onPrevEp) {
         e.preventDefault();
-        onPrevEp();
+        if (mediaKeyGate()) onPrevEp();
         return;
       }
 
       if (match("playerClose")) {
-        e.preventDefault();
-        e.stopPropagation();
-        void requestPlayerClose({
-          drawMode,
-          setDrawMode,
-          closePlayer,
-          playerEscExitsFullscreen: settings.playerEscExitsFullscreen,
-          playerConfirmLeave: settings.playerConfirmLeave,
-          onRememberConfirmLeave: () => update({ playerConfirmLeave: false }),
-        });
+        if (getLeaveConfirm().open) return;
+        if (drawMode) {
+          setDrawMode(false);
+          return;
+        }
+        if (returnToPreview) {
+          e.preventDefault();
+          returnToPreview();
+          return;
+        }
+        void (async () => {
+          if (
+            settings.playerEscExitsFullscreen &&
+            !isBigPictureActive() &&
+            (await isAnyFullscreen())
+          ) {
+            await exitAnyFullscreen();
+            return;
+          }
+          if (settings.playerConfirmLeave) {
+            openLeaveConfirm((remember) => {
+              if (remember) update({ playerConfirmLeave: false });
+              closePlayer();
+            });
+            return;
+          }
+          closePlayer();
+        })();
         return;
       }
       if (match("playerPip")) {
@@ -165,6 +254,16 @@ export function useKeyboardShortcuts(params: {
         seekStep(seekForwardStepSec);
         return;
       }
+      if (match("playerSeekBackShort")) {
+        e.preventDefault();
+        seekStep(-seekBackStepShortSec);
+        return;
+      }
+      if (match("playerSeekForwardShort")) {
+        e.preventDefault();
+        seekStep(seekForwardStepShortSec);
+        return;
+      }
       if (match("playerSeekBack30")) {
         e.preventDefault();
         seekStep(-30);
@@ -188,7 +287,10 @@ export function useKeyboardShortcuts(params: {
       if (match("playerVolumeUp")) {
         e.preventDefault();
         const step = e.shiftKey ? 0.5 : 0.05;
-        const max = bridgeRef.current?.capabilities().engine === "mpv" ? 6 : 1;
+        const max =
+          bridgeRef.current?.capabilities().engine === "mpv"
+            ? Math.max(1, Math.min(6, settings.volumeBoostMax || 2))
+            : 1;
         const next = Math.min(max, Math.max(0, snap.volume + step));
         bridgeRef.current?.setVolume(next);
         bridgeRef.current?.setMuted(false);
@@ -200,7 +302,10 @@ export function useKeyboardShortcuts(params: {
       if (match("playerVolumeDown")) {
         e.preventDefault();
         const step = e.shiftKey ? 0.5 : 0.05;
-        const max = bridgeRef.current?.capabilities().engine === "mpv" ? 6 : 1;
+        const max =
+          bridgeRef.current?.capabilities().engine === "mpv"
+            ? Math.max(1, Math.min(6, settings.volumeBoostMax || 2))
+            : 1;
         const next = Math.min(max, Math.max(0, snap.volume - step));
         bridgeRef.current?.setVolume(next);
         bridgeRef.current?.setMuted(false);
@@ -249,6 +354,14 @@ export function useKeyboardShortcuts(params: {
         if (!isWindowsDesktop() || isRtxHdrBlocked(settings.playerHdrToSdr, svpActive)) return;
         if (bridgeRef.current?.capabilities().engine !== "mpv") return;
         update({ playerRtxHdr: !settings.playerRtxHdr });
+        return;
+      }
+      if (match("playerRtxVsrToggle")) {
+        e.preventDefault();
+        if (e.repeat) return;
+        if (!isWindowsDesktop() || isRtxVsrBlocked(svpActive)) return;
+        if (bridgeRef.current?.capabilities().engine !== "mpv") return;
+        update({ playerRtxVsr: !settings.playerRtxVsr });
         return;
       }
       if (match("playerPanscanUp") && onPanscanUp) {
@@ -315,6 +428,7 @@ export function useKeyboardShortcuts(params: {
         const step = e.shiftKey ? 0.05 : 0.1;
         const delay = round2(snap.subDelaySec - step);
         bridgeRef.current?.setSubDelay(delay);
+        showSubtitleOffset(delay);
         writePlayerPrefs(metaId, { subDelaySec: delay });
         return;
       }
@@ -323,6 +437,7 @@ export function useKeyboardShortcuts(params: {
         const step = e.shiftKey ? 0.05 : 0.1;
         const delay = round2(snap.subDelaySec + step);
         bridgeRef.current?.setSubDelay(delay);
+        showSubtitleOffset(delay);
         writePlayerPrefs(metaId, { subDelaySec: delay });
         return;
       }
@@ -369,6 +484,18 @@ export function useKeyboardShortcuts(params: {
         onClipRecord();
         return;
       }
+      if (match("playerReloadSource") && onReloadSource) {
+        e.preventDefault();
+        if (e.repeat) return;
+        onReloadSource();
+        return;
+      }
+      if (match("playerRestartServer") && onRestartServer) {
+        e.preventDefault();
+        if (e.repeat) return;
+        onRestartServer();
+        return;
+      }
       if (!e.ctrlKey && !e.metaKey && !e.altKey) {
         if (e.key === "0") {
           e.preventDefault();
@@ -403,6 +530,11 @@ export function useKeyboardShortcuts(params: {
     const onKeyUp = (e: KeyboardEvent) => {
       if (isHeroDocked()) return;
       const h = holdRef.current;
+      if (isPlayerInteractionLocked()) {
+        if (e.cancelable) e.preventDefault();
+        if (h.key != null && e.key === h.key) releaseHold();
+        return;
+      }
       if (h.key == null || e.key !== h.key) return;
       if (releaseHold() === "tap") playPauseToggle();
     };
@@ -420,6 +552,7 @@ export function useKeyboardShortcuts(params: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     closePlayer,
+    returnToPreview,
     togglePip,
     drawMode,
     snap.muted,
@@ -430,6 +563,8 @@ export function useKeyboardShortcuts(params: {
     overrides,
     seekBackStepSec,
     seekForwardStepSec,
+    seekBackStepShortSec,
+    seekForwardStepShortSec,
     seekTo,
     toggleSwitcher,
     toggleEpisodePanel,
@@ -446,6 +581,8 @@ export function useKeyboardShortcuts(params: {
     onToggleAnime4k,
     onAnime4kOn,
     onAnime4kOff,
+    onReloadSource,
+    onRestartServer,
     onFrameStep,
     onVolumeFeedback,
     settings.playerEscExitsFullscreen,
@@ -453,9 +590,78 @@ export function useKeyboardShortcuts(params: {
     settings.playerVolumeSfx,
     settings.playerHdrToSdr,
     settings.playerRtxHdr,
+    settings.playerRtxVsr,
     svpActive,
     update,
   ]);
 
-  return { holdSpeedActive };
+  useEffect(() => {
+    if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return;
+    setVideoOwnsMediaKeys(true);
+    let dead = false;
+    let cleanup: (() => void) | undefined;
+    void import("@tauri-apps/api/event").then(async ({ listen }) => {
+      const u1 = await listen<string>("harbor://media-key", (e) => {
+        const m = mediaRef.current;
+        const playing = m.status === "playing";
+        switch (e.payload) {
+          case "playpause":
+            if (mediaKeyGate()) m.playPauseToggle();
+            break;
+          case "play":
+            if (!playing && mediaKeyGate()) m.playPauseToggle();
+            break;
+          case "pause":
+          case "stop":
+            if (playing && mediaKeyGate()) m.playPauseToggle();
+            break;
+          case "next":
+            if (m.hasNextEp && m.onNextEp && mediaKeyGate()) m.onNextEp();
+            break;
+          case "previous":
+            if (m.hasPrevEp && m.onPrevEp && mediaKeyGate()) m.onPrevEp();
+            break;
+        }
+      });
+      const u2 = await listen<number>("harbor://media-seek-relative", (e) => {
+        if (typeof e.payload === "number" && Number.isFinite(e.payload)) {
+          mediaRef.current.seekStep(e.payload);
+        }
+      });
+      const u3 = await listen<number>("harbor://media-seek-absolute", (e) => {
+        if (typeof e.payload === "number" && Number.isFinite(e.payload)) {
+          mediaRef.current.seekTo(e.payload);
+        }
+      });
+      const u4 = await listen<number>("harbor://media-set-volume", (e) => {
+        if (typeof e.payload === "number" && Number.isFinite(e.payload)) {
+          const vol = Math.max(0, Math.min(1, e.payload));
+          bridgeRef.current?.setVolume(vol);
+          bridgeRef.current?.setMuted(false);
+          writePlayerVolume({ volume: vol, muted: false });
+          onVolumeFeedback?.(vol, false);
+        }
+      });
+      if (dead) {
+        u1();
+        u2();
+        u3();
+        u4();
+      } else {
+        cleanup = () => {
+          u1();
+          u2();
+          u3();
+          u4();
+        };
+      }
+    });
+    return () => {
+      dead = true;
+      setVideoOwnsMediaKeys(false);
+      cleanup?.();
+    };
+  }, []);
+
+  return { holdSpeedActive, subtitleOffsetSec };
 }

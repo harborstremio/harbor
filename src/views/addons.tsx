@@ -6,11 +6,8 @@ import { useScrollMemory, useView } from "@/lib/view";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { AddonsMosaicBackdrop } from "@/components/addons-mosaic-backdrop";
-import { CURATED_RAILS, heroEntry } from "@/lib/addons-store/curated";
-import { useAddonsCatalog, buildRail, type ResolvedAddon } from "@/lib/addons-store/store";
-import { getAddon, useCategories } from "@/lib/providers/stremio-addons";
-import { communityFor, ensureCommunityIndex } from "@/lib/providers/stremio-addons-index";
-import { clearPendingDeepLink, consumePendingDeepLink, onDeepLinkInstall } from "@/lib/deep-link";
+import { useAddonsCatalog, type ResolvedAddon } from "@/lib/addons-store/store";
+import { useCategories } from "@/lib/providers/stremio-addons";
 import { prefetchTopAddonLogos } from "@/lib/providers/addon-logo-prefetch";
 import { relatedAddons, recommendedAddons } from "@/lib/addons-store/recommend";
 import { loadDisplayOrder } from "@/lib/addons-store/reorder";
@@ -37,6 +34,7 @@ import { OrganizeAddonsPage } from "./addons/organize/page";
 import { consumeAddonsTab, type Tab, type ToastInfo } from "./addons/addons-types";
 import { BrowsePane } from "./addons/browse-pane";
 import { DiscoverPane } from "./addons/discover-pane";
+import { ScrollToTop } from "./addons/scroll-to-top";
 import { InstalledPane } from "./addons/installed-pane";
 import { SearchBar } from "./addons/search-bar";
 import { Toaster } from "./addons/toaster";
@@ -67,19 +65,21 @@ const BROWSE_MODES: Array<{
 
 void Library;
 
-export function AddonsView() {
+export function AddonsView({ active = true }: { active?: boolean }) {
   const t = useT();
   const { settings, update } = useSettings();
   const { authKey } = useAuth();
-  const { byId, installedIds, loading, refetch } = useAddonsCatalog(settings.showAdultAddons);
+  const { byId, installedIds, installedAddons, loading, refetch } = useAddonsCatalog(
+    settings.showAdultAddons,
+  );
   const { addonDetailId, openAddonDetail, goBack } = useView();
   const [tab, setTab] = useState<Tab>(() => consumeAddonsTab() ?? "discover");
 
   useEffect(() => {
-    const requested = consumeAddonsTab();
-    if (requested) setTab(requested);
     void prefetchTopAddonLogos();
-    void ensureCommunityIndex().catch(() => undefined);
+    void import("@/lib/providers/stremio-addons-index").then((m) =>
+      m.ensureCommunityIndex().catch(() => undefined),
+    );
   }, []);
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [browseMode, setBrowseMode] = useState<BrowseModeId>("top");
@@ -95,6 +95,16 @@ export function AddonsView() {
     if (!settings.showAdultAddons && categoryFilter === "nsfw") setCategoryFilter(null);
   }, [settings.showAdultAddons, categoryFilter]);
   const [query, setQuery] = useState("");
+  useEffect(() => {
+    if (!active) return;
+    const requested = consumeAddonsTab();
+    if (!requested) return;
+    // Settings can reopen this still-mounted page. Explicit Manage navigation
+    // should show the full collection rather than a previous catalog search.
+    setTab(requested);
+    setQuery("");
+    setCategoryFilter(null);
+  }, [active]);
   const goToCategory = (cat: string) => {
     setCategoryFilter(cat);
     setTab("browse");
@@ -114,15 +124,19 @@ export function AddonsView() {
 
   useEffect(() => {
     let unlisten: (() => void) | null = null;
-    const pending = consumePendingDeepLink();
-    if (pending && !window.__harborInstallerOpen) {
-      setInstallModal({ kind: "install", url: pending });
-    }
-    unlisten = onDeepLinkInstall((rawUrl) => {
-      if (window.__harborInstallerOpen) return;
-      clearPendingDeepLink();
-      setInstallModal({ kind: "install", url: rawUrl });
-    });
+    void import("@/lib/deep-link").then(
+      ({ onDeepLinkInstall, consumePendingDeepLink, clearPendingDeepLink }) => {
+        const pending = consumePendingDeepLink();
+        if (pending && !window.__harborInstallerOpen) {
+          setInstallModal({ kind: "install", url: pending });
+        }
+        unlisten = onDeepLinkInstall((rawUrl) => {
+          if (window.__harborInstallerOpen) return;
+          clearPendingDeepLink();
+          setInstallModal({ kind: "install", url: rawUrl });
+        });
+      },
+    );
     return () => {
       unlisten?.();
     };
@@ -150,22 +164,6 @@ export function AddonsView() {
     [],
   );
 
-  const hero = useMemo(() => {
-    const h = heroEntry();
-    if (!h) return null;
-    const r = byId.get(h.id);
-    return r ? { entry: h, resolved: r } : null;
-  }, [byId]);
-
-  const railsData = useMemo(
-    () =>
-      CURATED_RAILS.map((rail) => ({
-        rail,
-        items: buildRail(byId, rail.id, 16),
-      })).filter((r) => r.items.length > 0),
-    [byId],
-  );
-
   const allAddons = useMemo(() => [...byId.values()], [byId]);
 
   const installed = useMemo(() => {
@@ -174,14 +172,12 @@ export function AddonsView() {
     seq.forEach((url, i) => {
       if (!rank.has(url)) rank.set(url, i);
     });
-    return allAddons
-      .filter((r) => r.installed)
-      .sort(
-        (a, b) =>
-          (rank.get(a.transportUrl) ?? Number.MAX_SAFE_INTEGER) -
-          (rank.get(b.transportUrl) ?? Number.MAX_SAFE_INTEGER),
-      );
-  }, [allAddons]);
+    return [...installedAddons].sort(
+      (a, b) =>
+        (rank.get(a.transportUrl) ?? Number.MAX_SAFE_INTEGER) -
+        (rank.get(b.transportUrl) ?? Number.MAX_SAFE_INTEGER),
+    );
+  }, [installedAddons]);
   const trimmedQuery = query.trim();
   useEffect(() => {
     if (trimmedQuery.length > 0 && tab !== "installed") setTab("browse");
@@ -291,7 +287,7 @@ export function AddonsView() {
   }
 
   return (
-    <main className="relative flex h-full flex-col overflow-hidden">
+    <main data-tv-chrome-offset className="relative flex h-full flex-col overflow-hidden">
       {tab === "discover" && <AddonsMosaicBackdrop />}
       <AgeGateModal
         open={ageGateOpen}
@@ -321,7 +317,7 @@ export function AddonsView() {
                         active ? "bg-canvas/15 text-canvas" : "bg-edge text-ink-muted"
                       }`}
                     >
-                      {installedIds.size}
+                      {installed.length}
                     </span>
                   </button>
                 );
@@ -347,7 +343,7 @@ export function AddonsView() {
                     {btn}
                     <div className="pointer-events-none invisible absolute start-0 top-full z-50 mt-2 w-80 rounded-xl border border-edge-soft bg-elevated/95 px-4 py-3 text-[12.5px] leading-relaxed text-ink-muted opacity-0 shadow-xl backdrop-blur-md transition duration-150 group-hover:visible group-hover:opacity-100">
                       {t(
-                        "Curated for popularity and reliability. No paid placements. Install anything else by URL on the Browse tab.",
+                        "Popular community addons ranked by the public directory's stars. Install anything else by URL on the Browse tab.",
                       )}
                     </div>
                   </div>
@@ -482,6 +478,8 @@ export function AddonsView() {
         )}
       </header>
 
+      <ScrollToTop scrollRef={scrollRef} />
+
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-12 pb-20 pt-6">
         {loading && allAddons.length === 0 ? (
           <div className="flex h-full items-center justify-center py-24">
@@ -489,12 +487,8 @@ export function AddonsView() {
           </div>
         ) : tab === "discover" ? (
           <DiscoverPane
-            hero={hero}
-            rails={railsData}
             installedIds={installedIds}
             onOpen={openAddonDetail}
-            onInstall={onInstall}
-            onUninstall={onUninstall}
             onCategorySelect={goToCategory}
             authKey={authKey}
             onRefetch={refetch}
@@ -619,12 +613,34 @@ function RemoteOrLocalDetail({
     setRemote(null);
     setFailed(false);
     (async () => {
+      const { recallPendingAddon } = await import("@/lib/addons-store/pending-detail");
+      const carried = recallPendingAddon(addonDetailId);
+      if (carried) {
+        const manifest =
+          (carried.manifest as ResolvedAddon["manifest"] | null) ??
+          ((await fetchManifestAt(carried.manifestUrl).catch(
+            () => null,
+          )) as ResolvedAddon["manifest"] | null);
+        if (cancelled) return;
+        if (manifest) {
+          setRemote({
+            manifest,
+            transportUrl: carried.manifestUrl,
+            source: "community",
+            installed: installedIds.has(addonDetailId),
+          });
+          return;
+        }
+      }
+      const { communityForLoose, ensureCommunityIndex } =
+        await import("@/lib/providers/stremio-addons-index");
       await ensureCommunityIndex().catch(() => undefined);
-      const community = communityFor(addonDetailId);
+      const community = communityForLoose(addonDetailId);
       if (!community) {
         if (!cancelled) setFailed(true);
         return;
       }
+      const { getAddon } = await import("@/lib/providers/stremio-addons");
       try {
         const d = await getAddon(community.slug);
         if (cancelled) return;

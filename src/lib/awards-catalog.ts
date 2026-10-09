@@ -161,6 +161,127 @@ export const AWARD_CATALOG: Record<AwardType, AwardMeta> = {
       { key: "silver_bear_director", name: "Silver Bear for Best Director" },
     ],
   },
+  bafta_tv: {
+    type: "bafta_tv",
+    title: "BAFTA Television Awards",
+    shorthand: "BAFTA TV",
+    tagline: "British Academy of Film and Television Arts · since 1955",
+    description:
+      "Britain's biggest night in television. A separate ceremony from the film BAFTAs, honoring the best drama, comedy, and performances on British screens, plus the standout international shows of the year.",
+    founded: 1955,
+    categories: [
+      { key: "best_drama_series", name: "Best Drama Series" },
+      { key: "best_scripted_comedy", name: "Best Scripted Comedy" },
+      { key: "best_actor", name: "Best Actor" },
+      { key: "best_actress", name: "Best Actress" },
+      { key: "best_international", name: "Best International Programme" },
+    ],
+  },
+  annie: {
+    type: "annie",
+    title: "Annie Awards",
+    shorthand: "The Annies",
+    tagline: "ASIFA-Hollywood · since 1972",
+    description:
+      "Animation's own awards night, presented by the Hollywood branch of the International Animated Film Association. The Best Animated Feature Annie is the genre's most telling prize outside the Oscars.",
+    founded: 1972,
+    categories: [
+      { key: "best_animated_feature", name: "Best Animated Feature" },
+      { key: "best_tv_production", name: "Best Animated Television Production" },
+    ],
+  },
+  spirit: {
+    type: "spirit",
+    title: "Independent Spirit Awards",
+    shorthand: "Spirit Awards",
+    tagline: "Film Independent · since 1985",
+    description:
+      "The beach-tent celebration of independent film, held the Saturday before the Oscars. Honors films made outside the studio system, and has crowned many eventual Best Picture winners first.",
+    founded: 1985,
+    categories: [
+      { key: "best_film", name: "Best Feature" },
+      { key: "best_director", name: "Best Director" },
+      { key: "best_first_film", name: "Best First Feature" },
+    ],
+  },
+  saturn: {
+    type: "saturn",
+    title: "Saturn Awards",
+    shorthand: "Saturns",
+    tagline: "Academy of Science Fiction, Fantasy and Horror Films · since 1973",
+    description:
+      "The genre awards: science fiction, fantasy, and horror get their own night. For fifty years the Saturns have honored the films the mainstream ceremonies overlooked.",
+    founded: 1973,
+    categories: [
+      { key: "best_scifi_film", name: "Best Science Fiction Film" },
+      { key: "best_fantasy_film", name: "Best Fantasy Film" },
+      { key: "best_horror_film", name: "Best Horror Film" },
+    ],
+  },
+  cesar: {
+    type: "cesar",
+    title: "César Awards",
+    shorthand: "Césars",
+    tagline: "Académie des Arts et Techniques du Cinéma · since 1976",
+    description:
+      "France's national film awards, voted by over four thousand members of the French film academy. The César for Best Film is the highest honor in French cinema.",
+    founded: 1976,
+    categories: [
+      { key: "best_film", name: "Best Film" },
+      { key: "best_director", name: "Best Director" },
+    ],
+  },
+  goya: {
+    type: "goya",
+    title: "Goya Awards",
+    shorthand: "Goyas",
+    tagline: "Academia de Cine de España · since 1987",
+    description:
+      "Spain's premier film awards, named after the painter Francisco de Goya. The bronze bust of Goya is Spanish cinema's most coveted prize.",
+    founded: 1987,
+    categories: [
+      { key: "best_film", name: "Best Film" },
+      { key: "best_director", name: "Best Director" },
+    ],
+  },
+  blue_dragon: {
+    type: "blue_dragon",
+    title: "Blue Dragon Film Awards",
+    shorthand: "Blue Dragons",
+    tagline: "Sports Chosun · since 1963",
+    description:
+      "South Korea's most prestigious film awards, held in Seoul every year. The Blue Dragon for Best Film has crowned the giants of Korean cinema from Oldboy to Parasite.",
+    founded: 1963,
+    categories: [
+      { key: "best_film", name: "Best Film" },
+      { key: "best_director", name: "Best Director" },
+    ],
+  },
+  baeksang: {
+    type: "baeksang",
+    title: "Baeksang Arts Awards",
+    shorthand: "Baeksang",
+    tagline: "Ilgan Sports · since 1965",
+    description:
+      "Korea's only major awards honoring both film and television. The Baeksang Grand Prize is the crowning achievement in Korean entertainment, and its TV categories are K-drama's biggest honors.",
+    founded: 1965,
+    categories: [
+      { key: "best_film", name: "Best Film" },
+      { key: "best_drama", name: "Best Drama" },
+    ],
+  },
+  bifa: {
+    type: "bifa",
+    title: "British Independent Film Awards",
+    shorthand: "BIFAs",
+    tagline: "British Independent Film Awards · since 1998",
+    description:
+      "The celebration of British filmmaking outside the studio system. BIFA wins regularly launch films and careers straight into the BAFTA and Oscar conversation.",
+    founded: 1998,
+    categories: [
+      { key: "best_film", name: "Best British Independent Film" },
+    ],
+  },
   other: {
     type: "other",
     title: "Other Awards",

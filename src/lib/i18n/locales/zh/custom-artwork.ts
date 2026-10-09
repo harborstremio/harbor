@@ -1,0 +1,21 @@
+export default {
+  "artwork.title": "加载与启动画面",
+  "artwork.hint": "使用 Lottie 动画、GIF 或图片。最大 8 MB。",
+  "artwork.loading": "加载动画",
+  "artwork.loadingHint": "用于连接和加载界面。",
+  "artwork.launch": "启动标志",
+  "artwork.launchHint": "打开 Harbor 时显示，包括 Big Picture 模式。",
+  "artwork.original": "Harbor 原版",
+  "artwork.choose": "选择文件",
+  "artwork.saving": "正在保存…",
+  "artwork.reset": "重置",
+  "artwork.chooseLoading": "选择加载动画",
+  "artwork.chooseLaunch": "选择启动标志",
+  "artwork.resetLoading": "重置加载动画",
+  "artwork.resetLaunch": "重置启动标志",
+  "artwork.local": "保存在此设备上。开启减少动态效果后显示静态图片。",
+  "artwork.error.large": "请选择更小的文件：最大 8 MB，尺寸不超过 4096 × 4096 像素。",
+  "artwork.error.external": "此动画使用外部媒体。请在导出时嵌入图片。",
+  "artwork.error.storage": "无法在此设备上保存文件。之前的选择未更改。",
+  "artwork.error.invalid": "无法读取此文件。请选择 Lottie（.json 或 .lottie）、GIF、PNG、JPEG 或 WebP。"
+};

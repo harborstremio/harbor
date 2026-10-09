@@ -19,7 +19,30 @@ function startLabel(
 
 import { SportsHoverPreview } from "./sports-hover-preview";
 
+const ROUND_SHORT: Array<[RegExp, string]> = [
+  [/^final$/i, "FINAL"],
+  [/semifinal/i, "SF"],
+  [/quarterfinal/i, "QF"],
+  [/qualifying/i, "QUAL"],
+  [/round of (\d+)/i, "R$1"],
+  [/round (\d+)/i, "R$1"],
+];
+
+export function shortRound(round: string): string {
+  for (const [re, out] of ROUND_SHORT) {
+    if (re.test(round)) return round.replace(re, out).toUpperCase();
+  }
+  return round;
+}
+
+function contextLabel(game: SportsGame): string {
+  const c = game.context;
+  if (!c) return game.league;
+  return [c.name, shortRound(c.round)].filter(Boolean).join(" · ") || game.league;
+}
+
 export function SportsCard({ game, onSelect }: { game: SportsGame; onSelect: (g: SportsGame) => void }) {
+  const t = useT();
   const finalGame = game.state === "post";
   const live = game.state === "in";
   const hasScores = (game.home.score && game.home.score !== "0") || (game.away.score && game.away.score !== "0");
@@ -31,10 +54,13 @@ export function SportsCard({ game, onSelect }: { game: SportsGame; onSelect: (g:
         type="button"
         className="flex h-24 w-[260px] shrink-0 flex-col justify-between rounded-xl border border-edge-soft/55 bg-elevated p-3 text-start transition-colors duration-150 hover:border-edge"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <Status game={game} />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-subtle">
-            {game.league}
+          <span className="flex min-w-0 items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-subtle">
+            {game.context?.major && (
+              <span className="shrink-0 rounded bg-accent/20 px-1 text-[9px] text-accent">{t("SLAM")}</span>
+            )}
+            <span className="truncate">{contextLabel(game)}</span>
           </span>
         </div>
         <SideRow side={game.away} active={live || finalGame} dim={finalGame && !game.away.winner} showWinner={showWinIndicator} />

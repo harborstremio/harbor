@@ -1,0 +1,80 @@
+.music-dock-track {
+  container: music-dock-track / inline-size;
+}
+@container music-dock-track (max-width: 220px) {
+  [data-music-dock-like] {
+    display: none;
+  }
+}
+@container music-dock-track (max-width: 148px) {
+  [data-music-dock-art] {
+    display: none;
+  }
+}
+@container music-dock-track (max-width: 76px) {
+  .music-dock-track > * {
+    display: none;
+  }
+}
+
+[data-music-dock]:not([data-music-dock-tab]) {
+  container-name: music-dock;
+}
+
+.music-dock-viz {
+  display: none;
+  inline-size: 76px;
+  block-size: 16px;
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  margin-inline-end: 12px;
+  color: color-mix(
+    in srgb,
+    var(--music-art-accent, var(--color-accent)) 35%,
+    var(--color-ink-muted)
+  );
+  contain: layout paint;
+  pointer-events: none;
+}
+
+.music-dock-viz-strip {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  block-size: 100%;
+}
+
+/* Fixed frequency bands rise from the baseline; nothing scrolls sideways. */
+.music-dock-viz-bar {
+  --v: 0;
+  flex: 1;
+  min-inline-size: 0;
+  block-size: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  transform: scaleY(calc(0.08 + var(--v) * 0.92));
+  transform-origin: bottom;
+  opacity: calc(0.55 + var(--v) * 0.45);
+  transition:
+    transform var(--response, 45ms) ease-out,
+    opacity 80ms linear;
+}
+
+.music-dock-viz[data-resting="true"] .music-dock-viz-bar {
+  transform: scaleY(0.08);
+  opacity: 0.25;
+}
+
+@container music-dock (min-width: 700px) {
+  @container music-dock-track (min-width: 272px) {
+    .music-dock-viz {
+      display: block;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-dock-viz {
+    display: none;
+  }
+}

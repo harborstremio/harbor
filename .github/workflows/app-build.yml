@@ -12,6 +12,12 @@ on:
 permissions:
   contents: read
 
+env:
+  # The extension compat layer is not in this repository, so a runner cannot stage its runtime.
+  # This build compiles without it and says so. Drop this line once the layer ships with the
+  # checkout, and the build starts refusing to omit it.
+  HARBOR_CAPSTAN_OPTIONAL: "1"
+
 concurrency:
   group: app-build-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -73,6 +79,14 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
+
+      - name: Set up Pokémon engine SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.401'
+
+      - name: Build Pokémon engine and corresponding source bundle
+        run: node tools/pokemon-engine/build.mjs --fetch-source "${{ runner.temp }}/harbor-pokemon-source" --output src-tauri/resources/pokemon-engine --artifacts "${{ runner.temp }}/harbor-pokemon-build"
 
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile

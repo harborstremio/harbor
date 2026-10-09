@@ -7,7 +7,8 @@ import type { PlayerStatus } from "@/lib/player/bridge";
 import type { PlayerSrc } from "@/lib/view";
 import { cloudWriteId } from "@/lib/stremio";
 
-const CACHE_MS = 12000;
+const CACHE_MS = 60000;
+const REFRESH_MS = 300000;
 const WARM_MS = 4000;
 const EXIT_GRAB_MS = 700;
 const GRAB_FULL_MS = 3500;
@@ -43,9 +44,11 @@ export function useExitSnapshot(params: {
   const { src, engine, status, durationSec, videoMountRef, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled } = params;
   const { settings } = useSettings();
   const fullQuality = settings.cwSnapshotFullQuality;
-  const latest = useRef({ src, engine, durationSec, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled, fullQuality });
-  latest.current = { src, engine, durationSec, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled, fullQuality };
+  const snapshotsOff = settings.cwSnapshotRetentionDays === 0;
+  const latest = useRef({ src, engine, durationSec, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled, fullQuality, snapshotsOff });
+  latest.current = { src, engine, durationSec, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled, fullQuality, snapshotsOff };
   const lastGoodRef = useRef<Cached | null>(null);
+  const lastGrabAtRef = useRef(0);
   const capturedKeyRef = useRef<string | null>(null);
 
   const grabFrame = useCallback(
@@ -64,7 +67,8 @@ export function useExitSnapshot(params: {
   );
 
   const captureExitSnapshot = useCallback(async () => {
-    const { src: s, durationSec: dur, resolvedImdbId: resolved, resolvedImdbVerified: verified } = latest.current;
+    const { src: s, durationSec: dur, resolvedImdbId: resolved, resolvedImdbVerified: verified, snapshotsOff: off } = latest.current;
+    if (off) return;
     const id = snapshotId(s, resolved, verified);
     if (!id) {
       persist(lastGoodRef.current);
@@ -96,28 +100,30 @@ export function useExitSnapshot(params: {
   }, [grabFrame]);
 
   useEffect(() => {
-    if (status !== "playing") return;
+    if (status !== "playing" || snapshotsOff) return;
     const tick = async () => {
       const { src: s, durationSec: dur, resolvedImdbId: resolved, resolvedImdbVerified: verified } = latest.current;
       const id = snapshotId(s, resolved, verified);
       if (!id) return;
+      const good = lastGoodRef.current;
+      if (good && good.id === id && Date.now() - lastGrabAtRef.current < REFRESH_MS) return;
       const cur = getPlaybackPosition();
       if (!Number.isFinite(cur) || cur <= 0 || nearEnd(cur, dur, false)) return;
       const img = await grabFrame(true);
       if (!img) return;
+      lastGrabAtRef.current = Date.now();
       if (latest.current.src.meta.id !== s.meta.id) return;
       const cached = { img, id };
       lastGoodRef.current = cached;
       persist(cached);
     };
-    void tick();
     const warm = window.setTimeout(() => void tick(), WARM_MS);
     const id = window.setInterval(() => void tick(), CACHE_MS);
     return () => {
       window.clearTimeout(warm);
       window.clearInterval(id);
     };
-  }, [status, grabFrame]);
+  }, [status, snapshotsOff, grabFrame]);
 
   useEffect(() => {
     const flush = () => persist(lastGoodRef.current);

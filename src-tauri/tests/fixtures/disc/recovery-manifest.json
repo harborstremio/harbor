@@ -1,0 +1,19 @@
+{
+  "generator": "pycdlib 1.14.0",
+  "payloadBytes": 2097152,
+  "payloadSha256": "91d3beb88a9b2f778a6c44a1c53b63d3c79931845a9aef84b3fb414610bd1938",
+  "images": [
+    {
+      "name": "recovery-iso",
+      "bytes": 2158592,
+      "gzipBytes": 9016,
+      "sha256": "ed80134c112a1c960ef86b9949b47f8b7f4e873827b385bb07fb4ae1e1b32415"
+    },
+    {
+      "name": "recovery-udf",
+      "bytes": 2656256,
+      "gzipBytes": 10686,
+      "sha256": "13e47a292eca264dd55032744c422db236abcd2dd485a9f9dd790c873653ff33"
+    }
+  ]
+}

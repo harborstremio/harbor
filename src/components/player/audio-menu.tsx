@@ -1,13 +1,14 @@
-import { Check, Languages, RotateCcw, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Check, Languages, RotateCcw, Search, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { Flag } from "@/components/flag";
 import type { TrackInfo } from "@/lib/player/bridge";
 import { modalOverlayClose, modalOverlayEmitState, modalOverlayOpen } from "@/lib/modal-overlay";
-import { languageName } from "@/lib/subtitles/language";
+import { languageName, normalizeLang, trackLanguageName } from "@/lib/subtitles/language";
 import { useT } from "@/lib/i18n";
 import { useMenuSide } from "./menu-side";
 import { Tooltip } from "./transport/tooltip";
+import { watchOutsideMouseDown } from "@/lib/player/overlay-dismiss";
 
 type Props = {
   tracks: TrackInfo[];
@@ -18,6 +19,7 @@ type Props = {
   onDelay: (sec: number) => void;
   onOpenChange?: (open: boolean) => void;
   useOverlayPopup?: boolean;
+  iconUrl?: string;
 };
 
 function buildAudioOverlayState(props: Props) {
@@ -34,7 +36,7 @@ export function AudioMenu(props: Props) {
   const [open, setOpen] = useState(false);
   const [forceInline, setForceInline] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
-  const { side, measure } = useMenuSide(wrap, 360);
+  const { measure } = useMenuSide(wrap, 360);
   const useOverlay = props.useOverlayPopup === true;
   const propsRef = useRef(props);
   propsRef.current = props;
@@ -49,8 +51,7 @@ export function AudioMenu(props: Props) {
     const close = (e: MouseEvent) => {
       if (!wrap.current?.contains(e.target as Node)) setOpen(false);
     };
-    window.addEventListener("mousedown", close);
-    return () => window.removeEventListener("mousedown", close);
+    return watchOutsideMouseDown(close);
   }, [open, useOverlay]);
 
   useEffect(() => {
@@ -115,14 +116,15 @@ export function AudioMenu(props: Props) {
             open ? "bg-white/22 text-white" : "text-white/85 hover:bg-white/10 hover:text-white"
           }`}
         >
-          <Languages size={19} strokeWidth={2} />
+          {props.iconUrl ? (
+            <img src={props.iconUrl} alt="" className="h-[22px] w-[22px] shrink-0 select-none object-contain" draggable={false} />
+          ) : (
+            <Languages size={19} strokeWidth={2} />
+          )}
         </button>
       </Tooltip>
       {open && (forceInline || !useOverlay) && (
-        <div
-          data-tv-focus-scope
-          className={`absolute bottom-[calc(100%+10px)] ${side === "start" ? "start-0" : "end-0"} flex max-h-[400px] w-[360px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}
-        >
+        <div className="fixed end-14 bottom-[150px] flex max-h-[calc(100vh-174px)] w-[360px] max-w-[calc(100vw-72px)] flex-col overflow-hidden rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop">
           <AudioMenuBody {...props} onClose={() => setOpen(false)} />
         </div>
       )}
@@ -134,38 +136,86 @@ export function AudioMenuBody(props: Props & { onClose: () => void }) {
   return <MenuBody {...props} />;
 }
 
+/** Two or three tracks are read at a glance; a dozen dubs are not. */
+const SEARCH_FROM = 5;
+
+const fold = (text: string) => text.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
+
+/** Finds a language typed in its own script as readily as in English. */
+function trackMatches(track: TrackInfo, query: string): boolean {
+  const wanted = normalizeLang(query);
+  if (wanted && track.lang && normalizeLang(track.lang) === wanted) return true;
+  const haystack = [track.title, track.lang && languageName(track.lang), track.codec, track.channels];
+  return fold(haystack.filter(Boolean).join(" ")).includes(fold(query));
+}
+
 function MenuBody(props: Props & { onClose: () => void }) {
   const t = useT();
   const { tracks, selectedId, onSelect, onClose, delaySec, onDelay, engine } = props;
+  const [query, setQuery] = useState("");
+  const searchable = tracks.length >= SEARCH_FROM;
+  const shown = useMemo(() => {
+    const term = query.trim();
+    if (!searchable || !term) return tracks;
+    return tracks.filter((track) => trackMatches(track, term));
+  }, [tracks, query, searchable]);
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <header className="flex items-center justify-between border-b border-edge-soft px-4 py-2.5">
-        <div className="flex items-center gap-2.5">
-          <span className="text-[13.5px] font-semibold text-ink">{t("Audio")}</span>
-          {tracks.length > 0 && (
-            <span className="text-[11.5px] tabular-nums text-ink-subtle">{tracks.length}</span>
-          )}
+      <header className="flex flex-col gap-2.5 border-b border-edge-soft px-4 py-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="text-[13.5px] font-semibold text-ink">{t("Audio")}</span>
+            {tracks.length > 0 && (
+              <span className="text-[11.5px] tabular-nums text-ink-subtle">{shown.length}</span>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            aria-label={t("Close")}
+            className="flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+          >
+            <X size={13} strokeWidth={2.2} />
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          aria-label={t("Close")}
-          data-tv-modal-close
-          className="flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-        >
-          <X size={13} strokeWidth={2.2} />
-        </button>
+        {searchable && (
+          <div className="flex items-center gap-2 rounded-lg bg-raised px-2.5 py-1.5">
+            <Search size={13} strokeWidth={2.2} className="shrink-0 text-ink-subtle" aria-hidden />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={t("Search audio language")}
+              aria-label={t("Search audio language")}
+              className="min-w-0 flex-1 bg-transparent text-[12.5px] text-ink outline-none placeholder:text-ink-subtle"
+            />
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                aria-label={t("Clear")}
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+              >
+                <X size={11} strokeWidth={2.4} />
+              </button>
+            )}
+          </div>
+        )}
       </header>
 
       <div className="flex-1 overflow-y-auto p-2">
-        <TrackSection
-          tracks={tracks}
-          selectedId={selectedId}
-          engine={engine}
-          onSelect={(id) => {
-            onSelect(id);
-            onClose();
-          }}
-        />
+        {searchable && query.trim() && shown.length === 0 ? (
+          <div className="px-3 py-4 text-[12.5px] leading-relaxed text-ink-muted">
+            {t("No audio track in that language.")}
+          </div>
+        ) : (
+          <TrackSection
+            tracks={shown}
+            selectedId={selectedId}
+            engine={engine}
+            onSelect={(id) => {
+              onSelect(id);
+              onClose();
+            }}
+          />
+        )}
       </div>
 
       <DelayRow delay={delaySec} onDelay={onDelay} disabled={engine === "html5"} />
@@ -218,7 +268,7 @@ function TrackSection({
             </span>
             {t.lang && (
               <span className="mt-0.5 shrink-0">
-                <Flag language={languageName(t.lang)} size="sm" showLabel={false} />
+                <Flag language={trackLanguageName(t.lang, t.title)} size="sm" showLabel={false} />
               </span>
             )}
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -244,7 +294,7 @@ function trackTitle(t: TrackInfo, tr: (key: string) => string): string {
 
 function trackSubtitle(t: TrackInfo, tr: (key: string) => string): string {
   const parts: string[] = [];
-  if (t.lang) parts.push(languageName(t.lang));
+  if (t.lang) parts.push(trackLanguageName(t.lang, t.title));
   if (t.codec) parts.push(t.codec);
   if (t.channels) parts.push(t.channels);
   if (t.default) parts.push(tr("Default"));

@@ -1,7 +1,6 @@
-export type SubtitleLoadMetadata = {
-  format?: "srt" | "vtt" | "ass" | "ssa" | "sub";
-  encoding?: string;
-};
+import type { SubtitleLoadMetadata } from "@/lib/subtitles/types";
+
+export type { SubtitleLoadMetadata } from "@/lib/subtitles/types";
 
 export type SubtitleAddHandler = (
   url: string,

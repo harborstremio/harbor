@@ -1,5 +1,6 @@
 import { CastIcon } from "@/components/player/cast-icon";
 import type { CastDeviceInfo } from "@/lib/cast";
+import { useT } from "@/lib/i18n";
 
 export function CastingOverlay({
   device,
@@ -14,7 +15,8 @@ export function CastingOverlay({
   playing: boolean;
   connecting?: boolean;
 }) {
-  const label = connecting ? "Connecting to" : playing ? "Casting to" : "Paused on";
+  const t = useT();
+  const label = connecting ? t("Connecting to") : playing ? t("Casting to") : t("Paused on");
   return (
     <div className="pointer-events-none absolute inset-0 z-10 flex animate-[harbor-cast-in_240ms_ease-out] items-center justify-center bg-canvas">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-canvas via-canvas to-canvas/95" />
@@ -32,18 +34,27 @@ export function CastingOverlay({
       <div className="relative z-10 flex flex-col items-center gap-10 px-10 text-center">
         <div className="relative flex h-32 w-32 items-center justify-center">
           <span
-            className="absolute inset-0 rounded-[28px] bg-accent/20 blur-2xl"
+            className="absolute inset-0 rounded-2xl bg-accent/20 blur-2xl"
             style={{ animation: "harbor-cast-pulse 2.6s ease-in-out infinite" }}
           />
-          <span className="relative flex h-32 w-32 items-center justify-center rounded-[28px] border border-edge bg-elevated/85 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+          <span className="relative flex h-32 w-32 items-center justify-center rounded-2xl border border-edge bg-elevated/85 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)] backdrop-blur-xl">
             <CastIcon device={device} size={64} />
           </span>
           {connecting && (
             <span className="absolute -bottom-5 left-1/2 -translate-x-1/2">
               <span className="flex gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0s infinite" }} />
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0.18s infinite" }} />
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0.36s infinite" }} />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                  style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0s infinite" }}
+                />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                  style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0.18s infinite" }}
+                />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                  style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0.36s infinite" }}
+                />
               </span>
             </span>
           )}
@@ -52,7 +63,10 @@ export function CastingOverlay({
           <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink-subtle">
             {label}
           </span>
-          <span className="text-[28px] font-semibold leading-tight text-ink" style={{ fontFamily: "Fraunces, serif" }}>
+          <span
+            className="text-[28px] font-semibold leading-tight text-ink"
+            style={{ fontFamily: "Fraunces, serif" }}
+          >
             {device.name}
           </span>
           {title && !connecting && (

@@ -1,0 +1,24 @@
+.games-wow-equipment-note { margin: 0 0 16px; font-size: 13px; color: var(--color-ink-muted); line-height: 1.6; }
+.games-wow-equipment-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 24px; align-items: start; }
+.games-wow-equipment-item { min-width: 0; border-radius: 6px; }
+.games-wow-equipment-item > summary { display: flex; align-items: center; gap: 12px; min-height: 82px; padding: 12px 10px; cursor: pointer; list-style: none; border-radius: 6px; }
+.games-wow-equipment-item > summary::-webkit-details-marker { display: none; }
+.games-wow-equipment-item > summary:hover, .games-wow-equipment-item[open] { background: var(--color-surface); }
+.games-wow-equipment-item > summary:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.games-wow-equipment-item > summary > img, .games-wow-equipment-item > summary > .games-art-empty { width: 48px; height: 48px; flex: 0 0 48px; object-fit: cover; border-radius: 5px; background: var(--color-elevated); }
+.games-wow-equipment-name { flex: 1; min-width: 0; }
+.games-wow-equipment-name small { display: block; font-size: 12px; color: var(--color-ink-muted); margin-bottom: 5px; }
+.games-wow-equipment-name strong { display: block; font-size: 14px; font-weight: 550; line-height: 1.5; overflow-wrap: anywhere; }
+.games-wow-equipment-level { font-variant-numeric: tabular-nums; font-size: 15px; color: var(--color-ink); }
+.games-wow-equipment-item > summary > svg { flex-shrink: 0; color: var(--color-ink-muted); transition: transform 160ms ease; }
+.games-wow-equipment-item[open] > summary > svg { transform: rotate(180deg); }
+.games-wow-equipment-details { padding: 8px 14px 16px 70px; display: grid; gap: 16px; }
+[dir="rtl"] .games-wow-equipment-details { padding-inline: 70px 14px; }
+.games-wow-enhancements h5 { margin: 0 0 8px; font-size: 12px; font-weight: 600; }
+.games-wow-enhancements ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.games-wow-enhancements li { display: flex; align-items: center; gap: 9px; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.games-wow-enhancements li img, .games-wow-enhancements li .games-art-empty { width: 25px; height: 25px; flex: 0 0 25px; object-fit: cover; border-radius: 3px; }
+.games-wow-enhancements p { font-size: 12px; color: var(--color-ink-muted); margin: 8px 0 0; line-height: 1.5; }
+@media (max-width: 1000px) { .games-wow-equipment-grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .games-wow-equipment-item > summary { gap: 9px; padding-inline: 5px; }.games-wow-equipment-details { padding-inline: 62px 10px; }[dir="rtl"] .games-wow-equipment-details { padding-inline: 62px 10px; } }
+@media (prefers-reduced-motion: reduce) { .games-wow-equipment-item > summary > svg { transition: none; } }

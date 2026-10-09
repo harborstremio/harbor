@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useView } from "@/lib/view";
 import type { SourceFolder } from "@/lib/custom-sources";
 import { useAuth } from "@/lib/auth";
@@ -7,6 +7,7 @@ import { Pencil, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { EditFolderImagesModal } from "./edit-folder-images-modal";
 import { useT } from "@/lib/i18n";
+import { useEscape } from "@/components/modal-shell";
 import { useSettings } from "@/lib/settings";
 import { tmdbDiscover, tmdbCollection } from "@/lib/providers/tmdb";
 import { fetchTraktList } from "@/lib/trakt/lists";
@@ -32,6 +33,12 @@ export function SourceFolderCard({
   const [errorAddon, setErrorAddon] = useState<string | null>(null);
   const [missingTmdbKey, setMissingTmdbKey] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const closeAlert = useCallback(() => {
+    setErrorAddon(null);
+    setMissingTmdbKey(false);
+  }, []);
+  useEscape(closeAlert, !!errorAddon || missingTmdbKey);
 
   const handleClick = async () => {
     if (loading) return;
@@ -198,12 +205,12 @@ export function SourceFolderCard({
 
     {errorAddon && createPortal(
       <div
-        className="pointer-events-auto fixed inset-0 z-[120] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
+        className="pointer-events-auto fixed inset-0 z-[170] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
         onClick={(e) => {
           if (e.target === e.currentTarget) setErrorAddon(null);
         }}
       >
-        <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-[24px] border border-edge-soft bg-elevated/95 px-8 py-8 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
+        <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-3xl border border-edge-soft bg-elevated/95 px-8 py-8 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
           <div className="flex items-start justify-between gap-4">
             <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Addon not installed")}</h2>
             <button
@@ -234,12 +241,12 @@ export function SourceFolderCard({
 
     {missingTmdbKey && createPortal(
       <div
-        className="pointer-events-auto fixed inset-0 z-[120] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
+        className="pointer-events-auto fixed inset-0 z-[170] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
         onClick={(e) => {
           if (e.target === e.currentTarget) setMissingTmdbKey(false);
         }}
       >
-        <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-[24px] border border-edge-soft bg-elevated/95 px-8 py-8 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
+        <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-3xl border border-edge-soft bg-elevated/95 px-8 py-8 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
           <div className="flex items-start justify-between gap-4">
             <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Missing TMDB Key")}</h2>
             <button

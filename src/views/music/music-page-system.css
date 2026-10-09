@@ -1,0 +1,314 @@
+/* Shared music-page rhythm; surfaces and contrast follow the selected Harbor theme. */
+[data-music-view] {
+  container-type: inline-size;
+  padding-block-start: max(80px, var(--harbor-floating-back-space, 0px));
+}
+[data-music-view][data-music-opening],
+[data-music-view][data-music-opening] button {
+  cursor: progress;
+}
+.music-page-mast {
+  align-items: center;
+}
+.music-page-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-edge-soft);
+}
+.music-page-sections button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md, 10px);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  background: var(--color-surface);
+}
+.music-page-sections button:hover {
+  color: var(--color-ink);
+  background: var(--color-elevated);
+}
+[data-music-view] :is(button, a, summary):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+[data-music-view] :is(.music-audio-settings, .music-speakers) {
+  width: 100%;
+  max-width: 1000px;
+  margin-inline: 0;
+  padding: 8px 0 48px;
+}
+[data-music-view] :is(.music-audio-settings, .music-speakers) header {
+  margin-block: 0 28px;
+  padding-block: 0;
+}
+[data-music-view] :is(.music-audio-settings, .music-speakers) h2 {
+  font-size: clamp(28px, 3vw, 36px);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+[data-music-view] :is(.music-audio-settings, .music-speakers) button {
+  min-height: 44px;
+  font-size: 14px;
+}
+[data-music-view]
+  .music-audio-settings
+  :is(input:not([type="range"]):not([type="checkbox"]), select) {
+  min-height: 46px;
+  font-size: 14px;
+}
+[data-music-view] .music-detail-hero {
+  gap: 32px;
+  padding-block: 24px;
+  min-height: 240px;
+}
+[data-music-view] .music-detail-actions {
+  margin-top: 0;
+  gap: 12px;
+}
+[data-music-view] .music-detail-actions > button {
+  min-height: 48px;
+  font-size: 14px;
+  padding-inline: 18px;
+}
+[data-music-view] .music-detail-title h1 {
+  font-size: clamp(32px, 4.3vw, 64px);
+  line-height: 1.08;
+}
+[data-music-view] .music-detail-toolbar {
+  gap: 14px;
+  padding-block: 8px 18px;
+}
+[data-music-view] .music-detail-track-list > .group {
+  min-height: 72px;
+}
+[data-music-view] .music-release-facts {
+  padding-block: 8px 24px;
+}
+[data-music-view] .music-release-facts dl {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px 28px;
+}
+[data-music-view] .music-release-facts dt {
+  font-size: 12px;
+}
+[data-music-view] .music-release-facts dd {
+  font-size: 14px;
+  color: var(--color-ink);
+  line-height: 1.6;
+}
+[data-music-view] .music-artist-overview {
+  gap: 32px;
+  padding-block: 32px;
+}
+[data-music-view] .music-artist-story p {
+  font-size: 15px;
+  line-height: 1.8;
+  max-width: 68ch;
+}
+[data-music-view]
+  :is(.music-artist-read-more, .music-artist-biography-source, .music-artist-genres button) {
+  min-height: 44px;
+  padding-inline: 12px;
+  font-size: 13px;
+}
+[data-music-view] .music-artist-facts {
+  gap: 20px 32px;
+}
+[data-music-view] .music-artist-facts dt {
+  font-size: 12px;
+}
+[data-music-view] .music-artist-facts dd {
+  font-size: 14px;
+}
+[data-music-view] .music-artist-links button {
+  min-height: 48px;
+  font-size: 14px;
+}
+[data-music-view] .music-buy-links summary {
+  width: 100%;
+  min-height: 48px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+[data-music-view] .music-buy-links summary::after {
+  content: "+";
+  margin-inline-start: auto;
+  font-size: 20px;
+  font-weight: 400;
+}
+[data-music-view] .music-buy-links[open] summary::after {
+  content: "−";
+}
+[data-music-view]
+  :is(
+    .music-library-button,
+    .music-library-text,
+    .music-library-views button,
+    .music-discovery-back
+  ) {
+  min-height: 46px;
+  font-size: 14px;
+}
+[data-music-view] .music-library-search {
+  min-height: 46px;
+}
+[data-music-view] .music-library-search input {
+  font-size: 14px;
+}
+[data-music-view] .music-billboard-filters :is(input, button) {
+  min-height: 46px;
+  font-size: 14px;
+}
+[data-music-view] .music-billboard-filters label {
+  font-size: 13px;
+}
+[data-music-view] .music-billboard-page li {
+  min-height: 88px;
+  padding-block: 14px;
+}
+[data-music-view] .music-billboard-copy > .music-artist-link {
+  font-size: 14px;
+}
+[data-music-view] .music-navigation [role="tab"] {
+  padding-inline: 10px;
+  font-size: 14px;
+}
+@container (max-width:620px) {
+  .music-page-mast {
+    gap: 20px;
+  }
+  .music-page-sections {
+    gap: 6px;
+  }
+  .music-page-sections button {
+    flex: 1;
+    padding-inline: 10px;
+  }
+  [data-music-view] .music-detail-page .music-detail-hero {
+    padding: 24px;
+    gap: 24px;
+  }
+  [data-music-view] .music-detail-actions > button {
+    min-height: 46px;
+  }
+  [data-music-view] .music-release-facts dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+@container (max-width:380px) {
+  [data-music-view] .music-release-facts dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+[data-music-view] .music-connections-page {
+  max-width: 1100px;
+}
+[data-music-view] .music-connections-page :is(button, summary) {
+  min-height: 44px;
+}
+[data-music-view] .music-connections-page input {
+  min-height: 24px;
+  font-size: 14px;
+}
+[data-music-view] .music-detail-page > button {
+  min-height: 44px;
+}
+[data-music-view] .music-detail-page > div > button[aria-pressed] {
+  min-height: 44px;
+}
+
+[data-music-view] :is(h1, h2)[tabindex="-1"] {
+  outline: none;
+}
+[data-music-view] .music-detail-film {
+  margin-inline-start: auto;
+}
+[data-music-view] .music-collection-controls button:not(.music-collection-play):not(.music-collection-shuffle):not(.music-collection-extra) {
+  min-height: 48px;
+  padding-inline: 18px;
+  font-size: 14px;
+}
+@container (max-width:620px) {
+  [data-music-view] .music-detail-film {
+    margin-inline-start: 0;
+  }
+}
+.music-filmography {
+  min-width: 0;
+  padding-block: 24px;
+  border-top: 1px solid var(--color-edge-soft);
+}
+.music-filmography > p {
+  margin-top: 12px;
+}
+.music-filmography > h2 {
+  font-size: 22px;
+  font-weight: 650;
+  margin-bottom: 16px;
+}
+.music-filmography button > div:first-child {
+  box-shadow: none;
+}
+[data-music-view] .music-search-page > div > button[aria-pressed] {
+  min-height: 44px;
+}
+
+@container (max-width:620px) {
+  .music-top-result {
+    gap: 16px;
+    padding: 16px;
+  }
+  .music-top-result > span:first-child {
+    width: 96px;
+  }
+  .music-top-result > span:nth-child(2) > span:first-child {
+    flex-wrap: wrap;
+  }
+  .music-top-result [title] {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .music-top-result [title]:first-child {
+    font-size: 20px;
+  }
+}
+[data-music-view] [data-music-consolidated-back] [data-music-inner-back] {
+  display: none;
+}
+[data-music-view] .music-billboard-empty button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-elevated);
+}
+
+[data-music-view] .music-release-facts [data-music-stat] {
+  padding-block: 8px;
+}
+[data-music-view] .music-release-facts [data-music-stat] dt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--color-ink-muted);
+}
+[data-music-view] .music-release-facts [data-music-stat] dd {
+  margin-top: 12px;
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+}

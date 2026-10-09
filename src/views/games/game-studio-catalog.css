@@ -1,0 +1,21 @@
+.games-studio-catalog-filters { border-block:1px solid var(--color-edge);padding-block:20px; }
+.games-studio-catalog-search { display:flex;align-items:center;gap:16px;justify-content:space-between; }
+.games-studio-catalog-search .games-search { width:min(400px,100%);min-width:0;margin-inline-start:0;margin-inline-end:auto; }
+.games-studio-catalog-options { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px; }
+.games-studio-catalog-options>div>button { width:100%;justify-content:space-between;min-height:40px;background:var(--color-surface); }
+.games-studio-catalog-filter-note { display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px;font-size:12px;color:var(--color-ink-muted); }
+.games-studio-catalog-filter-note .games-text-action { flex-shrink:0;min-height:32px; }
+.games-studio-catalog .games-atlas-result-heading { margin-block:22px; }
+.games-studio-catalog .games-atlas-result-meta>span:last-child { margin-inline-start:0; }
+.games-studio-catalog .games-card-enter { bottom:13px;inset-inline-end:13px;width:34px;height:34px; }
+.games-studio-catalog-continuation { min-height:40px;margin-top:28px;position:relative; }
+.games-studio-catalog-continuation>span { display:block;font-size:12px;color:var(--color-ink-muted);margin-bottom:18px; }
+/* Keyboard users can explicitly continue without hunting for a scroll target. */
+.games-studio-catalog-next:not(:focus-visible) { position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%); }
+@container (max-width:850px) { .games-studio-catalog-options { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@container (max-width:500px) {
+  .games-studio-catalog-search { flex-wrap:wrap;gap:10px; }
+  .games-studio-catalog-search .games-search { width:100%; }
+  .games-studio-catalog-options { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .games-studio-catalog-filter-note { align-items:flex-start; }
+}

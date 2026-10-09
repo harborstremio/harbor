@@ -1,0 +1,17 @@
+.games-guide-reader-actions{display:flex;align-items:flex-start;gap:12px 20px;flex-wrap:wrap;margin-top:20px}
+.games-guide-reader-actions>.games-guide-source-link{align-self:center}
+.games-guide-export-buttons{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.games-guide-export-buttons button,.games-guide-copy{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:6px;background:var(--color-surface);color:var(--color-ink);font-size:12px;font-weight:600;cursor:pointer;transition:background .15s ease,color .15s ease}
+.games-guide-export-buttons button{min-height:36px;padding:8px 12px}
+.games-guide-export-buttons button:hover,.games-guide-copy:hover{background:var(--color-elevated)}
+.games-guide-export-buttons button:disabled{opacity:.6;cursor:wait}
+.games-guide-export-buttons button:focus-visible,.games-guide-copy:focus-visible{outline:2px solid var(--color-accent);outline-offset:3px}
+.games-guide-export p{max-width:460px;font-size:12px;color:var(--color-ink-muted);margin:8px 0 0}
+.games-guide-prose .games-guide-code{position:relative;margin:12px 0;background:var(--color-surface);border-radius:6px;overflow:hidden}
+.games-guide-prose .games-guide-code pre{margin:0;padding:44px 14px 14px;background:transparent;white-space:pre-wrap;overflow-wrap:anywhere;direction:ltr;text-align:left}
+.games-guide-code-action{position:absolute;inset-block-start:6px;inset-inline-end:6px}
+.games-guide-copy{min-height:30px;padding:5px 8px;color:var(--color-ink-muted)}
+.games-guide-copy span:first-child{display:flex}
+.games-guide-export-spinner{animation:games-guide-export-spin 1s linear infinite}
+@keyframes games-guide-export-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.games-guide-export-spinner{animation:none}.games-guide-copy,.games-guide-export-buttons button{transition:none}}

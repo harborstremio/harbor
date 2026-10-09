@@ -1,30 +1,103 @@
+import tvdbLogo from "@/assets/addon-logos/tvdb.svg";
+import tmdbLogo from "@/assets/addon-logos/tmdb.png";
 import { useSettings } from "@/lib/settings";
+import { effectiveOrderProvider } from "@/lib/settings/episode-order";
 import { useT } from "@/lib/i18n";
-import { ToggleRow } from "./shared";
+import { Segmented, ToggleRow } from "./shared";
+import { SettingRow } from "./kit";
 
-function Seg<T extends string>({
-  options,
-  value,
-  onChange,
+type Provider = "tvdb" | "tmdb";
+
+const TAG =
+  "inline-flex h-[22px] shrink-0 items-center rounded-[6px] bg-elevated px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink-subtle";
+
+function OrderPreview({ active }: { active: Provider }) {
+  const t = useT();
+  return (
+    <div className="grid w-full grid-cols-2 gap-3">
+      <PreviewCard on={active === "tvdb"} logo={tvdbLogo} title="TVDB" tag={t("Structured")}>
+        <div className="flex flex-wrap gap-1.5">
+          {["Aired", "DVD", "Abs"].map((o, i) => (
+            <span
+              key={o}
+              className={`rounded-full px-2.5 py-1 text-[13px] font-semibold ${
+                i === 0 ? "bg-ink text-canvas" : "bg-elevated text-ink-subtle"
+              }`}
+            >
+              {o}
+            </span>
+          ))}
+        </div>
+        <div className="mt-2.5 flex flex-col gap-1.5">
+          {[
+            { s: "Season 1", n: "12" },
+            { s: "Season 2", n: "10" },
+            { s: t("Specials"), n: "3" },
+          ].map((r) => (
+            <div
+              key={r.s}
+              className="flex items-center justify-between gap-3 rounded-md bg-canvas px-3 py-1.5"
+            >
+              <span className="min-w-0 truncate text-[15.5px] font-medium leading-[22px] text-ink">
+                {r.s}
+              </span>
+              <span className="shrink-0 text-[15.5px] leading-[22px] text-ink-subtle">
+                {t("{n} eps", { n: r.n })}
+              </span>
+            </div>
+          ))}
+        </div>
+      </PreviewCard>
+      <PreviewCard on={active === "tmdb"} logo={tmdbLogo} title="TMDB" tag={t("As aired")}>
+        <div className="flex flex-col gap-1.5">
+          {[
+            { n: 1, name: "Pilot" },
+            { n: 2, name: t("Episode 2") },
+            { n: 3, name: t("Episode 3") },
+            { n: 4, name: t("Episode 4") },
+          ].map((e) => (
+            <div key={e.n} className="flex items-center gap-2.5">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-elevated text-[13px] font-bold tabular-nums text-ink-subtle">
+                {e.n}
+              </span>
+              <span className="min-w-0 truncate text-[15.5px] leading-[22px] text-ink">
+                {e.name}
+              </span>
+            </div>
+          ))}
+        </div>
+      </PreviewCard>
+    </div>
+  );
+}
+
+function PreviewCard({
+  on,
+  logo,
+  title,
+  tag,
+  children,
 }: {
-  options: Array<{ value: T; label: string }>;
-  value: T;
-  onChange: (v: T) => void;
+  on: boolean;
+  logo: string;
+  title: string;
+  tag: string;
+  children: React.ReactNode;
 }) {
   return (
-    <div className="flex shrink-0 items-center gap-1 rounded-full border border-edge-soft bg-canvas/60 p-1">
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          onClick={() => onChange(o.value)}
-          className={`h-8 whitespace-nowrap rounded-full px-3 text-[12.5px] font-medium transition-colors ${
-            value === o.value ? "bg-ink text-canvas" : "text-ink-muted hover:text-ink"
-          }`}
-        >
-          {o.label}
-        </button>
-      ))}
+    <div
+      className={`flex min-w-0 flex-col rounded-md border bg-canvas p-3.5 transition ${
+        on ? "border-ink/80" : "border-edge-soft/60 opacity-45"
+      }`}
+    >
+      <div className="mb-3 flex items-center gap-2">
+        <img src={logo} alt="" className="h-5 w-5 shrink-0 rounded-[3px] object-contain" />
+        <span className="min-w-0 truncate text-[16.5px] font-medium leading-[24px] text-ink">
+          {title}
+        </span>
+        <span className={`ms-auto ${TAG}`}>{tag}</span>
+      </div>
+      {children}
     </div>
   );
 }
@@ -32,50 +105,60 @@ function Seg<T extends string>({
 export function EpisodeOrderSetting() {
   const { settings, update } = useSettings();
   const t = useT();
+  const provider: Provider = effectiveOrderProvider(settings);
+
+  const pickProvider = (p: Provider) => {
+    if (p === "tvdb") update({ episodeOrderProvider: "tvdb", tvdbOrderPanel: true });
+    else update({ episodeOrderProvider: "tmdb", tvdbOrderPanel: false });
+  };
+
   return (
-    <div className="mt-2 flex flex-col gap-3 border-t border-edge-soft/60 pt-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 flex-col">
-          <span className="text-[13.5px] font-medium text-ink">{t("Episode ordering")}</span>
-          <span className="text-[12px] leading-relaxed text-ink-subtle">
-            {t(
-              "How episodes are grouped for shows and anime. Default keeps TMDB's aired order; TVDB gives the arc/season orderings anime fans prefer. Each episode still plays and marks watched the same.",
-            )}
-          </span>
-        </div>
-        <Seg
-          options={[
-            { value: "default", label: t("Default") },
-            { value: "tvdb", label: t("TVDB") },
-          ]}
-          value={settings.episodeOrderProvider === "tvdb" ? "tvdb" : "default"}
-          onChange={(v) => update({ episodeOrderProvider: v })}
-        />
-      </div>
-      {settings.episodeOrderProvider === "tvdb" && !settings.tvdbOrderPanel && (
-        <div className="flex items-center justify-between gap-4 ps-1">
-          <span className="text-[13px] text-ink-muted">{t("TVDB order")}</span>
-          <Seg
-            options={[
-              { value: "aired", label: t("Aired") },
-              { value: "official", label: t("Official") },
-              { value: "dvd", label: t("DVD") },
-              { value: "absolute", label: t("Absolute") },
-              { value: "alternate", label: t("Alternate") },
-            ]}
-            value={settings.tvdbSeasonType}
-            onChange={(v) => update({ tvdbSeasonType: v })}
-          />
-        </div>
-      )}
-      <ToggleRow
-        label={t("TVDB season and order panel")}
-        sub={t(
-          "Turn the season button into a TVDB-style panel: order tabs (Aired, DVD, Absolute, and any the show has) plus a season table with air-date ranges and episode counts. On by default for anime through JL Media Vision's TVDB service, no key needed. Add your own TVDB key to use it for regular shows too.",
+    <>
+      <SettingRow
+        label={t("Episode ordering")}
+        desc={t(
+          "How episodes are grouped for shows and anime. TVDB is the default: it gives the arc, DVD, and absolute orderings anime fans expect, with no key needed. TMDB keeps the plain aired order. Either way, every episode still plays and marks watched the same.",
         )}
-        value={settings.tvdbOrderPanel}
-        onChange={(v) => update({ tvdbOrderPanel: v })}
-      />
-    </div>
+      >
+        <Segmented
+          options={[
+            { value: "tvdb", label: "TVDB" },
+            { value: "tmdb", label: "TMDB" },
+          ]}
+          value={provider}
+          onChange={pickProvider}
+        />
+      </SettingRow>
+
+      <OrderPreview active={provider} />
+
+      {provider === "tvdb" && (
+        <>
+          <ToggleRow
+            label={t("Rich season and order panel")}
+            sub={t(
+              "Turns the season button into a full panel: order tabs (Aired, DVD, Absolute, and any the show has) plus a season table with air-date ranges and episode counts. On by default for anime through Harbor's TVDB service, no key needed. Add your own TVDB key to use it for regular shows too.",
+            )}
+            value={settings.tvdbOrderPanel}
+            onChange={(v) => update({ tvdbOrderPanel: v })}
+          />
+          {!settings.tvdbOrderPanel && (
+            <SettingRow wide label={t("Which order")}>
+              <Segmented
+                options={[
+                  { value: "aired", label: t("Aired") },
+                  { value: "official", label: t("Official") },
+                  { value: "dvd", label: t("DVD") },
+                  { value: "absolute", label: t("Absolute") },
+                  { value: "alternate", label: t("Alternate") },
+                ]}
+                value={settings.tvdbSeasonType}
+                onChange={(v) => update({ tvdbSeasonType: v })}
+              />
+            </SettingRow>
+          )}
+        </>
+      )}
+    </>
   );
 }

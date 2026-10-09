@@ -1,0 +1,28 @@
+.mc-runtime-dialog {max-width:650px}
+.mc-runtime-cover {display:flex;gap:18px;align-items:center;margin-bottom:23px}
+.mc-runtime-cover>img,.mc-runtime-cover>.games-art {height:74px;width:74px;flex-shrink:0;border-radius:8px;object-fit:cover}
+.mc-runtime-cover>div {min-width:0;display:flex;flex-direction:column;gap:7px}
+.mc-runtime-cover strong {font-size:17px;font-weight:650;line-height:1.4;overflow-wrap:anywhere}
+.mc-runtime-cover span {font-size:12px;color:var(--color-ink-muted)}
+.mc-runtime-intro {font-size:14px;line-height:1.75;color:var(--color-ink-muted);margin-bottom:22px}
+.mc-runtime-steps {display:flex;flex-direction:column;gap:8px}
+.mc-runtime-steps>div {display:flex;gap:14px;align-items:center;background:var(--color-elevated);padding:18px;border-radius:8px}
+.mc-runtime-steps>div>svg {color:var(--color-ink-muted);flex-shrink:0}
+.mc-runtime-steps>div>div {display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.mc-runtime-steps strong {font-size:14px;font-weight:600}
+.mc-runtime-steps span,.mc-runtime-cached {font-size:12px;color:var(--color-ink-muted);line-height:1.65}
+.mc-runtime-steps b {font-size:13px;font-weight:500;white-space:nowrap}
+.mc-runtime-cached {display:flex;gap:10px;align-items:center;padding-block:18px 4px}
+.mc-runtime-cached>svg {flex-shrink:0;color:var(--color-success)}
+.mc-runtime-success {display:flex;gap:18px;padding-block:26px 18px;border-top:1px solid var(--color-edge-soft)}
+.mc-runtime-success>svg {color:var(--color-success);flex-shrink:0}
+.mc-runtime-success h3 {font-size:21px;font-weight:650;letter-spacing:-.025em;line-height:1.4}
+.mc-runtime-success p {font-size:14px;line-height:1.75;color:var(--color-ink-muted);margin-top:8px}
+.mc-runtime-dialog>footer>button b {font-size:11px;font-weight:500;opacity:.7;white-space:nowrap}
+.mc-runtime-complete {align-items:center;padding-block:13px 17px;gap:12px}
+.mc-runtime-complete h3 {font-size:14px;font-weight:600;flex:1}
+.mc-runtime-complete>.games-icon-button {width:34px;height:34px;flex-shrink:0}
+.mc-runtime-prerequisite {border:0;margin-top:20px;padding:0}
+.mc-runtime-prerequisite>p {font-size:13px;line-height:1.65;color:var(--color-ink-muted);margin-bottom:14px}
+.mc-runtime-prerequisite .mc-java-setup {margin-top:0}
+@media(max-width:600px) {.mc-runtime-dialog>footer {flex-wrap:wrap}.mc-runtime-dialog>footer>span {max-width:none;flex-basis:100%}.mc-runtime-dialog>footer>button {margin-inline-start:auto}.mc-runtime-steps>div {flex-wrap:wrap}.mc-runtime-steps b {margin-inline-start:34px}.mc-runtime-cover {gap:14px}.mc-runtime-cover strong {font-size:16px}}

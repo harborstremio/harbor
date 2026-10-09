@@ -1,19 +1,34 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { emptySnapshot, type PlayerBridge, type PlayerSnapshot } from "@/lib/player/bridge";
+import {
+  emptySnapshot,
+  initialPlayerSnapshot,
+  type PlayerBridge,
+  type PlayerSnapshot,
+} from "@/lib/player/bridge";
 import { probeMpv } from "@/lib/player/mpv";
 import { mergeMpvOptions } from "@/lib/player/mpv-tuning";
+import { metaIsAnime } from "@/lib/player/anime-src";
 import { anime4kShadersFor, type Anime4kChoice } from "./use-anime4k";
+import {
+  generalShaderChain,
+  generalShaderKey,
+  shaderCompanionOptions,
+} from "@/lib/player/shader-chain";
 import type { PlayerSrc } from "@/lib/view";
 import type { Settings } from "@/lib/settings";
-import { setPlaybackClock } from "@/lib/player/playback-clock";
-import { isLinuxDesktop, isWindowsDesktop } from "@/lib/platform";
+import { setPlaybackClock, setPlaybackStatus } from "@/lib/player/playback-clock";
+import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
+import { isLivePlaybackSrc } from "@/lib/player/live-src";
+import { readEmbedRect } from "@/lib/player/embed-rect";
 import { svpEnsureRunning, svpStatus } from "@/lib/svp";
-import { isAnimeMedia, isSvpActiveForMedia } from "@/lib/player/svp-policy";
+import { isSvpActiveForMedia } from "@/lib/player/svp-policy";
 import { pickBridge } from "../player-utils";
 
 function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean {
   return (
     a.status !== b.status ||
+    a.buffering !== b.buffering ||
+    a.firstFrameReady !== b.firstFrameReady ||
     a.durationSec !== b.durationSec ||
     a.volume !== b.volume ||
     a.muted !== b.muted ||
@@ -25,6 +40,8 @@ function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean
     a.audioDelaySec !== b.audioDelaySec ||
     a.subText !== b.subText ||
     a.subStartSec !== b.subStartSec ||
+    a.secondarySubText !== b.secondarySubText ||
+    a.noAudio !== b.noAudio ||
     a.audioNormalize !== b.audioNormalize ||
     a.videoWidth !== b.videoWidth ||
     a.videoHeight !== b.videoHeight ||
@@ -42,14 +59,14 @@ export function usePlayerBridge(params: {
 }) {
   const { bridgeRef, videoMountRef, src, settings } = params;
 
-  const [snap, setSnap] = useState<PlayerSnapshot>(emptySnapshot);
+  const [snap, setSnap] = useState<PlayerSnapshot>(initialPlayerSnapshot);
   const prevSnapRef = useRef<PlayerSnapshot>(emptySnapshot);
   const [engine, setEngine] = useState<"html5" | "mpv">("html5");
   const [autoFallbackTried, setAutoFallbackTried] = useState(false);
 
   const hdrOpaqueWindow = isWindowsDesktop() && settings.playerHdrOpaqueWindow;
   const embedActive = settings.playerMpvEmbed && !hdrOpaqueWindow;
-  const isAnimeSrc = isAnimeMedia(src.meta);
+  const isAnimeSrc = metaIsAnime(src.meta) || !!src.isAnime;
   const anime4kOn = settings.playerAnime4k && (!settings.playerAnime4kAnimeOnly || isAnimeSrc);
   const svpRequested = isSvpActiveForMedia(settings, src.meta);
   const [svpRuntimeReady, setSvpRuntimeReady] = useState<boolean | null>(
@@ -79,13 +96,10 @@ export function usePlayerBridge(params: {
   useEffect(() => {
     if (svpOn) void svpEnsureRunning().catch(() => {});
   }, [svpOn]);
-  const isLiveLike =
-    !!src.meta.id?.startsWith("iptv:") ||
-    (!!src.meta.type &&
-      !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
+  const isLiveLike = isLivePlaybackSrc(src);
   const chosenEngine =
     isLiveLike && !src.notWebReady ? "html5" : autoFallbackTried ? "mpv" : settings.playerEngine;
-  const bridgeKey = `${chosenEngine}|${anime4kOn}|${embedActive}|${anime4kOn ? settings.playerAnime4kShaders.join(",") : ""}|${svpOn}|${svpOn ? settings.svpVpyPath : ""}`;
+  const bridgeKey = `${chosenEngine}|${anime4kOn}|${embedActive}|${anime4kOn ? settings.playerAnime4kShaders.join(",") : ""}|${generalShaderKey(settings)}|${svpOn}|${svpOn ? settings.svpVpyPath : ""}`;
   const [bridgeReady, setBridgeReady] = useState(false);
   useEffect(() => {
     if (svpPending) return;
@@ -97,44 +111,45 @@ export function usePlayerBridge(params: {
     setBridgeReady(false);
     (async () => {
       const want = chosenEngine;
-      const getEmbedRect = async () => {
-        const el = videoMountRef.current;
-        if (!el) return null;
-        const r = el.getBoundingClientRect();
-        return {
-          cssLeft: r.left,
-          cssTop: r.top,
-          cssWidth: r.width,
-          cssHeight: r.height,
-          cssViewW: document.documentElement.clientWidth,
-          cssViewH: document.documentElement.clientHeight,
-        };
-      };
+      const getEmbedRect = () => readEmbedRect(videoMountRef.current);
       const { bridge: choose, engine: chosen } = await pickBridge(want, src.notWebReady === true, {
         anime4k: anime4kOn,
         hdrToSdr: settings.playerHdrToSdr,
         rtxHdr: settings.playerRtxHdr && !settings.playerHdrToSdr && !svpOn,
+        rtxVsr: settings.playerRtxVsr && !svpOn,
         embed: embedActive,
         d3d11Flip: settings.playerD3d11Flip,
-        anime4kShaders: anime4kShadersFor(
-          settings,
-          src,
-          (settings.playerAnime4kOverride as Anime4kChoice) || "auto",
-        ),
-        macEdr: false,
-        extraOptions: mergeMpvOptions(settings, svpOn),
+        renderer: settings.mpvRenderer,
+        forceYuv420p: settings.mpvForceYuv420p,
+        anime4kShaders: [
+          ...anime4kShadersFor(
+            settings,
+            src,
+            (settings.playerAnime4kOverride as Anime4kChoice) || "auto",
+          ),
+          ...generalShaderChain(settings),
+        ],
+        macEdr: isMacDesktop() && embedActive && settings.playerMacEdr && !settings.playerHdrToSdr,
+        fullDownload: settings.torrentFullDownload,
+        separateDisplay:
+          settings.playerSeparateDisplay.mode === "explicit"
+            ? settings.playerSeparateDisplay.monitor
+            : null,
+        separateCoverTaskbar: settings.playerSeparateCoverTaskbar,
+        cacheDir: settings.playbackCacheDir,
+        extraOptions: [mergeMpvOptions(settings, svpOn), shaderCompanionOptions(settings)]
+          .filter(Boolean)
+          .join("\n"),
         getEmbedRect,
       });
-      if (cancelled) {
-        choose.destroy();
-        return;
-      }
+      if (cancelled) return;
       bridge = choose;
       bridge.attach(host);
       bridgeRef.current = bridge;
       setEngine(chosen);
       off = bridge.subscribe((s) => {
         setPlaybackClock(s.positionSec, s.bufferedSec);
+        setPlaybackStatus(s.status);
         if (snapChangedIgnoringClock(prevSnapRef.current, s)) {
           prevSnapRef.current = s;
           setSnap(s);
@@ -149,6 +164,7 @@ export function usePlayerBridge(params: {
       bridge?.destroy();
       bridgeRef.current = null;
       setPlaybackClock(0, 0);
+      setPlaybackStatus("idle");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bridgeKey, svpPending]);

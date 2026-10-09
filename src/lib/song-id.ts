@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { t } from "@/lib/i18n";
 
 export type SongResult = {
   title: string;
@@ -14,6 +15,7 @@ export type SongIdToastMsg = {
   body?: string;
   art?: string;
   href?: string;
+  song?: { title: string; artist: string; album: string; artwork: string };
 };
 
 const TOAST_EVENT = "harbor:song-id-toast";
@@ -39,38 +41,61 @@ export function isIdentifying(): boolean {
   return busy;
 }
 
-export async function identifyNowPlaying(apiToken: string): Promise<void> {
+export type SongIdOptions = {
+  provider: "audd" | "ai";
+  auddKey: string;
+  aiKey: string;
+  aiModel: string;
+};
+
+function showResult(res: SongResult): void {
+  const head = res ? res.title || res.artist : "";
+  if (!res || !head) {
+    toast({ kind: "error", title: t("Couldn't identify the song") });
+    return;
+  }
+  const sub = res.title ? [res.artist, res.album].filter(Boolean).join(" · ") : res.album;
+  toast({
+    kind: "result",
+    title: head,
+    body: sub || undefined,
+    art: res.artwork || undefined,
+    href: youtubeSearchUrl(res.artist, res.title),
+    song: { title: res.title, artist: res.artist, album: res.album, artwork: res.artwork },
+  });
+}
+
+export async function identifyNowPlaying(opts: SongIdOptions): Promise<void> {
   if (busy) return;
-  const token = (apiToken ?? "").trim();
-  if (!token) {
+  const useAi = opts.provider === "ai";
+  const key = ((useAi ? opts.aiKey : opts.auddKey) ?? "").trim();
+  if (!key) {
     toast({
       kind: "error",
-      title: "Missing AudD key",
-      body: "Add it in Settings → Library & metadata",
+      title: useAi ? t("Missing Gemini API key") : t("Missing AudD key"),
+      body: t("Add it in Settings → Library & metadata"),
     });
     return;
   }
   busy = true;
-  toast({ kind: "info", title: "Listening…" });
+  toast({ kind: "info", title: t("Listening…") });
   try {
-    const res = await invoke<SongResult>("recognize_now_playing", {
-      apiToken: token,
-      seconds: 7,
-    });
-    if (!res) {
-      toast({ kind: "error", title: "Couldn't identify the song" });
-      return;
-    }
-    toast({
-      kind: "result",
-      title: res.title,
-      body: `${res.artist}${res.album ? " · " + res.album : ""}`,
-      art: res.artwork || undefined,
-      href: youtubeSearchUrl(res.artist, res.title),
-    });
+    const res = useAi
+      ? await invoke<SongResult>("recognize_now_playing_ai", {
+          apiKey: key,
+          model: (opts.aiModel ?? "").trim() || null,
+          seconds: 8,
+        })
+      : await invoke<SongResult>("recognize_now_playing", { apiToken: key, seconds: 7 });
+    showResult(res);
   } catch (e) {
     console.error("song-id failed", e);
-    toast({ kind: "error", title: "Song identification failed" });
+    const detail = typeof e === "string" ? e : ((e as Error)?.message ?? String(e));
+    toast({
+      kind: "error",
+      title: t("Song identification failed"),
+      body: detail.trim().slice(0, 260) || undefined,
+    });
   } finally {
     busy = false;
   }

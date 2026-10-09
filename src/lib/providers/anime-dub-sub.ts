@@ -8,16 +8,50 @@ let byAnilist: Set<number> | null = null;
 let inflight: Promise<void> | null = null;
 const subs = new Set<() => void>();
 
-type FeedEntry = { media?: { media?: { id?: number | null; idMal?: number | null } } };
+export type DubFeedEntry = {
+  title?: string | null;
+  romaji?: string | null;
+  english?: string | null;
+  episodeDate?: string | null;
+  episodeNumber?: number | null;
+  media?: {
+    media?: {
+      id?: number | null;
+      idMal?: number | null;
+      type?: string | null;
+      format?: string | null;
+      isAdult?: boolean | null;
+      title?: { romaji?: string | null; english?: string | null } | null;
+      coverImage?: { extraLarge?: string | null; medium?: string | null } | null;
+      bannerImage?: string | null;
+    } | null;
+  } | null;
+};
+
+let feedCache: { entries: DubFeedEntry[]; at: number } | null = null;
+const FEED_STALE_MS = 30 * 60 * 1000;
+
+/** Fetch the AniSchedule dub feed, cached briefly. Never rejects. */
+export async function fetchDubSchedule(): Promise<DubFeedEntry[]> {
+  const now = Date.now();
+  if (feedCache && now - feedCache.at < FEED_STALE_MS) return feedCache.entries;
+  try {
+    const res = await safeFetch(FEED_URL);
+    if (!res.ok) return feedCache?.entries ?? [];
+    const arr = (await res.json()) as DubFeedEntry[];
+    feedCache = { entries: arr, at: now };
+    return arr;
+  } catch {
+    return feedCache?.entries ?? [];
+  }
+}
 
 function load(): Promise<void> {
   if (byMal) return Promise.resolve();
   if (inflight) return inflight;
   inflight = (async () => {
     try {
-      const res = await safeFetch(FEED_URL);
-      if (!res.ok) return;
-      const arr = (await res.json()) as FeedEntry[];
+      const arr = await fetchDubSchedule();
       const mal = new Set<number>();
       const ani = new Set<number>();
       for (const e of arr) {

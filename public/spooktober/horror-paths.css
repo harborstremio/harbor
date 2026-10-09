@@ -1,0 +1,58 @@
+.horror-paths .section-top { margin-bottom:20px; }
+.horror-path-tabs { display:flex;flex-wrap:wrap;gap:9px;margin-bottom:17px; }
+.horror-path-tabs button { display:flex;align-items:center;gap:10px;min-height:58px;padding:10px 16px 10px 11px;border-radius:5px;background:#27282d;color:var(--muted);font-size:12px;transition:background 180ms ease,color 180ms ease; }
+.horror-path-tabs img { width:34px;height:34px;opacity:.65;transform:rotate(-4deg);transition:opacity 200ms ease,transform 320ms cubic-bezier(.2,.8,.3,1.2); }
+.horror-path-tabs button[aria-selected="true"] img,.horror-path-tabs button:hover img { opacity:1;transform:rotate(0) scale(1.06); }
+.horror-path-tabs button:hover { color:var(--ink);background:#33343a; }
+.horror-path-tabs button[aria-selected="true"] { color:var(--ink);background:#424147; }
+.horror-path-tabs button:focus-visible { outline:2px solid var(--ink);outline-offset:3px; }
+.horror-path-panels { display:grid; }
+.horror-path-panel { grid-area:1/1;min-width:0;opacity:0;visibility:hidden;transform:translateY(5px);transition:opacity 220ms ease,transform 300ms cubic-bezier(.2,.7,.3,1),visibility 300ms; }
+.horror-path-panel.is-current { opacity:1;visibility:visible;transform:none; }
+.horror-path-note { margin:0 0 25px;min-height:36px;max-width:620px;font-size:13px;line-height:1.6;color:var(--muted); }
+@media(max-width:600px) { .horror-path-tabs { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px; }.horror-path-tabs button { padding:9px 10px;font-size:11px;gap:8px;min-height:52px; }.horror-path-tabs img { width:29px;height:29px; }.horror-path-note { min-height:62px; } }
+@media(prefers-reduced-motion:reduce) { .horror-path-panel { transition:none;transform:none; } }
+.motion-off .horror-path-panel { transition:none;transform:none; }
+
+/* A compact field behind the existing shelf; no extra hero or scroll stop. */
+.encounter-world { position:relative;isolation:isolate;margin-block:30px 50px; }
+.encounter-world .section-top { position:relative;min-height:84px;padding-right:180px;align-items:center;margin-bottom:20px; }
+.encounter-field { position:absolute;z-index:-1;inset:-24px calc(-1 * var(--page)) -35px;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse at 68% 45%,#293b353d,transparent 67%);mask-image:linear-gradient(transparent,#000 19%,#000 72%,transparent); }
+.encounter-mist { position:absolute;inset:25% -15% 0;background:radial-gradient(ellipse at 70% 35%,#84998418,transparent 55%);mask-image:linear-gradient(transparent,#000 80px); }
+.encounter-hill { position:absolute;inset:40% -10% -40%;border-radius:50% 60% 0 0;background:#111b1bc4;transform:rotate(-3deg); }
+.encounter-hill.near { inset:65% -30% -60%;background:#182321bd;transform:rotate(4deg); }
+.encounter-tree { position:absolute;height:90%;width:30%;object-fit:contain;object-position:left bottom;left:-11%;bottom:5%;filter:brightness(.35);opacity:.3; }
+.encounter-grass { position:absolute;width:150px;height:130px;bottom:8%;opacity:.22;filter:brightness(.6); }
+.grass-left { left:2%; }.grass-right { right:2%;transform:scaleX(-1); }
+.encounter-craft { position:absolute;z-index:0;right:16%;top:22px;width:156px;transform:translate(var(--craft-x,0px),var(--craft-y,0px));pointer-events:none; }
+.encounter-craft svg { position:relative;display:block;width:100%;opacity:.8; }
+.encounter-beam { position:absolute;top:48px;left:-55%;width:210%;height:330px;clip-path:polygon(43% 0,57% 0,100% 100%,0 100%);background:linear-gradient(#bbd6b94d,transparent 90%);opacity:var(--beam-opacity,.3); }
+.encounter-world>.harbor-rail { position:relative;opacity:.8;transform:translateY(9px);transition:opacity 420ms ease,transform 540ms cubic-bezier(.2,.7,.3,1); }
+.encounter-ready>.harbor-rail { opacity:1;transform:none; }
+@media(max-width:700px) { .encounter-world .section-top { min-height:76px;padding-right:92px; }.encounter-world h2 { max-width:230px;font-size:25px; }.encounter-craft { width:95px;right:10%;top:10px; }.encounter-beam { top:30px;height:230px; }.encounter-tree { width:50%;left:-20%; } }
+@media(prefers-reduced-motion:reduce) { .encounter-craft { transform:none; }.encounter-world>.harbor-rail { transition:none;transform:none;opacity:1; } }
+.motion-off .encounter-craft { transform:none; }.motion-off .encounter-world>.harbor-rail { transition:none;transform:none;opacity:1; }
+
+.shudder-knife-scene { position:absolute;z-index:0;pointer-events:none;left:-12px;top:-50px;width:350px;height:430px;opacity:.39;mask-image:linear-gradient(90deg,#000 64%,#000c 82%,transparent),linear-gradient(#000 55%,transparent 97%);mask-composite:intersect; }
+.shudder-figure { position:relative;width:216px;height:402px;transform:translateY(var(--slasher-y,0px)) scaleX(-1); }
+.shudder-figure-body,.shudder-knife-art { position:absolute;inset:0;width:100%;height:100%;object-fit:contain; }
+.slasher-body-lean { position:absolute;inset:0;transform-origin:47.5% 63.5%;transform:rotate(var(--slasher-lean,0deg)); }
+.slasher-head { position:absolute;inset:0;transform-origin:47.5% 21%;transform:translateY(var(--slasher-head-dip,0px)) rotate(var(--slasher-head-tilt,0deg)) scaleY(var(--slasher-head-pitch,1)); }
+.slasher-head img { display:block;width:100%;height:100%; }
+.shudder-knife-art { overflow:visible; }
+.slasher-upper-arm { transform:rotate(var(--upper-angle,32deg)); }
+.slasher-forearm { transform:rotate(var(--forearm-angle,-22deg)); }
+.slasher-grip { transform:rotate(var(--grip-angle,-10deg)); }
+.shudder-shelf>.shudder-intro,.shudder-shelf>.harbor-rail,.shudder-shelf>.availability-note { position:relative;z-index:1; }
+.shudder-splatter-scene { position:absolute;z-index:0;pointer-events:none;left:calc(var(--blood-left,80px) - 26px);right:calc(var(--blood-left,80px) - 26px);top:calc(var(--blood-top,138px) - 24px);height:calc(var(--blood-height,260px) + 29px);overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 15px,#000 calc(100% - 15px),transparent),linear-gradient(transparent,#000 9px,#000 calc(100% - 9px),transparent);mask-composite:intersect; }
+.shudder-blood-hit { position:absolute;width:260px;height:260px;color:#79212c;transform-origin:50% 50%; }
+.shudder-blood-hit svg { display:block;width:100%;height:100%; }
+.blood-near { left:-45px;top:0;opacity:var(--blood-near-opacity,0);transform:rotate(-24deg) scale(var(--blood-near-scale,.18)); }
+.blood-far { left:calc(var(--blood-seam,420px) - 159px);top:-26px;color:#79212c;opacity:var(--blood-far-opacity,0);transform:rotate(27deg) scale(var(--blood-far-scale,.18)) scaleX(-1); }
+@media(max-width:700px){.shudder-blood-hit { width:220px;height:220px; }.blood-near { left:-33px; }.blood-far { left:auto;right:-29px;top:8px; }}
+.blood-crown { left:calc(var(--blood-crown-x,320px) - 95px);top:-62px;width:190px;height:190px;color:#8b2b34;opacity:var(--blood-near-opacity,0);transform:rotate(-12deg) scale(var(--blood-near-scale,.18)); }
+@media(prefers-reduced-motion:reduce){.shudder-splatter-scene { display:none; }}
+.motion-off .shudder-splatter-scene { display:none; }
+@media(max-width:700px) { .shudder-knife-scene { width:310px;height:365px;left:-22px;top:-22px;opacity:.24; }.shudder-figure { width:185px;height:344px; } }
+@media(prefers-reduced-motion:reduce) { .shudder-figure { transform:scaleX(-1); } }
+.motion-off .shudder-figure { transform:scaleX(-1); }

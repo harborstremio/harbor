@@ -3,8 +3,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SHA256 = "e9c87d19055bc5a82771b2b48e9fbae047bd5180603f5a1aaae10c90ca690467";
-const TAG = process.env.HARBOR_LIBMPV_TAG ?? "mpvdll";
+const SHA256 = "0a81c004aae0ee7d512b9a26e38f66281f9591e84e1663215cc3a36a4bde6f6a";
+// Keep each DLL pin on its own release so older branches retain their matching binary.
+const TAG = process.env.HARBOR_LIBMPV_TAG ?? "mpvdll-0a81c004aae0";
 const url =
   process.env.HARBOR_LIBMPV_URL ??
   `https://github.com/harborstremio/harbor/releases/download/${TAG}/libmpv-2.dll`;

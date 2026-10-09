@@ -1,0 +1,20 @@
+export default {
+  "Search shortcuts": "搜索快捷方式",
+  "Steam search shortcut": "Steam 搜索快捷方式",
+  "Type “st ” or “st:” to search the Steam store. Turn off to use normal Harbor search for these queries.": "输入“st ”或“st:”即可搜索 Steam 商店。关闭后，这些查询将使用普通 Harbor 搜索。",
+  "games.storeSearch.title": "Steam 商店",
+  "games.storeSearch.hint": "在 Harbor 搜索中输入“st ”即可直接搜索 Steam。",
+  "games.storeSearch.automatic": "自动",
+  "games.storeSearch.region": "商店地区",
+  "games.storeSearch.showLibrary": "标记已在我的游戏库中的游戏",
+  "games.storeSearch.settingsError": "无法保存或读取搜索偏好。请重试后再修改。",
+  "games.storeSearch.openError": "无法打开此链接。请检查 Steam 或浏览器是否可用，然后重试。",
+  "games.storeSearch.empty": "输入游戏名称。",
+  "games.storeSearch.saved": "{date}保存的结果和价格。",
+  "games.storeSearch.error": "Steam 搜索不可用，请重试。",
+  "games.storeSearch.comingSoon": "即将推出",
+  "games.storeSearch.inLibrary": "已在游戏库中",
+  "games.storeSearch.unavailable": "价格不可用",
+  "games.storeSearch.web": "网站",
+  "games.storeSearch.client": "在 Steam 中打开"
+};

@@ -1,4 +1,5 @@
 import type { IptvChannel } from "./types";
+import { fetchBoundedText } from "./bounded-response";
 
 export type XtreamCreds = {
   base: string;
@@ -27,13 +28,21 @@ export function parseXtreamUrl(url: string): XtreamCreds | null {
   }
 }
 
-export function credsFromServer(server: string, username: string, password: string): XtreamCreds | null {
+export function credsFromServer(
+  server: string,
+  username: string,
+  password: string,
+): XtreamCreds | null {
   const trimmed = server.trim().replace(/\/+$/, "");
   if (!/^https?:\/\//i.test(trimmed)) return null;
   if (!username.trim() || !password.trim()) return null;
   try {
     const u = new URL(trimmed);
-    return { base: `${u.protocol}//${u.host}`, username: username.trim(), password: password.trim() };
+    return {
+      base: `${u.protocol}//${u.host}`,
+      username: username.trim(),
+      password: password.trim(),
+    };
   } catch {
     return null;
   }
@@ -52,7 +61,12 @@ type LiveStreamRow = {
 };
 
 type UserInfo = {
-  user_info?: { auth?: number; status?: string; message?: string; allowed_output_formats?: string[] };
+  user_info?: {
+    auth?: number;
+    status?: string;
+    message?: string;
+    allowed_output_formats?: string[];
+  };
   server_info?: { server_protocol?: string; https_port?: string | number; port?: string | number };
 };
 
@@ -68,38 +82,43 @@ type ShortEpgRow = {
   stop_timestamp?: number | string;
 };
 
-export async function xtreamFetch(url: string): Promise<unknown> {
-  const text = await xtreamFetchText(url);
+export async function xtreamFetch(url: string, signal?: AbortSignal): Promise<unknown> {
+  const text = await xtreamFetchText(url, signal);
+  signal?.throwIfAborted();
   return parseJsonStrict(text);
 }
 
-async function xtreamFetchText(url: string): Promise<string> {
-  if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
-    const { fetch: tauriFetch } = await import("@tauri-apps/plugin-http");
-    let res: Response;
-    try {
-      res = await tauriFetch(url, {
-        method: "GET",
-        headers: {
-          "User-Agent": XTREAM_UA,
-          Accept: "application/json, */*",
-        },
-        connectTimeout: 30_000,
-        maxRedirections: 5,
-      } as unknown as RequestInit);
-    } catch (e) {
-      if (!/scope|not allowed/i.test(String(e))) throw e;
-      const { safeFetch } = await import("@/lib/safe-fetch");
-      res = await safeFetch(url, {
-        headers: { "User-Agent": XTREAM_UA, Accept: "application/json, */*" },
-      });
-    }
-    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-    return res.text();
-  }
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-  return res.text();
+async function xtreamFetchText(url: string, parentSignal?: AbortSignal): Promise<string> {
+  return fetchBoundedText(
+    async (signal) => {
+      if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
+        const { fetch: tauriFetch } = await import("@tauri-apps/plugin-http");
+        let res: Response;
+        try {
+          res = await tauriFetch(url, {
+            method: "GET",
+            signal,
+            headers: {
+              "User-Agent": XTREAM_UA,
+              Accept: "application/json, */*",
+            },
+            connectTimeout: 30_000,
+            maxRedirections: 5,
+          } as unknown as RequestInit);
+        } catch (e) {
+          if (!/scope|not allowed/i.test(String(e))) throw e;
+          const { safeFetch } = await import("@/lib/safe-fetch");
+          res = await safeFetch(url, {
+            signal,
+            headers: { "User-Agent": XTREAM_UA, Accept: "application/json, */*" },
+          });
+        }
+        return res;
+      }
+      return fetch(url, { cache: "no-store", signal });
+    },
+    { signal: parentSignal },
+  );
 }
 
 function parseJsonStrict(text: string): unknown {
@@ -118,7 +137,11 @@ function parseJsonStrict(text: string): unknown {
   }
 }
 
-export function apiUrl(creds: XtreamCreds, action: string, extra: Record<string, string> = {}): string {
+export function apiUrl(
+  creds: XtreamCreds,
+  action: string,
+  extra: Record<string, string> = {},
+): string {
   const params = new URLSearchParams({
     username: creds.username,
     password: creds.password,
@@ -133,8 +156,11 @@ function userInfoUrl(creds: XtreamCreds): string {
   return `${creds.base}/player_api.php?${params.toString()}`;
 }
 
-export async function fetchXtreamUserInfo(creds: XtreamCreds): Promise<XtreamServerCaps> {
-  const raw = (await xtreamFetch(userInfoUrl(creds))) as UserInfo;
+export async function fetchXtreamUserInfo(
+  creds: XtreamCreds,
+  signal?: AbortSignal,
+): Promise<XtreamServerCaps> {
+  const raw = (await xtreamFetch(userInfoUrl(creds), signal)) as UserInfo;
   const info = raw?.user_info;
   if (!info || typeof info !== "object") {
     throw new XtreamAuthError("Xtream login did not return account info. Check the server URL.");
@@ -146,8 +172,10 @@ export async function fetchXtreamUserInfo(creds: XtreamCreds): Promise<XtreamSer
   }
   const status = (info.status ?? "").toString().toLowerCase();
   if (status === "expired") throw new XtreamAuthError("This Xtream account is expired.");
-  if (status === "banned") throw new XtreamAuthError("This Xtream account is banned by the provider.");
-  if (status === "disabled") throw new XtreamAuthError("This Xtream account is disabled by the provider.");
+  if (status === "banned")
+    throw new XtreamAuthError("This Xtream account is banned by the provider.");
+  if (status === "disabled")
+    throw new XtreamAuthError("This Xtream account is disabled by the provider.");
   const allowedFormats = Array.isArray(info.allowed_output_formats)
     ? info.allowed_output_formats.map((f) => String(f).toLowerCase())
     : [];
@@ -180,12 +208,15 @@ export async function fetchXtreamLiveChannels(
   baseId: string,
   container: XtreamContainer = "ts",
   caps?: XtreamServerCaps,
+  onProgress?: (channels: IptvChannel[]) => void,
+  signal?: AbortSignal,
 ): Promise<IptvChannel[]> {
+  signal?.throwIfAborted();
   const resolvedContainer = pickContainer(container, caps?.allowedFormats ?? []);
   const streamBase = caps?.streamBase ?? creds.base;
   const [categoriesRaw, streamsRaw] = await Promise.all([
-    xtreamFetch(apiUrl(creds, "get_live_categories")),
-    xtreamFetch(apiUrl(creds, "get_live_streams")),
+    xtreamFetch(apiUrl(creds, "get_live_categories"), signal),
+    xtreamFetch(apiUrl(creds, "get_live_streams"), signal),
   ]);
   const categoryName = new Map<string, string>();
   if (Array.isArray(categoriesRaw)) {
@@ -195,11 +226,20 @@ export async function fetchXtreamLiveChannels(
   }
   const streams: LiveStreamRow[] = Array.isArray(streamsRaw) ? (streamsRaw as LiveStreamRow[]) : [];
   const out: IptvChannel[] = [];
+  let publishedAt = 0;
   for (let i = 0; i < streams.length; i += 1) {
+    signal?.throwIfAborted();
+    if (i > 0 && i % 512 === 0) {
+      if (onProgress && (publishedAt === 0 || performance.now() - publishedAt >= 750)) {
+        onProgress(out.slice());
+        publishedAt = performance.now();
+      }
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
     const s = streams[i];
     if (!s || s.stream_id == null) continue;
     const tvgId = s.epg_channel_id?.trim() || null;
-    const group = s.category_id ? categoryName.get(String(s.category_id)) ?? null : null;
+    const group = s.category_id ? (categoryName.get(String(s.category_id)) ?? null) : null;
     const url = buildLiveStreamUrl(creds, s.stream_id, resolvedContainer, streamBase);
     const attrs: Record<string, string> = {};
     if (Number(s.tv_archive) > 0) {
@@ -210,7 +250,7 @@ export async function fetchXtreamLiveChannels(
     out.push({
       id: `${baseId}::xt::${s.stream_id}`,
       tvgId,
-      name: s.name?.trim() || `Stream ${s.stream_id}`,
+      name: decodeBase64(s.name?.trim()) || `Stream ${s.stream_id}`,
       logo: s.stream_icon?.trim() || null,
       group,
       url,
@@ -219,6 +259,7 @@ export async function fetchXtreamLiveChannels(
       attrs,
     });
   }
+  signal?.throwIfAborted();
   return out;
 }
 
@@ -244,7 +285,8 @@ export async function fetchXtreamShortEpg(
   }
   const listings = (raw as { epg_listings?: ShortEpgRow[] })?.epg_listings;
   if (!Array.isArray(listings)) return [];
-  const out: Array<{ title: string; description: string | null; startMs: number; endMs: number }> = [];
+  const out: Array<{ title: string; description: string | null; startMs: number; endMs: number }> =
+    [];
   for (const row of listings) {
     const startMs = Number(row.start_timestamp) * 1000;
     const endMs = Number(row.stop_timestamp) * 1000;
@@ -267,7 +309,7 @@ function hasControlChars(s: string): boolean {
   return false;
 }
 
-function decodeBase64(s: string | undefined): string {
+export function decodeBase64(s: string | undefined): string {
   if (!s) return "";
   const raw = s.trim();
   if (!/^[A-Za-z0-9+/]+={0,2}$/.test(raw) || raw.length % 4 !== 0) return raw;

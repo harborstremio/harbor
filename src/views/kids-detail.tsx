@@ -1,4 +1,4 @@
-import { Play } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useRef, useState } from "react";
 import { PickCard } from "@/components/pick-card";
 import { Row } from "@/components/row";
@@ -8,7 +8,7 @@ import { tmdbDetails, type TmdbDetail } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { CollectionRow } from "./detail/collection-row";
-import { dropAdultContent, dropUnreleased, dropUnsafeGenres } from "./kids/kids-filter";
+import { dropUnreleased, dropUnsafeGenres } from "./kids/kids-filter";
 import { KidsEpisodes } from "./kids-detail/kids-episodes";
 
 export function KidsDetailView({
@@ -50,13 +50,7 @@ export function KidsDetailView({
   const genres = (detail?.genres?.length ? detail.genres : base?.genres) ?? [];
   const runtime = detail?.runtime;
   const year = meta.releaseInfo || base?.releaseInfo;
-  const recs = dropAdultContent(
-    dropUnsafeGenres(
-      dropUnreleased(
-        dedupe([...(detail?.recommendations ?? []), ...(detail?.similar ?? [])], meta.id),
-      ),
-    ),
-  );
+  const recs = dropUnsafeGenres(dropUnreleased(dedupe([...(detail?.recommendations ?? []), ...(detail?.similar ?? [])], meta.id)));
 
   const onPlay = () => {
     const isSeries = meta.type === "series";

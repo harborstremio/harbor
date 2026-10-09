@@ -1,18 +1,29 @@
-import { AlertCircle, ImageDown, Trash2 } from "lucide-react";
+import { fillStyle } from "@/components/slider";
+import { AlertCircle, ImageDown, Trash2 } from "../icons";
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/lib/i18n";
+import { ROW_ACTION, ROW_ACTION_PRIMARY, SettingRow } from "../kit";
 import { processBackgroundImage } from "./image-utils";
+
+function pickerShade(dim: number): string {
+  const a = (v: number) => `rgb(0 0 0 / ${Math.min(0.94, Math.max(0, v))})`;
+  return `linear-gradient(to bottom, ${a(dim + 0.14)} 0%, ${a(dim)} 38%, ${a(dim + 0.22)} 100%)`;
+}
 
 export function BackgroundPicker({
   imageData,
   dim,
   onImageChange,
   onDimChange,
+  variant = "theme",
 }: {
   imageData: string | null;
   dim: number;
   onImageChange: (data: string | null) => void;
   onDimChange: (dim: number) => void;
+  variant?: "theme" | "picker";
 }) {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +46,9 @@ export function BackgroundPicker({
   useEffect(() => {
     if (justSetRef.current && !imageData) {
       flashError(
-        "Couldn't save that background. Your local storage is full. Try a smaller crop or clear cached data.",
+        t(
+          "Couldn't save that background. Your local storage is full. Try a smaller crop or clear cached data.",
+        ),
       );
       justSetRef.current = false;
     } else if (imageData) {
@@ -50,13 +63,15 @@ export function BackgroundPicker({
     try {
       const processed = await processBackgroundImage(file);
       if (!processed) {
-        flashError("Couldn't compress this image small enough. Try a different photo or crop it down.");
+        flashError(
+          t("Couldn't compress this image small enough. Try a different photo or crop it down."),
+        );
         return;
       }
       justSetRef.current = true;
       onImageChange(processed);
     } catch {
-      flashError("Couldn't read that image. Try a different file.");
+      flashError(t("Couldn't read that image. Try a different file."));
     } finally {
       setBusy(false);
     }
@@ -64,31 +79,44 @@ export function BackgroundPicker({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-edge-soft bg-elevated/30">
+      <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-elevated">
         {imageData ? (
           <>
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${imageData})` }}
             />
-            <div className="absolute inset-0" style={{ background: "black", opacity: 0.45 }} />
-            <div
-              className="absolute inset-0 bg-canvas"
-              style={{ opacity: dim }}
-            />
+            {variant === "picker" ? (
+              <div className="absolute inset-0" style={{ background: pickerShade(dim) }} />
+            ) : (
+              <>
+                <div className="absolute inset-0 bg-canvas/[0.45]" />
+                <div className="absolute inset-0 bg-canvas" style={{ opacity: dim }} />
+              </>
+            )}
           </>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-ink-subtle">
             <ImageDown size={32} strokeWidth={1.6} />
-            <p className="text-[13px]">No background image</p>
+            <p className="text-[15.5px]">
+              {variant === "picker"
+                ? t("No background yet. The picker blurs the app behind it.")
+                : t("No background image")}
+            </p>
           </div>
         )}
         <div className="relative z-10 flex h-full flex-col items-start justify-end gap-1 p-5">
-          <p className="text-[10.5px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
-            Live preview
+          <p className="harbor-settings-label">
+            {variant === "picker" ? t("Who's watching preview") : t("Live preview")}
           </p>
-          <p className="font-display text-[26px] font-medium tracking-tight text-ink">Tonight's picks</p>
-          <p className="text-[12px] text-ink-muted">Both serif and body text should stay legible at this dim.</p>
+          <p className="font-display text-[26px] font-medium tracking-tight text-ink">
+            {variant === "picker" ? t("Who's watching?") : t("Tonight's picks")}
+          </p>
+          <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
+            {variant === "picker"
+              ? t("Profile names and avatars should stay readable at this dim.")
+              : t("Both serif and body text should stay legible at this dim.")}
+          </p>
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -106,47 +134,55 @@ export function BackgroundPicker({
         <button
           onClick={() => inputRef.current?.click()}
           disabled={busy}
-          className="flex items-center gap-2 rounded-full bg-ink px-5 py-2 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className={ROW_ACTION_PRIMARY}
         >
-          <ImageDown size={14} strokeWidth={2.2} />
-          {busy ? "Compressing…" : imageData ? "Replace image" : "Choose image"}
+          <ImageDown size={18} strokeWidth={2.2} />
+          {busy ? t("Compressing…") : imageData ? t("Replace image") : t("Choose image")}
         </button>
         {imageData && !busy && (
-          <button
-            onClick={() => onImageChange(null)}
-            className="flex items-center gap-2 rounded-full border border-edge-soft px-5 py-2 text-[12.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
-          >
-            <Trash2 size={13} strokeWidth={2.2} />
-            Remove
+          <button onClick={() => onImageChange(null)} className={ROW_ACTION}>
+            <Trash2 size={18} strokeWidth={2.2} />
+            {t("Remove")}
           </button>
         )}
-        <p className="ms-auto text-[11.5px] text-ink-subtle">
-          JPEG / PNG / WebP. Big files auto-compress to fit.
+        <p className="ms-auto max-w-[66ch] text-[15.5px] text-ink-subtle">
+          {t("JPEG / PNG / WebP. Big files auto-compress to fit.")}
         </p>
       </div>
       {error && (
-        <div className="flex animate-fade-in items-start gap-2.5 rounded-xl border border-rose-300/30 bg-rose-400/[0.08] px-4 py-3 text-[12.5px] leading-relaxed text-rose-100">
-          <AlertCircle size={15} strokeWidth={2.2} className="mt-0.5 shrink-0 text-rose-300" />
-          <span>{error}</span>
+        <div className="flex animate-fade-in items-start gap-2.5 rounded-[10px] border border-danger/30 bg-elevated px-4 py-3 text-[15.5px] leading-[22px] text-danger">
+          <AlertCircle size={18} strokeWidth={2.2} className="mt-[2px] shrink-0 text-danger" />
+          <span className="max-w-[66ch]">{error}</span>
         </div>
       )}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-baseline justify-between">
-          <label className="text-[13px] font-medium text-ink">Dim overlay</label>
-          <span className="text-[12px] tabular-nums text-ink-subtle">{Math.round(dim * 100)}%</span>
+      <SettingRow
+        wide
+        label={t("Dim overlay")}
+        desc={
+          variant === "picker"
+            ? t("0% shows the raw image. 100% covers it in black. 60-80% keeps profiles readable.")
+            : t(
+                "0% shows the raw image. 100% covers it with the theme color. 60-80% is the readable sweet spot.",
+              )
+        }
+      >
+        <div className="flex w-full max-w-[520px] flex-wrap items-center gap-4">
+          <input
+            type="range"
+            aria-label={t("Dim overlay")}
+            min={0}
+            max={100}
+            step={5}
+            value={Math.round(dim * 100)}
+            onChange={(e) => onDimChange(parseInt(e.currentTarget.value, 10) / 100)}
+            className="harbor-slider h-11 min-w-0 flex-1"
+            style={fillStyle(Math.round(dim * 100), 0, 100, 5)}
+          />
+          <span className="w-[64px] shrink-0 text-end text-[15.5px] font-semibold tabular-nums text-ink">
+            {Math.round(dim * 100)}%
+          </span>
         </div>
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={Math.round(dim * 100)}
-          onChange={(e) => onDimChange(parseInt(e.currentTarget.value, 10) / 100)}
-          className="w-full accent-[var(--color-accent)]"
-        />
-        <p className="text-[11.5px] leading-relaxed text-ink-subtle">
-          0% shows the raw image. 100% covers it with the theme color. 60-80% is the readable sweet spot.
-        </p>
-      </div>
+      </SettingRow>
     </div>
   );
 }

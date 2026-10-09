@@ -1,0 +1,81 @@
+.spooktober-music-content { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 0; height: 100%; }
+.spooktober-music-content[hidden] { display: none; }
+.spooktober-connections { height: 100%; overflow-y: auto; padding: 32px clamp(24px, 4vw, 64px); }
+.spooktober-playlist {
+  --spooktober-playlist-gutter: clamp(24px, 4vw, 72px);
+  container: spooktober-playlist / inline-size;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: clip;
+  overscroll-behavior-y: contain;
+  padding: 96px var(--spooktober-playlist-gutter) 56px;
+  color: var(--color-ink);
+  background: var(--color-canvas);
+}
+.spooktober-playlist-hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; gap: clamp(24px, 4vw, 64px); min-height: 390px; padding: 16px 0 44px; }
+.spooktober-playlist-intro { position: relative; z-index: 1; min-width: 0; }
+.spooktober-playlist-eyebrow { color: var(--color-ink-muted); font-size: 11px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase; }
+.spooktober-playlist h1 { margin: 17px 0 18px; font-size: clamp(40px, 6cqi, 76px); font-weight: 650; line-height: 1.07; letter-spacing: -.05em; overflow-wrap: break-word; }
+.spooktober-playlist h1:focus { outline: none; }
+.spooktober-playlist-description { max-width: 44ch; color: var(--color-ink-muted); font-size: 15px; line-height: 1.8; text-wrap: pretty; }
+.spooktober-playlist-facts { display: flex; align-items: center; gap: 11px; margin: 20px 0 26px; color: var(--color-ink-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.spooktober-playlist-save { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 10px 16px; border-radius: 7px; background: var(--color-elevated); color: var(--color-ink); font-size: 13px; font-weight: 600; }
+.spooktober-playlist-save:hover:enabled { background: var(--color-raised); }
+.spooktober-playlist-error { margin-top: 12px; color: var(--color-danger); font-size: 13px; }
+.spooktober-playlist-art { position: relative; isolation: isolate; min-width: 0; height: 100%; min-height: 330px; }
+.spooktober-playlist-art::before { content: ""; position: absolute; inset-inline-start: 14%; top: 14%; width: 29%; aspect-ratio: 1; border-radius: 50%; background: var(--color-accent); opacity: .2; }
+.spooktober-playlist-art::after { content: ""; position: absolute; inset: 76% -4% 0; border-radius: 50%; background: var(--color-elevated); opacity: .7; z-index: -1; }
+.spooktober-mix-prop, .spooktober-mix-cover { position: absolute; object-fit: contain; pointer-events: none; user-select: none; }
+.spooktober-mix-cover { width: 42%; max-width: 235px; right: 0; bottom: 12%; rotate: 8deg; border-radius: 4px; }
+.spooktober-mix-cover.cover-0 { right: 24%; bottom: 22%; rotate: -9deg; }
+.spooktober-playlist[data-playlist="party"] .prop-0 { left: 0; bottom: 7%; width: 28%; rotate: -9deg; z-index: 2; }
+.spooktober-playlist[data-playlist="party"] .prop-1 { right: 4%; bottom: 3%; width: 25%; rotate: 7deg; z-index: 2; }
+.spooktober-playlist[data-playlist="dark"] .prop-0 { left: -7%; bottom: -5%; width: 56%; height: 105%; opacity: .8; }
+.spooktober-playlist[data-playlist="dark"] .prop-1 { right: -3%; bottom: 0; width: 75%; height: 24%; opacity: .4; }
+.spooktober-playlist[data-playlist="scores"] :is(.prop-0,.prop-2,.prop-3) { left: 0; bottom: 3%; width: 32%; height: 91%; filter: brightness(.95); }
+.spooktober-playlist[data-playlist="scores"] .prop-1 { right: -4%; bottom: -1%; width: 88%; height: 25%; opacity: .45; }
+.spooktober-playlist[data-playlist="goth"] .prop-0 { left: 1%; bottom: 4%; width: 28%; height: 83%; filter: brightness(.8); }
+.spooktober-playlist[data-playlist="goth"] .prop-1 { right: 0; top: 0; width: 21%; height: 32%; opacity: .75; rotate: 11deg; }
+.spooktober-playlist[data-playlist="emo"] .prop-0 { left: -1%; bottom: 4%; width: 33%; height: 83%; filter: brightness(.85); }
+.spooktober-playlist[data-playlist="emo"] .prop-1 { left: 0; bottom: 0; width: 62%; height: 25%; opacity: .4; }
+.spooktober-playlist[data-playlist="darkpop"] .prop-0 { left: -1%; bottom: 6%; width: 34%; height: 65%; rotate: -7deg; filter: brightness(.8); }
+.spooktober-playlist[data-playlist="darkpop"] .prop-1 { left: 25%; top: 2%; width: 18%; height: 30%; opacity: .75; filter: brightness(.85); }
+.spooktober-playlist-tracks { border-top: 1px solid var(--color-edge-soft); padding-top: 28px; }
+.spooktober-playlist-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 26px; }
+.spooktober-playlist-count { display: flex; flex-wrap: wrap; align-items: baseline; gap: 14px; }
+.spooktober-playlist-count h2 { font-size: 23px; font-weight: 600; letter-spacing: -.03em; }
+.spooktober-playlist-count>span { color: var(--color-ink-muted); font-size: 12px; }
+.spooktober-playlist-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.spooktober-playlist-search { display: flex; align-items: center; gap: 10px; padding: 0 13px; min-height: 44px; border-radius: 6px; color: var(--color-ink-muted); background: var(--color-elevated); }
+.spooktober-playlist-search input { width: clamp(140px, 16cqi, 230px); min-width: 0; padding: 10px 0; color: var(--color-ink); outline: none; font-size: 13px; }
+.spooktober-playlist-search:focus-within { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.spooktober-playlist-search button { display: grid; place-items: center; width: 28px; height: 32px; }
+.spooktober-playlist-search input::-webkit-search-cancel-button { display: none; }
+.spooktober-playlist-rows { display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.spooktober-playlist-rows>li { min-width: 0; }
+.spooktober-playlist-state { padding: 44px 0; color: var(--color-ink-muted); font-size: 14px; }
+.spooktober-playlist-state button { margin-top: 12px; border-radius: 6px; padding: 10px 15px; background: var(--color-elevated); color: var(--color-ink); }
+
+@container spooktober-playlist (max-width: 650px) {
+  .spooktober-playlist-hero { grid-template-columns: 1fr; gap: 0; padding: 24px 0 30px; }
+  .spooktober-playlist h1 { font-size: clamp(39px, 10cqi, 62px); }
+  .spooktober-playlist-art { height: 270px; min-height: 0; width: min(100%, 440px); margin: 26px auto 0; }
+  .spooktober-playlist-toolbar { align-items: stretch; flex-direction: column; gap: 18px; }
+  .spooktober-playlist-count { justify-content: space-between; }
+  .spooktober-playlist-filters { flex-wrap: nowrap; }
+  .spooktober-playlist-search { flex: 1; min-width: 0; }
+  .spooktober-playlist-search input { width: 100%; }
+}
+@container spooktober-playlist (max-width: 410px) {
+  .spooktober-playlist-filters { flex-wrap: wrap; }
+  .spooktober-playlist-search { flex-basis: 100%; }
+  .spooktober-playlist-rows .music-track-cover { width: 44px; height: 44px; }
+  .spooktober-playlist-rows .music-track-title { padding-inline-start: 9px; }
+  .spooktober-playlist-rows .music-track-title~span { display: none; }
+  .spooktober-playlist-rows .group>span:first-child { width: 20px; }
+  .spooktober-playlist-rows .group>button { width: 36px; }
+}
+@media (hover: none) {
+  .spooktober-playlist-rows .group>button { opacity: 1; }
+}

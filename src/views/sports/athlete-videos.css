@@ -1,0 +1,151 @@
+.sh-athlete-videos {
+  margin-top: 28px;
+  min-width: 0;
+}
+.sh-athlete-videos > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.sh-athlete-videos h3 {
+  margin: 6px 0 0;
+}
+.sh-athlete-videos .sh-text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  font-size: 11px;
+}
+.sh-athlete-video-rail {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: 2px 2px 12px;
+  scrollbar-width: thin;
+}
+.sh-athlete-video-card {
+  flex: 0 0 250px;
+  text-align: left;
+  min-width: 0;
+}
+.sh-athlete-video-card > strong {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 11px 0 7px;
+}
+.sh-athlete-video-thumb {
+  display: block;
+  position: relative;
+  aspect-ratio: 16/9;
+  background: var(--color-elevated);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.sh-athlete-video-thumb > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+}
+.sh-athlete-video-thumb > img[data-ready="true"] {
+  opacity: 1;
+}
+.sh-athlete-video-thumb > small {
+  position: absolute;
+  bottom: 9px;
+  right: 9px;
+  background: #101112dd;
+  color: white;
+  border-radius: 4px;
+  padding: 3px 5px;
+  font-size: 10px;
+}
+.sh-athlete-video-play {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #101112dc;
+  color: white;
+}
+.sh-athlete-video-publisher,
+.sh-athlete-video-empty,
+.sh-athlete-video-loading {
+  font-size: 11px;
+  color: var(--color-ink-muted);
+}
+.sh-athlete-video-publisher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sh-athlete-video-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 70px;
+}
+.sh-athlete-video-empty {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.sh-athlete-video-player {
+  margin-bottom: 18px;
+  background: var(--color-canvas);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.sh-athlete-video-player > div {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  gap: 14px;
+}
+.sh-athlete-video-player strong {
+  flex: 1;
+  font-size: 12px;
+}
+.sh-athlete-video-player iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: 0;
+}
+.sh-athlete-video-player p {
+  padding: 8px 14px;
+  margin: 0;
+  font-size: 11px;
+  color: var(--color-ink-muted);
+}
+.sh-athlete-videos button:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .sh-athlete-video-card {
+    flex-basis: 220px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sh-athlete-video-thumb > img {
+    transition: none;
+  }
+  .sh-athlete-video-play .animate-spin {
+    animation: none;
+  }
+}

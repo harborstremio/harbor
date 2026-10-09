@@ -1,0 +1,32 @@
+.mc-java-setup {padding-top:22px;border-top:1px solid var(--color-edge-soft)}
+.mc-java-heading {display:flex;gap:16px;align-items:center;margin-bottom:20px}
+.mc-java-heading>svg {flex-shrink:0;color:var(--color-ink-muted)}
+.mc-java-heading h3 {font-size:18px;font-weight:650;line-height:1.4;letter-spacing:-.02em}
+.mc-java-heading p {font-size:13px;color:var(--color-ink-muted);line-height:1.65;margin-top:5px}
+.mc-java-choices {display:flex;flex-wrap:wrap;gap:8px;margin-block:14px 20px}
+.mc-java-current {padding:16px;border-radius:8px;background:var(--color-elevated);margin-bottom:16px}
+.mc-java-current-main {display:flex;align-items:center;gap:16px}
+.mc-java-current-main>div {display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0;flex:1}
+.mc-java-current-main>.games-button {flex-shrink:0}
+.mc-java-current-main span {overflow-wrap:anywhere}
+.mc-java-current svg {color:var(--color-success);flex-shrink:0}
+.mc-java-current strong {font-size:13px;font-weight:600;line-height:1.5}
+.mc-java-current span {font-size:12px;color:var(--color-ink-muted);flex-basis:100%;line-height:1.6;margin-top:2px}
+.mc-java-current details {margin-top:12px;color:var(--color-ink-muted);font-size:12px}
+.mc-java-current summary {cursor:pointer;min-height:24px;width:fit-content}
+.mc-java-current details p {overflow-wrap:anywhere;line-height:1.65;margin-top:8px}
+.mc-java-download {display:flex;gap:20px;justify-content:space-between;align-items:center;padding:20px;border-radius:8px;background:var(--color-elevated);margin-bottom:22px}
+.mc-java-download>div {min-width:0;display:flex;flex-direction:column;gap:7px}
+.mc-java-download strong {font-size:15px;font-weight:650}
+.mc-java-download span,.mc-java-download p {font-size:12px;color:var(--color-ink-muted);line-height:1.6}
+.mc-java-download>button {flex-shrink:0}
+.mc-java-memory {display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:16px;border-top:1px solid var(--color-edge-soft)}
+.mc-java-memory>div {min-width:0;display:flex;flex-direction:column;gap:6px}
+.mc-java-memory strong {font-size:13px;font-weight:600}
+.mc-java-memory span {font-size:12px;color:var(--color-ink-muted);line-height:1.6}
+.mc-java-memory select {appearance:auto;background:var(--color-canvas);color:var(--color-ink);border:0;border-radius:7px;padding:10px 12px;min-width:105px;min-height:42px;font-size:13px}
+.mc-java-progress {display:flex;align-items:center;gap:14px}
+.mc-java-progress>.mc-pack-progress {min-width:0;flex:1}
+.mc-java-current summary:focus-visible {outline:2px solid var(--color-ink);outline-offset:3px}
+@media(max-width:600px) {.mc-java-download {flex-wrap:wrap;gap:16px}.mc-java-download>button {margin-inline-start:auto}.mc-java-memory {gap:16px}.mc-java-progress {flex-wrap:wrap}.mc-java-progress>.mc-pack-progress {flex-basis:100%;margin-bottom:0}.mc-java-progress>button {margin-inline-start:auto;margin-bottom:12px}}
+@media(max-width:440px) {.mc-java-current-main {flex-wrap:wrap;gap:12px}.mc-java-current-main>div {flex-basis:100%}.mc-java-current-main>.games-button {margin-inline-start:auto}}

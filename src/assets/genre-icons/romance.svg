@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-romance">
+<title id="title-romance">Romance anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <path class="coral" d="M32 53S8 40 8 23c0-9 12-14 24-3 12-11 24-6 24 3 0 17-24 30-24 30z"/>
+  <path class="icon-stroke" d="M18 24c1-4 5-6 9-4"/>
+  <path class="gold" d="M48 8l1.8 4.2L54 14l-4.2 1.8L48 20l-1.8-4.2L42 14l4.2-1.8L48 8z"/>
+
+</svg>

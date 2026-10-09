@@ -11,6 +11,7 @@ type Props = {
   onCancel: () => void;
   onReveal: () => void;
   onReset: () => void;
+  iconUrl?: string;
 };
 
 export function DownloadButton({
@@ -19,6 +20,7 @@ export function DownloadButton({
   onCancel,
   onReveal,
   onReset,
+  iconUrl,
 }: Props) {
   const t = useT();
   useEffect(() => {
@@ -46,16 +48,26 @@ export function DownloadButton({
 
   if (status.kind === "downloading") {
     const pct = Math.round(status.ratio * 100);
+    const determinate = !!status.totalBytes;
     const detail = formatTooltip(status, speed, t);
     return (
       <Tooltip label={detail}>
         <button
           onClick={onCancel}
           aria-label={t("Downloading {pct}%, click to cancel", { pct })}
-          className="group relative flex h-12 w-12 items-center justify-center rounded-full text-white/85 transition-[background-color,color] hover:bg-white/10 hover:text-white"
+          className="group relative flex h-12 w-12 flex-col items-center justify-center rounded-full text-white/90 transition-[background-color,color] hover:bg-white/10 hover:text-white"
         >
-          <ProgressRing ratio={status.ratio} indeterminate={!status.totalBytes} />
-          <Download size={20} strokeWidth={1.9} className="relative transition-opacity group-hover:opacity-0" />
+          <ProgressRing ratio={status.ratio} indeterminate={!determinate} />
+          {determinate ? (
+            <>
+              <Download size={10} strokeWidth={2.2} className="relative -mb-px opacity-70 transition-opacity group-hover:opacity-0" />
+              <span className="relative text-[11px] font-bold leading-none tabular-nums transition-opacity group-hover:opacity-0">
+                {pct}%
+              </span>
+            </>
+          ) : (
+            <Download size={20} strokeWidth={1.9} className="relative transition-opacity group-hover:opacity-0" />
+          )}
           <X size={18} strokeWidth={2.4} className="absolute opacity-0 transition-opacity group-hover:opacity-100" />
         </button>
       </Tooltip>
@@ -88,7 +100,7 @@ export function DownloadButton({
   }
 
   return (
-    <BigButton onClick={onStart} ariaLabel={t("Download video")} tooltip={t("Download")}>
+    <BigButton onClick={onStart} ariaLabel={t("Download video")} tooltip={t("Download")} iconUrl={iconUrl}>
       <Download size={22} strokeWidth={1.9} />
     </BigButton>
   );
@@ -124,13 +136,9 @@ function ProgressRing({
         strokeWidth="2"
         strokeLinecap="round"
         strokeDasharray={c}
-        strokeDashoffset={indeterminate ? c * 0.78 : offset}
-        className={
-          indeterminate
-            ? "origin-center animate-[spin_1.4s_linear_infinite]"
-            : "transition-[stroke-dashoffset] duration-300 ease-out"
-        }
+        strokeDashoffset={indeterminate ? c * 0.9 : offset}
         transform="rotate(-90 24 24)"
+        className={`transition-[stroke-dashoffset] duration-500 ease-out ${indeterminate ? "animate-pulse" : ""}`}
       />
     </svg>
   );

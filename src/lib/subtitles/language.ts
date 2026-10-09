@@ -1,60 +1,243 @@
 const ISO_3_TO_1: Record<string, string> = {
-  eng: "en", fre: "fr", fra: "fr", ger: "de", deu: "de", spa: "es", ita: "it",
-  jpn: "ja", kor: "ko", rus: "ru", por: "pt", chi: "zh", zho: "zh", ara: "ar",
-  hin: "hi", tha: "th", vie: "vi", tur: "tr", pol: "pl", dut: "nl", nld: "nl",
-  swe: "sv", nor: "no", dan: "da", fin: "fi", heb: "he", ind: "id", ces: "cs",
-  cze: "cs", ell: "el", gre: "el", hun: "hu", rum: "ro", ron: "ro", ukr: "uk",
-  tam: "ta", tel: "te", mal: "ml", kan: "kn", ben: "bn", mar: "mr", guj: "gu",
-  pan: "pa", urd: "ur", ori: "or", ory: "or", asm: "as", nep: "ne", sin: "si",
-  msa: "ms", may: "ms", fil: "tl", tgl: "tl", mya: "my", bur: "my", khm: "km",
-  lao: "lo", fas: "fa", per: "fa", pus: "ps", kur: "ku", aze: "az", kat: "ka",
-  geo: "ka", hye: "hy", arm: "hy", kaz: "kk", uzb: "uz", bul: "bg", srp: "sr",
-  hrv: "hr", bos: "bs", slk: "sk", slo: "sk", slv: "sl", lit: "lt", lav: "lv",
-  est: "et", isl: "is", ice: "is", gle: "ga", cat: "ca", eus: "eu", baq: "eu",
-  glg: "gl", cym: "cy", wel: "cy", mlt: "mt", sqi: "sq", alb: "sq", mkd: "mk",
-  mac: "mk", bel: "be", swa: "sw", amh: "am", afr: "af", hau: "ha", yor: "yo",
-  ibo: "ig", zul: "zu",
+  eng: "en",
+  fre: "fr",
+  fra: "fr",
+  ger: "de",
+  deu: "de",
+  spa: "es",
+  ita: "it",
+  jpn: "ja",
+  kor: "ko",
+  rus: "ru",
+  por: "pt",
+  chi: "zh",
+  zho: "zh",
+  ara: "ar",
+  hin: "hi",
+  tha: "th",
+  vie: "vi",
+  tur: "tr",
+  pol: "pl",
+  dut: "nl",
+  nld: "nl",
+  swe: "sv",
+  nor: "no",
+  dan: "da",
+  fin: "fi",
+  heb: "he",
+  ind: "id",
+  ces: "cs",
+  cze: "cs",
+  ell: "el",
+  gre: "el",
+  hun: "hu",
+  rum: "ro",
+  ron: "ro",
+  ukr: "uk",
+  tam: "ta",
+  tel: "te",
+  mal: "ml",
+  kan: "kn",
+  ben: "bn",
+  mar: "mr",
+  guj: "gu",
+  pan: "pa",
+  urd: "ur",
+  ori: "or",
+  ory: "or",
+  asm: "as",
+  nep: "ne",
+  sin: "si",
+  msa: "ms",
+  may: "ms",
+  fil: "tl",
+  tgl: "tl",
+  mya: "my",
+  bur: "my",
+  khm: "km",
+  lao: "lo",
+  fas: "fa",
+  per: "fa",
+  pus: "ps",
+  kur: "ku",
+  aze: "az",
+  kat: "ka",
+  geo: "ka",
+  hye: "hy",
+  arm: "hy",
+  kaz: "kk",
+  uzb: "uz",
+  bul: "bg",
+  srp: "sr",
+  hrv: "hr",
+  bos: "bs",
+  slk: "sk",
+  slo: "sk",
+  slv: "sl",
+  lit: "lt",
+  lav: "lv",
+  est: "et",
+  isl: "is",
+  ice: "is",
+  gle: "ga",
+  cat: "ca",
+  eus: "eu",
+  baq: "eu",
+  glg: "gl",
+  cym: "cy",
+  wel: "cy",
+  mlt: "mt",
+  sqi: "sq",
+  alb: "sq",
+  mkd: "mk",
+  mac: "mk",
+  bel: "be",
+  swa: "sw",
+  amh: "am",
+  afr: "af",
+  hau: "ha",
+  yor: "yo",
+  ibo: "ig",
+  zul: "zu",
 };
 
 const NAMES: Record<string, string> = {
-  en: "English", es: "Spanish", "es-419": "Spanish (Latin America)", fr: "French",
-  de: "German", it: "Italian",
-  ja: "Japanese", ko: "Korean", zh: "Chinese", ru: "Russian", pt: "Portuguese",
+  en: "English",
+  es: "Spanish",
+  "es-419": "Spanish (Latin America)",
+  fr: "French",
+  de: "German",
+  it: "Italian",
+  ja: "Japanese",
+  ko: "Korean",
+  zh: "Chinese",
+  ru: "Russian",
+  pt: "Portuguese",
   "pt-br": "Portuguese (Brazil)",
-  ar: "Arabic", hi: "Hindi", th: "Thai", vi: "Vietnamese", tr: "Turkish",
-  pl: "Polish", nl: "Dutch", sv: "Swedish", no: "Norwegian", da: "Danish",
-  fi: "Finnish", he: "Hebrew", id: "Indonesian", cs: "Czech", el: "Greek",
-  hu: "Hungarian", ro: "Romanian", uk: "Ukrainian",
-  ta: "Tamil", te: "Telugu", ml: "Malayalam", kn: "Kannada", bn: "Bengali",
-  mr: "Marathi", gu: "Gujarati", pa: "Punjabi", ur: "Urdu", or: "Odia",
-  as: "Assamese", ne: "Nepali", si: "Sinhala", ms: "Malay", tl: "Filipino",
-  my: "Burmese", km: "Khmer", lo: "Lao", fa: "Persian", ps: "Pashto",
-  ku: "Kurdish", az: "Azerbaijani", ka: "Georgian", hy: "Armenian", kk: "Kazakh",
-  uz: "Uzbek", bg: "Bulgarian", sr: "Serbian", hr: "Croatian", bs: "Bosnian",
-  sk: "Slovak", sl: "Slovenian", lt: "Lithuanian", lv: "Latvian", et: "Estonian",
-  is: "Icelandic", ga: "Irish", ca: "Catalan", eu: "Basque", gl: "Galician",
-  cy: "Welsh", mt: "Maltese", sq: "Albanian", mk: "Macedonian", be: "Belarusian",
-  sw: "Swahili", am: "Amharic", af: "Afrikaans", ha: "Hausa", yo: "Yoruba",
-  ig: "Igbo", zu: "Zulu",
+  ar: "Arabic",
+  hi: "Hindi",
+  th: "Thai",
+  vi: "Vietnamese",
+  tr: "Turkish",
+  pl: "Polish",
+  nl: "Dutch",
+  sv: "Swedish",
+  no: "Norwegian",
+  da: "Danish",
+  fi: "Finnish",
+  he: "Hebrew",
+  id: "Indonesian",
+  cs: "Czech",
+  el: "Greek",
+  hu: "Hungarian",
+  ro: "Romanian",
+  uk: "Ukrainian",
+  ta: "Tamil",
+  te: "Telugu",
+  ml: "Malayalam",
+  kn: "Kannada",
+  bn: "Bengali",
+  mr: "Marathi",
+  gu: "Gujarati",
+  pa: "Punjabi",
+  ur: "Urdu",
+  or: "Odia",
+  as: "Assamese",
+  ne: "Nepali",
+  si: "Sinhala",
+  ms: "Malay",
+  tl: "Filipino",
+  my: "Burmese",
+  km: "Khmer",
+  lo: "Lao",
+  fa: "Persian",
+  ps: "Pashto",
+  ku: "Kurdish",
+  az: "Azerbaijani",
+  ka: "Georgian",
+  hy: "Armenian",
+  kk: "Kazakh",
+  uz: "Uzbek",
+  bg: "Bulgarian",
+  sr: "Serbian",
+  hr: "Croatian",
+  bs: "Bosnian",
+  sk: "Slovak",
+  sl: "Slovenian",
+  lt: "Lithuanian",
+  lv: "Latvian",
+  et: "Estonian",
+  is: "Icelandic",
+  ga: "Irish",
+  ca: "Catalan",
+  eu: "Basque",
+  gl: "Galician",
+  cy: "Welsh",
+  mt: "Maltese",
+  sq: "Albanian",
+  mk: "Macedonian",
+  be: "Belarusian",
+  sw: "Swahili",
+  am: "Amharic",
+  af: "Afrikaans",
+  ha: "Hausa",
+  yo: "Yoruba",
+  ig: "Igbo",
+  zu: "Zulu",
 };
 
 export const ALL_LANGUAGE_NAMES: string[] = Object.values(NAMES);
 
 const LATAM_ALIASES = new Set([
-  "es-419", "es-la", "lat", "latam", "latino", "latin american spanish",
-  "spanish (latin america)", "spanish latin america", "español latino",
-  "espanol latino", "español latinoamericano",
+  "es-419",
+  "es-la",
+  "lat",
+  "latam",
+  "latino",
+  "latin american spanish",
+  "spanish (latin america)",
+  "spanish latin america",
+  "español latino",
+  "espanol latino",
+  "español latinoamericano",
 ]);
 
 const LATAM_REGIONS = new Set([
-  "mx", "ar", "co", "cl", "pe", "ve", "ec", "gt", "cu", "bo", "do", "hn",
-  "py", "sv", "ni", "cr", "pa", "uy", "pr", "419",
+  "mx",
+  "ar",
+  "co",
+  "cl",
+  "pe",
+  "ve",
+  "ec",
+  "gt",
+  "cu",
+  "bo",
+  "do",
+  "hn",
+  "py",
+  "sv",
+  "ni",
+  "cr",
+  "pa",
+  "uy",
+  "pr",
+  "419",
 ]);
 
 const BRAZIL_ALIASES = new Set([
-  "pt-br", "pt_br", "pob", "por-br", "brazilian", "brazilian portuguese",
-  "portuguese (brazil)", "portuguese brazil", "português (brasil)",
-  "portugues (brasil)", "português brasil", "portugues brasil",
+  "pt-br",
+  "pt_br",
+  "pob",
+  "por-br",
+  "brazilian",
+  "brazilian portuguese",
+  "portuguese (brazil)",
+  "portuguese brazil",
+  "português (brasil)",
+  "portugues (brasil)",
+  "português brasil",
+  "portugues brasil",
 ]);
 
 const NAME_TO_CODE: Record<string, string> = (() => {
@@ -63,20 +246,48 @@ const NAME_TO_CODE: Record<string, string> = (() => {
   m["jp"] = "ja";
   m["mandarin"] = "zh";
   m["cantonese"] = "zh";
+  m["العربية"] = "ar";
+  m["عربي"] = "ar";
+  // People search for their own language in their own script before they try English.
+  for (const [native, code] of [
+    ["русский", "ru"],
+    ["español", "es"],
+    ["castellano", "es"],
+    ["français", "fr"],
+    ["deutsch", "de"],
+    ["português", "pt"],
+    ["italiano", "it"],
+    ["türkçe", "tr"],
+    ["polski", "pl"],
+    ["日本語", "ja"],
+    ["한국어", "ko"],
+    ["中文", "zh"],
+    ["हिन्दी", "hi"],
+    ["bahasa", "id"],
+    ["tiếng việt", "vi"],
+    ["עברית", "he"],
+    ["فارسی", "fa"],
+    ["українська", "uk"],
+    ["nederlands", "nl"],
+    ["svenska", "sv"],
+  ] as const) {
+    m[native] = code;
+  }
   return m;
 })();
 
 export function normalizeLang(input?: string | null): string {
   if (!input) return "";
   const raw = input.trim().toLowerCase();
+  if (raw === "in") return "id";
   if (LATAM_ALIASES.has(raw)) return "es-419";
   if (BRAZIL_ALIASES.has(raw)) return "pt-br";
-  if (raw.length === 2) return raw;
+  if (/^[a-z]{2}$/.test(raw)) return raw;
   if (raw.length === 3 && ISO_3_TO_1[raw]) return ISO_3_TO_1[raw];
   if (NAME_TO_CODE[raw]) return NAME_TO_CODE[raw];
   if (raw.includes("-") || raw.includes("_")) {
     const [head, region] = raw.split(/[-_]/);
-    const headCode = head.length === 2 ? head : ISO_3_TO_1[head] ?? NAME_TO_CODE[head];
+    const headCode = head.length === 2 ? head : (ISO_3_TO_1[head] ?? NAME_TO_CODE[head]);
     if (headCode === "es" && region && LATAM_REGIONS.has(region)) return "es-419";
     if (headCode === "pt" && region === "br") return "pt-br";
     if (headCode) return headCode;
@@ -87,6 +298,46 @@ export function normalizeLang(input?: string | null): string {
 export function languageName(code: string): string {
   const n = normalizeLang(code);
   return NAMES[n] || code.toUpperCase();
+}
+
+export function isKnownLanguage(code?: string | null): boolean {
+  return !!code && Object.hasOwn(NAMES, normalizeLang(code));
+}
+
+/**
+ * True when a "language" value is really a generated display label — a translating
+ * addon's on-demand variant such as "Make Hindi" — rather than a language code or name.
+ * Real codes and names never contain whitespace, and unknown single tokens (e.g. "spl")
+ * are excluded.
+ */
+export function isGeneratedLangLabel(raw?: string | null): boolean {
+  const lang = raw?.trim() ?? "";
+  return lang.length > 0 && !isKnownLanguage(lang) && /\s/.test(lang);
+}
+
+export function trackLanguageName(lang?: string | null, title?: string | null): string {
+  const base = normalizeLang(lang ?? "");
+  if (title) {
+    const fromTitle = normalizeLang(title);
+    if (
+      NAMES[fromTitle] &&
+      fromTitle !== base &&
+      (!base || base.split("-")[0] === fromTitle.split("-")[0])
+    ) {
+      return NAMES[fromTitle];
+    }
+  }
+  return NAMES[base] || (lang ? lang.toUpperCase() : "");
+}
+
+const IMPLAUSIBLE_LANG_PATTERN =
+  /[=<>{}[\]|\\]|\berror\b|\binvalid\b|\btimed?\s*out\b|\bfailed\b|\brequest\b/i;
+
+export function isPlausibleLang(raw: string | undefined | null): boolean {
+  if (!raw) return false;
+  const s = raw.trim();
+  if (!s || s.length > 24) return false;
+  return !IMPLAUSIBLE_LANG_PATTERN.test(s);
 }
 
 export function langScore(lang: string, preferred: string[]): number {
@@ -103,6 +354,16 @@ export function langScore(lang: string, preferred: string[]): number {
   if (exactIdx !== -1) return (preferred.length - exactIdx) * 2;
   if (baseIdx !== -1) return (preferred.length - baseIdx) * 2 - 1;
   return -1;
+}
+
+export function filterTracksByPreferredLanguage<T extends { id: string; lang?: string }>(
+  tracks: T[],
+  preferred: string[],
+): T[] {
+  if (preferred.length === 0) return tracks;
+  // An untagged track has no evidence that it is the wrong language. Keep it
+  // visible so local sidecars and poorly tagged media are still selectable.
+  return tracks.filter((track) => !track.lang || langScore(track.lang, preferred) >= 0);
 }
 
 export function pickBestTrack<T extends { lang?: string; default?: boolean; forced?: boolean }>(

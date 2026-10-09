@@ -57,7 +57,12 @@ export function EpisodeGrid({
 
   return (
     <div ref={wrapRef} className="flex scroll-mt-24 flex-col gap-5">
-      <div className="grid gap-x-4 gap-y-6 [grid-template-columns:repeat(auto-fill,minmax(232px,1fr))]">
+      <div
+        className="grid gap-x-4 gap-y-6"
+        style={{
+          gridTemplateColumns: `repeat(auto-fill,minmax(${Math.round(232 * (settings.episodeCardScale || 1))}px,1fr))`,
+        }}
+      >
         {pageItems.map((g) => (
           <EpisodeGridCard
             key={g.key}

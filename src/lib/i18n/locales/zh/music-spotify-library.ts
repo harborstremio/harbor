@@ -1,0 +1,37 @@
+const musicSpotifyLibrary: Record<string, string> = {
+  "music.spotifyLibrary.title": "Spotify 曲库",
+  "music.spotifyLibrary.body": "来自已连接账户的已喜欢歌曲和歌单。",
+  "music.spotifyLibrary.connect": "连接 Spotify",
+  "music.spotifyLibrary.liked": "已喜欢的歌曲",
+  "music.spotifyLibrary.playlists": "Spotify 歌单",
+  "music.spotifyLibrary.harbor": "Harbor 歌单",
+  "music.spotifyLibrary.back": "返回 Spotify 曲库",
+  "music.spotifyLibrary.import": "导入到 Harbor",
+  "music.spotifyLibrary.importBody":
+    "在 Harbor 中保存此列表的副本。歌曲仍会通过其原有音乐来源播放。",
+  "music.spotifyLibrary.importing": "正在读取 {count} 首歌曲…",
+  "music.spotifyLibrary.imported": "已将 {count} 首歌曲导入 {name}。",
+  "music.spotifyLibrary.skipped": "已跳过 Harbor 无法导入的 {count} 个条目。",
+  "music.spotifyLibrary.loaded": "{count} / {total}",
+  "music.spotifyLibrary.empty": "此 Spotify 收藏目前为空。",
+  "music.spotifyLibrary.noImportable": "此收藏中没有 Harbor 可以导入的曲目。",
+  "music.spotifyLibrary.error": "Spotify 未能完成请求。请检查连接后重试。",
+  "music.spotifyLibrary.permission": "重新连接 Spotify 以允许更改歌单。",
+  "music.spotifyLibrary.reconnect": "重新连接以授权",
+  "music.spotifyLibrary.reconnectNeeded": "请重新登录 Spotify 以读取此曲库。",
+  "music.spotifyLibrary.restricted":
+    "Spotify 仅为您拥有或协作管理的歌单提供这些曲目。您可以在 Spotify 中打开此歌单。",
+  "music.spotifyLibrary.rateLimit": "Spotify 正在限制请求。请稍候再试。",
+  "music.spotifyLibrary.unconfirmed": "Spotify 未确认此次更改。重试前请在 Spotify 中检查歌单。",
+  "music.spotifyLibrary.open": "在 Spotify 中打开",
+  "music.spotifyLibrary.create": "创建 Spotify 歌单",
+  "music.spotifyLibrary.private": "新建的 Spotify 歌单为私密歌单。",
+  "music.spotifyLibrary.created": "已在 Spotify 中创建 {name}。",
+  "music.spotifyLibrary.createThenAdd": "创建私密歌单，然后选择该歌单以添加此歌曲。",
+  "music.spotifyLibrary.spotifyTrackOnly":
+    "请选择此歌曲的 Spotify 版本，以将其添加到 Spotify 歌单。",
+  "music.spotifyLibrary.readOnly": "在 Spotify 中查看",
+  "music.spotifyLibrary.refresh": "刷新 Spotify 曲库",
+  "music.spotifyLibrary.destination": "歌单保存位置",
+};
+export default musicSpotifyLibrary;

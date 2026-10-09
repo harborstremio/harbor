@@ -4,109 +4,148 @@ import type { SubResult, SubSearchQuery } from "./types";
 import { searchWyzie } from "./providers/wyzie";
 import { searchAddons } from "./providers/addons";
 import { searchOpenSubtitlesV3 } from "./providers/opensubtitles-v3";
+import {
+  pickSources,
+  searchExtraSubSources,
+  toSubResult,
+  type ProviderCtx,
+} from "./autosync/sub-sources";
 import { langScore, normalizeLang } from "./language";
+import { compareSubtitleMatch } from "./candidate-ranking";
+import type { StreamHints } from "./stream-hints";
 import { SUBTITLE_PROVIDER_TIMEOUT_MS, withSubtitleTimeout } from "./autoload";
+import { bindSubtitleDownloadAuth, browserSubtitleCredentialKey } from "./provider-auth";
+import { isSafeProviderSubtitleUrl } from "./provider-url";
+
+export { streamTagsOf } from "./stream-hints";
+export type { StreamHints } from "./stream-hints";
+export {
+  compareSubtitleMatch,
+  rankSubtitleCandidates,
+  streamMatchDetail,
+  streamMatchScore,
+  subtitleText,
+} from "./candidate-ranking";
 
 export type SearchOptions = {
+  onPartial?: (results: SubResult[], stillFetching: number) => void;
+  timeoutMs?: number;
   providers?: { wyzie?: boolean; addons?: boolean; opensubtitles?: boolean };
   addons?: Addon[];
   preferredLangs: string[];
   streamHints?: StreamHints;
-};
-
-export type StreamHints = {
-  release?: string | null;
-  source?: string | null;
-  resolution?: string | null;
-  preferHearingImpaired?: boolean;
+  extra?: ProviderCtx;
 };
 
 export async function searchSubtitles(
   q: SubSearchQuery,
   opts: SearchOptions,
 ): Promise<SubResult[]> {
+  let extraCtx: ProviderCtx | undefined;
+  if (opts.extra) {
+    const [subdl, subsource] = await Promise.all([
+      bindSubtitleDownloadAuth("subdl-api-key", opts.extra.subdlApiKey),
+      bindSubtitleDownloadAuth("subsource-api-key", opts.extra.subsourceApiKey),
+    ]);
+    extraCtx = {
+      ...opts.extra,
+      subdlApiKey: browserSubtitleCredentialKey(opts.extra.subdlApiKey),
+      subsourceApiKey: browserSubtitleCredentialKey(opts.extra.subsourceApiKey),
+      credentialAuth: { subdl, subsource },
+    };
+  }
   const want = opts.providers ?? {};
   const wyzieOn = want.wyzie === true;
   const addonsOn = want.addons ?? true;
   const osOn = want.opensubtitles ?? true;
   dinfo("[subs] search", {
-    q,
+    type: q.type,
+    languages: q.langs?.length ?? 0,
+    hasImdbId: Boolean(q.imdbId),
+    hasTmdbId: Boolean(q.tmdbId),
+    hasVideoHash: Boolean(q.videoHash),
+    hasFilename: Boolean(q.filename),
     providers: { osOn, addonsOn, wyzieOn },
     addons: opts.addons?.length ?? 0,
   });
+  const tmo = opts.timeoutMs ?? SUBTITLE_PROVIDER_TIMEOUT_MS;
   const tasks: Array<{ name: string; p: Promise<SubResult[]> }> = [];
   if (osOn)
     tasks.push({
       name: "opensubtitles-v3",
-      p: withSubtitleTimeout(searchOpenSubtitlesV3(q), SUBTITLE_PROVIDER_TIMEOUT_MS, []),
+      p: withSubtitleTimeout(searchOpenSubtitlesV3(q), tmo, []),
     });
   if (wyzieOn)
     tasks.push({
       name: "wyzie",
-      p: withSubtitleTimeout(searchWyzie(q), SUBTITLE_PROVIDER_TIMEOUT_MS, []),
+      p: withSubtitleTimeout(searchWyzie(q), tmo, []),
     });
-  if (addonsOn && opts.addons && opts.addons.length > 0)
-    tasks.push({
-      name: "addons",
-      p: withSubtitleTimeout(searchAddons(opts.addons, q), SUBTITLE_PROVIDER_TIMEOUT_MS, []),
-    });
-  const settled = await Promise.allSettled(tasks.map((t) => t.p));
-  const all: SubResult[] = [];
-  settled.forEach((r, i) => {
-    if (r.status === "fulfilled") {
-      dinfo(`[subs] ${tasks[i].name}: ${r.value.length} results`);
-      all.push(...r.value);
-    } else {
-      dwarn(`[subs] ${tasks[i].name} failed`, r.reason);
+  if (addonsOn && opts.addons && opts.addons.length > 0) {
+    for (const addon of opts.addons) {
+      tasks.push({
+        name: `addon:${addon.manifest.name}`,
+        p: searchAddons([addon], q, tmo),
+      });
     }
-  });
-  const ranked = dedupAndRank(all, opts.preferredLangs, opts.streamHints);
-  dinfo(`[subs] total ${ranked.length} after dedup/rank`);
+  }
+  if (extraCtx) {
+    const extraTimeout = extraCtx.timeoutMs ?? tmo;
+    for (const source of pickSources(q, extraCtx)) {
+      tasks.push({
+        name: `extra:${source.id}`,
+        p: withSubtitleTimeout(
+          searchExtraSubSources(q, extraCtx, [source]).then((aggregate) => {
+            return aggregate.all.map((candidate) =>
+              toSubResult(
+                candidate,
+                candidate.downloadAuth
+                  ? extraCtx.credentialAuth?.[
+                      candidate.downloadAuth === "subsource-api-key" ? "subsource" : "subdl"
+                    ]
+                  : undefined,
+              ),
+            );
+          }),
+          extraTimeout + 500,
+          [],
+        ),
+      });
+    }
+  }
+  const resultsByTask: SubResult[][] = tasks.map(() => []);
+  const allResults = () => resultsByTask.flat();
+  let pending = tasks.length;
+  const emit = () => {
+    if (!opts.onPartial) return;
+    opts.onPartial(
+      deduplicateAndRankSubtitleResults(allResults(), opts.preferredLangs, opts.streamHints),
+      pending,
+    );
+  };
+  await Promise.all(
+    tasks.map((t, taskIndex) =>
+      t.p.then(
+        (v) => {
+          dinfo(`[subs] ${t.name}: ${v.length} results`);
+          resultsByTask[taskIndex] = v;
+          pending -= 1;
+          emit();
+        },
+        () => {
+          dwarn(`[subs] ${t.name} failed`);
+          pending -= 1;
+          emit();
+        },
+      ),
+    ),
+  );
+  const ranked = deduplicateAndRankSubtitleResults(
+    allResults(),
+    opts.preferredLangs,
+    opts.streamHints,
+  );
+  dinfo(`[subs] total ${ranked.length} after dedup/rank from ${tasks.length} sources`);
   return ranked;
-}
-
-const RELEASE_GROUP_RX =
-  /[-.][A-Z0-9]{2,}$|\b(EVO|RARBG|YTS|YIFY|FGT|PSA|TBS|GalaxyRG|GalaxyTV|MeGusta|ION10|EZTV|NTb|FLUX|TEPES|KOGi|SMURF|RZeroX|d3g|TGx)\b/gi;
-
-function extractReleaseGroup(text: string | null | undefined): string | null {
-  if (!text) return null;
-  const matches = text.match(RELEASE_GROUP_RX);
-  if (!matches || matches.length === 0) return null;
-  const last = matches[matches.length - 1].replace(/^[-.]/, "").toUpperCase();
-  return last.length >= 2 ? last : null;
-}
-
-function sourceTokens(source: string | null | undefined): string[] {
-  if (!source) return [];
-  const s = source.toLowerCase();
-  if (s.includes("bluray") || s === "remux" || s.includes("bdrip"))
-    return ["bluray", "bdrip", "remux"];
-  if (s.includes("web-dl") || s === "webdl" || s.includes("webrip"))
-    return ["web-dl", "webdl", "webrip", "web"];
-  if (s.includes("hdtv")) return ["hdtv"];
-  if (s.includes("dvd")) return ["dvd", "dvdrip"];
-  return [s];
-}
-
-function streamMatchScore(r: SubResult, hints: StreamHints | undefined): number {
-  if (!hints) return 0;
-  const release = extractReleaseGroup(hints.release);
-  const subText = `${r.release ?? ""} ${r.title ?? ""} ${r.url ?? ""}`.toLowerCase();
-  let score = 0;
-  if (release && subText.includes(release.toLowerCase())) score += 120;
-  const wantSrc = sourceTokens(hints.source);
-  for (const src of wantSrc) {
-    if (subText.includes(src)) {
-      score += 40;
-      break;
-    }
-  }
-  if (hints.resolution) {
-    const res = hints.resolution.toLowerCase();
-    if (subText.includes(res) || (res === "4k" && subText.includes("2160p"))) score += 8;
-  }
-  if (r.hearingImpaired && !hints.preferHearingImpaired) score -= 25;
-  return score;
 }
 
 function sourcePriority(source: SubResult["source"]): number {
@@ -117,6 +156,14 @@ function sourcePriority(source: SubResult["source"]): number {
       return 2;
     case "wyzie":
       return 2;
+    case "podnapisi":
+      return 2;
+    case "gestdown":
+      return 2;
+    case "subdl":
+      return 2;
+    case "subsource":
+      return 2;
     case "jimaku":
       return 1;
     default:
@@ -124,16 +171,112 @@ function sourcePriority(source: SubResult["source"]): number {
   }
 }
 
-function dedupAndRank(results: SubResult[], preferred: string[], hints?: StreamHints): SubResult[] {
-  const seen = new Set<string>();
-  const filtered: SubResult[] = [];
-  for (const r of results) {
-    // Include title and format in dedup key to handle cases where same URL appears multiple times
-    const key = `${normalizeLang(r.lang)}|${r.url}|${r.title || ""}|${r.format || ""}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    filtered.push(r);
+function providerConfidenceValue(result: SubResult): number {
+  switch (result.providerMatch?.confidence) {
+    case "exact":
+      return 5;
+    case "high":
+      return 4;
+    case "medium":
+      return 3;
+    case "low":
+      return 2;
+    case "unknown":
+      return 1;
+    default:
+      return 0;
   }
+}
+
+function providerScoreValue(result: SubResult): number {
+  const raw = result.providerMatch?.score;
+  if (raw == null || !Number.isFinite(raw)) return 0;
+  return Math.max(0, Math.min(1, raw > 1 ? raw / 100 : raw));
+}
+
+function metadataRichness(result: SubResult): number {
+  return Object.entries(result).reduce((score, [key, value]) => {
+    if (key === "id" || key === "url" || key === "lang" || value == null || value === "") {
+      return score;
+    }
+    if (Array.isArray(value)) return score + value.length;
+    if (typeof value === "object") return score + Object.keys(value).length;
+    return score + 1;
+  }, 0);
+}
+
+function stableDuplicateCandidateKey(result: SubResult): string {
+  return [
+    result.source,
+    result.id,
+    result.upstreamProvider ?? "",
+    result.release ?? "",
+    result.rawFilename ?? "",
+    result.providerMatch?.confidence ?? "",
+    providerScoreValue(result),
+  ]
+    .join("|")
+    .toLowerCase();
+}
+
+function compareDuplicateCandidates(a: SubResult, b: SubResult, hints?: StreamHints): number {
+  const hash = Number(b.hash === "moviehash") - Number(a.hash === "moviehash");
+  if (hash !== 0) return hash;
+  const auth = Number(Boolean(b.downloadAuth)) - Number(Boolean(a.downloadAuth));
+  if (auth !== 0) return auth;
+  const confidence = providerConfidenceValue(b) - providerConfidenceValue(a);
+  if (confidence !== 0) return confidence;
+  const providerScore = providerScoreValue(b) - providerScoreValue(a);
+  if (providerScore !== 0) return providerScore;
+  const local = compareSubtitleMatch(a, b, hints);
+  if (local !== 0) return local;
+  const richness = metadataRichness(b) - metadataRichness(a);
+  if (richness !== 0) return richness;
+  const source = sourcePriority(b.source) - sourcePriority(a.source);
+  if (source !== 0) return source;
+  const aKey = stableDuplicateCandidateKey(a);
+  const bKey = stableDuplicateCandidateKey(b);
+  return aKey < bKey ? -1 : aKey > bKey ? 1 : 0;
+}
+
+function mergeDuplicateGroup(group: SubResult[], hints?: StreamHints): SubResult {
+  const ordered = [...group].sort((a, b) => compareDuplicateCandidates(a, b, hints));
+  const merged: SubResult = { ...ordered[0] };
+  for (const candidate of ordered.slice(1)) {
+    for (const key of Object.keys(candidate) as Array<keyof SubResult>) {
+      if (merged[key] == null && candidate[key] != null) {
+        Object.assign(merged, { [key]: candidate[key] });
+      }
+    }
+  }
+  const providerMatches = ordered
+    .map((candidate) => candidate.providerMatch)
+    .filter((match): match is NonNullable<SubResult["providerMatch"]> => match != null);
+  if (providerMatches.length > 0) {
+    const primary = providerMatches[0];
+    merged.providerMatch = {
+      ...primary,
+      reasons: [...new Set(providerMatches.flatMap((match) => match.reasons ?? []))].sort(),
+      matchedBy: [...new Set(providerMatches.flatMap((match) => match.matchedBy ?? []))].sort(),
+    };
+  }
+  return merged;
+}
+
+export function deduplicateAndRankSubtitleResults(
+  results: SubResult[],
+  preferred: string[],
+  hints?: StreamHints,
+): SubResult[] {
+  const groups = new Map<string, SubResult[]>();
+  for (const r of results) {
+    if (!isSafeProviderSubtitleUrl(r.url)) continue;
+    const key = `${normalizeLang(r.lang)}|${r.url}|${r.title || ""}|${r.format || ""}`;
+    const group = groups.get(key) ?? [];
+    group.push(r);
+    groups.set(key, group);
+  }
+  const filtered = [...groups.values()].map((group) => mergeDuplicateGroup(group, hints));
   const interleaved = interleaveBySource(filtered, preferred, hints);
   return interleaved;
 }
@@ -155,13 +298,7 @@ function interleaveBySource(
       const la = langScore(a.lang, preferred);
       const lb = langScore(b.lang, preferred);
       if (la !== lb) return lb - la;
-      const sa = streamMatchScore(a, hints);
-      const sb = streamMatchScore(b, hints);
-      if (sa !== sb) return sb - sa;
-      const da = a.downloads ?? 0;
-      const db = b.downloads ?? 0;
-      if (da !== db) return db - da;
-      return (a.title || "").localeCompare(b.title || "");
+      return compareSubtitleMatch(a, b, hints);
     });
   }
   const sourceOrder = [...buckets.keys()].sort(
@@ -169,6 +306,18 @@ function interleaveBySource(
   );
   const out: SubResult[] = [];
   const seen = new Set<SubResult>();
+  const compare = (a: SubResult, b: SubResult) => {
+    const la = langScore(a.lang, preferred);
+    const lb = langScore(b.lang, preferred);
+    if (la !== lb) return lb - la;
+    return compareSubtitleMatch(a, b, hints);
+  };
+  const preferredResults = list.filter((r) => langScore(r.lang, preferred) > 0);
+  const best = [...(preferredResults.length > 0 ? preferredResults : list)].sort(compare)[0];
+  if (best) {
+    seen.add(best);
+    out.push(best);
+  }
   const drain = (predicate: (r: SubResult) => boolean) => {
     let depth = 0;
     let more = true;

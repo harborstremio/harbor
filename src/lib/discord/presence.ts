@@ -1,6 +1,12 @@
+import type { MangaReadingState } from "@/lib/manga-reading-state";
+
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 const HARBOR_LOGO = "https://jl-media-vision.vercel.app/favicon.png";
+// Discord strips buttons that link to its own invites: discord.gg makes it
+// reject the whole activity (presence vanishes), discord.com/invite is dropped
+// silently. A community-invite button needs a redirect on a domain we own.
+const STATIC_BUTTONS = [{ label: "JL Media Vision Website", url: "https://jl-media-vision.vercel.app/" }];
 
 type DiscordConfig = {
   enabled: boolean;
@@ -10,11 +16,27 @@ type DiscordConfig = {
   showPoster: boolean;
   showTimestamp: boolean;
   showPartyJoin: boolean;
+  showMusic: boolean;
+};
+
+export type MusicPresence = {
+  title: string;
+  artist: string;
+  album?: string;
+  artwork?: string;
+  paused: boolean;
+  positionSec: number;
+  durationSec: number;
+  trackUrl?: string;
+  artistUrl?: string;
+  albumUrl?: string;
 };
 
 export type PlaybackPresence = {
   title: string;
   subtitle?: string;
+  metaId?: string;
+  metaType?: string;
   posterUrl?: string;
   smallImageUrl?: string;
   year?: string | number;
@@ -44,8 +66,11 @@ let config: DiscordConfig = {
   showPoster: true,
   showTimestamp: true,
   showPartyJoin: true,
+  showMusic: true,
 };
 let playback: PlaybackPresence | null = null;
+let music: MusicPresence | null = null;
+let reading: MangaReadingState = null;
 let browse: BrowsePresence | null = null;
 let party: PartyPresence | null = null;
 let lastEnabledSent: boolean | null = null;
@@ -100,6 +125,68 @@ function computeBase(): Base {
       key: `play:${playback.title}|${state ?? ""}|${playback.paused}|${playback.posterUrl ?? ""}|${live ? "ts" : "nots"}`,
     };
   }
+  if (music && config.showMusic && !party && !(music.paused && !config.showWhenPaused)) {
+    if (config.hideTitle) {
+      return {
+        payload: {
+          details: "Listening to something",
+          state: music.paused ? "Paused" : undefined,
+          posterUrl: HARBOR_LOGO,
+          activityType: "listening",
+          paused: music.paused,
+        },
+        key: `music:hide:${music.paused}`,
+      };
+    }
+    const nowSec = Math.floor(Date.now() / 1000);
+    const remaining = music.durationSec - music.positionSec;
+    const live = !music.paused && music.durationSec > 0 && remaining > 0;
+    const credit = music.album ? `${music.artist} · ${music.album}` : music.artist;
+    const state = music.paused ? `Paused · ${music.artist}` : credit;
+    const buttons = music.trackUrl
+      ? [{ label: "Listen in JL Media Vision", url: music.trackUrl }, ...STATIC_BUTTONS]
+      : STATIC_BUTTONS;
+    return {
+      payload: {
+        details: music.title,
+        detailsUrl: music.trackUrl,
+        state,
+        stateUrl: music.artistUrl ?? music.trackUrl,
+        posterUrl: (config.showPoster && music.artwork) || HARBOR_LOGO,
+        largeText: music.album ? `${music.album} by ${music.artist}` : music.artist,
+        largeUrl: music.albumUrl ?? music.trackUrl,
+        smallUrl: STATIC_BUTTONS[0].url,
+        startTs: live && config.showTimestamp ? nowSec - Math.floor(music.positionSec) : undefined,
+        endTs: live && config.showTimestamp ? nowSec + Math.floor(remaining) : undefined,
+        activityType: "listening",
+        paused: music.paused,
+        buttons,
+      },
+      key: `music:${music.title}|${state}|${music.artwork ?? ""}|${live ? "ts" : "nots"}`,
+    };
+  }
+  if (reading) {
+    if (config.hideTitle) {
+      return {
+        payload: {
+          details: "Reading something",
+          state: reading.page > 0 ? `Page ${reading.page}/${reading.totalPages}` : undefined,
+          posterUrl: HARBOR_LOGO,
+        },
+        key: `read:hide:${reading.page}/${reading.totalPages}`,
+      };
+    }
+    const state = `${reading.chapterLabel}, page ${reading.page}/${reading.totalPages}`;
+    return {
+      payload: {
+        details: reading.title,
+        state,
+        posterUrl: (config.showPoster && reading.cover) || HARBOR_LOGO,
+        largeText: reading.title,
+      },
+      key: `read:${reading.title}|${state}|${reading.cover ?? ""}`,
+    };
+  }
   if (browse && config.showWhenBrowsing) {
     if (config.hideTitle)
       return {
@@ -136,10 +223,10 @@ function compute(): Computed {
     const people = headcount === 1 ? "1 👤" : `${headcount} 👥`;
     payload.details = `Watch Party · ${people}`;
     payload.state = context ?? "In the lobby";
-    if (party.joinUrl && config.showPartyJoin) {
-      payload.buttonLabel = "Join the Watch Party";
-      payload.buttonUrl = party.joinUrl;
-    }
+    payload.buttons =
+      party.joinUrl && config.showPartyJoin
+        ? [{ label: "Join the Watch Party", url: party.joinUrl }, ...STATIC_BUTTONS]
+        : STATIC_BUTTONS;
     const live = typeof payload.startTs === "number";
     return {
       payload,
@@ -147,7 +234,7 @@ function compute(): Computed {
     };
   }
   if (!base) return { payload: null, key: "clear" };
-  return base;
+  return { payload: { buttons: STATIC_BUTTONS, ...base.payload }, key: base.key };
 }
 
 function flush(): void {
@@ -185,8 +272,36 @@ export function configureDiscord(next: DiscordConfig): void {
   schedule();
 }
 
+export type ActivityState = { playback: PlaybackPresence | null; party: PartyPresence | null };
+
+const activitySubs = new Set<(s: ActivityState) => void>();
+
+function emitActivity(): void {
+  const s: ActivityState = { playback, party };
+  for (const fn of activitySubs) fn(s);
+}
+
+export function subscribeActivity(fn: (s: ActivityState) => void): () => void {
+  activitySubs.add(fn);
+  fn({ playback, party });
+  return () => {
+    activitySubs.delete(fn);
+  };
+}
+
 export function setPlaybackPresence(p: PlaybackPresence | null): void {
   playback = p;
+  schedule();
+  emitActivity();
+}
+
+export function setMusicPresence(m: MusicPresence | null): void {
+  music = m;
+  schedule();
+}
+
+export function setReadingPresence(r: MangaReadingState): void {
+  reading = r;
   schedule();
 }
 
@@ -198,4 +313,5 @@ export function setBrowsePresence(b: BrowsePresence | null): void {
 export function setPartyPresence(p: PartyPresence | null): void {
   party = p;
   schedule();
+  emitActivity();
 }

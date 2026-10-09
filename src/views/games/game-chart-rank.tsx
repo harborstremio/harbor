@@ -1,0 +1,6 @@
+/** Three original rank silhouettes, with the position drawn into each mark. */
+export function GameChartRank({rank}:{rank:number}) {
+  return <svg className={`games-chart-rank is-rank-${rank}`} viewBox="0 0 32 40" fill="none" aria-hidden="true">
+    {rank===1?<><path fill="currentColor" d="m5 7 6 4 5-8 5 8 6-4-3 11H8L5 7Z"/><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" d="M10 21h12"/><path fill="currentColor" d="m12 27 5-3h3v12h-4v-8l-3 2-1-3Z"/></>:rank===2?<><path fill="currentColor" opacity=".3" d="m8 26-2 12 10-5 10 5-2-12H8Z"/><path stroke="currentColor" strokeWidth="1.8" d="M27 15c0 7-4.6 13-11 13S5 22 5 15 9.6 3 16 3s11 5 11 12Z"/><path fill="currentColor" d="M11 11c0-6 11-6 11 .2 0 3-4 5.8-7 8h7v3H10v-3c4-3.3 8-6 8-8 0-2-3-2-3 .1H11Z"/></>:<><path stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" d="M12 33C4 29 2 20 5 11M20 33c8-4 10-13 7-22"/><path fill="currentColor" d="M5 18C1 16 1 12 2 9c4 2 5 5 3 9Zm0 7c-4-1-5-5-5-8 4 1 6 4 5 8Zm4 7c-5 0-7-3-8-6 5-1 7 2 8 6Zm18-14c4-2 4-6 3-9-4 2-5 5-3 9Zm0 7c4-1 5-5 5-8-4 1-6 4-5 8Zm-4 7c5 0 7-3 8-6-5-1-7 2-8 6ZM11 11h10v3l-4 4c6 0 6 9-1 9-4 0-6-2-6-5h4c0 2 4 2 4 0 0-1-2-2-4-1v-3l3-4h-6v-3Z"/></>}
+  </svg>;
+}

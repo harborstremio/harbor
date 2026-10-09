@@ -1,0 +1,21 @@
+<svg
+      viewBox="0 0 64 32"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="IMDb"
+      role="img"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <rect width="64" height="32" rx="5" fill="#F5C518" />
+      <text
+        x="32"
+        y="22.5"
+        text-anchor="middle"
+        fill="#000"
+        font-family='"Helvetica Neue", "Arial Black", Arial, sans-serif'
+        font-size="16.5"
+        font-weight="900"
+        letter-spacing="-0.6"
+      >
+        IMDb
+      </text>
+    </svg>

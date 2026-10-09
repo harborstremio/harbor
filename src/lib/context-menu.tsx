@@ -1,7 +1,26 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import type { NavItemId } from "@/chrome/nav-items";
+import type { View } from "@/lib/view";
+import type { MangaProgressEntry } from "@/lib/manga-progress";
+import type { MangaChapter } from "@/lib/manga/model";
 
 export type ViewSummonable = "home" | "discover" | "anime" | "queue" | "addons";
+
+export type SubtitleContextDetails = {
+  language: string;
+  source: string;
+  provider?: string;
+  format?: string;
+  fps?: number;
+  quality?: string;
+  release?: string;
+  author?: string;
+  downloads?: number;
+  compatibilityPercent?: number;
+  matchReasons?: string[];
+  flags?: string[];
+};
 
 export type ContextMenuTarget =
   | { kind: "meta"; meta: Meta }
@@ -9,13 +28,31 @@ export type ContextMenuTarget =
   | { kind: "addon"; addonId: string; label: string }
   | { kind: "edit"; element: HTMLElement | null; selection: string }
   | { kind: "backdrop"; metaId: string; url: string }
-  | { kind: "subtitle"; label: string; download?: () => void | Promise<unknown> };
+  | { kind: "person"; id: number }
+  | { kind: "manga"; id: string; title?: string; cover?: string }
+  | { kind: "manga-continue"; entry: MangaProgressEntry }
+  | {
+      kind: "manga-chapter";
+      mangaId: string;
+      mangaTitle?: string;
+      mangaCover?: string;
+      chapter: MangaChapter;
+    }
+  | { kind: "ebook"; id: string }
+  | { kind: "nav"; itemId?: NavItemId; view?: View; label?: string; onOpen?: () => void }
+  | {
+      kind: "subtitle";
+      label: string;
+      details?: SubtitleContextDetails;
+      download?: () => void | Promise<unknown>;
+    };
 
 type Pos = { x: number; y: number };
 
 type CtxValue = {
   state: { target: ContextMenuTarget; pos: Pos } | null;
   open: (e: React.MouseEvent | MouseEvent, target: ContextMenuTarget) => void;
+  openAt: (pos: Pos, target: ContextMenuTarget) => void;
   close: () => void;
 };
 
@@ -24,10 +61,19 @@ const Ctx = createContext<CtxValue | null>(null);
 export function ContextMenuProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<{ target: ContextMenuTarget; pos: Pos } | null>(null);
 
-  const open = useCallback((e: React.MouseEvent | MouseEvent, target: ContextMenuTarget) => {
-    e.preventDefault();
-    setState({ target, pos: { x: e.clientX, y: e.clientY } });
+  const openAt = useCallback((pos: Pos, target: ContextMenuTarget) => {
+    setState({ target, pos });
   }, []);
+
+  const open = useCallback(
+    (e: React.MouseEvent | MouseEvent, target: ContextMenuTarget) => {
+      e.preventDefault();
+      const el = e.target instanceof Element ? e.target : null;
+      if (el?.closest("[data-harbor-no-context-menu]")) return;
+      openAt({ x: e.clientX, y: e.clientY }, target);
+    },
+    [openAt],
+  );
 
   const close = useCallback(() => setState(null), []);
 
@@ -38,7 +84,9 @@ export function ContextMenuProvider({ children }: { children: ReactNode }) {
       if (t instanceof Element && t.closest("[data-harbor-player]")) return;
       close();
     };
-    const onResize = () => close();
+    // Fullscreen window chrome can briefly resize while opening a context menu.
+    // Keep the menu open and let its viewport-clamped position update instead.
+    const onResize = () => setState((current) => (current ? { ...current } : null));
     document.addEventListener("scroll", onScroll, true);
     window.addEventListener("resize", onResize);
     return () => {
@@ -47,7 +95,7 @@ export function ContextMenuProvider({ children }: { children: ReactNode }) {
     };
   }, [state, close]);
 
-  return <Ctx.Provider value={{ state, open, close }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ state, open, openAt, close }}>{children}</Ctx.Provider>;
 }
 
 export function useContextMenu(): CtxValue {

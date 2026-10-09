@@ -1,0 +1,63 @@
+.game-library-dock { position:absolute; inset-inline-end:10px; top:calc(50% + 104px); translate:0 -50%; width:36px; height:144px; z-index:150; color:var(--color-ink); pointer-events:none; --game-dock-travel:12px; }
+[dir=rtl] .game-library-dock { --game-dock-travel:-12px; }
+.game-dock-edge { position:absolute; inset:0; width:100%; height:100%; background:none; border:0; pointer-events:auto; transition:opacity 150ms ease-in-out; }
+.game-dock-edge::before { content:""; position:absolute; top:50%; inset-inline-end:0; translate:0 -50%; pointer-events:none; width:18px; height:72px; border-start-start-radius:100% 50%; border-end-start-radius:100% 50%; background:color-mix(in srgb,var(--color-ink) 9%,transparent); transform-origin:right center; transition:background 150ms ease-in-out,transform 150ms ease-in-out; }
+[dir=rtl] .game-dock-edge::before { transform-origin:left center; }
+.game-dock-edge::after { content:""; position:absolute; top:50%; inset-inline-end:6px; translate:0 -50%; width:2px; height:18px; border-radius:2px; background:color-mix(in srgb,var(--color-ink) 30%,transparent); pointer-events:none; transition:background 150ms ease-in-out; }
+.game-dock-edge:is(:hover,:focus-visible)::before { background:color-mix(in srgb,var(--color-ink) 14%,transparent); transform:scale(1.16,1.04); }
+.game-dock-edge:is(:hover,:focus-visible)::after { background:color-mix(in srgb,var(--color-ink) 65%,transparent); }
+.game-dock-edge:focus-visible { outline:2px solid var(--color-ink-muted); outline-offset:-3px; border-radius:18px; }
+.game-library-dock.is-open>.game-dock-edge { opacity:0; pointer-events:none; }
+.game-quick-library { position:absolute; inset-inline-end:0; top:calc(50% - 104px); translate:0 -50%; width:78px; height:min(480px,calc(100dvh - 200px)); display:flex; flex-direction:column; padding:12px 9px 14px; pointer-events:auto; isolation:isolate; animation:game-dock-in 220ms ease-in-out both; }
+.game-quick-library::before { content:""; position:absolute; inset-block:-20px; inset-inline:-20px -10px; z-index:-1; pointer-events:none; background:radial-gradient(ellipse at 100% 50%,color-mix(in srgb,var(--color-canvas) 92%,transparent) 50%,color-mix(in srgb,var(--color-canvas) 80%,transparent) 66%,transparent 74%); }
+[dir=rtl] .game-quick-library::before { background:radial-gradient(ellipse at 0% 50%,color-mix(in srgb,var(--color-canvas) 92%,transparent) 50%,color-mix(in srgb,var(--color-canvas) 80%,transparent) 66%,transparent 74%); }
+.game-library-dock.is-closing>.game-quick-library { pointer-events:none; animation:game-dock-out 180ms ease-in-out both; }
+.game-quick-library[hidden] { display:none; }
+.game-dock-tools { display:flex; flex-direction:column; align-items:center; gap:7px; padding:4px 0 14px; }
+.game-dock-tools>div:last-child { display:flex; gap:4px; }
+.game-dock-tools button { display:grid; place-items:center; width:27px; height:30px; border-radius:6px; color:var(--color-ink-muted); }
+.game-dock-tools .game-dock-library { width:48px; height:42px; color:var(--color-ink); }
+.game-dock-tools button:hover,.game-dock-tools button[aria-pressed=true] { background:var(--color-elevated); color:var(--color-ink); }
+.game-dock-list { display:flex; flex-direction:column; align-items:center; gap:12px; margin-inline:-6px; padding:10px 8px 24px; min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:none; mask-image:linear-gradient(to bottom,transparent,black 10px,black calc(100% - 22px),transparent); }
+.game-dock-list::-webkit-scrollbar { display:none; }
+.game-dock-row { position:relative; flex:0 0 56px; width:56px; height:56px; }
+.game-dock-open { width:56px; height:56px; display:grid; place-items:center; border-radius:9px; background:var(--color-elevated); overflow:hidden; transition:transform 160ms ease-in-out; }
+.game-dock-open>img { width:100%; height:100%; object-fit:cover; }
+.game-dock-row:hover .game-dock-open { transform:scale(1.04); }
+.game-dock-row button:focus-visible,.game-dock-tools button:focus-visible { outline:2px solid var(--color-ink); outline-offset:2px; }
+.game-dock-row .game-dock-favorite,.game-dock-row .game-dock-play { position:absolute; display:grid; place-items:center; border-radius:6px; background:var(--color-raised); color:var(--color-ink); opacity:0; transition:opacity 140ms ease-in-out; }
+.game-dock-row .game-dock-favorite { left:-4px; top:-4px; width:24px; height:24px; }
+.game-dock-row .game-dock-play { right:-4px; bottom:-4px; width:30px; height:30px; background:var(--color-ink); color:var(--color-canvas); }
+.game-dock-row:hover .game-dock-favorite,.game-dock-row:focus-within .game-dock-favorite,.game-dock-row:hover .game-dock-play,.game-dock-row:focus-within .game-dock-play { opacity:1; }
+.game-dock-row .game-dock-favorite[aria-pressed=true] { opacity:1; color:var(--color-accent); }
+.game-dock-favorite .is-confirmed { animation:game-dock-favorite 400ms ease-in-out both; }
+.game-dock-tooltip-art { width:105px; height:60px; object-fit:cover; border-radius:5px; }
+.game-dock-options { position:absolute; right:80px; top:14px; width:min(292px,calc(100vw - 94px)); padding:16px; display:grid; gap:12px; border-radius:9px; background:var(--color-elevated); box-shadow:0 12px 36px -18px #0009; }
+[dir=rtl] .game-dock-options { right:auto; left:80px; }
+.game-dock-option-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:15px; }
+.game-dock-option-heading button { padding:4px; }
+.game-dock-search { display:flex; align-items:center; gap:8px; min-height:42px; padding:0 10px; background:var(--color-canvas); border-radius:6px; color:var(--color-ink-muted); }
+.game-dock-search>svg { flex-shrink:0; }
+.game-dock-search input { min-width:0; width:100%; font-size:14px; color:var(--color-ink); background:none; border:0; outline:none!important; box-shadow:none; }
+.game-dock-options>label:not(.game-dock-search),.game-dock-ready { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:13px; }
+.game-dock-options>label>span { color:var(--color-ink-muted); flex-shrink:0; }
+.game-dock-ready { min-height:30px; text-align:start; }
+.game-dock-check { display:grid; place-items:center; width:22px; height:22px; flex-shrink:0; background:var(--color-canvas); border-radius:5px; }
+.game-dock-count { display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--color-ink-muted); }
+.game-dock-count button { color:var(--color-ink); }
+.game-dock-empty { display:grid; place-items:center; width:56px; min-height:56px; border-radius:8px; background:var(--color-elevated); color:var(--color-ink-muted); }
+.game-dock-error { position:absolute; right:80px; bottom:16px; width:250px; background:var(--color-elevated); padding:14px; border-radius:8px; font-size:13px; display:flex; gap:8px; }
+@keyframes game-dock-in { from { opacity:0; transform:translateX(var(--game-dock-travel)); } to { opacity:1; transform:translateX(0); } }
+@keyframes game-dock-out { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(var(--game-dock-travel)); } }
+@keyframes game-dock-favorite { from { opacity:0; transform:scale(0,0); } 20%,to { opacity:1; } 50% { transform:scale(1.2,1.25); } 75% { transform:scale(.9,.95); } to { transform:scale(1,1); } }
+@media(max-height:650px) { .game-quick-library { height:calc(100dvh - 150px); }.game-dock-options { max-height:calc(100dvh - 120px); top:0; overflow:auto; } }
+@media(prefers-reduced-motion:reduce) { .game-quick-library,.game-library-dock.is-closing>.game-quick-library,.game-dock-favorite .is-confirmed { animation:none; }.game-library-dock.is-closing>.game-quick-library { opacity:0; }.game-dock-edge,.game-dock-edge::before,.game-dock-edge::after,.game-dock-open,.game-dock-row .game-dock-favorite,.game-dock-row .game-dock-play { transition:none; transform:none!important; } }
+.music-quick-pin { color:var(--color-ink-muted); }
+.game-dock-row:hover .music-quick-pin { color:var(--color-ink); }
+.game-dock-mode-icon { display:grid; place-items:center; }
+@media(prefers-reduced-motion:no-preference) {
+  .game-dock-mode-icon { animation:game-dock-mode-swap 260ms var(--ease-out) backwards; }
+  .game-dock-list[data-dock-mode] { animation:game-dock-strip-swap 240ms var(--ease-out) backwards; }
+}
+@keyframes game-dock-mode-swap { from { opacity:0; transform:scale(.72) rotate(-12deg); } 60% { opacity:1; transform:scale(1.06) rotate(0deg); } to { opacity:1; transform:none; } }
+@keyframes game-dock-strip-swap { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }

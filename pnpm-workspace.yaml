@@ -1,17 +1,9 @@
 allowBuilds:
   esbuild: true
+  protobufjs: false
 blockExoticSubdeps: false
-catalog:
-  vite: npm:@voidzero-dev/vite-plus-core@0.2.4
-  vite-plus: 0.2.4
-  vitest: 4.1.10
-overrides:
-  vite: "catalog:"
-  vitest: "catalog:"
-peerDependencyRules:
-  allowAny:
-    - vite
-    - vitest
-  allowedVersions:
-    vite: "*"
-    vitest: "*"
+minimumReleaseAgeExclude:
+  - '@tauri-apps/api@2.12.0'
+  - html-to-pdfmake@2.5.35
+onlyBuiltDependencies:
+  - esbuild

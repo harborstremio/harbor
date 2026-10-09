@@ -1,0 +1,20 @@
+export default {
+  "Search shortcuts": "اختصارات البحث",
+  "Steam search shortcut": "اختصار البحث في Steam",
+  "Type “st ” or “st:” to search the Steam store. Turn off to use normal Harbor search for these queries.": "اكتب “st ” أو “st:” للبحث في متجر Steam. عطّل هذا الخيار لاستخدام بحث Harbor العادي لهذه الاستعلامات.",
+  "games.storeSearch.title": "متجر Steam",
+  "games.storeSearch.hint": "استخدم «st » في بحث Harbor للبحث مباشرة في Steam.",
+  "games.storeSearch.automatic": "تلقائية",
+  "games.storeSearch.region": "منطقة المتجر",
+  "games.storeSearch.showLibrary": "تمييز الألعاب الموجودة في مكتبتي",
+  "games.storeSearch.settingsError": "تعذّر حفظ تفضيلات البحث أو قراءتها. أعد المحاولة قبل تغييرها.",
+  "games.storeSearch.openError": "تعذّر فتح هذا الرابط. تأكد من توفر Steam أو متصفحك، ثم أعد المحاولة.",
+  "games.storeSearch.empty": "أدخل اسم لعبة.",
+  "games.storeSearch.saved": "نتائج وأسعار محفوظة بتاريخ {date}.",
+  "games.storeSearch.error": "بحث Steam غير متاح. أعد المحاولة.",
+  "games.storeSearch.comingSoon": "قريبًا",
+  "games.storeSearch.inLibrary": "في مكتبتك",
+  "games.storeSearch.unavailable": "السعر غير متاح",
+  "games.storeSearch.web": "الموقع الإلكتروني",
+  "games.storeSearch.client": "فتح في Steam"
+};

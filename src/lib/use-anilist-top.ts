@@ -1,46 +1,26 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchAnilistTopAnime, fetchAnilistTrendingAnime } from "@/lib/anilist/browse";
+import { createBrowseCache, type BrowseKey } from "@/lib/anilist/browse-cache";
 import type { Meta } from "@/lib/cinemeta";
 
-const cache: Record<string, Meta[]> = {};
-const inflight: Record<string, Promise<Meta[]> | undefined> = {};
+const browse = createBrowseCache(key => key === "top" ? fetchAnilistTopAnime(100) : fetchAnilistTrendingAnime(40));
 
-function useBrowse(key: "top" | "trending"): Meta[] {
-  const [metas, setMetas] = useState<Meta[]>(() => cache[key] ?? []);
-
+export function useAnilistBrowseState(key: BrowseKey) {
+  const [attempt, setAttempt] = useState(0);
+  const retry = useCallback(() => setAttempt(value => value + 1), []);
+  const [state, setState] = useState(() => ({ metas: browse.peek(key), loading: true, error: false }));
   useEffect(() => {
-    if (cache[key]) {
-      setMetas(cache[key]);
-      return;
-    }
     let cancelled = false;
-    if (!inflight[key]) {
-      const fetcher = key === "top" ? fetchAnilistTopAnime(100) : fetchAnilistTrendingAnime(40);
-      inflight[key] = fetcher.then((list) => {
-        cache[key] = list;
-        return list;
-      });
-    }
-    inflight[key]
-      ?.then((list) => {
-        if (!cancelled) setMetas(list);
-      })
-      .catch((e) => {
-        console.error(`[useBrowse] Anilist ${key} fetch failed:`, e);
-        inflight[key] = undefined;
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [key]);
-
-  return metas;
+    setState({ metas: browse.peek(key), loading: true, error: false });
+    browse.load(key).then(metas => {
+      if (!cancelled) setState({ metas, loading: false, error: false });
+    }).catch(() => {
+      if (!cancelled) setState(previous => ({ ...previous, loading: false, error: true }));
+    });
+    return () => { cancelled = true; };
+  }, [key, attempt]);
+  return { ...state, retry };
 }
 
-export function useAnilistTop(): Meta[] {
-  return useBrowse("top");
-}
-
-export function useAnilistTrending(): Meta[] {
-  return useBrowse("trending");
-}
+export function useAnilistTop(): Meta[] { return useAnilistBrowseState("top").metas; }
+export function useAnilistTrending(): Meta[] { return useAnilistBrowseState("trending").metas; }

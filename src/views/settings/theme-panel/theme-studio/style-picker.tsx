@@ -1,18 +1,20 @@
-import { Check, Pencil } from "lucide-react";
+import { Pencil } from "../../icons";
+import { useT } from "@/lib/i18n";
+import { PickCard, PickGrid } from "./controls/pick-grid";
 
 const CARD_STYLES = [
-  { id: "flat", name: "Flat", blurb: "Solid surfaces, clean edges." },
-  { id: "glass", name: "Glass", blurb: "Backdrop blur, soft tint." },
-  { id: "stremio", name: "Stremio", blurb: "Indigo accent rings." },
-  { id: "minui", name: "Hairline", blurb: "Crisp thin borders." },
-  { id: "custom", name: "Custom", blurb: "Click to edit your card CSS." },
+  { id: "flat", name: "Flat" },
+  { id: "glass", name: "Glass" },
+  { id: "stremio", name: "Stremio" },
+  { id: "minui", name: "Hairline" },
+  { id: "custom", name: "Custom" },
 ];
 
 const BUTTON_STYLES = [
-  { id: "flat", name: "Flat", blurb: "Solid color, no gradient." },
-  { id: "glossy", name: "Glossy", blurb: "Subtle highlight sheen." },
-  { id: "minui", name: "Minimal", blurb: "Clean, no gloss." },
-  { id: "custom", name: "Custom", blurb: "Style buttons via your CSS." },
+  { id: "flat", name: "Flat" },
+  { id: "glossy", name: "Glossy" },
+  { id: "minui", name: "Minimal" },
+  { id: "custom", name: "Custom" },
 ];
 
 export function StylePicker({
@@ -26,59 +28,39 @@ export function StylePicker({
   onChange: (v: string) => void;
   onEditCustom?: () => void;
 }) {
+  const t = useT();
   const list = kind === "card" ? CARD_STYLES : BUTTON_STYLES;
   return (
-    <div className="grid grid-cols-2 gap-2.5">
+    <PickGrid cols={2}>
       {list.map((s) => {
-        const active = value === s.id;
         const editable = kind === "card" && s.id === "custom" && !!onEditCustom;
         return (
-          <button
+          <PickCard
             key={s.id}
-            type="button"
-            onClick={() => {
+            selected={value === s.id}
+            onSelect={() => {
               onChange(s.id);
               if (editable) onEditCustom?.();
             }}
-            className={`relative flex flex-col gap-2 overflow-hidden rounded-lg border p-3 text-start transition-colors ${
-              active
-                ? "border-accent/80 bg-accent-soft"
-                : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-white/[0.04]"
-            }`}
+            label={t(s.name)}
+            badgeIcon={editable ? <Pencil size={12} strokeWidth={2.4} /> : undefined}
           >
-            <Swatch kind={kind} variant={s.id} active={active} />
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="text-[13.5px] font-semibold text-ink">{s.name}</span>
-                <span className="text-[11.5px] text-ink-subtle">{s.blurb}</span>
-              </div>
-              {active && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-canvas">
-                  {editable ? <Pencil size={11} strokeWidth={2.6} /> : <Check size={12} strokeWidth={3} />}
-                </span>
-              )}
+            <div className="px-3 pt-3">
+              <Swatch kind={kind} variant={s.id} />
             </div>
-          </button>
+          </PickCard>
         );
       })}
-    </div>
+    </PickGrid>
   );
 }
 
-function Swatch({ kind, variant, active }: { kind: "card" | "button"; variant: string; active: boolean }) {
+function Swatch({ kind, variant }: { kind: "card" | "button"; variant: string }) {
+  const t = useT();
   if (variant === "custom") {
     return (
-      <div
-        className="flex aspect-[5/3] w-full items-center justify-center rounded-lg border-2 border-dashed"
-        style={{
-          borderColor: active ? "var(--color-accent)" : "var(--color-edge)",
-          background: active ? "var(--color-accent-soft)" : "transparent",
-        }}
-      >
-        <span
-          className="font-mono text-[10.5px] font-semibold"
-          style={{ color: active ? "var(--color-accent)" : "var(--color-ink-subtle)" }}
-        >
+      <div className="flex aspect-[5/3] w-full items-center justify-center rounded-md border-2 border-dashed border-edge">
+        <span className="font-mono text-[10.5px] font-semibold text-ink-subtle">
           {kind === "card" ? "{ your-card }" : "{ your-button }"}
         </span>
       </div>
@@ -88,13 +70,12 @@ function Swatch({ kind, variant, active }: { kind: "card" | "button"; variant: s
     if (variant === "glass") {
       return (
         <div
-          className="aspect-[5/3] w-full rounded-lg border"
+          className="aspect-[5/3] w-full rounded-md"
           style={{
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04))",
-            borderColor: "rgba(255,255,255,0.18)",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04))",
+            boxShadow:
+              "inset 0 0 0 1px rgba(255,255,255,0.18), inset 0 1px 0 rgba(255,255,255,0.2)",
             backdropFilter: "blur(8px)",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.2)",
           }}
         />
       );
@@ -102,48 +83,37 @@ function Swatch({ kind, variant, active }: { kind: "card" | "button"; variant: s
     if (variant === "stremio") {
       return (
         <div
-          className="aspect-[5/3] w-full rounded-lg ring-2"
-          style={{
-            background: "linear-gradient(135deg, #181434, #1f1b3f)",
-            borderColor: "rgba(255,255,255,0.12)",
-            "--tw-ring-color": active ? "var(--color-accent)" : "#7b5bf5",
-          } as React.CSSProperties}
+          className="aspect-[5/3] w-full rounded-md ring-2 ring-[#7b5bf5]"
+          style={{ background: "linear-gradient(135deg, #181434, #1f1b3f)" }}
         />
       );
     }
     if (variant === "minui") {
       return (
         <div
-          className="aspect-[5/3] w-full rounded-lg border"
+          className="aspect-[5/3] w-full rounded-md"
           style={{
             background: "#ffffff",
-            borderColor: "rgba(15,15,18,0.16)",
-            boxShadow: "0 2px 6px -2px rgba(15,15,18,0.10), inset 0 1px 0 rgba(255,255,255,0.7)",
+            boxShadow:
+              "inset 0 0 0 1px rgba(15,15,18,0.16), 0 2px 6px -2px rgba(15,15,18,0.10), inset 0 1px 0 rgba(255,255,255,0.7)",
           }}
         />
       );
     }
-    return (
-      <div
-        className="aspect-[5/3] w-full rounded-lg border border-edge-soft"
-        style={{ background: "var(--color-elevated)" }}
-      />
-    );
+    return <div className="aspect-[5/3] w-full rounded-md bg-elevated ring-1 ring-edge-soft" />;
   }
   if (variant === "glossy") {
     return (
       <div className="flex aspect-[5/3] w-full items-center justify-center">
         <div
-          className="rounded-full px-4 py-2 text-[12px] font-semibold"
+          className="rounded-full px-4 py-2 text-[12.5px] font-semibold text-white"
           style={{
             background:
               "linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0) 55%), var(--color-accent)",
-            color: "#fff",
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.5), 0 6px 18px -6px rgba(0,0,0,0.45)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5), 0 6px 18px -6px rgba(0,0,0,0.45)",
           }}
         >
-          Button
+          {t("Button")}
         </div>
       </div>
     );
@@ -152,15 +122,14 @@ function Swatch({ kind, variant, active }: { kind: "card" | "button"; variant: s
     return (
       <div className="flex aspect-[5/3] w-full items-center justify-center">
         <div
-          className="rounded-full border px-4 py-2 text-[12px] font-semibold"
+          className="rounded-full px-4 py-2 text-[12.5px] font-semibold"
           style={{
             background: "#ffffff",
             color: "#0a0a0c",
-            borderColor: "rgba(15,15,18,0.16)",
-            boxShadow: "0 2px 6px -2px rgba(15,15,18,0.10)",
+            boxShadow: "inset 0 0 0 1px rgba(15,15,18,0.16), 0 2px 6px -2px rgba(15,15,18,0.10)",
           }}
         >
-          Button
+          {t("Button")}
         </div>
       </div>
     );
@@ -168,10 +137,10 @@ function Swatch({ kind, variant, active }: { kind: "card" | "button"; variant: s
   return (
     <div className="flex aspect-[5/3] w-full items-center justify-center">
       <div
-        className="rounded-full px-4 py-2 text-[12px] font-semibold"
-        style={{ background: "var(--color-accent)", color: "#fff" }}
+        className="rounded-full px-4 py-2 text-[12.5px] font-semibold text-white"
+        style={{ background: "var(--color-accent)" }}
       >
-        Button
+        {t("Button")}
       </div>
     </div>
   );

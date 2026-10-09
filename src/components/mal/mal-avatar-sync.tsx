@@ -5,7 +5,7 @@ import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 
 export function MalAvatarSync() {
-  const { settings, update } = useSettings();
+  const { settings } = useSettings();
   const { isConnected } = useMal();
   const { activeProfile, updateProfile } = useProfiles();
 
@@ -15,13 +15,12 @@ export function MalAvatarSync() {
     fetchMalAvatar().then((url) => {
       if (!live || !url) return;
       if (activeProfile.avatar === url) return;
-      update({ harborAvatar: url });
       updateProfile(activeProfile.id, { avatar: url });
     });
     return () => {
       live = false;
     };
-  }, [settings.useMalAvatar, isConnected, activeProfile, update, updateProfile]);
+  }, [settings.useMalAvatar, isConnected, activeProfile, updateProfile]);
 
   return null;
 }

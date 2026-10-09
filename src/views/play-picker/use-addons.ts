@@ -1,23 +1,17 @@
 import { useEffect, useState } from "react";
-import {
-  fetchInstalledAddons,
-  fetchManifestAt,
-  filterEnabled,
-  loadInstalled,
-} from "@/lib/addon-store";
+import { fetchInstalledAddons, fetchManifestAt, filterEnabled } from "@/lib/addon-store";
 import { torboxAddonFor, userAddons, withDebridKeys, type Addon } from "@/lib/addons";
 import { applyOrderToItems, loadDisplayOrder } from "@/lib/addons-store/reorder";
-import { withTimeout } from "@/lib/progressive-rows";
 import type { useSettings } from "@/lib/settings";
+import {
+  loadStreamPlugins,
+  pluginAddons,
+  pluginListKey,
+  setStreamPluginConfig,
+  subscribeStreamPluginList,
+} from "@/lib/streams/plugins";
 
 type Settings = ReturnType<typeof useSettings>["settings"];
-const ADDON_DISCOVERY_TIMEOUT_MS = 10_000;
-
-function savedAddons(): Addon[] {
-  return filterEnabled(loadInstalled()).flatMap((entry) =>
-    entry.manifest ? [{ manifest: entry.manifest, transportUrl: entry.transportUrl }] : [],
-  );
-}
 
 function hasAnyResources(a: Addon): boolean {
   return (a.manifest.resources ?? []).length > 0;
@@ -33,10 +27,7 @@ async function resolveManifests(addons: Addon[]): Promise<Addon[]> {
   return Promise.all(
     addons.map(async (a) => {
       if (hasAnyResources(a)) return a;
-      const manifest = await withTimeout(
-        fetchManifestAt(a.transportUrl),
-        ADDON_DISCOVERY_TIMEOUT_MS,
-      ).catch(() => null);
+      const manifest = await fetchManifestAt(a.transportUrl).catch(() => null);
       return manifest ? { ...a, manifest } : a;
     }),
   );
@@ -46,13 +37,21 @@ export function useAddons(
   authKey: string | null,
   settings: Settings,
 ): {
-  addons: Addon[];
-  discovering: boolean;
+  addons: Addon[] | null;
   userHasStreamAddons: boolean;
 } {
-  const [addons, setAddons] = useState<Addon[]>(() => savedAddons());
-  const [discovering, setDiscovering] = useState(true);
+  const [addons, setAddons] = useState<Addon[] | null>(null);
   const [userHasStreamAddons, setUserHasStreamAddons] = useState(false);
+  const [pluginTick, setPluginTick] = useState(0);
+  useEffect(() => {
+    let last = pluginListKey();
+    return subscribeStreamPluginList(() => {
+      const next = pluginListKey();
+      if (next === last) return;
+      last = next;
+      setPluginTick((n) => n + 1);
+    });
+  }, []);
   useEffect(() => {
     let cancelled = false;
     const debridKeys = {
@@ -63,18 +62,9 @@ export function useAddons(
       dlKey: settings.dlKey,
     };
     const torbox = torboxAddonFor(settings.tbKey);
-    void Promise.resolve().then(() => {
-      if (!cancelled) setDiscovering(true);
-    });
     (async () => {
-      const [stremioResult, installedResult] = await Promise.all([
-        authKey
-          ? withTimeout(userAddons(authKey), ADDON_DISCOVERY_TIMEOUT_MS).catch(() => [] as Addon[])
-          : Promise.resolve([] as Addon[]),
-        withTimeout(fetchInstalledAddons(), ADDON_DISCOVERY_TIMEOUT_MS).catch(() => []),
-      ]);
-      const stremioAddons = filterEnabled(stremioResult);
-      const installed = filterEnabled([...savedAddons(), ...installedResult]);
+      const stremioAddons = filterEnabled(authKey ? await userAddons(authKey).catch(() => []) : []);
+      const installed = filterEnabled(await fetchInstalledAddons().catch(() => []));
       if (cancelled) return;
       const merged: Addon[] = [];
       const idxByUrl = new Map<string, number>();
@@ -123,17 +113,46 @@ export function useAddons(
           list.push(torbox);
         }
       }
+      // The store is read even while the switch keeps the extensions back: an item that names the
+      // plugin that listed it is still that plugin's to answer, and answering needs the installed
+      // set. Reading it starts no runtime; only querying one does.
+      await loadStreamPlugins();
+      if (cancelled) return;
+      setStreamPluginConfig({ tmdbKey: settings.tmdbKey });
+      if (settings.pluginsEnabled) {
+        // The switch holds back the extensions that have a page of their own. A plugin with no rows
+        // of its own is asked either way: holding it back would leave it unreachable.
+        list.push(
+          ...pluginAddons({
+            groupByRepo: settings.pluginsGroupByRepo,
+            includeExtensions: settings.pluginsOutsideTab,
+          }),
+        );
+        void import("@/lib/plugins/auto-check").then((m) =>
+          m.schedulePluginAutoCheck(settings.pluginsAutoCheck),
+        );
+      }
       console.info(
         `[picker] final addon list (${list.length}): ${list.map((a) => a.manifest.name).join(", ")}`,
       );
       setAddons(list);
-    })().finally(() => {
-      if (!cancelled) setDiscovering(false);
-    });
+    })();
     return () => {
       cancelled = true;
     };
-  }, [authKey, settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey]);
+  }, [
+    authKey,
+    settings.rdKey,
+    settings.tbKey,
+    settings.adKey,
+    settings.pmKey,
+    settings.dlKey,
+    settings.tmdbKey,
+    settings.pluginsEnabled,
+    settings.pluginsOutsideTab,
+    settings.pluginsGroupByRepo,
+    pluginTick,
+  ]);
 
-  return { addons, discovering, userHasStreamAddons };
+  return { addons, userHasStreamAddons };
 }

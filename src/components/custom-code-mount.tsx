@@ -1,8 +1,9 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
 import { useView } from "@/lib/view";
-import type { CustomTheme } from "@/lib/custom-themes";
+import { scanTheme } from "@/lib/theme-scan";
+import { subscribeCustomThemes, type CustomTheme } from "@/lib/custom-themes";
 
 const STYLE_ID = "harbor-custom-css";
 const THEME_STYLE_ID = "harbor-theme-css";
@@ -24,17 +25,25 @@ function runThemeCleanup(key: "__harborCustomCleanup" | "__harborThemeCleanup") 
 export function CustomCodeMount() {
   const { settings } = useSettings();
   const { player } = useView();
+  const [themesTick, setThemesTick] = useState(0);
+
+  useEffect(() => subscribeCustomThemes(() => setThemesTick((t) => t + 1)), []);
 
   const themeExt = useMemo(() => {
     if (settings.theme.preset === "custom") return null;
     const t = getThemeById(settings.theme.preset) as CustomTheme | null;
     if (!t) return null;
-    return {
-      css: t.css ?? "",
-      js: t.js ?? "",
-      html: t.html ?? "",
-    };
-  }, [settings.theme.preset]);
+    const payload = { css: t.css ?? "", js: t.js ?? "", html: t.html ?? "" };
+    const scan = scanTheme(payload);
+    if (scan.verdict === "block") {
+      console.warn(
+        "[harbor-theme] blocked unsafe theme code:",
+        scan.findings.map((f) => `${f.category}:${f.rule}`).join(", "),
+      );
+      return { css: "", js: "", html: "" };
+    }
+    return payload;
+  }, [settings.theme.preset, themesTick]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;

@@ -1,9 +1,20 @@
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { StatusBadge, TelegramMark, TelegramTutorial, type FieldStatus } from "./webhook-field";
+import { Loader2 } from "../icons";
+import { useEffect, useRef, useState } from "react";
+import {
+  FIELD_LABEL,
+  StatusBadge,
+  SetupHelp,
+  TelegramMark,
+  TelegramTutorial,
+  type FieldStatus,
+} from "./webhook-field";
+import { ROW_ACTION_PRIMARY } from "../kit";
 import { useT } from "@/lib/i18n";
 
 const URL_RE = /^https?:\/\/api\.telegram\.org\/bot([^/]+)\/sendMessage(?:\?chat_id=(.+))?$/;
+
+const SUB_INPUT =
+  "h-11 w-full min-w-0 max-w-[520px] rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] tracking-wide text-ink outline-none transition-colors placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 function compose(token: string, chatId: string): string {
   const t = token.trim();
@@ -31,12 +42,20 @@ export function TelegramComposedField({
   const t = useT();
   const [token, setToken] = useState(() => parse(fullUrl).token);
   const [chatId, setChatId] = useState(() => parse(fullUrl).chatId);
+  const emittedUrl = useRef<string | null>(null);
 
   useEffect(() => {
+    if (fullUrl === emittedUrl.current) return;
     const next = parse(fullUrl);
     setToken((prev) => (prev === next.token ? prev : next.token));
     setChatId((prev) => (prev === next.chatId ? prev : next.chatId));
   }, [fullUrl]);
+
+  const publish = (nextToken: string, nextChatId: string) => {
+    const url = compose(nextToken, nextChatId);
+    emittedUrl.current = url;
+    onUrlChange(url);
+  };
 
   const onTokenChange = (raw: string) => {
     const v = raw.trim();
@@ -46,57 +65,58 @@ export function TelegramComposedField({
       const c = m[2] ?? chatId;
       setToken(t);
       if (m[2]) setChatId(m[2]);
-      onUrlChange(compose(t, c));
+      publish(t, c);
       return;
     }
     setToken(v);
-    onUrlChange(compose(v, chatId));
+    publish(v, chatId);
   };
 
   const onChatIdChange = (raw: string) => {
     const v = raw.trim();
     setChatId(v);
-    onUrlChange(compose(token, v));
+    publish(token, v);
   };
 
   const ready = token.length > 0 && chatId.length > 0;
+  const busy = status.state === "busy";
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <span className="flex items-center gap-2 text-[13px] font-semibold text-ink">
+    <div className="mt-6 flex flex-col gap-2.5 border-t border-edge-soft pt-7">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <span className="flex items-center gap-2">
           <TelegramMark />
-          {t("Telegram bot")}
+          <span className={FIELD_LABEL}>{t("Telegram bot")}</span>
         </span>
         <StatusBadge status={status} />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] gap-4">
         <SubField
           label={t("Bot token")}
           placeholder="1234567890:AAExampleTokenFromBotFather"
           value={token}
           onChange={onTokenChange}
-          monospace
         />
         <SubField
           label={t("Chat ID")}
           placeholder="123456789"
           value={chatId}
           onChange={onChatIdChange}
-          monospace
         />
       </div>
       <button
-        onClick={onTest}
-        disabled={!ready || status.state === "busy"}
-        className="flex h-10 items-center justify-center gap-1.5 self-start rounded-lg bg-ink px-5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        type="button"
+        onClick={busy ? undefined : onTest}
+        aria-disabled={busy}
+        disabled={!ready || busy}
+        className={`${ROW_ACTION_PRIMARY} self-start${busy ? " pointer-events-none opacity-40" : ""}`}
       >
-        {status.state === "busy" && <Loader2 size={12} strokeWidth={2.4} className="animate-spin" />}
+        {busy && <Loader2 size={17} strokeWidth={2.4} className="shrink-0 animate-spin" />}
         {t("Send test")}
       </button>
-      <div className="rounded-lg bg-canvas/60 p-3 text-[12px] leading-relaxed text-ink-muted">
+      <SetupHelp label={t("How to connect Telegram")}>
         <TelegramTutorial />
-      </div>
+      </SetupHelp>
     </div>
   );
 }
@@ -106,19 +126,15 @@ function SubField({
   placeholder,
   value,
   onChange,
-  monospace,
 }: {
   label: string;
   placeholder: string;
   value: string;
   onChange: (v: string) => void;
-  monospace?: boolean;
 }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        {label}
-      </span>
+    <label className="flex flex-col gap-2">
+      <span className={FIELD_LABEL}>{label}</span>
       <input
         type="text"
         value={value}
@@ -126,9 +142,7 @@ function SubField({
         placeholder={placeholder}
         spellCheck={false}
         autoComplete="off"
-        className={`h-10 rounded-lg border border-edge bg-canvas px-3 text-[12.5px] text-ink outline-none transition-colors focus:border-ink-subtle ${
-          monospace ? "font-mono text-[12px]" : ""
-        }`}
+        className={SUB_INPUT}
       />
     </label>
   );

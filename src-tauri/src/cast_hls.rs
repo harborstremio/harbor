@@ -371,8 +371,6 @@ async fn probe_source(url: &str, headers: &HashMap<String, String>) -> Result<Pr
         .arg("stream=codec_name,codec_type,width,height,r_frame_rate,bit_rate:format=duration,bit_rate")
         .arg("-of")
         .arg("default=noprint_wrappers=1:nokey=0")
-        // Pass the input via `-i` so an addon-controlled URL beginning with
-        // `-` is treated as ffprobe's input value, not parsed as a flag.
         .arg("-i")
         .arg(url);
     #[cfg(windows)]
@@ -558,7 +556,9 @@ async fn spawn_continuous_ffmpeg(
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::piped());
 
+    crate::proc_guard::configure_command(&mut cmd);
     let mut child = cmd.spawn().map_err(|e| format!("ffmpeg spawn: {}", e))?;
+    crate::proc_guard::adopt(&child);
     eprintln!("[cast-hls] ffmpeg spawned for seek={seek_start:.1}");
 
     if let Some(stderr) = child.stderr.take() {

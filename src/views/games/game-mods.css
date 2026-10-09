@@ -1,0 +1,107 @@
+.games-mods { padding-top: 24px; padding-bottom: 72px; }
+.games-mods-hero { position: relative; min-height: 230px; display: flex; align-items: center; overflow: hidden; border-radius: 13px; background: #181c19; isolation: isolate; }
+.games-mods-hero > div { position: relative; z-index: 1; width: 65%; padding: 30px 35px; }
+.games-mods-hero h2 { font-size: clamp(28px, 3.4vw, 43px); letter-spacing: -.045em; font-weight: 750; margin: 13px 0 10px; }
+.games-mods-hero p { color: #b8c2bb; max-width: 470px; font-size: 13px; line-height: 1.65; margin: 0 0 20px; }
+.games-mods-hero > img { position: absolute; z-index: -2; right: 0; width: 57%; height: 100%; object-fit: cover; object-position: 75% center; opacity: .8; }
+.games-mods-hero::after { content: ""; position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg,#181c19 36%,#181c19d9 48%,#181c1900 80%); }
+.games-mods-edition { display: flex; align-items: center; gap: 9px; color: #d1d7d3; font-size: 11px; }
+.games-mods-edition i { width: 3px; height: 3px; border-radius: 50%; background: #6e7a72; }
+.games-mods-environment { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; margin-top: 25px; }
+.games-mods-environment > label { display: grid; gap: 7px; font-size: 11px; color: var(--color-ink-muted); min-width: 135px; }
+.games-mods select,.games-mod-dialog select { background: var(--color-elevated,#242628); border: 0; border-radius: 7px; min-height: 39px; padding: 0 30px 0 12px; color: var(--color-ink); font: inherit; font-size: 12px; max-width: 100%; text-overflow: ellipsis; cursor: pointer; }
+.games-mods-folder { margin-left: auto; display: flex; gap: 9px; max-width: 100%; flex-wrap: wrap; }
+.games-mods-folder select { max-width: 280px; }
+.games-mods-setup-note { font-size: 11px; line-height: 1.6; color: var(--color-ink-subtle); margin: 11px 0 27px; max-width: 840px; }
+.games-mods-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 22px; }
+.games-mods-toolbar > div { display: flex; gap: 6px; }
+.games-mods-toolbar > div button { display: flex; gap: 9px; align-items: center; border: 0; border-radius: 7px; padding: 10px 14px; color: var(--color-ink-muted); background: transparent; font-size: 12px; }
+.games-mods-toolbar button[aria-pressed="true"] { color: var(--color-ink); background: var(--color-elevated,#242628); }
+.games-mods-toolbar button span { font-size: 10px; opacity: .6; }
+.games-mods-toolbar > label { display: flex; align-items: center; gap: 5px; color: var(--color-ink-muted); }
+.games-mods-toolbar > label select { background: transparent; }
+.games-mods-results { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+.games-mod-card { position: relative; display: flex; align-items: flex-start; gap: 15px; text-align: left; min-width: 0; min-height: 176px; padding: 19px; background: var(--color-surface,#191b1c); border: 1px solid transparent; border-radius: 10px; color: var(--color-ink); transition: background 180ms ease, border-color 180ms ease; }
+.games-mod-card:hover { background: var(--color-elevated,#242628); border-color: #ffffff09; }
+.games-mod-card > img,.games-mod-fallback,.games-mod-skeleton > i { width: 54px; height: 54px; object-fit: contain; border-radius: 10px; flex-shrink: 0; }
+.games-mod-fallback { display: grid; place-items: center; background: #ffffff06; color: var(--color-ink-subtle); }
+.games-mod-card > div { min-width: 0; flex: 1; }
+.games-mod-card h3 { font-size: 14px; font-weight: 650; margin: 1px 0 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding-right: 7px; }
+.games-mod-card small { font-size: 10px; color: var(--color-ink-subtle); }
+.games-mod-card p { font-size: 12px; line-height: 1.55; color: var(--color-ink-muted); margin: 13px 0 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 34px; }
+.games-mod-card footer { display: flex; gap: 10px; justify-content: space-between; color: var(--color-ink-subtle); font-size: 10px; line-height: 1.5; }
+.games-mod-card footer span { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.games-mod-card footer span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.games-mod-card .games-mod-owned { color: var(--color-accent,#eaa86c); }
+.games-mod-enter { position: absolute; top: 19px; right: 12px; color: var(--color-ink-subtle); opacity: 0; transform: translateX(-3px); transition: 180ms ease; }
+.games-mod-card:hover .games-mod-enter,.games-mod-card:focus-visible .games-mod-enter { opacity: 1; transform: none; }
+.games-mod-skeleton > i,.games-mod-skeleton b,.games-mod-skeleton span { display: block; background: #ffffff06; }
+.games-mod-skeleton b { height: 13px; width: 65%; margin: 5px 0 24px; border-radius: 3px; }
+.games-mod-skeleton span { height: 8px; width: 100%; margin: 9px 0; border-radius: 2px; }
+.games-mod-skeleton { animation: games-mod-breathe 1.8s ease-in-out infinite alternate; }
+@keyframes games-mod-breathe { to { opacity: .45; } }
+.games-mods-pages { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 25px; color: var(--color-ink-subtle); font-size: 11px; }
+.games-mods-pages > span:first-child { margin-right: auto; }
+.games-mods-error { display: flex; gap: 14px; align-items: center; justify-content: space-between; background: #d5966e10; border-radius: 7px; padding: 13px 15px; margin: 15px 0; color: var(--color-ink-muted); font-size: 12px; line-height: 1.6; }
+.games-mods-error .games-button { flex-shrink: 0; }
+.games-mods-owned-note { color: var(--color-ink-subtle); font-size: 11px; overflow-wrap: anywhere; margin-bottom: 18px; }
+.games-mods-installed > article { display:grid; grid-template-columns:52px minmax(0,1fr) auto; gap:16px; align-items:center; padding:18px 0; border-bottom:1px solid var(--color-edge-soft); }
+.games-mod-installed-art { display:grid; place-items:center; width:52px; height:52px; overflow:hidden; border-radius:9px; background:var(--color-canvas); color:var(--color-ink-subtle); }
+.games-mod-installed-art img { width:100%; height:100%; object-fit:contain; }
+.games-mod-installed-info { min-width:0; }
+.games-mod-installed-info h3 { font-size:15px; font-weight:600; line-height:1.4; margin:0 0 7px; overflow-wrap:anywhere; }
+.games-mod-installed-info p { display:flex; gap:10px; align-items:baseline; font-size:12px; line-height:1.5; color:var(--color-ink-subtle); margin:0; min-width:0; }
+.games-mod-installed-info p b { color:var(--color-ink-muted); font-weight:400; flex-shrink:0; max-width:45%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.games-mod-installed-info p span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.games-mod-installed.is-disabled .games-mod-installed-art { opacity:.55; }
+.games-mods-actions { display:flex; gap:16px; align-items:center; }
+.games-mod-versions { font-size:12px; }
+.games-mod-toggle { display:flex; align-items:center; gap:9px; background:transparent; border:0; padding:4px 0; color:var(--color-ink-muted); font-size:11px; min-height:36px; }
+.games-mod-toggle>span { min-width:5em; text-align:end; }
+.games-mod-toggle>i { width:30px; height:18px; border-radius:12px; background:var(--color-elevated); border:1px solid var(--color-ink-subtle); position:relative; flex-shrink:0; }
+.games-mod-toggle>i::after { content:""; position:absolute; width:10px; height:10px; inset-block-start:3px; inset-inline-start:3px; background:var(--color-ink-muted); border-radius:50%; transition:inset-inline-start 140ms ease; }
+.games-mod-toggle[aria-checked=true]>i { background:var(--color-accent); border-color:transparent; }
+.games-mod-toggle[aria-checked=true]>i::after { inset-inline-start:15px; background:var(--color-canvas); }
+.games-mods-installed :is(button):disabled { opacity:.45; cursor:default; }
+.games-mods-installed button:focus-visible { outline:2px solid var(--color-ink); outline-offset:3px; }
+.games-mod-confirm { grid-column:2/-1; display:flex; align-items:center; gap:10px; padding:12px; background:var(--color-elevated); border-radius:7px; }
+.games-mod-confirm>span { flex:1; font-size:12px; line-height:1.6; color:var(--color-ink-muted); }
+.games-mod-confirm>button { flex-shrink:0; }
+.games-mod-options { padding:6px; background:var(--color-elevated); color:var(--color-ink); border:1px solid var(--color-edge-soft); border-radius:9px; overflow:auto; }
+.games-mod-options>button { display:flex; align-items:center; gap:12px; text-align:start; width:100%; padding:12px; font-size:13px; line-height:1.4; border-radius:5px; }
+.games-mod-options>button:hover,.games-mod-options>button:focus-visible { background:var(--color-surface); }
+.games-mod-options>button:focus-visible { outline:2px solid var(--color-ink-muted); outline-offset:-2px; }
+.games-mod-options svg { flex-shrink:0; color:var(--color-ink-muted); }
+.games-mod-options small { display:block; color:var(--color-ink-subtle); font-size:11px; margin-top:3px; overflow-wrap:anywhere; }
+.games-mod-current { font-size:13px; color:var(--color-ink); margin:0 0 16px; }
+@container (max-width:700px) { .games-mods-installed>article {grid-template-columns:44px minmax(0,1fr);gap:12px}.games-mod-installed-art {width:44px;height:44px}.games-mods-actions {grid-column:2;justify-content:flex-end;gap:12px}.games-mod-versions {margin-inline-end:auto}.games-mod-confirm {grid-column:1/-1;flex-wrap:wrap}.games-mod-confirm>span {flex-basis:100%}.games-mod-confirm>button:first-of-type {margin-inline-start:auto} }
+.games-mod-dialog { display: flex; flex-direction: column; max-height: min(800px,calc(100dvh - 40px)); color: var(--color-ink); }
+.games-mod-dialog > header { display: flex; align-items: center; gap: 16px; padding: 24px 26px 19px; flex-shrink: 0; }
+.games-mod-dialog > header img { width: 49px; height: 49px; object-fit: contain; border-radius: 10px; }
+.games-mod-dialog > header > div { min-width: 0; flex: 1; }
+.games-mod-dialog > header h2 { font-size: 22px; font-weight: 680; margin: 7px 0 0; line-height: 1.2; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.games-mod-dialog .games-eyebrow { margin: 0; font-size: 10px; }
+.games-mod-dialog-scroll { overflow-y: auto; min-height: 0; padding: 0 26px 24px; scrollbar-width: thin; scrollbar-color: #ffffff22 transparent; }
+.games-mod-dialog-scroll::-webkit-scrollbar { width: 6px; }.games-mod-dialog-scroll::-webkit-scrollbar-thumb { background: #ffffff22; border-radius: 5px; }.games-mod-dialog-scroll::-webkit-scrollbar-button { display: none; }
+.games-mod-description { font-size: 13px; line-height: 1.7; color: var(--color-ink-muted); margin: 0 0 13px; }
+.games-mod-credit { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--color-ink-subtle); gap: 14px; margin-bottom: 27px; }
+.games-mod-credit button,.games-mod-credit a { display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 0; color: var(--color-ink-muted); font: inherit; text-decoration: none; }
+.games-mod-version { display: grid; gap: 9px; color: var(--color-ink-muted); font-size: 12px; }
+.games-mod-review-note { margin: 13px 0 0; font-size: 11px; line-height: 1.65; color: var(--color-ink-subtle); }
+.games-mod-dialog > footer { display: flex; gap: 20px; justify-content: space-between; align-items: center; padding: 17px 26px 22px; border-top: 1px solid #ffffff09; flex-shrink: 0; }
+.games-mod-dialog > footer > span { font-size: 10px; color: var(--color-ink-subtle); max-width: 290px; line-height: 1.5; }
+.games-mod-dialog > footer .games-button { white-space: nowrap; }
+.games-mod-review-heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 7px; }
+.games-mod-review-heading h3 { font-size: 13px; margin: 0; }.games-mod-review-heading > span { font-size: 11px; color: var(--color-ink-muted); }
+.games-mod-plan { list-style: none; margin: 0; padding: 0; }.games-mod-plan li { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #ffffff08; }
+.games-mod-plan li > svg { color: var(--color-ink-subtle); flex-shrink: 0; }.games-mod-plan li > div { min-width: 0; flex: 1; }.games-mod-plan strong { display: block; font-size: 12px; font-weight: 550; }.games-mod-plan small { display: block; font-size: 10px; color: var(--color-ink-subtle); margin-top: 5px; overflow-wrap: anywhere; }.games-mod-plan li > span { font-size: 10px; color: var(--color-ink-muted); white-space: nowrap; }
+.games-mod-target { display: flex; gap: 10px; align-items: center; font-size: 11px; color: var(--color-ink-muted); border-radius: 7px; background: #ffffff04; padding: 12px; margin-top: 20px; overflow-wrap: anywhere; }.games-mod-target svg { flex-shrink: 0; }
+.games-mod-working { display: flex; align-items: center; gap: 12px; margin-top: 25px; color: var(--color-ink-muted); font-size: 12px; }.games-mod-working svg { animation: games-mod-breathe 1s ease-in-out infinite alternate; }
+.games-mod-progress { display: grid; gap: 10px; font-size: 12px; margin-top: 22px; }.games-mod-progress progress { width: 100%; height: 5px; border: 0; accent-color: var(--color-accent); }.games-mod-progress small { font-size: 10px; color: var(--color-ink-subtle); }
+.games-mod-success { display: grid; justify-items: center; text-align: center; padding: 30px 20px 20px; }.games-mod-success > svg { color: var(--color-accent); }.games-mod-success h3 { font-size: 20px; margin: 16px 0 8px; }.games-mod-success p { max-width: 400px; color: var(--color-ink-muted); font-size: 12px; line-height: 1.7; }
+@container (max-width: 1150px) { .games-mods-results { grid-template-columns: repeat(2,minmax(0,1fr)); }.games-mods-folder { margin-left: 0; } }
+@container (max-width: 600px) { .games-mods-results { grid-template-columns: 1fr; }.games-mods-hero > div { width: 100%; padding: 25px; }.games-mods-hero > img { opacity: .3; width: 100%; }.games-mods-hero::after { background: linear-gradient(90deg,#181c19ed,#181c1990); }.games-mods-environment { gap: 10px; }.games-mods-environment > label { flex: 1; min-width: 100px; }.games-mods-folder { width: 100%; }.games-mods-folder select { width: 100%; max-width: none; }.games-mods-toolbar { align-items: flex-start; flex-wrap: wrap; }.games-mods-toolbar > div button { padding: 9px 11px; } }
+@media (max-width: 600px) { .games-mod-dialog > header { padding: 20px 18px 16px; gap: 12px; }.games-mod-dialog > header h2 { font-size: 20px; }.games-mod-dialog-scroll { padding: 0 18px 20px; }.games-mod-dialog > footer { padding: 15px 18px 19px; gap: 13px; flex-wrap: wrap; }.games-mod-dialog > footer > span { max-width: none; }.games-mod-dialog > footer > button { margin-left: auto; } }
+@media (prefers-reduced-motion: reduce) { .games-mod-card,.games-mod-enter,.games-mod-toggle>i::after { transition: none; }.games-mod-skeleton,.games-mod-working svg { animation: none; } }
+
+.games-mod-backdrop { padding: 20px!important; background: #0009; }.games-mod-backdrop > [role="dialog"] { max-height: calc(100dvh - 40px); }.games-mod-dialog { min-height: 0; }.games-mod-dialog button:disabled { opacity: .35; cursor: default; }.games-mod-dialog :is(button,select,a):focus-visible,.games-mods select:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }

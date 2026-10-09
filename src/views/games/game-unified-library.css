@@ -1,0 +1,44 @@
+.games-unified-library{padding-block:28px 56px}
+.games-unified-header-actions,.games-unified-result,.games-unified-filters,.games-unified-actions,.games-unified-result-actions{display:flex;align-items:center;gap:10px}
+.games-unified-header-actions{flex:none}
+.games-unified-tools{margin:28px 0 24px}
+.games-unified-result{justify-content:space-between;margin-bottom:17px;color:var(--color-ink-muted);font-size:12px}
+.games-unified-result-actions>.games-button{background:transparent;padding-inline:10px}
+.games-unified-library [data-selection=true] :is(.games-unified-favorite,.games-unified-actions){visibility:hidden}
+.games-unified-library [data-selectable=true]{position:relative}
+.games-unified-filters{flex-wrap:wrap;gap:8px}
+.games-unified-drive{max-width:min(100%,240px);min-width:0}
+.games-unified-clear{font-size:12px;color:var(--color-ink-muted);padding:8px}
+.games-unified-clear:hover{color:var(--color-ink)}
+.games-unified-cover{position:relative;min-width:0}
+.games-unified-favorite{position:absolute;top:9px;inset-inline-end:9px;background:#111c!important;color:#fff!important;opacity:0;transition:opacity 150ms}
+.games-unified-cover:is(:hover,:focus-within)>.games-unified-favorite,.games-unified-favorite[aria-pressed=true]{opacity:1}
+.games-unified-no-art{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:20px;height:100%;padding:24px;text-align:center;color:var(--color-ink-muted)}
+.games-unified-no-art>strong{font-size:18px;font-weight:550;line-height:1.45;overflow-wrap:anywhere}
+.games-unified-library .games-library-card-copy>p{font-size:11px;margin:8px 0}
+.games-unified-state{display:flex;align-items:center;gap:6px;font-size:11px;line-height:1.6;color:var(--color-ink-muted)}
+.games-unified-state>i{width:5px;height:5px;border-radius:50%;background:var(--color-success)}
+.games-unified-last-played{display:block;font-size:10px;line-height:1.6;margin-top:4px;color:var(--color-ink-subtle)}
+.games-unified-playtime{display:block;font-size:11px;line-height:1.6;margin-top:4px;color:var(--color-ink-muted)}
+.games-unified-playtime-note{font-size:12px;line-height:1.7;color:var(--color-ink-muted);margin:-8px 0 24px;max-width:76ch}
+.games-unified-playtime:focus-visible{outline:2px solid var(--color-ink);outline-offset:3px}
+.games-unified-actions{margin-top:13px;gap:6px}
+.games-unified-actions>.games-launch{flex:1;min-width:0}
+.games-unified-actions>.games-icon-button{flex:none}
+.games-unified-library .games-library-grid>.games-library-card{display:flex;flex-direction:column;height:100%}
+.games-unified-library .games-library-grid .games-unified-actions{margin-top:auto;padding-top:13px}
+.games-unified-library .games-library-list .games-unified-cover{width:120px;flex:none}
+.games-unified-library .games-library-list .games-library-card-art{width:100%}
+.games-unified-library .games-library-list .games-unified-actions{margin:0;max-width:230px}
+.games-unified-library .games-library-list .games-unified-no-art{padding:8px;flex-direction:row;gap:8px}
+.games-unified-library .games-library-list .games-unified-no-art>strong{font-size:11px;max-height:3em;overflow:hidden}
+.games-unified-notice{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:12px;line-height:1.7;color:var(--color-ink-muted);padding-block:12px}
+.games-unified-notice>button{flex:none;padding:6px;color:var(--color-ink)}
+.games-unified-manage{display:flex;flex-wrap:wrap;gap:20px;margin-top:32px;padding-top:20px;border-top:1px solid var(--color-edge-soft);font-size:12px;color:var(--color-ink-muted)}
+.games-unified-manage>button{padding-block:8px}
+.games-unified-manage>button:hover{color:var(--color-ink)}
+.games-unified-library :is(button,a):focus-visible{outline:2px solid var(--color-ink);outline-offset:3px}
+@container(max-width:700px){.games-unified-library>.games-section-heading{flex-wrap:wrap;gap:18px}.games-unified-header-actions{width:100%;justify-content:flex-end}.games-unified-library .games-library-list .games-unified-actions{margin-inline-start:auto}.games-unified-library .games-library-list .games-unified-cover{width:96px}.games-unified-library .games-library-list .games-library-card{flex-wrap:wrap}.games-unified-filters>div{max-width:100%}.games-unified-favorite{opacity:1}.games-unified-result{flex-wrap:wrap}.games-unified-result-actions{margin-inline-start:auto;max-width:100%;flex-wrap:wrap;justify-content:flex-end}}
+@media(hover:none){.games-unified-favorite{opacity:1}}
+@container(max-width:600px){.games-unified-library .games-library-list .games-library-card{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:start}.games-unified-library .games-library-list .games-unified-actions{grid-column:2;max-width:none;margin:0;flex-wrap:wrap}.games-unified-library .games-library-list .games-unified-actions>.games-launch{white-space:normal;text-align:start;min-height:36px}.games-unified-library .games-library-list .games-unified-cover{grid-row:1 / 3}.games-unified-library .games-library-list .games-library-card-copy>button{white-space:normal;overflow-wrap:anywhere}}
+@media(prefers-reduced-motion:reduce){.games-unified-favorite{transition:none}}

@@ -1,17 +1,27 @@
-import { ChevronRight, X } from "lucide-react";
+import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { HarborLoader } from "@/components/harbor-loader";
-import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import type { Meta } from "@/lib/cinemeta";
 import { useDebridClients } from "@/lib/debrid/registry";
+import { invalidatePreparedDebridLink } from "@/lib/debrid/playback-preparation";
 import type { PanelCorner } from "@/lib/player-chrome";
 import { useSettings } from "@/lib/settings";
 import { spoilerMaskFor } from "@/lib/spoilers";
 import { registerStreamProxy } from "@/lib/stream-proxy";
+import { unregisterStreamProxy } from "@/lib/stream-proxy";
 import { preflightCheck } from "@/lib/streams/preflight";
 import { resolveStream } from "@/lib/streams/resolve";
+import {
+  beginPlaybackTrace,
+  finishPlaybackTrace,
+  markPlaybackTrace,
+} from "@/lib/perf/playback-trace";
 import type { ScoredStream } from "@/lib/streams/types";
-import { useView, type PlayEpisode } from "@/lib/view";
+import { usePlayerNavigation, type PlayEpisode } from "@/lib/view";
+import { parseKitsuId } from "@/lib/providers/kitsu";
+import { splitFranchiseDisplaySeason } from "@/lib/streams/anime-identity-core";
+import { useQueue } from "@/lib/queue";
+import { QueueUpNext } from "./queue-up-next";
 import { playLocalAware } from "@/lib/local-library/playback";
 import { localPlayerSrc } from "@/lib/local-library/player-src";
 import { useT } from "@/lib/i18n";
@@ -19,6 +29,16 @@ import { EpisodeRow } from "./episode-row";
 import { SeasonPicker } from "./season-picker";
 import { StreamsView } from "./streams-view";
 import { useSeasonBrowser } from "./use-season-browser";
+
+const RESOLVE_TIMEOUT_MS = 150_000;
+
+function displayEpLabel(ep: PlayEpisode, metaId?: string): string {
+  const part =
+    splitFranchiseDisplaySeason(parseKitsuId(ep.kitsuStreamId ?? "")) ??
+    splitFranchiseDisplaySeason(parseKitsuId(metaId ?? ""));
+  if (part != null) return `S${part} · E${String(ep.episode).padStart(2, "0")}`;
+  return `S${ep.imdbSeason ?? ep.season} · E${String(ep.imdbEpisode ?? ep.episode).padStart(2, "0")}`;
+}
 
 function sameEpisode(a: PlayEpisode, b: PlayEpisode): boolean {
   if (a.kitsuStreamId && b.kitsuStreamId) return a.kitsuStreamId === b.kitsuStreamId;
@@ -29,7 +49,6 @@ function sameEpisode(a: PlayEpisode, b: PlayEpisode): boolean {
 }
 
 export function EpisodePanel({
-  engine,
   open,
   onClose,
   meta,
@@ -54,11 +73,11 @@ export function EpisodePanel({
   onRestart?: () => void;
 }) {
   const t = useT();
-  const isMpv = engine === "mpv";
   const { settings, update } = useSettings();
-  const { openPicker, replacePlayerSrc } = useView();
+  const { openPicker, replacePlayerSrc } = usePlayerNavigation();
+  const queue = useQueue();
   const debrids = useDebridClients();
-  const { seasons, season, setSeason, episodes, loading } = useSeasonBrowser(
+  const { seasons, season, setSeason, episodes, loading, imdbRatings } = useSeasonBrowser(
     meta,
     currentEpisode,
     open,
@@ -71,10 +90,26 @@ export function EpisodePanel({
   const [expandedEp, setExpandedEp] = useState<string | null>(null);
   const [pickingFor, setPickingFor] = useState<PlayEpisode | null>(null);
   const [resolvingFor, setResolvingFor] = useState<PlayEpisode | null>(null);
+  const resolveAcRef = useRef<AbortController | null>(null);
+  useEffect(() => {
+    if (!resolvingFor) return;
+    const t = window.setTimeout(() => {
+      resolveAcRef.current?.abort();
+      setResolvingFor(null);
+    }, RESOLVE_TIMEOUT_MS);
+    return () => window.clearTimeout(t);
+  }, [resolvingFor]);
+  useEffect(() => () => resolveAcRef.current?.abort(), []);
+  const [showEpsOpen, setShowEpsOpen] = useState(false);
+  const hasQueue = queue.length > 0;
+  const isSeries = meta.type === "series";
+  const followQueue = settings.queueDrivesNav && hasQueue && isSeries;
+  const showQueueList = hasQueue && (followQueue || !isSeries);
   useEffect(() => {
     if (!open) {
       setExpandedEp(null);
       setPickingFor(null);
+      resolveAcRef.current?.abort();
       setResolvingFor(null);
     }
   }, [open]);
@@ -96,7 +131,7 @@ export function EpisodePanel({
       source: "manual",
       playLocal: (e, o) => {
         onClose();
-        replacePlayerSrc({ ...localPlayerSrc(e), startFromZero: o?.fromStart });
+        replacePlayerSrc({ ...localPlayerSrc(e, undefined, ep), startFromZero: o?.fromStart });
       },
       playStream: streamFlow,
       setMode: (m) => update({ localPlaybackMode: m }),
@@ -106,36 +141,51 @@ export function EpisodePanel({
     if (!pickingFor || roomGuest) return;
     if (!stream.url && stream.externalUrl) return;
     const ep = pickingFor;
+    const playbackTraceId = beginPlaybackTrace(
+      stream.url ? "direct" : debrids.length > 0 ? "debrid" : "p2p",
+    );
+    let traceTransferred = false;
+    let proxySessionId: string | undefined;
+    let proxyTransferred = false;
+    markPlaybackTrace(playbackTraceId, "resolve-start");
+    resolveAcRef.current?.abort();
+    const ac = new AbortController();
+    resolveAcRef.current = ac;
     setResolvingFor(ep);
     try {
       const hint = { season: ep.season ?? null, episode: ep.episode ?? null };
-      const r = await resolveStream(
-        stream,
-        debrids,
-        new AbortController().signal,
-        true,
-        false,
-        hint,
-      );
+      const r = await resolveStream(stream, debrids, ac.signal, true, false, hint);
+      if (ac.signal.aborted) return;
       if (!r.ok) {
         setResolvingFor(null);
         return;
       }
+      markPlaybackTrace(playbackTraceId, "resolve-ready");
       let playUrl = r.data.url;
-      if (r.data.headers && Object.keys(r.data.headers).length > 0) {
+      const hasProxyHeaders = !!r.data.headers && Object.keys(r.data.headers).length > 0;
+      if (hasProxyHeaders) {
         try {
           const proxied = await registerStreamProxy(r.data.url, r.data.headers);
           playUrl = proxied.url;
+          proxySessionId = proxied.sessionId;
         } catch {
           setResolvingFor(null);
           return;
         }
       }
-      const skipPreflight = r.via === "p2p" || r.via === "direct";
+      const skipPreflight =
+        r.via === "p2p" ||
+        r.via === "direct" ||
+        r.via === "local-download" ||
+        r.readiness?.exactUrlValidated === true;
+      if (!skipPreflight) markPlaybackTrace(playbackTraceId, "preflight-start");
       const preflight = skipPreflight
         ? ({ ok: true } as const)
         : await preflightCheck(playUrl).catch(() => ({ ok: true }) as const);
+      if (!skipPreflight) markPlaybackTrace(playbackTraceId, "preflight-ready");
       if (!preflight.ok && preflight.reason === "stub") {
+        const preparedDebrid = debrids.find((debrid) => debrid.slug === r.via);
+        if (preparedDebrid) invalidatePreparedDebridLink(stream, preparedDebrid, hint);
         setResolvingFor(null);
         return;
       }
@@ -146,8 +196,16 @@ export function EpisodePanel({
         url: playUrl,
         title: stream.parsedTitle ?? stream.title ?? stream.name ?? meta.name,
         notWebReady: !stream.url && !!stream.infoHash,
+        playbackTraceId,
+        proxySessionId,
+        historyUrl: r.data.url,
         subtitles: [],
         streamRef: {
+          resolvedFilename:
+            r.data.filename ??
+            stream.behaviorHints?.filename ??
+            stream.behaviorHints?.fileName ??
+            null,
           infoHash: stream.infoHash ?? null,
           fileIdx: r.data.fileIdx ?? stream.fileIdx ?? null,
           addonId: stream.addonId ?? null,
@@ -158,16 +216,22 @@ export function EpisodePanel({
           size: stream.size ?? null,
         },
       });
+      markPlaybackTrace(playbackTraceId, "player-opened");
+      traceTransferred = true;
+      proxyTransferred = true;
       onClose();
     } catch {
       setResolvingFor(null);
+    } finally {
+      if (proxySessionId && !proxyTransferred) {
+        void unregisterStreamProxy(proxySessionId).catch(() => {});
+      }
+      if (!traceTransferred) finishPlaybackTrace(playbackTraceId, "failed");
     }
   };
   return (
     <div
       aria-hidden={!open}
-      data-tv-focus-scope={open || undefined}
-      inert={!open ? true : undefined}
       className={`pointer-events-${open ? "auto" : "none"} absolute inset-0 z-30`}
     >
       {resolvingFor && (
@@ -175,11 +239,20 @@ export function EpisodePanel({
           <HarborLoader size="md" caption={t("Connecting")} />
           <p className="text-[13px] text-white/75">
             {t("Loading {label}", {
-              label: `S${resolvingFor.imdbSeason ?? resolvingFor.season} · E${String(resolvingFor.imdbEpisode ?? resolvingFor.episode).padStart(2, "0")}${
+              label: `${displayEpLabel(resolvingFor, meta.id)}${
                 resolvingFor.name ? ` · ${resolvingFor.name}` : ""
               }`,
             })}
           </p>
+          <button
+            onClick={() => {
+              resolveAcRef.current?.abort();
+              setResolvingFor(null);
+            }}
+            className="mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-[13px] font-semibold text-white transition-colors duration-150 ease-in-out hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+          >
+            {t("Cancel")}
+          </button>
         </div>
       )}
       <button
@@ -190,12 +263,13 @@ export function EpisodePanel({
           open ? "opacity-100" : "opacity-0"
         }`}
       />
-
       <aside
         role="dialog"
         aria-label={t("Up next")}
         className={`absolute top-0 h-full w-full max-w-[440px] overflow-hidden shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)] transition-transform duration-300 ease-out ${
-          corner === "top-left" || corner === "bottom-left" ? "left-0" : "right-0"
+          corner === "top-left" || corner === "bottom-left"
+            ? "left-0 rounded-r-[12px]"
+            : "right-0 rounded-l-[12px]"
         } ${
           open
             ? "translate-x-0"
@@ -204,191 +278,163 @@ export function EpisodePanel({
               : "translate-x-full"
         }`}
       >
-        <ThreeLiquidGlassSurface
-          radius={
-            corner === "top-left" || corner === "bottom-left" ? "0 24px 24px 0" : "24px 0 0 24px"
-          }
-          shaderRadius={0.42}
-          intensity={0.1}
-          refractionStrength={0.62}
-          lensStrength={0.9}
-          causticsStrength={0.06}
-          motionSpeed={0.5}
-          interactive={false}
-          alwaysActive
-          style={
-            isMpv
-              ? {
-                  background:
-                    "linear-gradient(145deg, rgba(8,12,18,0.36), rgba(8,12,18,0.30) 48%, rgba(8,12,18,0.34))",
-                  boxShadow:
-                    corner === "top-left" || corner === "bottom-left"
-                      ? "inset -1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)"
-                      : "inset 1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)",
-                }
-              : {
-                  background:
-                    "linear-gradient(145deg, rgba(255,255,255,0.055), rgba(10,12,18,0.16) 48%, rgba(255,255,255,0.018))",
-                  WebkitBackdropFilter:
-                    "blur(18px) saturate(1.38) brightness(1.025) contrast(1.025)",
-                  backdropFilter: "blur(18px) saturate(1.38) brightness(1.025) contrast(1.025)",
-                  boxShadow:
-                    corner === "top-left" || corner === "bottom-left"
-                      ? "inset -1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)"
-                      : "inset 1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)",
-                }
-          }
-          className={`h-full w-full ${
-            corner === "top-left" || corner === "bottom-left" ? "border-r" : "border-l"
-          } border-white/[0.10]`}
-          contentClassName="relative h-full w-full overflow-hidden"
-        >
-          {isMpv && (
-            <div aria-hidden className="pointer-events-none absolute inset-0 z-0 bg-[#080c12]/55" />
-          )}
-          <div className="relative z-10 flex h-full w-full flex-col">
-            {pickingFor ? (
-              <StreamsView
-                meta={meta}
-                episode={pickingFor}
-                onBack={() => setPickingFor(null)}
-                onClose={onClose}
-                onPick={handlePickStream}
-              />
-            ) : (
-              <>
-                <header className="flex items-center justify-between gap-3 px-6 pb-4 pt-7">
-                  <div>
-                    <p className="text-[10.5px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
-                      {t("Up Next")}
-                    </p>
-                    <h2 className="mt-1 font-display text-[22px] font-semibold leading-tight text-ink">
-                      {meta.name}
-                    </h2>
-                  </div>
-                  <ThreeLiquidGlassSurface
-                    radius="9999px"
-                    shaderRadius={0.5}
-                    intensity={0.1}
-                    refractionStrength={0.78}
-                    lensStrength={1}
-                    causticsStrength={0.05}
-                    motionSpeed={0.5}
-                    interactive={false}
-                    alwaysActive
-                    style={
-                      isMpv
-                        ? {
-                            background:
-                              "linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
-                            boxShadow:
-                              "inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.08)",
-                          }
-                        : {
-                            background:
-                              "linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
-                            WebkitBackdropFilter: "blur(12px) saturate(1.42) brightness(1.035)",
-                            backdropFilter: "blur(12px) saturate(1.42) brightness(1.035)",
-                            boxShadow:
-                              "inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.08)",
-                          }
-                    }
-                    className="h-11 w-11 shrink-0 border border-white/[0.12]"
-                    contentClassName="flex h-full w-full"
+        <div className="relative flex h-full w-full flex-col overflow-hidden bg-canvas">
+          {pickingFor ? (
+            <StreamsView
+              meta={meta}
+              episode={pickingFor}
+              onBack={() => setPickingFor(null)}
+              onClose={onClose}
+              onPick={handlePickStream}
+            />
+          ) : (
+            <>
+              <header className="flex items-center justify-between gap-3 px-6 pb-4 pt-7">
+                <div>
+                  <p className="text-[10.5px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
+                    {t("Up Next")}
+                  </p>
+                  <h2 className="mt-1 font-display text-[22px] font-semibold leading-tight text-ink">
+                    {meta.name}
+                  </h2>
+                </div>
+                <div className="flex shrink-0 items-center gap-2.5">
+                  {hasQueue && isSeries && (
+                    <div
+                      role="group"
+                      aria-label={t("Next and Previous behavior")}
+                      className="flex gap-0.5 rounded-full bg-elevated/60 p-0.5 ring-1 ring-edge-soft"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => update({ queueDrivesNav: true })}
+                        aria-pressed={settings.queueDrivesNav}
+                        title={t("Next and Previous follow your queue")}
+                        className={`rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${settings.queueDrivesNav ? "bg-accent text-canvas" : "text-ink-muted hover:text-ink"}`}
+                      >
+                        {t("Queue")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => update({ queueDrivesNav: false })}
+                        aria-pressed={!settings.queueDrivesNav}
+                        title={t("Next and Previous follow this show")}
+                        className={`rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${!settings.queueDrivesNav ? "bg-accent text-canvas" : "text-ink-muted hover:text-ink"}`}
+                      >
+                        {t("This show")}
+                      </button>
+                    </div>
+                  )}
+                  <button
+                    aria-label={t("Close")}
+                    onClick={onClose}
+                    data-tv-modal-close
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10 text-ink-muted transition-[color,background-color,transform] hover:bg-white/15 hover:text-ink active:scale-[0.96]"
                   >
-                    <button
-                      aria-label={t("Close")}
-                      onClick={onClose}
-                      data-tv-modal-close
-                      className="
-                    flex h-full w-full items-center justify-center rounded-full
-                    bg-transparent text-ink-muted
-                    transition-[color,transform]
-                    hover:text-ink active:scale-[0.96]
-                  "
-                    >
-                      <X size={18} strokeWidth={2.2} />
-                    </button>
-                  </ThreeLiquidGlassSurface>
-                </header>
-                <div className="flex items-center justify-between gap-3 px-6 pb-3">
-                  {currentEpisode ? (
-                    <p className="min-w-0 truncate text-[12.5px] text-ink-subtle">
-                      {t("Now playing: {label}", {
-                        label: `S${currentEpisode.imdbSeason ?? currentEpisode.season} · E${String(currentEpisode.imdbEpisode ?? currentEpisode.episode).padStart(2, "0")}${
-                          currentEpisode.name ? ` · ${currentEpisode.name}` : ""
-                        }`,
-                      })}
-                    </p>
-                  ) : (
-                    <span />
-                  )}
-                  {seasons.length > 1 && (
-                    <SeasonPicker seasons={seasons} active={season} onChange={setSeason} />
-                  )}
+                    <X size={18} strokeWidth={2.2} />
+                  </button>
                 </div>
-                <div ref={listRef} className="flex-1 overflow-y-auto px-4 pb-8 pt-2">
-                  {loading && episodes.length === 0 && (
-                    <div className="flex items-center justify-center py-16">
-                      <HarborLoader size="sm" />
-                    </div>
-                  )}
-                  {!loading && episodes.length === 0 && (
-                    <p className="px-2 py-10 text-center text-[13.5px] text-ink-muted">
-                      {t("No episodes found for this season.")}
-                    </p>
-                  )}
-                  {episodes.length > 0 && (
-                    <div className="flex flex-col gap-3">
-                      {episodes.map((ep) => {
-                        const key = `${ep.season}:${ep.episode}`;
-                        const isCurrent = !!currentEpisode && sameEpisode(ep, currentEpisode);
-                        const isNextUp = !!nextEp && sameEpisode(ep, nextEp);
-                        return (
-                          <EpisodeRow
-                            key={key}
-                            episode={ep}
-                            expanded={expandedEp === key}
-                            onToggle={() => setExpandedEp((cur) => (cur === key ? null : key))}
-                            onPlay={() => {
-                              if (isCurrent) {
-                                if (roomGuest) return;
-                                onRestart?.();
-                                onClose();
-                              } else {
-                                handlePlay(ep);
-                              }
-                            }}
-                            isCurrent={isCurrent}
-                            watched={watchedFor?.(ep) ?? false}
-                            spoiler={spoilerMaskFor(settings, {
-                              watched: isCurrent || (watchedFor?.(ep) ?? false),
-                              isNextUp,
-                            })}
-                          />
-                        );
-                      })}
-                    </div>
-                  )}
-                  {!loading && nextSeason !== undefined && (
-                    <button
-                      onClick={() => setSeason(nextSeason)}
-                      className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-elevated px-4 py-3.5 text-[13.5px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
-                    >
-                      {t("Season {n}", { n: nextSeason })}
-                      <ChevronRight size={16} strokeWidth={2.4} />
-                    </button>
-                  )}
-                </div>
-                <footer className="border-t border-edge-soft/60 px-6 py-4 text-[12px] text-ink-subtle">
-                  {manualMode
-                    ? t("Manual mode: clicking Play opens the source picker here.")
-                    : t("Instant Play: clicking Play queues the next stream automatically.")}
-                </footer>
-              </>
-            )}
-          </div>
-        </ThreeLiquidGlassSurface>
+              </header>
+              <div className="flex items-center justify-between gap-3 px-6 pb-3">
+                {currentEpisode ? (
+                  <p className="min-w-0 truncate text-[12.5px] text-ink-subtle">
+                    {t("Now playing: {label}", {
+                      label: `${displayEpLabel(currentEpisode, meta.id)}${
+                        currentEpisode.name ? ` · ${currentEpisode.name}` : ""
+                      }`,
+                    })}
+                  </p>
+                ) : (
+                  <span />
+                )}
+                {seasons.length > 1 && (
+                  <SeasonPicker seasons={seasons} active={season} onChange={setSeason} />
+                )}
+              </div>
+              <div ref={listRef} className="flex-1 overflow-y-auto px-4 pb-8 pt-2">
+                {showQueueList && (
+                  <QueueUpNext
+                    meta={meta}
+                    currentEpisode={currentEpisode}
+                    roomGuest={roomGuest}
+                    onClose={onClose}
+                  />
+                )}
+                {followQueue && (
+                  <button
+                    type="button"
+                    onClick={() => setShowEpsOpen((o) => !o)}
+                    className="mt-5 flex w-full items-center justify-between border-t border-edge-soft/60 px-1 pt-4 text-[11px] font-bold uppercase tracking-[0.22em] text-ink-subtle transition-colors hover:text-ink"
+                  >
+                    {t("This show")}
+                    <ChevronDown
+                      size={16}
+                      strokeWidth={2.4}
+                      className={`transition-transform ${showEpsOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                )}
+                {(!followQueue || showEpsOpen) && (
+                  <div className={followQueue ? "mt-3" : undefined}>
+                    {meta.type === "series" && loading && episodes.length === 0 && (
+                      <div className="flex items-center justify-center py-16">
+                        <HarborLoader size="sm" />
+                      </div>
+                    )}
+                    {meta.type === "series" && !loading && episodes.length === 0 && (
+                      <p className="px-2 py-10 text-center text-[13.5px] text-ink-muted">
+                        {t("No episodes found for this season.")}
+                      </p>
+                    )}
+                    {episodes.length > 0 && (
+                      <div className="flex flex-col gap-3">
+                        {episodes.map((ep) => {
+                          const key = `${ep.season}:${ep.episode}`;
+                          const isCurrent = !!currentEpisode && sameEpisode(ep, currentEpisode);
+                          const isNextUp = !!nextEp && sameEpisode(ep, nextEp);
+                          return (
+                            <EpisodeRow
+                              key={key}
+                              episode={ep}
+                              metaId={meta.id}
+                              imdbRating={imdbRatings.get(`${ep.season}:${ep.episode}`)}
+                              expanded={expandedEp === key}
+                              onToggle={() => setExpandedEp((cur) => (cur === key ? null : key))}
+                              onPlay={() => {
+                                if (isCurrent) {
+                                  if (roomGuest) return;
+                                  onRestart?.();
+                                  onClose();
+                                } else {
+                                  handlePlay(ep);
+                                }
+                              }}
+                              isCurrent={isCurrent}
+                              watched={watchedFor?.(ep) ?? false}
+                              spoiler={spoilerMaskFor(settings, {
+                                watched: isCurrent || (watchedFor?.(ep) ?? false),
+                                isNextUp,
+                              })}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                    {!loading && nextSeason !== undefined && (
+                      <button
+                        onClick={() => setSeason(nextSeason)}
+                        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-elevated px-4 py-3.5 text-[13.5px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
+                      >
+                        {t("Season {n}", { n: nextSeason })}
+                        <ChevronRight size={16} strokeWidth={2.4} />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </aside>
     </div>
   );

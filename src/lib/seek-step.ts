@@ -1,4 +1,4 @@
-export const SEEK_STEP_OPTIONS = [5, 10, 15, 30, 60, 90] as const;
+export const SEEK_STEP_OPTIONS = [1, 3, 5, 10, 15, 30, 60, 90] as const;
 
 export type SeekStepSeconds = (typeof SEEK_STEP_OPTIONS)[number];
 

@@ -1,17 +1,19 @@
-import { ColorPopoverTrigger } from "../../color-picker";
 import type { CustomColors } from "@/lib/theme";
+import { useT } from "@/lib/i18n";
+import { ColorPopover } from "./controls/color-popover";
+import { SwatchField } from "./controls/swatch-field";
 
-const FIELDS: Array<{ key: keyof CustomColors; label: string; hint: string }> = [
-  { key: "canvas", label: "Background", hint: "Page base." },
-  { key: "surface", label: "Surface", hint: "Cards, panels." },
-  { key: "elevated", label: "Elevated", hint: "Modals, dropdowns." },
-  { key: "raised", label: "Raised", hint: "Hover state." },
-  { key: "ink", label: "Text", hint: "Primary copy." },
-  { key: "inkMuted", label: "Muted text", hint: "Secondary copy." },
-  { key: "inkSubtle", label: "Subtle text", hint: "Captions, hints." },
-  { key: "edge", label: "Border", hint: "Lines, dividers." },
-  { key: "accent", label: "Accent", hint: "Highlights, links." },
-  { key: "danger", label: "Danger", hint: "Errors, destructive." },
+const SURFACES: Array<{ key: keyof CustomColors; label: string }> = [
+  { key: "canvas", label: "Canvas" },
+  { key: "surface", label: "Surface" },
+  { key: "elevated", label: "Elevated" },
+  { key: "raised", label: "Raised" },
+];
+
+const INK: Array<{ key: keyof CustomColors; sample: string; cls: string }> = [
+  { key: "ink", sample: "Primary text you read", cls: "text-[16.5px] font-medium leading-[24px]" },
+  { key: "inkMuted", sample: "Secondary copy sits here", cls: "text-[15.5px] leading-[22px]" },
+  { key: "inkSubtle", sample: "Captions and quiet hints", cls: "text-[15.5px] leading-[22px]" },
 ];
 
 export function ColorsGrid({
@@ -21,27 +23,89 @@ export function ColorsGrid({
   colors: CustomColors;
   onChange: (next: CustomColors) => void;
 }) {
+  const t = useT();
+  const set = (key: keyof CustomColors, hex: string) => onChange({ ...colors, [key]: hex });
   return (
-    <div className="-mx-1 flex flex-col">
-      {FIELDS.map((f) => (
-        <div
-          key={f.key}
-          className="flex items-center justify-between gap-3 rounded-lg px-1 py-2.5 transition-colors hover:bg-white/[0.03]"
-        >
-          <div className="flex min-w-0 flex-1 flex-col">
-            <span className="text-[14px] font-medium text-ink">{f.label}</span>
-            <span className="text-[12px] text-ink-subtle">{f.hint}</span>
-          </div>
-          <ColorPopoverTrigger
-            value={colors[f.key]}
-            onChange={(v) => onChange({ ...colors, [f.key]: v })}
-            label={colors[f.key].toUpperCase()}
-            align="right"
-            direction="down"
-            highlighted
+    <div className="flex flex-col gap-4">
+      <div className="flex h-24 w-full overflow-hidden rounded-md ring-1 ring-edge-soft">
+        {SURFACES.map((s) => (
+          <SwatchField
+            key={s.key}
+            label={t(s.label)}
+            value={colors[s.key]}
+            onChange={(v) => set(s.key, v)}
+            className="flex-1"
+          >
+            <span
+              aria-hidden
+              className="absolute inset-x-0 bottom-0 px-2 py-1.5 text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px]"
+              style={{ color: "#ffffff", mixBlendMode: "difference" }}
+            >
+              {t(s.label)}
+            </span>
+          </SwatchField>
+        ))}
+      </div>
+
+      <div
+        className="flex flex-col gap-1 rounded-md p-3.5 ring-1 ring-edge-soft"
+        style={{ background: colors.canvas }}
+      >
+        {INK.map((l) => (
+          <ColorPopover key={l.key} label={t(l.sample)} value={colors[l.key]} onChange={(v) => set(l.key, v)}>
+            {(open) => (
+              <span
+                className={`block truncate rounded-md px-1.5 py-2.5 transition-shadow ${l.cls} ${
+                  open ? "ring-2 ring-accent" : "ring-1 ring-transparent hover:ring-edge/40"
+                }`}
+                style={{ color: colors[l.key] }}
+              >
+                {t(l.sample)}
+              </span>
+            )}
+          </ColorPopover>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-3 gap-2.5">
+        <div className="flex flex-col gap-1.5">
+          <SwatchField
+            label={t("Accent")}
+            value={colors.accent}
+            onChange={(v) => set("accent", v)}
+            className="h-14 rounded-md"
           />
+          <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t("Accent")}</span>
         </div>
-      ))}
+        <div className="flex flex-col gap-1.5">
+          <SwatchField
+            label={t("Danger")}
+            value={colors.danger}
+            onChange={(v) => set("danger", v)}
+            className="h-14 rounded-md"
+          />
+          <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t("Danger")}</span>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <ColorPopover
+            label={t("Border")}
+            value={colors.edge}
+            onChange={(v) => set("edge", v)}
+            className="h-14 overflow-hidden rounded-md ring-1 ring-edge-soft"
+          >
+            {(open) => (
+              <span
+                className={`flex h-full w-full items-center justify-center gap-2 ${open ? "ring-2 ring-inset ring-accent" : ""}`}
+                style={{ background: colors.canvas }}
+              >
+                <span className="h-8 w-px" style={{ background: colors.edge }} />
+                <span className="h-px w-8" style={{ background: colors.edge }} />
+              </span>
+            )}
+          </ColorPopover>
+          <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t("Border")}</span>
+        </div>
+      </div>
     </div>
   );
 }

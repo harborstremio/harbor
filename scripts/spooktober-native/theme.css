@@ -1,0 +1,167 @@
+
+/* These variables cross the shadow boundary from Harbor's selected theme. */
+:is(.spook-native-body,.spook-native-viewport) {
+  --canvas:var(--color-canvas);
+  --ink:var(--color-ink);
+  --muted:var(--color-ink-muted);
+  --accent:var(--color-accent);
+  color-scheme:inherit;
+  font-family:var(--font-sans);
+}
+.spook-native-body,main {background:var(--color-canvas)}
+main::after {display:none}
+.festival-title h1,.section-top h2,.media-title,.director-name,
+.route-page-content h1,.detail-copy h2,.playlist-hero h1 {color:var(--color-ink)}
+.media-meta,.director-sub,.feature-synopsis,.feature-metadata,.service-line,
+.provider-link,.feature-label,.feature p:not(.feature-label) {color:var(--color-ink-muted)}
+.format-link,.feature-pick,.playlist-track:hover,.secondary-button {background:var(--color-surface);color:var(--color-ink)}
+.format-link:hover,.secondary-button:hover {background:var(--color-elevated);color:var(--color-ink)}
+.primary-button,.film-actions .primary-button {background:var(--event-action,#ee9955);color:#241911}
+.primary-button:hover,.film-actions .primary-button:hover {background:#ffb374}
+.film-actions .feature-explore {height:48px;padding:0 28px;gap:10px;border-radius:var(--radius-md,10px);background:var(--color-ink);color:var(--color-canvas);font-size:14.5px;font-weight:600;clip-path:none;transition:none;animation:none;transform:none}
+.film-actions .feature-explore:is(:hover,:active) {background:var(--color-ink);transform:none}
+.film-actions .feature-explore svg,.film-actions .feature-explore:is(:hover,:active) svg {width:18px;height:18px;fill:currentColor;stroke:none;transform:none;transition:none;animation:none}
+.feature-metadata {display:flex;flex-wrap:wrap;align-items:center;column-gap:20px;row-gap:6px;font-size:13px}
+.hero-imdb .imdb-rating {display:inline-flex;align-items:center;gap:6px;color:var(--color-ink);font-size:13px;font-weight:600}
+.hero-imdb img {height:14px;width:auto;border-radius:2px}
+:host([data-show-imdb="false"]) .hero-imdb {display:none}
+.encounter-mist {mask-image:linear-gradient(transparent,#000 80px)}
+.playlist-card .mix-art-goth .mix-prop-1 {width:31%;height:44%;left:29%;bottom:19%;opacity:.8;z-index:1;transition:translate 450ms ease-in-out}
+.playlist-card:is(:hover,:focus-visible) .mix-art-goth .mix-prop-1 {translate:0 -8px}
+.spook-playlist-playing {position:absolute;inset:0;pointer-events:none;z-index:3}
+.spook-playlist-playing .music-eq-bars {display:inline-flex;align-items:flex-end;gap:2px;height:13px}
+.spook-playlist-playing .music-eq-bars i {width:2.5px;height:30%;border-radius:1px;background:var(--color-accent);animation:music-eq-bounce 900ms ease-in-out infinite}
+.spook-playlist-playing .music-eq-bars i:nth-child(2) {animation-delay:-600ms}
+.spook-playlist-playing .music-eq-bars i:nth-child(3) {animation-delay:-300ms}
+.spook-playlist-playing .music-eq-bars i:nth-child(4) {animation-delay:-800ms}
+.spook-playlist-playing[data-paused] .music-eq-bars i {animation-play-state:paused}
+.spook-playlist-playing .music-live-mark[data-loading] svg {animation:spook-playlist-spin 1s linear infinite}
+@keyframes spook-playlist-spin {to{transform:rotate(360deg)}}
+@keyframes music-eq-bounce {0%,100%{height:22%}50%{height:92%}}
+.skip,.text-button-filled {background:var(--color-ink);color:var(--color-canvas)}
+.feature-slide::after {background:linear-gradient(90deg,color-mix(in srgb,var(--color-canvas) 94%,transparent),color-mix(in srgb,var(--color-canvas) 65%,transparent) 32%,transparent 65%),linear-gradient(transparent 60%,var(--color-canvas) 99%)}
+/* Leave room for Harbor's global controls without adding a second navbar. */
+.festival-title {top:80px}
+.page-tools {top:80px}
+.hero {height:auto;min-height:680px}
+#cinema-root {display:block;position:relative;inset:auto;padding-top:195px}
+.film-hero {position:relative;inset:auto}
+.feature-slides {position:relative;inset:auto;display:grid}
+.feature-slide {position:relative;inset:auto;grid-area:1 / 1}
+.cinema-copy {position:relative;inset:auto;width:min(470px,49%);max-width:none;margin-inline:var(--page)}
+.feature-controller {position:relative;inset:auto;margin:32px var(--page) 0;max-width:none;padding-bottom:36px}
+.film-actions .provider-link {flex-basis:100%;margin:4px 0 0;padding:0;line-height:1.6;min-height:20px}
+.film-actions .feature-save {width:46px;height:48px;min-height:48px;padding:0;justify-content:center;background:transparent;color:var(--color-ink)}
+.film-actions .feature-save>span {display:none}
+.film-actions .feature-save svg {width:28px;height:32px;stroke-width:1.5}
+.film-actions .feature-save:hover {background:var(--color-surface)}
+.film-actions .feature-save[aria-pressed="true"] svg {fill:currentColor}
+@container spooktober (max-width:750px) {
+  .festival-title {top:76px}
+  #cinema-root {padding-top:250px}
+  .cinema-copy {width:auto;margin-inline:28px}
+  .feature-controller {margin:28px 28px 0;padding-bottom:28px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .film-actions .feature-explore {transition:none;transform:none}
+  .playlist-card .mix-art-goth .mix-prop-1,.playlist-card:is(:hover,:focus-visible) .mix-art-goth .mix-prop-1 {transition:none;translate:none}
+  .spook-playlist-playing .music-eq-bars i {animation:none;height:55%}
+  .spook-playlist-playing .music-live-mark[data-loading] svg {animation:none}
+}
+
+/* One quiet grave and a ghost, with space between their silhouettes. */
+.new-release-layout .shelf-garden::before{display:none}
+.shelf-garden .garden-stone-front{width:54%;left:14%;bottom:24px;filter:brightness(.53)}
+.shelf-garden .garden-ghost{width:39%;right:8%;top:0;opacity:.65;filter:brightness(.82)}
+.shelf-garden .garden-grass{width:72%;left:8%;bottom:2px;opacity:.45}
+
+.shelf-garden .garden-tree{width:94%;left:-12%;bottom:18px;opacity:.58;filter:brightness(.72);z-index:0}
+.shelf-garden .garden-stone-front{z-index:1}
+.shelf-garden .garden-ghost{z-index:2;transform:translate(var(--ghost-x,0px),var(--ghost-y,0px)) rotate(var(--ghost-tilt,0deg));transition:transform 220ms ease-in-out}
+.motion-off .shelf-garden .garden-ghost{transform:none;transition:none}
+@media(prefers-reduced-motion:reduce){.shelf-garden .garden-ghost{transform:none;transition:none}}
+
+/* Lift only the trees above the film, below the existing foreground props. */
+.graveyard-stage:not(.cinema-tree-stage) .art-foreground-tree{visibility:hidden}
+.cinema-tree-stage{z-index:2;opacity:.48}
+.cinema-foreground{z-index:3}
+.shelf-garden .garden-tree{width:88%;height:90%;object-fit:contain;object-position:right bottom;left:auto;right:0;bottom:0}
+.shelf-garden .garden-stone-front{width:39%;left:8%;bottom:0}
+.shelf-garden .garden-ghost{width:33%;right:2%;top:8%}
+
+.hero .moon-disc{display:none}
+.hero .cinema-foreground,.hero .cinema-tree-stage .hero-depth{transform:none!important;will-change:auto!important}
+
+/* Featured now: flat cards, no rule beneath. The active one is a filled tile, not an underline. */
+.feature-selector > i { display: none; }
+.feature-selector {
+  border-radius: 10px;
+  padding: 10px 10px;
+  background: transparent;
+  transition:
+    background-color 200ms ease-in-out,
+    color 200ms ease-in-out;
+}
+.feature-selector > img { border-radius: 6px; }
+.feature-selector[aria-pressed="true"],
+.feature-selector:is(.intent-active, :focus-visible) {
+  background: color-mix(in srgb, var(--color-elevated) 82%, transparent);
+  color: var(--color-ink);
+}
+.feature-selector:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .feature-selector { transition: none; }
+}
+
+/* Book and manga details share Harbor's quiet cover-and-copy composition. */
+.inline-detail .detail-layout {
+  grid-template-columns:clamp(170px,22cqw,260px) minmax(0,1fr);
+  align-items:center;
+  gap:clamp(28px,4cqw,56px);
+  max-width:1120px;
+  padding:24px 20px 36px 0;
+}
+.inline-detail .detail-layout .detail-art { display:flex;justify-content:flex-start; }
+.inline-detail .detail-layout .detail-poster {
+  width:100%;height:auto;max-height:340px;object-fit:contain;object-position:left center;
+  border-radius:var(--radius-sm,6px);
+}
+.inline-detail .detail-layout .detail-copy {
+  display:flex;flex-wrap:wrap;align-items:center;column-gap:22px;row-gap:0;min-width:0;padding:0;
+}
+.inline-detail .detail-layout .detail-copy>p,
+.inline-detail .detail-layout .detail-copy>h2 { flex-basis:100%; }
+.inline-detail .detail-layout .detail-meta { margin:0 0 10px;color:var(--color-ink-muted);font-size:13px;line-height:1.5; }
+.inline-detail .detail-layout .detail-copy h2 { margin:0;font-size:clamp(30px,3.6cqw,46px);line-height:1.12;letter-spacing:-.035em;text-wrap:balance; }
+.inline-detail .detail-layout .detail-creator { margin:12px 0 0;color:var(--color-ink-muted);font-size:16px;line-height:1.5; }
+.inline-detail .detail-layout .detail-copy .description { max-width:none;margin:22px 0 28px;color:var(--color-ink-muted);font-size:16px;line-height:1.7;text-wrap:pretty; }
+.inline-detail .detail-layout .save-title {
+  min-height:48px;margin:0;padding:13px 20px;gap:10px;border-radius:var(--radius-md,10px);
+  background:var(--color-ink);color:var(--color-canvas);font-size:14px;font-weight:600;
+}
+.inline-detail .detail-layout .save-title:hover { background:color-mix(in srgb,var(--color-ink),var(--color-canvas) 10%); }
+.inline-detail .detail-layout .source-link {
+  align-items:center;gap:5px;min-height:48px;margin:0;padding-block:10px;color:var(--color-ink-muted);
+  font-size:14px;line-height:1.5;text-decoration:none;
+}
+.inline-detail .detail-layout .source-link:hover { color:var(--color-ink);text-decoration:underline; }
+.inline-detail:has(.detail-layout) .inline-toolbar { padding-bottom:4px; }
+.inline-detail:has(.detail-layout) .inline-toolbar button { color:var(--color-ink-muted); }
+.inline-detail:has(.detail-layout) .inline-toolbar button:hover { color:var(--color-ink); }
+.inline-detail:has(.detail-layout) :is(button,a):focus-visible { outline:2px solid var(--color-accent);outline-offset:4px; }
+@container spooktober (max-width:650px) {
+  .inline-detail .detail-layout { grid-template-columns:110px minmax(0,1fr);align-items:start;gap:22px;padding:16px 4px 28px 0; }
+  .inline-detail .detail-layout .detail-poster { max-height:180px; }
+  .inline-detail .detail-layout .detail-copy h2 { font-size:28px; }
+  .inline-detail .detail-layout .detail-creator { font-size:14px;margin-top:8px; }
+  .inline-detail .detail-layout .detail-copy .description { margin:18px 0 22px;font-size:14px;line-height:1.65; }
+  .inline-detail .detail-layout .source-link { font-size:13px; }
+}
+@container spooktober (max-width:400px) {
+  .inline-detail .detail-layout { grid-template-columns:80px minmax(0,1fr);gap:16px; }
+  .inline-detail .detail-layout .detail-copy h2 { font-size:25px; }
+  .inline-detail .detail-layout .save-title { padding-inline:14px; }
+}

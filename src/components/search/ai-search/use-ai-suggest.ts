@@ -1,18 +1,22 @@
 import { useEffect, useRef, useState } from "react";
-import { aiSuggest, resolveAiSuggestions, type AiResult } from "@/lib/ai-search";
+import {
+  AiSearchError,
+  aiSuggest,
+  resolveAiSuggestions,
+  type AiErrorDescriptor,
+  type AiResult,
+} from "@/lib/ai-search";
 import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
-import { keyForProvider, providerForModel } from "@/lib/ai-models";
+import { aiIsGroq, aiKey } from "@/lib/ai-models";
 import { enrichWithContent } from "@/lib/jina-search";
 
 export type AiStatus = "idle" | "loading" | "done" | "error";
 
 export function useAiSuggest(query: string, runSignal = 0) {
   const { settings } = useSettings();
-  const t = useT();
   const [status, setStatus] = useState<AiStatus>("idle");
   const [results, setResults] = useState<AiResult[]>([]);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<AiErrorDescriptor | null>(null);
   const [ranQuery, setRanQuery] = useState("");
   const reqRef = useRef(0);
 
@@ -20,12 +24,11 @@ export function useAiSuggest(query: string, runSignal = 0) {
     reqRef.current += 1;
     setStatus("idle");
     setResults([]);
-    setError("");
+    setError(null);
     setRanQuery("");
   }, [query]);
 
-  const provider = providerForModel(settings.aiSearchModel);
-  const activeKey = keyForProvider(settings, provider);
+  const activeKey = aiKey(settings);
 
   useEffect(() => {
     if (!runSignal || !query.trim() || !activeKey.trim()) return;
@@ -35,7 +38,7 @@ export function useAiSuggest(query: string, runSignal = 0) {
   const run = async () => {
     const id = ++reqRef.current;
     setStatus("loading");
-    setError("");
+    setError(null);
     setRanQuery(query);
     try {
       let webContext: string | undefined;
@@ -47,7 +50,13 @@ export function useAiSuggest(query: string, runSignal = 0) {
           webContext = undefined;
         }
       }
-      const suggestions = await aiSuggest(activeKey, settings.aiSearchModel, query, webContext);
+      const suggestions = await aiSuggest(
+        activeKey,
+        settings.aiSearchModel,
+        aiIsGroq(settings),
+        query,
+        webContext,
+      );
       if (id !== reqRef.current) return;
       if (suggestions.length === 0) {
         setResults([]);
@@ -60,7 +69,19 @@ export function useAiSuggest(query: string, runSignal = 0) {
       setStatus("done");
     } catch (e) {
       if (id !== reqRef.current) return;
-      setError(e instanceof Error ? e.message : t("Something went wrong."));
+      if (e instanceof AiSearchError) {
+        setError({
+          messageKey: e.messageKey,
+          ...(e.values ? { values: e.values } : {}),
+          ...(e.detail ? { detail: e.detail } : {}),
+        });
+      } else {
+        const detail = e instanceof Error ? e.message : typeof e === "string" ? e : undefined;
+        setError({
+          messageKey: "AI search failed.",
+          ...(detail ? { detail } : {}),
+        });
+      }
       setStatus("error");
     }
   };

@@ -7,7 +7,7 @@ const STORE_NAME = "entries";
 const DB_VERSION = 1;
 const SCHEMA_VERSION = 1;
 
-export type IptvCacheKind = "playlist" | "xtream-vod";
+export type IptvCacheKind = "playlist" | "xtream-vod" | "epg";
 
 export type PersistentIptvCacheEntry<T> = {
   sourceSignature: string;

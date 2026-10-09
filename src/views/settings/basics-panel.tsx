@@ -1,10 +1,19 @@
-import { ChevronRight, Eye, EyeOff, Languages, LogIn, MonitorPlay, Palette, Zap } from "lucide-react";
+import { Check, ChevronRight, Eye, EyeOff } from "./icons";
 import { useState, type ReactNode } from "react";
+import { Flag } from "@/components/flag";
+import tmdbLogo from "@/assets/addon-logos/tmdb.png";
+import omdbLogo from "@/assets/addon-logos/omdb.png";
+import rpdbLogo from "@/assets/addon-logos/rpdb.png";
+import tvdbLogo from "@/assets/addon-logos/tvdb.svg";
+import fanartLogo from "@/assets/addon-logos/fanarttv.svg";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { PlayModePanel } from "./player-panel";
+import { getThemeById } from "@/lib/theme";
+import { ROW_ACTION } from "./kit";
 import { Section, useSettingsActiveContext } from "./shared";
+import { SRow } from "./ui";
+import { SportsAccessRow } from "./sports-access-row";
 
 const ENGINE_LABEL: Record<string, string> = {
   auto: "Auto",
@@ -12,201 +21,208 @@ const ENGINE_LABEL: Record<string, string> = {
   mpv: "mpv",
 };
 
+const THEME_SWATCH = ["var(--color-surface)", "var(--color-raised)", "var(--color-accent)"];
+
+function Chevron() {
+  return (
+    <ChevronRight
+      size={20}
+      strokeWidth={2.2}
+      className="shrink-0 text-ink-subtle rtl:-scale-x-100"
+    />
+  );
+}
+
+function Value({ children }: { children: ReactNode }) {
+  return (
+    <span className="flex min-w-0 items-center gap-2 text-[15.5px] leading-[22px] text-ink-muted">
+      {children}
+    </span>
+  );
+}
+
 export function BasicsPanel() {
   const t = useT();
   const { user } = useAuth();
-  const { settings } = useSettings();
+  const { settings, update } = useSettings();
   const { setActive } = useSettingsActiveContext();
+  const [reveal, setReveal] = useState(false);
 
-  const debridCount = [settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey].filter(
-    Boolean,
-  ).length;
+  const metaKeys = [
+    { src: tmdbLogo, on: !!settings.tmdbKey, name: "TMDB" },
+    { src: fanartLogo, on: !!settings.fanartKey, name: "Fanart" },
+    { src: tvdbLogo, on: !!settings.tvdbKey, name: "TVDB" },
+    { src: omdbLogo, on: !!settings.omdbKey, name: "OMDb" },
+    { src: rpdbLogo, on: !!settings.rpdbKey, name: "RPDB" },
+  ];
+  const metaDone = metaKeys.filter((k) => k.on).length;
   const langs = settings.preferredLanguages;
-  const langLabel =
-    langs.length === 0 ? t("Any") : langs.length === 1 ? langs[0] : t("{n} languages", { n: langs.length });
+  const engine = ENGINE_LABEL[settings.playerEngine] ?? settings.playerEngine;
+  const themeName = getThemeById(settings.theme.preset)?.name ?? t("Custom theme");
 
   return (
     <>
-      <div className="flex flex-col gap-2.5">
-        <SignInRow email={user?.email ?? null} signedIn={!!user} onManage={() => setActive("account")} />
-
-        <LaunchRow
-          icon={<Zap size={19} strokeWidth={2} />}
-          title={t("Streaming quality")}
-          sub={
-            debridCount > 0
-              ? t("A debrid service is connected. You'll get instant, high-quality streams.")
-              : t("Connect a debrid service (Real-Debrid, TorBox, AllDebrid) for instant HD without the wait.")
+      <Section title={t("Essentials")} subtitle={t("Four things worth checking once.")}>
+        <SRow
+          title={t("Stremio account")}
+          description={
+            user
+              ? t(
+                  "Signed in as {email}. Your library, add-ons and watch history sync with Stremio.",
+                  {
+                    email: maskEmail(user.email, reveal),
+                  },
+                )
+              : t("Sign in to sync your library, add-ons and watch history with Stremio.")
           }
-          status={debridCount > 0 ? t("{n} connected", { n: debridCount }) : t("Set up")}
-          highlight={debridCount === 0}
-          onClick={() => setActive("streaming")}
+          trailing={
+            <>
+              {user && (
+                <button
+                  type="button"
+                  aria-label={reveal ? t("Hide email address") : t("Show email address")}
+                  onClick={() => setReveal((v) => !v)}
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-[10px] text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
+                >
+                  {reveal ? <EyeOff size={19} /> : <Eye size={19} />}
+                </button>
+              )}
+              <button type="button" onClick={() => setActive("account")} className={ROW_ACTION}>
+                {t("Open")}
+              </button>
+            </>
+          }
         />
-      </div>
 
-      <Section
-        title={t("How Play works")}
-        subtitle={t("What happens when you hit Play on a title. Instant just starts; Manual lets you pick the source.")}
-      >
-        <PlayModePanel />
+        <SRow
+          title={t("Metadata providers")}
+          description={t(
+            "TMDB, Fanart, TVDB, OMDb and RPDB supply posters, artwork and ratings. Adding your own free keys makes artwork load faster and more completely.",
+          )}
+          onClick={() => setActive("library")}
+          trailing={
+            <>
+              <span className="flex shrink-0 items-center gap-1.5">
+                {metaKeys.map((k) => (
+                  <img
+                    key={k.name}
+                    src={k.src}
+                    alt={k.name}
+                    className={`h-6 w-6 rounded-[6px] object-contain ${
+                      k.on ? "opacity-100" : "opacity-30 grayscale"
+                    }`}
+                  />
+                ))}
+              </span>
+              <Value>{t("{n} of {total}", { n: metaDone, total: metaKeys.length })}</Value>
+              <Chevron />
+            </>
+          }
+        />
+
+        <SRow
+          title={t("Player engine")}
+          description={t(
+            "Auto uses mpv when Harbor can reach it and falls back to the built in player. Pick one yourself if playback misbehaves.",
+          )}
+          onClick={() => setActive("player")}
+          trailing={
+            <>
+              <Value>{engine}</Value>
+              <Chevron />
+            </>
+          }
+        />
+
+        <SRow
+          title={t("Preferred languages")}
+          description={t(
+            "Harbor puts streams, audio tracks and subtitles in these languages first. Leave it empty to accept anything.",
+          )}
+          onClick={() => setActive("language")}
+          trailing={
+            <>
+              {langs.length > 0 && <Flag language={langs[0]} size="md" showLabel={false} />}
+              <Value>
+                {langs.length === 0
+                  ? t("Any")
+                  : langs.length === 1
+                    ? langs[0]
+                    : t("{n} languages", { n: langs.length })}
+              </Value>
+              <Chevron />
+            </>
+          }
+        />
       </Section>
 
-      <div className="flex flex-col gap-2.5">
-        <LaunchRow
-          icon={<MonitorPlay size={19} strokeWidth={2} />}
-          title={t("Player engine")}
-          sub={t("Auto is best for most people. mpv handles the trickiest 4K, HDR, and audio formats.")}
-          status={ENGINE_LABEL[settings.playerEngine] ?? settings.playerEngine}
-          onClick={() => setActive("player")}
+      <Section
+        title={t("When you press Play")}
+        subtitle={t("Pick one. You can change it any time.")}
+      >
+        <SRow
+          title={t("Instant")}
+          description={t(
+            "Harbor picks the best stream it can find and starts playing straight away.",
+          )}
+          onClick={() => update({ instantPlay: true })}
+          trailing={<Picked on={settings.instantPlay} />}
         />
-        <LaunchRow
-          icon={<Languages size={19} strokeWidth={2} />}
-          title={t("Languages")}
-          sub={t("Pick which audio and subtitle languages Harbor reaches for first.")}
-          status={langLabel}
-          onClick={() => setActive("language")}
+        <SRow
+          title={t("Pick a source")}
+          description={t(
+            "Harbor shows the full list of streams every time so you choose one yourself.",
+          )}
+          onClick={() => update({ instantPlay: false })}
+          trailing={<Picked on={!settings.instantPlay} />}
         />
-        <LaunchRow
-          icon={<Palette size={19} strokeWidth={2} />}
-          title={t("Theme & appearance")}
-          sub={t("Recolor everything, swap fonts, resize posters, set a wallpaper.")}
-          status={prettyPreset(settings.theme.preset)}
+      </Section>
+
+      <SportsAccessRow />
+
+      <Section title={t("Make it yours")} subtitle={t("Colors, posters, fonts and wallpaper.")}>
+        <SRow
+          title={t("Theme and appearance")}
+          description={t("Currently using {name}. Pick another preset or build your own.", {
+            name: themeName,
+          })}
           onClick={() => setActive("theme")}
+          trailing={
+            <>
+              <span className="flex h-8 w-14 shrink-0">
+                {THEME_SWATCH.map((c, i) => (
+                  <span
+                    key={c}
+                    style={{ background: c }}
+                    className={`h-full flex-1 ${i === 0 ? "rounded-s-[6px]" : ""} ${
+                      i === THEME_SWATCH.length - 1 ? "rounded-e-[6px]" : ""
+                    }`}
+                  />
+                ))}
+              </span>
+              <Chevron />
+            </>
+          }
         />
-      </div>
+      </Section>
     </>
   );
 }
 
-function prettyPreset(id: string): string {
-  return id.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function maskEmail(email: string): string {
-  const [local, domain] = email.split("@");
-  if (!domain) return "*****";
-  return `${local.slice(0, 1)}${"*".repeat(Math.max(local.length - 1, 4))}@${domain}`;
-}
-
-function SignInRow({
-  email,
-  signedIn,
-  onManage,
-}: {
-  email: string | null;
-  signedIn: boolean;
-  onManage: () => void;
-}) {
+function Picked({ on }: { on: boolean }) {
   const t = useT();
-  const [reveal, setReveal] = useState(false);
-
-  if (!signedIn) {
-    return (
-      <button
-        type="button"
-        onClick={onManage}
-        className="group flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 px-5 py-4 text-start transition-colors hover:border-edge hover:bg-elevated/60"
-      >
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
-          <LogIn size={19} strokeWidth={2} />
-        </span>
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="text-[15px] font-semibold text-ink">{t("Sign in to Stremio")}</span>
-          <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("Sync your library, watch progress, and installed addons across every device.")}
-          </span>
-        </div>
-        <span className="shrink-0 rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-accent">
-          {t("Recommended")}
-        </span>
-        <ChevronRight
-          size={18}
-          className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5"
-        />
-      </button>
-    );
-  }
-
+  if (!on) return <span className="block h-5 w-5 shrink-0" />;
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 px-5 py-4">
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-canvas/60 text-ink-muted">
-        <LogIn size={19} strokeWidth={2} />
-      </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[15px] font-semibold text-ink">{t("Stremio account")}</span>
-        <span className="flex items-center gap-2 text-[12.5px] leading-snug text-ink-muted">
-          <span className="truncate tracking-wide">
-            {email ? (reveal ? email : maskEmail(email)) : t("Your library and watch progress sync here.")}
-          </span>
-          {email && (
-            <button
-              type="button"
-              onClick={() => setReveal((r) => !r)}
-              aria-label={reveal ? t("Hide email") : t("Show email")}
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-canvas/50 hover:text-ink"
-            >
-              {reveal ? <EyeOff size={14} /> : <Eye size={14} />}
-            </button>
-          )}
-        </span>
-      </div>
-      <button
-        type="button"
-        onClick={onManage}
-        className="group flex shrink-0 items-center gap-1 rounded-full bg-canvas/70 px-3 py-1.5 text-[12px] font-semibold text-ink-muted transition-colors hover:text-ink"
-      >
-        {t("Manage")}
-        <ChevronRight size={15} className="transition-transform group-hover:translate-x-0.5" />
-      </button>
-    </div>
+    <span className="flex shrink-0 items-center gap-2">
+      <Check size={20} strokeWidth={2.6} className="text-accent" />
+      <span className="text-[15.5px] leading-[22px] font-medium text-accent">{t("Picked")}</span>
+    </span>
   );
 }
 
-function LaunchRow({
-  icon,
-  title,
-  sub,
-  status,
-  highlight,
-  onClick,
-}: {
-  icon: ReactNode;
-  title: string;
-  sub: string;
-  status?: string;
-  highlight?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 px-5 py-4 text-start transition-colors hover:border-edge hover:bg-elevated/60"
-    >
-      <span
-        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${
-          highlight ? "bg-accent/15 text-accent" : "bg-canvas/60 text-ink-muted"
-        }`}
-      >
-        {icon}
-      </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[15px] font-semibold text-ink">{title}</span>
-        <span className="text-[12.5px] leading-snug text-ink-muted">{sub}</span>
-      </div>
-      {status && (
-        <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide ${
-            highlight ? "bg-accent/15 text-accent" : "bg-canvas/70 text-ink-subtle"
-          }`}
-        >
-          {status}
-        </span>
-      )}
-      <ChevronRight
-        size={18}
-        className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5"
-      />
-    </button>
-  );
+function maskEmail(email: string, reveal: boolean): string {
+  if (reveal) return email;
+  const [local, domain] = email.split("@");
+  if (!domain) return email;
+  return `${local.slice(0, 1)}${"*".repeat(Math.max(local.length - 1, 4))}@${domain}`;
 }

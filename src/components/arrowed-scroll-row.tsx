@@ -1,6 +1,7 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
-import { useT } from "@/lib/i18n";
+import { isRtl, useT, useUiLanguage } from "@/lib/i18n";
+import { horizontalScrollState } from "@/lib/horizontal-scroll";
+import { NavArrow } from "./nav-arrow";
 
 type DragState = {
   active: boolean;
@@ -30,13 +31,16 @@ export function ArrowedScrollRow({
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
   const [grabbing, setGrabbing] = useState(false);
+  const language = useUiLanguage();
+  const rtl = isRtl(language);
 
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
     const update = () => {
-      setCanPrev(el.scrollLeft > 2);
-      setCanNext(el.scrollWidth - (el.scrollLeft + el.clientWidth) > 2);
+      const { position, max } = horizontalScrollState(el);
+      setCanPrev(position > 2);
+      setCanNext(max - position > 2);
     };
     update();
     el.addEventListener("scroll", update, { passive: true });
@@ -46,12 +50,13 @@ export function ArrowedScrollRow({
       el.removeEventListener("scroll", update);
       ro.disconnect();
     };
-  }, []);
+  }, [language]);
 
   const scroll = (dir: -1 | 1) => {
     const el = trackRef.current;
     if (!el) return;
-    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: "smooth" });
+    const { rtl } = horizontalScrollState(el);
+    el.scrollBy({ left: (rtl ? -dir : dir) * el.clientWidth * 0.85, behavior: "smooth" });
   };
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
@@ -117,46 +122,46 @@ export function ArrowedScrollRow({
     <div className={`relative ${className}`}>
       <div
         ref={trackRef}
+        data-tauri-drag-region="false"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         onClickCapture={onClickCapture}
-        className={`-my-3 flex gap-3 overflow-x-auto px-1 py-3 select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${grabbing ? "cursor-grabbing" : "cursor-grab"}`}
+        className={`-my-3 flex gap-3 overflow-x-auto px-1 py-3 select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [overflow-anchor:none] [overscroll-behavior-x:contain] ${grabbing ? "cursor-grabbing" : "cursor-grab"}`}
+        style={{ contain: "layout style", transform: "translateZ(0)" }}
       >
         {children}
       </div>
-      <Arrow side="left" visible={canPrev} onClick={() => scroll(-1)} />
-      <Arrow side="right" visible={canNext} onClick={() => scroll(1)} />
+      <Arrow side="left" rtl={rtl} visible={canPrev} onClick={() => scroll(-1)} />
+      <Arrow side="right" rtl={rtl} visible={canNext} onClick={() => scroll(1)} />
     </div>
   );
 }
 
 function Arrow({
   side,
+  rtl,
   visible,
   onClick,
 }: {
   side: "left" | "right";
+  rtl: boolean;
   visible: boolean;
   onClick: () => void;
 }) {
   const t = useT();
+  const direction = rtl ? (side === "left" ? "right" : "left") : side;
   return (
-    <button
-      type="button"
+    <NavArrow
+      dir={direction}
       onClick={onClick}
-      aria-label={t(side === "left" ? "Scroll left" : "Scroll right")}
+      label={t(direction === "left" ? "Scroll left" : "Scroll right")}
       tabIndex={visible ? 0 : -1}
-      className={`absolute top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-edge bg-canvas/95 text-ink shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] backdrop-blur-md transition-all hover:scale-105 hover:bg-canvas active:scale-95 ${
+      size={28}
+      className={`absolute top-1/2 z-20 h-11 w-11 -translate-y-1/2 transition-opacity ${
         side === "left" ? "start-1" : "end-1"
       } ${visible ? "opacity-100" : "pointer-events-none opacity-0"}`}
-    >
-      {side === "left" ? (
-        <ChevronLeft size={20} strokeWidth={2.4} className="dir-icon" />
-      ) : (
-        <ChevronRight size={20} strokeWidth={2.4} className="dir-icon" />
-      )}
-    </button>
+    />
   );
 }

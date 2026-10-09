@@ -1,10 +1,12 @@
-import { ChevronDown, Plus, X } from "lucide-react";
+import { ChevronDown, Plus, X } from "@/views/settings/icons";
+import { loadPickerBg } from "@/lib/theme-storage";
+import { KawaiiBunny } from "./kawaii-bunny";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { TvModalClose } from "@/components/tv-modal-close";
 import { useT } from "@/lib/i18n";
-import { useTvFocusScope } from "@/lib/keyboard-navigation";
 import { useProfiles } from "@/lib/profiles";
+import { captureFocusReturn } from "@/lib/keyboard-navigation";
+import { isBackKey, isVisible } from "@/lib/keyboard-navigation/geometry";
 import { EditorView } from "./editor-view";
 import { PasswordPrompt } from "./password-prompt";
 import { ProfileTile } from "./profile-tile";
@@ -13,25 +15,33 @@ const prefersReducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 export function ProfilePickerModal() {
-  const { profiles, pickerOpen, pickerView, setPickerView, selectProfile, closePicker } = useProfiles();
+  const { profiles, pickerOpen, pickerView, setPickerView, selectProfile, closePicker } =
+    useProfiles();
   const t = useT();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const scopeRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [moreBelow, setMoreBelow] = useState(false);
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const [exiting, setExiting] = useState(false);
+  const [cameFromList, setCameFromList] = useState(false);
   const timers = useRef<number[]>([]);
-  useTvFocusScope(pickerOpen, scopeRef);
 
   useEffect(() => {
     if (!pickerOpen) {
       setSelectingId(null);
       setExiting(false);
+      setCameFromList(false);
       timers.current.forEach((id) => window.clearTimeout(id));
       timers.current = [];
     }
   }, [pickerOpen]);
   useEffect(() => () => timers.current.forEach((id) => window.clearTimeout(id)), []);
+  useEffect(() => {
+    if (!pickerOpen) return;
+    const restore = captureFocusReturn();
+    dialogRef.current?.focus({ preventScroll: true });
+    return restore;
+  }, [pickerOpen]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -48,9 +58,22 @@ export function ProfilePickerModal() {
     };
   }, [pickerView.kind, pickerOpen]);
 
+  const [bg, setBg] = useState<{ image: string | null; dim: number }>({ image: null, dim: 55 });
+  useEffect(() => {
+    if (!pickerOpen) return;
+    let alive = true;
+    void loadPickerBg().then((v) => {
+      if (alive) setBg(v);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [pickerOpen]);
+
   if (!pickerOpen) return null;
 
   const goList = () => setPickerView({ kind: "list" });
+  const finishEditor = () => (cameFromList ? goList() : closePicker());
   const showClose = pickerView.kind === "create" || pickerView.kind === "edit";
 
   const handleSelect = (id: string) => {
@@ -70,58 +93,142 @@ export function ProfilePickerModal() {
 
   return createPortal(
     <div
-      ref={scopeRef}
-      data-tv-focus-scope
       data-tauri-drag-region
-      className={`fixed inset-0 z-[180] flex items-center justify-center bg-black/85 backdrop-blur-2xl transition-opacity duration-[340ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        exiting ? "opacity-0" : "animate-in fade-in duration-500"
-      }`}
+      className={`fixed inset-0 z-[180] flex items-center justify-center transition-opacity duration-[340ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        bg.image ? "bg-black" : "bg-black/85 backdrop-blur-2xl"
+      } ${exiting ? "opacity-0" : "animate-in fade-in duration-500"}`}
     >
-      <TvModalClose onClose={closePicker} label={t("common.close")} />
-      <div className="relative flex max-h-[calc(100vh-3rem)] w-full max-w-[860px] flex-col animate-in fade-in zoom-in-95 slide-in-from-bottom-3 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+      {bg.image && (
+        <>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage: `url(${bg.image})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: `linear-gradient(to bottom, rgb(0 0 0 / ${bg.dim / 100 + 0.14}) 0%, rgb(0 0 0 / ${bg.dim / 100}) 38%, rgb(0 0 0 / ${Math.min(0.94, bg.dim / 100 + 0.22)}) 100%)`,
+            }}
+          />
+        </>
+      )}
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t(
+          pickerView.kind === "create"
+            ? "New profile"
+            : pickerView.kind === "edit"
+              ? "Edit profile"
+              : "Choose a profile",
+        )}
+        data-profile-picker=""
+        tabIndex={-1}
+        onKeyDown={(e) => {
+          if (e.defaultPrevented) return;
+          const target = e.target as HTMLElement;
+          if (target.closest('[role="dialog"]') !== e.currentTarget) return;
+          if (e.key === "Tab") {
+            const controls = Array.from(
+              e.currentTarget.querySelectorAll<HTMLElement>(
+                'button:not([disabled]), a[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]',
+              ),
+            ).filter(isVisible);
+            const first = controls[0];
+            const last = controls[controls.length - 1];
+            if (!first) {
+              e.preventDefault();
+              return;
+            }
+            if (e.shiftKey && (target === first || target === e.currentTarget)) {
+              e.preventDefault();
+              last.focus();
+            } else if (!e.shiftKey && target === last) {
+              e.preventDefault();
+              first.focus();
+            }
+          }
+          if (isBackKey(e.nativeEvent) && !target.closest("[data-search-editing]")) {
+            if (showClose && e.currentTarget.querySelector("[data-profile-editor]")) {
+              e.preventDefault();
+              e.stopPropagation();
+              finishEditor();
+            } else if (pickerView.kind === "unlock") {
+              e.preventDefault();
+              e.stopPropagation();
+              goList();
+            }
+          }
+        }}
+        className={`relative flex max-h-[calc(100vh-3rem)] w-full max-w-[860px] flex-col outline-none animate-in fade-in zoom-in-95 slide-in-from-bottom-3 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${showClose ? "rounded-xl bg-canvas ring-1 ring-edge-soft" : ""}`}
+      >
+        <KawaiiBunny />
         {showClose && (
           <button
             type="button"
             onClick={closePicker}
             aria-label={t("common.close")}
-            className="absolute end-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-canvas/70 text-ink-muted ring-1 ring-edge-soft backdrop-blur transition-colors hover:bg-elevated hover:text-ink"
+            className="absolute end-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-canvas/70 text-ink-muted ring-1 ring-edge-soft backdrop-blur transition-colors hover:bg-elevated hover:text-ink"
           >
             <X size={16} strokeWidth={2.4} />
           </button>
         )}
         <div
           ref={scrollRef}
-          className="flex min-h-0 w-full flex-1 flex-col items-center overflow-y-auto overscroll-contain px-10 py-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex min-h-0 w-full flex-1 flex-col items-center overflow-y-auto overscroll-contain px-4 py-8 sm:px-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {pickerView.kind === "list" && (
             <ListView
               selectingId={selectingId}
-              onCreate={() => setPickerView({ kind: "create" })}
-              onEdit={(id) => setPickerView({ kind: "edit", profileId: id })}
+              onCreate={() => {
+                setCameFromList(true);
+                setPickerView({ kind: "create" });
+              }}
+              onEdit={(id) => {
+                setCameFromList(true);
+                setPickerView({ kind: "edit", profileId: id });
+              }}
               onSelect={handleSelect}
             />
           )}
-          {pickerView.kind === "create" && <EditorView mode={{ kind: "create" }} onCancel={goList} onDone={goList} />}
-          {pickerView.kind === "edit" && (() => {
-            const target = profiles.find((p) => p.id === pickerView.profileId);
-            if (!target) {
-              return <NotFoundFallback onBack={goList} />;
-            }
-            return <EditorView mode={{ kind: "edit", profile: target }} onCancel={goList} onDone={goList} />;
-          })()}
-          {pickerView.kind === "unlock" && (() => {
-            const target = profiles.find((p) => p.id === pickerView.profileId);
-            if (!target || !target.passwordHash) {
-              return <NotFoundFallback onBack={goList} />;
-            }
-            return (
-              <PasswordPrompt
-                profile={target}
-                onSuccess={() => selectProfile(target.id, { unlocked: true })}
-                onCancel={goList}
-              />
-            );
-          })()}
+          {pickerView.kind === "create" && (
+            <EditorView mode={{ kind: "create" }} onCancel={finishEditor} onDone={finishEditor} />
+          )}
+          {pickerView.kind === "edit" &&
+            (() => {
+              const target = profiles.find((p) => p.id === pickerView.profileId);
+              if (!target) {
+                return <NotFoundFallback onBack={finishEditor} />;
+              }
+              return (
+                <EditorView
+                  mode={{ kind: "edit", profile: target }}
+                  onCancel={finishEditor}
+                  onDone={finishEditor}
+                />
+              );
+            })()}
+          {pickerView.kind === "unlock" &&
+            (() => {
+              const target = profiles.find((p) => p.id === pickerView.profileId);
+              if (!target || !target.passwordHash) {
+                return <NotFoundFallback onBack={goList} />;
+              }
+              return (
+                <PasswordPrompt
+                  profile={target}
+                  onSuccess={() => selectProfile(target.id, { unlocked: true })}
+                  onCancel={goList}
+                />
+              );
+            })()}
         </div>
         {moreBelow && (
           <>
@@ -129,7 +236,10 @@ export function ProfilePickerModal() {
             <button
               type="button"
               onClick={() =>
-                scrollRef.current?.scrollBy({ top: scrollRef.current.clientHeight * 0.8, behavior: "smooth" })
+                scrollRef.current?.scrollBy({
+                  top: scrollRef.current.clientHeight * 0.8,
+                  behavior: "smooth",
+                })
               }
               aria-label={t("Scroll down")}
               className="absolute bottom-3 left-1/2 z-20 flex h-8 w-8 -translate-x-1/2 animate-bounce items-center justify-center rounded-full bg-canvas/80 text-ink-muted ring-1 ring-edge-soft backdrop-blur transition-colors hover:text-ink"
@@ -198,7 +308,6 @@ function ListView({
                 profile={p}
                 onSelect={() => onSelect(p.id)}
                 onEdit={canEditThis ? () => onEdit(p.id) : undefined}
-                initialFocus={i === 0}
               />
             </div>
           );
@@ -213,7 +322,10 @@ function ListView({
             style={
               selecting
                 ? undefined
-                : { animationDelay: `${140 + Math.min(profiles.length, 8) * 55}ms`, animationFillMode: "both" }
+                : {
+                    animationDelay: `${140 + Math.min(profiles.length, 8) * 55}ms`,
+                    animationFillMode: "both",
+                  }
             }
           >
             <AddProfileButton onClick={onCreate} />

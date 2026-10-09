@@ -1,0 +1,22 @@
+export default {
+  "games.mods.browse": "Tìm mod",
+  "games.mods.installed": "Mod của bạn",
+  "games.mods.enabled": "Đã bật",
+  "games.mods.disabled": "Đã tắt",
+  "games.mods.remove": "Xóa",
+  "games.mods.removeConfirm": "Xóa tệp được quản lý này?",
+  "games.mods.noMatches": "Không có mod đã cài nào khớp với tìm kiếm này.",
+  "games.mods.options": "Tùy chọn cho {name}",
+  "games.mods.versions": "Phiên bản",
+  "games.mods.restore": "Khôi phục bản trước",
+  "games.mods.restored": "Đã khôi phục phiên bản trước.",
+  "games.mods.changeTitle": "Tệp sẽ thay đổi",
+  "games.mods.backupNote": "Các phiên bản được thay thế được sao lưu cục bộ. Dùng Khôi phục bản trước trong bộ mod của bạn để quay lại; các phụ thuộc vẫn được kiểm tra.",
+  "games.mods.currentVersion": "Đã cài: {version}",
+  "games.mods.current": "Đã cài",
+  "games.mods.versionNote": "Chọn phiên bản tương thích. Harbor kiểm tra thay đổi và giữ lại phiên bản trước trên máy. Đóng Minecraft trước khi áp dụng.",
+  "games.mods.applyChanges": "Áp dụng thay đổi",
+  "games.mods.reviewChanges": "Xem lại thay đổi",
+  "games.mods.previousVersion": "Bản trước: {version}",
+  "games.mods.restoreConfirm": "Khôi phục phiên bản {version}? Hãy đóng Minecraft trước."
+} satisfies Record<string, string>;

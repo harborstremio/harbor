@@ -10,10 +10,13 @@ import {
 } from "./persistent-cache";
 import type { IptvChannel, IptvPlaylist, IptvPlaylistSource } from "./types";
 import { clearSeriesInfoCache } from "./xtream-vod";
+import { fetchBoundedText } from "./bounded-response";
 
 const cache = new Map<string, IptvPlaylist>();
 const inflight = new Map<string, Promise<IptvPlaylist>>();
 const restoring = new Map<string, Promise<IptvPlaylist | null>>();
+const cancelledRestores = new WeakSet<Promise<IptvPlaylist | null>>();
+const controllers = new Map<string, AbortController>();
 const listeners = new Set<() => void>();
 const vodHydrated = new Set<string>();
 
@@ -40,6 +43,10 @@ export function getCachedPlaylist(id: string): IptvPlaylist | null {
 
 export function clearPlaylistCache(id?: string) {
   if (id) {
+    controllers.get(id)?.abort();
+    controllers.delete(id);
+    const restore = restoring.get(id);
+    if (restore) cancelledRestores.add(restore);
     cache.delete(id);
     restoring.delete(id);
     vodHydrated.delete(id);
@@ -47,6 +54,9 @@ export function clearPlaylistCache(id?: string) {
     clearSeriesInfoCache(id);
     void deleteIptvCache("playlist", id);
   } else {
+    for (const controller of controllers.values()) controller.abort();
+    controllers.clear();
+    for (const restore of restoring.values()) cancelledRestores.add(restore);
     cache.clear();
     restoring.clear();
     vodHydrated.clear();
@@ -62,8 +72,12 @@ export async function loadPlaylist(
 ): Promise<IptvPlaylist> {
   if (opts?.force) return fetchPlaylist(src, true);
 
-  const existing = cache.get(src.id) ?? (await restorePlaylist(src));
-  if (existing) {
+  const cached = cache.get(src.id);
+  const restoration = cached ? undefined : restorePlaylist(src);
+  const existing = cached ?? (await restoration);
+  if (restoration && cancelledRestores.has(restoration))
+    throw new DOMException("Playlist source was removed", "AbortError");
+  if (existing && !existing.loading) {
     if (!isPersistentCacheFresh(existing.fetchedAt)) {
       void fetchPlaylist(src).catch(() => {});
     }
@@ -72,14 +86,15 @@ export async function loadPlaylist(
   return fetchPlaylist(src);
 }
 
-async function restorePlaylist(src: IptvPlaylistSource): Promise<IptvPlaylist | null> {
+function restorePlaylist(src: IptvPlaylistSource): Promise<IptvPlaylist | null> {
   const existing = cache.get(src.id);
-  if (existing) return existing;
+  if (existing) return Promise.resolve(existing);
   const pending = restoring.get(src.id);
   if (pending) return pending;
 
   const promise = readIptvCache<IptvPlaylist>("playlist", src.id)
     .then((entry) => {
+      if (cancelledRestores.has(promise) || restoring.get(src.id) !== promise) return null;
       if (!entry) return null;
       if (entry.sourceSignature !== iptvSourceSignature(src) || !isPlaylist(entry.value)) {
         void deleteIptvCache("playlist", src.id);
@@ -99,7 +114,36 @@ async function restorePlaylist(src: IptvPlaylistSource): Promise<IptvPlaylist | 
 function fetchPlaylist(src: IptvPlaylistSource, force = false): Promise<IptvPlaylist> {
   const pending = inflight.get(src.id);
   if (pending && !force) return pending;
-  const promise = loadFromShape(src, detectProviderShape(src));
+  controllers.get(src.id)?.abort();
+  const controller = new AbortController();
+  controllers.set(src.id, controller);
+  if (force) {
+    const restore = restoring.get(src.id);
+    if (restore) {
+      cancelledRestores.add(restore);
+      restoring.delete(src.id);
+    }
+  }
+  const timer = setTimeout(
+    () =>
+      controller.abort(
+        new DOMException("Playlist loading took too long. Please retry.", "TimeoutError"),
+      ),
+    5 * 60_000,
+  );
+  const promise: Promise<IptvPlaylist> = loadFromShape(
+    src,
+    detectProviderShape(src),
+    (channels) => {
+      if (inflight.get(src.id) !== promise) return;
+      const previous = cache.get(src.id);
+      if (previous && !previous.loading) return;
+      // Partial results are visible immediately, but only a complete playlist reaches disk.
+      cache.set(src.id, { ...shapePlaylist(src, channels), loading: true });
+      notify();
+    },
+    controller.signal,
+  );
   inflight.set(src.id, promise);
   return promise
     .then((result) => {
@@ -114,8 +158,17 @@ function fetchPlaylist(src: IptvPlaylistSource, force = false): Promise<IptvPlay
       }
       return result;
     })
+    .catch((error) => {
+      if (inflight.get(src.id) === promise && cache.get(src.id)?.loading) {
+        cache.delete(src.id);
+        notify();
+      }
+      throw error;
+    })
     .finally(() => {
+      clearTimeout(timer);
       if (inflight.get(src.id) === promise) inflight.delete(src.id);
+      if (controllers.get(src.id) === controller) controllers.delete(src.id);
     });
 }
 
@@ -147,39 +200,31 @@ export function commitHydratedPlaylist(src: IptvPlaylistSource, channels: IptvCh
 }
 
 const CONNECT_TIMEOUT_S = 30;
-const PARSE_LIMIT_BYTES = 80 * 1024 * 1024;
-
-export async function fetchM3uText(url: string): Promise<string> {
-  let res: Response;
-  try {
-    res = await iptvFetch(url);
-  } catch (e) {
-    throw new Error(networkErrorMessage(e));
-  }
-  if (!res.ok) {
-    throw new Error(httpErrorMessage(res.status, res.statusText));
-  }
-  let text: string;
-  try {
-    text = await res.text();
-  } catch (e) {
-    throw new Error(`Failed reading playlist body: ${e instanceof Error ? e.message : String(e)}`);
-  }
+export async function fetchM3uText(url: string, signal?: AbortSignal): Promise<string> {
+  const text = await fetchBoundedText(
+    async (requestSignal) => {
+      try {
+        return await iptvFetch(url, requestSignal);
+      } catch (error) {
+        requestSignal.throwIfAborted();
+        throw new Error(networkErrorMessage(error));
+      }
+    },
+    { signal, httpError: (response) => httpErrorMessage(response.status, response.statusText) },
+  );
   if (!text) {
     throw new Error("Playlist server returned an empty body");
-  }
-  if (text.length > PARSE_LIMIT_BYTES) {
-    throw new Error(`Playlist is too large (${(text.length / 1024 / 1024).toFixed(1)} MB). 80 MB limit.`);
   }
   return text;
 }
 
-async function iptvFetch(url: string): Promise<Response> {
+async function iptvFetch(url: string, signal?: AbortSignal): Promise<Response> {
   if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
     const { fetch: tauriFetch } = await import("@tauri-apps/plugin-http");
     try {
       return await tauriFetch(url, {
         method: "GET",
+        signal,
         headers: {
           "User-Agent": "VLC/3.0.20 LibVLC/3.0.20",
           Accept: "audio/x-mpegurl, application/x-mpegURL, application/octet-stream, */*",
@@ -191,6 +236,7 @@ async function iptvFetch(url: string): Promise<Response> {
       if (!/scope|not allowed/i.test(String(e))) throw e;
       const { safeFetch } = await import("@/lib/safe-fetch");
       return safeFetch(url, {
+        signal,
         headers: {
           "User-Agent": "VLC/3.0.20 LibVLC/3.0.20",
           Accept: "audio/x-mpegurl, application/x-mpegURL, application/octet-stream, */*",
@@ -198,7 +244,7 @@ async function iptvFetch(url: string): Promise<Response> {
       });
     }
   }
-  return fetch(url, { cache: "no-store" });
+  return fetch(url, { cache: "no-store", signal });
 }
 
 function httpErrorMessage(status: number, statusText: string): string {

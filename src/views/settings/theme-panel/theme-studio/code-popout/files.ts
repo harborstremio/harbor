@@ -1,4 +1,4 @@
-import { Braces, FileCode2, FileType2, type LucideIcon } from "lucide-react";
+import { Braces, FileCode2, FileType2, type LucideIcon } from "../../../icons";
 import type { CodeLang } from "@/components/code-editor";
 
 export type ThemeFile = {

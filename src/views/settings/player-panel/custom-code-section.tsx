@@ -1,7 +1,9 @@
-import { AlertTriangle, ChevronDown, Eraser } from "lucide-react";
+import { AlertTriangle, ChevronDown, Eraser } from "../icons";
 import { useState } from "react";
 import { useSettings, type Settings } from "@/lib/settings";
-import { settingsAnchor } from "../shared";
+import { Section } from "../shared";
+import { ModalButton, ROW_ACTION, ROW_ACTION_DANGER, ROW_DESC, SettingsModal } from "../kit";
+import { SRow } from "../ui";
 import { SubField } from "./internals";
 import { useT } from "@/lib/i18n";
 
@@ -18,7 +20,7 @@ const FIELDS: Array<{
     id: "customCss",
     label: "Custom CSS",
     placeholder:
-      "/* override anything */\n.harbor-seek-fill { box-shadow: 0 0 12px #ffca3a; }",
+      "/* override anything */\n.harbor-seek-fill { box-shadow: 0 0 12px var(--color-accent); }",
     hint: "Live-injected into the document. Use it to retheme buttons, change spacing, recolor anything.",
     rows: 7,
   },
@@ -33,7 +35,7 @@ const FIELDS: Array<{
   {
     id: "customHtml",
     label: "Custom HTML overlay",
-    placeholder: '<div style="position:fixed;bottom:12px;right:12px">hello</div>',
+    placeholder: '<div style="position:fixed;bottom:12px;inset-inline-end:12px">hello</div>',
     hint: "Injected into a fixed-position layer above the app (pointer-events disabled by default). Wrap in a div with pointer-events:auto to make it interactive.",
     rows: 5,
   },
@@ -43,46 +45,43 @@ export function CustomCodeCard() {
   const t = useT();
   const [open, setOpen] = useState(false);
   return (
-    <section
-      id={settingsAnchor("Custom code")}
-      className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
+    <Section
+      title={t("Custom code")}
+      subtitle={t(
+        "Customize Harbor with your own CSS, JavaScript, and HTML. Changes apply as you type.",
+      )}
     >
-      <button
-        type="button"
+      <SRow
+        title={open ? t("Hide the code editors") : t("Show the code editors")}
+        description={t(
+          "Opens three editors for CSS, JavaScript, and an HTML overlay. Changes apply as you type.",
+        )}
         onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="flex items-start justify-between gap-3 text-start"
-      >
-        <div className="flex flex-col gap-1">
-          <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Custom code")}</h2>
-          <span className="text-[13.5px] leading-relaxed text-ink-muted">
-            {t("Power-user knob. Inject your own CSS, JS, and HTML into Harbor. Lives in your local settings; nothing leaves your machine.")}
-          </span>
-        </div>
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-edge text-ink-muted transition-colors hover:bg-elevated hover:text-ink">
+        trailing={
           <ChevronDown
-            size={14}
+            size={18}
             strokeWidth={2}
-            className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+            className={`text-ink-subtle transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           />
-        </span>
-      </button>
+        }
+      />
       {open && <CustomCodePanel />}
-    </section>
+    </Section>
   );
 }
 
 export function CustomCodePanel() {
   const t = useT();
   const { settings, update } = useSettings();
+  const [clearField, setClearField] = useState<Field | null>(null);
 
   return (
-    <div className="flex flex-col gap-7">
-      <div className="flex items-start gap-2.5 rounded-xl border border-danger/40 bg-danger/10 px-3.5 py-3 text-[12px] leading-snug text-ink">
-        <AlertTriangle size={14} strokeWidth={2.2} className="mt-0.5 shrink-0 text-danger" />
-        <span>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+        <AlertTriangle size={18} strokeWidth={2.2} className="mt-[2px] shrink-0 text-danger" />
+        <p className={`max-w-[66ch] ${ROW_DESC}`}>
           {t("You're modding your own client. Custom JS has full access to your Harbor session. Only paste code you wrote or fully trust.")}
-        </span>
+        </p>
       </div>
 
       {FIELDS.map((f) => (
@@ -92,28 +91,39 @@ export function CustomCodePanel() {
           value={t("{n} chars", { n: String((settings[f.id] ?? "").length) })}
         >
           <textarea
+            aria-label={t(f.label)}
             value={settings[f.id] ?? ""}
             onChange={(e) => update({ [f.id]: e.target.value } as Partial<Settings>)}
             placeholder={f.placeholder}
             rows={f.rows}
             spellCheck={false}
-            className="w-full resize-y rounded-xl border border-edge-soft bg-canvas/40 px-3 py-2.5 font-mono text-[12px] leading-relaxed text-ink placeholder:text-ink-subtle/70 focus:border-edge focus:outline-none"
+            className="w-full resize-y rounded-[10px] border border-edge-soft bg-elevated px-4 py-3 font-mono text-[15.5px] leading-[22px] text-ink outline-none transition-colors placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           />
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] leading-snug text-ink-subtle">{t(f.hint)}</span>
-            {settings[f.id] && (
-              <button
-                type="button"
-                onClick={() => update({ [f.id]: "" } as Partial<Settings>)}
-                className="flex h-7 items-center gap-1 rounded-full bg-raised px-2.5 text-[11px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
-              >
-                <Eraser size={11} strokeWidth={2.4} />
-                {t("Clear")}
-              </button>
-            )}
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            <span className={`max-w-[70ch] ${ROW_DESC}`}>{t(f.hint)}</span>
+            <button
+              type="button"
+              onClick={() => setClearField(f.id)}
+              disabled={!settings[f.id]}
+              aria-label={t("Clear {name}", { name: t(f.label) })}
+              aria-disabled={!settings[f.id]}
+              className={`${ROW_ACTION}${settings[f.id] ? "" : " pointer-events-none opacity-45"}`}
+            >
+              <Eraser size={16} strokeWidth={2.4} />
+              {t("Clear")}
+            </button>
           </div>
         </SubField>
       ))}
+      <SettingsModal
+        open={clearField !== null}
+        onClose={() => setClearField(null)}
+        title={t("Clear this code?")}
+        sub={clearField === "customJs" ? t("The saved JavaScript will be removed. Restart Harbor to clear any effects from scripts that already ran.") : t("The saved {name} will be removed and its changes will stop applying.", { name: t(FIELDS.find((f) => f.id === clearField)?.label ?? "code") })}
+        actions={<><ModalButton ghost onClick={() => setClearField(null)}>{t("Keep code")}</ModalButton><button type="button" className={ROW_ACTION_DANGER} onClick={() => { if (clearField) update({ [clearField]: "" } as Partial<Settings>); setClearField(null); }}>{t("Clear code")}</button></>}
+      >
+        <p className={ROW_DESC}>{t("Copy any code you want to keep before clearing it.")}</p>
+      </SettingsModal>
     </div>
   );
 }

@@ -1,0 +1,36 @@
+.games-library-news{margin:0 0 30px;min-width:0}
+.games-library-news-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:36px}
+.games-library-news .games-page-controls>span{direction:ltr;unicode-bidi:isolate}
+[dir=rtl] .games-library-news .games-page-controls svg[viewBox="0 0 320 512"]{scale:-1 1}
+.games-library-news-toggle{display:flex;align-items:center;gap:10px;padding:6px 0;text-align:start}
+.games-library-news-heading>h3{font-size:19px;font-weight:550;letter-spacing:-.02em;margin:0}
+.games-library-news-toggle>svg{color:var(--color-ink-muted);transition:transform 180ms}
+.games-library-news-toggle[aria-expanded=false]>svg{transform:rotate(-90deg)}
+.games-library-news-note{font-size:12px;line-height:1.6;color:var(--color-ink-muted);margin:3px 0 15px}
+.games-library-news-grid{display:grid;gap:16px;animation:games-library-news-page 180ms ease-out}
+.games-library-news-grid>article{min-width:0;display:flex;flex-direction:column}
+.games-library-news-article{display:block;color:inherit;text-decoration:none;flex:1}
+.games-library-news-art{position:relative;overflow:hidden;aspect-ratio:16/7;border-radius:6px;background:var(--color-surface)}
+.games-library-news-art>img,.games-library-news-art>.games-art-empty{width:100%;height:100%;object-fit:cover;transition:transform 240ms ease-out}
+.games-library-news-art>svg{position:absolute;inset-inline-end:12px;bottom:12px;color:white;opacity:0;transform:translateY(3px);transition:opacity 160ms,transform 160ms;filter:drop-shadow(0 1px 3px #000)}
+.games-library-news-article:is(:hover,:focus-visible) .games-library-news-art>svg{opacity:1;transform:none}
+.games-library-news-article:is(:hover,:focus-visible) .games-library-news-art>img{transform:scale(1.025)}
+.games-library-news-copy{padding:12px 0 10px;min-height:136px}
+.games-library-news-copy time,.games-library-news-copy>span{font-size:11px;color:var(--color-ink-muted);line-height:1.5}
+.games-library-news-copy>span{margin-inline-start:8px}
+.games-library-news-copy h4{font-size:15px;line-height:1.45;font-weight:550;margin:6px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.games-library-news-copy p{font-size:12px;line-height:1.6;color:var(--color-ink-muted);margin:6px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.games-library-news-game{display:flex;align-items:center;gap:9px;width:fit-content;max-width:100%;text-align:start;color:var(--color-ink-muted);font-size:12px;padding:4px 0}
+.games-library-news-game:hover{color:var(--color-ink)}
+.games-library-news-game>img,.games-library-news-game>.games-art-empty{width:38px;height:22px;object-fit:cover;flex:none;border-radius:2px}
+.games-library-news-game>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.games-library-news-footer,.games-library-news-error{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px;font-size:11px;line-height:1.6;color:var(--color-ink-muted)}
+.games-library-news-empty{font-size:13px;line-height:1.7;color:var(--color-ink-muted);padding:18px 0;margin:0}
+.games-library-news-error .games-text-action,.games-library-news-footer .games-text-action{font-size:12px;padding:5px 0}
+.games-library-news-error>[aria-disabled=true]{opacity:.5}
+.games-library-news-placeholder>div{aspect-ratio:16/7;border-radius:6px;background:var(--color-surface)}
+.games-library-news-placeholder>i,.games-library-news-placeholder>b,.games-library-news-placeholder>span{display:block;height:12px;background:var(--color-surface);margin-top:16px;border-radius:2px;width:40%}
+.games-library-news-placeholder>b{width:85%;height:34px;margin-top:9px}
+.games-library-news-placeholder>span{width:55%;height:22px;margin-top:52px}
+@keyframes games-library-news-page{from{opacity:.5}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.games-library-news-toggle>svg,.games-library-news-art>img,.games-library-news-art>svg{transition:none}.games-library-news .is-scanning,.games-library-news-grid{animation:none}}

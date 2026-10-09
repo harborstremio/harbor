@@ -1,0 +1,21 @@
+export default {
+  "artwork.title": "Изображения загрузки и запуска",
+  "artwork.hint": "Используйте анимацию Lottie, GIF или изображение. До 8 МБ.",
+  "artwork.loading": "Анимация загрузки",
+  "artwork.loadingHint": "Используется на экранах подключения и загрузки.",
+  "artwork.launch": "Логотип запуска",
+  "artwork.launchHint": "Показывается при открытии Harbor, включая Big Picture.",
+  "artwork.original": "Оригинал Harbor",
+  "artwork.choose": "Выбрать файл",
+  "artwork.saving": "Сохранение…",
+  "artwork.reset": "Сбросить",
+  "artwork.chooseLoading": "Выбрать анимацию загрузки",
+  "artwork.chooseLaunch": "Выбрать логотип запуска",
+  "artwork.resetLoading": "Сбросить анимацию загрузки",
+  "artwork.resetLaunch": "Сбросить логотип запуска",
+  "artwork.local": "Сохраняется на этом устройстве. При уменьшении движения показывается неподвижное изображение.",
+  "artwork.error.large": "Выберите файл поменьше: до 8 МБ и 4096 × 4096 пикселей.",
+  "artwork.error.external": "В анимации используются внешние файлы. Экспортируйте её со встроенными изображениями.",
+  "artwork.error.storage": "Не удалось сохранить файл на этом устройстве. Предыдущий выбор не изменён.",
+  "artwork.error.invalid": "Не удалось прочитать файл. Выберите Lottie (.json или .lottie), GIF, PNG, JPEG или WebP."
+};

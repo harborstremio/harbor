@@ -59,8 +59,13 @@ export function deltaFn(points: SyncPoint[], nudge: number): (t: number) => numb
   const b = sorted[sorted.length - 1];
   const d1 = a.at - a.t;
   const span = b.t - a.t;
-  if (Math.abs(span) < 1e-6) return () => d1 + nudge;
   const m = (b.at - b.t - d1) / span;
+  // Nearby clicks measure reaction time, not FPS drift. Keep the latest
+  // alignment as a constant offset when the two-point fit is unreliable.
+  if (span < MIN_GAP_SEC || !Number.isFinite(m) || Math.abs(m) > MAX_SLOPE) {
+    const latest = points[points.length - 1];
+    return () => latest.at - latest.t + nudge;
+  }
   return (t: number) => d1 + m * (t - a.t) + nudge;
 }
 

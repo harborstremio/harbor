@@ -1,6 +1,9 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { AwardLogo, laurelColorFor } from "@/components/icons/award-logo";
 import { Laurel } from "@/components/icons/laurel";
+import { AWARD_CATALOG } from "@/lib/awards-catalog";
+import { scrollToDetailSection } from "@/lib/section-scroll";
+import type { AwardType } from "@/lib/providers/wikidata";
 import { useT } from "@/lib/i18n";
 
 type HeroTier = "full" | "compact" | "hidden";
@@ -53,11 +56,12 @@ export function HeroAwardsCorner({
   }
   if (lines.length === 0) return null;
   const won = top.wins > 0;
-  const headline = compact
-    ? won
+  const detailed = inline || !compact;
+  const headline = detailed
+    ? `${headlineFor(top.type)} ${won ? t("Winner") : t("Nominee")}`
+    : won
       ? t("Award Winner")
-      : t("Award Nominee")
-    : `${headlineFor(top.type)} ${won ? t("Winner") : t("Nominee")}`;
+      : t("Award Nominee");
   const laurelTint = laurelColorFor(top.type);
   const positionCls = className ?? (inline ? "max-w-md" : "absolute bottom-14 end-12 max-w-[44%]");
   const content = (
@@ -82,7 +86,7 @@ export function HeroAwardsCorner({
         >
           {headline}
         </span>
-        {!compact && (
+        {detailed && (
           <div
             className={`flex flex-col gap-0.5 text-[13px] font-medium leading-snug ${onDark ? "text-white/75" : "text-ink/70"}`}
           >
@@ -103,6 +107,7 @@ export function HeroAwardsCorner({
         ref={(el) => {
           ref.current = el;
         }}
+        title={lines.join(" · ")}
         className={`flex items-center gap-3 rounded-2xl px-3 py-2 text-end ${positionCls}`}
       >
         {content}
@@ -117,9 +122,10 @@ export function HeroAwardsCorner({
       }}
       type="button"
       data-hero-awards
+      title={lines.join(" · ")}
       onClick={(e) => {
         e.stopPropagation();
-        document.getElementById("awards-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        scrollToDetailSection("awards", "awards-section");
       }}
       className={`group flex items-center gap-3 rounded-2xl px-3 py-2 text-end transition-all duration-200 hover:-translate-y-0.5 hover:bg-canvas/45 ${positionCls}`}
     >
@@ -149,8 +155,10 @@ export function awardNoun(type: string, n: number): string {
       return `Venice Award${plural}`;
     case "berlin":
       return `Berlin Award${plural}`;
-    default:
-      return `Award${plural}`;
+    default: {
+      const base = AWARD_CATALOG[type as AwardType]?.shorthand;
+      return base ? `${base} Award${plural}` : `Award${plural}`;
+    }
   }
 }
 
@@ -175,6 +183,6 @@ function headlineFor(type: string): string {
     case "critics_choice":
       return "Critics' Choice";
     default:
-      return "Award";
+      return AWARD_CATALOG[type as AwardType]?.shorthand ?? "Award";
   }
 }

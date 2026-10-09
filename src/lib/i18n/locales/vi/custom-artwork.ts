@@ -1,0 +1,21 @@
+export default {
+  "artwork.title": "Hình ảnh tải và khởi động",
+  "artwork.hint": "Dùng hoạt ảnh Lottie, GIF hoặc hình ảnh. Tối đa 8 MB.",
+  "artwork.loading": "Hoạt ảnh tải",
+  "artwork.loadingHint": "Dùng trên các màn hình kết nối và tải.",
+  "artwork.launch": "Logo khởi động",
+  "artwork.launchHint": "Hiển thị khi mở Harbor, kể cả Big Picture.",
+  "artwork.original": "Mặc định của Harbor",
+  "artwork.choose": "Chọn tệp",
+  "artwork.saving": "Đang lưu…",
+  "artwork.reset": "Đặt lại",
+  "artwork.chooseLoading": "Chọn hoạt ảnh tải",
+  "artwork.chooseLaunch": "Chọn logo khởi động",
+  "artwork.resetLoading": "Đặt lại hoạt ảnh tải",
+  "artwork.resetLaunch": "Đặt lại logo khởi động",
+  "artwork.local": "Lưu trên thiết bị này. Khi giảm chuyển động, hình ảnh tĩnh sẽ được sử dụng.",
+  "artwork.error.large": "Chọn tệp nhỏ hơn: tối đa 8 MB và 4096 × 4096 pixel.",
+  "artwork.error.external": "Hoạt ảnh này dùng nội dung bên ngoài. Hãy xuất với hình ảnh được nhúng.",
+  "artwork.error.storage": "Không thể lưu tệp trên thiết bị này. Lựa chọn trước đó không thay đổi.",
+  "artwork.error.invalid": "Không thể đọc tệp. Chọn Lottie (.json hoặc .lottie), GIF, PNG, JPEG hoặc WebP."
+};

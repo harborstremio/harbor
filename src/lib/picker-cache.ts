@@ -31,8 +31,17 @@ const cache = new Map<string, Entry>();
 const listeners = new Set<() => void>();
 
 function entryKey(meta: Meta, episode?: PlayEpisode): string {
-  if (episode) return `${meta.id}|s${episode.season}e${episode.episode}`;
-  return meta.id;
+  if (!episode) return meta.id;
+  const base = `${meta.id}|s${episode.season}e${episode.episode}`;
+  const anime = /^(kitsu|mal|anilist|anidb):/.test(meta.id) || episode.kitsuStreamId != null;
+  if (!anime) return base;
+  const disc =
+    episode.videoId ??
+    episode.kitsuStreamId ??
+    (episode.imdbSeason != null && episode.imdbEpisode != null
+      ? `${episode.imdbSeason}:${episode.imdbEpisode}`
+      : null);
+  return disc ? `${base}|${disc}` : base;
 }
 
 function notify() {
@@ -47,7 +56,7 @@ export function setPickerCache(
   complete = true,
 ): void {
   if (result.picker.all.length === 0) return;
-  const stripped: StoredResult = { picker: result.picker, rejected: result.rejected.slice(0, 60) };
+  const stripped: StoredResult = { picker: result.picker, rejected: result.rejected.slice(0, 60), debridErrors: result.debridErrors };
   lruSet(cache, entryKey(meta, episode), {
     meta,
     episode,

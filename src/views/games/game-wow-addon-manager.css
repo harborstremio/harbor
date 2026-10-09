@@ -1,0 +1,67 @@
+.wow-addon-manager { margin-block: 20px; }
+.wow-addon-browser { margin-top: 18px; padding: 22px; border-radius: 10px; background: var(--color-surface); }
+.wow-addon-browser > header, .wow-addon-dialog > header { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
+.wow-addon-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.wow-addon-tabs button[aria-pressed="true"] { background: var(--color-ink); color: var(--color-canvas); }
+.wow-addon-caption, .wow-addon-notice { font-size: 14px; color: var(--color-ink-muted); line-height: 1.65; margin-block: 16px; overflow-wrap: anywhere; }
+.wow-addon-notice { padding-block: 6px; }
+.wow-addon-notice button { margin-inline-start: 8px; }
+.wow-addon-search { display: flex; flex-wrap: wrap; gap: 10px; margin-block: 22px; }
+.wow-addon-search > label { display: flex; align-items: center; gap: 10px; flex: 1 1 220px; min-width: 0; background: var(--color-elevated); padding: 12px; border-radius: 7px; }
+.wow-addon-search input { width: 100%; min-width: 0; outline: none; background: transparent; color: var(--color-ink); }
+.wow-addon-search label:focus-within { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.wow-addon-catalog { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; }
+.wow-addon-catalog > i { height: 106px; margin-block: 5px; border-radius: 6px; }
+.wow-addon-catalog-item { display: flex; gap: 15px; align-items: center; padding: 18px 10px; text-align: start; border-bottom: 1px solid var(--color-edge-soft); min-width: 0; border-radius: 6px; }
+.wow-addon-catalog-item:hover { background: var(--color-elevated); }
+.wow-addon-catalog-item > div { flex: 1; min-width: 0; }
+.wow-addon-catalog-item strong { display: block; font-size: 15px; font-weight: 600; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.wow-addon-catalog-item small { display: block; margin-block: 5px 8px; color: var(--color-ink-muted); font-size: 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.wow-addon-catalog-item > div > span { display: flex; gap: 14px; align-items: center; color: var(--color-ink-muted); font-size: 12px; overflow-wrap: anywhere; }
+.wow-addon-catalog-item > div > span > span { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.wow-addon-category-art { flex: 0 0 48px; width: 48px; height: 48px; border-radius: 7px; object-fit: contain; }
+.wow-addon-catalog-item > svg { flex-shrink: 0; color: var(--color-ink-muted); }
+.wow-addon-pagination, .wow-addon-pagination > div { display: flex; align-items: center; gap: 14px; }
+.wow-addon-pagination { justify-content: space-between; margin-block: 22px; font-size: 13px; color: var(--color-ink-muted); font-variant-numeric: tabular-nums; }
+.wow-addon-managed { margin-block: 12px; }
+.wow-addon-imports { margin-block: 28px; }
+.wow-addon-imports h3 { font-size: 18px; font-weight: 600; }
+.wow-addon-managed article { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding-block: 18px; border-bottom: 1px solid var(--color-edge-soft); }
+.wow-addon-managed article > div:first-child { min-width: 0; }
+.wow-addon-managed strong { display: block; font-weight: 600; overflow-wrap: anywhere; }
+.wow-addon-managed small { display: block; margin-top: 5px; font-size: 12px; color: var(--color-ink-muted); overflow-wrap: anywhere; }
+.wow-addon-managed article > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
+.wow-addon-source, .wow-addon-dialog a { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--color-ink-muted); }
+.wow-addon-scrim { background: rgb(0 0 0 / .48); }
+.wow-addon-dialog { display: flex; flex-direction: column; min-height: 0; color: var(--color-ink); }
+.wow-addon-dialog > header { padding: 24px 26px 18px; }
+.wow-addon-dialog header h2 { margin: 4px 0 0; font-size: 24px; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+.wow-addon-dialog header small { font-size: 12px; color: var(--color-ink-muted); }
+.wow-addon-dialog-body { overflow: auto; overscroll-behavior: contain; padding: 0 26px 24px; min-height: 0; }
+.wow-addon-dialog-body h3 { margin-top: 12px; font-size: 18px; font-weight: 600; }
+.wow-addon-dialog .games-wow-addon-media { max-width: none; margin-top: 22px; }
+.wow-addon-dialog .games-wow-addon-media figure > :is(img, .games-art-empty) { height: clamp(190px, 35vw, 400px); background: var(--color-canvas); }
+.wow-addon-dialog > footer { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 18px 26px; border-top: 1px solid var(--color-edge-soft); }
+.wow-addon-version { margin-block: 18px; font-size: 16px; overflow-wrap: anywhere; }
+.wow-addon-folders { margin-block: 18px; padding: 0; list-style: none; }
+.wow-addon-folders li { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; padding-block: 12px; border-bottom: 1px solid var(--color-edge-soft); }
+.wow-addon-folders li > span { overflow-wrap: anywhere; min-width: 0; }
+.wow-addon-folders small { color: var(--color-ink-muted); }
+.wow-addon-success { padding-block: 36px; display: flex; gap: 14px; align-items: center; }
+.wow-addon-progress { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.wow-addon-progress i { width: 7px; height: 7px; background: var(--color-accent); border-radius: 50%; animation: wow-addon-pulse 1.4s ease-in-out infinite alternate; }
+.wow-addon-dialog :is(button, a):focus-visible, .wow-addon-browser :is(button, a):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+[dir="rtl"] .wow-addon-catalog-item > svg, [dir="rtl"] .wow-addon-pagination svg { transform: scaleX(-1); }
+@keyframes wow-addon-pulse { to { opacity: .35; } }
+@media (max-width: 850px) { .wow-addon-catalog { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) {
+  .wow-addon-browser { padding: 16px; }
+  .wow-addon-managed article { align-items: start; flex-direction: column; }
+  .wow-addon-dialog > header { padding: 20px 18px 12px; }
+  .wow-addon-dialog-body { padding-inline: 18px; }
+  .wow-addon-dialog > footer { padding: 16px 18px; flex-wrap: wrap; }
+  .wow-addon-dialog header h2 { font-size: 21px; }
+  .wow-addon-category-art { flex-basis: 40px; width: 40px; height: 40px; }
+  .wow-addon-pagination { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) { .wow-addon-progress i { animation: none; } }

@@ -1,4 +1,5 @@
 import { Blocks, Check, ChevronRight } from "lucide-react";
+import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
 import type { AddonHit } from "@/lib/search-addon-index";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
@@ -23,13 +24,12 @@ export function AddonHits({ hits, onClose }: { hits: AddonHit[]; onClose: () => 
             }}
             className="group flex items-center gap-4 rounded-2xl border border-transparent px-3 py-2.5 text-start transition-colors hover:border-edge-soft hover:bg-elevated/50 active:scale-[0.997]"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-elevated ring-1 ring-edge-soft">
-              {a.logo ? (
-                <img src={a.logo} alt="" loading="lazy" draggable={false} className="h-8 w-8 object-contain" />
-              ) : (
-                <Blocks size={20} className="text-ink-subtle" strokeWidth={1.9} />
-              )}
-            </div>
+            <AddonLogo
+              addonId={a.id}
+              addonName={a.name}
+              manifestLogo={resolveAddonLogo(a.logo, a.transportUrl)}
+              size="lg"
+            />
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <div className="flex items-center gap-2">
                 <span className="truncate text-[16px] font-semibold text-ink">{a.name}</span>

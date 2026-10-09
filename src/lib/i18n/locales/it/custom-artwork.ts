@@ -1,0 +1,21 @@
+export default {
+  "artwork.title": "Immagini di caricamento e avvio",
+  "artwork.hint": "Usa un’animazione Lottie, una GIF o un’immagine. Fino a 8 MB.",
+  "artwork.loading": "Animazione di caricamento",
+  "artwork.loadingHint": "Usata nelle schermate di connessione e caricamento.",
+  "artwork.launch": "Logo di avvio",
+  "artwork.launchHint": "Mostrato all’apertura di Harbor, anche in Big Picture.",
+  "artwork.original": "Originale Harbor",
+  "artwork.choose": "Scegli file",
+  "artwork.saving": "Salvataggio…",
+  "artwork.reset": "Ripristina",
+  "artwork.chooseLoading": "Scegli animazione di caricamento",
+  "artwork.chooseLaunch": "Scegli logo di avvio",
+  "artwork.resetLoading": "Ripristina animazione di caricamento",
+  "artwork.resetLaunch": "Ripristina logo di avvio",
+  "artwork.local": "Salvato su questo dispositivo. Con movimento ridotto viene usata un’immagine fissa.",
+  "artwork.error.large": "Scegli un file più piccolo: massimo 8 MB e 4096 × 4096 pixel.",
+  "artwork.error.external": "Questa animazione usa contenuti esterni. Esportala con le immagini incorporate.",
+  "artwork.error.storage": "Impossibile salvare il file su questo dispositivo. La scelta precedente resta invariata.",
+  "artwork.error.invalid": "Impossibile leggere il file. Scegli Lottie (.json o .lottie), GIF, PNG, JPEG o WebP."
+};

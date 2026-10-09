@@ -1,0 +1,28 @@
+.pokemon-map-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.pokemon-map-toolbar .pokemon-search{flex:1;max-width:480px;min-width:200px}
+.pokemon-map-view-toggle{display:flex;gap:4px;margin-inline-start:auto}
+.pokemon-map-view-toggle button{width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:8px;background:none;color:var(--color-ink-muted)}
+.pokemon-map-view-toggle button[aria-pressed=true],.pokemon-map-view-toggle button:hover{background:var(--poke-raised);color:var(--color-ink)}
+.pokemon .pokemon-map-count{font-size:13px;color:var(--color-ink-muted);margin-bottom:18px}
+.pokemon-map-index{display:flex;flex-direction:column;gap:6px}
+.pokemon-map-group{background:var(--poke-fill);border-radius:9px;overflow:clip}
+.pokemon-map-group>summary{display:flex;align-items:center;gap:14px;min-height:60px;padding:14px 18px;cursor:pointer;list-style:none}
+.pokemon-map-group>summary::-webkit-details-marker{display:none}
+.pokemon-map-group>summary>strong{font-size:16px;font-weight:600;min-width:0;overflow-wrap:anywhere}
+.pokemon-map-group>summary>span{margin-inline-start:auto;color:var(--color-ink-muted);font-size:13px;white-space:nowrap}
+.pokemon-map-group>summary>svg{flex:none;color:var(--color-ink-muted)}
+.pokemon-map-group[open]>summary>svg:last-child{rotate:180deg}
+.pokemon-map-group>summary:hover{background:var(--poke-raised)}
+.pokemon-map-group>div{padding:0 12px 12px}
+.pokemon-map-file{display:flex;align-items:center;gap:16px;width:100%;min-height:82px;padding:10px;border:0;border-radius:7px;background:none;text-align:start}
+.pokemon-map-file:hover{background:var(--poke-raised)}
+.pokemon-map-file>.pokemon-map-image{width:80px;height:62px;object-fit:contain;flex:none;image-rendering:pixelated}
+.pokemon-map-file>strong{font-size:14px;font-weight:500;overflow-wrap:anywhere}
+.pokemon-map-file>svg{margin-inline-start:auto;flex:none;color:var(--color-ink-muted)}
+@container(max-width:550px){.pokemon-map-toolbar{gap:8px}.pokemon-map-toolbar .pokemon-search{flex-basis:100%;max-width:none}.pokemon-map-group>summary{padding:12px;gap:10px}.pokemon-map-file{gap:10px}.pokemon-map-file>.pokemon-map-image{width:60px}}
+
+.pokemon-map-group>summary:focus-visible{outline-offset:-3px;border-radius:8px}
+
+.pokemon-map-file .pokemon-map-image img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+.pokemon-map-grid>button>.pokemon-map-image{height:240px;display:grid;place-items:center;justify-content:stretch;padding:0}
+.pokemon-map-grid>button>.pokemon-map-image img{width:100%;height:100%;aspect-ratio:auto;object-fit:contain}

@@ -1,0 +1,1887 @@
+[
+  {
+    "id": 621,
+    "name": "Call of Duty",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 14,
+        "abbreviation": "Mac",
+        "name": "Mac",
+        "platform_logo": {
+          "id": 867,
+          "image_id": "plo3"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 15094,
+        "uid": "2620",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 1020,
+    "name": "Grand Theft Auto V",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 9,
+        "abbreviation": "PS3",
+        "name": "PlayStation 3",
+        "platform_logo": {
+          "id": 79,
+          "image_id": "tuyy1nrqodtmbqajp4jg"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 12,
+        "abbreviation": "X360",
+        "name": "Xbox 360",
+        "platform_logo": {
+          "id": 622,
+          "image_id": "plha"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 213597,
+        "uid": "xbox36066acd000-77fe-1000-9115-d802545408a7",
+        "external_game_source": 11
+      },
+      {
+        "id": 210553,
+        "uid": "BPJ686W6S0NH",
+        "external_game_source": 11
+      },
+      {
+        "id": 11827,
+        "uid": "271590",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 1905,
+    "name": "Fortnite",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 508,
+        "abbreviation": "Switch 2",
+        "name": "Nintendo Switch 2",
+        "platform_logo": {
+          "id": 896,
+          "image_id": "plow"
+        }
+      },
+      {
+        "id": 34,
+        "abbreviation": "Android",
+        "name": "Android",
+        "platform_logo": {
+          "id": 831,
+          "image_id": "pln3"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 39,
+        "abbreviation": "iOS",
+        "name": "iOS",
+        "platform_logo": {
+          "id": 248,
+          "image_id": "pl6w"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 14,
+        "abbreviation": "Mac",
+        "name": "Mac",
+        "platform_logo": {
+          "id": 867,
+          "image_id": "plo3"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      },
+      {
+        "id": 130,
+        "abbreviation": "Switch",
+        "name": "Nintendo Switch",
+        "platform_logo": {
+          "id": 606,
+          "image_id": "plgu"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 3142033,
+        "uid": "BT5P2X999VH2",
+        "external_game_source": 54
+      },
+      {
+        "id": 212287,
+        "uid": "BT5P2X999VH2",
+        "external_game_source": 11
+      }
+    ]
+  },
+  {
+    "id": 7360,
+    "name": "Rainbow Six Siege",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 170,
+        "abbreviation": "Stadia",
+        "name": "Google Stadia",
+        "platform_logo": {
+          "id": 328,
+          "image_id": "pl94"
+        }
+      },
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 211048,
+        "uid": "C12T09DSVP8J",
+        "external_game_source": 11
+      },
+      {
+        "id": 2654938,
+        "uid": "9MV3SSL8ZPB7",
+        "external_game_source": 11
+      },
+      {
+        "id": 8916,
+        "uid": "359550",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 8173,
+    "name": "Overwatch",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      },
+      {
+        "id": 130,
+        "abbreviation": "Switch",
+        "name": "Nintendo Switch",
+        "platform_logo": {
+          "id": 606,
+          "image_id": "plgu"
+        }
+      }
+    ],
+    "external_games": []
+  },
+  {
+    "id": 11198,
+    "name": "Rocket League",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 3,
+        "abbreviation": "Linux",
+        "name": "Linux",
+        "platform_logo": {
+          "id": 380,
+          "image_id": "plak"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 14,
+        "abbreviation": "Mac",
+        "name": "Mac",
+        "platform_logo": {
+          "id": 867,
+          "image_id": "plo3"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      },
+      {
+        "id": 130,
+        "abbreviation": "Switch",
+        "name": "Nintendo Switch",
+        "platform_logo": {
+          "id": 606,
+          "image_id": "plgu"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 210854,
+        "uid": "C125W9BG2K0V",
+        "external_game_source": 11
+      },
+      {
+        "id": 12308,
+        "uid": "252950",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 17269,
+    "name": "Roblox",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 386,
+        "abbreviation": "Meta Quest 2",
+        "name": "Meta Quest 2",
+        "platform_logo": {
+          "id": 756,
+          "image_id": "pll0"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 34,
+        "abbreviation": "Android",
+        "name": "Android",
+        "platform_logo": {
+          "id": 831,
+          "image_id": "pln3"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 39,
+        "abbreviation": "iOS",
+        "name": "iOS",
+        "platform_logo": {
+          "id": 248,
+          "image_id": "pl6w"
+        }
+      },
+      {
+        "id": 471,
+        "abbreviation": "Meta Quest 3",
+        "name": "Meta Quest 3",
+        "platform_logo": {
+          "id": 839,
+          "image_id": "plnb"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 14,
+        "abbreviation": "Mac",
+        "name": "Mac",
+        "platform_logo": {
+          "id": 867,
+          "image_id": "plo3"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 210850,
+        "uid": "BQ1TN1T79V9K",
+        "external_game_source": 11
+      },
+      {
+        "id": 2160221,
+        "uid": "9NBLGGGZM6WM",
+        "external_game_source": 11
+      }
+    ]
+  },
+  {
+    "id": 25076,
+    "name": "Red Dead Redemption 2",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 170,
+        "abbreviation": "Stadia",
+        "name": "Google Stadia",
+        "platform_logo": {
+          "id": 328,
+          "image_id": "pl94"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 1837431,
+        "uid": "1174180",
+        "external_game_source": 1
+      },
+      {
+        "id": 2083059,
+        "uid": "9N2ZDN7NWQKV",
+        "external_game_source": 11
+      },
+      {
+        "id": 210828,
+        "uid": "BPSWGQBW7R3G",
+        "external_game_source": 11
+      }
+    ]
+  },
+  {
+    "id": 77290,
+    "name": "Call of Duty",
+    "game_type": 11,
+    "platforms": [
+      {
+        "id": 42,
+        "abbreviation": "NGage",
+        "name": "N-Gage",
+        "platform_logo": {
+          "id": 258,
+          "image_id": "pl76"
+        }
+      }
+    ],
+    "external_games": []
+  },
+  {
+    "id": 91210,
+    "name": "Battlefield",
+    "game_type": 5,
+    "platforms": [
+      {
+        "id": 99,
+        "abbreviation": "famicom",
+        "name": "Family Computer",
+        "platform_logo": {
+          "id": 843,
+          "image_id": "plnf"
+        }
+      }
+    ],
+    "external_games": []
+  },
+  {
+    "id": 114795,
+    "name": "Apex Legends",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 508,
+        "abbreviation": "Switch 2",
+        "name": "Nintendo Switch 2",
+        "platform_logo": {
+          "id": 896,
+          "image_id": "plow"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      },
+      {
+        "id": 130,
+        "abbreviation": "Switch",
+        "name": "Nintendo Switch",
+        "platform_logo": {
+          "id": 606,
+          "image_id": "plgu"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 1945229,
+        "uid": "1172470",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 125174,
+    "name": "Overwatch",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 508,
+        "abbreviation": "Switch 2",
+        "name": "Nintendo Switch 2",
+        "platform_logo": {
+          "id": 896,
+          "image_id": "plow"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      },
+      {
+        "id": 130,
+        "abbreviation": "Switch",
+        "name": "Nintendo Switch",
+        "platform_logo": {
+          "id": 606,
+          "image_id": "plgu"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 2728440,
+        "uid": "2357570",
+        "external_game_source": 1
+      },
+      {
+        "id": 2948001,
+        "uid": "C1C4DZJPBC2V",
+        "external_game_source": 11
+      }
+    ]
+  },
+  {
+    "id": 134709,
+    "name": "Grand Theft Auto V",
+    "game_type": 3,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 2413593,
+        "uid": "9NXMBTB02ZSF",
+        "external_game_source": 11
+      },
+      {
+        "id": 2449629,
+        "uid": "9P8RQH67TTT1",
+        "external_game_source": 11
+      }
+    ]
+  },
+  {
+    "id": 134710,
+    "name": "Grand Theft Auto Online",
+    "game_type": 4,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 9,
+        "abbreviation": "PS3",
+        "name": "PlayStation 3",
+        "platform_logo": {
+          "id": 79,
+          "image_id": "tuyy1nrqodtmbqajp4jg"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 12,
+        "abbreviation": "X360",
+        "name": "Xbox 360",
+        "platform_logo": {
+          "id": 622,
+          "image_id": "plha"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 2719285,
+        "uid": "9P079R5LGV4T",
+        "external_game_source": 11
+      },
+      {
+        "id": 2327442,
+        "uid": "9NKC1Z4Z92VN",
+        "external_game_source": 11
+      }
+    ]
+  },
+  {
+    "id": 135400,
+    "name": "Minecraft",
+    "game_type": 11,
+    "platforms": [
+      {
+        "id": 132,
+        "abbreviation": "FireTV",
+        "name": "Amazon Fire TV",
+        "platform_logo": {
+          "id": 325,
+          "image_id": "pl91"
+        }
+      },
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 3,
+        "abbreviation": "Linux",
+        "name": "Linux",
+        "platform_logo": {
+          "id": 380,
+          "image_id": "plak"
+        }
+      },
+      {
+        "id": 508,
+        "abbreviation": "Switch 2",
+        "name": "Nintendo Switch 2",
+        "platform_logo": {
+          "id": 896,
+          "image_id": "plow"
+        }
+      },
+      {
+        "id": 388,
+        "abbreviation": "Gear VR",
+        "name": "Gear VR",
+        "platform_logo": {
+          "id": 739,
+          "image_id": "plkj"
+        }
+      },
+      {
+        "id": 74,
+        "abbreviation": "Win Phone",
+        "name": "Windows Phone",
+        "platform_logo": {
+          "id": 363,
+          "image_id": "pla3"
+        }
+      },
+      {
+        "id": 34,
+        "abbreviation": "Android",
+        "name": "Android",
+        "platform_logo": {
+          "id": 831,
+          "image_id": "pln3"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 39,
+        "abbreviation": "iOS",
+        "name": "iOS",
+        "platform_logo": {
+          "id": 248,
+          "image_id": "pl6w"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 14,
+        "abbreviation": "Mac",
+        "name": "Mac",
+        "platform_logo": {
+          "id": 867,
+          "image_id": "plo3"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      },
+      {
+        "id": 130,
+        "abbreviation": "Switch",
+        "name": "Nintendo Switch",
+        "platform_logo": {
+          "id": 606,
+          "image_id": "plgu"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 2611889,
+        "uid": "9MVXMVT8ZKWC",
+        "external_game_source": 11
+      },
+      {
+        "id": 2633512,
+        "uid": "9NQ19C36R0VD",
+        "external_game_source": 11
+      },
+      {
+        "id": 210703,
+        "uid": "9NBLGGH537BL",
+        "external_game_source": 11
+      }
+    ]
+  },
+  {
+    "id": 214394,
+    "name": "Dune: Awakening",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 2534212,
+        "uid": "1172710",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 231090,
+    "name": "Fortnite",
+    "game_type": 11,
+    "platforms": [
+      {
+        "id": 34,
+        "abbreviation": "Android",
+        "name": "Android",
+        "platform_logo": {
+          "id": 831,
+          "image_id": "pln3"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      }
+    ]
+  },
+  {
+    "id": 239064,
+    "name": "Grand Theft Auto V",
+    "game_type": 3,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      }
+    ],
+    "external_games": []
+  },
+  {
+    "id": 250616,
+    "name": "Helldivers 2",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 2710035,
+        "uid": "553850",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 290355,
+    "name": "Battlefield",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 82,
+        "abbreviation": "browser",
+        "name": "Web browser",
+        "platform_logo": {
+          "id": 825,
+          "image_id": "plmx"
+        }
+      }
+    ],
+    "external_games": []
+  },
+  {
+    "id": 294041,
+    "name": "Marvel Rivals",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 508,
+        "abbreviation": "Switch 2",
+        "name": "Nintendo Switch 2",
+        "platform_logo": {
+          "id": 896,
+          "image_id": "plow"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 2901435,
+        "uid": "2767030",
+        "external_game_source": 1
+      },
+      {
+        "id": 2967782,
+        "uid": "9N8PMW7QMD3D",
+        "external_game_source": 11
+      }
+    ]
+  },
+  {
+    "id": 322845,
+    "name": "Call of Duty",
+    "game_type": 11,
+    "platforms": [
+      {
+        "id": 55,
+        "abbreviation": "Mobile",
+        "name": "Legacy Mobile Device",
+        "platform_logo": {
+          "id": 841,
+          "image_id": "plnd"
+        }
+      }
+    ]
+  },
+  {
+    "id": 329146,
+    "name": "EA Sports College Football 26",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 3148531,
+        "uid": "9NLKS78C4F3Z",
+        "external_game_source": 54
+      }
+    ]
+  },
+  {
+    "id": 337712,
+    "name": "RuneScape: Dragonwilds",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 508,
+        "abbreviation": "Switch 2",
+        "name": "Nintendo Switch 2",
+        "platform_logo": {
+          "id": 896,
+          "image_id": "plow"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 2996505,
+        "uid": "1374490",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 342382,
+    "name": "Madden NFL 26",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 508,
+        "abbreviation": "Switch 2",
+        "name": "Nintendo Switch 2",
+        "platform_logo": {
+          "id": 896,
+          "image_id": "plow"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 3015681,
+        "uid": "3230400",
+        "external_game_source": 1
+      },
+      {
+        "id": 3142719,
+        "uid": "9NVD16NP4J8T",
+        "external_game_source": 54
+      }
+    ]
+  },
+  {
+    "id": 348330,
+    "name": "Forza Horizon 6",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 3177590,
+        "uid": "9N431PX143P8",
+        "external_game_source": 54
+      },
+      {
+        "id": 3103087,
+        "uid": "2483190",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 353848,
+    "name": "EA Sports FC 26",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 508,
+        "abbreviation": "Switch 2",
+        "name": "Nintendo Switch 2",
+        "platform_logo": {
+          "id": 896,
+          "image_id": "plow"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      },
+      {
+        "id": 130,
+        "abbreviation": "Switch",
+        "name": "Nintendo Switch",
+        "platform_logo": {
+          "id": 606,
+          "image_id": "plgu"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 3080733,
+        "uid": "3405690",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 353901,
+    "name": "NBA 2K26",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 508,
+        "abbreviation": "Switch 2",
+        "name": "Nintendo Switch 2",
+        "platform_logo": {
+          "id": 896,
+          "image_id": "plow"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      },
+      {
+        "id": 130,
+        "abbreviation": "Switch",
+        "name": "Nintendo Switch",
+        "platform_logo": {
+          "id": 606,
+          "image_id": "plgu"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 3161816,
+        "uid": "9PP9PFSCJTWR",
+        "external_game_source": 54
+      },
+      {
+        "id": 3161815,
+        "uid": "9NFKCJNBR34N",
+        "external_game_source": 54
+      },
+      {
+        "id": 3079051,
+        "uid": "3472040",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 400379,
+    "name": "Madden NFL 27",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 508,
+        "abbreviation": "Switch 2",
+        "name": "Nintendo Switch 2",
+        "platform_logo": {
+          "id": 896,
+          "image_id": "plow"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 3170593,
+        "uid": "3940610",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 400601,
+    "name": "EA Sports College Football 27",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 3181806,
+        "uid": "4032350",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 408819,
+    "name": "EA Sports FC 27",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "name": "PlayStation 4",
+        "platform_logo": {
+          "id": 231,
+          "image_id": "pl6f"
+        }
+      },
+      {
+        "id": 508,
+        "abbreviation": "Switch 2",
+        "name": "Nintendo Switch 2",
+        "platform_logo": {
+          "id": 896,
+          "image_id": "plow"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "name": "Xbox One",
+        "platform_logo": {
+          "id": 329,
+          "image_id": "pl95"
+        }
+      },
+      {
+        "id": 130,
+        "abbreviation": "Switch",
+        "name": "Nintendo Switch",
+        "platform_logo": {
+          "id": 606,
+          "image_id": "plgu"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 3197775,
+        "uid": "4080220",
+        "external_game_source": 1
+      }
+    ]
+  },
+  {
+    "id": 408823,
+    "name": "NBA 2K27",
+    "game_type": 0,
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "name": "Xbox Series X|S",
+        "platform_logo": {
+          "id": 561,
+          "image_id": "plfl"
+        }
+      },
+      {
+        "id": 508,
+        "abbreviation": "Switch 2",
+        "name": "Nintendo Switch 2",
+        "platform_logo": {
+          "id": 896,
+          "image_id": "plow"
+        }
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "platform_logo": {
+          "id": 670,
+          "image_id": "plim"
+        }
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "name": "PlayStation 5",
+        "platform_logo": {
+          "id": 892,
+          "image_id": "plos"
+        }
+      }
+    ],
+    "external_games": [
+      {
+        "id": 3197364,
+        "uid": "4356430",
+        "external_game_source": 1
+      }
+    ]
+  }
+]

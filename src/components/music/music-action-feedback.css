@@ -1,0 +1,47 @@
+.music-action-glyph {
+  display: inline-grid;
+  position: relative;
+  flex: none;
+  vertical-align: middle;
+}
+.music-action-glyph > span {
+  grid-area: 1 / 1;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 140ms ease-in-out, transform 160ms ease-in-out;
+}
+.music-action-glyph:is([data-state="idle"], [data-state="error"]) > .music-action-glyph-idle,
+.music-action-glyph[data-state="busy"] > .music-action-glyph-busy,
+.music-action-glyph[data-state="done"] > .music-action-glyph-done {
+  opacity: 1;
+  transform: none;
+}
+.music-action-glyph[data-state="busy"] > .music-action-glyph-busy > svg {
+  animation: music-action-working 800ms linear infinite;
+}
+.music-action-glyph[data-arrived] .music-action-glyph-done polyline {
+  animation: music-action-signed 240ms ease-in-out both;
+}
+/* Keep the receipt readable while a completed action is disabled. */
+button.music-action-button[data-music-action-state="done"]:disabled {
+  opacity: 1;
+}
+@keyframes music-action-working {
+  to { transform: rotate(360deg); }
+}
+@keyframes music-action-signed {
+  from { stroke-dasharray: 0 32; stroke-width: .9; }
+  to { stroke-dasharray: 32 32; stroke-width: 1.8; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-action-glyph > span {
+    transition: none;
+    transform: none;
+  }
+  .music-action-glyph[data-state="busy"] > .music-action-glyph-busy > svg,
+  .music-action-glyph[data-arrived] .music-action-glyph-done polyline {
+    animation: none;
+  }
+}

@@ -1,0 +1,24 @@
+.games-steam-import-backdrop { background:#0009; padding:20px; }
+.games-steam-imported { margin-top:36px; }.games-steam-imported>.games-section-heading h3 { font-size:22px; font-weight:600; letter-spacing:-.025em; }.games-steam-imported .games-library-card-footer>.games-icon-button { flex:0 0 36px; height:36px; }
+.games-steam-import { display:flex; flex-direction:column; min-height:0; color:var(--color-ink); }
+.games-steam-import header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:24px 28px 12px; }
+.games-steam-import h2 { margin:0; font-size:25px; font-weight:600; letter-spacing:-.03em; }
+.games-steam-import>.games-steam-import-note { margin:0; padding:0 28px 22px; }
+.games-steam-import-note { color:var(--color-ink-muted); font-size:13px; line-height:1.6; }
+.games-steam-import-scroll { padding:0 28px 24px; min-height:0; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+.games-steam-import-scroll>label { display:block; margin-bottom:10px; font-size:14px; }
+.games-steam-import textarea { display:block; resize:vertical; width:100%; min-height:132px; max-height:240px; padding:14px; margin-bottom:18px; border:1px solid var(--color-edge-soft); background:var(--color-elevated); border-radius:8px; font-size:14px; line-height:1.6; color:var(--color-ink); }
+.games-steam-import .games-button { min-height:44px; padding:10px 18px; font-size:13px; }
+.games-steam-import .games-icon-button { width:44px; height:44px; flex-shrink:0; }
+.games-steam-import-count { margin:0 0 8px; font-size:15px; font-weight:500; font-variant-numeric:tabular-nums; }
+.games-steam-import-ignore { margin-top:22px; padding-top:18px; border-top:1px solid var(--color-edge-soft); }.games-steam-import-ignore>button:first-child { min-height:40px; text-align:start; font-size:13px; color:var(--color-ink-muted); }.games-steam-import-ignore>label { display:block; font-size:14px; margin:14px 0 8px; }.games-steam-import-ignore textarea { min-height:90px; }.games-steam-import-ignore p { margin:8px 0 14px; }
+.games-steam-import-row { display:flex; align-items:center; gap:15px; min-height:72px; padding:12px 0; border-bottom:1px solid var(--color-edge-soft); }
+.games-steam-import-row input { width:20px; height:20px; flex-shrink:0; accent-color:var(--color-accent); }
+.games-steam-import-row>span { min-width:0; flex:1; }
+.games-steam-import-row strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; font-weight:500; }
+.games-steam-import-row small { display:block; color:var(--color-ink-muted); font-size:12px; margin-top:5px; line-height:1.5; }
+.games-steam-import-row:has(input:disabled) { color:var(--color-ink-muted); }
+.games-steam-import-error,.games-steam-import-success { font-size:13px; line-height:1.6; margin-top:18px; }.games-steam-import-error { color:var(--color-danger); }.games-steam-import-success { color:var(--color-success); }
+.games-steam-import footer { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:12px; padding:20px 28px; border-top:1px solid var(--color-edge-soft); }
+.games-steam-import button:disabled { opacity:.45; }.games-steam-import :is(button,input,textarea):focus-visible { outline:2px solid var(--color-accent); outline-offset:3px; }
+@media(max-width:500px) { .games-steam-import-backdrop { padding:12px; }.games-steam-import header { padding:20px 20px 10px; }.games-steam-import>.games-steam-import-note { padding:0 20px 18px; }.games-steam-import-scroll { padding:0 20px 20px; }.games-steam-import footer { padding:16px 20px; }.games-steam-import h2 { font-size:22px; } }

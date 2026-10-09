@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import jlMark from "@/assets/brand/jl-mark.webp";
-import {
-  prefetchTopAddonLogos,
-  prefetchedTopAddonLogos,
-} from "@/lib/providers/addon-logo-prefetch";
+import { CustomArtwork } from "./custom-artwork";
+import { prefetchTopAddonLogos, prefetchedTopAddonLogos } from "@/lib/providers/addon-logo-prefetch";
 
-type Size = "sm" | "md" | "lg" | "xl";
+type Size = "xs" | "sm" | "md" | "lg" | "xl";
 
 const SIZE_CLASS: Record<Size, string> = {
+  xs: "h-7 w-7",
   sm: "h-20 w-20",
   md: "h-32 w-32",
   lg: "h-44 w-44",
@@ -37,12 +36,46 @@ export function HarborLoader({
   className = "",
   keyed = false,
   logos,
+  original = false,
   onReady,
 }: {
   size?: Size;
   caption?: string;
   className?: string;
   keyed?: boolean;
+  logos?: string[];
+  original?: boolean;
+  onReady?: () => void;
+}) {
+  const mark = <JlMark size={size} keyed={keyed} logos={logos} onReady={onReady} />;
+  return (
+    <div className={`flex flex-col items-center justify-center gap-2 ${className}`}>
+      {original ? (
+        mark
+      ) : (
+        <CustomArtwork
+          role="loading"
+          className={`harbor-loader-art ${SIZE_CLASS[size]}`}
+          fallback={mark}
+        />
+      )}
+      {caption && (
+        <p className="harbor-loader-cap mt-1 text-[12.5px] font-medium uppercase tracking-[0.18em] text-white/70">
+          {caption}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function JlMark({
+  size,
+  keyed,
+  logos,
+  onReady,
+}: {
+  size: Size;
+  keyed: boolean;
   logos?: string[];
   onReady?: () => void;
 }) {
@@ -58,12 +91,18 @@ export function HarborLoader({
   }, [effective.length]);
 
   const shown = effective.length
-    ? Array.from({ length: Math.min(3, effective.length) }, (_, k) => effective[(cycle + k) % effective.length])
+    ? Array.from(
+        { length: Math.min(3, effective.length) },
+        (_, k) => effective[(cycle + k) % effective.length],
+      )
     : [];
 
   return (
-    <div className={`flex flex-col items-center justify-center gap-2 ${className}`}>
-      <div className={`relative flex items-center justify-center ${SIZE_CLASS[size]}`} aria-hidden>
+    <div className="flex flex-col items-center justify-center gap-2">
+      <div
+        className={`harbor-loader-art relative flex items-center justify-center ${SIZE_CLASS[size]}`}
+        aria-hidden
+      >
         <div className="jl-loader-glow absolute inset-[14%] rounded-full" />
         <div className="jl-loader-ring absolute inset-[4%] rounded-full" />
         <img
@@ -88,11 +127,6 @@ export function HarborLoader({
             />
           ))}
         </div>
-      )}
-      {caption && (
-        <p className="mt-1 text-[12.5px] font-medium uppercase tracking-[0.18em] text-white/70">
-          {caption}
-        </p>
       )}
     </div>
   );

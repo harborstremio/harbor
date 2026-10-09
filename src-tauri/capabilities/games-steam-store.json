@@ -1,0 +1,13 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "games-steam-store",
+  "description": "Open a selected Steam game storefront in the installed Steam client.",
+  "windows": ["main"],
+  "platforms": ["windows", "linux", "macOS"],
+  "permissions": [
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [{ "url": "steam://openurl/https://store.steampowered.com/app/*" }]
+    }
+  ]
+}

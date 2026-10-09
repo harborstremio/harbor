@@ -1,0 +1,19 @@
+.games-detail-flow-block:has(> .games-tarkov){clear:both}
+.games-tarkov{clear:both;grid-column:1/-1;min-width:0;margin-block:64px;color:var(--color-ink)}
+.games-tarkov>header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:26px}
+.games-tarkov>header p{font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--color-ink-muted);margin:0 0 10px}
+.games-tarkov h2{font-size:30px;font-weight:750;letter-spacing:-.04em;margin:0}
+.games-tarkov h3{font-size:16px;font-weight:600;margin:0 0 12px}
+.games-tarkov p{font-size:13px;line-height:1.65;color:var(--color-ink-muted);margin:10px 0}
+.games-tarkov small{display:block;font-size:11px;color:var(--color-ink-subtle);margin-top:12px}
+.games-tarkov-clock{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(240px,1fr);gap:40px;align-items:start}
+.games-tarkov-countdown{min-width:0}.games-tarkov-season{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:0 0 18px!important;font-weight:700;color:var(--color-ink)!important}.games-tarkov-season>span{font-size:11px;font-weight:400;color:var(--color-ink-muted)}
+.games-tarkov-digits{display:flex;gap:clamp(20px,3vw,48px);margin:18px 0 22px;font-variant-numeric:tabular-nums}.games-tarkov-digits strong{display:block;font-size:clamp(40px,4.8vw,68px);line-height:1.05;font-weight:750;letter-spacing:-.045em}.games-tarkov-digits span{display:block;font-size:12px;color:var(--color-ink-muted);margin-top:8px}
+.games-tarkov-clock aside{padding:24px;background:var(--color-surface);border-radius:10px}.games-tarkov-clock aside>strong{display:block;font-size:30px;font-weight:700;letter-spacing:-.03em}.games-tarkov-note{max-width:56ch}
+.games-tarkov-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--color-ink-muted);padding-block:7px}.games-tarkov-link:hover{color:var(--color-ink)}
+.games-tarkov-history{margin-top:32px}.games-tarkov-history>summary{display:flex;align-items:center;justify-content:space-between;gap:15px;list-style:none;cursor:pointer;padding:16px 0;font-size:14px;font-weight:650;border-block-end:1px solid var(--color-border)}.games-tarkov-history>summary::-webkit-details-marker{display:none}.games-tarkov-history[open]>summary svg{transform:rotate(180deg)}.games-tarkov-history>div{overflow:auto;max-height:420px}.games-tarkov-history table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}.games-tarkov-history th{font-weight:500;color:var(--color-ink-muted)}.games-tarkov-history th,.games-tarkov-history td{padding:14px 10px;text-align:start;border-bottom:1px solid var(--color-border)}
+.games-tarkov-loading{display:flex;align-items:center;min-height:136px;color:var(--color-ink-muted)}.games-tarkov-loading svg{animation:games-tarkov-spin 1s linear infinite}
+.games-tarkov :is(button,summary):focus-visible{outline:2px solid var(--color-accent);outline-offset:4px}
+@keyframes games-tarkov-spin{to{transform:rotate(360deg)}}
+@media(max-width:760px){.games-tarkov-clock{grid-template-columns:1fr;gap:26px}.games-tarkov h2{font-size:25px}.games-tarkov{margin-block:44px}.games-tarkov-history th,.games-tarkov-history td{padding-inline:5px}.games-tarkov-history th:last-child{max-width:110px}}
+@media(prefers-reduced-motion:reduce){.games-tarkov-loading svg{animation:none}}

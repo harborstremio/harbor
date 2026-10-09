@@ -1,0 +1,248 @@
+.music-artist-gallery {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  min-height: 0;
+  height: min(84vh, 780px);
+  background: var(--color-surface);
+}
+
+.music-artist-gallery-close {
+  position: absolute;
+  inset-inline-end: 12px;
+  top: 12px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.5);
+  color: #fff;
+  transition: background-color 180ms ease-out;
+}
+
+.music-artist-gallery-close:hover {
+  background: rgb(0 0 0 / 0.72);
+}
+
+.music-artist-gallery-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  padding: 10px;
+  background: #07080b;
+}
+
+.music-artist-gallery-stage img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  cursor: zoom-in;
+  transition: transform 260ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  animation: music-gallery-fade 280ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+@keyframes music-gallery-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-artist-gallery-stage img {
+    animation: none;
+  }
+}
+
+.music-artist-gallery-stage[data-zoom] img {
+  cursor: zoom-out;
+}
+
+.music-artist-gallery-wait {
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+  color: var(--color-ink-muted);
+  font-size: 13px;
+}
+
+.music-artist-gallery-arrow {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.5);
+  color: #fff;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition:
+    opacity 160ms ease-out,
+    background-color 180ms ease-out;
+}
+
+.music-artist-gallery-arrow[data-side="start"] {
+  inset-inline-start: 12px;
+}
+
+.music-artist-gallery-arrow[data-side="end"] {
+  inset-inline-end: 12px;
+}
+
+.music-artist-gallery-stage:is(:hover, :focus-within) .music-artist-gallery-arrow,
+.music-artist-gallery-arrow:focus-visible {
+  opacity: 1;
+}
+
+.music-artist-gallery-arrow:hover {
+  background: rgb(0 0 0 / 0.75);
+}
+
+.music-artist-gallery-tools {
+  position: absolute;
+  inset-inline-start: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.5);
+}
+
+.music-artist-gallery-tools button {
+  display: grid;
+  place-items: center;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: 50%;
+  color: #fff;
+  transition: background-color 180ms ease-out;
+}
+
+.music-artist-gallery-tools button:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.16);
+}
+
+.music-artist-gallery-count {
+  padding-inline: 8px;
+  color: rgb(255 255 255 / 0.78);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.music-artist-gallery-side {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px 20px;
+  overflow-y: auto;
+  border-inline-start: 1px solid var(--color-edge-soft);
+}
+
+.music-artist-gallery-side h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.music-artist-gallery-credit {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-subtle);
+}
+
+.music-artist-gallery-bio {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--color-ink-muted);
+}
+
+.music-artist-gallery-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.music-artist-gallery-facts dt {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink-subtle);
+}
+
+.music-artist-gallery-facts dd {
+  font-size: 13px;
+  color: var(--color-ink);
+}
+
+.music-artist-gallery-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.music-artist-gallery-socials a {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-inline: 13px;
+  border: 1px solid var(--color-edge);
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: var(--color-ink);
+  transition: background-color 180ms ease-out;
+}
+
+.music-artist-gallery-socials a:hover {
+  background: var(--color-elevated);
+}
+
+.music-artist-gallery-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 6px;
+}
+
+.music-artist-gallery-strip button {
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: opacity 180ms ease-out;
+}
+
+.music-artist-gallery-strip button:is(:hover, [aria-current="true"]) {
+  opacity: 1;
+}
+
+.music-artist-gallery-strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 900px) {
+  .music-artist-gallery {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .music-artist-gallery-side {
+    border-inline-start: none;
+    border-top: 1px solid var(--color-edge-soft);
+  }
+}

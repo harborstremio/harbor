@@ -16,10 +16,12 @@ import {
   type PollResult,
 } from "./device-auth";
 import { getSession, setSession, subscribeSession } from "./session";
+import { subscribeSecretsReady } from "@/lib/secret-store";
 import { stremioIdToTraktTarget, type TraktEpisodeRef } from "./ids";
-import { scrobblePause, scrobbleStart, scrobbleStop } from "./scrobble";
-import { pushWatched } from "./history";
+import { commitPlaybackState, commitWatchedEpisode } from "./resolve";
+import { armOnlineFlush, flushPendingStops, recordPendingStop } from "./pending-sync";
 import type { DeviceCode, TraktSession, TraktTarget } from "./types";
+import { activeProfileId } from "@/lib/active-profile-id";
 
 export type ConnectState =
   | { kind: "idle" }
@@ -62,6 +64,10 @@ export function TraktProvider({ children }: { children: ReactNode }) {
       }),
     [],
   );
+
+  // The persisted store loads after this mounts, so the first read can miss a
+  // connected account. Re-read once it is in memory.
+  useEffect(() => subscribeSecretsReady(() => setLocalSession(getSession())), []);
 
   useEffect(() => {
     return () => {
@@ -117,17 +123,43 @@ export function TraktProvider({ children }: { children: ReactNode }) {
     async (action: "start" | "pause" | "stop", args: ScrobbleArgs) => {
       const target = resolveTarget(args.metaId, args.episode);
       if (!target) return;
-      if (!getSession()) return;
+      const owner = getSession();
+      const profile = activeProfileId();
+      if (!owner) return;
       const progress = Math.max(0, Math.min(100, args.progress));
-      if (action === "start") await scrobbleStart(target, progress);
-      else if (action === "pause") await scrobblePause(target, progress);
+      if (action === "start") await commitPlaybackState("start", target, args.metaId, progress);
+      else if (action === "pause")
+        await commitPlaybackState("pause", target, args.metaId, progress);
       else {
-        const outcome = await scrobbleStop(target, progress);
-        if (outcome === "failed") await pushWatched(target);
+        const outcome = await commitWatchedEpisode(target, args.metaId, progress);
+        const current = getSession();
+        if (
+          !current ||
+          profile !== activeProfileId() ||
+          (owner.username ? current.username !== owner.username : current !== owner)
+        )
+          return;
+        const settled =
+          outcome === "recorded" || outcome === "already-recorded" || outcome === "not-found";
+        if (!settled) recordPendingStop(args.metaId, args.episode, progress);
       }
     },
     [resolveTarget],
   );
+
+  useEffect(
+    () =>
+      armOnlineFlush({
+        hasSession: () => getSession() != null,
+        resolveTarget,
+        commit: (target, metaId, progress) => commitWatchedEpisode(target, metaId, progress),
+      }),
+    [resolveTarget],
+  );
+
+  useEffect(() => {
+    if (session) void flushPendingStops().catch(() => {});
+  }, [session]);
 
   const value = useMemo<Value>(
     () => ({

@@ -1,16 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PickCard } from "@/components/pick-card";
 import type { Meta } from "@/lib/cinemeta";
-import { useActiveKid } from "@/lib/profiles";
 import { tmdbCollection, type TmdbCollection } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory } from "@/lib/view";
 import { useT } from "@/lib/i18n";
-import { dropAdultContent, dropUnreleased } from "./kids/kids-filter";
 
 export function CollectionView({ collectionId }: { collectionId: number }) {
   const t = useT();
-  const kid = useActiveKid();
   const { settings } = useSettings();
   const [data, setData] = useState<TmdbCollection | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,15 +37,10 @@ export function CollectionView({ collectionId }: { collectionId: number }) {
   }, [settings.tmdbKey, collectionId]);
 
   const grid = "grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7";
-  const parts = data ? (kid ? dropAdultContent(dropUnreleased(data.parts)) : data.parts) : [];
-  const years = yearRange(parts);
+  const years = data ? yearRange(data.parts) : null;
 
   return (
-    <main
-      ref={scrollRef}
-      data-rail-flush
-      className="relative flex min-h-0 flex-1 flex-col overflow-y-auto"
-    >
+    <main ref={scrollRef} data-rail-flush className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
       {data?.backdrop && (
         <div
           aria-hidden
@@ -81,18 +73,16 @@ export function CollectionView({ collectionId }: { collectionId: number }) {
               />
             )}
             <div className="min-w-0 max-w-3xl">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-ink-subtle">
-                {t("Collection")}
-              </p>
+              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-ink-subtle">{t("Collection")}</p>
               <h1 className="mt-2 font-display text-[clamp(34px,4.4vw,56px)] font-medium leading-[1.03] tracking-tight text-ink">
                 {data?.name ?? t("Collection")}
               </h1>
-              {parts.length > 0 && (
+              {data && data.parts.length > 0 && (
                 <div className="mt-3.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13.5px] font-medium text-ink-muted">
                   <span>
-                    {parts.length === 1
-                      ? t("{n} film", { n: parts.length })
-                      : t("{n} films", { n: parts.length })}
+                    {data.parts.length === 1
+                      ? t("{n} film", { n: data.parts.length })
+                      : t("{n} films", { n: data.parts.length })}
                   </span>
                   {years && (
                     <>
@@ -103,9 +93,7 @@ export function CollectionView({ collectionId }: { collectionId: number }) {
                 </div>
               )}
               {data?.overview && (
-                <p className="mt-4 line-clamp-3 text-[15px] leading-relaxed text-ink-muted">
-                  {data.overview}
-                </p>
+                <p className="mt-4 line-clamp-3 text-[15px] leading-relaxed text-ink-muted">{data.overview}</p>
               )}
             </div>
           </div>
@@ -113,10 +101,8 @@ export function CollectionView({ collectionId }: { collectionId: number }) {
       </div>
 
       <div className="px-12 pb-16 pt-10">
-        {parts.length > 0 && (
-          <h2 className="mb-4 text-[13px] font-bold uppercase tracking-[0.2em] text-ink-subtle">
-            {t("Films")}
-          </h2>
+        {data && data.parts.length > 0 && (
+          <h2 className="mb-4 text-[13px] font-bold uppercase tracking-[0.2em] text-ink-subtle">{t("Films")}</h2>
         )}
         {loading ? (
           <div className={grid}>
@@ -126,12 +112,12 @@ export function CollectionView({ collectionId }: { collectionId: number }) {
           </div>
         ) : !settings.tmdbKey ? (
           <Notice>{t("Add a TMDB key in Settings to browse collections.")}</Notice>
-        ) : !data || parts.length === 0 ? (
+        ) : !data || data.parts.length === 0 ? (
           <Notice>{t("No films found in this collection.")}</Notice>
         ) : (
           <div className={grid}>
-            {parts.map((m) => (
-              <PickCard key={m.id} meta={m} kids={!!kid} />
+            {data.parts.map((m) => (
+              <PickCard key={m.id} meta={m} />
             ))}
           </div>
         )}

@@ -78,7 +78,7 @@ export function TogetherInviteToast() {
   };
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-6 z-[120] flex justify-center px-6">
+    <div className="pointer-events-none fixed inset-x-0 top-6 z-[260] flex justify-center px-6">
       <div className="harbor-together-pill pointer-events-auto relative flex items-center gap-3 overflow-hidden rounded-full border border-edge bg-surface/98 px-2 py-2 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.75)] animate-popover-in">
         <div className="relative h-11 w-16 shrink-0 overflow-hidden rounded-full bg-canvas/60 ring-1 ring-edge-soft/60">
           {invite.backgroundUrl || invite.posterUrl ? (

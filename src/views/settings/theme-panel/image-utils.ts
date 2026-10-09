@@ -39,6 +39,35 @@ export async function processBackgroundImage(file: File): Promise<string | null>
   return downscaleImage(raw);
 }
 
+const SHARE_BG_MAX_DIMENSION = 2560;
+const SHARE_BG_BUDGET = 1_200_000;
+
+export async function optimizeBackgroundForShare(dataURL: string): Promise<string> {
+  if (!dataURL.startsWith("data:image/")) return dataURL;
+  if (dataURL.startsWith("data:image/svg")) return dataURL;
+  if (dataURL.length <= SHARE_BG_BUDGET) return dataURL;
+  const img = new Image();
+  img.src = dataURL;
+  await img.decode().catch(() => null);
+  if (!img.width || !img.height) return dataURL;
+  const ratio = Math.min(1, SHARE_BG_MAX_DIMENSION / Math.max(img.width, img.height));
+  const w = Math.max(1, Math.round(img.width * ratio));
+  const h = Math.max(1, Math.round(img.height * ratio));
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return dataURL;
+  ctx.drawImage(img, 0, 0, w, h);
+  let best = dataURL;
+  for (const q of [0.86, 0.78, 0.68, 0.58, 0.45, 0.35]) {
+    const out = canvas.toDataURL("image/jpeg", q);
+    if (out.length < best.length) best = out;
+    if (out.length <= SHARE_BG_BUDGET) return out;
+  }
+  return best;
+}
+
 export async function processLogoImage(file: File, maxDim: number): Promise<string | null> {
   const raw = await readFileAsDataURL(file).catch(() => null);
   if (!raw) return null;

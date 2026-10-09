@@ -1,15 +1,20 @@
 import { memo, type ComponentProps, type RefObject } from "react";
 import { DrawCanvas, StrokesLayer, type Stroke } from "@/components/player/draw-canvas";
+import { cropTransform } from "./hooks/use-video-fill";
 import { StreamSwitcher } from "@/components/player/stream-switcher";
 import { StreamCheckPill } from "@/components/player/stream-check-pill";
 import { AdReportButton } from "@/components/player/ad-report-button";
+import { XrayOverlay } from "@/components/player/xray/xray-overlay";
+import { BufferingIndicator } from "@/components/player/buffering-indicator";
 import { P2pStatusChip } from "@/components/player/p2p-status-chip";
 import type { VolumeHudPosition, VolumeIndicatorState } from "@/components/player/volume-indicator";
 import type { ParentalCategory } from "@/lib/providers/harbor-imdb";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
+import { writePlayerPrefs } from "@/lib/player-prefs";
 import type { PlayerSrc, PlayEpisode } from "@/lib/view";
+import { isLivePlaybackSrc } from "@/lib/player/live-src";
+import { BpTenFootLayer } from "./bp-ten-foot";
 import { CastLayer } from "./cast-layer";
-import { BufferingIndicator } from "./buffering-indicator";
 import { DragClickStage } from "./drag-click-stage";
 import { JlLiveField } from "./jl-live-field";
 import { LiveLayer } from "./live-layer";
@@ -35,6 +40,10 @@ type Pill = ComponentProps<typeof StreamCheckPill>;
 type Loader = ComponentProps<typeof LoaderLayer>;
 
 export type PlayerOverlayLayersProps = {
+  // Big Picture is driving: every mouse-era surface with a ten-foot replacement
+  // is suppressed and BpTenFootLayer renders the replacement. Never both. Two
+  // transports on two independent timers shipped that way once.
+  tenFoot: boolean;
   snap: PlayerSnapshot;
   engine: "html5" | "mpv";
   src: PlayerSrc;
@@ -44,6 +53,7 @@ export type PlayerOverlayLayersProps = {
   subAssNative: boolean;
   showStats: boolean;
   holdSpeedActive: boolean;
+  subtitleOffsetSec: number | null;
   volumeIndicator: VolumeIndicatorState;
   volumeHudPosition: VolumeHudPosition;
   videoFillPill: string | null;
@@ -58,9 +68,11 @@ export type PlayerOverlayLayersProps = {
   onVolumeWheel: (deltaY: number) => void;
   onVolumeFeedback: (volume: number, muted: boolean) => void;
   isLocalSrc: boolean;
+  sourceFailed: boolean;
   swappingEp: boolean;
   swapResolvingKey: string | null;
   closePlayer: () => void;
+  onBack: () => void;
   cancelToPicker: () => void;
   engineStats: Loader["engineStats"];
   isP2pEngine: boolean;
@@ -88,6 +100,9 @@ export type PlayerOverlayLayersProps = {
   allowAutoSkip: boolean;
   seekTo: (sec: number) => void;
   goToEpisode: (ep: PlayEpisode | null) => void;
+  playNext: () => void;
+  playPrev: () => void;
+  hasPrevEpisodeNow: boolean;
   setAutoNextCancelled: (v: boolean) => void;
   showChrome: boolean;
   ab: Tools["ab"];
@@ -116,7 +131,7 @@ export type PlayerOverlayLayersProps = {
   setHideOthersDrawings: (fn: (h: boolean) => boolean) => void;
   canPickAnother: boolean;
   resolvedImdbId: string | null;
-  contentAdvisory: { categories: ParentalCategory[]; playKey: string };
+  contentAdvisory: { categories: ParentalCategory[]; playKey: string; imdbId: string | null };
   tmdbKey: string | null;
   download: Shell["download"];
   liveOverlay: Live["liveOverlay"];
@@ -157,6 +172,7 @@ export type PlayerOverlayLayersProps = {
   streamPillVariant: Pill["variant"] | null;
   mpvEmbedWindowsActive: boolean;
   setStreamCheckOpen: (v: boolean) => void;
+  dismissStreamPill: () => void;
   dvrOpen: boolean;
   setSwitcherOpen: (fn: (v: boolean) => boolean) => void;
   onSwitchStream: Switcher["onPick"];
@@ -181,9 +197,24 @@ export type PlayerOverlayLayersProps = {
   syncApi: ReturnType<typeof useTextSync>;
   syncToast: ToastInfo | null;
   onSyncPlayPause: () => void;
+  homeServerQualityControl?: Shell["homeServerQualityControl"];
 };
 
 export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOverlayLayersProps) {
+  const roomAvatarTopLeft =
+    p.inRoom && !p.avatarsHidden && p.participants.length > 0 && p.avatarsCorner === "top-left";
+  const roomAvatarTopRight =
+    p.inRoom && !p.avatarsHidden && p.participants.length > 0 && p.avatarsCorner === "top-right";
+  const roomChatTopLeft = p.inRoom && !p.chatHidden && p.chatCorner === "top-left";
+  const roomChatTopRight = p.inRoom && !p.chatHidden && p.chatCorner === "top-right";
+  const topLeftOccupied = p.showStats || roomAvatarTopLeft || roomChatTopLeft;
+  const topRightOccupied = roomAvatarTopRight || roomChatTopRight;
+  const contentAdvisoryPosition = topLeftOccupied
+    ? topRightOccupied
+      ? "top-center"
+      : "top-end"
+    : "top-start";
+
   return (
     <>
       <StageOverlays
@@ -194,24 +225,22 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         subAssNative={p.subAssNative}
         showStats={p.showStats}
         holdSpeedActive={p.holdSpeedActive}
+        subtitleOffsetSec={p.subtitleOffsetSec}
         volumeIndicator={p.volumeIndicator}
         volumeHudPosition={p.volumeHudPosition}
         videoFillPill={p.videoFillPill}
         subDropToast={p.subDropToast}
         contentAdvisory={p.contentAdvisory}
+        contentAdvisoryPosition={contentAdvisoryPosition}
         onSubDelay={(s) => {
           p.bridgeRef.current?.setSubDelay(s);
+          writePlayerPrefs(p.metaId, { subDelaySec: s });
         }}
         onEnterSync={p.onEnterSync}
         chromeVisible={p.showChrome}
       />
-      <BufferingIndicator
-        key={p.src.url}
-        buffering={p.snap.buffering}
-        status={p.snap.status}
-        suppressed={p.loaderActive || p.pipMode || p.cast.castDevice != null}
-      />
       <CastLayer
+        chromeVisible={p.showChrome}
         cast={p.cast}
         src={p.src}
         durationSec={p.snap.durationSec}
@@ -226,20 +255,38 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         onWheelVolume={p.onVolumeWheel}
       />
 
-      <LoaderLayer
-        src={p.src}
-        snap={p.snap}
-        isLocalSrc={p.isLocalSrc}
-        forceShow={p.swappingEp || p.swapResolvingKey != null}
-        onCancel={p.cancelToPicker}
-        engineStats={p.engineStats}
-        onShowingChange={p.setLoaderShowing}
-        onRetry={p.onLoaderRetry}
-        onBrowseChannels={p.liveOverlay.isLive ? () => p.liveOverlay.setOpen(true) : undefined}
-      />
+      {p.tenFoot ? (
+        <BpTenFootLayer p={p} />
+      ) : (
+        <LoaderLayer
+          src={p.src}
+          snap={p.snap}
+          isLocalSrc={p.isLocalSrc}
+          forceShow={p.swappingEp || p.swapResolvingKey != null}
+          sourceFailed={p.sourceFailed}
+          onCancel={p.cancelToPicker}
+          engineStats={p.engineStats}
+          onShowingChange={p.setLoaderShowing}
+          onRetry={p.onLoaderRetry}
+          onBrowseChannels={p.liveOverlay.isLive ? () => p.liveOverlay.setOpen(true) : undefined}
+        />
+      )}
+
+      {!p.tenFoot && !p.pipMode && (
+        <BufferingIndicator
+          show={p.snap.buffering && (p.snap.status === "playing" || p.snap.status === "paused")}
+        />
+      )}
 
       {!p.pipMode && !p.cast.castDevice && (
-        <StrokesLayer strokes={p.strokes} hideOthers={p.hideOthersDrawings} selfId={p.clientId} />
+        <StrokesLayer
+          strokes={p.strokes}
+          hideOthers={p.hideOthersDrawings}
+          selfId={p.clientId}
+          videoWidth={p.snap.videoWidth}
+          videoHeight={p.snap.videoHeight}
+          transform={cropTransform(p.cropMode ?? "fit")}
+        />
       )}
       {p.drawMode && !p.pipMode && !p.cast.castDevice && p.bridgeRef.current && (
         <DrawCanvas
@@ -249,6 +296,9 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
           selfColor={p.selfColor}
           hideOthers={p.hideOthersDrawings}
           strokes={p.strokes}
+          videoWidth={p.snap.videoWidth}
+          videoHeight={p.snap.videoHeight}
+          transform={cropTransform(p.cropMode ?? "fit")}
           onStrokeStart={p.onDrawStart}
           onStrokePoint={p.onDrawPoint}
           onStrokeEnd={p.onDrawEnd}
@@ -256,6 +306,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
       )}
 
       <ToolsLayer
+        tenFoot={p.tenFoot}
         engine={p.engine}
         pipMode={p.pipMode}
         drawMode={p.drawMode}
@@ -271,7 +322,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         pillsVisible={p.pillsVisible}
         allowAutoSkip={p.allowAutoSkip}
         onSkip={p.seekTo}
-        onNextEpisode={() => p.goToEpisode(p.adjacentNext)}
+        onNextEpisode={p.playNext}
         onCancelAutoNext={() => p.setAutoNextCancelled(true)}
         showChrome={p.showChrome}
         ab={p.ab}
@@ -291,10 +342,20 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         />
       )}
 
-      {!p.loaderActive && p.syncMode === "idle" && (
+      {!p.pipMode && !p.drawMode && (
+        <XrayOverlay
+          meta={p.src.meta}
+          visible={p.showChrome}
+          isPaused={p.snap.status === "paused"}
+          bridgeRef={p.bridgeRef}
+        />
+      )}
+
+      {!p.loaderActive && !p.tenFoot && p.syncMode === "idle" && (
         <ShellLayer
           shellId={p.playerShellId}
           shellSnap={p.shellSnap}
+          isLive={isLivePlaybackSrc(p.src)}
           snapRef={p.snapRef}
           bridgeRef={p.bridgeRef}
           engine={p.engine}
@@ -306,7 +367,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
           showDraw={p.showDraw}
           metaId={p.metaId}
           onMenuOpenChange={p.setAnyMenuOpen}
-          onBack={p.closePlayer}
+          onBack={p.onBack}
           onPlayPause={p.playPauseToggle}
           onSeek={p.seekTo}
           onSeekStep={p.onSeekStep}
@@ -333,16 +394,17 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
           subtitle={p.src.subtitle}
           resolution={p.src.streamRef?.resolution}
           quality={p.src.streamRef?.quality}
+          releaseName={p.src.streamRef?.title ?? p.src.streamRef?.parsedTitle}
           hoverTitle={p.src.meta.name}
           hoverSub={
             p.src.episode
               ? `S${p.src.episode.imdbSeason ?? p.src.episode.season} · E${String(p.src.episode.imdbEpisode ?? p.src.episode.episode).padStart(2, "0")}`
               : undefined
           }
-          hasPrevEp={p.canChangeEpisode && !!p.adjacentPrev}
-          hasNextEp={p.canChangeEpisode && !!p.adjacentNext}
-          onPrevEp={() => p.goToEpisode(p.adjacentPrev)}
-          onNextEp={() => p.goToEpisode(p.adjacentNext)}
+          hasPrevEp={p.hasPrevEpisodeNow}
+          hasNextEp={p.hasNextEpisode}
+          onPrevEp={p.playPrev}
+          onNextEp={p.playNext}
           metaImdbId={p.resolvedImdbId}
           metaTitle={p.src.meta.name ?? null}
           metaReleaseDate={p.src.meta.releaseDate ?? null}
@@ -354,6 +416,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
           onOpenDvr={p.openDvr}
           sleep={p.sleep}
           onVolumeFeedback={p.onVolumeFeedback}
+          homeServerQualityControl={p.homeServerQualityControl}
         />
       )}
 
@@ -409,8 +472,10 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
           visible
           compact={p.mpvEmbedWindowsActive}
           live={p.liveOverlay.isLive}
-          onLooksGood={
-            p.streamPillVariant === "check" ? () => p.setStreamCheckOpen(false) : undefined
+          onDismiss={
+            p.streamPillVariant === "check"
+              ? () => p.setStreamCheckOpen(false)
+              : p.dismissStreamPill
           }
           onPickAnother={p.pickAnotherOrGuide}
         />
@@ -430,7 +495,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
       />
       <JlLiveField channelId={p.liveOverlay.currentChannelId} chromeVisible={p.showChrome} />
       <StreamSwitcher
-        open={p.switcherOpen}
+        open={p.switcherOpen && !p.tenFoot}
         onClose={() => p.setSwitcherOpen(() => false)}
         onPick={p.onSwitchStream}
         resolvingKey={p.swapResolvingKey}
@@ -446,6 +511,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
       />
 
       <PanelsLayer
+        tenFoot={p.tenFoot}
         engine={p.engine}
         isSeriesPlayback={p.isSeriesPlayback}
         meta={p.src.meta}

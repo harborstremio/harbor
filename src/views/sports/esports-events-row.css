@@ -1,0 +1,206 @@
+.eev-row-section {
+  margin-bottom: 26px;
+}
+.eev-row {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 2px 1px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-raised) transparent;
+  touch-action: pan-y;
+}
+.eev-card {
+  flex: 0 0 268px;
+  display: flex;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-surface);
+  transition:
+    background-color 160ms ease-out,
+    transform 200ms var(--ease-out);
+}
+.eev-card:hover {
+  background: var(--color-elevated);
+}
+.eev-card[data-live] {
+  border-inline-start: 3px solid #d83845;
+}
+.eev-card-open {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  text-align: start;
+  min-height: 44px;
+}
+.eev-card-media {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  background: var(--color-canvas);
+  overflow: hidden;
+}
+.eev-card-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    oklch(0.14 0.004 260 / 0.7) 0%,
+    oklch(0.14 0.004 260 / 0.2) 52%,
+    transparent 100%
+  );
+}
+.eev-card-art {
+  width: 100%;
+  height: 100%;
+}
+/* Publisher art is the backdrop, never the subject: one title fills a whole row with the same
+   key art, so it is dimmed and the event's own mark carries the identity. */
+.eev-card-art > img {
+  object-fit: cover;
+}
+.eev-card-art[data-image-ready="true"] > img {
+  opacity: 0.58;
+}
+.eev-card-art .ea-image-fallback {
+  display: none;
+}
+.eev-card-mark {
+  position: absolute;
+  z-index: 1;
+  inset-block-end: 10px;
+  inset-inline-start: 12px;
+  width: 46px;
+  height: 46px;
+  padding: 4px;
+  border-radius: 9px;
+  background: oklch(0.18 0.004 260 / 0.55);
+}
+.eev-card-flags {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: 10px;
+  inset-inline-start: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.eev-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+  background: oklch(0.2 0.004 260 / 0.82);
+  border: 1px solid var(--color-edge-soft);
+  white-space: nowrap;
+}
+.eev-chip-tier {
+  color: var(--color-accent);
+  border-color: var(--color-accent-soft);
+}
+.eev-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 13px 14px 14px;
+  flex: 1;
+  min-width: 0;
+}
+.eev-card-body .ea-kicker {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.eev-card-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  color: var(--color-ink);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.eev-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 11.5px;
+  color: var(--color-ink-muted);
+}
+.eev-card-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.eev-card-meta b {
+  font-weight: 650;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+.eev-card-note {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--color-ink-muted);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.eev-card-teams {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+.eev-card-teams .ea-image {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--color-elevated);
+}
+.eev-card-teams .ea-image-fallback > b {
+  font-size: 9px;
+}
+.eev-card-teams > small {
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--color-ink-subtle);
+  font-variant-numeric: tabular-nums;
+}
+.eev-card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 10px;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--color-ink);
+}
+.eev-card.is-fallback .eev-card-media::after {
+  background: linear-gradient(to top, oklch(0.14 0.004 260 / 0.8), transparent 70%);
+}
+@media (max-width: 640px) {
+  .eev-card {
+    flex-basis: 224px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eev-card {
+    transition: none;
+  }
+}

@@ -2,14 +2,14 @@ import { dinfo, dwarn } from "@/lib/debug";
 import { safeFetch } from "@/lib/safe-fetch";
 import type { SubResult, SubSearchQuery } from "../types";
 import { normalizeLang } from "../language";
+import {
+  classifyProviderSubtitleMetadata,
+  type ProviderSubtitleFlags,
+} from "../provider-classification";
 
-const ENDPOINTS = [
-  "https://opensubtitles.stremio.homes",
-  "https://opensubtitles-v3.strem.io",
-  "https://opensubtitles.strem.io",
-];
+const ENDPOINTS = ["https://opensubtitles-v3.strem.io"];
 
-type RawSub = {
+type RawSub = ProviderSubtitleFlags & {
   id?: string;
   url: string;
   lang: string;
@@ -19,13 +19,15 @@ type RawSub = {
   encoding?: string;
 };
 
-function buildId(q: SubSearchQuery): string | null {
-  if (!q.imdbId) return null;
-  let id = q.imdbId.startsWith("tt") ? q.imdbId : `tt${q.imdbId}`;
-  if (q.season != null && q.episode != null && !id.includes(":")) {
-    id = `${id}:${q.season}:${q.episode}`;
+function scopedIds(q: SubSearchQuery): Array<{ id: string; type: "series" | "movie" }> {
+  const tt = q.imdbId!.startsWith("tt") ? q.imdbId! : `tt${q.imdbId!}`;
+  if (q.season != null && q.episode != null) {
+    return [{ id: `${tt}:${q.season}:${q.episode}`, type: "series" }];
   }
-  return id;
+  if (q.episode != null) {
+    return [{ id: `${tt}:1:${q.episode}`, type: "series" }];
+  }
+  return [{ id: tt, type: q.type === "series" ? "series" : "movie" }];
 }
 
 async function callEndpoint(base: string, type: string, id: string): Promise<RawSub[]> {
@@ -33,29 +35,29 @@ async function callEndpoint(base: string, type: string, id: string): Promise<Raw
   try {
     const res = await safeFetch(url, { headers: { Accept: "application/json" } });
     if (!res.ok) {
-      dwarn(`[opensubtitles-v3] ${url} → ${res.status}`);
+      dwarn(`[opensubtitles-v3] endpoint returned ${res.status}`);
       return [];
     }
     const data = (await res.json()) as { subtitles?: RawSub[] };
     const list = Array.isArray(data?.subtitles) ? data.subtitles : [];
-    dinfo(`[opensubtitles-v3] ${url} → ${list.length} subs`);
+    dinfo(`[opensubtitles-v3] endpoint returned ${list.length} subtitles`);
     return list;
-  } catch (e) {
-    dwarn(`[opensubtitles-v3] ${url} fetch error`, e);
+  } catch {
+    dwarn("[opensubtitles-v3] endpoint fetch failed");
     return [];
   }
 }
 
 export async function searchOpenSubtitlesV3(q: SubSearchQuery): Promise<SubResult[]> {
-  const id = buildId(q);
-  if (!id) {
+  if (!q.imdbId) {
     dinfo("[opensubtitles-v3] no imdbId, skipping");
     return [];
   }
-  const isEpisode = q.season != null && q.episode != null;
-  const type = isEpisode || id.includes(":") ? "series" : "movie";
+  const targets = scopedIds(q);
 
-  const results = await Promise.all(ENDPOINTS.map((base) => callEndpoint(base, type, id)));
+  const results = await Promise.all(
+    ENDPOINTS.flatMap((base) => targets.map((t) => callEndpoint(base, t.type, t.id))),
+  );
   const seen = new Set<string>();
   const merged: RawSub[] = [];
   for (const list of results) {
@@ -72,8 +74,9 @@ export async function searchOpenSubtitlesV3(q: SubSearchQuery): Promise<SubResul
     const lang = normalizeLang(s.lang);
     const n = (perLang.get(lang) ?? 0) + 1;
     perLang.set(lang, n);
+    const classification = classifyProviderSubtitleMetadata(s, [s.m, s.id, s.url]);
     return {
-      id: String(s.id ?? `os3:${s.url}`),
+      id: `os3:${s.id ?? s.url}`,
       url: s.url,
       lang,
       title: `OpenSubtitles V3 #${n}`,
@@ -81,6 +84,8 @@ export async function searchOpenSubtitlesV3(q: SubSearchQuery): Promise<SubResul
       format: (s.SubFormat?.toLowerCase() as SubResult["format"]) || undefined,
       encoding: s.encoding,
       fps: s.fps,
+      release: s.m || undefined,
+      ...classification,
     };
   });
 }

@@ -1,0 +1,663 @@
+{
+  "schemaVersion": 1,
+  "entrypoint": "native-entry.js",
+  "fileCount": 131,
+  "totalBytes": 4593083,
+  "files": [
+    {
+      "path": "alt-collections.json",
+      "bytes": 22857,
+      "sha256": "c8ce825689e8d40d3ca15cd43d4fd418dfe5074a865dfd1c8d5f530a4f067a57"
+    },
+    {
+      "path": "anime-expanded.json",
+      "bytes": 24638,
+      "sha256": "465221f3ac3fb0878ac1d64bcc364b09b1d962cd4c859bccec3ff80739439ffa"
+    },
+    {
+      "path": "app.js",
+      "bytes": 30225,
+      "sha256": "5f2f33c90a6f062ab21fe1d8983b40f7caefc6e7a2632018a4a88464ae59f901"
+    },
+    {
+      "path": "assets/art/cat-candy.svg",
+      "bytes": 34350,
+      "sha256": "7da9dfa00fdf0e6d028fbd975d8365350b5f4532b72741500ea3af7be3338ce9"
+    },
+    {
+      "path": "assets/art/event/bats-flight.svg",
+      "bytes": 1369,
+      "sha256": "52c116a35c505ecbff0bfa6186f6c4a68dfa850ea5966d1173d060859b46e740"
+    },
+    {
+      "path": "assets/art/event/bookmark.svg",
+      "bytes": 513,
+      "sha256": "13c0700c80e7517f1ac1af18c5656e47b8ee4553b8d86cbd5ed6e8be19c491a2"
+    },
+    {
+      "path": "assets/art/event/corner-vines.svg",
+      "bytes": 425,
+      "sha256": "ff0becee8b96dc5d28355d5e82fbb6a39ccc81fea66f8ede824e17ae17d71b45"
+    },
+    {
+      "path": "assets/art/event/corner-web.svg",
+      "bytes": 361,
+      "sha256": "64f26f0b2a1f4d23dd36b55d81b497b3fac786d3c98520147fd867c93307e625"
+    },
+    {
+      "path": "assets/art/event/ink-tag.svg",
+      "bytes": 575,
+      "sha256": "fbecc2f0e272cb5e67bf533bbc0fa1e6d8ce744e85152ef7666cbb01d8e966fc"
+    },
+    {
+      "path": "assets/art/event/pumpkin-seal.svg",
+      "bytes": 913,
+      "sha256": "1cc9f354231a10b9aea0720467932a2acf0771298f3a0220141c8a8f3fdeb83b"
+    },
+    {
+      "path": "assets/art/event/record-tag.svg",
+      "bytes": 637,
+      "sha256": "e8f2846ca92bfdc6986acb71bad72cf0420e0f9dbb55000753e4d5dc1ef1b203"
+    },
+    {
+      "path": "assets/art/event/screening-frame.svg",
+      "bytes": 621,
+      "sha256": "76655d266069ec91c7c6cfa4f9c8421932ddcc3715afdee6481351a7ec9e4e07"
+    },
+    {
+      "path": "assets/art/event/spooktober-splash-original.jpg",
+      "bytes": 223094,
+      "sha256": "c316c434aedca94e354c79073222d181ff167ed3e14e859d3bec7c7ae2c90fca"
+    },
+    {
+      "path": "assets/art/event/spooktober-splash.svg",
+      "bytes": 211799,
+      "sha256": "a2e610b1a12f7b54ac47f130ee8115743bf968c6d6905d70aeec7bdbfffb0bdd"
+    },
+    {
+      "path": "assets/art/event/tab-plate.svg",
+      "bytes": 481,
+      "sha256": "8e2f7866c407f3ccf46f29fd211b6867ae44a0602cbd22d2412b9ea82991017a"
+    },
+    {
+      "path": "assets/art/event/ticket.svg",
+      "bytes": 552,
+      "sha256": "3cb252a3dd3f69bed31826711e6dade319f0b20d3f9df1d966d713cad1045ee9"
+    },
+    {
+      "path": "assets/art/eyes-cat.svg",
+      "bytes": 272,
+      "sha256": "82920b684d89f1e65a38b9911b26feb922ddaa29bb9b7c7739ff673ea5954567"
+    },
+    {
+      "path": "assets/art/eyes-curious.svg",
+      "bytes": 295,
+      "sha256": "991b9006c7ca1bcd9c1819cb31035199f3e4080c0539d948d646f8f4faf0663a"
+    },
+    {
+      "path": "assets/art/eyes-sleepy.svg",
+      "bytes": 283,
+      "sha256": "18acb63726f65787bd4c27132ff2ef400a55a563cec442f90897b590d58b5406"
+    },
+    {
+      "path": "assets/art/foreground-tree.svg",
+      "bytes": 42854,
+      "sha256": "21913c2fcbcbb9613949d2563cfe1a05f04691266c8eaef490d7decc819748ef"
+    },
+    {
+      "path": "assets/art/foreground-wall.svg",
+      "bytes": 14028,
+      "sha256": "c119602b232f4a1d41547336ebfaf58b6f71583ec2e7e4c2a6bbbaf59352352e"
+    },
+    {
+      "path": "assets/art/ghost-float.svg",
+      "bytes": 4654,
+      "sha256": "f0e1d782fd81f744cc33f9c6961a6da3dd750f6eef9b431d70a0ccdae87ead74"
+    },
+    {
+      "path": "assets/art/ghost-peek.svg",
+      "bytes": 4321,
+      "sha256": "de558117943e017bac957a120ecce08527f6c1e986350ae752573f6424a9b499"
+    },
+    {
+      "path": "assets/art/grass-clump.svg",
+      "bytes": 2356,
+      "sha256": "3f6c535c12b7e7c161e9cbe11eb00bcbf3add41490c40f6694ffe7cc6a70542d"
+    },
+    {
+      "path": "assets/art/graveyard-ground.svg",
+      "bytes": 119816,
+      "sha256": "dc944cebddc817ca6feaa6fdda6ad530f26ead4f40230d9b95cce89712cbaa1b"
+    },
+    {
+      "path": "assets/art/Harbor-Spookfest-Midnight.svg",
+      "bytes": 280089,
+      "sha256": "4aa9c7f30d373faec85fe307a7238c7dfb686cce6ae4e37e5db95d16704db6ce"
+    },
+    {
+      "path": "assets/art/Harbor-Spookfest-Original.svg",
+      "bytes": 273215,
+      "sha256": "ebc8cfe3af1620ae9f483ba7041b742313b97362ecbcf8590af50a0ca0a29d04"
+    },
+    {
+      "path": "assets/art/haunted-record.svg",
+      "bytes": 1475,
+      "sha256": "ffb3d5d748259276571e818f6153975511f6056f92f0a1bf4c213a442418f952"
+    },
+    {
+      "path": "assets/art/headstone-cross.svg",
+      "bytes": 4009,
+      "sha256": "d24d4c35b6321a33189a9583c82ef78ccf00e2947aa95292f1603a835e02ea91"
+    },
+    {
+      "path": "assets/art/headstone-ornate.svg",
+      "bytes": 3403,
+      "sha256": "7ff8c5cecc6cea22837c80ca729cde93af267551da32d102d203b08efb3ea624"
+    },
+    {
+      "path": "assets/art/headstone-round.svg",
+      "bytes": 2703,
+      "sha256": "4e43b7088ab101595993eff8a1de978c328d753838112598cc19fc9f7b63781d"
+    },
+    {
+      "path": "assets/art/headstone-small.svg",
+      "bytes": 2593,
+      "sha256": "be555d41ac326f1c08bb5dcfbd2a34dc689e06e83208703de8bec91fadc69ced"
+    },
+    {
+      "path": "assets/art/headstone-stepped.svg",
+      "bytes": 7535,
+      "sha256": "4f162129f1a83548b277078d0daa82e0c4d589a1bc2ada8b01a86687aebb1cdb"
+    },
+    {
+      "path": "assets/art/night-grain.svg",
+      "bytes": 302,
+      "sha256": "c1f13732b8412c786e60259221b666447d0ada38079d832095ba6a62a672a55f"
+    },
+    {
+      "path": "assets/art/pumpkin-grin.svg",
+      "bytes": 18682,
+      "sha256": "9c0dfe0f074ef626a6fb279fe8aa971357bd50632e9668c548d682cc90509439"
+    },
+    {
+      "path": "assets/art/pumpkin-mischief.svg",
+      "bytes": 15472,
+      "sha256": "0497469787503796809da8021d883bd2d18441eba9d8bbded1966bc42d36af58"
+    },
+    {
+      "path": "assets/art/shudder-figure-body.svg",
+      "bytes": 2034,
+      "sha256": "fb8aa6978cfb5e2ac9f60f278d287bbfcbec2ddee7fdd7ce603ec09c8de33880"
+    },
+    {
+      "path": "assets/art/shudder-figure-head.svg",
+      "bytes": 1362,
+      "sha256": "336074be2f39f2ffb57f749a6852a906cbbb0aed920f3bb294b2c065c97a4a4c"
+    },
+    {
+      "path": "assets/art/shudder-figure.svg",
+      "bytes": 3640,
+      "sha256": "e42afe1158cf921ee0a4c4b16dbe4b68dea32c43675ebbba829dd66e1f406a0f"
+    },
+    {
+      "path": "assets/art/shudder-knife-arm.svg",
+      "bytes": 1114,
+      "sha256": "0d1a437891dad0368d2002c75b69696d224131b7feba511edb95dca58892f010"
+    },
+    {
+      "path": "assets/art/shudder-knife-grip.svg",
+      "bytes": 861,
+      "sha256": "ee7fda01a0a30a56fd29bde71dd02f71c23037501c82b6f6ffd912d77140fa00"
+    },
+    {
+      "path": "assets/art/shudder-knife-hand.svg",
+      "bytes": 2053,
+      "sha256": "01906b338c2c4f6170026d4ed81382cfbcd70829aee60b260d309953865fb620"
+    },
+    {
+      "path": "assets/art/shudder-knife-sleeve.svg",
+      "bytes": 314,
+      "sha256": "a6a5c62b0a07f1fffad29d2cc60f7df877a1d9a52ac9cf1eb8b75e9a2eabf8a5"
+    },
+    {
+      "path": "assets/art/witch-hat.svg",
+      "bytes": 4903,
+      "sha256": "903b1835efaaccfaedfc78db2e2a5e866d42d6c1e93c26f2dbb6ec40366bbac0"
+    },
+    {
+      "path": "assets/fonts/jakarta-latin.woff2",
+      "bytes": 27348,
+      "sha256": "153fc85b70298beeb1d61a5f723331649e7f23bb77302a66e61cb3e2fbdb5e79"
+    },
+    {
+      "path": "assets/fonts/nightmare.otf",
+      "bytes": 49656,
+      "sha256": "359e40471bf527b3567fd1846d94f91a507fa8ba69d16d70ec52e586858b6821"
+    },
+    {
+      "path": "assets/fonts/switzer-400.woff2",
+      "bytes": 16728,
+      "sha256": "ddd9595560c35725e00d01667ce9bee519d245620e610844f0dd149df10b5d5f"
+    },
+    {
+      "path": "assets/fonts/switzer-500.woff2",
+      "bytes": 19564,
+      "sha256": "7393d1abac009ede0da9f95d6c83479a08d798e28d3509575e02fb1d2346866f"
+    },
+    {
+      "path": "assets/fonts/switzer-600.woff2",
+      "bytes": 19640,
+      "sha256": "d6497c264dbf70ae51add5103b6c7553dadff334b5853d09adf8c9f1c63ad36b"
+    },
+    {
+      "path": "assets/fonts/switzer-700.woff2",
+      "bytes": 19432,
+      "sha256": "7aecbe035c1e311eabe7cac089f565c917558c365f809d5a9684881782370e1f"
+    },
+    {
+      "path": "assets/fonts/switzer.woff2",
+      "bytes": 16384,
+      "sha256": "699d43c546d6b12795fbc73edd1bf45667e8cb63f17abcb1b5948e6d22f065e3"
+    },
+    {
+      "path": "assets/icons/anime-spirit.svg",
+      "bytes": 2319,
+      "sha256": "65a625cf33561d42535aed8a59518dd0739777af88682683f0d84f7f3b65181c"
+    },
+    {
+      "path": "assets/icons/arrow-right.svg",
+      "bytes": 1039,
+      "sha256": "61920b73a86d2e7d14e6eba114cd00c5991bc7564cefeb41edc7d820c861945f"
+    },
+    {
+      "path": "assets/icons/candle.svg",
+      "bytes": 1185,
+      "sha256": "c12978724d7547950d67938ed3cb757f88b0c7ede5ac3c58c4a3b808b1b26020"
+    },
+    {
+      "path": "assets/icons/candy.svg",
+      "bytes": 1036,
+      "sha256": "9424613eeefea64a38fba121580b0f41a4607d3f893796a1d55dc8e4ce281bd3"
+    },
+    {
+      "path": "assets/icons/case-file.svg",
+      "bytes": 333,
+      "sha256": "9d62d77a0691b8759dc1ae75edca1b9c5175ba264cb918ec75f7040d77ca496b"
+    },
+    {
+      "path": "assets/icons/ghost-tv.svg",
+      "bytes": 1821,
+      "sha256": "abb1f9d22d698a7d5e51be1d1df7097d24abbda612460d3e2faf906e44d69ad7"
+    },
+    {
+      "path": "assets/icons/haunted-book.svg",
+      "bytes": 2188,
+      "sha256": "b0d6c39281dfbb33695e45f2e09978c1a6fba22a322605aec615f5e47222c4df"
+    },
+    {
+      "path": "assets/icons/haunted-record.svg",
+      "bytes": 430,
+      "sha256": "ccc9af5f4d73d09191d6f75a54252860c2841452261fb81000299c8e6659f13f"
+    },
+    {
+      "path": "assets/icons/ink-eye.svg",
+      "bytes": 1530,
+      "sha256": "1867352c4e79975d2398d83666cff18ea53dfc0e8daf9af2c273a14246571be7"
+    },
+    {
+      "path": "assets/icons/midnight-film.svg",
+      "bytes": 1601,
+      "sha256": "837b659697415438338d239f8a06a1e0d51fc478125a8aacd93649960fe57ee4"
+    },
+    {
+      "path": "assets/icons/moon.svg",
+      "bytes": 942,
+      "sha256": "aadc19a9dfaf0122b800a0da63941ea84bb8e29c8ba966d1dbbb65ed8b1965f3"
+    },
+    {
+      "path": "assets/icons/path-body-horror.svg",
+      "bytes": 485,
+      "sha256": "ac4da34561fce63af7618c04cbff0bf4f7559122342561dc301c5d2423991a88"
+    },
+    {
+      "path": "assets/icons/path-folk-horror.svg",
+      "bytes": 441,
+      "sha256": "2859521c521cc1daf9325b24281be8e9a742c1ba5af9eb140ea3576b88d473c3"
+    },
+    {
+      "path": "assets/icons/path-found-footage.svg",
+      "bytes": 533,
+      "sha256": "9a0f5a57d8530c18d4e388f3d3c0089089e311f61249ba59c9929bfca1a54a73"
+    },
+    {
+      "path": "assets/icons/path-giallo.svg",
+      "bytes": 461,
+      "sha256": "1c76814946e06c7927606913a7780fb19c0d31b48d7336077256712aa67088a6"
+    },
+    {
+      "path": "assets/posters/backrooms.jpg",
+      "bytes": 16187,
+      "sha256": "4045bf17c99c0b312b4cb84030dc1fdbc8d01940b5e1c5d3cd4c5a08d4a08ce3"
+    },
+    {
+      "path": "assets/posters/coraline-backdrop.jpg",
+      "bytes": 101770,
+      "sha256": "95ae710011c97400506356c7f8f2503ac42208b7e18f18e236447c161f2e0168"
+    },
+    {
+      "path": "assets/posters/obsession.jpg",
+      "bytes": 110916,
+      "sha256": "9eae90c80c10bb33291657f783cd99e1da39599ce9b794ef53da38ebc3fa9094"
+    },
+    {
+      "path": "assets/posters/other-mommy.jpg",
+      "bytes": 11265,
+      "sha256": "5624f6c68528ee651323a3b5e06ad2e2ef9f87df39b0ed80a07d7003d94a0946"
+    },
+    {
+      "path": "assets/reading-cozy/book-tender-is-the-flesh.webp",
+      "bytes": 16746,
+      "sha256": "6f54f5d001c4c5ddbd27afa84b5bbf539dff987b3692fe33cd3b226cab2de7e9"
+    },
+    {
+      "path": "assets/series-features/hulu.svg",
+      "bytes": 806,
+      "sha256": "6bf705502216ffd2ad58721bcb1b76b93d3a2a31995dfa919ef34a847d038e1f"
+    },
+    {
+      "path": "assets/services/imdb.svg",
+      "bytes": 533,
+      "sha256": "b10d53730fb0ed017d0716decdad3e5bd8ae401c50cb75210e0b714f4268bc44"
+    },
+    {
+      "path": "assets/services/max.svg",
+      "bytes": 3287,
+      "sha256": "930e98e7a6fa3e5b36c201398619db23aa217e49d67f460ae96f0ef897d00f3b"
+    },
+    {
+      "path": "assets/services/mubi.svg",
+      "bytes": 6507,
+      "sha256": "1c2db2ecf58d03bd6e0c72ae30c3448548f18845ede47f3f82a1e39259592885"
+    },
+    {
+      "path": "assets/services/myanimelist.svg",
+      "bytes": 703,
+      "sha256": "089d5e61d444500831461d349c804408a4356ee8251802c4d7cfdcb84e24644e"
+    },
+    {
+      "path": "assets/services/neon.svg",
+      "bytes": 6567,
+      "sha256": "6459f8b6752c9d8f888bab15aed682374e3b2e8b6f455551045654b402752419"
+    },
+    {
+      "path": "assets/services/netflix.svg",
+      "bytes": 1118,
+      "sha256": "0c12d5374247e16fced565a207d010bf39f1eb55ee0394581ced67b2e6fa7b92"
+    },
+    {
+      "path": "assets/services/peacock.svg",
+      "bytes": 3335,
+      "sha256": "5d7134f70e44896a3cd445b3c8355d0f49140d733f99c4a4c148e8dd999ce864"
+    },
+    {
+      "path": "assets/services/shudder.svg",
+      "bytes": 49134,
+      "sha256": "ed7631d3ab477433c714681e06fa372d172ce892bfb8d47adf9edbfbdf311709"
+    },
+    {
+      "path": "assets/twilight/tt1099212-logo.png",
+      "bytes": 130268,
+      "sha256": "6f97f3a059d078639848fc48088df7b45da860ad93db291a2feb1dea56362d90"
+    },
+    {
+      "path": "assets/twilight/tt1325004-background.webp",
+      "bytes": 252202,
+      "sha256": "efd7feb3e0bd6ffbca35aea32b7984a6b96ab872b1b050cc7dcc67c6340eca68"
+    },
+    {
+      "path": "back-to-top.js",
+      "bytes": 6317,
+      "sha256": "225191b8d7da9f5e7772b127f1b0ef9dae416657ea9970b56cff242fc435e910"
+    },
+    {
+      "path": "catalog.js",
+      "bytes": 9890,
+      "sha256": "505aa6ad9f7aef4393b042c467a9df15af6ea7f366b825686126345d114ae6d7"
+    },
+    {
+      "path": "catalog.json",
+      "bytes": 434712,
+      "sha256": "be6e2e58a4ce8a3cc0c5e2e9db94c83e940016e16165ce6ea8aa8a609ba443f7"
+    },
+    {
+      "path": "cinema.js",
+      "bytes": 10627,
+      "sha256": "9ada986878f56a7d1041e53a65239c3c7c2c58211243953e85e21f9c59f1a0dd"
+    },
+    {
+      "path": "content.json",
+      "bytes": 34842,
+      "sha256": "ec8991e26faf7d9c876b71b1c01a618c2109122981af9c60d37904a7996e292c"
+    },
+    {
+      "path": "credits.html",
+      "bytes": 7884,
+      "sha256": "7a39f1ea63fd845efc28203b3bf4a058b65c17bac7dd59a0eedd9b7164c756a2"
+    },
+    {
+      "path": "cult-features.css",
+      "bytes": 6202,
+      "sha256": "0a69fc02ebd891f26a427cebba184e3a622aa0e1e8e2f029205b8748ab951733"
+    },
+    {
+      "path": "cult-features.js",
+      "bytes": 4489,
+      "sha256": "22325b118b813feb17d0416ce4cb1bd4f9535e9857e62ba9c6a368b0d491902e"
+    },
+    {
+      "path": "editorial.js",
+      "bytes": 2355,
+      "sha256": "5df726cbd66202f9fd15275e0cbe2e85663a67b7892cfc5cbaef61d2359d471c"
+    },
+    {
+      "path": "encounter.js",
+      "bytes": 6250,
+      "sha256": "01a1931711a6b66502211f1c33b94f4b40d6420fe180e970ec5b51f550beb214"
+    },
+    {
+      "path": "fresh-releases.js",
+      "bytes": 3139,
+      "sha256": "fd2831878ef3a9235b96fb26dc5170ca6bc8aebaf3af50e8c14acf9f88eb8a70"
+    },
+    {
+      "path": "halloween-night.js",
+      "bytes": 2032,
+      "sha256": "21842b1d6950b34f8aabee7d1ef7b486cfac32376f286a95f890a56f58865e79"
+    },
+    {
+      "path": "halloween-song-shelf.json",
+      "bytes": 3136,
+      "sha256": "d497a9c2d09ca6c1b98e3f21fbbb4d76de2fe1caf4f327a2100d350485e6acb1"
+    },
+    {
+      "path": "harbor-bridge.js",
+      "bytes": 3913,
+      "sha256": "b5675d7b970d040b9490b19fe82918b1b0c0023fac793fe6a54649a31d2e3432"
+    },
+    {
+      "path": "hero-depth.js",
+      "bytes": 3688,
+      "sha256": "d07a6b5daab3dc237b114a3ec5fae395cc8e87df69a615accce2834282b520f3"
+    },
+    {
+      "path": "horror-paths.css",
+      "bytes": 7304,
+      "sha256": "65b3ea11ec59bfad33fe4b1c7be032af76c49a09260046c2b65b663a01bf7548"
+    },
+    {
+      "path": "horror-paths.js",
+      "bytes": 2496,
+      "sha256": "30bf8db3ea4e7d73ca146d667aecbdee6cb69f8bcdcf7feba6ac3307409da4eb"
+    },
+    {
+      "path": "horror-paths.json",
+      "bytes": 58650,
+      "sha256": "2cb40c030791923770dcd297716bafbbde879fcba28a045a250bb91db087d2cd"
+    },
+    {
+      "path": "index.html",
+      "bytes": 160439,
+      "sha256": "3378ddfb3e2fa4ba3c5223a45ee006d44f00c670ddfb2008823898d29fbe02ba"
+    },
+    {
+      "path": "inline-surface.js",
+      "bytes": 2160,
+      "sha256": "6e1bc38cc92e39cade8e9beb2630672136fa49832ff228e29dd78f9df270ff6d"
+    },
+    {
+      "path": "international-expanded.json",
+      "bytes": 49195,
+      "sha256": "289531393b86625593665de5e98fe731c4a7833e56e93d46a69fe8ceb44b301b"
+    },
+    {
+      "path": "manga-expanded.json",
+      "bytes": 43317,
+      "sha256": "ce72547fad3f15d6a4c23a8967ab83b1ceef79b60b0160c7a335f292804a2aa9"
+    },
+    {
+      "path": "masters.js",
+      "bytes": 8063,
+      "sha256": "1a46ac5da775a59b1471a988d70c3354a7bb75db1ee14515198acfba7ad184ac"
+    },
+    {
+      "path": "mixtapes.js",
+      "bytes": 3437,
+      "sha256": "775e223144be9ccdc2384e31aba275ada9ebe089219a8841da22fe19b0660a00"
+    },
+    {
+      "path": "music.json",
+      "bytes": 468808,
+      "sha256": "4cf8c17c53ad517bfdcf783a380574c3a3d1ccec26f597d507f57df4824fbdf0"
+    },
+    {
+      "path": "native-entry.js",
+      "bytes": 2821,
+      "sha256": "2a64a65aa2d4207b1806fd1508d236b0321b99a64c59994dce747932befa5414"
+    },
+    {
+      "path": "native-environment.js",
+      "bytes": 10643,
+      "sha256": "b3cd4c1cf90df93643074c2fd3e0da6ad81f3ae13505eb9642bc7bcbee0f9ee3"
+    },
+    {
+      "path": "native-fonts.json",
+      "bytes": 369,
+      "sha256": "4431167385c0bf0bde0de31f338dfa3ff82ccac053db7de3b7521bc6e2a736a9"
+    },
+    {
+      "path": "native-layout.html",
+      "bytes": 159773,
+      "sha256": "c1d3484961ffae67456c13582425cc0ba7e60aaf132d982cdb6a38d03ac8c7b0"
+    },
+    {
+      "path": "native-runtime.js",
+      "bytes": 173346,
+      "sha256": "1f87a4b3cd8ab0f0084eb8c0baef4d58757e3c803c9fa175d2e4f338d002df3f"
+    },
+    {
+      "path": "native-styles.css",
+      "bytes": 155870,
+      "sha256": "862c0a8df21bf5d2027ec97a36d75872cfca109a81105e1f6025faa056319942"
+    },
+    {
+      "path": "new-releases-expanded.json",
+      "bytes": 13905,
+      "sha256": "63a5ce1cac79ed5126b7725f4e0cb0ec1f243a50790bff27a7fef40ea896764a"
+    },
+    {
+      "path": "official-video.js",
+      "bytes": 2645,
+      "sha256": "4d1ff16c587d813a2761a254935200d7a261fd7acfe1bdba50b1da08ac27bf07"
+    },
+    {
+      "path": "page-navigation.js",
+      "bytes": 2796,
+      "sha256": "7cd41f8d91ece0cad0ec8eff162b1ac657820cd8371d5ae9efab8c2fe5f91c0f"
+    },
+    {
+      "path": "playlist-data.json",
+      "bytes": 14143,
+      "sha256": "7e7943d45e8fe71bb77910f7123ddcaff7f7b938c2603f34138c93ec06cd3552"
+    },
+    {
+      "path": "playlist-pages.css",
+      "bytes": 18196,
+      "sha256": "af6e2110e22cadc71f765c171abbd7273266bd773c718eabe5664b3b243a235f"
+    },
+    {
+      "path": "playlist-pages.js",
+      "bytes": 19682,
+      "sha256": "e5a1a11f670fed837f7adcc0a81e4042307aa5cf97f78da65fbb14c719d0c808"
+    },
+    {
+      "path": "rails.js",
+      "bytes": 8374,
+      "sha256": "a56521c2bbd5d3bba2d5855abcca2e958ac71488f8e20adbed4571812a25226d"
+    },
+    {
+      "path": "reading-cozy-expanded.json",
+      "bytes": 41589,
+      "sha256": "977871a4ca47240db64e34381dee532c943834cbcee68acf7e9c2b9bcaf03dd5"
+    },
+    {
+      "path": "scene-life.js",
+      "bytes": 4656,
+      "sha256": "98eb23e78dfca8e3031817def87b532dc85f474c1c426fa03f28962d6da59cb6"
+    },
+    {
+      "path": "screen-shelves-expanded.json",
+      "bytes": 82645,
+      "sha256": "99cceb7688ea34f5e44bb6fddf9fce301eac2d8b4e5421f92b7f55c22091724d"
+    },
+    {
+      "path": "screening.css",
+      "bytes": 68593,
+      "sha256": "191582ed7355c755cf9a1d84c0f25bc8dfa5019cedb44db7ebfd239cc4c25980"
+    },
+    {
+      "path": "screening.json",
+      "bytes": 46883,
+      "sha256": "5c41a4b9560cbe7303200ea810ba589cf1e21fdb1fcc57216b80069faffe90d8"
+    },
+    {
+      "path": "series-features.json",
+      "bytes": 10946,
+      "sha256": "7b424912e4647538644b7f196d880ec31a2376a6f893336636c7e0c730bfc700"
+    },
+    {
+      "path": "shudder-art.js",
+      "bytes": 8491,
+      "sha256": "4f8a5e3ec3f23ea16f74e0ab82079aa89f0df2c366d7b750ea74d4e5f2a64309"
+    },
+    {
+      "path": "spotlight-data.json",
+      "bytes": 14738,
+      "sha256": "5ede2e3c170ab158248e997ebdaa363c37e4500a0b2eb0ce6d5b2a8d9119949c"
+    },
+    {
+      "path": "true-crime-expanded.json",
+      "bytes": 81873,
+      "sha256": "6ccc45d52cd2d5e00a8be52311cb164e9a8c0870e67f6dd95fbb9cf9dcb2d95c"
+    },
+    {
+      "path": "twilight-data.json",
+      "bytes": 3961,
+      "sha256": "3fc0f22c45c71c8d45b3dfc1394f8b20ba255829dcc71016726236373749c2a9"
+    },
+    {
+      "path": "world.css",
+      "bytes": 38312,
+      "sha256": "00d48b60ad1bc1305c6885431114aa785b4418c8a66755e008d04369fb969e9d"
+    }
+  ]
+}

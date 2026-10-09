@@ -1,0 +1,45 @@
+.music-connect-shelf {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 8px;
+  border-block-start: 1px solid var(--color-edge-soft);
+}
+.music-connect-shelf-logo { border-radius: 8px; }
+.music-connect-shelf-copy { min-width: 0; }
+.music-connect-shelf-copy h3 {
+  color: var(--color-ink);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -.02em;
+  overflow-wrap: anywhere;
+}
+.music-connect-shelf-copy p {
+  max-width: 68ch;
+  margin-top: 5px;
+  color: var(--color-ink-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.music-connect-shelf-action {
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: var(--color-elevated);
+  color: var(--color-ink);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color 160ms ease-out;
+}
+.music-connect-shelf-action:hover { background: var(--color-raised); }
+.music-connect-shelf-action:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+@media (max-width: 640px) {
+  .music-connect-shelf { grid-template-columns: 56px minmax(0, 1fr); gap: 12px 16px; }
+  .music-connect-shelf-action { grid-column: 2; justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-connect-shelf-action { transition: none; }
+}

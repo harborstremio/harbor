@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import jlParticle from "@/assets/brand/jl-particle.webp";
+import { CustomArtwork } from "@/components/custom-artwork";
 import { Poster } from "@/components/poster";
 import { topMovies, topSeries, type Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
@@ -59,9 +60,20 @@ export function SplashStep({ onAdvance }: { onAdvance: () => void }) {
         }}
       />
       <div className="relative flex h-full flex-col items-center justify-center gap-3 text-center">
-        <h1 className="animate-splash-title">
-          <img src={jlParticle} alt="JL Media Vision" draggable={false} className="h-[300px] w-auto object-contain" />
-        </h1>
+        <CustomArtwork
+          role="launch"
+          className="h-44 w-64"
+          fallback={
+            <h1 className="animate-splash-title">
+              <img
+                src={jlParticle}
+                alt="JL Media Vision"
+                draggable={false}
+                className="h-[300px] w-auto object-contain"
+              />
+            </h1>
+          }
+        />
         <p
           className="animate-splash-title text-[14px] uppercase tracking-[0.42em] text-ink-muted"
           style={{ animationDelay: "260ms" }}

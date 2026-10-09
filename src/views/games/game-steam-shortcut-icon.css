@@ -1,0 +1,9 @@
+.games-shortcut-icon{display:grid;grid-template:minmax(0,1fr)/minmax(0,1fr);place-items:center;min-width:0;min-height:0;flex-shrink:0;color:var(--color-ink-muted);overflow:hidden}
+.games-shortcut-icon>img{width:100%;height:100%;max-width:96px;max-height:96px;object-fit:contain!important}
+.games-shortcut-art>.games-shortcut-icon{width:100%;height:100%;padding:6px}
+.games-unified-no-art>.games-shortcut-icon{width:72px;height:72px;max-height:60%}
+.games-library-list .games-shortcut-icon{width:40px;max-height:44px}
+.games-library-side-game>.games-shortcut-icon{width:29px;height:29px;border-radius:4px}
+.games-library-sidebar.is-collapsed .games-library-side-game>.games-shortcut-icon{display:grid;width:32px;height:32px}
+.games-library-side-game[data-tone]:not([data-tone=active])>.games-shortcut-icon{opacity:.6}
+.game-dock-open>.games-shortcut-icon{width:100%;height:100%;padding:5px}

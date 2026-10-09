@@ -1,8 +1,8 @@
 import { ChevronRight, Loader2, Plus, Sparkles, Star, TrendingUp } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
-import { CardArtBackdrop } from "@/components/card-art-backdrop";
 import { installAddon, manifestToConfigureUrl } from "@/lib/addon-store";
+import { rememberPendingAddon } from "@/lib/addons-store/pending-detail";
 import { openInstallerViewport } from "@/components/installer-viewport";
 import { listAddons, risingEntryFor, useRising, type SAAddon } from "@/lib/providers/stremio-addons";
 import { useTopMovers } from "@/lib/providers/stremio-addons-velocity";
@@ -287,8 +287,10 @@ function CommunityRow({
   const logo = resolveAddonLogo(m?.logo, addon.manifestUrl);
 
   const open = () => {
-    if (m?.id) onOpen(m.id);
-    else openUrl(addon.url);
+    if (m?.id) {
+      rememberPendingAddon(m.id, addon.manifestUrl, addon.manifest);
+      onOpen(m.id);
+    } else openUrl(addon.url);
   };
   const install = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -317,9 +319,8 @@ function CommunityRow({
       onClick={open}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && open()}
       style={{ contentVisibility: "auto", containIntrinsicSize: "auto 116px" }}
-      className="group relative flex cursor-pointer items-start gap-5 overflow-hidden rounded-2xl border border-edge-soft bg-elevated px-5 py-5 text-start transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-edge hover:shadow-[0_18px_36px_-22px_rgba(0,0,0,0.4)]"
+      className="group relative flex cursor-pointer items-start gap-5 overflow-hidden rounded-2xl border border-edge-soft bg-elevated px-5 py-5 text-start transition-colors duration-150 hover:border-edge hover:bg-raised"
     >
-      <CardArtBackdrop logo={logo} background={m?.background} />
       <AddonLogo
         addonId={m?.id ?? addon.slug}
         addonName={name}
@@ -330,7 +331,7 @@ function CommunityRow({
         <div className="flex flex-wrap items-center gap-2">
           <span className="truncate text-[16px] font-semibold text-ink">{name}</span>
           {addon.stars > 0 && (
-            <span className="inline-flex h-5 items-center gap-1 rounded-full bg-canvas/70 px-1.5 text-[10.5px] font-bold text-accent ring-1 ring-accent/30 backdrop-blur-sm">
+            <span className="inline-flex h-5 items-center gap-1 rounded-full bg-canvas/70 px-1.5 text-[10.5px] font-bold text-accent ring-1 ring-accent/30">
               <Star size={9} strokeWidth={2.6} fill="currentColor" className="harbor-rating-star" />
               {addon.stars.toLocaleString()}
             </span>
@@ -375,7 +376,10 @@ function CommunityRow({
             {t("Installed")}
           </span>
         )}
-        <ChevronRight size={16} className="dir-icon text-ink-subtle" />
+        <ChevronRight
+          size={16}
+          className="dir-icon text-ink-subtle transition-[transform,color] duration-150 group-hover:translate-x-0.5 group-hover:text-ink-muted rtl:group-hover:-translate-x-0.5"
+        />
       </div>
     </div>
   );

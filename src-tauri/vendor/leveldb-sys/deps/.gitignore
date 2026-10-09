@@ -1,0 +1,23 @@
+# Generic object file
+*.o
+*.lo
+*.a
+*.la
+*.dylib
+*.so
+
+# Snappy-specific stuff
+snappy-*/.deps/
+snappy-*/.libs/
+snappy-*/Makefile
+snappy-*/config.h
+snappy-*/config.log
+snappy-*/config.status
+snappy-*/libsnappy.la
+snappy-*/libtool
+snappy-*/snappy_unittest
+snappy-*/stamp-h1
+snappy-*/autom4te.cache
+
+# Our build script copies this over
+leveldb-*/build_detect_platform

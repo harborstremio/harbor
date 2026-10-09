@@ -4,9 +4,11 @@
  * يتيح التحكم بتأخير/تقديم الترجمة أثناء تشغيل الفيديو مباشرة
  */
 import { Check, RotateCcw, Type, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { useT } from "@/lib/i18n";
-import { closeSyncBar, useSyncBarOpen } from "@/lib/player/sub-sync";
+import { closeSyncBar, useSyncBarState } from "@/lib/player/sub-sync";
+import { AutosyncPopover } from "./autosync/autosync-popover";
+import { useAutoSyncHandle } from "./autosync/autosync-store";
 
 const IDLE_MS = 12000;
 const round = (v: number) => Math.round(v * 100) / 100;
@@ -19,19 +21,11 @@ type Props = {
 };
 
 export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Props) {
-
   const t = useT();
-  const open = useSyncBarOpen();
-  const [localDelay, setLocalDelay] = useState(delaySec);
-  const savedRef = useRef(delaySec);
-
-  // Sync external delay into local state when bar opens
-  useEffect(() => {
-    if (open) {
-      setLocalDelay(delaySec);
-      savedRef.current = delaySec;
-    }
-  }, [open]);
+  const { open, initialDelaySec } = useSyncBarState();
+  const autoSyncHandle = useAutoSyncHandle();
+  // The live prop is the single source of truth: a local copy only synced on open
+  // meant keyboard offset changes made while the bar was open never showed.
 
   // Auto-close after idle
   useEffect(() => {
@@ -64,36 +58,35 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
 
   // Apply delay to player live
   const applyDelay = (sec: number) => {
-    const v = round(sec);
-    setLocalDelay(v);
-    onDelay(v);
+    onDelay(round(sec));
   };
 
   // Save = just close (delay is already applied live)
   const handleSave = () => {
-    savedRef.current = localDelay;
     closeSyncBar();
   };
 
   // Discard = restore saved value
   const handleDiscard = () => {
-    applyDelay(savedRef.current);
+    applyDelay(initialDelaySec);
     closeSyncBar();
   };
 
-  const isDirty = round(localDelay) !== round(savedRef.current);
-  const isNonZero = localDelay !== 0;
+  const isDirty = round(delaySec) !== round(initialDelaySec);
+  const isNonZero = delaySec !== 0;
 
-  if (!open) return null;
+  const popover = autoSyncHandle ? <AutosyncPopover handle={autoSyncHandle} /> : null;
+
+  if (!open) return popover;
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center px-6 pt-[68px] animate-in fade-in slide-in-from-top-2 duration-300">
       <div
         role="toolbar"
         aria-label={t("Subtitle sync")}
-        className="pointer-events-auto flex items-stretch gap-2.5 rounded-[16px] border border-edge bg-elevated/95 px-2.5 py-2 shadow-[0_24px_64px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
+        className="pointer-events-auto flex items-stretch gap-2.5 rounded-md bg-elevated px-2.5 py-2 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
       >
-        {/* Left Side: Text Sync (Fixed width to center the middle section) */}
+        {/* Left Side: Live Sync (Fixed width to center the middle section) */}
         <div className="flex w-[240px] items-center gap-1.5">
           {onEnterSync && (
             <button
@@ -103,8 +96,10 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
                 onEnterSync();
               }}
               disabled={!syncAvailable}
-              title={syncAvailable ? t("Sync subtitles via text") : t("Select a subtitle track to sync")}
-              aria-label={t("Sync via text")}
+              title={
+                syncAvailable ? t("Open guided live sync") : t("Select a subtitle track to sync")
+              }
+              aria-label={t("Live sync")}
               className={`flex h-10 items-center gap-2 rounded-xl px-3.5 text-[13px] font-semibold transition-all ${
                 syncAvailable
                   ? "bg-raised text-ink-muted hover:bg-elevated hover:text-ink active:scale-95"
@@ -112,36 +107,22 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
               }`}
             >
               <Type size={15} strokeWidth={2} />
-              <span className="hidden lg:inline">{t("Text Sync")}</span>
+              <span className="hidden lg:inline">{t("Live sync")}</span>
             </button>
           )}
         </div>
 
         {/* Center Side: Sync Controls */}
         <div className="flex items-center gap-[2px] rounded-xl bg-raised p-[2px] shadow-inner">
-          <StepBtn
-            label="−0.5s"
-            onClick={() => applyDelay(localDelay - 0.5)}
-            wide
-          />
-          <StepBtn
-            label="−0.1s"
-            onClick={() => applyDelay(localDelay - 0.1)}
-          />
-          
+          <StepBtn label="−0.5s" onClick={() => applyDelay(delaySec - 0.5)} wide />
+          <StepBtn label="−0.1s" onClick={() => applyDelay(delaySec - 0.1)} />
+
           <div className="mx-1.5 flex h-10 w-[96px] items-center justify-center rounded-lg bg-elevated">
-            <DelayDisplay value={localDelay} nonZero={isNonZero} onReset={() => applyDelay(0)} />
+            <DelayDisplay value={delaySec} nonZero={isNonZero} onReset={() => applyDelay(0)} />
           </div>
 
-          <StepBtn
-            label="+0.1s"
-            onClick={() => applyDelay(localDelay + 0.1)}
-          />
-          <StepBtn
-            label="+0.5s"
-            onClick={() => applyDelay(localDelay + 0.5)}
-            wide
-          />
+          <StepBtn label="+0.1s" onClick={() => applyDelay(delaySec + 0.1)} />
+          <StepBtn label="+0.5s" onClick={() => applyDelay(delaySec + 0.5)} wide />
         </div>
 
         {/* Right Side: Save & Discard (Fixed width to match left side) */}
@@ -184,20 +165,12 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function StepBtn({
-  label,
-  onClick,
-  wide,
-}: {
-  label: string;
-  onClick: () => void;
-  wide?: boolean;
-}) {
+function StepBtn({ label, onClick, wide }: { label: string; onClick: () => void; wide?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[36px] items-center justify-center rounded-[10px] font-mono text-[13px] font-bold tabular-nums text-ink-muted transition-colors hover:bg-elevated hover:text-ink active:scale-95 ${
+      className={`flex h-[36px] items-center justify-center rounded-md font-mono text-[13px] font-bold tabular-nums text-ink-muted transition-colors hover:bg-elevated hover:text-ink active:scale-95 ${
         wide ? "w-14" : "w-12"
       }`}
     >

@@ -2,7 +2,6 @@ import { Check, Loader2, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
 import { AddonStarBadge } from "@/components/addon-star-badge";
-import { CardArtBackdrop } from "@/components/card-art-backdrop";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
 import { useT } from "@/lib/i18n";
 import { idOf, nameOf, subtitleFromManifest } from "./addons-utils";
@@ -46,12 +45,8 @@ export function TileCard({
       tabIndex={0}
       onClick={onOpen}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen()}
-      className="group relative flex cursor-pointer flex-col gap-4 overflow-hidden rounded-2xl border border-edge-soft bg-elevated p-6 transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-edge hover:shadow-[0_18px_40px_-22px_rgba(0,0,0,0.4)]"
+      className="group relative flex cursor-pointer flex-col gap-4 overflow-hidden rounded-2xl border border-edge-soft bg-elevated p-6 transition-colors duration-150 hover:border-edge hover:bg-raised"
     >
-      <CardArtBackdrop
-        logo={resolveAddonLogo(resolved.manifest?.logo, resolved.transportUrl)}
-        background={resolved.manifest?.background}
-      />
       <div className="relative flex items-center gap-4">
         <AddonLogo
           addonId={idOf(resolved)}

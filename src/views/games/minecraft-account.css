@@ -1,0 +1,31 @@
+.mc-world-nav .mc-account-button {margin-inline-start:auto;border:0;font-weight:500;gap:8px;font-size:13px}
+.mc-account-face {position:relative;display:block;flex:none;width:24px;height:24px;background:var(--color-elevated);image-rendering:pixelated}
+.mc-account-face>span {position:absolute;inset:0;background-size:192px;background-position:-24px -24px}
+.mc-account-face>span+span {background-position:-120px -24px}
+.mc-account-scrim {position:fixed;inset:0;z-index:240;display:grid;place-items:center;padding:32px;background:#0009}
+.mc-account-scrim>[role=dialog] {display:flex;flex-direction:column;max-height:86vh;overflow:hidden;border-radius:6px;background:var(--color-surface)}
+.mc-account-dialog {padding:28px;overflow:auto;color:var(--color-ink)}
+.mc-account-dialog>header {display:flex;justify-content:space-between;align-items:start;gap:18px;margin-bottom:24px}
+.mc-account-dialog h2 {font-size:26px;letter-spacing:-.035em;margin:8px 0 0;font-weight:700}
+.mc-account-dialog h3 {font-size:18px;margin:0 0 10px;font-weight:650}
+.mc-account-signin>p,.mc-account-capes>p {font-size:13px;line-height:1.7;color:var(--color-ink-muted);margin:0 0 20px}
+.mc-account-signin>.games-button {margin-bottom:18px}
+.mc-account-note {padding:16px;background:var(--color-canvas);border-radius:8px}
+.mc-account-code {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;background:var(--color-canvas);border-radius:8px;margin:18px 0}
+.mc-account-code strong {font-size:28px;letter-spacing:.15em;user-select:all}
+.mc-account-appearance {display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.mc-account-appearance .mc-skin-preview {position:relative;top:0;background:var(--color-canvas)}
+.mc-account-appearance .mc-skin-stage {height:360px}
+.mc-account-appearance .mc-skin-preview-hint {font-size:11px}
+.mc-account-dialog footer {display:flex;justify-content:space-between;gap:16px;margin-top:24px;padding-top:20px;border-top:1px solid var(--color-edge-soft)}
+.mc-cape-list {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-height:310px;overflow:auto;margin-bottom:18px}
+.mc-cape-list button {display:flex;align-items:center;flex-direction:column;gap:12px;padding:15px 8px;border-radius:7px;background:var(--color-canvas);color:var(--color-ink-muted);font-size:11px;min-width:0}
+.mc-cape-list button[aria-pressed=true] {background:var(--color-elevated);color:var(--color-ink)}
+.mc-cape-list button>span:last-of-type {max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc-cape-texture {width:40px;height:64px;background-size:256px 128px;background-position:-4px -4px;image-rendering:pixelated;display:block}
+.mc-cape-none {width:40px;height:64px;display:grid;place-items:center;color:var(--color-ink-subtle)}
+.mc-account-skin-empty {display:grid;place-items:center;min-height:360px;border-radius:10px;background:var(--color-canvas);padding:24px;color:var(--color-ink-muted);font-size:13px;text-align:center}
+.mc-account-dialog :is(button,a):focus-visible {outline:2px solid var(--color-ink);outline-offset:3px}
+.mc-account-dialog button:disabled {opacity:.4;cursor:default}
+@container(max-width:550px) {.mc-world-nav {gap:18px}.mc-world-nav button {font-size:12px;gap:7px}.mc-world-nav .mc-account-button {padding-inline:8px}.mc-world-nav .mc-account-button>span:last-child {display:none}}
+@media(max-width:650px) {.mc-account-dialog {padding:20px}.mc-account-appearance {grid-template-columns:1fr}.mc-account-appearance .mc-skin-stage {height:300px}.mc-cape-list {grid-template-columns:repeat(4,minmax(0,1fr))}.mc-world-nav {gap:18px}.mc-world-nav .mc-account-button {font-size:12px}.mc-account-code strong {font-size:24px}}

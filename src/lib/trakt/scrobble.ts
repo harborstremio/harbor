@@ -9,6 +9,12 @@ function scrobbleBody(target: TraktTarget, progress: number) {
     return { movie: { ids: target.ids }, progress: clamped };
   }
   if (target.kind === "episode") {
+    const showHasIds = Object.keys(target.show.ids).length > 0;
+    if (target.episodeIds && Object.keys(target.episodeIds).length > 0) {
+      return showHasIds
+        ? { show: { ids: target.show.ids }, episode: { ids: target.episodeIds }, progress: clamped }
+        : { episode: { ids: target.episodeIds }, progress: clamped };
+    }
     return {
       show: { ids: target.show.ids },
       episode: { season: target.season, number: target.number },

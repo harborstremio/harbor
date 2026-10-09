@@ -1,3 +1,5 @@
+import { ANIME_CLOUD_ID } from "@/lib/stremio";
+
 const API = "https://api.strem.io/api";
 
 export type RepairProgress = {
@@ -117,6 +119,8 @@ export async function repairStremioLibrary(
       unrepairable++;
       continue;
     }
+    const nid = String((normalized as { _id?: unknown })._id ?? "");
+    if (ANIME_CLOUD_ID.test(nid) && (normalized as { removed?: unknown }).removed !== true) continue;
     if (differs(raw, normalized)) toPush.push(normalized);
   }
   onProgress?.({ phase: "normalizing", total: items.length, needsRepair: toPush.length });

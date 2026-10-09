@@ -1,0 +1,28 @@
+.games-metadata-import { display:flex; flex-direction:column; max-height:86dvh; min-height:0; color:var(--color-ink); }
+.games-metadata-import header { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; padding:26px 28px 20px; }
+.games-metadata-import header>div { min-width:0; }
+.games-metadata-import header>.games-icon-button { flex-shrink:0; }
+.games-metadata-import h2 { margin:0; font-size:25px; line-height:1.25; font-weight:600; letter-spacing:-.025em; }
+.games-metadata-import header p,.games-metadata-import-footnote { color:var(--color-ink-muted); font-size:14px; line-height:1.6; margin:10px 0 0; max-width:56ch; }
+.games-metadata-import header,.games-metadata-import footer { flex-shrink:0; }
+.games-metadata-import-scroll { overflow:auto; min-height:0; padding:0 28px 22px; overscroll-behavior:contain; }
+.games-metadata-import-scope { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+.games-metadata-import-scope button { min-height:44px; padding:10px 14px; border-radius:7px; font-size:14px; color:var(--color-ink-muted); }
+.games-metadata-import-scope button[aria-pressed=true] { background:var(--color-elevated); color:var(--color-ink); }
+.games-metadata-import-progress { display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:13px; color:var(--color-ink-muted); }
+.games-metadata-import-progress strong { font-weight:500; color:var(--color-ink); }
+.games-metadata-import progress { width:100%; height:4px; display:block; margin:12px 0 18px; accent-color:var(--color-accent); border:0; border-radius:2px; background:var(--color-elevated); }
+.games-metadata-import progress::-webkit-progress-bar { background:var(--color-elevated); border-radius:2px; }
+.games-metadata-import progress::-webkit-progress-value { background:var(--color-accent); border-radius:2px; }
+.games-metadata-import-row { display:flex; align-items:center; gap:15px; padding:15px 0; border-bottom:1px solid var(--color-edge-soft); }
+.games-metadata-import-mark { flex-shrink:0; color:var(--color-ink-subtle); }
+.games-metadata-import-row[data-state=saved] .games-metadata-import-mark { color:var(--color-success); }
+.games-metadata-import-row>div { flex:1; min-width:0; }
+.games-metadata-import-row strong { display:block; font-size:15px; font-weight:550; line-height:1.4; overflow-wrap:anywhere; }
+.games-metadata-import-row span:not(.games-metadata-import-mark) { display:block; font-size:13px; line-height:1.5; margin-top:3px; color:var(--color-ink-muted); }
+.games-metadata-import-row .games-button { min-height:42px; font-size:13px; flex-shrink:0; }
+.games-metadata-import footer { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:12px; padding:18px 28px; border-top:1px solid var(--color-edge-soft); }
+.games-metadata-import footer .games-button { min-height:46px; font-size:14px; padding-inline:20px; }
+.games-metadata-import button:focus-visible { outline:2px solid var(--color-accent); outline-offset:3px; }
+.games-metadata-import button:disabled { opacity:.5; }
+@media(max-width:560px) { .games-metadata-import header { padding:22px 18px 18px; }.games-metadata-import-scroll { padding-inline:18px; }.games-metadata-import footer { padding:16px 18px; }.games-metadata-import-row { gap:10px; }.games-metadata-import-row>div { min-width:80px; }.games-metadata-import h2 { font-size:23px; } }

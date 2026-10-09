@@ -1,0 +1,20 @@
+export default {
+  "Search shortcuts": "Lối tắt tìm kiếm",
+  "Steam search shortcut": "Lối tắt tìm kiếm Steam",
+  "Type “st ” or “st:” to search the Steam store. Turn off to use normal Harbor search for these queries.": "Nhập “st ” hoặc “st:” để tìm trong cửa hàng Steam. Tắt để dùng tìm kiếm Harbor thông thường cho các truy vấn này.",
+  "games.storeSearch.title": "Cửa hàng Steam",
+  "games.storeSearch.hint": "Dùng “st ” trong tìm kiếm Harbor để tìm trực tiếp trên Steam.",
+  "games.storeSearch.automatic": "Tự động",
+  "games.storeSearch.region": "Khu vực cửa hàng",
+  "games.storeSearch.showLibrary": "Đánh dấu trò chơi đã có trong thư viện",
+  "games.storeSearch.settingsError": "Không thể lưu hoặc đọc tùy chọn tìm kiếm. Hãy thử lại trước khi thay đổi.",
+  "games.storeSearch.openError": "Không thể mở liên kết này. Kiểm tra Steam hoặc trình duyệt rồi thử lại.",
+  "games.storeSearch.empty": "Nhập tên trò chơi.",
+  "games.storeSearch.saved": "Kết quả và giá đã lưu từ {date}.",
+  "games.storeSearch.error": "Tìm kiếm Steam không khả dụng. Hãy thử lại.",
+  "games.storeSearch.comingSoon": "Sắp ra mắt",
+  "games.storeSearch.inLibrary": "Trong thư viện của bạn",
+  "games.storeSearch.unavailable": "Không có giá",
+  "games.storeSearch.web": "Trang web",
+  "games.storeSearch.client": "Mở trong Steam"
+};

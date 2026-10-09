@@ -1,0 +1,7 @@
+.games-custom-row { display: contents; }
+.games-page-customize { margin-block: 16px 24px; }
+.games-page-customize button { min-height:32px; padding:6px 10px; border-radius:6px; gap:6px; }
+.games-row-controls { margin-block: 24px 12px; }
+.games-row-controls > div { border:1px solid var(--color-edge-soft); border-radius:8px; background:var(--color-surface); padding:6px 8px; gap:6px; }
+.games-row-controls button { min-width: 32px; min-height: 32px; }
+.games-row-controls button:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }

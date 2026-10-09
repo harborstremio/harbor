@@ -1,0 +1,26 @@
+.mc-runtime-dialog fieldset {min-width:0;border:0;padding:0;margin:0}
+.mc-runtime-dialog fieldset:disabled {opacity:.55}
+.mc-runtime-dialog .mc-launch-account {display:flex;align-items:center;justify-content:space-between;gap:20px;padding-block:22px 8px;margin-top:20px;border-top:1px solid var(--color-edge-soft)}
+.mc-launch-account>div {display:flex;flex-direction:column;gap:5px;min-width:0}
+.mc-launch-account strong {font-size:14px;font-weight:600}
+.mc-launch-account>div>span {font-size:12px;line-height:1.6;color:var(--color-ink-muted)}
+.mc-launch-account>.mc-account-button {display:flex;align-items:center;gap:8px;flex-shrink:0;max-width:50%;min-height:42px;padding:10px 13px;border-radius:8px;background:var(--color-elevated);font-size:13px}
+.mc-launch-account>.mc-account-button:hover {background:var(--color-raised)}
+.mc-runtime-dialog .mc-java-setup:has(.mc-java-current) .mc-java-heading {margin-bottom:14px}
+.mc-runtime-dialog .mc-java-setup:has(.mc-java-current) .mc-java-heading h3 {font-size:14px}
+.mc-runtime-dialog .mc-java-setup:has(.mc-java-current) .mc-java-heading p {display:none}
+.mc-runtime-dialog .mc-java-setup:has(.mc-java-current) .mc-java-current {padding:12px 16px}
+.mc-runtime-dialog .mc-java-setup:has(.mc-java-current) .mc-java-current details {margin-top:6px}
+.mc-launch-status:empty {display:none}
+.mc-launch-status {margin-top:18px}
+.mc-launch-running {display:flex;align-items:center;gap:18px;padding:22px 0}
+.mc-launch-running>:is(svg,.mc-launch-running-icon) {color:var(--color-success);flex-shrink:0}
+.mc-launch-running h3 {font-size:21px;line-height:1.4;font-weight:650;letter-spacing:-.02em}
+.mc-launch-running p,.mc-launch-exit {font-size:13px;line-height:1.7;color:var(--color-ink-muted);margin-top:6px}
+.mc-runtime-dialog:has(.mc-launch-running)>footer {justify-content:flex-end}
+.mc-runtime-dialog:has(.mc-launch-running)>footer>span {display:none}
+.mc-launch-log {margin-top:18px;border-top:1px solid var(--color-edge-soft);padding-top:14px}
+.mc-launch-log summary {display:flex;gap:9px;align-items:center;cursor:pointer;font-size:13px;min-height:36px;color:var(--color-ink-muted)}
+.mc-launch-log summary:hover {color:var(--color-ink)}
+.mc-launch-log pre {white-space:pre-wrap;overflow-wrap:anywhere;max-height:230px;overflow:auto;padding:14px;border-radius:8px;background:var(--color-canvas);font-size:12px;line-height:1.65;margin-top:8px;user-select:text}
+@media(max-width:500px) {.mc-runtime-dialog .mc-launch-account {align-items:flex-start;flex-direction:column;gap:12px}.mc-launch-account>.mc-account-button {max-width:100%}}

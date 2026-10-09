@@ -1,0 +1,12 @@
+.games-view .games-availability-badge { position:absolute;inset-inline-start:8px;inset-block-end:8px;z-index:2;display:inline-flex;align-items:center;gap:5px;max-width:calc(100% - 16px);padding:5px 7px;border-radius:4px;background:#111e;color:#f5f5f5;font-size:11px;font-weight:600;line-height:1.3;pointer-events:none; }
+.games-availability-badge>svg { flex:none; }
+.games-availability-badge>span { min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.games-view .games-availability-badge.is-inline { position:static;align-self:start;max-width:100%;width:fit-content;background:var(--color-surface);color:var(--color-ink); }
+.games-view .games-availability-badge.is-mark { inset-inline-start:auto;inset-inline-end:3px;inset-block-end:3px;display:grid;place-items:center;width:23px;height:23px;max-width:none;padding:4px;border-radius:50%;background:color-mix(in srgb,var(--color-canvas) 94%,transparent);color:var(--color-ink);pointer-events:auto; }
+.games-availability-badge.is-mark>svg { width:15px;height:15px; }
+.games-view :is(.games-release-feature,.games-launcher-feature)>.games-availability-badge.is-mark { inset-block-start:14px;inset-block-end:auto;inset-inline-end:14px; }
+.games-view .games-showcase-facts>.games-availability-badge.is-mark { align-self:center;flex:none; }
+.games-recent-art:has(.games-availability-badge) .games-recent-open { display:none; }
+.games-availability-cover { position:relative;display:block;min-width:0; }
+.games-availability-cover>img,.games-availability-cover>.games-art-empty { display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit; }
+.games-view :is(.games-card-art,.games-highlight-art,.games-recommend-art):has(>.games-availability-badge.is-mark)>:is(.games-card-enter,.games-highlight-open,.games-recommend-enter) { display:none; }

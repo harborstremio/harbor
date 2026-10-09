@@ -1,0 +1,75 @@
+.games-nav-icon {
+  /* Rock with the presses at 0/240/480ms, then soften the landing at 1040ms. */
+  --games-motion-duration: 1040ms;
+  --games-press-duration: 360ms;
+  --games-press-step: 240ms;
+  display: inline-flex;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.games-nav-icon svg {
+  transform-origin: 50% 60%;
+}
+
+.games-nav-icon.is-pressing svg {
+  animation: games-nav-play var(--games-motion-duration) ease-in-out both;
+}
+
+/* The original artwork moves as one controller; its controls press independently. */
+.games-nav-icon path:not(:first-child) {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.games-nav-icon.is-pressing path:not(:first-child) {
+  animation: games-nav-press var(--games-press-duration) ease-in-out both;
+}
+
+.games-nav-icon.is-pressing path:nth-child(3) {
+  animation-delay: var(--games-press-step);
+}
+
+.games-nav-icon.is-pressing path:nth-child(4) {
+  animation-delay: calc(var(--games-press-step) * 2);
+}
+
+@keyframes games-nav-play {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  14% {
+    transform: translate(-0.6px, -1.6px) rotate(-12deg);
+  }
+  38% {
+    transform: translate(0.65px, -1px) rotate(9deg);
+  }
+  60% {
+    transform: translate(-0.25px, -0.45px) rotate(-4deg);
+  }
+  78% {
+    transform: translate(0, 0.35px) rotate(1.5deg) scale(1.025, 0.975);
+  }
+}
+
+@keyframes games-nav-press {
+  0%, 100% {
+    fill: currentColor;
+    transform: translateY(0) scale(1);
+  }
+  30%, 50% {
+    fill: color-mix(in oklab, currentColor 25%, var(--color-accent));
+    transform: translateY(6px) scale(0.86, 0.9);
+  }
+  78% {
+    fill: color-mix(in oklab, currentColor 88%, var(--color-accent));
+    transform: translateY(-1px) scale(1.035, 1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .games-nav-icon.is-pressing svg,
+  .games-nav-icon.is-pressing path:not(:first-child) {
+    animation: none;
+  }
+}

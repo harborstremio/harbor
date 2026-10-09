@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useContextMenu } from "@/lib/context-menu";
 import { setPreviewTmdbKey } from "@/lib/hover-preview/preview-data";
 import {
@@ -43,8 +36,7 @@ import { useSearch } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
 import { activeLayout } from "@/lib/theme";
 import { useView } from "@/lib/view";
-import { PreviewBlock } from "./hover-preview/block";
-import { PreviewCrown } from "./hover-preview/crown";
+import { PreviewBody } from "./hover-preview/marquee";
 import { useMedia, type Scene } from "./hover-preview/scene";
 import { crownHeightFor, panelWidthFor, placePanel } from "./hover-preview/use-preview-position";
 
@@ -69,22 +61,15 @@ export function HoverPreview() {
 
   useEffect(() => {
     setHoverPreviewGates({
-      enabled: settings.hoverPreviewEnabled && settings.cardHoverStyle === "default",
+      enabled:
+        settings.hoverPreviewEnabled &&
+        (settings.cardHoverStyle === "default" || settings.cardHoverStyle === "marquee"),
       finePointer,
       viewClear: view.player === null && view.picker === null && !view.chromeHidden,
       searchClosed: !search.open,
       menuClosed: menu.state === null,
     });
-  }, [
-    settings.hoverPreviewEnabled,
-    settings.cardHoverStyle,
-    finePointer,
-    view.player,
-    view.picker,
-    view.chromeHidden,
-    search.open,
-    menu.state,
-  ]);
+  }, [settings.hoverPreviewEnabled, settings.cardHoverStyle, finePointer, view.player, view.picker, view.chromeHidden, search.open, menu.state]);
 
   const snap = useSyncExternalStore(subscribeHoverPreview, getHoverPreviewSnapshot);
 
@@ -227,22 +212,10 @@ export function HoverPreview() {
     const outEl = layerEls.current.get(scene.outgoing.key);
     const inEl = layerEls.current.get(currentKey);
     if (reduced) {
-      outEl?.animate([{ opacity: 1 }, { opacity: 0 }], {
-        duration: REDUCED_MS,
-        easing: "linear",
-        fill: "forwards",
-      });
-      inEl?.animate([{ opacity: 0 }, { opacity: 1 }], {
-        duration: REDUCED_MS,
-        easing: "linear",
-        fill: "backwards",
-      });
+      outEl?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: REDUCED_MS, easing: "linear", fill: "forwards" });
+      inEl?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: REDUCED_MS, easing: "linear", fill: "backwards" });
     } else {
-      outEl?.animate([{ opacity: 1 }, { opacity: 0 }], {
-        duration: MORPH_FADE_OUT_MS,
-        easing: "ease-in",
-        fill: "forwards",
-      });
+      outEl?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: MORPH_FADE_OUT_MS, easing: "ease-in", fill: "forwards" });
       inEl?.animate(
         [
           { opacity: 0, transform: `translateY(${MORPH_RISE_PX}px)` },
@@ -253,12 +226,9 @@ export function HoverPreview() {
     }
     for (const t of morphTimersRef.current) window.clearTimeout(t);
     morphTimersRef.current = [
-      window.setTimeout(
-        () => {
-          setScene((s) => (s && s.current.key === currentKey ? { ...s, height: s.nextHeight } : s));
-        },
-        reduced ? 0 : MORPH_FADE_OUT_MS,
-      ),
+      window.setTimeout(() => {
+        setScene((s) => (s && s.current.key === currentKey ? { ...s, height: s.nextHeight } : s));
+      }, reduced ? 0 : MORPH_FADE_OUT_MS),
       window.setTimeout(
         () => {
           setScene((s) => (s && s.current.key === currentKey ? { ...s, outgoing: null } : s));
@@ -278,34 +248,19 @@ export function HoverPreview() {
     const seq = scene.seq;
     const done = () => setScene((s) => (s && s.seq === seq ? null : s));
     if (reduced) {
-      frame.animate([{ opacity: 1 }, { opacity: 0 }], {
-        duration: REDUCED_MS,
-        easing: "linear",
-        fill: "forwards",
-      }).onfinish = done;
+      frame.animate([{ opacity: 1 }, { opacity: 0 }], { duration: REDUCED_MS, easing: "linear", fill: "forwards" }).onfinish = done;
       return;
     }
     if (scene.exiting === "hard") {
-      frame.animate([{ opacity: 1 }, { opacity: 0 }], {
-        duration: HARD_CLOSE_MS,
-        easing: "linear",
-        fill: "forwards",
-      }).onfinish = done;
+      frame.animate([{ opacity: 1 }, { opacity: 0 }], { duration: HARD_CLOSE_MS, easing: "linear", fill: "forwards" }).onfinish = done;
       return;
     }
-    panelRef.current?.animate(
-      [{ transform: "scale(1)" }, { transform: `scale(${CLOSE_SCALE_TO})` }],
-      {
-        duration: CLOSE_MS,
-        easing: CLOSE_EASE,
-        fill: "forwards",
-      },
-    );
-    frame.animate([{ opacity: 1 }, { opacity: 0 }], {
+    panelRef.current?.animate([{ transform: "scale(1)" }, { transform: `scale(${CLOSE_SCALE_TO})` }], {
       duration: CLOSE_MS,
       easing: CLOSE_EASE,
       fill: "forwards",
-    }).onfinish = done;
+    });
+    frame.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CLOSE_MS, easing: CLOSE_EASE, fill: "forwards" }).onfinish = done;
   }, [scene?.exiting, scene?.seq, reduced]);
 
   useLayoutEffect(() => {
@@ -327,6 +282,18 @@ export function HoverPreview() {
     const payload = sceneRef.current?.current.payload;
     closeHoverPreview("hard");
     if (payload) viewRef.current.openMeta(payload.meta);
+  }, []);
+
+  const onPlay = useCallback(() => {
+    const payload = sceneRef.current?.current.payload;
+    closeHoverPreview("hard");
+    if (!payload) return;
+    const resume = payload.data.resume;
+    const episode =
+      resume && !resume.external && resume.season != null && resume.episode != null
+        ? { season: resume.season, episode: resume.episode }
+        : undefined;
+    viewRef.current.openPicker(payload.meta, episode, { autoPlay: settingsRef.current.instantPlay, resume: true });
   }, []);
 
   const onPanelPointerMove = useCallback((e: React.PointerEvent) => {
@@ -356,10 +323,7 @@ export function HoverPreview() {
         resume.season != null && resume.episode != null
           ? { season: resume.season, episode: resume.episode }
           : undefined;
-      viewRef.current.openPicker(payload.meta, episode, {
-        autoPlay: settingsRef.current.instantPlay,
-        resume: true,
-      });
+      viewRef.current.openPicker(payload.meta, episode, { autoPlay: settingsRef.current.instantPlay, resume: true });
     } else {
       viewRef.current.openMeta(payload.meta);
     }
@@ -374,6 +338,7 @@ export function HoverPreview() {
   if (!scene) return null;
 
   const revealed = scene.pos !== null;
+  const marquee = settings.cardHoverStyle === "marquee";
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[110]">
@@ -387,8 +352,7 @@ export function HoverPreview() {
             ? `translate3d(${scene.pos.left}px, ${scene.pos.top}px, 0)`
             : "translate3d(0px, 0px, 0)",
           visibility: revealed ? "visible" : "hidden",
-          transition:
-            scene.outgoing && !reduced ? `transform ${MORPH_MOVE_MS}ms ${OPEN_EASE}` : undefined,
+          transition: scene.outgoing && !reduced ? `transform ${MORPH_MOVE_MS}ms ${OPEN_EASE}` : undefined,
         }}
       >
         <div
@@ -401,29 +365,33 @@ export function HoverPreview() {
           onPointerDown={onPanelPointerDown}
           onClick={onPanelClick}
           onContextMenu={onPanelContextMenu}
-          className={`group relative cursor-pointer overflow-hidden rounded-xl bg-elevated shadow-[0_24px_60px_-20px_rgba(0,0,0,0.78)] ring-1 ring-edge-soft ${
+          className={`group relative cursor-pointer overflow-hidden ${marquee ? "rounded-md" : "rounded-xl"} bg-elevated shadow-[0_24px_60px_-20px_rgba(0,0,0,0.78)] ring-1 ring-edge-soft ${
             revealed && !reduced ? "animate-preview-in" : ""
           }`}
           style={{
             height: revealed ? scene.height : undefined,
-            transformOrigin: scene.pos
-              ? `${scene.pos.originX}px ${scene.pos.originY}px`
-              : undefined,
+            transformOrigin: scene.pos ? `${scene.pos.originX}px ${scene.pos.originY}px` : undefined,
           }}
         >
           {scene.outgoing && (
-            <div
-              key={scene.outgoing.key}
-              ref={setLayerEl(scene.outgoing.key)}
-              className="absolute inset-x-0 top-0"
-            >
-              <PreviewCrown data={scene.outgoing.payload.data} height={scene.crownH} />
-              <PreviewBlock data={scene.outgoing.payload.data} onDetails={onDetails} />
+            <div key={scene.outgoing.key} ref={setLayerEl(scene.outgoing.key)} className="absolute inset-x-0 top-0">
+              <PreviewBody
+                data={scene.outgoing.payload.data}
+                crownH={scene.crownH}
+                marquee={marquee}
+                onPlay={onPlay}
+                onDetails={onDetails}
+              />
             </div>
           )}
           <div key={scene.current.key} ref={setLayerEl(scene.current.key)}>
-            <PreviewCrown data={scene.current.payload.data} height={scene.crownH} />
-            <PreviewBlock data={scene.current.payload.data} onDetails={onDetails} />
+            <PreviewBody
+              data={scene.current.payload.data}
+              crownH={scene.crownH}
+              marquee={marquee}
+              onPlay={onPlay}
+              onDetails={onDetails}
+            />
           </div>
           {scene.incoming && (
             <div
@@ -431,8 +399,13 @@ export function HoverPreview() {
               ref={setLayerEl(scene.incoming.key)}
               className="invisible absolute inset-x-0 top-0"
             >
-              <PreviewCrown data={scene.incoming.payload.data} height={scene.crownH} />
-              <PreviewBlock data={scene.incoming.payload.data} onDetails={onDetails} />
+              <PreviewBody
+                data={scene.incoming.payload.data}
+                crownH={scene.crownH}
+                marquee={marquee}
+                onPlay={onPlay}
+                onDetails={onDetails}
+              />
             </div>
           )}
         </div>

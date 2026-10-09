@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Harbor Stream Blocker",
+  "version": "1.0.0",
+  "description": "Local ad request filters for Twitch and Kick, with TwitchAdSolutions playlist filtering.",
+  "permissions": [
+    "declarativeNetRequest"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.twitch.tv/*"
+      ],
+      "js": [
+        "twitch-vaft.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": true
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "provider_ads",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6c0GDu29IYBkIzYE/ZFx4Xm9SeXY0Dj6L/obSkBcje1CXKdyI29lR7EjyDpvYgD1VvESDxzD/F1h55ebzQWo79aa7GjwcnNu9P1O4gtbfMxW7V2+dcXBZSUzGVQEaQRB6iUGbs5UFjpZ3IK//gCumBP6mTNWDi090iUU4+9wfaCHNoCy2EKMpJ4ZYGSdAX0TznSc/PT/b3fUfqL3Wq8Z1oYioG5tXzu5opyN68Oro/WskpMky3QJ9SahJHRGiPruYlZqX7zvgz71tTuJzkE/bxLu2fGmynec2/PwuYZa56s7wUKGiaAu8Qjt2QzzZ9u4aID7T3u6eKcRi0/fmASsGQIDAQAB"
+}

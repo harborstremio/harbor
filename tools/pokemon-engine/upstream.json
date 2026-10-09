@@ -1,0 +1,7 @@
+{
+  "pkforge": { "url": "https://github.com/sofianeelhor/PKForge.git", "commit": "58ba096c79d74f452d4dae74460af5e8d48b0c4e" },
+  "pkhex": { "url": "https://github.com/sofianeelhor/PKForge-PKHeX.git", "commit": "033591d6220680cc74c8397f152361fb642f9ee7" },
+  "automod": { "url": "https://github.com/santacrab2/PKHeX-Plugins.git", "commit": "23ab1fc73f7be6ad427fbc900f9b99111cd2d560" },
+  "protocol": 1,
+  "license": "GPL-3.0-or-later"
+}

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-mystery">
+<title id="title-mystery">Mystery anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <circle class="coral" cx="28" cy="28" r="18"/>
+  <path class="icon-stroke" d="M41 41l13 13M22 24c1-6 12-6 12 1 0 5-6 5-6 10M28 41h.1"/>
+  <path class="gold" d="M48 8l1.4 3.6L53 13l-3.6 1.4L48 18l-1.4-3.6L43 13l3.6-1.4L48 8z"/>
+
+</svg>

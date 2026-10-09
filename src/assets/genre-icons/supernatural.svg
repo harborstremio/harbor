@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-supernatural">
+<title id="title-supernatural">Supernatural anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <path class="coral" d="M13 53V29C13 16 21 8 32 8s19 8 19 21v24l-7-5-6 6-6-6-6 6-6-6-7 5z"/>
+  <circle class="ink" cx="25" cy="29" r="3"/><circle class="ink" cx="39" cy="29" r="3"/>
+  <path class="icon-stroke" d="M27 39c3 2 7 2 10 0"/>
+  <path class="gold" d="M50 10l1.5 3.5L55 15l-3.5 1.5L50 20l-1.5-3.5L45 15l3.5-1.5L50 10z"/>
+
+</svg>

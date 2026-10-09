@@ -1,11 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
+import { useSettings } from "@/lib/settings";
 import { listLocalCw, subscribeLocalCw } from "@/lib/local-cw";
+import { setExternalCwSources } from "@/lib/feed/external-cw";
+import { useExternalCw } from "@/lib/feed/external-cw";
 import {
+  ANIME_CLOUD_ID,
+  cwMemberViaResume,
   cwSortKey,
   episodeFromVideoId,
   isCwMember,
   library,
+  resumeSourceForItem,
+  type ExternalCwSource,
   type LibraryItem,
 } from "@/lib/stremio";
 
@@ -19,21 +27,25 @@ export type CwCard = {
   episode?: number;
   videoId?: string;
   progress: number;
+  at: number;
 };
 
-function localToLibraryItem(e: ReturnType<typeof listLocalCw>[number]): LibraryItem {
+export function localToLibraryItem(e: ReturnType<typeof listLocalCw>[number]): LibraryItem {
   return {
     _id: e.id,
     type: e.type,
     name: e.name,
     poster: e.poster,
     background: e.background,
+    isAnime: e.isAnime,
     state: {
       timeOffset: e.positionMs,
       duration: e.durationMs,
       season: e.season,
       episode: e.episode,
-      video_id: e.videoId,
+      video_id:
+        e.videoId ??
+        (e.season != null && e.episode != null ? `${e.id}:${e.season}:${e.episode}` : undefined),
       flaggedWatched: e.durationMs > 0 && e.positionMs / e.durationMs >= 0.9 ? 1 : 0,
       lastWatched: new Date(e.t).toISOString(),
     },
@@ -58,6 +70,13 @@ function episodeOf(i: LibraryItem): { season: number; episode: number } | null {
   return parsed && parsed.episode > 0 ? parsed : null;
 }
 
+function watchedAt(i: LibraryItem): number {
+  const lw = i.state?.lastWatched ? Date.parse(i.state.lastWatched) : NaN;
+  if (Number.isFinite(lw)) return lw;
+  const m = i._mtime ? Date.parse(i._mtime) : NaN;
+  return Number.isFinite(m) ? m : 0;
+}
+
 function toCard(i: LibraryItem): CwCard {
   const ep = i.type === "movie" ? null : episodeOf(i);
   const duration = i.state?.duration ?? 0;
@@ -72,11 +91,25 @@ function toCard(i: LibraryItem): CwCard {
     episode: ep?.episode,
     videoId: i.state?.video_id,
     progress: duration > 0 ? Math.min(1, offset / duration) : 0,
+    at: watchedAt(i),
   };
 }
 
+const CW_RETRY_DELAYS_MS = [1000, 4000, 10000];
+let cwCacheKey: string | null = null;
+let cwCacheItems: LibraryItem[] = [];
+
 export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
   const { authKey } = useAuth();
+  const { settings } = useSettings();
+  const { activeProfile, profiles } = useProfiles();
+  const hideSharedCw =
+    settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
+  const cwSources = settings.cwSources;
+  useEffect(() => {
+    setExternalCwSources({ trakt: cwSources.trakt, simkl: cwSources.simkl });
+  }, [cwSources.trakt, cwSources.simkl]);
+  const externalCw = useExternalCw(!hideSharedCw && (cwSources.trakt || cwSources.simkl));
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [localVersion, setLocalVersion] = useState(0);
 
@@ -86,13 +119,44 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       return;
     }
     let cancelled = false;
-    library(authKey)
-      .then((li) => {
-        if (!cancelled) setItems(li);
-      })
-      .catch(() => {});
+    let timer: number | null = null;
+    let attempt = 0;
+    if (cwCacheKey === authKey && cwCacheItems.length > 0) setItems(cwCacheItems);
+    const load = () => {
+      library(authKey)
+        .then((li) => {
+          cwCacheKey = authKey;
+          cwCacheItems = li;
+          attempt = 0;
+          if (!cancelled) setItems(li);
+        })
+        .catch(() => {
+          if (cancelled || attempt >= CW_RETRY_DELAYS_MS.length) return;
+          const wait = CW_RETRY_DELAYS_MS[attempt];
+          attempt += 1;
+          timer = window.setTimeout(load, wait);
+        });
+    };
+    load();
+    const retryNow = () => {
+      if (cancelled || cwCacheKey === authKey) return;
+      if (timer != null) {
+        window.clearTimeout(timer);
+        timer = null;
+      }
+      attempt = 0;
+      load();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") retryNow();
+    };
+    window.addEventListener("online", retryNow);
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       cancelled = true;
+      if (timer != null) window.clearTimeout(timer);
+      window.removeEventListener("online", retryNow);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [authKey]);
 
@@ -100,8 +164,29 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
 
   return useMemo(() => {
     void localVersion;
-    const merged = [...items, ...listLocalCw().map(localToLibraryItem)]
-      .filter((i) => (i.type as string) !== "other" && !i._id.startsWith("iptv:") && isCwMember(i))
+    const disabledSources = new Set<ExternalCwSource>();
+    if (!cwSources.simkl) disabledSources.add("simkl");
+    if (!cwSources.trakt) disabledSources.add("trakt");
+    const base = hideSharedCw
+      ? []
+      : [
+          ...(cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
+          ...externalCw.filter((i) => !(i.external && disabledSources.has(i.external))),
+        ];
+    const local = listLocalCw(hideSharedCw).filter((e) =>
+      e.source === "library" ? cwSources.library : cwSources.local,
+    );
+    const merged = [...base, ...local.map(localToLibraryItem)]
+      .filter((i) => {
+        if ((i.type as string) === "other" || i._id.startsWith("iptv:")) return false;
+        if (!isCwMember(i)) return false;
+        // A disabled source's backfilled resume entry must not resurrect library cards.
+        if (disabledSources.size > 0 && cwMemberViaResume(i)) {
+          const src = resumeSourceForItem(i);
+          if (src && disabledSources.has(src)) return false;
+        }
+        return true;
+      })
       .map((i) => ({ i, k: cwSortKey(i) }))
       .sort((a, b) => b.k - a.k)
       .map((e) => e.i);
@@ -114,5 +199,5 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       if (out.length >= limit) break;
     }
     return out;
-  }, [items, localVersion, excludeId, limit]);
+  }, [items, externalCw, localVersion, excludeId, limit, hideSharedCw, cwSources, activeProfile?.id]);
 }

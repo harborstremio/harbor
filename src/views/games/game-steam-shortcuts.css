@@ -1,0 +1,15 @@
+.games-steam-shortcuts{margin-block-start:40px;padding-block-start:28px;border-top:1px solid var(--color-edge-soft)}
+.games-steam-shortcuts h3{font-size:22px;font-weight:600;letter-spacing:-.03em}
+.games-shortcut-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-block:16px}
+.games-shortcut-path,.games-shortcut-empty{font-size:13px;color:var(--color-ink-muted);overflow-wrap:anywhere;margin-block:14px}
+.games-shortcut-list{display:grid;gap:6px}.games-shortcut-list article{display:flex;gap:16px;align-items:center;padding:10px 0;min-width:0}
+.games-shortcut-open{display:flex;align-items:center;gap:16px;text-align:start;min-width:0;flex:1;border-radius:6px}
+.games-shortcut-open>span:last-child{display:grid;gap:6px;min-width:0}.games-shortcut-open strong{font-size:15px;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.games-shortcut-open small{font-size:12px;color:var(--color-ink-muted)}
+.games-shortcut-art{display:grid;place-items:center;overflow:hidden;flex:0 0 112px;height:64px;border-radius:5px;background:var(--color-elevated);color:var(--color-ink-muted)}.games-shortcut-art img{width:100%;height:100%;object-fit:cover}
+.games-shortcut-detail{display:flex;flex-direction:column;min-height:0}.games-shortcut-detail header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:24px}.games-shortcut-detail h2{font-size:24px;font-weight:650;line-height:1.2;overflow-wrap:anywhere}.games-shortcut-detail-scroll{padding:0 24px 24px;overflow:auto;overscroll-behavior:contain}.games-shortcut-detail-scroll p{font-size:14px;color:var(--color-ink-muted);margin-block:16px}.games-shortcut-detail-hero{width:100%;max-height:210px;object-fit:cover;border-radius:6px}.games-shortcut-detail dl{font-size:13px;display:grid;gap:7px}.games-shortcut-detail dt{color:var(--color-ink-muted);margin-block-start:12px}.games-shortcut-detail dd{white-space:pre-wrap;overflow-wrap:anywhere}.games-shortcut-detail footer{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--color-edge-soft);padding:18px 24px}
+@media(max-width:650px){.games-shortcut-list article{gap:8px;flex-wrap:wrap}.games-shortcut-open{flex-basis:calc(100% - 44px)}.games-shortcut-art{flex-basis:88px;height:50px}.games-shortcut-list article>.games-launch{margin-inline-start:104px}.games-shortcut-detail header{padding:20px}}
+
+.games-shortcut-detail{color:var(--color-ink)}.games-shortcut-detail button:focus-visible,.games-steam-shortcuts button:focus-visible{outline:2px solid var(--color-accent);outline-offset:3px}.games-shortcut-detail button:disabled{opacity:.4}
+.games-shortcut-direct-note{padding:0 24px 18px;font-size:12px;line-height:1.6;color:var(--color-ink-muted)}
+.games-shortcut-launch-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.games-shortcut-detail footer{flex-wrap:wrap;align-items:center}

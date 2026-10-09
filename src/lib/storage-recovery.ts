@@ -33,7 +33,6 @@ const PRUNABLE_EXACT = new Set<string>([
   "harbor.anime.toppicks.shown.v1",
   "harbor.anime.toppicks.visit.v1",
   "harbor.anime.mal_id_by_franchise.v1",
-  "harbor.anime.detected.v1",
   "harbor.picker-cache.v4",
   "harbor.picker-cache.v5",
   "harbor.shows.hero.pool.v2",
@@ -44,11 +43,21 @@ const PRUNABLE_EXACT = new Set<string>([
   "harbor.surprise.recent.v1",
   "harbor.stremio-addons.velocity.v1",
   "harbor.playback-history.v1",
+  "harbor.streamBadges.v1",
+  "harbor.manga.popular.v1",
+  "harbor.ebook.metadata.v1",
+  "harbor.heroPool.v1",
 ]);
 
 const PRUNABLE_PREFIXES = [
   "harbor.libraryNameRepair.v1.",
   "harbor.anilist.collection.v1.",
+  "harbor.manga.cache.v1.",
+  "harbor.manga.cache.v2.",
+  "harbor.manga.art.",
+  "harbor.ebook.openlibrary.v1.",
+  "harbor.tvdbo.",
+  "harbor.playback-history.v1.",
 ];
 
 function isPrunable(key: string): boolean {
@@ -92,6 +101,22 @@ function pruneOne(key: string): number {
   }
 }
 
+const SNAP_PREFIX = "harbor.snap.";
+const SNAP_KEEP = new Set(["harbor.snap.index", "harbor.snap.retention"]);
+
+function snapshotFrames(): Array<{ key: string; size: number }> {
+  const out: Array<{ key: string; size: number }> = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith(SNAP_PREFIX) || SNAP_KEEP.has(key)) continue;
+    const v = localStorage.getItem(key);
+    if (v == null) continue;
+    out.push({ key, size: v.length + key.length });
+  }
+  out.sort((a, b) => b.size - a.size);
+  return out;
+}
+
 export function setItemWithRecovery(key: string, value: string): boolean {
   try {
     localStorage.setItem(key, value);
@@ -99,7 +124,8 @@ export function setItemWithRecovery(key: string, value: string): boolean {
   } catch (e) {
     if (!isQuotaError(e)) throw e;
   }
-  for (const { key: candidate } of prunableEntries()) {
+  const evictable = [...prunableEntries(), ...snapshotFrames()];
+  for (const { key: candidate } of evictable) {
     if (candidate === key) continue;
     pruneOne(candidate);
     try {
@@ -108,6 +134,29 @@ export function setItemWithRecovery(key: string, value: string): boolean {
     } catch (e) {
       if (!isQuotaError(e)) throw e;
     }
+  }
+  // Replacing a value can still fail at the quota boundary because WebView storage
+  // reserves the new value before releasing the old one. Retry non-destructively by
+  // temporarily removing the previous value, and restore it if the replacement fails.
+  let previous: string | null = null;
+  try {
+    previous = localStorage.getItem(key);
+    if (previous != null) {
+      localStorage.removeItem(key);
+      try {
+        localStorage.setItem(key, value);
+        return true;
+      } catch (e) {
+        try {
+          localStorage.setItem(key, previous);
+        } catch {
+          console.error(`[storage] could not restore "${key}" after replacement failed`);
+        }
+        if (!isQuotaError(e)) throw e;
+      }
+    }
+  } catch (e) {
+    if (!isQuotaError(e)) throw e;
   }
   console.warn(`[storage] giving up on "${key}" after pruning every cache`);
   return false;
@@ -126,11 +175,61 @@ export function freeStorageSpace(): { freedBytes: number; pruned: string[] } {
   return { freedBytes: freed, pruned };
 }
 
+const pendingCritical = new Map<string, string>();
+let flushBound = false;
+
+function bindCriticalFlush(): void {
+  if (flushBound || typeof window === "undefined") return;
+  flushBound = true;
+  const flush = () => {
+    if (pendingCritical.size === 0) return;
+    for (const [k, v] of pendingCritical) {
+      if (setItemWithRecovery(k, v)) pendingCritical.delete(k);
+    }
+  };
+  window.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") flush();
+  });
+  window.addEventListener("pagehide", flush);
+}
+
+export function persistCritical(key: string, value: string): boolean {
+  bindCriticalFlush();
+  const ok = setItemWithRecovery(key, value);
+  if (ok) {
+    pendingCritical.delete(key);
+  } else {
+    pendingCritical.set(key, value);
+    console.error(`[storage] critical key "${key}" did not persist; will retry before close`);
+  }
+  return ok;
+}
+
 const PROACTIVE_PER_KEY_THRESHOLD = 256 * 1024;
 const PROACTIVE_TOTAL_THRESHOLD = 3.5 * 1024 * 1024;
 
 const DEAD_CACHE_PREFIXES = ["harbor.picker-cache."];
-const VERSIONED_CACHE_PREFIXES = ["harbor.awards.wikidata"];
+const VERSIONED_CACHE_PREFIXES = ["harbor.awards.wikidata", "harbor.anime_awards.metas"];
+
+const LRU_PREFIX_CAPS: Array<{ prefix: string; keep: number }> = [
+  { prefix: "harbor.tvdbo.", keep: 24 },
+];
+
+function capLruPrefixes(): void {
+  for (const { prefix, keep } of LRU_PREFIX_CAPS) {
+    const found: Array<{ key: string; size: number }> = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith(prefix)) continue;
+      const v = localStorage.getItem(k);
+      if (v == null) continue;
+      found.push({ key: k, size: v.length });
+    }
+    if (found.length <= keep) continue;
+    found.sort((a, b) => b.size - a.size);
+    for (const f of found.slice(keep)) pruneOne(f.key);
+  }
+}
 
 function purgeDeadCaches(): void {
   const kill: string[] = [];
@@ -161,6 +260,7 @@ export function proactiveStorageCleanup(): void {
   if (typeof localStorage === "undefined") return;
   purgeDeadCaches();
   purgeOldCacheVersions();
+  capLruPrefixes();
   const entries = prunableEntries();
   let total = 0;
   for (const { key, size } of entries) {
@@ -169,6 +269,8 @@ export function proactiveStorageCleanup(): void {
   }
   if (total > PROACTIVE_TOTAL_THRESHOLD) {
     const r = freeStorageSpace();
-    console.info(`[storage] proactive total cleanup: ${r.pruned.length} caches, ${r.freedBytes} bytes`);
+    console.info(
+      `[storage] proactive total cleanup: ${r.pruned.length} caches, ${r.freedBytes} bytes`,
+    );
   }
 }

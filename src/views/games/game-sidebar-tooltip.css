@@ -1,0 +1,16 @@
+.games-sidebar-tooltip { width:280px; max-width:calc(100vw - 16px); padding:12px; border-radius:8px; }
+.games-sidebar-tooltip>span:first-child { align-items:center; gap:10px; }
+.games-sidebar-tooltip>span:first-child>span { font-size:14px; line-height:1.4; }
+.games-sidebar-tooltip .game-dock-tooltip-art { width:72px; height:43px; object-fit:cover; border-radius:4px; flex-shrink:0; }
+.games-sidebar-tip-details { margin-top:12px; font-size:12px; font-weight:400; line-height:1.5; }
+.games-sidebar-tip-state { display:flex; align-items:center; gap:8px; }
+.games-sidebar-tip-state>svg { flex-shrink:0; }
+.games-sidebar-tip-state>span { flex:1; }
+.games-sidebar-tip-state>strong { font-size:12px; font-variant-numeric:tabular-nums; }
+.games-sidebar-tip-state[data-tone=ready]>svg { color:var(--color-success); }
+.games-sidebar-tip-state:is([data-tone=active],[data-tone=pending])>svg { color:var(--color-accent); }
+.games-sidebar-tip-state[data-tone=attention]>svg { color:var(--color-danger); }
+.games-sidebar-tip-details p { margin:7px 0 0; color:var(--color-ink-muted); }
+.games-sidebar-tip-progress { height:3px; margin-top:9px; background:var(--color-edge); overflow:hidden; border-radius:2px; }
+.games-sidebar-tip-progress>i { display:block; height:100%; background:var(--color-accent); }
+.games-sidebar-tip-meta { display:flex; flex-wrap:wrap; gap:3px 10px; margin-top:10px; color:var(--color-ink-muted); font-size:11px; }

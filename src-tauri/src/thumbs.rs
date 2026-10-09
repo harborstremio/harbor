@@ -187,6 +187,11 @@ pub(crate) fn locate_mpv() -> Option<PathBuf> {
         candidates.push("mpv.exe".into());
         candidates.push("mpv".into());
     } else if cfg!(target_os = "macos") {
+        if let Ok(exe) = std::env::current_exe() {
+            if let Some(dir) = exe.parent() {
+                candidates.push(dir.join("mpv").to_string_lossy().into_owned());
+            }
+        }
         candidates.push("/opt/homebrew/bin/mpv".into());
         candidates.push("/usr/local/bin/mpv".into());
         candidates.push("mpv".into());
@@ -557,8 +562,52 @@ pub(crate) fn shutdown(app: &tauri::AppHandle) {
     tauri::async_runtime::block_on(state.stop());
 }
 
+async fn is_hdr_source(url: &str) -> bool {
+    let Some(ffprobe) = crate::transcode::locate_ffprobe() else {
+        return false;
+    };
+    let mut cmd = tokio::process::Command::new(&ffprobe);
+    cmd.args([
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-show_entries",
+        "stream=color_transfer,color_primaries,color_space",
+        "-of",
+        "default=nw=1:nk=1",
+        url,
+    ])
+    .stdin(Stdio::null())
+    .stdout(Stdio::piped())
+    .stderr(Stdio::null());
+    #[cfg(windows)]
+    {
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+    crate::proc_guard::configure_command(&mut cmd);
+    let probe = tokio::time::timeout(Duration::from_secs(8), cmd.output()).await;
+    let Ok(Ok(out)) = probe else {
+        return false;
+    };
+    let s = String::from_utf8_lossy(&out.stdout).to_ascii_lowercase();
+    s.contains("smpte2084") || s.contains("arib-std-b67") || s.contains("bt2020")
+}
+
+fn thumb_filter(hdr: bool) -> String {
+    if !hdr {
+        return format!("scale={}:-2", THUMB_WIDTH);
+    }
+    format!(
+        "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,\
+tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p,scale={}:-2",
+        THUMB_WIDTH
+    )
+}
+
 async fn spawn_shadow(url: &str, session: &str, pending: Pending) -> Result<Shadow, String> {
     let bin = locate_mpv().ok_or_else(|| "mpv not found".to_string())?;
+    let hdr = is_hdr_source(url).await;
     let pipe = shadow_pipe(session);
     let dir = cache_dir(session);
     tokio::fs::create_dir_all(&dir)
@@ -578,14 +627,11 @@ async fn spawn_shadow(url: &str, session: &str, pending: Pending) -> Result<Shad
         "--ytdl=no".into(),
         "--cache=yes".into(),
         "--demuxer-max-bytes=32MiB".into(),
-        format!("--vf=scale={}:-2", THUMB_WIDTH),
+        format!("--vf={}", thumb_filter(hdr)),
         "--screenshot-format=jpg".into(),
         format!("--screenshot-jpeg-quality={}", SCREENSHOT_QUALITY),
         "--screenshot-tag-colorspace=no".into(),
         "--hr-seek=no".into(),
-        // End-of-options terminator: without it, an addon-controlled stream
-        // URL beginning with `-`/`--` (e.g. `--log-file=<path>`) would be
-        // parsed by mpv as an option, allowing arbitrary file writes.
         "--".into(),
         url.to_string(),
     ];
@@ -600,7 +646,9 @@ async fn spawn_shadow(url: &str, session: &str, pending: Pending) -> Result<Shad
     {
         cmd.creation_flags(CREATE_NO_WINDOW);
     }
+    crate::proc_guard::configure_command(&mut cmd);
     let mut child = cmd.spawn().map_err(|e| format!("spawn shadow: {}", e))?;
+    crate::proc_guard::adopt(&child);
 
     tokio::time::sleep(Duration::from_millis(400)).await;
     if let Some(status) = child

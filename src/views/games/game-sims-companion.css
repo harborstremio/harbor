@@ -1,0 +1,197 @@
+.games-detail-flow-block:has(>.games-sims){clear:both}
+.games-sims-creator-content{grid-column:1/-1;min-width:0;border-top:1px solid var(--color-edge-soft);padding-top:18px}.games-sims-creator-content>summary{display:flex;align-items:center;justify-content:space-between;gap:16px;list-style:none;cursor:pointer;font-size:15px;font-weight:600;padding:8px 0}.games-sims-creator-content[open]>summary>svg{transform:rotate(180deg)}.games-sims-creator-content>p{max-width:75ch}.games-sims-creator-content>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}.games-sims-creator-content article{display:flex;gap:14px;min-width:0;padding:18px 0;border-bottom:1px solid var(--color-edge-soft)}.games-sims-creator-content article>.games-sims-file-icon{width:24px;height:24px;flex:none;margin-top:2px}.games-sims-creator-content article>div{min-width:0;flex:1}.games-sims-creator-content strong{display:block;font-size:14px;line-height:1.5;overflow-wrap:anywhere}.games-sims-creator-content small{display:block;overflow-wrap:anywhere;margin-top:5px}.games-sims-creator-content article button{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:13px}.games-sims-creator-content>.games-button{margin-top:18px}.games-sims-mts-back{max-width:100%;overflow-wrap:anywhere;text-align:start}.games-sims-mts-back>svg{flex:none}@container(max-width:640px){.games-sims-creator-content>div{grid-template-columns:minmax(0,1fr)}}
+.games-sims .games-sims-tray .games-sims-info-button{display:block;margin:8px 0 0}
+.games-sims-content header>div{min-width:0;flex:1}.games-sims-content header h2{overflow-wrap:anywhere}.games-sims-content-cover{width:84px;height:64px;object-fit:contain;border-radius:var(--radius-sm);background:var(--color-elevated);flex:none}.games-sims-content-file{display:flex;align-items:flex-start;gap:12px;padding:18px 0;border-bottom:1px solid var(--color-edge-soft)}.games-sims-content-file>svg{flex:none;margin-top:3px;color:var(--color-ink-muted)}.games-sims-content-file>div{min-width:0}.games-sims-content-file h3{font-size:15px;overflow-wrap:anywhere}.games-sims-content-file small{display:block;overflow-wrap:anywhere;margin-top:5px}.games-sims-content-file p{margin:7px 0}.games-sims-content .games-sims-content-heading{font-size:16px;margin:24px 0 4px}.games-sims-content-game{margin-top:22px}.games-sims-content-game>summary{display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;list-style:none;font-size:14px;font-weight:600;padding-block:10px}.games-sims-content-game[open]>summary>svg{transform:rotate(180deg)}.games-sims-content-date{display:block;margin-top:20px}.games-sims-content-source{display:inline-flex;align-items:center;gap:6px;margin-top:20px}.games-sims-content footer{gap:12px;flex-wrap:wrap}.games-sims-content footer>button:last-child{margin-inline-start:auto}@media(max-width:500px){.games-sims-content-cover{width:56px;height:44px}.games-sims-content header{gap:12px}.games-sims-content header h2{font-size:19px}.games-sims-content-file{gap:10px}}
+.games-sims{clear:both;min-width:0;padding-block:48px;--sims-gap:24px}
+.games-sims>header,.games-sims-workspace,.games-sims-dialog header{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.games-sims h2{font-size:28px;font-weight:650;letter-spacing:-.8px;line-height:1.2;margin:6px 0 10px}
+.games-sims h3,.games-sims-dialog h3{font-size:18px;font-weight:600;line-height:1.4;margin:0}
+.games-sims p,.games-sims-dialog p{font-size:14px;line-height:1.6;color:var(--color-ink-muted)}
+.games-sims small,.games-sims-dialog small{font-size:12px;color:var(--color-ink-muted);line-height:1.5}
+.games-sims>header>div>p{max-width:54ch;margin:0}
+.games-sims-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.games-sims-actions .games-button{min-height:40px}
+.games-sims-workspace{padding:22px 0;margin-top:20px;border-bottom:1px solid var(--color-edge-soft)}
+.games-sims-workspace>div{min-width:0}.games-sims-workspace strong{font-size:14px;font-weight:600}.games-sims-workspace small{display:block;margin-top:5px}
+.games-sims-path{overflow-wrap:anywhere;word-break:break-word}
+.games-sims-empty{display:flex;align-items:center;gap:26px;padding:40px 0}.games-sims-empty>img{width:76px;height:76px;object-fit:contain}.games-sims-empty p{max-width:58ch;margin:8px 0}
+.games-sims-guidance{margin-top:18px;background:var(--color-surface);border-radius:8px;padding:16px 20px}.games-sims-guidance>summary{display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:14px;font-weight:600;list-style:none}.games-sims-guidance[open]>summary svg{transform:rotate(180deg)}.games-sims-guidance p{margin:12px 0;max-width:78ch}
+.games-sims-tools{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:28px}.games-sims-tabs{display:flex;gap:6px;flex-wrap:wrap}.games-sims-tabs .games-button{background:transparent;color:var(--color-ink-muted)}.games-sims-tabs .games-button[aria-pressed=true]{background:var(--color-elevated);color:var(--color-ink)}
+.games-sims-search{display:flex;align-items:center;gap:9px;flex:1 1 180px;margin-inline-start:auto;max-width:280px;min-width:0;padding:10px 12px;border-radius:8px;background:var(--color-elevated);color:var(--color-ink-muted)}.games-sims-search input{width:100%;min-width:0;background:transparent;outline:none;color:var(--color-ink);font-size:13px}
+.games-sims-caption{margin:18px 0 22px;max-width:80ch}.games-sims-empty-note{padding:24px 0}
+.games-sims-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.games-sims-groups>article{display:flex;align-items:flex-start;gap:20px;border-bottom:1px solid var(--color-edge-soft);padding-bottom:24px}.games-sims-group-main{min-width:0;flex:1}.games-sims-group-main h3{overflow-wrap:anywhere}.games-sims-group-main p{margin:6px 0}.games-sims-group-main small{display:block;margin-bottom:14px}
+.games-sims-preview{position:relative;display:grid;place-items:center;aspect-ratio:1;background:var(--color-surface);border-radius:10px;overflow:hidden}.games-sims-preview>img{width:38%;height:38%;object-fit:contain}.games-sims-preview.has-image>img{width:100%;height:100%;object-fit:contain}.games-sims-preview-loading{position:absolute;inset:0;display:grid;place-items:center;background:var(--color-surface)}.games-sims-groups .games-sims-preview{width:110px;flex:none}
+.games-sims-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:24px 18px}.games-sims-file{min-width:0}.games-sims-file strong{font-size:14px;display:block;overflow-wrap:anywhere;line-height:1.4;margin-top:12px}.games-sims-file small{display:block;overflow-wrap:anywhere;margin-top:4px}.games-sims-file p{font-size:12px;margin:5px 0}.games-sims-file .games-sims-warning{color:var(--color-ink)}
+.games-sims-backups>article{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:18px 0;border-bottom:1px solid var(--color-edge-soft)}.games-sims-backups strong{font-size:15px;overflow-wrap:anywhere}.games-sims-backups small{display:block;margin-top:5px}
+.games-sims>footer{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:30px;padding-top:24px;border-top:1px solid var(--color-edge-soft)}.games-sims>footer p{max-width:70ch;margin:0;font-size:12px}.games-sims>footer button{flex:none}
+.games-sims-notice{padding:18px 0;display:flex;gap:16px;align-items:center;flex-wrap:wrap}.games-sims-pending{display:flex;align-items:center;gap:10px;padding:12px 0}.games-sims-pending svg,.games-sims-preview-loading svg{animation:sims-spin 1s linear infinite}@keyframes sims-spin{to{transform:rotate(360deg)}}
+.games-sims-scrim{background:rgb(0 0 0 / .55)}.games-sims-dialog{display:flex;flex-direction:column;min-height:0;outline:none}.games-sims-dialog header{padding:24px}.games-sims-dialog h2{font-size:23px;font-weight:650;margin:5px 0}.games-sims-dialog-body{padding:0 24px 24px;overflow:auto;overscroll-behavior:contain}.games-sims-dialog-body>p{margin:14px 0}.games-sims-dialog ul{list-style:none;margin:16px 0;padding:0;max-height:240px;overflow:auto}.games-sims-dialog li{display:flex;gap:16px;justify-content:space-between;font-size:13px;line-height:1.5;padding:8px 0;border-bottom:1px solid var(--color-edge-soft);overflow-wrap:anywhere}.games-sims-dialog li span{min-width:0}.games-sims-dialog li small{flex:none}.games-sims-name{display:grid;gap:8px;font-size:14px}.games-sims-name input{background:var(--color-elevated);border-radius:8px;padding:12px;color:var(--color-ink);width:100%;min-width:0}.games-sims-dialog footer{padding:20px 24px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--color-edge-soft)}.games-sims-dialog details>summary{font-size:13px;cursor:pointer}.games-sims-success{display:flex;align-items:center;gap:12px;padding:24px 0}.games-sims-success svg{color:var(--color-success)}
+.games-sims :is(button,input,summary):focus-visible,.games-sims-dialog :is(button,input,summary):focus-visible{outline:2px solid var(--color-accent);outline-offset:3px}
+.games-sims-file-icon{display:block;width:38%;height:38%;background:var(--color-ink-muted);mask-size:contain;mask-position:center;mask-repeat:no-repeat}.games-sims-empty>.games-sims-file-icon{width:76px;height:76px;flex:none}
+.games-sims .games-detail-text-button{display:inline-flex;align-items:center;gap:7px}
+.games-sims-file-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px 24px;margin-top:24px}.games-sims-file-list>.games-sims-file{display:flex;align-items:flex-start;gap:14px}.games-sims-file-list .games-sims-preview{width:44px;flex:none;background:transparent}.games-sims-file-list .games-sims-file-icon{width:55%;height:55%}.games-sims-file-list .games-sims-file>div:last-child{min-width:0}.games-sims-file-list strong{margin-top:0}
+@media(max-width:1050px){.games-sims-groups{grid-template-columns:1fr}}
+@media(max-width:1050px){.games-sims-file-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.games-sims-file-list{grid-template-columns:1fr}.games-sims-empty>.games-sims-file-icon{width:48px;height:48px}}
+@media(max-width:650px){.games-sims>header,.games-sims>footer{align-items:flex-start;flex-direction:column;gap:16px}.games-sims-tools{gap:12px}.games-sims-search{max-width:none;margin:0}.games-sims-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.games-sims-groups .games-sims-preview{width:72px}.games-sims-groups>article{gap:14px}.games-sims-backups>article{align-items:flex-start;flex-direction:column;gap:10px}.games-sims-empty{gap:16px}.games-sims-empty>img{width:48px;height:48px}.games-sims-scrim{padding:14px}.games-sims-dialog header{padding:20px}.games-sims-dialog-body{padding:0 20px 20px}.games-sims-dialog footer{padding:16px 20px}.games-sims-dialog footer button{white-space:normal}.games-sims-guidance{padding:16px}.games-sims>footer button{flex:auto}}
+@media(prefers-reduced-motion:reduce){.games-sims-pending svg,.games-sims-preview-loading svg{animation:none}}
+
+.games-sims-sets{padding:24px 0;border-bottom:1px solid var(--color-edge-soft)}.games-sims-sets>header{display:flex;align-items:center;justify-content:space-between;gap:20px}.games-sims-sets>header p{margin:5px 0 0;max-width:62ch}.games-sims-set-controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px}.games-sims-set-controls>div:first-child{min-width:200px;max-width:100%}.games-sims-set-current{display:inline-flex;align-items:center;gap:6px}.games-sims-sets>small{display:block;margin-top:16px}.games-sims-sets button:disabled{opacity:.45;cursor:default}
+.games-sims-set-members{display:grid;gap:6px}.games-sims-set-member{display:flex;align-items:center;gap:12px;width:100%;text-align:start;padding:13px;border-radius:7px;background:var(--color-elevated);font-size:14px;line-height:1.4}.games-sims-set-member>span:nth-child(2){min-width:0;overflow-wrap:anywhere}.games-sims-set-member small{margin-inline-start:auto;white-space:nowrap}.games-sims-set-member:hover{background:var(--color-raised)}.games-sims-check{display:grid;place-items:center;width:20px;height:20px;flex:none;background:var(--color-surface);border:1px solid var(--color-edge);border-radius:4px}.games-sims-set-member[aria-checked=true] .games-sims-check{background:var(--color-ink);color:var(--color-canvas);border-color:transparent}.games-sims-set-delete{margin-inline-end:auto}.games-sims-set-backup{margin-top:20px}.games-sims-set-changes{max-height:none!important}.games-sims-set-changes li{align-items:center}.games-sims-dialog p>.games-sims-path{display:block;margin-top:5px}.games-sims-backup-progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+@media(max-width:650px){.games-sims-sets>header{align-items:flex-start;flex-wrap:wrap;gap:14px}.games-sims-set-controls{gap:12px}.games-sims-set-controls>div:first-child{width:100%}.games-sims-set-changes li{align-items:flex-start;flex-direction:column;gap:4px}.games-sims-set-member{padding:12px;gap:9px}.games-sims-set-member small{font-size:11px}.games-sims-set-delete{max-width:40%}}
+
+@media(max-width:650px){.games-sims-workspace{flex-direction:column;align-items:flex-start;gap:14px}.games-sims-workspace>.games-sims-actions{width:100%;flex-wrap:nowrap}.games-sims-workspace .games-button{white-space:nowrap}.games-sims-workspace .games-icon-button{margin-inline-start:auto}}
+
+.games-sims-caption-bar{display:flex;align-items:center;justify-content:space-between;gap:20px}.games-sims-caption-bar>button{flex:none}.games-sims-adopt-paths{display:grid;gap:12px;margin:18px 0}.games-sims-adopt-paths dt{font-size:12px;color:var(--color-ink-muted);margin-bottom:5px}.games-sims-adopt-paths dd{margin:0;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+@media(max-width:650px){.games-sims-caption-bar{align-items:flex-start;flex-direction:column;gap:0;margin-bottom:20px}.games-sims-caption-bar .games-sims-caption{margin-bottom:10px}}
+
+.games-sims-test{padding:24px 0;border-bottom:1px solid var(--color-edge-soft)}.games-sims-test>header{display:flex;align-items:center;justify-content:space-between;gap:24px}.games-sims-test h3{display:flex;align-items:center;gap:9px}.games-sims-test header p{margin:6px 0 0;max-width:65ch}.games-sims-test>header>button{flex:none}.games-sims-test-step{padding:22px 24px;margin-top:20px;background:var(--color-surface);border-radius:8px}.games-sims-test h4{margin:6px 0;font-size:19px;font-weight:600}.games-sims-test-step p{max-width:80ch}.games-sims-test ul{list-style:none;padding:0;margin:14px 0}.games-sims-test li{font-size:14px;line-height:1.6;padding:6px 0;overflow-wrap:anywhere}.games-sims-test-step>ul{display:flex;flex-wrap:wrap;gap:8px}.games-sims-test-step>ul>li{background:var(--color-elevated);border-radius:5px;padding:6px 12px}.games-sims-test-step .games-sims-actions{margin-top:20px}.games-sims-test-footer{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-top:20px}.games-sims-test-footer summary{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;list-style:none}.games-sims-test-footer details[open] summary svg{transform:rotate(180deg)}.games-sims-test-footer>button{flex:none}.games-sims-test-help{margin-top:18px;font-size:12px}.games-sims-test button:disabled{opacity:.45;cursor:default}
+@media(max-width:650px){.games-sims-test>header,.games-sims-test-footer{flex-direction:column;align-items:flex-start;gap:14px}.games-sims-test-step{padding:18px}.games-sims-test .games-sims-actions button{white-space:normal}.games-sims-test li{font-size:13px}}
+
+.games-sims-test h3:focus{outline:none}
+
+.games-sims-tray>article{display:flex;align-items:center;gap:20px;padding:24px 0;border-bottom:1px solid var(--color-edge-soft)}.games-sims-tray-main{min-width:0;flex:1}.games-sims-tray h3{overflow-wrap:anywhere}.games-sims-tray p{margin:6px 0}.games-sims-tray>p{margin-top:22px}.games-sims-tray>article>button{flex:none}.games-sims-tray-icon{width:48px;height:48px;flex:none;background:var(--color-ink-muted);mask-position:center;mask-size:contain;mask-repeat:no-repeat}@media(max-width:650px){.games-sims-tray>article{flex-wrap:wrap;gap:16px}.games-sims-tray-main{flex-basis:calc(100% - 136px)}.games-sims-tray>article>button{margin-inline-start:136px;max-width:calc(100% - 136px);white-space:normal}}
+.games-sims-file-progress { display: grid; gap: 8px; margin-block: 12px; min-width: 0; }
+.games-sims-file-progress small { overflow-wrap: anywhere; color: var(--color-ink-muted); }
+.games-sims-file-progress small:last-child { direction: ltr; unicode-bidi: isolate; text-align: match-parent; }
+.games-sims-file-progress progress { width: 100%; height: 4px; border: 0; border-radius: 4px; overflow: hidden; accent-color: var(--color-ink); }
+.games-sims-file-progress progress::-webkit-progress-bar { background: var(--color-elevated); }
+.games-sims-file-progress progress::-webkit-progress-value { background: var(--color-ink); }
+.games-sims-dialog button:disabled { opacity: .45; cursor: default; }
+.games-sims-info-button{margin:0 0 12px;font-size:12px}.games-sims-file .games-sims-info-button{margin:4px 0 0}
+.games-sims-information header{align-items:flex-start}.games-sims-information header>div{min-width:0}.games-sims-information h2{font-size:21px;overflow-wrap:anywhere}.games-sims-information header>button{flex:none}
+.games-sims-info-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;gap:10px;text-align:center}.games-sims-info-loading>svg{animation:sims-spin .9s linear infinite}.games-sims-info-loading p{margin:0}.games-sims-info-loading small{overflow-wrap:anywhere;max-width:100%}
+.games-sims-info-entry{padding:24px 0;border-top:1px solid var(--color-edge-soft);overflow-wrap:anywhere}.games-sims-info-entry>p{margin:6px 0}.games-sims-info-entry>.games-sims-info-description{white-space:pre-line;margin:14px 0}.games-sims-info-entry .games-detail-text-button{display:inline-flex;align-items:center;gap:6px;font-size:13px;margin-top:8px;text-align:start}
+.games-sims-info-packs{margin-top:18px;font-size:13px}.games-sims-info-packs ul{margin:8px 0 0;max-height:none;overflow:visible}.games-sims-info-packs li{justify-content:flex-start;gap:10px;border:0;padding:3px 0;font-size:14px}.games-sims-info-packs li small{align-self:center;direction:ltr}.games-sims-info-requirements{margin-top:24px}.games-sims-info-requirements h4{font-size:14px;font-weight:600;margin:0 0 12px}.games-sims-info-requirements>div{padding:14px 16px;border-radius:8px;background:var(--color-elevated);margin-top:8px}.games-sims-info-requirements strong{font-size:14px}.games-sims-info-requirements small{display:block;margin-top:5px}.games-sims-info-requirements p{margin:8px 0 0;font-size:13px}.games-sims-info-source{display:block;margin-top:20px}
+@media(prefers-reduced-motion:reduce){.games-sims-info-loading>svg{animation:none}}
+
+.games-sims-tray-preview{position:relative;display:grid;place-items:center;flex:none;width:144px;aspect-ratio:3/2;overflow:hidden;border-radius:var(--radius-sm);background:var(--color-surface)}.games-sims-tray-preview>img{width:100%;height:100%;object-fit:contain}.games-sims-tray-preview .games-sims-tray-icon{width:40px;height:40px}@media(max-width:650px){.games-sims-tray-preview{width:120px}}@media(max-width:420px){.games-sims-tray-preview{width:96px}.games-sims-tray-main{flex-basis:calc(100% - 112px)}.games-sims-tray>article>button{margin-inline-start:112px;max-width:calc(100% - 112px)}}
+
+.games-sims-review-creation{display:flex;align-items:center;gap:20px}.games-sims-review-creation>img{width:160px;aspect-ratio:3/2;object-fit:contain;flex:none;background:var(--color-surface);border-radius:var(--radius-sm)}.games-sims-review-creation>h3{min-width:0;overflow-wrap:anywhere}@media(max-width:420px){.games-sims-review-creation{gap:14px}.games-sims-review-creation>img{width:112px}}
+
+.games-sims-kept-files>summary>span{min-width:0}.games-sims-kept-files>summary>svg{flex:none}.games-sims-kept-files .games-sims-backups{max-height:340px;overflow:auto}.games-sims-kept-files article>div{min-width:0}.games-sims-kept-files button{flex:none}
+
+.games-sims-catalog { display: grid; grid-template-columns: minmax(0,1fr) minmax(280px,360px); gap: 32px; margin: 28px 0; padding: 24px; border-radius: 12px; background: var(--color-surface); }
+.games-sims-creator-copy h3 { margin: 8px 0; font-size: 24px; font-weight: 650; }
+.games-sims-creator-copy p { max-width: 45ch; }
+.games-sims-creator-copy > small, .games-sims-creator-controls > small { color: var(--color-ink-muted); }
+.games-sims-creator-controls { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.games-sims-creator-controls p, .games-sims-creator-copy p { margin: 0 0 12px; color: var(--color-ink-muted); line-height: 1.55; }
+.games-sims-creator-controls .games-sims-actions { gap: 12px; }
+.games-sims-creator-controls .games-sims-warning { color: var(--color-ink); }
+.games-sims-creator-provenance { line-height: 1.6; }
+.games-sims-creator-target { display: flex; flex-direction: column; gap: 6px; width: 100%; min-width: 0; }
+.games-sims-creator-target > small { color: var(--color-ink-muted); }
+.games-sims-lot51 { container-type: inline-size; padding-block: 28px; border-top: 1px solid var(--color-edge-soft); }
+.games-sims-lot51-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+.games-sims-lot51 h3 { font-size: 20px; font-weight: 650; margin: 4px 0; }
+.games-sims-lot51 small, .games-sims-lot51 p { color: var(--color-ink-muted); }
+.games-sims-lot51-search { display: flex; gap: 8px; align-items: center; background: var(--color-elevated); padding: 10px 12px; border-radius: 8px; min-width: 0; }
+.games-sims-lot51-search input { width: 180px; min-width: 0; background: transparent; outline: none; }
+.games-sims-lot51-search:focus-within { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.games-sims-lot51-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 16px; }
+.games-sims-lot51-card { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; min-width: 0; text-align: start; background: var(--color-surface); border-radius: 10px; overflow: hidden; padding-bottom: 14px; }
+.games-sims-lot51-card:hover, .games-sims-lot51-card[aria-pressed="true"] { background: var(--color-elevated); }
+.games-sims-lot51-card:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.games-sims-lot51-art { display: grid; place-items: center; height: 132px; background: var(--color-elevated); }
+.games-sims-lot51-art img { height: 100%; width: 100%; object-fit: contain; }
+.games-sims-lot51-card-title { display: flex; gap: 10px; align-items: center; padding: 14px 14px 0; font-weight: 600; }
+.games-sims-lot51-card-title > .games-sims-lot51-image { width: 36px; height: 36px; object-fit: contain; }
+.games-sims-lot51-card-title small { display: block; font-size: 12px; font-weight: 400; }
+.games-sims-lot51-card p { font-size: 13px; line-height: 1.5; margin: 10px 14px 0; }
+.games-sims-lot51 > .games-detail-text-button { margin-top: 16px; }
+.games-sims-lot51-detail { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--color-edge-soft); display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px; }
+.games-sims-lot51-detail-title { display: flex; gap: 14px; align-items: center; }
+.games-sims-lot51-detail-title > .games-sims-lot51-image { width: 56px; height: 56px; object-fit: contain; }
+.games-sims-lot51-detail-title small { display: block; font-size: 13px; font-weight: 400; }
+.games-sims-lot51-detail p { font-size: 14px; line-height: 1.6; margin: 14px 0; max-width: 65ch; }
+.games-sims-lot51-detail p .games-detail-text-button { display: flex; margin-top: 8px; }
+@container (max-width: 600px) { .games-sims-lot51-detail { grid-template-columns: minmax(0, 1fr); gap: 20px; } }
+@media(max-width:700px) { .games-sims-catalog { grid-template-columns: minmax(0,1fr); padding: 20px; gap: 20px; } }
+
+.games-sims-lot51-art-fallback { display: block; width: 48px; height: 48px; flex-shrink: 0; background: var(--color-ink-muted); mask-size: contain; mask-repeat: no-repeat; mask-position: center; }
+
+.games-sims-lot51-image { position: relative; display: grid; place-items: center; width: 100%; height: 100%; flex-shrink: 0; }
+.games-sims-lot51-image > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; }
+.games-sims-lot51-image > img.is-loaded { opacity: 1; }
+.games-sims-lot51-image > .games-sims-lot51-art-fallback { max-width: 65%; max-height: 65%; }
+
+.games-sims-mts{margin-block:24px;container-type:inline-size}
+.games-sims-mts-browser{scroll-margin-block-start:80px}
+.games-sims-mts-filters{display:flex;align-items:end;flex-wrap:wrap;gap:12px;border:0;margin:0;padding:0;min-width:0}
+.games-sims-mts-filters>div{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0;flex:1 1 160px}
+.games-sims-mts-filters small,.games-sims-mts-search>span:first-child{font-size:12px;color:var(--color-ink-muted)}
+.games-sims-mts-search{display:grid;gap:8px;flex:2 1 240px;min-width:0}
+.games-sims-mts-search>span:last-child{display:flex;align-items:center;gap:10px;background:var(--color-elevated);border-radius:8px;padding-inline:12px}
+.games-sims-mts-search input{border:0;background:none;min-width:0;width:100%;padding-block:12px;color:var(--color-ink)}
+.games-sims-mts-search svg{flex:none;color:var(--color-ink-muted)}
+.games-sims-mts-results-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px}
+.games-sims-mts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:24px 16px;margin-block:16px 24px}
+.games-sims-mts-card{display:flex;flex-direction:column;align-items:stretch;gap:7px;min-width:0;padding:0;border:0;border-radius:10px;background:none;color:var(--color-ink);text-align:start;cursor:pointer;overflow-wrap:anywhere}
+.games-sims-mts-card:disabled{cursor:default;opacity:.55}
+.games-sims-mts-card .games-sims-mts-art{width:100%;margin-bottom:5px}
+.games-sims-mts-card strong{font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.games-sims-mts-card small,.games-sims-mts-card>span:last-child{font-size:12px;line-height:1.5;color:var(--color-ink-muted)}
+.games-sims-mts-card>span:last-child{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.games-sims-mts-card:hover .games-sims-mts-art{background:var(--color-hover)}
+.games-sims-mts-card:focus-visible{outline:2px solid var(--color-ink);outline-offset:5px}
+.games-sims-mts-pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.games-sims-mts-pagination>span{font-size:12px;color:var(--color-ink-muted)}
+.games-sims-mts-pagination svg:dir(rtl),.games-sims-mts-back svg:dir(rtl){transform:scaleX(-1)}
+.games-sims-mts-attribution{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px;color:var(--color-ink-muted)}
+.games-sims-mts-back,.games-sims-mts-paste{margin-block:20px}
+.games-sims-mts-paste>summary{cursor:pointer;font-size:13px;color:var(--color-ink-muted)}
+.games-sims-mts-paste[open]>.games-sims-mts-form{margin-top:16px}
+@container(max-width:520px){.games-sims-mts-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 12px}.games-sims-mts-filters>div{flex-basis:120px}.games-sims-mts-filters>button{width:100%}}
+@container(max-width:360px){.games-sims-mts-filters>div{flex-basis:100%}}
+.games-sims-mts-form{display:flex;align-items:end;gap:12px;flex-wrap:wrap}
+.games-sims-mts-form label{display:grid;gap:8px;flex:1;min-width:min(100%,260px)}
+.games-sims-mts-form label>span,.games-sims-mts-choices small{font-size:12px;color:var(--color-ink-muted)}
+.games-sims-mts-form input{width:100%;min-width:0;padding:12px;border:0;border-radius:8px;background:var(--color-elevated);color:var(--color-ink)}
+.games-sims-mts-form>.games-detail-text-button{align-self:center;margin-top:22px}
+.games-sims-mts .games-detail-text-button{display:inline-flex;align-items:center;gap:6px}
+.games-sims-mts-managed{margin-top:20px}.games-sims-mts-managed>summary{display:inline-flex;gap:8px;align-items:center;cursor:pointer;font-size:13px}
+.games-sims-mts-managed>div{display:grid;gap:12px;margin-top:14px}.games-sims-mts-managed button{justify-self:start;text-align:start;overflow-wrap:anywhere}
+.games-sims-mts-detail{display:grid;grid-template-columns:140px minmax(0,1fr);gap:24px;margin-top:24px;padding-top:24px;border-top:1px solid var(--color-edge-soft)}
+.games-sims-mts-art{width:140px;aspect-ratio:1;position:relative;display:grid;place-items:center;background:var(--color-elevated);border-radius:10px;overflow:hidden}
+.games-sims-mts-art>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0}.games-sims-mts-art>img.is-loaded{opacity:1}
+.games-sims-mts-art>span{width:44px;height:44px;background:var(--color-ink-muted);mask-size:contain;mask-repeat:no-repeat;mask-position:center}
+.games-sims-mts-art>svg{animation:sims-spin 1s linear infinite;color:var(--color-ink-muted)}
+.games-sims-mts-content{min-width:0;overflow-wrap:anywhere}.games-sims-mts-content h3{font-size:18px;margin:5px 0 10px}.games-sims-mts-content p{font-size:14px;line-height:1.6;max-width:65ch}
+.games-sims-mts-choices{display:flex;flex-wrap:wrap;gap:16px;margin-top:20px}.games-sims-mts-choices>div{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0;max-width:100%;flex:1 1 200px}
+.games-sims-mts-choices>div>div{min-width:0;max-width:100%}
+@container(max-width:520px){.games-sims-mts-detail{grid-template-columns:minmax(0,1fr);gap:16px}.games-sims-mts-art{width:120px}.games-sims-mts-form>.games-detail-text-button{margin-top:0}}
+@media(prefers-reduced-motion:reduce){.games-sims-mts-art>svg{animation:none}}
+.games-sims .games-sims-lot51-search input:focus, .games-sims .games-sims-lot51-search input:focus-visible { outline: none !important; box-shadow: none; }
+.games-sims-duplicates-intro,.games-sims-duplicates-progress{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.games-sims-duplicates-intro p{max-width:66ch;flex:1;min-width:min(100%,220px)}
+.games-sims-duplicates-progress p{display:flex;align-items:center;gap:10px;min-width:0}
+.games-sims-duplicates-progress small{display:block;overflow-wrap:anywhere}
+.games-sims-duplicates-progress svg{flex:none;animation:sims-spin 1s linear infinite}
+.games-sims-duplicates-results{display:grid;gap:16px;margin-block:16px}
+.games-sims-duplicates-results article{padding-block:8px;min-width:0}
+.games-sims-duplicates-results article>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.games-sims-duplicates-results ul{list-style:none;padding:0;margin:10px 0 0}
+.games-sims-duplicates-results li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px;border-top:1px solid var(--color-edge-soft);flex-wrap:wrap}
+.games-sims-duplicates-results li>div:first-child{flex:1;min-width:min(100%,200px);overflow-wrap:anywhere}
+.games-sims-duplicates-results li span{display:block;color:var(--color-ink-muted);font-size:13px}
+@media(prefers-reduced-motion:reduce){.games-sims-duplicates-progress svg{animation:none}}
+
+.games-sims-dependency-results{margin-top:20px}.games-sims-dependency-results>article{padding:20px 0;border-top:1px solid var(--color-edge-soft);overflow-wrap:anywhere}.games-sims-dependency-results header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.games-sims-dependency-results h3{font-size:15px;font-weight:600;margin:5px 0 0}.games-sims-dependency-results header>span{font-size:12px;flex:none;max-width:42%;text-align:end}.games-sims-dependency-results p{margin:8px 0;font-size:13px}.games-sims-dependency-results .games-detail-text-button{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:13px}.games-sims-dependency-results details{margin-top:12px;font-size:12px}.games-sims-dependency-results summary{display:inline-flex;align-items:center;gap:8px;cursor:pointer}.games-sims-dependency-results details[open] summary svg{transform:rotate(180deg)}.games-sims-dependency-results li{padding:5px 0;color:var(--color-ink-muted)}.games-sims-dependency-results .games-sims-info-source{margin-top:12px}
+.games-sims-pack-check{margin-bottom:24px}
+.games-sims-pack-actions{margin:12px 0;min-width:0}.games-sims-pack-actions>small{display:block;margin-top:8px;color:var(--color-ink-muted)}.games-sims-pack-actions .games-sims-pending{padding:0}
+.games-sims-pack-requirements{margin:20px 0;font-size:13px;min-width:0}.games-sims-pack-requirements>strong{display:block;font-size:14px}
+.games-sims-pack-list{list-style:none;padding:0!important;margin:8px 0!important;max-height:none!important;overflow:visible!important}
+.games-sims-pack-list>li{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--color-edge-soft);font-size:14px}
+.games-sims-pack-list>li>span:first-child{min-width:0;overflow-wrap:anywhere}.games-sims-pack-list small{display:block;font-size:11px;color:var(--color-ink-muted)}
+.games-sims-pack-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--color-ink-muted);flex-shrink:0}.games-sims-pack-status svg{flex-shrink:0}.games-sims-pack-status.is-found svg{color:var(--color-success)}
+.games-sims-pack-scope{display:block;color:var(--color-ink-muted);line-height:1.5}
+.games-sims-pack-status.is-conflict svg{color:var(--color-danger)}
+.games-sims-pack-launch{margin-block:12px;line-height:1.5}.games-sims-pack-launch>small{display:block;overflow-wrap:anywhere}
+.games-sims-installations{display:grid;gap:6px;margin-bottom:14px}.games-sims-installations>small{margin-bottom:3px}
+.games-sims-installations>button{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border-radius:6px;background:var(--color-elevated);text-align:start}.games-sims-installations>button:hover{background:var(--color-raised)}.games-sims-installations>button:disabled{opacity:.5;cursor:default}
+.games-sims-installation-label{min-width:0;flex:1}.games-sims-installations strong{display:block;font-size:13px;font-weight:600}.games-sims-installations small{display:block;overflow-wrap:anywhere;font-size:12px}.games-sims-installations svg{flex-shrink:0}
+.games-sims-installations>button:focus-visible{outline:2px solid var(--color-ink);outline-offset:-2px}
+.games-sims-installations:dir(rtl) .lucide-chevron-right{transform:scaleX(-1)}
+.games-sims-installation-options{margin-bottom:14px}.games-sims-installation-options>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;font-size:13px;min-height:36px}.games-sims-installation-options[open]>summary svg{transform:rotate(180deg)}.games-sims-installation-options .games-sims-installations{margin:8px 0 0}
+@media(max-width:500px){.games-sims-pack-list>li{align-items:flex-start;gap:6px;flex-direction:column}.games-sims-pack-actions .games-button{white-space:normal;text-align:start}}

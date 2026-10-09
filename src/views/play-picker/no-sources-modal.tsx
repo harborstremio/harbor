@@ -5,7 +5,7 @@ export function NoSourcesConfiguredModal({ meta }: { meta: Meta }) {
   const { goBack, setView, openSettings } = useView();
   const title = meta.name ?? "this title";
   return (
-    <main data-tv-focus-scope className="fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-black px-6">
+    <main className="fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-black px-6">
       <div className="w-full max-w-md rounded-2xl bg-elevated p-8 ring-1 ring-edge-soft">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-ink-subtle">
           JL Media Vision
@@ -35,7 +35,6 @@ export function NoSourcesConfiguredModal({ meta }: { meta: Meta }) {
           </button>
           <button
             onClick={goBack}
-            data-tv-modal-close
             className="mt-1 text-[12.5px] text-ink-subtle transition-colors hover:text-ink-muted"
           >
             Back

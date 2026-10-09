@@ -8,6 +8,7 @@ export type PreviewMeta = {
   runtime?: string;
   genres?: string[];
   releaseInfo?: string;
+  seasonCount?: number;
 };
 
 const CAP = 200;
@@ -18,6 +19,15 @@ let chain: Promise<unknown> = Promise.resolve();
 
 registerCache("hover-preview:synopsis", () => cache.size);
 
+function seasonsOf(full: Meta): number | undefined {
+  if (full.type !== "series" || !full.videos?.length) return undefined;
+  const seasons = new Set<number>();
+  for (const v of full.videos) {
+    if (typeof v.season === "number" && v.season >= 1) seasons.add(v.season);
+  }
+  return seasons.size || undefined;
+}
+
 function prune(full: Meta): PreviewMeta {
   return {
     description: full.description,
@@ -25,6 +35,7 @@ function prune(full: Meta): PreviewMeta {
     runtime: full.runtime,
     genres: full.genres?.slice(0, 3),
     releaseInfo: full.releaseInfo,
+    seasonCount: seasonsOf(full),
   };
 }
 

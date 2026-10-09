@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-music">
+<title id="title-music">Music anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <path class="coral" d="M12 31c0-13 8-22 20-22s20 9 20 22v14h-9V32h5c0-10-6-17-16-17S16 22 16 32h5v13h-9V31z"/>
+  <path class="gold" d="M26 25l17-4v22c0 6-10 8-10 1 0-5 5-7 8-6V27l-13 3v17c0 6-10 8-10 1 0-5 5-7 8-6V25z"/>
+
+</svg>

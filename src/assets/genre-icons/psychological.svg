@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-psychological">
+<title id="title-psychological">Psychological anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <path class="coral" d="M33 7c-13 0-22 9-22 22 0 9 5 15 12 19v9h18V46c7-4 12-11 12-19C53 15 45 7 33 7z"/>
+  <path class="icon-stroke" d="M34 17c-8 0-11 9-5 13 6 4 13-3 8-8-4-4-10 1-7 5 2 3 6 1 5-2"/>
+  <path class="gold" d="M45 40l1.5 3.5L50 45l-3.5 1.5L45 50l-1.5-3.5L40 45l3.5-1.5L45 40z"/>
+
+</svg>

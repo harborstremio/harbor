@@ -1,0 +1,20 @@
+const musicArtistExtras: Record<string, string> = {
+  "music.extras.merch": "Merchandise",
+  "music.extras.tour": "Live shows",
+  "music.extras.store": "Visit store",
+  "music.extras.tourLink": "Tour information",
+  "music.extras.official": "Artist website",
+  "music.extras.loading": "Loading artist updates…",
+  "music.extras.source": "From {source}",
+  "music.extras.event": "Event details",
+  "music.credits.title": "Credits",
+  "music.credits.main": "Main artist",
+  "music.credits.featured": "Featured artist",
+  "music.credits.composer": "Composer",
+  "music.credits.lyricist": "Lyricist",
+  "music.credits.producer": "Producer",
+  "music.credits.performer": "Performer",
+  "music.artist.readMore": "Read more",
+  "music.artist.readLess": "Show less",
+};
+export default musicArtistExtras;

@@ -1,7 +1,8 @@
 type Schedule = (task: () => void) => void;
 
 function scheduleNextPaint(task: () => void): void {
-  if (typeof requestAnimationFrame === "function") {
+  const hidden = typeof document !== "undefined" && document.hidden;
+  if (!hidden && typeof requestAnimationFrame === "function") {
     requestAnimationFrame(() => task());
     return;
   }

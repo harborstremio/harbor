@@ -1,104 +1,75 @@
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { Dropdown } from "@/components/dropdown";
+import { Clock, UserCheck } from "../icons";
 import { useProfiles } from "@/lib/profiles";
+import { PickerBackground } from "./picker-background";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { ROW_DESC, Segmented } from "../shared";
+import { SettingGroup, SettingRow } from "../kit";
 
 const INTERVALS = [
-  ["launch", "Every launch"],
-  ["15m", "Every 15 min"],
-  ["30m", "Every 30 min"],
-  ["never", "Never"],
+  { value: "launch", label: "Every launch" },
+  { value: "15m", label: "Every 15 min" },
+  { value: "30m", label: "Every 30 min" },
+  { value: "never", label: "Never" },
 ] as const;
+
+type Interval = (typeof INTERVALS)[number]["value"];
 
 export function StartupDefaults() {
   const t = useT();
   const { settings, update } = useSettings();
   const { profiles } = useProfiles();
-  const [open, setOpen] = useState(false);
   if (profiles.length <= 1) return null;
   const interval = settings.profilePromptInterval ?? "launch";
   const defaultId = settings.defaultProfileId ?? "";
-  const defaultName = defaultId
-    ? profiles.find((p) => p.id === defaultId)?.name ?? t("Ask each time")
-    : t("Ask each time");
-  const intervalLabel = t(INTERVALS.find(([v]) => v === interval)?.[1] ?? "Every launch");
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-edge-soft/60 bg-canvas/30 p-3">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center justify-between gap-3 text-start"
-      >
-        <div className="flex min-w-0 flex-col">
-          <span className="text-[13px] font-medium text-ink">{t("Startup & default")}</span>
-          <span className="truncate text-[11.5px] text-ink-subtle">
-            {t("Who's watching: {a} · Default: {b}", { a: intervalLabel, b: defaultName })}
-          </span>
-        </div>
-        <ChevronDown
-          size={16}
-          className={`shrink-0 text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-      {open && (
-        <div className="flex flex-col gap-4 pt-1">
-          <div className="flex flex-col gap-2">
-            <span className="text-[12.5px] text-ink-muted">
-              {t("How often the profile screen appears when you have more than one profile.")}
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {INTERVALS.map(([val, label]) => {
-                const active = interval === val;
-                return (
-                  <button
-                    key={val}
-                    type="button"
-                    onClick={() => update({ profilePromptInterval: val })}
-                    className={`h-9 rounded-full border px-4 text-[13px] font-medium transition-colors ${
-                      active
-                        ? "border-ink bg-ink text-canvas"
-                        : "border-edge-soft bg-canvas/60 text-ink-muted hover:border-ink-subtle hover:text-ink"
-                    }`}
-                  >
-                    {t(label)}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          {profiles.length > 1 && (
-            <div className="flex flex-col gap-2">
-              <span className="text-[12.5px] text-ink-muted">
-                {t("Skip Who's watching and always start as this profile. PIN-locked profiles can't be a default.")}
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { id: "", label: t("Ask each time") },
-                  ...profiles.filter((p) => !p.passwordHash).map((p) => ({ id: p.id, label: p.name })),
-                ].map(({ id, label }) => {
-                  const active = defaultId === id;
-                  return (
-                    <button
-                      key={id || "ask"}
-                      type="button"
-                      onClick={() => update({ defaultProfileId: id })}
-                      className={`h-9 rounded-full border px-4 text-[13px] font-medium transition-colors ${
-                        active
-                          ? "border-ink bg-ink text-canvas"
-                          : "border-edge-soft bg-canvas/60 text-ink-muted hover:border-ink-subtle hover:text-ink"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+    <>
+      <SettingGroup label={t("Startup & default")}>
+        <SettingRow
+          wide
+          icon={<Clock size={18} strokeWidth={2} />}
+          label={t("Who's watching")}
+          desc={t(
+            "Choose when Harbor asks you to pick a profile. Timed prompts appear when you return to Harbor.",
           )}
-        </div>
-      )}
-    </div>
+        >
+          <Segmented<Interval>
+            value={interval}
+            options={INTERVALS.map((o) => ({ ...o, label: t(o.label) }))}
+            onChange={(v) => update({ profilePromptInterval: v })}
+          />
+        </SettingRow>
+        <SettingRow
+          icon={<UserCheck size={18} strokeWidth={2} />}
+          label={t("Start as")}
+          desc={t(
+            "Open this profile at launch. Timed prompts can still appear later. Profiles with a PIN cannot be a default.",
+          )}
+        >
+          <div className="w-[280px] max-w-full">
+            <Dropdown
+              value={defaultId}
+              onChange={(v) => update({ defaultProfileId: v })}
+              options={[
+                { value: "", label: t("No default profile") },
+                ...profiles
+                  .filter((p) => !p.passwordHash)
+                  .map((p) => ({ value: p.id, label: p.name })),
+              ]}
+            />
+          </div>
+        </SettingRow>
+      </SettingGroup>
+      <SettingGroup label={t("Who's watching background")}>
+        <p className={`max-w-[70ch] ${ROW_DESC}`}>
+          {t(
+            "Shown behind the profile picker only. It does not change the app theme or wallpaper.",
+          )}
+        </p>
+        <PickerBackground />
+      </SettingGroup>
+    </>
   );
 }

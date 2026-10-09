@@ -3,7 +3,10 @@
 ## Task Completion Requirements
 
 - Run `pnpm run check` (`vp check`) for files changed by the task before considering it complete.
-- Run `pnpm run typecheck` (`tsc -b --pretty false`) after TypeScript changes.
+- Run `pnpm run typecheck` (`tsc --noEmit -p tsconfig.json`) after TypeScript changes.
+  Never use `tsc -b` for a typecheck. It emits `vite.config.js` and `vite.config.d.ts`
+  (both gitignored) and writing them restarts the dev server, killing hot reload.
+  `tsc -b` belongs only in the `build` scripts, where emitting is intended.
 - Run `cargo check --manifest-path src-tauri/Cargo.toml` after Rust changes.
 - Run `pnpm tauri:build:linux-system` (`tauri build --config src-tauri/tauri.linux-system.conf.json`) to build the full Linux binary.
 - Test platform-specific changes on the affected platform when possible.

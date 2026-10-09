@@ -5,7 +5,9 @@ import { saveImageToDisk, saveTrailerToDisk } from "@/lib/download/save-binary";
 import { t } from "@/lib/i18n";
 import type { TmdbDetail } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
-import { setTitleLogo } from "@/lib/title-logo";
+import { clearTitleBackdrop, setTitleBackdrop, useTitleBackdrop } from "@/lib/title-backdrop";
+import { clearTitleLogo, setTitleLogo, useTitleLogo } from "@/lib/title-logo";
+import { clearTitlePoster, setTitlePoster, useTitlePoster } from "@/lib/title-poster";
 import { resolveTrailerQuality } from "@/lib/trailer";
 import { TrailerOverlay } from "./trailer-overlay";
 import { MediaLightbox } from "./media-lightbox";
@@ -84,12 +86,46 @@ export function MediaGallery({
     [settings.theme, update, flash],
   );
 
+  const pinnedLogo = useTitleLogo(metaId);
   const setLogo = useCallback(
     (url: string) => {
+      if (pinnedLogo === url) {
+        clearTitleLogo(metaId);
+        flash(t("Logo reset to default"));
+        return;
+      }
       setTitleLogo(metaId, url);
       flash(t("Set as show logo"));
     },
-    [metaId, flash],
+    [metaId, pinnedLogo, flash],
+  );
+
+  const pinnedPoster = useTitlePoster(metaId);
+  const setPoster = useCallback(
+    (url: string) => {
+      if (pinnedPoster === url) {
+        clearTitlePoster(metaId);
+        flash(t("Poster reset to default"));
+        return;
+      }
+      setTitlePoster(metaId, url);
+      flash(t("Set as show poster"));
+    },
+    [metaId, pinnedPoster, flash],
+  );
+
+  const pinnedBackdrop = useTitleBackdrop(metaId);
+  const setShowBackdrop = useCallback(
+    (url: string) => {
+      if (pinnedBackdrop === url) {
+        clearTitleBackdrop(metaId);
+        flash(t("Backdrop reset to default"));
+        return;
+      }
+      setTitleBackdrop(metaId, url);
+      flash(t("Set as show backdrop"));
+    },
+    [metaId, pinnedBackdrop, flash],
   );
 
   if (tabs.length === 0) return null;
@@ -117,21 +153,24 @@ export function MediaGallery({
         </div>
       </div>
 
+      <div key={current} className="animate-media-swap motion-reduce:animate-none">
       {current === "videos" && (
-        <MediaRail>
+        <MediaRail min={300}>
           {videos.map((v) => (
             <VideoTile key={v.ytId} v={v} onPlay={() => setTrailer(v.ytId)} onDownload={() => downloadVideo(v)} />
           ))}
         </MediaRail>
       )}
       {current === "backdrops" && (
-        <MediaRail>
+        <MediaRail min={300}>
           {backdrops.map((src, i) => (
             <ImageTile
               key={src}
               src={src}
               ratio="landscape"
               pinnable
+              backdropPinned={pinnedBackdrop === src}
+              onSetShowBackdrop={() => setShowBackdrop(src)}
               onOpen={() => setLightbox({ images: backdrops, index: i, kind: "backdrops" })}
               onDownload={() => downloadImage(src, "backdrop", i)}
               onSetBackdrop={() => setBackdrop(src)}
@@ -140,12 +179,14 @@ export function MediaGallery({
         </MediaRail>
       )}
       {current === "posters" && (
-        <MediaRail>
+        <MediaRail min={160}>
           {posters.map((src, i) => (
             <ImageTile
               key={src}
               src={src}
               ratio="portrait"
+              posterPinned={pinnedPoster === src}
+              onSetPoster={() => setPoster(src)}
               onOpen={() => setLightbox({ images: posters, index: i, kind: "posters" })}
               onDownload={() => downloadImage(src, "poster", i)}
             />
@@ -153,11 +194,12 @@ export function MediaGallery({
         </MediaRail>
       )}
       {current === "logos" && (
-        <MediaRail>
+        <MediaRail min={220}>
           {logos.map((src, i) => (
             <LogoTile
               key={src}
               src={src}
+              pinned={pinnedLogo === src}
               onOpen={() => setLightbox({ images: logos, index: i, kind: "logos" })}
               onDownload={() => downloadImage(src, "logo", i)}
               onSetLogo={() => setLogo(src)}
@@ -165,6 +207,7 @@ export function MediaGallery({
           ))}
         </MediaRail>
       )}
+      </div>
 
       {trailer && <TrailerOverlay id={trailer} title={title} logo={logo} onClose={() => setTrailer(null)} />}
       {lightbox &&

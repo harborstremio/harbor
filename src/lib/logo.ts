@@ -1,5 +1,6 @@
 import { lruSet } from "@/lib/cache";
 import { meta as fetchCinemeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
+import { ensureCuratedLogos, peekCuratedLogo } from "@/lib/curated-logos";
 import { registerEvictable } from "@/lib/maintenance";
 import { registerCache } from "@/lib/memory-profiler";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
@@ -8,7 +9,8 @@ import { externalToKitsu } from "@/lib/providers/anime-mapping";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import { fetchTvdbArtwork } from "@/lib/providers/tvdb-proxy";
 import { tmdbAnimeLogo, tmdbIdFromImdb, tmdbImdbId, tmdbLogo } from "@/lib/providers/tmdb";
-import { shouldLocalizePosters } from "@/lib/providers/tmdb/tmdb-image-lang";
+import { imageLangParam, shouldLocalizePosters } from "@/lib/providers/tmdb/tmdb-image-lang";
+import { getTitleLogo } from "@/lib/title-logo";
 
 const CACHE_MAX = 1200;
 const cache = new Map<string, string | undefined>();
@@ -17,9 +19,8 @@ const inflight = new Map<string, Promise<string | undefined>>();
 registerCache("logo:url", () => cache.size);
 registerCache("logo:inflight", () => inflight.size);
 
-registerEvictable("logo", (aggressive) => {
-  if (!aggressive) return;
-  cache.clear();
+registerEvictable("logo", () => {
+  inflight.clear();
 });
 
 const isAnimeLogoId = (id: string) => /^(kitsu|mal|anilist|anidb):/.test(id);
@@ -34,9 +35,15 @@ export async function resolveLogo(
   meta: Meta,
   opts?: { preferOwn?: boolean },
 ): Promise<string | undefined> {
+  const pinned = getTitleLogo(meta.id);
+  if (pinned) return pinned;
+  await ensureCuratedLogos();
+  const curated = peekCuratedLogo(meta.id);
+  const localize = preferTmdbLogo(tmdbKey, meta);
+  if (curated && !localize) return curated;
   const preferOwn = opts?.preferOwn === true && isAnimeLogoId(meta.id);
   if (meta.logo && !preferOwn && !preferTmdbLogo(tmdbKey, meta)) return meta.logo;
-  const cacheKey = `${meta.id}::${tmdbKey ? "k" : "n"}`;
+  const cacheKey = `${meta.id}::${tmdbKey ? "k" : "n"}::${imageLangParam(meta.originalLanguage)}`;
   const cached = cache.get(cacheKey);
   if (cached) return cached;
   const existing = inflight.get(cacheKey);
@@ -44,7 +51,7 @@ export async function resolveLogo(
   const p = doResolve(tmdbKey, meta).then((url) => {
     if (url) lruSet(cache, cacheKey, url, CACHE_MAX);
     inflight.delete(cacheKey);
-    return url ?? meta.logo;
+    return url ?? curated ?? meta.logo;
   });
   inflight.set(cacheKey, p);
   return p;
@@ -55,8 +62,12 @@ export function peekCachedLogo(
   meta: Meta,
   opts?: { preferOwn?: boolean },
 ): string | undefined {
+  const pinned = getTitleLogo(meta.id);
+  if (pinned) return pinned;
+  const curated = peekCuratedLogo(meta.id);
+  if (curated) return curated;
   const preferOwn = opts?.preferOwn === true && isAnimeLogoId(meta.id);
-  const cacheKey = `${meta.id}::${tmdbKey ? "k" : "n"}`;
+  const cacheKey = `${meta.id}::${tmdbKey ? "k" : "n"}::${imageLangParam(meta.originalLanguage)}`;
   if (preferOwn || preferTmdbLogo(tmdbKey, meta)) return cache.get(cacheKey);
   if (meta.logo) return meta.logo;
   return cache.get(cacheKey);
@@ -71,16 +82,20 @@ async function doResolve(tmdbKey: string, m: Meta): Promise<string | undefined> 
         if (localized) return localized;
       }
     }
-    const full = await fetchCinemeta(narrowMediaType(m.type),m.id);
+    const full = await fetchCinemeta(narrowMediaType(m.type), m.id);
     return full?.logo;
   }
   if (m.id.startsWith("tmdb:")) {
     if (tmdbKey) {
+      const tt = await tmdbImdbId(tmdbKey, m.id);
       const fromTmdb = await tmdbLogo(tmdbKey, m.id, m.originalLanguage);
       if (fromTmdb) return fromTmdb;
-      const tt = await tmdbImdbId(tmdbKey, m.id);
       if (tt) {
-        const full = await fetchCinemeta(narrowMediaType(m.type),tt);
+        const curated = peekCuratedLogo(tt);
+        if (curated) return curated;
+      }
+      if (tt) {
+        const full = await fetchCinemeta(narrowMediaType(m.type), tt);
         if (full?.logo) return full.logo;
       }
     }
@@ -92,21 +107,26 @@ async function doResolve(tmdbKey: string, m: Meta): Promise<string | undefined> 
     m.id.startsWith("anilist:") ||
     m.id.startsWith("anidb:")
   ) {
-    const akm = await animeKitsuMeta(m.id);
     const kind = m.type === "movie" ? "movie" : "tv";
+    let kitsuId = parseKitsuId(m.id);
+    if (kitsuId == null) {
+      const ext = m.id.match(/^(mal|anilist|anidb):(\d+)/);
+      if (ext) {
+        const src = ext[1] === "mal" ? "myanimelist" : ext[1];
+        const idNum = Number(ext[2]);
+        if (Number.isFinite(idNum)) kitsuId = await externalToKitsu(src, idNum).catch(() => null);
+      }
+    }
+    const canonicalId = kitsuId != null ? `kitsu:${kitsuId}` : m.id;
+    const akm = await animeKitsuMeta(canonicalId).catch(() => null);
     const year = akm?.releaseInfo ?? m.releaseInfo;
+    if (akm?.logo) return akm.logo;
     if (isDerivedAnimeFormat(m.animeFormat)) {
       if (tmdbKey && m.name) {
         const hit = await tmdbAnimeLogo(tmdbKey, m.name, year, kind, { exact: true });
         if (hit?.logo) return hit.logo;
       }
       return undefined;
-    }
-    if (akm?.logo) return akm.logo;
-    let kitsuId = parseKitsuId(m.id);
-    if (kitsuId == null && m.id.startsWith("mal:")) {
-      const malId = Number(m.id.slice(4));
-      if (Number.isFinite(malId)) kitsuId = await externalToKitsu("myanimelist", malId).catch(() => null);
     }
     if (kitsuId != null) {
       const art = await fetchTvdbArtwork({ kitsuId }).catch(() => null);

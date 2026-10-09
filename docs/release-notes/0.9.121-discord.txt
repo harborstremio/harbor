@@ -1,0 +1,30 @@
+# <:harbor:1528569473659834459> Harbor Update
+
+**Hey @everyone!**
+[Beta] v0.9.121 is live. <:hooray:1528571878866948258>
+
+**What's included:**
+
+**Books, home servers, and languages**
+
+> - A complete eBook library and reader
+> - Plex, Jellyfin, and Emby playback with local/online version selection
+> - Full interface localization across 15 languages
+
+**Playback and subtitles**
+
+> - Faster subtitle discovery, stronger Arabic matching, and up to 15 valid results
+> - Your latest selected subtitle and saved Live Sync correction return immediately
+> - Continue Watching, Simkl, trailers, source filtering, calendar, themes, controllers, and Live TV received major fixes
+
+**Updating Harbor**
+
+> - The new Windows installer is ready while older NSIS installations remain fully supported
+
+The full details and contributor credits are available in the in-app changelog.
+
+-# [STABLE] Download the latest stable [here](https://github.com/harborstremio/harbor/releases)
+-# [BETA] Download the latest beta using the in-app updater (Settings --> Advanced --> Updates)
+
+-# Thanks for all the testing and feedback — it really helps us improve.
+//J <:love:1528571945677754398>

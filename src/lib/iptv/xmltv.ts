@@ -71,8 +71,8 @@ export async function fetchAndParseXmltv(
       received += first.value.byteLength;
       if (first.value[0] === 0x1f && first.value[1] === 0x8b) {
         console.info("[epg] gzip payload detected, inflating");
-        const firstChunk = new Uint8Array(first.value);
-        reader = new ReadableStream<Uint8Array<ArrayBuffer>>({
+        const firstChunk = first.value;
+        reader = new ReadableStream<Uint8Array>({
           start(c) {
             c.enqueue(firstChunk);
           },
@@ -89,7 +89,7 @@ export async function fetchAndParseXmltv(
                 c.error(new Error("EPG exceeds 200MB limit"));
                 return;
               }
-              c.enqueue(new Uint8Array(value));
+              c.enqueue(value);
             }
           },
         })
@@ -136,9 +136,7 @@ export async function fetchAndParseXmltv(
     buffer += decoder.decode();
     drainBlocks(buffer, out, channelMeta);
     const totalSec = ((Date.now() - startedAt) / 1000).toFixed(1);
-    console.info(
-      `[epg] parsed ${out.length} programs, ${channelMeta.size} channel defs, ${(received / 1024 / 1024).toFixed(1)}MB in ${totalSec}s from ${url}`,
-    );
+    console.info(`[epg] parsed ${out.length} programs, ${channelMeta.size} channel defs, ${(received / 1024 / 1024).toFixed(1)}MB in ${totalSec}s from ${url}`);
     return { programs: out, channelMeta };
   } finally {
     if (stallTimer) clearTimeout(stallTimer);
@@ -285,10 +283,7 @@ export function indexProgramsByChannel(programs: EpgProgram[]): Map<string, EpgP
   return map;
 }
 
-export function findCurrent(
-  arr: EpgProgram[] | undefined,
-  nowMs: number,
-): {
+export function findCurrent(arr: EpgProgram[] | undefined, nowMs: number): {
   current: EpgProgram | null;
   next: EpgProgram | null;
 } {

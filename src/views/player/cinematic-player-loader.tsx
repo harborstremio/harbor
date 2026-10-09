@@ -1,17 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { HarborLoader } from "@/components/harbor-loader";
+import { CustomArtwork } from "@/components/custom-artwork";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
-import { getPlaybackPosition, usePlaybackFlag } from "@/lib/player/playback-clock";
 import { isLocalUrl } from "@/lib/player/local-url";
+import { usePlaybackPositionGated } from "@/lib/player/playback-clock";
 import type { PlayerSrc } from "@/lib/view";
 import { Topbar } from "@/chrome/topbar";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
+import { resolveLogo } from "@/lib/logo";
+import { useSettings } from "@/lib/settings";
+import { useTitleLogo } from "@/lib/title-logo";
 import { LoaderLogoOrText } from "./loader-logo-or-text";
 import { readinessScore, type EngineStats } from "@/lib/torrent/engine-stats";
 import { isBundledEngineUrl, isLocalEngineUrl } from "@/lib/stremio-server";
 import { StreamLoadingBar } from "./stream-loading-bar";
-import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
+import { useP2pPreparingStatus } from "./use-p2p-preparing-status";
+import { useMedia } from "@/components/hover-preview/scene";
 
 const LOADER_BUBBLES = [8, 20, 33, 47, 60, 72, 85, 94];
 
@@ -25,6 +30,7 @@ export function CinematicPlayerLoader({
   src,
   snap,
   forceShow,
+  failed,
   onCancel,
   engineStats,
   onShowingChange,
@@ -32,15 +38,33 @@ export function CinematicPlayerLoader({
   src: PlayerSrc;
   snap: PlayerSnapshot;
   forceShow?: boolean;
+  failed?: boolean;
   onCancel: () => void;
   engineStats?: EngineStats | null;
   onShowingChange?: (showing: boolean) => void;
 }) {
   const t = useT();
   const kid = useActiveKid();
+  const { settings } = useSettings();
+  const pinnedLogo = useTitleLogo(src.meta.id);
+  const [localizedLogo, setLocalizedLogo] = useState<string | undefined>();
+  useEffect(() => {
+    let cancelled = false;
+    setLocalizedLogo(undefined);
+    if (pinnedLogo) return;
+    void resolveLogo(settings.tmdbKey, src.meta)
+      .then((logo) => {
+        if (!cancelled) setLocalizedLogo(logo);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [pinnedLogo, settings.tmdbKey, src.meta]);
   const isLocal = isLocalUrl(src.url);
   const isInfoHash =
     (isBundledEngineUrl(src.url) || isLocalEngineUrl(src.url)) && !src.url.includes("/hlsv2/");
+  const isLocalEngine = isLocalEngineUrl(src.url) && !!src.streamRef?.infoHash;
   const enginePeers = engineStats
     ? engineStats.unchoked > 0
       ? engineStats.unchoked
@@ -51,9 +75,10 @@ export function CinematicPlayerLoader({
   const streamBytes = src.streamRef?.size ?? engineStats?.streamLen ?? null;
   const ready = isInfoHash ? readinessScore(engineStats ?? null, true) : 0;
   const heavyForP2p = isInfoHash && streamBytes != null && streamBytes > 20 * 1024 ** 3;
+  const clockTick = usePlaybackPositionGated(true);
+  void clockTick;
   const everPlayedRef = useRef(false);
-  const hasProgress = usePlaybackFlag(() => getPlaybackPosition() > 0.3);
-  if (hasProgress && (snap.durationSec > 0 || snap.status === "playing")) {
+  if (snap.firstFrameReady) {
     everPlayedRef.current = true;
   }
   const sessionKey = `${src.meta.id}::${src.episode?.season ?? ""}:${src.episode?.episode ?? ""}`;
@@ -63,7 +88,8 @@ export function CinematicPlayerLoader({
     everPlayedRef.current = false;
   }
   const showing =
-    forceShow || (!everPlayedRef.current && snap.errorCode == null && snap.status !== "ended");
+    forceShow ||
+    (!everPlayedRef.current && !failed && snap.errorCode == null && snap.status !== "ended");
   const done = !showing && snap.errorCode == null;
   const [mounted, setMounted] = useState(showing);
   useEffect(() => {
@@ -78,12 +104,19 @@ export function CinematicPlayerLoader({
     const timer = window.setTimeout(() => setMounted(false), 320);
     return () => window.clearTimeout(timer);
   }, [showing]);
+  const reducedMotion = useMedia("(prefers-reduced-motion: reduce)");
+  const prep = useP2pPreparingStatus({
+    url: src.url,
+    infoHash: src.streamRef?.infoHash ?? null,
+    fileIdx: src.streamRef?.fileIdx ?? null,
+    active: showing && isLocalEngine,
+  });
   if (!mounted) return null;
   const backdrop = src.episode?.still || src.meta.background || src.meta.poster;
   return (
     <div
       data-tauri-drag-region
-      className={`absolute inset-0 z-[80] overflow-hidden transition-opacity duration-300 ${
+      className={`harbor-connecting absolute inset-0 z-[80] overflow-hidden transition-opacity duration-300 ${
         kid ? "bg-[#0c4a6e]" : "bg-black"
       } ${showing ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
     >
@@ -93,13 +126,13 @@ export function CinematicPlayerLoader({
           src={backdrop}
           alt=""
           aria-hidden
-          className={`absolute inset-0 h-full w-full object-cover saturate-150 ${
+          className={`harbor-connecting-art absolute inset-0 h-full w-full object-cover saturate-150 ${
             kid ? "opacity-20 blur-[36px]" : "opacity-40 blur-[28px]"
           }`}
         />
       )}
       <div
-        className={`absolute inset-0 ${
+        className={`harbor-connecting-veil absolute inset-0 ${
           kid
             ? "bg-gradient-to-b from-[#3aa6c4]/85 via-[#1c789f]/88 to-[#0a3d5c]/94"
             : "bg-gradient-to-b from-black/65 via-black/55 to-black/85"
@@ -144,9 +177,12 @@ export function CinematicPlayerLoader({
       )}
       <div
         data-tauri-drag-region
-        className="relative flex h-full flex-col items-center justify-center gap-7 px-8 text-center"
+        className="harbor-connecting-body relative flex h-full flex-col items-center justify-center gap-7 px-8 text-center"
       >
-        <LoaderLogoOrText logo={src.meta.logo ?? null} fallbackText={src.meta.name ?? src.title} />
+        <LoaderLogoOrText
+          logo={pinnedLogo ?? localizedLogo ?? src.meta.logo ?? null}
+          fallbackText={src.meta.name ?? src.title}
+        />
         {src.episode && (
           <p className="text-[12.5px] font-semibold uppercase tracking-[0.32em] text-white/70">
             S{src.episode.imdbSeason ?? src.episode.season} · E
@@ -155,16 +191,62 @@ export function CinematicPlayerLoader({
           </p>
         )}
         {isInfoHash ? (
-          <div className="flex w-full max-w-sm flex-col items-center gap-3">
-            <StreamLoadingBar key={src.url} ready={ready} done={done} />
-            <p className="text-[12.5px] font-medium uppercase tracking-[0.18em] text-white/70">
-              {t("Loading video")}
-            </p>
-          </div>
+          isLocalEngine && prep.phase === "no-peers" ? (
+            <div className="flex w-full max-w-md flex-col items-center gap-4">
+              <p className="text-[12.5px] font-medium uppercase tracking-[0.18em] text-white/70">
+                {t("No peers found")}
+              </p>
+              <p className="max-w-md text-[13.5px] leading-relaxed text-white/70">
+                {t(
+                  "Couldn't connect to any peers for this torrent. It may be unreachable on your network (some ISPs and VPNs block torrent traffic).",
+                )}
+              </p>
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={onCancel}
+                  className="harbor-connecting-btn flex h-11 cursor-pointer items-center rounded-full bg-[#34343b] px-6 text-[13.5px] font-medium text-white/90 transition-colors hover:bg-[#41414a]"
+                >
+                  {t("Go back")}
+                </button>
+                <button
+                  onClick={prep.retry}
+                  className="harbor-connecting-btn2 flex h-11 cursor-pointer items-center rounded-full bg-[#26262c] px-6 text-[13.5px] font-medium text-white/70 transition-colors hover:bg-[#31313a] hover:text-white"
+                >
+                  {t("Try again")}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex w-full max-w-sm flex-col items-center gap-3">
+              <CustomArtwork role="loading" className="h-32 w-32" />
+              <StreamLoadingBar key={src.url} ready={ready} done={done} />
+              <p className="text-[12.5px] font-medium uppercase tracking-[0.18em] text-white/70">
+                {snap.buffering ? t("Buffering") : t("Preparing stream")}
+              </p>
+              {isLocalEngine && (
+                <p className="flex items-center gap-2 text-[12.5px] font-medium tracking-wide text-white/55 tabular-nums">
+                  {prep.phase === "searching" && (
+                    <span
+                      aria-hidden
+                      className={`h-1.5 w-1.5 rounded-full bg-white/40 ${reducedMotion ? "" : "animate-pulse"}`}
+                    />
+                  )}
+                  {prep.peers > 0
+                    ? `${prep.peers} ${prep.peers === 1 ? t("peer") : t("peers")} · ${fmtSpeed(prep.downloadSpeed)}`
+                    : t("Looking for peers…")}
+                </p>
+              )}
+              {isLocalEngine && prep.phase === "slow" && (
+                <p className="max-w-xs text-[12px] leading-relaxed text-amber-300/85">
+                  {t("Found peers but no data yet. The torrent may be slow.")}
+                </p>
+              )}
+            </div>
+          )
         ) : (
-          <HarborLoader size="md" caption={isLocal ? t("Loading") : t("Loading video")} />
+          <HarborLoader size="md" caption={isLocal ? t("Loading") : t("Connecting")} />
         )}
-        {!kid && showEngineActivity && (
+        {!kid && showEngineActivity && !isLocalEngine && (
           <p className="text-[12.5px] font-medium tracking-wide text-white/50 tabular-nums">
             {enginePeers} {enginePeers === 1 ? t("peer") : t("peers")} · {fmtSpeed(engineSpeed)}
           </p>
@@ -177,19 +259,10 @@ export function CinematicPlayerLoader({
           </p>
         )}
       </div>
-      <ThreeLiquidGlassSurface
-        radius="9999px"
-        shaderRadius={1}
-        intensity={1.05}
-        refractionStrength={1.18}
-        contentClassName="h-full w-full"
-        style={{
-          boxShadow: "none",
-        }}
-      >
+      {!(isLocalEngine && prep.phase === "no-peers") && (
         <button
           onClick={onCancel}
-          className="absolute bottom-10 left-1/2 z-10 flex h-11 -translate-x-1/2 cursor-pointer items-center gap-2 rounded-full border border-white/15 bg-black/45 px-6 text-[13.5px] font-medium text-white/75 backdrop-blur-md transition-colors hover:border-white/30 hover:bg-black/60 hover:text-white"
+          className="harbor-connecting-btn absolute bottom-10 left-1/2 z-10 flex h-11 -translate-x-1/2 cursor-pointer items-center gap-2 rounded-full bg-[#34343b] px-6 text-[13.5px] font-medium text-white/85 transition-colors hover:bg-[#41414a]"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
             <path
@@ -201,7 +274,7 @@ export function CinematicPlayerLoader({
           </svg>
           {t("Cancel")}
         </button>
-      </ThreeLiquidGlassSurface>
+      )}
     </div>
   );
 }

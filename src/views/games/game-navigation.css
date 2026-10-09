@@ -1,0 +1,51 @@
+.games-mast.games-inset { display:grid;grid-template-columns:auto auto minmax(190px,1fr);gap:24px; }
+.games-mast .games-navigation { display:flex;align-items:center;align-self:center;flex-wrap:wrap;gap:6px;margin:0; }
+.games-mast .games-navigation .games-navigation-button { display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:12px 14px;border-radius:var(--radius-md);font-size:15px;line-height:24px;font-weight:550;white-space:nowrap;color:var(--color-ink-muted);transition:background 160ms,color 160ms; }
+.games-mast .games-navigation .games-navigation-button:hover { background:color-mix(in srgb,var(--color-elevated) 85%,transparent);color:var(--color-ink); }
+.games-mast .games-navigation .games-navigation-button[aria-current],.games-mast .games-navigation .games-navigation-button[aria-expanded=true] { background:var(--color-raised);color:var(--color-ink); }
+.games-mast .games-navigation .games-navigation-button[aria-current]::after { content:none; }
+.games-mast .games-navigation .games-navigation-button>span { margin:0;font-size:inherit; }
+.games-mast .games-navigation .games-navigation-button>span[aria-hidden],.games-navigation-rom-icon { display:inline-flex;align-items:center;justify-content:center;flex:none;width:21px;height:21px; }
+.games-navigation-rom-icon>svg { width:21px;height:21px;padding:0; }
+.games-navigation-chevron { flex:none;opacity:.7; }
+.games-navigation-download-count { position:relative;display:grid;place-items:center;flex:none;width:24px;height:24px;margin-inline-start:1px;border-radius:50%;background:var(--color-canvas);color:var(--color-ink-muted);font-size:11px;font-weight:650;font-style:normal;line-height:1;font-variant-numeric:tabular-nums; }
+.games-navigation-download-count::before { content:"";position:absolute;inset:0;border:2px solid var(--color-edge);border-radius:50%; }
+.games-navigation-download-count.is-active { color:var(--color-accent); }
+.games-navigation-download-count.is-active::before { border-color:color-mix(in srgb,var(--color-accent) 25%,transparent);border-top-color:var(--color-accent);border-inline-end-color:var(--color-accent);animation:games-navigation-download-spin 1.5s ease-in-out infinite; }
+.games-navigation-download-count.needs-attention { color:var(--color-danger); }
+.games-navigation-download-count.needs-attention::before { border-color:color-mix(in srgb,var(--color-danger) 45%,transparent); }
+.games-mast .games-navigation-download-count>span { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;margin:0;padding:0;font-size:inherit;line-height:1;text-align:center;animation:games-navigation-download-pop 340ms ease-in-out both; }
+@keyframes games-navigation-download-spin { to { transform:rotate(360deg); } }
+@keyframes games-navigation-download-pop { from { opacity:0;transform:scale(0,0); }20%,to { opacity:1; }50% { transform:scale(1.2,1.25); }75% { transform:scale(.9,.95); }to { transform:scale(1,1); } }
+.games-mast.games-inset>.games-search-control,.games-mast.games-inset>.games-search { width:100%;min-width:0; }
+.games-mast.games-inset>.games-search-control.is-expanded { grid-column:1/-1;margin-top:0; }
+.games-mast.games-inset .games-search { min-height:48px; }
+.games-browser-home>.games-showcase { padding-top:calc(max(132px,var(--games-navigation-height,132px)) + var(--games-chrome-inset)); }
+.games-browser-roms .games-rom-hero { padding-top:calc(var(--games-navigation-height,96px) + 20px + var(--games-chrome-inset)); }
+.games-navigation-menu { min-height:0;max-height:min(440px,65dvh);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--color-ink-subtle) transparent;padding:6px;background:var(--color-elevated);border-radius:var(--radius-md);color:var(--color-ink);box-shadow:0 12px 32px #0005; }
+.games-navigation-menu::-webkit-scrollbar { width:5px; }
+.games-navigation-menu::-webkit-scrollbar-track { background:transparent; }
+.games-navigation-menu::-webkit-scrollbar-button { display:none;width:0;height:0; }
+.games-navigation-menu::-webkit-scrollbar-thumb { background:color-mix(in srgb,var(--color-ink-muted) 45%,transparent);border-radius:8px; }
+.games-navigation-menu::-webkit-scrollbar-thumb:hover { background:var(--color-ink-muted); }
+@supports selector(::-webkit-scrollbar) { .games-navigation-menu { scrollbar-width:auto;scrollbar-color:auto; } }
+.games-navigation-divider { height:1px;margin:6px 10px;background:var(--color-edge); }
+.games-navigation-label { margin:10px 12px 4px;font-size:12px;color:var(--color-ink-muted); }
+.games-console-logo { display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;height:28px;padding:3px;border-radius:3px;background:#f4f4f4;color:#292929;overflow:hidden; }
+.games-console-logo img { width:100%;height:100%;object-fit:contain; }
+.games-console-logo>span { font-size:9px;font-weight:700; }
+.games-navigation-menu>button { display:flex;align-items:center;gap:13px;width:100%;min-height:48px;padding:12px;border-radius:var(--radius-sm);font-size:15px;line-height:24px;text-align:start;transition:background 160ms; }
+.games-navigation-menu>button:is(:hover,:focus-visible),.games-navigation-menu>button[aria-current] { background:var(--color-raised); }
+.games-navigation-menu>button:focus-visible { outline:2px solid var(--color-ink);outline-offset:-2px; }
+@container(max-width:1150px) {
+  .games-mast.games-inset { grid-template-columns:auto minmax(190px,350px);justify-content:space-between;padding-block:16px;gap:12px 24px; }
+  .games-mast .games-navigation { grid-column:1/-1;grid-row:2; }
+  .games-mast.games-inset>.games-search-control,.games-mast.games-inset>.games-search { grid-column:2;grid-row:1;order:initial; }
+  .games-mast.games-inset>.games-search-control.is-expanded { grid-column:1/-1;grid-row:3; }
+}
+@container(max-width:650px) {
+  .games-mast.games-inset { grid-template-columns:auto minmax(130px,1fr);gap:12px 18px; }
+  .games-mast .games-navigation { gap:4px; }
+  .games-mast .games-navigation .games-navigation-button { padding-inline:8px; }
+}
+@media(prefers-reduced-motion:reduce) { .games-mast .games-navigation .games-navigation-button,.games-navigation-menu>button { transition:none; }.games-navigation-download-count.is-active::before,.games-mast .games-navigation-download-count>span { animation:none; } }

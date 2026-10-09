@@ -1,6 +1,12 @@
+import { activeProfileId } from "@/lib/active-profile-id";
+import { getSession } from "./session";
+import { resolveForMeta } from "@/lib/tracker-resolve";
+import { currentActivitiesAll } from "./activities/gate";
 import { simklRequest } from "./client";
 import { simklTargetIds } from "./ids";
 import type { SimklIds, SimklTarget } from "./types";
+
+const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
 
 export type SimklHistoryItem = {
   id: number;
@@ -30,10 +36,34 @@ function num(v: number | string | undefined): number | undefined {
   return undefined;
 }
 
+const HISTORY_TTL_MS = 25000;
+let historyCache: { at: number; val: Promise<SimklHistoryItem[]> } | null = null;
+let historyMarker: string | null = null;
+
+export function invalidateHistoryCache(): void {
+  historyCache = null;
+}
+
+async function loadHistory(): Promise<SimklHistoryItem[]> {
+  const all = await currentActivitiesAll();
+  if (historyCache) {
+    if (all !== null && all === historyMarker) return historyCache.val;
+    if (all === null && Date.now() - historyCache.at < HISTORY_TTL_MS) return historyCache.val;
+  }
+  const val = pullHistory();
+  historyCache = { at: Date.now(), val };
+  historyMarker = all;
+  return val;
+}
+
 export async function fetchWatchedHistory(limit = 200): Promise<SimklHistoryItem[]> {
-  const data = await simklRequest<RawAllItems>(
-    "/sync/all-items/all/completed?extended=full",
-  ).catch(() => ({}) as RawAllItems);
+  return (await loadHistory()).slice(0, limit);
+}
+
+async function pullHistory(): Promise<SimklHistoryItem[]> {
+  const data = await simklRequest<RawAllItems>("/sync/all-items/all/completed?extended=full").catch(
+    () => ({}) as RawAllItems,
+  );
   const out: SimklHistoryItem[] = [];
   for (const e of data.movies ?? []) {
     const m = e.movie;
@@ -62,12 +92,13 @@ export async function fetchWatchedHistory(limit = 200): Promise<SimklHistoryItem
     });
   }
   out.sort((a, b) => b.watchedAt.localeCompare(a.watchedAt));
-  return out.slice(0, limit);
+  return out;
 }
 
-export async function addToHistory(target: SimklTarget): Promise<boolean> {
+async function postHistory(target: SimklTarget): Promise<boolean> {
   const watchedAt = new Date().toISOString();
   try {
+    invalidateHistoryCache();
     if (target.kind === "movie") {
       const r = await simklRequest<{ added?: { movies?: number } }>("/sync/history", {
         method: "POST",
@@ -95,7 +126,7 @@ export async function addToHistory(target: SimklTarget): Promise<boolean> {
           },
         },
       );
-      return (r?.added?.episodes ?? r?.added?.shows ?? 0) > 0;
+      return (r?.added?.episodes ?? 0) > 0;
     }
     const r = await simklRequest<{ added?: { shows?: number } }>("/sync/history", {
       method: "POST",
@@ -107,6 +138,23 @@ export async function addToHistory(target: SimklTarget): Promise<boolean> {
   }
 }
 
+export async function addToHistory(target: SimklTarget, metaId?: string): Promise<boolean> {
+  const profile = activeProfileId();
+  const session = getSession();
+  const owned = () => session != null && getSession() === session && activeProfileId() === profile;
+  if (!owned()) return false;
+  if (await postHistory(target)) return true;
+  if (!owned() || !metaId || target.kind !== "episode" || ANIME_ID.test(metaId)) return false;
+  const resolved = await resolveForMeta(metaId, target.season, target.number);
+  if (!owned() || !resolved.ok) return false;
+  return postHistory({
+    kind: "episode",
+    show: { ids: resolved.episode.showIds },
+    season: resolved.episode.season,
+    number: resolved.episode.number,
+  });
+}
+
 export async function markEpisodesWatched(
   show: SimklIds,
   season: number,
@@ -115,7 +163,8 @@ export async function markEpisodesWatched(
   if (episodes.length === 0) return false;
   const watchedAt = new Date().toISOString();
   try {
-    await simklRequest("/sync/history", {
+    invalidateHistoryCache();
+    const result = await simklRequest<{ added?: { episodes?: number } }>("/sync/history", {
       method: "POST",
       body: {
         shows: [
@@ -131,7 +180,7 @@ export async function markEpisodesWatched(
         ],
       },
     });
-    return true;
+    return (result?.added?.episodes ?? 0) >= new Set(episodes).size;
   } catch {
     return false;
   }
@@ -142,11 +191,26 @@ export async function unmarkEpisodeWatched(
   season: number,
   episode: number,
 ): Promise<boolean> {
+  return unmarkEpisodesWatched(show, season, [episode]);
+}
+
+export async function unmarkEpisodesWatched(
+  show: SimklIds,
+  season: number,
+  episodes: number[],
+): Promise<boolean> {
+  if (episodes.length === 0) return false;
   try {
+    invalidateHistoryCache();
     await simklRequest("/sync/history/remove", {
       method: "POST",
       body: {
-        shows: [{ ids: show, seasons: [{ number: season, episodes: [{ number: episode }] }] }],
+        shows: [
+          {
+            ids: show,
+            seasons: [{ number: season, episodes: episodes.map((n) => ({ number: n })) }],
+          },
+        ],
       },
     });
     return true;

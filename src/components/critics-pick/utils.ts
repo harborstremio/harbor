@@ -1,6 +1,6 @@
 export function upsizeTmdb(url?: string): string | undefined {
   if (!url) return url;
-  return url.replace("/t/p/w780/", "/t/p/w1280/").replace("/t/p/w342/", "/t/p/w1280/");
+  return url.replace(/\/t\/p\/(w\d+|original)\//, "/t/p/w1280/");
 }
 
 export function profileUrl(path: string | null): string | undefined {

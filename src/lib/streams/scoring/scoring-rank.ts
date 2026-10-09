@@ -1,5 +1,5 @@
 import type { DebridSlug, RankedPicker, ScoredStream, Tier } from "../types";
-import { hasUncachedMarker } from "../cached";
+import { isCached } from "../cached";
 
 export function rankAndPick(
   scored: ScoredStream[],
@@ -7,9 +7,6 @@ export function rankAndPick(
   preferAac = false,
   respectAddonOrder = false,
 ): RankedPicker {
-  const isCached = (s: ScoredStream) =>
-    (s.url != null && !hasUncachedMarker(s)) || activeDebrids.some((slug) => s.cached[slug] === true);
-
   const pri = (s: ScoredStream) => s.addonPriority ?? Number.MAX_SAFE_INTEGER;
   const ret = (s: ScoredStream) => s.addonReturnIdx ?? Number.MAX_SAFE_INTEGER;
   const all = scored
@@ -18,8 +15,8 @@ export function rankAndPick(
       respectAddonOrder ? pri(a) - pri(b) || ret(a) - ret(b) || b.score - a.score : b.score - a.score,
     );
   const cachedFirst = all.slice().sort((a, b) => {
-    const ac = isCached(a) ? 1 : 0;
-    const bc = isCached(b) ? 1 : 0;
+    const ac = isCached(a, activeDebrids) ? 1 : 0;
+    const bc = isCached(b, activeDebrids) ? 1 : 0;
     return bc - ac;
   });
 
@@ -28,9 +25,9 @@ export function rankAndPick(
     if (!byTier[s.tier]) byTier[s.tier] = s;
   }
 
-  let primary = all.find((s) => isCached(s)) ?? null;
+  let primary = all.find((s) => isCached(s, activeDebrids)) ?? null;
   if (preferAac && primary) {
-    const aac = all.find((s) => isCached(s) && s.audio?.codec === "AAC");
+    const aac = all.find((s) => isCached(s, activeDebrids) && s.audio?.codec === "AAC");
     if (aac) primary = aac;
   }
 

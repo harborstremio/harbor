@@ -1,67 +1,127 @@
-import { ChevronDown, ChevronUp, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { ShieldCheck } from "../icons";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { Diagnostics } from "@/lib/bug-report";
+import { getDirection } from "@/lib/keyboard-navigation/geometry";
+import { ModalButton, SettingRow, SettingsModal } from "../kit";
+import { SButton } from "../ui";
+import { useT } from "@/lib/i18n";
 
 export function DiagnosticsCard({ diag }: { diag: Diagnostics | null }) {
   const [open, setOpen] = useState(false);
+  const [scrolls, setScrolls] = useState(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const t = useT();
+
+  useEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    const measure = () => setScrolls(el.scrollHeight > el.clientHeight + 1);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open]);
+
+  const onListKey = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    const el = bodyRef.current;
+    const dir = getDirection(e.nativeEvent);
+    if (!el || (dir !== "up" && dir !== "down")) return;
+    const atStart = el.scrollTop <= 1;
+    const atEnd = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+    if (dir === "up" ? atStart : atEnd) return;
+    e.preventDefault();
+    el.scrollBy({ top: (dir === "down" ? 0.8 : -0.8) * el.clientHeight, behavior: "smooth" });
+  };
+
   if (!diag) {
     return (
-      <div className="flex items-center gap-2 rounded-xl border border-edge-soft/55 bg-canvas/30 px-4 py-3 text-[12px] text-ink-subtle">
-        Loading environment details…
-      </div>
+      <SettingRow
+        icon={<ShieldCheck size={18} strokeWidth={1.9} />}
+        label={t("What gets sent")}
+        desc={t("Reading your environment details…")}
+      />
     );
   }
   const compact = `JL Media Vision ${diag.appVersion} · ${diag.os}${diag.osVersion ? ` ${diag.osVersion}` : ""} · ${diag.viewport} · ${diag.locale}`;
+  const mpv = diag.mpvProbe;
+  const mpvLine = !mpv
+    ? t("not probed")
+    : mpv.available
+      ? mpv.version || t("available")
+      : t("unavailable: {error}", { error: mpv.error || t("unknown") });
   return (
-    <div className="rounded-xl border border-edge-soft/55 bg-canvas/30">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-start"
+    <>
+      <SettingRow
+        icon={<ShieldCheck size={18} strokeWidth={1.9} />}
+        label={t("What gets sent")}
+        desc={compact}
       >
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-elevated text-ink-muted">
-          <ShieldCheck size={14} strokeWidth={1.9} />
-        </span>
-        <div className="flex min-w-0 flex-col">
-          <span className="text-[12px] font-semibold text-ink">What gets sent</span>
-          <span className="truncate text-[11.5px] text-ink-subtle">{compact}</span>
+        <SButton onClick={() => setOpen(true)}>{t("Review")}</SButton>
+      </SettingRow>
+      <SettingsModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={t("What gets sent")}
+        sub={t(
+          "Included with your report: app and device details, enabled-service counts, the player check, and recent error messages.",
+        )}
+        actions={
+          <ModalButton ghost onClick={() => setOpen(false)}>
+            {t("Close")}
+          </ModalButton>
+        }
+      >
+        <div
+          ref={bodyRef}
+          tabIndex={scrolls ? 0 : undefined}
+          onKeyDown={scrolls ? onListKey : undefined}
+          className="max-h-[46vh] overflow-y-auto"
+        >
+          <dl className="m-0 grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-x-5 gap-y-2 text-[15.5px] leading-[22px]">
+            <Pair k={t("App")} v={diag.appVersion} />
+            <Pair k={t("OS")} v={`${diag.os} ${diag.osVersion}`} />
+            <Pair k={t("Viewport")} v={diag.viewport} />
+            <Pair k={t("Locale")} v={diag.locale} />
+            <Pair k={t("Player")} v={diag.flags.playerEngine} />
+            <Pair k="libmpv" v={mpvLine} />
+            <Pair k={t("Region")} v={diag.flags.region} />
+            <Pair k={t("TMDB key")} v={diag.flags.hasTmdb ? t("yes") : t("no")} />
+            <Pair k={t("RPDB key")} v={diag.flags.hasRpdb ? t("yes") : t("no")} />
+            <Pair k="Trakt" v={diag.flags.hasTrakt ? t("yes") : t("no")} />
+            <Pair k="Stremio" v={diag.flags.hasStremio ? t("signed in") : t("guest")} />
+            <Pair k={t("Debrid keys")} v={String(diag.flags.debridCount)} />
+            <Pair k={t("Addons")} v={diag.flags.addonCount === null ? t("Unavailable") : String(diag.flags.addonCount)} />
+            <Pair k={t("IPTV lists")} v={String(diag.flags.iptvCount)} />
+            <Pair k={t("Recent errors")} v={String(diag.recentErrors.length)} />
+          </dl>
+          <details className="mt-5 border-t border-edge-soft pt-4">
+            <summary className="cursor-pointer text-[15px] font-medium text-ink">{t("Browser details")}</summary>
+            <p className="mt-3 break-words text-[13px] leading-5 text-ink-muted">{diag.ua}</p>
+          </details>
+          {diag.recentErrors.length > 0 && (
+            <details className="mt-5 border-t border-edge-soft pt-4">
+              <summary className="cursor-pointer text-[15px] font-medium text-ink">{t("Review error messages")}</summary>
+              <div className="mt-3 flex flex-col gap-3">
+                {diag.recentErrors.map((error, index) => (
+                  <pre key={`${error.ts}-${index}`} className="whitespace-pre-wrap break-words rounded-lg bg-canvas p-3 font-mono text-[12px] leading-5 text-ink-muted">
+                    {error.src && `${error.src}\n`}{error.msg}
+                  </pre>
+                ))}
+              </div>
+            </details>
+          )}
         </div>
-        <span className="ms-auto text-ink-subtle">
-          {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </span>
-      </button>
-      {open && (
-        <div className="border-t border-edge-soft/55 px-4 py-3">
-          <p className="mb-2 text-[11.5px] leading-relaxed text-ink-muted">
-            Auto-included. No keys, no library, no URLs. Just structural flags so reproductions go faster.
-          </p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11.5px] font-mono text-ink-muted">
-            <Pair k="App" v={diag.appVersion} />
-            <Pair k="OS" v={`${diag.os} ${diag.osVersion}`} />
-            <Pair k="Viewport" v={diag.viewport} />
-            <Pair k="Locale" v={diag.locale} />
-            <Pair k="Player" v={diag.flags.playerEngine} />
-            <Pair k="Region" v={diag.flags.region} />
-            <Pair k="TMDB key" v={diag.flags.hasTmdb ? "yes" : "no"} />
-            <Pair k="RPDB key" v={diag.flags.hasRpdb ? "yes" : "no"} />
-            <Pair k="Trakt" v={diag.flags.hasTrakt ? "yes" : "no"} />
-            <Pair k="Stremio" v={diag.flags.hasStremio ? "signed in" : "guest"} />
-            <Pair k="Debrid keys" v={String(diag.flags.debridCount)} />
-            <Pair k="Addons" v={String(diag.flags.addonCount)} />
-            <Pair k="IPTV lists" v={String(diag.flags.iptvCount)} />
-            <Pair k="Recent errors" v={String(diag.recentErrors.length)} />
-          </div>
-        </div>
-      )}
-    </div>
+      </SettingsModal>
+    </>
   );
 }
 
 function Pair({ k, v }: { k: string; v: string }) {
+  const t = useT();
   return (
     <>
-      <span className="text-ink-subtle">{k}</span>
-      <span className="truncate text-ink">{v || "n/a"}</span>
+      <dt className="min-w-0 text-ink-muted">{k}</dt>
+      <dd className="m-0 min-w-0 break-words text-ink">{v || t("n/a")}</dd>
     </>
   );
 }

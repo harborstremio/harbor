@@ -35,16 +35,19 @@ export type AnilistMedia = {
   bannerImage: string | null;
   format: string | null;
   episodes: number | null;
+  chapters?: number | null;
   averageScore: number | null;
   seasonYear: number | null;
   countryOfOrigin?: string | null;
   description?: string | null;
+  status?: string | null;
 };
 
 export type AnilistMediaEntry = {
   id: number;
   status: MediaListStatus;
   progress: number;
+  progressVolumes?: number;
   score: number;
   media: AnilistMedia;
 };

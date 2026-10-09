@@ -1,3 +1,4 @@
+import { artAtWidth } from "@/lib/image-rung";
 export function Still({
   src,
   alt,
@@ -11,7 +12,7 @@ export function Still({
   if (!onClick) {
     return (
       <div className="relative aspect-[16/9] overflow-hidden rounded-md border border-edge-soft">
-        <img src={src} alt={alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+        <img src={artAtWidth(src, 200)} alt={alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
       </div>
     );
   }
@@ -23,7 +24,7 @@ export function Still({
       className="group/still relative aspect-[16/9] overflow-hidden rounded-md border border-edge-soft transition-colors duration-200 hover:border-ink"
     >
       <img
-        src={src}
+        src={artAtWidth(src, 200)}
         alt={alt}
         loading="lazy"
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover/still:scale-[1.04]"

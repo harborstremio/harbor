@@ -23,6 +23,7 @@ const PREFIX = "harbor.snap.";
 const INDEX_KEY = "harbor.snap.index";
 const RETENTION_KEY = "harbor.snap.retention";
 const MAX_ENTRIES = 80;
+const MAX_TOTAL_BYTES = 2.5 * 1024 * 1024;
 const DEFAULT_RETENTION_DAYS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -88,6 +89,26 @@ function pruneExpired(index: IndexEntry[]): IndexEntry[] {
   return kept;
 }
 
+function frameBytes(id: string): number {
+  try {
+    return localStorage.getItem(PREFIX + id)?.length ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+function enforceByteBudget(index: IndexEntry[]): IndexEntry[] {
+  let total = 0;
+  for (const e of index) total += frameBytes(e.id);
+  while (total > MAX_TOTAL_BYTES && index.length > 1) {
+    const evicted = index.shift();
+    if (!evicted) break;
+    total -= frameBytes(evicted.id);
+    dropEntry(evicted.id);
+  }
+  return index;
+}
+
 export function readSnapshot(id: string): string | null {
   if (snapshotsDisabled()) return null;
   const index = readIndex();
@@ -141,7 +162,9 @@ export function saveSnapshot(id: string, dataUrl: string): void {
       dropEntry(evicted.id);
     }
   }
-  if (!saved) {
+  if (saved) {
+    index = enforceByteBudget(index);
+  } else {
     index = index.filter((e) => e.id !== id);
   }
   writeIndex(index);

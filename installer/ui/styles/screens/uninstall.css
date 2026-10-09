@@ -1,0 +1,353 @@
+.hb-un-lead {
+  margin: 0 0 20px;
+  animation: un-rise 340ms var(--ease) 60ms both;
+}
+
+.hb-un-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 56px;
+  margin-bottom: 18px;
+}
+
+.hb-un-head {
+  margin: 0 0 10px;
+  animation: un-rise 320ms var(--ease) 110ms both;
+}
+
+.hb-un-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transition: opacity var(--t-state) var(--ease);
+}
+
+.hb-un-list.is-struck {
+  opacity: 0.42;
+}
+
+.hb-un-list.is-struck .hb-un-item {
+  text-decoration: line-through;
+  text-decoration-color: var(--ink-subtle);
+}
+
+.hb-un-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-height: 22px;
+  margin: 0 0 3px;
+  color: var(--ink-muted);
+  animation: un-rise 320ms var(--ease) calc(min(var(--i, 0) * 26ms, 260ms) + 140ms) both;
+}
+
+.hb-un-dot {
+  flex: 0 0 auto;
+  width: 4px;
+  height: 4px;
+  margin-top: 6px;
+  border-radius: var(--r-pill);
+  background: var(--ink-subtle);
+}
+
+.hb-un-col:first-child .hb-un-dot {
+  background: var(--danger);
+}
+
+.hb-un-wipe {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 12px 0 10px;
+  margin: 0 0 22px -10px;
+  border-radius: var(--r-md);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color var(--t-hover) var(--ease);
+  animation: un-rise 320ms var(--ease) 200ms both;
+}
+
+.hb-un-wipe:hover {
+  background: var(--wash-quiet);
+}
+
+.hb-un-box {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--edge);
+  transition:
+    background-color var(--t-hover) var(--ease),
+    box-shadow var(--t-hover) var(--ease);
+}
+
+.hb-un-wipe[aria-checked="true"] .hb-un-box {
+  background: var(--danger);
+  box-shadow: inset 0 0 0 1.5px var(--danger);
+}
+
+.hb-un-wipe-text {
+  color: var(--ink-muted);
+}
+
+.hb-un-wipe[aria-checked="true"] .hb-un-wipe-text {
+  color: var(--ink);
+}
+
+.hb-alt-head {
+  margin: 0 0 10px;
+  animation: un-rise 320ms var(--ease) 230ms both;
+}
+
+.hb-alts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.hb-alt {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--wash-quiet);
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--t-hover) var(--ease);
+  animation: un-rise 320ms var(--ease) calc(min(var(--i, 0) * 40ms, 160ms) + 270ms) both;
+}
+
+.hb-alt:hover {
+  background: var(--wash);
+}
+
+.hb-alt-badge {
+  position: relative;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+}
+
+.hb-alt-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.hb-alt-tag {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 15px;
+  height: 15px;
+  border-radius: var(--r-pill);
+  display: grid;
+  place-items: center;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--canvas);
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--canvas);
+}
+
+[dir="rtl"] .hb-alt-tag {
+  right: auto;
+  left: -3px;
+}
+
+.hb-alt-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hb-alt-name {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.hb-alt-note {
+  line-height: 15px;
+}
+
+.hb-rm-confirm {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  animation: un-rise 340ms var(--ease) 60ms both;
+}
+
+.hb-rm-badge {
+  position: relative;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-pill);
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--wash-quiet);
+}
+
+.hb-rm-badge svg {
+  width: 22px;
+  height: 22px;
+  opacity: 0;
+  transition: opacity var(--t-state) var(--ease);
+}
+
+.hb-rm-badge.is-done svg {
+  opacity: 1;
+}
+
+.hb-rm-badge.is-done {
+  animation: rm-pop 420ms var(--ease) both;
+}
+
+.hb-rm-badge::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--edge);
+  border-top-color: var(--ink-muted);
+  animation: rm-spin 760ms linear infinite;
+  transition: opacity var(--t-hover) var(--ease);
+}
+
+.hb-rm-badge.is-done::after {
+  opacity: 0;
+  animation: none;
+}
+
+.hb-rm-step-in {
+  animation: rm-step 300ms var(--ease) both;
+}
+
+@keyframes rm-step {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hb-rm-copy {
+  min-width: 0;
+}
+
+.hb-rm-note {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--ink-muted);
+  animation: un-rise 320ms var(--ease) 120ms both;
+}
+
+.hb-rm-link {
+  margin-top: 14px;
+  padding: 0;
+  background: none;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--t-hover) var(--ease);
+  animation: un-rise 320ms var(--ease) 200ms both;
+}
+
+.hb-rm-link:hover {
+  text-decoration-color: var(--accent);
+}
+
+.hb-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: rm-draw 460ms var(--ease) 120ms both;
+}
+
+@keyframes rm-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes rm-pop {
+  0% {
+    transform: scale(0.8, 0.86);
+  }
+  52% {
+    transform: scale(1.08, 1.04);
+  }
+  78% {
+    transform: scale(0.98, 1.01);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+@keyframes rm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes un-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-un-lead,
+  .hb-un-head,
+  .hb-un-item,
+  .hb-un-wipe,
+  .hb-alt-head,
+  .hb-alt,
+  .hb-rm-confirm,
+  .hb-rm-note,
+  .hb-rm-link {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .hb-rm-badge::after {
+    animation: none;
+  }
+  .hb-rm-step-in {
+    animation: none;
+  }
+  .hb-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}

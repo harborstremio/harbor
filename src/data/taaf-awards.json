@@ -3,7 +3,7 @@
   "name": "Tokyo Anime Award Festival",
   "shortName": "TAAF",
   "wikipedia": "https://en.wikipedia.org/wiki/Tokyo_Anime_Award_Festival",
-  "updatedAt": "2026-05-24",
+  "updatedAt": "2026-07-17",
   "categories": {
     "anime_of_the_year": {
       "name": "Animation of the Year",
@@ -200,6 +200,10 @@
         {
           "year": 2025,
           "title": "Frieren: Beyond Journey's End"
+        },
+        {
+          "year": 2026,
+          "title": "Mobile Suit Gundam GQuuuuuuX"
         }
       ]
     },
@@ -301,6 +305,10 @@
         {
           "year": 2025,
           "title": "Look Back"
+        },
+        {
+          "year": 2026,
+          "title": "Demon Slayer: Kimetsu no Yaiba Infinity Castle"
         }
       ]
     },

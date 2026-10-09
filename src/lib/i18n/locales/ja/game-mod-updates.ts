@@ -1,0 +1,22 @@
+export default {
+  "games.mods.browse": "Mod を探す",
+  "games.mods.installed": "自分の Mod",
+  "games.mods.enabled": "有効",
+  "games.mods.disabled": "無効",
+  "games.mods.remove": "削除",
+  "games.mods.removeConfirm": "この管理対象ファイルを削除しますか？",
+  "games.mods.noMatches": "検索に一致するインストール済みの Mod はありません。",
+  "games.mods.options": "{name} のオプション",
+  "games.mods.versions": "バージョン",
+  "games.mods.restore": "前の版に戻す",
+  "games.mods.restored": "前のバージョンに戻しました。",
+  "games.mods.changeTitle": "変更するファイル",
+  "games.mods.backupNote": "置き換えたバージョンはローカルに保存されます。「自分の構成」の「前の版に戻す」で復元できます。依存関係は再度確認されます。",
+  "games.mods.currentVersion": "インストール済み: {version}",
+  "games.mods.current": "インストール済み",
+  "games.mods.versionNote": "互換性のあるバージョンを選んでください。Harborは変更を確認し、前のバージョンをローカルに保存します。適用前にMinecraftを終了してください。",
+  "games.mods.applyChanges": "変更を適用",
+  "games.mods.reviewChanges": "変更を確認",
+  "games.mods.previousVersion": "前の版: {version}",
+  "games.mods.restoreConfirm": "バージョン{version}に戻しますか？先にMinecraftを終了してください。"
+} satisfies Record<string, string>;

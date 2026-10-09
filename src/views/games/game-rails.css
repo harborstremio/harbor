@@ -1,0 +1,10 @@
+/* Keep Games' section alignment; navigation and motion belong to Harbor's Row. */
+.games-content-rail.harbor-row-shell { padding-inline-start:0; }
+.games-content-rail .games-highlight-card,.games-content-rail .games-card,.games-content-rail .games-recommendation { animation:none; }
+.games-content-rail .games-card-caption h3 { height:2.8em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+.games-world-picker.games-content-rail,.games-world-members.games-content-rail { display:flex; }
+.games-world-choice,.games-world-member { width:100%; }
+.games-world-members.games-content-rail { margin-top:32px; }
+.games-content-rail:dir(rtl) .group\/edge svg:not(.dir-icon) { scale:-1 1; }
+
+.games-card-kind{position:absolute;top:10px;inset-inline-start:10px;display:flex;align-items:center;gap:5px;max-width:calc(100% - 20px);padding:5px 8px;border-radius:5px;background:#101313e8;color:#fff;font-size:11px;line-height:1.35;text-align:start}.games-card-kind svg{flex:none}

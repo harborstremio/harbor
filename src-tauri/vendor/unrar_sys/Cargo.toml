@@ -1,0 +1,23 @@
+[package]
+name = "unrar_sys"
+version = "0.5.8"
+authors = ["Danyel Bayraktar <rust@danyel.io>"]
+
+build = "build.rs"
+license-file = "LICENSES.txt"
+description = "FFI bindings to unrar (with minimal abstractions)"
+repository = "https://github.com/muja/unrar.rs"
+edition = "2021"
+
+[features]
+default = ["std"]
+std = ["libc/std", "winapi/std"]
+
+[dependencies]
+libc = { version = "0.2", default-features = false }
+
+[build-dependencies]
+cc = "1"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["minwindef", "ntdef"] }

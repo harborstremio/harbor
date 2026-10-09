@@ -1,0 +1,143 @@
+import { useEffect, useRef, useState, type RefObject } from "react";
+import { UiIcon } from "@/components/ui-icon";
+import type { Meta } from "@/lib/cinemeta";
+import type { PlayerBridge } from "@/lib/player/bridge";
+import type { CastEntry } from "@/lib/providers/tmdb";
+import { useSettings } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
+import { fetch as tauriHttpFetch } from "@tauri-apps/plugin-http";
+import { useFaceId } from "@/lib/face/use-face-id";
+import { useXrayCast } from "@/lib/xray/use-xray-cast";
+import { usePageVisible } from "@/lib/visibility";
+import { TrailerOverlay } from "@/views/detail/trailer-overlay";
+import { CastModal } from "../cast-modal";
+import { XrayRail } from "./xray-rail";
+import { XrayBrowser } from "./xray-browser";
+import type { XrayPerson } from "./xray-actor-card";
+
+const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const NO_CAST: CastEntry[] = [];
+
+async function loadBitmap(url: string, signal?: AbortSignal): Promise<ImageBitmap> {
+  const response = IS_TAURI ? await tauriHttpFetch(url, { signal }) : await fetch(url, { signal });
+  const buf = await response.arrayBuffer();
+  if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+  return createImageBitmap(new Blob([buf]));
+}
+
+type View = "closed" | "rail" | "browser";
+
+export function XrayOverlay({
+  meta,
+  visible,
+  isPaused,
+  bridgeRef,
+}: {
+  meta: Meta;
+  visible: boolean;
+  isPaused: boolean;
+  bridgeRef?: RefObject<PlayerBridge | null>;
+}) {
+  const { settings } = useSettings();
+  const t = useT();
+  const pageVisible = usePageVisible();
+  const [view, setView] = useState<View>("closed");
+  const [trailer, setTrailer] = useState<{ ytId: string; name: string } | null>(null);
+  const [person, setPerson] = useState<XrayPerson | null>(null);
+  useEffect(() => {
+    setPerson(null);
+  }, [meta.id]);
+  const resumeRef = useRef(false);
+  const active = settings.xrayEnabled && view !== "closed";
+  const { cast, details } = useXrayCast(meta, active);
+  const { people, ready, galleryReady, progress, error } = useFaceId({
+    metaKey: meta.id,
+    cast: cast ?? NO_CAST,
+    liveScan: active && settings.xrayLiveScan && pageVisible,
+    isPaused,
+    loadBitmap,
+  });
+
+  if (!settings.xrayEnabled) return null;
+
+  const scenePeople: XrayPerson[] = people.map((p) => ({
+    id: p.id,
+    name: p.name,
+    sub: p.character,
+    profilePath: p.profilePath,
+  }));
+
+  const castFallback: XrayPerson[] = (cast ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    sub: c.character,
+    profilePath: c.profilePath,
+  }));
+
+  const playVideo = (ytId: string, name: string) => {
+    resumeRef.current = !isPaused;
+    if (!isPaused) bridgeRef?.current?.pause();
+    setTrailer({ ytId, name });
+  };
+  const closeTrailer = () => {
+    setTrailer(null);
+    if (resumeRef.current) void bridgeRef?.current?.play();
+  };
+
+  return (
+    <>
+      {visible && view === "closed" && (
+        <button
+          type="button"
+          onClick={() => setView("rail")}
+          aria-label={t("X-Ray")}
+          className="absolute left-7 top-20 z-20 flex items-center gap-1.5 py-1 text-[12.5px] font-semibold text-white opacity-40 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] transition-opacity duration-300 hover:opacity-100"
+        >
+          <UiIcon name="xray" className="h-[15px] w-[15px] text-accent" /> {t("X-Ray")}
+        </button>
+      )}
+      {view === "rail" && (
+        <XrayRail
+          people={scenePeople}
+          onOpenPerson={setPerson}
+          castPeople={castFallback}
+          ready={ready}
+          galleryReady={galleryReady}
+          progress={progress}
+          error={error}
+          needsTmdbKey={!settings.tmdbKey}
+          onViewAll={() => setView("browser")}
+          onClose={() => setView("closed")}
+        />
+      )}
+      {view === "browser" && (
+        <XrayBrowser
+          meta={meta}
+          details={details}
+          people={scenePeople}
+          onPlayVideo={playVideo}
+          onOpenPerson={setPerson}
+          onClose={() => setView("rail")}
+        />
+      )}
+      {person && (
+        <CastModal
+          key={`${meta.id}:${person.id}`}
+          open
+          meta={meta}
+          tmdbKey={settings.tmdbKey || null}
+          initialPerson={person}
+          onClose={() => setPerson(null)}
+        />
+      )}
+      {trailer && (
+        <TrailerOverlay
+          id={trailer.ytId}
+          title={trailer.name}
+          logo={details?.logo ?? undefined}
+          onClose={closeTrailer}
+        />
+      )}
+    </>
+  );
+}

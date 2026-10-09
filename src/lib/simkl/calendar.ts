@@ -1,34 +1,13 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { CalendarItem } from "@/lib/calendar";
 import { SIMKL_APP_NAME, SIMKL_APP_VERSION, SIMKL_CLIENT_ID } from "./config";
-
-export type SimklCdnItem = {
-  title: string;
-  poster?: string;
-  date: string;
-  release_date?: string;
-  ratings?: {
-    simkl?: {
-      rating?: number | null;
-      votes?: number | null;
-    };
-  };
-  ids?: {
-    simkl_id?: number;
-    slug?: string;
-    tmdb?: string | number;
-    imdb?: string;
-  };
-  episode?: {
-    season?: number;
-    episode?: number;
-  };
-};
+import { parseSimklCalendar, type SimklCdnItem } from "./calendar-data";
+export type { SimklCdnItem } from "./calendar-data";
 
 const UA = `${SIMKL_APP_NAME}/${SIMKL_APP_VERSION}`;
 
 function cdnUrl(path: string): string {
-  return `https://data.simkl.in/calendar/${path}?client_id=${SIMKL_CLIENT_ID}&app-name=${SIMKL_APP_NAME}&app-version=${SIMKL_APP_VERSION}`;
+  return `https://data.simkl.in/calendar/v2/${path}?client_id=${SIMKL_CLIENT_ID}&app-name=${SIMKL_APP_NAME}&app-version=${SIMKL_APP_VERSION}`;
 }
 
 function pad(n: number): string {
@@ -50,7 +29,7 @@ function mapCdnItem(item: SimklCdnItem, type: "tv" | "movie", isAnime: boolean):
     name = `${item.title} S${pad(item.episode.season)}E${pad(item.episode.episode)}`;
   }
 
-  const poster = item.poster ? `https://simkl.in/posters/${item.poster}_m.jpg` : null;
+  const poster = item.poster ? `https://wsrv.nl/?url=https://simkl.in/posters/${item.poster}_m.webp&q=90` : null;
 
   return {
     id,
@@ -71,7 +50,7 @@ export async function fetchSimklCdnRolling(catalog: "tv" | "anime" | "movie"): P
   try {
     const res = await fetch(cdnUrl(filename), { headers: { "User-Agent": UA } });
     if (!res.ok) return [];
-    const data = (await res.json()) as SimklCdnItem[];
+    const data = parseSimklCalendar(await res.json());
     const type = catalog === "movie" ? "movie" : "tv";
     return data.map((item) => mapCdnItem(item, type, catalog === "anime"));
   } catch {
@@ -91,7 +70,7 @@ export async function fetchSimklCdnArchive(
       headers: { "User-Agent": UA },
     });
     if (!res.ok) return [];
-    const data = (await res.json()) as SimklCdnItem[];
+    const data = parseSimklCalendar(await res.json());
     const type = catalog === "movie" ? "movie" : "tv";
     return data.map((item) => mapCdnItem(item, type, catalog === "anime"));
   } catch {

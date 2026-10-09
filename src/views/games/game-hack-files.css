@@ -1,0 +1,43 @@
+.games-hack-files{margin-block:30px 48px;min-width:0}
+.games-hack-files h2{font-size:24px;font-weight:650;letter-spacing:-.025em}
+.games-hack-files>p{font-size:13px;line-height:1.65;color:var(--color-ink-muted);max-width:65ch}
+.games-hack-files .games-hack-required{font-size:12px;margin-block:12px 22px}
+.games-hack-files .games-source-release{margin-top:18px}
+.games-hack-files-loading{display:grid;gap:8px;margin-top:20px}
+.games-hack-files-loading>div{height:68px;border-radius:5px}
+.games-hack-files.is-compact{margin:16px 0}
+.games-hack-file-links{display:grid;gap:6px}
+.games-hack-file-links>a{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--color-surface);padding:16px;border-radius:5px}
+.games-hack-file-links>a:hover{background:var(--color-elevated)}
+.games-hack-file-links span{display:grid;gap:4px;min-width:0}
+.games-hack-file-links strong{font-size:13px;font-weight:550;overflow-wrap:anywhere}
+.games-hack-file-links small{font-size:11px;color:var(--color-ink-muted)}
+.games-hack-file-links>a:focus-visible{outline:2px solid var(--color-accent);outline-offset:3px}
+.games-hack-patch-download{display:flex;align-items:center;gap:14px;width:100%;padding:18px;border:0;border-radius:8px;background:var(--color-surface);color:var(--color-ink);text-align:start;margin-top:8px}
+.games-hack-patch-download:hover{background:var(--color-elevated)}.games-hack-patch-download>span{display:grid;gap:6px;min-width:0}.games-hack-patch-download strong{font-size:14px;overflow-wrap:anywhere}.games-hack-patch-download small{font-size:12px;color:var(--color-ink-muted)}
+.games-hack-project-link{display:inline-flex;margin-top:18px;font-size:13px}.games-patch-manual{margin-top:20px}.games-patch-manual>summary{cursor:pointer;padding-block:12px;color:var(--color-ink-muted);font-size:13px}.games-patch-manual .games-patch-files{margin-top:16px}
+
+/* A modal file is a stack, even on a wide desktop. Viewport breakpoints cannot
+   tell when the shared release row has only a dialog's content width. */
+.games-hack-files.is-compact .games-source-release { margin-top: 10px; }
+.games-hack-files.is-compact .games-source-release-body { padding: 0; }
+.games-hack-files.is-compact .games-source-file {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  padding: 18px;
+  min-width: 0;
+  border-radius: 8px;
+}
+.games-hack-files.is-compact .games-source-file > .games-source-file-identity { flex: 0 0 auto; width: 100%; min-width: 0; align-items: flex-start; }
+.games-hack-files.is-compact .games-source-file-identity > div { flex: 1; min-width: 0; }
+.games-hack-files.is-compact .games-source-file-identity strong { font-size: 14px; line-height: 1.5; word-break: normal; overflow-wrap: anywhere; }
+.games-hack-files.is-compact .games-source-file-identity small { font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.games-hack-files.is-compact .games-source-file-art { flex: 0 0 26px; }
+.games-hack-files.is-compact .games-source-file > .games-source-transfer { width: 100%; min-width: 0; max-width: none; flex: 0 0 auto; }
+.games-hack-files.is-compact .games-source-file > :is(.games-source-page-actions, .games-source-magnet-actions) { display: flex; flex: 0 0 auto; flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
+.games-hack-files.is-compact .games-source-file .games-button { min-width: 0; min-height: 40px; white-space: normal; text-align: start; justify-content: flex-start; }
+.games-hack-files.is-compact .games-source-file > .games-button { align-self: flex-start; }
+.games-hack-files.is-compact :is(.games-source-release, .games-hack-file-links, .games-hack-patch-download) { animation: games-patch-reveal 180ms ease-out both; }
+@media (prefers-reduced-motion: reduce) { .games-hack-files.is-compact * { animation: none !important; transition: none !important; } }

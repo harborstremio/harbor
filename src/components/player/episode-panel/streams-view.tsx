@@ -9,7 +9,10 @@ import { useSettings } from "@/lib/settings";
 import type { ScoredStream } from "@/lib/streams/types";
 import { hasCachedMarker } from "@/lib/streams/cached";
 import type { PlayEpisode } from "@/lib/view";
+import { parseKitsuId } from "@/lib/providers/kitsu";
+import { splitFranchiseDisplaySeason } from "@/lib/streams/anime-identity-core";
 import { useAddons } from "@/views/play-picker/use-addons";
+import { useAnimeAltTitles } from "@/views/play-picker/use-anime-alt-titles";
 import { useImdbId } from "@/views/play-picker/use-imdb-id";
 import { usePipelineResult } from "@/views/play-picker/use-pipeline-result";
 import { useStreamIds } from "@/views/play-picker/use-stream-ids";
@@ -36,6 +39,7 @@ export function StreamsView({
   const { addons } = useAddons(authKey, settings);
   const imdbId = useImdbId(meta, settings.tmdbKey).id;
   const streamIds = useStreamIds(meta, episode, imdbId);
+  const animeTitles = useAnimeAltTitles(meta);
   const { result, loading, pipelineDone } = usePipelineResult({
     meta,
     episode,
@@ -46,6 +50,7 @@ export function StreamsView({
     settings,
     strictMode: settings.streamFilterLevel === "strict",
     filterDisabled: settings.streamFilterLevel === "off",
+    animeTitles,
   });
 
   const isCached = useCallback(
@@ -87,7 +92,13 @@ export function StreamsView({
   }, [result, addons, isCached]);
 
   const totalStreams = result?.picker.all.length ?? 0;
-  const epLabel = `S${episode.imdbSeason ?? episode.season} · E${String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}`;
+  const partSeason =
+    splitFranchiseDisplaySeason(parseKitsuId(episode.kitsuStreamId ?? "")) ??
+    splitFranchiseDisplaySeason(parseKitsuId(meta.id));
+  const epLabel =
+    partSeason != null
+      ? `S${partSeason} · E${String(episode.episode).padStart(2, "0")}`
+      : `S${episode.imdbSeason ?? episode.season} · E${String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}`;
 
   return (
     <>
@@ -133,7 +144,10 @@ export function StreamsView({
               <span>
                 {totalStreams === 1
                   ? t("{n} source across {count} addons", { n: totalStreams, count: groups.length })
-                  : t("{n} sources across {count} addons", { n: totalStreams, count: groups.length })}
+                  : t("{n} sources across {count} addons", {
+                      n: totalStreams,
+                      count: groups.length,
+                    })}
               </span>
               {!pipelineDone && (
                 <span className="flex items-center gap-1.5">

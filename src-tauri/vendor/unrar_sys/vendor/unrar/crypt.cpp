@@ -1,0 +1,129 @@
+#include "rar.hpp"
+
+#ifndef SFX_MODULE
+#include "crypt1.cpp"
+#include "crypt2.cpp"
+#endif
+#include "crypt3.cpp"
+#include "crypt5.cpp"
+
+
+CryptData::CryptData()
+{
+  Method=CRYPT_NONE;
+  KDF3CachePos=0;
+  KDF5CachePos=0;
+  memset(CRCTab,0,sizeof(CRCTab));
+}
+
+
+
+
+void CryptData::DecryptBlock(byte *Buf,size_t Size)
+{
+  switch(Method)
+  {
+#ifndef SFX_MODULE
+    case CRYPT_RAR13:
+      Decrypt13(Buf,Size);
+      break;
+    case CRYPT_RAR15:
+      Crypt15(Buf,Size);
+      break;
+    case CRYPT_RAR20:
+      for (size_t I=0;I<Size;I+=CRYPT_BLOCK_SIZE)
+        DecryptBlock20(Buf+I);
+      break;
+#endif
+    case CRYPT_RAR30:
+    case CRYPT_RAR50:
+      rin.blockDecrypt(Buf,Size,Buf);
+      break;
+  }
+}
+
+
+bool CryptData::SetCryptKeys(bool Encrypt,CRYPT_METHOD Method,
+     SecPassword *Password,const byte *Salt,
+     const byte *InitV,uint Lg2Cnt,byte *HashKey,byte *PswCheck)
+{
+  if (Method==CRYPT_NONE || !Password->IsSet())
+    return false;
+
+  CryptData::Method=Method;
+
+  wchar PwdW[MAXPASSWORD];
+  Password->Get(PwdW,ASIZE(PwdW));
+
+  // Display this warning only when encrypting. Users complained that
+  // it is distracting when decrypting. It still can be useful when encrypting,
+  // so users do not waste time to excessively long passwords.
+  if (Encrypt && wcslen(PwdW)>=MAXPASSWORD_RAR)
+    uiMsg(UIERROR_TRUNCPSW,MAXPASSWORD_RAR-1);
+
+  PwdW[Min(MAXPASSWORD_RAR,MAXPASSWORD)-1]=0; // For compatibility with existing archives.
+
+  char PwdA[MAXPASSWORD];
+  WideToChar(PwdW,PwdA,ASIZE(PwdA));
+  PwdA[Min(MAXPASSWORD_RAR,MAXPASSWORD)-1]=0; // For compatibility with existing archives.
+
+  bool Success=true;
+  
+  switch(Method)
+  {
+#ifndef SFX_MODULE
+    case CRYPT_RAR13:
+      SetKey13(PwdA);
+      break;
+    case CRYPT_RAR15:
+      SetKey15(PwdA);
+      break;
+    case CRYPT_RAR20:
+      SetKey20(PwdA);
+      break;
+#endif
+    case CRYPT_RAR30:
+      SetKey30(Encrypt,Password,PwdW,Salt);
+      break;
+    case CRYPT_RAR50:
+      Success=SetKey50(Encrypt,Password,PwdW,Salt,InitV,Lg2Cnt,HashKey,PswCheck);
+      break;
+  }
+  cleandata(PwdA,sizeof(PwdA));
+  cleandata(PwdW,sizeof(PwdW));
+  return Success;
+}
+
+
+
+
+// Fill buffer with random data.
+void GetRnd(byte *RndBuf,size_t BufSize)
+{
+  bool Success=false;
+#if defined(_WIN_ALL)
+  HCRYPTPROV hProvider = 0;
+  if (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+  {
+    Success=CryptGenRandom(hProvider, (DWORD)BufSize, RndBuf) != FALSE;
+    CryptReleaseContext(hProvider, 0);
+  }
+#elif defined(_UNIX)
+  FILE *rndf = fopen("/dev/urandom", "rb");
+  if (rndf!=NULL)
+  {
+    Success=fread(RndBuf, 1, BufSize, rndf) == BufSize;
+    fclose(rndf);
+  }
+#endif
+  if (!Success)
+  {
+#if defined(_WIN_ALL)
+    const wchar *ErrMsg=L"CryptGenRandom";
+#else
+    const wchar *ErrMsg=L"/dev/urandom";
+#endif
+    if (!Success)
+      ErrHandler.OpenError(ErrMsg);
+  }
+}

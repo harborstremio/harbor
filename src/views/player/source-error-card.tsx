@@ -16,7 +16,14 @@ const STATUS_TEXT: Record<number, string> = {
   504: "Gateway Timeout",
 };
 
-function describe(status: number): { title: string; detail: string; offline: boolean } {
+function describe(error: SourceError): { title: string; detail: string; offline: boolean } {
+  const status = error.status;
+  if (error.exhausted)
+    return {
+      title: "Harbor couldn't start any source",
+      detail: "Every source Harbor tried failed to start. Pick a different one, or try again in a moment.",
+      offline: false,
+    };
   if (status === 0)
     return {
       title: "This source didn't respond",
@@ -52,12 +59,12 @@ export function SourceErrorCard({
   onRetry: () => void;
 }) {
   const t = useT();
-  const info = describe(error.status);
+  const info = describe(error);
   const codeLabel = error.status === 0 ? t("No response") : `HTTP ${error.status}`;
   const statusName = STATUS_TEXT[error.status];
 
   return (
-    <div className="animate-fade-in absolute inset-0 z-40 flex items-center justify-center bg-canvas/85 p-6 backdrop-blur-md">
+    <div className="animate-fade-in absolute inset-0 z-[90] flex items-center justify-center bg-canvas/85 p-6 backdrop-blur-md">
       <div className="animate-modal-in flex w-[min(94vw,440px)] flex-col items-center gap-5 rounded-2xl border border-edge-soft bg-elevated/95 px-7 py-8 text-center shadow-[0_30px_90px_-25px_rgba(0,0,0,0.7)]">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/12 text-rose-300">
           {info.offline ? <WifiOff size={26} strokeWidth={2} /> : <ServerCrash size={26} strokeWidth={2} />}
@@ -66,20 +73,24 @@ export function SourceErrorCard({
           <h2 className="font-display text-[20px] font-medium text-ink">{t(info.title)}</h2>
           <p className="text-[13.5px] leading-relaxed text-ink-muted">{t(info.detail)}</p>
         </div>
-        <div className="flex w-full flex-col gap-1 rounded-xl border border-edge-soft bg-canvas/50 px-4 py-3">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-              {t("Source said")}
-            </span>
-            <span className="font-mono text-[13px] font-semibold text-rose-300">
-              {codeLabel}
-              {statusName ? ` ${statusName}` : ""}
-            </span>
+        {(!error.exhausted || !!error.host) && (
+          <div className="flex w-full flex-col gap-1 rounded-xl border border-edge-soft bg-canvas/50 px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
+                {error.exhausted ? t("Last source tried") : t("Source said")}
+              </span>
+              {!error.exhausted && (
+                <span className="font-mono text-[13px] font-semibold text-rose-300">
+                  {codeLabel}
+                  {statusName ? ` ${statusName}` : ""}
+                </span>
+              )}
+            </div>
+            {error.host && (
+              <div className="truncate text-start font-mono text-[11.5px] text-ink-subtle">{error.host}</div>
+            )}
           </div>
-          {error.host && (
-            <div className="truncate text-start font-mono text-[11.5px] text-ink-subtle">{error.host}</div>
-          )}
-        </div>
+        )}
         <div className="flex w-full items-center gap-2.5">
           <button
             type="button"

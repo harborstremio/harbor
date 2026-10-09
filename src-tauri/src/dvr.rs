@@ -148,7 +148,9 @@ pub async fn dvr_start(
     cmd.kill_on_drop(true);
     #[cfg(windows)]
     cmd.creation_flags(CREATE_NO_WINDOW);
+    crate::proc_guard::configure_command(&mut cmd);
     let child = cmd.spawn().map_err(|e| format!("spawn mpv: {}", e))?;
+    crate::proc_guard::adopt(&child);
 
     let id = Uuid::new_v4().to_string();
     let started_at = Instant::now();
@@ -284,6 +286,16 @@ async fn finalize(
         let _ = app.emit(topic, &payload);
     }
     Ok(())
+}
+
+pub(crate) fn shutdown(app: &AppHandle) {
+    use tauri::Manager;
+    let inner = app.state::<DvrState>().inner.clone();
+    tauri::async_runtime::block_on(async move {
+        for (_, mut rec) in inner.lock().await.drain() {
+            let _ = rec.child.start_kill();
+        }
+    });
 }
 
 #[tauri::command]

@@ -24,6 +24,8 @@ export type IncomingParticipantLeft = {
   clientId: string;
   name: string;
   at: number;
+  avatar?: string | null;
+  color?: string | null;
 };
 
 export type IncomingSummon = {

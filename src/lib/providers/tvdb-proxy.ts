@@ -1,8 +1,9 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { kitsuToTvdb } from "./anime-mapping";
+import { HARBOR_TVDB_BASE } from "@/lib/config/endpoints";
 
-const PROXY = "https://harbor.site/api/tvdb/images";
-const ART_PROXY = "https://harbor.site/api/tvdb/artwork";
+const PROXY = `${HARBOR_TVDB_BASE}/api/tvdb/images`;
+const ART_PROXY = `${HARBOR_TVDB_BASE}/api/tvdb/artwork`;
 
 export type TvdbImageMap = Record<string, string>;
 

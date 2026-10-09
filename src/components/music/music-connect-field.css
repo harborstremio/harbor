@@ -1,0 +1,29 @@
+.music-connect-folder { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.music-connect-folder > label { font-size:14px; font-weight:500; color:var(--color-ink-muted); }
+.music-connect-folder-control { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.music-connect-folder-control input { flex:1 1 220px; min-width:0; width:100%; height:44px; padding:0 14px; border:1px solid var(--color-edge-soft); border-radius:8px; background:var(--color-canvas); color:var(--color-ink); font-size:14px; text-overflow:ellipsis; }
+.music-connect-folder-control input::placeholder { color:var(--color-ink-subtle); }
+.music-connect-folder-control input:focus-visible { outline:2px solid var(--color-accent); outline-offset:2px; }
+.music-connect-folder-control button { flex-shrink:0; }
+
+.music-connect-field input {
+  transition:
+    border-color 180ms ease-out,
+    box-shadow 180ms ease-out;
+}
+.music-connect-field input:focus,
+.music-connect-field input:focus-visible,
+html:not([data-input-modality="pointer"]) .music-connect-field input:focus-visible {
+  outline: none !important;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-accent) 18%, transparent);
+}
+.music-connect-field:focus-within,
+html:not([data-input-modality="pointer"]) .music-connect-field:focus-visible {
+  outline: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-connect-field input {
+    transition: none;
+  }
+}

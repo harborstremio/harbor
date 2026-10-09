@@ -1,0 +1,305 @@
+{
+  "notes": {
+    "0.9.128": {
+      "title": "Harbor Beta 0.9.128",
+      "intro": "The biggest beta yet: a full Sports section, a complete DJ deck, a much larger Music experience, a rebuilt Manga library with a phone remote, and a curated film canon running through discovery and detail pages, alongside a deep pass on speed, caching and reliability.",
+      "sections": [
+        {
+          "heading": "Sports",
+          "items": [
+            "Added a full Sports section with live scores, schedules, event pages, league guides, standings and date navigation.",
+            "Added athlete profiles with career history, portraits, videos and identity matching across providers.",
+            "Added boxing schedules and fight cards, baseball, American football, motorsport, NASCAR and racing venues.",
+            "Added esports coverage with match rails, team directories, profiles, rankings, team history and map blueprints.",
+            "Added sports broadcasts with an addon source panel, stream picker, watch providers and an access gate.",
+            "Added event enrichment with boxscores, venue lineups, score detail, odds and competition metadata.",
+            "Added reminders for matches you follow, personalization, and regional coverage including Saudi league team aliases.",
+            "Added the full Sports experience to Big Picture, with its own hero, event rows, broadcast stage, chips and explore view.",
+            "A fast league now renders before a slow one instead of everything waiting for the slowest, and cached scores survive a provider outage.",
+            "A missing score stays missing and a reported zero stays zero, so old timestamps can no longer manufacture a fake live game.",
+            "One busy league can no longer crowd F1, the NBA and fight nights out of discovery, and a single fight card counts as one highlight.",
+            "Fights with unannounced opponents now show the named event rather than inventing participants.",
+            "Provider demonstration data can no longer populate a real roster or schedule, and rosters keep provider identity while de-duplicating athletes.",
+            "Stale or unrelated live race data can no longer overwrite the race you selected, and NASCAR venue matching no longer confuses similarly named cities."
+          ]
+        },
+        {
+          "heading": "DJ deck",
+          "items": [
+            "Added a standalone DJ deck window with two decks, platter scratching with real physics, tempo sync and crossfade.",
+            "Added performance pads with several pad modes, loop controls, and an FX rack with a dedicated FX bay.",
+            "Added a live waveform display with tile-based painting, DSP analysis and motion.",
+            "Added deck audio routing, release effects and sample playback.",
+            "A deck that is not live is never adopted, so controls cannot act on the wrong deck.",
+            "A disabled equaliser no longer ships its curve, while speed changes still apply."
+          ]
+        },
+        {
+          "heading": "Music",
+          "items": [
+            "Added Listen Together so a mix can be followed live between windows.",
+            "Added a Hatsune Miku visualizer that dances, changes expression and reacts to rhythm and tempo.",
+            "Added an animated GIF visualizer with its own decoder and settings.",
+            "Added virtual audio cable output with PulseAudio, PipeWire and CoreAudio backends for broadcasting Harbor audio.",
+            "Added artist pages with galleries, rarities, linked biographies, related artists and a performance spotlight.",
+            "Added genre browsing with per-genre catalogs, scenes, insights, videos and a full set of genre artwork.",
+            "Added record label pages with label metadata and roster.",
+            "Added Billboard and Rolling Stone chart pages and rows.",
+            "Added karaoke, synced lyrics and a lyric offset control.",
+            "Added a parametric equalizer, audio metering and expanded audio settings.",
+            "Added speaker and cast output for music, plus music downloads.",
+            "Added daily mixes, made for you rows, recently played contexts and top playlists.",
+            "Added Discord Rich Presence for music.",
+            "Added playlist cover editing, artwork saving and queue continuation between sessions.",
+            "Improved music search with better ranking, scoring, multiple search lanes and fallbacks.",
+            "Two different artists who share a name no longer merge into one, and neither inherits the other's audience.",
+            "A well-known artist can no longer ride an unrelated query to the top of results, and a Cyrillic typo no longer hands the top spot to an impostor.",
+            "A song liked from a playlist still reads as liked when it plays from a different source.",
+            "The player title now sends you back to the playlist the song is actually playing from.",
+            "A song with a release tag in its title no longer loses its exact match, and titles that are only noise keep their raw form instead of vanishing.",
+            "Up next renders nothing at all when there is no next track, instead of a bare heading.",
+            "A blank lyric line now shows nothing rather than an empty scrim, and a song with no lyrics shows no overlay.",
+            "Lossy codecs such as Opus no longer inherit Hi-Res or decoder depth from a high sample rate.",
+            "A queued track keeps its place in the queue instead of being pushed to the end."
+          ]
+        },
+        {
+          "heading": "Manga",
+          "items": [
+            "Rebuilt the Manga library with a spotlight, a home-style favorites rail, grid favorites, a section switcher and scroll-spy. — @Thunderhawkk",
+            "Added a phone remote with QR pairing, control layouts, a two-way reader settings sheet and a scroll-following strip mode. — @Thunderhawkk",
+            "Mirrored desktop reading modes on mobile and synced modes and positions in both directions. — @Thunderhawkk",
+            "Added pinch zoom, a zoom badge, a direction toggle and tap to toggle chrome in the phone reader. — @Thunderhawkk",
+            "Separated manga lists from shared lists so they have their own quota. — @Thunderhawkk",
+            "Added in-app context menus, read badges on finished chapters, and continue reading that advances only on true completion. — @Thunderhawkk",
+            "Fixed continue reading not restoring the last chapter position, and details not resuming from loaded chapters. — @Thunderhawkk",
+            "Fixed strip follow jitter, right-to-left drift, loading collapse, short-page centering and the paged chrome toggle. — @Thunderhawkk",
+            "Made favorites, chapters and sections load lazily so large libraries scroll far more smoothly. — @Thunderhawkk"
+          ]
+        },
+        {
+          "heading": "Discovery and detail pages",
+          "items": [
+            "Added curated film lists including the National Film Registry, AFI 100, Sight and Sound, the Criterion Collection and major festival winners, with accolade badges on cards.",
+            "Added country browsing with per-country canons, notable people and tiles, plus a Born Today row.",
+            "Added a criticism panel, production facts, camera and format details, adaptation rows and soundtrack rows to detail pages.",
+            "Added filmography grouping and completion tracking, and a shared crew line between two people.",
+            "Added a relationship graph that explains why titles are connected.",
+            "A festival badge now names the prize it won rather than leaning on the curator line.",
+            "Title matching is stricter, so a sequel marker or a colon continuation no longer passes as the same film, and short common-word titles are treated as risky."
+          ]
+        },
+        {
+          "heading": "Speed and efficiency",
+          "items": [
+            "Watchlist grids are virtualized per date group, so very large watchlists scroll smoothly. — @Thunderhawkk",
+            "Proxied images are resized on the server with a thumbnail cache, and cover thumbnails are kept on disk and can be cleared by hand. — @Thunderhawkk",
+            "Requests for the same thing are now shared instead of duplicated, and a prefetch skips anything already resolved or already being fetched.",
+            "Closing a page now cancels the work it started, and a late reply from cancelled work can no longer populate a cache or resurrect a stopped session.",
+            "Feeds render progressively as each source answers, rather than holding everything for the slowest.",
+            "Caches are now size-bounded with real expiry, so stale, future-dated or malformed entries cannot hide fresh data.",
+            "A slow provider now hits its deadline without discarding the data that already arrived.",
+            "Artwork downloads stop at a size limit without relying on the server reporting a length, and an unmeasured poster is no longer downgraded.",
+            "Live TV responses are bounded and cancellable, so a slow or endless source can no longer hang the page."
+          ]
+        },
+        {
+          "heading": "Plugins and extensions",
+          "items": [
+            "Fixed extension archives being fetched as text instead of bytes, which corrupted every download. — @Thunderhawkk",
+            "Added the extension API members measured as missing, plus CloudflareKiller and several Android system stubs, so far more extensions load. — @Thunderhawkk",
+            "Fixed V-Cloud, Pixeldrain and Supervideo link resolution. — @Thunderhawkk",
+            "Fixed the compatibility layer failing to build from folder paths containing spaces. — @Thunderhawkk",
+            "Gave plugin checks the same timeout as playback and warmed the bridge before a deadline starts. — @Thunderhawkk",
+            "An addon outage is now told apart from a cancelled request and from a real error, so a healthy source is not marked broken."
+          ]
+        },
+        {
+          "heading": "Interface and navigation",
+          "items": [
+            "Added in-place sidebar editing with hide, reorder and a hidden tray, replacing the separate Manga and Live TV hide toggles. — @Thunderhawkk",
+            "Added the MinUI Dark theme preset with a token-driven dock. — @Thunderhawkk",
+            "Added per-cache storage usage in the Caches tab so you can see what is using space. — @Thunderhawkk",
+            "Kept sidebar menus measurable and immediately dismissible. — @Talal1011",
+            "Fixed rows not re-measuring cards after switching card style. — @Thunderhawkk",
+            "Fixed TV cards using blurred posters instead of real anime backdrops. — @Thunderhawkk",
+            "Fixed poster dock clipping at row boundaries and header action overlap. — @O1Abdulrahman",
+            "Fixed stray focus rings in search and made Tab stay inside the overlay. — @Thunderhawkk",
+            "Fixed F6 tearing down pane focus, and focus restore borrowing page-level rounded corners. — @Thunderhawkk",
+            "Fixed the clock overlay being hidden in windowed mode.",
+            "A fractional interface zoom no longer lifts the dock off the bottom of the window.",
+            "Pages no longer scroll past the end of the list they belong to, and a zoomed or panned view now counts its own offset instead of pushing content upward.",
+            "Hover and keyboard controls now meet a 44 pixel pointer target and reveal on focus as well as hover."
+          ]
+        },
+        {
+          "heading": "Playback and platform",
+          "items": [
+            "Fixed a Linux race by creating the mpv render context before loading the file. — @kalashnikxvxiii",
+            "Native power inhibition is now preferred on Cinnamon and GNOME, so the screen no longer sleeps during playback. — @anmol210202",
+            "Fixed watchlist same-name collisions, duplicate ghost entries and anime details hijacking the wrong title. — @Thunderhawkk",
+            "Fixed metadata addons installed through a Stremio account not being detected. — @Thunderhawkk",
+            "Fixed the cache clear confirmation resetting before the clear ran. — @AnessBen",
+            "Improved HDR session handling and the overlay stage across providers.",
+            "Windows playback now serializes start and stop separately from property polling, so a quick stop and start no longer trips over itself.",
+            "DRM, local tracks and unsupported cast protocols no longer trigger native playback on a receiver.",
+            "Cancelling a cast load no longer mutes or plays the local picture before the stop is acknowledged.",
+            "Cancelling a download now removes the partial file and its entry instead of leaving a stub behind.",
+            "A provider key that hits a quota error is treated as a failure, while an entitlement error no longer rejects the key everywhere."
+          ]
+        },
+        {
+          "heading": "Mobile and TV",
+          "items": [
+            "We are still working on mobile and TV apps. We have no ETA but we appreciate and value all feedback given for the circulating TV betas."
+          ]
+        }
+      ]
+    },
+    "0.9.127": {
+      "title": "Harbor Beta 0.9.127",
+      "intro": "A focused update for Windows HDR playback, window startup, and embedded subtitle selection.",
+      "sections": [
+        {
+          "heading": "What's in this one",
+          "items": [
+            "Fixed the extra Harbor loading window during True HDR embedded playback on Windows.",
+            "Fixed the thin light line at the bottom of Harbor when reopening maximized with Windows taskbar auto-hide enabled.",
+            "Fixed automatic embedded subtitle selection when track information arrives late. With Prefer embedded subtitles enabled, matching embedded tracks take priority over external results."
+          ]
+        },
+        {
+          "heading": "A note from Talal",
+          "items": [
+            "Thank you for the reports and for testing these fixes. Please check HDR playback, reopening Harbor maximized, and automatic subtitle selection on your setup. If an issue returns, include your version, Windows display settings, and clear steps in our Discord support channel. Hide private links and account details before sharing. — Talal"
+          ]
+        }
+      ]
+    },
+    "0.9.126": {
+      "title": "Harbor Beta 0.9.126",
+      "intro": "Account, playback, subtitle, and browsing improvements, with more reliable name saving and session handling.",
+      "sections": [
+        {
+          "heading": "Accounts and sessions",
+          "items": [
+            "Improved Harbor display-name saving, retry handling, and account isolation.",
+            "Added proactive Harbor session renewal and a single retry for eligible requests after an expired session. Temporary connection failures preserve your saved session; revoked sessions still require sign-in."
+          ]
+        },
+        {
+          "heading": "Playback and subtitles",
+          "items": [
+            "Fixed the Windows player startup background and cleanup of Harbor's RTX filter when switching between eligible SDR and HDR sources.",
+            "Fixed subtitle text remaining visible after selecting Off, including late subtitle events.",
+            "Included seeking, Windows audio recovery, and content-advisory updates.",
+            "Load custom mpv scripts before player initialization and open the separate Windows player on Harbor's display (#1422). HDR display restoration still needs device-specific verification, especially in separate-window mode.",
+            "Improved subtitle pop-out placement and prevented duplicate subtitle overlays while it is open.",
+            "Improved playback statistics: unavailable drop counters no longer appear as a measured zero. This is not a universal fix for fullscreen stuttering."
+          ]
+        },
+        {
+          "heading": "Browsing and retained changes",
+          "items": [
+            "Improved Discover loading and scrolling behavior.",
+            "Updated settings layouts and profile-background previews, and added the subtitle-FPS icon to the icon collection.",
+            "Added custom screensaver videos, GIFs and images, richer Voyage hover details, and corrected settings-search destinations.",
+            "Improved anime Continue Watching deduplication and Bleach TYBW episode labels. Added offline retry queues for Trakt and Simkl progress, isolated by Harbor profile (#1421).",
+            "Retained the approved Continue Watching and plugin updates, along with earlier beta and experimental fixes.",
+            "These version-specific release notes remain available offline after installation."
+          ]
+        },
+        {
+          "heading": "Request security",
+          "items": [
+            "Improved provider domain checks, including public suffixes and shared hosting domains."
+          ]
+        },
+        {
+          "heading": "Please test",
+          "items": [
+            "Save a display name, reopen settings, and restart Harbor. Confirm the saved name and sign-in remain.",
+            "Check a failed save while offline, then reconnect and retry. A failed save must not report success.",
+            "Check account actions after real session renewal without signing in again. Offline recovery and expiry retry have passed simulated tests; live verification is still pending.",
+            "Turn subtitles Off while a line is visible, seek, then turn them on again. Check that no old line stays on screen.",
+            "On Windows, switch from SDR playback with RTX enabled to HDR and back. Check the picture, seeking, audio, and fullscreen.",
+            "Finish an episode offline, reconnect, and check tracker history. Switch profiles and confirm pending progress does not move to the other profile.",
+            "Check custom screensaver playback, subtitle pop-out open/close, settings search, and separate-window placement on a second monitor.",
+            "Report problems through Harbor's official Discord support. Include your version, platform, steps, and expected result. Remove passwords, tokens, and private URLs from anything you share."
+          ]
+        },
+        {
+          "heading": "A note from Talal",
+          "items": [
+            "Thank you for helping improve Harbor. Please try the features you use every day and tell us if anything feels different. If something goes wrong, note what you were doing, your Harbor version, and your operating system. For playback issues, include whether HDR, RTX, or fullscreen was enabled. Clear steps and a short recording help us investigate. Please hide passwords, tokens, and private links before sharing. — Talal"
+          ]
+        }
+      ]
+    },
+    "0.9.125": {
+      "title": "Harbor Beta 0.9.125",
+      "intro": "Playback, subtitles, Continue Watching, navigation, and library improvements brought forward from Experimental 0.0.3 and 0.0.4, together with the latest approved beta changes.",
+      "sections": [
+        {
+          "heading": "Playback, subtitles, and X-Ray",
+          "items": [
+            "Fixed Arabic/English subtitle identity and grouping, and preserved manual Live Try timing through seeking and pause/resume.",
+            "Improved encrypted HLS playback to address repeated segment stalls (#1400).",
+            "Improved Windows audio-output switching and recovery (#1334), and restored window bounds and maximized state after leaving fullscreen (#1394).",
+            "Select an X-Ray actor to browse their movies and TV shows without leaving the player.",
+            "Added Linux MPRIS desktop media controls for playback, seeking, volume, and metadata (#1372)."
+          ]
+        },
+        {
+          "heading": "Continue Watching and your library",
+          "items": [
+            "Dismissed cards can return when you make further progress, including progress from Trakt and Simkl. Improved external-source refresh and retained shared-profile safeguards (#1411, #1359).",
+            "Added optional episode-still artwork for Continue Watching, with your saved frame as a fallback. This preference is off by default (#1411).",
+            "Season selection follows watch progress (#1401).",
+            "Added drag-and-drop list reordering (#1361) and descriptions for custom and featured lists (#1371)."
+          ]
+        },
+        {
+          "heading": "Navigation and appearance",
+          "items": [
+            "Improved TV/controller navigation across settings, settings focus, and home search (#1408).",
+            "Improved Arabic/RTL navigation in Big Picture, the poster dock, and live TV multiview (#1406).",
+            "Restored the standard row arrows while retaining navigation fixes. Liquid Glass arrows are unchanged.",
+            "Restored ElegantFin sidebar collapse and Back alignment (#1399).",
+            "Refreshed the content advisory popup with translucent styling and updated animations. Removed the migration that automatically enabled content advisories.",
+            "Updated studio/network facts: removed average-rating/runtime facts and display an IMDb score for the featured acclaimed title when available.",
+            "Added a custom background and dimming control for the Who's watching screen."
+          ]
+        },
+        {
+          "heading": "Books, manga, and more",
+          "items": [
+            "Added full Edge TTS voice discovery for ebooks (#1409).",
+            "Included manga downloads, browsing/extension improvements, and AniList/MAL progress tracking (#1385).",
+            "Included desktop notifications (#1398) and controller cursor toggle, idle auto-hide, and input-yield options (#1362).",
+            "Experimental release notes remain available after installation, including offline. Beta 0.9.125 includes its own bundled changelog fallback.",
+            "Updated regression coverage for navigation, subtitles, release notes, Continue Watching, and background controls."
+          ]
+        },
+        {
+          "heading": "Account changes",
+          "items": [
+            "Discord account sign-in, linking, and recovery have been removed. Discord Rich Presence is separate and remains available."
+          ]
+        },
+        {
+          "heading": "A note from Talal",
+          "items": [
+            "Sorry for the delay, everyone, and thank you for your patience. The stable release will be published soon. Thank you to every tester, developer, and contributor helping us improve Harbor."
+          ]
+        },
+        {
+          "heading": "Credits",
+          "items": [
+            "Credits: Thunderhawkk, uddx7, O1Abdulrahman, anmol210202, pengunnn, OwaisByte, kalashnikxvxiii, Talal1011, and the Harbor contributors."
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,10 +1,16 @@
-import { ArrowDownToLine, Check, X } from "lucide-react";
-import { useEffect } from "react";
-import { createPortal } from "react-dom";
-import { BetaTag } from "@/components/beta-tag";
+import { ArrowDownToLine, Check, Info, X } from "../icons";
+import { ModalShell, useModalExit } from "@/components/modal-shell";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { RichNote } from "@/components/update/rich-notes";
+import { advanceFocus, captureFocusReturn } from "@/lib/keyboard-navigation";
+import { getDirection, isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
+import { hasRichNote, releaseNote, type ReleaseNote } from "@/lib/updater/release-notes";
 import { installerUrl, type VersionEntry } from "@/lib/updater/versions";
 import { openUrl } from "@/lib/window";
+import { ROW_DESC } from "../kit";
+import { SButton } from "../ui";
+import { VERSION_BADGE } from "./badge";
 
 const RELEASES_URL = "https://github.com/harborstremio/harbor/releases";
 
@@ -17,82 +23,126 @@ export function VersionNotesModal({
   isCurrent: boolean;
   onClose: () => void;
 }) {
+  const { closing, close } = useModalExit(onClose);
   const t = useT();
   const url = installerUrl(entry);
+  const [rich, setRich] = useState<ReleaseNote | null>(null);
+  const [scrolls, setScrolls] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => captureFocusReturn(), []);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+    if (closeRef.current) advanceFocus(closeRef.current);
+  }, []);
 
-  return createPortal(
-    <div
-      className="animate-fade-in fixed inset-0 z-[200] flex items-center justify-center bg-canvas/80 p-4"
-      onClick={onClose}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="animate-modal-in flex max-h-[80vh] w-[min(94vw,560px)] flex-col rounded-2xl border border-edge-soft bg-elevated shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]"
-      >
-        <div className="flex items-center justify-between gap-3 border-b border-edge-soft px-5 pb-3.5 pt-4">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <h2 className="font-display text-[20px] font-medium tabular-nums text-ink">{entry.version}</h2>
-            {entry.channel === "beta" && <BetaTag force />}
-            {entry.channel === "stable" && (
-              <span className="inline-flex shrink-0 items-center rounded-md bg-ink/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted ring-1 ring-edge">
-                {t("Stable")}
-              </span>
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!isBackKey(e)) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      close();
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [close]);
+
+  useEffect(() => {
+    let ok = true;
+    releaseNote(entry.version).then((n) => ok && setRich(n));
+    return () => {
+      ok = false;
+    };
+  }, [entry.version]);
+
+  useEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    const measure = () => setScrolls(el.scrollHeight > el.clientHeight + 1);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [rich]);
+
+  const onNotesKey = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    const el = bodyRef.current;
+    const dir = getDirection(e.nativeEvent);
+    if (!el || (dir !== "up" && dir !== "down")) return;
+    const atStart = el.scrollTop <= 1;
+    const atEnd = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+    if (dir === "up" ? atStart : atEnd) return;
+    e.preventDefault();
+    el.scrollBy({ top: (dir === "down" ? 0.8 : -0.8) * el.clientHeight, behavior: "smooth" });
+  };
+
+  return (
+    <ModalShell closing={closing} onDismiss={close}>
+      <div className="flex items-start gap-4 px-6 pt-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <h2 className="min-w-0 text-[19px] font-semibold leading-[26px] tabular-nums tracking-tight text-ink">
+              {entry.version}
+            </h2>
+            {entry.channel === "beta" && (
+              <span className={`${VERSION_BADGE} bg-accent-soft text-accent`}>{t("Beta")}</span>
             )}
-            {entry.date && <span className="text-[12px] text-ink-subtle">{entry.date}</span>}
+            {entry.channel === "stable" && (
+              <span className={`${VERSION_BADGE} bg-elevated text-ink-subtle`}>{t("Stable")}</span>
+            )}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("Close")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
-          >
-            <X size={17} />
-          </button>
+          {entry.date && <p className={ROW_DESC}>{entry.date}</p>}
         </div>
+        <button
+          ref={closeRef}
+          type="button"
+          onClick={close}
+          aria-label={t("Close")}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-[8px] text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+        >
+          <X size={18} strokeWidth={2.2} />
+        </button>
+      </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-          {entry.notes ? (
-            <p className="whitespace-pre-line text-[13.5px] leading-relaxed text-ink-muted">{entry.notes}</p>
-          ) : (
-            <p className="text-[13px] text-ink-subtle">
+      <div
+        ref={bodyRef}
+        tabIndex={scrolls ? 0 : undefined}
+        onKeyDown={scrolls ? onNotesKey : undefined}
+        className="min-h-0 flex-1 overflow-y-auto px-6 pt-4"
+      >
+        {hasRichNote(rich) ? (
+          <RichNote note={rich} />
+        ) : entry.notes ? (
+          <p className={`max-w-[70ch] whitespace-pre-line ${ROW_DESC}`}>{entry.notes}</p>
+        ) : (
+          <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+            <Info size={18} className="mt-[2px] shrink-0 text-ink-subtle" />
+            <p className={`max-w-[66ch] ${ROW_DESC}`}>
               {t("No notes were published for this build.")}
             </p>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between gap-3 border-t border-edge-soft px-5 py-3.5">
-          <button
-            type="button"
-            onClick={() => openUrl(RELEASES_URL)}
-            className="text-[12px] font-semibold text-ink-subtle underline-offset-2 transition-colors hover:text-ink hover:underline"
-          >
-            {t("All releases on GitHub")}
-          </button>
-          {isCurrent ? (
-            <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1.5 text-[11.5px] font-bold uppercase tracking-[0.1em] text-accent">
-              <Check size={13} strokeWidth={2.8} />
-              {t("Current")}
-            </span>
-          ) : url ? (
-            <button
-              type="button"
-              title={t("Download this build's installer, then run it over your current copy")}
-              onClick={() => openUrl(url)}
-              className="flex h-10 shrink-0 items-center gap-2 rounded-xl bg-ink px-4 text-[13px] font-semibold text-canvas transition-all hover:scale-[1.02] active:scale-[0.97]"
-            >
-              <ArrowDownToLine size={14} strokeWidth={2.4} />
-              {t("Download this build")}
-            </button>
-          ) : null}
-        </div>
+          </div>
+        )}
       </div>
-    </div>,
-    document.body,
+
+      <div className="flex flex-wrap items-center justify-end gap-2.5 px-6 pb-6 pt-5">
+        <SButton onClick={() => openUrl(RELEASES_URL)}>{t("All releases on GitHub")}</SButton>
+        {isCurrent ? (
+          <span className={`${VERSION_BADGE} bg-accent-soft text-accent`}>
+            <Check size={13} strokeWidth={2.8} />
+            {t("Current")}
+          </span>
+        ) : url ? (
+          <SButton
+            variant="primary"
+            title={t("Download this build's installer, then run it over your current copy")}
+            onClick={() => openUrl(url)}
+          >
+            <ArrowDownToLine size={16} strokeWidth={2.4} />
+            {t("Download this build")}
+          </SButton>
+        ) : null}
+      </div>
+    </ModalShell>
   );
 }

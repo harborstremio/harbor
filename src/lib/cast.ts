@@ -25,6 +25,7 @@ export type CastStatus = {
   position_sec: number;
   player_state: string;
   connected: boolean;
+  transport_codec?: string | null;
 };
 
 export type CastSubStyle = {
@@ -69,6 +70,11 @@ export async function castLoad(opts: {
   profile?: TranscodeProfile;
   subtitle?: CastSubInfo | null;
   subStyle?: CastSubStyle | null;
+  /** Extract audio from this exact source; the receiver must confirm progress before LOAD resolves. */
+  audioOnly?: boolean;
+  /** Embedded audio ordinal in this exact source (FFmpeg 0:a:N), never mpv aid. */
+  audioTrackOrdinal?: number;
+  audioStartPaused?: boolean;
 }): Promise<{ ok: boolean; error: string | null }> {
   if (!isTauri) return { ok: false, error: "Casting requires the desktop build." };
   try {
@@ -87,6 +93,9 @@ export async function castLoad(opts: {
       profile: opts.profile ?? null,
       subtitle: opts.subtitle ?? null,
       subStyle: opts.subStyle ?? null,
+      audioOnly: opts.audioOnly ?? false,
+      audioTrackOrdinal: opts.audioTrackOrdinal ?? null,
+      audioStartPaused: opts.audioStartPaused ?? false,
     });
     return { ok: true, error: null };
   } catch (e) {
@@ -96,31 +105,27 @@ export async function castLoad(opts: {
 
 export async function castPlay(): Promise<void> {
   if (!isTauri) return;
-  await invoke("cast_play").catch((e) => console.warn("[cast] play", e));
+  await invoke("cast_play");
 }
 
 export async function castPause(): Promise<void> {
   if (!isTauri) return;
-  await invoke("cast_pause").catch((e) => console.warn("[cast] pause", e));
+  await invoke("cast_pause");
 }
 
 export async function castSeek(sec: number): Promise<void> {
   if (!isTauri) return;
-  await invoke("cast_seek", { sec }).catch((e) => console.warn("[cast] seek", e));
+  await invoke("cast_seek", { sec });
 }
 
 export async function castStop(): Promise<void> {
   if (!isTauri) return;
-  await invoke("cast_stop").catch((e) => console.warn("[cast] stop", e));
+  await invoke("cast_stop");
 }
 
 export async function castStatus(): Promise<CastStatus | null> {
   if (!isTauri) return null;
-  try {
-    return (await invoke<CastStatus | null>("cast_status")) ?? null;
-  } catch {
-    return null;
-  }
+  return (await invoke<CastStatus | null>("cast_status")) ?? null;
 }
 
 let ffmpegPresentCache: boolean | null = null;
@@ -149,7 +154,5 @@ function mimeFromExt(s: string): string | undefined {
 }
 
 export function guessContentType(url: string, fallbackName?: string): string {
-  return (
-    mimeFromExt(url) ?? (fallbackName ? mimeFromExt(fallbackName) : undefined) ?? "video/mp4"
-  );
+  return mimeFromExt(url) ?? (fallbackName ? mimeFromExt(fallbackName) : undefined) ?? "video/mp4";
 }

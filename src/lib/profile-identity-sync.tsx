@@ -4,12 +4,7 @@ import { useSettings, type ContentFilters } from "./settings";
 import { useTogether } from "./together/provider";
 
 function sameHideContent(a: ContentFilters, b: ContentFilters): boolean {
-  return (
-    a.anime === b.anime &&
-    a.liveTv === b.liveTv &&
-    a.sports === b.sports &&
-    a.adult === b.adult
-  );
+  return a.anime === b.anime && a.sports === b.sports && a.adult === b.adult;
 }
 
 export function ProfileIdentitySync() {
@@ -25,7 +20,7 @@ export function ProfileIdentitySync() {
   }, [activeProfile?.id, activeProfile?.color]);
 
   useEffect(() => {
-    if (!activeProfile || activeProfile.kid) return;
+    if (!activeProfile || activeProfile.kid || !activeProfile.isPrimary) return;
     if (settings.harborAvatar !== activeProfile.avatar) {
       update({ harborAvatar: activeProfile.avatar });
     }

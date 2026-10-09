@@ -1,6 +1,8 @@
-import { Film, Maximize, Minimize, Plus, Save, Tv, Users, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Film, Maximize, Minimize, Plus, Save, Tv, Users, X } from "../icons";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { captureFocusReturn, tvFocus } from "@/lib/keyboard-navigation";
+import { isBackKey, isVisible } from "@/lib/keyboard-navigation/geometry";
 import {
   CONTROL_META,
   type ControlVariant,
@@ -17,12 +19,17 @@ import {
   type StremioRenderCtx,
 } from "@/components/player/transport/control-renderer-stremio";
 import { setPlaybackClock } from "@/lib/player/playback-clock";
+import { useT } from "@/lib/i18n";
 import { DefaultLayout, FauxBackdrop, StremioLayout, TopRow } from "./editor-chrome";
 import { buildDefaultCtx, buildStremioCtx, type PlayerMode } from "./editor-mock-ctx";
 import { EditorPanels } from "./editor-panels";
 import { FloatingInspector } from "./floating-inspector";
 import { ProfilePicker } from "./profile-picker";
 import { usePreviewBackdrop } from "./use-preview-backdrop";
+import { stripArrowKeys } from "../shared";
+
+const OVERLAY_LABEL =
+  "text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px]";
 
 type Props = {
   theme: ThemeId;
@@ -85,7 +92,10 @@ export function EditorOverlay({
   onResetToDefaults,
   onUnhide,
 }: Props) {
+  const t = useT();
   const chromeRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
   const [chromeW, setChromeW] = useState(0);
   const [winSize, setWinSize] = useState(() => ({
     w: window.innerWidth,
@@ -104,18 +114,36 @@ export function EditorOverlay({
     setPreviewStates({});
   };
 
+  const focusHeader = () => {
+    const el = headerRef.current?.querySelector<HTMLElement>("button:not([disabled])");
+    if (el) tvFocus(el);
+  };
+
   useEffect(() => {
     document.body.style.overflow = "hidden";
     setPlaybackClock(1342, 1500);
+    const restore = captureFocusReturn();
+    const land =
+      rootRef.current?.querySelector<HTMLElement>(
+        "[data-control-id][data-tv-initial-focus], [data-panel-id][data-tv-initial-focus]",
+      ) ?? headerRef.current?.querySelector<HTMLElement>("button:not([disabled])");
+    if (land) tvFocus(land);
     return () => {
       document.body.style.overflow = "";
       setPlaybackClock(0, 0);
+      restore();
     };
   }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.defaultPrevented || !isBackKey(e)) return;
+      const stacked = Array.from(
+        document.querySelectorAll<HTMLElement>('[role="dialog"], [role="menu"]'),
+      ).some((el) => el !== rootRef.current && isVisible(el));
+      if (stacked) return;
+      e.preventDefault();
+      onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -161,33 +189,42 @@ export function EditorOverlay({
   const mid = chromeW > 0 && chromeW < 1300;
   const compact = chromeW > 0 && chromeW < 1000;
   const tight = chromeW > 0 && chromeW < 600;
-  const sizeLabel = tight ? "Tight" : compact ? "Compact" : mid ? "Mid" : "Wide";
+  const sizeLabel = tight ? t("Tight") : compact ? t("Compact") : mid ? t("Mid") : t("Wide");
 
   const controlVariants = useMemo(
     () => Object.fromEntries(config.controls.map((c) => [c.id, c.variant ?? "auto"])),
     [config.controls],
   );
 
-  const ctx = useMemo(
-    () => {
-      const opts = {
-        mid,
-        compact,
-        tight,
-        mode,
-        customIcons: config.customIcons,
-        controlVariants,
-        timeFormat: config.options.timeFormat,
-        volumeStyle: config.options.volumeStyle,
-        previewStates,
-      };
-      return theme === "stremio" ? buildStremioCtx(opts) : buildDefaultCtx(opts);
-    },
-    [theme, mid, compact, tight, mode, config.customIcons, controlVariants, config.options.timeFormat, config.options.volumeStyle, previewStates],
-  );
+  const ctx = useMemo(() => {
+    const opts = {
+      mid,
+      compact,
+      tight,
+      mode,
+      customIcons: config.customIcons,
+      controlVariants,
+      timeFormat: config.options.timeFormat,
+      volumeStyle: config.options.volumeStyle,
+      previewStates,
+    };
+    return theme === "stremio" ? buildStremioCtx(opts) : buildDefaultCtx(opts);
+  }, [
+    theme,
+    mid,
+    compact,
+    tight,
+    mode,
+    config.customIcons,
+    controlVariants,
+    config.options.timeFormat,
+    config.options.volumeStyle,
+    previewStates,
+  ]);
 
   const renderOne = (id: PlayerControlId) => {
-    if (theme === "stremio") return <RenderedStremioControl id={id} ctx={ctx as StremioRenderCtx} />;
+    if (theme === "stremio")
+      return <RenderedStremioControl id={id} ctx={ctx as StremioRenderCtx} />;
     return renderControl(id, ctx as ControlContext);
   };
 
@@ -215,20 +252,25 @@ export function EditorOverlay({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[300] flex flex-col bg-black text-white">
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-white/8 px-8 py-4">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[10.5px] font-bold uppercase tracking-[0.32em] text-white/45">
-            Layout editor · {theme === "stremio" ? "Stremio" : "Default"}
+    <div
+      ref={rootRef}
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[300] flex flex-col bg-black text-white"
+    >
+      <header
+        ref={headerRef}
+        className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-3 px-8 py-4"
+      >
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className={`${OVERLAY_LABEL} text-white/60`}>
+            {t("Layout editor")} · {theme === "stremio" ? t("Stremio") : t("Default")}
           </span>
-          <h2
-            className="text-[22px] font-medium tracking-tight"
-            style={{ fontFamily: '"Fraunces", "Iowan Old Style", "Georgia", serif' }}
-          >
-            Click any control to edit it.
+          <h2 className="font-display text-[22px] font-medium tracking-tight">
+            {t("Click any control to edit it.")}
           </h2>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           <ModeSwitch mode={mode} onChange={handleSetMode} />
           <ProfilePicker
             profiles={profiles}
@@ -245,39 +287,49 @@ export function EditorOverlay({
             type="button"
             onClick={onSave}
             disabled={!dirty && !justSaved}
-            className={`flex h-11 items-center gap-2 rounded-full ps-3.5 pe-4 text-[13px] font-semibold transition-all duration-150 active:scale-[0.97] ${
+            className={`harbor-press-pop flex h-11 items-center gap-2 rounded-md px-4 text-[15px] font-semibold transition-opacity ${
               justSaved
-                ? "bg-emerald-500/85 text-white"
+                ? "bg-accent text-black"
                 : dirty
-                  ? "bg-white text-black hover:scale-[1.02]"
+                  ? "bg-white text-black hover:opacity-90"
                   : "cursor-not-allowed bg-white/8 text-white/35"
             }`}
           >
-            <Save size={14} strokeWidth={2.4} />
-            {justSaved ? "Saved" : "Save"}
+            <Save size={17} strokeWidth={2.4} />
+            {justSaved ? t("Saved") : t("Save")}
           </button>
           <button
             type="button"
             onClick={toggleFullscreen}
-            aria-label={isFs ? "Exit fullscreen" : "Enter fullscreen"}
-            title={isFs ? "Exit fullscreen" : "Enter fullscreen"}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/8 text-white/85 transition-colors hover:bg-white/15 hover:text-white"
+            aria-label={isFs ? t("Exit fullscreen") : t("Enter fullscreen")}
+            title={isFs ? t("Exit fullscreen") : t("Enter fullscreen")}
+            className="flex h-11 w-11 items-center justify-center rounded-md bg-white/8 text-white/85 transition-colors hover:bg-white/15 hover:text-white"
           >
-            {isFs ? <Minimize size={14} strokeWidth={2.4} /> : <Maximize size={14} strokeWidth={2.4} />}
+            {isFs ? (
+              <Minimize size={17} strokeWidth={2.4} />
+            ) : (
+              <Maximize size={17} strokeWidth={2.4} />
+            )}
           </button>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close editor"
-            className="flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/8 ps-3 pe-5 text-[13px] font-medium text-white/85 transition-colors hover:bg-white/15 hover:text-white"
+            aria-label={t("Close editor")}
+            className="flex h-11 items-center gap-2 rounded-md bg-white/8 px-4 text-[15px] font-semibold text-white/85 transition-colors hover:bg-white/15 hover:text-white"
           >
-            <X size={15} strokeWidth={2.4} />
-            Close
+            <X size={17} strokeWidth={2.4} />
+            {t("Close")}
           </button>
         </div>
       </header>
 
-      <HiddenTray config={config} onUnhide={onUnhide} onSelect={onSelect} />
+      <HiddenTray
+        config={config}
+        mode={mode}
+        onUnhide={onUnhide}
+        onSelect={onSelect}
+        onEmptied={focusHeader}
+      />
 
       <div className="relative min-h-0 flex-1 overflow-hidden">
         <FauxBackdrop width={winSize.w} height={winSize.h} sizeLabel={sizeLabel} bg={previewBg} />
@@ -356,34 +408,71 @@ export function EditorOverlay({
   );
 }
 
+const LIVE_ONLY_CONTROLS = new Set<PlayerControlId>(["dvr"]);
+const NOT_IN_LIVE_CONTROLS = new Set<PlayerControlId>([
+  "download",
+  "seek-back",
+  "seek-forward",
+  "prev-episode",
+  "next-episode",
+]);
+
+function controlAppliesToMode(id: PlayerControlId, mode: PlayerMode): boolean {
+  if (mode === "live") return !NOT_IN_LIVE_CONTROLS.has(id);
+  return !LIVE_ONLY_CONTROLS.has(id);
+}
+
 function HiddenTray({
   config,
+  mode,
   onUnhide,
   onSelect,
+  onEmptied,
 }: {
   config: PlayerChromeConfig;
+  mode: PlayerMode;
   onUnhide: (id: PlayerControlId) => void;
   onSelect: (id: PlayerControlId | null) => void;
+  onEmptied: () => void;
 }) {
-  const hidden = config.controls.filter((c) => c.hidden);
+  const t = useT();
+  const chipRefs = useRef(new Map<PlayerControlId, HTMLButtonElement>());
+  const pending = useRef<PlayerControlId | null>(null);
+  const hidden = config.controls.filter((c) => c.hidden && controlAppliesToMode(c.id, mode));
+
+  useLayoutEffect(() => {
+    const id = pending.current;
+    if (!id) return;
+    pending.current = null;
+    const el = chipRefs.current.get(id);
+    if (el) tvFocus(el);
+  });
+
   if (hidden.length === 0) return null;
   return (
-    <div className="flex shrink-0 items-center gap-3 overflow-x-auto border-b border-white/8 px-8 py-2.5">
-      <span className="shrink-0 text-[10.5px] font-bold uppercase tracking-[0.24em] text-white/40">Hidden</span>
-      <div className="flex items-center gap-1.5">
-        {hidden.map((c) => (
+    <div className="flex shrink-0 flex-wrap items-center gap-3 px-8 pb-3">
+      <span className={`shrink-0 ${OVERLAY_LABEL} text-white/60`}>{t("Hidden")}</span>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {hidden.map((c, i) => (
           <button
             key={c.id}
             type="button"
+            ref={(el) => {
+              if (el) chipRefs.current.set(c.id, el);
+              else chipRefs.current.delete(c.id);
+            }}
             onClick={() => {
+              const next = hidden[i + 1] ?? hidden[i - 1] ?? null;
+              if (next) pending.current = next.id;
+              else onEmptied();
               onUnhide(c.id);
               onSelect(c.id);
             }}
-            title={`Show ${CONTROL_META[c.id]?.label ?? c.id}`}
-            className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/12 bg-white/5 py-1.5 ps-2.5 pe-3 text-[12px] font-medium text-white/65 transition-colors hover:border-white/25 hover:bg-white/12 hover:text-white"
+            title={t("Show {label}", { label: t(CONTROL_META[c.id]?.label ?? c.id) })}
+            className="flex h-11 shrink-0 items-center gap-2 rounded-md bg-white/8 ps-3 pe-4 text-[15px] font-medium text-white/80 transition-colors hover:bg-white/15 hover:text-white"
           >
-            <Plus size={12} strokeWidth={2.6} />
-            <span className="max-w-[160px] truncate">{CONTROL_META[c.id]?.label ?? c.id}</span>
+            <Plus size={16} strokeWidth={2.6} />
+            <span className="max-w-[160px] truncate">{t(CONTROL_META[c.id]?.label ?? c.id)}</span>
           </button>
         ))}
       </div>
@@ -391,17 +480,45 @@ function HiddenTray({
   );
 }
 
+const MODE_ORDER: PlayerMode[] = ["normal", "live", "together"];
+
 function ModeSwitch({ mode, onChange }: { mode: PlayerMode; onChange: (m: PlayerMode) => void }) {
+  const t = useT();
+  const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
   return (
-    <div className="flex h-11 items-center gap-0.5 rounded-full border border-white/10 bg-white/4 p-1">
-      <ModePill active={mode === "normal"} onClick={() => onChange("normal")} icon={<Film size={13} strokeWidth={2.4} />}>
-        Normal
+    <div
+      onKeyDown={stripArrowKeys(btnRefs, (i) => onChange(MODE_ORDER[i]))}
+      className="flex h-11 items-center gap-0.5 rounded-md bg-white/8"
+    >
+      <ModePill
+        btnRef={(el) => {
+          btnRefs.current[0] = el;
+        }}
+        active={mode === "normal"}
+        onClick={() => onChange("normal")}
+        icon={<Film size={16} strokeWidth={2.4} />}
+      >
+        {t("Normal")}
       </ModePill>
-      <ModePill active={mode === "live"} onClick={() => onChange("live")} icon={<Tv size={13} strokeWidth={2.4} />}>
-        Live TV
+      <ModePill
+        btnRef={(el) => {
+          btnRefs.current[1] = el;
+        }}
+        active={mode === "live"}
+        onClick={() => onChange("live")}
+        icon={<Tv size={16} strokeWidth={2.4} />}
+      >
+        {t("Live TV")}
       </ModePill>
-      <ModePill active={mode === "together"} onClick={() => onChange("together")} icon={<Users size={13} strokeWidth={2.4} />}>
-        Together
+      <ModePill
+        btnRef={(el) => {
+          btnRefs.current[2] = el;
+        }}
+        active={mode === "together"}
+        onClick={() => onChange("together")}
+        icon={<Users size={16} strokeWidth={2.4} />}
+      >
+        {t("Together")}
       </ModePill>
     </div>
   );
@@ -412,18 +529,21 @@ function ModePill({
   onClick,
   icon,
   children,
+  btnRef,
 }: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   children: React.ReactNode;
+  btnRef?: React.Ref<HTMLButtonElement>;
 }) {
   return (
     <button
+      ref={btnRef}
       type="button"
       onClick={onClick}
-      className={`flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[12px] font-medium transition-colors ${
-        active ? "bg-white/15 text-white" : "text-white/55 hover:text-white/85"
+      className={`flex h-11 items-center gap-2 rounded-md px-4 text-[15px] font-medium transition-colors ${
+        active ? "bg-white text-black" : "text-white/70 hover:text-white"
       }`}
     >
       {icon}

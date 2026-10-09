@@ -9,3 +9,21 @@ export function realQualityLabel(width: number, height: number): string | null {
   if (h >= 480 || w >= 854) return "480p";
   return "SD";
 }
+
+const DV_TOKEN = /dolby\s*vision|\bdovi\b|\bdv\b/;
+const HDR_TOKEN = /\bhdr10\+?\b|hdr10plus|\bhdr\b|\bhlg\b/;
+
+export function hdrFormatLabel(
+  hdrGamma: string,
+  ...formats: Array<string | null | undefined>
+): string | null {
+  const q = formats.filter(Boolean).join(" ").toLowerCase();
+  const isDv = DV_TOKEN.test(q);
+  const isHdr10Plus = /hdr10\s*\+|hdr10plus/.test(q);
+  if (hdrGamma === "pq" || hdrGamma === "hlg") return isDv ? "DV" : isHdr10Plus ? "HDR10+" : "HDR";
+  if (hdrGamma) return null;
+  if (isDv) return "DV";
+  if (isHdr10Plus) return "HDR10+";
+  if (HDR_TOKEN.test(q)) return "HDR";
+  return null;
+}

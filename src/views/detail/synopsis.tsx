@@ -30,6 +30,7 @@ export function Synopsis({ text }: { text: string }) {
     <div className="max-w-3xl">
       <p
         ref={ref}
+        data-tauri-drag-region="false"
         className={`text-[16px] leading-relaxed text-ink-muted ${expanded ? "" : "line-clamp-4"}`}
       >
         {text}

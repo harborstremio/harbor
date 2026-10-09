@@ -1,0 +1,23 @@
+[package]
+name = "leveldb-sys"
+version = "2.0.9"
+authors = ["Andrew Dunham <andrew@du.nham.ca>", "Florian Gilcher <florian.gilcher@asquera.de>"]
+
+description = "FFI bindings to LevelDB"
+repository = "https://github.com/skade/leveldb-sys"
+documentation = "https://docs.rs/leveldb-sys/"
+license = "MIT"
+
+build = "src/build.rs"
+links = "leveldb"
+
+[features]
+snappy = []
+
+[dependencies]
+libc = "0.2.*"
+ffi-opaque = "2"
+
+[build-dependencies]
+cmake = "0.1"
+num_cpus = "1.10"

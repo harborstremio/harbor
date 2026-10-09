@@ -1,0 +1,41 @@
+.mc-content-scrim {position:fixed;inset:0;z-index:240;display:grid;place-items:center;padding:28px;background:#000a}
+.mc-content-scrim>[role=dialog] {max-height:88dvh;overflow:hidden;border-radius:12px;background:var(--color-surface)}
+.mc-content {display:flex;flex-direction:column;max-height:88dvh;min-height:min(640px,88dvh);color:var(--color-ink);background:var(--color-surface);container-type:inline-size}
+.mc-content>header {display:flex;align-items:center;gap:20px;padding:28px 30px 24px;border-bottom:1px solid var(--color-edge-soft)}
+.mc-content-art {width:76px;height:76px;flex-shrink:0;overflow:hidden;border-radius:10px;background:var(--color-elevated)}
+.mc-content-art img {width:100%;height:100%;object-fit:cover}
+.mc-content>header>div+div {min-width:0}
+.mc-content>header span {font-size:12px;color:var(--color-ink-muted)}
+.mc-content h2 {font-size:clamp(23px,2.7vw,31px);letter-spacing:-.035em;font-weight:650;line-height:1.3;overflow-wrap:anywhere;margin:5px 0 9px}
+.mc-content>header p {display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:12px;color:var(--color-ink-muted)}
+.mc-content>header p i {width:3px;height:3px;background:var(--color-ink-subtle);border-radius:50%}
+.mc-content-close {margin-inline-start:auto;align-self:flex-start;flex-shrink:0}
+.mc-content-scroll {overflow:auto;min-height:0;overscroll-behavior:contain;padding:24px 30px 30px}
+.mc-content-intro {display:flex;gap:24px;align-items:center;justify-content:space-between;margin-bottom:24px}
+.mc-content-intro>p {font-size:13px;line-height:1.65;color:var(--color-ink-muted);max-width:440px}
+.mc-content-intro>label {display:flex;gap:9px;align-items:center;background:var(--color-canvas);padding:10px 13px;min-height:42px;border-radius:7px;min-width:0;width:300px;color:var(--color-ink-muted)}
+.mc-content-intro input {width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--color-ink);font-size:13px}
+.mc-content-intro input:focus {outline:none!important;box-shadow:none!important}
+.mc-content-intro .games-icon-button {width:24px;height:24px;min-width:24px}
+.mc-content .games-mods {padding:0}
+.mc-content .games-mods-results {grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mc-content .games-mod-card {background:var(--color-canvas);padding:18px;min-height:168px;text-align:start}
+.mc-content .games-mod-card:hover {background:var(--color-elevated)}
+.mc-content .games-mod-card h3 {padding-inline-end:10px}
+.mc-content .games-mods-installed>article {padding:18px 0;border-color:var(--color-edge-soft);gap:16px}
+.mc-content .games-mods-installed h3 {font-size:15px;line-height:1.4}
+.mc-content .games-mods-installed p,.mc-content .games-mods-installed small {font-size:12px}
+.mc-content-external {margin-top:26px}
+.mc-content-external>header {display:flex;gap:9px;align-items:center}
+.mc-content-external h3 {font-size:15px;font-weight:600}
+.mc-content-external>header>span {font-size:12px;color:var(--color-ink-muted)}
+.mc-content-external>p {font-size:12px;line-height:1.7;color:var(--color-ink-muted);margin:8px 0 15px;max-width:680px}
+.mc-content-external>div {display:flex;gap:12px;align-items:center;padding:14px 0;border-top:1px solid var(--color-edge-soft);font-size:13px}
+.mc-content-external>div>svg {flex-shrink:0;color:var(--color-ink-muted)}
+.mc-content-external>div>span {min-width:0;overflow-wrap:anywhere}
+.mc-content-external small {margin-inline-start:auto;flex-shrink:0;font-size:12px;color:var(--color-ink-muted)}
+.mc-content-loading {display:grid;gap:12px}
+.mc-content-loading i {height:82px;border-radius:8px;background:var(--color-elevated)}
+.mc-content :is(button,select):focus-visible,.mc-content-intro>label:focus-within {outline:2px solid var(--color-ink);outline-offset:3px}
+@container(max-width:760px) {.mc-content .games-mods-results {grid-template-columns:1fr}.mc-content-intro {flex-direction:column;align-items:stretch;gap:15px}.mc-content-intro>label {width:100%}}
+@media(max-width:600px) {.mc-content-scrim {padding:14px}.mc-content>header {padding:20px;gap:13px}.mc-content-art {width:56px;height:56px}.mc-content-scroll {padding:20px}.mc-content h2 {font-size:23px}.mc-content .games-mods-toolbar {gap:7px}.mc-content .games-mods-toolbar>div button {padding:10px}.mc-content .games-mods-pages {flex-wrap:wrap}}

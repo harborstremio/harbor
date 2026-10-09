@@ -1,0 +1,73 @@
+.music-playlist-cover-edit {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.music-playlist-cover-actions {
+  position: absolute;
+  inset-inline-end: 8px;
+  bottom: 8px;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 160ms ease-out,
+    transform 220ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.music-playlist-cover-edit:is(:hover, :focus-within) .music-playlist-cover-actions {
+  opacity: 1;
+  transform: none;
+}
+
+.music-playlist-cover-actions button {
+  display: grid;
+  place-items: center;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.62);
+  color: #fff;
+  transition: background-color 180ms ease-out;
+}
+
+.music-playlist-cover-actions button:hover:not(:disabled) {
+  background: rgb(0 0 0 / 0.82);
+}
+
+.music-playlist-cover-actions button:disabled {
+  opacity: 0.6;
+}
+
+.music-playlist-cover-error {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% + 6px);
+  font-size: 11.5px;
+  color: var(--color-ink-muted);
+}
+
+.music-playlist-custom-cover {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--color-elevated);
+}
+
+.music-playlist-custom-cover::before {
+  content: "";
+  display: block;
+  padding-top: 100%;
+}
+
+.music-playlist-custom-cover img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

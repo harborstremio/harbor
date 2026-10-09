@@ -9,6 +9,8 @@ export {
   tmdbIdFromImdb,
 } from "./tmdb/tmdb-imdb-resolve";
 
+export { useTmdbVote } from "./tmdb/tmdb-vote";
+
 export {
   tmdbPersonIdCached,
   tmdbPersonIdByName,
@@ -24,6 +26,8 @@ export {
   tmdbKeywordIdByName,
   tmdbResolveKeywordIds,
 } from "./tmdb/tmdb-keywords";
+
+export { tmdbCompanyIdByName, tmdbCompanyArt, type CompanyArt } from "./tmdb/tmdb-companies";
 
 export {
   tmdbMovieRow,
@@ -86,3 +90,13 @@ export {
   tmdbEpisodeGroup,
   type StoryArc,
 } from "./tmdb/tmdb-episode-groups";
+
+export { tmdbEpisodeNames } from "./tmdb/tmdb-episode-names";
+
+export {
+  applyTmdbEpisodeNames,
+  needsTmdbEpisodeNames,
+  pickEpisodeName,
+  type NamedEpisode,
+  type TmdbEpisodeText,
+} from "./tmdb/tmdb-episode-name-merge";

@@ -1,0 +1,49 @@
+.games-warhammer-world { min-width: 0; margin-bottom: 24px; container:warhammer / inline-size; }
+.games-atlas-page.is-warhammer .games-atlas-grid { grid-template-columns:repeat(auto-fill,minmax(min(150px,calc((100% - 18px)/2)),1fr));gap:30px 18px; }
+.wh-catalog-continuation { min-height:1px; }
+.wh-catalog-continuation>span { display:block;margin-block:24px 18px; }
+.games-warhammer-hero { position: relative; isolation: isolate; min-height: 470px; display: flex; align-items: center; overflow: hidden; border-radius: 10px; background: var(--color-surface); }
+.games-warhammer-hero-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 35%; z-index: -2; }
+.games-warhammer-hero::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg,rgba(8,12,14,.94),rgba(8,12,14,.64) 44%,rgba(8,12,14,.12)); }
+.games-warhammer-hero-copy { padding: 48px; width: min(650px,65%); color: #f7f8f8; }
+.games-warhammer-logo { width: min(280px,80%); height: 62px; object-fit: contain; object-position: left center; margin-bottom: 25px; }
+.games-warhammer-hero h1 { font-size: clamp(38px,5.4cqw,62px); line-height: 1.04; font-weight: 650; letter-spacing: -.04em; margin: 0 0 22px; max-width:15ch; }
+.games-warhammer-hero p { font-size: 17px; line-height: 1.65; color: #d5dcdf; max-width: 39ch; }
+.games-warhammer-hero-copy > div { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 25px; }
+.games-warhammer-faction-picker { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 10px; margin: 24px 0 32px; }
+.games-warhammer-faction-picker button { display: flex;flex-direction:column; align-items: center;justify-content:start; gap: 16px; padding: 20px 12px; border-radius: 7px; background: var(--color-surface); color: var(--color-ink-muted); font-size: 15px;line-height:1.4; font-weight: 600; text-align: center; min-width: 0; }
+.games-warhammer-faction-picker button:hover,.games-warhammer-faction-picker button[aria-pressed=true] { color: var(--color-ink); background: var(--color-raised); }
+.games-warhammer-faction-picker button > span { display: grid; place-items: center; width: 66px; height: 66px; flex: 0 0 66px; }
+.games-warhammer-faction-picker img { width: 62px; height: 62px; object-fit: contain; }
+.games-warhammer-faction-copy { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.games-warhammer-faction-copy h2 { font-size: 24px; line-height: 1.3; font-weight: 650; letter-spacing: -.025em; }
+.games-warhammer-faction-copy p { margin-top: 8px; max-width: 66ch; color: var(--color-ink-muted); font-size: 14px; line-height: 1.65; min-height: 46px; }
+.games-warhammer-faction-copy > a { display: flex; align-items: center; gap: 7px; color: var(--color-ink-muted); font-size: 13px; padding: 5px 0; flex-shrink: 0; }
+.games-warhammer-connections-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin: 22px 0 16px; }
+.games-warhammer-connections-heading > p { font-size: 14px; font-weight: 600; }
+.games-warhammer-connections-heading > div { display: flex; gap: 4px; }
+.games-warhammer-connections-heading button { min-height:46px;padding: 12px 18px; border-radius: 6px; font-size: 14px; color: var(--color-ink-muted); }
+.games-warhammer-connections-heading button[aria-pressed=true] { background: var(--color-elevated); color: var(--color-ink); }
+.games-warhammer-connections { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 22px; }
+.games-warhammer-connections > article { min-width: 0; }
+.games-warhammer-connections .games-card { width: 100%; }
+.games-warhammer-connections .games-card-art { aspect-ratio: 16/9; }
+.games-warhammer-connection-role { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 8px; font-size: 12px; color: var(--color-ink-muted); }
+.games-warhammer-connection-role a { padding: 4px; }
+.games-warhammer-world footer { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 10px; color: var(--color-ink-muted); font-size: 12px; line-height: 1.6; margin-top: 22px; }
+.games-warhammer-status { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 12px 0; font-size: 14px; line-height: 1.6; color: var(--color-ink-muted); }
+.games-warhammer-placeholder i { display: block; aspect-ratio: 16/9; border-radius: 8px; }
+.games-warhammer-placeholder b,.games-warhammer-placeholder span { display: block; margin-top: 12px; height: 16px; width: 80%; border-radius: 4px; }
+.games-warhammer-placeholder span { width: 55%; height: 12px; }
+.games-warhammer-catalog-title { scroll-margin-top: 96px; margin-top: 54px; padding-top: 26px; border-top: 1px solid var(--color-edge-soft); font-size: 23px; font-weight: 650; }
+.games-warhammer-world :is(button,a):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.games-warhammer-world a:hover { color: var(--color-ink); }
+.games-warhammer-hero a:hover { color: white; }
+.games-warhammer-crossover { color: var(--color-ink-muted); font-size: 11px; }
+[dir=rtl] .games-warhammer-hero::after { transform: scaleX(-1); }
+[dir=rtl] .games-warhammer-logo { object-position: right center; }
+@container warhammer (max-width:1050px) { .games-warhammer-faction-picker { grid-template-columns: repeat(3,minmax(0,1fr)); }.games-warhammer-hero-copy{padding:36px;width:65%} }
+@container warhammer (max-width:720px) { .games-warhammer-hero{min-height:480px}.games-warhammer-hero-copy{width:100%;padding:30px}.games-warhammer-hero::after{background:linear-gradient(90deg,#080c0eeb,#080c0e7a)}.games-warhammer-hero h1{font-size:42px}.games-warhammer-hero p{font-size:16px}.games-warhammer-faction-picker{grid-template-columns:repeat(2,minmax(0,1fr))}.games-warhammer-faction-copy{flex-direction:column}.games-warhammer-connections{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media(max-width:700px) { .games-warhammer-hero-copy { padding: 28px 22px; } .games-warhammer-hero { min-height: 340px; } .games-warhammer-hero::after { background: linear-gradient(90deg,rgba(8,12,14,.94),rgba(8,12,14,.58)); } .games-warhammer-faction-picker { grid-template-columns: repeat(2,minmax(0,1fr)); } .games-warhammer-faction-copy { flex-direction: column; gap: 5px; } .games-warhammer-faction-copy p { min-height: 0; } .games-warhammer-connections { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; } }
+@media(max-width:480px) { .games-warhammer-connections { grid-template-columns: minmax(0,1fr); } .games-warhammer-hero-copy > div { gap: 14px; } }
+@media(prefers-reduced-motion:reduce) { .games-warhammer-world * { scroll-behavior: auto; transition: none; animation: none; } }

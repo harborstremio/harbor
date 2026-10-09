@@ -1,6 +1,10 @@
-import { Globe, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { directionForLanguage, useT } from "@/lib/i18n";
+import { X } from "./icons";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useModalExit } from "@/components/modal-shell";
+import { captureFocusReturn } from "@/lib/keyboard-navigation";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
+import { normalizeLanguage, setUiLanguage, useT } from "@/lib/i18n";
 import { localeForRegion, localeLabel, type LocaleProfile } from "@/lib/region/locale-map";
 import { useSettings } from "@/lib/settings";
 import type { Settings } from "@/lib/settings";
@@ -9,15 +13,18 @@ import { RegionPicker } from "./region-picker";
 export { RegionPicker };
 
 function prepend(value: string, list: string[]): string[] {
-  return [value, ...list.filter((item) => item !== value)];
+  return [value, ...list.filter((x) => x !== value)];
 }
 
-function applyLocaleCascade(
+export function applyLocaleCascade(
   update: (patch: Partial<Settings>) => void,
   next: LocaleProfile,
   current: Pick<Settings, "preferredLanguages" | "preferredSubLangs" | "preferredAudioLangs">,
 ): void {
+  const uiLanguage = normalizeLanguage(next.uiLanguage);
+  setUiLanguage(uiLanguage);
   update({
+    uiLanguage,
     tmdbLanguage: next.tmdbLanguage,
     preferredLanguages: prepend(next.audioLanguage, current.preferredLanguages),
     preferredSubLangs: prepend(next.subtitleLanguage, current.preferredSubLangs),
@@ -25,15 +32,48 @@ function applyLocaleCascade(
   });
 }
 
+export function regionFromNavigator(): string | null {
+  if (typeof navigator === "undefined") return null;
+  const tag = (navigator.language || "").trim();
+  if (!tag) return null;
+  const parts = tag.split("-");
+  const region = parts[1]?.toUpperCase();
+  if (region && region.length === 2) return region;
+  const lang = parts[0]?.toLowerCase();
+  if (lang === "ar") return "SA";
+  if (lang === "es") return "ES";
+  if (lang === "ru") return "RU";
+  if (lang === "pt") return "PT";
+  return null;
+}
+
+export function useFirstRunLocaleDetect(): void {
+  const { settings, update } = useSettings();
+  const ran = useRef(false);
+  useEffect(() => {
+    if (ran.current) return;
+    ran.current = true;
+    if (settings.uiLanguage !== "en" || settings.arabicWelcomeSeen) return;
+    if (settings.region !== "US") return;
+    const detected = regionFromNavigator();
+    if (!detected) return;
+    const next = localeForRegion(detected);
+    if (next.uiLanguage === "en") return;
+    update({ region: detected });
+    applyLocaleCascade(update, next, settings);
+  }, [settings, update]);
+}
+
 export function RegionField() {
   const { settings, update } = useSettings();
   const t = useT();
-  const [pending, setPending] = useState<{ next: LocaleProfile } | null>(null);
+  const [pending, setPending] = useState<{ code: string; next: LocaleProfile } | null>(null);
 
   const onChange = (code: string) => {
     update({ region: code });
     const next = localeForRegion(code);
-    setPending({ next });
+    if (next.uiLanguage === "en") return;
+    setPending({ code, next });
   };
 
   const confirm = () => {
@@ -48,7 +88,7 @@ export function RegionField() {
       {pending && (
         <LocaleConfirm
           label={localeLabel(pending.next)}
-          language={pending.next.language}
+          rtl={pending.next.rtl}
           onConfirm={confirm}
           onDismiss={() => setPending(null)}
           t={t}
@@ -60,72 +100,75 @@ export function RegionField() {
 
 function LocaleConfirm({
   label,
-  language,
+  rtl,
   onConfirm,
   onDismiss,
   t,
 }: {
   label: string;
-  language: string;
+  rtl: boolean;
   onConfirm: () => void;
   onDismiss: () => void;
   t: (key: string, vars?: Record<string, string | number>) => string;
 }) {
+  const { closing, close } = useModalExit(onDismiss);
+  useEffect(() => captureFocusReturn(), []);
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onDismiss();
+    const onKey = (e: KeyboardEvent) => {
+      if (!isBackKey(e)) return;
+      e.stopPropagation();
+      close();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onDismiss]);
-
-  return (
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [close]);
+  return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-canvas/70 p-6 backdrop-blur-sm animate-in fade-in duration-150"
-      onClick={onDismiss}
+      className={`${closing ? "animate-scrim-out" : "animate-scrim-in"} fixed inset-0 z-[240] flex items-center justify-center p-6`}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) close();
+      }}
     >
       <div
-        dir={directionForLanguage(language)}
-        className="flex w-full max-w-[440px] flex-col overflow-hidden rounded-3xl border border-edge bg-elevated shadow-[0_40px_120px_-30px_rgba(0,0,0,0.8)] animate-popover-in"
-        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        dir={rtl ? "rtl" : undefined}
+        className={`${closing ? "animate-dialog-out" : "animate-dialog-in"} flex max-h-[86vh] w-[min(640px,100%)] flex-col overflow-hidden rounded-md bg-surface harbor-float`}
+        onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-edge-soft px-6 py-5">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
-              <Globe size={18} strokeWidth={2.2} />
-            </span>
-            <div className="flex flex-col">
-              <h2 className="font-display text-[19px] font-medium tracking-tight text-ink">
-                {t("Apply {language} preferences?", { language: label })}
-              </h2>
-              <p className="text-[12.5px] text-ink-muted">
-                {t("This sets metadata, subtitle, and audio languages to match.")}
-              </p>
-            </div>
-          </div>
+        <div className="flex shrink-0 items-start justify-between gap-4 px-6 pt-5">
+          <h2 className="min-w-0 text-[19px] font-semibold leading-[26px] tracking-tight text-ink">
+            {t("Switch Harbor to {language}?", { language: label })}
+          </h2>
           <button
-            onClick={onDismiss}
+            onClick={close}
             aria-label={t("Close")}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
           >
             <X size={18} strokeWidth={2.2} />
           </button>
         </div>
-        <div className="flex items-center justify-end gap-2.5 px-6 py-4">
+        <div className="min-h-0 grow overflow-y-auto px-6 pt-1.5 [scrollbar-width:thin]">
+          <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-subtle">
+            {t("This sets the interface, metadata, subtitle, and audio languages to match.")}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center justify-end gap-2 px-6 pb-5 pt-5">
           <button
-            onClick={onDismiss}
-            className="rounded-full px-4 py-2.5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:text-ink"
+            onClick={close}
+            className="h-11 rounded-[8px] bg-elevated px-4 text-[15px] font-semibold text-ink-muted transition-colors hover:text-ink"
           >
             {t("Just change region")}
           </button>
           <button
             onClick={onConfirm}
-            className="rounded-full bg-ink px-5 py-2.5 text-[13.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+            className="h-11 rounded-[8px] bg-ink px-4 text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90"
           >
             {t("Apply {language}", { language: label })}
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

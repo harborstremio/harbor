@@ -1,0 +1,208 @@
+.broadcast-score-ticker {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: 34px;
+  min-width: 0;
+  gap: 10px;
+  padding-inline: 8px;
+  font-size: 12px;
+}
+.broadcast-score-live {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  font-weight: 650;
+}
+.broadcast-score-live i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.broadcast-score-viewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.broadcast-score-viewport:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.broadcast-score-track {
+  display: flex;
+  width: max-content;
+  animation: broadcast-scores var(--ticker-duration) linear infinite;
+}
+.broadcast-score-group {
+  display: flex;
+  flex-shrink: 0;
+}
+.broadcast-score-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 24px;
+  border-inline-end: 1px solid var(--color-edge-soft);
+  white-space: nowrap;
+}
+.broadcast-score-game,
+.broadcast-score-team {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.broadcast-score-game {
+  color: var(--color-ink-muted);
+  font-size: 10px;
+}
+.broadcast-score-team > span:last-child {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.broadcast-score-value {
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+}
+.broadcast-score-ticker .ea-image {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.broadcast-score-ticker .ea-image img,
+.broadcast-score-ticker .ea-image svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.broadcast-score-ticker .ea-image-fallback {
+  font-size: 9px;
+}
+.broadcast-score-ticker .ea-image-fallback svg {
+  display: none;
+}
+.broadcast-score-ticker small {
+  color: var(--color-ink-muted);
+  font-size: 10px;
+}
+.broadcast-score-ticker:hover .broadcast-score-track,
+.broadcast-score-ticker:focus-within .broadcast-score-track,
+.broadcast-score-ticker[data-paused="true"] .broadcast-score-track {
+  animation-play-state: paused;
+}
+@keyframes broadcast-scores {
+  to {
+    transform: translateX(-50%);
+  }
+}
+[dir="rtl"] .broadcast-score-track {
+  animation-name: broadcast-scores-rtl;
+}
+@keyframes broadcast-scores-rtl {
+  to {
+    transform: translateX(50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .broadcast-score-track {
+    animation: none;
+  }
+  .broadcast-score-group[aria-hidden="true"] {
+    display: none;
+  }
+  .broadcast-score-viewport {
+    overflow-x: auto;
+  }
+}
+
+.sports-embed-scores {
+  min-width: 0;
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  .broadcast-score-live {
+    font-size: 0;
+    gap: 0;
+  }
+  .broadcast-score-ticker {
+    gap: 4px;
+    padding-inline: 0;
+  }
+  .broadcast-score-item {
+    padding-inline: 12px;
+  }
+}
+
+.broadcast-match-details {
+  z-index: 300 !important;
+}
+.sports-embed-player .broadcast-score-item {
+  min-width: 260px;
+  border-radius: 0;
+  padding-inline: 24px;
+  justify-content: center;
+}
+.broadcast-score-viewport {
+  width: 100%;
+}
+
+.broadcast-score-track {
+  animation: none !important;
+}
+.broadcast-score-viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-edge) transparent;
+  cursor: grab;
+  touch-action: pan-y;
+}
+.broadcast-score-viewport:active {
+  cursor: grabbing;
+}
+.broadcast-score-viewport .broadcast-score-item {
+  cursor: inherit;
+  user-select: none;
+}
+.broadcast-score-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--color-ink-muted);
+  padding: 3px 6px;
+  background: var(--color-elevated);
+  border-radius: 3px;
+}
+.broadcast-score-status[data-state="live"] {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+.broadcast-score-status i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.broadcast-score-viewport {
+  scrollbar-width: none;
+  height: 34px;
+  display: flex;
+  align-items: center;
+}
+.broadcast-score-viewport::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+.broadcast-score-track,
+.broadcast-score-group {
+  align-items: center;
+  height: 34px;
+}

@@ -1,0 +1,119 @@
+.games-stardew { margin-block: 48px; min-width: 0; }
+.games-stardew-heading { display: flex; align-items: center; gap: 24px; margin-bottom: 24px; }
+.games-stardew-art { position: relative; flex-shrink: 0; width: 176px; aspect-ratio: 460/215; border-radius: 8px; overflow: hidden; background: var(--color-surface); }
+.games-stardew-art > img { width: 100%; height: 100%; object-fit: cover; }
+.games-stardew-art > span { position: absolute; inset: 0; display: grid; place-items: center; color: var(--color-ink-muted); background: var(--color-surface); }
+.games-stardew-art svg { animation: games-stardew-spin 1s linear infinite; }
+.games-stardew .games-detail-text-button { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; text-align: start; }
+.games-stardew-heading h2 { font-size: 24px; font-weight: 650; margin: 0 0 8px; }
+.games-stardew-heading p, .games-stardew-note { color: var(--color-ink-muted); font-size: 13px; line-height: 1.6; margin: 6px 0; }
+.games-stardew-heading button { margin-top: 8px; }
+.games-stardew-toolbar, .games-stardew-overview { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; }
+.games-stardew-overview { margin-top: 24px; font-size: 13px; color: var(--color-ink-muted); }
+.games-stardew-overview > :first-child { color: var(--color-ink); font-weight: 600; }
+.games-stardew-path { font-size: 12px; color: var(--color-ink-subtle); overflow-wrap: anywhere; margin-top: 12px; text-align: start; }
+.games-stardew-candidate { margin-top: 12px; max-width: 100%; }
+.games-stardew-candidate span { overflow-wrap: anywhere; text-align: start; }
+.games-stardew-progress { display: flex; gap: 20px; align-items: center; margin-top: 16px; }
+.games-stardew-progress p { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.games-stardew-progress p > svg { animation: games-stardew-spin 1s linear infinite; }
+.games-stardew-notice { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; font-size: 13px; color: var(--color-ink-muted); }
+.games-stardew-notice svg { flex-shrink: 0; margin-top: 2px; }
+.games-stardew-filters { display: flex; gap: 16px; justify-content: space-between; align-items: center; margin: 24px 0 12px; }
+.games-stardew-search { display: flex; align-items: center; gap: 10px; background: var(--color-elevated); border-radius: 7px; padding: 10px 12px; width: min(320px, 55%); color: var(--color-ink-muted); }
+.games-stardew-search input { background: transparent; border: 0; outline: 0; width: 100%; min-width: 0; color: var(--color-ink); font-size: 13px; }
+.games-stardew-search:focus-within { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.games-stardew-mod { border-bottom: 1px solid var(--color-edge-soft); }
+.games-stardew-mod > summary { display: flex; align-items: center; gap: 14px; padding: 16px 8px; cursor: pointer; list-style: none; border-radius: 7px; }
+.games-stardew-mod > summary:hover { background: var(--color-surface); }
+.games-stardew-package { width: 30px; height: 30px; flex-shrink: 0; mask-size: contain; mask-position: center; mask-repeat: no-repeat; background: var(--color-ink-muted); }
+.games-stardew-mod-name { min-width: 0; flex: 1; display: grid; gap: 4px; }
+.games-stardew-mod-name strong { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.games-stardew-mod-name small { font-size: 12px; color: var(--color-ink-muted); overflow-wrap: anywhere; }
+.games-stardew-status { font-size: 12px; color: var(--color-ink-subtle); max-width: 35%; text-align: end; }
+.games-stardew-status.is-notice { color: var(--color-accent); }
+.games-stardew-mod summary > svg:last-child { flex-shrink: 0; transition: transform 160ms ease-out; }
+.games-stardew-mod[open] > summary > svg:last-child { transform: rotate(180deg); }
+.games-stardew-mod-detail { padding: 4px 8px 20px 54px; font-size: 13px; line-height: 1.6; color: var(--color-ink-muted); overflow-wrap: anywhere; }
+[dir=rtl] .games-stardew-mod-detail { padding-inline: 54px 8px; }
+.games-stardew-mod-detail p { margin: 8px 0; }
+.games-stardew-mod-detail code, .games-stardew-issues code { font-size: 12px; color: var(--color-ink-subtle); }
+.games-stardew-mod-detail > button { margin-top: 8px; }
+.games-stardew-requirements { margin-top: 18px; max-width: 780px; }
+.games-stardew-requirements h3 { font-size: 13px; font-weight: 600; color: var(--color-ink); margin-bottom: 8px; }
+.games-stardew-requirements > div { display: flex; justify-content: space-between; gap: 20px; padding-block: 7px; }
+.games-stardew-requirements > div > :last-child { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+.games-stardew-history, .games-stardew-issues { margin-top: 16px; }
+.games-stardew-history summary, .games-stardew-issues summary { list-style: none; cursor: pointer; display: flex; gap: 8px; align-items: center; font-size: 13px; }
+.games-stardew-history > p:first-of-type { font-size: 12px; color: var(--color-ink-subtle); }
+.games-stardew-issues ul { margin-top: 12px; padding-inline-start: 26px; overflow-wrap: anywhere; }
+.games-stardew-empty { padding: 24px 0; font-size: 14px; color: var(--color-ink-muted); }
+.games-stardew summary::-webkit-details-marker { display: none; }
+.games-stardew summary:focus-visible, .games-stardew button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+@keyframes games-stardew-spin { to { transform: rotate(360deg); } }
+@media (max-width: 600px) {
+  .games-stardew-heading { gap: 16px; align-items: flex-start; }
+  .games-stardew-art { width: 92px; }
+  .games-stardew-heading h2 { font-size: 21px; }
+  .games-stardew-filters { align-items: stretch; flex-direction: column; gap: 10px; }
+  .games-stardew-search { width: 100%; }
+  .games-stardew-mod > summary { gap: 10px; }
+  .games-stardew-mod-detail { padding-inline: 8px; }
+  [dir=rtl] .games-stardew-mod-detail { padding-inline: 8px; }
+  .games-stardew-requirements > div { flex-wrap: wrap; gap: 4px 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .games-stardew-progress p > svg, .games-stardew-art svg { animation: none; } .games-stardew-mod summary > svg:last-child { transition: none; } }
+
+.games-stardew-manager { margin-block: 28px 36px; }
+.games-stardew-manager-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 14px; }
+.games-stardew-manager h3 { font-size: 17px; font-weight: 650; margin: 0 0 5px; }
+.games-stardew-manager-heading p { font-size: 13px; color: var(--color-ink-muted); max-width: 540px; line-height: 1.6; }
+.games-stardew-manager-heading > button { flex-shrink: 0; }
+.games-stardew-managed .games-stardew-toolbar { margin-top: 16px; }
+.games-stardew-backups { margin-top: 20px; }
+.games-stardew-backups > summary, .games-stardew-review summary { display: flex; align-items: center; gap: 10px; cursor: pointer; list-style: none; font-size: 13px; padding-block: 10px; }
+.games-stardew-backups > code { display: block; }
+.games-stardew-backup { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-block: 14px; border-bottom: 1px solid var(--color-edge-soft); }
+.games-stardew-backup > span { min-width: 0; }
+.games-stardew-backup strong { display: block; font-size: 14px; overflow-wrap: anywhere; }
+.games-stardew-backup small { display: block; color: var(--color-ink-muted); font-size: 12px; margin-top: 4px; }
+.games-stardew-review { display: flex; flex-direction: column; overflow: hidden; color: var(--color-ink); }
+.games-stardew-review header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px 24px 16px; }
+.games-stardew-review h2 { font-size: 20px; font-weight: 650; }
+.games-stardew-review h3 { font-size: 18px; font-weight: 650; }
+.games-stardew-review header button { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; border-radius: 6px; }
+.games-stardew-review header button:hover { background: var(--color-elevated); }
+.games-stardew-review-body { padding: 0 24px 16px; overflow-y: auto; font-size: 13px; line-height: 1.65; }
+.games-stardew-review-body p { margin-block: 12px; color: var(--color-ink-muted); }
+.games-stardew-review-title { padding-block: 12px; }
+.games-stardew-review code, .games-stardew-review li { font-size: 12px; color: var(--color-ink-muted); overflow-wrap: anywhere; }
+.games-stardew-review ul { list-style: none; padding-block: 10px; }
+.games-stardew-review-requirements { margin-top: 20px; }
+.games-stardew-review-requirements h3 { font-size: 14px; }
+.games-stardew-review-requirements p:not(:last-child) { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.games-stardew-review footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 16px 24px 24px; }
+.games-stardew-working { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.games-stardew-origin { margin-block: 12px; }
+.games-stardew-origin > button { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; text-align: start; font-size: 12px; }
+.games-stardew-origin > button svg { flex-shrink: 0; }
+.games-stardew-origin > code { display: block; margin-top: 6px; }
+.games-stardew-discovery { margin-block: 20px 28px; }
+.games-stardew-discovery > button .games-stardew-package { width: 17px; height: 17px; }
+.games-stardew-catalog { margin-top: 24px; }
+.games-stardew-catalog-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.games-stardew-catalog-heading h3 { font-size: 19px; font-weight: 650; margin-bottom: 6px; }
+.games-stardew-catalog-heading p, .games-stardew-catalog > p { font-size: 13px; color: var(--color-ink-muted); line-height: 1.6; }
+.games-stardew-catalog-heading > button { flex-shrink: 0; padding: 10px; }
+.games-stardew-projects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; margin-block: 12px 24px; }
+.games-stardew-project { min-width: 0; padding-block: 24px; border-bottom: 1px solid var(--color-edge-soft); display: flex; flex-direction: column; align-items: flex-start; }
+.games-stardew-project h4 { font-size: 16px; font-weight: 650; overflow-wrap: anywhere; }
+.games-stardew-project small { color: var(--color-ink-muted); font-size: 12px; margin-top: 4px; }
+.games-stardew-project > p { font-size: 14px; line-height: 1.65; color: var(--color-ink-muted); margin-block: 10px 16px; max-width: 52ch; overflow-wrap: anywhere; flex: 1; }
+.games-stardew-project .games-stardew-toolbar { margin: 14px 0 0; min-height: 36px; }
+.games-stardew-catalog-source { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; font-size: 12px; color: var(--color-ink-muted); margin-top: 16px; }
+.games-stardew-discovery button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+@media (max-width: 620px) { .games-stardew-projects { grid-template-columns: minmax(0, 1fr); } }
+.games-stardew-working .lucide-loader-circle { animation: games-stardew-spin 1s linear infinite; }
+.games-stardew-review button:focus-visible, .games-stardew-review summary:focus-visible, .games-stardew-manager summary:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+@media (max-width: 560px) { .games-stardew-manager-heading { align-items: flex-start; flex-direction: column; gap: 12px; } .games-stardew-review header { padding-inline: 18px; } .games-stardew-review-body, .games-stardew-review footer { padding-inline: 18px; } }
+@media (prefers-reduced-motion: reduce) { .games-stardew-working .lucide-loader-circle { animation: none; } }

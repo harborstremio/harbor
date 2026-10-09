@@ -1,0 +1,22 @@
+export default {
+  "games.mods.browse": "Buscar mods",
+  "games.mods.installed": "Tus mods",
+  "games.mods.enabled": "Activado",
+  "games.mods.disabled": "Desactivado",
+  "games.mods.remove": "Eliminar",
+  "games.mods.removeConfirm": "¿Eliminar este archivo gestionado?",
+  "games.mods.noMatches": "Ningún mod instalado coincide con esta búsqueda.",
+  "games.mods.options": "Opciones de {name}",
+  "games.mods.versions": "Versiones",
+  "games.mods.restore": "Restaurar anterior",
+  "games.mods.restored": "Versión anterior restaurada.",
+  "games.mods.changeTitle": "Archivos que cambiarán",
+  "games.mods.backupNote": "Las versiones reemplazadas se guardan en una copia local. Usa Restaurar anterior en Tu configuración para volver; se comprobarán las dependencias.",
+  "games.mods.currentVersion": "Instalada: {version}",
+  "games.mods.current": "Instalada",
+  "games.mods.versionNote": "Elige una versión compatible. Harbor revisa los cambios y guarda la versión anterior localmente. Cierra Minecraft antes de aplicarlos.",
+  "games.mods.applyChanges": "Aplicar cambios",
+  "games.mods.reviewChanges": "Revisar cambios",
+  "games.mods.previousVersion": "Anterior: {version}",
+  "games.mods.restoreConfirm": "¿Restaurar la versión {version}? Cierra Minecraft primero."
+} satisfies Record<string, string>;

@@ -1,36 +1,209 @@
-import { Check, ChevronDown, Loader2, Plus, Save, Search as SearchIcon } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Flag } from "@/components/flag";
+import { Loader2, Search as SearchIcon, SlidersHorizontal, X } from "lucide-react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import type { Addon } from "@/lib/addons";
-import { useContextMenu } from "@/lib/context-menu";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
-import { languageName } from "@/lib/subtitles/language";
-import { saveSubtitleToDisk } from "@/lib/subtitles/save-to-disk";
-import { searchSubtitles } from "@/lib/subtitles/search";
+import { isKnownLanguage, languageName, langScore } from "@/lib/subtitles/language";
+import { HoverTooltip } from "@/components/hover-tooltip";
+import { searchSubtitles, type SearchOptions } from "@/lib/subtitles/search";
+import { subtitleLoadMetadataOf, subtitleTitleOf } from "@/lib/subtitles/provider-label";
 import type { SubResult } from "@/lib/subtitles/types";
+import {
+  bestCandidate,
+  parseTitleQuery,
+  searchTitleCandidates,
+  type TitleCandidate,
+} from "@/lib/subtitles/title-search";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSubtitleContext } from "./subtitle-context-store";
 import type { SubtitleMenuProps } from "./types";
 import { isVeryNewRelease } from "./utils";
+import { FilterChip, LangGroup } from "./search-results";
+import type { StreamHints } from "@/lib/subtitles/stream-hints";
+import {
+  readSubtitleSearchCacheEntry,
+  subtitleSearchCacheKey,
+  subtitleSearchResultsMayBeCached,
+  type SubtitleSearchCacheEntry,
+  type SubtitleSearchCacheScope,
+} from "@/lib/subtitles/search-cache";
+import { TargetBar, TitleSuggestDropdown } from "./title-suggest";
 
-export function SearchSection(props: SubtitleMenuProps) {
+type TitleTarget = {
+  imdbId: string;
+  type: "movie" | "series";
+  title: string;
+  year?: string;
+  season?: number;
+  episode?: number;
+};
+
+function labelOf(t: TitleTarget): string {
+  return t.year ? `${t.title} (${t.year})` : t.title;
+}
+
+function isPlayingTarget(a: TitleTarget, b: TitleTarget): boolean {
+  return (
+    a.imdbId === b.imdbId && a.title === b.title && a.season === b.season && a.episode === b.episode
+  );
+}
+
+const searchCache = new Map<string, SubtitleSearchCacheEntry>();
+
+type SavedSearchState = {
+  playingKey: string;
+  target: TitleTarget;
+  isOverride: boolean;
+  query: string;
+  hideHI: boolean;
+  forcedOnly: boolean;
+  sortBySource: boolean;
+  filtersOpen: boolean;
+  scrollTop: number;
+};
+
+let savedState: SavedSearchState | null = null;
+
+function playingKeyOf(
+  metaImdbId?: string | null,
+  metaTitle?: string | null,
+  season?: number | null,
+  episode?: number | null,
+): string {
+  return `${metaImdbId ?? ""}|${metaTitle ?? ""}|${season ?? ""}|${episode ?? ""}`;
+}
+
+export function SearchSection(
+  props: SubtitleMenuProps & {
+    focusLang?: string | null;
+    focusLabel?: string | null;
+    onClearFocus?: () => void;
+  },
+) {
   const t = useT();
-  const { metaImdbId, metaTitle, season, episode, onAddSubtitle } = props;
+  const {
+    metaImdbId,
+    metaTitle,
+    season,
+    episode,
+    onAddSubtitle,
+    focusLang,
+    focusLabel,
+    onClearFocus,
+  } = props;
   const { settings } = useSettings();
   const { authKey } = useAuth();
-  const [query, setQuery] = useState(
-    metaTitle && season != null && episode != null
-      ? `${metaTitle} S${String(season).padStart(2, "0")}E${String(episode).padStart(2, "0")}`
-      : (metaTitle ?? ""),
+  const playbackContext = useSubtitleContext();
+
+  const playingTarget = useMemo<TitleTarget>(() => {
+    // Context coords are authoritative when present; long-running anime
+    // intentionally carry no season (undefined beats the raw prop).
+    const hasCoords = playbackContext?.searchEpisode != null;
+    const s = hasCoords ? playbackContext!.searchSeason : (season ?? undefined);
+    const e = hasCoords ? playbackContext!.searchEpisode : (episode ?? undefined);
+    return {
+      imdbId: metaImdbId ?? "",
+      type: s != null && e != null ? "series" : "movie",
+      title: metaTitle ?? "",
+      season: s ?? undefined,
+      episode: e ?? undefined,
+    };
+  }, [metaImdbId, metaTitle, season, episode, playbackContext]);
+
+  const playingKey = playingKeyOf(metaImdbId, metaTitle, season, episode);
+  const restorableRef = useRef(
+    savedState && savedState.playingKey === playingKey ? savedState : null,
   );
+  const restorable = restorableRef.current;
+
+  const [target, setTarget] = useState<TitleTarget>(restorable?.target ?? playingTarget);
+  const [isOverride, setIsOverride] = useState(restorable?.isOverride ?? false);
+  const [query, setQuery] = useState(
+    restorable?.query ??
+      (metaTitle && playingTarget.season != null && playingTarget.episode != null
+        ? `${metaTitle} S${String(playingTarget.season).padStart(2, "0")}E${String(
+            playingTarget.episode,
+          ).padStart(2, "0")}`
+        : (metaTitle ?? "")),
+  );
+  const [suggestions, setSuggestions] = useState<TitleCandidate[]>([]);
+  const [suggestLoading, setSuggestLoading] = useState(false);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const searchAnchorRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const scrollTopRef = useRef(restorable?.scrollTop ?? 0);
+  const scrollRestored = useRef(false);
   const [results, setResults] = useState<SubResult[] | null>(null);
   const [loading, setLoading] = useState(false);
-  const [hideHI, setHideHI] = useState(false);
-  const [forcedOnly, setForcedOnly] = useState(false);
+  const [hideHI, setHideHI] = useState(restorable?.hideHI ?? false);
+  const [forcedOnly, setForcedOnly] = useState(restorable?.forcedOnly ?? false);
+  const [sortBySource, setSortBySource] = useState(restorable?.sortBySource ?? false);
+  const [filtersOpen, setFiltersOpen] = useState(restorable?.filtersOpen ?? true);
   const [addons, setAddons] = useState<Addon[] | null>(null);
   const [addonsLoading, setAddonsLoading] = useState(true);
-  const initialSearchDone = useRef(false);
+  const lastAutoSearchKey = useRef<string | null>(null);
+  const searchSeq = useRef(0);
+  const coordsTouchedRef = useRef(false);
+  const [pendingSources, setPendingSources] = useState(0);
+  const resultStreamHints = useMemo<StreamHints>(
+    () => ({
+      release:
+        (isPlayingTarget(target, playingTarget) ? playbackContext?.filename : null) ?? target.title,
+      season: target.season ?? null,
+      episode: target.episode ?? null,
+    }),
+    [target, playingTarget, playbackContext],
+  );
+
+  const cacheScope = (tgt: TitleTarget): SubtitleSearchCacheScope => {
+    const enabled = settings.subProvidersEnabled ?? {};
+    const titleOnly = !tgt.imdbId && Boolean(tgt.title);
+    const subdl = enabled.subdl === true && Boolean(settings.subdlApiKey.trim());
+    const subsource = enabled.subsource === true && Boolean(settings.subsourceApiKey.trim());
+    return {
+      languages: settings.preferredSubLangs ?? [],
+      providers: {
+        wyzie: titleOnly || enabled.wyzie === true,
+        addons: enabled.addons ?? true,
+        opensubtitles: enabled.opensubtitles ?? true,
+        subdl,
+        subsource,
+      },
+      addonUrls: (addons ?? []).map((addon) => addon.transportUrl),
+      credentialBound: subdl || subsource,
+    };
+  };
+
+  const cacheKeyFor = (tgt: TitleTarget, filename?: string | null) =>
+    subtitleSearchCacheKey({ ...tgt, filename, scope: cacheScope(tgt) });
+
+  const latestStateRef = useRef<Omit<SavedSearchState, "scrollTop">>({
+    playingKey,
+    target,
+    isOverride,
+    query,
+    hideHI,
+    forcedOnly,
+    sortBySource,
+    filtersOpen,
+  });
+  latestStateRef.current = {
+    playingKey,
+    target,
+    isOverride,
+    query,
+    hideHI,
+    forcedOnly,
+    sortBySource,
+    filtersOpen,
+  };
+
+  useEffect(() => {
+    return () => {
+      savedState = { ...latestStateRef.current, scrollTop: scrollTopRef.current };
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,64 +226,179 @@ export function SearchSection(props: SubtitleMenuProps) {
     };
   }, [authKey]);
 
-  useEffect(() => {
-    // Only run initial auto-search once, after addons are loaded
-    if (!metaImdbId || addons === null || addonsLoading || initialSearchDone.current) return;
-    initialSearchDone.current = true;
-    void run();
-  }, [metaImdbId, addons, addonsLoading]);
-
-  const run = async () => {
+  const run = async (tgt: TitleTarget) => {
     setLoading(true);
     setResults(null);
     try {
       const enabled = settings.subProvidersEnabled ?? {};
+      const titleOnly = !tgt.imdbId && !!tgt.title;
+      const playing = isPlayingTarget(tgt, playingTarget) ? playbackContext : null;
+      const scope = cacheScope(tgt);
       const searchQuery = {
-        imdbId: metaImdbId ?? undefined,
-        title: !metaImdbId ? query : undefined,
-        season: season ?? undefined,
-        episode: episode ?? undefined,
+        imdbId: tgt.imdbId || undefined,
+        title: tgt.title || undefined,
+        type: tgt.type,
+        season: tgt.season ?? undefined,
+        episode: tgt.episode ?? undefined,
         langs: settings.preferredSubLangs ?? [],
+        candidateIds: playing?.candidateIds,
+        stremioId: playing?.stremioId ?? undefined,
+        filename: playing?.filename ?? undefined,
       };
-      const searchOpts = {
+      const searchOpts: SearchOptions = {
+        timeoutMs: 8_000,
         providers: {
-          wyzie: enabled.wyzie === true,
+          wyzie: titleOnly ? true : enabled.wyzie === true,
           addons: enabled.addons ?? true,
           opensubtitles: enabled.opensubtitles ?? true,
         },
         addons: addons ?? [],
         preferredLangs: settings.preferredSubLangs ?? [],
-      };
-
-      // Log search attempt for debugging (will appear in terminal)
-      console.log("[SUBTITLES SEARCH] Starting with:", {
-        hasImdbId: !!metaImdbId,
-        addonsCount: addons?.length ?? 0,
-        providers: searchOpts.providers,
-        query: searchQuery,
-      });
-
-      const r = await searchSubtitles(searchQuery, searchOpts);
-
-      // Log results by source (will appear in terminal)
-      const bySource = r.reduce(
-        (acc, sub) => {
-          acc[sub.source] = (acc[sub.source] || 0) + 1;
-          return acc;
+        extra: {
+          userAgent: "Harbor",
+          netAllowed: true,
+          subdlApiKey: settings.subdlApiKey || null,
+          subsourceApiKey: settings.subsourceApiKey || null,
+          enabled: { subdl: enabled.subdl === true, subsource: enabled.subsource === true },
         },
-        {} as Record<string, number>,
-      );
-      console.log("[SUBTITLES SEARCH] Complete:", {
-        total: r.length,
-        bySource,
-        addonResults: bySource.addon || 0,
-        opensubtitlesResults: bySource.opensubtitles || 0,
-      });
-
+      };
+      const seq = ++searchSeq.current;
+      searchOpts.onPartial = (partial, stillFetching) => {
+        if (seq !== searchSeq.current) return;
+        setResults(partial);
+        setPendingSources(stillFetching);
+        if (partial.length > 0) setLoading(false);
+      };
+      const r = await searchSubtitles(searchQuery, searchOpts);
+      if (seq !== searchSeq.current) return;
       setResults(r);
+      if (subtitleSearchResultsMayBeCached(scope, r)) {
+        searchCache.set(cacheKeyFor(tgt, playing?.filename), {
+          results: r,
+          createdAt: Date.now(),
+        });
+      }
+      setPendingSources(0);
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (!playbackContext || isOverride || coordsTouchedRef.current) return;
+    const s = playbackContext.searchSeason;
+    const e = playbackContext.searchEpisode;
+    if (s == null && e == null) return;
+    if (s === target.season && e === target.episode) return;
+    const next = { ...target, season: s, episode: e };
+    setTarget(next);
+  }, [playbackContext, isOverride, target]);
+
+  useEffect(() => {
+    if (addons === null || addonsLoading) return;
+    if (!target.imdbId && !target.title) return;
+    const playing = isPlayingTarget(target, playingTarget) ? playbackContext : null;
+    const scope = cacheScope(target);
+    const key = cacheKeyFor(target, playing?.filename);
+    if (lastAutoSearchKey.current === key) return;
+    lastAutoSearchKey.current = key;
+    const cached = scope.credentialBound
+      ? null
+      : readSubtitleSearchCacheEntry(searchCache.get(key));
+    if (cached) {
+      setResults(cached);
+      return;
+    }
+    void run(target);
+  }, [addons, addonsLoading, target, playingTarget, playbackContext, settings]);
+
+  useEffect(() => {
+    if (!suggestOpen) return;
+    const parsed = parseTitleQuery(query);
+    if (parsed.title.length < 2) {
+      setSuggestions([]);
+      setSuggestLoading(false);
+      return;
+    }
+    setSuggestLoading(true);
+    const id = window.setTimeout(() => {
+      searchTitleCandidates(query, metaImdbId)
+        .then((c) => setSuggestions(c.slice(0, 8)))
+        .catch(() => setSuggestions([]))
+        .finally(() => setSuggestLoading(false));
+    }, 250);
+    return () => window.clearTimeout(id);
+  }, [query, suggestOpen]);
+
+  const pickCandidate = (c: TitleCandidate) => {
+    const parsed = parseTitleQuery(query);
+    const next: TitleTarget = {
+      imdbId: c.imdbId,
+      type: c.type,
+      title: c.name,
+      year: c.year,
+      season: c.type === "series" ? (parsed.season ?? target.season ?? 1) : undefined,
+      episode: c.type === "series" ? (parsed.episode ?? target.episode ?? 1) : undefined,
+    };
+    setTarget(next);
+    setIsOverride(true);
+    setQuery(labelOf(next));
+    setSuggestOpen(false);
+    void run(next);
+  };
+
+  const runFromQuery = async () => {
+    setSuggestOpen(false);
+    const parsed = parseTitleQuery(query);
+    if (parsed.title.length < 2) {
+      void run(target);
+      return;
+    }
+    setLoading(true);
+    setResults(null);
+    const cands = await searchTitleCandidates(query, metaImdbId).catch(() => []);
+    const best = bestCandidate(cands, parsed, metaImdbId);
+    const next: TitleTarget = best
+      ? {
+          imdbId: best.imdbId,
+          type: best.type,
+          title: best.name,
+          year: best.year,
+          season: best.type === "series" ? (parsed.season ?? 1) : undefined,
+          episode: best.type === "series" ? (parsed.episode ?? 1) : undefined,
+        }
+      : {
+          imdbId: "",
+          type: parsed.season != null ? "series" : "movie",
+          title: parsed.title,
+          season: parsed.season,
+          episode: parsed.episode,
+        };
+    setTarget(next);
+    setIsOverride(true);
+    await run(next);
+  };
+
+  const changeEp = (patch: Partial<Pick<TitleTarget, "season" | "episode">>) => {
+    coordsTouchedRef.current = true;
+    const next = { ...target, ...patch };
+    setTarget(next);
+    void run(next);
+  };
+
+  const clearOverride = () => {
+    setTarget(playingTarget);
+    setIsOverride(false);
+    coordsTouchedRef.current = false;
+    setQuery(
+      metaTitle && playingTarget.season != null && playingTarget.episode != null
+        ? `${metaTitle} S${String(playingTarget.season).padStart(2, "0")}E${String(
+            playingTarget.episode,
+          ).padStart(2, "0")}`
+        : (metaTitle ?? ""),
+    );
+    setSuggestOpen(false);
+    void run(playingTarget);
   };
 
   const filtered = useMemo(() => {
@@ -131,13 +419,43 @@ export function SearchSection(props: SubtitleMenuProps) {
       list.push(r);
       m.set(key, list);
     }
-    return [...m.entries()].map(([lang, items]) => ({ lang, items }));
-  }, [filtered]);
+    const out = [...m.entries()].map(([lang, items]) => ({ lang, items }));
+    if (sortBySource) {
+      for (const g of out) g.items.sort((a, b) => a.source.localeCompare(b.source));
+    }
+    // A translating addon labels its generated entries with a display name (e.g.
+    // "Make Hindi") instead of a language code. Those groups are exactly what the addon
+    // exists for, so keep them near the user's preferred languages instead of leaving
+    // them dead last behind every other language. Order: preferred, generated, rest.
+    const preferred = settings.preferredSubLangs ?? [];
+    const tier = (lang: string) =>
+      langScore(lang, preferred) > 0 ? 0 : isKnownLanguage(lang) ? 2 : 1;
+    out.sort((a, b) => tier(a.lang) - tier(b.lang));
+    return out;
+  }, [filtered, sortBySource, settings.preferredSubLangs]);
+
+  // A generated translation group picked from the sidebar narrows the list to that group.
+  const visibleGroups = useMemo(
+    () => (focusLang ? grouped.filter((g) => g.lang === focusLang) : grouped),
+    [grouped, focusLang],
+  );
+
+  useLayoutEffect(() => {
+    if (scrollRestored.current || !restorable) return;
+    if (grouped.length === 0) return;
+    const el = resultsRef.current;
+    if (el) el.scrollTop = restorable.scrollTop;
+    scrollRestored.current = true;
+  }, [grouped, restorable]);
+
+  const showTargetBar = target.type === "series" || isOverride;
+  const activeFilterCount = (hideHI ? 1 : 0) + (forcedOnly ? 1 : 0) + (sortBySource ? 1 : 0);
+  const hasTargetBar = showTargetBar || (results !== null && results.length > 0);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex shrink-0 items-center gap-2 px-4 py-3">
-        <div className="relative flex-1">
+        <div ref={searchAnchorRef} className="relative flex-1">
           <SearchIcon
             size={14}
             strokeWidth={2.2}
@@ -145,38 +463,103 @@ export function SearchSection(props: SubtitleMenuProps) {
           />
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") void run();
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setSuggestOpen(true);
             }}
-            placeholder={metaImdbId ? t("Refine search") : t("Title")}
-            className="h-9 w-full rounded-lg border border-edge-soft bg-canvas/60 ps-9 pe-3 text-[13.5px] text-ink placeholder:text-ink-subtle focus:border-edge focus:outline-none"
+            onFocus={() => setSuggestOpen(true)}
+            onBlur={() => setSuggestOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void runFromQuery();
+              if (e.key === "Escape") setSuggestOpen(false);
+            }}
+            placeholder={t("Search any show or movie")}
+            className={`h-9 w-full rounded-lg border border-edge-soft bg-canvas/60 ps-9 text-[13.5px] text-ink placeholder:text-ink-subtle focus:border-edge focus:outline-none ${
+              isOverride ? "pe-9" : "pe-3"
+            }`}
           />
+          {isOverride && (
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={clearOverride}
+              aria-label={t("Back to what's playing")}
+              className="absolute end-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
+            >
+              <X size={13} strokeWidth={2.4} />
+            </button>
+          )}
+          {suggestOpen && (
+            <TitleSuggestDropdown
+              anchorRef={searchAnchorRef}
+              items={suggestions}
+              loading={suggestLoading}
+              onPick={pickCandidate}
+            />
+          )}
         </div>
         <button
-          onClick={() => void run()}
-          disabled={loading || (!metaImdbId && !query.trim())}
+          onClick={() => void runFromQuery()}
+          disabled={loading || query.trim().length < 2}
           className="flex h-9 items-center gap-1.5 rounded-lg bg-elevated px-4 text-[13px] font-semibold text-ink ring-1 ring-edge transition-colors hover:bg-raised disabled:opacity-40"
         >
           {loading ? <Loader2 size={13} className="animate-spin" /> : t("Search")}
         </button>
+        {hasTargetBar && (
+          <HoverTooltip
+            label={filtersOpen ? t("Hide filters") : t("Show filters")}
+            side="bottom"
+            align="end"
+          >
+            <button
+              type="button"
+              onClick={() => setFiltersOpen((v) => !v)}
+              aria-label={t("Toggle filters")}
+              className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1 transition-colors ${
+                filtersOpen
+                  ? "bg-elevated text-ink ring-edge"
+                  : "text-ink-subtle ring-edge-soft hover:bg-elevated/60 hover:text-ink"
+              }`}
+            >
+              <SlidersHorizontal size={15} strokeWidth={2.2} />
+              {activeFilterCount > 0 && (
+                <span className="absolute -end-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-canvas">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </HoverTooltip>
+        )}
       </div>
 
-      {results && results.length > 0 && (
-        <div className="flex items-center gap-1.5 px-4 pb-2.5">
-          <FilterChip active={!hideHI} onClick={() => setHideHI((v) => !v)}>
-            {t("Show HI/SDH")}
+      {filtersOpen && hasTargetBar && (
+        <TargetBar
+          type={target.type}
+          season={target.season}
+          episode={target.episode}
+          onSeason={(n) => changeEp({ season: n })}
+          onEpisode={(n) => changeEp({ episode: n })}
+        />
+      )}
+
+      {filtersOpen && results && results.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 px-4 pb-2.5">
+          <FilterChip active={hideHI} onClick={() => setHideHI((v) => !v)}>
+            {t("Hide HI/SDH")}
           </FilterChip>
           <FilterChip active={forcedOnly} onClick={() => setForcedOnly((v) => !v)}>
             {t("Forced only")}
           </FilterChip>
-          <span className="ms-auto text-[11.5px] tabular-nums text-ink-subtle">
+          <FilterChip active={sortBySource} onClick={() => setSortBySource((v) => !v)}>
+            {t("Sort by source")}
+          </FilterChip>
+          <span className="ms-auto text-[11px] tabular-nums text-ink-subtle">
             {t("{shown} of {total}", { shown: filtered?.length ?? 0, total: results.length })}
           </span>
         </div>
       )}
 
-      {loading && results == null && (
+      {(loading || pendingSources > 0) && (!results || results.length === 0) && (
         <p className="flex items-center gap-2 px-4 py-3 text-[13px] text-ink-muted">
           <Loader2 size={14} className="animate-spin" />
           {addonsLoading
@@ -184,261 +567,53 @@ export function SearchSection(props: SubtitleMenuProps) {
             : t("Searching {count} sources…", { count: 1 + (addons?.length ?? 0) })}
         </p>
       )}
-      {results !== null && results.length === 0 && (
-        <p className="px-4 py-3 text-[13px] text-ink-muted">
-          {isVeryNewRelease(props.metaReleaseDate)
-            ? t("Movie's too new. Subtitles haven't been published yet.")
-            : t("No subtitles found.")}
+      {pendingSources > 0 && results !== null && results.length > 0 && (
+        <p className="flex items-center gap-2 px-4 py-1.5 text-[12px] text-ink-subtle">
+          <Loader2 size={12} className="animate-spin" />
+          {t("Still searching {count} more…", { count: pendingSources })}
         </p>
       )}
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        {grouped.map(({ lang, items }, i) => (
+      {results !== null && results.length === 0 && !loading && pendingSources === 0 && (
+        <p className="px-4 py-3 text-[13px] text-ink-muted">
+          {isVeryNewRelease(props.metaReleaseDate)
+            ? t("Too new. Subtitles haven't been published yet.")
+            : t("No subtitles found. Try another title above, or adjust the season and episode.")}
+        </p>
+      )}
+      {focusLang && results !== null && (
+        <div className="flex items-center gap-2 px-4 py-1.5 text-[11.5px] text-ink-subtle">
+          <span className="min-w-0 flex-1 truncate">
+            {t("Showing {lang}", { lang: focusLabel ?? focusLang })}
+          </span>
+          <button
+            type="button"
+            onClick={() => onClearFocus?.()}
+            className="shrink-0 rounded-full bg-elevated px-2.5 py-1 font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
+          >
+            {t("Show all")}
+          </button>
+        </div>
+      )}
+      <div
+        ref={resultsRef}
+        onScroll={(e) => {
+          scrollTopRef.current = e.currentTarget.scrollTop;
+        }}
+        className="min-h-0 flex-1 overflow-y-auto"
+      >
+        {visibleGroups.map(({ lang, items }, i) => (
           <LangGroup
             key={lang}
             lang={lang}
             items={items}
             defaultOpen={i === 0}
+            streamHints={resultStreamHints}
             onAdd={(r) =>
-              onAddSubtitle(r.url, r.lang, r.title, {
-                format: r.format,
-                encoding: r.encoding,
-              })
+              onAddSubtitle(r.url, r.lang, subtitleTitleOf(r), subtitleLoadMetadataOf(r))
             }
           />
         ))}
       </div>
     </div>
   );
-}
-
-function LangGroup({
-  lang,
-  items,
-  defaultOpen,
-  onAdd,
-}: {
-  lang: string;
-  items: SubResult[];
-  defaultOpen: boolean;
-  onAdd: (r: SubResult) => void | Promise<boolean | void>;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="border-t border-edge-soft/60">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-2 bg-canvas/40 px-4 py-2 text-start transition-colors hover:bg-canvas/60"
-      >
-        <Flag language={lang} size="sm" showLabel={false} />
-        <span className="text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-muted">
-          {lang}
-        </span>
-        <span className="text-[11px] tabular-nums text-ink-subtle">{items.length}</span>
-        <ChevronDown
-          size={14}
-          strokeWidth={2.4}
-          className={`ms-auto shrink-0 text-ink-subtle transition-transform duration-200 ${open ? "" : "-rotate-90"}`}
-        />
-      </button>
-      {open &&
-        items
-          .slice(0, 30)
-          .map((r) => <ResultRow key={r.id} result={r} lang={lang} onAdd={() => onAdd(r)} />)}
-    </div>
-  );
-}
-
-function ResultRow({
-  result,
-  lang,
-  onAdd,
-}: {
-  result: SubResult;
-  lang: string;
-  onAdd: () => void | Promise<boolean | void>;
-}) {
-  const t = useT();
-  const { open } = useContextMenu();
-  const [busy, setBusy] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [adding, setAdding] = useState(false);
-  const [added, setAdded] = useState(false);
-  const timer = useRef<number | null>(null);
-  const addTimer = useRef<number | null>(null);
-
-  useEffect(
-    () => () => {
-      if (timer.current !== null) window.clearTimeout(timer.current);
-      if (addTimer.current !== null) window.clearTimeout(addTimer.current);
-    },
-    [],
-  );
-
-  const handleAdd = async () => {
-    if (adding) return;
-    setAdding(true);
-    try {
-      const ok = await Promise.resolve(onAdd());
-      if (ok !== false) {
-        setAdded(true);
-        if (addTimer.current !== null) window.clearTimeout(addTimer.current);
-        addTimer.current = window.setTimeout(() => setAdded(false), 2600);
-      }
-    } finally {
-      setAdding(false);
-    }
-  };
-
-  const download = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const ok = await saveSubtitleToDisk(result.url, {
-        title: result.title,
-        lang: result.lang,
-        format: result.format,
-        label: t("Subtitle"),
-      });
-      if (ok) {
-        setSaved(true);
-        if (timer.current !== null) window.clearTimeout(timer.current);
-        timer.current = window.setTimeout(() => setSaved(false), 1400);
-      }
-    } catch {
-      /* noop */
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  // Enhanced source display with color coding
-  const sourceColor =
-    {
-      addon: "text-blue-400",
-      opensubtitles: "text-emerald-400",
-      wyzie: "text-purple-400",
-      jimaku: "text-amber-400",
-    }[result.source] || "text-ink-subtle";
-
-  return (
-    <div
-      onContextMenu={(e) => open(e, { kind: "subtitle", label: result.title || lang, download })}
-      className={`group flex w-full items-start gap-3 px-4 py-2.5 transition-colors duration-300 ${
-        added ? "bg-emerald-400/12" : "hover:bg-canvas/60"
-      }`}
-    >
-      <button onClick={handleAdd} className="flex min-w-0 flex-1 items-start gap-3 text-start">
-        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-          {adding ? (
-            <Loader2 size={14} className="animate-spin text-ink-subtle" />
-          ) : added ? (
-            <Check
-              size={15}
-              strokeWidth={2.6}
-              className="text-emerald-400 animate-in zoom-in-50 duration-200"
-            />
-          ) : (
-            <Plus
-              size={14}
-              strokeWidth={2.4}
-              className="text-ink-subtle transition-colors group-hover:text-ink"
-            />
-          )}
-        </span>
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="flex items-center gap-2">
-            <span className="truncate text-[13.5px] text-ink">{result.title || lang}</span>
-            {added && (
-              <span className="shrink-0 rounded bg-emerald-400/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-300 animate-in fade-in slide-in-from-left-1 duration-200">
-                {t("Added")}
-              </span>
-            )}
-          </span>
-          <span className="flex items-center gap-2 text-[11.5px] text-ink-subtle">
-            <span className={`font-semibold capitalize ${sourceColor}`}>{result.source}</span>
-            {result.format && (
-              <>
-                <span aria-hidden>·</span>
-                <span className="uppercase">{result.format}</span>
-              </>
-            )}
-            {typeof result.downloads === "number" && result.downloads > 0 && (
-              <>
-                <span aria-hidden>·</span>
-                <span>{t("{count} dl", { count: compactNumber(result.downloads) })}</span>
-              </>
-            )}
-            {result.hearingImpaired && (
-              <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-200">
-                {t("HI/SDH")}
-              </span>
-            )}
-            {result.forced && (
-              <span className="rounded bg-sky-400/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-sky-200">
-                {t("Forced")}
-              </span>
-            )}
-          </span>
-        </div>
-      </button>
-      <span
-        role="button"
-        tabIndex={0}
-        title={saved ? t("Saved to disk") : t("Download to disk")}
-        aria-label={t("Download subtitle to disk")}
-        onClick={(e) => {
-          e.stopPropagation();
-          void download();
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            e.stopPropagation();
-            void download();
-          }
-        }}
-        className={`mt-0.5 inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors ${
-          saved ? "text-accent" : "text-ink-subtle hover:bg-elevated hover:text-ink"
-        }`}
-      >
-        {busy ? (
-          <Loader2 size={13} className="animate-spin" />
-        ) : saved ? (
-          <Check size={13} strokeWidth={2.4} />
-        ) : (
-          <Save size={13} strokeWidth={2} />
-        )}
-      </span>
-    </div>
-  );
-}
-
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex h-7 items-center rounded-full px-2.5 text-[11.5px] font-semibold transition-colors ${
-        active
-          ? "bg-elevated text-ink ring-1 ring-edge"
-          : "bg-raised text-ink-muted hover:bg-elevated/80"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function compactNumber(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
-  return String(n);
 }

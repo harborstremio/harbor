@@ -1,0 +1,46 @@
+/* The characters share one faded composition; the choice never moves the film rail. */
+.twilight-world { margin:65px var(--page) 80px; }
+.twilight-choice { position:relative;isolation:isolate;min-height:455px;display:grid;place-items:center; }
+.twilight-characters { position:absolute;inset:-35px -35px -20px;z-index:-1;overflow:hidden;mask-image:linear-gradient(transparent,#000 17%,#000 66%,transparent 98%); }
+.twilight-character { position:absolute;top:0;bottom:0;width:51%;background-image:url('assets/twilight/tt1325004-background.webp');background-repeat:no-repeat;background-size:auto 115%;opacity:.64;filter:saturate(.65);transition:opacity 650ms ease,filter 650ms ease,transform 850ms cubic-bezier(.2,.7,.3,1); }
+.twilight-edward { left:0;background-position:50px 24%;mask-image:linear-gradient(90deg,transparent 11%,#000 23%,#000 33%,#0005 44%,transparent 56%); }
+.twilight-jacob { right:0;background-position:calc(100% - 50px) 24%;mask-image:linear-gradient(270deg,transparent 11%,#000 23%,#000 33%,#0005 44%,transparent 56%); }
+.twilight-copy { text-align:center;max-width:440px;padding:40px 0 15px; }
+.twilight-wordmark { display:block;object-fit:contain;width:145px;height:65px;margin:0 auto 22px;filter:brightness(0) invert(1);opacity:.85; }
+.twilight-copy h2 { font-size:clamp(32px,3.8vw,50px);line-height:1.13;letter-spacing:-.055em; }
+.twilight-copy>p { font-size:14px;color:var(--muted);margin:16px 0 28px; }
+.twilight-teams { display:flex;justify-content:center;gap:12px; }
+.twilight-teams button { display:flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:0 19px;border-radius:6px;background:#303137;color:var(--ink);font-size:13px;font-weight:600;transition:background 180ms ease,color 180ms ease,transform 200ms cubic-bezier(.2,.7,.3,1); }
+.twilight-teams button:hover { background:#414249;transform:scale(1.035); }
+.twilight-teams button:active { transform:scale(.98); }
+.twilight-teams button:focus-visible { outline:2px solid var(--ink);outline-offset:4px; }
+.twilight-teams [aria-pressed="true"] { background:#e8e5e0;color:#1a1b1f; }
+.twilight-copy .twilight-status { margin:15px 0 0;min-height:20px;font-size:11px;color:var(--subtle,#969399); }
+.twilight-world[data-team="edward"] .twilight-edward,.twilight-world[data-team="jacob"] .twilight-jacob { opacity:1;filter:saturate(.95);transform:scale(1.025); }
+.twilight-world[data-team="edward"] .twilight-jacob,.twilight-world[data-team="jacob"] .twilight-edward { opacity:.25;filter:grayscale(.65); }
+.twilight-films.shelf { padding:0;margin:0; }
+.twilight-films .section-top { align-items:center;margin-bottom:24px; }
+.twilight-films h3 { font-size:23px;letter-spacing:-.035em; }
+.twilight-films .section-top>span { font-size:11px;color:var(--muted); }
+.twilight-film-action { display:flex;align-items:center;justify-content:flex-end;min-height:32px;min-width:148px;font-size:11px;color:var(--muted); }
+.twilight-film-action .section-cta { font-size:12px;white-space:nowrap;padding:6px 0; }
+.twilight-film-action [hidden] { display:none; }
+.twilight-row { --columns:5; }
+.twilight-row .poster-label { display:none; }
+.twilight-pick { position:absolute;z-index:3;top:12px;left:12px;background:var(--ink);color:var(--canvas);padding:6px 9px;border-radius:4px;font-size:10px;font-weight:650;opacity:0;transform:translateY(-5px);transition:opacity 220ms ease,transform 300ms cubic-bezier(.2,.7,.3,1);pointer-events:none; }
+.is-team-pick .twilight-pick { opacity:1;transform:translateY(0); }
+.spotlight-shelf { margin:45px var(--page); }
+.spotlight-shelf .editorial-intro { min-height:355px; }
+.spotlight-shelf .editorial-backdrop { opacity:.45;object-position:60% 30%; }
+.spotlight-shelf .editorial-intro-copy { padding-bottom:25px; }
+.spotlight-role { font-size:12px;color:var(--muted); }
+.spotlight-shelf h2 { margin:10px 0 14px;font-size:clamp(31px,3.2vw,45px);max-width:260px;letter-spacing:-.045em;line-height:1.06; }
+.spotlight-count { display:block;margin-top:22px;font-size:11px;color:var(--muted); }
+/* Keep the canvas continuous: shading belongs in the artwork's alpha, not a rectangular overlay. */
+.editorial-intro::after { display:none; }
+.editorial-backdrop { mask-image:linear-gradient(0deg,transparent,#0009 25%,#000 48%,#000 73%,transparent),linear-gradient(90deg,transparent,#000 18%,#000 68%,transparent);mask-composite:intersect; }
+@media(max-width:1000px){.twilight-character{background-size:auto 105%;width:52%}.twilight-edward{background-position:left 24%}.twilight-jacob{background-position:right 24%}.twilight-copy{padding-top:125px}.twilight-wordmark{width:120px;height:50px;margin-bottom:17px}.twilight-copy h2{font-size:38px}.twilight-row{--columns:4.15}}
+@media(max-width:700px){.twilight-world{margin:45px var(--page) 55px}.twilight-choice{min-height:440px}.twilight-characters{inset:0 -18px 65px;mask-image:linear-gradient(transparent,#000 16%,#000 48%,transparent 94%)}.twilight-character{width:63%;background-size:auto 91%;opacity:.7}.twilight-edward{left:-24px;mask-image:linear-gradient(90deg,transparent,#000 14%,#000 30%,#0005 44%,transparent 61%)}.twilight-jacob{right:-24px;mask-image:linear-gradient(270deg,transparent,#000 14%,#000 30%,#0005 44%,transparent 61%)}.twilight-copy{padding-top:190px}.twilight-wordmark{width:120px;height:43px;margin-bottom:12px}.twilight-copy h2{font-size:32px}.twilight-copy>p{font-size:12px;margin:10px 0 19px}.twilight-teams{gap:10px}.twilight-teams button{padding:0 14px;min-height:46px;font-size:12px}.twilight-films .section-top{margin-top:18px}.twilight-films h3{font-size:21px}.twilight-row{--columns:2.65}.spotlight-shelf{margin:35px var(--page)}.spotlight-shelf .editorial-intro{min-height:0;padding:0 0 22px}.spotlight-shelf h2{max-width:none;font-size:31px}.spotlight-shelf .editorial-intro-copy{padding:0}.spotlight-count{position:absolute;right:0;bottom:0;margin:0}}
+@media(max-width:420px){.twilight-row{--columns:2.2}}
+@media(prefers-reduced-motion:reduce){.twilight-character,.twilight-teams button,.twilight-pick{transition:none;transform:none!important}}
+.motion-off .twilight-character,.motion-off .twilight-teams button,.motion-off .twilight-pick { transition:none; }

@@ -41,13 +41,7 @@ async function getProp<T = unknown>(name: string): Promise<T | null> {
   }
 }
 
-export function StatsOverlay({
-  snap,
-  engine,
-}: {
-  snap: PlayerSnapshot;
-  engine: "html5" | "mpv";
-}) {
+export function StatsOverlay({ snap, engine }: { snap: PlayerSnapshot; engine: "html5" | "mpv" }) {
   const tr = useT();
   const [stats, setStats] = useState<MpvStats>(EMPTY_STATS);
 
@@ -58,8 +52,8 @@ export function StatsOverlay({
       const [vb, ab, fdd, fdo, fps, vc, ac, hw, cfps, cb] = await Promise.all([
         getProp<number>("video-bitrate"),
         getProp<number>("audio-bitrate"),
+        getProp<number>("decoder-frame-drop-count"),
         getProp<number>("frame-drop-count"),
-        getProp<number>("vo-drop-frame-count"),
         getProp<number>("estimated-vf-fps"),
         getProp<string>("video-codec"),
         getProp<string>("audio-codec"),
@@ -103,17 +97,25 @@ export function StatsOverlay({
   if (stats.videoCodec) rows.push([tr("Video codec"), stats.videoCodec]);
   if (stats.audioCodec) rows.push([tr("Audio codec"), stats.audioCodec]);
   if (stats.hwdec) rows.push([tr("HW decode"), stats.hwdec]);
-  if (stats.videoBitrate != null) rows.push([tr("Video bitrate"), formatBitrate(stats.videoBitrate)]);
-  if (stats.audioBitrate != null) rows.push([tr("Audio bitrate"), formatBitrate(stats.audioBitrate)]);
-  if (stats.frameDropDecoder != null)
+  if (stats.videoBitrate != null)
+    rows.push([tr("Video bitrate"), formatBitrate(stats.videoBitrate)]);
+  if (stats.audioBitrate != null)
+    rows.push([tr("Audio bitrate"), formatBitrate(stats.audioBitrate)]);
+  if (stats.frameDropDecoder != null || stats.frameDropOutput != null)
     rows.push([
       tr("Dropped (decode / vo)"),
-      `${stats.frameDropDecoder} / ${stats.frameDropOutput ?? 0}`,
+      `${stats.frameDropDecoder ?? "—"} / ${stats.frameDropOutput ?? "—"}`,
     ]);
   if (stats.cacheBufferingState != null)
     rows.push([tr("Cache buffering"), `${stats.cacheBufferingState.toFixed(0)}%`]);
-  rows.push([tr("Audio track"), audioTrack ? audioTrack.title || audioTrack.lang || audioTrack.id : "—"]);
-  rows.push([tr("Subtitle track"), subTrack ? subTrack.title || subTrack.lang || subTrack.id : tr("Off")]);
+  rows.push([
+    tr("Audio track"),
+    audioTrack ? audioTrack.title || audioTrack.lang || audioTrack.id : "—",
+  ]);
+  rows.push([
+    tr("Subtitle track"),
+    subTrack ? subTrack.title || subTrack.lang || subTrack.id : tr("Off"),
+  ]);
   rows.push([tr("Speed"), `${snap.rate.toFixed(2)}×`]);
   rows.push([tr("Volume"), `${Math.round(snap.volume * 100)}%${snap.muted ? tr(" · muted") : ""}`]);
 

@@ -2,22 +2,28 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { BackToTop } from "@/components/back-to-top";
 import { PickCard } from "@/components/pick-card";
-import { VirtualGrid } from "@/components/virtual-grid";
+import { TV_CARD_MIN } from "@/components/row";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { layoutHasGlobalBack } from "@/lib/theme";
+import { useSettings } from "@/lib/settings";
 import { useScrollMemory, useView, type GridSpec } from "@/lib/view";
 
 const PAGE_CAP = 40;
 
 export function GridView({ grid }: { grid: GridSpec }) {
   const { goBack } = useView();
+  const { settings } = useSettings();
   const t = useT();
   const scrollRef = useRef<HTMLElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [metas, setMetas] = useState<Meta[]>(grid.initial ?? []);
-  const [page, setPage] = useState(grid.initial?.length ? 1 : 0);
-  const [done, setDone] = useState(false);
+  const initialPage = grid.initialPage ?? (grid.initial?.length ? 1 : 0);
+  const [page, setPage] = useState(initialPage);
+  const [done, setDone] = useState(initialPage >= PAGE_CAP);
+  // Preview seeds are not complete pages. Provider offsets count raw results,
+  // including duplicates, rather than the number of visible cards.
+  const loadedRef = useRef(initialPage === 0 ? 0 : (grid.initial?.length ?? 0));
   const loadingRef = useRef(false);
   useScrollMemory(`grid:${grid.title}`, scrollRef);
 
@@ -31,17 +37,18 @@ export function GridView({ grid }: { grid: GridSpec }) {
         loadingRef.current = true;
         const next = page + 1;
         grid
-          .fetcher(next)
+          .fetcher(next, loadedRef.current)
           .then((batch) => {
             setPage(next);
-            if (batch.length === 0 || next >= PAGE_CAP) {
-              setDone(true);
-              return;
-            }
+            loadedRef.current += batch.length;
+            if (batch.length === 0 || next >= PAGE_CAP) setDone(true);
             const seen = new Set(metas.map((m) => m.id));
-            const fresh = batch.filter((m) => !seen.has(m.id));
-            if (fresh.length === 0) setDone(true);
-            else setMetas((prev) => [...prev, ...fresh]);
+            const fresh = batch.filter((m) => {
+              if (seen.has(m.id)) return false;
+              seen.add(m.id);
+              return true;
+            });
+            if (fresh.length > 0) setMetas((prev) => [...prev, ...fresh]);
           })
           .catch(() => setDone(true))
           .finally(() => {
@@ -59,16 +66,18 @@ export function GridView({ grid }: { grid: GridSpec }) {
 
   const body = (
     <>
-      <VirtualGrid
-        items={metas}
-        scrollRef={scrollRef}
-        minColumnWidth={150}
-        gapX={16}
-        gapY={32}
-        estimateRowHeight={260}
-        getKey={(m, i) => `${m.id}-${i}`}
-        renderItem={(m) => <PickCard meta={m} kids={!!hero} />}
-      />
+      <div
+        className="grid gap-x-4 gap-y-8"
+        style={{
+          gridTemplateColumns: `repeat(auto-fill, minmax(${
+            settings.rowCardStyle === "tv" && !hero ? TV_CARD_MIN : 150
+          }px, 1fr))`,
+        }}
+      >
+        {metas.map((m, i) => (
+          <PickCard key={`${m.id}-${i}`} meta={m} kids={!!hero} />
+        ))}
+      </div>
       {!done && <div ref={sentinelRef} className="h-24" />}
       {done &&
         metas.length === 0 &&
@@ -85,7 +94,7 @@ export function GridView({ grid }: { grid: GridSpec }) {
             </p>
           </div>
         ) : (
-          <p className="py-20 text-center text-[14px] text-ink-subtle">Nothing here yet.</p>
+          <p className="py-20 text-center text-[14px] text-ink-subtle">{t("Nothing here yet.")}</p>
         ))}
     </>
   );
@@ -133,7 +142,7 @@ export function GridView({ grid }: { grid: GridSpec }) {
             {!layoutHasGlobalBack() && (
               <button
                 onClick={goBack}
-                aria-label="Back"
+                aria-label={t("Back")}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-elevated text-ink-muted transition-colors hover:text-ink"
               >
                 <ArrowLeft size={18} strokeWidth={2.2} />
@@ -142,7 +151,9 @@ export function GridView({ grid }: { grid: GridSpec }) {
             <h1 className="font-display text-[30px] font-medium leading-none tracking-tight text-ink">
               {grid.title}
             </h1>
-            <span className="text-[14px] text-ink-subtle">{metas.length} titles</span>
+            <span className="text-[14px] text-ink-subtle">
+              {metas.length} {metas.length === 1 ? t("title") : t("titles")}
+            </span>
           </div>
           {body}
         </div>

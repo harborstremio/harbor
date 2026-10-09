@@ -1,5 +1,6 @@
-import { ChevronDown, Download, Folder } from "lucide-react";
+import { ChevronDown, Download, Folder } from "../../../icons";
 import type { CodeLang } from "@/components/code-editor";
+import { useT } from "@/lib/i18n";
 import { IDE, type ThemeFile } from "./files";
 
 export function FileTree({
@@ -17,24 +18,28 @@ export function FileTree({
   onSelect: (id: CodeLang) => void;
   onDownload: (id: CodeLang) => void;
 }) {
+  const t = useT();
   return (
     <aside
       className="flex w-[264px] shrink-0 flex-col"
-      style={{ background: IDE.panel, borderRight: `1px solid ${IDE.border}` }}
+      style={{ background: IDE.panel, borderInlineEnd: `1px solid ${IDE.border}` }}
     >
       <div className="px-4 pb-1.5 pt-4">
         <span
-          className="text-[11px] font-bold uppercase tracking-[0.24em]"
+          className="text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px]"
           style={{ color: IDE.textFaint }}
         >
-          Project
+          {t("Project")}
         </span>
       </div>
 
-      <div className="flex items-center gap-2 px-3.5 py-2">
+      <div className="flex h-11 items-center gap-2 px-3.5">
         <ChevronDown size={16} strokeWidth={2.4} style={{ color: IDE.textDim }} />
-        <Folder size={17} strokeWidth={2} style={{ color: IDE.accent }} />
-        <span className="truncate text-[14.5px] font-semibold" style={{ color: IDE.text }}>
+        <Folder size={18} strokeWidth={2} style={{ color: IDE.accent }} />
+        <span
+          className="truncate text-[16.5px] font-medium leading-[24px] tracking-[-0.1px]"
+          style={{ color: IDE.text }}
+        >
           {projectName}
         </span>
       </div>
@@ -55,19 +60,20 @@ export function FileTree({
               <button
                 type="button"
                 onClick={() => onSelect(f.id)}
-                className="flex h-11 w-full items-center gap-2.5 rounded-lg ps-6 pe-2.5 text-start transition-colors hover:bg-white/[0.04]"
-                style={{ background: on ? "rgba(255,255,255,0.06)" : "transparent" }}
+                className={`flex h-11 w-full items-center gap-2.5 rounded-md ps-6 pe-2.5 text-start transition-colors ${
+                  on ? "bg-white/[0.06]" : "hover:bg-white/[0.04]"
+                }`}
               >
-                <Icon size={18} strokeWidth={2} style={{ color: f.tint }} />
+                <Icon size={18} strokeWidth={2} className="shrink-0" style={{ color: f.tint }} />
                 <span
-                  className="flex-1 truncate text-[14px]"
-                  style={{ color: on ? "#fff" : IDE.text, fontWeight: on ? 600 : 500 }}
+                  className="flex-1 truncate text-[16.5px] font-medium leading-[24px] tracking-[-0.1px]"
+                  style={{ color: IDE.text }}
                 >
                   {f.name}
                 </span>
                 {len > 0 && (
                   <span
-                    className="shrink-0 tabular-nums text-[11.5px] transition-opacity group-hover/row:opacity-0"
+                    className="shrink-0 tabular-nums text-[15.5px] font-normal leading-[22px] transition-opacity group-hover/row:opacity-0 group-focus-within/row:opacity-0"
                     style={{ color: IDE.textFaint }}
                   >
                     {len.toLocaleString()}
@@ -77,11 +83,11 @@ export function FileTree({
               <button
                 type="button"
                 onClick={() => onDownload(f.id)}
-                aria-label={`Download ${f.name}`}
-                className="absolute end-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md opacity-0 transition-opacity hover:bg-white/10 group-hover/row:opacity-100"
+                aria-label={t("Download {file}", { file: f.name })}
+                className="absolute end-0.5 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md opacity-0 transition-opacity hover:bg-white/10 group-hover/row:opacity-100 group-focus-within/row:opacity-100"
                 style={{ color: IDE.textDim }}
               >
-                <Download size={16} strokeWidth={2.2} />
+                <Download size={18} strokeWidth={2.2} />
               </button>
             </div>
           );

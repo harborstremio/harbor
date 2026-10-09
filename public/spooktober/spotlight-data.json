@@ -1,0 +1,525 @@
+[
+ {
+  "id": "zombie",
+  "name": "Rob Zombie",
+  "title": "Rob Zombie",
+  "role": "Director",
+  "description": "Films directed by Rob Zombie.",
+  "featuredId": "tt0251736",
+  "poster": "https://images.metahub.space/poster/medium/tt0251736/img",
+  "background": "https://images.metahub.space/background/medium/tt0251736/img",
+  "itemIds": [
+   "tt0251736",
+   "tt0395584",
+   "tt1731697",
+   "tt0373883",
+   "tt1311067",
+   "tt3835080",
+   "tt8134742",
+   "tt0419724",
+   "tt14813212"
+  ],
+  "items": [
+   {
+    "id": "tt0251736",
+    "title": "House of 1000 Corpses",
+    "year": "2003",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Rob Zombie",
+    "description": "Two young couples traveling across the backwoods of Texas searching for urban legends of murder end up as prisoners of a bizarre and sadistic backwater family of serial killers.",
+    "poster": "https://images.metahub.space/poster/medium/tt0251736/img",
+    "source": "https://www.imdb.com/title/tt0251736/",
+    "genres": [
+     "Horror"
+    ],
+    "imdbId": "tt0251736",
+    "runtime": "89 min",
+    "imdbRating": "6.0",
+    "cast": [
+     "Sid Haig",
+     "Karen Black",
+     "Bill Moseley"
+    ]
+   },
+   {
+    "id": "tt0395584",
+    "title": "The Devil's Rejects",
+    "year": "2005",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Rob Zombie",
+    "description": "The murderous, backwoods Firefly family take to the road to escape the vengeful Sheriff Wydell, who is not afraid of being as ruthless as his target.",
+    "poster": "https://images.metahub.space/poster/medium/tt0395584/img",
+    "source": "https://www.imdb.com/title/tt0395584/",
+    "genres": [
+     "Crime",
+     "Drama",
+     "Horror"
+    ],
+    "imdbId": "tt0395584",
+    "runtime": "111 min",
+    "imdbRating": "6.7",
+    "cast": [
+     "Sid Haig",
+     "Sheri Moon Zombie",
+     "Bill Moseley"
+    ]
+   },
+   {
+    "id": "tt1731697",
+    "imdbId": "tt1731697",
+    "title": "The Lords of Salem",
+    "year": "2012",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Rob Zombie",
+    "cast": [
+     "Sheri Moon Zombie",
+     "Meg Foster",
+     "Bruce Davison"
+    ],
+    "description": "A Salem radio host plays a mysterious record and begins experiencing disturbing visions.",
+    "poster": "https://images.metahub.space/poster/medium/tt1731697/img",
+    "source": "https://www.imdb.com/title/tt1731697/",
+    "genres": [
+     "Horror",
+     "Thriller"
+    ],
+    "runtime": "101 min",
+    "imdbRating": "5.2"
+   },
+   {
+    "id": "tt0373883",
+    "title": "Halloween",
+    "year": "2007",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Rob Zombie",
+    "description": "After being committed for 15 years, Michael Myers, now a grown man and still very dangerous, escapes from the mental institution and immediately returns to Haddonfield to find his baby sister, Laurie.",
+    "poster": "https://images.metahub.space/poster/medium/tt0373883/img",
+    "source": "https://www.imdb.com/title/tt0373883/",
+    "genres": [
+     "Horror"
+    ],
+    "imdbId": "tt0373883",
+    "runtime": "110 min",
+    "imdbRating": "6.1",
+    "cast": [
+     "Scout Taylor-Compton",
+     "Malcolm McDowell",
+     "Tyler Mane"
+    ]
+   },
+   {
+    "id": "tt1311067",
+    "imdbId": "tt1311067",
+    "title": "Halloween II",
+    "year": "2009",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Rob Zombie",
+    "cast": [
+     "Scout Taylor-Compton",
+     "Tyler Mane",
+     "Malcolm McDowell"
+    ],
+    "description": "Laurie Strode struggles with the aftermath of Michael Myers’s attacks as he returns to Haddonfield.",
+    "poster": "https://images.metahub.space/poster/medium/tt1311067/img",
+    "source": "https://www.imdb.com/title/tt1311067/",
+    "genres": [
+     "Horror"
+    ],
+    "runtime": "105 min",
+    "imdbRating": "4.8"
+   },
+   {
+    "id": "tt3835080",
+    "imdbId": "tt3835080",
+    "title": "31",
+    "year": "2016",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Rob Zombie",
+    "cast": [
+     "Malcolm McDowell",
+     "Richard Brake",
+     "Jeff Daniel Phillips"
+    ],
+    "description": "Kidnapped carnival workers are forced to survive a deadly game on Halloween.",
+    "poster": "https://images.metahub.space/poster/medium/tt3835080/img",
+    "source": "https://www.imdb.com/title/tt3835080/",
+    "genres": [
+     "Horror",
+     "Thriller"
+    ],
+    "runtime": "102 min",
+    "imdbRating": "5.1"
+   },
+   {
+    "id": "tt8134742",
+    "imdbId": "tt8134742",
+    "title": "3 from Hell",
+    "year": "2019",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Rob Zombie",
+    "cast": [
+     "Sheri Moon Zombie",
+     "Bill Moseley",
+     "Sid Haig"
+    ],
+    "description": "The surviving Firefly family members escape captivity and return to violence.",
+    "poster": "https://images.metahub.space/poster/medium/tt8134742/img",
+    "source": "https://www.imdb.com/title/tt8134742/",
+    "genres": [
+     "Action",
+     "Horror"
+    ],
+    "runtime": "115 min",
+    "imdbRating": "5.4"
+   },
+   {
+    "id": "tt0419724",
+    "imdbId": "tt0419724",
+    "title": "The Haunted World of El Superbeasto",
+    "year": "2009",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Rob Zombie",
+    "cast": [
+     "Joe Alaskey",
+     "Ken Foree",
+     "Sheri Moon Zombie",
+     "Tom Papa"
+    ],
+    "description": "A masked wrestler and his sister confront Dr. Satan in an adult animated horror comedy.",
+    "poster": "https://images.metahub.space/poster/medium/tt0419724/img",
+    "source": "https://www.imdb.com/title/tt0419724/",
+    "genres": [
+     "Animation",
+     "Action",
+     "Comedy",
+     "Fantasy",
+     "Horror",
+     "Musical",
+     "Sci-Fi"
+    ],
+    "runtime": "77 min",
+    "imdbRating": "5.9"
+   },
+   {
+    "id": "tt14813212",
+    "imdbId": "tt14813212",
+    "title": "The Munsters",
+    "year": "2022",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Rob Zombie",
+    "cast": [
+     "Sheri Moon Zombie",
+     "Jeff Daniel Phillips",
+     "Daniel Roebuck"
+    ],
+    "description": "Herman and Lily Munster meet and fall in love in this monster comedy.",
+    "poster": "https://images.metahub.space/poster/medium/tt14813212/img",
+    "source": "https://www.imdb.com/title/tt14813212/",
+    "genres": [
+     "Comedy",
+     "Family",
+     "Fantasy"
+    ],
+    "runtime": "110 min",
+    "imdbRating": "4.5"
+   }
+  ]
+ },
+ {
+  "id": "cage",
+  "name": "Nicolas Cage",
+  "title": "Nicolas Cage",
+  "role": "Actor",
+  "description": "Horror films starring Nicolas Cage.",
+  "featuredId": "tt6998518",
+  "poster": "https://images.metahub.space/poster/medium/tt6998518/img",
+  "background": "https://images.metahub.space/background/medium/tt6998518/img",
+  "itemIds": [
+   "tt6998518",
+   "tt5073642",
+   "tt23468450",
+   "tt0098577",
+   "tt21942866",
+   "tt11358390",
+   "tt8114980",
+   "tt5462326",
+   "tt22939186",
+   "tt3733778",
+   "tt0450345"
+  ],
+  "items": [
+   {
+    "id": "tt6998518",
+    "title": "Mandy",
+    "year": "2018",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Panos Cosmatos",
+    "description": "The enchanted lives of a couple in a secluded forest are brutally shattered by a nightmarish hippie cult and their demon-biker henchmen, propelling a man into a spiraling, surreal rampage of vengeance.",
+    "poster": "https://images.metahub.space/poster/medium/tt6998518/img",
+    "source": "https://www.imdb.com/title/tt6998518/",
+    "genres": [
+     "Action",
+     "Fantasy",
+     "Horror"
+    ],
+    "imdbId": "tt6998518",
+    "runtime": "122 min",
+    "imdbRating": "6.5",
+    "cast": [
+     "Nicolas Cage",
+     "Andrea Riseborough",
+     "Linus Roache"
+    ]
+   },
+   {
+    "id": "tt5073642",
+    "imdbId": "tt5073642",
+    "title": "Color Out of Space",
+    "year": "2019",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Richard Stanley",
+    "cast": [
+     "Nicolas Cage",
+     "Joely Richardson",
+     "Madeleine Arthur"
+    ],
+    "description": "A meteorite contaminates the land around a family’s home and begins changing everything it touches.",
+    "poster": "https://images.metahub.space/poster/medium/tt5073642/img",
+    "source": "https://www.imdb.com/title/tt5073642/",
+    "genres": [
+     "Horror",
+     "Mystery",
+     "Sci-Fi"
+    ],
+    "runtime": "111 min",
+    "imdbRating": "6.1"
+   },
+   {
+    "id": "tt23468450",
+    "title": "Longlegs",
+    "year": "2024",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Osgood Perkins",
+    "description": "In pursuit of a serial killer, an FBI agent uncovers a series of occult clues that she must solve to end his terrifying killing spree.",
+    "poster": "https://images.metahub.space/poster/medium/tt23468450/img",
+    "source": "https://www.imdb.com/title/tt23468450/",
+    "genres": [
+     "Crime",
+     "Horror",
+     "Mystery"
+    ],
+    "imdbId": "tt23468450",
+    "runtime": "101 min",
+    "imdbRating": "6.5",
+    "cast": [
+     "Maika Monroe",
+     "Nicolas Cage",
+     "Blair Underwood"
+    ]
+   },
+   {
+    "id": "tt0098577",
+    "imdbId": "tt0098577",
+    "title": "Vampire's Kiss",
+    "year": "1988",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Robert Bierman",
+    "cast": [
+     "Nicolas Cage",
+     "Maria Conchita Alonso",
+     "Jennifer Beals"
+    ],
+    "description": "A publishing executive becomes convinced that a woman has turned him into a vampire.",
+    "poster": "https://images.metahub.space/poster/medium/tt0098577/img",
+    "source": "https://www.imdb.com/title/tt0098577/",
+    "genres": [
+     "Comedy",
+     "Crime",
+     "Fantasy"
+    ],
+    "runtime": "104 min",
+    "imdbRating": "6.1"
+   },
+   {
+    "id": "tt21942866",
+    "imdbId": "tt21942866",
+    "title": "Dream Scenario",
+    "year": "2023",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Kristoffer Borgli",
+    "cast": [
+     "Lily Bird",
+     "Nicolas Cage",
+     "Julianne Nicholson"
+    ],
+    "description": "An ordinary professor begins appearing in strangers’ dreams, and his sudden fame turns against him.",
+    "poster": "https://images.metahub.space/poster/medium/tt21942866/img",
+    "source": "https://www.imdb.com/title/tt21942866/",
+    "genres": [
+     "Comedy",
+     "Drama",
+     "Fantasy"
+    ],
+    "runtime": "102 min",
+    "imdbRating": "6.8"
+   },
+   {
+    "id": "tt11358390",
+    "title": "Renfield",
+    "year": "2023",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Chris McKay",
+    "description": "Renfield, Dracula's tortured henchman, is forced to capture prey for his master and do his every bidding. But now, after centuries of servitude, Renfield is ready to see if there is a life outside his boss's shadow.",
+    "poster": "https://images.metahub.space/poster/medium/tt11358390/img",
+    "source": "https://www.imdb.com/title/tt11358390/",
+    "genres": [
+     "Action",
+     "Comedy",
+     "Fantasy"
+    ],
+    "imdbId": "tt11358390",
+    "runtime": "93 min",
+    "imdbRating": "6.4",
+    "cast": [
+     "Nicholas Hoult",
+     "Nicolas Cage",
+     "Awkwafina"
+    ]
+   },
+   {
+    "id": "tt8114980",
+    "imdbId": "tt8114980",
+    "title": "Willy's Wonderland",
+    "year": "2021",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Kevin Lewis",
+    "cast": [
+     "Nicolas Cage",
+     "Emily Tosta",
+     "Beth Grant"
+    ],
+    "description": "A drifter spends the night cleaning an abandoned family entertainment centre occupied by murderous animatronics.",
+    "poster": "https://images.metahub.space/poster/medium/tt8114980/img",
+    "source": "https://www.imdb.com/title/tt8114980/",
+    "genres": [
+     "Action",
+     "Comedy",
+     "Horror"
+    ],
+    "runtime": "89 min",
+    "imdbRating": "5.5"
+   },
+   {
+    "id": "tt5462326",
+    "imdbId": "tt5462326",
+    "title": "Mom and Dad",
+    "year": "2017",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Brian Taylor",
+    "cast": [
+     "Nicolas Cage",
+     "Selma Blair",
+     "Anne Winters"
+    ],
+    "description": "A mysterious outbreak causes parents to turn violently against their own children.",
+    "poster": "https://images.metahub.space/poster/medium/tt5462326/img",
+    "source": "https://www.imdb.com/title/tt5462326/",
+    "genres": [
+     "Comedy",
+     "Horror",
+     "Thriller"
+    ],
+    "runtime": "86 min",
+    "imdbRating": "5.6"
+   },
+   {
+    "id": "tt22939186",
+    "imdbId": "tt22939186",
+    "title": "Arcadian",
+    "year": "2024",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Benjamin Brewer",
+    "cast": [
+     "Nicolas Cage",
+     "Jaeden Martell",
+     "Maxwell Jenkins"
+    ],
+    "description": "A father and his two sons defend their farmhouse from creatures that attack at night.",
+    "poster": "https://images.metahub.space/poster/medium/tt22939186/img",
+    "source": "https://www.imdb.com/title/tt22939186/",
+    "genres": [
+     "Action",
+     "Drama",
+     "Horror"
+    ],
+    "runtime": "92 min",
+    "imdbRating": "5.5"
+   },
+   {
+    "id": "tt3733778",
+    "imdbId": "tt3733778",
+    "title": "Pay the Ghost",
+    "year": "2015",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Uli Edel",
+    "cast": [
+     "Nicolas Cage",
+     "Sarah Wayne Callies",
+     "Veronica Ferres"
+    ],
+    "description": "A father searches for his son after the child disappears during a Halloween celebration.",
+    "poster": "https://images.metahub.space/poster/medium/tt3733778/img",
+    "source": "https://www.imdb.com/title/tt3733778/",
+    "genres": [
+     "Horror",
+     "Mystery"
+    ],
+    "runtime": "94 min",
+    "imdbRating": "5.2"
+   },
+   {
+    "id": "tt0450345",
+    "imdbId": "tt0450345",
+    "title": "The Wicker Man",
+    "year": "2006",
+    "type": "Film",
+    "section": "catalog",
+    "creator": "Neil LaBute",
+    "cast": [
+     "Nicolas Cage",
+     "Ellen Burstyn",
+     "Leelee Sobieski"
+    ],
+    "description": "A police officer investigates a child’s disappearance on an isolated island.",
+    "poster": "https://images.metahub.space/poster/medium/tt0450345/img",
+    "source": "https://www.imdb.com/title/tt0450345/",
+    "genres": [
+     "Horror",
+     "Mystery",
+     "Thriller"
+    ],
+    "runtime": "102 min",
+    "imdbRating": "3.8"
+   }
+  ]
+ }
+]

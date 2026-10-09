@@ -12,7 +12,6 @@ if (typeof window !== "undefined" && isTauri()) {
   void listen("modal://closed", () => {
     overlayOpen = false;
   });
-
   void listen("modal://show", () => {
     overlayOpen = true;
   });
@@ -38,6 +37,36 @@ export async function modalOverlayEmitState(kind: string, state: unknown): Promi
 
 export async function modalOverlayEmitAction(event: string, payload: unknown): Promise<void> {
   await invoke("modal_overlay_emit_action", { event, payload }).catch(() => {});
+}
+
+export async function modalOverlayEmitResult(event: string, payload: unknown): Promise<void> {
+  await invoke("modal_overlay_emit_result", { event, payload }).catch(() => {});
+}
+
+export async function modalOverlayRequestAction<T>(
+  event: string,
+  payload: Record<string, unknown>,
+  timeoutMs = 30_000,
+): Promise<T | null> {
+  const requestId = crypto.randomUUID();
+  const responseEvent = `${event}-result`;
+  let resolveResult: (value: T | null) => void = () => {};
+  const result = new Promise<T | null>((resolve) => {
+    resolveResult = resolve;
+  });
+  let timer: number | null = null;
+  const unlisten = await listen<{ requestId: string; result: T }>(responseEvent, (message) => {
+    if (message.payload.requestId !== requestId) return;
+    unlisten();
+    if (timer !== null) window.clearTimeout(timer);
+    resolveResult(message.payload.result);
+  });
+  timer = window.setTimeout(() => {
+    unlisten();
+    resolveResult(null);
+  }, timeoutMs);
+  await modalOverlayEmitAction(event, { ...payload, requestId });
+  return result;
 }
 
 export async function modalOverlaySync(): Promise<void> {

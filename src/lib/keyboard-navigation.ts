@@ -3,6 +3,7 @@ import { shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
 import { SFX } from "@/lib/sfx";
 import { isModalOverlayOpen, modalOverlayClose } from "@/lib/modal-overlay";
 import { stableCardNavigationRect } from "@/lib/poster-backdrop-expansion";
+import { navOwnsFocus } from "./keyboard-navigation/geometry";
 
 export type Dir = "up" | "down" | "left" | "right";
 
@@ -68,6 +69,8 @@ const BACK_KEYS = new Set(["Escape", "Esc", "BrowserBack", "GoBack", "Back"]);
 
 const MODAL_SELECTOR = '[role="dialog"], [aria-modal="true"]';
 const LOCAL_KEYBOARD_SELECTOR = [
+  // Embedded surfaces handle their own keys; shadow DOM retargets events to their host.
+  '[data-local-keyboard]',
   '[role="listbox"]',
   '[role="menu"]',
   '[role="grid"]',
@@ -78,8 +81,84 @@ const LOCAL_KEYBOARD_SELECTOR = [
 const AXIS_TOLERANCE = 24;
 
 let activeSearchEditEl: HTMLElement | null = null;
+let navEnabled = false;
 let focusStylesInjected = false;
 let hasTvNavigationIntent = false;
+
+let lastFocusedEl: HTMLElement | null = null;
+let hoveredEl: HTMLElement | null = null;
+let suppressFocusScroll = false;
+function reflectCardFocus() {
+  if (typeof document === "undefined") return;
+  const active = document.activeElement;
+  const ring =
+    lastFocusedEl?.isConnected && lastFocusedEl.getAttribute("data-tv-focused") === "true"
+      ? lastFocusedEl
+      : null;
+  const onCard =
+    (active instanceof HTMLElement && active.hasAttribute("data-focused-card")) ||
+    (ring?.hasAttribute("data-focused-card") ?? false);
+  document.documentElement.toggleAttribute("data-card-focused", onCard);
+}
+
+export function tvFocus(el: HTMLElement) {
+  focusElement(el);
+}
+
+export function tvHover(el: HTMLElement | null) {
+  clearTvFocusRing();
+  hoveredEl = el;
+}
+
+function borrowRadius(el: HTMLElement) {
+  // Focus restore can target top-level containers (e.g. <body> when search
+  // closes). Never reshape the page itself; drop any stale inline radius.
+  if (el === document.body || el === document.documentElement) {
+    el.style.borderRadius = "";
+    return;
+  }
+  const existing = el.style.borderRadius || getComputedStyle(el).borderRadius;
+  if (existing && existing !== "0px") return;
+
+  // Media cards and focused movie cards
+  if (
+    el.matches("[data-media-card], [data-movie-card], [data-focused-card], .media-card") ||
+    el.closest("[data-media-card], [data-focused-card]")
+  ) {
+    const rootRadius = getComputedStyle(document.documentElement)
+      .getPropertyValue("--poster-radius")
+      .trim();
+    el.style.borderRadius = rootRadius || "12px";
+    return;
+  }
+
+  // Check child elements (e.g. poster container, thumbnail, preview anchor)
+  const child = el.querySelector<HTMLElement>(
+    ".harbor-poster, [data-preview-anchor], img, [class*='rounded']",
+  );
+  if (child) {
+    const childRadius = getComputedStyle(child).borderRadius;
+    if (childRadius && childRadius !== "0px") {
+      el.style.borderRadius = childRadius;
+      return;
+    }
+  }
+
+  // Check parent
+  const parent = el.parentElement;
+  if (parent) {
+    const radius = getComputedStyle(parent).borderRadius;
+    if (radius && radius !== "0px") {
+      el.style.borderRadius = radius;
+      return;
+    }
+  }
+
+  // Fallback for interactive buttons/links so focus ring is never sharp square
+  if (el.matches("button, a, [role='button']")) {
+    el.style.borderRadius = "8px";
+  }
+}
 
 type InputModality = "pointer" | "keys";
 
@@ -119,7 +198,27 @@ function setPointerModality() {
   // TV marker is removed. Drop that stale focus so pointer movement does not
   // replace the inset TV ring with the regular outer keyboard outline.
   const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-  if (active && !isEditable(active)) active.blur();
+  if (active && !isEditable(active) && !isLocallyManaged(active)) active.blur();
+}
+
+export function advanceFocus(el: HTMLElement, dir?: Dir) {
+  const active = document.activeElement;
+  if (!(active instanceof HTMLElement) || !navOwnsFocus(active)) {
+    el.focus({ preventScroll: true });
+    return;
+  }
+  if (dir) SFX.navigate(dir, getSoundType(el));
+  focusElement(el);
+}
+
+export function captureFocusReturn(): () => void {
+  const el = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const ring = !!el && navOwnsFocus(el);
+  return () => {
+    if (!el || !el.isConnected) return;
+    if (ring) focusElement(el);
+    else el.focus({ preventScroll: true });
+  };
 }
 
 /** Scroll/layout can synthesize pointermove without motion — require real movement. */
@@ -165,7 +264,26 @@ export function isSearchLikeField(el: HTMLElement | null) {
 
 export function isVisible(el: HTMLElement) {
   if (!el.isConnected) return false;
-  if (el.closest('[hidden], [inert], [aria-hidden="true"]')) return false;
+  if (
+    el.closest(
+      "[hidden], [inert], [aria-hidden='true'], [data-layer-inactive], [data-tv-skip='true'], [data-tv-skip], .hidden, .invisible, [class*='content-visibility']",
+    )
+  ) {
+    return false;
+  }
+
+  // Skip brand/logo buttons in TV navigation
+  if (el.matches("button, a")) {
+    const label = el.getAttribute("aria-label") ?? "";
+    if (
+      label.toLowerCase().includes("harbor home") ||
+      (label.includes("Harbor") && label.includes("الرئيسية")) ||
+      el.hasAttribute("data-brand-logo") ||
+      !!el.querySelector("svg.harbor-logo, img.harbor-logo")
+    ) {
+      return false;
+    }
+  }
 
   const style = window.getComputedStyle(el);
   if (
@@ -185,7 +303,7 @@ export function isVisible(el: HTMLElement) {
 
 function isInSidebar(el: HTMLElement): boolean {
   if (el.closest("[data-tv-top-chrome]")) return false;
-  return !!el.closest("[data-harbor-sidebar], [data-tv-nav-zone]");
+  return !!el.closest("[data-harbor-sidebar], [data-tv-nav-zone], aside");
 }
 
 /** Horizontal top chrome (TopDock / Royal / etc.) — not the left sidebar. */
@@ -195,7 +313,7 @@ function isInTopChrome(el: HTMLElement): boolean {
 
 function isInNav(el: HTMLElement): boolean {
   if (isInTopChrome(el)) return false;
-  return !!el.closest("[data-tv-nav-zone], [data-harbor-sidebar], [data-harbor-nav]");
+  return !!el.closest("[data-tv-nav-zone], [data-harbor-sidebar], [data-harbor-nav], aside");
 }
 
 function isInHero(el: HTMLElement): boolean {
@@ -258,9 +376,11 @@ function getFocusableInZone(
 }
 
 function getRect(el: HTMLElement) {
-  const cell = el.closest<HTMLElement>("[data-tv-nav-base-width]");
+  const cell = el.closest<HTMLElement>(
+    "[data-tv-nav-cell], [data-tv-nav-base-width], [data-tv-text-field]",
+  );
   const r = cell?.getBoundingClientRect() ?? el.getBoundingClientRect();
-  const baseWidth = cell ? Number(cell.dataset.tvNavBaseWidth) : undefined;
+  const baseWidth = cell?.dataset.tvNavBaseWidth ? Number(cell.dataset.tvNavBaseWidth) : undefined;
   const rtl = cell ? window.getComputedStyle(cell).direction === "rtl" : false;
   return stableCardNavigationRect(r, baseWidth, rtl);
 }
@@ -280,6 +400,26 @@ function findClosestByY(from: HTMLElement, candidates: HTMLElement[]): HTMLEleme
     const dy = Math.abs(dst.cy - src.cy);
     const dx = Math.abs(dst.cx - src.cx);
     const score = dy * 10 + dx;
+
+    if (score < bestScore) {
+      bestScore = score;
+      best = el;
+    }
+  }
+  return best;
+}
+
+function findClosestByX(from: HTMLElement, candidates: HTMLElement[]): HTMLElement | null {
+  const src = getRect(from);
+  let best: HTMLElement | null = null;
+  let bestScore = Number.POSITIVE_INFINITY;
+
+  for (const el of candidates) {
+    if (el === from) continue;
+    const dst = getRect(el);
+    const dx = Math.abs(dst.cx - src.cx);
+    const dy = Math.abs(dst.cy - src.cy);
+    const score = dx * 10 + dy;
 
     if (score < bestScore) {
       bestScore = score;
@@ -334,7 +474,7 @@ function getDirection(e: KeyboardEvent): Dir | null {
   return KEYCODE_TO_DIR[e.keyCode] ?? null;
 }
 
-function isBackKey(e: KeyboardEvent): boolean {
+export function isBackKey(e: KeyboardEvent): boolean {
   if (BACK_KEYS.has(e.key)) return true;
   if (BACK_KEYCODES.has(e.keyCode)) return true;
   return false;
@@ -345,12 +485,16 @@ function getInitialFocus(list: HTMLElement[]) {
 }
 
 const NAV_FOCUS_SELECTOR =
-  "[data-harbor-nav], [data-tv-nav-zone] button, [data-harbor-sidebar] button, [data-tv-nav-zone] a[href], [data-harbor-sidebar] a[href], [data-tv-nav-zone] [data-focusable='true'], [data-harbor-sidebar] [data-focusable='true']";
+  "[data-harbor-nav], [data-tv-nav-zone] button, [data-harbor-sidebar] button, aside button, [data-tv-nav-zone] a[href], [data-harbor-sidebar] a[href], aside a[href], [data-tv-nav-zone] [data-focusable='true'], [data-harbor-sidebar] [data-focusable='true'], aside [data-focusable='true']";
 
-function focusNavChrome() {
-  const navItems = Array.from(document.querySelectorAll<HTMLElement>(NAV_FOCUS_SELECTOR)).filter(
+export function getNavCandidates(root: ParentNode = document): HTMLElement[] {
+  return Array.from(root.querySelectorAll<HTMLElement>(NAV_FOCUS_SELECTOR)).filter(
     (el) => isVisible(el) && isInNav(el),
   );
+}
+
+export function getNavFocusTarget(root: ParentNode = document): HTMLElement | null {
+  const navItems = getNavCandidates(root);
 
   const activeNav =
     navItems.find(
@@ -361,15 +505,22 @@ function focusNavChrome() {
     navItems[0] ??
     null;
 
-  if (activeNav) {
-    focusElement(activeNav, "center");
-    return;
-  }
+  if (activeNav) return activeNav;
 
-  const topChrome = document.querySelector<HTMLElement>(
-    "[data-tv-top-chrome] button, [data-tv-top-chrome] a[href]",
-  );
-  if (topChrome && isVisible(topChrome)) focusElement(topChrome, "none");
+  const topChrome = Array.from(
+    document.querySelectorAll<HTMLElement>(
+      "[data-tv-top-chrome] button, [data-tv-top-chrome] a[href]",
+    ),
+  ).find(isVisible);
+  if (topChrome) return topChrome;
+  return null;
+}
+
+export function focusNavChrome() {
+  const target = getNavFocusTarget();
+  if (target) {
+    focusElement(target, isInTopChrome(target) ? "none" : "center");
+  }
 }
 
 /** Focus the page's primary control (Play, etc.) or first content focusable. */
@@ -390,7 +541,14 @@ export function focusTvPageDefault(): void {
   }
   const content = getFocusableInZone("content");
   const first = getInitialFocus(content);
-  if (first) focusElement(first);
+  if (first) {
+    focusElement(first);
+    return;
+  }
+  const nav = getNavFocusTarget();
+  if (nav && isVisible(nav)) {
+    focusElement(nav, isInTopChrome(nav) ? "none" : "center");
+  }
 }
 
 const MODAL_CLOSE_SELECTOR = "[data-tv-modal-close]";
@@ -456,7 +614,41 @@ function ensureFocusStyles() {
       position: relative;
     }
 
+    /*
+     * Search overlay is a direct typing surface with its own panel styling.
+     * Never ring its header container or input while editing.
+     */
+    html:not([data-input-modality="pointer"]) [data-search-overlay] [data-tv-search-editing-focused="true"],
+    html:not([data-input-modality="pointer"]) [data-search-overlay] [data-search-editing="true"] {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
     html:not([data-input-modality="pointer"]) [data-tv-search-editing-focused="true"] [data-search-editing="true"] {
+      box-shadow: none !important;
+    }
+
+    /*
+     * A typed field never carries the navigation ring. The markers are set from
+     * several paths (nav engine, exported tvFocus, programmatic focus from a
+     * dialog), so gating the writers is not enough; this removes the ring at the
+     * only place that draws it.
+     *
+     * The repeated attribute is deliberate. The ring rules above carry both
+     * !important and a :not() prefix, so a plainer selector here loses on
+     * specificity and the ring survives. Repeating the marker outranks them.
+     */
+    html input[data-tv-focused="true"][data-tv-focused][data-tv-focused][data-tv-focused],
+    html textarea[data-tv-focused="true"][data-tv-focused][data-tv-focused][data-tv-focused],
+    html [contenteditable="true"][data-tv-focused="true"][data-tv-focused][data-tv-focused][data-tv-focused],
+    html label[data-tv-focused="true"][data-tv-focused][data-tv-focused][data-tv-focused]:has(input, textarea),
+    html [data-tv-text-field][data-tv-focused="true"][data-tv-focused][data-tv-focused][data-tv-focused],
+    html [data-tv-focus-container][data-tv-focused="true"][data-tv-focused][data-tv-focused][data-tv-focused]:has(input, textarea),
+    html [data-tv-search-nav-focused="true"][data-tv-search-nav-focused][data-tv-search-nav-focused][data-tv-search-nav-focused],
+    html [data-tv-search-editing-focused="true"][data-tv-search-editing-focused][data-tv-search-editing-focused][data-tv-search-editing-focused],
+    html [data-search-editing="true"][data-search-editing][data-search-editing][data-search-editing],
+    html [data-search-nav-mode="true"][data-search-nav-mode][data-search-nav-mode][data-search-nav-mode] {
+      outline: none !important;
       box-shadow: none !important;
     }
   `;
@@ -523,7 +715,7 @@ function getSearchFocusVisual(el: HTMLElement): HTMLElement | null {
 
   return (
     el.closest<HTMLElement>("label, [data-tv-text-field], [data-tv-focus-container]") ??
-    el.parentElement
+    el
   );
 }
 
@@ -538,7 +730,7 @@ function clearSearchVisualFocus() {
     });
 }
 
-/** Ring the visible field container (label/panel) instead of the bare input. */
+/** Ring explicit field wrappers only; a bare input may live in a whole section. */
 function markSearchEditingVisual(el: HTMLElement) {
   const visual = getSearchFocusVisual(el);
   if (visual && visual !== el) {
@@ -552,13 +744,19 @@ function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "
   // Remove stale TV focus markers while keeping the marker on the new item.
   clearTvFocusRing(el);
 
-  el.setAttribute("data-tv-focused", "true");
+  // With navigation off there is no remote to show a ring for, and no modality is
+  // ever recorded, so the ring rules would match on every pointer focus.
+  if (navEnabled) {
+    el.setAttribute("data-tv-focused", "true");
+    borrowRadius(el);
+  }
+  lastFocusedEl = el;
 
   if (el.hasAttribute("data-focused-card")) {
     document.getElementById("root")?.setAttribute("data-card-focus-active", "");
   }
 
-  if (isSearchLikeField(el) && activeSearchEditEl !== el) {
+  if (navEnabled && inputModality !== "pointer" && isSearchLikeField(el) && activeSearchEditEl !== el) {
     // Navigation focus is not editing mode.
     el.removeAttribute("data-search-editing");
     setSearchNavMode(el);
@@ -570,6 +768,8 @@ function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "
   }
 
   el.focus({ preventScroll: true });
+  reflectCardFocus();
+  if (suppressFocusScroll) return;
 
   if (isInHero(el)) {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
@@ -598,10 +798,19 @@ function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "
 
 function clearTvFocusRing(except?: HTMLElement) {
   document.querySelectorAll<HTMLElement>('[data-tv-focused="true"]').forEach((focused) => {
-    if (focused !== except) focused.removeAttribute("data-tv-focused");
+    if (focused !== except) {
+      focused.removeAttribute("data-tv-focused");
+      focused.style.removeProperty("border-radius");
+    }
   });
 
+  if (lastFocusedEl && lastFocusedEl !== except) {
+    lastFocusedEl.style.removeProperty("border-radius");
+    lastFocusedEl = null;
+  }
+
   clearSearchVisualFocus();
+  reflectCardFocus();
 
   if (!except?.hasAttribute("data-focused-card")) {
     document.getElementById("root")?.removeAttribute("data-card-focus-active");
@@ -716,14 +925,23 @@ function getSpatialOrder(list: HTMLElement[]) {
 export function moveFocus(dir: Dir, wrap: boolean = true): void {
   hasTvNavigationIntent = true;
   setKeysModality();
-  const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const rawActive = document.activeElement;
+  const active =
+    rawActive instanceof HTMLElement &&
+    rawActive !== document.body &&
+    rawActive !== document.documentElement &&
+    isVisible(rawActive)
+      ? rawActive
+      : null;
   const root = getActiveModal(active) ?? getTopFocusScope() ?? document;
   const scroll = dir === "left" || dir === "right" ? "nearest" : "center";
   const horizontalDir = dir === "left" || dir === "right" ? dir : null;
 
   if (active && horizontalDir && !isInSidebar(active) && !isInTopChrome(active)) {
     if (!hasHorizontalNeighborInRow(active, horizontalDir, root)) {
-      const sidebarItems = getFocusable(root).filter(isInSidebar);
+      const sidebarItems = getFocusable(root).filter(
+        (el) => isInSidebar(el) && isTargetInHorizontalDirection(active, el, horizontalDir),
+      );
       const targetNav = findClosestByY(active, sidebarItems);
       if (targetNav && isTargetInHorizontalDirection(active, targetNav, horizontalDir)) {
         SFX.navigate(horizontalDir, getSoundType(targetNav));
@@ -736,29 +954,81 @@ export function moveFocus(dir: Dir, wrap: boolean = true): void {
   }
 
   if (active && horizontalDir && isInSidebar(active)) {
-    const contentItems = getFocusable(root).filter((el) => !isInSidebar(el));
+    const contentItems = getFocusable(root).filter(
+      (el) =>
+        !isInSidebar(el) &&
+        !isInTopChrome(el) &&
+        isTargetInHorizontalDirection(active, el, horizontalDir),
+    );
     const targetContent = findClosestByY(active, contentItems);
     if (targetContent && isTargetInHorizontalDirection(active, targetContent, horizontalDir)) {
       SFX.navigate(horizontalDir, getSoundType(targetContent));
       focusElement(targetContent, "center");
       return;
     }
+    // Spatial match failed — force exit to first content, hero, or chrome item.
+    const heroItems = getFocusableInZone("hero", root);
+    const firstHero = getInitialFocus(heroItems);
+    if (firstHero) {
+      SFX.navigate(horizontalDir, getSoundType(firstHero));
+      focusElement(firstHero, "center");
+      return;
+    }
+    const allContent = getFocusableInZone("content", root);
+    const firstContent = getInitialFocus(allContent);
+    if (firstContent) {
+      SFX.navigate(horizontalDir, getSoundType(firstContent));
+      focusElement(firstContent, "center");
+      return;
+    }
+    // No content or hero — stay in sidebar.
   }
 
-  // Top chrome is its own nav strip — Down leaves to page content (like sidebar Right).
+  // Sidebar Up → jump to top chrome if present.
+  if (active && dir === "up" && isInSidebar(active)) {
+    const navAll = getFocusableInZone("nav", root);
+    const above = findBest(active, navAll, "up");
+    if (!above) {
+      const topItems = getFocusable(root).filter(isInTopChrome);
+      const target = findClosestByX(active, topItems) ?? topItems[0];
+      if (target) {
+        SFX.navigate(dir, getSoundType(target));
+        focusElement(target, "none");
+        return;
+      }
+    }
+  }
+
+  // Top chrome is its own nav strip — Down leaves to hero (if present) or page content.
   if (active && dir === "down" && isInTopChrome(active)) {
+    const heroItems = getFocusableInZone("hero", root);
+    if (heroItems.length > 0) {
+      const target = findClosestByX(active, heroItems) ?? getInitialFocus(heroItems);
+      if (target) {
+        SFX.navigate(dir, getSoundType(target));
+        focusElement(target, "center");
+        return;
+      }
+    }
     const contentItems = getFocusableInZone("content", root);
-    const first = getInitialFocus(contentItems);
-    if (first) {
-      SFX.navigate(dir, getSoundType(first));
-      focusElement(first, "center");
+    const target = findClosestByX(active, contentItems) ?? getInitialFocus(contentItems);
+    if (target) {
+      SFX.navigate(dir, getSoundType(target));
+      focusElement(target, "center");
       return;
     }
   }
 
   const zone = active ? zoneOf(active) : "content";
   const all = getFocusableInZone(zone, root);
-  if (!all.length) return;
+  if (!all.length) {
+    const nav = getNavFocusTarget();
+    if (nav && isVisible(nav)) {
+      SFX.navigate(dir, getSoundType(nav));
+      focusElement(nav, isInTopChrome(nav) ? "none" : "center");
+    }
+    return;
+  }
 
   if (!active || !all.includes(active)) {
     // Prefer page primary CTA over DOM-order (avoids sidebar collapse).
@@ -773,6 +1043,13 @@ export function moveFocus(dir: Dir, wrap: boolean = true): void {
     if (first) {
       SFX.navigate(dir, getSoundType(first));
       focusElement(first, "center");
+      return;
+    }
+    const nav = getNavFocusTarget();
+    if (nav && isVisible(nav)) {
+      SFX.navigate(dir, getSoundType(nav));
+      focusElement(nav, isInTopChrome(nav) ? "none" : "center");
+      return;
     }
     return;
   }
@@ -780,13 +1057,44 @@ export function moveFocus(dir: Dir, wrap: boolean = true): void {
   if (zone === "hero" && (dir === "up" || dir === "down")) {
     if (dir === "down") {
       const contentItems = getFocusableInZone("content", root);
-      const first = getInitialFocus(contentItems);
-      if (first) {
-        SFX.navigate(dir, getSoundType(first));
-        focusElement(first, "center");
+      const target = findClosestByX(active, contentItems) ?? getInitialFocus(contentItems);
+      if (target) {
+        SFX.navigate(dir, getSoundType(target));
+        focusElement(target, "center");
+        return;
+      }
+    }
+    if (dir === "up") {
+      const topItems = getFocusable(root).filter(isInTopChrome);
+      if (topItems.length > 0) {
+        const target = findClosestByX(active, topItems) ?? topItems[0];
+        if (target) {
+          SFX.navigate(dir, getSoundType(target));
+          focusElement(target, "none");
+          return;
+        }
       }
     }
     return;
+  }
+
+  if (zone === "chrome" && (dir === "left" || dir === "right")) {
+    const sorted = [...all].sort((a, b) => getRect(a).cx - getRect(b).cx);
+    if (sorted.length > 0) {
+      const activeRect = getRect(active);
+      let next: HTMLElement | null = null;
+      if (dir === "right") {
+        next = sorted.find((el) => getRect(el).cx > activeRect.cx + 4) ?? (wrap ? sorted[0] : null);
+      } else {
+        const leftItems = sorted.filter((el) => getRect(el).cx < activeRect.cx - 4);
+        next = leftItems[leftItems.length - 1] ?? (wrap ? sorted[sorted.length - 1] : null);
+      }
+      if (next && next !== active) {
+        SFX.navigate(dir, getSoundType(next));
+        focusElement(next, "none");
+        return;
+      }
+    }
   }
 
   const best = findBest(active, all, dir);
@@ -799,13 +1107,45 @@ export function moveFocus(dir: Dir, wrap: boolean = true): void {
   // Don't wrap Left/Right onto another shelf when the current row is exhausted.
   if (dir === "left" || dir === "right") return;
 
-  // Content with nowhere above → enter the top chrome strip.
+  // Content with nowhere above → enter hero (if present) or the top chrome strip.
   if (dir === "up" && zone === "content") {
+    const heroItems = getFocusableInZone("hero", root);
+    if (heroItems.length > 0) {
+      const target = findClosestByX(active, heroItems) ?? getInitialFocus(heroItems);
+      if (target) {
+        SFX.navigate(dir, getSoundType(target));
+        focusElement(target, "center");
+        return;
+      }
+    }
     const topItems = getFocusable(root).filter(isInTopChrome);
-    const target = findBest(active, topItems, "up") ?? findClosestByY(active, topItems);
+    const target =
+      findBest(active, topItems, "up") ?? findClosestByX(active, topItems) ?? topItems[0];
     if (target) {
       SFX.navigate(dir, getSoundType(target));
       focusElement(target, "none");
+      return;
+    }
+  }
+
+  // Content with nowhere below: try finding any focusable item below active, or scroll
+  if (dir === "down" && zone === "content") {
+    const src = getRect(active);
+    const below = all.filter((el) => {
+      const dst = getRect(el);
+      return dst.top >= src.bottom - AXIS_TOLERANCE || dst.cy > src.cy + AXIS_TOLERANCE;
+    });
+    if (below.length > 0) {
+      const target = findClosestByX(active, below) ?? below[0];
+      if (target) {
+        SFX.navigate(dir, getSoundType(target));
+        focusElement(target, "center");
+        return;
+      }
+    }
+    const scroller = document.querySelector<HTMLElement>("main") ?? document.documentElement;
+    if (scroller && scroller.scrollHeight > scroller.scrollTop + scroller.clientHeight + 40) {
+      scroller.scrollBy({ top: 340, behavior: "smooth" });
       return;
     }
   }
@@ -879,8 +1219,28 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
   arrowsRef.current = arrows;
 
   useEffect(() => {
-    if (!enabled) clearTvFocusRing();
+    navEnabled = enabled;
+    if (enabled) return;
+    clearTvFocusRing();
+    if (activeSearchEditEl) {
+      activeSearchEditEl.removeAttribute("data-search-editing");
+      activeSearchEditEl = null;
+    }
+    document.querySelectorAll<HTMLElement>('[data-search-nav-mode="true"]').forEach((field) => {
+      clearSearchNavMode(field);
+    });
   }, [enabled]);
+
+  // F6 is WebView2 pane-focus: on this frameless window it tears down the
+  // renderer instead. Nothing binds F6, so swallow it before default handling.
+  useEffect(() => {
+    const swallowF6 = (e: KeyboardEvent) => {
+      if (e.key !== "F6" || e.defaultPrevented) return;
+      e.preventDefault();
+    };
+    window.addEventListener("keydown", swallowF6);
+    return () => window.removeEventListener("keydown", swallowF6);
+  }, []);
 
   useEffect(() => {
     if (!enabled) return;
@@ -932,6 +1292,7 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
       // Tab is native keyboard navigation, but does not call moveFocus().
       // Restore keyboard modality so its focus cues are not hidden after mouse use.
       if (e.key === "Tab") setKeysModality();
+      reflectCardFocus();
 
       const target = e.target instanceof HTMLElement ? e.target : null;
       const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -1006,6 +1367,14 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
       if (dir && (targetIsRange || targetIsSelect)) {
         if (!arrowsRef.current) return;
         if (targetIsRange && (dir === "left" || dir === "right")) return;
+        e.preventDefault();
+        e.stopPropagation();
+        moveFocus(dir, wrapRef.current);
+        return;
+      }
+
+      if (dir && activeIsSearch && !isEditingSearch) {
+        if (!arrowsRef.current) return;
         e.preventDefault();
         e.stopPropagation();
         moveFocus(dir, wrapRef.current);
@@ -1135,13 +1504,17 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         const focused =
           document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
-        if (focused && !isEditable(focused)) focused.blur();
+        // Menus and embedded surfaces own focus; blurring their host can close
+        // a menu before the pointer's click reaches the selected item.
+        if (focused && !isEditable(focused) && !isLocallyManaged(focused)) focused.blur();
       });
     };
 
     window.addEventListener("keydown", onKeyDown, true);
     window.addEventListener("beforeinput", onBeforeInput, true);
     window.addEventListener("focusin", onFocusIn, true);
+    window.addEventListener("focusin", reflectCardFocus, true);
+    window.addEventListener("focusout", reflectCardFocus, true);
     window.addEventListener("pointerdown", onPointerDown, true);
 
     const onPointerMove = (e: PointerEvent) => notePointerMove(e.screenX, e.screenY);
@@ -1153,6 +1526,8 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
       window.removeEventListener("keydown", onKeyDown, true);
       window.removeEventListener("beforeinput", onBeforeInput, true);
       window.removeEventListener("focusin", onFocusIn, true);
+      window.removeEventListener("focusin", reflectCardFocus, true);
+      window.removeEventListener("focusout", reflectCardFocus, true);
       window.removeEventListener("pointerdown", onPointerDown, true);
       window.removeEventListener("pointermove", onPointerMove, true);
       window.removeEventListener("wheel", onWheel, true);
@@ -1174,25 +1549,51 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
   }, [enabled, wrap, arrows]);
 }
 
+const TV_NAV_KEY: Record<Dir | "back" | "prevTab" | "nextTab" | "options", string> = {
+  up: "ArrowUp",
+  down: "ArrowDown",
+  left: "ArrowLeft",
+  right: "ArrowRight",
+  back: "Escape",
+  prevTab: "PageUp",
+  nextTab: "PageDown",
+  options: "ContextMenu",
+};
+
 /**
- * Phone touchpad entry point.
- * Arrows call moveFocus directly (synthetic keydown fights player hotkeys).
- * Select/back use DOM click / the registered Back handlers (synthetic Enter/Esc are ignored by Chromium).
+ * Gamepad / remote entry point.
+ * Direct movement keeps smooth HTPC behavior, while auxiliary buttons
+ * dispatch synthetic key events.
  */
-export function dispatchTvNav(action: Dir | "select" | "back"): void {
+export function dispatchTvNav(
+  action: Dir | "select" | "back" | "home" | "prevTab" | "nextTab" | "options",
+  repeat = false,
+): void {
+  hasTvNavigationIntent = true;
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("harbor:user-activity"));
   }
+
+  if (action === "home") {
+    const homeNav = document.querySelector('[data-harbor-nav="home"]');
+    if (homeNav instanceof HTMLElement) homeNav.click();
+    return;
+  }
+
   if (action === "select") {
     const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const target = hoveredEl ?? active;
 
-    if (active && isSearchLikeField(active)) {
+    if (target && isSearchLikeField(target)) {
       SFX.open();
-      enterSearchEditMode(active);
+      enterSearchEditMode(target);
       return;
     }
 
-    if (active && !isEditable(active)) active.click();
+    if (target && !isEditable(target)) {
+      if (target !== active) target.focus({ preventScroll: true });
+      target.click();
+    }
     return;
   }
 
@@ -1204,5 +1605,26 @@ export function dispatchTvNav(action: Dir | "select" | "back"): void {
     return;
   }
 
-  moveFocus(action, remoteBackFns.wrap ?? true);
+  const anchor = hoveredEl;
+  const fromHover = !!anchor;
+  if (anchor) {
+    anchor.focus({ preventScroll: true });
+    hoveredEl = null;
+  }
+
+  if (action === "up" || action === "down" || action === "left" || action === "right") {
+    suppressFocusScroll = fromHover;
+    moveFocus(action, remoteBackFns.wrap ?? true);
+    suppressFocusScroll = false;
+    return;
+  }
+
+  const key = TV_NAV_KEY[action];
+  if (key) {
+    suppressFocusScroll = fromHover;
+    window.dispatchEvent(
+      new KeyboardEvent("keydown", { key, code: key, bubbles: true, cancelable: true, repeat }),
+    );
+    suppressFocusScroll = false;
+  }
 }

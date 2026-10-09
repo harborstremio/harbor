@@ -8,6 +8,7 @@ use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::Router;
+use futures_util::StreamExt;
 use librqbit::api::TorrentIdOrHash;
 use librqbit::Session;
 use serde::Deserialize;
@@ -19,7 +20,10 @@ pub fn router(session: Arc<Session>) -> Router {
         .route("/health", get(health))
         .route("/settings", get(h_settings))
         .route("/{hash}/create", post(h_create))
-        .route("/{hash}/{file_id}", get(h_remote_stream).head(h_remote_stream))
+        .route(
+            "/{hash}/{file_id}",
+            get(h_remote_stream).head(h_remote_stream),
+        )
         .with_state(session)
 }
 
@@ -65,7 +69,12 @@ fn trackers_from_sources(sources: Option<Vec<String>>) -> Vec<String> {
                 Some(rest.to_string())
             } else if s.starts_with("dht:") {
                 None
-            } else if s.starts_with("udp://") || s.starts_with("http://") || s.starts_with("https://") || s.starts_with("ws://") || s.starts_with("wss://") {
+            } else if s.starts_with("udp://")
+                || s.starts_with("http://")
+                || s.starts_with("https://")
+                || s.starts_with("ws://")
+                || s.starts_with("wss://")
+            {
                 Some(s)
             } else {
                 None
@@ -103,22 +112,24 @@ fn urldecode(input: &str) -> Option<String> {
 }
 
 async fn h_create(
-    State(_session): State<Arc<Session>>,
+    State(session): State<Arc<Session>>,
     Path(hash): Path<String>,
     Json(body): Json<CreateBody>,
 ) -> Response {
     let trackers = trackers_from_sources(body.peer_search.and_then(|p| p.sources));
-    match super::ensure_added(&hash, trackers, None).await {
+    match super::ensure_added(&session, &hash, trackers, None).await {
         Ok((_info_hash, files)) => {
-            let guessed = files
-                .iter()
-                .max_by_key(|f| f.length)
-                .map(|f| f.idx);
+            let guessed = files.iter().max_by_key(|f| f.length).map(|f| f.idx);
             let out = serde_json::json!({
                 "guessedFileIdx": guessed,
                 "files": files,
             });
-            (StatusCode::OK, [(header::CONTENT_TYPE, "application/json")], out.to_string()).into_response()
+            (
+                StatusCode::OK,
+                [(header::CONTENT_TYPE, "application/json")],
+                out.to_string(),
+            )
+                .into_response()
         }
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
     }
@@ -131,7 +142,7 @@ async fn h_remote_stream(
     headers: HeaderMap,
 ) -> Response {
     let trackers = trackers_from_query(query);
-    if let Err(e) = super::ensure_added(&hash, trackers, Some(file_id)).await {
+    if let Err(e) = super::ensure_added(&session, &hash, trackers, Some(file_id)).await {
         return (StatusCode::NOT_FOUND, e).into_response();
     }
     stream_file(&session, &hash, file_id, &headers).await
@@ -151,14 +162,45 @@ async fn stream_file(
     file_id: usize,
     headers: &HeaderMap,
 ) -> Response {
+    match super::run_session(session, async {
+        Ok(stream_file_inner(session, hash, file_id, headers).await)
+    })
+    .await
+    {
+        Ok(response) => response,
+        Err(error) => (StatusCode::SERVICE_UNAVAILABLE, error).into_response(),
+    }
+}
+
+async fn stream_file_inner(
+    session: &Arc<Session>,
+    hash: &str,
+    file_id: usize,
+    headers: &HeaderMap,
+) -> Response {
     let Ok(id) = TorrentIdOrHash::parse(hash) else {
         return (StatusCode::BAD_REQUEST, "bad hash").into_response();
     };
     let Some(handle) = session.get(id) else {
         return (StatusCode::NOT_FOUND, "no torrent").into_response();
     };
+    // Torrent selection resolves metadata only. Peer transfer starts when a
+    // player or an intentional download actually asks for stream bytes.
+    if handle.is_paused() {
+        if let Err(error) = session.unpause(&handle).await {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("could not start torrent: {error:#}"),
+            )
+                .into_response();
+        }
+    }
     let ct = handle
-        .with_metadata(|m| m.file_infos.get(file_id).map(|fi| ct_for(&fi.relative_filename)))
+        .with_metadata(|m| {
+            m.file_infos
+                .get(file_id)
+                .map(|fi| ct_for(&fi.relative_filename))
+        })
         .ok()
         .flatten()
         .unwrap_or("application/octet-stream");
@@ -167,17 +209,19 @@ async fn stream_file(
         Err(e) => return (StatusCode::NOT_FOUND, format!("{e:#}")).into_response(),
     };
     let len = stream.len();
-    let parsed = headers
-        .get(header::RANGE)
-        .and_then(|v| v.to_str().ok())
-        .and_then(parse_range);
+    let requested_range = headers.get(header::RANGE);
+    let parsed = requested_range
+        .and_then(|value| value.to_str().ok())
+        .map(|value| parse_range(value, len));
     let (status, start, end) = match parsed {
-        Some((s, e_opt)) => {
-            let e = e_opt.map(|x| x + 1).unwrap_or(len);
-            if e > len || e <= s {
-                return (StatusCode::RANGE_NOT_SATISFIABLE, "range not satisfiable").into_response();
+        Some(Ok((start, end))) => (StatusCode::PARTIAL_CONTENT, start, end),
+        Some(Err(())) => {
+            let mut response =
+                (StatusCode::RANGE_NOT_SATISFIABLE, "range not satisfiable").into_response();
+            if let Ok(value) = HeaderValue::from_str(&format!("bytes */{len}")) {
+                response.headers_mut().insert(header::CONTENT_RANGE, value);
             }
-            (StatusCode::PARTIAL_CONTENT, s, e)
+            return response;
         }
         None => (StatusCode::OK, 0u64, len),
     };
@@ -198,22 +242,66 @@ async fn stream_file(
             HeaderValue::from_str(&format!("bytes {}-{}/{}", start, end - 1, len)).unwrap(),
         );
     }
-    let body = Body::from_stream(tokio_util::io::ReaderStream::with_capacity(
-        stream.take(to_take),
-        65536,
-    ));
+    let body = Body::from_stream(
+        tokio_util::io::ReaderStream::with_capacity(stream.take(to_take), 65536)
+            .take_until(session.cancellation_token().clone().cancelled_owned()),
+    );
     (status, out, body).into_response()
 }
 
-fn parse_range(raw: &str) -> Option<(u64, Option<u64>)> {
-    let spec = raw.trim().strip_prefix("bytes=")?;
-    let (s, e) = spec.split_once('-')?;
-    let start: u64 = s.trim().parse().ok()?;
-    let end = e.trim();
-    if end.is_empty() {
-        Some((start, None))
-    } else {
-        Some((start, Some(end.parse().ok()?)))
+fn parse_range(raw: &str, len: u64) -> Result<(u64, u64), ()> {
+    let spec = raw.trim().strip_prefix("bytes=").ok_or(())?.trim();
+    if spec.contains(',') || len == 0 {
+        return Err(());
+    }
+    let (start_raw, end_raw) = spec.split_once('-').ok_or(())?;
+    let start_raw = start_raw.trim();
+    let end_raw = end_raw.trim();
+
+    if start_raw.is_empty() {
+        let suffix_len = end_raw.parse::<u64>().map_err(|_| ())?;
+        if suffix_len == 0 {
+            return Err(());
+        }
+        return Ok((len.saturating_sub(suffix_len), len));
+    }
+
+    let start = start_raw.parse::<u64>().map_err(|_| ())?;
+    if start >= len {
+        return Err(());
+    }
+    if end_raw.is_empty() {
+        return Ok((start, len));
+    }
+
+    let inclusive_end = end_raw.parse::<u64>().map_err(|_| ())?;
+    if inclusive_end < start {
+        return Err(());
+    }
+    Ok((start, inclusive_end.saturating_add(1).min(len)))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_range;
+
+    #[test]
+    fn parses_http_byte_ranges_used_by_media_players() {
+        assert_eq!(parse_range("bytes=0-499", 1_000), Ok((0, 500)));
+        assert_eq!(parse_range("bytes=500-", 1_000), Ok((500, 1_000)));
+        assert_eq!(parse_range("bytes=-500", 1_000), Ok((500, 1_000)));
+        assert_eq!(parse_range("bytes=-1500", 1_000), Ok((0, 1_000)));
+        assert_eq!(parse_range("bytes=900-2000", 1_000), Ok((900, 1_000)));
+    }
+
+    #[test]
+    fn rejects_invalid_or_unsatisfiable_http_byte_ranges() {
+        assert_eq!(parse_range("bytes=1000-", 1_000), Err(()));
+        assert_eq!(parse_range("bytes=10-9", 1_000), Err(()));
+        assert_eq!(parse_range("bytes=-0", 1_000), Err(()));
+        assert_eq!(parse_range("bytes=0-1,4-5", 1_000), Err(()));
+        assert_eq!(parse_range("not-a-range", 1_000), Err(()));
+        assert_eq!(parse_range("bytes=0-", 0), Err(()));
     }
 }
 

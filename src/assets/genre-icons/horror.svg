@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-horror">
+<title id="title-horror">Horror anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <path class="coral" d="M8 30c6-10 14-15 24-15s18 5 24 15c-6 10-14 15-24 15S14 40 8 30z"/>
+  <circle class="ink" cx="32" cy="30" r="10"/>
+  <circle class="dark" cx="32" cy="30" r="5"/>
+  <path class="gold" d="M23 45v8l4-4 5 7 5-7 4 4v-8c-6 3-12 3-18 0z"/>
+  <path class="icon-stroke" d="M16 19l-5-5M48 19l5-5"/>
+
+</svg>

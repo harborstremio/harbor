@@ -1,4 +1,4 @@
-import { apiUrl, xtreamFetch, type XtreamCreds } from "./xtream";
+import { apiUrl, decodeBase64, xtreamFetch, type XtreamCreds } from "./xtream";
 import type { IptvChannel } from "./types";
 import { processInBatches, type BatchProgress } from "./xtream-batches";
 
@@ -24,7 +24,7 @@ type EpisodeRow = {
   title?: string;
   container_extension?: string;
   season?: string | number;
-  info?: { movie_image?: string };
+  info?: { movie_image?: string; duration_secs?: string | number; plot?: string };
 };
 type SeriesInfo = { episodes?: Record<string, EpisodeRow[]> };
 type XtreamSeries = Pick<SeriesRow, "series_id" | "name" | "cover" | "category_id">;
@@ -92,7 +92,7 @@ export async function fetchXtreamVod(
       return {
         id: `${baseId}::xtvod::${row.stream_id}`,
         tvgId: null,
-        name: row.name?.trim() || `Movie ${row.stream_id}`,
+        name: decodeBase64(row.name?.trim()) || `Movie ${row.stream_id}`,
         logo: row.stream_icon?.trim() || null,
         group: row.category_id ? (cats.get(String(row.category_id)) ?? null) : null,
         url: buildVodUrl(creds, row.stream_id, row.container_extension),
@@ -126,7 +126,7 @@ export async function fetchXtreamSeries(
       return {
         id: `${baseId}::xtseries::${item.series_id}`,
         tvgId: null,
-        name: item.name?.trim() || `Series ${item.series_id}`,
+        name: decodeBase64(item.name?.trim()) || `Series ${item.series_id}`,
         logo: item.cover?.trim() || null,
         group: item.category_id ? (cats.get(String(item.category_id)) ?? null) : null,
         url: "",
@@ -144,7 +144,7 @@ export async function fetchXtreamSeriesEpisodes(
   baseId: string,
   series: XtreamSeries,
 ): Promise<IptvChannel[]> {
-  const seriesName = series.name?.trim() || `Series ${series.series_id}`;
+  const seriesName = decodeBase64(series.name?.trim()) || `Series ${series.series_id}`;
   const cacheKey = `${baseId}::${series.series_id}`;
   let info = seriesInfoCache.get(cacheKey);
   if (!info) {
@@ -172,8 +172,12 @@ export async function fetchXtreamSeriesEpisodes(
         group: series.category_id ?? null,
         url: buildSeriesUrl(creds, ep.id, ep.container_extension),
         catchupSource: null,
-        durationSec: null,
-        attrs: { "tvg-type": "series" },
+        durationSec: Number(ep.info?.duration_secs) || null,
+        attrs: {
+          "tvg-type": "series",
+          ...(ep.title?.trim() ? { "episode-title": ep.title.trim() } : {}),
+          ...(ep.info?.plot?.trim() ? { "episode-plot": ep.info.plot.trim() } : {}),
+        },
       });
     }
   }

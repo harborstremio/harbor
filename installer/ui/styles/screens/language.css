@@ -1,0 +1,90 @@
+.hb-lang-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-content: start;
+  gap: 14px;
+  max-height: 100%;
+}
+
+.hb-lang-scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.hb-lang-grid .hb-state svg {
+  transition: opacity var(--t-hover) var(--ease);
+}
+
+.hb-lang-consequence {
+  margin: 0;
+}
+
+.hb-lang-name {
+  display: inline-block;
+  color: var(--ink);
+}
+
+.hb-lang-anim-name {
+  animation: language-name-in 260ms var(--ease) 0ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-lang-anim-name {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .hb-lang-grid .hb-state svg {
+    transition-duration: 1ms;
+  }
+}
+
+.hb-tile-flag {
+  width: 26px;
+  height: 20px;
+  flex: 0 0 auto;
+  border-radius: 3px;
+  object-fit: cover;
+  box-shadow: inset 0 0 0 1px var(--edge-soft);
+  user-select: none;
+}
+.hb-tile-names {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.hb-tile-english {
+  font-size: 11.5px;
+  font-weight: 400;
+  line-height: 15px;
+  color: var(--ink-subtle);
+}
+.hb-tile[aria-checked="true"] .hb-tile-english {
+  color: var(--ink-muted);
+}
+
+.hb-tile-flag-split {
+  position: relative;
+  overflow: hidden;
+  display: block;
+}
+
+.hb-tile-flag-split img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+
+.hb-tile-flag-split img:first-child {
+  clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%);
+}
+
+.hb-tile-flag-split img:last-child {
+  clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%);
+}

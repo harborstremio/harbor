@@ -1,0 +1,17 @@
+.game-dock-welcome { z-index:151; }
+.game-dock-welcome>.game-dock-edge::before { animation:game-dock-invite-pulse 1250ms ease-in-out 2; }
+.game-dock-welcome>.game-dock-edge::after { animation:game-dock-invite-grip 1250ms ease-in-out 2; }
+.game-dock-invitation { position:absolute; inset-inline-end:42px; top:50%; translate:0 -50%; width:min(310px,calc(100vw - 74px)); padding:18px; border-radius:12px; background:var(--color-elevated); color:var(--color-ink); pointer-events:auto; animation:game-dock-in 220ms ease-in-out both; }
+.game-dock-invitation::after { content:""; position:absolute; inset-inline-end:-5px; top:calc(50% - 5px); width:10px; height:10px; rotate:45deg; background:var(--color-elevated); border-radius:2px; }
+.game-dock-invitation-heading { display:flex; align-items:center; gap:10px; font-size:15px; line-height:1.4; }
+.game-dock-invitation-heading>svg { flex-shrink:0; }
+.game-dock-invitation p { margin:10px 0 16px; font-size:13px; line-height:1.65; color:var(--color-ink-muted); }
+.game-dock-invitation-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.game-dock-invitation-actions>button { min-height:40px; padding:9px 12px; border-radius:7px; font-size:13px; font-weight:650; background:var(--color-raised); transition:background 140ms ease-in-out,transform 140ms ease-in-out; }
+.game-dock-invitation-actions>button:first-child { background:var(--color-ink); color:var(--color-canvas); }
+.game-dock-invitation-actions>button:last-child:hover { background:var(--color-canvas); }
+.game-dock-invitation-actions>button:active { transform:scale(.98,.96); }
+.game-dock-invitation-actions>button:focus-visible { outline:2px solid var(--color-ink-muted); outline-offset:3px; }
+@keyframes game-dock-invite-pulse { 0%,100% { background:color-mix(in srgb,var(--color-ink) 9%,transparent); transform:scale(1,1); } 50% { background:color-mix(in srgb,var(--color-ink) 23%,transparent); transform:scale(1.2,1.05); } 75% { transform:scale(.98,1); } }
+@keyframes game-dock-invite-grip { 0%,100% { background:color-mix(in srgb,var(--color-ink) 30%,transparent); } 50% { background:color-mix(in srgb,var(--color-ink) 75%,transparent); } }
+@media(prefers-reduced-motion:reduce) { .game-dock-invitation,.game-dock-welcome>.game-dock-edge::before,.game-dock-welcome>.game-dock-edge::after { animation:none; }.game-dock-invitation-actions>button { transition:none; transform:none; } }

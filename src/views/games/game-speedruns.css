@@ -1,0 +1,24 @@
+.games-speedrun-category { width:100%; }
+.games-detail-speedruns header > a { display:inline-flex; align-items:center; gap:6px; }
+.games-detail-speedruns header > a:hover { color:var(--color-ink); }
+.games-detail-speedruns header > a:focus-visible { outline:2px solid var(--color-ink); outline-offset:3px; border-radius:4px; }
+.games-speedrun-category>button { background:var(--color-elevated); }
+.games-speedrun-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:16px; }
+.games-speedrun-actions .games-speedrun-watch { gap:7px; min-height:34px; padding:8px 11px; font-size:12px; }
+.games-speedrun-actions>a { display:inline-flex; align-items:center; gap:4px; font-size:11px; color:var(--color-ink-muted); }
+.games-speedrun-actions>a:hover { color:var(--color-ink); }
+.games-speedrun-actions :is(a,button):focus-visible { outline:2px solid var(--color-ink); outline-offset:3px; border-radius:5px; }
+.games-speedrun-video { overflow:auto; min-height:0; }
+.games-speedrun-video>header { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; padding:20px 24px; }
+.games-speedrun-video h2 { margin:0; font-size:19px; line-height:1.4; font-weight:600; overflow-wrap:anywhere; }
+.games-speedrun-video header p { margin:6px 0 0; color:var(--color-ink-muted); font-size:13px; }
+.games-speedrun-video-parts { padding:0 24px 16px; max-width:380px; }
+.games-speedrun-player { width:100%; aspect-ratio:16/9; background:#000; }
+.games-speedrun-player iframe { display:block; width:100%; height:100%; border:0; }
+.games-speedrun-external { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; height:100%; padding:20px; color:#f5f5f5; text-align:center; }
+.games-speedrun-external p { font-size:14px; }
+.games-speedrun-video>footer { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:14px; padding:16px 24px; }
+.games-speedrun-video footer a { display:inline-flex; align-items:center; gap:7px; font-size:12px; color:var(--color-ink); }
+.games-speedrun-video footer a>span { color:var(--color-ink-muted); }
+.games-speedrun-video :is(button,a):focus-visible { outline:2px solid var(--color-ink); outline-offset:3px; border-radius:5px; }
+@media(max-width:600px) { .games-speedrun-backdrop { padding:12px; } .games-speedrun-video>header,.games-speedrun-video>footer { padding:16px; } .games-speedrun-video h2 { font-size:16px; } .games-speedrun-video-parts { padding-inline:16px; } }

@@ -1,7 +1,7 @@
 import { meta as fetchMeta, narrowMediaType } from "@/lib/cinemeta";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { tmdbLiteMeta } from "@/lib/providers/tmdb/tmdb-lite";
-import { libraryPut, type LibraryItem } from "@/lib/stremio";
+import { libraryGetOneStrict, libraryPut, type LibraryItem } from "@/lib/stremio";
 
 const FLAG_PREFIX = "harbor.libraryNameRepair.v1.";
 const MAX_ITEMS = 150;
@@ -58,12 +58,20 @@ export async function repairLibraryNames(
       const canon = await canonicalFor(item, tmdbKey);
       if (!canon?.name) continue;
       if (norm(canon.name) === norm(item.name ?? "")) continue;
+      let fresh: LibraryItem | null;
+      try {
+        fresh = await libraryGetOneStrict(authKey, item._id);
+      } catch {
+        continue;
+      }
+      if (!fresh) continue;
+      if (norm(canon.name) === norm(fresh.name ?? "")) continue;
       try {
         await libraryPut(authKey, {
-          ...item,
+          ...fresh,
           name: canon.name,
-          poster: canon.poster ?? item.poster,
-          _mtime: new Date().toISOString(),
+          poster: canon.poster ?? fresh.poster,
+          _mtime: fresh._mtime,
         });
         repaired += 1;
         console.info(`[library-repair] "${item.name}" -> "${canon.name}" (${item._id})`);

@@ -1,0 +1,22 @@
+export default {
+  "games.mods.browse": "查找模组",
+  "games.mods.installed": "我的模组",
+  "games.mods.enabled": "已启用",
+  "games.mods.disabled": "已禁用",
+  "games.mods.remove": "移除",
+  "games.mods.removeConfirm": "移除此受管理的文件？",
+  "games.mods.noMatches": "没有已安装的模组与此搜索匹配。",
+  "games.mods.options": "{name} 的选项",
+  "games.mods.versions": "版本",
+  "games.mods.restore": "恢复上一版本",
+  "games.mods.restored": "已恢复上一版本。",
+  "games.mods.changeTitle": "将更改的文件",
+  "games.mods.backupNote": "被替换的版本会保存在本地备份中。可在“我的配置”中选择“恢复上一版本”来还原，届时仍会检查依赖关系。",
+  "games.mods.currentVersion": "已安装：{version}",
+  "games.mods.current": "已安装",
+  "games.mods.versionNote": "选择兼容的版本。Harbor 会检查更改并在本地保留上一版本。应用更改前请关闭 Minecraft。",
+  "games.mods.applyChanges": "应用更改",
+  "games.mods.reviewChanges": "检查更改",
+  "games.mods.previousVersion": "上一版本：{version}",
+  "games.mods.restoreConfirm": "要恢复版本 {version} 吗？请先关闭 Minecraft。"
+} satisfies Record<string, string>;

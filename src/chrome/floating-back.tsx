@@ -1,7 +1,34 @@
+import { useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
-import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import { useT } from "@/lib/i18n";
+import { useSectionBackActive } from "@/lib/section-back";
 import { useView } from "@/lib/view";
+import { BACK_SHAPE, BACK_SKIN } from "./back-affordance";
+
+const DEEP_KINDS = new Set([
+  "meta",
+  "collection",
+  "addon-collection",
+  "person",
+  "filter",
+  "award",
+  "anime-award",
+  "curated-list",
+  "service",
+  "addon-detail",
+  "queue",
+  "groups",
+  "group",
+  "list",
+  "downloads",
+]);
+
+/** The inline back controls defer to this one, so both read the same condition. */
+export function useFloatingBackShown(): boolean {
+  const { canGoBack, topKind, chromeHidden } = useView();
+  const sectionBack = useSectionBackActive();
+  return canGoBack && !chromeHidden && (sectionBack || DEEP_KINDS.has(topKind));
+}
 
 export function FloatingBack({
   offsetLeft = 24,
@@ -10,84 +37,32 @@ export function FloatingBack({
   offsetLeft?: number;
   offsetTop?: number;
 }) {
-  const { canGoBack, goBack, exitPlayback, topKind, chromeHidden } = useView();
+  const { goBack } = useView();
   const t = useT();
+  const shown = useFloatingBackShown();
 
-  if (!canGoBack || chromeHidden) return null;
+  useEffect(() => {
+    if (!shown) return;
+    const root = document.documentElement;
+    root.style.setProperty("--harbor-floating-back-space", `${offsetTop + 56}px`);
+    return () => {
+      root.style.removeProperty("--harbor-floating-back-space");
+    };
+  }, [shown, offsetTop]);
 
-  const deep =
-    topKind === "meta" ||
-    topKind === "collection" ||
-    topKind === "person" ||
-    topKind === "filter" ||
-    topKind === "award" ||
-    topKind === "anime-award" ||
-    topKind === "service" ||
-    topKind === "addon-detail" ||
-    topKind === "queue";
-
-  if (!deep) return null;
-
-  void exitPlayback;
+  if (!shown) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: offsetTop,
-        insetInlineStart: offsetLeft,
-        zIndex: 70,
-      }}
+    <button
+      type="button"
+      onClick={goBack}
+      aria-label={t("common.back")}
+      data-floating-back
+      style={{ position: "fixed", top: offsetTop, insetInlineStart: offsetLeft, zIndex: 70 }}
+      className={`${BACK_SHAPE} ${BACK_SKIN}`}
     >
-      <ThreeLiquidGlassSurface
-        radius="9999px"
-        shaderRadius={0.28}
-        intensity={0.1}
-        refractionStrength={0.08}
-        interactive={false}
-        alwaysActive
-        className="
-          h-10
-          w-fit
-          shrink-0
-          rounded-full
-          border
-          border-white/[0.10]
-        "
-        contentClassName="flex h-full w-full"
-        style={{
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
-        }}
-      >
-        <button
-          type="button"
-          onClick={goBack}
-          aria-label={t("common.back")}
-          className="
-            flex
-            h-full
-            w-full
-            items-center
-            gap-2
-            rounded-full
-            bg-transparent
-            ps-3
-            pe-5
-            text-[13.5px]
-            font-medium
-            text-ink-muted
-            outline-none
-            transition-[color,transform]
-            duration-150
-            hover:text-ink
-            active:scale-[0.97]
-          "
-        >
-          <ArrowLeft size={15} className="dir-icon" />
-
-          {t("common.back")}
-        </button>
-      </ThreeLiquidGlassSurface>
-    </div>
+      <ArrowLeft size={15} className="dir-icon" />
+      {t("common.back")}
+    </button>
   );
 }

@@ -6,6 +6,8 @@ export type PlayerActions = {
   canDownload: boolean;
   downloadSubtitle: () => void;
   canDownloadSubtitle: boolean;
+  streamUrl: string | null;
+  infoHash: string | null;
 };
 
 let current: PlayerActions | null = null;
@@ -20,7 +22,9 @@ export function setPlayerActions(actions: PlayerActions | null) {
     current.toggleFullscreen === actions.toggleFullscreen &&
     current.canDownload === actions.canDownload &&
     current.downloadSubtitle === actions.downloadSubtitle &&
-    current.canDownloadSubtitle === actions.canDownloadSubtitle
+    current.canDownloadSubtitle === actions.canDownloadSubtitle &&
+    current.streamUrl === actions.streamUrl &&
+    current.infoHash === actions.infoHash
   ) {
     return;
   }

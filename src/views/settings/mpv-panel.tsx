@@ -1,14 +1,34 @@
+import { Info } from "./icons";
+import { useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { Section, Segmented, ToggleRow } from "./shared";
+import { ROW_DESC, Section, Segmented, ToggleRow } from "./shared";
+import { SettingRow } from "./kit";
 import { isTauri } from "./player-panel/internals";
 import { QualityProfile } from "./mpv-panel/profile";
+import { BufferSizeSection } from "./mpv-panel/buffer";
 import { PictureDialsSection, ColorHdrSection } from "./mpv-panel/dials";
 import { AdvancedMpvSection } from "./mpv-panel/advanced";
+import { useSubTabs } from "./sub-tabs";
+
+type Tab = "quality" | "picture" | "network" | "advanced";
 
 export function MpvPanel() {
   const { settings, update } = useSettings();
   const t = useT();
+  const [tab, setTab] = useState<Tab>("quality");
+  useSubTabs(
+    isTauri
+      ? [
+          { id: "quality", label: t("Quality") },
+          { id: "picture", label: t("Picture") },
+          { id: "network", label: t("Network") },
+          { id: "advanced", label: t("mpv.conf") },
+        ]
+      : [],
+    tab,
+    (id) => setTab(id as Tab),
+  );
 
   if (!isTauri) {
     return (
@@ -16,71 +36,92 @@ export function MpvPanel() {
         title={t("Desktop only")}
         subtitle={t("These tune the bundled mpv engine, which runs in the Harbor desktop app. They have no effect in the browser.")}
       >
-        <span className="text-[13px] text-ink-subtle">{t("Download the desktop app to use video tuning.")}</span>
+        <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+          <Info size={18} className="mt-[2px] shrink-0 text-ink-subtle" />
+          <p className={`max-w-[66ch] ${ROW_DESC}`}>
+            {t("Download the desktop app to use video tuning.")}
+          </p>
+        </div>
       </Section>
     );
   }
 
   return (
-    <>
-      <Section
-        title={t("Picture quality")}
-        subtitle={t("One choice that sets how hard your computer works to make video look its best. Pick the one that matches your machine. Takes effect on the next thing you play.")}
-      >
-        <QualityProfile />
-      </Section>
+    <div key={tab} className="harbor-cascade flex flex-col gap-10">
+      {tab === "quality" && (
+        <>
+          <Section
+            title={t("Picture quality")}
+            subtitle={t("Balance picture quality and performance. Changes apply to the next video you play.")}
+          >
+            <QualityProfile />
+          </Section>
 
-      <Section
-        title={t("Hardware acceleration")}
-        subtitle={t("Let your graphics card do the heavy lifting of decoding video. It saves battery and keeps the CPU cool. Auto is right for almost everyone; only switch if playback looks wrong or won't start.")}
-      >
-        <Segmented
-          value={settings.mpvHwdec ?? "auto"}
-          options={[
-            { value: "auto", label: "Auto" },
-            { value: "on", label: "Force on" },
-            { value: "off", label: "Off (use CPU)" },
-          ]}
-          onChange={(v) => update({ mpvHwdec: v })}
-        />
-        <p className="mt-2.5 text-[12.5px] leading-relaxed text-ink-subtle">
-          {settings.mpvHwdec === "off"
-            ? t("The CPU decodes everything. Most compatible, but it runs hot and can stutter on 4K. Use this only if the picture glitches with hardware decoding on.")
-            : settings.mpvHwdec === "on"
-              ? t("Forces the graphics card on. Smoothest and coolest, but a few old or unusual files may refuse to play. Switch back to Auto if something won't start.")
-              : t("Harbor uses the graphics card when it's safe and falls back to the CPU when it isn't. The right call for almost everyone.")}
-        </p>
-      </Section>
+          <Section
+            title={t("Hardware acceleration")}
+          >
+            <SettingRow
+              wide
+              label={t("Hardware acceleration")}
+              desc={
+                settings.mpvHwdec === "off"
+                  ? t("Uses the processor to decode video. Try this if hardware decoding causes picture problems.")
+                  : settings.mpvHwdec === "on"
+                    ? t("Always requests hardware decoding. Switch back to Auto if a video will not play.")
+                    : t("Uses the graphics card when supported, with a processor fallback. Recommended for most computers.")
+              }
+            >
+              <Segmented
+                value={settings.mpvHwdec ?? "auto"}
+                options={[
+                  { value: "auto", label: "Auto" },
+                  { value: "on", label: t("Force on") },
+                  { value: "off", label: t("Off (use CPU)") },
+                ]}
+                onChange={(v) => update({ mpvHwdec: v })}
+              />
+            </SettingRow>
+          </Section>
 
-      <PictureDialsSection />
-
-      <ColorHdrSection />
-
-      <Section
-        title={t("Slow or unstable connection")}
-        subtitle={t("If video keeps pausing to buffer, or you're on spotty Wi-Fi or a far-away server, this gives Harbor a bigger head start so playback rides through the rough patches.")}
-      >
-        <ToggleRow
-          label={t("Build a bigger buffer")}
-          sub={t("Loads more of the video ahead of time before playing. Smoother on weak connections, uses a little more memory and takes a moment longer to start.")}
-          value={settings.mpvBufferBoost}
-          onChange={(v) => update({ mpvBufferBoost: v })}
-        />
-      </Section>
-
-      <Section
-        title={t("Audio")}
-        subtitle={t("For laptop speakers and headphones. Movies mixed for 5.1 or 7.1 surround can sound hollow or have quiet dialogue on two speakers. This folds them down properly.")}
-      >
-        <ToggleRow
-          label={t("Mix surround sound down to stereo")}
-          sub={t("Turn on if you watch on a laptop or headphones and dialogue feels too quiet next to the effects. Leave off if you have a real surround setup or a soundbar.")}
-          value={settings.mpvDownmixStereo}
-          onChange={(v) => update({ mpvDownmixStereo: v })}
-        />
-      </Section>
-
-      <AdvancedMpvSection />
-    </>
+          <Section
+            title={t("Compatibility")}
+            subtitle={t("Try these if video shows a black screen, incorrect colors, or other picture problems.")}
+          >
+            <SettingRow
+              wide
+              label={t("Renderer")}
+              desc={
+                settings.mpvRenderer === "gpu"
+                  ? t("Uses the older GPU renderer for graphics cards that have trouble with the modern renderer.")
+                  : t("Uses the modern GPU renderer for higher-quality video processing.")
+              }
+            >
+              <Segmented
+                value={settings.mpvRenderer ?? "gpu-next"}
+                options={[
+                  { value: "gpu-next", label: t("GPU next") },
+                  { value: "gpu", label: t("GPU (compatibility)") },
+                ]}
+                onChange={(v) => update({ mpvRenderer: v })}
+              />
+            </SettingRow>
+            <ToggleRow
+              label={t("Simple color mode")}
+              sub={t("Converts video to 8-bit color for compatibility with older graphics cards. This disables HDR.")}
+              value={settings.mpvForceYuv420p === true}
+              onChange={(v) => update({ mpvForceYuv420p: v })}
+            />
+          </Section>
+        </>
+      )}
+      {tab === "picture" && (
+        <>
+          <PictureDialsSection />
+          <ColorHdrSection />
+        </>
+      )}
+      {tab === "network" && <BufferSizeSection />}
+      {tab === "advanced" && <AdvancedMpvSection />}
+    </div>
   );
 }

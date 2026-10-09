@@ -16,7 +16,12 @@ export type RelayTest = {
   message: string;
 };
 
-export type PassiveRelayHealth = { version: number | null; needsUpdate: boolean } | null;
+export type PassiveRelayHealth = {
+  version: number | null;
+  needsUpdate: boolean;
+  healthMs: number | null;
+  reachable: boolean;
+} | null;
 
 function httpBaseOf(url: string): string {
   return url
@@ -58,10 +63,14 @@ export function useRelayHealth(relayUrl: string): {
     const t = window.setTimeout(() => {
       void (async () => {
         try {
-          const { version } = await fetchRelayVersion(relayUrl);
-          if (!cancelled) setPassive({ version, needsUpdate: relayOutdated(version) });
+          const { version, healthMs } = await fetchRelayVersion(relayUrl);
+          if (!cancelled) {
+            setPassive({ version, needsUpdate: relayOutdated(version), healthMs, reachable: true });
+          }
         } catch {
-          if (!cancelled) setPassive(null);
+          if (!cancelled) {
+            setPassive({ version: null, needsUpdate: false, healthMs: null, reachable: false });
+          }
         }
       })();
     }, 600);
@@ -88,7 +97,7 @@ export function useRelayHealth(relayUrl: string): {
         needsUpdate,
         message: `Worker reachable in ${healthMs}ms.${updateNote}`,
       });
-      setPassive({ version, needsUpdate });
+      setPassive({ version, needsUpdate, healthMs, reachable: true });
     } catch (e) {
       setTestResult({
         ok: false,
@@ -97,6 +106,7 @@ export function useRelayHealth(relayUrl: string): {
         needsUpdate: false,
         message: e instanceof Error ? e.message : String(e),
       });
+      setPassive({ version: null, needsUpdate: false, healthMs: null, reachable: false });
     } finally {
       setTesting(false);
     }

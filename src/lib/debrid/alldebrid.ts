@@ -135,16 +135,15 @@ export function createAllDebrid(apiKey: string): DebridStore {
     }
     const id = first.id;
 
-    let entry: AdMagnetStatus | null = first.ready
-      ? null
-      : null;
     let chosenLink: AdMagnetLink | null = null;
 
     for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt++) {
       if (signal.aborted) return { ok: false, code: "aborted", status: 0 };
-      const s = await get<{ magnets: AdMagnetStatus }>(`/magnet/status?id=${id}`, signal);
+      const s = await get<{ magnets: AdMagnetStatus | AdMagnetStatus[] }>(`/magnet/status?id=${id}`, signal);
       if (!s.ok) return s;
-      entry = s.data.magnets;
+      // Accept both response shapes and never resolve a different magnet.
+      const magnets = Array.isArray(s.data.magnets) ? s.data.magnets : [s.data.magnets];
+      const entry = magnets.find((magnet) => magnet && String(magnet.id) === String(id));
       if (!entry) {
         await sleep(POLL_DELAY_MS, signal);
         continue;
@@ -273,11 +272,15 @@ function pickAdLink(links: AdMagnetLink[], fileIdx: number | undefined, hint?: E
 
 function sleep(ms: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve) => {
-    const t = setTimeout(resolve, ms);
-    signal.addEventListener("abort", () => {
+    const onAbort = () => {
       clearTimeout(t);
       resolve();
-    });
+    };
+    const t = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal.addEventListener("abort", onAbort, { once: true });
   });
 }
 

@@ -1,0 +1,27 @@
+.games-wow-weekly { padding-block: 12px; }
+.games-wow-weekly-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 24px; margin-bottom: 24px; }
+.games-wow-weekly-switch { display: flex; flex-wrap: wrap; gap: 4px; }
+.games-wow-weekly-switch button { min-height: 40px; padding: 9px 14px; color: var(--color-ink-muted); border-radius: 5px; font-size: 13px; }
+.games-wow-weekly-switch button[aria-pressed=true], .games-wow-weekly-switch button:hover { background: var(--color-elevated); color: var(--color-ink); }
+.games-wow-weekly button:focus-visible, .games-wow-weekly-runs a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.games-wow-weekly-heading > p { margin: 0; margin-inline-start: auto; font-size: 12px; line-height: 1.7; color: var(--color-ink-muted); }
+.games-wow-weekly-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 18px; margin-bottom: 20px; }
+.games-wow-weekly-summary > strong { font-size: 36px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.games-wow-weekly-summary > span { font-size: 14px; }
+.games-wow-weekly-summary small { display: block; margin-top: 4px; font-size: 12px; color: var(--color-ink-muted); }
+.games-wow-weekly-summary p { margin: 0; margin-inline-start: auto; color: var(--color-ink-muted); font-size: 12px; }
+.games-wow-weekly-runs { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 24px; }
+.games-wow-weekly-runs li { min-width: 0; }
+.games-wow-weekly-runs a { display: flex; align-items: center; gap: 14px; padding: 12px 8px; border-radius: 6px; }
+.games-wow-weekly-runs a:hover { background: var(--color-surface); }
+.games-wow-weekly-runs img, .games-wow-weekly-runs .games-art-empty { width: 88px; height: 64px; object-fit: cover; flex: 0 0 88px; border-radius: 4px; }
+.games-wow-weekly-run-name { min-width: 0; flex: 1; }
+.games-wow-weekly-run-name > strong { display: block; font-size: 14px; font-weight: 550; overflow-wrap: anywhere; }
+.games-wow-weekly-run-name time, .games-wow-weekly-run-name > span { display: block; font-size: 12px; color: var(--color-ink-muted); margin-top: 5px; line-height: 1.5; }
+.games-wow-weekly-run-name > span > svg { display: inline; vertical-align: -2px; }
+.games-wow-weekly-level { font-size: 20px; font-weight: 550; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.games-wow-weekly-runs a > svg { flex-shrink: 0; color: var(--color-ink-subtle); }
+.games-wow-weekly > footer { font-size: 12px; color: var(--color-ink-muted); line-height: 1.6; margin-top: 22px; }
+.games-wow-weekly > footer p { margin: 0 0 6px; }
+@media (max-width: 1050px) { .games-wow-weekly-runs { grid-template-columns: 1fr; } }
+@media (max-width: 550px) { .games-wow-weekly-heading > p { margin-inline-start: 0; flex-basis: 100%; }.games-wow-weekly-runs a { gap: 10px; padding-inline: 0; }.games-wow-weekly-runs img, .games-wow-weekly-runs .games-art-empty { width: 64px; height: 56px; flex-basis: 64px; }.games-wow-weekly-runs a > svg { display: none; }.games-wow-weekly-summary p { flex-basis: 100%; }.games-wow-weekly-level { font-size: 18px; } }

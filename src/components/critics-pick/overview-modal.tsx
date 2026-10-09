@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, ExternalLink, Quote, X } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import type { CriticReview } from "@/lib/providers/tmdb";
@@ -14,7 +14,9 @@ export function OverviewModal({
   overview,
   review,
   people,
+  poster,
   onClose,
+  onOpenTitle,
   onPersonClick,
   reviewCount,
   reviewIndex,
@@ -25,7 +27,9 @@ export function OverviewModal({
   overview: string;
   review: CriticReview | null;
   people: PersonRef[];
+  poster?: string | null;
   onClose: () => void;
+  onOpenTitle?: () => void;
   onPersonClick: (id: number) => void;
   reviewCount?: number;
   reviewIndex?: number;
@@ -33,6 +37,12 @@ export function OverviewModal({
 }) {
   const t = useT();
   const contentRef = useRef<HTMLDivElement>(null);
+  const [dir, setDir] = useState<1 | -1>(1);
+
+  const nav = (d: 1 | -1) => {
+    setDir(d);
+    onNavReview?.(d);
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -43,14 +53,15 @@ export function OverviewModal({
       if (!onNavReview || !reviewCount || reviewCount < 2) return;
       if (e.key === "ArrowRight") {
         e.preventDefault();
-        onNavReview(1);
+        nav(1);
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
-        onNavReview(-1);
+        nav(-1);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose, onNavReview, reviewCount]);
 
   useEffect(() => {
@@ -65,36 +76,81 @@ export function OverviewModal({
     };
   }, []);
 
+  const canOpenTitle = !!poster && !!onOpenTitle;
+
   return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label={t("{title} overview", { title })}
       onClick={onClose}
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-canvas/85 p-8 backdrop-blur-sm"
+      className="critics-backdrop-in fixed inset-0 z-[170] flex items-center justify-center bg-canvas/85 p-8 backdrop-blur-md"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex max-h-[80vh] w-full max-w-[640px] flex-col gap-5 overflow-hidden rounded-2xl border border-edge-soft bg-surface p-8"
+        className="critics-modal-in relative flex max-h-[80vh] w-full max-w-[640px] flex-col gap-5 overflow-hidden rounded-2xl border border-edge-soft bg-surface p-8 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.65)]"
       >
         <button
           type="button"
           onClick={onClose}
           aria-label={t("Close overview")}
-          className="absolute end-5 top-5 flex h-9 w-9 items-center justify-center rounded-full border border-edge-soft text-ink-muted transition-colors duration-150 hover:bg-elevated hover:text-ink"
+          className="absolute end-5 top-5 flex h-9 w-9 items-center justify-center rounded-full border border-edge-soft text-ink-muted transition-[background-color,color,transform] duration-150 hover:bg-elevated hover:text-ink active:scale-90"
         >
           <X size={18} />
         </button>
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[11.5px] uppercase tracking-[0.2em] text-ink-subtle">
-            {review ? t("Reader review") : t("Synopsis")}
-          </span>
-          <h3 className="font-display text-[24px] font-medium tracking-tight text-ink">{title}</h3>
+        <div className="flex items-start gap-4 pe-10">
+          {poster &&
+            (canOpenTitle ? (
+              <button
+                type="button"
+                onClick={onOpenTitle}
+                aria-label={t("Open {title}", { title })}
+                className="group/poster relative shrink-0 overflow-hidden rounded-lg ring-1 ring-edge-soft transition-transform duration-200 hover:-translate-y-0.5 hover:ring-accent/50 active:scale-95"
+              >
+                <img
+                  src={poster}
+                  alt=""
+                  decoding="async"
+                  className="h-[84px] w-[56px] object-cover transition-transform duration-300 group-hover/poster:scale-[1.06]"
+                />
+                <span className="pointer-events-none absolute inset-0 bg-ink/0 transition-colors duration-200 group-hover/poster:bg-ink/10" />
+              </button>
+            ) : (
+              <img
+                src={poster}
+                alt=""
+                decoding="async"
+                className="h-[84px] w-[56px] shrink-0 rounded-lg object-cover ring-1 ring-edge-soft"
+              />
+            ))}
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <span className="text-[11.5px] uppercase tracking-[0.2em] text-ink-subtle">
+              {review ? t("Reader review") : t("Synopsis")}
+            </span>
+            {canOpenTitle ? (
+              <button
+                type="button"
+                onClick={onOpenTitle}
+                className="text-start font-display text-[24px] font-medium leading-tight tracking-tight text-ink transition-colors duration-150 hover:text-accent"
+              >
+                {title}
+              </button>
+            ) : (
+              <h3 className="font-display text-[24px] font-medium leading-tight tracking-tight text-ink">
+                {title}
+              </h3>
+            )}
+          </div>
         </div>
         {review ? (
           <>
             <Quote size={22} className="shrink-0 text-accent" />
-            <div ref={contentRef} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pe-2">
+            <div
+              ref={contentRef}
+              key={reviewIndex}
+              data-dir={dir}
+              className="critics-review-in flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pe-2"
+            >
               <p className="font-display text-[15px] leading-[1.65] text-ink/90 whitespace-pre-wrap">
                 <LinkedReview text={review.content} people={people} onPersonClick={onPersonClick} />
               </p>
@@ -114,9 +170,9 @@ export function OverviewModal({
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() => onNavReview(-1)}
+                      onClick={() => nav(-1)}
                       aria-label={t("Previous review")}
-                      className="flex h-7 w-7 items-center justify-center rounded-full border border-edge-soft text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+                      className="flex h-7 w-7 items-center justify-center rounded-full border border-edge-soft text-ink-muted transition-[background-color,color,transform] duration-150 hover:bg-elevated hover:text-ink active:scale-90"
                     >
                       <ChevronLeft size={15} strokeWidth={2.2} className="dir-icon" />
                     </button>
@@ -125,9 +181,9 @@ export function OverviewModal({
                     </span>
                     <button
                       type="button"
-                      onClick={() => onNavReview(1)}
+                      onClick={() => nav(1)}
                       aria-label={t("Next review")}
-                      className="flex h-7 w-7 items-center justify-center rounded-full border border-edge-soft text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+                      className="flex h-7 w-7 items-center justify-center rounded-full border border-edge-soft text-ink-muted transition-[background-color,color,transform] duration-150 hover:bg-elevated hover:text-ink active:scale-90"
                     >
                       <ChevronRight size={15} strokeWidth={2.2} className="dir-icon" />
                     </button>
@@ -137,7 +193,7 @@ export function OverviewModal({
                   <button
                     type="button"
                     onClick={() => openUrl(review.url!)}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-edge px-3 py-1 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-edge px-3 py-1 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ink-muted transition-[background-color,color,transform] duration-150 hover:bg-elevated hover:text-ink active:scale-95"
                   >
                     {t("Source")} <ExternalLink size={11} strokeWidth={2} />
                   </button>

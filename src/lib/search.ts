@@ -1,20 +1,28 @@
-import { get } from "@/lib/providers/tmdb/tmdb-client";
-import {
-  movieMeta,
-  seriesMeta,
-  type Page,
-  type RawMovie,
-  type RawSeries,
-} from "@/lib/providers/tmdb/tmdb-meta-mappers";
+import { animeCatalogRequest } from "./providers/anime-catalog-client";
+import { effectiveTmdbLanguage, get } from "@/lib/providers/tmdb/tmdb-client";
+import { movieMeta, seriesMeta, type Page, type RawMovie, type RawSeries } from "@/lib/providers/tmdb/tmdb-meta-mappers";
 import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
 import type { Meta } from "@/lib/cinemeta";
 import type { AddonResultGroup } from "@/lib/search-addons";
 import type { AddonHit } from "@/lib/search-addon-index";
 import { getCachedPlaylist } from "@/lib/iptv/store";
+import type { StoredPlaylist } from "@/lib/iptv/playlists-store";
 import { arabicAwareMatch } from "@/lib/iptv/rtl";
-import type { Settings } from "@/lib/settings";
+import { loadStoredSettings } from "@/lib/settings/load";
 import { safeFetch } from "@/lib/safe-fetch";
 import { anilistAnimeSearch } from "@/lib/anilist/browse";
+import type { MangaSummary } from "@/lib/manga/model";
+import type { CharacterHit } from "@/lib/anilist/character";
+import type { EBook } from "@/lib/ebook/api";
+import type { SportsEventHit } from "@/lib/sports/search-events";
+
+export type MusicSearchHit = {
+  id: string;
+  kind: "artist" | "album" | "track";
+  title: string;
+  subtitle: string;
+  artwork?: string;
+};
 
 export type SearchPerson = {
   id: number;
@@ -52,6 +60,7 @@ export type AnimeHit = {
   malId: number;
   kitsuId?: number;
   anilistId?: number;
+  format: string | null;
   name: string;
   year: string | null;
   poster: string | null;
@@ -62,19 +71,17 @@ export type AnimeHit = {
 
 export type SearchResults = {
   query: string;
-  topMatch: {
-    kind: "movie" | "series";
-    meta: Meta;
-    popularity: number;
-    backdrop?: string;
-    overview?: string;
-    voteAverage?: number;
-  } | null;
+  topMatch: { kind: "movie" | "series"; meta: Meta; popularity: number; backdrop?: string; overview?: string; voteAverage?: number } | null;
   people: SearchPerson[];
   movies: Meta[];
   series: Meta[];
   liveTv: LiveTvHit[];
   anime: AnimeHit[];
+  manga: MangaSummary[];
+  music: MusicSearchHit[];
+  ebooks: EBook[];
+  sports: SportsEventHit[];
+  characters: CharacterHit[];
   addonGroups: AddonResultGroup[];
   addons: AddonHit[];
   intent: SearchIntent;
@@ -88,7 +95,7 @@ export type SearchIntent =
 
 export function searchLiveTvChannels(
   query: string,
-  iptvPlaylists: Settings["iptvPlaylists"],
+  iptvPlaylists: StoredPlaylist[],
   limit = 8,
 ): LiveTvHit[] {
   const q = query.trim().toLowerCase();
@@ -120,6 +127,7 @@ export function searchLiveTvChannels(
 
 type JikanAnime = {
   mal_id: number;
+  type?: string | null;
   title?: string;
   title_english?: string;
   year?: number | null;
@@ -134,18 +142,16 @@ async function jikanAnimeSearch(query: string, limit: number): Promise<AnimeHit[
   const q = query.trim();
   if (q.length < 2) return [];
   try {
-    const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&order_by=popularity&sort=asc&limit=${limit}&sfw=true`;
-    const res = await safeFetch(url);
-    if (!res.ok) return [];
-    const data = (await res.json()) as { data?: JikanAnime[] };
+    const data = await animeCatalogRequest<JikanAnime[]>(`/anime?q=${encodeURIComponent(q)}&order_by=popularity&sort=asc&limit=${limit}&sfw=true`);
     return (data.data ?? []).map((a) => {
       const year = a.year ?? (a.aired?.from ? Number(a.aired.from.slice(0, 4)) : null);
       const name = a.title_english?.trim() || a.title?.trim() || "Untitled";
       return {
         malId: a.mal_id,
+        format: a.type ?? null,
         name,
         year: year ? String(year) : null,
-        poster: a.images?.jpg?.large_image_url ?? a.images?.jpg?.image_url ?? null,
+        poster: a.images?.jpg?.image_url ?? a.images?.jpg?.large_image_url ?? null,
         background: a.trailer?.images?.maximum_image_url ?? null,
         overview: a.synopsis ?? "",
         score: a.score ?? 0,
@@ -156,12 +162,58 @@ async function jikanAnimeSearch(query: string, limit: number): Promise<AnimeHit[
   }
 }
 
+type KitsuSearchDatum = {
+  id: string;
+  attributes: {
+    canonicalTitle?: string;
+    subtype?: string | null;
+    titles?: { en?: string | null; en_jp?: string | null };
+    startDate?: string | null;
+    synopsis?: string | null;
+    averageRating?: string | null;
+    posterImage?: { large?: string | null; medium?: string | null } | null;
+    coverImage?: { large?: string | null } | null;
+  };
+};
+
+async function kitsuAnimeSearch(query: string, limit: number): Promise<AnimeHit[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  try {
+    const url = `https://kitsu.io/api/edge/anime?filter%5Btext%5D=${encodeURIComponent(q)}&page%5Blimit%5D=${limit}&sort=-userCount`;
+    const res = await safeFetch(url, { headers: { Accept: "application/vnd.api+json" } });
+    if (!res.ok) return [];
+    const data = (await res.json()) as { data?: KitsuSearchDatum[] };
+    return (data.data ?? []).map((a) => {
+      const at = a.attributes;
+      return {
+        malId: 0,
+        kitsuId: Number(a.id),
+        format: at.subtype ?? null,
+        name: at.titles?.en?.trim() || at.canonicalTitle || "Untitled",
+        year: at.startDate ? at.startDate.slice(0, 4) : null,
+        poster: at.posterImage?.medium ?? at.posterImage?.large ?? null,
+        background: at.coverImage?.large ?? null,
+        overview: at.synopsis ?? "",
+        score: at.averageRating ? Number(at.averageRating) / 10 : 0,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+function withSearchTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([p, new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms))]);
+}
+
 export async function searchAnime(query: string, limit = 8): Promise<AnimeHit[]> {
   const q = query.trim();
   if (q.length < 2) return [];
-  const [anilist, jikan] = await Promise.all([
-    anilistAnimeSearch(q, limit).catch(() => []),
-    jikanAnimeSearch(q, limit).catch(() => []),
+  const [anilist, jikan, kitsu] = await Promise.all([
+    withSearchTimeout(anilistAnimeSearch(q, limit).catch(() => []), 1500, []),
+    withSearchTimeout(jikanAnimeSearch(q, limit).catch(() => []), 1200, []),
+    withSearchTimeout(kitsuAnimeSearch(q, limit).catch(() => []), 3000, []),
   ]);
   const out: AnimeHit[] = [];
   const seenMal = new Set<number>();
@@ -179,6 +231,7 @@ export async function searchAnime(query: string, limit = 8): Promise<AnimeHit[]>
     push({
       malId: a.malId ?? 0,
       anilistId: a.anilistId,
+      format: a.format,
       name: a.name,
       year: a.year,
       poster: a.poster,
@@ -188,6 +241,7 @@ export async function searchAnime(query: string, limit = 8): Promise<AnimeHit[]>
     });
   }
   for (const j of jikan) push(j);
+  for (const k of kitsu) push(k);
   return out.slice(0, limit);
 }
 
@@ -212,37 +266,16 @@ export async function searchAll(
 ): Promise<SearchResults> {
   const trimmed = query.trim();
   if (!trimmed) {
-    return {
-      query: "",
-      topMatch: null,
-      people: [],
-      movies: [],
-      series: [],
-      liveTv: [],
-      anime: [],
-      addonGroups: [],
-      addons: [],
-      intent: null,
-    };
+    return { query: "", topMatch: null, people: [], movies: [], series: [], liveTv: [], anime: [], manga: [], music: [], ebooks: [], sports: [], characters: [], addonGroups: [], addons: [], intent: null };
   }
   if (!key) {
-    return {
-      query: trimmed,
-      topMatch: null,
-      people: [],
-      movies: [],
-      series: [],
-      liveTv: [],
-      anime: [],
-      addonGroups: [],
-      addons: [],
-      intent: detectIntent(trimmed),
-    };
+    return { query: trimmed, topMatch: null, people: [], movies: [], series: [], liveTv: [], anime: [], manga: [], music: [], ebooks: [], sports: [], characters: [], addonGroups: [], addons: [], intent: detectIntent(trimmed) };
   }
 
   const data = await get<Page<MultiItem>>(key, "search/multi", {
     query: trimmed,
     include_adult: "false",
+    ...(loadStoredSettings().translateTitles ? {} : { language: "en-US" }),
   });
   if (!data) {
     return {
@@ -253,11 +286,37 @@ export async function searchAll(
       series: [],
       liveTv: [],
       anime: [],
+      manga: [],
+      music: [],
+      ebooks: [],
+      sports: [],
+      characters: [],
       addonGroups: [],
       addons: [],
       intent: detectIntent(trimmed),
       tmdbUnavailable: true,
     };
+  }
+  const metaBase = effectiveTmdbLanguage().split("-")[0]?.toLowerCase() ?? "";
+  let enNameById: Map<number, string> | null = null;
+  if (
+    loadStoredSettings().translateTitles &&
+    metaBase !== "" &&
+    metaBase !== "en" &&
+    metaBase !== "ja"
+  ) {
+    const en = await get<Page<MultiItem>>(key, "search/multi", {
+      query: trimmed,
+      include_adult: "false",
+      language: "en-US",
+    });
+    if (en?.results) {
+      enNameById = new Map();
+      for (const r of en.results) {
+        const n = (r as { title?: string; name?: string }).title ?? (r as { name?: string }).name;
+        if (typeof r.id === "number" && n) enNameById.set(r.id, n);
+      }
+    }
   }
   const exclude = new Set(opts.excludeGenres ?? []);
   const hasExcludedGenre = (gs?: number[]) => (gs ?? []).some((id) => exclude.has(id));
@@ -278,14 +337,14 @@ export async function searchAll(
 
   for (const r of results) {
     if (r.media_type === "movie" && r.poster_path) {
-      movies.push(movieMeta(r));
+      movies.push(movieMeta(r, enNameById?.get(r.id)));
       const pop = r.popularity ?? 0;
       if (pop > topPop) {
         topRaw = r;
         topPop = pop;
       }
     } else if (r.media_type === "tv" && r.poster_path) {
-      series.push(seriesMeta(r));
+      series.push(seriesMeta(r, enNameById?.get(r.id)));
       const pop = r.popularity ?? 0;
       if (pop > topPop) {
         topRaw = r;
@@ -293,10 +352,7 @@ export async function searchAll(
       }
     } else if (r.media_type === "person") {
       const known = (r.known_for ?? [])
-        .map(
-          (k) =>
-            (k as { title?: string; name?: string }).title ?? (k as { name?: string }).name ?? "",
-        )
+        .map((k) => (k as { title?: string; name?: string }).title ?? (k as { name?: string }).name ?? "")
         .filter(Boolean)
         .slice(0, 2)
         .join(", ");
@@ -325,11 +381,11 @@ export async function searchAll(
     const isMovie = winner.media_type === "movie";
     topMatch = {
       kind: isMovie ? "movie" : "series",
-      meta: isMovie ? movieMeta(winner as RawMovie) : seriesMeta(winner as RawSeries),
+      meta: isMovie
+        ? movieMeta(winner as RawMovie, enNameById?.get(winner.id))
+        : seriesMeta(winner as RawSeries, enNameById?.get(winner.id)),
       popularity: winner.popularity ?? 0,
-      backdrop: winner.backdrop_path
-        ? `https://image.tmdb.org/t/p/w1280${winner.backdrop_path}`
-        : undefined,
+      backdrop: winner.backdrop_path ? `https://image.tmdb.org/t/p/w1280${winner.backdrop_path}` : undefined,
       overview: winner.overview,
       voteAverage: winner.vote_average,
     };
@@ -343,6 +399,11 @@ export async function searchAll(
     series: series.slice(0, 12),
     liveTv: [],
     anime: [],
+    manga: [],
+    music: [],
+    ebooks: [],
+    sports: [],
+    characters: [],
     addonGroups: [],
     addons: [],
     intent: detectIntent(trimmed),
@@ -355,7 +416,7 @@ function levenshtein(a: string, b: string): number {
   if (m === 0) return n;
   if (n === 0) return m;
   let prev = Array.from({ length: n + 1 }, (_, i) => i);
-  let cur = new Array<number>(n + 1);
+  let cur = Array.from({ length: n + 1 }, () => 0);
   for (let i = 1; i <= m; i++) {
     cur[0] = i;
     for (let j = 1; j <= n; j++) {
@@ -396,10 +457,7 @@ async function fuzzyPeopleFallback(
     if (seen.has(r.id) || !nameCloseTo(r.name, query)) continue;
     seen.add(r.id);
     const known = (r.known_for ?? [])
-      .map(
-        (k) =>
-          (k as { title?: string; name?: string }).title ?? (k as { name?: string }).name ?? "",
-      )
+      .map((k) => (k as { title?: string; name?: string }).title ?? (k as { name?: string }).name ?? "")
       .filter(Boolean)
       .slice(0, 2)
       .join(", ");

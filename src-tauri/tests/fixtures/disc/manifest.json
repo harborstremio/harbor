@@ -1,0 +1,100 @@
+{
+  "generator": "pycdlib 1.14.0",
+  "images": [
+    {
+      "name": "plain",
+      "bytes": 579584,
+      "sha256": "5b115ed420cd1d73c5661c75dcaa4e2158e79de261816e7896d6a85c2c8ec101"
+    },
+    {
+      "name": "joliet",
+      "bytes": 595968,
+      "sha256": "d2d3ec0ec1efc2c64966bdcf08281d5f456d1e8f1080a00bcc5deb54407cc6e7"
+    },
+    {
+      "name": "rockridge",
+      "bytes": 581632,
+      "sha256": "aa22a10e840e4455ec282b8c731b862a0f993adae5b7da12ab7dc11ee796bd9a"
+    },
+    {
+      "name": "both",
+      "bytes": 598016,
+      "sha256": "e7267dc4adfeb87ddf28f3a728de41334ccdb0e6ca565ec08d2fb886717ffee8"
+    },
+    {
+      "name": "udf_bridge",
+      "bytes": 1101824,
+      "sha256": "dfdf15b79c6c9a50aede92ad95bc8befccf164c07d2d787ea09b3420e4ffb4ec"
+    },
+    {
+      "name": "udf-extra",
+      "bytes": 555008,
+      "sha256": "bd16faa5a224daca6f5d3f699a8937ee8f64f36ff43642c98fa6c20ba4a1d1e2"
+    },
+    {
+      "name": "udf-bad-checksum",
+      "bytes": 1101824,
+      "sha256": "f75089416f7b17e4fada77400564b9f00626afb3357df4f84d27ad577e7ddd2b"
+    },
+    {
+      "name": "udf-bad-identifier",
+      "bytes": 1101824,
+      "sha256": "39e22094eb7a8d9fdf1210a5c26a16f0a6aeb44fbbaf819255d70daa36f8ad14"
+    },
+    {
+      "name": "udf-bad-name_length",
+      "bytes": 1101824,
+      "sha256": "04ec9249f318f66242a3789277eddc6b5013da59305253e7eb9540021eb0304b"
+    },
+    {
+      "name": "udf-special-6",
+      "bytes": 1101824,
+      "sha256": "d20f5c104ef0d737a672d77e368318ed64b0ba0e9b4cb4b18287a2b256403cf0"
+    },
+    {
+      "name": "udf-special-7",
+      "bytes": 1101824,
+      "sha256": "47f4a722e07add5f0e249db964d9591e06ace4f2c1f759f79ae9cff9877f2f89"
+    },
+    {
+      "name": "udf-special-9",
+      "bytes": 1101824,
+      "sha256": "c69d071efee540e9e18d7b2115f27e1988087c9a48f7afef796e9b883c6b39ea"
+    },
+    {
+      "name": "udf-special-10",
+      "bytes": 1101824,
+      "sha256": "72b6b0aca90e205faf73edd6a7a16e2a4257ef0bc5f7c9cb529d6cc6edbdec75"
+    },
+    {
+      "name": "udf-special-12",
+      "bytes": 1101824,
+      "sha256": "f52f5a462aca36dd2661d7053931e77075503bc98095a103119297340fb44e4d"
+    },
+    {
+      "name": "unsafe",
+      "bytes": 53248,
+      "sha256": "05b13f616e1e400cb88bb1a4c26abb573d065749eb7f7d2a7d205b65a50c0160"
+    },
+    {
+      "name": "reserved",
+      "bytes": 53248,
+      "sha256": "9a2902da2ee656d34ea6788add675eb1cd868d1142ecc811fe8aadc46e721fd5"
+    },
+    {
+      "name": "symlink",
+      "bytes": 51200,
+      "sha256": "b941de8c4656b65a5056a2bf50be49a09a9eaa39a9685d6e2cad6f88275a9e61"
+    },
+    {
+      "name": "collision",
+      "bytes": 55296,
+      "sha256": "abb5fde97df8cf2b5e987a3c11b76d781a7f80b0dcca8a8dbceccbb30f8f8fa3"
+    },
+    {
+      "name": "descriptor-noise",
+      "bytes": 51200,
+      "sha256": "f1b2b8aa09b748f5c80cf4ee84a6e33d09caeaac2b3394ced60ae7e22c64dd6b"
+    }
+  ]
+}

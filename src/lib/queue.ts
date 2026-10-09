@@ -1,6 +1,9 @@
 import { useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayEpisode } from "@/lib/view";
+import { persistCritical } from "@/lib/storage-recovery";
+import { isManuallyWatched, subscribeManualWatched } from "@/lib/manual-watched";
+import { isMovieWatchedLocal } from "@/lib/movie-watched";
 
 export type QueueItem = {
   id: string;
@@ -26,11 +29,7 @@ function load(): QueueItem[] {
 }
 
 function persist(): void {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(items));
-  } catch {
-    /* ignore */
-  }
+  persistCritical(KEY, JSON.stringify(items));
   listeners.forEach((l) => l());
 }
 
@@ -74,13 +73,21 @@ export function queueReorder(orderedIds: string[]): void {
   persist();
 }
 
-export function queueShift(): QueueItem | null {
-  const first = items[0] ?? null;
-  if (first) {
-    items = items.slice(1);
-    persist();
-  }
-  return first;
+export function queueIndexOf(meta: Meta, episode?: PlayEpisode): number {
+  const k = keyOf(meta, episode);
+  return items.findIndex((i) => keyOf(i.meta, i.episode) === k);
+}
+
+export function queueItemAfter(meta: Meta, episode?: PlayEpisode): QueueItem | null {
+  const idx = queueIndexOf(meta, episode);
+  if (idx < 0) return null;
+  return items[idx + 1] ?? null;
+}
+
+export function queueItemBefore(meta: Meta, episode?: PlayEpisode): QueueItem | null {
+  const idx = queueIndexOf(meta, episode);
+  if (idx <= 0) return null;
+  return items[idx - 1] ?? null;
 }
 
 function subscribe(fn: () => void): () => void {
@@ -123,3 +130,27 @@ export function setSleepAtEnd(on: boolean): void {
 export function useSleepAtEnd(): boolean {
   return useSyncExternalStore(subscribe, getSleepAtEnd, getSleepAtEnd);
 }
+
+let playingKey: string | null = null;
+
+export function setQueuePlaying(meta: Meta | null, episode?: PlayEpisode): void {
+  const next = meta ? keyOf(meta, episode) : null;
+  if (next === playingKey) return;
+  playingKey = next;
+  queuePruneWatched();
+}
+
+export function queuePruneWatched(): void {
+  const next = items.filter((i) => {
+    if (playingKey && keyOf(i.meta, i.episode) === playingKey) return true;
+    return i.episode
+      ? !isManuallyWatched(i.meta.id, i.episode.season ?? 0, i.episode.episode ?? 0)
+      : !isMovieWatchedLocal(i.meta.id);
+  });
+  if (next.length === items.length) return;
+  items = next;
+  persist();
+}
+
+queueMicrotask(() => queuePruneWatched());
+subscribeManualWatched(() => queuePruneWatched());

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { PickCard } from "@/components/pick-card";
-import { Row } from "@/components/row";
+import { Row, usePosterRow } from "@/components/row";
 import type { Meta } from "@/lib/cinemeta";
 import { type Topic } from "@/lib/feed/genre-topics";
 import { useT } from "@/lib/i18n";
@@ -17,6 +17,7 @@ export function TopicSection({
   mediaType: "movie" | "tv";
 }) {
   const t = useT();
+  const posterRow = usePosterRow();
   const { settings } = useSettings();
   const dedup = useDedupOnSeenIds(`topic:${mediaType}:${topic.id}`);
   const gate = useContext(SpotlightGateContext);
@@ -138,15 +139,13 @@ export function TopicSection({
   );
 
   return (
-    <Row title={title} onEndReached={onEndReached}>
+    <Row {...posterRow} title={title} onEndReached={onEndReached}>
       {items
         ? items.map((m) => (
-            <div key={m.id} className="w-36 shrink-0">
-              <PickCard meta={m} />
-            </div>
+            <PickCard key={m.id} meta={m} />
           ))
         : Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/40" />
+            <div key={i} className={`${posterRow.shape === "landscape" ? "aspect-[16/9]" : "aspect-[2/3]"} animate-pulse rounded-xl bg-elevated/40`} />
           ))}
     </Row>
   );

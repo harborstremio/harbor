@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-comedy">
+<title id="title-comedy">Comedy anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <circle class="coral" cx="32" cy="32" r="23"/>
+  <path class="icon-stroke" d="M21 27c2-2 5-2 7 0M36 27c2-2 5-2 7 0M20 36c6 9 18 9 24 0"/>
+  <path class="gold" d="M14 20l1.6 4.4L20 26l-4.4 1.6L14 32l-1.6-4.4L8 26l4.4-1.6L14 20z"/>
+
+</svg>

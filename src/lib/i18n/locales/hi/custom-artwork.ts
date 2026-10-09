@@ -1,0 +1,21 @@
+export default {
+  "artwork.title": "लोडिंग और लॉन्च की छवियाँ",
+  "artwork.hint": "Lottie ऐनिमेशन, GIF या छवि का इस्तेमाल करें। अधिकतम 8 MB।",
+  "artwork.loading": "लोडिंग ऐनिमेशन",
+  "artwork.loadingHint": "कनेक्ट करने और लोड होने वाली स्क्रीन पर दिखता है।",
+  "artwork.launch": "लॉन्च लोगो",
+  "artwork.launchHint": "Harbor खुलने पर दिखता है, Big Picture में भी।",
+  "artwork.original": "Harbor का मूल डिज़ाइन",
+  "artwork.choose": "फ़ाइल चुनें",
+  "artwork.saving": "सहेजा जा रहा है…",
+  "artwork.reset": "रीसेट करें",
+  "artwork.chooseLoading": "लोडिंग ऐनिमेशन चुनें",
+  "artwork.chooseLaunch": "लॉन्च लोगो चुनें",
+  "artwork.resetLoading": "लोडिंग ऐनिमेशन रीसेट करें",
+  "artwork.resetLaunch": "लॉन्च लोगो रीसेट करें",
+  "artwork.local": "इस डिवाइस पर सहेजा जाता है। कम गति की सेटिंग में स्थिर छवि दिखती है।",
+  "artwork.error.large": "छोटी फ़ाइल चुनें: अधिकतम 8 MB और 4096 × 4096 पिक्सेल।",
+  "artwork.error.external": "यह ऐनिमेशन बाहरी मीडिया का इस्तेमाल करता है। छवियों को एम्बेड करके एक्सपोर्ट करें।",
+  "artwork.error.storage": "इस डिवाइस पर फ़ाइल नहीं सहेजी जा सकी। पिछला चयन नहीं बदला है।",
+  "artwork.error.invalid": "फ़ाइल नहीं पढ़ी जा सकी। Lottie (.json या .lottie), GIF, PNG, JPEG या WebP चुनें।"
+};

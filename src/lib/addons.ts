@@ -1,15 +1,21 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
-import type { Meta } from "./cinemeta";
+import { cachedCatalogRow, type CatalogLoad } from "@/lib/addon-catalog-cache";
+import { runLanes } from "@/lib/run-lanes";
+import { allowDirectHost, safeFetch as fetch } from "@/lib/safe-fetch";
+import type { AddonOrigin, Meta } from "./cinemeta";
 import { fetchManifestAt, filterEnabled, loadInstalled } from "./addon-store";
 
 const STREMIO_API = "https://api.strem.io/api";
 const MAX_ROWS = 24;
+const CATALOG_LANES = 6;
 
 export type CatalogDef = {
   id: string;
   type: string;
   name: string;
   extra?: Array<{ name: string; isRequired?: boolean; options?: string[] }>;
+  // The older manifest form. An addon may declare search through either this or
+  // `extra`, and reading only `extra` left those addons never queried at all.
+  extraSupported?: string[];
 };
 
 export type AddonResource =
@@ -39,6 +45,17 @@ export type Addon = {
   transportUrl: string;
 };
 
+export function addonBasesForOrigin(addons: Addon[], origin: AddonOrigin | undefined): string[] {
+  if (!origin) return [];
+  const bases = new Set<string>();
+  if (origin.base) bases.add(origin.base.replace(/\/manifest\.json$/, ""));
+  for (const addon of addons) {
+    if (addon.manifest.id !== origin.id) continue;
+    bases.add(addon.transportUrl.replace(/\/manifest\.json$/, ""));
+  }
+  return [...bases];
+}
+
 export type CatalogExtra = { name: string; value: string };
 
 export type AddonCatalogCursor = {
@@ -56,6 +73,36 @@ export type AddonRow = {
   more?: AddonCatalogCursor;
 };
 
+const EPISODE_ID_SUFFIX = /:(\d+):(\d+)$/;
+
+function seriesBaseId(m: Meta): string {
+  if (m.type !== "series" && m.type !== "anime") return m.id;
+  return m.id.replace(EPISODE_ID_SUFFIX, "");
+}
+
+function collapseEpisodeMetas(metas: Meta[]): Meta[] {
+  const counts = new Map<string, number>();
+  for (const m of metas) {
+    const base = seriesBaseId(m);
+    counts.set(base, (counts.get(base) ?? 0) + 1);
+  }
+  let collapses = 0;
+  for (const n of counts.values()) if (n > 1) collapses += 1;
+  if (collapses === 0) return metas;
+  const seen = new Set<string>();
+  const out: Meta[] = [];
+  for (const m of metas) {
+    const base = seriesBaseId(m);
+    if ((counts.get(base) ?? 0) < 2) {
+      out.push(m);
+      continue;
+    }
+    if (seen.has(base)) continue;
+    seen.add(base);
+    out.push(base === m.id ? m : { ...m, id: base });
+  }
+  return out;
+}
 export function addonAccepts(addon: Addon, resource: string, type: string, id: string): boolean {
   const m = addon.manifest;
   const resources = m.resources ?? [];
@@ -65,9 +112,10 @@ export function addonAccepts(addon: Addon, resource: string, type: string, id: s
   );
   if (specific.length > 0) {
     return specific.some((r) => {
-      const typeOk = Array.isArray(r.types) && r.types.includes(type);
-      const idOk =
-        !r.idPrefixes || r.idPrefixes.length === 0 || r.idPrefixes.some((p) => id.startsWith(p));
+      const types = r.types ?? m.types ?? [];
+      const typeOk = types.includes(type);
+      const prefixes = r.idPrefixes ?? m.idPrefixes;
+      const idOk = !prefixes || prefixes.length === 0 || prefixes.some((p) => id.startsWith(p));
       return typeOk && idOk;
     });
   }
@@ -154,11 +202,32 @@ export function normalizeName(name: string, type: string): string {
   return `${n}::${type ?? ""}`;
 }
 
+// Region-gated addons (Max, Disney+, ...) decide what to serve from the request
+// language. On web the browser attaches Accept-Language automatically, but the
+// app's harbor_fetch sends none, so those catalogs come back empty until the user
+// changes region by hand. Send an Accept-Language built from the region/language
+// they actually picked, so the app matches web and honours their choice.
+function addonAcceptLanguage(): string | null {
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem("harbor.settings") : null;
+    const s = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
+    const region = String(s.region ?? "US").trim().toUpperCase();
+    const lang = String(s.tmdbLanguage || s.uiLanguage || "en").trim().toLowerCase().split("-")[0];
+    if (!/^[a-z]{2,3}$/.test(lang)) return null;
+    if (!/^[A-Z]{2}$/.test(region)) return `${lang},en;q=0.8`;
+    return lang === "en" ? `en-${region},en;q=0.8` : `${lang}-${region},${lang};q=0.9,en;q=0.8`;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<Response | null> {
   const ac = new AbortController();
   const t = setTimeout(() => ac.abort(), timeoutMs);
   try {
-    return await fetch(url, { signal: ac.signal });
+    const al = addonAcceptLanguage();
+    allowDirectHost(url);
+    return await fetch(url, { signal: ac.signal, headers: al ? { "Accept-Language": al } : undefined });
   } catch {
     return null;
   } finally {
@@ -240,7 +309,7 @@ export function withDebridKeys(addons: Addon[], keys: DebridKeySet): Addon[] {
   return addons.map((a) => {
     if (a.manifest.id !== "com.stremio.torrentio.addon") return a;
     if (torrentioCount > 1) return a;
-    if (!/torrentio\.strem\.fun\/manifest\.json$/.test(a.transportUrl)) return a;
+    if (!a.transportUrl.endsWith("torrentio.strem.fun/manifest.json")) return a;
     return {
       ...a,
       transportUrl: config
@@ -287,63 +356,103 @@ function catalogRequestUrl(base: string, cat: CatalogDef): string | null {
   return `${base}/catalog/${cat.type}/${cat.id}/${parts.join("&")}.json`;
 }
 
-export async function loadAddonRows(
-  authKey: string | null,
-  opts: { dedup?: boolean; cap?: number } = {},
-): Promise<AddonRow[]> {
-  const dedup = opts.dedup ?? true;
-  const cap = opts.cap ?? (dedup ? MAX_ROWS : 200);
-  const addons = await gatherCatalogAddons(authKey);
-  const tasks = addons.flatMap((addon) =>
-    (addon.manifest.catalogs ?? [])
-      .filter((c) => c && c.name && c.type && c.id && !NON_CONTENT_TYPES.has(c.type.toLowerCase()))
-      .map(async (cat): Promise<AddonRow | null> => {
-        const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
-        const url = catalogRequestUrl(base, cat);
-        if (!url) return null;
-        const res = await fetchWithTimeout(url);
-        if (!res || !res.ok) return null;
-        try {
-          const json = await res.json();
-          const raw: Meta[] = json.metas ?? [];
-          if (raw.length === 0) return null;
-          const origin = {
-            id: addon.manifest.id,
-            name: addon.manifest.name,
-            logo: addon.manifest.logo,
-            base,
-          };
-          const metas: Meta[] = raw.map((m) => ({ ...m, addonOrigin: origin }));
-          return {
-            key: `${addon.manifest.id}-${cat.type}-${cat.id}`,
-            type: cat.type,
-            name: cat.name,
-            metas,
-            more: { base, type: cat.type, id: cat.id, extras: requiredCatalogExtras(cat) ?? undefined },
-          };
-        } catch {
-          return null;
-        }
-      }),
+export function isCollectionCatalog(c: { type?: string; id?: string; name?: string }): boolean {
+  const hay = `${c.type ?? ""} ${c.id ?? ""} ${c.name ?? ""}`;
+  return /\bcollections\b/i.test(hay);
+}
+
+export function contentCatalogs(addon: Addon): CatalogDef[] {
+  return (addon.manifest.catalogs ?? []).filter(
+    (c) => c && c.name && c.type && c.id && !NON_CONTENT_TYPES.has(c.type.toLowerCase()),
   );
-  const results = await Promise.all(tasks);
-  if (!dedup) {
-    const out: AddonRow[] = [];
-    for (const r of results) {
-      if (r) out.push(r);
-    }
-    return out.slice(0, cap);
+}
+
+export function fetchCatalogRow(
+  addon: Addon,
+  cat: CatalogDef,
+): Promise<CatalogLoad<AddonRow | null>> {
+  return cachedCatalogRow(`${addon.transportUrl}|${cat.type}|${cat.id}`, () =>
+    loadCatalogRow(addon, cat),
+  );
+}
+
+async function loadCatalogRow(
+  addon: Addon,
+  cat: CatalogDef,
+): Promise<CatalogLoad<AddonRow | null>> {
+  const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
+  const url = catalogRequestUrl(base, cat);
+  if (!url) return { value: null, ok: true };
+  const res = await fetchWithTimeout(url);
+  if (!res || !res.ok) return { value: null, ok: false };
+  try {
+    const json = await res.json();
+    const raw: Meta[] = json.metas ?? [];
+    if (raw.length === 0) return { value: null, ok: true };
+    const origin = {
+      id: addon.manifest.id,
+      name: addon.manifest.name,
+      logo: addon.manifest.logo,
+      base,
+    };
+    const collection = isCollectionCatalog(cat);
+    const metas: Meta[] = collapseEpisodeMetas(raw).map((m) => ({
+      ...m,
+      addonOrigin: origin,
+      ...(collection ? { isCollection: true } : null),
+    }));
+    return {
+      value: {
+        key: `${addon.manifest.id}-${cat.type}-${cat.id}`,
+        type: cat.type,
+        name: cat.name,
+        metas,
+        more: { base, type: cat.type, id: cat.id, extras: requiredCatalogExtras(cat) ?? undefined },
+      },
+      ok: true,
+    };
+  } catch {
+    return { value: null, ok: false };
   }
+}
+
+export function dedupeAddonRows(rows: AddonRow[], cap: number): AddonRow[] {
   const seen = new Set<string>();
   const deduped: AddonRow[] = [];
-  for (const r of results) {
-    if (!r) continue;
+  for (const r of rows) {
     const key = normalizeName(r.name, r.type);
     if (seen.has(key)) continue;
     seen.add(key);
     deduped.push(r);
   }
   return deduped.slice(0, cap);
+}
+
+export async function loadAddonRows(
+  authKey: string | null,
+  opts: { dedup?: boolean; cap?: number; onFailed?: (failed: number) => void } = {},
+): Promise<AddonRow[]> {
+  const dedup = opts.dedup ?? true;
+  const cap = opts.cap ?? (dedup ? MAX_ROWS : 200);
+  const addons = await gatherCatalogAddons(authKey);
+  const tasks = addons.flatMap((addon) =>
+    contentCatalogs(addon).map((cat) => ({ addon, cat })),
+  );
+  const failure: CatalogLoad<AddonRow | null> = { value: null, ok: false };
+  const results = await runLanes(tasks, CATALOG_LANES, (t) =>
+    fetchCatalogRow(t.addon, t.cat).catch(() => failure),
+  );
+  let failed = 0;
+  const rows: AddonRow[] = [];
+  for (const result of results) {
+    if (!result || !result.ok) {
+      failed += 1;
+      continue;
+    }
+    if (result.value) rows.push(result.value);
+  }
+  opts.onFailed?.(failed);
+  return dedup ? dedupeAddonRows(rows, cap) : rows.slice(0, cap);
 }
 
 export async function fetchAddonMeta(base: string, type: string, id: string): Promise<Meta | null> {
@@ -383,11 +492,11 @@ const DEFAULT_CATALOG_PAGE_SIZE = 20;
 export function createAddonCatalogFetcher(
   cursor: AddonCatalogCursor,
   opts: { initialPageSize?: number; mapMeta?: (meta: Meta) => Meta } = {},
-): (page: number) => Promise<Meta[]> {
+): (page: number, loaded?: number) => Promise<Meta[]> {
   let pageSize = opts.initialPageSize && opts.initialPageSize > 0 ? opts.initialPageSize : null;
-  return async (page: number): Promise<Meta[]> => {
+  return async (page: number, loaded?: number): Promise<Meta[]> => {
     const step = pageSize ?? DEFAULT_CATALOG_PAGE_SIZE;
-    const skip = page <= 1 ? 0 : (page - 1) * step;
+    const skip = loaded != null && loaded > 0 ? loaded : page <= 1 ? 0 : (page - 1) * step;
     const metas = await fetchAddonCatalogPage(cursor.base, cursor.type, cursor.id, skip, cursor.extras);
     if (metas.length > 0 && pageSize == null) pageSize = metas.length;
     return opts.mapMeta ? metas.map(opts.mapMeta) : metas;

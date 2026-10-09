@@ -8,6 +8,7 @@ import { parseAudio } from "./parser-audio";
 import { parseLanguages } from "./parser-language";
 import { parseCacheFlags } from "./parser-cache-flags";
 import { extractFilenameLine } from "./parser-filename";
+import { parseEpisodeSpan } from "@/lib/episode-span";
 import {
   computeScamScore,
   parseAnimeHash,
@@ -40,7 +41,13 @@ export function parseStream(stream: Stream): ParsedStream {
   const audioLanguages = parseLanguages(text);
   const size = parseSize(text, stream.behaviorHints?.videoSize);
   const seeders = parseSeeders(text);
-  const cached = parseCacheFlags(text, stream.behaviorHints?.bingeGroup, stream.addonName, stream.url);
+  const cached = parseCacheFlags(
+    text,
+    stream.behaviorHints?.bingeGroup,
+    stream.addonName,
+    stream.url,
+  );
+  const cacheVerified: Partial<Record<DebridSlug, boolean>> = {};
   const inLibrary: Partial<Record<DebridSlug, boolean>> = {};
   const container = parseContainer(stream.behaviorHints?.filename, filenameLine, text);
   const releaseGroup = ptt.group ?? null;
@@ -51,9 +58,11 @@ export function parseStream(stream: Stream): ParsedStream {
   const edition = parseEdition(text, ptt);
   const year = ptt.year ?? null;
   const yearRange = parseYearRange(text);
-  const season = ptt.season ?? null;
-  const episode = ptt.episode ?? null;
-  const seasonPack = parseSeasonPack(text, ptt);
+  const span = parseEpisodeSpan(filenameLine || text);
+  const season = span?.season ?? ptt.season ?? null;
+  const episode = span?.episode ?? ptt.episode ?? null;
+  const episodeEnd = span?.episodeEnd ?? episode;
+  const seasonPack = parseSeasonPack(text, ptt, filenameLine);
   const discIndex = parseDisc(text);
   const repackIteration = parseRepackIteration(text, ptt);
   const proper = ptt.proper === true;
@@ -74,6 +83,7 @@ export function parseStream(stream: Stream): ParsedStream {
     size,
     seeders,
     cached,
+    cacheVerified,
     inLibrary,
     container,
     releaseGroup,
@@ -84,6 +94,7 @@ export function parseStream(stream: Stream): ParsedStream {
     yearRange,
     season,
     episode,
+    episodeEnd,
     seasonPack,
     discIndex,
     repackIteration,

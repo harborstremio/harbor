@@ -1,5 +1,13 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 
 /**
  * Multi-column CSS-grid style virtualizer for large poster grids.
@@ -48,10 +56,24 @@ export function VirtualGrid<T>({
     return () => ro.disconnect();
   }, [gapX, minColumnWidth]);
 
+  // A grid rarely starts at the top of its scroller: a page can stack one per date group,
+  // and all of them share the one scroll element. Without its own distance from the top,
+  // a grid reads the raw scrollTop as its own and renders rows nowhere near the viewport.
+  const [scrollMargin, setScrollMargin] = useState(0);
+  const readMargin = useCallback(() => {
+    const el = containerRef.current;
+    const scroller = scrollRef.current;
+    if (!el || !scroller) return;
+    const offset =
+      el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
+    setScrollMargin((previous) => (Math.abs(previous - offset) > 0.5 ? offset : previous));
+  }, [scrollRef]);
+
   const rowCount = Math.max(1, Math.ceil(items.length / cols));
   const rowVirtualizer = useVirtualizer({
     count: items.length === 0 ? 0 : rowCount,
     getScrollElement: () => scrollRef.current,
+    scrollMargin,
     estimateSize: () => estimateRowHeight + gapY,
     // Each virtual item contains exactly one CSS-grid row, so `rowGap` would
     // not create spacing between virtual rows. Include the gap in measurement
@@ -59,6 +81,33 @@ export function VirtualGrid<T>({
     measureElement: (element) => element.getBoundingClientRect().height + gapY,
     overscan,
   });
+
+  const totalSize = rowVirtualizer.getTotalSize();
+  useLayoutEffect(readMargin, [readMargin, cols, items.length, totalSize]);
+  useEffect(() => {
+    const el = containerRef.current;
+    const scroller = scrollRef.current;
+    if (!el || !scroller) return;
+    let frame = 0;
+    const schedule = () => {
+      if (!frame)
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          readMargin();
+        });
+    };
+    const observer = new ResizeObserver(schedule);
+    // Rows above settle from estimate to measured height, which slides this grid down
+    // without resizing it. Every box up to the scroller does grow, so watching the chain
+    // catches a sibling's reflow without reading layout on each scrolled frame.
+    for (let node: HTMLElement | null = el; node && node !== scroller; node = node.parentElement)
+      observer.observe(node);
+    observer.observe(scroller);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [readMargin, scrollRef]);
 
   if (items.length === 0) return null;
 
@@ -75,7 +124,7 @@ export function VirtualGrid<T>({
               ref={rowVirtualizer.measureElement}
               className="absolute start-0 grid w-full"
               style={{
-                transform: `translateY(${row.start}px)`,
+                transform: `translateY(${row.start - scrollMargin}px)`,
                 gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
                 columnGap: gapX,
               }}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- Generator: Adobe Illustrator 30.8.1, SVG Export Plug-In . SVG Version: 9.03 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 216 132" style="enable-background:new 0 0 216 132;" xml:space="preserve">
+<path id="Unfolding_course" style="fill:none;stroke:#777B7A;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:3,5;" d="
+	M20,102c19,0,16-25,37-23c20,0,14,13,32,11c18,0,11-23,34-29c20-2,28,1,37-13"/>
+<circle id="Departure" style="fill:none;stroke:#B7BBB7;stroke-width:1.4;stroke-miterlimit:10;" cx="20" cy="102" r="3"/>
+<circle id="A_film_along_the_way" style="fill:none;stroke:#B7BBB7;stroke-width:1.4;stroke-miterlimit:10;" cx="89" cy="90" r="4"/>
+<circle id="Compass_ring" style="fill:none;stroke:#F3AD79;stroke-width:1.5;stroke-miterlimit:10;" cx="166" cy="39" r="24"/>
+<line id="North" style="fill:none;stroke:#B7BBB7;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="166" y1="8" x2="166" y2="12"/>
+<line id="East" style="fill:none;stroke:#B7BBB7;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="193" y1="39" x2="197" y2="39"/>
+<line id="South" style="fill:none;stroke:#B7BBB7;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="166" y1="66" x2="166" y2="70"/>
+<line id="West" style="fill:none;stroke:#B7BBB7;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="135" y1="39" x2="139" y2="39"/>
+<polygon id="Course_needle" style="fill:none;stroke:#F3AD79;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" points="
+	177,25 170,43 155,53 162,35 "/>
+<polyline id="Needle_fold" style="fill:none;stroke:#F3AD79;stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" points="
+	177,25 166,39 155,53 "/>
+<line id="Horizon_one" style="fill:none;stroke:#777B7A;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="16" y1="38" x2="51" y2="38"/>
+<line id="Horizon_two" style="fill:none;stroke:#777B7A;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="16" y1="45" x2="36" y2="45"/>
+</svg>

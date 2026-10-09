@@ -1,6 +1,8 @@
-import { Search, X } from "lucide-react";
+import { X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import type { AiProvider } from "@/lib/ai-models";
 import { ProviderLogo } from "@/components/ai-provider-logo";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import { useT } from "@/lib/i18n";
 
 export function EpisodeSearchToggle({
@@ -21,34 +23,41 @@ export function EpisodeSearchToggle({
   const t = useT();
   return (
     <>
-      <button
-        type="button"
-        onClick={onSearch}
-        aria-label={t("Search episodes")}
-        title={t("Search episodes")}
-        className={`flex h-10 w-10 items-center justify-center rounded-full border transition-colors ${
-          searchActive
-            ? "border-accent/50 bg-accent/15 text-accent"
-            : "border-edge-soft bg-canvas/90 text-ink-muted hover:text-ink"
-        }`}
-      >
-        <Search size={16} />
-      </button>
-      {aiEnabled && (
+      <HoverTooltip label={t("Search episodes")} align="center" className="shrink-0">
         <button
           type="button"
-          onClick={onAskAi}
-          aria-label={t("Ask AI")}
-          title={t("Ask AI")}
-          className={`flex h-10 items-center gap-1.5 rounded-full border px-3 text-[12.5px] font-medium transition-colors ${
-            aiMode
-              ? "border-accent/50 bg-accent/15 text-accent"
-              : "border-edge-soft bg-canvas/90 text-ink-muted hover:text-ink"
+          onClick={onSearch}
+          aria-label={t("Search episodes")}
+          className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+            searchActive
+              ? "bg-accent/15 text-accent"
+              : "bg-white/[0.06] text-ink-muted hover:bg-white/[0.10] hover:text-ink"
           }`}
         >
-          <ProviderLogo provider={aiProvider} size={16} />
-          {t("Ask AI")}
+          <Search size={16} />
         </button>
+      </HoverTooltip>
+      {aiEnabled && (
+        <HoverTooltip
+          label={t("Ask AI")}
+          sublabel={t("Find episodes by describing them")}
+          align="center"
+          className="shrink-0"
+        >
+          <button
+            type="button"
+            onClick={onAskAi}
+            aria-label={t("Ask AI")}
+            className={`flex h-10 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[12.5px] font-medium transition-colors xl:px-3 ${
+              aiMode
+                ? "bg-accent/15 text-accent"
+                : "bg-white/[0.06] text-ink-muted hover:bg-white/[0.10] hover:text-ink"
+            }`}
+          >
+            <ProviderLogo provider={aiProvider} size={16} />
+            <span className="hidden xl:inline">{t("Ask AI")}</span>
+          </button>
+        </HoverTooltip>
       )}
     </>
   );

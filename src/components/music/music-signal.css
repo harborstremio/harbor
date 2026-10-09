@@ -1,0 +1,206 @@
+.music-quality-badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  background: transparent;
+  padding: 0;
+  color: var(--color-ink-muted);
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.music-quality-badge svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+.music-quality-badge[data-tier="lossy"],
+.music-signal-heading[data-tier="lossy"] > svg {
+  color: light-dark(#2868ab, #8bbcf1);
+}
+.music-quality-badge[data-tier="lossless"],
+.music-signal-heading[data-tier="lossless"] > svg {
+  color: light-dark(#28734d, #8cc8a5);
+}
+.music-quality-badge[data-tier="hi-res"],
+.music-signal-heading[data-tier="hi-res"] > svg {
+  color: light-dark(#7950a9, #c1a6e6);
+}
+.music-quality-evidence {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-ink-muted);
+  font-weight: 450;
+}
+.music-signal-details {
+  color: var(--color-ink);
+  font-size: 13px;
+  min-width: 0;
+}
+.music-signal-heading {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding-block: 4px 18px;
+}
+.music-signal-heading > svg {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.music-signal-heading h3 {
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.4;
+  margin: 0;
+}
+.music-signal-heading p,
+.music-signal-note {
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 5px 0 0;
+}
+.music-signal-stages {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+.music-signal-stage h4,
+.music-signal-caption {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.035em;
+  color: var(--color-ink-muted);
+  margin: 0 0 10px;
+}
+.music-signal-stage dl {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.music-signal-stage dl > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  min-width: 0;
+}
+.music-signal-stage dt {
+  color: var(--color-ink-muted);
+}
+.music-signal-stage dd {
+  margin: 0;
+  text-align: end;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.music-signal-settings {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  background: var(--color-raised);
+  border: 0;
+  border-radius: 6px;
+  padding: 0 12px;
+  margin-top: 18px;
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.music-signal-settings:hover {
+  background: color-mix(in srgb, var(--color-raised), var(--color-ink) 6%);
+}
+.music-signal-settings:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+.music-level-meter {
+  margin-top: 22px;
+  min-width: 0;
+}
+.music-signal-caption {
+  display: flex;
+  justify-content: space-between;
+}
+.music-level-channels {
+  display: grid;
+  gap: 8px;
+}
+.music-level-channel {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) 40px;
+  gap: 10px;
+  align-items: center;
+}
+.music-level-label,
+.music-level-reading,
+.music-level-scale {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-muted);
+}
+.music-level-reading {
+  text-align: right;
+}
+.music-level-track {
+  height: 8px;
+  border-radius: 2px;
+  background: var(--color-raised);
+  position: relative;
+  overflow: hidden;
+}
+.music-level-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  background: var(--color-ink-muted);
+  border-radius: 2px;
+  transition: transform 95ms linear;
+}
+.music-level-peak {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-2px);
+  background: var(--color-accent);
+}
+.music-level-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-inline: 22px 50px;
+  font-size: 9px;
+}
+@media (max-width: 480px) {
+  .music-signal-stages {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+  .music-signal-stage dl > div {
+    gap: 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-level-fill {
+    transition: none;
+  }
+}
+.music-signal-stage h4 { display: inline-flex; align-items: center; gap: 5px; }
+.music-signal-stage h4 > svg { color: var(--color-ink-subtle); flex: none; }
+.music-signal-stages { padding-block-end: 10px; }
+
+[data-art-colors] .music-level-fill {
+  background: color-mix(in srgb, var(--music-art-accent) 40%, var(--color-ink));
+}
+[data-art-colors] .music-level-peak {
+  background: color-mix(in srgb, var(--music-art-accent) 75%, var(--color-ink));
+}

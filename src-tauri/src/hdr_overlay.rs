@@ -1,8 +1,12 @@
 use tauri::{
-    AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder,
+    AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, WebviewUrl, WebviewWindowBuilder,
 };
 
 pub const HDR_OVERLAY_LABEL: &str = "harbor-hdr-overlay";
+
+// Serialize creation with cleanup so stopping playback cannot leave a late overlay behind.
+static HDR_OVERLAY_OPERATION: tokio::sync::Mutex<Option<String>> =
+    tokio::sync::Mutex::const_new(None);
 
 #[cfg(windows)]
 fn set_no_activate(app: &AppHandle) {
@@ -26,82 +30,110 @@ fn set_no_activate(app: &AppHandle) {
     }
 }
 
-fn main_rect(app: &AppHandle) -> Result<((f64, f64), (f64, f64)), String> {
+fn main_rect(app: &AppHandle) -> Result<(PhysicalPosition<i32>, PhysicalSize<u32>), String> {
     let main = app
         .get_webview_window("main")
         .ok_or_else(|| "main missing".to_string())?;
-    let scale = main.scale_factor().unwrap_or(1.0);
     let size = main
         .inner_size()
-        .map_err(|e| format!("inner_size: {}", e))?
-        .to_logical::<f64>(scale);
+        .map_err(|e| format!("inner_size: {}", e))?;
     let pos = main
-        .outer_position()
-        .map_err(|e| format!("outer_position: {}", e))?
-        .to_logical::<f64>(scale);
-    Ok(((pos.x, pos.y), (size.width, size.height)))
+        .inner_position()
+        .map_err(|e| format!("inner_position: {}", e))?;
+    Ok((pos, size))
 }
 
 #[tauri::command]
-pub async fn hdr_overlay_open(app: AppHandle) -> Result<(), String> {
+pub async fn hdr_overlay_open(app: AppHandle, stage_id: String) -> Result<(), String> {
+    let mut operation = HDR_OVERLAY_OPERATION.lock().await;
+    *operation = Some(stage_id.clone());
+    crate::mpv::mpv_set_hdr_stage(app.clone(), false).await?;
     if let Some(w) = app.get_webview_window(HDR_OVERLAY_LABEL) {
-        let _ = w.show();
-        return hdr_overlay_sync(app).await;
+        w.hide().map_err(|e| e.to_string())?;
+        let mut url = w.url().map_err(|e| e.to_string())?;
+        url.query_pairs_mut()
+            .clear()
+            .append_pair("harbor-overlay", "1")
+            .append_pair("stageId", &stage_id);
+        w.navigate(url).map_err(|e| e.to_string())?;
+        return Ok(());
     }
-    let ((px, py), (sw, sh)) = main_rect(&app)?;
     let app_clone = app.clone();
-    let (tx, rx) = std::sync::mpsc::channel::<Result<(), String>>();
-    app.run_on_main_thread(move || {
-        let url = WebviewUrl::App("index.html?harbor-overlay=1".into());
+    // WebView2 creation must not run inside the UI event loop: it can deadlock
+    // that loop, including the tray and every other Harbor window.
+    tauri::async_runtime::spawn_blocking(move || -> Result<(), String> {
+        let url = WebviewUrl::App(format!("index.html?harbor-overlay=1&stageId={stage_id}").into());
         let builder = WebviewWindowBuilder::new(&app_clone, HDR_OVERLAY_LABEL, url)
             .title("Harbor HDR")
-            .inner_size(sw, sh)
-            .position(px, py)
             .resizable(false)
-            .always_on_top(true)
             .decorations(false)
             .skip_taskbar(true)
             .shadow(false)
-            .visible(true)
+            .visible(false)
             .focused(false);
         #[cfg(windows)]
-        let builder = builder.transparent(true);
-        let result = builder.build();
-        match result {
-            Ok(_) => {
-                let _ = tx.send(Ok(()));
-            }
-            Err(e) => {
-                let _ = tx.send(Err(e.to_string()));
-            }
-        }
+        let builder = {
+            let main = app_clone
+                .get_webview_window("main")
+                .ok_or_else(|| "main missing".to_string())?;
+            // An owned window stays above Harbor, not above unrelated applications.
+            builder
+                .transparent(true)
+                .parent(&main)
+                .map_err(|e| e.to_string())?
+        };
+        let builder = crate::browser_args::match_main(&app_clone, builder);
+        builder.build().map_err(|e| e.to_string())?;
+        Ok(())
     })
-    .map_err(|e| format!("run_on_main_thread: {}", e))?;
-
-    match rx.recv() {
-        Ok(Ok(())) => {
-            #[cfg(windows)]
-            {
-                set_no_activate(&app);
-                crate::webview_helpers::apply_transparency(&app, HDR_OVERLAY_LABEL);
-            }
-            Ok(())
-        }
-        Ok(Err(e)) => Err(e),
-        Err(e) => Err(format!("channel: {}", e)),
+    .await
+    .map_err(|e| format!("overlay creation worker: {e}"))??;
+    #[cfg(windows)]
+    {
+        set_no_activate(&app);
+        crate::webview_helpers::apply_transparency(&app, HDR_OVERLAY_LABEL);
     }
+    Ok(())
 }
 
 #[tauri::command]
-pub async fn hdr_overlay_close(app: AppHandle) -> Result<(), String> {
+pub async fn hdr_overlay_show(app: AppHandle, stage_id: String) -> Result<bool, String> {
+    let operation = HDR_OVERLAY_OPERATION.lock().await;
+    if operation.as_deref() != Some(stage_id.as_str()) {
+        return Ok(false);
+    }
+    let window = app
+        .get_webview_window(HDR_OVERLAY_LABEL)
+        .ok_or("HDR overlay missing")?;
+    // Physical client bounds avoid cross-monitor DPI conversion and frame offsets.
+    // Sync at handoff, not at boot: the main window may have moved while loading.
+    hdr_overlay_sync(app.clone()).await?;
+    window.show().map_err(|e| e.to_string())?;
+    crate::mpv::mpv_set_hdr_stage(app, true).await?;
+    Ok(true)
+}
+
+#[tauri::command]
+pub async fn hdr_overlay_close(app: AppHandle, stage_id: String) -> Result<(), String> {
+    let mut operation = HDR_OVERLAY_OPERATION.lock().await;
+    if operation.as_deref() != Some(stage_id.as_str()) {
+        return Ok(());
+    }
+    *operation = None;
+    crate::mpv::mpv_set_hdr_stage(app.clone(), false).await?;
     if let Some(w) = app.get_webview_window(HDR_OVERLAY_LABEL) {
-        let _ = w.close();
+        // Keep the hidden WebView for a later, explicitly navigated fresh boot.
+        // Closing/recreating the same label races Windows' asynchronous teardown.
+        w.hide().map_err(|e| e.to_string())?;
     }
     Ok(())
 }
 
 #[tauri::command]
 pub async fn hdr_overlay_hide(app: AppHandle) -> Result<(), String> {
+    let mut operation = HDR_OVERLAY_OPERATION.lock().await;
+    *operation = None;
+    crate::mpv::mpv_set_hdr_stage(app.clone(), false).await?;
     if let Some(w) = app.get_webview_window(HDR_OVERLAY_LABEL) {
         let _ = w.hide();
     }
@@ -114,18 +146,26 @@ pub async fn hdr_overlay_sync(app: AppHandle) -> Result<(), String> {
         Some(w) => w,
         None => return Ok(()),
     };
-    let ((px, py), (sw, sh)) = main_rect(&app)?;
-    let _ = overlay.set_position(LogicalPosition::new(px, py));
-    let _ = overlay.set_size(LogicalSize::new(sw, sh));
+    let (pos, size) = main_rect(&app)?;
+    overlay.set_position(pos).map_err(|e| e.to_string())?;
+    overlay.set_size(size).map_err(|e| e.to_string())?;
     #[cfg(windows)]
     crate::webview_helpers::apply_transparency(&app, HDR_OVERLAY_LABEL);
     Ok(())
 }
 
 #[tauri::command]
-pub async fn hdr_overlay_emit_props(app: AppHandle, payload: serde_json::Value) -> Result<(), String> {
-    let _ = app.emit_to(HDR_OVERLAY_LABEL, "hdr-stage://props", payload);
-    Ok(())
+pub async fn hdr_overlay_emit_props(
+    app: AppHandle,
+    mut payload: serde_json::Value,
+) -> Result<(), String> {
+    let operation = HDR_OVERLAY_OPERATION.lock().await;
+    let Some(stage_id) = operation.as_ref() else {
+        return Ok(());
+    };
+    payload["stageId"] = serde_json::Value::String(stage_id.clone());
+    app.emit_to(HDR_OVERLAY_LABEL, "hdr-stage://props", payload)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -133,7 +173,12 @@ pub async fn hdr_overlay_emit_action(
     app: AppHandle,
     event: String,
     payload: serde_json::Value,
+    stage_id: Option<String>,
 ) -> Result<(), String> {
-    let _ = app.emit_to("main", &event, payload);
-    Ok(())
+    let operation = HDR_OVERLAY_OPERATION.lock().await;
+    if operation.is_none() || *operation != stage_id {
+        return Ok(());
+    }
+    app.emit_to("main", &event, payload)
+        .map_err(|e| e.to_string())
 }

@@ -1,6 +1,50 @@
+import { t } from "@/lib/i18n";
+
+function htmlAttribute(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
 export type Recipe = { title: string; lang: "css" | "html" | "js"; code: string; why: string };
 
 export const RECIPES: Recipe[] = [
+  {
+    title: "Bell + account menu in your custom chrome",
+    lang: "html",
+    get code() {
+      return `<div style="display:flex; align-items:center; gap:6px; margin-inline-start:auto;">
+  <button data-harbor-notifications aria-label="${htmlAttribute(t("Notifications"))}"
+          style="position:relative; display:grid; place-items:center;
+                 width:38px; height:38px; border:0; border-radius:999px;
+                 background:transparent; color:var(--color-ink-muted); cursor:pointer;">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+    </svg>
+    <span data-harbor-unread data-empty
+          style="position:absolute; top:2px; right:2px; min-width:15px; height:15px;
+                 padding:0 3px; display:flex; align-items:center; justify-content:center;
+                 border-radius:999px; background:var(--color-accent);
+                 color:var(--color-canvas); font:700 9px var(--font-sans);"></span>
+  </button>
+  <button data-harbor-account aria-label="${htmlAttribute(t("Account"))}"
+          style="display:grid; place-items:center; width:38px; height:38px; border:0;
+                 border-radius:999px; background:transparent;
+                 color:var(--color-ink-muted); cursor:pointer;">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path>
+    </svg>
+  </button>
+</div>
+<style>[data-harbor-unread][data-empty] { display: none; }</style>`;
+    },
+    why: "Drop this in any custom top bar or sidebar. The attributes do everything: the bell opens the real notification center, the badge stays live, and the account button opens Harbor's real dropdown (profiles, View my profile, Notifications, sign in/out) anchored under it. Zero JS, and new menu items appear in your theme automatically with every Harbor update.",
+  },
   {
     title: "Tint the cinema badge",
     lang: "css",

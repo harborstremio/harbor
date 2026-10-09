@@ -1,4 +1,5 @@
 import { TogetherDeployModal } from "@/components/together-deploy-modal";
+import { useT } from "@/lib/i18n";
 import { RelayDocs } from "./relay-docs";
 import { TogetherRelayPanel } from "./relay-panel";
 import { Section } from "./shared";
@@ -14,6 +15,7 @@ export function RelaySection({
   mode: RelayMode;
   onModeChange: (mode: RelayMode) => void;
 }) {
+  const t = useT();
   if (mode === "panel") {
     return (
       <div
@@ -21,11 +23,11 @@ export function RelaySection({
         className="animate-in fade-in slide-in-from-left-3 rtl:slide-in-from-right-3 duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)]"
       >
         <Section
-          title="Harbor Relay"
+          title={t("Harbor Relay")}
           subtitle={
             IS_WEB
-              ? "Watch Together rooms are routed through Harbor's hosted relay."
-              : "A Cloudflare Worker on your own account that hosts your Watch Together rooms."
+              ? t("Watch Together rooms are routed through Harbor's hosted relay.")
+              : t("A Cloudflare Worker on your own account that hosts your Watch Together rooms.")
           }
         >
           <TogetherRelayPanel

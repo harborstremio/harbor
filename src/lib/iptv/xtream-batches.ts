@@ -12,7 +12,8 @@ type BatchOptions<T, R> = {
 
 function yieldToBrowser(): Promise<void> {
   return new Promise((resolve) => {
-    if (typeof requestAnimationFrame === "function") {
+    const hidden = typeof document !== "undefined" && document.hidden;
+    if (!hidden && typeof requestAnimationFrame === "function") {
       requestAnimationFrame(() => resolve());
       return;
     }

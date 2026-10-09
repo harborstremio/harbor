@@ -4,13 +4,15 @@ import { CatalogRows } from "@/components/catalog/catalog-rows";
 import { CatalogCustomizeBar } from "@/components/catalog/customize-bar";
 import { CinemaHero } from "@/components/cinema-hero";
 import { Row, ScrollRootContext } from "@/components/row";
-import { TopRankCard } from "@/components/top-rank-card";
 import { PickCard } from "@/components/pick-card";
 import { TmdbNudge } from "@/components/nudge";
+import { blackAndWhitePage } from "@/lib/black-and-white";
 import { topMovies, type Meta } from "@/lib/cinemeta";
-import { useCatalogPage, type CatalogRowSpec } from "@/lib/catalog-page";
+import { useHideAnimeMetas, useHideAnimeRows } from "@/lib/anime-hide";
 import { recentlyPlayed } from "@/lib/playback-history";
 import { useT } from "@/lib/i18n";
+import { listPager } from "@/lib/list-pager";
+import { CATALOG_REQUEST_TIMEOUT_MS, upsertOrdered, withTimeout } from "@/lib/progressive-rows";
 import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory, useView } from "@/lib/view";
@@ -18,50 +20,20 @@ import { useLetterboxd } from "@/lib/stremboxd/provider";
 import { buildLetterboxdHomeRows } from "@/lib/stremboxd/home-rails";
 import { LetterboxdRowMenu } from "@/components/letterboxd/letterboxd-row-menu";
 import type { HomeRow } from "./home/home-types";
+import { useCollectionRowsForPage } from "@/lib/page-collection-rows";
 import { buildMovieHero, HERO_POOL_TARGET, movieSpecs, rotateDaily } from "./movies/movie-specs";
 
 const MAX_PER_ROW = 30;
 
-const CINEMETA_GENRES = [
-  "Action",
-  "Drama",
-  "Comedy",
-  "Sci-Fi",
-  "Thriller",
-  "Horror",
-  "Romance",
-  "Animation",
-  "Adventure",
-  "Crime",
-  "Mystery",
-  "Fantasy",
-  "Documentary",
-] as const;
-
-function cinemetaMovieSpecs(): CatalogRowSpec[] {
-  return [
-    {
-      key: "cinemeta-top",
-      title: "Top Movies",
-      noPaginate: true,
-      fetcher: async () => {
-        const top = await topMovies().catch(() => [] as Meta[]);
-        return top.slice(0, 30);
-      },
-    },
-    ...CINEMETA_GENRES.map(
-      (g): CatalogRowSpec => ({
-        key: `cinemeta-genre-${g.toLowerCase().replace(/[^a-z]/g, "")}`,
-        title: `Top ${g}`,
-        noPaginate: true,
-        fetcher: async () => {
-          const list = await topMovies(g).catch(() => [] as Meta[]);
-          return list.slice(0, 30);
-        },
-      }),
-    ),
-  ];
-}
+type MovieRow = {
+  key: string;
+  title: string;
+  metas: Meta[];
+  page: number;
+  hasMore: boolean;
+  fetcher?: (page: number) => Promise<Meta[]>;
+  variant?: "rank";
+};
 
 export function Movies({ active = true }: { active?: boolean }) {
   const { settings } = useSettings();
@@ -69,37 +41,17 @@ export function Movies({ active = true }: { active?: boolean }) {
   const t = useT();
   const letterboxd = useLetterboxd();
   const pageRows = usePageRows("movies");
+  const [hero, setHero] = useState<Meta[]>([]);
+  const [rows, setRows] = useState<MovieRow[]>([]);
   const [letterboxdRows, setLetterboxdRows] = useState<HomeRow[]>([]);
+  const rowsRef = useRef<MovieRow[]>([]);
+  const loadingRef = useRef<Set<string>>(new Set());
   const scrollRef = useRef<HTMLElement>(null);
   const [scrollEl, setScrollEl] = useState<HTMLElement | null>(null);
 
-  const tmdbKey = settings.tmdbKey;
-  const region = settings.region;
-  const scope = tmdbKey ? `tmdb:${tmdbKey}:${region}` : "cinemeta";
-
-  const specs = useMemo<CatalogRowSpec[]>(
-    () => (tmdbKey ? movieSpecs(tmdbKey, region) : cinemetaMovieSpecs()),
-    [tmdbKey, region],
-  );
-
-  const heroFetcher = useCallback(async () => {
-    if (tmdbKey) return buildMovieHero(tmdbKey, recentlyPlayed());
-    const top = await topMovies().catch(() => [] as Meta[]);
-    return rotateDaily(
-      top.filter((m) => m.background),
-      HERO_POOL_TARGET,
-      recentlyPlayed(),
-    );
-  }, [tmdbKey]);
-
-  const { hero, rows, loadMore, loading } = useCatalogPage({
-    pageId: "movies",
-    scope,
-    specs,
-    heroFetcher,
-    enabled: active,
-    maxPerRow: MAX_PER_ROW,
-  });
+  useEffect(() => {
+    rowsRef.current = rows;
+  }, [rows]);
 
   useScrollMemory("movies", scrollRef, active);
 
@@ -148,11 +100,141 @@ export function Movies({ active = true }: { active?: boolean }) {
     setScrollEl(el);
   }, []);
 
-  const top10 = useMemo(() => {
-    const trending = rows.find((r) => r.key === "trending");
-    if (!trending) return [] as Meta[];
-    return trending.metas.slice(0, 10);
-  }, [rows]);
+  useEffect(() => {
+    let cancelled = false;
+    setHero([]);
+    setRows([]);
+    (async () => {
+      const seen = recentlyPlayed();
+      if (settings.tmdbKey) {
+        const specs = movieSpecs(settings.tmdbKey, settings.region);
+        const order = specs.map((spec) => spec.key);
+        void withTimeout(buildMovieHero(settings.tmdbKey, seen), CATALOG_REQUEST_TIMEOUT_MS)
+          .then((heroPool) => {
+            if (!cancelled) setHero(heroPool);
+          })
+          .catch(() => {});
+        const results = await Promise.allSettled(
+          specs.map(async (spec) => {
+            const metas = await withTimeout(spec.fetcher(1), CATALOG_REQUEST_TIMEOUT_MS);
+            if (cancelled || metas.length === 0) return false;
+            const row: MovieRow = {
+              key: spec.key,
+              title: spec.title,
+              metas,
+              page: 1,
+              hasMore: !spec.noPaginate && metas.length >= 14,
+              fetcher: spec.noPaginate ? undefined : spec.fetcher,
+            };
+            setRows((current) => upsertOrdered(current, row, order));
+            return true;
+          }),
+        );
+        if (cancelled) return;
+        if (results.some((result) => result.status === "fulfilled" && result.value)) return;
+      }
+      const genreList = [
+        "Action",
+        "Drama",
+        "Comedy",
+        "Sci-Fi",
+        "Thriller",
+        "Horror",
+        "Romance",
+        "Animation",
+        "Adventure",
+        "Crime",
+        "Mystery",
+        "Fantasy",
+        "Documentary",
+      ];
+      const [top, ...byGenre] = await Promise.all([
+        withTimeout(topMovies(), CATALOG_REQUEST_TIMEOUT_MS).catch(() => [] as Meta[]),
+        ...genreList.map((g) =>
+          withTimeout(topMovies(g), CATALOG_REQUEST_TIMEOUT_MS).catch(() => [] as Meta[]),
+        ),
+      ]);
+      if (cancelled) return;
+      setHero(
+        rotateDaily(
+          top.filter((m) => m.background),
+          HERO_POOL_TARGET,
+          seen,
+        ),
+      );
+      const built: MovieRow[] = [
+        {
+          key: "cinemeta-top",
+          title: "Top Movies",
+          metas: top.slice(0, 30),
+          page: 1,
+          hasMore: false,
+          fetcher: listPager(top),
+        },
+      ];
+      for (let i = 0; i < genreList.length; i++) {
+        const list = byGenre[i] ?? [];
+        if (list.length === 0) continue;
+        built.push({
+          key: `cinemeta-genre-${genreList[i].toLowerCase().replace(/[^a-z]/g, "")}`,
+          title: `Top ${genreList[i]}`,
+          metas: list.slice(0, 30),
+          page: 1,
+          hasMore: false,
+          fetcher: listPager(list),
+        });
+      }
+      built.push({
+        key: "black-and-white",
+        title: "In Black and White",
+        metas: await blackAndWhitePage(1),
+        page: 1,
+        hasMore: false,
+        fetcher: blackAndWhitePage,
+      });
+      setRows(built);
+    })().catch(console.error);
+    return () => {
+      cancelled = true;
+    };
+  }, [settings.tmdbKey, settings.region]);
+
+  const loadMore = useCallback((rowKey: string) => {
+    if (loadingRef.current.has(rowKey)) return;
+    const row = rowsRef.current.find((r) => r.key === rowKey);
+    if (!row || !row.fetcher || !row.hasMore || row.metas.length >= MAX_PER_ROW) return;
+    loadingRef.current.add(rowKey);
+    const next = row.page + 1;
+    row
+      .fetcher(next)
+      .then((more) => {
+        setRows((rs) =>
+          rs.map((r) => {
+            if (r.key !== rowKey) return r;
+            const ids = new Set(r.metas.map((m) => m.id));
+            const fresh = more.filter((m) => !ids.has(m.id));
+            const combined = [...r.metas, ...fresh];
+            const reachedCap = combined.length >= MAX_PER_ROW;
+            return {
+              ...r,
+              metas: reachedCap ? combined.slice(0, MAX_PER_ROW) : combined,
+              page: next,
+              hasMore: !reachedCap && more.length > 0,
+            };
+          }),
+        );
+      })
+      .catch(() => {})
+      .finally(() => {
+        loadingRef.current.delete(rowKey);
+      });
+  }, []);
+
+  const shownHero = useHideAnimeMetas(hero);
+  const shownLetterboxdRows = useHideAnimeRows(letterboxdRows);
+  const trendingMetas = useMemo(() => rows.find((r) => r.key === "trending")?.metas ?? [], [rows]);
+  const shownTrending = useHideAnimeMetas(trendingMetas);
+  const top10 = useMemo(() => shownTrending.slice(0, 10), [shownTrending]);
 
   const restRows = useMemo(() => {
     const seen = new Set<string>();
@@ -160,30 +242,60 @@ export function Movies({ active = true }: { active?: boolean }) {
     if (top10.length > 0) {
       for (const m of top10) seen.add(m.id);
     }
-    return (
-      rows
-        .filter((r) => r.key !== "trending" || top10.length === 0)
-        .map((r) => {
-          const dedupedMetas = r.metas.filter((m) => {
-            if (seen.has(m.id)) return false;
-            seen.add(m.id);
-            return true;
-          });
-          return { ...r, metas: dedupedMetas };
-        })
-        // Keep partial rows while loading; only drop tiny rails once we have content.
-        .filter((r) => r.metas.length >= (loading && rows.length < 3 ? 1 : 4))
-    );
-  }, [rows, hero, top10, loading]);
+    return rows
+      .filter((r) => r.key !== "trending" || top10.length === 0)
+      .map((r) => {
+        const dedupedMetas = r.metas.filter((m) => {
+          if (seen.has(m.id)) return false;
+          seen.add(m.id);
+          return true;
+        });
+        return { ...r, metas: dedupedMetas };
+      })
+      .filter((r) => r.metas.length >= 4);
+  }, [rows, hero, top10]);
+
+  const movieCollections = useCollectionRowsForPage("movies");
+  const collectionRows = useMemo<MovieRow[]>(
+    () =>
+      movieCollections
+        .filter((c) => c.items.length > 0)
+        .map((c) => ({
+          key: `collection-${c.id}`,
+          title: c.name,
+          metas: c.items.map((it) => ({
+            id: it.id,
+            type: it.type,
+            name: it.name,
+            poster: it.poster,
+          })),
+          page: 1,
+          hasMore: false,
+        })),
+    [movieCollections],
+  );
+  const allRestRows = useMemo(() => [...collectionRows, ...restRows], [collectionRows, restRows]);
+  const catalogRows = useMemo<MovieRow[]>(() => {
+    if (top10.length < 10) return allRestRows;
+    const trending = rows.find((r) => r.key === "trending");
+    return [
+      {
+        key: "top10",
+        title: "Top 10 Movies Today",
+        metas: top10.slice(0, 10),
+        page: 1,
+        hasMore: false,
+        fetcher: trending?.fetcher,
+        variant: "rank",
+      },
+      ...allRestRows,
+    ];
+  }, [top10, rows, allRestRows]);
 
   return (
-    <main ref={scrollCb} className="relative h-full overflow-y-auto bg-canvas">
+    <main ref={scrollCb} className="relative h-full overflow-y-auto overflow-x-hidden bg-canvas">
       <ScrollRootContext.Provider value={scrollEl}>
-        {hero.length > 0 ? (
-          <CinemaHero slides={hero} eyebrow={t("Featured tonight")} />
-        ) : (
-          <div className="h-[42vh] min-h-[280px] w-full animate-pulse bg-elevated/40" />
-        )}
+        <CinemaHero slides={shownHero} eyebrow={t("Featured tonight")} />
         <div className="relative flex w-full flex-col gap-12 px-12 pb-32 pt-12">
           <CatalogCustomizeBar
             editMode={pageRows.editMode}
@@ -192,32 +304,14 @@ export function Movies({ active = true }: { active?: boolean }) {
             onReset={() => pageRows.persist(resetPageRows())}
           />
           {!settings.tmdbKey && <TmdbNudge />}
-          {loading && restRows.length === 0 && (
-            <div className="flex flex-col gap-10">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="flex flex-col gap-4">
-                  <div className="h-5 w-48 animate-pulse rounded bg-elevated/50" />
-                  <div className="flex gap-5 overflow-hidden">
-                    {Array.from({ length: 7 }).map((_, j) => (
-                      <div
-                        key={j}
-                        className="h-52 w-36 shrink-0 animate-pulse rounded-xl bg-elevated/40"
-                        style={{ animationDelay: `${j * 60}ms` }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          {letterboxdRows.map((row, i) => {
+          {shownLetterboxdRows.map((row, i) => {
             const catalogId = row.key.replace("letterboxd-", "");
             return (
               <Row
                 key={row.key}
                 title={
                   <>
-                    {t(row.name)}
+                    {row.name}
                     <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
                       Letterboxd
                     </span>
@@ -226,7 +320,7 @@ export function Movies({ active = true }: { active?: boolean }) {
                 titleExtra={
                   <LetterboxdRowMenu
                     canMoveUp={i > 0}
-                    canMoveDown={i < letterboxdRows.length - 1}
+                    canMoveDown={i < shownLetterboxdRows.length - 1}
                     hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
                     onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
                     onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
@@ -238,8 +332,7 @@ export function Movies({ active = true }: { active?: boolean }) {
                 scrollKey={`movies:${row.key}`}
                 onViewAll={
                   row.fetcher
-                    ? () =>
-                        openGrid({ title: t(row.name), fetcher: row.fetcher!, initial: row.metas })
+                    ? () => openGrid({ title: row.name, fetcher: row.fetcher!, initial: row.metas })
                     : undefined
                 }
               >
@@ -249,31 +342,8 @@ export function Movies({ active = true }: { active?: boolean }) {
               </Row>
             );
           })}
-          {top10.length >= 10 && (
-            <Row
-              title={t("Top 10 Movies Today")}
-              min={216}
-              shape="rank"
-              scrollKey="movies:top10"
-              onViewAll={(() => {
-                const trending = rows.find((r) => r.key === "trending");
-                return trending?.fetcher
-                  ? () =>
-                      openGrid({
-                        title: t(trending.title),
-                        fetcher: trending.fetcher!,
-                        initial: trending.metas,
-                      })
-                  : undefined;
-              })()}
-            >
-              {top10.slice(0, 10).map((m, i) => (
-                <TopRankCard key={m.id} meta={m} rank={i + 1} />
-              ))}
-            </Row>
-          )}
           <CatalogRows
-            rows={restRows}
+            rows={catalogRows}
             editMode={pageRows.editMode}
             custom={pageRows.custom}
             onPersist={pageRows.persist}

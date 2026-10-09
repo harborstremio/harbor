@@ -2,6 +2,7 @@ import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import anilistLogo from "@/assets/anilist.png";
 import { AnchoredMenu } from "@/components/anchored-menu";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import { deleteListEntry, fetchListEntry, saveListEntry } from "@/lib/anilist/mutations";
 import { useAnilist } from "@/lib/anilist/provider";
 import { resolveAnilistMediaId } from "@/lib/anilist/sync";
@@ -32,21 +33,24 @@ export function AddToAnilistButton({ harborId, title }: { harborId: string; titl
   const [mediaId, setMediaId] = useState<number | null>(null);
   const [entryId, setEntryId] = useState<number | null>(null);
   const [status, setStatus] = useState<MediaListStatus | null>(null);
-  const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const btnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    setAttempt(0);
+  }, [harborId]);
 
   useEffect(() => {
     if (!isConnected) return;
     let cancelled = false;
-    setReady(false);
+    let timer: number | undefined;
     (async () => {
-      const id = await resolveAnilistMediaId(harborId);
+      const id = await resolveAnilistMediaId(harborId).catch(() => null);
       if (cancelled) return;
       if (id == null) {
-        setMediaId(null);
-        setReady(true);
+        if (attempt < 2) timer = window.setTimeout(() => setAttempt((a) => a + 1), 15000);
         return;
       }
       setMediaId(id);
@@ -54,14 +58,14 @@ export function AddToAnilistButton({ harborId, title }: { harborId: string; titl
       if (cancelled) return;
       setEntryId(info?.entry?.id ?? null);
       setStatus(info?.entry?.status ?? null);
-      setReady(true);
     })();
     return () => {
       cancelled = true;
+      if (timer != null) window.clearTimeout(timer);
     };
-  }, [harborId, isConnected]);
+  }, [harborId, isConnected, attempt]);
 
-  if (!isConnected || !ready || mediaId == null) return null;
+  if (!isConnected || mediaId == null) return null;
 
   const setTo = async (next: MediaListStatus) => {
     setBusy(true);
@@ -99,17 +103,18 @@ export function AddToAnilistButton({ harborId, title }: { harborId: string; titl
 
   if (status == null) {
     return (
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => void setTo("PLANNING")}
-        title={t("Add {title} to AniList", { title })}
-        className="flex h-12 items-center gap-2.5 rounded-full border border-edge bg-canvas/80 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[transform,background-color,border-color] duration-200 hover:border-ink-subtle hover:bg-canvas/95 active:scale-[0.98] disabled:opacity-60"
-      >
-        <img src={anilistLogo} alt="" className="h-[18px] w-[18px] rounded-[3px] object-contain" />
-        <Plus size={16} strokeWidth={2.2} className="-ms-1" />
-        {t("Add to AniList")}
-      </button>
+      <HoverTooltip label={t("Add {title} to AniList", { title })} align="center" className="shrink-0">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void setTo("PLANNING")}
+          className="flex h-12 items-center gap-2.5 rounded-full bg-canvas/80 px-6 text-[15px] font-medium text-ink transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.98] disabled:opacity-60"
+        >
+          <img src={anilistLogo} alt="" className="h-[18px] w-[18px] rounded-[3px] object-contain" />
+          <Plus size={16} strokeWidth={2.2} className="-ms-1" />
+          {t("Add to AniList")}
+        </button>
+      </HoverTooltip>
     );
   }
 

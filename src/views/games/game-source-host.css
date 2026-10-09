@@ -1,0 +1,19 @@
+.games-host-check{margin:0 0 16px;color:var(--color-ink)}
+.games-host-heading{display:flex;align-items:center;justify-content:space-between;min-height:32px}
+.games-host-toggle{display:flex;align-items:center;gap:7px;background:none;border:0;padding:6px 0;color:var(--color-ink-muted);font-size:12px;text-align:start}
+.games-host-toggle[aria-expanded=true]{color:var(--color-ink)}
+.games-host-toggle>svg:last-child{transition:transform 180ms ease}.games-host-toggle[aria-expanded=true]>svg:last-child{transform:rotate(180deg)}
+.games-host-reveal{display:grid;grid-template-rows:0fr;opacity:0;visibility:hidden;transition:grid-template-rows 200ms ease,opacity 150ms ease,visibility 0s linear 200ms}
+.games-host-reveal[data-open=true]{grid-template-rows:1fr;opacity:1;visibility:visible;transition-delay:0s}
+.games-host-reveal>div{min-height:0;overflow:hidden}
+.games-host-details{padding:12px 0 0;max-height:230px;overflow:auto;overscroll-behavior:contain}
+.games-host-identity{display:flex;align-items:center;gap:10px}.games-host-identity>img{object-fit:contain;flex-shrink:0}.games-host-identity>svg{color:var(--color-ink-muted);flex-shrink:0}
+.games-host-identity>div{display:grid;gap:5px;min-width:0}.games-host-identity strong{font-size:13px;overflow-wrap:anywhere}
+.games-host-state{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-ink-muted)}.games-host-state>i{width:5px;height:5px;flex-shrink:0;border-radius:50%;background:currentColor}
+.games-host-state.is-available>i{background:var(--color-success)}.games-host-state:is(.is-down,.is-limited)>i{background:var(--color-accent)}
+.games-host-allowances{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px;margin:14px 0}.games-host-allowances>div{min-width:0}.games-host-allowances dt{font-size:11px;line-height:1.5;color:var(--color-ink-muted)}.games-host-allowances dd{margin:3px 0 0;font-size:13px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.games-source-link-body .games-host-details p{font-size:12px;line-height:1.6;margin:10px 0;overflow-wrap:anywhere}.games-host-details small{font-size:11px;color:var(--color-ink-muted)}
+.games-host-loading{display:grid;grid-template-columns:28px 1fr;gap:6px 10px;min-height:60px}.games-host-loading i{grid-row:1/3;width:28px;height:28px}.games-host-loading span{max-width:180px;height:10px}.games-host-loading :is(i,span){background:var(--color-elevated);border-radius:3px;animation:games-source-link-pulse 1.2s ease-in-out infinite alternate}
+.games-host-error{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:12px;line-height:1.6;color:var(--color-ink-muted)}
+.games-source-link-options:has(.games-host-reveal[data-open=true]){flex-shrink:1;max-height:42dvh}
+@media(prefers-reduced-motion:reduce){.games-host-toggle>svg:last-child,.games-host-reveal{transition:none}.games-host-loading :is(i,span){animation:none}}

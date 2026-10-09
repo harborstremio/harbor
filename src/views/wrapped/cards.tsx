@@ -1,8 +1,8 @@
-import { BarChart3, Cat, Film, Tv } from "lucide-react";
+import { BarChart3, CalendarClock, Cat, Film, Flame, Sparkles, Tv } from "lucide-react";
 import type { ReactNode } from "react";
 import { Poster } from "@/components/poster";
 import { useT } from "@/lib/i18n";
-import type { WrappedStats } from "@/lib/wrapped/types";
+import type { TopTitle, WrappedStats } from "@/lib/wrapped/types";
 
 function Card({ children, tint }: { children: ReactNode; tint?: boolean }) {
   return (
@@ -79,23 +79,104 @@ export function SplitCard({ stats }: { stats: WrappedStats }) {
   );
 }
 
-export function TopTitlesCard({ stats }: { stats: WrappedStats }) {
+export function TopTitlesCard({ stats, onOpen }: { stats: WrappedStats; onOpen: (tt: TopTitle) => void }) {
   const t = useT();
   if (stats.topTitles.length === 0) return null;
   return (
     <Card>
       <Label>{t("Top titles")}</Label>
-      <div className="flex flex-col gap-2.5">
-        {stats.topTitles.map((tt, i) => (
-          <div key={tt.id} className="flex items-center gap-3">
+      <div className="flex flex-col gap-1">
+        {stats.topTitles.slice(0, 10).map((tt, i) => (
+          <button
+            key={tt.id}
+            type="button"
+            onClick={() => onOpen(tt)}
+            className="group/row flex items-center gap-3 rounded-xl px-2 py-1.5 text-start transition-colors hover:bg-canvas/50 active:scale-[0.99] motion-reduce:active:scale-100"
+          >
             <span className="w-5 shrink-0 text-end font-display text-[15px] text-ink-subtle">{i + 1}</span>
             <div className="w-9 shrink-0 overflow-hidden rounded-md">
               <Poster src={stats.posters[tt.id]} seed={tt.id} ratio="portrait" />
             </div>
-            <span className="min-w-0 flex-1 truncate text-[14.5px] text-ink">{tt.title}</span>
+            <span className="min-w-0 flex-1 truncate text-[14.5px] text-ink transition-colors group-hover/row:text-accent">
+              {tt.title}
+            </span>
             <span className="shrink-0 text-[12.5px] font-semibold tabular-nums text-ink-muted">
               {tt.count}
             </span>
+          </button>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function initials(name: string): string {
+  const parts = name.split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase() || "?";
+}
+
+export function ActorsCard({ stats }: { stats: WrappedStats }) {
+  const t = useT();
+  if (stats.topActors.length === 0) return null;
+  return (
+    <Card>
+      <Label>{t("People you watch")}</Label>
+      <div className="grid grid-cols-1 gap-x-7 gap-y-3.5 sm:grid-cols-2">
+        {stats.topActors.map((a) => (
+          <div key={a.name} className="flex items-center gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-canvas/70 font-display text-[13.5px] text-ink-subtle ring-1 ring-edge-soft">
+              {a.photo ? (
+                <img src={a.photo} alt="" draggable={false} className="h-full w-full object-cover" />
+              ) : (
+                initials(a.name)
+              )}
+            </span>
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-[14px] font-medium text-ink">{a.name}</span>
+              <span className="text-[12px] text-ink-muted">{t("{n} titles", { n: a.count })}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function prettyDate(iso: string): string {
+  const d = new Date(`${iso}T00:00:00`);
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+export function HighlightsCard({ stats }: { stats: WrappedStats }) {
+  const t = useT();
+  const rows: Array<{ icon: typeof Sparkles; title: string; body: string }> = [];
+  if (stats.archetype.label) {
+    rows.push({ icon: Sparkles, title: stats.archetype.label, body: stats.archetype.blurb });
+  }
+  if (stats.longestBinge.count > 1) {
+    rows.push({
+      icon: Flame,
+      title: t("Longest binge"),
+      body: `${t("{n} in a day", { n: stats.longestBinge.count })} · ${prettyDate(stats.longestBinge.date)}`,
+    });
+  }
+  if (stats.firstPlay) {
+    rows.push({ icon: CalendarClock, title: t("Where it started"), body: stats.firstPlay.title });
+  }
+  if (rows.length === 0) return null;
+  return (
+    <Card tint>
+      <Label>{t("Highlights")}</Label>
+      <div className="flex flex-col gap-4">
+        {rows.map((r) => (
+          <div key={r.title} className="flex items-start gap-3.5">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-canvas/60 text-accent ring-1 ring-edge-soft">
+              <r.icon size={17} strokeWidth={2} />
+            </span>
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <span className="text-[14px] font-semibold text-ink">{r.title}</span>
+              <span className="text-[12.5px] leading-relaxed text-ink-muted">{r.body}</span>
+            </div>
           </div>
         ))}
       </div>

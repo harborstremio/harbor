@@ -3,32 +3,19 @@ import { invoke } from "@tauri-apps/api/core";
 import { isWindowsDesktop } from "@/lib/platform";
 import {
   hdrOverlayClose,
-  hdrOverlayHide,
   hdrOverlayOpen,
+  hdrOverlayShow,
   onHdrStageDead,
   onHdrStageReady,
 } from "@/lib/hdr-overlay";
 import type { Settings } from "@/lib/settings";
+import { startHdrStageSession } from "@/lib/player/hdr-stage-session";
 
 const HDR_GAMMAS = new Set(["pq", "hlg"]);
 const MONITOR_DEBOUNCE_MS = 600;
-const LIVENESS_TIMEOUT_MS = 8000;
-const COLD_BOOT_TIMEOUT_MS = 12000;
-const MAX_BOOT_RETRIES = 2;
-const MAX_LIVENESS_REOPENS = 3;
 const RECOVERY_POLL_MS = 4000;
 
 export type HdrStageState = { requested: boolean; confirmed: boolean };
-
-function raiseStage() {
-  void invoke("mpv_set_hdr_stage", { active: true }).catch(() => {});
-  window.dispatchEvent(new Event("harbor:mpv-force-geom"));
-}
-
-function dropStage() {
-  void invoke("mpv_set_hdr_stage", { active: false }).catch(() => {});
-  window.dispatchEvent(new Event("harbor:mpv-force-geom"));
-}
 
 async function displayHdrActive(): Promise<boolean> {
   try {
@@ -39,6 +26,7 @@ async function displayHdrActive(): Promise<boolean> {
 }
 
 export function useHdrStage(params: {
+  sourceKey: string;
   engine: "html5" | "mpv";
   embedActive: boolean;
   hdrGamma: string;
@@ -46,13 +34,16 @@ export function useHdrStage(params: {
   playerHdrToSdr: boolean;
   onFallback?: () => void;
 }): HdrStageState {
-  const { engine, embedActive, hdrGamma, playerHdrStage, playerHdrToSdr, onFallback } = params;
+  const { sourceKey, engine, embedActive, hdrGamma, playerHdrStage, playerHdrToSdr, onFallback } =
+    params;
   const [want, setWant] = useState(false);
   const [requested, setRequested] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [failed, setFailed] = useState(false);
   const onFallbackRef = useRef(onFallback);
   onFallbackRef.current = onFallback;
+
+  useEffect(() => setFailed(false), [sourceKey, playerHdrStage, playerHdrToSdr]);
 
   const eligible =
     isWindowsDesktop() &&
@@ -76,6 +67,7 @@ export function useHdrStage(params: {
     if (!isTauri) return;
     let cancelled = false;
     let unMoved: (() => void) | null = null;
+    let unFlip: (() => void) | null = null;
     let timer: number | null = null;
     const recheck = async () => {
       const w = await displayHdrActive();
@@ -91,10 +83,22 @@ export function useHdrStage(params: {
       if (cancelled) off();
       else unMoved = off;
     })();
+    // The display-info script flips the display a beat after the video
+    // opens; re-check once the OS-level flip lands so staging follows it.
+    void (async () => {
+      const { listen } = await import("@tauri-apps/api/event");
+      const off = await listen("hdr-stage://display-status", () => {
+        if (timer != null) window.clearTimeout(timer);
+        timer = window.setTimeout(() => void recheck(), 250);
+      });
+      if (cancelled) off();
+      else unFlip = off;
+    })();
     return () => {
       cancelled = true;
       if (timer != null) window.clearTimeout(timer);
       unMoved?.();
+      unFlip?.();
     };
   }, [eligible, playerHdrStage]);
 
@@ -102,89 +106,35 @@ export function useHdrStage(params: {
     if (!want) return;
     const isTauri = "__TAURI__" in window || "__TAURI_INTERNALS__" in window;
     if (!isTauri) return;
-    let cancelled = false;
-    let unReady: (() => void) | null = null;
-    let unDead: (() => void) | null = null;
-    let timer: number | null = null;
-    let confirmedOnce = false;
-    let bootAttempts = 0;
-    let livenessReopens = 0;
     setRequested(true);
-
-    const clearTimer = () => {
-      if (timer != null) {
-        window.clearTimeout(timer);
-        timer = null;
-      }
-    };
-    const armTimer = (ms: number, fn: () => void) => {
-      clearTimer();
-      timer = window.setTimeout(fn, ms);
-    };
-    const giveUp = () => {
-      if (cancelled) return;
-      clearTimer();
-      dropStage();
-      setConfirmed(false);
-      onFallbackRef.current?.();
-      setFailed(true);
-    };
-    const onBootTimeout = () => {
-      if (cancelled) return;
-      if (bootAttempts < MAX_BOOT_RETRIES) {
-        bootAttempts += 1;
-        armTimer(COLD_BOOT_TIMEOUT_MS, onBootTimeout);
-        void hdrOverlayOpen();
-        return;
-      }
-      giveUp();
-    };
-    const onLivenessTimeout = () => {
-      if (cancelled) return;
-      if (livenessReopens < MAX_LIVENESS_REOPENS) {
-        livenessReopens += 1;
-        confirmedOnce = false;
-        armTimer(COLD_BOOT_TIMEOUT_MS, onBootTimeout);
-        void hdrOverlayOpen();
-        return;
-      }
-      giveUp();
-    };
-    const onReady = () => {
-      if (cancelled) return;
-      livenessReopens = 0;
-      armTimer(LIVENESS_TIMEOUT_MS, onLivenessTimeout);
-      if (!confirmedOnce) {
-        confirmedOnce = true;
-        raiseStage();
-        setConfirmed(true);
-      }
-    };
-    const onDead = () => giveUp();
-
-    void (async () => {
-      unReady = await onHdrStageReady(onReady);
-      unDead = await onHdrStageDead(onDead);
-      if (cancelled) {
-        unReady?.();
-        unDead?.();
-        return;
-      }
-      armTimer(COLD_BOOT_TIMEOUT_MS, onBootTimeout);
-      await hdrOverlayOpen();
-    })();
-
+    const stop = startHdrStageSession({
+      id: () => crypto.randomUUID(),
+      open: hdrOverlayOpen,
+      show: hdrOverlayShow,
+      close: async (id) => {
+        await hdrOverlayClose(id);
+        window.dispatchEvent(new Event("harbor:mpv-force-geom"));
+      },
+      ready: onHdrStageReady,
+      dead: onHdrStageDead,
+      confirmed: (active) => {
+        setConfirmed(active);
+        window.dispatchEvent(new Event("harbor:mpv-force-geom"));
+      },
+      fallback: () => {
+        onFallbackRef.current?.();
+        setFailed(true);
+      },
+      schedule: (callback, ms) => {
+        const timer = window.setTimeout(callback, ms);
+        return () => window.clearTimeout(timer);
+      },
+    });
     return () => {
-      cancelled = true;
-      clearTimer();
-      unReady?.();
-      unDead?.();
+      stop();
       setRequested(false);
-      setConfirmed(false);
-      void hdrOverlayHide();
-      dropStage();
     };
-  }, [want]);
+  }, [want, sourceKey]);
 
   useEffect(() => {
     if (!failed) return;
@@ -199,12 +149,6 @@ export function useHdrStage(params: {
     }, RECOVERY_POLL_MS);
     return () => window.clearInterval(id);
   }, [failed]);
-
-  useEffect(() => {
-    return () => {
-      void hdrOverlayClose();
-    };
-  }, []);
 
   return { requested, confirmed };
 }

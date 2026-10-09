@@ -1,0 +1,263 @@
+.games-browser-roms { position:relative; margin-top:calc(-1 * var(--games-chrome-inset));padding-top:var(--games-chrome-inset);overflow:clip; }
+.games-browser-roms>.games-mast {position:absolute;inset-inline:0;top:var(--games-chrome-inset);color:#f5f5f5;z-index:3}
+.games-browser-roms>.games-mast nav button {color:#ffffffb8}
+.games-browser-roms>.games-mast nav button[aria-current] {color:#fff}
+.games-browser-roms>.games-mast .games-search {background:#111a;backdrop-filter:blur(12px);color:#fff}
+.games-browser-roms>.games-mast .games-search input {color:#fff}
+.games-roms {min-width:0}
+.games-browser-roms:has(.games-roms.is-browsing)>.games-mast {position:relative;top:0;color:var(--color-ink)}
+.games-browser-roms:has(.games-roms.is-browsing)>.games-mast nav button {color:var(--color-ink-muted)}
+.games-browser-roms:has(.games-roms.is-browsing)>.games-mast nav button[aria-current] {color:var(--color-ink)}
+.games-browser-roms:has(.games-roms.is-browsing)>.games-mast .games-search {background:var(--color-elevated);color:var(--color-ink)}
+.games-browser-roms:has(.games-roms.is-browsing)>.games-mast .games-search input {color:var(--color-ink)}
+.games-roms.is-browsing .games-rom-hero {display:none}
+.games-rom-hero {position:relative;isolation:isolate;margin-top:calc(-1 * var(--games-chrome-inset));min-height:calc(530px + var(--games-chrome-inset));padding-top:calc(96px + var(--games-chrome-inset));display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;color:#fff;background:var(--color-canvas)}
+.games-rom-hero-art {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:75% 35%;z-index:-2;opacity:0;transition:opacity 600ms ease}
+.games-rom-hero-art.is-active {opacity:1}
+.games-rom-hero-shade {position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,var(--color-canvas),transparent 65%),linear-gradient(90deg,#000d,#0008 36%,#0001 78%),linear-gradient(180deg,#0009,transparent 35%);pointer-events:none}
+.games-rom-hero-copy {padding-block:12px 24px;max-width:700px;min-height:345px;display:flex;flex-direction:column;justify-content:center}
+.games-rom-hero-kicker {display:flex;gap:14px;align-items:center;font-size:12px;color:#ffffffbd;margin-bottom:20px}
+.games-rom-hero-kicker i {width:3px;height:3px;border-radius:50%;background:currentColor}
+.games-rom-hero h2 {font-size:clamp(36px,4.8cqw,64px);line-height:1.07;font-weight:650;letter-spacing:-.045em;text-wrap:balance;max-width:19ch;margin:0 0 22px}
+.games-rom-copy-enter>p {font-size:15px;line-height:1.65;max-width:51ch;color:#ffffffe0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 16px}
+.games-rom-hero-facts {display:flex;align-items:center;gap:16px;color:#ffffffbf;font-size:12px;margin-bottom:25px}
+.games-rom-hero .games-button {background:#ffffffeb;color:#171717;min-height:44px}
+.games-rom-hero .games-button:hover {background:#fff}
+.games-rom-hero-bottom {display:flex;align-items:start;padding-bottom:22px;min-height:88px}
+.games-rom-hero-picker {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;min-width:0;flex:1}
+.games-rom-hero-picker button {position:relative;display:flex;align-items:center;gap:12px;padding:12px;border-radius:6px;text-align:start;min-width:0;min-height:64px;color:#ffffffb8;background:#ffffff08;transition:background 180ms,color 180ms}
+.games-rom-hero-picker button[aria-pressed=true] {background:#ffffff12;color:#fff}
+.games-rom-hero-picker button:hover {background:#ffffff1c;color:#fff}
+.games-rom-hero-picker img {width:32px;height:46px;flex:none;object-fit:cover;border-radius:3px}
+.games-rom-hero-picker span {font-size:12px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.games-rom-hero-skeleton {height:300px;display:flex;flex-direction:column;gap:25px;width:min(500px,80cqw)}
+.games-rom-hero-skeleton .games-skeleton-logo {height:100px;width:90%}
+.games-rom-body {padding-bottom:50px}
+.games-rom-body .games-section {margin-top:40px}
+.games-rom-body .games-section-heading {margin-bottom:24px;gap:20px}
+.games-rom-body .games-section-heading h2 {font-size:clamp(23px,2.4cqw,29px)}
+.games-rom-grid {display:grid;gap:20px;min-width:0}
+.games-rom-card {min-width:0}
+.games-rom-card-main {width:100%;display:block;text-align:start}
+.games-rom-cover {aspect-ratio:2/3;overflow:hidden;border-radius:6px;background:var(--color-surface)}
+.games-rom-cover img {width:100%;height:100%;object-fit:cover;transition:transform 250ms ease}
+.games-rom-card-main:hover img {transform:scale(1.025)}
+.games-rom-card h3 {font-size:14px;font-weight:600;line-height:1.4;margin:12px 0 6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.games-rom-card-main>span {display:block;font-size:12px;line-height:1.6;color:var(--color-ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.games-rom-card-meta {display:flex;align-items:center;gap:8px;margin-top:8px;min-height:30px}
+.games-rom-card-meta>span {font-size:11px;color:var(--color-ink-muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.games-rom-card-meta>.games-icon-button {margin-inline-start:auto;flex:none;width:30px;height:30px;background:transparent;color:var(--color-ink-muted)}
+.games-rom-card-meta>.games-icon-button[aria-pressed=true] {color:var(--color-accent)}
+.games-rom-score {display:inline-flex;align-items:baseline;gap:2px;padding:4px 6px;border-radius:3px;background:#087944;color:#fff;font-size:12px;font-weight:700;white-space:nowrap}
+.games-rom-score small {font-size:8px;font-weight:500}
+.games-rom-score[data-tone=mixed] {background:#a25207}
+.games-rom-score[data-tone=low] {background:#ab3530}
+.games-rom-catalog-grid {grid-template-columns:repeat(6,minmax(0,1fr))}
+.games-rom-filters {display:flex;gap:12px;align-items:center;margin:22px 0;flex-wrap:wrap}
+.games-rom-filters>[role=status] {margin-inline-start:auto;font-size:12px;color:var(--color-ink-muted)}
+.games-rom-hacks-entry {display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:40px;align-items:center;padding-block:36px;margin-block:48px;border-block:1px solid var(--color-edge-soft);min-height:320px}
+.games-rom-hacks-copy h2 {font-size:clamp(26px,2.8cqw,36px);letter-spacing:-.04em;line-height:1.15;margin:12px 0 16px;text-wrap:balance}
+.games-rom-hacks-copy p {font-size:14px;line-height:1.65;color:var(--color-ink-muted);margin-bottom:22px;max-width:44ch}
+.games-rom-hacks-copy>span {font-size:12px;color:var(--color-ink-muted)}
+.games-rom-hacks-art {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-self:stretch;align-items:center}
+.games-rom-hacks-art>button {min-width:0;text-align:start}
+.games-rom-hack-scene {display:block;position:relative;height:174px;margin-bottom:14px}
+.games-rom-hack-scene>img:first-child {width:100%;height:100%;border-radius:6px;object-fit:cover}
+.games-rom-hack-scene .games-rom-hack-cover {position:absolute;width:62px;height:88px;inset-inline-start:10px;bottom:-6px;object-fit:cover;border-radius:4px}
+.games-rom-hacks-art strong {display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:14px;font-weight:600;line-height:1.45;min-height:2.9em}
+.games-rom-hacks-art>button>span:last-child {display:block;margin-top:6px;font-size:12px;color:var(--color-ink-muted);line-height:1.5}
+.games-rom-source {font-size:11px;line-height:1.7;color:var(--color-ink-muted);margin-top:35px}
+@media(prefers-reduced-motion:reduce){.games-rom-hero-art,.games-rom-cover img{transition:none}}
+
+.games-rom-hero-empty{min-height:300px;padding-block:30px}.games-rom-hero-empty p{font-size:14px;color:#ffffffbf;margin-block:20px}
+.games-rom-identity{position:relative;margin-bottom:22px;max-width:420px;width:100%;display:flex;align-items:center;flex:none}
+.games-rom-identity{height:124px}
+.games-rom-identity img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:left center;opacity:0;transition:opacity 180ms ease}
+.games-rom-identity img.is-ready{opacity:1}
+.games-rom-identity h2{margin:0}
+:dir(rtl) .games-rom-identity img{object-position:right center}
+@media(prefers-reduced-motion:reduce){.games-rom-identity img{transition:none}}
+.games-rom-identity h2{font-size:clamp(28px,3.6cqw,44px);line-height:1.1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.games-rom-card h3{min-height:2.8em}
+
+/* Each destination has a recognizable original mark and a generous target. */
+.games-rom-destinations{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-block:8px 14px;scroll-margin-top:80px}
+.games-rom-destinations>button{display:flex;align-items:center;gap:12px;min-width:0;padding:16px 18px;min-height:92px;text-align:start;border-radius:10px;background:var(--color-surface);color:var(--color-ink-muted);transition:background 180ms,color 180ms}
+.games-rom-destinations>button:hover,.games-rom-destinations>button[aria-current]{background:var(--color-elevated);color:var(--color-ink)}
+.games-rom-destinations>button[aria-current]{box-shadow:inset 0 0 0 1px var(--color-edge)}
+.games-rom-mark{width:58px;height:48px;flex:none;color:var(--color-ink-muted)}
+.games-rom-destinations>button[aria-current] .games-rom-mark{color:var(--color-ink)}
+.games-rom-destinations span{font-size:14px;font-weight:600;line-height:1.35}
+.games-rom-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:4px 8px;min-width:0}
+.games-rom-toolbar>.games-text-action{min-height:44px}
+.games-rom-body .games-section-heading h2{letter-spacing:-.025em;font-weight:650}
+.games-rom-body .games-section-heading p{max-width:68ch;font-size:13px;line-height:1.6;margin-top:7px;color:var(--color-ink-muted)}
+.games-rom-body .games-rom-hardware{margin-top:18px}
+.games-rom-devices{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+.games-rom-devices button{text-align:start;min-width:0}
+.games-rom-device-art{display:flex;align-items:center;justify-content:center;height:148px;background:color-mix(in srgb,var(--color-canvas),var(--color-ink) 42%);border-radius:8px;overflow:hidden;padding:23px}
+.games-rom-device-art.has-device{padding:14px}
+.games-rom-device-art img{width:100%;height:100%;object-fit:contain;transition:transform 220ms ease}
+.games-rom-device-art:not(.has-device) img{max-height:80px}
+.games-rom-devices button:hover img{transform:translateY(-3px)}
+.games-rom-device-label{display:flex;align-items:center;justify-content:space-between;gap:6px;padding-top:12px}
+.games-rom-device-label strong{font-size:13px;line-height:1.45;font-weight:600}
+.games-rom-device-label svg{color:var(--color-ink-muted);flex:none}
+.games-rom-devices button[aria-pressed=true] .games-rom-device-label{color:var(--color-accent)}
+.games-rom-devices.is-all{row-gap:28px}
+.games-rom-popular{padding-block:4px 12px}
+.games-rom-chart{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:column;grid-template-rows:repeat(3,1fr);gap:10px 24px}
+.games-rom-chart>button{display:flex;align-items:center;gap:13px;text-align:start;min-width:0;padding:10px 8px;border-radius:8px;min-height:102px}
+.games-rom-chart>button:hover{background:var(--color-surface)}
+.games-rom-rank{font-size:25px;font-weight:550;letter-spacing:-.04em;font-variant-numeric:tabular-nums;color:var(--color-ink-subtle);width:32px;flex:none}
+.games-rom-chart>button>img{width:54px;height:76px;object-fit:cover;border-radius:4px;flex:none}
+.games-rom-chart-copy{display:flex;flex-direction:column;gap:5px;min-width:0}
+.games-rom-chart-copy strong{font-size:14px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.games-rom-chart-copy>span,.games-rom-chart-copy small{font-size:11px;color:var(--color-ink-muted);line-height:1.4}
+.games-rom-chart-copy small{color:var(--color-ink-subtle)}
+.games-rom-worlds{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.games-rom-worlds>button{position:relative;isolation:isolate;aspect-ratio:1.13;overflow:hidden;border-radius:9px;min-width:0;background:var(--color-surface);color:#fff;text-align:start}
+.games-rom-world-scene{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform 250ms ease}
+.games-rom-world-shade{position:absolute;inset:0;background:linear-gradient(180deg,#0004,#0002 25%,#000b 100%);z-index:-1}
+.games-rom-world-logo{position:absolute;width:78%;height:42%;inset-inline-start:11%;top:20%;object-fit:contain;filter:brightness(0) invert(1)}
+.games-rom-world-logo.original-color{filter:none}
+.games-rom-world-name{position:absolute;inset:26% 12% auto;text-align:center;font-size:26px;line-height:1.2;text-wrap:balance}
+.games-rom-world-footer{position:absolute;inset-inline:17px;bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:600;line-height:1.4}
+.games-rom-world-footer svg{flex:none}
+.games-rom-worlds>button:hover .games-rom-world-scene{transform:scale(1.04)}
+.games-rom-card.is-landscape .games-rom-cover{aspect-ratio:16/10}
+.games-rom-card.is-landscape h3{min-height:0;font-size:16px}
+.games-rom-card.is-landscape .games-rom-card-meta{margin-top:4px}
+.games-rom-video-switch{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.games-rom-video-switch button{padding:10px 15px;border-radius:6px;font-size:12px;color:var(--color-ink-muted);min-height:40px}
+.games-rom-video-switch button[aria-pressed=true]{background:var(--color-elevated);color:var(--color-ink)}
+.games-rom-video-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.games-rom-video-grid>button{min-width:0;text-align:start}
+.games-rom-video-image{position:relative;display:block;aspect-ratio:16/10;border-radius:8px;overflow:hidden;background:var(--color-surface)}
+.games-rom-video-image>img{width:100%;height:100%;object-fit:cover}
+.games-rom-video-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#000a;color:#fff}
+.games-rom-video-grid>button:hover .games-rom-video-play{background:#fff;color:#171717}
+.games-rom-video-grid>button>strong{font-size:14px;line-height:1.4;display:block;margin-top:13px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.games-rom-video-grid>button>span:last-child{display:block;font-size:12px;color:var(--color-ink-muted);margin-top:5px;line-height:1.4;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.games-rom-library-entry{display:flex;align-items:center;gap:24px;margin-top:48px;padding:30px;background:var(--color-surface);border-radius:10px}
+.games-rom-library-entry .games-rom-mark{width:86px;height:70px}
+.games-rom-library-entry h2{font-size:22px;font-weight:600;line-height:1.3}
+.games-rom-library-entry p{font-size:13px;line-height:1.6;color:var(--color-ink-muted);margin-top:8px;max-width:56ch}
+.games-rom-library-entry>.games-button{margin-inline-start:auto;flex:none}
+.games-rom-watch-action{display:inline-flex;align-items:center;gap:10px;color:#fff;padding:12px 14px;min-height:48px;font-size:14px;font-weight:600;border-radius:7px;background:#ffffff12}
+.games-rom-watch-action:hover{background:#ffffff20}
+.games-rom-hero .games-button{min-height:48px;padding-inline:22px;font-size:14px}
+.games-rom-hero-save{width:48px;height:48px;justify-content:center;padding:0}
+.games-rom-hero-picker button[aria-pressed=true]{background:#ffffff1c;box-shadow:inset 0 0 0 1px #ffffff24}
+.games-rom-hero-picker i{width:5px;height:5px;flex:none;border-radius:50%;margin-inline-start:auto;background:transparent}
+.games-rom-hero-picker button[aria-pressed=true] i{background:#fff}
+.games-roms :is(button,a):focus-visible{outline:2px solid var(--color-accent);outline-offset:4px}
+.games-rom-catalog{padding-top:26px}
+.games-rom-download-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 20px}
+.games-rom-chart-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:12px 24px}
+.games-rom-chart-source{white-space:nowrap}
+[dir=rtl] .games-rom-chart-actions .games-icon-button svg{scale:-1 1}
+.games-rom-chart-source .games-source-art{width:20px;height:20px;flex:none;background:transparent;border-radius:0}
+.games-rom-download-skeleton{display:grid;grid-template-columns:94px minmax(0,1fr);text-align:start;column-gap:14px;align-content:center;align-items:center;row-gap:12px}
+.games-rom-download-skeleton i{grid-row:span 3;height:100px;border-radius:7px;background:var(--color-surface)}
+.games-rom-download-skeleton span{height:12px;width:85%;border-radius:3px;background:var(--color-surface)}
+.games-rom-download-skeleton span:last-child{width:55%}
+.games-rom-download-grid>button{min-width:0;display:grid;grid-template-columns:94px minmax(0,1fr);text-align:start;column-gap:14px;align-content:center;align-items:center}
+.games-rom-download-image{position:relative;grid-row:span 3;display:block;height:100px;background:var(--color-surface);border-radius:7px;overflow:hidden}
+.games-rom-download-image img{width:100%;height:100%;object-fit:cover}
+.games-rom-download-image b{position:absolute;inset-inline-start:5px;top:5px;min-width:24px;height:24px;display:grid;place-items:center;background:#101212d9;color:white;border-radius:4px;font-size:12px}
+.games-rom-download-grid>button>strong{font-size:14px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.games-rom-download-grid>button>span:not(.games-rom-download-image){font-size:11px;color:var(--color-ink-muted);line-height:1.5;margin-top:5px}
+.games-rom-download-grid small{font-size:11px;color:var(--color-ink-muted);display:flex;align-items:center;gap:5px;margin-top:7px}
+.games-rom-download-grid button:hover strong{color:var(--color-accent)}
+@container(max-width:900px){.games-rom-download-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container(max-width:550px){.games-rom-download-grid{grid-template-columns:1fr}.games-rom-downloads .games-section-heading{align-items:start;flex-wrap:wrap;gap:16px}.games-rom-chart-actions{width:100%;justify-content:space-between}}
+@container(max-width:1100px){.games-rom-catalog-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.games-rom-destinations>button{padding:14px 12px;gap:8px}.games-rom-mark{width:48px}.games-rom-device-art{height:130px}.games-rom-chart{gap:8px 14px}.games-rom-chart>button{gap:9px}.games-rom-rank{font-size:21px;width:25px}}
+@container(max-width:900px){.games-rom-destinations>button{flex-direction:column;justify-content:center;text-align:center;gap:5px}.games-rom-destinations span{font-size:12px}.games-rom-destinations{gap:8px}.games-rom-device-art{height:110px;padding:13px}.games-rom-devices{gap:12px}.games-rom-device-label strong{font-size:12px}.games-rom-chart{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-flow:row}.games-rom-chart>button:last-child{display:none}.games-rom-catalog-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.games-rom-worlds{grid-template-columns:repeat(2,minmax(0,1fr))}.games-rom-worlds>button{aspect-ratio:1.6}.games-rom-video-grid{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:25px}.games-rom-hacks-entry{grid-template-columns:1fr;gap:28px}.games-rom-hack-scene{height:180px}.games-rom-library-entry{flex-wrap:wrap}.games-rom-library-entry>.games-button{margin-inline-start:110px}.games-rom-library-entry>div{flex:1;min-width:180px}}
+@container(max-width:750px){.games-rom-hero{padding-top:calc(150px + var(--games-chrome-inset))}.games-rom-hero-copy{min-height:345px}.games-rom-hero-picker{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.games-rom-hero-bottom{min-height:155px}.games-rom-hero-picker button{min-height:60px;padding:9px}.games-rom-devices{grid-template-columns:repeat(3,minmax(0,1fr))}.games-rom-device-art{height:140px}.games-rom-destinations{grid-template-columns:repeat(5,minmax(0,1fr))}.games-rom-destinations>button{padding:12px 5px}.games-rom-destinations span{font-size:11px}}
+@container(max-width:550px){.games-rom-identity{height:105px;max-width:300px}.games-rom-copy-enter>p{font-size:14px}.games-rom-hero-facts{gap:10px;flex-wrap:wrap}.games-rom-hero-shade{background:linear-gradient(0deg,var(--color-canvas),transparent 75%),linear-gradient(90deg,#000c,#0007),linear-gradient(180deg,#0008,transparent 45%)}.games-rom-destinations{grid-template-columns:repeat(3,minmax(0,1fr))}.games-rom-destinations>button{min-height:87px}.games-rom-destinations span{font-size:12px}.games-rom-devices{grid-template-columns:repeat(2,minmax(0,1fr))}.games-rom-device-art{height:135px}.games-rom-devices:not(.is-all)>button:last-child{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:18px}.games-rom-chart{grid-template-columns:1fr}.games-rom-chart>button:last-child{display:flex}.games-rom-chart>button{min-height:92px;gap:15px}.games-rom-chart>button>img{height:68px;width:49px}.games-rom-rank{font-size:24px;width:32px}.games-rom-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.games-rom-worlds{gap:14px}.games-rom-worlds>button{aspect-ratio:1}.games-rom-world-footer{inset-inline:12px;bottom:12px;font-size:12px}.games-rom-world-name{font-size:21px}.games-rom-grid{gap:14px}.games-rom-body .games-section-heading{align-items:start;flex-wrap:wrap;gap:12px}.games-rom-body .games-page-controls{margin-inline-start:auto}.games-rom-video-grid{gap:22px 14px}.games-rom-video-play{width:40px;height:40px}.games-rom-hacks-art{grid-template-columns:1fr;gap:20px}.games-rom-hacks-art>button{display:grid;grid-template-columns:128px minmax(0,1fr);column-gap:20px;align-items:center}.games-rom-hack-scene{grid-row:span 2;height:100px;margin-bottom:0}.games-rom-hack-scene .games-rom-hack-cover{width:44px;height:64px;bottom:6px}.games-rom-hacks-art strong{align-self:end;min-height:0}.games-rom-hacks-art>button>span:last-child{align-self:start}.games-rom-library-entry{padding:22px;gap:18px}.games-rom-library-entry .games-rom-mark{width:60px}.games-rom-library-entry>.games-button{margin-inline-start:0}.games-rom-filters>[role=status]{width:100%;margin-inline-start:0}}
+@media(prefers-reduced-motion:reduce){.games-roms *{scroll-behavior:auto!important;transition:none!important}.games-roms button:hover img{transform:none}}
+
+/* Keep loading and decoded media in the same footprint. */
+.games-rom-cover{position:relative}
+.games-rom-cover:has(img[data-loaded=false])::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 20%,#ffffff0c 48%,transparent 76%);background-size:240% 100%;animation:games-rom-shimmer 1.8s linear infinite;pointer-events:none}
+.games-rom-cover img[data-loaded=false]{opacity:0}
+.games-rom-cover img[data-loaded=true]{opacity:1}
+.games-rom-cover .games-art-empty{display:block;width:100%;height:100%;background:var(--color-surface)}
+.games-rom-continuation{height:1px;pointer-events:none}
+.games-rom-world-pending{aspect-ratio:1.13;border-radius:9px}
+.games-rom-worlds:has(.games-rom-world-pending){content-visibility:visible}
+.games-rom-world-logo[data-loaded=true]+.games-rom-world-name{display:none}
+.games-rom-world-logo.games-art-empty{display:none}
+.games-rom-world-logo{filter:none}
+.games-rom-identity .games-rom-title-logo{position:absolute;inset:0;width:100%;height:100%}
+.games-rom-title-logo.is-monochrome{filter:brightness(0) invert(1)}
+.games-rom-title-logo[data-loaded=true]+h2{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.games-rom-copy-enter>p{font-size:15px;line-height:1.65;max-width:51ch;color:#ffffffe0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 16px}
+.games-rom-copy-enter{animation:games-rom-copy-in .45s ease-out both}
+.games-rom-scene-enter{animation:games-rom-scene-in .7s ease-out both}
+.games-rom-hero-source{display:flex;justify-content:flex-end;align-items:center;gap:22px;min-height:44px;margin-bottom:10px;color:#ffffffbd;font-size:11px}
+.games-rom-hero-source>span{display:flex;gap:9px;align-items:center}
+.games-rom-hero-source img{width:32px;height:16px;object-fit:contain}
+.games-rom-hero-source .games-page-controls{gap:10px}
+.games-rom-hero-source .games-icon-button{width:30px;height:30px;color:white}
+.games-rom-studio-filter{position:relative;min-width:145px;max-width:260px}
+.games-rom-studio-filter>.games-text-action{width:100%;justify-content:space-between;min-height:40px;padding:8px 12px;background:var(--color-surface);border-radius:6px}
+.games-rom-studio-menu{position:absolute;inset-inline-start:0;top:calc(100% + 8px);width:min(300px,calc(100vw - 48px));z-index:30;padding:10px;background:var(--color-elevated);border:1px solid var(--color-edge-soft);border-radius:8px;box-shadow:0 8px 24px #0003}
+.games-rom-studio-menu .games-search{margin:0 0 8px;min-width:0;width:100%}
+.games-rom-studio-menu [role=listbox]{max-height:260px;overflow:auto}
+.games-rom-studio-menu [role=option]{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;min-height:40px;text-align:start;font-size:12px;border-radius:4px}
+.games-rom-studio-menu [role=option]:is(:hover,:focus-visible,[aria-selected=true]){background:var(--color-surface);color:var(--color-ink)}
+.games-rom-studio-menu>span{display:block;padding:10px 12px;font-size:12px;color:var(--color-ink-muted)}
+@keyframes games-rom-scene-in{from{opacity:0}to{opacity:1}}
+@keyframes games-rom-copy-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes games-rom-shimmer{from{background-position:150% 0}to{background-position:-90% 0}}
+@container(max-width:900px){.games-rom-world-pending{aspect-ratio:1.6}}
+@container(max-width:550px){.games-rom-world-pending{aspect-ratio:1}.games-rom-hero-source{justify-content:space-between;gap:10px}.games-rom-studio-filter{max-width:100%}}
+@media(prefers-reduced-motion:reduce){.games-rom-scene-enter,.games-rom-copy-enter,.games-rom-cover::after{animation:none!important}}
+
+.games-rom-world-logo:not(.original-color){filter:brightness(0) invert(1)}
+.games-rom-hero-source img{filter:brightness(0) invert(1)}
+
+.games-rom-toolbar-filters{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+@container(max-width:550px){.games-rom-toolbar{align-items:flex-start}.games-rom-toolbar-filters{gap:6px;max-width:72%}}
+
+.games-rom-card-main>.games-rom-cover:has(img[data-loaded=false]){background:var(--color-surface);animation:games-skeleton-breathe 2s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.games-rom-card-main>.games-rom-cover{animation:none!important}}
+
+.games-rom-toolbar-filters .games-rom-studio-menu{inset-inline-start:auto;inset-inline-end:0}
+.games-rom-device-rail{position:relative}
+.games-rom-devices:not(.is-all){display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-block:4px}
+.games-rom-devices:not(.is-all)::-webkit-scrollbar{display:none}
+.games-rom-devices:not(.is-all)>button{flex:0 0 calc((100% - 64px)/5);scroll-snap-align:start}
+.games-rom-rail-arrow{position:absolute;top:50%;transform:translateY(-65%);display:grid;place-items:center;width:42px;height:64px;background:var(--color-surface);color:var(--color-ink);border-radius:var(--radius-sm);opacity:0;transition:opacity 160ms ease}
+.games-rom-rail-arrow.is-left{left:-14px}.games-rom-rail-arrow.is-right{right:-14px}
+.games-rom-device-rail:hover>.games-rom-rail-arrow,.games-rom-device-rail:focus-within>.games-rom-rail-arrow{opacity:1}
+.games-rom-hacks-entry{border:0;padding-block:16px;margin-block:32px;min-height:0;gap:32px;grid-template-columns:minmax(220px,.65fr) minmax(0,1.35fr)}
+.games-rom-hacks-copy h2{margin:8px 0 12px}.games-rom-hacks-copy p{max-width:30ch;margin-bottom:18px}
+@container(max-width:900px){.games-rom-devices:not(.is-all)>button{flex-basis:calc((100% - 24px)/3)}.games-rom-hacks-entry{grid-template-columns:1fr}}
+@container(max-width:550px){.games-rom-devices:not(.is-all)>button,.games-rom-devices:not(.is-all)>button:last-child{display:block;flex-basis:calc((100% - 12px)/2)}}
+@media(hover:none){.games-rom-rail-arrow{opacity:1}}
+@media(prefers-reduced-motion:reduce){.games-rom-rail-arrow{transition:none}}
+
+.games-rom-video-controls{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px}
+.games-rom-video-grid small{display:block;color:var(--color-ink-muted);font-size:12px;margin-top:4px}
+.games-rom-videos>.games-page-controls{justify-content:flex-end;margin-top:14px}
+
+/* Match the scale of Harbor's film heroes without a second navigation strip. */
+.games-rom-hero{min-height:calc(570px + var(--games-chrome-inset));justify-content:center}
+.games-rom-hero-copy{min-height:420px;padding-block:30px 36px;max-width:760px}
+.games-rom-identity{height:170px;max-width:480px;margin-bottom:26px}
+.games-rom-copy-enter>p{font-size:16px;max-width:48ch;-webkit-line-clamp:3;margin-bottom:20px}
+.games-rom-hero .games-actions{gap:12px;align-items:center}
+.games-rom-hero .games-button{min-height:54px;padding-inline:26px;gap:12px;font-size:15px;border-radius:8px}
+.games-rom-watch-action{width:54px;height:54px;padding:0;justify-content:center;border-radius:8px}
+.games-rom-hero-source{padding-bottom:20px}
+@container(max-width:550px){.games-rom-hero-copy{min-height:390px;padding-block:24px}.games-rom-identity{height:140px;max-width:360px}.games-rom-copy-enter>p{font-size:15px}.games-rom-hero .games-button{padding-inline:22px}}
+
+.games-rom-hero .games-button{border-radius:999px}
+.games-rom-watch-action,.games-rom-watch-action:hover{background:none}
+.games-rom-hero-save{width:54px;height:54px;padding:0;justify-content:center}
+.games-rom-hero-save:hover{background:none}
+
+.games-rom-hero-source{padding-bottom:52px}

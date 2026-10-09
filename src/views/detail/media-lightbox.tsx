@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, ImagePlus, X } from "lucide-react";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import { t } from "@/lib/i18n";
 
 export function MediaLightbox({
@@ -67,32 +68,34 @@ export function MediaLightbox({
       {(onDownload || onSetBackdrop) && (
         <div className="absolute start-7 top-16 z-10 flex items-center gap-2">
           {onSetBackdrop && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSetBackdrop(images[i]);
-              }}
-              aria-label={t("Set as theme backdrop")}
-              title={t("Set as theme backdrop")}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-canvas/90 text-ink shadow-[0_8px_22px_rgba(0,0,0,0.4)] transition-colors hover:bg-canvas active:scale-[0.94]"
-            >
-              <ImagePlus size={18} strokeWidth={2.2} />
-            </button>
+            <HoverTooltip label={t("Set as theme backdrop")} align="center">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSetBackdrop(images[i]);
+                }}
+                aria-label={t("Set as theme backdrop")}
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-canvas/90 text-ink shadow-[0_8px_22px_rgba(0,0,0,0.4)] transition-colors hover:bg-canvas active:scale-[0.94]"
+              >
+                <ImagePlus size={18} strokeWidth={2.2} />
+              </button>
+            </HoverTooltip>
           )}
           {onDownload && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDownload(images[i], i);
-              }}
-              aria-label={t("Download")}
-              title={t("Download")}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-canvas/90 text-ink shadow-[0_8px_22px_rgba(0,0,0,0.4)] transition-colors hover:bg-canvas active:scale-[0.94]"
-            >
-              <Download size={18} strokeWidth={2.2} />
-            </button>
+            <HoverTooltip label={t("Download")} align="center">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDownload(images[i], i);
+                }}
+                aria-label={t("Download")}
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-canvas/90 text-ink shadow-[0_8px_22px_rgba(0,0,0,0.4)] transition-colors hover:bg-canvas active:scale-[0.94]"
+              >
+                <Download size={18} strokeWidth={2.2} />
+              </button>
+            </HoverTooltip>
           )}
         </div>
       )}

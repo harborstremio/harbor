@@ -1,15 +1,25 @@
-import { ChevronLeft, ChevronRight, User } from "lucide-react";
+import { User } from "lucide-react";
+import { NavArrow } from "@/components/nav-arrow";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import type { SearchPerson } from "@/lib/search";
 import { useView } from "@/lib/view";
 
-const CARD_WIDTH = 132;
-const GAP = 18;
+const CARD_WIDTH = 104;
+const GAP = 16;
 
-export function PeopleRow({ people, onClose }: { people: SearchPerson[]; onClose: () => void }) {
+export function PeopleRow({
+  people,
+  onClose,
+  onOpenPerson,
+}: {
+  people: SearchPerson[];
+  onClose: () => void;
+  onOpenPerson?: (p: SearchPerson) => void;
+}) {
   const { openPerson } = useView();
   const t = useT();
+  const withPhotos = people.filter((p) => p.profile);
   const trackRef = useRef<HTMLDivElement>(null);
   const [scrollState, setScrollState] = useState({ canLeft: false, canRight: false });
 
@@ -28,7 +38,7 @@ export function PeopleRow({ people, onClose }: { people: SearchPerson[]; onClose
 
   useLayoutEffect(() => {
     recompute();
-  }, [people.length, recompute]);
+  }, [withPhotos.length, recompute]);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -50,7 +60,7 @@ export function PeopleRow({ people, onClose }: { people: SearchPerson[]; onClose
     el.scrollBy({ left: dir * step * visible, behavior: "smooth" });
   };
 
-  if (people.length === 0) return null;
+  if (withPhotos.length === 0) return null;
 
   return (
     <section>
@@ -61,17 +71,21 @@ export function PeopleRow({ people, onClose }: { people: SearchPerson[]; onClose
           className="flex overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [scroll-snap-type:x_mandatory]"
           style={{ gap: `${GAP}px` }}
         >
-          {people.map((p) => (
+          {withPhotos.map((p) => (
             <button
               key={p.id}
               onClick={() => {
+                if (onOpenPerson) {
+                  onOpenPerson(p);
+                  return;
+                }
                 openPerson(p.id);
                 onClose();
               }}
               className="group flex shrink-0 flex-col items-center gap-2 text-center [scroll-snap-align:start]"
               style={{ width: `${CARD_WIDTH}px` }}
             >
-              <div className="relative h-[110px] w-[110px] overflow-hidden rounded-full ring-1 ring-edge-soft transition-all duration-200 group-hover:ring-2 group-hover:ring-ink/40 group-active:scale-[0.97]">
+              <div className="relative h-[84px] w-[84px] overflow-hidden rounded-full ring-1 ring-edge-soft transition-all duration-200 group-hover:ring-2 group-hover:ring-ink/40 group-active:scale-[0.97]">
                 {p.profile ? (
                   <img
                     src={`https://image.tmdb.org/t/p/h632${p.profile}`}
@@ -88,8 +102,8 @@ export function PeopleRow({ people, onClose }: { people: SearchPerson[]; onClose
                 )}
               </div>
               <div className="flex w-full flex-col px-1">
-                <span className="truncate text-[14px] font-semibold text-ink">{p.name}</span>
-                <span className="truncate text-[12px] text-ink-subtle">{p.knownFor}</span>
+                <span className="truncate text-[13px] font-semibold text-ink">{p.name}</span>
+                <span className="truncate text-[11.5px] text-ink-subtle">{p.knownFor}</span>
               </div>
             </button>
           ))}
@@ -112,24 +126,19 @@ function ArrowButton({
 }) {
   const t = useT();
   return (
-    <button
-      type="button"
-      aria-label={t(side === "left" ? "Scroll left" : "Scroll right")}
+    <NavArrow
+      dir={side}
       onClick={onClick}
-      className={`absolute top-[55px] z-10 -translate-y-1/2 ${
+      label={t(side === "left" ? "Scroll left" : "Scroll right")}
+      size={26}
+      className={`absolute top-[42px] z-10 h-10 w-10 -translate-y-1/2 ${
         side === "left" ? "start-1" : "end-1"
-      } flex h-10 w-10 items-center justify-center rounded-full bg-canvas/85 text-ink backdrop-blur-md transition-opacity duration-200 hover:bg-canvas focus:outline-none ${
+      } ${
         visible
           ? "opacity-0 group-hover/people:opacity-100 pointer-events-auto"
           : "pointer-events-none opacity-0"
       }`}
-    >
-      {side === "left" ? (
-        <ChevronLeft size={18} strokeWidth={2.4} className="dir-icon" />
-      ) : (
-        <ChevronRight size={18} strokeWidth={2.4} className="dir-icon" />
-      )}
-    </button>
+    />
   );
 }
 

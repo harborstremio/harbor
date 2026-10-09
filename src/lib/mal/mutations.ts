@@ -1,6 +1,5 @@
 import { malRequest } from "./client";
 import type { MalListStatus } from "./types";
-import { kitsuToAnilist } from "@/lib/providers/anime-mapping";
 
 export type SavedEntry = {
   status: MalListStatus;
@@ -47,12 +46,18 @@ export async function resolveMalMediaId(harborId: string): Promise<number | null
   if (harborId.startsWith("mal:")) return leadingInt(harborId.slice(4));
   if (harborId.startsWith("anilist:")) {
     const id = leadingInt(harborId.slice(8));
-    return id != null ? anilistToMal(id) : null;
+    if (id == null) return null;
+    const { anilistToMal: mappedAnilistToMal } = await import("@/lib/providers/anime-mapping");
+    const viaMap = await mappedAnilistToMal(id).catch(() => null);
+    return viaMap ?? anilistToMal(id);
   }
   if (harborId.startsWith("kitsu:")) {
     const id = leadingInt(harborId.slice(6));
     if (id == null) return null;
-    const anilistId = await kitsuToAnilist(id);
+    const { kitsuToMal, kitsuToAnilist } = await import("@/lib/providers/anime-mapping");
+    const direct = await kitsuToMal(id).catch(() => null);
+    if (direct != null) return direct;
+    const anilistId = await kitsuToAnilist(id).catch(() => null);
     return anilistId != null ? anilistToMal(anilistId) : null;
   }
   return null;
@@ -81,8 +86,7 @@ export async function saveListEntry(input: {
 }): Promise<SavedEntry> {
   const params = new URLSearchParams();
   if (input.status) params.set("status", input.status);
-  if (input.numEpisodesWatched != null)
-    params.set("num_watched_episodes", String(input.numEpisodesWatched));
+  if (input.numEpisodesWatched != null) params.set("num_watched_episodes", String(input.numEpisodesWatched));
   const data = await malRequest<RawStatus>(`/anime/${input.malId}/my_list_status`, {
     method: "PATCH",
     body: params,

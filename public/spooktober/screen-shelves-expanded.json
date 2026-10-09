@@ -1,0 +1,2495 @@
+{
+ "shelves": {
+  "classics": [
+   "halloween",
+   "shining",
+   "thing",
+   "psycho",
+   "alien",
+   "exorcist",
+   "scream",
+   "tt0063350",
+   "tt0072271",
+   "tt0063522",
+   "tt0073195",
+   "tt0074285",
+   "tt0076786",
+   "tt0092991",
+   "tt0087800",
+   "tt0091064",
+   "tt0082010",
+   "tt0093177",
+   "tt0093437",
+   "tt0103919",
+   "tt0103874",
+   "tt0110148",
+   "tt0109506",
+   "tt0070917",
+   "tt0077402",
+   "tt0071222",
+   "tt0178868",
+   "tt0235198",
+   "tt0123948",
+   "tt0082933",
+   "tt0086541",
+   "tt0089885",
+   "tt0084516",
+   "tt0080749",
+   "tt0115963",
+   "tt0185937"
+  ],
+  "modern": [
+   "hereditary",
+   "tt5052448",
+   "witch",
+   "tt8772262",
+   "tt3235888",
+   "tt2321549",
+   "tt1457767",
+   "tt31193180",
+   "tt5040012",
+   "tt17526714",
+   "tt10638522",
+   "tt1131734",
+   "tt0210070",
+   "tt1714915",
+   "tt0246578",
+   "tt1139797",
+   "tt5700672",
+   "tt0435625",
+   "tt0365376",
+   "tt5215952",
+   "tt0230600",
+   "tt1038988",
+   "tt0298130",
+   "tt0464141",
+   "tt2326554",
+   "tt0762073",
+   "tt3289956",
+   "tt16300962",
+   "tt26470109",
+   "tt14966898",
+   "tt12749596",
+   "tt8508734",
+   "tt2400463",
+   "tt4062536",
+   "tt7798634",
+   "tt1259521",
+   "tt0365748",
+   "tt0862856",
+   "tt10168670",
+   "tt2554274",
+   "tt7984734",
+   "tt6998518"
+  ],
+  "series": [
+   "tt1844624",
+   "tt2085059",
+   "tt13443470",
+   "tt13623632",
+   "tt19244304",
+   "tt4574334",
+   "hill-house",
+   "midnight-mass",
+   "tt9813792",
+   "tt3960394",
+   "tt2628232",
+   "tt2243973",
+   "tt11041332",
+   "tt2708480",
+   "marianne",
+   "tt9055008",
+   "usher",
+   "bly",
+   "tt8415836",
+   "tt13365348",
+   "tt4820370",
+   "tt3581920",
+   "tt6611916",
+   "tt7569592",
+   "tt6548228",
+   "tt8068860",
+   "tt8550800",
+   "tt0460681",
+   "tt1520211",
+   "tt4189022",
+   "tt7908628",
+   "tt1285482",
+   "tt2521668",
+   "tt0052520",
+   "tt5368542",
+   "tt8388390"
+  ]
+ },
+ "items": [
+  {
+   "id": "halloween",
+   "title": "Halloween",
+   "year": "1978",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "John Carpenter",
+   "description": "An escaped killer returns to Haddonfield as a babysitter and her friends prepare for Halloween night.",
+   "poster": "https://images.metahub.space/poster/medium/tt0077651/img",
+   "source": "https://www.imdb.com/title/tt0077651/",
+   "runtime": "91 min",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "imdbRating": "7.7",
+   "imdbId": "tt0077651",
+   "service": "Shudder",
+   "serviceLogo": "assets/services/shudder.svg",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "serviceAction": "Browse Shudder",
+   "background": "https://images.metahub.space/background/medium/tt0077651/img",
+   "logo": "https://images.metahub.space/logo/medium/tt0077651/img"
+  },
+  {
+   "id": "shining",
+   "title": "The Shining",
+   "year": "1980",
+   "type": "Film",
+   "section": "classics",
+   "creator": "Stanley Kubrick",
+   "description": "An empty hotel. A long winter. A family slowly running out of places to hide.",
+   "poster": "https://images.metahub.space/poster/medium/tt0081505/img",
+   "source": "https://www.imdb.com/title/tt0081505/",
+   "runtime": "144 min",
+   "genres": [
+    "Drama",
+    "Horror"
+   ],
+   "imdbRating": "8.4",
+   "imdbId": "tt0081505"
+  },
+  {
+   "id": "thing",
+   "title": "The Thing",
+   "year": "1982",
+   "type": "Film",
+   "section": "classics",
+   "creator": "John Carpenter",
+   "description": "At an Antarctic outpost, a creature can look like anyone. Trust is the first thing to disappear.",
+   "poster": "https://images.metahub.space/poster/medium/tt0084787/img",
+   "source": "https://www.imdb.com/title/tt0084787/",
+   "runtime": "109 min",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Sci-Fi"
+   ],
+   "imdbRating": "8.2",
+   "imdbId": "tt0084787"
+  },
+  {
+   "id": "psycho",
+   "title": "Psycho",
+   "year": "1960",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Alfred Hitchcock",
+   "description": "A woman on the run stops at a quiet motel whose attentive young owner lives in his mother’s shadow.",
+   "poster": "https://images.metahub.space/poster/medium/tt0054215/img",
+   "source": "https://www.imdb.com/title/tt0054215/",
+   "backdrop": "https://images.metahub.space/poster/medium/tt0054215/img",
+   "runtime": "109 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "8.5",
+   "imdbId": "tt0054215",
+   "service": "Shudder",
+   "serviceLogo": "assets/services/shudder.svg",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "serviceAction": "Browse Shudder",
+   "background": "https://images.metahub.space/background/medium/tt0054215/img",
+   "logo": "https://images.metahub.space/logo/medium/tt0054215/img"
+  },
+  {
+   "id": "alien",
+   "title": "Alien",
+   "year": "1979",
+   "type": "Film",
+   "section": "classics",
+   "creator": "Ridley Scott",
+   "description": "Something has come aboard the Nostromo. A perfect collision of haunted-house dread and deep space.",
+   "poster": "https://images.metahub.space/poster/medium/tt0078748/img",
+   "source": "https://www.imdb.com/title/tt0078748/",
+   "runtime": "117 min",
+   "genres": [
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbRating": "8.5",
+   "imdbId": "tt0078748"
+  },
+  {
+   "id": "exorcist",
+   "title": "The Exorcist",
+   "year": "1973",
+   "type": "Film",
+   "section": "classics",
+   "creator": "William Friedkin",
+   "description": "A mother searches for answers when her daughter begins to change. A landmark in supernatural horror.",
+   "poster": "https://images.metahub.space/poster/medium/tt0070047/img",
+   "source": "https://www.imdb.com/title/tt0070047/",
+   "runtime": "122 min",
+   "genres": [
+    "Horror"
+   ],
+   "imdbRating": "8.1",
+   "imdbId": "tt0070047"
+  },
+  {
+   "id": "scream",
+   "title": "Scream",
+   "year": "1996",
+   "type": "Film",
+   "section": "directors",
+   "creator": "Wes Craven",
+   "description": "A masked killer turns a small town and its love of scary movies into a deadly game.",
+   "poster": "https://images.metahub.space/poster/medium/tt0117571/img",
+   "source": "https://www.imdb.com/title/tt0117571/",
+   "runtime": "112 min",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "7.4",
+   "imdbId": "tt0117571"
+  },
+  {
+   "id": "tt0063350",
+   "title": "Night of the Living Dead",
+   "year": "1968",
+   "type": "Film",
+   "section": "classics",
+   "creator": "George A. Romero",
+   "description": "A ragtag group of Pennsylvanians barricade themselves in an old farmhouse to remain safe from a horde of flesh-eating ghouls that are ravaging the Northeast of the United States.",
+   "poster": "https://images.metahub.space/poster/medium/tt0063350/img",
+   "source": "https://www.imdb.com/title/tt0063350/",
+   "runtime": "96 min",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "imdbRating": "7.8",
+   "imdbId": "tt0063350"
+  },
+  {
+   "id": "tt0072271",
+   "title": "The Texas Chain Saw Massacre",
+   "year": "1974",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Tobe Hooper",
+   "description": "A detour through rural Texas brings five friends to a house occupied by a terrifying family.",
+   "poster": "https://images.metahub.space/poster/medium/tt0072271/img",
+   "source": "https://www.imdb.com/title/tt0072271/",
+   "genres": [
+    "Horror"
+   ],
+   "imdbId": "tt0072271",
+   "runtime": "83 min",
+   "imdbRating": "7.4",
+   "service": "Shudder",
+   "serviceLogo": "assets/services/shudder.svg",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "serviceAction": "Browse Shudder",
+   "background": "https://images.metahub.space/background/medium/tt0072271/img",
+   "logo": "https://images.metahub.space/logo/medium/tt0072271/img"
+  },
+  {
+   "id": "tt0063522",
+   "title": "Rosemary's Baby",
+   "year": "1968",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Roman Polanski",
+   "description": "A young couple trying for a baby moves into an aging, ornate apartment building on Central Park West, where they find themselves surrounded by peculiar neighbors.",
+   "poster": "https://images.metahub.space/poster/medium/tt0063522/img",
+   "source": "https://www.imdb.com/title/tt0063522/",
+   "genres": [
+    "Drama",
+    "Horror"
+   ],
+   "imdbId": "tt0063522",
+   "runtime": "138 min",
+   "imdbRating": "8.0"
+  },
+  {
+   "id": "tt0073195",
+   "title": "Jaws",
+   "year": "1975",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Steven Spielberg",
+   "description": "When a massive killer shark unleashes chaos on a beach community off Long Island, it's up to the local police chief, a marine biologist, and an old seafarer to hunt the beast down.",
+   "poster": "https://images.metahub.space/poster/medium/tt0073195/img",
+   "source": "https://www.imdb.com/title/tt0073195/",
+   "genres": [
+    "Adventure",
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt0073195",
+   "runtime": "124 min",
+   "imdbRating": "8.1"
+  },
+  {
+   "id": "tt0074285",
+   "title": "Carrie",
+   "year": "1976",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Brian De Palma",
+   "description": "Carrie White, a shy, friendless teenage girl who is sheltered by her domineering, religious mother, unleashes her telekinetic powers after being humiliated by her classmates at her senior prom.",
+   "poster": "https://images.metahub.space/poster/medium/tt0074285/img",
+   "source": "https://www.imdb.com/title/tt0074285/",
+   "genres": [
+    "Horror"
+   ],
+   "imdbId": "tt0074285",
+   "runtime": "98 min",
+   "imdbRating": "7.4"
+  },
+  {
+   "id": "tt0076786",
+   "title": "Suspiria",
+   "year": "1977",
+   "type": "Film",
+   "section": "classics",
+   "creator": "Dario Argento",
+   "description": "An American newcomer to a prestigious German ballet academy comes to realize that the school is a front for something sinister amid a series of grisly murders.",
+   "poster": "https://images.metahub.space/poster/medium/tt0076786/img",
+   "source": "https://www.imdb.com/title/tt0076786/",
+   "runtime": "99 min",
+   "genres": [
+    "Horror"
+   ],
+   "imdbRating": "7.3",
+   "imdbId": "tt0076786"
+  },
+  {
+   "id": "tt0092991",
+   "title": "Evil Dead II",
+   "year": "1987",
+   "type": "Film",
+   "section": "classics",
+   "creator": "Sam Raimi",
+   "description": "Ash Williams, the lone survivor of an earlier onslaught of flesh-possessing spirits, holes up in a cabin with a group of strangers while the demons continue their attack.",
+   "poster": "https://images.metahub.space/poster/medium/tt0092991/img",
+   "source": "https://www.imdb.com/title/tt0092991/",
+   "runtime": "84 min",
+   "genres": [
+    "Comedy",
+    "Horror"
+   ],
+   "imdbRating": "7.7",
+   "imdbId": "tt0092991"
+  },
+  {
+   "id": "tt0087800",
+   "title": "A Nightmare on Elm Street",
+   "year": "1984",
+   "type": "Film",
+   "section": "classics",
+   "creator": "Wes Craven",
+   "description": "Teenager Nancy Thompson must uncover the dark truth concealed by her parents after she and her friends become targets of the spirit of a serial killer with a bladed glove in their dreams, in which if they die, it kills them in rea...",
+   "poster": "https://images.metahub.space/poster/medium/tt0087800/img",
+   "source": "https://www.imdb.com/title/tt0087800/",
+   "runtime": "91 min",
+   "genres": [
+    "Horror"
+   ],
+   "imdbRating": "7.4",
+   "imdbId": "tt0087800"
+  },
+  {
+   "id": "tt0091064",
+   "title": "The Fly",
+   "year": "1986",
+   "type": "Film",
+   "section": "classics",
+   "creator": "David Cronenberg",
+   "description": "A botched experiment transmutes a man into a monstrous insect.",
+   "poster": "https://images.metahub.space/poster/medium/tt0091064/img",
+   "source": "https://www.imdb.com/title/tt0091064/",
+   "runtime": "96 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbRating": "7.6",
+   "imdbId": "tt0091064"
+  },
+  {
+   "id": "tt0082010",
+   "title": "An American Werewolf in London",
+   "year": "1981",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "John Landis",
+   "description": "American college students David Kessler and Jack Goodman on a walking tour of Britain are attacked by a werewolf that none of the locals will admit exists. Jack dies. David recovers in a hospital, where he has nightmares.",
+   "poster": "https://images.metahub.space/poster/medium/tt0082010/img",
+   "source": "https://www.imdb.com/title/tt0082010/",
+   "genres": [
+    "Comedy",
+    "Horror"
+   ],
+   "imdbId": "tt0082010",
+   "runtime": "97 min",
+   "imdbRating": "7.5"
+  },
+  {
+   "id": "tt0093177",
+   "title": "Hellraiser",
+   "year": "1987",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Clive Barker",
+   "description": "A woman discovers the newly resurrected, partially formed, body of her brother-in-law and lover. She starts killing for him to revitalize his body and escape the demonic beings that are pursuing him after he escaped their underworld.",
+   "poster": "https://images.metahub.space/poster/medium/tt0093177/img",
+   "source": "https://www.imdb.com/title/tt0093177/",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt0093177",
+   "runtime": "93 min",
+   "imdbRating": "6.9"
+  },
+  {
+   "id": "tt0093437",
+   "title": "The Lost Boys",
+   "year": "1987",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Joel Schumacher",
+   "description": "When a recently divorced mother and her two teenage boys move to a coastal town to stay with her father, it doesn't take long for the brothers to realize the area is a haven for something much more sinister than party-going surfers.",
+   "poster": "https://images.metahub.space/poster/medium/tt0093437/img",
+   "source": "https://www.imdb.com/title/tt0093437/",
+   "genres": [
+    "Comedy",
+    "Horror"
+   ],
+   "imdbId": "tt0093437",
+   "runtime": "97 min",
+   "imdbRating": "7.2"
+  },
+  {
+   "id": "tt0103919",
+   "title": "Candyman",
+   "year": "1992",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Bernard Rose",
+   "description": "The Candyman, a murderous soul with a hook for a hand, is accidentally summoned to reality by a skeptic grad student researching the monster's myth.",
+   "poster": "https://images.metahub.space/poster/medium/tt0103919/img",
+   "source": "https://www.imdb.com/title/tt0103919/",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt0103919",
+   "runtime": "100 min",
+   "imdbRating": "6.7"
+  },
+  {
+   "id": "tt0103874",
+   "title": "Dracula",
+   "year": "1992",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Francis Ford Coppola",
+   "description": "Centuries-old vampire Count Dracula comes to England to seduce his barrister Jonathan Harker's fiancée Mina Murray and wreak havoc in the foreign land.",
+   "poster": "https://images.metahub.space/poster/medium/tt0103874/img",
+   "source": "https://www.imdb.com/title/tt0103874/",
+   "genres": [
+    "Fantasy",
+    "Horror",
+    "Romance"
+   ],
+   "imdbId": "tt0103874",
+   "runtime": "128 min",
+   "imdbRating": "7.4"
+  },
+  {
+   "id": "tt0110148",
+   "title": "Interview with the Vampire",
+   "year": "1994",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Neil Jordan",
+   "description": "A vampire tells his epic life story: love, betrayal, loneliness, and hunger.",
+   "poster": "https://images.metahub.space/poster/medium/tt0110148/img",
+   "source": "https://www.imdb.com/title/tt0110148/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt0110148",
+   "runtime": "123 min",
+   "imdbRating": "7.5"
+  },
+  {
+   "id": "tt0109506",
+   "title": "The Crow",
+   "year": "1994",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Alex Proyas",
+   "description": "A murdered musician returns to avenge the woman he loved.",
+   "poster": "https://images.metahub.space/poster/medium/tt0109506/img",
+   "source": "https://www.imdb.com/title/tt0109506/",
+   "genres": [
+    "Action",
+    "Crime",
+    "Drama"
+   ],
+   "runtime": "102 min",
+   "imdbRating": "7.5",
+   "imdbId": "tt0109506"
+  },
+  {
+   "id": "tt0070917",
+   "title": "The Wicker Man",
+   "year": "1973",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Robin Hardy",
+   "description": "A puritan police sergeant arrives in a Scottish island village in search of a missing girl, who the pagan locals claim never existed.",
+   "poster": "https://images.metahub.space/poster/medium/tt0070917/img",
+   "source": "https://www.imdb.com/title/tt0070917/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt0070917",
+   "runtime": "93 min",
+   "imdbRating": "7.5"
+  },
+  {
+   "id": "tt0077402",
+   "title": "Dawn of the Dead",
+   "year": "1978",
+   "type": "Film",
+   "section": "classics",
+   "creator": "George A. Romero",
+   "description": "During an escalating zombie epidemic, two Philadelphia SWAT team members, a traffic reporter and his TV executive girlfriend seek refuge in a secluded shopping mall.",
+   "poster": "https://images.metahub.space/poster/medium/tt0077402/img",
+   "source": "https://www.imdb.com/title/tt0077402/",
+   "runtime": "127 min",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "imdbRating": "7.8",
+   "imdbId": "tt0077402"
+  },
+  {
+   "id": "tt0071222",
+   "title": "Black Christmas",
+   "year": "1974",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Bob Clark",
+   "description": "During their Christmas break, a group of sorority girls are stalked by a stranger.",
+   "poster": "https://images.metahub.space/poster/medium/tt0071222/img",
+   "source": "https://www.imdb.com/title/tt0071222/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt0071222",
+   "runtime": "98 min",
+   "imdbRating": "7.1"
+  },
+  {
+   "id": "tt0178868",
+   "title": "Ringu",
+   "year": "1998",
+   "type": "Film",
+   "section": "international",
+   "creator": "Hideo Nakata",
+   "description": "When her niece is found dead along with three friends after viewing a supposedly cursed videotape, reporter Reiko sets out to investigate. She finds the tape, watches it and receives a phone call informing her that she'll die in a...",
+   "poster": "https://images.metahub.space/poster/medium/tt0178868/img",
+   "source": "https://www.imdb.com/title/tt0178868/",
+   "runtime": "96 min",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "7.2",
+   "imdbId": "tt0178868"
+  },
+  {
+   "id": "tt0235198",
+   "title": "Audition",
+   "year": "1999",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Takashi Miike",
+   "description": "A widower has his film producer friend organize a fake audition as a means of helping him find a new girlfriend, but the woman he selects is not who she appears to be.",
+   "poster": "https://images.metahub.space/poster/medium/tt0235198/img",
+   "source": "https://www.imdb.com/title/tt0235198/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt0235198",
+   "runtime": "115 min",
+   "imdbRating": "7.1"
+  },
+  {
+   "id": "tt0123948",
+   "title": "Cure",
+   "year": "1997",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Kiyoshi Kurosawa",
+   "description": "A frustrated detective deals with the case of several gruesome murders committed by people who have no recollection of what they've done.",
+   "poster": "https://images.metahub.space/poster/medium/tt0123948/img",
+   "source": "https://www.imdb.com/title/tt0123948/",
+   "genres": [
+    "Crime",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt0123948",
+   "runtime": "111 min",
+   "imdbRating": "7.5"
+  },
+  {
+   "id": "tt0082933",
+   "title": "Possession",
+   "year": "1981",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Andrzej Zulawski",
+   "description": "A woman starts exhibiting increasingly disturbing behavior after asking her husband for a divorce. Suspicions of infidelity soon give way to something much more sinister.",
+   "poster": "https://images.metahub.space/poster/medium/tt0082933/img",
+   "source": "https://www.imdb.com/title/tt0082933/",
+   "genres": [
+    "Drama",
+    "Horror"
+   ],
+   "imdbId": "tt0082933",
+   "runtime": "124 min",
+   "imdbRating": "7.2"
+  },
+  {
+   "id": "tt0086541",
+   "title": "Videodrome",
+   "year": "1983",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "David Cronenberg",
+   "description": "A Toronto cable TV station co-owner who specializes in adult entertainment searches for the producers of a dangerous and bizarre broadcast titled \"Videodrome.\"",
+   "poster": "https://images.metahub.space/poster/medium/tt0086541/img",
+   "source": "https://www.imdb.com/title/tt0086541/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt0086541",
+   "runtime": "88 min",
+   "imdbRating": "7.2"
+  },
+  {
+   "id": "tt0089885",
+   "title": "Re-Animator",
+   "year": "1985",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Stuart Gordon",
+   "description": "After an odd new medical student arrives on campus, a dedicated local and his girlfriend become involved in bizarre experiments centering around the re-animation of dead tissue.",
+   "poster": "https://images.metahub.space/poster/medium/tt0089885/img",
+   "source": "https://www.imdb.com/title/tt0089885/",
+   "genres": [
+    "Comedy",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt0089885",
+   "runtime": "86 min",
+   "imdbRating": "7.1"
+  },
+  {
+   "id": "tt0084516",
+   "title": "Poltergeist",
+   "year": "1982",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Tobe Hooper",
+   "description": "A family's home becomes the center of paranormal activity that opens a doorway to the \"other side.\" With help, they must cross over to get their daughter back.",
+   "poster": "https://images.metahub.space/poster/medium/tt0084516/img",
+   "source": "https://www.imdb.com/title/tt0084516/",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt0084516",
+   "runtime": "114 min",
+   "imdbRating": "7.3"
+  },
+  {
+   "id": "tt0080749",
+   "title": "The Fog",
+   "year": "1980",
+   "type": "Film",
+   "section": "classics",
+   "creator": "John Carpenter",
+   "description": "Local legend tells of a ship lured on to the rocks of Antonio Bay being enveloped by a supernatural cloud as it sank; the myth says that when this mysterious fog returns, the victims will rise up from the depths seeking vengeance.",
+   "poster": "https://images.metahub.space/poster/medium/tt0080749/img",
+   "source": "https://www.imdb.com/title/tt0080749/",
+   "runtime": "90 min",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "imdbRating": "6.8",
+   "imdbId": "tt0080749"
+  },
+  {
+   "id": "tt0115963",
+   "title": "The Craft",
+   "year": "1996",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Andrew Fleming",
+   "description": "A young girl new to a Catholic school befriends a coven of witches whom the other students either shun or fear. But when a powerful invocation goes wrong, the consequences could endanger their lives.",
+   "poster": "https://images.metahub.space/poster/medium/tt0115963/img",
+   "source": "https://www.imdb.com/title/tt0115963/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt0115963",
+   "runtime": "101 min",
+   "imdbRating": "6.5"
+  },
+  {
+   "id": "tt0185937",
+   "title": "The Blair Witch Project",
+   "year": "1999",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Daniel Myrick, Eduardo Sánchez",
+   "description": "Three film students vanish after traveling into a Maryland forest to film a documentary on the local Blair Witch legend, leaving only their footage behind.",
+   "poster": "https://images.metahub.space/poster/medium/tt0185937/img",
+   "source": "https://www.imdb.com/title/tt0185937/",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt0185937",
+   "runtime": "81 min",
+   "imdbRating": "6.5"
+  },
+  {
+   "id": "hereditary",
+   "title": "Hereditary",
+   "year": "2018",
+   "type": "Film",
+   "section": "modern",
+   "creator": "Ari Aster",
+   "description": "Grief opens the door to something much older and more terrible in this family nightmare.",
+   "poster": "https://images.metahub.space/poster/medium/tt7784604/img",
+   "source": "https://www.imdb.com/title/tt7784604/",
+   "runtime": "128 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "7.3",
+   "imdbId": "tt7784604"
+  },
+  {
+   "id": "tt5052448",
+   "title": "Get Out",
+   "year": "2017",
+   "type": "Film",
+   "section": "modern",
+   "creator": "Jordan Peele",
+   "description": "A young African-American visits his white girlfriend's parents for the weekend, where his simmering uneasiness about their reception of him eventually reaches a boiling point.",
+   "poster": "https://images.metahub.space/poster/medium/tt5052448/img",
+   "source": "https://www.imdb.com/title/tt5052448/",
+   "runtime": "104 min",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbRating": "7.8",
+   "imdbId": "tt5052448"
+  },
+  {
+   "id": "witch",
+   "title": "The Witch",
+   "year": "2016",
+   "type": "Film",
+   "section": "modern",
+   "creator": "Robert Eggers",
+   "description": "An isolated New England family begins to turn on itself at the edge of a forbidding wood.",
+   "poster": "https://images.metahub.space/poster/medium/tt4263482/img",
+   "source": "https://www.imdb.com/title/tt4263482/",
+   "backdrop": "https://images.metahub.space/poster/medium/tt4263482/img",
+   "runtime": "92 min",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbRating": "7.0",
+   "imdbId": "tt4263482"
+  },
+  {
+   "id": "tt8772262",
+   "title": "Midsommar",
+   "year": "2019",
+   "type": "Film",
+   "section": "modern",
+   "creator": "Ari Aster",
+   "description": "A couple travels to Northern Europe to visit a rural hometown's fabled Swedish mid-summer festival. What begins as an idyllic retreat quickly devolves into an increasingly violent and bizarre competition at the hands of a pagan cult.",
+   "poster": "https://images.metahub.space/poster/medium/tt8772262/img",
+   "source": "https://www.imdb.com/title/tt8772262/",
+   "runtime": "147 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "7.1",
+   "imdbId": "tt8772262"
+  },
+  {
+   "id": "tt3235888",
+   "title": "It Follows",
+   "year": "2014",
+   "type": "Film",
+   "section": "modern",
+   "creator": "David Robert Mitchell",
+   "description": "A young woman is followed by an unknown supernatural force after a sexual encounter.",
+   "poster": "https://images.metahub.space/poster/medium/tt3235888/img",
+   "source": "https://www.imdb.com/title/tt3235888/",
+   "runtime": "101 min",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbRating": "6.8",
+   "imdbId": "tt3235888"
+  },
+  {
+   "id": "tt2321549",
+   "title": "The Babadook",
+   "year": "2014",
+   "type": "Film",
+   "section": "modern",
+   "creator": "Jennifer Kent",
+   "description": "A single mother and her child fall into a deep well of paranoia when an eerie children's book titled \"Mister Babadook\" manifests in their home.",
+   "poster": "https://images.metahub.space/poster/medium/tt2321549/img",
+   "source": "https://www.imdb.com/title/tt2321549/",
+   "runtime": "94 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "6.8",
+   "imdbId": "tt2321549"
+  },
+  {
+   "id": "tt1457767",
+   "title": "The Conjuring",
+   "year": "2013",
+   "type": "Film",
+   "section": "modern",
+   "creator": "James Wan",
+   "description": "Paranormal investigators Ed and Lorraine Warren work to help a family terrorized by a dark presence in their farmhouse.",
+   "poster": "https://images.metahub.space/poster/medium/tt1457767/img",
+   "source": "https://www.imdb.com/title/tt1457767/",
+   "runtime": "112 min",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbRating": "7.5",
+   "imdbId": "tt1457767"
+  },
+  {
+   "id": "tt31193180",
+   "title": "Sinners",
+   "year": "2025",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Ryan Coogler",
+   "description": "Trying to leave their troubled lives behind, twin brothers return to their hometown to start again, only to discover that an even greater evil is waiting to welcome them back.",
+   "poster": "https://images.metahub.space/poster/medium/tt31193180/img",
+   "source": "https://www.imdb.com/title/tt31193180/",
+   "genres": [
+    "Action",
+    "Drama",
+    "Horror"
+   ],
+   "imdbId": "tt31193180",
+   "runtime": "138 min",
+   "imdbRating": "7.5"
+  },
+  {
+   "id": "tt5040012",
+   "title": "Nosferatu",
+   "year": "2024",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Robert Eggers",
+   "description": "A gothic tale of obsession between a haunted young woman and the terrifying vampire infatuated with her, causing untold horror in its wake.",
+   "poster": "https://images.metahub.space/poster/medium/tt5040012/img",
+   "source": "https://www.imdb.com/title/tt5040012/",
+   "genres": [
+    "Fantasy",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt5040012",
+   "runtime": "133 min",
+   "imdbRating": "7.1"
+  },
+  {
+   "id": "tt17526714",
+   "title": "The Substance",
+   "year": "2024",
+   "type": "Film",
+   "section": "catalog",
+   "description": "A fading star tries a treatment that promises a younger version of herself. There is one rule: share your time equally.",
+   "creator": "Coralie Fargeat",
+   "source": "https://www.imdb.com/title/tt17526714/",
+   "poster": "https://images.metahub.space/poster/medium/tt17526714/img",
+   "runtime": "141 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbRating": "7.2",
+   "background": "https://images.metahub.space/background/medium/tt17526714/img",
+   "logo": "https://images.metahub.space/logo/medium/tt17526714/img",
+   "service": "MUBI",
+   "serviceUrl": "https://mubi.com/en/us/films/the-substance",
+   "featureLine": "Be careful what you wish for.",
+   "serviceLogo": "assets/services/mubi.svg",
+   "imdbId": "tt17526714"
+  },
+  {
+   "id": "tt10638522",
+   "title": "Talk to Me",
+   "year": "2022",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Danny Philippou, Michael Philippou",
+   "description": "When a group of friends discover how to conjure spirits using an embalmed hand, they become hooked on the new thrill, until one of them goes too far and unleashes terrifying supernatural forces.",
+   "poster": "https://images.metahub.space/poster/medium/tt10638522/img",
+   "source": "https://www.imdb.com/title/tt10638522/",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt10638522",
+   "runtime": "95 min",
+   "imdbRating": "7.1"
+  },
+  {
+   "id": "tt1131734",
+   "title": "Jennifer's Body",
+   "year": "2009",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Karyn Kusama",
+   "description": "A teenager becomes possessed after meeting a touring band, leaving her best friend to confront what she has become.",
+   "poster": "https://images.metahub.space/poster/medium/tt1131734/img",
+   "source": "https://www.imdb.com/title/tt1131734/",
+   "genres": [
+    "Comedy",
+    "Horror"
+   ],
+   "runtime": "107 min",
+   "imdbRating": "5.6",
+   "imdbId": "tt1131734"
+  },
+  {
+   "id": "tt0210070",
+   "title": "Ginger Snaps",
+   "year": "2000",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "John Fawcett",
+   "description": "A werewolf attack transforms one of two inseparable sisters and threatens their bond.",
+   "poster": "https://images.metahub.space/poster/medium/tt0210070/img",
+   "source": "https://www.imdb.com/title/tt0210070/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "runtime": "108 min",
+   "imdbRating": "6.8",
+   "imdbId": "tt0210070"
+  },
+  {
+   "id": "tt1714915",
+   "title": "Only Lovers Left Alive",
+   "year": "2013",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jim Jarmusch",
+   "description": "Two vampire lovers reunite between Detroit and Tangier as their long lives grow harder to sustain.",
+   "poster": "https://images.metahub.space/poster/medium/tt1714915/img",
+   "source": "https://www.imdb.com/title/tt1714915/",
+   "genres": [
+    "Comedy",
+    "Drama",
+    "Fantasy"
+   ],
+   "runtime": "123 min",
+   "imdbRating": "7.2",
+   "imdbId": "tt1714915"
+  },
+  {
+   "id": "tt0246578",
+   "title": "Donnie Darko",
+   "year": "2001",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Richard Kelly",
+   "description": "A troubled teenager follows a rabbit-masked figure toward a deadline on Halloween.",
+   "poster": "https://images.metahub.space/poster/medium/tt0246578/img",
+   "source": "https://www.imdb.com/title/tt0246578/",
+   "genres": [
+    "Drama",
+    "Mystery",
+    "Sci-Fi"
+   ],
+   "runtime": "114 min",
+   "imdbRating": "8.0",
+   "imdbId": "tt0246578"
+  },
+  {
+   "id": "tt1139797",
+   "title": "Let the Right One In",
+   "year": "2008",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Tomas Alfredson",
+   "description": "A bullied boy forms a unique friendship with his new neighbor, a peculiar girl with a dark secret.",
+   "poster": "https://images.metahub.space/poster/medium/tt1139797/img",
+   "source": "https://www.imdb.com/title/tt1139797/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt1139797",
+   "runtime": "115 min",
+   "imdbRating": "7.8"
+  },
+  {
+   "id": "tt5700672",
+   "title": "Train to Busan",
+   "year": "2016",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Yeon Sang-ho",
+   "description": "While a zombie virus breaks out in South Korea, passengers struggle to survive on the train from Seoul to Busan.",
+   "poster": "https://images.metahub.space/poster/medium/tt5700672/img",
+   "source": "https://www.imdb.com/title/tt5700672/",
+   "genres": [
+    "Action",
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt5700672",
+   "runtime": "118 min",
+   "imdbRating": "7.6"
+  },
+  {
+   "id": "tt0435625",
+   "title": "The Descent",
+   "year": "2005",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Neil Marshall",
+   "description": "A caving expedition goes horribly wrong when six explorers become trapped and ultimately pursued by a strange breed of predators.",
+   "poster": "https://images.metahub.space/poster/medium/tt0435625/img",
+   "source": "https://www.imdb.com/title/tt0435625/",
+   "genres": [
+    "Adventure",
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt0435625",
+   "runtime": "100 min",
+   "imdbRating": "7.2"
+  },
+  {
+   "id": "tt0365376",
+   "title": "A Tale of Two Sisters",
+   "year": "2003",
+   "type": "Film",
+   "section": "international",
+   "creator": "Kim Jee-woon",
+   "description": "After being institutionalized in a mental hospital, Su-mi reunites with her sister, Su-yeon, and they return to live at their country home. But strange events plague the house, leading to surprising revelations and a shocking conc...",
+   "poster": "https://images.metahub.space/poster/medium/tt0365376/img",
+   "source": "https://www.imdb.com/title/tt0365376/",
+   "runtime": "115 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "7.1",
+   "imdbId": "tt0365376"
+  },
+  {
+   "id": "tt5215952",
+   "title": "The Wailing",
+   "year": "2016",
+   "type": "Film",
+   "section": "international",
+   "creator": "Na Hong-jin",
+   "description": "Soon after a stranger arrives in a little village, a mysterious sickness starts spreading. A policeman, drawn into the incident, is forced to solve the mystery in order to save his daughter...",
+   "poster": "https://images.metahub.space/poster/medium/tt5215952/img",
+   "source": "https://www.imdb.com/title/tt5215952/",
+   "runtime": "156 min",
+   "genres": [
+    "Drama",
+    "Horror"
+   ],
+   "imdbRating": "7.4",
+   "imdbId": "tt5215952"
+  },
+  {
+   "id": "tt0230600",
+   "title": "The Others",
+   "year": "2001",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Alejandro Amenábar",
+   "description": "In 1945, immediately following the end of Second World War, a woman who lives with her two photosensitive children on her darkened old family estate in the Channel Islands becomes convinced that the home is haunted.",
+   "poster": "https://images.metahub.space/poster/medium/tt0230600/img",
+   "source": "https://www.imdb.com/title/tt0230600/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt0230600",
+   "runtime": "101 min",
+   "imdbRating": "7.6"
+  },
+  {
+   "id": "tt1038988",
+   "title": "REC",
+   "year": "2007",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jaume Balagueró, Paco Plaza",
+   "description": "A television reporter and cameraman follow emergency workers into a dark apartment building and are quickly locked inside with something terrifying.",
+   "poster": "https://images.metahub.space/poster/medium/tt1038988/img",
+   "source": "https://www.imdb.com/title/tt1038988/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt1038988",
+   "runtime": "78 min",
+   "imdbRating": "7.4"
+  },
+  {
+   "id": "tt0298130",
+   "title": "The Ring",
+   "year": "2002",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Gore Verbinski",
+   "description": "A journalist must investigate a mysterious videotape which seems to cause the death of anyone one week to the day after they view it.",
+   "poster": "https://images.metahub.space/poster/medium/tt0298130/img",
+   "source": "https://www.imdb.com/title/tt0298130/",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt0298130",
+   "runtime": "115 min",
+   "imdbRating": "7.1"
+  },
+  {
+   "id": "tt0464141",
+   "title": "The Orphanage",
+   "year": "2007",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "J.A. Bayona",
+   "description": "A woman brings her family back to her childhood home, which used to be an orphanage for handicapped children. Before long, her son starts to communicate with an invisible new friend.",
+   "poster": "https://images.metahub.space/poster/medium/tt0464141/img",
+   "source": "https://www.imdb.com/title/tt0464141/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt0464141",
+   "runtime": "105 min",
+   "imdbRating": "7.4"
+  },
+  {
+   "id": "tt2326554",
+   "title": "A Girl Walks Home Alone at Night",
+   "year": "2014",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Ana Lily Amirpour",
+   "description": "In the Iranian ghost-town Bad City, a place that reeks of death and loneliness, the townspeople are unaware they are being stalked by a lonesome vampire.",
+   "poster": "https://images.metahub.space/poster/medium/tt2326554/img",
+   "source": "https://www.imdb.com/title/tt2326554/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Romance"
+   ],
+   "imdbId": "tt2326554",
+   "runtime": "101 min",
+   "imdbRating": "6.9"
+  },
+  {
+   "id": "tt0762073",
+   "title": "Thirst",
+   "year": "2009",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Park Chan-wook",
+   "description": "Through a failed medical experiment, a priest is stricken with vampirism and is forced to abandon his ascetic ways.",
+   "poster": "https://images.metahub.space/poster/medium/tt0762073/img",
+   "source": "https://www.imdb.com/title/tt0762073/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt0762073",
+   "runtime": "134 min",
+   "imdbRating": "7.1"
+  },
+  {
+   "id": "tt3289956",
+   "title": "The Autopsy of Jane Doe",
+   "year": "2016",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "André Øvredal",
+   "description": "A father and son examine an unidentified body as impossible discoveries turn their morgue into a trap.",
+   "poster": "https://images.metahub.space/poster/medium/tt3289956/img",
+   "source": "https://www.imdb.com/title/tt3289956/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt3289956",
+   "runtime": "86 min",
+   "imdbRating": "6.8",
+   "service": "Shudder",
+   "serviceLogo": "assets/services/shudder.svg",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "serviceAction": "Browse Shudder",
+   "background": "https://images.metahub.space/background/medium/tt3289956/img",
+   "logo": "https://images.metahub.space/logo/medium/tt3289956/img"
+  },
+  {
+   "id": "tt16300962",
+   "title": "When Evil Lurks",
+   "year": "2023",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Demián Rugna",
+   "description": "In a remote village, two brothers find a demon-infected man just about to \"give birth\" to evil itself. They decide to get rid of the body, only to end up unintentionally spreading chaos.",
+   "poster": "https://images.metahub.space/poster/medium/tt16300962/img",
+   "source": "https://www.imdb.com/title/tt16300962/",
+   "genres": [
+    "Horror"
+   ],
+   "runtime": "100 min",
+   "imdbRating": "6.9",
+   "background": "https://images.metahub.space/background/medium/tt16300962/img",
+   "logo": "https://images.metahub.space/logo/medium/tt16300962/img",
+   "service": "Shudder",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "serviceLogo": "assets/services/shudder.svg",
+   "imdbId": "tt16300962",
+   "serviceAction": "Browse Shudder"
+  },
+  {
+   "id": "tt26470109",
+   "title": "Oddity",
+   "year": "2024",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Damian Mc Carthy",
+   "description": "A psychic medium attempts to uncover the truth behind her sister's murder at the site of the crime.",
+   "poster": "https://images.metahub.space/poster/medium/tt26470109/img",
+   "source": "https://www.imdb.com/title/tt26470109/",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "runtime": "98 min",
+   "imdbRating": "6.7",
+   "background": "https://images.metahub.space/background/medium/tt26470109/img",
+   "logo": "https://images.metahub.space/logo/medium/tt26470109/img",
+   "service": "Shudder",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "backdropHasTitle": true,
+   "serviceLogo": "assets/services/shudder.svg",
+   "imdbId": "tt26470109",
+   "serviceAction": "Browse Shudder"
+  },
+  {
+   "id": "tt14966898",
+   "title": "Late Night with the Devil",
+   "year": "2023",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Cameron Cairnes, Colin Cairnes",
+   "description": "On Halloween night, a desperate talk-show host invites a medium and a very unusual guest onto live television.",
+   "poster": "https://images.metahub.space/poster/medium/tt14966898/img",
+   "source": "https://www.imdb.com/title/tt14966898/",
+   "genres": [
+    "Horror"
+   ],
+   "runtime": "93 min",
+   "imdbRating": "7.0",
+   "background": "https://images.metahub.space/background/medium/tt14966898/img",
+   "logo": "https://images.metahub.space/logo/medium/tt14966898/img",
+   "service": "Shudder",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "featureLine": "A Halloween broadcast goes off script.",
+   "serviceLogo": "assets/services/shudder.svg",
+   "imdbId": "tt14966898",
+   "serviceAction": "Browse Shudder"
+  },
+  {
+   "id": "tt12749596",
+   "title": "Host",
+   "year": "2020",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Rob Savage",
+   "description": "Six friends hire a medium to hold a seance via Zoom during lockdown, but they get far more than they bargained for as things quickly go wrong.",
+   "poster": "https://images.metahub.space/poster/medium/tt12749596/img",
+   "source": "https://www.imdb.com/title/tt12749596/",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "runtime": "56 min",
+   "imdbRating": "6.5",
+   "background": "https://images.metahub.space/background/medium/tt12749596/img",
+   "logo": "https://images.metahub.space/logo/medium/tt12749596/img",
+   "service": "Shudder",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "serviceLogo": "assets/services/shudder.svg",
+   "imdbId": "tt12749596",
+   "serviceAction": "Browse Shudder"
+  },
+  {
+   "id": "tt8508734",
+   "title": "His House",
+   "year": "2020",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Remi Weekes",
+   "description": "A refugee couple makes a harrowing escape from war-torn South Sudan, but then they struggle to adjust to their new life in an English town that has an evil lurking beneath the surface.",
+   "poster": "https://images.metahub.space/poster/medium/tt8508734/img",
+   "source": "https://www.imdb.com/title/tt8508734/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt8508734",
+   "runtime": "93 min",
+   "imdbRating": "6.4"
+  },
+  {
+   "id": "tt2400463",
+   "title": "The Invitation",
+   "year": "2015",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Karyn Kusama",
+   "description": "When a man accepts an invitation to a dinner party hosted by his ex-wife, the unsettling past reopens old wounds and creates new tensions.",
+   "poster": "https://images.metahub.space/poster/medium/tt2400463/img",
+   "source": "https://www.imdb.com/title/tt2400463/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt2400463",
+   "runtime": "100 min",
+   "imdbRating": "6.6"
+  },
+  {
+   "id": "tt4062536",
+   "title": "Green Room",
+   "year": "2015",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jeremy Saulnier",
+   "description": "A punk rock band is forced to fight for survival after witnessing a murder at a neo-Nazi skinhead bar.",
+   "poster": "https://images.metahub.space/poster/medium/tt4062536/img",
+   "source": "https://www.imdb.com/title/tt4062536/",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt4062536",
+   "runtime": "95 min",
+   "imdbRating": "7.0"
+  },
+  {
+   "id": "tt7798634",
+   "title": "Ready or Not",
+   "year": "2019",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Matt Bettinelli-Olpin, Tyler Gillett",
+   "description": "A bride's wedding night takes a sinister turn when her eccentric new in-laws force her to take part in a terrifying game.",
+   "poster": "https://images.metahub.space/poster/medium/tt7798634/img",
+   "source": "https://www.imdb.com/title/tt7798634/",
+   "genres": [
+    "Action",
+    "Comedy",
+    "Horror"
+   ],
+   "imdbId": "tt7798634",
+   "runtime": "96 min",
+   "imdbRating": "6.9"
+  },
+  {
+   "id": "tt1259521",
+   "title": "The Cabin in the Woods",
+   "year": "2012",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Drew Goddard",
+   "description": "Five teens visit a remote cabin and explore its cellar, finding strange items. When Dana reads from a book there, she unleashes zombie killers. But the situation is more complex than it appears.",
+   "poster": "https://images.metahub.space/poster/medium/tt1259521/img",
+   "source": "https://www.imdb.com/title/tt1259521/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt1259521",
+   "runtime": "95 min",
+   "imdbRating": "7.0"
+  },
+  {
+   "id": "tt0365748",
+   "title": "Shaun of the Dead",
+   "year": "2004",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Edgar Wright",
+   "description": "The uneventful, aimless lives of a London electronics salesman and his layabout roommate are disrupted by the zombie apocalypse.",
+   "poster": "https://images.metahub.space/poster/medium/tt0365748/img",
+   "source": "https://www.imdb.com/title/tt0365748/",
+   "genres": [
+    "Comedy",
+    "Horror"
+   ],
+   "imdbId": "tt0365748",
+   "runtime": "99 min",
+   "imdbRating": "7.8"
+  },
+  {
+   "id": "tt0862856",
+   "title": "Trick 'r Treat",
+   "year": "2007",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Michael Dougherty",
+   "description": "Five Halloween stories: A principal has a secret life, a virgin is looking for her first time, a group of kids pull a prank, a woman who loathes Halloween does not respect the rules and a mean old man meets a demonic trick-or-trea...",
+   "poster": "https://images.metahub.space/poster/medium/tt0862856/img",
+   "source": "https://www.imdb.com/title/tt0862856/",
+   "genres": [
+    "Comedy",
+    "Horror"
+   ],
+   "imdbId": "tt0862856",
+   "runtime": "82 min",
+   "imdbRating": "6.7"
+  },
+  {
+   "id": "tt10168670",
+   "title": "Bones and All",
+   "year": "2022",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Luca Guadagnino",
+   "description": "A young woman embarks on a 1000 mile odyssey through America where she meets a disenfranchised drifter. But all roads lead back to their terrifying pasts and to a final stand that will determine whether love can survive their othe...",
+   "poster": "https://images.metahub.space/poster/medium/tt10168670/img",
+   "source": "https://www.imdb.com/title/tt10168670/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Romance"
+   ],
+   "imdbId": "tt10168670",
+   "runtime": "131 min",
+   "imdbRating": "6.8"
+  },
+  {
+   "id": "tt2554274",
+   "title": "Crimson Peak",
+   "year": "2015",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Guillermo del Toro",
+   "description": "A new bride investigates ghostly visions at a remote gothic mansion that holds dark secrets.",
+   "poster": "https://images.metahub.space/poster/medium/tt2554274/img",
+   "source": "https://www.imdb.com/title/tt2554274/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt2554274",
+   "runtime": "119 min",
+   "imdbRating": "6.5"
+  },
+  {
+   "id": "tt7984734",
+   "title": "The Lighthouse",
+   "year": "2019",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Robert Eggers",
+   "description": "Two lighthouse keepers try to maintain their sanity while living on a remote and mysterious New England island in the 1890s.",
+   "poster": "https://images.metahub.space/poster/medium/tt7984734/img",
+   "source": "https://www.imdb.com/title/tt7984734/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt7984734",
+   "runtime": "109 min",
+   "imdbRating": "7.4"
+  },
+  {
+   "id": "tt6998518",
+   "title": "Mandy",
+   "year": "2018",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Panos Cosmatos",
+   "description": "The enchanted lives of a couple in a secluded forest are brutally shattered by a nightmarish hippie cult and their demon-biker henchmen, propelling a man into a spiraling, surreal rampage of vengeance.",
+   "poster": "https://images.metahub.space/poster/medium/tt6998518/img",
+   "source": "https://www.imdb.com/title/tt6998518/",
+   "genres": [
+    "Action",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt6998518",
+   "runtime": "122 min",
+   "imdbRating": "6.5",
+   "cast": [
+    "Nicolas Cage",
+    "Andrea Riseborough",
+    "Linus Roache"
+   ]
+  },
+  {
+   "id": "tt1844624",
+   "title": "American Horror Story",
+   "year": "2011",
+   "type": "Series",
+   "section": "series",
+   "creator": "Ryan Murphy, Brad Falchuk",
+   "description": "The anthology returns for its thirteenth installment, bringing familiar characters back into the nightmare.",
+   "poster": "https://images.metahub.space/poster/medium/tt1844624/img",
+   "source": "https://www.fxnetworks.com/shows/american-horror-story",
+   "runtime": "44 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbRating": "7.9",
+   "seasonNumber": 13,
+   "seasonYear": "2026",
+   "releaseDate": "2026-09-24",
+   "featureTag": "New episodes",
+   "background": "https://images.metahub.space/background/medium/tt1844624/img",
+   "logo": "https://images.metahub.space/logo/medium/tt1844624/img",
+   "service": "Hulu",
+   "serviceLogo": "assets/series-features/hulu.svg",
+   "serviceUrl": "https://www.hulu.com/series/a67a233c-fcfe-4e8e-b000-052603ddd616",
+   "sourceUrl": "https://www.fxnetworks.com/shows/american-horror-story",
+   "releaseSourceUrl": "https://press.hulu.com/schedule/september-2026/",
+   "statusNote": "The September 2026 Hulu schedule lists the September 24 three-episode premiere. FX and Hulu currently show Season 13 available.",
+   "artworkScope": {
+    "poster": "Season 13 official Hulu key art",
+    "background": "Season 13 official Hulu key art",
+    "logo": "Season 13 official Hulu title treatment"
+   },
+   "imdbId": "tt1844624",
+   "seasonLabel": "Season 13",
+   "releaseStatus": "streaming",
+   "statusLabel": "New episodes",
+   "checked": "2026-09-28",
+   "metadataSource": "https://v3-cinemeta.strem.io/meta/series/tt1844624.json",
+   "serviceAction": "View on Hulu"
+  },
+  {
+   "id": "tt2085059",
+   "title": "Black Mirror",
+   "seasonNumber": 7,
+   "seasonYear": "2025",
+   "releaseDate": "2025-04-10",
+   "featureTag": "Latest released season",
+   "creator": "Charlie Brooker",
+   "description": "Six stories about the cost of new technology. Includes the return of the USS Callister.",
+   "poster": "https://images.metahub.space/poster/medium/tt2085059/img",
+   "background": "https://images.metahub.space/background/medium/tt2085059/img",
+   "logo": "https://images.metahub.space/logo/medium/tt2085059/img",
+   "service": "Netflix",
+   "serviceLogo": "assets/services/netflix.svg",
+   "serviceUrl": "https://www.netflix.com/title/70264888",
+   "sourceUrl": "https://www.netflix.com/tudum/articles/black-mirror-season-7",
+   "statusNote": "Season 7 is streaming. Netflix announced the series will return on January 9, 2026; that announcement supplies no premiere date for the next season.",
+   "nextSeason": {
+    "status": "Return announced",
+    "releaseDate": null,
+    "sourceUrl": "https://www.netflix.com/tudum/articles/black-mirror-charlie-brooker-announcement"
+   },
+   "artworkScope": {
+    "poster": "Series key art from Cinemeta/MetaHub; not represented as Season 7-specific",
+    "background": "Official Netflix Season 7 production still",
+    "logo": "Series title treatment from Cinemeta/MetaHub"
+   },
+   "imdbId": "tt2085059",
+   "type": "Series",
+   "section": "series",
+   "year": "2011",
+   "seasonLabel": "Season 7",
+   "releaseStatus": "streaming",
+   "statusLabel": "Latest released season",
+   "checked": "2026-09-28",
+   "source": "https://www.netflix.com/tudum/articles/black-mirror-season-7",
+   "metadataSource": "https://v3-cinemeta.strem.io/meta/series/tt2085059.json",
+   "genres": [
+    "Crime",
+    "Drama",
+    "Mystery"
+   ],
+   "runtime": "59 min",
+   "imdbRating": "8.7",
+   "serviceAction": "View on Netflix"
+  },
+  {
+   "id": "tt13443470",
+   "title": "Wednesday",
+   "year": "2022",
+   "type": "Series",
+   "section": "series",
+   "description": "Back at Nevermore, Wednesday finds herself the target of a dangerous stalker.",
+   "source": "https://www.netflix.com/tudum/articles/wednesday-season-2-renewed",
+   "poster": "https://images.metahub.space/poster/medium/tt13443470/img",
+   "runtime": "54 min",
+   "genres": [
+    "Comedy",
+    "Crime",
+    "Fantasy"
+   ],
+   "imdbRating": "8.0",
+   "background": "https://images.metahub.space/background/medium/tt13443470/img",
+   "logo": "https://images.metahub.space/logo/medium/tt13443470/img",
+   "service": "Netflix",
+   "serviceUrl": "https://www.netflix.com/title/81231974",
+   "featureLine": "A very different kind of school year.",
+   "serviceLogo": "assets/services/netflix.svg",
+   "seasonNumber": 2,
+   "seasonYear": "2025",
+   "releaseDate": "2025-08-06",
+   "featureTag": "Complete season",
+   "creator": "Alfred Gough, Miles Millar",
+   "sourceUrl": "https://www.netflix.com/tudum/articles/wednesday-season-2-renewed",
+   "statusNote": "All eight Season 2 episodes are streaming. Season 3 is in production; the official April 20, 2026 update supplies no premiere date.",
+   "nextSeason": {
+    "number": 3,
+    "status": "In production",
+    "releaseDate": null,
+    "sourceUrl": "https://www.netflix.com/tudum/articles/wednesday-season-3-release-date"
+   },
+   "artworkScope": {
+    "poster": "Official Netflix Season 2 Part 2 key art",
+    "background": "Official Netflix Season 2 production still",
+    "logo": "Existing series title treatment"
+   },
+   "imdbId": "tt13443470",
+   "seasonLabel": "Season 2",
+   "releaseStatus": "streaming",
+   "statusLabel": "Complete season",
+   "checked": "2026-09-28",
+   "metadataSource": "https://v3-cinemeta.strem.io/meta/series/tt13443470.json",
+   "serviceAction": "View on Netflix"
+  },
+  {
+   "id": "tt13623632",
+   "title": "Alien: Earth",
+   "year": "2025",
+   "type": "Series",
+   "section": "series",
+   "description": "A spacecraft crashes on Earth. The team sent to investigate finds something that should have stayed in space.",
+   "poster": "https://images.metahub.space/poster/medium/tt13623632/img",
+   "source": "https://www.fxnetworks.com/shows/alien-earth",
+   "genres": [
+    "Horror",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "seasonNumber": 1,
+   "seasonYear": "2025",
+   "releaseDate": "2025-08-12",
+   "featureTag": "Complete season",
+   "creator": "Noah Hawley",
+   "background": "https://images.metahub.space/background/medium/tt13623632/img",
+   "logo": "https://images.metahub.space/logo/medium/tt13623632/img",
+   "service": "Hulu",
+   "serviceLogo": "assets/series-features/hulu.svg",
+   "serviceUrl": "https://www.hulu.com/series/ac314a24-c615-48ee-8e24-b26de75e64ef",
+   "sourceUrl": "https://www.fxnetworks.com/shows/alien-earth",
+   "releaseSourceUrl": "https://d23.com/meet-the-cast-and-characters-of-fxs-alien-earth/",
+   "statusNote": "FX advertises the full season; Hulu lists one season with eight episodes. Disney confirmed Season 2 production on July 10, 2026 without a premiere date.",
+   "nextSeason": {
+    "number": 2,
+    "status": "In production",
+    "releaseDate": null,
+    "sourceUrl": "https://press.disney.co.uk/news/tracy-ullman-sam-spruell-and-jerome-flynn-join-the-season-two-cast-of-fxs-alien-earth-coming-to-disneyplus"
+   },
+   "artworkScope": {
+    "poster": "Season 1 series key art from Cinemeta/MetaHub",
+    "background": "Season 1 series key art from Cinemeta/MetaHub",
+    "logo": "Series title treatment from Cinemeta/MetaHub"
+   },
+   "imdbId": "tt13623632",
+   "seasonLabel": "Season 1",
+   "releaseStatus": "streaming",
+   "statusLabel": "Complete season",
+   "checked": "2026-09-28",
+   "metadataSource": "https://v3-cinemeta.strem.io/meta/series/tt13623632.json",
+   "runtime": "56 min",
+   "imdbRating": "7.1",
+   "serviceAction": "View on Hulu"
+  },
+  {
+   "id": "tt19244304",
+   "title": "IT: Welcome to Derry",
+   "year": "2025",
+   "type": "Series",
+   "section": "series",
+   "description": "A child goes missing in 1962 Derry. New arrivals discover the town has been hiding a nightmare.",
+   "poster": "https://images.metahub.space/poster/medium/tt19244304/img",
+   "source": "https://press.wbd.com/na/property/it-welcome-derry",
+   "genres": [
+    "Fantasy",
+    "Horror"
+   ],
+   "seasonNumber": 1,
+   "seasonYear": "2025",
+   "releaseDate": "2025-10-26",
+   "featureTag": "Season one",
+   "creator": "Andy Muschietti, Barbara Muschietti, Jason Fuchs",
+   "background": "https://images.metahub.space/background/medium/tt19244304/img",
+   "logo": "https://images.metahub.space/logo/medium/tt19244304/img",
+   "service": "HBO Max",
+   "serviceLogo": "assets/services/max.svg",
+   "serviceUrl": "https://www.hbo.com/it-welcome-to-derry",
+   "serviceAction": "Series details",
+   "sourceUrl": "https://press.wbd.com/na/property/it-welcome-derry",
+   "statusNote": "The official WBD series page identifies Season 1 and the October 26, 2025 premiere. No Season 2 release date is asserted.",
+   "artworkScope": {
+    "poster": "Season 1 series key art from Cinemeta/MetaHub",
+    "background": "Season 1 series key art from Cinemeta/MetaHub",
+    "logo": "Series title treatment from Cinemeta/MetaHub"
+   },
+   "imdbId": "tt19244304",
+   "seasonLabel": "Season 1",
+   "releaseStatus": "streaming",
+   "statusLabel": "Season one",
+   "checked": "2026-09-28",
+   "metadataSource": "https://v3-cinemeta.strem.io/meta/series/tt19244304.json",
+   "runtime": "60 min",
+   "imdbRating": "7.9"
+  },
+  {
+   "id": "tt4574334",
+   "title": "Stranger Things",
+   "year": "2016",
+   "type": "Series",
+   "section": "series",
+   "creator": "Matt Duffer, Ross Duffer",
+   "description": "The rifts have torn Hawkins apart. The friends reunite to find and defeat Vecna.",
+   "poster": "https://images.metahub.space/poster/medium/tt4574334/img",
+   "source": "https://about.netflix.com/en/news/stranger-things-5-prepare-for-one-last-adventure-with-our-final-season",
+   "runtime": "65 min",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbRating": "8.6",
+   "seasonNumber": 5,
+   "seasonYear": "2025",
+   "releaseDate": "2025-11-26",
+   "featureTag": "Final season",
+   "background": "https://images.metahub.space/background/medium/tt4574334/img",
+   "logo": "https://images.metahub.space/logo/medium/tt4574334/img",
+   "service": "Netflix",
+   "serviceLogo": "assets/services/netflix.svg",
+   "serviceUrl": "https://www.netflix.com/title/80057281",
+   "sourceUrl": "https://about.netflix.com/en/news/stranger-things-5-prepare-for-one-last-adventure-with-our-final-season",
+   "releaseSourceUrl": "https://www.netflix.com/tudum/features/stranger-things-season-5-release-date",
+   "statusNote": "The final season began November 26, 2025. Netflix’s January 1, 2026 coverage guide confirms the finale and every episode are streaming.",
+   "artworkScope": {
+    "poster": "Official Netflix Season 5 key art by Kyle Lambert",
+    "background": "Official Netflix Season 5 production still",
+    "logo": "Series title treatment from Cinemeta/MetaHub"
+   },
+   "imdbId": "tt4574334",
+   "seasonLabel": "Season 5",
+   "releaseStatus": "streaming",
+   "statusLabel": "Final season",
+   "checked": "2026-09-28",
+   "metadataSource": "https://v3-cinemeta.strem.io/meta/series/tt4574334.json",
+   "serviceAction": "View on Netflix"
+  },
+  {
+   "id": "hill-house",
+   "title": "The Haunting of Hill House",
+   "year": "2018",
+   "type": "Series",
+   "section": "series",
+   "creator": "Mike Flanagan",
+   "description": "Five siblings return to the childhood home that never really let them leave.",
+   "poster": "https://images.metahub.space/poster/medium/tt6763664/img",
+   "source": "https://www.imdb.com/title/tt6763664/",
+   "runtime": "57 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "8.5",
+   "imdbId": "tt6763664"
+  },
+  {
+   "id": "midnight-mass",
+   "title": "Midnight Mass",
+   "year": "2021",
+   "type": "Series",
+   "section": "series",
+   "creator": "Mike Flanagan",
+   "description": "A new priest brings miracles to an isolated island. Faith and fear begin to look alike.",
+   "poster": "https://images.metahub.space/poster/medium/tt10574558/img",
+   "source": "https://www.imdb.com/title/tt10574558/",
+   "runtime": "65 min",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbRating": "7.7",
+   "imdbId": "tt10574558"
+  },
+  {
+   "id": "tt9813792",
+   "title": "From",
+   "year": "2022",
+   "type": "Series",
+   "section": "series",
+   "creator": "John Griffin",
+   "description": "A town with a hidden secret experiences strange occurrences that intensify at night. Mysterious forces disrupt everyday routines as residents try to preserve stability and community while attempting to comprehend their surroundings.",
+   "poster": "https://images.metahub.space/poster/medium/tt9813792/img",
+   "source": "https://www.imdb.com/title/tt9813792/",
+   "runtime": "51 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "7.8",
+   "imdbId": "tt9813792"
+  },
+  {
+   "id": "tt3960394",
+   "title": "Interview with the Vampire",
+   "year": "2022",
+   "type": "Series",
+   "section": "catalog",
+   "description": "A vampire tells his epic story of love, blood, and the perils of immortality to a journalist.",
+   "poster": "https://images.metahub.space/poster/medium/tt3960394/img",
+   "source": "https://www.imdb.com/title/tt3960394/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt3960394",
+   "runtime": "53 min",
+   "imdbRating": "7.6",
+   "creator": ""
+  },
+  {
+   "id": "tt2628232",
+   "title": "Penny Dreadful",
+   "year": "2014",
+   "type": "Series",
+   "section": "series",
+   "creator": "John Logan",
+   "description": "Explorer Sir Malcolm Murray, American gunslinger Ethan Chandler, scientist Victor Frankenstein and medium Vanessa Ives unite to combat supernatural threats in Victorian London.",
+   "poster": "https://images.metahub.space/poster/medium/tt2628232/img",
+   "source": "https://www.imdb.com/title/tt2628232/",
+   "runtime": "60 min",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbRating": "8.2",
+   "imdbId": "tt2628232"
+  },
+  {
+   "id": "tt2243973",
+   "title": "Hannibal",
+   "year": "2013",
+   "type": "Series",
+   "section": "catalog",
+   "description": "Explores the early relationship between renowned psychiatrist Hannibal Lecter and a young FBI criminal profiler who is haunted by his ability to empathize with serial killers.",
+   "poster": "https://images.metahub.space/poster/medium/tt2243973/img",
+   "source": "https://www.imdb.com/title/tt2243973/",
+   "genres": [
+    "Crime",
+    "Drama",
+    "Horror"
+   ],
+   "imdbId": "tt2243973",
+   "runtime": "45 min",
+   "imdbRating": "8.5",
+   "creator": ""
+  },
+  {
+   "id": "tt11041332",
+   "title": "Yellowjackets",
+   "year": "2021",
+   "type": "Series",
+   "section": "catalog",
+   "description": "A wildly talented girls high school soccer team become the unlucky survivors of a plane crash deep in the Canadian wilderness.",
+   "poster": "https://images.metahub.space/poster/medium/tt11041332/img",
+   "source": "https://www.imdb.com/title/tt11041332/",
+   "genres": [
+    "Drama",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt11041332",
+   "runtime": "57 min",
+   "imdbRating": "7.7",
+   "creator": ""
+  },
+  {
+   "id": "tt2708480",
+   "title": "The Terror",
+   "year": "2018",
+   "type": "Series",
+   "section": "catalog",
+   "description": "Supernatural, semihistorical horror anthology series, where each season is inspired by a different infamous or mysterious real-life historical tragedy.",
+   "poster": "https://images.metahub.space/poster/medium/tt2708480/img",
+   "source": "https://www.imdb.com/title/tt2708480/",
+   "genres": [
+    "Adventure",
+    "Drama",
+    "Horror"
+   ],
+   "imdbId": "tt2708480",
+   "runtime": "44 min",
+   "imdbRating": "7.8",
+   "creator": ""
+  },
+  {
+   "id": "marianne",
+   "title": "Marianne",
+   "year": "2019",
+   "type": "Series",
+   "section": "series",
+   "creator": "Samuel Bodin",
+   "description": "A horror writer discovers that the witch from her stories has followed her home.",
+   "poster": "https://images.metahub.space/poster/medium/tt10875696/img",
+   "source": "https://www.imdb.com/title/tt10875696/",
+   "runtime": "45 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "7.3",
+   "imdbId": "tt10875696"
+  },
+  {
+   "id": "tt9055008",
+   "title": "Evil",
+   "year": "2019",
+   "type": "Series",
+   "section": "catalog",
+   "description": "A skeptical psychologist and scientist join a Catholic priest-in-training to investigate the church's backlog of unexplained mysteries, miracles, and demonic possessions.",
+   "poster": "https://images.metahub.space/poster/medium/tt9055008/img",
+   "source": "https://www.imdb.com/title/tt9055008/",
+   "genres": [
+    "Crime",
+    "Drama",
+    "Horror"
+   ],
+   "imdbId": "tt9055008",
+   "runtime": "50 min",
+   "imdbRating": "7.7",
+   "creator": ""
+  },
+  {
+   "id": "usher",
+   "title": "The Fall of the House of Usher",
+   "year": "2023",
+   "type": "Series",
+   "section": "series",
+   "creator": "Mike Flanagan",
+   "description": "A powerful family falls, one heir at a time, in a deliciously dark love letter to Edgar Allan Poe.",
+   "poster": "https://images.metahub.space/poster/medium/tt15567174/img",
+   "source": "https://www.imdb.com/title/tt15567174/",
+   "runtime": "62 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "7.9",
+   "imdbId": "tt15567174"
+  },
+  {
+   "id": "bly",
+   "title": "The Haunting of Bly Manor",
+   "year": "2020",
+   "type": "Series",
+   "section": "series",
+   "creator": "Mike Flanagan",
+   "description": "A governess arrives at a beautiful estate. Its ghosts have been waiting for someone to remember them.",
+   "poster": "https://images.metahub.space/poster/medium/tt10970552/img",
+   "source": "https://www.imdb.com/title/tt10970552/",
+   "runtime": "54 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "7.4",
+   "imdbId": "tt10970552"
+  },
+  {
+   "id": "tt8415836",
+   "title": "Guillermo del Toro's Cabinet of Curiosities",
+   "year": "2022",
+   "type": "Series",
+   "section": "catalog",
+   "description": "Bizarre nightmares unfold in eight tales of terror in a visually stunning, spine-tingling horror collection curated by Guillermo del Toro.",
+   "poster": "https://images.metahub.space/poster/medium/tt8415836/img",
+   "source": "https://www.imdb.com/title/tt8415836/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt8415836",
+   "runtime": "56 min",
+   "imdbRating": "7.0",
+   "creator": ""
+  },
+  {
+   "id": "tt13365348",
+   "title": "Archive 81",
+   "year": "2022",
+   "type": "Series",
+   "section": "catalog",
+   "description": "An archivist hired to restore a collection of tapes finds himself reconstructing the work of a filmmaker and her investigation into a dangerous cult.",
+   "poster": "https://images.metahub.space/poster/medium/tt13365348/img",
+   "source": "https://www.imdb.com/title/tt13365348/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt13365348",
+   "runtime": "53 min",
+   "imdbRating": "7.3",
+   "creator": ""
+  },
+  {
+   "id": "tt4820370",
+   "title": "Channel Zero",
+   "year": "2016",
+   "type": "Series",
+   "section": "catalog",
+   "description": "An anthology series based on creepypastas.",
+   "poster": "https://images.metahub.space/poster/medium/tt4820370/img",
+   "source": "https://www.imdb.com/title/tt4820370/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt4820370",
+   "runtime": "45 min",
+   "imdbRating": "7.1",
+   "creator": ""
+  },
+  {
+   "id": "tt3581920",
+   "title": "The Last of Us",
+   "year": "2023",
+   "type": "Series",
+   "section": "series",
+   "creator": "Neil Druckmann, Craig Mazin",
+   "description": "After a global pandemic destroys civilization, a hardened survivor takes charge of a 14-year-old girl who may be humanity's last hope.",
+   "poster": "https://images.metahub.space/poster/medium/tt3581920/img",
+   "source": "https://www.imdb.com/title/tt3581920/",
+   "runtime": "56 min",
+   "genres": [
+    "Action",
+    "Adventure",
+    "Drama"
+   ],
+   "imdbRating": "8.4",
+   "imdbId": "tt3581920"
+  },
+  {
+   "id": "tt6611916",
+   "title": "Kingdom",
+   "year": "2019",
+   "type": "Series",
+   "section": "catalog",
+   "description": "While strange rumors about their ill King grip a kingdom, the crown prince becomes their only hope against a mysterious plague overtaking the land.",
+   "poster": "https://images.metahub.space/poster/medium/tt6611916/img",
+   "source": "https://www.imdb.com/title/tt6611916/",
+   "genres": [
+    "Action",
+    "Drama",
+    "Horror"
+   ],
+   "imdbId": "tt6611916",
+   "runtime": "48 min",
+   "imdbRating": "8.3",
+   "creator": ""
+  },
+  {
+   "id": "tt7569592",
+   "title": "Chilling Adventures of Sabrina",
+   "year": "2018",
+   "type": "Series",
+   "section": "catalog",
+   "description": "Magic and mischief collide as half-human, half-witch Sabrina navigates between two worlds: mortal teen life and her family's legacy, the Church of Night.",
+   "poster": "https://images.metahub.space/poster/medium/tt7569592/img",
+   "source": "https://www.imdb.com/title/tt7569592/",
+   "genres": [
+    "Mystery",
+    "Sci-Fi & Fantasy",
+    "Drama"
+   ],
+   "imdbId": "tt7569592",
+   "runtime": "60 min",
+   "imdbRating": "7.4",
+   "creator": ""
+  },
+  {
+   "id": "tt6548228",
+   "title": "Castle Rock",
+   "year": "2018",
+   "type": "Series",
+   "section": "catalog",
+   "description": "A psychological-horror series set in the Stephen King multiverse combines the mythological scale and intimate character storytelling, weaving an epic saga of darkness and light, played out on a few square miles of Maine woodland.",
+   "poster": "https://images.metahub.space/poster/medium/tt6548228/img",
+   "source": "https://www.imdb.com/title/tt6548228/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt6548228",
+   "runtime": "50 min",
+   "imdbRating": "7.5",
+   "creator": ""
+  },
+  {
+   "id": "tt8068860",
+   "title": "Servant",
+   "year": "2019",
+   "type": "Series",
+   "section": "catalog",
+   "description": "A Philadelphia couple are in mourning after an unspeakable tragedy creates a rift in their marriage and opens a door for a mysterious force to enter their home.",
+   "poster": "https://images.metahub.space/poster/medium/tt8068860/img",
+   "source": "https://www.imdb.com/title/tt8068860/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt8068860",
+   "runtime": "29 min",
+   "imdbRating": "7.4",
+   "creator": ""
+  },
+  {
+   "id": "tt8550800",
+   "title": "The Outsider",
+   "year": "2020",
+   "type": "Series",
+   "section": "catalog",
+   "description": "When an insidious supernatural force edges its way into a seemingly straightforward investigation into the gruesome murder of a young boy, it leads a seasoned cop and an unorthodox investigator to question everything they believe in.",
+   "poster": "https://images.metahub.space/poster/medium/tt8550800/img",
+   "source": "https://www.imdb.com/title/tt8550800/",
+   "genres": [
+    "Crime",
+    "Drama",
+    "Horror"
+   ],
+   "imdbId": "tt8550800",
+   "runtime": "55 min",
+   "imdbRating": "7.6",
+   "creator": ""
+  },
+  {
+   "id": "tt0460681",
+   "title": "Supernatural",
+   "year": "2005",
+   "type": "Series",
+   "section": "catalog",
+   "description": "Two brothers follow their father's footsteps as hunters, fighting evil supernatural beings of many kinds, including monsters, demons, and gods that roam the earth.",
+   "poster": "https://images.metahub.space/poster/medium/tt0460681/img",
+   "source": "https://www.imdb.com/title/tt0460681/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt0460681",
+   "runtime": "42 min",
+   "imdbRating": "8.4",
+   "creator": ""
+  },
+  {
+   "id": "tt1520211",
+   "title": "The Walking Dead",
+   "year": "2010",
+   "type": "Series",
+   "section": "catalog",
+   "description": "Sheriff Deputy Rick Grimes wakes up from a coma to learn the world is in ruins and must lead a group of survivors to stay alive.",
+   "poster": "https://images.metahub.space/poster/medium/tt1520211/img",
+   "source": "https://www.imdb.com/title/tt1520211/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt1520211",
+   "runtime": "46 min",
+   "imdbRating": "8.1",
+   "creator": ""
+  },
+  {
+   "id": "tt4189022",
+   "title": "Ash vs Evil Dead",
+   "year": "2015",
+   "type": "Series",
+   "section": "catalog",
+   "description": "Ash has spent the last thirty years avoiding responsibility, maturity, and the terrors of the Evil Dead until a Deadite plague threatens to destroy all of mankind and Ash becomes mankind's only hope.",
+   "poster": "https://images.metahub.space/poster/medium/tt4189022/img",
+   "source": "https://www.imdb.com/title/tt4189022/",
+   "genres": [
+    "Action",
+    "Comedy",
+    "Horror"
+   ],
+   "imdbId": "tt4189022",
+   "runtime": "28 min",
+   "imdbRating": "8.4",
+   "creator": ""
+  },
+  {
+   "id": "tt7908628",
+   "title": "What We Do in the Shadows",
+   "year": "2019",
+   "type": "Series",
+   "section": "catalog",
+   "description": "A look into the nightly lives of four vampires who have lived together on Staten Island for over a century.",
+   "poster": "https://images.metahub.space/poster/medium/tt7908628/img",
+   "source": "https://www.imdb.com/title/tt7908628/",
+   "genres": [
+    "Comedy",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt7908628",
+   "runtime": "25 min",
+   "imdbRating": "8.5",
+   "creator": ""
+  },
+  {
+   "id": "tt1285482",
+   "title": "Dead Set",
+   "year": "2008",
+   "type": "Series",
+   "section": "catalog",
+   "description": "During a fictional series of Big Brother, a zombie outbreak occurs, but the house-mates are unaware of the impending doom outside of the Big Brother House.",
+   "poster": "https://images.metahub.space/poster/medium/tt1285482/img",
+   "source": "https://www.imdb.com/title/tt1285482/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Reality-TV"
+   ],
+   "imdbId": "tt1285482",
+   "runtime": null,
+   "imdbRating": "7.6",
+   "creator": "",
+   "runtimeBasis": "Omitted: source metadata does not establish a valid per-episode runtime."
+  },
+  {
+   "id": "tt2521668",
+   "title": "The Returned",
+   "year": "2012",
+   "type": "Series",
+   "section": "catalog",
+   "description": "In a small French mountain town where everyone knows each other, the dead begin to inexplicably return as if their death never happened. Forcing the townsfolk to confront their difficult past as they seek to understand this phenom...",
+   "poster": "https://images.metahub.space/poster/medium/tt2521668/img",
+   "source": "https://www.imdb.com/title/tt2521668/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt2521668",
+   "runtime": "50 min",
+   "imdbRating": "8.0",
+   "creator": ""
+  },
+  {
+   "id": "tt0052520",
+   "title": "The Twilight Zone",
+   "year": "1959",
+   "type": "Series",
+   "section": "catalog",
+   "description": "Classic American Anthology series created by Rod Serling, featuring standalone stories of science fiction, fantasy, and horror, each with a twist ending or moral lesson.",
+   "poster": "https://images.metahub.space/poster/medium/tt0052520/img",
+   "source": "https://www.imdb.com/title/tt0052520/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt0052520",
+   "runtime": "51 min",
+   "imdbRating": "9.0",
+   "creator": ""
+  },
+  {
+   "id": "tt5368542",
+   "title": "The Exorcist",
+   "year": "2016",
+   "type": "Series",
+   "section": "catalog",
+   "description": "Follows two priests dealing with cases of a demonic presence targeting a family and a foster home.",
+   "poster": "https://images.metahub.space/poster/medium/tt5368542/img",
+   "source": "https://www.imdb.com/title/tt5368542/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt5368542",
+   "runtime": "45 min",
+   "imdbRating": "7.9",
+   "creator": ""
+  },
+  {
+   "id": "tt8388390",
+   "title": "Chucky",
+   "year": "2021",
+   "type": "Series",
+   "section": "catalog",
+   "description": "After a vintage Chucky doll turns up at a suburban yard sale, an idyllic American town is thrown into chaos as a series of horrifying murders begin to expose the town's hypocrisies and secrets.",
+   "poster": "https://images.metahub.space/poster/medium/tt8388390/img",
+   "source": "https://www.imdb.com/title/tt8388390/",
+   "genres": [
+    "Comedy",
+    "Drama",
+    "Fantasy"
+   ],
+   "imdbId": "tt8388390",
+   "runtime": "46 min",
+   "imdbRating": "7.2",
+   "creator": ""
+  }
+ ],
+ "checked": "2026-09-28",
+ "sources": [
+  {
+   "type": "Existing preview catalog records",
+   "files": [
+    "catalog.json",
+    "content.json",
+    "alt-collections.json",
+    "spotlight-data.json",
+    "twilight-data.json",
+    "screening.json",
+    "series-features.json"
+   ],
+   "note": "Curated references and complete record copies; no changes to original source files."
+  },
+  {
+   "type": "Metadata snapshots",
+   "provider": "Cinemeta/IMDb",
+   "file": "screen-shelves-provenance/metadata-fetch.json",
+   "note": "Real runtime, rating, genre or director values fill missing fields. Newly fetched responses are saved alongside reused caches. No scores or durations invented."
+  },
+  {
+   "type": "Season status verification",
+   "file": "series-provenance/README.md",
+   "note": "The six verified featured-series records lead the series shelf with their season-specific metadata and official source URLs."
+  }
+ ]
+}

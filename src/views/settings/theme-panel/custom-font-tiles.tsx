@@ -1,6 +1,7 @@
-import { Check, Loader2, Trash2, Upload } from "lucide-react";
+import { Check, Loader2, Trash2, Upload } from "../icons";
 import { useRef, type ChangeEvent } from "react";
 import { useCustomFonts } from "@/lib/custom-fonts";
+import { useT } from "@/lib/i18n";
 
 export function CustomFontTiles({
   activeId,
@@ -13,7 +14,16 @@ export function CustomFontTiles({
   onClear: () => void;
   compact?: boolean;
 }) {
+  const t = useT();
   const { fonts, busy, error, addFont, removeFont } = useCustomFonts();
+  const localizedError =
+    error === "Use a TTF, OTF, WOFF or WOFF2 file."
+      ? t("Use a TTF, OTF, WOFF or WOFF2 file.")
+      : error === "That font is over 32 MB. Try a lighter file."
+        ? t("That font is over 32 MB. Try a lighter file.")
+        : error === "That file is not a valid font."
+          ? t("That file is not a valid font.")
+          : error;
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -30,10 +40,9 @@ export function CustomFontTiles({
   };
 
   const pad = compact ? "p-4" : "p-5";
-  const radius = compact ? "rounded-xl" : "rounded-2xl";
+  const radius = "rounded-[10px]";
   const previewSize = compact ? "text-[22px]" : "text-[28px]";
-  const activeCls = compact ? "border-accent bg-accent-soft" : "border-ink bg-elevated/40";
-  const checkCls = compact ? "bg-accent" : "bg-ink";
+  const activeCls = compact ? "border-accent bg-elevated" : "border-ink bg-elevated";
 
   return (
     <>
@@ -44,14 +53,14 @@ export function CustomFontTiles({
           <div
             key={f.id}
             className={`group/font relative flex flex-col ${radius} border ${pad} transition-colors ${
-              active ? activeCls : "border-edge-soft bg-elevated/15 hover:border-edge"
+              active ? activeCls : "border-edge-soft bg-elevated hover:border-edge"
             }`}
             style={{ animation: "harborFontIn 240ms ease both" }}
           >
             <button
               type="button"
               onClick={() => onSelect(f.id)}
-              className="flex flex-1 flex-col gap-1.5 pe-8 text-start"
+              className="flex min-h-11 flex-1 flex-col gap-1.5 pe-12 text-start"
             >
               <span
                 className={`${previewSize} font-medium leading-none tracking-tight text-ink`}
@@ -60,35 +69,35 @@ export function CustomFontTiles({
                 Media Vision
               </span>
               {!compact && (
-                <span className="text-[13px] text-ink-muted" style={{ fontFamily: family }}>
-                  The quick brown fox jumps over the lazy dog
+                <span className="text-[15.5px] leading-[22px] text-ink-muted" style={{ fontFamily: family }}>
+                  {t("The quick brown fox jumps over the lazy dog")}
                 </span>
               )}
               <span
-                className={`truncate ${
+                className={`min-w-0 break-words ${
                   compact
-                    ? "mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-subtle"
-                    : "text-[11.5px] text-ink-subtle"
+                    ? "mt-1 text-[15.5px] font-medium leading-[22px] text-ink-subtle"
+                    : "text-[15.5px] leading-[22px] text-ink-subtle"
                 }`}
               >
                 {f.name}
               </span>
             </button>
-            <div className="absolute end-3 top-3 flex items-center">
+            <div className="absolute end-2 top-2 flex items-center">
               {active && (
-                <span
-                  className={`flex h-5 w-5 items-center justify-center rounded-full ${checkCls} text-canvas group-hover/font:hidden`}
-                >
-                  <Check size={12} strokeWidth={3} />
-                </span>
+                <Check
+                  size={18}
+                  strokeWidth={2.6}
+                  className="me-2 shrink-0 text-accent group-hover/font:hidden [html[data-input-modality=keys]_&]:hidden"
+                />
               )}
               <button
                 type="button"
                 onClick={() => remove(f.id)}
-                aria-label={`Remove ${f.name}`}
-                className="hidden h-7 w-7 items-center justify-center rounded-full bg-canvas/70 text-ink-subtle transition-colors hover:bg-danger/20 hover:text-danger group-hover/font:flex"
+                aria-label={t("Remove {name}", { name: f.name })}
+                className="hidden h-11 w-11 items-center justify-center rounded-full bg-canvas text-ink-subtle transition-colors hover:bg-danger/25 hover:text-danger group-hover/font:flex [html[data-input-modality=keys]_&]:flex"
               >
-                <Trash2 size={13} strokeWidth={2.2} />
+                <Trash2 size={18} strokeWidth={2.2} />
               </button>
             </div>
           </div>
@@ -100,27 +109,31 @@ export function CustomFontTiles({
         onClick={() => inputRef.current?.click()}
         disabled={busy}
         className={`flex flex-col items-center justify-center gap-2 ${radius} border border-dashed border-edge-soft ${pad} text-center transition-colors ${
-          busy ? "opacity-80" : "hover:border-edge hover:bg-elevated/20"
+          busy ? "opacity-80" : "hover:border-edge hover:bg-elevated"
         }`}
       >
-        <span
-          className={`flex items-center justify-center rounded-full bg-elevated/50 text-ink-muted ${
-            compact ? "h-9 w-9" : "h-11 w-11"
-          }`}
-        >
+        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-elevated text-ink-muted">
           {busy ? (
-            <Loader2 size={compact ? 16 : 18} className="animate-spin" />
+            <Loader2 size={20} className="animate-spin" />
           ) : (
-            <Upload size={compact ? 16 : 18} strokeWidth={2.2} />
+            <Upload size={20} strokeWidth={2.2} />
           )}
         </span>
-        <span className="text-[13px] font-semibold text-ink">
-          {busy ? "Adding font..." : "Upload a font"}
+        <span className="text-[16.5px] font-semibold leading-[24px] text-ink">
+          {busy ? t("Adding font…") : t("Upload a font")}
         </span>
-        {!busy && <span className="text-[11px] text-ink-subtle">TTF, OTF, WOFF or WOFF2</span>}
+        {!busy && (
+          <span className="text-[15.5px] leading-[22px] text-ink-subtle">
+            {t("TTF, OTF, WOFF or WOFF2")}
+          </span>
+        )}
       </button>
 
-      {error && <p className="col-span-full text-[12px] font-medium text-danger">{error}</p>}
+      {localizedError && (
+        <p className="col-span-full max-w-[66ch] text-[15.5px] leading-[22px] font-medium text-danger">
+          {localizedError}
+        </p>
+      )}
 
       <input
         ref={inputRef}

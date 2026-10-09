@@ -1,0 +1,190 @@
+/* Downloads uses one compact activity band and a flat, artwork-led queue. */
+.games-downloads { padding-block:28px 90px; }
+.games-download-heading { display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:20px; }
+.games-download-heading h2 { font-size:clamp(27px,2.8cqw,34px);line-height:1.2;letter-spacing:-.035em;margin:0; }
+.games-download-heading-actions { display:flex;align-items:center;gap:8px;flex-shrink:0; }
+.games-download-heading-actions .games-button { min-height:40px;font-size:12px;padding:11px 16px; }
+.games-download-heading-actions .games-icon-button { width:44px;height:44px; }
+.games-download-heading-actions .games-icon-button>svg { width:22px;height:22px; }
+.games-download-toolbar { display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px; }
+.games-download-filters,.games-download-tools { display:flex;align-items:center;gap:6px; }
+.games-download-filters button { display:flex;align-items:center;gap:8px;min-height:36px;padding:8px 12px;border-radius:5px;color:var(--color-ink-muted);font-size:12px;white-space:nowrap; }
+.games-download-filters button[aria-pressed=true] { background:var(--color-elevated);color:var(--color-ink); }
+.games-download-filters button span { color:var(--color-ink-subtle);font-size:11px;font-variant-numeric:tabular-nums; }
+.games-download-tools { gap:3px; }
+.games-download-tools .games-icon-button { width:42px;height:42px;color:var(--color-ink-muted); }
+.games-download-tools .games-icon-button>svg { width:22px;height:22px; }
+.games-downloads .games-icon-button { flex-shrink:0; }
+.games-download-empty { padding:75px 0;display:flex;align-items:center;flex-direction:column;text-align:center; }
+.games-download-empty>svg { color:var(--color-ink-subtle);margin-bottom:22px; }
+.games-download-empty h3 { font-size:22px;font-weight:500;letter-spacing:-.02em; }
+.games-download-empty p { max-width:44ch;color:var(--color-ink-muted);font-size:13px;line-height:1.7;margin-top:12px; }
+.games-downloads .games-download-loading { min-height:240px;display:grid;place-items:center;color:var(--color-ink-muted); }
+
+/* The history shares space with the art instead of pushing the queue down. */
+.games-download-feature { isolation:isolate;position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(340px,1fr);gap:38px;min-height:224px;padding:24px 28px;border-radius:6px;background:var(--color-surface); }
+.games-download-feature-art { position:absolute;inset:0;z-index:-3;pointer-events:none; }
+.games-download-feature-art img { display:block;width:65%;height:100%;object-fit:cover;object-position:center; }
+.games-download-feature:before { content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,color-mix(in srgb,var(--color-surface) 9%,transparent),color-mix(in srgb,var(--color-surface) 48%,transparent) 30%,var(--color-surface) 59%),linear-gradient(0deg,var(--color-surface),transparent 80%); }
+.games-download-feature-title { align-self:start;min-width:0;padding-top:6px;padding-bottom:52px; }
+.games-download-feature-title h3 { margin:0;font-size:clamp(24px,2.5cqw,34px);font-weight:600;line-height:1.15;letter-spacing:-.03em;text-wrap:balance;overflow-wrap:anywhere; }
+.games-download-feature-logo { display:block;width:270px;height:78px;max-width:100%;object-fit:contain;object-position:left center;margin-bottom:9px; }
+.games-download-feature-logo:not([data-loaded="true"]) { display:none; }
+.games-download-feature-title:has(.games-download-feature-logo[data-loaded="true"]) h3 { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+.games-download-feature-title p { font-size:12px;line-height:1.5;margin:8px 0 0;color:var(--color-ink-muted); }
+.games-download-feature-title>span { display:block;max-width:90%;margin-top:3px;font-size:11px;line-height:1.5;color:var(--color-ink-subtle);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.games-download-feature-activity { min-width:0;align-self:stretch;display:flex;flex-direction:column;justify-content:center; }
+.games-download-meters { display:flex;justify-content:space-between;gap:14px;margin:0 0 30px; }
+.games-download-complete-state { margin:0 0 30px;font-size:13px;font-weight:600;line-height:1.4;color:var(--color-ink); }
+.games-download-meters>div { min-width:0; }
+.games-download-meters dt { display:flex;align-items:center;gap:5px;font-size:10px;color:var(--color-ink-muted);line-height:1.4; }
+.games-download-meters dt>svg { color:var(--color-accent);flex-shrink:0; }
+.games-download-seeders-meter dt::before { content:"";width:12px;height:2px;flex:none;background:var(--color-success); }
+.games-download-meters dd { font-size:17px;font-weight:600;margin:4px 0 0;font-variant-numeric:tabular-nums;white-space:nowrap; }
+.games-download-meters dd small { margin-inline-start:2px;font-size:10px;color:var(--color-ink-muted);font-weight:400; }
+.games-download-graph { position:absolute;z-index:1;inset-inline-start:0;bottom:0;width:55%;height:67px;display:block;pointer-events:none;background:linear-gradient(0deg,color-mix(in srgb,var(--color-surface) 66%,transparent),transparent); }
+.games-download-graph-base { stroke:var(--color-edge-soft);stroke-width:1;fill:none;vector-effect:non-scaling-stroke; }
+.games-download-graph-network { stroke:var(--color-accent);stroke-width:2;fill:none;opacity:.7;vector-effect:non-scaling-stroke; }
+.games-download-graph-seeders { stroke:var(--color-success);stroke-width:1.5;fill:none;vector-effect:non-scaling-stroke; }
+.games-download-feature-progress { display:flex;justify-content:space-between;gap:12px;font-size:12px;line-height:1.5; }
+.games-download-feature-progress strong { display:flex;align-items:center;gap:8px;font-weight:550; }
+.games-download-spinner { flex-shrink:0;animation:games-download-spin 900ms linear infinite; }
+.games-download-feature-progress>span { font-size:11px;color:var(--color-ink-muted);font-variant-numeric:tabular-nums;white-space:nowrap; }
+.games-download-progress { height:4px;border-radius:3px;background:var(--color-elevated);margin-top:10px;overflow:hidden; }
+.games-download-progress>i { display:block;height:100%;border-radius:inherit;background:var(--color-ink-muted);transition:width 250ms linear; }
+.is-downloading .games-download-progress>i { background:var(--color-accent); }
+.games-download-progress.is-indeterminate>i { width:30%!important;animation:games-download-flow 1.8s ease-in-out infinite; }
+.games-download-feature-footer { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;min-height:40px; }
+.games-download-feature-summary { display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;font-size:12px;color:var(--color-ink-muted);line-height:1.5;min-width:0; }
+.games-download-remaining { display:flex;flex-direction:column;gap:2px; }
+.games-download-remaining>span { font-size:11px;color:var(--color-ink-muted); }
+.games-download-remaining strong { font-size:22px;line-height:1.2;font-weight:550;letter-spacing:-.02em;color:var(--color-ink);font-variant-numeric:tabular-nums; }
+.games-download-connection { display:inline-flex;align-items:center;gap:9px;white-space:nowrap;border-radius:3px;font-size:13px;color:var(--color-ink-muted); }
+.games-download-connection>svg { width:23px;height:23px;flex-shrink:0;color:var(--color-ink-muted); }
+.games-download-feature .games-download-action-set { gap:10px; }
+.games-download-feature .games-download-action-set .games-icon-button { width:48px;height:48px; }
+.games-download-feature .games-download-action-set .games-icon-button>svg { width:26px;height:26px; }
+.games-download-feature .games-download-action-set .games-download-primary-action { background:var(--color-ink);color:var(--color-canvas);width:56px;height:56px;border-radius:50%; }
+.games-download-feature .games-download-action-set .games-download-primary-action:hover:not(:disabled) { background:var(--color-ink);color:var(--color-canvas);transform:scale(1.055); }
+.games-download-feature .games-download-action-set .games-download-primary-action:active:not(:disabled) { transform:scale(.97); }
+.games-download-feature:dir(rtl):before { background:linear-gradient(270deg,color-mix(in srgb,var(--color-surface) 9%,transparent),color-mix(in srgb,var(--color-surface) 48%,transparent) 30%,var(--color-surface) 59%),linear-gradient(0deg,var(--color-surface),transparent 80%); }
+.games-download-feature:dir(rtl) .games-download-feature-art img { margin-inline-end:auto; }
+
+.games-download-group { margin-top:29px; }
+.games-download-group>header { display:flex;align-items:baseline;gap:14px;margin-bottom:5px; }
+.games-download-group>header:after { content:"";height:1px;flex:1;align-self:center;background:var(--color-edge-soft); }
+.games-download-group>header h3 { flex-shrink:0;margin:0;font-size:19px;font-weight:550;letter-spacing:-.02em; }
+.games-download-group>header h3 span { color:var(--color-ink-subtle);font-size:13px;margin-inline-start:6px;font-weight:400; }
+.games-download-group>header p { order:1;max-width:44ch;margin:0;font-size:11px;color:var(--color-ink-subtle);line-height:1.5;text-align:end; }
+.games-download-group>header:has(.games-download-clear)>div { order:1; }
+.games-download-clear { font-size:12px;min-height:36px; }
+.games-download-completed-date { display:block;margin-top:7px;color:var(--color-ink-muted);font-size:11px;line-height:1.5;font-variant-numeric:tabular-nums; }
+.games-download-history { display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-top:24px;font-size:11px;color:var(--color-ink-subtle); }
+.games-download-history p { margin:0; }
+.games-download-row { display:grid;grid-template-columns:164px minmax(0,1fr) auto;align-items:center;column-gap:20px;padding:15px 0; }
+.games-download-art { display:grid;place-items:center;width:100%;aspect-ratio:460/215;background:var(--color-surface);border-radius:4px;overflow:hidden;color:var(--color-ink-subtle); }
+.games-download-art img { width:100%;height:100%;object-fit:cover; }
+.games-download-art>svg { width:32px;height:32px;opacity:.55; }
+.games-download-info { min-width:0; }
+.games-download-name { display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 14px; }
+.games-download-name h3 { margin:0;font-size:15px;font-weight:550;line-height:1.4;overflow-wrap:anywhere; }
+.games-download-name>span { font-size:11px;line-height:1.4;color:var(--color-ink-subtle); }
+.games-download-content-info { display:inline-flex;align-items:center;gap:4px;min-width:24px;min-height:24px;color:var(--color-ink-subtle);font-size:10px;font-variant-numeric:tabular-nums;vertical-align:middle; }
+.games-download-content-info:hover,.games-download-content-info[aria-expanded=true] { color:var(--color-ink); }
+.games-download-content-info:focus-visible { outline:2px solid var(--color-accent);outline-offset:3px;border-radius:4px;color:var(--color-ink); }
+.games-download-feature-identity { display:flex;align-items:center;gap:10px;margin-top:12px; }
+.games-download-feature-identity>.games-download-source-identity { margin-top:0; }
+.games-download-feature-identity>.games-download-content { flex:none; }
+.games-download-row.is-downloading .games-download-name>span { color:var(--color-accent); }
+.games-download-row.is-failed .games-download-name>span { color:var(--color-danger); }
+.games-download-host { display:block;margin-top:5px;font-size:11px;line-height:1.4;color:var(--color-ink-subtle);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.games-download-stats { display:flex;flex-wrap:wrap;gap:5px 14px;font-size:11px;margin-top:5px;color:var(--color-ink-muted);font-variant-numeric:tabular-nums; }
+.games-download-stats>span { display:flex;align-items:center;gap:5px; }
+.games-download-row:is(.is-queued,.is-complete,.is-canceled) .games-download-progress { display:none; }
+.games-download-row.is-complete .games-download-stats>span>svg { color:var(--color-success); }
+.games-download-error { margin:7px 0 0;font-size:12px;line-height:1.6;color:var(--color-ink-muted); }
+.games-download-actions,.games-download-action-set { display:flex;align-items:center;gap:4px;flex-shrink:0; }
+.games-download-actions .games-icon-button,.games-download-action-set .games-icon-button { width:40px;height:40px;border-radius:50%;color:var(--color-ink-muted);transition:color 160ms ease-out,transform 180ms cubic-bezier(.22,.61,.36,1); }
+.games-download-actions .games-icon-button>svg,.games-download-action-set .games-icon-button>svg { width:23px;height:23px; }
+.games-download-action-set .games-download-primary-action { background:transparent;color:var(--color-ink); }
+.games-downloads .games-icon-button:hover:not(:disabled),.games-downloads .games-download-details-toggle[aria-expanded=true] { background:transparent;color:var(--color-ink); }
+.games-downloads .games-icon-button:hover:not(:disabled) { transform:scale(1.06); }
+.games-download-order-actions { display:flex;gap:2px;margin-inline-end:5px;padding-inline-end:6px;border-inline-end:1px solid var(--color-edge-soft); }
+.games-download-order-actions .games-icon-button>svg { width:18px;height:18px; }
+.games-download-order.sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+.games-download-details { grid-column:2/-1;padding:15px 0 2px; }
+.games-download-detail-name { margin:0 0 10px;font-size:12px;color:var(--color-ink);overflow-wrap:anywhere; }
+.games-download-details dl { display:grid;grid-template-columns:minmax(85px,auto) minmax(0,1fr);gap:9px 24px;margin:0;font-size:11px;line-height:1.6; }
+.games-download-details dt { color:var(--color-ink-subtle); }
+.games-download-details dd { min-width:0;margin:0;color:var(--color-ink-muted);overflow-wrap:anywhere; }
+.games-downloads :is(button,summary,[tabindex]):focus-visible { outline:2px solid var(--color-accent);outline-offset:3px; }
+
+@container(max-width:1000px) {
+  .games-download-feature { grid-template-columns:minmax(0,.9fr) minmax(320px,1fr);gap:24px;padding:22px; }
+  .games-download-feature-logo { width:235px;height:72px; }
+  .games-download-graph { width:47%; }
+  .games-download-row { grid-template-columns:132px minmax(0,1fr) auto;column-gap:16px; }
+  .games-download-order-actions { flex-direction:column;gap:0; }
+  .games-download-order-actions .games-icon-button { width:28px;height:28px; }
+  .games-download-group>header p { max-width:34ch; }
+}
+@container(max-width:750px) {
+  .games-download-heading { align-items:flex-start;gap:16px;flex-wrap:wrap; }
+  .games-download-heading-actions { gap:4px; }
+  .games-download-heading-actions .games-button { padding-inline:12px; }
+  .games-download-toolbar { flex-wrap:wrap;gap:8px; }
+  .games-download-tools { margin-inline-start:auto; }
+  .games-download-feature { grid-template-columns:1fr;gap:0;padding:24px; }
+  .games-download-feature-title { min-height:155px;padding:0 0 28px; }
+  .games-download-feature-art img { width:100%;height:250px; }
+  .games-download-feature:before,.games-download-feature:dir(rtl):before { background:linear-gradient(0deg,var(--color-surface) 39%,color-mix(in srgb,var(--color-surface) 40%,transparent) 88%,color-mix(in srgb,var(--color-surface) 15%,transparent)); }
+  .games-download-feature-logo { width:250px;height:70px;margin-top:6px; }
+  .games-download-meters { margin-bottom:22px;gap:16px; }
+  .games-download-graph { position:relative;inset:auto;width:100%;height:56px;margin:0 0 18px; }
+  .games-download-feature-title>span { max-width:100%; }
+  .games-download-feature-footer { flex-wrap:wrap; }
+  .games-download-feature-summary { flex:1;min-width:min(100%,160px); }
+  .games-download-feature-footer>.games-download-action-set { margin-inline-start:auto; }
+  .games-download-row { grid-template-columns:112px minmax(0,1fr);gap:0 15px;padding:16px 0; }
+  .games-download-art { grid-row:1/3;align-self:start; }
+  .games-download-actions { grid-column:2;justify-self:start;margin-top:12px; }
+  .games-download-order-actions { flex-direction:row; }
+  .games-download-order-actions .games-icon-button { width:32px;height:32px; }
+  .games-download-details { grid-column:1/-1; }
+  .games-download-name>span { font-size:10px; }
+  .games-download-group>header { flex-wrap:wrap;gap:8px; }
+  .games-download-group>header p { flex-basis:100%;max-width:none;text-align:start; }
+}
+@container(max-width:480px) {
+  .games-download-heading { flex-direction:column;gap:15px;margin-bottom:18px; }
+  .games-download-heading-actions { width:100%;justify-content:flex-end; }
+  .games-download-filters { gap:2px; }
+  .games-download-filters button { padding:8px;font-size:11px; }
+  .games-download-feature { padding:20px; }
+  .games-download-meters { gap:12px;flex-wrap:wrap; }
+  .games-download-meters dd { font-size:16px; }
+  .games-download-feature-progress { flex-wrap:wrap;gap:3px; }
+  .games-download-row { grid-template-columns:88px minmax(0,1fr);column-gap:12px; }
+  .games-download-name h3 { font-size:14px; }
+  .games-download-actions { gap:2px; }
+  .games-download-actions .games-icon-button { width:34px;height:36px; }
+  .games-download-order-actions { margin-inline-end:2px;padding-inline-end:3px; }
+  .games-download-order-actions .games-icon-button { width:26px; }
+  .games-download-details dl { grid-template-columns:1fr;gap:3px; }
+  .games-download-details dt:not(:first-child) { margin-top:8px; }
+}
+@keyframes games-download-flow { from { transform:translateX(-100%); } to { transform:translateX(430%); } }
+@keyframes games-download-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .games-download-progress>i,.games-downloads .games-icon-button { transition:none; } .games-downloads .games-icon-button:hover:not(:disabled),.games-download-feature .games-download-action-set .games-download-primary-action:active:not(:disabled) { transform:none; } .games-download-progress.is-indeterminate>i { animation:none;opacity:.5; } }
+@media(prefers-reduced-motion:reduce) { .games-download-spinner { animation:none; } }
+.games-download-form { padding:28px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--color-edge) transparent; }
+.games-download-form header { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.games-download-form h2 { font-size:25px; font-weight:550; letter-spacing:-.03em; margin:0; }
+.games-download-form p { font-size:12px; color:var(--color-ink-muted); line-height:1.7; margin:17px 0 24px; }
+.games-download-form label { display:flex; flex-direction:column; gap:10px; font-size:12px; margin-block:20px; }
+.games-download-form input { width:100%; min-width:0; background:var(--color-elevated); color:var(--color-ink); border-radius:7px; padding:12px 14px; font-size:13px; }
+.games-download-form summary { font-size:12px; color:var(--color-ink-muted); cursor:pointer; }
+.games-download-form details p { font-size:11px; }
+.games-download-form footer { display:flex; justify-content:flex-end; gap:10px; padding-top:25px; border-top:1px solid var(--color-edge); margin-top:25px; }
+
+.games-download-feature .games-download-primary-action { --games-transfer-play-size:26px; }

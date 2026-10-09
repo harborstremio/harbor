@@ -1,13 +1,12 @@
 import { useState, type Dispatch, type RefObject, type SetStateAction } from "react";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
-import type { PlayEpisode } from "@/lib/view";
 import { useClipRecorder } from "./use-clip-recorder";
 import { useFrameGrab } from "./use-frame-grab";
 import { useGifRecorder } from "./use-gif-recorder";
 import { useKeyboardShortcuts } from "./use-keyboard-shortcuts";
 import { useLiveChannelOverlay } from "./use-live-channel-overlay";
 import { useSleepTimer } from "./use-sleep-timer";
-import { useVideoFill } from "./use-video-fill";
+import { useVideoFill, ZOOM_STEP } from "./use-video-fill";
 
 export function usePlayerHotkeys(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
@@ -17,6 +16,7 @@ export function usePlayerHotkeys(params: {
   drawMode: boolean;
   setDrawMode: Dispatch<SetStateAction<boolean>>;
   closePlayer: () => Promise<void>;
+  returnToPreview?: () => void;
   playPauseToggle: () => void;
   seekStep: (delta: number) => void;
   seekTo: (sec: number) => void;
@@ -24,9 +24,10 @@ export function usePlayerHotkeys(params: {
   togglePip: () => void;
   fullscreen: boolean;
   cycleSubtitles: () => void;
-  canChangeEpisode: boolean;
-  adjacent: { prev: PlayEpisode | null; next: PlayEpisode | null };
-  goToEpisode: (ep: PlayEpisode | null) => void;
+  playNext: () => void;
+  playPrev: () => void;
+  hasNextEpisode: boolean;
+  hasPrevEpisode: boolean;
   toggleSwitcher: () => void;
   toggleEpisodePanel: () => void;
   liveOverlay: ReturnType<typeof useLiveChannelOverlay>;
@@ -40,6 +41,8 @@ export function usePlayerHotkeys(params: {
   onToggleAnime4k?: () => void;
   onAnime4kOn?: () => void;
   onAnime4kOff?: () => void;
+  onReloadSource?: () => void;
+  onRestartServer?: () => void;
   onVolumeFeedback?: (volume: number, muted: boolean) => void;
 }) {
   const {
@@ -50,6 +53,7 @@ export function usePlayerHotkeys(params: {
     drawMode,
     setDrawMode,
     closePlayer,
+    returnToPreview,
     playPauseToggle,
     seekStep,
     seekTo,
@@ -57,9 +61,10 @@ export function usePlayerHotkeys(params: {
     togglePip,
     fullscreen,
     cycleSubtitles,
-    canChangeEpisode,
-    adjacent,
-    goToEpisode,
+    playNext,
+    playPrev,
+    hasNextEpisode,
+    hasPrevEpisode,
     toggleSwitcher,
     toggleEpisodePanel,
     liveOverlay,
@@ -73,16 +78,19 @@ export function usePlayerHotkeys(params: {
     onToggleAnime4k,
     onAnime4kOn,
     onAnime4kOff,
+    onReloadSource,
+    onRestartServer,
     onVolumeFeedback,
   } = params;
 
   const [showStats, setShowStats] = useState(false);
-  const { holdSpeedActive } = useKeyboardShortcuts({
+  const { holdSpeedActive, subtitleOffsetSec } = useKeyboardShortcuts({
     bridgeRef,
     snap,
     drawMode,
     setDrawMode,
     closePlayer,
+    returnToPreview,
     playPauseToggle,
     seekStep,
     seekTo,
@@ -93,10 +101,10 @@ export function usePlayerHotkeys(params: {
     setShowStats,
     metaId,
     svpActive,
-    onNextEp: canChangeEpisode && adjacent.next ? () => goToEpisode(adjacent.next) : undefined,
-    onPrevEp: canChangeEpisode && adjacent.prev ? () => goToEpisode(adjacent.prev) : undefined,
-    hasNextEp: canChangeEpisode && !!adjacent.next,
-    hasPrevEp: canChangeEpisode && !!adjacent.prev,
+    onNextEp: hasNextEpisode ? playNext : undefined,
+    onPrevEp: hasPrevEpisode ? playPrev : undefined,
+    hasNextEp: hasNextEpisode,
+    hasPrevEp: hasPrevEpisode,
     toggleSwitcher,
     toggleEpisodePanel,
     toggleGuide: () => {
@@ -111,15 +119,17 @@ export function usePlayerHotkeys(params: {
     onGifRecord: quickToolsEnabled ? () => gif.toggle() : undefined,
     onClipRecord: quickToolsEnabled ? () => clip.openChooser() : undefined,
     onToggleCrop: () => videoFill.cycle(),
-    onPanscanUp: () => videoFill.step(0.1),
-    onPanscanDown: () => videoFill.step(-0.1),
+    onPanscanUp: () => videoFill.step(ZOOM_STEP),
+    onPanscanDown: () => videoFill.step(-ZOOM_STEP),
     onPrevChannel: liveOverlay.isLive ? liveOverlay.goPrevChannel : undefined,
     onToggleAnime4k,
     onAnime4kOn,
     onAnime4kOff,
+    onReloadSource,
+    onRestartServer,
     onFrameStep: (dir) => bridgeRef.current?.frameStep?.(dir),
     onVolumeFeedback,
   });
 
-  return { holdSpeedActive, showStats };
+  return { holdSpeedActive, showStats, subtitleOffsetSec };
 }

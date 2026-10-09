@@ -19,6 +19,8 @@ export type VodEpisode = {
   title: string;
   url: string;
   logo: string | null;
+  durationSec?: number | null;
+  plot?: string | null;
 };
 
 export type VodSeries = {

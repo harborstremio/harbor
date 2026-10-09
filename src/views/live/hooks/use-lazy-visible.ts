@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
 const INITIAL_BATCH = 24;
 const BATCH_SIZE = 24;
@@ -6,10 +6,15 @@ const MAX_SHOWN = 1500;
 
 const SHOWN_CACHE = new Map<string, number>();
 
-export function useLazyVisible<T>(items: T[], resetKey: unknown): {
+export function useLazyVisible<T>(
+  items: T[],
+  resetKey: unknown,
+  rootRef?: RefObject<HTMLElement | null>,
+): {
   visible: T[];
   sentinelRef: (el: HTMLDivElement | null) => void;
   hasMore: boolean;
+  loadMore: () => void;
 } {
   const cacheKey = String(resetKey);
   const cacheKeyRef = useRef(cacheKey);
@@ -20,7 +25,7 @@ export function useLazyVisible<T>(items: T[], resetKey: unknown): {
   });
   const itemsLenRef = useRef(items.length);
   itemsLenRef.current = items.length;
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const [sentinel, setSentinel] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (cacheKeyRef.current === cacheKey) return;
@@ -33,17 +38,10 @@ export function useLazyVisible<T>(items: T[], resetKey: unknown): {
     SHOWN_CACHE.set(cacheKey, shown);
   }, [cacheKey, shown]);
 
+  // observing from an effect, not from the ref callback: React assigns child
+  // refs before parent ones, so the scroll container is still null at that point
   useEffect(() => {
-    return () => {
-      observerRef.current?.disconnect();
-      observerRef.current = null;
-    };
-  }, []);
-
-  const sentinelRef = useCallback((el: HTMLDivElement | null) => {
-    observerRef.current?.disconnect();
-    observerRef.current = null;
-    if (!el) return;
+    if (!sentinel) return;
     const obs = new IntersectionObserver(
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
@@ -54,10 +52,20 @@ export function useLazyVisible<T>(items: T[], resetKey: unknown): {
           return Math.min(ceiling, n + BATCH_SIZE);
         });
       },
-      { rootMargin: "150px 0px" },
+      { root: rootRef?.current ?? null, rootMargin: "300px 0px" },
     );
-    obs.observe(el);
-    observerRef.current = obs;
+    obs.observe(sentinel);
+    return () => obs.disconnect();
+  }, [sentinel, rootRef]);
+
+  const sentinelRef = useCallback((el: HTMLDivElement | null) => setSentinel(el), []);
+
+  const loadMore = useCallback(() => {
+    setShown((n) => {
+      const ceiling = Math.min(itemsLenRef.current, MAX_SHOWN);
+      if (n >= ceiling) return n;
+      return Math.min(ceiling, n + BATCH_SIZE);
+    });
   }, []);
 
   const ceiling = Math.min(items.length, MAX_SHOWN);
@@ -65,5 +73,6 @@ export function useLazyVisible<T>(items: T[], resetKey: unknown): {
     visible: items.slice(0, Math.min(shown, ceiling)),
     sentinelRef,
     hasMore: shown < ceiling,
+    loadMore,
   };
 }

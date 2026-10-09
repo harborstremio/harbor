@@ -90,7 +90,7 @@ jobs:
   native:
     name: Native
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -153,11 +153,12 @@ jobs:
       - name: Check Tauri application
         if: steps.native-changes.outputs.changed == 'true'
         env:
-          TAURI_CONFIG: '{"bundle":{"externalBin":[]}}'
+          # Cargo checks do not package sidecars or the staged Java runtime.
+          TAURI_CONFIG: '{"bundle":{"externalBin":[],"resources":[]}}'
         run: cargo check --manifest-path src-tauri/Cargo.toml
 
       - name: Test Tauri application
         if: steps.native-changes.outputs.changed == 'true'
         env:
-          TAURI_CONFIG: '{"bundle":{"externalBin":[]}}'
+          TAURI_CONFIG: '{"bundle":{"externalBin":[],"resources":[]}}'
         run: cargo test --manifest-path src-tauri/Cargo.toml

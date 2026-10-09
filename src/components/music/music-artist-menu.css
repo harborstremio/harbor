@@ -1,0 +1,35 @@
+.music-artist-menu {
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--color-elevated);
+  box-shadow:
+    0 0 0 1px var(--color-edge-soft),
+    0 24px 64px -24px rgb(0 0 0 / 0.65);
+}
+.music-artist-menu button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 42px;
+  padding-inline: 10px;
+  border-radius: 6px;
+  text-align: start;
+  font-size: 13px;
+  color: var(--color-ink);
+}
+.music-artist-menu button:hover:not(:disabled),
+.music-artist-menu button:focus-visible {
+  background: var(--color-raised);
+  outline: none;
+}
+.music-artist-menu button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.music-artist-menu svg {
+  flex-shrink: 0;
+  color: var(--color-ink-muted);
+}

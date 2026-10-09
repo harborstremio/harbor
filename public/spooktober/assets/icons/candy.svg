@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 30.8.1, SVG Export Plug-In . SVG Version: 9.03 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 48 48" enable-background="new 0 0 48 48" xml:space="preserve">
+<g id="candy">
+	<polyline fill="#EDC78B" points="14,19 6,13 5,26 14,24 	"/>
+	<polyline fill="#EDC78B" points="33,24 42,31 43,16 33,20 	"/>
+	
+		<path fill="#2E3037" stroke="#D7CBB7" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+		M14,15c6.667-2.667,13-2.667,19,0v16c-6,2.667-12.333,2.333-19-1V15z"/>
+	
+		<line fill="none" stroke="#EDC78B" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="18" y1="15" x2="26" y2="32"/>
+	
+		<line fill="none" stroke="#EDC78B" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="25" y1="14" x2="32" y2="30"/>
+</g>
+</svg>

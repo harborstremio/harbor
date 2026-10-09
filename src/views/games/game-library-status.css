@@ -1,0 +1,6 @@
+.games-library-status-setting{border:0;padding:0;margin:22px 0 26px;min-width:0}
+.games-library-status-setting>legend{font-size:13px;font-weight:550;margin-bottom:9px;color:var(--color-ink)}
+.games-library-status-setting>p{font-size:12px;line-height:1.65;margin:10px 0 0;color:var(--color-ink-muted)}
+.games-library-status-setting>div{max-width:100%}
+.games-library-status-setting:disabled{opacity:.6}
+.games-unified-play-status{display:block;margin-top:7px;font-size:12px;line-height:1.5;color:var(--color-ink-muted)}

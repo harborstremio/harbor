@@ -1,5 +1,5 @@
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
-import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
+import type { PlayerBridge, PlayerSnapshot, TrackInfo } from "@/lib/player/bridge";
 import { fetchAndParse, parseSubtitle, type SubCue } from "./parser";
 
 export type CueSource = { cues: SubCue[]; format: "srt" | "vtt" };
@@ -35,12 +35,16 @@ function snapshotOf(bridge: PlayerBridge): PlayerSnapshot | null {
   return snap;
 }
 
+export function embeddedSubIndex(tracks: TrackInfo[], trackId: string): number {
+  const idx = tracks.filter((t) => !t.external && !t.url).findIndex((t) => t.id === trackId);
+  return idx >= 0 ? idx : 0;
+}
+
 function selectedEmbeddedIndex(bridge: PlayerBridge): number {
   const snap = snapshotOf(bridge);
   if (!snap) return 0;
-  const embedded = snap.subtitleTracks.filter((t) => !t.external && !t.url);
-  const idx = embedded.findIndex((t) => t.selected);
-  return idx >= 0 ? idx : 0;
+  const sel = snap.subtitleTracks.find((t) => !t.external && !t.url && t.selected);
+  return sel ? embeddedSubIndex(snap.subtitleTracks, sel.id) : 0;
 }
 
 export async function getCuesAnySource(

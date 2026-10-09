@@ -243,6 +243,8 @@ export function NativeTrailerPlayer({
           e.currentTarget.playbackRate = speed;
         }}
         onCanPlay={() => setBuffering(false)}
+        onSeeking={() => setBuffering(true)}
+        onSeeked={() => setBuffering(false)}
         onWaiting={() => setBuffering(true)}
         onPlaying={() => setBuffering(false)}
         onVolumeChange={(e) => {

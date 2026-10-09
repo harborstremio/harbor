@@ -1,0 +1,22 @@
+const videoCast: Record<string, string> = {
+  "video.cast.protocol": "目前，将视频音频单独发送到扬声器需要 DLNA 接收设备。",
+  "video.cast.audioRoute": "扬声器音频",
+  "video.cast.localPicture": "视频仍在此电脑播放",
+  "video.cast.speakerHelp": "请在扬声器上调节音量。网络音频可能落后于画面。",
+  "video.cast.return": "将音频切回此电脑",
+  "video.cast.stopping": "正在停止扬声器…",
+  "video.cast.noPlayer": "请先播放视频，再选择扬声器。",
+  "video.cast.volume": "请在扬声器上调节音量。电脑音量和增益不适用。",
+  "video.cast.settings": "更改速度或音轨前，请先将音频切回此电脑。",
+  "video.cast.muteFailed": "无法确认本地音频已静音。已停止扬声器播放。",
+  "video.cast.loadFailed": "无法在此扬声器上启动音频。请尝试其他来源。",
+  "video.cast.notReady": "扬声器未确认播放。",
+  "video.cast.retryReturn": "请检查扬声器，然后重试将音频切回此电脑。",
+  "video.cast.disconnected": "扬声器连接已断开。视频已暂停；扬声器停止前，本地音频将保持保护状态。",
+  "video.cast.buffering": "视频正在缓冲。两端均已暂停，准备就绪后请点击播放。",
+  "video.cast.controlFailed": "扬声器未确认命令。请重试将音频切回此电脑。",
+  "video.cast.playerChanged": "本地播放器已更改。请先停止扬声器再继续。",
+  "video.cast.trackUnavailable": "无法将此音轨对应到来源。请先选择内嵌音轨。",
+  "video.cast.liveUnsupported": "直播视频暂不支持单独的网络扬声器。",
+};
+export default videoCast;

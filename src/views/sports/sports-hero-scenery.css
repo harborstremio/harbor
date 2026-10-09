@@ -1,0 +1,42 @@
+.sh-hero-scenery {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 65% center;
+  z-index: -3;
+  pointer-events: none;
+}
+
+.hot-art {
+  isolation: isolate;
+}
+.hot-art > .sh-hero-scenery {
+  z-index: -1;
+}
+.hot-art > .hot-art-photo {
+  position: absolute;
+  inset: 0;
+}
+.hot-art-logos {
+  position: relative;
+}
+.hot-art:has(.hot-art-logos) > .sh-hero-scenery {
+  filter: brightness(0.6);
+}
+.hot-art .sh-team-logo img {
+  background: transparent;
+}
+
+.sh-event-art {
+  position: relative;
+  isolation: isolate;
+}
+.sh-event-art > .sh-hero-scenery {
+  z-index: -1;
+  filter: brightness(0.62);
+}
+.sh-event-art .sh-team-logo img {
+  background: transparent;
+}

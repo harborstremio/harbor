@@ -1,9 +1,13 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { Check, Play, X } from "lucide-react";
+import { Check, X } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
-import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
+import traktLogo from "@/assets/trakt.svg";
+import { narrowMediaType, type Meta } from "@/lib/cinemeta";
+import { resolveMeta } from "@/lib/meta-resource";
 import { animeKitsuMeta, type AnimeKitsuVideo } from "@/lib/providers/anime-kitsu-addon";
 import { tmdbLiteMeta } from "@/lib/providers/tmdb/tmdb-lite";
+import { tmdbIdFromImdb } from "@/lib/providers/tmdb";
 import { useContextMenu } from "@/lib/context-menu";
 import { useT } from "@/lib/i18n";
 import { readSnapshot, useSnapshotVersion } from "@/lib/snapshots";
@@ -15,47 +19,123 @@ import {
 } from "@/lib/stremio";
 import { useHasNewEpisode } from "@/lib/new-episodes";
 import { Tooltip } from "@/views/detail/tooltip";
-import { useProfiles } from "@/lib/profiles";
+import { useProfiles, sharesStremioStorage } from "@/lib/profiles";
+import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
 import { useView, type PlayEpisode } from "@/lib/view";
 import { getWatchedBy } from "@/lib/watched-by";
-import { playLocalAware } from "@/lib/local-library/playback";
+import { resolveLocalPlayVersions } from "@/lib/local-library/playback";
 import { localPlayerSrc } from "@/lib/local-library/player-src";
+import { openLocalVersions } from "@/lib/player/local-versions-modal";
+import { mediaServerConnections } from "@/lib/media-server/connections";
+import { mediaServerItems } from "@/lib/media-server/index-store";
+import { matchingServerItems, serverPlayableCopies } from "@/lib/media-server/selectors";
+import { createMediaServerPlayerSrc, decidePlaybackSource } from "@/lib/media-server/playback";
 import { fetchSeasonEpisodes } from "@/lib/series-episodes";
+import { aniZipByAnidb, aniZipByAnilist, aniZipByKitsu, aniZipByMal } from "@/lib/providers/anizip";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { resolvePreferredAnimeTitle } from "@/lib/anime-title";
+import { stripFranchiseSuffix } from "@/lib/providers/jikan";
+import { getAnimeCwId } from "@/lib/anime-cw-ids";
+import { aniZipLookupKey, applyAniZipEpisode, needsAniZipSyncIds } from "@/lib/cw-anime-episode";
+import { isSplitFranchiseKitsu } from "@/lib/providers/anime-franchise-root";
+import { parseKitsuId } from "@/lib/providers/kitsu";
+import {
+  isForeignSplitSeason,
+  splitFranchiseDisplaySeason,
+} from "@/lib/streams/anime-identity-core";
+import { classifyAnimeNumbering } from "@/lib/subtitles/anime-numbering";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
+
+// Bleach: Thousand-Year Blood War is split across four cours that carry their
+// own arc name appended to the base title (e.g. "... - The Separation"). The
+// library keeps the arc name, but the card should show only the base title.
+// This is a closed set of the four cour subtitles; do not add anime names here.
+const ANIME_ARC_STRIP: ReadonlyArray<{ matcher: string; replace: string }> = [
+  { matcher: "The Blood Warfare", replace: "" },
+  { matcher: "The Separation", replace: "" },
+  { matcher: "The Conflict", replace: "" },
+  { matcher: "The Calamity", replace: "" },
+];
+
+function stripAnimeArcSuffix(name: string): string {
+  let t = name;
+  for (const { matcher, replace } of ANIME_ARC_STRIP) {
+    t = t.replace(new RegExp(`(?:\\s*[-:—]\\s*|\\s)${escapeRegExp(matcher)}$`, "i"), replace);
+  }
+  return t.replace(/[\s°'."’˚_:-]+$/g, "").trim();
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 type Props = {
   item: LibraryItem;
   watched?: boolean;
   onDismiss?: (item: LibraryItem) => void;
+  /**
+   * Overrides the default play behaviour. The local library row passes this
+   * because it already knows the file on disk and can handle a `local:` id.
+   */
+  onPlayOverride?: (episode: PlayEpisode | undefined) => void;
 };
 
 export const ContinueCard = memo(function ContinueCard({
   item,
   watched = false,
   onDismiss,
+  onPlayOverride,
 }: Props) {
   const { openMeta, openPicker, openPlayer } = useView();
   const t = useT();
-  const { settings, update } = useSettings();
+  const { settings } = useSettings();
+  const { authKey } = useAuth();
   const { profiles, activeProfile } = useProfiles();
   const watcherId = getWatchedBy(item._id);
   const watcher = watcherId ? profiles.find((p) => p.id === watcherId) : null;
-  const showWatcher = !!watcher && watcher.id !== activeProfile?.id;
+  const showWatcher =
+    !!watcher &&
+    !!activeProfile &&
+    watcher.id !== activeProfile.id &&
+    sharesStremioStorage(activeProfile, watcher, profiles);
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
   const { open: openContextMenu } = useContextMenu();
   useSnapshotVersion();
   const newEpisode = useHasNewEpisode(item);
   const snapshot = readSnapshot(item._id);
-  const isExternal = item.external === "simkl";
+  const isExternal = !!item.external;
+  const externalLogo = item.external === "trakt" ? traktLogo : simklLogo;
+  const externalLabel = item.external === "trakt" ? t("Paused on Trakt") : t("Paused on Simkl");
   const dur = item.state?.duration ?? 0;
   const off = item.state?.timeOffset ?? 0;
   const progress = dur > 0 ? Math.min(1, off / dur) : 0;
   const remaining = dur > 0 && !isExternal ? formatRemaining(t, dur - off) : "";
   const upNext = item.upNext === true;
+  const waitingForAir = (item as Record<string, unknown>).waitingForAir === true;
+  const nextAirDate = waitingForAir
+    ? ((item as Record<string, unknown>).nextAirDate as string | undefined)
+    : undefined;
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!waitingForAir || !nextAirDate) return;
+    const id = window.setInterval(() => setNow(Date.now()), 60000);
+    return () => window.clearInterval(id);
+  }, [waitingForAir, nextAirDate]);
+  const countdown = useMemo(() => {
+    if (!nextAirDate) return "";
+    const diff = Date.parse(nextAirDate) - now;
+    if (diff <= 0) return t("Airing now");
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    if (days > 0)
+      return t("Next in {days}d {hours}h", { days: String(days), hours: String(hours) });
+    if (hours > 0)
+      return t("Next in {hours}h {minutes}m", { hours: String(hours), minutes: String(minutes) });
+    return t("Next in {minutes}m", { minutes: String(Math.max(1, minutes)) });
+  }, [nextAirDate, now, t]);
   const kitsuThreeSeg =
     /^(kitsu|mal|anilist|anidb):/.test(item._id) &&
     (item.state?.video_id ?? "").split(":").length === 3;
@@ -70,24 +150,21 @@ export const ContinueCard = memo(function ContinueCard({
     : isAnimeCwItem(item) && ep
       ? ep.episode
       : null;
-
-  const sub =
-    animeEp && Number.isFinite(animeEp) && animeEp > 0
-      ? `Ep ${animeEp}`
-      : ep
-        ? `S${ep.season}E${ep.episode}`
-        : "";
   const [logo, setLogo] = useState<string | undefined>();
   const [metaBg, setMetaBg] = useState<string | undefined>();
   const [hydratedMeta, setHydratedMeta] = useState<Meta | null>(null);
   const [kitsuVideo, setKitsuVideo] = useState<AnimeKitsuVideo | null>(null);
+  const [absoluteNumber, setAbsoluteNumber] = useState<number | null>(null);
   const [epTitle, setEpTitle] = useState<string | null>(null);
+  const [epStill, setEpStill] = useState<string | null>(null);
   const [translatedTitle, setTranslatedTitle] = useState<string | null>(null);
   const [imgIdx, setImgIdx] = useState(0);
   const cardRef = useRef<HTMLButtonElement>(null);
 
   const candidates = useMemo(() => {
     const thumb = upNext ? undefined : snapshot;
+    const still =
+      upNext || !settings.cwPreferEpisodeStill ? undefined : hiResStill(epStill ?? undefined);
     const seen = new Set<string>();
     const out: string[] = [];
     for (const u of [thumb, metaBg, item.background, item.poster]) {
@@ -97,16 +174,30 @@ export const ContinueCard = memo(function ContinueCard({
       seen.add(d);
       out.push(d);
     }
+    if (still && !seen.has(still)) out.unshift(still);
     return out;
-  }, [snapshot, metaBg, item.background, item.poster, upNext]);
+  }, [
+    snapshot,
+    epStill,
+    settings.cwPreferEpisodeStill,
+    metaBg,
+    item.background,
+    item.poster,
+    upNext,
+  ]);
 
   const src = candidates[imgIdx];
+
+  useEffect(() => {
+    setImgIdx(0);
+  }, [candidates]);
 
   useEffect(() => {
     setLogo(undefined);
     setMetaBg(undefined);
     setHydratedMeta(null);
     setKitsuVideo(null);
+    setAbsoluteNumber(null);
     setTranslatedTitle(null);
     setImgIdx(0);
     const el = cardRef.current;
@@ -146,11 +237,34 @@ export const ContinueCard = memo(function ContinueCard({
                 .catch(() => {});
             const bg = m.background || (item.background ? undefined : m.poster);
             if (bg) setMetaBg(bg);
-            if (kitsuThreeSeg) {
+            if (animeEp != null && Number.isFinite(animeEp)) {
               const vid =
                 m.videos.find((v) => v.id === item.state?.video_id) ??
                 m.videos.find((v) => v.episode === animeEp);
               if (vid) setKitsuVideo(vid);
+            }
+            const key = aniZipLookupKey(item._id);
+            if (key && animeEp != null && Number.isFinite(animeEp) && animeEp > 0) {
+              const lookup =
+                key.scheme === "mal"
+                  ? aniZipByMal
+                  : key.scheme === "anilist"
+                    ? aniZipByAnilist
+                    : key.scheme === "anidb"
+                      ? aniZipByAnidb
+                      : aniZipByKitsu;
+              lookup(key.id)
+                .then((az) => {
+                  if (cancelled || !az?.episodes) return;
+                  if (classifyAnimeNumbering(az) !== "longRunning") return;
+                  // For continuous long-running entries, the entry-relative number
+                  // IS the absolute number (AniZip keys them 1..N across the whole
+                  // run, and only populates absoluteEpisodeNumber sparsely).
+                  const azEp = az.episodes[String(animeEp)];
+                  const abs = azEp?.absoluteEpisodeNumber ?? animeEp;
+                  if (abs != null && Number.isFinite(abs) && abs > 0) setAbsoluteNumber(abs);
+                })
+                .catch(() => {});
             }
           })
           .catch(() => {});
@@ -174,7 +288,9 @@ export const ContinueCard = memo(function ContinueCard({
         return;
       }
       const looksEpisodic = item.type === "movie" && episodeFromVideoId(item.state?.video_id);
-      fetchMeta(looksEpisodic ? "series" : narrowMediaType(item.type), item._id)
+      // resolveMeta honours a custom metadata addon before Cinemeta, so disabling the Cinemeta
+      // toggle (to use another addon) no longer leaves this card with a blank/stretched thumbnail.
+      resolveMeta(authKey, looksEpisodic ? "series" : narrowMediaType(item.type), item._id)
         .then((full) => {
           if (cancelled || !full) return;
           setHydratedMeta(full);
@@ -189,6 +305,13 @@ export const ContinueCard = memo(function ContinueCard({
               .catch(() => {});
           const bg = full.background || (item.background ? undefined : full.poster);
           if (bg) setMetaBg(bg);
+          if (!full.background && key && item._id.startsWith("tt")) {
+            void resolveTmdbBackdrop(key, item._id, full.type)
+              .then((b) => {
+                if (!cancelled && b) setMetaBg(b);
+              })
+              .catch(() => {});
+          }
         })
         .catch(() => {});
     };
@@ -206,10 +329,11 @@ export const ContinueCard = memo(function ContinueCard({
       cancelled = true;
       io.disconnect();
     };
-  }, [item._id, item.type, item.state?.video_id]);
+  }, [item._id, item.type, item.state?.video_id, authKey]);
 
   useEffect(() => {
     setEpTitle(null);
+    setEpStill(null);
     if (!ep || kitsuThreeSeg) return;
     if (/^(kitsu|mal|anilist|anidb):/.test(item._id)) return;
     let cancelled = false;
@@ -219,6 +343,7 @@ export const ContinueCard = memo(function ContinueCard({
         if (cancelled) return;
         const found = eps.find((e) => e.episode === ep.episode);
         if (found?.name) setEpTitle(found.name);
+        if (found?.still) setEpStill(found.still);
       })
       .catch(() => {});
     return () => {
@@ -228,6 +353,36 @@ export const ContinueCard = memo(function ContinueCard({
   }, [item._id, ep?.season, ep?.episode, kitsuThreeSeg]);
 
   const episodeTitle = epTitle ?? kitsuVideo?.title ?? null;
+
+  const isAnimeItem = /^(kitsu|mal|anilist|anidb):/.test(item._id);
+  const cardKitsuId =
+    parseKitsuId(item._id) ??
+    parseKitsuId(kitsuVideo?.id ?? "") ??
+    parseKitsuId(getAnimeCwId(item._id) ?? "");
+  const seasonForeignCard = isForeignSplitSeason(
+    isSplitFranchiseKitsu(cardKitsuId),
+    ep?.season,
+    kitsuVideo?.imdbSeason,
+  );
+  const partSeasonCard = splitFranchiseDisplaySeason(cardKitsuId);
+  const animeSeasonMapped =
+    !seasonForeignCard &&
+    kitsuVideo &&
+    kitsuVideo.imdbSeason != null &&
+    kitsuVideo.imdbSeason >= 2 &&
+    kitsuVideo.imdbEpisode != null
+      ? { season: kitsuVideo.imdbSeason, episode: kitsuVideo.imdbEpisode }
+      : null;
+  const sub =
+    isAnimeItem && absoluteNumber != null && Number.isFinite(absoluteNumber) && absoluteNumber > 0
+      ? `Ep ${absoluteNumber}`
+      : animeSeasonMapped
+        ? `S${animeSeasonMapped.season} · E${String(animeSeasonMapped.episode).padStart(2, "0")}`
+        : ep
+          ? `S${partSeasonCard ?? ep.season}E${ep.episode}`
+          : animeEp && Number.isFinite(animeEp) && animeEp > 0
+            ? `Ep ${animeEp}`
+            : "";
 
   const meta: Meta = hydratedMeta
     ? { ...hydratedMeta, id: item._id, type: libraryMetaType(item.type) }
@@ -239,12 +394,26 @@ export const ContinueCard = memo(function ContinueCard({
         background: item.background,
       };
 
-  const onClick = () => {
-    openMeta(meta, ep ? { episodeHint: ep } : undefined);
+  const rawTitle = translatedTitle || hydratedMeta?.name?.trim() || item.name;
+  const displayTitle = isAnimeCwItem(item)
+    ? stripAnimeArcSuffix(stripFranchiseSuffix(rawTitle)) || rawTitle
+    : rawTitle;
+
+  const onOpenDetails = () => {
+    const isAnime = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
+    // Continue Watching artwork comes from the Stremio library record and may
+    // use a different language than the current TMDB image preference. Do not
+    // let those cached assets become the detail page's stable/locked artwork;
+    // the detail loader will resolve the same localized logo and backdrop used
+    // when the title is opened from Search.
+    const detailMeta = isAnime ? meta : { ...meta, background: undefined, logo: undefined };
+    openMeta(
+      detailMeta,
+      ep || isAnime ? { episodeHint: ep ?? undefined, exact: isAnime } : undefined,
+    );
   };
 
-  const onPlay = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const resolveEpisode = async (): Promise<PlayEpisode | undefined> => {
     let episode: PlayEpisode | undefined = item.type === "series" && ep ? ep : undefined;
     if (!episode && kitsuThreeSeg) {
       if (kitsuVideo) {
@@ -264,37 +433,134 @@ export const ContinueCard = memo(function ContinueCard({
         if (Number.isFinite(epNum) && epNum > 0) episode = { season: 1, episode: epNum };
       }
     }
-    playLocalAware({
-      meta,
-      episode: episode ?? null,
-      mode: settings.localPlaybackMode,
-      source: "manual",
-      resumeId: meta.id,
-      playStream: () => openPicker(meta, episode, { autoPlay: settings.instantPlay, resume: true }),
-      playLocal: (entry, o) => {
-        const s = localPlayerSrc(entry);
-        openPlayer({
-          ...s,
-          meta: {
-            ...s.meta,
-            id: meta.id,
-            poster: meta.poster ?? s.meta.poster,
-            background: meta.background,
-          },
-          startFromZero: o?.fromStart,
-        });
-      },
-      setMode: (m) => update({ localPlaybackMode: m }),
-    });
+    if (needsAniZipSyncIds(item._id, episode) && episode) {
+      const key = aniZipLookupKey(item._id);
+      if (key) {
+        const lookup =
+          key.scheme === "mal"
+            ? aniZipByMal
+            : key.scheme === "anilist"
+              ? aniZipByAnilist
+              : key.scheme === "anidb"
+                ? aniZipByAnidb
+                : aniZipByKitsu;
+        episode = applyAniZipEpisode(episode, await lookup(key.id).catch(() => null));
+      }
+    }
+    if (episode && !episode.sourceMetaId && item._id.startsWith("tt")) {
+      const animeId = getAnimeCwId(item._id);
+      if (animeId) episode = { ...episode, sourceMetaId: animeId };
+    }
+    return episode;
+  };
+
+  const openAvailableSources = async (
+    episode: PlayEpisode | undefined,
+    chooseEveryTime: boolean,
+  ) => {
+    const stream = () =>
+      openPicker(meta, episode, { autoPlay: !chooseEveryTime, resume: !chooseEveryTime });
+    const tmdbMatch = meta.id.match(/^tmdb:(?:movie|tv):(\d+)$/);
+    const identity = {
+      tmdbId: tmdbMatch ? Number(tmdbMatch[1]) : undefined,
+      imdbId: meta.id.startsWith("tt") ? meta.id : undefined,
+    };
+    const kind = episode ? "series" : "movie";
+    const connections = mediaServerConnections();
+    const indexed = await mediaServerItems();
+    const serverItems = matchingServerItems(
+      indexed,
+      identity,
+      kind,
+      episode?.season,
+      episode?.episode,
+    );
+    const serverCopies = serverPlayableCopies(serverItems, connections);
+    const local = resolveLocalPlayVersions(meta, episode ?? null, identity.imdbId);
+    const playLocal = (entry: (typeof local)[number]) => {
+      const source = localPlayerSrc(entry, undefined, episode);
+      openPlayer({
+        ...source,
+        meta: {
+          ...source.meta,
+          id: meta.id,
+          poster: meta.poster ?? source.meta.poster,
+          background: meta.background,
+        },
+      });
+    };
+    const playServer = async (copy: (typeof serverCopies)[number]) => {
+      const connection = connections.find((entry) => entry.id === copy.connectionId);
+      const item = serverItems.find(
+        (entry) => entry.connectionId === copy.connectionId && entry.id === copy.itemId,
+      );
+      if (!connection || !item) return;
+      openPlayer(
+        await createMediaServerPlayerSrc({
+          meta,
+          imdbId: identity.imdbId,
+          episode,
+          connection,
+          item,
+          versionId: copy.version.id,
+        }),
+      );
+    };
+    const showChooser = () => {
+      if (local.length === 0 && serverCopies.length === 0) {
+        stream();
+        return;
+      }
+      openLocalVersions({
+        title: meta.name,
+        poster: meta.poster,
+        entries: local,
+        onPlayLocal: playLocal,
+        serverCopies,
+        onPlayServer: (copy) => void playServer(copy),
+        onStream: stream,
+      });
+    };
+    if (chooseEveryTime) {
+      showChooser();
+      return;
+    }
+    const decision = decidePlaybackSource(settings, local.length, serverCopies);
+    if (decision.kind === "online") stream();
+    else if (decision.kind === "local" && local[0]) playLocal(local[0]);
+    else if (decision.kind === "home-server") await playServer(decision.copy);
+    else showChooser();
+  };
+
+  const onChooseSource = async () => {
+    const episode = await resolveEpisode();
+    if (onPlayOverride) {
+      onPlayOverride(episode);
+      return;
+    }
+    await openAvailableSources(episode, true);
+  };
+
+  const onPlay = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const episode = await resolveEpisode();
+    if (onPlayOverride) {
+      onPlayOverride(episode);
+      return;
+    }
+    await openAvailableSources(episode, false);
   };
 
   return (
     <div className="group relative w-full min-w-0">
       <button
         ref={cardRef}
-        onClick={onClick}
+        type="button"
+        onClick={() => void onChooseSource()}
         onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
-        className="flex w-full min-w-0 flex-col gap-2.5 text-start"
+        aria-label={`${t("Choose another source")}: ${displayTitle}`}
+        title={t("Choose another source")}
+        className="block w-full min-w-0 rounded-xl text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <div className="harbor-poster relative aspect-[16/9] overflow-hidden rounded-xl bg-elevated shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] will-change-transform [transform:translate3d(0,0,0)] transition-transform duration-[220ms] ease-[cubic-bezier(0.22,0.61,0.36,1)] group-hover:scale-[1.02]">
           <div className="absolute inset-0 bg-gradient-to-br from-raised via-elevated to-surface" />
@@ -303,7 +569,7 @@ export const ContinueCard = memo(function ContinueCard({
               key={src}
               src={src}
               alt=""
-              decoding="sync"
+              decoding="async"
               onError={() => setImgIdx((i) => i + 1)}
               className="absolute inset-0 h-full w-full object-cover brightness-95"
             />
@@ -349,16 +615,18 @@ export const ContinueCard = memo(function ContinueCard({
             <div className="absolute bottom-2 start-2 flex max-w-[calc(100%-16px)] items-center gap-1.5 rounded-md bg-canvas/95 px-2 py-1 text-[11px]">
               {isExternal ? (
                 <img
-                  src={simklLogo}
+                  src={externalLogo}
                   alt=""
                   className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                  title={t("Paused on Simkl")}
+                  title={externalLabel}
                 />
               ) : (
                 <Play size={11} fill="currentColor" className="shrink-0 text-ink" />
               )}
               {sub && <span className="shrink-0 font-medium text-ink">{sub}</span>}
-              {upNext ? (
+              {waitingForAir && countdown ? (
+                <span className="shrink-0 font-medium text-amber">{countdown}</span>
+              ) : upNext ? (
                 <>
                   {sub && <span className="shrink-0 text-ink-subtle">·</span>}
                   <span className="shrink-0 font-medium text-accent">{t("Up Next")}</span>
@@ -404,52 +672,9 @@ export const ContinueCard = memo(function ContinueCard({
             <div className="h-full bg-accent" style={{ width: `${progress * 100}%` }} />
           </div>
         </div>
-        <p className="truncate text-[13px] font-medium text-ink">
-          {translatedTitle || hydratedMeta?.name?.trim() || item.name}
-        </p>
       </button>
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center">
-        <ThreeLiquidGlassSurface
-          radius="9999px"
-          shaderRadius={0.58}
-          intensity={0.9}
-          style={{
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
-          }}
-          className="
-            pointer-events-none h-14 w-14 scale-95 rounded-full border border-white/[0.10] opacity-0
-            transition-[opacity,transform] duration-[120ms]
-            group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100
-            focus-within:pointer-events-auto focus-within:scale-100 focus-within:opacity-100
-          "
-          contentClassName="flex h-full w-full"
-        >
-          <button
-            type="button"
-            onClick={onPlay}
-            aria-label={t("Play")}
-            title={t("Play")}
-            className="
-              flex h-full w-full
-              items-center justify-center
-              rounded-full bg-transparent
-              text-ink outline-none
-              transition-transform duration-150
-              active:scale-95
-            "
-          >
-            <Play size={22} fill="currentColor" className="ml-0.5 text-ink" />
-          </button>
-        </ThreeLiquidGlassSurface>
-      </div>
-      {onDismiss && (
-        <div
-          className="
-            absolute end-0.5 top-0.5 z-10
-            flex h-11 w-11
-            items-center justify-center
-          "
-        >
+      {settings.liquidGlass ? (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center">
           <ThreeLiquidGlassSurface
             radius="9999px"
             shaderRadius={0.58}
@@ -457,43 +682,118 @@ export const ContinueCard = memo(function ContinueCard({
             style={{
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
             }}
-            className="
-            pointer-events-none h-9 w-9 scale-95 rounded-full border border-white/[0.09] opacity-0
-            transition-[opacity,transform] duration-[120ms]
-            group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100
-            focus-within:pointer-events-auto focus-within:scale-100 focus-within:opacity-100
-          "
+            className="pointer-events-none h-14 w-14 scale-95 rounded-full border border-white/[0.10] opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100 focus-within:pointer-events-auto focus-within:scale-100 focus-within:opacity-100"
             contentClassName="flex h-full w-full"
           >
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDismiss(item);
-              }}
-              aria-label={t("Remove from Continue Watching")}
-              className="
-                flex h-full w-full
-                items-center justify-center
-                rounded-full bg-transparent
-                text-ink-muted outline-none
-                transition-colors duration-150
-                hover:text-ink
-                active:scale-95
-              "
+              tabIndex={-1}
+              data-tv-skip="true"
+              onClick={onPlay}
+              aria-label={t("Play {name}", { name: displayTitle })}
+              title={t("Play")}
+              className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-ink outline-none transition-transform duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-accent"
             >
-              <X size={20} strokeWidth={2.4} />
+              <Play size={22} fill="currentColor" className="ml-0.5 text-ink" />
             </button>
           </ThreeLiquidGlassSurface>
         </div>
+      ) : (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center opacity-0 transition-opacity duration-[220ms] group-hover:opacity-100 group-focus-within:opacity-100">
+          <button
+            type="button"
+            tabIndex={-1}
+            data-tv-skip="true"
+            onClick={onPlay}
+            aria-label={t("Play {name}", { name: displayTitle })}
+            title={t("Play")}
+            className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-canvas ring-1 ring-white/15 shadow-[0_10px_28px_-8px_rgba(0,0,0,0.6)] transition-transform duration-150 hover:scale-[1.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <Play size={22} fill="currentColor" className="ml-0.5 text-ink" />
+          </button>
+        </div>
       )}
+      <button
+        type="button"
+        tabIndex={-1}
+        data-tv-skip="true"
+        onClick={onOpenDetails}
+        aria-label={`${t("Open details")}: ${displayTitle}`}
+        className="mt-2.5 block w-full truncate rounded-sm text-start text-[13px] font-medium text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        {displayTitle}
+      </button>
+      {onDismiss &&
+        (settings.liquidGlass ? (
+          <div className="absolute end-0.5 top-0.5 z-10 flex h-11 w-11 items-center justify-center">
+            <ThreeLiquidGlassSurface
+              radius="9999px"
+              shaderRadius={0.58}
+              intensity={0.9}
+              style={{
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+              }}
+              className="pointer-events-none h-9 w-9 scale-95 rounded-full border border-white/[0.09] opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100 focus-within:pointer-events-auto focus-within:scale-100 focus-within:opacity-100"
+              contentClassName="flex h-full w-full"
+            >
+              <button
+                type="button"
+                tabIndex={-1}
+                data-tv-skip="true"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDismiss(item);
+                }}
+                aria-label={t("Remove from Continue Watching")}
+                className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-ink-muted outline-none transition-colors duration-150 hover:text-ink active:scale-95"
+              >
+                <X size={20} strokeWidth={2.4} />
+              </button>
+            </ThreeLiquidGlassSurface>
+          </div>
+        ) : (
+          <button
+            type="button"
+            tabIndex={-1}
+            data-tv-skip="true"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDismiss(item);
+            }}
+            aria-label={t("Remove from Continue Watching")}
+            className="group/x absolute end-0.5 top-0.5 z-10 flex h-11 w-11 items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-canvas/85 text-ink-muted ring-1 ring-white/12 backdrop-blur-sm transition-colors group-hover/x:bg-canvas group-hover/x:text-ink">
+              <X size={20} strokeWidth={2.4} />
+            </span>
+          </button>
+        ))}
     </div>
   );
 });
 
+function hiResStill(url?: string): string | undefined {
+  if (!url) return url;
+  return url.replace("/t/p/w300/", "/t/p/w780/");
+}
+
 function downscaleTmdb(url?: string): string | undefined {
   if (!url) return url;
-  return url.replace(/\/t\/p\/(original|w1280|w780|w500)\//, "/t/p/w300/");
+  return url
+    .replace(/\/t\/p\/(original|w1280|w780|w500)\//, "/t/p/w300/")
+    .replace(/(images\.metahub\.space\/background\/)(medium|large)\//i, "$1small/");
+}
+
+async function resolveTmdbBackdrop(
+  key: string,
+  imdbId: string,
+  type: string,
+): Promise<string | undefined> {
+  const tmdbId = await tmdbIdFromImdb(key, imdbId, narrowMediaType(type)).catch(() => null);
+  if (!tmdbId) return undefined;
+  const kind = type === "movie" ? "movie" : "tv";
+  const lite = await tmdbLiteMeta(key, `tmdb:${kind}:${tmdbId}`).catch(() => null);
+  return lite?.background ?? undefined;
 }
 
 function formatRemaining(

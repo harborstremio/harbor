@@ -1,13 +1,15 @@
 import { activeProfileId } from "@/lib/active-profile-id";
 import { kitsuToAnilist } from "@/lib/providers/anime-mapping";
 import { AnilistApiError, anilistRequest } from "./client";
-import { isAuthenticated } from "./session";
+import { isAuthenticated, getSession } from "./session";
+
+export type SyncError = "update-not-confirmed" | "unreachable";
 
 export type SyncEvent =
   | { kind: "syncing"; title: string; episode: number }
   | { kind: "ok"; title: string; episode: number }
   | { kind: "watching"; title: string }
-  | { kind: "error"; title: string; message: string };
+  | { kind: "error"; title: string; error: SyncError };
 
 const listeners = new Set<(e: SyncEvent) => void>();
 let last: SyncEvent | null = null;
@@ -32,7 +34,25 @@ const SENT_KEY_BASE = "harbor.anilist.synced.v1";
 function sentKey(): string {
   return `${SENT_KEY_BASE}.${activeProfileId()}`;
 }
-type SentMap = Record<string, number>;
+type SentValue = number | { p: number; t: number };
+type SentMap = Record<string, SentValue>;
+
+// Only collapses the per-tick writes of one playback session. Kept indefinitely it
+// outlives the server, so removing the entry there could never be re-synced.
+const SENT_TTL_MS = 60 * 1000;
+
+function sentProgress(map: SentMap, key: string): { p: number; t: number } | null {
+  const value = map[key];
+  if (typeof value === "number") return { p: value, t: 0 };
+  if (value && typeof value === "object" && typeof value.p === "number") {
+    return { p: value.p, t: typeof value.t === "number" ? value.t : 0 };
+  }
+  return null;
+}
+
+function rememberSent(map: SentMap, key: string, progress: number): void {
+  map[key] = { p: progress, t: Date.now() };
+}
 
 function loadSent(): SentMap {
   try {
@@ -124,22 +144,28 @@ export function resetForProfile(): void {
 
 export async function markAnimeWatching(harborId: string, title: string): Promise<void> {
   if (!isAuthenticated()) return;
+  const profile = activeProfileId();
+  const session = getSession();
+  const owned = () => activeProfileId() === profile && getSession() === session;
   if (watchingMarked.has(harborId)) return;
   watchingMarked.add(harborId);
   try {
     const mediaId = await resolveAnilistMediaId(harborId);
-    if (mediaId == null) {
+    if (!owned() || mediaId == null) {
       watchingMarked.delete(harborId);
       return;
     }
     const cur = await anilistRequest<EntryResponse>(ENTRY_QUERY, { id: mediaId });
+    if (!owned()) return;
     const entry = cur?.Media?.mediaListEntry;
     if (entry && entry.status !== "PLANNING") return;
+    const total = cur?.Media?.episodes ?? 0;
+    if (entry && total > 0 && entry.progress >= total) return;
     await anilistRequest<{ SaveMediaListEntry: { id: number } | null }>(SAVE_STATUS_MUTATION, {
       mediaId,
       status: "CURRENT",
     });
-    emit({ kind: "watching", title });
+    if (owned()) emit({ kind: "watching", title });
   } catch (e) {
     watchingMarked.delete(harborId);
     if (e instanceof AnilistApiError && e.status === 401) return;
@@ -150,53 +176,77 @@ export async function syncAnimeProgress(
   harborId: string,
   episode: number | undefined,
   title: string,
+  season?: number,
 ): Promise<void> {
   if (!isAuthenticated()) return;
+  const profile = activeProfileId();
+  const session = getSession();
+  const owned = () => activeProfileId() === profile && getSession() === session;
   const ep = episode ?? 1;
-  if (!Number.isFinite(ep) || ep < 1) return;
+  if (!Number.isInteger(ep) || ep < 1) return;
 
   const sent = loadSent();
-  if ((sent[harborId] ?? 0) >= ep) return;
+  const sentKey = `${harborId}|${season ?? ""}|${ep}`;
+  const prevSent = sentProgress(sent, sentKey);
+  if (prevSent && Date.now() - prevSent.t < SENT_TTL_MS && prevSent.p >= ep) {
+    return;
+  }
 
-  const flightKey = `${harborId}|${ep}`;
-  if (inflight.has(flightKey)) return;
+  const flightKey = `${profile}|${harborId}|${ep}`;
+  if (inflight.has(flightKey)) {
+    return;
+  }
   inflight.add(flightKey);
 
   try {
     const mediaId = await resolveAnilistMediaId(harborId);
-    if (mediaId == null) return;
+    if (!owned() || mediaId == null) return;
 
     const cur = await anilistRequest<EntryResponse>(ENTRY_QUERY, { id: mediaId });
+    if (!owned()) return;
     const media = cur?.Media;
     if (!media) return;
 
+    // Never overwrite an entry the user deliberately moved to Completed or
+    // Re-watching; auto-sync would otherwise flip it back to CURRENT.
+    const entryStatus = media.mediaListEntry?.status;
+    if (entryStatus === "COMPLETED" || entryStatus === "REPEATING") {
+      return;
+    }
+
     const current = media.mediaListEntry?.progress ?? 0;
-    if (ep <= current) {
-      sent[harborId] = current;
+    const total = media.episodes ?? 0;
+    // The caller resolves entry-relative numbering before reaching this layer.
+    const target = ep;
+    if (total > 0 && target > total) return;
+    if (target <= current) {
+      rememberSent(sent, sentKey, Math.max(prevSent?.p ?? 0, current));
       saveSent(sent);
       return;
     }
 
-    const total = media.episodes ?? 0;
-    const status = total > 0 && ep >= total ? "COMPLETED" : "CURRENT";
-    emit({ kind: "syncing", title, episode: ep });
+    const status = total > 0 && target >= total ? "COMPLETED" : "CURRENT";
+    emit({ kind: "syncing", title, episode: target });
 
     const saved = await anilistRequest<SaveResponse>(SAVE_MUTATION, {
       mediaId,
-      progress: ep,
+      progress: target,
       status,
     });
 
-    if (saved?.SaveMediaListEntry?.progress === ep) {
-      sent[harborId] = ep;
+    if (!owned()) return;
+    if (saved?.SaveMediaListEntry?.progress === target) {
+      rememberSent(sent, sentKey, target);
       saveSent(sent);
-      emit({ kind: "ok", title, episode: ep });
+      emit({ kind: "ok", title, episode: target });
     } else {
-      emit({ kind: "error", title, message: "AniList did not confirm the update." });
+      // Unconfirmed writes stay retryable; recording them as sent would suppress retries.
+      emit({ kind: "error", title, error: "update-not-confirmed" });
     }
   } catch (e) {
+    if (!owned()) return;
     if (e instanceof AnilistApiError && e.status === 401) return;
-    emit({ kind: "error", title, message: "Couldn't reach AniList." });
+    emit({ kind: "error", title, error: "unreachable" });
   } finally {
     inflight.delete(flightKey);
   }

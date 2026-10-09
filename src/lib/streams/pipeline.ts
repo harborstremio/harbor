@@ -1,9 +1,17 @@
 import type { Addon } from "@/lib/addons";
 import { dlog } from "@/lib/debug";
 import type { DebridStore } from "@/lib/debrid/types";
-import { fetchAddonStreams, type StreamRequest } from "./addons";
+import {
+  fetchAddonStreams,
+  type AddonFailure,
+  type AddonProgress,
+  type StreamRequest,
+} from "./addons";
+import type { AddonRankFn } from "./addon-priority";
+import { applyStreamPriority } from "./priority-partition";
 import { enhanceAnimeStreams } from "./anitomy";
-import { fetchLibraryStreams, type LibraryQuery } from "./library";
+import { partitionByExactAnimeEpisode } from "./anime-identity-core";
+import { fetchLibraryStreams, type LibraryListings, type LibraryQuery } from "./library";
 import { parseStream } from "./parser";
 import { applyTrust, type Rejection, type TrustOptions } from "./trust";
 import { computeCorpusStats, rankAndPick, scoreStream, type ScoreOptions } from "./scoring";
@@ -56,9 +64,37 @@ function finalizeWithRescue(
   const keep: ParsedStream[] = [...picker.all, ...rescued];
   const corpus = computeCorpusStats(keep, score);
   const scored = keep.map((s) => scoreStream(s, score, corpus));
-  const newPicker = rankAndPick(scored, score.activeDebrids, PREFER_AAC, score.respectAddonOrder === true);
+  const newPicker = rankAndPick(
+    scored,
+    score.activeDebrids,
+    PREFER_AAC,
+    score.respectAddonOrder === true,
+  );
   dlog(`[pipeline] early-leak rescue: restored ${rescued.size} corroborated high-res stream(s)`);
   return { picker: newPicker, rejected: rejected.filter((r) => !rescued.has(r.stream)) };
+}
+
+function applyAnimeEpisodeFilter(
+  parsed: ParsedStream[],
+  input: PipelineInput,
+): { kept: ParsedStream[]; extraRejected: Rejection[] } {
+  const expected = input.animeAbsoluteEpisode;
+  // Off/Show all must bypass this pre-filter as well as the main trust checks.
+  if (input.trust?.disabled || !input.isAnime || expected == null) {
+    return { kept: parsed, extraRejected: [] };
+  }
+  const validNums = new Set<number>([expected]);
+  for (const a of input.animeEpisodeAliases ?? []) {
+    if (Number.isFinite(a) && a >= 1) validNums.add(a);
+  }
+  const { keep, drop } = partitionByExactAnimeEpisode(parsed, validNums);
+  return {
+    kept: keep,
+    extraRejected: drop.map((stream) => ({
+      stream,
+      reason: `anime-episode-mismatch:${stream.episode}-vs-${expected}`,
+    })),
+  };
 }
 
 export type PipelineInput = {
@@ -69,114 +105,289 @@ export type PipelineInput = {
   trust?: TrustOptions;
   score: ScoreOptions;
   isAnime?: boolean;
+  animeAbsoluteEpisode?: number | null;
+  animeEpisodeAliases?: Set<number> | null;
   presetStreams?: Stream[];
+  addonTimeoutMs?: number;
+  addonRanks?: AddonRankFn | null;
+  forcedAddonBases?: Array<{ base: string; id: string }>;
 };
+
+export type DebridError = { slug: string; name: string; code: string };
 
 export type PipelineResult = {
   picker: RankedPicker;
   rejected: Rejection[];
   raw: { addon: Stream[]; library: Stream[] };
+  debridErrors?: DebridError[];
+  addonErrors?: AddonFailure[];
 };
+
+// One debrid cacheCheck can fan out into many provider calls, so re-checking on
+// every addon batch would hammer the APIs; a short floor keeps it to the first
+// batch plus at most one refresh per interval.
+const DEBRID_CHECK_MIN_INTERVAL_MS = 1500;
 
 export async function runPipeline(
   input: PipelineInput,
   signal: AbortSignal,
   onProgress?: (partial: PipelineResult) => void,
+  onAddonProgress?: (progress: AddonProgress) => void,
 ): Promise<PipelineResult> {
   let library: Stream[] = [];
   let lastPartialAt = 0;
+  let latestAddonStreams: Stream[] = [];
+  const debridErrors: DebridError[] = [];
+  let addonErrors: AddonFailure[] = [];
+  const priorityActive = input.addonRanks != null;
 
-  const buildPartial = (addonStreams: Stream[]): PipelineResult => {
+  // Debrid verification runs alongside the addon fetch instead of after it, so
+  // the "Cached / In library" badges land on the early partials rather than only
+  // on the final list. Results are accumulated per provider and re-applied to
+  // every partial.
+  const cachedBySlug = new Map<string, Record<string, true>>();
+  const libraryBySlug = new Map<string, Set<string>>();
+  const checkedBySlug = new Map<string, Set<string>>();
+  let cacheCheckTimer: number | null = null;
+  let lastCacheCheckAt = 0;
+  let cacheCheckInFlight: Promise<void> | null = null;
+  let cacheCheckRequested = false;
+  let acceptPartials = true;
+  let partialRevision = 0;
+
+  const stopPartials = (): void => {
+    acceptPartials = false;
+    partialRevision++;
+    if (cacheCheckTimer != null) {
+      window.clearTimeout(cacheCheckTimer);
+      cacheCheckTimer = null;
+    }
+  };
+  signal.addEventListener("abort", stopPartials, { once: true });
+
+  const hashList = (streams: Stream[]): string[] => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const s of streams) {
+      if (!s.infoHash) continue;
+      const h = s.infoHash.toLowerCase();
+      if (seen.has(h)) continue;
+      seen.add(h);
+      out.push(h);
+    }
+    return out;
+  };
+
+  const applyDebridFlags = (parsed: ParsedStream[]): void => {
+    if (input.debrids.length === 0) return;
+    for (const p of parsed) {
+      if (!p.infoHash) continue;
+      const h = p.infoHash.toLowerCase();
+      for (const d of input.debrids) {
+        const cached = cachedBySlug.get(d.slug)?.[h] === true;
+        const inLibrary = libraryBySlug.get(d.slug)?.has(h) === true;
+        if (!cached && !inLibrary) continue;
+        p.cached[d.slug] = true;
+        if (inLibrary) p.inLibrary[d.slug] = true;
+        p.cacheVerified[d.slug] = true;
+      }
+    }
+  };
+
+  const runCacheCheck = async (streams: Stream[]): Promise<void> => {
+    if (signal.aborted || input.debrids.length === 0) return;
+    const hashes = hashList(streams);
+    if (hashes.length === 0) return;
+    await Promise.allSettled(
+      input.debrids.map(async (d) => {
+        const checked = checkedBySlug.get(d.slug) ?? new Set<string>();
+        const fresh = hashes.filter((h) => !checked.has(h));
+        if (fresh.length === 0) return;
+        const r = await d.cacheCheck(fresh, signal);
+        if (signal.aborted || !r.ok) return;
+        const map = cachedBySlug.get(d.slug) ?? {};
+        for (const h of fresh) {
+          checked.add(h);
+          if (r.data[h]) map[h] = true;
+        }
+        checkedBySlug.set(d.slug, checked);
+        cachedBySlug.set(d.slug, map);
+      }),
+    );
+    lastCacheCheckAt = performance.now();
+  };
+
+  const buildPartial = async (addonStreams: Stream[]): Promise<PipelineResult> => {
     const merged = mergeAndDedupe(library, addonStreams);
-    const parsed = merged.map(parseStream);
+    const pre = merged.map(parseStream);
+    if (input.isAnime && input.animeAbsoluteEpisode != null) {
+      await enhanceAnimeStreams(pre);
+    }
+    const { kept: parsed, extraRejected } = applyAnimeEpisodeFilter(pre, input);
+    applyDebridFlags(parsed);
     const { keep, rejected } = applyTrust(parsed, input.trust ?? {});
     const corpus = computeCorpusStats(keep, input.score);
     const scored = keep.map((s) => scoreStream(s, input.score, corpus));
-    const picker = rankAndPick(scored, input.score.activeDebrids, PREFER_AAC, input.score.respectAddonOrder === true);
+    const picker = rankAndPick(
+      scored,
+      input.score.activeDebrids,
+      PREFER_AAC,
+      input.score.respectAddonOrder === true,
+    );
     const fin = finalizeWithRescue(picker, rejected, input.trust ?? {}, input.score);
-    return { picker: fin.picker, rejected: fin.rejected, raw: { addon: addonStreams, library } };
+    return {
+      picker: applyStreamPriority(fin.picker, priorityActive, input.score.activeDebrids),
+      rejected: [...fin.rejected, ...extraRejected],
+      raw: { addon: addonStreams, library },
+      debridErrors: debridErrors.length > 0 ? debridErrors : undefined,
+      addonErrors: addonErrors.length > 0 ? addonErrors : undefined,
+    };
   };
 
-  const emitPartial = (addonStreams: Stream[]) => {
+  const emitPartialNow = (): void => {
+    if (!onProgress || signal.aborted || !acceptPartials) return;
+    const revision = ++partialRevision;
+    void buildPartial(latestAddonStreams)
+      .then((result) => {
+        if (signal.aborted || !acceptPartials || revision !== partialRevision) return;
+        onProgress(result);
+      })
+      .catch(() => {
+        /* swallow */
+      });
+  };
+
+  const scheduleCacheCheck = (): void => {
+    if (input.debrids.length === 0 || signal.aborted || !acceptPartials) return;
+    cacheCheckRequested = true;
+    if (cacheCheckInFlight || cacheCheckTimer != null) return;
+    const since = performance.now() - lastCacheCheckAt;
+    const delay = lastCacheCheckAt === 0 ? 0 : Math.max(0, DEBRID_CHECK_MIN_INTERVAL_MS - since);
+    cacheCheckTimer = window.setTimeout(() => {
+      cacheCheckTimer = null;
+      cacheCheckRequested = false;
+      cacheCheckInFlight = runCacheCheck(latestAddonStreams).finally(() => {
+        cacheCheckInFlight = null;
+        emitPartialNow();
+        if (cacheCheckRequested) scheduleCacheCheck();
+      });
+    }, delay);
+  };
+
+  const onAddonBatch = (addonStreams: Stream[]): void => {
+    if (signal.aborted || !acceptPartials) return;
+    latestAddonStreams = addonStreams;
+    partialRevision++;
+    scheduleCacheCheck();
     if (!onProgress || signal.aborted) return;
     const now = performance.now();
     if (now - lastPartialAt < 250) return;
     lastPartialAt = now;
-    try {
-      onProgress(buildPartial(addonStreams));
-    } catch {
-      /* swallow */
-    }
+    emitPartialNow();
   };
+
+  // `fetchAddonStreams` reports which addons answered with nothing because the
+  // request failed; carry that into the result so the picker can explain "0
+  // streams" instead of staying silent.
+  const handleAddonProgress = (progress: AddonProgress): void => {
+    if (signal.aborted || !acceptPartials) return;
+    addonErrors = progress.failures ?? [];
+    onAddonProgress?.(progress);
+  };
+
+  // Library listings do not depend on the addon responses, so start them with the
+  // addons instead of after them.
+  const libraryListsPromise: LibraryListings =
+    input.debrids.length > 0
+      ? Promise.allSettled(input.debrids.map((d) => d.listLibrary(signal))).then((results) => {
+          if (signal.aborted) return results;
+          for (let i = 0; i < results.length; i++) {
+            const result = results[i];
+            const provider = input.debrids[i];
+            if (result.status === "fulfilled" && result.value.ok) {
+              libraryBySlug.set(
+                provider.slug,
+                new Set(result.value.data.map((e) => e.hash.toLowerCase()).filter(Boolean)),
+              );
+            } else {
+              debridErrors.push({
+                slug: provider.slug,
+                name: provider.name,
+                code:
+                  result.status === "fulfilled" && !result.value.ok
+                    ? result.value.code
+                    : "network-error",
+              });
+            }
+          }
+          return results;
+        })
+      : Promise.resolve([]);
 
   const presets = input.presetStreams ?? [];
   const [librarySettled, addonSettled] = await Promise.allSettled([
-    fetchLibraryStreams(input.debrids, input.query, signal).then((s) => {
+    fetchLibraryStreams(input.debrids, input.query, signal, libraryListsPromise).then((s) => {
       library = s;
+      emitPartialNow();
       return s;
     }),
     presets.length > 0
       ? Promise.resolve(presets)
-      : fetchAddonStreams(input.addons, input.request, signal, emitPartial),
+      : fetchAddonStreams(
+          input.addons,
+          input.request,
+          signal,
+          onAddonBatch,
+          handleAddonProgress,
+          input.addonTimeoutMs,
+          input.addonRanks,
+          input.forcedAddonBases,
+        ),
   ]);
+  // An older asynchronous parse must never replace the completed picker. Finish
+  // the active cache check before flushing its tail to avoid duplicate requests.
+  stopPartials();
+  signal.removeEventListener("abort", stopPartials);
   if (librarySettled.status === "fulfilled") library = librarySettled.value;
   const addonStreams = addonSettled.status === "fulfilled" ? addonSettled.value : [];
   const merged = mergeAndDedupe(library, addonStreams);
+  await cacheCheckInFlight;
+  await runCacheCheck(merged);
 
-  const parsed = merged.map(parseStream);
+  const preParsed = merged.map(parseStream);
+  const verifiedCacheByHash = new Map<string, ParsedStream["cacheVerified"]>();
+  const markCacheVerified = (stream: ParsedStream, slug: DebridStore["slug"]) => {
+    if (!stream.infoHash) return;
+    const hash = stream.infoHash.toLowerCase();
+    stream.cacheVerified[slug] = true;
+    const byProvider = verifiedCacheByHash.get(hash) ?? {};
+    byProvider[slug] = true;
+    verifiedCacheByHash.set(hash, byProvider);
+  };
+  const restoreCacheVerification = (picker: RankedPicker) => {
+    for (const stream of picker.all) {
+      if (!stream.infoHash) continue;
+      const verified = verifiedCacheByHash.get(stream.infoHash.toLowerCase());
+      if (verified) stream.cacheVerified = { ...verified };
+    }
+  };
 
   if (input.isAnime) {
-    await enhanceAnimeStreams(parsed);
+    await enhanceAnimeStreams(preParsed);
   }
 
-  const hashes = [
-    ...new Set(
-      parsed
-        .map((p) => p.infoHash)
-        .filter((h): h is string => Boolean(h))
-        .map((h) => h.toLowerCase()),
-    ),
-  ];
-  if (hashes.length > 0 && input.debrids.length > 0 && !signal.aborted) {
-    dlog(`[pipeline] ${parsed.length} parsed streams · ${hashes.length} unique hashes · debrids: ${input.debrids.map((d) => d.name).join(", ")}`);
-    const [cacheResults, libraryResults] = await Promise.all([
-      Promise.allSettled(input.debrids.map((d) => d.cacheCheck(hashes, signal))),
-      Promise.allSettled(input.debrids.map((d) => d.listLibrary(signal))),
-    ]);
-    for (let i = 0; i < input.debrids.length; i++) {
-      const r = cacheResults[i];
-      if (r.status !== "fulfilled" || !r.value.ok) continue;
-      const slug = input.debrids[i].slug;
-      let hits = 0;
-      for (const p of parsed) {
-        if (!p.infoHash) continue;
-        if (r.value.data[p.infoHash.toLowerCase()]) {
-          p.cached[slug] = true;
-          hits++;
-        }
-      }
-      dlog(`[pipeline] cacheCheck on ${input.debrids[i].name}: ${hits} streams flagged cached`);
-    }
+  const { kept: parsed, extraRejected: animeRejected } = applyAnimeEpisodeFilter(preParsed, input);
+  if (animeRejected.length > 0) {
+    dlog(
+      `[pipeline] anime episode filter: dropped ${animeRejected.length} stream(s) not matching ep ${input.animeAbsoluteEpisode}`,
+    );
+  }
 
-    for (let i = 0; i < input.debrids.length; i++) {
-      const r = libraryResults[i];
-      if (r.status !== "fulfilled" || !r.value.ok) continue;
-      const slug = input.debrids[i].slug;
-      const libHashes = new Set(r.value.data.map((e) => e.hash.toLowerCase()).filter(Boolean));
-      let hits = 0;
-      for (const p of parsed) {
-        if (!p.infoHash) continue;
-        if (libHashes.has(p.infoHash.toLowerCase())) {
-          if (!p.cached[slug]) hits++;
-          p.cached[slug] = true;
-          p.inLibrary[slug] = true;
-        }
-      }
-      dlog(`[pipeline] listLibrary cross-check on ${input.debrids[i].name}: ${hits} extra streams flagged cached (lib has ${libHashes.size} hashes)`);
+  applyDebridFlags(parsed);
+  for (const stream of parsed) {
+    for (const provider of input.debrids) {
+      if (stream.cacheVerified[provider.slug]) markCacheVerified(stream, provider.slug);
     }
-
-    const totalCached = parsed.filter((p) => Object.values(p.cached).some(Boolean)).length;
-    dlog(`[pipeline] final: ${totalCached}/${parsed.length} streams marked cached`);
   }
 
   const core = await runCorePipeline(parsed, input.trust ?? {}, input.score);
@@ -188,10 +399,19 @@ export async function runPipeline(
         byReason.set(k, (byReason.get(k) ?? 0) + 1);
       }
       const summary = [...byReason.entries()].map(([k, n]) => `${k}=${n}`).join(", ");
-      dlog(`[pipeline] (core) trust kept ${core.picker.all.length}/${parsed.length} · rejected: ${summary}`);
+      dlog(
+        `[pipeline] (core) trust kept ${core.picker.all.length}/${parsed.length} · rejected: ${summary}`,
+      );
     }
     const fin = finalizeWithRescue(core.picker, core.rejected, input.trust ?? {}, input.score);
-    return { picker: fin.picker, rejected: fin.rejected, raw: { addon: addonStreams, library } };
+    restoreCacheVerification(fin.picker);
+    return {
+      picker: applyStreamPriority(fin.picker, priorityActive, input.score.activeDebrids),
+      rejected: [...fin.rejected, ...animeRejected],
+      raw: { addon: addonStreams, library },
+      debridErrors: debridErrors.length > 0 ? debridErrors : undefined,
+      addonErrors: addonErrors.length > 0 ? addonErrors : undefined,
+    };
   }
   const { keep, rejected } = applyTrust(parsed, input.trust ?? {});
   if (rejected.length > 0) {
@@ -203,14 +423,28 @@ export async function runPipeline(
     const summary = [...byReason.entries()].map(([k, n]) => `${k}=${n}`).join(", ");
     dlog(`[pipeline] trust kept ${keep.length}/${parsed.length} · rejected: ${summary}`);
     for (const r of rejected.slice(0, 6)) {
-      dlog(`[pipeline]   reject ${r.reason} :: ${r.stream.parsedTitle ?? r.stream.title ?? r.stream.name ?? "?"}`);
+      dlog(
+        `[pipeline]   reject ${r.reason} :: ${r.stream.parsedTitle ?? r.stream.title ?? r.stream.name ?? "?"}`,
+      );
     }
   }
   const corpus = computeCorpusStats(keep, input.score);
   const scored = keep.map((s) => scoreStream(s, input.score, corpus));
-  const picker = rankAndPick(scored, input.score.activeDebrids, PREFER_AAC, input.score.respectAddonOrder === true);
+  const picker = rankAndPick(
+    scored,
+    input.score.activeDebrids,
+    PREFER_AAC,
+    input.score.respectAddonOrder === true,
+  );
   const fin = finalizeWithRescue(picker, rejected, input.trust ?? {}, input.score);
-  return { picker: fin.picker, rejected: fin.rejected, raw: { addon: addonStreams, library } };
+  restoreCacheVerification(fin.picker);
+  return {
+    picker: applyStreamPriority(fin.picker, priorityActive, input.score.activeDebrids),
+    rejected: [...fin.rejected, ...animeRejected],
+    raw: { addon: addonStreams, library },
+    debridErrors: debridErrors.length > 0 ? debridErrors : undefined,
+    addonErrors: addonErrors.length > 0 ? addonErrors : undefined,
+  };
 }
 
 async function runCorePipeline(
@@ -218,7 +452,8 @@ async function runCorePipeline(
   trustOpts: TrustOptions,
   scoreOpts: ScoreOptions,
 ): Promise<{ picker: RankedPicker; rejected: Rejection[] } | null> {
-  const isTauri = typeof window !== "undefined" && ("__TAURI__" in window || "__TAURI_INTERNALS__" in window);
+  const isTauri =
+    typeof window !== "undefined" && ("__TAURI__" in window || "__TAURI_INTERNALS__" in window);
   if (!isTauri) return null;
   try {
     const { invoke } = await import("@tauri-apps/api/core");

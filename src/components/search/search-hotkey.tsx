@@ -8,19 +8,14 @@ export function SearchHotkey() {
   const { settings } = useSettings();
   const binding = effectiveBinding("globalSearchFocus", settings.hotkeys ?? {});
   useEffect(() => {
-    const open = () => setOpen(true);
     const onKey = (e: KeyboardEvent) => {
       if (!shouldHandleGlobalKeyboardEvent(e)) return;
       if (eventToBinding(e) !== binding) return;
       e.preventDefault();
-      open();
+      setOpen(true);
     };
     window.addEventListener("keydown", onKey);
-    window.addEventListener("harbor:open-search", open);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("harbor:open-search", open);
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, [binding, setOpen]);
   return null;
 }

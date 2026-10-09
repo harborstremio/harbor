@@ -1,0 +1,16 @@
+.music-track-details {
+  container: music-track-details / inline-size;
+}
+.music-eq[data-paused] .music-eq-bars i { animation-play-state: paused; }
+
+@container music-track-details (max-width: 328px) {
+  .music-track-badges [data-music-label]:not([data-music-label="explicit"]) {
+    display: none;
+  }
+}
+
+@container music-track-details (max-width: 236px) {
+  .music-track-badges [data-music-kind] {
+    display: none;
+  }
+}

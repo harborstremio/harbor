@@ -1,8 +1,20 @@
 import type { TrackInfo } from "@/lib/player/bridge";
 import { subtitleTrackLanguageLabel, subtitleTrackTitle } from "@/lib/subtitles/track-label";
+import type { SubtitleContentContext } from "./subtitle-context-store";
 import type { Group, SubtitleMenuProps } from "./types";
+import type { GeneratedSubtitleGroup } from "@/lib/subtitles/types";
+import type { TranslationJob } from "@/lib/subtitles/translation-jobs";
 
-export function buildOverlayState(props: SubtitleMenuProps) {
+export function buildOverlayState(
+  props: SubtitleMenuProps,
+  preferredLanguages: string[],
+  subtitleContext: SubtitleContentContext | null,
+  translationState?: {
+    generated: GeneratedSubtitleGroup[];
+    translations: TranslationJob[];
+    addedUrls: string[];
+  },
+) {
   return {
     tracks: props.tracks,
     selectedId: props.selectedId,
@@ -12,6 +24,9 @@ export function buildOverlayState(props: SubtitleMenuProps) {
     metaReleaseDate: props.metaReleaseDate ?? null,
     season: props.season ?? null,
     episode: props.episode ?? null,
+    preferredLanguages,
+    subtitleContext,
+    ...translationState,
   };
 }
 

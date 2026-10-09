@@ -1,0 +1,39 @@
+.games-download-setup-status { display:inline-flex;align-items:center;gap:8px;line-height:1.45;color:var(--color-ink-muted); }
+.games-download-setup-status.is-installing,.games-download-setup-status.is-checking,.games-download-setup-status.is-registering { color:var(--color-ink); }
+.games-download-setup-status.is-ready { color:var(--color-success); }
+.games-download-setup-status.is-attention { color:var(--color-accent); }
+.games-download-install-progress { min-width:0; }
+.games-download-install-heading { display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:30px; }
+.games-download-install-heading>.games-download-setup-status { font-size:18px;font-weight:550;letter-spacing:-.02em; }
+.games-download-install-heading>strong { font-size:25px;line-height:1.2;font-weight:550;font-variant-numeric:tabular-nums;letter-spacing:-.025em; }
+.games-download-install-heading>strong small { margin-inline-start:2px;font-size:13px;color:var(--color-ink-muted); }
+.games-download-install-progress .games-download-progress { height:4px;border-radius:3px;background:var(--color-elevated);margin-top:10px;overflow:hidden; }
+.games-download-install-progress .games-download-progress>i { display:block;height:100%;background:var(--color-success);border-radius:inherit;transition:width 350ms ease-out; }
+.games-download-install-progress .games-download-progress.is-indeterminate>i { width:30%;animation:games-install-flow 1.8s ease-in-out infinite; }
+.games-download-install-meters { display:flex;gap:20px;justify-content:space-between;margin:0 0 20px; }
+.games-download-install-meters>div { min-width:0; }
+.games-download-install-meters dt { display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-ink-muted); }
+.games-download-install-meters dt>svg { color:var(--color-success); }
+.games-download-install-meters dd { margin:5px 0 0;font-size:22px;line-height:1.2;font-weight:550;font-variant-numeric:tabular-nums; }
+.games-download-install-meters dd small { margin-inline-start:2px;font-size:11px;font-weight:400;color:var(--color-ink-muted); }
+.games-download-install-current { display:flex;gap:6px 14px;flex-wrap:wrap;align-items:baseline;margin-top:12px;font-size:13px;line-height:1.5;color:var(--color-ink-muted); }
+.games-download-install-current strong { font-weight:450;color:var(--color-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%; }
+.games-download-install-activity { font-size:12px;line-height:1.6;margin-top:7px;color:var(--color-ink-subtle); }
+.games-download-install-destination { display:flex;align-items:center;gap:8px;margin-top:8px;color:var(--color-ink-subtle);font-size:11px; }
+.games-download-install-destination svg { flex:none; }
+.games-download-install-destination span { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.games-download-install-progress .games-download-show-installer { display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:6px 0;margin-top:10px;background:transparent;color:var(--color-ink-muted);font-size:12px; }
+.games-download-install-progress .games-download-show-installer:hover:not(:disabled) { color:var(--color-ink);background:transparent; }
+.games-download-install-footer { display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px; }
+.games-download-install-footer>.games-download-action-set { margin-inline-start:auto; }
+.games-download-install-footer .games-download-show-installer { margin-top:0; }
+.games-download-install-progress.is-compact .games-download-install-meters { margin-bottom:14px; }
+.games-download-install-progress.is-compact.is-ready { display:flex;align-items:center;justify-content:flex-end;gap:20px;width:100%;margin-inline-start:auto; }
+.games-download-install-progress.is-compact.is-ready .games-download-install-heading { min-width:0;min-height:0;text-align:start; }
+.games-download-install-progress.is-compact.is-ready .games-download-setup-status { color:var(--color-ink-muted);font-size:15px;font-weight:450;letter-spacing:0; }
+.games-download-install-progress.is-compact.is-ready .games-download-install-footer { flex:none;margin-top:0; }
+.games-setup-job .games-download-install-progress { margin-bottom:20px; }
+.games-setup-job .games-download-install-current { margin-block:16px 10px; }
+@keyframes games-install-flow { from { transform:translateX(-100%); }to { transform:translateX(430%); } }
+@media(max-width:480px) { .games-download-install-meters { flex-wrap:wrap;gap:12px 20px; }.games-download-install-heading>.games-download-setup-status { font-size:16px; } }
+@media(prefers-reduced-motion:reduce) { .games-download-install-progress .games-download-progress>i { transition:none;animation:none; }.games-download-install-progress .games-download-spinner { animation:none; } }

@@ -47,7 +47,7 @@ export function TierStrip({
             <button
               key={t}
               onClick={() => onSelect(t)}
-              className={`group flex min-h-[56px] items-center gap-3 rounded-[14px] border px-4 py-2.5 text-start transition-[border-color,background-color,opacity] duration-200 ${
+              className={`group flex min-h-[56px] items-center gap-3 rounded-lg border px-4 py-2.5 text-start transition-[border-color,background-color,opacity] duration-200 ${
                 isActive
                   ? "border-ink/35 bg-ink/[0.05]"
                   : "border-edge-soft hover:border-edge hover:bg-canvas/60"

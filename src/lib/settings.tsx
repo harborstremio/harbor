@@ -16,11 +16,12 @@ import { effectiveTmdbLanguage, setTmdbLanguage } from "@/lib/providers/tmdb/tmd
 import { setPosterBaseUrl } from "@/lib/providers/rpdb";
 import { setMdblistBatchKey } from "@/lib/providers/mdblist-batch";
 import { setUiLanguage } from "@/lib/i18n";
-import { setSnapshotRetentionDays } from "@/lib/snapshots";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { STORAGE_KEY } from "./settings/defaults";
 import { readSettingsFile, writeSettingsFile } from "./settings/file-store";
+import { torrentEngineSetEnabled } from "./torrent/local-engine";
 import { loadFontData, saveFontData } from "./font-storage";
+import { isRemovedBuiltinAvatar } from "./avatars/catalog";
 import {
   forkToProfile,
   loadEffective,
@@ -29,17 +30,23 @@ import {
   sourceKeyFor,
 } from "./settings/profile-store";
 import type { Settings, StreamingService } from "./settings/types";
+import { markSectionDirty } from "./profile-sync/scheduler";
+import { configureLayoutStore } from "./layout-sync/store";
+import { SYNCED_SETTINGS_FIELDS } from "./layout-sync/sections";
 
 export type {
   ContentCategory,
   ContentFilters,
   Settings,
   StreamingService,
+  StreamPriorityEntry,
   WebhookTrigger,
 } from "./settings/types";
 
 type SettingsValue = {
   settings: Settings;
+  torrentEnginePolicyPending: boolean;
+  torrentEnginePolicyError: boolean;
   update: (patch: Partial<Settings>) => void;
   toggleStreaming: (s: StreamingService) => void;
   switchProfile: (profileId: string, linked: boolean) => void;
@@ -66,27 +73,51 @@ function readActiveSource(): SettingsSource {
 
 const Ctx = createContext<SettingsValue | null>(null);
 
-export function SettingsProvider({ children }: { children: ReactNode }) {
+export function SettingsProvider({
+  children,
+  syncTorrentEnginePolicy = false,
+}: {
+  children: ReactNode;
+  syncTorrentEnginePolicy?: boolean;
+}) {
   const sourceRef = useRef<SettingsSource>({ profileId: "default", linked: true });
   const [settings, setSettings] = useState<Settings>(() => {
     seedSharedFromLegacy();
     const src = readActiveSource();
     sourceRef.current = src;
     const s = loadEffective(src.profileId, src.linked);
-    setUiLanguage(s.uiLanguage);
+    setUiLanguage(s.uiLanguage, s.region);
     return s;
   });
+  const [settingsReady, setSettingsReady] = useState(false);
+  const settingsReadyRef = useRef(settingsReady);
+  useEffect(() => {
+    settingsReadyRef.current = settingsReady;
+  }, [settingsReady]);
+  const [torrentEnginePolicyPending, setTorrentEnginePolicyPending] = useState(false);
+  const [torrentEnginePolicyError, setTorrentEnginePolicyError] = useState(false);
   const settingsRef = useRef(settings);
   useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
 
+  useEffect(() => {
+    setUiLanguage(settings.uiLanguage, settings.region);
+  }, [settings.uiLanguage, settings.region]);
+
   setTmdbLanguage(settings.tmdbLanguage);
+
+  const lastSavedImageRef = useRef<{ profileId: string; image: string | null }>({
+    profileId: sourceRef.current.profileId,
+    image: null,
+  });
 
   useEffect(() => {
     let cancelled = false;
-    void loadBgImage().then((img) => {
+    const activeId = sourceRef.current.profileId;
+    void loadBgImage(activeId).then((img) => {
       if (cancelled || !img) return;
+      lastSavedImageRef.current = { profileId: activeId, image: img };
       setSettings((s) =>
         s.theme.backgroundImage ? s : { ...s, theme: { ...s.theme, backgroundImage: img } },
       );
@@ -97,33 +128,47 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (localStorage.getItem(STORAGE_KEY)) return;
+    if (localStorage.getItem(STORAGE_KEY)) {
+      setSettingsReady(true);
+      return;
+    }
     let cancelled = false;
     void readSettingsFile().then((raw) => {
-      if (cancelled || !raw || localStorage.getItem(STORAGE_KEY)) return;
-      try {
-        localStorage.setItem(STORAGE_KEY, raw);
-        seedSharedFromLegacy();
-        const restored = loadEffective(sourceRef.current.profileId, sourceRef.current.linked);
-        setUiLanguage(restored.uiLanguage);
-        setSettings(restored);
-      } catch {}
+      if (cancelled) return;
+      if (raw && !localStorage.getItem(STORAGE_KEY)) {
+        try {
+          localStorage.setItem(STORAGE_KEY, raw);
+          seedSharedFromLegacy();
+          setSettings(loadEffective(sourceRef.current.profileId, sourceRef.current.linked));
+        } catch {}
+      }
+      setSettingsReady(true);
     });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const lastSavedImageRef = useRef<string | null>(null);
   useEffect(() => {
+    setSettings((s) => (isRemovedBuiltinAvatar(s.harborAvatar) ? { ...s, harborAvatar: null } : s));
+  }, []);
+
+  useEffect(() => {
+    const activeId = sourceRef.current.profileId;
     const img = settings.theme.backgroundImage;
-    if (img === lastSavedImageRef.current) return;
-    lastSavedImageRef.current = img;
-    void saveBgImage(img);
+    if (
+      lastSavedImageRef.current.profileId === activeId &&
+      lastSavedImageRef.current.image === img
+    ) {
+      return;
+    }
+    lastSavedImageRef.current = { profileId: activeId, image: img };
+    void saveBgImage(img, activeId);
   }, [settings.theme.backgroundImage]);
 
   const fileTimerRef = useRef(0);
   useEffect(() => {
+    if (!settingsReady) return;
     try {
       const json = persistEffective(
         settings,
@@ -140,7 +185,27 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         }
       }
     }
-  }, [settings]);
+  }, [settings, settingsReady]);
+
+  useEffect(() => {
+    if (!syncTorrentEnginePolicy || !settingsReady || !("__TAURI_INTERNALS__" in window)) return;
+    let cancelled = false;
+    setTorrentEnginePolicyPending(true);
+    setTorrentEnginePolicyError(false);
+    void torrentEngineSetEnabled(!settings.torrentsDisabled)
+      .then(() => {
+        if (!cancelled) setTorrentEnginePolicyPending(false);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setTorrentEnginePolicyPending(false);
+          setTorrentEnginePolicyError(true);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [settings.torrentsDisabled, settingsReady, syncTorrentEnginePolicy]);
 
   const tmdbLangRef = useRef<string | null>(null);
   useEffect(() => {
@@ -230,6 +295,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           console.warn("[fonts] failed to load", family, e);
         }
       }
+      if (cancelled) return;
+      try {
+        const { syncSubFontsToDisk } = await import("@/lib/player/sub-font-install");
+        await syncSubFontsToDisk(fonts);
+      } catch (e) {
+        console.warn("[fonts] could not sync fonts to disk for libass", e);
+      }
     })();
     return () => {
       cancelled = true;
@@ -243,6 +315,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     };
   }, [settings.customFonts]);
 
+  useEffect(() => {
+    const fam = settings.subFontFamily;
+    if (!fam?.startsWith("custom:")) return;
+    const id = fam.slice("custom:".length);
+    if ((settings.customFonts ?? []).some((f) => f.id === id)) return;
+    setSettings((s) => ({ ...s, subFontFamily: "inter" }));
+  }, [settings.subFontFamily, settings.customFonts]);
+
   const fontMigratedRef = useRef(false);
   useEffect(() => {
     if (fontMigratedRef.current) return;
@@ -250,14 +330,22 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (legacy.length === 0) return;
     fontMigratedRef.current = true;
     void (async () => {
-      for (const f of legacy) if (f.dataUrl) await saveFontData(f.id, f.dataUrl).catch(() => {});
+      const moved = new Set<string>();
+      for (const f of legacy) {
+        if (!f.dataUrl) continue;
+        try {
+          await saveFontData(f.id, f.dataUrl);
+          moved.add(f.id);
+        } catch (e) {
+          console.warn("[fonts] keeping inline copy, IDB write failed for", f.id, e);
+        }
+      }
+      if (moved.size === 0) return;
       setSettings((s) => ({
         ...s,
-        customFonts: (s.customFonts ?? []).map((f) => ({
-          id: f.id,
-          name: f.name,
-          format: f.format,
-        })),
+        customFonts: (s.customFonts ?? []).map((f) =>
+          moved.has(f.id) ? { id: f.id, name: f.name, format: f.format } : f,
+        ),
       }));
     })();
   }, [settings.customFonts]);
@@ -266,10 +354,17 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     void import("@/lib/privacy/blocklist").then(({ setTrackerBlocking }) => {
       setTrackerBlocking(settings.blockTrackers);
     });
-  }, [settings.blockTrackers]);
+    if (settingsReady && "__TAURI_INTERNALS__" in window) {
+      void import("@tauri-apps/api/core")
+        .then(({ invoke }) => invoke("privacy_set_enabled", { enabled: settings.blockTrackers }))
+        .catch((error) => console.warn("Stream blocker preference could not be applied", error));
+    }
+  }, [settings.blockTrackers, settingsReady]);
 
   useEffect(() => {
-    setSnapshotRetentionDays(settings.cwSnapshotRetentionDays);
+    void import("@/lib/snapshots").then(({ setSnapshotRetentionDays }) => {
+      setSnapshotRetentionDays(settings.cwSnapshotRetentionDays);
+    });
   }, [settings.cwSnapshotRetentionDays]);
 
   useEffect(() => {
@@ -377,7 +472,40 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const update = useCallback((patch: Partial<Settings>) => {
     setSettings((s) => ({ ...s, ...patch }));
+    // The write-side trigger for account sync. Without it a layout change is persisted
+    // locally and never queued, so the section only ever travels device-to-server by
+    // accident. Marking on the patch rather than diffing the whole blob keeps this off
+    // the hot path: update is called for every settings toggle in the app.
+    for (const [section, field] of SYNCED_SETTINGS_FIELDS) {
+      if (field in patch) markSectionDirty(section);
+    }
   }, []);
+
+  // Same contract as the roster store: sync reads and writes through the provider for
+  // the ACTIVE profile, and straight to disk for any other, because only the active
+  // profile has live React state that a direct write would lose.
+  useEffect(() => {
+    configureLayoutStore({
+      activeProfileId: () => sourceRef.current.profileId,
+      isLinked: (profileId) =>
+        profileId === sourceRef.current.profileId ? sourceRef.current.linked : true,
+      readActive: () => settingsRef.current,
+      writeActive: (patch) => setSettings((s) => ({ ...s, ...patch })),
+    });
+    return () => configureLayoutStore(null);
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("harbor.migrate.tvdbpanel.v1")) return;
+      localStorage.setItem("harbor.migrate.tvdbpanel.v1", "1");
+      if (!settingsRef.current.tvdbOrderPanel) {
+        update({ tvdbOrderPanel: true, episodeOrderProvider: "tvdb" });
+      }
+    } catch {
+      /* noop */
+    }
+  }, [update]);
 
   const toggleStreaming = useCallback((svc: StreamingService) => {
     setSettings((s) => ({
@@ -388,20 +516,42 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const switchProfile = useCallback((profileId: string, linked: boolean) => {
     const cur = sourceRef.current;
-    if (sourceKeyFor(cur.profileId, cur.linked) === sourceKeyFor(profileId, linked)) {
-      sourceRef.current = { profileId, linked };
+    if (cur.profileId === profileId && cur.linked === linked) {
       return;
     }
-    persistEffective(settingsRef.current, cur.profileId, cur.linked);
-    const next = loadEffective(profileId, linked);
-    setUiLanguage(next.uiLanguage);
-    setTmdbLanguage(next.tmdbLanguage);
-    tmdbLangRef.current = effectiveTmdbLanguage();
-    imgLangRef.current = next.tmdbImageLangs.join(",");
-    sourceRef.current = { profileId, linked };
-    persistEffective(next, profileId, linked);
-    settingsRef.current = next;
-    setSettings(next);
+
+    if (sourceKeyFor(cur.profileId, cur.linked) === sourceKeyFor(profileId, linked)) {
+      sourceRef.current = { profileId, linked };
+    } else {
+      if (settingsReadyRef.current)
+        persistEffective(settingsRef.current, cur.profileId, cur.linked);
+      const next = loadEffective(profileId, linked);
+      setUiLanguage(next.uiLanguage, next.region);
+      setTmdbLanguage(next.tmdbLanguage);
+      tmdbLangRef.current = effectiveTmdbLanguage();
+      imgLangRef.current = next.tmdbImageLangs.join(",");
+      sourceRef.current = { profileId, linked };
+      if (settingsReadyRef.current) persistEffective(next, profileId, linked);
+      settingsRef.current = next;
+      setSettings(next);
+    }
+
+    lastSavedImageRef.current = { profileId, image: null };
+    settingsRef.current = {
+      ...settingsRef.current,
+      theme: { ...settingsRef.current.theme, backgroundImage: null },
+    };
+    setSettings((s) => ({ ...s, theme: { ...s.theme, backgroundImage: null } }));
+
+    void loadBgImage(profileId).then((img) => {
+      if (sourceRef.current.profileId !== profileId) return;
+      lastSavedImageRef.current = { profileId, image: img };
+      settingsRef.current = {
+        ...settingsRef.current,
+        theme: { ...settingsRef.current.theme, backgroundImage: img },
+      };
+      setSettings((s) => ({ ...s, theme: { ...s.theme, backgroundImage: img } }));
+    });
   }, []);
 
   const setSettingsLinked = useCallback(
@@ -415,8 +565,24 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ settings, update, toggleStreaming, switchProfile, setSettingsLinked }),
-    [settings, update, toggleStreaming, switchProfile, setSettingsLinked],
+    () => ({
+      settings,
+      torrentEnginePolicyPending,
+      torrentEnginePolicyError,
+      update,
+      toggleStreaming,
+      switchProfile,
+      setSettingsLinked,
+    }),
+    [
+      settings,
+      torrentEnginePolicyPending,
+      torrentEnginePolicyError,
+      update,
+      toggleStreaming,
+      switchProfile,
+      setSettingsLinked,
+    ],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

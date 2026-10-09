@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { PickCard } from "@/components/pick-card";
-import { Row } from "@/components/row";
+import { Row, usePosterRow } from "@/components/row";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { useClaimSeenIds, useDedupOnSeenIds } from "@/lib/feed/seen-ids";
@@ -12,6 +12,7 @@ import { MAX_PAGES, MIN_INITIAL_FILL, SpotlightGateContext } from "./spotlight-g
 
 export function RailSection({ filter, rail }: { filter: MetaFilter; rail: StandardRail }) {
   const t = useT();
+  const posterRow = usePosterRow();
   const { settings } = useSettings();
   const gate = useContext(SpotlightGateContext);
   const noDedup = rail.noDedup === true;
@@ -113,15 +114,13 @@ export function RailSection({ filter, rail }: { filter: MetaFilter; rail: Standa
   );
 
   return (
-    <Row title={title} onEndReached={onEndReached}>
+    <Row {...posterRow} title={title} onEndReached={onEndReached}>
       {visible
         ? visible.map((m) => (
-            <div key={m.id} className="w-36 shrink-0">
-              <PickCard meta={m} />
-            </div>
+            <PickCard key={m.id} meta={m} />
           ))
         : Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/40" />
+            <div key={i} className={`${posterRow.shape === "landscape" ? "aspect-[16/9]" : "aspect-[2/3]"} animate-pulse rounded-xl bg-elevated/40`} />
           ))}
     </Row>
   );
