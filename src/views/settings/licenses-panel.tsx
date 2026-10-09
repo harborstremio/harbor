@@ -6,7 +6,7 @@ import { APP_VERSION } from "@/lib/build-info";
 import { Section } from "./shared";
 import { ROW_DESC } from "./kit";
 import { AssetDownloadFeedback, useAssetDownload, type AssetDownload } from "./asset-download";
-import harborWordmark from "@/assets/harbor-wordmark.svg";
+import harborWordmark from "@/assets/brand/jl-wordmark-white.webp";
 import crowdinLogo from "@/assets/crowdin-mark.png";
 import cloudsmithLogo from "@/assets/cloudsmith.png";
 import elfhostedLogo from "@/assets/elfhosted.svg";
@@ -412,7 +412,7 @@ export function LicensesPanel() {
     <>
       <div className="hset-attr-hero">
         <span className="hset-attr-wordmark">
-          <img src={harborWordmark} alt="Harbor" draggable={false} />
+          <img src={harborWordmark} alt="JL Media Vision" draggable={false} />
           <span className="hset-attr-version">{APP_VERSION}</span>
         </span>
         <p className="hset-attr-license">

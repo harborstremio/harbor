@@ -2,7 +2,9 @@ import { getUiLanguage, LANGUAGES, type UiLanguage } from "@/lib/i18n";
 import { safeFetchStream } from "@/lib/safe-fetch";
 import { setItemWithRecovery } from "@/lib/storage-recovery";
 import { ebookTranslationCacheGet, ebookTranslationCachePut } from "./cache";
-import translationInstructions from "./translation-chapter-instructions.md?raw";
+// Harbor beta points at a chapter-instructions file it never committed (.md is gitignored);
+// the tracked instructions keep the build and translation working.
+import translationInstructions from "./translation-instructions.md?raw";
 
 const STORAGE_KEY = "harbor.ebook.translation.v1";
 const CACHE_PREFIX = "harbor.ebook.translation.cache.v1.";

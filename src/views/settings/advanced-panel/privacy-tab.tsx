@@ -1,4 +1,4 @@
-import harborDiscord from "@/assets/harbor-discord.svg";
+import harborDiscord from "@/assets/brand/jl-mark.webp";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, ToggleRow } from "../shared";
