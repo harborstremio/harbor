@@ -93,8 +93,10 @@ export function createMediaListStore(prefix: string) {
     useEffect(() => {
       const tick = () => setItems(readMap(keyFor(pid)));
       listeners.add(tick);
+      window.addEventListener("jl:profile-data-applied", tick);
       return () => {
         listeners.delete(tick);
+        window.removeEventListener("jl:profile-data-applied", tick);
       };
     }, [pid]);
 

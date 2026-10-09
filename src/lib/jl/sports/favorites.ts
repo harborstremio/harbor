@@ -16,7 +16,7 @@ export type JlFavoritePlayer = {
 type ListStore<T> = {
   useList: () => T[];
   read: () => T[];
-  write: (list: T[]) => void;
+  write: (list: T[], requirePersistence?: boolean) => void;
 };
 
 // Told about every write to either list (the account sync pushes changes from here).
@@ -62,15 +62,23 @@ function createProfileListStore<T>(baseKey: string, valid: (item: unknown) => it
     };
   };
 
-  const write = (list: T[]) => {
+  const write = (list: T[], requirePersistence = false) => {
     try {
       localStorage.setItem(keyFor(), JSON.stringify(list));
-    } catch {
+    } catch (error) {
+      if (requirePersistence) throw error;
       /* storage unavailable: nothing can be saved */
     }
     for (const fn of listeners) fn();
     for (const fn of changeListeners) fn();
   };
+
+  if (typeof window !== "undefined") {
+    const refresh = () => { cache = null; for (const fn of listeners) fn(); };
+    window.addEventListener("harbor:active-profile-changed", refresh);
+    window.addEventListener("jl:account-changed", refresh);
+    window.addEventListener("storage", (event) => { if (event.key === null || event.key.startsWith(baseKey + ".")) refresh(); });
+  }
 
   return { read, write, useList: () => useSyncExternalStore(subscribe, read, () => empty) };
 }
@@ -116,9 +124,9 @@ export const toggleFavoritePlayer = (player: JlFavoritePlayer) => toggle(players
 export const useJlSportsFavorites = teams.useList;
 export const useJlFavoritePlayers = players.useList;
 export const readJlFavorites = () => ({ teams: teams.read(), players: players.read() });
-export const writeJlFavorites = (next: { teams?: JlFavoriteTeam[]; players?: JlFavoritePlayer[] }) => {
-  if (next.teams) teams.write(next.teams);
-  if (next.players) players.write(next.players);
+export const writeJlFavorites = (next: { teams?: JlFavoriteTeam[]; players?: JlFavoritePlayer[] }, requirePersistence = false) => {
+  if (next.teams) teams.write(next.teams, requirePersistence);
+  if (next.players) players.write(next.players, requirePersistence);
 };
 
 /** Teams to rank and fetch for: followed teams plus followed players' teams. */

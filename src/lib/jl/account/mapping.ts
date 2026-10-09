@@ -52,6 +52,20 @@ export function playerToRow(profileId: string, player: JlFavoritePlayer): MediaF
 
 export const rowKey = (r: Pick<MediaFavoriteRow, "kind" | "item_id">) => `${r.kind}:${r.item_id}`;
 
+/** Reject malformed responses instead of interpreting them as an empty account to apply locally. */
+export function parseFavoriteRows(value: unknown): RemoteFavoriteRow[] {
+  if (!Array.isArray(value)) throw new Error("Invalid JL favorites response");
+  const seen = new Set<string>();
+  return value.map((row: Partial<RemoteFavoriteRow>) => {
+    if (!row || (row.kind !== "team" && row.kind !== "player") || typeof row.item_id !== "string" ||
+        !splitItemId(row.item_id) || typeof row.meta?.name !== "string") throw new Error("Invalid JL favorite");
+    const result: RemoteFavoriteRow = { kind: row.kind, item_id: row.item_id, meta: { name: row.meta.name.slice(0, NAME_MAX) } };
+    if (seen.has(rowKey(result))) throw new Error("Duplicate JL favorite");
+    seen.add(rowKey(result));
+    return result;
+  });
+}
+
 /** Remote rows as app favorites. Players keep known team details; unknown players need a lookup. */
 export function rowsToFavorites(
   rows: RemoteFavoriteRow[],

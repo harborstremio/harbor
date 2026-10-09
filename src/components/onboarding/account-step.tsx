@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { useState } from "react";
 import { JlAccountForm } from "@/components/jl-account-form";
 import { useT } from "@/lib/i18n";
 import { signOutJl, useJlSession } from "@/lib/jl/account/client";
@@ -7,6 +8,7 @@ import { isWeb } from "@/lib/platform";
 export function AccountStep({ onSkip }: { onSkip: () => void }) {
   const t = useT();
   const session = useJlSession();
+  const [error, setError] = useState<string | null>(null);
   // The web app only works signed in; the desktop and TV apps can also run on their own.
   const required = isWeb();
 
@@ -26,20 +28,21 @@ export function AccountStep({ onSkip }: { onSkip: () => void }) {
             <span className="min-w-0 truncate">{session.email ?? t("Signed in")}</span>
           </p>
           <p className="text-[14px] leading-relaxed text-ink-muted">
-            {t("Your profiles, favorites, keys and TV logins now follow you to every device.")}
+            {t("Choose your JL profile to sync supported preferences, favorites, library and progress. Device files and configured addon URLs stay on this device.")}
           </p>
           <button
-            onClick={() => void signOutJl()}
+            onClick={() => void signOutJl().catch(() => setError(t("Sign-out could not be saved. Free some storage and try again.")))}
             className="w-fit text-[13px] text-ink-subtle underline-offset-4 hover:text-ink hover:underline"
           >
             {t("Use a different account")}
           </button>
+          {error && <p role="alert" className="text-[13px] text-danger">{error}</p>}
         </div>
       ) : (
         <>
           <JlAccountForm
             intro={t(
-              "One account for every device. Already set up somewhere else? Sign in and your TV provider and keys come with you.",
+              "Sign in to your JL Media Vision account, then choose the profile whose supported settings and library you want to sync.",
             )}
           />
           {!required && (

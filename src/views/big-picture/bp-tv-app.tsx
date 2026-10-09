@@ -3,6 +3,7 @@ import { CurfewGuard } from "@/components/curfew-guard";
 import { GamepadRunner } from "@/components/gamepad-runner";
 import { HarborAvatarSync } from "@/components/harbor-avatar-sync";
 import { HarborNameSync } from "@/components/harbor-name-sync";
+import { JlAccountSync } from "@/components/jl-account-sync";
 import { ProfileIdentitySync } from "@/lib/profile-identity-sync";
 import { ProfileSyncRunner } from "@/lib/profile-sync";
 import { SettingsProfileBridge } from "@/lib/settings-profile-bridge";
@@ -112,6 +113,7 @@ function BpTvRoot() {
       <SettingsProfileBridge />
       <TrackerProfileBridge />
       <ProfileSyncRunner />
+      <JlAccountSync />
       <Suspense fallback={null}>
         <BigPictureShell />
       </Suspense>

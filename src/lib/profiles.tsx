@@ -47,6 +47,13 @@ export const DEFAULT_KID: KidConfig = { age: 7, curfewMinutes: null, parentPinHa
 // sync roster apply both purge, and a key that only one of them knows about is a leak
 // that outlives the profile.
 const PROFILE_KEY_PREFIXES = [
+  "harbor.jl.library.v1.",
+  "harbor.jl.library-queue.v1.",
+  "jl.sports.favorites.v1.",
+  "jl.sports.players.v1.",
+  "jl.account.link.v2.",
+  "harbor.addonOrder.",
+  "harbor.addonOrderBackups.",
   "harbor.games.sims.folder:",
   "harbor.games.ffxiv.center:",
   "harbor.games.eve.route:",
@@ -624,14 +631,13 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
 
   const createProfile = useCallback<ProfilesValue["createProfile"]>(
     ({ name, avatar, color, kid }) => {
-      const primary = state.profiles.find((p) => p.isPrimary) ?? state.profiles[0];
       const created: Profile = {
         id: newId(),
         name: name.trim().slice(0, 32) || "Profile",
         avatar: avatar ?? null,
         color,
         isPrimary: false,
-        shareStremioWith: primary?.id ?? null,
+        shareStremioWith: null,
         passwordHash: null,
         hideContent: null,
         lockedTabs: null,
@@ -640,6 +646,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
         createdAt: Date.now(),
       };
       setState((s) => ({ ...s, profiles: [...s.profiles, created] }));
+      try { localStorage.setItem(`jl.account.profile-created.v1.${created.id}`, "1"); } catch { /* Explicit account linking remains available. */ }
       return created;
     },
     [state.profiles],

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AVATAR_CATALOG, avatarUrl } from "@/lib/avatars/catalog";
 import { useT } from "@/lib/i18n";
 import { useJlSession } from "@/lib/jl/account/client";
-import { listJlProfiles, type JlProfile } from "@/lib/jl/account/sync";
+import { jlProfileContext, refreshJlProfileContext, linkJlProfile, listJlProfiles, useJlLink, type JlProfile, type JlProfileContext } from "@/lib/jl/account/sync";
 import { isPlaceholderName, useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { useTogether } from "@/lib/together/provider";
@@ -21,14 +21,19 @@ export function ProfileStep() {
   const selectedAvatar = activeProfile?.avatar ?? null;
   const session = useJlSession();
   const userId = session?.userId ?? "";
-  const [accountProfiles, setAccountProfiles] = useState<JlProfile[]>([]);
+  const link = useJlLink();
+  const localId = activeProfile?.id ?? "";
+  const [selection, setSelection] = useState<{ context: JlProfileContext; profiles: JlProfile[] } | null>(null);
+  const [selectionError, setSelectionError] = useState<string | null>(null);
+  const accountProfiles = selection?.context.account.userId === userId && selection.context.localId === localId ? selection.profiles : [];
 
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
-    listJlProfiles()
+    const context = jlProfileContext();
+    listJlProfiles(context)
       .then((list) => {
-        if (!cancelled) setAccountProfiles(list);
+        if (!cancelled) setSelection({ context, profiles: list });
       })
       .catch(() => {
         /* offline: the viewer types a name instead */
@@ -36,7 +41,7 @@ export function ProfileStep() {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, localId]);
 
   const saveName = (next: string) => {
     setName(next);
@@ -55,8 +60,17 @@ export function ProfileStep() {
 
   // Picking a profile that already exists on the account links this device to it.
   const pickAccountProfile = (p: JlProfile) => {
-    saveName(p.name);
-    if (p.avatar) setAvatar(p.avatar);
+    if (!selection) return;
+    try {
+      linkJlProfile(p, refreshJlProfileContext(selection.context));
+      // Keep subsequent selections valid after our own binding change.
+      setSelection({ ...selection, context: jlProfileContext() });
+      saveName(p.name);
+      if (p.avatar) setAvatar(p.avatar);
+      setSelectionError(null);
+    } catch {
+      setSelectionError("Your account or profile changed. Reopen this step to choose again.");
+    }
   };
 
   return (
@@ -72,7 +86,7 @@ export function ProfileStep() {
           <span className="text-[13px] text-ink-muted">{t("On your account")}</span>
           <div className="flex flex-wrap gap-2">
             {accountProfiles.map((p) => {
-              const on = name.trim().toLowerCase() === p.name.trim().toLowerCase();
+              const on = link?.profileId === p.id;
               return (
                 <button
                   key={p.id}
@@ -97,6 +111,7 @@ export function ProfileStep() {
           </div>
         </div>
       )}
+      {selectionError && <p role="alert" className="text-[13px] text-danger">{t(selectionError)}</p>}
       <label className="flex flex-col gap-2">
         <span className="text-[13px] text-ink-muted">{t("Your name")}</span>
         <input

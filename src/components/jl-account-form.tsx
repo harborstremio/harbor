@@ -12,6 +12,10 @@ const inputClass =
 /** Turns Supabase auth errors into something a customer can act on. */
 function friendly(err: unknown, mode: Mode): string {
   const msg = err instanceof Error ? err.message : String(err);
+  if (/not configured/i.test(msg)) return "JL accounts aren't set up in this build. Contact JL Media Vision support.";
+  if (/timed out/i.test(msg)) return "The account service took too long to respond. Try again.";
+  if (/could not be saved/i.test(msg)) return "Your account could not be saved on this device. Free some storage and try again.";
+  if (/account changed/i.test(msg)) return "Your sign-in changed while this request was running. Try again.";
   if (/invalid login|invalid credentials/i.test(msg)) return "That email and password don't match an account.";
   if (/email not confirmed/i.test(msg)) return "Confirm your email first. Check your inbox for the link we sent.";
   if (/already registered|already exists/i.test(msg)) return "There's already an account with that email. Sign in instead.";
@@ -57,16 +61,20 @@ export function JlAccountForm({ intro }: { intro?: string }) {
   };
 
   const forgot = async () => {
+    if (busy) return;
     if (!/\S+@\S+\.\S+/.test(email.trim())) {
       setError("Enter your email first, then tap Forgot password.");
       return;
     }
     setError(null);
+    setBusy(true);
     try {
       await resetJlPassword(email);
       setNotice("We emailed you a link to set a new password.");
     } catch {
       setError("Couldn't send the reset email. Try again in a minute.");
+    } finally {
+      setBusy(false);
     }
   };
 

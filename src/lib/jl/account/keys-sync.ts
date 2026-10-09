@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useSettings, type Settings } from "@/lib/settings";
-import { currentJlSession, jlRpc, useJlSession } from "./client";
+import { assertJlAccountCurrent, jlAccountContext, jlRpc, useJlSession, type JlAccountContext } from "./client";
+import { claimKeySyncOwner, runKeySync } from "./key-sync-run";
 import {
-  mergeKeys,
   secretName,
   settingKeyFromSecret,
   SYNCED_SETTING_KEYS,
@@ -71,8 +71,11 @@ function toPatch(values: KeyValues): Partial<Settings> {
   return patch;
 }
 
-async function pullRemote(): Promise<KeyValues> {
-  const rows = await jlRpc<Array<{ name: string; value: string }>>("get_secrets");
+async function pullRemote(context: JlAccountContext): Promise<KeyValues> {
+  const rows = await jlRpc<Array<{ name: string; value: string }>>("get_secrets", {}, context);
+  if (!Array.isArray(rows) || rows.some((row) => !row || typeof row.name !== "string" || typeof row.value !== "string")) {
+    throw new Error("Invalid JL key response");
+  }
   const out: KeyValues = {};
   for (const row of rows ?? []) {
     const key = settingKeyFromSecret(row.name);
@@ -81,31 +84,35 @@ async function pullRemote(): Promise<KeyValues> {
   return out;
 }
 
-let running: Promise<void> | null = null;
-
-async function runKeySync(settings: Settings, update: (patch: Partial<Settings>) => void): Promise<void> {
-  const session = currentJlSession();
-  if (!session) return;
-  const remote = await pullRemote();
-  const merged = mergeKeys(readBase(session.userId), localValues(settings), remote);
-  for (const [key, value] of Object.entries(merged.push) as Array<[SyncedSettingKey, string]>) {
-    await jlRpc("set_secret", { p_name: secretName(key), p_value: value });
-  }
-  const patch = toPatch(merged.apply);
-  if (Object.keys(patch).length) update(patch);
-  writeBase(session.userId, merged.base);
-}
+const running = new Map<string, Promise<void>>();
 
 /** Pull and push now. Safe to call often; overlapping calls share one run. */
-export function syncJlKeys(settings: Settings, update: (patch: Partial<Settings>) => void): Promise<void> {
-  running ??= runKeySync(settings, update)
+export function syncJlKeys(settings: Settings, update: (patch: Partial<Settings>) => void, read = () => settings): Promise<void> {
+  const context = jlAccountContext();
+  if (!context || !claimKeySyncOwner(localStorage, context.userId)) return Promise.resolve();
+  const key = `${context.userId}:${context.generation}`;
+  const existing = running.get(key);
+  if (existing) return existing;
+  const promise = runKeySync({
+    assertCurrent: () => assertJlAccountCurrent(context),
+    readLocal: () => localValues(read()),
+    readBase: () => readBase(context.userId),
+    writeBase: (base) => writeBase(context.userId, base),
+    pull: () => pullRemote(context),
+    push: (setting, value) => jlRpc("set_secret", { p_name: secretName(setting), p_value: value }, context),
+    apply: (values) => {
+      const patch = toPatch(values);
+      if (Object.keys(patch).length) update(patch);
+    },
+  })
     .catch(() => {
       /* offline or signed out: the next focus, interval or change retries */
     })
     .finally(() => {
-      running = null;
+      if (running.get(key) === promise) running.delete(key);
     });
-  return running;
+  running.set(key, promise);
+  return promise;
 }
 
 /** Runs the key sync while signed in: on sign-in, on focus, every few minutes, and after each change. */
@@ -119,16 +126,18 @@ export function useJlKeySync(): void {
 
   useEffect(() => {
     if (!userId) return;
-    const run = () => void syncJlKeys(latest.current.settings, latest.current.update);
+    const run = () => void syncJlKeys(latest.current.settings, latest.current.update, () => latest.current.settings);
     run();
     const timer = window.setInterval(run, PULL_EVERY_MS);
     const onVisible = () => {
       if (document.visibilityState === "visible") run();
     };
     document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("online", run);
     return () => {
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", run);
     };
   }, [userId]);
 
@@ -140,7 +149,7 @@ export function useJlKeySync(): void {
       return;
     }
     const timer = window.setTimeout(
-      () => void syncJlKeys(latest.current.settings, latest.current.update),
+      () => void syncJlKeys(latest.current.settings, latest.current.update, () => latest.current.settings),
       PUSH_DELAY_MS,
     );
     return () => window.clearTimeout(timer);

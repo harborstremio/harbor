@@ -4,20 +4,26 @@ import { JlAccountForm } from "@/components/jl-account-form";
 import { useT } from "@/lib/i18n";
 import { jlAccountsConfigured, signOutJl, useJlSession } from "@/lib/jl/account/client";
 import {
-  createJlProfile,
+  createAndLinkJlProfile,
+  jlProfileContext,
+  refreshJlProfileContext,
   linkJlProfile,
   listJlProfiles,
   syncNow,
+  saveJlSyncConflictBackup,
   unlinkJlProfile,
   useJlLink,
   type JlProfile,
 } from "@/lib/jl/account/sync";
 import { JlDialog } from "./jl-dialog";
+import { useProfiles } from "@/lib/profiles";
+import { useJlSyncStatus } from "@/lib/jl/account/sync-status";
 
 export function AccountDialog({ onClose }: { onClose: () => void }) {
   const t = useT();
   const session = useJlSession();
   const link = useJlLink();
+  const { activeId } = useProfiles();
   return (
     <JlDialog title={t("JL Media Vision account")} onClose={onClose}>
       {!jlAccountsConfigured() ? (
@@ -25,7 +31,7 @@ export function AccountDialog({ onClose }: { onClose: () => void }) {
       ) : !session ? (
         <SignInForm />
       ) : !link ? (
-        <ProfilePicker />
+        <ProfilePicker key={`${session.userId}:${activeId}`} />
       ) : (
         <Linked name={link.name} email={session.email} />
       )}
@@ -44,10 +50,11 @@ function ProfilePicker() {
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [context] = useState(jlProfileContext);
 
   useEffect(() => {
     let cancelled = false;
-    listJlProfiles()
+    listJlProfiles(context)
       .then((list) => {
         if (!cancelled) setProfiles(list);
       })
@@ -62,10 +69,10 @@ function ProfilePicker() {
   }, []);
 
   const create = async () => {
-    if (!newName.trim()) return;
+    if (!newName.trim() || busy) return;
     setBusy(true);
     try {
-      linkJlProfile(await createJlProfile(newName));
+      await createAndLinkJlProfile(newName, null, refreshJlProfileContext(context));
     } catch {
       setError(t("The profile could not be created. Try again."));
     } finally {
@@ -81,7 +88,10 @@ function ProfilePicker() {
       {profiles?.map((p) => (
         <button
           key={p.id}
-          onClick={() => linkJlProfile(p)}
+          onClick={() => {
+            try { linkJlProfile(p, refreshJlProfileContext(context)); }
+            catch (error) { setError(error instanceof Error ? error.message : t("Your account or profile changed. Reopen this dialog to choose again.")); }
+          }}
           className="flex items-center gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-3.5 py-2.5 text-start text-[14px] text-ink hover:border-edge focus:border-ink-subtle focus:outline-none"
         >
           <UserRound size={16} className="text-ink-subtle" />
@@ -107,7 +117,7 @@ function ProfilePicker() {
           </button>
         </div>
       )}
-      <button onClick={() => void signOutJl()} className="self-start text-[12.5px] text-ink-subtle hover:text-ink">
+      <button onClick={() => void signOutJl().catch(() => setError(t("Sign-out could not be saved. Free some storage and try again.")))} className="self-start text-[12.5px] text-ink-subtle hover:text-ink">
         {t("Sign out")}
       </button>
     </div>
@@ -117,6 +127,8 @@ function ProfilePicker() {
 function Linked({ name, email }: { name: string; email: string | null }) {
   const t = useT();
   const [syncing, setSyncing] = useState(false);
+  const status = useJlSyncStatus();
+  const [error, setError] = useState<string | null>(null);
   return (
     <div className="flex flex-col gap-3">
       <p className="flex items-center gap-2 text-[13.5px] text-ink">
@@ -124,7 +136,10 @@ function Linked({ name, email }: { name: string; email: string | null }) {
         {t("Syncing with {profile}", { profile: name })}
       </p>
       {email && <p className="text-[12.5px] text-ink-subtle">{email}</p>}
+      <p role="status" className="text-[12.5px] text-ink-muted">{t(status.message)}</p>
+      {error && <p role="alert" className="text-[12.5px] text-danger">{error}</p>}
       <div className="flex flex-wrap gap-2">
+        {status.message.includes("saved conflicts") && <button onClick={() => void saveJlSyncConflictBackup().catch(() => setError(t("The conflict backup could not be saved. Try again.")))} className="flex h-9 items-center rounded-lg border border-edge px-3 text-[12.5px] font-semibold text-ink">{t("Save conflict backup")}</button>}
         <button
           onClick={() => {
             setSyncing(true);
@@ -143,8 +158,7 @@ function Linked({ name, email }: { name: string; email: string | null }) {
         </button>
         <button
           onClick={() => {
-            unlinkJlProfile();
-            void signOutJl();
+            void signOutJl().catch(() => setError(t("Sign-out could not be saved. Free some storage and try again.")));
           }}
           className="flex h-9 items-center rounded-lg border border-edge px-3 text-[12.5px] font-semibold text-ink-muted"
         >
