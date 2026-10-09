@@ -1,1 +1,1 @@
-JL Media Vision 0.9.26 rebuild: restore the verified Capstan runtime and publish Windows plus Android only after both stable download assets exist.
+JL Media Vision 0.9.26 rebuild: stage the pinned Pokemon engine, corresponding sources and subtitle fonts; verify all Windows resources and publish only after both stable assets match the release commit.

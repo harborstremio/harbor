@@ -122,6 +122,7 @@ gemini.key
 /public/games/
 
 # Built separately from pinned GPL sources; see tools/pokemon-engine/README.md.
+!tools/pokemon-engine/README.md
 /src-tauri/resources/pokemon-engine/
 
 # Rotated dev-server logs: *.log covers dev.log but not its .prev rotation.

@@ -98,6 +98,14 @@ jobs:
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Setup Pokémon engine SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.401'
+
+      - name: Build Pokémon engine and corresponding source bundle
+        run: node tools/pokemon-engine/build.mjs --fetch-source "${{ runner.temp }}/harbor-pokemon-source" --output src-tauri/resources/pokemon-engine --artifacts "${{ runner.temp }}/harbor-pokemon-build" --rid win-x64
+
       - name: Prepare Capstan extension dependencies
         shell: bash
         run: sh android-extension-compat/tools/deps.sh
@@ -112,6 +120,9 @@ jobs:
       - name: Fetch mpv
         run: pnpm run setup:mpv
 
+      - name: Fetch bundled fonts
+        run: pnpm run setup:fonts
+
       - name: Fetch external binaries
         shell: bash
         run: |
@@ -124,7 +135,10 @@ jobs:
           mv ffprobe.exe "ffprobe-${TARGET}.exe"
           rm ffmpeg.zip
 
-      - name: Build and publish release
+      - name: Verify Windows bundle resources
+        run: node scripts/check-jl-bundle.mjs
+
+      - name: Build draft release
         id: tauri
         uses: tauri-apps/tauri-action@v0
         env:
@@ -198,6 +212,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="${{ needs.windows.outputs.tag }}"
+          release_commit=$(gh api "repos/${{ github.repository }}/commits/$tag" --jq '.sha')
+          if [ "$release_commit" != "${{ github.sha }}" ]; then
+            echo "::error::Release tag does not point to the commit built by this workflow."
+            exit 1
+          fi
           assets=$(gh release view "$tag" --repo "${{ github.repository }}" --json assets --jq '.assets[].name')
           for required in JL-Media-Vision-Setup-x64.exe JL-Media-Vision-TV.apk; do
             if ! grep -Fxq "$required" <<<"$assets"; then
