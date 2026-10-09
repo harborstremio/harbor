@@ -53,8 +53,9 @@ include(CheckCXXSourceCompiles)
 # Test whether -Wthread-safety is available. See
 # https://clang.llvm.org/docs/ThreadSafetyAnalysis.html
 # -Werror is necessary because unknown attributes only generate warnings.
-set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-list(APPEND CMAKE_REQUIRED_FLAGS -Werror -Wthread-safety)
+# CMAKE_REQUIRED_FLAGS is a space-separated string, not a CMake list.
+set(OLD_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
+string(APPEND CMAKE_REQUIRED_FLAGS " -Werror -Wthread-safety")
 check_cxx_source_compiles("
 struct __attribute__((lockable)) Lock {
   void Acquire() __attribute__((exclusive_lock_function()));
@@ -66,7 +67,7 @@ struct ThreadSafeType {
 };
 int main() { return 0; }
 "  HAVE_CLANG_THREAD_SAFETY)
-set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
+set(CMAKE_REQUIRED_FLAGS "${OLD_CMAKE_REQUIRED_FLAGS}")
 
 # Test whether C++17 __has_include is available.
 check_cxx_source_compiles("
