@@ -63,17 +63,18 @@ function migrateLegacy(): void {
   try {
     const pid = primaryProfileId();
     if (!pid) return;
-    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
-    if (legacy) {
-      const perKey = STORAGE_KEY_PREFIX + pid;
-      if (!localStorage.getItem(perKey)) localStorage.setItem(perKey, legacy);
-      localStorage.removeItem(LEGACY_STORAGE_KEY);
-    }
-    const legacyDisabled = localStorage.getItem(LEGACY_DISABLED_KEY);
-    if (legacyDisabled) {
-      const perKey = DISABLED_KEY_PREFIX + pid;
-      if (!localStorage.getItem(perKey)) localStorage.setItem(perKey, legacyDisabled);
-      localStorage.removeItem(LEGACY_DISABLED_KEY);
+    for (const [legacyKey, prefix] of [
+      [LEGACY_STORAGE_KEY, STORAGE_KEY_PREFIX],
+      [LEGACY_DISABLED_KEY, DISABLED_KEY_PREFIX],
+    ] as const) {
+      const legacy = localStorage.getItem(legacyKey);
+      if (legacy === null) continue;
+      const perKey = prefix + pid;
+      if (localStorage.getItem(perKey) === null) localStorage.setItem(perKey, legacy);
+      // Conflicting or unconfirmed copies remain recoverable without changing
+      // the active profile's configured URLs or enabled state.
+      if (localStorage.getItem(perKey) !== legacy) return;
+      localStorage.removeItem(legacyKey);
     }
   } catch {
     /* noop */
