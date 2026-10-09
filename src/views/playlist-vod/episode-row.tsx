@@ -15,6 +15,7 @@ function clock(sec: number): string {
 }
 
 export function episodeProgressOf(seriesId: string, ep: VodEpisode): { ratio: number; leftSec: number } {
+  if (ep.numbered === false) return { ratio: 0, leftSec: 0 };
   const entry = readResumeEntry(seriesId, ep.season, ep.episode);
   const total = ep.durationSec && ep.durationSec > 0 ? ep.durationSec : 0;
   if (!entry || entry.ms <= 0 || total <= 0) return { ratio: 0, leftSec: 0 };
@@ -64,7 +65,7 @@ export function EpisodeRow({
       <span className="min-w-0 flex-1 pt-0.5">
         <span className="flex items-baseline gap-2">
           <span className="text-[12px] font-semibold tabular-nums text-ink-subtle">
-            {ep.episode}
+            {ep.numbered === false ? t("Unnumbered") : ep.episode}
           </span>
           <span className="min-w-0 flex-1 truncate text-[14px] font-medium text-ink">
             {ep.title}

@@ -1,4 +1,5 @@
-import type { IptvPlaylist } from "./types";
+import type { IptvChannel, IptvPlaylist } from "./types";
+import { headersFromChannel } from "./channel-headers";
 import { classifyChannel } from "./vod-classify";
 import { cleanTitle, extractYear, parseSeriesEpisode, showTitleFromEpisode } from "./vod-title";
 
@@ -11,9 +12,13 @@ export type VodMovie = {
   url: string;
   playlistId: string;
   playlistName: string;
+  headers?: Record<string, string>;
 };
 
 export type VodEpisode = {
+  id?: string;
+  /** False when the provider did not supply an unambiguous episode number. */
+  numbered?: boolean;
   season: number;
   episode: number;
   title: string;
@@ -21,6 +26,7 @@ export type VodEpisode = {
   logo: string | null;
   durationSec?: number | null;
   plot?: string | null;
+  headers?: Record<string, string>;
 };
 
 export type VodSeries = {
@@ -43,18 +49,32 @@ export function isExternalPlaylistId(id: string): boolean {
 
 function norm(s: string): string {
   return s
+    .normalize("NFC")
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/[^\p{L}\p{N}\p{M}]+/gu, "-")
     .replace(/^-|-$/g, "");
 }
 
-function numberFallbackEpisodes(episodes: VodEpisode[]): void {
-  const fallback = episodes.filter((e) => e.episode === 0);
-  if (fallback.length === 0) return;
-  fallback.sort((a, b) => a.url.localeCompare(b.url));
-  fallback.forEach((e, i) => {
-    e.episode = i + 1;
-  });
+export function vodEpisodeFromChannel(ch: IptvChannel): VodEpisode {
+  const parsed = parseSeriesEpisode(ch.name);
+  const number = (value: string | undefined) =>
+    value != null && /^\d+$/.test(value) && Number.isSafeInteger(Number(value))
+      ? Number(value)
+      : undefined;
+  const season = number(ch.attrs["episode-season"]) ?? parsed?.season;
+  const episode = number(ch.attrs["episode-number"]) ?? parsed?.episode;
+  return {
+    id: ch.id,
+    season: season ?? 1,
+    episode: episode ?? 0,
+    numbered: season != null && episode != null,
+    title: ch.attrs["episode-title"] || cleanTitle(ch.name),
+    url: ch.url,
+    logo: ch.logo,
+    durationSec: ch.durationSec,
+    plot: ch.attrs["episode-plot"] || null,
+    headers: headersFromChannel(ch),
+  };
 }
 
 export function buildVodLibrary(
@@ -74,7 +94,9 @@ export function buildVodLibrary(
       if (kind === "movie") {
         const title = cleanTitle(ch.name);
         const year = extractYear(ch.name);
-        const dedupe = `${pl.id}|${norm(title)}|${year ?? ""}`;
+        // Different provider IDs can be different editions, languages or sources.
+        // A title/year match is not evidence that one can be discarded.
+        const dedupe = `${pl.id}|${ch.id}`;
         if (movieSeen.has(dedupe)) continue;
         movieSeen.add(dedupe);
         movies.push({
@@ -86,6 +108,7 @@ export function buildVodLibrary(
           url: ch.url,
           playlistId: pl.id,
           playlistName: plName,
+          headers: headersFromChannel(ch),
         });
         continue;
       }
@@ -115,20 +138,12 @@ export function buildVodLibrary(
         series.xtreamSeriesId = xtreamSeriesId;
         continue;
       }
-      const se = parseSeriesEpisode(ch.name);
-      series.episodes.push({
-        season: se?.season ?? 1,
-        episode: se?.episode ?? 0,
-        title: cleanTitle(ch.name),
-        url: ch.url,
-        logo: ch.logo,
-      });
+      series.episodes.push(vodEpisodeFromChannel(ch));
     }
   }
 
   const series = [...seriesMap.values()];
   for (const s of series) {
-    numberFallbackEpisodes(s.episodes);
     s.episodes.sort((a, b) => a.season - b.season || a.episode - b.episode);
     s.seasons = [...new Set(s.episodes.map((e) => e.season))].sort((a, b) => a - b);
   }

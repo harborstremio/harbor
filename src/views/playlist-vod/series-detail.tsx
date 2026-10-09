@@ -8,11 +8,13 @@ import { EpisodeRow } from "./episode-row";
 type Props = {
   series: VodSeries;
   loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   onBack: () => void;
   onPlay: (ep: VodEpisode) => void;
 };
 
-export function SeriesDetail({ series, loading = false, onBack, onPlay }: Props) {
+export function SeriesDetail({ series, loading = false, error, onRetry, onBack, onPlay }: Props) {
   const t = useT();
   const [season, setSeason] = useState<number>(series.seasons[0] ?? 1);
   const episodes = series.episodes.filter((e) => e.season === season);
@@ -67,12 +69,19 @@ export function SeriesDetail({ series, loading = false, onBack, onPlay }: Props)
       )}
 
       <div className="flex flex-col gap-1">
-        {loading ? (
+        {error ? (
+          <div role="alert" className="px-3 py-4 text-[14px] text-ink-muted">
+            <p>{error}</p>
+            {onRetry && <button type="button" onClick={onRetry} className="mt-3 rounded-lg bg-elevated px-4 py-2 text-ink">{t("Retry")}</button>}
+          </div>
+        ) : loading ? (
           <p className="px-3 py-4 text-[14px] text-ink-muted">{t("Loading episodes...")}</p>
+        ) : episodes.length === 0 ? (
+          <p className="px-3 py-4 text-[14px] text-ink-muted">{t("No episodes were returned for this season.")}</p>
         ) : (
           episodes.map((ep) => (
             <EpisodeRow
-              key={`${ep.season}-${ep.episode}`}
+              key={ep.id || `${ep.season}-${ep.episode}-${ep.url}`}
               seriesId={series.id}
               ep={ep}
               fallbackLogo={series.logo}

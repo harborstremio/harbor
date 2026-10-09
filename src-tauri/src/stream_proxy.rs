@@ -699,6 +699,20 @@ fn guess_ct_from_url(url: &str) -> &'static str {
 const PREBUFFER_MIN_BYTES: usize = 256 * 1024;
 const PREBUFFER_MAX_BYTES: usize = 2 * 1024 * 1024;
 const PREBUFFER_TIMEOUT: Duration = Duration::from_millis(2500);
+const STREAM_HEADER_TIMEOUT: Duration = Duration::from_secs(30);
+
+async fn stream_headers(
+    client: &reqwest::Client,
+    request: reqwest::RequestBuilder,
+    origin: &str,
+    deadline: Duration,
+) -> Result<reqwest::Response, &'static str> {
+    // Bound connect + redirect + response-header waits, not the media body's
+    // lifetime. RequestBuilder::timeout would cut off long films after 30s.
+    tokio::time::timeout(deadline, crate::http_redirect::send_get(client, request, origin))
+        .await
+        .map_err(|_| "upstream header timeout")?
+}
 
 fn start_prebuffer(
     client: reqwest::Client,
@@ -975,8 +989,11 @@ async fn forward_upstream(
         req = req.header(k, v);
     }
 
-    let upstream = match crate::http_redirect::send_get(&state.client, req, &session.url).await {
+    let upstream = match stream_headers(&state.client, req, &session.url, STREAM_HEADER_TIMEOUT).await {
         Ok(r) => r,
+        Err("upstream header timeout") => {
+            return (StatusCode::GATEWAY_TIMEOUT, "upstream response timed out").into_response();
+        }
         Err(e) => {
             return (StatusCode::BAD_GATEWAY, format!("upstream error: {}", e)).into_response();
         }
@@ -1158,6 +1175,47 @@ pub async fn proxy_gc_idle(state: tauri::State<'_, ProxyState>) -> Result<usize,
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn stalled_stream_headers_have_a_deadline() {
+        use tokio::io::AsyncReadExt;
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}/synthetic.mp4", listener.local_addr().unwrap());
+        let server = tokio::spawn(async move {
+            let (mut stream, _) = listener.accept().await.unwrap();
+            let mut request = [0; 1024];
+            let _ = stream.read(&mut request).await;
+            tokio::time::sleep(Duration::from_secs(1)).await;
+        });
+        let client = reqwest::Client::builder().no_proxy()
+            .redirect(reqwest::redirect::Policy::none()).build().unwrap();
+        let result = stream_headers(&client, client.get(&url), &url, Duration::from_millis(30)).await;
+        server.abort();
+        assert_eq!(result.err(), Some("upstream header timeout"));
+    }
+
+    #[tokio::test]
+    async fn body_and_ranges_survive_after_the_header_deadline() {
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}/synthetic.mp4?signature=fixture", listener.local_addr().unwrap());
+        let server = tokio::spawn(async move {
+            let (mut stream, _) = listener.accept().await.unwrap();
+            let mut request = [0; 2048];
+            let len = stream.read(&mut request).await.unwrap();
+            assert!(String::from_utf8_lossy(&request[..len]).to_lowercase().contains("range: bytes=2-7"));
+            stream.write_all(b"HTTP/1.1 206 Partial Content\r\nContent-Length: 6\r\nContent-Range: bytes 2-7/8\r\nContent-Type: video/mp4\r\nConnection: close\r\n\r\nab").await.unwrap();
+            tokio::time::sleep(Duration::from_millis(150)).await;
+            stream.write_all(b"cdef").await.unwrap();
+        });
+        let client = reqwest::Client::builder().no_proxy()
+            .redirect(reqwest::redirect::Policy::none()).build().unwrap();
+        let response = stream_headers(&client, client.get(&url).header("range", "bytes=2-7"), &url, Duration::from_millis(100)).await.unwrap();
+        assert_eq!(response.status(), reqwest::StatusCode::PARTIAL_CONTENT);
+        assert_eq!(response.headers().get("content-range").unwrap(), "bytes 2-7/8");
+        assert_eq!(response.bytes().await.unwrap().as_ref(), b"abcdef");
+        server.await.unwrap();
+    }
 
     #[test]
     fn parses_media_byte_ranges() {

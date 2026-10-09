@@ -25,6 +25,7 @@ import { isPlayerInteractionLocked } from "@/lib/player/interaction-lock";
 import { SubtitleSelectionCoordinator } from "@/lib/player/subtitle-selection";
 import { PreparedSubtitleSeedBatch } from "@/lib/subtitles/seed-batch";
 import { isSafeProviderSubtitleUrl } from "@/lib/subtitles/provider-url";
+import { html5Transport } from "./transport";
 
 let DOCUMENT_PIP_KNOWN_BROKEN = false;
 
@@ -520,7 +521,7 @@ export function createHtml5Bridge(): PlayerBridge {
       }
       activeTraceId = src.traceId ?? null;
       markPlaybackTrace(activeTraceId, "bridge-load");
-      isLiveSrc = src.notWebReady === true;
+      isLiveSrc = src.isLive === true;
       pendingStart = src.startAtSec ?? null;
       if (hls) {
         try {
@@ -540,16 +541,12 @@ export function createHtml5Bridge(): PlayerBridge {
       video.muted = false;
       if (video.volume === 0) video.volume = 1;
 
-      const bare = src.url.toLowerCase().split("?")[0];
-      const lowerUrl = src.url.toLowerCase();
-      const isHls =
-        bare.endsWith(".m3u8") || lowerUrl.includes("m3u8") || lowerUrl.includes("/playlist/");
-      const isTs =
-        bare.endsWith(".ts") ||
-        (src.notWebReady === true && !isHls && !/\.(mp4|webm|mov|mkv|mpd)$/.test(bare));
+      const transport = html5Transport(src.url, src.isLive === true && src.notWebReady === true);
+      const isHls = transport === "hls";
+      const isTs = transport === "mpegts";
       if (isHls && Hls.isSupported()) {
         hls = new Hls(
-          src.notWebReady === true || src.isLive === true
+          src.isLive === true
             ? {
                 enableWorker: true,
                 lowLatencyMode: false,
@@ -564,8 +561,8 @@ export function createHtml5Bridge(): PlayerBridge {
         hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, refreshSnapshot);
       } else if (isTs && mpegts.isSupported()) {
         tsPlayer = mpegts.createPlayer(
-          { type: "mpegts", url: src.url, isLive: true, cors: true },
-          { enableWorker: true, liveBufferLatencyChasing: true, lazyLoadMaxDuration: 4 },
+          { type: "mpegts", url: src.url, isLive: src.isLive === true, cors: true },
+          { enableWorker: true, liveBufferLatencyChasing: src.isLive === true, lazyLoadMaxDuration: 4 },
         );
         tsPlayer.attachMediaElement(video);
         tsPlayer.on(mpegts.Events.ERROR, refreshSnapshot);

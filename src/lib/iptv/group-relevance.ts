@@ -65,15 +65,18 @@ export function scoreGroupForUser(
   const tokens = tokenize(group);
   if (tokens.length === 0) return 0;
   const head = tokens[0];
+  const text = tokens.join(" ");
+  const startsWithTag = (tag: string) => text === tag || text.startsWith(`${tag} `);
+  const containsTag = (tag: string) => ` ${text} `.includes(` ${tag} `);
   const regionTokens = REGION_TO_TOKENS[region.toUpperCase()] ?? [];
-  if (regionTokens.includes(head)) return 100;
-  if (regionTokens.some((t) => tokens.includes(t))) return 80;
+  if (regionTokens.some(startsWithTag)) return 100;
+  if (regionTokens.some(containsTag)) return 80;
   for (let i = 0; i < preferredLanguages.length; i++) {
     const lang = preferredLanguages[i].toLowerCase();
     const langTokens = LANG_TO_TOKENS[lang];
     if (!langTokens) continue;
-    if (langTokens.includes(head)) return 60 - i * 5;
-    if (langTokens.some((t) => tokens.includes(t))) return 45 - i * 5;
+    if (langTokens.some(startsWithTag)) return 60 - i * 5;
+    if (langTokens.some(containsTag)) return 45 - i * 5;
   }
   if (NEUTRAL_PRIORITY_BUMP.has(head)) return 5;
   return 0;

@@ -3,10 +3,11 @@ import { Search } from "@/components/icons/search-icon";
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
-import { normalizeArabic } from "@/lib/iptv/rtl";
+import { matchesVodSearch, vodSearchText } from "@/lib/iptv/vod-match";
+import { sortChannelsByGroupRelevance } from "@/lib/iptv/group-relevance";
 import { getCachedPlaylist } from "@/lib/iptv/store";
 import type { IptvPlaylistSource } from "@/lib/iptv/types";
-import { buildVodLibrary, type VodEpisode, type VodMovie, type VodSeries } from "@/lib/iptv/vod";
+import { buildVodLibrary, vodEpisodeFromChannel, type VodEpisode, type VodMovie, type VodSeries } from "@/lib/iptv/vod";
 import { credsFromServer } from "@/lib/iptv/xtream";
 import { fetchXtreamSeriesEpisodes } from "@/lib/iptv/xtream-vod";
 import { useSettings } from "@/lib/settings";
@@ -58,12 +59,16 @@ export function PlaylistVodView({ active }: { active: boolean }) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<VodSeries | null>(null);
   const [loadingSeriesId, setLoadingSeriesId] = useState<string | null>(null);
+  const [episodeError, setEpisodeError] = useState<string | null>(null);
+  const seriesRequest = useRef<AbortController | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const loadMoreTimer = useRef<number | null>(null);
 
   const chooseTab = useCallback((t: Tab) => {
+    seriesRequest.current?.abort();
     setTab(t);
     setSelected(null);
+    setEpisodeError(null);
   }, []);
   const viewError = isXtream
     ? tab === "movies"
@@ -83,7 +88,10 @@ export function PlaylistVodView({ active }: { active: boolean }) {
   const tabItemCount = tab === "movies" ? library.movies.length : library.series.length;
 
   useEffect(() => {
+    seriesRequest.current?.abort();
     setSelected(null);
+    setEpisodeError(null);
+    setLoadingSeriesId(null);
     setVisibleCount(PAGE_SIZE);
   }, [activeId]);
 
@@ -93,28 +101,35 @@ export function PlaylistVodView({ active }: { active: boolean }) {
 
   useEffect(
     () => () => {
+      seriesRequest.current?.abort();
       if (loadMoreTimer.current != null) window.clearTimeout(loadMoreTimer.current);
     },
     [],
   );
 
   const deferredQuery = useDeferredValue(query);
-  const q = useMemo(() => normalizeArabic(deferredQuery), [deferredQuery]);
+  const q = useMemo(() => vodSearchText(deferredQuery), [deferredQuery]);
   const movieIndex = useMemo(
-    () => library.movies.map((m) => normalizeArabic(m.title)),
+    () => library.movies.map((m) => vodSearchText(m.title)),
     [library.movies],
   );
   const seriesIndex = useMemo(
-    () => library.series.map((s) => normalizeArabic(s.title)),
+    () => library.series.map((s) => vodSearchText(s.title)),
     [library.series],
   );
   const movies = useMemo(
-    () => (q ? library.movies.filter((_, i) => movieIndex[i].includes(q)) : library.movies),
-    [library.movies, movieIndex, q],
+    () => sortChannelsByGroupRelevance(
+      q ? library.movies.filter((_, i) => matchesVodSearch(movieIndex[i], q)) : library.movies,
+      settings.region, settings.preferredLanguages,
+    ),
+    [library.movies, movieIndex, q, settings.region, settings.preferredLanguages],
   );
   const series = useMemo(
-    () => (q ? library.series.filter((_, i) => seriesIndex[i].includes(q)) : library.series),
-    [library.series, seriesIndex, q],
+    () => sortChannelsByGroupRelevance(
+      q ? library.series.filter((_, i) => matchesVodSearch(seriesIndex[i], q)) : library.series,
+      settings.region, settings.preferredLanguages,
+    ),
+    [library.series, seriesIndex, q, settings.region, settings.preferredLanguages],
   );
   const visibleMovies = movies.slice(0, visibleCount);
   const visibleSeries = series.slice(0, visibleCount);
@@ -127,6 +142,7 @@ export function PlaylistVodView({ active }: { active: boolean }) {
         title: m.title,
         subtitle: m.year ? String(m.year) : m.playlistName,
         notWebReady: true,
+        headers: m.headers,
       });
     },
     [openPlayer],
@@ -135,12 +151,13 @@ export function PlaylistVodView({ active }: { active: boolean }) {
   const playEpisode = useCallback(
     (s: VodSeries, ep: VodEpisode) => {
       openPlayer({
-        meta: vodMeta(s.id, "series", s.title, s.logo, null),
-        episode: { season: ep.season, episode: ep.episode, name: ep.title },
+        meta: vodMeta(ep.numbered === false ? `vod:${ep.id || s.id}` : s.id, "series", s.title, s.logo, null),
+        episode: ep.numbered === false ? undefined : { season: ep.season, episode: ep.episode, name: ep.title },
         url: ep.url,
         title: ep.title,
-        subtitle: `${s.title} · S${ep.season} · E${ep.episode}`,
+        subtitle: ep.numbered === false ? s.title : `${s.title} · S${ep.season} · E${ep.episode}`,
         notWebReady: true,
+        headers: ep.headers,
       });
     },
     [openPlayer],
@@ -148,6 +165,10 @@ export function PlaylistVodView({ active }: { active: boolean }) {
 
   const openSeries = useCallback(
     (series: VodSeries) => {
+      seriesRequest.current?.abort();
+      const controller = new AbortController();
+      seriesRequest.current = controller;
+      setEpisodeError(null);
       setSelected(series);
       if (!series.xtreamSeriesId || activeSource?.kind !== "xtream" || !activeSource.xtream) return;
       const creds = credsFromServer(
@@ -163,20 +184,11 @@ export function PlaylistVodView({ active }: { active: boolean }) {
         name: series.title,
         cover: series.logo ?? undefined,
         category_id: series.group ?? undefined,
-      })
+      }, controller.signal)
         .then((channels) => {
-          const episodes = channels.map((channel) => {
-            const match = /S(\d+)E(\d+)$/i.exec(channel.name);
-            return {
-              season: Number(match?.[1]) || 1,
-              episode: Number(match?.[2]) || 0,
-              title: channel.attrs["episode-title"] || channel.name,
-              url: channel.url,
-              logo: channel.logo,
-              durationSec: channel.durationSec,
-              plot: channel.attrs["episode-plot"] || null,
-            };
-          });
+          if (controller.signal.aborted) return;
+          const episodes = channels.map(vodEpisodeFromChannel)
+            .sort((a, b) => a.season - b.season || a.episode - b.episode);
           const seasons = [...new Set(episodes.map((episode) => episode.season))].sort(
             (a, b) => a - b,
           );
@@ -184,10 +196,18 @@ export function PlaylistVodView({ active }: { active: boolean }) {
             current?.id === series.id ? { ...current, episodes, seasons } : current,
           );
         })
-        .catch(() => {})
-        .finally(() => setLoadingSeriesId((current) => (current === series.id ? null : current)));
+        .catch(() => {
+          if (!controller.signal.aborted) {
+            setEpisodeError(t("Episodes could not be loaded. Check the connection and retry."));
+          }
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) {
+            setLoadingSeriesId((current) => (current === series.id ? null : current));
+          }
+        });
     },
-    [activeSource],
+    [activeSource, t],
   );
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -279,7 +299,9 @@ export function PlaylistVodView({ active }: { active: boolean }) {
             key={`${selected.id}:${selected.seasons.join(",")}`}
             series={selected}
             loading={loadingSeriesId === selected.id}
-            onBack={() => setSelected(null)}
+            error={episodeError}
+            onRetry={() => openSeries(selected)}
+            onBack={() => { seriesRequest.current?.abort(); setSelected(null); }}
             onPlay={(ep) => playEpisode(selected, ep)}
           />
         ) : tab === "movies" ? (

@@ -49,7 +49,7 @@ export async function searchAddonCatalogs(
   const perAddon = addons.map((addon) => ({
     addon,
     catalogs: (addon.manifest.catalogs ?? []).filter(
-      (c) => catalogIsSearchable(c) && (c.type === "movie" || c.type === "series"),
+      (c) => catalogIsSearchable(c) && ["movie", "series"].includes(c.type.toLowerCase()),
     ),
   }));
   const deepest = perAddon.reduce((n, a) => Math.max(n, a.catalogs.length), 0);
@@ -67,14 +67,16 @@ export async function searchAddonCatalogs(
   const settled = await Promise.allSettled(
     targets.map(async ({ addon, type, id, collection }) => {
       const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
-      const url = `${base}/catalog/${type}/${id}/search=${encodeURIComponent(q)}.json`;
-      const res = await safeFetch(url, { headers: { Accept: "application/json" } });
-      if (!res.ok) return { type, collection, metas: [] as Meta[], origin: addonOrigin(addon) };
-      const json = (await res.json()) as { metas?: Meta[] };
+      const url = `${base}/catalog/${encodeURIComponent(type)}/${encodeURIComponent(id)}/search=${encodeURIComponent(q)}.json`;
+      // The fused movie/show lanes need the same bounded body read as addon rows.
+      const json = await withDeadline((async () => {
+        const res = await safeFetch(url, { headers: { Accept: "application/json" } });
+        return res.ok ? await res.json() as { metas?: Meta[] } : null;
+      })(), GROUP_TIMEOUT_MS);
       return {
         type,
         collection,
-        metas: (json.metas ?? []).slice(0, CAP_PER_CATALOG),
+        metas: (Array.isArray(json?.metas) ? json.metas : []).slice(0, CAP_PER_CATALOG),
         origin: addonOrigin(addon),
       };
     }),
@@ -86,14 +88,15 @@ export async function searchAddonCatalogs(
   for (const r of settled) {
     if (r.status !== "fulfilled") continue;
     for (const m of r.value.metas) {
-      if (!m?.id || seen.has(m.id)) continue;
-      seen.add(m.id);
+      const key = `${(m?.type || r.value.type).toLowerCase()}:${m?.id}`;
+      if (!m?.id || seen.has(key)) continue;
+      seen.add(key);
       const tagged = {
         ...m,
         addonOrigin: r.value.origin,
         ...(r.value.collection ? { isCollection: true } : null),
       };
-      if (r.value.type === "series" || m.type === "series") series.push(tagged);
+      if (r.value.type.toLowerCase() === "series" || m.type?.toLowerCase() === "series") series.push(tagged);
       else movies.push(tagged);
     }
   }
