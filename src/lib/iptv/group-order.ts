@@ -73,3 +73,15 @@ export function useGroupPrefs(sourceId: string): GroupPrefs {
   );
   return map[sourceId] ?? EMPTY;
 }
+
+/** Every source's group prefs, for views that combine channels from several providers. */
+export function useAllGroupPrefs(): Readonly<Record<string, GroupPrefs>> {
+  return useSyncExternalStore(
+    (cb) => {
+      listeners.add(cb);
+      return () => listeners.delete(cb);
+    },
+    load,
+    load,
+  );
+}

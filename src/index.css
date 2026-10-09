@@ -2823,3 +2823,36 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
     #000 calc(var(--hd-bottom, 0px) + 96px)
   );
 }
+
+/* Sports Hub: the full-bleed hero reaches past the view's padding and under the top bar. */
+.jl-sports-bleed {
+  margin-top: -7rem;
+  margin-left: -3rem;
+  margin-right: -3rem;
+}
+html[data-theme-layout="stremio"] .jl-sports-bleed {
+  margin-top: -5.5rem;
+  margin-left: -2.5rem;
+  margin-right: -2.75rem;
+}
+/* Wide display type for team names and ranks (Orbitron ships with the app's web fonts). */
+.jl-sports-display {
+  font-family: "Orbitron", var(--font-display);
+}
+/* Top 10's outlined rank numerals, in the theme's ink. */
+.jl-rank-numeral {
+  color: transparent;
+  -webkit-text-stroke: 2px color-mix(in oklch, var(--color-ink) 42%, transparent);
+}
+/* A slow drift on hero art; the global reduced-motion rule stills it. */
+@keyframes jl-kenburns {
+  from {
+    transform: scale(1.04);
+  }
+  to {
+    transform: scale(1.14) translate3d(-1.5%, -1%, 0);
+  }
+}
+.jl-kenburns {
+  animation: jl-kenburns 18s ease-out both;
+}

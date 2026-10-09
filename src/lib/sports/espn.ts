@@ -14,6 +14,9 @@ export type SportsSide = {
   nickname?: string;
   /** AP/CFP poll rank, when ESPN lists one. */
   rank?: number | null;
+  /** Team colours as ESPN lists them (hex without '#'). */
+  color?: string;
+  altColor?: string;
 };
 
 export type SportsGame = {
@@ -372,6 +375,9 @@ const TTL = 10_000;
 const cache = new Map<string, { at: number; games: SportsGame[] }>();
 const inflight = new Map<string, Promise<SportsGame[]>>();
 
+const hexColor = (v: unknown): string | undefined =>
+  typeof v === "string" && /^[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : undefined;
+
 function toSide(c: Record<string, unknown> | undefined, group?: string): SportsSide {
   const team = (c?.team ?? {}) as Record<string, unknown>;
   // For individual-sport athletes (MMA, racing, tennis, golf)
@@ -417,6 +423,8 @@ function toSide(c: Record<string, unknown> | undefined, group?: string): SportsS
     nickname: typeof team.name === "string" ? team.name : undefined,
     // ESPN marks unranked teams as 99.
     rank: typeof curated === "number" && curated >= 1 && curated <= 25 ? curated : null,
+    color: hexColor(team.color),
+    altColor: hexColor(team.alternateColor),
   };
 }
 

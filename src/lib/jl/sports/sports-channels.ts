@@ -260,6 +260,19 @@ export function parseEventName(clean: string, now: Date): EventInfo {
   return { slot, title: rest, start: t ? t.start.getTime() : null };
 }
 
+// "No Event", "OFF AIR", "Event starts soon": an event slot telling you it has nothing on.
+const PLACEHOLDER_NAME =
+  /\b(no (live )?(events?|games?|streams?|programs?|programmes?)( (scheduled|streaming|today|now|available|on))?|off ?air|offline|stand ?by|to be (announced|confirmed)|tba|tbd|tbc|coming soon|not (live|started|active)|events? (starts? soon|not started)|nothing (on|scheduled))\b/gi;
+
+/** An event-slot title with no game in it: empty, just the slot ("ESPN+ 018"), or a placeholder. */
+export function isIdleEventTitle(title: string): boolean {
+  const rest = title
+    .replace(PLACEHOLDER_NAME, " ")
+    .replace(/[\s\-–—|:•.,()[\]]+/g, " ")
+    .trim();
+  return !rest || (!MATCHUP.test(rest) && IDLE_TITLE.test(rest));
+}
+
 function looksLikeEvent(clean: string, group: string | null, now: Date): boolean {
   if (EVENT_NAME.test(clean) || MATCHUP.test(clean) || SLOT_PREFIX.test(clean)) return true;
   return !!takeTime(clean, now) || EVENT_GROUP.test(group ?? "");
@@ -314,15 +327,14 @@ export function collectSportsChannels(
     const event = !!parsed || looksLikeEvent(clean, ch.group, opts.now);
     const info = event ? parseEventName(clean, opts.now) : null;
     const start = parsed ? parsed.start.getTime() : (info?.start ?? null);
-    const idle =
-      !!info &&
-      start == null &&
-      (!info.title || (!MATCHUP.test(info.title) && IDLE_TITLE.test(info.title)));
-    // The same game on two providers (or two slots) is one card; idle slots never merge.
+    const idle = !!info && start == null && isIdleEventTitle(info.title);
+    // The same game on two providers (or two slots) is one card; idle slots never merge. A plain
+    // channel keys on its country from the name or, failing that, the group ("ESPN" in "USA
+    // Sports" is "US: ESPN" from another provider).
     const key =
       info && info.title && !idle
         ? `event|${keyOf(info.title, null)}|${start ?? ""}`
-        : keyOf(clean, nameCountry);
+        : keyOf(clean, idle ? nameCountry : country);
     rank.set(ch.id, (preferred && sourceIdOf(ch.id) !== preferred ? 2 : 0) + (backup ? 1 : 0));
     const existing = byKey.get(key);
     if (existing) {
@@ -421,11 +433,14 @@ export function applyLiveState(
   const out = entries.map((e): LiveSportsEntry => {
     let liveNow = false;
     let sport = e.sport;
+    let idle = e.idle;
     if (e.start != null) {
       liveNow =
         opts.now >= e.start - EARLY_MS && opts.now < e.start + DURATION_H[e.sport] * 3600000;
     } else {
       const title = currentTitleOf(e, opts.currentTitle);
+      // An empty slot whose guide has a real programme on is carrying something after all.
+      if (idle && isRealProgram(title)) idle = false;
       if (title) {
         liveNow = e.event
           ? isRealProgram(title) && !NOT_LIVE_PROGRAM.test(title)
@@ -436,6 +451,7 @@ export function applyLiveState(
     return {
       ...e,
       sport,
+      idle,
       liveNow,
       favorite: !!fav && e.channels.some((c) => fav.has(c.id)),
     };
@@ -458,6 +474,15 @@ function currentTitleOf(
     if (t) return t;
   }
   return null;
+}
+
+/**
+ * The channels worth listing (and counting): everything except empty event slots. Providers ship
+ * hundreds of numbered PPV/event slots ("ESPN+ 018", "PPV 12: No Event") per provider; until one
+ * names a game or its guide shows one, it is a placeholder, not a sports channel.
+ */
+export function listedSportsEntries(entries: LiveSportsEntry[]): LiveSportsEntry[] {
+  return entries.filter((e) => !e.idle || e.liveNow || e.favorite);
 }
 
 // ---------------------------------------------------------------------------------------------
