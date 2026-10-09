@@ -120,12 +120,13 @@ const zh: Record<string, string> = {
   ...gameHub,
   ...floatingPlayer,
   ...gameAntiCheat,
-  "Translations": "翻译",
+  Translations: "翻译",
   "Translating…": "正在翻译…",
   "Showing {lang}": "正在显示{lang}",
   "Show all": "显示全部",
   "games.download.speed.title": "下载速度",
-  "games.download.speed.note": "此个人资料中的直接下载和种子下载共用此限制。单个种子可以设有更低的限制。",
+  "games.download.speed.note":
+    "此个人资料中的直接下载和种子下载共用此限制。单个种子可以设有更低的限制。",
   "games.download.speed.unlimited": "不限速",
   "games.download.speed.limited": "限制速度",
   "games.download.speed.rate": "每秒千字节",
@@ -135,12 +136,16 @@ const zh: Record<string, string> = {
   "games.discovery.sale.cards.included": "集换式卡牌",
   "games.discovery.sale.cards.none": "无特卖卡牌",
   "games.discovery.sale.cards.unknown": "卡牌尚未确认",
-  "games.discovery.sale.cards.includedNote": "根据 Steam 现行的特卖卡牌规则，此特卖包含卡牌。请打开 Steam 查看获取条件。",
-  "games.discovery.sale.cards.noneNote": "根据 Steam 现行规则，此季节特卖不包含集换式卡牌。其他活动奖励另行计算。",
-  "games.discovery.sale.cards.unknownNote": "无法核实 Steam 现行的卡牌规则。请打开 Steam 查看是否提供卡牌。",
+  "games.discovery.sale.cards.includedNote":
+    "根据 Steam 现行的特卖卡牌规则，此特卖包含卡牌。请打开 Steam 查看获取条件。",
+  "games.discovery.sale.cards.noneNote":
+    "根据 Steam 现行规则，此季节特卖不包含集换式卡牌。其他活动奖励另行计算。",
+  "games.discovery.sale.cards.unknownNote":
+    "无法核实 Steam 现行的卡牌规则。请打开 Steam 查看是否提供卡牌。",
   "games.discovery.sale.cards.badgeNote": "集齐一套卡牌即可合成特卖徽章、表情和个人资料背景。",
   "games.download.storage.title": "下载空间",
-  "games.download.storage.note": "估算包含直接下载、种子下载和临时文件，也包括已暂停的下载。不包含外部安装程序。",
+  "games.download.storage.note":
+    "估算包含直接下载、种子下载和临时文件，也包括已暂停的下载。不包含外部安装程序。",
   "games.download.storage.error": "无法检查存储空间。",
   "games.download.storage.unavailable": "无法获取可用空间",
   "games.download.storage.free": "可用空间：{size}",
@@ -198,15 +203,20 @@ const zh: Record<string, string> = {
   "games.collections.type": "合辑类型",
   "games.collections.filters": "合辑筛选条件",
   "games.collections.ruleQuery": "游戏标题包含",
-  "games.collections.autoNote": "游戏会根据其在游戏库中的状态是否符合筛选条件，自动加入或移出此合辑。",
-  "games.collections.pickerAutoNote": "按筛选条件收录的合辑会自动更新。请在“合辑”中管理其筛选条件。",
+  "games.collections.autoNote":
+    "游戏会根据其在游戏库中的状态是否符合筛选条件，自动加入或移出此合辑。",
+  "games.collections.pickerAutoNote":
+    "按筛选条件收录的合辑会自动更新。请在“合辑”中管理其筛选条件。",
   "games.collections.matches": "匹配的游戏：{count}款",
-  "games.collections.emptyDynamic": "游戏库中没有符合这些筛选条件的游戏。请更改筛选条件，或向游戏库添加更多游戏。",
+  "games.collections.emptyDynamic":
+    "游戏库中没有符合这些筛选条件的游戏。请更改筛选条件，或向游戏库添加更多游戏。",
   "games.collections.collections_rules": "无法读取此合辑的筛选条件。已保存的数据未被替换。",
-  "games.collections.collections_dynamic": "此合辑会自动更新。请在“合辑”中更改其筛选条件，以调整显示的游戏。",
+  "games.collections.collections_dynamic":
+    "此合辑会自动更新。请在“合辑”中更改其筛选条件，以调整显示的游戏。",
   "games.collections.title": "合辑",
   "games.collections.personal": "由你创建",
-  "games.collections.note": "每种游戏都有自己的归处。将心爱的游戏、准备玩的作品和想重返的世界归在一起。",
+  "games.collections.note":
+    "每种游戏都有自己的归处。将心爱的游戏、准备玩的作品和想重返的世界归在一起。",
   "games.collections.addTo": "添加到合辑",
   "games.collections.count": "{count}款游戏",
   "games.collections.one": "1款游戏",
@@ -233,13 +243,17 @@ const zh: Record<string, string> = {
   "games.collections.save": "保存更改",
   "games.collections.collections_name": "合辑名称须为1至80个字符，描述最多240个字符。",
   "games.collections.collections_duplicate": "你已有同名合辑。",
-  "games.collections.collections_limit": "此个人资料已达到合辑存储上限。请移除不用的合辑或游戏后重试。",
+  "games.collections.collections_limit":
+    "此个人资料已达到合辑存储上限。请移除不用的合辑或游戏后重试。",
   "games.collections.collections_missing": "此合辑已被移除。请选择其他合辑。",
   "games.collections.collections_read": "无法读取你的合辑。已保存的数据未被替换。请尝试重新加载。",
-  "games.collections.collections_write": "无法保存更改。之前的合辑仍然保留。请释放一些设备存储空间后重试。",
+  "games.collections.collections_write":
+    "无法保存更改。之前的合辑仍然保留。请释放一些设备存储空间后重试。",
   "games.collections.collections_game": "无法识别这款游戏。请刷新游戏库后重试。",
-  "games.collections.firstNote": "创建合辑，然后从游戏详情页添加游戏，或在游戏库中选择游戏。PC游戏和ROM可以放在同一个合辑中。",
-  "games.collections.emptyNote": "从游戏详情页添加游戏，或在游戏库中选择游戏，然后选择“添加到合辑”。",
+  "games.collections.firstNote":
+    "创建合辑，然后从游戏详情页添加游戏，或在游戏库中选择游戏。PC游戏和ROM可以放在同一个合辑中。",
+  "games.collections.emptyNote":
+    "从游戏详情页添加游戏，或在游戏库中选择游戏，然后选择“添加到合辑”。",
   "games.cache.saved": "已保存的数据 · {date}",
   "games.cache.refresh": "刷新",
   "games.cache.refreshing": "正在刷新…",
@@ -320,7 +334,8 @@ const zh: Record<string, string> = {
   ...gamePlaytime,
   ...gameLaunchHealth,
   "games.torrent.share.title": "分享种子",
-  "games.torrent.share.note": "与其他节点分享已验证的文件。达到任一限制或关闭 Harbor 时停止。修改文件前请停止分享。",
+  "games.torrent.share.note":
+    "与其他节点分享已验证的文件。达到任一限制或关闭 Harbor 时停止。修改文件前请停止分享。",
   "games.torrent.share.upload": "上传限速（KB/秒）",
   "games.torrent.share.ratio": "分享率（1–10）",
   "games.torrent.share.minutes": "时间限制（分钟）",
@@ -333,7 +348,8 @@ const zh: Record<string, string> = {
   "games.torrent.share.limitReached": "已达到分享限制",
   "games.torrent.share.failed": "分享失败。请检查文件后重试。",
   "games.torrent.share.stats": "已上传 {uploaded} · {minutes} 分钟",
-  "games.torrent.torrent_seed_files": "已完成的文件丢失、发生变化或正在使用。分享前请检查下载文件夹。",
+  "games.torrent.torrent_seed_files":
+    "已完成的文件丢失、发生变化或正在使用。分享前请检查下载文件夹。",
   "games.torrent.torrent_seed_limits": "请选择 32–1,048,576 KB/秒、1–10 的分享率及 1–1,440 分钟。",
 
   ...gamePokemonUi,

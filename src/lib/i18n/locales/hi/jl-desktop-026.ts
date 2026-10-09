@@ -2,64 +2,95 @@ const jlDesktop026: Record<string, string> = {
   "Sharing {name}'s addon setup": "{name} का ऐडऑन सेटअप साझा किया जा रहा है",
   "Local JL profile": "स्थानीय JL प्रोफ़ाइल",
   "Offline Room": "ऑफ़लाइन कक्ष",
-  "Your library and addons work locally. Sign in to use JL account features.": "आपकी लाइब्रेरी और ऐडऑन इस डिवाइस पर काम करते हैं। JL खाते की सुविधाओं का उपयोग करने के लिए साइन इन करें।",
+  "Your library and addons work locally. Sign in to use JL account features.":
+    "आपकी लाइब्रेरी और ऐडऑन इस डिवाइस पर काम करते हैं। JL खाते की सुविधाओं का उपयोग करने के लिए साइन इन करें।",
   "Continue locally": "स्थानीय रूप से जारी रखें",
-  "Choose your JL profile to sync supported preferences, favorites, library and progress. Device files and configured addon URLs stay on this device.": "समर्थित प्राथमिकताओं, पसंदीदा आइटम, लाइब्रेरी और देखने की प्रगति को सिंक करने के लिए अपनी JL प्रोफ़ाइल चुनें। डिवाइस की फ़ाइलें और कॉन्फ़िगर किए गए ऐडऑन URL इसी डिवाइस पर रहते हैं।",
-  "Sign-out could not be saved. Free some storage and try again.": "साइन आउट की स्थिति सहेजी नहीं जा सकी। कुछ स्टोरेज खाली करें और फिर से कोशिश करें।",
-  "Sign in to your JL Media Vision account, then choose the profile whose supported settings and library you want to sync.": "अपने JL Media Vision खाते में साइन इन करें, फिर वह प्रोफ़ाइल चुनें जिसकी समर्थित सेटिंग और लाइब्रेरी आप सिंक करना चाहते हैं।",
+  "Choose your JL profile to sync supported preferences, favorites, library and progress. Device files and configured addon URLs stay on this device.":
+    "समर्थित प्राथमिकताओं, पसंदीदा आइटम, लाइब्रेरी और देखने की प्रगति को सिंक करने के लिए अपनी JL प्रोफ़ाइल चुनें। डिवाइस की फ़ाइलें और कॉन्फ़िगर किए गए ऐडऑन URL इसी डिवाइस पर रहते हैं।",
+  "Sign-out could not be saved. Free some storage and try again.":
+    "साइन आउट की स्थिति सहेजी नहीं जा सकी। कुछ स्टोरेज खाली करें और फिर से कोशिश करें।",
+  "Sign in to your JL Media Vision account, then choose the profile whose supported settings and library you want to sync.":
+    "अपने JL Media Vision खाते में साइन इन करें, फिर वह प्रोफ़ाइल चुनें जिसकी समर्थित सेटिंग और लाइब्रेरी आप सिंक करना चाहते हैं।",
   "Library and addon sharing": "लाइब्रेरी और ऐडऑन साझा करना",
-  "Use the primary profile's saved addon setup and watchlist.": "मुख्य प्रोफ़ाइल का सहेजा हुआ ऐडऑन सेटअप और वॉचलिस्ट इस्तेमाल करें।",
+  "Use the primary profile's saved addon setup and watchlist.":
+    "मुख्य प्रोफ़ाइल का सहेजा हुआ ऐडऑन सेटअप और वॉचलिस्ट इस्तेमाल करें।",
   "Keep this profile separate": "इस प्रोफ़ाइल को अलग रखें",
-  "Library and addons stay separate. No additional account is needed.": "लाइब्रेरी और ऐडऑन अलग रहते हैं। किसी अतिरिक्त खाते की ज़रूरत नहीं है।",
+  "Library and addons stay separate. No additional account is needed.":
+    "लाइब्रेरी और ऐडऑन अलग रहते हैं। किसी अतिरिक्त खाते की ज़रूरत नहीं है।",
   "Addon install link copied": "ऐडऑन इंस्टॉल लिंक कॉपी किया गया",
   "Compatible addon, listed in JL Media Vision.": "संगत ऐडऑन, JL Media Vision में सूचीबद्ध।",
   "Saving on this device": "इस डिवाइस पर सहेजा जा रहा है",
-  "Couldn't read your local addon collection. Nothing was written.": "आपका स्थानीय ऐडऑन संग्रह पढ़ा नहीं जा सका। कोई डेटा नहीं लिखा गया।",
-  "Local storage didn't confirm the move. Your collection may be unchanged. Reload to see the current state.": "स्थानीय स्टोरेज ने स्थानांतरण की पुष्टि नहीं की। हो सकता है आपका संग्रह न बदला हो। वर्तमान स्थिति देखने के लिए फिर से लोड करें।",
-  "Moved 1 addon to this JL profile. It is saved on this device.": "1 ऐडऑन इस JL प्रोफ़ाइल में स्थानांतरित किया गया। यह इस डिवाइस पर सहेजा गया है।",
-  "Moved {n} addons to this JL profile. They are saved on this device.": "{n} ऐडऑन इस JL प्रोफ़ाइल में स्थानांतरित किए गए। ये इस डिवाइस पर सहेजे गए हैं।",
-  "Couldn't load your local addon collection. Nothing can be reordered safely without it.": "आपका स्थानीय ऐडऑन संग्रह लोड नहीं हो सका। इसके बिना क्रम सुरक्षित रूप से बदला नहीं जा सकता।",
+  "Couldn't read your local addon collection. Nothing was written.":
+    "आपका स्थानीय ऐडऑन संग्रह पढ़ा नहीं जा सका। कोई डेटा नहीं लिखा गया।",
+  "Local storage didn't confirm the move. Your collection may be unchanged. Reload to see the current state.":
+    "स्थानीय स्टोरेज ने स्थानांतरण की पुष्टि नहीं की। हो सकता है आपका संग्रह न बदला हो। वर्तमान स्थिति देखने के लिए फिर से लोड करें।",
+  "Moved 1 addon to this JL profile. It is saved on this device.":
+    "1 ऐडऑन इस JL प्रोफ़ाइल में स्थानांतरित किया गया। यह इस डिवाइस पर सहेजा गया है।",
+  "Moved {n} addons to this JL profile. They are saved on this device.":
+    "{n} ऐडऑन इस JL प्रोफ़ाइल में स्थानांतरित किए गए। ये इस डिवाइस पर सहेजे गए हैं।",
+  "Couldn't load your local addon collection. Nothing can be reordered safely without it.":
+    "आपका स्थानीय ऐडऑन संग्रह लोड नहीं हो सका। इसके बिना क्रम सुरक्षित रूप से बदला नहीं जा सकता।",
   "This JL profile": "यह JL प्रोफ़ाइल",
-  "This order is saved on this device for the active JL profile.": "यह क्रम इस डिवाइस पर सक्रिय JL प्रोफ़ाइल के लिए सहेजा जाता है।",
+  "This order is saved on this device for the active JL profile.":
+    "यह क्रम इस डिवाइस पर सक्रिय JL प्रोफ़ाइल के लिए सहेजा जाता है।",
   "No addons are installed in this profile yet.": "इस प्रोफ़ाइल में अभी कोई ऐडऑन इंस्टॉल नहीं है।",
   "Add every addon below to this JL profile": "नीचे दिए गए सभी ऐडऑन इस JL प्रोफ़ाइल में जोड़ें",
-  "Choose a JL profile to organize its installed addons.": "इंस्टॉल किए गए ऐडऑन व्यवस्थित करने के लिए एक JL प्रोफ़ाइल चुनें।",
-  "JL Media Vision reads the saved local collection back to verify the order.": "JL Media Vision क्रम की पुष्टि करने के लिए सहेजे गए स्थानीय संग्रह को दोबारा पढ़ता है।",
-  "Your addon collection changed while the editor was open. Nothing was written.": "संपादक खुला रहने के दौरान आपका ऐडऑन संग्रह बदल गया। कोई डेटा नहीं लिखा गया।",
-  "Local storage didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again.": "स्थानीय स्टोरेज ने सहेजे जाने की पुष्टि नहीं की। हो सकता है आपका संग्रह न बदला हो। दोबारा कोशिश करने पर फिर से लिखने से पहले जाँच की जाएगी।",
-  "The local collection has a different order than was saved.": "स्थानीय संग्रह का क्रम सहेजे गए क्रम से अलग है।",
+  "Choose a JL profile to organize its installed addons.":
+    "इंस्टॉल किए गए ऐडऑन व्यवस्थित करने के लिए एक JL प्रोफ़ाइल चुनें।",
+  "JL Media Vision reads the saved local collection back to verify the order.":
+    "JL Media Vision क्रम की पुष्टि करने के लिए सहेजे गए स्थानीय संग्रह को दोबारा पढ़ता है।",
+  "Your addon collection changed while the editor was open. Nothing was written.":
+    "संपादक खुला रहने के दौरान आपका ऐडऑन संग्रह बदल गया। कोई डेटा नहीं लिखा गया।",
+  "Local storage didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again.":
+    "स्थानीय स्टोरेज ने सहेजे जाने की पुष्टि नहीं की। हो सकता है आपका संग्रह न बदला हो। दोबारा कोशिश करने पर फिर से लिखने से पहले जाँच की जाएगी।",
+  "The local collection has a different order than was saved.":
+    "स्थानीय संग्रह का क्रम सहेजे गए क्रम से अलग है।",
   "Addon order saved in this JL profile": "इस JL प्रोफ़ाइल में ऐडऑन का क्रम सहेजा गया",
   "Using a local JL profile.": "स्थानीय JL प्रोफ़ाइल का उपयोग किया जा रहा है।",
   "JL account (sign in on the TV)": "JL खाता (टीवी पर साइन इन करें)",
   "Your JL Media Vision password": "आपका JL Media Vision पासवर्ड",
-  "Skip this and JL Media Vision still works. Your library stays local.": "इसे छोड़ने पर भी JL Media Vision काम करेगा। आपकी लाइब्रेरी स्थानीय रहेगी।",
-  "Interrupted. Retry to resume safely; sources without a validator restart.": "डाउनलोड बाधित हुआ। सुरक्षित रूप से जारी रखने के लिए फिर से कोशिश करें; सत्यापन पहचान के बिना वाले स्रोतों से डाउनलोड शुरू से होगा।",
+  "Skip this and JL Media Vision still works. Your library stays local.":
+    "इसे छोड़ने पर भी JL Media Vision काम करेगा। आपकी लाइब्रेरी स्थानीय रहेगी।",
+  "Interrupted. Retry to resume safely; sources without a validator restart.":
+    "डाउनलोड बाधित हुआ। सुरक्षित रूप से जारी रखने के लिए फिर से कोशिश करें; सत्यापन पहचान के बिना वाले स्रोतों से डाउनलोड शुरू से होगा।",
   "Play offline": "ऑफ़लाइन चलाएँ",
   "Choose a fresh download source": "डाउनलोड का नया स्रोत चुनें",
-  "Saved movies, episodes, music, and eBooks for offline use": "ऑफ़लाइन उपयोग के लिए सहेजी गई फ़िल्में, एपिसोड, संगीत और ई-बुक",
-  "Saved files belong to this account and profile on this device. Only completed files play offline. Direct, unencrypted files are supported; streaming playlists and protected sources are not.": "सहेजी गई फ़ाइलें इस डिवाइस पर इस खाते और प्रोफ़ाइल की हैं। केवल पूरी तरह डाउनलोड हुई फ़ाइलें ऑफ़लाइन चलती हैं। सीधे डाउनलोड होने वाली, गैर-एन्क्रिप्टेड फ़ाइलें समर्थित हैं; स्ट्रीमिंग प्लेलिस्ट और संरक्षित स्रोत समर्थित नहीं हैं।",
-  "Older downloads have no profile owner. Add them to this local profile only if they are yours.": "पुराने डाउनलोड किसी प्रोफ़ाइल के स्वामित्व में नहीं हैं। उन्हें इस स्थानीय प्रोफ़ाइल में तभी जोड़ें जब वे आपके हों।",
+  "Saved movies, episodes, music, and eBooks for offline use":
+    "ऑफ़लाइन उपयोग के लिए सहेजी गई फ़िल्में, एपिसोड, संगीत और ई-बुक",
+  "Saved files belong to this account and profile on this device. Only completed files play offline. Direct, unencrypted files are supported; streaming playlists and protected sources are not.":
+    "सहेजी गई फ़ाइलें इस डिवाइस पर इस खाते और प्रोफ़ाइल की हैं। केवल पूरी तरह डाउनलोड हुई फ़ाइलें ऑफ़लाइन चलती हैं। सीधे डाउनलोड होने वाली, गैर-एन्क्रिप्टेड फ़ाइलें समर्थित हैं; स्ट्रीमिंग प्लेलिस्ट और संरक्षित स्रोत समर्थित नहीं हैं।",
+  "Older downloads have no profile owner. Add them to this local profile only if they are yours.":
+    "पुराने डाउनलोड किसी प्रोफ़ाइल के स्वामित्व में नहीं हैं। उन्हें इस स्थानीय प्रोफ़ाइल में तभी जोड़ें जब वे आपके हों।",
   "Add older downloads to this local profile": "पुराने डाउनलोड इस स्थानीय प्रोफ़ाइल में जोड़ें",
   "Movies, episodes and books": "फ़िल्में, एपिसोड और किताबें",
-  "Choose Download on a movie, episode, music track, or eBook to keep an intentional offline copy. Queue progress and saved files appear here.": "ऑफ़लाइन प्रति सहेजने के लिए किसी फ़िल्म, एपिसोड, संगीत ट्रैक या ई-बुक पर डाउनलोड चुनें। कतार की प्रगति और सहेजी गई फ़ाइलें यहाँ दिखाई देंगी।",
-  "Your playback history appears here. You can optionally connect Trakt.": "आपका प्लेबैक इतिहास यहाँ दिखाई देता है। आप चाहें तो Trakt कनेक्ट कर सकते हैं।",
+  "Choose Download on a movie, episode, music track, or eBook to keep an intentional offline copy. Queue progress and saved files appear here.":
+    "ऑफ़लाइन प्रति सहेजने के लिए किसी फ़िल्म, एपिसोड, संगीत ट्रैक या ई-बुक पर डाउनलोड चुनें। कतार की प्रगति और सहेजी गई फ़ाइलें यहाँ दिखाई देंगी।",
+  "Your playback history appears here. You can optionally connect Trakt.":
+    "आपका प्लेबैक इतिहास यहाँ दिखाई देता है। आप चाहें तो Trakt कनेक्ट कर सकते हैं।",
   "{n} in your JL library": "आपकी JL लाइब्रेरी में {n}",
-  "Your account or profile changed. Reopen this dialog to choose again.": "आपका खाता या प्रोफ़ाइल बदल गई है। दोबारा चुनने के लिए यह संवाद फिर से खोलें।",
-  "The conflict backup could not be saved. Try again.": "परस्पर विरोधी बदलावों का बैकअप सहेजा नहीं जा सका। फिर से कोशिश करें।",
+  "Your account or profile changed. Reopen this dialog to choose again.":
+    "आपका खाता या प्रोफ़ाइल बदल गई है। दोबारा चुनने के लिए यह संवाद फिर से खोलें।",
+  "The conflict backup could not be saved. Try again.":
+    "परस्पर विरोधी बदलावों का बैकअप सहेजा नहीं जा सका। फिर से कोशिश करें।",
   "Save conflict backup": "परस्पर विरोधी बदलावों का बैकअप सहेजें",
   "Your JL account stays with you": "आपका JL खाता आपके साथ रहता है",
-  "Sign in to JL Media Vision directly on your TV. This legacy phone setup step does not send account tokens. Your addons and library also work with a local profile.": "अपने टीवी पर सीधे JL Media Vision में साइन इन करें। फ़ोन से सेटअप करने का यह पुराना चरण खाते के टोकन नहीं भेजता। आपके ऐडऑन और लाइब्रेरी स्थानीय प्रोफ़ाइल के साथ भी काम करते हैं।",
+  "Sign in to JL Media Vision directly on your TV. This legacy phone setup step does not send account tokens. Your addons and library also work with a local profile.":
+    "अपने टीवी पर सीधे JL Media Vision में साइन इन करें। फ़ोन से सेटअप करने का यह पुराना चरण खाते के टोकन नहीं भेजता। आपके ऐडऑन और लाइब्रेरी स्थानीय प्रोफ़ाइल के साथ भी काम करते हैं।",
   "Live updates are unavailable. Retrying.": "लाइव अपडेट उपलब्ध नहीं हैं। फिर से कोशिश की जा रही है।",
-  "Unnumbered": "बिना नंबर वाला",
+  Unnumbered: "बिना नंबर वाला",
   "No episodes were returned for this season.": "इस सीज़न के लिए कोई एपिसोड नहीं मिला।",
-  "Episodes could not be loaded. Check the connection and retry.": "एपिसोड लोड नहीं हो सके। कनेक्शन जाँचें और फिर से कोशिश करें।",
+  "Episodes could not be loaded. Check the connection and retry.":
+    "एपिसोड लोड नहीं हो सके। कनेक्शन जाँचें और फिर से कोशिश करें।",
   "Reset to account avatar": "खाते का अवतार बहाल करें",
-  "Sign in with your JL Media Vision account. Your local library and addons remain available.": "अपने JL Media Vision खाते से साइन इन करें। आपकी स्थानीय लाइब्रेरी और ऐडऑन उपलब्ध रहेंगे।",
+  "Sign in with your JL Media Vision account. Your local library and addons remain available.":
+    "अपने JL Media Vision खाते से साइन इन करें। आपकी स्थानीय लाइब्रेरी और ऐडऑन उपलब्ध रहेंगे।",
   "JL account ID": "JL खाता ID",
   "Your stable JL account identifier.": "आपके JL खाते की स्थायी पहचान।",
   "Sign out of JL Media Vision": "JL Media Vision से साइन आउट करें",
-  "Stops account sync and returns to this device's local profiles.": "खाते का सिंक रोकता है और इस डिवाइस की स्थानीय प्रोफ़ाइल पर वापस ले जाता है।",
-  "Choose a JL profile to manage installed addons.": "इंस्टॉल किए गए ऐडऑन प्रबंधित करने के लिए एक JL प्रोफ़ाइल चुनें।",
+  "Stops account sync and returns to this device's local profiles.":
+    "खाते का सिंक रोकता है और इस डिवाइस की स्थानीय प्रोफ़ाइल पर वापस ले जाता है।",
+  "Choose a JL profile to manage installed addons.":
+    "इंस्टॉल किए गए ऐडऑन प्रबंधित करने के लिए एक JL प्रोफ़ाइल चुनें।",
   "Checked {n}s ago.": "{n} सेकंड पहले जाँच की गई।",
   "Installed in this JL profile.": "इस JL प्रोफ़ाइल में इंस्टॉल है।",
   "addon installed": "ऐडऑन इंस्टॉल है",
@@ -67,46 +98,78 @@ const jlDesktop026: Record<string, string> = {
   "Refresh addons": "ऐडऑन रीफ़्रेश करें",
   "JL account": "JL खाता",
   "Community account": "समुदाय खाता",
-  "Each JL profile keeps its own settings, library, and PIN.": "हर JL प्रोफ़ाइल की अपनी सेटिंग, लाइब्रेरी और PIN होता है।",
+  "Each JL profile keeps its own settings, library, and PIN.":
+    "हर JL प्रोफ़ाइल की अपनी सेटिंग, लाइब्रेरी और PIN होता है।",
   "Profiles on this device": "इस डिवाइस की प्रोफ़ाइल",
-  "Your local library remains available without an account.": "आपकी स्थानीय लाइब्रेरी बिना खाते के भी उपलब्ध रहती है।",
-  "Your addon configurations are kept on this device. Manage each installation in Addons.": "आपके ऐडऑन के कॉन्फ़िगरेशन इसी डिवाइस पर रखे जाते हैं। हर इंस्टॉलेशन को ऐडऑन में प्रबंधित करें।",
+  "Your local library remains available without an account.":
+    "आपकी स्थानीय लाइब्रेरी बिना खाते के भी उपलब्ध रहती है।",
+  "Your addon configurations are kept on this device. Manage each installation in Addons.":
+    "आपके ऐडऑन के कॉन्फ़िगरेशन इसी डिवाइस पर रखे जाते हैं। हर इंस्टॉलेशन को ऐडऑन में प्रबंधित करें।",
   "Addon install links": "ऐडऑन इंस्टॉल लिंक",
-  "JL Media Vision supports compatible manifests and stremio:// install links without an external account.": "JL Media Vision बिना किसी बाहरी खाते के संगत मैनिफ़ेस्ट और stremio:// इंस्टॉल लिंक का समर्थन करता है।",
+  "JL Media Vision supports compatible manifests and stremio:// install links without an external account.":
+    "JL Media Vision बिना किसी बाहरी खाते के संगत मैनिफ़ेस्ट और stremio:// इंस्टॉल लिंक का समर्थन करता है।",
   "Open compatible addon links in JL Media Vision": "संगत ऐडऑन लिंक JL Media Vision में खोलें",
-  "Choose JL Media Vision when your operating system asks which app should open an addon link. You can also paste a manifest URL in Addons.": "जब ऑपरेटिंग सिस्टम पूछे कि ऐडऑन लिंक किस ऐप में खोलना है, तो JL Media Vision चुनें। आप ऐडऑन में मैनिफ़ेस्ट URL भी पेस्ट कर सकते हैं।",
-  "{app} itself does not host, distribute, or index any media. All streams come from third-party addons, debrid services, or your own media sources that you configure yourself. You are responsible for what you choose to play and for complying with the laws of your jurisdiction.": "{app} स्वयं किसी मीडिया को होस्ट, वितरित या अनुक्रमित नहीं करता। सभी स्ट्रीम तीसरे पक्ष के ऐडऑन, डेब्रिड सेवाओं या आपके द्वारा कॉन्फ़िगर किए गए अपने मीडिया स्रोतों से आती हैं। आप जो चलाना चुनते हैं और अपने क्षेत्र के कानूनों का पालन करने के लिए आप स्वयं ज़िम्मेदार हैं।",
-  "Select a JL profile first. The repair scans only its local library.": "पहले एक JL प्रोफ़ाइल चुनें। मरम्मत केवल उसकी स्थानीय लाइब्रेरी की जाँच करती है।",
-  "Repairs malformed records in the active JL profile library. Existing provider IDs and playback progress are retained.": "सक्रिय JL प्रोफ़ाइल की लाइब्रेरी के गलत प्रारूप वाले रिकॉर्ड सुधारता है। मौजूदा प्रदाता ID और प्लेबैक प्रगति सुरक्षित रहती है।",
-  "Select a JL profile first. This scans its local library.": "पहले एक JL प्रोफ़ाइल चुनें। इससे उसकी स्थानीय लाइब्रेरी की जाँच होगी।",
+  "Choose JL Media Vision when your operating system asks which app should open an addon link. You can also paste a manifest URL in Addons.":
+    "जब ऑपरेटिंग सिस्टम पूछे कि ऐडऑन लिंक किस ऐप में खोलना है, तो JL Media Vision चुनें। आप ऐडऑन में मैनिफ़ेस्ट URL भी पेस्ट कर सकते हैं।",
+  "{app} itself does not host, distribute, or index any media. All streams come from third-party addons, debrid services, or your own media sources that you configure yourself. You are responsible for what you choose to play and for complying with the laws of your jurisdiction.":
+    "{app} स्वयं किसी मीडिया को होस्ट, वितरित या अनुक्रमित नहीं करता। सभी स्ट्रीम तीसरे पक्ष के ऐडऑन, डेब्रिड सेवाओं या आपके द्वारा कॉन्फ़िगर किए गए अपने मीडिया स्रोतों से आती हैं। आप जो चलाना चुनते हैं और अपने क्षेत्र के कानूनों का पालन करने के लिए आप स्वयं ज़िम्मेदार हैं।",
+  "Select a JL profile first. The repair scans only its local library.":
+    "पहले एक JL प्रोफ़ाइल चुनें। मरम्मत केवल उसकी स्थानीय लाइब्रेरी की जाँच करती है।",
+  "Repairs malformed records in the active JL profile library. Existing provider IDs and playback progress are retained.":
+    "सक्रिय JL प्रोफ़ाइल की लाइब्रेरी के गलत प्रारूप वाले रिकॉर्ड सुधारता है। मौजूदा प्रदाता ID और प्लेबैक प्रगति सुरक्षित रहती है।",
+  "Select a JL profile first. This scans its local library.":
+    "पहले एक JL प्रोफ़ाइल चुनें। इससे उसकी स्थानीय लाइब्रेरी की जाँच होगी।",
   "Local library repair": "स्थानीय लाइब्रेरी की मरम्मत",
-  "Checks the active JL profile library for malformed item records and repairs compatible fields locally.": "सक्रिय JL प्रोफ़ाइल की लाइब्रेरी में गलत प्रारूप वाले आइटम रिकॉर्ड जाँचता है और संगत फ़ील्ड को स्थानीय रूप से सुधारता है।",
-  "This browser stores your JL session and local settings. Signing in enables account sync for supported profile data and service credentials. Clearing browser data removes local copies, but does not delete data already synced to your JL account.": "यह ब्राउज़र आपका JL सत्र और स्थानीय सेटिंग सहेजता है। साइन इन करने पर समर्थित प्रोफ़ाइल डेटा और सेवा क्रेडेंशियल खाते के साथ सिंक होते हैं। ब्राउज़र का डेटा साफ़ करने से स्थानीय प्रतियाँ हटती हैं, लेकिन आपके JL खाते में पहले से सिंक किया गया डेटा नहीं मिटता।",
-  "Choose which parts of your setup to save in one backup file. Your account sign-in is excluded.": "अपने सेटअप के जिन हिस्सों को एक बैकअप फ़ाइल में सहेजना है, उन्हें चुनें। आपके खाते का साइन-इन शामिल नहीं होता।",
-  "Choose a Harbor backup and review what it contains before restoring. Your account sign-in stays on this device.": "JL Media Vision बैकअप चुनें और बहाल करने से पहले उसकी सामग्री की समीक्षा करें। आपके खाते का साइन-इन इसी डिवाइस पर रहता है।",
-  "Choose the sections to save in one file. Your account sign-in is excluded.": "एक फ़ाइल में सहेजने के लिए हिस्से चुनें। आपके खाते का साइन-इन शामिल नहीं होता।",
-  "Saved {when} from Harbor {app}. Your account sign-in stays as is.": "JL Media Vision {app} से {when} सहेजा गया। आपके खाते का साइन-इन जस का तस रहता है।",
-  "Signed in as {email} with your JL Media Vision account.": "अपने JL Media Vision खाते में {email} के रूप में साइन इन हैं।",
-  "Your library and addons work locally. Sign in to use JL account sync.": "आपकी लाइब्रेरी और ऐडऑन स्थानीय रूप से काम करते हैं। JL खाते का सिंक इस्तेमाल करने के लिए साइन इन करें।",
-  "On: only titles you bookmarked. Off: also keeps titles added when you hit play.": "चालू: केवल बुकमार्क किए गए शीर्षक। बंद: चलाते समय जोड़े गए शीर्षक भी रखे जाते हैं।",
-  "Keep the Library Watchlist tab limited to titles you bookmarked. Turn this off to also include anything automatically added when you pressed play.": "लाइब्रेरी के वॉचलिस्ट टैब में केवल बुकमार्क किए गए शीर्षक रखें। चलाते समय अपने आप जोड़े गए शीर्षक भी शामिल करने के लिए इसे बंद करें।",
-  "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this device.": "देखना जारी रखें में केवल सक्रिय प्रोफ़ाइल की प्रगति दिखाएँ। हर प्रोफ़ाइल केवल अपनी प्रगति देखती है, इसलिए आप जो देखते हैं वह इस डिवाइस का उपयोग करने वाली अन्य प्रोफ़ाइल से छिपा रहता है।",
+  "Checks the active JL profile library for malformed item records and repairs compatible fields locally.":
+    "सक्रिय JL प्रोफ़ाइल की लाइब्रेरी में गलत प्रारूप वाले आइटम रिकॉर्ड जाँचता है और संगत फ़ील्ड को स्थानीय रूप से सुधारता है।",
+  "This browser stores your JL session and local settings. Signing in enables account sync for supported profile data and service credentials. Clearing browser data removes local copies, but does not delete data already synced to your JL account.":
+    "यह ब्राउज़र आपका JL सत्र और स्थानीय सेटिंग सहेजता है। साइन इन करने पर समर्थित प्रोफ़ाइल डेटा और सेवा क्रेडेंशियल खाते के साथ सिंक होते हैं। ब्राउज़र का डेटा साफ़ करने से स्थानीय प्रतियाँ हटती हैं, लेकिन आपके JL खाते में पहले से सिंक किया गया डेटा नहीं मिटता।",
+  "Choose which parts of your setup to save in one backup file. Your account sign-in is excluded.":
+    "अपने सेटअप के जिन हिस्सों को एक बैकअप फ़ाइल में सहेजना है, उन्हें चुनें। आपके खाते का साइन-इन शामिल नहीं होता।",
+  "Choose a Harbor backup and review what it contains before restoring. Your account sign-in stays on this device.":
+    "JL Media Vision बैकअप चुनें और बहाल करने से पहले उसकी सामग्री की समीक्षा करें। आपके खाते का साइन-इन इसी डिवाइस पर रहता है।",
+  "Choose the sections to save in one file. Your account sign-in is excluded.":
+    "एक फ़ाइल में सहेजने के लिए हिस्से चुनें। आपके खाते का साइन-इन शामिल नहीं होता।",
+  "Saved {when} from Harbor {app}. Your account sign-in stays as is.":
+    "JL Media Vision {app} से {when} सहेजा गया। आपके खाते का साइन-इन जस का तस रहता है।",
+  "Signed in as {email} with your JL Media Vision account.":
+    "अपने JL Media Vision खाते में {email} के रूप में साइन इन हैं।",
+  "Your library and addons work locally. Sign in to use JL account sync.":
+    "आपकी लाइब्रेरी और ऐडऑन स्थानीय रूप से काम करते हैं। JL खाते का सिंक इस्तेमाल करने के लिए साइन इन करें।",
+  "On: only titles you bookmarked. Off: also keeps titles added when you hit play.":
+    "चालू: केवल बुकमार्क किए गए शीर्षक। बंद: चलाते समय जोड़े गए शीर्षक भी रखे जाते हैं।",
+  "Keep the Library Watchlist tab limited to titles you bookmarked. Turn this off to also include anything automatically added when you pressed play.":
+    "लाइब्रेरी के वॉचलिस्ट टैब में केवल बुकमार्क किए गए शीर्षक रखें। चलाते समय अपने आप जोड़े गए शीर्षक भी शामिल करने के लिए इसे बंद करें।",
+  "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this device.":
+    "देखना जारी रखें में केवल सक्रिय प्रोफ़ाइल की प्रगति दिखाएँ। हर प्रोफ़ाइल केवल अपनी प्रगति देखती है, इसलिए आप जो देखते हैं वह इस डिवाइस का उपयोग करने वाली अन्य प्रोफ़ाइल से छिपा रहता है।",
   "Classic rows": "पारंपरिक पंक्तियाँ",
   "Classic button order.": "बटनों का पारंपरिक क्रम।",
-  "When you hit Play on something you've partly watched, show a prompt to resume from where you left off or start over. Also covers saved JL progress and connected Trakt history.": "आंशिक रूप से देखे गए किसी शीर्षक को चलाने पर पूछें कि वहीं से जारी रखना है या शुरू से देखना है। इसमें सहेजी गई JL प्रगति और कनेक्ट किए गए Trakt का इतिहास भी शामिल है।",
-  "This is a compatible addon manifest. Add it from the Addons page instead.": "यह एक संगत ऐडऑन मैनिफ़ेस्ट है। इसे ऐडऑन पेज से जोड़ें।",
-  "Condensed shows a top pick, quality tiles, and a drawer. Addon list groups sources by addon, no scoring.": "संक्षिप्त दृश्य में सबसे अच्छा विकल्प, गुणवत्ता टाइलें और एक खुलने वाला पैनल दिखता है। ऐडऑन सूची स्रोतों को ऐडऑन के अनुसार समूहित करती है, बिना स्कोर दिए।",
-  "Show complete addon descriptions in the addon list picker, downloads, and Big Picture.": "ऐडऑन सूची चयनकर्ता, डाउनलोड और Big Picture में ऐडऑन का पूरा विवरण दिखाएँ।",
+  "When you hit Play on something you've partly watched, show a prompt to resume from where you left off or start over. Also covers saved JL progress and connected Trakt history.":
+    "आंशिक रूप से देखे गए किसी शीर्षक को चलाने पर पूछें कि वहीं से जारी रखना है या शुरू से देखना है। इसमें सहेजी गई JL प्रगति और कनेक्ट किए गए Trakt का इतिहास भी शामिल है।",
+  "This is a compatible addon manifest. Add it from the Addons page instead.":
+    "यह एक संगत ऐडऑन मैनिफ़ेस्ट है। इसे ऐडऑन पेज से जोड़ें।",
+  "Condensed shows a top pick, quality tiles, and a drawer. Addon list groups sources by addon, no scoring.":
+    "संक्षिप्त दृश्य में सबसे अच्छा विकल्प, गुणवत्ता टाइलें और एक खुलने वाला पैनल दिखता है। ऐडऑन सूची स्रोतों को ऐडऑन के अनुसार समूहित करती है, बिना स्कोर दिए।",
+  "Show complete addon descriptions in the addon list picker, downloads, and Big Picture.":
+    "ऐडऑन सूची चयनकर्ता, डाउनलोड और Big Picture में ऐडऑन का पूरा विवरण दिखाएँ।",
   "Addon list": "ऐडऑन सूची",
-  "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, in a flat list. Stream priority below decides which addon leads, in both modes.": "JL Media Vision रैंकिंग सबसे अधिक स्कोर वाले स्रोत पहले दिखाती है। ऐडऑन क्रम हर ऐडऑन के परिणामों को उसी क्रम में एक सीधी सूची में रखता है जिस क्रम में वे मिले थे। नीचे दी गई स्ट्रीम प्राथमिकता दोनों मोड में तय करती है कि कौन-सा ऐडऑन पहले आएगा।",
-  "Show each addon's results in the order it returned them, grouped by your addon list. Keeps the original addon ordering.": "हर ऐडऑन के परिणाम उसी क्रम में दिखाएँ जिस क्रम में वे मिले थे, आपकी ऐडऑन सूची के अनुसार समूहित करके। ऐडऑन का मूल क्रम बना रहता है।",
-  "Any compatible subtitle addons you have installed are searched here too.": "आपके इंस्टॉल किए गए सभी संगत सबटाइटल ऐडऑन में भी यहाँ खोज की जाती है।",
+  "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, in a flat list. Stream priority below decides which addon leads, in both modes.":
+    "JL Media Vision रैंकिंग सबसे अधिक स्कोर वाले स्रोत पहले दिखाती है। ऐडऑन क्रम हर ऐडऑन के परिणामों को उसी क्रम में एक सीधी सूची में रखता है जिस क्रम में वे मिले थे। नीचे दी गई स्ट्रीम प्राथमिकता दोनों मोड में तय करती है कि कौन-सा ऐडऑन पहले आएगा।",
+  "Show each addon's results in the order it returned them, grouped by your addon list. Keeps the original addon ordering.":
+    "हर ऐडऑन के परिणाम उसी क्रम में दिखाएँ जिस क्रम में वे मिले थे, आपकी ऐडऑन सूची के अनुसार समूहित करके। ऐडऑन का मूल क्रम बना रहता है।",
+  "Any compatible subtitle addons you have installed are searched here too.":
+    "आपके इंस्टॉल किए गए सभी संगत सबटाइटल ऐडऑन में भी यहाँ खोज की जाती है।",
   "Addon compatibility": "ऐडऑन संगतता",
-  "JL Media Vision uses the open addon protocol. Compatible manifests and configured addon links work without an external media account. Third-party notices are listed in Licenses.": "JL Media Vision खुले ऐडऑन प्रोटोकॉल का उपयोग करता है। संगत मैनिफ़ेस्ट और कॉन्फ़िगर किए गए ऐडऑन लिंक किसी बाहरी मीडिया खाते के बिना काम करते हैं। तीसरे पक्ष की सूचनाएँ लाइसेंस में सूचीबद्ध हैं।",
-  "If you were going to send something, send it to ElfHosted above, or to one of the charities below. They all do more good with it.": "अगर आप कुछ दान करना चाहते हैं, तो ऊपर दिए गए ElfHosted या नीचे दी गई किसी धर्मार्थ संस्था को दें। वे सभी इसका अच्छा उपयोग करेंगे।",
-  "Support ElfHosted, or give to any charity below, and the badge lands on your profile.": "ElfHosted का समर्थन करें या नीचे दी गई किसी धर्मार्थ संस्था को दान दें, और आपकी प्रोफ़ाइल पर बैज आ जाएगा।",
-  "Choose a JL profile first so its watchlist can sync.": "पहले एक JL प्रोफ़ाइल चुनें ताकि उसकी वॉचलिस्ट सिंक हो सके।",
-  "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your account sign-in.": "अपने पूरे JL Media Vision सेटअप को एक फ़ाइल में निर्यात करें, फिर उसे नए कंप्यूटर पर बहाल करें या बैकअप के रूप में रखें। आपके खाते के साइन-इन को छोड़कर सब कुछ शामिल है।",
+  "JL Media Vision uses the open addon protocol. Compatible manifests and configured addon links work without an external media account. Third-party notices are listed in Licenses.":
+    "JL Media Vision खुले ऐडऑन प्रोटोकॉल का उपयोग करता है। संगत मैनिफ़ेस्ट और कॉन्फ़िगर किए गए ऐडऑन लिंक किसी बाहरी मीडिया खाते के बिना काम करते हैं। तीसरे पक्ष की सूचनाएँ लाइसेंस में सूचीबद्ध हैं।",
+  "If you were going to send something, send it to ElfHosted above, or to one of the charities below. They all do more good with it.":
+    "अगर आप कुछ दान करना चाहते हैं, तो ऊपर दिए गए ElfHosted या नीचे दी गई किसी धर्मार्थ संस्था को दें। वे सभी इसका अच्छा उपयोग करेंगे।",
+  "Support ElfHosted, or give to any charity below, and the badge lands on your profile.":
+    "ElfHosted का समर्थन करें या नीचे दी गई किसी धर्मार्थ संस्था को दान दें, और आपकी प्रोफ़ाइल पर बैज आ जाएगा।",
+  "Choose a JL profile first so its watchlist can sync.":
+    "पहले एक JL प्रोफ़ाइल चुनें ताकि उसकी वॉचलिस्ट सिंक हो सके।",
+  "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your account sign-in.":
+    "अपने पूरे JL Media Vision सेटअप को एक फ़ाइल में निर्यात करें, फिर उसे नए कंप्यूटर पर बहाल करें या बैकअप के रूप में रखें। आपके खाते के साइन-इन को छोड़कर सब कुछ शामिल है।",
 };
 
 export default jlDesktop026;

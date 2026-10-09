@@ -135,32 +135,40 @@ const es: Record<string, string> = {
   ...gameHub,
   ...floatingPlayer,
   ...gameAntiCheat,
-  "Translations": "Traducciones",
+  Translations: "Traducciones",
   "Translating…": "Traduciendo…",
   "Showing {lang}": "Mostrando {lang}",
   "Show all": "Mostrar todo",
   "games.download.speed.title": "Velocidad de descarga",
-  "games.download.speed.note": "Compartida por las descargas directas y torrents de este perfil. El límite propio de un torrent puede ser menor.",
+  "games.download.speed.note":
+    "Compartida por las descargas directas y torrents de este perfil. El límite propio de un torrent puede ser menor.",
   "games.download.speed.unlimited": "Sin límite",
   "games.download.speed.limited": "Limitar velocidad",
   "games.download.speed.rate": "Kilobytes por segundo",
   "games.download.speed.range": "Introduce un número entero entre {min} y {max}.",
-  "games.download.speed.error": "No se pudo cargar o guardar el ajuste de velocidad. Inténtalo de nuevo.",
+  "games.download.speed.error":
+    "No se pudo cargar o guardar el ajuste de velocidad. Inténtalo de nuevo.",
   "games.download.speed.current": "Velocidad de descarga: {rate}",
   "games.discovery.sale.cards.included": "Cromos",
   "games.discovery.sale.cards.none": "Sin cromos de oferta",
   "games.discovery.sale.cards.unknown": "Cromos sin confirmar",
-  "games.discovery.sale.cards.includedNote": "Incluidos según las reglas actuales de Steam para los cromos de ofertas. Abre Steam para ver cómo conseguirlos.",
-  "games.discovery.sale.cards.noneNote": "Las reglas actuales de Steam no incluyen cromos para estas ofertas de temporada. Otras recompensas del evento son independientes.",
-  "games.discovery.sale.cards.unknownNote": "No se pudieron verificar las reglas actuales de Steam para los cromos. Abre Steam para comprobar su disponibilidad.",
-  "games.discovery.sale.cards.badgeNote": "Reúne un conjunto para crear una insignia de las ofertas, un emoticono y un fondo de perfil.",
+  "games.discovery.sale.cards.includedNote":
+    "Incluidos según las reglas actuales de Steam para los cromos de ofertas. Abre Steam para ver cómo conseguirlos.",
+  "games.discovery.sale.cards.noneNote":
+    "Las reglas actuales de Steam no incluyen cromos para estas ofertas de temporada. Otras recompensas del evento son independientes.",
+  "games.discovery.sale.cards.unknownNote":
+    "No se pudieron verificar las reglas actuales de Steam para los cromos. Abre Steam para comprobar su disponibilidad.",
+  "games.discovery.sale.cards.badgeNote":
+    "Reúne un conjunto para crear una insignia de las ofertas, un emoticono y un fondo de perfil.",
   "games.download.storage.title": "Espacio para descargas",
-  "games.download.storage.note": "Las estimaciones incluyen descargas directas, torrents y archivos temporales, también las descargas en pausa. No incluyen instaladores externos.",
+  "games.download.storage.note":
+    "Las estimaciones incluyen descargas directas, torrents y archivos temporales, también las descargas en pausa. No incluyen instaladores externos.",
   "games.download.storage.error": "No se pudo comprobar el almacenamiento.",
   "games.download.storage.unavailable": "Espacio libre no disponible",
   "games.download.storage.free": "{size} libres",
   "games.download.storage.remaining": "Espacio adicional: {size}",
-  "games.download.storage.estimate": "Algunos archivos existentes aún no se han comprobado. El espacio necesario puede ser menor.",
+  "games.download.storage.estimate":
+    "Algunos archivos existentes aún no se han comprobado. El espacio necesario puede ser menor.",
   "games.download.storage.unknown": "Tamaño desconocido: {count} archivos",
   "games.download.storage.other": "{size} reservados por otras operaciones de Harbor",
   "games.download.storage.shortfall": "Se necesitan {size} más de espacio",
@@ -183,8 +191,10 @@ const es: Record<string, string> = {
   ...gameEve,
   ...warhammerUniverse,
   ...gameWow,
-  "games.selection.partial": "Se actualizaron {count} de {total} juegos. Los juegos restantes siguen seleccionados; inténtalo de nuevo.",
-  "games.selection.failed": "No se pudieron actualizar los juegos seleccionados. Inténtalo de nuevo.",
+  "games.selection.partial":
+    "Se actualizaron {count} de {total} juegos. Los juegos restantes siguen seleccionados; inténtalo de nuevo.",
+  "games.selection.failed":
+    "No se pudieron actualizar los juegos seleccionados. Inténtalo de nuevo.",
   "games.custom.nav": "Juegos locales",
   "games.libraryPersonal.visibility": "Visibilidad en la biblioteca",
   "games.libraryPersonal.visible": "Tus juegos",
@@ -205,7 +215,8 @@ const es: Record<string, string> = {
   "games.selection.hide": "Ocultar",
   "games.selection.pin": "Fijar",
   "games.selection.unpin": "Desfijar",
-  "games.selection.matchNote": "Algunos juegos seleccionados no están disponibles. Actualiza tu biblioteca e inténtalo de nuevo.",
+  "games.selection.matchNote":
+    "Algunos juegos seleccionados no están disponibles. Actualiza tu biblioteca e inténtalo de nuevo.",
   "games.selection.collection": "Añadir a colección",
   "games.collections.localMissing": "Ya no está en la biblioteca de este perfil",
   "games.collections.dynamic": "Colección basada en filtros",
@@ -213,15 +224,21 @@ const es: Record<string, string> = {
   "games.collections.type": "Tipo de colección",
   "games.collections.filters": "Filtros de la colección",
   "games.collections.ruleQuery": "El título del juego contiene",
-  "games.collections.autoNote": "Los juegos entran o salen de esta colección automáticamente según coincidan con sus filtros en tu biblioteca.",
-  "games.collections.pickerAutoNote": "Las colecciones basadas en filtros se actualizan automáticamente. Gestiona sus filtros en Colecciones.",
+  "games.collections.autoNote":
+    "Los juegos entran o salen de esta colección automáticamente según coincidan con sus filtros en tu biblioteca.",
+  "games.collections.pickerAutoNote":
+    "Las colecciones basadas en filtros se actualizan automáticamente. Gestiona sus filtros en Colecciones.",
   "games.collections.matches": "Juegos coincidentes: {count}",
-  "games.collections.emptyDynamic": "Ningún juego de tu biblioteca coincide con estos filtros. Cambia los filtros o añade más juegos a tu biblioteca.",
-  "games.collections.collections_rules": "No se pudieron leer los filtros de esta colección. Los datos guardados no se han reemplazado.",
-  "games.collections.collections_dynamic": "Esta colección se actualiza automáticamente. Cambia sus filtros en Colecciones para elegir qué juegos aparecen.",
+  "games.collections.emptyDynamic":
+    "Ningún juego de tu biblioteca coincide con estos filtros. Cambia los filtros o añade más juegos a tu biblioteca.",
+  "games.collections.collections_rules":
+    "No se pudieron leer los filtros de esta colección. Los datos guardados no se han reemplazado.",
+  "games.collections.collections_dynamic":
+    "Esta colección se actualiza automáticamente. Cambia sus filtros en Colecciones para elegir qué juegos aparecen.",
   "games.collections.title": "Colecciones",
   "games.collections.personal": "Creadas por ti",
-  "games.collections.note": "Un lugar para cada tipo de juego. Agrupa tus favoritos, los que quieres jugar y los mundos a los que merece la pena volver.",
+  "games.collections.note":
+    "Un lugar para cada tipo de juego. Agrupa tus favoritos, los que quieres jugar y los mundos a los que merece la pena volver.",
   "games.collections.addTo": "Añadir a colección",
   "games.collections.count": "{count} juegos",
   "games.collections.one": "1 juego",
@@ -231,7 +248,8 @@ const es: Record<string, string> = {
   "games.collections.create": "Crear",
   "games.collections.first": "Tu primera colección empieza aquí.",
   "games.collections.noMatches": "No hay colecciones que coincidan.",
-  "games.collections.pickerNote": "Elige tantas como quieras. Los cambios se guardan sobre la marcha.",
+  "games.collections.pickerNote":
+    "Elige tantas como quieras. Los cambios se guardan sobre la marcha.",
   "games.collections.empty": "Un lugar para tu próxima gran pasión.",
   "games.collections.findGames": "Buscar juegos",
   "games.collections.description": "Unas palabras sobre ella",
@@ -239,22 +257,30 @@ const es: Record<string, string> = {
   "games.collections.pin": "Fijar colección",
   "games.collections.unpin": "Desfijar colección",
   "games.collections.remove": "Eliminar colección",
-  "games.collections.removeNote": "Solo se elimina esta colección. Tus juegos, partidas guardadas, descargas y otras colecciones se conservan.",
+  "games.collections.removeNote":
+    "Solo se elimina esta colección. Tus juegos, partidas guardadas, descargas y otras colecciones se conservan.",
   "games.collections.confirmRemove": "Eliminar esta colección",
   "games.collections.removeGame": "Quitar {name} de esta colección",
   "games.collections.removeShort": "Quitar de la colección",
   "games.collections.added": "Últimos añadidos primero",
   "games.collections.done": "Listo",
   "games.collections.save": "Guardar cambios",
-  "games.collections.collections_name": "Pon a la colección un nombre de 1–80 caracteres y una descripción de hasta 240 caracteres.",
+  "games.collections.collections_name":
+    "Pon a la colección un nombre de 1–80 caracteres y una descripción de hasta 240 caracteres.",
   "games.collections.collections_duplicate": "Ya tienes una colección con ese nombre.",
-  "games.collections.collections_limit": "Este perfil ha alcanzado el límite de almacenamiento de colecciones. Elimina colecciones o juegos que no uses e inténtalo de nuevo.",
+  "games.collections.collections_limit":
+    "Este perfil ha alcanzado el límite de almacenamiento de colecciones. Elimina colecciones o juegos que no uses e inténtalo de nuevo.",
   "games.collections.collections_missing": "Esta colección se ha eliminado. Elige otra.",
-  "games.collections.collections_read": "No se pudieron leer tus colecciones. Los datos guardados no se han reemplazado. Intenta cargarlas de nuevo.",
-  "games.collections.collections_write": "No se pudo guardar el cambio. Tu colección anterior sigue aquí. Libera espacio en el dispositivo e inténtalo de nuevo.",
-  "games.collections.collections_game": "No se pudo identificar este juego. Actualiza tu biblioteca e inténtalo de nuevo.",
-  "games.collections.firstNote": "Crea una colección y añade juegos desde sus páginas de detalles o selecciónalos en tu biblioteca. Los juegos de PC y las ROM pueden estar juntos.",
-  "games.collections.emptyNote": "Añade juegos desde sus páginas de detalles o selecciona juegos en tu biblioteca y elige Añadir a colección.",
+  "games.collections.collections_read":
+    "No se pudieron leer tus colecciones. Los datos guardados no se han reemplazado. Intenta cargarlas de nuevo.",
+  "games.collections.collections_write":
+    "No se pudo guardar el cambio. Tu colección anterior sigue aquí. Libera espacio en el dispositivo e inténtalo de nuevo.",
+  "games.collections.collections_game":
+    "No se pudo identificar este juego. Actualiza tu biblioteca e inténtalo de nuevo.",
+  "games.collections.firstNote":
+    "Crea una colección y añade juegos desde sus páginas de detalles o selecciónalos en tu biblioteca. Los juegos de PC y las ROM pueden estar juntos.",
+  "games.collections.emptyNote":
+    "Añade juegos desde sus páginas de detalles o selecciona juegos en tu biblioteca y elige Añadir a colección.",
   "games.cache.saved": "Datos guardados · {date}",
   "games.cache.refresh": "Actualizar",
   "games.cache.refreshing": "Actualizando…",
@@ -347,7 +373,8 @@ const es: Record<string, string> = {
   ...gamePlaytime,
   ...gameLaunchHealth,
   "games.torrent.share.title": "Compartir torrent",
-  "games.torrent.share.note": "Comparte archivos verificados con otros pares. Se detiene al alcanzar un límite o cerrar Harbor. Detén el envío antes de cambiar los archivos.",
+  "games.torrent.share.note":
+    "Comparte archivos verificados con otros pares. Se detiene al alcanzar un límite o cerrar Harbor. Detén el envío antes de cambiar los archivos.",
   "games.torrent.share.upload": "Límite de subida (KB/s)",
   "games.torrent.share.ratio": "Proporción (1–10)",
   "games.torrent.share.minutes": "Tiempo límite (minutos)",
@@ -358,10 +385,13 @@ const es: Record<string, string> = {
   "games.torrent.share.seeding": "Compartiendo",
   "games.torrent.share.stopped": "Envío detenido",
   "games.torrent.share.limitReached": "Límite alcanzado",
-  "games.torrent.share.failed": "No se pudo compartir. Comprueba los archivos e inténtalo de nuevo.",
+  "games.torrent.share.failed":
+    "No se pudo compartir. Comprueba los archivos e inténtalo de nuevo.",
   "games.torrent.share.stats": "{uploaded} enviados · {minutes} min",
-  "games.torrent.torrent_seed_files": "Los archivos faltan, han cambiado o están en uso. Comprueba la carpeta de descarga antes de compartir.",
-  "games.torrent.torrent_seed_limits": "Elige 32–1.048.576 KB/s, una proporción de 1–10 y 1–1.440 minutos.",
+  "games.torrent.torrent_seed_files":
+    "Los archivos faltan, han cambiado o están en uso. Comprueba la carpeta de descarga antes de compartir.",
+  "games.torrent.torrent_seed_limits":
+    "Elige 32–1.048.576 KB/s, una proporción de 1–10 y 1–1.440 minutos.",
 
   ...gamePokemonUi,
   ...customArtwork,

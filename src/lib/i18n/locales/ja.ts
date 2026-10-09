@@ -124,7 +124,8 @@ const ja: Record<string, string> = {
   "collections.feed.more": "コレクションをさらに読み込む",
   "collections.feed.error": "コレクションを読み込めませんでした。もう一度お試しください。",
   "Show content ratings?": "コンテンツのレーティングを表示しますか？",
-  "Age ratings and content notes when playback starts.": "再生開始時に年齢区分と内容に関する注意を表示します。",
+  "Age ratings and content notes when playback starts.":
+    "再生開始時に年齢区分と内容に関する注意を表示します。",
   ...gameCommunity,
   ...gamePokemon,
   ...torrentDialog,
@@ -138,32 +139,40 @@ const ja: Record<string, string> = {
   ...gameHub,
   ...floatingPlayer,
   ...gameAntiCheat,
-  "Translations": "翻訳",
+  Translations: "翻訳",
   "Translating…": "翻訳中…",
   "Showing {lang}": "{lang}を表示中",
   "Show all": "すべて表示",
   "games.download.speed.title": "ダウンロード速度",
-  "games.download.speed.note": "このプロフィールの直接ダウンロードとトレント全体で共有されます。個別のトレントには、これより低い制限を設定できます。",
+  "games.download.speed.note":
+    "このプロフィールの直接ダウンロードとトレント全体で共有されます。個別のトレントには、これより低い制限を設定できます。",
   "games.download.speed.unlimited": "無制限",
   "games.download.speed.limited": "速度を制限",
   "games.download.speed.rate": "キロバイト毎秒",
   "games.download.speed.range": "{min} から {max} までの整数を入力してください。",
-  "games.download.speed.error": "速度設定を読み込むか保存できませんでした。もう一度お試しください。",
+  "games.download.speed.error":
+    "速度設定を読み込むか保存できませんでした。もう一度お試しください。",
   "games.download.speed.current": "ファイルのダウンロード速度: {rate}",
   "games.discovery.sale.cards.included": "トレーディングカード",
   "games.discovery.sale.cards.none": "セールカードなし",
   "games.discovery.sale.cards.unknown": "カードは未確認",
-  "games.discovery.sale.cards.includedNote": "Steamの現行のセールカード規則では対象です。入手条件はSteamで確認してください。",
-  "games.discovery.sale.cards.noneNote": "Steamの現行の規則では、この季節のセールはトレーディングカードの対象外です。他のイベント報酬は別扱いです。",
-  "games.discovery.sale.cards.unknownNote": "Steamの現行のカード規則を確認できませんでした。提供状況はSteamで確認してください。",
-  "games.discovery.sale.cards.badgeNote": "セットを集めると、セールバッジ、絵文字、プロフィール背景を作成できます。",
+  "games.discovery.sale.cards.includedNote":
+    "Steamの現行のセールカード規則では対象です。入手条件はSteamで確認してください。",
+  "games.discovery.sale.cards.noneNote":
+    "Steamの現行の規則では、この季節のセールはトレーディングカードの対象外です。他のイベント報酬は別扱いです。",
+  "games.discovery.sale.cards.unknownNote":
+    "Steamの現行のカード規則を確認できませんでした。提供状況はSteamで確認してください。",
+  "games.discovery.sale.cards.badgeNote":
+    "セットを集めると、セールバッジ、絵文字、プロフィール背景を作成できます。",
   "games.download.storage.title": "ダウンロード容量",
-  "games.download.storage.note": "直接ダウンロード、トレント、一時ファイルの必要容量を推定します。一時停止中のダウンロードも含みます。外部インストーラーは含みません。",
+  "games.download.storage.note":
+    "直接ダウンロード、トレント、一時ファイルの必要容量を推定します。一時停止中のダウンロードも含みます。外部インストーラーは含みません。",
   "games.download.storage.error": "ストレージを確認できませんでした。",
   "games.download.storage.unavailable": "空き容量を取得できません",
   "games.download.storage.free": "空き容量：{size}",
   "games.download.storage.remaining": "追加の空き容量：{size}",
-  "games.download.storage.estimate": "まだ確認していない既存ファイルがあります。実際に必要な空き容量は少ない場合があります。",
+  "games.download.storage.estimate":
+    "まだ確認していない既存ファイルがあります。実際に必要な空き容量は少ない場合があります。",
   "games.download.storage.unknown": "サイズ不明：{count}ファイル",
   "games.download.storage.other": "他のHarborの処理用に{size}を確保",
   "games.download.storage.shortfall": "あと{size}の空き容量が必要",
@@ -186,7 +195,8 @@ const ja: Record<string, string> = {
   ...gameEve,
   ...warhammerUniverse,
   ...gameWow,
-  "games.selection.partial": "{total}本中{count}本を更新しました。残りのゲームは選択されたままです。もう一度お試しください。",
+  "games.selection.partial":
+    "{total}本中{count}本を更新しました。残りのゲームは選択されたままです。もう一度お試しください。",
   "games.selection.failed": "選択したゲームを更新できませんでした。もう一度お試しください。",
   "games.custom.nav": "ローカルゲーム",
   "games.libraryPersonal.visibility": "ライブラリの表示対象",
@@ -208,7 +218,8 @@ const ja: Record<string, string> = {
   "games.selection.hide": "非表示",
   "games.selection.pin": "ピン留め",
   "games.selection.unpin": "ピン留めを解除",
-  "games.selection.matchNote": "選択したゲームの一部を利用できません。ライブラリを更新して、もう一度お試しください。",
+  "games.selection.matchNote":
+    "選択したゲームの一部を利用できません。ライブラリを更新して、もう一度お試しください。",
   "games.selection.collection": "コレクションに追加",
   "games.collections.localMissing": "このプロフィールのライブラリにはもうありません",
   "games.collections.dynamic": "絞り込み条件によるコレクション",
@@ -216,15 +227,21 @@ const ja: Record<string, string> = {
   "games.collections.type": "コレクションの種類",
   "games.collections.filters": "コレクションの絞り込み条件",
   "games.collections.ruleQuery": "ゲームタイトルに含む文字",
-  "games.collections.autoNote": "ライブラリのゲームが条件に一致するかどうかに応じて、このコレクションへの追加や削除が自動で行われます。",
-  "games.collections.pickerAutoNote": "絞り込み条件によるコレクションは自動更新されます。「コレクション」で条件を管理してください。",
+  "games.collections.autoNote":
+    "ライブラリのゲームが条件に一致するかどうかに応じて、このコレクションへの追加や削除が自動で行われます。",
+  "games.collections.pickerAutoNote":
+    "絞り込み条件によるコレクションは自動更新されます。「コレクション」で条件を管理してください。",
   "games.collections.matches": "条件に一致するゲーム：{count}本",
-  "games.collections.emptyDynamic": "この条件に一致するゲームはライブラリにありません。条件を変更するか、ライブラリにゲームを追加してください。",
-  "games.collections.collections_rules": "このコレクションの絞り込み条件を読み取れませんでした。保存済みのデータは置き換えていません。",
-  "games.collections.collections_dynamic": "このコレクションは自動更新されます。表示されるゲームを変更するには、「コレクション」で絞り込み条件を変更してください。",
+  "games.collections.emptyDynamic":
+    "この条件に一致するゲームはライブラリにありません。条件を変更するか、ライブラリにゲームを追加してください。",
+  "games.collections.collections_rules":
+    "このコレクションの絞り込み条件を読み取れませんでした。保存済みのデータは置き換えていません。",
+  "games.collections.collections_dynamic":
+    "このコレクションは自動更新されます。表示されるゲームを変更するには、「コレクション」で絞り込み条件を変更してください。",
   "games.collections.title": "コレクション",
   "games.collections.personal": "あなたが作成",
-  "games.collections.note": "どんなゲームにも居場所を。お気に入り、これから遊びたいゲーム、また訪れたい世界をまとめましょう。",
+  "games.collections.note":
+    "どんなゲームにも居場所を。お気に入り、これから遊びたいゲーム、また訪れたい世界をまとめましょう。",
   "games.collections.addTo": "コレクションに追加",
   "games.collections.count": "{count}本のゲーム",
   "games.collections.one": "1本のゲーム",
@@ -242,22 +259,31 @@ const ja: Record<string, string> = {
   "games.collections.pin": "コレクションをピン留め",
   "games.collections.unpin": "コレクションのピン留めを解除",
   "games.collections.remove": "コレクションを削除",
-  "games.collections.removeNote": "このコレクションだけが削除されます。ゲーム、セーブデータ、ダウンロード、ほかのコレクションはそのまま残ります。",
+  "games.collections.removeNote":
+    "このコレクションだけが削除されます。ゲーム、セーブデータ、ダウンロード、ほかのコレクションはそのまま残ります。",
   "games.collections.confirmRemove": "このコレクションを削除",
   "games.collections.removeGame": "このコレクションから{name}を削除",
   "games.collections.removeShort": "コレクションから削除",
   "games.collections.added": "追加した順（新しい順）",
   "games.collections.done": "完了",
   "games.collections.save": "変更を保存",
-  "games.collections.collections_name": "コレクション名は1～80文字、説明は240文字以内で入力してください。",
+  "games.collections.collections_name":
+    "コレクション名は1～80文字、説明は240文字以内で入力してください。",
   "games.collections.collections_duplicate": "同じ名前のコレクションがすでにあります。",
-  "games.collections.collections_limit": "このプロフィールのコレクション保存容量が上限に達しました。使っていないコレクションやゲームを削除して、もう一度お試しください。",
-  "games.collections.collections_missing": "このコレクションは削除されました。別のコレクションを選んでください。",
-  "games.collections.collections_read": "コレクションを読み取れませんでした。保存済みのデータは置き換えていません。もう一度読み込んでください。",
-  "games.collections.collections_write": "変更を保存できませんでした。変更前のコレクションは残っています。デバイスの空き容量を増やして、もう一度お試しください。",
-  "games.collections.collections_game": "このゲームを識別できませんでした。ライブラリを更新して、もう一度お試しください。",
-  "games.collections.firstNote": "コレクションを作成し、ゲームの詳細ページから追加するか、ライブラリでゲームを選択しましょう。PCゲームとROMを一緒にまとめられます。",
-  "games.collections.emptyNote": "ゲームの詳細ページから追加するか、ライブラリでゲームを選択して「コレクションに追加」を選んでください。",
+  "games.collections.collections_limit":
+    "このプロフィールのコレクション保存容量が上限に達しました。使っていないコレクションやゲームを削除して、もう一度お試しください。",
+  "games.collections.collections_missing":
+    "このコレクションは削除されました。別のコレクションを選んでください。",
+  "games.collections.collections_read":
+    "コレクションを読み取れませんでした。保存済みのデータは置き換えていません。もう一度読み込んでください。",
+  "games.collections.collections_write":
+    "変更を保存できませんでした。変更前のコレクションは残っています。デバイスの空き容量を増やして、もう一度お試しください。",
+  "games.collections.collections_game":
+    "このゲームを識別できませんでした。ライブラリを更新して、もう一度お試しください。",
+  "games.collections.firstNote":
+    "コレクションを作成し、ゲームの詳細ページから追加するか、ライブラリでゲームを選択しましょう。PCゲームとROMを一緒にまとめられます。",
+  "games.collections.emptyNote":
+    "ゲームの詳細ページから追加するか、ライブラリでゲームを選択して「コレクションに追加」を選んでください。",
   "games.cache.saved": "保存済みデータ · {date}",
   "games.cache.refresh": "更新",
   "games.cache.refreshing": "更新中…",
@@ -354,7 +380,8 @@ const ja: Record<string, string> = {
   ...gamePlaytime,
   ...gameLaunchHealth,
   "games.torrent.share.title": "トレントを共有",
-  "games.torrent.share.note": "検証済みファイルをピアと共有します。いずれかの上限に達するかHarborを閉じると停止します。ファイルを変更する前に共有を停止してください。",
+  "games.torrent.share.note":
+    "検証済みファイルをピアと共有します。いずれかの上限に達するかHarborを閉じると停止します。ファイルを変更する前に共有を停止してください。",
   "games.torrent.share.upload": "アップロード上限（KB/秒）",
   "games.torrent.share.ratio": "共有比率（1～10）",
   "games.torrent.share.minutes": "制限時間（分）",
@@ -367,8 +394,10 @@ const ja: Record<string, string> = {
   "games.torrent.share.limitReached": "共有上限に到達",
   "games.torrent.share.failed": "共有できませんでした。ファイルを確認して再試行してください。",
   "games.torrent.share.stats": "送信済み {uploaded} · {minutes} 分",
-  "games.torrent.torrent_seed_files": "完了したファイルが見つからないか、変更または使用されています。共有前にダウンロードフォルダーを確認してください。",
-  "games.torrent.torrent_seed_limits": "32～1,048,576 KB/秒、比率1～10、時間1～1,440分を選択してください。",
+  "games.torrent.torrent_seed_files":
+    "完了したファイルが見つからないか、変更または使用されています。共有前にダウンロードフォルダーを確認してください。",
+  "games.torrent.torrent_seed_limits":
+    "32～1,048,576 KB/秒、比率1～10、時間1～1,440分を選択してください。",
 
   ...gamePokemonUi,
   ...customArtwork,

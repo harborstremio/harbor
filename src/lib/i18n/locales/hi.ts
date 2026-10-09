@@ -114,12 +114,13 @@ const hi: Record<string, string> = {
   ...gameHub,
   ...floatingPlayer,
   ...gameAntiCheat,
-  "Translations": "अनुवाद",
+  Translations: "अनुवाद",
   "Translating…": "अनुवाद हो रहा है…",
   "Showing {lang}": "{lang} दिखाया जा रहा है",
   "Show all": "सभी दिखाएँ",
   "games.download.speed.title": "डाउनलोड की गति",
-  "games.download.speed.note": "इस प्रोफ़ाइल के सीधे डाउनलोड और टोरेंट के बीच साझा सीमा। किसी टोरेंट की अपनी सीमा इससे कम हो सकती है।",
+  "games.download.speed.note":
+    "इस प्रोफ़ाइल के सीधे डाउनलोड और टोरेंट के बीच साझा सीमा। किसी टोरेंट की अपनी सीमा इससे कम हो सकती है।",
   "games.download.speed.unlimited": "असीमित",
   "games.download.speed.limited": "गति सीमित करें",
   "games.download.speed.rate": "किलोबाइट प्रति सेकंड",
@@ -129,12 +130,17 @@ const hi: Record<string, string> = {
   "games.discovery.sale.cards.included": "ट्रेडिंग कार्ड",
   "games.discovery.sale.cards.none": "सेल कार्ड नहीं",
   "games.discovery.sale.cards.unknown": "कार्ड की पुष्टि नहीं",
-  "games.discovery.sale.cards.includedNote": "Steam के मौजूदा सेल कार्ड नियमों के अनुसार शामिल हैं। इन्हें पाने की शर्तें देखने के लिए Steam खोलें।",
-  "games.discovery.sale.cards.noneNote": "Steam के मौजूदा नियमों में इस मौसमी सेल के ट्रेडिंग कार्ड शामिल नहीं हैं। इवेंट के अन्य इनाम अलग हैं।",
-  "games.discovery.sale.cards.unknownNote": "Steam के मौजूदा कार्ड नियमों की पुष्टि नहीं हो सकी। उपलब्धता जाँचने के लिए Steam खोलें।",
-  "games.discovery.sale.cards.badgeNote": "सेल बैज, इमोटिकॉन और प्रोफ़ाइल बैकग्राउंड बनाने के लिए पूरा सेट इकट्ठा करें।",
+  "games.discovery.sale.cards.includedNote":
+    "Steam के मौजूदा सेल कार्ड नियमों के अनुसार शामिल हैं। इन्हें पाने की शर्तें देखने के लिए Steam खोलें।",
+  "games.discovery.sale.cards.noneNote":
+    "Steam के मौजूदा नियमों में इस मौसमी सेल के ट्रेडिंग कार्ड शामिल नहीं हैं। इवेंट के अन्य इनाम अलग हैं।",
+  "games.discovery.sale.cards.unknownNote":
+    "Steam के मौजूदा कार्ड नियमों की पुष्टि नहीं हो सकी। उपलब्धता जाँचने के लिए Steam खोलें।",
+  "games.discovery.sale.cards.badgeNote":
+    "सेल बैज, इमोटिकॉन और प्रोफ़ाइल बैकग्राउंड बनाने के लिए पूरा सेट इकट्ठा करें।",
   "games.download.storage.title": "डाउनलोड के लिए जगह",
-  "games.download.storage.note": "अनुमान में सीधे डाउनलोड, टोरेंट और अस्थायी फ़ाइलें शामिल हैं, रोके गए डाउनलोड भी। बाहरी इंस्टॉलर शामिल नहीं हैं।",
+  "games.download.storage.note":
+    "अनुमान में सीधे डाउनलोड, टोरेंट और अस्थायी फ़ाइलें शामिल हैं, रोके गए डाउनलोड भी। बाहरी इंस्टॉलर शामिल नहीं हैं।",
   "games.download.storage.error": "स्टोरेज की जाँच नहीं हो सकी।",
   "games.download.storage.unavailable": "खाली जगह की जानकारी उपलब्ध नहीं",
   "games.download.storage.free": "{size} खाली",
@@ -162,7 +168,8 @@ const hi: Record<string, string> = {
   ...gameEve,
   ...warhammerUniverse,
   ...gameWow,
-  "games.selection.partial": "{total} में से {count} गेम अपडेट हुए। बाकी गेम अब भी चुने हुए हैं; फिर से कोशिश करें।",
+  "games.selection.partial":
+    "{total} में से {count} गेम अपडेट हुए। बाकी गेम अब भी चुने हुए हैं; फिर से कोशिश करें।",
   "games.selection.failed": "चुने गए गेम अपडेट नहीं हो सके। फिर से कोशिश करें।",
   "games.custom.nav": "स्थानीय गेम",
   "games.libraryPersonal.visibility": "लाइब्रेरी में दिखने की स्थिति",
@@ -192,15 +199,21 @@ const hi: Record<string, string> = {
   "games.collections.type": "संग्रह का प्रकार",
   "games.collections.filters": "संग्रह के फ़िल्टर",
   "games.collections.ruleQuery": "गेम के नाम में शामिल है",
-  "games.collections.autoNote": "आपकी लाइब्रेरी के गेम इन फ़िल्टर से मेल खाने पर अपने आप इस संग्रह में जुड़ते हैं और मेल न खाने पर इससे हट जाते हैं।",
-  "games.collections.pickerAutoNote": "फ़िल्टर पर आधारित संग्रह अपने आप अपडेट होते हैं। संग्रह में उनके फ़िल्टर प्रबंधित करें।",
+  "games.collections.autoNote":
+    "आपकी लाइब्रेरी के गेम इन फ़िल्टर से मेल खाने पर अपने आप इस संग्रह में जुड़ते हैं और मेल न खाने पर इससे हट जाते हैं।",
+  "games.collections.pickerAutoNote":
+    "फ़िल्टर पर आधारित संग्रह अपने आप अपडेट होते हैं। संग्रह में उनके फ़िल्टर प्रबंधित करें।",
   "games.collections.matches": "मेल खाने वाले गेम: {count}",
-  "games.collections.emptyDynamic": "लाइब्रेरी का कोई गेम इन फ़िल्टर से मेल नहीं खाता। फ़िल्टर बदलें या लाइब्रेरी में और गेम जोड़ें।",
-  "games.collections.collections_rules": "इस संग्रह के फ़िल्टर पढ़े नहीं जा सके। सहेजा गया डेटा बदला नहीं गया है।",
-  "games.collections.collections_dynamic": "यह संग्रह अपने आप अपडेट होता है। कौन से गेम दिखें, यह बदलने के लिए संग्रह में इसके फ़िल्टर बदलें।",
+  "games.collections.emptyDynamic":
+    "लाइब्रेरी का कोई गेम इन फ़िल्टर से मेल नहीं खाता। फ़िल्टर बदलें या लाइब्रेरी में और गेम जोड़ें।",
+  "games.collections.collections_rules":
+    "इस संग्रह के फ़िल्टर पढ़े नहीं जा सके। सहेजा गया डेटा बदला नहीं गया है।",
+  "games.collections.collections_dynamic":
+    "यह संग्रह अपने आप अपडेट होता है। कौन से गेम दिखें, यह बदलने के लिए संग्रह में इसके फ़िल्टर बदलें।",
   "games.collections.title": "संग्रह",
   "games.collections.personal": "आपके बनाए हुए",
-  "games.collections.note": "हर तरह के गेम के लिए एक जगह। पसंदीदा गेम, आगे खेलने वाले गेम और उन दुनियाओं को साथ रखें जहाँ फिर लौटना चाहते हैं।",
+  "games.collections.note":
+    "हर तरह के गेम के लिए एक जगह। पसंदीदा गेम, आगे खेलने वाले गेम और उन दुनियाओं को साथ रखें जहाँ फिर लौटना चाहते हैं।",
   "games.collections.addTo": "संग्रह में जोड़ें",
   "games.collections.count": "{count} गेम",
   "games.collections.one": "1 गेम",
@@ -218,7 +231,8 @@ const hi: Record<string, string> = {
   "games.collections.pin": "संग्रह पिन करें",
   "games.collections.unpin": "संग्रह का पिन हटाएँ",
   "games.collections.remove": "संग्रह हटाएँ",
-  "games.collections.removeNote": "केवल यह संग्रह हटाया जाता है। आपके गेम, गेम की सेव फ़ाइलें, डाउनलोड और दूसरे संग्रह बने रहते हैं।",
+  "games.collections.removeNote":
+    "केवल यह संग्रह हटाया जाता है। आपके गेम, गेम की सेव फ़ाइलें, डाउनलोड और दूसरे संग्रह बने रहते हैं।",
   "games.collections.confirmRemove": "यह संग्रह हटाएँ",
   "games.collections.removeGame": "इस संग्रह से {name} हटाएँ",
   "games.collections.removeShort": "संग्रह से हटाएँ",
@@ -227,13 +241,19 @@ const hi: Record<string, string> = {
   "games.collections.save": "बदलाव सहेजें",
   "games.collections.collections_name": "संग्रह को 1–80 अक्षरों का नाम और अधिकतम 240 अक्षरों का विवरण दें।",
   "games.collections.collections_duplicate": "इस नाम का संग्रह आपके पास पहले से है।",
-  "games.collections.collections_limit": "इस प्रोफ़ाइल में संग्रहों के लिए स्टोरेज की सीमा पूरी हो गई है। इस्तेमाल न होने वाले संग्रह या गेम हटाएँ और फिर से कोशिश करें।",
+  "games.collections.collections_limit":
+    "इस प्रोफ़ाइल में संग्रहों के लिए स्टोरेज की सीमा पूरी हो गई है। इस्तेमाल न होने वाले संग्रह या गेम हटाएँ और फिर से कोशिश करें।",
   "games.collections.collections_missing": "यह संग्रह हटा दिया गया है। कोई दूसरा चुनें।",
-  "games.collections.collections_read": "आपके संग्रह पढ़े नहीं जा सके। सहेजा गया डेटा बदला नहीं गया है। उन्हें फिर से लोड करके देखें।",
-  "games.collections.collections_write": "बदलाव सहेजा नहीं जा सका। आपका पहले वाला संग्रह अभी भी मौजूद है। डिवाइस में कुछ जगह खाली करें और फिर से कोशिश करें।",
-  "games.collections.collections_game": "इस गेम की पहचान नहीं हो सकी। अपनी लाइब्रेरी रीफ़्रेश करें और फिर से कोशिश करें।",
-  "games.collections.firstNote": "एक संग्रह बनाएँ, फिर गेम के विवरण पेज से उन्हें जोड़ें या अपनी लाइब्रेरी में उन्हें चुनें। PC गेम और ROM एक ही संग्रह में रह सकते हैं।",
-  "games.collections.emptyNote": "गेम के विवरण पेज से उन्हें जोड़ें, या अपनी लाइब्रेरी में गेम चुनें और संग्रह में जोड़ें विकल्प चुनें।",
+  "games.collections.collections_read":
+    "आपके संग्रह पढ़े नहीं जा सके। सहेजा गया डेटा बदला नहीं गया है। उन्हें फिर से लोड करके देखें।",
+  "games.collections.collections_write":
+    "बदलाव सहेजा नहीं जा सका। आपका पहले वाला संग्रह अभी भी मौजूद है। डिवाइस में कुछ जगह खाली करें और फिर से कोशिश करें।",
+  "games.collections.collections_game":
+    "इस गेम की पहचान नहीं हो सकी। अपनी लाइब्रेरी रीफ़्रेश करें और फिर से कोशिश करें।",
+  "games.collections.firstNote":
+    "एक संग्रह बनाएँ, फिर गेम के विवरण पेज से उन्हें जोड़ें या अपनी लाइब्रेरी में उन्हें चुनें। PC गेम और ROM एक ही संग्रह में रह सकते हैं।",
+  "games.collections.emptyNote":
+    "गेम के विवरण पेज से उन्हें जोड़ें, या अपनी लाइब्रेरी में गेम चुनें और संग्रह में जोड़ें विकल्प चुनें।",
   "games.cache.saved": "सहेजा गया डेटा · {date}",
   "games.cache.refresh": "रीफ़्रेश करें",
   "games.cache.refreshing": "रीफ़्रेश हो रहा है…",
@@ -307,7 +327,8 @@ const hi: Record<string, string> = {
   ...gamePlaytime,
   ...gameLaunchHealth,
   "games.torrent.share.title": "टोरेंट साझा करें",
-  "games.torrent.share.note": "सत्यापित फ़ाइलें अन्य पीयर से साझा करें। किसी सीमा पर पहुँचने या Harbor बंद होने पर रुकता है। फ़ाइलें बदलने से पहले साझाकरण रोकें।",
+  "games.torrent.share.note":
+    "सत्यापित फ़ाइलें अन्य पीयर से साझा करें। किसी सीमा पर पहुँचने या Harbor बंद होने पर रुकता है। फ़ाइलें बदलने से पहले साझाकरण रोकें।",
   "games.torrent.share.upload": "अपलोड सीमा (KB/s)",
   "games.torrent.share.ratio": "साझाकरण अनुपात (1–10)",
   "games.torrent.share.minutes": "समय सीमा (मिनट)",
@@ -320,7 +341,8 @@ const hi: Record<string, string> = {
   "games.torrent.share.limitReached": "साझाकरण सीमा पूरी",
   "games.torrent.share.failed": "साझाकरण विफल। फ़ाइलें जाँचकर फिर कोशिश करें।",
   "games.torrent.share.stats": "{uploaded} अपलोड · {minutes} मिनट",
-  "games.torrent.torrent_seed_files": "पूरी हुई फ़ाइलें गायब हैं, बदल गई हैं या उपयोग में हैं। साझा करने से पहले डाउनलोड फ़ोल्डर जाँचें।",
+  "games.torrent.torrent_seed_files":
+    "पूरी हुई फ़ाइलें गायब हैं, बदल गई हैं या उपयोग में हैं। साझा करने से पहले डाउनलोड फ़ोल्डर जाँचें।",
   "games.torrent.torrent_seed_limits": "32–1,048,576 KB/s अपलोड, 1–10 अनुपात और 1–1,440 मिनट चुनें।",
 
   ...gamePokemonUi,

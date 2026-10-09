@@ -119,12 +119,13 @@ const tr: Record<string, string> = {
   ...gameHub,
   ...floatingPlayer,
   ...gameAntiCheat,
-  "Translations": "Çeviriler",
+  Translations: "Çeviriler",
   "Translating…": "Çevriliyor…",
   "Showing {lang}": "{lang} gösteriliyor",
   "Show all": "Tümünü göster",
   "games.download.speed.title": "İndirme hızı",
-  "games.download.speed.note": "Bu profilin doğrudan indirmeleri ve torrentleri arasında paylaşılır. Bir torrentin kendi sınırı daha düşük olabilir.",
+  "games.download.speed.note":
+    "Bu profilin doğrudan indirmeleri ve torrentleri arasında paylaşılır. Bir torrentin kendi sınırı daha düşük olabilir.",
   "games.download.speed.unlimited": "Sınırsız",
   "games.download.speed.limited": "Hızı sınırla",
   "games.download.speed.rate": "Saniyede kilobayt",
@@ -134,17 +135,23 @@ const tr: Record<string, string> = {
   "games.discovery.sale.cards.included": "Koleksiyon kartları",
   "games.discovery.sale.cards.none": "İndirim kartı yok",
   "games.discovery.sale.cards.unknown": "Kartlar doğrulanmadı",
-  "games.discovery.sale.cards.includedNote": "Steam’in güncel indirim kartı kurallarına göre dahildir. Kazanma koşullarını görmek için Steam’i açın.",
-  "games.discovery.sale.cards.noneNote": "Steam’in güncel kuralları bu mevsimsel indirim için koleksiyon kartlarını kapsamıyor. Diğer etkinlik ödülleri ayrıdır.",
-  "games.discovery.sale.cards.unknownNote": "Steam’in güncel kart kuralları doğrulanamadı. Kullanılabilirliği kontrol etmek için Steam’i açın.",
-  "games.discovery.sale.cards.badgeNote": "İndirim rozeti, ifade ve profil arka planı oluşturmak için bir set toplayın.",
+  "games.discovery.sale.cards.includedNote":
+    "Steam’in güncel indirim kartı kurallarına göre dahildir. Kazanma koşullarını görmek için Steam’i açın.",
+  "games.discovery.sale.cards.noneNote":
+    "Steam’in güncel kuralları bu mevsimsel indirim için koleksiyon kartlarını kapsamıyor. Diğer etkinlik ödülleri ayrıdır.",
+  "games.discovery.sale.cards.unknownNote":
+    "Steam’in güncel kart kuralları doğrulanamadı. Kullanılabilirliği kontrol etmek için Steam’i açın.",
+  "games.discovery.sale.cards.badgeNote":
+    "İndirim rozeti, ifade ve profil arka planı oluşturmak için bir set toplayın.",
   "games.download.storage.title": "İndirme alanı",
-  "games.download.storage.note": "Tahminler, duraklatılmış indirmeler dahil doğrudan indirmeleri, torrentleri ve geçici dosyaları kapsar. Harici yükleyiciler dahil değildir.",
+  "games.download.storage.note":
+    "Tahminler, duraklatılmış indirmeler dahil doğrudan indirmeleri, torrentleri ve geçici dosyaları kapsar. Harici yükleyiciler dahil değildir.",
   "games.download.storage.error": "Depolama alanı kontrol edilemedi.",
   "games.download.storage.unavailable": "Boş alan bilgisi alınamadı",
   "games.download.storage.free": "{size} boş",
   "games.download.storage.remaining": "Ek alan: {size}",
-  "games.download.storage.estimate": "Mevcut dosyaların bazıları henüz kontrol edilmedi. Gereken alan daha az olabilir.",
+  "games.download.storage.estimate":
+    "Mevcut dosyaların bazıları henüz kontrol edilmedi. Gereken alan daha az olabilir.",
   "games.download.storage.unknown": "Boyutu bilinmeyen: {count} dosya",
   "games.download.storage.other": "Diğer Harbor işlemleri için {size} ayrıldı",
   "games.download.storage.shortfall": "{size} daha fazla alan gerekli",
@@ -167,7 +174,8 @@ const tr: Record<string, string> = {
   ...gameEve,
   ...warhammerUniverse,
   ...gameWow,
-  "games.selection.partial": "{total} oyundan {count} tanesi güncellendi. Kalan oyunlar hâlâ seçili; tekrar dene.",
+  "games.selection.partial":
+    "{total} oyundan {count} tanesi güncellendi. Kalan oyunlar hâlâ seçili; tekrar dene.",
   "games.selection.failed": "Seçilen oyunlar güncellenemedi. Tekrar dene.",
   "games.custom.nav": "Yerel oyunlar",
   "games.libraryPersonal.visibility": "Kitaplık görünürlüğü",
@@ -189,7 +197,8 @@ const tr: Record<string, string> = {
   "games.selection.hide": "Gizle",
   "games.selection.pin": "Sabitle",
   "games.selection.unpin": "Sabitlemeyi kaldır",
-  "games.selection.matchNote": "Seçilen bazı oyunlar kullanılamıyor. Kitaplığınızı yenileyip tekrar deneyin.",
+  "games.selection.matchNote":
+    "Seçilen bazı oyunlar kullanılamıyor. Kitaplığınızı yenileyip tekrar deneyin.",
   "games.selection.collection": "Koleksiyona ekle",
   "games.collections.localMissing": "Artık bu profilin kitaplığında değil",
   "games.collections.dynamic": "Filtre tabanlı koleksiyon",
@@ -197,15 +206,21 @@ const tr: Record<string, string> = {
   "games.collections.type": "Koleksiyon türü",
   "games.collections.filters": "Koleksiyon filtreleri",
   "games.collections.ruleQuery": "Oyun başlığı şunu içerir",
-  "games.collections.autoNote": "Oyunlar, kitaplığınızda bu koleksiyonun filtreleriyle eşleşmelerine göre koleksiyona otomatik olarak eklenir veya koleksiyondan çıkarılır.",
-  "games.collections.pickerAutoNote": "Filtre tabanlı koleksiyonlar otomatik olarak güncellenir. Filtrelerini Koleksiyonlar bölümünden yönetin.",
+  "games.collections.autoNote":
+    "Oyunlar, kitaplığınızda bu koleksiyonun filtreleriyle eşleşmelerine göre koleksiyona otomatik olarak eklenir veya koleksiyondan çıkarılır.",
+  "games.collections.pickerAutoNote":
+    "Filtre tabanlı koleksiyonlar otomatik olarak güncellenir. Filtrelerini Koleksiyonlar bölümünden yönetin.",
   "games.collections.matches": "Eşleşen oyunlar: {count}",
-  "games.collections.emptyDynamic": "Kitaplığınızdaki hiçbir oyun bu filtrelerle eşleşmiyor. Filtreleri değiştirin veya kitaplığınıza daha fazla oyun ekleyin.",
-  "games.collections.collections_rules": "Bu koleksiyonun filtreleri okunamadı. Kayıtlı veriler değiştirilmedi.",
-  "games.collections.collections_dynamic": "Bu koleksiyon otomatik olarak güncellenir. Görünen oyunları değiştirmek için Koleksiyonlar bölümünden filtrelerini değiştirin.",
+  "games.collections.emptyDynamic":
+    "Kitaplığınızdaki hiçbir oyun bu filtrelerle eşleşmiyor. Filtreleri değiştirin veya kitaplığınıza daha fazla oyun ekleyin.",
+  "games.collections.collections_rules":
+    "Bu koleksiyonun filtreleri okunamadı. Kayıtlı veriler değiştirilmedi.",
+  "games.collections.collections_dynamic":
+    "Bu koleksiyon otomatik olarak güncellenir. Görünen oyunları değiştirmek için Koleksiyonlar bölümünden filtrelerini değiştirin.",
   "games.collections.title": "Koleksiyonlar",
   "games.collections.personal": "Sizin oluşturduklarınız",
-  "games.collections.note": "Her tür oyun için bir yer. Favorileri, daha sonra oynayacaklarınızı ve geri dönmeye değer dünyaları gruplandırın.",
+  "games.collections.note":
+    "Her tür oyun için bir yer. Favorileri, daha sonra oynayacaklarınızı ve geri dönmeye değer dünyaları gruplandırın.",
   "games.collections.addTo": "Koleksiyona ekle",
   "games.collections.count": "{count} oyun",
   "games.collections.one": "1 oyun",
@@ -215,7 +230,8 @@ const tr: Record<string, string> = {
   "games.collections.create": "Oluştur",
   "games.collections.first": "İlk koleksiyonunuz burada başlıyor.",
   "games.collections.noMatches": "Eşleşen koleksiyon yok.",
-  "games.collections.pickerNote": "İstediğiniz kadar seçin. Değişiklikler seçim yaptıkça kaydedilir.",
+  "games.collections.pickerNote":
+    "İstediğiniz kadar seçin. Değişiklikler seçim yaptıkça kaydedilir.",
   "games.collections.empty": "Bir sonraki tutkunuz için yer var.",
   "games.collections.findGames": "Oyun bul",
   "games.collections.description": "Hakkında birkaç söz",
@@ -223,22 +239,30 @@ const tr: Record<string, string> = {
   "games.collections.pin": "Koleksiyonu sabitle",
   "games.collections.unpin": "Koleksiyonun sabitlemesini kaldır",
   "games.collections.remove": "Koleksiyonu kaldır",
-  "games.collections.removeNote": "Yalnızca bu koleksiyon kaldırılır. Oyunlarınız, oyun kayıtlarınız, indirmeleriniz ve diğer koleksiyonlarınız olduğu gibi kalır.",
+  "games.collections.removeNote":
+    "Yalnızca bu koleksiyon kaldırılır. Oyunlarınız, oyun kayıtlarınız, indirmeleriniz ve diğer koleksiyonlarınız olduğu gibi kalır.",
   "games.collections.confirmRemove": "Bu koleksiyonu kaldır",
   "games.collections.removeGame": "{name} oyununu bu koleksiyondan çıkar",
   "games.collections.removeShort": "Koleksiyondan çıkar",
   "games.collections.added": "Son eklenenler önce",
   "games.collections.done": "Bitti",
   "games.collections.save": "Değişiklikleri kaydet",
-  "games.collections.collections_name": "Koleksiyona 1–80 karakterlik bir ad ve en fazla 240 karakterlik bir açıklama verin.",
+  "games.collections.collections_name":
+    "Koleksiyona 1–80 karakterlik bir ad ve en fazla 240 karakterlik bir açıklama verin.",
   "games.collections.collections_duplicate": "Bu ada sahip bir koleksiyonunuz zaten var.",
-  "games.collections.collections_limit": "Bu profil koleksiyon depolama sınırına ulaştı. Kullanılmayan koleksiyonları veya oyunları kaldırıp tekrar deneyin.",
+  "games.collections.collections_limit":
+    "Bu profil koleksiyon depolama sınırına ulaştı. Kullanılmayan koleksiyonları veya oyunları kaldırıp tekrar deneyin.",
   "games.collections.collections_missing": "Bu koleksiyon kaldırıldı. Başka bir koleksiyon seçin.",
-  "games.collections.collections_read": "Koleksiyonlarınız okunamadı. Kayıtlı veriler değiştirilmedi. Yeniden yüklemeyi deneyin.",
-  "games.collections.collections_write": "Değişiklik kaydedilemedi. Önceki koleksiyonunuz hâlâ burada. Cihazda biraz depolama alanı açıp tekrar deneyin.",
-  "games.collections.collections_game": "Bu oyun tanımlanamadı. Kitaplığınızı yenileyip tekrar deneyin.",
-  "games.collections.firstNote": "Bir koleksiyon oluşturun, ardından oyunları ayrıntı sayfalarından ekleyin veya kitaplığınızda seçin. PC oyunları ve ROM’lar bir arada bulunabilir.",
-  "games.collections.emptyNote": "Oyunları ayrıntı sayfalarından ekleyin veya kitaplığınızda oyunları seçip Koleksiyona ekle seçeneğini kullanın.",
+  "games.collections.collections_read":
+    "Koleksiyonlarınız okunamadı. Kayıtlı veriler değiştirilmedi. Yeniden yüklemeyi deneyin.",
+  "games.collections.collections_write":
+    "Değişiklik kaydedilemedi. Önceki koleksiyonunuz hâlâ burada. Cihazda biraz depolama alanı açıp tekrar deneyin.",
+  "games.collections.collections_game":
+    "Bu oyun tanımlanamadı. Kitaplığınızı yenileyip tekrar deneyin.",
+  "games.collections.firstNote":
+    "Bir koleksiyon oluşturun, ardından oyunları ayrıntı sayfalarından ekleyin veya kitaplığınızda seçin. PC oyunları ve ROM’lar bir arada bulunabilir.",
+  "games.collections.emptyNote":
+    "Oyunları ayrıntı sayfalarından ekleyin veya kitaplığınızda oyunları seçip Koleksiyona ekle seçeneğini kullanın.",
   "games.cache.saved": "Kaydedilen veriler · {date}",
   "games.cache.refresh": "Yenile",
   "games.cache.refreshing": "Yenileniyor…",
@@ -317,7 +341,8 @@ const tr: Record<string, string> = {
   ...gamePlaytime,
   ...gameLaunchHealth,
   "games.torrent.share.title": "Torrenti paylaş",
-  "games.torrent.share.note": "Doğrulanmış dosyaları eşlerle paylaş. Sınırlardan birine ulaşılınca veya Harbor kapanınca durur. Dosyaları değiştirmeden önce paylaşımı durdur.",
+  "games.torrent.share.note":
+    "Doğrulanmış dosyaları eşlerle paylaş. Sınırlardan birine ulaşılınca veya Harbor kapanınca durur. Dosyaları değiştirmeden önce paylaşımı durdur.",
   "games.torrent.share.upload": "Yükleme sınırı (KB/sn)",
   "games.torrent.share.ratio": "Paylaşım oranı (1–10)",
   "games.torrent.share.minutes": "Süre sınırı (dakika)",
@@ -330,7 +355,8 @@ const tr: Record<string, string> = {
   "games.torrent.share.limitReached": "Paylaşım sınırına ulaşıldı",
   "games.torrent.share.failed": "Paylaşım başarısız. Dosyaları denetleyip tekrar dene.",
   "games.torrent.share.stats": "{uploaded} yüklendi · {minutes} dk",
-  "games.torrent.torrent_seed_files": "Tamamlanan dosyalar eksik, değiştirilmiş veya kullanımda. Paylaşmadan önce indirme klasörünü denetle.",
+  "games.torrent.torrent_seed_files":
+    "Tamamlanan dosyalar eksik, değiştirilmiş veya kullanımda. Paylaşmadan önce indirme klasörünü denetle.",
   "games.torrent.torrent_seed_limits": "32–1.048.576 KB/sn, 1–10 oran ve 1–1.440 dakika seç.",
 
   ...gamePokemonUi,

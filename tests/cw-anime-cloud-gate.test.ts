@@ -166,7 +166,7 @@ test("library repair cannot rewrite live anime-scheme items", () => {
   const repair = read("src/lib/stremio-library-repair.ts");
   assert.match(
     repair,
-    /ANIME_CLOUD_ID\.test\(nid\) && \(normalized as \{ removed\?: unknown \}\)\.removed !== true\) continue;/,
+    /ANIME_CLOUD_ID\.test\(nid\) && \(normalized as \{ removed\?: unknown \}\)\.removed !== true\)\s+continue;/,
   );
 });
 

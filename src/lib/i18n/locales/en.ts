@@ -112,7 +112,7 @@ const en: Record<string, string> = {
   "sports.boxing.draws": "Draws",
   "sports.boxing.knockouts": "KOs",
   "sports.boxing.tba": "Fighter to be announced",
-  "Translations": "Translations",
+  Translations: "Translations",
   "Translating…": "Translating…",
   "Showing {lang}": "Showing {lang}",
   "Show all": "Show all",

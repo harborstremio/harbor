@@ -143,12 +143,13 @@ const ar: Record<string, string> = {
   ...gameHub,
   ...floatingPlayer,
   ...gameAntiCheat,
-  "Translations": "الترجمات",
+  Translations: "الترجمات",
   "Translating…": "جارٍ الترجمة…",
   "Showing {lang}": "عرض {lang}",
   "Show all": "عرض الكل",
   "games.download.speed.title": "سرعة التنزيل",
-  "games.download.speed.note": "حد مشترك للتنزيلات المباشرة والتورنت في هذا الملف الشخصي. قد يكون حد التورنت الخاص أقل.",
+  "games.download.speed.note":
+    "حد مشترك للتنزيلات المباشرة والتورنت في هذا الملف الشخصي. قد يكون حد التورنت الخاص أقل.",
   "games.download.speed.unlimited": "بلا حد",
   "games.download.speed.limited": "تحديد السرعة",
   "games.download.speed.rate": "كيلوبايت في الثانية",
@@ -158,17 +159,23 @@ const ar: Record<string, string> = {
   "games.discovery.sale.cards.included": "بطاقات التداول",
   "games.discovery.sale.cards.none": "لا توجد بطاقات للتخفيضات",
   "games.discovery.sale.cards.unknown": "البطاقات غير مؤكدة",
-  "games.discovery.sale.cards.includedNote": "مشمولة وفق قواعد Steam الحالية لبطاقات التخفيضات. افتح Steam لمعرفة شروط الحصول عليها.",
-  "games.discovery.sale.cards.noneNote": "قواعد Steam الحالية لا تشمل بطاقات تداول لهذه التخفيضات الموسمية. مكافآت الفعالية الأخرى منفصلة.",
-  "games.discovery.sale.cards.unknownNote": "تعذّر التحقق من قواعد Steam الحالية للبطاقات. افتح Steam للتحقق من توفرها.",
-  "games.discovery.sale.cards.badgeNote": "اجمع مجموعة كاملة لصنع شارة للتخفيضات ورمز تعبيري وخلفية للملف الشخصي.",
+  "games.discovery.sale.cards.includedNote":
+    "مشمولة وفق قواعد Steam الحالية لبطاقات التخفيضات. افتح Steam لمعرفة شروط الحصول عليها.",
+  "games.discovery.sale.cards.noneNote":
+    "قواعد Steam الحالية لا تشمل بطاقات تداول لهذه التخفيضات الموسمية. مكافآت الفعالية الأخرى منفصلة.",
+  "games.discovery.sale.cards.unknownNote":
+    "تعذّر التحقق من قواعد Steam الحالية للبطاقات. افتح Steam للتحقق من توفرها.",
+  "games.discovery.sale.cards.badgeNote":
+    "اجمع مجموعة كاملة لصنع شارة للتخفيضات ورمز تعبيري وخلفية للملف الشخصي.",
   "games.download.storage.title": "مساحة التنزيل",
-  "games.download.storage.note": "تشمل التقديرات التنزيلات المباشرة والتورنت والملفات المؤقتة، بما فيها التنزيلات المتوقفة مؤقتًا. لا تشمل برامج التثبيت الخارجية.",
+  "games.download.storage.note":
+    "تشمل التقديرات التنزيلات المباشرة والتورنت والملفات المؤقتة، بما فيها التنزيلات المتوقفة مؤقتًا. لا تشمل برامج التثبيت الخارجية.",
   "games.download.storage.error": "تعذّر التحقق من مساحة التخزين.",
   "games.download.storage.unavailable": "المساحة الخالية غير متاحة",
   "games.download.storage.free": "{size} متاحة",
   "games.download.storage.remaining": "المساحة الإضافية: {size}",
-  "games.download.storage.estimate": "لم تُفحص بعض الملفات الموجودة بعد. قد تكون المساحة المطلوبة أقل.",
+  "games.download.storage.estimate":
+    "لم تُفحص بعض الملفات الموجودة بعد. قد تكون المساحة المطلوبة أقل.",
   "games.download.storage.unknown": "الحجم غير معروف: {count} ملفات",
   "games.download.storage.other": "المحجوز لعمليات Harbor الأخرى: {size}",
   "games.download.storage.shortfall": "تحتاج إلى مساحة إضافية قدرها {size}",
@@ -191,7 +198,8 @@ const ar: Record<string, string> = {
   ...gameEve,
   ...warhammerUniverse,
   ...gameWow,
-  "games.selection.partial": "تم تحديث {count} من أصل {total} لعبة. لا تزال الألعاب المتبقية محددة؛ حاول مجددًا.",
+  "games.selection.partial":
+    "تم تحديث {count} من أصل {total} لعبة. لا تزال الألعاب المتبقية محددة؛ حاول مجددًا.",
   "games.selection.failed": "تعذّر تحديث الألعاب المحددة. حاول مجددًا.",
   "games.custom.nav": "الألعاب المحلية",
   "games.libraryPersonal.visibility": "ظهور الألعاب في المكتبة",
@@ -221,15 +229,21 @@ const ar: Record<string, string> = {
   "games.collections.type": "نوع المجموعة",
   "games.collections.filters": "فلاتر المجموعة",
   "games.collections.ruleQuery": "عنوان اللعبة يحتوي على",
-  "games.collections.autoNote": "تُضاف الألعاب إلى هذه المجموعة أو تُزال منها تلقائيًا بحسب مطابقتها لفلاتر المجموعة في مكتبتك.",
-  "games.collections.pickerAutoNote": "تُحدَّث المجموعات التي تعتمد على الفلاتر تلقائيًا. يمكنك إدارة فلاترها في المجموعات.",
+  "games.collections.autoNote":
+    "تُضاف الألعاب إلى هذه المجموعة أو تُزال منها تلقائيًا بحسب مطابقتها لفلاتر المجموعة في مكتبتك.",
+  "games.collections.pickerAutoNote":
+    "تُحدَّث المجموعات التي تعتمد على الفلاتر تلقائيًا. يمكنك إدارة فلاترها في المجموعات.",
   "games.collections.matches": "الألعاب المطابقة: {count}",
-  "games.collections.emptyDynamic": "لا توجد ألعاب في مكتبتك تطابق هذه الفلاتر. غيّر الفلاتر أو أضف مزيدًا من الألعاب إلى مكتبتك.",
-  "games.collections.collections_rules": "تعذّرت قراءة فلاتر هذه المجموعة. لم تُستبدل البيانات المحفوظة.",
-  "games.collections.collections_dynamic": "تُحدّث هذه المجموعة تلقائيًا. غيّر فلاترها في المجموعات لتغيير الألعاب التي تظهر.",
+  "games.collections.emptyDynamic":
+    "لا توجد ألعاب في مكتبتك تطابق هذه الفلاتر. غيّر الفلاتر أو أضف مزيدًا من الألعاب إلى مكتبتك.",
+  "games.collections.collections_rules":
+    "تعذّرت قراءة فلاتر هذه المجموعة. لم تُستبدل البيانات المحفوظة.",
+  "games.collections.collections_dynamic":
+    "تُحدّث هذه المجموعة تلقائيًا. غيّر فلاترها في المجموعات لتغيير الألعاب التي تظهر.",
   "games.collections.title": "المجموعات",
   "games.collections.personal": "من إنشائك",
-  "games.collections.note": "مكان لكل نوع من الألعاب. اجمع ألعابك المفضلة وما تنوي لعبه والعوالم التي تستحق العودة إليها.",
+  "games.collections.note":
+    "مكان لكل نوع من الألعاب. اجمع ألعابك المفضلة وما تنوي لعبه والعوالم التي تستحق العودة إليها.",
   "games.collections.addTo": "إضافة إلى مجموعة",
   "games.collections.count": "الألعاب: {count}",
   "games.collections.one": "لعبة واحدة",
@@ -247,7 +261,8 @@ const ar: Record<string, string> = {
   "games.collections.pin": "تثبيت المجموعة في الأعلى",
   "games.collections.unpin": "إلغاء تثبيت المجموعة في الأعلى",
   "games.collections.remove": "إزالة المجموعة",
-  "games.collections.removeNote": "تُزال هذه المجموعة فقط. تبقى ألعابك وملفات حفظ اللعب والتنزيلات والمجموعات الأخرى كما هي.",
+  "games.collections.removeNote":
+    "تُزال هذه المجموعة فقط. تبقى ألعابك وملفات حفظ اللعب والتنزيلات والمجموعات الأخرى كما هي.",
   "games.collections.confirmRemove": "إزالة هذه المجموعة",
   "games.collections.removeGame": "إزالة {name} من هذه المجموعة",
   "games.collections.removeShort": "إزالة من المجموعة",
@@ -256,13 +271,18 @@ const ar: Record<string, string> = {
   "games.collections.save": "حفظ التغييرات",
   "games.collections.collections_name": "أدخل للمجموعة اسمًا من 1–80 حرفًا ووصفًا لا يتجاوز 240 حرفًا.",
   "games.collections.collections_duplicate": "لديك مجموعة بهذا الاسم بالفعل.",
-  "games.collections.collections_limit": "بلغ هذا الملف الشخصي الحد الأقصى لتخزين المجموعات. أزل المجموعات أو الألعاب غير المستخدمة وحاول مجددًا.",
+  "games.collections.collections_limit":
+    "بلغ هذا الملف الشخصي الحد الأقصى لتخزين المجموعات. أزل المجموعات أو الألعاب غير المستخدمة وحاول مجددًا.",
   "games.collections.collections_missing": "تمت إزالة هذه المجموعة. اختر مجموعة أخرى.",
-  "games.collections.collections_read": "تعذّرت قراءة مجموعاتك. لم تُستبدل البيانات المحفوظة. حاول تحميلها مجددًا.",
-  "games.collections.collections_write": "تعذّر حفظ التغيير. لا تزال مجموعتك السابقة موجودة. وفّر مساحة تخزين على الجهاز وحاول مجددًا.",
+  "games.collections.collections_read":
+    "تعذّرت قراءة مجموعاتك. لم تُستبدل البيانات المحفوظة. حاول تحميلها مجددًا.",
+  "games.collections.collections_write":
+    "تعذّر حفظ التغيير. لا تزال مجموعتك السابقة موجودة. وفّر مساحة تخزين على الجهاز وحاول مجددًا.",
   "games.collections.collections_game": "تعذّر التعرف على هذه اللعبة. حدّث مكتبتك وحاول مجددًا.",
-  "games.collections.firstNote": "أنشئ مجموعة، ثم أضف الألعاب من صفحات تفاصيلها أو حددها في مكتبتك. يمكن أن تضم المجموعة ألعاب الكمبيوتر وملفات ROM معًا.",
-  "games.collections.emptyNote": "أضف الألعاب من صفحات تفاصيلها، أو حدد الألعاب في مكتبتك واختر إضافة إلى مجموعة.",
+  "games.collections.firstNote":
+    "أنشئ مجموعة، ثم أضف الألعاب من صفحات تفاصيلها أو حددها في مكتبتك. يمكن أن تضم المجموعة ألعاب الكمبيوتر وملفات ROM معًا.",
+  "games.collections.emptyNote":
+    "أضف الألعاب من صفحات تفاصيلها، أو حدد الألعاب في مكتبتك واختر إضافة إلى مجموعة.",
   "games.cache.saved": "بيانات محفوظة · {date}",
   "games.cache.refresh": "تحديث",
   "games.cache.refreshing": "جارٍ التحديث…",
@@ -362,7 +382,8 @@ const ar: Record<string, string> = {
   ...gamePlaytime,
   ...gameLaunchHealth,
   "games.torrent.share.title": "مشاركة التورنت",
-  "games.torrent.share.note": "شارك الملفات المتحقق منها مع الأقران. تتوقف المشاركة عند بلوغ أي حد أو إغلاق Harbor. أوقفها قبل تغيير الملفات.",
+  "games.torrent.share.note":
+    "شارك الملفات المتحقق منها مع الأقران. تتوقف المشاركة عند بلوغ أي حد أو إغلاق Harbor. أوقفها قبل تغيير الملفات.",
   "games.torrent.share.upload": "حد الرفع (كيلوبايت/ث)",
   "games.torrent.share.ratio": "نسبة المشاركة (1–10)",
   "games.torrent.share.minutes": "الحد الزمني (دقائق)",
@@ -375,8 +396,10 @@ const ar: Record<string, string> = {
   "games.torrent.share.limitReached": "تم بلوغ حد المشاركة",
   "games.torrent.share.failed": "فشلت المشاركة. افحص الملفات وحاول مجددًا.",
   "games.torrent.share.stats": "تم رفع {uploaded} · {minutes} دقيقة",
-  "games.torrent.torrent_seed_files": "الملفات المكتملة مفقودة أو تغيرت أو قيد الاستخدام. افحص مجلد التنزيل قبل المشاركة.",
-  "games.torrent.torrent_seed_limits": "اختر حد رفع 32–1,048,576 كيلوبايت/ث، ونسبة 1–10، ومدة 1–1,440 دقيقة.",
+  "games.torrent.torrent_seed_files":
+    "الملفات المكتملة مفقودة أو تغيرت أو قيد الاستخدام. افحص مجلد التنزيل قبل المشاركة.",
+  "games.torrent.torrent_seed_limits":
+    "اختر حد رفع 32–1,048,576 كيلوبايت/ث، ونسبة 1–10، ومدة 1–1,440 دقيقة.",
 
   ...gamePokemonUi,
   ...customArtwork,

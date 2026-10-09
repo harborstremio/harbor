@@ -139,12 +139,13 @@ const vi: Record<string, string> = {
   ...gameHub,
   ...floatingPlayer,
   ...gameAntiCheat,
-  "Translations": "Bản dịch",
+  Translations: "Bản dịch",
   "Translating…": "Đang dịch…",
   "Showing {lang}": "Đang hiển thị {lang}",
   "Show all": "Hiển thị tất cả",
   "games.download.speed.title": "Tốc độ tải xuống",
-  "games.download.speed.note": "Dùng chung cho tải trực tiếp và torrent của hồ sơ này. Giới hạn riêng của một torrent có thể thấp hơn.",
+  "games.download.speed.note":
+    "Dùng chung cho tải trực tiếp và torrent của hồ sơ này. Giới hạn riêng của một torrent có thể thấp hơn.",
   "games.download.speed.unlimited": "Không giới hạn",
   "games.download.speed.limited": "Giới hạn tốc độ",
   "games.download.speed.rate": "Kilobyte mỗi giây",
@@ -154,17 +155,23 @@ const vi: Record<string, string> = {
   "games.discovery.sale.cards.included": "Thẻ sưu tầm",
   "games.discovery.sale.cards.none": "Không có thẻ đợt giảm giá",
   "games.discovery.sale.cards.unknown": "Thẻ chưa xác nhận",
-  "games.discovery.sale.cards.includedNote": "Có theo quy định hiện hành của Steam về thẻ đợt giảm giá. Mở Steam để xem điều kiện nhận thẻ.",
-  "games.discovery.sale.cards.noneNote": "Quy định hiện hành của Steam không có thẻ sưu tầm cho đợt giảm giá theo mùa này. Các phần thưởng sự kiện khác được tính riêng.",
-  "games.discovery.sale.cards.unknownNote": "Không thể xác minh quy định hiện hành của Steam về thẻ. Mở Steam để kiểm tra tình trạng cung cấp.",
-  "games.discovery.sale.cards.badgeNote": "Thu thập đủ một bộ để chế tạo huy hiệu đợt giảm giá, biểu tượng cảm xúc và nền hồ sơ.",
+  "games.discovery.sale.cards.includedNote":
+    "Có theo quy định hiện hành của Steam về thẻ đợt giảm giá. Mở Steam để xem điều kiện nhận thẻ.",
+  "games.discovery.sale.cards.noneNote":
+    "Quy định hiện hành của Steam không có thẻ sưu tầm cho đợt giảm giá theo mùa này. Các phần thưởng sự kiện khác được tính riêng.",
+  "games.discovery.sale.cards.unknownNote":
+    "Không thể xác minh quy định hiện hành của Steam về thẻ. Mở Steam để kiểm tra tình trạng cung cấp.",
+  "games.discovery.sale.cards.badgeNote":
+    "Thu thập đủ một bộ để chế tạo huy hiệu đợt giảm giá, biểu tượng cảm xúc và nền hồ sơ.",
   "games.download.storage.title": "Dung lượng tải xuống",
-  "games.download.storage.note": "Ước tính bao gồm tải trực tiếp, torrent và tệp tạm, kể cả các lượt tải đang tạm dừng. Không bao gồm trình cài đặt bên ngoài.",
+  "games.download.storage.note":
+    "Ước tính bao gồm tải trực tiếp, torrent và tệp tạm, kể cả các lượt tải đang tạm dừng. Không bao gồm trình cài đặt bên ngoài.",
   "games.download.storage.error": "Không thể kiểm tra dung lượng lưu trữ.",
   "games.download.storage.unavailable": "Không rõ dung lượng trống",
   "games.download.storage.free": "Còn trống {size}",
   "games.download.storage.remaining": "Dung lượng bổ sung: {size}",
-  "games.download.storage.estimate": "Một số tệp hiện có chưa được kiểm tra. Dung lượng cần thiết có thể thấp hơn.",
+  "games.download.storage.estimate":
+    "Một số tệp hiện có chưa được kiểm tra. Dung lượng cần thiết có thể thấp hơn.",
   "games.download.storage.unknown": "Chưa rõ kích thước: {count} tệp",
   "games.download.storage.other": "Đã dành {size} cho tác vụ Harbor khác",
   "games.download.storage.shortfall": "Cần thêm {size} dung lượng",
@@ -187,7 +194,8 @@ const vi: Record<string, string> = {
   ...gameEve,
   ...warhammerUniverse,
   ...gameWow,
-  "games.selection.partial": "Đã cập nhật {count} trên {total} trò chơi. Các trò chơi còn lại vẫn được chọn; hãy thử lại.",
+  "games.selection.partial":
+    "Đã cập nhật {count} trên {total} trò chơi. Các trò chơi còn lại vẫn được chọn; hãy thử lại.",
   "games.selection.failed": "Không thể cập nhật các trò chơi đã chọn. Hãy thử lại.",
   "games.custom.nav": "Trò chơi cục bộ",
   "games.libraryPersonal.visibility": "Hiển thị trong thư viện",
@@ -209,7 +217,8 @@ const vi: Record<string, string> = {
   "games.selection.hide": "Ẩn",
   "games.selection.pin": "Ghim",
   "games.selection.unpin": "Bỏ ghim",
-  "games.selection.matchNote": "Một số trò chơi đã chọn không khả dụng. Hãy làm mới thư viện và thử lại.",
+  "games.selection.matchNote":
+    "Một số trò chơi đã chọn không khả dụng. Hãy làm mới thư viện và thử lại.",
   "games.selection.collection": "Thêm vào bộ sưu tập",
   "games.collections.localMissing": "Không còn trong thư viện của hồ sơ này",
   "games.collections.dynamic": "Bộ sưu tập theo bộ lọc",
@@ -217,15 +226,21 @@ const vi: Record<string, string> = {
   "games.collections.type": "Loại bộ sưu tập",
   "games.collections.filters": "Bộ lọc của bộ sưu tập",
   "games.collections.ruleQuery": "Tên trò chơi chứa",
-  "games.collections.autoNote": "Trò chơi tự động được thêm vào hoặc rời khỏi bộ sưu tập này tùy theo việc chúng có khớp với bộ lọc trong thư viện hay không.",
-  "games.collections.pickerAutoNote": "Bộ sưu tập theo bộ lọc tự động cập nhật. Quản lý bộ lọc của chúng trong Bộ sưu tập.",
+  "games.collections.autoNote":
+    "Trò chơi tự động được thêm vào hoặc rời khỏi bộ sưu tập này tùy theo việc chúng có khớp với bộ lọc trong thư viện hay không.",
+  "games.collections.pickerAutoNote":
+    "Bộ sưu tập theo bộ lọc tự động cập nhật. Quản lý bộ lọc của chúng trong Bộ sưu tập.",
   "games.collections.matches": "Trò chơi phù hợp: {count}",
-  "games.collections.emptyDynamic": "Không có trò chơi nào trong thư viện khớp với các bộ lọc này. Hãy đổi bộ lọc hoặc thêm trò chơi vào thư viện.",
-  "games.collections.collections_rules": "Không thể đọc bộ lọc của bộ sưu tập này. Dữ liệu đã lưu chưa bị thay thế.",
-  "games.collections.collections_dynamic": "Bộ sưu tập này tự động cập nhật. Hãy đổi bộ lọc trong Bộ sưu tập để thay đổi các trò chơi xuất hiện.",
+  "games.collections.emptyDynamic":
+    "Không có trò chơi nào trong thư viện khớp với các bộ lọc này. Hãy đổi bộ lọc hoặc thêm trò chơi vào thư viện.",
+  "games.collections.collections_rules":
+    "Không thể đọc bộ lọc của bộ sưu tập này. Dữ liệu đã lưu chưa bị thay thế.",
+  "games.collections.collections_dynamic":
+    "Bộ sưu tập này tự động cập nhật. Hãy đổi bộ lọc trong Bộ sưu tập để thay đổi các trò chơi xuất hiện.",
   "games.collections.title": "Bộ sưu tập",
   "games.collections.personal": "Do bạn tạo",
-  "games.collections.note": "Một nơi cho mọi loại trò chơi. Nhóm các trò yêu thích, những trò định chơi và những thế giới đáng quay lại.",
+  "games.collections.note":
+    "Một nơi cho mọi loại trò chơi. Nhóm các trò yêu thích, những trò định chơi và những thế giới đáng quay lại.",
   "games.collections.addTo": "Thêm vào bộ sưu tập",
   "games.collections.count": "{count} trò chơi",
   "games.collections.one": "1 trò chơi",
@@ -243,22 +258,30 @@ const vi: Record<string, string> = {
   "games.collections.pin": "Ghim bộ sưu tập",
   "games.collections.unpin": "Bỏ ghim bộ sưu tập",
   "games.collections.remove": "Xóa bộ sưu tập",
-  "games.collections.removeNote": "Chỉ bộ sưu tập này bị xóa. Trò chơi, bản lưu tiến trình, nội dung tải xuống và các bộ sưu tập khác của bạn vẫn được giữ nguyên.",
+  "games.collections.removeNote":
+    "Chỉ bộ sưu tập này bị xóa. Trò chơi, bản lưu tiến trình, nội dung tải xuống và các bộ sưu tập khác của bạn vẫn được giữ nguyên.",
   "games.collections.confirmRemove": "Xóa bộ sưu tập này",
   "games.collections.removeGame": "Xóa {name} khỏi bộ sưu tập này",
   "games.collections.removeShort": "Xóa khỏi bộ sưu tập",
   "games.collections.added": "Thêm gần đây nhất trước",
   "games.collections.done": "Xong",
   "games.collections.save": "Lưu thay đổi",
-  "games.collections.collections_name": "Đặt tên bộ sưu tập dài 1–80 ký tự và phần mô tả tối đa 240 ký tự.",
+  "games.collections.collections_name":
+    "Đặt tên bộ sưu tập dài 1–80 ký tự và phần mô tả tối đa 240 ký tự.",
   "games.collections.collections_duplicate": "Bạn đã có một bộ sưu tập mang tên này.",
-  "games.collections.collections_limit": "Hồ sơ này đã đạt giới hạn lưu trữ bộ sưu tập. Xóa bộ sưu tập hoặc trò chơi không dùng rồi thử lại.",
+  "games.collections.collections_limit":
+    "Hồ sơ này đã đạt giới hạn lưu trữ bộ sưu tập. Xóa bộ sưu tập hoặc trò chơi không dùng rồi thử lại.",
   "games.collections.collections_missing": "Bộ sưu tập này đã bị xóa. Hãy chọn bộ sưu tập khác.",
-  "games.collections.collections_read": "Không thể đọc các bộ sưu tập của bạn. Dữ liệu đã lưu chưa bị thay thế. Hãy thử tải lại.",
-  "games.collections.collections_write": "Không thể lưu thay đổi. Bộ sưu tập trước đó của bạn vẫn còn. Hãy giải phóng một ít dung lượng trên thiết bị rồi thử lại.",
-  "games.collections.collections_game": "Không thể xác định trò chơi này. Hãy làm mới thư viện và thử lại.",
-  "games.collections.firstNote": "Tạo một bộ sưu tập, rồi thêm trò chơi từ trang chi tiết hoặc chọn trò chơi trong thư viện. Trò chơi PC và ROM có thể ở cùng một bộ sưu tập.",
-  "games.collections.emptyNote": "Thêm trò chơi từ trang chi tiết, hoặc chọn trò chơi trong thư viện và chọn Thêm vào bộ sưu tập.",
+  "games.collections.collections_read":
+    "Không thể đọc các bộ sưu tập của bạn. Dữ liệu đã lưu chưa bị thay thế. Hãy thử tải lại.",
+  "games.collections.collections_write":
+    "Không thể lưu thay đổi. Bộ sưu tập trước đó của bạn vẫn còn. Hãy giải phóng một ít dung lượng trên thiết bị rồi thử lại.",
+  "games.collections.collections_game":
+    "Không thể xác định trò chơi này. Hãy làm mới thư viện và thử lại.",
+  "games.collections.firstNote":
+    "Tạo một bộ sưu tập, rồi thêm trò chơi từ trang chi tiết hoặc chọn trò chơi trong thư viện. Trò chơi PC và ROM có thể ở cùng một bộ sưu tập.",
+  "games.collections.emptyNote":
+    "Thêm trò chơi từ trang chi tiết, hoặc chọn trò chơi trong thư viện và chọn Thêm vào bộ sưu tập.",
   "games.cache.saved": "Dữ liệu đã lưu · {date}",
   "games.cache.refresh": "Làm mới",
   "games.cache.refreshing": "Đang làm mới…",
@@ -357,7 +380,8 @@ const vi: Record<string, string> = {
   ...gamePlaytime,
   ...gameLaunchHealth,
   "games.torrent.share.title": "Chia sẻ torrent",
-  "games.torrent.share.note": "Chia sẻ tệp đã xác minh với các máy ngang hàng. Dừng khi đạt một giới hạn hoặc đóng Harbor. Dừng chia sẻ trước khi thay đổi tệp.",
+  "games.torrent.share.note":
+    "Chia sẻ tệp đã xác minh với các máy ngang hàng. Dừng khi đạt một giới hạn hoặc đóng Harbor. Dừng chia sẻ trước khi thay đổi tệp.",
   "games.torrent.share.upload": "Giới hạn tải lên (KB/giây)",
   "games.torrent.share.ratio": "Tỷ lệ chia sẻ (1–10)",
   "games.torrent.share.minutes": "Giới hạn thời gian (phút)",
@@ -370,8 +394,10 @@ const vi: Record<string, string> = {
   "games.torrent.share.limitReached": "Đã đạt giới hạn",
   "games.torrent.share.failed": "Chia sẻ thất bại. Kiểm tra tệp và thử lại.",
   "games.torrent.share.stats": "Đã tải lên {uploaded} · {minutes} phút",
-  "games.torrent.torrent_seed_files": "Tệp hoàn tất bị thiếu, đã thay đổi hoặc đang được sử dụng. Kiểm tra thư mục tải xuống trước khi chia sẻ.",
-  "games.torrent.torrent_seed_limits": "Chọn 32–1.048.576 KB/giây, tỷ lệ 1–10 và thời gian 1–1.440 phút.",
+  "games.torrent.torrent_seed_files":
+    "Tệp hoàn tất bị thiếu, đã thay đổi hoặc đang được sử dụng. Kiểm tra thư mục tải xuống trước khi chia sẻ.",
+  "games.torrent.torrent_seed_limits":
+    "Chọn 32–1.048.576 KB/giây, tỷ lệ 1–10 và thời gian 1–1.440 phút.",
 
   ...gamePokemonUi,
   ...customArtwork,

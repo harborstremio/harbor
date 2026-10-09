@@ -141,32 +141,40 @@ const de: Record<string, string> = {
   ...gameHub,
   ...floatingPlayer,
   ...gameAntiCheat,
-  "Translations": "Übersetzungen",
+  Translations: "Übersetzungen",
   "Translating…": "Wird übersetzt…",
   "Showing {lang}": "{lang} wird angezeigt",
   "Show all": "Alle anzeigen",
   "games.download.speed.title": "Downloadgeschwindigkeit",
-  "games.download.speed.note": "Gilt gemeinsam für direkte Downloads und Torrents dieses Profils. Ein einzelner Torrent kann ein niedrigeres Limit haben.",
+  "games.download.speed.note":
+    "Gilt gemeinsam für direkte Downloads und Torrents dieses Profils. Ein einzelner Torrent kann ein niedrigeres Limit haben.",
   "games.download.speed.unlimited": "Unbegrenzt",
   "games.download.speed.limited": "Begrenzen",
   "games.download.speed.rate": "Kilobyte pro Sekunde",
   "games.download.speed.range": "Gib eine ganze Zahl von {min} bis {max} ein.",
-  "games.download.speed.error": "Die Geschwindigkeitseinstellung konnte nicht geladen oder gespeichert werden. Versuche es erneut.",
+  "games.download.speed.error":
+    "Die Geschwindigkeitseinstellung konnte nicht geladen oder gespeichert werden. Versuche es erneut.",
   "games.download.speed.current": "Downloadgeschwindigkeit: {rate}",
   "games.discovery.sale.cards.included": "Sammelkarten",
   "games.discovery.sale.cards.none": "Keine Aktionskarten",
   "games.discovery.sale.cards.unknown": "Karten unbestätigt",
-  "games.discovery.sale.cards.includedNote": "Nach Steams aktuellen Regeln sind Aktionskarten enthalten. Die Bedingungen findest du auf Steam.",
-  "games.discovery.sale.cards.noneNote": "Steams aktuelle Regeln sehen für diese saisonale Aktion keine Sammelkarten vor. Andere Eventbelohnungen sind davon unabhängig.",
-  "games.discovery.sale.cards.unknownNote": "Steams aktuelle Kartenregeln konnten nicht geprüft werden. Prüfe die Verfügbarkeit auf Steam.",
-  "games.discovery.sale.cards.badgeNote": "Sammle ein vollständiges Set, um ein Aktionsabzeichen, ein Emoticon und einen Profilhintergrund herzustellen.",
+  "games.discovery.sale.cards.includedNote":
+    "Nach Steams aktuellen Regeln sind Aktionskarten enthalten. Die Bedingungen findest du auf Steam.",
+  "games.discovery.sale.cards.noneNote":
+    "Steams aktuelle Regeln sehen für diese saisonale Aktion keine Sammelkarten vor. Andere Eventbelohnungen sind davon unabhängig.",
+  "games.discovery.sale.cards.unknownNote":
+    "Steams aktuelle Kartenregeln konnten nicht geprüft werden. Prüfe die Verfügbarkeit auf Steam.",
+  "games.discovery.sale.cards.badgeNote":
+    "Sammle ein vollständiges Set, um ein Aktionsabzeichen, ein Emoticon und einen Profilhintergrund herzustellen.",
   "games.download.storage.title": "Speicher für Downloads",
-  "games.download.storage.note": "Die Schätzungen umfassen direkte Downloads, Torrents und temporäre Dateien, einschließlich pausierter Downloads. Externe Installationsprogramme sind nicht enthalten.",
+  "games.download.storage.note":
+    "Die Schätzungen umfassen direkte Downloads, Torrents und temporäre Dateien, einschließlich pausierter Downloads. Externe Installationsprogramme sind nicht enthalten.",
   "games.download.storage.error": "Der Speicherplatz konnte nicht geprüft werden.",
   "games.download.storage.unavailable": "Freier Speicher unbekannt",
   "games.download.storage.free": "{size} frei",
   "games.download.storage.remaining": "Zusätzlicher Speicherplatz: {size}",
-  "games.download.storage.estimate": "Einige vorhandene Dateien wurden noch nicht geprüft. Der benötigte Speicherplatz kann geringer sein.",
+  "games.download.storage.estimate":
+    "Einige vorhandene Dateien wurden noch nicht geprüft. Der benötigte Speicherplatz kann geringer sein.",
   "games.download.storage.unknown": "Größe unbekannt: {count} Dateien",
   "games.download.storage.other": "{size} durch andere Harbor-Vorgänge reserviert",
   "games.download.storage.shortfall": "{size} zusätzlicher Speicher benötigt",
@@ -189,8 +197,10 @@ const de: Record<string, string> = {
   ...gameEve,
   ...warhammerUniverse,
   ...gameWow,
-  "games.selection.partial": "{count} von {total} Spielen aktualisiert. Die übrigen Spiele bleiben ausgewählt; versuche es erneut.",
-  "games.selection.failed": "Die ausgewählten Spiele konnten nicht aktualisiert werden. Versuche es erneut.",
+  "games.selection.partial":
+    "{count} von {total} Spielen aktualisiert. Die übrigen Spiele bleiben ausgewählt; versuche es erneut.",
+  "games.selection.failed":
+    "Die ausgewählten Spiele konnten nicht aktualisiert werden. Versuche es erneut.",
   "games.custom.nav": "Lokale Spiele",
   "games.libraryPersonal.visibility": "Sichtbarkeit in der Bibliothek",
   "games.libraryPersonal.visible": "Deine Spiele",
@@ -211,7 +221,8 @@ const de: Record<string, string> = {
   "games.selection.hide": "Ausblenden",
   "games.selection.pin": "Anheften",
   "games.selection.unpin": "Lösen",
-  "games.selection.matchNote": "Einige ausgewählte Spiele sind nicht verfügbar. Aktualisiere deine Bibliothek und versuche es erneut.",
+  "games.selection.matchNote":
+    "Einige ausgewählte Spiele sind nicht verfügbar. Aktualisiere deine Bibliothek und versuche es erneut.",
   "games.selection.collection": "Zur Sammlung hinzufügen",
   "games.collections.localMissing": "Nicht mehr in der Bibliothek dieses Profils",
   "games.collections.dynamic": "Filterbasierte Sammlung",
@@ -219,15 +230,21 @@ const de: Record<string, string> = {
   "games.collections.type": "Art der Sammlung",
   "games.collections.filters": "Sammlungsfilter",
   "games.collections.ruleQuery": "Spieltitel enthält",
-  "games.collections.autoNote": "Spiele werden dieser Sammlung automatisch hinzugefügt oder daraus entfernt, je nachdem, ob deine Bibliothek zu ihren Filtern passt.",
-  "games.collections.pickerAutoNote": "Filterbasierte Sammlungen werden automatisch aktualisiert. Verwalte ihre Filter unter Sammlungen.",
+  "games.collections.autoNote":
+    "Spiele werden dieser Sammlung automatisch hinzugefügt oder daraus entfernt, je nachdem, ob deine Bibliothek zu ihren Filtern passt.",
+  "games.collections.pickerAutoNote":
+    "Filterbasierte Sammlungen werden automatisch aktualisiert. Verwalte ihre Filter unter Sammlungen.",
   "games.collections.matches": "Passende Spiele: {count}",
-  "games.collections.emptyDynamic": "Keine Spiele aus deiner Bibliothek passen zu diesen Filtern. Ändere die Filter oder füge deiner Bibliothek weitere Spiele hinzu.",
-  "games.collections.collections_rules": "Die Filter dieser Sammlung konnten nicht gelesen werden. Die gespeicherten Daten wurden nicht ersetzt.",
-  "games.collections.collections_dynamic": "Diese Sammlung wird automatisch aktualisiert. Ändere ihre Filter unter Sammlungen, um festzulegen, welche Spiele erscheinen.",
+  "games.collections.emptyDynamic":
+    "Keine Spiele aus deiner Bibliothek passen zu diesen Filtern. Ändere die Filter oder füge deiner Bibliothek weitere Spiele hinzu.",
+  "games.collections.collections_rules":
+    "Die Filter dieser Sammlung konnten nicht gelesen werden. Die gespeicherten Daten wurden nicht ersetzt.",
+  "games.collections.collections_dynamic":
+    "Diese Sammlung wird automatisch aktualisiert. Ändere ihre Filter unter Sammlungen, um festzulegen, welche Spiele erscheinen.",
   "games.collections.title": "Sammlungen",
   "games.collections.personal": "Von dir erstellt",
-  "games.collections.note": "Ein Platz für jede Art von Spiel. Gruppiere Favoriten, Spiele für später und Welten, in die du zurückkehren möchtest.",
+  "games.collections.note":
+    "Ein Platz für jede Art von Spiel. Gruppiere Favoriten, Spiele für später und Welten, in die du zurückkehren möchtest.",
   "games.collections.addTo": "Zur Sammlung hinzufügen",
   "games.collections.count": "{count} Spiele",
   "games.collections.one": "1 Spiel",
@@ -237,7 +254,8 @@ const de: Record<string, string> = {
   "games.collections.create": "Erstellen",
   "games.collections.first": "Hier beginnt deine erste Sammlung.",
   "games.collections.noMatches": "Keine passenden Sammlungen.",
-  "games.collections.pickerNote": "Wähle so viele aus, wie du möchtest. Änderungen werden sofort gespeichert.",
+  "games.collections.pickerNote":
+    "Wähle so viele aus, wie du möchtest. Änderungen werden sofort gespeichert.",
   "games.collections.empty": "Platz für dein nächstes Lieblingsspiel.",
   "games.collections.findGames": "Spiele finden",
   "games.collections.description": "Ein paar Worte dazu",
@@ -245,22 +263,30 @@ const de: Record<string, string> = {
   "games.collections.pin": "Sammlung anheften",
   "games.collections.unpin": "Sammlung nicht mehr anheften",
   "games.collections.remove": "Sammlung entfernen",
-  "games.collections.removeNote": "Nur diese Sammlung wird entfernt. Deine Spiele, Spielstände, Downloads und anderen Sammlungen bleiben erhalten.",
+  "games.collections.removeNote":
+    "Nur diese Sammlung wird entfernt. Deine Spiele, Spielstände, Downloads und anderen Sammlungen bleiben erhalten.",
   "games.collections.confirmRemove": "Diese Sammlung entfernen",
   "games.collections.removeGame": "{name} aus dieser Sammlung entfernen",
   "games.collections.removeShort": "Aus Sammlung entfernen",
   "games.collections.added": "Zuletzt hinzugefügt zuerst",
   "games.collections.done": "Fertig",
   "games.collections.save": "Änderungen speichern",
-  "games.collections.collections_name": "Gib der Sammlung einen Namen mit 1–80 Zeichen und eine Beschreibung mit höchstens 240 Zeichen.",
+  "games.collections.collections_name":
+    "Gib der Sammlung einen Namen mit 1–80 Zeichen und eine Beschreibung mit höchstens 240 Zeichen.",
   "games.collections.collections_duplicate": "Du hast bereits eine Sammlung mit diesem Namen.",
-  "games.collections.collections_limit": "Dieses Profil hat das Speicherlimit für Sammlungen erreicht. Entferne ungenutzte Sammlungen oder Spiele und versuche es erneut.",
+  "games.collections.collections_limit":
+    "Dieses Profil hat das Speicherlimit für Sammlungen erreicht. Entferne ungenutzte Sammlungen oder Spiele und versuche es erneut.",
   "games.collections.collections_missing": "Diese Sammlung wurde entfernt. Wähle eine andere aus.",
-  "games.collections.collections_read": "Deine Sammlungen konnten nicht gelesen werden. Die gespeicherten Daten wurden nicht ersetzt. Versuche, sie erneut zu laden.",
-  "games.collections.collections_write": "Die Änderung konnte nicht gespeichert werden. Deine bisherige Sammlung ist noch vorhanden. Gib Speicherplatz auf dem Gerät frei und versuche es erneut.",
-  "games.collections.collections_game": "Dieses Spiel konnte nicht identifiziert werden. Aktualisiere deine Bibliothek und versuche es erneut.",
-  "games.collections.firstNote": "Erstelle eine Sammlung und füge Spiele über ihre Detailseiten hinzu oder wähle sie in deiner Bibliothek aus. PC-Spiele und ROMs passen in dieselbe Sammlung.",
-  "games.collections.emptyNote": "Füge Spiele über ihre Detailseiten hinzu oder wähle Spiele in deiner Bibliothek und dann „Zur Sammlung hinzufügen“ aus.",
+  "games.collections.collections_read":
+    "Deine Sammlungen konnten nicht gelesen werden. Die gespeicherten Daten wurden nicht ersetzt. Versuche, sie erneut zu laden.",
+  "games.collections.collections_write":
+    "Die Änderung konnte nicht gespeichert werden. Deine bisherige Sammlung ist noch vorhanden. Gib Speicherplatz auf dem Gerät frei und versuche es erneut.",
+  "games.collections.collections_game":
+    "Dieses Spiel konnte nicht identifiziert werden. Aktualisiere deine Bibliothek und versuche es erneut.",
+  "games.collections.firstNote":
+    "Erstelle eine Sammlung und füge Spiele über ihre Detailseiten hinzu oder wähle sie in deiner Bibliothek aus. PC-Spiele und ROMs passen in dieselbe Sammlung.",
+  "games.collections.emptyNote":
+    "Füge Spiele über ihre Detailseiten hinzu oder wähle Spiele in deiner Bibliothek und dann „Zur Sammlung hinzufügen“ aus.",
   "games.cache.saved": "Gespeicherte Daten · {date}",
   "games.cache.refresh": "Aktualisieren",
   "games.cache.refreshing": "Wird aktualisiert…",
@@ -359,7 +385,8 @@ const de: Record<string, string> = {
   ...gamePlaytime,
   ...gameLaunchHealth,
   "games.torrent.share.title": "Torrent teilen",
-  "games.torrent.share.note": "Teile geprüfte Dateien mit anderen Peers. Endet bei einem der Limits oder beim Schließen von Harbor. Vor Dateiänderungen das Teilen stoppen.",
+  "games.torrent.share.note":
+    "Teile geprüfte Dateien mit anderen Peers. Endet bei einem der Limits oder beim Schließen von Harbor. Vor Dateiänderungen das Teilen stoppen.",
   "games.torrent.share.upload": "Upload-Limit (KB/s)",
   "games.torrent.share.ratio": "Verhältnis (1–10)",
   "games.torrent.share.minutes": "Zeitlimit (Minuten)",
@@ -372,8 +399,10 @@ const de: Record<string, string> = {
   "games.torrent.share.limitReached": "Limit erreicht",
   "games.torrent.share.failed": "Teilen fehlgeschlagen. Dateien prüfen und erneut versuchen.",
   "games.torrent.share.stats": "{uploaded} hochgeladen · {minutes} Min.",
-  "games.torrent.torrent_seed_files": "Die fertigen Dateien fehlen, wurden geändert oder werden verwendet. Prüfe vor dem Teilen den Downloadordner.",
-  "games.torrent.torrent_seed_limits": "Wähle 32–1.048.576 KB/s, ein Verhältnis von 1–10 und 1–1.440 Minuten.",
+  "games.torrent.torrent_seed_files":
+    "Die fertigen Dateien fehlen, wurden geändert oder werden verwendet. Prüfe vor dem Teilen den Downloadordner.",
+  "games.torrent.torrent_seed_limits":
+    "Wähle 32–1.048.576 KB/s, ein Verhältnis von 1–10 und 1–1.440 Minuten.",
 
   ...gamePokemonUi,
   ...customArtwork,

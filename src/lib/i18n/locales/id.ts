@@ -120,12 +120,13 @@ const id: Record<string, string> = {
   ...gameHub,
   ...floatingPlayer,
   ...gameAntiCheat,
-  "Translations": "Terjemahan",
+  Translations: "Terjemahan",
   "Translating…": "Menerjemahkan…",
   "Showing {lang}": "Menampilkan {lang}",
   "Show all": "Tampilkan semua",
   "games.download.speed.title": "Kecepatan unduh",
-  "games.download.speed.note": "Dibagi antara unduhan langsung dan torrent profil ini. Batas tiap torrent dapat lebih rendah.",
+  "games.download.speed.note":
+    "Dibagi antara unduhan langsung dan torrent profil ini. Batas tiap torrent dapat lebih rendah.",
   "games.download.speed.unlimited": "Tanpa batas",
   "games.download.speed.limited": "Batasi kecepatan",
   "games.download.speed.rate": "Kilobita per detik",
@@ -135,17 +136,23 @@ const id: Record<string, string> = {
   "games.discovery.sale.cards.included": "Kartu koleksi",
   "games.discovery.sale.cards.none": "Tanpa kartu obral",
   "games.discovery.sale.cards.unknown": "Kartu belum pasti",
-  "games.discovery.sale.cards.includedNote": "Termasuk dalam aturan kartu obral Steam saat ini. Buka Steam untuk melihat syarat mendapatkannya.",
-  "games.discovery.sale.cards.noneNote": "Aturan Steam saat ini tidak mencakup kartu koleksi untuk obral musiman ini. Hadiah acara lainnya terpisah.",
-  "games.discovery.sale.cards.unknownNote": "Aturan kartu Steam saat ini tidak dapat diverifikasi. Buka Steam untuk memeriksa ketersediaannya.",
-  "games.discovery.sale.cards.badgeNote": "Kumpulkan satu set untuk membuat lencana obral, emotikon, dan latar profil.",
+  "games.discovery.sale.cards.includedNote":
+    "Termasuk dalam aturan kartu obral Steam saat ini. Buka Steam untuk melihat syarat mendapatkannya.",
+  "games.discovery.sale.cards.noneNote":
+    "Aturan Steam saat ini tidak mencakup kartu koleksi untuk obral musiman ini. Hadiah acara lainnya terpisah.",
+  "games.discovery.sale.cards.unknownNote":
+    "Aturan kartu Steam saat ini tidak dapat diverifikasi. Buka Steam untuk memeriksa ketersediaannya.",
+  "games.discovery.sale.cards.badgeNote":
+    "Kumpulkan satu set untuk membuat lencana obral, emotikon, dan latar profil.",
   "games.download.storage.title": "Ruang unduhan",
-  "games.download.storage.note": "Perkiraan mencakup unduhan langsung, torrent, dan berkas sementara, termasuk unduhan yang dijeda. Penginstal eksternal tidak termasuk.",
+  "games.download.storage.note":
+    "Perkiraan mencakup unduhan langsung, torrent, dan berkas sementara, termasuk unduhan yang dijeda. Penginstal eksternal tidak termasuk.",
   "games.download.storage.error": "Penyimpanan tidak dapat diperiksa.",
   "games.download.storage.unavailable": "Ruang kosong tidak tersedia",
   "games.download.storage.free": "{size} kosong",
   "games.download.storage.remaining": "Ruang tambahan: {size}",
-  "games.download.storage.estimate": "Beberapa berkas yang ada belum diperiksa. Ruang yang diperlukan mungkin lebih sedikit.",
+  "games.download.storage.estimate":
+    "Beberapa berkas yang ada belum diperiksa. Ruang yang diperlukan mungkin lebih sedikit.",
   "games.download.storage.unknown": "Ukuran tidak diketahui: {count} file",
   "games.download.storage.other": "{size} dicadangkan untuk operasi Harbor lain",
   "games.download.storage.shortfall": "Perlu ruang tambahan {size}",
@@ -168,7 +175,8 @@ const id: Record<string, string> = {
   ...gameEve,
   ...warhammerUniverse,
   ...gameWow,
-  "games.selection.partial": "{count} dari {total} gim diperbarui. Gim lainnya masih dipilih; coba lagi.",
+  "games.selection.partial":
+    "{count} dari {total} gim diperbarui. Gim lainnya masih dipilih; coba lagi.",
   "games.selection.failed": "Gim yang dipilih tidak dapat diperbarui. Coba lagi.",
   "games.custom.nav": "Game lokal",
   "games.libraryPersonal.visibility": "Visibilitas pustaka",
@@ -190,7 +198,8 @@ const id: Record<string, string> = {
   "games.selection.hide": "Sembunyikan",
   "games.selection.pin": "Sematkan",
   "games.selection.unpin": "Lepas sematan",
-  "games.selection.matchNote": "Beberapa game yang dipilih tidak tersedia. Muat ulang pustaka dan coba lagi.",
+  "games.selection.matchNote":
+    "Beberapa game yang dipilih tidak tersedia. Muat ulang pustaka dan coba lagi.",
   "games.selection.collection": "Tambahkan ke koleksi",
   "games.collections.localMissing": "Tidak lagi ada di pustaka profil ini",
   "games.collections.dynamic": "Koleksi berbasis filter",
@@ -198,15 +207,21 @@ const id: Record<string, string> = {
   "games.collections.type": "Jenis koleksi",
   "games.collections.filters": "Filter koleksi",
   "games.collections.ruleQuery": "Judul game mengandung",
-  "games.collections.autoNote": "Game ditambahkan ke atau dikeluarkan dari koleksi ini secara otomatis sesuai kecocokannya dengan filter di pustaka.",
-  "games.collections.pickerAutoNote": "Koleksi berbasis filter diperbarui secara otomatis. Kelola filternya di Koleksi.",
+  "games.collections.autoNote":
+    "Game ditambahkan ke atau dikeluarkan dari koleksi ini secara otomatis sesuai kecocokannya dengan filter di pustaka.",
+  "games.collections.pickerAutoNote":
+    "Koleksi berbasis filter diperbarui secara otomatis. Kelola filternya di Koleksi.",
   "games.collections.matches": "Game yang cocok: {count}",
-  "games.collections.emptyDynamic": "Tidak ada game di pustaka yang cocok dengan filter ini. Ubah filter atau tambahkan game lain ke pustaka.",
-  "games.collections.collections_rules": "Filter koleksi ini tidak dapat dibaca. Data yang tersimpan tidak diganti.",
-  "games.collections.collections_dynamic": "Koleksi ini diperbarui secara otomatis. Ubah filternya di Koleksi untuk mengubah game yang ditampilkan.",
+  "games.collections.emptyDynamic":
+    "Tidak ada game di pustaka yang cocok dengan filter ini. Ubah filter atau tambahkan game lain ke pustaka.",
+  "games.collections.collections_rules":
+    "Filter koleksi ini tidak dapat dibaca. Data yang tersimpan tidak diganti.",
+  "games.collections.collections_dynamic":
+    "Koleksi ini diperbarui secara otomatis. Ubah filternya di Koleksi untuk mengubah game yang ditampilkan.",
   "games.collections.title": "Koleksi",
   "games.collections.personal": "Buatanmu",
-  "games.collections.note": "Tempat untuk setiap jenis game. Kelompokkan favorit, game untuk nanti, dan dunia yang layak dikunjungi kembali.",
+  "games.collections.note":
+    "Tempat untuk setiap jenis game. Kelompokkan favorit, game untuk nanti, dan dunia yang layak dikunjungi kembali.",
   "games.collections.addTo": "Tambahkan ke koleksi",
   "games.collections.count": "{count} game",
   "games.collections.one": "1 game",
@@ -216,7 +231,8 @@ const id: Record<string, string> = {
   "games.collections.create": "Buat",
   "games.collections.first": "Koleksi pertamamu dimulai di sini.",
   "games.collections.noMatches": "Tidak ada koleksi yang cocok.",
-  "games.collections.pickerNote": "Pilih sebanyak yang kamu mau. Perubahan disimpan saat kamu memilih.",
+  "games.collections.pickerNote":
+    "Pilih sebanyak yang kamu mau. Perubahan disimpan saat kamu memilih.",
   "games.collections.empty": "Ruang untuk game favoritmu berikutnya.",
   "games.collections.findGames": "Temukan game",
   "games.collections.description": "Sedikit tentang koleksi ini",
@@ -224,22 +240,30 @@ const id: Record<string, string> = {
   "games.collections.pin": "Sematkan koleksi",
   "games.collections.unpin": "Lepas sematan koleksi",
   "games.collections.remove": "Hapus koleksi",
-  "games.collections.removeNote": "Hanya koleksi ini yang dihapus. Game, simpanan permainan, unduhan, dan koleksi lain tetap ada.",
+  "games.collections.removeNote":
+    "Hanya koleksi ini yang dihapus. Game, simpanan permainan, unduhan, dan koleksi lain tetap ada.",
   "games.collections.confirmRemove": "Hapus koleksi ini",
   "games.collections.removeGame": "Hapus {name} dari koleksi ini",
   "games.collections.removeShort": "Hapus dari koleksi",
   "games.collections.added": "Yang terakhir ditambahkan lebih dulu",
   "games.collections.done": "Selesai",
   "games.collections.save": "Simpan perubahan",
-  "games.collections.collections_name": "Beri koleksi nama sepanjang 1–80 karakter dan deskripsi hingga 240 karakter.",
+  "games.collections.collections_name":
+    "Beri koleksi nama sepanjang 1–80 karakter dan deskripsi hingga 240 karakter.",
   "games.collections.collections_duplicate": "Kamu sudah memiliki koleksi dengan nama itu.",
-  "games.collections.collections_limit": "Profil ini telah mencapai batas penyimpanan koleksi. Hapus koleksi atau game yang tidak digunakan, lalu coba lagi.",
+  "games.collections.collections_limit":
+    "Profil ini telah mencapai batas penyimpanan koleksi. Hapus koleksi atau game yang tidak digunakan, lalu coba lagi.",
   "games.collections.collections_missing": "Koleksi ini telah dihapus. Pilih koleksi lain.",
-  "games.collections.collections_read": "Koleksimu tidak dapat dibaca. Data yang tersimpan tidak diganti. Coba muat lagi.",
-  "games.collections.collections_write": "Perubahan tidak dapat disimpan. Koleksi sebelumnya masih ada. Kosongkan sebagian ruang penyimpanan perangkat, lalu coba lagi.",
-  "games.collections.collections_game": "Game ini tidak dapat diidentifikasi. Muat ulang pustaka dan coba lagi.",
-  "games.collections.firstNote": "Buat koleksi, lalu tambahkan game dari halaman detailnya atau pilih dari pustaka. Game PC dan ROM bisa berada dalam koleksi yang sama.",
-  "games.collections.emptyNote": "Tambahkan game dari halaman detailnya, atau pilih game di pustaka lalu pilih Tambahkan ke koleksi.",
+  "games.collections.collections_read":
+    "Koleksimu tidak dapat dibaca. Data yang tersimpan tidak diganti. Coba muat lagi.",
+  "games.collections.collections_write":
+    "Perubahan tidak dapat disimpan. Koleksi sebelumnya masih ada. Kosongkan sebagian ruang penyimpanan perangkat, lalu coba lagi.",
+  "games.collections.collections_game":
+    "Game ini tidak dapat diidentifikasi. Muat ulang pustaka dan coba lagi.",
+  "games.collections.firstNote":
+    "Buat koleksi, lalu tambahkan game dari halaman detailnya atau pilih dari pustaka. Game PC dan ROM bisa berada dalam koleksi yang sama.",
+  "games.collections.emptyNote":
+    "Tambahkan game dari halaman detailnya, atau pilih game di pustaka lalu pilih Tambahkan ke koleksi.",
   "games.cache.saved": "Data tersimpan · {date}",
   "games.cache.refresh": "Perbarui",
   "games.cache.refreshing": "Memperbarui…",
@@ -319,7 +343,8 @@ const id: Record<string, string> = {
   ...gamePlaytime,
   ...gameLaunchHealth,
   "games.torrent.share.title": "Bagikan torrent",
-  "games.torrent.share.note": "Bagikan berkas terverifikasi ke peer. Berhenti saat salah satu batas tercapai atau Harbor ditutup. Hentikan berbagi sebelum mengubah berkas.",
+  "games.torrent.share.note":
+    "Bagikan berkas terverifikasi ke peer. Berhenti saat salah satu batas tercapai atau Harbor ditutup. Hentikan berbagi sebelum mengubah berkas.",
   "games.torrent.share.upload": "Batas unggah (KB/dtk)",
   "games.torrent.share.ratio": "Rasio berbagi (1–10)",
   "games.torrent.share.minutes": "Batas waktu (menit)",
@@ -332,8 +357,10 @@ const id: Record<string, string> = {
   "games.torrent.share.limitReached": "Batas berbagi tercapai",
   "games.torrent.share.failed": "Gagal berbagi. Periksa berkas dan coba lagi.",
   "games.torrent.share.stats": "{uploaded} diunggah · {minutes} menit",
-  "games.torrent.torrent_seed_files": "Berkas selesai hilang, berubah, atau sedang dipakai. Periksa folder unduhan sebelum berbagi.",
-  "games.torrent.torrent_seed_limits": "Pilih 32–1.048.576 KB/dtk, rasio 1–10, dan waktu 1–1.440 menit.",
+  "games.torrent.torrent_seed_files":
+    "Berkas selesai hilang, berubah, atau sedang dipakai. Periksa folder unduhan sebelum berbagi.",
+  "games.torrent.torrent_seed_limits":
+    "Pilih 32–1.048.576 KB/dtk, rasio 1–10, dan waktu 1–1.440 menit.",
 
   ...gamePokemonUi,
   ...customArtwork,

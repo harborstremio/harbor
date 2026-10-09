@@ -3,64 +3,98 @@ const jlDesktop026: Record<string, string> = {
   "Sharing {name}'s addon setup": "Используется набор дополнений профиля {name}",
   "Local JL profile": "Локальный профиль JL",
   "Offline Room": "Офлайн-библиотека",
-  "Your library and addons work locally. Sign in to use JL account features.": "Библиотека и дополнения работают локально. Войдите, чтобы пользоваться возможностями аккаунта JL.",
+  "Your library and addons work locally. Sign in to use JL account features.":
+    "Библиотека и дополнения работают локально. Войдите, чтобы пользоваться возможностями аккаунта JL.",
   "Continue locally": "Продолжить локально",
-  "Choose your JL profile to sync supported preferences, favorites, library and progress. Device files and configured addon URLs stay on this device.": "Выберите профиль JL для синхронизации поддерживаемых настроек, избранного, библиотеки и прогресса просмотра. Файлы устройства и настроенные URL дополнений остаются на этом устройстве.",
-  "Sign-out could not be saved. Free some storage and try again.": "Не удалось сохранить выход из аккаунта. Освободите место и повторите попытку.",
-  "Sign in to your JL Media Vision account, then choose the profile whose supported settings and library you want to sync.": "Войдите в аккаунт JL Media Vision, затем выберите профиль, поддерживаемые настройки и библиотеку которого хотите синхронизировать.",
+  "Choose your JL profile to sync supported preferences, favorites, library and progress. Device files and configured addon URLs stay on this device.":
+    "Выберите профиль JL для синхронизации поддерживаемых настроек, избранного, библиотеки и прогресса просмотра. Файлы устройства и настроенные URL дополнений остаются на этом устройстве.",
+  "Sign-out could not be saved. Free some storage and try again.":
+    "Не удалось сохранить выход из аккаунта. Освободите место и повторите попытку.",
+  "Sign in to your JL Media Vision account, then choose the profile whose supported settings and library you want to sync.":
+    "Войдите в аккаунт JL Media Vision, затем выберите профиль, поддерживаемые настройки и библиотеку которого хотите синхронизировать.",
   "Library and addon sharing": "Общая библиотека и дополнения",
-  "Use the primary profile's saved addon setup and watchlist.": "Использовать сохранённый набор дополнений и список просмотра основного профиля.",
+  "Use the primary profile's saved addon setup and watchlist.":
+    "Использовать сохранённый набор дополнений и список просмотра основного профиля.",
   "Keep this profile separate": "Оставить этот профиль отдельным",
-  "Library and addons stay separate. No additional account is needed.": "Библиотека и дополнения останутся отдельными. Дополнительный аккаунт не нужен.",
+  "Library and addons stay separate. No additional account is needed.":
+    "Библиотека и дополнения останутся отдельными. Дополнительный аккаунт не нужен.",
   "Addon install link copied": "Ссылка для установки дополнения скопирована",
-  "Compatible addon, listed in JL Media Vision.": "Совместимое дополнение из каталога JL Media Vision.",
+  "Compatible addon, listed in JL Media Vision.":
+    "Совместимое дополнение из каталога JL Media Vision.",
   "Saving on this device": "Сохранение на этом устройстве",
-  "Couldn't read your local addon collection. Nothing was written.": "Не удалось прочитать локальный набор дополнений. Ничего не записано.",
-  "Local storage didn't confirm the move. Your collection may be unchanged. Reload to see the current state.": "Локальное хранилище не подтвердило перенос. Набор дополнений мог остаться без изменений. Перезагрузите страницу, чтобы увидеть текущее состояние.",
-  "Moved 1 addon to this JL profile. It is saved on this device.": "В этот профиль JL перенесено 1 дополнение. Оно сохранено на этом устройстве.",
-  "Moved {n} addons to this JL profile. They are saved on this device.": "В этот профиль JL перенесены дополнения: {n}. Они сохранены на этом устройстве.",
-  "Couldn't load your local addon collection. Nothing can be reordered safely without it.": "Не удалось загрузить локальный набор дополнений. Без него нельзя безопасно изменить порядок.",
+  "Couldn't read your local addon collection. Nothing was written.":
+    "Не удалось прочитать локальный набор дополнений. Ничего не записано.",
+  "Local storage didn't confirm the move. Your collection may be unchanged. Reload to see the current state.":
+    "Локальное хранилище не подтвердило перенос. Набор дополнений мог остаться без изменений. Перезагрузите страницу, чтобы увидеть текущее состояние.",
+  "Moved 1 addon to this JL profile. It is saved on this device.":
+    "В этот профиль JL перенесено 1 дополнение. Оно сохранено на этом устройстве.",
+  "Moved {n} addons to this JL profile. They are saved on this device.":
+    "В этот профиль JL перенесены дополнения: {n}. Они сохранены на этом устройстве.",
+  "Couldn't load your local addon collection. Nothing can be reordered safely without it.":
+    "Не удалось загрузить локальный набор дополнений. Без него нельзя безопасно изменить порядок.",
   "This JL profile": "Этот профиль JL",
-  "This order is saved on this device for the active JL profile.": "Этот порядок сохранён на этом устройстве для активного профиля JL.",
-  "No addons are installed in this profile yet.": "В этом профиле пока нет установленных дополнений.",
+  "This order is saved on this device for the active JL profile.":
+    "Этот порядок сохранён на этом устройстве для активного профиля JL.",
+  "No addons are installed in this profile yet.":
+    "В этом профиле пока нет установленных дополнений.",
   "Add every addon below to this JL profile": "Добавить все дополнения ниже в этот профиль JL",
-  "Choose a JL profile to organize its installed addons.": "Выберите профиль JL, чтобы упорядочить установленные в нём дополнения.",
-  "JL Media Vision reads the saved local collection back to verify the order.": "JL Media Vision повторно читает сохранённый локальный набор, чтобы проверить порядок.",
-  "Your addon collection changed while the editor was open. Nothing was written.": "Набор дополнений изменился, пока редактор был открыт. Ничего не записано.",
-  "Local storage didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again.": "Локальное хранилище не подтвердило сохранение. Набор дополнений мог остаться без изменений. При повторной попытке он будет проверен перед записью.",
-  "The local collection has a different order than was saved.": "Порядок в локальном наборе отличается от сохранённого.",
+  "Choose a JL profile to organize its installed addons.":
+    "Выберите профиль JL, чтобы упорядочить установленные в нём дополнения.",
+  "JL Media Vision reads the saved local collection back to verify the order.":
+    "JL Media Vision повторно читает сохранённый локальный набор, чтобы проверить порядок.",
+  "Your addon collection changed while the editor was open. Nothing was written.":
+    "Набор дополнений изменился, пока редактор был открыт. Ничего не записано.",
+  "Local storage didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again.":
+    "Локальное хранилище не подтвердило сохранение. Набор дополнений мог остаться без изменений. При повторной попытке он будет проверен перед записью.",
+  "The local collection has a different order than was saved.":
+    "Порядок в локальном наборе отличается от сохранённого.",
   "Addon order saved in this JL profile": "Порядок дополнений сохранён в этом профиле JL",
   "Using a local JL profile.": "Используется локальный профиль JL.",
   "JL account (sign in on the TV)": "Аккаунт JL (войдите на телевизоре)",
   "Your JL Media Vision password": "Ваш пароль JL Media Vision",
-  "Skip this and JL Media Vision still works. Your library stays local.": "Этот шаг можно пропустить — JL Media Vision продолжит работать. Библиотека останется локальной.",
-  "Interrupted. Retry to resume safely; sources without a validator restart.": "Загрузка прервана. Повторите попытку для безопасного продолжения; источники без идентификатора проверки файла начнут загрузку заново.",
+  "Skip this and JL Media Vision still works. Your library stays local.":
+    "Этот шаг можно пропустить — JL Media Vision продолжит работать. Библиотека останется локальной.",
+  "Interrupted. Retry to resume safely; sources without a validator restart.":
+    "Загрузка прервана. Повторите попытку для безопасного продолжения; источники без идентификатора проверки файла начнут загрузку заново.",
   "Play offline": "Воспроизвести офлайн",
   "Choose a fresh download source": "Выбрать новый источник загрузки",
-  "Saved movies, episodes, music, and eBooks for offline use": "Фильмы, эпизоды, музыка и электронные книги, сохранённые для использования офлайн",
-  "Saved files belong to this account and profile on this device. Only completed files play offline. Direct, unencrypted files are supported; streaming playlists and protected sources are not.": "Сохранённые файлы принадлежат этому аккаунту и профилю на этом устройстве. Офлайн воспроизводятся только полностью загруженные файлы. Поддерживаются прямые незашифрованные файлы; потоковые плейлисты и защищённые источники не поддерживаются.",
-  "Older downloads have no profile owner. Add them to this local profile only if they are yours.": "Старые загрузки не привязаны к профилю. Добавляйте их в этот локальный профиль, только если они ваши.",
+  "Saved movies, episodes, music, and eBooks for offline use":
+    "Фильмы, эпизоды, музыка и электронные книги, сохранённые для использования офлайн",
+  "Saved files belong to this account and profile on this device. Only completed files play offline. Direct, unencrypted files are supported; streaming playlists and protected sources are not.":
+    "Сохранённые файлы принадлежат этому аккаунту и профилю на этом устройстве. Офлайн воспроизводятся только полностью загруженные файлы. Поддерживаются прямые незашифрованные файлы; потоковые плейлисты и защищённые источники не поддерживаются.",
+  "Older downloads have no profile owner. Add them to this local profile only if they are yours.":
+    "Старые загрузки не привязаны к профилю. Добавляйте их в этот локальный профиль, только если они ваши.",
   "Add older downloads to this local profile": "Добавить старые загрузки в этот локальный профиль",
   "Movies, episodes and books": "Фильмы, эпизоды и книги",
-  "Choose Download on a movie, episode, music track, or eBook to keep an intentional offline copy. Queue progress and saved files appear here.": "Нажмите «Скачать» у фильма, эпизода, музыкальной композиции или электронной книги, чтобы специально сохранить копию для офлайн-доступа. Здесь появятся ход загрузки очереди и сохранённые файлы.",
-  "Your playback history appears here. You can optionally connect Trakt.": "Здесь появится история воспроизведения. При желании можно подключить Trakt.",
+  "Choose Download on a movie, episode, music track, or eBook to keep an intentional offline copy. Queue progress and saved files appear here.":
+    "Нажмите «Скачать» у фильма, эпизода, музыкальной композиции или электронной книги, чтобы специально сохранить копию для офлайн-доступа. Здесь появятся ход загрузки очереди и сохранённые файлы.",
+  "Your playback history appears here. You can optionally connect Trakt.":
+    "Здесь появится история воспроизведения. При желании можно подключить Trakt.",
   "{n} in your JL library": "{n} в вашей библиотеке JL",
-  "Your account or profile changed. Reopen this dialog to choose again.": "Аккаунт или профиль изменился. Откройте это окно заново, чтобы повторить выбор.",
-  "The conflict backup could not be saved. Try again.": "Не удалось сохранить резервную копию конфликтов. Повторите попытку.",
+  "Your account or profile changed. Reopen this dialog to choose again.":
+    "Аккаунт или профиль изменился. Откройте это окно заново, чтобы повторить выбор.",
+  "The conflict backup could not be saved. Try again.":
+    "Не удалось сохранить резервную копию конфликтов. Повторите попытку.",
   "Save conflict backup": "Сохранить копию конфликтов",
   "Your JL account stays with you": "Ваш аккаунт JL всегда с вами",
-  "Sign in to JL Media Vision directly on your TV. This legacy phone setup step does not send account tokens. Your addons and library also work with a local profile.": "Войдите в JL Media Vision прямо на телевизоре. Этот устаревший шаг настройки через телефон не передаёт токены аккаунта. Дополнения и библиотека работают и с локальным профилем.",
-  "Live updates are unavailable. Retrying.": "Обновления в реальном времени недоступны. Повторная попытка.",
-  "Unnumbered": "Без номера",
+  "Sign in to JL Media Vision directly on your TV. This legacy phone setup step does not send account tokens. Your addons and library also work with a local profile.":
+    "Войдите в JL Media Vision прямо на телевизоре. Этот устаревший шаг настройки через телефон не передаёт токены аккаунта. Дополнения и библиотека работают и с локальным профилем.",
+  "Live updates are unavailable. Retrying.":
+    "Обновления в реальном времени недоступны. Повторная попытка.",
+  Unnumbered: "Без номера",
   "No episodes were returned for this season.": "Для этого сезона не получено ни одного эпизода.",
-  "Episodes could not be loaded. Check the connection and retry.": "Не удалось загрузить эпизоды. Проверьте подключение и повторите попытку.",
+  "Episodes could not be loaded. Check the connection and retry.":
+    "Не удалось загрузить эпизоды. Проверьте подключение и повторите попытку.",
   "Reset to account avatar": "Вернуть аватар аккаунта",
-  "Sign in with your JL Media Vision account. Your local library and addons remain available.": "Войдите в аккаунт JL Media Vision. Локальная библиотека и дополнения останутся доступны.",
+  "Sign in with your JL Media Vision account. Your local library and addons remain available.":
+    "Войдите в аккаунт JL Media Vision. Локальная библиотека и дополнения останутся доступны.",
   "JL account ID": "ID аккаунта JL",
   "Your stable JL account identifier.": "Постоянный идентификатор вашего аккаунта JL.",
   "Sign out of JL Media Vision": "Выйти из JL Media Vision",
-  "Stops account sync and returns to this device's local profiles.": "Останавливает синхронизацию аккаунта и возвращает к локальным профилям этого устройства.",
-  "Choose a JL profile to manage installed addons.": "Выберите профиль JL для управления установленными дополнениями.",
+  "Stops account sync and returns to this device's local profiles.":
+    "Останавливает синхронизацию аккаунта и возвращает к локальным профилям этого устройства.",
+  "Choose a JL profile to manage installed addons.":
+    "Выберите профиль JL для управления установленными дополнениями.",
   "Checked {n}s ago.": "Проверено {n} с назад.",
   "Installed in this JL profile.": "Установлено в этом профиле JL.",
   "addon installed": "дополнение установлено",
@@ -68,46 +102,79 @@ const jlDesktop026: Record<string, string> = {
   "Refresh addons": "Обновить дополнения",
   "JL account": "Аккаунт JL",
   "Community account": "Аккаунт сообщества",
-  "Each JL profile keeps its own settings, library, and PIN.": "У каждого профиля JL свои настройки, библиотека и PIN-код.",
+  "Each JL profile keeps its own settings, library, and PIN.":
+    "У каждого профиля JL свои настройки, библиотека и PIN-код.",
   "Profiles on this device": "Профили на этом устройстве",
-  "Your local library remains available without an account.": "Локальная библиотека доступна и без аккаунта.",
-  "Your addon configurations are kept on this device. Manage each installation in Addons.": "Конфигурации дополнений хранятся на этом устройстве. Управляйте каждой установкой в разделе «Дополнения».",
+  "Your local library remains available without an account.":
+    "Локальная библиотека доступна и без аккаунта.",
+  "Your addon configurations are kept on this device. Manage each installation in Addons.":
+    "Конфигурации дополнений хранятся на этом устройстве. Управляйте каждой установкой в разделе «Дополнения».",
   "Addon install links": "Ссылки для установки дополнений",
-  "JL Media Vision supports compatible manifests and stremio:// install links without an external account.": "JL Media Vision поддерживает совместимые манифесты и ссылки установки stremio:// без внешнего аккаунта.",
-  "Open compatible addon links in JL Media Vision": "Открывать совместимые ссылки дополнений в JL Media Vision",
-  "Choose JL Media Vision when your operating system asks which app should open an addon link. You can also paste a manifest URL in Addons.": "Выберите JL Media Vision, когда операционная система спросит, каким приложением открыть ссылку дополнения. Также можно вставить URL манифеста в разделе «Дополнения».",
-  "{app} itself does not host, distribute, or index any media. All streams come from third-party addons, debrid services, or your own media sources that you configure yourself. You are responsible for what you choose to play and for complying with the laws of your jurisdiction.": "{app} не хранит, не распространяет и не индексирует медиаматериалы. Все потоки поступают из сторонних дополнений, сервисов debrid или ваших собственных источников, которые вы настраиваете самостоятельно. Вы отвечаете за выбор воспроизводимого контента и соблюдение законов вашей юрисдикции.",
-  "Select a JL profile first. The repair scans only its local library.": "Сначала выберите профиль JL. Восстановление проверяет только его локальную библиотеку.",
-  "Repairs malformed records in the active JL profile library. Existing provider IDs and playback progress are retained.": "Исправляет некорректные записи в библиотеке активного профиля JL. Существующие идентификаторы поставщиков и прогресс воспроизведения сохраняются.",
-  "Select a JL profile first. This scans its local library.": "Сначала выберите профиль JL. Будет проверена его локальная библиотека.",
+  "JL Media Vision supports compatible manifests and stremio:// install links without an external account.":
+    "JL Media Vision поддерживает совместимые манифесты и ссылки установки stremio:// без внешнего аккаунта.",
+  "Open compatible addon links in JL Media Vision":
+    "Открывать совместимые ссылки дополнений в JL Media Vision",
+  "Choose JL Media Vision when your operating system asks which app should open an addon link. You can also paste a manifest URL in Addons.":
+    "Выберите JL Media Vision, когда операционная система спросит, каким приложением открыть ссылку дополнения. Также можно вставить URL манифеста в разделе «Дополнения».",
+  "{app} itself does not host, distribute, or index any media. All streams come from third-party addons, debrid services, or your own media sources that you configure yourself. You are responsible for what you choose to play and for complying with the laws of your jurisdiction.":
+    "{app} не хранит, не распространяет и не индексирует медиаматериалы. Все потоки поступают из сторонних дополнений, сервисов debrid или ваших собственных источников, которые вы настраиваете самостоятельно. Вы отвечаете за выбор воспроизводимого контента и соблюдение законов вашей юрисдикции.",
+  "Select a JL profile first. The repair scans only its local library.":
+    "Сначала выберите профиль JL. Восстановление проверяет только его локальную библиотеку.",
+  "Repairs malformed records in the active JL profile library. Existing provider IDs and playback progress are retained.":
+    "Исправляет некорректные записи в библиотеке активного профиля JL. Существующие идентификаторы поставщиков и прогресс воспроизведения сохраняются.",
+  "Select a JL profile first. This scans its local library.":
+    "Сначала выберите профиль JL. Будет проверена его локальная библиотека.",
   "Local library repair": "Восстановление локальной библиотеки",
-  "Checks the active JL profile library for malformed item records and repairs compatible fields locally.": "Проверяет библиотеку активного профиля JL на некорректные записи и локально исправляет совместимые поля.",
-  "This browser stores your JL session and local settings. Signing in enables account sync for supported profile data and service credentials. Clearing browser data removes local copies, but does not delete data already synced to your JL account.": "Этот браузер хранит вашу сессию JL и локальные настройки. Вход включает синхронизацию поддерживаемых данных профиля и учётных данных сервисов с аккаунтом. Очистка данных браузера удаляет локальные копии, но не удаляет данные, уже синхронизированные с аккаунтом JL.",
-  "Choose which parts of your setup to save in one backup file. Your account sign-in is excluded.": "Выберите части настроек для сохранения в одном файле резервной копии. Данные входа в аккаунт не включаются.",
-  "Choose a Harbor backup and review what it contains before restoring. Your account sign-in stays on this device.": "Выберите резервную копию JL Media Vision и проверьте её содержимое перед восстановлением. Данные входа в аккаунт останутся на этом устройстве.",
-  "Choose the sections to save in one file. Your account sign-in is excluded.": "Выберите разделы для сохранения в одном файле. Данные входа в аккаунт не включаются.",
-  "Saved {when} from Harbor {app}. Your account sign-in stays as is.": "Сохранено {when} в JL Media Vision {app}. Данные входа в аккаунт остаются без изменений.",
-  "Signed in as {email} with your JL Media Vision account.": "Выполнен вход как {email} через аккаунт JL Media Vision.",
-  "Your library and addons work locally. Sign in to use JL account sync.": "Библиотека и дополнения работают локально. Войдите, чтобы синхронизировать аккаунт JL.",
-  "On: only titles you bookmarked. Off: also keeps titles added when you hit play.": "Включено: только добавленные вами в закладки названия. Выключено: также названия, добавленные при нажатии «Воспроизвести».",
-  "Keep the Library Watchlist tab limited to titles you bookmarked. Turn this off to also include anything automatically added when you pressed play.": "Показывать на вкладке списка просмотра в библиотеке только названия, добавленные вами в закладки. Выключите, чтобы также включать всё, что добавилось автоматически при нажатии «Воспроизвести».",
-  "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this device.": "Показывать «Продолжить просмотр» только для активного профиля. Каждый профиль видит лишь свой прогресс, поэтому ваши просмотры скрыты от других профилей на этом устройстве.",
+  "Checks the active JL profile library for malformed item records and repairs compatible fields locally.":
+    "Проверяет библиотеку активного профиля JL на некорректные записи и локально исправляет совместимые поля.",
+  "This browser stores your JL session and local settings. Signing in enables account sync for supported profile data and service credentials. Clearing browser data removes local copies, but does not delete data already synced to your JL account.":
+    "Этот браузер хранит вашу сессию JL и локальные настройки. Вход включает синхронизацию поддерживаемых данных профиля и учётных данных сервисов с аккаунтом. Очистка данных браузера удаляет локальные копии, но не удаляет данные, уже синхронизированные с аккаунтом JL.",
+  "Choose which parts of your setup to save in one backup file. Your account sign-in is excluded.":
+    "Выберите части настроек для сохранения в одном файле резервной копии. Данные входа в аккаунт не включаются.",
+  "Choose a Harbor backup and review what it contains before restoring. Your account sign-in stays on this device.":
+    "Выберите резервную копию JL Media Vision и проверьте её содержимое перед восстановлением. Данные входа в аккаунт останутся на этом устройстве.",
+  "Choose the sections to save in one file. Your account sign-in is excluded.":
+    "Выберите разделы для сохранения в одном файле. Данные входа в аккаунт не включаются.",
+  "Saved {when} from Harbor {app}. Your account sign-in stays as is.":
+    "Сохранено {when} в JL Media Vision {app}. Данные входа в аккаунт остаются без изменений.",
+  "Signed in as {email} with your JL Media Vision account.":
+    "Выполнен вход как {email} через аккаунт JL Media Vision.",
+  "Your library and addons work locally. Sign in to use JL account sync.":
+    "Библиотека и дополнения работают локально. Войдите, чтобы синхронизировать аккаунт JL.",
+  "On: only titles you bookmarked. Off: also keeps titles added when you hit play.":
+    "Включено: только добавленные вами в закладки названия. Выключено: также названия, добавленные при нажатии «Воспроизвести».",
+  "Keep the Library Watchlist tab limited to titles you bookmarked. Turn this off to also include anything automatically added when you pressed play.":
+    "Показывать на вкладке списка просмотра в библиотеке только названия, добавленные вами в закладки. Выключите, чтобы также включать всё, что добавилось автоматически при нажатии «Воспроизвести».",
+  "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this device.":
+    "Показывать «Продолжить просмотр» только для активного профиля. Каждый профиль видит лишь свой прогресс, поэтому ваши просмотры скрыты от других профилей на этом устройстве.",
   "Classic rows": "Классические ряды",
   "Classic button order.": "Классический порядок кнопок.",
-  "When you hit Play on something you've partly watched, show a prompt to resume from where you left off or start over. Also covers saved JL progress and connected Trakt history.": "При нажатии «Воспроизвести» у частично просмотренного материала предлагать продолжить с прежнего места или начать заново. Также учитываются сохранённый прогресс JL и история подключённого Trakt.",
-  "This is a compatible addon manifest. Add it from the Addons page instead.": "Это манифест совместимого дополнения. Добавьте его на странице «Дополнения».",
-  "Condensed shows a top pick, quality tiles, and a drawer. Addon list groups sources by addon, no scoring.": "Компактный режим показывает лучший вариант, плитки качества и выдвижную панель. Список дополнений группирует источники по дополнениям без оценки.",
-  "Show complete addon descriptions in the addon list picker, downloads, and Big Picture.": "Показывать полные описания дополнений в окне выбора списка дополнений, загрузках и режиме Big Picture.",
+  "When you hit Play on something you've partly watched, show a prompt to resume from where you left off or start over. Also covers saved JL progress and connected Trakt history.":
+    "При нажатии «Воспроизвести» у частично просмотренного материала предлагать продолжить с прежнего места или начать заново. Также учитываются сохранённый прогресс JL и история подключённого Trakt.",
+  "This is a compatible addon manifest. Add it from the Addons page instead.":
+    "Это манифест совместимого дополнения. Добавьте его на странице «Дополнения».",
+  "Condensed shows a top pick, quality tiles, and a drawer. Addon list groups sources by addon, no scoring.":
+    "Компактный режим показывает лучший вариант, плитки качества и выдвижную панель. Список дополнений группирует источники по дополнениям без оценки.",
+  "Show complete addon descriptions in the addon list picker, downloads, and Big Picture.":
+    "Показывать полные описания дополнений в окне выбора списка дополнений, загрузках и режиме Big Picture.",
   "Addon list": "Список дополнений",
-  "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, in a flat list. Stream priority below decides which addon leads, in both modes.": "Рейтинг JL Media Vision ставит источники с наивысшей оценкой первыми. Порядок дополнений сохраняет результаты каждого дополнения в исходном порядке, в плоском списке. Приоритет потоков ниже определяет первое дополнение в обоих режимах.",
-  "Show each addon's results in the order it returned them, grouped by your addon list. Keeps the original addon ordering.": "Показывать результаты каждого дополнения в полученном порядке, группируя по вашему списку дополнений. Сохраняет исходный порядок результатов.",
-  "Any compatible subtitle addons you have installed are searched here too.": "Здесь также выполняется поиск во всех установленных совместимых дополнениях с субтитрами.",
+  "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, in a flat list. Stream priority below decides which addon leads, in both modes.":
+    "Рейтинг JL Media Vision ставит источники с наивысшей оценкой первыми. Порядок дополнений сохраняет результаты каждого дополнения в исходном порядке, в плоском списке. Приоритет потоков ниже определяет первое дополнение в обоих режимах.",
+  "Show each addon's results in the order it returned them, grouped by your addon list. Keeps the original addon ordering.":
+    "Показывать результаты каждого дополнения в полученном порядке, группируя по вашему списку дополнений. Сохраняет исходный порядок результатов.",
+  "Any compatible subtitle addons you have installed are searched here too.":
+    "Здесь также выполняется поиск во всех установленных совместимых дополнениях с субтитрами.",
   "Addon compatibility": "Совместимость дополнений",
-  "JL Media Vision uses the open addon protocol. Compatible manifests and configured addon links work without an external media account. Third-party notices are listed in Licenses.": "JL Media Vision использует открытый протокол дополнений. Совместимые манифесты и настроенные ссылки дополнений работают без внешнего медиааккаунта. Уведомления сторонних разработчиков приведены в разделе «Лицензии».",
-  "If you were going to send something, send it to ElfHosted above, or to one of the charities below. They all do more good with it.": "Если хотите сделать пожертвование, поддержите ElfHosted выше или одну из благотворительных организаций ниже. Все они найдут вашему вкладу полезное применение.",
-  "Support ElfHosted, or give to any charity below, and the badge lands on your profile.": "Поддержите ElfHosted или любую благотворительную организацию ниже, и в вашем профиле появится значок.",
-  "Choose a JL profile first so its watchlist can sync.": "Сначала выберите профиль JL, чтобы синхронизировать его список просмотра.",
-  "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your account sign-in.": "Экспортируйте все настройки JL Media Vision в один файл, затем восстановите их на новом компьютере или сохраните как резервную копию. Включается всё, кроме данных входа в аккаунт.",
+  "JL Media Vision uses the open addon protocol. Compatible manifests and configured addon links work without an external media account. Third-party notices are listed in Licenses.":
+    "JL Media Vision использует открытый протокол дополнений. Совместимые манифесты и настроенные ссылки дополнений работают без внешнего медиааккаунта. Уведомления сторонних разработчиков приведены в разделе «Лицензии».",
+  "If you were going to send something, send it to ElfHosted above, or to one of the charities below. They all do more good with it.":
+    "Если хотите сделать пожертвование, поддержите ElfHosted выше или одну из благотворительных организаций ниже. Все они найдут вашему вкладу полезное применение.",
+  "Support ElfHosted, or give to any charity below, and the badge lands on your profile.":
+    "Поддержите ElfHosted или любую благотворительную организацию ниже, и в вашем профиле появится значок.",
+  "Choose a JL profile first so its watchlist can sync.":
+    "Сначала выберите профиль JL, чтобы синхронизировать его список просмотра.",
+  "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your account sign-in.":
+    "Экспортируйте все настройки JL Media Vision в один файл, затем восстановите их на новом компьютере или сохраните как резервную копию. Включается всё, кроме данных входа в аккаунт.",
 };
 
 export default jlDesktop026;

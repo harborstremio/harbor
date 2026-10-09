@@ -56,6 +56,8 @@ include(CheckCXXSourceCompiles)
 # CMAKE_REQUIRED_FLAGS is a space-separated string, not a CMake list.
 set(OLD_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
 string(APPEND CMAKE_REQUIRED_FLAGS " -Werror -Wthread-safety")
+# Recheck caches created by the former malformed flag-list probe.
+unset(HAVE_CLANG_THREAD_SAFETY CACHE)
 check_cxx_source_compiles("
 struct __attribute__((lockable)) Lock {
   void Acquire() __attribute__((exclusive_lock_function()));

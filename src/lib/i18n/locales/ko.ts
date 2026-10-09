@@ -105,7 +105,8 @@ const ko: Record<string, string> = {
   "collections.feed.more": "컬렉션 더 불러오기",
   "collections.feed.error": "컬렉션을 불러오지 못했습니다. 다시 시도해 주세요.",
   "Show content ratings?": "콘텐츠 등급을 표시할까요?",
-  "Age ratings and content notes when playback starts.": "재생이 시작될 때 연령 등급과 콘텐츠 안내를 표시합니다.",
+  "Age ratings and content notes when playback starts.":
+    "재생이 시작될 때 연령 등급과 콘텐츠 안내를 표시합니다.",
   ...gameCommunity,
   ...torrentDialog,
   "nav.games": "게임",
@@ -118,12 +119,13 @@ const ko: Record<string, string> = {
   ...gameHub,
   ...floatingPlayer,
   ...gameAntiCheat,
-  "Translations": "번역",
+  Translations: "번역",
   "Translating…": "번역 중…",
   "Showing {lang}": "{lang} 표시 중",
   "Show all": "모두 표시",
   "games.download.speed.title": "다운로드 속도",
-  "games.download.speed.note": "이 프로필의 직접 다운로드와 토렌트가 함께 사용하는 제한입니다. 개별 토렌트의 제한은 더 낮을 수 있습니다.",
+  "games.download.speed.note":
+    "이 프로필의 직접 다운로드와 토렌트가 함께 사용하는 제한입니다. 개별 토렌트의 제한은 더 낮을 수 있습니다.",
   "games.download.speed.unlimited": "무제한",
   "games.download.speed.limited": "속도 제한",
   "games.download.speed.rate": "초당 킬로바이트",
@@ -133,17 +135,23 @@ const ko: Record<string, string> = {
   "games.discovery.sale.cards.included": "트레이딩 카드",
   "games.discovery.sale.cards.none": "세일 카드 없음",
   "games.discovery.sale.cards.unknown": "카드 미확인",
-  "games.discovery.sale.cards.includedNote": "Steam의 현재 세일 카드 규정에 따라 포함됩니다. 획득 조건은 Steam에서 확인하세요.",
-  "games.discovery.sale.cards.noneNote": "Steam의 현재 규정상 이번 계절 세일에는 트레이딩 카드가 포함되지 않습니다. 다른 이벤트 보상은 별개입니다.",
-  "games.discovery.sale.cards.unknownNote": "Steam의 현재 카드 규정을 확인하지 못했습니다. 제공 여부는 Steam에서 확인하세요.",
-  "games.discovery.sale.cards.badgeNote": "한 세트를 모으면 세일 배지, 이모티콘, 프로필 배경을 제작할 수 있습니다.",
+  "games.discovery.sale.cards.includedNote":
+    "Steam의 현재 세일 카드 규정에 따라 포함됩니다. 획득 조건은 Steam에서 확인하세요.",
+  "games.discovery.sale.cards.noneNote":
+    "Steam의 현재 규정상 이번 계절 세일에는 트레이딩 카드가 포함되지 않습니다. 다른 이벤트 보상은 별개입니다.",
+  "games.discovery.sale.cards.unknownNote":
+    "Steam의 현재 카드 규정을 확인하지 못했습니다. 제공 여부는 Steam에서 확인하세요.",
+  "games.discovery.sale.cards.badgeNote":
+    "한 세트를 모으면 세일 배지, 이모티콘, 프로필 배경을 제작할 수 있습니다.",
   "games.download.storage.title": "다운로드 공간",
-  "games.download.storage.note": "일시 중지된 항목을 포함해 직접 다운로드, 토렌트 및 임시 파일에 필요한 공간을 추정합니다. 외부 설치 프로그램은 포함되지 않습니다.",
+  "games.download.storage.note":
+    "일시 중지된 항목을 포함해 직접 다운로드, 토렌트 및 임시 파일에 필요한 공간을 추정합니다. 외부 설치 프로그램은 포함되지 않습니다.",
   "games.download.storage.error": "저장 공간을 확인할 수 없습니다.",
   "games.download.storage.unavailable": "여유 공간을 알 수 없음",
   "games.download.storage.free": "{size} 여유",
   "games.download.storage.remaining": "추가 공간: {size}",
-  "games.download.storage.estimate": "아직 확인하지 않은 기존 파일이 있습니다. 실제 필요한 공간은 더 적을 수 있습니다.",
+  "games.download.storage.estimate":
+    "아직 확인하지 않은 기존 파일이 있습니다. 실제 필요한 공간은 더 적을 수 있습니다.",
   "games.download.storage.unknown": "크기 미상: 파일 {count}개",
   "games.download.storage.other": "다른 Harbor 작업이 {size} 예약 중",
   "games.download.storage.shortfall": "{size}의 추가 공간 필요",
@@ -166,7 +174,8 @@ const ko: Record<string, string> = {
   ...gameEve,
   ...warhammerUniverse,
   ...gameWow,
-  "games.selection.partial": "전체 {total}개 중 {count}개 게임을 업데이트했습니다. 나머지 게임은 계속 선택되어 있습니다. 다시 시도하세요.",
+  "games.selection.partial":
+    "전체 {total}개 중 {count}개 게임을 업데이트했습니다. 나머지 게임은 계속 선택되어 있습니다. 다시 시도하세요.",
   "games.selection.failed": "선택한 게임을 업데이트하지 못했습니다. 다시 시도하세요.",
   "games.custom.nav": "로컬 게임",
   "games.libraryPersonal.visibility": "라이브러리 표시",
@@ -188,7 +197,8 @@ const ko: Record<string, string> = {
   "games.selection.hide": "숨기기",
   "games.selection.pin": "고정",
   "games.selection.unpin": "고정 해제",
-  "games.selection.matchNote": "선택한 게임 중 일부를 이용할 수 없습니다. 라이브러리를 새로고침하고 다시 시도하세요.",
+  "games.selection.matchNote":
+    "선택한 게임 중 일부를 이용할 수 없습니다. 라이브러리를 새로고침하고 다시 시도하세요.",
   "games.selection.collection": "컬렉션에 추가",
   "games.collections.localMissing": "이 프로필의 라이브러리에 더 이상 없음",
   "games.collections.dynamic": "필터 기반 컬렉션",
@@ -196,15 +206,21 @@ const ko: Record<string, string> = {
   "games.collections.type": "컬렉션 유형",
   "games.collections.filters": "컬렉션 필터",
   "games.collections.ruleQuery": "게임 제목에 포함된 내용",
-  "games.collections.autoNote": "라이브러리의 게임이 필터와 일치하는지에 따라 이 컬렉션에 자동으로 추가되거나 컬렉션에서 제외됩니다.",
-  "games.collections.pickerAutoNote": "필터 기반 컬렉션은 자동으로 업데이트됩니다. 컬렉션에서 필터를 관리하세요.",
+  "games.collections.autoNote":
+    "라이브러리의 게임이 필터와 일치하는지에 따라 이 컬렉션에 자동으로 추가되거나 컬렉션에서 제외됩니다.",
+  "games.collections.pickerAutoNote":
+    "필터 기반 컬렉션은 자동으로 업데이트됩니다. 컬렉션에서 필터를 관리하세요.",
   "games.collections.matches": "일치하는 게임: {count}개",
-  "games.collections.emptyDynamic": "이 필터와 일치하는 게임이 라이브러리에 없습니다. 필터를 변경하거나 라이브러리에 게임을 더 추가하세요.",
-  "games.collections.collections_rules": "이 컬렉션의 필터를 읽지 못했습니다. 저장된 데이터는 대체되지 않았습니다.",
-  "games.collections.collections_dynamic": "이 컬렉션은 자동으로 업데이트됩니다. 표시되는 게임을 바꾸려면 컬렉션에서 필터를 변경하세요.",
+  "games.collections.emptyDynamic":
+    "이 필터와 일치하는 게임이 라이브러리에 없습니다. 필터를 변경하거나 라이브러리에 게임을 더 추가하세요.",
+  "games.collections.collections_rules":
+    "이 컬렉션의 필터를 읽지 못했습니다. 저장된 데이터는 대체되지 않았습니다.",
+  "games.collections.collections_dynamic":
+    "이 컬렉션은 자동으로 업데이트됩니다. 표시되는 게임을 바꾸려면 컬렉션에서 필터를 변경하세요.",
   "games.collections.title": "컬렉션",
   "games.collections.personal": "직접 만든 컬렉션",
-  "games.collections.note": "모든 게임을 위한 공간입니다. 좋아하는 게임, 앞으로 플레이할 게임, 다시 돌아가고 싶은 세계를 모아 보세요.",
+  "games.collections.note":
+    "모든 게임을 위한 공간입니다. 좋아하는 게임, 앞으로 플레이할 게임, 다시 돌아가고 싶은 세계를 모아 보세요.",
   "games.collections.addTo": "컬렉션에 추가",
   "games.collections.count": "게임 {count}개",
   "games.collections.one": "게임 1개",
@@ -222,7 +238,8 @@ const ko: Record<string, string> = {
   "games.collections.pin": "컬렉션 고정",
   "games.collections.unpin": "컬렉션 고정 해제",
   "games.collections.remove": "컬렉션 제거",
-  "games.collections.removeNote": "이 컬렉션만 제거됩니다. 게임, 저장 데이터, 다운로드 및 다른 컬렉션은 그대로 유지됩니다.",
+  "games.collections.removeNote":
+    "이 컬렉션만 제거됩니다. 게임, 저장 데이터, 다운로드 및 다른 컬렉션은 그대로 유지됩니다.",
   "games.collections.confirmRemove": "이 컬렉션 제거",
   "games.collections.removeGame": "이 컬렉션에서 {name} 제거",
   "games.collections.removeShort": "컬렉션에서 제거",
@@ -231,13 +248,19 @@ const ko: Record<string, string> = {
   "games.collections.save": "변경 사항 저장",
   "games.collections.collections_name": "컬렉션 이름은 1–80자, 설명은 최대 240자로 입력하세요.",
   "games.collections.collections_duplicate": "같은 이름의 컬렉션이 이미 있습니다.",
-  "games.collections.collections_limit": "이 프로필의 컬렉션 저장 한도에 도달했습니다. 사용하지 않는 컬렉션이나 게임을 제거하고 다시 시도하세요.",
+  "games.collections.collections_limit":
+    "이 프로필의 컬렉션 저장 한도에 도달했습니다. 사용하지 않는 컬렉션이나 게임을 제거하고 다시 시도하세요.",
   "games.collections.collections_missing": "이 컬렉션은 제거되었습니다. 다른 컬렉션을 선택하세요.",
-  "games.collections.collections_read": "컬렉션을 읽지 못했습니다. 저장된 데이터는 대체되지 않았습니다. 다시 불러오세요.",
-  "games.collections.collections_write": "변경 사항을 저장하지 못했습니다. 이전 컬렉션은 그대로 남아 있습니다. 기기의 저장 공간을 확보하고 다시 시도하세요.",
-  "games.collections.collections_game": "이 게임을 식별하지 못했습니다. 라이브러리를 새로고침하고 다시 시도하세요.",
-  "games.collections.firstNote": "컬렉션을 만든 다음 게임의 상세 페이지에서 추가하거나 라이브러리에서 게임을 선택하세요. PC 게임과 ROM을 함께 모을 수 있습니다.",
-  "games.collections.emptyNote": "게임의 상세 페이지에서 추가하거나, 라이브러리에서 게임을 선택한 뒤 컬렉션에 추가를 선택하세요.",
+  "games.collections.collections_read":
+    "컬렉션을 읽지 못했습니다. 저장된 데이터는 대체되지 않았습니다. 다시 불러오세요.",
+  "games.collections.collections_write":
+    "변경 사항을 저장하지 못했습니다. 이전 컬렉션은 그대로 남아 있습니다. 기기의 저장 공간을 확보하고 다시 시도하세요.",
+  "games.collections.collections_game":
+    "이 게임을 식별하지 못했습니다. 라이브러리를 새로고침하고 다시 시도하세요.",
+  "games.collections.firstNote":
+    "컬렉션을 만든 다음 게임의 상세 페이지에서 추가하거나 라이브러리에서 게임을 선택하세요. PC 게임과 ROM을 함께 모을 수 있습니다.",
+  "games.collections.emptyNote":
+    "게임의 상세 페이지에서 추가하거나, 라이브러리에서 게임을 선택한 뒤 컬렉션에 추가를 선택하세요.",
   "games.cache.saved": "저장된 데이터 · {date}",
   "games.cache.refresh": "새로고침",
   "games.cache.refreshing": "새로고침 중…",
@@ -316,7 +339,8 @@ const ko: Record<string, string> = {
   ...gamePlaytime,
   ...gameLaunchHealth,
   "games.torrent.share.title": "토렌트 공유",
-  "games.torrent.share.note": "검증된 파일을 피어와 공유합니다. 한도에 도달하거나 Harbor를 닫으면 중지됩니다. 파일을 변경하기 전에 공유를 중지하세요.",
+  "games.torrent.share.note":
+    "검증된 파일을 피어와 공유합니다. 한도에 도달하거나 Harbor를 닫으면 중지됩니다. 파일을 변경하기 전에 공유를 중지하세요.",
   "games.torrent.share.upload": "업로드 제한 (KB/초)",
   "games.torrent.share.ratio": "공유 비율 (1–10)",
   "games.torrent.share.minutes": "시간 제한 (분)",
@@ -329,8 +353,10 @@ const ko: Record<string, string> = {
   "games.torrent.share.limitReached": "공유 한도 도달",
   "games.torrent.share.failed": "공유에 실패했습니다. 파일을 확인하고 다시 시도하세요.",
   "games.torrent.share.stats": "{uploaded} 업로드 · {minutes}분",
-  "games.torrent.torrent_seed_files": "완료된 파일이 없거나 변경되었거나 사용 중입니다. 공유 전에 다운로드 폴더를 확인하세요.",
-  "games.torrent.torrent_seed_limits": "업로드 32–1,048,576 KB/초, 비율 1–10, 시간 1–1,440분을 선택하세요.",
+  "games.torrent.torrent_seed_files":
+    "완료된 파일이 없거나 변경되었거나 사용 중입니다. 공유 전에 다운로드 폴더를 확인하세요.",
+  "games.torrent.torrent_seed_limits":
+    "업로드 32–1,048,576 KB/초, 비율 1–10, 시간 1–1,440분을 선택하세요.",
 
   ...gamePokemonUi,
   ...customArtwork,

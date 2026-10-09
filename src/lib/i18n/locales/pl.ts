@@ -122,32 +122,40 @@ const pl: Record<string, string> = {
   ...gameHub,
   ...floatingPlayer,
   ...gameAntiCheat,
-  "Translations": "Tłumaczenia",
+  Translations: "Tłumaczenia",
   "Translating…": "Tłumaczenie…",
   "Showing {lang}": "Wyświetlanie: {lang}",
   "Show all": "Pokaż wszystkie",
   "games.download.speed.title": "Prędkość pobierania",
-  "games.download.speed.note": "Wspólna dla pobrań bezpośrednich i torrentów tego profilu. Osobny limit torrenta może być niższy.",
+  "games.download.speed.note":
+    "Wspólna dla pobrań bezpośrednich i torrentów tego profilu. Osobny limit torrenta może być niższy.",
   "games.download.speed.unlimited": "Bez limitu",
   "games.download.speed.limited": "Ogranicz prędkość",
   "games.download.speed.rate": "Kilobajty na sekundę",
   "games.download.speed.range": "Wpisz liczbę całkowitą od {min} do {max}.",
-  "games.download.speed.error": "Nie udało się wczytać lub zapisać ustawienia prędkości. Spróbuj ponownie.",
+  "games.download.speed.error":
+    "Nie udało się wczytać lub zapisać ustawienia prędkości. Spróbuj ponownie.",
   "games.download.speed.current": "Prędkość pobierania plików: {rate}",
   "games.discovery.sale.cards.included": "Karty kolekcjonerskie",
   "games.discovery.sale.cards.none": "Bez kart wyprzedaży",
   "games.discovery.sale.cards.unknown": "Karty niepotwierdzone",
-  "games.discovery.sale.cards.includedNote": "Dostępne według aktualnych zasad Steam dotyczących kart wyprzedaży. Warunki zdobycia sprawdzisz na Steam.",
-  "games.discovery.sale.cards.noneNote": "Aktualne zasady Steam nie przewidują kart dla tej sezonowej wyprzedaży. Inne nagrody wydarzenia są odrębne.",
-  "games.discovery.sale.cards.unknownNote": "Nie udało się sprawdzić aktualnych zasad Steam dotyczących kart. Sprawdź ich dostępność na Steam.",
-  "games.discovery.sale.cards.badgeNote": "Zbierz zestaw, aby wytworzyć odznakę wyprzedaży, emotikon i tło profilu.",
+  "games.discovery.sale.cards.includedNote":
+    "Dostępne według aktualnych zasad Steam dotyczących kart wyprzedaży. Warunki zdobycia sprawdzisz na Steam.",
+  "games.discovery.sale.cards.noneNote":
+    "Aktualne zasady Steam nie przewidują kart dla tej sezonowej wyprzedaży. Inne nagrody wydarzenia są odrębne.",
+  "games.discovery.sale.cards.unknownNote":
+    "Nie udało się sprawdzić aktualnych zasad Steam dotyczących kart. Sprawdź ich dostępność na Steam.",
+  "games.discovery.sale.cards.badgeNote":
+    "Zbierz zestaw, aby wytworzyć odznakę wyprzedaży, emotikon i tło profilu.",
   "games.download.storage.title": "Miejsce na pobieranie",
-  "games.download.storage.note": "Szacunki obejmują pobieranie bezpośrednie, torrenty i pliki tymczasowe, także przy wstrzymanym pobieraniu. Zewnętrzne instalatory nie są uwzględniane.",
+  "games.download.storage.note":
+    "Szacunki obejmują pobieranie bezpośrednie, torrenty i pliki tymczasowe, także przy wstrzymanym pobieraniu. Zewnętrzne instalatory nie są uwzględniane.",
   "games.download.storage.error": "Nie udało się sprawdzić miejsca na dysku.",
   "games.download.storage.unavailable": "Wolne miejsce niedostępne",
   "games.download.storage.free": "{size} wolnego",
   "games.download.storage.remaining": "Dodatkowe miejsce: {size}",
-  "games.download.storage.estimate": "Niektóre istniejące pliki nie zostały jeszcze sprawdzone. Potrzebne miejsce może być mniejsze.",
+  "games.download.storage.estimate":
+    "Niektóre istniejące pliki nie zostały jeszcze sprawdzone. Potrzebne miejsce może być mniejsze.",
   "games.download.storage.unknown": "Nieznany rozmiar: {count} plików",
   "games.download.storage.other": "Zarezerwowane przez inne operacje Harbor: {size}",
   "games.download.storage.shortfall": "Potrzeba jeszcze {size} miejsca",
@@ -170,7 +178,8 @@ const pl: Record<string, string> = {
   ...gameEve,
   ...warhammerUniverse,
   ...gameWow,
-  "games.selection.partial": "Zaktualizowano {count} z {total} gier. Pozostałe gry są nadal zaznaczone; spróbuj ponownie.",
+  "games.selection.partial":
+    "Zaktualizowano {count} z {total} gier. Pozostałe gry są nadal zaznaczone; spróbuj ponownie.",
   "games.selection.failed": "Nie udało się zaktualizować wybranych gier. Spróbuj ponownie.",
   "games.custom.nav": "Gry lokalne",
   "games.libraryPersonal.visibility": "Widoczność w bibliotece",
@@ -192,7 +201,8 @@ const pl: Record<string, string> = {
   "games.selection.hide": "Ukryj",
   "games.selection.pin": "Przypnij",
   "games.selection.unpin": "Odepnij",
-  "games.selection.matchNote": "Niektóre wybrane gry są niedostępne. Odśwież bibliotekę i spróbuj ponownie.",
+  "games.selection.matchNote":
+    "Niektóre wybrane gry są niedostępne. Odśwież bibliotekę i spróbuj ponownie.",
   "games.selection.collection": "Dodaj do kolekcji",
   "games.collections.localMissing": "Nie ma już tej gry w bibliotece tego profilu",
   "games.collections.dynamic": "Kolekcja oparta na filtrach",
@@ -200,15 +210,21 @@ const pl: Record<string, string> = {
   "games.collections.type": "Typ kolekcji",
   "games.collections.filters": "Filtry kolekcji",
   "games.collections.ruleQuery": "Tytuł gry zawiera",
-  "games.collections.autoNote": "Gry są automatycznie dodawane do tej kolekcji lub z niej usuwane zależnie od tego, czy pasują do jej filtrów w twojej bibliotece.",
-  "games.collections.pickerAutoNote": "Kolekcje oparte na filtrach aktualizują się automatycznie. Zarządzaj ich filtrami w Kolekcjach.",
+  "games.collections.autoNote":
+    "Gry są automatycznie dodawane do tej kolekcji lub z niej usuwane zależnie od tego, czy pasują do jej filtrów w twojej bibliotece.",
+  "games.collections.pickerAutoNote":
+    "Kolekcje oparte na filtrach aktualizują się automatycznie. Zarządzaj ich filtrami w Kolekcjach.",
   "games.collections.matches": "Pasujące gry: {count}",
-  "games.collections.emptyDynamic": "Żadna gra z biblioteki nie pasuje do tych filtrów. Zmień filtry lub dodaj więcej gier do biblioteki.",
-  "games.collections.collections_rules": "Nie udało się odczytać filtrów tej kolekcji. Zapisane dane nie zostały zastąpione.",
-  "games.collections.collections_dynamic": "Ta kolekcja aktualizuje się automatycznie. Zmień jej filtry w Kolekcjach, aby zmienić wyświetlane gry.",
+  "games.collections.emptyDynamic":
+    "Żadna gra z biblioteki nie pasuje do tych filtrów. Zmień filtry lub dodaj więcej gier do biblioteki.",
+  "games.collections.collections_rules":
+    "Nie udało się odczytać filtrów tej kolekcji. Zapisane dane nie zostały zastąpione.",
+  "games.collections.collections_dynamic":
+    "Ta kolekcja aktualizuje się automatycznie. Zmień jej filtry w Kolekcjach, aby zmienić wyświetlane gry.",
   "games.collections.title": "Kolekcje",
   "games.collections.personal": "Utworzone przez ciebie",
-  "games.collections.note": "Miejsce na każdy rodzaj gry. Grupuj ulubione gry, te na później i światy, do których warto wracać.",
+  "games.collections.note":
+    "Miejsce na każdy rodzaj gry. Grupuj ulubione gry, te na później i światy, do których warto wracać.",
   "games.collections.addTo": "Dodaj do kolekcji",
   "games.collections.count": "Gry: {count}",
   "games.collections.one": "1 gra",
@@ -226,22 +242,30 @@ const pl: Record<string, string> = {
   "games.collections.pin": "Przypnij kolekcję",
   "games.collections.unpin": "Odepnij kolekcję",
   "games.collections.remove": "Usuń kolekcję",
-  "games.collections.removeNote": "Usunięta zostanie tylko ta kolekcja. Gry, zapisy rozgrywki, pobrane pliki i pozostałe kolekcje pozostaną na miejscu.",
+  "games.collections.removeNote":
+    "Usunięta zostanie tylko ta kolekcja. Gry, zapisy rozgrywki, pobrane pliki i pozostałe kolekcje pozostaną na miejscu.",
   "games.collections.confirmRemove": "Usuń tę kolekcję",
   "games.collections.removeGame": "Usuń {name} z tej kolekcji",
   "games.collections.removeShort": "Usuń z kolekcji",
   "games.collections.added": "Ostatnio dodane najpierw",
   "games.collections.done": "Gotowe",
   "games.collections.save": "Zapisz zmiany",
-  "games.collections.collections_name": "Nadaj kolekcji nazwę o długości 1–80 znaków i opis do 240 znaków.",
+  "games.collections.collections_name":
+    "Nadaj kolekcji nazwę o długości 1–80 znaków i opis do 240 znaków.",
   "games.collections.collections_duplicate": "Masz już kolekcję o takiej nazwie.",
-  "games.collections.collections_limit": "Ten profil osiągnął limit przechowywania kolekcji. Usuń nieużywane kolekcje lub gry i spróbuj ponownie.",
+  "games.collections.collections_limit":
+    "Ten profil osiągnął limit przechowywania kolekcji. Usuń nieużywane kolekcje lub gry i spróbuj ponownie.",
   "games.collections.collections_missing": "Ta kolekcja została usunięta. Wybierz inną.",
-  "games.collections.collections_read": "Nie udało się odczytać twoich kolekcji. Zapisane dane nie zostały zastąpione. Spróbuj wczytać je ponownie.",
-  "games.collections.collections_write": "Nie udało się zapisać zmiany. Poprzednia kolekcja nadal jest dostępna. Zwolnij trochę miejsca na urządzeniu i spróbuj ponownie.",
-  "games.collections.collections_game": "Nie udało się rozpoznać tej gry. Odśwież bibliotekę i spróbuj ponownie.",
-  "games.collections.firstNote": "Utwórz kolekcję, a potem dodawaj gry z ich stron szczegółów lub zaznaczaj je w bibliotece. Gry PC i ROM-y mogą być w jednej kolekcji.",
-  "games.collections.emptyNote": "Dodawaj gry z ich stron szczegółów albo zaznacz gry w bibliotece i wybierz Dodaj do kolekcji.",
+  "games.collections.collections_read":
+    "Nie udało się odczytać twoich kolekcji. Zapisane dane nie zostały zastąpione. Spróbuj wczytać je ponownie.",
+  "games.collections.collections_write":
+    "Nie udało się zapisać zmiany. Poprzednia kolekcja nadal jest dostępna. Zwolnij trochę miejsca na urządzeniu i spróbuj ponownie.",
+  "games.collections.collections_game":
+    "Nie udało się rozpoznać tej gry. Odśwież bibliotekę i spróbuj ponownie.",
+  "games.collections.firstNote":
+    "Utwórz kolekcję, a potem dodawaj gry z ich stron szczegółów lub zaznaczaj je w bibliotece. Gry PC i ROM-y mogą być w jednej kolekcji.",
+  "games.collections.emptyNote":
+    "Dodawaj gry z ich stron szczegółów albo zaznacz gry w bibliotece i wybierz Dodaj do kolekcji.",
   "games.cache.saved": "Zapisane dane · {date}",
   "games.cache.refresh": "Odśwież",
   "games.cache.refreshing": "Odświeżanie…",
@@ -323,7 +347,8 @@ const pl: Record<string, string> = {
   ...gamePlaytime,
   ...gameLaunchHealth,
   "games.torrent.share.title": "Udostępnij torrent",
-  "games.torrent.share.note": "Udostępniaj sprawdzone pliki innym uczestnikom. Zatrzyma się po osiągnięciu limitu lub zamknięciu Harbor. Zatrzymaj udostępnianie przed zmianą plików.",
+  "games.torrent.share.note":
+    "Udostępniaj sprawdzone pliki innym uczestnikom. Zatrzyma się po osiągnięciu limitu lub zamknięciu Harbor. Zatrzymaj udostępnianie przed zmianą plików.",
   "games.torrent.share.upload": "Limit wysyłania (KB/s)",
   "games.torrent.share.ratio": "Współczynnik (1–10)",
   "games.torrent.share.minutes": "Limit czasu (minuty)",
@@ -336,8 +361,10 @@ const pl: Record<string, string> = {
   "games.torrent.share.limitReached": "Osiągnięto limit",
   "games.torrent.share.failed": "Udostępnianie nie powiodło się. Sprawdź pliki i spróbuj ponownie.",
   "games.torrent.share.stats": "Wysłano {uploaded} · {minutes} min",
-  "games.torrent.torrent_seed_files": "Gotowe pliki zniknęły, zostały zmienione lub są używane. Sprawdź folder pobierania przed udostępnieniem.",
-  "games.torrent.torrent_seed_limits": "Wybierz 32–1 048 576 KB/s, współczynnik 1–10 i czas 1–1 440 minut.",
+  "games.torrent.torrent_seed_files":
+    "Gotowe pliki zniknęły, zostały zmienione lub są używane. Sprawdź folder pobierania przed udostępnieniem.",
+  "games.torrent.torrent_seed_limits":
+    "Wybierz 32–1 048 576 KB/s, współczynnik 1–10 i czas 1–1 440 minut.",
 
   ...gamePokemonUi,
   ...customArtwork,

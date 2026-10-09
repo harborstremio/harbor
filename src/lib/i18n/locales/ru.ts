@@ -147,32 +147,40 @@ const ru: Record<string, string> = {
   ...gameHub,
   ...floatingPlayer,
   ...gameAntiCheat,
-  "Translations": "Переводы",
+  Translations: "Переводы",
   "Translating…": "Перевод…",
   "Showing {lang}": "Показано: {lang}",
   "Show all": "Показать все",
   "games.download.speed.title": "Скорость загрузки",
-  "games.download.speed.note": "Общий лимит для прямых загрузок и торрентов этого профиля. У отдельного торрента лимит может быть ниже.",
+  "games.download.speed.note":
+    "Общий лимит для прямых загрузок и торрентов этого профиля. У отдельного торрента лимит может быть ниже.",
   "games.download.speed.unlimited": "Без ограничений",
   "games.download.speed.limited": "Ограничить",
   "games.download.speed.rate": "Килобайт в секунду",
   "games.download.speed.range": "Введите целое число от {min} до {max}.",
-  "games.download.speed.error": "Не удалось загрузить или сохранить настройку скорости. Попробуйте ещё раз.",
+  "games.download.speed.error":
+    "Не удалось загрузить или сохранить настройку скорости. Попробуйте ещё раз.",
   "games.download.speed.current": "Скорость загрузки файлов: {rate}",
   "games.discovery.sale.cards.included": "Коллекционные карточки",
   "games.discovery.sale.cards.none": "Без карточек распродажи",
   "games.discovery.sale.cards.unknown": "Карточки не подтверждены",
-  "games.discovery.sale.cards.includedNote": "Предусмотрены текущими правилами Steam для карточек распродаж. Условия получения можно узнать в Steam.",
-  "games.discovery.sale.cards.noneNote": "По текущим правилам Steam для этой сезонной распродажи карточки не предусмотрены. Другие награды события учитываются отдельно.",
-  "games.discovery.sale.cards.unknownNote": "Не удалось проверить текущие правила Steam для карточек. Уточните их доступность в Steam.",
-  "games.discovery.sale.cards.badgeNote": "Соберите набор, чтобы создать значок распродажи, смайлик и фон профиля.",
+  "games.discovery.sale.cards.includedNote":
+    "Предусмотрены текущими правилами Steam для карточек распродаж. Условия получения можно узнать в Steam.",
+  "games.discovery.sale.cards.noneNote":
+    "По текущим правилам Steam для этой сезонной распродажи карточки не предусмотрены. Другие награды события учитываются отдельно.",
+  "games.discovery.sale.cards.unknownNote":
+    "Не удалось проверить текущие правила Steam для карточек. Уточните их доступность в Steam.",
+  "games.discovery.sale.cards.badgeNote":
+    "Соберите набор, чтобы создать значок распродажи, смайлик и фон профиля.",
   "games.download.storage.title": "Место для загрузок",
-  "games.download.storage.note": "Оценка включает прямые загрузки, торренты и временные файлы, в том числе приостановленные загрузки. Внешние установщики не учитываются.",
+  "games.download.storage.note":
+    "Оценка включает прямые загрузки, торренты и временные файлы, в том числе приостановленные загрузки. Внешние установщики не учитываются.",
   "games.download.storage.error": "Не удалось проверить свободное место.",
   "games.download.storage.unavailable": "Свободное место неизвестно",
   "games.download.storage.free": "Свободно: {size}",
   "games.download.storage.remaining": "Дополнительное место: {size}",
-  "games.download.storage.estimate": "Некоторые существующие файлы ещё не проверены. Необходимый объём места может быть меньше.",
+  "games.download.storage.estimate":
+    "Некоторые существующие файлы ещё не проверены. Необходимый объём места может быть меньше.",
   "games.download.storage.unknown": "Размер неизвестен: {count} файлов",
   "games.download.storage.other": "Зарезервировано другими операциями Harbor: {size}",
   "games.download.storage.shortfall": "Нужно ещё {size} места",
@@ -195,7 +203,8 @@ const ru: Record<string, string> = {
   ...gameEve,
   ...warhammerUniverse,
   ...gameWow,
-  "games.selection.partial": "Обновлено {count} из {total} игр. Остальные игры по-прежнему выбраны; попробуйте снова.",
+  "games.selection.partial":
+    "Обновлено {count} из {total} игр. Остальные игры по-прежнему выбраны; попробуйте снова.",
   "games.selection.failed": "Не удалось обновить выбранные игры. Попробуйте снова.",
   "games.custom.nav": "Локальные игры",
   "games.libraryPersonal.visibility": "Видимость в библиотеке",
@@ -217,7 +226,8 @@ const ru: Record<string, string> = {
   "games.selection.hide": "Скрыть",
   "games.selection.pin": "Закрепить",
   "games.selection.unpin": "Открепить",
-  "games.selection.matchNote": "Некоторые выбранные игры недоступны. Обновите библиотеку и попробуйте снова.",
+  "games.selection.matchNote":
+    "Некоторые выбранные игры недоступны. Обновите библиотеку и попробуйте снова.",
   "games.selection.collection": "Добавить в коллекцию",
   "games.collections.localMissing": "Больше нет в библиотеке этого профиля",
   "games.collections.dynamic": "Коллекция на основе фильтров",
@@ -225,15 +235,21 @@ const ru: Record<string, string> = {
   "games.collections.type": "Тип коллекции",
   "games.collections.filters": "Фильтры коллекции",
   "games.collections.ruleQuery": "Название игры содержит",
-  "games.collections.autoNote": "Игры автоматически добавляются в эту коллекцию или удаляются из неё в зависимости от того, соответствуют ли они её фильтрам в вашей библиотеке.",
-  "games.collections.pickerAutoNote": "Коллекции на основе фильтров обновляются автоматически. Управляйте их фильтрами в разделе «Коллекции».",
+  "games.collections.autoNote":
+    "Игры автоматически добавляются в эту коллекцию или удаляются из неё в зависимости от того, соответствуют ли они её фильтрам в вашей библиотеке.",
+  "games.collections.pickerAutoNote":
+    "Коллекции на основе фильтров обновляются автоматически. Управляйте их фильтрами в разделе «Коллекции».",
   "games.collections.matches": "Подходящие игры: {count}",
-  "games.collections.emptyDynamic": "Ни одна игра в библиотеке не соответствует этим фильтрам. Измените фильтры или добавьте больше игр в библиотеку.",
-  "games.collections.collections_rules": "Не удалось прочитать фильтры этой коллекции. Сохранённые данные не были заменены.",
-  "games.collections.collections_dynamic": "Эта коллекция обновляется автоматически. Измените её фильтры в разделе «Коллекции», чтобы выбрать, какие игры будут показаны.",
+  "games.collections.emptyDynamic":
+    "Ни одна игра в библиотеке не соответствует этим фильтрам. Измените фильтры или добавьте больше игр в библиотеку.",
+  "games.collections.collections_rules":
+    "Не удалось прочитать фильтры этой коллекции. Сохранённые данные не были заменены.",
+  "games.collections.collections_dynamic":
+    "Эта коллекция обновляется автоматически. Измените её фильтры в разделе «Коллекции», чтобы выбрать, какие игры будут показаны.",
   "games.collections.title": "Коллекции",
   "games.collections.personal": "Созданные вами",
-  "games.collections.note": "Место для любых игр. Объединяйте любимые игры, планы на будущее и миры, в которые хочется вернуться.",
+  "games.collections.note":
+    "Место для любых игр. Объединяйте любимые игры, планы на будущее и миры, в которые хочется вернуться.",
   "games.collections.addTo": "Добавить в коллекцию",
   "games.collections.count": "Игры: {count}",
   "games.collections.one": "1 игра",
@@ -251,22 +267,30 @@ const ru: Record<string, string> = {
   "games.collections.pin": "Закрепить коллекцию",
   "games.collections.unpin": "Открепить коллекцию",
   "games.collections.remove": "Удалить коллекцию",
-  "games.collections.removeNote": "Удаляется только эта коллекция. Ваши игры, сохранения, загрузки и другие коллекции остаются на месте.",
+  "games.collections.removeNote":
+    "Удаляется только эта коллекция. Ваши игры, сохранения, загрузки и другие коллекции остаются на месте.",
   "games.collections.confirmRemove": "Удалить эту коллекцию",
   "games.collections.removeGame": "Удалить {name} из этой коллекции",
   "games.collections.removeShort": "Удалить из коллекции",
   "games.collections.added": "Последние добавленные первыми",
   "games.collections.done": "Готово",
   "games.collections.save": "Сохранить изменения",
-  "games.collections.collections_name": "Задайте коллекции название длиной 1–80 символов и описание длиной до 240 символов.",
+  "games.collections.collections_name":
+    "Задайте коллекции название длиной 1–80 символов и описание длиной до 240 символов.",
   "games.collections.collections_duplicate": "У вас уже есть коллекция с таким названием.",
-  "games.collections.collections_limit": "Этот профиль достиг лимита хранения коллекций. Удалите неиспользуемые коллекции или игры и попробуйте снова.",
+  "games.collections.collections_limit":
+    "Этот профиль достиг лимита хранения коллекций. Удалите неиспользуемые коллекции или игры и попробуйте снова.",
   "games.collections.collections_missing": "Эта коллекция была удалена. Выберите другую.",
-  "games.collections.collections_read": "Не удалось прочитать ваши коллекции. Сохранённые данные не были заменены. Попробуйте загрузить их снова.",
-  "games.collections.collections_write": "Не удалось сохранить изменение. Предыдущая коллекция по-прежнему доступна. Освободите немного места на устройстве и попробуйте снова.",
-  "games.collections.collections_game": "Не удалось определить эту игру. Обновите библиотеку и попробуйте снова.",
-  "games.collections.firstNote": "Создайте коллекцию, затем добавляйте игры с их страниц или выбирайте их в библиотеке. Игры для ПК и ROM-файлы могут быть в одной коллекции.",
-  "games.collections.emptyNote": "Добавляйте игры с их страниц или выберите игры в библиотеке и нажмите «Добавить в коллекцию».",
+  "games.collections.collections_read":
+    "Не удалось прочитать ваши коллекции. Сохранённые данные не были заменены. Попробуйте загрузить их снова.",
+  "games.collections.collections_write":
+    "Не удалось сохранить изменение. Предыдущая коллекция по-прежнему доступна. Освободите немного места на устройстве и попробуйте снова.",
+  "games.collections.collections_game":
+    "Не удалось определить эту игру. Обновите библиотеку и попробуйте снова.",
+  "games.collections.firstNote":
+    "Создайте коллекцию, затем добавляйте игры с их страниц или выбирайте их в библиотеке. Игры для ПК и ROM-файлы могут быть в одной коллекции.",
+  "games.collections.emptyNote":
+    "Добавляйте игры с их страниц или выберите игры в библиотеке и нажмите «Добавить в коллекцию».",
   "games.cache.saved": "Сохранённые данные · {date}",
   "games.cache.refresh": "Обновить",
   "games.cache.refreshing": "Обновление…",
@@ -371,7 +395,8 @@ const ru: Record<string, string> = {
   ...gamePlaytime,
   ...gameLaunchHealth,
   "games.torrent.share.title": "Раздавать торрент",
-  "games.torrent.share.note": "Раздавайте проверенные файлы другим участникам. Остановка при достижении любого лимита или закрытии Harbor. Остановите раздачу перед изменением файлов.",
+  "games.torrent.share.note":
+    "Раздавайте проверенные файлы другим участникам. Остановка при достижении любого лимита или закрытии Harbor. Остановите раздачу перед изменением файлов.",
   "games.torrent.share.upload": "Лимит отдачи (КБ/с)",
   "games.torrent.share.ratio": "Коэффициент отдачи (1–10)",
   "games.torrent.share.minutes": "Лимит времени (минуты)",
@@ -384,8 +409,10 @@ const ru: Record<string, string> = {
   "games.torrent.share.limitReached": "Лимит достигнут",
   "games.torrent.share.failed": "Не удалось начать раздачу. Проверьте файлы и повторите попытку.",
   "games.torrent.share.stats": "Отдано {uploaded} · {minutes} мин",
-  "games.torrent.torrent_seed_files": "Готовые файлы отсутствуют, изменены или используются. Проверьте папку загрузки перед раздачей.",
-  "games.torrent.torrent_seed_limits": "Выберите 32–1 048 576 КБ/с, коэффициент 1–10 и время 1–1 440 минут.",
+  "games.torrent.torrent_seed_files":
+    "Готовые файлы отсутствуют, изменены или используются. Проверьте папку загрузки перед раздачей.",
+  "games.torrent.torrent_seed_limits":
+    "Выберите 32–1 048 576 КБ/с, коэффициент 1–10 и время 1–1 440 минут.",
 
   ...gamePokemonUi,
   ...customArtwork,
