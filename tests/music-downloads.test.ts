@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
+import * as offlinePolicy from "../src/lib/download/offline-policy.ts";
 const track = {
   id: "yt:one",
   connectorId: "youtube_music",
@@ -19,12 +20,16 @@ function fixture() {
     fail: () => void = () => {},
     cancelled = false;
   let stream = "https://example.test/audio";
+  let owner = JSON.stringify(["account-a", "profile-a"]);
+  let changed = () => {};
   const code = ts.transpileModule(
     readFileSync(new URL("../src/lib/music/downloads.ts", import.meta.url), "utf8"),
     { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } },
   ).outputText;
   const mocks: any = {
     react: { useSyncExternalStore: (_: unknown, snapshot: () => unknown) => snapshot() },
+    "@/lib/download/owner": { downloadOwner: () => owner, subscribeDownloadOwner: (listener: () => void) => { changed = listener; } },
+    "@/lib/download/offline-policy": offlinePolicy,
     "./preferences": {
       readMusicPreference: (k: string) => storage.get(k) ?? null,
       writeMusicPreference: (k: string, v: string) => storage.set(k, v),
@@ -100,6 +105,7 @@ function fixture() {
     fail: () => fail(),
     cancelled: () => cancelled,
     stream: (s: string) => (stream = s),
+    switchOwner: (next: string) => { owner = next; changed(); },
     wait: async () => {
       for (let i = 0; i < 30 && !calls.some((c) => c.kind); i++)
         await new Promise((r) => setTimeout(r, 1));
@@ -142,7 +148,7 @@ test("cancel waits for transfer and removes partial file and entry", async () =>
   assert.equal(f.files.size, 0);
   assert.equal(f.api.useMusicDownloads().length, 0);
 });
-test("failed download retries from an empty partial file; missing completed file becomes retryable", async () => {
+test("failed music retry keeps the same partial path for native validation; missing completed file becomes retryable", async () => {
   const f = fixture();
   let job = f.api.downloadMusic(track);
   await f.wait();
@@ -152,13 +158,28 @@ test("failed download retries from an empty partial file; missing completed file
   job = f.api.downloadMusic(track);
   for (let i = 0; i < 30 && f.calls.filter((c) => c.kind).length < 2; i++)
     await new Promise((r) => setTimeout(r, 1));
-  assert.equal(f.files.size, 0);
+  assert.equal(f.files.size, 1);
+  assert.equal(f.calls.filter((c) => c.kind)[0].path, f.calls.filter((c) => c.kind)[1].path);
   f.finish();
   await job;
   const entry = f.api.musicDownloadFor(track)!;
   f.files.clear();
   await assert.rejects(f.api.downloadedMusicTrack(entry), /missing/);
   assert.equal(entry.status, "error");
+});
+test("owner change pauses music and hides it; another account cannot read or delete the file", async () => {
+  const f = fixture();
+  const job = f.api.downloadMusic(track);
+  await f.wait();
+  const entry = f.api.musicDownloadFor(track)!;
+  f.switchOwner(JSON.stringify(["account-b", "profile-b"]));
+  await job;
+  assert.equal(entry.status, "paused");
+  assert.equal(f.api.useMusicDownloads().length, 0);
+  await assert.rejects(f.api.musicDownloadPath(entry.id), /another profile/);
+  await f.api.deleteMusicDownload(entry.id);
+  f.switchOwner(JSON.stringify(["account-a", "profile-a"]));
+  assert.equal(f.api.useMusicDownloads()[0].id, entry.id);
 });
 test("manifest streams and unavailable sources never produce a completed download", async () => {
   const f = fixture();

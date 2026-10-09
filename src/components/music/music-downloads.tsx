@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import "./music-library.css";
 import { FolderOpen, Trash2, X, Plus, RotateCcw, Play } from "@/components/icons/music-icons";
+import { Pause } from "lucide-react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { useT } from "@/lib/i18n";
 import {
@@ -11,13 +13,14 @@ import {
   revealMusicDownload,
   setMusicDownloadDir,
   useMusicDownloads,
+  pauseMusicDownload,
   type MusicDownload,
 } from "@/lib/music/downloads";
 import { playMusic, closeMusicPlayer, getMusicState } from "@/lib/music/player";
 import { useMusicPlaylistPicker } from "./music-playlist-picker";
 import { Poster } from "@/components/poster";
 import { MusicTrackPlaybackMark } from "./music-now-playing-mark";
-export function MusicDownloads({ query = "" }: { query?: string }) {
+export function MusicDownloads({ query = "", allowPlaylist = true }: { query?: string; allowPlaylist?: boolean }) {
   const t = useT(),
     entries = useMusicDownloads(),
     { openPlaylistPicker } = useMusicPlaylistPicker();
@@ -125,6 +128,9 @@ export function MusicDownloads({ query = "" }: { query?: string }) {
               {t(
                 entry.status === "done"
                   ? "music.download.done"
+                  : entry.status === "paused" ? "Paused"
+                  : entry.status === "queued" ? "Queued"
+                  : entry.status === "interrupted" ? "Interrupted. Retry to resume safely."
                   : entry.status === "error"
                     ? (entry.error ?? "music.download.failed")
                     : "music.download.busy",
@@ -146,7 +152,7 @@ export function MusicDownloads({ query = "" }: { query?: string }) {
               >
                 <Play size={17} />
               </button>
-              <button
+              {allowPlaylist && <button
                 aria-label={t("music.card.addToPlaylist")}
                 title={t("music.card.addToPlaylist")}
                 onClick={() =>
@@ -156,7 +162,7 @@ export function MusicDownloads({ query = "" }: { query?: string }) {
                 }
               >
                 <Plus size={17} />
-              </button>
+              </button>}
               <button
                 aria-label={t("music.download.folder")}
                 title={t("music.download.folder")}
@@ -166,11 +172,14 @@ export function MusicDownloads({ query = "" }: { query?: string }) {
               </button>
             </>
           )}
-          {entry.status === "error" && (
+          {["downloading", "queued"].includes(entry.status) && (
+            <button aria-label={t("Pause download")} title={t("Pause download")} onClick={() => pauseMusicDownload(entry.id)}><Pause size={17} /></button>
+          )}
+          {["error", "interrupted", "paused", "canceled"].includes(entry.status) && (
             <button
               aria-label={t("music.download.retry")}
               title={t("music.download.retry")}
-              onClick={() => void downloadMusic(entry.track)}
+              onClick={() => void run(entry.id, () => downloadMusic(entry.track))}
             >
               <RotateCcw size={17} />
             </button>

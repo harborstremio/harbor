@@ -13,6 +13,7 @@ import { buildDefaultFilename, extensionFromUrl } from "@/lib/download/filename"
 import { useSettings } from "@/lib/settings";
 import { isWindowsDesktop } from "@/lib/platform";
 import type { PlayEpisode } from "@/lib/view";
+import { downloadOwner } from "@/lib/download/owner";
 
 export type DownloadStatus =
   | { kind: "idle" }
@@ -41,7 +42,7 @@ export function useVideoDownload({ url, meta, episode, headers }: Args) {
     item.episode === (episode?.episode ?? null);
   const selected = downloadId ? downloads.find((item) => item.id === downloadId) : null;
   const active = downloads.find(
-    (item) => matchesSource(item) && (item.status === "downloading" || item.status === "paused"),
+    (item) => matchesSource(item) && (item.status === "downloading" || item.status === "paused" || item.status === "queued"),
   );
   const current = selected?.status === "canceled" ? active : (selected ?? active);
 
@@ -51,7 +52,7 @@ export function useVideoDownload({ url, meta, episode, headers }: Args) {
       ? { kind: "error", message: localError }
       : current?.status === "done"
         ? { kind: "done", path: current.path }
-        : current?.status === "downloading" || current?.status === "paused"
+        : current?.status === "downloading" || current?.status === "paused" || current?.status === "queued"
           ? {
               kind: "downloading",
               ratio: current.ratio,
@@ -63,7 +64,8 @@ export function useVideoDownload({ url, meta, episode, headers }: Args) {
             : { kind: "idle" };
 
   const start = useCallback(async () => {
-    if (preparing || current?.status === "downloading" || current?.status === "paused") return;
+    if (preparing || current?.status === "downloading" || current?.status === "paused" || current?.status === "queued") return;
+    const requestedOwner = downloadOwner();
     setPreparing(true);
     setLocalError(null);
     const defaultFilename = buildDefaultFilename(meta, episode, url);
@@ -91,6 +93,7 @@ export function useVideoDownload({ url, meta, episode, headers }: Args) {
     }
 
     try {
+      if (requestedOwner !== downloadOwner()) throw new Error("Profile changed. Start the download again from the current profile.");
       const id = await enqueueDownload({
         meta,
         episode,

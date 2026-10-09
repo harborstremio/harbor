@@ -1,6 +1,7 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { WifiOff } from "lucide-react";
 import { useDownloads } from "@/lib/download/downloads-store";
+import { useMusicDownloads } from "@/lib/music/downloads";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 
@@ -21,9 +22,10 @@ export function OfflineBanner() {
   const online = useOnline();
   const { view, setView } = useView();
   const items = useDownloads();
+  const music = useMusicDownloads();
   const t = useT();
   const routed = useRef(false);
-  const hasSaved = items.some((d) => d.status === "done");
+  const hasSaved = items.some((d) => d.status === "done") || music.some((d) => d.status === "done");
 
   useEffect(() => {
     if (routed.current) return;
@@ -45,7 +47,7 @@ export function OfflineBanner() {
             onClick={() => setView("downloads")}
             className="rounded-full bg-ink px-3 py-1 text-[12px] font-semibold text-canvas transition-opacity hover:opacity-90"
           >
-            {t("nav.downloads")}
+            {t("Offline Room")}
           </button>
         ) : (
           <span className="w-1.5" />

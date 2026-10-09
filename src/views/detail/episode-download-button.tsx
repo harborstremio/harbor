@@ -30,7 +30,7 @@ export function EpisodeDownloadButton({
   const dl = activeDownloadFor(meta.id, episode?.season ?? null, episode?.episode ?? null);
   if (isLocal) return null;
   const status = dl?.status;
-  const downloading = status === "downloading";
+  const downloading = status === "downloading" || status === "queued";
   const done = status === "done";
   const failed = status === "error";
   const persistent = downloading || done || failed;

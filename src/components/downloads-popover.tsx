@@ -26,7 +26,7 @@ export function DownloadsButton() {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverId = useId();
   const activeCount = downloads.filter(
-    (d) => d.status === "downloading" || d.status === "paused",
+    (d) => d.status === "downloading" || d.status === "paused" || d.status === "queued",
   ).length;
   const downloadingCount = downloads.filter((d) => d.status === "downloading").length;
 
@@ -134,7 +134,7 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
   const pct = d.totalBytes
     ? Math.min(100, Math.round((d.receivedBytes / d.totalBytes) * 100))
     : Math.round(d.ratio * 100);
-  const active = d.status === "downloading" || d.status === "paused";
+  const active = d.status === "downloading" || d.status === "paused" || d.status === "queued";
   const eta = compactEta(d);
   return (
     <div className="group flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors hover:bg-raised/50">
@@ -159,7 +159,7 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
                 />
               </span>
               <span className="shrink-0 text-[10.5px] tabular-nums text-ink-subtle">
-                {d.status === "paused" ? t("Paused") : `${pct}%${eta ? ` · ${eta}` : ""}`}
+                {d.status === "paused" ? t("Paused") : d.status === "queued" ? t("Queued") : `${pct}%${eta ? ` · ${eta}` : ""}`}
               </span>
             </span>
           ) : (

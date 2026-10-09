@@ -5,7 +5,7 @@ type BarStatus = "none" | "normal" | "indeterminate" | "paused";
 type Bar = { status: BarStatus; progress?: number };
 
 function compute(items: DownloadItem[]): Bar {
-  const active = items.filter((d) => d.status === "downloading" || d.status === "paused");
+  const active = items.filter((d) => d.status === "downloading" || d.status === "paused" || d.status === "queued");
   if (active.length === 0) return { status: "none" };
   const running = active.some((d) => d.status === "downloading");
   const sized = active.filter((d) => typeof d.totalBytes === "number" && d.totalBytes > 0);

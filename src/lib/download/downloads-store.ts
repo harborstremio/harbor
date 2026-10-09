@@ -1,5 +1,6 @@
 import { downloadDir as systemDownloadDir } from "@tauri-apps/api/path";
-import { exists, mkdir, remove } from "@tauri-apps/plugin-fs";
+import { invoke } from "@tauri-apps/api/core";
+import { exists, mkdir, remove, stat } from "@tauri-apps/plugin-fs";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
@@ -7,6 +8,8 @@ import type { PlayEpisode } from "@/lib/view";
 import { buildDefaultFilename, sanitizeName } from "./filename";
 import { startDownload, type DownloadHandle } from "./video-download";
 import { isWindowsDesktop } from "@/lib/platform";
+import { downloadOwner, subscribeDownloadOwner } from "./owner";
+import { canRetryDownload, directDownloadError, nextQueuedDownload, recoveredDownloadStatus, visibleDownloads, type OfflineStatus } from "./offline-policy";
 import {
   localEngineStreamRef,
   pauseTorrentUsage,
@@ -18,6 +21,8 @@ import {
 
 export type DownloadItem = {
   id: string;
+  owner?: string;
+  requiresHeaders?: boolean;
   metaId: string;
   title: string;
   subtitle: string | null;
@@ -29,7 +34,7 @@ export type DownloadItem = {
   torrentInfoHash?: string | null;
   torrentFileIdx?: number | null;
   path: string;
-  status: "downloading" | "paused" | "done" | "error" | "canceled" | "interrupted";
+  status: OfflineStatus;
   receivedBytes: number;
   totalBytes: number | null;
   ratio: number;
@@ -92,6 +97,8 @@ const managedRunners = new Map<string, ManagedDownloadRunner>();
 const listeners = new Set<() => void>();
 
 let snapshot: DownloadItem[] = [];
+let owner = downloadOwner();
+let persistenceError: string | null = null;
 
 const PERSIST_KEY = "harbor.downloads.v1";
 
@@ -99,13 +106,14 @@ function persist() {
   try {
     const durable = [...items.values()].map((d) => ({ ...d, bytesPerSec: 0 }));
     localStorage.setItem(PERSIST_KEY, JSON.stringify(durable));
+    persistenceError = null;
   } catch {
-    /* ignore */
+    persistenceError = "Download history could not be saved. Keep the app open until storage is available.";
   }
 }
 
 function rebuild() {
-  snapshot = [...items.values()].sort((a, b) => b.startedAt - a.startedAt);
+  snapshot = visibleDownloads([...items.values()], owner).sort((a, b) => b.startedAt - a.startedAt);
   persist();
   listeners.forEach((l) => l());
 }
@@ -118,16 +126,56 @@ function hydrate() {
     if (!Array.isArray(arr)) return;
     for (const d of arr) {
       if (!d || typeof d.id !== "string" || typeof d.path !== "string") continue;
-      const status = d.status === "downloading" || d.status === "paused" ? "interrupted" : d.status;
+      const status = recoveredDownloadStatus(d.status);
       items.set(d.id, { ...d, status, bytesPerSec: 0 });
     }
-    snapshot = [...items.values()].sort((a, b) => b.startedAt - a.startedAt);
+    snapshot = visibleDownloads([...items.values()], owner).sort((a, b) => b.startedAt - a.startedAt);
   } catch {
     /* ignore */
   }
 }
 
 hydrate();
+
+function owns(item: DownloadItem | undefined): item is DownloadItem {
+  return !!item && item.owner === downloadOwner();
+}
+
+subscribeDownloadOwner(() => {
+  const next = downloadOwner();
+  if (next === owner) return;
+  for (const item of items.values()) {
+    if (item.owner !== owner || !["downloading", "queued"].includes(item.status)) continue;
+    items.set(item.id, { ...item, status: "paused", bytesPerSec: 0 });
+    handles.get(item.id)?.abort();
+    managedControllers.get(item.id)?.abort();
+  }
+  owner = next;
+  rebuild();
+});
+
+export function downloadPersistenceError(): string | null { return persistenceError; }
+export function unclaimedDownloadCount(): number {
+  return [...items.values()].filter((item) => !item.owner).length;
+}
+export function claimLegacyDownloads(): void {
+  // Historical downloads have no reliable account identity. Only an explicit
+  // local-profile action can adopt them; signing in never silently claims data.
+  if (JSON.parse(downloadOwner())[0] !== "local") return;
+  for (const item of items.values()) if (!item.owner) items.set(item.id, { ...item, owner: downloadOwner() });
+  rebuild();
+}
+
+function drainQueue(): void {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+  let next = nextQueuedDownload([...items.values()], downloadOwner(), handles.size);
+  while (next) {
+    patch(next.id, { status: "downloading", error: null });
+    beginDownload(next.id);
+    next = nextQueuedDownload([...items.values()], downloadOwner(), handles.size);
+  }
+}
+if (typeof window !== "undefined") window.addEventListener("online", drainQueue);
 
 function patch(id: string, next: Partial<DownloadItem>) {
   const cur = items.get(id);
@@ -231,10 +279,11 @@ export async function completedTorrentDownloadFor(
   fileIdx?: number,
   hint?: { season?: number | null; episode?: number | null },
 ): Promise<DownloadItem | null> {
+  const requestedOwner = downloadOwner();
   const key = infoHash.trim().toLowerCase();
   const candidates = [...items.values()]
     .filter((item) => {
-      if (item.status !== "done") return false;
+      if (!owns(item) || item.status !== "done") return false;
       const ref = downloadTorrentRef(item);
       return ref?.infoHash === key && (fileIdx == null || ref.fileIdx === fileIdx);
     })
@@ -252,7 +301,8 @@ export async function completedTorrentDownloadFor(
           ? candidates[0]
           : null;
   if (!match) return null;
-  return (await exists(match.path).catch(() => false)) ? match : null;
+  const available = await exists(match.path).catch(() => false);
+  return available && requestedOwner === downloadOwner() && owns(match) ? match : null;
 }
 
 export async function completedDownloadFor(
@@ -260,15 +310,18 @@ export async function completedDownloadFor(
   season: number | null,
   episode: number | null,
 ): Promise<DownloadItem | null> {
+  const requestedOwner = downloadOwner();
   const candidates = [...items.values()]
     .filter((d) => {
-      if (d.status !== "done" || d.metaId !== metaId) return false;
+      if (!owns(d) || d.status !== "done" || d.metaId !== metaId) return false;
       if (season == null && episode == null) return d.season == null && d.episode == null;
       return d.season === season && d.episode === episode;
     })
     .sort((a, b) => b.startedAt - a.startedAt);
   for (const item of candidates) {
-    if (await exists(item.path).catch(() => false)) return item;
+    const available = await exists(item.path).catch(() => false);
+    if (requestedOwner !== downloadOwner()) return null;
+    if (available && owns(item)) return item;
   }
   return null;
 }
@@ -279,6 +332,7 @@ export function activeDownloadFor(
   episode?: number | null,
 ): DownloadItem | null {
   for (const d of items.values()) {
+    if (!owns(d)) continue;
     if (d.metaId !== metaId) continue;
     if (season != null && episode != null) {
       if (d.season !== season || d.episode !== episode) continue;
@@ -292,13 +346,17 @@ export function activeDownloadFor(
 
 export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
   const { meta, episode, streamLabel, url, headers, destinationPath } = args;
+  const requestedOwner = downloadOwner();
+  const unsupported = directDownloadError(url);
+  if (unsupported) throw new Error(unsupported);
   const existing = [...items.values()].find(
     (item) =>
+      owns(item) &&
       item.metaId === meta.id &&
       item.url === url &&
       item.season === (episode?.season ?? null) &&
       item.episode === (episode?.episode ?? null) &&
-      (item.status === "downloading" || item.status === "paused"),
+      ["downloading", "paused", "queued"].includes(item.status),
   );
   if (existing) return existing.id;
   const torrentRef = localEngineStreamRef(url);
@@ -320,8 +378,11 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
     destinationPath ??
     (await uniquePath(dir ? `${dir}${dir.endsWith(sep()) ? "" : sep()}${filename}` : filename));
   const id = randomId();
+  if (requestedOwner !== downloadOwner()) throw new Error("Profile changed. Start the download again from the current profile.");
   const item: DownloadItem = {
     id,
+    owner: requestedOwner,
+    requiresHeaders: !!headers && Object.keys(headers).length > 0,
     metaId: meta.id,
     title: meta.name ?? "Download",
     subtitle: episode
@@ -335,7 +396,7 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
     torrentInfoHash: torrentRef?.infoHash ?? null,
     torrentFileIdx: torrentRef?.fileIdx ?? null,
     path,
-    status: "downloading",
+    status: "queued",
     receivedBytes: 0,
     totalBytes: null,
     ratio: 0,
@@ -349,13 +410,14 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
   if (headers && Object.keys(headers).length > 0) requestHeaders.set(id, headers);
   rebuild();
 
-  beginDownload(id);
+  drainQueue();
   return id;
 }
 
 export function enqueueManagedDownload(args: ManagedDownloadArgs): string {
   const existing = [...items.values()].find(
     (item) =>
+      owns(item) &&
       item.kind === "ebook" &&
       item.metaId === args.metaId &&
       item.format === args.format &&
@@ -365,6 +427,7 @@ export function enqueueManagedDownload(args: ManagedDownloadArgs): string {
   const id = randomId();
   items.set(id, {
     id,
+    owner: downloadOwner(),
     metaId: args.metaId,
     title: args.title,
     subtitle: args.subtitle ?? null,
@@ -447,7 +510,11 @@ function beginManagedDownload(id: string): void {
 
 function beginDownload(id: string): void {
   const item = items.get(id);
-  if (!item || handles.has(id)) return;
+  if (!owns(item) || handles.has(id)) return;
+  if (item.requiresHeaders && !requestHeaders.has(id)) {
+    patch(id, { status: "error", error: "This source needs headers that are not stored. Select the source again to reconnect safely." });
+    return;
+  }
   retainDownloadTorrent(item);
   speed.set(id, { bytes: item.receivedBytes, at: Date.now() });
   const handle = startDownload(
@@ -466,6 +533,7 @@ function beginDownload(id: string): void {
         receivedBytes: p.receivedBytes,
         totalBytes: p.totalBytes,
         ratio: p.ratio,
+        phaseLabel: p.phaseLabel ?? null,
         ...(bps > 0 ? { bytesPerSec: bps } : {}),
       });
     },
@@ -492,17 +560,18 @@ function beginDownload(id: string): void {
       speed.delete(id);
       const current = items.get(id);
       if (current?.status !== "paused") {
-        requestHeaders.delete(id);
+        if (!current || current.status === "done" || current.status === "canceled") requestHeaders.delete(id);
         if (current) releaseDownloadTorrent(current);
       }
       reconcileFromUrl(item.url);
+      drainQueue();
     });
   completions.set(id, completion);
 }
 
 export function cancelDownload(id: string): void {
   const item = items.get(id);
-  if (!item || (item.status !== "downloading" && item.status !== "paused")) return;
+  if (!owns(item) || !["downloading", "paused", "queued"].includes(item.status)) return;
   const wasPaused = item.status === "paused";
   patch(id, { status: "canceled", bytesPerSec: 0 });
   managedControllers.get(id)?.abort();
@@ -515,28 +584,41 @@ export function cancelDownload(id: string): void {
 export function pauseDownload(id: string): void {
   const item = items.get(id);
   const handle = handles.get(id);
-  if (!item || item.canPause === false || item.status !== "downloading" || !handle) return;
+  if (!owns(item) || item.canPause === false || !["downloading", "queued"].includes(item.status)) return;
   patch(id, { status: "paused", bytesPerSec: 0 });
-  handle.abort();
+  handle?.abort();
   const engine = downloadTorrentRef(item);
   if (engine) pauseTorrentUsage(engine.infoHash, torrentOwnerId(id));
 }
 
 export async function resumeDownload(id: string): Promise<void> {
-  if (items.get(id)?.status !== "paused") return;
+  const item = items.get(id);
+  if (!owns(item) || !canRetryDownload(item.status) || item.kind === "ebook") return;
   await completions.get(id);
-  if (items.get(id)?.status !== "paused" || handles.has(id)) return;
-  patch(id, { status: "downloading", error: null, bytesPerSec: 0 });
-  beginDownload(id);
+  const current = items.get(id);
+  if (!owns(current) || !canRetryDownload(current.status) || handles.has(id)) return;
+  patch(id, { status: "queued", error: null, bytesPerSec: 0 });
+  drainQueue();
   const url = items.get(id)?.url;
   if (url) reconcileFromUrl(url);
 }
 
-export function removeDownload(id: string): void {
+export async function removeDownload(id: string): Promise<void> {
   const item = items.get(id);
+  if (!owns(item)) return;
+  patch(id, { status: "canceled", bytesPerSec: 0 });
   handles.get(id)?.abort();
-  handles.delete(id);
-  completions.delete(id);
+  managedControllers.get(id)?.abort();
+  await completions.get(id);
+  // The writer has stopped before deleting bytes (important on Windows).
+  try {
+    for (const path of [item.path, `${item.path}.part`, `${item.path}.part.meta.json`]) {
+      if (await exists(path)) await remove(path);
+    }
+  } catch {
+    patch(id, { status: "error", error: "Could not delete the file. Stop playback and check folder access, then retry Delete." });
+    return;
+  }
   requestHeaders.delete(id);
   speed.delete(id);
   managedControllers.get(id)?.abort();
@@ -546,14 +628,12 @@ export function removeDownload(id: string): void {
   if (item) {
     releaseDownloadTorrent(item);
     reconcileFromUrl(item.url);
-    void remove(item.path).catch(() => {});
-    void remove(`${item.path}.part`).catch(() => {});
   }
 }
 
 export async function revealDownload(id: string): Promise<void> {
   const d = items.get(id);
-  if (!d) return;
+  if (!owns(d)) return;
   try {
     await revealItemInDir(d.path);
   } catch {
@@ -580,5 +660,29 @@ export function useDownloads(): DownloadItem[] {
 
 export function useActiveDownloadCount(): number {
   const all = useDownloads();
-  return all.filter((d) => d.status === "downloading" || d.status === "paused").length;
+  return all.filter((d) => ["downloading", "paused", "queued"].includes(d.status)).length;
+}
+
+export async function verifyDownloadFiles(): Promise<void> {
+  const capturedOwner = downloadOwner();
+  for (const item of visibleDownloads([...items.values()], capturedOwner)) {
+    if (["downloading", "queued"].includes(item.status) || item.kind === "ebook") continue;
+    try {
+      const recovered = await invoke<number | null>("download_verify", { dest: item.path });
+      if (downloadOwner() !== capturedOwner) return;
+      if (recovered != null) {
+        patch(item.id, { status: "done", receivedBytes: recovered, totalBytes: recovered, ratio: 1, bytesPerSec: 0, error: null });
+        continue;
+      }
+      if (item.status !== "done") continue;
+      const info = await stat(item.path);
+      if (downloadOwner() !== capturedOwner) return;
+      if (!info.isFile || info.size !== item.receivedBytes) {
+        patch(item.id, { status: "error", error: "The saved file is missing or its size changed. Remove it and download again." });
+      }
+    } catch {
+      if (downloadOwner() !== capturedOwner) return;
+      patch(item.id, { status: "error", error: "The saved file could not be verified. Reconnect its drive, or remove the damaged file and download again." });
+    }
+  }
 }

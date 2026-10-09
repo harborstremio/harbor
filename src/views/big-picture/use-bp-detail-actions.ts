@@ -205,7 +205,7 @@ export function useBpDetailActions(params: {
 
   if (isMovie) {
     const dl = activeDownloadFor(meta.id, null, null);
-    const downloading = dl?.status === "downloading";
+    const downloading = dl?.status === "downloading" || dl?.status === "queued";
     const done = dl?.status === "done";
     const failed = dl?.status === "error";
     const pct = Math.round((dl?.ratio ?? 0) * 100);

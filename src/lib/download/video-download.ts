@@ -4,6 +4,7 @@ export type DownloadProgress = {
   receivedBytes: number;
   totalBytes: number | null;
   ratio: number;
+  phaseLabel?: string | null;
 };
 
 export type DownloadHandle = {
@@ -14,6 +15,7 @@ export type DownloadHandle = {
 type DownloadEvent =
   | { kind: "started"; total: number | null; resumed: number }
   | { kind: "progress"; received: number; total: number | null }
+  | { kind: "verifying"; received: number }
   | { kind: "done"; received: number }
   | { kind: "error"; message: string }
   | { kind: "canceled"; received: number };
@@ -38,6 +40,7 @@ export function startDownload(
       receivedBytes: received,
       totalBytes: total,
       ratio: total ? Math.min(1, received / total) : 0,
+      phaseLabel: null,
     });
 
   const channel = new Channel<DownloadEvent>();
@@ -52,6 +55,9 @@ export function startDownload(
       case "done":
         emit(ev.received, ev.received);
         settle();
+        break;
+      case "verifying":
+        onProgress({ receivedBytes: ev.received, totalBytes: ev.received, ratio: 1, phaseLabel: "Verifying saved file" });
         break;
       case "canceled": {
         const e = new Error("Download canceled");

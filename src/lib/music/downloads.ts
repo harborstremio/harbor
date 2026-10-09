@@ -6,11 +6,15 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { startDownload, type DownloadHandle } from "@/lib/download/video-download";
 import { readMusicPreference, writeMusicPreference } from "./preferences";
 import type { MusicTrack, MusicSourceCandidate } from "./types";
+import { downloadOwner, subscribeDownloadOwner } from "@/lib/download/owner";
+import { directDownloadError, recoveredDownloadStatus, visibleDownloads, type OfflineStatus } from "@/lib/download/offline-policy";
 
 export type MusicDownload = {
   id: string;
+  owner?: string;
+  withFilters?: boolean;
   track: MusicTrack;
-  status: "downloading" | "done" | "error";
+  status: OfflineStatus;
   progress: number;
   bytes: number;
   error?: string;
@@ -92,21 +96,65 @@ const listeners = new Set<() => void>();
 const handles = new Map<string, DownloadHandle>();
 const jobs = new Map<string, Promise<void>>();
 const canceled = new Set<string>();
+const running = new Set<string>();
+const waiting = new Map<string, (ready: boolean) => void>();
 let entries: MusicDownload[] = [];
+let snapshot: MusicDownload[] = [];
+let owner = downloadOwner();
 try {
   entries = JSON.parse(readMusicPreference(KEY) || "[]")
     .filter((entry: MusicDownload) => /^[a-f0-9-]{36}$/.test(entry.id) && entry.track?.id)
     .map((entry: MusicDownload) => ({
       ...entry,
-      status: entry.status === "done" ? "done" : "error",
+      status: recoveredDownloadStatus(entry.status),
     }));
 } catch {
   /* Empty first-run library. */
 }
+snapshot = visibleDownloads(entries, owner);
 function publish() {
   entries = [...entries];
+  snapshot = visibleDownloads(entries, downloadOwner());
   writeMusicPreference(KEY, JSON.stringify(entries));
   listeners.forEach((listener) => listener());
+}
+function owns(entry: MusicDownload | undefined): entry is MusicDownload {
+  return !!entry && entry.owner === downloadOwner();
+}
+function drainQueue() {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+  for (const [id, ready] of waiting) {
+    if (running.size >= 2) break;
+    waiting.delete(id);
+    const entry = entries.find((item) => item.id === id);
+    if (!owns(entry) || entry.status !== "queued") { ready(false); continue; }
+    running.add(id); ready(true);
+  }
+}
+subscribeDownloadOwner(() => {
+  if (owner === downloadOwner()) return;
+  for (const entry of entries) {
+    if (entry.owner !== owner || !["downloading", "queued"].includes(entry.status)) continue;
+    entry.status = "paused";
+    handles.get(entry.id)?.abort();
+    waiting.get(entry.id)?.(false); waiting.delete(entry.id);
+  }
+  owner = downloadOwner(); publish();
+});
+if (typeof window !== "undefined") window.addEventListener("online", drainQueue);
+export function claimLegacyMusicDownloads(): void {
+  if (JSON.parse(downloadOwner())[0] !== "local") return;
+  for (const entry of entries) if (!entry.owner) entry.owner = downloadOwner();
+  publish();
+}
+export function unclaimedMusicDownloadCount(): number { return entries.filter((entry) => !entry.owner).length; }
+export function pauseMusicDownload(id: string): void {
+  const entry = entries.find((item) => item.id === id);
+  if (!owns(entry) || !["downloading", "queued"].includes(entry.status)) return;
+  entry.status = "paused";
+  handles.get(id)?.abort();
+  waiting.get(id)?.(false); waiting.delete(id);
+  publish();
 }
 const subscribe = (listener: () => void) => {
   listeners.add(listener);
@@ -117,20 +165,23 @@ const subscribe = (listener: () => void) => {
 export const useMusicDownloads = () =>
   useSyncExternalStore(
     subscribe,
-    () => entries,
-    () => entries,
+    () => snapshot,
+    () => snapshot,
   );
 export const musicDownloadFor = (track: MusicTrack) =>
   entries.find(
-    (entry) => entry.track.id === track.id && entry.track.connectorId === track.connectorId,
+    (entry) => owns(entry) && entry.track.id === track.id && entry.track.connectorId === track.connectorId,
   );
 export async function musicDownloadPath(id: string) {
-  const saved = entries.find((entry) => entry.id === id)?.path;
-  if (saved) return saved;
   if (!/^[a-f0-9-]{36}$/.test(id)) throw new Error("Invalid download");
+  const entry = entries.find((entry) => entry.id === id);
+  if (!owns(entry)) throw new Error("This download belongs to another profile");
+  const saved = entry.path;
+  if (saved) return saved;
   return join(await appDataDir(), "music-downloads", `${id}.audio`);
 }
 export async function downloadedMusicTrack(entry: MusicDownload): Promise<MusicTrack> {
+  if (!owns(entry)) throw new Error("This download belongs to another profile");
   const path = await musicDownloadPath(entry.id);
   if (entry.status !== "done" || !(await exists(path))) {
     entry.status = "error";
@@ -138,6 +189,7 @@ export async function downloadedMusicTrack(entry: MusicDownload): Promise<MusicT
     publish();
     throw new Error("music.download.missing");
   }
+  if (!owns(entry)) throw new Error("Profile changed before playback");
   return {
     ...entry.track,
     id: `download:${entry.id}`,
@@ -151,24 +203,33 @@ export async function downloadMusic(
   track: MusicTrack,
   withFilters = false,
 ): Promise<void> {
+  const requestedOwner = downloadOwner();
   const prior = musicDownloadFor(track);
-  if (prior?.status === "downloading" || prior?.status === "done") return;
+  if (prior && ["downloading", "queued", "done"].includes(prior.status)) return;
+  if (prior) await jobs.get(prior.id);
+  if (requestedOwner !== downloadOwner()) return;
   if (track.connectorId === "spotify" || track.connectorId === "local")
     throw new Error("music.download.unsupported");
   const id = prior?.id ?? crypto.randomUUID();
   const { playbackUrl: _url, ...metadata } = track;
   const entry: MusicDownload = {
     id,
+    owner: downloadOwner(),
+    withFilters: prior?.withFilters ?? withFilters,
     track: metadata,
-    status: "downloading",
-    progress: 0,
-    bytes: 0,
+    status: "queued",
+    progress: prior?.progress ?? 0,
+    bytes: prior?.bytes ?? 0,
+    path: prior?.path,
     added: Date.now(),
   };
   entries = [...entries.filter((item) => item.id !== id), entry];
   publish();
   const job = (async () => {
     try {
+      const ready = await new Promise<boolean>((resolve) => { waiting.set(id, resolve); drainQueue(); });
+      if (!ready || !owns(entry) || canceled.has(id)) return;
+      entry.status = "downloading"; publish();
       let source = track;
       if (track.connectorId === "catalog") {
         const candidates = await invoke<MusicSourceCandidate[]>("music_source_candidates", {
@@ -185,29 +246,30 @@ export async function downloadMusic(
         if (!candidate) throw new Error("music.download.unsupported");
         source = candidate.track;
       }
+      if (!owns(entry) || entry.status !== "downloading") return;
       const stream = await invoke<{
         url: string;
         mimeType?: string;
         httpHeaders?: Record<string, string>;
       }>("music_resolve_stream", { track: source });
-      if (canceled.has(id)) return;
+      if (canceled.has(id) || !owns(entry) || entry.status !== "downloading") return;
       if (
-        !/^https?:\/\//i.test(stream.url) ||
+        directDownloadError(stream.url) ||
         /(?:mpegurl|dash\+xml)/i.test(stream.mimeType ?? "") ||
         /\.m3u8(?:[?#]|$)/i.test(stream.url)
       )
         throw new Error("music.download.unsupported");
       const folder = await musicDownloadFolder();
       await mkdir(folder, { recursive: true });
-      const path = await freeTarget(
+      const path = entry.path ?? await freeTarget(
         folder,
         musicFileName(source, audioContainer(stream.mimeType, stream.url)),
       );
       entry.path = path;
-      if (canceled.has(id)) return;
-      // A freshly resolved URL may use a different rendition; never append to an older one.
-      if (await exists(`${path}.part`)) await remove(`${path}.part`);
-      if (canceled.has(id)) return;
+      publish();
+      if (canceled.has(id) || !owns(entry) || entry.status !== "downloading") return;
+      // Native resume checks the source/header hash, ETag and exact byte range.
+      // A fresh signed URL or rendition safely restarts instead of appending.
       const handle = startDownload(
         `music:${id}`,
         stream.url,
@@ -222,7 +284,7 @@ export async function downloadMusic(
       );
       handles.set(id, handle);
       await handle.promise;
-      if (withFilters && !canceled.has(id)) {
+      if (entry.withFilters && !canceled.has(id) && owns(entry) && entry.status === "downloading") {
         try {
           await invoke<boolean>("music_export_filtered", { path });
         } catch (error) {
@@ -235,7 +297,7 @@ export async function downloadMusic(
         publish();
       }
     } catch (error) {
-      if (!canceled.has(id)) {
+      if (!canceled.has(id) && entry.status !== "paused") {
         entry.status = "error";
         entry.error =
           error instanceof Error && error.message.startsWith("music.download.")
@@ -246,19 +308,24 @@ export async function downloadMusic(
     } finally {
       handles.delete(id);
       jobs.delete(id);
+      running.delete(id);
+      drainQueue();
     }
   })();
   jobs.set(id, job);
   await job;
 }
 export async function deleteMusicDownload(id: string): Promise<void> {
+  if (!owns(entries.find((entry) => entry.id === id))) return;
   canceled.add(id);
+  waiting.get(id)?.(false); waiting.delete(id);
   handles.get(id)?.abort();
   await jobs.get(id);
   try {
     const path = await musicDownloadPath(id);
     if (await exists(path)) await remove(path);
     if (await exists(`${path}.part`)) await remove(`${path}.part`);
+    if (await exists(`${path}.part.meta.json`)) await remove(`${path}.part.meta.json`);
     entries = entries.filter((entry) => entry.id !== id);
     publish();
   } finally {

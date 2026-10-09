@@ -1359,6 +1359,7 @@ pub fn run() {
             temp_prune::temp_clear,
             download::download_start,
             download::download_cancel,
+            download::download_verify,
             stream_proxy::proxy_register,
             streams::resolve_playback_redirect,
             stream_proxy::proxy_unregister,

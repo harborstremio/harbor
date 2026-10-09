@@ -2,7 +2,10 @@ import { useMemo, useState } from "react";
 import { Download as DownloadIcon } from "lucide-react";
 import { Poster, usePosterChain } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
-import { useDownloads, type DownloadItem } from "@/lib/download/downloads-store";
+import { useDownloads, claimLegacyDownloads, unclaimedDownloadCount, downloadPersistenceError, verifyDownloadFiles, type DownloadItem } from "@/lib/download/downloads-store";
+import { claimLegacyMusicDownloads, unclaimedMusicDownloadCount, useMusicDownloads } from "@/lib/music/downloads";
+import { MusicDownloads } from "@/components/music/music-downloads";
+import { downloadOwner } from "@/lib/download/owner";
 import { useT } from "@/lib/i18n";
 import { StreamingNowButton } from "./downloads/streaming-now";
 import { DownloadRow } from "./downloads/download-row";
@@ -17,11 +20,11 @@ type DownloadGroup =
 type Filter = "all" | "active" | "saved" | "issues";
 
 function statusRank(s: DownloadItem["status"]): number {
-  return s === "downloading" || s === "paused" ? 0 : s === "error" ? 1 : s === "done" ? 2 : 3;
+  return ["downloading", "paused", "queued"].includes(s) ? 0 : s === "error" ? 1 : s === "done" ? 2 : 3;
 }
 
 function matchesFilter(d: DownloadItem, f: Filter): boolean {
-  if (f === "active") return d.status === "downloading" || d.status === "paused";
+  if (f === "active") return ["downloading", "paused", "queued"].includes(d.status);
   if (f === "saved") return d.status === "done";
   if (f === "issues") return d.status === "error" || d.status === "interrupted";
   return true;
@@ -60,6 +63,11 @@ function buildGroups(items: DownloadItem[]): DownloadGroup[] {
 export function DownloadsView({ active = false }: { active?: boolean }) {
   const t = useT();
   const items = useDownloads();
+  const music = useMusicDownloads();
+  const [room, setRoom] = useState<"video" | "music">(() => items.length === 0 && music.length > 0 ? "music" : "video");
+  const [checking, setChecking] = useState(false);
+  const legacy = unclaimedDownloadCount() + unclaimedMusicDownloadCount();
+  const isLocal = JSON.parse(downloadOwner())[0] === "local";
   const [filter, setFilter] = useState<Filter>("all");
 
   const counts = useMemo(
@@ -84,7 +92,7 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
   );
   const subtitle =
     items.length === 0
-      ? t("Saved movies, episodes, and eBooks for offline use")
+      ? t("Saved movies, episodes, music, and eBooks for offline use")
       : [
           items.length === 1 ? t("1 item") : t("{count} items", { count: items.length }),
           counts.active - paused > 0
@@ -107,7 +115,7 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
       <div className="mx-auto w-full max-w-4xl">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
           <div className="min-w-0">
-            <h1 className="text-[28px] font-semibold tracking-tight text-ink">{t("Downloads")}</h1>
+            <h1 className="text-[28px] font-semibold tracking-tight text-ink">{t("Offline Room")}</h1>
             <p className="mt-1.5 text-[13.5px] tabular-nums text-ink-subtle">{subtitle}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -116,6 +124,22 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
             <SaveLocationChip />
           </div>
         </header>
+
+        <p className="mb-4 text-sm text-ink-muted">{t("Saved files belong to this account and profile on this device. Only completed files play offline. Direct, unencrypted files are supported; streaming playlists and protected sources are not.")}</p>
+        {downloadPersistenceError() && <p role="alert" className="mb-4 text-sm text-danger">{t(downloadPersistenceError()!)}</p>}
+        {legacy > 0 && isLocal && <div className="mb-4 rounded-xl border border-edge-soft p-4 text-sm text-ink-muted">
+          <p>{t("Older downloads have no profile owner. Add them to this local profile only if they are yours.")}</p>
+          <button className="mt-2 font-semibold text-accent" onClick={() => { claimLegacyDownloads(); claimLegacyMusicDownloads(); }}>{t("Add older downloads to this local profile")} ({legacy})</button>
+        </div>}
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          <FilterTab label={t("Movies, episodes and books")} count={items.length} active={room === "video"} onClick={() => setRoom("video")} />
+          <FilterTab label={t("Music")} count={music.length} active={room === "music"} onClick={() => setRoom("music")} />
+          {room === "video" && <button disabled={checking} className="px-3 text-sm text-accent disabled:opacity-50" onClick={() => {
+            setChecking(true); void verifyDownloadFiles().finally(() => setChecking(false));
+          }}>{t(checking ? "Checking saved files…" : "Check and recover saved files")}</button>}
+        </div>
+
+        {room === "music" ? <MusicDownloads allowPlaylist={false} /> : <>
 
         {items.length > 0 && (
           <div className="mb-5 flex flex-wrap items-center gap-1.5">
@@ -167,6 +191,7 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
             )}
           </div>
         )}
+        </>}
       </div>
     </main>
   );
@@ -214,7 +239,7 @@ function EmptyState() {
         <p className="text-[15px] font-semibold text-ink">{t("No downloads yet")}</p>
         <p className="max-w-[340px] text-[13.5px] leading-relaxed text-ink-muted">
           {t(
-            "Download a movie, episode, or eBook and it will appear here with its progress and offline status.",
+            "Choose Download on a movie, episode, music track, or eBook to keep an intentional offline copy. Queue progress and saved files appear here.",
           )}
         </p>
       </div>

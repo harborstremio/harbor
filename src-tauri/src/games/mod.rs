@@ -255,7 +255,7 @@ mod wow_addon_package;
 mod wow_addon_store;
 mod wow_addon_guard;
 mod wow_addon_reviews;
-mod transfer_files;
+pub(crate) mod transfer_files;
 mod transfer_protocol;
 mod transfer_retry;
 mod transfer_storage;

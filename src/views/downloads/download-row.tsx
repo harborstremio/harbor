@@ -1,5 +1,8 @@
-import type { ReactNode } from "react";
-import { BookOpen, Check, FileText, FolderOpen, Trash2 } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { BookOpen, Check, FileText, FolderOpen, Trash2, RotateCcw, ArrowDownToLine } from "lucide-react";
+import { exists } from "@tauri-apps/plugin-fs";
+import { downloadOwner } from "@/lib/download/owner";
+import { canRetryDownload } from "@/lib/download/offline-policy";
 import { Play } from "@/components/icons/play-filled";
 import { DownloadCancelIcon, DownloadPauseResumeIcon } from "@/components/download-action-icons";
 import { Poster, usePosterChain } from "@/components/poster";
@@ -18,7 +21,7 @@ import { fmtBytes, fmtEta, fmtSpeed } from "./downloads-format";
 
 export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolean }) {
   const t = useT();
-  const { openPlayer } = useView();
+  const { openPlayer, openPicker } = useView();
   const { settings } = useSettings();
   const poster = usePosterChain(
     settings.rpdbKey,
@@ -27,10 +30,18 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
     d.season != null ? "series" : "movie",
   );
   const isEBook = d.kind === "ebook";
+  const [playError, setPlayError] = useState<string | null>(null);
   const pct = Math.round(d.ratio * 100);
   const downloading = d.status === "downloading";
-  const active = downloading || d.status === "paused";
-  const playLocal = () =>
+  const active = downloading || d.status === "paused" || d.status === "queued";
+  const playLocal = async () => {
+    if (d.owner !== downloadOwner()) return;
+    if (!(await exists(d.path).catch(() => false))) {
+      setPlayError("The saved file is unavailable. Reconnect its drive or download it again.");
+      return;
+    }
+    if (d.owner !== downloadOwner()) return;
+    setPlayError(null);
     openPlayer({
       meta: {
         id: d.metaId,
@@ -47,6 +58,7 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
           ? { season: d.season, episode: d.episode }
           : undefined,
     });
+  };
   return (
     <li className="group flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-3 transition-colors hover:bg-elevated/70">
       <div
@@ -77,7 +89,7 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
               />
             </div>
             <div className="flex flex-wrap items-center gap-x-2 text-[11.5px] tabular-nums text-ink-muted">
-              <span>{d.status === "paused" ? t("Paused") : `${pct}%`}</span>
+              <span>{d.status === "paused" ? t("Paused") : d.status === "queued" ? t("Queued") : `${pct}%`}</span>
               {d.phaseLabel && <span className="text-ink-subtle">· {t(d.phaseLabel)}</span>}
               {d.totalBytes != null && (
                 <span className="text-ink-subtle">
@@ -107,10 +119,11 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
             )}
             {d.status === "canceled" && <span className="text-ink-subtle">{t("Canceled")}</span>}
             {d.status === "interrupted" && (
-              <span className="text-amber-300/85">{t("Interrupted: re-download to finish")}</span>
+              <span className="text-amber-300/85">{t("Interrupted. Retry to resume safely; sources without a validator restart.")}</span>
             )}
           </span>
         )}
+        {playError && <p role="alert" className="text-[12px] text-danger">{t(playError)}</p>}
       </div>
       <div className="flex shrink-0 items-center gap-1">
         {active && (
@@ -136,7 +149,7 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
             {d.status === "done" && (
               <>
                 {!isEBook && (
-                  <RowBtn label={t("Play")} onClick={playLocal}>
+                  <RowBtn label={t("Play offline")} onClick={() => void playLocal()}>
                     <Play size={16} strokeWidth={2.2} fill="currentColor" />
                   </RowBtn>
                 )}
@@ -158,7 +171,20 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
                 )}
               </>
             )}
-            <DeleteButton onClick={() => removeDownload(d.id)} />
+            {!isEBook && canRetryDownload(d.status) && (
+              <>
+              <RowBtn label={t("Retry download")} onClick={() => void resumeDownload(d.id)}>
+                <RotateCcw size={16} />
+              </RowBtn>
+              <RowBtn label={t("Choose a fresh download source")} onClick={() => {
+                if (d.owner !== downloadOwner()) return;
+                openPicker({ id: d.metaId, type: d.season != null ? "series" : "movie", name: d.title, poster: d.poster ?? undefined },
+                  d.season != null && d.episode != null ? { season: d.season, episode: d.episode } : undefined,
+                  { intent: "download" });
+              }}><ArrowDownToLine size={16} /></RowBtn>
+              </>
+            )}
+            <DeleteButton onClick={() => void removeDownload(d.id)} />
           </>
         )}
       </div>

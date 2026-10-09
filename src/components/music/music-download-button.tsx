@@ -23,7 +23,7 @@ export function MusicDownloadButton({
   const anchor = useRef<HTMLButtonElement>(null);
   const [asking, setAsking] = useState(false);
   const entry = musicDownloadFor(track);
-  const busy = entry?.status === "downloading",
+  const busy = entry?.status === "downloading" || entry?.status === "queued",
     done = entry?.status === "done";
   const filtered =
     Math.abs(audio.settings.speed - 1) > 0.001 ||
