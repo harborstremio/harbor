@@ -10,9 +10,13 @@ on:
         description: Publish after both builds (requires authorized release access)
         type: boolean
         default: false
+      windows_only:
+        description: Verify and retain Windows only; never publish this run
+        type: boolean
+        default: false
   push:
     tags: ["jl-v*"]
-    branches: ["claude/determined-planck-b1p158"]
+    branches: ["claude/determined-planck-b1p158", "codex/jl-release-026"]
     paths: [".github/jl-release"]
 
 permissions:
@@ -73,6 +77,7 @@ jobs:
       tag: jl-v${{ steps.tauri.outputs.appVersion }}
     env:
       TARGET: x86_64-pc-windows-msvc
+      HARBOR_CHANNEL: stable
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -175,6 +180,8 @@ jobs:
   android-tv:
     name: Android TV
     needs: settings
+    # Desktop feature integration must not rebuild or publish the paused Android release.
+    if: github.ref != 'refs/heads/codex/jl-release-026' && !(github.event_name == 'workflow_dispatch' && inputs.windows_only)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -233,7 +240,7 @@ jobs:
   publish:
     name: Publish verified installers
     needs: [windows, android-tv]
-    if: github.event_name == 'workflow_dispatch' && inputs.publish
+    if: github.event_name == 'workflow_dispatch' && inputs.publish && !inputs.windows_only && github.ref != 'refs/heads/codex/jl-release-026'
     runs-on: ubuntu-latest
     permissions:
       contents: write

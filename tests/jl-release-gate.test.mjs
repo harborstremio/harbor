@@ -6,10 +6,34 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import vm from "node:vm";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const workflow = readFileSync(new URL("../.github/workflows/jl-release.yml", import.meta.url), "utf8").replace(/\r\n/g, "\n");
 const bash = process.platform === "win32" ? "C:/Program Files/Git/bin/bash.exe" : "bash";
+
+function jobEnabled(job, { event = "workflow_dispatch", ref = "refs/heads/claude/determined-planck-b1p158", publish = false, windowsOnly = false } = {}) {
+  const section = workflow.split(`\n  ${job}:\n`)[1];
+  const condition = section?.match(/^    if: (.+)$/m)?.[1];
+  assert.ok(condition, `Missing condition for ${job}`);
+  return vm.runInNewContext(condition, { github: { event_name: event, ref }, inputs: { publish, windows_only: windowsOnly } });
+}
+
+test("Windows-only verification never builds Android or publishes, even if publish is selected", () => {
+  for (const publish of [false, true]) {
+    assert.equal(jobEnabled("android-tv", { publish, windowsOnly: true }), false);
+    assert.equal(jobEnabled("publish", { publish, windowsOnly: true }), false);
+    assert.equal(jobEnabled("android-tv", { publish, ref: "refs/heads/codex/jl-release-026" }), false);
+    assert.equal(jobEnabled("publish", { publish, ref: "refs/heads/codex/jl-release-026" }), false);
+  }
+});
+
+test("normal dual-platform builds keep explicit publication opt-in", () => {
+  assert.equal(jobEnabled("android-tv"), true);
+  assert.equal(jobEnabled("publish"), false);
+  assert.equal(jobEnabled("publish", { publish: true }), true);
+  assert.equal(jobEnabled("publish", { event: "push", publish: true }), false);
+});
 
 function runStep(name, overrides = {}, cwd = root) {
   const section = workflow.split(`      - name: ${name}\n`)[1];

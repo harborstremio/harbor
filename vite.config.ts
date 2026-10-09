@@ -3,7 +3,7 @@ import { execSync } from "node:child_process";
 import { defineConfig, type ViteDevServer, type HttpProxy } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import pkg from "./package.json" with { type: "json" };
+import jlBuild from "./src-tauri/tauri.jl-dev.conf.json" with { type: "json" };
 
 declare const process: { env: Record<string, string | undefined> };
 
@@ -56,7 +56,9 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tailwindcss(), silenceMediapipeSourcemap(), servePublicMediapipe()],
     clearScreen: false,
     define: {
-      __APP_VERSION__: JSON.stringify(pkg.version),
+      // The JL installer has its own release version; the upstream package version
+      // must not make About report a different build than the installed EXE.
+      __APP_VERSION__: JSON.stringify(jlBuild.version),
       __IS_BETA_BUILD__: JSON.stringify(process.env.HARBOR_CHANNEL !== "stable"),
       __BUILD_ID__: JSON.stringify(
         process.env.HARBOR_BUILD_ID ||
