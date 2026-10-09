@@ -13,7 +13,11 @@ import type { Settings } from "@/lib/settings/types";
 import { openUrl } from "@/lib/window";
 import { KeyField, Section, ToggleRow } from "./shared";
 
-type PluginField = "sportsTopGames" | "sportsChannelFinder" | "sportsScoreTicker" | "sportsOdds";
+type PluginField =
+  | "sportsTopGames"
+  | "sportsChannelFinder"
+  | "sportsScoreTicker"
+  | "sportsShowOdds";
 
 const PLUGINS: Array<{ field: PluginField; label: string; sub: string }> = [
   {
@@ -32,7 +36,8 @@ const PLUGINS: Array<{ field: PluginField; label: string; sub: string }> = [
     sub: "A live-score strip for the teams you follow, from kick-off to the final.",
   },
   {
-    field: "sportsOdds",
+    // The same setting as the Sports page's own odds switch, so both stay in step.
+    field: "sportsShowOdds",
     label: "Odds overlay",
     sub: "Moneyline and spread on game cards. Uses The Odds API when you add its key, otherwise ESPN's line.",
   },

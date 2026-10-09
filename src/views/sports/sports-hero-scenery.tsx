@@ -36,6 +36,25 @@ const PHOTO_SPORTS = new Set([
   "softball",
 ]);
 
+function sceneryFor(sport: string, league?: string) {
+  const photo =
+    sport === "motorsport"
+      ? racingDefaultPhoto(league)
+      : PHOTO_SPORTS.has(sport)
+        ? sport
+        : "soccer";
+  const gameId = sport === "esports" && league ? esportsRailGames([league])?.[0] : undefined;
+  const gameArt = gameId ? ESPORTS_GAMES.find((game) => game.id === gameId)?.art : undefined;
+  const fallback = `/sports/hero-photos/${photo}.webp?v=${photo === "combat" ? "arena-1" : photo === "basketball" ? "court-1" : photo === "soccer" ? "pitch-1" : ["baseball", "motorsport", "esports"].includes(photo) ? "venue-2" : "surface-1"}`;
+  return { photo, fallback, gameArt };
+}
+
+/** The bundled scenery photo for a sport (an esports title's own art first), as a URL. */
+export function sportsSceneryPhoto(sport = "soccer", league?: string): string {
+  const { fallback, gameArt } = sceneryFor(sport, league);
+  return gameArt || fallback;
+}
+
 /** Bundled photographs keep the hero visible while provider artwork loads or fails. */
 export function SportsHeroScenery({
   sport = "soccer",
@@ -46,16 +65,8 @@ export function SportsHeroScenery({
   league?: string;
   priority?: boolean;
 }) {
-  const photo =
-    sport === "motorsport"
-      ? racingDefaultPhoto(league)
-      : PHOTO_SPORTS.has(sport)
-        ? sport
-        : "soccer";
-  const gameId = sport === "esports" && league ? esportsRailGames([league])?.[0] : undefined;
-  const gameArt = gameId ? ESPORTS_GAMES.find((game) => game.id === gameId)?.art : undefined;
+  const { photo, fallback, gameArt } = sceneryFor(sport, league);
   const [failedArt, setFailedArt] = useState("");
-  const fallback = `/sports/hero-photos/${photo}.webp?v=${photo === "combat" ? "arena-1" : photo === "basketball" ? "court-1" : photo === "soccer" ? "pitch-1" : ["baseball", "motorsport", "esports"].includes(photo) ? "venue-2" : "surface-1"}`;
   const src = gameArt && failedArt !== gameArt ? gameArt : fallback;
   return (
     <img

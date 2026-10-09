@@ -3,7 +3,16 @@ import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import type { SportsGame, SportsSide } from "../src/lib/sports/espn.ts";
-import { alsoTodayGroups, teamSlideInfo } from "../src/lib/jl/sports/hub-sections.ts";
+import {
+  alsoTodayGroups,
+  heroFeatured,
+  heroPhoto,
+  mixHeroSlides,
+  photoSlides,
+  teamSlideInfo,
+} from "../src/lib/jl/sports/hub-sections.ts";
+import { parseEvents } from "../src/lib/sports/espn-parse.ts";
+import type { LeagueDef } from "../src/lib/sports/espn-types.ts";
 import { espnDarkLogo, monogram, nameColor, teamLook } from "../src/lib/jl/sports/team-look.ts";
 
 function side(name: string, extra: Partial<SportsSide> = {}): SportsSide {
@@ -138,4 +147,93 @@ test("team slides: ESPN's listing of the team and its game on now or next", () =
     now,
   )[0];
   assert.equal(live.next?.id, "g0");
+});
+
+test("hero photos: curated, then the event, the team, the league; else designed", () => {
+  assert.equal(heroPhoto({ curated: "c", event: "e", team: "t", league: "l" }), "c");
+  assert.equal(heroPhoto({ curated: null, event: "e", team: "t", league: "l" }), "e");
+  assert.equal(heroPhoto({ event: "", team: "t", league: "l" }), "t");
+  assert.equal(heroPhoto({ team: null, league: "l" }), "l");
+  assert.equal(heroPhoto({}), null);
+});
+
+test("hero rotation: JL slides take turns with featured events, leftovers follow", () => {
+  assert.deepEqual(mixHeroSlides(["a", "b", "c"], [1, 2]), ["a", 1, "b", 2, "c"]);
+  assert.deepEqual(mixHeroSlides(["a"], [1, 2, 3]), ["a", 1, 2, 3]);
+  assert.deepEqual(mixHeroSlides([], [1]), [1]);
+});
+
+test("hero featured events skip the Top 10 and repeats, up to the limit", () => {
+  const a = game("1", "NBA", side("A"), side("B"));
+  const b = game("2", "NBA", side("C"), side("D"));
+  const c = game("3", "EPL", side("E"), side("F"));
+  const shown = new Set(["NBA:1"]);
+  assert.deepEqual(
+    heroFeatured([a, b, b, c], shown).map((g) => g.id),
+    ["2", "3"],
+  );
+  assert.deepEqual(
+    heroFeatured([a, b, c], new Set(), 2).map((g) => g.id),
+    ["1", "2"],
+  );
+});
+
+test("ESPN scoreboard: team identity, colours, national network and the published line", () => {
+  const league: LeagueDef = {
+    key: "NFL",
+    label: "NFL",
+    labelEn: "NFL",
+    tag: "NFL",
+    path: "football/nfl",
+    logo: "",
+    group: "football",
+  };
+  const team = (id: string, location: string, name: string, color: string) => ({
+    id,
+    location,
+    name,
+    displayName: `${location} ${name}`,
+    abbreviation: id,
+    color,
+    alternateColor: "FFFFFF",
+  });
+  const [g] = parseEvents(
+    [
+      {
+        id: "9",
+        competitions: [
+          {
+            date: "2026-10-11T17:00Z",
+            status: { type: { state: "pre", shortDetail: "1:00 PM" } },
+            competitors: [
+              { homeAway: "home", team: team("KC", "Kansas City", "Chiefs", "E31837") },
+              { homeAway: "away", team: team("BUF", "Buffalo", "Bills", "not-a-colour") },
+            ],
+            broadcasts: [
+              { market: "home", names: ["KSHB"] },
+              { market: "national", names: ["CBS"] },
+            ],
+            odds: [{ details: "KC -3.5", overUnder: 47.5 }],
+          },
+        ],
+      },
+    ],
+    league,
+  );
+  assert.equal(g.home.location, "Kansas City");
+  assert.equal(g.home.nickname, "Chiefs");
+  assert.equal(g.home.color, "e31837");
+  assert.equal(g.home.altColor, "ffffff");
+  assert.equal(g.away.color, undefined);
+  assert.equal(g.network, "CBS");
+  assert.deepEqual(g.broadcasts, ["KSHB", "CBS"]);
+  assert.equal(g.odds, "KC -3.5 · O/U 47.5");
+});
+
+test("hero photos alternate: featured always, Top 10 games take turns, others stay designed", () => {
+  assert.deepEqual(
+    photoSlides(["either", "designed", "either", "either", "photo", "either", "either"]),
+    [false, false, true, false, true, false, true],
+  );
+  assert.deepEqual(photoSlides(["either", "photo", "either"]), [false, true, false]);
 });

@@ -7,12 +7,12 @@ import { isFavoriteSide, type JlFavoriteTeam } from "./rank.ts";
  * slide per followed team. Plain module, no I/O.
  */
 
-/** Section titles per league, in the order sections appear. */
+/** Section titles per league tag (games carry the tag: college basketball is "NCAA"), in order. */
 export const ALSO_TODAY_LEAGUES: Array<{ league: string; label: string }> = [
   { league: "NCAAF", label: "College" },
   { league: "NFL", label: "NFL" },
   { league: "NBA", label: "NBA" },
-  { league: "NCAAB", label: "College basketball" },
+  { league: "NCAA", label: "College basketball" },
   { league: "NHL", label: "NHL" },
   { league: "MLB", label: "MLB" },
   { league: "EPL", label: "Premier League" },
@@ -96,4 +96,65 @@ export function teamSlideInfo(
     const next = live ?? followedGamesThisWeek(games, [team], now)[0] ?? null;
     return { team, side, next };
   });
+}
+
+/**
+ * The hero's photo for a slide, best first: the owner's curated art, a picture of this very event,
+ * the team's own photo (TheSportsDB fan art, stadium or banner), then the league's photo. Null
+ * leaves the designed backdrop of team colours and logos.
+ */
+export function heroPhoto(sources: {
+  curated?: string | null;
+  event?: string | null;
+  team?: string | null;
+  league?: string | null;
+}): string | null {
+  return sources.curated || sources.event || sources.team || sources.league || null;
+}
+
+/**
+ * The hero's rotation: JL's own slides (Top 10 games on designed team art, followed teams,
+ * players) taking turns with the Sports page's featured events, which lead with photos, so
+ * pictures and designed slides alternate. Leftovers of the longer list follow in order.
+ */
+export function mixHeroSlides<T>(own: readonly T[], photos: readonly T[]): T[] {
+  const out: T[] = [];
+  for (let i = 0; i < Math.max(own.length, photos.length); i++) {
+    if (i < own.length) out.push(own[i]);
+    if (i < photos.length) out.push(photos[i]);
+  }
+  return out;
+}
+
+/** Featured events for the hero that the Top 10 doesn't already show, at most `limit`. */
+export function heroFeatured(
+  featured: readonly SportsGame[],
+  shown: ReadonlySet<string>,
+  limit = 5,
+): SportsGame[] {
+  const out: SportsGame[] = [];
+  const seen = new Set(shown);
+  for (const g of featured) {
+    const key = `${g.league}:${g.id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(g);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+/**
+ * Which hero slides lead with a photo. Featured events always do and team, player and leader
+ * slides keep their designed look; a Top 10 game goes the other way from the slide before it, so
+ * photos and designed logo slides alternate through the rotation.
+ */
+export function photoSlides(kinds: ReadonlyArray<"photo" | "designed" | "either">): boolean[] {
+  const out: boolean[] = [];
+  let previous = true;
+  for (const kind of kinds) {
+    previous = kind === "photo" ? true : kind === "designed" ? false : !previous;
+    out.push(previous);
+  }
+  return out;
 }

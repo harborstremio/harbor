@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { stableIndex, type TeamArt } from "@/lib/jl/sports/fanart";
+import { heroPhoto } from "@/lib/jl/sports/hub-sections";
 import { teamLook, type TeamLook } from "@/lib/jl/sports/team-look";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import { curatedTeamArt, useGameArt, useTeamArt } from "./use-sports-extras";
@@ -194,16 +195,28 @@ export function GameBackdrop({
   game,
   variant = "card",
   marks = true,
+  eventPhoto,
+  leaguePhoto,
 }: {
   game: SportsGame;
   variant?: Variant;
   /** The hero's big logos on the right; off where a headshot takes that place. */
   marks?: boolean;
+  /** A picture of this event (Harbor's sports artwork), ahead of the teams' own photos. */
+  eventPhoto?: string | null;
+  /** The league's photo, used only when neither the event nor the teams have one. */
+  leaguePhoto?: string | null;
 }) {
   const art = useGameArt(game);
+  const photo = heroPhoto({
+    curated: art.curated,
+    event: eventPhoto,
+    team: art.photo,
+    league: leaguePhoto,
+  });
   return (
     <ArtLayers
-      photo={art.photo}
+      photo={photo}
       looks={gameLooks(game, art.home, art.away)}
       variant={variant}
       marks={marks}

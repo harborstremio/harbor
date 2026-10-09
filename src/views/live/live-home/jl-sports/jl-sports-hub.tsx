@@ -1,5 +1,6 @@
 import {
   Cloud,
+  Globe2,
   GraduationCap,
   Info,
   Play,
@@ -53,12 +54,18 @@ export function JlSportsHub({
   favorites,
   actions,
   onOpenGame,
+  onLeagues,
 }: {
   top: JlHubGame[];
   ticker: JlHubGame[];
   favorites: JlFavoriteTeam[];
   actions: JlSportsActions;
   onOpenGame: (game: SportsGame) => void;
+  /**
+   * Where "Leagues" goes when the page has its own league browser (the Sports page's Explore).
+   * World sports then gets its own button, since JL's leagues page is where it lived.
+   */
+  onLeagues?: () => void;
 }) {
   const t = useT();
   const session = useJlSession();
@@ -79,10 +86,19 @@ export function JlSportsHub({
             <Users size={14} />
             {t("Teams & players")}
           </button>
-          <button onClick={() => openSportsPage({ kind: "leagues" })} className={pill}>
+          <button
+            onClick={onLeagues ?? (() => openSportsPage({ kind: "leagues" }))}
+            className={pill}
+          >
             <Trophy size={14} />
             {t("Leagues")}
           </button>
+          {onLeagues && (
+            <button onClick={() => openSportsPage({ kind: "world" })} className={pill}>
+              <Globe2 size={14} />
+              {t("World sports")}
+            </button>
+          )}
           <button onClick={() => openSportsPage({ kind: "colleges" })} className={pill}>
             <GraduationCap size={14} />
             {t("Colleges")}

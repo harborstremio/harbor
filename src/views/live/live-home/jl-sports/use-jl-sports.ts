@@ -11,6 +11,7 @@ import { fetchJlScoreboard, fetchTeamGames } from "@/lib/jl/sports/feed";
 import { followedGamesThisWeek, selectTopGames, teamsMissingFromScoreboard } from "@/lib/jl/sports/gameday";
 import { alsoTodayGroups, teamSlideInfo } from "@/lib/jl/sports/hub-sections";
 import { isFavoriteGame, rankGames, type JlFavoriteTeam, type RankedGame } from "@/lib/jl/sports/rank";
+import { useActiveKid } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import { useOddsApiGames } from "./use-sports-extras";
@@ -35,11 +36,12 @@ export type JlTeamSlide = { team: JlFavoriteTeam; side: SportsSide | null; next:
 export type JlAlsoToday = { league: string; label: string; live: number; items: JlHubGame[] };
 
 /** Scoreboards for JL's leagues plus the schedules of followed teams that aren't on them. */
-export function useJlGames(favorites: JlFavoriteTeam[]): SportsGame[] {
+export function useJlGames(favorites: JlFavoriteTeam[], enabled = true): SportsGame[] {
   const [games, setGames] = useState<SportsGame[]>([]);
   const favoritesKey = favorites.map((f) => `${f.league}:${f.id}`).join(",");
 
   useEffect(() => {
+    if (!enabled) return;
     let cancelled = false;
     const tick = async () => {
       if (document.visibilityState !== "visible") return;
@@ -69,19 +71,28 @@ export function useJlGames(favorites: JlFavoriteTeam[]): SportsGame[] {
     };
     // favoritesKey captures every change to the followed teams.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [favoritesKey]);
+  }, [favoritesKey, enabled]);
 
   return games;
 }
 
-export function useJlSports(params: { channels: IptvChannel[]; epg: EpgIndex | null; nowMs: number }) {
-  const { channels, epg, nowMs } = params;
+export function useJlSports(params: {
+  channels: IptvChannel[];
+  epg: EpgIndex | null;
+  nowMs: number;
+  /** False while the page is parked: no polling, the last games stay on screen. */
+  active?: boolean;
+}) {
+  const { channels, epg, nowMs, active = true } = params;
   const { settings } = useSettings();
-  const { sportsTopGames, sportsChannelFinder, sportsScoreTicker, sportsOdds } = settings;
+  const { sportsTopGames, sportsChannelFinder, sportsScoreTicker } = settings;
+  // Harbor's odds setting covers every sports surface; kids' profiles never see lines.
+  const kid = useActiveKid();
+  const sportsOdds = settings.sportsShowOdds && !kid;
   const teams = useJlSportsFavorites();
   const players = useJlFavoritePlayers();
   const favorites = useMemo(() => effectiveTeams(teams, players), [teams, players]);
-  const games = useJlGames(favorites);
+  const games = useJlGames(favorites, active);
   const bucket = Math.floor(nowMs / INDEX_BUCKET_MS);
 
   // Smart Channel Finder off: no channel matching, so every game offers "Ways to watch" only.
@@ -158,5 +169,15 @@ export function useJlSports(params: { channels: IptvChannel[]; epg: EpgIndex | n
     () => hub.top.map((r, i) => ({ ...r, game: sportsOdds ? (oddsGames[i] ?? r.game) : { ...r.game, odds: null } })),
     [hub.top, oddsGames, sportsOdds],
   );
-  return useMemo(() => ({ ...hub, top }), [hub, top]);
+  const alsoToday = useMemo(
+    () =>
+      sportsOdds
+        ? hub.alsoToday
+        : hub.alsoToday.map((g) => ({
+            ...g,
+            items: g.items.map((r) => ({ ...r, game: { ...r.game, odds: null } })),
+          })),
+    [hub.alsoToday, sportsOdds],
+  );
+  return useMemo(() => ({ ...hub, top, alsoToday }), [hub, top, alsoToday]);
 }

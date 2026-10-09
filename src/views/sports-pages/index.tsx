@@ -7,6 +7,7 @@ import { LeaguesPage } from "./leagues";
 import { MatchCenterPage } from "./match-center";
 import { StudentPage } from "./student";
 import { TeamPage } from "./team";
+import { WorldSportsPage } from "./world-sports";
 
 /** One view for every deeper Sports page; each kind lives in its own file. */
 export function SportsPageView({ page }: { page: SportsPage }) {
@@ -19,6 +20,8 @@ export function SportsPageView({ page }: { page: SportsPage }) {
       return <LeaguePage page={page} />;
     case "leagues":
       return <LeaguesPage page={page} />;
+    case "world":
+      return <WorldSportsPage />;
     case "match-center":
       return <MatchCenterPage page={page} />;
     case "colleges":

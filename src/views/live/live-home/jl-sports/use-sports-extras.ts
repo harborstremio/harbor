@@ -80,7 +80,13 @@ export function useTeamArt(league: string, side: ArtSide | null): TeamArt | null
   return teamArt.get(cacheKey) ?? null;
 }
 
-export type GameArt = { photo: string | null; home: TeamArt | null; away: TeamArt | null };
+export type GameArt = {
+  photo: string | null;
+  /** The curated part of `photo`, so callers can put event pictures right after it. */
+  curated: string | null;
+  home: TeamArt | null;
+  away: TeamArt | null;
+};
 
 /** A team's own curated wallpaper, when one is set. */
 export function curatedTeamArt(league: string, side: { id?: string } | null): string | null {
@@ -98,7 +104,12 @@ export function useGameArt(game: SportsGame | null): GameArt {
   const curated = game
     ? (curatedTeamArt(league, game.home) ?? curatedTeamArt(league, game.away))
     : null;
-  return { photo: curated ?? (game ? chooseGameArt(game, home, away) : null), home, away };
+  return {
+    photo: curated ?? (game ? chooseGameArt(game, home, away) : null),
+    curated,
+    home,
+    away,
+  };
 }
 
 /* ---------------- The Odds API ---------------- */

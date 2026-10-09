@@ -1,24 +1,39 @@
 import { ChevronLeft, ChevronRight, Info, Play, Sparkles } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import type { InsightLeader } from "@/lib/jl/sports/insight";
 import { fetchPlayerLine, fetchPregameInsight } from "@/lib/jl/sports/people";
 import { espnHeadshot } from "@/lib/jl/sports/search-parse";
+import { mixHeroSlides, photoSlides } from "@/lib/jl/sports/hub-sections";
 import { teamLook } from "@/lib/jl/sports/team-look";
+import { isIndividualCompetition } from "@/lib/sports/competition-metadata";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
+import { getLeagueLabel, leagueByKey } from "@/lib/sports/espn-leagues";
+import { hubLeague } from "@/lib/sports/hub-data";
+import type { TeamIdentity } from "@/lib/sports/team-profile";
 import { useView } from "@/lib/view";
+import { sportsSceneryPhoto } from "@/views/sports/sports-hero-scenery";
+import { useSportsArtwork } from "@/views/sports/use-artwork";
+import "@/views/sports/team-profile.css";
 import { GameBackdrop, TeamBackdrop, TeamMark } from "./game-backdrop";
 import { statusText } from "./jl-sports-hub";
 import type { JlSportsActions } from "./use-jl-sports-dialogs";
 import type { JlHubGame, JlPlayerSlide, JlTeamSlide } from "./use-jl-sports";
 import { useGameArt, useTeamArt } from "./use-sports-extras";
 
+// Harbor's team page, opened from a followed team's slide.
+const TeamProfile = lazy(() =>
+  import("@/views/sports/team-profile").then((m) => ({ default: m.TeamProfile })),
+);
+
 const ADVANCE_MS = 9000;
 const LEADER_SLIDES = 3;
 const NO_TEAM_SLIDES: JlTeamSlide[] = [];
+const NO_FEATURED: JlHubGame[] = [];
 
 type Slide =
-  | { kind: "game"; item: JlHubGame; place: number }
+  | { kind: "game"; item: JlHubGame; place: number; photo?: boolean }
+  | { kind: "featured"; item: JlHubGame }
   | { kind: "team"; slide: JlTeamSlide }
   | { kind: "player"; slide: JlPlayerSlide }
   | { kind: "leader"; leader: InsightLeader; item: JlHubGame; team: string };
@@ -28,32 +43,42 @@ type Translate = ReturnType<typeof useT>;
 const slideKey = (s: Slide): string =>
   s.kind === "game"
     ? `g:${s.item.game.league}:${s.item.game.id}`
-    : s.kind === "team"
-      ? `t:${s.slide.team.league}:${s.slide.team.id}`
-      : s.kind === "player"
-        ? `p:${s.slide.player.league}:${s.slide.player.id}`
-        : `l:${s.item.game.id}:${s.leader.athlete}`;
+    : s.kind === "featured"
+      ? `f:${s.item.game.league}:${s.item.game.id}`
+      : s.kind === "team"
+        ? `t:${s.slide.team.league}:${s.slide.team.id}`
+        : s.kind === "player"
+          ? `p:${s.slide.player.league}:${s.slide.player.id}`
+          : `l:${s.item.game.id}:${s.leader.athlete}`;
 
 /**
  * The Sports Hub's full-bleed hero: the Top 10 games, a slide for each team you follow, your
  * players and the top game's leaders, each on its team art (TheSportsDB photo, or a designed
- * backdrop from ESPN's logos and colours). One slide at a time; text and art change together.
+ * backdrop from ESPN's logos and colours). On the Sports page the Hub's featured events take turns
+ * with them, on real event or league photos where there are any. One slide at a time; text and
+ * art change together.
  */
 export function JlSportsHero({
   top,
   teamSlides = NO_TEAM_SLIDES,
   playerSlides,
+  featured = NO_FEATURED,
   actions,
   onOpenGame,
   bleed = false,
+  flush = false,
 }: {
   top: JlHubGame[];
   teamSlides?: JlTeamSlide[];
   playerSlides: JlPlayerSlide[];
+  /** Featured events from the Sports page's own selection, shown between JL's slides. */
+  featured?: JlHubGame[];
   actions: JlSportsActions;
   onOpenGame: (game: SportsGame) => void;
   /** Edge to edge under the top bar (the Sports view); otherwise a rounded panel (Live TV). */
   bleed?: boolean;
+  /** With `bleed`: the parent has no padding to reach past (the Sports page's own scroller). */
+  flush?: boolean;
 }) {
   const t = useT();
   const root = useRef<HTMLElement>(null);
@@ -61,14 +86,24 @@ export function JlSportsHero({
   const slides = useMemo<Slide[]>(() => {
     const games = top.map((item, i) => ({ kind: "game" as const, item, place: i + 1 }));
     const teams = teamSlides.map((slide) => ({ kind: "team" as const, slide }));
-    return [
+    const own: Slide[] = [
       ...games.slice(0, 1),
       ...teams,
       ...games.slice(1),
       ...playerSlides.map((slide) => ({ kind: "player" as const, slide })),
       ...leaders,
     ];
-  }, [top, teamSlides, playerSlides, leaders]);
+    const mixed = mixHeroSlides<Slide>(
+      own,
+      featured.map((item) => ({ kind: "featured" as const, item })),
+    );
+    const photo = photoSlides(
+      mixed.map((s) =>
+        s.kind === "featured" ? "photo" : s.kind === "game" ? "either" : "designed",
+      ),
+    );
+    return mixed.map((s, i) => (s.kind === "game" ? { ...s, photo: photo[i] } : s));
+  }, [top, teamSlides, playerSlides, featured, leaders]);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = slides.length;
@@ -101,7 +136,7 @@ export function JlSportsHero({
       }}
       className={`relative overflow-hidden bg-canvas ${
         bleed
-          ? "jl-sports-bleed h-[clamp(520px,80vh,980px)]"
+          ? `${flush ? "" : "jl-sports-bleed "}h-[clamp(520px,80vh,980px)]`
           : "mx-[9px] h-[clamp(420px,60vh,720px)] rounded-[28px] border border-edge-soft/60"
       }`}
     >
@@ -122,6 +157,9 @@ export function JlSportsHero({
             actions={actions}
             onOpenGame={onOpenGame}
           />
+        )}
+        {current.kind === "featured" && (
+          <FeaturedSlide item={current.item} actions={actions} onOpenGame={onOpenGame} />
         )}
         {current.kind === "team" && <TeamSlide slide={current.slide} actions={actions} />}
         {current.kind === "player" && <PlayerSlide slide={current.slide} actions={actions} />}
@@ -178,7 +216,13 @@ export function JlSportsHero({
 }
 
 function SlideArt({ slide }: { slide: Slide }) {
-  if (slide.kind === "game") return <GameBackdrop game={slide.item.game} variant="hero" />;
+  if (slide.kind === "game")
+    return slide.photo ? (
+      <FeaturedArt game={slide.item.game} />
+    ) : (
+      <GameBackdrop game={slide.item.game} variant="hero" />
+    );
+  if (slide.kind === "featured") return <FeaturedArt game={slide.item.game} />;
   if (slide.kind === "team")
     return <TeamBackdrop league={slide.slide.team.league} side={teamSide(slide.slide)} />;
   const game = slide.kind === "leader" ? slide.item.game : (slide.slide.next?.game ?? null);
@@ -197,6 +241,31 @@ function SlideArt({ slide }: { slide: Slide }) {
         <div className="absolute inset-0 bg-[radial-gradient(110%_90%_at_80%_40%,var(--color-accent-soft),transparent_70%)]" />
       )}
       {image && <Headshot src={image} />}
+    </>
+  );
+}
+
+/**
+ * A photo slide's art (featured events and every other Top 10 game): Harbor's sports artwork
+ * (a picture of the event, else the league's photo, else Harbor's photo of the sport) around
+ * the teams' own photos, over the designed backdrop. A fight's portraits stand at the far side
+ * like a player's.
+ */
+function FeaturedArt({ game }: { game: SportsGame }) {
+  const art = useSportsArtwork(game);
+  // Harbor's bundled venue photo for the sport keeps every featured slide a picture.
+  const scenery = sportsSceneryPhoto(hubLeague(game.league)?.group, game.league);
+  const portrait = art.home || art.away;
+  return (
+    <>
+      <GameBackdrop
+        game={game}
+        variant="hero"
+        marks={!portrait}
+        eventPhoto={game.artwork || game.poster}
+        leaguePhoto={art.backdrop || scenery}
+      />
+      {portrait && <Headshot src={portrait} />}
     </>
   );
 }
@@ -320,11 +389,14 @@ function watchLabel(item: JlHubGame, t: Translate): string {
 function GameSlide({
   item,
   place,
+  eyebrow,
   actions,
   onOpenGame,
 }: {
   item: JlHubGame;
-  place: number;
+  place?: number;
+  /** Replaces the Top 10 eyebrow (featured events). */
+  eyebrow?: string;
   actions: JlSportsActions;
   onOpenGame: (game: SportsGame) => void;
 }) {
@@ -333,31 +405,40 @@ function GameSlide({
   const art = useGameArt(game);
   const live = game.state === "in";
   const atHome = game.state === "pre" ? t("at") : t("vs");
+  // Races, fight cards and tournaments read by the event's name, not the leading pair.
+  const eventName = isEventSlide(game) ? game.context?.name : "";
   return (
     <>
       <Eyebrow>
-        {[
-          t("Top 10 · #{n}", { n: place }),
-          reasons[0] ? t(reasons[0].label, reasons[0].vars) : null,
-        ]
-          .filter(Boolean)
-          .join(" · ")}
+        {eyebrow ??
+          [
+            place ? t("Top 10 · #{n}", { n: place }) : null,
+            reasons[0] ? t(reasons[0].label, reasons[0].vars) : null,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
       </Eyebrow>
-      <div className="flex flex-col gap-2">
-        <HeroTeam
-          side={game.away}
-          look={teamLook(game.away, art.away)}
-          showScore={game.state !== "pre"}
-        />
-        <span className="jl-sports-display ps-1 text-[13px] font-bold uppercase tracking-[0.3em] text-ink-muted">
-          {atHome}
-        </span>
-        <HeroTeam
-          side={game.home}
-          look={teamLook(game.home, art.home)}
-          showScore={game.state !== "pre"}
-        />
-      </div>
+      {eventName ? (
+        <h2 className="jl-sports-display line-clamp-2 text-[clamp(32px,4.6vw,88px)] font-black uppercase leading-[1] tracking-wide text-ink drop-shadow-[0_6px_30px_rgba(0,0,0,0.6)]">
+          {eventName}
+        </h2>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <HeroTeam
+            side={game.away}
+            look={teamLook(game.away, art.away)}
+            showScore={game.state !== "pre"}
+          />
+          <span className="jl-sports-display ps-1 text-[13px] font-bold uppercase tracking-[0.3em] text-ink-muted">
+            {atHome}
+          </span>
+          <HeroTeam
+            side={game.home}
+            look={teamLook(game.home, art.home)}
+            showScore={game.state !== "pre"}
+          />
+        </div>
+      )}
       <p className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[14px] font-medium text-ink/90 drop-shadow 2xl:text-[17px]">
         <span className={`flex items-center gap-1.5 font-semibold ${live ? "text-danger" : ""}`}>
           {live && <span className="h-2 w-2 animate-pulse rounded-full bg-danger" />}
@@ -388,6 +469,36 @@ function GameSlide({
         </RoundAction>
       </div>
     </>
+  );
+}
+
+function isEventSlide(game: SportsGame): boolean {
+  const group = hubLeague(game.league)?.group ?? "";
+  return !!game.context?.name && (!!game.field?.length || isIndividualCompetition(group));
+}
+
+/** A featured event from the Sports page, laid out like a Top 10 slide. */
+function FeaturedSlide({
+  item,
+  actions,
+  onOpenGame,
+}: {
+  item: JlHubGame;
+  actions: JlSportsActions;
+  onOpenGame: (game: SportsGame) => void;
+}) {
+  const t = useT();
+  const { game } = item;
+  const league = hubLeague(game.league);
+  const name = league ? getLeagueLabel(league) : game.league;
+  const live = game.state === "in" && game.savedAt === undefined;
+  return (
+    <GameSlide
+      item={item}
+      eyebrow={`${live ? t("Live now") : t("Featured")} · ${name}`}
+      actions={actions}
+      onOpenGame={onOpenGame}
+    />
   );
 }
 
@@ -430,8 +541,18 @@ function TeamSlide({ slide, actions }: { slide: JlTeamSlide; actions: JlSportsAc
   const { team, next } = slide;
   const side = teamSide(slide);
   const art = useTeamArt(team.league, side);
-  const openTeam = () =>
-    openSportsPage({ kind: "team", league: team.league, teamId: team.id, name: team.name });
+  const [profile, setProfile] = useState<TeamIdentity | null>(null);
+  const opener = useRef<HTMLElement | null>(null);
+  // Harbor's team page when it covers the league; JL's own team page otherwise.
+  const openTeam = () => {
+    const identity = harborTeam(team, side);
+    if (!identity) {
+      openSportsPage({ kind: "team", league: team.league, teamId: team.id, name: team.name });
+      return;
+    }
+    opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setProfile(identity);
+  };
   const game = next?.game ?? null;
   const live = game?.state === "in";
   let status = t("No game scheduled");
@@ -471,8 +592,29 @@ function TeamSlide({ slide, actions }: { slide: JlTeamSlide; actions: JlSportsAc
           <Info size={20} />
         </RoundAction>
       </div>
+      {profile && (
+        <Suspense fallback={null}>
+          <TeamProfile
+            team={profile}
+            onClose={() => {
+              setProfile(null);
+              const el = opener.current;
+              window.requestAnimationFrame(
+                () => el?.isConnected && el.focus({ preventScroll: true }),
+              );
+            }}
+          />
+        </Suspense>
+      )}
     </>
   );
+}
+
+/** A followed team as Harbor's team page knows it, when Harbor's Sports Hub has its league. */
+function harborTeam(team: JlTeamSlide["team"], side: SportsSide): TeamIdentity | null {
+  const tag = leagueByKey(team.league)?.tag ?? team.league;
+  if (!hubLeague(tag) || !team.id) return null;
+  return { id: team.id, name: side.name || team.name, logo: side.logo || undefined, league: tag };
 }
 
 function PlayerSlide({ slide, actions }: { slide: JlPlayerSlide; actions: JlSportsActions }) {
