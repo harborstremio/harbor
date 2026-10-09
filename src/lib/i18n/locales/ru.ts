@@ -1,3 +1,4 @@
+import jlDesktop026 from "./ru/jl-desktop-026";
 import jlMediaVision from "./ru/jl-media-vision";
 import playOrders from "./ru/play-orders";
 import gameRomLibrary from "./ru/game-rom-library";
@@ -393,6 +394,7 @@ const ru: Record<string, string> = {
   ...gameNotes,
   ...playOrders,
   ...jlMediaVision,
+  ...jlDesktop026,
 };
 
 export default ru;

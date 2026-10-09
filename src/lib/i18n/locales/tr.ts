@@ -1,3 +1,4 @@
+import jlDesktop026 from "./tr/jl-desktop-026";
 import playOrders from "./tr/play-orders";
 import gameRomLibrary from "./tr/game-rom-library";
 import gameNotes from "./tr/game-notes";
@@ -338,6 +339,7 @@ const tr: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...jlDesktop026,
 };
 
 export default tr;

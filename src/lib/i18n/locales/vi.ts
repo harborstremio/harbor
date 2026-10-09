@@ -1,3 +1,4 @@
+import jlDesktop026 from "./vi/jl-desktop-026";
 import playOrders from "./vi/play-orders";
 import gameRomLibrary from "./vi/game-rom-library";
 import gameNotes from "./vi/game-notes";
@@ -378,6 +379,7 @@ const vi: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...jlDesktop026,
 };
 
 export default vi;

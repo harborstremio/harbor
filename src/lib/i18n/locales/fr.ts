@@ -1,3 +1,4 @@
+import jlDesktop026 from "./fr/jl-desktop-026";
 import playOrders from "./fr/play-orders";
 import gameRomLibrary from "./fr/game-rom-library";
 import gameNotes from "./fr/game-notes";
@@ -374,6 +375,7 @@ const fr: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...jlDesktop026,
 };
 
 export default fr;

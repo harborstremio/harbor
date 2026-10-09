@@ -1,3 +1,4 @@
+import jlDesktop026 from "./ko/jl-desktop-026";
 import playOrders from "./ko/play-orders";
 import gameRomLibrary from "./ko/game-rom-library";
 import gameNotes from "./ko/game-notes";
@@ -337,6 +338,7 @@ const ko: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...jlDesktop026,
 };
 
 export default ko;

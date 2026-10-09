@@ -1,3 +1,4 @@
+import jlDesktop026 from "./en/jl-desktop-026";
 import jlMediaVision from "./en/jl-media-vision";
 import playOrders from "./en/play-orders";
 import gameRomLibrary from "./en/game-rom-library";
@@ -488,6 +489,7 @@ const en: Record<string, string> = {
   ...gameNotes,
   ...playOrders,
   ...jlMediaVision,
+  ...jlDesktop026,
 };
 
 export default en;

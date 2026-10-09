@@ -1,3 +1,4 @@
+import jlDesktop026 from "./zh/jl-desktop-026";
 import playOrders from "./zh/play-orders";
 import gameRomLibrary from "./zh/game-rom-library";
 import gameNotes from "./zh/game-notes";
@@ -341,6 +342,7 @@ const zh: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...jlDesktop026,
 };
 
 export default zh;
