@@ -327,7 +327,7 @@ function SportsHubView({ active = false }: { active?: boolean }) {
       )}
       <header className={jlHero ? "sh-masthead sh-masthead-after-hero" : "sh-masthead"}>
         <div>
-          <span className="sh-eyebrow">HARBOR SPORTS</span>
+          <span className="sh-eyebrow">JL SPORTS</span>
           <h1>{t("Every game. Your game.")}</h1>
         </div>
         <SportsPersonalizeHint

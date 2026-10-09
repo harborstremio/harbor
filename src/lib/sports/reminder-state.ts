@@ -25,5 +25,5 @@ export function dueReminderChannels(reminder: SportsReminder, now: number) {
 }
 export function reminderMessage(reminder: SportsReminder, now: number, locale?: string) {
   const minutes = Math.max(0, Math.ceil((reminder.startMs - now) / 60_000));
-  return `Harbor Sports · ${reminder.league}\n${reminder.name}\n${minutes ? `Starts in ${minutes} minutes` : "Starting now"}\n${new Date(reminder.startMs).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" })}\nWatch through your authorized provider or connected sources.`;
+  return `JL Media Vision Sports · ${reminder.league}\n${reminder.name}\n${minutes ? `Starts in ${minutes} minutes` : "Starting now"}\n${new Date(reminder.startMs).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" })}\nWatch through your authorized provider or connected sources.`;
 }
