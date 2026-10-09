@@ -27,7 +27,6 @@ mod proc_mem;
 mod settings_store;
 mod stream_proxy;
 mod streams;
-mod stremio_auth;
 mod subtitle_credentials;
 mod temp_prune;
 mod thumb_cache;
@@ -1517,7 +1516,6 @@ pub fn run() {
             local_lib::harbor_scan_folder,
             tray::tray_set_prefs,
             tray::tray_set_custom_themes,
-            stremio_auth::stremio_auth_start,
             song_id::recognize_now_playing,
             song_id::recognize_now_playing_ai,
             app_icon::set_app_icon,

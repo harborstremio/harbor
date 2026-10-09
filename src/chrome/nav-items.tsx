@@ -274,7 +274,7 @@ const NAV_ITEMS_ALL: NavItem[] = [
   },
   {
     id: "downloads",
-    label: "nav.downloads",
+    label: "Offline Room",
     render: (active, hovered) => (
       <NavLottie
         data={lotDownloads}

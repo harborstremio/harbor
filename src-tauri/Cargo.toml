@@ -1,7 +1,7 @@
 [package]
 name = "harbor"
 version = "0.9.132"
-description = "A Stremio client built for adventure"
+description = "JL Media Vision desktop media center"
 edition = "2021"
 
 [lib]
