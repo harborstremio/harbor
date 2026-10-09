@@ -1,4 +1,5 @@
 import { setItemWithRecovery } from "@/lib/storage-recovery";
+import { legacyProfileSyncAllowed } from "./authority";
 import { readJson, removeKey } from "./keys";
 import { clearIdMap, dropLocalMapping, readIdMap, setMappings } from "./id-map";
 import { applyRoster, readLocalRoster, rosterWired } from "./roster-store";
@@ -40,6 +41,7 @@ function writeTombstones(list: WireProfile[]): void {
  * devices that deleted it.
  */
 export function noteProfileDeleted(localId: string): void {
+  if (!legacyProfileSyncAllowed()) return;
   const syncId = readIdMap()[localId];
   dropLocalMapping(localId);
   if (!syncId) return;
@@ -65,6 +67,7 @@ export function noteProfileDeleted(localId: string): void {
 }
 
 export function clearRosterSectionState(): void {
+  if (!legacyProfileSyncAllowed()) return;
   removeKey(TOMBSTONE_KEY);
   removeKey(KNOWN_KEY);
   clearIdMap();
@@ -78,7 +81,7 @@ export function setRosterFirstPull(pending: boolean): void {
 
 function readRosterValue(): RosterValue {
   const value = buildRosterValue(readLocalRoster(), readIdMap(), tombstones(), knownRoster());
-  rememberRoster(value.profiles);
+  if (legacyProfileSyncAllowed()) rememberRoster(value.profiles);
   return value;
 }
 
@@ -89,6 +92,7 @@ function readRosterValue(): RosterValue {
  * apply: nothing local changes, only the id map gains entries.
  */
 export function seedRosterFromLocal(): void {
+  if (!legacyProfileSyncAllowed()) return;
   const plan = planRoster({
     local: readLocalRoster(),
     server: [],
@@ -119,6 +123,7 @@ function mintMissingSyncIds(localIds: string[]): void {
  * believing it is in step with a roster it never adopted.
  */
 function writeRosterValue(_profileId: string, value: unknown): boolean {
+  if (!legacyProfileSyncAllowed()) return false;
   const server = parseRoster(value);
   writeTombstones(server.filter((p) => p.deletedAt != null));
   // Adopt their stamps as well as their content, so the next read does not decide every

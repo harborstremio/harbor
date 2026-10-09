@@ -1,4 +1,5 @@
 import { currentAuthor } from "@/lib/theme-auth";
+import { legacyProfileSyncAllowed } from "./authority";
 import {
   fetchSyncState,
   isAuthFailure,
@@ -66,6 +67,7 @@ export function syncAccountId(): string {
 }
 
 export function resetSyncState(): void {
+  if (!legacyProfileSyncAllowed()) return;
   clearRevState();
   clearQueue();
   clearAllParked();
@@ -215,7 +217,7 @@ function settleRoster(docs: SyncDoc[]): void {
 export async function runPull(signal?: AbortSignal): Promise<PullOutcome> {
   const arm = syncArm();
   if (arm !== "ok") {
-    patchSyncStatus({ armed: false, phase: arm === "signed-out" ? "signed-out" : "no-refresh" });
+    patchSyncStatus({ armed: false, phase: arm });
     return { ok: false, reason: "auth" };
   }
   const account = syncAccountId();
@@ -235,11 +237,17 @@ export async function runPull(signal?: AbortSignal): Promise<PullOutcome> {
   try {
     state = await fetchSyncState(signal);
   } catch (e) {
+    if (!legacyProfileSyncAllowed()) {
+      patchSyncStatus({ armed: false, phase: "off" });
+      return { ok: false, reason: "auth" };
+    }
     const reason = classify(e);
     if (reason === "rate-limited") rateLimitedUntil = Date.now() + RATE_LIMIT_BACKOFF_MS;
     patchSyncStatus({ phase: firstPull ? "first-pull-failed" : "idle", lastError: reason });
     return { ok: false, reason };
   }
+
+  if (!legacyProfileSyncAllowed()) return { ok: false, reason: "auth" };
 
   // AFTER the request, never before it. This used to run at the top of runPull on every
   // attempt while the account was unbound, and resetSyncState clears the queue, the
@@ -402,7 +410,7 @@ function onRejected(prepared: Prepared, current: SyncDoc): void {
 export async function runPush(): Promise<PushOutcome> {
   const arm = syncArm();
   if (arm !== "ok") {
-    patchSyncStatus({ armed: false, phase: arm === "signed-out" ? "signed-out" : "no-refresh" });
+    patchSyncStatus({ armed: false, phase: arm });
     return { ok: false, reason: "auth" };
   }
   if (Date.now() < rateLimitedUntil) return { ok: false, reason: "rate-limited" };
@@ -416,6 +424,10 @@ export async function runPush(): Promise<PushOutcome> {
   try {
     response = await pushSyncWrites(prepared.map((p) => p.write));
   } catch (e) {
+    if (!legacyProfileSyncAllowed()) {
+      patchSyncStatus({ armed: false, phase: "off" });
+      return { ok: false, reason: "auth" };
+    }
     const reason = classify(e);
     if (reason === "rate-limited") rateLimitedUntil = Date.now() + RATE_LIMIT_BACKOFF_MS;
     if (reason === "server") {
@@ -438,6 +450,7 @@ export async function runPush(): Promise<PushOutcome> {
     return { ok: false, reason };
   }
 
+  if (!legacyProfileSyncAllowed()) return { ok: false, reason: "auth" };
   const byKey = new Map(prepared.map((p) => [p.write.key, p]));
   let accepted = 0;
   let rejected = 0;

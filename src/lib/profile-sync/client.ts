@@ -1,5 +1,6 @@
 import { socialGet, socialPost } from "@/lib/social/client";
 import { authToken, refreshTokenValue } from "@/lib/theme-auth";
+import { assertLegacyProfileSyncAllowed, legacyProfileSyncAllowed } from "./authority";
 import type { PushResponse, PushResult, PushWrite, SyncDoc, SyncStateResponse } from "./types";
 
 /**
@@ -11,7 +12,7 @@ import type { PushResponse, PushResult, PushWrite, SyncDoc, SyncStateResponse } 
 const STATE_PATH = "/sync/v1/state";
 const PUSH_PATH = "/sync/v1/push";
 
-export type SyncArm = "ok" | "signed-out" | "no-refresh";
+export type SyncArm = "ok" | "off" | "signed-out" | "no-refresh";
 
 /**
  * The legacy theme-author sign in (theme-auth.ts registerAuthor/loginAuthor/recoverAuthor)
@@ -20,6 +21,7 @@ export type SyncArm = "ok" | "signed-out" | "no-refresh";
  * swallows errors, so it would fail forever with no symptom. Refuse to arm instead.
  */
 export function syncArm(): SyncArm {
+  if (!legacyProfileSyncAllowed()) return "off";
   if (!authToken()) return "signed-out";
   if (!refreshTokenValue()) return "no-refresh";
   return "ok";
@@ -128,9 +130,15 @@ export function resultKey(result: PushResult): string {
 }
 
 export async function fetchSyncState(signal?: AbortSignal): Promise<SyncStateResponse> {
-  return asState(await socialGet<unknown>(STATE_PATH, signal));
+  assertLegacyProfileSyncAllowed();
+  const state = await socialGet<unknown>(STATE_PATH, signal);
+  assertLegacyProfileSyncAllowed();
+  return asState(state);
 }
 
 export async function pushSyncWrites(writes: PushWrite[]): Promise<PushResponse> {
-  return asPushResponse(await socialPost<unknown>(PUSH_PATH, { writes }));
+  assertLegacyProfileSyncAllowed();
+  const response = await socialPost<unknown>(PUSH_PATH, { writes });
+  assertLegacyProfileSyncAllowed();
+  return asPushResponse(response);
 }

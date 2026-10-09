@@ -8,6 +8,7 @@ This implementation uses the existing JL Supabase `media` schema. It does not us
 - Keep `JlAccountSync` mounted inside settings/profile providers. It registers the profile metadata port and runs profile/favorites/key sync.
 - Identity changes stage and persist a separate local roster/settings workspace before publishing the JL session. A session-storage failure rolls back the workspace. Actual user-ID changes reload providers/caches; same-user refresh does not.
 - Offline/download scope uses `JSON.stringify([currentJlSession()?.userId ?? "local", activeProfileId()])`. Consumers can subscribe to `subscribeJlSession`, `jl:account-changed`, and `harbor:active-profile-changed`.
+- The legacy Harbor profile-sync scheduler, manual requests/flushes, queue marks, transports and roster applies are disabled when the JL build is configured or a JL session/workspace marker exists (including the signed-out `local` workspace). In-flight legacy responses cannot apply or acknowledge old writes after JL takes ownership. Community theme sign-in remains available; legacy queues, mappings and parked rosters remain stored for recovery.
 
 ## Data contract
 

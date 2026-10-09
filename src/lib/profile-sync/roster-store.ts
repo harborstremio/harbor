@@ -1,4 +1,5 @@
 import type { LocalProfileLike, RosterApply, RosterStore } from "./types";
+import { legacyProfileSyncAllowed } from "./authority";
 
 const PROFILES_KEY = "harbor.profiles.v1";
 
@@ -62,6 +63,7 @@ function readKid(raw: unknown): LocalProfileLike["kid"] {
 }
 
 export function applyRoster(apply: RosterApply): boolean {
+  if (!legacyProfileSyncAllowed()) return false;
   if (!store) return false;
   store.apply(apply);
   return true;

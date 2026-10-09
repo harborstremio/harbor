@@ -1,5 +1,6 @@
 import { activeProfileId } from "@/lib/active-profile-id";
 import { subscribeAuthor } from "@/lib/theme-auth";
+import { legacyProfileSyncAllowed } from "./authority";
 import { rateLimitRemaining, runPull, runPush } from "./engine";
 import { syncIdFor } from "./id-map";
 import { clearParked, readParked } from "./parked";
@@ -34,7 +35,7 @@ function refreshQueueStatus(): void {
 }
 
 export function scheduleFlush(delay = DEBOUNCE_MS): void {
-  if (!started) return;
+  if (!started || !legacyProfileSyncAllowed()) return;
   const now = Date.now();
   const floor = Math.max(0, lastPushAt + PUSH_FLOOR_MS - now);
   const wait = Math.max(delay, floor, rateLimitRemaining(now));
@@ -43,6 +44,7 @@ export function scheduleFlush(delay = DEBOUNCE_MS): void {
 }
 
 async function flush(): Promise<void> {
+  if (!legacyProfileSyncAllowed()) return;
   if (busy) {
     scheduleFlush(1000);
     return;
@@ -63,18 +65,20 @@ async function flush(): Promise<void> {
  * why the queue is persisted: the write is not lost, it goes up on next launch.
  */
 export function flushSyncNow(): void {
+  if (!legacyProfileSyncAllowed()) return;
   window.clearTimeout(flushTimer);
   if (rateLimitRemaining(Date.now()) > 0) return;
   void flush();
 }
 
 function schedulePull(delay: number): void {
-  if (!started) return;
+  if (!started || !legacyProfileSyncAllowed()) return;
   window.clearTimeout(pullTimer);
   pullTimer = window.setTimeout(() => void pull(), delay);
 }
 
 async function pull(): Promise<void> {
+  if (!legacyProfileSyncAllowed()) return;
   if (busy) {
     schedulePull(2000);
     return;
@@ -122,6 +126,7 @@ function scopeFor(section: SectionKey, profileId?: string): string | null {
  * mutation after that.
  */
 export function markSectionDirty(section: SectionKey, profileId?: string): void {
+  if (!legacyProfileSyncAllowed()) return;
   const scope = scopeFor(section, profileId);
   if (!scope) return;
   enqueueDirty(docKey(section, scope));
@@ -130,6 +135,7 @@ export function markSectionDirty(section: SectionKey, profileId?: string): void 
 }
 
 export function markSectionCleared(section: SectionKey, profileId?: string): void {
+  if (!legacyProfileSyncAllowed()) return;
   const scope = scopeFor(section, profileId);
   if (!scope) return;
   enqueueClear(docKey(section, scope));
@@ -142,6 +148,7 @@ export function markSectionCleared(section: SectionKey, profileId?: string): voi
  * queued at the fresh baseRev the rejection taught us, so this time it wins cleanly.
  */
 export function restoreParkedSection(section: SectionKey, profileId?: string): boolean {
+  if (!legacyProfileSyncAllowed()) return false;
   const scope = scopeFor(section, profileId);
   if (!scope) return false;
   const key = docKey(section, scope);
@@ -161,6 +168,7 @@ export function restoreParkedSection(section: SectionKey, profileId?: string): b
 }
 
 export function startProfileSync(): () => void {
+  if (!legacyProfileSyncAllowed()) return stopProfileSync;
   if (started) return stopProfileSync;
   started = true;
   registerRosterSection();
