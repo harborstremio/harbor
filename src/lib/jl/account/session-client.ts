@@ -18,6 +18,8 @@ type TokenResponse = {
   user?: { id?: string; email?: string };
   error_description?: string;
   msg?: string;
+  /** The gateway's own errors ("Invalid API key") use this field. */
+  message?: string;
   code?: string;
   error_code?: string;
 };
@@ -198,7 +200,10 @@ export function createJlSessionClient(options: {
     const body = (await res.json().catch(() => ({}))) as TokenResponse;
     if (!res.ok)
       throw new AuthError(
-        body.error_description || body.msg || `JL account request failed (${res.status})`,
+        body.error_description ||
+          body.msg ||
+          body.message ||
+          `JL account request failed (${res.status})`,
         body.code ?? body.error_code,
       );
     return body;

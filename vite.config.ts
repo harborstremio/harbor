@@ -64,6 +64,27 @@ function checkJlAccountSettings() {
     );
   if (!key || /^https?:/i.test(key))
     throw new Error("VITE_JL_SUPABASE_ANON_KEY must be the accounts project's public (anon) key.");
+  // A legacy anon key is a token naming its project; it must be the same project as the address.
+  const project = /^https:\/\/([a-z0-9-]+)\./.exec(url)?.[1];
+  const keyProject = jwtRef(key);
+  if (keyProject && project && keyProject !== project)
+    throw new Error(
+      `VITE_JL_SUPABASE_ANON_KEY belongs to project "${keyProject}" but VITE_JL_SUPABASE_URL is project "${project}". Use the address and key of the same accounts project.`,
+    );
+}
+
+/** The project ref inside a Supabase JWT key, or null for other key formats. */
+function jwtRef(key: string): string | null {
+  const payload = key.split(".")[1];
+  if (!payload) return null;
+  try {
+    const json = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
+      ref?: unknown;
+    };
+    return typeof json.ref === "string" ? json.ref : null;
+  } catch {
+    return null;
+  }
 }
 
 export default defineConfig(({ mode, command }) => {

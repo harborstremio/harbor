@@ -15,6 +15,9 @@ function friendly(err: unknown, mode: Mode): string {
   if (/not configured/i.test(msg))
     return "JL accounts aren't set up in this build. Contact JL Media Vision support.";
   if (/timed out/i.test(msg)) return "The account service took too long to respond. Try again.";
+  // The build's account address and key belong to different projects; no password can work.
+  if (/invalid api key|no api key/i.test(msg))
+    return "This version's account settings don't match the account service. Contact JL Media Vision support.";
   if (/could not be saved/i.test(msg))
     return "Your account could not be saved on this device. Free some storage and try again.";
   if (/account changed/i.test(msg))
