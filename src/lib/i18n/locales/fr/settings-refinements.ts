@@ -520,6 +520,10 @@ const settingsRefinements: Record<string, string> = {
   "Please include artist credit if you intend to reuse these.": "Veuillez créditer l'artiste si vous souhaitez réutiliser ces créations.",
   "The settings sidebar uses a separate icon set, not drawn by Abiyyu.": "La barre latérale des paramètres utilise un jeu d'icônes distinct, qui n'a pas été dessiné par Abiyyu.",
   "Controller button glyphs:": "Symboles des boutons de manette :",
+  "Previous season": "Saison précédente",
+  "Next season": "Saison suivante",
+  "Jump to the next unwatched episode": "Aller au prochain épisode non vu",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Fait défiler la liste jusqu'au premier épisode non vu quand vous ouvrez une série ou changez de saison.",
 };
 
 export default settingsRefinements;

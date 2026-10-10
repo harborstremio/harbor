@@ -46,6 +46,8 @@ function harness(layout: "list" | "grid" | "strip", videos: NonNullable<Meta["vi
     "./episode-grid-card": { EpisodeGridCard: "EpisodeGridCard" },
     "./episode-layout-toggle": { EpisodeLayoutToggle: "EpisodeLayoutToggle" },
     "./helpers": { isUpcomingDate: () => false },
+    "./season-stepper": { SeasonStepper: "SeasonStepper" },
+    "./use-episode-auto-scroll": { useEpisodeAutoScroll: () => () => {} },
     "./episode-groups": groups,
   };
   const exports: Record<string, any> = {};

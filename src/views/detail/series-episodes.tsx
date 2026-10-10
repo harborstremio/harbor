@@ -45,6 +45,8 @@ import { useEpisodeProgressMap } from "./series-episodes/use-episode-progress-ma
 import { useTvdbSeasonTypes } from "./series-episodes/use-tvdb-season-types";
 import { useSeriesTvdbStills } from "./series-episodes/use-series-tvdb-stills";
 import { TvdbOrderPanel } from "./series-episodes/tvdb-order-panel";
+import { SeasonStepper, pickerStepKeys } from "./season-stepper";
+import { useEpisodeAutoScroll, type AutoScrollTarget } from "./use-episode-auto-scroll";
 
 export function SeriesEpisodes({
   meta,
@@ -319,14 +321,22 @@ export function SeriesEpisodes({
   const activeSeason = seasons.find((s) => s.seasonNumber === active);
 
   useEffect(() => {
-    if (scrolledRef.current) return;
+    if (settings.episodeAutoScroll || scrolledRef.current) return;
     if (resumeEpisode == null || resumeSeason == null || active !== resumeSeason) return;
     if (loading || enrichedEpisodes.length === 0) return;
     scrolledRef.current = true;
     scrollToDataEp(scrollRef.current, resumeEpisode, { center: true });
-  }, [resumeEpisode, resumeSeason, active, loading, enrichedEpisodes.length, scrollRef]);
+  }, [
+    settings.episodeAutoScroll,
+    resumeEpisode,
+    resumeSeason,
+    active,
+    loading,
+    enrichedEpisodes.length,
+    scrollRef,
+  ]);
 
-  const { progressByEp, spoilerFor, allWatched } = useEpisodeProgressMap({
+  const { progressByEp, nextUpEp, spoilerFor, allWatched } = useEpisodeProgressMap({
     episodes: enrichedEpisodes,
     metaId: meta.id,
     traktKey,
@@ -336,6 +346,49 @@ export function SeriesEpisodes({
     mwVersion,
     settings,
   });
+  const autoScrollTarget = useMemo<AutoScrollTarget>(() => {
+    const list = altActive ? visibleOrderedEps : visibleEpisodes;
+    const idx = list.findIndex((ep) =>
+      altActive
+        ? !getEpisodeProgress(
+            meta.id,
+            ep.seasonNumber,
+            ep.episodeNumber,
+            ep.runtime,
+            traktKey,
+            traktWatched,
+            stremioWatched,
+            undefined,
+            simklWatched,
+          ).watched
+        : ep.episodeNumber === nextUpEp,
+    );
+    if (idx < 0) return null;
+    return { episode: list[idx].episodeNumber, first: idx === 0 };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    altActive,
+    visibleOrderedEps,
+    visibleEpisodes,
+    nextUpEp,
+    meta.id,
+    traktKey,
+    traktWatched,
+    stremioWatched,
+    simklWatched,
+    mwVersion,
+  ]);
+  const markPicked = useEpisodeAutoScroll({
+    scrollRef,
+    scopeKey: meta.id,
+    seasonKey: altActive ? `${source}:${picker.activeKey}` : String(active),
+    target: autoScrollTarget,
+    ready: altActive ? !orderedLoading && visibleOrderedEps.length > 0 : !loading && visibleEpisodes.length > 0,
+  });
+  const selectSeason = (key: string) => {
+    markPicked();
+    picker.onSelect(key);
+  };
   const markSeason = useMarkSeason({ meta, active, enrichedEpisodes, simklConnected });
   const downloadEpisodes = useMemo(
     () =>
@@ -398,23 +451,35 @@ export function SeriesEpisodes({
             }}
           />
           {panelActive ? (
-            <TvdbOrderPanel
-              items={picker.items}
+            <SeasonStepper
+              keys={pickerStepKeys(picker.items)}
               activeKey={picker.activeKey}
-              onSelect={picker.onSelect}
-              orderTypes={orderTypesEff}
-              activeType={settings.tvdbSeasonType}
-              onSelectType={(v) => update({ tvdbSeasonType: v as typeof settings.tvdbSeasonType })}
-            />
-          ) : (
-            (picker.items.length > 1 || arcAvailable) && (
-              <SeasonArcPicker
+              onSelect={selectSeason}
+            >
+              <TvdbOrderPanel
                 items={picker.items}
                 activeKey={picker.activeKey}
-                onSelect={picker.onSelect}
-                mode={arcAvailable ? mode : undefined}
-                onModeChange={arcAvailable ? setMode : undefined}
+                onSelect={selectSeason}
+                orderTypes={orderTypesEff}
+                activeType={settings.tvdbSeasonType}
+                onSelectType={(v) => update({ tvdbSeasonType: v as typeof settings.tvdbSeasonType })}
               />
+            </SeasonStepper>
+          ) : (
+            (picker.items.length > 1 || arcAvailable) && (
+              <SeasonStepper
+                keys={pickerStepKeys(picker.items)}
+                activeKey={picker.activeKey}
+                onSelect={selectSeason}
+              >
+                <SeasonArcPicker
+                  items={picker.items}
+                  activeKey={picker.activeKey}
+                  onSelect={selectSeason}
+                  mode={arcAvailable ? mode : undefined}
+                  onModeChange={arcAvailable ? setMode : undefined}
+                />
+              </SeasonStepper>
             )
           )}
         </div>

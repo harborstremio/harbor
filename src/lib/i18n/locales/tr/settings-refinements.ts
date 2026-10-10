@@ -520,6 +520,10 @@ const settingsRefinements: Record<string, string> = {
   "Please include artist credit if you intend to reuse these.": "Bu çalışmaları yeniden kullanmayı düşünüyorsanız lütfen sanatçının adını belirtin.",
   "The settings sidebar uses a separate icon set, not drawn by Abiyyu.": "Ayarlar kenar çubuğu, Abiyyu tarafından çizilmemiş ayrı bir simge seti kullanır.",
   "Controller button glyphs:": "Kontrolcü düğme simgeleri:",
+  "Previous season": "Önceki sezon",
+  "Next season": "Sonraki sezon",
+  "Jump to the next unwatched episode": "Sıradaki izlenmemiş bölüme git",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Bir dizi açtığınızda veya sezon değiştirdiğinizde listeyi izlemediğiniz ilk bölüme kaydırır.",
 };
 
 export default settingsRefinements;

@@ -520,6 +520,10 @@ const settingsRefinements: Record<string, string> = {
   "Please include artist credit if you intend to reuse these.": "如果您打算重复使用这些作品，请注明艺术家。",
   "The settings sidebar uses a separate icon set, not drawn by Abiyyu.": "设置侧边栏使用独立的图标集，并非由 Abiyyu 绘制。",
   "Controller button glyphs:": "控制器按钮图标：",
+  "Previous season": "上一季",
+  "Next season": "下一季",
+  "Jump to the next unwatched episode": "跳到下一集未看剧集",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "打开剧集或切换季时，将剧集列表滚动到第一集未看的剧集。",
 };
 
 export default settingsRefinements;

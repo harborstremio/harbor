@@ -8160,6 +8160,21 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
+    label: "Jump to the next unwatched episode",
+    section: "library",
+    tab: "detail",
+    anchorTitle: "Episode cards",
+    keywords: [
+      "scroll to episode",
+      "first unwatched",
+      "next up",
+      "auto scroll",
+      "jump to episode",
+      "where i left off",
+      "season change scroll",
+    ],
+  },
+  {
     label: "Hide and skip episodes",
     section: "library",
     tab: "detail",

@@ -22,6 +22,8 @@ import { EpisodeGridCard } from "./episode-grid-card";
 import type { GridEpisode, Progress } from "./episode-grid-types";
 import { EpisodeLayoutToggle } from "./episode-layout-toggle";
 import { isUpcomingDate } from "./helpers";
+import { SeasonStepper } from "./season-stepper";
+import { useEpisodeAutoScroll, type AutoScrollTarget } from "./use-episode-auto-scroll";
 import {
   episodeNumber,
   episodeSeason,
@@ -37,11 +39,13 @@ export function CinemetaEpisodes({
   videos,
   stremioWatched,
   resumeSeason,
+  scrollRef,
 }: {
   meta: Meta;
   videos: NonNullable<Meta["videos"]>;
   stremioWatched?: Set<string>;
   resumeSeason?: number;
+  scrollRef: React.RefObject<HTMLElement | null>;
 }) {
   const t = useT();
   const { settings, update } = useSettings();
@@ -109,6 +113,28 @@ export function CinemetaEpisodes({
     return st === true || (st === undefined && (stremioWatched?.has(`${season}:${number}`) ?? false));
   };
 
+  const autoScrollTarget = useMemo<AutoScrollTarget>(() => {
+    const idx = activeEps.findIndex(
+      (ep, i) => !watchedAt(episodeSeason(ep), episodeNumber(ep, i)),
+    );
+    if (idx < 0) return null;
+    return { episode: episodeNumber(activeEps[idx], idx), first: idx === 0 };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeEps, meta.id, stremioWatched, mwVersion]);
+  const markPicked = useEpisodeAutoScroll({
+    scrollRef,
+    scopeKey: meta.id,
+    seasonKey: String(active),
+    target: autoScrollTarget,
+    ready: activeEps.length > 0,
+  });
+  const selectSeason = (n: number) => {
+    markPicked();
+    userPickedRef.current = true;
+    setActive(n);
+  };
+  const seasonNumbers = grouped.map((g) => g.seasonNumber);
+
   const progressFor = (g: GridEpisode): Progress => ({
     ratio: 0,
     watched: watchedAt(g.season, g.number),
@@ -173,14 +199,13 @@ export function CinemetaEpisodes({
         <h3 className="text-[22px] font-medium tracking-tight text-ink">{t("Episodes")}</h3>
         <div className="flex items-center gap-3">
           {grouped.length > 1 && (
-            <SeasonDropdown
-              seasons={grouped.map((g) => g.seasonNumber)}
-              active={active}
-              onChange={(n) => {
-                userPickedRef.current = true;
-                setActive(n);
-              }}
-            />
+            <SeasonStepper
+              keys={seasonNumbers.filter((n) => n > 0).map(String)}
+              activeKey={String(active)}
+              onSelect={(k) => selectSeason(Number(k))}
+            >
+              <SeasonDropdown seasons={seasonNumbers} active={active} onChange={selectSeason} />
+            </SeasonStepper>
           )}
           <EpisodeLayoutToggle
             value={settings.episodeLayout}
@@ -286,6 +311,7 @@ export function CinemetaEpisodeRow({
   };
   return (
     <div
+      data-ep={epNumber}
       data-no-card-ring
       onContextMenu={onContextMenu ? (e) => onContextMenu(e, season, epNumber, watched) : undefined}
       className="group flex items-center gap-4 rounded-lg px-4 py-5 transition-colors hover:bg-elevated/30"

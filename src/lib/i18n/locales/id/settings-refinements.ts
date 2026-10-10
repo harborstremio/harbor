@@ -520,6 +520,10 @@ const settingsRefinements: Record<string, string> = {
   "Please include artist credit if you intend to reuse these.": "Harap cantumkan kredit seniman jika ingin menggunakan kembali karya ini.",
   "The settings sidebar uses a separate icon set, not drawn by Abiyyu.": "Bilah samping pengaturan menggunakan set ikon terpisah yang tidak digambar oleh Abiyyu.",
   "Controller button glyphs:": "Simbol tombol pengontrol:",
+  "Previous season": "Musim sebelumnya",
+  "Next season": "Musim berikutnya",
+  "Jump to the next unwatched episode": "Lompat ke episode berikutnya yang belum ditonton",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Gulir daftar episode ke episode pertama yang belum Anda tonton saat membuka acara atau mengganti musim.",
 };
 
 export default settingsRefinements;

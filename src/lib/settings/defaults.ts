@@ -146,6 +146,7 @@ export const DEFAULT: Settings = {
   episodeLayout: "list",
   episodeCardScale: 1,
   episodeSort: "oldest",
+  episodeAutoScroll: true,
   showEpisodeRating: true,
   showEpisodeDescription: true,
   episodeHiding: false,

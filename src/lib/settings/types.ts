@@ -228,6 +228,7 @@ export type Settings = {
   episodeLayout: "list" | "strip" | "grid";
   episodeCardScale: number;
   episodeSort: "oldest" | "newest";
+  episodeAutoScroll: boolean;
   showEpisodeRating: boolean;
   showEpisodeDescription: boolean;
   episodeHiding: boolean;

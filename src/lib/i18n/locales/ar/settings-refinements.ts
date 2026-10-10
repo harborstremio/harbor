@@ -796,6 +796,10 @@ const settingsRefinements: Record<string, string> = {
   GIF: "GIF",
   "{kind} · In use": "{kind} · قيد الاستخدام",
   Use: "استخدام",
+  "Previous season": "الموسم السابق",
+  "Next season": "الموسم التالي",
+  "Jump to the next unwatched episode": "الانتقال إلى الحلقة التالية غير المشاهدة",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "مرّر قائمة الحلقات إلى أول حلقة لم تشاهدها عند فتح مسلسل أو تغيير الموسم.",
 };
 
 export default settingsRefinements;

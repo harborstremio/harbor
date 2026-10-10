@@ -520,6 +520,10 @@ const settingsRefinements: Record<string, string> = {
   "Please include artist credit if you intend to reuse these.": "Если вы планируете использовать эти работы, пожалуйста, укажите автора.",
   "The settings sidebar uses a separate icon set, not drawn by Abiyyu.": "В боковой панели настроек используется отдельный набор значков, нарисованный не Abiyyu.",
   "Controller button glyphs:": "Символы кнопок контроллера:",
+  "Previous season": "Предыдущий сезон",
+  "Next season": "Следующий сезон",
+  "Jump to the next unwatched episode": "Переходить к следующему непросмотренному эпизоду",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Прокручивать список к первому непросмотренному эпизоду при открытии сериала или смене сезона.",
 };
 
 export default settingsRefinements;

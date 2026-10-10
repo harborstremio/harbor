@@ -520,6 +520,10 @@ const settingsRefinements: Record<string, string> = {
   "Please include artist credit if you intend to reuse these.": "Vui lòng ghi tên nghệ sĩ nếu bạn định sử dụng lại các tác phẩm này.",
   "The settings sidebar uses a separate icon set, not drawn by Abiyyu.": "Thanh bên cài đặt sử dụng một bộ biểu tượng riêng, không do Abiyyu vẽ.",
   "Controller button glyphs:": "Ký hiệu nút tay cầm:",
+  "Previous season": "Mùa trước",
+  "Next season": "Mùa sau",
+  "Jump to the next unwatched episode": "Nhảy tới tập chưa xem tiếp theo",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Cuộn danh sách tập tới tập đầu tiên bạn chưa xem khi mở một chương trình hoặc đổi mùa.",
 };
 
 export default settingsRefinements;
