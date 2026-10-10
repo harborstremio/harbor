@@ -8,7 +8,7 @@ import { useT } from "@/lib/i18n";
 import { AddToListMenu } from "@/components/lists/add-to-list-menu";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import type { ListItemInput } from "@/lib/custom-lists";
-import { AnilistMenuItems, SimklMenuItems, TraktMenuItems } from "./overflow-sync-items";
+import { AnilistMenuItems, PmdbMenuItems, SimklMenuItems, TraktMenuItems } from "./overflow-sync-items";
 import { UiIcon } from "@/components/ui-icon";
 
 const CIRCLES_SAVED_ESTIMATE = 132;
@@ -73,6 +73,7 @@ export function HeroActionOverflow({
   listItem = null,
   simkl = null,
   anilist = null,
+  pmdb = null,
 }: {
   meta: Meta;
   isFav: boolean;
@@ -89,6 +90,7 @@ export function HeroActionOverflow({
   listItem?: ListItemInput | null;
   simkl?: { harborId: string; type: "movie" | "series" } | null;
   anilist?: { harborId: string } | null;
+  pmdb?: { harborId: string; type: "movie" | "series" } | null;
 }) {
   const t = useT();
   const { openPicker } = useView();
@@ -177,6 +179,13 @@ export function HeroActionOverflow({
                 )}
                 {anilist && (
                   <AnilistMenuItems harborId={anilist.harborId} onAction={() => setMenu(null)} />
+                )}
+                {pmdb && (
+                  <PmdbMenuItems
+                    harborId={pmdb.harborId}
+                    type={pmdb.type}
+                    onAction={() => setMenu(null)}
+                  />
                 )}
                 <TraktMenuItems
                   harborId={meta.id}

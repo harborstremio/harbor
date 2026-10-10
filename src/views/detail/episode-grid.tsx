@@ -25,6 +25,7 @@ export function EpisodeGrid({
     episode: number,
     watched: boolean,
     sourceMetaId?: string,
+    absoluteNumber?: number,
   ) => void;
 }) {
   const { settings } = useSettings();

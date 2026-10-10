@@ -16,6 +16,7 @@ export function useAnimeProgressMap({
   traktWatched,
   anilistWatched,
   malWatched,
+  pmdbWatched,
   entrySourceId,
   entryAnilistWatched,
   entryMalWatched,
@@ -29,6 +30,7 @@ export function useAnimeProgressMap({
   traktWatched: Set<string>;
   anilistWatched?: Set<string>;
   malWatched?: Set<string>;
+  pmdbWatched?: Set<string>;
   entrySourceId?: string | null;
   entryAnilistWatched?: Set<string>;
   entryMalWatched?: Set<string>;
@@ -55,6 +57,8 @@ export function useAnimeProgressMap({
         isCurrent ? malWatched : isEntry ? entryMalWatched : undefined,
         ep.imdbSeason,
         ep.imdbEpisode,
+        pmdbWatched,
+        ep.absoluteNumber,
       );
       if (
         isCurrent &&
@@ -76,6 +80,8 @@ export function useAnimeProgressMap({
           malWatched,
           ep.imdbSeason,
           ep.imdbEpisode,
+          pmdbWatched,
+          ep.absoluteNumber,
         );
         if (alt.watched || alt.ratio > prog.ratio) prog = alt;
       }
@@ -92,6 +98,7 @@ export function useAnimeProgressMap({
     traktWatched,
     anilistWatched,
     malWatched,
+    pmdbWatched,
     entrySourceId,
     entryAnilistWatched,
     entryMalWatched,

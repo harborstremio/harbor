@@ -286,6 +286,14 @@ export function HomeTab() {
                 : undefined
             }
           />
+          <ToggleRow
+            label={t("PublicMetaDB progress")}
+            sub={t(
+              "Pulls what you have part-watched on PublicMetaDB into the row, marked with the PublicMetaDB logo. Requires a connected PublicMetaDB account.",
+            )}
+            value={settings.cwSources.publicmetadb}
+            onChange={(v) => update({ cwSources: { ...settings.cwSources, publicmetadb: v } })}
+          />
         </SettingGroup>
 
         <SettingGroup label={t("Navigation")}>

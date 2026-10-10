@@ -40,6 +40,7 @@ export function AnimeEpisodeRow({
     episode: number,
     watched: boolean,
     sourceMetaId?: string,
+    absoluteNumber?: number,
   ) => void;
   metaForEp?: (ep: KitsuEpisode) => Meta;
   showSeason?: boolean;
@@ -70,7 +71,7 @@ export function AnimeEpisodeRow({
       data-no-card-ring
       style={{ contentVisibility: "auto", containIntrinsicSize: "auto 160px" }}
       onContextMenu={(e) =>
-        onContextMenu?.(e, animeSeasonKey(ep), ep.number, progress.watched, ep.sourceMetaId)
+        onContextMenu?.(e, animeSeasonKey(ep), ep.number, progress.watched, ep.sourceMetaId, ep.absoluteNumber)
       }
       className="group flex gap-6 rounded-lg px-4 py-5 transition-colors hover:bg-elevated/30"
     >

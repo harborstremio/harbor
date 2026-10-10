@@ -46,6 +46,10 @@ export function resolveEffectiveEpisode(
   if (mixed) {
     return { season: mixed.season, episode: mixed.episode, remappedMixed: true };
   }
+  const absoluteExact = list.find((e) => e.absoluteNumber === episode);
+  if (absoluteExact) {
+    return { season: absoluteExact.season, episode: absoluteExact.episode, remappedMixed: true };
+  }
   return { season, episode, remappedMixed: false };
 }
 

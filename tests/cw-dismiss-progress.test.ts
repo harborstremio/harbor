@@ -263,9 +263,11 @@ test("external backfills preserve dismissals and save true remote progress only 
 
 test("source toggles preserve the shared-profile protection on desktop and mobile", () => {
   for (const path of ["src/views/home.tsx", "src/views/mobile/mobile-cw-row.tsx"]) {
+    const source = read(path);
+    assert.match(source, /!hideSharedCw/);
     assert.match(
-      read(path),
-      /!hideSharedCw && \(settings\.cwSources\.trakt \|\| settings\.cwSources\.simkl\)/,
+      source,
+      /settings\.cwSources\.trakt \|\| settings\.cwSources\.simkl \|\| settings\.cwSources\.publicmetadb/,
     );
   }
 });

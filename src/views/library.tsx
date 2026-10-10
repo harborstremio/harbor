@@ -14,11 +14,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import traktLogo from "@/assets/trakt.svg";
 import anilistLogo from "@/assets/anilist.png";
 import simklLogo from "@/assets/simkl.png";
+import publicmetadbLogo from "@/assets/publicmetadb.svg";
 import letterboxdLogo from "@/assets/addon-logos/letterboxd.png";
 import { MalLogo } from "@/components/icons/mal-logo";
 import { useAnilist } from "@/lib/anilist/provider";
 import { useMal } from "@/lib/mal/provider";
 import { useSimkl } from "@/lib/simkl/provider";
+import { usePublicMetaDb } from "@/lib/publicmetadb/provider";
 import { useTrakt } from "@/lib/trakt/provider";
 import { useScrollMemory, useView } from "@/lib/view";
 import { useSettings } from "@/lib/settings";
@@ -34,6 +36,7 @@ import { MyListsTab } from "./library/my-lists-tab";
 import { FavoritesTab } from "./library/favorites-tab";
 import { TabBtn, type Tab } from "./library/shared";
 import { SimklTab } from "./library/simkl-tab";
+import { PublicMetaDbTab } from "./library/publicmetadb-tab";
 import { TraktTab } from "./library/trakt-tab";
 import { WatchlistTab } from "./library/watchlist-tab";
 import { LetterboxdTab } from "./library/letterboxd-tab";
@@ -67,6 +70,7 @@ function readSavedTab(): Tab {
       v === "trakt" ||
       v === "anilist" ||
       v === "simkl" ||
+      v === "publicmetadb" ||
       v === "letterboxd" ||
       v === "mal"
     )
@@ -82,6 +86,7 @@ export function LibraryView({ active }: { active: boolean }) {
   const { isConnected: anilistConnected } = useAnilist();
   const { isConnected: malConnected } = useMal();
   const { isConnected: simklConnected } = useSimkl();
+  const { isConnected: pmdbConnected } = usePublicMetaDb();
   const lb = useLetterboxd();
   const scrollRef = useRef<HTMLElement>(null);
   useScrollMemory("library", scrollRef, active);
@@ -104,6 +109,10 @@ export function LibraryView({ active }: { active: boolean }) {
   useEffect(() => {
     if (tab === "simkl" && !simklConnected) setTab("library");
   }, [tab, simklConnected]);
+
+  useEffect(() => {
+    if (tab === "publicmetadb" && !pmdbConnected) setTab("library");
+  }, [tab, pmdbConnected]);
 
   useEffect(() => {
     if (tab === "letterboxd" && !lb.isActive) setTab("library");
@@ -149,6 +158,7 @@ export function LibraryView({ active }: { active: boolean }) {
             anilistConnected={anilistConnected}
             malConnected={malConnected}
             simklConnected={simklConnected}
+            pmdbConnected={pmdbConnected}
             lbConnected={lb.isActive}
           />
           {tab === "library" && <WatchlistTab mode="library" scrollRef={scrollRef} />}
@@ -161,6 +171,7 @@ export function LibraryView({ active }: { active: boolean }) {
           {tab === "trakt" && traktConnected && <TraktTab />}
           {tab === "anilist" && anilistConnected && <AnilistTab />}
           {tab === "simkl" && simklConnected && <SimklTab />}
+          {tab === "publicmetadb" && pmdbConnected && <PublicMetaDbTab />}
           {tab === "letterboxd" && lb.isActive && <LetterboxdTab />}
           {tab === "mal" && malConnected && <MalTab />}
         </div>
@@ -191,6 +202,7 @@ function Header({
   anilistConnected,
   malConnected,
   simklConnected,
+  pmdbConnected,
   lbConnected,
 }: {
   tab: Tab;
@@ -199,6 +211,7 @@ function Header({
   anilistConnected: boolean;
   malConnected: boolean;
   simklConnected: boolean;
+  pmdbConnected: boolean;
   lbConnected: boolean;
 }) {
   const t = useT();
@@ -299,6 +312,16 @@ function Header({
           <TabBtn active={tab === "simkl"} onClick={() => onTab("simkl")}>
             <img src={simklLogo} alt="" className="h-3.5 w-3.5 object-contain" />
             Simkl
+          </TabBtn>
+        )}
+        {pmdbConnected && (
+          <TabBtn active={tab === "publicmetadb"} onClick={() => onTab("publicmetadb")}>
+            <img
+              src={publicmetadbLogo}
+              alt=""
+              className="h-3.5 w-3.5 rounded-[3px] object-contain"
+            />
+            PMDB
           </TabBtn>
         )}
         {lbConnected && (

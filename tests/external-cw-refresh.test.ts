@@ -23,14 +23,16 @@ function fixture() {
   const providers = {
     simkl: async (): Promise<LibraryItem[]> => [],
     trakt: async (): Promise<LibraryItem[]> => [],
+    pmdb: async (): Promise<LibraryItem[]> => [],
   };
-  const connected = { simkl: true, trakt: true };
-  const sessions = { simkl: {}, trakt: {} };
+  const connected = { simkl: true, trakt: true, pmdb: true };
+  const sessions = { simkl: {}, trakt: {}, pmdb: {} };
   const detectionBatches: LibraryItem[][] = [];
   const mocks: Record<string, unknown> = {
     react: {},
     "@/lib/simkl/playback": { fetchSimklPlaybackItems: () => providers.simkl() },
     "@/lib/trakt/playback": { fetchTraktPlaybackItems: () => providers.trakt() },
+    "@/lib/publicmetadb/playback": { fetchPublicMetaDbPlaybackItems: () => providers.pmdb() },
     "@/lib/simkl/session": {
       getSession: () => (connected.simkl ? sessions.simkl : null),
       subscribeSession: (fn: () => void) => {
@@ -41,6 +43,12 @@ function fixture() {
       getSession: () => (connected.trakt ? sessions.trakt : null),
       subscribeSession: (fn: () => void) => {
         listeners.trakt = fn;
+      },
+    },
+    "@/lib/publicmetadb/session": {
+      getSession: () => (connected.pmdb ? sessions.pmdb : null),
+      subscribeSession: (fn: () => void) => {
+        listeners.pmdb = fn;
       },
     },
     "@/lib/stremio": { episodeFromVideoId: () => null },

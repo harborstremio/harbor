@@ -97,7 +97,8 @@ export function useMobileCw(limit = 14): LibraryItem[] {
     settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
   const hideAnime = useHideAnime();
   const externalCw = useExternalCw(
-    !hideSharedCw && (settings.cwSources.trakt || settings.cwSources.simkl),
+    !hideSharedCw &&
+      (settings.cwSources.trakt || settings.cwSources.simkl || settings.cwSources.publicmetadb),
   );
   const [items, setItems] = useState<LibraryItem[]>(() =>
     authKey && cloudKey === authKey ? cloudCache : [],

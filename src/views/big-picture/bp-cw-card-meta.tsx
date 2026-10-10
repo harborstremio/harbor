@@ -3,6 +3,7 @@ import { Check, Clock } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
+import publicmetadbLogo from "@/assets/publicmetadb.svg";
 import { getAnimeCwId } from "@/lib/anime-cw-ids";
 import type { Meta } from "@/lib/cinemeta";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
@@ -353,7 +354,7 @@ export function BpCwCardPill({
     <span data-bp-cw-pill className={PILL}>
       {external ? (
         <img
-          src={external === "trakt" ? traktLogo : simklLogo}
+          src={external === "trakt" ? traktLogo : external === "publicmetadb" ? publicmetadbLogo : simklLogo}
           alt=""
           className="h-[1.15em] w-[1.15em] shrink-0 rounded-[3px]"
         />

@@ -11,6 +11,7 @@ export function useEpisodeProgressMap({
   traktWatched,
   stremioWatched,
   simklWatched,
+  pmdbWatched,
   mwVersion,
   settings,
 }: {
@@ -20,6 +21,7 @@ export function useEpisodeProgressMap({
   traktWatched: Set<string>;
   stremioWatched?: Set<string>;
   simklWatched?: Set<string>;
+  pmdbWatched?: Set<string>;
   mwVersion: number;
   settings: Parameters<typeof spoilerMaskFor>[0];
 }) {
@@ -38,11 +40,15 @@ export function useEpisodeProgressMap({
           stremioWatched,
           undefined,
           simklWatched,
+          undefined,
+          undefined,
+          undefined,
+          pmdbWatched,
         ),
       );
     }
     return m;
-  }, [episodes, metaId, traktKey, traktWatched, stremioWatched, simklWatched, mwVersion]);
+  }, [episodes, metaId, traktKey, traktWatched, stremioWatched, simklWatched, pmdbWatched, mwVersion]);
 
   const nextUpEp = useMemo(() => {
     for (const ep of episodes) {

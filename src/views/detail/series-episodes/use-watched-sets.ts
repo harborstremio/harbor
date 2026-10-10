@@ -1,20 +1,25 @@
 import { useEffect, useState } from "react";
 import { loadSimklWatchedMap, simklWatchedForId } from "@/lib/simkl/list-status";
 import { fetchWatchedKeySet } from "@/lib/trakt/history";
+import { fetchPmdbWatchedKeySet } from "@/lib/publicmetadb/history";
+import { stremioIdToPmdbTarget } from "@/lib/publicmetadb/ids";
 
 export function useWatchedSets({
   traktConnected,
   simklConnected,
+  pmdbConnected,
   imdbId,
   metaId,
 }: {
   traktConnected: boolean;
   simklConnected: boolean;
+  pmdbConnected?: boolean;
   imdbId: string | null;
   metaId: string;
-}): { traktWatched: Set<string>; simklWatched: Set<string> } {
+}): { traktWatched: Set<string>; simklWatched: Set<string>; pmdbWatched: Set<string> } {
   const [traktWatched, setTraktWatched] = useState<Set<string>>(() => new Set());
   const [simklWatched, setSimklWatched] = useState<Set<string>>(() => new Set());
+  const [pmdbWatched, setPmdbWatched] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     if (!traktConnected) {
@@ -48,5 +53,22 @@ export function useWatchedSets({
     };
   }, [simklConnected, imdbId, metaId]);
 
-  return { traktWatched, simklWatched };
+  useEffect(() => {
+    if (!pmdbConnected) {
+      setPmdbWatched(new Set());
+      return;
+    }
+    let cancelled = false;
+    const target = stremioIdToPmdbTarget(metaId, undefined, "series");
+    fetchPmdbWatchedKeySet(target ?? undefined)
+      .then((set) => {
+        if (!cancelled) setPmdbWatched(set);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [pmdbConnected, metaId]);
+
+  return { traktWatched, simklWatched, pmdbWatched };
 }
