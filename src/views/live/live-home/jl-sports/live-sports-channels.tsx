@@ -65,15 +65,7 @@ const isChip = (v: string) =>
  * grouped by sport with the guide's now/next. Separate from Live TV; playback goes through the
  * same player path (onPlay), and a channel matched to a game remembers it for the live field.
  */
-export function LiveSportsChannels({
-  active,
-  channels,
-  activeSourceId,
-  epg,
-  nowMs,
-  games,
-  onPlay,
-}: {
+export type LiveSportsChannelsParams = {
   active: boolean;
   /** The active provider's channels, as Live TV shows them (hidden groups removed). */
   channels: IptvChannel[];
@@ -83,8 +75,27 @@ export function LiveSportsChannels({
   /** Hub games with their matched channels, so playing one of them can offer the live field. */
   games: JlHubGame[];
   onPlay: (channel: IptvChannel) => void;
-}) {
-  const t = useT();
+};
+
+export type LiveSportsChannelsData = ReturnType<typeof useLiveSportsChannels>;
+
+export function LiveSportsChannels(props: LiveSportsChannelsParams) {
+  return <LiveSportsChannelsView data={useLiveSportsChannels(props)} />;
+}
+
+/**
+ * The viewer's sports channels across every provider, classified by sport with the guide's
+ * now/next. Computed once per page and shared by the photo cards and the full section.
+ */
+export function useLiveSportsChannels({
+  active,
+  channels,
+  activeSourceId,
+  epg,
+  nowMs,
+  games,
+  onPlay,
+}: LiveSportsChannelsParams) {
   const favorites = useFavorites();
   const epgMapVersion = useEpgMapVersion();
 
@@ -168,6 +179,22 @@ export function LiveSportsChannels({
       for (const c of g.channels) if (!m.has(c.channel.id)) m.set(c.channel.id, g.game);
     return m;
   }, [games]);
+  const rows = useMemo(() => sportsChannelRows(entries), [entries]);
+
+  const play = useCallback(
+    (ch: IptvChannel) => {
+      const game = gameByChannel.get(ch.id);
+      if (game) setWatchingGame(ch.id, game);
+      onPlay(ch);
+    },
+    [gameByChannel, onPlay],
+  );
+  return { entries, rows, nowNext, sourceNames, gameByChannel, play, epg, nowMs };
+}
+
+export function LiveSportsChannelsView({ data }: { data: LiveSportsChannelsData }) {
+  const t = useT();
+  const { entries, rows, nowNext, sourceNames, play, epg, nowMs } = data;
 
   const [chip, setChipState] = useState<SportsChip>(() =>
     readPref<SportsChip>(CHIP_KEY, "all", isChip),
@@ -199,13 +226,6 @@ export function LiveSportsChannels({
       }),
     [entries, chip, query, nowNext],
   );
-  const rows = useMemo(() => sportsChannelRows(entries), [entries]);
-
-  const play = (ch: IptvChannel) => {
-    const game = gameByChannel.get(ch.id);
-    if (game) setWatchingGame(ch.id, game);
-    onPlay(ch);
-  };
   const activate = (e: LiveSportsEntry) => {
     if (e.channels.length > 1) setChoosing(e);
     else play(e.channels[0]);
@@ -595,7 +615,7 @@ function ChannelCard({
 }
 
 /** The same channel on several providers or feeds: pick one. Nothing plays until you do. */
-function SourceChooser({
+export function SourceChooser({
   entry,
   nowNext,
   sourceNames,

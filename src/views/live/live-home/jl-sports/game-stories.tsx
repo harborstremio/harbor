@@ -1,11 +1,13 @@
-import { ChevronLeft, ChevronRight, Info, Play, Star, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, Play, X } from "lucide-react";
 import {
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
@@ -16,14 +18,20 @@ import {
   type StorySlide,
   type StorySummary,
 } from "@/lib/jl/sports/game-story";
+import { artKey, curatedArtSlot, useCuratedArtVersion } from "@/lib/jl/sports/curated-art";
+import { stableIndex } from "@/lib/jl/sports/fanart";
+import { isFollowing, useJlSportsFavorites } from "@/lib/jl/sports/favorites";
 import { isFavoriteGame, type JlFavoriteTeam } from "@/lib/jl/sports/rank";
+import { teamLook } from "@/lib/jl/sports/team-look";
 import { isCurrentLiveGame } from "@/lib/jl/sports/presentation";
 import { useSportsSessionScope } from "@/lib/jl/sports/session-scope";
 import { fetchStorySummary } from "@/lib/jl/sports/story-feed";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import type { GameChannel } from "@/lib/jl/sports/channels";
+import { TeamMark } from "./game-backdrop";
 import { statusText } from "./jl-sports-hub";
 import type { JlHubGame } from "./use-jl-sports";
+import { useTeamArt } from "./use-sports-extras";
 
 const ADVANCE_MS = 8000;
 const LIVE_REFRESH_MS = 20_000;
@@ -31,6 +39,41 @@ const LIVE_REFRESH_MS = 20_000;
 // Games that were in the Top 10 at any point this session keep their story after the final.
 const seenTopKeys = new Set<string>();
 let seenTopScope = "";
+
+// Stories opened this session lose their highlight ring, as on a phone's stories row.
+const SEEN_KEY = "jl.sports.storiesSeen.v1";
+let seenStories: ReadonlySet<string> = (() => {
+  try {
+    const raw = sessionStorage.getItem(SEEN_KEY);
+    const list = raw ? (JSON.parse(raw) as unknown) : null;
+    return new Set(Array.isArray(list) ? list.filter((k) => typeof k === "string") : []);
+  } catch {
+    return new Set<string>();
+  }
+})();
+const seenListeners = new Set<() => void>();
+function markStorySeen(key: string): void {
+  if (seenStories.has(key)) return;
+  seenStories = new Set([...seenStories, key]);
+  try {
+    sessionStorage.setItem(SEEN_KEY, JSON.stringify([...seenStories].slice(-200)));
+  } catch {
+    /* the memory copy still works */
+  }
+  for (const fn of seenListeners) fn();
+}
+function useSeenStories(): ReadonlySet<string> {
+  return useSyncExternalStore(
+    (fn) => {
+      seenListeners.add(fn);
+      return () => {
+        seenListeners.delete(fn);
+      };
+    },
+    () => seenStories,
+    () => seenStories,
+  );
+}
 
 /** Story bubbles for the Sports Hub, from the games it already polls. */
 export function useGameStories(params: {
@@ -64,17 +107,25 @@ export function GameStoriesRow({
   stories,
   onWatch,
   onOpenGame,
+  aside,
 }: {
   stories: JlHubGame[];
   onWatch: (item: JlHubGame) => void;
   onOpenGame: (game: SportsGame) => void;
+  /** Shown at the end of the heading row (the Sports page's shortcuts). */
+  aside?: ReactNode;
 }) {
   const t = useT();
   const scope = useSportsSessionScope();
+  const seen = useSeenStories();
   const [selection, setSelection] = useState<{ scope: string; key: string } | null>(null);
   const openKey = selection?.scope === scope ? selection.key : null;
   const opener = useRef<HTMLElement | null>(null);
   const index = openKey ? stories.findIndex((s) => gameKey(s.game) === openKey) : -1;
+
+  useEffect(() => {
+    if (openKey && index >= 0) markStorySeen(openKey);
+  }, [openKey, index]);
 
   const close = useCallback(() => {
     setSelection(null);
@@ -83,24 +134,30 @@ export function GameStoriesRow({
     window.requestAnimationFrame(() => el?.isConnected && el.focus());
   }, []);
 
-  if (!stories.length) return null;
+  if (!stories.length && !aside) return null;
   return (
-    <section aria-label={t("Game Stories")} className="flex flex-col gap-2.5 ps-[9px]">
-      <h2 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
-        {t("Game Stories")}
-      </h2>
-      <div className="flex gap-3 overflow-x-auto pb-1 pe-[9px] pt-1">
-        {stories.map((item) => (
-          <StoryBubble
-            key={gameKey(item.game)}
-            item={item}
-            onOpen={(el) => {
-              opener.current = el;
-              setSelection({ scope, key: gameKey(item.game) });
-            }}
-          />
-        ))}
+    <section aria-label={t("Game Stories")} className="flex flex-col gap-3 ps-[9px]">
+      <div className="flex flex-wrap items-center gap-3 pe-[9px]">
+        {stories.length > 0 && (
+          <h2 className="text-[20px] font-bold text-ink 2xl:text-[24px]">{t("Game Stories")}</h2>
+        )}
+        {aside && <div className="ms-auto flex flex-wrap items-center gap-2">{aside}</div>}
       </div>
+      {stories.length > 0 && (
+        <div className="flex gap-4 overflow-x-auto pb-1 pe-[9px] pt-1 2xl:gap-6">
+          {stories.map((item) => (
+            <StoryBubble
+              key={gameKey(item.game)}
+              item={item}
+              seen={seen.has(gameKey(item.game))}
+              onOpen={(el) => {
+                opener.current = el;
+                setSelection({ scope, key: gameKey(item.game) });
+              }}
+            />
+          ))}
+        </div>
+      )}
       {index >= 0 &&
         createPortal(
           <StoryViewer
@@ -123,63 +180,84 @@ export function GameStoriesRow({
   );
 }
 
-function StoryBubble({ item, onOpen }: { item: JlHubGame; onOpen: (el: HTMLElement) => void }) {
+/**
+ * A story as a round photo of the team it's about (the followed side, else home): the owner's
+ * story art (or a crop of their hero), else the team's TheSportsDB photo, else its logo. The
+ * ring is lit until the story is opened; red while the game is live.
+ */
+function StoryBubble({
+  item,
+  seen,
+  onOpen,
+}: {
+  item: JlHubGame;
+  seen: boolean;
+  onOpen: (el: HTMLElement) => void;
+}) {
   const t = useT();
-  const { game, mine } = item;
+  const followed = useJlSportsFavorites();
+  useCuratedArtVersion();
+  const { game } = item;
+  const side =
+    game.away.id && isFollowing(followed, game.league, game.away.id) ? game.away : game.home;
+  const art = useTeamArt(game.league, side);
   const live = isCurrentLiveGame(game);
-  const label =
+  const owner = side.id ? curatedArtSlot(artKey.team(game.league, side.id), "story") : null;
+  const photos = [
+    owner?.url,
+    art?.fanart.length ? art.fanart[stableIndex(side.id || side.name, art.fanart.length)] : null,
+  ].filter((u): u is string => !!u);
+  const [failed, setFailed] = useState<string[]>([]);
+  const photo = photos.find((u) => !failed.includes(u));
+  const status =
     game.savedAt !== undefined || game.state !== "post"
       ? statusText(game, t)
       : t("Final {away}–{home}", { away: game.away.score, home: game.home.score });
+  const ring = live
+    ? "bg-danger"
+    : seen
+      ? "bg-ink/20"
+      : "bg-[conic-gradient(from_200deg,var(--color-accent),#ffd23f,var(--color-accent))]";
   return (
     <button
       onClick={(e) => onOpen(e.currentTarget)}
-      aria-label={`${game.away.name} at ${game.home.name}: ${label}`}
-      className="group flex w-[92px] shrink-0 flex-col items-center gap-1.5 rounded-2xl p-1 text-center"
+      aria-label={`${game.away.name} ${t("at")} ${game.home.name}: ${status}`}
+      className="group flex w-[clamp(96px,7.4vw,140px)] shrink-0 flex-col items-center gap-2 rounded-2xl p-1 text-center"
     >
       <span
-        className={`relative flex h-[76px] w-[76px] items-center justify-center rounded-full p-[3px] transition-transform group-hover:scale-105 group-focus-visible:scale-105 ${
-          live ? "bg-danger" : "bg-edge"
-        }`}
+        className={`relative flex aspect-square w-full items-center justify-center rounded-full p-[4px] shadow-[0_10px_30px_-12px_rgba(0,0,0,0.8)] transition-transform group-hover:scale-105 group-focus-visible:scale-105 ${ring}`}
       >
-        <span className="flex h-full w-full items-center justify-center gap-0.5 rounded-full bg-elevated">
-          <BubbleLogo side={game.away} />
-          <BubbleLogo side={game.home} />
+        <span className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-canvas bg-elevated">
+          {photo ? (
+            <img
+              key={photo}
+              src={photo}
+              alt=""
+              draggable={false}
+              loading="lazy"
+              onError={() => setFailed((f) => [...f, photo])}
+              className={`h-full w-full object-cover ${
+                photo === owner?.url && owner.borrowed ? "object-[74%_35%]" : "object-center"
+              }`}
+            />
+          ) : (
+            <TeamMark
+              look={teamLook(side, art)}
+              className="h-[62%] w-[62%]"
+              textClass="text-[22px]"
+            />
+          )}
         </span>
-        {mine && (
-          <Star
-            size={18}
-            fill="currentColor"
-            strokeWidth={0}
-            aria-label={t("Your team")}
-            className="absolute -end-0.5 -top-0.5 text-accent drop-shadow"
-          />
+        {live && (
+          <span className="absolute -bottom-1 start-1/2 -translate-x-1/2 rounded bg-danger px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.1em] text-white rtl:translate-x-1/2">
+            {t("Live")}
+          </span>
         )}
       </span>
-      <span
-        className={`max-w-full truncate text-[10.5px] font-bold uppercase ${live ? "text-danger" : "text-ink-subtle"}`}
-      >
-        {label}
-      </span>
-      <span className="w-full truncate text-[11.5px] font-semibold text-ink">
-        {game.away.abbr || game.away.name} · {game.home.abbr || game.home.name}
+      <span className="w-full truncate text-[14px] font-semibold text-ink 2xl:text-[16px]">
+        {side.location || side.name}
       </span>
     </button>
-  );
-}
-
-function BubbleLogo({ side }: { side: SportsSide }) {
-  const [err, setErr] = useState(false);
-  if (!side.logo || err) return <span className="h-7 w-7 rounded-full bg-canvas/60" />;
-  return (
-    <img
-      src={side.logo}
-      alt=""
-      draggable={false}
-      loading="lazy"
-      onError={() => setErr(true)}
-      className="h-7 w-7 object-contain"
-    />
   );
 }
 

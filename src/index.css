@@ -7565,6 +7565,26 @@ html[data-theme-layout="stremio"] .jl-sports-bleed {
 .jl-sports-display {
   font-family: "Orbitron", var(--font-display);
 }
+/* The Sports hero's two-line team wordmark: heavy condensed type (Oswald, which the app loads
+   for rank numerals), the second line slanted in the team's brighter colour. */
+.jl-wordmark {
+  font-family: var(--font-rank);
+  font-weight: 700;
+  line-height: 0.86;
+  letter-spacing: 0.005em;
+  font-size: clamp(56px, 7vw, 148px);
+  filter: drop-shadow(0 8px 34px rgba(0, 0, 0, 0.55));
+}
+.jl-wordmark-line {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.jl-wordmark-accent {
+  font-style: italic;
+  transform: skewX(-8deg);
+  transform-origin: left bottom;
+  font-size: 1.08em;
+}
 /* Top 10's outlined rank numerals, in the theme's ink. */
 .jl-rank-numeral {
   color: transparent;

@@ -56,12 +56,15 @@ export function JlSportsHub({
   actions,
   onOpenGame,
   onLeagues,
+  shortcuts = true,
 }: {
   top: JlHubGame[];
   ticker: JlHubGame[];
   favorites: JlFavoriteTeam[];
   actions: JlSportsActions;
   onOpenGame: (game: SportsGame) => void;
+  /** Off where the page shows Teams & players / Leagues / Colleges under its hero instead. */
+  shortcuts?: boolean;
   /**
    * Where "Leagues" goes when the page has its own league browser (the Sports page's Explore).
    * World sports then gets its own button, since JL's leagues page is where it lived.
@@ -83,27 +86,33 @@ export function JlSportsHub({
         <span className="text-[12px] text-ink-subtle/80">{t("Top games, ranked for you")}</span>
         <SportsKeysHint />
         <div className="ms-auto flex flex-wrap items-center gap-2">
-          <button onClick={actions.follow} className={pill}>
-            <Users size={14} />
-            {t("Teams & players")}
-          </button>
-          <button
-            onClick={onLeagues ?? (() => openSportsPage({ kind: "leagues" }))}
-            className={pill}
-          >
-            <Trophy size={14} />
-            {t("Leagues")}
-          </button>
+          {shortcuts && (
+            <>
+              <button onClick={actions.follow} className={pill}>
+                <Users size={14} />
+                {t("Teams & players")}
+              </button>
+              <button
+                onClick={onLeagues ?? (() => openSportsPage({ kind: "leagues" }))}
+                className={pill}
+              >
+                <Trophy size={14} />
+                {t("Leagues")}
+              </button>
+            </>
+          )}
           {onLeagues && (
             <button onClick={() => openSportsPage({ kind: "world" })} className={pill}>
               <Globe2 size={14} />
               {t("World sports")}
             </button>
           )}
-          <button onClick={() => openSportsPage({ kind: "colleges" })} className={pill}>
-            <GraduationCap size={14} />
-            {t("Colleges")}
-          </button>
+          {shortcuts && (
+            <button onClick={() => openSportsPage({ kind: "colleges" })} className={pill}>
+              <GraduationCap size={14} />
+              {t("Colleges")}
+            </button>
+          )}
           <button onClick={actions.account} className={pill}>
             <Cloud size={14} className={link && session ? "text-accent" : ""} />
             {link && session
@@ -226,6 +235,9 @@ function TopPoster({
   const { settings } = useSettings();
   const { game, reasons, channels, mine } = item;
   const art = useGameArt(game);
+  const focusId =
+    [game.away, game.home].find((s) => s.id && isFollowing(favorites, game.league, s.id))?.id ??
+    null;
   const detail = [
     ...reasons.slice(0, 2).map((r) => t(r.label, r.vars)),
     game.network,
@@ -249,7 +261,7 @@ function TopPoster({
             aria-label={`${ctaLabel(item, t)}: ${game.away.name} ${t("at")} ${game.home.name}`}
             className="group relative z-10 block aspect-[2/3] w-full overflow-hidden rounded-2xl text-start shadow-[0_18px_40px_-18px_rgba(0,0,0,0.7)] ring-1 ring-edge transition duration-200 hover:-translate-y-1 hover:ring-2 hover:ring-accent"
           >
-            <GameBackdrop game={game} variant="poster" />
+            <GameBackdrop game={game} variant="poster" focusId={focusId} />
             <div className="absolute inset-x-3 top-3 flex items-center justify-between gap-2">
               <span className="rounded-full bg-canvas/70 px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink backdrop-blur">
                 {game.league}
@@ -432,6 +444,9 @@ function WallCard({
   const { game, channels } = item;
   const art = useGameArt(game);
   const scored = game.state !== "pre";
+  const focusId =
+    [game.away, game.home].find((s) => s.id && isFollowing(favorites, game.league, s.id))?.id ??
+    null;
   return (
     <li className="relative">
       <button
@@ -439,7 +454,7 @@ function WallCard({
         aria-label={`${ctaLabel(item, t)}: ${game.away.name} ${t("at")} ${game.home.name}`}
         className="group relative flex aspect-[16/7] w-full flex-col overflow-hidden rounded-2xl text-start ring-1 ring-edge transition duration-200 hover:ring-2 hover:ring-accent"
       >
-        <GameBackdrop game={game} variant="card" />
+        <GameBackdrop game={game} variant="card" slot="card" focusId={focusId} />
         <div className="relative grid flex-1 grid-cols-[1fr_auto_1fr] items-center gap-2 px-5 pt-6">
           <WallTeam side={game.away} look={teamLook(game.away, art.away)} />
           <div className="flex flex-col items-center gap-1">

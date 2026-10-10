@@ -81,3 +81,40 @@ export function teamLook(
   if (art?.badge) logos.push(art.badge);
   return { primary, secondary, logos: [...new Set(logos)], monogram: monogram(side.name) };
 }
+
+/**
+ * A team's name as a two-line wordmark: school or city on top, nickname below ("OREGON" /
+ * "DUCKS"). Without a listed nickname the last word moves to the second line.
+ */
+export function wordmarkLines(
+  side: Pick<SportsSide, "name" | "location" | "nickname">,
+): [string, string] {
+  const name = side.name.replace(/^#\d+\s+/, "").trim();
+  const location = side.location?.trim() ?? "";
+  const nickname = side.nickname?.trim() ?? "";
+  if (location && nickname) return [location.toUpperCase(), nickname.toUpperCase()];
+  if (location && name.toLowerCase().startsWith(`${location.toLowerCase()} `))
+    return [location.toUpperCase(), name.slice(location.length + 1).toUpperCase()];
+  const words = name.split(/\s+/).filter(Boolean);
+  if (words.length < 2) return [(name || location).toUpperCase(), ""];
+  return [words.slice(0, -1).join(" ").toUpperCase(), words[words.length - 1].toUpperCase()];
+}
+
+function luminance(hex: string): number {
+  const [r, g, b] = [0, 2, 4].map((i) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/**
+ * The colour for a wordmark's second line: the team's brighter colour when it reads on dark
+ * art (Oregon's yellow), else null for the theme's accent.
+ */
+export function wordmarkAccent(look: Pick<TeamLook, "primary" | "secondary">): string | null {
+  const candidates = [look.secondary, look.primary].filter(
+    (c) => valid(c) && !NEUTRAL.has(c.toLowerCase()),
+  );
+  return candidates.find((c) => luminance(c) >= 0.28) ?? null;
+}

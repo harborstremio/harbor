@@ -1,12 +1,19 @@
-import { ChevronLeft, ChevronRight, Info, Play, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageIcon, Info, Play, Sparkles, Users2 } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useHeroDock } from "@/lib/hero-dock";
 import { useT } from "@/lib/i18n";
+import { nativeTvAvailable } from "@/lib/player/native-tv/bridge";
+import { artKey, curatedArt, useCuratedArtVersion } from "@/lib/jl/sports/curated-art";
+import { stableIndex } from "@/lib/jl/sports/fanart";
+import { isFollowing, useJlSportsFavorites } from "@/lib/jl/sports/favorites";
 import type { InsightLeader } from "@/lib/jl/sports/insight";
+import { setPinnedWallpaper, usePinnedWallpaper } from "@/lib/jl/sports/page-wallpaper";
 import { fetchPlayerLine, fetchPregameInsight } from "@/lib/jl/sports/people";
 import { espnHeadshot } from "@/lib/jl/sports/search-parse";
 import { mixHeroSlides, photoSlides } from "@/lib/jl/sports/hub-sections";
-import { teamLook } from "@/lib/jl/sports/team-look";
-import { isCurrentLiveGame } from "@/lib/jl/sports/presentation";
+import { teamLook, wordmarkAccent, wordmarkLines } from "@/lib/jl/sports/team-look";
+import { isCurrentLiveGame, visibleScore } from "@/lib/jl/sports/presentation";
+import { useSettings } from "@/lib/settings";
 import { isIndividualCompetition } from "@/lib/sports/competition-metadata";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import { getLeagueLabel, leagueByKey } from "@/lib/sports/espn-leagues";
@@ -20,7 +27,7 @@ import { GameBackdrop, TeamBackdrop, TeamMark } from "./game-backdrop";
 import { statusText } from "./jl-sports-hub";
 import type { JlSportsActions } from "./use-jl-sports-dialogs";
 import type { JlHubGame, JlPlayerSlide, JlTeamSlide } from "./use-jl-sports";
-import { useGameArt, useTeamArt } from "./use-sports-extras";
+import { curatedTeamArt, useGameArt, useTeamArt } from "./use-sports-extras";
 
 // Harbor's team page, opened from a followed team's slide.
 const TeamProfile = lazy(() =>
@@ -52,12 +59,44 @@ const slideKey = (s: Slide): string =>
           ? `p:${s.slide.player.league}:${s.slide.player.id}`
           : `l:${s.item.game.id}:${s.leader.athlete}`;
 
+/** The team a slide is about: the followed side of a game, else its home side. */
+type Focus = { league: string; side: SportsSide } | null;
+
+function gameFocus(game: SportsGame, followed: Array<{ league: string; id: string }>): SportsSide {
+  if (game.away.id && isFollowing(followed, game.league, game.away.id)) return game.away;
+  return game.home;
+}
+
+function slideFocus(slide: Slide, followed: Array<{ league: string; id: string }>): Focus {
+  switch (slide.kind) {
+    case "game":
+    case "featured":
+      return { league: slide.item.game.league, side: gameFocus(slide.item.game, followed) };
+    case "team":
+      return { league: slide.slide.team.league, side: teamSide(slide.slide) };
+    case "player": {
+      const { player, next } = slide.slide;
+      if (next) return { league: next.game.league, side: gameFocus(next.game, followed) };
+      return player.teamId
+        ? {
+            league: player.league,
+            side: { ...EMPTY_SIDE, id: player.teamId, name: player.teamName ?? "" },
+          }
+        : null;
+    }
+    case "leader":
+      return { league: slide.item.game.league, side: gameFocus(slide.item.game, followed) };
+  }
+}
+
+const EMPTY_SIDE: SportsSide = { id: "", name: "", abbr: "", logo: "", score: "", winner: false };
+
 /**
- * The Sports Hub's full-bleed hero: the Top 10 games, a slide for each team you follow, your
- * players and the top game's leaders, each on its team art (TheSportsDB photo, or a designed
- * backdrop from ESPN's logos and colours). On the Sports page the Hub's featured events take turns
- * with them, on real event or league photos where there are any. One slide at a time; text and
- * art change together.
+ * The Sports Hub's full-bleed fan-art hero: the Top 10 games, a slide for each team you follow,
+ * your players and the top game's leaders. Each slide stands on the owner's own art for its team
+ * (else TheSportsDB's photo, Harbor's sports artwork, then a designed backdrop from ESPN's logos
+ * and colours), with the team's wordmark large at the start. On the Sports page the Hub's
+ * featured events take turns with them. One slide at a time; text and art change together.
  */
 export function JlSportsHero({
   top,
@@ -83,6 +122,7 @@ export function JlSportsHero({
 }) {
   const t = useT();
   const root = useRef<HTMLElement>(null);
+  const followed = useJlSportsFavorites();
   const leaders = useTopGameLeaders(top[0] ?? null);
   const slides = useMemo<Slide[]>(() => {
     const games = top.map((item, i) => ({ kind: "game" as const, item, place: i + 1 }));
@@ -122,6 +162,7 @@ export function JlSportsHero({
   if (!current) return null;
   const go = (delta: number) => setIndex((position + delta + count) % count);
   const key = slideKey(current);
+  const focus = slideFocus(current, followed);
 
   return (
     <section
@@ -137,18 +178,18 @@ export function JlSportsHero({
       }}
       className={`relative overflow-hidden bg-canvas ${
         bleed
-          ? `${flush ? "" : "jl-sports-bleed "}h-[clamp(520px,80vh,980px)]`
+          ? `${flush ? "" : "jl-sports-bleed "}h-[clamp(520px,68vh,900px)]`
           : "mx-[9px] h-[clamp(420px,60vh,720px)] rounded-[28px] border border-edge-soft/60"
       }`}
     >
       <div key={`art-${key}`} className="animate-fade-in absolute inset-0">
-        <SlideArt slide={current} />
+        <SlideArt slide={current} focusId={focus?.side.id || null} />
       </div>
       <div
         key={key}
         aria-live="polite"
-        className={`animate-fade-in relative z-10 flex h-full max-w-[min(72rem,66%)] flex-col justify-end gap-5 2xl:gap-7 ${
-          bleed ? "px-12 pb-24 pt-32" : "px-8 pb-20 pt-10"
+        className={`animate-fade-in relative z-10 flex h-full max-w-[min(64rem,62%)] flex-col justify-end gap-4 2xl:gap-6 ${
+          bleed ? "px-12 pb-20 pt-32" : "px-8 pb-16 pt-10"
         }`}
       >
         {current.kind === "game" && (
@@ -157,12 +198,20 @@ export function JlSportsHero({
             place={current.place}
             actions={actions}
             onOpenGame={onOpenGame}
+            focus={focus}
           />
         )}
         {current.kind === "featured" && (
-          <FeaturedSlide item={current.item} actions={actions} onOpenGame={onOpenGame} />
+          <FeaturedSlide
+            item={current.item}
+            actions={actions}
+            onOpenGame={onOpenGame}
+            focus={focus}
+          />
         )}
-        {current.kind === "team" && <TeamSlide slide={current.slide} actions={actions} />}
+        {current.kind === "team" && (
+          <TeamSlide slide={current.slide} actions={actions} onOpenGame={onOpenGame} />
+        )}
         {current.kind === "player" && <PlayerSlide slide={current.slide} actions={actions} />}
         {current.kind === "leader" && (
           <LeaderSlide
@@ -173,9 +222,10 @@ export function JlSportsHero({
           />
         )}
       </div>
+      <PinWallpaperButton focus={focus} bleed={bleed} />
       {count > 1 && (
         <div
-          className={`absolute z-20 flex items-center gap-2 ${bleed ? "bottom-8 end-12" : "bottom-6 end-8"}`}
+          className={`absolute z-20 flex items-center gap-2 ${bleed ? "bottom-7 end-12" : "bottom-6 end-8"}`}
         >
           <button
             onClick={() => go(-1)}
@@ -216,14 +266,65 @@ export function JlSportsHero({
   );
 }
 
-function SlideArt({ slide }: { slide: Slide }) {
+/**
+ * "Pin to wallpaper": with a game playing in the hero dock it moves the video behind the page
+ * (Harbor's wallpaper dock mode); otherwise it pins this slide's art as the page's wallpaper.
+ * Pressed again, it unpins.
+ */
+function PinWallpaperButton({ focus, bleed }: { focus: Focus; bleed: boolean }) {
+  const t = useT();
+  const dock = useHeroDock();
+  const { settings, update } = useSettings();
+  const pinned = usePinnedWallpaper();
+  const art = useTeamArt(focus?.league ?? "", focus?.side ?? null);
+  useCuratedArtVersion();
+  const videoMode = !!dock && !nativeTvAvailable();
+  const key = focus?.side.id ? artKey.team(focus.league, focus.side.id) : null;
+  const fallback =
+    (art?.fanart.length
+      ? art.fanart[stableIndex(focus?.side.id || focus?.side.name || "", art.fanart.length)]
+      : (art?.stadium ?? art?.banner ?? null)) ??
+    (focus ? sportsSceneryPhoto(hubLeague(focus.league)?.group, focus.league) : null);
+  const target =
+    key && curatedArt(key, "wallpaper") ? { key, url: fallback } : { key: null, url: fallback };
+  const label = focus?.side.name || focus?.side.location || "";
+  const pressed = videoMode
+    ? settings.heroDockMode === "wallpaper"
+    : !!pinned && pinned.key === target.key && (target.key !== null || pinned.url === target.url);
+  if (!videoMode && !target.url && !target.key) return null;
+  const onClick = () => {
+    if (videoMode) update({ heroDockMode: pressed ? "hero" : "wallpaper" });
+    else setPinnedWallpaper(pressed ? null : { ...target, label });
+  };
+  const text = pressed ? t("Unpin wallpaper") : t("Pin to wallpaper");
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={pressed}
+      title={videoMode ? t("Wallpaper mode — video continues while you browse") : undefined}
+      className={`absolute z-20 flex h-11 items-center gap-2 rounded-xl border px-4 text-[14px] font-semibold backdrop-blur-md transition-colors ${
+        bleed ? "end-12 top-24" : "end-6 top-6"
+      } ${
+        pressed
+          ? "border-accent/60 bg-accent/20 text-ink"
+          : "border-white/15 bg-canvas/55 text-ink hover:border-white/35 hover:bg-canvas/75"
+      }`}
+    >
+      <ImageIcon size={17} />
+      {text}
+    </button>
+  );
+}
+
+function SlideArt({ slide, focusId }: { slide: Slide; focusId: string | null }) {
   if (slide.kind === "game")
     return slide.photo ? (
-      <FeaturedArt game={slide.item.game} />
+      <FeaturedArt game={slide.item.game} focusId={focusId} />
     ) : (
-      <GameBackdrop game={slide.item.game} variant="hero" />
+      <GameBackdrop game={slide.item.game} variant="hero" focusId={focusId} />
     );
-  if (slide.kind === "featured") return <FeaturedArt game={slide.item.game} />;
+  if (slide.kind === "featured") return <FeaturedArt game={slide.item.game} focusId={focusId} />;
   if (slide.kind === "team")
     return <TeamBackdrop league={slide.slide.team.league} side={teamSide(slide.slide)} />;
   const game = slide.kind === "leader" ? slide.item.game : (slide.slide.next?.game ?? null);
@@ -237,7 +338,7 @@ function SlideArt({ slide }: { slide: Slide }) {
   return (
     <>
       {game ? (
-        <GameBackdrop game={game} variant="hero" marks={false} />
+        <GameBackdrop game={game} variant="hero" marks={false} focusId={focusId} />
       ) : (
         <div className="absolute inset-0 bg-[radial-gradient(110%_90%_at_80%_40%,var(--color-accent-soft),transparent_70%)]" />
       )}
@@ -252,7 +353,7 @@ function SlideArt({ slide }: { slide: Slide }) {
  * the teams' own photos, over the designed backdrop. A fight's portraits stand at the far side
  * like a player's.
  */
-function FeaturedArt({ game }: { game: SportsGame }) {
+function FeaturedArt({ game, focusId }: { game: SportsGame; focusId: string | null }) {
   const art = useSportsArtwork(game);
   // Harbor's bundled venue photo for the sport keeps every featured slide a picture.
   const scenery = sportsSceneryPhoto(hubLeague(game.league)?.group, game.league);
@@ -262,6 +363,7 @@ function FeaturedArt({ game }: { game: SportsGame }) {
       <GameBackdrop
         game={game}
         variant="hero"
+        focusId={focusId}
         marks={!portrait}
         eventPhoto={game.artwork || game.poster}
         leaguePhoto={art.backdrop || scenery}
@@ -333,7 +435,106 @@ function Eyebrow({ children }: { children: ReactNode }) {
   );
 }
 
-/** The big round play button with its label, as one control. */
+/**
+ * A team's wordmark: the owner's wordmark image when they set one, else the name in heavy
+ * condensed type on two lines, the second in the team's brighter colour ("OREGON" / "DUCKS").
+ */
+function Wordmark({ league, side, name }: { league: string; side: SportsSide; name?: string }) {
+  useCuratedArtVersion();
+  const image = curatedTeamArt(league, side, "wordmark");
+  const [failed, setFailed] = useState<string | null>(null);
+  const art = useTeamArt(league, side);
+  const full = name || side.name;
+  if (image && failed !== image) {
+    return (
+      <h2 className="m-0">
+        <img
+          src={image}
+          alt={full}
+          draggable={false}
+          onError={() => setFailed(image)}
+          className="max-h-[clamp(120px,22vh,260px)] w-auto max-w-full object-contain object-left drop-shadow-[0_10px_40px_rgba(0,0,0,0.55)] rtl:object-right"
+        />
+      </h2>
+    );
+  }
+  const [first, second] = wordmarkLines({ ...side, name: full });
+  const accent = wordmarkAccent(teamLook(side, art));
+  return (
+    <h2 className="jl-wordmark m-0 flex flex-col uppercase" aria-label={full}>
+      <span className="jl-wordmark-line text-ink">{first}</span>
+      {second && (
+        <span
+          className="jl-wordmark-line jl-wordmark-accent"
+          style={{ color: accent ? `#${accent}` : "var(--color-accent)" }}
+        >
+          {second}
+        </span>
+      )}
+    </h2>
+  );
+}
+
+/** "UCLA at Oregon" with both logos, and the score once the game is on. */
+function Matchup({ game }: { game: SportsGame }) {
+  const t = useT();
+  const art = useGameArt(game);
+  const scored = game.state !== "pre";
+  const team = (side: SportsSide, look: ReturnType<typeof teamLook>) => (
+    <span className="flex min-w-0 items-center gap-2.5">
+      <TeamMark
+        look={look}
+        className="h-[clamp(30px,2.6vw,46px)] w-[clamp(30px,2.6vw,46px)] shrink-0"
+        textClass="text-[13px]"
+      />
+      {side.rank ? <span className="text-[0.7em] font-bold text-accent">#{side.rank}</span> : null}
+      <span className="truncate">{side.location || side.name}</span>
+      {scored && (
+        <span className="font-[family-name:var(--font-rank)] text-[1.15em] font-bold tabular-nums">
+          {visibleScore(game, side)}
+        </span>
+      )}
+    </span>
+  );
+  return (
+    <p className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[clamp(17px,1.45vw,26px)] font-semibold text-ink drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
+      {team(game.away, teamLook(game.away, art.away))}
+      <span className="text-[0.75em] font-medium text-ink-muted">
+        {game.state === "pre" ? t("at") : t("vs")}
+      </span>
+      {team(game.home, teamLook(game.home, art.home))}
+    </p>
+  );
+}
+
+/** The game's status line: live state, league, network, the line and why it ranks. */
+function GameMeta({ item }: { item: JlHubGame }) {
+  const t = useT();
+  const { game, reasons } = item;
+  const live = isCurrentLiveGame(game);
+  return (
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[14px] font-medium text-ink/90 drop-shadow 2xl:text-[16px]">
+      <span className={`flex items-center gap-1.5 font-semibold ${live ? "text-danger" : ""}`}>
+        {live && <span className="h-2 w-2 animate-pulse rounded-full bg-danger" />}
+        {statusText(game, t)}
+      </span>
+      {[game.league, game.network].filter(Boolean).map((m) => (
+        <span key={m}>{m}</span>
+      ))}
+      {game.odds && <span className="text-ink-muted">{game.odds}</span>}
+      {reasons.slice(1, 3).map((r) => (
+        <span
+          key={r.label}
+          className="rounded-full bg-canvas/55 px-2.5 py-0.5 text-[12px] text-ink-muted backdrop-blur"
+        >
+          {t(r.label, r.vars)}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+/** The accent "Watch game" pill: opens the chooser of the viewer's channels for the game. */
 function PlayAction({
   label,
   onClick,
@@ -347,14 +548,31 @@ function PlayAction({
     <button
       onClick={onClick}
       aria-label={ariaLabel}
-      className="group flex items-center gap-4 rounded-full pe-4"
+      className="flex h-12 items-center gap-2.5 rounded-full bg-accent px-6 text-[16px] font-bold text-canvas shadow-[0_12px_34px_-10px_var(--color-accent)] transition-transform duration-150 hover:scale-[1.03] active:scale-95 2xl:h-14 2xl:px-7 2xl:text-[18px]"
     >
-      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-canvas shadow-[0_10px_34px_-8px_var(--color-accent)] transition-transform duration-150 group-hover:scale-105 group-active:scale-95 2xl:h-20 2xl:w-20">
-        <Play size={28} fill="currentColor" strokeWidth={0} className="dir-icon ms-1" />
-      </span>
-      <span className="jl-sports-display text-[13px] font-bold uppercase tracking-[0.2em] text-ink drop-shadow 2xl:text-[16px]">
-        {label}
-      </span>
+      <Play size={18} fill="currentColor" strokeWidth={0} className="dir-icon" />
+      {label}
+    </button>
+  );
+}
+
+/** The glass outline pill next to Watch ("Game details", "Team page"). */
+function GlassAction({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex h-12 items-center gap-2.5 rounded-full border border-white/25 bg-canvas/45 px-5 text-[15px] font-semibold text-ink backdrop-blur-md transition-colors hover:border-white/50 hover:bg-canvas/70 2xl:h-14 2xl:text-[17px]"
+    >
+      {children}
+      {label}
     </button>
   );
 }
@@ -373,7 +591,7 @@ function RoundAction({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="flex h-12 w-12 items-center justify-center rounded-full border border-ink/25 bg-canvas/45 text-ink backdrop-blur transition-colors hover:border-ink/60 hover:bg-canvas/70 2xl:h-14 2xl:w-14"
+      className="flex h-12 w-12 items-center justify-center rounded-full border border-white/25 bg-canvas/45 text-ink backdrop-blur transition-colors hover:border-white/50 hover:bg-canvas/70 2xl:h-14 2xl:w-14"
     >
       {children}
     </button>
@@ -383,8 +601,15 @@ function RoundAction({
 function watchLabel(item: JlHubGame, t: Translate): string {
   const n = item.channels.length;
   if (!n) return t("Ways to watch");
-  if (isCurrentLiveGame(item.game)) return t("Watch live · {n} channels", { n });
-  return t("Watch · {n} channels", { n });
+  if (isCurrentLiveGame(item.game)) return t("Watch live");
+  return t("Watch game");
+}
+
+/** Accessible name for Watch: the game and how many of the viewer's channels carry it. */
+function watchAria(item: JlHubGame, t: Translate): string {
+  const { game, channels } = item;
+  const n = channels.length;
+  return `${n ? t("Watch · {n} channels", { n }) : t("Ways to watch")}: ${game.away.name} ${t("at")} ${game.home.name}`;
 }
 
 function GameSlide({
@@ -393,6 +618,7 @@ function GameSlide({
   eyebrow,
   actions,
   onOpenGame,
+  focus,
 }: {
   item: JlHubGame;
   place?: number;
@@ -400,12 +626,10 @@ function GameSlide({
   eyebrow?: string;
   actions: JlSportsActions;
   onOpenGame: (game: SportsGame) => void;
+  focus: Focus;
 }) {
   const t = useT();
   const { game, reasons, mine } = item;
-  const art = useGameArt(game);
-  const live = isCurrentLiveGame(game);
-  const atHome = game.state === "pre" ? t("at") : t("vs");
   // Races, fight cards and tournaments read by the event's name, not the leading pair.
   const eventName = isEventSlide(game) ? game.context?.name : "";
   return (
@@ -420,54 +644,33 @@ function GameSlide({
             .join(" · ")}
       </Eyebrow>
       {eventName ? (
-        <h2 className="jl-sports-display line-clamp-2 text-[clamp(32px,4.6vw,88px)] font-black uppercase leading-[1] tracking-wide text-ink drop-shadow-[0_6px_30px_rgba(0,0,0,0.6)]">
+        <h2 className="jl-wordmark jl-wordmark-line line-clamp-2 uppercase text-ink">
           {eventName}
         </h2>
       ) : (
-        <div className="flex flex-col gap-2">
-          <HeroTeam
-            side={game.away}
-            look={teamLook(game.away, art.away)}
-            showScore={game.state !== "pre"}
-          />
-          <span className="jl-sports-display ps-1 text-[13px] font-bold uppercase tracking-[0.3em] text-ink-muted">
-            {atHome}
-          </span>
-          <HeroTeam
-            side={game.home}
-            look={teamLook(game.home, art.home)}
-            showScore={game.state !== "pre"}
-          />
-        </div>
+        focus && <Wordmark league={focus.league} side={focus.side} />
       )}
-      <p className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[14px] font-medium text-ink/90 drop-shadow 2xl:text-[17px]">
-        <span className={`flex items-center gap-1.5 font-semibold ${live ? "text-danger" : ""}`}>
-          {live && <span className="h-2 w-2 animate-pulse rounded-full bg-danger" />}
-          {statusText(game, t)}
-        </span>
-        {[game.league, game.network].filter(Boolean).map((m) => (
-          <span key={m}>{m}</span>
-        ))}
-        {game.odds && <span className="text-ink-muted">{game.odds}</span>}
-        {reasons.slice(1, 3).map((r) => (
-          <span
-            key={r.label}
-            className="rounded-full bg-canvas/55 px-2.5 py-0.5 text-[12px] text-ink-muted backdrop-blur"
-          >
-            {t(r.label, r.vars)}
-          </span>
-        ))}
-      </p>
-      <div className="flex flex-wrap items-center gap-4 pt-1">
-        <PlayAction label={watchLabel(item, t)} onClick={() => actions.watch(item)} />
+      {mine && (
+        <p className="text-[clamp(18px,1.6vw,30px)] font-semibold text-ink/95 drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)]">
+          {t("Your teams. Your game day.")}
+        </p>
+      )}
+      {!eventName && <Matchup game={game} />}
+      <GameMeta item={item} />
+      <div className="flex flex-wrap items-center gap-3 pt-1">
+        <PlayAction
+          label={watchLabel(item, t)}
+          ariaLabel={watchAria(item, t)}
+          onClick={() => actions.watch(item)}
+        />
+        <GlassAction label={t("Game details")} onClick={() => onOpenGame(game)}>
+          <Info size={18} />
+        </GlassAction>
         {mine && game.state === "pre" && (
           <RoundAction label={t("Pre-game")} onClick={() => actions.pregame(item)}>
             <Sparkles size={19} />
           </RoundAction>
         )}
-        <RoundAction label={t("Game details")} onClick={() => onOpenGame(game)}>
-          <Info size={20} />
-        </RoundAction>
       </div>
     </>
   );
@@ -483,10 +686,12 @@ function FeaturedSlide({
   item,
   actions,
   onOpenGame,
+  focus,
 }: {
   item: JlHubGame;
   actions: JlSportsActions;
   onOpenGame: (game: SportsGame) => void;
+  focus: Focus;
 }) {
   const t = useT();
   const { game } = item;
@@ -499,49 +704,24 @@ function FeaturedSlide({
       eyebrow={`${live ? t("Live now") : t("Featured")} · ${name}`}
       actions={actions}
       onOpenGame={onOpenGame}
+      focus={focus}
     />
   );
 }
 
-function HeroTeam({
-  side,
-  look,
-  showScore,
+function TeamSlide({
+  slide,
+  actions,
+  onOpenGame,
 }: {
-  side: SportsSide;
-  look: ReturnType<typeof teamLook>;
-  showScore: boolean;
+  slide: JlTeamSlide;
+  actions: JlSportsActions;
+  onOpenGame: (game: SportsGame) => void;
 }) {
-  return (
-    <div className="flex min-w-0 items-center gap-4">
-      <TeamMark
-        look={look}
-        className="h-[clamp(44px,4.4vw,88px)] w-[clamp(44px,4.4vw,88px)] shrink-0"
-        textClass="text-[clamp(14px,1.4vw,28px)]"
-      />
-      {side.rank ? (
-        <span className="jl-sports-display text-[clamp(14px,1.3vw,24px)] font-bold text-accent">
-          #{side.rank}
-        </span>
-      ) : null}
-      <span className="jl-sports-display min-w-0 truncate text-[clamp(28px,3.4vw,64px)] font-black uppercase leading-[1.02] tracking-wide text-ink drop-shadow-[0_4px_24px_rgba(0,0,0,0.55)]">
-        {side.location || side.name}
-      </span>
-      {showScore && (
-        <span className="jl-sports-display ms-2 shrink-0 text-[clamp(28px,3.2vw,60px)] font-black tabular-nums text-ink">
-          {side.score}
-        </span>
-      )}
-    </div>
-  );
-}
-
-function TeamSlide({ slide, actions }: { slide: JlTeamSlide; actions: JlSportsActions }) {
   const t = useT();
   const { openSportsPage } = useView();
   const { team, next } = slide;
   const side = teamSide(slide);
-  const art = useTeamArt(team.league, side);
   const [profile, setProfile] = useState<TeamIdentity | null>(null);
   const opener = useRef<HTMLElement | null>(null);
   // Harbor's team page when it covers the league; JL's own team page otherwise.
@@ -555,43 +735,43 @@ function TeamSlide({ slide, actions }: { slide: JlTeamSlide; actions: JlSportsAc
     setProfile(identity);
   };
   const game = next?.game ?? null;
-  const live = isCurrentLiveGame(game);
-  let status = t("No game scheduled");
-  if (game) {
-    const home = game.home.id === team.id;
-    const opponent = home ? game.away : game.home;
-    status = live
-      ? `${t("Live")} · ${[game.detail, `${game.away.abbr || game.away.name} ${game.away.score} – ${game.home.score} ${game.home.abbr || game.home.name}`].filter(Boolean).join(" · ")}`
-      : `${home ? t("Next: vs {team}", { team: opponent.location || opponent.name }) : t("Next: at {team}", { team: opponent.location || opponent.name })} · ${statusText(game, t)}${game.network ? ` · ${game.network}` : ""}`;
-  }
   return (
     <>
       <Eyebrow>{t("Your team · {league}", { league: team.league })}</Eyebrow>
-      <div className="flex items-center gap-5">
-        <TeamMark
-          look={teamLook(side, art)}
-          className="h-[clamp(56px,5.5vw,110px)] w-[clamp(56px,5.5vw,110px)] shrink-0"
-          textClass="text-[clamp(18px,1.8vw,34px)]"
-        />
-        <h2 className="jl-sports-display line-clamp-2 text-[clamp(36px,5.6vw,104px)] font-black uppercase leading-[0.98] tracking-wide text-ink drop-shadow-[0_6px_30px_rgba(0,0,0,0.6)]">
-          {side.name || team.name}
-        </h2>
-      </div>
-      <p
-        className={`flex items-center gap-2 text-[15px] font-medium drop-shadow 2xl:text-[19px] ${live ? "text-danger" : "text-ink/90"}`}
-      >
-        {live && <span className="h-2 w-2 animate-pulse rounded-full bg-danger" />}
-        {status}
+      <Wordmark league={team.league} side={side} name={side.name || team.name} />
+      <p className="text-[clamp(18px,1.6vw,30px)] font-semibold text-ink/95 drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)]">
+        {t("Your teams. Your game day.")}
       </p>
-      <div className="flex flex-wrap items-center gap-4 pt-1">
+      {game && next ? (
+        <>
+          <Matchup game={game} />
+          <GameMeta item={next} />
+        </>
+      ) : (
+        <p className="text-[15px] font-medium text-ink/85 drop-shadow 2xl:text-[18px]">
+          {t("No game scheduled")}
+        </p>
+      )}
+      <div className="flex flex-wrap items-center gap-3 pt-1">
         {next ? (
-          <PlayAction label={watchLabel(next, t)} onClick={() => actions.watch(next)} />
+          <>
+            <PlayAction
+              label={watchLabel(next, t)}
+              ariaLabel={watchAria(next, t)}
+              onClick={() => actions.watch(next)}
+            />
+            <GlassAction label={t("Game details")} onClick={() => onOpenGame(next.game)}>
+              <Info size={18} />
+            </GlassAction>
+            <RoundAction label={t("Team page")} onClick={openTeam}>
+              <Users2 size={19} />
+            </RoundAction>
+          </>
         ) : (
-          <PlayAction label={t("Team page")} onClick={openTeam} />
+          <GlassAction label={t("Team page")} onClick={openTeam}>
+            <Users2 size={18} />
+          </GlassAction>
         )}
-        <RoundAction label={t("Team page")} onClick={openTeam}>
-          <Info size={20} />
-        </RoundAction>
       </div>
       {profile && (
         <Suspense fallback={null}>

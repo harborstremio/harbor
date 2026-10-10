@@ -36,14 +36,26 @@ import { SportsAccessGate } from "./sports/access-gate";
 import { SportsNoProviderNote } from "./sports/no-provider-note";
 import { SportsPersonalizeHint } from "./sports/personalize-hint";
 import { heroFeatured } from "@/lib/jl/sports/hub-sections";
+import type { IptvChannel } from "@/lib/iptv/types";
 import { GameStoriesRow } from "./live/live-home/jl-sports/game-stories";
 import { AlsoToday, JlSportsHub } from "./live/live-home/jl-sports/jl-sports-hub";
-import { LiveSportsChannels } from "./live/live-home/jl-sports/live-sports-channels";
+import {
+  LiveSportsChannelsView,
+  useLiveSportsChannels,
+} from "./live/live-home/jl-sports/live-sports-channels";
+import {
+  ScoresStrip,
+  SportChannelCards,
+  SportsShortcuts,
+  stripGames,
+} from "./live/live-home/jl-sports/jl-sports-top";
+import { useSportsPageWallpaper } from "./live/live-home/jl-sports/use-page-wallpaper";
 import { JlSportsHero } from "./live/live-home/jl-sports/sports-hero";
 import type { JlHubGame } from "./live/live-home/jl-sports/use-jl-sports";
 import { useJlSportsPage } from "./live/live-home/jl-sports/use-jl-sports-page";
 
 const LIVE_SCOREBOARDS = liveScoreboardKeys(HUB_LEAGUES);
+const NO_CHANNELS: IptvChannel[] = [];
 
 const HotEvents = lazy(() => import("./sports/hot-events").then((m) => ({ default: m.HotEvents })));
 const EsportsMatchRail = lazy(() =>
@@ -272,6 +284,22 @@ function SportsHubView({ active = false }: { active?: boolean }) {
     ...HUB_LEAGUES.filter((l) => leagues.includes(l.key)).map((l) => l.tag),
   ]);
   const jlAlsoToday = jl.sports.alsoToday.filter((g) => !scheduleTags.has(g.league));
+  // The viewer's sports channels, classified once for the photo cards and the full browser.
+  const jlChannels = useLiveSportsChannels({
+    active: active && jlAll,
+    channels: jlAll ? jl.channels : NO_CHANNELS,
+    activeSourceId: jl.activeSourceId,
+    epg: jl.epg,
+    nowMs: jl.nowMs,
+    games: jl.sports.top,
+    onPlay: jl.play,
+  });
+  const jlScores = useMemo(() => stripGames(jl.sports.games), [jl.sports.games]);
+  const jlLeagues = () => {
+    setTab("explore");
+    setGroup("all");
+  };
+  const wallpaperStyle = useSportsPageWallpaper();
   const busy =
     tab !== "hot" &&
     tab !== "explore" &&
@@ -312,6 +340,7 @@ function SportsHubView({ active = false }: { active?: boolean }) {
       className="sports-hub"
       onScroll={(e) => setShowTop(e.currentTarget.scrollTop > 700)}
       aria-label={t("Sports")}
+      style={wallpaperStyle}
     >
       {jlHero && (
         <JlSportsHero
@@ -324,6 +353,18 @@ function SportsHubView({ active = false }: { active?: boolean }) {
           bleed
           flush
         />
+      )}
+      {jlAll && (
+        <div className="sh-body sh-jl-top relative z-10 flex flex-col gap-8 pt-2">
+          <GameStoriesRow
+            stories={jl.stories}
+            onWatch={jl.actions.watch}
+            onOpenGame={open}
+            aside={<SportsShortcuts actions={jl.actions} onLeagues={jlLeagues} />}
+          />
+          <SportChannelCards data={jlChannels} favorites={jl.sports.teams} />
+          <ScoresStrip games={jlScores} onOpenGame={open} />
+        </div>
       )}
       <header className={jlHero ? "sh-masthead sh-masthead-after-hero" : "sh-masthead"}>
         <div>
@@ -539,20 +580,15 @@ function SportsHubView({ active = false }: { active?: boolean }) {
               </button>
             )}
             {jlAll && (
-              <>
-                <JlSportsHub
-                  top={jl.sports.top}
-                  ticker={jl.sports.ticker}
-                  favorites={jl.sports.teams}
-                  actions={jl.actions}
-                  onOpenGame={open}
-                  onLeagues={() => {
-                    setTab("explore");
-                    setGroup("all");
-                  }}
-                />
-                <GameStoriesRow stories={jl.stories} onWatch={jl.actions.watch} onOpenGame={open} />
-              </>
+              <JlSportsHub
+                top={jl.sports.top}
+                ticker={jl.sports.ticker}
+                favorites={jl.sports.teams}
+                actions={jl.actions}
+                onOpenGame={open}
+                onLeagues={jlLeagues}
+                shortcuts={false}
+              />
             )}
             <HubRow
               title={t(
@@ -597,17 +633,7 @@ function SportsHubView({ active = false }: { active?: boolean }) {
                 stale={upcoming.stale}
               />
             )}
-            {jlAll && (
-              <LiveSportsChannels
-                active={active}
-                channels={jl.channels}
-                activeSourceId={jl.activeSourceId}
-                epg={jl.epg}
-                nowMs={jl.nowMs}
-                games={jl.sports.top}
-                onPlay={jl.play}
-              />
-            )}
+            {jlAll && <LiveSportsChannelsView data={jlChannels} />}
             {pitchGame && <HubPitchSpotlight game={pitchGame} active={active} onOpen={open} />}
             {group === "all" && esportsLeagues.length > 0 && (
               <Suspense fallback={<SportsRailSkeleton />}>
