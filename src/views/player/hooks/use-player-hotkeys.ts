@@ -44,6 +44,7 @@ export function usePlayerHotkeys(params: {
   onReloadSource?: () => void;
   onRestartServer?: () => void;
   onVolumeFeedback?: (volume: number, muted: boolean) => void;
+  onSpeedFeedback?: (rate: number) => void;
 }) {
   const {
     bridgeRef,
@@ -81,6 +82,7 @@ export function usePlayerHotkeys(params: {
     onReloadSource,
     onRestartServer,
     onVolumeFeedback,
+    onSpeedFeedback,
   } = params;
 
   const [showStats, setShowStats] = useState(false);
@@ -129,6 +131,7 @@ export function usePlayerHotkeys(params: {
     onRestartServer,
     onFrameStep: (dir) => bridgeRef.current?.frameStep?.(dir),
     onVolumeFeedback,
+    onSpeedFeedback,
   });
 
   return { holdSpeedActive, showStats, subtitleOffsetSec };

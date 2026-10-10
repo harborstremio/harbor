@@ -520,6 +520,19 @@ const settingsRefinements: Record<string, string> = {
   "Please include artist credit if you intend to reuse these.": "이 작품들을 재사용하려면 아티스트의 이름을 밝혀 주세요.",
   "The settings sidebar uses a separate icon set, not drawn by Abiyyu.": "설정 사이드바는 Abiyyu가 그린 것이 아닌 별도의 아이콘 세트를 사용합니다.",
   "Controller button glyphs:": "컨트롤러 버튼 기호:",
+  "Previous season": "이전 시즌",
+  "Next season": "다음 시즌",
+  "Speed pop-up": "속도 팝업",
+  "Speed pop-up while watching": "시청 중 속도 팝업",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.":
+    "단축키, 휠 또는 속도 메뉴로 재생 속도를 바꿀 때 표시합니다.",
+  "Speed pop-up position": "속도 팝업 위치",
+  "Scroll over the speed button to change speed": "속도 버튼 위에서 스크롤하여 속도 변경",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.":
+    "휠을 위로 올리면 빨라지고 아래로 내리면 느려집니다(0.25× 단위).",
+  "Jump to the next unwatched episode": "다음 미시청 에피소드로 이동",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.":
+    "프로그램을 열거나 시즌을 바꿀 때 아직 보지 않은 첫 에피소드로 목록을 스크롤합니다.",
 };
 
 export default settingsRefinements;

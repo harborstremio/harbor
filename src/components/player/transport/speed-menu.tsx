@@ -10,6 +10,7 @@ import { useT } from "@/lib/i18n";
 import { useMenuSide } from "../menu-side";
 import { Tooltip } from "./tooltip";
 import { watchOutsideMouseDown } from "@/lib/player/overlay-dismiss";
+import { SPEED_MAX, SPEED_MIN } from "../speed-indicator";
 
 const CURATED_SPEEDS = [0.75, 1, 1.25, 1.5, 2];
 const CURATED_SLEEP_IDS = ["30", "60", "ep", "ep2"];
@@ -44,7 +45,29 @@ export function SpeedMenu({
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
   const { measure } = useMenuSide(wrap, 400);
+  const wheelRef = useRef({ rate, onRate });
+  wheelRef.current = { rate, onRate };
+  const wheelEnabled = settings.playerSpeedWheel;
+  useEffect(() => {
+    const el = btnRef.current;
+    if (!el || !wheelEnabled) return;
+    // Native non-passive listener so the wheel never also scrolls volume on the stage behind.
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey || e.deltaY === 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const { rate: cur, onRate: set } = wheelRef.current;
+      const next =
+        Math.round(
+          Math.min(SPEED_MAX, Math.max(SPEED_MIN, cur + (e.deltaY < 0 ? 0.25 : -0.25))) * 100,
+        ) / 100;
+      if (Math.abs(next - cur) > 0.001) set(next);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [wheelEnabled]);
   useEffect(() => {
     onOpenChange?.(open);
   }, [open, onOpenChange]);
@@ -124,6 +147,7 @@ export function SpeedMenu({
     <div ref={wrap} className="relative">
       <Tooltip label={sleep ? t("Speed & sleep") : t("Playback speed")}>
         <button
+          ref={btnRef}
           onClick={() => {
             if (!open) measure();
             setOpen((o) => !o);

@@ -44,6 +44,8 @@ import { useAnimeFranchiseNav } from "./anime-episodes/use-anime-franchise-nav";
 import { useTvdbProxyImages } from "./anime-episodes/use-tvdb-proxy-images";
 import { pickTvdbImage } from "@/lib/providers/tvdb-proxy";
 import { TvdbOrderPanel } from "./series-episodes/tvdb-order-panel";
+import { SeasonStepper, pickerStepKeys } from "./season-stepper";
+import { useEpisodeAutoScroll, type AutoScrollTarget } from "./use-episode-auto-scroll";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import { aiIsGroq, aiKey, providerForModel } from "@/lib/ai-models";
 
@@ -447,9 +449,45 @@ export function AnimeEpisodes({
     return () => io.disconnect();
   }, [settings.episodeLayout, hasMore, grow, scrollRef]);
 
+  const isOneOff = meta.type === "movie" || episodes.length <= 1;
+  const autoScrollTarget = useMemo<AutoScrollTarget>(
+    () =>
+      nextUpNum == null
+        ? null
+        : { episode: nextUpNum, id: nextUpId, first: orderedEpisodes[0]?.id === nextUpId },
+    [nextUpNum, nextUpId, orderedEpisodes],
+  );
+  const markPicked = useEpisodeAutoScroll({
+    scrollRef,
+    scopeKey: meta.id,
+    seasonKey: `${activeEntryId}:${tvdbPanel.panel?.activeKey ?? order?.activeKey ?? ""}`,
+    target: autoScrollTarget,
+    ready: !isOneOff && displayEpisodes.length > 0 && !(tvdbPanel.active && !tvdbPanel.panel),
+    beforeScroll: reveal,
+  });
+  const pickSeason = useCallback(
+    (key: string) => {
+      markPicked();
+      onPickerSelect(key);
+    },
+    [markPicked, onPickerSelect],
+  );
+  const pickTvdbSeason = (key: string) => {
+    markPicked();
+    tvdbPanel.panel?.onSelect(key);
+  };
+  const pickEntry = (entryId: string) => {
+    markPicked();
+    onSelectEntry(entryId);
+  };
+  const franchiseStepKeys = useMemo(
+    () => pickerFranchise.filter((f) => !isFranchiseExtra(f)).map((f) => f.meta.id),
+    [pickerFranchise],
+  );
+
   const didJumpRef = useRef("");
   useEffect(() => {
-    if (order || tvdbPanel.panel) return;
+    if (settings.episodeAutoScroll || order || tvdbPanel.panel) return;
     if (nextUpNum == null || didJumpRef.current === meta.id) return;
     const idx = episodes.findIndex((ep) => ep.id === nextUpId);
     if (idx < 12) return;
@@ -461,9 +499,8 @@ export function AnimeEpisodes({
       center: true,
       epId: nextUpId,
     });
-  }, [nextUpNum, nextUpId, episodes, meta.id, reveal, scrollRef]);
+  }, [settings.episodeAutoScroll, nextUpNum, nextUpId, episodes, meta.id, reveal, scrollRef]);
 
-  const isOneOff = meta.type === "movie" || episodes.length <= 1;
   const downloadEpisodes = useMemo(
     () =>
       displayEpisodes.map((e) => ({
@@ -538,30 +575,48 @@ export function AnimeEpisodes({
                 />
               ) : null
             ) : tvdbPanel.panel ? (
-              <TvdbOrderPanel
-                items={tvdbPanel.panel.items}
+              <SeasonStepper
+                keys={pickerStepKeys(tvdbPanel.panel.items)}
                 activeKey={tvdbPanel.panel.activeKey}
-                onSelect={tvdbPanel.panel.onSelect}
-                orderTypes={tvdbPanel.panel.orderTypes}
-                activeType={tvdbPanel.panel.activeType}
-                onSelectType={(v) =>
-                  update({ tvdbSeasonType: v as typeof settings.tvdbSeasonType })
-                }
-              />
+                onSelect={pickTvdbSeason}
+              >
+                <TvdbOrderPanel
+                  items={tvdbPanel.panel.items}
+                  activeKey={tvdbPanel.panel.activeKey}
+                  onSelect={pickTvdbSeason}
+                  orderTypes={tvdbPanel.panel.orderTypes}
+                  activeType={tvdbPanel.panel.activeType}
+                  onSelectType={(v) =>
+                    update({ tvdbSeasonType: v as typeof settings.tvdbSeasonType })
+                  }
+                />
+              </SeasonStepper>
             ) : tvdbPanel.active ? (
               <div aria-hidden className="h-10 w-44 animate-pulse rounded-full bg-white/[0.06]" />
             ) : effectiveOrder ? (
-              <SeasonArcPicker
-                items={pickerItems}
+              <SeasonStepper
+                keys={pickerStepKeys(pickerItems)}
                 activeKey={franchiseActiveKey ?? effectiveOrder.activeKey}
-                onSelect={onPickerSelect}
-              />
+                onSelect={pickSeason}
+              >
+                <SeasonArcPicker
+                  items={pickerItems}
+                  activeKey={franchiseActiveKey ?? effectiveOrder.activeKey}
+                  onSelect={pickSeason}
+                />
+              </SeasonStepper>
             ) : franchise.length > 1 ? (
-              <AnimeSeasonPicker
-                franchise={pickerFranchise}
-                activeEntryId={activeEntryId}
-                onSelectEntry={onSelectEntry}
-              />
+              <SeasonStepper
+                keys={franchiseStepKeys}
+                activeKey={activeEntryId}
+                onSelect={pickEntry}
+              >
+                <AnimeSeasonPicker
+                  franchise={pickerFranchise}
+                  activeEntryId={activeEntryId}
+                  onSelectEntry={pickEntry}
+                />
+              </SeasonStepper>
             ) : null}
           </div>
         </div>

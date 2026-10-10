@@ -55,6 +55,7 @@ export function useKeyboardShortcuts(params: {
   onReloadSource?: () => void;
   onRestartServer?: () => void;
   onVolumeFeedback?: (volume: number, muted: boolean) => void;
+  onSpeedFeedback?: (rate: number) => void;
 }) {
   const {
     bridgeRef,
@@ -95,6 +96,7 @@ export function useKeyboardShortcuts(params: {
     onReloadSource,
     onRestartServer,
     onVolumeFeedback,
+    onSpeedFeedback,
   } = params;
   const { settings, update } = useSettings();
   const overrides = settings.hotkeys ?? {};
@@ -411,6 +413,7 @@ export function useKeyboardShortcuts(params: {
         const r = Math.max(0.25, +(snap.rate - 0.25).toFixed(2));
         bridgeRef.current?.setRate(r);
         writePlayerPrefs(metaId, { rate: r });
+        onSpeedFeedback?.(r);
         return;
       }
       if (match("playerSpeedUp")) {
@@ -418,6 +421,7 @@ export function useKeyboardShortcuts(params: {
         const r = Math.min(3, +(snap.rate + 0.25).toFixed(2));
         bridgeRef.current?.setRate(r);
         writePlayerPrefs(metaId, { rate: r });
+        onSpeedFeedback?.(r);
         return;
       }
       if (match("playerSubDelayDown")) {
@@ -581,6 +585,7 @@ export function useKeyboardShortcuts(params: {
     onRestartServer,
     onFrameStep,
     onVolumeFeedback,
+    onSpeedFeedback,
     settings.playerEscExitsFullscreen,
     settings.playerConfirmLeave,
     settings.playerVolumeSfx,

@@ -6,6 +6,7 @@ import { Section, Segmented, ToggleRow } from "../shared";
 import { Anchored } from "../player-panel/choice";
 import { FullscreenPreview } from "../fullscreen-preview";
 import { VolumeHudPreview } from "../player-panel/volume-hud-preview";
+import { SpeedHudPreview } from "../player-panel/speed-hud-preview";
 
 export function PlayerWindowOptions() {
   const { settings, update } = useSettings();
@@ -66,6 +67,45 @@ export function PlayerWindowOptions() {
               />
             </SettingRow>
           )}
+        </SettingsWorkbench>
+      </Section>
+      <Section title={t("Speed pop-up")}>
+        <SettingsWorkbench
+          compact
+          preview={
+            settings.playerSpeedHud ? (
+              <SpeedHudPreview position={settings.playerSpeedHudPosition} />
+            ) : null
+          }
+        >
+          <ToggleRow
+            label={t("Speed pop-up while watching")}
+            sub={t(
+              "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.",
+            )}
+            value={settings.playerSpeedHud}
+            onChange={(v) => update({ playerSpeedHud: v })}
+          />
+          {settings.playerSpeedHud && (
+            <SettingRow wide label={t("Speed pop-up position")}>
+              <Segmented
+                value={settings.playerSpeedHudPosition}
+                options={[
+                  { value: "center", label: t("Center") },
+                  { value: "top", label: t("Top") },
+                  { value: "top-left", label: t("Top left") },
+                  { value: "top-right", label: t("Top right") },
+                ]}
+                onChange={(playerSpeedHudPosition) => update({ playerSpeedHudPosition })}
+              />
+            </SettingRow>
+          )}
+          <ToggleRow
+            label={t("Scroll over the speed button to change speed")}
+            sub={t("Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.")}
+            value={settings.playerSpeedWheel}
+            onChange={(v) => update({ playerSpeedWheel: v })}
+          />
         </SettingsWorkbench>
       </Section>
     </>

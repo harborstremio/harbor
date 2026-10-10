@@ -520,6 +520,20 @@ const settingsRefinements: Record<string, string> = {
   "Please include artist credit if you intend to reuse these.": "Incluye el crédito del artista si tienes intención de reutilizar estas obras.",
   "The settings sidebar uses a separate icon set, not drawn by Abiyyu.": "La barra lateral de ajustes utiliza un conjunto de iconos independiente que no fue dibujado por Abiyyu.",
   "Controller button glyphs:": "Símbolos de los botones del mando:",
+  "Previous season": "Temporada anterior",
+  "Next season": "Temporada siguiente",
+  "Speed pop-up": "Indicador de velocidad",
+  "Speed pop-up while watching": "Indicador de velocidad durante la reproducción",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.":
+    "Muestra la velocidad de reproducción cuando la cambias con un atajo, la rueda o el menú de velocidad.",
+  "Speed pop-up position": "Posición del indicador de velocidad",
+  "Scroll over the speed button to change speed":
+    "Desplázate sobre el botón de velocidad para cambiarla",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.":
+    "Rueda arriba acelera la reproducción y rueda abajo la ralentiza, en pasos de 0.25×.",
+  "Jump to the next unwatched episode": "Ir al siguiente episodio sin ver",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.":
+    "Desplaza la lista de episodios al primer episodio que no has visto al abrir una serie o cambiar de temporada.",
 };
 
 export default settingsRefinements;

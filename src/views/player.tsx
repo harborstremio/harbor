@@ -101,6 +101,7 @@ import { HdrStageBridge } from "./player/hdr-stage-bridge";
 import { setSkipSegmentsView } from "@/lib/skip-intro/segment-store";
 import { markStreamDead, STUB_TTL_MS } from "@/lib/dead-streams";
 import type { VolumeIndicatorState } from "@/components/player/volume-indicator";
+import type { SpeedIndicatorState } from "@/components/player/speed-indicator";
 import type { ToastInfo } from "@/views/addons/addons-types";
 import { SFX } from "@/lib/sfx";
 import { useKeyboardNavigation } from "@/lib/keyboard-navigation";
@@ -799,13 +800,24 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     volume: snap.volume,
     muted: snap.muted,
   });
+  const speedIndicatorTimerRef = useRef<number | null>(null);
+  const [speedIndicator, setSpeedIndicator] = useState<SpeedIndicatorState>({
+    visible: false,
+    rate: snap.rate,
+  });
   const volumeHudEnabled = settings.playerVolumeHud;
+  const speedHudEnabled = settings.playerSpeedHud;
   const showVolumeFeedback = useCallback(
     (volume: number, muted: boolean) => {
       if (!volumeHudEnabled) return;
       if (volumeIndicatorTimerRef.current != null) {
         window.clearTimeout(volumeIndicatorTimerRef.current);
       }
+      if (speedIndicatorTimerRef.current != null) {
+        window.clearTimeout(speedIndicatorTimerRef.current);
+        speedIndicatorTimerRef.current = null;
+      }
+      setSpeedIndicator((current) => (current.visible ? { ...current, visible: false } : current));
       setVolumeIndicator({ visible: true, volume, muted });
       volumeIndicatorTimerRef.current = window.setTimeout(() => {
         setVolumeIndicator((current) => ({ ...current, visible: false }));
@@ -814,10 +826,32 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     },
     [volumeHudEnabled],
   );
+  const showSpeedFeedback = useCallback(
+    (rate: number) => {
+      if (!speedHudEnabled) return;
+      if (speedIndicatorTimerRef.current != null) {
+        window.clearTimeout(speedIndicatorTimerRef.current);
+      }
+      if (volumeIndicatorTimerRef.current != null) {
+        window.clearTimeout(volumeIndicatorTimerRef.current);
+        volumeIndicatorTimerRef.current = null;
+      }
+      setVolumeIndicator((current) => (current.visible ? { ...current, visible: false } : current));
+      setSpeedIndicator({ visible: true, rate });
+      speedIndicatorTimerRef.current = window.setTimeout(() => {
+        setSpeedIndicator((current) => ({ ...current, visible: false }));
+        speedIndicatorTimerRef.current = null;
+      }, 1200);
+    },
+    [speedHudEnabled],
+  );
   useEffect(() => {
     return () => {
       if (volumeIndicatorTimerRef.current != null) {
         window.clearTimeout(volumeIndicatorTimerRef.current);
+      }
+      if (speedIndicatorTimerRef.current != null) {
+        window.clearTimeout(speedIndicatorTimerRef.current);
       }
     };
   }, []);
@@ -1031,6 +1065,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     clip,
     videoFill,
     onVolumeFeedback: showVolumeFeedback,
+    onSpeedFeedback: showSpeedFeedback,
   });
 
   useEffect(() => {
@@ -1321,6 +1356,8 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     subtitleOffsetSec,
     volumeIndicator,
     volumeHudPosition: settings.playerVolumeHudPosition,
+    speedIndicator,
+    speedHudPosition: settings.playerSpeedHudPosition,
     videoFillPill: videoFill.pill,
     cropMode: videoFill.mode,
     onCropMode: videoFill.setMode,
@@ -1337,6 +1374,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     toggleFullscreen,
     onVolumeWheel,
     onVolumeFeedback: showVolumeFeedback,
+    onSpeedFeedback: showSpeedFeedback,
     isLocalSrc,
     swappingEp,
     swapResolvingKey,

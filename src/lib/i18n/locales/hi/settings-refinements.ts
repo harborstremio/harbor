@@ -520,6 +520,19 @@ const settingsRefinements: Record<string, string> = {
   "Please include artist credit if you intend to reuse these.": "यदि आप इनका दोबारा उपयोग करना चाहते हैं, तो कृपया कलाकार को श्रेय दें।",
   "The settings sidebar uses a separate icon set, not drawn by Abiyyu.": "सेटिंग्स के साइडबार में एक अलग आइकन सेट इस्तेमाल होता है, जिसे Abiyyu ने नहीं बनाया है।",
   "Controller button glyphs:": "कंट्रोलर के बटन चिह्न:",
+  "Previous season": "पिछला सीज़न",
+  "Next season": "अगला सीज़न",
+  "Speed pop-up": "स्पीड पॉप-अप",
+  "Speed pop-up while watching": "देखते समय स्पीड पॉप-अप",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.":
+    "शॉर्टकट, व्हील या स्पीड मेन्यू से प्लेबैक स्पीड बदलने पर उसे दिखाएँ।",
+  "Speed pop-up position": "स्पीड पॉप-अप की स्थिति",
+  "Scroll over the speed button to change speed": "स्पीड बदलने के लिए स्पीड बटन पर स्क्रॉल करें",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.":
+    "व्हील ऊपर करने से प्लेबैक तेज़ और नीचे करने से धीमा होता है, 0.25× के चरणों में।",
+  "Jump to the next unwatched episode": "अगले न देखे गए एपिसोड पर जाएँ",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.":
+    "कोई शो खोलने या सीज़न बदलने पर एपिसोड सूची को पहले न देखे गए एपिसोड तक स्क्रॉल करें।",
 };
 
 export default settingsRefinements;

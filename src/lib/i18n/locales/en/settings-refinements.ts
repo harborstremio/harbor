@@ -520,6 +520,19 @@ const settingsRefinements: Record<string, string> = {
   "Please include artist credit if you intend to reuse these.": "Please include artist credit if you intend to reuse these.",
   "The settings sidebar uses a separate icon set, not drawn by Abiyyu.": "The settings sidebar uses a separate icon set, not drawn by Abiyyu.",
   "Controller button glyphs:": "Controller button glyphs:",
+  "Previous season": "Previous season",
+  "Next season": "Next season",
+  "Speed pop-up": "Speed pop-up",
+  "Speed pop-up while watching": "Speed pop-up while watching",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.":
+    "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.",
+  "Speed pop-up position": "Speed pop-up position",
+  "Scroll over the speed button to change speed": "Scroll over the speed button to change speed",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.":
+    "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.",
+  "Jump to the next unwatched episode": "Jump to the next unwatched episode",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.":
+    "Scroll the episode list to the first episode you have not watched when you open a show or change season.",
 };
 
 export default settingsRefinements;

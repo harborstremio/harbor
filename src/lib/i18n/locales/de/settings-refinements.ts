@@ -520,6 +520,20 @@ const settingsRefinements: Record<string, string> = {
   "Please include artist credit if you intend to reuse these.": "Bitte nenne den Künstler, wenn du diese Werke weiterverwenden möchtest.",
   "The settings sidebar uses a separate icon set, not drawn by Abiyyu.": "Die Seitenleiste der Einstellungen verwendet einen separaten Symbolsatz, der nicht von Abiyyu gezeichnet wurde.",
   "Controller button glyphs:": "Controller-Tastensymbole:",
+  "Previous season": "Vorherige Staffel",
+  "Next season": "Nächste Staffel",
+  "Speed pop-up": "Geschwindigkeitsanzeige",
+  "Speed pop-up while watching": "Geschwindigkeits-Pop-up während der Wiedergabe",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.":
+    "Zeigt die Wiedergabegeschwindigkeit, wenn du sie per Tastenkürzel, Mausrad oder Geschwindigkeitsmenü änderst.",
+  "Speed pop-up position": "Position der Geschwindigkeitsanzeige",
+  "Scroll over the speed button to change speed":
+    "Über der Geschwindigkeitstaste scrollen, um die Geschwindigkeit zu ändern",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.":
+    "Nach oben scrollen beschleunigt, nach unten verlangsamt die Wiedergabe, in Schritten von 0.25×.",
+  "Jump to the next unwatched episode": "Zur nächsten ungesehenen Folge springen",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.":
+    "Scrollt die Folgenliste zur ersten nicht gesehenen Folge, wenn du eine Serie öffnest oder die Staffel wechselst.",
 };
 
 export default settingsRefinements;

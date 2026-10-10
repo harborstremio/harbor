@@ -64,6 +64,7 @@ export const ShellLayer = memo(function ShellLayer({
   onOpenDvr,
   sleep,
   onVolumeFeedback,
+  onSpeedFeedback,
   homeServerQualityControl,
 }: {
   shellId: string;
@@ -122,6 +123,7 @@ export const ShellLayer = memo(function ShellLayer({
   onOpenDvr?: () => void;
   sleep: PlayerShellProps["sleep"];
   onVolumeFeedback?: (volume: number, muted: boolean) => void;
+  onSpeedFeedback?: (rate: number) => void;
   homeServerQualityControl?: PlayerShellProps["homeServerQualityControl"];
 }) {
   const ActiveShell = getPlayerShell(shellId).Component;
@@ -191,6 +193,7 @@ export const ShellLayer = memo(function ShellLayer({
       onRate={(r) => {
         bridgeRef.current?.setRate(r);
         writePlayerPrefs(metaId, { rate: r });
+        onSpeedFeedback?.(r);
       }}
       cropMode={cropMode}
       onCropMode={onCropMode}

@@ -157,6 +157,14 @@ export function DetailTab() {
 
         <SettingGroup label={t("Browsing")}>
           <ToggleRow
+            label={t("Jump to the next unwatched episode")}
+            sub={t(
+              "Scroll the episode list to the first episode you have not watched when you open a show or change season.",
+            )}
+            value={settings.episodeAutoScroll}
+            onChange={(v) => update({ episodeAutoScroll: v })}
+          />
+          <ToggleRow
             label={t("Hide and skip episodes")}
             sub={t(
               "Adds a Hide option when you right-click an episode. Hidden episodes disappear from the list and are skipped by Up Next. A Show hidden toggle on each show lets you bring them back.",

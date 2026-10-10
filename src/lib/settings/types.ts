@@ -217,6 +217,9 @@ export type Settings = {
   contentAdvisoryShowIgnore: boolean;
   playerVolumeHud: boolean;
   playerVolumeHudPosition: "center" | "top" | "top-left" | "top-right";
+  playerSpeedHud: boolean;
+  playerSpeedHudPosition: "center" | "top" | "top-left" | "top-right";
+  playerSpeedWheel: boolean;
   customPlaybackSpeeds: number[];
   customSleepMinutes: number[];
   defaultPlaybackSpeed: number;
@@ -228,6 +231,7 @@ export type Settings = {
   episodeLayout: "list" | "strip" | "grid";
   episodeCardScale: number;
   episodeSort: "oldest" | "newest";
+  episodeAutoScroll: boolean;
   showEpisodeRating: boolean;
   showEpisodeDescription: boolean;
   episodeHiding: boolean;
