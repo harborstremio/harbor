@@ -1,6 +1,7 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { PRODUCT_NAME } from "@/lib/i18n/brand";
 
-const APP = "Harbor";
+const APP = PRODUCT_NAME;
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 let applied = "";

@@ -120,7 +120,10 @@ pub(super) async fn install() -> Result<(), String> {
     let command = install_command(&source)?;
     run_privileged(
         &command,
-        "Harbor needs administrator access to install its virtual microphone into /Library/Audio/Plug-Ins/HAL and restart Core Audio.",
+        concat!(
+            crate::product_name!(),
+            " needs administrator access to install its virtual microphone into /Library/Audio/Plug-Ins/HAL and restart Core Audio.",
+        ),
     )
     .await
 }
@@ -129,7 +132,10 @@ pub(super) async fn uninstall() -> Result<(), String> {
     let command = uninstall_command()?;
     run_privileged(
         &command,
-        "Harbor needs administrator access to remove its virtual microphone from /Library/Audio/Plug-Ins/HAL and restart Core Audio.",
+        concat!(
+            crate::product_name!(),
+            " needs administrator access to remove its virtual microphone from /Library/Audio/Plug-Ins/HAL and restart Core Audio.",
+        ),
     )
     .await
 }

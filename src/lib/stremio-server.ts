@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { t } from "@/lib/i18n";
 
 export const DEFAULT_BUNDLED_PORT = 11470;
 const PROBE_TIMEOUT_MS = 1500;
@@ -81,7 +82,7 @@ export async function getCastServerStatus(): Promise<CastServerStatus | null> {
 }
 
 export async function restartCastServer(): Promise<string | null> {
-  if (!isTauri) return "Harbor's streaming server only runs in the desktop app.";
+  if (!isTauri) return t("Harbor's streaming server only runs in the desktop app.");
   try {
     await invoke("cast_server_restart");
     probeCache = null;

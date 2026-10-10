@@ -12,7 +12,10 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use tauri::AppHandle;
 use tokio::sync::Mutex;
 
-pub(super) const DECK_LABELS: [&str; 2] = ["Harbor Music", "Harbor Music B"];
+pub(super) const DECK_LABELS: [&str; 2] = [
+    concat!(crate::product_name!(), " Music"),
+    concat!(crate::product_name!(), " Music B"),
+];
 
 pub(super) struct MusicSession {
     pub(super) mpv: Arc<Mpv>,

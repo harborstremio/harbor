@@ -1,5 +1,6 @@
 import { useEffect, useRef, type RefObject } from "react";
 import { shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
+import { PRODUCT_NAME } from "@/lib/i18n/brand";
 import { SFX } from "@/lib/sfx";
 import { isModalOverlayOpen, modalOverlayClose } from "@/lib/modal-overlay";
 import { stableCardNavigationRect } from "@/lib/poster-backdrop-expansion";
@@ -277,7 +278,8 @@ export function isVisible(el: HTMLElement) {
     const label = el.getAttribute("aria-label") ?? "";
     if (
       label.toLowerCase().includes("harbor home") ||
-      (label.includes("Harbor") && label.includes("الرئيسية")) ||
+      label.toLowerCase().includes(`${PRODUCT_NAME.toLowerCase()} home`) ||
+      ((label.includes("Harbor") || label.includes(PRODUCT_NAME)) && label.includes("الرئيسية")) ||
       el.hasAttribute("data-brand-logo") ||
       !!el.querySelector("svg.harbor-logo, img.harbor-logo")
     ) {

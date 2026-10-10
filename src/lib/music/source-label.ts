@@ -1,3 +1,4 @@
+import { PRODUCT_NAME } from "@/lib/i18n/brand";
 const SOURCE_LABEL: Record<string, string> = {
   spotify: "Spotify",
   soundcloud: "SoundCloud",
@@ -21,7 +22,7 @@ const SOURCE_LABEL: Record<string, string> = {
   tidal: "Tidal",
   apple: "Apple Music",
   applemusic: "Apple Music",
-  harbor: "Harbor",
+  harbor: PRODUCT_NAME,
 };
 
 export function sourceLabel(id: string, override?: string): string {

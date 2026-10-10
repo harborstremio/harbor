@@ -1,4 +1,5 @@
 import { HoverTooltip } from "@/components/hover-tooltip";
+import { PRODUCT_NAME } from "@/lib/i18n/brand";
 import { MusicQuickListenIcon } from "@/components/music/music-quick-listen-icon";
 import { MusicSurpriseButton } from "@/components/music/music-surprise-button";
 import "@/components/music/music-quick-listen.css";
@@ -334,7 +335,7 @@ function MusicViewContent({ active }: { active: boolean }) {
   const searchGeneration = useRef(0);
 
   useEffect(() => {
-    if (active) document.title = `${t("music.title")} | Harbor`;
+    if (active) document.title = `${t("music.title")} | ${PRODUCT_NAME}`;
   }, [active, t]);
 
   const runSearch = useCallback((query: string, connector: string | null) => {

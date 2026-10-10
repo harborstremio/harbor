@@ -19,7 +19,7 @@ export function ProfileAvatar({
   const ringStyle = profile?.color ? { boxShadow: `0 0 0 2px ${profile.color}` } : undefined;
   return (
     <div className={`${dim} shrink-0 overflow-hidden rounded-full bg-elevated`} style={ringStyle}>
-      <AvatarImage src={src} className="h-full w-full object-cover" />
+      <AvatarImage src={src} seed={profile?.id} className="h-full w-full object-cover" />
     </div>
   );
 }

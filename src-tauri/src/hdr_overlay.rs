@@ -64,7 +64,7 @@ pub async fn hdr_overlay_open(app: AppHandle, stage_id: String) -> Result<(), St
     tauri::async_runtime::spawn_blocking(move || -> Result<(), String> {
         let url = WebviewUrl::App(format!("index.html?harbor-overlay=1&stageId={stage_id}").into());
         let builder = WebviewWindowBuilder::new(&app_clone, HDR_OVERLAY_LABEL, url)
-            .title("Harbor HDR")
+            .title(concat!(crate::product_name!(), " HDR"))
             .resizable(false)
             .decorations(false)
             .skip_taskbar(true)

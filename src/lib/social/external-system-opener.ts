@@ -1,3 +1,4 @@
+import { PRODUCT_NAME } from "@/lib/i18n/brand";
 import { parseExternalLink } from "./external-link-policy.ts";
 
 export type ExternalUrlOpenAdapter = {
@@ -11,7 +12,7 @@ export async function openExternalUrlStrict(
   adapter: ExternalUrlOpenAdapter,
 ): Promise<void> {
   const parsed = parseExternalLink(rawUrl);
-  if (!parsed.ok) throw new Error("Harbor requires a valid external link.");
+  if (!parsed.ok) throw new Error(`${PRODUCT_NAME} requires a valid external link.`);
   if (adapter.isTauri) {
     await adapter.openTauri(parsed.link.href);
     return;

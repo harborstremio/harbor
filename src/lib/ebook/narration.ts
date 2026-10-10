@@ -1,3 +1,4 @@
+import { PRODUCT_NAME } from "@/lib/i18n/brand";
 import { Channel, invoke } from "@tauri-apps/api/core";
 
 export type NarrationProgress = {
@@ -79,7 +80,7 @@ export async function synthesizeNarration(
   onProgress: (progress: NarrationProgress) => void,
 ): Promise<{ blob: Blob; boundaries: NarrationBoundary[] }> {
   if (!("__TAURI_INTERNALS__" in window)) {
-    throw new Error("Direct Edge TTS is available in the Harbor desktop app");
+    throw new Error(`Direct Edge TTS is available in the ${PRODUCT_NAME} desktop app`);
   }
   const cache = "caches" in globalThis ? await caches.open(CACHE) : null;
   const cacheKey = new Request(

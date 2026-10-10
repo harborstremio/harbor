@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Star } from "lucide-react";
-import { CatAvatar } from "@/components/icons/cat-avatar";
+import { DefaultAvatar } from "@/components/icons/default-avatar";
 import { BADGE_ICON_BASE } from "./badge-catalog";
 import { t, useT } from "@/lib/i18n";
 
@@ -43,7 +43,7 @@ export function Avatar({
             {initial}
           </span>
         ) : (
-          <CatAvatar className="h-full w-full" />
+          <DefaultAvatar className="h-full w-full" />
         )}
       </span>
       {(dotClass !== undefined || online !== undefined) && (

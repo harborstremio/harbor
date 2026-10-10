@@ -1,6 +1,7 @@
 import { Download, FlaskConical, Loader2, RotateCw } from "../icons";
 import { useId, useState } from "react";
 import { useSettings } from "@/lib/settings";
+import { PRODUCT_NAME } from "@/lib/i18n/brand";
 import { readChannelPreference, selectedUpdateChannel } from "@/lib/updater/channel";
 import { readBetaReturnContext } from "@/lib/updater/beta-return";
 import {
@@ -120,7 +121,7 @@ export function UpdatesRow() {
                 ? t("Harbor {version} available", { version: u.version })
                 : installedExperimental
                   ? `${t("Experimental")} ${installedExperimental.experimentalVersion}`
-                  : `Harbor ${__APP_VERSION__}`}
+                  : `${PRODUCT_NAME} ${__APP_VERSION__}`}
           </span>
           {u.channel === "experimental" ? (
             <span className={`${QUAL} bg-accent-soft text-accent`}>{t("Experimental")}</span>

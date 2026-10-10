@@ -116,6 +116,7 @@ export function IdentityTab() {
         <div className="hset-profile-identity flex items-center gap-6 py-3">
           <AvatarRing
             src={effectiveAvatar}
+            seed={activeProfile?.id}
             size={88}
             color={color}
             onClick={() => fileRef.current?.click()}

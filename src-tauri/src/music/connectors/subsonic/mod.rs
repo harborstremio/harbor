@@ -162,7 +162,9 @@ impl SubsonicConnector {
                 Err(error) => failure = Some(error),
             }
         }
-        Err(failure.unwrap_or_else(|| "Harbor could not reach that music server".to_string()))
+        Err(failure.unwrap_or_else(|| {
+            concat!(crate::product_name!(), " could not reach that music server").to_string()
+        }))
     }
 }
 

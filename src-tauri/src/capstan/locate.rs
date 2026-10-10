@@ -105,7 +105,7 @@ pub(super) fn resolve_jvm(app: &AppHandle) -> Result<Jvm, String> {
             source: "java on PATH".into(),
         });
     }
-    Err("Harbor could not find a Java runtime, which extensions need. Install Java 17 or newer, or set HARBOR_JAVA to a copy you already have, then try again.".into())
+    Err(concat!(crate::product_name!(), " could not find a Java runtime, which extensions need. Install Java 17 or newer, or set HARBOR_JAVA to a copy you already have, then try again.").into())
 }
 
 pub(super) struct Layout {
@@ -188,5 +188,12 @@ pub(super) fn resolve_layout(app: &AppHandle) -> Result<Layout, String> {
     roots(app)
         .iter()
         .find_map(|root| layout_at(root))
-        .ok_or_else(|| "The extension runtime is missing from this install. Reinstall Harbor, or build the layer with tools/build.sh if you are running from source.".into())
+        .ok_or_else(|| {
+            concat!(
+                "The extension runtime is missing from this install. Reinstall ",
+                crate::product_name!(),
+                ", or build the layer with tools/build.sh if you are running from source."
+            )
+            .into()
+        })
 }

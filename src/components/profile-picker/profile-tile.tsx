@@ -33,7 +33,7 @@ export function ProfileTile({
             className={`relative flex ${dim} items-center justify-center overflow-hidden rounded-full bg-elevated ${ring} transition-all duration-200 group-hover:scale-[1.04]`}
             style={{ boxShadow: `0 0 0 3px ${profile.color}` }}
           >
-            <AvatarImage src={profile.avatar} className="h-full w-full object-cover" />
+            <AvatarImage src={profile.avatar} seed={profile.id} className="h-full w-full object-cover" />
           </span>
         </button>
         {profile.passwordHash && (

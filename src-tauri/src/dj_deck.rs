@@ -16,7 +16,7 @@ pub async fn dj_deck_open(app: AppHandle) -> Result<(), String> {
     app.run_on_main_thread(move || {
         let url = WebviewUrl::App("index.html?harbor-dj=1".into());
         let builder = WebviewWindowBuilder::new(&app_for_main, DJ_LABEL, url)
-            .title("Harbor DJ")
+            .title(concat!(crate::product_name!(), " DJ"))
             .inner_size(960.0, 660.0)
             .min_inner_size(900.0, 600.0)
             .resizable(true)

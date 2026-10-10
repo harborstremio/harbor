@@ -210,7 +210,7 @@ fn open_solver(app: &AppHandle, url: &str) -> Result<(), String> {
     app.run_on_main_thread(move || {
         let builder =
             WebviewWindowBuilder::new(&app_main, SOLVER_LABEL, WebviewUrl::External(parsed))
-                .title("Harbor · checking source")
+                .title(concat!(crate::product_name!(), " · checking source"))
                 .inner_size(480.0, 640.0)
                 .center()
                 .resizable(true)

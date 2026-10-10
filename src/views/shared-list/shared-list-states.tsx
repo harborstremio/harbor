@@ -1,4 +1,5 @@
 import { ListX } from "lucide-react";
+import { t } from "@/lib/i18n";
 
 export function SharedListLoading() {
   return (
@@ -34,12 +35,12 @@ export function SharedListMissing({
       </div>
       <div className="flex flex-col gap-1.5">
         <h2 className="font-display text-[22px] text-ink">
-          {kind === "error" ? "Could not load this list" : "List not found"}
+          {kind === "error" ? t("Could not load this list") : t("List not found")}
         </h2>
         <p className="max-w-sm text-[13.5px] leading-relaxed text-ink-muted">
           {kind === "error"
-            ? "Something went wrong reaching Harbor. Check your connection and try again."
-            : "This list may be private, unlisted, or no longer shared by its maker."}
+            ? t("Something went wrong reaching Harbor. Check your connection and try again.")
+            : t("This list may be private, unlisted, or no longer shared by its maker.")}
         </p>
       </div>
       <div className="mt-1 flex items-center gap-2.5">

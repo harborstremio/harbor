@@ -158,9 +158,15 @@ pub fn tray_set_custom_themes(app: AppHandle, themes: Vec<CustomThemeEntry>) {
 }
 
 pub fn build(app: &AppHandle) -> tauri::Result<()> {
-    let show = MenuItem::with_id(app, "tray_show", "Show Harbor", true, None::<&str>)?;
+    let show = MenuItem::with_id(
+        app,
+        "tray_show",
+        concat!("Show ", crate::product_name!()),
+        true,
+        None::<&str>,
+    )?;
     let themes: [(&str, &str); 14] = [
-        ("cool-grey", "Harbor default"),
+        ("cool-grey", concat!(crate::product_name!(), " default")),
         ("nord", "Nord"),
         ("stremio", "Stremio"),
         ("crunch", "Crunchy"),
@@ -227,7 +233,13 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         None::<&str>,
     )?;
     let sep = PredefinedMenuItem::separator(app)?;
-    let quit = MenuItem::with_id(app, "tray_quit", "Quit Harbor", true, None::<&str>)?;
+    let quit = MenuItem::with_id(
+        app,
+        "tray_quit",
+        concat!("Quit ", crate::product_name!()),
+        true,
+        None::<&str>,
+    )?;
     let menu = Menu::with_items(
         app,
         &[

@@ -129,7 +129,8 @@ async fn ensure_port_free() -> Result<(), String> {
         }
     }
     Err(format!(
-        "Spotify sign in needs port {REDIRECT_PORT}. Close whatever is using it, or restart Harbor, and try again."
+        "Spotify sign in needs port {REDIRECT_PORT}. Close whatever is using it, or restart {name}, and try again.",
+        name = crate::brand::PRODUCT_NAME
     ))
 }
 

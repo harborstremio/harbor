@@ -79,9 +79,10 @@ fn serve_bundled_asset(app: &AppHandle, raw_path: &str) -> Response<Body> {
         None => Response::builder()
             .status(StatusCode::NOT_FOUND)
             .header(header::CONTENT_TYPE, "text/plain")
-            .body(Body::from(
-                "Harbor web assets are not available in this build.",
-            ))
+            .body(Body::from(concat!(
+                crate::product_name!(),
+                " web assets are not available in this build."
+            )))
             .unwrap(),
     }
 }

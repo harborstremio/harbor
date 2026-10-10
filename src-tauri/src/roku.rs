@@ -235,7 +235,7 @@ pub async fn load(
     start_time_sec: Option<f64>,
 ) -> Result<(), String> {
     let format = guess_format(&url, content_type.as_deref());
-    let title_str = title.unwrap_or_else(|| "Harbor".into());
+    let title_str = title.unwrap_or_else(|| crate::brand::PRODUCT_NAME.into());
     let channel_id = match locate_media_player_channel(&ecp_base).await {
         Ok(id) => id,
         Err(e) => {

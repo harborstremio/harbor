@@ -3,6 +3,7 @@ import en from "./locales/en";
 import { getUiLanguage, getUiRegion, useUiLanguage, useUiRegion } from "./store";
 import { isRtl, LANGUAGES, type UiLanguage } from "./languages";
 import { associationFootballEnglishLabel } from "./regional-labels";
+import { applyBrand } from "./brand";
 
 type Vars = Record<string, string | number>;
 
@@ -145,7 +146,8 @@ function resolve(lang: UiLanguage, key: string, vars?: Vars, region = getUiRegio
 }
 
 export function t(key: string, vars?: Vars): string {
-  return interpolate(resolve(getUiLanguage(), key, vars), vars);
+  const lang = getUiLanguage();
+  return interpolate(applyBrand(resolve(lang, key, vars), lang), vars);
 }
 
 export function sourceTranslationKey(value: string): string {
@@ -158,7 +160,8 @@ export function useT(): (key: string, vars?: Vars) => string {
   const lang = useUiLanguage();
   const region = useUiRegion();
   useSyncExternalStore(subscribeUiCatalog, uiCatalogVersion, uiCatalogVersion);
-  return (key: string, vars?: Vars) => interpolate(resolve(lang, key, vars, region), vars);
+  return (key: string, vars?: Vars) =>
+    interpolate(applyBrand(resolve(lang, key, vars, region), lang), vars);
 }
 
 export { useUiLanguage, isRtl, LANGUAGES };

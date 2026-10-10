@@ -324,7 +324,12 @@ fn describe(status: u16, body: &str) -> String {
         401 => format!("{SIGN_IN_AGAIN}. Connect Spotify again."),
         403 => "Spotify refused this request for the connected account.".to_string(),
         404 => "Spotify does not have that item.".to_string(),
-        429 => "Spotify is rate limiting Harbor. Try again in a moment.".to_string(),
+        429 => concat!(
+            "Spotify is rate limiting ",
+            crate::product_name!(),
+            ". Try again in a moment."
+        )
+        .to_string(),
         400 => format!("{RESTRICTED_CLIENT}. {}", excerpt(body)),
         _ => format!("Spotify returned {status}. {}", excerpt(body)),
     }

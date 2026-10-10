@@ -78,7 +78,7 @@ pub async fn captions_open(app: AppHandle, window: WebviewWindow) -> Result<(), 
     app.run_on_main_thread(move || {
         let url = WebviewUrl::App("index.html?harbor-captions=1".into());
         let builder = WebviewWindowBuilder::new(&app_clone, CAPTIONS_LABEL, url)
-            .title("Harbor Subtitles")
+            .title(concat!(crate::product_name!(), " Subtitles"))
             .inner_size(width, height)
             .min_inner_size(280.0, 108.0)
             .position(x, y)

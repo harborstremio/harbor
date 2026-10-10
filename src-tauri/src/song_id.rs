@@ -120,7 +120,8 @@ fn capture_loopback(seconds: u32) -> Result<(Vec<u8>, u32, u16, u16), String> {
     if got < target_bytes.min(bytes_per_sec * 4) {
         let secs = got as f32 / bytes_per_sec as f32;
         return Err(format!(
-            "Harbor only captured {secs:.1}s before your playback device went quiet. Keep the scene playing while Harbor listens."
+            "{name} only captured {secs:.1}s before your playback device went quiet. Keep the scene playing while {name} listens.",
+            name = crate::brand::PRODUCT_NAME
         ));
     }
 
@@ -136,7 +137,7 @@ fn ensure_audible(pcm: &[u8]) -> Result<(), String> {
         .max()
         .unwrap_or(0);
     if peak < 150 {
-        return Err("Harbor heard silence on your default playback device. Play the scene with sound, and make sure Windows is playing it through the device set as default.".to_string());
+        return Err(concat!(crate::product_name!(), " heard silence on your default playback device. Play the scene with sound, and make sure Windows is playing it through the device set as default.").to_string());
     }
     Ok(())
 }

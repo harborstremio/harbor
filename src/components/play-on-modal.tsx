@@ -1,6 +1,7 @@
 import { ListPlus, RefreshCw, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { PRODUCT_NAME } from "@/lib/i18n/brand";
 import { APP_VERSION } from "@/lib/build-info";
 import { useT } from "@/lib/i18n";
 import { queueAdd } from "@/lib/queue";
@@ -191,7 +192,7 @@ function PlayOnPanel({ request, themeId }: { request: PlayOnRequest; themeId: st
       }
       setRows((prev) => ({
         ...prev,
-        [instance.id]: { kind: "failed", text: failureText(result.reason) },
+        [instance.id]: { kind: "failed", text: t(failureText(result.reason)) },
       }));
     },
     [clearRow, payload, t],
@@ -213,7 +214,7 @@ function PlayOnPanel({ request, themeId }: { request: PlayOnRequest; themeId: st
   const localName = identity?.name?.trim() || t("This computer");
   const localDetail = [
     platformLabel(identity?.platform ?? ""),
-    `Harbor ${identity?.version || APP_VERSION}`,
+    `${PRODUCT_NAME} ${identity?.version || APP_VERSION}`,
     themeLabel(themeId),
   ]
     .filter(Boolean)

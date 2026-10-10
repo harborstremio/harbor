@@ -1,3 +1,4 @@
+import { PRODUCT_NAME } from "@/lib/i18n/brand";
 import { compatibleVocalVersion, shouldResolvePreferredSource } from "./source-version";
 import { cancelMusicQueueAutomation, markMusicQueueAutomationStarted, ownsMusicQueueAutomation } from "./queue-automation";
 import { activeProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
@@ -411,7 +412,7 @@ function updateMediaSession(track: MusicTrack): void {
   navigator.mediaSession.metadata = new MediaMetadata({
     title: track.title,
     artist: track.artist,
-    album: track.album ?? "Harbor Music",
+    album: track.album ?? `${PRODUCT_NAME} Music`,
     artwork: track.artwork ? [{ src: track.artwork, sizes: "544x544" }] : [],
   });
 }

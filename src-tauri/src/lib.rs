@@ -7,6 +7,7 @@ mod ytmusic;
 // `tauri::menu` and `tauri::tray`. The getters are not, which is why
 // display geometry reads are fine and display geometry writes are not.
 mod binary_lookup;
+mod brand;
 mod cast_hls;
 mod cast_subs;
 mod crash_report;
@@ -821,7 +822,13 @@ pub fn run() {
         tauri::http::Response::builder()
             .status(200)
             .header("content-type", "text/html; charset=utf-8")
-            .body(b"<!doctype html><meta charset=\"utf-8\"><title>Harbor</title>".to_vec())
+            .body(
+                format!(
+                    "<!doctype html><meta charset=\"utf-8\"><title>{}</title>",
+                    crate::brand::PRODUCT_NAME
+                )
+                .into_bytes(),
+            )
             .unwrap()
     });
 

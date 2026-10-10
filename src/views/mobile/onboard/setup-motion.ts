@@ -9,7 +9,7 @@ export const SETUP_MOTION_CSS = `
 .setup-boat {
   position: relative;
   display: block;
-  aspect-ratio: 700 / 642.88;
+  aspect-ratio: 512 / 383;
 }
 .setup-boat-part {
   position: absolute;

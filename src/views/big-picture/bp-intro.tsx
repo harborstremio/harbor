@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import jlMark from "@/assets/brand/jl-mark.webp";
 import { Poster } from "@/components/poster";
 import { CustomArtwork } from "@/components/custom-artwork";
 import type { Meta } from "@/lib/cinemeta";
@@ -119,75 +120,18 @@ export function BpIntro({ pool, leaving }: { pool: Meta[]; leaving: boolean }) {
   );
 }
 
-// The logo animation is 161 frames. Stopping a little short lets it settle
-// rather than snapping at the very end.
-const LOTTIE_LAST_FRAME = 146;
-
-// Static twin of the animation's resting pose, and the same art index-tv.html
-// inlines. Used whenever the boot splash already played the arrival, so the
-// viewer is not shown the logo assembling itself a second time.
-function BpIntroStaticMark() {
-  return (
-    <svg viewBox="0 0 700 642.88" fill="currentColor" aria-hidden className="h-full w-full text-ink">
-      <g transform="matrix(0.13333333,0,0,-0.13333333,0,642.88)">
-        <path d="m 72.0781,1534.27 c 0,0 1127.5819,922.03 1526.9319,2636.89 0,0 463.95,-1274.4 17.61,-2625.15 L 72.0781,1534.27" />
-        <path d="M 3975.59,2945.05 2812.18,2222.26 c -36.68,-22.79 -84.13,3.59 -84.13,46.78 v 1391.45 c 0,42.35 45.8,68.85 82.51,47.75 l 1163.41,-668.68 c 36.11,-20.75 37,-72.53 1.62,-94.51 z M 2021.85,4821.57 V 1438.84 l 2818.94,416.96 c 0,0 252.54,2501.82 -2818.94,2965.77" />
-        <path d="m 615.313,4.40234 c 0,0 -364.817,308.39866 -604.4224,706.25766 -28.3125,47.012 1.4922,107.77 55.8555,115.281 L 5090.13,1520.12 c 57.31,7.92 102.66,-47.69 82.95,-102.09 C 5065.81,1122 4746.77,351.742 4222.68,0 L 615.313,4.40234" />
-      </g>
-    </svg>
-  );
-}
-
+// Same art and box as the mark index-tv.html inlines, so the boot splash hands
+// over by removal. When the splash already showed the arrival, the mark is
+// drawn settled instead of fading in a second time.
 function BpIntroMark({ settled }: { settled: boolean }) {
-  const host = useRef<HTMLDivElement | null>(null);
-
-  // lottie-web and its 200KB of animation data are imported here rather than at
-  // the top of the file so they stay out of the shell's eager graph. On a
-  // television that graph is about sixty chunks parsed before the first paint,
-  // and this pair was half a megabyte of it for one logo.
-  useEffect(() => {
-    const el = host.current;
-    if (!el || settled) return;
-    let anim: import("lottie-web").AnimationItem | null = null;
-    let dead = false;
-    void (async () => {
-      try {
-        const [{ default: lottie }, { default: data }] = await Promise.all([
-          import("lottie-web"),
-          import("@/assets/harbor-lottie.json"),
-        ]);
-        if (dead) return;
-        const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-        anim = lottie.loadAnimation({
-          container: el,
-          renderer: "svg",
-          loop: false,
-          autoplay: false,
-          animationData: data as object,
-        });
-        if (reduce) anim.goToAndStop(LOTTIE_LAST_FRAME, true);
-        else anim.playSegments([0, LOTTIE_LAST_FRAME], true);
-      } catch {
-      }
-    })();
-    return () => {
-      dead = true;
-      anim?.destroy();
-    };
-  }, [settled]);
-
-  if (settled) {
-    return (
-      <div className="h-[min(22vh,200px)] w-[min(24vw,200px)]">
-        <BpIntroStaticMark />
-      </div>
-    );
-  }
-
   return (
-    <div
-      ref={host}
-      className="w-[min(58vw,780px)] [animation:bp-intro-mark_1200ms_var(--bp-ease)_both] motion-reduce:[animation:none]"
+    <img
+      src={jlMark}
+      alt=""
+      draggable={false}
+      className={`h-[min(22vh,200px)] w-[min(24vw,200px)] object-contain ${
+        settled ? "" : "[animation:bp-intro-mark_1200ms_var(--bp-ease)_both] motion-reduce:[animation:none]"
+      }`}
     />
   );
 }

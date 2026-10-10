@@ -92,7 +92,7 @@ pub async fn pip_open(
     let result = tauri::async_runtime::spawn_blocking(move || -> Result<(), String> {
         let url = WebviewUrl::App("index.html?pip=1".into());
         let builder = WebviewWindowBuilder::new(&app_for_window, PIP_LABEL, url)
-            .title("Harbor PiP")
+            .title(concat!(crate::product_name!(), " PiP"))
             .inner_size(560.0, 360.0)
             .position(200.0, 200.0)
             .resizable(true)

@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
-import { CatAvatar } from "@/components/icons/cat-avatar";
+import { DefaultAvatar } from "@/components/icons/default-avatar";
 
-export function AvatarImage({ src, className }: { src?: string | null; className?: string }) {
+export function AvatarImage({
+  src,
+  seed,
+  className,
+}: {
+  src?: string | null;
+  seed?: string | null;
+  className?: string;
+}) {
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     setFailed(false);
   }, [src]);
 
-  if (!src || failed) return <CatAvatar className={className} />;
+  if (!src || failed) return <DefaultAvatar seed={seed} className={className} />;
 
   return (
     <img

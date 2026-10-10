@@ -365,7 +365,14 @@ pub async fn dvr_default_dir(app: AppHandle) -> Result<String, String> {
         .or_else(|_| app.path().download_dir())
         .or_else(|_| app.path().app_data_dir())
         .map_err(|e| format!("no base dir: {}", e))?;
-    let dir = base.join("Harbor DVR");
+    // Earlier builds recorded into "Harbor DVR". Keep using that folder when it
+    // exists so existing recordings stay where new ones land.
+    let legacy = base.join("Harbor DVR");
+    let dir = if legacy.is_dir() {
+        legacy
+    } else {
+        base.join(concat!(crate::product_name!(), " DVR"))
+    };
     if !dir.exists() {
         let _ = std::fs::create_dir_all(&dir);
     }

@@ -47,7 +47,14 @@ impl SubsonicClient {
             return Err(format!("Music server returned HTTP {status}"));
         }
         let body = serde_json::from_str::<Envelope>(&payload)
-            .map_err(|_| "Music server sent a response Harbor could not read".to_string())?
+            .map_err(|_| {
+                concat!(
+                    "Music server sent a response ",
+                    crate::product_name!(),
+                    " could not read"
+                )
+                .to_string()
+            })?
             .response;
         if body.status != "ok" {
             return Err(describe(body.error.as_ref()));

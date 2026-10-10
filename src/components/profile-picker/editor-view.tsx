@@ -58,7 +58,7 @@ import { fetchSimklAvatar } from "@/lib/simkl/profile";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useSettings } from "@/lib/settings";
 import { AvatarRing } from "@/views/settings/account/avatar-ring";
-import { CatAvatar } from "@/components/icons/cat-avatar";
+import { DefaultAvatar } from "@/components/icons/default-avatar";
 import { resizeAvatar } from "@/views/settings/account/avatar-utils";
 import { AvatarFan } from "@/components/avatar-picker/avatar-fan";
 import { AvatarCatalogModal } from "@/components/avatar-picker/avatar-catalog-modal";
@@ -514,7 +514,12 @@ export function EditorView({
 
       <div className="flex flex-col gap-4 border-b border-edge-soft pb-6">
         <div className="hset-profile-editor-identity flex items-center gap-5">
-          <AvatarRing src={avatar} size={76} onClick={() => fileRef.current?.click()} />
+          <AvatarRing
+            src={avatar}
+            seed={editing?.id}
+            size={76}
+            onClick={() => fileRef.current?.click()}
+          />
           <input
             ref={fileRef}
             type="file"
@@ -979,7 +984,7 @@ export function EditorView({
                             draggable={false}
                           />
                         ) : (
-                          <CatAvatar className="h-full w-full" />
+                          <DefaultAvatar seed={p.id} className="h-full w-full" />
                         )}
                       </span>
                       <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-ink">

@@ -1,5 +1,5 @@
 import { Check, Lock, Pencil, Plus } from "../icons";
-import { CatAvatar } from "@/components/icons/cat-avatar";
+import { DefaultAvatar } from "@/components/icons/default-avatar";
 import { useProfiles } from "@/lib/profiles";
 import { useT } from "@/lib/i18n";
 import { ROW_TITLE } from "../shared";
@@ -50,7 +50,7 @@ export function ProfilesStrip() {
                         draggable={false}
                       />
                     ) : (
-                      <CatAvatar className="h-full w-full" />
+                      <DefaultAvatar seed={p.id} className="h-full w-full" />
                     )}
                   </span>
                 </span>

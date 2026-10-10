@@ -28,7 +28,7 @@ mod win {
         let title = String::from_utf16_lossy(&title_buf[..title_len as usize]);
         let is_mpv = class_name == "mpv"
             || class_name.starts_with("mpv ")
-            || (class_name.is_empty() && title.starts_with("Harbor"));
+            || (class_name.is_empty() && title.starts_with(crate::brand::PLAYER_WINDOW_TITLE));
         if is_mpv {
             (*(lparam.0 as *mut Vec<isize>)).push(hwnd.0 as isize);
         }
@@ -158,7 +158,7 @@ async fn ensure_pip_window(app: &AppHandle) -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(move || -> Result<(), String> {
         let url = WebviewUrl::App("index.html?harbor-video-pip=1".into());
         let builder = WebviewWindowBuilder::new(&app_clone, PIP_LABEL, url)
-            .title("Harbor")
+            .title(crate::brand::PRODUCT_NAME)
             .inner_size(480.0, 270.0)
             .min_inner_size(240.0, 135.0)
             .resizable(true)

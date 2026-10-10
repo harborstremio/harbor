@@ -1,3 +1,4 @@
+import { PRODUCT_NAME } from "@/lib/i18n/brand";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import htmlToPdfmake from "html-to-pdfmake";
@@ -95,7 +96,7 @@ export async function createGuidePdf({game,item,article}:GuideExport,signal:Abor
   const definition:TDocumentDefinitions={
     pageSize:"A4",pageMargins:[48,48,48,50],content,
     defaultStyle:{font:"Roboto",fontSize:10.5,lineHeight:1.3,color:"#20272d"},
-    info:{title:article.title,author,subject:game,creator:"Harbor"},
+    info:{title:article.title,author,subject:game,creator:PRODUCT_NAME},
     header:page=>page===1?null:{text:fontRuns(game,"Roboto"),margin:[48,21,48,0],fontSize:8,color:"#71777c"},
     footer:(page,count)=>({columns:[{text:"HARBOR",width:"*"},{text:`${page} / ${count}`,alignment:"right"}],margin:[48,18,48,0],fontSize:8,color:"#71777c"}),
     pageBreakBefore:(node,queries)=>{

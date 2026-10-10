@@ -211,7 +211,7 @@ mod linux {
 
         #[zbus(property)]
         fn identity(&self) -> &str {
-            "Harbor"
+            crate::brand::PRODUCT_NAME
         }
 
         #[zbus(property)]

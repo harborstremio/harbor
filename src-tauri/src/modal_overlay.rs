@@ -74,7 +74,7 @@ pub async fn modal_overlay_open(
     app.run_on_main_thread(move || {
         let url = WebviewUrl::App("index.html?harbor-modal=1".into());
         let builder = WebviewWindowBuilder::new(&app_clone, OVERLAY_LABEL, url)
-            .title("Harbor Modal")
+            .title(concat!(crate::product_name!(), " Modal"))
             .inner_size(popup_size.0, popup_size.1)
             .position(pos.x, pos.y)
             .resizable(false)

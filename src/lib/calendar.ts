@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { safeFetch as fetch, safeFetchBytes } from "@/lib/safe-fetch";
 import { formatAirDate } from "@/lib/dates";
+import { PRODUCT_NAME } from "@/lib/i18n/brand";
 import {
   isPermissionGranted as tauriNotifyGranted,
   requestPermission as tauriNotifyRequest,
@@ -607,7 +608,7 @@ export async function fireWebhook(
     let attempted = 0;
     if (payload.items.length === 0) {
       attempted = 1;
-      if (await sendDesktopNotification("Harbor", payload.text, undefined, HARBOR_ICON_PATH)) {
+      if (await sendDesktopNotification(PRODUCT_NAME, payload.text, undefined, HARBOR_ICON_PATH)) {
         delivered = 1;
       }
     } else {
@@ -627,7 +628,7 @@ export async function fireWebhook(
       }
       if (payload.items.length > DESKTOP_NOTIFY_CAP) {
         attempted++;
-        if (await sendDesktopNotification("Harbor", payload.text)) delivered++;
+        if (await sendDesktopNotification(PRODUCT_NAME, payload.text)) delivered++;
       }
     }
     if (delivered === 0) {

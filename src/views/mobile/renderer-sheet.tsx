@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Cast, Check, MonitorSmartphone } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { PRODUCT_NAME } from "@/lib/i18n/brand";
 import { useMobileRemote } from "./mobile-remote";
 import { SHEET_EXIT_CSS, useSheetPresence } from "./remote-extras";
 import { APP_VERSION } from "@/lib/build-info";
@@ -57,10 +58,10 @@ export function RendererSheet({
           )}
         </div>
         <div className="flex flex-col px-2 pb-2">
-          <SectionLabel>Harbor</SectionLabel>
+          <SectionLabel>{PRODUCT_NAME}</SectionLabel>
           <DeviceRow
             name={localName}
-            badge={`Harbor ${hostVersion}`}
+            badge={`${PRODUCT_NAME} ${hostVersion}`}
             icon={<MonitorSmartphone size={20} strokeWidth={2} />}
             active={localActive}
             onSelect={() => {
