@@ -140,3 +140,33 @@ export function wordmarkAccent(look: Pick<TeamLook, "primary" | "secondary">): s
   );
   return candidates.find((c) => luminance(c) >= 0.28) ?? null;
 }
+
+/** "rrggbb" moved `amount` (0..1) of the way to white. */
+function lighten(hex: string, amount: number): string {
+  return [0, 2, 4]
+    .map((i) => {
+      const c = parseInt(hex.slice(i, i + 2), 16);
+      return Math.round(c + (255 - c) * amount)
+        .toString(16)
+        .padStart(2, "0");
+    })
+    .join("");
+}
+
+/**
+ * The team's own colour for accents on dark art (pills, glow, highlights): its main colour when
+ * it shows up on dark (Alabama crimson, Lions blue), else its brighter second colour (Oregon
+ * yellow, Seahawks green), else a lighter shade of the main colour (Penn State navy). `ink` is the
+ * text colour that reads on it.
+ */
+export function teamAccent(look: Pick<TeamLook, "primary" | "secondary">): {
+  color: string;
+  ink: string;
+} {
+  const usable = (c: string) => valid(c) && !NEUTRAL.has(c.toLowerCase()) && luminance(c) >= 0.05;
+  const pick = [look.primary, look.secondary].find(usable);
+  const color = (
+    pick ?? lighten(valid(look.primary) ? look.primary : "777777", 0.45)
+  ).toLowerCase();
+  return { color, ink: luminance(color) >= 0.4 ? "111111" : "ffffff" };
+}

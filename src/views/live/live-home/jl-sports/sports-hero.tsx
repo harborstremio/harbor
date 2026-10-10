@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
   type RefObject,
 } from "react";
@@ -20,8 +21,8 @@ import { setPinnedWallpaper, usePinnedWallpaper } from "@/lib/jl/sports/page-wal
 import { fetchPlayerLine, fetchPregameInsight } from "@/lib/jl/sports/people";
 import { espnHeadshot } from "@/lib/jl/sports/search-parse";
 import { mixHeroSlides, photoSlides } from "@/lib/jl/sports/hub-sections";
-import { teamLook, wordmarkAccent, wordmarkLines } from "@/lib/jl/sports/team-look";
-import { brandLook } from "@/lib/jl/sports/vision";
+import { teamAccent, teamLook, wordmarkAccent, wordmarkLines } from "@/lib/jl/sports/team-look";
+import { brandLook, useVisionVersion } from "@/lib/jl/sports/vision";
 import { isCurrentLiveGame, visibleScore } from "@/lib/jl/sports/presentation";
 import { useSettings } from "@/lib/settings";
 import { isIndividualCompetition } from "@/lib/sports/competition-metadata";
@@ -176,10 +177,24 @@ export function JlSportsHero({
   const go = (delta: number) => setIndex((position + delta + count) % count);
   const key = slideKey(current);
   const focus = slideFocus(current, followed);
+  useVisionVersion();
+  // The slide's team colours the hero's accents (wordmark, Watch pill, glow, dots), not the app's.
+  const accent = focus
+    ? teamAccent(teamLook(focus.side, null, brandLook(focus.league, focus.side.id)))
+    : null;
 
   return (
     <section
       ref={root}
+      style={
+        accent
+          ? ({
+              "--color-accent": `#${accent.color}`,
+              "--color-accent-soft": `#${accent.color}40`,
+              "--hero-accent-ink": `#${accent.ink}`,
+            } as CSSProperties)
+          : undefined
+      }
       data-tv-hero-zone
       aria-roledescription="carousel"
       aria-label={t("Top games and players")}
@@ -570,7 +585,7 @@ function PlayAction({
     <button
       onClick={onClick}
       aria-label={ariaLabel}
-      className="flex h-12 items-center gap-2.5 rounded-full bg-accent px-6 text-[16px] font-bold text-canvas shadow-[0_12px_34px_-10px_var(--color-accent)] transition-transform duration-150 hover:scale-[1.03] active:scale-95 2xl:h-14 2xl:px-7 2xl:text-[18px]"
+      className="flex h-12 items-center gap-2.5 rounded-full bg-accent px-6 text-[16px] font-bold text-(--hero-accent-ink,var(--color-canvas)) shadow-[0_12px_34px_-10px_var(--color-accent)] transition-transform duration-150 hover:scale-[1.03] active:scale-95 2xl:h-14 2xl:px-7 2xl:text-[18px]"
     >
       <Play size={18} fill="currentColor" strokeWidth={0} className="dir-icon" />
       {label}
