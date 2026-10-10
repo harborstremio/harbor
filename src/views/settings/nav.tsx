@@ -544,6 +544,7 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
           "plugins",
           "channel finder",
           "ticker",
+          "sports art",
         ],
       },
       {
@@ -2814,6 +2815,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "sports",
     anchorTitle: "Sports Hub plugins",
     keywords: ["top games", "ranked matchups", "channel finder", "score ticker", "odds overlay"],
+  },
+  {
+    label: "Sports art",
+    section: "sports",
+    anchorTitle: "Sports art",
+    keywords: ["sports art", "team art", "wallpaper", "wordmark", "hero", "fan art", "upload"],
   },
   {
     label: "Region & language",
