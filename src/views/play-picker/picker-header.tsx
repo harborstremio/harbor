@@ -20,7 +20,7 @@ export function PickerNav({
   const { settings } = useSettings();
   const groupLeft = settings.pickerRefreshNextToBack;
   return (
-    <div className="-mb-9">
+    <div className="mt-6">
       <div className={`flex items-center gap-3 ${groupLeft ? "justify-start" : "justify-between"}`}>
         <button
           type="button"

@@ -117,7 +117,7 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
   return (
     <header
       data-cleannav={settings.topbarAppearance === "transparent" ? "on" : undefined}
-      className={`pointer-events-none fixed inset-x-0 top-0 ${topKind === "picker" || connecting ? "z-[130]" : "z-[55]"} h-20`}
+      className={`pointer-events-none fixed inset-x-0 top-0 ${connecting ? "z-[130]" : "z-[55]"} h-20`}
     >
       {!inSettings && settings.topbarScrollBlur && settings.topbarAppearance !== "transparent" && (
         <div

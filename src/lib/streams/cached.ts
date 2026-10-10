@@ -1,6 +1,6 @@
 import type { DebridSlug } from "./types";
 
-export const UNCACHED_MARKER_RX = /\b(?:rd|ad|pm|dl|tb|oc)\s*download\b|\buncached\b|[⬇⏳⌛⏬🔽📥☁]/i;
+export const UNCACHED_MARKER_RX = /\b(?:rd|ad|pm|dl|tb|oc)\s*download\b|\buncached\b|[⬇⏳⌛⏬🔽☁]/iu;
 export const CACHED_MARKER_RX = /[⚡✅]/u;
 export const DEBRID_TAG_RX =
   /\[(?:realdebrid|real-debrid|torbox|alldebrid|all-debrid|premiumize|debridlink|debrid-link|easydebrid|offcloud|rd|ad|pm|dl|tb|trb|oc|ed|putio)(?:\+|⚡|✅|⬇|⏳|\]|\s)/iu;
