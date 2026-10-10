@@ -70,10 +70,19 @@ export function PlayerWindowOptions() {
         </SettingsWorkbench>
       </Section>
       <Section title={t("Speed pop-up")}>
-        <SettingsWorkbench compact preview={settings.playerSpeedHud ? <SpeedHudPreview position={settings.playerSpeedHudPosition} /> : null}>
+        <SettingsWorkbench
+          compact
+          preview={
+            settings.playerSpeedHud ? (
+              <SpeedHudPreview position={settings.playerSpeedHudPosition} />
+            ) : null
+          }
+        >
           <ToggleRow
             label={t("Speed pop-up while watching")}
-            sub={t("Show the playback speed when you change it with a shortcut, the wheel or the speed menu.")}
+            sub={t(
+              "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.",
+            )}
             value={settings.playerSpeedHud}
             onChange={(v) => update({ playerSpeedHud: v })}
           />

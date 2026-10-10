@@ -383,7 +383,9 @@ export function SeriesEpisodes({
     scopeKey: meta.id,
     seasonKey: altActive ? `${source}:${picker.activeKey}` : String(active),
     target: autoScrollTarget,
-    ready: altActive ? !orderedLoading && visibleOrderedEps.length > 0 : !loading && visibleEpisodes.length > 0,
+    ready: altActive
+      ? !orderedLoading && visibleOrderedEps.length > 0
+      : !loading && visibleEpisodes.length > 0,
   });
   const selectSeason = (key: string) => {
     markPicked();
@@ -462,7 +464,9 @@ export function SeriesEpisodes({
                 onSelect={selectSeason}
                 orderTypes={orderTypesEff}
                 activeType={settings.tvdbSeasonType}
-                onSelectType={(v) => update({ tvdbSeasonType: v as typeof settings.tvdbSeasonType })}
+                onSelectType={(v) =>
+                  update({ tvdbSeasonType: v as typeof settings.tvdbSeasonType })
+                }
               />
             </SeasonStepper>
           ) : (

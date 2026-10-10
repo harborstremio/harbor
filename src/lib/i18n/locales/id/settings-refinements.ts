@@ -524,12 +524,16 @@ const settingsRefinements: Record<string, string> = {
   "Next season": "Musim berikutnya",
   "Speed pop-up": "Pop-up kecepatan",
   "Speed pop-up while watching": "Pop-up kecepatan saat menonton",
-  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "Tampilkan kecepatan putar saat Anda mengubahnya dengan pintasan, roda mouse, atau menu kecepatan.",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.":
+    "Tampilkan kecepatan putar saat Anda mengubahnya dengan pintasan, roda mouse, atau menu kecepatan.",
   "Speed pop-up position": "Posisi pop-up kecepatan",
-  "Scroll over the speed button to change speed": "Gulir di atas tombol kecepatan untuk mengubah kecepatan",
-  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.": "Gulir ke atas mempercepat dan gulir ke bawah memperlambat pemutaran, dengan langkah 0.25×.",
+  "Scroll over the speed button to change speed":
+    "Gulir di atas tombol kecepatan untuk mengubah kecepatan",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.":
+    "Gulir ke atas mempercepat dan gulir ke bawah memperlambat pemutaran, dengan langkah 0.25×.",
   "Jump to the next unwatched episode": "Lompat ke episode berikutnya yang belum ditonton",
-  "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Gulir daftar episode ke episode pertama yang belum Anda tonton saat membuka acara atau mengganti musim.",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.":
+    "Gulir daftar episode ke episode pertama yang belum Anda tonton saat membuka acara atau mengganti musim.",
 };
 
 export default settingsRefinements;

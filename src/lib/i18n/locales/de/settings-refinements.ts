@@ -524,12 +524,16 @@ const settingsRefinements: Record<string, string> = {
   "Next season": "Nächste Staffel",
   "Speed pop-up": "Geschwindigkeitsanzeige",
   "Speed pop-up while watching": "Geschwindigkeits-Pop-up während der Wiedergabe",
-  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "Zeigt die Wiedergabegeschwindigkeit, wenn du sie per Tastenkürzel, Mausrad oder Geschwindigkeitsmenü änderst.",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.":
+    "Zeigt die Wiedergabegeschwindigkeit, wenn du sie per Tastenkürzel, Mausrad oder Geschwindigkeitsmenü änderst.",
   "Speed pop-up position": "Position der Geschwindigkeitsanzeige",
-  "Scroll over the speed button to change speed": "Über der Geschwindigkeitstaste scrollen, um die Geschwindigkeit zu ändern",
-  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.": "Nach oben scrollen beschleunigt, nach unten verlangsamt die Wiedergabe, in Schritten von 0.25×.",
+  "Scroll over the speed button to change speed":
+    "Über der Geschwindigkeitstaste scrollen, um die Geschwindigkeit zu ändern",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.":
+    "Nach oben scrollen beschleunigt, nach unten verlangsamt die Wiedergabe, in Schritten von 0.25×.",
   "Jump to the next unwatched episode": "Zur nächsten ungesehenen Folge springen",
-  "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Scrollt die Folgenliste zur ersten nicht gesehenen Folge, wenn du eine Serie öffnest oder die Staffel wechselst.",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.":
+    "Scrollt die Folgenliste zur ersten nicht gesehenen Folge, wenn du eine Serie öffnest oder die Staffel wechselst.",
 };
 
 export default settingsRefinements;

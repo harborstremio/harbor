@@ -800,12 +800,15 @@ const settingsRefinements: Record<string, string> = {
   "Next season": "الموسم التالي",
   "Speed pop-up": "نافذة السرعة",
   "Speed pop-up while watching": "نافذة السرعة المنبثقة أثناء المشاهدة",
-  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "اعرض سرعة التشغيل عند تغييرها باختصار أو بعجلة الفأرة أو من قائمة السرعة.",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.":
+    "اعرض سرعة التشغيل عند تغييرها باختصار أو بعجلة الفأرة أو من قائمة السرعة.",
   "Speed pop-up position": "موضع نافذة السرعة",
   "Scroll over the speed button to change speed": "مرّر العجلة فوق زر السرعة لتغيير السرعة",
-  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.": "التمرير لأعلى يسرّع التشغيل والتمرير لأسفل يبطئه، بخطوات قدرها 0.25×.",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.":
+    "التمرير لأعلى يسرّع التشغيل والتمرير لأسفل يبطئه، بخطوات قدرها 0.25×.",
   "Jump to the next unwatched episode": "الانتقال إلى الحلقة التالية غير المشاهدة",
-  "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "مرّر قائمة الحلقات إلى أول حلقة لم تشاهدها عند فتح مسلسل أو تغيير الموسم.",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.":
+    "مرّر قائمة الحلقات إلى أول حلقة لم تشاهدها عند فتح مسلسل أو تغيير الموسم.",
 };
 
 export default settingsRefinements;

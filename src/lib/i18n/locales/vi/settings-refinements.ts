@@ -524,12 +524,15 @@ const settingsRefinements: Record<string, string> = {
   "Next season": "Mùa sau",
   "Speed pop-up": "Bảng tốc độ",
   "Speed pop-up while watching": "Hiện tốc độ khi xem",
-  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "Hiển thị tốc độ phát khi bạn thay đổi bằng phím tắt, con lăn hoặc menu tốc độ.",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.":
+    "Hiển thị tốc độ phát khi bạn thay đổi bằng phím tắt, con lăn hoặc menu tốc độ.",
   "Speed pop-up position": "Vị trí bảng tốc độ",
   "Scroll over the speed button to change speed": "Cuộn trên nút tốc độ để đổi tốc độ",
-  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.": "Lăn lên để tăng tốc, lăn xuống để giảm tốc, mỗi bước 0.25×.",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.":
+    "Lăn lên để tăng tốc, lăn xuống để giảm tốc, mỗi bước 0.25×.",
   "Jump to the next unwatched episode": "Nhảy tới tập chưa xem tiếp theo",
-  "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Cuộn danh sách tập tới tập đầu tiên bạn chưa xem khi mở một chương trình hoặc đổi mùa.",
+  "Scroll the episode list to the first episode you have not watched when you open a show or change season.":
+    "Cuộn danh sách tập tới tập đầu tiên bạn chưa xem khi mở một chương trình hoặc đổi mùa.",
 };
 
 export default settingsRefinements;

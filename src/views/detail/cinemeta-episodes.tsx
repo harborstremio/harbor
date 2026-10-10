@@ -114,9 +114,7 @@ export function CinemetaEpisodes({
   };
 
   const autoScrollTarget = useMemo<AutoScrollTarget>(() => {
-    const idx = activeEps.findIndex(
-      (ep, i) => !watchedAt(episodeSeason(ep), episodeNumber(ep, i)),
-    );
+    const idx = activeEps.findIndex((ep, i) => !watchedAt(episodeSeason(ep), episodeNumber(ep, i)));
     if (idx < 0) return null;
     return { episode: episodeNumber(activeEps[idx], idx), first: idx === 0 };
     // eslint-disable-next-line react-hooks/exhaustive-deps

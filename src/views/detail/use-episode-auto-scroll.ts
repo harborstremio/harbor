@@ -141,7 +141,8 @@ export function useEpisodeAutoScroll({
       }
       return;
     }
-    if (!fresh && hold && hold.target.episode === target.episode && hold.target.id === target.id) return;
+    if (!fresh && hold && hold.target.episode === target.episode && hold.target.id === target.id)
+      return;
     doneRef.current = key;
     pickedRef.current = false;
     // On entry a remembered or user scroll position wins; a reload while still pinned does not count as one.

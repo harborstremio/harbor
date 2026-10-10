@@ -59,9 +59,10 @@ export function SpeedMenu({
       e.preventDefault();
       e.stopPropagation();
       const { rate: cur, onRate: set } = wheelRef.current;
-      const next = Math.round(
-        Math.min(SPEED_MAX, Math.max(SPEED_MIN, cur + (e.deltaY < 0 ? 0.25 : -0.25))) * 100,
-      ) / 100;
+      const next =
+        Math.round(
+          Math.min(SPEED_MAX, Math.max(SPEED_MIN, cur + (e.deltaY < 0 ? 0.25 : -0.25))) * 100,
+        ) / 100;
       if (Math.abs(next - cur) > 0.001) set(next);
     };
     el.addEventListener("wheel", onWheel, { passive: false });
