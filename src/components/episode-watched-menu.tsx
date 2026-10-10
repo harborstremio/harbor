@@ -36,12 +36,15 @@ export function EpisodeWatchedMenu({
   meta,
   target,
   allEpisodes,
+  onMarkMany,
   onClose,
 }: {
   metaId: string;
   meta: ManualWatchedMeta;
   target: WatchedMenuTarget;
   allEpisodes?: Array<{ season: number; episode: number; released?: string | null }>;
+  /** Anime lists route marks themselves: display keys locally, entry numbering for trackers. */
+  onMarkMany?: (scope: "one" | "upTo", watched: boolean) => void;
   onClose: () => void;
 }) {
   const t = useT();
@@ -76,9 +79,12 @@ export function EpisodeWatchedMenu({
   const started = !target.watched && readResumeEntry(metaId, target.season, target.episode) != null;
 
   const unmark = () => {
-    setManualWatched(metaId, target.season, target.episode, false);
     clearResume(metaId, target.season, target.episode);
-    if (showIds) void unmarkEpisodeWatched(showIds, target.season, target.episode);
+    if (onMarkMany) onMarkMany("one", false);
+    else {
+      setManualWatched(metaId, target.season, target.episode, false);
+      if (showIds) void unmarkEpisodeWatched(showIds, target.season, target.episode);
+    }
     onClose();
   };
 
@@ -104,9 +110,12 @@ export function EpisodeWatchedMenu({
             icon={<Check size={14} strokeWidth={2} />}
             label={t("Mark as watched")}
             onClick={() => {
-              recordManualWatchedMeta(metaId, meta);
-              setManualWatched(metaId, target.season, target.episode, true);
-              if (showIds) void markEpisodesWatched(showIds, target.season, [target.episode]);
+              if (onMarkMany) onMarkMany("one", true);
+              else {
+                recordManualWatchedMeta(metaId, meta);
+                setManualWatched(metaId, target.season, target.episode, true);
+                if (showIds) void markEpisodesWatched(showIds, target.season, [target.episode]);
+              }
               onClose();
             }}
           />
@@ -114,6 +123,11 @@ export function EpisodeWatchedMenu({
             icon={<Eye size={14} strokeWidth={2} />}
             label={t("Mark watched up to here")}
             onClick={() => {
+              if (onMarkMany) {
+                onMarkMany("upTo", true);
+                onClose();
+                return;
+              }
               recordManualWatchedMeta(metaId, meta);
               if (allEpisodes && allEpisodes.length > 0) {
                 const upTo = allEpisodes.filter(

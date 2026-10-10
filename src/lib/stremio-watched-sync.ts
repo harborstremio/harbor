@@ -211,6 +211,7 @@ export function markMovieWatchedStremio(
   }));
 }
 
+/** Resolves `null` when the title is skipped on purpose, otherwise whether the write landed. */
 export async function setEpisodesWatchedStremio(
   authKey: string,
   meta: Meta,
@@ -218,12 +219,17 @@ export async function setEpisodesWatchedStremio(
   videos: CinemetaVideo[] | undefined,
   localWatched: Set<string>,
   localUnwatched: Set<string>,
-): Promise<boolean> {
-  if (ANIME_ID.test(meta.id) || meta.type === "anime") return false;
-  if (/^tt\d+$/.test(meta.id) && !isDetectedAnime(meta.id)) {
-    await detectAnimeForCw([{ _id: meta.id, type: "series" }]);
+  cinemetaKeyed = false,
+): Promise<boolean | null> {
+  if (ANIME_ID.test(canonicalId)) return null;
+  // Anime manual keys use entry numbering; only callers that already mapped them to Cinemeta pass through.
+  if (!cinemetaKeyed) {
+    if (ANIME_ID.test(meta.id) || meta.type === "anime") return null;
+    if (/^tt\d+$/.test(meta.id) && !isDetectedAnime(meta.id)) {
+      await detectAnimeForCw([{ _id: meta.id, type: "series" }]);
+    }
+    if (isDetectedAnime(meta.id)) return null;
   }
-  if (isDetectedAnime(meta.id)) return false;
   return putWithState(authKey, meta, canonicalId, async (base) => {
     const server = await decodeWatchedEpisodes(base?.state?.watched, videos).catch(
       () => new Set<string>(),

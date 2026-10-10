@@ -127,6 +127,15 @@ export function resolveAnimeIdentity(
   const task = resolveTask(metaId, imdbId, episode ?? {});
   if (identityCache.size >= IDENTITY_CACHE_MAX) identityCache.clear();
   identityCache.set(key, task);
+  // A lookup that failed on the network must not stick for the session; AniZip caches real misses.
+  task.then(
+    (r) => {
+      if (r == null && identityCache.get(key) === task) identityCache.delete(key);
+    },
+    () => {
+      if (identityCache.get(key) === task) identityCache.delete(key);
+    },
+  );
   return task;
 }
 

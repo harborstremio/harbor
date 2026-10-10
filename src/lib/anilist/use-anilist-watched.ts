@@ -4,6 +4,7 @@ import { fetchListEntry } from "@/lib/anilist/mutations";
 import { resolveAnilistMediaId } from "@/lib/anilist/sync";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { airedOnly } from "@/lib/aired";
+import { trackerWatchedKeys } from "@/lib/tracker-watched-keys";
 
 export type AnilistWatched = { watchedKeys: Set<string>; completed: boolean };
 
@@ -36,22 +37,16 @@ export function useAnilistWatched(harborId: string, episodes: KitsuEpisode[]): A
         return;
       }
       const { status, progress } = info.entry;
-      const sorted = airedOnly(
-        [...episodesRef.current].sort(
-          (a, b) => (a.seasonNumber ?? 1) - (b.seasonNumber ?? 1) || a.number - b.number,
-        ),
-        (e) => e.airdate,
+      const eps = episodesRef.current;
+      const cap = airedOnly(eps, (e) => e.airdate).length;
+      const watchedKeys = await trackerWatchedKeys(
+        harborId,
+        eps,
+        progress,
+        status === "COMPLETED",
+        info.episodes,
       );
-      const mediaTotal = info.episodes;
-      const cap =
-        mediaTotal != null && mediaTotal > 0 ? Math.min(sorted.length, mediaTotal) : sorted.length;
-      const watchedCount =
-        status === "COMPLETED" ? cap : Math.max(0, Math.min(progress, cap));
-      const watchedKeys = new Set<string>();
-      for (let i = 0; i < watchedCount; i++) {
-        const ep = sorted[i];
-        watchedKeys.add(`${ep.seasonNumber ?? 1}:${ep.number}`);
-      }
+      if (cancelled) return;
       const completed = status === "COMPLETED" || (cap <= 1 && progress >= 1);
       setResult({ watchedKeys, completed });
     })();

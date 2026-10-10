@@ -1,5 +1,5 @@
 import { activeProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
-import { getSecret, setSecret } from "@/lib/secret-store";
+import { getSecret, setSecret, subscribeSecretsReady } from "@/lib/secret-store";
 import { clearPendingStops } from "./pending-sync";
 import { REFRESH_THRESHOLD_SEC } from "./config";
 import type { TraktSession } from "./types";
@@ -108,6 +108,9 @@ export function subscribeSession(fn: () => void): () => void {
     subscribers.delete(fn);
   };
 }
+
+// Startup readers (external CW) can cache null before secrets.json is in memory.
+if (typeof window !== "undefined") subscribeSecretsReady(() => loaded && resetForProfile());
 
 export function isAuthenticated(): boolean {
   const s = getSession();

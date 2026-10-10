@@ -16,6 +16,7 @@ import { markMovieWatchedStremio } from "@/lib/stremio-watched-sync";
 import { syncSeriesWatchedToStremio } from "@/lib/stremio-episode-watched";
 import { tmdbImdbCached } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
 import { airedOnly } from "@/lib/aired";
+import { isDetectedAnime } from "@/lib/anime-detect";
 
 export async function markMovieWatched(
   meta: Meta,
@@ -79,6 +80,51 @@ async function releasedEpisodes(
   return airedOnly(ordered, (v) => v.rel).map(({ season, episode }) => ({ season, episode }));
 }
 
+// Anime rows read `${id}|${seasonNumber}|${number}`, falling back to the IMDb pair; write both.
+async function markAnimeEpisodes(
+  meta: Meta,
+  watched: boolean,
+  ownerProfile: string,
+): Promise<void> {
+  const [
+    { animeDetails },
+    { readSettings },
+    { pushAnimeMarks },
+    { imdbToKitsu },
+    { syncAnimeWatchedToStremio },
+  ] = await Promise.all([
+    import("@/lib/providers/anime-detail"),
+    import("@/lib/auto-download/context"),
+    import("@/lib/anime-tracker-marks"),
+    import("@/lib/providers/anime-mapping"),
+    import("@/lib/anime-stremio-watched"),
+  ]);
+  const settings = readSettings();
+  // animeDetails only resolves anime-native ids, as the detail page does for detected anime.
+  const kitsu = meta.id.startsWith("tt") ? await imdbToKitsu(meta.id).catch(() => null) : null;
+  const lookup = kitsu != null ? { ...meta, id: `kitsu:${kitsu}` } : meta;
+  const res = await animeDetails(settings, lookup).catch(() => null);
+  if (!res || activeProfileId() !== ownerProfile) return;
+  const eps = res.episodes.filter((e) => e.sourceMetaId == null && (e.imdbSeason ?? 1) !== 0);
+  const rows = watched ? airedOnly(eps, (e) => e.airdate) : eps;
+  if (rows.length === 0) return;
+  const keys: Array<{ season: number; episode: number }> = [];
+  for (const e of rows) {
+    keys.push({ season: e.seasonNumber ?? 1, episode: e.number });
+    if (e.imdbSeason != null && e.imdbEpisode != null && e.imdbSeason >= 1)
+      keys.push({ season: e.imdbSeason, episode: e.imdbEpisode });
+  }
+  setManualWatchedMany(meta.id, keys, watched);
+  if (meta.id.startsWith("tt")) syncAnimeWatchedToStremio(meta, meta.id, rows);
+  void pushAnimeMarks(meta.id, rows, watched, {
+    title: meta.name,
+    trackId: `kitsu:${res.kitsuId}`,
+    anilist: settings.anilistAutoSync,
+    mal: settings.malAutoSync,
+    simkl: true,
+  });
+}
+
 export async function markMetaWatched(
   meta: Meta,
   imdbId?: string | null,
@@ -106,11 +152,15 @@ export async function markMetaWatched(
   const ownerProfile = activeProfileId();
   const ownerSession = getTraktSession();
   const resolvedImdb = resolveSeriesImdb(meta, imdbId);
-  const eps = await releasedEpisodes(meta, resolvedImdb);
+  const isAnime = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
+  if (isAnime || meta.type === "anime" || isDetectedAnime(meta.id)) {
+    await markAnimeEpisodes(meta, true, ownerProfile);
+    if (activeProfileId() !== ownerProfile) return;
+  }
+  const eps = isAnime ? [] : await releasedEpisodes(meta, resolvedImdb);
   if (activeProfileId() !== ownerProfile) return;
   if (eps.length > 0) setManualWatchedMany(meta.id, eps, true);
   void syncSeriesWatchedToStremio(meta, resolvedImdb);
-  const isAnime = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
   const imdb = resolvedImdb ?? (meta.id.startsWith("tt") ? meta.id : undefined);
   const tmdb = typeof tmdbId === "string" ? Number(tmdbId) || undefined : (tmdbId ?? undefined);
   if (!isAnime && eps.length > 0) {
@@ -133,7 +183,11 @@ export async function unmarkMetaWatched(meta: Meta, imdbId?: string | null): Pro
     return;
   }
   const resolvedImdb = resolveSeriesImdb(meta, imdbId);
-  const eps = await releasedEpisodes(meta, resolvedImdb);
+  const isAnime = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
+  if (isAnime || meta.type === "anime" || isDetectedAnime(meta.id)) {
+    await markAnimeEpisodes(meta, false, activeProfileId());
+  }
+  const eps = isAnime ? [] : await releasedEpisodes(meta, resolvedImdb);
   if (eps.length > 0) setManualWatchedMany(meta.id, eps, false);
   void syncSeriesWatchedToStremio(meta, resolvedImdb);
 }

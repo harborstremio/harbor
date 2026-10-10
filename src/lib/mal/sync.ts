@@ -124,6 +124,38 @@ export async function markMalWatching(harborId: string, title: string): Promise<
   }
 }
 
+/** Lowers progress to the last episode still watched; leaves completed and re-watching entries alone. */
+export async function rewindMalProgress(harborId: string, target: number): Promise<void> {
+  if (!isAuthenticated() || !Number.isInteger(target) || target < 0) return;
+  const profile = activeProfileId();
+  const session = getSession();
+  const owned = () => activeProfileId() === profile && getSession() === session;
+  try {
+    const malId = await resolveMalMediaId(harborId);
+    if (!owned() || malId == null) return;
+    const cur = await malRequest<EntryResponse>(
+      `/anime/${malId}?fields=num_episodes,my_list_status`,
+    );
+    const listStatus = cur?.my_list_status;
+    if (!owned() || !listStatus) return;
+    if (listStatus.status === "completed" || listStatus.is_rewatching) return;
+    if (listStatus.num_episodes_watched <= target) return;
+    await malRequest<SaveResponse>(`/anime/${malId}/my_list_status`, {
+      method: "PATCH",
+      body: new URLSearchParams({ num_watched_episodes: String(target) }),
+    });
+    // Forget sent ticks above the new count so replaying those episodes syncs again.
+    const sent = loadSent();
+    for (const key of Object.keys(sent)) {
+      if (key.startsWith(`${harborId}|`) && (sentProgress(sent, key)?.p ?? 0) > target)
+        delete sent[key];
+    }
+    saveSent(sent);
+  } catch {
+    return;
+  }
+}
+
 export async function syncMalProgress(
   harborId: string,
   episode: number | undefined,

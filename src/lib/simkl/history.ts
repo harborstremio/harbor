@@ -186,6 +186,87 @@ export async function markEpisodesWatched(
   }
 }
 
+type HistoryResult = { added?: { episodes?: number }; not_found?: Record<string, unknown> };
+
+/** Simkl adds nothing for an episode already in history, so only a not_found entry means a miss. */
+export function historyConfirmed(result: HistoryResult | null | undefined): boolean {
+  if (!result) return false;
+  return Object.values(result.not_found ?? {}).every((v) => !Array.isArray(v) || v.length === 0);
+}
+
+/** Simkl matches anime by native ids and entry-relative numbers, never by TVDB season under an IMDb id. */
+export async function markAnimeEpisodesWatched(
+  anime: SimklIds,
+  episodes: number[],
+): Promise<boolean> {
+  if (episodes.length === 0) return false;
+  const watchedAt = new Date().toISOString();
+  try {
+    invalidateHistoryCache();
+    const result = await simklRequest<HistoryResult>("/sync/history", {
+      method: "POST",
+      body: {
+        anime: [
+          { ids: anime, episodes: episodes.map((n) => ({ number: n, watched_at: watchedAt })) },
+        ],
+      },
+    });
+    return historyConfirmed(result);
+  } catch {
+    return false;
+  }
+}
+
+export async function unmarkAnimeEpisodesWatched(
+  anime: SimklIds,
+  episodes: number[],
+): Promise<boolean> {
+  if (episodes.length === 0) return false;
+  try {
+    invalidateHistoryCache();
+    await simklRequest("/sync/history/remove", {
+      method: "POST",
+      body: { anime: [{ ids: anime, episodes: episodes.map((n) => ({ number: n })) }] },
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** TVDB-coordinate fallback: Simkl routes these to the right anime entry only with this flag. */
+export async function markTvdbAnimeEpisodesWatched(
+  show: SimklIds,
+  season: number,
+  episodes: number[],
+): Promise<boolean> {
+  if (episodes.length === 0) return false;
+  const watchedAt = new Date().toISOString();
+  try {
+    invalidateHistoryCache();
+    const result = await simklRequest<HistoryResult>("/sync/history", {
+      method: "POST",
+      body: {
+        shows: [
+          {
+            ids: show,
+            use_tvdb_anime_seasons: true,
+            seasons: [
+              {
+                number: season,
+                episodes: episodes.map((n) => ({ number: n, watched_at: watchedAt })),
+              },
+            ],
+          },
+        ],
+      },
+    });
+    return historyConfirmed(result);
+  } catch {
+    return false;
+  }
+}
+
 export async function unmarkEpisodeWatched(
   show: SimklIds,
   season: number,

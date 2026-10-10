@@ -28,6 +28,8 @@ export type AnimeTvdbPanel = {
   activeKey: string;
   onSelect: (key: string) => void;
   visibleEpisodes: KitsuEpisode[];
+  /** Every numbered season's rows in display order, excluding specials. */
+  orderedEpisodes: KitsuEpisode[];
   orderTypes: TvdbSeasonTypeOption[];
   activeType: TvdbOrderType;
 };
@@ -374,6 +376,9 @@ export function useAnimeTvdbPanel(
       activeKey,
       onSelect,
       visibleEpisodes: built.subset.get(activeKey) ?? built.pool,
+      orderedEpisodes: built.items
+        .filter((i) => !i.extra)
+        .flatMap((i) => built.subset.get(i.key) ?? []),
       orderTypes,
       activeType,
     },

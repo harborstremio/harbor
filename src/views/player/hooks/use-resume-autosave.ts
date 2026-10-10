@@ -30,6 +30,8 @@ import { useProfiles } from "@/lib/profiles";
 import type { PlayerSrc, PlayEpisode } from "@/lib/view";
 import { ANIME_CLOUD_ID, CLOUD_OK } from "@/lib/stremio";
 import { syncSeriesWatchedToStremio } from "@/lib/stremio-episode-watched";
+import { isDetectedAnime } from "@/lib/anime-detect";
+import { absoluteEntryNumber } from "@/lib/anime-entry-target";
 import { isNaturalEnd } from "@/lib/player/playback-end";
 import { playerLoadIdentity } from "@/lib/player/load-identity";
 
@@ -73,6 +75,8 @@ type ResumeSession = {
   ready: boolean;
   position: number;
   lastSaved: number;
+  /** "pushing" while a Stremio watched push is in flight, "done" once it landed this session. */
+  stremioWatched?: "pushing" | "done";
 };
 
 export function useResumeAutosave(params: ResumeAutosaveParams) {
@@ -154,6 +158,17 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
     if (pos < MIN_POSITION_SEC) return;
     const seasonForeign = splitSeasonForeign(s, se);
     const cs = seasonForeign ? se : canonSeason(s, se);
+    // Next/queue episodes come from Cinemeta without the IMDb pair; for tt anime their own pair is it.
+    const ttAnimeBare =
+      id.startsWith("tt") &&
+      !!s.episode &&
+      s.episode.imdbSeason == null &&
+      !s.episode.kitsuStreamId &&
+      typeof ep === "number" &&
+      (!!s.isAnime || !!s.episode.sourceMetaId || isDetectedAnime(id));
+    const syncEpisode = ttAnimeBare
+      ? { ...s.episode!, imdbSeason: se, imdbEpisode: ep }
+      : s.episode;
     const finished =
       (sn.durationSec > 0 && pos / sn.durationSec >= WATCHED_RATIO) || isNaturalEnd(sn, pos);
     current.lastSaved = pos * 1000;
@@ -195,13 +210,12 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
     } else {
       savePlayback(id, { title: s.meta.name, parsedTitle: s.meta.name }, cs, ep);
     }
-    if (
+    const seriesFinished =
       (s.meta.type === "series" || s.meta.type === "anime" || isAnimeId(id)) &&
       typeof cs === "number" &&
       typeof ep === "number" &&
-      finished &&
-      !isManuallyWatched(id, cs, ep)
-    ) {
+      finished;
+    if (seriesFinished && !isManuallyWatched(id, cs, ep)) {
       recordManualWatchedMeta(id, {
         type: "series",
         name: s.meta.name,
@@ -210,7 +224,33 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
       });
       for (const coveredEpisode of covered.length ? covered : [ep])
         setManualWatched(id, cs, coveredEpisode, true);
-      void syncSeriesWatchedToStremio(s.meta, rv ? rid : null);
+    }
+    // Kept apart from the local mark so a failed push retries on the next tick.
+    if (seriesFinished && current.stremioWatched == null && isManuallyWatched(id, cs, ep)) {
+      current.stremioWatched = "pushing";
+      const animeImdb = syncEpisode?.imdbEpisode;
+      const ttAnime =
+        id.startsWith("tt") &&
+        (!!s.isAnime ||
+          s.meta.type === "anime" ||
+          !!s.episode?.kitsuStreamId ||
+          isDetectedAnime(id));
+      // Anime keys use entry numbering; Stremio only understands the episode's Cinemeta pair.
+      const push =
+        ttAnime && cs != null && animeImdb != null
+          ? syncSeriesWatchedToStremio(s.meta, id, {
+              watched: new Set([`${cs}:${animeImdb}`]),
+              unwatched: new Set(),
+            })
+          : syncSeriesWatchedToStremio(s.meta, rv ? rid : null);
+      void push.then(
+        (ok) => {
+          current.stremioWatched = ok ? "done" : undefined;
+        },
+        () => {
+          current.stremioWatched = undefined;
+        },
+      );
     }
     if (s.meta.type === "movie" && finished) {
       setMovieWatchedLocal(id, true);
@@ -269,7 +309,7 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
       );
     }
     if (pos < TASTE_MIN_SEC) return;
-    const track = animeTrackerTarget(id, s.episode, ep);
+    const track = animeTrackerTarget(id, syncEpisode, ep);
     const profile = activeProfileId();
     const anilistSession = getAnilistSession();
     const malSession = getMalSession();
@@ -288,24 +328,33 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
     };
     const useIdentity =
       (anilistAutoSyncRef.current || malAutoSyncRef.current) &&
-      animeIdentityEligibleForSync(id, s.episode);
+      animeIdentityEligibleForSync(id, syncEpisode);
     if (track && !useIdentity) {
       fireTrackers(track.id, track.episode);
     } else if (useIdentity) {
       void resolveAnimeIdentity(id, rid, {
         season: cs,
         episode: ep,
-        imdbSeason: s.episode?.imdbSeason,
-        imdbEpisode: s.episode?.imdbEpisode,
+        imdbSeason: syncEpisode?.imdbSeason,
+        imdbEpisode: syncEpisode?.imdbEpisode,
       })
-        .then((identity) => {
+        .then(async (identity) => {
           // Prefer the season-scoped entry so multi-season franchises sync to
           // the correct per-season AniList/MAL media, not the season-1 entry.
-          if (identity) fireTrackers(`kitsu:${identity.kitsuId}`, identity.number);
-          else if (track) fireTrackers(track.id, track.episode);
+          if (identity) {
+            // One entry across TVDB seasons counts in absolute order, which AniZip keys can drift from.
+            const absolute = await absoluteEntryNumber(
+              identity.kitsuId,
+              syncEpisode?.imdbSeason,
+              syncEpisode?.imdbEpisode,
+              syncEpisode?.absoluteNumber,
+            ).catch(() => null);
+            fireTrackers(`kitsu:${identity.kitsuId}`, absolute ?? identity.number);
+          } else if (track && !ttAnimeBare) fireTrackers(track.id, track.episode);
         })
         .catch(() => {
-          if (track) fireTrackers(track.id, track.episode);
+          // A bare tt episode number is a TVDB number, never an entry number.
+          if (track && !ttAnimeBare) fireTrackers(track.id, track.episode);
         });
     }
     const kind = finished ? "watched" : "play";

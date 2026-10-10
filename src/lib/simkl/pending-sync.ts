@@ -136,11 +136,38 @@ function clearPending(key: string): void {
   save(load().filter((p) => keyOf(p) !== key));
 }
 
-let flushDeps: FlushDeps | null = null;
+/** Drops one queued watch after a direct history write confirmed it. */
+export function clearPendingWatch(metaId: string, episode: PendingEpisodeInput): void {
+  const clean = cleanEpisode(episode);
+  clearPending(keyOf({ metaId, ...(clean ? { episode: clean } : {}) }));
+}
 
-export async function flushPendingWatches(
+let flushDeps: FlushDeps | null = null;
+let flushing: Promise<{ flushed: number; remaining: number }> | null = null;
+let flushAgain = false;
+
+/** Single-flight: overlapping triggers would replay the same entries and duplicate Simkl writes. */
+export function flushPendingWatches(
   deps?: FlushDeps,
 ): Promise<{ flushed: number; remaining: number }> {
+  if (flushing) {
+    flushAgain = true;
+    return flushing;
+  }
+  flushing = (async () => {
+    let result = await flushOnce(deps);
+    while (flushAgain) {
+      flushAgain = false;
+      result = await flushOnce(deps);
+    }
+    return result;
+  })().finally(() => {
+    flushing = null;
+  });
+  return flushing;
+}
+
+async function flushOnce(deps?: FlushDeps): Promise<{ flushed: number; remaining: number }> {
   const d = deps ?? flushDeps;
   if (!d || !d.hasSession()) return { flushed: 0, remaining: load().length };
   const owner = storageKey();

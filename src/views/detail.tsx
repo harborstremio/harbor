@@ -70,6 +70,7 @@ import {
 } from "@/lib/stremio";
 import { decodeWatchedEpisodes, stremioMovieWatched } from "@/lib/stremio-watched";
 import { setEpisodesWatchedStremio } from "@/lib/stremio-watched-sync";
+import { reconcileRemoteWatched } from "@/lib/stremio-watched-pull";
 import { useHideAnimeMetas } from "@/lib/anime-hide";
 import {
   isMovieWatchedLocal,
@@ -772,18 +773,37 @@ export function DetailView({
     if (!meta.id.startsWith("tt") && CLOUD_OK.test(meta.id)) candidates.push(meta.id);
     if (candidates.length === 0) return;
     let cancelled = false;
-    void (async () => {
+    const load = async () => {
       for (const cid of candidates) {
         const item = await libraryGetOne(authKey, cid).catch(() => null);
         if (cancelled) return;
         if (item) {
-          setLibraryItem(item);
+          setLibraryItem((prev) => (prev && prev._mtime === item._mtime ? prev : item));
+          // Ticks set in another Stremio client reach the episode rows through manual keys.
+          reconcileRemoteWatched([item]);
           return;
         }
       }
-    })();
+    };
+    void load();
+    // Same cadence as Home: refetch on return to the window and every 30 s while visible.
+    let debounce: number | null = null;
+    const refresh = () => {
+      if (document.visibilityState !== "visible" || debounce != null) return;
+      debounce = window.setTimeout(() => {
+        debounce = null;
+        void load();
+      }, 600);
+    };
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    const poll = window.setInterval(refresh, 30000);
     return () => {
       cancelled = true;
+      if (debounce != null) window.clearTimeout(debounce);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+      window.clearInterval(poll);
     };
   }, [authKey, meta.id, detail?.imdbId]);
 

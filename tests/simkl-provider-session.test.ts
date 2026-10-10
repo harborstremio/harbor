@@ -42,6 +42,7 @@ function fixture() {
       },
       setSession: () => {},
     },
+    "@/lib/secret-store": { subscribeSecretsReady: () => () => {} },
     "./device-auth": {},
     "./ids": {},
     "./history": {},
@@ -91,6 +92,40 @@ test("Simkl provider catches a session restored between render and subscription"
   assert.equal(f.render().isConnected, false);
   f.unmount();
   assert.equal(f.subscribers.size, 0);
+});
+
+test("a session read before secrets.json loads is re-read once the store is ready", () => {
+  let secret: string | null = null;
+  let ready: (() => void) | null = null;
+  const module = { exports: {} as any };
+  const deps: Record<string, unknown> = {
+    "@/lib/active-profile-id": { activeProfileId: () => "p", activeProfileIsPrimary: () => true },
+    "@/lib/secret-store": {
+      getSecret: (k: string) => (k === "harbor.simkl.session.v1.p" ? secret : null),
+      setSecret: () => {},
+      subscribeSecretsReady: (fn: () => void) => {
+        ready = fn;
+        return () => {};
+      },
+    },
+    "./pending-sync": { clearPendingWatches: () => {} },
+  };
+  const code = ts.transpileModule(readFileSync("src/lib/simkl/session.ts", "utf8"), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  new Function("require", "module", "exports", "window", code)(
+    (id: string) => deps[id],
+    module,
+    module.exports,
+    {},
+  );
+  assert.equal(module.exports.getSession(), null);
+  secret = JSON.stringify({ accessToken: "t", username: "u" });
+  let notified = 0;
+  module.exports.subscribeSession(() => notified++);
+  ready!();
+  assert.equal(module.exports.getSession()?.username, "u");
+  assert.equal(notified, 1);
 });
 
 test("a disconnect before subscription cannot retain a stale connected session", () => {

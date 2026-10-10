@@ -1,7 +1,13 @@
 export type ScrobbleAction = "start" | "pause" | "stop";
 
 export type EpisodeRef =
-  | { season?: number; episode?: number; imdbId?: string; imdbSeason?: number }
+  | {
+      season?: number;
+      episode?: number;
+      imdbId?: string;
+      imdbSeason?: number;
+      imdbEpisode?: number;
+    }
   | undefined;
 
 export type ScrobbleInfo = { title?: string; year?: number | null; imdb?: string; tmdb?: number };

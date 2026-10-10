@@ -219,9 +219,12 @@ test("an imdb keyed Continue Watching play no longer drops the AniList and MAL s
     new URL("../src/views/player/hooks/use-resume-autosave.ts", import.meta.url),
     "utf8",
   );
-  assert.match(src, /animeIdentityEligibleForSync\(id, s\.episode\)/);
+  assert.match(src, /animeIdentityEligibleForSync\(id, syncEpisode\)/);
   assert.match(src, /resolveAnimeIdentity\(id, rid, \{/);
-  assert.match(src, /fireTrackers\(`kitsu:\$\{identity\.kitsuId\}`, identity\.number\)/);
+  assert.match(
+    src,
+    /fireTrackers\(`kitsu:\$\{identity\.kitsuId\}`, absolute \?\? identity\.number\)/,
+  );
   assert.doesNotMatch(
     src,
     /anilistAutoSyncRef\.current && trackId/,

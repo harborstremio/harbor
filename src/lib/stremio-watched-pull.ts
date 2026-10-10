@@ -8,7 +8,6 @@ import {
   unwatchedAt,
 } from "@/lib/manual-watched";
 import { isMovieWatchedLocal, setMovieWatchedLocal } from "@/lib/movie-watched";
-import { detectAnimeForCw, isDetectedAnime } from "@/lib/anime-detect";
 
 const reconciled = new Set<string>();
 const lastPullMtime = new Map<string, number>();
@@ -21,7 +20,8 @@ function isSeries(i: LibraryItem): boolean {
 export function reconcileRemoteWatched(items: LibraryItem[]): void {
   for (const i of items) {
     if (i.removed && !i.temp) continue;
-    if (ANIME_ID.test(i._id) || i.isAnime === true || isDetectedAnime(i._id)) continue;
+    // Anime-native ids have no Cinemeta numbering; tt anime decodes like any show and rows read the IMDb pair.
+    if (ANIME_ID.test(i._id)) continue;
     const key = `${i._id}|${String(i._mtime ?? "")}`;
     if (reconciled.has(key)) continue;
     reconciled.add(key);
@@ -43,9 +43,8 @@ export function reconcileRemoteWatched(items: LibraryItem[]): void {
 
 async function applySeries(id: string, watched: string, remoteMtime: number): Promise<void> {
   if (!id.startsWith("tt")) return;
-  if (!isDetectedAnime(id)) await detectAnimeForCw([{ _id: id, type: "series" }]);
-  if (isDetectedAnime(id)) return;
-  const full = await fetchCinemetaMeta("series", id).catch(() => null);
+  // Stremio indexes the watched bitfield against Cinemeta's list, whatever metadata the user prefers.
+  const full = await fetchCinemetaMeta("series", id, true).catch(() => null);
   const videos = full?.videos;
   if (!videos?.length) return;
   const keys = await decodeWatchedEpisodes(watched, videos).catch(() => new Set<string>());

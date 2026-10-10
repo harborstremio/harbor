@@ -10,12 +10,14 @@ import { fetchWatchedKeySet } from "@/lib/trakt/history";
 import { useTrakt } from "@/lib/trakt/provider";
 import { useAnilistWatched } from "@/lib/anilist/use-anilist-watched";
 import { useMalWatched } from "@/lib/mal/use-mal-watched";
+import { useSimklAnimeWatched } from "@/lib/simkl/use-simkl-anime-watched";
 import { EpisodeWatchedMenu, type WatchedMenuTarget } from "@/components/episode-watched-menu";
 import { manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
 import { useT } from "@/lib/i18n";
 import { AnimeEpisodeRow } from "./anime-episodes/episode-row";
 import { AnimeSeasonPicker } from "./anime-episodes/anime-season-picker";
 import { mapSeasonToEntry } from "./anime-episodes/anime-season-art";
+import { animeSeasonKey } from "./anime-episodes/anime-season-key";
 import { MovieEntryCard } from "./anime-episodes/movie-entry-card";
 import { useAnimeOrder } from "./anime-episodes/use-anime-order";
 import { SeasonArcPicker } from "./series-episodes/season-arc-picker";
@@ -197,7 +199,7 @@ export function AnimeEpisodes({
     intentSeasonKey ?? undefined,
     soloEntry,
   );
-  const routing = useAnimeWatchedRouting(meta, franchise, trackId);
+  const routing = useAnimeWatchedRouting(meta, franchise, trackId, imdbId);
   const effectiveOrder = order;
   const { openMeta } = useView();
   const [activeEntryId, setActiveEntryId] = useState(currentId);
@@ -357,6 +359,7 @@ export function AnimeEpisodes({
     setWatchedMenu({ x: e.clientX, y: e.clientY, season, episode, watched, metaId: sourceMetaId });
   };
 
+  const simklWatched = useSimklAnimeWatched(imdbId, [meta.id, trackId], episodes);
   const { progressFor, nextUpNum, nextUpId, spoilerFor, allWatched } = useAnimeProgressMap({
     episodes,
     displayEpisodes,
@@ -368,10 +371,40 @@ export function AnimeEpisodes({
     entrySourceId: displaySourceId,
     entryAnilistWatched,
     entryMalWatched,
+    simklWatched,
     mwVersion,
     settings,
   });
-  const markSeason = (watched: boolean) => routing.markMany(displayEpisodes, watched);
+  // Bulk marks must cover the rows the user sees, keyed as the rows read them.
+  const allOrderedEpisodes = tvdbPanel.panel
+    ? tvdbPanel.panel.orderedEpisodes
+    : activeIsAnchor && effectiveOrder
+      ? effectiveOrder.orderedEpisodes
+      : displayEpisodes;
+  // Unmarking rewinds tracker progress to the last row still shown watched.
+  const seriesRows = () => {
+    const rows = new Map<number, KitsuEpisode>();
+    for (const ep of [...allOrderedEpisodes, ...displayEpisodes, ...episodes]) rows.set(ep.id, ep);
+    return [...rows.values()].map((row) => ({ row, watched: progressFor(row).watched }));
+  };
+  const markSeason = (watched: boolean) =>
+    routing.markMany(displayEpisodes, watched, watched ? undefined : seriesRows());
+  const markFromMenu = (scope: "one" | "upTo", watched: boolean) => {
+    if (!watchedMenu) return;
+    const owner = watchedMenu.metaId ?? meta.id;
+    const isTarget = (ep: KitsuEpisode) =>
+      (ep.sourceMetaId ?? meta.id) === owner &&
+      animeSeasonKey(ep) === watchedMenu.season &&
+      ep.number === watchedMenu.episode;
+    const pool = allOrderedEpisodes.some(isTarget) ? allOrderedEpisodes : displayEpisodes;
+    const idx = pool.findIndex(isTarget);
+    if (idx < 0) return;
+    routing.markMany(
+      scope === "one" ? [pool[idx]] : pool.slice(0, idx + 1),
+      watched,
+      watched ? undefined : seriesRows(),
+    );
+  };
 
   const orderedEpisodes = useMemo(
     () => (settings.episodeSort === "newest" ? displayEpisodes.slice().reverse() : displayEpisodes),
@@ -645,13 +678,7 @@ export function AnimeEpisodes({
                 }
           }
           target={watchedMenu}
-          allEpisodes={entryEpisodes
-            .filter((ep) => (ep.sourceMetaId ?? meta.id) === (watchedMenu.metaId ?? meta.id))
-            .map((ep) => ({
-              season: ep.seasonNumber ?? 1,
-              episode: ep.number,
-              released: ep.airdate ?? null,
-            }))}
+          onMarkMany={markFromMenu}
           onClose={() => setWatchedMenu(null)}
         />
       )}

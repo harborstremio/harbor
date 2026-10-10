@@ -30,7 +30,10 @@ test("the poisoned detected-anime set is purged via a storage version bump", () 
 
 test("watched-to-Stremio sync gates on the id SCHEME, never fuzzy anime detection", () => {
   assert.ok(!/isDetectedAnime/.test(episodeWatched), "stremio-episode-watched must not gate on isDetectedAnime");
-  assert.match(episodeWatched, /if \(ANIME_ID\.test\(id\) \|\| meta\.type === "anime"\) return;/);
+  assert.match(
+    episodeWatched,
+    /if \(ANIME_ID\.test\(id\) \|\| \(meta\.type === "anime" && !animeKeys\)\) return true;/,
+  );
 });
 
 test("detail-page watched reconciliation is unblocked for tt cartoons", () => {

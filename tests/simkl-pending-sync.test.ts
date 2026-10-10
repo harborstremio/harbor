@@ -7,6 +7,7 @@ import test from "node:test";
 import "./_localstorage-stub.ts";
 import {
   armOnlineFlush,
+  clearPendingWatch,
   flushPendingWatches,
   listPendingWatches,
   recordPendingWatch,
@@ -133,6 +134,41 @@ test("flush replays the terminal stop before the history write", async () => {
   ]);
   assert.equal(listPendingWatches().length, 1);
   assert.equal(listPendingWatches()[0].metaId, "tt0000000");
+  clearPending();
+});
+
+test("overlapping flushes replay each queued watch once", async () => {
+  clearPending();
+  recordPendingWatch("tt1224144", { season: 7, episode: 22 });
+  recordPendingWatch("tt1224144", { season: 7, episode: 21 });
+  const writes: number[] = [];
+  const deps = {
+    hasSession: () => true,
+    stopScrobble: async () => true,
+    recordWatched: async (_m: string, ep: { episode: number } | undefined) => {
+      writes.push(ep?.episode ?? 0);
+      await new Promise((r) => setTimeout(r, 5));
+      return true;
+    },
+  };
+  await Promise.all([
+    flushPendingWatches(deps),
+    flushPendingWatches(deps),
+    flushPendingWatches(deps),
+  ]);
+  assert.deepEqual(writes.sort(), [21, 22]);
+  assert.equal(listPendingWatches().length, 0);
+});
+
+test("a confirmed direct write clears only its own queued watch", () => {
+  clearPending();
+  recordPendingWatch("tt1224144", { season: 7, episode: 22 }, "tt1224144");
+  recordPendingWatch("tt1224144", { season: 7, episode: 21 }, "tt1224144");
+  clearPendingWatch("tt1224144", { season: 7, episode: 22 });
+  assert.deepEqual(
+    listPendingWatches().map((p) => p.episode?.episode),
+    [21],
+  );
   clearPending();
 });
 

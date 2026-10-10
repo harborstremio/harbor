@@ -7,15 +7,18 @@ import {
   setManualWatchedMany,
   type ManualWatchedMeta,
 } from "@/lib/manual-watched";
-import { syncAnimeProgress } from "@/lib/anilist/sync";
-import { syncMalProgress } from "@/lib/mal/sync";
+import { pushAnimeMarks } from "@/lib/anime-tracker-marks";
+import { syncAnimeWatchedToStremio } from "@/lib/anime-stremio-watched";
 import { useSettings } from "@/lib/settings";
 import { airedOnly } from "../helpers";
 import { animeSeasonKey } from "./anime-season-key";
 
-const ANIME_TRACK_ID = /^(kitsu|mal|anilist|anidb):/;
-
-export function useAnimeWatchedRouting(meta: Meta, franchise: FranchiseEntry[], trackId?: string) {
+export function useAnimeWatchedRouting(
+  meta: Meta,
+  franchise: FranchiseEntry[],
+  trackId?: string,
+  imdbId?: string | null,
+) {
   const { settings } = useSettings();
   const byId = useMemo(() => {
     const m = new Map<string, Meta>();
@@ -33,35 +36,43 @@ export function useAnimeWatchedRouting(meta: Meta, franchise: FranchiseEntry[], 
     return { type: "series", name: m.name, poster: m.poster, background: m.background };
   };
 
-  const markMany = (displayEpisodes: KitsuEpisode[], watched: boolean) => {
+  /** Writes the keys the rows read, then each tracker entry's own episode numbers. */
+  const markMany = (
+    displayEpisodes: KitsuEpisode[],
+    watched: boolean,
+    seriesRows?: Array<{ row: KitsuEpisode; watched: boolean }>,
+  ) => {
     const eligible = watched ? airedOnly(displayEpisodes, (ep) => ep.airdate) : displayEpisodes;
     if (eligible.length === 0) return;
-    const groups = new Map<string, Array<{ season: number; episode: number }>>();
+    const groups = new Map<string, KitsuEpisode[]>();
     for (const ep of eligible) {
       const id = ep.sourceMetaId ?? meta.id;
       const list = groups.get(id) ?? [];
-      list.push({
-        season: animeSeasonKey(ep),
-        episode: ep.number,
-      });
+      list.push(ep);
       groups.set(id, list);
     }
     for (const [id, eps] of groups) {
       if (watched) recordManualWatchedMeta(id, manualMetaFor(id));
-      setManualWatchedMany(id, eps, watched);
-      const syncId =
-        id === meta.id && trackId && ANIME_TRACK_ID.test(trackId) && !ANIME_TRACK_ID.test(id)
-          ? trackId
-          : id;
-      if (watched && ANIME_TRACK_ID.test(syncId)) {
-        const highest = Math.max(...eps.map((e) => e.episode));
-        if (Number.isFinite(highest) && highest > 0) {
-          const title = manualMetaFor(id).name;
-          if (settings.anilistAutoSync) void syncAnimeProgress(syncId, highest, title);
-          if (settings.malAutoSync) void syncMalProgress(syncId, highest, title);
-        }
-      }
+      setManualWatchedMany(
+        id,
+        eps.map((ep) => ({ season: animeSeasonKey(ep), episode: ep.number })),
+        watched,
+      );
     }
+    if (!/^(kitsu|mal|anilist|anidb):/.test(meta.id) && groups.has(meta.id))
+      syncAnimeWatchedToStremio(meta, imdbId ?? null, groups.get(meta.id)!);
+    const unmarked = new Set(eligible);
+    void pushAnimeMarks(meta.id, eligible, watched, {
+      title: meta.name,
+      trackId,
+      anilist: settings.anilistAutoSync,
+      mal: settings.malAutoSync,
+      simkl: true,
+      watchedRows: seriesRows?.map(({ row, watched: w }) => ({
+        row,
+        watched: w && !unmarked.has(row),
+      })),
+    });
   };
 
   return { metaForEp, manualMetaFor, markMany };

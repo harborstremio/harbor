@@ -101,10 +101,13 @@ export function getEpisodeProgress(
     ? `imdb:${traktImdbId}:${traktSeason ?? season}:${traktEpisode ?? episode}`
     : null;
   const traktDone = traktKey ? traktWatched.has(traktKey) : false;
-  const stremioDone = stremioWatched ? stremioWatched.has(`${season}:${episode}`) : false;
-  const anilistDone = anilistWatched ? anilistWatched.has(`${season}:${episode}`) : false;
-  const simklDone = simklWatched ? simklWatched.has(`${season}:${episode}`) : false;
-  const malDone = malWatched ? malWatched.has(`${season}:${episode}`) : false;
+  // External sets may be keyed by the canonical (IMDb/TVDB) pair rather than the row's own numbering.
+  const inSet = (set?: Set<string>) =>
+    !!set && (set.has(`${season}:${episode}`) || (canonDiffers && set.has(`${canonS}:${canonE}`)));
+  const stremioDone = inSet(stremioWatched);
+  const anilistDone = inSet(anilistWatched);
+  const simklDone = inSet(simklWatched);
+  const malDone = inSet(malWatched);
   const manualDone = resumeIds.some(
     (id) =>
       manualWatchedState(id, season, episode) === true ||

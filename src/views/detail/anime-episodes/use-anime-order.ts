@@ -14,6 +14,8 @@ export type AnimeOrder = {
   activeKey: string;
   onSelect: (key: string) => void;
   visibleEpisodes: KitsuEpisode[];
+  /** Every numbered season's rows in display order, excluding specials. */
+  orderedEpisodes: KitsuEpisode[];
 };
 
 export function useAnimeOrder(
@@ -92,5 +94,8 @@ export function useAnimeOrder(
     activeKey,
     onSelect,
     visibleEpisodes: filteredBuilt.subsetByKey.get(activeKey) ?? [],
+    orderedEpisodes: filteredBuilt.items
+      .filter((i) => !i.extra)
+      .flatMap((i) => filteredBuilt.subsetByKey.get(i.key) ?? []),
   };
 }

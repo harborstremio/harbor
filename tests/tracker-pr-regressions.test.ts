@@ -303,6 +303,9 @@ test("Simkl fallback returns actual outcomes and stops after its account changes
   let resolutions = 0;
   const api = load("src/lib/simkl/record-watched.ts", {
     "@/lib/active-profile-id": { activeProfileId: () => "a" },
+    "@/lib/anime-detect": { isDetectedAnime: () => false },
+    "@/lib/anime-entry-target": { animeEntryTarget: async () => null },
+    "@/lib/providers/anime-mapping": { kitsuToMal: async () => null },
     "./session": { getSession: () => session },
     "./ids": {
       stremioIdToSimklTarget: () => (known ? { ok: true, target: episode } : { ok: false }),
@@ -313,6 +316,7 @@ test("Simkl fallback returns actual outcomes and stops after its account changes
         if (switchDuring) session = { username: "b" };
         return confirmed;
       },
+      markAnimeEpisodesWatched: async () => false,
       addToHistory: async () => confirmed,
     },
     "@/lib/tracker-resolve": {

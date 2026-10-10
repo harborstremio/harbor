@@ -172,6 +172,37 @@ export async function markAnimeWatching(harborId: string, title: string): Promis
   }
 }
 
+/** Lowers progress to the last episode still watched; leaves completed and repeating entries alone. */
+export async function rewindAnimeProgress(harborId: string, target: number): Promise<void> {
+  if (!isAuthenticated() || !Number.isInteger(target) || target < 0) return;
+  const profile = activeProfileId();
+  const session = getSession();
+  const owned = () => activeProfileId() === profile && getSession() === session;
+  try {
+    const mediaId = await resolveAnilistMediaId(harborId);
+    if (!owned() || mediaId == null) return;
+    const cur = await anilistRequest<EntryResponse>(ENTRY_QUERY, { id: mediaId });
+    const entry = cur?.Media?.mediaListEntry;
+    if (!owned() || !entry) return;
+    if (entry.status === "COMPLETED" || entry.status === "REPEATING") return;
+    if (entry.progress <= target) return;
+    await anilistRequest<SaveResponse>(SAVE_MUTATION, {
+      mediaId,
+      progress: target,
+      status: entry.status,
+    });
+    // Forget sent ticks above the new count so replaying those episodes syncs again.
+    const sent = loadSent();
+    for (const key of Object.keys(sent)) {
+      if (key.startsWith(`${harborId}|`) && (sentProgress(sent, key)?.p ?? 0) > target)
+        delete sent[key];
+    }
+    saveSent(sent);
+  } catch {
+    return;
+  }
+}
+
 export async function syncAnimeProgress(
   harborId: string,
   episode: number | undefined,

@@ -19,6 +19,7 @@ export function playbackPersistenceHarness(kind: "local" | "cloud" = "local") {
   const localCw: any[] = [], cleared: any[][] = [], watchEvents: any[] = [];
   const localOwners: any[] = [];
   let profileId = "fixture";
+  let stremioPushOk = () => true;
   let trackerSession = {};
   const cloudWrites: any[][] = [];
   const identityRequests: any[][] = [], trackerProgress: any[][] = [], trackerStatus: any[][] = [];
@@ -57,7 +58,9 @@ export function playbackPersistenceHarness(kind: "local" | "cloud" = "local") {
     subscribePlaybackClock: (fn: () => void) => { listeners.add(fn); return () => listeners.delete(fn); },
     useSettings: () => ({ settings: { anilistAutoSync: false, malAutoSync: false } }),
     ANIME_CLOUD_ID: /^(kitsu|mal|anilist|anidb):/, CLOUD_OK: /^(tt|tmdb:)/,
-    syncSeriesWatchedToStremio: (...args: any[]) => { synced.push(args); return Promise.resolve(); },
+    syncSeriesWatchedToStremio: (...args: any[]) => { synced.push(args); return Promise.resolve(stremioPushOk()); },
+    isDetectedAnime: () => false,
+    absoluteEntryNumber: async () => null,
     isNaturalEnd, playerLoadIdentity,
     cloudWriteId: (id: string, resolved: string, verified: boolean) => id.startsWith("tt") ? id : verified ? resolved : null,
     useProfiles: () => ({ activeProfile: { id: profileId } }),
@@ -89,12 +92,14 @@ export function playbackPersistenceHarness(kind: "local" | "cloud" = "local") {
   return {
     writes, watched, history, synced, cleared, localCw, watchEvents, cloudWrites,
     localOwners, setProfile: (id: string) => { profileId = id; },
+    setStremioPush: (ok: () => boolean) => { stremioPushOk = ok; },
     setCloudRead: (read: () => Promise<any>) => { cloudRead = read; },
     identityRequests, trackerProgress, trackerStatus,
     setIdentityResolver(resolve: (...args: any[]) => Promise<any>) {
       dependencies.resolveAnimeIdentity = (...args: any[]) => { identityRequests.push(args); return resolve(...args); };
     },
     skipIdentityResolution() { dependencies.animeIdentityEligible = () => false; },
+    dependencies,
     switchTrackerSession() { trackerSession = {}; },
     enableAnimeSync() {
       dependencies.useSettings = () => ({ settings: { anilistAutoSync: true, malAutoSync: true } });

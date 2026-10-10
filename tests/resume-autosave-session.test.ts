@@ -84,6 +84,57 @@ test("normal completion still records the watched episode and clears its resume 
   assert.equal(h.synced[0]?.[1], "tt100");
 });
 
+test("a failed Stremio watched push retries after the episode is already marked locally", async () => {
+  const h = resumeAutosaveHarness();
+  let results = [false, true];
+  h.setStremioPush(() => results.shift() ?? true);
+  let p = playbackParams(); h.render(p);
+  p = { ...p, snap: { ...p.snap, status: "playing", positionSec: 3500, durationSec: 3600 } };
+  h.render(p); h.clock(3500); h.tick();
+  assert.equal(h.synced.length, 1);
+  await new Promise((r) => setTimeout(r, 0));
+  h.clock(3510); h.tick();
+  assert.equal(h.watched.length, 1, "the local mark is written once");
+  assert.equal(h.synced.length, 2, "the failed push is retried");
+  await new Promise((r) => setTimeout(r, 0));
+  h.clock(3520); h.tick();
+  assert.equal(h.synced.length, 2, "a landed push is not repeated");
+  results = [];
+});
+
+test("an IMDb anime episode reached by Next syncs its entry number and Cinemeta pair", async () => {
+  const h = resumeAutosaveHarness();
+  h.enableAnimeSync();
+  const d = h.dependencies;
+  d.isDetectedAnime = (id: string) => id === "tt100";
+  // Mirrors the stock eligibility check: identity needs an IMDb season.
+  d.animeIdentityEligible = (_id: string, ep: { imdbSeason?: number }) =>
+    (ep?.imdbSeason ?? 0) >= 1;
+  d.resolveAnimeIdentity = async (...args: any[]) => {
+    h.identityRequests.push(args);
+    return { kitsuId: 1444, number: 999 };
+  };
+  d.absoluteEntryNumber = async (_k: number, s: number, e: number) =>
+    s === 8 && e === 10 ? 187 : null;
+  // Next builds the episode from Cinemeta: season/episode only, no IMDb pair or stream id.
+  let p: any = playbackParams(8, 10);
+  p.src.episode = { season: 8, episode: 10, sourceMetaId: "kitsu:1444" };
+  h.render(p);
+  p = { ...p, snap: { ...p.snap, status: "playing", positionSec: 1300, durationSec: 1400 } };
+  h.render(p);
+  h.clock(1300);
+  h.tick();
+  await new Promise((r) => setTimeout(r, 0));
+  assert.deepEqual(
+    h.trackerProgress.map((v) => v.slice(0, 3)),
+    [
+      ["anilist", "kitsu:1444", 187],
+      ["mal", "kitsu:1444", 187],
+    ],
+  );
+  assert.deepEqual([...h.synced[0][2].watched], ["8:10"]);
+});
+
 test("loading with stale telemetry cannot save progress for an episode that never starts", () => {
   const h = resumeAutosaveHarness();
   const first = playbackParams(); h.render(first);
@@ -114,7 +165,7 @@ test("outgoing anime tracker sync uses its own resolved ID and reaches both trac
   h.render({ ...p, snap: { ...p.snap, status: "playing", positionSec: 3300, durationSec: 3600 } });
   h.clock(3300); h.clock(0);
   h.render(playbackParams(2, 1, { resolvedImdbId: "tt200" }));
-  await Promise.resolve(); await Promise.resolve();
+  await new Promise((r) => setTimeout(r, 0));
   assert.deepEqual(h.identityRequests[0]?.slice(0, 2), ["tmdb:tv:100", "tt100"]);
   assert.deepEqual(h.trackerProgress.map(v => v.slice(0, 3)), [
     ["anilist", "kitsu:99", 1], ["mal", "kitsu:99", 1],

@@ -18,6 +18,7 @@ export type SimklIds = {
   tvdb?: number;
   mal?: number;
   anidb?: number;
+  anilist?: number;
   kitsu?: number;
 };
 

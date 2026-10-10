@@ -3,6 +3,7 @@ import { useMal } from "@/lib/mal/provider";
 import { fetchListEntry, resolveMalMediaId } from "@/lib/mal/mutations";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { airedOnly } from "@/lib/aired";
+import { trackerWatchedKeys } from "@/lib/tracker-watched-keys";
 
 export type MalWatched = { watchedKeys: Set<string>; completed: boolean };
 
@@ -35,22 +36,16 @@ export function useMalWatched(harborId: string, episodes: KitsuEpisode[]): MalWa
         return;
       }
       const { status, numEpisodesWatched } = info.entry;
-      const sorted = airedOnly(
-        [...episodesRef.current].sort(
-          (a, b) => (a.seasonNumber ?? 1) - (b.seasonNumber ?? 1) || a.number - b.number,
-        ),
-        (e) => e.airdate,
+      const eps = episodesRef.current;
+      const cap = airedOnly(eps, (e) => e.airdate).length;
+      const watchedKeys = await trackerWatchedKeys(
+        harborId,
+        eps,
+        numEpisodesWatched,
+        status === "completed",
+        info.numEpisodes,
       );
-      const mediaTotal = info.numEpisodes;
-      const cap =
-        mediaTotal != null && mediaTotal > 0 ? Math.min(sorted.length, mediaTotal) : sorted.length;
-      const watchedCount =
-        status === "completed" ? cap : Math.max(0, Math.min(numEpisodesWatched, cap));
-      const watchedKeys = new Set<string>();
-      for (let i = 0; i < watchedCount; i++) {
-        const ep = sorted[i];
-        watchedKeys.add(`${ep.seasonNumber ?? 1}:${ep.number}`);
-      }
+      if (cancelled) return;
       const completed = status === "completed" || (cap <= 1 && numEpisodesWatched >= 1);
       setResult({ watchedKeys, completed });
     })();

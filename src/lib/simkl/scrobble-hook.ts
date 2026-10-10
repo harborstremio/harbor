@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useSimkl } from "./provider";
 import { simklScrobble, buildBody, type ScrobbleInfo } from "./scrobble";
-import { recordPendingWatch } from "./pending-sync";
+import { clearPendingWatch, recordPendingWatch } from "./pending-sync";
 import { recordWatchedFallback } from "./record-watched";
-import { getPlaybackPosition } from "@/lib/player/playback-clock";
+import { getPlaybackPosition, subscribePlaybackClock } from "@/lib/player/playback-clock";
 import { useSettings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
 import {
@@ -124,7 +124,8 @@ export function useSimklScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
             if (!ok) recordPendingWatch(metaId, ep, info?.imdb);
           });
         }
-        lastActionRef.current = "stop";
+        // A truncated end is reloaded in place (same key), so it must not lock out the real end.
+        lastActionRef.current = endPct >= WATCHED_MARK_PCT ? "stop" : null;
       }
       return;
     }
@@ -149,12 +150,18 @@ export function useSimklScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
 
   useEffect(() => {
     if (!enabled) return;
-    if (snap.durationSec < STUB_MAX_SEC) return;
-    if (key !== lastKeyRef.current) return;
-    if (lastActionRef.current !== "start" && lastActionRef.current !== "pause") return;
-    const pct = Math.min(100, Math.max(0, (snap.positionSec / snap.durationSec) * 100));
-    if (pct > progressRef.current) progressRef.current = pct;
-  }, [enabled, key, snap.positionSec, snap.durationSec]);
+    const duration = snap.durationSec;
+    if (duration < STUB_MAX_SEC) return;
+    // snap only changes on status and track events, so follow the live clock instead.
+    const track = () => {
+      if (key !== lastKeyRef.current) return;
+      if (lastActionRef.current !== "start" && lastActionRef.current !== "pause") return;
+      const pct = Math.min(100, Math.max(0, (getPlaybackPosition() / duration) * 100));
+      if (pct > progressRef.current) progressRef.current = pct;
+    };
+    track();
+    return subscribePlaybackClock(track);
+  }, [enabled, key, snap.durationSec]);
 
   useEffect(() => {
     return () => {
@@ -166,7 +173,11 @@ export function useSimklScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
         const action = progress >= WATCHED_MARK_PCT ? "stop" : "pause";
         sendBeacon(a.metaId, a.episode, action === "stop" ? 100 : progress, action, a.info);
         if (action === "stop") {
+          // Leaving the player (Next from the ending preview, Back) keeps the app alive: queue, write, clear.
           recordPendingWatch(a.metaId, a.episode, a.info?.imdb);
+          void recordWatchedFallback(a.metaId, a.episode, a.info).then((ok) => {
+            if (ok) clearPendingWatch(a.metaId, a.episode);
+          });
         }
         lastActionRef.current = action;
       } else {

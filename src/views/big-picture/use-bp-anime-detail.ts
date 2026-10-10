@@ -3,6 +3,7 @@ import type { Meta } from "@/lib/cinemeta";
 import { useAnilistWatched } from "@/lib/anilist/use-anilist-watched";
 import type { EpisodeProgress } from "@/lib/episode-progress";
 import { useMalWatched } from "@/lib/mal/use-mal-watched";
+import { useSimklAnimeWatched } from "@/lib/simkl/use-simkl-anime-watched";
 import { manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
 import { animeDetails, type AnimeDetailExtras } from "@/lib/providers/anime-detail";
 import { parseKitsuId, type KitsuEpisode, type KitsuStreamer } from "@/lib/providers/kitsu";
@@ -185,6 +186,11 @@ export function useBpAnimeDetail(meta: Meta | null, opts?: BpAnimeDetailOptions)
   const mwVersion = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
   const { watchedKeys: anilistWatched } = useAnilistWatched(isAnime ? canonicalId : "", episodes);
   const { watchedKeys: malWatched } = useMalWatched(isAnime ? canonicalId : "", episodes);
+  const simklWatched = useSimklAnimeWatched(
+    isAnime ? imdbId : null,
+    isAnime ? [metaId, canonicalId] : [],
+    episodes,
+  );
 
   const preferredSeasonKey = useAnimePreferredSeason({
     episodes,
@@ -261,6 +267,7 @@ export function useBpAnimeDetail(meta: Meta | null, opts?: BpAnimeDetailOptions)
     traktWatched: NO_TRAKT,
     anilistWatched,
     malWatched,
+    simklWatched,
     mwVersion,
     settings,
   });

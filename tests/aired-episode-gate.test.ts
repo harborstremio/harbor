@@ -61,7 +61,14 @@ test("mark all watched runs the same aired rule as mark season", () => {
 test("tracker progress is projected onto aired episodes, not a left-shifted list", () => {
   for (const path of ["../src/lib/anilist/use-anilist-watched.ts", "../src/lib/mal/use-mal-watched.ts"]) {
     const src = readFileSync(new URL(path, import.meta.url), "utf8");
-    assert.match(src, /const sorted = airedOnly\(\s+\[\.\.\.episodesRef\.current\]\.sort\(/, path);
+    assert.match(src, /trackerWatchedKeys\(/, path);
+    assert.doesNotMatch(src, /function airedEpisodes/, path);
+    assert.doesNotMatch(src, /if \(!e\.airdate\) return true/, path);
+  }
+  {
+    const path = "../src/lib/tracker-watched-keys.ts";
+    const src = readFileSync(new URL(path, import.meta.url), "utf8");
+    assert.match(src, /const sorted = airedOnly\(\s+\[\.\.\.episodes\]\.sort\(/, path);
     assert.doesNotMatch(src, /function airedEpisodes/, path);
     assert.doesNotMatch(src, /if \(!e\.airdate\) return true/, path);
   }

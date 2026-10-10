@@ -2,7 +2,15 @@ import { activeProfileId } from "@/lib/active-profile-id";
 import { getSession } from "./session";
 import { resolveForMeta } from "@/lib/tracker-resolve";
 import { resolveSimklEpisodeTarget, stremioIdToSimklTarget } from "./ids";
-import { addToHistory, markEpisodesWatched } from "./history";
+import {
+  addToHistory,
+  markAnimeEpisodesWatched,
+  markEpisodesWatched,
+  markTvdbAnimeEpisodesWatched,
+} from "./history";
+import { isDetectedAnime } from "@/lib/anime-detect";
+import { animeEntryTarget } from "@/lib/anime-entry-target";
+import { kitsuToMal } from "@/lib/providers/anime-mapping";
 import type { ScrobbleInfo } from "./scrobble-body";
 import type { PlayerSrc } from "@/lib/view";
 
@@ -25,6 +33,27 @@ export async function recordWatchedFallback(
   const session = getSession();
   const owned = () => session != null && getSession() === session && activeProfileId() === profile;
   if (!owned()) return false;
+  if (episode && metaId.startsWith("tt") && isDetectedAnime(metaId)) {
+    // An IMDb-opened episode's own season/episode already are the TVDB pair.
+    const t = await animeEntryTarget(metaId, {
+      number: episode.episode,
+      seasonNumber: episode.season,
+      imdbId: episode.imdbId,
+      imdbSeason: episode.imdbSeason ?? episode.season,
+      imdbEpisode: episode.imdbEpisode ?? episode.episode,
+      streamId: episode.kitsuStreamId,
+    });
+    const mal = t ? await kitsuToMal(t.kitsuId).catch(() => null) : null;
+    if (!owned()) return false;
+    if (t) {
+      const ids = mal != null ? { kitsu: t.kitsuId, mal } : { kitsu: t.kitsuId };
+      return markAnimeEpisodesWatched(ids, [t.number]);
+    }
+    // Without a Kitsu entry only Simkl's TVDB-anime mapping can place it; plain shows[] never matches.
+    const season = episode.imdbSeason ?? episode.season;
+    const number = episode.imdbEpisode ?? episode.episode;
+    return markTvdbAnimeEpisodesWatched({ imdb: metaId.split(":")[0] }, season, [number]);
+  }
   const r = stremioIdToSimklTarget(metaId, episode);
   const t = r.ok
     ? r.target
