@@ -298,7 +298,9 @@ export function createVisionStore(ports: VisionPorts) {
   let retryAt = 0;
   let loading: Promise<void> | null = null;
   let version = 0;
-  // Links worked out on this device (vision-cfbd-link.ts) for teams the database hasn't linked.
+  // Links worked out on this device for teams the database hasn't linked, per source
+  // (vision-cfbd-link.ts, college-games.ts), merged into extraLinks.
+  const linkSources = new Map<string, Map<string, string>>();
   let extraLinks = new Map<string, string>();
 
   const emit = () => {
@@ -490,11 +492,13 @@ export function createVisionStore(ports: VisionPorts) {
      * Provider ids linked on this device, used only where the database has no link. Replaces
      * any earlier set; the database's own links always win.
      */
-    setDeviceLinks(links: ReadonlyMap<string, string>): void {
+    setDeviceLinks(source: string, links: ReadonlyMap<string, string>): void {
+      const before = linkSources.get(source);
       const same =
-        links.size === extraLinks.size && [...links].every(([k, v]) => extraLinks.get(k) === v);
+        !!before && links.size === before.size && [...links].every(([k, v]) => before.get(k) === v);
       if (same) return;
-      extraLinks = new Map(links);
+      linkSources.set(source, new Map(links));
+      extraLinks = new Map([...linkSources.values()].flatMap((m) => [...m]));
       emit();
     },
     /** The JL Vision team behind a provider's team id, or null when it isn't linked. */

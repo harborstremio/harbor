@@ -12,7 +12,18 @@ import {
   useJlSportsFavorites,
   type JlFavoritePlayer,
 } from "@/lib/jl/sports/favorites";
+import { fetchCalendar } from "@/lib/jl/sports/college-data";
+import { useFollowedColleges } from "@/lib/jl/sports/college-follows";
+import {
+  collegeFavorite,
+  collegeGames,
+  linkCollegesToVision,
+  SCHOOL_SOURCE,
+} from "@/lib/jl/sports/college-games";
+import type { College } from "@/lib/jl/sports/colleges";
 import { fetchJlScoreboard, fetchTeamGames } from "@/lib/jl/sports/feed";
+import { logoUrl } from "@/lib/jl/sports/sidearm";
+import { useVisionVersion, vision, visionTeamFor } from "@/lib/jl/sports/vision";
 import { followedGamesThisWeek, selectTopGames, teamsMissingFromScoreboard } from "@/lib/jl/sports/gameday";
 import { alsoTodayGroups, teamSlideInfo } from "@/lib/jl/sports/hub-sections";
 import { isFavoriteGame, rankGames, type JlFavoriteTeam, type RankedGame } from "@/lib/jl/sports/rank";
@@ -40,10 +51,49 @@ export type JlTeamSlide = { team: JlFavoriteTeam; side: SportsSide | null; next:
 /** "Also today": the day's other games, one group per league. */
 export type JlAlsoToday = { league: string; label: string; live: number; items: JlHubGame[] };
 
-/** Scoreboards for JL's leagues plus the schedules of followed teams that aren't on them. */
+/** The teams the hub follows: ESPN favorites plus colleges followed on their College page. */
+export function useHubTeams(): JlFavoriteTeam[] {
+  const teams = useJlSportsFavorites();
+  const colleges = useFollowedColleges();
+  return useMemo(() => [...teams, ...colleges.map(collegeFavorite)], [teams, colleges]);
+}
+
+/** A followed college's games from its own athletics site (college-games.ts). */
+async function schoolGames(colleges: readonly College[]): Promise<SportsGame[]> {
+  const now = Date.now();
+  const lists = await Promise.all(
+    colleges.map(async (c) => {
+      if (!c.site) return [];
+      const cal = await fetchCalendar(c.site).catch(() => null);
+      return cal ? collegeGames(c, cal.events, now, { logo: logoUrl(c.site) }) : [];
+    }),
+  );
+  return lists.flat();
+}
+
+/** A school's mascot from its JL Vision team, for the wordmark's second line ("BISON"). */
+function withVisionMascot(game: SportsGame): SportsGame {
+  if (game.source !== SCHOOL_SOURCE) return game;
+  const side = (s: SportsSide): SportsSide => {
+    const mascot = visionTeamFor(game.league, s.id)?.mascot;
+    return mascot && !s.nickname ? { ...s, nickname: mascot, name: `${s.location ?? s.name} ${mascot}` } : s;
+  };
+  return { ...game, home: side(game.home), away: side(game.away) };
+}
+
+/**
+ * Scoreboards for JL's leagues, the schedules of followed teams that aren't on them, and the
+ * games of colleges followed on their College page.
+ */
 export function useJlGames(favorites: JlFavoriteTeam[], enabled = true): SportsGame[] {
   const [games, setGames] = useState<SportsGame[]>([]);
   const favoritesKey = favorites.map((f) => `${f.league}:${f.id}`).join(",");
+  const colleges = useFollowedColleges();
+  const collegesKey = colleges.map((c) => c.id).join(",");
+  const visionVersion = useVisionVersion();
+  useEffect(() => {
+    vision.setDeviceLinks("colleges", linkCollegesToVision(colleges, vision.teams()));
+  }, [colleges, visionVersion]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -51,11 +101,17 @@ export function useJlGames(favorites: JlFavoriteTeam[], enabled = true): SportsG
     const tick = async () => {
       if (document.visibilityState !== "visible") return;
       const boards = (await Promise.all(JL_SPORTS_LEAGUES.map((l) => fetchJlScoreboard(l)))).flat();
-      const missing = teamsMissingFromScoreboard(boards, favorites);
-      const extra = (await Promise.all(missing.map((f) => fetchTeamGames(f.league, f.id)))).flat();
+      // Followed colleges aren't ESPN teams; their games come from their own sites.
+      const missing = teamsMissingFromScoreboard(boards, favorites).filter(
+        (f) => !f.id.startsWith("ncaa-"),
+      );
+      const [extra, school] = await Promise.all([
+        Promise.all(missing.map((f) => fetchTeamGames(f.league, f.id))).then((l) => l.flat()),
+        schoolGames(colleges),
+      ]);
       const seen = new Set<string>();
       const merged: SportsGame[] = [];
-      for (const g of [...boards, ...extra]) {
+      for (const g of [...boards, ...extra, ...school]) {
         const key = `${g.league}:${g.id}`;
         if (seen.has(key)) continue;
         seen.add(key);
@@ -74,11 +130,13 @@ export function useJlGames(favorites: JlFavoriteTeam[], enabled = true): SportsG
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisible);
     };
-    // favoritesKey captures every change to the followed teams.
+    // favoritesKey and collegesKey capture every change to the followed teams.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [favoritesKey, enabled]);
+  }, [favoritesKey, collegesKey, enabled]);
 
-  return games;
+  // visionVersion: a mascot can arrive after the games.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(() => games.map(withVisionMascot), [games, visionVersion]);
 }
 
 /** Which of the viewer's channels carry each game; empty while Smart Channel Finder is off. */
@@ -109,7 +167,7 @@ export function useJlSports(params: {
   // Harbor's odds setting covers every sports surface; kids' profiles never see lines.
   const kid = useActiveKid();
   const sportsOdds = settings.sportsShowOdds && !kid;
-  const teams = useJlSportsFavorites();
+  const teams = useHubTeams();
   const players = useJlFavoritePlayers();
   const favorites = useMemo(() => effectiveTeams(teams, players), [teams, players]);
   const games = useJlGames(favorites, active);

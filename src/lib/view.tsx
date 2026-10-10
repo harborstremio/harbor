@@ -32,6 +32,7 @@ import { beginMarathonAdvance } from "./fullscreen-state";
 import { consumeBack } from "./back-intercept";
 import { useSectionBackActive } from "./section-back";
 import type { SubtitleLoadMetadata } from "./subtitles/types";
+import { collegeIdOfGame } from "./jl/sports/college-games";
 import { sportsPageKey, type SportsPage } from "./jl/sports/pages";
 import {
   getHeroDock,
@@ -1207,6 +1208,18 @@ export function ViewProvider({ children }: { children: ReactNode }) {
 
   const openMatchDetail = useCallback(
     (game: SportsGame, eventGames?: SportsGame[]) => {
+      // A followed college's game from its own site has no ESPN match centre; its College
+      // page holds its schedule, results and streams.
+      const collegeId = collegeIdOfGame(game);
+      if (collegeId) {
+        const page: SportsPage = { kind: "college", collegeId };
+        setNavStack((cur) => {
+          const t = cur[cur.length - 1];
+          if (t.kind === "sports-page" && sportsPageKey(t.page) === sportsPageKey(page)) return cur;
+          return pushFrame(cur, { kind: "sports-page", page });
+        });
+        return;
+      }
       setNavStack((cur) => {
         const t = cur[cur.length - 1];
         if (t.kind === "match-detail" && t.game.id === game.id && t.game.league === game.league && t.game.source === game.source && !!t.eventGames === !!eventGames) return cur;

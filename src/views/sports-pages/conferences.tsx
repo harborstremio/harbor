@@ -196,6 +196,8 @@ function TeamBranding({ team }: { team: VisionTeam }) {
     conference,
     tagline: [team.mascot, conference].filter(Boolean).join(" · "),
   };
+  // A school followed on its College page links here too (college-games.ts).
+  const college = vision.providerId(team.key, "ncaa", "college");
   const linked = Object.keys(PAGE_LEAGUE)
     .map((league) => ({ league, id: vision.providerId(team.key, "espn", league) }))
     .find((p): p is { league: string; id: string } => !!p.id);
@@ -226,7 +228,17 @@ function TeamBranding({ team }: { team: VisionTeam }) {
             {t("Scores, schedule & roster")}
           </Pill>
         )}
-        {!linked && <Note>{t("Not linked to live scores yet.")}</Note>}
+        {!linked && college && (
+          <Pill
+            onClick={() =>
+              openSportsPage({ kind: "college", collegeId: `ncaa:${college}`, name: team.name })
+            }
+          >
+            <ExternalLink size={13} />
+            {t("Schedule, results & roster")}
+          </Pill>
+        )}
+        {!linked && !college && <Note>{t("Not linked to live scores yet.")}</Note>}
         {!theme && (
           <Note>{t("Team colours aren't verified yet, so the JL glass look is used.")}</Note>
         )}

@@ -41,6 +41,9 @@ export function visionTeamFor(
   league: string,
   espnId: string | null | undefined,
 ): VisionTeam | null {
+  // Colleges followed from their College page carry "ncaa-<orgId>" (college-games.ts).
+  const ncaa = espnId ? /^ncaa-(\d+)$/.exec(espnId) : null;
+  if (ncaa) return vision.byProvider("ncaa", "college", ncaa[1]);
   const espnLeague = espnLeagueOf(league);
   return espnLeague && espnId ? vision.byProvider("espn", espnLeague, espnId) : null;
 }

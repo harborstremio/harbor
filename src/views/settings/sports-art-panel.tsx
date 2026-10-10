@@ -11,6 +11,9 @@ import {
   type ArtKind,
 } from "@/lib/jl/sports/custom-art";
 import { useJlSportsFavorites } from "@/lib/jl/sports/favorites";
+import { useFollowedColleges } from "@/lib/jl/sports/college-follows";
+import { collegeFavorite } from "@/lib/jl/sports/college-games";
+import { logoUrl } from "@/lib/jl/sports/sidearm";
 import { searchTeamsAndPlayers } from "@/lib/jl/sports/people";
 import type { SportsSearchHit } from "@/lib/jl/sports/search-parse";
 import { espnTeamLogo } from "@/lib/jl/sports/sport-art";
@@ -37,7 +40,15 @@ export function SportsArtSection() {
     if (session) void customArt.load();
   }, [session]);
 
-  const teams = artTeams(followed, added);
+  // Colleges followed on their College page (Gallaudet, say) hold art like any other team.
+  const colleges = useFollowedColleges();
+  const teams = artTeams(
+    [
+      ...followed,
+      ...colleges.map((c) => ({ ...collegeFavorite(c), logo: c.site ? logoUrl(c.site) : null })),
+    ],
+    added,
+  );
 
   const status = customArt.status();
   return (
@@ -94,7 +105,10 @@ export function SportsArtSection() {
 }
 
 /** Followed teams, teams picked from search, and teams that already hold art, once each. */
-function artTeams(followed: Array<{ league: string; id: string; name: string }>, added: ArtTeam[]) {
+function artTeams(
+  followed: Array<{ league: string; id: string; name: string; logo?: string | null }>,
+  added: ArtTeam[],
+) {
   const out: ArtTeam[] = [];
   const seen = new Set<string>();
   const push = (team: ArtTeam) => {
@@ -104,7 +118,12 @@ function artTeams(followed: Array<{ league: string; id: string; name: string }>,
     out.push(team);
   };
   for (const f of followed)
-    push({ league: f.league, id: f.id, name: f.name, logo: espnTeamLogo(f.league, f.id) });
+    push({
+      league: f.league,
+      id: f.id,
+      name: f.name,
+      logo: f.logo !== undefined ? f.logo : espnTeamLogo(f.league, f.id),
+    });
   for (const a of added) push(a);
   for (const ref of customArt.refs()) {
     const m = /^team:([^:]+):(.+)$/.exec(ref);

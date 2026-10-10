@@ -70,7 +70,7 @@ export function useCfbdVisionLinks(): void {
     void cfbd.teams(key).then((teams) => {
       const visionTeams = vision.teams();
       if (active && teams?.length && visionTeams.length)
-        vision.setDeviceLinks(linkVisionToCfbd(visionTeams, teams));
+        vision.setDeviceLinks("cfbd", linkVisionToCfbd(visionTeams, teams));
     });
     return () => {
       active = false;

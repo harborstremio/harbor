@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { channelsForGame } from "@/lib/jl/sports/channels";
-import {
-  effectiveTeams,
-  useJlFavoritePlayers,
-  useJlSportsFavorites,
-} from "@/lib/jl/sports/favorites";
+import { effectiveTeams, useJlFavoritePlayers } from "@/lib/jl/sports/favorites";
 import { watchGameOn } from "@/lib/jl/sports/now-watching";
 import { selectTickerGames } from "@/lib/jl/sports/ticker";
 import { useActiveKid } from "@/lib/profiles";
@@ -13,7 +9,7 @@ import { useView } from "@/lib/view";
 import { ScoreTickerBar } from "./score-ticker";
 import { publishScoreTicker, useTickerDismissed, type ScoreTickerItem } from "./score-ticker-store";
 import { useActiveLiveChannels } from "./use-active-live-channels";
-import { useJlGames, useSportsChannelIndex } from "./use-jl-sports";
+import { useHubTeams, useJlGames, useSportsChannelIndex } from "./use-jl-sports";
 
 function channelIdOf(metaId: string | undefined): string | null {
   return metaId?.startsWith("iptv:") ? metaId.slice(5) : null;
@@ -41,7 +37,7 @@ export function ScoreTickerHost({
   const active = !dismissed && (bar || overlay);
 
   const live = useActiveLiveChannels(active);
-  const teams = useJlSportsFavorites();
+  const teams = useHubTeams();
   const players = useJlFavoritePlayers();
   const favorites = useMemo(() => effectiveTeams(teams, players), [teams, players]);
   const games = useJlGames(favorites, active);
