@@ -907,6 +907,23 @@ const coverage: Record<string, string> = {
   "NYT Books API key": "NYT Books API anahtarı",
   "Choose whether Harbor prefers direct and debrid sources, peer-to-peer torrents, or shows both.":
     "Harbor'ın doğrudan ve debrid kaynaklarını mı, eşler arası torrentleri mi tercih edeceğini veya ikisini birden mi göstereceğini seçin.",
+
+  "Imported from MyAnimeList": "MyAnimeList'den içe aktarıldı",
+  "Imported from AniList": "AniList'ten içe aktarıldı",
+  "Imported from trackers": "Takipçilerden içe aktarıldı",
+  "MyAnimeList progress": "MyAnimeList ilerlemesi",
+  "AniList progress": "AniList ilerlemesi",
+  "Imports anime you are currently watching on MyAnimeList into the row as the next unwatched episode, marked with a MAL badge. Requires a connected MAL account.": "MyAnimeList'te izlediğiniz animeleri, MAL rozetiyle satıra bir sonraki izlenmemiş bölüm olarak aktarır. Bağlı bir MAL hesabı gerektirir.",
+  "Imports anime you are currently watching on AniList into the row as the next unwatched episode, marked with an AL badge. Requires a connected AniList account.": "AniList'te izlediğiniz animeleri, AL rozetiyle satıra bir sonraki izlenmemiş bölüm olarak aktarır. Bağlı bir AniList hesabı gerektirir.",
+  "Enable at least one anime Continue Watching source to use this.": "Bunu kullanmak için en az bir anime izlemeye devam etme kaynağını etkinleştirin.",
+  "Re-queries the connected anime tracker(s) and updates the anime continue watching row.": "Bağlı anime takipçilerini yeniden sorgular ve anime izlemeye devam etme satırını günceller.",
+  "Anime continue watching: refresh result": "Anime izlemeye devam et: yenileme sonucu",
+  "Error:": "Hata:",
+  "No anime continue watching items were produced.": "Anime izlemeye devam etme öğesi üretilmedi.",
+  "Season {s}, Episode {e}": "Sezon {s}, Bölüm {e}",
+  "Reload anime continue watching": "Anime izlemeye devam etmeyi yeniden yükle",
+  "Unavailable while Continue Watching is kept private to each profile, because MAL progress is shared across every profile on this account.": "İzlemeye devam et her profil için gizli tutulurken kullanılamaz, çünkü MAL ilerlemesi bu hesaptaki tüm profiller arasında paylaşılır.",
+  "Unavailable while Continue Watching is kept private to each profile, because AniList progress is shared across every profile on this account.": "İzlemeye devam et her profil için gizli tutulurken kullanılamaz, çünkü AniList ilerlemesi bu hesaptaki tüm profiller arasında paylaşılır.",
 };
 
 export default coverage;

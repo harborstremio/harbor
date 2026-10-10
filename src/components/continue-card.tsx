@@ -1,8 +1,10 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { Check, X } from "lucide-react";
+import { Check, RefreshCw, X } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
+import malLogo from "@/assets/mal.png";
+import anilistLogo from "@/assets/anilist.png";
 import { narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { resolveMeta } from "@/lib/meta-resource";
 import { animeKitsuMeta, type AnimeKitsuVideo } from "@/lib/providers/anime-kitsu-addon";
@@ -106,8 +108,26 @@ export const ContinueCard = memo(function ContinueCard({
   const newEpisode = useHasNewEpisode(item);
   const snapshot = readSnapshot(item._id);
   const isExternal = !!item.external;
-  const externalLogo = item.external === "trakt" ? traktLogo : simklLogo;
-  const externalLabel = item.external === "trakt" ? t("Paused on Trakt") : t("Paused on Simkl");
+  const externalLogo =
+    item.external === "trakt"
+      ? traktLogo
+      : item.external === "simkl"
+        ? simklLogo
+        : item.external === "mal"
+          ? malLogo
+          : item.external === "anilist"
+            ? anilistLogo
+            : null;
+  const externalLabel =
+    item.external === "trakt"
+      ? t("Paused on Trakt")
+      : item.external === "simkl"
+        ? t("Paused on Simkl")
+        : item.external === "mal"
+          ? t("Imported from MyAnimeList")
+          : item.external === "anilist"
+            ? t("Imported from AniList")
+            : t("Imported from trackers");
   const dur = item.state?.duration ?? 0;
   const off = item.state?.timeOffset ?? 0;
   const progress = dur > 0 ? Math.min(1, off / dur) : 0;
@@ -614,12 +634,18 @@ export const ContinueCard = memo(function ContinueCard({
           {(sub || remaining || isExternal || upNext || episodeTitle) && (
             <div className="absolute bottom-2 start-2 flex max-w-[calc(100%-16px)] items-center gap-1.5 rounded-md bg-canvas/95 px-2 py-1 text-[11px]">
               {isExternal ? (
-                <img
-                  src={externalLogo}
-                  alt=""
-                  className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                  title={externalLabel}
-                />
+                externalLogo ? (
+                  <img
+                    src={externalLogo}
+                    alt=""
+                    className="h-3.5 w-3.5 shrink-0 rounded-sm"
+                    title={externalLabel}
+                  />
+                ) : (
+                  <span className="shrink-0" title={externalLabel}>
+                    <RefreshCw size={11} strokeWidth={2.4} className="text-ink-subtle" />
+                  </span>
+                )
               ) : (
                 <Play size={11} fill="currentColor" className="shrink-0 text-ink" />
               )}

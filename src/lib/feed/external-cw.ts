@@ -108,7 +108,9 @@ async function runRefresh(gen: number): Promise<boolean> {
   const failedSources = new Set(
     enabled.filter((_, index) => results[index] === null).map(({ source }) => source),
   );
-  const retained = items.filter((i) => i.external && failedSources.has(i.external));
+  const retained = items.filter((i) =>
+    i.external === "simkl" || i.external === "trakt" ? failedSources.has(i.external) : false,
+  );
   setItems(merge([...succeeded, retained]));
   if (complete) retryAttempt = 0;
   return complete;

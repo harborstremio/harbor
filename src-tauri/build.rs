@@ -97,5 +97,8 @@ fn main() {
     }
 
     let _ = manifest;
-    tauri_build::build()
+    let attributes = tauri_build::Attributes::new().windows_attributes(
+        tauri_build::WindowsAttributes::new().static_vc_runtime(false),
+    );
+    tauri_build::try_build(attributes).expect("failed to run tauri-build");
 }

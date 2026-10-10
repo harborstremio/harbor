@@ -33,7 +33,7 @@ export async function resolve(specifier, context, nextResolve) {
     sourcePath = fileURLToPath(new URL(specifier, context.parentURL));
   }
 
-  if (sourcePath && !path.extname(sourcePath)) {
+  if (sourcePath && (!path.extname(sourcePath) || specifier.startsWith("@/"))) {
     const url = await existingModuleUrl(sourcePath);
     if (url) return { url, shortCircuit: true };
   }
@@ -42,11 +42,27 @@ export async function resolve(specifier, context, nextResolve) {
 }
 
 export async function load(url, context, nextLoad) {
-  if (url.endsWith(".tsx")) {
-    const source = await readFile(fileURLToPath(url), "utf8");
+  // Vite handles asset imports at build time; under Node return an empty
+  // string so theme/asset chains (import.meta.env consumers aside) load.
+  if (/\.(png|jpe?g|gif|webp|svg|css|woff2?)$/.test(url)) {
+    return { format: "module", source: "export default ''", shortCircuit: true };
+  }
+
+  const isTsx = url.endsWith(".tsx");
+  if (isTsx || url.endsWith(".ts")) {
+    // Node strips types but rejects TS-only runtime syntax (parameter
+    // properties, enums) that provider clients use, so transpile instead of
+    // relying on strip-only mode. .tsx needed the same treatment for JSX.
+    let source = await readFile(fileURLToPath(url), "utf8");
+    // Vite injects import.meta.env at build time; under Node it is undefined
+    // and module-scope config constants would throw. Swap in an empty object
+    // so every endpoint/config falls back to its hardcoded default.
+    source = source.replace(/\bimport\.meta\.env\b/g, "(globalThis.__harborTestEnv ?? {})");
     const output = ts.transpileModule(source, {
       compilerOptions: {
-        jsx: ts.JsxEmit.ReactJSX,
+        // JSX only for .tsx: parsing JSX in plain .ts mangles single-generic
+        // arrows like <T,>(x) => … into JSX elements and emits broken code.
+        jsx: isTsx ? ts.JsxEmit.ReactJSX : undefined,
         module: ts.ModuleKind.ESNext,
         target: ts.ScriptTarget.ES2022,
       },
