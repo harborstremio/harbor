@@ -142,16 +142,19 @@ export function createJlSessionClient(options: {
     if (!configured()) throw new Error("JL accounts are not configured in this build.");
   }
 
-  async function request(path: string, init: RequestInit): Promise<Response> {
+  async function request(path: string, init: RequestInit, timeoutMs?: number): Promise<Response> {
     const controller = new AbortController();
     let timedOut = false;
     const abort = () => controller.abort();
     if (init.signal?.aborted) abort();
     init.signal?.addEventListener("abort", abort, { once: true });
-    const timer = setTimeout(() => {
-      timedOut = true;
-      controller.abort();
-    }, options.timeoutMs ?? 15_000);
+    const timer = setTimeout(
+      () => {
+        timedOut = true;
+        controller.abort();
+      },
+      timeoutMs ?? options.timeoutMs ?? 15_000,
+    );
     try {
       const response = await options.fetch(`${url}${path}`, { ...init, signal: controller.signal });
       // Account endpoints carry bounded JSON. Include the response body in the
@@ -272,10 +275,12 @@ export function createJlSessionClient(options: {
     refreshing = run;
     return run.promise;
   }
-  async function rest(
+  /** An account request under `/<base>/v1/`, renewing the session once on a 401. */
+  async function authed(
+    base: "rest" | "storage",
     path: string,
-    init: RequestInit = {},
-    expected = context(),
+    init: RequestInit,
+    expected: JlAccountContext | null,
   ): Promise<Response> {
     if (!expected) throw new Error("Not signed in");
     assertCurrent(expected);
@@ -285,21 +290,37 @@ export function createJlSessionClient(options: {
     const headers = new Headers(init.headers);
     headers.set("apikey", anonKey);
     headers.set("Authorization", `Bearer ${session.accessToken}`);
-    headers.set("Accept-Profile", "media");
-    headers.set("Content-Profile", "media");
-    if (init.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-    let res = await request(`/rest/v1/${path}`, { ...init, headers });
+    if (base === "rest") {
+      headers.set("Accept-Profile", "media");
+      headers.set("Content-Profile", "media");
+    }
+    if (typeof init.body === "string" && !headers.has("Content-Type"))
+      headers.set("Content-Type", "application/json");
+    // Uploads carry up to a few megabytes; give them longer than a JSON call.
+    const timeout = base === "storage" ? 90_000 : undefined;
+    let res = await request(`/${base}/v1/${path}`, { ...init, headers }, timeout);
     if (res.status === 401) {
       assertCurrent(expected);
       const renewed = await fresh(true);
       assertCurrent(expected);
       if (renewed) {
         headers.set("Authorization", `Bearer ${renewed.accessToken}`);
-        res = await request(`/rest/v1/${path}`, { ...init, headers });
+        res = await request(`/${base}/v1/${path}`, { ...init, headers }, timeout);
       }
     }
     assertCurrent(expected);
     return res;
+  }
+  function rest(path: string, init: RequestInit = {}, expected = context()): Promise<Response> {
+    return authed("rest", path, init, expected);
+  }
+  /** Supabase Storage (the private `media-art` bucket); RLS keeps each account in its folder. */
+  function storage(path: string, init: RequestInit = {}, expected = context()): Promise<Response> {
+    return authed("storage", path, init, expected);
+  }
+  /** A Storage-relative URL (a signed URL's path) as an absolute one. */
+  function storageUrl(relative: string): string {
+    return `${url}/storage/v1${relative.startsWith("/") ? "" : "/"}${relative}`;
   }
   async function rpc<T>(
     fn: string,
@@ -324,6 +345,8 @@ export function createJlSessionClient(options: {
     fresh,
     rest,
     rpc,
+    storage,
+    storageUrl,
     resetPassword: async (email: string) => {
       await authRequest("recover", { email: email.trim() });
     },

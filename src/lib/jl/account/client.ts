@@ -81,6 +81,8 @@ export const resetJlPassword = client.resetPassword;
 export const freshJlSession = client.fresh;
 export const jlRest = client.rest;
 export const jlRpc = client.rpc;
+export const jlStorage = client.storage;
+export const jlStorageUrl = client.storageUrl;
 export const subscribeJlSession = client.subscribe;
 
 export function useJlSession() {
