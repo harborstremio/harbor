@@ -282,10 +282,14 @@ export function useAnimeTvdbPanel(
         const imdbRating =
           imdbMap?.get(`${e.seasonNumber}:${e.episodeNumber}`) ??
           (abs != null ? imdbMap?.get(`1:${abs}`) : undefined);
+        const displayNumber = e.orderNumber ?? e.episodeNumber;
+        const displaySeason = e.orderSeason ?? e.seasonNumber;
 
         const ep: KitsuEpisode = match
           ? {
               ...match,
+              displayNumber,
+              displaySeason,
               thumbnail: !match.thumbnail && img ? img : match.thumbnail,
               ...(title != null ? { title } : {}),
               ...(synopsis != null ? { synopsis } : {}),
@@ -297,6 +301,8 @@ export function useAnimeTvdbPanel(
               id: -e.id,
               number: e.episodeNumber,
               seasonNumber: e.seasonNumber,
+              displayNumber,
+              displaySeason,
               title:
                 pickLocalizedText(
                   [{ text: e.name }, { text: e.nameEn ?? "" }, { text: currentMatch?.title ?? "" }],

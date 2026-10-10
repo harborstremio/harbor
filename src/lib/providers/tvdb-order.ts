@@ -2,7 +2,14 @@ import type { Episode, Season } from "@/lib/providers/tmdb";
 import { tvdbEpisodesByType, tvdbSeasonNames, tvdbSeriesByRemote, type TvdbEpisode } from "./tvdb";
 import { readOrderCache, writeOrderCache } from "./tvdb-order-cache";
 
-export type OrderedEpisode = Episode & { nameEn?: string; overviewEn?: string };
+export type OrderedEpisode = Episode & {
+  nameEn?: string;
+  overviewEn?: string;
+  /** Episode number within the selected ordering (e.g. DVD, alternate). Absent for arc episodes. */
+  orderNumber?: number;
+  /** Season number within the selected ordering. Absent for arc episodes. */
+  orderSeason?: number;
+};
 
 export type TvdbOrder = {
   seasons: Season[];
@@ -114,6 +121,8 @@ async function build(
       id: e.id,
       seasonNumber: c.season,
       episodeNumber: c.episode,
+      orderSeason: e.seasonNumber,
+      orderNumber: e.number,
       name: (tr?.name || trEn?.name || e.name) ?? "",
       overview: (tr?.overview || trEn?.overview || e.overview) ?? "",
       nameEn: trEn?.name,
@@ -136,6 +145,8 @@ async function build(
     bucket.forEach((ep, i) => {
       ep.seasonNumber = alt[i].season;
       ep.episodeNumber = alt[i].episode;
+      ep.orderSeason = alt[i].season;
+      ep.orderNumber = alt[i].episode;
     });
   }
   if (bySeason.size === 0) return null;

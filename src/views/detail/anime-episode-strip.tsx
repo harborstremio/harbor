@@ -54,12 +54,16 @@ export function AnimeEpisodeStrip({
     () =>
       episodes.map((ep) => {
         const epMeta = metaForEp ? metaForEp(ep) : meta;
+        const episodeNumber = ep.displayNumber ?? ep.number;
+        const seasonNumber = ep.displaySeason ?? ep.imdbSeason ?? ep.seasonNumber ?? 1;
         return {
           key: String(ep.id),
           number: ep.number,
+          displayNumber: episodeNumber,
           season: animeSeasonKey(ep),
-          seasonLabel: showSeason ? `S${ep.imdbSeason ?? ep.seasonNumber ?? 1}` : undefined,
-          title: ep.title || t("Episode {n}", { n: ep.number }),
+          displaySeason: seasonNumber,
+          seasonLabel: showSeason ? `S${seasonNumber}` : undefined,
+          title: ep.title || t("Episode {n}", { n: episodeNumber }),
           stills: [ep.thumbnail, ep.thumbnailFallback, meta.background].filter((u): u is string => !!u),
           runtime: ep.length,
           airDate: ep.airdate,
@@ -151,6 +155,8 @@ function AnimeEpisodeStripCard({
   const { openPicker, openEpisodeDetail } = useView();
   const { settings } = useSettings();
   const upcoming = isUpcomingDate(ep.airdate);
+  const episodeNumber = ep.displayNumber ?? ep.number;
+  const seasonNumber = ep.displaySeason ?? ep.imdbSeason ?? ep.seasonNumber ?? 1;
 
   const handlePlayClick = () => {
     openPicker(
@@ -162,7 +168,7 @@ function AnimeEpisodeStripCard({
 
   return (
     <div
-      data-ep={ep.number}
+      data-ep={episodeNumber}
       data-no-card-ring
       onContextMenu={(e) =>
         onContextMenu?.(e, animeSeasonKey(ep), ep.number, progress.watched, ep.sourceMetaId)
@@ -197,7 +203,7 @@ function AnimeEpisodeStripCard({
         )}
 
         <span className="absolute start-2 top-2 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[11px] font-semibold text-ink transition-opacity group-hover:opacity-0">
-          {ep.number}
+          {episodeNumber}
         </span>
         {progress.watched && (
           <span className="absolute end-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-success/20 text-success backdrop-blur-sm transition-opacity group-hover:opacity-0">
@@ -218,12 +224,12 @@ function AnimeEpisodeStripCard({
         >
           <span className="flex items-center gap-2">
             <span className={`truncate text-[13.5px] font-semibold text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}>
-              {ep.title || t("Episode {n}", { n: ep.number })}
+              {ep.title || t("Episode {n}", { n: episodeNumber })}
             </span>
             {ep.filler && <FillerBadge />}
           </span>
           <span className="text-[11.5px] text-ink-subtle">
-            {showSeason ? `S${ep.imdbSeason ?? ep.seasonNumber ?? 1} · E${ep.number}` : `E${ep.number}`}
+            {showSeason ? `S${seasonNumber} · E${episodeNumber}` : `E${episodeNumber}`}
             {ep.length ? ` · ${t("{n} min", { n: ep.length })}` : ""}
             {upcoming && ep.airdate ? ` · ${formatAirDate(ep.airdate)}` : ""}
           </span>

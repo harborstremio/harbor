@@ -49,6 +49,8 @@ export function AnimeEpisodeRow({
   const { settings } = useSettings();
   const epMeta = metaForEp ? metaForEp(ep) : meta;
   const watchedAgo = progress.startedAt > 0 ? formatRelativeWatched(progress.startedAt) : "";
+  const episodeNumber = ep.displayNumber ?? ep.number;
+  const seasonNumber = ep.displaySeason ?? ep.imdbSeason ?? ep.seasonNumber ?? 1;
   const playEpisode = {
     season: animeSeasonKey(ep),
     episode: ep.number,
@@ -65,7 +67,7 @@ export function AnimeEpisodeRow({
   };
   return (
     <div
-      data-ep={ep.number}
+      data-ep={episodeNumber}
       data-epid={ep.id}
       data-no-card-ring
       style={{ contentVisibility: "auto", containIntrinsicSize: "auto 160px" }}
@@ -104,7 +106,7 @@ export function AnimeEpisodeRow({
             </div>
           </div>
           <span className="absolute start-2 top-2 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[11px] font-semibold text-ink">
-            {ep.number}
+            {episodeNumber}
           </span>
           {settings.showEpisodeRating && ep.rating != null && ep.rating > 0 && (
             <span className="absolute bottom-2 start-2 z-[6] drop-shadow-md">
@@ -128,7 +130,7 @@ export function AnimeEpisodeRow({
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <h4 className="flex items-center gap-2 truncate text-[16px] font-semibold text-ink">
             <span className={`truncate ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}>
-              {ep.title || t("Episode {n}", { n: ep.number })}
+              {ep.title || t("Episode {n}", { n: episodeNumber })}
             </span>
             {ep.filler && <FillerBadge />}
             {isUpcomingDate(ep.airdate) ? <UpcomingBadge /> : null}
@@ -137,9 +139,9 @@ export function AnimeEpisodeRow({
             <span>
               {[
                 showSeason
-                  ? `S${partDisplaySeason(meta.id, ep.sourceMetaId) ?? ep.imdbSeason ?? ep.seasonNumber ?? 1} · E${ep.number}`
-                  : `E${ep.number}`,
-                ep.absoluteNumber && ep.absoluteNumber !== ep.number
+                  ? `S${partDisplaySeason(meta.id, ep.sourceMetaId) ?? seasonNumber} · E${episodeNumber}`
+                  : `E${episodeNumber}`,
+                ep.absoluteNumber && ep.absoluteNumber !== episodeNumber
                   ? `Abs E${ep.absoluteNumber}`
                   : null,
                 ep.length ? t("{n} min", { n: ep.length }) : null,
