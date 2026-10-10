@@ -8,7 +8,8 @@ import {
   type ArtSide,
   type TeamArt,
 } from "@/lib/jl/sports/fanart";
-import { artKey, curatedArt } from "@/lib/jl/sports/curated-art";
+import { artKey, curatedArt, useCuratedArtVersion } from "@/lib/jl/sports/curated-art";
+import type { ArtKind } from "@/lib/jl/sports/custom-art";
 import {
   applyOddsLines,
   oddsLeaguesFor,
@@ -68,6 +69,8 @@ export function usePrefetchTeamArt(games: SportsGame[], extra: ArtTeam[] = []): 
 /** A team's TheSportsDB art once known (null without a key or art). */
 export function useTeamArt(league: string, side: ArtSide | null): TeamArt | null {
   const key = useArtKey();
+  // The owner's own art sits ahead of TheSportsDB everywhere this hook is used.
+  useCuratedArtVersion();
   useSyncExternalStore(teamArt.subscribe, teamArt.version, teamArt.version);
   const cacheKey = side ? teamArtCacheKey(league, side) : "";
   useEffect(() => {
@@ -88,22 +91,37 @@ export type GameArt = {
   away: TeamArt | null;
 };
 
-/** A team's own curated wallpaper, when one is set. */
-export function curatedTeamArt(league: string, side: { id?: string } | null): string | null {
-  return side?.id ? curatedArt(artKey.team(league, side.id)) : null;
+/**
+ * The owner's art for a team's slot (hero by default), when one is set. Callers re-render on
+ * changes through useTeamArt/useGameArt, or useCuratedArtVersion.
+ */
+export function curatedTeamArt(
+  league: string,
+  side: { id?: string } | null,
+  kind: ArtKind = "hero",
+): string | null {
+  return side?.id ? curatedArt(artKey.team(league, side.id), kind) : null;
 }
 
 /**
- * Art for a game: curated art (home team first), then TheSportsDB's photo; null leaves the
+ * Art for a game: curated art (the focus team, else home first), then TheSportsDB's photo; null leaves the
  * designed backdrop. Each team's TheSportsDB art comes along for colours and badges.
  */
-export function useGameArt(game: SportsGame | null): GameArt {
+export function useGameArt(
+  game: SportsGame | null,
+  focusId?: string | null,
+  kind: ArtKind = "hero",
+): GameArt {
   const league = game?.league ?? "";
   const home = useTeamArt(league, game?.home ?? null);
   const away = useTeamArt(league, game?.away ?? null);
-  const curated = game
-    ? (curatedTeamArt(league, game.home) ?? curatedTeamArt(league, game.away))
-    : null;
+  // The followed side's art first when there is one, else the home team's.
+  const sides = game
+    ? focusId && game.away.id === focusId
+      ? [game.away, game.home]
+      : [game.home, game.away]
+    : [];
+  const curated = sides.map((s) => curatedTeamArt(league, s, kind)).find(Boolean) ?? null;
   return {
     photo: curated ?? (game ? chooseGameArt(game, home, away) : null),
     curated,

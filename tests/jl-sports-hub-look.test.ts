@@ -149,9 +149,10 @@ test("team slides: ESPN's listing of the team and its game on now or next", () =
   assert.equal(live.next?.id, "g0");
 });
 
-test("hero photos: curated, then the event, the team, the league; else designed", () => {
+test("hero photos: curated, then the team, the event, the league; else designed", () => {
   assert.equal(heroPhoto({ curated: "c", event: "e", team: "t", league: "l" }), "c");
-  assert.equal(heroPhoto({ curated: null, event: "e", team: "t", league: "l" }), "e");
+  assert.equal(heroPhoto({ curated: null, event: "e", team: "t", league: "l" }), "t");
+  assert.equal(heroPhoto({ event: "e", team: "", league: "l" }), "e");
   assert.equal(heroPhoto({ event: "", team: "t", league: "l" }), "t");
   assert.equal(heroPhoto({ team: null, league: "l" }), "l");
   assert.equal(heroPhoto({}), null);

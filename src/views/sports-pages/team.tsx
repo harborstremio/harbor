@@ -16,6 +16,7 @@ import { leadersSource, splitSchedule } from "@/lib/jl/sports/espn-team";
 import { fetchTeamGames } from "@/lib/jl/sports/feed";
 import type { SportsPage } from "@/lib/jl/sports/pages";
 import { espnHeadshot } from "@/lib/jl/sports/search-parse";
+import { artKey } from "@/lib/jl/sports/curated-art";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import {
@@ -51,6 +52,7 @@ export function TeamPage({ page }: { page: Extract<SportsPage, { kind: "team" }>
   return (
     <PageShell>
       <PageHeader
+        artRef={artKey.team(tag, teamId)}
         image={info.data?.logo ?? null}
         eyebrow={def ? getLeagueLabel(def) : tag}
         title={name || (info.loading ? "" : t("Team"))}

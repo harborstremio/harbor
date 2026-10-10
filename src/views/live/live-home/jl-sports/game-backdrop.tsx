@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { stableIndex, type TeamArt } from "@/lib/jl/sports/fanart";
 import { heroPhotoCandidates } from "@/lib/jl/sports/hub-sections";
+import type { ArtKind } from "@/lib/jl/sports/custom-art";
 import { teamLook, type TeamLook } from "@/lib/jl/sports/team-look";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import { hubLeague } from "@/lib/sports/hub-data";
@@ -152,16 +153,20 @@ function ArtLayers({
   looks,
   variant,
   marks = true,
+  curated,
 }: {
   photos: string[];
   looks: TeamLook[];
   variant: Variant;
   marks?: boolean;
+  curated?: string | null;
 }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       <Designed looks={looks} variant={variant} marks={marks} />
-      {photos.length > 0 && <BackdropPhoto sources={photos} hero={variant === "hero"} />}
+      {photos.length > 0 && (
+        <BackdropPhoto sources={photos} hero={variant === "hero"} subjectRight={curated} />
+      )}
       <Veils variant={variant} />
     </div>
   );
@@ -182,9 +187,15 @@ export function GameBackdrop({
   marks = true,
   eventPhoto,
   leaguePhoto,
+  focusId,
+  slot = "hero",
 }: {
   game: SportsGame;
   variant?: Variant;
+  /** The followed team in this game, whose own art leads. */
+  focusId?: string | null;
+  /** Which of the owner's art slots this backdrop shows (a card shows the card art). */
+  slot?: ArtKind;
   /** The hero's big logos on the right; off where a headshot takes that place. */
   marks?: boolean;
   /** A picture of this event (Harbor's sports artwork), ahead of the teams' own photos. */
@@ -192,7 +203,7 @@ export function GameBackdrop({
   /** The league's photo, used only when neither the event nor the teams have one. */
   leaguePhoto?: string | null;
 }) {
-  const art = useGameArt(game);
+  const art = useGameArt(game, focusId, slot);
   const photos = heroPhotoCandidates({
     curated: art.curated,
     event: eventPhoto,
@@ -207,6 +218,7 @@ export function GameBackdrop({
       looks={gameLooks(game, art.home, art.away)}
       variant={variant}
       marks={marks}
+      curated={art.curated}
     />
   );
 }
@@ -216,18 +228,23 @@ export function TeamBackdrop({
   league,
   side,
   variant = "hero",
+  slot = "hero",
 }: {
   league: string;
   side: SportsSide;
   variant?: Variant;
+  slot?: ArtKind;
 }) {
   const art = useTeamArt(league, side);
+  const curated = curatedTeamArt(league, side, slot);
   const photos = heroPhotoCandidates({
-    curated: curatedTeamArt(league, side),
+    curated,
     team: art?.fanart.length
       ? art.fanart[stableIndex(side.id ?? side.name, art.fanart.length)]
       : (art?.stadium ?? art?.banner ?? null),
     bundled: variant === "hero" ? sportsSceneryPhoto(hubLeague(league)?.group, league) : null,
   });
-  return <ArtLayers photos={photos} looks={[teamLook(side, art)]} variant={variant} />;
+  return (
+    <ArtLayers photos={photos} looks={[teamLook(side, art)]} variant={variant} curated={curated} />
+  );
 }

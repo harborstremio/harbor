@@ -99,9 +99,9 @@ export function teamSlideInfo(
 }
 
 /**
- * The hero's photo for a slide, best first: the owner's curated art, a picture of this very event,
- * the team's own photo (TheSportsDB fan art, stadium or banner), then the league's photo. Null
- * leaves the designed backdrop of team colours and logos.
+ * The hero's photo for a slide, best first: the owner's curated art, the team's own photo
+ * (TheSportsDB fan art, stadium or banner), Harbor's picture of this very event, then the
+ * league's photo. Null leaves the designed backdrop of team colours and logos.
  */
 type HeroPhotoSources = {
   curated?: string | null;
@@ -115,7 +115,7 @@ type HeroPhotoSources = {
 export function heroPhotoCandidates(sources: HeroPhotoSources): string[] {
   return [
     ...new Set(
-      [sources.curated, sources.event, sources.team, sources.league, sources.bundled].filter(
+      [sources.curated, sources.team, sources.event, sources.league, sources.bundled].filter(
         (url): url is string => typeof url === "string" && url.trim().length > 0,
       ),
     ),

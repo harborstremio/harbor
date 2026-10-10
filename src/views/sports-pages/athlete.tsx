@@ -4,6 +4,7 @@ import { withTeamDetails, type AthleteProfile, type GameLog } from "@/lib/jl/spo
 import { isFollowing, toggleFavoritePlayer, useJlFavoritePlayers } from "@/lib/jl/sports/favorites";
 import type { SportsPage } from "@/lib/jl/sports/pages";
 import { espnHeadshot } from "@/lib/jl/sports/search-parse";
+import { artKey } from "@/lib/jl/sports/curated-art";
 import { getLeagueLabel } from "@/lib/sports/espn";
 import { useView } from "@/lib/view";
 import { FollowToggle, Img, Note, PageHeader, PageShell, Section, Spinner, useLoad } from "./espn-page-parts";
@@ -42,6 +43,7 @@ export function AthletePage({ page }: { page: Extract<SportsPage, { kind: "athle
   return (
     <PageShell>
       <PageHeader
+        artRef={artKey.athlete(tag, athleteId)}
         image={headshot}
         round
         color={team?.color}

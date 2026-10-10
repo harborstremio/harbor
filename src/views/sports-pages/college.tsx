@@ -38,6 +38,8 @@ import {
   useLoad,
   useWatchStream,
 } from "./college-ui";
+import { OwnerArtBackdrop } from "./espn-page-parts";
+import { artKey } from "@/lib/jl/sports/curated-art";
 
 const SHELF_MAX = 30;
 
@@ -96,7 +98,8 @@ export function CollegePage({ page }: { page: Extract<SportsPage, { kind: "colle
 
   return (
     <PageShell>
-      <section className="flex flex-col gap-6 md:flex-row md:items-end">
+      <section className="relative isolate flex flex-col gap-6 overflow-hidden rounded-2xl md:flex-row md:items-end">
+        <OwnerArtBackdrop artRef={artKey.college(college.id)} className="-z-10" />
         <SchoolMark college={college} size={120} />
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <p className="text-[11.5px] font-bold uppercase tracking-[0.2em] text-accent">

@@ -7,6 +7,39 @@ import type { SportsGame } from "@/lib/sports/espn";
 import { useView } from "@/lib/view";
 import { statusText, TeamLine } from "@/views/live/live-home/jl-sports/jl-sports-hub";
 import { isCurrentLiveGame } from "@/lib/jl/sports/presentation";
+import { curatedArt, useCuratedArtVersion } from "@/lib/jl/sports/curated-art";
+
+/**
+ * The owner's hero art for a page's subject, behind its header (the parent must be relative
+ * and clip). Nothing when the signed-in owner has no art for it.
+ */
+export function OwnerArtBackdrop({
+  artRef,
+  className = "",
+}: {
+  artRef: string | null;
+  className?: string;
+}) {
+  useCuratedArtVersion();
+  const src = artRef ? curatedArt(artRef, "hero") : null;
+  const [failed, setFailed] = useState<string | null>(null);
+  if (!src || failed === src) return null;
+  return (
+    <div
+      aria-hidden
+      className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
+    >
+      <img
+        src={src}
+        alt=""
+        draggable={false}
+        onError={() => setFailed(src)}
+        className="h-full w-full object-cover object-[74%_35%] opacity-75"
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-canvas via-canvas/75 to-canvas/10 rtl:bg-gradient-to-l" />
+    </div>
+  );
+}
 
 /** Shared pieces for the team, athlete and league pages. */
 
@@ -60,7 +93,10 @@ export function PageHeader({
   facts,
   color,
   actions,
+  artRef = null,
 }: {
+  /** The owner's art key for this page's subject ("team:nfl:12"). */
+  artRef?: string | null;
   image: string | null;
   round?: boolean;
   eyebrow?: ReactNode;
@@ -72,6 +108,7 @@ export function PageHeader({
   const shown = facts.filter((f): f is string => !!f);
   return (
     <header className="relative overflow-hidden rounded-2xl border border-edge-soft/60 bg-gradient-to-br from-elevated via-canvas to-canvas p-6 md:p-8">
+      <OwnerArtBackdrop artRef={artRef} />
       {color && (
         <div
           aria-hidden
