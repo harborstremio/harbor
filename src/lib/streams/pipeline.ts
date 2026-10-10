@@ -336,6 +336,7 @@ export async function runPipeline(
       : fetchAddonStreams(
           input.addons,
           input.request,
+          input.isAnime === true,
           signal,
           onAddonBatch,
           handleAddonProgress,
