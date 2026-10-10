@@ -1,6 +1,7 @@
 import { ArrowLeftRight, Crosshair, Eye, EyeOff, Flag, LayoutGrid, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import type { InsightSide, PregameInsight } from "@/lib/jl/sports/insight";
 import {
   activeLineup,
@@ -22,7 +23,10 @@ import type {
 } from "@/lib/jl/sports/soccer-live";
 import { LEAGUES, type SportsGame } from "@/lib/sports/espn";
 
-const POLL_MS = 20_000;
+// Polled often so the delayed view below moves in small steps.
+const POLL_MS = 8_000;
+const DELAY_STEP_SEC = 15;
+const MAX_DELAY_SEC = 180;
 const MODE_KEY = "jl.liveField.mode";
 
 type Mode = "solid" | "clear";
@@ -70,7 +74,12 @@ export function JlLiveField({
   const [closedFor, setClosedFor] = useState<string | null>(null);
   const [openedFor, setOpenedFor] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>(readMode);
-  const feed = useLiveData(game, sport, !!game && closedFor !== gameKey);
+  const { settings, update } = useSettings();
+  // Streams run behind live; the field waits this long so its plays line up with the picture.
+  const delaySec = Math.min(MAX_DELAY_SEC, Math.max(0, Math.round(settings.sportsFieldDelaySec)));
+  const setDelay = (sec: number) =>
+    update({ sportsFieldDelaySec: Math.min(MAX_DELAY_SEC, Math.max(0, sec)) });
+  const feed = useLiveData(game, sport, !!game && closedFor !== gameKey, delaySec * 1000);
   const live = feed.data;
 
   if (!game) return null;
@@ -132,6 +141,28 @@ export function JlLiveField({
             {now.detail}
           </span>
         </span>
+        <span
+          className="pointer-events-auto flex h-7 items-center rounded-full bg-white/15 text-[11px] font-semibold"
+          title={t("Delay the field to match your stream")}
+        >
+          <button
+            onClick={() => setDelay(delaySec - DELAY_STEP_SEC)}
+            disabled={delaySec === 0}
+            aria-label={t("Less delay")}
+            className="flex h-7 w-6 items-center justify-center rounded-s-full hover:bg-white/25 disabled:opacity-40"
+          >
+            −
+          </button>
+          <span className="px-1 tabular-nums">{t("Delay {n}s", { n: delaySec })}</span>
+          <button
+            onClick={() => setDelay(delaySec + DELAY_STEP_SEC)}
+            disabled={delaySec >= MAX_DELAY_SEC}
+            aria-label={t("More delay")}
+            className="flex h-7 w-6 items-center justify-center rounded-e-full hover:bg-white/25 disabled:opacity-40"
+          >
+            +
+          </button>
+        </span>
         <button
           onClick={toggleMode}
           aria-pressed={clear}
@@ -167,15 +198,70 @@ export function JlLiveField({
       )}
       {live.kind === "soccer" && <SoccerLiveView live={live.live} clear={clear} />}
       {live.kind === "none" && !feed.failed && (
-        <p className="text-[12px] text-white/70">{t("Waiting for live data…")}</p>
+        <p className="text-[12px] text-white/70">
+          {feed.syncing ? t("Lining up with your stream…") : t("Waiting for live data…")}
+        </p>
       )}
     </div>
   );
 }
 
-type LiveFeed = { data: LiveData; at: number; failed: boolean };
+type LiveFeed = {
+  data: LiveData;
+  at: number;
+  failed: boolean;
+  /** Data has arrived but is still being held back to match the stream delay. */
+  syncing?: boolean;
+};
 
-function useLiveData(game: SportsGame | null, sport: FieldSport | null, active: boolean): LiveFeed {
+/**
+ * The live data, held back by `delayMs` so it lines up with a stream running behind live: every
+ * answer is queued with its arrival time and shown once it is `delayMs` old. Failures show at
+ * once; only the data waits.
+ */
+function useLiveData(
+  game: SportsGame | null,
+  sport: FieldSport | null,
+  active: boolean,
+  delayMs: number,
+): LiveFeed {
+  const latest = useLatestLiveData(game, sport, active);
+  const key = game ? `${game.league}:${game.id}` : "";
+  const [queue, setQueue] = useState<{ key: string; items: LiveFeed[] }>({ key: "", items: [] });
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (latest.at === 0 || latest.failed) return;
+    setQueue((q) => {
+      const items = q.key === key ? q.items : [];
+      if (items[items.length - 1]?.at === latest.at) return q;
+      // Enough history for the longest delay.
+      const keepFrom = latest.at - MAX_DELAY_SEC * 1000 - POLL_MS;
+      return { key, items: [...items.filter((i) => i.at >= keepFrom), latest] };
+    });
+  }, [key, latest]);
+
+  useEffect(() => {
+    if (!active || delayMs === 0) return;
+    const id = window.setInterval(() => setTick((n) => n + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [active, delayMs]);
+
+  if (latest.failed) return latest;
+  if (delayMs === 0) return latest;
+  const items = queue.key === key ? queue.items : [];
+  const due = Date.now() - delayMs;
+  let shown: LiveFeed | null = null;
+  for (const item of items) if (item.at <= due) shown = item;
+  if (shown) return shown;
+  return { data: { kind: "none" }, at: 0, failed: false, syncing: items.length > 0 };
+}
+
+function useLatestLiveData(
+  game: SportsGame | null,
+  sport: FieldSport | null,
+  active: boolean,
+): LiveFeed {
   const [result, setResult] = useState<(LiveFeed & { key: string }) | null>(null);
   const key = game ? `${game.league}:${game.id}` : "";
 

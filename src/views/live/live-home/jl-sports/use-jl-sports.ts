@@ -23,6 +23,12 @@ import {
 import type { College } from "@/lib/jl/sports/colleges";
 import { fetchJlScoreboard, fetchTeamGames } from "@/lib/jl/sports/feed";
 import { logoUrl } from "@/lib/jl/sports/sidearm";
+import {
+  leaguesForToday,
+  normalizeDayFocus,
+  normalizePriority,
+  type SportPrefs,
+} from "@/lib/jl/sports/sport-priorities";
 import { useVisionVersion, vision, visionTeamFor } from "@/lib/jl/sports/vision";
 import { followedGamesThisWeek, selectTopGames, teamsMissingFromScoreboard } from "@/lib/jl/sports/gameday";
 import { alsoTodayGroups, teamSlideInfo } from "@/lib/jl/sports/hub-sections";
@@ -50,6 +56,19 @@ export type JlTeamSlide = { team: JlFavoriteTeam; side: SportsSide | null; next:
 
 /** "Also today": the day's other games, one group per league. */
 export type JlAlsoToday = { league: string; label: string; live: number; items: JlHubGame[] };
+
+/** The viewer's sports order and game-day focus (Settings → Sports → My sports). */
+export function useSportPrefs(): SportPrefs {
+  const { settings } = useSettings();
+  const { sportsPriority, sportsDayFocus } = settings;
+  return useMemo(
+    () => ({
+      priority: normalizePriority(sportsPriority),
+      dayFocus: normalizeDayFocus(sportsDayFocus),
+    }),
+    [sportsPriority, sportsDayFocus],
+  );
+}
 
 /** The teams the hub follows: ESPN favorites plus colleges followed on their College page. */
 export function useHubTeams(): JlFavoriteTeam[] {
@@ -164,6 +183,7 @@ export function useJlSports(params: {
   const { channels, epg, nowMs, active = true } = params;
   const { settings } = useSettings();
   const { sportsTopGames, sportsScoreTicker } = settings;
+  const prefs = useSportPrefs();
   // Harbor's odds setting covers every sports surface; kids' profiles never see lines.
   const kid = useActiveKid();
   const sportsOdds = settings.sportsShowOdds && !kid;
@@ -186,7 +206,11 @@ export function useJlSports(params: {
       }
       return found;
     };
-    const ranked = rankGames(games, favorites, { now, watchable: (g) => channelsOf(g).length > 0 });
+    const ranked = rankGames(games, favorites, {
+      now,
+      watchable: (g) => channelsOf(g).length > 0,
+      prefs,
+    });
     const followed = followedGamesThisWeek(games, favorites, now);
     const top: JlHubGame[] = selectTopGames(ranked, followed).map((r) => ({ ...r, channels: channelsOf(r.game) }));
     // The ticker follows your teams through the day: live, today's kick-offs, and today's finals.
@@ -203,15 +227,20 @@ export function useJlSports(params: {
         mine: isFavoriteGame(g, favorites),
         channels: channelsOf(g),
       };
-    const teamSlides: JlTeamSlide[] = teamSlideInfo(games, teams, now).map(({ team, side, next }) => ({
-      team,
-      side,
-      next: next ? hubItem(next) : null,
-    }));
+    // Every followed team gets a slide, today's focus sport and your top sports first.
+    const leagueOrder = leaguesForToday(prefs, now);
+    const rankOf = (league: string) => {
+      const i = leagueOrder.indexOf(league);
+      return i < 0 ? leagueOrder.length : i;
+    };
+    const teamSlides: JlTeamSlide[] = teamSlideInfo(games, teams, now)
+      .map(({ team, side, next }) => ({ team, side, next: next ? hubItem(next) : null }))
+      .sort((a, b) => rankOf(a.team.league) - rankOf(b.team.league));
     const shownTop = sportsTopGames ? top : [];
     const alsoToday: JlAlsoToday[] = alsoTodayGroups(games, {
       now: now.getTime(),
       exclude: new Set(shownTop.map((r) => `${r.game.league}:${r.game.id}`)),
+      order: leagueOrder,
     }).map((g) => ({ league: g.league, label: g.label, live: g.live, items: g.games.map(hubItem) }));
     const playerSlides: JlPlayerSlide[] = players.map((player) => {
       const team = player.teamId ? [{ league: player.league, id: player.teamId, name: player.teamName ?? "" }] : [];
@@ -234,7 +263,7 @@ export function useJlSports(params: {
       favorites,
       channelsFor: channelsOf,
     };
-  }, [games, favorites, index, nowMs, teams, players, sportsTopGames, sportsScoreTicker]);
+  }, [games, favorites, index, nowMs, teams, players, sportsTopGames, sportsScoreTicker, prefs]);
 
   // Odds overlay: The Odds API's line when the viewer has a key, else ESPN's; none when off.
   const oddsGames = useOddsApiGames(useMemo(() => (sportsOdds ? hub.top.map((r) => r.game) : []), [hub.top, sportsOdds]));

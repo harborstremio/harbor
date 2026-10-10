@@ -13,6 +13,7 @@ import type { Settings } from "@/lib/settings/types";
 import { openUrl } from "@/lib/window";
 import { KeyField, Section, ToggleRow } from "./shared";
 import { SportsArtSection } from "./sports-art-panel";
+import { SportPrioritiesEditor } from "./sports-priorities";
 
 type PluginField =
   | "sportsTopGames"
@@ -55,6 +56,12 @@ export function SportsPanel() {
   const { settings, update } = useSettings();
   return (
     <>
+      <Section
+        title={t("My sports")}
+        subtitle={t("What matters most to you leads the Sports Hub.")}
+      >
+        <SportPrioritiesEditor />
+      </Section>
       <Section
         title={t("Sports keys")}
         subtitle={t(

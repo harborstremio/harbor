@@ -34,7 +34,12 @@ function sameLocalDay(a: number, b: number): boolean {
  */
 export function alsoTodayGroups(
   games: SportsGame[],
-  opts: { now: number; exclude: ReadonlySet<string> },
+  opts: {
+    now: number;
+    exclude: ReadonlySet<string>;
+    /** The viewer's leagues for today, in order (sport-priorities.ts); others are left out. */
+    order?: readonly string[];
+  },
 ): AlsoTodayGroup[] {
   const byLeague = new Map<string, SportsGame[]>();
   for (const g of games) {
@@ -45,6 +50,17 @@ export function alsoTodayGroups(
     else byLeague.set(g.league, [g]);
   }
   const order = (g: SportsGame) => (g.state === "in" ? 0 : g.state === "pre" ? 1 : 2);
+  if (opts.order) {
+    const label = (league: string) =>
+      ALSO_TODAY_LEAGUES.find((l) => l.league === league)?.label ?? league;
+    return opts.order.flatMap((league) => {
+      const list = byLeague.get(league);
+      if (!list?.length) return [];
+      list.sort((a, b) => order(a) - order(b) || a.startMs - b.startMs || a.id.localeCompare(b.id));
+      const live = list.filter((g) => g.state === "in").length;
+      return [{ league, label: label(league), games: list, live }];
+    });
+  }
   const known = new Set(ALSO_TODAY_LEAGUES.map((l) => l.league));
   const leagues = [
     ...ALSO_TODAY_LEAGUES,

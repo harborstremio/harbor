@@ -1,5 +1,6 @@
 import type { SportsGame, SportsSide } from "../../sports/espn.ts";
 import { teamKey } from "./event-parse.ts";
+import { leagueWeight, type SportPrefs } from "./sport-priorities.ts";
 
 /** A followed team: Harbor league tag ("NFL", "NCAAF", "NBA") + ESPN team id, and its name as a fallback. */
 export type JlFavoriteTeam = { league: string; id: string; name: string };
@@ -96,19 +97,29 @@ function dayWeights(now: Date): Record<"nfl" | "cfb", number> {
 export function rankGames(
   games: SportsGame[],
   favorites: JlFavoriteTeam[],
-  opts: { now: Date; watchable?: (game: SportsGame) => boolean },
+  opts: {
+    now: Date;
+    watchable?: (game: SportsGame) => boolean;
+    /** The viewer's sports order and game-day focus; switched-off sports only show for your teams. */
+    prefs?: SportPrefs;
+  },
 ): RankedGame[] {
-  const { now, watchable } = opts;
+  const { now, watchable, prefs } = opts;
   const weights = dayWeights(now);
   return games
     .filter((g) => g.state !== "post")
-    .map((game) => {
+    .flatMap((game) => {
       const reasons: RankReason[] = [];
-      const sport = FOOTBALL_SPORT[game.league];
-      let score = (sport ? weights[sport] : 10) + (watchable?.(game) ? 6 : 0);
       const mine = isFavoriteGame(game, favorites);
+      const sport = FOOTBALL_SPORT[game.league];
+      const preferred = prefs ? leagueWeight(game.league, prefs, now) : null;
+      if (prefs && preferred === null && !mine) return [];
+      let score =
+        (prefs ? (preferred ?? 0) : sport ? weights[sport] : 10) + (watchable?.(game) ? 6 : 0);
+      if (prefs && preferred !== null && preferred >= 120) reasons.push({ label: "Game day" });
       if (mine) {
-        score += 100;
+        // With your own sports order in play, your teams still come before any game-day focus.
+        score += prefs ? 250 : 100;
         const hoursAway = (game.startMs - now.getTime()) / 3600000;
         reasons.push({ label: hoursAway > 20 ? "Your team · next game" : "Your team" });
       }
@@ -137,7 +148,7 @@ export function rankGames(
         score += 50;
         reasons.push({ label: "On {network}", vars: { network: game.network } });
       }
-      return { game, score, reasons, mine };
+      return [{ game, score, reasons, mine }];
     })
     .sort((a, b) => b.score - a.score || a.game.startMs - b.game.startMs);
 }

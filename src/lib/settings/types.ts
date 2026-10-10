@@ -126,6 +126,12 @@ export type Settings = {
   sportsScoreTicker: boolean;
   /** The live-score crawl across the top of the hubs (Tickarr). */
   sportsTickerBar: boolean;
+  /** Your sports in order (league tags); left-out sports stay out of the Top 10. */
+  sportsPriority: string[];
+  /** Sports that lead on each weekday ("Sat": ["NCAAF"]). */
+  sportsDayFocus: Partial<Record<"Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun", string[]>>;
+  /** Seconds the live field waits so its plays line up with a delayed stream. */
+  sportsFieldDelaySec: number;
   sportsOdds: boolean;
   sportsKeysHintDismissed: boolean;
   tvdbKey: string;

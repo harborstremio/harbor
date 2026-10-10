@@ -99,9 +99,12 @@ export function LiveHome({
 
   return (
     <div className="flex flex-col gap-8 pb-12">
-      {(jlSports.top.length > 0 || jlSports.playerSlides.length > 0) && (
+      {(jlSports.top.length > 0 ||
+        jlSports.teamSlides.length > 0 ||
+        jlSports.playerSlides.length > 0) && (
         <JlSportsHero
           top={jlSports.top}
+          teamSlides={jlSports.teamSlides}
           playerSlides={jlSports.playerSlides}
           actions={jlDialogs.actions}
           onOpenGame={openMatchDetail}

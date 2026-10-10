@@ -13,6 +13,7 @@ import type { SportsPage } from "@/lib/jl/sports/pages";
 import type { SportsSearchHit } from "@/lib/jl/sports/search-parse";
 import { useView } from "@/lib/view";
 import { JlDialog } from "./jl-dialog";
+import { SportPrioritiesEditor } from "@/views/settings/sports-priorities";
 
 const SEARCH_DELAY_MS = 350;
 
@@ -126,6 +127,12 @@ export function FollowPanel({ onClose }: { onClose: () => void }) {
           </ul>
         )}
         <FollowingList onClose={onClose} />
+        <section className="flex flex-col gap-2 border-t border-edge-soft pt-4">
+          <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+            {t("My sports")}
+          </h3>
+          <SportPrioritiesEditor />
+        </section>
       </div>
     </JlDialog>
   );

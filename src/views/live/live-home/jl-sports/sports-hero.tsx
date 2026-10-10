@@ -1,5 +1,14 @@
 import { ChevronLeft, ChevronRight, ImageIcon, Info, Play, Sparkles, Users2 } from "lucide-react";
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { useHeroDock } from "@/lib/hero-dock";
 import { useT } from "@/lib/i18n";
 import { nativeTvAvailable } from "@/lib/player/native-tv/bridge";
@@ -128,10 +137,12 @@ export function JlSportsHero({
   const slides = useMemo<Slide[]>(() => {
     const games = top.map((item, i) => ({ kind: "game" as const, item, place: i + 1 }));
     const teams = teamSlides.map((slide) => ({ kind: "team" as const, slide }));
+    // A game of yours on now leads; then every team you follow, then the rest of the Top 10.
+    const liveMine = games.filter((g) => g.item.mine && g.item.game.state === "in");
     const own: Slide[] = [
-      ...games.slice(0, 1),
+      ...liveMine,
       ...teams,
-      ...games.slice(1),
+      ...games.filter((g) => !liveMine.includes(g)),
       ...playerSlides.map((slide) => ({ kind: "player" as const, slide })),
       ...leaders,
     ];
@@ -148,6 +159,7 @@ export function JlSportsHero({
   }, [top, teamSlides, playerSlides, featured, leaders]);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const awake = useHeroAwake(root);
   const count = slides.length;
   // Following or unfollowing changes the slide count; stay on a valid slide.
   const position = count ? index % count : 0;
@@ -223,7 +235,7 @@ export function JlSportsHero({
           />
         )}
       </div>
-      <PinWallpaperButton focus={focus} bleed={bleed} />
+      <PinWallpaperButton focus={focus} bleed={bleed} awake={awake} />
       {count > 1 && (
         <div
           className={`absolute z-20 flex items-center gap-2 ${bleed ? "bottom-7 end-12" : "bottom-6 end-8"}`}
@@ -272,7 +284,16 @@ export function JlSportsHero({
  * (Harbor's wallpaper dock mode); otherwise it pins this slide's art as the page's wallpaper.
  * Pressed again, it unpins.
  */
-function PinWallpaperButton({ focus, bleed }: { focus: Focus; bleed: boolean }) {
+function PinWallpaperButton({
+  focus,
+  bleed,
+  awake,
+}: {
+  focus: Focus;
+  bleed: boolean;
+  /** Shown only while the hero is in use, so it never sits on top of the art. */
+  awake: boolean;
+}) {
   const t = useT();
   const dock = useHeroDock();
   const { settings, update } = useSettings();
@@ -304,9 +325,9 @@ function PinWallpaperButton({ focus, bleed }: { focus: Focus; bleed: boolean }) 
       onClick={onClick}
       aria-pressed={pressed}
       title={videoMode ? t("Wallpaper mode — video continues while you browse") : undefined}
-      className={`absolute z-20 flex h-11 items-center gap-2 rounded-xl border px-4 text-[14px] font-semibold backdrop-blur-md transition-colors ${
+      className={`absolute z-20 flex h-11 items-center gap-2 rounded-xl border px-4 text-[14px] font-semibold backdrop-blur-md transition-[color,background-color,border-color,opacity] duration-300 ${
         bleed ? "end-12 top-24" : "end-6 top-6"
-      } ${
+      } ${awake ? "opacity-100" : "pointer-events-none opacity-0"} ${
         pressed
           ? "border-accent/60 bg-accent/20 text-ink"
           : "border-white/15 bg-canvas/55 text-ink hover:border-white/35 hover:bg-canvas/75"
@@ -898,4 +919,52 @@ function PersonLayout({
       <div className="relative">{footer}</div>
     </>
   );
+}
+
+const HERO_IDLE_MS = 2500;
+
+/**
+ * Whether the hero is in use: the pointer moved over it, or focus (keyboard, remote, gamepad) is
+ * inside it. Goes idle a moment after the pointer stops; focus inside keeps it awake, so the
+ * remote can always reach the hero's controls.
+ */
+function useHeroAwake(root: RefObject<HTMLElement | null>): boolean {
+  const [awake, setAwake] = useState(false);
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    let timer = 0;
+    const focused = () => el.contains(document.activeElement);
+    const wake = () => {
+      setAwake(true);
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setAwake(focused()), HERO_IDLE_MS);
+    };
+    const leave = () => {
+      window.clearTimeout(timer);
+      setAwake(focused());
+    };
+    const blur = (e: FocusEvent) => {
+      if (!el.contains(e.relatedTarget as Node | null)) leave();
+    };
+    const controller = () => {
+      if (focused()) wake();
+    };
+    el.addEventListener("pointermove", wake);
+    el.addEventListener("pointerenter", wake);
+    el.addEventListener("pointerleave", leave);
+    el.addEventListener("focusin", wake);
+    el.addEventListener("focusout", blur);
+    window.addEventListener("harbor:controller-activity", controller);
+    return () => {
+      window.clearTimeout(timer);
+      el.removeEventListener("pointermove", wake);
+      el.removeEventListener("pointerenter", wake);
+      el.removeEventListener("pointerleave", leave);
+      el.removeEventListener("focusin", wake);
+      el.removeEventListener("focusout", blur);
+      window.removeEventListener("harbor:controller-activity", controller);
+    };
+  }, [root]);
+  return awake;
 }
