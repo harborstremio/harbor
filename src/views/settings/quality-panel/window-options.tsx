@@ -91,6 +91,12 @@ export function PlayerWindowOptions() {
               />
             </SettingRow>
           )}
+          <ToggleRow
+            label={t("Scroll over the speed button to change speed")}
+            sub={t("Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.")}
+            value={settings.playerSpeedWheel}
+            onChange={(v) => update({ playerSpeedWheel: v })}
+          />
         </SettingsWorkbench>
       </Section>
     </>

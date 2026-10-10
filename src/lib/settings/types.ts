@@ -219,6 +219,7 @@ export type Settings = {
   playerVolumeHudPosition: "center" | "top" | "top-left" | "top-right";
   playerSpeedHud: boolean;
   playerSpeedHudPosition: "center" | "top" | "top-left" | "top-right";
+  playerSpeedWheel: boolean;
   customPlaybackSpeeds: number[];
   customSleepMinutes: number[];
   defaultPlaybackSpeed: number;

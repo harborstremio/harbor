@@ -137,6 +137,7 @@ export const DEFAULT: Settings = {
   playerVolumeHudPosition: "top",
   playerSpeedHud: true,
   playerSpeedHudPosition: "top",
+  playerSpeedWheel: true,
   customPlaybackSpeeds: [],
   customSleepMinutes: [],
   defaultPlaybackSpeed: 1,

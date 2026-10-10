@@ -526,6 +526,8 @@ const settingsRefinements: Record<string, string> = {
   "Speed pop-up while watching": "視聴中の速度ポップアップ",
   "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "ショートカット、ホイール、速度メニューで再生速度を変えたときに表示します。",
   "Speed pop-up position": "速度ポップアップの位置",
+  "Scroll over the speed button to change speed": "速度ボタン上でスクロールして速度を変更",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.": "ホイールを上で速く、下で遅くします（0.25× 刻み）。",
   "Jump to the next unwatched episode": "次の未視聴エピソードへ移動",
   "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "番組を開いたときやシーズンを切り替えたときに、最初の未視聴エピソードまでスクロールします。",
 };

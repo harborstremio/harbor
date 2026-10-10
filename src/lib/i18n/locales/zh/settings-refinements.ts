@@ -526,6 +526,8 @@ const settingsRefinements: Record<string, string> = {
   "Speed pop-up while watching": "观看时显示速度弹窗",
   "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "通过快捷键、滚轮或速度菜单更改播放速度时显示当前速度。",
   "Speed pop-up position": "速度弹窗位置",
+  "Scroll over the speed button to change speed": "在速度按钮上滚动以调整速度",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.": "向上滚动加快播放，向下滚动减慢播放，每次 0.25×。",
   "Jump to the next unwatched episode": "跳到下一集未看剧集",
   "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "打开剧集或切换季时，将剧集列表滚动到第一集未看的剧集。",
 };

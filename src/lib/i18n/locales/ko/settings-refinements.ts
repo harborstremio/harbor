@@ -526,6 +526,8 @@ const settingsRefinements: Record<string, string> = {
   "Speed pop-up while watching": "시청 중 속도 팝업",
   "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "단축키, 휠 또는 속도 메뉴로 재생 속도를 바꿀 때 표시합니다.",
   "Speed pop-up position": "속도 팝업 위치",
+  "Scroll over the speed button to change speed": "속도 버튼 위에서 스크롤하여 속도 변경",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.": "휠을 위로 올리면 빨라지고 아래로 내리면 느려집니다(0.25× 단위).",
   "Jump to the next unwatched episode": "다음 미시청 에피소드로 이동",
   "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "프로그램을 열거나 시즌을 바꿀 때 아직 보지 않은 첫 에피소드로 목록을 스크롤합니다.",
 };

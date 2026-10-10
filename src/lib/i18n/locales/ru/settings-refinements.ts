@@ -526,6 +526,8 @@ const settingsRefinements: Record<string, string> = {
   "Speed pop-up while watching": "Индикатор скорости при просмотре",
   "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "Показывать скорость воспроизведения при её изменении сочетанием клавиш, колёсиком или в меню скорости.",
   "Speed pop-up position": "Положение индикатора скорости",
+  "Scroll over the speed button to change speed": "Прокрутка над кнопкой скорости меняет скорость",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.": "Колёсико вверх ускоряет, вниз замедляет воспроизведение, с шагом 0.25×.",
   "Jump to the next unwatched episode": "Переходить к следующему непросмотренному эпизоду",
   "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Прокручивать список к первому непросмотренному эпизоду при открытии сериала или смене сезона.",
 };

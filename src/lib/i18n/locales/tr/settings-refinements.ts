@@ -526,6 +526,8 @@ const settingsRefinements: Record<string, string> = {
   "Speed pop-up while watching": "İzlerken hız göstergesi",
   "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "Oynatma hızını kısayol, tekerlek veya hız menüsüyle değiştirdiğinizde gösterir.",
   "Speed pop-up position": "Hız göstergesinin konumu",
+  "Scroll over the speed button to change speed": "Hızı değiştirmek için hız düğmesi üzerinde kaydırın",
+  "Wheel up speeds playback up and wheel down slows it down, in steps of 0.25×.": "Tekerleği yukarı kaydırmak hızlandırır, aşağı kaydırmak yavaşlatır; 0.25× adımlarla.",
   "Jump to the next unwatched episode": "Sıradaki izlenmemiş bölüme git",
   "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Bir dizi açtığınızda veya sezon değiştirdiğinizde listeyi izlemediğiniz ilk bölüme kaydırır.",
 };

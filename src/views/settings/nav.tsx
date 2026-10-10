@@ -5611,6 +5611,19 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["speed position", "speed hud placement", "speed overlay position"],
   },
   {
+    label: "Scroll over the speed button to change speed",
+    section: "player",
+    tab: "onscreen",
+    anchorTitle: "Speed pop-up",
+    keywords: [
+      "scroll wheel speed",
+      "mouse wheel playback speed",
+      "wheel rate",
+      "speed button scroll",
+      "faster slower wheel",
+    ],
+  },
+  {
     label: "Auto",
     section: "player",
     tab: "engine",
