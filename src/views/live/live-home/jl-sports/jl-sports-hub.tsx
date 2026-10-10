@@ -15,6 +15,7 @@ import {
 import { useState, type ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { useCfbdVisionLinks } from "@/lib/jl/sports/use-cfbd";
 import { useJlSession } from "@/lib/jl/account/client";
 import { useJlLink } from "@/lib/jl/account/sync";
 import { isFollowing, toggleFavoriteTeam } from "@/lib/jl/sports/favorites";
@@ -77,6 +78,8 @@ export function JlSportsHub({
   const session = useJlSession();
   const link = useJlLink();
   const { openSportsPage } = useView();
+  // With a CollegeFootballData key, college teams JL Vision hasn't linked get linked here.
+  useCfbdVisionLinks();
   const pill =
     "flex h-9 items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/40 px-3.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink";
   return (

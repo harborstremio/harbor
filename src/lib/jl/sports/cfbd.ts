@@ -36,6 +36,8 @@ export type CfbdTeam = {
   school: string;
   mascot: string | null;
   abbreviation: string | null;
+  /** Other names CFBD lists for the school ("UMass" for Massachusetts). */
+  altNames: string[];
   conference: string | null;
   /** "fbs", "fcs", "ii", "iii". */
   classification: string | null;
@@ -131,6 +133,12 @@ export function parseTeams(body: unknown): CfbdTeam[] {
         school,
         mascot: text(t.mascot),
         abbreviation: text(t.abbreviation),
+        altNames: [
+          ...asArray<unknown>(t.alternateNames),
+          t.alt_name1,
+          t.alt_name2,
+          t.alt_name3,
+        ].flatMap((n) => text(n) ?? []),
         conference: text(t.conference),
         classification: text(t.classification)?.toLowerCase() ?? null,
         color: hex(t.color),

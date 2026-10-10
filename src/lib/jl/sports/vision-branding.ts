@@ -298,6 +298,8 @@ export function createVisionStore(ports: VisionPorts) {
   let retryAt = 0;
   let loading: Promise<void> | null = null;
   let version = 0;
+  // Links worked out on this device (vision-cfbd-link.ts) for teams the database hasn't linked.
+  let extraLinks = new Map<string, string>();
 
   const emit = () => {
     version++;
@@ -484,11 +486,34 @@ export function createVisionStore(ports: VisionPorts) {
       return all.filter((t) => within.has(t.conference));
     },
     team: (key: string): VisionTeam | null => current().teams.get(key) ?? null,
+    /**
+     * Provider ids linked on this device, used only where the database has no link. Replaces
+     * any earlier set; the database's own links always win.
+     */
+    setDeviceLinks(links: ReadonlyMap<string, string>): void {
+      const same =
+        links.size === extraLinks.size && [...links].every(([k, v]) => extraLinks.get(k) === v);
+      if (same) return;
+      extraLinks = new Map(links);
+      emit();
+    },
     /** The JL Vision team behind a provider's team id, or null when it isn't linked. */
     byProvider(provider: string, league: string, id: string): VisionTeam | null {
       const d = current();
-      const key = d.byProvider.get(providerKey(provider, league, id));
+      const pk = providerKey(provider, league, id);
+      const key = d.byProvider.get(pk) ?? extraLinks.get(pk);
       return key ? (d.teams.get(key) ?? null) : null;
+    },
+    /** A team's id at a provider: the database's link, else one made on this device. */
+    providerId(key: string, provider: string, league: string): string | null {
+      const own = current()
+        .teams.get(key)
+        ?.providerIds.find((p) => p.provider === provider && p.league === league);
+      if (own) return own.id;
+      const prefix = `${provider}:${league.toLowerCase()}:`;
+      for (const [pk, teamKey] of extraLinks)
+        if (teamKey === key && pk.startsWith(prefix)) return pk.slice(prefix.length);
+      return null;
     },
     theme: (key: string): VisionTheme | null => current().themes.get(key) ?? null,
     logoUrl(key: string): string | null {

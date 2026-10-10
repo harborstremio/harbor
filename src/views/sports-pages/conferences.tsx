@@ -5,6 +5,7 @@ import { useJlSession } from "@/lib/jl/account/client";
 import type { SportsPage } from "@/lib/jl/sports/pages";
 import { monogram } from "@/lib/jl/sports/team-look";
 import { vision, useVisionVersion } from "@/lib/jl/sports/vision";
+import { useCfbdVisionLinks } from "@/lib/jl/sports/use-cfbd";
 import type { VisionGroup, VisionTeam } from "@/lib/jl/sports/vision-branding";
 import { useView } from "@/lib/view";
 import { Note, PageShell, Pill, Section, Spinner } from "./espn-page-parts";
@@ -25,6 +26,7 @@ export function ConferencesPage({ page }: { page: Extract<SportsPage, { kind: "c
   const t = useT();
   const session = useJlSession();
   useVisionVersion();
+  useCfbdVisionLinks();
   const groups = vision.groups();
   const status = vision.status();
   const tops = groups.filter((g) => !g.parent);
@@ -194,7 +196,9 @@ function TeamBranding({ team }: { team: VisionTeam }) {
     conference,
     tagline: [team.mascot, conference].filter(Boolean).join(" · "),
   };
-  const linked = team.providerIds.find((p) => p.provider === "espn" && PAGE_LEAGUE[p.league]);
+  const linked = Object.keys(PAGE_LEAGUE)
+    .map((league) => ({ league, id: vision.providerId(team.key, "espn", league) }))
+    .find((p): p is { league: string; id: string } => !!p.id);
   return (
     <section className="flex flex-col gap-4">
       {hero && (
