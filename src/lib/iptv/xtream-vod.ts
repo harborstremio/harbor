@@ -11,6 +11,9 @@ type VodRow = {
   stream_icon?: string;
   category_id?: string;
   container_extension?: string;
+  tmdb?: string | number;
+  tmdb_id?: string | number;
+  year?: string | number;
 };
 type SeriesRow = {
   series_id: number;
@@ -18,6 +21,11 @@ type SeriesRow = {
   stream_type?: string;
   cover?: string;
   category_id?: string;
+  tmdb?: string | number;
+  tmdb_id?: string | number;
+  year?: string | number;
+  releaseDate?: string;
+  release_date?: string;
 };
 type EpisodeRow = {
   id: string | number;
@@ -79,6 +87,18 @@ export function clearSeriesInfoCache(baseId?: string): void {
   }
 }
 
+// Panels that know a title's TMDB id or release year report them on the catalog row; matching a
+// title to what is playing relies on them, so they are kept when present.
+function identityAttrs(row: VodRow | SeriesRow): Record<string, string> {
+  const out: Record<string, string> = {};
+  const tmdb = wholeNumber(row.tmdb) ?? wholeNumber(row.tmdb_id);
+  if (tmdb) out["tmdb-id"] = String(tmdb);
+  const dated = "releaseDate" in row ? (row.releaseDate ?? row.release_date) : undefined;
+  const year = wholeNumber(row.year) ?? wholeNumber(dated?.slice(0, 4));
+  if (year != null && year >= 1900 && year <= 2099) out["release-year"] = String(year);
+  return out;
+}
+
 function catMap(raw: unknown): Map<string, string> {
   const m = new Map<string, string>();
   if (Array.isArray(raw)) {
@@ -128,7 +148,7 @@ export async function fetchXtreamVod(
         url: buildVodUrl(creds, row.stream_id, row.container_extension),
         catchupSource: null,
         durationSec: null,
-        attrs: { "tvg-type": "movie" },
+        attrs: { "tvg-type": "movie", ...identityAttrs(row) },
       } satisfies IptvChannel;
     },
     onBatch: options?.onBatch,
@@ -162,7 +182,11 @@ export async function fetchXtreamSeries(
         url: "",
         catchupSource: null,
         durationSec: null,
-        attrs: { "tvg-type": "series", "xtream-series-id": String(item.series_id) },
+        attrs: {
+          "tvg-type": "series",
+          "xtream-series-id": String(item.series_id),
+          ...identityAttrs(item),
+        },
       } satisfies IptvChannel;
     },
     onBatch: options?.onBatch,

@@ -13,6 +13,7 @@ import { enhanceAnimeStreams } from "./anitomy";
 import { partitionByExactAnimeEpisode } from "./anime-identity-core";
 import { fetchLibraryStreams, type LibraryListings, type LibraryQuery } from "./library";
 import { parseStream } from "./parser";
+import { isProviderVodStream } from "./source-order";
 import { applyTrust, type Rejection, type TrustOptions } from "./trust";
 import { computeCorpusStats, rankAndPick, scoreStream, type ScoreOptions } from "./scoring";
 import type { ParsedStream, RankedPicker, Stream } from "./types";
@@ -74,6 +75,29 @@ function finalizeWithRescue(
   return { picker: newPicker, rejected: rejected.filter((r) => !rescued.has(r.stream)) };
 }
 
+/**
+ * The viewer's own provider plays first. Its copies are matched by title identity before they get
+ * here, so release-name trust checks (built for torrent names) are not applied to them.
+ */
+function withProviderFirst(
+  picker: RankedPicker,
+  provider: Stream[],
+  score: ScoreOptions,
+): RankedPicker {
+  if (provider.length === 0) return picker;
+  const parsed = provider.map(parseStream);
+  const corpus = computeCorpusStats(parsed, score);
+  // Ahead of every ranked addon, so lists sorted by addon order keep the provider on top too.
+  const scored = parsed.map((s) => ({ ...scoreStream(s, score, corpus), addonPriority: -1 }));
+  const byTier = { ...picker.byTier };
+  for (const s of scored.slice().reverse()) byTier[s.tier] = s;
+  return {
+    primary: scored[0],
+    byTier,
+    all: [...scored, ...picker.all.filter((s) => !isProviderVodStream(s))],
+  };
+}
+
 function applyAnimeEpisodeFilter(
   parsed: ParsedStream[],
   input: PipelineInput,
@@ -111,6 +135,8 @@ export type PipelineInput = {
   addonTimeoutMs?: number;
   addonRanks?: AddonRankFn | null;
   forcedAddonBases?: Array<{ base: string; id: string }>;
+  /** Direct-play copies from the viewer's own providers; they are listed ahead of everything. */
+  providerStreams?: (signal: AbortSignal) => Promise<Stream[]>;
 };
 
 export type DebridError = { slug: string; name: string; code: string };
@@ -118,7 +144,7 @@ export type DebridError = { slug: string; name: string; code: string };
 export type PipelineResult = {
   picker: RankedPicker;
   rejected: Rejection[];
-  raw: { addon: Stream[]; library: Stream[] };
+  raw: { addon: Stream[]; library: Stream[]; provider?: Stream[] };
   debridErrors?: DebridError[];
   addonErrors?: AddonFailure[];
 };
@@ -135,6 +161,7 @@ export async function runPipeline(
   onAddonProgress?: (progress: AddonProgress) => void,
 ): Promise<PipelineResult> {
   let library: Stream[] = [];
+  let provider: Stream[] = [];
   let lastPartialAt = 0;
   let latestAddonStreams: Stream[] = [];
   const debridErrors: DebridError[] = [];
@@ -236,9 +263,13 @@ export async function runPipeline(
     );
     const fin = finalizeWithRescue(picker, rejected, input.trust ?? {}, input.score);
     return {
-      picker: applyStreamPriority(fin.picker, priorityActive, input.score.activeDebrids),
+      picker: withProviderFirst(
+        applyStreamPriority(fin.picker, priorityActive, input.score.activeDebrids),
+        provider,
+        input.score,
+      ),
       rejected: [...fin.rejected, ...extraRejected],
-      raw: { addon: addonStreams, library },
+      raw: { addon: addonStreams, library, provider },
       debridErrors: debridErrors.length > 0 ? debridErrors : undefined,
       addonErrors: addonErrors.length > 0 ? addonErrors : undefined,
     };
@@ -324,6 +355,17 @@ export async function runPipeline(
         })
       : Promise.resolve([]);
 
+  const providerPromise = input.providerStreams
+    ? input
+        .providerStreams(signal)
+        .catch(() => [] as Stream[])
+        .then((s) => {
+          provider = s;
+          if (s.length > 0) emitPartialNow();
+          return s;
+        })
+    : Promise.resolve([] as Stream[]);
+
   const presets = input.presetStreams ?? [];
   const [librarySettled, addonSettled] = await Promise.allSettled([
     fetchLibraryStreams(input.debrids, input.query, signal, libraryListsPromise).then((s) => {
@@ -348,6 +390,7 @@ export async function runPipeline(
   // the active cache check before flushing its tail to avoid duplicate requests.
   stopPartials();
   signal.removeEventListener("abort", stopPartials);
+  await providerPromise;
   if (librarySettled.status === "fulfilled") library = librarySettled.value;
   const addonStreams = addonSettled.status === "fulfilled" ? addonSettled.value : [];
   const merged = mergeAndDedupe(library, addonStreams);
@@ -406,9 +449,13 @@ export async function runPipeline(
     const fin = finalizeWithRescue(core.picker, core.rejected, input.trust ?? {}, input.score);
     restoreCacheVerification(fin.picker);
     return {
-      picker: applyStreamPriority(fin.picker, priorityActive, input.score.activeDebrids),
+      picker: withProviderFirst(
+        applyStreamPriority(fin.picker, priorityActive, input.score.activeDebrids),
+        provider,
+        input.score,
+      ),
       rejected: [...fin.rejected, ...animeRejected],
-      raw: { addon: addonStreams, library },
+      raw: { addon: addonStreams, library, provider },
       debridErrors: debridErrors.length > 0 ? debridErrors : undefined,
       addonErrors: addonErrors.length > 0 ? addonErrors : undefined,
     };
@@ -439,9 +486,13 @@ export async function runPipeline(
   const fin = finalizeWithRescue(picker, rejected, input.trust ?? {}, input.score);
   restoreCacheVerification(fin.picker);
   return {
-    picker: applyStreamPriority(fin.picker, priorityActive, input.score.activeDebrids),
+    picker: withProviderFirst(
+      applyStreamPriority(fin.picker, priorityActive, input.score.activeDebrids),
+      provider,
+      input.score,
+    ),
     rejected: [...fin.rejected, ...animeRejected],
-    raw: { addon: addonStreams, library },
+    raw: { addon: addonStreams, library, provider },
     debridErrors: debridErrors.length > 0 ? debridErrors : undefined,
     addonErrors: addonErrors.length > 0 ? addonErrors : undefined,
   };

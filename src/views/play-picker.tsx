@@ -79,7 +79,7 @@ import { useActiveKid } from "@/lib/profiles";
 import { useAutoCandidates } from "./play-picker/use-auto-candidates";
 import { useAutoFire } from "./play-picker/use-auto-fire";
 import { useRoomInvite } from "./play-picker/use-room-invite";
-import { useAddons } from "./play-picker/use-addons";
+import { declaresStream, useAddons } from "./play-picker/use-addons";
 import { useAnimeAltTitles } from "./play-picker/use-anime-alt-titles";
 import { useImdbId } from "./play-picker/use-imdb-id";
 import { usePipelineResult } from "./play-picker/use-pipeline-result";
@@ -95,6 +95,9 @@ import { LocalStreamList } from "./play-picker/local-stream-card";
 import { SubtitleSelectStep } from "./play-picker/subtitle-select-step";
 import { prefetchResumeStart } from "@/lib/player/resume-start";
 import { isLivePlaybackSrc } from "@/lib/player/live-src";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
+import { providerVodSources } from "@/lib/streams/provider-vod";
+import { searchedSourceLabels } from "@/lib/streams/source-order";
 
 const TIER_ORDER: Tier[] = ["4K_DV", "4K_HDR", "4K", "1080p_HDR", "1080p", "720p", "SD", "ROUGH"];
 
@@ -206,6 +209,12 @@ export function PlayPicker({
     [downloadEntry, localMatches],
   );
   const { addons } = useAddons(authKey, settings);
+  const playlists = usePlaylists();
+  const providerNames = useMemo(() => providerVodSources().map((p) => p.name), [playlists]);
+  const searchedSources = useMemo(
+    () => searchedSourceLabels(providerNames, (addons ?? []).filter(declaresStream)),
+    [providerNames, addons],
+  );
   const [seasonLogo, setSeasonLogo] = useState<string | undefined>(() =>
     peekCachedLogo(settings.tmdbKey, meta, { preferOwn: true }),
   );
@@ -858,7 +867,11 @@ export function PlayPicker({
   }, [attempt, episode, meta.id]);
   useScrollMemory(pickerScrollKey, mainRef, !showAutoTransition);
 
-  const noSourcesConfigured = addons !== null && addons.length === 0 && debrids.length === 0;
+  const noSourcesConfigured =
+    addons !== null &&
+    !addons.some(declaresStream) &&
+    debrids.length === 0 &&
+    providerNames.length === 0;
 
   if (pendingPreselect) {
     return (
@@ -922,6 +935,7 @@ export function PlayPicker({
         meta={meta}
         episode={episode}
         absoluteEpisode={animeAbsoluteEpisode}
+        sources={searchedSources}
         triedCount={autoCandidates.length}
         onBrowseManually={() => {
           setAutoCancelled(true);

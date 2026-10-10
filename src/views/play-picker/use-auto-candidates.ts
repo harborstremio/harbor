@@ -14,6 +14,7 @@ import { hostSourceStream } from "@/lib/together/host-stream";
 import { hasInstantMarker, isWatchHub, needsDownload, streamMatchesLangs } from "./picker-utils";
 import { titleTokensPresent } from "@/lib/streams/trust";
 import { episodeSpanContains } from "@/lib/episode-span";
+import { isProviderVodStream, sourceOrderRank } from "@/lib/streams/source-order";
 
 const RES_PREF: Record<string, number> = { "1080p": 0, "720p": 1, "480p": 2, "4K": 3, SD: 4 };
 const LIKELY_PACK_BYTES = 12 * 1024 * 1024 * 1024;
@@ -124,12 +125,19 @@ export function useAutoCandidates(args: {
       const aw = isWatchHub(a) ? 1 : 0;
       const bw = isWatchHub(b) ? 1 : 0;
       if (aw !== bw) return aw - bw;
+      const apv = isProviderVodStream(a) ? 0 : 1;
+      const bpv = isProviderVodStream(b) ? 0 : 1;
+      if (apv !== bpv) return apv - bpv;
       const ai0 = instantTier(a);
       const bi0 = instantTier(b);
       if (ai0 !== bi0) return ai0 - bi0;
       const an = a.nameAbsent ? 1 : 0;
       const bn = b.nameAbsent ? 1 : 0;
       if (an !== bn) return an - bn;
+      // Among equally ready copies, Real-Debrid is tried before TorBox, then everything else.
+      const aso = sourceOrderRank(a);
+      const bso = sourceOrderRank(b);
+      if (aso !== bso) return aso - bso;
       const aym = isYourMedia(a) ? 0 : 1;
       const bym = isYourMedia(b) ? 0 : 1;
       if (aym !== bym) return aym - bym;

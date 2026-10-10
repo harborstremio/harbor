@@ -31,7 +31,10 @@ import { hostSourceMatchesMedia } from "@/lib/together/room-derive";
 import { buildMatchScores, matchBadge } from "@/lib/together/source-match";
 import type { PlayEpisode } from "@/lib/view";
 import { streamIsCached } from "@/views/play-picker/picker-utils";
-import { useAddons } from "@/views/play-picker/use-addons";
+import { declaresStream, useAddons } from "@/views/play-picker/use-addons";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
+import { providerVodSources } from "@/lib/streams/provider-vod";
+import { searchedSourceLabels } from "@/lib/streams/source-order";
 import { useAnimeAltTitles } from "@/views/play-picker/use-anime-alt-titles";
 import { useImdbId } from "@/views/play-picker/use-imdb-id";
 import { usePipelineResult } from "@/views/play-picker/use-pipeline-result";
@@ -75,6 +78,8 @@ export type BpStreams = BpStreamFilters & {
   homeServerItems: MediaServerItem[];
   homeServersLoaded: boolean;
   noSources: boolean;
+  /** The sources a search covers, in the order they are tried. */
+  searchedSources: string[];
   rememberedStream: ScoredStream | null;
   strictMode: boolean;
   forceShowAll: boolean;
@@ -89,6 +94,12 @@ export function useBpStreams(params: { meta: Meta; episode?: PlayEpisode }): BpS
   const { authKey } = useAuth();
   const debrids = useDebridClients();
   const { addons } = useAddons(authKey, settings);
+  const playlists = usePlaylists();
+  const providerNames = useMemo(() => providerVodSources().map((p) => p.name), [playlists]);
+  const searchedSources = useMemo(
+    () => searchedSourceLabels(providerNames, (addons ?? []).filter(declaresStream)),
+    [providerNames, addons],
+  );
   const resolvedImdb = useImdbId(meta, settings.tmdbKey);
   const streamIds = useStreamIds(meta, episode, resolvedImdb.id);
   const animeTitles = useAnimeAltTitles(meta);
@@ -340,7 +351,12 @@ export function useBpStreams(params: { meta: Meta; episode?: PlayEpisode }): BpS
     homeServerConnections: homeServerState.connections,
     homeServerItems: homeServerState.items,
     homeServersLoaded,
-    noSources: addons !== null && addons.length === 0 && debrids.length === 0,
+    noSources:
+      addons !== null &&
+      !addons.some(declaresStream) &&
+      debrids.length === 0 &&
+      providerNames.length === 0,
+    searchedSources,
     rememberedStream,
     strictMode,
     forceShowAll,

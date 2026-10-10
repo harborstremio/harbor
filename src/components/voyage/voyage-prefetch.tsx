@@ -8,6 +8,7 @@ import { useSettings } from "@/lib/settings";
 import { buildEpisodePipelineInput } from "@/lib/streams/episode-pipeline-input";
 import { runPipeline } from "@/lib/streams/pipeline";
 import { isPluginAddon, pluginCacheTokens } from "@/lib/streams/plugins";
+import { providerVodCacheTokens } from "@/lib/streams/provider-vod";
 import { useAddons } from "@/views/play-picker/use-addons";
 import { useAnimeAltTitles } from "@/views/play-picker/use-anime-alt-titles";
 import { useImdbId } from "@/views/play-picker/use-imdb-id";
@@ -37,7 +38,7 @@ export function VoyagePrefetch({ meta }: { meta: Meta }) {
       buildPickerConfigHash({
         addonTransportUrls: (addons ?? []).map((a) => a.transportUrl),
         debridSlugs: debrids.map((d) => d.slug),
-        scraperKeys: pluginCacheTokens(),
+        scraperKeys: [...pluginCacheTokens(), ...providerVodCacheTokens()],
         filterMode: filterDisabled ? "off" : strictMode ? "strict" : "balanced",
       }),
     [addons, debrids, filterDisabled, strictMode],

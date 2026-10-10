@@ -77,6 +77,7 @@ export async function resolveBestDownload(
     strictMode: false,
     filterDisabled: false,
     resolvePinnedPlugin: false,
+    includeProviderVod: false,
   });
 
   const result = await runPipeline(input, opts.signal);

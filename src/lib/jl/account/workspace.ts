@@ -17,16 +17,57 @@ const KEYS = [
   "harbor.playback-history.v1",
   "harbor.watchevents.v1",
 ] as const;
+// Per-profile copies live under these prefixes (`harbor.settings.<profileId>` and so on). Profile
+// IDs differ between rosters, so every key under a prefix belongs to the active workspace.
+const PREFIXES = [
+  "harbor.settings.",
+  "harbor.installed-addons.",
+  "harbor.addons.disabled.",
+  "harbor.addonOrder.",
+  "harbor.addonOrderBackups.",
+] as const;
+const SCOPED_KEYS = ["harbor.addons.seeded.v1"] as const;
+// Snapshots parked before per-profile keys were included do not list them; restoring one of those
+// must leave the per-profile keys alone rather than delete what the snapshot never saw.
+const SCOPED_MARK = "jl.workspace.scoped.v2";
 type Port = Pick<Storage, "getItem" | "setItem" | "removeItem" | "length" | "key">;
-type Snapshot = Record<(typeof KEYS)[number], string | null>;
+type Snapshot = Record<string, string | null>;
+
+const FIXED = new Set<string>(KEYS);
+function isScoped(key: string): boolean {
+  if (FIXED.has(key)) return false;
+  return (
+    (SCOPED_KEYS as readonly string[]).includes(key) || PREFIXES.some((p) => key.startsWith(p))
+  );
+}
+function scopedKeys(storage: Port): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < storage.length; i++) {
+    const key = storage.key(i);
+    if (key && isScoped(key)) out.push(key);
+  }
+  return out;
+}
 
 function capture(storage: Port): Snapshot {
-  return Object.fromEntries(KEYS.map((key) => [key, storage.getItem(key)])) as Snapshot;
+  const snapshot: Snapshot = Object.fromEntries(KEYS.map((key) => [key, storage.getItem(key)]));
+  for (const key of scopedKeys(storage)) snapshot[key] = storage.getItem(key);
+  snapshot[SCOPED_MARK] = "1";
+  return snapshot;
 }
 function restore(storage: Port, snapshot: Snapshot): void {
   for (const key of KEYS) {
     const value = snapshot[key];
-    if (value === null) storage.removeItem(key);
+    if (value == null) storage.removeItem(key);
+    else storage.setItem(key, value);
+  }
+  if (snapshot[SCOPED_MARK] !== "1") return;
+  for (const key of scopedKeys(storage)) {
+    if (!(key in snapshot)) storage.removeItem(key);
+  }
+  for (const [key, value] of Object.entries(snapshot)) {
+    if (!isScoped(key)) continue;
+    if (value == null) storage.removeItem(key);
     else storage.setItem(key, value);
   }
 }
@@ -35,12 +76,17 @@ function empty(): Snapshot {
     ...Object.fromEntries(KEYS.map((key) => [key, null])),
     "harbor.settings.shared": "{}",
     "harbor.settings": "{}",
-  } as Snapshot;
+    [SCOPED_MARK]: "1",
+  };
 }
 function parse(raw: string | null): Snapshot | null {
   if (!raw) return null;
   const value = JSON.parse(raw) as Snapshot;
-  if (!value || !KEYS.every((key) => value[key] === null || typeof value[key] === "string")) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    !Object.values(value).every((v) => v === null || typeof v === "string")
+  ) {
     throw new Error("JL account workspace is damaged. The existing data has been preserved.");
   }
   return value;

@@ -7,6 +7,7 @@ import type { PlayEpisode } from "@/lib/view";
 import { resolveAddonRanks } from "./addon-priority";
 import { animeAbsoluteFromScopedId } from "./anime-identity-core";
 import type { PipelineInput } from "./pipeline";
+import { fetchProviderVodStreams } from "./provider-vod";
 import { PLUGIN_ADDON_PREFIX, isPluginAddon, pluginAddonById, pluginIdFromCatalogueBase, pluginsForAddon } from "./plugins/addon";
 import { unverifiedAnimeSeasonId } from "./stream-ids";
 import type { Stream } from "./types";
@@ -62,6 +63,8 @@ export function buildEpisodePipelineInput(params: {
   /** Resolve the item's own plugin when it names one, even where plugins are otherwise kept out.
    * Background work opts out, so the switch keeps plugins out of it entirely. */
   resolvePinnedPlugin?: boolean;
+  /** Background downloads leave the viewer's IPTV provider alone; its connections are limited. */
+  includeProviderVod?: boolean;
 }): PipelineInput {
   const {
     meta,
@@ -145,6 +148,20 @@ export function buildEpisodePipelineInput(params: {
     !animeReq || episode?.imdbEpisode == null || episode.episode === episode.imdbEpisode;
   const effSeason = imdbEpAligned ? (episode?.imdbSeason ?? episode?.season) : episode?.season;
   const effEpisode = imdbEpAligned ? (episode?.imdbEpisode ?? episode?.episode) : episode?.episode;
+  const tmdbMatch = /^tmdb:(?:movie|tv|series):(\d+)$/.exec(meta.id);
+  const mediaYear = parseInt(meta.releaseInfo ?? "", 10) || null;
+  // Anime numbering differs between providers, so an episode is never guessed for it.
+  const providerQuery =
+    animeReq || params.includeProviderVod === false
+      ? null
+      : {
+          type: episode || meta.type === "series" ? ("series" as const) : ("movie" as const),
+          title: meta.name,
+          year: mediaYear,
+          tmdbId: tmdbMatch ? Number(tmdbMatch[1]) : null,
+          season: effSeason ?? null,
+          episode: effEpisode ?? null,
+        };
   const prevGroup =
     episode && typeof effSeason === "number" && typeof effEpisode === "number" && effEpisode > 1
       ? (readPlayback(meta.id, effSeason, effEpisode - 1)?.releaseGroup ?? undefined)
@@ -179,6 +196,9 @@ export function buildEpisodePipelineInput(params: {
     presetStreams: embedded.length > 0 ? embedded : undefined,
     addonTimeoutMs: Math.max(8, Math.min(120, settings.addonTimeoutSec ?? 30)) * 1000,
     addonRanks: resolveAddonRanks(effectiveAddons, settings.streamPriority),
+    providerStreams: providerQuery
+      ? (signal) => fetchProviderVodStreams(providerQuery, signal)
+      : undefined,
     forcedAddonBases: (() => {
       const forced = originBases.map((base) => ({ base, id: meta.id }));
       if (appendedBase) forced.push({ base: appendedBase, id: meta.id });

@@ -2,6 +2,7 @@ import type { IptvChannel, IptvPlaylist } from "./types";
 import { headersFromChannel } from "./channel-headers";
 import { classifyChannel } from "./vod-classify";
 import { cleanTitle, extractYear, parseSeriesEpisode, showTitleFromEpisode } from "./vod-title";
+import { vodQualityLabel } from "./vod-lookup";
 
 export type VodMovie = {
   id: string;
@@ -13,6 +14,8 @@ export type VodMovie = {
   playlistId: string;
   playlistName: string;
   headers?: Record<string, string>;
+  tmdbId?: number;
+  quality?: string;
 };
 
 export type VodEpisode = {
@@ -39,12 +42,21 @@ export type VodSeries = {
   episodes: VodEpisode[];
   seasons: number[];
   xtreamSeriesId?: string;
+  year?: number | null;
+  tmdbId?: number;
 };
 
 export type VodLibrary = { movies: VodMovie[]; series: VodSeries[] };
 
 export function isExternalPlaylistId(id: string): boolean {
   return id.startsWith("iptv:") || id.startsWith("vod:");
+}
+
+function attrNumber(ch: IptvChannel, key: string): number | undefined {
+  const raw = ch.attrs[key]?.trim();
+  if (!raw || !/^\d+$/.test(raw)) return undefined;
+  const n = Number(raw);
+  return Number.isSafeInteger(n) && n > 0 ? n : undefined;
 }
 
 function norm(s: string): string {
@@ -93,7 +105,9 @@ export function buildVodLibrary(
 
       if (kind === "movie") {
         const title = cleanTitle(ch.name);
-        const year = extractYear(ch.name);
+        const year = extractYear(ch.name) ?? attrNumber(ch, "release-year") ?? null;
+        const tmdbId = attrNumber(ch, "tmdb-id");
+        const quality = vodQualityLabel(ch.name, ch.group);
         // Different provider IDs can be different editions, languages or sources.
         // A title/year match is not evidence that one can be discarded.
         const dedupe = `${pl.id}|${ch.id}`;
@@ -109,6 +123,8 @@ export function buildVodLibrary(
           playlistId: pl.id,
           playlistName: plName,
           headers: headersFromChannel(ch),
+          ...(tmdbId ? { tmdbId } : {}),
+          ...(quality ? { quality } : {}),
         });
         continue;
       }
@@ -130,6 +146,8 @@ export function buildVodLibrary(
           episodes: [],
           seasons: [],
           xtreamSeriesId: xtreamSeriesId || undefined,
+          year: attrNumber(ch, "release-year") ?? extractYear(show) ?? null,
+          tmdbId: attrNumber(ch, "tmdb-id"),
         };
         seriesMap.set(key, series);
       }

@@ -174,6 +174,51 @@ test("workspace parking preserves account A while B and signed-out local remain 
   assert.equal(s.getItem("harbor.profiles.v1"), "roster-b");
 });
 
+test("per-profile addons and settings are parked with their account", () => {
+  const s = storage();
+  s.setItem("harbor.profiles.v1", "roster-a");
+  s.setItem("harbor.settings.pa", '{"rdKey":"a-key"}');
+  s.setItem("harbor.installed-addons.pa", "addons-a");
+  s.setItem("harbor.addons.disabled.pa", "disabled-a");
+  s.setItem("harbor.addonOrder.pa", "order-a");
+  s.setItem("harbor.addons.seeded.v1", "1");
+  s.setItem("harbor.iptv.active", "device-wide");
+  switchJlWorkspace(s, null, "a");
+  assert.equal(s.getItem("harbor.settings.pa"), '{"rdKey":"a-key"}');
+  switchJlWorkspace(s, "a", "b");
+  for (const key of [
+    "harbor.settings.pa",
+    "harbor.installed-addons.pa",
+    "harbor.addons.disabled.pa",
+    "harbor.addonOrder.pa",
+    "harbor.addons.seeded.v1",
+  ]) {
+    assert.equal(s.getItem(key), null, key);
+  }
+  assert.equal(s.getItem("harbor.iptv.active"), "device-wide");
+  s.setItem("harbor.settings.pb", '{"tbKey":"b-key"}');
+  s.setItem("harbor.installed-addons.pb", "addons-b");
+  switchJlWorkspace(s, "b", "a");
+  assert.equal(s.getItem("harbor.settings.pa"), '{"rdKey":"a-key"}');
+  assert.equal(s.getItem("harbor.installed-addons.pa"), "addons-a");
+  assert.equal(s.getItem("harbor.addons.seeded.v1"), "1");
+  assert.equal(s.getItem("harbor.settings.pb"), null);
+  assert.equal(s.getItem("harbor.installed-addons.pb"), null);
+  switchJlWorkspace(s, "a", "b");
+  assert.equal(s.getItem("harbor.settings.pb"), '{"tbKey":"b-key"}');
+  assert.equal(s.getItem("harbor.settings.pa"), null);
+});
+
+test("a workspace parked before per-profile keys were tracked leaves them in place", () => {
+  const s = storage();
+  s.setItem(WORKSPACE_OWNER, "b");
+  s.setItem("jl.account.workspace.v1.a", JSON.stringify({ "harbor.profiles.v1": "roster-a" }));
+  s.setItem("harbor.settings.pa", '{"rdKey":"a-key"}');
+  switchJlWorkspace(s, "b", "a");
+  assert.equal(s.getItem("harbor.profiles.v1"), "roster-a");
+  assert.equal(s.getItem("harbor.settings.pa"), '{"rdKey":"a-key"}');
+});
+
 test("a failed workspace swap rolls back before the identity can be changed", () => {
   const s = storage();
   s.setItem("harbor.profiles.v1", "original");

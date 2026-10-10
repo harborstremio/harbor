@@ -545,6 +545,7 @@ export function BpStreams({
           title={meta.name}
           episode={episode}
           triedCount={play.autoTriedCount}
+          sources={s.searchedSources}
           onBrowse={play.browseManually}
           onBack={onClose}
         />

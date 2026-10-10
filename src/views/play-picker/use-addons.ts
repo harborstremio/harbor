@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { fetchInstalledAddons, fetchManifestAt, filterEnabled } from "@/lib/addon-store";
-import { torboxAddonFor, userAddons, withDebridKeys, type Addon } from "@/lib/addons";
+import {
+  torboxAddonFor,
+  torrentioAddonFor,
+  userAddons,
+  withDebridKeys,
+  type Addon,
+} from "@/lib/addons";
 import { applyOrderToItems, loadDisplayOrder } from "@/lib/addons-store/reorder";
 import type { useSettings } from "@/lib/settings";
 import {
@@ -17,7 +23,14 @@ function hasAnyResources(a: Addon): boolean {
   return (a.manifest.resources ?? []).length > 0;
 }
 
-function declaresStream(a: Addon): boolean {
+function isTorrentio(a: Addon): boolean {
+  return (
+    a.manifest.id.startsWith("com.stremio.torrentio.") ||
+    a.transportUrl.includes("torrentio.strem.fun")
+  );
+}
+
+export function declaresStream(a: Addon): boolean {
   return (a.manifest.resources ?? []).some((r) =>
     typeof r === "string" ? r === "stream" : r.name === "stream",
   );
@@ -99,6 +112,19 @@ export function useAddons(
       console.info(
         `[picker] authKey=${authKey ? "yes" : "no"} tbKey=${settings.tbKey ? `set(${settings.tbKey.slice(0, 8)}…)` : "EMPTY"} stremioAddons=${stremioAddons.length} installed=${installed.length} merged=${merged.length} userStreamCount=${userStreamCount} hasTorbox=${existingTorboxIdx >= 0} torboxAutoAddable=${!!torbox}`,
       );
+      // A Real-Debrid (or other non-TorBox debrid) key is only useful with something that searches
+      // for torrents, so a keyed Torrentio is added the way TorBox's own addon is. TorBox keeps
+      // its own addon below, so its key is not repeated here.
+      const torrentioKeys = {
+        rdKey: settings.rdKey?.trim() || undefined,
+        adKey: settings.adKey?.trim() || undefined,
+        pmKey: settings.pmKey?.trim() || undefined,
+        dlKey: settings.dlKey?.trim() || undefined,
+      };
+      if (Object.values(torrentioKeys).some(Boolean) && !list.some(isTorrentio)) {
+        console.info("[picker] auto-adding keyed Torrentio for the configured debrid service");
+        list.push(torrentioAddonFor(torrentioKeys));
+      }
       if (torbox) {
         if (existingTorboxIdx >= 0) {
           const existing = list[existingTorboxIdx];

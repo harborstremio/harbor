@@ -7,12 +7,15 @@ export function AutoExhaustedModal({
   meta,
   episode,
   absoluteEpisode,
+  sources,
   onBrowseManually,
   onTryAgain,
 }: {
   meta: Meta;
   episode?: PlayEpisode;
   absoluteEpisode?: number | null;
+  /** The sources that were searched, in the order they are tried. */
+  sources?: string[];
   triedCount: number;
   onBrowseManually: () => void;
   onTryAgain: () => void;
@@ -51,6 +54,11 @@ export function AutoExhaustedModal({
           <li dir="auto">· No stream addon is installed yet (Torrentio, MediaFusion, Comet).</li>
           <li dir="auto">· This title is too new and no source has it cached yet.</li>
         </ul>
+        {sources && sources.length > 0 && (
+          <p className="mt-3 text-start text-[13px] leading-relaxed text-ink-subtle" dir="auto">
+            Sources checked: {sources.join(" → ")}
+          </p>
+        )}
         <div className="mt-7 flex flex-col gap-2.5">
           <button
             onClick={onTryAgain}

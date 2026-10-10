@@ -207,16 +207,16 @@ export function BpDebridDownDialog({
 
 export function BpNoSourcesDialog({ title, onClose }: { title: string; onClose: () => void }) {
   const t = useBpT();
-  const { openSettings } = useView();
+  const { openSettings, setView } = useView();
   const seedRef = useRef<HTMLButtonElement | null>(null);
   useSeededFocus(seedRef, onClose);
 
   return (
     <BpDialogShell
-      label={t("No streaming sources yet")}
-      title={t("No streaming sources yet")}
+      label={t("Set up a source")}
+      title={t("Set up a source")}
       body={t(
-        "Harbor needs at least one streaming source before it can play {title}. Install a stream addon or add a debrid key in settings.",
+        "Nothing is set up that can search for {title} yet. Sources are tried in this order: your IPTV provider (M3U or Xtream), then Real-Debrid, then TorBox. Add a provider in Live TV or a key in settings.",
         { title },
       )}
     >
@@ -247,6 +247,19 @@ export function BpNoSourcesDialog({ title, onClose }: { title: string; onClose: 
       >
         {t("Leave Big Picture and open settings")}
       </button>
+      <button
+        type="button"
+        data-bp-focusable
+        data-bp-chip
+        onClick={() => {
+          SFX.click();
+          exitBigPicture();
+          setView("live");
+        }}
+        className={BTN_QUIET}
+      >
+        {t("Leave Big Picture and add an IPTV provider")}
+      </button>
     </BpDialogShell>
   );
 }
@@ -255,12 +268,15 @@ export function BpAutoExhaustedDialog({
   title,
   episode,
   triedCount,
+  sources,
   onBrowse,
   onBack,
 }: {
   title: string;
   episode?: PlayEpisode;
   triedCount: number;
+  /** The sources that were searched, in the order they are tried. */
+  sources?: string[];
   onBrowse: () => void;
   onBack: () => void;
 }) {
@@ -279,6 +295,13 @@ export function BpAutoExhaustedDialog({
         "Harbor tried {n} sources for {title} and none of them played. Usually that means a debrid key has expired, no stream addon is installed yet, or nothing has this title cached.",
         { n: triedCount, title: label },
       )}
+      extra={
+        sources && sources.length > 0 ? (
+          <p className="text-[clamp(12px,1.6vh,18px)] leading-relaxed text-ink-subtle">
+            {t("Sources checked: {list}", { list: sources.join(" → ") })}
+          </p>
+        ) : undefined
+      }
     >
       <button
         ref={seedRef}

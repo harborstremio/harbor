@@ -11,6 +11,8 @@ import {
 import { useSettings } from "@/lib/settings";
 import type { AddonProgress } from "@/lib/streams/addons";
 import { pluginCacheTokens } from "@/lib/streams/plugins";
+import { providerVodCacheTokens } from "@/lib/streams/provider-vod";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
 import { runPipeline, type PipelineResult } from "@/lib/streams/pipeline";
 import { buildEpisodePipelineInput } from "@/lib/streams/episode-pipeline-input";
 import type { PlayEpisode } from "@/lib/view";
@@ -61,15 +63,16 @@ export function usePipelineResult({
   });
   const [pipelineStartedAt, setPipelineStartedAt] = useState<number | null>(null);
 
+  const playlists = usePlaylists();
   const configHash = useMemo(
     () =>
       buildPickerConfigHash({
         addonTransportUrls: (addons ?? []).map((a) => a.transportUrl),
         debridSlugs: debrids.map((d) => d.slug),
-        scraperKeys: pluginCacheTokens(),
+        scraperKeys: [...pluginCacheTokens(), ...providerVodCacheTokens()],
         filterMode: filterDisabled ? "off" : strictMode ? "strict" : "balanced",
       }),
-    [addons, debrids, filterDisabled, strictMode],
+    [addons, debrids, filterDisabled, strictMode, playlists],
   );
 
   useEffect(() => {
@@ -168,6 +171,7 @@ export function usePipelineResult({
     filterDisabled,
     (animeTitles ?? []).join("|"),
     refreshNonce,
+    configHash,
   ]);
 
   const refresh = useCallback(() => {
