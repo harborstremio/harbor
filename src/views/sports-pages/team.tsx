@@ -18,6 +18,8 @@ import type { SportsPage } from "@/lib/jl/sports/pages";
 import { espnHeadshot } from "@/lib/jl/sports/search-parse";
 import { artKey } from "@/lib/jl/sports/curated-art";
 import { teamBrand, useVisionVersion } from "@/lib/jl/sports/vision";
+import { rankOf } from "@/lib/jl/sports/cfbd";
+import { useCfbdRankings } from "@/lib/jl/sports/use-cfbd";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import {
@@ -52,6 +54,9 @@ export function TeamPage({ page }: { page: Extract<SportsPage, { kind: "team" }>
   useVisionVersion();
   // JL Vision's verified palette and approved logo, when this team has them.
   const brand = teamBrand(tag, teamId);
+  // College football: the AP Top 25 rank from CollegeFootballData, when the viewer has a key.
+  const { rankings } = useCfbdRankings();
+  const apRank = tag === "NCAAF" ? rankOf(rankings, teamId) : null;
 
   return (
     <PageShell>
@@ -61,7 +66,12 @@ export function TeamPage({ page }: { page: Extract<SportsPage, { kind: "team" }>
         eyebrow={def ? getLeagueLabel(def) : tag}
         title={name || (info.loading ? "" : t("Team"))}
         color={brand?.theme?.primary ?? info.data?.color}
-        facts={[info.data?.record, info.data?.standing, info.data?.venue]}
+        facts={[
+          apRank ? t("#{n} AP Top 25", { n: apRank }) : null,
+          info.data?.record,
+          info.data?.standing,
+          info.data?.venue,
+        ]}
         actions={
           <>
             {name && (

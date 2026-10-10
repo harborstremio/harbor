@@ -14,6 +14,7 @@ import type { SportsPage } from "@/lib/jl/sports/pages";
 import { espnHeadshot } from "@/lib/jl/sports/search-parse";
 import { getGroupLabel, getLeagueLabel, LEAGUE_GROUPS } from "@/lib/sports/espn";
 import { useView } from "@/lib/view";
+import { CfbdRankings } from "./cfbd-rankings";
 import {
   GameCard,
   Img,
@@ -72,6 +73,10 @@ function LeagueBody({ tag, group }: { tag: string; group: string }) {
   const tables = useMemo(() => standings.data ?? [], [standings.data]);
   const columns = useMemo(() => standingColumns(group, tables), [group, tables]);
   const openTeam = (id: string, name: string) => openSportsPage({ kind: "team", league: tag, teamId: id, name });
+  const logos = useMemo(
+    () => new Map((teams.data ?? []).flatMap((team) => (team.logo ? [[team.id, team.logo] as const] : []))),
+    [teams.data],
+  );
 
   if (games.loading && standings.loading && teams.loading) return <Spinner />;
   const nothing =
@@ -102,6 +107,7 @@ function LeagueBody({ tag, group }: { tag: string; group: string }) {
           </Shelf>
         </Section>
       )}
+      {tag === "NCAAF" && <CfbdRankings logos={logos} onTeam={openTeam} />}
       {tables.length > 0 && (
         <Section title={t("Standings")}>
           <div className="grid gap-4 xl:grid-cols-2">

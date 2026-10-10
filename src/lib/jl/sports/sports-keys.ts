@@ -44,7 +44,8 @@ export const SPORTS_KEYS: SportsKeyDef[] = [
     id: "cfbd",
     field: "cfbdKey",
     name: "CollegeFootballData",
-    unlocks: "College football games, AP rankings and team data for the Colleges pages.",
+    unlocks:
+      "The AP Top 25, Coaches Poll and Playoff rankings on the college football page, and each ranked team's spot on its team page.",
     signupUrl: "https://collegefootballdata.com/key",
     freePlan: true,
     placeholder: "API key",
