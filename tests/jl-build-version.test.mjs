@@ -16,5 +16,5 @@ test("the actual JL frontend configuration reports the Windows package version",
   );
   assert.ok(loaded, "Vite configuration loads");
   assert.equal(JSON.parse(loaded.config.define.__APP_VERSION__), native.version);
-  assert.equal(native.version, "0.9.27");
+  assert.equal(native.version, "0.9.28");
 });
