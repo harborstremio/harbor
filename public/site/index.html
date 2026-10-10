@@ -54,6 +54,7 @@
               <a class="btn btn-solid" href="/windows" data-platform="windows">Download for Windows</a>
               <a class="btn btn-line" href="/tv" data-platform="android">Get it on Android TV</a>
             </div>
+            <p class="release" data-release hidden></p>
           </div>
           <div class="orb">
             <div class="orb-halo" aria-hidden="true"></div>
@@ -313,6 +314,7 @@
             <p class="dl-tag">Desktop</p>
             <h3>Windows</h3>
             <p class="req">Windows 10 and 11 · 64-bit · .exe</p>
+            <p class="release" data-release hidden></p>
             <a class="btn btn-solid" href="/windows">Download for Windows</a>
             <ol>
               <li>Open the installer from your Downloads.</li>
@@ -324,6 +326,7 @@
             <p class="dl-tag">TV</p>
             <h3>Android TV &amp; Shield</h3>
             <p class="req">Android TV 7 and newer · .apk</p>
+            <p class="release" data-release hidden></p>
             <a class="btn btn-solid" href="/tv">Download for Android TV</a>
             <ol>
               <li>Install <b>Downloader</b> from the Play Store.</li>
@@ -421,6 +424,33 @@
           h1.setAttribute("aria-label", h1.textContent);
           document.documentElement.classList.add("animate");
         }
+      })();
+
+      (function () {
+        // The download buttons always fetch the latest release, so the label reads the same one.
+        var labels = document.querySelectorAll("[data-release]");
+        if (!labels.length || !window.fetch) return;
+        fetch("https://api.github.com/repos/jafar-pixel/harbor/releases/latest", {
+          headers: { Accept: "application/vnd.github+json" },
+        })
+          .then(function (r) {
+            return r.ok ? r.json() : null;
+          })
+          .then(function (release) {
+            var version = release && /(\d+\.\d+\.\d+)/.exec(release.tag_name || "");
+            if (!version) return;
+            var when = release.published_at ? new Date(release.published_at) : null;
+            var date =
+              when && !isNaN(when.getTime())
+                ? " · Released " +
+                  when.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+                : "";
+            Array.prototype.forEach.call(labels, function (el) {
+              el.textContent = "Version " + version[1] + date;
+              el.hidden = false;
+            });
+          })
+          .catch(function () {});
       })();
 
       (function () {

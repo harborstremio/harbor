@@ -1029,6 +1029,18 @@ code {
   font-size: 26px;
 }
 
+.release {
+  margin: 14px 0 0;
+  color: var(--subtle);
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+}
+
+.dl .release {
+  margin: -12px 0 14px;
+}
+
 .req {
   margin: 10px 0 24px;
   color: var(--subtle);
